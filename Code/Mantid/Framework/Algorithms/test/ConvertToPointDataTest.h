@@ -89,6 +89,9 @@ public:
     //test the vertical axis
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->length(), 3 );
     TS_ASSERT_EQUALS( outputWS->getAxis(1)->unit()->unitID(), "MomentumTransfer" );
+    TS_ASSERT_EQUALS( (*(outputWS->getAxis(1)))(0), 0 );
+    TS_ASSERT_EQUALS( (*(outputWS->getAxis(1)))(1), 2 );
+    TS_ASSERT_EQUALS( (*(outputWS->getAxis(1)))(2), 4 );
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }
