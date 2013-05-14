@@ -16,16 +16,22 @@
 BOOST_PYTHON_MODULE(WorkspaceCreationHelper)
 {
   using namespace boost::python;
+  using namespace WorkspaceCreationHelper;
 
   // Doc string options - User defined, python arguments, C++ call signatures
   docstring_options docstrings(true, true, false);
 
-  // EventWorkspaces
+  // 2D workspaces
   using namespace Mantid::DataObjects;
+  register_ptr_to_python<boost::shared_ptr<Workspace2D> >();
+  class_<Workspace2D, bases<Mantid::API::MatrixWorkspace>,boost::noncopyable>("Workspace2D", no_init);
+  def("create2DWorkspaceWithFullInstrument", &create2DWorkspaceWithFullInstrument);
+
+  // EventWorkspaces
   register_ptr_to_python<boost::shared_ptr<EventWorkspace> >();
   class_<EventWorkspace, bases<Mantid::API::IEventWorkspace>,boost::noncopyable>("EventWorkspace", no_init);
 
-  using namespace WorkspaceCreationHelper;
+
   def("CreateEventWorkspace", (EventWorkspace_sptr (*)())&CreateEventWorkspace);
   def("CreateEventWorkspace2", &CreateEventWorkspace2);
 

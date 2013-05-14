@@ -305,6 +305,10 @@ namespace WorkspaceCreationHelper
     }
 
     Workspace2D_sptr space = Create2DWorkspaceBinned(nhist, nbins); // A 1:1 spectra is created by default
+    space->setTitle("Test histogram"); // actually adds a property call run_title to the logs
+    space->getAxis(0)->setUnit("TOF");
+    space->setYUnit("Counts");
+
     boost::shared_ptr<Instrument> testInst(new Instrument("testInst"));
     testInst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y,X,Left,"")));
     space->setInstrument(testInst);

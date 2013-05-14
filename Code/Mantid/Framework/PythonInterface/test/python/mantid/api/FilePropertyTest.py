@@ -1,6 +1,5 @@
 import unittest
-from testhelpers import run_algorithm
-from mantid.api import FileProperty, FileAction
+from mantid.api import FileProperty, FileAction, AlgorithmManager
 from mantid.kernel import Direction
 
 class FilePropertyTest(unittest.TestCase):
@@ -31,11 +30,11 @@ class FilePropertyTest(unittest.TestCase):
         self.assertEquals(Direction.InOut, prop.direction)
     
     def test_alg_get_property_converts_to_this(self):
-        alg = run_algorithm('LoadRaw', Filename='LOQ48127.raw', OutputWorkspace='tmp', SpectrumMax=1)
+        alg = AlgorithmManager.createUnmanaged("LoadRaw")
+        alg.initialize()
         prop = alg.getProperty("Filename")
         self.assertEquals(type(prop), FileProperty)
         self.assertTrue('value' in dir(prop)) # Do we have a value method
 
-        
 if __name__ == '__main__':
     unittest.main()
