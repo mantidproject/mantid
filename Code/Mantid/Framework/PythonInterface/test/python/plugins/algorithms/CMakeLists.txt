@@ -4,6 +4,7 @@
 
 set ( TEST_PY_FILES
   CheckForSampleLogsTest.py
+  ConjoinSpectraTest.py
   CreateWorkspaceTest.py
   DakotaChiSquaredTest.py
   FindReflectometryLinesTest.py
