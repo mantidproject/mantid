@@ -22,7 +22,7 @@ T^{''} = \exp(-\mu x) \exp( \frac{-\mu(d-x)}{\cos(2\theta)})
 Hammouda, gives an approximate result for the integral, see page 208 of [[http://www.ncnr.nist.gov/staff/hammouda/the_SANS_toolbox.pdf SANS toolbox]]:
 
 <math>
-T^' = \frac{T_0(T_0^A - 1)}{A \ln(T_0)}
+T^{'} = \frac{T_0(T_0^A - 1)}{A \ln(T_0)}
 </math>
 
 For:
@@ -31,7 +31,7 @@ For:
 A = \frac{1}{\cos(2\theta)} - 1 
 </math>
    
-For example if  <math>T_0 = 0.2</math> and <math>2\theta = 40</math>  then  <math>T^' = 0.158</math>, a shift of <math>~20%</math> of the SANS curve. Note that the result is independent of sample thickness. 
+For example if  <math>T_0 = 0.2</math> and <math>2\theta = 40</math>  then  <math>T^{'} = 0.158</math>, a shift of <math>~20</math>% of the SANS curve. Note that the result is independent of sample thickness. 
 
 <math>T_0</math> is a function of neutron wavelength, whilst <math>A</math> is a function of detector pixel location.
 
@@ -88,6 +88,7 @@ This parameter enters inside [[Q1D]] as WavePixelAdj. But, this is all done for 
 '''NB''': This algorithm is not intended to be called and used as a standalone Mantid algorithm because actual transmission values are <i>not</i> passed to the reduction algorithm [[Q1D]].
 
 *WIKI_USAGE*"""
+
 
 from mantid.api import *
 from mantid.kernel import *
