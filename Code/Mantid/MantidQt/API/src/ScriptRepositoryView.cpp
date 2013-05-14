@@ -294,7 +294,7 @@ void ScriptRepositoryView::RepoDelegate::paint(
 */
 bool  ScriptRepositoryView::RepoDelegate::editorEvent(QEvent *event,
                                    QAbstractItemModel *model,
-                                                      const QStyleOptionViewItem &option,
+                                                      const QStyleOptionViewItem &/*option*/,
                                    const QModelIndex &index) {
   // if event is mouse click 
   if (event->type() == QEvent::MouseButtonPress){
@@ -306,7 +306,7 @@ bool  ScriptRepositoryView::RepoDelegate::editorEvent(QEvent *event,
       return false;// ignore 
     return model->setData(index, action, Qt::EditRole);  
   }else{
-    return QStyledItemDelegate::editorEvent(event, model, option, index);
+    return true; //Does not allow others events to be processed (example: double-click)
   }   
 }
 /** Provides the ideal size for this column
@@ -386,7 +386,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(QPainter *painter, const QSty
 */
 bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(QEvent *event,
                                                          QAbstractItemModel *model,
-                                                         const QStyleOptionViewItem &option,
+                                                         const QStyleOptionViewItem &/*option*/,
                                                          const QModelIndex &index){
  if (event->type() == QEvent::MouseButtonPress){
   QString value = model->data(index, Qt::DisplayRole).toString();
@@ -395,7 +395,8 @@ bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(QEvent *event,
     action = "setTrue";
   return model->setData(index, action, Qt::EditRole);
  }else{
-   return QStyledItemDelegate::editorEvent(event, model, option, index);
+   // QStyledItemDelegate::editorEvent(event, model, option, index);
+   return true;// Does not allow the event to be catched by another one
  }
 }
 
