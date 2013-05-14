@@ -885,7 +885,7 @@ namespace API
         if (it->second.status & REMOTE_CHANGED){
           download(it->first); 
           output_list.push_back(it->first);
-          g_log.notice()  << "Update file " << it->first << " to more recently version available" << std::endl;
+          g_log.debug()  << "Update file " << it->first << " to more recently version available" << std::endl;
         }
       }
     }
