@@ -10,6 +10,8 @@
 #include <boost/python/return_value_policy.hpp>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+
 
 BOOST_PYTHON_MODULE(WorkspaceCreationHelper)
 {
@@ -26,4 +28,10 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper)
   using namespace WorkspaceCreationHelper;
   def("CreateEventWorkspace", (EventWorkspace_sptr (*)())&CreateEventWorkspace);
   def("CreateEventWorkspace2", &CreateEventWorkspace2);
+
+  // Peaks workspace
+  register_ptr_to_python<boost::shared_ptr<PeaksWorkspace> >();
+  class_<PeaksWorkspace, bases<Mantid::API::IPeaksWorkspace>,boost::noncopyable>("PeaksWorkspace", no_init);
+
+  def("createPeaksWorkspace", &createPeaksWorkspace);
 }

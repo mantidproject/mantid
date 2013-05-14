@@ -1,21 +1,16 @@
 import unittest
-from testhelpers import run_algorithm
+from testhelpers import run_algorithm, WorkspaceCreationHelper
 from mantid.kernel import V3D
-from mantid.api import mtd, IPeaksWorkspace
+from mantid.api import IPeaksWorkspace
 
 class IPeaksWorkspaceTest(unittest.TestCase):
     """
     Test the python interface to PeaksWorkspace's
     """
     
-    def setUp(self):
-        run_algorithm('LoadEventNexus',Filename='CNCS_7860_event.nxs', OutputWorkspace='cncs',
-                      FilterByTimeStart=60.0,FilterByTimeStop=60.5,LoadMonitors=False)
-        run_algorithm('CreatePeaksWorkspace',InstrumentWorkspace='cncs', OutputWorkspace='peaks')
-    
     def test_interface(self):
-        """ Rudimentary test to get peak and get/set some values """ 
-        pws = mtd['peaks']
+        """ Rudimentary test to get peak and get/set some values """
+        pws = WorkspaceCreationHelper.createPeaksWorkspace(1)
         self.assertTrue(isinstance(pws, IPeaksWorkspace))
         self.assertEqual(pws.getNumberPeaks(), 1)
         p = pws.getPeak(0)
@@ -55,9 +50,6 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         
         # Peaks workspace will not be integrated by default.
         self.assertTrue(not pws.hasIntegratedPeaks())
-        
-        mtd.remove('cncs')
-        mtd.remove('peaks')
         
 if __name__ == '__main__':
     unittest.main()
