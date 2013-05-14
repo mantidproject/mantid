@@ -107,7 +107,6 @@ public:
 
   /// Is this dialog initialized
   bool isInitialized() const;
-  void showHiddenWorkspaces(const bool & show);
 
 protected:
 
@@ -272,8 +271,6 @@ protected:
   bool m_isInitialized;
   /// Flag if the input should be parsed automatically on initialization
   bool m_autoParseOnInit;
-  /// Whether we show hidden workspaces
-  bool m_showHidden;
 
   /// A list of labels to use as validation markers
   QHash<QString, QLabel*> m_validators;

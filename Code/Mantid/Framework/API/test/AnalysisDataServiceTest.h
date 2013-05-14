@@ -21,11 +21,23 @@ namespace
 
 class AnalysisDataServiceTest : public CxxTest::TestSuite
 {
+private:
+  AnalysisDataServiceImpl& ads;
+
 public:
+  static AnalysisDataServiceTest *createSuite() { return new AnalysisDataServiceTest(); }
+  static void destroySuite(AnalysisDataServiceTest *suite) { delete suite; }
+
+  AnalysisDataServiceTest() : ads(AnalysisDataService::Instance())
+  {}
+
+  void setUp()
+  {
+    ads.clear();
+  }
 
   void test_IsValid_Returns_An_Empty_String_For_A_Valid_Name_When_All_CharsAre_Allowed()
   {
-    AnalysisDataServiceImpl & ads = AnalysisDataService::Instance();
     TS_ASSERT_EQUALS(ads.isValid("CamelCase"), "");
     TS_ASSERT_EQUALS(ads.isValid("_Has_Underscore"), "");
     TS_ASSERT_EQUALS(ads.isValid("alllowercase"), "");
@@ -34,7 +46,6 @@ public:
 
   void test_IsValid_Returns_An_Error_String_For_A_Invalid_Name()
   {
-    AnalysisDataServiceImpl & ads = AnalysisDataService::Instance();
     const std::string illegalChars = " +-/*\\%<>&|^~=!@()[]{},:.`$'\"?";
     ads.setIllegalCharacterList(illegalChars);
     const size_t nchars(illegalChars.size());
@@ -54,21 +65,21 @@ public:
   {
     addToADS("z");
     addToADS("Z");
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieve("z"));
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieve("Z"));
+    TS_ASSERT_THROWS_NOTHING(ads.retrieve("z"));
+    TS_ASSERT_THROWS_NOTHING(ads.retrieve("Z"));
 
-    removeFromADS("z");// Remove lower case
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieve("z")); // Will find upper case
-    removeFromADS("z");// Remove lower case
-    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("z"), Exception::NotFoundError);
+    ads.remove("z");// Remove lower case
+    TS_ASSERT_THROWS_NOTHING(ads.retrieve("z")); // Will find upper case
+    ads.remove("z");// Remove lower case
+    TS_ASSERT_THROWS(ads.retrieve("z"), Exception::NotFoundError);
   }
 
   void test_Add_With_Name_That_Has_No_Special_Chars_Is_Accpeted()
   {
     const std::string name = "MySpace";
     TS_ASSERT_THROWS_NOTHING(addToADS(name));
-    TS_ASSERT(isInADS(name));
-    TS_ASSERT_THROWS_NOTHING(removeFromADS(name));
+    TS_ASSERT(ads.doesExist(name));
+    TS_ASSERT_THROWS_NOTHING(ads.remove(name));
   }
 
   void test_Adding_A_Second_Item_Of_Same_Name_Throws_Runtime_Error()
@@ -77,7 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(addToADS(name));
     // Adding again will throw
     TS_ASSERT_THROWS(addToADS(name), std::runtime_error);
-    TS_ASSERT_THROWS_NOTHING(removeFromADS(name));
+    TS_ASSERT_THROWS_NOTHING(ads.remove(name));
   }
 
   void test_Add_With_Name_Containing_Special_Chars_Throws_Invalid_Argument()
@@ -97,15 +108,14 @@ public:
     std::string name = "ContainsIllegal" + illegalChar;
     TS_ASSERT_THROWS_NOTHING(addToADS(name));
     // Ban period characters
-    AnalysisDataService::Instance().setIllegalCharacterList(illegalChar);
+    ads.setIllegalCharacterList(illegalChar);
     // Check we still have the original one
-    TS_ASSERT_EQUALS(isInADS(name), true);
+    TS_ASSERT_EQUALS(ads.doesExist(name), true);
     std::string banned = "Also.Contains.Illegal";
     // This should not be allowed now.
     TS_ASSERT_THROWS(addToADS(banned), std::invalid_argument);
-    AnalysisDataService::Instance().remove(name);
     // Clear up
-    AnalysisDataService::Instance().setIllegalCharacterList("");
+    ads.setIllegalCharacterList("");
   }
 
   void test_AddOrReplace_Does_Not_Throw_When_Adding_Object_That_Has_A_Name_That_Already_Exists()
@@ -114,17 +124,17 @@ public:
     TS_ASSERT_THROWS_NOTHING(addOrReplaceToADS(name));
     TS_ASSERT_THROWS(addToADS(name),std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(addOrReplaceToADS(name));
-    TS_ASSERT_THROWS_NOTHING(removeFromADS(name));
+    TS_ASSERT_THROWS_NOTHING(ads.remove(name));
   }
 
   void testRemove()
   {
     const std::string name("MySpace");
     addToADS(name);
-    TS_ASSERT_THROWS_NOTHING(removeFromADS(name));
-    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve(name),std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(ads.remove(name));
+    TS_ASSERT_THROWS(ads.retrieve(name),std::runtime_error);
     // Remove should not throw but give a warning in the log file, changed by LCC 05/2008
-    TS_ASSERT_THROWS_NOTHING(removeFromADS("ttttt"));
+    TS_ASSERT_THROWS_NOTHING(ads.remove("ttttt"));
   }
 
   void testRetrieve()
@@ -132,10 +142,8 @@ public:
     const std::string name("MySpace");
     Workspace_sptr work = addToADS(name);
     Workspace_sptr workBack;
-    TS_ASSERT_THROWS_NOTHING(workBack = AnalysisDataService::Instance().retrieve(name));
+    TS_ASSERT_THROWS_NOTHING(workBack = ads.retrieve(name));
     TS_ASSERT_EQUALS(work, workBack);
-    //clean up the ADS for other tests
-    removeFromADS(name);
   }
 
   void testRetrieveWS()
@@ -143,10 +151,8 @@ public:
     const std::string name("MySpace");
     Workspace_sptr work = addToADS(name);
     MockWorkspace_sptr workBack;
-    TS_ASSERT_THROWS_NOTHING(workBack = AnalysisDataService::Instance().retrieveWS<MockWorkspace>(name));
+    TS_ASSERT_THROWS_NOTHING(workBack = ads.retrieveWS<MockWorkspace>(name));
     TS_ASSERT_EQUALS(work, workBack);
-    //clean up the ADS for other tests
-    removeFromADS(name);
   }
 
   void test_Rename()
@@ -154,36 +160,29 @@ public:
     const std::string oldName = "Old";
     const std::string newName = "New";
     Workspace_sptr work = addToADS(oldName);
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().rename(oldName, newName) );
-    auto workBack = AnalysisDataService::Instance().retrieve(newName);
+    TS_ASSERT_THROWS_NOTHING( ads.rename(oldName, newName) );
+    auto workBack = ads.retrieve(newName);
     TS_ASSERT_EQUALS(work, workBack);
-    TS_ASSERT( ! AnalysisDataService::Instance().doesExist( oldName ) );
-    TS_ASSERT( AnalysisDataService::Instance().doesExist( newName ) );
-    //clean up the ADS for other tests
-    AnalysisDataService::Instance().clear();
+    TS_ASSERT( ! ads.doesExist( oldName ) );
+    TS_ASSERT( ads.doesExist( newName ) );
   }
 
   void test_Rename_Overwrites_Existing_WS()
   {
-    AnalysisDataService::Instance().clear();
     const std::string oldName = "Old";
     const std::string newName = "New";
     Workspace_sptr work1 = addToADS(oldName);
     Workspace_sptr work2 = addToADS(newName);
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().rename(oldName, newName) );
-    auto workBack = AnalysisDataService::Instance().retrieve(newName);
+    TS_ASSERT_THROWS_NOTHING( ads.rename(oldName, newName) );
+    auto workBack = ads.retrieve(newName);
     TS_ASSERT_EQUALS(work1, workBack);
-    TS_ASSERT( ! AnalysisDataService::Instance().doesExist( oldName ) );
-    TS_ASSERT( AnalysisDataService::Instance().doesExist( newName ) );
-    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1 );
-
-    //clean up the ADS for other tests
-    AnalysisDataService::Instance().clear();
+    TS_ASSERT( ! ads.doesExist( oldName ) );
+    TS_ASSERT( ads.doesExist( newName ) );
+    TS_ASSERT_EQUALS( ads.size(), 1 );
   }
 
   void test_add_workspace_group()
   {
-    auto& ADS = AnalysisDataService::Instance();
     // create a group
     WorkspaceGroup_sptr group( new WorkspaceGroup );
     // create anonymous workspaces
@@ -193,20 +192,17 @@ public:
     group->addWorkspace( ws1 );
     group->addWorkspace( ws2 );
     // ADS must be empty
-    TS_ASSERT_EQUALS( ADS.size(), 0 );
-    ADS.add( "Group", group );
+    TS_ASSERT_EQUALS( ads.size(), 0 );
+    ads.add( "Group", group );
     // there must be 3 workspaces in the ADS
-    TS_ASSERT_EQUALS( ADS.size(), 3 );
-    TS_ASSERT( ADS.doesExist( "Group" ) );
-    TS_ASSERT( ADS.doesExist( "Group_1" ) );
-    TS_ASSERT( ADS.doesExist( "Group_2" ) );
-    //clean up the ADS for other tests
-    AnalysisDataService::Instance().clear();
+    TS_ASSERT_EQUALS( ads.size(), 3 );
+    TS_ASSERT( ads.doesExist( "Group" ) );
+    TS_ASSERT( ads.doesExist( "Group_1" ) );
+    TS_ASSERT( ads.doesExist( "Group_2" ) );
   }
 
   void test_add_workspace_group_keeps_existing_workspaces()
   {
-    auto& ADS = AnalysisDataService::Instance();
     // populate the ADS
     Workspace_sptr work1 = addToADS("work1");
     Workspace_sptr work2 = addToADS("work2");
@@ -219,28 +215,24 @@ public:
     // and one existing workspace
     group->addWorkspace( work2 );
     // ADS must have 2 workspaces
-    TS_ASSERT_EQUALS( ADS.size(), 2 );
-    ADS.add( "Group", group );
+    TS_ASSERT_EQUALS( ads.size(), 2 );
+    ads.add( "Group", group );
     // there must be 4 workspaces in the ADS
-    TS_ASSERT_EQUALS( ADS.size(), 4 );
-    TS_ASSERT(   ADS.doesExist( "Group" ) );
-    TS_ASSERT(   ADS.doesExist( "Group_1" ) );
-    TS_ASSERT( ! ADS.doesExist( "Group_2" ) );
-    TS_ASSERT(   ADS.doesExist( "work1" ) );
-    TS_ASSERT(   ADS.doesExist( "work2" ) );
+    TS_ASSERT_EQUALS( ads.size(), 4 );
+    TS_ASSERT(   ads.doesExist( "Group" ) );
+    TS_ASSERT(   ads.doesExist( "Group_1" ) );
+    TS_ASSERT( ! ads.doesExist( "Group_2" ) );
+    TS_ASSERT(   ads.doesExist( "work1" ) );
+    TS_ASSERT(   ads.doesExist( "work2" ) );
 
     auto names = group->getNames();
     TS_ASSERT_EQUALS( names.size(), 2 );
     TS_ASSERT_EQUALS( names[0], "Group_1" );
     TS_ASSERT_EQUALS( names[1], "work2" );
-
-    //clean up the ADS for other tests
-    AnalysisDataService::Instance().clear();
   }
 
   void test_addOrReplace_workspace_group_replaces_existing_workspaces()
   {
-    auto& ADS = AnalysisDataService::Instance();
     // populate the ADS
     Workspace_sptr work1 = addToADS("work1");
     Workspace_sptr work2 = addToADS("Group_2");
@@ -253,28 +245,24 @@ public:
     group->addWorkspace( ws1 );
     group->addWorkspace( ws2 );
     // ADS must have 2 workspaces
-    TS_ASSERT_EQUALS( ADS.size(), 2 );
-    ADS.addOrReplace( "Group", group );
+    TS_ASSERT_EQUALS( ads.size(), 2 );
+    ads.addOrReplace( "Group", group );
     // there must be 4 workspaces in the ADS
-    TS_ASSERT_EQUALS( ADS.size(), 4 );
-    TS_ASSERT(   ADS.doesExist( "Group" ) );
-    TS_ASSERT(   ADS.doesExist( "Group_1" ) );
-    TS_ASSERT(   ADS.doesExist( "Group_2" ) );
-    TS_ASSERT(   ADS.doesExist( "work1" ) );
-    TS_ASSERT( ! ADS.doesExist( "work2" ) );
+    TS_ASSERT_EQUALS( ads.size(), 4 );
+    TS_ASSERT(   ads.doesExist( "Group" ) );
+    TS_ASSERT(   ads.doesExist( "Group_1" ) );
+    TS_ASSERT(   ads.doesExist( "Group_2" ) );
+    TS_ASSERT(   ads.doesExist( "work1" ) );
+    TS_ASSERT( ! ads.doesExist( "work2" ) );
 
     auto names = group->getNames();
     TS_ASSERT_EQUALS( names.size(), 2 );
     TS_ASSERT_EQUALS( names[0], "Group_1" );
     TS_ASSERT_EQUALS( names[1], "Group_2" );
-
-    //clean up the ADS for other tests
-    AnalysisDataService::Instance().clear();
   }
 
   void test_add_workspace_group_throws_if_adding_existing_names()
   {
-    auto& ADS = AnalysisDataService::Instance();
     // populate the ADS
     Workspace_sptr work1 = addToADS("work1");
     Workspace_sptr work2 = addToADS("Group_2");
@@ -287,23 +275,59 @@ public:
     group->addWorkspace( ws1 );
     group->addWorkspace( ws2 );
     // ADS must have 2 workspaces
-    TS_ASSERT_EQUALS( ADS.size(), 2 );
-    TS_ASSERT_THROWS( ADS.add( "Group", group ), std::runtime_error );
+    TS_ASSERT_EQUALS( ads.size(), 2 );
+    TS_ASSERT_THROWS( ads.add( "Group", group ), std::runtime_error );
     // there must be 4 workspaces in the ADS
-    TS_ASSERT_EQUALS( ADS.size(), 4 );
-    TS_ASSERT(   ADS.doesExist( "Group" ) );
-    TS_ASSERT(   ADS.doesExist( "Group_1" ) );
-    TS_ASSERT(   ADS.doesExist( "Group_2" ) );
-    TS_ASSERT(   ADS.doesExist( "work1" ) );
-    TS_ASSERT( ! ADS.doesExist( "work2" ) );
+    TS_ASSERT_EQUALS( ads.size(), 4 );
+    TS_ASSERT(   ads.doesExist( "Group" ) );
+    TS_ASSERT(   ads.doesExist( "Group_1" ) );
+    TS_ASSERT(   ads.doesExist( "Group_2" ) );
+    TS_ASSERT(   ads.doesExist( "work1" ) );
+    TS_ASSERT( ! ads.doesExist( "work2" ) );
 
     auto names = group->getNames();
     TS_ASSERT_EQUALS( names.size(), 2 );
     TS_ASSERT_EQUALS( names[0], "Group_1" );
     TS_ASSERT_EQUALS( names[1], "Group_2" );
+  }
 
-    //clean up the ADS for other tests
-    AnalysisDataService::Instance().clear();
+  // Test base DataService class methods to make sure behaviour w.r.t. hidden objects
+  // persists, as this class is where it will most be used.
+  void test_size()
+  {
+    TS_ASSERT_EQUALS( ads.size(), 0 );
+    addToADS("something");
+    TS_ASSERT_EQUALS( ads.size(), 1 );
+    addToADS("__hidden");
+    TSM_ASSERT_EQUALS( "Hidden workspaces should not be counted", ads.size(), 1 );
+
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","1");
+    TS_ASSERT_EQUALS( ads.size(), 2 );
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","0");
+  }
+
+  void test_getObjectNames_and_getObjects()
+  {
+    addToADS("One");
+    addToADS("Two");
+    addToADS("__Three");
+
+    auto names = ads.getObjectNames();
+    auto objects = ads.getObjects();
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned", names.size(), 2 );
+    TSM_ASSERT_EQUALS("Hidden entries should not be returned", objects.size(), 2 );
+    TS_ASSERT_DIFFERS( names.find("One"), names.end() );
+    TS_ASSERT_DIFFERS( names.find("Two"), names.end() );
+    TS_ASSERT_EQUALS( names.find("__Three"), names.end() );
+    TSM_ASSERT_EQUALS( "Hidden entries should not be returned", names.find("__Three"), names.end() );
+
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","1");
+    names = ads.getObjectNames();
+    objects = ads.getObjects();
+    TS_ASSERT_EQUALS( names.size(), 3 );
+    TS_ASSERT_EQUALS( objects.size(), 3 );
+    TS_ASSERT_DIFFERS( names.find("__Three"), names.end() );
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","0");
   }
 
 private:
@@ -312,7 +336,7 @@ private:
   void doAddingOnInvalidNameTests(bool replace)
   {
     const std::string illegalChars = " +-/*\\%<>&|^~=!@()[]{},:.`$'\"?";
-    AnalysisDataService::Instance().setIllegalCharacterList(illegalChars);
+    ads.setIllegalCharacterList(illegalChars);
     const size_t nchars(illegalChars.size());
     const std::string allowed("WsName");
 
@@ -332,36 +356,26 @@ private:
       {
         TSM_ASSERT_THROWS(errorMsg.str(), addOrReplaceToADS(name.str()), std::invalid_argument);
       }
-      bool stored = isInADS(name.str());
+      bool stored = ads.doesExist(name.str());
       TS_ASSERT_EQUALS(stored, false);
-      if( stored ) removeFromADS(name.str()); // Clear up if the test fails so that it dones't impact on others.
+      if( stored ) ads.remove(name.str()); // Clear up if the test fails so that it dones't impact on others.
     }
     // Clean up
-    AnalysisDataService::Instance().setIllegalCharacterList("");
+    ads.setIllegalCharacterList("");
   }
 
   /// Add a ptr to the ADS with the given name
   Workspace_sptr addToADS(const std::string & name)
   {
     MockWorkspace_sptr space = MockWorkspace_sptr(new MockWorkspace);
-    AnalysisDataService::Instance().add(name, space);
+    ads.add(name, space);
     return space;
   }
 
   /// Add or replace the given name
   void addOrReplaceToADS(const std::string & name)
   {
-    AnalysisDataService::Instance().addOrReplace(name, Workspace_sptr(new MockWorkspace));
-  }
-
-  void removeFromADS(const std::string & name)
-  {
-    AnalysisDataService::Instance().remove(name);
-  }
-  
-  bool isInADS(const std::string & name)
-  {
-    return AnalysisDataService::Instance().doesExist(name);
+    ads.addOrReplace(name, Workspace_sptr(new MockWorkspace));
   }
 
 };

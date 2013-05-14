@@ -34,10 +34,6 @@ namespace API
     m_gridLayout->addWidget(m_label, m_row, 0, 0);
     m_widgets.push_back(m_label);
 
-    // Check whether we should display hidden workspaces in WS comboboxes
-    QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces"));
-    bool showHidden = (!setting.compare("0")) ? false : true;
-
     //It is a choice of certain allowed values and can use a combination box
     //Check if this is the row that matches the one that we want to link to the
     //output box and used the saved combo box
@@ -46,15 +42,10 @@ namespace API
     connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(valueChangedSlot()));
     m_widgets.push_back(m_combo);
 
-    bool isWorkspaceProp(dynamic_cast<IWorkspaceProperty*>(prop));
     std::set<std::string> items = prop->allowedValues();
-    std::set<std::string>::const_iterator vend = items.end();
-    for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != vend; ++vitr)
+    for(std::set<std::string>::const_iterator vitr = items.begin(); vitr != items.end(); ++vitr)
     {
-      QString propValue = QString::fromStdString(*vitr);
-      // Skip hidden workspaces
-      if ( isWorkspaceProp && ( ! showHidden ) && propValue.startsWith("__") ) continue;
-      m_combo->addItem(propValue);
+      m_combo->addItem(QString::fromStdString(*vitr));
     }
 
     // Put the combo in column 1

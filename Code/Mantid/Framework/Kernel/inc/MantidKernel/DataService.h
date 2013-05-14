@@ -5,20 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include <boost/shared_ptr.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <string>
-#include <map>
-#include <vector>
-#include <functional>
-#include <algorithm>
-
+#include <boost/algorithm/string.hpp>
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
-#include <Poco/ScopedLock.h>
-#include <Poco/Mutex.h>
-
-#include "MantidKernel/DllConfig.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
@@ -36,10 +25,7 @@ namespace Kernel
     This is the primary data service that  the users will interact with either through writing scripts or directly
     through the API. It is implemented as a singleton class.
 
-    @author Laurent C Chapon, ISIS, Rutherford Appleton Laboratory
-    @date 30/05/2008
-
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -184,16 +170,12 @@ public:
    * @param Tobject :: shared pointer to object to add
    * @throw std::runtime_error if name is empty
    * @throw std::runtime_error if name exists in the map
+   * @throw std::runtime_error if a null pointer is passed for the object
    */
   virtual void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
-    // Don't permit an empty name for the workspace
-    if (name.empty())
-    {
-      std::string error="Add Data Object with empty name";
-      g_log.debug() << error << std::endl;
-      throw std::runtime_error(error);
-    }
+    checkForEmptyName(name);
+    checkForNullPointer(Tobject);
 
     // Make DataService access thread-safe
     m_mutex.lock();
@@ -214,10 +196,7 @@ public:
       g_log.debug() << "Add Data Object " << name << " successful" << std::endl;
       m_mutex.unlock();
 
-     if(objectIsToBeVisible(name))
-     {
-       notificationCenter.postNotification(new AddNotification(name,Tobject));
-     }
+      notificationCenter.postNotification(new AddNotification(name,Tobject));
     }
     return;
   }
@@ -232,12 +211,14 @@ public:
    */
   virtual void addOrReplace( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
+    checkForNullPointer(Tobject);
+
     // Make DataService access thread-safe
     m_mutex.lock();
 
     //find if the Tobject already exists
     std::string foundName;
-    svc_it it = this->findNameWithCaseSearch(name, foundName);
+    svc_it it = findNameWithCaseSearch(name, foundName);
     if (it!=datamap.end())
     {
       g_log.debug("Data Object '"+ foundName +"' replaced in data service.\n");
@@ -248,10 +229,8 @@ public:
       m_mutex.lock();
       datamap[foundName] = Tobject;
       m_mutex.unlock();
-      if(objectIsToBeVisible(name))
-      {
-        notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));
-      }
+
+      notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));
     }
     else
     {
@@ -271,18 +250,10 @@ public:
     m_mutex.lock();
 
     std::string foundName;
-    svc_it it = this->findNameWithCaseSearch(name, foundName);
+    svc_it it = findNameWithCaseSearch(name, foundName);
     if (it==datamap.end())
     {
-      if ( ! objectIsToBeHidden(name) )
-      {
-        g_log.warning(" remove '" + name + "' cannot be found");
-      }
-      else
-      {
-        // Log only at a low level for hidden workspaces
-        g_log.debug(" remove '" + name + "' cannot be found");
-      }
+      g_log.debug(" remove '" + name + "' cannot be found");
       m_mutex.unlock();
       return;
     }
@@ -305,11 +276,13 @@ public:
    */
   void rename( const std::string& oldName, const std::string& newName)
   {
+    checkForEmptyName(newName);
+
     // Make DataService access thread-safe
     m_mutex.lock();
 
     std::string foundName;
-    svc_it it = this->findNameWithCaseSearch(oldName, foundName);
+    svc_it it = findNameWithCaseSearch(oldName, foundName);
     if (it==datamap.end())
     {
       g_log.warning(" rename '" + oldName + "' cannot be found");
@@ -325,10 +298,7 @@ public:
     it = datamap.find( newName );
     if ( it != datamap.end() )
     {
-      if(objectIsToBeVisible(newName))
-      {
-        notificationCenter.postNotification(new AfterReplaceNotification(newName,object));
-      }
+      notificationCenter.postNotification(new AfterReplaceNotification(newName,object));
       datamap.erase( it );
     }
 
@@ -343,14 +313,8 @@ public:
     g_log.information("Data Object '"+ foundName +"' renamed to '" + newName + "'");
 
     m_mutex.unlock();
-    if(objectIsToBeVisible(newName))
-    {
-      notificationCenter.postNotification(new RenameNotification(oldName, newName));
-    }
-    else
-    {
-      notificationCenter.postNotification(new PostDeleteNotification(oldName));
-    }
+    notificationCenter.postNotification(new RenameNotification(oldName, newName));
+
     return;
   }
 
@@ -376,7 +340,7 @@ public:
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
     std::string foundName;
-    svc_it it = this->findNameWithCaseSearch(name, foundName);
+    svc_it it = findNameWithCaseSearch(name, foundName);
     if (it != datamap.end())
     {
       return it->second;
@@ -394,7 +358,7 @@ public:
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
     std::string foundName;
-    svc_it it = this->findNameWithCaseSearch(name, foundName);
+    svc_it it = findNameWithCaseSearch(name, foundName);
     if (it!=datamap.end())
         return true;
     return false;
@@ -403,18 +367,48 @@ public:
   /// Return the number of objects stored by the data service
   size_t size() const
   {
-    return datamap.size();
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
+    if ( showingHiddenObjects() )
+    {
+      return datamap.size();
+    }
+    else
+    {
+      size_t count = 0;
+      for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
+      {
+        if ( ! isHiddenDataServiceObject(it->first) ) ++count;
+      }
+      return count;
+    }
   }
 
-  /// Get a vector of the names of the data objects stored by the service
+  /// Get the names of the data objects stored by the service
   std::set<std::string> getObjectNames() const
   {
-    // Make DataService access thread-safe
+    if ( showingHiddenObjects() ) return getObjectNamesInclHidden();
+
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
     std::set<std::string> names;
-    svc_constit it;
-    for( it = datamap.begin(); it != datamap.end(); ++it)
+    for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
+    {
+      if ( ! isHiddenDataServiceObject(it->first) )
+      {
+        names.insert(it->first);
+      }
+    }
+    return names;
+  }
+
+  /// Get the names of the data objects stored by the service
+  std::set<std::string> getObjectNamesInclHidden() const
+  {
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
+    std::set<std::string> names;
+    for( svc_constit it = datamap.begin(); it != datamap.end(); ++it)
     {
       names.insert(it->first);
     }
@@ -424,36 +418,43 @@ public:
   /// Get a vector of the pointers to the data objects stored by the service
   std::vector< boost::shared_ptr<T> > getObjects() const
   {
-    // Make DataService access thread-safe
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
+    const bool showingHidden = showingHiddenObjects();
     std::vector< boost::shared_ptr<T> > objects;
-    objects.reserve( size() );
+    objects.reserve( datamap.size() );
     for(auto it = datamap.begin(); it != datamap.end(); ++it)
     {
-      objects.push_back( it->second );
+      if ( showingHidden || ! isHiddenDataServiceObject(it->first) )
+      {
+        objects.push_back( it->second );
+      }
     }
     return objects;
   }
 
-  /// Returns true if object with given name is considered visible
-  bool objectIsToBeVisible(const std::string & name)
+  inline static std::string prefixToHide()
   {
-    return !objectIsToBeHidden(name);
+    return "__";
   }
 
-  /// Returns true if object with given name is considered hidden
-  bool objectIsToBeHidden(const std::string & name)
+  inline static bool isHiddenDataServiceObject(const std::string& name)
   {
-    if(hiddenObjectsAreVisible()) return false;
-    return boost::starts_with(name, m_prefixToHide);
+    return boost::starts_with(name, prefixToHide());
   }
 
-  /// Returns true objects prefixed with "invisible" prefix should be visible
-  bool hiddenObjectsAreVisible()
+  static bool showingHiddenObjects()
   {
-    std::string hiddenWS = Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces");
-    return (hiddenWS == "1");
+    int showingHiddenFlag;
+    const int success = ConfigService::Instance().getValue("MantidOptions.InvisibleWorkspaces",showingHiddenFlag);
+    if ( success == 1 && showingHiddenFlag == 1 )
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   }
 
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
@@ -463,7 +464,7 @@ public:
 
 protected:
   /// Protected constructor (singleton)
-  DataService(const std::string& name) : svc_name(name),g_log(Kernel::Logger::get(svc_name)), m_prefixToHide("__"){}
+  DataService(const std::string& name) : svc_name(name),g_log(Kernel::Logger::get(svc_name)) {}
   virtual ~DataService(){}
 
 private:
@@ -472,9 +473,25 @@ private:
   /// Private, unimplemented copy assignment operator
   DataService& operator=(const DataService&);
 
-  /// Recursive mutex to avoid simultaneous access or notifications
-  mutable Poco::Mutex m_mutex;
+  void checkForEmptyName(const std::string& name)
+  {
+    if (name.empty())
+    {
+      const std::string error="Add Data Object with empty name";
+      g_log.debug() << error << std::endl;
+      throw std::runtime_error(error);
+    }
+  }
 
+  void checkForNullPointer(const boost::shared_ptr<T>& Tobject)
+  {
+    if (!Tobject)
+    {
+      const std::string error="Attempt to add empty shared pointer";
+      g_log.debug() << error << std::endl;
+      throw std::runtime_error(error);
+    }
+  }
 
   /**
    * Find a name in the map and return an iterator pointing to it. This takes
@@ -486,7 +503,7 @@ private:
    */
   svc_it findNameWithCaseSearch(const std::string & name, std::string &foundName) const
   {
-    const svcmap& constdata = this->datamap;
+    const svcmap& constdata = datamap;
     svcmap& data = const_cast<svcmap&>(constdata);
     if(name.empty()) return data.end();
 
@@ -515,17 +532,13 @@ private:
   }
 
   /// DataService name. This is set only at construction. DataService name should be provided when construction of derived classes
-  std::string svc_name;
-  
+  const std::string svc_name;
   /// Map of objects in the data service
   svcmap datamap;
-
-  /// Static reference to the logger for this DataService
+  /// Recursive mutex to avoid simultaneous access or notifications
+  mutable Poco::Mutex m_mutex;
+  /// Reference to the logger for this DataService
   Logger& g_log;
-
-  /// Prefix to indicate hidden object
-  std::string m_prefixToHide;
-
 }; // End Class Data service
 
 } // Namespace Kernel
