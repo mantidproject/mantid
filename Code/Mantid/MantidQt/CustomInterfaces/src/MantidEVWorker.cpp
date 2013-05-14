@@ -875,7 +875,7 @@ std::vector< std::pair<std::string,std::string> >MantidEVWorker::PointInfo( cons
   const auto& ADS = AnalysisDataService::Instance();
   Mantid::DataObjects::PeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<Mantid::DataObjects::PeaksWorkspace>(peaks_ws_name);
 
-  return peaks_ws->PeakInfo( Q ); 
+  return peaks_ws->PeakInfo( Q , lab_coords); 
 }
 
 } // namespace CustomInterfaces
