@@ -28,6 +28,7 @@ set ( SRC_FILES
   src/UserSubWindow.cpp
   src/VatesViewerInterface.cpp
   src/WorkspaceObserver.cpp
+  src/SelectionNotificationService.cpp
 )
 
 set ( MOC_FILES
@@ -52,6 +53,7 @@ set ( MOC_FILES
   inc/MantidQtAPI/UserSubWindow.h
   inc/MantidQtAPI/VatesViewerInterface.h
   inc/MantidQtAPI/WorkspaceObserver.h
+  inc/MantidQtAPI/SelectionNotificationService.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -71,6 +73,7 @@ set ( INC_FILES
   inc/MantidQtAPI/MantidQwtWorkspaceData.h
   inc/MantidQtAPI/PropertyWidgetFactory.h
   inc/MantidQtAPI/ScriptRepositoryView.h
+  inc/MantidQtAPI/SelectionNotificationService.h
 )
 
 set ( UI_FILES 
