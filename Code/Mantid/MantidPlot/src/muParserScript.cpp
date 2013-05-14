@@ -46,6 +46,8 @@ muParserScript::muParserScript(ScriptingEnv *env,  const QString &name, QObject 
 : Script(env,name, Script::NonInteractive, context),
   d_warn_multiline_code(checkMultilineCode)
 {
+  // warning for multiline code removed, therefore the variable d_warn_multiline_code is not used
+  // however it has been left in, to remove the need to affect the class hierarchy.
   variables.setAutoDelete(true);
   rvariables.setAutoDelete(true);
 
@@ -71,23 +73,9 @@ muParserScript::muParserScript(ScriptingEnv *env,  const QString &name, QObject 
     parser.DefineFun("cell", mu_cell);
 
   rparser = parser;
-  if (context->isA("Table") || context->isA("Matrix")){
-    if (d_warn_multiline_code){
-      QApplication::restoreOverrideCursor();
-      QString mess = tr("Multiline expressions take much more time to evaluate! Do you want to continue anyways?");
-      if (QMessageBox::Yes == QMessageBox::warning((QWidget*)context, tr("MantidPlot") + " - " + tr("Warning"), mess,
-          QMessageBox::Yes, QMessageBox::Cancel)){
-        parser.SetVarFactory(mu_addVariable);
-        rparser.SetVarFactory(mu_addVariableR);
-      }
-    } else {
-      parser.SetVarFactory(mu_addVariable);
-      rparser.SetVarFactory(mu_addVariableR);
-    }
-  } else {
-    parser.SetVarFactory(mu_addVariable);
-    rparser.SetVarFactory(mu_addVariableR);
-  }
+  parser.SetVarFactory(mu_addVariable);
+  rparser.SetVarFactory(mu_addVariableR);
+  
 }
 
 double muParserScript::col(const QString &arg)
