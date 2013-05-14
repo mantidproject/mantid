@@ -430,8 +430,19 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
   uint16_t runIndex = mdEventWS->addExperimentInfo(ei);
 
   const MantidVec & binBoundaries = m_InWS2D->readX(0);
-  auto mapping = m_InWS2D->spectraMap().createIDGroupsMap();
 
+  // Replacement for SpectraDetectorMap::createIDGroupsMap using the ISpectrum objects instead
+  auto mapping = boost::make_shared<det2group_map>();
+  for ( size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i )
+  {
+    const auto& dets = m_InWS2D->getSpectrum(i)->getDetectorIDs();
+    if(!dets.empty())
+    {
+      std::vector<detid_t> id_vector;
+      std::copy(dets.begin(), dets.end(), std::back_inserter(id_vector));
+      mapping->insert(std::make_pair(id_vector.front(), id_vector));
+    }
+  }
 
   uint16_t nexpts = mdEventWS->getNumExperimentInfo();
   for(uint16_t i = 0; i < nexpts; ++i)
@@ -441,9 +452,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
     expt->cacheDetectorGroupings(*mapping);
   }
 
- // and add it to the target workspace description for further usage as identifier for the workspaces, which come from this run. 
-   targWSDescr.addProperty("RUN_INDEX",runIndex,true);
-  
+  // and add it to the target workspace description for further usage as identifier for the workspaces, which come from this run.
+  targWSDescr.addProperty("RUN_INDEX",runIndex,true);
 }
 
 /** Constructor */
