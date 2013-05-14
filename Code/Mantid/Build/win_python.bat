@@ -9,15 +9,18 @@
 setlocal
 
 set script_dir=%~dp0
-set release_lib=mantid\kernel\kernel.pyd
-set debug_lib=mantid\kernel\kernel_d.pyd
+set release_lib=mantid\kernel\_kernel.pyd
+set debug_lib=mantid\kernel\_kernel_d.pyd
 
 if EXIST "%script_dir%"%release_lib% (
   python %*
-)
-
-if EXIST "%script_dir%"%debug_lib% (
-  python_d %*
+) else (
+  if EXIST %script_dir%%debug_lib% (
+    python_d %*
+  ) else (
+    echo No Python libs found. Cannot determine python version to call.
+    exit /b 1
+  )
 )
 
 endlocal
