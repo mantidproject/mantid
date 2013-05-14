@@ -699,8 +699,7 @@ namespace Mantid
         auto detIDs = getSpectrum(i)->getDetectorIDs();
         for ( auto it = detIDs.begin(); it != detIDs.end(); ++it)
         {
-          auto setForThisDetID = detectorIDtoWSIndices[*it];
-          setForThisDetID.insert(i);
+          detectorIDtoWSIndices[*it].insert(i);
         }
       }
 
