@@ -35,7 +35,7 @@ SelectionNotificationServiceImpl:: ~SelectionNotificationServiceImpl()
 void SelectionNotificationServiceImpl::sendQPointSelection( bool lab_coords, double qx, double qy, double qz )
 {
   emit QPointSelection_signal( lab_coords, qx, qy, qz );
-  std::cout << "QPointSelection_signal emitted" << std::endl;
+//  std::cout << "QPointSelection_signal emitted" << std::endl;
 }
 
 
