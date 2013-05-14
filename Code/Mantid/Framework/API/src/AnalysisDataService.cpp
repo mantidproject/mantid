@@ -122,10 +122,29 @@ namespace Mantid
     }
 
     /**
+     * Remove a workspace
+     * @param name :: Name of a workspace to remove.
+     */
+    void AnalysisDataServiceImpl::remove(const std::string &name)
+    {
+        if ( removeFromTopLevel(name) ) return;
+
+        std::vector<Workspace_sptr> workspaces = getObjects();
+        for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
+        {
+            WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>( it->get() );
+            if ( wsg && wsg->deepRemove(name) )
+            {
+                return;
+            }
+        }
+    }
+
+    /**
      * A method to help with workspace group management.
      * @param name :: Name of a workspace to emove.
      */
-    void AnalysisDataServiceImpl::removeFromTopLevel(const std::string &name)
+    bool AnalysisDataServiceImpl::removeFromTopLevel(const std::string &name)
     {
         std::string foundName = name;
         std::transform(foundName.begin(), foundName.end(), foundName.begin(),toupper);
@@ -135,9 +154,10 @@ namespace Mantid
             if ( (**it).getUpperCaseName() == foundName )
             {
                 Kernel::DataService<Workspace>::remove( name );
-                return;
+                return true;
             }
         }
+        return false;
     }
 
     /**

@@ -92,6 +92,8 @@ public:
   void print() const;
   /// Remove a name from the group
   void remove(const std::string& name);
+  /// Remove a workspace by name.
+  bool deepRemove(const std::string& name, bool convertToUpperCase = true, size_t nesting = 0);
   /// Remove all names from the group but do not touch the ADS
   void removeAll();
   /// Remove all names from the group and also from the ADS
@@ -111,10 +113,10 @@ private:
   WorkspaceGroup(const WorkspaceGroup& ref);
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
-  /// Callback when a delete notification is received
-  void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
-  /// Observer for workspace delete notfications
-  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
+//  /// Callback when a delete notification is received
+//  void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
+//  /// Observer for workspace delete notfications
+//  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
   /// Callback when a before-replace notification is received
   void workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
   /// Observer for workspace before-replace notfications

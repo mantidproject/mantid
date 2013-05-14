@@ -265,7 +265,7 @@ public:
   //--------------------------------------------------------------------------
   /** Remove an object from the service.
    * @param name :: name of the object */
-  void remove( const std::string& name)
+  virtual void remove( const std::string& name)
   {
     // Make DataService access thread-safe
     m_mutex.lock();

@@ -116,6 +116,8 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    virtual boost::shared_ptr<API::Workspace> retrieve( const std::string& name) const;
    /// Check to see if a data object exists in the store
    virtual bool doesExist(const std::string& name) const;
+   /// Overridden to take workspace groups into account
+   virtual void remove( const std::string& name);
 
    /** Retrieve a workspace and cast it to the given WSTYPE
     *
@@ -133,7 +135,7 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    }
 
    /// Remove a workspace if it is on the top level of the ADS, ie not a part of a workspace group.
-   void removeFromTopLevel(const std::string &name);
+   bool removeFromTopLevel(const std::string &name);
    /// Count instances of a workspace in the ADS
    size_t count(Workspace_const_sptr workspace) const;
    /// Find a stored workspace

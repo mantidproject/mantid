@@ -21,7 +21,6 @@ size_t WorkspaceGroup::g_maxNestingLevel = 100;
 
 WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
   Workspace(), 
-  m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
   m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
   m_workspaces(), m_observingADS(false), m_nameCounter(0)
 {
@@ -76,7 +75,6 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
   {
     if(!m_observingADS)
     {
-      AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
       AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
       m_observingADS = true;
     }
@@ -85,7 +83,6 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
   {
     if(m_observingADS)
     {
-      AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
       AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
       m_observingADS = false;
     }
@@ -142,6 +139,9 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
 
 /**
  * Remove a workspace if it is in the group. Doesn't look into nested groups.
+ * Removes the workspace from ADS (if it was there). If ADS has multiple copies
+ * of the workspace only one of them is removed.
+ *
  * @param workspace :: A workspace to remove.
  */
 void WorkspaceGroup::removeWorkspace(Workspace_sptr workspace)
@@ -288,7 +288,16 @@ size_t WorkspaceGroup::count(Workspace_const_sptr workspace, size_t nesting) con
 /// Empty all the entries out of the workspace group. Does not remove the workspaces from the ADS.
 void WorkspaceGroup::removeAll()
 {
-  m_workspaces.clear();
+    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    {
+        auto ws = *it;
+        if ( ! ws->name().empty() )
+        {
+            // leave removed workspace in the ADS
+            AnalysisDataService::Instance().add( ws->name(), ws );
+        }
+    }
+    m_workspaces.clear();
 }
 
 /** Remove the named workspace from the group. Does not delete the workspace from the AnalysisDataService.
@@ -302,6 +311,9 @@ void WorkspaceGroup::remove(const std::string& wsName)
   {
     if ( (**it).name() == wsName )
     {
+      // leave removed workspace in the ADS
+      auto ws = *it;
+      AnalysisDataService::Instance().add( ws->name(), ws );
       m_workspaces.erase(it);
       break;
     }
@@ -309,17 +321,71 @@ void WorkspaceGroup::remove(const std::string& wsName)
   updated();
 }
 
+/**
+ *  Search in nested groups for a name and remove the workspace if found.
+ * @param name :: Name of a workspace to remove.
+ * @param convertToUpperCase  :: Set true if wsName needs to be converted to upper case before search.
+ * @param nesting :: Current nesting level. To detect cycles.
+ * @return :: True in success.
+ */
+bool WorkspaceGroup::deepRemove(const std::string &name, bool convertToUpperCase, size_t nesting)
+{
+    if ( nesting >= g_maxNestingLevel )
+    {
+        // check for cycles
+        throw std::runtime_error("Workspace group nesting is too deep. Could be a cycle.");
+    }
+
+    std::string upperName = name;
+    if ( convertToUpperCase )
+    {
+        std::transform(upperName.begin(), upperName.end(), upperName.begin(),toupper);
+    }
+
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
+    // try direct members first
+    size_t oldSize = m_workspaces.size();
+    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    {
+      if ( (**it).getUpperCaseName() == upperName )
+      {
+        m_workspaces.erase(it);
+        break;
+      }
+    }
+
+    // empty top-level groups must be removed from the ADS
+    if ( nesting == 0 && m_workspaces.empty() && ! getName().empty() )
+    {
+        AnalysisDataService::Instance().remove( getName() );
+        return true;
+    }
+
+    if ( oldSize != m_workspaces.size() ) return true;
+
+    // if not found look recursively in child groups
+    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    {
+        WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>( it->get() );
+        if ( wsg && wsg->deepRemove( upperName, false, nesting + 1) )
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 /// Removes all members of the group from the group AND from the AnalysisDataService
 void WorkspaceGroup::deepRemoveAll()
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   while (!m_workspaces.empty())
   {
     AnalysisDataService::Instance().remove(m_workspaces.back()->name());
-	  m_workspaces.pop_back();
+    m_workspaces.pop_back();
   }
-  if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
 }
 
 /// Print the names of all the workspaces in this group to the logger (at debug level)
@@ -329,31 +395,6 @@ void WorkspaceGroup::print() const
   for (auto itr = m_workspaces.begin(); itr != m_workspaces.end(); ++itr)
   {
     g_log.debug() << "Workspace name in group vector =  " << (**itr).name() << std::endl;
-  }
-}
-
-/** Callback for a workspace delete notification
- *
- * Removes any deleted entries from the group.
- * This also deletes the workspace group when the last member of it gets deteleted.
- *
- * @param notice :: A pointer to a workspace delete notificiation object
- */
-void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice)
-{
-  Poco::Mutex::ScopedLock _lock(m_mutex);
-  const std::string deletedName = notice->object_name();
-  if( !this->contains(deletedName)) return;
-
-  if( deletedName != this->getName() )
-  {
-    this->remove(deletedName);
-    if(isEmpty())
-    {
-      //We are about to get deleted so we don't want to recieve any notifications
-      observeADSNotifications(false);
-      AnalysisDataService::Instance().remove(this->getName());
-    }
   }
 }
 

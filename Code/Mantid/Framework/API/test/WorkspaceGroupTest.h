@@ -296,7 +296,7 @@ public:
     TS_ASSERT_EQUALS( boost::dynamic_pointer_cast<Workspace>(group->getItem(0)), ws );
     TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1);
     // add same workspace again -
-    group->add("ws");
+    //group->add("ws");
     TS_ASSERT_EQUALS( group->size(), 1 );
     TS_ASSERT_EQUALS( boost::dynamic_pointer_cast<Workspace>(group->getItem(0)), ws );
     TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1);
@@ -373,45 +373,74 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void xtest_remove()
+  void test_removeWorkspace()
+  {
+      WorkspaceGroup_sptr group(new WorkspaceGroup());
+      WorkspaceGroup_sptr child_group(new WorkspaceGroup());
+      Workspace_sptr ws(new WorkspaceTester());
+      child_group->addWorkspace( ws );
+
+      group->addWorkspace( child_group );
+      group->addWorkspace( ws );
+
+      // count decreases by 1
+      TS_ASSERT_EQUALS( group->count( ws ), 2 );
+      group->removeWorkspace( ws );
+      TS_ASSERT_EQUALS( group->count( ws ), 1 );
+
+      TS_ASSERT_THROWS_NOTHING( group->removeWorkspace( makeWorkspace() ) );
+
+      // removes workspace from ADS as well
+      AnalysisDataService::Instance().add( "group", group );
+      TS_ASSERT( AnalysisDataService::Instance().doesExist("group_1") );
+      group->removeWorkspace( group->getItem(0) );
+      TS_ASSERT( ! AnalysisDataService::Instance().doesExist("group_1") );
+      AnalysisDataService::Instance().clear();
+  }
+
+  void test_remove()
   {
     WorkspaceGroup_sptr group = makeGroup();
-    group->remove("ws0");
-    TSM_ASSERT( "remove() takes out from group", !group->contains("ws0") );
-    TSM_ASSERT( "remove() does not take out of ADS ", AnalysisDataService::Instance().doesExist("ws0") );
+    AnalysisDataService::Instance().add( "group", group );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("group_1") );
+    group->remove("group_1");
+    TSM_ASSERT( "remove() takes out from group", !group->contains("group_1") );
+    TSM_ASSERT( "remove() does not take out of ADS ", AnalysisDataService::Instance().doesExist("group_1") );
     AnalysisDataService::Instance().clear();
 }
 
-  void xtest_removeAll()
+  void test_removeAll()
   {
     WorkspaceGroup_sptr group = makeGroup();
+    AnalysisDataService::Instance().add( "group", group );
     group->removeAll();
     TS_ASSERT_EQUALS( group->size(), 0);
-    TSM_ASSERT( "removeAll() does not take out of ADS ", AnalysisDataService::Instance().doesExist("ws0") );
+    TSM_ASSERT( "removeAll() does not take out of ADS ", AnalysisDataService::Instance().doesExist("group_1") );
     AnalysisDataService::Instance().clear();
   }
 
-  /*
-  void xtest_deleting_workspaces()
+  void test_deleting_workspaces()
   {
     WorkspaceGroup_sptr group = makeGroup();
+    AnalysisDataService::Instance().add( "group", group );
     TS_ASSERT( AnalysisDataService::Instance().doesExist("group") );
 
     // When you delete a workspace it gets removed from the group
-    AnalysisDataService::Instance().remove("ws0");
+    AnalysisDataService::Instance().remove("group_1");
     TS_ASSERT( AnalysisDataService::Instance().doesExist("group") );
-    TS_ASSERT( !group->contains("ws0") );
+    TS_ASSERT( !group->contains("group_1") );
 
-    AnalysisDataService::Instance().remove("ws1");
+    AnalysisDataService::Instance().remove("group_2");
     TS_ASSERT( AnalysisDataService::Instance().doesExist("group") );
-    TS_ASSERT( !group->contains("ws1") );
+    TS_ASSERT( !group->contains("group_2") );
 
     // When you remove the last one, the group deletes itself
-    AnalysisDataService::Instance().remove("ws2");
+    AnalysisDataService::Instance().remove("group_3");
     TS_ASSERT( !AnalysisDataService::Instance().doesExist("group") );
     AnalysisDataService::Instance().clear();
   }
 
+  /*
   void xtest_areNamesSimilar()
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup());
