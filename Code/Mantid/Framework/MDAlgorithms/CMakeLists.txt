@@ -13,10 +13,6 @@ set ( SRC_FILES
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMD.cpp
-	src/ConvertToMDEvents.cpp
-	src/ConvertToMDEventsChildAlgFactory.cpp
-	src/ConvertToMDEventsParams.cpp
-	src/ConvertToMDEventsWSBase.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/DivideMD.cpp
@@ -73,8 +69,6 @@ set ( SRC_FILES
 #)
 
 set ( INC_FILES
-	# END TMP
-	# Old TMP convertToMD code prepared for deprication:
 	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
 	inc/MantidMDAlgorithms/AndMD.h
 	inc/MantidMDAlgorithms/BinMD.h
@@ -86,18 +80,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
-	inc/MantidMDAlgorithms/ConvertToMDEvents.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsChildAlgFactory.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h
-	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/DivideMD.h
@@ -155,9 +137,6 @@ set ( INC_FILES
 # Test files. Other source files required.
 set ( TEST_FILES
 	#
-	#	ConvertToMDEventsCoordTransfTest.h
-	#    ConvertToMDEventsUnitsConvTest.h
-	# Old TMD convertToMD code prepared for deprication:
 	# these tests are as they test verify different parts of the CPR algorithms
 	#CreateMDFitWorkspaceTest.h
 	AndMDTest.h
