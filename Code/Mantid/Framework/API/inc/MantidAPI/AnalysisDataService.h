@@ -136,6 +136,8 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    void removeFromTopLevel(const std::string &name);
    /// Count instances of a workspace in the ADS
    size_t count(Workspace_const_sptr workspace) const;
+   /// Find a stored workspace
+   boost::shared_ptr<API::Workspace> find( const std::string& name) const;
 
 private:
    /// Checks the name is valid, throwing if not

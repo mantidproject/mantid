@@ -141,6 +141,23 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
 }
 
 /**
+ * Remove a workspace if it is in the group. Doesn't look into nested groups.
+ * @param workspace :: A workspace to remove.
+ */
+void WorkspaceGroup::removeWorkspace(Workspace_sptr workspace)
+{
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    {
+      if ( *it == workspace )
+      {
+          m_workspaces.erase(it);
+          return;
+      }
+    }
+}
+
+/**
  * Does this group contain the named workspace?
  * @param wsName :: A string to compare
  * @returns True if the name is part of this group, false otherwise
@@ -244,6 +261,7 @@ Workspace_sptr WorkspaceGroup::findItem(const std::string wsName, bool convertTo
  * @param workspace :: Workspace to look for.
  * @param nesting :: Current nesting level. To detect cycles.
  * @return :: Number of copies.
+ * @throw :: std::runtime_error if nesting level exceeds maximum.
  */
 size_t WorkspaceGroup::count(Workspace_const_sptr workspace, size_t nesting) const
 {

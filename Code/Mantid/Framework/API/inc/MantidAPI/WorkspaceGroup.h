@@ -69,6 +69,8 @@ public:
   void add(const std::string& wsName);
   /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
+  /// Remove a workspace from the group.
+  void removeWorkspace(Workspace_sptr workspace);
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(this->size()); }
   /// Return the size of the group, so it is more like a container

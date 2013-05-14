@@ -100,24 +100,12 @@ namespace Mantid
     /**
       * Extend the default behaviour by searching workspace groups recursively. Search is case insensitive.
       * @param name :: Name of the workspace.
+      * @throw NotFoundError if the workspace wasn't found
       */
     boost::shared_ptr<API::Workspace> AnalysisDataServiceImpl::retrieve(const std::string &name) const
     {
-        std::string foundName = name;
-        std::transform(foundName.begin(), foundName.end(), foundName.begin(),toupper);
-        std::vector<Workspace_sptr> workspaces = getObjects();
-        for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
-        {
-          Workspace *ws = it->get();
-          if ( ws->getUpperCaseName() == foundName ) return *it;
-          WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>(ws);
-          if ( wsg )
-          {
-              // look in member groups recursively
-              auto res = wsg->findItem(foundName, false);
-              if ( res ) return res;
-          }
-        }
+        auto ws = find(name);
+        if ( ws ) return ws;
         throw Kernel::Exception::NotFoundError("Workspace",name);
     }
 
@@ -128,15 +116,8 @@ namespace Mantid
      */
     bool AnalysisDataServiceImpl::doesExist(const std::string &name) const
     {
-        try
-        {
-            auto it = retrieve(name);
-            if ( it ) return true;
-        }
-        catch(Kernel::Exception::NotFoundError)
-        {
-            return false;
-        }
+        auto it = find(name);
+        if ( it ) return true;
         return false;
     }
 
@@ -179,6 +160,31 @@ namespace Mantid
             }
         }
         return n;
+    }
+
+    /**
+     * Find a workspace in the ADS.
+     * @param name :: Name of the workspace to find.
+     * @return :: Shared pointer to the found workspace or an empty pointer otherwise.
+     */
+    boost::shared_ptr<Workspace> AnalysisDataServiceImpl::find(const std::string &name) const
+    {
+        std::string foundName = name;
+        std::transform(foundName.begin(), foundName.end(), foundName.begin(),toupper);
+        std::vector<Workspace_sptr> workspaces = getObjects();
+        for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
+        {
+          Workspace *ws = it->get();
+          if ( ws->getUpperCaseName() == foundName ) return *it;
+          WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>(ws);
+          if ( wsg )
+          {
+              // look in member groups recursively
+              auto res = wsg->findItem(foundName, false);
+              if ( res ) return res;
+          }
+        }
+        return boost::shared_ptr<Workspace>();
     }
 
     //-------------------------------------------------------------------------
