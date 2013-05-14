@@ -76,6 +76,8 @@ void export_AnalysisDataService()
   register_ptr_to_python<DataItem_wptr>();
 
   class_<AnalysisDataServiceImpl,boost::noncopyable>("AnalysisDataServiceImpl", no_init)
+    .def("add", &AnalysisDataServiceImpl::add, "Adds the given object to the service with the given name. If the name/object exists it will raise an error.")
+    .def("addOrReplace", &AnalysisDataServiceImpl::add, "Adds the given object to the service with the given name. The the name exists the object is replaced.")
     .def("doesExist", &AnalysisDataServiceImpl::doesExist, "Returns True if the object is found in the service.")
     .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::downcast_returned_value>(),
          "Retrieve the named object. Raises an exception if the name does not exist")
