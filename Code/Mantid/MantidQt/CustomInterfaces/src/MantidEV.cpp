@@ -1061,7 +1061,7 @@ void MantidEV::showInfo_slot()
    getDouble( m_uiForm.Qz_ledt, qz );
 
    /// loop back test of SelectionNotificationService
-   MantidQt::API::SelectionNotificationService::Instance().sendQPointSelection( false, qx, qy, qz );
+   MantidQt::API::SelectionNotificationService::Instance().sendQPointSelection( true, qx, qy, qz );
 }
 
 
@@ -1078,7 +1078,7 @@ void MantidEV::showInfo_slot()
 void MantidEV::QPointSelection_slot( bool lab_coords, double qx, double qy, double qz )
 {
   Mantid::Kernel::V3D q_point( qx, qy, qz );
-  showInfo( q_point );
+  showInfo( lab_coords, q_point );
 }
 
 
@@ -1086,9 +1086,11 @@ void MantidEV::QPointSelection_slot( bool lab_coords, double qx, double qy, doub
  *  Use the peaks workspace to get information about the specified
  *  Q-vector.
  *
+ *  @param  lab_coords  Will be true if the Q-components are in lab coordinates
+ *                      and false if they are in sample coordinates.
  *  @param q_point Vector containing the Q-coordinates.
  */
-void MantidEV::showInfo( Mantid::Kernel::V3D  q_point )
+void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
 {
    std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
@@ -1102,7 +1104,7 @@ void MantidEV::showInfo( Mantid::Kernel::V3D  q_point )
      errorMessage("Requested Peaks Workspace Doesn't Exist");
    }
 
-   std::vector< std::pair< std::string, std::string > > info = worker->PointInfo( peaks_ws_name, q_point );
+   std::vector< std::pair< std::string, std::string > > info = worker->PointInfo( peaks_ws_name, lab_coords, q_point );
 
    m_uiForm.SelectedPoint_tbl->setRowCount((int)info.size());
    m_uiForm.SelectedPoint_tbl->setColumnCount(2);
