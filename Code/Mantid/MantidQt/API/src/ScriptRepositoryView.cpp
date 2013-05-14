@@ -93,15 +93,7 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
       repo_ptr->install(dir.toStdString());
       g_log.information() << "ScriptRepository installed at " << dir.toStdString() << std::endl;
 
-    }else{
-      // try to update
-      try{
-        repo_ptr->check4Update();
-      }catch(Mantid::API::ScriptRepoException & ex){
-        g_log.information() << "Failed to update: " << ex.what() << std::endl; // 
-      }
     }
-
       // create the model
     model = new RepoModel(this);   
 
