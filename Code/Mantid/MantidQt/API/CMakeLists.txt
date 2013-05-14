@@ -85,7 +85,7 @@ set( TEST_FILES
    InterfaceManagerTest.h
    MantidColorMapTest.h
    MantidQwtMatrixWorkspaceDataTest.h
-   SelectionNotificationServiceTest.h
+#  SelectionNotificationServiceTest.h
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
