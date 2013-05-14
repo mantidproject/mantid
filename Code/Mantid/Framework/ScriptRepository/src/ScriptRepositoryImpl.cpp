@@ -830,11 +830,15 @@ namespace API
   }
 
   /** 
-   *  It downloads the repository.json file from the repository and review the status 
-   *  of all the files. If any file is found back in the version and it is marked as 
-   *  auto_update, it will be downloaded.
+   * Implements ScriptRepository::check4Update. It downloads the file repository.json
+   * from the central repository and call the listFiles again in order to inspect the current 
+   * state of every entry inside the local repository. For the files marked as AutoUpdate, if there 
+   * is a new version of these files, it downloads the file. As output, it provides a list of
+   * all files that were downloaded automatically.
+   * 
+   *  @return List of all files automatically downloaded.
   */
-  void ScriptRepositoryImpl::check4Update(void) 
+  std::vector<std::string> ScriptRepositoryImpl::check4Update(void) 
   {
     g_log.debug() << "ScriptRepositoryImpl checking for update\n" ; 
     // download the new repository json file
@@ -846,6 +850,7 @@ namespace API
       f.moveTo(backup); 
     }
     try{
+      g_log.debug() << "Download information from the Central Repository status" << std::endl;
       doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
     }catch(...){
@@ -867,8 +872,9 @@ namespace API
     #endif
 
     // re list the files
+    g_log.debug() << "Check the status of all files again" << std::endl;
     listFiles(); 
-    
+    std::vector<std::string> output_list;
     // look for all the files in the list, to check those that 
     // has the auto_update and check it they have changed.
     for(Repository::iterator it = repo.begin(); 
@@ -878,10 +884,13 @@ namespace API
         // THE SAME AS it->status in (REMOTE_CHANGED, BOTH_CHANGED)
         if (it->second.status & REMOTE_CHANGED){
           download(it->first); 
+          output_list.push_back(it->first);
+          g_log.notice()  << "Update file " << it->first << " to more recently version available" << std::endl;
         }
       }
     }
     g_log.debug() << "ScriptRepositoryImpl::checking for update finished\n" ; 
+    return output_list;
   }
 
   /** 
