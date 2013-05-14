@@ -1068,8 +1068,8 @@ public slots:
   /** Sets whether to prompt the user when closing/deleting a folder */
   void setConfirmFolderClose(bool value)
   { confirmCloseFolder = value; }
-
-
+  /** The very fist method to be executed as soon as the QApplication event loop starts*/
+  void about2Start();
 signals:
   void modified();
   void shutting_down();

@@ -18035,3 +18035,20 @@ void ApplicationWindow::validateWindowPos(MdiSubWindow* w, int& x, int& y)
     x = y = 0;
   }
 }
+
+/**
+ * Here it is possible to add all the methods that should be triggered 
+ * on MantidPlot initialization but which requires the eventloop to be 
+ * processing. 
+ * 
+ * Currently: 
+ *  - Update of Script Repository
+ */
+void ApplicationWindow::about2Start(){
+  // triggers the execution of UpdateScriptRepository Algorithm in a separated thread.
+  // this was necessary because in order to log while in a separate thread, it is necessary to have
+  // the postEvents available, so, we need to execute it here at about2Start.
+  Mantid::API::IAlgorithm_sptr update_script_repo = mantidUI->createAlgorithm("UpdateScriptRepository");
+  update_script_repo->initialize(); 
+  mantidUI->executeAlgorithmAsync(update_script_repo);
+}

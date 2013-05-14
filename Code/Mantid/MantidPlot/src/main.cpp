@@ -32,6 +32,7 @@
 #include <QMessageBox>
 #include <QDir>
 #include <QThread>
+#include <QTimer>
 
 #include "ApplicationWindow.h"
 #include "MantidKernel/Logger.h"
@@ -214,6 +215,7 @@ int main( int argc, char ** argv )
     splash.finish(mw);
 
     app.connect( &app, SIGNAL(lastWindowClosed()), mw, SLOT(exitWithPresetCode()) );
+    QTimer::singleShot(0, mw, SLOT(about2Start()));
     return app.exec();
   }
   catch(std::exception& e)
