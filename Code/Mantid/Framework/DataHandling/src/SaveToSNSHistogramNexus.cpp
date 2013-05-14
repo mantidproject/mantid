@@ -304,14 +304,12 @@ namespace DataHandling
     double saveTime = 0;
 
     // Make a buffer of floats will all the counts in that bank.
-    float * data;
-    float * errors;
-    data = new float[slabDimensions[0]*slabDimensions[1]*slabDimensions[2]];
+    float * data = new float[slabDimensions[0]*slabDimensions[1]*slabDimensions[2]];
+    
+	//Only allocate an array for errors if it is needed
+	float * errors = NULL;
     if (doBoth)
       errors = new float[slabDimensions[0]*slabDimensions[1]*slabDimensions[2]];
-
-//    for (size_t i=0; i < slabDimensions[0]*slabDimensions[1]*slabDimensions[2]; i++)
-//      data[i]=i;
 
 
     for (int x = 0; x < det->xpixels(); x++)

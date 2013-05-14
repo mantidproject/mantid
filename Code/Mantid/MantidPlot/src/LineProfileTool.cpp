@@ -45,9 +45,8 @@
 LineProfileTool::LineProfileTool(Graph *graph, ApplicationWindow *app, int average_pixels)
 	: QWidget(graph->plotWidget()->canvas()),
 	PlotToolInterface(graph),
-	d_app(app)
+	d_app(app), d_op_start(QPoint(0,0)),d_op_dp(QPoint(0,0))
 {
-	d_op_start = d_op_dp = QPoint(0,0);
 	// make sure we average over an odd number of pixels
 	d_average_pixels = (average_pixels % 2) ? average_pixels : average_pixels + 1;
 	d_target = dynamic_cast<ImageMarker*>(d_graph->selectedMarkerPtr());

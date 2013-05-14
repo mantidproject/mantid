@@ -843,7 +843,6 @@ namespace Algorithms
     int currindex = -1;
     DateAndTime lastTime, currTime;
     DateAndTime start, stop;
-    double currValue = 0.0;
     size_t progslot = 0;
 
     int logsize = m_dblLog->size();
@@ -857,7 +856,7 @@ namespace Algorithms
       bool newsplitter = false;
 
       currTime = m_dblLog->nthTime(i);
-      currValue = m_dblLog->nthValue(i);
+      double currValue = m_dblLog->nthValue(i);
 
       // b) Filter out by time and direction (optional)
       bool intime = false;

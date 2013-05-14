@@ -281,11 +281,11 @@ void ModeratorTzero::CalculateTfLi(MatrixWorkspace_sptr inputWS, size_t i, doubl
     {
       double E_f = wsProp.at(0); //[E_f]=meV
       double v_f = convFact * sqrt(E_f); //[v_f]=meter/microsec
-      //obtain L_f, calculate t_f
-      double L_f;
+      
       try
       {
-        L_f = det->getDistance(*sample);
+		//obtain L_f, calculate t_f
+        double L_f = det->getDistance(*sample);
         t_f = L_f / v_f;
         //g_log.debug() << "detector: " << i << " L_f=" << L_f << " t_f=" << t_f << std::endl;
       }

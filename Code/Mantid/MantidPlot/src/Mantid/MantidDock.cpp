@@ -432,8 +432,7 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
 
   // Experiment info data
   ExperimentInfo_sptr experimentInfo_ws = boost::dynamic_pointer_cast<ExperimentInfo>(workspace);
-  bool specialWorkspace = false;
-  specialWorkspace = (workspace->id() == "SpecialWorkspace2D" || workspace->id() == "MaskWorkspace"
+  bool specialWorkspace = specialWorkspace = (workspace->id() == "SpecialWorkspace2D" || workspace->id() == "MaskWorkspace"
                       || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
   if (experimentInfo_ws && (!specialWorkspace))
     populateExperimentInfoData(experimentInfo_ws, item);
@@ -659,8 +658,7 @@ void MantidDockWidget::populateExperimentInfoData(Mantid::API::ExperimentInfo_sp
 void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
   // Are we showing one of the special workspaces, OffsetsWorkspace or GroupingWorkspace
-  bool specialWorkspace = false;
-  specialWorkspace = (workspace->id() == "MaskWorkspace" || workspace->id() == "SpecialWorkspace2D" || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
+  bool specialWorkspace = (workspace->id() == "MaskWorkspace" || workspace->id() == "SpecialWorkspace2D" || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
 
   MantidTreeWidgetItem* data_item = new MantidTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())), m_tree);
   data_item->setFlags(Qt::NoItemFlags);
@@ -1700,6 +1698,7 @@ QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected()
       wsNames.append(allWsNames[i]);
   }
 
+  // cppcheck-suppress redundantAssignment
   QList<QString>::const_iterator it = wsNames.constBegin();
 
   // Check to see if all workspaces have a *single* histogram ...

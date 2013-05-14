@@ -132,13 +132,12 @@ namespace Mantid
         MantidVec::iterator itOutY = outY.begin();
         MantidVec::const_iterator itInE = refE.begin();
         MantidVec::iterator itOutE = outE.begin();
-        double err2;
         for (; itOutY != outY.end(); ++itOutY, ++itInY, ++itOutE, ++itInE)
         {
           //Calculate \sum_{j}Cij.Y(j)
           (*itOutY) = std::inner_product(itInY, itInY + nsteps, Cij.begin(), 0.0);
           //Calculate the error bars sqrt(\sum_{j}Cij^2.E^2)
-          err2 = std::inner_product(itInE, itInE + nsteps, Cij2.begin(), 0.0);
+          double err2 = std::inner_product(itInE, itInE + nsteps, Cij2.begin(), 0.0);
           (*itOutE) = sqrt(err2);
         }
         m_progress->report();

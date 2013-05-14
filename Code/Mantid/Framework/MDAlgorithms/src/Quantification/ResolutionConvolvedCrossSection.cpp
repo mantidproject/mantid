@@ -16,9 +16,6 @@
 
 /// Parallel region start macro. Different to generic one as that is specific to algorithms
 /// Assumes boolean exceptionThrow has been declared
-#define OMP_FOR_NO_CHECK \
-  PRAGMA(omp parallel for)
-
 #define OMP_START_INTERRUPT \
     if (!exceptionThrown && !this->cancellationRequestReceived()) \
     { \
@@ -133,7 +130,7 @@ namespace Mantid
       }
 
       bool exceptionThrown = false;
-      OMP_FOR_NO_CHECK
+      PARALLEL_FOR_NO_WSP_CHECK()
       for(int i = 0; i < nthreads; ++i)
       {
         API::IMDIterator *boxIterator = iterators[i];

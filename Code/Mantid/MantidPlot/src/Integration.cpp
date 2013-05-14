@@ -126,7 +126,6 @@ double Integration::trapezf(int n)
 
     static double s;
     if (n == 1){
-		x = d_from;
 		double aux = parser.Eval();
 		x = d_to;
         return (s = 0.5*(d_to - d_from)*(aux + parser.Eval()));

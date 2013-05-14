@@ -289,29 +289,29 @@ namespace Mantid
         while(gc!=Gparts.end() && (*gc < *fc))
         {
           NegParts.push_back(*gc);
-          gc++;
+          ++gc;
         }
 
         if (gc!=Gparts.end() && *gc==*fc)          // match
-          gc++;
+          ++gc;
         else   // ok that didn't work so add to us
           Outparts.push_back(*fc);
       }  
       // add extra bits from Gparts onto NegParts
-      for(;gc!=Gparts.end();gc++)
+      for(;gc!=Gparts.end();++gc)
         NegParts.push_back(*gc);
 
       // Clear This to put in Outparts.
       Units.clear();
       Comp.clear();
       Intersect=0;
-      for(fc=Outparts.begin();fc!=Outparts.end();fc++)
+      for(fc=Outparts.begin();fc!=Outparts.end();++fc)
         addComp(*fc);
       joinDepth();
       removeEqComp();                       // move equal items.
       // Now add any components from g but need to be as intersections
       std::vector<Acomp>::iterator negX;
-      for(negX=NegParts.begin();negX!=NegParts.end();negX++)
+      for(negX=NegParts.begin();negX!=NegParts.end();++negX)
       {
         negX->complement();
         this->operator*=(*negX);

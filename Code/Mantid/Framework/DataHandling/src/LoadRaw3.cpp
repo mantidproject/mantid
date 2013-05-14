@@ -118,10 +118,9 @@ namespace Mantid
 
       bool bLoadlogFiles = getProperty("LoadLogFiles");
 
-      bool bincludeMonitors = true;
+      bool bincludeMonitors = isIncludeMonitors();
       bool bseparateMonitors = false;
       bool bexcludeMonitors = false;
-      bincludeMonitors = isIncludeMonitors();
       if (!bincludeMonitors)
       {
         bseparateMonitors = isSeparateMonitors();
