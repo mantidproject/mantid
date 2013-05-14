@@ -687,40 +687,37 @@ namespace Mantid
 
     //---------------------------------------------------------------------------------------
     /** Converts a list of detector IDs to the corresponding workspace indices.
-     * Might be slow!
-     * This is optimized for few detectors in the list vs the number of histograms.
      *
      *  @param detIdList :: The list of detector IDs required
      *  @param indexList :: Returns a reference to the vector of indices
      */
     void MatrixWorkspace::getIndicesFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<size_t>& indexList) const
     {
-      std::vector<detid_t>::const_iterator it_start = detIdList.begin();
-      std::vector<detid_t>::const_iterator it_end = detIdList.end();
+      std::map<detid_t,std::set<size_t>> detectorIDtoWSIndices;
+      for ( size_t i = 0; i < getNumberHistograms(); ++i )
+      {
+        auto detIDs = getSpectrum(i)->getDetectorIDs();
+        for ( auto it = detIDs.begin(); it != detIDs.end(); ++it)
+        {
+          auto setForThisDetID = detectorIDtoWSIndices[*it];
+          setForThisDetID.insert(i);
+        }
+      }
 
       indexList.clear();
-
-      // Try every detector in the list
-      std::vector<detid_t>::const_iterator it;
-      for (it = it_start; it != it_end; ++it)
+      indexList.reserve(detIdList.size());
+      for ( size_t j = 0; j < detIdList.size(); ++j )
       {
-        bool foundDet = false;
-        size_t foundWI = 0;
-
-        // Go through every histogram
-        for (size_t i=0; i<this->getNumberHistograms(); i++)
+        auto wsIndices = detectorIDtoWSIndices.find(detIdList[j]);
+        if ( wsIndices != detectorIDtoWSIndices.end() )
         {
-          if (this->getSpectrum(i)->hasDetectorID(*it))
+          for ( auto it = wsIndices->second.begin(); it != wsIndices->second.end(); ++it )
           {
-            foundDet = true;
-            foundWI = i;
-            break;
+            indexList.push_back(*it);
           }
         }
+      }
 
-        if (foundDet)
-          indexList.push_back(foundWI);
-      } // for each detector ID in the list
     }
 
 
