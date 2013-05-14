@@ -830,7 +830,9 @@ namespace API
   }
 
   /** 
-      @todo describe
+   *  It downloads the repository.json file from the repository and review the status 
+   *  of all the files. If any file is found back in the version and it is marked as 
+   *  auto_update, it will be downloaded.
   */
   void ScriptRepositoryImpl::check4Update(void) 
   {
@@ -909,7 +911,13 @@ namespace API
   }
 
   /** 
-      @todo describe
+   * Configure the AutoUpdate, in order to be able to check if the user selected 
+   * to update this entry. 
+   * @param input_path : the path that identifies the entry
+   * @param option: true or false to indicate if it is set to auto update. 
+   *
+   * These configurations will be used at check4update, to download all entries that 
+   * are set to auto update.
   */
   void ScriptRepositoryImpl::setAutoUpdate(const std::string & input_path, bool option){
     ensureValidRepository();
@@ -1103,7 +1111,7 @@ namespace API
 
             entry_it->second.downloaded_pubdate = DateAndTime(file.second.get<std::string>("downloaded_pubdate"));
             entry_it->second.downloaded_date = DateAndTime(file.second.get<std::string>("downloaded_date"));
-
+            entry_it->second.auto_update = (file.second.get<std::string>("auto_update",std::string()) == "true");
 
           }else{
             // if the entry was not found locally or remotelly, this means 
@@ -1174,6 +1182,11 @@ namespace API
       local_json.put(
                 boost::property_tree::ptree::path_type( std::string(path).append("!downloaded_date"), '!'), 
                 entry.downloaded_date.toFormattedString().c_str());
+      std::string auto_update_op = (const char *)((entry.auto_update)?"true":"false");
+      std::string key = std::string(path).append("!auto_update");     
+      local_json.put(
+                     boost::property_tree::ptree::path_type(key,'!'),
+                     auto_update_op);
     }
     //g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
     #if defined(_WIN32) ||  defined(_WIN64)
