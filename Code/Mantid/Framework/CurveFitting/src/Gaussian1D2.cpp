@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/GaussianLinearBG1D.h"
+#include "MantidCurveFitting/Gaussian1D2.h"
 #include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
@@ -10,17 +10,17 @@ namespace CurveFitting
 {
 
 /// Empty default constructor
-GaussianLinearBG1D::GaussianLinearBG1D()
+Gaussian1D2::Gaussian1D2()
 {
   useAlgorithm("Fit alg with Gaussian and linear background function");
   deprecatedDate("2011-08-16");
 }
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(GaussianLinearBG1D)
+DECLARE_ALGORITHM(Gaussian1D2)
 
 /// Sets documentation strings for this algorithm
-void GaussianLinearBG1D::initDocs()
+void Gaussian1D2::initDocs()
 {
   this->setWikiSummary("== Deprecation notice == Instead of using this algorithm to fit a Gaussian please use the [[Fit]] algorithm where the Function parameter of this algorithm is used to specified the fitting function, including selecting a [[Gaussian]]. ");
   this->setOptionalMessage("== Deprecation notice == Instead of using this algorithm to fit a Gaussian please use the Fit algorithm where the Function parameter of this algorithm is used to specified the fitting function, including selecting a Gaussian.");
@@ -29,7 +29,7 @@ void GaussianLinearBG1D::initDocs()
 
 using namespace Kernel;
 
-void GaussianLinearBG1D::declareParameters()
+void Gaussian1D2::declareParameters()
 {
   declareProperty("BG0", 0.0, "Constant background value (default 0)", Direction::InOut);
   declareProperty("BG1", 0.0, "Linear background modelling parameter (default 0)", Direction::InOut);
@@ -42,7 +42,7 @@ void GaussianLinearBG1D::declareParameters()
   declareProperty("Sigma", 1.0, positiveDouble, "Standard deviation (default 1)", Direction::InOut);
 }
 
-void GaussianLinearBG1D::modifyStartOfRange(double& startX) 
+void Gaussian1D2::modifyStartOfRange(double& startX) 
 {
   const double peak_val = getProperty("PeakCentre");
   const double sigma = getProperty("Sigma");
@@ -50,7 +50,7 @@ void GaussianLinearBG1D::modifyStartOfRange(double& startX)
   startX = peak_val-(6*sigma);
 }
 
-void GaussianLinearBG1D::modifyEndOfRange(double& endX) 
+void Gaussian1D2::modifyEndOfRange(double& endX) 
 {
   const double peak_val = getProperty("PeakCentre");
   const double sigma = getProperty("Sigma");
@@ -58,21 +58,21 @@ void GaussianLinearBG1D::modifyEndOfRange(double& endX)
   endX = peak_val+(6*sigma);
 }
 
-void GaussianLinearBG1D::modifyInitialFittedParameters(std::vector<double>& fittedParameter)
+void Gaussian1D2::modifyInitialFittedParameters(std::vector<double>& fittedParameter)
 {
   const double sigma = getProperty("Sigma");
 
   fittedParameter[4] = 1/(sigma*sigma);  // the fitting is actually done on 1/sigma^2, also referred to as the weight
 }
 
-void GaussianLinearBG1D::modifyFinalFittedParameters(std::vector<double>& fittedParameter) 
+void Gaussian1D2::modifyFinalFittedParameters(std::vector<double>& fittedParameter) 
 {
   double weight = fittedParameter[4];
 
   fittedParameter[4] = sqrt(1/weight); // to convert back to sigma
 }
 
-void GaussianLinearBG1D::function(const double* in, double* out, const double* xValues, const size_t nData)
+void Gaussian1D2::function(const double* in, double* out, const double* xValues, const size_t nData)
 {
     const double bg0 = in[0];
     const double bg1 = in[1];
@@ -87,7 +87,7 @@ void GaussianLinearBG1D::function(const double* in, double* out, const double* x
     }
 }
 
-void GaussianLinearBG1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData)
+void Gaussian1D2::functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData)
 {
     const double height = in[2];
     const double peakCentre = in[3];
