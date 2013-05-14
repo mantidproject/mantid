@@ -45,9 +45,6 @@ else ()
   add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB )
   set ( BOOST_PYTHON_SRC ) # Not necessary on Windows
   set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
-  
-  # No prefix for any of them as they are loaded by Python not the OS
-  set ( CMAKE_SHARED_LIBRARY_PREFIX )
 endif ()
 
 ####################################################################################
@@ -82,6 +79,8 @@ ENDMACRO( )
 # A function for setting the correct properties on the individual targets
 ####################################################################################
 FUNCTION( SET_PYTHON_PROPERTIES TARGET TARGET_NAME )
+  # No library prefixes
+  set_target_properties( ${TARGET} PROPERTIES PREFIX "" )
   # Library name needs to end in .pyd for Windows
   if ( MSVC )
     set_target_properties ( ${TARGET} PROPERTIES SUFFIX .pyd 

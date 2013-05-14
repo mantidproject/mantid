@@ -4,6 +4,9 @@ are for use in unit tests only!
 # Define all mantid exported classes first
 import mantid
 
+# Add workspace creation namespace
+import WorkspaceCreationHelper
+
 # Define some pure-Python functions to add to the mix
 
 def run_algorithm(name, **kwargs):
