@@ -16,7 +16,7 @@ namespace CurveFitting
 /// Empty default constructor
 Gaussian1D2::Gaussian1D2()
 {
-  useAlgorithm("Fit alg with Gaussian and linear background function");
+  useAlgorithm("Fit");
   deprecatedDate("2011-08-16");
 }
 
