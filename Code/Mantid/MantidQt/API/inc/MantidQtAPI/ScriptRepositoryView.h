@@ -86,6 +86,7 @@ namespace API
     void cell_activated(const QModelIndex & ); 
     void updateModel();
     void 	currentChanged ( const QModelIndex & current );
+    void helpClicked();
 
 
   private:
