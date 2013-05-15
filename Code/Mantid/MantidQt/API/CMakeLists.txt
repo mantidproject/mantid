@@ -85,7 +85,7 @@ set( TEST_FILES
    InterfaceManagerTest.h
    MantidColorMapTest.h
    MantidQwtMatrixWorkspaceDataTest.h
-#  SelectionNotificationServiceTest.h
+   SelectionNotificationServiceTest.h
 )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
@@ -95,13 +95,15 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
 # For Windows:
-add_definitions ( -DIN_MANTIDQT_API )
+# add_definitions ( -DIN_MANTIDQT_API )
 # add_definitions ( -DQWT_DLL )
 # add_definitions ( -DQWT_MAKEDLL )
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers( inc/MantidQtAPI/PrecompiledHeader.h ALL_SRC )
 add_library ( MantidQtAPI ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+
+set_target_properties ( MantidQtAPI PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_API )
 
 target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
