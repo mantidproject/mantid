@@ -1,10 +1,12 @@
 """*WIKI* 
 
+Conjoin two workspaces, which are file based. Uses [[ConjoinWorkspaces]] to do the heavy-lifting.
 
 *WIKI*"""
 
-from MantidFramework import *
-from mantidsimple import *
+from mantid.api import *
+from mantid.kernel import *
+from mantid.simpleapi import *
 import os
 
 class ConjoinFiles(PythonAlgorithm):
@@ -30,9 +32,11 @@ class ConjoinFiles(PythonAlgorithm):
         raise RuntimeError("Failed to load run %s" % str(run))              
 
     def PyInit(self):
-        self.declareListProperty("RunNumbers",[0], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output)
-        self.declareFileProperty("Directory", "", FileAction.OptionalDirectory)
+        greaterThanZero = IntArrayBoundedValidator()
+        greaterThanZero.setLower(0)
+        self.declareProperty(IntArrayProperty("RunNumbers",values=[0], validator=greaterThanZero), doc="Run numbers")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
+        self.declareProperty(FileProperty("Directory", "", FileAction.OptionalDirectory))
 
     def PyExec(self):
         # generic stuff for running
@@ -59,4 +63,4 @@ class ConjoinFiles(PythonAlgorithm):
 
         self.setProperty("OutputWorkspace", mtd[wksp])
 
-mtd.registerPyAlgorithm(ConjoinFiles())
+AlgorithmFactory.subscribe(ConjoinFiles)
