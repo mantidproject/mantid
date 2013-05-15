@@ -5,7 +5,7 @@ Changes between 1.0 and 2.0
 
 .. note::
 
-   This page is intended for those users who have used Python in Mantid v1.X. For
+   This page is intended for those users who have used Python in Mantid v1.x. For
    new users, see the getting started guide.
    	
 After feedback from the usage of Python within Mantid it was decided that 
@@ -99,7 +99,7 @@ does not handle
 
 Any script containing the above will raise an error in the migration process and restore the original script from the backup. 
 
-An old API algorithm call that does *NOT* use a return value, such as::
+An old API algorithm call that does **NOT** use a return value, such as::
 
     Load('SomeRunFile.ext','runWS')
 
