@@ -42,7 +42,7 @@ class ConjoinFiles(PythonAlgorithm):
         # generic stuff for running
         wksp = self.getPropertyValue("OutputWorkspace")
         runs = self.getProperty("RunNumbers")
-        instr = mtd.getSettings().facility().instrument().shortName()
+        instr = config.getInstrument().shortName()
         directory = self.getPropertyValue("Directory").strip()
 
         # change here if you want something other than gsas files
@@ -59,7 +59,7 @@ class ConjoinFiles(PythonAlgorithm):
             else:
                 self.__load(directory, instr, run, loader, exts, run)
                 ConjoinWorkspaces(InputWorkspace1=wksp, InputWorkspace2=run, CheckOverlapping=False)
-                mtd.deleteWorkspace(run)
+                DeleteWorkspace(run)
 
         self.setProperty("OutputWorkspace", mtd[wksp])
 
