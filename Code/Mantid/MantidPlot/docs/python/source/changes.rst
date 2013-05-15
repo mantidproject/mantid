@@ -26,42 +26,71 @@ the new API is::
 
     from mantid.simpleapi import *
 
-The major differences in the new API are as follows:
+Changes
+-------
 
-* Algorithm functions now return their outputs (see here for more details), i.e.::
+* The *MantidFramework* module no longer exists, it has been replaced with the *mantid* package, i.e
 
-    run = Load('SomeRunFile.ext')
-    print run.getNumberHistograms()
-    ei, mon_peak, mon_index, tzero = GetEi(run, 1,2, 12.0) # This will run GetEi and return the outputs as a tuple and the Python will unpack them for you
-
-* The output workspace name is taken from the variable that it is assigned to. The above example
-  would load the file into a workspace named "run". **Note:** It is still possible to use the algorithm
-  functions with keyword syntax to provide a workspace name but it should not be the preferred way of 
-  working, i.e.::
-
-    Load(Filename='SomeRunFile.ext', OutputWorkspace="run")
-    run = mtd["run"]
-    print run.getNumberHistograms()
+ * *import MantidFramework* -> *import mantid*
 
 * The *mtd* object can now only be used to access workspaces from Mantid. In the v1 API there
   were many additional functions attached to *mtd* such as *sendLogMessage*, *deleteWorkspace* and *settings*. These
   are no longer available, there replacements are:
   
+  * *mtd.initialize()* has been removed and has no counterpart as it is unnecessary
   * *mtd.sendLogMessage("msg")* -> *logger.information("msg")*
   * *mtd.deleteWorkspace(ws)* -> *DeleteWorkspace(ws)*
   * *mtd.settings* -> *config*
+  * *mtd.workspaceExists("ws")* -> *mtd.doesExist("ws")*
+  * *mtd.settings.facility* -> *config.getFacility*
+  * *mtd.getConfigProperty* -> *config.getString*
 
-* *mtd* will now raise an *KeyError* if a workspace does not exist rather than returning *None*
+* *mtd[]* will now raise an *KeyError* if a workspace does not exist rather than returning *None*.
+
+* The *isGroup* function on a workspace no longer exists. To test for a group use the Python *isinstance* function::
+
+    ws = mtd["name"]
+    from mantid.api import WorkspaceGroup # (only required as while the old API still exists.)
+    if isinstance(ws, WorkspaceGroup):
+      print "is group"
+    else:
+      print "is not a group"
+
+* The *getSampleDetails()* function has been removed. It should be replaced with *getRun()*.
+
+* The Axis functions *createNumericAxis*, *createTextAxis*, *createSpectraAxis* have been removed. A spectra axis can no longer be created
+  from Python as it is the default workspace axis & changing it almost always results in unexpected behaviour. The functions have been
+  replaced, they new ones take the same arguments, with:
+
+  * *createNumericAxis* -> *NumericAxis.create*
+  * *createTextAxis* -> *TextAxis.create*
+
+* The *.workspace()* function on algorithm functions has been removed & they now return their outputs (see here for more details), i.e.::
+
+    run = Load('SomeRunFile.ext')
+    print run.getNumberHistograms()
+    ei, mon_peak, mon_index, tzero = GetEi(run, 1,2, 12.0) # This will run GetEi and return the outputs as a tuple and the Python will unpack them for you
+
+* The output workspace name is taken from the variable that it is assigned to::
+
+    run = Load('SomeRunFile.ext') # loads the file into a workspace called "run"
+
+* It is still possible provide a different workspace name and use mtd::
+
+    run = Load(Filename='SomeRunFile.ext', OutputWorkspace="rawfile") # name in mantid will be "rawfile"
+    rawfile = mtd["rawfile"]
+    print run.getNumberHistograms()
+    print rawfile.getNumberHistograms()
 
 * The *qti* module no longer exists. All user scripts should simply use the *mantidplot* module which contains
   all of the *qti* functionality but adds protection against crashes from closed windows.
 
-* The *getSampleDetails()* function has been removed. It should be replaced with *getRun()*.
+* There have also been changes with Python algorithm syntax. For this it will be most beneficial to read the new tutorial `here <http://www.mantidproject.org/Python_Algorithms_Documentation/>`_. 
 
-Migration (first cut)
----------------------
+Automatic Migration
+-------------------
 
-This release includes a script that is able to translate simple scripts from the the old API to the new API. It covers the basics of the replacements mentioned 
+A script is included with the distribution that is able to translate simple scripts from the the old API to the new API. It covers the basics of the replacements mentioned 
 above along with converting some algorithm calls. It will create a backup of the original script with the string *.mantidbackup* appended to it. Currently the script
 does not handle
 
