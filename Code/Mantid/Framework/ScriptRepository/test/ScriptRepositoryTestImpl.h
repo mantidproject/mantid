@@ -677,17 +677,30 @@ void test_downloading_locally_modified_file(){
   }
 
 
-
-
-
-
-
   void test_list_files_after_download_repository(){
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
     TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py")); 
     TS_ASSERT_THROWS_NOTHING(repo->check4Update()); 
     TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py")); 
+  }
+
+  void test_download_add_folder_to_python_scripts(){
+    ConfigServiceImpl & config = ConfigService::Instance();
+    std::string backup_python_directories = config.getString("pythonscripts.directories");
+
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py"));
+
+    std::string curr_python_direc = config.getString("pythonscripts.directories");
+    std::string direc = std::string(local_rep).append("TofConv/");
+    std::cout << "find for direc " << direc << std::endl; 
+    TS_ASSERT(curr_python_direc.find(direc) != string::npos);
+
+
+    config.setString("pythonscripts.directories", backup_python_directories); 
+    config.saveConfig(config.getUserFilename());
   }
 
  /*************************************
