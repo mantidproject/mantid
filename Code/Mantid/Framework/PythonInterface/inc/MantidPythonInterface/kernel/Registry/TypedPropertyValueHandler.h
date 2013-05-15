@@ -110,16 +110,17 @@ namespace Mantid
           typedef boost::weak_ptr<Kernel::DataItem> DataItem_wptr;
 
           PropertyValueType sharedItem;
-          try
+          extract<DataItem_wptr> weakPtrExtractor(value);
+          if(weakPtrExtractor.check())
           {
             // NOTE: The type here must be DataItem not T as if it came from the ADS
             // then that's what it was originally
             // If we can extract a weak pointer then we must construct the shared pointer
             // from the weak pointer itself to ensure the new shared_ptr has the correct
             // use count
-            sharedItem = boost::static_pointer_cast<PointeeType>(extract<DataItem_wptr>(value)().lock());
+            sharedItem = boost::static_pointer_cast<PointeeType>(weakPtrExtractor().lock());
           }
-          catch(error_already_set&)
+          else
           {
             sharedItem = extract<PropertyValueType>(value)();
           }
