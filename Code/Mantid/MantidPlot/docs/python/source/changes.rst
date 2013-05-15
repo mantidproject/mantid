@@ -41,6 +41,7 @@ Changes
   * *mtd.sendLogMessage("msg")* -> *logger.information("msg")*
   * *mtd.deleteWorkspace(ws)* -> *DeleteWorkspace(ws)*
   * *mtd.settings* -> *config*
+  * *mtd.getSettings* -> *config*
   * *mtd.workspaceExists("ws")* -> *mtd.doesExist("ws")*
   * *mtd.settings.facility* -> *config.getFacility*
   * *mtd.getConfigProperty* -> *config.getString*
