@@ -26,6 +26,8 @@
 #include "MantidKernel/IPropertyManager.h"
 #include <boost/python/object.hpp>
 #include <boost/python/extract.hpp>
+#include <boost/python/converter/arg_from_python.hpp>
+#include <boost/weak_ptr.hpp>
 #include <string>
 
 namespace Mantid
@@ -84,6 +86,81 @@ namespace Mantid
           return extractor.check();
         }
       };
+
+      //
+      // Specialization for shared_ptr types that can be set via weak pointers
+      //
+      template<typename T>
+      struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T> > : public PropertyValueHandler
+      {
+        /// Convenience typedef
+        typedef T PointeeType;
+        /// Convenience typedef
+        typedef boost::shared_ptr<T> PropertyValueType;
+
+        /**
+         * Set function to handle Python -> C++ calls and get the correct type
+         * @param alg :: A pointer to an IPropertyManager
+         * @param name :: The name of the property
+         * @param value :: A boost python object that stores the value
+         */
+        void set(Kernel::IPropertyManager* alg, const std::string &name, const boost::python::object & value)
+        {
+          using namespace boost::python;
+          typedef boost::weak_ptr<Kernel::DataItem> DataItem_wptr;
+
+          PropertyValueType sharedItem;
+          extract<DataItem_wptr> weakPtrExtractor(value);
+          if(weakPtrExtractor.check())
+          {
+            // NOTE: The type here must be DataItem not T as if it came from the ADS
+            // then that's what it was originally
+            // If we can extract a weak pointer then we must construct the shared pointer
+            // from the weak pointer itself to ensure the new shared_ptr has the correct
+            // use count
+            sharedItem = boost::static_pointer_cast<PointeeType>(weakPtrExtractor().lock());
+          }
+          else
+          {
+            sharedItem = extract<PropertyValueType>(value)();
+          }
+          alg->setProperty<PropertyValueType>(name, sharedItem);
+        }
+
+        /**
+         * Create a PropertyWithValue from the given python object value
+         * @param name :: The name of the property
+         * @param defaultValue :: The defaultValue of the property. The object attempts to extract
+         * a value of type ValueType from the python object
+         * @param validator :: A python object pointing to a validator instance, which can be None.
+         * @param direction :: The direction of the property
+         * @returns A pointer to a newly constructed property instance
+         */
+        Kernel::Property * create(const std::string & name, const boost::python::object & defaultValue,
+                                  const boost::python::object & validator, const unsigned int direction) const
+        {
+          using boost::python::extract;
+          const boost::shared_ptr<T> valueInC = extract<PropertyValueType>(defaultValue)();
+          Kernel::Property *valueProp(NULL);
+          if( validator.is_none() )
+          {
+            valueProp = new Kernel::PropertyWithValue<PropertyValueType>(name, valueInC, direction);
+          }
+          else
+          {
+            const Kernel::IValidator *propValidator = extract<Kernel::IValidator*>(validator);
+            valueProp = new Kernel::PropertyWithValue<PropertyValueType>(name, valueInC, propValidator->clone(), direction);
+          }
+          return valueProp;
+        }
+        /// Is the given object a derived type of this objects Type
+        bool checkExtract(const boost::python::object & value) const
+        {
+          boost::python::extract<PropertyValueType> extractor(value);
+          return extractor.check();
+        }
+      };
+
     }
   }
 }
