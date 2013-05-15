@@ -164,7 +164,8 @@ public:
   /// Get Info about a Q-Vector from a PeaksWorkspace
   std::vector< std::pair< std::string, std::string > >
                                PointInfo( const std::string & peaks_ws_name, 
-                                                Mantid::Kernel::V3D Q);
+                                                bool          lab_coords,
+                                          Mantid::Kernel::V3D Q);
 
 
 private:
