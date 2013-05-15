@@ -623,6 +623,7 @@ namespace API
     std::string local_path = std::string(local_repository).append(file_path); 
     g_log.debug() << "ScriptRepository download url_path: " << url_path << " to " << local_path << std::endl;
 
+    std::string dir_path;
 
     try{
 
@@ -639,7 +640,7 @@ namespace API
       size_t slash_pos = local_path.rfind('/');
       Poco::File file_out(local_path);
       if (slash_pos != std::string::npos){
-        std::string dir_path = std::string(local_path.begin(),local_path.begin()+slash_pos);
+        dir_path = std::string(local_path.begin(),local_path.begin()+slash_pos);
         if (!dir_path.empty()){
           Poco::File dir_parent(dir_path);
           if (!dir_parent.exists()){
@@ -650,7 +651,7 @@ namespace API
       
       if (!file_out.exists())
         file_out.createFile();
-
+      
       tmpFile.copyTo(local_path); 
       
     }catch(Poco::FileAccessDeniedException &){
@@ -665,6 +666,24 @@ namespace API
                                                                           timeformat));
       entry.downloaded_pubdate = entry.pub_date;
       entry.status = BOTH_UNCHANGED;      
+    }
+    
+    // Update pythonscripts.directories if necessary (TEST_DOWNLOAD_ADD_FOLDER_TO_PYTHON_SCRIPTS)
+    if (!dir_path.empty()){
+      const char * python_sc_option = "pythonscripts.directories";
+      ConfigServiceImpl & config = ConfigService::Instance(); 
+      std::string python_dir = config.getString(python_sc_option); 
+      if (python_dir.find(dir_path) == std::string::npos){
+        // this means that the directory is not inside the pythonscripts.directories
+        // add to the repository
+        python_dir.append(";").append(dir_path);
+        config.setString(python_sc_option,python_dir); 
+        config.saveConfig(config.getUserFilename());
+        
+        // the previous code make the path available for the following 
+        // instances of Mantid, but, for the current one, it is necessary 
+        // do add to the python path... 
+      }
     }
     
     updateLocalJson(file_path, entry); ///FIXME: performance!    
