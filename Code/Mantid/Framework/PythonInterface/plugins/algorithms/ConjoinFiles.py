@@ -51,7 +51,7 @@ class ConjoinFiles(PythonAlgorithm):
 
         # load things and conjoin them
         first = True
-        for run in runs:
+        for run in runs.value:
             run = str(run)
             if first:
                 self.__load(directory, instr, run, loader, exts, wksp)
