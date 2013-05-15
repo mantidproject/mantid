@@ -41,7 +41,7 @@ namespace MDEvents
     MDGridBox(boost::shared_ptr<Mantid::API::BoxController> &bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
     MDGridBox(Mantid::API::BoxController *const bc, const uint32_t depth,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
-    MDGridBox(MDBox<MDE, nd> * box, bool splitRecursively=false);
+    MDGridBox(MDBox<MDE, nd> * box);
 
     MDGridBox(const MDGridBox<MDE, nd> & box,Mantid::API::BoxController *const otherBC);
 
@@ -102,12 +102,10 @@ namespace MDEvents
     //----------------------------------------------------------------------------------------------------------------------
     void addEvent(const MDE & event);
     void addEventUnsafe(const MDE & event);
-    void addAndTraceEvent(const MDE & point,size_t index);
    
 
     /*--------------->  EVENTS from event data              <-------------------------------------------------------------*/
     virtual void buildAndAddEvent(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
-    virtual void buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index);
     virtual void buildAndAddEventUnsafe(const signal_t Signal,const  signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId);
     virtual size_t buildAndAddEvents(const std::vector<signal_t> &sigErrSq,const  std::vector<coord_t> &Coord,const std::vector<uint16_t> &runIndex,const std::vector<uint32_t> &detectorId);
     //----------------------------------------------------------------------------------------------------------------------

@@ -107,10 +107,8 @@ namespace MDEvents
     {
       this->getBox()->getBoxes(boxes,maxDepth,leafOnly);
     }
- 
-    void addEvent(const MDE & event);
-    void addAndTraceEvent(const MDE & point,size_t index);
 
+    void addEvent(const MDE & event);
 
     size_t addEvents(const std::vector<MDE> & events);
 

@@ -535,20 +535,7 @@ namespace MDEvents
     data->addEvent(event);
   }
 
-   //-----------------------------------------------------------------------------------------------
-  /** Add a single event to this workspace and remebers the MDBox, which needs splitting in the internal 
-   *  BC cache
-   *
-   * @param point :: MD Event to add.
-   * @param index :: current event index
-   * 
-   */
-  TMDE(
-  void MDEventWorkspace)::addAndTraceEvent(const MDE & point,size_t index)
-  {
-    data->addAndTraceEvent(point,index);
-  }
-
+ 
   //-----------------------------------------------------------------------------------------------
   /** Add a vector of MDEvents to the workspace.
    *

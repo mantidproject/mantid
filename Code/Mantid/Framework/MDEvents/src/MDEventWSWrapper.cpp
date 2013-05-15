@@ -79,40 +79,6 @@ void MDEventWSWrapper::addMDDataND(float *sigErr,uint16_t *runIndex,uint32_t* de
 
 }
 
-/** templated by number of dimesnions function to add multidimensional data to the workspace and trace the cells, which requested splitting
-*   it is  expected that all MD coordinates are within the ranges of MD defined workspace, so no checks are performed
-
-   tempate parameter:
-     * nd -- number of dimensions
-
-*@param sigErr   -- pointer to the beginning of 2*data_size array containing signal and squared error
-*@param runIndex -- pointer to the beginnign of data_size  containing run index
-*@param detId    -- pointer to the beginning of dataSize array containing detector id-s
-*@param Coord    -- pointer to the beginning of dataSize*nd array containig the coordinates od nd-dimensional events
-*
-*@param dataSize -- the length of the vector of MD events
-*/
-template<size_t nd>
-void MDEventWSWrapper::addAndTraceMDDataND(float *sigErr,uint16_t *runIndex,uint32_t* detId,coord_t* Coord,size_t dataSize)const
-{
-
-  MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(m_Workspace.get());
-  if(!pWs)throw(std::bad_cast());
-
-  for(size_t i=0;i<dataSize;i++)
-  {
-    pWs->addAndTraceEvent(MDEvents::MDEvent<nd>(*(sigErr+2*i),*(sigErr+2*i+1),*(runIndex+i),*(detId+i),(Coord+i*nd)),0);
-  }
-  // if there are boxes ready to split -- we have to indicate need for that. 
-//  if(pWs->getBoxController()->getBoxesToSplit().size()>0)m_needSplitting=true;
-
-  // This splits up all the boxes according to split thresholds and sizes.
-  //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
-  //ThreadPool tp(NULL);
-  //pWs->splitAllIfNeeded(NULL);
-  //tp.joinAll();        
-
-}
 
 /// the function used in template metaloop termination on 0 dimensions and to throw the error in attempt to add data to 0-dimension workspace
 template<>
@@ -229,23 +195,6 @@ void  MDEventWSWrapper::addMDData(std::vector<float> &sigErr,std::vector<uint16_
   (this->*(mdEvAddAndForget[m_NDimensions]))(&sigErr[0],&runIndex[0],&detId[0],&Coord[0],dataSize);
 
 }
-/** method adds the data to the workspace which was initiated before and traces changed cells;
-*@param sigErr   -- pointer to the beginning of 2*data_size array containing signal and squared error
-*@param runIndex -- pointer to the beginnign of data_size  containing run index
-*@param detId    -- pointer to the beginning of dataSize array containing detector id-s
-*@param Coord    -- pointer to the beginning of dataSize*nd array containig the coordinates od nd-dimensional events   
-*
-*@param dataSize -- the length of the vector of MD events
-*/
-void  MDEventWSWrapper::addAndTraceMDData(std::vector<float> &sigErr,std::vector<uint16_t> &runIndex,std::vector<uint32_t> &detId,std::vector<coord_t> &Coord,size_t dataSize)const
-{
-
-  if(dataSize==0)return;
-  // perform the actual dimension-dependent addition 
-  (this->*(mdEvAddAndTrace[m_NDimensions]))(&sigErr[0],&runIndex[0],&detId[0],&Coord[0],dataSize);
-
-}
-
 
 
 /** method should be called at the end of the algorithm, to let the workspace manager know that it has whole responsibility for the workspace
@@ -269,7 +218,6 @@ public:
     LOOP< i-1 >::EXEC(pH);
     pH->wsCreator[i]    = &MDEventWSWrapper::createEmptyEventWS<i>;
     pH->mdEvAddAndForget[i]= &MDEventWSWrapper::addMDDataND<i>;
-    pH->mdEvAddAndTrace[i] = &MDEventWSWrapper::addAndTraceMDDataND<i>;
     pH->mdCalCentroid[i]= &MDEventWSWrapper::calcCentroidND<i>;
     pH->mdBoxListSplitter[i]=&MDEventWSWrapper::splitBoxList<i>;
 
@@ -284,7 +232,6 @@ public:
   {           
     pH->wsCreator[0] = &MDEventWSWrapper::createEmptyEventWS<0>;
     pH->mdEvAddAndForget[0] = &MDEventWSWrapper::addMDDataND<0>;
-    pH->mdEvAddAndTrace[0] = &MDEventWSWrapper::addMDDataND<0>;
     pH->mdCalCentroid[0]= &MDEventWSWrapper::calcCentroidND<0>;
     pH->mdBoxListSplitter[0]= &MDEventWSWrapper::splitBoxList<0>;
   }
@@ -297,7 +244,6 @@ m_needSplitting(false)
 {
   wsCreator.resize(MAX_N_DIM+1);
   mdEvAddAndForget.resize(MAX_N_DIM+1);
-  mdEvAddAndTrace.resize(MAX_N_DIM+1);
   mdCalCentroid.resize(MAX_N_DIM+1);
   mdBoxListSplitter.resize(MAX_N_DIM+1);
   LOOP<MAX_N_DIM>::EXEC(this);
