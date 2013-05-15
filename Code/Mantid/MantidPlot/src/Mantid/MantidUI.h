@@ -478,6 +478,10 @@ private:
   void handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::GroupUpdatedNotification> m_workspaceGroupUpdateObserver;
 
+  // handles notification send by ConfigService, change on pythonscripts.directories
+  void handleConfigServiceUpdate(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
+  Poco::NObserver<MantidUI, Mantid::Kernel::ConfigValChangeNotification> m_configServiceObserver;
+
   //#678
   //for savenexus algorithm
   void executeSaveNexus(QString algName,int version);
