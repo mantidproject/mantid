@@ -28,15 +28,18 @@ class MergeCalFiles(PythonAlgorithm):
         
   def PyExec(self):
     #extract settings
-    mergeOffsets = self.getProperty("MergeOffsets")
-    mergeSelections = self.getProperty("MergeSelections")
-    mergeGroups = self.getProperty("MergeGroups")
+    mergeOffsets = self.getProperty("MergeOffsets").value
+    mergeSelections = self.getProperty("MergeSelections").value
+    mergeGroups = self.getProperty("MergeGroups").value
     updateFileName = self.getPropertyValue("UpdateFile")
     masterFileName = self.getPropertyValue("MasterFile")
     outputFileName = self.getPropertyValue("OutputFile")
+    
+    logger.information("INFO")
+    logger.information(str(mergeOffsets))
+    logger.information(str(mergeSelections))
+    logger.information(str(mergeGroups))
 	
-    if (mergeOffsets == False) and (mergeSelections == False) and (mergeGroups == False):
-       raise RuntimeError('Nothing set to merge, please set one of the properties to merge, otherwise I have nothing to do')
     if (masterFileName == outputFileName) :
        raise RuntimeError('The output file must be different to the master file.')
 	

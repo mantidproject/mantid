@@ -9,6 +9,7 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   LoadFullprofFileTest.py
   MaskWorkspaceToCalFileTest.py
+  MergeCalFilesTest.py
   RetrieveRunInfoTest.py
   Stitch1DTest.py
   SuggestTibCNCSTest.py
