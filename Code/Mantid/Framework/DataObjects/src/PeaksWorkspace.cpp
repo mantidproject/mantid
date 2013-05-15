@@ -237,8 +237,10 @@ namespace Mantid
    /**
     * Returns selected information for a "peak" at QLabFrame.
     *
-    * @param QLabFrame  a postion in Q-space. A peak does not have to be at that position
-    * @param lab_coords
+    * @param QFrame      An arbitrary position in Q-space.  This does not have to be the 
+    *                    position of a peak.
+    * @param lab_coords  Set true if the position is in the lab coordinate system, false if 
+    *                    it is in the sample coordinate system.
     * @return a vector whose elements contain different information about the "peak" at that position.
     *         each element is a pair of description of information and the string form for the corresponding
     *         value.
