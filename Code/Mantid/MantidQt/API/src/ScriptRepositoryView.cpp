@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QPainter>
+#include <QDesktopServices>
 namespace MantidQt
 {
 namespace API
@@ -133,7 +134,8 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
 
     // configure the Ui
     ui->setupUi(this);
-    connect(ui->reloadPushButton, SIGNAL(clicked()),this,SLOT(updateModel())); 
+    connect(ui->reloadPushButton, SIGNAL(clicked()),this,SLOT(updateModel()));
+    connect(ui->pbHelp, SIGNAL(clicked()),this,SLOT(helpClicked()));
 
     // setup the model and delegates   
     ui->repo_treeView->setModel(model);
@@ -407,8 +409,10 @@ bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(QEvent *event,
    return QStyledItemDelegate::editorEvent(event, model, option, index);
  }
 }
-
- 
+  /** Open the ScriptRepository Page on Web Browser*/
+void ScriptRepositoryView::helpClicked(){
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/ScriptRepository"));
+} 
 
 } // namespace API
 } // namespace Mantid
