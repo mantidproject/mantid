@@ -1,4 +1,5 @@
 #ifndef MANTID_PYTHONINTERFACE_WEAKPTR_H_
+#define MANTID_PYTHONINTERFACE_WEAKPTR_H_
 /*
 
   This file declares the get_pointer template function to allow
