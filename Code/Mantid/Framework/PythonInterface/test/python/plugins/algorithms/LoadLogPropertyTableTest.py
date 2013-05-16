@@ -23,9 +23,9 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         self.assertEqual(6, tablews.rowCount())
         self.assertEqual(2, tablews.columnCount())
         
-        self.assertEqual("18.95MHz 100W", print output.cell(0,1))
-        self.assertEqual("15189", print output.cell(0,0))
-        self.assertEqual("15194", print output.cell(5,0))
+        self.assertEqual("18.95MHz 100W", output.cell(0,1))
+        self.assertEqual("15189", output.cell(0,0))
+        self.assertEqual("15194", output.cell(5,0))
 
         run_algorithm("DeleteWorkspace", Workspace = outputWorskapceName)
         
@@ -45,10 +45,10 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         self.assertEqual(2, tablews.rowCount())
         self.assertEqual(2, tablews.columnCount())
         
-        self.assertEqual("26287", print output.cell(0,0))
-        self.assertEqual("180", print output.cell(0,1))
-        self.assertEqual("26287", print output.cell(1,0))
-        self.assertEqual("7.32055", print output.cell(1,1))
+        self.assertEqual("26287", output.cell(0,0))
+        self.assertEqual("180", output.cell(0,1))
+        self.assertEqual("26287", output.cell(1,0))
+        self.assertEqual("7.32055", output.cell(1,1))
 
         run_algorithm("DeleteWorkspace", Workspace = outputWorskapceName)
         
