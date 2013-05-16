@@ -695,7 +695,11 @@ void test_downloading_locally_modified_file(){
 
     std::string curr_python_direc = config.getString("pythonscripts.directories");
     std::string direc = std::string(local_rep).append("TofConv/");
-    std::cout << "find for direc " << direc << std::endl; 
+    // make all the back slashs direct slashs, for comparing the path
+    // required for windows.
+    boost::replace_all(curr_python_direc,"\\","/");
+    boost::replace_all(direc,"\\","/");
+
     TS_ASSERT(curr_python_direc.find(direc) != string::npos);
 
 
