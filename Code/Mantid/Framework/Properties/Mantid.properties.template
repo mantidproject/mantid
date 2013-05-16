@@ -66,11 +66,6 @@ requiredpythonscript.directories = @REQUIREDSCRIPT_DIRS@
 # This key is NOT recursive so sub-directories must be added in addition
 pythonscripts.directories = @PYTHONSCRIPT_DIRS@
 
-# The locations of Python algorithms that are to be loaded at startup (deprecated)
-pythonalgorithms.directories = 
-# Require a copy of what they key used to look like so we know if a user had overridden it
-pythonalgorithms.directories.deprecated = @PYTHONALG_DIRS@
-
 # Setting this to 1 will allow python algorithms to be reloaded before execution.
 pythonalgorithms.refresh.allowed = 0
 

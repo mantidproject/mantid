@@ -461,7 +461,7 @@ endif ()
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
 set ( PYTHONALG_DIRS ${PLUGINS}/PythonAlgs ) # deprecated
-set ( PYTHONPLUGIN_DIRS ${PLUGINS}/python )
+set ( PYTHONPLUGIN_DIRS "${PLUGINS}/python;${PYTHONALG_DIRS}" )
 set ( DATADIRS "" )
 SET ( MANTIDPUBLISHER "http://upload.mantidproject.org/scriptrepository/payload/publish" )
 
