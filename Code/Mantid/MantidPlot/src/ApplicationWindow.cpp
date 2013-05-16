@@ -223,11 +223,7 @@ Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
 m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
-#ifdef Q_OS_MAC // Mac
-  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
-#else
-  settings("ISIS", "MantidPlot")
-#endif
+settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
 {
   QStringList empty;
   init(factorySettings, empty);
@@ -239,13 +235,44 @@ Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
 m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
-#ifdef Q_OS_MAC // Mac
-  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
-#else
-  settings("ISIS", "MantidPlot")
-#endif
+settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
 {
   init(factorySettings, args);
+}
+
+void ApplicationWindow::handleConfigDir()
+{
+  QFileInfo curConfig(settings.fileName());
+  QString oldPath = settings.fileName();
+  oldPath.replace("Mantid", "ISIS");
+  QFileInfo oldConfig(oldPath);
+
+  // If the old config directory exists, copy it's contents and
+  // then delete it
+  QDir oldConfigDir = oldConfig.dir();
+  if (oldConfigDir.exists())
+  {
+    QStringList entries = oldConfigDir.entryList();
+    foreach ( QString entry, entries )
+    {
+      if (!entry.startsWith("."))
+      {
+        QFileInfo oldFile(oldConfig.dir(), entry);
+        QFileInfo newFile(curConfig.dir(), entry);
+        // Qt will not overwrite files, so remove new one first
+        QFile::remove(newFile.filePath());
+        std::cout << "D: " << oldFile.filePath().toStdString() << std::endl;
+        std::cout << "E: " << newFile.filePath().toStdString() << std::endl;
+        std::cout << "G: " << newFile.exists() << std::endl;
+        if (!QFile::copy(oldFile.filePath(), newFile.filePath()))
+        {
+          std::cout << "Cannot copy " << newFile.filePath().toStdString() << std::endl;
+        }
+        QFile::remove(oldFile.filePath());
+      }
+    }
+    oldConfigDir.rmdir(oldConfig.path());
+  }
 }
 
 /**
@@ -254,11 +281,12 @@ m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
 void ApplicationWindow::exitWithPresetCode()
 {
   QCoreApplication::exit(m_exitCode);
+  handleConfigDir();
 }
 
 void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 {
-  QCoreApplication::setOrganizationName("ISIS");
+  QCoreApplication::setOrganizationName("Mantid");
   QCoreApplication::setApplicationName("MantidPlot");
   setAttribute(Qt::WA_DeleteOnClose);
 
