@@ -101,11 +101,11 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bg, specMin, specM
     if Verbose:
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
-	    StartX=startX, EndX=endX, FitType='Sequential')
+        StartX=startX, EndX=endX, FitType='Sequential')
     wsname = confitParsToWS(outNm, inputWS, bg, specMin, specMax)
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
     if Save:
-        o_path = os.path.join(workdir, wsname+'.nxs')					# path name for nxs file
+        o_path = os.path.join(workdir, wsname+'.nxs')                   # path name for nxs file
         if Verbose:
             logger.notice('Creating file : '+o_path)
         SaveNexusProcessed(InputWorkspace=wsname, Filename=o_path)
