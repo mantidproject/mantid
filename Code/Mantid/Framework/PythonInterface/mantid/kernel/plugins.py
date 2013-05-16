@@ -6,8 +6,10 @@ algorithms, fit functions etc.
 """
 import os as _os
 import imp as _imp
-from mantid.kernel import logger, Logger, ConfigService
+from mantid.kernel import logger, Logger, config
 
+# String that separates paths (should be in the ConfigService)
+PATH_SEPARATOR=";"
 
 class PluginLoader(object):
 
@@ -36,6 +38,21 @@ class PluginLoader(object):
         return _imp.load_source(name, pathname)
 
 #======================================================================================================================
+# High-level functions to assist with loading
+#======================================================================================================================
+
+def get_plugin_paths_as_set(key):
+    """
+        Returns the value of the given key in the config service
+        as a set. Raises an KeyError if the key is not defined
+        
+        @param key The name of the key
+        @returns A set containing defined plugins paths
+    """
+    s = set(config[key].split(PATH_SEPARATOR))
+    if '' in s:
+        s.remove('')
+    return s
 
 def check_for_plugins(top_dir):
     """
@@ -89,8 +106,8 @@ def load(path):
         will not included modules that will have attempted to be
         reloaded but had not been changed
     """
-    if ";" in path:
-        path = path.split(";")
+    if PATH_SEPARATOR in path:
+        path = path.split(PATH_SEPARATOR)
 
     loaded = []
     if type(path) == list:
@@ -214,3 +231,53 @@ def contains_newapi_algorithm(filename):
             break
     file.close()
     return alg_found
+
+#======================================================================================================================
+
+def cleanup_deprecated_key(plugin_dirs, deprecated_key, new_key):
+    """
+        Checks whether the deprecated plugins key exists and adds any directories 
+        that are not in the plugin dirs yet to the list. It then updates the new key 
+        with these values and blanks the deprecated key's value. The config is then
+        saved out
+        
+        @param plugin_dirs A set containing the list of existing plugin directories
+        @param deprecated_key A string containing the deprecated key name
+        @param new_key A string containing the new key name that will be updated.
+        @returns The updated set of plugins
+    """
+    if not isinstance(plugin_dirs, set):
+        raise ValueError("plugin_dirs is expected to be a set type")
+    
+    try:
+        dirs_depr_key = get_plugin_paths_as_set(deprecated_key)
+    except KeyError:
+        dirs_depr_key = set()
+    if len(dirs_depr_key) == 0:
+        logger.debug("No values from deprecated key '%s' to move" % deprecated_key)
+        return plugin_dirs
+    
+    extra_dirs = dirs_depr_key.difference(plugin_dirs)
+    logger.debug("Additional directories found in deprecated key '%s'.\nMerging '%s' into new key '%s'" % (deprecated_key,str(extra_dirs),new_key))
+    plugin_dirs.update(extra_dirs)
+    
+    # Update config service (key must exist or the above check would have returned
+    config[deprecated_key] = ""
+    try:
+        new_key_value = config[new_key]
+    except KeyError:
+        new_key_value = ""
+    if len(new_key_value) > 0 and not new_key_value.endswith(PATH_SEPARATOR):
+        new_key_value += PATH_SEPARATOR
+    
+    for path in extra_dirs:
+        new_key_value += path + PATH_SEPARATOR
+
+    new_key_value = new_key_value.rstrip(PATH_SEPARATOR)
+    logger.debug("Updating ConfigService key '%s' with value '%s'" % (new_key, new_key_value))
+    config[new_key] = new_key_value
+    logger.debug("Saving config to '%s'" % config.getUserFilename())
+    config.saveConfig(config.getUserFilename())
+
+    return plugin_dirs
+    
