@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>818</width>
+    <width>854</width>
     <height>526</height>
    </rect>
   </property>
@@ -794,7 +794,7 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Analysis Details</string>
+       <string>Reduction Settings</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_13">
        <item row="0" column="0">
@@ -3905,9 +3905,9 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabDisplay">
+     <widget class="QWidget" name="tab1DAnalysis">
       <attribute name="title">
-       <string>Display</string>
+       <string>1D Analysis</string>
       </attribute>
       <layout class="QVBoxLayout" name="displayLayout"/>
      </widget>
