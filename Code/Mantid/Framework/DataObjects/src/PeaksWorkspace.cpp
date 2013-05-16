@@ -249,12 +249,16 @@ namespace Mantid
         bool lab_coords) const
     {
       std::vector<std::pair<std::string, std::string> > Result;
-
-      std::pair<std::string, std::string> QMag("|Q|", boost::lexical_cast<std::string>(QFrame.norm()));
+      std::ostringstream oss;
+      oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(QFrame.norm());
+      std::pair<std::string, std::string> QMag("|Q|",oss.str());
       Result.push_back(QMag);
 
-      std::pair<std::string, std::string> dspc("d-spacing",
-          boost::lexical_cast<std::string>(2.0 * M_PI / QFrame.norm()));
+      oss.str(""); oss.clear();
+      oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(2.0 * M_PI / QFrame.norm());
+
+      std::pair<std::string, std::string> dspc("d-spacing",oss.str());
+      oss.str(""); oss.clear();
       Result.push_back(dspc);
 
       int seqNum = -1;
@@ -337,7 +341,7 @@ namespace Mantid
 
         if (hasOneRunNumber)
         {
-          std::pair<std::string, std::string> runn("RunNumber",
+          std::pair<std::string, std::string> runn("RunNumber","   "+
               boost::lexical_cast<std::string>(runNum));
           Result.push_back(runn);
 
@@ -352,13 +356,14 @@ namespace Mantid
             boost::lexical_cast<std::string>(PhiChiOmega));
         Result.push_back(GRead);
 
-        std::pair<std::string, std::string> SeqNum("Sequence Num",
+        std::pair<std::string, std::string> SeqNum("Sequence Num","    "+
             boost::lexical_cast<std::string>(seqNum));
         Result.push_back(SeqNum);
 
-        std::pair<std::string, std::string> wl("Wavelength",
-            boost::lexical_cast<std::string>(peak->getWavelength()));
+        oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(peak->getWavelength());
+        std::pair<std::string, std::string> wl("Wavelength", oss.str());
         Result.push_back(wl);
+        oss.str(""); oss.clear();
 
         if (peak->findDetector())
         {
@@ -367,27 +372,29 @@ namespace Mantid
               boost::lexical_cast<std::string>(peak->getDetPos()));
           Result.push_back(detpos);
 
-          std::pair<std::string, std::string> tof("TOF",
-              boost::lexical_cast<std::string>(peak->getTOF()));
+          oss<<std::setw(15)<<std::fixed<<std::setprecision(3)<< (peak->getTOF());
+          std::pair<std::string, std::string> tof("TOF", oss.str());
           Result.push_back(tof);
+          oss.str(""); oss.clear();
 
-          std::pair<std::string, std::string> Energy("Energy",
-              boost::lexical_cast<std::string>(peak->getFinalEnergy()));
+          oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<< (peak->getFinalEnergy());
+          std::pair<std::string, std::string> Energy("Energy", oss.str());
           Result.push_back(Energy);
+          oss.str(""); oss.clear();
 
-          std::pair<std::string, std::string> row("Row",
+          std::pair<std::string, std::string> row("Row","    "+
               boost::lexical_cast<std::string>(peak->getRow()));
           Result.push_back(row);
 
-          std::pair<std::string, std::string> col("Col",
+          std::pair<std::string, std::string> col("Col","    "+
               boost::lexical_cast<std::string>(peak->getCol()));
           Result.push_back(col);
 
-          std::pair<std::string, std::string> bank("Bank", peak->getBankName());
+          std::pair<std::string, std::string> bank("Bank", "    "+peak->getBankName());
           Result.push_back(bank);
 
-          std::pair<std::string, std::string> scat("Scattering Angle",
-              boost::lexical_cast<std::string>(peak->getScattering()));
+          oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<< (peak->getScattering());
+          std::pair<std::string, std::string> scat("Scattering Angle", oss.str());
           Result.push_back(scat);
 
         }

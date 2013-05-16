@@ -203,6 +203,10 @@ private slots:
   /// Slot for the select workspace tab's Apply button 
   void selectWorkspace_slot();
 
+
+  /// Slot for the Finished Editing text for loading an event file 
+  void loadEventFileEntered_slot();
+
   /// Slot for the Browse button for loading an event file 
   void loadEventFile_slot();
 
