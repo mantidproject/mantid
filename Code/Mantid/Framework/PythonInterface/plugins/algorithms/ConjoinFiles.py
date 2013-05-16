@@ -17,6 +17,7 @@ class ConjoinFiles(PythonAlgorithm):
         return "ConjoinFiles"
 
     def __load(self, directory, instr, run, loader, exts, wksp):
+        filename = None
         for ext in exts:
             filename = "%s_%s%s" % (instr, str(run), ext)
             if len(directory) > 0:
@@ -25,11 +26,12 @@ class ConjoinFiles(PythonAlgorithm):
                     continue
             try:
                 self.log().information("Trying to load '%s'" % filename)
-                loader(filename, wksp)
+                loader(Filename=filename, OutputWorkspace=wksp)
                 return
             except Exception, e:
+                logger.information(str(e))
                 pass
-        raise RuntimeError("Failed to load run %s" % str(run))              
+        raise RuntimeError("Failed to load run %s from file %s" % (str(run), filename))              
 
     def PyInit(self):
         greaterThanZero = IntArrayBoundedValidator()
@@ -44,7 +46,7 @@ class ConjoinFiles(PythonAlgorithm):
         runs = self.getProperty("RunNumbers")
         instr = config.getInstrument().shortName()
         directory = self.getPropertyValue("Directory").strip()
-
+        
         # change here if you want something other than gsas files
         exts = ['.txt', '.gsa']
         loader = LoadGSS
@@ -59,7 +61,8 @@ class ConjoinFiles(PythonAlgorithm):
             else:
                 self.__load(directory, instr, run, loader, exts, run)
                 ConjoinWorkspaces(InputWorkspace1=wksp, InputWorkspace2=run, CheckOverlapping=False)
-                DeleteWorkspace(run)
+                if mtd.doesExist(run):
+                    DeleteWorkspace(run)
 
         self.setProperty("OutputWorkspace", mtd[wksp])
 
