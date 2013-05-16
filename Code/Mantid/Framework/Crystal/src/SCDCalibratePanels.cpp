@@ -37,6 +37,12 @@ Some features:
 
  6) Maximum changes in the quantities that are altered during optimization are now settable.
 
+== After Calibration ==
+
+After calibration, you can save the workspace to Nexus (or Nexus processed) and get it back by loading in a later Mantid session.
+You can copy the calibration to another workspace using the same instrument by means of the [[CopyInstrumentParameters]] algorithm. 
+To do so select the workspace, which you have calibrated as the InputWorkspace and the workspace you want to copy the calibration to, the OutputWorkspace.
+
 *WIKI*/
 
 
