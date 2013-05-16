@@ -10,9 +10,7 @@ import os
 class LoadLogPropertyTableTest(unittest.TestCase):
 
 	def test_LoadValidFilesComments(self):
-        """ Test to load valid files that are all present
-        """
-		autoTestDir="../../../../../Test/AutoTestData/"
+        autoTestDir="../../../../../Test/AutoTestData/"
 		outputWorskapceName = "LoadLogPropertyTableTest_Test1"
 		
         alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = autoTestDir + "MUSR00015189.nxs", 
@@ -34,9 +32,7 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         return
 		
 	def test_LoadPartiallyValidFilesLogValues(self):
-        """ Test to load files that are partially present
-        """
-		autoTestDir="../../../../../Test/AutoTestData/"
+        autoTestDir="../../../../../Test/AutoTestData/"
 		outputWorskapceName = "LoadLogPropertyTableTest_Test2"
 		
         alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = autoTestDir + "argus0026287.nxs", 
