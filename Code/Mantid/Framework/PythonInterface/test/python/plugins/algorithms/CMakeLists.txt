@@ -8,6 +8,7 @@ set ( TEST_PY_FILES
   DakotaChiSquaredTest.py
   FindReflectometryLinesTest.py
   LoadFullprofFileTest.py
+  LoadLogPropertyTableTest.py
   MaskWorkspaceToCalFileTest.py
   RetrieveRunInfoTest.py
   Stitch1DTest.py
