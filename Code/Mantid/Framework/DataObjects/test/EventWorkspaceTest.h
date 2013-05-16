@@ -268,7 +268,19 @@ public:
     TS_ASSERT_EQUALS( ws->getEventList(2).getNumberEvents(), 0);
   }
 
-
+  void test_resizeTo()
+  {
+    ew = createEventWorkspace(false, false);
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), 1 );
+    ew->resizeTo(3);
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), 3 );
+    for ( size_t i = 0; i < ew->getNumberHistograms(); ++i )
+    {
+      TS_ASSERT_EQUALS( ew->getSpectrum(i)->getSpectrumNo(), i+1 );
+      //TS_ASSERT( ew->getEventList(i).empty() );
+      TS_ASSERT_EQUALS( ew->readX(i).size(), 2);
+    }
+  }
 
   //------------------------------------------------------------------------------
   void test_padSpectra()

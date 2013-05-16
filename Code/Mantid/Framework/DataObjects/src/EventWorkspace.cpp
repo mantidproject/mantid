@@ -532,55 +532,20 @@ namespace DataObjects
       return *result;
   }
 
-
-  // 
-  //-----------------------------------------------------------------------------
-  /** Pad the workspace with empty event lists for all the spectra in the workspace.
-   * This requires that a non-empty spectra-detector map.
-   *
-   * This runs in parallel.
+  /** Resizes the workspace to contain the number of spectra/events lists given.
+   *  Any existing eventlists will be cleared first.
+   *  Spectrum numbers will be set to count from 1
+   *  @param numSpectra The number of spectra to resize the workspace to
    */
-  void EventWorkspace::padSpectra()
+  void EventWorkspace::resizeTo(const std::size_t numSpectra)
   {
-    using Geometry::ISpectraDetectorMap;
-    const ISpectraDetectorMap & spectramap = this->spectraMap();
-    const size_t numSpectra = spectramap.nSpectra();
-    if( numSpectra == 0 )
-    {
-      throw std::runtime_error("EventWorkspace::padSpectra - The spectra-detector map has not been "
-                               "populated.");
-    }
-    
-    // Remove all old EventLists and resize the vector to hold everything
+    // Remove all old EventLists and resize the vector
     this->clearData();
     data.resize(numSpectra);
     m_noVectors = numSpectra;
-
-    // Loop through the map creating an event list for each unique spectrum number
-    ISpectraDetectorMap::const_iterator itr = spectramap.cbegin();
-    ISpectraDetectorMap::const_iterator iend = spectramap.cend();
-    specid_t previous = itr->first;
-    data[0] = new EventList(mru, previous);
-    data[0]->addDetectorID(itr->second);
-    ++itr;
-    size_t index(0);
-    for(; itr != iend; ++itr)
+    for ( size_t i = 0; i < numSpectra; ++i )
     {
-      const specid_t current = itr->first;
-      if( current == previous )
-      {
-        data[index]->addDetectorID(itr->second);
-      }
-      else
-      {
-        // go to the next workspace index
-        ++index;
-        // the spectrum number (in the iterator) just changed.
-        // Create an event list for this spectrum number
-        data[index] = new EventList(mru, current);
-        data[index]->addDetectorID(itr->second);
-        previous = current;
-      }
+      data[i] = new EventList(mru, static_cast<specid_t>(i+1));
     }
 
     // Put on a default set of X vectors, with one bin of 0 & extremely close to zero
@@ -590,9 +555,27 @@ namespace DataObjects
     // Move the rhs very,very slightly just incase something doesn't like them being the same
     x[1] = std::numeric_limits<double>::min();
     this->setAllX(xVals);
-    
+
     //Clearing the MRU list is a good idea too.
     this->clearMRU();
+  }
+
+  /** Expands the workspace to a number of spectra corresponding to the number of
+   *  pixels/detectors (not including monitors) contained in the instrument attached
+   *  to the workspace.
+   *  All events lists will be empty after calling this method. Spectrum numbers will
+   *  count from 1 and detector IDs will be ordered as they are in the instrument.
+   */
+  void EventWorkspace::padSpectra()
+  {
+    const std::vector<detid_t> pixelIDs = getInstrument()->getDetectorIDs(true);
+
+    resizeTo(pixelIDs.size());
+    
+    for ( size_t i = 0; i < pixelIDs.size(); ++i )
+    {
+      getSpectrum(i)->setDetectorID(pixelIDs[i]);
+    }
   }
 
   void EventWorkspace::deleteEmptyLists()
