@@ -351,7 +351,7 @@ class SNSPowderReduction(PythonAlgorithm):
             samRuns = [samRun]
             workspacelist.append(str(samRun))
             samwksplist.append(str(samRun))
-        # ENDIF
+        # ENDIF (SUM)
 
         for samRun in samRuns:
             # first round of processing the sample
@@ -644,7 +644,7 @@ class SNSPowderReduction(PythonAlgorithm):
         """
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
-        print "runnumber = ", runnumber, " extension = ", extension
+        self.log().information("_focusChunks(): runnumber = %d, extension = %s" % (runnumber, extension))
 
         strategy = self._getStrategy(runnumber, extension)
 
@@ -666,14 +666,13 @@ class SNSPowderReduction(PythonAlgorithm):
             firstChunkList.append(True)
             wksplist.append(None)
 
-        print "Number of workspace to process = %d" %(numwksp)
+        self.log().information("DB1141A: Number of workspace to process = %d" %(numwksp))
 
         # reduce data by chunks
         ichunk = -1
         for chunk in strategy:
+            self.log().information("DB1141B: Start of Chunk %s" % (str(chunk)))
             ichunk += 1
-
-            print "Process chunk %d" %(ichunk)
 
             # Log information
             if "ChunkNumber" in chunk:
@@ -683,6 +682,11 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # Load chunk
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
+            if str(type(temp)).count("IEvent") > 0:
+                # Event workspace 
+                self.log().information("DB1141C There are %d events after data is loaded in workspace %s." % (
+                    temp.getNumberEvents(), str(temp)))
+
             if self._info is None:
                 self._info = self._getinfo(temp)
 
@@ -692,6 +696,10 @@ class SNSPowderReduction(PythonAlgorithm):
                 # Filter bad pulses
                 if (self._filterBadPulses and filterBadPulsesOverride):
                     temp = api.FilterBadPulses(InputWorkspace=temp, OutputWorkspace=temp)
+                    if str(type(temp)).count("IEvent") > 0:
+                        # Event workspace 
+                        self.log().information("DB1141D There are %d events after FilterBadPulses in workspace %s." % (
+                            temp.getNumberEvents(), str(temp)))
 
                 # Filter to bad 
                 if dosplit:
@@ -735,6 +743,7 @@ class SNSPowderReduction(PythonAlgorithm):
             for itemp in xrange(numwksp):
                 temp = tempwslist[itemp]
                 # Align and focus
+                self.log().information("[DB1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk))
                 print "[DB1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk)
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
