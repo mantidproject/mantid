@@ -146,7 +146,11 @@ void export_Run()
 
     .def("addProperty", &addPropertyWithUnit, "Adds a property with the given name, value and unit. If replace=True then an existing property is overwritten")
 
+    .def("setStartAndEndTime", &Run::setStartAndEndTime, "Set the start and end time of the run")
+
     .def ("startTime", &Run::startTime, "Return the total starting time of the run.")
+
+    .def ("endTime", &Run::endTime, "Return the total ending time of the run.")
 
     //--------------------------- Dictionary access----------------------------
     .def("get", &getWithDefault, "Returns the value pointed to by the key or None if it does not exist")
