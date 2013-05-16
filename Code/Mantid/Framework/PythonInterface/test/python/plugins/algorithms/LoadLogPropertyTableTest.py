@@ -9,7 +9,7 @@ import os
 
 class LoadLogPropertyTableTest(unittest.TestCase):
 
-    def test_LoadValidFilesComments(self):
+	def test_LoadValidFilesComments(self):
         """ Test to load valid files that are all present
         """
 		autoTestDir="../../../../../Test/AutoTestData/"
@@ -20,7 +20,7 @@ class LoadLogPropertyTableTest(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted())
 
-        Verify some values
+        #Verify some values
         tablews = AnalysisDataService.retrieve(outputWorskapceName)
         self.assertEqual(6, tablews.rowCount())
 		self.assertEqual(2, tablews.columnCount())
@@ -30,12 +30,11 @@ class LoadLogPropertyTableTest(unittest.TestCase):
 		self.assertEqual("15194", print output.cell(5,0))
 
 		run_algorithm("DeleteWorkspace", Workspace = outputWorskapceName)
-
         
         return
 		
-		def test_LoadPartiallyValidFilesLogValues(self):
-        """ Test to load valid files that are all present
+	def test_LoadPartiallyValidFilesLogValues(self):
+        """ Test to load files that are partially present
         """
 		autoTestDir="../../../../../Test/AutoTestData/"
 		outputWorskapceName = "LoadLogPropertyTableTest_Test2"
@@ -45,7 +44,7 @@ class LoadLogPropertyTableTest(unittest.TestCase):
 
         self.assertTrue(alg_test.isExecuted())
 
-        Verify some values
+        #Verify some values
         tablews = AnalysisDataService.retrieve(outputWorskapceName)
         self.assertEqual(2, tablews.rowCount())
 		self.assertEqual(2, tablews.columnCount())
@@ -56,7 +55,6 @@ class LoadLogPropertyTableTest(unittest.TestCase):
 		self.assertEqual("7.32055", print output.cell(1,1))
 
 		run_algorithm("DeleteWorkspace", Workspace = outputWorskapceName)
-
         
         return
 
