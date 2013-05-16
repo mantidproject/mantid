@@ -1,11 +1,12 @@
-#ifndef MANTID_API_IPEAKFUNCTION_H_
-#define MANTID_API_IPEAKFUNCTION_H_
+#ifndef MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_
+#define MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 
 using namespace std;
 
@@ -39,7 +40,7 @@ namespace API
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL IPowderDiffPeakFunction : virtual public API::ParamFunction,public virtual API::IFunction1D
+class MANTID_API_DLL IPowderDiffPeakFunction : public virtual API::ParamFunction,public virtual API::IFunction1D
 {
 public:
 
@@ -54,15 +55,15 @@ public:
   // virtual const std::string category(){ return "General"; }
 
   /// Get peak's centre
-  double centre() const;
+  virtual double centre() const;
   /// Get peak's intensity
-  double height() const;
+  virtual double height() const;
   /// Get peakl's FWHM
-  double fwhm()const;
+  virtual double fwhm()const;
   /// Set peak's height
-  void setHeight(const double h);
+  virtual void setHeight(const double h);
   /// Set peak's radius
-  void setPeakRadius(const int& r);
+  virtual void setPeakRadius(const int& r);
 
   //--------------- ThermalNeutron peak function special ---------------------------------------
   /// Set Miller Indicies
@@ -78,7 +79,7 @@ public:
   virtual void calculateParameters(bool explicitoutput) const = 0;
 
   /// Set up the flag to show whether (from client) cell parameter value changed
-  void setUnitCellParameterValueChangeFlag(bool changed)
+  virtual void setUnitCellParameterValueChangeFlag(bool changed)
   {
     m_cellParamValueChanged = changed;
   }
@@ -90,25 +91,25 @@ public:
   virtual void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
 
   /// Check whether a parameter is a profile parameter
-  bool hasProfileParameter(std::string paramname);
+  virtual bool hasProfileParameter(std::string paramname);
 
-  void function1D(double* out, const double* xValues, const size_t nData)const;
+  // void functionLocal(double* out, const double* xValues, const size_t nData)const;
 
   /// Calculate function in a range
   virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const = 0;
 
 protected:
   /// Local function for GSL minimizer
-  virtual void functionLocal(double*, const double*, int&) const = 0;
+  // virtual void functionLocal(double*, const double*, int&) const = 0;
 
   /// Local function for calculation in Mantid
-  virtual void functionLocal(vector<double> &out, const vector<double> &xValues) const = 0;
+  // virtual void functionLocal(vector<double> &out, const vector<double> &xValues) const = 0;
 
   /// General implementation of the method for all peaks. Calculates derivatives only
   /// void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData) const;
 
   /// General implemenation of derivative
-  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData) const;
+  // void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData) const;
 
   /// Defines the area around the centre where the peak values are to be calculated (in FWHM).
   static int s_peakRadius;
@@ -125,6 +126,14 @@ protected:
   /// Flag if any parameter value changed
   bool m_hasNewParameterValue;
 
+  std::vector<std::string> m_sortedProfileParameterNames;
+
+  /// Unit cell
+  mutable Geometry::UnitCell m_unitCell;
+
+  /// Unit cell size
+  double m_unitCellSize;
+
 };
 
 typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;
@@ -132,4 +141,4 @@ typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_IPEAKFUNCTION_H_*/
+#endif /*MANTID_API_IPOWDERDIFFPEAKFUNCTION_H_*/

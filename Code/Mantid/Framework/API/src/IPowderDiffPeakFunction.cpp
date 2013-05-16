@@ -127,8 +127,8 @@ namespace API
    * @param out :: Output function values
    * @param xValues :: X values for data points
    * @param nData :: Number of data points
-   */
-  void IPowderDiffPeakFunction::function1D(double* out, const double* xValues, const size_t nData)const
+
+  void IPowderDiffPeakFunction::functionLocal(double* out, const double* xValues, const size_t nData)const
   {
     double c = this->centre();
     double dx = fabs(s_peakRadius*this->fwhm());
@@ -153,6 +153,7 @@ namespace API
 
     return;
   }
+     */
 
   //----------------------------------------------------------------------------------------------
   /** General implementation of the method for all peaks. Calculates derivatives only
@@ -205,9 +206,28 @@ namespace API
     if (r > 0)
     {
       s_peakRadius = r;
-      std::string setting = boost::lexical_cast<std::string>(r);
-      Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",setting);
+
+      // std::string setting = boost::lexical_cast<std::string>(r);
+      // Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",setting);
     }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Check whether a parameter is a profile parameter
+    */
+  bool IPowderDiffPeakFunction::hasProfileParameter(std::string paramname)
+  {
+    vector<string>::iterator niter;
+    niter = lower_bound(m_sortedProfileParameterNames.begin(), m_sortedProfileParameterNames.end(),
+                        paramname);
+    if (niter == m_sortedProfileParameterNames.end())
+      return false;
+
+    std::string candname = *niter;
+    if (candname.compare(paramname))
+      return false;
+
+    return true;
   }
 
 

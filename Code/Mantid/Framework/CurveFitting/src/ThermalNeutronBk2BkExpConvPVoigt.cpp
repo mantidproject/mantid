@@ -106,13 +106,16 @@ where
  *WIKI*/
 
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
-#include "MantidAPI/Algorithm.h"
+// #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MultiThreaded.h"
 
+#include "MantidKernel/ConfigService.h"
+
 #include <gsl/gsl_sf_erf.h>
+#include <boost/lexical_cast.hpp>
 
 const double PI = 3.14159265358979323846264338327950288419716939937510582;
 const double PEAKRANGE = 5.0;
@@ -520,7 +523,7 @@ namespace CurveFitting
   }
 
   /** Get the center of the peak
- */
+
   double ThermalNeutronBk2BkExpConvPVoigt::centre()const
   {
     if (m_newValueSet)
@@ -528,25 +531,28 @@ namespace CurveFitting
 
     return m_centre;
   }
+   */
 
   /** Set peak height
- */
+
   void ThermalNeutronBk2BkExpConvPVoigt::setHeight(const double h)
   {
     setParameter(0, h);
     return;
   }
+ */
 
   /** Get peak's height
-   */
+
   double ThermalNeutronBk2BkExpConvPVoigt::height() const
   {
     double height = this->getParameter(0);
     return height;
   }
+     */
 
   /** Get peak's FWHM
-   */
+
   double ThermalNeutronBk2BkExpConvPVoigt::fwhm() const
   {
     if (m_newValueSet)
@@ -554,6 +560,7 @@ namespace CurveFitting
 
     return m_fwhm;
   }
+     */
 
   //-------------  Private Function To Calculate Peak Profile --------------------------------------------
   /** Calcualte H and eta for the peak
@@ -703,7 +710,6 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** This is called during long-running operations,
    * and check if the algorithm has requested that it be cancelled.
-   */
   void ThermalNeutronBk2BkExpConvPVoigt::interruption_point() const
   {
     // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
@@ -712,6 +718,7 @@ namespace CurveFitting
     IF_NOT_PARALLEL
         if (m_cancel) throw Algorithm::CancelException();
   }
+  */
 
   //-------------------------  External Functions ---------------------------------------------------
   /** Implementation of complex integral E_1
@@ -788,8 +795,8 @@ namespace CurveFitting
    * @param out :: Output function values
    * @param xValues :: X values for data points
    * @param nData :: Number of data points
-   */
-  void ThermalNeutronBk2BkExpConvPVoigt::function1D(double* out, const double* xValues, const size_t nData)const
+
+  void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double* out, const double* xValues, const size_t nData)const
   {
     double c = this->centre();
     double dx = fabs(s_peakRadius*this->fwhm());
@@ -812,13 +819,14 @@ namespace CurveFitting
 
     return;
   }
+  */
 
   /// Default value for the peak radius
   int ThermalNeutronBk2BkExpConvPVoigt::s_peakRadius = 5;
 
   //----------------------------------------------------------------------------------------------
   /** Set peak radius
-    */
+
   void ThermalNeutronBk2BkExpConvPVoigt::setPeakRadius(const int& r)
   {
     if (r > 0)
@@ -827,6 +835,13 @@ namespace CurveFitting
       std::string setting = boost::lexical_cast<std::string>(r);
       Kernel::ConfigService::Instance().setString("curvefitting.peakRadius",setting);
     }
+  }
+    */
+
+  //----------------------------------------------------------------------------------------------
+  void ThermalNeutronBk2BkExpConvPVoigt::function(std::vector<double>& out, const std::vector<double>& xValues) const
+  {
+    throw runtime_error("To be implemented soon!");
   }
 
 } // namespace CurveFitting

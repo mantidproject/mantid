@@ -115,7 +115,7 @@ public:
       xvalues[i] = vecX[i];
       out[i] = 0.0;
     }
-    peak.function1D(out, xvalues, nData);
+    peak.functionLocal(out, xvalues, nData);
 
     std::stringstream outstring;
     for (size_t id = 0; id < nData; ++id)
@@ -205,7 +205,7 @@ public:
       xvalues[i] = vecX[i];
       out[i] = 0.0;
     }
-    peak.function1D(out, xvalues, nData);
+    peak.functionLocal(out, xvalues, nData);
 
 
     std::stringstream outstring;
