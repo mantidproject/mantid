@@ -28,34 +28,20 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/FunctionTask.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 
-#include <fstream>
-#include <sstream>
-#include <climits>
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
-#include <Poco/File.h>
-#include <Poco/Path.h>
+
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 
 using std::endl;
 using std::map;
@@ -63,9 +49,6 @@ using std::string;
 using std::vector;
 
 using namespace ::NeXus;
-using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
-using namespace Mantid::Kernel;
 
 namespace Mantid
 {
@@ -75,13 +58,10 @@ namespace DataHandling
 DECLARE_ALGORITHM(LoadEventNexus)
 DECLARE_LOADALGORITHM(LoadEventNexus)
 
-
-
 using namespace Kernel;
+using namespace Geometry;
 using namespace API;
-using Geometry::Instrument;
-
-
+using namespace DataObjects;
 
 //===============================================================================================
 //===============================================================================================
