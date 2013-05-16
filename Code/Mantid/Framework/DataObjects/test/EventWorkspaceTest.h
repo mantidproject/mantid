@@ -63,38 +63,42 @@ public:
    * 500 pixels
    * 1000 histogrammed bins.
    */
-  EventWorkspace_sptr createEventWorkspace(int initialize_pixels, int setX, bool evenTOFs=false)
+  EventWorkspace_sptr createEventWorkspace(bool initialize_pixels, bool setX, bool evenTOFs=false)
   {
 
     EventWorkspace_sptr retVal(new EventWorkspace);
     if (initialize_pixels)
-      retVal->initialize(NUMPIXELS,1,1);
-    else
-      retVal->initialize(1,1,1);
-
-    //Make fake events
-    for (int pix=0; pix<NUMPIXELS; pix++)
     {
-      for (int i=0; i<NUMBINS-1; i++)
+      retVal->initialize(NUMPIXELS,1,1);
+
+      //Make fake events
+      for (int pix=0; pix<NUMPIXELS; pix++)
       {
-        double tof = 0;
-        if (evenTOFs)
+        for (int i=0; i<NUMBINS-1; i++)
         {
-          tof = (i+0.5)*BIN_DELTA; 
+          double tof = 0;
+          if (evenTOFs)
+          {
+            tof = (i+0.5)*BIN_DELTA;
+          }
+          else
+          {
+            //Two events per bin
+            tof = (pix+i+0.5)*BIN_DELTA;
+          }
+          size_t pulse_time = static_cast<size_t>(tof);
+          retVal->getEventList(pix) += TofEvent(tof, pulse_time);
+          retVal->getEventList(pix) += TofEvent(tof, pulse_time);
         }
-        else
-        {
-          //Two events per bin
-          tof = (pix+i+0.5)*BIN_DELTA;
-        }
-        size_t pulse_time = static_cast<size_t>(tof);
-        retVal->getEventList(pix) += TofEvent(tof, pulse_time);
-        retVal->getEventList(pix) += TofEvent(tof, pulse_time);
+        retVal->getEventList(pix).addDetectorID(pix);
+        retVal->getEventList(pix).setSpectrumNo(pix);
       }
-      retVal->getEventList(pix).addDetectorID(pix);
-      retVal->getEventList(pix).setSpectrumNo(pix);
+      retVal->doneAddingEventLists();
     }
-    retVal->doneAddingEventLists();
+    else
+    {
+      retVal->initialize(1,1,1);
+    }
 
     if (setX)
     {
@@ -270,7 +274,7 @@ public:
   void test_padSpectra()
   {
     bool timing = false;
-    ew = createEventWorkspace(1, 0);
+    ew = createEventWorkspace(true, false);
 
     int numpixels = timing ? 900000 : 1800;
     //Make an instrument with lots of pixels
@@ -864,7 +868,7 @@ public:
 
   void test_getEventXMinMax()
   {
-    EventWorkspace_sptr wksp = createEventWorkspace(1, 1, true);
+    EventWorkspace_sptr wksp = createEventWorkspace(true, true, true);
     TS_ASSERT_DELTA(wksp->getEventXMin(), 500, .01);
     TS_ASSERT_DELTA(wksp->getEventXMax(), 1023500, .01);
   }
