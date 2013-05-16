@@ -22,15 +22,16 @@ include_directories ( ${FRAMEWORK_DIR}/CurveFitting/inc ${FRAMEWORK_DIR}/DataHan
 set ( SRC_FILES
   WorkspaceCreationHelperModule.cpp 
   ${FRAMEWORK_DIR}/TestHelpers/src/ComponentCreationHelper.cpp
+  ${FRAMEWORK_DIR}/TestHelpers/src/MDEventsTestHelper.cpp
   ${FRAMEWORK_DIR}/TestHelpers/src/WorkspaceCreationHelper.cpp
 )
-add_library ( WorkspaceCreationHelper ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
-set_python_properties( WorkspaceCreationHelper WorkspaceCreationHelper )
-set_target_output_directory ( WorkspaceCreationHelper ${OUTPUT_DIR} .pyd )
+add_library ( PythonWorkspaceCreationHelper ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+set_python_properties( PythonWorkspaceCreationHelper WorkspaceCreationHelper )
+set_target_output_directory ( PythonWorkspaceCreationHelper ${OUTPUT_DIR} .pyd )
 # Override folder
-set_property ( TARGET WorkspaceCreationHelper PROPERTY FOLDER "UnitTests/Python" )
-target_link_libraries ( WorkspaceCreationHelper PythonAPIModule )
+set_property ( TARGET PythonWorkspaceCreationHelper PROPERTY FOLDER "UnitTests/Python" )
+target_link_libraries ( PythonWorkspaceCreationHelper PythonAPIModule )
 
 # Overall testhelpers target
-add_custom_target ( testhelpers DEPENDS WorkspaceCreationHelper )
+add_custom_target ( testhelpers DEPENDS PythonWorkspaceCreationHelper )
 set_property ( TARGET testhelpers PROPERTY FOLDER "UnitTests/Python" )
