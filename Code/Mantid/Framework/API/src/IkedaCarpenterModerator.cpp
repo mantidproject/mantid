@@ -310,35 +310,23 @@ namespace Mantid
      //    Output, double ZERO, the estimated value of a zero of
      //    the function F.
      //
-       double c;
-       double d;
-       double e;
-       double fa;
-       double fb;
-       double fc;
-       double m;
-       double macheps;
-       double p;
-       double q;
-       double r;
-       double s;
-       double sa;
-       double sb;
-       double tol;
+       
        //
        //  Make local copies of A and B.
        //
-       sa = a;
-       sb = b;
-       fa = areaToTimeFunction(sa);
-       fb = areaToTimeFunction(sb);
+	   double sa = a;
+       double sb = b;
 
-       c = sa;
-       fc = fa;
-       e = sb - sa;
-       d = e;
+       double fa = areaToTimeFunction(sa);
+       double fb = areaToTimeFunction(sb);
+       double fc = fa;
 
-       macheps = 1e-14; // more than sufficient for Tobyfit
+       double c = sa;
+
+       double e = sb - sa;
+       double d = e;
+
+       double macheps = 1e-14; // more than sufficient for Tobyfit
 
        for (int i=0; true ;  i++)
        {
@@ -352,8 +340,8 @@ namespace Mantid
            fc = fa;
          }
 
-         tol = 2.0 * macheps * fabs( sb ) + t;
-         m = 0.5 * ( c - sb );
+         double tol = 2.0 * macheps * fabs( sb ) + t;
+         double m = 0.5 * ( c - sb );
 
          if ( fabs ( m ) <= tol || fb == 0.0 )
          {
@@ -367,8 +355,12 @@ namespace Mantid
          }
          else
          {
-           s = fb / fa;
+           double p;
+		   double q;
+		   double r;
+		   double s = fb / fa;
 
+		   
            if ( sa == c )
            {
              p = 2.0 * m * s;

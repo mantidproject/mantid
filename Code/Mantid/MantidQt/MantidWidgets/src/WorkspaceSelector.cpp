@@ -20,7 +20,7 @@ using namespace MantidQt::MantidWidgets;
 WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(parent),
   m_addObserver(*this, &WorkspaceSelector::handleAddEvent), 
   m_remObserver(*this, &WorkspaceSelector::handleRemEvent),
-  m_init(init), m_workspaceTypes(), m_showHidden(true), m_optional(false),
+  m_init(init), m_workspaceTypes(), m_showHidden(false), m_optional(false),
   m_suffix(), m_algName(), m_algPropName(), m_algorithm()
 {
   setEditable(false); 
@@ -146,6 +146,12 @@ void WorkspaceSelector::setValidatingAlgorithm(const QString & algName)
 
 void WorkspaceSelector::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) 
 {
+  if ( !showHiddenWorkspaces() &&
+      Mantid::API::AnalysisDataService::Instance().isHiddenDataServiceObject(pNf->object_name()) )
+  {
+    return;
+  }
+
   QString name = QString::fromStdString( pNf->object_name() );
   if ( checkEligibility(name, pNf->object() ) )
   {
@@ -180,10 +186,6 @@ bool WorkspaceSelector::checkEligibility(const QString & name, Mantid::API::Work
   {
     return false;
   }
-  else if ( ( ! m_showHidden ) && name.startsWith("__") )
-  {
-    return false;
-  }
   else if ( ( ! m_suffix.isEmpty() ) && ( ! name.endsWith(m_suffix) ) )
   {
     return false;
@@ -196,17 +198,23 @@ void WorkspaceSelector::refresh()
 {
   clear();
   if ( m_optional ) addItem("");
-  Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
-  std::set<std::string> items = ads.getObjectNames();
-  if ( ! items.empty() )
+  auto& ads = Mantid::API::AnalysisDataService::Instance();
+  std::set<std::string> items;
+  if ( showHiddenWorkspaces() )
   {
-    for ( std::set<std::string>::iterator it = items.begin(); it != items.end(); ++it )
-    {      
-      QString name = QString::fromStdString(*it);
-      if ( checkEligibility( name, ads.retrieve(*it) ) )
-      {
-        addItem(name);
-      }
+    items = ads.getObjectNamesInclHidden();
+  }
+  else
+  {
+    items = ads.getObjectNames();
+  }
+
+  for ( std::set<std::string>::iterator it = items.begin(); it != items.end(); ++it )
+  {
+    QString name = QString::fromStdString(*it);
+    if ( checkEligibility( name, ads.retrieve(*it) ) )
+    {
+      addItem(name);
     }
   }
 }

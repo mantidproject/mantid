@@ -404,7 +404,7 @@ namespace API
     std::string last_directory = ""; 
     for (Repository::reverse_iterator it = repo.rbegin();
          it != repo.rend();
-           it++){
+           ++it){
       // for every entry, it takes the path and RepositoryEntry
       std::string entry_path = it->first; 
       RepositoryEntry & entry = it->second;
@@ -546,7 +546,7 @@ namespace API
     std::string directory_path_with_slash = std::string(directory_path).append("/");
     bool found = false; 
     for(Repository::iterator it = repo.begin();
-        it != repo.end(); it++){
+        it != repo.end(); ++it){
       // skip all entries that are not children of directory_path
       // the map will list the entries in alphabetical order, so, 
       // when it first find the directory, it will list all the 
@@ -871,7 +871,7 @@ namespace API
     // has the auto_update and check it they have changed.
     for(Repository::iterator it = repo.begin(); 
         it!= repo.end();
-        it++){
+        ++it){
       if (it->second.auto_update){
         // THE SAME AS it->status in (REMOTE_CHANGED, BOTH_CHANGED)
         if (it->second.status & REMOTE_CHANGED){
@@ -1123,7 +1123,7 @@ namespace API
       if (entries_to_delete.size() > 0){
         for (std::vector<std::string>::iterator it = entries_to_delete.begin();
              it != entries_to_delete.end();
-             it++){
+             ++it){
           // remove this entry
           pt.erase(*it);
         }

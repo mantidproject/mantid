@@ -1681,7 +1681,7 @@ namespace DataObjects
     size_t numPerBlock = events.size() / numThreads;
 
     // Do each block in parallel
-    PRAGMA_OMP(parallel for)
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (int thread=0; thread < numThreads; thread++)
     {
       // The local output vector

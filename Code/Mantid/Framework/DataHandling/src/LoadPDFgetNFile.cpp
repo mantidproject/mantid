@@ -353,12 +353,12 @@ namespace DataHandling
       if (temps.compare("NaN") == 0)
       {
         // FIXME:  Need to discuss with Peter about how to treat NaN value
-        tempvalue = DBL_MAX-1.0;
+        //tempvalue = DBL_MAX-1.0;
         tempvalue = 0.0;
       }
       else if (temps.compare("-NaN") == 0)
       {
-        tempvalue = -DBL_MAX+1.0;
+        //tempvalue = -DBL_MAX+1.0;
         // FIXME:  Need to discuss with Peter about how to treat NaN value
         tempvalue = 0.0;
       }

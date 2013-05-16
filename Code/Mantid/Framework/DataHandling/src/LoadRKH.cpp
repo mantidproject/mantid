@@ -408,6 +408,9 @@ const std::string LoadRKH::readUnit(const std::string & line)
   //this is a syntax check the line before returning its data
   if ( codes.count() >= 3 )
   {
+	// For the next line it is possible to use str.compare instead of str.find, this would be more efficient if the line was very long
+	// however to use is safely other checks would be required that would impair readability, therefore in this case the unlikely performance hit is accepted.
+	// cppcheck-suppress stlIfStrFind
     if ( unit.find('(') != 0 || unit.find(')') != unit.size() )
     {
       std::string qCode = boost::lexical_cast<std::string>(SaveRKH::Q_CODE);

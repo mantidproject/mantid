@@ -8,7 +8,7 @@ You can load the workspace as a [[MDWorkspace#File-Backed MDWorkspaces|file-back
 by checking the FileBackEnd option. This will load the box structure
 (allowing for some visualization with no speed penalty) but leave the
 events on disk until requested. Processing file-backed MDWorkspaces
-is signficantly slower than in-memory workspaces due to frequeny file access!
+is significantly slower than in-memory workspaces due to frequency file access!
 
 For file-backed workspaces, the Memory option allows you to specify a cache
 size, in MB, to keep events in memory before caching to disk.
@@ -525,8 +525,8 @@ namespace Mantid
     std::vector<coord_t> vec;
     file->getData<coord_t>(vec);
     std::string type;
-    int inD;
-    int outD;
+    int inD(0);
+    int outD(0);
     file->getAttr("type", type);
     file->getAttr<int>("rows", outD);
     file->getAttr<int>("columns", inD);

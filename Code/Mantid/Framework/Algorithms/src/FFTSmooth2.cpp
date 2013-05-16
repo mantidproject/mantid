@@ -384,10 +384,10 @@ void FFTSmooth2::Butterworth(int n, int order)
   yi.assign(Yr.size(),0);
 
   double cutoff = ny;
-  double scale;
+
   for(int i=0;i<my;i++)
   {
-    scale = 1.0/(1.0 + pow(i/cutoff, 2*order));
+    double scale = 1.0/(1.0 + pow(i/cutoff, 2*order));
     yr[i] = scale * Yr[i];
     yi[i] = scale * Yi[i];
   }

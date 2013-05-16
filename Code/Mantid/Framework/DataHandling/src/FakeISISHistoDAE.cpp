@@ -205,7 +205,7 @@ public:
       int n = 0;
       try
       {
-        n = socket().receiveBytes(&comm,sizeof(comm));
+        socket().receiveBytes(&comm,sizeof(comm));
         n = socket().receiveBytes(&buffer,1024);
         if ( n == 0 ) break;
       }

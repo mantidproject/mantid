@@ -512,19 +512,21 @@ if (fromX >= toX || fromY >= toY || fromZ >= toZ)
 	return;
 	}
 
-double x,y;
 QString formula=boxFunction->currentText();
 bool error=false;
 try
 	{
 	MyParser parser;
+	double x=fromX;
+	double y=fromY;
 	parser.DefineVar("x", &x);
 	parser.DefineVar("y", &y);
 	parser.SetExpr(formula.ascii());
 
-	x=fromX; y=fromY;
+	
 	parser.Eval();
-	x=toX; y=toY;
+	x=toX; 
+	y=toY;
 	parser.Eval();
 	}
 catch(mu::ParserError &e)

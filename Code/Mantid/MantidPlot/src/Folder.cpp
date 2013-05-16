@@ -35,9 +35,8 @@
 
 
 Folder::Folder( Folder *parent, const QString &name )
-    : QObject(parent), d_log_info(QString()), myFolderListItem(0), d_active_window(0)
+    : QObject(parent), birthdate(QDateTime::currentDateTime().toString(Qt::LocalDate)), d_log_info(QString()), myFolderListItem(0), d_active_window(0)
 {
-	birthdate = QDateTime::currentDateTime ().toString(Qt::LocalDate);
 	setObjectName(name);
 }
 

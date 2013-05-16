@@ -18,7 +18,7 @@ namespace Kernel
 } //namespace
 } //namespace
 
-// The syntax used to dfine a pragma within a macro is different on windows and GCC
+// The syntax used to define a pragma within a macro is different on windows and GCC
 #ifdef _MSC_VER
 #define PRAGMA __pragma
 #else //_MSC_VER

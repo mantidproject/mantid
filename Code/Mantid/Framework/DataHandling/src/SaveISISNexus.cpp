@@ -138,7 +138,7 @@ void SaveISISNexus::exec()
   {
     throw std::runtime_error("Cannot open file " + outputFilename + " for writing.");
   }
-  status = NXmakegroup(handle,"raw_data_1","NXentry");
+  NXmakegroup(handle,"raw_data_1","NXentry");
   NXopengroup(handle,"raw_data_1","NXentry");
     write_isis_vms_compat();
     saveString("beamline"," ");

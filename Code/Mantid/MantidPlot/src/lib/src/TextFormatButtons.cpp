@@ -56,9 +56,10 @@ void TextFormatButtons::init(Buttons buttons)
   }
 
   QFont font = QFont();
-  int btnSize = 32;
 #ifdef Q_OS_MAC
-  btnSize = 38;
+  int btnSize = 38;
+#else
+  int btnSize = 32;
 #endif
   if (buttons == Legend || buttons == TexLegend){
     QPushButton *buttonCurve = new QPushButton( QPixmap(":/lineSymbol.png"), QString());

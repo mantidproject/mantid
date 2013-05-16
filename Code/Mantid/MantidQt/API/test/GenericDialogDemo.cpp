@@ -43,8 +43,6 @@ void showAlgo(IAlgorithm_sptr alg, QStringList enabled, QStringList disabled, QA
 
   dlg->addEnabledAndDisableLists(enabled, disabled);
 
-  dlg->showHiddenWorkspaces(false);
-
   // Setup the layout
   dlg->initializeLayout();
 

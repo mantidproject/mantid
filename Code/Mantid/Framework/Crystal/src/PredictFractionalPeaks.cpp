@@ -220,6 +220,7 @@ namespace Mantid
 
                   if (Qs[2]>0 && peak->findDetector())
                   {
+					// cppcheck-suppress redundantAssignment
                     ErrPos=2;
                     vector<int> SavPk;
                     SavPk.push_back(RunNumber);
@@ -230,13 +231,14 @@ namespace Mantid
                   //TODO keep list sorted so searching is faster?
                     vector<vector<int> >::iterator it = find(AlreadyDonePeaks.begin(),AlreadyDonePeaks.end(),SavPk);
 
+					// cppcheck-suppress redundantAssignment
                     ErrPos=3;
                     if( it == AlreadyDonePeaks.end())
                       AlreadyDonePeaks.push_back(SavPk);
                     else
                       continue;
 
-
+					// cppcheck-suppress redundantAssignment
                     ErrPos=4;
                     peak->setHKL(hkl1);
                     peak->setRunNumber(RunNumber);

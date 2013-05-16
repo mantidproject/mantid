@@ -184,8 +184,7 @@ void PlotDialog::showAll(bool all)
 }
 void PlotDialog::initContourLinesPage()
 {
-	QLocale locale = QLocale();
-    locale = d_app->locale();
+	QLocale locale = d_app->locale();
 
   	contourLinesPage = new QWidget();
 

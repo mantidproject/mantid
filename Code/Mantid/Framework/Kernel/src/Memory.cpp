@@ -209,7 +209,8 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
     if (totPages < 0) totPages = 0;
     if (avPages < 0) totPages = 0;
     if (pageSize < 1) pageSize = 1;
-    sys_avail = avPages / 1024 * pageSize;
+    //Commented out the next line as the value was being written by the one after
+	//sys_avail = avPages / 1024 * pageSize;
     sys_avail = totPages / 1024 * pageSize;
   }
   // Can get the info on the memory that we've already obtained but aren't using right now
