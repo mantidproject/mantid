@@ -9,6 +9,11 @@ using namespace boost::python;
 void export_DateAndTime()
 {
   class_<DateAndTime>("DateAndTime", no_init)
+    // Constructors
+    .def(init<const std::string>("Construct from an ISO8601 string"))
+    .def(init<double,double>("Construct using a number of seconds and nanoseconds (floats)"))
+    .def(init<int64_t,int64_t>("Construct using a number of seconds and nanoseconds (integers)"))
+    .def(init<int64_t>("Construct a total number of nanoseconds"))
     .def("total_nanoseconds", &DateAndTime::totalNanoseconds)
     .def("totalNanoseconds", &DateAndTime::totalNanoseconds)
     .def("__str__", &Mantid::Kernel::DateAndTime::toISO8601String)

@@ -8,6 +8,7 @@ set ( TEST_PY_FILES
   BoundedValidatorTest.py
   CompositeValidatorTest.py
   ConfigServiceTest.py
+  DateAndTimeTest.py
   DeltaEModeTest.py
   FacilityInfoTest.py
   FilteredTimeSeriesPropertyTest.py
