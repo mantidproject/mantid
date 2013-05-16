@@ -303,7 +303,6 @@ void AlignDetectors::execEvent()
         API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    //outputWS->mutableSpectraMap().clear();
     //You need to copy over the data as well.
     outputWS->copyDataFrom( (*inputWS) );
 
