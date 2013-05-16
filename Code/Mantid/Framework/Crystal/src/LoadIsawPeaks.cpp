@@ -131,7 +131,7 @@ namespace Crystal
 	    readToEndOfLine( in ,  true );
 	    confidence = 95;
       }
-      catch (std::exception & e)
+      catch (std::exception & )
       {
       }
       return confidence;
@@ -148,7 +148,7 @@ namespace Crystal
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "Path to an ISAW-style .peaks filename.");
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output workspace.");
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "Name of the output workspace.");
   }
 
 
