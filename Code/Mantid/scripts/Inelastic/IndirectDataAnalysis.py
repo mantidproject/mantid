@@ -121,27 +121,37 @@ def GetTemperature(root,tempWS,log_type,Verbose):
     (instr, run) = getInstrRun(root)
     run_name = instr+run
     log_name = run_name+'_'+log_type
-    logger.notice(log_name)
-    log_file = log_name+'.txt'
-    log_path = FileFinder.getFullPath(log_file)
-    logger.notice(log_path)
-    if (log_path == ''):
-        mess = ' Run : '+run_name +' ; Temperature file not found'
-        xval = int(run_name[-3:])
-        xlabel = 'Run-numbers (last 3 digits)'
-    else:			
-        LoadLog(Workspace=tempWS, Filename=log_path)
-        run_logs = mtd[tempWS].getRun()
-        tmp = run_logs[log_name].value
+    run = mtd[tempWS].getRun()
+    unit1 = 'Temperature'               # default values
+    unit2 = 'K'
+    if log_type in run:                 # test logs in WS
+        tmp = run[log_type].value
         temp = tmp[len(tmp)-1]
-        mess = ' Run : '+run_name+' ; Temperature = '+str(temp)
         xval = temp
-        xlabel = 'Temperature (K)'
+        mess = ' Run : '+run_name +' ; Temperature in log = '+str(temp)
+    else:                               # logs not in WS
+        logger.notice('Log parameter not found')
+        log_file = log_name+'.txt'
+        log_path = FileFinder.getFullPath(log_file)
+        if (log_path == ''):            # log file does not exists
+            mess = ' Run : '+run_name +' ; Temperature file not found'
+            xval = int(run_name[-3:])
+            unit1 = 'Run-number'
+            unit2 = 'last 3 digits'
+        else:                           # get from log file
+            LoadLog(Workspace=tempWS, Filename=log_path)
+            run_logs = mtd[tempWS].getRun()
+            tmp = run_logs[log_name].value
+            temp = tmp[len(tmp)-1]
+            xval = temp
+            mess = ' Run : '+run_name+' ; Temperature in file = '+str(temp)
     if Verbose:
         logger.notice(mess)
-    return xval,xlabel
+    unit = [unit1,unit2]
+    return xval,unit
 
-def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False): 
+def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
+        Save=False, Verbose=False, Plot=False): 
     StartTime('ElWin')
     workdir = config['defaultsave.directory']
     CheckXrange(eRange,'Energy')
@@ -160,8 +170,7 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         (root, ext) = os.path.splitext(file_name)
         LoadNexus(Filename=file, OutputWorkspace=tempWS)
         nsam,ntc = CheckHistZero(tempWS)
-        log_type = 'sample'
-        (xval, xlabel) = GetTemperature(root,tempWS,log_type,Verbose)
+        (xval, unit) = GetTemperature(root,tempWS,log_type,Verbose)
         if Verbose:
             logger.notice('Reading file : '+file)
         if ( len(eRange) == 4 ):
@@ -248,24 +257,51 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
         ename = first+'to_'+last
     elfWS = ename+'_elf'    # interchange Q & T
     CreateWorkspace(OutputWorkspace=elfWS, DataX=datTx, DataY=datTy, DataE=datTe,
-        Nspec=nQ, UnitX='Energy')
+        Nspec=nQ, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=q1)
+    unitx = mtd[elfWS].getAxis(0).setUnit("Label")
+    unitx.setLabel(unit[0], unit[1])
     DeleteWorkspace('__elf')
     e1WS = ename+'_eq1'
     CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
         Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
-    AddSampleLog(Workspace=e1WS, LogName="Vaxis", LogType="String", LogText=xlabel)
+    unity = mtd[e1WS].getAxis(1).setUnit("Label")
+    unity.setLabel(unit[0], unit[1])
+    label = unit[0]+' / '+unit[1]
+    AddSampleLog(Workspace=e1WS, LogName="Vaxis", LogType="String", LogText=label)
     e2WS = ename+'_eq2'
     CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
         Nspec=nr, UnitX='QSquared', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
-    AddSampleLog(Workspace=e2WS, LogName="Vaxis", LogType="String", LogText=xlabel)
+    unity = mtd[e2WS].getAxis(1).setUnit("Label")
+    unity.setLabel(unit[0], unit[1])
+    AddSampleLog(Workspace=e2WS, LogName="Vaxis", LogType="String", LogText=label)
+    if unit[0] == 'Temperature':
+        nT = len(Tvalue)
+        if Tvalue[0] < Tvalue[nT-1]:
+            lo = 0
+            hi = nT-1
+        else:
+            lo = nT-1
+            hi = 0
+        text = 'Temperature range : '+str(Tvalue[lo])+' to '+str(Tvalue[hi])
+        if Normalise:
+            yval = mtd[e1WS].readY(lo)
+            normFactor = 1.0/yval[0]
+            Scale(InputWorkspace=e1WS, OutputWorkspace=e1WS, Factor=normFactor, Operation='Multiply')
+            if Verbose:
+                logger.notice(text)
+                logger.notice('Normalised eq1 by scale factor : '+str(normFactor))
+
     if Save:
         e1_path = os.path.join(workdir, e1WS+'.nxs')					# path name for nxs file
         e2_path = os.path.join(workdir, e2WS+'.nxs')					# path name for nxs file
+        elf_path = os.path.join(workdir, elfWS+'.nxs')					# path name for nxs file
         if Verbose:
             logger.notice('Creating file : '+e1_path)
             logger.notice('Creating file : '+e2_path)
+            logger.notice('Creating file : '+elf_path)
         SaveNexusProcessed(InputWorkspace=e1WS, Filename=e1_path)
         SaveNexusProcessed(InputWorkspace=e2WS, Filename=e2_path)
+        SaveNexusProcessed(InputWorkspace=elfWS, Filename=elf_path)
     if Plot:
         elwinPlot(e1WS,e2WS,elfWS)
     EndTime('Elwin')
