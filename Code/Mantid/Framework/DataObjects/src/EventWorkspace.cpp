@@ -48,11 +48,8 @@ namespace DataObjects
   {
     delete mru;
 
-    //Go through the event list and clear them?
-    EventListVector::iterator i = this->data.begin();
-    for( ; i != this->data.end(); ++i )
+    for( auto i = data.begin(); i != this->data.end(); ++i )
     {
-      //Deleting the event list should call its destructor to release the vector memory.
       delete (*i);
     }
   }
@@ -286,11 +283,10 @@ namespace DataObjects
     // set to crazy values to start
     double xmin = std::numeric_limits<double>::max();
     size_t numWorkspace = this->data.size();
-    double temp;
     for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
     {
       const EventList &evList = this->getEventList(workspaceIndex);
-      temp = evList.getTofMin();
+      const double temp = evList.getTofMin();
       if (temp < xmin)
         xmin = temp;
     }
@@ -312,11 +308,10 @@ namespace DataObjects
     // set to crazy values to start
     double xmax = -1.0 * std::numeric_limits<double>::max();
     size_t numWorkspace = this->data.size();
-    double temp;
     for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
     {
       const EventList &evList = this->getEventList(workspaceIndex);
-      temp = evList.getTofMax();
+      const double temp = evList.getTofMax();
       if (temp > xmax)
         xmax = temp;
     }
@@ -334,11 +329,10 @@ namespace DataObjects
     xmin = std::numeric_limits<double>::max();
     xmax = -1.0 * xmin;
     size_t numWorkspace = this->data.size();
-    double temp;
     for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
     {
       const EventList &evList = this->getEventList(workspaceIndex);
-      temp = evList.getTofMin();
+      double temp = evList.getTofMin();
       if (temp < xmin)
         xmin = temp;
       temp = evList.getTofMax();
@@ -432,8 +426,7 @@ namespace DataObjects
     m_noVectors = data.size();
     for (size_t i=0; i < m_noVectors; i++)
     {
-      if (data[i])
-        delete data[i];
+      delete data[i];
     }
     data.clear();
     m_noVectors = 0;
