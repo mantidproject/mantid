@@ -8,10 +8,6 @@
 #include "MantidQtCustomInterfaces/MantidEV.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IEventWorkspace.h"
-#include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/LiveListenerFactory.h"
-#include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 
 namespace MantidQt
@@ -183,15 +179,15 @@ void RunEllipsoidIntegrate::run()
  *  Constructor for MantidEV.  Makes the thread pool and instance of
  *  MantidEVWorker.
  */
-MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent),observer(*this, &MantidEV::handleQpointNotification),
-                     observer1(*this, &MantidEV::handleQpointNotification1)                  
+MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
 {
   worker        = new MantidEVWorker();
   m_thread_pool = new QThreadPool( this );
   m_thread_pool->setMaxThreadCount(1);
    
-  SelectionNotificationService::Instance().notificationCenter.addObserver(observer);
-  SelectionNotificationService::Instance().notificationCenter.addObserver(observer1);
+  QObject::connect( &(MantidQt::API::SelectionNotificationService::Instance()),
+                    SIGNAL( QPointSelection_signal( bool, double, double, double )),
+                    this, SLOT(QPointSelection_slot( bool, double, double, double )) );
 }
 
 
@@ -202,10 +198,6 @@ MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent),observer(*this, &Man
 MantidEV::~MantidEV()
 {
   saveSettings("");
-  SelectionNotificationService::Instance().notificationCenter.removeObserver( observer);
-
-  SelectionNotificationService::Instance().notificationCenter.removeObserver( observer1);
-
   delete worker;
   delete m_thread_pool;
 }
@@ -1068,31 +1060,37 @@ void MantidEV::showInfo_slot()
    getDouble( m_uiForm.Qy_ledt, qy );
    getDouble( m_uiForm.Qz_ledt, qz );
 
-   Mantid::Kernel::V3D q_point( qx, qy, qz );
-
-   boost::shared_ptr<std::vector<double>> q_vec(new std::vector<double>());
-   q_vec->push_back( qx );
-   q_vec->push_back( qy );
-   q_vec->push_back( qz );
-   std::string message_name("PointedAt");
-   SelectionNotificationService::Instance().addOrReplace(message_name.c_str(),q_vec);
+   /// loop back test of SelectionNotificationService
+   MantidQt::API::SelectionNotificationService::Instance().sendQPointSelection( true, qx, qy, qz );
 }
 
 
-void MantidEV::handleQpointNotification1(const Poco::AutoPtr<SelectionNotificationServiceImpl::AfterReplaceNotification> & message )
+/**
+ *  This slot is connected to the QPointSelection signal, which will be emitted
+ *  when a QPoint is selected by some participating object.
+ *
+ *  @param  lab_coords  Will be true if the Q-components are in lab coordinates
+ *                      and false if they are in sample coordinates.
+ *  @param qx           The x-component of the Mantid Q-vector.
+ *  @param qy           The y-component of the Mantid Q-vector.
+ *  @param qz           The z-component of the Mantid Q-vector.
+ */
+void MantidEV::QPointSelection_slot( bool lab_coords, double qx, double qy, double qz )
 {
-  Mantid::Kernel::V3D  q_point( message->object()->at(0), message->object()->at(1), message->object()->at(2) );
-  showInfo( q_point );
-}
-
-void MantidEV::handleQpointNotification(const Poco::AutoPtr<SelectionNotificationServiceImpl::AddNotification> & message )
-{
-  Mantid::Kernel::V3D  q_point( message->object()->at(0), message->object()->at(1), message->object()->at(2) );
-  showInfo( q_point );
+  Mantid::Kernel::V3D q_point( qx, qy, qz );
+  showInfo( lab_coords, q_point );
 }
 
 
-void MantidEV::showInfo( Mantid::Kernel::V3D  q_point )
+/**
+ *  Use the peaks workspace to get information about the specified
+ *  Q-vector.
+ *
+ *  @param  lab_coords  Will be true if the Q-components are in lab coordinates
+ *                      and false if they are in sample coordinates.
+ *  @param q_point Vector containing the Q-coordinates.
+ */
+void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
 {
    std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
    if ( peaks_ws_name.length() == 0 )
@@ -1106,7 +1104,7 @@ void MantidEV::showInfo( Mantid::Kernel::V3D  q_point )
      errorMessage("Requested Peaks Workspace Doesn't Exist");
    }
 
-   std::vector< std::pair< std::string, std::string > > info = worker->PointInfo( peaks_ws_name, q_point );
+   std::vector< std::pair< std::string, std::string > > info = worker->PointInfo( peaks_ws_name, lab_coords, q_point );
 
    m_uiForm.SelectedPoint_tbl->setRowCount((int)info.size());
    m_uiForm.SelectedPoint_tbl->setColumnCount(2);

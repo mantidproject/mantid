@@ -237,142 +237,169 @@ namespace Mantid
    /**
     * Returns selected information for a "peak" at QLabFrame.
     *
-    * @param QLabFrame  a postion in Q-space. A peak does not have to be at that position
+    * @param QFrame      An arbitrary position in Q-space.  This does not have to be the 
+    *                    position of a peak.
+    * @param lab_coords  Set true if the position is in the lab coordinate system, false if 
+    *                    it is in the sample coordinate system.
     * @return a vector whose elements contain different information about the "peak" at that position.
     *         each element is a pair of description of information and the string form for the corresponding
     *         value.
     */
-    std::vector<std::pair<std::string,std::string> >PeaksWorkspace::PeakInfo(Kernel::V3D QLabFrame ) const
+    std::vector<std::pair<std::string, std::string> > PeaksWorkspace::PeakInfo(Kernel::V3D QFrame,
+        bool lab_coords) const
     {
-      std::vector<std::pair< std::string,std::string > > Result;
+      std::vector<std::pair<std::string, std::string> > Result;
 
-      std::pair< std::string,std::string > QMag( "|Q|", boost::lexical_cast<std::string>(QLabFrame.norm()));
-      Result.push_back( QMag );
+      std::pair<std::string, std::string> QMag("|Q|", boost::lexical_cast<std::string>(QFrame.norm()));
+      Result.push_back(QMag);
 
-      std::pair< std::string,std::string > dspc( "d-spacing", boost::lexical_cast<std::string>(2.0*M_PI/QLabFrame.norm()));
-      Result.push_back( dspc);
+      std::pair<std::string, std::string> dspc("d-spacing",
+          boost::lexical_cast<std::string>(2.0 * M_PI / QFrame.norm()));
+      Result.push_back(dspc);
 
+      int seqNum = -1;
+      bool hasOneRunNumber = true;
+      int runNum = -1;
+      double minDist = 10000000;
 
-      std::pair< std::string,std::string > Qlab("Qlab",boost::lexical_cast<std::string>(QLabFrame));
-      Result.push_back(Qlab);
-
-      try{
-        API::IPeak* peak = createPeak( QLabFrame);
-        int seqNum=-1;
-        bool hasOneRunNumber = true;
-        int runNum = -1;
-        double minDist= 10000000;
-
-        for( int i = 0; i < getNumberPeaks() ; i++ )
+      for (int i = 0; i < getNumberPeaks(); i++)
+      {
+        Peak pk = getPeak(i);
+        V3D Q = pk.getQLabFrame();
+        if (!lab_coords)
+          Q = pk.getQSampleFrame();
+        double D = QFrame.distance(Q);
+        if (D < minDist)
         {
-          Peak pk = getPeak(i);
-          double D = QLabFrame.distance(pk.getQLabFrame() );
-          if( D < minDist)
-          {
-            minDist = D;
-            seqNum = i+1;
-          }
-           int run= pk.getRunNumber();
-           if( runNum <0)
-             runNum =run;
-           else if( runNum != run)
-             hasOneRunNumber = false;
+          minDist = D;
+          seqNum = i + 1;
         }
 
-        if( hasOneRunNumber)
+        int run = pk.getRunNumber();
+        if (runNum < 0)
+          runNum = run;
+        else if (runNum != run)
+          hasOneRunNumber = false;
+      }
+
+      V3D Qlab = QFrame;
+      V3D Qsamp;
+      Kernel::Matrix<double> Gon(3, 3, true);
+      if (seqNum >= 0)
+        Gon = getPeak(seqNum).getGoniometerMatrix();
+      if (lab_coords)
+      {
+
+        Kernel::Matrix<double> InvGon(Gon);
+        InvGon.Invert();
+        Qsamp = InvGon * Qlab;
+
+      }
+      else
+      {
+        Qsamp = QFrame;
+        Qlab = Gon * Qsamp;
+      }
+
+      if (lab_coords || seqNum >= 0)
+
+      {
+        std::pair<std::string, std::string> QlabStr("Qlab", boost::lexical_cast<std::string>(Qlab));
+        Result.push_back(QlabStr);
+      }
+
+      if (!lab_coords || seqNum >= 0)
+      {
+
+        std::pair<std::string, std::string> QsampStr("QSample", boost::lexical_cast<std::string>(Qsamp));
+        Result.push_back(QsampStr);
+      }
+
+      try
+      {
+        API::IPeak* peak = createPeak(Qlab);
+
+        if (sample().hasOrientedLattice())
         {
-          std::pair< std::string,std::string > runn( "RunNumber", boost::lexical_cast<std::string>(runNum));
+
+          peak->setGoniometerMatrix(Gon);
+          const Geometry::OrientedLattice & lat = (sample().getOrientedLattice());
+
+          const Kernel::Matrix<double> &UB0 = lat.getUB();
+          Kernel::Matrix<double> UB(UB0);
+          UB.Invert();
+          V3D hkl = UB * Qsamp / 2 / M_PI;
+
+          std::pair<std::string, std::string> HKL("HKL", boost::lexical_cast<std::string>(hkl));
+          Result.push_back(HKL);
+
+        }
+
+        if (hasOneRunNumber)
+        {
+          std::pair<std::string, std::string> runn("RunNumber",
+              boost::lexical_cast<std::string>(runNum));
           Result.push_back(runn);
-          const Kernel::DblMatrix GonRconst= run().getGoniometerMatrix();
-          Kernel::Matrix<double> GonR(GonRconst);
-          Kernel::Matrix<double>ident(3,3);
-          ident.identityMatrix();
-          V3D QSamp;
-          if( !(GonR ==ident))
-          {
-
-            Kernel::Matrix<double> InvGon( GonR);
-            InvGon.Invert();
-            QSamp = InvGon *QLabFrame;
-
-            std::pair< std::string,std::string > Qsamp("QSample",boost::lexical_cast<std::string>(QSamp));
-            Result.push_back(Qsamp);
-
-          }else
-            QSamp = QLabFrame;
-
-          if( sample().hasOrientedLattice())
-          {
-
-              const Geometry::OrientedLattice & lat =(sample().getOrientedLattice());
-
-              const Kernel::Matrix<double> &UB0 = lat.getUB();
-              Kernel::Matrix<double> UB ( UB0);
-              UB.Invert();
-              V3D hkl = UB*QSamp/2/M_PI;
-
-              std::pair< std::string,std::string > HKL("HKL", boost::lexical_cast<std::string>(hkl));
-              Result.push_back( HKL );
-
-          }
-
-          //------- Now get phi, chi and omega ----------------
-          Geometry::Goniometer Gon( GonR);
-          std::vector<double>OmegaChiPhi= Gon.getEulerAngles("YZY");
-          Kernel::V3D PhiChiOmega( OmegaChiPhi[2],OmegaChiPhi[1],OmegaChiPhi[0]);
-
-          std::pair< std::string,std::string > GRead( "Goniometer Angles",boost::lexical_cast<std::string>(PhiChiOmega));
-          Result.push_back( GRead );
 
         }
 
-        std::pair< std::string,std::string > SeqNum( "Sequence Num",boost::lexical_cast<std::string>(seqNum));
-        Result.push_back( SeqNum );
+        //------- Now get phi, chi and omega ----------------
+        Geometry::Goniometer GonG(Gon);
+        std::vector<double> OmegaChiPhi = GonG.getEulerAngles("YZY");
+        Kernel::V3D PhiChiOmega(OmegaChiPhi[2], OmegaChiPhi[1], OmegaChiPhi[0]);
 
-        std::pair< std::string,std::string > wl( "Wavelength", boost::lexical_cast<std::string>(peak->getWavelength()));
-        Result.push_back( wl );
+        std::pair<std::string, std::string> GRead("Goniometer Angles",
+            boost::lexical_cast<std::string>(PhiChiOmega));
+        Result.push_back(GRead);
 
-        if( peak->findDetector())
+        std::pair<std::string, std::string> SeqNum("Sequence Num",
+            boost::lexical_cast<std::string>(seqNum));
+        Result.push_back(SeqNum);
+
+        std::pair<std::string, std::string> wl("Wavelength",
+            boost::lexical_cast<std::string>(peak->getWavelength()));
+        Result.push_back(wl);
+
+        if (peak->findDetector())
         {
-           V3D detPos = peak->getDetPos();
-           std::pair< std::string,std::string > detpos( "Position(x,y,z)", boost::lexical_cast<std::string>(peak->getDetPos()));
-           Result.push_back( detpos );
+          V3D detPos = peak->getDetPos();
+          std::pair<std::string, std::string> detpos("Position(x,y,z)",
+              boost::lexical_cast<std::string>(peak->getDetPos()));
+          Result.push_back(detpos);
 
+          std::pair<std::string, std::string> tof("TOF",
+              boost::lexical_cast<std::string>(peak->getTOF()));
+          Result.push_back(tof);
 
-           std::pair< std::string,std::string > tof( "TOF", boost::lexical_cast<std::string>(peak->getTOF()));
-           Result.push_back( tof );
+          std::pair<std::string, std::string> Energy("Energy",
+              boost::lexical_cast<std::string>(peak->getFinalEnergy()));
+          Result.push_back(Energy);
 
-           std::pair< std::string,std::string > Energy( "Energy", boost::lexical_cast<std::string>(peak->getFinalEnergy()));
-           Result.push_back( Energy );
+          std::pair<std::string, std::string> row("Row",
+              boost::lexical_cast<std::string>(peak->getRow()));
+          Result.push_back(row);
 
-           std::pair< std::string,std::string > row( "Row", boost::lexical_cast<std::string>(peak->getRow()));
-           Result.push_back( row );
+          std::pair<std::string, std::string> col("Col",
+              boost::lexical_cast<std::string>(peak->getCol()));
+          Result.push_back(col);
 
+          std::pair<std::string, std::string> bank("Bank", peak->getBankName());
+          Result.push_back(bank);
 
-           std::pair< std::string,std::string > col( "Col", boost::lexical_cast<std::string>(peak->getCol()));
-           Result.push_back( col );
-
-
-           std::pair< std::string,std::string > bank( "Bank",peak->getBankName() );
-           Result.push_back( bank );
-
-           std::pair< std::string,std::string > scat( "Scattering Angle",boost::lexical_cast<std::string>(peak->getScattering() ));
-           Result.push_back( scat );
-
-
-
+          std::pair<std::string, std::string> scat("Scattering Angle",
+              boost::lexical_cast<std::string>(peak->getScattering()));
+          Result.push_back(scat);
 
         }
 
-
-
-
-      }catch(...)//Impossible position
+      } catch (...)    //Impossible position
       {
 
       }
       return Result;
     }
+
+
     //---------------------------------------------------------------------------------------------
     /** Return a reference to the Peaks vector */
     std::vector<Peak> & PeaksWorkspace::getPeaks()

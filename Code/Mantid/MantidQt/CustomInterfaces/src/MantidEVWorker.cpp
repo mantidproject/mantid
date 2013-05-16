@@ -858,13 +858,24 @@ bool MantidEVWorker::showUB( const std::string & peaks_ws_name )
 }
 
 
+/**
+ * Get information about a specified Q-position from the specified peaks
+ * workspace.
+ *
+ * @param  peaks_ws_name   The name of the peaks workspace
+ * @param  lab_coords      This will be true if the Q-vector is
+ *                         in lab coordinates and will be false if
+ *                         it is in sample coordinates.
+ * @param  Q               The Q-vector.
+ */
 std::vector< std::pair<std::string,std::string> >MantidEVWorker::PointInfo( const std::string & peaks_ws_name,
+                                                                                  bool          lab_coords,
                                                                             Mantid::Kernel::V3D Q)
 {
   const auto& ADS = AnalysisDataService::Instance();
   Mantid::DataObjects::PeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<Mantid::DataObjects::PeaksWorkspace>(peaks_ws_name);
 
-  return peaks_ws->PeakInfo( Q ); 
+  return peaks_ws->PeakInfo( Q , lab_coords); 
 }
 
 } // namespace CustomInterfaces

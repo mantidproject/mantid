@@ -12,8 +12,7 @@
 #include "ui_MantidEV.h"
 #include "MantidEVWorker.h"
 #include "MantidQtAPI/UserSubWindow.h"
-
-#include "MantidAPI/SelectionNotificationService.h"
+#include "MantidQtAPI/SelectionNotificationService.h"
 
 namespace MantidQt
 {
@@ -192,6 +191,9 @@ public:
   /// The name of the interface as registered into the factory
   static std::string name() { return "SCD Event Data Reduction"; }
 
+public slots:
+  /// Slot for Q-Point selection notification
+  void QPointSelection_slot( bool, double, double, double );
 
 private slots:
 
@@ -303,13 +305,8 @@ private slots:
   /// Slot to enable/disable the ellipse size options controls
   void setEnabledEllipseSizeOptions_slot();
 
-  /// Methods to handle pointed at message from any source
-  void handleQpointNotification(const Poco::AutoPtr<Mantid::API::SelectionNotificationServiceImpl::AddNotification> & message );
-
-  void handleQpointNotification1(const Poco::AutoPtr<Mantid::API::SelectionNotificationServiceImpl::AfterReplaceNotification> & message );
-
   /// Method to get and display info about the specified Q-vector
-  void showInfo( Mantid::Kernel::V3D  q_point );
+  void showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point );
 
 private:
   /// super class pure virtual method we MUST implement
@@ -375,9 +372,6 @@ private:
   QThreadPool  *m_thread_pool; /// local thread pool with only one thread to 
                                /// allow running precisely one operation 
                                /// at a time in a separate thread.
-
- Poco::NObserver<MantidEV, Mantid::API::SelectionNotificationServiceImpl::AddNotification> observer;
- Poco::NObserver<MantidEV, Mantid::API::SelectionNotificationServiceImpl::AfterReplaceNotification> observer1;
 
 };
 
