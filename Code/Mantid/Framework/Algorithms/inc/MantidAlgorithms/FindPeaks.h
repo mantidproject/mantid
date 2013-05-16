@@ -52,6 +52,32 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+
+class PeakFittingRecord
+{
+public:
+  /// Constructor
+  PeakFittingRecord();
+  /// Destructor
+  ~PeakFittingRecord();
+  /// Set parameters
+  void set(double chi2, const std::map<std::string, double>& peakparammap, const std::map<std::string, double>&  bkgdparammap);
+  /// Get chi-square
+  double getChiSquare() { return m_goodness; }
+  /// Get peak parameters
+  std::map<std::string, double> getPeakParameters() { return m_peakParameterMap;}
+  /// Get background parameters
+  std::map<std::string, double> getBackgroundParameters() { return m_bkgdParameterMap; }
+
+private:
+  /// chi-square
+  double m_goodness;
+  /// parameter value
+  std::map<std::string, double> m_peakParameterMap;
+  /// parameter value
+  std::map<std::string, double> m_bkgdParameterMap;
+};
+
 class DLLExport FindPeaks : public API::Algorithm
 {
 public:
@@ -89,7 +115,7 @@ private:
 
   void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& iright, const int& ileft, const int& icentre,
       const unsigned int& i_min, const unsigned int& i_max,
-      const double& in_bg0, const double& in_bg1, const double& in_bg2);
+      double &in_bg0, double &in_bg1, double &in_bg2);
 
   void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
       const double& in_bg0, const double& in_bg1, const double& in_bg2);
@@ -97,24 +123,58 @@ private:
   void addInfoRow(const int spectrum, const std::vector<double> &params, const std::vector<double> &paramsRaw, const double mincost, bool error);
   void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestEffparams, std::vector<double> &bestRawparams, double &mincost, const double expPeakPos, const double expPeakHeight);
 
-  std::string createTies(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak);
   API::IFunction_sptr createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak = true);
   int getBackgroundOrder();
+  /// Create a background function
+  API::IFunction_sptr createBackgroundFunction(const double a0, const double a1, const double a2);
 
   /// Fit background functions
-  void fitBackground(const MantidVec &X, const MantidVec &Y,
-                         const MantidVec &E, size_t ileft, size_t iright,
-                         size_t imin, size_t imax, double in_bg0, double in_bg1, double in_bg2);
+  bool fitBackground(const MantidVec& X, const MantidVec& Y, const MantidVec& E,
+                     size_t ileft, size_t iright, size_t imin, size_t imax,
+                     double &chi2);
 
   /// Fit a single peak with background fixed
-  void fitPeakBackgroundFunction(API::MatrixWorkspace_sptr peakws, size_t wsindex, API::IFunction_sptr peakfunc, double in_sigma, double in_height);
+  double fitPeakBackgroundFunction(API::IFunction_sptr peakbgkgdfunc, API::MatrixWorkspace_sptr dataws, size_t wsindex, double startx, double endx, std::string constraint, double &init_rwp);
 
   /// Get function parameters from a function to a map
-  std::map<std::string, double> getParameters(API::IFunction_sptr func);
+  std::map<std::string, double> getFunctionParameters(API::IFunction_sptr func);
 
   /// Set parameters to a peak function
   void setParameters(API::IFunction_sptr peak, double height, double centre, double sigma, double centre_lowerbound, double centre_upperbound);
 
+  /// Fit peak with multiple iterations
+  PeakFittingRecord multiFitPeakBackground(API::MatrixWorkspace_sptr purepeakws, int purepeakindex,
+                                   API::MatrixWorkspace_sptr dataws, int datawsindex,
+                                   API::IPeakFunction_sptr peak,
+                                   double in_centre, double in_height, std::vector<double> in_sigmas,
+                                   double peakleftboundary, double peakrightboundary);
+
+  /// Set parameters values to a peak function
+  void setFunctionParameterValue(API::IFunction_sptr function, std::map<std::string, double> parvalues);
+
+  /// Set boundary/contraint on peak's centre
+  std::string makePeakCentreConstraint(API::IFunction_sptr peak, double peakleftboundary, double peakrightboundary, bool composite);
+
+  void estimateLinearBackground(const MantidVec& X, const MantidVec& Y, const unsigned i_min, const unsigned i_max,
+                                double& out_bg0, double& out_bg1, double& out_bg2);
+
+  bool estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
+                              size_t i_min, size_t i_max, double& centre, double& height, double& fwhm);
+
+  /// Calulate a function with given data range, and its goodness of fit, Rwp.
+  double calculateFunctionRwp(API::IFunction_sptr function, API::MatrixWorkspace_sptr dataws,
+                              size_t wsindex, double startx, double endx);
+
+  ///
+  API::MatrixWorkspace_sptr createOutputDataWorkspace();
+
+  /// Compare 2 fit results and record the better one
+  void processFitResult(PeakFittingRecord& r1, PeakFittingRecord& r2, API::IPeakFunction_sptr peak, API::IFunction_sptr bkgdfunc, int spectrum, unsigned int ileft, unsigned int iright);
+
+  /// Get best result from a set of fitting result
+  int getBestResult(std::vector<double> vecRwp);
+
+  void addFittedFunction(API::IFunction_sptr fitfunction, unsigned int ileft, unsigned int iright);
 
   /// The number of smoothing iterations. Set to 5, the optimum value according to Mariscotti.
   static const int g_z = 5;
@@ -154,6 +214,10 @@ private:
 
   bool m_usePeakHeightTolerance;
   double m_peakHeightTolerance;
+
+  std::vector<API::IFunction_sptr> m_fitFunctions;
+  std::vector<unsigned int> m_peakLeftIndexes;
+  std::vector<unsigned int> m_peakRightIndexes;
 
 };
 
