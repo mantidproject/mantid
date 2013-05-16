@@ -43,7 +43,16 @@ public:
      loadPeaks.setPropertyValue("OutputWorkspace","abc");
      loadPeaks.execute();
      loadPeaks.setPropertyValue("OutputWorkspace","abc");
-     PeaksWorkspace_sptr Peak5637= loadPeaks.getProperty("OutputWorkspace");
+     //Needed for ticket #6469
+     try
+     {
+		 API::Workspace_sptr ows=loadPeaks.getProperty("OutputWorkspace");
+		 PeaksWorkspace_sptr Peak5637 = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
+     }
+     catch (...)
+     {
+    	 PeaksWorkspace_sptr Peak5637= loadPeaks.getProperty("OutputWorkspace");
+     }
 
      LoadIsawPeaks loadPeaks2;
      loadPeaks2.initialize();
@@ -51,7 +60,16 @@ public:
      loadPeaks2.setPropertyValue("OutputWorkspace","def");
      loadPeaks2.execute();
      loadPeaks2.setPropertyValue("OutputWorkspace","def");
-     PeaksWorkspace_sptr Peak5643= loadPeaks.getProperty("OutputWorkspace");
+     //Needed for ticket #6469
+     try
+     {
+    	 API::Workspace_sptr ows=loadPeaks2.getProperty("OutputWorkspace");
+		 PeaksWorkspace_sptr Peak5643 = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
+     }
+     catch (...)
+     {
+    	 PeaksWorkspace_sptr Peak5643= loadPeaks.getProperty("OutputWorkspace");
+     }
 
      GoniometerAnglesFromPhiRotation Gonr;
      //boost::shared_ptr<Algorithm> GonRot =Mantid::API::AlgorithmFactory::Instance().create("GoniometerAnglesFromPhiRotation");
