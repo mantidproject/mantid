@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   LoadFullprofFileTest.py
   MaskWorkspaceToCalFileTest.py
   RetrieveRunInfoTest.py
+  RunPythonScriptTest.py
   Stitch1DTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
