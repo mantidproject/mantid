@@ -88,17 +88,17 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
             imgpath = os.path.join(HTML_DIR, IMG, imagefile)
             destname = os.path.join(outputdir, IMG, imagefile)
             urllib.urlretrieve(fileurl, filename=destname)   
+            
             # Now link to image
+            sourcepath = "%s/%s" % (IMG, imagefile)
+    
+            htmlfile.openTag("img", {"src": sourcepath, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400", "align":"right"})
+            htmlfile.closeTag(True)
+            if imgpath != "":
+                qhp.addFile(imgpath)
             
         except IOError:
             pass    
-    
-    sourcepath = "%s/%s" % (IMG, imagefile)
-    
-    htmlfile.openTag("img", {"src": sourcepath, "style":"position:relative; z-index:1000; padding-left:5px;", "width":"400", "align":"right"})
-    htmlfile.closeTag(True)
-    if imgpath != "":
-        qhp.addFile(imgpath)
     
     num_versions = len(versions)
     for version in versions:
