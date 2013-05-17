@@ -8,14 +8,11 @@ from mantid.api import AnalysisDataService
 import os
 
 class LoadLogPropertyTableTest(unittest.TestCase):
-    _autotestDir=None
-    def setUp(self):
-        self._autotestDir="../../../Test/AutoTestData/"
     def test_LoadValidFilesComments(self):
         outputWorskapceName = "LoadLogPropertyTableTest_Test1"
         
-        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = self._autotestDir + "MUSR00015189.nxs", 
-                LastFile = self._autotestDir + "MUSR00015194.nxs", LogNames="comment", OutputWorkspace = outputWorskapceName)
+        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "MUSR00015189.nxs", 
+                LastFile = "MUSR00015194.nxs", LogNames="comment", OutputWorkspace = outputWorskapceName)
 
         self.assertTrue(alg_test.isExecuted())
 
@@ -35,8 +32,8 @@ class LoadLogPropertyTableTest(unittest.TestCase):
     def test_LoadPartiallyValidFilesMultipleLogValues(self):
         outputWorskapceName = "LoadLogPropertyTableTest_Test2"
         
-        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = self._autotestDir + "emu00006473.nxs", 
-                LastFile = self._autotestDir + "emu00006475.nxs", LogNames="Temp_Sample,dur", OutputWorkspace = outputWorskapceName)
+        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu00006473.nxs", 
+                LastFile = "emu00006475.nxs", LogNames="Temp_Sample,dur", OutputWorkspace = outputWorskapceName)
 
         self.assertTrue(alg_test.isExecuted())
 
@@ -59,8 +56,8 @@ class LoadLogPropertyTableTest(unittest.TestCase):
     def test_LoadValidFilesBlankLog(self):
         outputWorskapceName = "LoadLogPropertyTableTest_Test3"
         
-        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = self._autotestDir + "MUSR00015189.nxs", 
-                LastFile = self._autotestDir + "MUSR00015194.nxs", OutputWorkspace = outputWorskapceName)
+        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "MUSR00015189.nxs", 
+                LastFile = "MUSR00015194.nxs", OutputWorkspace = outputWorskapceName)
 
         self.assertTrue(alg_test.isExecuted())
 
@@ -80,15 +77,15 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         outputWorskapceName = "LoadLogPropertyTableTest_Test4"
         
         #invalid log name
-        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = self._autotestDir + "emu00006473.nxs", 
-                LastFile = self._autotestDir + "emu00006475.nxs", LogNames="WrongTemp", OutputWorkspace = outputWorskapceName)
+        alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu00006473.nxs", 
+                LastFile = "emu00006475.nxs", LogNames="WrongTemp", OutputWorkspace = outputWorskapceName)
         self.assertFalse(alg_test.isExecuted())
         
         #invalid first file
         ExecptionThrownOnBadFileParameter = False
         try:
-            alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = self._autotestDir + "emu0000000.nxs", 
-                LastFile = self._autotestDir + "emu00006475.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName)
+            alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu0000000.nxs", 
+                LastFile = "emu00006475.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName)
             self.assertFalse(alg_test.isExecuted())
         except:
             ExecptionThrownOnBadFileParameter = True
@@ -97,8 +94,8 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         #invalid last file
         ExecptionThrownOnBadFileParameter = False
         try:
-            alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = self._autotestDir + "emu00006473.nxs", 
-                LastFile = self._autotestDir + "emu9999999.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName)
+            alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = "emu00006473.nxs", 
+                LastFile = "emu9999999.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName)
             self.assertFalse(alg_test.isExecuted())
         except:
             ExecptionThrownOnBadFileParameter = True
