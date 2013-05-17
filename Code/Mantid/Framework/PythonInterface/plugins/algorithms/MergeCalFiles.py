@@ -4,7 +4,8 @@ Combines the data contained in two cal files, based on the selections offsets, s
 
 *WIKI*"""
 
-from MantidFramework import *
+from mantid.api import *
+from mantid.kernel import *
 
 class MergeCalFiles(PythonAlgorithm):
 
@@ -17,25 +18,28 @@ class MergeCalFiles(PythonAlgorithm):
 
   def PyInit(self):
     self.setWikiSummary("Combines the data from two [[CalFile| Cal Files]].")
-    self.declareFileProperty("UpdateFile","", FileAction.Load, ['cal'],Description="The cal file containing the updates to merge into another file.")
-    self.declareFileProperty("MasterFile","", FileAction.Load, ['cal'],Description="The master file to be altered, the file must be sorted by UDET")
-    self.declareFileProperty("OutputFile","", FileAction.Save, ['cal'],Description="The file to contain the results")
+    self.declareProperty(FileProperty("UpdateFile","", FileAction.Load, ['cal']), doc="The cal file containing the updates to merge into another file.")
+    self.declareProperty(FileProperty("MasterFile","", FileAction.Load, ['cal']), doc="The master file to be altered, the file must be sorted by UDET")
+    self.declareProperty(FileProperty("OutputFile","", FileAction.Save, ['cal']), doc="The file to contain the results")
 	
-    self.declareProperty("MergeOffsets", False, Description="If True, the offsets from file1 will be merged to the master file. Default: False")
-    self.declareProperty("MergeSelections", False, Description="If True, the selections from file1 will be merged to the master file. Default: False")
-    self.declareProperty("MergeGroups", False, Description="If True, the Groups from file1 will be merged to the master file. Default: False")
+    self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged to the master file. Default: False")
+    self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged to the master file. Default: False")
+    self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to the master file. Default: False")
         
   def PyExec(self):
     #extract settings
-    mergeOffsets = self.getProperty("MergeOffsets")
-    mergeSelections = self.getProperty("MergeSelections")
-    mergeGroups = self.getProperty("MergeGroups")
-    updateFileName = self.getProperty("UpdateFile")
-    masterFileName = self.getProperty("MasterFile")
-    outputFileName = self.getProperty("OutputFile")
+    mergeOffsets = self.getProperty("MergeOffsets").value
+    mergeSelections = self.getProperty("MergeSelections").value
+    mergeGroups = self.getProperty("MergeGroups").value
+    updateFileName = self.getPropertyValue("UpdateFile")
+    masterFileName = self.getPropertyValue("MasterFile")
+    outputFileName = self.getPropertyValue("OutputFile")
+    
+    logger.information("INFO")
+    logger.information(str(mergeOffsets))
+    logger.information(str(mergeSelections))
+    logger.information(str(mergeGroups))
 	
-    if (mergeOffsets == False) and (mergeSelections == False) and (mergeGroups == False):
-       raise RuntimeError('Nothing set to merge, please set one of the properties to merge, otherwise I have nothing to do')
     if (masterFileName == outputFileName) :
        raise RuntimeError('The output file must be different to the master file.')
 	
@@ -137,5 +141,4 @@ class MergeCalFiles(PythonAlgorithm):
     return line
 	
 #############################################################################################
-
-mtd.registerPyAlgorithm(MergeCalFiles())
+AlgorithmFactory.subscribe(MergeCalFiles())
