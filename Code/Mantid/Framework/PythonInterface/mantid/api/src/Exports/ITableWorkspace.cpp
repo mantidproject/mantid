@@ -110,7 +110,7 @@ namespace
   bool addColumn(ITableWorkspace &self, const std::string& type, const std::string& name)
   {
     // The shared pointer will be converted to a boolean automatically
-    return self.addColumn(type,name);
+    return self.addColumn(type,name)!=0;
   }
 
   /**

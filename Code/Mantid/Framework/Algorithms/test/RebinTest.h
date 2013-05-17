@@ -214,7 +214,7 @@ public:
 
     MatrixWorkspace_sptr outWS;
     EventWorkspace_sptr eventOutWS;
-    TS_ASSERT_THROWS_NOTHING( outWS = boost::shared_dynamic_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve(outName) ));
+    TS_ASSERT_THROWS_NOTHING( outWS = boost::dynamic_pointer_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve(outName) ));
     TS_ASSERT( outWS );
     if (!outWS) return;
 
@@ -341,7 +341,7 @@ public:
 
     TS_ASSERT( reb->isExecuted() );
 
-    MatrixWorkspace_sptr outWS = boost::shared_dynamic_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve("test_RebinPointDataOutput") );
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve("test_RebinPointDataOutput") );
 
     TS_ASSERT(! outWS->isHistogramData() );
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1 );

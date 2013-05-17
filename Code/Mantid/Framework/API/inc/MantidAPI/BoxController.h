@@ -353,7 +353,7 @@ namespace API
     // { return m_useWriteBuffer; }
     /// Returns if current box controller is file backed. Assumes that BC(workspace) is fileBackd if fileIO is defined;
      bool isFileBacked()const
-     {return m_fileIO;}
+     {return (m_fileIO!=0);}
      /// returns the pointer to the class, responsible for fileIO operations;
      IBoxControllerIO * getFileIO()
      {return m_fileIO.get();}

@@ -182,8 +182,8 @@ namespace Algorithms
       // Get all the workspaces which are to be inspected for log proeprties.
       for( auto wsName = wsNames.begin(); wsName != wsNames.end(); ++wsName )
       {
-        WorkspaceGroup_sptr wsGroup = boost::shared_dynamic_cast<WorkspaceGroup>( AnalysisDataService::Instance().retrieve(*wsName) );
-        MatrixWorkspace_sptr matrixWs = boost::shared_dynamic_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve(*wsName) );
+        WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>( AnalysisDataService::Instance().retrieve(*wsName) );
+        MatrixWorkspace_sptr matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve(*wsName) );
 
         if( wsGroup )
         {
