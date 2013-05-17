@@ -1,25 +1,38 @@
 import unittest
-from mantid.kernel import FloatFilteredTimeSeriesProperty
-import testhelpers
+from mantid.kernel import BoolTimeSeriesProperty, FloatTimeSeriesProperty, FloatFilteredTimeSeriesProperty
 
 class FilteredTimeSeriesPropertyTest(unittest.TestCase):
 
-    _test_ws = None
+    _source = None
+    _filter = None
 
     def setUp(self):
-        if self.__class__._test_ws is None:
-            alg = testhelpers.run_algorithm("LoadRaw", Filename="CSP78173.raw", OutputWorkspace='test', child=True)
-            self.__class__._test_ws = alg.getProperty("OutputWorkspace_7").value
+        if self.__class__._source is not None:
+            return
+        height = FloatTimeSeriesProperty("height")
+        height.addValue("2007-11-30T16:17:00",1)
+        height.addValue("2007-11-30T16:17:10",2)
+        height.addValue("2007-11-30T16:17:20",3)
+        height.addValue("2007-11-30T16:17:30",4)
+        height.addValue("2007-11-30T16:17:40",5)
+  
+        filter = BoolTimeSeriesProperty("filter")
+        filter.addValue("2007-11-30T16:16:50",False)
+        filter.addValue("2007-11-30T16:17:25",True)
+        filter.addValue("2007-11-30T16:17:39",False)
+        
+        self.__class__._source = height
+        self.__class__._filter = filter
 
-    def test_filtered_property_gives_back_correct_unfiltered_one(self):
-        run_info = self._test_ws.getRun()
-        height_log = run_info.getLogData("height")
+    def test_constructor_filters_source_series(self):
+        filtered = FloatFilteredTimeSeriesProperty(self._source, self._filter,False)
+        self.assertEquals(filtered.size(), 2)
         
-        self.assertTrue(isinstance(height_log, FloatFilteredTimeSeriesProperty))
-        self.assertEquals(height_log.size(), 6)
+    def test_unfiltered_returns_source_property(self):
+        filtered = FloatFilteredTimeSeriesProperty(self._source, self._filter,False)
+        unfiltered = filtered.unfiltered()
         
-        unfiltered_height = height_log.unfiltered()
-        self.assertEquals(unfiltered_height.size(), 6)
-        
+        self.assertEquals(self._source.size(),unfiltered.size())
+
 if __name__ == '__main__':
     unittest.main()
