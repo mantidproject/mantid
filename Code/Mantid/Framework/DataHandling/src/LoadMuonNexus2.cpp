@@ -52,7 +52,6 @@ Version 1 supports the loading version 1.0 of the muon nexus format.  This is st
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -176,9 +175,8 @@ namespace Mantid
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
-      // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
+      // If multiperiod, will need to hold the Instrument & Sample for copying
       boost::shared_ptr<Instrument> instrument;
-      //-      boost::shared_ptr<SpectraDetectorMap> specMap;
       boost::shared_ptr<Sample> sample;
 
       std::string detectorName;
@@ -291,7 +289,6 @@ namespace Mantid
           // Only run the Child Algorithms once
           loadRunDetails(localWorkspace);
           runLoadInstrument(localWorkspace );
-          localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spectrum_index(),spectrum_index(),m_numberOfSpectra));
           loadLogs(localWorkspace, entry, period);
         }
         else   // We are working on a higher period of a multiperiod raw file
