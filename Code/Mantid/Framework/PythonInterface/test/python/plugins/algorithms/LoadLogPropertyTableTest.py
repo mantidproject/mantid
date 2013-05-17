@@ -43,10 +43,10 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         self.assertEqual(3, tablews.columnCount())
         
         self.assertEqual(6473, tablews.cell(0,0))
-        self.assertAlmostEqual(200.078, tablews.cell(0,1),3)
+        self.assertAlmostEqual(200.078, tablews.cell(0,1),2)
         self.assertEqual("8697", tablews.cell(0,2))
         self.assertEqual(6475, tablews.cell(1,0))
-        self.assertAlmostEqual(283.523, tablews.cell(1,1),3)
+        self.assertAlmostEqual(283.523, tablews.cell(1,1),2)
         self.assertEqual("5647", tablews.cell(1,2))
 
         run_algorithm("DeleteWorkspace", Workspace = outputWorskapceName)
