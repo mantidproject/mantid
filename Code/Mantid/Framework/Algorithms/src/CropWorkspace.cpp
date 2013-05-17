@@ -321,12 +321,8 @@ void CropWorkspace::execEvent()
     }
     outEL.setSortOrder(el.getSortType());
 
-    std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
-    std::set<detid_t>::iterator k;
-    for (k = dets.begin(); k != dets.end(); ++k)
-    {
-      outEL.addDetectorID(*k);
-    }
+    outEL.setDetectorIDs(eventW->getEventList(i).getDetectorIDs());
+
     // Spectrum number
     ISpectrum * inSpec = m_inputWorkspace->getSpectrum(i);
     ISpectrum * outSpec = outputWorkspace->getSpectrum(j);
