@@ -29,6 +29,7 @@ NOTE: The instrument used is determined by reading the 'Instrument:' and 'Date:'
 #include <stdlib.h>
 #include <string>
 #include "MantidKernel/Unit.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 
 using Mantid::Kernel::Strings::readToEndOfLine;
 using Mantid::Kernel::Strings::getWord;
@@ -41,12 +42,12 @@ namespace Crystal
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(LoadIsawPeaks)
+  DECLARE_LOADALGORITHM(LoadIsawPeaks)
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
   using namespace Mantid::Geometry;
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -70,6 +71,71 @@ namespace Crystal
     this->setWikiSummary("Load an ISAW-style .peaks file into a [[PeaksWorkspace]].");
     this->setOptionalMessage("Load an ISAW-style .peaks file into a PeaksWorkspace.");
    }
+  //----------------------------------------------------------------------------------------------
+
+ /// @copydoc Mantid::API::IDataFileChecker::quickFileCheck
+  bool LoadIsawPeaks::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
+  {
+    UNUSED_ARG(nread);
+    UNUSED_ARG(header);
+
+    std::string ext = this->extension(filePath);
+    // If the extension is peaks or integrate then give it a go
+    if( ext.compare("peaks") == 0 ) return true;
+    else if( ext.compare("integrate") == 0 ) return true;
+    else return false;
+  }
+
+  /// @copydoc Mantid::API::IDataFileChecker::fileCheck
+  int LoadIsawPeaks::fileCheck(const std::string& filePath)
+  {
+      int confidence(0);
+      try
+      {
+	    // Open the file
+	    std::ifstream in( filePath.c_str() );
+	    // Read the header, load the instrument
+	    std::string tag;
+	    std::string r = getWord( in ,  false );
+
+	    if( r.length() < 1 )
+	      throw std::logic_error( std::string( "No first line of Peaks file" ) );
+
+	    if( r.compare( std::string( "Version:" ) ) != 0 )
+	      throw std::logic_error(
+	          std::string( "No Version: on first line of Peaks file" ) );
+
+	    std::string C_version = getWord( in ,  false );
+	    if( C_version.length() < 1 )
+	      throw  std::logic_error( std::string( "No Version for Peaks file" ) );
+
+	    getWord( in ,  false ); //tag
+	    // cppcheck-suppress unreadVariable
+	    std::string C_Facility = getWord( in ,  false );
+
+	    getWord( in ,  false ); //tag
+	    std::string C_Instrument = getWord( in ,  false );
+
+	    if( C_Instrument.length() < 1 )
+	      throw std::logic_error(
+	          std::string( "No Instrument for Peaks file" ) );
+
+	    // Date: use the current date/time if not found
+	    Kernel::DateAndTime C_experimentDate;
+	    std::string date;
+	    tag = getWord( in ,  false );
+	    if(tag.empty())
+	      date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
+	    else if(tag == "Date:")
+	      date = getWord( in ,  false );
+	    readToEndOfLine( in ,  true );
+	    confidence = 95;
+      }
+      catch (std::exception & )
+      {
+      }
+      return confidence;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -82,7 +148,7 @@ namespace Crystal
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "Path to an ISAW-style .peaks filename.");
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output workspace.");
+    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "Name of the output workspace.");
   }
 
 
@@ -539,7 +605,7 @@ namespace Crystal
     this->appendFile( ws, getPropertyValue("Filename") );
 
     // Save it in the output
-    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
   }
 
 

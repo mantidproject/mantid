@@ -37,6 +37,12 @@ class OptimizeCrystalPlacementTest: public CxxTest::TestSuite
 {
 
 public:
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static OptimizeCrystalPlacementTest *createSuite() { return new OptimizeCrystalPlacementTest(); }
+  static void destroySuite( OptimizeCrystalPlacementTest *suite ) { delete suite; }
+
   OptimizeCrystalPlacementTest()
   {
     LoadIsawPeaks alg;
@@ -46,7 +52,8 @@ public:
     alg.execute();
 
     alg.setProperty("OutputWorkspace", "abcd");
-    peaks = alg.getProperty("OutputWorkspace");
+    API::Workspace_sptr ows=alg.getProperty("OutputWorkspace");
+    peaks = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
 
     LoadIsawUB loadUB;
     loadUB.initialize();

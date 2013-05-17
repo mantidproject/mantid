@@ -77,6 +77,10 @@ namespace Mantid
         bool is_ascii (true);
         if( filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0)
         	is_ascii =false;
+        else if( filePath.compare(filePath.size()-6,6,".peaks") == 0)
+        	is_ascii =false;
+        else if( filePath.compare(filePath.size()-10,10,".integrate") == 0)
+        	is_ascii =false;
         for(size_t i=0; i<nread; i++)
         {
           if (!isascii(header.full_hdr[i]))
@@ -106,7 +110,16 @@ namespace Mantid
         fclose(file);
         return confidence;
       }
-
+      else if( filePath.compare(filePath.size()-6,6,".peaks") == 0)
+      {
+        fclose(file);
+        return confidence;
+      }
+      else if( filePath.compare(filePath.size()-10,10,".integrate") == 0)
+      {
+        fclose(file);
+        return confidence;
+      }
       if (isAscii(file))
       {
         confidence = 10; //Lower because should load other files first

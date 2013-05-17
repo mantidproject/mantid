@@ -65,7 +65,8 @@ public:
         alg.setProperty("OutputWorkspace","abcd");
         alg.execute();
         alg.setProperty("OutputWorkspace","abcd");
-        DataObjects::PeaksWorkspace_sptr peaks =alg.getProperty("OutputWorkspace");
+        API::Workspace_sptr ows=alg.getProperty("OutputWorkspace");
+        DataObjects::PeaksWorkspace_sptr peaks = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
         //std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<std::endl;
 
         LoadIsawUB loadUB;
