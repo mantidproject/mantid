@@ -132,8 +132,9 @@ namespace Crystal
 
     std::vector<V3D>  q_vectors;
     q_vectors.reserve( n_peaks );
-    for ( size_t i = 0; i < n_peaks; i++ )
-      q_vectors.push_back( peaks[i].getQSampleFrame() );
+
+      for (size_t i = 0; i < n_peaks; i++)
+        q_vectors.push_back(peaks[i].getQSampleFrame());
 
     Matrix<double> UB(3,3,false);
     double error = IndexingUtils::Find_UB( UB, q_vectors, 
@@ -154,34 +155,58 @@ namespace Crystal
          "UB NOT SAVED.") );
     }
     else                                 // tell user how many would be indexed
-    {                                    // and save the UB in the sample 
-      char logInfo[200];
-      int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
-      sprintf( logInfo,
-               std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(),
-               num_indexed, n_peaks, tolerance);
-      g_log.notice( std::string(logInfo) );
+      {                                    // and save the UB in the sample
 
-      OrientedLattice o_lattice;
-      o_lattice.setUB( UB );
-      double calc_a = o_lattice.a();
-      double calc_b = o_lattice.b();
-      double calc_c = o_lattice.c();
-      double calc_alpha = o_lattice.alpha();
-      double calc_beta  = o_lattice.beta();
-      double calc_gamma = o_lattice.gamma();
-                                        // Show the modified lattice parameters
-      sprintf( logInfo, 
-               std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
-               calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
-      g_log.notice( std::string(logInfo) );
-      sprintf( logInfo, 
-               std::string("Lattice Parameters (Refined - Input): %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
-               calc_a-a, calc_b-b, calc_c-c, calc_alpha-alpha, calc_beta-beta, calc_gamma-gamma);
-      g_log.notice( std::string(logInfo) );
+        std::vector<double> sigabc(7);
+        std::vector<V3D> miller_ind;
+        std::vector<V3D> indexed_qs;
+        double fit_error;
+        miller_ind.reserve( q_vectors.size() );
+        indexed_qs.reserve( q_vectors.size() );
+        IndexingUtils::GetIndexedPeaks( UB, q_vectors, tolerance,
+                               miller_ind, indexed_qs, fit_error );
 
-      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
-    }
+        IndexingUtils::Optimize_UB(UB, miller_ind,indexed_qs,sigabc);
+
+        char logInfo[200];
+        int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
+        sprintf(logInfo,
+            std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(),
+            num_indexed, n_peaks, tolerance);
+        g_log.notice(std::string(logInfo));
+
+        OrientedLattice o_lattice;
+        o_lattice.setUB(UB);
+        o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
+
+        o_lattice.setUB(UB);
+        double calc_a = o_lattice.a();
+        double calc_b = o_lattice.b();
+        double calc_c = o_lattice.c();
+        double calc_alpha = o_lattice.alpha();
+        double calc_beta = o_lattice.beta();
+        double calc_gamma = o_lattice.gamma();
+        // Show the modified lattice parameters
+        sprintf(logInfo, std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+            calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
+        g_log.notice(std::string(logInfo));
+
+
+        g_log.notice()<<"Parameter Errors  :"<<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[0]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[1]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[2]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[3]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[4]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[5]
+                                              <<std::endl;
+
+        sprintf(logInfo,
+            std::string("Lattice Parameters (Refined - Input): %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+            calc_a - a, calc_b - b, calc_c - c, calc_alpha - alpha, calc_beta - beta,
+            calc_gamma - gamma);
+        g_log.notice(std::string(logInfo));
+        ws->mutableSample().setOrientedLattice(new OrientedLattice(o_lattice));
+      }
   }
 
 

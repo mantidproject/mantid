@@ -86,6 +86,11 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                double                     required_tolerance,
                                double                     degrees_per_step );
 
+  /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
+  static double Optimize_UB(      Kernel::DblMatrix         & UB,
+                                    const std::vector<Kernel::V3D>  & hkl_vectors,
+                                    const std::vector<Kernel::V3D>  & q_vectors ,
+                                    std::vector<double> & sigabc);
 
   /// Find the UB matrix that most nearly maps hkl to qxyz for 3 or more peaks
   static double Optimize_UB(      Kernel::DblMatrix         & UB,
