@@ -250,6 +250,21 @@ m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
 
 void ApplicationWindow::handleConfigDir()
 {
+#ifdef Q_OS_WIN
+  // We use the registry for settings on Windows
+  QSettings oldSettings("ISIS", "MantidPlot");
+  QStringList keys = oldSettings.allKeys();
+  // If the keys are empty, we removed the MantidPlot entries
+  if (!keys.empty())
+  {
+    foreach (QString key, keys)
+    {
+	    settings.setValue(key, oldSettings.value(key));
+    }
+    // This unfortunately cannot remove the top-level entry
+    oldSettings.remove("");
+  }
+#else
   QFileInfo curConfig(settings.fileName());
   QString oldPath = settings.fileName();
   oldPath.replace("Mantid", "ISIS");
@@ -281,6 +296,7 @@ void ApplicationWindow::handleConfigDir()
     }
     oldConfigDir.rmdir(oldConfig.path());
   }
+#endif
 }
 
 /**
