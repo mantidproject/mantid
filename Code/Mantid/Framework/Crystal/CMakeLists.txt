@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/OptimizeCrystalPlacement.cpp
 	src/OptimizeExtinctionParameters.cpp
 	src/PeakHKLErrors.cpp
+	src/ShowPeakHKLOffsets.cpp
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
 	src/PredictFractionalPeaks.cpp
@@ -75,6 +76,7 @@ set ( INC_FILES
 	inc/MantidCrystal/OptimizeCrystalPlacement.h
 	inc/MantidCrystal/OptimizeExtinctionParameters.h
 	inc/MantidCrystal/PeakHKLErrors.h
+	inc/MantidCrystal/ShowPeakHKLOffsets.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PredictFractionalPeaks.h
@@ -136,6 +138,7 @@ set ( TEST_FILES
 	SetGoniometerTest.h
 	SetSpecialCoordinatesTest.h
 	SetUBTest.h
+	ShowPeakHKLOffsetsTest.h
 	ShowPossibleCellsTest.h
 	SortHKLTest.h
 	SortPeaksWorkspaceTest.h
