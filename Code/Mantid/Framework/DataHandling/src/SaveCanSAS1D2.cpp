@@ -264,6 +264,29 @@ void SaveCanSAS1D2::createSASTransElement(std::string& sasTrans, const std::stri
   sasTrans += trans.str(); 
 }
 
+/** Write xml header tags including the root element and starting the SASentry
+ *  element, this overrides the method in SaveCanSAS1D
+ *  @param fileName :: the name of the file to write to
+ *  @throw FileError if the file can't be opened or writen to
+ */
+void SaveCanSAS1D2::writeHeader(const std::string & fileName)
+{
+  try
+  {
+    m_outFile.open(fileName.c_str(), std::ios::out | std::ios::trunc);
+    //write the file header
+    m_outFile << "<?xml version=\"1.0\"?>\n"
+        << "<?xml-stylesheet type=\"text/xsl\" href=\"cansas1d.xsl\" ?>\n";
+    std::string sasroot="";
+    createSASRootElement(sasroot);
+    m_outFile<<sasroot;
+  }  
+  catch (std::fstream::failure &)
+  {
+    throw Exception::FileError("Error opening the output file for writing", fileName);
+  }
+}
+
 }
 
 }
