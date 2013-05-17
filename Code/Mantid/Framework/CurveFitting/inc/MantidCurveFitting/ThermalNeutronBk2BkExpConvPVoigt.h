@@ -90,13 +90,11 @@ namespace CurveFitting
     /// Override setting a new value to a parameter by name
     void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
 
+    using IFunction1D::function;
     virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const;
 
     /// Function you want to fit to.
-    virtual void function1D(double* out, const double* xValues, const size_t nData)const
-    {
-      throw std::runtime_error("To Implement ASAP.");
-    };
+    virtual void function1D(double* out, const double* xValues, const size_t nData)const;
 
   private:
     //----- Overwrite IFunction ------------------------------------------------
@@ -106,8 +104,6 @@ namespace CurveFitting
     virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
     /// Derivative
     virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
-    /// Function local (vector version)
-    void functionLocal(vector<double> &out, const vector<double> &xValues) const;
 
     /// Overwrite IFunction base class method, which declare function parameters
     virtual void init();

@@ -79,7 +79,6 @@ namespace CurveFitting
 
     /// Function
     void setPeakHeights(std::vector<double> inheights);
-    API::IPowderDiffPeakFunction_sptr getPeak(size_t peakindex);
 
     void calPeaksParameters();
 
@@ -121,15 +120,15 @@ namespace CurveFitting
     /// Log
     static Kernel::Logger& g_log;
 
-    /*
-    virtual void function1D(double* out, const double* xValues, const size_t nData)const;
-    virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
-    virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
-    */
+    /// Get reference to a peak
+    API::IPowderDiffPeakFunction_sptr getPeak(size_t peakindex);
 
     /// Set peak parameters
     void setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,
                            double peakheight, bool setpeakheight);
+
+    /// Calculate all peaks' parameter value
+    void calculatePeakParameterValues() const;
 
     ///
 
@@ -151,8 +150,7 @@ namespace CurveFitting
 
     /// Number of peaks
     size_t m_numPeaks;
-    /// Vector of all peaks
-    vector<API::IPowderDiffPeakFunction_sptr> m_peakvec;
+
     /// Vector of pair <peak position in d-space, Peak> sortable
     vector<pair<double, API::IPowderDiffPeakFunction_sptr> > m_dspPeakVec;
     /// order of parameter names in m_peakParameterNameVec must be same as the order in IPowderDiffPeakFunction.
@@ -167,6 +165,9 @@ namespace CurveFitting
 
     /// Parameters
     map<string, double> m_functionParameters;
+
+    /// Has new peak values
+    mutable double m_hasNewPeakValue;
 
 
     /*
@@ -183,7 +184,8 @@ namespace CurveFitting
     mutable std::vector<double> heights;
     std::vector<std::vector<int> > m_peakHKLVec;
 
-    std::vector<API::IPowderDiffPeakFunction_sptr> m_peakVec;
+    /// Vector of all peaks
+    vector<API::IPowderDiffPeakFunction_sptr> m_peakvec;
 
     mutable std::vector<std::map<std::string, double> > mPeakParameters; // It is in strict order with dvalues;
 

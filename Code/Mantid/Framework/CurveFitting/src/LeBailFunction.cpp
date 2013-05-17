@@ -86,10 +86,44 @@ namespace CurveFitting
     */
   bool LeBailFunction::isParameterCorrect() const
   {
-    throw runtime_error("Implement LeBailFunction::isParameterCorrect ASASP!");
+    // Re-calculate peak parameter if there is some modification
+    if (m_hasNewPeakValue)
+    {
+      calculatePeakParameterValues();
+    }
 
-    return false;
+    // Check whether each peak has valid value
+    bool arevalid = true;
+    for (size_t i = 0; i < m_numPeaks; ++i)
+    {
+      IPowderDiffPeakFunction_sptr peak = m_peakvec[i];
+      bool isvalid = peak->isPhysical();
+      if (!isvalid)
+      {
+        arevalid = false;
+        break;
+      }
+    }
+
+    return arevalid;
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Calculate all peaks' parameter value
+    */
+  void LeBailFunction::calculatePeakParameterValues() const
+  {
+    for (size_t i = 0; i < m_numPeaks; ++i)
+    {
+      IPowderDiffPeakFunction_sptr peak = m_peakvec[i];
+      peak->calculateParameters(false);
+    }
+
+    m_hasNewPeakValue = false;
+
+    return;
+  }
+
 
 
   //----------------------------------------------------------------------------------------------
@@ -464,6 +498,8 @@ namespace CurveFitting
   void LeBailFunction::setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,
                                          double peakheight, bool setpeakheight)
   {
+    throw runtime_error("Requiring update flag: peak value changed and etc.");
+
     // FIXME - The best solution for speeding is to have a set of peak parameter listed in the order
     //         of peak function's parameters' indexed.  Then no need to do search anymore.
 
@@ -1010,15 +1046,20 @@ namespace CurveFitting
   }
 
 
+  //----------------------------------------------------------------------------------------------
+  /** Get the reference to a peak
+    */
   IPowderDiffPeakFunction_sptr LeBailFunction::getPeak(size_t peakindex)
   {
     if (peakindex >= m_numPeaks)
     {
-      g_log.error() << "Try to access peak " << peakindex << " out of range [0, " << m_peakVec.size() << ")." << std::endl;
-      throw std::invalid_argument("getPeak() out of boundary");
+      stringstream errmsg;
+      errmsg << "Try to access peak " << peakindex << " out of range [0, " << m_numPeaks << ").";
+      g_log.error(errmsg.str());
+      throw runtime_error(errmsg.str());
     }
 
-    IPowderDiffPeakFunction_sptr rpeak = m_peakVec[peakindex];
+    IPowderDiffPeakFunction_sptr rpeak = m_peakvec[peakindex];
 
     return rpeak;
   }
@@ -1050,18 +1091,19 @@ namespace CurveFitting
     return;
   }
 
-  /*
-   * Return peak parameters
+  //----------------------------------------------------------------------------------------------
+  /** Get value of one specific peak's parameter
    */
   double LeBailFunction::getPeakParameter(size_t index, std::string parname) const
   {
+    throw runtime_error("This function might not be called at all.");
     if (index >= mPeakParameters.size())
     {
       g_log.error() << "getParameter() Index out of range" << std::endl;
       throw std::runtime_error("Index out of range");
     }
 
-    IPowderDiffPeakFunction_sptr peak = m_peakVec[index];
+    IPowderDiffPeakFunction_sptr peak = m_peakvec[index];
 
     double value = peak->getParameter(parname);
 
@@ -1088,13 +1130,14 @@ namespace CurveFitting
    */
   double LeBailFunction::getPeakFWHM(size_t peakindex) const
   {
-    if (peakindex >= m_peakVec.size())
+    throw runtime_error("This function may not be called at all.");
+    if (peakindex >= m_peakvec.size())
     {
-      g_log.error() << "LeBailFunction() cannot get peak indexed " << peakindex << ".  Number of peaks = " << m_peakVec.size() << std::endl;
+      g_log.error() << "LeBailFunction() cannot get peak indexed " << peakindex << ".  Number of peaks = " << m_peakvec.size() << std::endl;
       throw std::invalid_argument("LeBailFunction getPeakFWHM() cannot return peak indexed out of range. ");
     }
 
-    return m_peakVec[peakindex]->fwhm();
+    return m_peakvec[peakindex]->fwhm();
 
   }
 

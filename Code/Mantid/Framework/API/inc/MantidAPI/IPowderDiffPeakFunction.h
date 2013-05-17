@@ -84,6 +84,9 @@ public:
     m_cellParamValueChanged = changed;
   }
 
+  /// The flag to show whether the parameters set to peak function making an valid peak
+  virtual bool isPhysical() { return m_parameterValid; }
+
   /// Override setting a new value to the i-th parameter
   virtual void setParameter(size_t i, const double& value, bool explicitlySet=true);
 
@@ -96,6 +99,7 @@ public:
   // void functionLocal(double* out, const double* xValues, const size_t nData)const;
 
   /// Calculate function in a range
+  using IFunction1D::function;
   virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const = 0;
 
 protected:
@@ -133,6 +137,9 @@ protected:
 
   /// Unit cell size
   double m_unitCellSize;
+
+  /// Flag to indicate whether peaks' parameters value can generate a valid peak
+  mutable bool m_parameterValid;
 
 };
 

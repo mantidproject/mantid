@@ -14,6 +14,8 @@ using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 
+using namespace std;
+
 class LeBailFunctionTest : public CxxTest::TestSuite
 {
 public:
@@ -28,13 +30,8 @@ public:
     TS_ASSERT(function.isParameterCorrect());
   }
 
-  void test_CalculatePeakParameters()
-  {
-    TS_ASSERT_DIFFERS(1, 2);
-  }
-
-  /*
-   * Goal: test function1D() of LeBailFunction by plotting 2 adjacent peaks
+  //----------------------------------------------------------------------------------------------
+  /** Goal: Test function() of LeBailFunction by plotting 2 adjacent peaks
    * Input
    * (1) Instrument geometry parameters Dtt1, Dtt1t, Zero, ... from .prf file;
    * (2) Base peak parameters Alph0, Alph1, ... from .prf file
@@ -49,9 +46,20 @@ public:
    */
   void test_CalculatePeakParametersX()
   {
-#if 0
-    LeBailFunction fitalg;
-    fitalg.initialize();
+    LeBailFunction lebail;
+
+    // Add peaks
+    vector<vector<int> > vechkl;
+    vector<int> p111;
+    p111.push_back(1); p111.push_back(1); p111.push_back(1);
+    vechkl.push_back(p111);
+    vector<int> p110;
+    p110.push_back(1); p110.push_back(1); p110.push_back(0);
+    vechkl.push_back(p110);
+    lebail.addPeaks(vechkl);
+
+
+ #if 0
 
     // TS_ASSERT_EQUALS(fitalg.asString(),
     // "name=LeBailFunction,Dtt1=1,Dtt2=1,Dtt1t=1,Dtt2t=1,Zero=0,Zerot=0,Width=1,Tcross=1,Alph0=1.6,Alph1=1.5,Beta0=1.6,Beta1=1.5,Alph0t=1.6,Alph1t=1.5,Beta0t=1.6,Beta1t=1.5,Sig0=1,Sig1=1,Sig2=1,Gam0=0,Gam1=0,Gam2=0");

@@ -305,7 +305,7 @@ namespace CurveFitting
   */
   void ThermalNeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const
   {
-    // 1. Get parameters (class)
+    // Obtain parameters (class) with pre-set order
     double dtt1   = getParameter(1);
     double dtt1t  = getParameter(3);
     double dtt2t  = getParameter(4);
@@ -334,7 +334,7 @@ namespace CurveFitting
 
     double dh, tof_h, eta, alpha, beta, H, sigma2, gamma, N;
 
-    // 2. Calcualte Peak Position d-spacing and TOF
+    // Calcualte Peak Position d-spacing and TOF
     if (m_cellParamValueChanged)
     {
       m_unitCell.set(latticeconstant, latticeconstant, latticeconstant, 90.0, 90.0, 90.0);
@@ -347,8 +347,8 @@ namespace CurveFitting
       dh = m_dcentre;
     }
 
-    // 3. Calculate all the parameters
-    // i. Start to calculate alpha, beta, sigma2, gamma,
+    // Calculate all the parameters
+    // - Start to calculate alpha, beta, sigma2, gamma,
     double n = 0.5*gsl_sf_erfc(wcross*(Tcross-1/dh));
 
     double alpha_e = alph0 + alph1*dh;
@@ -366,12 +366,12 @@ namespace CurveFitting
     sigma2 = sig0*sig0 + sig1*sig1*std::pow(dh, 2) + sig2*sig2*std::pow(dh, 4);
     gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
 
-    // 3. Calcualte H for the peak
+    // - Calcualte H for the peak
     calHandEta(sigma2, gamma, H, eta);
 
     N = alpha*beta*0.5/(alpha+beta);
 
-    // 4. Record recent value
+    // Record recent value
     m_Alpha = alpha;
     m_Beta = beta;
     m_Sigma2 = sigma2;
@@ -381,7 +381,17 @@ namespace CurveFitting
     m_N = N;
     m_eta = eta;
 
-    // 5. Debug output
+    // Check whether all the parameters are physical
+    if (alpha != alpha || beta != beta || sigma2 != sigma2 || gamma != gamma || H != H || H <= 0.)
+    {
+      m_parameterValid = false;
+    }
+    else
+    {
+      m_parameterValid = true;
+    }
+
+    // 5.Debug output
     if (explicitoutput)
     {
       stringstream errss;
@@ -477,7 +487,7 @@ namespace CurveFitting
     * with a value of zero everywhere.
     * @param xValues: The x-values to evaluate the peak at.
    */
-  void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(vector<double>& out, const vector<double> &xValues) const
+  void ThermalNeutronBk2BkExpConvPVoigt::function(vector<double>& out, const vector<double> &xValues) const
   {
     // calculate peak parameters
     const double HEIGHT = getParameter(0);
@@ -795,8 +805,8 @@ namespace CurveFitting
    * @param out :: Output function values
    * @param xValues :: X values for data points
    * @param nData :: Number of data points
-
-  void ThermalNeutronBk2BkExpConvPVoigt::functionLocal(double* out, const double* xValues, const size_t nData)const
+   */
+  void ThermalNeutronBk2BkExpConvPVoigt::function1D(double* out, const double* xValues, const size_t nData)const
   {
     double c = this->centre();
     double dx = fabs(s_peakRadius*this->fwhm());
@@ -819,7 +829,6 @@ namespace CurveFitting
 
     return;
   }
-  */
 
   /// Default value for the peak radius
   int ThermalNeutronBk2BkExpConvPVoigt::s_peakRadius = 5;
@@ -837,12 +846,6 @@ namespace CurveFitting
     }
   }
     */
-
-  //----------------------------------------------------------------------------------------------
-  void ThermalNeutronBk2BkExpConvPVoigt::function(std::vector<double>& out, const std::vector<double>& xValues) const
-  {
-    throw runtime_error("To be implemented soon!");
-  }
 
 } // namespace CurveFitting
 } // namespace Mantid
