@@ -130,7 +130,7 @@ set ( SRC_FILES
 	src/MergeRuns.cpp
 	src/Min.cpp
 	src/Minus.cpp
-	src/ModeratorTzero.cpp
+	src/ModeratorTzeroLinear.cpp
 	src/MonteCarloAbsorption.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
@@ -344,7 +344,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MergeRuns.h
 	inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
-	inc/MantidAlgorithms/ModeratorTzero.h
+	inc/MantidAlgorithms/ModeratorTzeroLinear.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
@@ -554,7 +554,7 @@ set ( TEST_FILES
 	MedianDetectorTestTest.h
 	MergeRunsTest.h
 	MinusTest.h
-	ModeratorTzeroTest.h
+	ModeratorTzeroLinearTest.h
 	MonteCarloAbsorptionTest.h
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
