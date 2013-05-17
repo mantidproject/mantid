@@ -56,11 +56,7 @@ public:
   int decimals(){return d_prec;};
   void setDecimals(int prec){if (prec >= 0) d_prec = prec;};
 
-  // MAG: Add back interpretText call for Mac 'fix'. The Mac spin boxes
-  // don't seem to lose focus in the same way the other platforms do
-  // so if value() is called when the box still has focus it returns
-  // the original and not the updated value.
-  double value(){ interpretText(); return d_value;};
+  double value();
   bool setValue(double val);
 
   void setFormat(const char format, int prec = 1){d_format = format; setDecimals(prec);};
@@ -74,7 +70,7 @@ public:
   void activated(DoubleSpinBox *);
 
 private slots:
-  void interpretText();
+  void interpretText(bool notify=true);
 
 protected:
   void stepBy ( int steps );

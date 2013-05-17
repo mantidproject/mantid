@@ -75,7 +75,14 @@ void DoubleSpinBox::setRange(double min, double max)
   setMaximum(max);
 }
 
-void DoubleSpinBox::interpretText()
+/**
+ * Interpret the text and update the stored value.
+ * @param notify If true then emit signals to indicate if the value has changed (default=true)
+ * The default is important so that connected signals ensure the correct updates are pushed
+ * through but we need to be able to turn them off as there are cases where this causes
+ * a recursive call.
+ */
+void DoubleSpinBox::interpretText(bool notify)
 {
 // RJT: Keep our version of this, which contains a bug fix (see [10521]).
 // Also, there are lines referring to methods that don't exist in our (older) MyParser class.
@@ -83,7 +90,7 @@ void DoubleSpinBox::interpretText()
   double value = locale().toDouble(text(), &ok);
   if (ok && setValue(value))
   {
-    emit valueChanged(d_value);
+    if(notify) emit valueChanged(d_value);
   }
   else
   {
@@ -91,7 +98,7 @@ void DoubleSpinBox::interpretText()
     value = locale().toDouble(val, &ok);
     if ( ok && setValue(value) )
     {
-      emit valueChanged(d_value);
+      if(notify) emit valueChanged(d_value);
     }
     else
     {
@@ -148,6 +155,13 @@ QAbstractSpinBox::StepEnabled DoubleSpinBox::stepEnabled() const
     stepUp = StepUpEnabled;
 
   return stepDown | stepUp;
+}
+
+double DoubleSpinBox::value()
+{
+  const bool notify(false);
+  interpretText(notify);
+  return d_value;
 }
 
 bool DoubleSpinBox::setValue(double val)
