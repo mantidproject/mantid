@@ -1,4 +1,4 @@
-from mantidsimple import *
+from mantid.simpleapi import *
 
 def heliumDetectorEff(workspace):
   ''' 	Calculate the corrected Helium detector values. '''
@@ -13,7 +13,7 @@ def heliumDetectorEff(workspace):
   gn= ac*gp/vm			# Number density of gas
   sgn= gn*gsig0*gt/lam0	        # Exponential term for gas
 
-  OneMinusExponentialCor(workspace,workspace,str(sgn),Operation="Divide")
+  OneMinusExponentialCor(InputWorkspace=workspace,OutputWorkspace=workspace,C=str(sgn),Operation="Divide")
   
   wt= 60.014			# Molecular weight Ni-Cu g mol-1
   rho= 8.00			# Density Ni-Cu g cm-3
@@ -23,10 +23,10 @@ def heliumDetectorEff(workspace):
   wn= ac*rho/wt			# Number density of wall
   swn= wn*wsig0*ct/lam0	        # Exponential term for wall
   
-  ExponentialCorrection(workspace,workspace,C1=str(swn),Operation="Divide")
+  ExponentialCorrection(InputWorkspace=workspace,OutputWorkspace=workspace,C1=str(swn),Operation="Divide")
   
   # simple polynomial correction based on a D2O spectrum taken at 1.5 deg
-  PolynomialCorrection(workspace,workspace,"-1.3697,0.8602,-0.7839,0.2866,-0.0447,0.0025")
+  PolynomialCorrection(InputWorkspace=workspace,OutputWorkspace=workspace,Coefficients="-1.3697,0.8602,-0.7839,0.2866,-0.0447,0.0025")
   return
 
 def monitor2Eff(workspace):
@@ -41,12 +41,12 @@ def monitor2Eff(workspace):
   zz = 0.6    #0.03		# thickness(cm) of scintillator
   c1 = 0.7112*zz      #8.3047*zz
   
-  ExponentialCorrection(workspace,workspace,C1=str(c1),Operation="Multiply")
+  ExponentialCorrection(InputWorkspace=workspace,OutputWorkspace=workspace,C1=str(c1),Operation="Multiply")
   shift = (1.0/unt)-1.0
-  CreateSingleValuedWorkspace("shift",str(shift),"0.0")
-  Plus(workspace,"shift",workspace)
-  mtd.deleteWorkspace("shift")
-  OneMinusExponentialCor(workspace,workspace,str(c1))
+  CreateSingleValuedWorkspace(OutputWorkspace="shift",DataValue=str(shift),ErrorValue="0.0")
+  Plus(LHSWorkspace=workspace,RHSWorkspace="shift",OutputWorkspace=workspace)
+  mtd.remove("shift")
+  OneMinusExponentialCor(InputWorkspace=workspace,OutputWorkspace=workspace,C=str(c1))
 
   return
 
@@ -54,7 +54,7 @@ def monitor2Eff(workspace):
 def main():
   '''This main routine. It is executed on if the script is run directly, not if it is imported.''' 
   LoadRawDialog(OutputWorkspace="ws",SpectrumMin="1",SpectrumMax="1")
-  ConvertUnits("ws","ws","Wavelength",AlignBins="1")
+  ConvertUnits(InputWorkspace="ws",OutputWorkspace="ws",Target="Wavelength",AlignBins="1")
   heliumDetectorEff("ws")
   monitor2Eff("ws")
   print "Done!"
