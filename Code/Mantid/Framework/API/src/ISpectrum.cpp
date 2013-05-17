@@ -176,6 +176,15 @@ namespace API
     this->detectorIDs.insert( detID );
   }
 
+  void ISpectrum::setDetectorIDs(std::set<detid_t>&& detIDs)
+  {
+#if !(defined(__INTEL_COMPILER))
+    detectorIDs = std::move(detIDs);
+#else
+    detectorIDs = detIDs; // No moving on the Mac :(
+#endif
+  }
+
   // --------------------------------------------------------------------------
   /** Return true if the given detector ID is in the list for this ISpectrum */
   bool ISpectrum::hasDetectorID(const detid_t detID) const
