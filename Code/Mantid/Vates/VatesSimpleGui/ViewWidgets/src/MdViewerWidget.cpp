@@ -609,7 +609,7 @@ void MdViewerWidget::createMenus()
   QMenuBar *menubar;
   if (this->pluginMode)
   {
-    menubar = new QMenuBar(this);
+    menubar = new QMenuBar(this->parentWidget());
     QSizePolicy policy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     menubar->setSizePolicy(policy);
   }
