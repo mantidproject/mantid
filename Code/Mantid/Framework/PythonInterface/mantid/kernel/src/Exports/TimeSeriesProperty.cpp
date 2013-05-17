@@ -3,11 +3,12 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/implicit.hpp>
+#include <boost/python/init.hpp>
 #include <boost/python/make_function.hpp>
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-
+using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Kernel::Property;
 using namespace boost::python;
@@ -23,9 +24,11 @@ namespace
     register_ptr_to_python<const TimeSeriesProperty<TYPE>*>();\
     implicitly_convertible<TimeSeriesProperty<TYPE>*,const TimeSeriesProperty<TYPE>*>();\
     \
-    class_<TimeSeriesProperty<TYPE>, bases<Property>, boost::noncopyable>(#Prefix"TimeSeriesProperty", no_init)\
+    class_<TimeSeriesProperty<TYPE>, bases<Property>, boost::noncopyable>(#Prefix"TimeSeriesProperty", init<const std::string&>())\
       .add_property("value", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector, return_value_policy<VectorToNumpy>())) \
       .add_property("times", &Mantid::Kernel::TimeSeriesProperty<TYPE>::timesAsVector) \
+      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(const DateAndTime&,const TYPE))&TimeSeriesProperty<TYPE>::addValue) \
+      .def("addValue", (void (TimeSeriesProperty<TYPE>::*)(const std::string&,const TYPE))&TimeSeriesProperty<TYPE>::addValue) \
       .def("valueAsString", &TimeSeriesProperty<TYPE>::value) \
       .def("size", &TimeSeriesProperty<TYPE>::size)\
       .def("firstTime", &TimeSeriesProperty<TYPE>::firstTime) \

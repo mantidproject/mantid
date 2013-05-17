@@ -25,7 +25,13 @@ namespace
      */
     void addPropertyWithUnit(Run & self, const std::string & name, PyObject *value, const std::string & units, bool replace)
     {
-      if( PyFloat_Check(value) )
+      extract<Property*> extractor(value);
+      if(extractor.check())
+      {
+        Property *prop = extractor();
+        self.addProperty(prop->clone(), replace); // Clone the property as Python owns the one that is passed in
+      }
+      else if( PyFloat_Check(value) )
       {
         self.addProperty(name, extract<double>(value)(), units, replace);
       }
