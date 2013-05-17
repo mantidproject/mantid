@@ -223,7 +223,11 @@ Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
 m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
-settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
+#ifdef Q_OS_MAC // Mac
+  settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
+#else
+  settings("Mantid", "MantidPlot")
+#endif
 {
   QStringList empty;
   init(factorySettings, empty);
@@ -235,7 +239,11 @@ Scripted(ScriptingLangManager::newEnv(this)),
 blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
 m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
-settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
+#ifdef Q_OS_MAC // Mac
+  settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
+#else
+  settings("Mantid", "MantidPlot")
+#endif
 {
   init(factorySettings, args);
 }
