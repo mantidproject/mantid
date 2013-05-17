@@ -149,7 +149,7 @@ namespace API
    *
    * @param detIDs :: set of detector IDs to insert in set.
    */
-  void ISpectrum::addDetectorIDs(const std::set<detid_t> detIDs)
+  void ISpectrum::addDetectorIDs(const std::set<detid_t>& detIDs)
   {
     if (detIDs.size() == 0) return;
     this->detectorIDs.insert( detIDs.begin(), detIDs.end() );
@@ -159,7 +159,7 @@ namespace API
    *
    * @param detIDs :: vector of detector IDs to insert in set.
    */
-  void ISpectrum::addDetectorIDs(const std::vector<detid_t> detIDs)
+  void ISpectrum::addDetectorIDs(const std::vector<detid_t>& detIDs)
   {
     if (detIDs.size() == 0) return;
     this->detectorIDs.insert( detIDs.begin(), detIDs.end() );
