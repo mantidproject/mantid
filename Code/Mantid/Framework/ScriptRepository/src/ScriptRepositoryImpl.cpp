@@ -123,6 +123,10 @@ namespace API
       local_repository = loc; 
     else
       local_repository = local_rep; 
+
+    // if no folder is given, the repository is invalid.
+    if (local_repository.empty())
+      return;
     
     if (local_repository[local_repository.size()-1] != '/')
       local_repository.append("/");
@@ -150,9 +154,6 @@ namespace API
     
     // check if the repository is valid.
     valid = false;
-    // if no folder is given, the repository is invalid.
-    if (local_repository.empty())
-      return;
 
     // parsing the ignore pattern
     std::string ignore = ignorePatterns(); 
