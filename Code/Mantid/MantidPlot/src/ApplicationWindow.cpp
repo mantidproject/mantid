@@ -284,13 +284,7 @@ void ApplicationWindow::handleConfigDir()
         QFileInfo newFile(curConfig.dir(), entry);
         // Qt will not overwrite files, so remove new one first
         QFile::remove(newFile.filePath());
-        std::cout << "D: " << oldFile.filePath().toStdString() << std::endl;
-        std::cout << "E: " << newFile.filePath().toStdString() << std::endl;
-        std::cout << "G: " << newFile.exists() << std::endl;
-        if (!QFile::copy(oldFile.filePath(), newFile.filePath()))
-        {
-          std::cout << "Cannot copy " << newFile.filePath().toStdString() << std::endl;
-        }
+        QFile::copy(oldFile.filePath(), newFile.filePath());
         QFile::remove(oldFile.filePath());
       }
     }
