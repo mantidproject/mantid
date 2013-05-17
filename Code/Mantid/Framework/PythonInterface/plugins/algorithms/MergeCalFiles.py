@@ -35,10 +35,6 @@ class MergeCalFiles(PythonAlgorithm):
     masterFileName = self.getPropertyValue("MasterFile")
     outputFileName = self.getPropertyValue("OutputFile")
     
-    logger.information("INFO")
-    logger.information(str(mergeOffsets))
-    logger.information(str(mergeSelections))
-    logger.information(str(mergeGroups))
 	
     if (masterFileName == outputFileName) :
        raise RuntimeError('The output file must be different to the master file.')
