@@ -103,12 +103,8 @@ namespace IDA
 
     pyInput+= "]\n";
 
-    if (uiForm().leLogName->text() != "sample")
-    {
-      pyInput+= "logType = "+ uiForm().leLogName->text() +"\n";
-    }
-    else pyInput+= "logType = sample\n";
-
+    pyInput+= "logType = '"+ uiForm().leLogName->text() +"'\n";
+    
     if ( uiForm().elwin_ckNormalise->isChecked() ) pyInput += "normalise = True\n";
     else pyInput += "normalise = False\n";
 
