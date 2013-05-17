@@ -187,7 +187,7 @@ namespace Mantid
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
-      // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
+      // If multiperiod, will need to hold the Instrument & Sample for copying
       boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<Sample> sample;
 
