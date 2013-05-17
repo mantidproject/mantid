@@ -34,7 +34,6 @@ The Child Algorithms used by LoadMuonNexus are:
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
@@ -1019,7 +1018,6 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   }
 
   //Now build the spectra list
-  int *spectra_list = new int[ndets];
   int index=0;
 
   for(int i = 1; i <= nspectra; ++i)
@@ -1031,27 +1029,23 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
       if ((i >= m_spec_min && i < m_spec_max )||(m_list && find(m_spec_list.begin(), m_spec_list.end(),
         i) != m_spec_list.end()))
       {
+        ISpectrum * spec = local_workspace->getSpectrum(index);
         if( m_axis1vals.empty() )
         {
-          local_workspace->getSpectrum(index)->setSpectrumNo(spectrum);
+          spec->setSpectrumNo(spectrum);
         }
         else
         {
-          local_workspace->getSpectrum(index)->setSpectrumNo(static_cast<specid_t>(m_axis1vals[i-1]));
+          spec->setSpectrumNo(static_cast<specid_t>(m_axis1vals[i-1]));
         }
         ++index;
-      }
 
-      int offset = det_index[i-1];
-      int detcount = det_count[i-1];
-      for(int j = 0; j < detcount; j++)
-      {
-        spectra_list[offset + j] = spectrum;
+        int start = det_index[i-1];
+        int end = start + det_count[i-1];
+        assert( end <= ndets );
+        spec->setDetectorIDs(std::set<detid_t>(det_list.get()+start,det_list.get()+end));
       }
-     
   }
-  local_workspace->replaceSpectraMap(new SpectraDetectorMap(spectra_list, det_list.get(), ndets));
-  delete[] spectra_list;
 }
 
 
