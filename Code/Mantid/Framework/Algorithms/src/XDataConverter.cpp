@@ -60,6 +60,9 @@ namespace Mantid
       // Create the new workspace 
       MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, numSpectra, numXValues, numYValues);
 
+      // Copy over the 'vertical' axis
+      if (inputWS->axes() > 1) outputWS->replaceAxis( 1, inputWS->getAxis(1)->clone(outputWS.get()) );
+
       Progress prog(this,0.0,1.0,numSpectra);
       PARALLEL_FOR2(inputWS,outputWS)
       for (int i = 0; i < int(numSpectra); ++i)
