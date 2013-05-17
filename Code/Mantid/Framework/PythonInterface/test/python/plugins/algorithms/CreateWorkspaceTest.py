@@ -48,24 +48,26 @@ class CreateWorkspaceTest(unittest.TestCase):
         
     def test_with_data_from_other_workspace(self):
         wsname = 'LOQ'
-        alg = run_algorithm('Load', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=2, child=True)
-        loq = alg.getProperty("OutputWorkspace").value
+        x1 = np.array([1.,2.,3.,4.])
+        y1 = np.array([[1.,2.,3.],[4.,5.,6.]])
+        e1 = np.sqrt(y1)
+        loq = CreateWorkspace(DataX=x1, DataY=y1,DataE=e1,NSpec=2,UnitX='Wavelength')
         
-        x = loq.extractX()
-        y = loq.extractY()
-        e = loq.extractE()
+        x2 = loq.extractX()
+        y2 = loq.extractY()
+        e2 = loq.extractE()
         
-        wksp = CreateWorkspace(DataX=x, DataY=y,DataE=e,NSpec=2,UnitX='Wavelength')
+        wksp = CreateWorkspace(DataX=x2, DataY=y2,DataE=e2,NSpec=2,UnitX='Wavelength')
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
         self.assertEquals(wksp.getNumberHistograms(), 2)
         
         for i in [0,1]:
-            for j in range(len(y[0])):
+            for j in range(len(y2[0])):
                 self.assertEquals(wksp.readY(i)[j], loq.readY(i)[j])
                 self.assertEquals(wksp.readE(i)[j], loq.readE(i)[j])
                 self.assertEquals(wksp.readX(i)[j], loq.readX(i)[j])
             # Last X value
-            self.assertEquals(wksp.readX(i)[len(x)-1], loq.readX(i)[len(x)-1])
+            self.assertEquals(wksp.readX(i)[len(x2)-1], loq.readX(i)[len(x2)-1])
 
         AnalysisDataService.remove("wksp")
 
