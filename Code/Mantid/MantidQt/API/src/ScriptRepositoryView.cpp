@@ -94,15 +94,7 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
       repo_ptr->install(dir.toStdString());
       g_log.information() << "ScriptRepository installed at " << dir.toStdString() << std::endl;
 
-    }else{
-      // try to update
-      try{
-        repo_ptr->check4Update();
-      }catch(Mantid::API::ScriptRepoException & ex){
-        g_log.information() << "Failed to update: " << ex.what() << std::endl; // 
-      }
     }
-
       // create the model
     model = new RepoModel(this);   
 
@@ -141,7 +133,6 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
     ui->repo_treeView->setModel(model);
     ui->repo_treeView->setItemDelegateForColumn(1, new RepoDelegate(this));
     ui->repo_treeView->setItemDelegateForColumn(2, new CheckBoxDelegate(this));
-    ui->repo_treeView->hideColumn(2); // hide the auto update column
     ui->repo_treeView->setColumnWidth(0,290);
     
 
@@ -305,7 +296,7 @@ void ScriptRepositoryView::RepoDelegate::paint(
 */
 bool  ScriptRepositoryView::RepoDelegate::editorEvent(QEvent *event,
                                    QAbstractItemModel *model,
-                                                      const QStyleOptionViewItem &option,
+                                                      const QStyleOptionViewItem &/*option*/,
                                    const QModelIndex &index) {
   // if event is mouse click 
   if (event->type() == QEvent::MouseButtonPress){
@@ -317,7 +308,7 @@ bool  ScriptRepositoryView::RepoDelegate::editorEvent(QEvent *event,
       return false;// ignore 
     return model->setData(index, action, Qt::EditRole);  
   }else{
-    return QStyledItemDelegate::editorEvent(event, model, option, index);
+    return true; //Does not allow others events to be processed (example: double-click)
   }   
 }
 /** Provides the ideal size for this column
@@ -397,7 +388,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(QPainter *painter, const QSty
 */
 bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(QEvent *event,
                                                          QAbstractItemModel *model,
-                                                         const QStyleOptionViewItem &option,
+                                                         const QStyleOptionViewItem &/*option*/,
                                                          const QModelIndex &index){
  if (event->type() == QEvent::MouseButtonPress){
   QString value = model->data(index, Qt::DisplayRole).toString();
@@ -406,7 +397,8 @@ bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(QEvent *event,
     action = "setTrue";
   return model->setData(index, action, Qt::EditRole);
  }else{
-   return QStyledItemDelegate::editorEvent(event, model, option, index);
+   // QStyledItemDelegate::editorEvent(event, model, option, index);
+   return true;// Does not allow the event to be catched by another one
  }
 }
   /** Open the ScriptRepository Page on Web Browser*/

@@ -830,9 +830,15 @@ namespace API
   }
 
   /** 
-      @todo describe
+   * Implements ScriptRepository::check4Update. It downloads the file repository.json
+   * from the central repository and call the listFiles again in order to inspect the current 
+   * state of every entry inside the local repository. For the files marked as AutoUpdate, if there 
+   * is a new version of these files, it downloads the file. As output, it provides a list of
+   * all files that were downloaded automatically.
+   * 
+   *  @return List of all files automatically downloaded.
   */
-  void ScriptRepositoryImpl::check4Update(void) 
+  std::vector<std::string> ScriptRepositoryImpl::check4Update(void) 
   {
     g_log.debug() << "ScriptRepositoryImpl checking for update\n" ; 
     // download the new repository json file
@@ -844,6 +850,7 @@ namespace API
       f.moveTo(backup); 
     }
     try{
+      g_log.debug() << "Download information from the Central Repository status" << std::endl;
       doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
     }catch(...){
@@ -865,8 +872,9 @@ namespace API
     #endif
 
     // re list the files
+    g_log.debug() << "Check the status of all files again" << std::endl;
     listFiles(); 
-    
+    std::vector<std::string> output_list;
     // look for all the files in the list, to check those that 
     // has the auto_update and check it they have changed.
     for(Repository::iterator it = repo.begin(); 
@@ -876,10 +884,13 @@ namespace API
         // THE SAME AS it->status in (REMOTE_CHANGED, BOTH_CHANGED)
         if (it->second.status & REMOTE_CHANGED){
           download(it->first); 
+          output_list.push_back(it->first);
+          g_log.debug()  << "Update file " << it->first << " to more recently version available" << std::endl;
         }
       }
     }
     g_log.debug() << "ScriptRepositoryImpl::checking for update finished\n" ; 
+    return output_list;
   }
 
   /** 
@@ -909,7 +920,13 @@ namespace API
   }
 
   /** 
-      @todo describe
+   * Configure the AutoUpdate, in order to be able to check if the user selected 
+   * to update this entry. 
+   * @param input_path : the path that identifies the entry
+   * @param option: true or false to indicate if it is set to auto update. 
+   *
+   * These configurations will be used at check4update, to download all entries that 
+   * are set to auto update.
   */
   void ScriptRepositoryImpl::setAutoUpdate(const std::string & input_path, bool option){
     ensureValidRepository();
@@ -1103,7 +1120,7 @@ namespace API
 
             entry_it->second.downloaded_pubdate = DateAndTime(file.second.get<std::string>("downloaded_pubdate"));
             entry_it->second.downloaded_date = DateAndTime(file.second.get<std::string>("downloaded_date"));
-
+            entry_it->second.auto_update = (file.second.get<std::string>("auto_update",std::string()) == "true");
 
           }else{
             // if the entry was not found locally or remotelly, this means 
@@ -1174,6 +1191,11 @@ namespace API
       local_json.put(
                 boost::property_tree::ptree::path_type( std::string(path).append("!downloaded_date"), '!'), 
                 entry.downloaded_date.toFormattedString().c_str());
+      std::string auto_update_op = (const char *)((entry.auto_update)?"true":"false");
+      std::string key = std::string(path).append("!auto_update");     
+      local_json.put(
+                     boost::property_tree::ptree::path_type(key,'!'),
+                     auto_update_op);
     }
     //g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
     #if defined(_WIN32) ||  defined(_WIN64)

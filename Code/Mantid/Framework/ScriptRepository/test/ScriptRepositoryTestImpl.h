@@ -443,6 +443,46 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
 }
 
 
+  void test_auto_update(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    std::vector<string> list_of_files;
+    TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles()); 
+    TS_ASSERT (list_of_files.size() == 5); 
+    std::string file_name = "TofConv/README.txt";
+    
+    // before downloading the file is REMOTE_ONLY
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY);
+
+    // do download
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+
+    // after downloading the file is BOTH_UNCHANGED
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
+
+    // set this file for AutoUpdate
+    TS_ASSERT_THROWS_NOTHING(repo->setAutoUpdate(file_name, true));
+    
+    // simulate a new version of the file inside the central repository
+    // 
+    std::string original_time = "2012-Feb-13 10:02:50"; 
+    std::string change_to_ =  "2012-Mar-13 10:02:50";
+
+    // simulate new version of the file
+    boost::replace_all(repo->repository_json_content,
+                       original_time,
+                       change_to_);
+
+    // execute a check4updte
+    TS_ASSERT_THROWS_NOTHING(list_of_files = repo->check4Update());
+    
+    // ensure that it has downloaded the file again
+    TS_ASSERT(list_of_files.size() == 1);
+    TS_ASSERT(list_of_files[0] == file_name);
+
+}
+
+
 
 
  /*************************************
