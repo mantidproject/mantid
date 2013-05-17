@@ -78,9 +78,8 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Constructor
    * @param box :: MDBox containing the events to split
-   * @param splitRecursively :: flag to split boxes recursively
    */
-  TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box,bool splitRecursively)
+  TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box)
    : MDBoxBase<MDE, nd>(*box,box->getBoxController()),
      nPoints(0)
   {
@@ -110,16 +109,9 @@ namespace MDEvents
     const std::vector<MDE> & events = box->getConstEvents();   
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
-    if(splitRecursively)
-    {
-      // Add all the events recursively, going through all internal boxes
-      for (; it != it_end; ++it)  addAndTraceEvent(*it,0);
-    }
-    else
-    {
-      // just add event to the existing internal box
+   // just add event to the existing internal box
        for (; it != it_end; ++it)  addEvent(*it);
-    }
+   
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
 
@@ -1427,22 +1419,7 @@ namespace MDEvents
        this->addEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0],runIndex, detectorId));
    }
 
-  /** Create MD MDEvent from the input data and add it to the box.
-   *   Sets pointer to the box which needs splitting (if one actually need) 
-   * @param Signal  :: events signal
-   * @param errorSq :: events Error squared
-   * @param point :: reference to the  MDEvent coordinates
-   * @param point   :: reference to the vector of  MDEvent coordinates
-   * @param runIndex ::    run  index
-   * @param detectorId ::  detector's ID
-   * @param index  :: index of this box in the gridBox, which contains this one
-   */
-   TMDE(
-   void MDGridBox)::buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
-   {
-       this->addAndTraceEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId),index);
-   }
-
+ 
   //-----------------------------------------------------------------------------------------------
   /**Create MDEvent and add it to the box, in a NON-THREAD-SAFE manner.
    * No lock is performed. This is only safe if no 2 threads will
@@ -1493,43 +1470,6 @@ namespace MDEvents
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
       m_Children[index]->addEvent(event);
-  }
-  /** Add a single MDLeanEvent to the grid box. If the boxes
-   * contained within are also gridded, this will recursively push the event
-   * down to the deepest level.
-   * Warning! No bounds checking is done (for performance). It must
-   * be known that the event is within the bounds of the grid box before adding.
-   *
-   * Note! nPoints, signal and error must be re-calculated using refreshCache()
-   * after all events have been added.
-   *
-   * @param point ::       reference to a MDEvent to add.
-   * @param ind :: index for something (unused)
-   *
-   * @returns boxToSplit:: pointer to the MDBox which has more events then it suppose to keep and should be split or NULL if 
-   *                       this does not happens
-    * */
-
-  TMDE(
-  inline void MDGridBox)::addAndTraceEvent(const MDE & point,size_t ind)
-  {
-    UNUSED_ARG(ind);
-
-    size_t index = 0;
-    for (size_t d=0; d<nd; d++)
-    {
-      coord_t x = point.getCenter(d);
-      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
-
-      // Accumulate the index
-      index += (i * splitCumul[d]);
-    }
-
-    // Add it to the contained box
-    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      m_Children[index]->addAndTraceEvent(point,index);
-  
-
   }
   //-----------------------------------------------------------------------------------------------
   /** Add a single MDLeanEvent to the grid box. If the boxes
