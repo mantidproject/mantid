@@ -10,7 +10,6 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 #include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/LogManager.h"
 

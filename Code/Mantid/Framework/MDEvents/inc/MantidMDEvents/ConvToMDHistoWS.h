@@ -11,7 +11,6 @@
 #include "MantidMDEvents/MDEvent.h"
 
 #include "MantidMDEvents/ConvToMDBase.h"
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
 // coordinate transformation
 #include "MantidMDEvents/MDTransfInterface.h"
 
