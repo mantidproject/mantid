@@ -1,6 +1,6 @@
 """*WIKI* 
 
-In algorithms related to Le Bail fit and powder diffractomer instrument profile calibration, 
+In algorithms related to [[Le Bail Fit]] and powder diffractomer instrument profile calibration, 
 TableWorkspace containing the peak profile parameters' information are used as input and output. 
 ''UpdatePeakParameterTableValue'' gives user the method to change the value of parameters' information,
 including its status to fit, value, minimum/maximum value (for boundary contrains) and step size (for Monte Carlo optimizer). 
@@ -16,7 +16,7 @@ The cell to have value updated can be specified by its row and column index.
 * If multiple row indexes are specified, then all the cells of the specified column and rows are updated to same value from either "NewFloatValue" or "NewStringValue". 
 
 == How to use algorithm with other algorithms ==
-This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[LeBailFit]].
+This algorithm is designed to work with [[Le Bail Fit|other algorithms]] to do Le Bail fit.
 
 
 *WIKI*"""

@@ -21,7 +21,7 @@ For instance of a back-to-back exponential convoluted with Gaussian peak,
 the peak profile parameters include Alpha, Beta, Sigma, centre and height. 
 
 == How to use algorithm with other algorithms ==
-This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[LeBailFit]].
+This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[Le Bail Fit]].
 
 *WIKI*"""
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction

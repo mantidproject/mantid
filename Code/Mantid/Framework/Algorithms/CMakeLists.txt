@@ -186,7 +186,6 @@ set ( SRC_FILES
 	src/SofQW2.cpp
 	src/SofQW3.cpp
 	src/SolidAngle.cpp
-	src/Sort.cpp
 	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
 	src/SphericalAbsorption.cpp
@@ -400,7 +399,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SofQW2.h
 	inc/MantidAlgorithms/SofQW3.h
 	inc/MantidAlgorithms/SolidAngle.h
-	inc/MantidAlgorithms/Sort.h
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
 	inc/MantidAlgorithms/SphericalAbsorption.h

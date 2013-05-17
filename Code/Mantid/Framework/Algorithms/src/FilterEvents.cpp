@@ -11,7 +11,7 @@ The calibration, or say correction, from the detector to sample must be consider
 The calibration is in column data format.
 
 A reasonable approximation of the correction is
- correction(detecotr_ID) = L1/(L1+L2(detector_ID))
+ correction(detector_ID) = L1/(L1+L2(detector_ID))
 
 *WIKI*/
 

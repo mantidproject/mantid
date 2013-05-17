@@ -1,6 +1,6 @@
-'''*WIKI* 
-    Compute I(q) for reduced EQSANS data
-*WIKI*'''
+"""*WIKI* 
+Compute I(q) for reduced EQSANS data
+*WIKI*"""
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import Scale

@@ -1,5 +1,12 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+This algorithm is for producing rocking curves from alignment scan runs. It is for use only with ADARA-style SNS datasets as it requires the 'scan_index' log variable.
+  
+The algorithm optionally uses the [[MaskDetectors]] and/or [[FilterByXValue]] algorithms to restrict the region of data included.
+'''N.B. If these options are used, then this algorithm will modify the input workspace.'''
+
+The [[SumEventsByLogValue]] algorithm is then called, with 'scan_index' as the log to sum against. 
+The row of the resulting table pertaining to scan_index=0 (which indicates 'not a scan point') is then removed.
+  
 *WIKI*/
 
 #include "MantidWorkflowAlgorithms/StepScan.h"
@@ -37,22 +44,22 @@ namespace WorkflowAlgorithms
 
   void StepScan::initDocs()
   {
-    this->setWikiSummary("Workflow algorithm for analysis of an alignment scan.");
-    this->setOptionalMessage("Workflow algorithm for analysis of an alignment scan.");
+    this->setWikiSummary("Workflow algorithm for analysis of an alignment scan. CAN ONLY BE USED WITH SNS DATA FROM AN ADARA-ENABLED BEAMLINE.");
+    this->setOptionalMessage("Workflow algorithm for analysis of an alignment scan from an SNS Adara-enabled beam line");
   }
 
   void StepScan::init()
   {
     // TODO: Validator to ensure that this is 'fresh' data???
     declareProperty(new WorkspaceProperty<DataObjects::EventWorkspace>("InputWorkspace","",Direction::Input,
-        boost::make_shared<WorkspaceUnitValidator>("TOF")), "The input workspace. Must hold 'raw' events.");
+        boost::make_shared<WorkspaceUnitValidator>("TOF")), "The input workspace. Must hold 'raw' (unweighted) events.");
     // Note that this algorithm may modify the input workspace (by masking and/or cropping)
     declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output), "The output table workspace.");
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace","",Direction::Input, PropertyMode::Optional), "A workspace holding pixels to be masked.");
 
     declareProperty("XMin", EMPTY_DBL(), "The minimum value of X for which an event will be counted.");
-    declareProperty("XMax", EMPTY_DBL(), "The maximum value of X for which an event will be counted.");
+    declareProperty("XMax", EMPTY_DBL(), "The maximum value of X for which an event will be counted. Must be greater than XMin.");
     // TODO: Restrict the choice of units?
     declareProperty("RangeUnit", "TOF", boost::make_shared<StringListValidator>(UnitFactory::Instance().getKeys()),
       "The units in which XMin and XMax is being given." );

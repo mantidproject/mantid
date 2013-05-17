@@ -52,13 +52,13 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport GaussianLinearBG1D : public Fit1D, public API::DeprecatedAlgorithm
+    class DLLExport Gaussian1D2 : public Fit1D, public API::DeprecatedAlgorithm
     {
     public:
       /// Default constructor
-      GaussianLinearBG1D();
+      Gaussian1D2();
       /// Destructor
-      virtual ~GaussianLinearBG1D() {};
+      virtual ~Gaussian1D2() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Gaussian1D";}
       /// Algorithm's version for identification overriding a virtual method
@@ -83,4 +83,4 @@ namespace Mantid
   } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_GAUSSIANLINEARBG1Dl1D2_H_*/
+#endif /*MANTID_CURVEFITTING_GAUSSIAN1D2_H_*/

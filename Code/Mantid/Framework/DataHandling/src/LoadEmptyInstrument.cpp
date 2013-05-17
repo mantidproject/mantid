@@ -1,5 +1,8 @@
 /*WIKI* 
 
+This algorithm is to enable you to look at an instrument without having to load a full data file. 
+Instead of loading a data file, it loads the [[InstrumentDefinitionFile]] for the instrument, which has information about the instrument.
+The instrument is referred to as being empty because there is no data associated with it.
 
 *WIKI*/
 #include "MantidAPI/FileProperty.h"
@@ -21,8 +24,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void LoadEmptyInstrument::initDocs()
     {
-      this->setWikiSummary(" Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]], with the purpose of being able to visualise an instrument without requiring to read in a raw datafile first. The name of the algorithm refers to the fact that an instrument is loaded into a workspace but without any real data - hence the reason for referring to it as an 'empty' instrument.  For more information on IDFs see [[InstrumentDefinitionFile]]. ");
-      this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace, with the purpose of being able to visualise an instrument without requiring to read in a raw datafile first. The name of the algorithm refers to the fact that an instrument is loaded into a workspace but without any real data - hence the reason for referring to it as an 'empty' instrument.  For more information on IDFs see InstrumentDefinitionFile.");
+      this->setWikiSummary("Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]] rather than a data file.");
+      this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace rather than a data file.");
     }
     
 

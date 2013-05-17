@@ -2,7 +2,7 @@
 This algorithm fits a certain set of single peaks in a powder diffraction pattern. 
 
 It serves as the first step to fit/refine instrumental parameters that will be 
-introduced in Le Bail Fit. 
+introduced in [[Le Bail Fit]]. 
 The second step is realized by algorithm RefinePowderInstrumentParameters.
 
 ==== Version ====
@@ -55,7 +55,7 @@ This algorithm is designed to work with other algorithms to do Le Bail fit.  The
 
 ==== Example of Working With Other Algorithms ====
 ''FitPowderDiffPeaks'' is designed to work with other algorithms, such ''RefinePowderInstrumentParameters'',
-and ''LeBailFit''. 
+and ''LeBailFit''. See [[Le Bail Fit]] for full list of such algorithms.
 
 A common scenario is that the starting values of instrumental geometry related parameters (Dtt1, Dtt1t, and etc)
 are enough far from the real values.  

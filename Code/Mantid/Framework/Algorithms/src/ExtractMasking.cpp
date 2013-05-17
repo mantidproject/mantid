@@ -1,3 +1,8 @@
+/*WIKI*
+
+This algorithm does the same as [[ExtractMask]], but is deprecated.
+
+*WIKI*/
 #include "MantidAlgorithms/ExtractMasking.h"
 #include "MantidKernel/System.h"
 

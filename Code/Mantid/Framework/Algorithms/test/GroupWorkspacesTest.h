@@ -7,7 +7,6 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidCurveFitting/GaussianLinearBG1D.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
