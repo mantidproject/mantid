@@ -123,7 +123,7 @@ namespace Mantid
       /// Moves to the end of the last entry in the file
       void findEndofLastEntry();
       /// Write xml header tags
-      void writeHeader(const std::string & fileName);
+      virtual void writeHeader(const std::string & fileName);
       /// this method searches for xml special characters and replace with entity references
       void searchandreplaceSpecialChars(std::string &input);
       /// replaces the charcter at index in the input string with xml entity reference(eg.replace '&' with "&amp;")

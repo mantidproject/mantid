@@ -46,11 +46,12 @@ namespace Mantid
      - Overide the ::createSASRootElement to conform the new header. 
      - Introduction of the method to deal with the new element: ::createSASTransElement. 
      - Override the ::exec method to introduce this new element when apropriated. 
+     - Override the ::writeHeader method to introduce set the correct stylesheet
        
     @author Gesner Passos, Rutherford Appleton Laboratory
     @date 11/04/2013
 
-    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-13 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -90,6 +91,9 @@ namespace Mantid
 
       /// this method creates SAStransmission_spectrum element
       void createSASTransElement(std::string& sasTrans, const std::string & name  );
+	  
+      /// Overwrites writeHeader method
+      virtual void writeHeader(const std::string & fileName);
 
       ///points to the workspace that will be written to file
       API::MatrixWorkspace_const_sptr m_trans_ws, m_transcan_ws;
