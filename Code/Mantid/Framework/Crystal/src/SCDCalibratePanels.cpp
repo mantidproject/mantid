@@ -2,9 +2,9 @@
 
 
 This algorithm calibrates sets of Rectangular Detectors in one instrument.
-The initial path, time offset,panel width's, panel height's, panel locations and orientation are all
+The initial path, time offset,panel widths, panel heights, panel locations and orientation are all
 adjusted so the error in q positions from the theoretical q positions is minimized.  Also, there
-are options to optimize taking into account sample position and to have the rotations be rigid rotations.
+are optimize options that take into account sample position and the need for rigid rotations.
 
 Some features:
 

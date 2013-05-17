@@ -7,11 +7,13 @@ set ( SRC_FILES
 	src/CombinePeaksWorkspaces.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/FilterPeaks.cpp
+	src/GoniometerAnglesFromPhiRotation.cpp
 	src/FindSXPeaks.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
+	src/GoniometerAnglesFromPhiRotation.cpp
 	src/IndexPeaks.cpp
 	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
@@ -54,11 +56,13 @@ set ( INC_FILES
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/FilterPeaks.h
+
 	inc/MantidCrystal/FindSXPeaks.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
+	inc/MantidCrystal/GoniometerAnglesFromPhiRotation.h
 	inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/IndexPeaks.h
 	inc/MantidCrystal/IndexSXPeaks.h
@@ -101,6 +105,7 @@ set ( TEST_FILES
 	CombinePeaksWorkspacesTest.h
 	DiffPeaksWorkspacesTest.h
 	FilterPeaksTest.h
+	GoniometerAnglesFromPhiRotationTest.h
 	FindSXPeaksTest.h
 	FindUBUsingFFTTest.h
 	FindUBUsingIndexedPeaksTest.h

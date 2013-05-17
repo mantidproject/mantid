@@ -45,6 +45,14 @@ public:
 
   OptimizeCrystalPlacementTest()
   {
+    initted = false;
+  }
+
+  void init()
+  {
+    if( initted)
+      return;
+    initted = true;
     LoadIsawPeaks alg;
     alg.initialize();
     alg.setProperty("Filename", "TOPAZ_5637_8.peaks");
@@ -65,7 +73,7 @@ public:
 
   }
   void test_basic()
-  {
+  { init();
     OptimizeCrystalPlacement alg;
     alg.initialize();
     alg.setPropertyValue("PeaksWorkspace", "abcd");
@@ -138,6 +146,7 @@ public:
 
   void test_tilt()
   {
+    init();
     Kernel::Matrix<double> tilt = PeakHKLErrors::RotationMatrixAboutRegAxis(1, 'x')
         * PeakHKLErrors::RotationMatrixAboutRegAxis(-2, 'y')
         * PeakHKLErrors::RotationMatrixAboutRegAxis(1.3, 'z');
@@ -221,6 +230,7 @@ public:
 
   void test_SamplePosition()
   {
+    init();
     API::IPeak & peak = peaks1->getPeak(0);
     boost::shared_ptr<const Geometry::Instrument> Inst = peak.getInstrument();
     Kernel::V3D SampPos(.0003, -.00025, .00015);
@@ -269,6 +279,7 @@ private:
   DataObjects::PeaksWorkspace_sptr peaks;
   DataObjects::PeaksWorkspace_sptr peaks1;
   Kernel::Matrix<double> origGon5637, origGon5638;
+  bool initted;
 };
 
 #endif /* OPTIMIZECRYSTALPLACEMENTTEST_H_ */
