@@ -108,6 +108,22 @@ set_target_properties ( MantidQtAPI PROPERTIES COMPILE_DEFINITIONS IN_MANTIDQT_A
 target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
+# Windows: Generate a qt.conf file so that the dev build finds the qt
+# plugins in third party. Done in two steps to get it into the build
+# directory that is selected at build time.
+# This file is NOT packaged. See Installers/WinInstaller for the package
+# version.
+###########################################################################
+if ( WIN32 )
+  set ( QT_CONF qt.conf )
+  configure_file ( qt.conf.template ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} @ONLY )
+  add_custom_command ( TARGET MantidQtAPI POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                               ${CMAKE_CURRENT_BINARY_DIR}/${QT_CONF} 
+                               ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${QT_CONF} )
+endif()
+
+###########################################################################
 # Testing
 ###########################################################################
 
