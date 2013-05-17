@@ -248,6 +248,13 @@ m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
   init(factorySettings, args);
 }
 
+/**
+ * This function is responsible for copying the old configuration
+ * information from the ISIS\MantidPlot area to the new Mantid\MantidPlot
+ * area. The old area is deleted once the trnasfer is complete. On subsequent
+ * runs, if the old configuration area is missing or empty, the copying
+ * is ignored.
+ */
 void ApplicationWindow::handleConfigDir()
 {
 #ifdef Q_OS_WIN
