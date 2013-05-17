@@ -2205,8 +2205,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string& filename, const bool 
     for ( size_t j = 0; j < WS->getNumberHistograms(); ++j )
     {
       auto spec = WS->getSpectrum(j);
-      spec->clearDetectorIDs();
-      spec->addDetectorIDs(mapping[spec->getSpectrumNo()]);
+      spec->setDetectorIDs(mapping[spec->getSpectrumNo()]);
     }
   }
   return true;
