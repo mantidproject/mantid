@@ -5,8 +5,9 @@ This algorithm allows a single spectrum to be extracted from a range of workspac
 *WIKI*"""
 
 
-from MantidFramework import *
-from mantidsimple import *
+from mantid.api import *
+from mantid.kernel import *
+from mantid.simpleapi import *
 import os
 
 class ConjoinSpectra(PythonAlgorithm):
@@ -24,12 +25,12 @@ class ConjoinSpectra(PythonAlgorithm):
 
     def PyInit(self):
         self.setWikiSummary("Joins individual spectra from a range of workspaces into a single workspace for plotting or further analysis.")
-        self.declareProperty("InputWorkspaces","", Validator=MandatoryValidator(), Description="Comma seperated list of workspaces to use, group workspaces will automatically include all members.")
-        self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, Description="Name the workspace that will contain the result")
-        self.declareProperty("WorkspaceIndex", 0, Description="The workspace index of the spectra in each workspace to extract. Default: 0")
-        self.declareProperty("LabelUsing", "", Description="The name of a log value used to label the resulting spectra. Default: The source workspace name")
+        self.declareProperty("InputWorkspaces","", validator=StringMandatoryValidator(), doc="Comma seperated list of workspaces to use, group workspaces will automatically include all members.")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="Name the workspace that will contain the result")
+        self.declareProperty("WorkspaceIndex", 0, doc="The workspace index of the spectra in each workspace to extract. Default: 0")
+        self.declareProperty("LabelUsing", "", doc="The name of a log value used to label the resulting spectra. Default: The source workspace name")
         labelValueOptions =  ["Mean","Median","Maximum","Minimum","First Value"]
-        self.declareProperty("LabelValue", "Mean", Validator=ListValidator(labelValueOptions), Description="How to derive the value from a time series property")
+        self.declareProperty("LabelValue", "Mean", validator=StringListValidator(labelValueOptions), doc="How to derive the value from a time series property")
       
       
     def PyExec(self):
@@ -52,13 +53,13 @@ class ConjoinSpectra(PythonAlgorithm):
             #if we cannot find the ws then stop
             if ws == None:
                 raise RuntimeError ("Cannot find workspace '" + wsName.strip() + "', aborting")
-            if ws.isGroup():
+            if isinstance(ws, WorkspaceGroup):
                 wsNames.extend(ws.getNames())
             else:
                 wsNames.append(wsName)
 
-        ta = createTextAxis(len(wsNames))
-        if mtd.workspaceExists(wsOutput):
+        ta = TextAxis.create(len(wsNames))
+        if mtd.doesExist(wsOutput):
             DeleteWorkspace(Workspace=wsOutput)
         for wsName in wsNames:
             #extract the spectrum
@@ -69,11 +70,11 @@ class ConjoinSpectra(PythonAlgorithm):
                 labelString = self.GetLogValue(mtd[wsName.strip()],labelUsing,labelValue)
             if (labelString == ""):
                 labelString =wsName+"_"+str(wsIndex)
-            ta.setValue(loopIndex,labelString)
+            ta.setLabel(loopIndex,labelString)
             loopIndex += 1
-            if mtd.workspaceExists(wsOutput):
+            if mtd.doesExist(wsOutput):
                 ConjoinWorkspaces(InputWorkspace1=wsOutput,InputWorkspace2=wsTemp,CheckOverlapping=False)
-                if mtd.workspaceExists(wsTemp):
+                if mtd.doesExist(wsTemp):
                     DeleteWorkspace(Workspace=wsTemp)
             else:
                 RenameWorkspace(InputWorkspace=wsTemp,OutputWorkspace=wsOutput)
@@ -108,7 +109,7 @@ class ConjoinSpectra(PythonAlgorithm):
         except:
             #failed to find the property
             #log and pass out an empty string
-            mtd.sendLogMessage("Could not find log " + labelUsing + " in workspace " + str(ws) + " using workspace label instead.")
+            logger.information("Could not find log " + labelUsing + " in workspace " + str(ws) + " using workspace label instead.")
         return labelString
         
-mtd.registerPyAlgorithm(ConjoinSpectra())
+AlgorithmFactory.subscribe(ConjoinSpectra)
