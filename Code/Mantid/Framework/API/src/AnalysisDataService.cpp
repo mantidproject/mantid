@@ -133,9 +133,9 @@ namespace Mantid
         for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
         {
             WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>( it->get() );
-            if ( wsg && wsg->deepRemove(name) )
+            if ( wsg  )
             {
-                return;
+                wsg->deepRemove(name);
             }
         }
     }

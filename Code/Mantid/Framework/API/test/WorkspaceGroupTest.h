@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/FakeObjects.h"
@@ -417,6 +418,25 @@ public:
     TS_ASSERT_EQUALS( group->size(), 0);
     TSM_ASSERT( "removeAll() does not take out of ADS ", AnalysisDataService::Instance().doesExist("group_1") );
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_deepRemove()
+  {
+      WorkspaceGroup_sptr group = makeGroup();
+      WorkspaceGroup_sptr child_group(new WorkspaceGroup());
+      child_group->addWorkspace( group->getItem(0) );
+      group->addWorkspace( child_group );
+      AnalysisDataService::Instance().add( "group", group );
+
+      TS_ASSERT( group->contains("group_1") );
+      TS_ASSERT( child_group->contains("group_1") );
+
+      TS_ASSERT( AnalysisDataService::Instance().doesExist("group_1") );
+      group->deepRemove("group_1");
+
+      TS_ASSERT( ! group->contains("group_1") );
+      TS_ASSERT( ! AnalysisDataService::Instance().doesExist("group_1") );
+      AnalysisDataService::Instance().clear();
   }
 
   void test_deleting_workspaces()

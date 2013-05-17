@@ -328,7 +328,7 @@ void WorkspaceGroup::remove(const std::string& wsName)
  * @param nesting :: Current nesting level. To detect cycles.
  * @return :: True in success.
  */
-bool WorkspaceGroup::deepRemove(const std::string &name, bool convertToUpperCase, size_t nesting)
+void WorkspaceGroup::deepRemove(const std::string &name, bool convertToUpperCase, size_t nesting)
 {
     if ( nesting >= g_maxNestingLevel )
     {
@@ -344,37 +344,29 @@ bool WorkspaceGroup::deepRemove(const std::string &name, bool convertToUpperCase
 
     Poco::Mutex::ScopedLock _lock(m_mutex);
 
-    // try direct members first
-    size_t oldSize = m_workspaces.size();
-    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    for(auto it = m_workspaces.begin(); it != m_workspaces.end();)
     {
       if ( (**it).getUpperCaseName() == upperName )
       {
-        m_workspaces.erase(it);
-        break;
+        it = m_workspaces.erase(it);
       }
+      else
+      {
+          WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>( it->get() );
+          if ( wsg )
+          {
+              wsg->deepRemove( upperName, false, nesting + 1);
+          }
+          ++it;
+      }
+
     }
 
     // empty top-level groups must be removed from the ADS
     if ( nesting == 0 && m_workspaces.empty() && ! getName().empty() )
     {
         AnalysisDataService::Instance().remove( getName() );
-        return true;
     }
-
-    if ( oldSize != m_workspaces.size() ) return true;
-
-    // if not found look recursively in child groups
-    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
-    {
-        WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>( it->get() );
-        if ( wsg && wsg->deepRemove( upperName, false, nesting + 1) )
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 /// Removes all members of the group from the group AND from the AnalysisDataService
@@ -388,13 +380,23 @@ void WorkspaceGroup::deepRemoveAll()
   }
 }
 
-/// Print the names of all the workspaces in this group to the logger (at debug level)
-void WorkspaceGroup::print() const
+/**
+ * Print the names of all the workspaces in this group to the logger (at debug level)
+ *
+ * @param padding :: A string to put in front of each output line. Used to create
+ * different identation for nested groups.
+ */
+void WorkspaceGroup::print(const std::string &padding) const
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
   for (auto itr = m_workspaces.begin(); itr != m_workspaces.end(); ++itr)
   {
-    g_log.debug() << "Workspace name in group vector =  " << (**itr).name() << std::endl;
+    g_log.debug() << padding << (**itr).name() << std::endl;
+    const WorkspaceGroup *grp = dynamic_cast<const WorkspaceGroup*>( itr->get() );
+    if ( grp )
+    {
+        grp->print( padding + "  " );
+    }
   }
 }
 

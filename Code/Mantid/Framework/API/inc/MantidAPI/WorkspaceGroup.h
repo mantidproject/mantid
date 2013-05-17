@@ -89,11 +89,11 @@ public:
   /// Returns the names of workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
   std::vector<std::string> getNames() const;
   /// Prints the group to the screen using the logger at debug
-  void print() const;
+  void print(const std::string& padding = "") const;
   /// Remove a name from the group
   void remove(const std::string& name);
   /// Remove a workspace by name.
-  bool deepRemove(const std::string& name, bool convertToUpperCase = true, size_t nesting = 0);
+  void deepRemove(const std::string& name, bool convertToUpperCase = true, size_t nesting = 0);
   /// Remove all names from the group but do not touch the ADS
   void removeAll();
   /// Remove all names from the group and also from the ADS
