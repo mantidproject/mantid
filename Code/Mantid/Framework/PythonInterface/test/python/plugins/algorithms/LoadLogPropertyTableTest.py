@@ -32,23 +32,25 @@ class LoadLogPropertyTableTest(unittest.TestCase):
         
         return
         
-    def test_LoadPartiallyValidFilesLogValues(self):
+    def test_LoadPartiallyValidFilesMultipleLogValues(self):
         outputWorskapceName = "LoadLogPropertyTableTest_Test2"
         
         alg_test = run_algorithm("LoadLogPropertyTable", FirstFile = self._autotestDir + "emu00006473.nxs", 
-                LastFile = self._autotestDir + "emu00006475.nxs", LogNames="Temp_Sample", OutputWorkspace = outputWorskapceName)
+                LastFile = self._autotestDir + "emu00006475.nxs", LogNames="Temp_Sample,dur", OutputWorkspace = outputWorskapceName)
 
         self.assertTrue(alg_test.isExecuted())
 
         #Verify some values
         tablews = AnalysisDataService.retrieve(outputWorskapceName)
         self.assertEqual(2, tablews.rowCount())
-        self.assertEqual(2, tablews.columnCount())
+        self.assertEqual(3, tablews.columnCount())
         
         self.assertEqual(6473, tablews.cell(0,0))
         self.assertAlmostEqual(200.078, tablews.cell(0,1),3)
+        self.assertEqual("8697", tablews.cell(0,2))
         self.assertEqual(6475, tablews.cell(1,0))
         self.assertAlmostEqual(283.523, tablews.cell(1,1),3)
+        self.assertEqual("5647", tablews.cell(1,2))
 
         run_algorithm("DeleteWorkspace", Workspace = outputWorskapceName)
         
