@@ -117,7 +117,7 @@ public:
 
     //Mantid
     void addPythonScriptsDirs();
-    void addPythonAlgorithmsDirs();
+    void addPythonPluginDirs();
     void addInstrumentDir();
     void addParameterDir();
     void treeClicked();
@@ -184,7 +184,7 @@ private:
   /// Mantid tab for setting directories
   QWidget *directoriesPage;
   QLineEdit* lePythonScriptsDirs;///< pythonscripts.directories
-  QLineEdit* lePythonAlgorithmsDirs;///< pythonalgorithms.directories
+  QLineEdit* lePythonPluginsDirs;///< python plugins directories
   QLineEdit* leInstrumentDir;///< instrumentDefinition.directory
   QLineEdit* leParameterDir;///< parameterDefinition.directory
   // Mantid curve fitting page
