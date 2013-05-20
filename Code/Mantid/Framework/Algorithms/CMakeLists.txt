@@ -459,6 +459,7 @@ set ( TEST_FILES
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
 	CalculateEfficiencyTest.h
+	CalculateFlatBackgroundTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h
