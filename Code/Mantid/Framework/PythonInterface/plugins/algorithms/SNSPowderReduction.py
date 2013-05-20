@@ -359,6 +359,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 self._info = None
                 returned = self._focusChunks(samRun, SUFFIX, filterWall, calib, self._splitws, 
                         preserveEvents=preserveEvents, normByCurrent=normbycurrent)
+
+                self.log().information("DBx213: self._info.van = %d" % (self._info.van))
                 
                 if returned.__class__.__name__ == "list":
                     # Returned with a list of workspaces
@@ -384,9 +386,11 @@ class SNSPowderReduction(PythonAlgorithm):
         for samRun in samwksplist:
             samRun = mtd[str(samRun)] 
             try: 
-                print "[DBx1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents())
+                self.log().information("[DBx1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents()))
             except Exception as e:
-                print "[DBx1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e))
+                self.log().information("[DBx1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
+                
+            self._info = self._getinfo(samRun)
 
             # process the container
             canRun = self.getProperty("BackgroundNumber").value
@@ -420,10 +424,13 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # process the vanadium run
             vanRun = self.getProperty("VanadiumNumber").value
+            self.log().information("DBx313A:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
             if vanRun == 0: # use the version in the info
                 vanRun = self._info.van
+                self.log().information("DBx313B: Van Correction SamRun = %s, VanRun = %s" % (str(samRun), str(vanRun)))
             elif vanRun < 0: # turn off the correction
                 vanRun = 0
+            self.log().information("DBx313C:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
             if vanRun > 0:
                 vanFile = "%s_%d" % (self._instrument, vanRun)+".nxs"
                 if HAVE_MPI and os.path.exists(vanFile):
@@ -738,7 +745,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 msg += "%s\t\t" % (str(ws))
                 if iws %5 == 4:
                     msg += "\n"
-            print msg
+            self.log().information(msg)
 
             for itemp in xrange(numwksp):
                 temp = tempwslist[itemp]
@@ -868,7 +875,7 @@ class SNSPowderReduction(PythonAlgorithm):
             raise RuntimeError("Only know how to deal with LambdaRequest in Angstrom, not $s" % wavelength)
         wavelength = wavelength.getStatistics().mean
 
-        self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
+        self.log().information("Frequency: " + str(frequency) + " Hz center wavelength:" + str(wavelength) + " Angstrom")
         return self._config.getInfo(frequency, wavelength)
 
     def _save(self, wksp, info, normalized, pdfgetn): 
