@@ -292,6 +292,7 @@ class SNSPowderReduction(PythonAlgorithm):
         preserveEvents = self.getProperty("PreserveEvents").value
         normbycurrent = self.getProperty("NormalizeByCurrent").value
         self._info = None
+        self._infodict = {}
         self._chunks = self.getProperty("MaxChunkSize").value
 
         self._splitws = self.getProperty("SplittersWorkspace").value
@@ -325,7 +326,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         preserveEvents=preserveEvents, normByCurrent=normbycurrent)
                 tempinfo = self._getinfo(temp)
 
-                print "Run %s Focused result of type %s" % (str(runnumber), str(temp))
+                # print "Run %s Focused result of type %s" % (str(runnumber), str(temp))
 
                 if samRun is None:
                     samRun = temp
@@ -351,7 +352,7 @@ class SNSPowderReduction(PythonAlgorithm):
             samRuns = [samRun]
             workspacelist.append(str(samRun))
             samwksplist.append(str(samRun))
-        # ENDIF
+        # ENDIF (SUM)
 
         for samRun in samRuns:
             # first round of processing the sample
@@ -359,7 +360,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 self._info = None
                 returned = self._focusChunks(samRun, SUFFIX, filterWall, calib, self._splitws, 
                         preserveEvents=preserveEvents, normByCurrent=normbycurrent)
-                
+
                 if returned.__class__.__name__ == "list":
                     # Returned with a list of workspaces
                     focusedwksplist = returned
@@ -384,9 +385,18 @@ class SNSPowderReduction(PythonAlgorithm):
         for samRun in samwksplist:
             samRun = mtd[str(samRun)] 
             try: 
-                print "[DBx1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents())
+                self.log().information("[DBx1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents()))
             except Exception as e:
-                print "[DBx1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e))
+                self.log().information("[DBx1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
+
+            # Get run number
+            runnumber = samRun.getRunNumber()
+            if self._infodict.has_key(runnumber): 
+                self.log().information("[DB1022A] Found run number %d in info dict." % (runnumber))
+                self._info = self._infodict[runnumber]
+            else:
+                self.log().information("[DB1022B] Unable to find _info for run number %d in info dict. "% (runnumber)) 
+                self._info = self._getinfo(samRun)
 
             # process the container
             canRun = self.getProperty("BackgroundNumber").value
@@ -420,10 +430,13 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # process the vanadium run
             vanRun = self.getProperty("VanadiumNumber").value
+            self.log().information("DBx313A:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
             if vanRun == 0: # use the version in the info
                 vanRun = self._info.van
+                self.log().information("DBx313B: Van Correction SamRun = %s, VanRun = %s" % (str(samRun), str(vanRun)))
             elif vanRun < 0: # turn off the correction
                 vanRun = 0
+            self.log().information("DBx313C:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
             if vanRun > 0:
                 vanFile = "%s_%d" % (self._instrument, vanRun)+".nxs"
                 if HAVE_MPI and os.path.exists(vanFile):
@@ -637,6 +650,7 @@ class SNSPowderReduction(PythonAlgorithm):
         """ Load, (optional) split and focus data in chunks
 
         Arguments: 
+         - runnumber : integer for run number
          - splitwksp:  SplittersWorkspace (if None then no split)
          - filterWall: Enabled if splitwksp is defined
 
@@ -644,7 +658,7 @@ class SNSPowderReduction(PythonAlgorithm):
         """
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
-        print "runnumber = ", runnumber, " extension = ", extension
+        self.log().information("_focusChunks(): runnumber = %d, extension = %s" % (runnumber, extension))
 
         strategy = self._getStrategy(runnumber, extension)
 
@@ -666,14 +680,13 @@ class SNSPowderReduction(PythonAlgorithm):
             firstChunkList.append(True)
             wksplist.append(None)
 
-        print "Number of workspace to process = %d" %(numwksp)
+        self.log().information("DB1141A: Number of workspace to process = %d" %(numwksp))
 
         # reduce data by chunks
         ichunk = -1
         for chunk in strategy:
+            self.log().information("DB1141B: Start of Chunk %s" % (str(chunk)))
             ichunk += 1
-
-            print "Process chunk %d" %(ichunk)
 
             # Log information
             if "ChunkNumber" in chunk:
@@ -683,8 +696,16 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # Load chunk
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
+            if str(type(temp)).count("IEvent") > 0:
+                # Event workspace 
+                self.log().information("DB1141C There are %d events after data is loaded in workspace %s." % (
+                    temp.getNumberEvents(), str(temp)))
+
             if self._info is None:
-                self._info = self._getinfo(temp)
+                if not self._infodict.has_key(int(runnumber)):
+                    self._info = self._getinfo(temp)
+                    self._infodict[int(runnumber)] = self._info
+                    self.log().information("[DB1012] Add info for run number %d." % (int(runnumber)))
 
             # Filtering... 
             tempwslist = []
@@ -692,6 +713,10 @@ class SNSPowderReduction(PythonAlgorithm):
                 # Filter bad pulses
                 if (self._filterBadPulses and filterBadPulsesOverride):
                     temp = api.FilterBadPulses(InputWorkspace=temp, OutputWorkspace=temp)
+                    if str(type(temp)).count("IEvent") > 0:
+                        # Event workspace 
+                        self.log().information("DB1141D There are %d events after FilterBadPulses in workspace %s." % (
+                            temp.getNumberEvents(), str(temp)))
 
                 # Filter to bad 
                 if dosplit:
@@ -730,11 +755,12 @@ class SNSPowderReduction(PythonAlgorithm):
                 msg += "%s\t\t" % (str(ws))
                 if iws %5 == 4:
                     msg += "\n"
-            print msg
+            self.log().information(msg)
 
             for itemp in xrange(numwksp):
                 temp = tempwslist[itemp]
                 # Align and focus
+                self.log().information("[DB1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk))
                 print "[DB1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk)
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
@@ -859,7 +885,7 @@ class SNSPowderReduction(PythonAlgorithm):
             raise RuntimeError("Only know how to deal with LambdaRequest in Angstrom, not $s" % wavelength)
         wavelength = wavelength.getStatistics().mean
 
-        self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
+        self.log().information("Frequency: " + str(frequency) + " Hz center wavelength:" + str(wavelength) + " Angstrom")
         return self._config.getInfo(frequency, wavelength)
 
     def _save(self, wksp, info, normalized, pdfgetn): 
