@@ -11927,7 +11927,7 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
     QStringList linefivelst=linefive.split("\t");
     QString name=linefivelst[1];
     QStringList qlist=name.split(" ");
-    std::string graph3DwsName=qlist[1].toStdString();
+    std::string graph3DwsName = qlist.size() > 1 ? qlist[1].toStdString() : "";
     MantidMatrix *m=0;
     QList<MantidMatrix*>::const_iterator matrixItr;;
     for( matrixItr=m_mantidmatrixWindows.begin();matrixItr!=m_mantidmatrixWindows.end();++matrixItr)
