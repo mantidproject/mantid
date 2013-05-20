@@ -292,6 +292,7 @@ class SNSPowderReduction(PythonAlgorithm):
         preserveEvents = self.getProperty("PreserveEvents").value
         normbycurrent = self.getProperty("NormalizeByCurrent").value
         self._info = None
+        self._infodict = {}
         self._chunks = self.getProperty("MaxChunkSize").value
 
         self._splitws = self.getProperty("SplittersWorkspace").value
@@ -360,8 +361,6 @@ class SNSPowderReduction(PythonAlgorithm):
                 returned = self._focusChunks(samRun, SUFFIX, filterWall, calib, self._splitws, 
                         preserveEvents=preserveEvents, normByCurrent=normbycurrent)
 
-                self.log().information("DBx213: self._info.van = %d" % (self._info.van))
-                
                 if returned.__class__.__name__ == "list":
                     # Returned with a list of workspaces
                     focusedwksplist = returned
@@ -389,8 +388,20 @@ class SNSPowderReduction(PythonAlgorithm):
                 self.log().information("[DBx1136] Sample Run %s:  number of events = %d" % (str(samRun), samRun.getNumberEvents()))
             except Exception as e:
                 self.log().information("[DBx1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
-                
-            self._info = self._getinfo(samRun)
+
+            # Get run number
+            samRunName = str(samRun)
+            if samRunName.count("_") > 0:
+                runnumber = int(samRunName.split("_")[1])
+            else:
+                runnumber = int(samRunName)
+
+            if self._infodict.has_key(runnumber): 
+                self.log().information("[DB1022A] Found run number %d in info dict." % (runnumber))
+                self._info = self._infodict[runnumber]
+            else:
+                self.log().information("[DB1022B] Unable to find _info for run number %d in info dict. "% (runnumber)) 
+                self._info = self._getinfo(samRun)
 
             # process the container
             canRun = self.getProperty("BackgroundNumber").value
@@ -695,7 +706,10 @@ class SNSPowderReduction(PythonAlgorithm):
                     temp.getNumberEvents(), str(temp)))
 
             if self._info is None:
-                self._info = self._getinfo(temp)
+                if not self._infodict.has_key(int(runnumber)):
+                    self._info = self._getinfo(temp)
+                    self._infodict[int(runnumber)] = self._info
+                    self.log().information("[DB1012] Add info for run number %d." % (int(runnumber)))
 
             # Filtering... 
             tempwslist = []
