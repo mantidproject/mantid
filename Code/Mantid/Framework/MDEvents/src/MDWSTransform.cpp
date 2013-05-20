@@ -407,6 +407,11 @@ CoordScaling MDWSTransform::getQScaling(const std::string &ScID)const
 
   return CoordScaling(nScaling);
 }
+/** Method to convert enum describing target scaling to its string representation */
+std::string MDWSTransform::getQScaling(const CnvrtToMD::CoordScaling ScaleID)const
+{
+    return m_QScalingID[ScaleID];
+}
 
 /** function which convert input string representing Target coordinate frame to correspondent enum */
 TargetFrame MDWSTransform::getTargetFrame(const std::string &FrameID)const
@@ -416,6 +421,11 @@ TargetFrame MDWSTransform::getTargetFrame(const std::string &FrameID)const
   if (nFrame<0)throw(std::invalid_argument(" The Target Frame with ID: "+FrameID+" is unavalible"));
 
   return TargetFrame(nFrame);
+}
+/** Method to convert enum describing target coordinate frame to its string representation */
+std::string MDWSTransform::getTargetFrame(const CnvrtToMD::TargetFrame FrameID)const
+{
+    return m_TargFramesID[FrameID];
 }
 
 //

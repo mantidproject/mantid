@@ -294,7 +294,7 @@ ConvertToMD::init()
 
     declareProperty(new PropertyWithValue<bool>("UpdateMasks", false, Direction::Input),
 "if PreprocessDetectorWS is used to build the workspace with preprocessed detectors at first algorithm "
-"call and the input workspaces instruments are different by just different masked monitors, setting this "
+"call and the input workspaces instruments are different by just different masked detectors, setting this "
 "option to true forces [[PreprocessDetectorsToMD]] update only the detectors masks for all subsequent "
 "calls to this algorithm. <span style=\"color:#FF0000\">This is temporary solution necessary until Mantid "
 "masks spectra by 0 rather then by NaN</span> "

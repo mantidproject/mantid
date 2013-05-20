@@ -11,6 +11,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 
@@ -21,6 +22,9 @@ namespace MDAlgorithms
 
   /** ConvertToDiffractionMDWorkspace2 :
    * Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.
+   *
+   * This is the wrapper for ConvertToMD algorithm transferring the properties of the old ConvertToDiffractionMDWorkspace into ConvertToMD properties 
+   * and running ConvertToMD as a subalgorithm. 
    *  
    * @date 2013-05-20 
    */
@@ -45,52 +49,13 @@ namespace MDAlgorithms
     void init();
     void exec();
 
-    template <class T>
-    void convertEventList(int workspaceIndex, DataObjects::EventList & el);
-
-    void convertSpectrum(int workspaceIndex);
-
-    /// The input MatrixWorkspace
-    API::MatrixWorkspace_sptr m_inWS;
-
-    /// The input event workspace
-    DataObjects::EventWorkspace_sptr m_inEventWS;
-
-    /// The output MDEventWorkspace<3>
-    MDEvents::MDEventWorkspace3Lean::sptr ws;
-    /// Do we clear events on the input during loading?
-    bool ClearInputWorkspace;
-    /// Use the histogram representation with one event per bin
-    bool OneEventPerBin;
-    /// Are we appending?
-    bool Append;
-    /// Perform LorentzCorrection on the fly.
-    bool LorentzCorrection;
-    /// Map of all the detectors in the instrument
-    detid2det_map allDetectors;
-    /// Primary flight path (source to sample)
-    double l1;
-    /// Beam direction and length
-    Kernel::V3D beamline;
-    /// Path length between source and sample
-    double beamline_norm;
-    /// Path length between source and sample
-    size_t failedDetectorLookupCount;
-    /// Beam direction (unit vector)
-    Kernel::V3D beamDir;
-    /// Sample position
-    Kernel::V3D samplePos;
-    /// Progress reporter (shared)
-    boost::shared_ptr<Kernel::ProgressBase> prog;
-    /// Matrix. Multiply this by the lab frame Qx, Qy, Qz to get the desired Q or HKL.
-    Kernel::Matrix<double> mat;
-
-    /// Minimum extents of the workspace. Cached for speed
-    coord_t * m_extentsMin;
-    /// Maximum extents of the workspace. Cached for speed
-    coord_t * m_extentsMax;
-
-
+    // the target frame names exposed as the algorithm properties and recognized by old convertToDiffractionWorkspace algorithm.
+    std::vector<std::string> frameOptions;
+  protected: // for testing
+    // method to convert the value of the target frame specified for the ConvertToDiffractionMDWorksapce  into the properties names of the ConvertToMD
+    void convertFramePropertyNames(const std::string &ConvToDifrWSPropName,std::string &TargFrameName,std::string & ScalingName);
+    // method to convert the extents specified for the ConvertToDiffractionMDWorksapce  into the min-max properties names of the ConvertToMD
+    void convertExtents(const std::string &Extents,std::string &minVal,std::string &maxVal);
   };
 
 
