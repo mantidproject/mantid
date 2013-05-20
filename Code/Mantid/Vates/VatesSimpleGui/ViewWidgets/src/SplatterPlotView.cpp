@@ -96,6 +96,10 @@ void SplatterPlotView::destroyView()
     this->destroyPeakSources();
     pqActiveObjects::instance().setActiveSource(this->origSrc);
   }
+  if (this->probeSource)
+  {
+    builder->destroy(this->probeSource);
+  }
   if (this->threshSource)
   {
     builder->destroy(this->threshSource);
