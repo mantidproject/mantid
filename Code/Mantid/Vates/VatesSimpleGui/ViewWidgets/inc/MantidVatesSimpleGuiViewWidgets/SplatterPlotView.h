@@ -86,6 +86,10 @@ public:
    */
   void resetDisplay();
 
+signals:
+  /// Change the state of the orthographic projection mode
+  void toggleOrthographicProjection(bool state);
+
 public slots:
   /// Check the coordinates for the peaks overlay if necessary
   void checkPeaksCoordinates();

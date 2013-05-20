@@ -386,6 +386,10 @@ void MdViewerWidget::setParaViewComponentsForView()
                      SIGNAL(applied()),
                      spv,
                      SLOT(checkPeaksCoordinates()));
+    QObject::connect(spv,
+                     SIGNAL(toggleOrthographicProjection(bool)),
+                     this->ui.parallelProjButton,
+                     SLOT(setChecked(bool)));
   }
 
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),

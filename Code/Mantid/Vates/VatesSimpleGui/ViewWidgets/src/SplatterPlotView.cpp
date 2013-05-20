@@ -219,6 +219,8 @@ void SplatterPlotView::onPickModeToggled(bool state)
   {
     builder->destroy(this->probeSource);
   }
+  emit this->toggleOrthographicProjection(state);
+  this->onParallelProjection(state);
 }
 
 void SplatterPlotView::resetCamera()
