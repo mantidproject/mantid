@@ -36,6 +36,8 @@ namespace CurveFitting
   {
     CompositeFunction_sptr m_function(new CompositeFunction());
     m_compsiteFunction = m_function;
+    m_hasNewPeakValue = false;
+    m_numPeaks = 0;
 
     return;
   }
@@ -61,11 +63,38 @@ namespace CurveFitting
   /** Calculate powder diffraction pattern by Le Bail algorithm
     * @param out :: output vector
     * @param xvalues :: input vector
+    * @param includebkgd :: if true, then calculate background and add to output.  otherwise, assume zero background
     */
-  void LeBailFunction::function(std::vector<double>& out, const std::vector<double>& xvalues) const
+  void LeBailFunction::function(std::vector<double>& out, const std::vector<double>& xvalues, bool includebkgd) const
   {
-    throw runtime_error("Implement LeBailFunction::function() ASAP!");
+    if (out.size() != xvalues.size())
+      throw runtime_error("xvalues and out have different sizes.");
 
+    // Reset output elements to zero
+    std::fill(out.begin(), out.end(), 0.0);
+
+    vector<double> temp(xvalues.size());
+
+    // Peaks
+    for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
+    {
+      IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
+      peak->function(temp, xvalues);
+      transform(out.begin(), out.end(), temp.begin(), out.begin(), ::plus<double>());
+    }
+
+    // Background if required
+    if (includebkgd)
+    {
+      FunctionDomain1DVector domain(xvalues);
+      FunctionValues values(domain);
+      m_background->function(domain, values);
+      size_t numpts = out.size();
+      for (size_t i = 0; i < numpts; ++i)
+        out[i] += values[i];
+    }
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -84,7 +113,7 @@ namespace CurveFitting
   /** Check whether the newly set parameters are correct, i.e., all peaks are physical
     * This function would be used with setParameters() and etc.
     */
-  bool LeBailFunction::isParameterCorrect() const
+  bool LeBailFunction::isParameterValid() const
   {
     // Re-calculate peak parameter if there is some modification
     if (m_hasNewPeakValue)
@@ -96,7 +125,7 @@ namespace CurveFitting
     bool arevalid = true;
     for (size_t i = 0; i < m_numPeaks; ++i)
     {
-      IPowderDiffPeakFunction_sptr peak = m_peakvec[i];
+      IPowderDiffPeakFunction_sptr peak = m_vecPeaks[i];
       bool isvalid = peak->isPhysical();
       if (!isvalid)
       {
@@ -115,7 +144,7 @@ namespace CurveFitting
   {
     for (size_t i = 0; i < m_numPeaks; ++i)
     {
-      IPowderDiffPeakFunction_sptr peak = m_peakvec[i];
+      IPowderDiffPeakFunction_sptr peak = m_vecPeaks[i];
       peak->calculateParameters(false);
     }
 
@@ -132,14 +161,12 @@ namespace CurveFitting
    */
   void LeBailFunction::addPeaks(std::vector<std::vector<int> > peakhkls)
   {
-#if 0
-    double lattice = getParameter("LatticeConstant");
-#endif
-
     for (size_t ipk = 0; ipk < peakhkls.size(); ++ ipk)
     {
+      vector<int> hkl = peakhkls[ipk];
+
       // Check input Miller Index
-      if (peakhkls[ipk].size() != 3)
+      if (hkl.size() != 3)
       {
         stringstream errss;
         errss << "Error of " << ipk << "-th input Miller Index.  It has " << peakhkls[ipk].size()
@@ -147,24 +174,21 @@ namespace CurveFitting
         g_log.error(errss.str());
         throw runtime_error(errss.str());
       }
-      int h = peakhkls[ipk][0];
-      int k = peakhkls[ipk][1];
-      int l = peakhkls[ipk][2];
 
-#if 0
-      // Calculate peak position
-      double peak_d = calCubicDSpace(lattice, h, k, l);
-#endif
-
+      // Generate new peak
+      int h = hkl[0];
+      int k = hkl[1];
+      int l = hkl[2];
       IPowderDiffPeakFunction_sptr newpeak = generatePeak(h, k, l);
-      double dsp = newpeak->getPeakParameter("dspace");
+      double dsp = newpeak->getPeakParameter("d_h");
 
-      // Add peak
-      // addPeak(peak_d);
-      m_peakvec.push_back(newpeak);
+      // Add new peak to all related data storage
+      m_vecPeaks.push_back(newpeak);
       m_dspPeakVec.push_back(make_pair(dsp, newpeak));
-      m_peakHKLVec.push_back(peakhkls[ipk]);
+      m_mapHKLPeak.insert(make_pair(hkl, newpeak));
     }
+
+    m_numPeaks = m_vecPeaks.size();
 
     return;
   } // END of addPeaks()
@@ -213,7 +237,7 @@ namespace CurveFitting
   *
   * Return: True if all peaks' height are physical.  False otherwise
   */
-  bool LeBailFunction::calculatePeaksIntensities(const vector<double>& vecX, vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues)
+  bool LeBailFunction::calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues)
   {
     // 1. Group the peak
     vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > > peakgroupvec;
@@ -672,6 +696,8 @@ namespace CurveFitting
     */
   void LeBailFunction::addBackgroundFunction(string backgroundtype, map<string, double> bkgdparmap)
   {
+    throw runtime_error("Who calls me!");
+
     size_t order = bkgdparmap.size();
 
     // Create background function from factory
@@ -730,7 +756,7 @@ namespace CurveFitting
     * @param paramname :: name of parameter
     * @param paramvalue :: value of parameter to be fixed to
     */
-  void LeBailFunction::setFixProfileParameter(string paramname, double paramvalue)
+  void LeBailFunction::fixPeakParameter(string paramname, double paramvalue)
   {
     for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
     {
@@ -761,7 +787,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Fix all background parameters
     */
-  void LeBailFunction::setFixBackgroundParameters()
+  void LeBailFunction::fixBackgroundParameters()
   {
     size_t numbkgdparams = m_background->nParams();
 
@@ -1059,36 +1085,33 @@ namespace CurveFitting
       throw runtime_error(errmsg.str());
     }
 
-    IPowderDiffPeakFunction_sptr rpeak = m_peakvec[peakindex];
+    IPowderDiffPeakFunction_sptr rpeak = m_vecPeaks[peakindex];
 
     return rpeak;
   }
 
-
-  /*
-   * Calculate d = a/sqrt(h**2+k**2+l**2)
+  //----------------------------------------------------------------------------------------------
+  /** Get value of one specific peak's parameter
    */
-  double LeBailFunction::calCubicDSpace(double a, int h, int k, int l) const
+  double LeBailFunction::getPeakParameter(std::vector<int> hkl, std::string parname) const
   {
-    double hklfactor = sqrt(double(h*h)+double(k*k)+double(l*l));
-    double d = a/hklfactor;
-    g_log.debug() << "DB143 a = " << a << " (HKL) = " << h << ", " << k << ", " << l << ": d = " << d << std::endl;
+    // Search peak in map
+    map<vector<int>, IPowderDiffPeakFunction_sptr>::const_iterator fiter;
+    fiter = m_mapHKLPeak.find(hkl);
+    if (fiter == m_mapHKLPeak.end())
+    {
+      stringstream errss;
+      errss << "Peak with Miller index (" << hkl[0] << ", " << hkl[1] << ","
+            << hkl[2] << ") does not exist in Le Bail function.";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
 
-    return d;
-  }
+    IPowderDiffPeakFunction_sptr peak = fiter->second;
 
-  /*
-   * A public function API for function1D
-   */
-  void LeBailFunction::calPeaks(double* out, const double* xValues, const size_t nData)
-  {
-#if 1
-    throw runtime_error("calPeaks() should be re-defined.");
-#else
-    this->function1D(out, xValues, nData);
-#endif
+    double parvalue = peak->getPeakParameter(parname);
 
-    return;
+    return parvalue;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1096,51 +1119,33 @@ namespace CurveFitting
    */
   double LeBailFunction::getPeakParameter(size_t index, std::string parname) const
   {
-    throw runtime_error("This function might not be called at all.");
-    if (index >= mPeakParameters.size())
+    if (index >= m_numPeaks)
     {
-      g_log.error() << "getParameter() Index out of range" << std::endl;
-      throw std::runtime_error("Index out of range");
+      stringstream errss;
+      errss << "getPeakParameter() tries to reach a peak with index " << index
+            << ", which is out of range " << m_numPeaks << "/" << m_vecPeaks.size() << ".";
+      g_log.error(errss.str());
+      throw std::runtime_error(errss.str());
     }
 
-    IPowderDiffPeakFunction_sptr peak = m_peakvec[index];
-
+    IPowderDiffPeakFunction_sptr peak = m_vecPeaks[index];
     double value = peak->getParameter(parname);
-
-    /*
-    std::map<std::string, double>::iterator mit;
-    mit = mPeakParameters[index].find(parname);
-    double value = 0.0;
-    if (mit != mPeakParameters[index].end())
-    {
-      value = mit->second;
-    }
-    else
-    {
-      g_log.error() << "Unable to find parameter " << parname << " in PeakParameters[" << index << "]" << std::endl;
-      throw std::invalid_argument("Non-existing parameter name.");
-    }
-    */
 
     return value;
   }
 
-  /*
-   * Return FWHM of the peak specified
-   */
-  double LeBailFunction::getPeakFWHM(size_t peakindex) const
+  //----------------------------------------------------------------------------------------------
+  /** Calculate d-space value of a Bragg peak of a cubic unit cell.
+    * d = a/sqrt(h**2+k**2+l**2)
+    */
+  double calCubicDSpace(double a, int h, int k, int l)
   {
-    throw runtime_error("This function may not be called at all.");
-    if (peakindex >= m_peakvec.size())
-    {
-      g_log.error() << "LeBailFunction() cannot get peak indexed " << peakindex << ".  Number of peaks = " << m_peakvec.size() << std::endl;
-      throw std::invalid_argument("LeBailFunction getPeakFWHM() cannot return peak indexed out of range. ");
-    }
+    double hklfactor = sqrt(double(h*h)+double(k*k)+double(l*l));
+    double d = a/hklfactor;
+    // cout << "DB143 a = " << a << " (HKL) = " << h << ", " << k << ", " << l << ": d = " << d << std::endl;
 
-    return m_peakvec[peakindex]->fwhm();
-
+    return d;
   }
-
 
 } // namespace Mantid
 } // namespace CurveFitting

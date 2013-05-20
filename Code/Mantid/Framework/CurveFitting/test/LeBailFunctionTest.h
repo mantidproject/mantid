@@ -2,6 +2,7 @@
 #define MANTID_CURVEFITTING_LEBAILFITTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include <iostream>
@@ -27,7 +28,7 @@ public:
   void test_init()
   {
     LeBailFunction function;
-    TS_ASSERT(function.isParameterCorrect());
+    TS_ASSERT(function.isParameterValid());
   }
 
   //----------------------------------------------------------------------------------------------
@@ -43,10 +44,11 @@ public:
    *
    * Source data:
    * ...../Tests/Peaks/Jason-Powgen/HR_10Hz/B_mods/pg10b1.irf, LB4917b1.hkl
+   * ...../"/home/wzz/Mantid/mantid/Code/release/LB4917b1_unittest.dat"
    */
   void test_CalculatePeakParametersX()
   {
-    LeBailFunction lebail;
+    LeBailFunction lebailfunction;
 
     // Add peaks
     vector<vector<int> > vechkl;
@@ -56,7 +58,83 @@ public:
     vector<int> p110;
     p110.push_back(1); p110.push_back(1); p110.push_back(0);
     vechkl.push_back(p110);
-    lebail.addPeaks(vechkl);
+    lebailfunction.addPeaks(vechkl);
+
+    // Add peak parameters
+    map<string, double> parammap;
+
+    parammap.insert(make_pair("Dtt1", 29671.7500));
+    parammap.insert(make_pair("Dtt2", 0.0));
+    parammap.insert(make_pair("Dtt1t", 29671.750));
+    parammap.insert(make_pair("Dtt2t", 0.30));
+
+    parammap.insert(make_pair("Zero", 0.0));
+    parammap.insert(make_pair("Zerot", 33.70));
+
+    parammap.insert(make_pair("Alph0", 4.026));
+    parammap.insert(make_pair("Alph1", 7.362));
+    parammap.insert(make_pair("Beta0", 3.489));
+    parammap.insert(make_pair("Beta1", 19.535));
+
+    parammap.insert(make_pair("Alph0t", 60.683));
+    parammap.insert(make_pair("Alph1t", 39.730));
+    parammap.insert(make_pair("Beta0t", 96.864));
+    parammap.insert(make_pair("Beta1t", 96.864));
+
+    parammap.insert(make_pair("Sig2",  11.380));
+    parammap.insert(make_pair("Sig1",   9.901));
+    parammap.insert(make_pair("Sig0",  17.370));
+
+    parammap.insert(make_pair("Width", 1.0055));
+    parammap.insert(make_pair("Tcross", 0.4700));
+
+    parammap.insert(make_pair("Gam0", 0.0));
+    parammap.insert(make_pair("Gam1", 0.0));
+    parammap.insert(make_pair("Gam2", 0.0));
+
+    parammap.insert(make_pair("LatticeConstant", 4.156890));
+
+    lebailfunction.setPeaksParameters(parammap);
+
+    TS_ASSERT(lebailfunction.isParameterValid());
+
+    // Test parameters of each peak
+    double tof_h_d1 = lebailfunction.getPeakParameter(p111, "TOF_h");
+    double alpha_d1 = lebailfunction.getPeakParameter(p111, "Alpha");
+    double beta_d1 = lebailfunction.getPeakParameter(p111, "Beta");
+    double sigma2_d1 = lebailfunction.getPeakParameter(p111, "Sigma2");
+    double gamma_d1 = lebailfunction.getPeakParameter(p111, "Gamma");
+    TS_ASSERT_DELTA(tof_h_d1, 71229.45, 0.1);
+    TS_ASSERT_DELTA(alpha_d1, 0.02977, 0.0001);
+    TS_ASSERT_DELTA(beta_d1, 0.01865, 0.0001);
+    TS_ASSERT_DELTA(sigma2_d1, 451.94833, 0.1);
+    TS_ASSERT_DELTA(gamma_d1, 0.0, 0.01);
+
+    double tof_h_d2 = lebailfunction.getPeakParameter(p110, "TOF_h");
+    double alpha_d2 = lebailfunction.getPeakParameter(p110, "Alpha");
+    double beta_d2 = lebailfunction.getPeakParameter(p110, "Beta");
+    double sigma2_d2 = lebailfunction.getPeakParameter(p110, "Sigma2");
+    double gamma_d2 = lebailfunction.getPeakParameter(p110, "Gamma");
+    TS_ASSERT_DELTA(tof_h_d2, 87235.37, 0.1);
+    TS_ASSERT_DELTA(alpha_d2, 0.02632, 0.0001);
+    TS_ASSERT_DELTA(beta_d2, 0.01597, 0.0001);
+    TS_ASSERT_DELTA(sigma2_d2, 952.39972, 0.1);
+    TS_ASSERT_DELTA(gamma_d2, 0.0, 0.01);
+
+    // Calculate peak
+    MatrixWorkspace_sptr testws = createDataWorkspace();
+    const vector<double> vecX = testws->readX(0);
+    const vector<double> vecY = testws->readY(0);
+
+    size_t nData = vecX.size();
+    vector<double> out(nData);
+
+    // Calculate peak intensities
+    vector<double> peakheights;
+    lebailfunction.calculatePeaksIntensities(vecX, vecY, true, peakheights);
+
+    // Calculate diffraction patters
+    lebailfunction.function(out, vecX, true);
 
 
  #if 0
@@ -64,35 +142,7 @@ public:
     // TS_ASSERT_EQUALS(fitalg.asString(),
     // "name=LeBailFunction,Dtt1=1,Dtt2=1,Dtt1t=1,Dtt2t=1,Zero=0,Zerot=0,Width=1,Tcross=1,Alph0=1.6,Alph1=1.5,Beta0=1.6,Beta1=1.5,Alph0t=1.6,Alph1t=1.5,Beta0t=1.6,Beta1t=1.5,Sig0=1,Sig1=1,Sig2=1,Gam0=0,Gam1=0,Gam2=0");
 
-    // 1. Set up parameters
-    fitalg.setParameter("Dtt1", 29671.7500);
-    fitalg.setParameter("Dtt2", 0.0);
-    fitalg.setParameter("Dtt1t", 29671.750);
-    fitalg.setParameter("Dtt2t", 0.30);
 
-    fitalg.setParameter("Zero", 0.0);
-    fitalg.setParameter("Zerot", 33.70);
-
-    fitalg.setParameter("Alph0", 4.026);
-    fitalg.setParameter("Alph1", 7.362);
-    fitalg.setParameter("Beta0", 3.489);
-    fitalg.setParameter("Beta1", 19.535);
-
-    fitalg.setParameter("Alph0t", 60.683);
-    fitalg.setParameter("Alph1t", 39.730);
-    fitalg.setParameter("Beta0t", 96.864);
-    fitalg.setParameter("Beta1t", 96.864);
-
-    fitalg.setParameter("Sig2",  11.380);
-    fitalg.setParameter("Sig1",   9.901);
-    fitalg.setParameter("Sig0",  17.370);
-
-    fitalg.setParameter("Width", 1.0055);
-    fitalg.setParameter("Tcross", 0.4700);
-
-    fitalg.setParameter("Gam0", 0.0);
-    fitalg.setParameter("Gam1", 0.0);
-    fitalg.setParameter("Gam2", 0.0);
 
     fitalg.setParameter("LatticeConstant", 4.156890);
 
@@ -181,6 +231,31 @@ public:
 #endif
 
     return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Create a test data workspace
+    */
+  MatrixWorkspace_sptr createDataWorkspace()
+  {
+    // Create vectors
+    std::vector<double> vecX;
+    std::vector<double> vecY;
+    std::vector<double> vecE;
+    generateData(vecX, vecY, vecE);
+
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
+          "Workspace2D", 1, vecX.size(), vecY.size());
+
+    for (size_t i = 0; i < vecX.size(); ++i)
+      ws->dataX(0)[i] = vecX[i];
+    for (size_t i = 0; i < vecY.size(); ++i)
+    {
+      ws->dataY(0)[i] = vecY[i];
+      ws->dataE(0)[i] = vecE[i];
+    }
+
+    return ws;
   }
 
 

@@ -290,9 +290,10 @@ namespace CurveFitting
     else
     {
       stringstream errss;
-      errss << "Parameter " << paramname << " does not exist in peak profile. "
-            << "Candidates are Alpha, Beta, Sigma2, Gamma2 and d_h.";
-      g_log.warning(errss.str());
+      errss << "Parameter " << paramname << " does not exist in peak function "
+            << this->name() << "'s calculated parameters. "
+            << "Candidates are Alpha, Beta, Sigma2, Gamma d_h and Eta. ";
+      g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
 

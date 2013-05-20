@@ -63,60 +63,57 @@ namespace CurveFitting
     /// From table/map to set parameters to all peaks.
     void setPeaksParameters(map<std::string, double> parammap);
 
-    /// Check whether a parameter is a profile parameter
-    bool hasProfileParameter(std::string paramname);
-
-    /// Add a new peak
-    void addPeak(int h, int k, int l);
-
-    /// Get a peak
-
-    /// Calculate
-    void function(std::vector<double>& out, const vector<double> &xvalues) const;
-
-    /// Return the composite function
-    API::IFunction_sptr getFunction();
+    /// Set up a parameter to fit but tied among all peaks
+    void setFitProfileParameter(string paramname, double minvalue, double maxvalue);
 
     /// Function
     void setPeakHeights(std::vector<double> inheights);
 
-    void calPeaksParameters();
+    /// Check whether a parameter is a profile parameter
+    bool hasProfileParameter(std::string paramname);
 
-    void calPeaks(double* out, const double* xValues, const size_t nData);
-
-    double getPeakParameter(size_t index, std::string parname) const;
-
-    double getPeakFWHM(size_t peakindex) const;
-
-    /// Get number of peaks
-    size_t getNumberOfPeaks() const { return m_numPeaks; }
-
-    /// Fix i-th parameter with given name.
-    void fit(size_t paramindex, string paramname);
-
-    /// Set up a parameter to fit but tied among all peaks
-    void setFitProfileParameter(string paramname, double minvalue, double maxvalue);
-
-    /// Set up a parameter to be fixed
-    void setFixProfileParameter(string paramname, double paramvalue);
-
-    /// Fix all background parameters
-    void setFixBackgroundParameters();
+    /// Check whether the newly set parameters are correct, i.e., all peaks are physical
+    bool isParameterValid() const;
 
     /// Generate peaks, and add them to this composite function
     void addPeaks(std::vector<std::vector<int> > peakhkls);
 
-    /// Check whether the newly set parameters are correct, i.e., all peaks are physical
-    bool isParameterCorrect() const;
+    /// Add background function
+    void addBackgroundFunction(string backgroundtype, map<string, double> bkgdparmap);
+
+    /// Get number of peaks
+    size_t getNumberOfPeaks() const { return m_numPeaks; }
+
+    /// Calculate
+    void function(std::vector<double>& out, const std::vector<double> &xvalues, bool includebkgd) const;
+
+    /// Return the composite function
+    API::IFunction_sptr getFunction();
+
+    /// Force to make all peaks to calculate peak parameters
+    void calPeaksParameters();
+
+    /// Get peak parameters (calculated)
+    double getPeakParameter(size_t index, std::string parname) const;
+
+    /// Get peak parameters (calculated)
+    double getPeakParameter(std::vector<int> hkl, std::string parname) const;
+
+    /// Set up a parameter to be fixed
+    void fixPeakParameter(string paramname, double paramvalue);
+
+    /// Fix all background parameters
+    void fixBackgroundParameters();
 
     /// Fix all peaks' intensity/height
     void setFixPeakHeights();
 
     /// Calculate peak intensities by Le Bail algorithm
-    bool calculatePeaksIntensities(const vector<double>& vecX, vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues);
+    bool calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues);
+
+    mutable std::vector<double> heights;
 
   private:
-
     /// Log
     static Kernel::Logger& g_log;
 
@@ -130,13 +127,6 @@ namespace CurveFitting
     /// Calculate all peaks' parameter value
     void calculatePeakParameterValues() const;
 
-    ///
-
-    void calPeakParametersForD(double dh, double& alpha, double& beta, double &Tof_h, double &sigma_g2, double &gamma_l, std::map<std::string, double>& parmap) const;
-    void adPeakPositionD(double dh);
-    double calCubicDSpace(double a, int h, int k, int l) const;
-    void addPeak(double d, double height);
-
     /// Generate a peak with parameter set by
     IPowderDiffPeakFunction_sptr generatePeak(int h, int k, int l);
 
@@ -149,25 +139,30 @@ namespace CurveFitting
     void groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec);
 
     /// Number of peaks
-    size_t m_numPeaks;
+    size_t m_numPeaks;    
 
-    /// Vector of pair <peak position in d-space, Peak> sortable
-    vector<pair<double, API::IPowderDiffPeakFunction_sptr> > m_dspPeakVec;
-    /// order of parameter names in m_peakParameterNameVec must be same as the order in IPowderDiffPeakFunction.
+    /// Name of peak parameter names (be same as the order in IPowderDiffPeakFunction)
     vector<string> m_peakParameterNameVec;
     /// Ordered profile parameter names for search
     vector<string> m_orderedProfileParameterNames;
 
+    /// Vector of all peaks
+    vector<API::IPowderDiffPeakFunction_sptr> m_vecPeaks;
+    /// Vector of pair <peak position in d-space, Peak> sortable
+    vector<pair<double, API::IPowderDiffPeakFunction_sptr> > m_dspPeakVec;
+    /// Vector of all peak's Miller indexes
+    std::map<std::vector<int>, API::IPowderDiffPeakFunction_sptr> m_mapHKLPeak;
+
+    /// Composite functions for all peaks and background
+    API::CompositeFunction_sptr m_compsiteFunction;
     /// Background function
     BackgroundFunction_sptr m_background;
-
-    API::CompositeFunction_sptr m_compsiteFunction;
 
     /// Parameters
     map<string, double> m_functionParameters;
 
     /// Has new peak values
-    mutable double m_hasNewPeakValue;
+    mutable bool m_hasNewPeakValue;
 
 
     /*
@@ -178,22 +173,15 @@ namespace CurveFitting
     mutable double Beta0, Beta1, Beta0t, Beta1t;
     mutable double Sig0, Sig1, Sig2, Gam0, Gam1, Gam2;
     mutable double Dtt1, Dtt2, Dtt1t, Dtt2t, Zero, Zerot;
+
+    // void calPeakParametersForD(double dh, double& alpha, double& beta, double &Tof_h, double &sigma_g2, double &gamma_l, std::map<std::string, double>& parmap) const;
+    void adPeakPositionD(double dh);
+    double calCubicDSpace(double a, int h, int k, int l) const;
+    void addPeak(double d, double height);
+        mutable std::vector<double> dvalues;
+    /// vector of peak's parameters (It is in strict order with dvalues)
+    mutable std::vector<std::map<std::string, double> > mPeakParameters;
     */
-
-    mutable std::vector<double> dvalues;
-    mutable std::vector<double> heights;
-    std::vector<std::vector<int> > m_peakHKLVec;
-
-    /// Vector of all peaks
-    vector<API::IPowderDiffPeakFunction_sptr> m_peakvec;
-
-    mutable std::vector<std::map<std::string, double> > mPeakParameters; // It is in strict order with dvalues;
-
-    /// Add background function
-    void addBackgroundFunction(string backgroundtype, map<string, double> bkgdparmap);
-
-
-
   };
 
   // typedef boost::shared_ptr<LeBailFunction> LeBailFunction_sptr;

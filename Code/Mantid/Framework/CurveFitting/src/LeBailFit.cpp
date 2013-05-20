@@ -262,7 +262,7 @@ namespace CurveFitting
     createOutputDataWorkspace();
 
     // 5. Adjust function mode according to input values
-    if (m_lebailFunction.isParameterCorrect())
+    if (m_lebailFunction.isParameterValid())
     {
       // All peaks within range are physical and good to refine
       m_inputParameterPhysical = true;
@@ -534,7 +534,8 @@ namespace CurveFitting
     map<string, double> fakemap;
     m_lebailFunction.setPeaksParameters(fakemap);
     // m_lebailFunction.calculatePeaksIntensities(vecX, dataws->readY(workspaceindex), false, vecY);
-    m_lebailFunction.function(vecY, dataws->readX(workspaceindex));
+    bool includebkgd = false;
+    m_lebailFunction.function(vecY, dataws->readX(workspaceindex), includebkgd);
 #else
     // 1. Set parameters to each peak
     bool allpeaksvalid = true;
@@ -581,7 +582,7 @@ namespace CurveFitting
     m_lebailFunction.function(vecY, vecX);
 #endif
 
-    bool allpeaksvalid = m_lebailFunction.isParameterCorrect();
+    bool allpeaksvalid = m_lebailFunction.isParameterValid();
 
     return allpeaksvalid;
   }
@@ -796,7 +797,7 @@ namespace CurveFitting
       else
       {
         // Fix the parameter
-        m_lebailFunction.setFixProfileParameter(parname, funcparam.curvalue);
+        m_lebailFunction.fixPeakParameter(parname, funcparam.curvalue);
       }
 
     } // FOR-Function Parameters
@@ -805,7 +806,7 @@ namespace CurveFitting
     m_lebailFunction.setFixPeakHeights();
 
     // 3. Fix all background paramaters to constants/current values
-    m_lebailFunction.setFixBackgroundParameters();
+    m_lebailFunction.fixBackgroundParameters();
 
     return;
   }
@@ -3328,7 +3329,7 @@ namespace CurveFitting
   {
     std::string fitoutputwsrootname("TempMinimizerOutput");
 
-    IFunction_sptr function = m_lebailFunction.getFunction();
+    IFunction_sptr function  = m_lebailFunction.getFunction();
 
     // 1. Initialize
     API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
