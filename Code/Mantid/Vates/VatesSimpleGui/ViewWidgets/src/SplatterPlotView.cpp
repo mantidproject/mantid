@@ -14,12 +14,15 @@
 #include <pqRenderView.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
+#include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMSourceProxy.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
 
+#include <QKeyEvent>
 #include <QMessageBox>
 
 namespace Mantid
@@ -51,10 +54,38 @@ SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
                    SLOT(onPickModeToggled(bool)));
 
   this->view = this->createRenderView(this->ui.renderFrame);
+  this->installEventFilter(this);
 }
 
 SplatterPlotView::~SplatterPlotView()
 {
+}
+
+/**
+ * This function is an event filter for handling pick mode. The release
+ * of the p key triggers the automatic accept feature and then calls the
+ * read and send function.
+ * @param obj : Object causing event
+ * @param ev : Event object
+ * @return true if the event is handled
+ */
+bool SplatterPlotView::eventFilter(QObject *obj, QEvent *ev)
+{
+  std::cout << "In filter: " << ev->type() << std::endl;
+  std::cout << "Object: " << obj->className() << std::endl;
+  if (QEvent::KeyRelease == ev->type() && this == obj &&
+      this->ui.pickModeButton->isChecked())
+  {
+    QKeyEvent *kev = static_cast<QKeyEvent *>(ev);
+    if (Qt::Key_P == kev->key())
+    {
+      std::cout << "Pick done" << std::endl;
+      emit this->triggerAccept();
+      this->readAndSendCoordinates();
+      return true;
+    }
+  }
+  return QObject::eventFilter(obj, ev);
 }
 
 void SplatterPlotView::destroyView()
@@ -235,6 +266,37 @@ void SplatterPlotView::destroyPeakSources()
   {
     builder->destroy(this->peaksSource.at(i));
   }
+}
+
+/**
+ * This function reads the coordinates from the probe point plugin and
+ * passes them on to a listening serivce that will handle them in the
+ * appropriate manner.
+ */
+void SplatterPlotView::readAndSendCoordinates()
+{
+  std::cout << "Reading coordinates" << std::endl;
+  std::vector<double> coords = vtkSMPropertyHelper(this->probeSource->getProxy(),
+                      "WorldPosition").GetDoubleArray();
+/*
+  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->probeSource->getProxy());
+  srcProxy->Modified();
+  srcProxy->UpdatePipelineInformation();
+
+  vtkSMDoubleVectorProperty *coords = vtkSMDoubleVectorProperty::SafeDownCast(\
+        srcProxy->GetProperty("WorldPosition"));
+
+  if (NULL != coords)
+  {
+    std::cout << "OK" << std::endl;
+  }
+  else
+  {
+    std::cout << "No coords" << std::endl;
+    return;
+  }
+*/
+  std::cout << "Size: " << coords.size() << std::endl;
 }
 
 } // SimpleGui

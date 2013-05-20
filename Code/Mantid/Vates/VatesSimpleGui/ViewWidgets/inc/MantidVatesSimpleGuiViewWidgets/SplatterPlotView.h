@@ -109,6 +109,10 @@ private:
 
   /// Destroy all peak sources.
   void destroyPeakSources();
+  /// Filter events for pick mode.
+  bool eventFilter(QObject *obj, QEvent *ev);
+  /// Read the coordinates and send to service.
+  void readAndSendCoordinates();
 
   bool noOverlay; ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource> > peaksSource; ///< A list of peaks sources
