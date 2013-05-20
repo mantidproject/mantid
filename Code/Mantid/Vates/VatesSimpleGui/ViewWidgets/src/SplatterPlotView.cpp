@@ -44,6 +44,12 @@ SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
                    this,
                    SLOT(onOverridePeakCoordToggled(bool)));
 
+  // Set connection to toggle button for pick mode checking
+  QObject::connect(this->ui.pickModeButton,
+                   SIGNAL(toggled(bool)),
+                   this,
+                   SLOT(onPickModeToggled(bool)));
+
   this->view = this->createRenderView(this->ui.renderFrame);
 }
 
@@ -193,6 +199,26 @@ void SplatterPlotView::checkView()
     ViewBase::checkView();
   }
   this->noOverlay = false;
+}
+
+/**
+ * This function is responsible for setting up and tearing down the VTK
+ * probe filter for use in pick mode.
+ * @param state : True if button is toggled, false if not
+ */
+void SplatterPlotView::onPickModeToggled(bool state)
+{
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  if (state)
+  {
+    this->probeSource = builder->createFilter("filters", "ProbePoint",
+                                              this->splatSource);
+    emit this->triggerAccept();
+  }
+  else
+  {
+    builder->destroy(this->probeSource);
+  }
 }
 
 void SplatterPlotView::resetCamera()
