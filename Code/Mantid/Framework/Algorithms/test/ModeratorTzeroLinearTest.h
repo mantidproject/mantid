@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MODERATORTZEROTEST_H_
-#define MANTID_ALGORITHMS_MODERATORTZEROTEST_H_
+#ifndef MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
+#define MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -7,19 +7,19 @@
 #include "MantidDataHandling/LoadSNSEventNexus.h"
 #include "MantidDataHandling/LoadAscii.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAlgorithms/ModeratorTzero.h"
+#include "MantidAlgorithms/ModeratorTzeroLinear.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class ModeratorTzeroTest : public CxxTest::TestSuite
+class ModeratorTzeroLinearTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ModeratorTzeroTest *createSuite() { return new ModeratorTzeroTest(); }
-  static void destroySuite( ModeratorTzeroTest *suite ) { delete suite; }
+  static ModeratorTzeroLinearTest *createSuite() { return new ModeratorTzeroLinearTest(); }
+  static void destroySuite( ModeratorTzeroLinearTest *suite ) { delete suite; }
 
   //instruments to test:
   //TOPAZ: no parameters file
@@ -96,9 +96,9 @@ public:
   }
 
 private:
-  ModeratorTzero alg;
+  ModeratorTzeroLinear alg;
 
-}; // end of class ModeratorTzeroTest : public CxxTest::TestSuite
+}; // end of class ModeratorTzeroLinearTest : public CxxTest::TestSuite
 
 
-#endif /* MANTID_ALGORITHMS_MODERATORTZEROTEST_H_ */
+#endif /* MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_ */

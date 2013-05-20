@@ -28,7 +28,7 @@ If the detector is a monitor, then we can treat it as both sample and detector. 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/ModeratorTzero.h"
+#include "MantidAlgorithms/ModeratorTzeroLinear.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -42,10 +42,10 @@ namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ModeratorTzero)
+DECLARE_ALGORITHM(ModeratorTzeroLinear)
 
 /// Sets documentation strings for this algorithm
-void ModeratorTzero::initDocs()
+void ModeratorTzeroLinear::initDocs()
 {
   setWikiSummary("For an indirect geometry instrument, subtracts to the time of flight a quantity dependent on the initial neutron energy.");
   setOptionalMessage(" Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the velocity of the neutron after passing through the moderator.");
@@ -59,7 +59,7 @@ using namespace Mantid::DataObjects;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
-void ModeratorTzero::init()
+void ModeratorTzeroLinear::init()
 {
 
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -70,9 +70,9 @@ void ModeratorTzero::init()
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
                   "The name of the output workspace");
 
-} // end of void ModeratorTzero::init()
+} // end of void ModeratorTzeroLinear::init()
 
-void ModeratorTzero::exec()
+void ModeratorTzeroLinear::exec()
 {
   //retrieve the input workspace.
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
@@ -183,7 +183,7 @@ void ModeratorTzero::exec()
   setProperty("OutputWorkspace",outputWS);
 }
 
-void ModeratorTzero::execEvent()
+void ModeratorTzeroLinear::execEvent()
 {
   g_log.information("Processing event workspace");
 
@@ -239,10 +239,10 @@ void ModeratorTzero::execEvent()
   }
   PARALLEL_CHECK_INTERUPT_REGION
       outputWS->clearMRU(); // Clears the Most Recent Used lists */
-} // end of void ModeratorTzero::execEvent()
+} // end of void ModeratorTzeroLinear::execEvent()
 
 //calculate time from sample to detector
-void ModeratorTzero::CalculateTfLi(MatrixWorkspace_sptr inputWS, size_t i, double &t_f, double &L_i)
+void ModeratorTzeroLinear::CalculateTfLi(MatrixWorkspace_sptr inputWS, size_t i, double &t_f, double &L_i)
 {
   static const double convFact = 1.0e-6*sqrt(2*PhysicalConstants::meV/PhysicalConstants::NeutronMass);
   static const double TfError = -1.0; //signal error when calculating final time

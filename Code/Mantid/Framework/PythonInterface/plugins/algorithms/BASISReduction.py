@@ -220,7 +220,7 @@ class BASISReduction(PythonAlgorithm):
     def _calibData(self, sam_ws, mon_ws):
         api.MaskDetectors(Workspace=sam_ws, 
                           MaskedWorkspace='BASIS_MASK')
-        api.ModeratorTzero(InputWorkspace=sam_ws, 
+        api.ModeratorTzeroLinear(InputWorkspace=sam_ws, 
                            OutputWorkspace=sam_ws)
         api.LoadParameterFile(Workspace=sam_ws, 
                               Filename=config.getInstrumentDirectory() + 'BASIS_silicon_111_Parameters.xml')
@@ -229,7 +229,7 @@ class BASISReduction(PythonAlgorithm):
                          Target='Wavelength', EMode='Indirect')
                 
         if not self._noMonNorm:
-            api.ModeratorTzero(InputWorkspace=mon_ws, 
+            api.ModeratorTzeroLinear(InputWorkspace=mon_ws, 
                                OutputWorkspace=mon_ws)
             api.Rebin(InputWorkspace=mon_ws, 
                       OutputWorkspace=mon_ws, Params='10')

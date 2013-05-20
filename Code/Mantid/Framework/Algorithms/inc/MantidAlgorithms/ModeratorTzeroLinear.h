@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_MODERATORTZERO_H_
-#define MANTID_ALGORITHMS_MODERATORTZERO_H_
+#ifndef MANTID_ALGORITHMS_MODERATORTZEROLINEAR_H_
+#define MANTID_ALGORITHMS_MODERATORTZEROLINEAR_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -63,15 +63,15 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ModeratorTzero : public Mantid::API::Algorithm
+class DLLExport ModeratorTzeroLinear : public Mantid::API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  ModeratorTzero() : Mantid::API::Algorithm() {}
+  ModeratorTzeroLinear() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~ModeratorTzero() {}
+  virtual ~ModeratorTzeroLinear() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "ModeratorTzero"; }
+  virtual const std::string name() const { return "ModeratorTzeroLinear"; }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -98,4 +98,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_MODERATORTZERO_H_*/
+#endif /*MANTID_ALGORITHMS_MODERATORTZEROLINEAR_H_*/
