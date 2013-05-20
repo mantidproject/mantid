@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
-#define MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_
+#ifndef MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE2_H_
+#define MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE2_H_
 
 #include "MantidAPI/Algorithm.h" 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -11,31 +11,31 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
-  /** ConvertToDiffractionMDWorkspace :
+  /** ConvertToDiffractionMDWorkspace2 :
    * Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.
-   * 
-   * @author Janik Zikovsky, SNS
-   * @date 2011-03-01 13:14:48.236513
+   *  
+   * @date 2013-05-20 
    */
-  class DLLExport ConvertToDiffractionMDWorkspace  : public BoxControllerSettingsAlgorithm
+  class DLLExport ConvertToDiffractionMDWorkspace2  : public MDEvents::BoxControllerSettingsAlgorithm
   {
   public:
-    ConvertToDiffractionMDWorkspace();
-    ~ConvertToDiffractionMDWorkspace();
+    /** Constructor   */
+      ConvertToDiffractionMDWorkspace2(){};
+     /** Destructor   */
+    virtual ~ConvertToDiffractionMDWorkspace2(){};
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "ConvertToDiffractionMDWorkspace";};
     /// Algorithm's version for identification 
-    virtual int version() const { return 1;};
+    virtual int version() const { return 2;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}
     

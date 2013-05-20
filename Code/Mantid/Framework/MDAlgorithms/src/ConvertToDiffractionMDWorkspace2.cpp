@@ -71,7 +71,7 @@ to an [[EventWorkspace]] but with no events for empty bins.
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
+#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
@@ -85,41 +85,27 @@ using namespace Mantid::Geometry;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
-  bool DODEBUG = true;
+  bool DODEBUG2 = true;
 
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace)
+  DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace2)
   
   /// Sets documentation strings for this algorithm
-  void ConvertToDiffractionMDWorkspace::initDocs()
+  void ConvertToDiffractionMDWorkspace2::initDocs()
   {
     this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.");
     this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.");
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  ConvertToDiffractionMDWorkspace::ConvertToDiffractionMDWorkspace()
-  {
-  }
-    
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  ConvertToDiffractionMDWorkspace::~ConvertToDiffractionMDWorkspace()
-  {
-  }
-
-
+  
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void ConvertToDiffractionMDWorkspace::init()
+  void ConvertToDiffractionMDWorkspace2::init()
   {
     // Input units must be TOF
     auto validator = boost::make_shared<API::WorkspaceUnitValidator>("TOF");
@@ -174,7 +160,7 @@ namespace MDEvents
 
 
   /// Our MDLeanEvent dimension
-  typedef MDLeanEvent<3> MDE;
+  typedef MDEvents::MDLeanEvent<3> MDE;
 
   //----------------------------------------------------------------------------------------------
   /** Convert one spectrum to MDEvents.
@@ -184,7 +170,7 @@ namespace MDEvents
    *
    * @param workspaceIndex :: index into the workspace
    */
-  void ConvertToDiffractionMDWorkspace::convertSpectrum(int workspaceIndex)
+  void ConvertToDiffractionMDWorkspace2::convertSpectrum(int workspaceIndex)
   {
     if (m_inEventWS && !OneEventPerBin)
     {
@@ -234,10 +220,10 @@ namespace MDEvents
    * @param el :: reference to the event list
    */
   template <class T>
-  void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex, EventList & el)
+  void ConvertToDiffractionMDWorkspace2::convertEventList(int workspaceIndex, EventList & el)
   {
     size_t numEvents = el.getNumberEvents();
-    MDBoxBase<MDLeanEvent<3>,3> * box = ws->getBox();
+    MDEvents::MDBoxBase<MDEvents::MDLeanEvent<3>,3> * box = ws->getBox();
 
     // Get the position of the detector there.
     const std::set<detid_t>& detectors = el.getDetectorIDs();
@@ -354,7 +340,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void ConvertToDiffractionMDWorkspace::exec()
+  void ConvertToDiffractionMDWorkspace2::exec()
   {
     Timer tim, timtotal;
     CPUTimer cputim, cputimtotal;
@@ -392,7 +378,7 @@ namespace MDEvents
 
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
-    ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>,3> >( i_out );
+    ws = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDLeanEvent<3>,3> >( i_out );
 
     // Initalize the matrix to 3x3 identity
     mat = Kernel::Matrix<double>(3,3, true);
@@ -447,8 +433,8 @@ namespace MDEvents
     {
       // Create an output workspace with 3 dimensions.
       size_t nd = 3;
-      i_out = MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
-      ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(i_out);
+      i_out = MDEvents::MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
+      ws = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace3Lean>(i_out);
 
       // ---------------- Get the extents -------------
       std::vector<double> extents = getProperty("Extents");
@@ -535,7 +521,7 @@ namespace MDEvents
     size_t eventsAdded = 0;
     size_t approxEventsInOutput = 0;
     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
-    if (DODEBUG) g_log.information() << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
+    if (DODEBUG2) g_log.information() << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
 
     for (size_t wi=0; wi < m_inWS->getNumberHistograms(); wi++)
     {
@@ -547,7 +533,7 @@ namespace MDEvents
       if (MultiThreadedAdding)
       {
         // Equivalent to calling "this->convertSpectrum(wi)"
-        boost::function<void ()> func = boost::bind(&ConvertToDiffractionMDWorkspace::convertSpectrum, &*this, static_cast<int>(wi));
+        boost::function<void ()> func = boost::bind(&ConvertToDiffractionMDWorkspace2::convertSpectrum, &*this, static_cast<int>(wi));
         // Give this task to the scheduler
         double cost = static_cast<double>(eventsAdding);
         ts->push( new FunctionTask( func, cost) );
@@ -564,10 +550,10 @@ namespace MDEvents
 
       if (bc->shouldSplitBoxes(approxEventsInOutput,eventsAdded, lastNumBoxes))
       {
-        if (DODEBUG) g_log.information() << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
+        if (DODEBUG2) g_log.information() << cputim << ": Added tasks worth " << eventsAdded << " events. WorkspaceIndex " << wi << std::endl;
         // Do all the adding tasks
         tp.joinAll();
-        if (DODEBUG) g_log.information() << cputim << ": Performing the addition of these events.\n";
+        if (DODEBUG2) g_log.information() << cputim << ": Performing the addition of these events.\n";
 
         // Now do all the splitting tasks
         ws->splitAllIfNeeded(ts);
@@ -577,7 +563,7 @@ namespace MDEvents
 
         // Count the new # of boxes.
         lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
-        if (DODEBUG) g_log.information() << cputim << ": Performing the splitting. There are now " << lastNumBoxes << " boxes.\n";
+        if (DODEBUG2) g_log.information() << cputim << ": Performing the splitting. There are now " << lastNumBoxes << " boxes.\n";
         eventsAdded = 0;
       }
     }
@@ -590,28 +576,28 @@ namespace MDEvents
         g_log.warning()<<"Unable to find detectors for " << this->failedDetectorLookupCount << " spectra. They have been skipped." << std::endl;
     }
 
-    if (DODEBUG) g_log.information() << cputim << ": We've added tasks worth " << eventsAdded << " events.\n";
+    if (DODEBUG2) g_log.information() << cputim << ": We've added tasks worth " << eventsAdded << " events.\n";
 
     tp.joinAll();
-    if (DODEBUG) g_log.information() << cputim << ": Performing the FINAL addition of these events.\n";
+    if (DODEBUG2) g_log.information() << cputim << ": Performing the FINAL addition of these events.\n";
 
     // Do a final splitting of everything
     ws->splitAllIfNeeded(ts);
     tp.joinAll();
-    if (DODEBUG) g_log.information() << cputim << ": Performing the FINAL splitting of boxes. There are now " << ws->getBoxController()->getTotalNumMDBoxes() <<" boxes\n";
+    if (DODEBUG2) g_log.information() << cputim << ": Performing the FINAL splitting of boxes. There are now " << ws->getBoxController()->getTotalNumMDBoxes() <<" boxes\n";
 
 
     // Recount totals at the end.
     cputim.reset();
     ws->refreshCache();
-    if (DODEBUG) g_log.information() << cputim << ": Performing the refreshCache().\n";
+    if (DODEBUG2) g_log.information() << cputim << ": Performing the refreshCache().\n";
 
     //TODO: Centroid in parallel, maybe?
     //ws->getBox()->refreshCentroid(NULL);
-    //if (DODEBUG) g_log.information() << cputim << ": Performing the refreshCentroid().\n";
+    //if (DODEBUG2) g_log.information() << cputim << ": Performing the refreshCentroid().\n";
 
 
-    if (DODEBUG)
+    if (DODEBUG2)
     {
       g_log.information() << "Workspace has " << ws->getNPoints() << " events. This took " << cputimtotal << " in total.\n";
       std::vector<std::string> stats = ws->getBoxControllerStats();

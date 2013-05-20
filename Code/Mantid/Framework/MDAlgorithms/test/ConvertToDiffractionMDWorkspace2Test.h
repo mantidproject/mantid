@@ -1,11 +1,11 @@
-#ifndef MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_
-#define MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST_H_
+#ifndef MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST2_H_
+#define MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACETEST2_H_
 
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
+#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -19,14 +19,15 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 
-class ConvertToDiffractionMDWorkspaceTest : public CxxTest::TestSuite
+class ConvertToDiffractionMDWorkspace2Test : public CxxTest::TestSuite
 {
 public:
     
   void test_Init()
   {
-    ConvertToDiffractionMDWorkspace alg;
+    ConvertToDiffractionMDWorkspace2 alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -124,7 +125,7 @@ public:
         "Params", "0, 500, 16e3",
         "PreserveEvents", MakeWorkspace2D ? "0" : "1" );
 
-    ConvertToDiffractionMDWorkspace alg;
+    ConvertToDiffractionMDWorkspace2 alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setPropertyValue("InputWorkspace", "inputWS");
