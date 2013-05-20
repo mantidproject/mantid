@@ -326,7 +326,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         preserveEvents=preserveEvents, normByCurrent=normbycurrent)
                 tempinfo = self._getinfo(temp)
 
-                print "Run %s Focused result of type %s" % (str(runnumber), str(temp))
+                # print "Run %s Focused result of type %s" % (str(runnumber), str(temp))
 
                 if samRun is None:
                     samRun = temp
@@ -390,12 +390,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 self.log().information("[DBx1136] Unable to get number of events of sample run %s.  Error message: %s" % (str(samRun), str(e)))
 
             # Get run number
-            samRunName = str(samRun)
-            if samRunName.count("_") > 0:
-                runnumber = int(samRunName.split("_")[1])
-            else:
-                runnumber = int(samRunName)
-
+            runnumber = samRun.getRunNumber()
             if self._infodict.has_key(runnumber): 
                 self.log().information("[DB1022A] Found run number %d in info dict." % (runnumber))
                 self._info = self._infodict[runnumber]
@@ -655,6 +650,7 @@ class SNSPowderReduction(PythonAlgorithm):
         """ Load, (optional) split and focus data in chunks
 
         Arguments: 
+         - runnumber : integer for run number
          - splitwksp:  SplittersWorkspace (if None then no split)
          - filterWall: Enabled if splitwksp is defined
 
