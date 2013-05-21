@@ -589,8 +589,7 @@ public:
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100); //200 events per spectrum, but the spectra are at different pixel ids
 
       //First pixel id of rhs is 100
-      index2detid_map *rhs_map = work_in2->getWorkspaceIndexToDetectorIDMap();
-      TS_ASSERT_EQUALS( (*rhs_map)[0], 100);
+      TS_ASSERT( work_in2->getSpectrum(0)->hasDetectorID(100) );
 
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace!=0, true /*outputIsEvent*/,
           DO_PLUS ? 3.0 : -1.0,   DO_PLUS ? 1.7320 : 1.7320);

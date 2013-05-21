@@ -588,45 +588,6 @@ namespace Mantid
       } // (for each workspace index)
     }
 
-
-    //---------------------------------------------------------------------------------------
-    /** Return a map where:
-    *    KEY is the Workspace Index
-    *    VALUE is the DetectorID (pixel ID)
-    *  @throw runtime_error if there is more than one detector per spectrum, or other incompatibilities.
-    *  @return Map of workspace index to detector/pixel id.
-    */
-    index2detid_map * MatrixWorkspace::getWorkspaceIndexToDetectorIDMap() const
-    {
-      SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
-      if (!ax)
-        throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToDetectorIDMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
-
-      index2detid_map * map = new index2detid_map();
-      //Loop through the workspace index
-      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
-      {
-        //Get the spectrum # from the WS index
-        specid_t specNo = ax->spectraNo(workspaceIndex);
-
-        //Now the list of detectors
-        std::vector<detid_t> detList = this->m_spectraMap->getDetectors(specNo);
-        if (detList.size() > 1)
-        {
-          delete map;
-          throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToDetectorIDMap(): more than 1 detector for one histogram! I cannot generate a map of workspace index to detector ID.");
-        }
-
-        //Set the KEY to the detector ID and the VALUE to the workspace index.
-        if (detList.size() == 1)
-          (*map)[workspaceIndex] = detList[0];
-
-        //Ignore if the detector list is empty.
-      }
-      return map;
-    }
-
-
     //---------------------------------------------------------------------------------------
     /** Converts a list of spectrum numbers to the corresponding workspace indices.
     *  Not a very efficient operation, but unfortunately it's sometimes required.

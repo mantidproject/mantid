@@ -310,11 +310,6 @@ public:
         if (badcount++ > 40) break;
     }
 
-    index2detid_map *map = ew->getWorkspaceIndexToDetectorIDMap();
-    TS_ASSERT_EQUALS(map->size(), numpixels);
-    TS_ASSERT_EQUALS((*map)[50], 51); //for example
-    delete map;
-
   }
 
 
