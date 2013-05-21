@@ -103,14 +103,15 @@ namespace API
     }
     catch(const std::runtime_error & re)
     {
-      g_log.debug("MultiFile loading has failed. Acting as standard FileProperty.");
+      g_log.debug("MultiFile loading has failed. Trying as standard FileProperty.");
 
       const std::string error = setValueAsSingleFile(propValue);
 
       if( error.empty() )
         return "";
 
-      // If we failed for whatever reason, catch the message and return it.
+      // If we failed return the error message from the multiple file load attempt as the single file was a guess
+      // and probably not what the user will expect to see
       return re.what();
     }
   }
