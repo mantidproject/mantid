@@ -108,7 +108,6 @@ namespace Mantid
       void generateSpectraMap();
 
       // More mapping
-      index2spec_map * getWorkspaceIndexToSpectrumMap() const;
       spec2index_map * getSpectrumToWorkspaceIndexMap() const;
       detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
       void getDetectorIDToWorkspaceIndexVector( std::vector<size_t> & out, detid_t & offset, bool throwIfMultipleDets) const;

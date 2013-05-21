@@ -387,30 +387,6 @@ namespace Mantid
       return neighbours;
     }
 
-
-    //---------------------------------------------------------------------------------------
-    /** Return a map where:
-    *    KEY is the Workspace Index
-    *    VALUE is the Spectrum #
-    */
-    index2spec_map * MatrixWorkspace::getWorkspaceIndexToSpectrumMap() const
-    {
-      SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
-      if (!ax)
-        throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToSpectrumMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
-      index2spec_map * map = new index2spec_map();
-      try
-      {
-        ax->getIndexSpectraMap(*map);
-      }
-      catch (std::runtime_error &)
-      {
-        delete map;
-        throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToSpectrumMap: no elements!");
-      }
-      return map;
-    }
-
     //---------------------------------------------------------------------------------------
     /** Return a map where:
     *    KEY is the Spectrum #
