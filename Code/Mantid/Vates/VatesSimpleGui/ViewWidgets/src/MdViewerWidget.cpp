@@ -770,7 +770,8 @@ void MdViewerWidget::updateAppState()
   this->viewSettings->updateEnableState();
 
   ThreeSliceView *tsv = dynamic_cast<ThreeSliceView *>(this->currentView);
-  if (tsv)
+  SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
+  if (NULL != tsv || NULL != spv)
   {
     this->currentView->onLodThresholdChange(false, this->lodThreshold);
     this->lodAction->setChecked(false);
