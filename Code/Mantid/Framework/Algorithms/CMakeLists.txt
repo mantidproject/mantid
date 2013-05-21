@@ -234,7 +234,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
-	inc/MantidAlgorithms/FlatBackground.h
+	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateZscore.h
