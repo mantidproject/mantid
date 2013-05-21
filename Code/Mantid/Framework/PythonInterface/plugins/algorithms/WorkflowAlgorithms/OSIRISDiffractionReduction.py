@@ -6,14 +6,12 @@ The source code for the Python Algorithm may be viewed at: [http://trac.mantidpr
 The source code for the reducer class which is used may be viewed at: [http://trac.mantidproject.org/mantid/browser/trunk/Code/Mantid/scripts/Inelastic/osiris_diffraction_reducer.py osiris_diffraction_reducer.py]
 
 *WIKI*"""
-
-
-from MantidFramework import *
-from mantidsimple import *
+from mantid.kernel import *
+from mantid.api import *
+from mantid.simpleapi import *
 
 import re
 import itertools
-from types import NoneType
 
 timeRegimeToDRange = {
      1.17e4: tuple([ 0.7,  2.5]),
@@ -36,30 +34,31 @@ class DRangeToWsMap(object):
     def __init__(self):
         self._map = {}
     
-    def addWs(self, ws):
+    def addWs(self, wsname):
         """ Takes in the given workspace and lists it alongside its time regime value.
         If the time regime has yet to be created, it will create it, and if there is already
         a workspace listed beside the time regime, then the new ws will be appended
         to that list.
         """
+        ws=mtd[wsname]
         # Get the time regime of the workspace, and use it to find the DRange.
         timeRegime = ws.dataX(0)[0]
         try:
             dRange = timeRegimeToDRange[timeRegime]
         except KeyError:
-            raise RuntimeError("Unable to identify the DRange of " + ws.getName() + 
+            raise RuntimeError("Unable to identify the DRange of " + wsname + 
                 ", which has a time regime of " + str(timeRegime))
         
         # Add the workspace to the map, alongside its DRange.
         if dRange in self._map:
-            self._map[dRange].append(ws)
+            self._map[dRange].append(wsname)
         else:
-            self._map[dRange] = [ws]
+            self._map[dRange] = [wsname]
             
-    def setItem(self, dRange, ws):
+    def setItem(self, dRange, wsname):
         """ Set a dRange and corresponding *single* ws.
         """
-        self._map[dRange] = ws
+        self._map[dRange] = wsname
         
     def getMap(self):
         """ Get access to wrapped map.
@@ -76,8 +75,8 @@ def averageWsList(wsList):
         
     # Generate the final name of the averaged workspace.
     avName = "avg"
-    for ws in wsList:
-        avName += "_" + ws.getName()
+    for name in wsList:
+        avName += "_" + name
     
     # Compute the average and put into "__temp_avg".
     __temp_avg = wsList[0] + wsList[1]
@@ -86,12 +85,12 @@ def averageWsList(wsList):
     __temp_avg/= len(wsList)
     
     # Delete the old workspaces that are now included in the average.
-    for ws in wsList:
-        DeleteWorkspace(Workspace=ws.getName())
+    for name in wsList:
+        DeleteWorkspace(Workspace=name)
         
     # Rename the average ws and return it.
     RenameWorkspace(InputWorkspace=__temp_avg, OutputWorkspace=avName)
-    return mtd[avName]
+    return avName
 
 def findIntersectionOfTwoRanges(rangeA, rangeB):
     
@@ -129,7 +128,7 @@ def getIntersectionsOfRanges(rangeList):
     intersections = []
     for rangePair in rangeCombos:
         intersection = findIntersectionOfTwoRanges(rangePair[0], rangePair[1])
-        if type(intersection) is not types.NoneType:
+        if intersection is not None:
             intersections.append(intersection)
     
     # Return the sorted intersections.
@@ -147,11 +146,18 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     """
     
     def PyInit(self):
-            self.setWikiSummary("This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS into dSpacing, by correcting for the monitor and linking the various d-ranges together.")
-        self.declareProperty('Sample', '', Description='The list of run numbers that are part of the sample run. There should be five of these in most cases. Enter them as comma seperated values.')
-        self.declareProperty('Vanadium', '', Description='The list of run numbers that are part of the vanadium run. There should be five of these in most cases. Enter them as comma seperated values.')
-        self.declareProperty('CalFile', '', Description='Filename of the .cal file to use in the [[AlignDetectors]] and [[DiffractionFocussing]] child algorithms.')
-        self.declareWorkspaceProperty('OutputWorkspace', '', Direction.Output, Description="Name to give the output workspace. If no name is provided, one will be generated based on the run numbers.")
+        wiki="This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS \
+              into dSpacing, by correcting for the monitor and linking the various d-ranges together."
+        
+        self.setWikiSummary(wiki)
+        runs_desc='The list of run numbers that are part of the sample run. \
+                   There should be five of these in most cases. Enter them as comma separated values.'
+        self.declareProperty('Sample', '', doc=runs_desc)
+        self.declareProperty('Vanadium', '', doc=runs_desc)
+        self.declareProperty('CalFile', '', 
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and [[DiffractionFocussing]] child algorithms.')
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output), 
+                             doc="Name to give the output workspace. If no name is provided, one will be generated based on the run numbers.")
         
         self._sams = []
         self._vans = []
@@ -163,33 +169,33 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     
     def PyExec(self):
         # Set OSIRIS as default instrument.
-        mtd.settings["default.instrument"] = 'OSIRIS'
+        config["default.instrument"] = 'OSIRIS'
         
         # Set all algo inputs to local vars.  Some validation/parsing via FileFinder,
         # which is helpful since this is an algorithm that could be called outside of
         # of the Indirect Diffraction interface.
         self._outputWsName = self.getPropertyValue("OutputWorkspace")
-        for sam in re.compile(r',').split(self.getProperty("Sample")):
+        for sam in re.compile(r',').split(self.getProperty("Sample").value):
             try:
                 val = FileFinder.findRuns(sam)[0]
             except IndexError:
                 raise RuntimeError("Could not locate sample file: " + sam)
             self._sams.append(val)
-        for van in re.compile(r',').split(self.getProperty("Vanadium")):
+        for van in re.compile(r',').split(self.getProperty("Vanadium").value):
             try:
                 val = FileFinder.findRuns(van)[0]
             except IndexError:
                 raise RuntimeError("Could not locate vanadium file: " + van)
             self._vans.append(val)
-        self._cal = self.getProperty("CalFile")
+        self._cal = self.getProperty("CalFile").value
         
         # Load all sample and vanadium files, and add the resulting workspaces to the DRangeToWsMaps.
         for file in self._sams + self._vans:
             Load(Filename=file, OutputWorkspace=file, SpectrumMin=3, SpectrumMax=962)
         for sam in self._sams:
-            self._samMap.addWs(mtd[sam])    
+            self._samMap.addWs(sam)
         for van in self._vans:
-            self._vanMap.addWs(mtd[van])
+            self._vanMap.addWs(van)
         
         # Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
         for dRange in self._samMap.getMap().iterkeys():
@@ -211,26 +217,26 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         
         # Run necessary algorithms on BOTH the Vanadium and Sample workspaces.
         for dRange, ws in self._samMap.getMap().items() + self._vanMap.getMap().items():
-            NormaliseByCurrent(ws, ws)
-            AlignDetectors(ws, ws, self._cal)
-            DiffractionFocussing(ws, ws, self._cal)
-            CropWorkspace(ws, ws, XMin=dRange[0], XMax=dRange[1])
+            NormaliseByCurrent(InputWorkspace=ws,OutputWorkspace=ws)
+            AlignDetectors(InputWorkspace=ws, OutputWorkspace=ws, CalibrationFile=self._cal)
+            DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws, GroupingFileName=self._cal)
+            CropWorkspace(InputWorkspace=ws, OutputWorkspace=ws, XMin=dRange[0], XMax=dRange[1])
         
         # Divide all sample files by the corresponding vanadium files.
         for dRange in self._samMap.getMap().iterkeys():
             samWs = self._samMap.getMap()[dRange]
             vanWs = self._vanMap.getMap()[dRange]
-            Divide(samWs, vanWs, samWs)
-            ReplaceSpecialValues(samWs, samWs, NaNValue=0.0, InfinityValue=0.0)
+            Divide(LHSWorkspace=samWs, RHSWorkspace=vanWs, OutputWorkspace=samWs)
+            ReplaceSpecialValues(InputWorkspace=samWs, OutputWorkspace=samWs, NaNValue=0.0, InfinityValue=0.0)
             
         # Create a list of sample workspace NAMES, since we need this for MergeRuns.
         samWsNamesList = []
         for sam in self._samMap.getMap().itervalues():
-            samWsNamesList.append(sam.getName())
+            samWsNamesList.append(sam)
         
         if len(samWsNamesList) > 1:
             # Merge the sample files into one.
-            MergeRuns(','.join(samWsNamesList), self._outputWsName)
+            MergeRuns(InputWorkspaces=','.join(samWsNamesList), OutputWorkspace=self._outputWsName)
         else:
             CloneWorkspace(InputWorkspace=samWsNamesList[0],
                            OutputWorkspace=self._outputWsName)
@@ -250,15 +256,15 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         # Create scalar from data and use to scale result.
         CreateWorkspace(OutputWorkspace="scaling", DataX=dataX, DataY=dataY, DataE=dataE, UnitX="dSpacing")
         scalar = mtd["scaling"]
-        Divide(result, scalar, result)
+        Divide(LHSWorkspace=result, RHSWorkspace=scalar, OutputWorkspace=result)
         
         # Delete all workspaces we've created, except the result.
         for ws in self._vanMap.getMap().values() + self._samMap.getMap().values() + [scalar]:
-            DeleteWorkspace(ws)
+            DeleteWorkspace(Workspace=ws)
         
         self.setProperty("OutputWorkspace", result)
         
     def category(self):
         return 'Diffraction;PythonAlgorithms'
 
-mtd.registerPyAlgorithm(OSIRISDiffractionReduction())
+AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
