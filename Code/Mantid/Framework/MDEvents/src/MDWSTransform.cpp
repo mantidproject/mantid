@@ -241,16 +241,12 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
   return Transf*Scale*Wmat;
 }
 
-///** Build meaningful dimension names for different conversion modes
-//*/
-//void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
-//{
-//  //axis units: convert string representation to any availible
-//  CoordScaling ScaleID = getQScaling(QScaleRequested);
-//  this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
-//
-//}
+/** Build meaningful dimension names for different conversion modes 
+ * @param TargWSDescription the class-container to keep the dimension names and dimension unints
+ * @param FrameID -- the ID describing the target transformation frame (lab, sample, hkl)
+ * @param ScaleID -- the scale ID which define how the dimensions are scaled
 
+*/
 void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame FrameID,CnvrtToMD::CoordScaling ScaleID)const
 {
 

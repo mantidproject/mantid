@@ -183,7 +183,7 @@ namespace MDAlgorithms
 
   }
 
-  void ConvertToDiffractionMDWorkspace2::convertExtents(const std::string &Extents,std::string &minVal,std::string &maxVal)
+  void ConvertToDiffractionMDWorkspace2::convertExtents(const std::vector<double> &Extents,std::vector<double> &minVal,std::vector<double> &maxVal)const
   {
       minVal.resize(3);
       maxVal.resize(3);
@@ -243,10 +243,10 @@ namespace MDAlgorithms
    
     Convert->setRethrows(true);
     Convert->initialize();
-    API::MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
+    std::string inWSName = this->getPropertyValue("InputWorkspace");
     std::string outWSName = this->getPropertyValue("OutputWorkspace");
 
-    Convert->setProperty("InputWorkspace",inWS);
+    Convert->setProperty("InputWorkspace",inWSName);
     Convert->setProperty("OutputWorkspace",outWSName);
     Convert->setProperty("OverwriteExisting",!this->getProperty("Append"));
 
@@ -271,8 +271,9 @@ namespace MDAlgorithms
      bool lorCorr = this->getProperty("LorentzCorrection");
      Convert->setProperty("LorentzCorrection",lorCorr);
      //set extents
-     std::string minVal,maxVal;
-     convertExtents(this->getProperty("Extents"),minVal,maxVal);
+     std::vector<double> extents = this->getProperty("Extents");
+     std::vector<double> minVal,maxVal;
+     convertExtents(extents,minVal,maxVal);
      Convert->setProperty("MinValues",minVal);
      Convert->setProperty("MaxValues",maxVal);
 
@@ -281,15 +282,16 @@ namespace MDAlgorithms
       Convert->setProperty("SplitInto",this->getPropertyValue("SplitInto"));
       Convert->setProperty("SplitThreshold",this->getPropertyValue("SplitThreshold"));
       Convert->setProperty("MaxRecursionDepth",this->getPropertyValue("MaxRecursionDepth"));
-      Convert->setProperty("MinRecursionDepth",this->getPropertyValue("MinRecursionDepth"));
+      std::string depth = this->getPropertyValue("MinRecursionDepth");
+      if(depth == "0") depth = "1";  // ConvertToMD does not understand 0 depth
+      Convert->setProperty("MinRecursionDepth",depth);
 
-      Convert->execute();
+      Convert->executeAsChildAlg();
 
       IMDEventWorkspace_sptr iOut = Convert->getProperty("OutputWorkspace");
       this->setProperty("OutputWorkspace",iOut);
 
       
- 
   }
 
 

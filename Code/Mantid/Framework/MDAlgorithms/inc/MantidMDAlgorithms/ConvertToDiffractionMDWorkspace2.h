@@ -55,7 +55,7 @@ namespace MDAlgorithms
     // method to convert the value of the target frame specified for the ConvertToDiffractionMDWorksapce  into the properties names of the ConvertToMD
     void convertFramePropertyNames(const std::string &ConvToDifrWSPropName,std::string &TargFrameName,std::string & ScalingName);
     // method to convert the extents specified for the ConvertToDiffractionMDWorksapce  into the min-max properties names of the ConvertToMD
-    void convertExtents(const std::string &Extents,std::string &minVal,std::string &maxVal);
+    void convertExtents(const std::vector<double> &Extents,std::vector<double> &minVal,std::vector<double> &maxVal)const;
   };
 
 

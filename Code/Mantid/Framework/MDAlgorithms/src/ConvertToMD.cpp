@@ -441,7 +441,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
     expt->cacheDetectorGroupings(*mapping);
   }
 
- // and add it to the target workspace description for further usage as identifier for the workspaces, which come from this run. 
+ // and add it to the target workspace description for further usage as the identifier for the workspaces, which come from this run. 
    targWSDescr.addProperty("RUN_INDEX",runIndex,true);
   
 }
@@ -502,12 +502,13 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
         // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace 
         // and derived from input parameters. 
         oldWSDescr.setUpMissingParameters(targWSDescr);      
-        // check inconsistencies
+       // set up target coordinate system and the dimension names/units
+        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);   
+
+        // check inconsistencies, if the existing workspace can be used as target workspace. 
         oldWSDescr.checkWSCorresponsMDWorkspace(targWSDescr);
         // reset new ws description name
         targWSDescr =oldWSDescr;
-       // set up target coordinate system
-        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);   
     }
     return createNewTargetWs;
 }

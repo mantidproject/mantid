@@ -26,7 +26,7 @@ void MDWSDescription::setDimName(unsigned int nDim,const std::string &Name)
   m_DimNames[nDim] = Name;
 }
 /** this is rather misleading function, as MD workspace does not currently have dimension units. 
-*It actually sets the units dimension names, which will be displayed along axis and have nothinbg in common with units, defined by unit factory */
+*It actually sets the units for the dimension names, which will be displayed along axis and have nothinbg in common with units, defined by unit factory */
 void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
 {
   if(nDim>=m_NDims)
@@ -143,6 +143,8 @@ void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS
 
   }
   m_Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
+  this->addProperty("W_MATRIX",pWS->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double> >("W_MATRIX"),true);
+
 
 
 }
@@ -189,6 +191,14 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
 
   if(m_Emode==Kernel::DeltaEMode::Undefined)
     throw(std::invalid_argument("Workspace description has not been correctly defined, as emode has not been defined")); 
+
+
+  for(size_t i=0;i<m_NDims;i++)
+  {
+      if(m_DimUnits[i] != NewMDWorkspaceD.m_DimUnits[i])
+        throw std::runtime_error("The existing MDEventWorkspace has different dimenson units than were requested! Either give a different worspace as the output, or change the OutputDimensions parameter.");
+  }
+
 
   //TODO: More thorough checks may be nesessary to prevent adding different kind of workspaces e.g 4D |Q|-dE-T-P workspace to Q3d+dE ws
 }
