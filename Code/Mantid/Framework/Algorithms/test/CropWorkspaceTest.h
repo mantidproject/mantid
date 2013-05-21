@@ -181,6 +181,7 @@ public:
       }
       TS_ASSERT_EQUALS( output->readX(i)[3], input->readX(i+2)[4] );
       TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i+2) );
+      TS_ASSERT_EQUALS( output->getSpectrum(i)->getDetectorIDs(), input->getSpectrum(i+2)->getDetectorIDs() );
     }
   }
 
@@ -209,6 +210,7 @@ public:
     for (int i = 0; i < 5; ++i)
     {
       TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i) );
+      TS_ASSERT_EQUALS( output->getSpectrum(i)->getDetectorIDs(), input->getSpectrum(i)->getDetectorIDs() );
     }
   }
 
