@@ -104,14 +104,14 @@ namespace API
     catch(const std::runtime_error & re)
     {
       g_log.debug("MultiFile loading has failed. Acting as standard FileProperty.");
-      
+
       const std::string error = setValueAsSingleFile(propValue);
 
       if( error.empty() )
         return "";
 
       // If we failed for whatever reason, catch the message and return it.
-      return "Unable to parse runs: \"" + std::string(re.what()) + "\". ";
+      return re.what();
     }
   }
   
@@ -265,7 +265,7 @@ namespace API
         }
         catch(const std::runtime_error & re)
         {
-          errorMsg << "Unable to parse run(s): \"" << re.what() << "\", so will treat as a single file.  ";
+          errorMsg << "Unable to parse run(s): \"" << re.what();
         }
 
         std::vector<std::vector<std::string> > f = m_parser.fileNames();
@@ -371,8 +371,7 @@ namespace API
           // If an error was returned then pass it along.
           if(!error.empty())
           {
-            errorMsg << "Unable to find file matching the string \"" + *unresolvedFileName + "\": \"" + error + "\".";
-            throw std::runtime_error(errorMsg.str());
+            throw std::runtime_error(error);
           }
           
           fullyResolvedFile = slaveFileProp();
