@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -47,11 +48,11 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FlatBackground : public API::Algorithm
+class DLLExport FlatBackground : public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
-  /// (Empty) Constructor
-  FlatBackground() : API::Algorithm(), m_convertedFromRawCounts(false), m_progress(NULL) {}
+  /// Constructor
+  FlatBackground();
   /// Virtual destructor
   virtual ~FlatBackground() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
@@ -59,7 +60,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "SANS;CorrectionFunctions\\BackgroundCorrections"; }
+  virtual const std::string category() const { return "Deprecated"; }
 
 private:
   /// Sets documentation strings for this algorithm

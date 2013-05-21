@@ -43,6 +43,12 @@ void FlatBackground::initDocs()
 using namespace Kernel;
 using namespace API;
 
+FlatBackground::FlatBackground() : API::Algorithm(), m_convertedFromRawCounts(false), m_progress(NULL)
+{
+  this->useAlgorithm("CalculateFlatBackground");
+  this->deprecatedDate("2013-05-21");
+}
+
 void FlatBackground::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
