@@ -283,6 +283,7 @@ public:
 
   void test_add_if_group_in_ADS()
   {
+    AnalysisDataService::Instance().clear();
     // if group and future member are in top level of ADS
     // member moves from top level to the group
     // ADS keeps only 1 pointer to member workspace
@@ -301,6 +302,7 @@ public:
     TS_ASSERT_EQUALS( group->size(), 1 );
     TS_ASSERT_EQUALS( boost::dynamic_pointer_cast<Workspace>(group->getItem(0)), ws );
     TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1);
+    group->print("group ");
     // cannot add a workspace which doesn't exist
     TS_ASSERT_THROWS( group->add("noworkspace"), Kernel::Exception::NotFoundError );
     AnalysisDataService::Instance().clear();
@@ -320,9 +322,7 @@ public:
       TS_ASSERT( ! group->findItem("noworkspace") );
 
       // make a cycle
-      child_group->addWorkspace( group );
-      // detect cycle
-      TS_ASSERT_THROWS( group->findItem("child_group_4"), std::runtime_error );
+      TS_ASSERT_THROWS( child_group->addWorkspace( group ), std::runtime_error );
 
       AnalysisDataService::Instance().clear();
   }
@@ -460,8 +460,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  /*
-  void xtest_areNamesSimilar()
+  void test_areNamesSimilar()
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup());
     group->setName("name");
@@ -495,7 +494,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void xtestUpdated()
+  void testUpdated()
   {
     WorkspaceGroupTest_WorkspaceGroupObserver observer;
     WorkspaceGroup_sptr group(new WorkspaceGroup());
@@ -535,13 +534,13 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void xtest_not_multiperiod_with_less_than_one_element()
+  void test_not_multiperiod_with_less_than_one_element()
   {
     WorkspaceGroup group;
     TSM_ASSERT("Cannot be multiperiod without entries", !group.isMultiperiod());
   }
 
-  void xtest_not_multiperiod_without_matrix_workspaces()
+  void test_not_multiperiod_without_matrix_workspaces()
   {
     Workspace_sptr a = boost::make_shared<MockWorkspace>();
     WorkspaceGroup group;
@@ -549,7 +548,7 @@ public:
     TSM_ASSERT("Cannot be multiperiod unless MatrixWorkspaces are used as elements.", !group.isMultiperiod());
   }
 
-  void xtest_not_multiperiod_if_missing_nperiods_log()
+  void test_not_multiperiod_if_missing_nperiods_log()
   {
     Workspace_sptr a = boost::make_shared<WorkspaceTester>(); // workspace has no nperiods entry.
     WorkspaceGroup group;
@@ -557,7 +556,7 @@ public:
     TSM_ASSERT("Cannot be multiperiod without nperiods log.", !group.isMultiperiod());
   }
 
-  void xtest_not_multiperiod_if_nperiods_log_less_than_one()
+  void test_not_multiperiod_if_nperiods_log_less_than_one()
   {
     Workspace_sptr a = boost::make_shared<WorkspaceTester>();
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -566,7 +565,7 @@ public:
     TSM_ASSERT("Cannot be multiperiod without nperiods log.", !group->isMultiperiod());
   }
 
-  void xtest_positive_identification_of_multiperiod_data()
+  void test_positive_identification_of_multiperiod_data()
   {
     Workspace_sptr a = boost::make_shared<WorkspaceTester>();
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
@@ -574,7 +573,6 @@ public:
     add_periods_logs(group, 1); 
     TS_ASSERT(group->isMultiperiod());
   }
-*/
 };
 
 

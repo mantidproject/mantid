@@ -122,7 +122,10 @@ public:
     TS_ASSERT_EQUALS( wsp1->isValid(), "" );
 
     // Put workspace of wrong type and check validation fails
-    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws3", space) );
+    Workspace_sptr space2;
+    TS_ASSERT_THROWS_NOTHING(space2 = WorkspaceFactory::Instance().create("WorkspacePropertyTest",1,1,1) );
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add("ws3", space2) );
+
     wsp3->setValue("ws3");
     TS_ASSERT_EQUALS( wsp3->isValid(),
       "Workspace ws3 is not of the correct type" );
@@ -130,11 +133,13 @@ public:
     TS_ASSERT_THROWS_NOTHING( space = WorkspaceFactory::Instance().create("WorkspacePropertyTest2",1,1,1) )
     TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().addOrReplace("ws3", space) );
     wsp3->setValue("ws3");
+
     TS_ASSERT_EQUALS( wsp3->isValid(), "");
 
     // The optional one
     wsp4->setValue("ws1");
     TS_ASSERT_EQUALS( wsp4->isValid(), "" );
+
     // Check incorrect type
     wsp5->setValue("ws1");
     TS_ASSERT_EQUALS(wsp5->isValid(),

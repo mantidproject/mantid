@@ -1222,8 +1222,6 @@ namespace Mantid
       // Finish up
       for (size_t i=0; i<outGroups.size(); i++)
       {
-        // Go back to observing ADS in each group.
-        outGroups[i]->observeADSNotifications(true);
         outGroups[i]->updated();
       }
 

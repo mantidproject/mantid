@@ -27,6 +27,8 @@ public:
 
 	void testInit()
 	{
+        // some other test didn't clean after itself :(
+        AnalysisDataService::Instance().clear();
 	    UnGroupWorkspace alg2;
 		TS_ASSERT_THROWS_NOTHING( alg2.initialize() );
 		TS_ASSERT( alg2.isInitialized() );

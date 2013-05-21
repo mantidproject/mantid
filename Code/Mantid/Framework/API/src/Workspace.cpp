@@ -51,9 +51,15 @@ void Workspace::setComment(const std::string& c)
 /** Set the name field of the workspace
  *
  *  @param name :: The name
+ *  @param force :: If true the name must be set regardless.
  */
-void Workspace::setName(const std::string& name)
+void Workspace::setName(const std::string& name, bool force)
 {
+  if ( ! m_name.empty() && ! force && name != m_name )
+  {
+      // cannot use setName to rename a workspace in ADS
+      throw std::runtime_error("Cannot change name of workspace " + m_name);
+  }
   m_name = name;
   m_upperCaseName = name;
   std::transform(m_upperCaseName.begin(), m_upperCaseName.end(), m_upperCaseName.begin(),toupper);

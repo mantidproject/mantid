@@ -129,7 +129,7 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    boost::shared_ptr<WSTYPE> retrieveWS(const std::string& name) const
    {
      // Get as a bare workspace
-     boost::shared_ptr<Mantid::API::Workspace> workspace = Kernel::DataService<API::Workspace>::retrieve(name);
+     boost::shared_ptr<Mantid::API::Workspace> workspace = this->retrieve(name);
      // Cast to the desired type and return that.
      return boost::dynamic_pointer_cast<WSTYPE>(workspace);
    }
@@ -140,6 +140,8 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    size_t count(Workspace_const_sptr workspace) const;
    /// Find a stored workspace
    boost::shared_ptr<API::Workspace> find( const std::string& name) const;
+   /// Print contents of the ADS
+   void print() const;
 
 private:
    /// Checks the name is valid, throwing if not

@@ -67,7 +67,7 @@ public:
 
     void virtual setTitle(const std::string&);
     void setComment(const std::string&);
-    virtual void setName(const std::string&);
+    virtual void setName(const std::string& name,bool force = false);
     //virtual const std::string& getTitle() const;
     virtual const std::string getTitle() const;
     const std::string& getComment() const;

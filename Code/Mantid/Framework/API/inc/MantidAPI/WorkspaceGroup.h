@@ -62,7 +62,7 @@ public:
   /// Return a string ID of the class
   virtual const std::string id() const { return "WorkspaceGroup"; }
   /// Set the name
-  virtual void setName(const std::string &name);
+  virtual void setName(const std::string &name,bool force = false);
   /// The size of the group.
   virtual size_t getMemorySize() const;
   /// Adds a workspace to the group.
@@ -117,10 +117,10 @@ private:
 //  void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
 //  /// Observer for workspace delete notfications
 //  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
-  /// Callback when a before-replace notification is received
-  void workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
-  /// Observer for workspace before-replace notfications
-  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceBeforeReplaceNotification> m_replaceObserver;
+//  /// Callback when a before-replace notification is received
+//  void workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
+//  /// Observer for workspace before-replace notfications
+//  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceBeforeReplaceNotification> m_replaceObserver;
 
   /// The list of workspace pointers in the group
   std::vector<Workspace_sptr> m_workspaces;

@@ -17,11 +17,11 @@ namespace API
 
 Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
-size_t WorkspaceGroup::g_maxNestingLevel = 100;
+size_t WorkspaceGroup::g_maxNestingLevel = 5;
 
 WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
   Workspace(), 
-  m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
+  //m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
   m_workspaces(), m_observingADS(false), m_nameCounter(0)
 {
   observeADSNotifications(observeADS);
@@ -34,19 +34,51 @@ WorkspaceGroup::~WorkspaceGroup()
 
 /**
  * Override the base method to set names of member workspaces if they are empty.
+ * Ensures that member names are unique in the ADS.
+ *
  * @param name :: The new name.
+ * @param force :: If true the name must be set (to realise workspace replacement in the ADS)
  */
-void WorkspaceGroup::setName(const std::string &name)
+void WorkspaceGroup::setName(const std::string &name, bool force)
 {
-    Workspace::setName(name);
-    for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    Workspace::setName(name, force);
+    // record workspaces received new names to roll back in case of exception
+    std::vector<bool> newNames(size(),false);
+    size_t i = 0;
+    for (auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it,++i)
     {
         std::string wsName = (**it).name();
-        if ( wsName.empty() )
+        if ( wsName.empty() && ! name.empty() )
         {
             ++m_nameCounter;
             wsName = name + "_" + boost::lexical_cast<std::string>(m_nameCounter);
+            // check that this name is unique in the ADS
+            if ( AnalysisDataService::Instance().doesExist(wsName) )
+            {
+                auto ws = AnalysisDataService::Instance().retrieve( wsName );
+                if ( ! force && ws != *it )
+                {
+                    // name is not unique: unset new names and throw
+                    size_t n = static_cast<size_t>(it - m_workspaces.begin());
+                    for(size_t j = 0; j < n; ++j)
+                    {
+                        if ( newNames[j] ) m_workspaces[j]->setName("",true);
+                    }
+                    throw std::runtime_error( "Cannot set name of workspace group member: name " + wsName + " already exists." );
+                }
+            }
             (**it).setName(wsName);
+            newNames[i] = true;
+        }
+        else if ( name.empty() )
+        {
+            // setting empty name means workspace is being removed from the ADS.
+            // this relies on ADS calling this method before removing group's pointer from the storage
+            if ( AnalysisDataService::Instance().count(*it) <= 1 )
+            {
+                // set empty name only if this member is unique in the ADS
+                (**it).setName("",true);
+            }
         }
     }
 }
@@ -75,7 +107,7 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
   {
     if(!m_observingADS)
     {
-      AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
+      //AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
       m_observingADS = true;
     }
   }
@@ -83,7 +115,7 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
   {
     if(m_observingADS)
     {
-      AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
+      //AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
       m_observingADS = false;
     }
   }
@@ -96,6 +128,7 @@ void WorkspaceGroup::add(const std::string& name)
 {
   Workspace_sptr ws = AnalysisDataService::Instance().retrieve( name );
   AnalysisDataService::Instance().remove( name );
+  ws->setName( name );
   addWorkspace( ws );
   g_log.debug() << "workspacename added to group vector =  " << name <<std::endl;
 }
@@ -114,7 +147,7 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
     m_workspaces.push_back( workspace );
     if ( ! name().empty() )
     {
-        // checking for non-empty name - a faster way of chacking for being in the ADS
+        // checking for non-empty name - a faster way of checking for being in the ADS
         if ( workspace->name().empty() )
         {
             ++m_nameCounter;
@@ -123,9 +156,11 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
         }
         else
         {
+            std::string wsName = workspace->name();
             bool observing = m_observingADS;
             observeADSNotifications( false );
             AnalysisDataService::Instance().removeFromTopLevel( workspace->name() );
+            workspace->setName(wsName);
             observeADSNotifications( observing );
         }
     }
@@ -294,7 +329,9 @@ void WorkspaceGroup::removeAll()
         if ( ! ws->name().empty() )
         {
             // leave removed workspace in the ADS
-            AnalysisDataService::Instance().add( ws->name(), ws );
+            std::string wsName = ws->name();
+            ws->setName("",true);
+            AnalysisDataService::Instance().add( wsName, ws );
         }
     }
     m_workspaces.clear();
@@ -313,8 +350,8 @@ void WorkspaceGroup::remove(const std::string& wsName)
     {
       // leave removed workspace in the ADS
       auto ws = *it;
-      AnalysisDataService::Instance().add( ws->name(), ws );
       m_workspaces.erase(it);
+      AnalysisDataService::Instance().add( ws->name(), ws );
       break;
     }
   }
@@ -348,6 +385,7 @@ void WorkspaceGroup::deepRemove(const std::string &name, bool convertToUpperCase
     {
       if ( (**it).getUpperCaseName() == upperName )
       {
+        (**it).setName("",true);
         it = m_workspaces.erase(it);
       }
       else
@@ -392,6 +430,7 @@ void WorkspaceGroup::print(const std::string &padding) const
   for (auto itr = m_workspaces.begin(); itr != m_workspaces.end(); ++itr)
   {
     g_log.debug() << padding << (**itr).name() << std::endl;
+    std::cerr << padding << (**itr).name() << std::endl;
     const WorkspaceGroup *grp = dynamic_cast<const WorkspaceGroup*>( itr->get() );
     if ( grp )
     {
@@ -405,24 +444,24 @@ void WorkspaceGroup::print(const std::string &padding) const
  * Replaces a member if it was replaced in the ADS.
  * @param notice :: A pointer to a workspace after-replace notificiation object
  */
-void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice)
-{
-  Poco::Mutex::ScopedLock _lock(m_mutex);
-  bool isObserving = m_observingADS;
-  if ( isObserving )
-    observeADSNotifications( false );
-  const std::string replacedName = notice->object_name();
-  for(auto citr=m_workspaces.begin(); citr!=m_workspaces.end(); ++citr)
-  {
-    if ( (**citr).name() == replacedName )
-    {
-      *citr = notice->new_object();
-      break;
-    }
-  }
-  if ( isObserving )
-    observeADSNotifications( true );
-}
+//void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice)
+//{
+//  Poco::Mutex::ScopedLock _lock(m_mutex);
+//  bool isObserving = m_observingADS;
+//  if ( isObserving )
+//    observeADSNotifications( false );
+//  const std::string replacedName = notice->object_name();
+//  for(auto citr=m_workspaces.begin(); citr!=m_workspaces.end(); ++citr)
+//  {
+//    if ( (**citr).name() == replacedName )
+//    {
+//      *citr = notice->new_object();
+//      break;
+//    }
+//  }
+//  if ( isObserving )
+//    observeADSNotifications( true );
+//}
 
 /**
  * This method returns true if the workspace group is empty
@@ -431,7 +470,7 @@ void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceN
 bool WorkspaceGroup::isEmpty() const
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-	return m_workspaces.empty();
+    return m_workspaces.empty();
 }
 
 //------------------------------------------------------------------------------

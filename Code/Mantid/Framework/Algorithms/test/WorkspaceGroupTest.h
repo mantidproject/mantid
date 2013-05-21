@@ -114,6 +114,7 @@ public:
       size_t nSize = GroupNames.size();
       TS_ASSERT_EQUALS(nSize, 4);
     }
+
     Plus alg;
     alg.initialize();
     alg.setPropertyValue("LHSWorkspace", "test_in");

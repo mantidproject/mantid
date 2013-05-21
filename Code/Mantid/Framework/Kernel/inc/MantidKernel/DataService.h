@@ -187,7 +187,7 @@ public:
    */
   virtual void add( const std::string& name, const boost::shared_ptr<T>& Tobject)
   {
-    // Don't permit an empty name for the workspace
+    // Don't permit an empty name for the data object
     if (name.empty())
     {
       std::string error="Add Data Object with empty name";
@@ -198,9 +198,9 @@ public:
     // Make DataService access thread-safe
     m_mutex.lock();
 
-    // At the moment, you can't overwrite a workspace (i.e. pass in a name
-    // that's already in the map with a pointer to a different workspace).
-    // Also, there's nothing to stop the same workspace from being added
+    // At the moment, you can't overwrite a data object (i.e. pass in a name
+    // that's already in the map with a pointer to a different object).
+    // Also, there's nothing to stop the same object from being added
     // more than once with different names.
     if ( ! datamap.insert(typename svcmap::value_type(name, Tobject)).second)
     {

@@ -64,6 +64,11 @@ namespace Mantid
     void AnalysisDataServiceImpl::add( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace)
     {
       verifyName(name);
+      if ( doesExist(name) )
+      {
+          std::string error="ADS : Unable to add workspace : '"+name+"'";
+          throw std::runtime_error(error);
+      }
       //Attach the name to the workspace
       if( workspace ) workspace->setName(name);
       Kernel::DataService<API::Workspace>::add(name, workspace);
@@ -79,8 +84,8 @@ namespace Mantid
     {
       verifyName(name);
 
-      //Attach the name to the workspace
-      if( workspace ) workspace->setName(name);
+      //Attach the new name to the workspace
+      if( workspace ) workspace->setName(name,true);
       Kernel::DataService<API::Workspace>::addOrReplace(name, workspace);
     }
 
@@ -91,10 +96,10 @@ namespace Mantid
      */
     void AnalysisDataServiceImpl::rename( const std::string& oldName, const std::string& newName)
     {
+      auto ws = retrieve( oldName );
       Kernel::DataService<API::Workspace>::rename( oldName, newName );
       //Attach the new name to the workspace
-      auto ws = retrieve( newName );
-      ws->setName( newName );
+      ws->setName( newName, true );
     }
 
     /**
@@ -153,6 +158,7 @@ namespace Mantid
         {
             if ( (**it).getUpperCaseName() == foundName )
             {
+                (**it).setName("",true); // this call goes before remove(name) to work correctly with workspace groups
                 Kernel::DataService<Workspace>::remove( name );
                 return true;
             }
@@ -205,6 +211,26 @@ namespace Mantid
           }
         }
         return boost::shared_ptr<Workspace>();
+    }
+
+    /**
+     * Print the names of all the workspaces in the ADS to the logger (at debug level)
+     *
+     */
+    void AnalysisDataServiceImpl::print() const
+    {
+        std::cerr << "Workspaces in ADS:" << std::endl;
+        std::vector<Workspace_sptr> workspaces = getObjects();
+        for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
+        {
+          Workspace *ws = it->get();
+          std::cerr << (**it).name() << std::endl;
+          WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>(ws);
+          if ( wsg )
+          {
+              wsg->print("  ");
+          }
+        }
     }
 
     //-------------------------------------------------------------------------

@@ -50,17 +50,10 @@ public:
     ads.setIllegalCharacterList("");
   }
 
-  void test_Retrieve_Checks_For_Exact_Match_Then_Lower_Upper_And_Sentence_Case()
+  void test_Workspace_names_are_caseless()
   {
     addToADS("z");
-    addToADS("Z");
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieve("z"));
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieve("Z"));
-
-    removeFromADS("z");// Remove lower case
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieve("z")); // Will find upper case
-    removeFromADS("z");// Remove lower case
-    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieve("z"), Exception::NotFoundError);
+    TS_ASSERT_THROWS( addToADS("Z"), std::runtime_error );
   }
 
   void test_Add_With_Name_That_Has_No_Special_Chars_Is_Accpeted()
@@ -78,6 +71,15 @@ public:
     // Adding again will throw
     TS_ASSERT_THROWS(addToADS(name), std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(removeFromADS(name));
+  }
+
+  void test_Adding_Same_Item_With_Different_Name_Throws_Runtime_Error()
+  {
+    MockWorkspace_sptr ws = MockWorkspace_sptr(new MockWorkspace);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add("FirstName",ws));
+    // Adding again will throw
+    TS_ASSERT_THROWS(AnalysisDataService::Instance().add("SecondName",ws), std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(removeFromADS("FirstName"));
   }
 
   void test_Add_With_Name_Containing_Special_Chars_Throws_Invalid_Argument()
@@ -195,8 +197,8 @@ public:
     // ADS must be empty
     TS_ASSERT_EQUALS( ADS.size(), 0 );
     ADS.add( "Group", group );
-    // there must be 3 workspaces in the ADS
-    TS_ASSERT_EQUALS( ADS.size(), 3 );
+    // there must be 1 workspace in the ADS
+    TS_ASSERT_EQUALS( ADS.size(), 1 );
     TS_ASSERT( ADS.doesExist( "Group" ) );
     TS_ASSERT( ADS.doesExist( "Group_1" ) );
     TS_ASSERT( ADS.doesExist( "Group_2" ) );
@@ -221,8 +223,8 @@ public:
     // ADS must have 2 workspaces
     TS_ASSERT_EQUALS( ADS.size(), 2 );
     ADS.add( "Group", group );
-    // there must be 4 workspaces in the ADS
-    TS_ASSERT_EQUALS( ADS.size(), 4 );
+    // there must be 3 top-level workspaces in the ADS
+    TS_ASSERT_EQUALS( ADS.size(), 3 );
     TS_ASSERT(   ADS.doesExist( "Group" ) );
     TS_ASSERT(   ADS.doesExist( "Group_1" ) );
     TS_ASSERT( ! ADS.doesExist( "Group_2" ) );
@@ -255,8 +257,8 @@ public:
     // ADS must have 2 workspaces
     TS_ASSERT_EQUALS( ADS.size(), 2 );
     ADS.addOrReplace( "Group", group );
-    // there must be 4 workspaces in the ADS
-    TS_ASSERT_EQUALS( ADS.size(), 4 );
+    // there must be 3 top-level workspaces in the ADS
+    TS_ASSERT_EQUALS( ADS.size(), 3 );
     TS_ASSERT(   ADS.doesExist( "Group" ) );
     TS_ASSERT(   ADS.doesExist( "Group_1" ) );
     TS_ASSERT(   ADS.doesExist( "Group_2" ) );
@@ -289,18 +291,19 @@ public:
     // ADS must have 2 workspaces
     TS_ASSERT_EQUALS( ADS.size(), 2 );
     TS_ASSERT_THROWS( ADS.add( "Group", group ), std::runtime_error );
-    // there must be 4 workspaces in the ADS
-    TS_ASSERT_EQUALS( ADS.size(), 4 );
-    TS_ASSERT(   ADS.doesExist( "Group" ) );
-    TS_ASSERT(   ADS.doesExist( "Group_1" ) );
+    // there must be 2 top-level workspaces in the ADS
+    TS_ASSERT_EQUALS( ADS.size(), 2 );
+    TS_ASSERT( ! ADS.doesExist( "Group" ) );
+    TS_ASSERT( ! ADS.doesExist( "Group_1" ) );
     TS_ASSERT(   ADS.doesExist( "Group_2" ) );
     TS_ASSERT(   ADS.doesExist( "work1" ) );
     TS_ASSERT( ! ADS.doesExist( "work2" ) );
 
     auto names = group->getNames();
     TS_ASSERT_EQUALS( names.size(), 2 );
-    TS_ASSERT_EQUALS( names[0], "Group_1" );
-    TS_ASSERT_EQUALS( names[1], "Group_2" );
+    // group wasn't added to ADS
+    TS_ASSERT_EQUALS( names[0], "" );
+    TS_ASSERT_EQUALS( names[1], "" );
 
     //clean up the ADS for other tests
     AnalysisDataService::Instance().clear();
