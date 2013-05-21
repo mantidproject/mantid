@@ -61,9 +61,11 @@
     <value val="IdentifyNoisyDetectors" />
 </parameter>
 
-<!-- formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
+<!-- Emission time from moderator, syntax below follows muParser, less-than sign escaped with the amperstand for correct xml parsing, incidentEnergy in meV, results in micro-seconds -->
 <parameter name="t0_formula" type="string">
-  <value val="34.746 - 0.166672*incidentEnergy + 0.00020538*incidentEnergy^(2.0)" />
+  <value val="(incidentEnergy &lt; 34.7332) ? 37.011296*incidentEnergy^(-0.052874) : (incidentEnergy &lt; 88.7556) ? 124.267307*incidentEnergy^(-0.394282) : (incidentEnergy &lt; 252.471) ? 963.775145*incidentEnergy^(-0.850919) : (incidentEnergy &lt; 420.145) ? 33.225834*incidentEnergy^(-0.242105) : (incidentEnergy &lt; 100000.0) ? 120.569231*incidentEnergy^(-0.455477) : 0.0" />
+  <!-- value val="370*incidentEnergy^(-0.1)" /-->
+  <!-- value val="40.0"/-->
 </parameter>
 
 </component-link>
