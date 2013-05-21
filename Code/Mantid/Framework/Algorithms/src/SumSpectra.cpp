@@ -540,10 +540,11 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
 
     //Add the event lists with the operator
     const EventList & tOutEL = localworkspace->getEventList(i);
-    if(tOutEL.empty())
-      numZeros++;
-    else
-      outEL += tOutEL;
+    if( tOutEL.empty() )
+    {
+      ++numZeros;
+    }
+    outEL += tOutEL;
 
     progress.report();
   }
