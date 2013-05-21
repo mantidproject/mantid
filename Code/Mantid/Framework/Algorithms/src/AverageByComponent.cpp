@@ -8,7 +8,7 @@ calculate the average along the tube (LevelsUp=1) (for non-masked pixels), and r
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <gsl/gsl_statistics.h>
-
+#include <boost/math/special_functions/fpclassify.hpp>
 namespace Mantid
 {
 namespace Algorithms
