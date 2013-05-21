@@ -20,7 +20,8 @@ namespace Mantid
     //------------------------------------------------------------------------------
     class Instrument;
     class IComponent;
-    class ISpectraDetectorMap;
+
+    typedef boost::unordered_map<specid_t, std::set<detid_t>> ISpectrumDetectorMapping;
 
     /**
      *  Abstract Nearest neighbours class. Implementations of this are used for seaching for the nearest neighbours of a 

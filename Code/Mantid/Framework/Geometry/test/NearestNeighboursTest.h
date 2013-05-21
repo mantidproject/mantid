@@ -5,7 +5,6 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
-#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -26,6 +25,16 @@ using Mantid::Kernel::V3D;
 //=====================================================================================
 class NearestNeighboursTest : public CxxTest::TestSuite
 {
+public:
+  static ISpectrumDetectorMapping buildSpectrumDetectorMapping(const specid_t start, const specid_t end)
+  {
+    boost::unordered_map<specid_t, std::set<detid_t>> map;
+    for ( specid_t i = start; i <= end; ++i )
+    {
+      map[i].insert(i);
+    }
+    return map;
+  }
 
 private:
 
@@ -34,7 +43,7 @@ private:
   {
   public:
       ExposedNearestNeighbours(boost::shared_ptr<const Instrument> instrument,
-        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=false) : NearestNeighbours(instrument, spectraMap, ignoreMasked){}
+        const ISpectrumDetectorMapping & spectraMap, bool ignoreMasked=false) : NearestNeighbours(instrument, spectraMap, ignoreMasked){}
 
       //Direct access to intermdiate spectra detectors
       std::map<specid_t, IDetector_const_sptr> getSpectraDetectors()
@@ -49,15 +58,15 @@ public:
   {
      // Create Instrument and make it Parameterised
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
-    TS_ASSERT_EQUALS(spectramap->nElements(), 18);
+    const ISpectrumDetectorMapping spectramap = buildSpectrumDetectorMapping(1, 18);
+    TS_ASSERT_EQUALS(spectramap.size(), 18);
     // Default parameter map.
     ParameterMap_sptr pmap(new ParameterMap());
     // Parameterized instrument
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(actualNeighboursNumber, m_instrument, *spectramap);
+    NearestNeighbours nn(actualNeighboursNumber, m_instrument, spectramap);
 
     // Check distances calculated in NearestNeighbours compare with those using getDistance on component
     std::map<specid_t, V3D> distances = nn.neighbours(14);
@@ -70,15 +79,15 @@ public:
   {
     // Create Instrument and make it Parameterised
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
-    TS_ASSERT_EQUALS(spectramap->nElements(), 18);
+    const ISpectrumDetectorMapping spectramap = buildSpectrumDetectorMapping(1, 18);
+    TS_ASSERT_EQUALS(spectramap.size(), 18);
     // Default parameter map.
     ParameterMap_sptr pmap(new ParameterMap());
     // Parameterized instrument
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, *spectramap);
+    NearestNeighbours nn(m_instrument, spectramap);
 
     detid2det_map m_detectors;
     m_instrument->getDetectors(m_detectors);
@@ -137,14 +146,14 @@ public:
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentRectangular(2, 16) );
 
     // Test fails without a parameter map.
-    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(256, 767));
+    const ISpectrumDetectorMapping spectramap = buildSpectrumDetectorMapping(256, 767);
     // Default parameter map.
     ParameterMap_sptr pmap(new ParameterMap());
     // Parameterized instrument
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, *spectramap);
+    NearestNeighbours nn(m_instrument, spectramap);
 
     // Correct # of detectors
     TS_ASSERT_EQUALS( m_instrument->getDetectorIDs().size(), 512);
@@ -169,7 +178,7 @@ public:
   void testIgnoreAndApplyMasking()
   {
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    const ISpectrumDetectorMapping spectramap = buildSpectrumDetectorMapping(1, 18);
 
     // Default parameter map.
     ParameterMap_sptr pmap(new ParameterMap());
@@ -177,7 +186,7 @@ public:
     //Mask the first 5 detectors
     for(Mantid::specid_t i = 1; i < 3; i++)
     {
-      if ( const Geometry::ComponentID det = instrument->getDetector(spectramap->getDetectors(i)[0])->getComponentID() )
+      if ( const Geometry::ComponentID det = instrument->getDetector(*spectramap.at(i).begin())->getComponentID() )
       {
         pmap->addBool(det,"masked",true);
       }
@@ -186,12 +195,12 @@ public:
     // Parameterized instrument
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
-    IDetector_const_sptr det = m_instrument->getDetector(spectramap->getDetectors(1)[0]);
+    IDetector_const_sptr det = m_instrument->getDetector(*spectramap.at(1).begin());
 
     // Create the NearestNeighbours object directly. Ignore any masking.
-    ExposedNearestNeighbours ignoreMaskedNN(m_instrument, *spectramap, true);
+    ExposedNearestNeighbours ignoreMaskedNN(m_instrument, spectramap, true);
     // Create the NearestNeighbours object directly. Account for any masking.
-    ExposedNearestNeighbours accountForMaskedNN(m_instrument, *spectramap, false);
+    ExposedNearestNeighbours accountForMaskedNN(m_instrument, spectramap, false);
 
     size_t sizeWithoutMasking = ignoreMaskedNN.getSpectraDetectors().size(); 
     size_t sizeWithMasking = accountForMaskedNN.getSpectraDetectors().size(); 
@@ -213,14 +222,14 @@ public:
   void testUsingRadius()
   {
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    const ISpectrumDetectorMapping spectramap = NearestNeighboursTest::buildSpectrumDetectorMapping(1, 18);
     // Default parameter map.
     ParameterMap_sptr pmap(new ParameterMap());
     // Parameterized instrument
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, *spectramap);
+    NearestNeighbours nn(m_instrument, spectramap);
     for(size_t i = 0; i < 2000; i++)
     {
       nn.neighboursInRadius(1, 5.0);
@@ -230,14 +239,14 @@ public:
   void testUsingDefault()
   {
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    const ISpectrumDetectorMapping spectramap = NearestNeighboursTest::buildSpectrumDetectorMapping(1, 18);
     // Default parameter map.
     ParameterMap_sptr pmap(new ParameterMap());
     // Parameterized instrument
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Create the NearestNeighbours object directly.
-    NearestNeighbours nn(m_instrument, *spectramap);
+    NearestNeighbours nn(m_instrument, spectramap);
     for(size_t i = 0; i < 2000; i++)
     {
       nn.neighboursInRadius(1, 0.0);
@@ -247,7 +256,7 @@ public:
   void testUsingNumberOfNeighbours()
   {
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    const ISpectrumDetectorMapping spectramap = NearestNeighboursTest::buildSpectrumDetectorMapping(1, 18);
     // Default parameter map.
     ParameterMap_sptr pmap(new ParameterMap());
     // Parameterized instrument
@@ -256,7 +265,7 @@ public:
     // Create the NearestNeighbours object directly.
     for(size_t i = 0; i < 2000; i++)
     {
-      NearestNeighbours nn(8, m_instrument, *spectramap);
+      NearestNeighbours nn(8, m_instrument, spectramap);
       nn.neighbours(1);
     }
   }

@@ -1,31 +1,17 @@
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/IMDWorkspace.h" 
-#include "MantidAPI/Axis.h"
+#include <numeric>
+#include <boost/math/special_functions/fpclassify.hpp>
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/LocatedDataRef.h"
-#include "MantidAPI/WorkspaceIterator.h"
-#include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Instrument/XMLlogfile.h"
+#include "MantidAPI/MatrixWorkspaceMDIterator.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidAPI/WorkspaceIteratorCode.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/MatrixWSIndexCalculator.h"
-#include "MantidKernel/PhysicalConstants.h"
-
-#include <numeric>
-#include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/DateAndTime.h"
-#include <boost/math/special_functions/fpclassify.hpp>
-#include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/Strings.h"
-#include "MantidAPI/MatrixWorkspaceMDIterator.h"
 
 using Mantid::Kernel::DateAndTime;
 using Mantid::Kernel::TimeSeriesProperty;
@@ -316,7 +302,8 @@ namespace Mantid
         boost::shared_ptr<const Instrument> inst = this->getInstrument();
         if ( inst )
         {
-          m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(inst, *m_spectraMap, ignoreMaskedDetectors));
+          SpectrumDetectorMapping spectraMap(this);
+          m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(inst, spectraMap.getMapping(), ignoreMaskedDetectors));
         }
         else
         {
@@ -393,7 +380,8 @@ namespace Mantid
     {
       if ( !m_nearestNeighbours )
       {
-        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(nNeighbours, this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
+        SpectrumDetectorMapping spectraMap(this);
+        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(nNeighbours, this->getInstrument(), spectraMap.getMapping(), ignoreMaskedDetectors));
       }
       std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighbours(spec);
       return neighbours;

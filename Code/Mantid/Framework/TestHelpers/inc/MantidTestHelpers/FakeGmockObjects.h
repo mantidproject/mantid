@@ -30,8 +30,8 @@ using namespace Mantid;
 class MockNearestNeighboursFactory : public Mantid::Geometry::INearestNeighboursFactory
 {
 public:
-  MOCK_METHOD3(create, Mantid::Geometry::INearestNeighbours*(boost::shared_ptr<const Mantid::Geometry::Instrument>,const Mantid::Geometry::ISpectraDetectorMap&, bool));
-  MOCK_METHOD4(create, Mantid::Geometry::INearestNeighbours*(int,boost::shared_ptr<const Mantid::Geometry::Instrument>,const Mantid::Geometry::ISpectraDetectorMap&, bool));
+  MOCK_METHOD3(create, Mantid::Geometry::INearestNeighbours*(boost::shared_ptr<const Mantid::Geometry::Instrument>,const Mantid::Geometry::ISpectrumDetectorMapping&, bool));
+  MOCK_METHOD4(create, Mantid::Geometry::INearestNeighbours*(int,boost::shared_ptr<const Mantid::Geometry::Instrument>,const Mantid::Geometry::ISpectrumDetectorMapping&, bool));
   virtual ~MockNearestNeighboursFactory()
   {
   }
