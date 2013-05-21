@@ -251,8 +251,16 @@ void SplatterPlotView::onPickModeToggled(bool state)
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   if (state)
   {
-    this->probeSource = builder->createFilter("filters", "ProbePoint",
-                                              this->splatSource);
+    pqPipelineSource *src = NULL;
+    if (NULL != this->threshSource)
+    {
+      src = this->threshSource;
+    }
+    else
+    {
+      src = this->splatSource;
+    }
+    this->probeSource = builder->createFilter("filters", "ProbePoint", src);
     emit this->triggerAccept();
   }
   else
