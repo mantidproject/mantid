@@ -68,8 +68,7 @@ to an [[EventWorkspace]] but with no events for empty bins.
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ProgressText.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -98,12 +97,23 @@ namespace MDAlgorithms
     this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) for an elastic diffraction experiment.");
   }
 
-  
+  /**Small class to diable propery on interface */
+  class DisabledProperty: public EnabledWhenProperty
+  {
+  public:
+      DisabledProperty():
+          EnabledWhenProperty("NonExistingProperty",IS_DEFAULT)
+      {};
+      virtual bool fulfillsCriterion(const IPropertyManager * algo) const
+      {return false;}
+  };
+
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void ConvertToDiffractionMDWorkspace2::init()
   {
+
     // Input units must be TOF
     auto validator = boost::make_shared<API::WorkspaceUnitValidator>("TOF");
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, validator),
@@ -113,14 +123,19 @@ namespace MDAlgorithms
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
     declareProperty(new PropertyWithValue<bool>("Append", false, Direction::Input),
         "Append events to the output workspace. The workspace is replaced if unchecked.");
+
     // Disabled for this version
     declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false, Direction::Input),
-        "Clear the events from the input workspace during conversion, to save memory.");
-    //TODO --> investigate
+        "Clearing the events from the input workspace during conversion, to save memory is not supported by algorithm v2");
+    // disable property on interface
+     this->setPropertySettings("ClearInputWorkspace",  new DisabledProperty());
+
     declareProperty(new PropertyWithValue<bool>("OneEventPerBin", false, Direction::Input),
-        "Use the histogram representation (event for event workspaces).\n"
-        "One MDEvent will be created for each histogram bin (even empty ones).\n"
-        "Warning! This can use signficantly more memory!");
+        "Algorithm v2 always uses OneMDEvent per histogram bin (including zero bins) when works with histogram workspace\n"
+        " and convers every event into MDEvent when works with event workspace");
+    // disable property on interface
+     this->setPropertySettings("OneEventPerBin", new DisabledProperty());
+
 
 
     frameOptions.push_back("Q (sample frame)");
@@ -140,7 +155,7 @@ namespace MDAlgorithms
     this->initBoxControllerProps("2" /*SplitInto*/, 1500 /*SplitThreshold*/, 20 /*MaxRecursionDepth*/);
 
     declareProperty(
-      new PropertyWithValue<int>("MinRecursionDepth", 0),
+      new PropertyWithValue<int>("MinRecursionDepth", 1),
       "Optional. If specified, then all the boxes will be split to this minimum recursion depth. 1 = one level of splitting, etc.\n"
       "Be careful using this since it can quickly create a huge number of boxes = (SplitInto ^ (MinRercursionDepth * NumDimensions)).\n"
       "But setting this property equal to MaxRecursionDepth property is necessary if one wants to generate multiple file based workspaces in order to merge them later\n");
@@ -155,6 +170,11 @@ namespace MDAlgorithms
     setPropertyGroup("Extents", getBoxSettingsGroupName());
   }
 
+  /** method to convert the value of the target frame specified for the ConvertToDiffractionMDWorksapce  into the properties names of the ConvertToMD 
+    * @param  TargFrame -- the string, describing target transformation frame in the form accepted by convertToDiffractionWorksapce
+    * @return TargFrameName -- the string describing target transformation frame in the form acepted by convertToMD
+    * @return ScalingName    -- default coordinate scaling name accepted by convertToMD;
+  */
   void ConvertToDiffractionMDWorkspace2::convertFramePropertyNames(const std::string &TargFrame,std::string &TargFrameName,std::string & ScalingName)
   {
     // ----------------- Handle the type of output -------------------------------------
@@ -182,7 +202,12 @@ namespace MDAlgorithms
     }
 
   }
-
+  /** Splits extents accepted by convertToDiffreactionMD workspace in the form min1,max1 or min1,max1,min2,max2,min3,max3 
+      into tso vectors min(3),max(3) accepted by convertToMD 
+     @param  Extents  -- the vector of extents consititing of 2 or 6 elements
+     @return minVal   -- 3-vector of minimal values for 3 processed dimensions
+     @return maxVal   -- 3-vector of maximal values for 3 processed dimensions
+  */
   void ConvertToDiffractionMDWorkspace2::convertExtents(const std::vector<double> &Extents,std::vector<double> &minVal,std::vector<double> &maxVal)const
   {
       minVal.resize(3);
@@ -213,28 +238,6 @@ namespace MDAlgorithms
   /** Execute the algorithm.   */
   void ConvertToDiffractionMDWorkspace2::exec()
   {
-
-    // ---------------------- Extract properties --------------------------------------
-      //TODO --> Reconsile 
-    //OneEventPerBin = getProperty("OneEventPerBin");
-
-    // -------- Input workspace -> convert to Event ------------------------------------
-
-    ////Workspace2D_sptr m_InWS2D = boost::dynamic_pointer_cast<Workspace2D>(m_inWS);
-    //if (LorentzCorrection)
-    //{
-    //  API::Run & run = m_inWS->mutableRun();
-    //  if ( run.hasProperty("LorentzCorrection") )
-    //  {
-    //    Kernel::Property* prop = run.getProperty("LorentzCorrection");
-    //    bool lorentzDone = boost::lexical_cast<bool,std::string>(prop->value());
-    //    if(lorentzDone)
-    //    {
-    //      LorentzCorrection = false;
-    //      g_log.warning()<<"Lorentz Correction was already done for this workspace.  LorentzCorrection was changed to false." << std::endl;
-    //    }
-    //  }
-    //}
          
 
 
