@@ -182,7 +182,7 @@ namespace API
    */
   void ISpectrum::setDetectorIDs(const std::set<detid_t>& detIDs)
   {
-    detectorIDs = detIDs; // No moving on the Mac :(
+    detectorIDs = detIDs;
   }
 
   /** Set the detector IDs to be the set given (move version).
