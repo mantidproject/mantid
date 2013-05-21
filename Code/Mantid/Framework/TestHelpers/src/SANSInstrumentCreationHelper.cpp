@@ -123,6 +123,4 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
         wi++;
       }
     }
-
-    workspace->generateSpectraMap();
   }

@@ -71,7 +71,6 @@ public:
       ws2D->setX(i, timeChannelsVec);
       ws2D->setData(i, v, e);
     }
-    ws2D->generateSpectraMap();
 
     //put this workspace in the data service
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));

@@ -96,8 +96,6 @@ public:
     m_axes.resize(2);
     m_axes[0] = new Mantid::API::RefAxis(j, this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
-
-    generateSpectraMap();
   }
   size_t size() const {return vec.size() * blocksize();}
   size_t blocksize() const {return vec[0].dataY().size();}

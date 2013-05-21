@@ -52,9 +52,6 @@ public:
     }
     space->setInstrument(instr);
 
-    // spectrum number = detector id = workspace index
-    space->generateSpectraMap();
-
     // Register the workspace in the data service
     AnalysisDataService::Instance().add("GroupTestWS", space);
   }
