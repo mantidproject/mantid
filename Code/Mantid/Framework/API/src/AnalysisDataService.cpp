@@ -219,12 +219,12 @@ namespace Mantid
      */
     void AnalysisDataServiceImpl::print() const
     {
-        std::cerr << "Workspaces in ADS:" << std::endl;
+        g_log.debug() << "Workspaces in ADS:" << std::endl;
         std::vector<Workspace_sptr> workspaces = getObjects();
         for(auto it = workspaces.begin(); it != workspaces.end(); ++it)
         {
           Workspace *ws = it->get();
-          std::cerr << (**it).name() << std::endl;
+          g_log.debug() << (**it).name() << std::endl;
           WorkspaceGroup* wsg = dynamic_cast<WorkspaceGroup*>(ws);
           if ( wsg )
           {

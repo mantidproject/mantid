@@ -75,6 +75,9 @@ public:
   Poco::NotificationCenter notificationCenter;
   void notifyAlgorithmStarting(AlgorithmID id);
 
+  /// Set maximum number of retained algorithms
+  void setMaxNoAlgorithms(int n);
+
   void clear();
   void cancelAll();
 

@@ -102,7 +102,8 @@ public:
   AlgorithmManagerTest() 
   {
     // A test fails unless algorithms.retained is big enough
-    Mantid::Kernel::ConfigService::Instance().setString("algorithms.retained","5");
+    // Note: for this setting to work it must be called before creating AlgorithmManager
+    //Mantid::Kernel::ConfigService::Instance().setString("algorithms.retained","5");
   }
 
   void testVersionFail()
@@ -206,6 +207,7 @@ public:
   void testDroppingOldOnes()
   {
     AlgorithmManager::Instance().clear();
+    AlgorithmManager::Instance().setMaxNoAlgorithms(5);
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
 
     IAlgorithm_sptr first = AlgorithmManager::Instance().create("AlgTest");
@@ -221,12 +223,31 @@ public:
     AlgorithmManager::Instance().create("AlgTest");
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
     TS_ASSERT( ! AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) );
+    AlgorithmManager::Instance().setMaxNoAlgorithms(50);
   }
+
+    void test_setMaxNoAlgorithms()
+    {
+        AlgorithmManager::Instance().clear();
+        AlgorithmManager::Instance().setMaxNoAlgorithms(10);
+        TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
+        for (size_t i=0; i<10; i++)
+          AlgorithmManager::Instance().create("AlgTest");
+        TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),10);
+        AlgorithmManager::Instance().setMaxNoAlgorithms(5);
+        // setting new maximum doesn't clear the store
+        TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),10);
+        AlgorithmManager::Instance().create("AlgTest");
+        // but adding a new algorithm does
+        TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),5);
+        AlgorithmManager::Instance().setMaxNoAlgorithms(50);
+    }
 
 
   /** Keep one algorithm running, drop the second-oldest one etc. */
   void testDroppingOldOnes_whenAnAlgorithmIsStillRunning()
   {
+    AlgorithmManager::Instance().setMaxNoAlgorithms(5);
     AlgorithmManager::Instance().clear();
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
 
@@ -265,7 +286,7 @@ public:
         AlgorithmManager::Instance().getAlgorithm(first->getAlgorithmID()) == first);
     TSM_ASSERT("The third algorithm (is still running) so it is still there",
         AlgorithmManager::Instance().getAlgorithm(third->getAlgorithmID()) == third);
-
+    AlgorithmManager::Instance().setMaxNoAlgorithms(50);
   }
 
   void testDroppingOldOnes_extremeCase()

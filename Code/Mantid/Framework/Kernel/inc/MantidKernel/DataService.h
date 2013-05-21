@@ -463,8 +463,11 @@ public:
 
 protected:
   /// Protected constructor (singleton)
-  DataService(const std::string& name) : svc_name(name),g_log(Kernel::Logger::get(svc_name)), m_prefixToHide("__"){}
+  DataService(const std::string& name) : g_log(Kernel::Logger::get(name)), svc_name(name),m_prefixToHide("__"){}
   virtual ~DataService(){}
+
+  /// Static reference to the logger for this DataService
+  Logger& g_log;
 
 private:
   /// Private, unimplemented copy constructor
@@ -519,9 +522,6 @@ private:
   
   /// Map of objects in the data service
   svcmap datamap;
-
-  /// Static reference to the logger for this DataService
-  Logger& g_log;
 
   /// Prefix to indicate hidden object
   std::string m_prefixToHide;

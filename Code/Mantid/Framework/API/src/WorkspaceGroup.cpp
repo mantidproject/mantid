@@ -17,7 +17,7 @@ namespace API
 
 Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
-size_t WorkspaceGroup::g_maxNestingLevel = 5;
+size_t WorkspaceGroup::g_maxNestingLevel = 100;
 
 WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
   Workspace(), 

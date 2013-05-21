@@ -158,6 +158,21 @@ namespace Mantid
       notificationCenter.postNotification(new AlgorithmStartingNotification(alg));
     }
 
+    /**
+     * Set maximum number of retained algorithms at run time.
+     *
+     * @param n :: The new maximum.
+     */
+    void AlgorithmManagerImpl::setMaxNoAlgorithms(int n)
+    {
+        if ( n <= 0 )
+        {
+            g_log.warning("Attempt to set the number of retained algorithms to a non-positive number.");
+            return;
+        }
+        m_max_no_algs = n;
+    }
+
     /// Returns the most recently created instance of the named algorithm (or null if not found)
     IAlgorithm_sptr AlgorithmManagerImpl::newestInstanceOf(const std::string& algorithmName) const
     {

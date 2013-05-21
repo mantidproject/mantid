@@ -147,6 +147,7 @@ public:
 
   void test_addWorkspace_if_group_in_ADS()
   {
+    AnalysisDataService::Instance().clear();
     WorkspaceGroup_sptr group(new WorkspaceGroup());
     AnalysisDataService::Instance().add("group",group);
 
