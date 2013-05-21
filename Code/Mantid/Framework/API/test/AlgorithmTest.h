@@ -608,7 +608,9 @@ public:
     makeWorkspaceGroup(group2, contents2);
     makeWorkspaceGroup(group3, contents3);
 
-    WorkspaceAlgorithm alg;
+    // I see a crash when the algorithm isn't on heap
+    auto palg = boost::shared_ptr<WorkspaceAlgorithm>( new WorkspaceAlgorithm() );
+    WorkspaceAlgorithm &alg = *palg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace1", group1);
     alg.setPropertyValue("InputWorkspace2", group2);
@@ -621,7 +623,7 @@ public:
     {
       TS_ASSERT( !alg.isExecuted() );
       return WorkspaceGroup_sptr();
-    } 
+    }
     TS_ASSERT( alg.isExecuted() )
     Workspace_sptr out1 = AnalysisDataService::Instance().retrieve("D");
     WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(out1);

@@ -1140,7 +1140,7 @@ namespace Mantid
       {
         Property * prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
         // Do not observe ADS notifications while constructing the group
-        WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup(false));
+        WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup());
         outGroups.push_back(outWSGrp);
         // Put the GROUP in the ADS
         AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp );

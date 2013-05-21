@@ -514,21 +514,17 @@ public:
     TS_ASSERT( observer.received );
     observer.received = false;
 
-    group->observeADSNotifications( false );
+    group->remove( "name_0" );
+    TS_ASSERT( observer.received );
+    observer.received = false;
+
+    AnalysisDataService::Instance().remove("group");
 
     group->add( "name_12" );
     TS_ASSERT( !observer.received );
     observer.received = false;
 
-    group->observeADSNotifications( true );
-
     group->remove( "name_12" );
-    TS_ASSERT( observer.received );
-    observer.received = false;
-
-    group->observeADSNotifications( false );
-
-    group->remove( "name_0" );
     TS_ASSERT( !observer.received );
     observer.received = false;
 

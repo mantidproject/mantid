@@ -56,7 +56,7 @@ class MANTID_API_DLL WorkspaceGroup : public Workspace
 {
 public:
   /// Default constructor.
-  WorkspaceGroup(const bool observeADS = true);
+  WorkspaceGroup();
   /// Destructor
   ~WorkspaceGroup();
   /// Return a string ID of the class
@@ -105,27 +105,15 @@ public:
   void updated() const;
   /// Inidicates that the workspace group can be treated as multiperiod.
   bool isMultiperiod() const;
-  /// Turn ADS observations on/off
-  void observeADSNotifications(const bool observeADS);
 
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
-//  /// Callback when a delete notification is received
-//  void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
-//  /// Observer for workspace delete notfications
-//  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
-//  /// Callback when a before-replace notification is received
-//  void workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice);
-//  /// Observer for workspace before-replace notfications
-//  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceBeforeReplaceNotification> m_replaceObserver;
 
   /// The list of workspace pointers in the group
   std::vector<Workspace_sptr> m_workspaces;
-  /// Flag as to whether the observers have been added to the ADS
-  bool m_observingADS;
   /// Recursive mutex to avoid simultaneous access
   mutable Poco::Mutex m_mutex;
   /// Counter for creating unigue names

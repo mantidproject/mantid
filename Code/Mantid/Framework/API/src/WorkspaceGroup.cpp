@@ -19,17 +19,13 @@ Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
 size_t WorkspaceGroup::g_maxNestingLevel = 100;
 
-WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
-  Workspace(), 
-  //m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
-  m_workspaces(), m_observingADS(false), m_nameCounter(0)
+WorkspaceGroup::WorkspaceGroup() :
+  Workspace(), m_workspaces(), m_nameCounter(0)
 {
-  observeADSNotifications(observeADS);
 }
 
 WorkspaceGroup::~WorkspaceGroup()
 {
-    observeADSNotifications(false);
 }
 
 /**
@@ -96,31 +92,6 @@ size_t WorkspaceGroup::getMemorySize() const
     return n;
 }
 
-/**
- * Turn on/off observing delete and rename notifications to update the group accordingly
- * It can be useful to turn them off when constructing the group.
- * @param observeADS :: If true observe the ADS notifications, otherwise disable them
- */
-void WorkspaceGroup::observeADSNotifications(const bool observeADS)
-{
-  if( observeADS )
-  {
-    if(!m_observingADS)
-    {
-      //AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
-      m_observingADS = true;
-    }
-  }
-  else
-  {
-    if(m_observingADS)
-    {
-      //AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
-      m_observingADS = false;
-    }
-  }
-}
-
 /** Add the named workspace to the group. The workspace must exist in the ADS
  *  @param name :: The name of the workspace (in the AnalysisDataService) to add
  */
@@ -157,11 +128,8 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
         else
         {
             std::string wsName = workspace->name();
-            bool observing = m_observingADS;
-            observeADSNotifications( false );
             AnalysisDataService::Instance().removeFromTopLevel( workspace->name() );
             workspace->setName(wsName);
-            observeADSNotifications( observing );
         }
     }
     updated();
@@ -510,7 +478,7 @@ bool WorkspaceGroup::areNamesSimilar() const
 void WorkspaceGroup::updated() const
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  if ( m_observingADS )
+  if ( ! name().empty() )
   {
     try
     {
