@@ -72,8 +72,8 @@ protected:
 class WorkspaceTester : public MatrixWorkspace
 {
 public:
-  WorkspaceTester(Mantid::Geometry::INearestNeighboursFactory* nnFactory) : MatrixWorkspace(nnFactory){}
-  WorkspaceTester() : MatrixWorkspace() {}
+  WorkspaceTester(Mantid::Geometry::INearestNeighboursFactory* nnFactory) : MatrixWorkspace(nnFactory), spec(0) {}
+  WorkspaceTester() : MatrixWorkspace(), spec(0) {}
   virtual ~WorkspaceTester() {}
 
   // Empty overrides of virtual methods
