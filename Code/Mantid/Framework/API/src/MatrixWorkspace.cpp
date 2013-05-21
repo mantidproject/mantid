@@ -375,7 +375,7 @@ namespace Mantid
     {
       if ( !m_nearestNeighbours )
       {
-        m_nearestNeighbours.reset(m_nearestNeighboursFactory->create(this->getInstrument(), *m_spectraMap, ignoreMaskedDetectors));
+        buildNearestNeighbours(ignoreMaskedDetectors);
       }
       std::map<specid_t, V3D> neighbours = m_nearestNeighbours->neighboursInRadius(spec, radius);
       return neighbours;
