@@ -1,5 +1,12 @@
 """*WIKI* 
 
+==== About Filter Wall ====
+Time filter wall is used in _loadData to load data in a certain range of time. 
+Here is how the filter is used:
+    1. There is NO filter if filter wall is NONE
+    2. There is NO lower boundary of the filter wall if wall[0] is ZERO;
+    3. There is NO upper boundary of the filter wall if wall[1] is ZERO;
+
 
 *WIKI*"""
 
@@ -296,17 +303,16 @@ class SNSPowderReduction(PythonAlgorithm):
 
         self._splitws = self.getProperty("SplittersWorkspace").value
         if self._splitws is not None:
-            print "SplittersWorkspace is %s" % (str(self._splitws))
+            self.log().information("SplittersWorkspace is %s" % (str(self._splitws)))
             if len(samRuns) != 1:
                 raise NotImplementedError("Reducing data with splitting cannot happen when there are more than 1 sample run.")
-            filterWall = self.getFilterWall(self._splitws, samRuns[0], SUFFIX)
-            print "So ... the filter wall is " , str(filterWall)
+            timeFilterWall = self._getTimeFilterWall(self._splitws, samRuns[0], SUFFIX)
+            self.log().information("The time filter wall is %s" %(str(timeFilterWall)))
         else:
             filterWall = (0.0, 0.0)
-            print "SplittersWorkspace is None!"
+            self.log().information("SplittersWorkspace is None, and thus there is NO time filter wall. ")
 
         # Process data
-
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
         samwksplist = []
 
@@ -321,7 +327,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 runnumber = temp
                 print "[Sum] Process run number ", str(runnumber)
 
-                temp = self._focusChunks(temp, SUFFIX, filterWall, calib, 
+                temp = self._focusChunks(temp, SUFFIX, timeFilterWall, calib, 
                         preserveEvents=preserveEvents, normByCurrent=normbycurrent)
                 tempinfo = self._getinfo(temp)
 
@@ -357,11 +363,12 @@ class SNSPowderReduction(PythonAlgorithm):
             # first round of processing the sample
             if not self.getProperty("Sum").value and samRun > 0:
                 self._info = None
-                returned = self._focusChunks(samRun, SUFFIX, filterWall, calib, self._splitws, 
+                returned = self._focusChunks(samRun, SUFFIX, timeFilterWall, calib, self._splitws, 
                         preserveEvents=preserveEvents, normByCurrent=normbycurrent)
                 
                 if returned.__class__.__name__ == "list":
                     # Returned with a list of workspaces
+                    self.log().information("[DBx540]: Returned is a list!")
                     focusedwksplist = returned
                     irun = 0
                     for run in focusedwksplist:
@@ -369,7 +376,7 @@ class SNSPowderReduction(PythonAlgorithm):
                             samwksplist.append(run) 
                             workspacelist.append(str(run))
                         else:
-                            print "Found a None entry in returned focused workspaces.  Index = %d." % (irun)
+                            self.log().warning("Found a None entry in returned focused workspaces.  Index = %d." % (irun))
                         # ENDIF
                         irun += 1
                     # ENDFOR
@@ -649,14 +656,25 @@ class SNSPowderReduction(PythonAlgorithm):
         strategy = self._getStrategy(runnumber, extension)
 
         dosplit = False
+        # Number of output workspaces from _focusChunk
         numwksp = 1
         if splitwksp is not None: 
+
+            # Check consistency in the code
+            if filterWall[0] < 1.0E-20 and filterWall[1] < 1.0E-20: 
+                # Default definition of filterWall when there is no split workspace specified. 
+                raise NotImplementedError("It is impossible to have a not-NONE splitters workspace and (0,0) time filter wall.")
+            # ENDIF
+
             # FIXME Unfiltered workspace (remainder) is not considered here
             numwksp = self.getNumberOfSplittedWorkspace(splitwksp)
-            if filterWall[0] < 1.0E-20 and filterWall[1] < 1.0E-20: 
-                # do splitting if and only if filterWall is not defined well (redundent check)
+            numsplitters = splitwksp.rowCount()
+
+            # Do explicit FilterEvents if number of splitters is larger than 1. 
+            # If number of splitters is equal to 1, then filterWall will do the job itself.
+            if numsplitters > 1:
                 dosplit = True
-            # ENDIF
+            self.log().information("[DBx948] Number of split workspaces = %d; Do split = %s" % (numwksp, str(dosplit)))
         # ENDIF
 
         firstChunkList = []
@@ -701,6 +719,12 @@ class SNSPowderReduction(PythonAlgorithm):
                             SplitterWorkspace=splitwksp, GroupWorkspaces=True)
                     wsgroup = mtd[basename]
                     tempwsnamelist = wsgroup.getNames()
+
+                    dbstr = "[DBx951] Splitted workspace names: "
+                    for wsname in tempwsnamelist:
+                        dbstr += "%s, " % (wsname)
+                    self.log().information(dbstr)
+
                     tempwslist = []
                     # FIXME Keep in mind to use this option. 
                     # keepremainder = self.getProperty("KeepRemainder").value
@@ -798,9 +822,12 @@ class SNSPowderReduction(PythonAlgorithm):
                     OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
 
             if normByCurrent:
-                wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
-                        OutputWorkspace=wksplist[itemp])
-                wksplist[itemp].getRun()['gsas_monitor'] = 1
+                try:
+                    wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
+                            OutputWorkspace=wksplist[itemp])
+                    wksplist[itemp].getRun()['gsas_monitor'] = 1
+                except Exception, e:
+                    self.log().warning(str(e))
 
             self._save(wksplist[itemp], self._info, False, True)
             self.log().information("Done focussing data of %d." % (itemp))
@@ -890,15 +917,16 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return
 
-    def getFilterWall(self, splitws, samrun, extension):
+    def _getTimeFilterWall(self, splitws, samrun, extension):
         """ Get filter wall from splitter workspace, i.e., 
-        get the earlies and latest time stamp in input splitter workspace
+        get the earlies and latest TIME stamp in input splitter workspace
 
         Arguments:
          - splitws      : splitters workspace
          - runstarttime : total nanoseconds of run start time (Mantid DateAndTime)
 
         Return: tuple of start-time and stop-time relative to run start time and in unit of second 
+                If there is no split workspace defined, filter is (0., 0.) as the default
         """
         # None case
         if splitws is None:
