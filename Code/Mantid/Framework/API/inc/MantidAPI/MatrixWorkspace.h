@@ -4,28 +4,17 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Axis.h"
+#include <boost/scoped_ptr.hpp>
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceIterator.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Unit.h"
-#include <set>
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/DateAndTime.h"
-#include <boost/scoped_ptr.hpp>
-#include "MantidAPI/IMDIterator.h"
-
-using Mantid::API::MDNormalization;
 
 namespace Mantid
 {
@@ -98,6 +87,8 @@ namespace Mantid
       /** @name Nearest neighbours */
       /// Build and populate the NearestNeighbours object
       void buildNearestNeighbours(const bool ignoreMaskedDetectors=false) const;
+      /// Causes the nearest neighbours map to be rebuilt
+      void rebuildNearestNeighbours();
       /// Query the NearestNeighbours object for a detector
       std::map<specid_t, Mantid::Kernel::V3D> getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using a search radius
@@ -265,8 +256,6 @@ namespace Mantid
       /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
       typedef std::map<size_t,double> MaskList;
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
-      // Causes the nearest neighbours map to be rebuilt.
-      void rebuildNearestNeighbours();
 
       void saveInstrumentNexus(::NeXus::File * file) const;
       void loadInstrumentNexus(::NeXus::File * file);
