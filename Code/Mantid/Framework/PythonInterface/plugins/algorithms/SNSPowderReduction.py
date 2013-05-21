@@ -659,7 +659,6 @@ class SNSPowderReduction(PythonAlgorithm):
         # Number of output workspaces from _focusChunk
         numwksp = 1
         if splitwksp is not None: 
-
             # Check consistency in the code
             if filterWall[0] < 1.0E-20 and filterWall[1] < 1.0E-20: 
                 # Default definition of filterWall when there is no split workspace specified. 
@@ -713,6 +712,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
                 # Filter to bad 
                 if dosplit:
+                    print "[DBx318] Call FilterEvents()"
                     # Splitting workspace
                     basename = str(temp) 
                     api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename, 
@@ -729,6 +729,7 @@ class SNSPowderReduction(PythonAlgorithm):
                     # FIXME Keep in mind to use this option. 
                     # keepremainder = self.getProperty("KeepRemainder").value
                     for wsname in tempwsnamelist:
+                        print "[DBx319] Found workspace %s in group." % (wsname)
                         tempws = mtd[wsname]
                         if tempws is not None: 
                             if wsname.endswith("_unfiltered") is False: 
