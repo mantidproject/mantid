@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
 	src/AsymmetryCalc.cpp
+	src/AverageByComponent.cpp
 	src/AverageLogData.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
@@ -228,6 +229,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/AsymmetryCalc.h
+	inc/MantidAlgorithms/AverageByComponent.h
 	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
@@ -453,6 +455,7 @@ set ( TEST_FILES
 	ApplyDetailedBalanceTest.h
 	ApplyTransmissionCorrectionTest.h
 	AsymmetryCalcTest.h
+	AverageByComponentTest.h
 	AverageLogDataTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
