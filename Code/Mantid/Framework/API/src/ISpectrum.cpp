@@ -178,7 +178,7 @@ namespace API
 
   /** Set the detector IDs to be the set given.
    *  Will clear any previous IDs (unlike addDetectorIDs).
-   *  @detIDs The new list of detector ID numbers
+   *  @param detIDs The new list of detector ID numbers
    */
   void ISpectrum::setDetectorIDs(const std::set<detid_t>& detIDs)
   {
@@ -187,7 +187,7 @@ namespace API
 
   /** Set the detector IDs to be the set given (move version).
    *  Will clear any previous IDs (unlike addDetectorIDs).
-   *  @detIDs The new list of detector ID numbers
+   *  @param detIDs The new list of detector ID numbers
    */
   void ISpectrum::setDetectorIDs(std::set<detid_t>&& detIDs)
   {
