@@ -77,21 +77,20 @@ SplatterPlotView::~SplatterPlotView()
  */
 bool SplatterPlotView::eventFilter(QObject *obj, QEvent *ev)
 {
-  //std::cout << "In filter: " << ev->type() << std::endl;
-  //std::cout << "Object: " << obj->className() << std::endl;
-  if (QEvent::KeyRelease == ev->type() && this == obj &&
+  this->setFocus();
+  if (QEvent::KeyRelease == ev->type() &&
+      this == obj &&
       this->ui.pickModeButton->isChecked())
   {
     QKeyEvent *kev = static_cast<QKeyEvent *>(ev);
     if (Qt::Key_P == kev->key())
     {
-      std::cout << "Pick done" << std::endl;
       emit this->triggerAccept();
       this->readAndSendCoordinates();
       return true;
     }
   }
-  return QObject::eventFilter(obj, ev);
+  return false;
 }
 
 void SplatterPlotView::destroyView()
@@ -285,7 +284,6 @@ void SplatterPlotView::destroyPeakSources()
  */
 void SplatterPlotView::readAndSendCoordinates()
 {
-  std::cout << "Reading coordinates" << std::endl;
   QList<vtkSMProxy *> pList = this->probeSource->getHelperProxies("Source");
   vtkSMDoubleVectorProperty *coords = vtkSMDoubleVectorProperty::SafeDownCast(\
         pList[0]->GetProperty("Center"));
