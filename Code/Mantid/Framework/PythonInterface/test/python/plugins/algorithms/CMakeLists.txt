@@ -18,6 +18,7 @@ set ( TEST_PY_FILES
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py
+  SANSSubtractTest.py
 )
 
 # Prefix for test name=PythonAlgorithms
