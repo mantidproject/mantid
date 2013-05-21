@@ -1,5 +1,8 @@
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 
+#include "MantidQtAPI/SelectionNotificationService.h"
+#include "MantidVatesAPI/vtkPeakMarkerFactory.h"
+
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -24,6 +27,9 @@
 
 #include <QKeyEvent>
 #include <QMessageBox>
+
+using namespace MantidQt::API;
+using namespace Mantid::VATES;
 
 namespace Mantid
 {
@@ -71,8 +77,8 @@ SplatterPlotView::~SplatterPlotView()
  */
 bool SplatterPlotView::eventFilter(QObject *obj, QEvent *ev)
 {
-  std::cout << "In filter: " << ev->type() << std::endl;
-  std::cout << "Object: " << obj->className() << std::endl;
+  //std::cout << "In filter: " << ev->type() << std::endl;
+  //std::cout << "Object: " << obj->className() << std::endl;
   if (QEvent::KeyRelease == ev->type() && this == obj &&
       this->ui.pickModeButton->isChecked())
   {
@@ -280,27 +286,33 @@ void SplatterPlotView::destroyPeakSources()
 void SplatterPlotView::readAndSendCoordinates()
 {
   std::cout << "Reading coordinates" << std::endl;
-  std::vector<double> coords = vtkSMPropertyHelper(this->probeSource->getProxy(),
-                      "WorldPosition").GetDoubleArray();
-/*
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(this->probeSource->getProxy());
-  srcProxy->Modified();
-  srcProxy->UpdatePipelineInformation();
-
+  QList<vtkSMProxy *> pList = this->probeSource->getHelperProxies("Source");
   vtkSMDoubleVectorProperty *coords = vtkSMDoubleVectorProperty::SafeDownCast(\
-        srcProxy->GetProperty("WorldPosition"));
+        pList[0]->GetProperty("Center"));
 
   if (NULL != coords)
   {
-    std::cout << "OK" << std::endl;
+    // Get coordinate type
+    int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
+                                             "SpecialCoordinates").GetAsInt();
+    // Make commensurate with vtkPeakMarkerFactory
+    peakViewCoords--;
+
+    if (peakViewCoords < vtkPeakMarkerFactory::Peak_in_HKL)
+    {
+      // For Qlab and Qsample coordinate data
+      // Qlab needs to be true, but enum is 0
+      bool coordType = !(static_cast<bool>(peakViewCoords));
+      SelectionNotificationService::Instance().sendQPointSelection(coordType,
+                                                                   coords->GetElement(0),
+                                                                   coords->GetElement(1),
+                                                                   coords->GetElement(2));
+    }
   }
   else
   {
-    std::cout << "No coords" << std::endl;
     return;
   }
-*/
-  std::cout << "Size: " << coords.size() << std::endl;
 }
 
 } // SimpleGui
