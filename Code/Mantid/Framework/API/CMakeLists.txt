@@ -95,11 +95,12 @@ set ( SRC_FILES
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
-	src/SelectionNotificationService.cpp
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
+	src/SelectionNotificationService.cpp
 	src/SpectraAxis.cpp
 	src/SpectraDetectorMap.cpp
+	src/SpectrumDetectorMapping.cpp
 	src/TableRow.cpp
 	src/TextAxis.cpp
 	src/TransformScaleFactory.cpp
@@ -167,7 +168,7 @@ set ( INC_FILES
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
-	inc/MantidAPI/IBoxControllerIO.h    
+	inc/MantidAPI/IBoxControllerIO.h
 	inc/MantidAPI/ICatalog.h
 	inc/MantidAPI/IConstraint.h
 	inc/MantidAPI/ICostFunction.h
@@ -188,7 +189,7 @@ set ( INC_FILES
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
-    inc/MantidAPI/IMDNode.h        
+	inc/MantidAPI/IMDNode.h
 	inc/MantidAPI/IMDWorkspace.h
 	inc/MantidAPI/IMaskWorkspace.h
 	inc/MantidAPI/IPeak.h
@@ -248,6 +249,7 @@ set ( INC_FILES
 	inc/MantidAPI/SpecialCoordinateSystem.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraDetectorMap.h
+	inc/MantidAPI/SpectrumDetectorMapping.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
 	inc/MantidAPI/TransformScaleFactory.h
@@ -322,6 +324,7 @@ set ( TEST_FILES
 	SelectionNotificationServiceTest.h
 	SpectraAxisTest.h
 	SpectraDetectorMapTest.h
+	SpectrumDetectorMappingTest.h
 	TextAxisTest.h
 	VectorParameterParserTest.h
 	VectorParameterTest.h
