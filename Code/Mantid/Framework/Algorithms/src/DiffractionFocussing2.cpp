@@ -207,7 +207,7 @@ void DiffractionFocussing2::exec()
   MantidVec weights_default(1,1.0), emptyVec(1,0.0), EOutDummy(nPoints);
 
   Progress * prog;
-  prog = new API::Progress(this, 0.2, 0.95, static_cast<int>(totalHistProcess) + nGroups);
+  prog = new API::Progress(this, 0.2, 1.00, static_cast<int>(totalHistProcess) + nGroups);
 #ifndef __APPLE__
   PARALLEL_FOR2(m_matrixInputW, out)
 #endif
@@ -344,10 +344,6 @@ void DiffractionFocussing2::exec()
   PARALLEL_CHECK_INTERUPT_REGION
 
   delete prog;
-  progress(0.95, "Generating spectra map");
-
-  // For backwards-compatibility
-  out->generateSpectraMap();
 
   setProperty("OutputWorkspace",out);
 
@@ -532,7 +528,6 @@ void DiffractionFocussing2::execEvent()
     else
       g_log.warning() << "Warning! No X histogram bins were found for any groups. Histogram will be empty.\n";
   }
-  out->generateSpectraMap();
   out->clearMRU();
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(out));
   return;

@@ -157,9 +157,6 @@ namespace Algorithms
     // change the axis by adding the maximum existing spectrum number to the current value
     for (size_t i = 0; i < output->getNumberHistograms(); i++)
       output->getSpectrum(i)->setSpectrumNo( specid_t(i) );
-
-    // To be deprecated:
-    output->generateSpectraMap();
   }
 
 } // namespace Mantid

@@ -146,6 +146,7 @@ public:
     for(size_t wi=0; wi<out->getNumberHistograms(); wi++)
     {
       TS_ASSERT_EQUALS( out->getSpectrum(wi)->getSpectrumNo(), specid_t(wi) );
+      TS_ASSERT( !out->getSpectrum(wi)->getDetectorIDs().empty() );
       for(size_t x=0; x<out->blocksize(); x++)
         TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
     }

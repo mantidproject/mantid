@@ -848,9 +848,6 @@ void SmoothNeighbours::setupNewInstrument(MatrixWorkspace_sptr outws)
     } //(each neighbour)
   }
 
-  // Final set up to close
-  outws->generateSpectraMap();
-
   return;
 }
 

@@ -241,8 +241,6 @@ void Integration::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  outputWorkspace->generateSpectraMap();
-
   // Assign it to the output workspace property
   setProperty("OutputWorkspace", outputWorkspace);
 
