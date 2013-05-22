@@ -218,7 +218,20 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                     if not ext.startswith('.'):
                         ext = '.' + ext
                     if algor == "SaveCanSAS1D":
-                        SaveCanSAS1D(workspace_name, workspace_name+ext, DetectorNames=detnames)
+                        # From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
+                        # reduced data. The name of workspaces of the Transmission are available at the 
+                        # sample logs.
+                        extra_param = dict()
+                        _ws = mtd[workspace_name]
+                        for prop in ['Transmission','TransmissionCan']:
+                            if _ws.getRun().hasProperty(prop):
+                                ws_name = _ws.getRun().getLogData(prop).value
+                                if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
+                                    extra_param[prop] = _ws.getRun().getLogData(prop).value
+                        # Call the SaveCanSAS1D with the Transmission and TransmissionCan if they are
+                        # available
+                        SaveCanSAS1D(workspace_name, workspace_name+ext, DetectorNames=detnames,
+                                     **extra_param)
                     elif algor == "SaveRKH":
                         SaveRKH(workspace_name, workspace_name+ext, Append=False)
                     else:
