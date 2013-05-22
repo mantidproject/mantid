@@ -380,6 +380,9 @@ namespace DataHandling
 
     // Assuming we're going to process this packet, check to see if we need
     // to finish our initialization steps
+    // We should already be initialized by the time we get here, but
+    // we'll give it one last try anyway since we'll have to throw
+    // the packet away if we can't initialize.
     if (! m_workspaceInitialized)
     {
       if (readyForInitPart2())
@@ -539,6 +542,15 @@ namespace DataHandling
       nodes->release();
     }
 
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
+    }
+
     return false;
   }
 
@@ -560,6 +572,15 @@ namespace DataHandling
     {
       // We need the instrument name
       m_instrumentName = pkt.longName();
+    }
+
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
     }
 
     return false;
@@ -686,6 +707,16 @@ namespace DataHandling
 
     // Note: all other possibilities for pkt.status() can be ignored
 
+
+    // Check to see if we can/should complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
+    }
+
     return m_pauseNetRead;
     // If we've set m_pauseNetRead, it means we want to stop processing packets.
     // In that case, we need to return true so that we'll break out of the read() loop
@@ -734,6 +765,16 @@ namespace DataHandling
         }
       }
     }
+
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
+    }
+
     return false;
   }
 
@@ -779,6 +820,16 @@ namespace DataHandling
         }
       }
     }
+
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
+    }
+
     return false;
   }
 
@@ -827,6 +878,16 @@ namespace DataHandling
         }
       }
     }
+
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
+    }
+
     return false;
   }
 
@@ -1189,6 +1250,12 @@ namespace DataHandling
         // a debugger, you probably ought to comment out this line
         throw std::runtime_error( "SNSLiveEventDataListener timed out without initializing.");
       }
+
+      // Check to see if the background thread has thrown an exception.  If so, re-throw it here.
+      if (m_backgroundException)
+      {
+        throw( *m_backgroundException);
+      }
       Poco::Thread::sleep( 100);  // 100 milliseconds
     }
 
@@ -1288,6 +1355,14 @@ namespace DataHandling
         {
           // A new run is starting...
           m_ignorePackets = false;
+        }
+        else  // If we receive any other status, then it means we weren't in a run.  In this case,
+              // we're going to throw an exception so that the algorithm will shut down.
+              // (Note: we're currently in the background thread here, so our exception will
+              // be caught by the handlers up in the run() function and then re-thrown from
+              // the foreground thread....
+        {
+          throw std::runtime_error("User requested data from start of current run, but system is not currently in a run.");
         }
       }
     }
