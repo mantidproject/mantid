@@ -291,12 +291,6 @@ namespace Mantid
      */
     void MatrixWorkspace::buildNearestNeighbours(const bool ignoreMaskedDetectors) const
     {
-      if( !m_spectraMap )
-      {
-        throw Kernel::Exception::NullPointerException("MatrixWorkspace::buildNearestNeighbours",
-                  "SpectraDetectorMap");
-      }
-
       if ( !m_nearestNeighbours )
       {
         boost::shared_ptr<const Instrument> inst = this->getInstrument();
