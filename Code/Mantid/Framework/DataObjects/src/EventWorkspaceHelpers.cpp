@@ -45,7 +45,6 @@ MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(MatrixWorkspace_spt
     for (size_t j=0; j < numBins; j++)
       Eout[j] = Ein[j];
   }
-  outputW->generateSpectraMap();
 
   return outputW;
 }

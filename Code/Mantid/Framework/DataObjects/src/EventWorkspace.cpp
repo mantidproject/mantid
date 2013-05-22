@@ -147,8 +147,6 @@ namespace DataObjects
     //Save the number of vectors
     m_noVectors = this->data.size();
 
-    // Regenerate the dumb spectramap
-    this->generateSpectraMap();
     this->clearMRU();
   }
 
@@ -603,9 +601,7 @@ namespace DataObjects
     // replace the old vector
     this->data.swap(notEmpty);
 
-    // fix spectra map
     this->m_noVectors = this->data.size();
-    this->generateSpectraMap();
 
     //Clearing the MRU list is a good idea too.
     this->clearMRU();
@@ -614,17 +610,11 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /** Call this method when you are done manually adding event lists
-   * at specific workspace indices.
-   * The spectra map and axis#1 are populated:
-   *      makeSpectraMap() to map to detector IDs
-   *      makeAxis1() to map workspace index to spectrum number
+   *  at specific workspace indices.
+   *  Used to deal with the axis and spectramapping. Doesn't really do anything any longer.
    */
   void EventWorkspace::doneAddingEventLists()
   {
-    //Now, make the spectra map (index -> detector ID)
-    //Make the wi to spectra map
-    this->generateSpectraMap();
-
     //Clearing the MRU list is a good idea too.
     this->clearMRU();
   }
