@@ -42,6 +42,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
+#include "MantidAPI/SpectrumDetectorMapping.h"
 
 using std::endl;
 using std::map;
@@ -2191,20 +2192,12 @@ bool LoadEventNexus::loadSpectraMapping(const std::string& filename, const bool 
   else
   {
     g_log.debug() << "Loading only detector spectra from " << filename << "\n";
-    // We need to filter the monitors out as they are included in the block also. Here we assume that they
-    // occur in a contiguous block
-    // TODO: This code will need to move somewhere central for reuse.
-    // Possibly a slimmed down SpectraDetectorMap class.
-    std::map<specid_t, std::set<detid_t>> mapping;
-    for ( size_t i = 0; i < ndets; ++i )
-    {
-      mapping[spec[i]].insert(udet[i]);
-    }
-    WS->resizeTo(mapping.size()-nmons);
+    SpectrumDetectorMapping mapping(spec,udet);
+    WS->resizeTo(mapping.getMapping().size()-nmons);
     for ( size_t j = 0; j < WS->getNumberHistograms(); ++j )
     {
       auto spec = WS->getSpectrum(j);
-      spec->setDetectorIDs(mapping[spec->getSpectrumNo()]);
+      spec->setDetectorIDs(mapping.getDetectorIDsForSpectrumNo(spec->getSpectrumNo()));
     }
   }
   return true;
