@@ -49,7 +49,7 @@ namespace API
   public:
     explicit SpectrumDetectorMapping(const MatrixWorkspace * const workspace);
     SpectrumDetectorMapping(const std::vector<specid_t>& spectrumNumbers, const std::vector<detid_t>& detectorIDs);
-    //SpectrumDetectorMapping(const specid_t* _spec, const detid_t* _udet, int64_t nentries);
+    SpectrumDetectorMapping(const specid_t* const spectrumNumbers, const detid_t* const detectorIDs, size_t arrayLengths);
     virtual ~SpectrumDetectorMapping();
 
     const std::set<detid_t>& getDetectorIDsForSpectrumNo(const specid_t spectrumNo) const;

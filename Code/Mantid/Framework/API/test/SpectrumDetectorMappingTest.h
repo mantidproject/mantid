@@ -49,6 +49,21 @@ public:
                       std::invalid_argument );
   }
 
+  void check_the_map(const SpectrumDetectorMapping& map)
+  {
+    TS_ASSERT_EQUALS( map.getMapping().size(), 3 )
+    auto idsFor1 = map.getDetectorIDsForSpectrumNo(1);
+    TS_ASSERT_EQUALS( idsFor1.size(), 1 );
+    TS_ASSERT_EQUALS( idsFor1.count(10), 1 );
+    auto idsFor2 = map.getDetectorIDsForSpectrumNo(2);
+    TS_ASSERT_EQUALS( idsFor2.size(), 2 );
+    TS_ASSERT_EQUALS( idsFor2.count(20), 1 );
+    TS_ASSERT_EQUALS( idsFor2.count(99), 1 );
+    auto idsFor3 = map.getDetectorIDsForSpectrumNo(3);
+    TS_ASSERT_EQUALS( idsFor3.size(), 1 );
+    TS_ASSERT_EQUALS( idsFor3.count(30), 1 );
+  }
+
   void test_vector_constructor()
   {
     // Empty is fine for the input
@@ -68,17 +83,24 @@ public:
     detids.push_back(99);
 
     SpectrumDetectorMapping map2(specs, detids);
-    TS_ASSERT_EQUALS( map2.getMapping().size(), 3 )
-    auto idsFor1 = map2.getDetectorIDsForSpectrumNo(1);
-    TS_ASSERT_EQUALS( idsFor1.size(), 1 );
-    TS_ASSERT_EQUALS( idsFor1.count(10), 1 );
-    auto idsFor2 = map2.getDetectorIDsForSpectrumNo(2);
-    TS_ASSERT_EQUALS( idsFor2.size(), 2 );
-    TS_ASSERT_EQUALS( idsFor2.count(20), 1 );
-    TS_ASSERT_EQUALS( idsFor2.count(99), 1 );
-    auto idsFor3 = map2.getDetectorIDsForSpectrumNo(3);
-    TS_ASSERT_EQUALS( idsFor3.size(), 1 );
-    TS_ASSERT_EQUALS( idsFor3.count(30), 1 );
+    check_the_map(map2);
+  }
+
+  void test_array_constructor_null_inputs()
+  {
+    specid_t specs[2];
+    detid_t detids[2];
+    TS_ASSERT_THROWS( SpectrumDetectorMapping(NULL, detids, 10), std::invalid_argument );
+    TS_ASSERT_THROWS( SpectrumDetectorMapping(specs, NULL, 10), std::invalid_argument );
+  }
+
+  void test_array_constructor()
+  {
+    specid_t specs[] = {1,2,2,3};
+    detid_t detids[] = {10,99,20,30};
+
+    SpectrumDetectorMapping map(specs, detids, 4);
+    check_the_map(map);
   }
 
   void test_getDetectorIDsForSpectrumNo()
