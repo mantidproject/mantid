@@ -454,30 +454,13 @@ namespace Mantid
     */
     detid2index_map * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
     {
-      if (this->m_axes.size() < 2)
-      {
-        throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): axis[1] does not exist, so I cannot generate a map.");
-      }
-      SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
-      if (!ax)
-        throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): axis[1] is not a SpectraAxis, so I cannot generate a map.");
-
       detid2index_map * map = new detid2index_map();
-      //Loop through the workspace index
-      size_t size = this->getNumberHistograms();
-      if (ax->length() < size)
-      {
-        g_log.information() << "Number in spectra axis (" << ax->length() << ") shorter than number of histograms ("
-                            << size << ")\n";
-        size = ax->length();
-      }
-      for (size_t workspaceIndex=0; workspaceIndex < size; workspaceIndex++)
-      {
-        //Get the spectrum # from the WS index
-        specid_t specNo = ax->spectraNo(workspaceIndex);
 
-        //Now the list of detectors
-        std::vector<detid_t> detList = m_spectraMap->getDetectors(specNo);
+      //Loop through the workspace index
+      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
+      {
+        auto detList = getSpectrum(workspaceIndex)->getDetectorIDs();
+
         if (throwIfMultipleDets)
         {
           if (detList.size() > 1)
@@ -488,12 +471,12 @@ namespace Mantid
 
           //Set the KEY to the detector ID and the VALUE to the workspace index.
           if (detList.size() == 1)
-            (*map)[ detList[0] ] = workspaceIndex;
+            (*map)[ *detList.begin() ] = workspaceIndex;
         }
         else
         {
           //Allow multiple detectors per workspace index
-          for (std::vector<detid_t>::iterator it = detList.begin(); it != detList.end(); ++it)
+          for (auto it = detList.begin(); it != detList.end(); ++it)
             (*map)[ *it ] = workspaceIndex;
         }
 

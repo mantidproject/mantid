@@ -564,6 +564,24 @@ public:
     TSM_ASSERT("If any detector is not masked, return false", !inst->isDetectorMasked(dets) );
   }
 
+  void test_getDetectorIDToWorkspaceIndexMap()
+  {
+    auto ws = makeWorkspaceWithDetectors(5, 1);
+    boost::scoped_ptr<detid2index_map> idmap(ws->getDetectorIDToWorkspaceIndexMap(true));
+    TS_ASSERT_EQUALS( idmap->size(), 5 );
+    int i = 0;
+    for ( auto it = idmap->begin(); it != idmap->end(); ++it, ++i )
+    {
+      TS_ASSERT_EQUALS( idmap->count(i), 1 );
+      TS_ASSERT_EQUALS( (*idmap)[i], i );
+    }
+
+    ws->getSpectrum(2)->addDetectorID(99); // Set a second ID on one spectrum
+    TS_ASSERT_THROWS( ws->getDetectorIDToWorkspaceIndexMap(true), std::runtime_error );
+    boost::scoped_ptr<detid2index_map> idmap2(ws->getDetectorIDToWorkspaceIndexMap(false));
+    TS_ASSERT_EQUALS( idmap2->size(), 6 );
+  }
+
   void test_getDetectorIDToWorkspaceIndexVector()
   {
     auto ws = makeWorkspaceWithDetectors(100, 10);
