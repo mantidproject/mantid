@@ -177,7 +177,7 @@ namespace MDAlgorithms
     * @param  TargFrameName -- the string describing target transformation frame in the form acepted by convertToMD
     * @param  ScalingName    -- default coordinate scaling name accepted by convertToMD;
     *
-    *
+    *@return TargFrameName and ScalingName
   */
   void ConvertToDiffractionMDWorkspace2::convertFramePropertyNames(const std::string &TargFrame,std::string &TargFrameName,std::string & ScalingName)
   {
@@ -207,10 +207,12 @@ namespace MDAlgorithms
 
   }
   /** Splits extents accepted by convertToDiffreactionMD workspace in the form min1,max1 or min1,max1,min2,max2,min3,max3 
-      into tso vectors min(3),max(3) accepted by convertToMD 
-     @param  Extents  -- the vector of extents consititing of 2 or 6 elements
-     @param minVal   -- 3-vector of minimal values for 3 processed dimensions
-     @param maxVal   -- 3-vector of maximal values for 3 processed dimensions
+   *   into tso vectors min(3),max(3) accepted by convertToMD 
+   *  @param  Extents  -- the vector of extents consititing of 2 or 6 elements
+   *  @param minVal   -- 3-vector of minimal values for 3 processed dimensions
+   *  @param maxVal   -- 3-vector of maximal values for 3 processed dimensions
+   *
+   * @return minVal and maxVal -- two vectors with minimal and maximal values of the momentums in the target workspace. 
   */
   void ConvertToDiffractionMDWorkspace2::convertExtents(const std::vector<double> &Extents,std::vector<double> &minVal,std::vector<double> &maxVal)const
   {
