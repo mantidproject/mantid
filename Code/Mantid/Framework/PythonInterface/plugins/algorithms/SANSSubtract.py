@@ -36,11 +36,55 @@ class SANSSubtract(PythonAlgorithm):
         self.declareProperty("Constant", 0., FloatBoundedValidator(),
                              doc="Additive constant [Default:0]")
         self.declareProperty(FileProperty("OutputDirectory","", FileAction.OptionalDirectory), 
-                             doc="Directory to write the output files in")
+                             doc="Directory to write the output files in [optional]")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              doc="Workspace containing data from detectors")
         return
     
+    def _find_or_load(self, data_str):
+        """
+            Determine whether the input data string is the name
+            of an existing workspace or is a file to be loaded.
+            Return the workspace and its name.
+            @param data_str: input string for the data
+        """
+        
+        if AnalysisDataService.doesExist(data_str):
+            data = AnalysisDataService.retrieve(data_str)
+            data_ws_name = data_str
+            # Keep track of dQ
+            dq = data.extractDx()[0]
+        else:    
+            data_ws_name = os.path.basename(data_str)
+            load_alg = mantid.api.AlgorithmManager.createUnmanaged('Load')        
+            load_alg.setChild(True)
+            load_alg.initialize()
+            load_alg.setProperty("Filename", data_str)
+            load_alg.setProperty("OutputWorkspace", data_ws_name)
+            load_alg.execute()
+            data = load_alg.getProperty("OutputWorkspace").value
+            
+            # Keep track of dQ
+            dq = data.extractDx()[0]
+
+            # Make sure we have histogram data for rebinning purposes
+            op = mantid.api.AlgorithmManager.createUnmanaged("ConvertToHistogram")
+            op.initialize()
+            op.setChild(True)
+            op.setProperty("InputWorkspace", data)
+            op.setProperty("OutputWorkspace", "__histo_data_%s" % data_ws_name)
+            op.execute()
+            data = op.getProperty("OutputWorkspace").value
+            
+            # Make sure we have the correct units, especially important
+            # if the data was loaded from an ASCII file
+            data.getAxis(0).setUnit('MomentumTransfer')
+
+            # Set the "distribution" flag on the matrix workspace 
+            data.setDistribution(False)
+            
+        return data, data_ws_name, dq
+        
     def PyExec(self):
         """ 
             Main execution body
@@ -52,40 +96,26 @@ class SANSSubtract(PythonAlgorithm):
         output_dir = self.getPropertyValue("OutputDirectory")
         
         # Load data or get it from the ADS
-        if AnalysisDataService.doesExist(data_str):
-            data = AnalysisDataService.retrieve(data_str)
-            data_ws_name = data_str
-        else:    
-            data_ws_name = os.path.basename(data_str)
-            load_alg = mantid.api.AlgorithmManager.createUnmanaged('Load')        
-            load_alg.setChild(True)
-            load_alg.initialize()
-            load_alg.setProperty("Filename", data_str)
-            load_alg.setProperty("OutputWorkspace", data_ws_name)
-            load_alg.execute()
-            data = load_alg.getProperty("OutputWorkspace").value
+        data, data_ws_name, dq = self._find_or_load(data_str)
             
         # Load background or get it from the ADS
-        if AnalysisDataService.doesExist(background_str):
-            background = AnalysisDataService.retrieve(background_str)
-            back_ws_name = background_str
-        else:    
-            load_alg = mantid.api.AlgorithmManager.createUnmanaged('Load')        
-            load_alg.setChild(True)
-            load_alg.initialize()
-            load_alg.setProperty("Filename", background_str)
-            load_alg.setProperty("OutputWorkspace", os.path.basename(background_str))
-            load_alg.execute()
-            background = load_alg.getProperty("OutputWorkspace").value
-                     
-        # Keep track of dQ
-        dq = data.readDx(0)
-        
+        background, back_ws_name, _ = self._find_or_load(background_str)
+
+        # Rebin background to data workspace
+        op = mantid.api.AlgorithmManager.createUnmanaged("RebinToWorkspace")
+        op.initialize()
+        op.setChild(True)
+        op.setProperty("WorkspaceToRebin", background)
+        op.setProperty("WorkspaceToMatch", data)
+        op.setProperty("OutputWorkspace", "__rebinned_bck")
+        op.execute()
+        rebinned_bck = op.getProperty("OutputWorkspace").value
+                             
         # Output = data - scale * background + constant
         op = mantid.api.AlgorithmManager.createUnmanaged('Scale') 
         op.initialize()
         op.setChild(True)
-        op.setProperty("InputWorkspace", background)
+        op.setProperty("InputWorkspace", rebinned_bck)
         op.setProperty("OutputWorkspace", '__scaled_bck')
         op.setProperty("Factor", scale)
         op.setProperty("Operation", "Multiply")
