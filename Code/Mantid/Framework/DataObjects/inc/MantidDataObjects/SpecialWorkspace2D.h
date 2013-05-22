@@ -63,9 +63,6 @@ namespace DataObjects
     
     bool isCompatible(boost::shared_ptr<const SpecialWorkspace2D> ws);
 
-    /// Non-const access to the spectra map is disallowed except by this classes constructor.
-    Workspace2D::replaceSpectraMap;
-
   protected:
 
     virtual void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength);

@@ -291,8 +291,6 @@ public:
     int numpixels = timing ? 900000 : 1800;
     //Make an instrument with lots of pixels
     ew->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(numpixels/9));
-    // Build a spectra map to match it
-    ew->rebuildSpectraMapping();
 
     Timer timer;
     ew->padSpectra();
