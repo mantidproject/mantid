@@ -441,7 +441,7 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
     expt->cacheDetectorGroupings(*mapping);
   }
 
- // and add it to the target workspace description for further usage as the identifier for the workspaces, which come from this run. 
+ // and add it to the target workspace description for further usage as the identifier for the events, which come from this run. 
    targWSDescr.addProperty("RUN_INDEX",runIndex,true);
   
 }
