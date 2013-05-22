@@ -340,7 +340,7 @@ namespace MantidQt
      */
     void MessageDisplay::appendText(const QString & text)
     {
-      m_textDisplay->append(text);
+      m_textDisplay->insertPlainText(text);
       QTextCursor cur = m_textDisplay->textCursor();
       cur.movePosition(QTextCursor::End);
       m_textDisplay->setTextCursor(cur);
