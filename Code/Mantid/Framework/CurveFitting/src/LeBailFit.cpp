@@ -252,7 +252,7 @@ namespace CurveFitting
     g_log.debug() << "LeBail Composite Function: " << m_lebailFunction->asString() << "\n";
     bool inputparamcorrect = generatePeaksFromInput();
 #else
-    m_lebailFunction.addPeaks(m_vecHKL); // m_funcParameters,
+    m_lebailFunction->addPeaks(m_vecHKL); // m_funcParameters,
 #endif
 
     // 3. Background function and calculation on it
@@ -262,7 +262,7 @@ namespace CurveFitting
     createOutputDataWorkspace();
 
     // 5. Adjust function mode according to input values
-    if (m_lebailFunction.isParameterValid())
+    if (m_lebailFunction->isParameterValid())
     {
       // All peaks within range are physical and good to refine
       m_inputParameterPhysical = true;
@@ -532,10 +532,10 @@ namespace CurveFitting
 #if 1
     throw runtime_error("How to deal with parameter map? And how to call the other functions. ");
     map<string, double> fakemap;
-    m_lebailFunction.setPeaksParameters(fakemap);
-    // m_lebailFunction.calculatePeaksIntensities(vecX, dataws->readY(workspaceindex), false, vecY);
+    m_lebailFunction->setProfileParameterValues(fakemap);
+    // m_lebailFunction->calculatePeaksIntensities(vecX, dataws->readY(workspaceindex), false, vecY);
     bool includebkgd = false;
-    m_lebailFunction.function(vecY, dataws->readX(workspaceindex), includebkgd);
+    m_lebailFunction->function(vecY, dataws->readX(workspaceindex), includebkgd);
 #else
     // 1. Set parameters to each peak
     bool allpeaksvalid = true;
@@ -579,10 +579,10 @@ namespace CurveFitting
     }
 
     // 4. Calcualte model pattern
-    m_lebailFunction.function(vecY, vecX);
+    m_lebailFunction->function(vecY, vecX);
 #endif
 
-    bool allpeaksvalid = m_lebailFunction.isParameterValid();
+    bool allpeaksvalid = m_lebailFunction->isParameterValid();
 
     return allpeaksvalid;
   }
@@ -611,7 +611,7 @@ namespace CurveFitting
     // writeToOutputWorkspace(5, domain, values);
 
     // b) Calculate input background
-    m_lebailFunction.backgroundfunction(vecX, vecY);
+    m_lebailFunction->backgroundfunction(vecX, vecY);
     writeToOutputWorkspace(6, domain, values);
 
     // 3. Construct the tie.  2-level loop. (1) peak parameter (2) peak
@@ -784,7 +784,7 @@ namespace CurveFitting
         continue;
       }
 #else
-      if (!m_lebailFunction.hasProfileParameter(parname))
+      if (!m_lebailFunction->hasProfileParameter(parname))
         throw runtime_error("Parameter map should have a 1-1 map to profile parameter");
 #endif
 
@@ -792,21 +792,21 @@ namespace CurveFitting
       if (funcparam.fit)
       {
         // Fit the parameter, tie the values among all peaks
-        m_lebailFunction.setFitProfileParameter(parname, funcparam.minvalue, funcparam.maxvalue);
+        m_lebailFunction->setFitProfileParameter(parname, funcparam.minvalue, funcparam.maxvalue);
       }
       else
       {
         // Fix the parameter
-        m_lebailFunction.fixPeakParameter(parname, funcparam.curvalue);
+        m_lebailFunction->fixPeakParameter(parname, funcparam.curvalue);
       }
 
     } // FOR-Function Parameters
 
     // 2. Set 'Height' to be fixed
-    m_lebailFunction.setFixPeakHeights();
+    m_lebailFunction->setFixPeakHeights();
 
     // 3. Fix all background paramaters to constants/current values
-    m_lebailFunction.fixBackgroundParameters();
+    m_lebailFunction->fixBackgroundParameters();
 
     return;
   }
@@ -2714,7 +2714,7 @@ namespace CurveFitting
     // 1. Set the parameters
     // a) Set the parameters to all peaks
 #if 0
-    m_lebailfunction.setPeaksParameters(m_dspPeaks, funparammap, 1.0, true);
+    m_lebailFunction->setPeaksParameters(m_dspPeaks, funparammap, 1.0, true);
 #else
     throw runtime_error("Figure out how to use LeBailFunction.setPeaksParameters!");
 #endif
@@ -3329,7 +3329,7 @@ namespace CurveFitting
   {
     std::string fitoutputwsrootname("TempMinimizerOutput");
 
-    IFunction_sptr function  = m_lebailFunction.getFunction();
+    IFunction_sptr function  = m_lebailFunction->getFunction();
 
     // 1. Initialize
     API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);

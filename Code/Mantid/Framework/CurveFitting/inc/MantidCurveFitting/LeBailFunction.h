@@ -55,13 +55,13 @@ namespace CurveFitting
   {
   public:
     /// Constructor
-    LeBailFunction();
+    LeBailFunction(string peaktype);
 
     /// Destructor
     virtual ~LeBailFunction();
 
     /// From table/map to set parameters to all peaks.
-    void setPeaksParameters(map<std::string, double> parammap);
+    void setProfileParameterValues(map<std::string, double> parammap);
 
     /// Set up a parameter to fit but tied among all peaks
     void setFitProfileParameter(string paramname, double minvalue, double maxvalue);
@@ -124,6 +124,9 @@ namespace CurveFitting
     void setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,
                            double peakheight, bool setpeakheight);
 
+    /// Retrieve peak's parameter.  may be native or calculated
+    double getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak, std::string parname) const;
+
     /// Calculate all peaks' parameter value
     void calculatePeakParameterValues() const;
 
@@ -132,19 +135,22 @@ namespace CurveFitting
 
     /// Calculate the peaks intensities in same group
     bool calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup,
-                                       vector<double>& vecX, vector<double> &vecY, bool zerobackground,
+                                       const vector<double> &vecX, const vector<double> &vecY, bool zerobackground,
                                        vector<double>& allpeaksvalues);
 
     /// Group close peaks together
     void groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec);
 
+    /// Peak type
+    std::string m_peakType;
+
     /// Number of peaks
     size_t m_numPeaks;    
 
     /// Name of peak parameter names (be same as the order in IPowderDiffPeakFunction)
-    vector<string> m_peakParameterNameVec;
+    std::vector<string> m_peakParameterNameVec;
     /// Ordered profile parameter names for search
-    vector<string> m_orderedProfileParameterNames;
+    std::vector<string> m_orderedProfileParameterNames;
 
     /// Vector of all peaks
     vector<API::IPowderDiffPeakFunction_sptr> m_vecPeaks;
@@ -163,6 +169,9 @@ namespace CurveFitting
 
     /// Has new peak values
     mutable bool m_hasNewPeakValue;
+
+    /// Has first value set up
+    bool m_isInputValue;
 
 
     /*
@@ -184,7 +193,7 @@ namespace CurveFitting
     */
   };
 
-  // typedef boost::shared_ptr<LeBailFunction> LeBailFunction_sptr;
+  typedef boost::shared_ptr<LeBailFunction> LeBailFunction_sptr;
 
 
 } // namespace CurveFitting

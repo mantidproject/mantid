@@ -284,7 +284,7 @@ namespace CurveFitting
     map<string, Parameter> m_functionParameters;
 
     /// Le Bail Function (Composite) (old: API::CompositeFunction_sptr m_lebailFunction)
-    LeBailFunction m_lebailFunction;
+    LeBailFunction_sptr m_lebailFunction;
 
     /// Instance data
     API::MatrixWorkspace_sptr m_dataWS;

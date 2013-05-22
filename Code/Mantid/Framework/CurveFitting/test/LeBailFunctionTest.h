@@ -27,7 +27,7 @@ public:
 
   void test_init()
   {
-    LeBailFunction function;
+    LeBailFunction function("ThermalNeutronBk2BkExpConvPVoigt");
     TS_ASSERT(function.isParameterValid());
   }
 
@@ -46,19 +46,9 @@ public:
    * ...../Tests/Peaks/Jason-Powgen/HR_10Hz/B_mods/pg10b1.irf, LB4917b1.hkl
    * ...../"/home/wzz/Mantid/mantid/Code/release/LB4917b1_unittest.dat"
    */
-  void test_CalculatePeakParametersX()
+  void test_CalculateLeBailFunction()
   {
-    LeBailFunction lebailfunction;
-
-    // Add peaks
-    vector<vector<int> > vechkl;
-    vector<int> p111;
-    p111.push_back(1); p111.push_back(1); p111.push_back(1);
-    vechkl.push_back(p111);
-    vector<int> p110;
-    p110.push_back(1); p110.push_back(1); p110.push_back(0);
-    vechkl.push_back(p110);
-    lebailfunction.addPeaks(vechkl);
+    LeBailFunction lebailfunction("ThermalNeutronBk2BkExpConvPVoigt");
 
     // Add peak parameters
     map<string, double> parammap;
@@ -94,7 +84,17 @@ public:
 
     parammap.insert(make_pair("LatticeConstant", 4.156890));
 
-    lebailfunction.setPeaksParameters(parammap);
+    lebailfunction.setProfileParameterValues(parammap);
+
+    // Add peaks
+    vector<vector<int> > vechkl;
+    vector<int> p111;
+    p111.push_back(1); p111.push_back(1); p111.push_back(1);
+    vechkl.push_back(p111);
+    vector<int> p110;
+    p110.push_back(1); p110.push_back(1); p110.push_back(0);
+    vechkl.push_back(p110);
+    lebailfunction.addPeaks(vechkl);
 
     TS_ASSERT(lebailfunction.isParameterValid());
 

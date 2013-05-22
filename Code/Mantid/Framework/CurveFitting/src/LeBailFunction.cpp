@@ -1,3 +1,12 @@
+/*WIKI*
+
+==== Set parameters to Le Bail Function ====
+The public method to set parameters values to Le Bail function is "setProfileParameterValues"
+The ultimate destination to set peak profile parameters is each peak function.
+Set up a new peak parameter value does not necessarily trigger each peak to calculate profile value
+
+*WIKI*/
+
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidKernel/System.h"
@@ -32,12 +41,44 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Constructor
     */
-  LeBailFunction::LeBailFunction()
+  LeBailFunction::LeBailFunction(std::string peaktype)
   {
+    // Set initial values to some class variables
     CompositeFunction_sptr m_function(new CompositeFunction());
     m_compsiteFunction = m_function;
-    m_hasNewPeakValue = false;
+
     m_numPeaks = 0;
+
+    m_isInputValue = false;
+    m_hasNewPeakValue = false;
+
+    // Peak type, validate and parameter name vectors
+    m_peakType = peaktype;
+    IFunction_sptr ifunc = FunctionFactory::Instance().createFunction(m_peakType);
+    if (!ifunc)
+    {
+      stringstream errss;
+      errss << "Input peak type " << peaktype << " is not a recoganizable Mantid function.";
+      throw runtime_error(errss.str());
+    }
+    IPowderDiffPeakFunction_sptr peakfunc = boost::dynamic_pointer_cast<IPowderDiffPeakFunction>(ifunc);
+    if (!peakfunc)
+    {
+      stringstream errss;
+      errss << "Input peak type " << peaktype << " is not a IPowderDiffPeakFunction.";
+      throw runtime_error(errss.str());
+    }
+
+    m_peakParameterNameVec = peakfunc->getParameterNames();
+    m_orderedProfileParameterNames = m_peakParameterNameVec;
+    sort(m_peakParameterNameVec.begin(), m_peakParameterNameVec.end());
+
+    // Peak parameter values
+    for (size_t i = 0; i < m_peakParameterNameVec.size(); ++i)
+    {
+      string parname = m_peakParameterNameVec[i];
+      m_functionParameters.insert(make_pair(parname, 0.0));
+    }
 
     return;
   }
@@ -103,10 +144,24 @@ namespace CurveFitting
    */
   bool LeBailFunction::hasProfileParameter(std::string paramname)
   {
-    vector<string>::iterator fiter = find(m_orderedProfileParameterNames.begin(), m_orderedProfileParameterNames.end(),
-                                          paramname);
+    vector<string>::iterator fiter = lower_bound(m_orderedProfileParameterNames.begin(), m_orderedProfileParameterNames.end(),
+                                                 paramname);
 
-    return (fiter != m_orderedProfileParameterNames.end());
+    bool found = true;
+    if (fiter == m_orderedProfileParameterNames.end())
+    {
+      // End of the vector
+      found = false;
+    }
+    else
+    {
+      // Middle of vector
+      string matchparname = *fiter;
+      if (matchparname.compare(paramname))
+        found = false;
+    }
+
+    return found;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -141,7 +196,7 @@ namespace CurveFitting
   /** Calculate all peaks' parameter value
     */
   void LeBailFunction::calculatePeakParameterValues() const
-  {
+  {    
     for (size_t i = 0; i < m_numPeaks; ++i)
     {
       IPowderDiffPeakFunction_sptr peak = m_vecPeaks[i];
@@ -161,6 +216,12 @@ namespace CurveFitting
    */
   void LeBailFunction::addPeaks(std::vector<std::vector<int> > peakhkls)
   {
+    // Prerequisit
+    if (!m_isInputValue)
+      throw runtime_error("Client must set up profile parameter vlaues by calling "
+                          "setProfileParameterValues() first! ");
+
+    // Add peaks
     for (size_t ipk = 0; ipk < peakhkls.size(); ++ ipk)
     {
       vector<int> hkl = peakhkls[ipk];
@@ -184,6 +245,7 @@ namespace CurveFitting
 
       // Add new peak to all related data storage
       m_vecPeaks.push_back(newpeak);
+      // FIXME - Refining lattice size is not considered here!
       m_dspPeakVec.push_back(make_pair(dsp, newpeak));
       m_mapHKLPeak.insert(make_pair(hkl, newpeak));
     }
@@ -202,12 +264,7 @@ namespace CurveFitting
     */
   IPowderDiffPeakFunction_sptr LeBailFunction::generatePeak(int h, int k, int l)
   {
-    /*
-    IPowderDiffPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPowderDiffPeakFunction>(
-          FunctionFactory::Instance().create("ThermalNeutronBk2BkExpConvPVoigt"));
-          */
-
-    IFunction_sptr f = FunctionFactory::Instance().createFunction("ThermalNeutronBk2BkExpConvPVoigt");
+    IFunction_sptr f = FunctionFactory::Instance().createFunction(m_peakType);
     IPowderDiffPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPowderDiffPeakFunction>(f);
 
     peak->setMillerIndex(h, k, l);
@@ -239,29 +296,26 @@ namespace CurveFitting
   */
   bool LeBailFunction::calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues)
   {
-    // 1. Group the peak
+    // Divide peaks into groups from peak's parameters
     vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > > peakgroupvec;
     groupPeaks(peakgroupvec);
 
-    // 2. Calculate each peak's intensity and set
-    bool peakheightsphysical = true;
+    // Calculate each peak's intensity and set
+    bool allpeakheightsphysical = true;
     for (size_t ig = 0; ig < peakgroupvec.size(); ++ig)
     {
-      g_log.debug() << "[DBx351] Peak group " << ig << " : number of peaks = "
-                    << peakgroupvec[ig].size() << "\n";
-#if 0
-      bool localphysical = calculateGroupPeakIntensities(peakgroupvec[ig], vecX, vecY, zerobackground, allpeaksvalues);
-#else
-      bool localphysical = false;
-      throw runtime_error("Deal with this later....");
-#endif
-      if (!localphysical)
-      {
-        peakheightsphysical = false;
-      }
+      g_log.debug() << "[Fx351] Calculate peaks heights for (peak) group " << ig
+                    << " : number of peaks = " << peakgroupvec[ig].size() << "\n";
+
+      zerobackground = true;
+      bool peakheightsphysical = calculateGroupPeakIntensities(peakgroupvec[ig], vecX, vecY, zerobackground,
+                                                               allpeaksvalues);
+
+      if (!peakheightsphysical)
+        allpeakheightsphysical = false;
     }
 
-    return peakheightsphysical;
+    return allpeakheightsphysical;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -275,7 +329,7 @@ namespace CurveFitting
    * @param zerobackground: true if background is zero
    */
   bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup,
-                                                     vector<double>& vecX, vector<double>& vecY, bool zerobackground,
+                                                     const vector<double>& vecX, const vector<double>& vecY, bool zerobackground,
                                                      vector<double>& allpeaksvalues)
   {
     // 1. Sort by d-spacing
@@ -563,54 +617,68 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** From table/map to set parameters to all peaks.
-    * Peak height will not be set.
+  /** From a parameter name/value map to
+    * 1. store values to LeBailFunction;
+    * 2. new values to each peak
     *
     * Request: order of parameter names in m_peakParameterNameVec must be same as the order in
     *          IPowderDiffPeakFunction.
     *
     * @param parammap: map of Parameters to set to peak
    */
-  void LeBailFunction::setPeaksParameters(map<std::string, double> parammap)
-  {    
-    // Define some variables and constants
-    if (m_numPeaks == 0)
-      throw runtime_error("Set parameters to empty peak list. ");
+  void LeBailFunction::setProfileParameterValues(map<std::string, double> parammap)
+  {
+    const double MINDIFF = 1.0E-10;
 
-    size_t numparnames = m_peakParameterNameVec.size();
-    map<std::string, double>::iterator pit;
+    map<std::string, double>::iterator inpiter, curiter;
 
-    // Apply parameters values to all peaks
-    for (size_t i = 0; i < numparnames; ++i)
+    size_t numpars = m_peakParameterNameVec.size();
+    for (size_t i = 0; i < numpars; ++i)
     {
       string& parname = m_peakParameterNameVec[i];
 
-      // If parameter is not peak height.  Set to all peak
-      if (parname.compare("Height"))
+      // Find iterator of this parameter in input parammap
+      inpiter = parammap.find(parname);
+      if (inpiter != parammap.end())
       {
-        // Get parameter value
-        pit = parammap.find(parname);
+        // Find iterator to parameter value in class' parameter map (parameter is found in input map)
+        curiter = m_functionParameters.find(parname);
+        if (curiter == m_functionParameters.end())
+        {
+          stringstream errmsg;
+          errmsg << "Parameter " << parname << " is in parameter name list, but not in profile "
+                 << "parameter map.  It violates the programming logic.";
+          g_log.error(errmsg.str());
+          throw runtime_error(errmsg.str());
+        }
 
-        if (pit == parammap.end())
+        // Set value if difference is large
+        double curvalue = curiter->second;
+        double newvalue = inpiter->second;
+        bool localnewvalue = false;
+        if (fabs(curvalue-newvalue) > MINDIFF)
         {
-          // Not found and then skip
-          g_log.warning() << "Peak parameter " << parname
-                          << "cannot be found in parameter map.\n";
+          curiter->second = newvalue;
+          m_hasNewPeakValue = true;
+          localnewvalue = true;
         }
-        else
+
+        // Set new value to each peak
+        if (!localnewvalue)
+          continue;
+
+        // Set new parameter to each peak
+        for (size_t ipk = 0; ipk < m_numPeaks; ++i)
         {
-          double parvalue = pit->second;
-          for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
-          {
-#if 0
-            m_peakvec[ipk]->setParameter(i, parvalue);
-#else
-            throw runtime_error("Is my problem?");
-#endif
-          }
+          IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
+          peak->setParameter(i, newvalue);
         }
-      }
-    } // END of all parameters
+      } // If parameter name is a profile parameter
+    } // ENDFOR [All profile parameter]
+
+    // Set the flag to indicate that client has input parameters
+    if (m_hasNewPeakValue && !m_isInputValue)
+      m_isInputValue = true;
 
     return;
   }
@@ -1109,7 +1177,7 @@ namespace CurveFitting
 
     IPowderDiffPeakFunction_sptr peak = fiter->second;
 
-    double parvalue = peak->getPeakParameter(parname);
+    double parvalue = getPeakParameterValue(peak, parname);
 
     return parvalue;
   }
@@ -1129,9 +1197,49 @@ namespace CurveFitting
     }
 
     IPowderDiffPeakFunction_sptr peak = m_vecPeaks[index];
-    double value = peak->getParameter(parname);
+    double value = getPeakParameterValue(peak, parname);
 
     return value;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Retrieve peak's parameter.  may be native or calculated
+    */
+  double LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak, std::string parname) const
+  {
+    // Locate the category of the parameter name
+    vector<string>::const_iterator vsiter = lower_bound(m_orderedProfileParameterNames.begin(),
+                                                        m_orderedProfileParameterNames.end(), parname);
+
+    double parvalue = EMPTY_DBL();
+
+    bool found = true;
+    if (vsiter == m_orderedProfileParameterNames.end())
+    {
+      // End of vector
+      found = false;
+    }
+    else
+    {
+      // Middle of vector. But no match
+      string matchparname = *vsiter;
+      if (parname.compare(matchparname))
+        found = false;
+    }
+
+    // Get parmaeter
+    if (found)
+    {
+      // It is a native peak parameter
+      parvalue = peak->getParameter(parname);
+    }
+    else
+    {
+      // It is a calculated peak parameter
+      parvalue = peak->getPeakParameter(parname);
+    }
+
+    return parvalue;
   }
 
   //----------------------------------------------------------------------------------------------
