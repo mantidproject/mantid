@@ -427,6 +427,8 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
   ei->mutableRun().addProperty("RUBW_MATRIX",targWSDescr.m_Wtransf.getVector(),true);
   ei->mutableRun().addProperty("W_MATRIX",targWSDescr.getPropertyValueAsType<std::vector<double> >("W_MATRIX"),true);
 
+  // run index as the number of experiment into megred within this run. It is possible to interpret it differently 
+  // and should never expect it to start with 0 (for first experiment info)
   uint16_t runIndex = mdEventWS->addExperimentInfo(ei);
 
   const MantidVec & binBoundaries = m_InWS2D->readX(0);
@@ -441,9 +443,9 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
     expt->cacheDetectorGroupings(*mapping);
   }
 
- // and add it to the target workspace description for further usage as the identifier for the events, which come from this run. 
-   targWSDescr.addProperty("RUN_INDEX",runIndex,true);
-  
+ // add rinindex to the target workspace description for further usage as the identifier for the events, which come from this run. 
+    targWSDescr.addProperty("RUN_INDEX",runIndex,true);  
+
 }
 
 /** Constructor */
