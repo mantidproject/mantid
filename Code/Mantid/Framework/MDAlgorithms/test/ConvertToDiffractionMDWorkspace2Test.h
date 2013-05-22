@@ -188,11 +188,10 @@ public:
     do_test_MINITOPAZ(TOF, 2);
   }
 
- /* void xest_MINITOPAZ_OneEventPerBin_fromEventWorkspace()
+  void test_MINITOPAZ_OneEventPerBin_fromEventWorkspace()
   {
-  not yet implemented
     do_test_MINITOPAZ(TOF, 1, true, false);
-  }*/
+  }
 
   void test_MINITOPAZ_OneEventPerBin_fromWorkspace2D()
   {
