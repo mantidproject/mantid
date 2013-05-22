@@ -104,8 +104,10 @@ namespace MDAlgorithms
       DisabledProperty():
           EnabledWhenProperty("NonExistingProperty",IS_DEFAULT)
       {};
-      virtual bool fulfillsCriterion(const IPropertyManager * algo) const
-      {return false;}
+      virtual bool fulfillsCriterion(const IPropertyManager * /*algo*/) const
+      {
+          return false;
+      }
   };
 
   //----------------------------------------------------------------------------------------------
