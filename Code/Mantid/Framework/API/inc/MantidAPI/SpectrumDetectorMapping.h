@@ -1,6 +1,7 @@
 #ifndef MANTID_API_SPECTRUMDETECTORMAPPING_H_
 #define MANTID_API_SPECTRUMDETECTORMAPPING_H_
 
+#include <vector>
 #include <set>
 #include <boost/unordered_map.hpp>
 #include "MantidGeometry/IDTypes.h"
@@ -47,6 +48,7 @@ namespace API
     typedef boost::unordered_map<specid_t, std::set<detid_t>> sdmap;
   public:
     explicit SpectrumDetectorMapping(const MatrixWorkspace * const workspace);
+    SpectrumDetectorMapping(const std::vector<specid_t>& spectrumNumbers, const std::vector<detid_t>& detectorIDs);
     //SpectrumDetectorMapping(const specid_t* _spec, const detid_t* _udet, int64_t nentries);
     virtual ~SpectrumDetectorMapping();
 
@@ -54,6 +56,9 @@ namespace API
     const sdmap& getMapping() const;
 
   private:
+    void fillMapFromArray(const specid_t * const spectrumNumbers, const detid_t * const detectorIDs,
+                          const size_t arrayLengths);
+
     /// The mapping of a spectrum number to zero or more detector IDs
     sdmap m_mapping;
   };

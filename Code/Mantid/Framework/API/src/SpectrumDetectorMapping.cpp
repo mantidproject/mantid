@@ -6,7 +6,7 @@ namespace Mantid
 namespace API
 {
   /** Constructor that fills the map from the spectrum-detector relationships in the given workspace.
-   *  @throws Exception::In
+   *  @throws std::invalid_argument if a null workspace pointer is passed in
    */
   SpectrumDetectorMapping::SpectrumDetectorMapping(const MatrixWorkspace * const workspace)
   {
@@ -19,6 +19,29 @@ namespace API
     {
       auto spectrum = workspace->getSpectrum(i);
       m_mapping[spectrum->getSpectrumNo()] = spectrum->getDetectorIDs();
+    }
+  }
+
+  /** Constructor that fills the map from a pair of vectors/
+   *  @throws std::invalid_argument if the vectors are not of equal length
+   */
+  SpectrumDetectorMapping::SpectrumDetectorMapping(const std::vector<specid_t>& spectrumNumbers , const std::vector<detid_t>& detectorIDs)
+  {
+    if ( spectrumNumbers.size() != detectorIDs.size() )
+    {
+      throw std::invalid_argument("SpectrumDetectorMapping: Different length spectrum number & detector ID array passed");
+    }
+
+    fillMapFromArray( spectrumNumbers.data(), detectorIDs.data(), spectrumNumbers.size() );
+  }
+
+  /// Called by the vector & c-array constructors to do the actual filling
+  void SpectrumDetectorMapping::fillMapFromArray(const specid_t * const spectrumNumbers,
+      const detid_t * const detectorIDs, const size_t arrayLengths)
+  {
+    for ( size_t i = 0; i < arrayLengths; ++i )
+    {
+      m_mapping[spectrumNumbers[i]].insert(detectorIDs[i]);
     }
   }
 

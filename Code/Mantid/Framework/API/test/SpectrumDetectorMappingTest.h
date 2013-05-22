@@ -36,11 +36,49 @@ public:
     TS_ASSERT( map.getDetectorIDsForSpectrumNo(1).empty() );
     auto idsFor2 = map.getDetectorIDsForSpectrumNo(2);
     TS_ASSERT_EQUALS( idsFor2.size(), 1 );
-    TS_ASSERT_DIFFERS( idsFor2.find(1), idsFor2.end() );
+    TS_ASSERT_EQUALS( idsFor2.count(1), 1 );
     auto idsFor3 = map.getDetectorIDsForSpectrumNo(3);
     TS_ASSERT_EQUALS( idsFor3.size(), 2 );
-    TS_ASSERT_DIFFERS( idsFor3.find(10), idsFor3.end() );
-    TS_ASSERT_DIFFERS( idsFor3.find(20), idsFor3.end() );
+    TS_ASSERT_EQUALS( idsFor3.count(10), 1 );
+    TS_ASSERT_EQUALS( idsFor3.count(20), 1 );
+  }
+
+  void test_vector_constructor_unequal_lengths()
+  {
+    TS_ASSERT_THROWS( SpectrumDetectorMapping(std::vector<specid_t>(2), std::vector<detid_t>(1)),
+                      std::invalid_argument );
+  }
+
+  void test_vector_constructor()
+  {
+    // Empty is fine for the input
+    std::vector<specid_t> specs;
+    std::vector<detid_t> detids;
+    SpectrumDetectorMapping map(specs, detids);
+    TS_ASSERT( map.getMapping().empty() );
+
+    // Now fill the vectors and test again
+    for ( int i = 1; i < 4; ++i )
+    {
+      specs.push_back(i);
+      detids.push_back(i*10);
+    }
+    // Add a second entry to one
+    specs.push_back(2);
+    detids.push_back(99);
+
+    SpectrumDetectorMapping map2(specs, detids);
+    TS_ASSERT_EQUALS( map2.getMapping().size(), 3 )
+    auto idsFor1 = map2.getDetectorIDsForSpectrumNo(1);
+    TS_ASSERT_EQUALS( idsFor1.size(), 1 );
+    TS_ASSERT_EQUALS( idsFor1.count(10), 1 );
+    auto idsFor2 = map2.getDetectorIDsForSpectrumNo(2);
+    TS_ASSERT_EQUALS( idsFor2.size(), 2 );
+    TS_ASSERT_EQUALS( idsFor2.count(20), 1 );
+    TS_ASSERT_EQUALS( idsFor2.count(99), 1 );
+    auto idsFor3 = map2.getDetectorIDsForSpectrumNo(3);
+    TS_ASSERT_EQUALS( idsFor3.size(), 1 );
+    TS_ASSERT_EQUALS( idsFor3.count(30), 1 );
   }
 
   void test_getDetectorIDsForSpectrumNo()
