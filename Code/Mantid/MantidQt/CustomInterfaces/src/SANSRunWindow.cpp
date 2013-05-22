@@ -19,6 +19,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/Run.h"
 
 #include <QLineEdit>
 #include <QHash>
@@ -2568,8 +2569,25 @@ void SANSRunWindow::handleDefSaveClick()
         if ( matrix_workspace->getInstrument()->getName() == "SANS2D" )
           saveCommand += "'front-detector, rear-detector'";
         if ( matrix_workspace->getInstrument()->getName() == "LOQ" )
-          saveCommand += "'HAB, main-detector-bank'";      
-      }  
+          saveCommand += "'HAB, main-detector-bank'";
+
+      /* From v2, SaveCanSAS1D is able to save the Transmission workspaces related to the
+         reduced data. The name of workspaces of the Transmission are available at the 
+         sample logs. This part add the parameters Transmission=trans_ws_name and 
+         TransmissionCan=trans_ws_name_can if they are available at the Workspace Sample log
+         and still available inside MantidPlot. */        
+        const Mantid::API::Run& run=  matrix_workspace->run();
+        QStringList list; list << "Transmission" << "TransmissionCan";
+        foreach(QString property,list){
+          if ( run.hasProperty(property.toStdString()) ){
+            std::string trans_ws_name = run.getLogData(property.toStdString())->value();
+            if (AnalysisDataService::Instance().isValid(trans_ws_name).empty()){
+              saveCommand += ", " + property + "=\"" + QString::fromStdString(trans_ws_name) + "\"";
+            }
+          }
+        }        
+      }
+      // finish the saveCommand for SaveCanSAS1D
       saveCommand += ")\n";
     }
     else
