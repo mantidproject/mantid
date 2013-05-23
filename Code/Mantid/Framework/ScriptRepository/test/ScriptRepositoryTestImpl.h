@@ -136,7 +136,9 @@ class ScriptRepositoryImplLocal : public ScriptRepositoryImpl{
    // request to ping the site
    if (local_file_path.empty())
      return;
-
+   if (url_file.find("http://") == std::string::npos){
+     throw ScriptRepoException("Invalid url to download");
+   }
    Poco::FileStream _out(local_file_path); 
    
    if( url_file.find("repository.json") != std::string::npos){
@@ -774,14 +776,17 @@ void test_downloading_locally_modified_file(){
     repo->setIgnorePatterns(""); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
     TS_ASSERT_THROWS_NOTHING(repo->info("myfile.pyc"));
-
-
-    
-
     // clean the ignore patterns
-    repo->setIgnorePatterns(backup); 
-    
+    repo->setIgnorePatterns(backup);     
   }
+  
+  void test_construct_without_parameters(){
+    delete repo;
+    TS_ASSERT_THROWS_NOTHING(repo = new ScriptRepositoryImplLocal()); 
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+  }
+
 
 
 };
