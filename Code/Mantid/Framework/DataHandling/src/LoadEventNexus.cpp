@@ -2194,11 +2194,7 @@ bool LoadEventNexus::loadSpectraMapping(const std::string& filename, const bool 
     g_log.debug() << "Loading only detector spectra from " << filename << "\n";
     SpectrumDetectorMapping mapping(spec,udet);
     WS->resizeTo(mapping.getMapping().size()-nmons);
-    for ( size_t j = 0; j < WS->getNumberHistograms(); ++j )
-    {
-      auto spec = WS->getSpectrum(j);
-      spec->setDetectorIDs(mapping.getDetectorIDsForSpectrumNo(spec->getSpectrumNo()));
-    }
+    WS->updateSpectraUsing(mapping);
   }
   return true;
 }
