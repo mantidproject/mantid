@@ -361,6 +361,82 @@ public:
 
   }
 
+  void test_ignore_invalid_data()
+  {
+      auto ws = createTestWorkspace(false);
+      const double zero = 0.0;
+      const double one = 1.0;
+      ws->dataY(0)[3] = 1.0 / zero;
+      ws->dataY(0)[5] = log(-one);
+      ws->dataE(0)[7] = 0;
+
+      FunctionDomain_sptr domain;
+      IFunctionValues_sptr values;
+
+      // Requires a property manager to make a workspce
+      auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+      const std::string wsPropName = "TestWorkspaceInput";
+      propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
+      propManager->setProperty<Workspace_sptr>(wsPropName, ws);
+
+      FitMW fitmw(propManager.get(), wsPropName);
+      fitmw.declareDatasetProperties("", true);
+      fitmw.ignoreInvalidData(true);
+      fitmw.createDomain(domain, values);
+
+      FunctionValues *val = dynamic_cast<FunctionValues*>(values.get());
+      for(size_t i = 0; i < val->size(); ++i)
+      {
+          if ( i == 3 || i == 5 || i == 7 )
+          {
+              TS_ASSERT_EQUALS( val->getFitWeight(i), 0.0 );
+          }
+          else
+          {
+              TS_ASSERT_DIFFERS( val->getFitWeight(i), 0.0 );
+          }
+      }
+
+      API::IFunction_sptr fun(new ExpDecay);
+      fun->setParameter("Height",1.);
+      fun->setParameter("Lifetime",1.0);
+
+      Fit fit;
+      fit.initialize();
+
+      fit.setProperty("Function",fun);
+      fit.setProperty("InputWorkspace",ws);
+      fit.setProperty("WorkspaceIndex",0);
+
+      fit.execute();
+      TS_ASSERT(! fit.isExecuted());
+
+      fit.setProperty("IgnoreInvalidData",true);
+      fit.setProperty("Minimizer","Levenberg-Marquardt");
+      fit.execute();
+      TS_ASSERT(fit.isExecuted());
+
+      TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-3);
+      TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
+
+      // check Levenberg-MarquardtMD minimizer
+      fun->setParameter("Height",1.);
+      fun->setParameter("Lifetime",1.0);
+      Fit fit1;
+      fit1.initialize();
+      fit1.setProperty("Function",fun);
+      fit1.setProperty("InputWorkspace",ws);
+      fit1.setProperty("WorkspaceIndex",0);
+      fit1.setProperty("IgnoreInvalidData",true);
+      fit1.setProperty("Minimizer","Levenberg-MarquardtMD");
+      fit1.execute();
+      TS_ASSERT(fit1.isExecuted());
+
+      TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-3);
+      TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
+
+  }
+
 
 private:
 
