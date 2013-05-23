@@ -20,17 +20,16 @@ public:
 	}
 
 	LoadPSITest() :
-			m_testFile("TODO.nxs")
-	{
+			m_testFile("focus2010n000468.hdf") {
 	}
 	void testName() {
 		LoadPSI alg;
-		TS_ASSERT_EQUALS( alg.name(), "LoadPSI");
+		TS_ASSERT_EQUALS(alg.name(), "LoadPSI");
 	}
 
 	void testVersion() {
 		LoadPSI alg;
-		TS_ASSERT_EQUALS( alg.version(), 1);
+		TS_ASSERT_EQUALS(alg.version(), 1);
 	}
 
 	void test_Init() {
@@ -40,38 +39,27 @@ public:
 	}
 
 	void test_exec() {
-		// Name of the output workspace.
-		std::string outWSName("LoadPSITest_OutputWS");
+		LoadPSI loader;
+		loader.initialize();
+		loader.setPropertyValue("Filename", m_testFile);
 
-		LoadPSI alg;
-		TS_ASSERT_THROWS_NOTHING(alg.initialize())
-		TS_ASSERT(alg.isInitialized())
-		TS_ASSERT_THROWS_NOTHING(
-				alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value"));
-		TS_ASSERT_THROWS_NOTHING(
-				alg.setPropertyValue("OutputWorkspace", outWSName));
-		TS_ASSERT_THROWS_NOTHING(alg.execute()
-		; );
-		TS_ASSERT(alg.isExecuted());
+		std::string outputSpace = "LoadPSITest_out";
+		loader.setPropertyValue("OutputWorkspace", outputSpace);
+		TS_ASSERT_THROWS_NOTHING(loader.execute());
 
-		// Retrieve the workspace from data service. TODO: Change to your desired type
-		Workspace_sptr ws;
-		TS_ASSERT_THROWS_NOTHING(
-				ws = AnalysisDataService::Instance().retrieveWS < Workspace
-						> (outWSName));
-		TS_ASSERT(ws);
-		if (!ws)
-			return;
+		//  test workspace, copied from LoadMuonNexusTest.h
+		MatrixWorkspace_sptr output;
 
-		// TODO: Check the results
+		(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
+				outputSpace));
+		MatrixWorkspace_sptr output2D = boost::dynamic_pointer_cast<
+				MatrixWorkspace>(output);
 
-		// Remove workspace from the data service.
-		AnalysisDataService::Instance().remove(outWSName);
+		TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 375);
+
+		AnalysisDataService::Instance().clear();
 	}
 
-	void test_Something() {
-		TSM_ASSERT("You forgot to write a test!", 0);
-	}
 
 private:
 	std::string m_testFile;
