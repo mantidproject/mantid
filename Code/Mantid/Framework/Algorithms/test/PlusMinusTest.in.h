@@ -425,6 +425,7 @@ public:
   {
     for(int inplace=0; inplace<2;inplace++)
     {
+      AnalysisDataService::Instance().clear();
       int nHist = 10,nBins=20;
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(1, nBins);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
@@ -785,8 +786,8 @@ public:
     std::string wsName2 = base + "_in2";
     std::string wsNameOut = base + "_out";
     if (doInPlace) wsNameOut = wsName1;
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
+    AnalysisDataService::Instance().addOrReplace(wsName1, work_in1);
+    AnalysisDataService::Instance().addOrReplace(wsName2, work_in2);
     alg->initialize();
     alg->setPropertyValue("LHSWorkspace",wsName1);
     alg->setPropertyValue("RHSWorkspace",wsName2);

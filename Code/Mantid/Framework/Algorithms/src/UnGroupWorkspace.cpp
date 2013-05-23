@@ -68,6 +68,14 @@ namespace Mantid
 
       // Notify observers that a WorkspaceGroup is about to be unrolled
       data_store.notificationCenter.postNotification(new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));
+
+      // Remove named members from the group
+      auto names = wsGrpSptr->getNames();
+      for(auto it = names.begin(); it != names.end(); ++it)
+      {
+          if ( !it->empty() ) wsGrpSptr->remove(*it);
+      }
+
       // Now remove the WorkspaceGroup from the ADS
       data_store.remove(inputws);
 

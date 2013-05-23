@@ -379,11 +379,7 @@ void WorkspaceGroup::deepRemove(const std::string &name, bool convertToUpperCase
 void WorkspaceGroup::deepRemoveAll()
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  while (!m_workspaces.empty())
-  {
-    AnalysisDataService::Instance().remove(m_workspaces.back()->name());
-    m_workspaces.pop_back();
-  }
+  m_workspaces.clear();
 }
 
 /**

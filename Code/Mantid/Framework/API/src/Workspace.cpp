@@ -83,11 +83,12 @@ const std::string& Workspace::getComment() const
   return m_comment;
 }
 
-/** Get the workspace name
+/** Get a copy of the workspace name. Copying because complex dependencies
+ * with ADS can break constness.
  *
  *  @return The name
  */
-const std::string& Workspace::getName() const
+const std::string Workspace::getName() const
 {
     return m_name;
 }

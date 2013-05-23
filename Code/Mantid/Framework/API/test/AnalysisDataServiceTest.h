@@ -94,6 +94,7 @@ public:
 
   void test_Add_Then_Changing_Illegal_Char_List_Only_Affects_Future_Additions()
   {
+    AnalysisDataService::Instance().clear();
     // The ADS shouldcurrently accept anything
     const std::string illegalChar(".");
     std::string name = "ContainsIllegal" + illegalChar;
@@ -112,6 +113,7 @@ public:
 
   void test_AddOrReplace_Does_Not_Throw_When_Adding_Object_That_Has_A_Name_That_Already_Exists()
   {
+    AnalysisDataService::Instance().clear();
     const std::string name("MySpaceAddOrReplace");
     TS_ASSERT_THROWS_NOTHING(addOrReplaceToADS(name));
     TS_ASSERT_THROWS(addToADS(name),std::runtime_error);
@@ -121,6 +123,7 @@ public:
 
   void testRemove()
   {
+    AnalysisDataService::Instance().clear();
     const std::string name("MySpace");
     addToADS(name);
     TS_ASSERT_THROWS_NOTHING(removeFromADS(name));
@@ -131,6 +134,7 @@ public:
 
   void testRetrieve()
   {
+    AnalysisDataService::Instance().clear();
     const std::string name("MySpace");
     Workspace_sptr work = addToADS(name);
     Workspace_sptr workBack;
@@ -142,6 +146,7 @@ public:
 
   void testRetrieveWS()
   {
+    AnalysisDataService::Instance().clear();
     const std::string name("MySpace");
     Workspace_sptr work = addToADS(name);
     MockWorkspace_sptr workBack;
@@ -153,6 +158,7 @@ public:
 
   void test_Rename()
   {
+    AnalysisDataService::Instance().clear();
     const std::string oldName = "Old";
     const std::string newName = "New";
     Workspace_sptr work = addToADS(oldName);

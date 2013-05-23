@@ -48,19 +48,26 @@ public:
     loader.setPropertyValue("OutputWorkspace", "in");
     loader.execute();
 
+    Workspace_sptr inWS = AnalysisDataService::Instance().retrieve("in");
     TS_ASSERT_THROWS_NOTHING( cloner.setPropertyValue("InputWorkspace","in") )
     TS_ASSERT_THROWS_NOTHING( cloner.setPropertyValue("OutputWorkspace","out") )
 
-    TS_ASSERT( cloner.execute() )
+    TS_ASSERT( cloner.execute() );
 
-    // Best way to test this is to use the CheckWorkspacesMatch algorithm
-    Mantid::Algorithms::CheckWorkspacesMatch checker;
-    checker.initialize();
-    checker.setPropertyValue("Workspace1","in");
-    checker.setPropertyValue("Workspace2","out");
-    checker.execute();
+    // ConvertToMatrixWorkspace doesn't create a copy of input MatrixWorkspace
+    // just returns it
 
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() )
+//    // Best way to test this is to use the CheckWorkspacesMatch algorithm
+//    Mantid::Algorithms::CheckWorkspacesMatch checker;
+//    checker.initialize();
+//    checker.setPropertyValue("Workspace1","in");
+//    checker.setPropertyValue("Workspace2","out");
+//    checker.execute();
+//    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() )
+
+    Workspace_sptr outWS = AnalysisDataService::Instance().retrieve("out");
+    TS_ASSERT_EQUALS( inWS, outWS );
+
   }
 
   void testExec_Event_to_2D()

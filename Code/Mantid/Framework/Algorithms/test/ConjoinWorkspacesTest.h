@@ -62,6 +62,7 @@ public:
   //----------------------------------------------------------------------------------------------
   void testExec()
   {
+    AnalysisDataService::Instance().clear();
     setupWS();
 
     ConjoinWorkspaces conj;

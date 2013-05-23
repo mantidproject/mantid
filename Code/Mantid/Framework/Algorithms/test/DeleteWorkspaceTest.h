@@ -71,7 +71,7 @@ public:
     group->add( testName2 );
     dataStore.add("group", group);
 
-    TS_ASSERT_EQUALS(dataStore.size(), 3);
+    TS_ASSERT_EQUALS(dataStore.size(), 1);
 
     Mantid::Algorithms::DeleteWorkspace alg;
     alg.initialize();

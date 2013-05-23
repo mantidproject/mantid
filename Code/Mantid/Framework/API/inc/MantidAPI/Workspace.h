@@ -76,8 +76,7 @@ public:
     void setComment(const std::string&);
     virtual const std::string getTitle() const;
     const std::string& getComment() const;
-    const std::string& getName() const;
-    const std::string& getUpperCaseName() const;
+    const std::string getName() const;
     bool isDirty(const int n=1) const;
     /// Get the footprint in memory in bytes.
     virtual size_t getMemorySize() const = 0;
@@ -92,6 +91,7 @@ public:
 private:
     /// Set name of this workspace. Only ADS can set names.
     virtual void setName(const std::string& name,bool force = false);
+    const std::string& getUpperCaseName() const;
     /// The title of the workspace
     std::string m_title;
     /// A user-provided comment that is attached to the workspace
