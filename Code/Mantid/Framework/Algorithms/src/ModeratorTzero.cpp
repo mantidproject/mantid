@@ -20,10 +20,21 @@ For an indirect geometry instrument, <math>E_1</math> is different for each neut
 <math>t_2 = L_2/v_2</math> with <math>L_2</math> the distance from sample to detector, and <math>v_2</math> is the final fixed velocity ( <math>E_2=1/2*m*v_2^2</math>)<br />
 
 
-We obtain <math>TOF^*</math> as an iterative process, taking into account the fact that the correction <math>t_0</math> is much smaller than <math>t_i+t_f</math>. Thus<br />
+'''Note:''' We obtain <math>TOF^*</math> as an iterative process, taking into account the fact that the correction <math>t_0</math> is much smaller than <math>t_i+t_f</math>. Thus<br />
 <math>TOF-t_0^{(n)} = L_1/v_1^{(n)} + L_2/v_2</math> , n=0, 1, 2,..<br />
 Set <math>t_0^{(0)}=0</math> and obtain <math>v_1^{(0)}</math> from the previous formula. From <math>v_1^{(0)}</math> we obtain <math>E_1^{(0)}</math><br />
 Set <math>t_0^{(1)}=func( E_1^{(0)} )</math> and repeat the steps until <math>|t_0^{(n+1)} - t_0^{(n+1)}| < tolTOF</math>. With tolTOF=0.1microsecond, only one iteration is needed for convergence.
+
+
+Here's the result of applying ModeratorTzero to both the event list and the histogrammed data of a run in the VISION beamline. The transformation of either events or histograms shifts the curve to smaller TOF's.
+The transformed curves are not supposed to be identical, but similar and differenciated from the original curve.
+
+{| class="wikitable"
+|-
+! Sumed Histogram !! Elastic Line !! Inelastic Peaks
+|-
+| [[File:ModeratorTzero_Fig.1.jpeg|200px||center|]] || [[File:ModeratorTzero_Fig.2.jpeg|200px||center|]] || [[File:ModeratorTzero_Fig.3.jpeg|200px||center|]]
+|}
 
 
 For indirect instruments featuring an incoming neutron flux having a sufficiently narrow distribution of energies, a linear relationship between t_0 and
