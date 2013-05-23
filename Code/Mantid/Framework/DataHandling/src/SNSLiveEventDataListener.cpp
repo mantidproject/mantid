@@ -296,8 +296,6 @@ namespace DataHandling
       g_log.fatal() << "Thread is exiting." << std::endl;
 
       m_isConnected = false;
-      m_workspaceInitialized = true;  // see the comments in the default exception
-                                      // handler for why we set this value.
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new ADARA::invalid_packet(e));
 
@@ -306,8 +304,6 @@ namespace DataHandling
                     << "Exception message: " << e.what() << std::endl
                     << "Thread will exit." << std::endl;
       m_isConnected = false;
-      m_workspaceInitialized = true;  // see the comments in the default exception
-                                      // handler for why we set this value.
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
@@ -315,13 +311,6 @@ namespace DataHandling
       g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
                     << "  Thread is exiting." << std::endl;
       m_isConnected = false;
-
-      // The extractData() function is deliberately designed to block until the workspace is
-      // initialized so we have to ensure the flag is set or else the entire GUI will lock up.
-      // Note that if the workspace really hasn't been initialized, then the values in it are
-      // going to be completely bogus, but since the entire we're not going to be able to read
-      // any data, that's not really an issue.
-      m_workspaceInitialized = true;
 
       m_backgroundException =
           boost::shared_ptr<std::runtime_error>( new std::runtime_error( "Unknown error in backgound thread"));
