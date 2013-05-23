@@ -93,17 +93,21 @@ public:
   {
     WorkspaceGroup_sptr group(makeGroup());
     Workspace_sptr ws(new WorkspaceTester());
-    ws->setName("workspace");
+    AnalysisDataService::Instance().add("workspace", ws);
+
     group->addWorkspace(ws);
     group->addWorkspace(makeWorkspace());
 
-    group->setName("group");
+    //group->setName("group");
+    AnalysisDataService::Instance().add("group",group);
     TS_ASSERT_EQUALS(group->name(), "group");
     TS_ASSERT_EQUALS(group->getItem(0)->name(), "group_1");
     TS_ASSERT_EQUALS(group->getItem(1)->name(), "group_2");
     TS_ASSERT_EQUALS(group->getItem(2)->name(), "group_3");
     TS_ASSERT_EQUALS(group->getItem(3)->name(), "workspace");
     TS_ASSERT_EQUALS(group->getItem(4)->name(), "group_4");
+
+    AnalysisDataService::Instance().clear();
   }
 
   void test_addWorkspace_increases_group_size_by_1()
@@ -464,7 +468,8 @@ public:
   void test_areNamesSimilar()
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup());
-    group->setName("name");
+    //group->setName("name");
+    AnalysisDataService::Instance().addOrReplace("name", group);
     TSM_ASSERT( "Empty group is not similar", !group->areNamesSimilar() );
 
     boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());

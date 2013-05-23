@@ -22,6 +22,13 @@ namespace Kernel
 
 namespace API
 {
+
+//----------------------------------------------------------------------
+// Forward Declarations
+//----------------------------------------------------------------------
+class AnalysisDataServiceImpl;
+class WorkspaceGroup;
+
 /** Base Workspace Abstract Class.
 
     @author Laurent C Chapon, ISIS, RAL
@@ -67,8 +74,6 @@ public:
 
     void virtual setTitle(const std::string&);
     void setComment(const std::string&);
-    virtual void setName(const std::string& name,bool force = false);
-    //virtual const std::string& getTitle() const;
     virtual const std::string getTitle() const;
     const std::string& getComment() const;
     const std::string& getName() const;
@@ -85,6 +90,8 @@ public:
 
 
 private:
+    /// Set name of this workspace. Only ADS can set names.
+    virtual void setName(const std::string& name,bool force = false);
     /// The title of the workspace
     std::string m_title;
     /// A user-provided comment that is attached to the workspace
@@ -96,6 +103,8 @@ private:
     /// The history of the workspace, algorithm and environment
     WorkspaceHistory m_history;
 
+    friend class AnalysisDataServiceImpl;
+    friend class WorkspaceGroup;
 };
 
 

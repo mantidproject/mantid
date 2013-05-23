@@ -349,10 +349,11 @@ namespace Mantid
         if ( ! this->operator()() && isOptional() ) return result;
         if ( this->direction() ) // Output or InOut
         {
+          auto ws = this->operator()();
           // Check that workspace exists
-          if ( ! this->operator()() ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
+          if ( ! ws ) throw std::runtime_error("WorkspaceProperty doesn't point to a workspace");
           // Note use of addOrReplace rather than add
-          API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, this->operator()() );
+          API::AnalysisDataService::Instance().addOrReplace(m_workspaceName, ws );
           result = true;
         }
         //always clear the internal pointer after storing

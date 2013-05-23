@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/NObserver.h>
 #include <Poco/Mutex.h>
@@ -23,7 +22,10 @@ namespace Kernel
 
 namespace API
 {
-
+//----------------------------------------------------------------------
+// Forward Declarations
+//----------------------------------------------------------------------
+class AnalysisDataServiceImpl;
 /** Class to hold a set of workspaces.
     The workspace group can be an entry in the AnalysisDataService. 
     Its constituent workspaces should also have individual ADS entries.
@@ -61,8 +63,6 @@ public:
   ~WorkspaceGroup();
   /// Return a string ID of the class
   virtual const std::string id() const { return "WorkspaceGroup"; }
-  /// Set the name
-  virtual void setName(const std::string &name,bool force = false);
   /// The size of the group.
   virtual size_t getMemorySize() const;
   /// Adds a workspace to the group.
@@ -111,6 +111,8 @@ private:
   WorkspaceGroup(const WorkspaceGroup& ref);
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
+  /// Set the name
+  virtual void setName(const std::string &name,bool force = false);
 
   /// The list of workspace pointers in the group
   std::vector<Workspace_sptr> m_workspaces;
@@ -122,6 +124,8 @@ private:
   static Kernel::Logger& g_log;
   /// Maximum nesting level allowed
   static size_t g_maxNestingLevel;
+
+  friend class AnalysisDataServiceImpl;
 };
 
 /// Shared pointer to a workspace group class

@@ -78,7 +78,7 @@ public:
     // 1. Empty workspace
     DataObjects::EventWorkspace_sptr eventws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2, true);
-    eventws->setName("TestWorkspace");
+    //eventws->setName("TestWorkspace");
 
     // 2. Run star time
     int64_t runstarttime_ns = 3000000000;

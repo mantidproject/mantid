@@ -84,6 +84,12 @@ namespace Mantid
     {
       verifyName(name);
 
+      // if workspace is already in the ADS this is equivalent to rename
+      if ( ! workspace->name().empty() )
+      {
+          rename( workspace->name(), name );
+          return;
+      }
       //Attach the new name to the workspace
       if( workspace ) workspace->setName(name,true);
       Kernel::DataService<API::Workspace>::addOrReplace(name, workspace);

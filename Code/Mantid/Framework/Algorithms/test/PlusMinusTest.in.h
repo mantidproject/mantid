@@ -966,8 +966,11 @@ public:
       int outputWorkspaceWillBe = 0
       )
   {
-    lhs->setName("MinusTest_lhs");
-    rhs->setName("MinusTest_rhs");
+      AnalysisDataService::Instance().clear();
+//    lhs->setName("MinusTest_lhs");
+//    rhs->setName("MinusTest_rhs");
+    AnalysisDataService::Instance().addOrReplace("MinusTest_lhs",lhs);
+    AnalysisDataService::Instance().addOrReplace("MinusTest_rhs",rhs);
     switch (outputWorkspaceWillBe)
     {
     case 0:
@@ -1033,21 +1036,27 @@ public:
           TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(4.00), 1e-5);
         }
 
-        //Incoming event workspace should still have 2.0 for values
-        TS_ASSERT_DELTA(  lhs->readY(pix)[i], 2.00, 1e-5);
-        TS_ASSERT_DELTA(  lhs->readE(pix)[i], sqrt(2.0), 1e-5);
-
-        if (!rhsShouldBeCleared)
+        if ( wsNameOut != "MinusTest_lhs" )
         {
-          //Incoming event workspace should still have 2.0 for values
-          TS_ASSERT_DELTA(  rhs->readY(pix)[i], 2.00, 1e-5);
-          TS_ASSERT_DELTA(  rhs->readE(pix)[i], sqrt(2.0), 1e-5);
+            //Incoming event workspace should still have 2.0 for values
+            TS_ASSERT_DELTA(  lhs->readY(pix)[i], 2.00, 1e-5);
+            TS_ASSERT_DELTA(  lhs->readE(pix)[i], sqrt(2.0), 1e-5);
         }
-        else
+
+        if ( wsNameOut != "MinusTest_rhs" )
         {
-          // If you cleared it, should be 0
-          TS_ASSERT_DELTA(  rhs->readY(pix)[i], 0.00, 1e-5);
-          TS_ASSERT_DELTA(  rhs->readE(pix)[i], 0.00, 1e-5);
+            if (!rhsShouldBeCleared)
+            {
+              //Incoming event workspace should still have 2.0 for values
+              TS_ASSERT_DELTA(  rhs->readY(pix)[i], 2.00, 1e-5);
+              TS_ASSERT_DELTA(  rhs->readE(pix)[i], sqrt(2.0), 1e-5);
+            }
+            else
+            {
+              // If you cleared it, should be 0
+              TS_ASSERT_DELTA(  rhs->readY(pix)[i], 0.00, 1e-5);
+              TS_ASSERT_DELTA(  rhs->readE(pix)[i], 0.00, 1e-5);
+            }
         }
       }
 

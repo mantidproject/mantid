@@ -421,7 +421,7 @@ namespace DataHandling
           // LoadInstrument adds the workspace to ADS as Anonymous
           // we don't want it there
           API::AnalysisDataService::Instance().remove("Anonymous");
-          localWorkspace->setName("");
+          //localWorkspace->setName("");
       }
     }
 

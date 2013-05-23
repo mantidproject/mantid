@@ -39,6 +39,7 @@ public:
 
   void testExec_2D_to_2D()
   {
+    AnalysisDataService::Instance().clear();
     if ( !cloner.isInitialized() ) cloner.initialize();
 
     Mantid::DataHandling::LoadRaw3 loader;

@@ -390,6 +390,7 @@ public:
 
     load.setProperty("Workspace", iws);
     load.setProperty("InstrumentName", "VULCAN");
+    load.setChild(true);
 
     load.execute();
 

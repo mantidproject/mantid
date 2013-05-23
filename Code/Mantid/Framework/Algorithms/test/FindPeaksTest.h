@@ -8,12 +8,26 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCurveFitting/GaussianLinearBG1D.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 using Mantid::Algorithms::FindPeaks;
 
 class FindPeaksTest : public CxxTest::TestSuite
 {
 public:
+    static FindPeaksTest *createSuite() { return new FindPeaksTest(); }
+    static void destroySuite(FindPeaksTest *suite) { delete suite; }
+
+    FindPeaksTest()
+    {
+        Mantid::API::AnalysisDataService::Instance().clear();
+    }
+
+    ~FindPeaksTest()
+    {
+        Mantid::API::AnalysisDataService::Instance().clear();
+    }
+
   void testTheBasics()
   {
     FindPeaks finder;

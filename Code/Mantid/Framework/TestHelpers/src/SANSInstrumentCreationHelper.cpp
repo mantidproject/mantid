@@ -61,6 +61,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     // Now execute the Child Algorithm. Catch and log any error, but don't stop.
     loadInst.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/" + instrumentID + "_Definition.xml");
     loadInst.setProperty<MatrixWorkspace_sptr> ("Workspace", workspace);
+    loadInst.setChild(true);
     loadInst.execute();
 
   }

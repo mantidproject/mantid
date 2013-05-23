@@ -237,7 +237,7 @@ namespace Mantid
       // Perform FindDetectorsOutsideLimits and MedianDetectorTest on the
       // detector vanadium
       maskWS = this->doDetVanTest(inputWS, numFailed);
-      maskWS->setName(maskName);
+      //maskWS->setName(maskName);
 
       // DetectorEfficiencyVariation (only if two workspaces are specified)
       if (input2WS)
@@ -352,7 +352,7 @@ namespace Mantid
       extract->setProperty("DetectorList", detList);
       extract->executeAsChildAlg();
       maskWS = extract->getProperty("OutputWorkspace");
-      maskWS->setName(maskName);
+      //maskWS->setName(maskName);
 
       this->setProperty("OutputWorkspace", maskWS);
     }

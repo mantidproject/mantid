@@ -36,6 +36,7 @@ public:
 
   void testINES()
   {
+    AnalysisDataService::Instance().clear();
     LoadEmptyInstrument loaderCAL;
 
     loaderCAL.initialize();

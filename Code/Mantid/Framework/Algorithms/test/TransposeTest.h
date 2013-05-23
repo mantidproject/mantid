@@ -94,7 +94,6 @@ public:
   {
     RebinnedOutput_sptr inputWS = WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
     std::string inName = inputWS->getName();
-    AnalysisDataService::Instance().addOrReplace(inName, inputWS);
     std::string outName = "rebinTrans";
     transpose = new Transpose();
     if ( !transpose->isInitialized() )

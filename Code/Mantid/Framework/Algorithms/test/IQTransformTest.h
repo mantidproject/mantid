@@ -15,6 +15,7 @@ public:
 
   IQTransformTest()
   {
+    Mantid::API::AnalysisDataService::Instance().clear();
     iq.setChild(true); // This means the ADS is not involved anywhere in this test
 
     inWS_hist = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,2);

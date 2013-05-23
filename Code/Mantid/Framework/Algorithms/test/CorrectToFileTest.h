@@ -24,7 +24,9 @@ public:
   static void destroySuite( CorrectToFileTest *suite ) { delete suite; }
 
   CorrectToFileTest() : inputFile("DIRECT.041")
-  {}
+  {
+
+  }
 
   void testInit()
   {
@@ -63,6 +65,7 @@ public:
 
   void testExecEvent()
   {
+      AnalysisDataService::Instance().clear();
     //Need a workspace to correct
     MatrixWorkspace_sptr testInput = 
       WorkspaceCreationHelper::CreateEventWorkspace(10, 102, 100, 1.5);
@@ -89,7 +92,9 @@ public:
   }
 
   void testSpectraDivide()
-  {    //Need a workspace to correct
+  {
+      AnalysisDataService::Instance().clear();
+      //Need a workspace to correct
     MatrixWorkspace_sptr testInput = 
       WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
 
@@ -114,7 +119,9 @@ public:
 
 
   void testSpectraMultip()
-  {    //Need a workspace to correct
+  {
+      AnalysisDataService::Instance().clear();
+      //Need a workspace to correct
     MatrixWorkspace_sptr testInput = 
       WorkspaceCreationHelper::Create2DWorkspaceBinned(102, 32, 1.5);
 

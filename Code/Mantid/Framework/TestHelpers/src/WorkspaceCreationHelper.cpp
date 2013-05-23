@@ -876,9 +876,10 @@ namespace WorkspaceCreationHelper
     */
    Mantid::DataObjects::EventWorkspace_sptr createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS, std::string wsname, API::Algorithm* alg)
    {
+      UNUSED_ARG(wsname);
      // 1. Initialize:use dummy numbers for arguments, for event workspace it doesn't matter
       Mantid::DataObjects::EventWorkspace_sptr outputWS = Mantid::DataObjects::EventWorkspace_sptr(new DataObjects::EventWorkspace());
-      outputWS->setName(wsname);
+      //outputWS->setName(wsname);
       outputWS->initialize(1,1,1);
 
       // 2. Set the units
@@ -943,7 +944,8 @@ namespace WorkspaceCreationHelper
    RebinnedOutput_sptr CreateRebinnedOutputWorkspace()
    {
      RebinnedOutput_sptr outputWS = Mantid::DataObjects::RebinnedOutput_sptr(new RebinnedOutput());
-     outputWS->setName("rebinTest");
+     //outputWS->setName("rebinTest");
+     AnalysisDataService::Instance().addOrReplace("rebinTest", outputWS);
 
      // Set Q ('y') axis binning
      MantidVec qbins;
