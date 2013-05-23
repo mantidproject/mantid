@@ -361,6 +361,12 @@ public:
 
   }
 
+#ifdef _WIN32
+#pragma warning( push )
+// Disable division by 0 warning
+#pragma warning( disable: 4723 )
+#endif
+
   void test_ignore_invalid_data()
   {
       auto ws = createTestWorkspace(false);
@@ -437,6 +443,9 @@ public:
 
   }
 
+#ifdef _WIN32
+#pragma warning ( pop ) // Re-enable the warning
+#endif
 
 private:
 
