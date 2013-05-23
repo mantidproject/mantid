@@ -105,7 +105,7 @@ namespace API
   */
   ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string & local_rep, 
                                          const std::string & remote) :
-  g_log(Logger::get("ScriptRepositoryImpl"))
+  g_log(Logger::get("ScriptRepositoryImpl")), valid(false)
   {    
     // get the local path and the remote path
     std::string loc, rem; 
@@ -153,7 +153,6 @@ namespace API
 
     
     // check if the repository is valid.
-    valid = false;
 
     // parsing the ignore pattern
     std::string ignore = ignorePatterns(); 
