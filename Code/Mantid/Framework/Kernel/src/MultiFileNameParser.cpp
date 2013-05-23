@@ -506,10 +506,20 @@ namespace Kernel
         std::vector<unsigned int> rangeDetails;
 
         // Convert the sub tokens to uInts.
-        std::transform(
-          subTokens.begin(), subTokens.end(),
-          std::back_inserter(rangeDetails),
-          boost::lexical_cast<unsigned int, std::string>);
+        std::vector<std::string>::iterator iter;
+
+        for (iter=subTokens.begin(); iter != subTokens.end(); ++iter)
+        {
+            try
+            {
+                rangeDetails.push_back(boost::lexical_cast<unsigned int>(*iter));
+            }
+            catch (boost::bad_lexical_cast &)
+            {
+                rangeDetails.push_back(0);
+            }
+
+        }
 
         // We should always end up with at least 1 unsigned int here.
         assert(1 <= rangeDetails.size());

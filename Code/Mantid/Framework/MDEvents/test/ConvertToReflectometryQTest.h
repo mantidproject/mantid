@@ -154,7 +154,7 @@ public:
   {
      auto alg = make_standard_algorithm();
      alg->execute();
-     auto ws = boost::shared_dynamic_cast<Mantid::API::IMDEventWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
+     auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
      TS_ASSERT(ws != NULL);
      TS_ASSERT_EQUALS(1, ws->getExperimentInfo(0)->run().getLogData().size());
   }

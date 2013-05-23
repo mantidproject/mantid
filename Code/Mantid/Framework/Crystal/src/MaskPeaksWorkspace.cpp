@@ -284,7 +284,7 @@ namespace Mantid
           boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
           if (parent->type().compare("RectangularDetector") == 0)
           {
-                  boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
+                  boost::shared_ptr<const RectangularDetector> RDet = boost::dynamic_pointer_cast<
                                         const RectangularDetector>(parent);
 
                   boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
