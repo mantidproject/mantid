@@ -1,27 +1,35 @@
 /*WIKI*
-  Corrects the time of flight (TOF) by a time offset that is dependent on the energy of the neutron after passing through the moderator.
-  A heuristic formula for the correction is stored in the instrument definition file. Below is shown the entry in the instrument file for the VISION beamline:
-  <!--  formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
-  <parameter name="t0_formula" type="string">
-   <value val="34.746 - 0.166672*incidentEnergy + 0.00020538*incidentEnergy^(2.0)" />
-  </parameter>
+Corrects the time of flight (TOF) by a time offset that is dependent on the energy of the neutron after passing through the moderator.
+A heuristic formula for the correction is stored in the instrument definition file. Below is shown the entry in the instrument file for the VISION beamline:<br />
+ <nowiki><!--  formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators--></nowiki>
+ <nowiki> <parameter name="t0_formula" type="string"></nowiki>
+ <nowiki>  <value val="34.746 - 0.166672*incidentEnergy + 0.00020538*incidentEnergy^(2.0)" /></nowiki>
+ <nowiki></parameter></nowiki>
 
-  The recorded TOF = t_0 + t_i + t_f with
-  t_0: emission time from the moderator
-  t_1: time from moderator to sample or monitor
-  t_2: time from sample to detector
-  This algorithm will replace TOF with TOF' = TOF-t_0 = t_i+t_f
+The recorded <math>TOF = t_0 + t_i + t_f</math> with<br />
+<math>t_0</math>: emission time from the moderator<br />
+<math>t_1</math>: time from moderator to sample or monitor<br />
+<math>t_2</math>: time from sample to detector<br />
+This algorithm will replace <math>TOF</math> with <math>TOF^* = TOF-t_0 = t_i+t_f</math><br />
 
-  For a direct geometry instrument, the incident energy E_1 is the same for all neutrons. Hence, the moderator emission time is the same for all neutrons.
-  For an indirect geometry instrument, E_1 is different for each neutron and is not known. However, the final energy E_2 selected by the analyzers is known.
-  t_0 = func(E_1) , a function of the incident energy
-  t_1 = L_1/v_1 with L_1 the distance from moderator to sample, and v_1 the initial unknown velocity ( E_1=1/2*m*v_1^2)
-  t_2 = L_2/v_2 with L_2 the distance from sample to detector, and v_2 is the final fixed velocity ( E_2=1/2*m*v_2^2)
 
-  We obtain TOF' in an iterative process, taking into account the fact that the correction t_0 is much smaller than t_i+t_f. Thus
-  TOF-t_0^(n) = L_1/v_1^(n) + L_2/v_2 , n=0, 1, 2,..
-  Set t_0^(0)=0 and obtain v_1^(0) from the previous formula. From v_1^(0) we obtain E_1^(0)
-  Set t_0^(1)=func( E_1^(0) ) and repeat the steps until |t_0^(n+1) - t_0^(n+1)| < 1 microsec. Typically, three to four iterations are needed for convergence.
+For a direct geometry instrument, the incident energy <math>E_1</math> is the same for all neutrons. Hence, the moderator emission time is the same for all neutrons.
+For an indirect geometry instrument, <math>E_1</math> is different for each neutron and is not known. However, the final energy <math>E_2</math> selected by the analyzers is known.<br />
+<math>t_0 = func(E_1)</math> , a function of the incident energy<br />
+<math>t_1 = L_1/v_1</math> with <math>L_1</math> the distance from moderator to sample, and <math>v_1</math> the initial unknown velocity ( <math>E_1=1/2*m*v_1^2</math>)<br />
+<math>t_2 = L_2/v_2</math> with <math>L_2</math> the distance from sample to detector, and <math>v_2</math> is the final fixed velocity ( <math>E_2=1/2*m*v_2^2</math>)<br />
+
+
+We obtain <math>TOF^*</math> as an iterative process, taking into account the fact that the correction <math>t_0</math> is much smaller than <math>t_i+t_f</math>. Thus<br />
+<math>TOF-t_0^{(n)} = L_1/v_1^{(n)} + L_2/v_2</math> , n=0, 1, 2,..<br />
+Set <math>t_0^{(0)}=0</math> and obtain <math>v_1^{(0)}</math> from the previous formula. From <math>v_1^{(0)}</math> we obtain <math>E_1^{(0)}</math><br />
+Set <math>t_0^{(1)}=func( E_1^{(0)} )</math> and repeat the steps until <math>|t_0^{(n+1)} - t_0^{(n+1)}| < tolTOF</math>. With tolTOF=0.1microsecond, only one iteration is needed for convergence.
+
+
+For indirect instruments featuring an incoming neutron flux having a sufficiently narrow distribution of energies, a linear relationship between t_0 and
+the wavelength of the incoming neutron can be established. This relation allows for coding of an algorithm with
+faster execution times. For indirect instruments that comply with these conditions, use of [[ModeratorTzeroLinear]] is preferred.
+
 *WIKI*/
 
 //----------------------------------------------------------------------
@@ -47,8 +55,8 @@ DECLARE_ALGORITHM(ModeratorTzero);
 /// Sets documentation strings for this algorithm
 void ModeratorTzero::initDocs()
 {
-  setWikiSummary(" Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the energy of the neutron after passing through the moderator. ");
-  setOptionalMessage(" Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the energy of the neutron after passing through the moderator.");
+  setWikiSummary("Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the energy of the neutron after passing through the moderator.");
+  setOptionalMessage("Corrects the time of flight of an indirect geometry instrument by a time offset that is dependent on the energy of the neutron after passing through the moderator.");
 }
 
 using namespace Mantid::Kernel;
@@ -70,7 +78,7 @@ void ModeratorTzero::init()
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator), "The name of the input workspace, containing events and/or histogram data, in units of time-of-flight");
   //declare the output workspace
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output), "The name of the output workspace");
-  declareProperty(new Kernel::PropertyWithValue<double>("tolTOF", 0.1, Kernel::Direction::Input),"Tolerance in the calculation of the emission time, in microseconds");
+  declareProperty(new Kernel::PropertyWithValue<double>("tolTOF", 0.1, Kernel::Direction::Input),"Tolerance in the calculation of the emission time, in microseconds (default:1)");
   declareProperty(new Kernel::PropertyWithValue<size_t>("Niter", 1, Kernel::Direction::Input),"Number of iterations (default:1)");
 
 } // end of void ModeratorTzero::init()
@@ -84,8 +92,10 @@ void ModeratorTzero::exec()
 
   //deltaE-mode (should be "indirect")
   std::vector<std::string> Emode=m_instrument->getStringParameter("deltaE-mode");
-  if(Emode.empty()) throw Exception::InstrumentDefinitionError("Unable to retrieve instrument geometry (direct or indirect) parameter", inputWS->getTitle());
-  if(Emode[0]!= "indirect") throw Exception::InstrumentDefinitionError("Instrument geometry must be of type indirect.");
+  if(Emode.empty())
+    throw Exception::InstrumentDefinitionError("Unable to retrieve instrument geometry (direct or indirect) parameter", inputWS->getTitle());
+  if(Emode[0]!= "indirect")
+    throw Exception::InstrumentDefinitionError("Instrument geometry must be of type indirect.");
 
   // extract formula from instrument parameters
   std::vector<std::string> t0_formula=m_instrument->getStringParameter("t0_formula");
@@ -110,11 +120,11 @@ void ModeratorTzero::exec()
 
   const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
-  PARALLEL_FOR2(inputWS, outputWS);
+  PARALLEL_FOR2(inputWS, outputWS)
   // iterate over the spectra
   for (int i=0; i < static_cast<int>(numHists); ++i)
   {
-    PARALLEL_START_INTERUPT_REGION;
+    PARALLEL_START_INTERUPT_REGION
     size_t wsIndex = static_cast<size_t>(i);
     double L1=CalculateL1(inputWS, wsIndex); // distance from source to sample or monitor
     double t2=CalculateT2(inputWS, wsIndex); // time from sample to detector
@@ -138,6 +148,9 @@ void ModeratorTzero::exec()
         else
           tof-=CalculateT0(tof, L1, t2, E1, parser);
         outbins[ibin] = tof;
+        //if(ibin%400==0)
+          //std::cout<<", "<<tof;
+          //std::cout<<i<<" "<<ibin<<" "<<tof<<" "<<E1<<std::endl;
       }
     }
     else
@@ -148,9 +161,9 @@ void ModeratorTzero::exec()
     outputWS->dataY(i) = inputWS->dataY(i);
     outputWS->dataE(i) = inputWS->dataE(i);
     prog.report();
-    PARALLEL_END_INTERUPT_REGION;
+    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION;
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Copy units
   if (inputWS->getAxis(0)->unit().get())
@@ -205,17 +218,17 @@ void ModeratorTzero::execEvent()
 
   // Loop over the spectra
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
-  PARALLEL_FOR1(outputWS);
+  PARALLEL_FOR1(outputWS)
   for (int i = 0; i < static_cast<int>(numHists); ++i)
   {
-    PARALLEL_START_INTERUPT_REGION;
+    PARALLEL_START_INTERUPT_REGION
     size_t wsIndex = static_cast<size_t>(i);
     EventList &evlist=outputWS->getEventList(wsIndex);
     if( evlist.getNumberEvents() > 0 ) //don't bother with empty lists
     {
       double L1=CalculateL1(matrixOutputWS, wsIndex); // distance from source to sample or monitor
       double t2=CalculateT2(matrixOutputWS, wsIndex); // time from sample to detector
-      if(t2 >= 0) //t2 < 0 when no detector info is available
+      if(t2>=0) //t2 < 0 when no detector info is available
       {
         double tof, E1;
         mu::Parser parser;
@@ -225,10 +238,10 @@ void ModeratorTzero::execEvent()
         double min_t0_next=parser.Eval(); // fast neutrons are shifted by min_t0_next, irrespective of tof
 
         // fix the histogram bins
-        MantidVec & x = evlist.dataX();
-        for (MantidVec::iterator iter = x.begin(); iter != x.end(); ++iter)
+        MantidVec &x=evlist.dataX();
+        for (MantidVec::iterator iter=x.begin(); iter!=x.end(); ++iter)
         {
-          tof = *iter;
+          tof=*iter;
           if(tof<m_t1min+t2)
             tof-=min_t0_next;
           else
@@ -251,9 +264,9 @@ void ModeratorTzero::execEvent()
       }
     }
     prog.report();
-    PARALLEL_END_INTERUPT_REGION;
+    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION;
+  PARALLEL_CHECK_INTERUPT_REGION
   outputWS->clearMRU(); // Clears the Most Recent Used lists */
 } // end of void ModeratorTzero::execEvent()
 
