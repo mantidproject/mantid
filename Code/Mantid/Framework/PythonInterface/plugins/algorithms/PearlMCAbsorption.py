@@ -8,8 +8,9 @@ If the file does not contain "t=" on the top line then the values are assumed to
 
 *WIKI*"""
 
-from MantidFramework import *
-from mantidsimple import LoadAscii
+from mantid.kernel import *
+from mantid.api import *
+from mantid.simpleapi import LoadAscii
 import math
 
 class PearlMCAbsorption(PythonAlgorithm):
@@ -20,12 +21,12 @@ class PearlMCAbsorption(PythonAlgorithm):
     def PyInit(self):
         self.setWikiSummary("Loads pre-calculated or measured absorption correction files for Pearl.")
         # Input file
-        self.declareFileProperty("Filename","", FileAction.Load, ['.out','.dat'],"The name of the input file.")
+        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.out','.dat']), doc="The name of the input file.")
         # Output workspace
-        self.declareWorkspaceProperty("OutputWorkspace","", Direction = Direction.Output, Description = "The name of the input file.")
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace","", direction=Direction.Output), doc="The name of the input file.")
         
     def PyExec(self):
-        filename = self.getProperty("Filename")
+        filename = self.getProperty("Filename").value
         thickness = self._parseHeader(filename)
         # If we have a thickness value then this is a file containing measured mu(t) values
         # and the units are wavelength. If not then they are calculated and the units are dspacing
@@ -36,7 +37,7 @@ class PearlMCAbsorption(PythonAlgorithm):
             
         wkspace_name = self.getPropertyValue("OutputWorkspace")
         # Load the file
-        ascii_wkspace = LoadAscii(filename, wkspace_name, Separator="Space", Unit=x_unit).workspace()
+        ascii_wkspace = LoadAscii(Filename=filename, OutputWorkspace=wkspace_name, Separator="Space", Unit=x_unit)
         if thickness is None:
             coeffs = ascii_wkspace
         else:
@@ -45,7 +46,6 @@ class PearlMCAbsorption(PythonAlgorithm):
         coeffs.setYUnitLabel("Attenuation Factor (I/I0)")
         coeffs.setYUnit("");
         coeffs.setDistribution(True)
-
         self.setProperty("OutputWorkspace", coeffs)
 
     def _parseHeader(self, filename):
@@ -70,9 +70,8 @@ class PearlMCAbsorption(PythonAlgorithm):
 
     def _calculateAbsorption(self, input_ws, thickness):
         """
-        Calculate the I/I_0 for the given set of mu_values, i.e.
-
-                   (I/I_0) = exp(-mu*t)
+            Calculate the I/I_0 for the given set of mu_values, i.e.
+            (I/I_0) = exp(-mu*t)
         """
         #c = math.exp(-1.0*mu*thickness)
         num_hist = input_ws.getNumberHistograms()
@@ -81,10 +80,8 @@ class PearlMCAbsorption(PythonAlgorithm):
             mu_values = input_ws.readY(i)
             for j in range(num_vals):
                 input_ws.dataY(i)[j] = math.exp(-1.0*mu_values[j]*thickness)
-                
+
         return input_ws
 
 #############################################################################################
-# Register the algorithm with mantid
-mtd.registerPyAlgorithm(PearlMCAbsorption())
-        
+AlgorithmFactory.subscribe(PearlMCAbsorption)
