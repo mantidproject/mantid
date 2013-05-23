@@ -1,7 +1,9 @@
 #ifndef MANTID_DATAHANDLING_LOADPSI_H_
 #define MANTID_DATAHANDLING_LOADPSI_H_
 
-#include "MantidKernel/System.h"
+//---------------------------------------------------
+// Includes
+//---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IDataFileChecker.h"
 #include "MantidNexus/NexusClasses.h"
@@ -9,7 +11,15 @@
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadPSI : TODO: DESCRIPTION
+/**
+ Loads an PSI nexus file into a Mantid workspace.
+
+ Required properties:
+ <UL>
+ <LI> Filename - The ILL nexus file to be read </LI>
+ <LI> Workspace - The name to give to the output workspace </LI>
+ </UL>
+
 
  Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,7 +41,7 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadPSI: public API::Algorithm {
+class DLLExport LoadPSI: public API::IDataFileChecker  {
 public:
 	LoadPSI();
 	virtual ~LoadPSI();
@@ -39,18 +49,37 @@ public:
 	virtual const std::string name() const;
 	virtual int version() const;
 	virtual const std::string category() const;
+	///checks the file can be loaded by reading 1st 100 bytes and looking at the file extension.
+	bool quickFileCheck(const std::string& filePath, size_t nread,
+			const file_header& header);
+	/// check the structure of the file and if this file can be loaded return a value between 1 and 100
+	int fileCheck(const std::string& filePath);
 
 private:
 	virtual void initDocs();
 	void init();
 	void exec();
-	NeXus::NXEntry openNexusFile();
 	void setInstrumentName(NeXus::NXEntry& entry);
-	void initWorkSpace(NeXus::NXEntry& entry);
+	std::string getInstrumentName(NeXus::NXEntry& entry);
+	void initWorkSpace(NeXus::NXEntry&);
+	void loadDataIntoTheWorkSpace(NeXus::NXEntry&);
+	std::vector<double> getTimeBinning(NeXus::NXEntry&);
+	double getL1();
+	double getL2(int detId = 1);
+	/// Calculate error for y
+	static double calculateError(double in) {
+		return sqrt(in);
+	}
+	void loadExperimentDetails(NeXus::NXEntry&);
+	void loadRunDetails(NeXus::NXEntry &);
+	void runLoadInstrument();
+	double calculateTOF(double);
 
+	std::vector<std::string> supportedInstruments;
+	std::string m_nexusInstrumentEntryName;
 	std::string m_instrumentName;
+	double m_wavelength;
 	API::MatrixWorkspace_sptr m_localWorkspace;
-
 	size_t m_numberOfTubes; // number of tubes - X
 	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
 	size_t m_numberOfChannels; // time channels - Z
