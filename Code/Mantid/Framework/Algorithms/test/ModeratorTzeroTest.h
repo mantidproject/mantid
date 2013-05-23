@@ -25,12 +25,10 @@ static ModeratorTzeroTest *createSuite() { return new ModeratorTzeroTest(); }
 static void destroySuite( ModeratorTzeroTest *suite ) { delete suite; }
 
 
-/*
 ModeratorTzeroTest()
 {
   FrameworkManager::Instance(); // Load plugins
 }
-*/
 
 void TestInit()
 {
@@ -141,13 +139,13 @@ MatrixWorkspace_sptr CreateHistogramWorkspace()
   MantidVecPtr xdata;
   xdata.access().resize(numBins+1);
   const double peakHeight(1000), peakCentre(7000.), sigmaSq(1000*1000.);
-  for(int ibin=0; ibin<=numBins; ++ibin)
+  for(int ibin=0; ibin<numBins; ++ibin)
   {
     const double xValue=4*ibin;
     testWS->dataY(0)[ibin]=peakHeight*exp(-0.5*pow(xValue-peakCentre, 2.)/sigmaSq);
-    // do we add data for the monitor spectra, too?
     xdata.access()[ibin] = xValue;
   }
+  xdata.access()[numBins] = 4*numBins;
   for( int ihist=0; ihist<numHists; ihist++)
     testWS->setX(ihist, xdata);
   return testWS;
