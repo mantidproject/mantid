@@ -24,10 +24,13 @@ public:
 static ModeratorTzeroTest *createSuite() { return new ModeratorTzeroTest(); }
 static void destroySuite( ModeratorTzeroTest *suite ) { delete suite; }
 
+
+/*
 ModeratorTzeroTest()
 {
   FrameworkManager::Instance(); // Load plugins
 }
+*/
 
 void TestInit()
 {
@@ -124,23 +127,6 @@ void TestExecEvents()
       TS_ASSERT_DELTA(tofs_a[ibin/400],tofs_b[ibin],0.2);
     }
   }
-
-/*
-  for (size_t ihist=0; ihist<numHists; ++ihist)
-  {
-    EventList &evlist=testWS->getEventList(ihist);
-    MantidVecPtr xdata;
-    xdata.access().resize(numBins+1);
-    for(int ibin=0; ibin<=numBins; ++ibin)
-    {
-      double tof=4*ibin;
-      TofEvent tofevent(tof);
-      xdata.access()[ibin]=tof;
-      evlist.addEventQuickly(tofevent); // insert event
-    }
-    evlist.setX(xdata); // set the bins for the associated histogram
-  }
- */
   AnalysisDataService::Instance().remove("testWS");
 }
 
