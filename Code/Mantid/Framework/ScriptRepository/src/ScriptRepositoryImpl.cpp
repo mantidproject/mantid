@@ -124,13 +124,6 @@ namespace API
     else
       local_repository = local_rep; 
 
-    // if no folder is given, the repository is invalid.
-    if (local_repository.empty())
-      return;
-    
-    if (local_repository[local_repository.size()-1] != '/')
-      local_repository.append("/");
-
     if (remote.empty())
       remote_url = rem; 
     else
@@ -145,6 +138,13 @@ namespace API
 
     if (remote_url[remote_url.size()-1] != '/')
       remote_url.append("/");
+
+    // if no folder is given, the repository is invalid.
+    if (local_repository.empty())
+      return;
+    
+    if (local_repository[local_repository.size()-1] != '/')
+      local_repository.append("/");
 
 
     g_log.debug() << "ScriptRepository creation pointing to " 
@@ -252,6 +252,13 @@ namespace API
    */
   void ScriptRepositoryImpl::install(const std::string &  path){
     using Poco::DirectoryIterator;
+    if (remote_url.empty())
+      {
+        std::stringstream ss; 
+        ss << "ScriptRepository is configured to download from a invalid URL (empty URL)."
+           << "\nThis URL comes from the property file and it is called ScriptRepository.";     
+        throw ScriptRepoException(ss.str());
+      }
     std::string folder = std::string(path); 
     Poco::File repository_folder(folder); 
     std::string rep_json_file = std::string(path).append("/.repository.json");
