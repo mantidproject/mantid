@@ -105,7 +105,7 @@ namespace API
   */
   ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string & local_rep, 
                                          const std::string & remote) :
-  g_log(Logger::get("ScriptRepositoryImpl"))
+  g_log(Logger::get("ScriptRepositoryImpl")), valid(false)
   {    
     // get the local path and the remote path
     std::string loc, rem; 
@@ -123,9 +123,6 @@ namespace API
       local_repository = loc; 
     else
       local_repository = local_rep; 
-    
-    if (local_repository[local_repository.size()-1] != '/')
-      local_repository.append("/");
 
     if (remote.empty())
       remote_url = rem; 
@@ -142,6 +139,13 @@ namespace API
     if (remote_url[remote_url.size()-1] != '/')
       remote_url.append("/");
 
+    // if no folder is given, the repository is invalid.
+    if (local_repository.empty())
+      return;
+    
+    if (local_repository[local_repository.size()-1] != '/')
+      local_repository.append("/");
+
 
     g_log.debug() << "ScriptRepository creation pointing to " 
                   << local_repository << " and " << remote_url << "\n";
@@ -149,10 +153,6 @@ namespace API
 
     
     // check if the repository is valid.
-    valid = false;
-    // if no folder is given, the repository is invalid.
-    if (local_repository.empty())
-      return;
 
     // parsing the ignore pattern
     std::string ignore = ignorePatterns(); 
@@ -252,6 +252,13 @@ namespace API
    */
   void ScriptRepositoryImpl::install(const std::string &  path){
     using Poco::DirectoryIterator;
+    if (remote_url.empty())
+      {
+        std::stringstream ss; 
+        ss << "ScriptRepository is configured to download from a invalid URL (empty URL)."
+           << "\nThis URL comes from the property file and it is called ScriptRepository.";     
+        throw ScriptRepoException(ss.str());
+      }
     std::string folder = std::string(path); 
     Poco::File repository_folder(folder); 
     std::string rep_json_file = std::string(path).append("/.repository.json");

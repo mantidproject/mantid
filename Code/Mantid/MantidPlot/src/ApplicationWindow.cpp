@@ -18048,7 +18048,11 @@ void ApplicationWindow::about2Start(){
   // triggers the execution of UpdateScriptRepository Algorithm in a separated thread.
   // this was necessary because in order to log while in a separate thread, it is necessary to have
   // the postEvents available, so, we need to execute it here at about2Start.
-  Mantid::API::IAlgorithm_sptr update_script_repo = mantidUI->createAlgorithm("UpdateScriptRepository");
-  update_script_repo->initialize(); 
-  mantidUI->executeAlgorithmAsync(update_script_repo);
+  std::string local_rep = Mantid::Kernel::ConfigService::Instance().getString("ScriptLocalRepository"); 
+  if (!local_rep.empty()){
+    // there is no reason to trigger UpdataScriptRepository if it has never been installed
+    Mantid::API::IAlgorithm_sptr update_script_repo = mantidUI->createAlgorithm("UpdateScriptRepository");
+    update_script_repo->initialize(); 
+    mantidUI->executeAlgorithmAsync(update_script_repo);
+  }
 }

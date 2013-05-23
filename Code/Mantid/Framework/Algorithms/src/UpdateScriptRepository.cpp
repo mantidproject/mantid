@@ -69,6 +69,9 @@ namespace Algorithms
     using Mantid::API::ScriptRepository;
     auto repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
     
+    if (!repo_ptr->isValid())
+      return; // it means that the ScriptRepository was not installed.
+    
     std::vector<std::string> f_list = repo_ptr->check4Update();
     if (f_list.size() > 0){
       std::stringstream info; 
