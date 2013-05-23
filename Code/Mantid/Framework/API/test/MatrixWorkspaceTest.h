@@ -6,6 +6,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
@@ -128,6 +129,21 @@ public:
     }
   }
   
+  void test_updateSpectraUsing()
+  {
+    WorkspaceTester testWS;
+    testWS.initialize(3,1,1);
+
+    specid_t specs[] = {1,2,2,3};
+    detid_t detids[] = {10,99,20,30};
+    TS_ASSERT_THROWS_NOTHING( testWS.updateSpectraUsing(SpectrumDetectorMapping(specs, detids, 4)) );
+
+    TS_ASSERT( testWS.getSpectrum(0)->hasDetectorID(10) );
+    TS_ASSERT( testWS.getSpectrum(1)->hasDetectorID(20) );
+    TS_ASSERT( testWS.getSpectrum(1)->hasDetectorID(99) );
+    TS_ASSERT( testWS.getSpectrum(2)->hasDetectorID(30) );
+  }
+
   void testSpectraMapCopiedWhenAWorkspaceIsCopied()
   {
     boost::shared_ptr<MatrixWorkspace> parent(new WorkspaceTester);

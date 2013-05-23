@@ -31,6 +31,7 @@ namespace Mantid
   namespace API
   {
     class SpectraDetectorMap;
+    class SpectrumDetectorMapping;
 
     //----------------------------------------------------------------------
     /** Base MatrixWorkspace Abstract Class.
@@ -102,6 +103,7 @@ namespace Mantid
       /// Replace the current spectra map with a new one
       void replaceSpectraMap(const Geometry::ISpectraDetectorMap* spectramap);
       void updateSpectraUsingMap();
+      void updateSpectraUsing(const SpectrumDetectorMapping& map);
       /// Build the default spectra mapping, most likely wanted after an instrument update
       void rebuildSpectraMapping(const bool includeMonitors = true);
       

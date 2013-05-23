@@ -174,6 +174,21 @@ namespace Mantid
       }
     }
 
+    void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping& map)
+    {
+      for ( size_t j = 0; j < getNumberHistograms(); ++j )
+      {
+        auto spec = getSpectrum(j);
+        try {
+          spec->setDetectorIDs(map.getDetectorIDsForSpectrumNo(spec->getSpectrumNo()));
+        } catch (std::out_of_range& e) {
+          // Get here if the spectrum number is not in the map.
+          spec->clearDetectorIDs();
+          g_log.debug(e.what());
+          g_log.debug() << "Spectrum number " << spec->getSpectrumNo() << " not in map.\n";
+        }
+      }
+    }
 
     //---------------------------------------------------------------------------------------
     /**
