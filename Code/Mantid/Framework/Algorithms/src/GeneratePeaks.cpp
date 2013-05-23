@@ -15,6 +15,12 @@ Peak parameters must have the following parameters, which are case sensitive in 
  7. A2
  8. chi2
 
+ ==== Output ====
+ Output will include
+ 1. pure peak
+ 2. pure background (with specified range of FWHM (int))
+ 3. peak + background
+
 [[Category:Algorithms]]
 {{AlgorithmLinks|GeneratePeaks}}
 
@@ -40,6 +46,7 @@ Peak parameters must have the following parameters, which are case sensitive in 
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -62,13 +69,16 @@ namespace Algorithms
   {
   }
   
+  //----------------------------------------------------------------------------------------------
+  /** Wiki documentation
+    */
   void GeneratePeaks::initDocs()
   {
     this->setWikiSummary("Generate peaks in an output workspace according to a [[TableWorkspace]] containing a list of peak's parameters.");
   }
 
-  /*
-   * Define algorithm's properties
+  //----------------------------------------------------------------------------------------------
+  /** Define algorithm's properties
    */
   void GeneratePeaks::init()
   {
@@ -100,42 +110,44 @@ namespace Algorithms
     return;
   }
 
-  /*
-   * Main execution body
+  //----------------------------------------------------------------------------------------------
+  /** Main execution body
    */
   void GeneratePeaks::exec()
   {
-    // 1. Get properties
+    // Get properties
     DataObjects::TableWorkspace_sptr peakParamWS = this->getProperty("PeakParametersWorkspace");
     std::string peakFunction = this->getProperty("PeakFunction");
 
     const std::vector<double> binParameters = this->getProperty("BinningParameters");
+    MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
 
-    // 2. Understand input workspace
+    // Process peak parameter workspace
     std::set<specid_t> spectra;
     getSpectraSet(peakParamWS, spectra);
 
-    // 3. Set output workspace
+    // Reference workspace and output workspace
     API::MatrixWorkspace_sptr outputWS;
-    API::MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
     bool newWSFromParent = true;
     if (!inputWS && binParameters.empty())
     {
-      // a) Nothing is setup
-      g_log.error("Must define either InputWorkspace or BinningParameters.");
-      throw std::invalid_argument("Must define either InputWorkspace or BinningParameters.");
+      // Error! Neither bin parameters or reference workspace is given.
+      std::string errmsg("Must define either InputWorkspace or BinningParameters.");
+      g_log.error(errmsg);
+      throw std::invalid_argument(errmsg);
     }
     else if (inputWS)
     {
-      // c) Generate Workspace2D from input workspace
+      // Generate Workspace2D from input workspace
       if (!binParameters.empty())
         g_log.notice() << "Both binning parameters and input workspace are given. "
-          << "Using input worksapce to generate output workspace!" << std::endl;
+                       << "Using input worksapce to generate output workspace!\n";
 
       outputWS = API::WorkspaceFactory::Instance().create(inputWS, inputWS->getNumberHistograms(),
           inputWS->dataX(0).size(), inputWS->dataY(0).size());
 
       std::set<specid_t>::iterator siter;
+      // Only copy the X-values from spectra with peaks specified in the table workspace.
       for (siter = spectra.begin(); siter != spectra.end(); ++siter)
       {
         specid_t iws = *siter;
@@ -146,8 +158,8 @@ namespace Algorithms
     }
     else
     {
-      // d) Generate a one-spectrum Workspace2D from binning
-      outputWS = createOutputWorkspace(spectra, binParameters);
+      // Generate a one-spectrum Workspace2D from binning
+      outputWS = createDataWorkspace(spectra, binParameters);
       newWSFromParent = false;
     }
 
@@ -199,19 +211,20 @@ namespace Algorithms
   }
   }
 
-  /*
-   * Generate peaks
+  //----------------------------------------------------------------------------------------------
+  /** Generate peaks and background if optioned
    */
   void GeneratePeaks::generatePeaks(API::MatrixWorkspace_sptr dataWS, DataObjects::TableWorkspace_const_sptr peakparameters,
-      std::string peakfunction, bool newWSFromParent)
+                                    std::string peakfunction, bool newWSFromParent)
   {
+    // Special properties related
     double maxchi2 = this->getProperty("MaxAllowedChi2");
     double numWidths = this->getProperty("NumberWidths");
     bool generateBackground = this->getProperty("GenerateBackground");
 
     size_t numpeaks = peakparameters->rowCount();
 
-    // get the parameter names for the peak function
+    // Get the parameter names for the peak function
     std::vector<std::string> columnNames = peakparameters->getColumnNames();
     if (!columnNames.front().compare("spectrum") == 0)
     {
@@ -280,6 +293,7 @@ namespace Algorithms
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /**
    * Create a function for fitting.
    * @return The requested function to fit.
@@ -342,61 +356,72 @@ namespace Algorithms
     return boost::shared_ptr<IFunction>(fitFunc);
   }
 
-  /*
-   * Create a Workspace2D (MatrixWorkspace) with given spectra and bin parameters
+  //----------------------------------------------------------------------------------------------
+  /** Create a Workspace2D (MatrixWorkspace) with given spectra and bin parameters
    */
-  API::MatrixWorkspace_sptr GeneratePeaks::createOutputWorkspace(std::set<specid_t> spectra, std::vector<double> mBinParameters)
+  MatrixWorkspace_sptr GeneratePeaks::createDataWorkspace(std::set<specid_t> spectra, std::vector<double> binparameters)
   {
-    // 0. Check
+    // Check validity
     if (spectra.size() == 0)
-      throw std::invalid_argument("Input spectra number is 0.  Unable to generate a new workspace.");
+      throw std::invalid_argument("Input spectra list is empty. Unable to generate a new workspace.");
 
-    if (mBinParameters.size() < 3)
+    if (binparameters.size() < 3)
     {
-      g_log.error() << "Input binning parameters are not enough." << std::endl;
-      throw std::invalid_argument("Input binning paramemters are not acceptible.");
+      std::stringstream errss;
+      errss << "Number of input binning parameters are not enough (" << binparameters.size() << "). "
+            << "Binning parameters should be 3 (x0, step, xf).";
+      g_log.error(errss.str());
+      throw std::invalid_argument(errss.str());
     }
 
-    // 1. Determine number of x values
+    double x0 = binparameters[0];
+    double dx = binparameters[1];
+    double xf = binparameters[2];
+    if (x0 < xf || (xf - x0) < dx || dx == 0.)
+    {
+      std::stringstream errss;
+      errss << "Order of input binning parameters is not correct.  It is not logical to have "
+            << "x0 = " << x0 << ", xf = " << xf << ", dx = " << dx;
+      g_log.error(errss.str());
+      throw std::invalid_argument(errss.str());
+    }
+
+    // Determine number of x values
     std::vector<double> xarray;
-    double x0 = mBinParameters[0];
-    double dx = mBinParameters[1];
-    double xf = mBinParameters[2];
     double xvalue = x0;
     while (xvalue <= xf)
     {
-      // a) push
+      // Push current value to vector
       xarray.push_back(xvalue);
-      // b) next value
+
+      // Calculate next value, linear or logarithmic
       if (dx > 0)
         xvalue += dx;
-      else if (dx < 0)
-        xvalue += -1*dx*xvalue;
       else
-        throw std::invalid_argument("Step of binning parameters cannot be 0.");
+        xvalue += fabs(dx)*xvalue;
     }
     size_t numxvalue = xarray.size();
 
-    // 2. Create new workspace
-    API::MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", spectra.size(), numxvalue, numxvalue-1);
+    // Create new workspace
+    MatrixWorkspace_sptr ws = API::WorkspaceFactory::Instance().create("Workspace2D", spectra.size(), numxvalue, numxvalue-1);
     for (size_t ip = 0; ip < spectra.size(); ip ++)
       std::copy(xarray.begin(), xarray.end(), ws->dataX(ip).begin());
 
-    // 3. Set spectrum numbers
+    // Set spectrum numbers
     std::map<specid_t, specid_t>::iterator spiter;
     for (spiter = mSpectrumMap.begin(); spiter != mSpectrumMap.end(); ++spiter)
     {
       specid_t specid = spiter->first;
       specid_t wsindex = spiter->second;
-      g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , " << specid << std::endl;
+      g_log.debug() << "Build WorkspaceIndex-Spectrum  " << wsindex << " , " << specid << "\n";
       ws->getSpectrum(wsindex)->setSpectrumNo(specid);
     }
 
     return ws;
   }
 
-  /*
-   * Get set of spectra of the input table workspace
+  //----------------------------------------------------------------------------------------------
+  /** Get set of spectra of the input table workspace
    */
   void GeneratePeaks::getSpectraSet(DataObjects::TableWorkspace_const_sptr peakParmsWS, std::set<specid_t>& spectra)
   {

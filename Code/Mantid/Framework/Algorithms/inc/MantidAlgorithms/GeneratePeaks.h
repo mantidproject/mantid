@@ -59,7 +59,7 @@ namespace Algorithms
     // Implement abstract Algorithm methods
     void exec();
 
-    API::MatrixWorkspace_sptr createOutputWorkspace(std::set<specid_t> spectra, std::vector<double> mBinParameters);
+    API::MatrixWorkspace_sptr createDataWorkspace(std::set<specid_t> spectra, std::vector<double> binparameters);
 
     API::IFunction_sptr createFunction(const std::string &peakFuncType, const std::vector<std::string> &colNames,
                                        const bool isRaw, const bool withBackground,
