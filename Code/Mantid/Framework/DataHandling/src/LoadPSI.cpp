@@ -230,10 +230,6 @@ void LoadPSI::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	timeBinningTmp[numberOfBins-1] = timeBinningTmp[numberOfBins-2]+timeBinningTmp[1]-timeBinningTmp[0];
 	m_localWorkspace->dataX(0).assign(timeBinningTmp.begin(),timeBinningTmp.end());
 
-	for (auto i : m_localWorkspace->dataX(0))
-		std::cout << i << " ";
-	std::cout << std::endl;
-
 	Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 	size_t spec = 0;
 	for (size_t i = 0; i < m_numberOfTubes; ++i) {
