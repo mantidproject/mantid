@@ -63,9 +63,6 @@ private:
 	std::string getInstrumentName(NeXus::NXEntry& entry);
 	void initWorkSpace(NeXus::NXEntry&);
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry&);
-	std::vector<double> getTimeBinning(NeXus::NXEntry&);
-	double getL1();
-	double getL2(int detId = 1);
 	/// Calculate error for y
 	static double calculateError(double in) {
 		return sqrt(in);
@@ -73,12 +70,10 @@ private:
 	void loadExperimentDetails(NeXus::NXEntry&);
 	void loadRunDetails(NeXus::NXEntry &);
 	void runLoadInstrument();
-	double calculateTOF(double);
 
 	std::vector<std::string> supportedInstruments;
 	std::string m_nexusInstrumentEntryName;
 	std::string m_instrumentName;
-	double m_wavelength;
 	API::MatrixWorkspace_sptr m_localWorkspace;
 	size_t m_numberOfTubes; // number of tubes - X
 	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y

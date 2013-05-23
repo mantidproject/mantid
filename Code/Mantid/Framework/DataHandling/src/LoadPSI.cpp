@@ -66,6 +66,7 @@ void LoadPSI::initDocs() {
 	this->setOptionalMessage("Loads PSI nexus file.");
 }
 
+
 bool LoadPSI::quickFileCheck(const std::string& filePath, size_t nread,
 		const file_header& header) {
 	std::string extn = extension(filePath);
@@ -132,14 +133,9 @@ void LoadPSI::exec() {
 
 	initWorkSpace(entry);
 
-	loadRunDetails(entry);
-
-	// Before loading the data I need to know positions of sample, source, etc...
-	runLoadInstrument();
-
 	loadDataIntoTheWorkSpace(entry);
 
-
+	loadRunDetails(entry);
 	loadExperimentDetails(entry);
 
 	runLoadInstrument();
@@ -221,23 +217,18 @@ void LoadPSI::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	NXInt data = dataGroup.openIntData();
 	data.load();
 
-	std::vector<double> timeBinning = getTimeBinning(entry);
+	NXFloat timeBinning = entry.openNXFloat("merged/time_binning");
+	timeBinning.load();
 
-//	NXFloat timeBinning = entry.openNXFloat("merged/time_binning");
-//	timeBinning.load();
-//	size_t numberOfBins = static_cast<size_t>(timeBinning.dim0()) + 1; // boundaries
-//	g_log.debug() << "Number of bins: " << numberOfBins << std::endl;
-
+	size_t numberOfBins = static_cast<size_t>(timeBinning.dim0()) + 1; // boundaries
+	g_log.debug() << "Number of bins: " << numberOfBins << std::endl;
 
 	// Assign time bin to first X entry
-//	float* timeBinning_p = &timeBinning[0];
-//	std::vector<double> timeBinningTmp(numberOfBins);
-//	timeBinningTmp.assign(timeBinning_p, timeBinning_p + numberOfBins);
-//	timeBinningTmp[numberOfBins - 1] = timeBinningTmp[numberOfBins - 2]
-//			+ timeBinningTmp[1] - timeBinningTmp[0];
-
-	m_localWorkspace->dataX(0).assign(timeBinning.begin(),
-			timeBinning.end());
+	float* timeBinning_p = &timeBinning[0];
+	std::vector<double> timeBinningTmp(numberOfBins);
+	timeBinningTmp.assign(timeBinning_p,timeBinning_p + numberOfBins);
+	timeBinningTmp[numberOfBins-1] = timeBinningTmp[numberOfBins-2]+timeBinningTmp[1]-timeBinningTmp[0];
+	m_localWorkspace->dataX(0).assign(timeBinningTmp.begin(),timeBinningTmp.end());
 
 	for (auto i : m_localWorkspace->dataX(0))
 		std::cout << i << " ";
@@ -269,58 +260,6 @@ void LoadPSI::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	g_log.debug() << "Data loading inti WS done...." << std::endl;
 }
 
-std::vector<double> LoadPSI::getTimeBinning(NeXus::NXEntry& entry) {
-
-	double l1 = getL1();
-	double l2 = getL2();
-	double elasticPeakPositionFloat = entry.getFloat(
-			m_nexusInstrumentEntryName + "/bank1/elastic_peak_position");
-	int elasticPeakPosition = static_cast<int>(elasticPeakPositionFloat);
-	double channelWidth = entry.getFloat(
-			m_nexusInstrumentEntryName + "/bank1/delay");
-
-	double theoreticalElasticTOF = (calculateTOF(l1) + calculateTOF(l2)) * 1e6; //microsecs
-
-	g_log.debug() << "elasticPeakPosition : "
-				<< static_cast<float>(elasticPeakPosition) << std::endl;
-		g_log.debug() << "l1 : " << l1 << std::endl;
-		g_log.debug() << "l2 : " << l2 << std::endl;
-		g_log.debug() << "theoreticalElasticTOF : " << theoreticalElasticTOF << std::endl;
-
-	std::vector<double> detectorTofBins(m_numberOfChannels + 1);
-
-	for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-		detectorTofBins[i] = theoreticalElasticTOF
-				+ channelWidth
-						* static_cast<double>(static_cast<int>(i)
-								- elasticPeakPosition)
-				- channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
-
-	}
-	return detectorTofBins;
-}
-
-double LoadPSI::getL1() {
-
-	Geometry::Instrument_const_sptr instrument =
-			m_localWorkspace->getInstrument();
-	Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-	double l1 = instrument->getSource()->getDistance(*sample);
-	return l1;
-}
-
-double LoadPSI::getL2(int detId) {
-	// Get a pointer to the instrument contained in the workspace
-	Geometry::Instrument_const_sptr instrument =
-			m_localWorkspace->getInstrument();
-	// Get the distance between the source and the sample (assume in metres)
-	Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-	// Get the sample-detector distance for this detector (in metres)
-	double l2 = m_localWorkspace->getDetector(detId)->getPos().distance(
-			sample->getPos());
-	return l2;
-}
-
 void LoadPSI::loadRunDetails(NXEntry & entry) {
 
 	API::Run & runDetails = m_localWorkspace->mutableRun();
@@ -337,13 +276,11 @@ void LoadPSI::loadRunDetails(NXEntry & entry) {
 	//end_time = getDateTimeInIsoFormat(end_time);
 	runDetails.addProperty("run_end", end_time);
 
-	m_wavelength = entry.getFloat(
-			m_nexusInstrumentEntryName + "/monochromator/lambda");
-	runDetails.addProperty<double>("wavelength", m_wavelength);
+	double wavelength = entry.getFloat(m_nexusInstrumentEntryName + "/monochromator/lambda");
+	runDetails.addProperty<double>("wavelength", wavelength);
 
-	double energy = entry.getFloat(
-			m_nexusInstrumentEntryName + "/monochromator/energy");
-	runDetails.addProperty<double>("Ei", energy, true); //overwrite
+	double energy = entry.getFloat(m_nexusInstrumentEntryName + "/monochromator/energy");
+	runDetails.addProperty<double>("Ei", energy,true); //overwrite
 
 	std::string title = entry.getString("title");
 	runDetails.addProperty("title", title);
@@ -363,7 +300,7 @@ void LoadPSI::loadExperimentDetails(NXEntry & entry) {
 	// TODO: Do the rest
 	// Pick out the geometry information
 
-	(void) entry;
+	(void)entry;
 
 //	std::string description = boost::lexical_cast<std::string>(
 //			entry.getFloat("sample/description"));
@@ -375,6 +312,7 @@ void LoadPSI::loadExperimentDetails(NXEntry & entry) {
 //	m_localWorkspace->mutableSample().setWidth(static_cast<double> (isis_raw->spb.e_width));
 
 }
+
 
 /**
  * Run the Child Algorithm LoadInstrument.
@@ -395,19 +333,6 @@ void LoadPSI::runLoadInstrument() {
 	} catch (...) {
 		g_log.information("Cannot load the instrument definition.");
 	}
-}
-
-/**
- * Calculate TOF from distance
- *  @param distance :: distance in meters
- *  @return tof in seconds
- */
-double LoadPSI::calculateTOF(double distance) {
-
-	double velocity = PhysicalConstants::h
-			/ (PhysicalConstants::NeutronMass * m_wavelength * 1e-10); //m/s
-
-	return distance / velocity;
 }
 
 } // namespace DataHandling
