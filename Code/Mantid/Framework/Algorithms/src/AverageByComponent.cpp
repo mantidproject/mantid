@@ -77,8 +77,8 @@ namespace Algorithms
     childAlg->setProperty( "InputWorkspace", inputWS );
     childAlg->setProperty( "StartWorkspaceIndex", 0 );
     childAlg->setProperty( "EndWorkspaceIndex",EMPTY_INT()  );
-    childAlg->setProperty("RangeLower",  EMPTY_DBL() );
-    childAlg->setProperty("RangeUpper", EMPTY_DBL());
+    childAlg->setProperty("RangeLower", inputWS->getXMin());
+    childAlg->setProperty("RangeUpper", inputWS->getXMax());
     childAlg->setPropertyValue("IncludePartialBins", "1");
     childAlg->executeAsChildAlg();
     MatrixWorkspace_sptr integratedWS = childAlg->getProperty("OutputWorkspace");
@@ -86,9 +86,11 @@ namespace Algorithms
     if (parents>0)
     {
         std::vector<std::vector<size_t> > specmap=makeMap(integratedWS,parents);
+        API::Progress prog(this,0.3,1.0,specmap.size());
         //calculate averages
         for (size_t j=0;  j< specmap.size(); ++j)
         {
+          prog.report();
           std::vector<size_t> hists=specmap.at(j);
           std::vector<double> averageYInput,averageEInput;
           Geometry::Instrument_const_sptr instrument = integratedWS->getInstrument();
@@ -106,6 +108,7 @@ namespace Algorithms
 
             const double yValue = integratedWS->readY(hists[i])[0];
             const double eValue = integratedWS->readE(hists[i])[0];
+
             if( boost::math::isnan(yValue) || boost::math::isinf(yValue) || boost::math::isnan(eValue) || boost::math::isinf(eValue)) // NaNs/Infs
               continue;
 
@@ -137,7 +140,6 @@ namespace Algorithms
           for (int i = 0; i<static_cast<int>(hists.size()); ++i)
           {
             PARALLEL_START_INTERUPT_REGION
-
             const std::set<detid_t>& detids = integratedWS->getSpectrum(hists[i])->getDetectorIDs();//should be only one detector per spectrum
             if (instrument->isDetectorMasked(detids))
               continue;
@@ -157,6 +159,7 @@ namespace Algorithms
             }
 
             PARALLEL_END_INTERUPT_REGION
+
           }
           PARALLEL_CHECK_INTERUPT_REGION
 
@@ -166,6 +169,11 @@ namespace Algorithms
     setProperty("OutputWorkspace", integratedWS);
   }
 
+  /**
+   * @brief Creates a map of subcomponents where every spectrum belongs to 1 group only
+   * @param countsWS the workspace to check for componets/parents
+   * @return  vector of vectors, containing each spectrum that belongs to each group
+   */
   std::vector<std::vector<size_t> > AverageByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS)
   {
     std::vector<std::vector<size_t> > mymap;
@@ -179,9 +187,11 @@ namespace Algorithms
     return mymap;
   }
 
-  /** This function will check how to group spectra when calculating median
-   *
-   *
+  /**
+   * @brief This function will check how to group spectra when calculating median
+   * @param countsWS the workspace to check for componets/parents
+   * @param parents  how many levels above detector to create the grouping
+   * @return vector of vectors, containing each spectrum that belongs to each group
    */
   std::vector<std::vector<size_t> > AverageByComponent::makeMap(API::MatrixWorkspace_sptr countsWS,int parents)
   {
