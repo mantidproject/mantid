@@ -184,6 +184,27 @@ public:
     TS_ASSERT_EQUALS( finalFilter->nthValue(5), true );
   }
 
+  void test_filtered_size_when_combined_filter_is_invalid()
+  {
+    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2009-Apr-28 09:20:52",-0.00161) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2009-Apr-28 09:21:57",-0.00161) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2009-Apr-28 09:23:01",-0.00161) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2009-Apr-28 09:25:10",-0.00161) );
+
+    TimeSeriesProperty<bool> *running = new TimeSeriesProperty<bool>("running");
+    running->addValue("2009-Apr-28 09:20:30", true);
+    running->addValue("2009-Apr-28 09:20:51", false);
+
+    TimeSeriesProperty<bool> *period = new TimeSeriesProperty<bool>("period 1");
+    running->addValue("2009-Apr-28 09:20:29", true);
+
+    LogFilter filter(p);
+    filter.addFilter(*running);
+    filter.addFilter(*period);
+    TS_ASSERT_EQUALS(filter.data()->size(), 4);
+  }
+
   void testF3()
   {
     auto testFilter = createTestFilter(4);
