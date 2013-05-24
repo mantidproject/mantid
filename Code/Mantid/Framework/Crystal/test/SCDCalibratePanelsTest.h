@@ -27,6 +27,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -83,7 +84,7 @@ public:
 
      alg->setPropertyValue("ResultWorkspace","Result");
 
-     boost::shared_ptr<TableWorkspace> Results  =  alg->getProperty("ResultWorkspace");
+     boost::shared_ptr<ITableWorkspace> Results  =  alg->getProperty("ResultWorkspace");
 
 
      TS_ASSERT_DELTA(-0.000561209,Results->cell<double>(3,1),.01);
