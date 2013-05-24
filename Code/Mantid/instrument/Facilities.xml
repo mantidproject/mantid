@@ -405,7 +405,8 @@
   </instrument>
 
 </facility>
-    
+
+<!-- The loader for SINQ is LoadPSI. Might have to changed in future. -->
 <facility name="SINQ" FileExtensions=".hdf">
 
   <instrument name="HRPT">
@@ -451,7 +452,7 @@
   <instrument name="FOCUS">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
-  </instrument>
+  </instrument> 
 
   <instrument name="Rita-II">
     <technique>Triple Axis Spectroscopy</technique>
@@ -478,13 +479,6 @@
     <technique>UNKOWN</technique>
   </instrument>
 
-</facility>
-
-
-<facility name="PSI" FileExtensions=".nxs,.hdf">
-  <instrument name="FOCUS at SINQ">
-    <technique>Neutron time-of-flight Spectroscopy</technique>
-  </instrument>
 </facility>
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">

@@ -32,7 +32,7 @@ DECLARE_LOADALGORITHM(LoadPSI)
  */
 LoadPSI::LoadPSI() {
 	m_instrumentName = "";
-	supportedInstruments.push_back("FOCUS at SINQ");
+	supportedInstruments.push_back("FOCUS");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -172,7 +172,9 @@ std::string LoadPSI::getInstrumentName(NeXus::NXEntry& entry) {
 			break;
 		}
 	}
-
+	//std::replace( instrumentName.begin(), instrumentName.end(), ' ', '_'); // replace all ' ' to '_'
+	long unsigned int pos = instrumentName.find(" ");
+	instrumentName = instrumentName.substr (0,pos);
 	return instrumentName;
 
 }
