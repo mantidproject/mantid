@@ -1,11 +1,10 @@
-#ifndef MANTID_ALGORITHMS_FLATBACKGROUND_H_
-#define MANTID_ALGORITHMS_FLATBACKGROUND_H_
+#ifndef MANTID_ALGORITHMS_CALCULATEFLATBACKGROUND_H_
+#define MANTID_ALGORITHMS_CALCULATEFLATBACKGROUND_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -48,19 +47,19 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport FlatBackground : public API::Algorithm, public API::DeprecatedAlgorithm
+class DLLExport CalculateFlatBackground : public API::Algorithm
 {
 public:
-  /// Constructor
-  FlatBackground();
+  /// (Empty) Constructor
+  CalculateFlatBackground() : API::Algorithm(), m_convertedFromRawCounts(false), m_progress(NULL) {}
   /// Virtual destructor
-  virtual ~FlatBackground() {if(m_progress) delete m_progress;m_progress=NULL;}
+  virtual ~CalculateFlatBackground() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
-  virtual const std::string name() const { return "FlatBackground"; }
+  virtual const std::string name() const { return "CalculateFlatBackground"; }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Deprecated"; }
+  virtual const std::string category() const { return "SANS;CorrectionFunctions\\BackgroundCorrections"; }
 
 private:
   /// Sets documentation strings for this algorithm
@@ -87,4 +86,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_FLATBACKGROUND_H_*/
+#endif /*MANTID_ALGORITHMS_CALCULATEFLATBACKGROUND_H_*/

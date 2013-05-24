@@ -14,7 +14,7 @@ The [[Linear]] algorithm is used when the Mode = Linear Fit. From the resulting 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/FlatBackground.h"
+#include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -30,10 +30,10 @@ namespace Algorithms
 {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(FlatBackground)
+DECLARE_ALGORITHM(CalculateFlatBackground)
 
 /// Sets documentation strings for this algorithm
-void FlatBackground::initDocs()
+void CalculateFlatBackground::initDocs()
 {
   this->setWikiSummary("Finds a constant value fit to an appropriate range of each desired spectrum and subtracts that value from the entire spectrum. ");
   this->setOptionalMessage("Finds a constant value fit to an appropriate range of each desired spectrum and subtracts that value from the entire spectrum.");
@@ -43,13 +43,7 @@ void FlatBackground::initDocs()
 using namespace Kernel;
 using namespace API;
 
-FlatBackground::FlatBackground() : API::Algorithm(), m_convertedFromRawCounts(false), m_progress(NULL)
-{
-  this->useAlgorithm("CalculateFlatBackground");
-  this->deprecatedDate("2013-05-21");
-}
-
-void FlatBackground::init()
+void CalculateFlatBackground::init()
 {
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
     boost::make_shared<HistogramValidator>() ),
@@ -81,7 +75,7 @@ void FlatBackground::init()
       "the InputWorkspace and returned or just returned (default: Subtract Background)");
 }
 
-void FlatBackground::exec()
+void CalculateFlatBackground::exec()
 {
   // Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -142,7 +136,7 @@ void FlatBackground::exec()
       // Now call the function the user selected to calculate the background
       const double background = std::string(getProperty("mode")) == "Mean" ?
         this->Mean(outputWS, currentSpec, startX, endX, variance) :
-        this->LinearFit(outputWS, currentSpec, startX, endX);
+        this->LinearFit(outputWS, currentSpec, startX, endX);  // THIS FUNCTION USES DEPRECATED CHILD ALGORITHM!
       
       if (background < 0)
       {
@@ -223,7 +217,7 @@ void FlatBackground::exec()
 *  aren't affected. A flag is set if there was a change allowing the workspace to be converted back
 *  @param workspace the workspace to check and possibly convert
 */
-void FlatBackground::convertToDistribution(API::MatrixWorkspace_sptr workspace)
+void CalculateFlatBackground::convertToDistribution(API::MatrixWorkspace_sptr workspace)
 {
   if (workspace->isDistribution())
   {
@@ -261,7 +255,7 @@ void FlatBackground::convertToDistribution(API::MatrixWorkspace_sptr workspace)
 *  is set
 *  @param workspace the workspace to, possibly, convert
 */
-void FlatBackground::restoreDistributionState(API::MatrixWorkspace_sptr workspace)
+void CalculateFlatBackground::restoreDistributionState(API::MatrixWorkspace_sptr workspace)
 {
   if (m_convertedFromRawCounts)
   {
@@ -274,7 +268,7 @@ void FlatBackground::restoreDistributionState(API::MatrixWorkspace_sptr workspac
  *  @param endX ::   The ending point
  *  @throw std::invalid_argument If XMin or XMax are not set, or XMax is less than XMin
  */
-void FlatBackground::checkRange(double& startX, double& endX)
+void CalculateFlatBackground::checkRange(double& startX, double& endX)
 {
   //use the overloaded operator =() to get the X value stored in each property
   startX = getProperty("StartX");
@@ -293,7 +287,7 @@ void FlatBackground::checkRange(double& startX, double& endX)
 *  @param output :: the array to be checked
 *  @param workspaceTotal :: required to be the total number of spectra in the workspace
 */
-void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTotal)
+void CalculateFlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTotal)
 {
   if ( output.size() > 0 )
   {
@@ -317,7 +311,7 @@ void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTo
 *  @throw out_of_range if either startX or endX are out of the range of X-values in the specified spectrum
 *  @throw invalid_argument if endX has the value of first X-value one of the spectra
 */
-double FlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const int specInd, const double startX, const double endX, double &variance) const
+double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const int specInd, const double startX, const double endX, double &variance) const
 {
   const MantidVec &XS = WS->readX(specInd), &YS = WS->readY(specInd);
   const MantidVec &ES = WS->readE(specInd);
@@ -352,9 +346,9 @@ double FlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const int 
   return background;
 }
 /// Calls Linear as a Child Algorithm to do the fitting
-double FlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX)
+double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX)
 {
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Linear");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Linear"); // Linear is DEPRECATED code will need replacing
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex",spectrum);
   childAlg->setProperty<double>("StartX",startX);
