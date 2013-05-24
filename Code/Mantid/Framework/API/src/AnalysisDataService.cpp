@@ -87,7 +87,10 @@ namespace Mantid
       // if workspace is already in the ADS this is equivalent to rename
       if ( ! workspace->name().empty() )
       {
-          rename( workspace->name(), name );
+          if (workspace->name() != name )
+          {
+              rename( workspace->name(), name );
+          }
           return;
       }
       //Attach the new name to the workspace

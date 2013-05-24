@@ -54,14 +54,14 @@ public:
     loadUB.setProperty("Filename", "ls5637.mat");
     loadUB.execute();
 
-    peaks->setName("abcd");
+    //peaks->setName("abcd");
 
   }
   void test_basic()
   {
     OptimizeCrystalPlacement alg;
     alg.initialize();
-    alg.setPropertyValue("PeaksWorkspace", "abcd");
+    //alg.setPropertyValue("PeaksWorkspace", "abcd");
     alg.setProperty("PeaksWorkspace", peaks);
     alg.setPropertyValue("ModifiedPeaksWorkspace", "ModPeaks");
     alg.setPropertyValue("FitInfoTable", "FitInfoTable");

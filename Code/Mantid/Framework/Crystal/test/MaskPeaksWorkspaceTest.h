@@ -56,7 +56,7 @@ public:
 
     // Create the peaks workspace
     PeaksWorkspace_sptr pkws(new PeaksWorkspace());
-    pkws->setName("TOPAZ");
+    //pkws->setName("TOPAZ");
 
     // This loads (appends) the peaks
     Mantid::DataObjects::Peak PeakObj(inputW->getInstrument(),1000,100.);
@@ -118,7 +118,7 @@ public:
 
     // Create the peaks workspace
     PeaksWorkspace_sptr pkws(new PeaksWorkspace());
-    pkws->setName("TOPAZ");
+    //pkws->setName("TOPAZ");
 
     // This loads (appends) the peaks
     Mantid::DataObjects::Peak PeakObj(inputW->getInstrument(),1000, 1.);

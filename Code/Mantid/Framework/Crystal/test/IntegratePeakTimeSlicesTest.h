@@ -168,8 +168,8 @@ public:
     pks->addPeak(peak);
 
     IntegratePeakTimeSlices algP;
-    wsPtr->setName("InputWorkspace");
-    pks->setName("PeaksWorkspace");
+    //wsPtr->setName("InputWorkspace");
+    //pks->setName("PeaksWorkspace");
     try
     {
       algP.initialize();
@@ -358,7 +358,7 @@ TotIntensityError     72.7901     90.9626     109.655     125.595     109.655   
       Peak peak(instP, pixelp->getID(), 6.955836);
 
       PeaksWorkspace_sptr pks(new PeaksWorkspace());
-      pks->setName("Peaks3");
+      //pks->setName("Peaks3");
       pks->addPeak(peak);
 
       IntegratePeakTimeSlices algP;
