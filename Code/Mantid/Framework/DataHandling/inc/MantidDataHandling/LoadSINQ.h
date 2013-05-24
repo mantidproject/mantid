@@ -41,10 +41,10 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadPSI: public API::IDataFileChecker  {
+class DLLExport LoadSINQ: public API::IDataFileChecker  {
 public:
-	LoadPSI();
-	virtual ~LoadPSI();
+	LoadSINQ();
+	virtual ~LoadSINQ();
 
 	virtual const std::string name() const;
 	virtual int version() const;

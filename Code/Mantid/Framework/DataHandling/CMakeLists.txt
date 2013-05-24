@@ -69,7 +69,7 @@ set ( SRC_FILES
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
 	src/LoadPDFgetNFile.cpp
-	src/LoadPSI.cpp
+	src/LoadSINQ.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
 	src/LoadPreNexusMonitors.cpp
@@ -214,7 +214,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
-	inc/MantidDataHandling/LoadPSI.h
+	inc/MantidDataHandling/LoadSINQ.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
@@ -347,7 +347,7 @@ set ( TEST_FILES
 	LoadNexusProcessedTest.h
 	LoadNexusTest.h
 	LoadPDFgetNFileTest.h
-	LoadPSITest.h
+	LoadSINQTest.h
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h

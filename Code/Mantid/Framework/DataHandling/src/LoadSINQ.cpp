@@ -2,7 +2,7 @@
  TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
  *WIKI*/
 
-#include "MantidDataHandling/LoadPSI.h"
+#include "MantidDataHandling/LoadSINQ.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
@@ -23,14 +23,14 @@ using namespace API;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadPSI)
+DECLARE_ALGORITHM(LoadSINQ)
 //register the algorithm into loadalgorithm factory
-DECLARE_LOADALGORITHM(LoadPSI)
+DECLARE_LOADALGORITHM(LoadSINQ)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadPSI::LoadPSI() {
+LoadSINQ::LoadSINQ() {
 	m_instrumentName = "";
 	supportedInstruments.push_back("FOCUS");
 }
@@ -38,36 +38,36 @@ LoadPSI::LoadPSI() {
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LoadPSI::~LoadPSI() {
+LoadSINQ::~LoadSINQ() {
 }
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadPSI::name() const {
-	return "LoadPSI";
+const std::string LoadSINQ::name() const {
+	return "LoadSINQ";
 }
 ;
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadPSI::version() const {
+int LoadSINQ::version() const {
 	return 1;
 }
 ;
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string LoadPSI::category() const {
+const std::string LoadSINQ::category() const {
 	return "DataHandling";
 }
 
 //----------------------------------------------------------------------------------------------
 /// Sets documentation strings for this algorithm
-void LoadPSI::initDocs() {
+void LoadSINQ::initDocs() {
 	this->setWikiSummary("Loads PSI nexus file.");
 	this->setOptionalMessage("Loads PSI nexus file.");
 }
 
 
-bool LoadPSI::quickFileCheck(const std::string& filePath, size_t nread,
+bool LoadSINQ::quickFileCheck(const std::string& filePath, size_t nread,
 		const file_header& header) {
 	std::string extn = extension(filePath);
 	bool bnexs(false);
@@ -94,7 +94,7 @@ bool LoadPSI::quickFileCheck(const std::string& filePath, size_t nread,
  * @param filePath :: name of the file inluding its path
  * @return an integer value how much this algorithm can load the file
  */
-int LoadPSI::fileCheck(const std::string& filePath) {
+int LoadSINQ::fileCheck(const std::string& filePath) {
 	// Create the root Nexus class
 	NXRoot root(filePath);
 	NXEntry entry = root.openFirstEntry();
@@ -110,7 +110,7 @@ int LoadPSI::fileCheck(const std::string& filePath) {
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
-void LoadPSI::init() {
+void LoadSINQ::init() {
 	std::vector<std::string> exts;
 	exts.push_back(".nxs");
 	exts.push_back(".hdf");
@@ -124,7 +124,7 @@ void LoadPSI::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadPSI::exec() {
+void LoadSINQ::exec() {
 
 	std::string filename = getPropertyValue("Filename");
 	NXRoot root(filename);
@@ -143,7 +143,7 @@ void LoadPSI::exec() {
 	setProperty("OutputWorkspace", m_localWorkspace);
 }
 
-void LoadPSI::setInstrumentName(NeXus::NXEntry& entry) {
+void LoadSINQ::setInstrumentName(NeXus::NXEntry& entry) {
 
 	m_instrumentName = getInstrumentName(entry);
 	if (m_instrumentName == "") {
@@ -155,7 +155,7 @@ void LoadPSI::setInstrumentName(NeXus::NXEntry& entry) {
 
 }
 
-std::string LoadPSI::getInstrumentName(NeXus::NXEntry& entry) {
+std::string LoadSINQ::getInstrumentName(NeXus::NXEntry& entry) {
 
 	// format: /entry0/?????/name
 
@@ -179,7 +179,7 @@ std::string LoadPSI::getInstrumentName(NeXus::NXEntry& entry) {
 
 }
 
-void LoadPSI::initWorkSpace(NeXus::NXEntry& entry) {
+void LoadSINQ::initWorkSpace(NeXus::NXEntry& entry) {
 
 	// read in the data
 	NXData dataGroup = entry.openNXData("merged");
@@ -212,7 +212,7 @@ void LoadPSI::initWorkSpace(NeXus::NXEntry& entry) {
 
 }
 
-void LoadPSI::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
+void LoadSINQ::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 
 	// read in the data
 	NXData dataGroup = entry.openNXData("merged");
@@ -248,7 +248,7 @@ void LoadPSI::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 			// Assign Error
 			MantidVec& E = m_localWorkspace->dataE(spec);
 			std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-					LoadPSI::calculateError);
+					LoadSINQ::calculateError);
 
 			++spec;
 			progress.report();
@@ -258,7 +258,7 @@ void LoadPSI::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	g_log.debug() << "Data loading inti WS done...." << std::endl;
 }
 
-void LoadPSI::loadRunDetails(NXEntry & entry) {
+void LoadSINQ::loadRunDetails(NXEntry & entry) {
 
 	API::Run & runDetails = m_localWorkspace->mutableRun();
 
@@ -293,7 +293,7 @@ void LoadPSI::loadRunDetails(NXEntry & entry) {
  *
  * @param entry :: The Nexus entry
  */
-void LoadPSI::loadExperimentDetails(NXEntry & entry) {
+void LoadSINQ::loadExperimentDetails(NXEntry & entry) {
 
 	// TODO: Do the rest
 	// Pick out the geometry information
@@ -315,7 +315,7 @@ void LoadPSI::loadExperimentDetails(NXEntry & entry) {
 /**
  * Run the Child Algorithm LoadInstrument.
  */
-void LoadPSI::runLoadInstrument() {
+void LoadSINQ::runLoadInstrument() {
 
 	IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

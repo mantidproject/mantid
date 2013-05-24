@@ -406,7 +406,6 @@
 
 </facility>
 
-<!-- The loader for SINQ is LoadPSI. Might have to changed in future. -->
 <facility name="SINQ" FileExtensions=".hdf">
 
   <instrument name="HRPT">

@@ -3,47 +3,47 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadPSI.h"
+#include "MantidDataHandling/LoadSINQ.h"
 
 using namespace Mantid::API;
-using Mantid::DataHandling::LoadPSI;
+using Mantid::DataHandling::LoadSINQ;
 
-class LoadPSITest: public CxxTest::TestSuite {
+class LoadSINQTest: public CxxTest::TestSuite {
 public:
 	// This pair of boilerplate methods prevent the suite being created statically
 	// This means the constructor isn't called when running other tests
-	static LoadPSITest *createSuite() {
-		return new LoadPSITest();
+	static LoadSINQTest *createSuite() {
+		return new LoadSINQTest();
 	}
-	static void destroySuite(LoadPSITest *suite) {
+	static void destroySuite(LoadSINQTest *suite) {
 		delete suite;
 	}
 
-	LoadPSITest() :
+	LoadSINQTest() :
 			m_testFile("focus2010n000468.hdf") {
 	}
 	void testName() {
-		LoadPSI alg;
-		TS_ASSERT_EQUALS(alg.name(), "LoadPSI");
+		LoadSINQ alg;
+		TS_ASSERT_EQUALS(alg.name(), "LoadSINQ");
 	}
 
 	void testVersion() {
-		LoadPSI alg;
+		LoadSINQ alg;
 		TS_ASSERT_EQUALS(alg.version(), 1);
 	}
 
 	void test_Init() {
-		LoadPSI alg;
+		LoadSINQ alg;
 		TS_ASSERT_THROWS_NOTHING(alg.initialize())
 		TS_ASSERT(alg.isInitialized())
 	}
 
 	void test_exec() {
-		LoadPSI loader;
+		LoadSINQ loader;
 		loader.initialize();
 		loader.setPropertyValue("Filename", m_testFile);
 
-		std::string outputSpace = "LoadPSITest_out";
+		std::string outputSpace = "LoadSINQTest_out";
 		loader.setPropertyValue("OutputWorkspace", outputSpace);
 		TS_ASSERT_THROWS_NOTHING(loader.execute());
 
