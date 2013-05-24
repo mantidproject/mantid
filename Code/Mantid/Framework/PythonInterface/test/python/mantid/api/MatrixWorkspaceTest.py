@@ -1,11 +1,11 @@
 import unittest
 import sys 
 import math
-from testhelpers import run_algorithm, can_be_instantiated
-from mantid.api import (MatrixWorkspace, WorkspaceProperty, Workspace,
+from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
+from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspaceProperty, Workspace,
                         ExperimentInfo, AnalysisDataService, WorkspaceFactory)
 from mantid.geometry import Detector
-from mantid.kernel import V3D
+from mantid.kernel import Direction, V3D
 
 import numpy as np
 
@@ -16,10 +16,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
     def setUp(self):
         if self._test_ws is None:
-            wsname = 'LOQ48127'
-            alg = run_algorithm('Load', Filename='LOQ48127.raw', OutputWorkspace=wsname, SpectrumMax=2, child=True)
-            self.__class__._test_ws_prop = alg.getProperty('OutputWorkspace')
-            self.__class__._test_ws = alg.getProperty('OutputWorkspace').value
+            self.__class__._test_ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(2,102,False) # no monitors
 
     def test_that_one_cannot_be_instantiated_directly(self):
         self.assertFalse(can_be_instantiated(MatrixWorkspace))
@@ -31,7 +28,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_meta_information(self):
         self.assertEquals(self._test_ws.id(), "Workspace2D")
         self.assertEquals(self._test_ws.name(), "")
-        self.assertEquals(self._test_ws.getTitle().rstrip(), "direct beam") #The title seems to have a newline in it
+        self.assertEquals(self._test_ws.getTitle(), "Test histogram")
         self.assertEquals(self._test_ws.getComment(), "")
         self.assertEquals(self._test_ws.isDirty(), False)
         self.assertTrue(self._test_ws.getMemorySize() > 0.0)
@@ -71,7 +68,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertTrue(isinstance(det, Detector))
         self.assertEquals(det.getID(), 1)
         self.assertFalse(det.isMasked())
-        self.assertAlmostEqual(math.pi, det.getTwoTheta(V3D(0,0,11), V3D(0,0,11)))
+        self.assertAlmostEqual(2.71496516, det.getTwoTheta(V3D(0,0,11), V3D(0,0,1)))
 
     def test_spectrum_retrieval(self):
         # Spectrum
@@ -85,13 +82,19 @@ class MatrixWorkspaceTest(unittest.TestCase):
             self.assertEquals(expected[i], ids[i])
 
     def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_a_property(self):
-        self.assertEquals(type(self._test_ws_prop), WorkspaceProperty)
+        wsname = "MatrixWorkspaceTest_Property"
+        AnalysisDataService.add(wsname,self._test_ws)
+
+        alg = create_algorithm("Rebin", InputWorkspace=wsname)
+        propValue = alg.getProperty("InputWorkspace").value
         # Is Workspace in the hierarchy of the value
-        self.assertTrue(isinstance(self._test_ws, Workspace))
+        self.assertTrue(isinstance(propValue, Workspace))
         # Have got a MatrixWorkspace back and not just the generic interface
-        self.assertEquals(type(self._test_ws), MatrixWorkspace)
-        mem = self._test_ws.getMemorySize()
+        self.assertEquals(type(propValue), MatrixWorkspace)
+        mem = propValue.getMemorySize()
         self.assertTrue( (mem > 0) )
+        
+        AnalysisDataService.remove(wsname)
 
     def test_read_data_members_give_readonly_numpy_array(self):
         def do_numpy_test(arr):

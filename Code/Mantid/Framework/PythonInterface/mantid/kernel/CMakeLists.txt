@@ -150,7 +150,7 @@ target_link_libraries ( PythonKernelModule ${PYTHON_DEPS} )
 
 if ( UNIX )
   add_library ( _dlopen src/dlopen.c )
-  set_target_properties ( _dlopen PROPERTIES OUTPUT_NAME _dlopen )
+  set_python_properties ( _dlopen _dlopen )
   set_target_output_directory ( _dlopen ${OUTPUT_DIR} .pyd )
 if ( APPLE )
   # and in .so on the Mac

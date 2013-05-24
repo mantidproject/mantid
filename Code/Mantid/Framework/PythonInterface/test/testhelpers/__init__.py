@@ -1,7 +1,13 @@
-"""A module of helper functions for the Python unit tests
+"""Defines a set of helpers wrapped around the C++ TestHelpers package that
+are for use in unit tests only!
 """
+# Define all mantid exported classes first
+import mantid
 
-from mantid.api import AlgorithmManager
+# Add workspace creation namespace
+import WorkspaceCreationHelper
+
+# Define some pure-Python functions to add to the mix
 
 def run_algorithm(name, **kwargs):
     """Run a named algorithm and return the
@@ -11,7 +17,24 @@ def run_algorithm(name, **kwargs):
         name - The name of the algorithm
         kwargs - A dictionary of property name:value pairs
     """
-    alg = AlgorithmManager.createUnmanaged(name)
+    alg = create_algorithm(name, **kwargs)
+    alg.execute()
+    return alg
+
+def create_algorithm(name, **kwargs):
+    """Create a named algorithm, set the properties given by the keywords and return the
+    algorithm handle WITHOUT executing the algorithm
+    
+    Useful keywords:
+      - child: Makes algorithm a child algorithm
+      - rethrow: Causes exceptions to be rethrown on execution
+
+    Parameters:
+        name - The name of the algorithm
+        kwargs - A dictionary of property name:value pairs
+    @returns The algorithm handle
+    """
+    alg = mantid.api.AlgorithmManager.createUnmanaged(name)
     alg.initialize()
     # Avoid problem that Load needs to set Filename first if it exists
     if name == 'Load' and 'Filename' in kwargs:
@@ -27,7 +50,6 @@ def run_algorithm(name, **kwargs):
         del kwargs['rethrow']
     for key, value in kwargs.iteritems():
         alg.setProperty(key, value)
-    alg.execute()
     return alg
 
 # Case difference is to be consistent with the unittest module

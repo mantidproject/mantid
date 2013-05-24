@@ -24,9 +24,9 @@ class AnalysisDataServiceTest(unittest.TestCase):
             Run create workspace storing the output in the named workspace
         """
         data = [1.0,2.0,3.0]
-        run_algorithm('CreateWorkspace',OutputWorkspace=wsname,DataX=data,DataY=data,NSpec=1,UnitX='Wavelength')
-        
-        
+        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
+        AnalysisDataService.addOrReplace(wsname, alg.getProperty("OutputWorkspace").value)
+
     def test_len_increases_when_item_added(self):
         wsname = 'ADSTest_test_len_increases_when_item_added'
         current_len = len(AnalysisDataService)
@@ -42,6 +42,15 @@ class AnalysisDataServiceTest(unittest.TestCase):
         # Remove to clean the test up
         del AnalysisDataService[wsname]
         self.assertEquals(len(AnalysisDataService), current_len - 1)
+        
+    def test_add_raises_error_if_name_exists(self):
+        data = [1.0,2.0,3.0]
+        alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', child=True)
+        name = "testws"
+        ws = alg.getProperty("OutputWorkspace").value
+        AnalysisDataService.addOrReplace(name, ws)
+        self.assertRaises(RuntimeError, AnalysisDataService.add, name, ws)
+        AnalysisDataService.remove(name)
     
     def do_check_for_matrix_workspace_type(self, workspace):
         self.assertTrue(isinstance(workspace, MatrixWorkspace))

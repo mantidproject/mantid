@@ -1,6 +1,6 @@
 import unittest
 from mantid.api import MultipleFileProperty, mtd
-from testhelpers import run_algorithm
+from testhelpers import create_algorithm
 
 class MultipleFilePropertyTest(unittest.TestCase):
 
@@ -9,13 +9,13 @@ class MultipleFilePropertyTest(unittest.TestCase):
         del mtd['w']
 
     def test_value_member_returns_python_str_for_single_file(self):
-        algorithm = run_algorithm('Load', Filename='LOQ48127.raw',OutputWorkspace='w',
+        algorithm = create_algorithm('Load', Filename='LOQ48127.raw',OutputWorkspace='w',
                                   SpectrumMin=1,SpectrumMax=1,child=True)
         prop = algorithm.getProperty("Filename")
         self.assertTrue(isinstance(prop.value, str))
 
     def test_value_member_returns_python_list_for_multiple_files(self):
-        algorithm = run_algorithm('Load', Filename='MUSR15189,15190,15191.nxs',OutputWorkspace='w',
+        algorithm = create_algorithm('Load', Filename='MUSR15189,15190,15191.nxs',OutputWorkspace='w',
                                   SpectrumMin=1,SpectrumMax=1,child=True)
         prop = algorithm.getProperty("Filename")
         filenames = prop.value
@@ -23,7 +23,7 @@ class MultipleFilePropertyTest(unittest.TestCase):
         self.assertEquals(len(filenames), 3)
 
     def test_value_member_returns_nested_python_list_for_summed_files(self):
-        algorithm = run_algorithm('Load', Filename='MUSR15189,15190+15191.nxs',OutputWorkspace='w',
+        algorithm = create_algorithm('Load', Filename='MUSR15189,15190+15191.nxs',OutputWorkspace='w',
                                   SpectrumMin=1,SpectrumMax=1,child=True)
         prop = algorithm.getProperty("Filename")
         filenames = prop.value

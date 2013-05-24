@@ -1,6 +1,7 @@
 import unittest
-from mantid.api import AlgorithmFactory, mtd, ITableWorkspace
+from mantid.api import (AlgorithmFactory, mtd, ITableWorkspace,MatrixWorkspace, WorkspaceGroup)
 import mantid.simpleapi as simpleapi
+import numpy
 
 import os
 import sys
@@ -117,14 +118,14 @@ PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorks
             else:
                 self.fail("Exception was raised but it did not have the correct message: '%s'" % str(exc))
         
-    def _do_exec_time_props_test(self, runner):
-        try:
-            data, monitors = runner('IRS21360.raw', LoadMonitors='Separate')
-        except Exception, exc:
-            self.fail("An error occurred when returning outputs declared at algorithm execution: '%s'" % str(exc))
-        
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
-        self._do_exec_time_props_test(simpleapi.LoadRaw)
+        ws1 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
+        ws2 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
+        # GroupWorkspaces defines extra properties for each workspace added at runtime
+        wsgroup,ws1a,ws2a = simpleapi.GroupWorkspaces(InputWorkspaces="ws1,ws2")
+        self.assertTrue(isinstance(wsgroup, WorkspaceGroup))
+        self.assertTrue(isinstance(ws1a, MatrixWorkspace))
+        self.assertTrue(isinstance(ws2a, MatrixWorkspace))
         
     def test_function_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided(self):
         wsname = 'test_function_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided'
@@ -169,13 +170,15 @@ PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorks
                 self.fail("Dialog function raised the correct exception type but the message was wrong")
                 
     def test_call_inside_function_uses_new_variable_name(self):
-        def convert(workspace):
+        def rebin(workspace):
             # Should replace the input workspace
-            workspace = simpleapi.ConvertUnits(workspace, Target='Energy')
+            workspace = simpleapi.Rebin(workspace, Params=[1,0.1,10])
             return workspace
         
-        raw = simpleapi.LoadRaw('IRS21360.raw',SpectrumMax=1)
-        raw = convert(raw)
+        dataX=numpy.linspace(start=1,stop=3,num=11)
+        dataY=numpy.linspace(start=1,stop=3,num=10)
+        raw = simpleapi.CreateWorkspace(DataX=dataX,DataY=dataY,NSpec=1)
+        raw = rebin(raw)
         # If this fails then the function above chose the name of the variable
         # over the actual object name
         self.assertTrue('workspace' in mtd)

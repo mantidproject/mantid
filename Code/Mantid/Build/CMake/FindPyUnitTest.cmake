@@ -13,14 +13,9 @@ macro ( PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix )
     set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin/Debug )
     set ( _working_dir ${_module_dir} )
     set ( _working_dir_debug ${_module_dir_debug} )
-    # Add test helper directory (semi colons must be escaped)
-    set ( _module_dir "${_module_dir}\;${TESTHELPER_SRC_DIR}" )
-    set ( _module_dir_debug "${_module_dir_debug}\;${TESTHELPER_SRC_DIR}" )
   else()
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
     set ( _working_dir ${_module_dir} )
-    # Add test helper directory
-    set ( _module_dir "${_module_dir}:${TESTHELPER_SRC_DIR}" )
   endif()
 
   # Add all of the individual tests so that they can be run in parallel

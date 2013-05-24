@@ -25,7 +25,13 @@ namespace
      */
     void addPropertyWithUnit(Run & self, const std::string & name, PyObject *value, const std::string & units, bool replace)
     {
-      if( PyFloat_Check(value) )
+      extract<Property*> extractor(value);
+      if(extractor.check())
+      {
+        Property *prop = extractor();
+        self.addProperty(prop->clone(), replace); // Clone the property as Python owns the one that is passed in
+      }
+      else if( PyFloat_Check(value) )
       {
         self.addProperty(name, extract<double>(value)(), units, replace);
       }
@@ -146,7 +152,11 @@ void export_Run()
 
     .def("addProperty", &addPropertyWithUnit, "Adds a property with the given name, value and unit. If replace=True then an existing property is overwritten")
 
+    .def("setStartAndEndTime", &Run::setStartAndEndTime, "Set the start and end time of the run")
+
     .def ("startTime", &Run::startTime, "Return the total starting time of the run.")
+
+    .def ("endTime", &Run::endTime, "Return the total ending time of the run.")
 
     //--------------------------- Dictionary access----------------------------
     .def("get", &getWithDefault, "Returns the value pointed to by the key or None if it does not exist")

@@ -12,3 +12,5 @@ class IComponentTest(unittest.TestCase):
         expected_attrs = ["getPos", "getDistance", "getName", "type"]
         for att in expected_attrs:
             self.assertTrue(att in attrs)
+
+if __name__ == '__main__': unittest.main()

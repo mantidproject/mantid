@@ -13,8 +13,10 @@ class ExperimentInfoTest(unittest.TestCase):
   
     def setUp(self):
         if self.__class__._expt_ws is None:
-            alg = run_algorithm('Load', Filename='LOQ48127.raw', SpectrumMax=1, child=True)
-            self.__class__._expt_ws = alg.getProperty("OutputWorkspace").value
+            alg = run_algorithm('CreateWorkspace', DataX=[1,2,3,4,5], DataY=[1,2,3,4,5],NSpec=1, child=True)
+            ws = alg.getProperty("OutputWorkspace").value
+            ws.run().addProperty("run_number", 48127, True)
+            self.__class__._expt_ws = ws
   
     def test_information_access(self):
         inst = self._expt_ws.getInstrument()
@@ -28,3 +30,6 @@ class ExperimentInfoTest(unittest.TestCase):
     def test_run_access_returns_run_object(self):
         run = self._expt_ws.run()
         self.assertTrue(isinstance(run, Run))
+        
+if __name__ == '__main__':
+    unittest.main()
