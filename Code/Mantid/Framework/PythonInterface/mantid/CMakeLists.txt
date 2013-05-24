@@ -19,6 +19,15 @@ set ( PY_FILES
 
 copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
                            PYTHON_PKGROOT_INSTALL_FILES )
+# Generate the version module
+set ( VERSION_PY pyversion )
+# Build version
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.py )
+# Copy py to build directory, taking care of multi-config (MSVC) builds
+copy_python_files_to_dir ( ${VERSION_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR}
+                           PYTHON_PKGROOT_INSTALL_FILES )
+# Package version
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py )
 
 if ( MSVC )
   # On windows copy over the python wrapper to the build directory (hang it off kernel build)
@@ -49,3 +58,7 @@ set_property ( TARGET PythonInterface PROPERTY FOLDER "MantidFramework/Python" )
 
 # Pure Python files 
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid )
+# version.py that will overwrite the ones from the built target
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py DESTINATION
+          ${BIN_DIR}/mantid RENAME ${VERSION_PY}.py )
+

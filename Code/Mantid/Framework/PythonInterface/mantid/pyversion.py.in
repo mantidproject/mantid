@@ -1,0 +1,19 @@
+"""
+    Checks that the running version of Python is compatible with the version of
+    Python that Mantid was built with.
+"""
+import sys
+
+# Define the target major.minor version (i.e. the one mantid was built against)
+TARGET_VERSION="@PYTHON_VERSION_MAJOR@.@PYTHON_VERSION_MINOR@"
+
+_vers_info = sys.version_info
+_running_vers = "%d.%d" % (_vers_info[0],_vers_info[1])
+if _running_vers != TARGET_VERSION:
+    message = \
+"""Python version mismatch, cannot continue.
+Mantid was built against version '%s' but you are running version '%s'. These versions
+must match.
+"""
+    raise ImportError(message % (TARGET_VERSION, _running_vers))
+
