@@ -49,6 +49,7 @@ private:
     void start(const std::string &url);
     bool isRunning();
     void findCollectionFile(std::string & binDir);
+    void findQtAssistantExe(std::string & binDir);
     void determineFileLocs();
 };
 
