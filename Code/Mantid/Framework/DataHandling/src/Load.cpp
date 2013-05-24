@@ -491,18 +491,15 @@ namespace Mantid
           Workspace_sptr secondWS = loadFileToWs(*filename,  "__@loadsum_temp@");
           sumWS = plusWs(sumWS, secondWS);
         }
-        //sumWS->setName(*wsName);
 
         API::WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(sumWS);
         if(group)
         {
-          std::vector<std::string> childWsNames = group->getNames();
-          auto childWsName = childWsNames.begin();
-          size_t count = 1;
-          for( ; childWsName != childWsNames.end(); ++childWsName, ++count )
+          for(size_t i = 0; i < group->size(); ++i )
           {
-            Workspace_sptr childWs = group->getItem(*childWsName);
-            //childWs->setName(group->getName() + "_" + boost::lexical_cast<std::string>(count));
+            Workspace_sptr childWs = group->getItem( i );
+            // adding to ADS is the only way to set a name
+            AnalysisDataService::Instance().addOrReplace(*wsName + "_" + boost::lexical_cast<std::string>(i + 1), childWs);
           }
         }
         // Add the sum to the list of loaded workspace names.
@@ -517,31 +514,21 @@ namespace Mantid
       // Else we have multiple loaded workspaces - group them and set the group as output.
       else
       {
-        API::WorkspaceGroup_sptr group = groupWsList(loadedWsList);
-        setProperty("OutputWorkspace", group);
+        API::WorkspaceGroup_sptr group = groupWsList(loadedWsList, wsNames);
 
-        std::vector<std::string> childWsNames = group->getNames();
-        size_t count = 1;
-        for(auto childWsName = childWsNames.begin(); childWsName != childWsNames.end(); ++childWsName )
+        for(size_t i = 0; i < group->size(); ++i)
         {
-          if( *childWsName == outputWsName )
+          Workspace_sptr childWs = group->getItem( i );
+          std::string outWsPropName = "OutputWorkspace_" + boost::lexical_cast<std::string>(i + 1);
+          std::string childWsName = childWs->name();
+          if ( childWsName.empty() )
           {
-            Mantid::API::Workspace_sptr child = group->getItem(*childWsName);
-            //child->setName(child->getName() + "_" + boost::lexical_cast<std::string>(count));
-            count++;
+              childWsName = outputWsName + "_" + boost::lexical_cast<std::string>(i + 1);
           }
-        }
-
-        childWsNames = group->getNames();
-        count = 1;
-        for(auto childWsName = childWsNames.begin(); childWsName != childWsNames.end(); ++childWsName)
-        {
-          Workspace_sptr childWs = group->getItem(*childWsName);
-          std::string outWsPropName = "OutputWorkspace_" + boost::lexical_cast<std::string>(count);
-          ++count;
-          declareProperty(new WorkspaceProperty<Workspace>(outWsPropName, *childWsName, Direction::Output));
+          declareProperty(new WorkspaceProperty<Workspace>(outWsPropName, childWsName, Direction::Output));
           setProperty(outWsPropName, childWs);
         }
+        setProperty("OutputWorkspace", group);
       }
     }
 
@@ -812,25 +799,26 @@ namespace Mantid
      *
      * @param wsList :: the list of workspaces to group
      */
-    API::WorkspaceGroup_sptr Load::groupWsList(const std::vector<API::Workspace_sptr> & wsList)
+    API::WorkspaceGroup_sptr Load::groupWsList(const std::vector<API::Workspace_sptr> & wsList, const std::vector<std::string> &wsNames)
     {
+      assert( wsList.size() == wsNames.size() );
       WorkspaceGroup_sptr group = WorkspaceGroup_sptr(new WorkspaceGroup);
 
-      for( auto ws = wsList.begin(); ws != wsList.end(); ++ws )
+      auto ws = wsList.begin();
+      auto wsName = wsNames.begin();
+      for( ; ws != wsList.end(); ++ws, ++wsName )
       {
         WorkspaceGroup_sptr isGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(*ws);
         // If the ws to add is already a group, then add its children individually.
         if(isGroup)
         {
-          std::vector<std::string> childrenNames = isGroup->getNames();
-          size_t count = 1;
-          for( auto childName = childrenNames.begin(); childName != childrenNames.end(); ++childName, ++count )
-          {
-            Workspace_sptr childWs = isGroup->getItem(*childName);
-            isGroup->remove(*childName);
-            //childWs->setName(isGroup->getName() + "_" + boost::lexical_cast<std::string>(count));
-            group->addWorkspace(childWs);
-          }
+            for(size_t i = 0; i < isGroup->size(); ++i)
+            {
+                auto item = isGroup->getItem(i);
+                // have to add item to ADS if we want to give it a specific name
+                AnalysisDataService::Instance().addOrReplace(*wsName + "_" + boost::lexical_cast<std::string>(i+1), item);
+                group->addWorkspace( item );
+            }
         }
         else
         {

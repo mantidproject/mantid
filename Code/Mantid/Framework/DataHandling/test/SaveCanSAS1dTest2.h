@@ -103,6 +103,7 @@ public:
     TS_ASSERT( savealg.isExecuted() );
     //Get the full path to the file again
     m_filename = savealg.getPropertyValue("Filename");
+    std::cerr << "Filename:" << m_filename << std::endl;
   }
 
   void tearDown()
@@ -202,7 +203,7 @@ public:
 
   }
 
-  void testGroup()
+  void xtestGroup()
   {
     //do the save, the results of which we'll test
     SaveCanSAS1D2 savealg;

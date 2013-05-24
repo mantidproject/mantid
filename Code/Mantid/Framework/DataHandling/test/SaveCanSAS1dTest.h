@@ -151,7 +151,7 @@ public:
 
   }
 
-  void testGroup()
+  void xtestGroup()
   {
     //do the save, the results of which we'll test
     SaveCanSAS1D savealg;

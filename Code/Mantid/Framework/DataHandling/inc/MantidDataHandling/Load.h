@@ -99,7 +99,7 @@ namespace Mantid
       /// Plus two workspaces together, "in place".
       API::Workspace_sptr plusWs(API::Workspace_sptr ws1, API::Workspace_sptr ws2);
       /// Manually group workspaces.
-      API::WorkspaceGroup_sptr groupWsList(const std::vector<API::Workspace_sptr> & wsList);
+      API::WorkspaceGroup_sptr groupWsList(const std::vector<API::Workspace_sptr> & wsList, const std::vector<std::string> &wsNames);
 
     private:
       /// The base properties
