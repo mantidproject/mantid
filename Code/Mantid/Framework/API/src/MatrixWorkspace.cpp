@@ -195,8 +195,7 @@ namespace Mantid
      * Rebuild the default spectra mapping for a workspace. If a non-empty
      * instrument is set then the default maps each detector to a spectra with
      * the same ID. If an empty instrument is set then a 1:1 map from 1->NHistograms
-     * is created. If axis one contains a spectra axis then this method also
-     * rebuilds this axis to match the generated mapping.
+     * is created.
      * @param includeMonitors :: If false the monitors are not included
      */
     void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors)
@@ -206,19 +205,7 @@ namespace Mantid
         return;
       }
 
-      SpectraDetectorMap *spectramap = new SpectraDetectorMap;
       std::vector<detid_t> pixelIDs = this->getInstrument()->getDetectorIDs(!includeMonitors);
-
-      if( m_axes.size() > 1 && m_axes[1]->isSpectra() )
-      {
-        delete m_axes[1];
-        m_axes[1] = new SpectraAxis(this);
-      }
-      else
-      {
-        if (m_axes.size() == 0) m_axes.push_back( new NumericAxis(this->blocksize()) );
-        m_axes.push_back(  new SpectraAxis(this) );
-      }
 
       try
       {
@@ -231,8 +218,6 @@ namespace Mantid
           const detid_t detId = *it;
           // By default: Spectrum number = index +  1
           const specid_t specNo = specid_t(index + 1);
-          // We keep the entry in the spectraDetectorMap. TODO: Deprecate spectraDetectorMap entirely.
-          spectramap->addSpectrumEntry(specNo, detId);
 
           if (index < this->getNumberHistograms())
           {
@@ -244,8 +229,6 @@ namespace Mantid
           index++;
         }
 
-        // equivalent of replaceSpectraMap TODO: DEPRECATE
-        m_spectraMap.reset(spectramap);
         m_nearestNeighbours.reset();
 
       }
