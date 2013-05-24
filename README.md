@@ -10,3 +10,6 @@ Useful links
  * Asking for help: http://download.mantidproject.org/webmailer/index.php
  * Issue tracking: http://trac.mantidproject.org
  * Build servers: http://download.mantidproject.org/jenkins and https://builds.sns.gov/
+
+
+Modified on a branch to test pull requests.
