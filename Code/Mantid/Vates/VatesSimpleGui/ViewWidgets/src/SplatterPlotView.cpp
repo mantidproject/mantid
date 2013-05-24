@@ -77,18 +77,20 @@ SplatterPlotView::~SplatterPlotView()
  */
 bool SplatterPlotView::eventFilter(QObject *obj, QEvent *ev)
 {
-  this->setFocus();
-  if (QEvent::KeyRelease == ev->type() &&
-      this == obj &&
-      this->ui.pickModeButton->isChecked())
+  if (this->ui.pickModeButton->isChecked())
   {
-    QKeyEvent *kev = static_cast<QKeyEvent *>(ev);
-    if (Qt::Key_P == kev->key())
+    this->setFocus();
+    if (QEvent::KeyRelease == ev->type() && this == obj)
     {
-      emit this->triggerAccept();
-      this->readAndSendCoordinates();
-      return true;
+      QKeyEvent *kev = static_cast<QKeyEvent *>(ev);
+      if (Qt::Key_P == kev->key())
+      {
+        emit this->triggerAccept();
+        this->readAndSendCoordinates();
+        return true;
+      }
     }
+    return false;
   }
   return false;
 }
