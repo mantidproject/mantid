@@ -65,8 +65,6 @@ class SANSSubtract(PythonAlgorithm):
         if AnalysisDataService.doesExist(data_str):
             data = AnalysisDataService.retrieve(data_str)
             data_ws_name = data_str
-            # Keep track of dQ
-            dq = data.extractDx()[0]
         else:    
             data_ws_name = os.path.basename(data_str)
             load_alg = mantid.api.AlgorithmManager.createUnmanaged('Load')        
@@ -77,24 +75,24 @@ class SANSSubtract(PythonAlgorithm):
             load_alg.execute()
             data = load_alg.getProperty("OutputWorkspace").value
             
-            # Keep track of dQ
-            dq = data.extractDx()[0]
+        # Keep track of dQ
+        dq = data.extractDx()[0]
 
-            # Make sure we have histogram data for rebinning purposes
-            op = mantid.api.AlgorithmManager.createUnmanaged("ConvertToHistogram")
-            op.initialize()
-            op.setChild(True)
-            op.setProperty("InputWorkspace", data)
-            op.setProperty("OutputWorkspace", "__histo_data_%s" % data_ws_name)
-            op.execute()
-            data = op.getProperty("OutputWorkspace").value
-            
-            # Make sure we have the correct units, especially important
-            # if the data was loaded from an ASCII file
-            data.getAxis(0).setUnit('MomentumTransfer')
+        # Make sure we have histogram data for rebinning purposes
+        op = mantid.api.AlgorithmManager.createUnmanaged("ConvertToHistogram")
+        op.initialize()
+        op.setChild(True)
+        op.setProperty("InputWorkspace", data)
+        op.setProperty("OutputWorkspace", "__histo_data_%s" % data_ws_name)
+        op.execute()
+        data = op.getProperty("OutputWorkspace").value
+        
+        # Make sure we have the correct units, especially important
+        # if the data was loaded from an ASCII file
+        data.getAxis(0).setUnit('MomentumTransfer')
 
-            # Set the "distribution" flag on the matrix workspace 
-            data.setDistribution(False)
+        # Set the "distribution" flag on the matrix workspace 
+        data.setDistribution(False)
             
         return data, data_ws_name, dq
         
