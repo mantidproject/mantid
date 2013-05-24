@@ -103,17 +103,23 @@ namespace IDA
 
     pyInput+= "]\n";
 
+    pyInput+= "logType = '"+ uiForm().leLogName->text() +"'\n";
+    
+    if ( uiForm().elwin_ckNormalise->isChecked() ) pyInput += "normalise = True\n";
+    else pyInput += "normalise = False\n";
+
+    if ( uiForm().elwin_ckSave->isChecked() ) pyInput += "save = True\n";
+    else pyInput += "save = False\n";
+
     if ( uiForm().elwin_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
     else pyInput += "verbose = False\n";
 
     if ( uiForm().elwin_ckPlot->isChecked() ) pyInput += "plot = True\n";
     else pyInput += "plot = False\n";
 
-    if ( uiForm().elwin_ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
 
     pyInput +=
-      "eq1_ws, eq2_ws = elwin(input, eRange, Save=save, Verbose=verbose, Plot=plot)\n";
+      "eq1_ws, eq2_ws = elwin(input, eRange, log_type=logType, Normalise=normalise, Save=save, Verbose=verbose, Plot=plot)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
 
