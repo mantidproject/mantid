@@ -52,8 +52,6 @@ To do so select the workspace, which you have calibrated as the InputWorkspace a
 *  Created on: Mar 12, 2012
 *      Author: ruth
 */
-//TODO
-//  Rotate should also rotate around centroid of Group
 
 
 
@@ -105,6 +103,11 @@ namespace Mantid
 
     DECLARE_ALGORITHM(SCDCalibratePanels)
 
+   namespace{
+      const double maxDetHWScale =1.15;
+      const double minDetHWScale = .85;
+    }
+
     SCDCalibratePanels::SCDCalibratePanels():API::Algorithm()
 
     {
@@ -119,7 +122,14 @@ namespace Mantid
     }
 
 
-
+    /**
+     * Converts a Quaternion to a corresponding matrix produce Rotx*Roty*Rotz, corresponding to the order
+     * Mantid uses in calculating rotations
+     * @param Q      The Quaternion. It will be normalized to represent a rotation
+     * @param Rotx   The angle in degrees for rotating around the x-axis
+     * @param Roty   The angle in degrees for rotating around the y-axis
+     * @param Rotz   The angle in degrees for rotating around the z-axis
+     */
     void  SCDCalibratePanels::Quat2RotxRotyRotz(const Quat Q, double &Rotx,double &Roty,double &Rotz)
     {
       Quat R(Q);
@@ -155,7 +165,14 @@ namespace Mantid
     }
 
 
-
+    /**
+     * Creates the Workspace that will be supplied to the SCDPanelErrors Fit function
+     * @param pwks      The peaks workspace of indexed peaks.
+     * @param bankNames  The bank names where all banks from Group 0 are first, Group 1 are second, etc.
+     * @param tolerance  If h,k, and l values are not rounded, this is the indexing tolerance for a peak to be included.
+     *                   NOTE: if rounded, only indexed peaks( h,k,l values not all 0) are included.
+     * @param bounds    The positions in bankNames vector of  the start of Group * peaks
+     */
     DataObjects::Workspace2D_sptr SCDCalibratePanels::calcWorkspace( DataObjects::PeaksWorkspace_sptr & pwks,
       vector< string>& bankNames,
       double tolerance, vector< int >&bounds)
@@ -224,7 +241,14 @@ namespace Mantid
     }
 
 
-
+    /**
+     * Converts the Grouping indicated by the user to an internal more usable form
+     * @param AllBankNames  All the bang names
+     * @param Grouping      The Grouping choice(one per bank, all together or specify)
+     * @param bankPrefix    The prefix for the bank names
+     * @param bankingCode   If Grouping Choice is specify, this is what the user specifies along with bankPrefix
+     * @param &Groups       The internal form for grouping.
+     */
     void  SCDCalibratePanels::CalculateGroups(set< string >& AllBankNames, string Grouping, string bankPrefix,
       string bankingCode, vector<vector< string > > &Groups)
     {
@@ -241,17 +265,20 @@ namespace Mantid
         }
 
       }else if( Grouping == "AllPanelsInOneGroup" )
-      {  vector< string > vbankName;
-      for( set< string >::iterator it = AllBankNames.begin(); it != AllBankNames.end(); ++it )
       {
-        string bankName = (*it);
+        vector< string > vbankName;
 
-        vbankName.push_back( bankName);
-      }
+        for( set< string >::iterator it = AllBankNames.begin(); it != AllBankNames.end(); ++it )
+        {
+           string bankName = (*it);
 
-      Groups.push_back(vbankName);
+           vbankName.push_back( bankName);
+         }
+
+        Groups.push_back(vbankName);
+
       }else if( Grouping == "SpecifyGroups" )
-      {//TODO catch lexical cast throws , tell where error is
+      {
         boost::trim(bankingCode);
 
         vector< string > GroupA;
@@ -353,7 +380,16 @@ namespace Mantid
     }
 
 
-
+    /**
+     * Modifies the instrument to correspond to an already modified instrument
+     *
+     * @param instrument         The base instrument to be modified with a parameterMap
+     * @param preprocessCommand  Type of preprocessing file with modification information
+     * @param preprocessFilename The name of the file with preprocessing information
+     * @param timeOffset         The time offset in preprocessing if used
+     * @param L0                 The initial path length from the preprocessing file if used
+     * @param  AllBankNames      The names of all the banks of interest in this instrument
+     */
     boost::shared_ptr<const Instrument> SCDCalibratePanels::GetNewCalibInstrument(
       boost::shared_ptr<const Instrument>   instrument,
       string preprocessCommand,
@@ -384,7 +420,7 @@ namespace Mantid
       }
 
       //---------------------update params for moderator.------------------------------
-     // updateSourceParams(instrument->getSource(), pmap1, pmap0);
+
 
       boost::shared_ptr<const Instrument> newInstr(new Instrument(instrument->baseInstrument(), pmap1));
 
@@ -425,7 +461,20 @@ namespace Mantid
       }
     }
 
-
+    /**
+     *  Calculates initial parameters for the fitting parameters
+     *  @param bank_rect        The bank(panel)
+     *  @param  instrument       The instrument
+     *  @param PreCalibinstrument The instrument with precalibrated values incorporated
+     *  @param detWidthScale0     The ratio of base instrument to PreCalib Instrument for this panel's width
+     *  @param detHeightScale0    The ratio of base instrument to PreCalib Instrument for this panel's height
+     *  @param Xoffset0         The difference between base instrument and PreCalib Instrument for this panel's center X
+     *  @param Yoffset0         The difference between base instrument and PreCalib Instrument for this panel's center Y
+     *  @param Zoffset0       The difference between base instrument and PreCalib Instrument for this panel's center Z
+     *  @param Xrot0       The difference between base instrument and PreCalib Instrument for this panel's Rot in X direction
+     *  @param Yrot0       The difference between base instrument and PreCalib Instrument for this panel's Rot in Y direction
+     *  @param Zrot0       The difference between base instrument and PreCalib Instrument for this panel's Rot in Z direction
+     */
     void SCDCalibratePanels::CalcInitParams(  RectangularDetector_const_sptr bank_rect,
       Instrument_const_sptr instrument,
       Instrument_const_sptr  PreCalibinstrument,
@@ -514,6 +563,17 @@ namespace Mantid
 
     }
 
+    /**
+     * Tests inputs. Does the indexing correspond to the entered lattice parameters
+     * @param peaksWs  The peaks workspace with indexed peaks
+     * @param a        The lattice parameter a
+     * @param  b       The lattice parameter b
+     * @param  c       The lattice parameter c
+     * @param  alpha       The lattice parameter alpha
+     * @param  beta       The lattice parameter beta
+     * @param  gamma       The lattice parameter gamma
+     * @param  tolerance   The indexing tolerance
+     */
     bool GoodStart(const PeaksWorkspace_sptr &peaksWs, double a, double b, double c, double alpha,
         double beta, double gamma, double tolerance)
     {
@@ -619,11 +679,12 @@ namespace Mantid
 
       double L0 = peaksWs->getPeak(0).getL1();
       boost::shared_ptr<const Instrument> PreCalibinstrument =
-        GetNewCalibInstrument(instrument,
-        (string) getProperty("PreProcessInstrument"),
-        (string) getProperty("PreProcFilename"),
-        T0, L0, banksVec);
+                                GetNewCalibInstrument(instrument,
+                                                     (string) getProperty("PreProcessInstrument"),
+                                                     (string) getProperty("PreProcFilename"),
+                                                       T0, L0, banksVec);
       g_log.debug()<<"Initial L0,T0="<<L0<<","<<T0<<endl;
+
       V3D samplePos = peaksWs->getPeak( 0 ).getInstrument()->getSample()->getPos();
 
       string PeakWSName = getPropertyValue( "PeakWorkspace");
@@ -733,7 +794,7 @@ namespace Mantid
 
           throw  runtime_error("Group " + BankNameString +" does not have enough peaks");
         }
-        //   oss << "BankNames=" << "\"" << BankNameString << "\"" << ",startX=" << startX << ",endX=" << endXp1-1;
+
         nbanksSoFar = nbanksSoFar + (int)(*itv).size();
 
         //---------- set Ties argument ----------------------------------
@@ -806,11 +867,11 @@ namespace Mantid
         ostringstream oss2 ( ostringstream::out);
 
         if( i == 0)
-          oss2 <<  (.85*L0) << "<" <<  "l0<"  <<  (1.15*L0 ) << ",-5<" <<  "t0<5" ;
+          oss2 <<  (minDetHWScale*L0) << "<" <<  "l0<"  <<  (maxDetHWScale*L0 ) << ",-5<" <<  "t0<5" ;
 
         double MaxRotOffset = getProperty("MaxRotationChange_degrees");
-        oss2 <<  "," << (.85)*detWidthScale0 << "<" << Gprefix << "detWidthScale<" << (1.15)*detWidthScale0
-          << "," << (.85)*detHeightScale0 << "<" << Gprefix << "detHeightScale<" << (1.15)*detHeightScale0
+        oss2 <<  "," << (minDetHWScale)*detWidthScale0 << "<" << Gprefix << "detWidthScale<" << (maxDetHWScale)*detWidthScale0
+          << "," << (minDetHWScale)*detHeightScale0 << "<" << Gprefix << "detHeightScale<" << (maxDetHWScale)*detHeightScale0
           <<","<< -maxXYOffset+Xoffset0 << "<" << Gprefix << "Xoffset<" << maxXYOffset+Xoffset0
           << "," << -maxXYOffset+Yoffset0 << "<" << Gprefix << "Yoffset<" << maxXYOffset+Yoffset0<<
           "," << -maxXYOffset+Zoffset0 << "<" << Gprefix << "Zoffset<" << maxXYOffset+Zoffset0<<","
@@ -883,6 +944,7 @@ namespace Mantid
 
       fit_alg->setProperty( "Function",FunctionArgument);
       fit_alg->setProperty( "MaxIterations",Niterations );
+
       if( !TiesArgument.empty())
         fit_alg->setProperty( "Ties",TiesArgument);
 
@@ -905,7 +967,7 @@ namespace Mantid
         new API::WorkspaceProperty<API::ITableWorkspace>
         ("OutputNormalisedCovarianceMatrix","",Kernel::Direction::Output),
         "The name of the TableWorkspace in which to store the final covariance matrix" );
-      //string NormMatName=fit_alg->getPropertyValue("OutputNormalisedCovarianceMatrix");
+
 
 
       ITableWorkspace_sptr NormCov= fit_alg->getProperty("OutputNormalisedCovarianceMatrix");
@@ -984,9 +1046,6 @@ namespace Mantid
 
       }
 
-
-
-
       //--------------------- Create Result Table Workspace-------------------
       int nn(0);
       if( getProperty("AllowSampleShift"))
@@ -1002,7 +1061,7 @@ namespace Mantid
         Result->addColumn( "double",GroupName);
       }
 
-      //double sqrtChiSqoverDof = sqrt( chisq);
+
       vector<string>TableFieldNames;
       for( int p=0; p <(int) names.size(); ++p)
       {
@@ -1060,28 +1119,10 @@ namespace Mantid
         Result->cell<double>(FieldNum,col)=params[p];
         Result->cell<double>(FieldNum+10+nn+1,col)=errs[p];
 
-        /*int FieldNum = (int)fieldBaseNames.find( ";" + Field + ";" ) / 15;
-        int col = 0;
-        if( FieldNum <= 0)
-        col = -1;
-        else if( dotPos > 0)
-        col = atoi( fieldName.substr( 1,dotPos).c_str());
-        FieldNum--;
 
-        if( col == 0)
-        {
-        Result->cell< string >( FieldNum,0) = Field;
-        Result->cell< string >( FieldNum + 10,0) = "Err:" + Field;
-        }
-        if( col >=0)
-        {
-        Result->cell< double >( FieldNum, col + 1) = params[ p ];
-        Result->cell< double >( FieldNum+10,col + 1) = errs[ p ] * sqrtChiSqoverDof;
-        }
-        */
       }
 
-      //    setProperty( "ResultWorkspace", Result);
+
       string ResultWorkspaceName= getPropertyValue( "ResultWorkspace");
       AnalysisDataService::Instance().addOrReplace(ResultWorkspaceName, Result);
       setPropertyValue( "ResultWorkspace", ResultWorkspaceName);
@@ -1214,26 +1255,31 @@ namespace Mantid
         TableRow++;
       }
 
-      //setProperty("QErrorWorkspace", QErrTable);
+
       string QErrorWorkspaceName = getPropertyValue("QErrorWorkspace");
       QErrTable->setComment(string("Errors in Q for each Peak"));
       AnalysisDataService::Instance().addOrReplace(QErrorWorkspaceName, QErrTable);
       setPropertyValue("QErrorWorkspace", QErrorWorkspaceName);
 
     }
-// New instrumemt is OldInstrument.base with a cloned parameter map on the
-// panels, sample etc.
+
+
+    /**
+     *  This is part of the algorithm, LoadIsawDetCal, starting with an existing instrument
+     *  to be modified.  Only banks in AllBankName are affected.
+     *
+     *  @param instrument   The instrument to be modified
+     *  @param AllBankName  The bank names in this instrument that will be modified
+     *  @param T0           The time offset from the DetCal file
+     *  @param filename       The DetCal file name
+     *  @param bankPrefixName   The prefix to the bank names.
+     */
     void  SCDCalibratePanels::LoadISawDetCal(
            boost::shared_ptr<const Instrument> &instrument,
            set<string> &AllBankName,double &T0,string filename,
            string bankPrefixName)
     {
-      /* if( AllBankName.empty())
-         {
-            g_log.debug()<<"There are NO banks(panels) to load" << endl;
-            throw invalid_argument("There are NO banks(panels) to load");
-         }
-         */
+
        V3D beamline, samplePos;
        double beamlineLen,L0;
        instrument->getInstrumentParameters(L0,beamline, beamlineLen,samplePos);
@@ -1354,9 +1400,10 @@ namespace Mantid
                     pmap->addQuat(det.get(),"rot",Rot);
 
 
-
        }//While reading thru file
     }
+
+
     /**
      * Really this is the operator SaveIsawDetCal but only the results of the given
      * banks are saved.  L0 and T0 are also saved.
@@ -1511,10 +1558,10 @@ namespace Mantid
       declareProperty("InitialTimeOffset", 0.0, "Initial time offset when using xml files");
 
 
-      declareProperty(new WorkspaceProperty<TableWorkspace> ("ResultWorkspace", "ResultWorkspace",
+      declareProperty(new WorkspaceProperty<ITableWorkspace> ("ResultWorkspace", "ResultWorkspace",
         Kernel::Direction::Output), "Workspace of Results");
 
-      declareProperty(new WorkspaceProperty<TableWorkspace> ("QErrorWorkspace", "QErrorWorkspace",
+      declareProperty(new WorkspaceProperty<ITableWorkspace> ("QErrorWorkspace", "QErrorWorkspace",
         Kernel::Direction::Output), "Workspace of Errors in Q");
       //------------------------------------ Tolerance settings-------------------------
 
@@ -1559,6 +1606,18 @@ namespace Mantid
 
     }
 
+    /**
+     * Creates The SCDPanelErrors function with the optimum parameters to get the resultant out,xvals to report results.
+     * @param ws      The workspace sent to SCDPanelErrors
+     * @param NGroups  The number if Groups
+     * @param names     The parameter names
+     * @param params    The parameter values
+     * @param BankNameString   The /separated list of bank names. Groups separated by !
+     * @param out           The result of function1D. These are the differences in the qx, qy,and qz values from the
+     *                      theoretical qx,qy, and qz values
+     * @param xVals        The xVals or indices of the peak in the PeakWorkspace
+     * @param nData        The size of xVals and out
+     */
     void  SCDCalibratePanels::CreateFxnGetValues(Workspace2D_sptr const ws,
       int const NGroups,
       vector<string>const names,
@@ -1764,14 +1823,7 @@ namespace Mantid
           Center.Z()-Center_orig.Z());
 
         Quat2RotxRotyRotz(rot, rotx, roty, rotz);
-        //cout<<"A dCenter rot for"<<bankName<<Center-Center_orig<<
-        //    "using rots="<< rotx<<","<<roty<<","<<rotz<<endl;
-        // cout<<"       before/aft Centers"<<Center_orig<<Center<<endl;
-        // cout<<"    Thru 1st prt param fix for "<<bankName<<". pos="<<bank->getPos()<<endl;
-        //cout<<"A"<<posNR<<pos<<pos1<<endl;
-        // pmap->addPositionCoordinate(bank.get(), string("x"), pos.X() + pos1.X());
-        // pmap->addPositionCoordinate(bank.get(), string("y"), pos.Y() + pos1.Y());
-        // pmap->addPositionCoordinate(bank.get(), string("z"), pos.Z() + pos1.Z());
+
 
         vector<double> oldScalex = pmap->getDouble(bank->getName(), string("scalex"));
         vector<double> oldScaley = pmap->getDouble(bank->getName(), string("scaley"));
