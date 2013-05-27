@@ -149,8 +149,8 @@ namespace Mantid
     if ( points_per_box < 1 )
       points_per_box = 1;
 
-    double max_signal = sorted_boxes[0]->getSignalNormalized();
-    double min_signal = sorted_boxes[sorted_boxes.size()-1]->getSignalNormalized();
+//    double max_signal = sorted_boxes[0]->getSignalNormalized();
+//    double min_signal = sorted_boxes[sorted_boxes.size()-1]->getSignalNormalized();
 
     std::cout << "numPoints                 = " << numPoints << std::endl;
     std::cout << "num boxes in all          = " << boxes.size() << std::endl;
