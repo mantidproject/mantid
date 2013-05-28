@@ -1,9 +1,9 @@
 import unittest
 import os
 
-from MantidFramework import mtd
-mtd.initialise()
-from mantidsimple import *
+from mantid.api import *
+from mantid.kernel import *
+from mantid.simpleapi import *
 
 
 class RunPythonScriptTest(unittest.TestCase):
@@ -34,7 +34,7 @@ class RunPythonScriptTest(unittest.TestCase):
         # Without modifying the original, because it was cloned.
         self.assertAlmostEqual(ws.dataY(0)[0], 1.0, 3)
         
-        
+    
     def test_simplePlus(self):
         code = "Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)"
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace='ws_out')

@@ -5,9 +5,9 @@ This is meant to be used by [[LoadLiveData]] to perform some processing.
 
 *WIKI*"""
 
-
-from MantidFramework import *
-from mantidsimple import *
+from mantid.kernel import *
+from mantid.api import *
+from mantid.simpleapi import *
 import os
 
 class RunPythonScript(PythonAlgorithm):
@@ -21,18 +21,16 @@ class RunPythonScript(PythonAlgorithm):
         return "RunPythonScript"
 
     def PyInit(self):
-        self.declareWorkspaceProperty("InputWorkspace","", Direction=Direction.Input, Type=Workspace,
-                Optional=True,
-                Description=
+        self.declareProperty(WorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional),
+                doc=
                     "An input workspace that the python code will modify.\n"
                     "The workspace will be in the python variable named 'input'.")
         
-        self.declareProperty("Code", "", Direction=Direction.Input,
-                             Description="Python code (can be on multiple lines)." )
+        self.declareProperty("Code", "", direction=Direction.Input,
+                             doc="Python code (can be on multiple lines)." )
         
-        self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, Type=Workspace,
-                Optional=True,
-                Description=
+        self.declareProperty(WorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output, optional=PropertyMode.Optional), 
+                doc=
                 "An output workspace to be produced by the python code.\n"
                 "The python code should create the workspace named by the python variable 'output'.")
       
@@ -54,7 +52,10 @@ class RunPythonScript(PythonAlgorithm):
         # Get the code to be run
         code = self.getPropertyValue("Code")
 
-        # Prepare variables expected in the script code
+        ''' Prepare variables expected in the script code
+        Scripts (read Code input) may need to reference input and output workspaces. In order to make 
+        this possible, standard alias names are provided, 'input' and 'output'.
+        '''
         input = mtd[wsInputName]
         output = wsOutputName
         
@@ -63,11 +64,11 @@ class RunPythonScript(PythonAlgorithm):
         
         # Did the code use an operator
         # like "output = input * 2.0"
-        if isinstance(output, WorkspaceProxy):
+        if isinstance(output, Workspace):
             wsOut = output
         else:
             # Output is (probably) still a string. Use the name
-            if mtd.workspaceExists(wsOutputName):
+            if mtd.doesExist(wsOutputName):
                 # The script did create the workspace; use it
                 wsOut = mtd[wsOutputName]
             elif len(wsOutputName)>0 and len(wsInputName)>0:
@@ -87,5 +88,4 @@ class RunPythonScript(PythonAlgorithm):
 
         return
         
-        
-mtd.registerPyAlgorithm(RunPythonScript())
+AlgorithmFactory.subscribe(RunPythonScript())

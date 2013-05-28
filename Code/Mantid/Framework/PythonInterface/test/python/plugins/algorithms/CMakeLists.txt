@@ -13,6 +13,7 @@ set ( TEST_PY_FILES
   MaskWorkspaceToCalFileTest.py
   MergeCalFilesTest.py
   RetrieveRunInfoTest.py
+  RunPythonScriptTest.py
   SANSWideAngleCorrectionTest.py
   Stitch1DTest.py
   SuggestTibCNCSTest.py
