@@ -34,7 +34,7 @@ namespace MantidQt
       map.insert(std::make_pair(L, QString::number(peak.getL())));
       map.insert(std::make_pair(DSPACING, QString::number(peak.getDSpacing())));
       map.insert(std::make_pair(INT, QString::number(peak.getIntensity())));
-      map.insert(std::make_pair(SIGMINT, QString::number(peak.getIntensity())));
+      map.insert(std::make_pair(SIGMINT, QString::number(peak.getSigmaIntensity())));
       map.insert(std::make_pair(QLAB, peak.getQLabFrame().toString().c_str()));
       map.insert(std::make_pair(QSAMPLE, peak.getQSampleFrame().toString().c_str()));
       return map;
