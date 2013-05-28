@@ -8,6 +8,8 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
+#include "MantidMDEvents/MDWSDescription.h"
 #include <boost/shared_ptr.hpp>
 
 
@@ -25,10 +27,27 @@ namespace MDEvents
    */
   class DLLExport MDEventFactory
   {
+      // definition which states how many dimensions to generate. 
+      enum {MAX_MD_DIMENSIONS_NUM = 9};
   public:
     MDEventFactory() {}
     ~MDEventFactory() {}
     static API::IMDEventWorkspace_sptr CreateMDWorkspace(size_t nd, const std::string & eventType="MDLeanEvent");
+
+    static API::IMDNode * createBox(size_t nDimensions, API::BoxController_sptr & splitter, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
+                                    const uint32_t depth=0,const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET, const std::string & eventType="MDLeanEvent");
+    static API::IMDNode * createGridBox(size_t nd, API::BoxController_sptr & splitter, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
+                                        const uint32_t depth=0,const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET, const std::string & eventType="MDLeanEvent");
+  private:   
+    typedef  API::IMDNode *(MDEventFactory::*fpCreateBox)(size_t nDim,API::BoxController_sptr & ,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & ,
+                                                        const uint32_t,const size_t ,const size_t, const std::string &);
+    // vector of function pointers to the functions which create MDBox or MDGridBox;
+    static std::vector<fpCreateBox> boxCreatorFP;
+
+    // typedef for the class function pointer to the function, which creates MD Workspaces
+    typedef API::IMDEventWorkspace *(MDEventFactory::*fpCreateMDWS)(size_t nd,const std::string & eventType);
+    // vector of function pointers to the funcions
+    static std::vector<fpCreateMDWS> wsCreatorFP;
   };
 
   //### BEGIN AUTO-GENERATED CODE #################################################################
@@ -381,6 +400,7 @@ namespace MDEvents
 } // namespace MDEvents
 
 #endif  /* MANTID_MDEVENTS_MDEVENTFACTORY_H_ */
+
 
 
 
