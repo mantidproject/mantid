@@ -19,6 +19,16 @@
          number_of_elements="1"
          default_values="1000">
        </IntVectorProperty>
+      <IntVectorProperty
+         name="Top Percentile"
+         command="SetTopPercentile"
+         number_of_elements="1"
+         default_values="5">
+         <IntRangeDomain name="range" min="1" max="100" />
+         <Documentation>
+            The set the viewing limit to the top percentile of the denses boxes.
+         </Documentation>
+      </IntVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End SplatterPlot -->

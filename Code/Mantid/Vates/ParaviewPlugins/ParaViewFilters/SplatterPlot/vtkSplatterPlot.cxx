@@ -48,6 +48,22 @@ void vtkSplatterPlot::SetNumberOfPoints(int nPoints)
   }
 }
 
+/**
+ * Set the threshold for the top percentile of most dense boxes to view
+ * @param topPercentile : the limit on the percentile of boxes to show
+ */
+void vtkSplatterPlot::SetTopPercentile(int topPercentile)
+{
+  if (topPercentile > 0)
+  {
+    if (m_topPercentile != topPercentile)
+    {
+      m_topPercentile = topPercentile;
+      this->Modified();
+    }
+  }
+}
+
 
 int vtkSplatterPlot::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
@@ -64,7 +80,8 @@ int vtkSplatterPlot::RequestData(vtkInformation *, vtkInformationVector **, vtkI
   Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsName);
 
   std::string scalarName = "signal";
-  vtkSplatterPlotFactory vtkGridFactory(ThresholdRange_scptr(new NoThresholdRange), scalarName, m_numberPoints);
+  vtkSplatterPlotFactory vtkGridFactory(ThresholdRange_scptr(new NoThresholdRange), scalarName, m_numberPoints,
+                                        static_cast<double>(m_topPercentile));
   vtkGridFactory.initialize(result);
   
   FilterUpdateProgressAction<vtkSplatterPlot> drawUpdateProgress(this, "Drawing...");
