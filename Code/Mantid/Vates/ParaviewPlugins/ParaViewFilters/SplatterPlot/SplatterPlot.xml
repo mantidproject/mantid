@@ -17,7 +17,7 @@
          name="Number of Points"
          command="SetNumberOfPoints"
          number_of_elements="1"
-         default_values="1000">
+         default_values="150000">
        </IntVectorProperty>
       <IntVectorProperty
          name="Top Percentile"
