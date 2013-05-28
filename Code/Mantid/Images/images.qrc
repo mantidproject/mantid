@@ -27,6 +27,7 @@
 	<file>running_process.png</file>
         <file>file_pdf.png</file>
         <file>selection-circle-ring.png</file>
+	<file>emptytrash.png</file>
     </qresource>
     <qresource prefix="/Icons">
         <file>LoadFile.png</file>
