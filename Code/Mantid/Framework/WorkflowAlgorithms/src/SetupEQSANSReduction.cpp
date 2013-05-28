@@ -904,7 +904,7 @@ void SetupEQSANSReduction::initializeReduction(boost::shared_ptr<PropertyManager
   g_log.information() << "Reducer script:\n" << script << std::endl;
 
   // Run a snippet of python
-  IAlgorithm_sptr alg = this->createChildAlgorithm("RunPythonScript");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("RunOldPythonScript");
   alg->setLogging(false);
   alg->setPropertyValue("Code", script);
   alg->execute();
