@@ -34,4 +34,5 @@ target_link_libraries ( PythonWorkspaceCreationHelper PythonAPIModule DataObject
 
 # Overall testhelpers target
 add_custom_target ( testhelpers DEPENDS PythonWorkspaceCreationHelper )
+add_dependencies ( FrameworkTests testhelpers )
 set_property ( TARGET testhelpers PROPERTY FOLDER "UnitTests/Python" )
