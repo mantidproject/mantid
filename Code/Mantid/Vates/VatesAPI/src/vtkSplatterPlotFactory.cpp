@@ -80,10 +80,11 @@ namespace Mantid
     }
 
     double percent_to_use = m_percentToUse;  
-    if ( percent_to_use <= 0 )
+    if ( percent_to_use <= 0 )                   // fail safe limits on fraction of boxes to use
     {
       percent_to_use = 5;
     }
+
     if ( percent_to_use > 100 )
     {
       percent_to_use = 100;
@@ -130,6 +131,8 @@ namespace Mantid
       num_boxes_to_use = sorted_boxes.size()-1;
     }
 
+                                            // restrict the number of points to the
+                                            // number of points in boxes being used
     size_t total_points_available = 0;
     for ( size_t i = 0; i < num_boxes_to_use; i++ )
     {
@@ -142,8 +145,8 @@ namespace Mantid
       numPoints = total_points_available;
     }
 
-    size_t points_per_box = 0;             // Average number of points
-    if ( num_boxes_to_use > 0 )
+    size_t points_per_box = 0;             // calculate the average number of points to
+    if ( num_boxes_to_use > 0 )            // to use per box
       points_per_box = numPoints / num_boxes_to_use;
 
     if ( points_per_box < 1 )
@@ -177,16 +180,17 @@ namespace Mantid
     // The list of IDs to use
     vtkIdType * ids = new vtkIdType[numPoints];
 
-                                // Now get the events from the boxes that
-                                // we are using.  Since boxes have different
-                                // numbers of events, we may not get all
-                                // the events we expected. Also, if we are
-                                // using a smaller number of points, we might
-                                // not use points from all of the boxes.
+                                // Now get the events from the boxes that we are using.  
+                                // For each box, get up to the average number of points
+                                // we want from each box, limited by the number of points
+                                // in the box.  NOTE: since boxes have different numbers 
+                                // of events, we will not get all the events we expected. 
+                                // Also, if we are using a smaller number of points, we
+                                // won't get points from some of the boxes with lower signal.
     size_t pointIndex = 0;
     size_t box_index  = 0;
     bool   done       = false;
-    while ( box_index < num_boxes_to_use && !done )
+    while ( box_index < num_boxes_to_use && !done )                // "For" each box
     {
       MDBox<MDE,nd> * box = sorted_boxes[box_index];
       box_index++;
@@ -200,8 +204,8 @@ namespace Mantid
       const std::vector<MDE> & events = box->getConstEvents();
       size_t startPointIndex = pointIndex;
       size_t event_index = 0;
-      while ( event_index < num_from_this_box && !done )
-      {
+      while ( event_index < num_from_this_box && !done )          // "For" each event we
+      {                                                           // get from this box
         const MDE & ev = events[ event_index ];
         event_index++;
         const coord_t * center = ev.getCenter();  
@@ -216,12 +220,12 @@ namespace Mantid
       box->releaseEvents();
       signals->InsertNextTuple1(signal_normalized);
       visualDataSet->InsertNextCell(VTK_POLY_VERTEX, pointIndex-startPointIndex, ids+startPointIndex);
-    } // For each box
+    } 
 
     if (VERBOSE) std::cout << tim << " to create " << pointIndex << " points." << std::endl;
 
     //Shrink to fit
-//    points->Squeeze();
+    //points->Squeeze();
     signals->Squeeze();
     visualDataSet->Squeeze();
 
