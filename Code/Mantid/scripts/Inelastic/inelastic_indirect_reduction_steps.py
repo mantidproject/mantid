@@ -106,7 +106,7 @@ class LoadData(ReductionStep):
 
         inst_name = mtd[output_ws].getInstrument().getName()
         if inst_name == 'BASIS':
-            ModeratorTzero(InputWorkspace=output_ws,OutputWorkspace= output_ws)
+            ModeratorTzeroLinear(InputWorkspace=output_ws,OutputWorkspace= output_ws)
             basis_mask = mtd[output_ws].getInstrument().getStringParameter(
                 'Workflow.MaskFile')[0]
             # Quick hack for older BASIS files that only have one side

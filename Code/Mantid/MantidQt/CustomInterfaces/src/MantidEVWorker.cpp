@@ -10,7 +10,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-
+#include <exception>
 
 namespace MantidQt
 {
@@ -153,39 +153,49 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                                double        maxQ,
                                                bool          do_lorentz_corr )
 {
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
-  alg->setProperty("Filename",file_name);
-  alg->setProperty("OutputWorkspace",ev_ws_name);
-  alg->setProperty("Precount",true);
-  alg->setProperty("LoadMonitors",true);
+  try
+  {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
+    alg->setProperty("Filename",file_name);
+    alg->setProperty("OutputWorkspace",ev_ws_name);
+    alg->setProperty("Precount",true);
+    alg->setProperty("LoadMonitors",true);
 
-  if ( !alg->execute() )
+    if ( !alg->execute() )
+      return false;
+
+    std::ostringstream min_str;
+    min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
+
+    std::ostringstream max_str;
+    max_str << maxQ << "," << maxQ << "," << maxQ;
+
+    alg = AlgorithmManager::Instance().create("ConvertToMD");
+    alg->setProperty("InputWorkspace",ev_ws_name);
+    alg->setProperty("OutputWorkspace",md_ws_name);
+    alg->setProperty("OverwriteExisting",true);
+    alg->setProperty("QDimensions","Q3D");
+    alg->setProperty("dEAnalysisMode","Elastic");
+    alg->setProperty("QConversionScales","Q in A^-1");
+    alg->setProperty("LorentzCorrection",do_lorentz_corr);
+    alg->setProperty("MinValues",min_str.str());
+    alg->setProperty("MaxValues",max_str.str());
+    alg->setProperty("SplitInto","2");
+    alg->setProperty("SplitThreshold","50");
+    alg->setProperty("MaxRecursionDepth","13");
+    alg->setProperty("MinRecursionDepth","7");
+
+    if ( !alg->execute() )
+      return false;
+  }catch( std::exception &e)
+  {
+    g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-
-  std::ostringstream min_str;
-  min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
-
-  std::ostringstream max_str;
-  max_str << maxQ << "," << maxQ << "," << maxQ;
-
-  alg = AlgorithmManager::Instance().create("ConvertToMD");
-  alg->setProperty("InputWorkspace",ev_ws_name);
-  alg->setProperty("OutputWorkspace",md_ws_name);
-  alg->setProperty("OverwriteExisting",true);
-  alg->setProperty("QDimensions","Q3D");
-  alg->setProperty("dEAnalysisMode","Elastic");
-  alg->setProperty("QConversionScales","Q in A^-1");
-  alg->setProperty("LorentzCorrection",do_lorentz_corr);
-  alg->setProperty("MinValues",min_str.str());
-  alg->setProperty("MaxValues",max_str.str());
-  alg->setProperty("SplitInto","2");
-  alg->setProperty("SplitThreshold","50");
-  alg->setProperty("MaxRecursionDepth","13");
-  alg->setProperty("MinRecursionDepth","7");
-
-  if ( !alg->execute() )
-    return false;
-
+  }catch(...)
+  {
+    g_log.error()<<"Error: Could Not load file and convert to MD" <<std::endl;
+    return false; 
+  }
   return true;
 }
 
@@ -215,18 +225,28 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
                                       size_t        num_to_find,
                                       double        min_intensity )
 {
-  double min_separation = 0.9 * 6.28 / max_abc;
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("FindPeaksMD");
-  alg->setProperty("InputWorkspace",md_ws_name);
-  alg->setProperty("PeakDistanceThreshold", min_separation);
-  alg->setProperty("MaxPeaks",(int64_t)num_to_find);
-  alg->setProperty("DensityThresholdFactor",min_intensity);
-  alg->setProperty("OutputWorkspace", peaks_ws_name );
+  try
+  {
+    double min_separation = 0.9 * 6.28 / max_abc;
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("FindPeaksMD");
+    alg->setProperty("InputWorkspace",md_ws_name);
+    alg->setProperty("PeakDistanceThreshold", min_separation);
+    alg->setProperty("MaxPeaks",(int64_t)num_to_find);
+    alg->setProperty("DensityThresholdFactor",min_intensity);
+    alg->setProperty("OutputWorkspace", peaks_ws_name );
 
-  if ( alg->execute() )
-    return true;
-
-  return false;
+    if ( alg->execute() )
+      return true;
+  }catch( std::exception &e)
+  {
+    g_log.error()<<"Error:" << e.what() <<std::endl;
+    return false;
+  }catch(...)
+  {
+    g_log.error()<<"Error: Could Not findPeaks" <<std::endl;
+    return false; 
+  }
+   return false;
 }
 
 
@@ -241,6 +261,7 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
 bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
                                     const std::string & file_name )
 {
+ 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadIsawPeaks");
   alg->setProperty("Filename",file_name );
 
@@ -248,7 +269,7 @@ bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
 
   if ( alg->execute() )
     return true;
-
+  
   return false;
 }
 
@@ -267,7 +288,7 @@ bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
 bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
                                     const std::string & file_name,
                                           bool          append  )
-{
+{  
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SaveIsawPeaks");
   alg->setProperty("InputWorkspace", peaks_ws_name );
   alg->setProperty("AppendFile", append );
@@ -275,7 +296,7 @@ bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
   
   if ( alg->execute() )
     return true;
-  
+
   return false;
 }
 
@@ -612,60 +633,71 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
                                              double        outer_radius,
                                              bool          integrate_edge )
 {
-  if ( !isPeaksWorkspace( peaks_ws_name ) )
-    return false;
-
-  if ( !isEventWorkspace( event_ws_name ) )
-    return false;
-
-
-  std::string temp_MD_ws_name = "__MantidEVWorker_sphere_integrate_temp_MD_ws";
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertToMD");
-  alg->setProperty("InputWorkspace",event_ws_name);
-  alg->setProperty("OutputWorkspace",temp_MD_ws_name);
-  alg->setProperty("OverwriteExisting",true);
-  alg->setProperty("QDimensions","Q3D");
-  alg->setProperty("dEAnalysisMode","Elastic");
-  alg->setProperty("QConversionScales","Q in A^-1");
-  alg->setProperty("UpdateMasks",false);
-  alg->setProperty("LorentzCorrection",false);
-  alg->setProperty("MinValues","-30,-30,-30");
-  alg->setProperty("MaxValues","30,30,30");
-  alg->setProperty("SplitInto","2,2,2");
-  alg->setProperty("SplitThreshold",200);
-  alg->setProperty("MaxRecursionDepth",12);
-  alg->setProperty("MinRecursionDepth",7);
-  std::cout << "Making temporary MD workspace" << std::endl; 
-  if ( !alg->execute() )
-    return false;
-  std::cout << "Made temporary MD workspace...OK" << std::endl; 
-
-  alg = AlgorithmManager::Instance().create("IntegratePeaksMD");
-  alg->setProperty("InputWorkspace", temp_MD_ws_name);
-  alg->setProperty("CoordinatesToUse","Q (sample frame)");
-  alg->setProperty("PeakRadius",peak_radius);
-  alg->setProperty("BackgroundInnerRadius",inner_radius);
-  alg->setProperty("BackgroundOuterRadius",outer_radius);
-  alg->setProperty("PeaksWorkspace",peaks_ws_name);
-  alg->setProperty("OutputWorkspace",peaks_ws_name);
-  alg->setProperty("ReplaceIntensity",true);
-  alg->setProperty("IntegrateIfOnEdge",integrate_edge);
-
-  std::cout << "Integrating temporary MD workspace" << std::endl; 
-
-  bool integrate_OK = alg->execute();
-  auto& ADS = AnalysisDataService::Instance();
-  std::cout << "Removing temporary MD workspace" << std::endl; 
-  ADS.remove( temp_MD_ws_name );
-
-  if ( integrate_OK )
+  try
   {
-    std::cout << "Integrated temporary MD workspace...OK" << std::endl; 
-    return true;
-  }
+    if ( !isPeaksWorkspace( peaks_ws_name ) )
+      return false;
 
-  std::cout << "Integrated temporary MD workspace FAILED" << std::endl; 
-  return false;
+    if ( !isEventWorkspace( event_ws_name ) )
+      return false;
+
+
+    std::string temp_MD_ws_name = "__MantidEVWorker_sphere_integrate_temp_MD_ws";
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertToMD");
+    alg->setProperty("InputWorkspace",event_ws_name);
+    alg->setProperty("OutputWorkspace",temp_MD_ws_name);
+    alg->setProperty("OverwriteExisting",true);
+    alg->setProperty("QDimensions","Q3D");
+    alg->setProperty("dEAnalysisMode","Elastic");
+    alg->setProperty("QConversionScales","Q in A^-1");
+    alg->setProperty("UpdateMasks",false);
+    alg->setProperty("LorentzCorrection",false);
+    alg->setProperty("MinValues","-30,-30,-30");
+    alg->setProperty("MaxValues","30,30,30");
+    alg->setProperty("SplitInto","2,2,2");
+    alg->setProperty("SplitThreshold",200);
+    alg->setProperty("MaxRecursionDepth",12);
+    alg->setProperty("MinRecursionDepth",7);
+    std::cout << "Making temporary MD workspace" << std::endl; 
+    if ( !alg->execute() )
+      return false;
+    std::cout << "Made temporary MD workspace...OK" << std::endl; 
+
+    alg = AlgorithmManager::Instance().create("IntegratePeaksMD");
+    alg->setProperty("InputWorkspace", temp_MD_ws_name);
+    alg->setProperty("CoordinatesToUse","Q (sample frame)");
+    alg->setProperty("PeakRadius",peak_radius);
+    alg->setProperty("BackgroundInnerRadius",inner_radius);
+    alg->setProperty("BackgroundOuterRadius",outer_radius);
+    alg->setProperty("PeaksWorkspace",peaks_ws_name);
+    alg->setProperty("OutputWorkspace",peaks_ws_name);
+    alg->setProperty("ReplaceIntensity",true);
+    alg->setProperty("IntegrateIfOnEdge",integrate_edge); 
+
+    std::cout << "Integrating temporary MD workspace" << std::endl; 
+
+    bool integrate_OK = alg->execute();
+    auto& ADS = AnalysisDataService::Instance();
+    std::cout << "Removing temporary MD workspace" << std::endl; 
+    ADS.remove( temp_MD_ws_name );
+
+    if ( integrate_OK )
+    {
+      std::cout << "Integrated temporary MD workspace...OK" << std::endl; 
+      return true;
+    }
+
+    std::cout << "Integrated temporary MD workspace FAILED" << std::endl; 
+    return false;
+  }catch( std::exception &e)
+  {
+    g_log.error()<<"Error:" << e.what() <<std::endl;
+    return false;
+  }catch(...)
+  {
+    g_log.error()<<"Error: Could Not Integrated temporary MD workspace" <<std::endl;
+    return false; 
+  }
 }
 
 
@@ -694,45 +726,56 @@ bool MantidEVWorker::fitIntegrate(  const std::string & peaks_ws_name,
                                           size_t        n_bad_edge_pix,
                                           bool          use_ikeda_carpenter )
 {
-  if ( !isPeaksWorkspace( peaks_ws_name ) )
-    return false;
-
-  if ( !isEventWorkspace( event_ws_name ) )
-    return false;
-
-  std::string temp_FIT_ws_name = "__MantidEVWorker_FIT_integration_temp_event_ws";
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Rebin");
-  alg->setProperty("InputWorkspace",event_ws_name);
-  alg->setProperty("OutputWorkspace",temp_FIT_ws_name); 
-  alg->setProperty("Params",rebin_param_str);
-  alg->setProperty("PreserveEvents",true);
-
-  std::cout << "Rebinning event workspace" << std::endl;
-  if ( !alg->execute() )
-    return false;
-
-  alg = AlgorithmManager::Instance().create("PeakIntegration");
-  alg->setProperty("InPeaksWorkspace", peaks_ws_name);
-  alg->setProperty("InputWorkspace", temp_FIT_ws_name);
-  alg->setProperty("OutPeaksWorkspace", peaks_ws_name);
-  alg->setProperty("IkedaCarpenterTOF",use_ikeda_carpenter);
-  alg->setProperty("MatchingRunNo",true);
-  alg->setProperty("NBadEdgePixels",(int)n_bad_edge_pix);
-
-  std::cout << "Integrating temporary Rebinned workspace" << std::endl;
-
-  bool integrate_OK = alg->execute();
-  auto& ADS = AnalysisDataService::Instance();
-  std::cout << "Removing temporary Rebinned workspace" << std::endl;
-  ADS.remove( temp_FIT_ws_name );
-
-  if ( integrate_OK )
+  try
   {
-    std::cout << "Integrated temporary FIT workspace...OK" << std::endl;
-    return true;
-  }
+    if ( !isPeaksWorkspace( peaks_ws_name ) )
+      return false;
 
-  std::cout << "Integrated temporary FIT workspace FAILED" << std::endl;
+    if ( !isEventWorkspace( event_ws_name ) )
+      return false;
+
+    std::string temp_FIT_ws_name = "__MantidEVWorker_FIT_integration_temp_event_ws";
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Rebin");
+    alg->setProperty("InputWorkspace",event_ws_name);
+    alg->setProperty("OutputWorkspace",temp_FIT_ws_name); 
+    alg->setProperty("Params",rebin_param_str);
+    alg->setProperty("PreserveEvents",true);
+
+    std::cout << "Rebinning event workspace" << std::endl;
+    if ( !alg->execute() )
+      return false;
+
+    alg = AlgorithmManager::Instance().create("PeakIntegration");
+    alg->setProperty("InPeaksWorkspace", peaks_ws_name);
+    alg->setProperty("InputWorkspace", temp_FIT_ws_name);
+    alg->setProperty("OutPeaksWorkspace", peaks_ws_name);
+    alg->setProperty("IkedaCarpenterTOF",use_ikeda_carpenter);
+    alg->setProperty("MatchingRunNo",true);
+    alg->setProperty("NBadEdgePixels",(int)n_bad_edge_pix);
+
+    std::cout << "Integrating temporary Rebinned workspace" << std::endl;
+
+    bool integrate_OK = alg->execute();
+    auto& ADS = AnalysisDataService::Instance();
+    std::cout << "Removing temporary Rebinned workspace" << std::endl;
+    ADS.remove( temp_FIT_ws_name );
+
+    if ( integrate_OK )
+    {
+      std::cout << "Integrated temporary FIT workspace...OK" << std::endl;
+      return true;
+    }
+
+    std::cout << "Integrated temporary FIT workspace FAILED" << std::endl;
+  }catch( std::exception &e)
+  {
+    g_log.error()<<"Error:" << e.what() <<std::endl;
+    return false;
+  }catch(...)
+  {
+    g_log.error()<<"Error: Could Not Integrated temporary FIT workspace" <<std::endl;
+    return false; 
+  }
   return false;
 }
 
@@ -764,32 +807,43 @@ bool MantidEVWorker::ellipsoidIntegrate( const std::string & peaks_ws_name,
                                          double        peak_size,
                                          double        inner_size,
                                          double        outer_size )
-{
-  if ( !isPeaksWorkspace( peaks_ws_name ) )
-    return false;
-
-  if ( !isEventWorkspace( event_ws_name ) )
-    return false;
-
-  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("IntegrateEllipsoids");
-  alg->setProperty("InputWorkspace", event_ws_name);
-  alg->setProperty("PeaksWorkspace", peaks_ws_name);
-  alg->setProperty("RegionRadius",region_radius);
-  alg->setProperty("SpecifySize",specify_size);
-  alg->setProperty("PeakSize",peak_size);
-  alg->setProperty("BackgroundInnerSize",inner_size);
-  alg->setProperty("BackgroundOuterSize",outer_size);
-  alg->setProperty("OutputWorkspace",peaks_ws_name);
-
-  std::cout << "Running IntegrateEllipsoids" << std::endl;
-
-  if ( alg->execute() )
+{ 
+  try
   {
-    std::cout << "IntegrateEllipsoids Executed OK" << std::endl;
-    return true;
-  }
+    if ( !isPeaksWorkspace( peaks_ws_name ) )
+      return false;
 
-  std::cout << "IntegrateEllipsoids FAILED" << std::endl;
+    if ( !isEventWorkspace( event_ws_name ) )
+      return false;
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("IntegrateEllipsoids");
+    alg->setProperty("InputWorkspace", event_ws_name);
+    alg->setProperty("PeaksWorkspace", peaks_ws_name);
+    alg->setProperty("RegionRadius",region_radius);
+    alg->setProperty("SpecifySize",specify_size);
+    alg->setProperty("PeakSize",peak_size);
+    alg->setProperty("BackgroundInnerSize",inner_size);
+    alg->setProperty("BackgroundOuterSize",outer_size);
+    alg->setProperty("OutputWorkspace",peaks_ws_name);
+
+    std::cout << "Running IntegrateEllipsoids" << std::endl;
+
+    if ( alg->execute() )
+    {
+      std::cout << "IntegrateEllipsoids Executed OK" << std::endl;
+      return true;
+    }
+
+    std::cout << "IntegrateEllipsoids FAILED" << std::endl;
+ }catch( std::exception &e)
+  {
+    g_log.error()<<"Error:" << e.what() <<std::endl;
+    return false;
+  }catch(...)
+  {
+    g_log.error()<<"Error: Could Not IntegratedEllipsoids" <<std::endl;
+    return false; 
+  }
   return false;
 }
 
@@ -847,7 +901,16 @@ bool MantidEVWorker::showUB( const std::string & peaks_ws_name )
     sprintf( logInfo,
              std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
              calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
+
     g_log.notice( std::string(logInfo) );
+
+    sprintf( logInfo,
+             std::string("%19s %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+             "Lattice Errors    :",
+             o_lattice.errora(),o_lattice.errorb(),o_lattice.errorc(),
+             o_lattice.erroralpha(),o_lattice.errorbeta(),o_lattice.errorgamma());
+
+    g_log.notice( std::string( logInfo));
   }
   catch(...)
   {

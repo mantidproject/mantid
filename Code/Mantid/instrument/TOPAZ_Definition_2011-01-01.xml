@@ -16,6 +16,7 @@
       <pointing-up axis="y"/>
       <handedness axis="right"/>
     </reference-frame>
+    <default-view view="spherical_y"/>
   </defaults>
 
   <!--SOURCE-->

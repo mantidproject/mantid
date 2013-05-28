@@ -6,7 +6,6 @@
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDEvents/ConvToMDBase.h"
 
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
 #include "MantidKernel/DeltaEMode.h"
 
 

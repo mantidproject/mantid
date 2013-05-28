@@ -272,7 +272,17 @@ namespace Mantid
         runPart = hint.substr(nChars);
       }
 
-      unsigned int irunPart = boost::lexical_cast<unsigned int>( runPart );
+      unsigned int irunPart(0);
+      try
+      {
+        irunPart = boost::lexical_cast<unsigned int>( runPart );
+      }
+      catch(boost::bad_lexical_cast &)
+      {
+        std::ostringstream os;
+        os << "Cannot convert '" << runPart << "' to run number.";
+        throw std::invalid_argument(os.str());
+      }
       Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getInstrument(instrPart);
       size_t nZero = instr.zeroPadding(irunPart);
       // remove any leading zeros in case there are too many of them

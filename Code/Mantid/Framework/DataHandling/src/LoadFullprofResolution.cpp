@@ -1,3 +1,8 @@
+/*WIKI* 
+
+Load Fullprof resolution (.irf) file to TableWorkspace(s)
+
+*WIKI*/
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"

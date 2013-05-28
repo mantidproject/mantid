@@ -1089,19 +1089,20 @@ void ConfigDialog::initDirSearchTab()
 
   /// pythonscripts.directories
 
-  label = new QLabel(tr("Python algorithms"));
+  label = new QLabel(tr("Python extensions (algorithms,fit functions)"));
+  label->setWordWrap(true);
   grid->addWidget(label, 1, 0);
 
-  str = Mantid::Kernel::ConfigService::Instance().getString("pythonalgorithms.directories");
-  lePythonAlgorithmsDirs = new QLineEdit();
-  lePythonAlgorithmsDirs->setText(QString::fromStdString(str));
-  grid->addWidget(lePythonAlgorithmsDirs, 1, 1);
+  str = Mantid::Kernel::ConfigService::Instance().getString("user.python.plugins.directories");
+  lePythonPluginsDirs = new QLineEdit();
+  lePythonPluginsDirs->setText(QString::fromStdString(str));
+  grid->addWidget(lePythonPluginsDirs, 1, 1);
 
   button = new QPushButton();
   button->setIcon(QIcon(getQPixmap("choose_folder_xpm")));
   grid->addWidget(button, 1, 2);
 
-  connect( button, SIGNAL(clicked()), this, SLOT(addPythonAlgorithmsDirs()) );
+  connect( button, SIGNAL(clicked()), this, SLOT(addPythonPluginDirs()) );
 
   /// instrumentDefinition.directory
   label = new QLabel(tr("Instrument definitions"));
@@ -2184,9 +2185,9 @@ void ConfigDialog::updateDirSearchSettings()
   setting.replace('\\','/');
   mantid_config.setString("pythonscripts.directories",setting.toStdString());
 
-  setting = lePythonAlgorithmsDirs->text();
+  setting = lePythonPluginsDirs->text();
   setting.replace('\\','/');
-  mantid_config.setString("pythonalgorithms.directories",setting.toStdString());
+  mantid_config.setString("user.python.plugins.directories",setting.toStdString());
 
   setting = leInstrumentDir->text();
   setting.replace('\\','/');
@@ -2601,19 +2602,19 @@ void ConfigDialog::addPythonScriptsDirs()
   }
 }
 
-void ConfigDialog::addPythonAlgorithmsDirs()
+void ConfigDialog::addPythonPluginDirs()
 {
-  QString dir = QFileDialog::getExistingDirectory(this, tr("Add a python algorithms directory"),
+  QString dir = QFileDialog::getExistingDirectory(this, tr("Add a python extension directory"),
     "", 0/**QFileDialog::ShowDirsOnly*/);
   if (!dir.isEmpty())
   {
-    QString dirs = lePythonAlgorithmsDirs->text();
+    QString dirs = lePythonPluginsDirs->text();
     if (!dirs.isEmpty())
     {
       dirs += ";";
     }
     dirs += dir;
-    lePythonAlgorithmsDirs->setText(dirs);
+    lePythonPluginsDirs->setText(dirs);
   }
 }
 

@@ -4,7 +4,6 @@
 #include <vector>
 #include <algorithm>
 #include "MantidKernel/ThreadScheduler.h"
-//#include "MantidKernel/INode.h"
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
@@ -139,8 +138,6 @@ public:
       
     /// Add a single event defined by its components
     virtual void buildAndAddEvent(const signal_t Signal, const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
-    /// add a single event and set pointer to the box which needs splitting (if one actually need)    
-    virtual void buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index) = 0;
     /// Add a single event, with no mutex locking
     virtual void buildAndAddEventUnsafe(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId) = 0;
     /// Add several events from the vector of event parameters

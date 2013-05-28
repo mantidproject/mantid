@@ -4,7 +4,7 @@
 import unittest
 import testhelpers
 import platform
-from mantid.simpleapi import Load, Fit, FitDialog
+from mantid.simpleapi import CreateWorkspace, Fit, FitDialog
 from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 import numpy as np
 from testhelpers import run_algorithm
@@ -15,7 +15,9 @@ class SimpleAPIFitTest(unittest.TestCase):
     
     def setUp(self):
         if self._raw_ws is None:
-            ws = Load('IRS21360.raw',SpectrumMax=1)
+            dataX = np.linspace(start=5.6e4,stop=5.701e4,num=101)
+            dataY = 5*dataX + 4
+            ws = CreateWorkspace(DataX=dataX,DataY=dataY,NSpec=1)
             self.__class__._raw_ws = ws
 
     def test_minimal_positional_arguments_work(self):

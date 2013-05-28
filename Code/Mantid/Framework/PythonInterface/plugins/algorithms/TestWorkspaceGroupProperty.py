@@ -1,4 +1,5 @@
-"""*WIKI* 
+"""*WIKI*
+This algorithm is only used for testing. 
 *WIKI*"""
 
 

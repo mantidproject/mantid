@@ -1,4 +1,8 @@
-__doc__ = '*WIKI* \n\n    Base class for SANS reduction workflow\n    \n*WIKI*'
+"""*WIKI*
+ 
+Base class for SANS reduction workflow
+
+*WIKI*"""
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *

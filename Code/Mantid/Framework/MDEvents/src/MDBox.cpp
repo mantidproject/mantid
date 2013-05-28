@@ -714,21 +714,6 @@ namespace MDEvents
        this->m_dataMutex.unlock();
    }
 
-  /** Create MD MDEvent amd add it to the box.
-   // add a single event and set pointer to the box which needs splitting (if one actually do ) 
-
-   * @param Signal  :: events signal
-   * @param errorSq :: events Error squared
-   * @param point :: reference to the  vector of MDEvent coordinates
-   * @param runIndex  ::  run  index of the experiment the event come from
-   * @param detectorId :: the ID of the  detector recoded the event
-   * @param index  :: the index of this cell within the hosting grid box.
-   */
-   TMDE(
-   void MDBox)::buildAndTraceEvent(const signal_t Signal,const signal_t errorSq,const std::vector<coord_t> &point, uint16_t runIndex,uint32_t detectorId,size_t index)
-   {
-       this->addAndTraceEvent(IF<MDE,nd>::BUILD_EVENT(Signal, errorSq, &point[0], runIndex, detectorId),index);
-   }
 
   //-----------------------------------------------------------------------------------------------
   /**Create MDEvent and add it to the box, in a NON-THREAD-SAFE manner.
@@ -757,38 +742,8 @@ namespace MDEvents
     this->m_dataMutex.lock();
     this->data.push_back(Evnt );
 
-//    // When we reach the split threshold exactly, track that the MDBox is too small
-//    // We check on equality and not >= to only add a box once.
-//    if (this->data.size() == this->m_BoxController->getSplitThreshold())
-//    {
-//      this->m_BoxController->addBoxToSplit(this);
-//    }
 
     this->m_dataMutex.unlock();
-  }
-  //-----------------------------------------------------------------------------------------------
-  /** Add a MDEvent to the box.
-   // add a single event and set pounter to the box which needs splitting (if one actually need) 
-
-   * @param point :: reference to a MDEvent to add.
-   * @param index :: current index for box
-   */
-  TMDE(
-  void MDBox)::addAndTraceEvent( const MDE & point, size_t /*index*/)
-  {
-    this->m_dataMutex.lock();
-    this->data.push_back(point);
-
-    this->m_dataMutex.unlock();
-
-    //// When we reach the split threshold exactly, track that the MDBox is too small
-    //// We check on equality and not >= to only add a box once.
-    //if (this->data.size() == this->m_BoxController->getSplitThreshold())
-    //{
-
-    //   this->m_BoxController->addBoxToSplit(new MDBoxToChange<MDE,nd>(this,index));
-    //}
-
   }
  
 

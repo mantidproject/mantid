@@ -93,6 +93,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
   m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
   m_workspaceGroupUpdateObserver(*this,&MantidUI::handleWorkspaceGroupUpdate),
+  m_configServiceObserver(*this,&MantidUI::handleConfigServiceUpdate),
   m_appWindow(aw), m_vatesSubWindow(NULL)
 {
 
@@ -181,6 +182,7 @@ void MantidUI::init()
   dataStore.notificationCenter.addObserver(m_groupworkspacesObserver);
   dataStore.notificationCenter.addObserver(m_ungroupworkspaceObserver);
   dataStore.notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
+  Mantid::Kernel::ConfigService::Instance().addObserver(m_configServiceObserver);
 
   m_exploreAlgorithms->update();
   try
@@ -288,6 +290,7 @@ MantidUI::~MantidUI()
 {
   delete m_algMonitor;
 
+  Mantid::Kernel::ConfigService::Instance().removeObserver(m_configServiceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_groupworkspacesObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_ungroupworkspaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_workspaceGroupUpdateObserver);
@@ -1874,6 +1877,25 @@ void MantidUI::handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_
 {
   QString name = QString::fromStdString(pNf->object_name());
   emit workspace_group_updated( name );
+}
+
+void MantidUI::handleConfigServiceUpdate(Mantid::Kernel::ConfigValChangeNotification_ptr pNf){
+  if (pNf->key() == "pythonscripts.directories"){
+    // this code ad the filepaths inside the pythonscripts.directories to the 
+    // python sys if they are not already there. This is to cope with the requirement
+    // at #7097 of letting python scripts usable when downloaded from Script Repository. 
+    // This code was added because changing the pythonscripts.directories update the 
+    // python path just after restarting MantidPlot.
+    QString code = QString("import sys\n\
+paths = '%1'\n\
+list_of_path = paths.split(';')\n\
+if isinstance(list_of_path,str):\n\
+  list_of_path = [list_of_path,]\n\
+for value in list_of_path:\n\
+  if value not in sys.path: sys.path.append(value)\n").arg(QString::fromStdString(pNf->curValue()));
+    // run this code silently
+    appWindow()->runPythonScript(code, false, true, true);
+  }
 }
 
 void MantidUI::manageMantidWorkspaces()

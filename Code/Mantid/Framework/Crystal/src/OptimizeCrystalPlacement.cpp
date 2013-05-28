@@ -47,6 +47,7 @@ that slowly build a UB with corrected sample orientations may be needed.
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidGeometry/Crystal/IndexingUtils.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -77,9 +78,9 @@ namespace Mantid
     void OptimizeCrystalPlacement::initDocs()
     {
       this->setWikiSummary(
-          "This algorithms  optimizing goniometer settings  and sample orientation to better index the peaks." );
+          "This algorithm  optimizes goniometer settings  and sample orientation to better index the peaks." );
       this->setOptionalMessage(
-          "This algorithms  optimizing goniometer settings  and sample orientation to better index the peaks." );
+          "This algorithm  optimizes goniometer settings  and sample orientation to better index the peaks." );
     }
 
     void OptimizeCrystalPlacement::init()
@@ -104,6 +105,8 @@ namespace Mantid
       declareProperty("Chi2overDoF", -1.0, "chi squared over dof", Direction::Output);
       declareProperty("nPeaks", -1, "Number of Peaks Used", Direction::Output);
       declareProperty("nParams", -1, "Number of Parameters fit", Direction::Output);
+      declareProperty("nIndexed", -1, "Number of new Peaks that WOULD be indexed at 'MaxIndexingError'", Direction::Output);
+
 
 
       declareProperty("MaxAngularChange", 5.0, "Max offset in degrees from current settings(def=5)");
@@ -425,7 +428,7 @@ namespace Mantid
       if( OldInstrument->isParametrized())
           Inst= OldInstrument->baseInstrument();
 
-      boost::shared_ptr<const Instrument>NewInstrument( new Instrument(Inst, pmap_new));
+      boost::shared_ptr<const Instrument>NewInstrument( new Geometry::Instrument(Inst, pmap_new));
 
       SCDCalibratePanels::FixUpSourceParameterMap( NewInstrument,L0, newSampPos,pmap_old);
 
@@ -438,37 +441,15 @@ namespace Mantid
       Matrix<double> GonTilt = PeakHKLErrors::RotationMatrixAboutRegAxis( Results["GonRotx"] ,'x')*
                                PeakHKLErrors::RotationMatrixAboutRegAxis( Results["GonRoty"] ,'y')*
                                PeakHKLErrors::RotationMatrixAboutRegAxis( Results["GonRotz"] ,'z');
-   /*   std::set<int> RunNums;
-      for( std::vector<std::string>::iterator it  =ChRunNumList.begin(); it !=ChRunNumList.end(); ++it)
-      {
-        std::string runNumStr = *it;
-        double chi = Results[ "chi"+runNumStr ];
-        double phi = Results[ "phi"+runNumStr ];
-        double omega = Results[ "omega"+runNumStr ];
 
-        Mantid::Geometry::Goniometer uniGonio;
-        uniGonio.makeUniversalGoniometer();
-
-        uniGonio.setRotationAngle( "phi", phi );
-        uniGonio.setRotationAngle( "chi", chi );
-        uniGonio.setRotationAngle( "omega", omega) ;
-
-        Matrix<double> GonMatrix = GonTilt*uniGonio.getR();
-
-        for( int i = 0 ; i < OutPeaks->getNumberPeaks() ; ++i)
-          if( OutPeaks->getPeak(i).getRunNumber()== boost::lexical_cast<int>(runNumStr))
-            {
-               OutPeaks->getPeak( i ).setGoniometerMatrix( GonMatrix );
-
-            }
-          else
-            RunNums.insert( OutPeaks->getPeak(i).getRunNumber());
-
-       }
-     */
       int prevRunNum = -1;
       std::map<int, Matrix<double> > MapRunNum2GonMat;
       std::string OptRun2 ="/"+OptRunNums+"/";
+
+      int nIndexed=0;
+      UBinv =OutPeaks->sample().getOrientedLattice().getUB();
+      UBinv.Invert();
+      UBinv/=(2*M_PI);
       for (int i = 0; i < OutPeaks->getNumberPeaks(); ++i)
       {
 
@@ -500,15 +481,28 @@ namespace Mantid
           MapRunNum2GonMat[RunNum] = GonMatrix;
         }
 
+
         OutPeaks->getPeak(i).setGoniometerMatrix( GonMatrix );
+        V3D hkl = UBinv*OutPeaks->getPeak(i).getQSampleFrame();
+        if( Geometry::IndexingUtils::ValidIndex(hkl, HKLintOffsetMax))
+             nIndexed++;
+
         prevRunNum= RunNum;
     }
 
+    if( MapRunNum2GonMat.size()==1)//Only one RunNumber in this PeaksWorkspace
+    {
+      Matrix<double> GonMatrix = MapRunNum2GonMat[ OutPeaks->getPeak(0).getRunNumber()];
+      Goniometer Gon( GonMatrix);
+      OutPeaks->mutableRun().setGoniometer( Gon , false);
+
+    }
 
       std::string OutputPeaksName= getPropertyValue("ModifiedPeaksWorkspace");
 
       setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
       setProperty( "ModifiedPeaksWorkspace", OutPeaks);
+      setProperty("nIndexed", nIndexed);
 
 
 

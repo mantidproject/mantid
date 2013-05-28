@@ -5,30 +5,36 @@ from mantid.kernel import LogFilter, FloatTimeSeriesProperty, BoolTimeSeriesProp
 
 class LogFilterTest(unittest.TestCase):
 
-    _test_ws = None
+    def test_addFilter_filters_log(self):
+        height_log = FloatTimeSeriesProperty("height_log");
+        height_log.addValue("2008-Jun-17 11:10:44", -0.86526)
+        height_log.addValue("2008-Jun-17 11:10:45", -1.17843)
+        height_log.addValue("2008-Jun-17 11:10:47", -1.27995)
+        height_log.addValue("2008-Jun-17 11:20:15", -1.38216)
+        height_log.addValue("2008-Jun-17 11:20:16", -1.87435)
+        height_log.addValue("2008-Jun-17 11:20:17", -2.70547)
+        height_log.addValue("2008-Jun-17 11:20:19", -2.99125)
+        height_log.addValue("2008-Jun-17 11:20:20", -3);
+        height_log.addValue("2008-Jun-17 11:20:27", -2.98519)
+        height_log.addValue("2008-Jun-17 11:20:29", -2.68904)
 
-    def setUp(self):
-        if self.__class__._test_ws is None:
-            alg = testhelpers.run_algorithm("LoadRaw", Filename="CSP78173.raw", OutputWorkspace='test', child=True)
-            self.__class__._test_ws = alg.getProperty("OutputWorkspace_7").value
+        period_log = BoolTimeSeriesProperty("period 7")
+        period_log.addValue("2008-Jun-17 11:11:13", False)
+        period_log.addValue("2008-Jun-17 11:11:13", False)
+        period_log.addValue("2008-Jun-17 11:11:18", False)
+        period_log.addValue("2008-Jun-17 11:11:30", False)
+        period_log.addValue("2008-Jun-17 11:11:42", False)
+        period_log.addValue("2008-Jun-17 11:11:52", False)
+        period_log.addValue("2008-Jun-17 11:12:01", False)
+        period_log.addValue("2008-Jun-17 11:12:11", False)
+        period_log.addValue("2008-Jun-17 11:12:21", True)
+        period_log.addValue("2008-Jun-17 11:12:32", False)
 
-    def test_filter_by_period_does_nothing_to_filtered_data(self):
-        run_info = self._test_ws.getRun()
-        height_log = run_info.getLogData("height")
-        self.assertEquals(height_log.size(), 6)
-        period_log = run_info.getLogData("period 7")
-        self.assertTrue(isinstance(period_log, BoolTimeSeriesProperty))
-
+        self.assertEquals(height_log.size(), 10);
         filter = LogFilter(height_log)
-        self.assertTrue(isinstance(filter, LogFilter))
         filter.addFilter(period_log)
-        filtered_log = filter.data()
-        self.assertEquals(filtered_log.size(), 6)
-        
-        self.assertAlmostEqual(filtered_log.nthValue(0), -1.27995)
-        self.assertEqual(str(filtered_log.nthTime(0)), "2008-06-17T11:10:44")
-        self.assertAlmostEqual(filtered_log.nthValue(5), 0.0)
-        self.assertEqual(str(filtered_log.nthTime(5)), "2008-06-17T11:20:17")
+        filtered = filter.data()
+        self.assertEquals(filtered.size(), 1)
 
 if __name__ == '__main__':
     unittest.main()

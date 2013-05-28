@@ -92,7 +92,7 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
     else this->setTitle(createCurveName(workspace,m_wsName,m_index));
   }
 
-  Mantid::API::MatrixWorkspace_const_sptr matrixWS = boost::shared_dynamic_cast<const Mantid::API::MatrixWorkspace>(workspace);
+  Mantid::API::MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(workspace);
   //we need to censor the data if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
   const bool log = g->isLog(QwtPlot::yLeft);
   MantidQwtMatrixWorkspaceData data(matrixWS,m_index, log,distr);

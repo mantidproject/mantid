@@ -1,7 +1,27 @@
 /*WIKI* 
 
+Given a set of peaks, and given lattice parameters (<math>a,b,c,alpha,beta,gamma</math>), this algorithm
+will find the UB matrix, that best fits the data.  The algorithm searches over a large range of possible
+orientations for the orientation for which the rotated B matrix best fits the data.  The search for the
+best orientation involves several steps. 
 
-Given a set of peaks, and given lattice parameters (<math>a,b,c,alpha,beta,gamma</math>), this algorithm will find the UB matrix, that best fits the data.  The algorithm searches over a large range of possible orientations for the orientation for which the rotated B matrix best fits the data.  It then uses a least squares approach to optimize the complete UB matrix.
+During the first step, a reduced set of peaks typically at lower |Q| are used, since it is easier 
+to index peaks at low |Q|.  Specifically, if there are at least 5 peaks, the peaks are shifted to 
+be centered at the strongest peaks and then sorted in order of increasing distance from the 
+strongest peak.  If there are fewer than 5 peaks the list is just sorted in order of increasing |Q|.  
+Only peaks from the initial portion of this sorted list are used in the first step.  The number of 
+peaks from this list to be used initially is specified by the user with the parameter NumInitial. 
+The search first finds a list of possible orientations for which the UB matrix will index the 
+maximum number of peaks from the initial set of peaks to within the specified tolerance on h,k,l values.  
+Subsequently, only the UB matrix that indexes that maximum number of peaks with the minimum distance 
+between the calculated h,k,l values and integers is kept and passed on to the second step.
+
+During the second step, additional peaks are gradually added to the initial list of peaks.  Each time
+peaks are added to the list, the subset of peaks from the new list that are indexed within the specified
+tolerance on k,k,l are used in a least squares calculation to optimize the UB matrix to best index those 
+peaks.  The process of gradually adding more peaks from the sorted list and optimizing the 
+UB based on the peaks that are indexed, continues until all peaks have been added to the list.  
+Finally, one last optimization of the UB matrix is carried out using the full list of peaks.
 
 
 *WIKI*/
@@ -112,8 +132,9 @@ namespace Crystal
 
     std::vector<V3D>  q_vectors;
     q_vectors.reserve( n_peaks );
-    for ( size_t i = 0; i < n_peaks; i++ )
-      q_vectors.push_back( peaks[i].getQSampleFrame() );
+
+      for (size_t i = 0; i < n_peaks; i++)
+        q_vectors.push_back(peaks[i].getQSampleFrame());
 
     Matrix<double> UB(3,3,false);
     double error = IndexingUtils::Find_UB( UB, q_vectors, 
@@ -134,34 +155,58 @@ namespace Crystal
          "UB NOT SAVED.") );
     }
     else                                 // tell user how many would be indexed
-    {                                    // and save the UB in the sample 
-      char logInfo[200];
-      int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
-      sprintf( logInfo,
-               std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(),
-               num_indexed, n_peaks, tolerance);
-      g_log.notice( std::string(logInfo) );
+      {                                    // and save the UB in the sample
 
-      OrientedLattice o_lattice;
-      o_lattice.setUB( UB );
-      double calc_a = o_lattice.a();
-      double calc_b = o_lattice.b();
-      double calc_c = o_lattice.c();
-      double calc_alpha = o_lattice.alpha();
-      double calc_beta  = o_lattice.beta();
-      double calc_gamma = o_lattice.gamma();
-                                        // Show the modified lattice parameters
-      sprintf( logInfo, 
-               std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
-               calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
-      g_log.notice( std::string(logInfo) );
-      sprintf( logInfo, 
-               std::string("Lattice Parameters (Refined - Input): %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
-               calc_a-a, calc_b-b, calc_c-c, calc_alpha-alpha, calc_beta-beta, calc_gamma-gamma);
-      g_log.notice( std::string(logInfo) );
+        std::vector<double> sigabc(7);
+        std::vector<V3D> miller_ind;
+        std::vector<V3D> indexed_qs;
+        double fit_error;
+        miller_ind.reserve( q_vectors.size() );
+        indexed_qs.reserve( q_vectors.size() );
+        IndexingUtils::GetIndexedPeaks( UB, q_vectors, tolerance,
+                               miller_ind, indexed_qs, fit_error );
 
-      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
-    }
+        IndexingUtils::Optimize_UB(UB, miller_ind,indexed_qs,sigabc);
+
+        char logInfo[200];
+        int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
+        sprintf(logInfo,
+            std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(),
+            num_indexed, n_peaks, tolerance);
+        g_log.notice(std::string(logInfo));
+
+        OrientedLattice o_lattice;
+        o_lattice.setUB(UB);
+        o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
+
+        o_lattice.setUB(UB);
+        double calc_a = o_lattice.a();
+        double calc_b = o_lattice.b();
+        double calc_c = o_lattice.c();
+        double calc_alpha = o_lattice.alpha();
+        double calc_beta = o_lattice.beta();
+        double calc_gamma = o_lattice.gamma();
+        // Show the modified lattice parameters
+        sprintf(logInfo, std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+            calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
+        g_log.notice(std::string(logInfo));
+
+
+        g_log.notice()<<"Parameter Errors  :"<<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[0]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[1]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[2]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[3]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[4]
+                                              <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[5]
+                                              <<std::endl;
+
+        sprintf(logInfo,
+            std::string("Lattice Parameters (Refined - Input): %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
+            calc_a - a, calc_b - b, calc_c - c, calc_alpha - alpha, calc_beta - beta,
+            calc_gamma - gamma);
+        g_log.notice(std::string(logInfo));
+        ws->mutableSample().setOrientedLattice(new OrientedLattice(o_lattice));
+      }
   }
 
 

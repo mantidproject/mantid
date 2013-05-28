@@ -105,7 +105,7 @@ namespace API
   */
   ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string & local_rep, 
                                          const std::string & remote) :
-  g_log(Logger::get("ScriptRepositoryImpl"))
+  g_log(Logger::get("ScriptRepositoryImpl")), valid(false)
   {    
     // get the local path and the remote path
     std::string loc, rem; 
@@ -123,9 +123,6 @@ namespace API
       local_repository = loc; 
     else
       local_repository = local_rep; 
-    
-    if (local_repository[local_repository.size()-1] != '/')
-      local_repository.append("/");
 
     if (remote.empty())
       remote_url = rem; 
@@ -142,6 +139,13 @@ namespace API
     if (remote_url[remote_url.size()-1] != '/')
       remote_url.append("/");
 
+    // if no folder is given, the repository is invalid.
+    if (local_repository.empty())
+      return;
+    
+    if (local_repository[local_repository.size()-1] != '/')
+      local_repository.append("/");
+
 
     g_log.debug() << "ScriptRepository creation pointing to " 
                   << local_repository << " and " << remote_url << "\n";
@@ -149,10 +153,6 @@ namespace API
 
     
     // check if the repository is valid.
-    valid = false;
-    // if no folder is given, the repository is invalid.
-    if (local_repository.empty())
-      return;
 
     // parsing the ignore pattern
     std::string ignore = ignorePatterns(); 
@@ -252,6 +252,13 @@ namespace API
    */
   void ScriptRepositoryImpl::install(const std::string &  path){
     using Poco::DirectoryIterator;
+    if (remote_url.empty())
+      {
+        std::stringstream ss; 
+        ss << "ScriptRepository is configured to download from a invalid URL (empty URL)."
+           << "\nThis URL comes from the property file and it is called ScriptRepository.";     
+        throw ScriptRepoException(ss.str());
+      }
     std::string folder = std::string(path); 
     Poco::File repository_folder(folder); 
     std::string rep_json_file = std::string(path).append("/.repository.json");
@@ -623,6 +630,7 @@ namespace API
     std::string local_path = std::string(local_repository).append(file_path); 
     g_log.debug() << "ScriptRepository download url_path: " << url_path << " to " << local_path << std::endl;
 
+    std::string dir_path;
 
     try{
 
@@ -639,7 +647,7 @@ namespace API
       size_t slash_pos = local_path.rfind('/');
       Poco::File file_out(local_path);
       if (slash_pos != std::string::npos){
-        std::string dir_path = std::string(local_path.begin(),local_path.begin()+slash_pos);
+        dir_path = std::string(local_path.begin(),local_path.begin()+slash_pos);
         if (!dir_path.empty()){
           Poco::File dir_parent(dir_path);
           if (!dir_parent.exists()){
@@ -650,7 +658,7 @@ namespace API
       
       if (!file_out.exists())
         file_out.createFile();
-
+      
       tmpFile.copyTo(local_path); 
       
     }catch(Poco::FileAccessDeniedException &){
@@ -665,6 +673,24 @@ namespace API
                                                                           timeformat));
       entry.downloaded_pubdate = entry.pub_date;
       entry.status = BOTH_UNCHANGED;      
+    }
+    
+    // Update pythonscripts.directories if necessary (TEST_DOWNLOAD_ADD_FOLDER_TO_PYTHON_SCRIPTS)
+    if (!dir_path.empty()){
+      const char * python_sc_option = "pythonscripts.directories";
+      ConfigServiceImpl & config = ConfigService::Instance(); 
+      std::string python_dir = config.getString(python_sc_option); 
+      if (python_dir.find(dir_path) == std::string::npos){
+        // this means that the directory is not inside the pythonscripts.directories
+        // add to the repository
+        python_dir.append(";").append(dir_path);
+        config.setString(python_sc_option,python_dir); 
+        config.saveConfig(config.getUserFilename());
+        
+        // the previous code make the path available for the following 
+        // instances of Mantid, but, for the current one, it is necessary 
+        // do add to the python path... 
+      }
     }
     
     updateLocalJson(file_path, entry); ///FIXME: performance!    
@@ -830,9 +856,15 @@ namespace API
   }
 
   /** 
-      @todo describe
+   * Implements ScriptRepository::check4Update. It downloads the file repository.json
+   * from the central repository and call the listFiles again in order to inspect the current 
+   * state of every entry inside the local repository. For the files marked as AutoUpdate, if there 
+   * is a new version of these files, it downloads the file. As output, it provides a list of
+   * all files that were downloaded automatically.
+   * 
+   *  @return List of all files automatically downloaded.
   */
-  void ScriptRepositoryImpl::check4Update(void) 
+  std::vector<std::string> ScriptRepositoryImpl::check4Update(void) 
   {
     g_log.debug() << "ScriptRepositoryImpl checking for update\n" ; 
     // download the new repository json file
@@ -844,6 +876,7 @@ namespace API
       f.moveTo(backup); 
     }
     try{
+      g_log.debug() << "Download information from the Central Repository status" << std::endl;
       doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
     }catch(...){
@@ -865,8 +898,9 @@ namespace API
     #endif
 
     // re list the files
+    g_log.debug() << "Check the status of all files again" << std::endl;
     listFiles(); 
-    
+    std::vector<std::string> output_list;
     // look for all the files in the list, to check those that 
     // has the auto_update and check it they have changed.
     for(Repository::iterator it = repo.begin(); 
@@ -876,10 +910,13 @@ namespace API
         // THE SAME AS it->status in (REMOTE_CHANGED, BOTH_CHANGED)
         if (it->second.status & REMOTE_CHANGED){
           download(it->first); 
+          output_list.push_back(it->first);
+          g_log.debug()  << "Update file " << it->first << " to more recently version available" << std::endl;
         }
       }
     }
     g_log.debug() << "ScriptRepositoryImpl::checking for update finished\n" ; 
+    return output_list;
   }
 
   /** 
@@ -909,7 +946,13 @@ namespace API
   }
 
   /** 
-      @todo describe
+   * Configure the AutoUpdate, in order to be able to check if the user selected 
+   * to update this entry. 
+   * @param input_path : the path that identifies the entry
+   * @param option: true or false to indicate if it is set to auto update. 
+   *
+   * These configurations will be used at check4update, to download all entries that 
+   * are set to auto update.
   */
   void ScriptRepositoryImpl::setAutoUpdate(const std::string & input_path, bool option){
     ensureValidRepository();
@@ -1103,7 +1146,7 @@ namespace API
 
             entry_it->second.downloaded_pubdate = DateAndTime(file.second.get<std::string>("downloaded_pubdate"));
             entry_it->second.downloaded_date = DateAndTime(file.second.get<std::string>("downloaded_date"));
-
+            entry_it->second.auto_update = (file.second.get<std::string>("auto_update",std::string()) == "true");
 
           }else{
             // if the entry was not found locally or remotelly, this means 
@@ -1174,6 +1217,11 @@ namespace API
       local_json.put(
                 boost::property_tree::ptree::path_type( std::string(path).append("!downloaded_date"), '!'), 
                 entry.downloaded_date.toFormattedString().c_str());
+      std::string auto_update_op = (const char *)((entry.auto_update)?"true":"false");
+      std::string key = std::string(path).append("!auto_update");     
+      local_json.put(
+                     boost::property_tree::ptree::path_type(key,'!'),
+                     auto_update_op);
     }
     //g_log.debug() << "Update LOCAL JSON FILE" << std::endl; 
     #if defined(_WIN32) ||  defined(_WIN64)

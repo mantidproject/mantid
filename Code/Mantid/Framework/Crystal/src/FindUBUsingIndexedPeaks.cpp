@@ -111,10 +111,9 @@ namespace Crystal
     }
 
     Matrix<double> UB(3,3,false);
-    double error = IndexingUtils::Optimize_UB( UB, hkl_vectors, q_vectors );
+    std::vector<double> sigabc(7);
+    IndexingUtils::Optimize_UB( UB, hkl_vectors, q_vectors,sigabc );
 
-    std::cout << "Error = " << error << std::endl;
-    std::cout << "UB = " << UB << std::endl;
 
     if ( ! IndexingUtils::CheckUB( UB ) ) // UB not found correctly
     {
@@ -153,7 +152,16 @@ namespace Crystal
                std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
                calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
       g_log.notice( std::string(logInfo) );
+      g_log.notice()<<std::fixed<<std::setprecision(3)<<std::setw(9);
 
+      g_log.notice()<<"Parameter Errors   :"<<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[0]
+                                            <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[1]
+                                            <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[2]
+                                            <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[3]
+                                            <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[4]
+                                            <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[5]
+                                            <<std::endl;
+      o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
       ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
     }
   }

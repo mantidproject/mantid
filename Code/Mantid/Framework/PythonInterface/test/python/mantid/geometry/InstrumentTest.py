@@ -17,3 +17,5 @@ class InstrumentTest(object):
                           "get_pos", "get_distance", "get_name", "type"]
         for att in expected_attrs:
             self.assertTrue(att in attrs)
+
+if __name__ == '__main__': unittest.main()

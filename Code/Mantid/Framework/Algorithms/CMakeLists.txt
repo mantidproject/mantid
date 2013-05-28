@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalculateEfficiency.cpp
+        src/CalculateFlatBackground.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateZscore.cpp
@@ -130,7 +131,7 @@ set ( SRC_FILES
 	src/MergeRuns.cpp
 	src/Min.cpp
 	src/Minus.cpp
-	src/ModeratorTzero.cpp
+	src/ModeratorTzeroLinear.cpp
 	src/MonteCarloAbsorption.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
 	src/Multiply.cpp
@@ -186,7 +187,6 @@ set ( SRC_FILES
 	src/SofQW2.cpp
 	src/SofQW3.cpp
 	src/SolidAngle.cpp
-	src/Sort.cpp
 	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
 	src/SphericalAbsorption.cpp
@@ -204,6 +204,7 @@ set ( SRC_FILES
 	src/Unwrap.cpp
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
+	src/UpdateScriptRepository.cpp
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
@@ -233,6 +234,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
+	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateZscore.h
@@ -344,7 +346,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MergeRuns.h
 	inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
-	inc/MantidAlgorithms/ModeratorTzero.h
+	inc/MantidAlgorithms/ModeratorTzeroLinear.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
 	inc/MantidAlgorithms/Multiply.h
@@ -400,7 +402,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SofQW2.h
 	inc/MantidAlgorithms/SofQW3.h
 	inc/MantidAlgorithms/SolidAngle.h
-	inc/MantidAlgorithms/Sort.h
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
 	inc/MantidAlgorithms/SphericalAbsorption.h
@@ -418,6 +419,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Unwrap.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
+	inc/MantidAlgorithms/UpdateScriptRepository.h
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
@@ -457,6 +459,7 @@ set ( TEST_FILES
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
 	CalculateEfficiencyTest.h
+	CalculateFlatBackgroundTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
 	CalculateZscoreTest.h
@@ -554,7 +557,7 @@ set ( TEST_FILES
 	MedianDetectorTestTest.h
 	MergeRunsTest.h
 	MinusTest.h
-	ModeratorTzeroTest.h
+	ModeratorTzeroLinearTest.h
 	MonteCarloAbsorptionTest.h
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h

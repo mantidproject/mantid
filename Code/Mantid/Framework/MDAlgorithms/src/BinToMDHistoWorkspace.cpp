@@ -1,3 +1,8 @@
+/*WIKI*
+
+This algorithm does the same as [[BinMD]], but is deprecated.
+
+*WIKI*/
 #include "MantidMDAlgorithms/BinToMDHistoWorkspace.h"
 #include "MantidKernel/System.h"
 

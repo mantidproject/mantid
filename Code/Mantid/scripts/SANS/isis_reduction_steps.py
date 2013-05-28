@@ -1456,13 +1456,13 @@ class CalculateNormISIS(sans_reduction_steps.CalculateNorm):
           override CalculateNorm.
         """
         detector = detector.upper()
-        if detector in ("FRONT","HAB","FRONT-DETECTOR-BANK"):
+        if detector in ("FRONT","HAB","FRONT-DETECTOR-BANK", "FRONT-DETECTOR"):
             return self._high_angle_pixel_file
-        elif detector in ("REAR","MAIN","MAIN-DETECTOR-BANK",""):
+        elif detector in ("REAR","MAIN","MAIN-DETECTOR-BANK","", "REAR-DETECTOR"):
             return self._low_angle_pixel_file
         else :
-            logger.warning("ASK GETPIXELCORRFILE WITHOUT ARGUMENT: + "+ str(detector))
-            return self._pixel_file        
+            logger.warning("Request of pixel correction file with unknown detector ("+ str(detector)+")")
+            return self._pixel_file
 
     def calculate(self, reducer, wave_wks=[]):
         """
@@ -1504,7 +1504,6 @@ class ConvertToQISIS(sans_reduction_steps.ConvertToQ):
         Almost a copy of sans_reduction_steps.ConvertToQ, except by the calculation of
         the transmission correction wide angle.
         """
-        from mantidsimple import SANSWideAngleCorrection
         wavepixeladj = ""
         if (reducer.wide_angle_correction and reducer.transmission_calculator.output_wksp):
             #calculate the transmission wide angle correction

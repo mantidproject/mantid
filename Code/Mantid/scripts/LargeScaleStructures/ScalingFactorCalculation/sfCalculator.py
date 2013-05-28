@@ -1,5 +1,5 @@
-from MantidFramework import *
-from mantidsimple import *
+from mantid import *
+from mantid.simpleapi import *
 from numpy import zeros
 from pylab import *
 import os.path
@@ -220,13 +220,13 @@ class sfCalculator():
                            bNumerator=bNumerator)
 
         #cleanup workspaces
-        mtd.deleteWorkspace('EventDataWks')
-        mtd.deleteWorkspace('HistoDataWks')
-        mtd.deleteWorkspace('IntegratedDataWks')
-        mtd.deleteWorkspace('TransposeIntegratedDataWks')
-        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
-        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
-        mtd.deleteWorkspace('DataWks')
+        mtd.remove('EventDataWks')
+        mtd.remove('HistoDataWks')
+        mtd.remove('IntegratedDataWks')
+        mtd.remove('TransposeIntegratedDataWks')
+        mtd.remove('TransposeIntegratedDataWks_t')
+        mtd.remove('TransposeHistoFlatDataWks')
+        mtd.remove('DataWks')
         
     def _calculateFinalAxis(self, Workspace=None, bNumerator=None):
         """

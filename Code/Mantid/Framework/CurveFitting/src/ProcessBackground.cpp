@@ -1,6 +1,6 @@
 /*WIKI*
 
-The algorithm ProcessBackground() provides several functions for user to process background to prepare Le Bail Fit.   
+The algorithm ProcessBackground() provides several functions for user to process background to prepare [[Le Bail Fit]].   
 
 ==== Automatic Background Points Selection ====
 This feature is designed to select many background points with user's simple input.  

@@ -15,7 +15,7 @@ To be noticed that the TableWorkspace output from ''RefinePowderInstrumentParame
 Input TableWorkspace must have two columns, "Name" and "Value", as column 0 and 1.  There is no restriction on other columns. 
 
 == How to use algorithm with other algorithms ==
-This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[LeBailFit]].
+This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in [[Le Bail Fit]].
 
 *WIKI*/
 

@@ -1569,7 +1569,8 @@ namespace Mantid
         {
           this->applyFilter();
         }
-        m_size = int(m_filterQuickRef.back().second);
+        size_t nvalues = m_filterQuickRef.empty() ? m_values.size() : m_filterQuickRef.back().second;
+        m_size = static_cast<int>(nvalues);
       }
 
       return;

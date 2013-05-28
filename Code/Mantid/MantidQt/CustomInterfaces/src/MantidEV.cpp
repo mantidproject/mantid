@@ -271,8 +271,10 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.actionOnline_Help_Page, SIGNAL(triggered()),
                      this, SLOT(help_slot()) );
 
+  QObject::connect( m_uiForm.EventFileName_ledt, SIGNAL(editingFinished()),
+                     this, SLOT(loadEventFileEntered_slot()) );
 
-                          // connect the slots for enabling and disabling
+                           // connect the slots for enabling and disabling
                           // various subsets of widgets
    QObject::connect( m_uiForm.LoadEventFile_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledLoadEventFileParams_slot(bool) ) );
@@ -452,7 +454,7 @@ void MantidEV::help_slot()
 void MantidEV::selectWorkspace_slot()
 {
    // Check that the event workspace name is non-blank.
-   std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().toStdString();
+   std::string ev_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
 
    if ( ev_ws_name.length() == 0 )
    {
@@ -461,7 +463,7 @@ void MantidEV::selectWorkspace_slot()
    }
 
    // Check that the MD workspace name is non-blank.
-   std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().toStdString();
+   std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
 
    if ( md_ws_name.length() == 0 )
    {
@@ -477,7 +479,7 @@ void MantidEV::selectWorkspace_slot()
 
    if ( m_uiForm.LoadEventFile_rbtn->isChecked() )  // load file and
    {                                                // convert to MD workspace
-     std::string file_name = m_uiForm.EventFileName_ledt->text().toStdString();
+     std::string file_name = m_uiForm.EventFileName_ledt->text().trimmed().toStdString();
      if ( file_name.length() == 0 )
      {
        errorMessage("Specify the name of an event file to load.");
@@ -515,6 +517,27 @@ void MantidEV::selectWorkspace_slot()
    }
 }
 
+/**
+ *  Slot called when editing the filename is finished on loading data from an event file
+ *  is pressed on the SelectData tab.
+ */
+void MantidEV::loadEventFileEntered_slot()
+{
+  QString Qfile_name =m_uiForm.EventFileName_ledt->text().trimmed();
+  if ( Qfile_name.length() > 0 )
+  {
+    last_event_file = Qfile_name.toStdString();   
+
+    std::string base_name = extractBaseFileName( last_event_file );
+    std::string event_ws_name = base_name + "_event";
+    std::string md_ws_name    = base_name + "_md";
+    std::string peaks_ws_name = base_name + "_peaks";
+
+    m_uiForm.SelectEventWorkspace_ledt->setText( QString::fromStdString( event_ws_name ));
+    m_uiForm.MDworkspace_ledt->setText( QString::fromStdString( md_ws_name ));
+    m_uiForm.PeaksWorkspace_ledt->setText( QString::fromStdString( peaks_ws_name ));
+  }
+}
 
 /**
  *  Slot called when the Browse button for loading data from an event file
@@ -561,7 +584,7 @@ void MantidEV::loadEventFile_slot()
  */
 void MantidEV::findPeaks_slot()
 {
-   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
      errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
@@ -580,7 +603,7 @@ void MantidEV::findPeaks_slot()
 
    if ( find_new_peaks )
    {
-     std::string md_ws_name  = m_uiForm.MDworkspace_ledt->text().toStdString();
+     std::string md_ws_name  = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
      if ( md_ws_name.length() == 0 )
      {
        errorMessage("Specify an MD workspace name on Select Data tab.");
@@ -617,7 +640,7 @@ void MantidEV::findPeaks_slot()
    }
    else if ( load_peaks )
    {
-     std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().toStdString();
+     std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
      if ( file_name.length() == 0 )
      {
        errorMessage("Specify a peaks file with the peaks to be loaded.");
@@ -700,7 +723,7 @@ void MantidEV::getSavePeaksFileName()
  */
 void MantidEV::findUB_slot()
 {
-   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
      errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
@@ -753,7 +776,7 @@ void MantidEV::findUB_slot()
 
    else if ( load_UB )
    {
-     std::string file_name = m_uiForm.SelectUBFile_ledt->text().toStdString();
+     std::string file_name = m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
      if ( file_name.length() == 0 )
      {
        errorMessage("Select a .mat file with the UB matrix to be loaded.");
@@ -860,7 +883,7 @@ void MantidEV::getSaveUB_FileName()
  */
 void MantidEV::chooseCell_slot()
 {
-   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
      errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
@@ -917,7 +940,7 @@ void MantidEV::chooseCell_slot()
  */
 void MantidEV::changeHKL_slot()
 {
-   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
      errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
@@ -946,7 +969,7 @@ void MantidEV::changeHKL_slot()
  */
 void MantidEV::integratePeaks_slot()
 {
-   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
 
    if ( peaks_ws_name.length() == 0 )
    {
@@ -954,7 +977,7 @@ void MantidEV::integratePeaks_slot()
      return;
    }
 
-   std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().toStdString();
+   std::string event_ws_name = m_uiForm.SelectEventWorkspace_ledt->text().trimmed().toStdString();
    if ( event_ws_name.length() == 0 )
    {
      errorMessage("Specify a time-of-flight event workspace name.");
@@ -1092,7 +1115,7 @@ void MantidEV::QPointSelection_slot( bool lab_coords, double qx, double qy, doub
  */
 void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
 {
-   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+   std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
    if ( peaks_ws_name.length() == 0 )
    {
      errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
@@ -1191,7 +1214,7 @@ void MantidEV::loadState_slot()
  */
 void MantidEV::saveIsawUB_slot()
 {
-  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
@@ -1200,7 +1223,7 @@ void MantidEV::saveIsawUB_slot()
 
   getSaveUB_FileName();
 
-  std::string file_name = m_uiForm.SelectUBFile_ledt->text().toStdString();
+  std::string file_name = m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
   if ( file_name.length() == 0 )
   {
      errorMessage("Select a .mat file with the UB matrix to be loaded.");
@@ -1222,7 +1245,7 @@ void MantidEV::saveIsawUB_slot()
  */
 void MantidEV::loadIsawUB_slot()
 {
-  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
@@ -1231,7 +1254,7 @@ void MantidEV::loadIsawUB_slot()
 
   getLoadUB_FileName_slot();
 
-  std::string file_name = m_uiForm.SelectUBFile_ledt->text().toStdString();
+  std::string file_name = m_uiForm.SelectUBFile_ledt->text().trimmed().toStdString();
   if ( file_name.length() == 0 )
   {
      errorMessage("Select a .mat file with the UB matrix to be loaded.");
@@ -1253,7 +1276,7 @@ void MantidEV::loadIsawUB_slot()
  */
 void MantidEV::saveIsawPeaks_slot()
 {
-  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
@@ -1262,7 +1285,7 @@ void MantidEV::saveIsawPeaks_slot()
 
   getSavePeaksFileName();
 
-  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().toStdString();
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
   if ( file_name.length() == 0 )
   {
      errorMessage("Specify a peaks file name for saving the peaks workspace.");
@@ -1315,7 +1338,7 @@ void MantidEV::saveIsawPeaks_slot()
  */
 void MantidEV::loadIsawPeaks_slot()
 {
-  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
@@ -1324,7 +1347,7 @@ void MantidEV::loadIsawPeaks_slot()
 
   getLoadPeaksFileName_slot();
 
-  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().toStdString();
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
   if ( file_name.length() == 0 )
   {
      errorMessage("Select a peaks file to be loaded.");
@@ -1346,7 +1369,7 @@ void MantidEV::loadIsawPeaks_slot()
  */
 void MantidEV::showUB_slot()
 {
-  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().toStdString();
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
   if ( peaks_ws_name.length() == 0 )
   {
     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");

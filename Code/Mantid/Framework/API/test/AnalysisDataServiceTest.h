@@ -295,6 +295,7 @@ public:
   // persists, as this class is where it will most be used.
   void test_size()
   {
+    ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","0");
     TS_ASSERT_EQUALS( ads.size(), 0 );
     addToADS("something");
     TS_ASSERT_EQUALS( ads.size(), 1 );

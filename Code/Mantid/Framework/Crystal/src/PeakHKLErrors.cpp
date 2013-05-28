@@ -4,25 +4,25 @@
  *  Created on: Jan 26, 2013
  *      Author: ruth
  */
-#include "MantidCrystal/PeakHKLErrors.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IConstraint.h"
 #include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/ParamFunction.h"
-#include <string>
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidAPI/IPeak.h"
-#include "MantidDataObjects/Peak.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDPanelErrors.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidKernel/V3D.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
-#include "MantidAPI/IConstraint.h"
+#include "MantidKernel/V3D.h"
 #include <cctype>
+#include <string>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -88,8 +88,8 @@ namespace Mantid
 
       for( size_t i = 0; i<OptRunNums.size(); i++ )
       {
-        declareParameter( "chi" + OptRunNums[i], 0.0, "Chi sample orientation value" );
         declareParameter( "phi" + OptRunNums[i], 0.0, "Phi sample orientation value" );
+        declareParameter( "chi" + OptRunNums[i], 0.0, "Chi sample orientation value" );
         declareParameter( "omega" + OptRunNums[i], 0.0, "Omega sample orientation value" );
       }
     }
@@ -384,6 +384,7 @@ namespace Mantid
         {
           peak.setGoniometerMatrix( GonRot*peak.getGoniometerMatrix());
         }
+
         V3D hkl = UBinv * peak.getQSampleFrame();
 
 

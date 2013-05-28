@@ -8,6 +8,7 @@ set ( TEST_PY_FILES
   BoundedValidatorTest.py
   CompositeValidatorTest.py
   ConfigServiceTest.py
+  DateAndTimeTest.py
   DeltaEModeTest.py
   FacilityInfoTest.py
   FilteredTimeSeriesPropertyTest.py
@@ -28,6 +29,8 @@ set ( TEST_PY_FILES
   UnitsTest.py
   V3DTest.py
 )
+
+check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
 
 # Prefix for test=PythonInterfaceKernel
 pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterfaceKernel ${TEST_PY_FILES} )

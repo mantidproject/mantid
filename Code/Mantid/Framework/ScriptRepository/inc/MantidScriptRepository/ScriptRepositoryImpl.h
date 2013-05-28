@@ -104,7 +104,7 @@ namespace API{
     /* Return true if there is a local repository installed*/
     bool isValid(void);
 
-    void check4Update(void);
+    std::vector<std::string> check4Update(void);
 
     void setIgnorePatterns(const std::string & patterns); 
     

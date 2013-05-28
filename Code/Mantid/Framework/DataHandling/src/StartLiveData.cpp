@@ -43,7 +43,57 @@ Please note that you may be limited in how much simultaneous processing you
 can do by your available memory and CPUs.
 
 *WIKI*/
+/*WIKI_USAGE_NO_SIGNATURE*
+Here are some examples of usage of StartLiveData, most use the FakeEventDataListener so they will always work, but this can be swapped for any instrument such as OFFSPEC, GEM, HYSPEC etc.
 
+Note:  After running each of these you will need to cancel the ongoing data loading by cancelling the MonitorLiveData algorithm.  
+You will find this by clicking the details button in the bottom left corner of Mantidplot.
+
+====Just Live Event Data====
+<source lang="python">
+StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',
+  OutputWorkspace='live')
+</source>
+
+====Live Event Rebin using an algorithm and plotting====
+<source lang="python">
+StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',
+  ProcessingAlgorithm='Rebin',ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',
+  OutputWorkspace='live')
+plotSpectrum('live', [0,1])
+</source>
+
+====Live Event Rebin using a python script====
+The script can be as simple or complicated as you want,
+you have to call the input workspace input, and the output workspace at the end output.
+<source lang="python">
+script='Rebin(InputWorkspace=input,OutputWorkspace=output,Params="40000,100,50000")'
+StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',  
+  ProcessingScript=script,ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',  
+  OutputWorkspace='live')
+plotSpectrum('live', [0,1])
+</source>
+
+====Live Event Pre and post processing====
+This uses rebin to select a region of time of flight, and then after 
+the data is accumulated it uses SumSpectra to sum all of the data into a single spectrum.
+When using post processing you have to give the accumulation workspace a name.
+<source lang="python">
+StartLiveData(UpdateEvery='1.0',Instrument='FakeEventDataListener',  
+  ProcessingAlgorithm='Rebin',ProcessingProperties='Params=10e3,1000,60e3;PreserveEvents=1',  
+  OutputWorkspace='live', AccumulationWorkspace="accumulation",
+  PostProcessingAlgorithm="SumSpectra",PostProcessingProperties="")
+plotSpectrum('live', 0)
+</source>
+
+====Live Histogram Data and plotting====
+For Histogram data the accumulationMethod needs to be set to Replace, you will get a warning otherwise.
+<source lang="python">
+StartLiveData(UpdateEvery='1.0',Instrument='OFFSPEC',
+ AccumulationMethod="Replace", OutputWorkspace='live')
+plotSpectrum('live', [0,1])
+</source>
+*WIKI_USAGE_NO_SIGNATURE*/
 #include "MantidDataHandling/StartLiveData.h"
 #include "MantidKernel/System.h"
 #include "MantidDataHandling/LoadLiveData.h"

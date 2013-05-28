@@ -6,11 +6,16 @@ from mantid.kernel import DateAndTime
 class RunTest(unittest.TestCase):
 
     _expt_ws = None
+    _nspec=1
   
     def setUp(self):
         if self.__class__._expt_ws is None:
-            alg = run_algorithm('Load', Filename='LOQ48127.raw', SpectrumMax=1, child=True)
-            self.__class__._expt_ws = alg.getProperty("OutputWorkspace").value
+            alg = run_algorithm('CreateWorkspace', DataX=[1,2,3,4,5], DataY=[1,2,3,4,5],NSpec=self._nspec, child=True)
+            ws = alg.getProperty("OutputWorkspace").value
+            ws.run().addProperty("gd_prtn_chrg", 10.05, True)
+            ws.run().addProperty("nspectra", self._nspec, True)
+            ws.run().setStartAndEndTime(DateAndTime("2008-12-18T17:58:38"), DateAndTime("2008-12-18T17:59:40"))
+            self.__class__._expt_ws = ws
 
     def test_get_goniometer(self):
         run = self._expt_ws.run()
@@ -21,21 +26,21 @@ class RunTest(unittest.TestCase):
         run = self._expt_ws.run()
         charge = run.getProtonCharge()
         self.assertEquals(type(charge), float)
-        self.assertAlmostEquals(charge, 10.040912628173828, 15)
+        self.assertAlmostEquals(charge, 10.05, 2)
         
     def test_run_hasProperty(self):
-        self.assertTrue(self._expt_ws.run().hasProperty('run_start'))
-        self.assertTrue('run_start' in self._expt_ws.run())
+        self.assertTrue(self._expt_ws.run().hasProperty('start_time'))
+        self.assertTrue('start_time' in self._expt_ws.run())
         self.assertFalse('not a log' in self._expt_ws.run())
 
     def test_run_getProperty(self):
-        run_start = self._expt_ws.run().getProperty('run_start')
+        run_start = self._expt_ws.run().getProperty('start_time')
         self.assertEquals(type(run_start.value), str)
         self.assertEquals(run_start.value, "2008-12-18T17:58:38")
         
         def do_spectra_check(nspectra):
             self.assertEquals(type(nspectra.value), int)
-            self.assertEquals(nspectra.value, 8)
+            self.assertEquals(nspectra.value, self._nspec)
             self.assertRaises(RuntimeError, self._expt_ws.run().getProperty, 'not_a_log')
 
         do_spectra_check(self._expt_ws.run().getProperty('nspectra'))
@@ -76,7 +81,7 @@ class RunTest(unittest.TestCase):
         
         # Test a few
         self.assertTrue('nspectra' in names)
-        self.assertTrue('run_start' in names)
+        self.assertTrue('start_time' in names)
         self.assertFalse('not a log' in names)
 
     def test_startime(self):
@@ -89,7 +94,15 @@ class RunTest(unittest.TestCase):
         self.assertEquals(runstartstr, "2008-12-18T17:58:38")
         self.assertTrue(isinstance(runstart, DateAndTime))
 
-        return
+    def test_endtime(self):
+        """ Test exported function endTime()
+        """
+        run = self._expt_ws.run()
+
+        runend = run.endTime()
+        runendstr = str(runend)
+        self.assertEquals(runendstr, "2008-12-18T17:59:40")
+        self.assertTrue(isinstance(runend, DateAndTime))
 
 if __name__ == '__main__':
     unittest.main()

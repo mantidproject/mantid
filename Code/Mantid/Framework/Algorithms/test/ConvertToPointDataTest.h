@@ -5,7 +5,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-
+#include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/UnitFactory.h"
 using Mantid::Algorithms::ConvertToPointData;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;
@@ -46,6 +47,15 @@ public:
     const int numSpectra(2);
     Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(numSpectra, numBins);
     TS_ASSERT_EQUALS(testWS->isHistogramData(), true);
+    //add a new vertical axis
+    Mantid::API::Axis* const verticalAxis = new Mantid::API::NumericAxis(numSpectra+1);
+    testWS->replaceAxis(1,verticalAxis);
+    for(int i=0;i<numSpectra+1;i++)
+    {
+        verticalAxis->setValue(i,2*i);
+    }
+    verticalAxis->unit() = Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer");
+    verticalAxis->title() = "|Q|";
 
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
 
@@ -76,6 +86,12 @@ public:
 	TS_ASSERT_EQUALS(xValues[j], expectedX);
       }
     }
+    //test the vertical axis
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->length(), 3 );
+    TS_ASSERT_EQUALS( outputWS->getAxis(1)->unit()->unitID(), "MomentumTransfer" );
+    TS_ASSERT_EQUALS( (*(outputWS->getAxis(1)))(0), 0 );
+    TS_ASSERT_EQUALS( (*(outputWS->getAxis(1)))(1), 2 );
+    TS_ASSERT_EQUALS( (*(outputWS->getAxis(1)))(2), 4 );
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
   }

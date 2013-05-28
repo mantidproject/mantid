@@ -3,7 +3,6 @@
 
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidCurveFitting/GaussianLinearBG1D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>

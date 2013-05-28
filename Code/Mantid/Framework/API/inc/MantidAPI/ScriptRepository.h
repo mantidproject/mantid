@@ -432,6 +432,9 @@ They will work as was expected for folders @ref folders-sec.
               
        This method, needs to know the remote URL wich must be available to the object before
        calling the check4update.
+
+       It must check the state of the central repository and download all the files marked as
+       AutoUpdate.
       
        @attention The responsibility of executing this method periodically, is not of 
                   the ScriptRepository it self. The others methods may not respond
@@ -441,8 +444,10 @@ They will work as was expected for folders @ref folders-sec.
 
        @exception ScriptRepoException notifies mainly connection failure, but, 
                   may eventually, notify that the local repository may not be created. 
+      
+       @return List with all the files automatically downloaded.
     */
-    virtual void check4Update(void)  = 0;
+    virtual std::vector<std::string> check4Update(void)  = 0;
 
     
     /**

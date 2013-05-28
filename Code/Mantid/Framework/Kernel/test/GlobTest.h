@@ -17,15 +17,15 @@ class GlobTest : public CxxTest::TestSuite
 public:
   GlobTest()
   {
-    base.assign( ConfigService::Instance().getDataSearchDirs()[0] );
-    base.makeParent().makeParent().pushDirectory("Code/Mantid");
+    base.assign( ConfigService::Instance().getInstrumentDirectory());
+    base.makeParent();
     base.assign(base.toString());
   }
 
   void test_Glob()
   {
     TS_ASSERT_EQUALS(base[base.depth() - 1],"Mantid");
-    std::string pattern = base.toString() + "Framework/*/CMakeLists.*";
+    std::string pattern = base.toString() + "Framework/*/CMakeLists.*t";
 
     std::set<std::string> files;
     Glob::glob(pattern,files);
@@ -48,7 +48,7 @@ public:
 
   void test_no_match()
   {
-    std::string pattern = base.toString() + "Doesnotexist/*/CMakeLists.*";
+    std::string pattern = base.toString() + "Doesnotexist/*/CMakeLists.*t";
 
     std::set<std::string> files;
     Glob::glob(pattern,files);
@@ -87,7 +87,7 @@ public:
   void test_double_dots_in_pattern()
   {
     TS_ASSERT_EQUALS(base[base.depth() - 1],"Mantid");
-    std::string pattern = base.toString() + "../Mantid/Framework/*/CMakeLists.*";
+    std::string pattern = base.toString() + "../Mantid/Framework/*/CMakeLists.*t";
 
     std::set<std::string> files;
     Glob::glob(pattern,files);

@@ -456,10 +456,10 @@ namespace Mantid
                                                       const double                   dQ)
    {
 
-     double Q = 0, ScatAngle = 0, dScatAngle = 0, DetSpan = 0;
-
      try
      {
+       double Q = 0, ScatAngle = 0, dScatAngle = 0, DetSpan = 0;
+
        Q = peak.getQLabFrame().norm();
        Geometry::Instrument_const_sptr instr = peak.getInstrument();
        const Geometry::IObjComponent_const_sptr  sample = instr->getSample();
@@ -789,7 +789,7 @@ namespace Mantid
         //std::map< specid_t, V3D > neighbors;
 
 
-        bool done = false;
+        //bool done = false;
 
         double neighborRadius ;//last radius for finding neighbors
 
@@ -818,7 +818,7 @@ namespace Mantid
 
         for( int dir =1 ; dir >-2; dir -=2)
         {
-          done = false;
+          bool done = false;
           for( int t= 0; t < dChan && !done; t++)
           if( dir < 0 &&  t==0 )
            {
@@ -1942,7 +1942,7 @@ namespace Mantid
          StatBase[ISSIxx]= -1;
         return;
       }
-      boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>(Data);
+      boost::shared_ptr<Workspace2D> ws = boost::dynamic_pointer_cast<Workspace2D>(Data);
 
       int NBadEdges = getProperty("NBadEdgePixels");
       spec_idList.clear();

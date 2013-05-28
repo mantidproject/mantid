@@ -136,7 +136,9 @@ class ScriptRepositoryImplLocal : public ScriptRepositoryImpl{
    // request to ping the site
    if (local_file_path.empty())
      return;
-
+   if (url_file.find("http://") == std::string::npos){
+     throw ScriptRepoException("Invalid url to download");
+   }
    Poco::FileStream _out(local_file_path); 
    
    if( url_file.find("repository.json") != std::string::npos){
@@ -443,6 +445,46 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
 }
 
 
+  void test_auto_update(){
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    std::vector<string> list_of_files;
+    TS_ASSERT_THROWS_NOTHING(list_of_files = repo->listFiles()); 
+    TS_ASSERT (list_of_files.size() == 5); 
+    std::string file_name = "TofConv/README.txt";
+    
+    // before downloading the file is REMOTE_ONLY
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY);
+
+    // do download
+    TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+
+    // after downloading the file is BOTH_UNCHANGED
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED);
+
+    // set this file for AutoUpdate
+    TS_ASSERT_THROWS_NOTHING(repo->setAutoUpdate(file_name, true));
+    
+    // simulate a new version of the file inside the central repository
+    // 
+    std::string original_time = "2012-Feb-13 10:02:50"; 
+    std::string change_to_ =  "2012-Mar-13 10:02:50";
+
+    // simulate new version of the file
+    boost::replace_all(repo->repository_json_content,
+                       original_time,
+                       change_to_);
+
+    // execute a check4updte
+    TS_ASSERT_THROWS_NOTHING(list_of_files = repo->check4Update());
+    
+    // ensure that it has downloaded the file again
+    TS_ASSERT(list_of_files.size() == 1);
+    TS_ASSERT(list_of_files[0] == file_name);
+
+}
+
+
 
 
  /*************************************
@@ -677,17 +719,34 @@ void test_downloading_locally_modified_file(){
   }
 
 
-
-
-
-
-
   void test_list_files_after_download_repository(){
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
     TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py")); 
     TS_ASSERT_THROWS_NOTHING(repo->check4Update()); 
     TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py")); 
+  }
+
+  void test_download_add_folder_to_python_scripts(){
+    ConfigServiceImpl & config = ConfigService::Instance();
+    std::string backup_python_directories = config.getString("pythonscripts.directories");
+
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+    TS_ASSERT_THROWS_NOTHING(repo->download("TofConv/TofConverter.py"));
+
+    std::string curr_python_direc = config.getString("pythonscripts.directories");
+    std::string direc = std::string(local_rep).append("TofConv/");
+    // make all the back slashs direct slashs, for comparing the path
+    // required for windows.
+    boost::replace_all(curr_python_direc,"\\","/");
+    boost::replace_all(direc,"\\","/");
+
+    TS_ASSERT(curr_python_direc.find(direc) != string::npos);
+
+
+    config.setString("pythonscripts.directories", backup_python_directories); 
+    config.saveConfig(config.getUserFilename());
   }
 
  /*************************************
@@ -717,14 +776,17 @@ void test_downloading_locally_modified_file(){
     repo->setIgnorePatterns(""); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
     TS_ASSERT_THROWS_NOTHING(repo->info("myfile.pyc"));
-
-
-    
-
     // clean the ignore patterns
-    repo->setIgnorePatterns(backup); 
-    
+    repo->setIgnorePatterns(backup);     
   }
+  
+  void test_construct_without_parameters(){
+    delete repo;
+    TS_ASSERT_THROWS_NOTHING(repo = new ScriptRepositoryImplLocal()); 
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles()); 
+  }
+
 
 
 };

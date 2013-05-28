@@ -1,9 +1,8 @@
 import os
 import copy
 import math
-from MantidFramework import *
-mtd.initialise(False)
-from mantidsimple import *
+from mantid.simpleapi import *
+from mantid.kernel import Logger
 
 IS_IN_MANTIDPLOT = True
 try:
@@ -113,7 +112,7 @@ class DataSet(object):
         """
            Get the name of the scaled workspace, if it exists 
         """
-        if mtd.workspaceExists(self._ws_scaled):
+        if mtd.doesExist(self._ws_scaled):
             return self._ws_scaled
         return None
     
@@ -156,7 +155,7 @@ class DataSet(object):
         """
             Return True is this data set has been loaded
         """
-        return mtd.workspaceExists(self._ws_name)
+        return mtd.doesExist(self._ws_name)
     
     def set_scale(self, scale=1.0):
         """
@@ -268,12 +267,12 @@ class DataSet(object):
         if os.path.isfile(self._file_path):
             self._ws_name = os.path.basename(self._file_path)
             Load(Filename=self._file_path, OutputWorkspace=self._ws_name)
-        elif mtd.workspaceExists(self._file_path):
+        elif mtd.doesExist(self._file_path):
             self._ws_name = self._file_path
         else:
             raise RuntimeError, "Specified file doesn't exist: %s" % self._file_path
         
-        if mtd.workspaceExists(self._ws_name):
+        if mtd.doesExist(self._ws_name):
             self._ws_scaled = self._ws_name+"_scaled"
             if update_range:
                 self._restricted_range = restricted_range        
@@ -351,7 +350,7 @@ class DataSet(object):
         return sum
             
     def select_range(self, call_back=None):
-        if mtd.workspaceExists(self._ws_name):
+        if mtd.doesExist(self._ws_name):
             if call_back is None:
                 call_back = self.set_range
             RangeSelector.connect([self._ws_name], call_back=call_back)
@@ -405,7 +404,7 @@ class Stitcher(object):
         
         # Check that we have an overlap
         if ref_max<d_min or ref_min>d_max:
-            mtd.sendLogMessage("No overlap between %s and %s" % (str(data_ref), str(data_to_scale)))
+            Logger.get("data_stitching").error("No overlap between %s and %s" % (str(data_ref), str(data_to_scale)))
             return
         
         # Get overlap

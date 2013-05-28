@@ -347,6 +347,7 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
+    <livedata address="sequoia-sms.sns.gov:31415" />
    </instrument> 
    
    <instrument name="ARCS" beamline="18"> 

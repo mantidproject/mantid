@@ -708,7 +708,9 @@ void UnwrappedSurface::findAndCorrectUGap()
   double bin_width = fabs(m_u_max - m_u_min) / (nbins - 1);
   if (bin_width == 0.0)
   {
+	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
     QMessageBox::warning(NULL, tr("MantidPLot - Instrument view error"), tr("Failed to build unwrapped surface"));
+	QApplication::restoreOverrideCursor();
     m_u_min = 0.0;
     m_u_max = 1.0;
     return;

@@ -9,9 +9,10 @@ class AxisTest(unittest.TestCase):
   
     def setUp(self):
         if self.__class__._test_ws is None:
-            alg = run_algorithm('CreateWorkspace', DataX=datY,DataY=datY,DataE=datY,NSpec=3,
-                                child=True)
-            self.__class__._test_ws = alg.getProperty("OutputWorkspace").value
+                    datY=[1,2,3]
+                    alg = run_algorithm('CreateWorkspace', DataX=datY,DataY=datY,DataE=datY,NSpec=3,
+                                UnitX='TOF',child=True)
+                    self.__class__._test_ws = alg.getProperty("OutputWorkspace").value
 
     def test_constructor_methods_return_the_correct_type(self):
         self.assertTrue(isinstance(NumericAxis.create(2),NumericAxis))
@@ -19,8 +20,6 @@ class AxisTest(unittest.TestCase):
 
     def test_axis_meta_data(self):
         yAxis = self._test_ws.getAxis(1)
-        self.assertTrue(isinstance(yAxis, SpectraAxis))
-        self.assertTrue(isinstance(yAxis, SpectraAxis))
         self.assertEquals(yAxis.length(), 3)
         self.assertEquals(len(yAxis), yAxis.length())
         self.assertEquals(yAxis.title(), "")
@@ -33,11 +32,12 @@ class AxisTest(unittest.TestCase):
         self.assertEquals(xunit.label(), "microsecond")
 
     def test_axis_unit_can_be_replaced(self):
-        datY=np.arange(100)
+        datY=[1,2,3]
         ns=3
+        taxis = [1,2,3]
         alg = run_algorithm('CreateWorkspace', DataX=datY,DataY=datY,DataE=datY,NSpec=ns,
                             VerticalAxisUnit="Label", VerticalAxisValues=taxis, child=True)
-        ws = alg.getPropertyValue("OutputWorkspace")
+        ws = alg.getProperty("OutputWorkspace").value
 
         ws.getAxis(0).setUnit("Label").setLabel("Time", "ns")
         ws.getAxis(1).setUnit("Label").setLabel("Temperature", "K")
@@ -74,3 +74,5 @@ class AxisTest(unittest.TestCase):
         for index, value in enumerate(values):
             self.assertEquals(value, axis_values[index])
         
+if __name__ == '__main__':
+    unittest.main()

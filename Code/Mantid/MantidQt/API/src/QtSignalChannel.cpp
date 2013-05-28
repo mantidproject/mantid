@@ -38,14 +38,16 @@ namespace MantidQt
 
     /**
      * If the source is set then only messages with a matching source
-     * cause a Qt signal to be emitted
+     * cause a Qt signal to be emitted. A newline is appended as the
+     * Poco log stream emits the message when a newline is received but doesn't
+     * actually send a newline character
      * @param msg A Poco message object containing a priority & the string message
      */
     void QtSignalChannel::log(const Poco::Message& msg)
     {
       if(m_source.isEmpty() || this->source() == msg.getSource().c_str())
       {
-        emit messageReceived(API::Message(QString::fromStdString(msg.getText()), msg.getPriority()));
+        emit messageReceived(API::Message(QString::fromStdString(msg.getText() + "\n"), msg.getPriority()));
       }
     }
 

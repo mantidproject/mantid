@@ -275,6 +275,8 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
           return "Click here to share this file with the Mantid community!";
           
         }
+      }else if (index.column() == 2){
+        return "Enable or disable this item to be downloaded automatically when new versions will be available";
       }
     }// end tool tip
   }catch(Mantid::API::ScriptRepoException & ex){
