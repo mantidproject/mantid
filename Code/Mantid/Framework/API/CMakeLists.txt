@@ -98,7 +98,6 @@ set ( SRC_FILES
 	src/ScriptRepository.cpp
 	src/ScriptRepositoryFactory.cpp
 	src/SpectraAxis.cpp
-	src/SpectraDetectorMap.cpp
 	src/SpectrumDetectorMapping.cpp
 	src/TableRow.cpp
 	src/TextAxis.cpp
@@ -246,7 +245,6 @@ set ( INC_FILES
 	inc/MantidAPI/SingleValueParameterParser.h
 	inc/MantidAPI/SpecialCoordinateSystem.h
 	inc/MantidAPI/SpectraAxis.h
-	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/SpectrumDetectorMapping.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
@@ -320,7 +318,6 @@ set ( TEST_FILES
 	SampleEnvironmentTest.h
 	SampleTest.h
 	SpectraAxisTest.h
-	SpectraDetectorMapTest.h
 	SpectrumDetectorMappingTest.h
 	TextAxisTest.h
 	VectorParameterParserTest.h
