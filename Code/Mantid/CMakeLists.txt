@@ -89,14 +89,6 @@ endif()
 ###########################################################################
 # Find PyQt & sip
 ###########################################################################
-find_package ( PythonInterp )
-if ( MSVC )
-  # Wrapper script to call either python or python_d depending on directory contents
-  set ( PYTHON_EXE_WRAPPER_SRC "${CMAKE_CURRENT_SOURCE_DIR}/Build/win_python.bat" )
-  set ( PYTHON_EXE_WRAPPER "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/win_python.bat" )
-else()
-  set ( PYTHON_EXE_WRAPPER ${PYTHON_EXECUTABLE} )
-endif()
 find_package ( PyQt4 REQUIRED )
 find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
