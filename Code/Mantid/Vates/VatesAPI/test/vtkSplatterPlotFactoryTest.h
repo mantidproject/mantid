@@ -69,8 +69,16 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(product = factory.create(progressUpdate));
 
+    /* original sizes for splatter plot test, before 5/28/2013
     const size_t expected_n_points = 1000;
     const size_t expected_n_cells = 999;
+    */
+
+    // New sizes for splatter plot test, after changing the way the points 
+    // are selected, 5/28/2013
+    const size_t expected_n_points = 50;
+    const size_t expected_n_cells = 50;
+
     const size_t expected_n_signals = expected_n_cells;
 
     TSM_ASSERT_EQUALS("Wrong number of points", expected_n_points, product->GetNumberOfPoints());
