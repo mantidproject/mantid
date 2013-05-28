@@ -56,7 +56,9 @@ class RunPythonScript(PythonAlgorithm):
         Scripts (read Code input) may need to reference input and output workspaces. In order to make 
         this possible, standard alias names are provided, 'input' and 'output'.
         '''
-        input = mtd[wsInputName]
+        if mtd.doesExist(wsInputName):
+            input = mtd[wsInputName]
+        
         output = wsOutputName
         
         # Run the script code passed

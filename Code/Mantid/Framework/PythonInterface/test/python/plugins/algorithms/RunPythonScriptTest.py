@@ -62,6 +62,10 @@ class RunPythonScriptTest(unittest.TestCase):
         code = ""
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace='ws_out')
         ws_out = mtd['ws_out']
+        
+    def test_withNoInputWorkspace(self):
+        c = RunPythonScript(Code="output = CreateSingleValuedWorkspace(DataValue='1')")
+        self.assertEqual(c.readY(0)[0], 1)
 
 if __name__ == '__main__':
     unittest.main()
