@@ -415,7 +415,9 @@ namespace API
 
       // for the directories, update the status of this directory
       if (entry.directory){
-        entry.status = acc_status; 
+        entry.status = acc_status;
+        if (!entry.remote)
+          entry.status = Mantid::API::LOCAL_ONLY;
         last_directory = entry_path;        
       }else{
         // for the files, it evaluates the status of this file
@@ -923,7 +925,13 @@ namespace API
       // There are more restriction when trying to remove from central repository
       // only local_changed and both_changed are acceptable for removing
       if (!(status == BOTH_UNCHANGED || status == LOCAL_CHANGED))
-        throw ScriptRepoException(not_allowed_exc); 
+        throw ScriptRepoException(not_allowed_exc);
+      
+      RepositoryEntry & entry = repo.at(relative_path);
+
+      if (entry.directory)
+        throw ScriptRepoException(not_allowed_exc);
+      
       
       // prepare the request, and call doDeleteRemoteFile to request the server to remove the file
       std::string remote_delete = remote_upload; 
@@ -994,7 +1002,7 @@ namespace API
       // update the repository list variable
       // now, it is local_only and it is not inside remote. 
       // this is necessary for the strange case, where removing locally may fail.
-      RepositoryEntry & entry = repo.at(relative_path);      
+
       entry.status = LOCAL_ONLY; 
       entry.remote = false; 
       
@@ -1006,27 +1014,26 @@ namespace API
       // now, remove file locally. 
       std::string absolute_path = local_repository + relative_path;           
       Poco::File local(absolute_path);
-      local.remove();       
+      local.remove(true);       
     }catch(Poco::Exception & ex){
       throw ScriptRepoException("You do not have right to remove this file in your computer",
                                 ex.displayText()); 
     }
-    
-    // now that we have remove the local file and from the repository.json, 
-    // the parseDownloadedEntries is able to remove it from the local.json
-    // delete the entry from the local.json
-    parseDownloadedEntries(repo);
 
-    
     RepositoryEntry & entry = repo.at(relative_path);
-    if (entry.remote)
-      entry.status = REMOTE_ONLY; // it was removed only locally
-    else
-      // this means that this value was removed from the central repository
-      // and from the local repository. So, it can be removed from the 
-      // cached variable
-      repo.erase(relative_path);
-    
+    if (entry.directory){
+      listFiles(); 
+    }else{
+      if (entry.remote){
+        entry.status = REMOTE_ONLY; 
+        entry.local = false; 
+      }else{
+        // this means that this value was removed from the central repository
+        // and from the local repository. So, it can be removed from the 
+        // cached variable
+        repo.erase(relative_path);         
+      }
+    }
   }
 
   /** Implements the request to the server to delete one file. It is created as a virtual protected member
@@ -1048,7 +1055,6 @@ namespace API
   std::string ScriptRepositoryImpl::doDeleteRemoteFile(const std::string & url, const std::string & file_path, 
                           const std::string & author, const std::string & email, 
                           const std::string & comment){
-
     using namespace Poco::Net;
     std::stringstream answer;
     try{
