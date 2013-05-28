@@ -100,6 +100,12 @@ namespace API{
     void upload(const std::string & file_path, const std::string & comment,
                 const std::string & author, 
                 const std::string & email);
+    // remove file from the central repository and from local folder
+    void remove(const std::string & file_path, const std::string & comment,
+                const std::string & author, 
+                const std::string & email);
+    // remove file from local folder
+    void remove_local(const std::string & file_path);
 
     /* Return true if there is a local repository installed*/
     bool isValid(void);
@@ -117,8 +123,12 @@ namespace API{
 
 
  
- 
+
     virtual void doDownloadFile(const std::string & url_file, const std::string & local_file_path = "");
+    // convenient method to allow to perform the unit tests on remove files.
+    virtual std::string doDeleteRemoteFile(const std::string & url, const std::string & file_path, 
+                              const std::string & author, const std::string & email, 
+                              const std::string & comment);
  protected:
     void parseCentralRepository(Repository & repo);
 
@@ -127,7 +137,12 @@ namespace API{
     void parseDownloadedEntries(Repository & repo); 
 
     void ensureValidRepository();
-
+    // auxiliary method that implements the removal of files.
+    void impl_remove_file(const std::string & file_path, 
+                          bool only_local = true,
+                          const std::string & comment = std::string(),
+                          const std::string & author = std::string(), 
+                          const std::string & email = std::string()); 
 
     bool isEntryValid(const std::string & path);
 
