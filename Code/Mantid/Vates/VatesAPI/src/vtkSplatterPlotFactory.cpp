@@ -115,9 +115,9 @@ namespace Mantid
       } // box is valid MDBox
     } // For each box
 
-    std::cout << "START SORTING" << std::endl;
+    if ( VERBOSE ) std::cout << "START SORTING" << std::endl;
     std::sort( sorted_boxes.begin(), sorted_boxes.end(), CompareNormalizedSignal );
-    std::cout << "DONE SORTING" << std::endl;
+    if ( VERBOSE ) std::cout << "DONE SORTING" << std::endl;
 
     size_t num_boxes_to_use = (size_t)(percent_to_use * (double)sorted_boxes.size() / 100.0);
     if ( num_boxes_to_use <= 0 )
@@ -149,15 +149,15 @@ namespace Mantid
     if ( points_per_box < 1 )
       points_per_box = 1;
 
-//    double max_signal = sorted_boxes[0]->getSignalNormalized();
-//    double min_signal = sorted_boxes[sorted_boxes.size()-1]->getSignalNormalized();
-
-    std::cout << "numPoints                 = " << numPoints << std::endl;
-    std::cout << "num boxes in all          = " << boxes.size() << std::endl;
-    std::cout << "num boxes above zero      = " << sorted_boxes.size() << std::endl;
-    std::cout << "num boxes to use          = " << num_boxes_to_use << std::endl;
-    std::cout << "total_points_available    = " << total_points_available << std::endl;
-    std::cout << "points needed per box     = " << points_per_box << std::endl;
+    if ( VERBOSE )
+    {
+      std::cout << "numPoints                 = " << numPoints << std::endl;
+      std::cout << "num boxes in all          = " << boxes.size() << std::endl;
+      std::cout << "num boxes above zero      = " << sorted_boxes.size() << std::endl;
+      std::cout << "num boxes to use          = " << num_boxes_to_use << std::endl;
+      std::cout << "total_points_available    = " << total_points_available << std::endl;
+      std::cout << "points needed per box     = " << points_per_box << std::endl;
+    }
 
     // Create all the points
     vtkPoints *points = vtkPoints::New();
