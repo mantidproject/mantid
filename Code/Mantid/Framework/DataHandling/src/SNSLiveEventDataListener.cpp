@@ -18,6 +18,8 @@
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/AutoPtr.h"
+#include "Poco/DOM/NodeList.h"
+#include "Poco/DOM/NamedNodeMap.h"
 
 #include <Poco/Thread.h>
 #include <Poco/Runnable.h>
@@ -41,12 +43,11 @@ using namespace Mantid::API;
 #define PROTON_CHARGE_PROPERTY "proton_charge"
 
 
-// Helper function to get a DateAndTime value from an ADARA packet
-Mantid::Kernel::DateAndTime timeFromPacket( const ADARA::Packet &pkt)
+// Helper function to get a DateAndTime value from an ADARA packet header
+Mantid::Kernel::DateAndTime timeFromPacket( const ADARA::PacketHeader &hdr)
 {
-  const uint32_t *field = (const uint32_t *)pkt.packet();
-  uint32_t seconds = field[2];
-  uint32_t nanoseconds = field[3];
+  uint32_t seconds = (uint32_t)(hdr.pulseId() >> 32);
+  uint32_t nanoseconds = hdr.pulseId() & 0xFFFFFFFF;
 
   // Make sure we pick the correct constructor (the Mac gets an ambiguous error)
   return DateAndTime( static_cast<int64_t>(seconds),
@@ -72,7 +73,9 @@ namespace DataHandling
       m_status(NoRun),
       m_workspaceInitialized( false), m_socket(),
       m_isConnected( false), m_pauseNetRead(false), m_stopThread( false),
-      m_runPaused( false)
+      m_runPaused( false),
+      m_ignorePackets( true),
+      m_filterUntilRunStart( false)
     // ADARA::Parser() will accept values for buffer size and max packet size, but the
     // defaults will work fine
   {
@@ -181,7 +184,20 @@ namespace DataHandling
     // Save the startTime and kick off the background thread
     // (Can't really do anything else until we send the hello packet and the SMS sends us
     // back the various metadata packets
-    m_startTime = startTime;   
+    m_startTime = startTime;
+
+    if (m_startTime.totalNanoseconds() == 1000000000)
+    {
+      // 1 billion nanoseconds - ie: 1 second past the EPOCH
+      // Start live listener sends us this when it wants to start processing
+      // at the start of the previous run (and it doesn't know when the previous
+      // run started).  This value for a start time will cause the SMS to replay
+      // all of its historical data and it will be up to us to filter out everything
+      // before the start of the previous run.
+      // See the description of the 'Client Hello' packet in the SNS DAS design doc
+      // for more details
+      m_filterUntilRunStart = true;
+    }
     m_thread.start( *this);
   }
 
@@ -220,11 +236,17 @@ namespace DataHandling
     while (m_stopThread == false)  // loop until the foreground thread tells us to stop
     {
 
-      while (m_pauseNetRead)
+      while (m_pauseNetRead && m_stopThread == false)
       {
         // foreground thread doesn't want us to process any more packets until
         // it's ready.  See comments in rxPacket( const ADARA::RunStatusPkt &pkt)
         Poco::Thread::sleep( 100);  // 100 milliseconds
+      }
+
+      if (m_stopThread)
+      {
+        // it's possible that a stop request came in while we were sleeping...
+        break;
       }
 
       // Get some more data from our socket and put it in the parser's buffer
@@ -275,8 +297,6 @@ namespace DataHandling
       g_log.fatal() << "Thread is exiting." << std::endl;
 
       m_isConnected = false;
-      m_workspaceInitialized = true;  // see the comments in the default exception
-                                      // handler for why we set this value.
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new ADARA::invalid_packet(e));
 
@@ -285,8 +305,6 @@ namespace DataHandling
                     << "Exception message: " << e.what() << std::endl
                     << "Thread will exit." << std::endl;
       m_isConnected = false;
-      m_workspaceInitialized = true;  // see the comments in the default exception
-                                      // handler for why we set this value.
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
@@ -307,13 +325,6 @@ namespace DataHandling
                     << "  Thread is exiting." << std::endl;
       m_isConnected = false;
 
-      // The extractData() function is deliberately designed to block until the workspace is
-      // initialized so we have to ensure the flag is set or else the entire GUI will lock up.
-      // Note that if the workspace really hasn't been initialized, then the values in it are
-      // going to be completely bogus, but since the entire we're not going to be able to read
-      // any data, that's not really an issue.
-      m_workspaceInitialized = true;
-
       m_backgroundException =
           boost::shared_ptr<std::runtime_error>( new std::runtime_error( "Unknown error in backgound thread"));
     }
@@ -331,8 +342,16 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RTDLPkt &pkt)
   {
+    // Check to see if we should process this packet (depending on what
+    // the user selected for start up options, the SMS might be replaying
+    // historical data that we don't care about).
+    if (ignorePacket( pkt))
+    {
+      return false;
+    }
+
     // At the moment, all we need from the RTDL packets is the pulse
-    // time (and its questionable whether we even need that).
+    // time (and it's questionable whether we even need that).
     m_rtdlPulseId = pkt.pulseId();
     return false;
   }
@@ -353,6 +372,39 @@ namespace DataHandling
   // before it sends BankedEventPkts.
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BankedEventPkt &pkt)
   {
+    // Check to see if we should process this packet (depending on what
+    // the user selected for start up options, the SMS might be replaying
+    // historical data that we don't care about).
+    if (ignorePacket( pkt))
+    {
+      return false;
+    }
+
+    // Assuming we're going to process this packet, check to see if we need
+    // to finish our initialization steps
+    // We should already be initialized by the time we get here, but
+    // we'll give it one last try anyway since we'll have to throw
+    // the packet away if we can't initialize.
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
+
+      // If we weren't ready to init, or the init failed, that's an error and
+      // we can't process this packet at all.
+      if (! m_workspaceInitialized)
+      {
+        g_log.error() << "Cannot process BankedEventPacket because workspace isn't initialized." << std::endl;
+        // Note: One error message per BankedEventPkt is likely to absolutely flood the error log.
+        // Might want to think about rate limiting this somehow...
+
+        return false; // We still return false (ie: "no error") because there's no reason to stop
+                      // parsing the data stream
+      }
+
+    }
 
     // A few counters that we use for logging purposes
     unsigned eventsPerBank = 0;
@@ -440,14 +492,67 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::GeometryPkt &pkt)
   {
+    // Note: Deliberately NOT calling ignorePacket() because we always parse
+    // these packets
+
     // TODO: For now, I'm assuming that we only need to process one of these
     // packets the first time it comes in and we can ignore any others.
     if (m_workspaceInitialized == false)
     {
-      m_instrumentXML = pkt.info();
+      m_instrumentXML = pkt.info();  // save the xml so we can pass it to the
+                                     // LoadInstrument algorithm
 
-      // If we've now got all the data we need to initialize the workspace,
-      // then do so.
+      // Now parse the XML for required logfile parameters (we can't call the
+      // LoadInstrument alg until we received a value for such parameters).
+      //
+      // What we're looking for is a node called "parameter" that has a child
+      // node called "logfile".  We need to save the id attribute on the
+      // logfile node.
+
+      Poco::XML::DOMParser parser;
+      Poco::AutoPtr<Poco::XML::Document> doc = parser.parseString( m_instrumentXML);
+
+      const Poco::XML::NodeList *nodes = doc->getElementsByTagName( "parameter");
+      // Oddly, NodeLists don't seem to have any provision for iterators.  Also,
+      // the length() function actually traverses the list to get the count,
+      // so we should probably call it once and store it in a variable instead
+      // of putting it at the top of a for loop...
+      long unsigned nodesLength = nodes->length();
+      for (long unsigned i = 0; i < nodesLength; i++)
+      {
+        Poco::XML::Node *node = nodes->item( i);
+        const Poco::XML::NodeList *childNodes = node->childNodes();
+
+        long unsigned childNodesLength = childNodes->length();
+        for (long unsigned j=0; j < childNodesLength; j++)
+        {
+          Poco::XML::Node *childNode = childNodes->item( j);
+          if (childNode->nodeName() == "logfile")
+          {
+            // Found one!
+            Poco::XML::NamedNodeMap *attr = childNode->attributes();
+            long unsigned attrLength = attr->length();
+            for (long unsigned k = 0; k < attrLength; k++)
+            {
+              Poco::XML::Node *attrNode = attr->item(k);
+              if (attrNode->nodeName() == "id")
+              {
+                m_requiredLogs.push_back( attrNode->nodeValue());
+              }
+            }
+
+            attr->release();
+          }
+        }
+        childNodes->release();
+
+      }
+      nodes->release();
+    }
+
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
       if (readyForInitPart2())
       {
         initWorkspacePart2();
@@ -467,14 +572,19 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamlineInfoPkt &pkt)
   {
+    // Note: Deliberately NOT calling ignorePacket() because we always parse
+    // these packets
+
     // We only need to process a beamlineinfo packet once
     if (m_workspaceInitialized == false)
     {
       // We need the instrument name
       m_instrumentName = pkt.longName();
+    }
 
-      // If we've now got all the data we need to initialize the workspace,
-      // then do so.
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
       if (readyForInitPart2())
       {
         initWorkspacePart2();
@@ -494,16 +604,26 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
   {
+
+    // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
+    // Note that we need this value even if we otherwise ignore the packet
+    if (m_workspaceInitialized == false)
+    {
+      m_dataStartTime = timeFromPacket( pkt);
+    }
+    
+    // Check to see if we should process the rest of this packet (depending
+    //  on what the user selected for start up options, the SMS might be
+    // replaying historical data that we don't care about).
+    if (ignorePacket( pkt, pkt.status()))
+    {
+      return false;
+    }
+
     // Note: We don't really need to lock the mutex for the entire length of
     // this function call, but it's far simpler to put the lock here than to
     // have individual lock/unlocks every time we fiddle with a run property
     Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
-
-    if (m_workspaceInitialized == false)
-    {
-      // grab the time from the packet - we'll use it down in initializeWorkspacePart2()
-      m_dataStartTime = timeFromPacket( pkt);
-    }
 
     if (pkt.status() == ADARA::RunStatus::NEW_RUN)
     {
@@ -595,6 +715,16 @@ namespace DataHandling
 
     // Note: all other possibilities for pkt.status() can be ignored
 
+
+    // Check to see if we can/should complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
+      }
+    }
+
     return m_pauseNetRead;
     // If we've set m_pauseNetRead, it means we want to stop processing packets.
     // In that case, we need to return true so that we'll break out of the read() loop
@@ -617,20 +747,39 @@ namespace DataHandling
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
-    // Look up the name of this variable
-    NameMapType::const_iterator it = m_nameMap.find( std::make_pair(devId, pvId));
-
-    if (it == m_nameMap.end())
+    // Check to see if we should process this packet now.  If not, add it to the
+    // variable map because we might need to process it later
+    if (ignorePacket( pkt))
     {
-      g_log.error() << "Ignoring variable value packet for device " << devId << ", variable "
-                    << pvId << " because we haven't received a device descriptor packet for it."
-                    << std::endl;
+      boost::shared_ptr<ADARA::Packet> ptr(new ADARA::VariableU32Pkt( pkt));
+      m_variableMap.insert( std::make_pair( std::make_pair(devId, pvId), ptr));
     }
     else
     {
+      // Look up the name of this variable
+      NameMapType::const_iterator it = m_nameMap.find( std::make_pair(devId, pvId));
+
+      if (it == m_nameMap.end())
       {
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
-        m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+        g_log.error() << "Ignoring variable value packet for device " << devId << ", variable "
+                      << pvId << " because we haven't received a device descriptor packet for it."
+                      << std::endl;
+      }
+      else
+      {
+        {
+          Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+          m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+        }
+      }
+    }
+
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
       }
     }
 
@@ -653,20 +802,39 @@ namespace DataHandling
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
-    // Look up the name of this variable
-    NameMapType::const_iterator it = m_nameMap.find( std::make_pair(devId, pvId));
-
-    if (it == m_nameMap.end())
+    // Check to see if we should process this packet now.  If not, add it to the
+    // variable map because we might need to process it later
+    if (ignorePacket( pkt))
     {
-      g_log.error() << "Ignoring variable value packet for device " << devId << ", variable "
-                    << pvId << " because we haven't received a device descriptor packet for it."
-                    << std::endl;
+      boost::shared_ptr<ADARA::Packet> ptr(new ADARA::VariableDoublePkt( pkt));
+      m_variableMap.insert( std::make_pair( std::make_pair(devId, pvId), ptr));
     }
     else
     {
+      // Look up the name of this variable
+      NameMapType::const_iterator it = m_nameMap.find( std::make_pair(devId, pvId));
+
+      if (it == m_nameMap.end())
       {
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
-        m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+        g_log.error() << "Ignoring variable value packet for device " << devId << ", variable "
+                      << pvId << " because we haven't received a device descriptor packet for it."
+                      << std::endl;
+      }
+      else
+      {
+        {
+          Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+          m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+        }
+      }
+    }
+
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
       }
     }
 
@@ -692,20 +860,39 @@ namespace DataHandling
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
-    // Look up the name of this variable
-    NameMapType::const_iterator it = m_nameMap.find( std::make_pair(devId, pvId));
-
-    if (it == m_nameMap.end())
+    // Check to see if we should process this packet now.  If not, add it to the
+    // variable map because we might need to process it later
+    if (ignorePacket( pkt))
     {
-      g_log.error() << "Ignoring variable value packet for device " << devId << ", variable "
-                    << pvId << " because we haven't received a device descriptor packet for it."
-                    << std::endl;
+      boost::shared_ptr<ADARA::Packet> ptr(new ADARA::VariableStringPkt( pkt));
+      m_variableMap.insert( std::make_pair( std::make_pair(devId, pvId), ptr));
     }
     else
     {
+      // Look up the name of this variable
+      NameMapType::const_iterator it = m_nameMap.find( std::make_pair(devId, pvId));
+
+      if (it == m_nameMap.end())
       {
-        Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
-        m_eventBuffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+        g_log.error() << "Ignoring variable value packet for device " << devId << ", variable "
+                      << pvId << " because we haven't received a device descriptor packet for it."
+                      << std::endl;
+      }
+      else
+      {
+        {
+          Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
+          m_eventBuffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+        }
+      }
+    }
+
+    // Check to see if we can complete the initialzation steps
+    if (! m_workspaceInitialized)
+    {
+      if (readyForInitPart2())
+      {
+        initWorkspacePart2();
       }
     }
 
@@ -727,6 +914,9 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &pkt)
   {
+    // Note: Deliberately NOT calling ignorePacket() because we always parse
+    // these packets
+
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> doc = parser.parseMemory( pkt.description().c_str(), pkt.description().length());
     const Poco::XML::Node* deviceNode = doc->firstChild();
@@ -875,6 +1065,14 @@ namespace DataHandling
   /// was an error and packet parsing should be interrupted
   bool SNSLiveEventDataListener::rxPacket( const ADARA::AnnotationPkt &pkt)
   {
+    // Check to see if we should process this packet (depending on what
+    // the user selected for start up options, the SMS might be replaying
+    // historical data that we don't care about).
+    if (ignorePacket( pkt))
+    {
+      return false;
+    }
+
     {
       Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
       // We have to lock the mutex prior to calling mutableRun()
@@ -962,6 +1160,10 @@ namespace DataHandling
 
     loadInst->execute();
 
+    m_requiredLogs.clear();  // Clear the list.  If we have to initialize the workspace again,
+                             // (at the start of another run, for example), the list will be
+                             // repopulated when we receive the next geometry packet.
+
     m_eventBuffer->padSpectra();  // expands the workspace to the size of the just loaded instrument
 
     // Set the units
@@ -979,6 +1181,33 @@ namespace DataHandling
     }
 
     m_workspaceInitialized = true;
+  }
+
+  // Check to see if we have data for all of the logs listed in m_requiredLogs.
+  // NOTE: This function does not lock the mutex!  The calling function must
+  // ensure that m_eventBuffer won't change while the function runs (either by
+  // locking the mutex, or by the simple fact of never calling it once the workspace
+  // has been initialized...)
+  bool SNSLiveEventDataListener::haveRequiredLogs()
+  {
+    bool allFound = true;
+    Run &run = m_eventBuffer->mutableRun();
+    auto it = m_requiredLogs.begin();
+    while (it != m_requiredLogs.end() && allFound)
+    {
+      if (! run.hasProperty(*it))
+      {
+        allFound = false;
+      }
+      else if ( run.getProperty(*it)->size() == 0)
+      {
+        allFound = false;
+      }
+
+      it++;
+    }
+
+    return allFound;
   }
 
   /// Adds an event to the workspace
@@ -1014,11 +1243,28 @@ namespace DataHandling
     // Block until the background thread has actually initialized the workspace
     // (Which won't happen until the SMS sends it the packet with the geometry
     // information in it.)
-    // Note:  Yes, I discussed this with the other developers and they all agreed
-    // that blocking was the proper behavior.  We can't return NULL, or some
-    // invalid workspace.
+    //
+    // Limit the maximum time we block to 10 seconds.  If we haven't initialized by
+    // that time, there's probably a problem upstream.  The only thing we can do,
+    // though, is throw an exception.
+
+#define MAX_BLOCK_TIME  10 // in seconds
+    Mantid::Kernel::DateAndTime endTime = Mantid::Kernel::DateAndTime::getCurrentTime();
+    endTime += (double)MAX_BLOCK_TIME;
     while (m_workspaceInitialized == false)
     {
+      if  (Mantid::Kernel::DateAndTime::getCurrentTime() > endTime)
+      {
+        // Note: If you're stepping through the initializtion code in
+        // a debugger, you probably ought to comment out this line
+        throw std::runtime_error( "SNSLiveEventDataListener timed out without initializing.");
+      }
+
+      // Check to see if the background thread has thrown an exception.  If so, re-throw it here.
+      if (m_backgroundException)
+      {
+        throw( *m_backgroundException);
+      }
       Poco::Thread::sleep( 100);  // 100 milliseconds
     }
 
@@ -1094,6 +1340,72 @@ namespace DataHandling
     return rv;
   }
   
-  
+
+  // Called by the rxPacket() functions to determine if the packet should be processed
+  // (Depending on when it last indexed its data, SMS might send us packets that are
+  // older than we requested.)
+  // Returns false if the packet should be processed, true if is should be ignored
+  bool SNSLiveEventDataListener::ignorePacket( const ADARA::PacketHeader &hdr, const ADARA::RunStatus::Enum status)
+  {
+    // Since we're filtering based on time (either the absolute timestamp or nothing
+    // before the start of the most recent run), once we've determined a given
+    // packet should be processed, we know all packets after that should also be
+    // processed.  Thus, we can reduce most calls to this function to a simple
+    // boolean test...
+    if ( ! m_ignorePackets)
+      return false;
+
+    // Are we looking for the start of the run?
+    if (m_filterUntilRunStart)
+    {
+      if (hdr.type() == ADARA::PacketType::RUN_STATUS_V0)
+      {
+        if (status == ADARA::RunStatus::NEW_RUN)
+        {
+          // A new run is starting...
+          m_ignorePackets = false;
+        }
+        else  // If we receive any other status, then it means we weren't in a run.  In this case,
+              // we're going to throw an exception so that the algorithm will shut down.
+              // (Note: we're currently in the background thread here, so our exception will
+              // be caught by the handlers up in the run() function and then re-thrown from
+              // the foreground thread....
+        {
+          throw std::runtime_error("User requested data from start of current run, but system is not currently in a run.");
+        }
+      }
+    }
+    else  // Filter based solely on time
+    {
+      if (timeFromPacket(hdr) >= m_startTime)
+      {
+        m_ignorePackets = false;
+      }
+    }
+
+    // If we've just hit our start-up condition, then process
+    // all the variable value packets we've been hanging on to.
+    if (! m_ignorePackets)
+    {
+      replayVariableCache();
+    }
+
+    return m_ignorePackets;
+  }
+
+
+  // Process all the variable value packets stored in m_variableMap
+  void SNSLiveEventDataListener::replayVariableCache()
+  {
+    auto it = m_variableMap.begin();
+    while (it != m_variableMap.end())
+    {
+      rxPacket( *(*it).second);  // call rxPacket() on the stored packet
+      it++;
+    }
+
+    m_variableMap.clear();  // empty the map to save a little ram
+  }
+
 } // namespace Mantid
 } // namespace DataHandling

@@ -117,6 +117,12 @@ void StartLiveDataDialog::initLayout()
   tie(ui.editAccumulationWorkspace, "AccumulationWorkspace", ui.gridLayout);
   tie(ui.editOutputWorkspace, "OutputWorkspace", ui.gridLayout);
 
+  // == Prevent the user from entering invalid values in the DateTime edit box ==
+  QDateTime epochStart( QDateTime::fromString( "1990-01-01T00:00:00", Qt::ISODate));
+  epochStart.setTimeSpec( Qt::UTC);
+  ui.dateTimeEdit->setMinimumDateTime( epochStart);
+  ui.dateTimeEdit->setMaximumDateTime( QDateTime::currentDateTime().toUTC());
+
   // ========== Update GUIs =============
   ui.processingAlgo->update();
   ui.postAlgo->update();

@@ -188,12 +188,34 @@ namespace DataHandling
     if (numChecked != 1)
       throw std::runtime_error("Please check exactly one of FromNow, FromStartOfRun, FromTime.");
 
+
     // Adjust the StartTime if you are starting from run/now.
     if (FromNow)
-      this->setPropertyValue("StartTime", DateAndTime::getCurrentTime().toISO8601String());
+      this->setPropertyValue("StartTime", "1990-01-01T00:00:00");
+      // Use the epoch value for the start time.  It will get converted to 0 when passed
+      // to SMSD in the ClientHello packet.  See the description of the ClientHello packet
+      // in the ADARA network protocol docs.
     else if (FromStartOfRun)
-      // TODO: implement
-      throw Kernel::Exception::NotImplementedError("Cannot start from the run start yet.");
+      // At this point, we don't know when the start of the run was.  Set the requested time
+      // to 1 second past the epoch (which will get turned into 1 when passed to SMSD in
+      // the ClientHello packet) which will cause the SMS to replay all the historical data
+      // it has.  We'll filter out unnecessary packets down in the live listener
+      this->setPropertyValue("StartTime", "1990-01-01T00:00:01");
+    else
+    {
+      // Validate the StartTime property.  Don't allow times from the future
+      DateAndTime reqStartTime( this->getPropertyValue( "StartTime"));
+      // DateAndTime will throw an exception if it can't interpret the string, so
+      // we don't need to test for that condition.
+
+      // check for a requested time in the future
+      if (reqStartTime > DateAndTime::getCurrentTime())
+      {
+        g_log.error() << "Requested start time in the future.  Resetting to current time." << std::endl;
+        this->setPropertyValue("StartTime", DateAndTime::getCurrentTime().toISO8601String());
+      }
+    }
+
 
     // Get the listener (and start listening) as early as possible
     ILiveListener_sptr listener = this->getLiveListener();
