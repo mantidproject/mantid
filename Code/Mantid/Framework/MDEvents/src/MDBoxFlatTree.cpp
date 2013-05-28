@@ -6,10 +6,10 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include <Poco/File.h>
 
-#if defined (__INTEL_COMPILER)
- typedef std::auto_ptr< ::NeXus::File>  file_holder_type;
-#else 
+#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
  typedef std::unique_ptr< ::NeXus::File>  file_holder_type;
+#else
+ typedef std::auto_ptr< ::NeXus::File>  file_holder_type;
 #endif
 
 namespace Mantid

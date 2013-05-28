@@ -26,11 +26,10 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include "MantidMDEvents/MDBoxFlatTree.h"
 #include "MantidMDEvents/BoxControllerNeXusIO.h"
 
-
-#if defined (__INTEL_COMPILER)
- typedef std::auto_ptr< ::NeXus::File>  file_holder_type;
-#else 
+#if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
  typedef std::unique_ptr< ::NeXus::File>  file_holder_type;
+#else
+ typedef std::auto_ptr< ::NeXus::File>  file_holder_type;
 #endif
 
 using namespace Mantid::Kernel;
