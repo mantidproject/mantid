@@ -112,23 +112,6 @@ public:
     }
   }
 
-  void test_replaceSpectraMap()
-  {
-    WorkspaceTester testWS;
-    testWS.initialize(1,1,1);
-    // Default one
-    TS_ASSERT_EQUALS(testWS.getSpectrum(0)->getSpectrumNo(), 1);
-
-    ISpectraDetectorMap * spectraMap = new OneToOneSpectraDetectorMap(1,10);
-    testWS.replaceSpectraMap(spectraMap);
-    // Has it been replaced
-    for (size_t i=0; i<testWS.getNumberHistograms(); i++)
-    {
-      TS_ASSERT_EQUALS(testWS.getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
-      TS_ASSERT(testWS.getSpectrum(i)->hasDetectorID(detid_t(i+1)));
-    }
-  }
-  
   void test_updateSpectraUsing()
   {
     WorkspaceTester testWS;
@@ -144,21 +127,17 @@ public:
     TS_ASSERT( testWS.getSpectrum(2)->hasDetectorID(30) );
   }
 
-  void testSpectraMapCopiedWhenAWorkspaceIsCopied()
+  void testDetectorMappingCopiedWhenAWorkspaceIsCopied()
   {
     boost::shared_ptr<MatrixWorkspace> parent(new WorkspaceTester);
     parent->initialize(1,1,1);
-    ISpectraDetectorMap * spectraMap = new OneToOneSpectraDetectorMap(1,10);
-    parent->replaceSpectraMap(spectraMap);
+    parent->getSpectrum(0)->setSpectrumNo(99);
+    parent->getSpectrum(0)->setDetectorID(999);
 
-    MatrixWorkspace_sptr copied = WorkspaceFactory::Instance().create(parent,1,1,1);
-
+    MatrixWorkspace_sptr copied = WorkspaceFactory::Instance().create(parent);
     // Has it been copied?
-    for (size_t i=0; i<copied->getNumberHistograms(); i++)
-    {
-      TS_ASSERT_EQUALS(copied->getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
-      TS_ASSERT(copied->getSpectrum(i)->hasDetectorID(detid_t(i+1)));
-    }
+    TS_ASSERT_EQUALS(copied->getSpectrum(0)->getSpectrumNo(), 99);
+    TS_ASSERT(copied->getSpectrum(0)->hasDetectorID(999));
   }
 
   void testGetMemorySize()

@@ -24,13 +24,11 @@ namespace Mantid
   namespace Geometry
   {
     class ParameterMap;
-    class ISpectraDetectorMap;
     class INearestNeighbours;
     class INearestNeighboursFactory;
   }
   namespace API
   {
-    class SpectraDetectorMap;
     class SpectrumDetectorMapping;
 
     //----------------------------------------------------------------------
@@ -98,16 +96,9 @@ namespace Mantid
       std::map<specid_t, Mantid::Kernel::V3D> getNeighboursExact(specid_t spec, const int nNeighbours, const bool ignoreMaskedDetectors=false) const;
       //@}
 
-      /// Const access to the spectra-detector map
-      const Geometry::ISpectraDetectorMap& spectraMap() const;
-      /// Replace the current spectra map with a new one
-      void replaceSpectraMap(const Geometry::ISpectraDetectorMap* spectramap);
-      void updateSpectraUsingMap();
       void updateSpectraUsing(const SpectrumDetectorMapping& map);
       /// Build the default spectra mapping, most likely wanted after an instrument update
       void rebuildSpectraMapping(const bool includeMonitors = true);
-      
-      void generateSpectraMap();
 
       // More mapping
       spec2index_map * getSpectrumToWorkspaceIndexMap() const;
@@ -323,9 +314,6 @@ namespace Mantid
 
       /// Has this workspace been initialised?
       bool m_isInitialized;
-
-      /// A shared pointer to the spectra-detector map
-      boost::shared_ptr<const Geometry::ISpectraDetectorMap> m_spectraMap;
 
       /// The unit for the data values (e.g. Counts)
       std::string m_YUnit;

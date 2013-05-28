@@ -3,7 +3,6 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceIteratorCode.h"
@@ -34,7 +33,6 @@ namespace Mantid
     MatrixWorkspace::MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* nnFactory) : 
       IMDWorkspace(), ExperimentInfo(),
       m_axes(), m_isInitialized(false),
-      m_spectraMap(new Geometry::OneToOneSpectraDetectorMap),
       m_YUnit(), m_YUnitLabel(), m_isDistribution(false),
       m_masks(), m_indexCalculator(),
       m_nearestNeighboursFactory((nnFactory == NULL) ? new NearestNeighboursFactory : nnFactory),
@@ -69,10 +67,6 @@ namespace Mantid
 
       // Bypass the initialization if the workspace has already been initialized.
       if (m_isInitialized) return;
-
-//      // Setup a default 1:1 spectra map that goes from 1->NVectors
-//      // Do this before derived init so that it can be replaced if necessary
-//      this->replaceSpectraMap(new Geometry::OneToOneSpectraDetectorMap(1,static_cast<specid_t>(NVectors)));
 
       // Invoke init() method of the derived class inside a try/catch clause
       try
@@ -120,58 +114,6 @@ namespace Mantid
       }
       else      
         return Workspace::getTitle();
-    }
-
-
-    //---------------------------------------------------------------------------------------
-    /** Get a const reference to the SpectraDetectorMap associated with this workspace.
-    *  Can ONLY be taken as a const reference!
-    *
-    *  @return The SpectraDetectorMap
-    */
-    const Geometry::ISpectraDetectorMap& MatrixWorkspace::spectraMap() const
-    {
-      return *m_spectraMap;
-    }
-
-    //---------------------------------------------------------------------------------------
-    /** Replace the current spectra map with a new one. This object takes ownership.
-     * This will fill in the detector ID lists in each spectrum of the workspace
-     * for backwards compatibility.
-     *
-     * @param spectraMap :: A pointer to a new SpectraDetectorMap.
-     */
-    void MatrixWorkspace::replaceSpectraMap(const Geometry::ISpectraDetectorMap * spectraMap)
-    {
-      //g_log.notice() << "MatrixWorkspace::replaceSpectraMap() is being deprecated." << std::endl;
-      m_spectraMap.reset(spectraMap);
-      // The neighbour map needs to be rebuilt
-      m_nearestNeighbours.reset();
-      try
-      {
-        this->updateSpectraUsingMap();
-      }
-      catch (std::exception &e)
-      {
-        g_log.error() << "Error in MatrixWorkspace::replaceSpectraMap(): " << e.what() << std::endl;
-      }
-    }
-
-    /** Using the current spectraDetectorMap,
-     * this will fill in the detector ID lists in each spectrum of the workspace
-    * for backwards compatibility.
-    */
-    void MatrixWorkspace::updateSpectraUsingMap()
-    {
-      for (size_t wi=0; wi < this->getNumberHistograms(); wi++)
-      {
-        ISpectrum * spec = getSpectrum(wi);
-        specid_t specNo = spec->getSpectrumNo();
-
-        std::vector<detid_t> dets = m_spectraMap->getDetectors(specNo);
-        spec->clearDetectorIDs();
-        spec->addDetectorIDs(dets);
-      }
     }
 
     void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping& map)
@@ -239,47 +181,6 @@ namespace Mantid
       }
 
     }
-
-
-
-
-    //---------------------------------------------------------------------------------------
-    /** Working off the spectrum numbers and
-     * lists of detector IDs in each spectrum,
-     * create the SpectraDetectorMap, and the axis(1).
-     *
-     * For BACKWARDS-COMPATIBILITY.
-     *
-     */
-    void MatrixWorkspace::generateSpectraMap()
-    {
-      // We create a spectra-type axis that holds the spectrum # at each workspace index.
-
-      if( m_axes.size() > 1 )
-      {
-        delete m_axes[1];
-        m_axes[1] = new SpectraAxis(this);
-      }
-      else
-        m_axes.push_back(  new SpectraAxis(this) );
-
-      API::SpectraDetectorMap *newMap = new API::SpectraDetectorMap;
-
-      //Go through all the spectra
-      for (size_t wi=0; wi<this->getNumberHistograms(); wi++)
-      {
-        ISpectrum * spec = getSpectrum(wi);
-        specid_t specNo = spec->getSpectrumNo();
-        newMap->addSpectrumEntries(specNo, spec->getDetectorIDs());
-        //std::cout << "generateSpectraMap : wi " << wi << " specNo " << specNo << " detID " << *spec->getDetectorIDs().begin() << std::endl;
-      }
-
-      // Equivalent of replaceSpectraMap(newMap);
-      m_spectraMap.reset(newMap);
-      m_nearestNeighbours.reset();
-    }
-
-
 
     //---------------------------------------------------------------------------------------
     /**
