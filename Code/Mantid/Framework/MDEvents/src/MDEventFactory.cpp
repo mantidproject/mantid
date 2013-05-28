@@ -193,8 +193,8 @@ namespace Mantid
 {
     namespace MDEvents
     {
-        std::vector<MDEventFactory::fpCreateBox>  MDEventFactory::boxCreatorFP(4*MDEventFactory::MAX_MD_DIMENSIONS_NUM,NULL);
-        std::vector<MDEventFactory::fpCreateMDWS> MDEventFactory::wsCreatorFP(MDEventFactory::MAX_MD_DIMENSIONS_NUM,NULL);
+        std::vector<MDEventFactory::fpCreateBox>  MDEventFactory::boxCreatorFP(4*(MDEventFactory::MAX_MD_DIMENSIONS_NUM+1),NULL);
+        std::vector<MDEventFactory::fpCreateMDWS> MDEventFactory::wsCreatorFP(MDEventFactory::MAX_MD_DIMENSIONS_NUM+1,NULL);
 
 
         template<size_t nd>
@@ -239,6 +239,10 @@ namespace Mantid
         class LOOP
         {
         public:
+            LOOP()
+            {
+                LOOP::EXEC();
+            }
             static inline void EXEC()
             {
                 LOOP< nd-1 >::EXEC();
@@ -251,6 +255,7 @@ namespace Mantid
         class LOOP<0>
         {
         public:
+            LOOP(){}
             static inline void EXEC()
             {           
                 MDEventFactory::wsCreatorFP[0]    = &MDEventFactory::createMDWorkspaceND<0>;
