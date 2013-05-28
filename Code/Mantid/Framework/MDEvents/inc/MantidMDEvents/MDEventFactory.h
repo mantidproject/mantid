@@ -45,9 +45,20 @@ namespace MDEvents
     static std::vector<fpCreateBox> boxCreatorFP;
 
     // typedef for the class function pointer to the function, which creates MD Workspaces
-    typedef API::IMDEventWorkspace *(MDEventFactory::*fpCreateMDWS)(size_t nd,const std::string & eventType);
+    typedef API::IMDEventWorkspace *(*fpCreateMDWS)(const std::string & eventType);
     // vector of function pointers to the funcions
     static std::vector<fpCreateMDWS> wsCreatorFP;
+
+    // as the constructor's address can not be taken, we are writing local wrapper around the constructor. This can also help in a future when writing custom memory allocator
+    template<size_t nd>
+    static API::IMDEventWorkspace * createMDWorkspaceND(const std::string & eventType);
+
+
+   // helper class to generate methaloop on MD workspaces dimensions:
+    template<size_t nd>
+    friend class LOOP;
+
+    static LOOP<MAX_MD_DIMENSIONS_NUM> CODE_GENERATOR;
   };
 
   //### BEGIN AUTO-GENERATED CODE #################################################################
