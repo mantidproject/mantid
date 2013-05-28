@@ -643,6 +643,20 @@ class ScriptRepositoryTestImpl : public CxxTest::TestSuite{
     TS_ASSERT(repo->fileStatus(folder_name) == Mantid::API::BOTH_UNCHANGED) ;
   }
 
+ void test_status_of_empty_local_folder(){
+    std::string folder_name = "LocalFolder";
+    // install 
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
+
+    Poco::File dir(std::string(local_rep).append(folder_name)); 
+    dir.createDirectories();
+
+    // list files
+    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
+    // it should be local only
+    TS_ASSERT(repo->fileStatus(folder_name) == Mantid::API::LOCAL_ONLY) ;
+  }
+
   void test_downloading_and_removing_files(){
     std::string file_name = "TofConv/TofConverter.py";
     // install 
