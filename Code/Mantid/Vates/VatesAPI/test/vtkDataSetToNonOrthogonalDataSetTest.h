@@ -31,6 +31,7 @@ private:
   std::string createMantidWorkspace(bool nonUnityTransform,
                                     bool forgetUB = false,
                                     bool forgetWmat = false,
+                                    bool forgetAffmat = false,
                                     double scale = 1.0)
   {
     // Creating an MDEventWorkspace as the content is not germain to the
@@ -97,7 +98,10 @@ private:
                       
     CoordTransformAffine affMat(4, 4);
     affMat.setMatrix(Matrix<Mantid::coord_t>(affMatVals));
-    ws->setTransformToOriginal(affMat.clone(), 0);
+    if (!forgetAffmat)
+    {
+      ws->setTransformToOriginal(affMat.clone(), 0);
+    }
 
     // Create the transform (W) matrix
     // Need it as a vector
@@ -244,6 +248,15 @@ public:
     ds->Delete();
   }
 
+  void testNoThrowsSimpleDataSetNoAffineMatrix()
+  {
+    std::string wsName = createMantidWorkspace(false, false, false, true);
+    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    TS_ASSERT_THROWS_NOTHING(converter.execute());
+    ds->Delete();
+  }
+
   void testStaticUseForSimpleDataSet()
   {
     std::string wsName = createMantidWorkspace(false);
@@ -287,7 +300,7 @@ public:
 
   void testScaledSimpleDataset()
   {
-    std::string wsName = createMantidWorkspace(false, false, false, 2.0);
+    std::string wsName = createMantidWorkspace(false, false, false, false, 2.0);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
     TS_ASSERT_THROWS_NOTHING(converter.execute());
@@ -297,7 +310,7 @@ public:
 
   void testScaledNonUnitySimpleDataset()
   {
-    std::string wsName = createMantidWorkspace(true, false, false, 2.0);
+    std::string wsName = createMantidWorkspace(true, false, false, false, 2.0);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
     TS_ASSERT_THROWS_NOTHING(converter.execute());

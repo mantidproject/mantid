@@ -105,8 +105,18 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
         throw std::invalid_argument("W_MATRIX is not present on workspace");
       }
       wMatArr = run.getPropertyValueAsType<std::vector<double > >("W_MATRIX");
-      API::CoordTransform *transform = infoWs->getTransformToOriginal();
-      affMat = transform->makeAffineMatrix();
+      try
+      {
+        API::CoordTransform *transform = infoWs->getTransformToOriginal();
+        affMat = transform->makeAffineMatrix();
+      }
+      catch (std::runtime_error &)
+      {
+        // Create identity matrix of dimension+1
+        std::size_t nDims = infoWs->getNumDims() + 1;
+        Kernel::Matrix<coord_t> temp(nDims, nDims, true);
+        affMat = temp;
+      }
     }
     // This is only here to make the unit test run.
     if (boost::algorithm::find_first(wsType, "MDEventWorkspace"))
@@ -125,8 +135,18 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
         throw std::invalid_argument("W_MATRIX is not present on workspace");
       }
       wMatArr = run.getPropertyValueAsType<std::vector<double > >("W_MATRIX");
-      API::CoordTransform *transform = infoWs->getTransformToOriginal();
-      affMat = transform->makeAffineMatrix();
+      try
+      {
+        API::CoordTransform *transform = infoWs->getTransformToOriginal();
+        affMat = transform->makeAffineMatrix();
+      }
+      catch (std::runtime_error &)
+      {
+        // Create identity matrix of dimension+1
+        std::size_t nDims = infoWs->getNumDims() + 1;
+        Kernel::Matrix<coord_t> temp(nDims, nDims, true);
+        affMat = temp;
+      }
     }
     Kernel::DblMatrix wTrans(wMatArr);
     this->createSkewInformation(oLatt, wTrans, affMat);
