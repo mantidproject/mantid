@@ -660,9 +660,8 @@ namespace Mantid
     *  @return A single detector object representing the detector(s) contributing
     *          to the given spectrum number. If more than one detector contributes then
     *          the returned object's concrete type will be DetectorGroup.
-    *  @throw  std::runtime_error if the SpectraDetectorMap has not been filled
-    *  @throw  Kernel::Exception::NotFoundError if the SpectraDetectorMap or the Instrument
-    do not contain the requested spectrum number of detector ID
+    *  @throw  Kernel::Exception::NotFoundError If the Instrument is missing or the
+                  requested workspace index does not have any associated detectors
     */
     Geometry::IDetector_const_sptr MatrixWorkspace::getDetector(const size_t workspaceIndex) const
     {
