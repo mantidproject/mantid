@@ -26,6 +26,9 @@ namespace Mantid
   typedef std::tr1::unordered_map<detid_t, size_t> detid2index_map;
 #endif
 
+  /// Map single det ID of group to its members
+  typedef std::map<detid_t, std::vector<detid_t> > det2group_map;
+
 }
 
 #endif //MANTID_API_SPECTRADETECTORMAP_TYPES

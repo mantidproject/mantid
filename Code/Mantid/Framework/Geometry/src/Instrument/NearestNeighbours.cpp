@@ -3,7 +3,6 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 // Nearest neighbours library
 #include "MantidKernel/ANN/ANN.h"

@@ -5,7 +5,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 
 #include <boost/lexical_cast.hpp>
 #include <iostream>

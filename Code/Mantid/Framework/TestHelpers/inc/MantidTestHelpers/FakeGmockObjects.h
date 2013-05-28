@@ -13,7 +13,6 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/INearestNeighboursFactory.h"
 #include "gmock/gmock.h"
