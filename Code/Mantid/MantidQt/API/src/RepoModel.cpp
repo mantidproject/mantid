@@ -16,12 +16,20 @@ using Mantid::Kernel::ConfigService;
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <QFormLayout>
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QDialogButtonBox>
 #include <QtConcurrentRun>
+#include <QTextStream>
 
 
 
+// flag to indicate that the thread is delete thread
+const char * delete_mark = "*DELETE*";
+const char * nofile_flag = "nofile"; 
+
+
+/// Executes the download from ScriptRepository. This function will be executed in a separate thread
 static QString download_thread(Mantid::API::ScriptRepository_sptr & pt, const std::string & path){
   QString result; 
   try{
@@ -35,7 +43,7 @@ static QString download_thread(Mantid::API::ScriptRepository_sptr & pt, const st
   return result; 
 }
 
-
+/// Execute the upload from ScriptRepository. This function will be executed in a separate thread
 static QString upload_thread(Mantid::API::ScriptRepository_sptr & pt, 
                              const std::string & path, const QString & email, 
                              const QString & author, const QString & comment)
@@ -50,10 +58,24 @@ static QString upload_thread(Mantid::API::ScriptRepository_sptr & pt,
   }
   return QString(); 
 }
-                               
-                               
+/// Execute the remove from ScriptRepository. This function will be executed in a separate thread.
+static QString delete_thread(Mantid::API::ScriptRepository_sptr & pt,
+                             const std::string & path, const QString & email, 
+                             const QString & author, const QString & comment)
+  {
+  try{
+    pt->remove(path, comment.toStdString(), 
+                 author.toStdString(), email.toStdString()); 
+  }catch(Mantid::API::ScriptRepoException & ex){
+    QString info = QString::fromStdString(ex.what()); 
+    info.replace("\n","</p><p>");
+    // it adds the mark *DELETE* so to recognize that it was used to delete an entry.
+    return info+delete_mark; 
+  }
+  return delete_mark;  
+}
 
-//Initialize the logger
+///Initialize the logger
 Mantid::Kernel::Logger & RepoModel::g_log = Mantid::Kernel::Logger::get("RepoModel");
 
 
@@ -117,7 +139,14 @@ int RepoModel::RepoItem::row() const
         return parentItem->childItems.indexOf(const_cast<RepoItem*>(this));
     return 0;
 }
-
+/** Remove the given child from the childItems. Used to allow removing rows from the view*/
+bool RepoModel::RepoItem::removeChild(int row){
+  if (row < 0 || row >= childCount())
+    return false;
+  
+  childItems.removeAt(row); 
+  return true;
+}
 
 //////////////////////////////////////////////////
 // MODEL
@@ -139,8 +168,8 @@ RepoModel::RepoModel(QObject *parent):
   repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
   connect(&download_watcher, SIGNAL(finished()), this, SLOT(downloadFinished()));
   connect(&upload_watcher, SIGNAL(finished()), this, SLOT(uploadFinished()));
-  uploading_path = "nofile"; 
-  downloading_path = "nofile";
+  uploading_path = nofile_flag; 
+  downloading_path = nofile_flag;
   setupModelData(rootItem);
 }
 
@@ -157,10 +186,11 @@ RepoModel::~RepoModel()
    From the index.internalPointer the RepoModel will have access to the path, 
    which uniquely define its entry on ScriptRepository. 
 
-   The RepoModel defines 3 columns: 
+   The RepoModel defines 4 columns: 
     - Path
     - Status
     - AutoUpdate
+    - Delete
    
    The path, provides the name of the file. The status, give information on the ScriptRepository
    entries. Currently, an entry may be found on the following states: 
@@ -173,6 +203,9 @@ RepoModel::~RepoModel()
    
    The AutoUpdate allow to flag the entries to receive the updates automatically when new files 
    are available at the central repository.
+
+   The delete column will return a string "protected" or "deletable" that will be used to know if it
+   can be deleted or not. For the current version, folders are protected, and files are deletable.
 
    The repomodel will react to the following roles: 
      - DisplayRole: to provide the main information. 
@@ -203,9 +236,15 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
         status = repo_ptr->fileStatus(path.toStdString());
         return fromStatus(status); 
         break; 
-      case 2:
+      case 2:// autoupdate option
         inf = repo_ptr->fileInfo(path.toStdString()); 
         return inf.auto_update?QString("true"):QString("false");
+        break;
+      case 3:// delete action
+        inf = repo_ptr->fileInfo(path.toStdString());
+        status = repo_ptr->fileStatus(path.toStdString()); 
+        if (status == REMOTE_ONLY) return PROTECTEDENTRY;     
+        return DELETABLEENTRY;
         break;
       }
     }
@@ -277,6 +316,16 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
         }
       }else if (index.column() == 2){
         return "Enable or disable this item to be downloaded automatically when new versions will be available";
+      }else if (index.column() == 3){ 
+        if (isUploading(index))
+          return "Connection busy... Be patient.";
+        inf = repo_ptr->fileInfo(path.toStdString());
+        if (inf.directory)
+          return QVariant(); 
+        status = repo_ptr->fileStatus(path.toStdString()); 
+        if (status == REMOTE_ONLY)
+          return QVariant(); 
+        return "Click here to delete this file"; 
       }
     }// end tool tip
   }catch(Mantid::API::ScriptRepoException & ex){
@@ -398,7 +447,7 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
         qDebug() << "Uploading... "<< QString::fromStdString(path) << form->comment()
                    << form->author() << form->email() << endl;
         uploading_path = QString::fromStdString(path); 
-        upload_index = index; 
+
         upload_threads = QtConcurrent::run(upload_thread, repo_ptr, path, form->email(), 
                                            form->author(), form->comment()); 
         upload_watcher.setFuture(upload_threads); 
@@ -411,11 +460,137 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
     }   
   }
 
-  if (ret){
+
+  if (index.column() == 3){ // trigger actions: delete
+    using namespace Mantid::API;
+    if (action != "delete")
+      return false;
+    // used to show qwidgets
+    QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+    
+    SCRIPTSTATUS status = repo_ptr->fileStatus(path);
+
+    /* We do not remove files directly from the central repository, but, usually, 
+       this option is not available from the GUI (no button), so, just return false*/
+    if (status == REMOTE_ONLY)
+      return false; 
+
+    // it requires a new connection to the uploader server
+    if (!upload_threads.isFinished()){
+      QWidget * father = qobject_cast<QWidget*>(QObject::parent());
+      QMessageBox::information(father, "Wait", "The connection with the server is busy now, wait a while and try again. "); 
+      return false;
+    }
+    //query the user if he wants to delete only locally or remote as well.
+    DeleteQueryBox * box = new DeleteQueryBox(QString::fromStdString(path), status, father);
+
+    if (box->exec() != QMessageBox::Yes){
+      // the user gave up deleting this entry, release memory
+      delete box; 
+      box = 0;
+      return false; 
+    }
+
+    // get the options from the user
+    bool remove_central(box->deleteCentral()); 
+    QString comment(box->comment()); 
+    { // release memory
+      delete box; 
+      box = 0; 
+    }
+
+    if (remove_central){
+      // remove from central repository
+      // currently, directories can not be deleted recursively
+      if (repo_ptr->fileInfo(path).directory){
+        QMessageBox::information(father, 
+                                 "Not Supported", 
+                                 "The current version does not support deleting from the central repository recursively. Please, delete one-by-one"); 
+        return false; 
+      };
+
+      // check if the reason was given and it is valid
+      if (comment.isEmpty()){
+        QMessageBox::information(father, "Not Allowed",
+                                 "You are not allowed to delete one file without a reason"); 
+        return false; 
+      }
+
+      // we will not allow them to remove if they have no e-mail and author saved
+      QSettings settings; 
+      settings.beginGroup("Mantid/ScriptRepository"); 
+      QString email = settings.value("UploadEmail",QString()).toString();
+      QString author = settings.value("UploadAuthor",QString()).toString();
+      settings.endGroup(); 
+      
+      if (author.isEmpty() || email.isEmpty()){
+        QMessageBox::information(father, "You have not uploaded this file",
+                                 "You are not allowed to remove files that you have not updloaded through ScriptRepository");
+        return false; 
+      }
+
+      // we have all we need to delete from the central repository
+      // execute the delete in a separate thread, we will use the upload established way, because,
+      // it will connect to the same server to delete.
+      delete_index = index;
+      uploading_path = QString::fromStdString(path); 
+      upload_threads = QtConcurrent::run(delete_thread, repo_ptr, path, 
+                                         email, author, comment);
+      upload_watcher.setFuture(upload_threads); 
+      ret = true;
+            
+    }else{
+      // remove only the local entry
+      try{
+        repo_ptr->remove_local(path);
+        
+        try{
+          repo_ptr->fileStatus(path);
+        }catch(...){
+          // this means that this entry is not inside the ScriptRepository any more.          
+          removeRow(item->row(), createIndex(0,0,item->parent()));
+        }
+      
+      }catch(Mantid::API::ScriptRepoException & ex){
+        g_log.information() << "Delete exception: " << ex.what() << ": " <<  ex.systemError() << std::endl; 
+        QMessageBox::warning(father, 
+                             "Delete file failed!",
+                             ex.what());
+        return false; 
+      }
+      ret = true;      
+    }
+
+  }// end delete action
+
+  if (ret)       
     emit dataChanged(index, index);  
-  }
   
   return ret;
+}
+
+
+bool RepoModel::removeRows (int row, int count, const QModelIndex & parent){
+  // currently, we only allow removing files, this means, that we do not accept
+  // removing recursively. Besides, we have choose to make removeRows protected, 
+  // which means that only inside RepoModel, it can be called, and it is called
+  // only through the removeRow method.  
+  bool success1 = true; 
+  bool success2 = true; 
+  RepoItem *parentItem = static_cast<RepoItem*>(parent.internalPointer());
+  if (!parentItem )
+    return true;
+    
+  for (int i=row + count -1; i>=row; i--){
+    QModelIndex child = index(i, 0, parent);
+    if (rowCount(child))
+      success1 = success1 && removeRows(0, rowCount(child),child);  
+    beginRemoveRows(parent, i, i); 
+    success2 = success2 && parentItem->removeChild(row);
+    endRemoveRows();        
+  }
+  return success1 && success2; 
+
 }
 
 /**Define the interaction with the user allowed. 
@@ -436,10 +611,11 @@ Qt::ItemFlags RepoModel::flags(const QModelIndex &index) const
 }
 
 /** Return the header for the columns. 
- * The RepoModel defines 3 columns with the following information: 
+ * The RepoModel defines 4 columns with the following information: 
  *  - Path
  *  - Status
  *  - AutoUpdate
+ *  - Delete
  *  @param section: The column number
  *  @param orientation: It will accept only the Horizontal orientation.
  *  @param role: Only the DisplayRole will be accepted. It will not provide tool tip 
@@ -457,6 +633,8 @@ QVariant RepoModel::headerData(int section, Qt::Orientation orientation, int rol
       return "Status"; 
     case 2: 
       return "AutoUpdate";
+    case 3: 
+      return "Delete";
     default:
       return QVariant();
     }
@@ -541,11 +719,11 @@ int RepoModel::rowCount(const QModelIndex &parent) const
  * But, for all the index, the number of columns will be always 3. 
  * (path, status, autoupdate)
  *
- * @return 3.
+ * @return 4.
  */
 int RepoModel::columnCount(const QModelIndex &/*parent*/) const
 {
-  return 3;
+  return 4;
 }
 
 /** Return the description of the file for a defined entry
@@ -749,7 +927,7 @@ void RepoModel::downloadFinished(void){
                           QString("<html><body><p>%1</p></body></html>")
                           .arg(info));  
   }
-  downloading_path = "nofile";
+  downloading_path = nofile_flag;
   emit dataChanged(download_index, download_index);
 }
 
@@ -764,14 +942,33 @@ bool RepoModel::isDownloading(const QModelIndex & index)const{
 
 void RepoModel::uploadFinished(void){  
   QString info = upload_threads.result();
+  bool _delete = false;
+  QString title =  "Upload Failed"; 
+  if (info.contains(delete_mark)){
+    info.replace(delete_mark,""); 
+    title = "Delete Failed";
+    _delete = true;
+  }
+  
   if (!info.isEmpty()){
     QMessageBox::warning( qobject_cast<QWidget*>(QObject::parent()), 
-                          "Upload Failed",
+                          title,
                           QString("<html><body><p>%1</p></body></html>")
-                          .arg(info));  
+                          .arg(info));
+    return;
   }
-  uploading_path = "nofile";
-  emit dataChanged(download_index, download_index);
+  
+  if (_delete){
+    g_log.debug() << "File " << uploading_path.toStdString() << " removed"<<std::endl; 
+    try{
+      repo_ptr->fileStatus(uploading_path.toStdString());
+    }catch(...){
+      // this means that this entry is not inside the ScriptRepository any more.
+      RepoItem * item = static_cast<RepoItem*>(delete_index.internalPointer());
+      removeRow(item->row(), createIndex(0,0,item->parent()));
+    }
+  }
+  uploading_path = nofile_flag;
 }
 
   
@@ -861,3 +1058,86 @@ void RepoModel::UploadForm::setAuthor(const QString & author){
 void RepoModel::UploadForm::lastSaveOption(bool option){
   save_ck->setCheckState(option?Qt::Checked:Qt::Unchecked);
 }
+
+
+RepoModel::DeleteQueryBox::DeleteQueryBox( const QString & path,
+                                           Mantid::API::SCRIPTSTATUS status,
+                                           QWidget * parent):
+  QMessageBox(QMessageBox::Question, "Delete file", "", QMessageBox::Yes|QMessageBox::No,
+              parent){
+  using namespace Mantid::API;
+  QString info_str; 
+  QTextStream info(&info_str); 
+
+  switch(status){
+  case REMOTE_ONLY:
+    info << "You cannot remove it!"; 
+    break;
+  case LOCAL_ONLY:
+    info  << "Are you sure you want to delete this file from your script repository?"
+             << "\n\n\t" << path << "\n\n";
+    break;
+  case REMOTE_CHANGED:
+  case BOTH_CHANGED:
+    info << "Are you sure you want to delete this file from your script repository?"
+         << "\n\n\t" << path << "\n\n"
+         << "OBS: there is a new version of this file at the central repository, so you are not "
+         << "allowed to remove this file from the central repository."; 
+    break;
+
+  case BOTH_UNCHANGED:
+    info << "Are you sure you want to delete this file from your script repository?"
+         << "\n\n\t" << path << "\n\n";
+    break;
+  case LOCAL_CHANGED:
+    info << "Are you sure you want to delete this file from your script repository?"
+         << "\n\n\t" << path << "\n\n";
+    info << "\n\nObs: You file has local changes and they can not be recovered afterwards";
+    break; 
+  }
+  // creation of the new widgets
+  delete_ck = NULL; 
+  comment_te = NULL; 
+
+  setText(info_str); 
+
+  if (status == BOTH_UNCHANGED || status == LOCAL_CHANGED){
+    QGridLayout * _lay = qobject_cast<QGridLayout*>(layout()); 
+    if (_lay){
+      QLayoutItem * buttons = _lay->takeAt(_lay->count()-1);
+
+      delete_ck = new QCheckBox("Delete it from Central Repository",this);
+      QLabel * la = new QLabel("Please, give the reason for deleting:", this);
+      comment_te = new QTextEdit(this);  
+
+      
+      la->setEnabled(false); 
+      comment_te->setEnabled(false);
+      _lay->addWidget(delete_ck, _lay->rowCount(), 0, 1, -1);
+      _lay->addWidget(la, _lay->rowCount(), 0, 1, -1);
+      _lay->addWidget(comment_te, _lay->rowCount(), 0, 1, -1);
+      _lay->addItem(buttons, _lay->rowCount(), 0,1,-1); 
+      connect(delete_ck, SIGNAL(toggled ( bool )),
+              comment_te, SLOT(setEnabled(bool))); 
+      connect(delete_ck, SIGNAL(toggled (bool)),
+              la, SLOT(setEnabled(bool))); 
+    }
+  }
+
+}
+
+RepoModel::DeleteQueryBox::~DeleteQueryBox(){
+} 
+QString RepoModel::DeleteQueryBox::comment(){
+  if (comment_te)
+    return comment_te->text(); 
+  else
+    return QString(); 
+}
+bool RepoModel::DeleteQueryBox::deleteCentral(){
+  if (delete_ck)
+    return delete_ck->isChecked(); 
+  else 
+    return false; 
+}
+
