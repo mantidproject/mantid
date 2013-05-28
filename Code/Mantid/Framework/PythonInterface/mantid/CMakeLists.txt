@@ -30,14 +30,6 @@ copy_python_files_to_dir ( ${VERSION_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${VERSION_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${VERSION_PY}.install.py )
 
 if ( MSVC )
-  # Wrapper script to call either python or python_d depending on directory contents
-  set ( PYTHON_EXE_WRAPPER_SRC "${CMAKE_CURRENT_SOURCE_DIR}/../../../Build/win_python.bat" )
-  set ( PYTHON_EXE_WRAPPER "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/win_python.bat" )
-else()
-  set ( PYTHON_EXE_WRAPPER ${PYTHON_EXECUTABLE} )
-endif()
-
-if ( MSVC )
   # On windows copy over the python wrapper to the build directory (hang it off kernel build)
   add_custom_command ( OUTPUT ${PYTHON_EXE_WRAPPER}
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
