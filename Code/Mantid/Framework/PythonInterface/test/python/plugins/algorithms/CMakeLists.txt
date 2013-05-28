@@ -18,6 +18,7 @@ set ( TEST_PY_FILES
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
   UpdatePeakParameterTableValueTest.py
+  SANSSubtractTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
