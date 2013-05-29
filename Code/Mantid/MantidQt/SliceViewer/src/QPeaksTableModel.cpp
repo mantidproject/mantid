@@ -21,30 +21,39 @@ namespace MantidQt
     const QString QPeaksTableModel::QLAB = "QLab";
     const QString QPeaksTableModel::QSAMPLE = "QSample";
 
-    /**
-    Create map. Create a map of column names to values for a peak.
-    */
-    QPeaksTableModel::ColumnNameRowValueMap QPeaksTableModel::createMap(const Mantid::API::IPeak& peak) const
+    void QPeaksTableModel::updateDataCache(const Mantid::API::IPeak& peak, const int row) const
     {
-      ColumnNameRowValueMap map;
-      map.insert(std::make_pair(RUNNUMBER, QString::number(peak.getRunNumber())));
-      map.insert(std::make_pair(DETID, QString::number(peak.getDetectorID())));
-      map.insert(std::make_pair(H, QString::number(peak.getH())));
-      map.insert(std::make_pair(K, QString::number(peak.getK())));
-      map.insert(std::make_pair(L, QString::number(peak.getL())));
-      map.insert(std::make_pair(DSPACING, QString::number(peak.getDSpacing())));
-      map.insert(std::make_pair(INT, QString::number(peak.getIntensity())));
-      map.insert(std::make_pair(SIGMINT, QString::number(peak.getSigmaIntensity())));
-      map.insert(std::make_pair(QLAB, peak.getQLabFrame().toString().c_str()));
-      map.insert(std::make_pair(QSAMPLE, peak.getQSampleFrame().toString().c_str()));
-      return map;
+      // if the index is what is already cached just return
+      if (row == m_dataCachePeakIndex)
+        return;
+
+      // generate the cache
+      m_dataCache.clear();
+      m_dataCache.push_back(QString::number(peak.getRunNumber()));
+      m_dataCache.push_back(QString::number(peak.getDetectorID()));
+      m_dataCache.push_back(QString::number(peak.getH()));
+      m_dataCache.push_back(QString::number(peak.getK()));
+      m_dataCache.push_back(QString::number(peak.getL()));
+      m_dataCache.push_back(QString::number(peak.getDSpacing()));
+      m_dataCache.push_back(QString::number(peak.getIntensity()));
+      m_dataCache.push_back(QString::number(peak.getIntensity()));
+
+      const QString COMMA(",");
+
+      const Mantid::Kernel::V3D qlab = peak.getQLabFrame();
+      m_dataCache.push_back(QString::number(qlab.X()) + COMMA + QString::number(qlab.Y()) + COMMA + QString::number(qlab.Z()));
+
+      const Mantid::Kernel::V3D qsample = peak.getQSampleFrame();
+      m_dataCache.push_back(QString::number(qsample.X()) + COMMA + QString::number(qsample.Y()) + COMMA + QString::number(qsample.Z()));
     }
 
     /**
     Constructor
     @param peaksWS : Workspace model.
     */
-    QPeaksTableModel::QPeaksTableModel(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) : m_peaksWS(peaksWS)
+    QPeaksTableModel::QPeaksTableModel(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) :
+        m_dataCachePeakIndex(-1),
+        m_peaksWS(peaksWS)
     {
       int index = 0;
       m_columnNameMap.insert(std::make_pair(index++, RUNNUMBER));
@@ -120,18 +129,10 @@ namespace MantidQt
 
       const int colNumber = index.column();
       const int rowNumber = index.row();
+
       const IPeak& peak = m_peaksWS->getPeak(rowNumber);
-
-      const QString colName = findColumnName(colNumber);
-
-      ColumnNameRowValueMap valueMap = createMap(peak);
-      ColumnNameRowValueMap::const_iterator foundRowValue = valueMap.find(colName);
-      if(foundRowValue == valueMap.end())
-      {
-        throw std::runtime_error("Unknown row requested");
-      }
-
-      return foundRowValue->second;
+      this->updateDataCache(peak, rowNumber);
+      return m_dataCache[colNumber];
     }
 
     /**
@@ -183,7 +184,7 @@ namespace MantidQt
        // TODO raise event and propagate through to Proper presenter.
        peaksSorted(columnName.toStdString(), order== Qt::AscendingOrder);
 
-       this->update();
+       emit layoutChanged(); //This should tell the view that the data has changed.
       }
     }
   }

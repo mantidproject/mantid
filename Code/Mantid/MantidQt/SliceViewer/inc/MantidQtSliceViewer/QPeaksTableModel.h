@@ -4,6 +4,7 @@
 #include "boost/function.hpp"
 #include "boost/tuple/tuple.hpp"
 #include <map>
+#include <vector>
 
 // Forward declarations
 namespace Mantid
@@ -67,7 +68,6 @@ namespace MantidQt
       typedef QString ColumnValueType;
       typedef std::map<ColumnNameType, bool> ColumnNameSortableMap;
       typedef std::map<int, ColumnNameType> ColumnIndexNameMap;
-      typedef std::map<ColumnNameType, ColumnValueType> ColumnNameRowValueMap;
 
       static const QString RUNNUMBER;
       static const QString DETID;
@@ -80,8 +80,11 @@ namespace MantidQt
       static const QString QLAB;
       static const QString QSAMPLE;
 
+      mutable std::vector<QString> m_dataCache;
+      mutable int m_dataCachePeakIndex;
+
       QString findColumnName(const int colIndex) const;
-      ColumnNameRowValueMap createMap(const Mantid::API::IPeak& peak) const;
+      void updateDataCache(const Mantid::API::IPeak& peak, const int row) const;
 
       /// Collection of data for viewing.
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
@@ -91,7 +94,6 @@ namespace MantidQt
 
       /// Map of column names to sortable flag.
       ColumnNameSortableMap m_sortableColumns;
-
     };
   }
 }

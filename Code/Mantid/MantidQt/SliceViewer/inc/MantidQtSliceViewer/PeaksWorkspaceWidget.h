@@ -40,8 +40,6 @@ namespace SliceViewer
 
     int m_originalTableWidth;
 
-    virtual void resizeEvent(QResizeEvent*);
-
   private slots:
       void onBackgroundColourClicked();
       void onForegroundColourClicked();
