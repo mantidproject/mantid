@@ -24,6 +24,7 @@ namespace CurveFitting
   /**
    */
   ComptonProfile::ComptonProfile() : API::ParamFunction(), API::IFunction1D(),
+      m_log(Kernel::Logger::get("ComptonProfile")),
       m_workspace(), m_wsIndex(0), m_mass(0.0),  m_l1(0.0), m_sigmaL1(0.0),
       m_l2(0.0), m_sigmaL2(0.0), m_theta(0.0), m_sigmaTheta(0.0), m_e1(0.0),
       m_t0(0.0), m_hwhmGaussE(0.0), m_hwhmLorentzE(0.0), m_voigt()
@@ -109,6 +110,7 @@ namespace CurveFitting
    */
   void ComptonProfile::function1D(double* out, const double* xValues, const size_t nData) const
   {
+    m_log.notice() << "--------------------- Mass=" << m_mass << " -----------------------" << std::endl;
     const double mn = PhysicalConstants::NeutronMassAMU;
     const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;
     const double massToMeV = 0.5*PhysicalConstants::NeutronMass/PhysicalConstants::meV; // Includes factor of 1/2
@@ -121,7 +123,6 @@ namespace CurveFitting
     double x0(0.0),x1(0.0);
     gsl_poly_solve_quadratic(m_mass-1.0, 2.0*std::cos(m_theta), -(m_mass+1.0), &x0, &x1);
     const double k0k1 = std::max(x0,x1); // K0/K1 at y=0
-
     double qy0(0.0), wgauss(0.0), lorentzFWHM(0.0);
 ;
     if(m_mass > 1.0)
@@ -142,6 +143,7 @@ namespace CurveFitting
       lorentzFWHM = m_hwhmLorentzE*factor;
       wgauss = m_hwhmGaussE*factor;
     }
+
     double k0y0 = k1*k0k1;                     // k0_y0 =  k0 value at y=0
     double wtheta = 2.0*STDDEV_TO_HWHM*std::abs(k0y0*k1*std::sin(m_theta)/qy0)*m_sigmaTheta;
     double common = (m_mass/mn) - 1 + k1*std::cos(m_theta)/k0y0;
@@ -149,6 +151,12 @@ namespace CurveFitting
     double wl2 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,3)/(k1*qy0*m_l1))*common)*m_sigmaL2;
 
     const double resolutionSigma = std::sqrt(std::pow(wgauss,2) + std::pow(wtheta,2) + std::pow(wl1,2) + std::pow(wl2,2));
+
+    m_log.notice() << "w_l1 (FWHM)=" << wl2 << std::endl;
+    m_log.notice() << "w_l0 (FWHM)=" << wl1 << std::endl;
+    m_log.notice() << "w_theta (FWHM)=" << wtheta << std::endl;
+    m_log.notice() << "w_foil_lorentz (FWHM)=" << lorentzFWHM << std::endl;
+    m_log.notice() << "w_foil_gauss (FWHM)=" << wgauss << std::endl;
 
     // -------------------------------------- Profile factor --------------------------------------------------------------
 
@@ -178,6 +186,7 @@ namespace CurveFitting
       out[j] = std::pow(e0[j],0.1)*m_mass*profile[j]/m_modQ[j];
     }
 
+    m_log.setEnabled(false);
   }
 
   /**

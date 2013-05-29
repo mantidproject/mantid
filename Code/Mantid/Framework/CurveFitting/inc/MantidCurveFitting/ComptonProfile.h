@@ -71,6 +71,10 @@ namespace CurveFitting
     void voigtApprox(std::vector<double> & voigt, const std::vector<double> & yspace, const double lorentzPos, const double lorentzAmp,
                      const double lorentzWidth, const double gaussWidth) const;
 
+  protected:
+    /// Logger
+    Kernel::Logger & m_log;
+
   private:
     /// Retrieve a component parameter
     double getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const;
@@ -114,6 +118,7 @@ namespace CurveFitting
     /// Current Q values
     mutable std::vector<double> m_modQ;
     ///@}
+
   };
 
 
