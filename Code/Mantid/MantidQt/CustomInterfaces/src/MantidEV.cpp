@@ -1116,18 +1116,27 @@ void MantidEV::QPointSelection_slot( bool lab_coords, double qx, double qy, doub
 void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
 {
    std::string peaks_ws_name = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
-   if ( peaks_ws_name.length() == 0 )
-   {
-     errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
-     return;
-   }
 
-   if ( !worker->isPeaksWorkspace( peaks_ws_name ) )
-   {
-     errorMessage("Requested Peaks Workspace Doesn't Exist");
-   }
+   std::vector< std::pair< std::string, std::string > > info;
 
-   std::vector< std::pair< std::string, std::string > > info = worker->PointInfo( peaks_ws_name, lab_coords, q_point );
+   if ( !worker->isPeaksWorkspace( peaks_ws_name ) )  // just show the Q vector
+   {
+     errorMessage("NOTE: Peaks Workspace Doesn't Exist");
+     if ( lab_coords )
+     {
+       std::pair<std::string, std::string> QlabStr("Qlab", boost::lexical_cast<std::string>(q_point));
+       info.push_back( QlabStr );
+     }
+     else
+     {
+       std::pair<std::string, std::string> QSampleStr("QSample", boost::lexical_cast<std::string>(q_point));
+       info.push_back( QSampleStr );
+     }
+   }
+   else   // get the info from the peaks workspace
+   {
+     info = worker->PointInfo( peaks_ws_name, lab_coords, q_point );
+   }
 
    m_uiForm.SelectedPoint_tbl->setRowCount((int)info.size());
    m_uiForm.SelectedPoint_tbl->setColumnCount(2);
