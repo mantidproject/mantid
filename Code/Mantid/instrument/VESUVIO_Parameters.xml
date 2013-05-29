@@ -109,7 +109,7 @@
 
 <!-- Standard deviation of detector theta distribution (radians) -->
 <parameter name="sigma_theta">
-  <value val="0.0023"/>
+  <value val="0.028"/>
 </parameter>
 
 <!-- Final energy of neutrons (meV) (Currently common but should it be?) -->
