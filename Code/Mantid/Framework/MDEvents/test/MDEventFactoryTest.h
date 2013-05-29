@@ -9,6 +9,7 @@
 
 #include <MantidMDEvents/MDEventFactory.h>
 
+
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 
@@ -28,6 +29,44 @@ public:
     TS_ASSERT_EQUALS( ew->getNumDims(), n);
 
     TS_ASSERT_THROWS( ew = MDEventFactory::CreateMDWorkspace(0), std::invalid_argument);
+  }
+
+
+  void test_box_factory()
+  {
+      BoxController_sptr bc = boost::shared_ptr<BoxController>(new BoxController(4));
+
+      IMDNode *Box = MDEventFactory::createBox(4,MDEventFactory::BoxType::MDBoxWithLean,bc);
+      TS_ASSERT_EQUALS( Box->getNumDims(), 4);
+      MDBox<MDLeanEvent<4>,4>* leanBox = dynamic_cast<MDBox<MDLeanEvent<4>,4>*>(Box);
+      TS_ASSERT(leanBox!=NULL);
+      delete Box;
+
+      bc.reset(new BoxController(9));
+      Box = MDEventFactory::createBox(9,MDEventFactory::BoxType::MDBoxWithFat,bc);
+      TS_ASSERT_EQUALS( Box->getNumDims(), 9);
+      MDBox<MDEvent<9>,9>* fatBox = dynamic_cast<MDBox<MDEvent<9>,9>*>(Box);
+      TS_ASSERT(fatBox!=NULL);
+      delete Box;
+
+
+
+      bc.reset(new BoxController(3));
+      Box = MDEventFactory::createBox(3,MDEventFactory::BoxType::MDGridBoxWithLean,bc);
+      TS_ASSERT_EQUALS( Box->getNumDims(), 3);
+      MDGridBox<MDLeanEvent<3>,3>* leanGridBox = dynamic_cast<MDGridBox<MDLeanEvent<3>,3>*>(Box);
+      TS_ASSERT(leanGridBox!=NULL);
+      delete Box;
+
+      bc.reset(new BoxController(1));
+      Box = MDEventFactory::createBox(1,MDEventFactory::BoxType::MDGridBoxWithFat,bc);
+      TS_ASSERT_EQUALS( Box->getNumDims(), 1);
+      MDGridBox<MDEvent<1>,1>* fatGridBox = dynamic_cast<MDGridBox<MDEvent<1>,1>*>(Box);
+      TS_ASSERT(fatGridBox!=NULL);
+      delete Box;
+
+      TS_ASSERT_THROWS(MDEventFactory::createBox(0,MDEventFactory::BoxType::MDBoxWithLean,bc), std::invalid_argument);
+      TS_ASSERT_THROWS(MDEventFactory::createBox(10,MDEventFactory::BoxType::MDGridBoxWithFat,bc), std::invalid_argument);
   }
 
 

@@ -232,6 +232,16 @@ namespace Mantid
                 throw std::invalid_argument(" there are more dimensions requested then instantiated");
 
          size_t id = nDimensions*MDEventFactory::NumBoxTypes + Type;
+         if(extentsVector.size()!=nDimensions) // set defaults
+         {
+             std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > defaultExtents(nDimensions);
+             for(size_t i=0;i<nDimensions;i++)
+             {
+                 defaultExtents[i].setExtents(-FLT_MAX,FLT_MAX);
+             }
+             return (*(boxCreatorFP[id]))(splitter.get(),defaultExtents,depth,nBoxEvents,boxID);
+         }
+
 
          return (*(boxCreatorFP[id]))(splitter.get(),extentsVector,depth,nBoxEvents,boxID);
         }
