@@ -70,9 +70,9 @@ namespace MDEvents
     template<size_t nd>
     static API::IMDNode * createMDBoxFat(API::BoxController *splitter,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,const uint32_t depth,const size_t nBoxEvents,const size_t boxID);
     template<size_t nd>
-    static API::IMDNode * createMDGridBoxLean(API::BoxController *splitter,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,const uint32_t depth,const size_t nBoxEvents,const size_t boxID);
+    static API::IMDNode * createMDGridBoxLean(API::BoxController *splitter,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,const uint32_t depth,const size_t nBoxEvents=0,const size_t boxID=0);
     template<size_t nd>
-    static API::IMDNode * createMDGridBoxFat(API::BoxController *splitter,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,const uint32_t depth,const size_t nBoxEvents,const size_t boxID);
+    static API::IMDNode * createMDGridBoxFat(API::BoxController *splitter,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,const uint32_t depth,const size_t nBoxEvents=0,const size_t boxID=0);
     // 0-dimensions terminator
     static API::IMDNode * createMDBoxWrong(API::BoxController *,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & ,const uint32_t ,const size_t ,const size_t );
 
