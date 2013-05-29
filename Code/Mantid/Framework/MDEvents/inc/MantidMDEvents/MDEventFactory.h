@@ -35,8 +35,8 @@ namespace MDEvents
       enum BoxType
       {
           MDBoxWithLean=0, //< MDBox generated for MDLeanEvent
-          MDBoxWithFat=1,  //< MDBox generated for MDEvent
-          MDGridBoxWithLean=2, //< MDGridBox generated for MDLeanEvent
+          MDGridBoxWithLean=1, //< MDGridBox generated for MDLeanEvent
+          MDBoxWithFat=2,     //< MDBox generated for MDEvent
           MDGridBoxWithFat=3,  //< MDGridBox generated for MDEvent
           NumBoxTypes=4        //< Number of different types of the events, used as metaloop splitter
       };
@@ -49,6 +49,8 @@ namespace MDEvents
     static API::IMDNode * createBox(size_t nDimensions,BoxType Type, API::BoxController_sptr & splitter, 
                                     const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector = std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> >(),
                                     const uint32_t depth=0,const size_t nBoxEvents=UNDEF_SIZET,const size_t boxID=UNDEF_SIZET);
+
+      
    private:   
     typedef  API::IMDNode *(*fpCreateBox)(API::BoxController * ,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & ,
                                                           const uint32_t,const size_t ,const size_t);

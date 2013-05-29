@@ -194,7 +194,53 @@ namespace Mantid
 {
     namespace MDEvents
     {
+        //------------------------------- FACTORY METHODS ------------------------------------------------------------------------------------------------------------------
+
+        /** Create a MDEventWorkspace of the given type
+        @param nd :: number of dimensions
+        @param eventType :: string describing the event type (MDEvent or MDLeanEvent)
+        @return shared pointer to the MDEventWorkspace created (as a IMDEventWorkspace).
+        */
+        API::IMDEventWorkspace_sptr MDEventFactory::CreateMDWorkspace(size_t nd, const std::string & eventType)
+        {
+
+            if(nd > MAX_MD_DIMENSIONS_NUM)
+                throw std::invalid_argument(" there are more dimensions requested then instantiated");
+
+            API::IMDEventWorkspace *pWs = (*(wsCreatorFP[nd]))(eventType);
+
+            return boost::shared_ptr<API::IMDEventWorkspace >(pWs);
+        }
+        /** Create a MDBox or MDGridBoxof the given type
+        @param nDimensions  :: number of dimensions
+        @param Type         :: enum descibing the box (MDBox or MDGridBox) and the event type (MDEvent or MDLeanEvent)
+        @param splitter     :: shared pointer to the box controller responsible for splitting boxes. The BC is not incremented as boxes take usual pointer from this pointer
+        @param extentsVector:: box extents in all n-dimensions (min-max)
+        @param depth        :: the depth of the box within the box tree
+        @param nBoxEvents   :: if defined, specify the memory the box should allocate to accept events -- not used for MDGridBox
+        @param boxID        :: the unique identifier, referencing location of the box in 1D linked list of boxes.  -- not used for MDGridBox
+
+        @return pointer to the IMDNode with proper box created.
+        */
+
+        API::IMDNode * MDEventFactory::createBox(size_t nDimensions,MDEventFactory::BoxType Type, API::BoxController_sptr & splitter, 
+                                    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
+                                    const uint32_t depth,const size_t nBoxEvents,const size_t boxID)
+        {
+
+         if(nDimensions > MAX_MD_DIMENSIONS_NUM)
+                throw std::invalid_argument(" there are more dimensions requested then instantiated");
+
+         size_t id = nDimensions*MDEventFactory::NumBoxTypes + Type;
+
+         return (*(boxCreatorFP[id]))(splitter.get(),extentsVector,depth,nBoxEvents,boxID);
+        }
+
+        //------------------------------- FACTORY METHODS END --------------------------------------------------------------------------------------------------------------
+
+        // static vector, conaining the pointers to the functions to create MD boxes
         std::vector<MDEventFactory::fpCreateBox>  MDEventFactory::boxCreatorFP(MDEventFactory::NumBoxTypes*(MDEventFactory::MAX_MD_DIMENSIONS_NUM+1),NULL);
+        // static vector, conaining the pointers to the functions to create MD Workspaces
         std::vector<MDEventFactory::fpCreateMDWS> MDEventFactory::wsCreatorFP(MDEventFactory::MAX_MD_DIMENSIONS_NUM+1,NULL);
 
 
@@ -249,52 +295,9 @@ namespace Mantid
         }
         //-------------------------------------------------------------- MD BOX constructor wrapper -- END
 
-        //------------------------------- FACTORY METHODS ------------------------------------------------------------------------------------------------------------------
 
-        /** Create a MDEventWorkspace of the given type
-        @param nd :: number of dimensions
-        @param eventType :: string describing the event type (MDEvent or MDLeanEvent)
-        @return shared pointer to the MDEventWorkspace created (as a IMDEventWorkspace).
-        */
-        API::IMDEventWorkspace_sptr MDEventFactory::CreateMDWorkspace(size_t nd, const std::string & eventType)
-        {
-
-            if(nd > MAX_MD_DIMENSIONS_NUM)
-                throw std::invalid_argument(" there are more dimensions requested then instantiated");
-
-            API::IMDEventWorkspace *pWs = (*(wsCreatorFP[nd]))(eventType);
-
-            return boost::shared_ptr<API::IMDEventWorkspace >(pWs);
-        }
-        /** Create a MDBox or MDGridBoxof the given type
-        @param nDimensions  :: number of dimensions
-        @param Type         :: enum descibing the box (MDBox or MDGridBox) and the event type (MDEvent or MDLeanEvent)
-        @param splitter     :: shared pointer to the box controller responsible for splitting boxes. The BC is not incremented as boxes take usual pointer from this pointer
-        @param extentsVector:: box extents in all n-dimensions (min-max)
-        @param depth        :: the depth of the box within the box tree
-        @param nBoxEvents   :: if defined, specify the memory the box should allocate to accept events -- not used for MDGridBox
-        @param boxID        :: the unique identifier, referencing location of the box in 1D linked list of boxes.  -- not used for MDGridBox
-
-        @return pointer to the IMDNode with proper box created.
-        */
-
-        API::IMDNode * MDEventFactory::createBox(size_t nDimensions,MDEventFactory::BoxType Type, API::BoxController_sptr & splitter, 
-                                    const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,
-                                    const uint32_t depth,const size_t nBoxEvents,const size_t boxID)
-        {
-
-         if(nDimensions > MAX_MD_DIMENSIONS_NUM)
-                throw std::invalid_argument(" there are more dimensions requested then instantiated");
-
-         size_t id = nDimensions*MDEventFactory::NumBoxTypes + Type;
-
-         return (*(boxCreatorFP[id]))(splitter.get(),extentsVector,depth,nBoxEvents,boxID);
-        }
-
-        //------------------------------- FACTORY METHODS END --------------------------------------------------------------------------------------------------------------
-
-        //// the class instantiated by compiler at compilation time and generates the map,  
-        //// between the number of dimensions and the function, which process this number of dimensions
+        // the class instantiated by compiler at compilation time and generates the map,  
+        // between the number of dimensions and the function, which process this number of dimensions
         template<size_t nd>
         class LOOP
         {

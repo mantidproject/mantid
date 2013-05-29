@@ -331,7 +331,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** Sets the inverse of the volume of the cell
      * @param invVolume :: value to set. */
-    void setInverseVolume(coord_t invVolume)
+    void setInverseVolume(const coord_t invVolume)
     {
       m_inverseVolume = invVolume;
     }
