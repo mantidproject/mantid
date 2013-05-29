@@ -259,7 +259,7 @@ namespace Mantid
         API::IMDEventWorkspace * MDEventFactory::createMDWorkspaceND(const std::string & eventType)
         {
             if (eventType == "MDEvent")
-                return new MDEventWorkspace<MDLeanEvent<nd>,nd>;
+                return new MDEventWorkspace<MDEvent<nd>,nd>;
             else if(eventType == "MDLeanEvent")
                 return new MDEventWorkspace<MDLeanEvent<nd>,nd>;
             else
