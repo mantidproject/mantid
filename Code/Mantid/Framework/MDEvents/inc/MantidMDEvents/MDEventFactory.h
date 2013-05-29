@@ -25,6 +25,10 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date 2011-02-24 15:08:43.105134
    */
+  // preliminary definition
+  template <size_t nd>
+  class LOOP;
+
   class DLLExport MDEventFactory
   {
       /// definition which states how many dimensions to generate. If this number changes, one has to run generate_mdevent_declarations to reinstantiate atogenerated code
@@ -82,6 +86,7 @@ namespace MDEvents
    // helper class to generate methaloop on MD workspaces dimensions:
     template<size_t nd>
     friend class LOOP;
+
 
     static LOOP<MAX_MD_DIMENSIONS_NUM> CODE_GENERATOR;
   };
