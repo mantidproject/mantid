@@ -12,6 +12,7 @@
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidAPI/FrameworkManager.h"
 
 
@@ -72,6 +73,17 @@ int vtkSplatterPlot::RequestData(vtkInformation *, vtkInformationVector **, vtkI
   product->SetFieldData(input->GetFieldData());
   output->ShallowCopy(product);
 
+  try
+  {
+    vtkDataSetToNonOrthogonalDataSet converter(output, wsName);
+    converter.execute();
+  }
+  catch (std::invalid_argument &e)
+  {
+    std::string error = e.what();
+    vtkDebugMacro(<< "Workspace does not have correct information to "
+                  << "plot non-orthogonal axes. " << error);
+  }
   return 1;
 }
 
