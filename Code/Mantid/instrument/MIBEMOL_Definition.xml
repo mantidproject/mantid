@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
+<instrument name="MIBEMOL" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-05-27 12:29:36">
+  <!-- Author: ricardo.leal@ill.fr -->
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+             y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+  <component type="moderator">
+    <location z="-0.490000" />
+  </component>
+  <type name="moderator" is="Source"></type>
+  <!-- Sample position -->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0" />
+  </component>
+  <type name="sample-position" is="SamplePos" />
+  <idlist idname="detectors">
+    <id start="1" end="84" />
+  </idlist>
+  <!-- Detector list def -->
+  <component type="detectors" idlist="detectors">
+    <location />
+  </component>
+  <!-- Detector Banks -->
+  <type name="detectors">
+    <component type="bank">
+      <location />
+    </component>
+  </type>
+  <!-- Definition of every bank -->
+  <type name="bank">
+    <component type="pack">
+      <location r="3.580000" t="147.157000" p="0.000000" name="det1"></location>
+      <location r="3.580000" t="143.666000" p="0.000000" name="det2"></location>
+      <location r="3.580000" t="141.509000" p="0.000000" name="det3"></location>
+      <location r="3.580000" t="141.484000" p="0.000000" name="det4"></location>
+      <location r="3.580000" t="139.462000" p="0.000000" name="det5"></location>
+      <location r="3.580000" t="138.475000" p="0.000000" name="det6"></location>
+      <location r="3.580000" t="136.565000" p="0.000000" name="det7"></location>
+      <location r="3.580000" t="135.639000" p="0.000000" name="det8"></location>
+      <location r="3.580000" t="134.732000" p="0.000000" name="det9"></location>
+      <location r="3.580000" t="132.967000" p="0.000000" name="det10"></location>
+      <location r="3.580000" t="132.107000" p="0.000000" name="det11"></location>
+      <location r="3.580000" t="131.262000" p="0.000000" name="det12"></location>
+      <location r="3.580000" t="128.009000" p="0.000000" name="det13"></location>
+      <location r="3.580000" t="126.453000" p="0.000000" name="det14"></location>
+      <location r="3.580000" t="125.690000" p="0.000000" name="det15"></location>
+      <location r="3.580000" t="124.193000" p="0.000000" name="det16"></location>
+      <location r="3.580000" t="122.732000" p="0.000000" name="det17"></location>
+      <location r="3.580000" t="121.304000" p="0.000000" name="det18"></location>
+      <location r="3.580000" t="120.602000" p="0.000000" name="det19"></location>
+      <location r="3.580000" t="119.220000" p="0.000000" name="det20"></location>
+      <location r="3.580000" t="117.866000" p="0.000000" name="det21"></location>
+      <location r="3.580000" t="116.538000" p="0.000000" name="det22"></location>
+      <location r="3.580000" t="115.235000" p="0.000000" name="det23"></location>
+      <location r="3.580000" t="112.695000" p="0.000000" name="det24"></location>
+      <location r="3.580000" t="110.845000" p="0.000000" name="det25"></location>
+      <location r="3.580000" t="110.237000" p="0.000000" name="det26"></location>
+      <location r="3.580000" t="108.443000" p="0.000000" name="det27"></location>
+      <location r="3.580000" t="107.853000" p="0.000000" name="det28"></location>
+      <location r="3.580000" t="106.109000" p="0.000000" name="det29"></location>
+      <location r="3.580000" t="104.965000" p="0.000000" name="det30"></location>
+      <location r="3.580000" t="103.836000" p="0.000000" name="det31"></location>
+      <location r="3.580000" t="102.721000" p="0.000000" name="det32"></location>
+      <location r="3.580000" t="101.620000" p="0.000000" name="det33"></location>
+      <location r="3.580000" t="99.991000" p="0.000000" name="det34"></location>
+      <location r="3.580000" t="98.921000" p="0.000000" name="det35"></location>
+      <location r="3.580000" t="96.814000" p="0.000000" name="det36"></location>
+      <location r="3.580000" t="95.263000" p="0.000000" name="det37"></location>
+      <location r="3.580000" t="94.241000" p="0.000000" name="det38"></location>
+      <location r="3.580000" t="92.727000" p="0.000000" name="det39"></location>
+      <location r="3.580000" t="91.729000" p="0.000000" name="det40"></location>
+      <location r="3.580000" t="90.248000" p="0.000000" name="det41"></location>
+      <location r="3.580000" t="89.272000" p="0.000000" name="det42"></location>
+      <location r="3.580000" t="87.822000" p="0.000000" name="det43"></location>
+      <location r="3.580000" t="86.390000" p="0.000000" name="det44"></location>
+      <location r="3.580000" t="85.445000" p="0.000000" name="det45"></location>
+      <location r="3.580000" t="84.040000" p="0.000000" name="det46"></location>
+      <location r="3.580000" t="79.915000" p="0.000000" name="det47"></location>
+      <location r="3.580000" t="79.015000" p="0.000000" name="det48"></location>
+      <location r="3.580000" t="77.677000" p="0.000000" name="det49"></location>
+      <location r="3.580000" t="76.350000" p="0.000000" name="det50"></location>
+      <location r="3.580000" t="75.473000" p="0.000000" name="det51"></location>
+      <location r="3.580000" t="73.884000" p="0.000000" name="det52"></location>
+      <location r="3.580000" t="72.442000" p="0.000000" name="det53"></location>
+      <location r="3.580000" t="71.586000" p="0.000000" name="det54"></location>
+      <location r="3.580000" t="69.889000" p="0.000000" name="det55"></location>
+      <location r="3.580000" t="69.047000" p="0.000000" name="det56"></location>
+      <location r="3.580000" t="67.792000" p="0.000000" name="det57"></location>
+      <location r="3.580000" t="64.899000" p="0.000000" name="det58"></location>
+      <location r="3.580000" t="63.674000" p="0.000000" name="det59"></location>
+      <location r="3.580000" t="62.456000" p="0.000000" name="det60"></location>
+      <location r="3.580000" t="61.246000" p="0.000000" name="det61"></location>
+      <location r="3.580000" t="60.044000" p="0.000000" name="det62"></location>
+      <location r="3.580000" t="58.452000" p="0.000000" name="det63"></location>
+      <location r="3.580000" t="57.266000" p="0.000000" name="det64"></location>
+      <location r="3.580000" t="56.087000" p="0.000000" name="det65"></location>
+      <location r="3.580000" t="54.525000" p="0.000000" name="det66"></location>
+      <location r="3.580000" t="53.360000" p="0.000000" name="det67"></location>
+      <location r="3.580000" t="52.202000" p="0.000000" name="det68"></location>
+      <location r="3.580000" t="48.759000" p="0.000000" name="det69"></location>
+      <location r="3.580000" t="47.623000" p="0.000000" name="det70"></location>
+      <location r="3.580000" t="46.114000" p="0.000000" name="det71"></location>
+      <location r="3.580000" t="44.989000" p="0.000000" name="det72"></location>
+      <location r="3.580000" t="43.868000" p="0.000000" name="det73"></location>
+      <location r="3.580000" t="42.380000" p="0.000000" name="det74"></location>
+      <location r="3.580000" t="41.269000" p="0.000000" name="det75"></location>
+      <location r="3.580000" t="40.162000" p="0.000000" name="det76"></location>
+      <location r="3.580000" t="38.692000" p="0.000000" name="det77"></location>
+      <location r="3.580000" t="37.594000" p="0.000000" name="det78"></location>
+      <location r="3.580000" t="36.499000" p="0.000000" name="det79"></location>
+      <location r="3.580000" t="27.500000" p="0.000000" name="det80"></location>
+      <location r="3.580000" t="26.100000" p="0.000000" name="det81"></location>
+      <location r="3.580000" t="24.800000" p="0.000000" name="det82"></location>
+      <location r="3.580000" t="23.500000" p="0.000000" name="det83"></location>
+      <location r="3.580000" t="0.000000" p="0.000000" name="det84"></location>
+    </component>
+  </type>
+  <type name="pack" is="detector">
+    <cuboid id="pack-pixel-shape">
+      <left-front-bottom-point z="-0.005" y="-0.2" x="-0.01" />
+      <left-front-top-point z="-0.005" y="0.2" x="-0.01" />
+      <left-back-bottom-point z="-0.005" y="-0.2" x="0.01" />
+      <right-front-bottom-point z="0.005" y="-0.2" x="-0.01" />
+    </cuboid>
+    <algebra val="pack-pixel-shape" />
+  </type>
+</instrument>
