@@ -83,8 +83,18 @@ public:
     }
 
     // Clean up files
+    std::string file1;
+    std::string file2;
+    if (fileBacked)
+    {
+      file1 = ws1->getBoxController()->getFileIO()->getFileName();
+      file2 = ws2->getBoxController()->getFileIO()->getFileName();
+    }
     ws1->clearFileBacked(false);
     ws2->clearFileBacked(false);
+
+    MDEventsTestHelper::checkAndDeleteFile(file1);
+    MDEventsTestHelper::checkAndDeleteFile(file2);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(inWSName);
