@@ -1,9 +1,8 @@
 import unittest
 import os
 
-from MantidFramework import mtd
-mtd.initialise()
-from mantidsimple import *
+import mantid
+from mantid.simpleapi import *
 
 
 class LoadLiveDataTest(unittest.TestCase):
@@ -12,7 +11,7 @@ class LoadLiveDataTest(unittest.TestCase):
     """
     
     def setUp(self):
-        mtd.clearData()
+        FrameworkManager.clearData()
         pass
     
     
