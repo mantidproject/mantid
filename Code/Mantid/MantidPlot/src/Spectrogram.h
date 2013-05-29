@@ -57,8 +57,8 @@ class Spectrogram: public QObject, public QwtPlotSpectrogram
 public:
   Spectrogram();
   Spectrogram(Matrix *m);
-  Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
-  Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
+  Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz);//Mantid
+  Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz);//Mantid
   ~Spectrogram();
 
 
@@ -71,7 +71,7 @@ public:
 
   Spectrogram* copy();
   Matrix * matrix(){return d_matrix;};
-  UserHelperFunction *funct(){return d_funct;}
+  Function2D *funct(){return d_funct;}
 
   int levels()const{return (int)contourLevels().size() + 1;};
   void setLevelsNumber(int levels);
@@ -152,7 +152,7 @@ protected:
 
   //! Pointer to the source data matrix
   Matrix *d_matrix;
-  UserHelperFunction *d_funct;
+  Function2D *d_funct;
 
   //! Axis used to display the color scale
   int color_axis;
@@ -282,13 +282,13 @@ private:
 class FunctionData: public SpectrogramData
 {
 public:
-  FunctionData(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz):
+  FunctionData(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz):
     SpectrogramData(QwtDoubleRect(left, top, width, height)),
     d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
   {
   }
 
-  FunctionData(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz):
+  FunctionData(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz):
     SpectrogramData(bRect),
     d_funct(f),n_rows(nrows),n_cols(ncols),min_z(minz),max_z(maxz)
   {
@@ -323,7 +323,7 @@ public:
   double getMinPositiveValue()const{return d_funct->getMinPositiveValue();}
 
 private:
-  UserHelperFunction *d_funct;
+  Function2D *d_funct;
 
   //! Data size
   int n_rows, n_cols;

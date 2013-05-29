@@ -80,7 +80,7 @@ Spectrogram::Spectrogram(Matrix *m):
   setContourLevels(contourLevels);
 }
 
-Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz)
+Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz)
 :	QObject(), QwtPlotSpectrogram(),
  	d_matrix(0),d_funct(f),
  	color_axis(QwtPlot::yRight),
@@ -99,7 +99,7 @@ Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left,
 
 }
 
-Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz)
+Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz)
 :	QObject(), QwtPlotSpectrogram(),
  	d_color_map_pen(false),
  	d_matrix(0),

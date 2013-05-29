@@ -8436,8 +8436,8 @@ MdiSubWindow* ApplicationWindow::clone(MdiSubWindow* w)
     QString caption = generateUniqueName(tr("Graph"));
     QString s = g->formula();
     if (g->userFunction()){
-      UserFunction *f = g->userFunction();
-      nw = plotSurface(f->function(), g->xStart(), g->xStop(), g->yStart(), g->yStop(),
+      UserFunction2D *f = g->userFunction();
+      nw = plotSurface(f->formula(), g->xStart(), g->xStop(), g->yStart(), g->yStop(),
           g->zStart(), g->zStop(), f->columns(), f->rows());
     } else if (g->parametricSurface()){
       UserParametricSurface *s = g->parametricSurface();

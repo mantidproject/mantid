@@ -240,7 +240,7 @@ void Graph3D::initCoord()
 
 void Graph3D::addFunction(const QString& s, double xl, double xr, double yl,
 						double yr, double zl, double zr, int columns, int rows, 
-                        UserHelperFunction* hfun)//Mantid
+                        Function2D* hfun)//Mantid
 {
 	if (d_surface)
 		delete d_surface;
@@ -250,7 +250,7 @@ void Graph3D::addFunction(const QString& s, double xl, double xr, double yl,
 	sp->makeCurrent();
 	sp->resize(this->size());
 
-	d_func = new UserFunction(s, *sp);
+    d_func = new UserFunction2D(s, *sp);
 
     d_func->setHlpFun(hfun);//Mantid
 
@@ -2269,7 +2269,7 @@ Qwt3D::COORDSTYLE Graph3D::coordStyle()
 QString Graph3D::formula()
 {
 	if (d_func)
-		return d_func->function();
+        return d_func->formula();
 	else
 		return plotAssociation;
 }
@@ -2284,7 +2284,7 @@ QString Graph3D::saveToString(const QString& geometry, bool)
 
 	sp->makeCurrent();
 	if (d_func)
-	{ s+="mantidMatrix3D\t";	s += d_func->function() + ";" + QString::number(d_func->columns()) + ";" + QString::number(d_func->rows()) + "\t";
+    { s+="mantidMatrix3D\t";	s += d_func->formula() + ";" + QString::number(d_func->columns()) + ";" + QString::number(d_func->rows()) + "\t";
 	}
 	else if (d_surface){
 		s += d_surface->xFormula() + "," + d_surface->yFormula() + "," + d_surface->zFormula() + ",";

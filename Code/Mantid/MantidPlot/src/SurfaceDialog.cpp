@@ -281,11 +281,11 @@ void SurfaceDialog::setFunction(Graph3D *g)
 		return;
 
 	d_graph = g;
-	UserFunction *f = d_graph->userFunction();
+    UserFunction2D *f = d_graph->userFunction();
 	if (!f)
 		return;
 
-	boxFunction->setCurrentText(f->function());
+    boxFunction->setCurrentText(f->formula());
 	boxFuncColumns->setValue(f->columns());
 	boxFuncRows->setValue(f->rows());
 

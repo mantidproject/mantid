@@ -896,7 +896,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
   boundingRect();
   
   m_funct.init();
-  plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows(), static_cast<UserHelperFunction*>(&m_funct));
+  plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows(), static_cast<Function2D*>(&m_funct));
 
   const Mantid::API::Axis* ax = m_workspace->getAxis(0);
   std::string s;
@@ -1054,7 +1054,7 @@ void MantidMatrix::removeWindow()
   foreach(MdiSubWindow *w, windows){
     //if (w->isA("Graph3D") && ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
     if (w->isA("Graph3D") )//&& ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
-    { 	UserFunction* fn=(dynamic_cast<Graph3D*>(w))->userFunction();
+    { 	UserFunction2D* fn=(dynamic_cast<Graph3D*>(w))->userFunction();
       if(fn)
       {	if(fn->hlpFun() == &m_funct)(dynamic_cast<Graph3D*>(w))->clearData();
       }

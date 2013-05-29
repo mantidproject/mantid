@@ -44,7 +44,7 @@ class ProjectData;
 /**
  * This class helps displaying a MantidMatrix in a 2D graph
  */
-class MantidMatrixFunction: public UserHelperFunction
+class MantidMatrixFunction: public Function2D
 {
 public:
   MantidMatrixFunction(MantidMatrix* wsm);

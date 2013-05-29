@@ -6,17 +6,13 @@
 #include "UserFunction.h"
 #include <QMessageBox>
 
-UserFunction::UserFunction(const QString& s, SurfacePlot& pw)
-: Function(pw), formula(s), d_rows(0), d_columns(0), m_hlpFun(0)
+UserFunction2D::UserFunction2D(const QString& s, Qwt3D::SurfacePlot& pw)
+: Function(pw), d_formula(s), d_rows(0), d_columns(0)
 {}
 
-double UserFunction::operator()(double x, double y)
+double UserFunction2D::operator()(double x, double y)
 {
-    //Mantid
-    if (m_hlpFun) 
-        return (*m_hlpFun)(x,y);
-
-	if (formula.isEmpty())
+    if (d_formula.isEmpty())
 		return 0.0;
 
 	MyParser parser;
@@ -26,17 +22,24 @@ double UserFunction::operator()(double x, double y)
 		parser.DefineVar("x", &x);
 		parser.DefineVar("y", &y);
 
-		parser.SetExpr((const std::string)formula.ascii());
+        parser.SetExpr((const std::string)d_formula.ascii());
 		result=parser.Eval();
 	}
 	catch(mu::ParserError &e)
 	{
 		QMessageBox::critical(0,"MantidPlot - Input function error",QString::fromStdString(e.GetMsg()));
 	}
-	return result;
+    return result;
 }
 
-void UserFunction::setMesh (unsigned int columns, unsigned int rows)
+/**
+ * @return The smallest positive value this function ever to return.
+ */
+double UserFunction2D::getMinPositiveValue() const
+{
+}
+
+void UserFunction2D::setMesh (unsigned int columns, unsigned int rows)
 {
 	Function::setMesh (columns, rows);
 	d_columns = columns;
