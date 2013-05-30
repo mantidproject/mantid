@@ -3,9 +3,12 @@ mtd.initialise()
 from mantidsimple import *
 
 import os
-import boostmpi as mpi
+from mpi4py import MPI
 import sys
 
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
 
 cal_file  = "./mantid_5427.cal"
 char_file = "./NOM_characterizations.txt"
@@ -15,8 +18,8 @@ sam_back = sys.argv[2]
 van      = sys.argv[3]
 van_back = 0
 outputDir='/home/vel/scripts'
-if mpi.world.rank == 0:
-    print str(mpi.world.size)," mpi tasks"
+if rank == 0:
+    print str(size)," mpi tasks"
 
 SNSPowderReduction(Instrument="NOM", RunNumber=runNumber, Extension="_event.nxs",
                    PreserveEvents=False, PushDataPositive='AddMinimum',

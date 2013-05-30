@@ -15,10 +15,10 @@ calib = 'NOM_2011_03_07.cal'
 
 
 import os
-import boostmpi as mpi
+from mpi4py import MPI
 
 # Save typing
-comm = mpi.world
+comm = MPI.COMM_WORLD
 
 if comm.size > 99:
     print "This script must be run with fewer than 99 MPI processes! (99 banks in NOMAD)"
