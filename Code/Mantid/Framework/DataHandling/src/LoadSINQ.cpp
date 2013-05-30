@@ -1,5 +1,9 @@
 /*WIKI*
- TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+
+ Loads a SINQ (PSI) nexus file into a [[Workspace2D]] with the given name.
+
+ To date this algorithm only supports: FOCUS
+
  *WIKI*/
 
 #include "MantidDataHandling/LoadSINQ.h"
