@@ -66,7 +66,6 @@ void LoadSINQ::initDocs() {
 	this->setOptionalMessage("Loads PSI nexus file.");
 }
 
-
 bool LoadSINQ::quickFileCheck(const std::string& filePath, size_t nread,
 		const file_header& header) {
 	std::string extn = extension(filePath);
@@ -174,7 +173,7 @@ std::string LoadSINQ::getInstrumentName(NeXus::NXEntry& entry) {
 	}
 	//std::replace( instrumentName.begin(), instrumentName.end(), ' ', '_'); // replace all ' ' to '_'
 	long unsigned int pos = instrumentName.find(" ");
-	instrumentName = instrumentName.substr (0,pos);
+	instrumentName = instrumentName.substr(0, pos);
 	return instrumentName;
 
 }
@@ -228,9 +227,11 @@ void LoadSINQ::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	// Assign time bin to first X entry
 	float* timeBinning_p = &timeBinning[0];
 	std::vector<double> timeBinningTmp(numberOfBins);
-	timeBinningTmp.assign(timeBinning_p,timeBinning_p + numberOfBins);
-	timeBinningTmp[numberOfBins-1] = timeBinningTmp[numberOfBins-2]+timeBinningTmp[1]-timeBinningTmp[0];
-	m_localWorkspace->dataX(0).assign(timeBinningTmp.begin(),timeBinningTmp.end());
+	timeBinningTmp.assign(timeBinning_p, timeBinning_p + numberOfBins);
+	timeBinningTmp[numberOfBins - 1] = timeBinningTmp[numberOfBins - 2]
+			+ timeBinningTmp[1] - timeBinningTmp[0];
+	m_localWorkspace->dataX(0).assign(timeBinningTmp.begin(),
+			timeBinningTmp.end());
 
 	Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 	size_t spec = 0;
@@ -274,11 +275,13 @@ void LoadSINQ::loadRunDetails(NXEntry & entry) {
 	//end_time = getDateTimeInIsoFormat(end_time);
 	runDetails.addProperty("run_end", end_time);
 
-	double wavelength = entry.getFloat(m_nexusInstrumentEntryName + "/monochromator/lambda");
+	double wavelength = entry.getFloat(
+			m_nexusInstrumentEntryName + "/monochromator/lambda");
 	runDetails.addProperty<double>("wavelength", wavelength);
 
-	double energy = entry.getFloat(m_nexusInstrumentEntryName + "/monochromator/energy");
-	runDetails.addProperty<double>("Ei", energy,true); //overwrite
+	double energy = entry.getFloat(
+			m_nexusInstrumentEntryName + "/monochromator/energy");
+	runDetails.addProperty<double>("Ei", energy, true); //overwrite
 
 	std::string title = entry.getString("title");
 	runDetails.addProperty("title", title);
@@ -295,22 +298,11 @@ void LoadSINQ::loadRunDetails(NXEntry & entry) {
  */
 void LoadSINQ::loadExperimentDetails(NXEntry & entry) {
 
-	// TODO: Do the rest
-	// Pick out the geometry information
-
-	(void)entry;
-
-//	std::string description = boost::lexical_cast<std::string>(
-//			entry.getFloat("sample/description"));
-//
-//	m_localWorkspace->mutableSample().setName(description);
-
-//	m_localWorkspace->mutableSample().setThickness(static_cast<double> (isis_raw->spb.e_thick));
-//	m_localWorkspace->mutableSample().setHeight(static_cast<double> (isis_raw->spb.e_height));
-//	m_localWorkspace->mutableSample().setWidth(static_cast<double> (isis_raw->spb.e_width));
+	std::string name = boost::lexical_cast<std::string>(
+			entry.getFloat("sample/name"));
+	m_localWorkspace->mutableSample().setName(name);
 
 }
-
 
 /**
  * Run the Child Algorithm LoadInstrument.
