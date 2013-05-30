@@ -616,7 +616,7 @@ namespace Algorithms
       }
     }
 
-#if 0
+#if 1
     // FIXME - Remove this section after debugging
     if (s == 3695 || s == 3693)
     {
@@ -694,6 +694,7 @@ namespace Algorithms
 #if 1
       chisq.push_back(chi2);
 #else
+      // Experiment to use peak height as a fitting fact
       if (height > 0)
         chisq.push_back(chi2/height);
       else
@@ -706,6 +707,7 @@ namespace Algorithms
     {
       if (peakPosFitted[i] <= minD || peakPosFitted[i] >= maxD)
       {
+        // ban peaks from big D-range
         banned.push_back(i);
         continue;
       }
@@ -714,12 +716,14 @@ namespace Algorithms
         if (peakPosFitted[i] <= fitWindowsToUse[2*i]
             || peakPosFitted[i] >= fitWindowsToUse[2*i+1])
         {
-            banned.push_back(i);
-            continue;
+          // ban peaks from fit window
+          banned.push_back(i);
+          continue;
         }
       }
       if (chisq[i] > m_maxChiSq)
       {
+        // ban peaks from HUGE chi-square
         banned.push_back(i);
         continue;
       }

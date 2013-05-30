@@ -121,6 +121,10 @@ private:
       const double& in_bg0, const double& in_bg1, const double& in_bg2);
 
   void addInfoRow(const size_t spectrum, const std::vector<double> &params, const std::vector<double> &paramsRaw, const double mincost, bool error);
+
+  /// Add the fit record (failure) to output workspace
+  void addNonFitRecord(const size_t spectrum);
+
   void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestEffparams, std::vector<double> &bestRawparams, double &mincost, const double expPeakPos, const double expPeakHeight);
 
   API::IFunction_sptr createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak = true);
@@ -146,7 +150,7 @@ private:
   PeakFittingRecord multiFitPeakBackground(API::MatrixWorkspace_sptr purepeakws, size_t purepeakindex,
                                            API::MatrixWorkspace_sptr dataws, size_t datawsindex,
                                            API::IPeakFunction_sptr peak,
-                                           double in_centre, double in_height, std::vector<double> in_sigmas,
+                                           double in_centre, double in_height, std::vector<double> in_fwhms,
                                            double peakleftboundary, double peakrightboundary);
 
   /// Set parameters values to a peak function
@@ -208,8 +212,8 @@ private:
   API::IFunction_sptr m_backgroundFunction;
   API::IFunction_sptr m_peakAndBackgroundFunction;
 
-  size_t minGuessedPeakWidth;
-  size_t maxGuessedPeakWidth;
+  size_t m_minGuessedPeakWidth;
+  size_t m_maxGuessedPeakWidth;
   size_t stepGuessedPeakWidth;
 
   bool m_usePeakPositionTolerance;
