@@ -304,7 +304,7 @@ class SNSPowderReduction(PythonAlgorithm):
             timeFilterWall = (0.0, 0.0)
             self.log().information("SplittersWorkspace is None, and thus there is NO time filter wall. ")
 
-        self._splitinfotablews = self.getProperty("SplitInformationWorkspace")
+        self._splitinfotablews = self.getProperty("SplitInformationWorkspace").value
 
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
@@ -733,8 +733,10 @@ class SNSPowderReduction(PythonAlgorithm):
                         api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename, 
                                 SplitterWorkspace=splitwksp, GroupWorkspaces=True)
                     else:
+                        self.log().information("SplitterWorkspace = %s, Information Workspace = %s. " % (
+                            str(splitwksp), str(self._splitinfotablews)))
                         api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename, 
-                                SplitterWorkspace=splitwksp, InformationWorkspace = self._splitinfotablews,
+                                SplitterWorkspace=splitwksp, InformationWorkspace = str(self._splitinfotablews),
                                 GroupWorkspaces=True)
                     # ENDIF
                     wsgroup = mtd[basename]
