@@ -50,7 +50,7 @@ class DLLExport vtkSplatterPlotFactory : public vtkDataSetFactory
 public:
 
   /// Constructor
-  vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t numPoints = 1000);
+  vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t numPoints = 150000, const double percentToUse = 5.0);
 
   /// Destructor
   virtual ~vtkSplatterPlotFactory();
@@ -67,7 +67,11 @@ public:
     return "vtkSplatterPlotFactory";
   }
 
+  /// Set upper limit on the number of points that will be plotted
   virtual void SetNumberOfPoints(size_t points);
+
+  /// Set percentage of boxes from which points will be plotted
+  virtual void SetPercentToUse( double percentToUse );
 
 private:
 
@@ -88,6 +92,9 @@ private:
 
   /// Approximate number of points to plot
   size_t m_numPoints;
+
+  /// Size of the initial portion of the sorted list of boxes to use.
+  double m_percentToUse;
 
   /// Data set that will be generated
   mutable vtkDataSet * dataSet;

@@ -9,6 +9,7 @@ public:
   vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   void SetNumberOfPoints(int nPoints);
+  void SetTopPercentile(double topPercentile);
   void updateAlgorithmProgress(double progress, const std::string& message);
 protected:
 
@@ -21,5 +22,6 @@ private:
   vtkSplatterPlot(const vtkSplatterPlot&);
   void operator = (const vtkSplatterPlot&);
   size_t m_numberPoints;
+  double m_topPercentile;
 };
 #endif
