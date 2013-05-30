@@ -1893,6 +1893,9 @@ void SliceViewer::openFromXML(const QString & xml)
   if ((m_ws->getNumDims() < 3) || (m_ws->getNumDims() > 4))
     throw std::runtime_error("SliceViewer::openFromXML(): Workspace should have 3 or 4 dimensions.");
 
+  // Hard update to make sure axis reorientations are respected.
+  this->updateDisplay(true);
+
   // ------- Read which are the X/Y dimensions ------------
   Poco::XML::Element* dims = pRootElem->getChildElement("DimensionSet");
   if (!dims) throw std::runtime_error("SliceViewer::openFromXML(): No DimensionSet element.");
