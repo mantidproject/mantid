@@ -10,7 +10,7 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
-    const QString QPeaksTableModel::RUNNUMBER = "RunNumber";
+    const QString QPeaksTableModel::RUNNUMBER = "Run";
     const QString QPeaksTableModel::DETID = "DetID";
     const QString QPeaksTableModel::H = "h";
     const QString QPeaksTableModel::K= "k";
@@ -45,6 +45,39 @@ namespace MantidQt
 
       const Mantid::Kernel::V3D qsample = peak.getQSampleFrame();
       m_dataCache.push_back(QString::number(qsample.X()) + COMMA + QString::number(qsample.Y()) + COMMA + QString::number(qsample.Z()));
+    }
+
+    /**
+     * @param column The column to get the number of characters
+     * estimated for.
+     *
+     * @return The number of characters estimated for the column. If
+     * it cannot be determined this returns 10.
+     */
+    int QPeaksTableModel::numCharacters(const int column) const
+    {
+      if (column == 0) // RUNNUMBER
+        return 5;
+      else if (column == 1) // DETID
+        return 7;
+      else if (column == 2) // H
+        return 3;
+      else if (column == 3) // K
+        return 3;
+      else if (column == 4) // L
+        return 3;
+      else if (column == 5) // DSPACING
+        return 7;
+      else if (column == 6) // INT
+        return 5;
+      else if (column == 7) // SIGMINT
+          return 5;
+      else if (column == 8) // QLAB
+          return 3*7;
+      else if (column == 9) // QSAMPLE
+          return 3*7;
+      else
+        return 3;
     }
 
     /**

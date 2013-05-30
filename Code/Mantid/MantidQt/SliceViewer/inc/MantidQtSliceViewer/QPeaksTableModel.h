@@ -59,6 +59,7 @@ namespace MantidQt
       QVariant headerData(int section, Qt::Orientation orientation, int role) const;
       Qt::ItemFlags flags(const QModelIndex &index) const;
       void sort (int column, Qt::SortOrder);
+      int numCharacters(const int column) const;
       ~QPeaksTableModel();
      signals:
       void peaksSorted(const std::string&, const bool);
