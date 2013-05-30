@@ -30,7 +30,7 @@ footer = """
 #============================================================================================================
 
 
-def build_macro(min_dimension=1, max_dimensions=4,const=""):
+def build_macro(padding,min_dimension=1, max_dimensions=4,const=""):
     """ Return the macro code CALL_MDEVENT_FUNCTION
     Parameter:
         min_dimension :: to avoid compiler warnings, limit to dimensions higher than this
@@ -51,7 +51,7 @@ def build_macro(min_dimension=1, max_dimensions=4,const=""):
 """
 
 
-    macro = """%sMDEventWorkspace<%s, %d>::sptr %s = boost::dynamic_pointer_cast<%sMDEventWorkspace<%s, %d> >(workspace); \\
+    macro = """%s%sMDEventWorkspace<%s, %d>::sptr %s = boost::dynamic_pointer_cast<%sMDEventWorkspace<%s, %d> >(workspace); \\
 if (%s) funcname<%s, %d>(%s); \\
     """
 
@@ -69,7 +69,7 @@ if (%s) funcname<%s, %d>(%s); \\
                 varname = "MDEW_%s_%d" % (mdevent_type.upper(),nd)
                 if const != "":
                     varname = "CONST_" + varname
-                s += macro % (const, eventType,nd, varname, const, eventType,nd, varname, eventType,nd, varname) 
+                s += macro % (padding,const, eventType,nd, varname, const, eventType,nd, varname, eventType,nd, varname) 
     s +=  "} \n  \n  \n"
 
     return s.split("\n")
@@ -178,9 +178,9 @@ def generate():
     # ========== Start the header file =============
 
     # Make the macro then pad it into the list of lines
-    macro_lines = build_macro(1,nDim)+build_macro(3,nDim)+build_macro(1,nDim,"const ");
+    macro_lines = build_macro(padding,1,nDim)+build_macro(padding,3,nDim)+build_macro(padding,1,nDim,"const ");
     # add padding to macro-generated lines
-    macro_lines=map(lambda x: padding+x,macro_lines);
+
 
     lines += macro_lines;
 
