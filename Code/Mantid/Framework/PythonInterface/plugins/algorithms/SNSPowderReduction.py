@@ -249,17 +249,8 @@ class SNSPowderReduction(PythonAlgorithm):
 
         tableprop = ITableWorkspaceProperty("SplittersWorkspace", "", Direction.Input, PropertyMode.Optional)
         self.declareProperty(tableprop, "Splitters workspace for split event workspace.")
-        # self.declareProperty("KeepRemainder", True, "Keeping the remainder events workspace if true.")
-
-        """ Disabled Due To #
-        self.declareProperty("FilterByLogValue", "", "Name of log value to filter by")
-        self.declareProperty("FilterMinimumValue", 0.0, "Minimum log value for which to keep events.")
-        self.declareProperty("FilterMaximumValue", 0.0, "Maximum log value for which to keep events.")
-        self.declareProperty("FilterByTimeMin", 0.,
-                             "Relative time to start filtering by in seconds. Applies only to sample.")
-        self.declareProperty("FilterByTimeMax", 0.,
-                             "Relative time to stop filtering by in seconds. Applies only to sample.")
-        """
+        infotableprop = ITableWorkspaceProperty("SplitInformationWorkspace", "", Direction.Input, PropertyMode.Optional)
+        self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
         return
 
@@ -312,6 +303,8 @@ class SNSPowderReduction(PythonAlgorithm):
         else:
             timeFilterWall = (0.0, 0.0)
             self.log().information("SplittersWorkspace is None, and thus there is NO time filter wall. ")
+
+        self._splitinfotablews = self.getProperty("SplitInformationWorkspace")
 
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
@@ -736,8 +729,14 @@ class SNSPowderReduction(PythonAlgorithm):
                 if dosplit:
                     # Splitting workspace
                     basename = str(temp) 
-                    api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename, 
-                            SplitterWorkspace=splitwksp, GroupWorkspaces=True)
+                    if self._splitinfotablews is None: 
+                        api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename, 
+                                SplitterWorkspace=splitwksp, GroupWorkspaces=True)
+                    else:
+                        api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename, 
+                                SplitterWorkspace=splitwksp, InformationWorkspace = self._splitinfotablews,
+                                GroupWorkspaces=True)
+                    # ENDIF
                     wsgroup = mtd[basename]
                     tempwsnamelist = wsgroup.getNames()
 
