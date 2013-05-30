@@ -1,11 +1,10 @@
 /*WIKI* 
 
 Renames a list of workspaces to a different name in the data service.
-This renaming is done by appending a suffix or adding a prefix to the old names.
-The Renaming is implemented by calling RenameWorspace as a child algorithm having defined the output workspace appropriately.
+This renaming is done by either replacing with new names in a list or adding a prefix, suffix or both.
+The Renaming is implemented by calling RenameWorkspace as a child algorithm having defined the output workspace appropriately.
 
-If run on a group workspace, the members of the group will be renamed if their names follow the pattern groupName_1, groupName_2, etc. (they will be renamed to newName_1, newname_2, etc.). 
-Otherwise, only the group itself will be renamed - the members will keep their previous names.
+If run on a group workspace, the members of the group will be renamed in the same manner as done by RemameWorkspace
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -13,6 +12,8 @@ Otherwise, only the group itself will be renamed - the members will keep their p
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RenameWorkspaces.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid
@@ -37,12 +38,16 @@ using namespace API;
  */
 void RenameWorkspaces::init()
 {
-  declareProperty(new WorkspaceProperty<Workspace> ("InputWorkspace", "", Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "", Direction::Output));
-  declareProperty("Prefix", false,
-      "If true, then Output Workspace if prefixed, else it is suffixed.",
-      Direction::Input);
-
+  declareProperty(new ArrayProperty<std::string> ("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+      "Names of the Input Workspaces");
+  // WorkspaceNames - List of new names
+  declareProperty(new ArrayProperty<std::string>("WorkspaceNames",Direction::Input), "New Names of the Workspaces");
+  // --or--
+  // Prefix
+  declareProperty("Prefix",std::string(""),"Prefix to add to input workspace names",Direction::Input);
+  // Suffix 
+  declareProperty("Suffix",std::string(""),"Suffix to add to input workspace names",Direction::Input);
+  
 }
 
 /** Executes the algorithm
@@ -52,18 +57,23 @@ void RenameWorkspaces::init()
 void RenameWorkspaces::exec()
 {
   // Get the input workspace list
-  std::string inputwsName = getPropertyValue("InputWorkspace");
-  // get the output workspace affix
-  std::string outputwsName = getPropertyValue("OutputWorkspace");
+  std::vector<std::string> inputwsName = getProperty("InputWorkspaces");
 
-  if (getPropertyValue("OutputWorkspace") == "")
-  {
-    throw std::invalid_argument("The no prefix or suffix has been supplied");
-  }
+  //// get the output workspace affix
+  //std::string outputwsName = getPropertyValue("OutputWorkspace");
+  //// get the prefix indicator
+  //bool isPrefix = getProperty("isPrefix");
+
+  //if (getPropertyValue("OutputWorkspace") == "")
+  //{
+  //  throw std::invalid_argument("The no prefix or suffix has been supplied");
+  //}
 
   // Convert the comma separated input workspace list to an array
 
   // loop over array and rename each workspace
+
+  //declareProperty("OutputWorkspace_" + 1);
 
 
 }
