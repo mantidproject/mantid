@@ -140,7 +140,20 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
   {
     return;
   }
+  // Work around a "bug" in pqScalarToColors::checkRange() where the lower
+  // limit gets lost when log scaling is used. This only happens when
+  // changing the color map.
+  bool logStateChanged = false;
+  if (this->colorUpdater.isLogScale())
+  {
+    this->colorUpdater.logScale(rep, false);
+    logStateChanged = true;
+  }
   this->colorUpdater.colorMapChange(rep, model);
+  if (logStateChanged)
+  {
+    this->colorUpdater.logScale(rep, true);
+  }
   rep->renderViewEventually();
 }
 
