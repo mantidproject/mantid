@@ -384,8 +384,10 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
   const int numTimesteps = static_cast<int>(dvp->GetNumberOfElements());
   //qDebug() << "# timesteps: " << numTimesteps;
 
-  if (1 < numTimesteps)
+  if (0 < numTimesteps)
   {
+    // Integrated "time" axis has 1 bin
+    bool isIntegrated = !(1 < numTimesteps);
     if (doUpdate)
     {
       vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(\
@@ -393,9 +395,14 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
       vtkSMPropertyHelper(srcProxy, "TimestepValues").Set(dvp->GetElements(),
                                                           numTimesteps);
     }
+    int endIndex = 0;
+    if (!isIntegrated)
+    {
+      endIndex = dvp->GetNumberOfElements() - 1;
+    }
     double tStart = dvp->GetElement(0);
-    double tEnd = dvp->GetElement(dvp->GetNumberOfElements() - 1);
-    emit this->setAnimationControlState(true);
+    double tEnd = dvp->GetElement(endIndex);
+    emit this->setAnimationControlState(!isIntegrated);
     emit this->setAnimationControlInfo(tStart, tEnd, numTimesteps);
   }
   else
