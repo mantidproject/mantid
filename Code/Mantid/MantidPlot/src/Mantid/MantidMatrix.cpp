@@ -1060,10 +1060,14 @@ void MantidMatrix::removeWindow()
     //if (w->isA("Graph3D") && ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
     if (w->isA("Graph3D") )//&& ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
     {
-      MantidMatrixFunction* fn= dynamic_cast<MantidMatrixFunction*>( (dynamic_cast<Graph3D*>(w))->userFunction() );
-      if ( fn )
+      Graph3D *g3d = dynamic_cast<Graph3D*>(w);
+      if ( g3d )
       {
-          if ( fn == &m_funct )  (dynamic_cast<Graph3D*>(w))->clearData();
+          MantidMatrixFunction* fn= dynamic_cast<MantidMatrixFunction*>( g3d->userFunction() );
+          if ( fn )
+          {
+              if ( fn == &m_funct )  (dynamic_cast<Graph3D*>(w))->clearData();
+          }
       }
 
     }else if (w->isA("Table")){

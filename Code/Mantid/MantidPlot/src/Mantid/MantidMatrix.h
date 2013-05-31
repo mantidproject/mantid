@@ -9,6 +9,7 @@
 #include <QVector>
 #include <QThread>
 #include <QMap>
+#include <QPointer>
 
 #include <Poco/NObserver.h>
 
@@ -61,7 +62,7 @@ public:
   void getRowXRange(int row,double& xmin, double& xmax)const;
   const Mantid::MantidVec& getMantidVec(int row)const;
 private:
-  MantidMatrix* m_matrix;
+  QPointer<MantidMatrix> m_matrix;
   double m_dx,m_dy;
   double m_outside;
 };
