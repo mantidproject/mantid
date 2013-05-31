@@ -546,6 +546,7 @@ public:
     saveAlg.setPropertyValue("Filename", fileName);
     saveAlg.execute();
     TS_ASSERT( saveAlg.isExecuted() );
+    std::string this_fileName = saveAlg.getProperty("Filename");
 
     LoadMD loadAlg;
     loadAlg.initialize();
@@ -559,9 +560,9 @@ public:
     // Check that the special coordinate system is the same before the save-load cycle.
     TS_ASSERT_EQUALS(appliedCoordinateSystem, ws->getSpecialCoordinateSystem());
 
-    if (Poco::File(fileName).exists())
+    if (Poco::File(this_fileName).exists())
     {
-      Poco::File(fileName).remove();
+      Poco::File(this_fileName).remove();
     }
     AnalysisDataService::Instance().remove(inputWSName);
     AnalysisDataService::Instance().remove("OutputWorkspace");
@@ -592,6 +593,7 @@ public:
     alg.setProperty("MakeFileBacked","0");
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
+    std::string this_filename = alg.getProperty("Filename");
 
     LoadMD loadAlg;
     loadAlg.initialize();
@@ -608,9 +610,9 @@ public:
     TS_ASSERT_EQUALS( affMat[0][1], 1.0 );
     TS_ASSERT_EQUALS( affMat[2][0], 1.0 );
 
-    if (Poco::File(filename).exists())
+    if (Poco::File(this_filename).exists())
     {
-      Poco::File(filename).remove();
+      Poco::File(this_filename).remove();
     }
 
     AnalysisDataService::Instance().remove("SaveMDAffineTest_ws");

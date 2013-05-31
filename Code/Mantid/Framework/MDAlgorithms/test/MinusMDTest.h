@@ -93,17 +93,24 @@ public:
 
     TSM_ASSERT("If the workspace is file-backed, then it needs updating.", ws->fileNeedsUpdating() );
     //cleanup
+    std::string realFile;
     if ((inPlace==1)&&rhs->isFileBacked())
     {
+        realFile = rhs->getBoxController()->getFileIO()->getFileName();
         rhs->clearFileBacked(false);
+        MDEventsTestHelper::checkAndDeleteFile(realFile);
     }
     if ((inPlace==2)&&lhs->isFileBacked())
     {
+        realFile = lhs->getBoxController()->getFileIO()->getFileName();
         lhs->clearFileBacked(false);
+        MDEventsTestHelper::checkAndDeleteFile(realFile);
     }
     if (ws->isFileBacked())
     {
+        realFile = ws->getBoxController()->getFileIO()->getFileName();
         ws->clearFileBacked(false);
+        MDEventsTestHelper::checkAndDeleteFile(realFile);
     }
     AnalysisDataService::Instance().remove(outWSName);
   }
