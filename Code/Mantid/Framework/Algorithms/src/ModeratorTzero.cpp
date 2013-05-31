@@ -3,7 +3,7 @@ Corrects the time of flight (TOF) by a time offset that is dependent on the ener
 A heuristic formula for the correction is stored in the instrument definition file. Below is shown the entry in the instrument file for the VISION beamline:<br />
  <nowiki><!--  formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators--></nowiki>
  <nowiki> <parameter name="t0_formula" type="string"></nowiki>
- <nowiki>  <value val="34.746 - 0.166672*incidentEnergy + 0.00020538*incidentEnergy^(2.0)" /></nowiki>
+ <nowiki>  <value val="(incidentEnergy &lt; 34.7332) ? 37.011296*incidentEnergy^(-0.052874) : (incidentEnergy &lt; 88.7556) ? 124.267307*incidentEnergy^(-0.394282) : (incidentEnergy &lt; 252.471) ? 963.775145*incidentEnergy^(-0.850919) : (incidentEnergy &lt; 420.145) ? 33.225834*incidentEnergy^(-0.242105) : (incidentEnergy &lt; 100000.0) ? 120.569231*incidentEnergy^(-0.455477) : 0.0" /></nowiki>
  <nowiki></parameter></nowiki>
 
 The recorded <math>TOF = t_0 + t_i + t_f</math> with<br />
