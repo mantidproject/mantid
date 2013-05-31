@@ -58,11 +58,11 @@ namespace Mantid
     public:
       /// Constructor with an instrument and a spectra map
       NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
-                        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=true);
+                        const ISpectrumDetectorMapping & spectraMap, bool ignoreMasked=true);
 
       /// Constructor with an instrument and a spectra map and number of neighbours
       NearestNeighbours(int nNeighbours, boost::shared_ptr<const Instrument> instrument,
-                        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=true);
+                        const ISpectrumDetectorMapping & spectraMap, bool ignoreMasked=true);
 
       /// Default (empty) destructor
       virtual ~NearestNeighbours() {};
@@ -78,12 +78,12 @@ namespace Mantid
       /// Get the spectra associated with all in the instrument
       std::map<specid_t, IDetector_const_sptr>
         getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
-        const ISpectraDetectorMap & spectraMap);
+        const ISpectrumDetectorMapping & spectraMap);
 
       /// A pointer the the instrument
       boost::shared_ptr<const Instrument> m_instrument;
       /// A reference to the spectra map
-      const ISpectraDetectorMap & m_spectraMap;
+      const ISpectrumDetectorMapping & m_spectraMap;
 
     private:
       /// typedef for Graph object used to hold the calculated information

@@ -160,9 +160,6 @@ void ConvertUnits::exec()
      values at the ends of all spectra, but that would be less efficient */
   if ( m_outputUnit->unitID().find("Delta")==0 && !m_inputEvents ) outputWS = this->removeUnphysicalBins(outputWS);
 
-  //outputWS->updateSpectraUsingMap();
-
-
   // Rebin the data to common bins if requested, and if necessary
   bool alignBins = getProperty("AlignBins");
   if (alignBins && !WorkspaceHelpers::commonBoundaries(outputWS)) 

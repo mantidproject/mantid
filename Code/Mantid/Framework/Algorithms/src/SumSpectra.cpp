@@ -195,7 +195,6 @@ void SumSpectra::exec()
     //take the square root of all the accumulated squared errors - Assumes Gaussian errors
     std::transform(YError.begin(), YError.end(), YError.begin(), rs);
 
-    outputWorkspace->generateSpectraMap();
     // set up the summing statistics
     outputWorkspace->mutableRun().addProperty("NumAllSpectra",int(numSpectra),"",true);
     outputWorkspace->mutableRun().addProperty("NumMaskSpectra",int(numMasked),"",true);
@@ -541,10 +540,11 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
 
     //Add the event lists with the operator
     const EventList & tOutEL = localworkspace->getEventList(i);
-    if(tOutEL.empty())
-      numZeros++;
-    else
-      outEL += tOutEL;
+    if( tOutEL.empty() )
+    {
+      ++numZeros;
+    }
+    outEL += tOutEL;
 
     progress.report();
   }

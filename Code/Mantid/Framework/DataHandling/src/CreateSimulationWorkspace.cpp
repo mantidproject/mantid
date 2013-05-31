@@ -314,7 +314,6 @@ namespace Mantid
         spectrum->addDetectorIDs(iter->second);
         ++wsIndex;
       }
-      m_outputWS->generateSpectraMap();
     }
 
     /**

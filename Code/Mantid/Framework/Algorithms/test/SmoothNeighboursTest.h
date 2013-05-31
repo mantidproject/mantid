@@ -66,6 +66,10 @@ public:
       // Therefore the output WS has lower errors than input:
       for (size_t j=0; j < inWS->readE(0).size(); j++)
         { TS_ASSERT_LESS_THAN( outWS->readE(wi)[j],  inWS->readE(wi)[j] );  }
+      auto inDetIDs = inWS->getSpectrum(wi)->getDetectorIDs();
+      auto outDetIDs = outWS->getSpectrum(wi)->getDetectorIDs();
+      TS_ASSERT_LESS_THAN( inDetIDs.size(), outDetIDs.size() );
+      if ( !inDetIDs.empty() ) TS_ASSERT_EQUALS( outDetIDs.count(*inDetIDs.begin()), 1 );
     }
 
     AnalysisDataService::Instance().remove("testMW");

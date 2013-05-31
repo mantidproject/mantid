@@ -39,6 +39,7 @@ LoadRaw version 1 and 2 are no longer available in Mantid.  Version 3 has been v
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include <boost/shared_ptr.hpp>
 #include <Poco/Path.h>
@@ -159,7 +160,9 @@ namespace Mantid
 
       // Only run the Child Algorithms once
       loadRunParameters(localWorkspace);
-      runLoadMappingTable(m_filename,localWorkspace);
+      const SpectrumDetectorMapping detectorMapping(isisRaw->spec,isisRaw->udet,isisRaw->i_det);
+      localWorkspace->updateSpectraUsing(detectorMapping);
+
       runLoadInstrument(m_filename,localWorkspace, 0.0, 0.4);
       m_prog_start = 0.4;
       Run& run = localWorkspace->mutableRun();
@@ -196,7 +199,7 @@ namespace Mantid
       else
       {
         //gets the monitor spectra list from workspace
-        getmonitorSpectrumList(localWorkspace, monitorSpecList);
+        monitorSpecList = getmonitorSpectrumList(detectorMapping);
         //calculate the workspace size for normal workspace and monitor workspace
         calculateWorkspacesizes(monitorSpecList,normalwsSpecs, monitorwsSpecs);
         try
@@ -298,11 +301,9 @@ namespace Mantid
         }
 
         // Re-update spectra etc.
-        if (localWorkspace)
-          localWorkspace->updateSpectraUsingMap();
+        if (localWorkspace) localWorkspace->updateSpectraUsing(detectorMapping);
 
-        if (monitorWorkspace)
-          monitorWorkspace->updateSpectraUsingMap();
+        if (monitorWorkspace) monitorWorkspace->updateSpectraUsing(detectorMapping);
 
         // Assign the result to the output workspace property
         if (m_numberOfPeriods > 1)
@@ -652,11 +653,10 @@ namespace Mantid
     {
       (void) binclude; // Avoid compiler warning
 
-      std::vector<specid_t> monitorSpecList;
       std::vector<specid_t> monitorwsList;
       DataObjects::Workspace2D_sptr monitorWorkspace;
       FILE *file(NULL);
-      getmonitorSpectrumList(localWorkspace, monitorSpecList);
+      std::vector<specid_t> monitorSpecList = getmonitorSpectrumList(SpectrumDetectorMapping(localWorkspace.get()));
       if (bseparate && !monitorSpecList.empty())
       {
         Property *ws = getProperty("OutputWorkspace");

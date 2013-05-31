@@ -182,7 +182,7 @@ namespace Mantid
       void makeMapToEventLists(std::vector<T> & vectors);
 
       void loadEvents(API::Progress * const prog, const bool monitors);
-      void createSpectraMapping(const std::string &nxsfile, API::MatrixWorkspace_sptr workspace,
+      void createSpectraMapping(const std::string &nxsfile,
                                 const bool monitorsOnly, const std::string & bankName = "");
       void deleteBanks(API::MatrixWorkspace_sptr workspace, std::vector<std::string> bankNames);
       bool hasEventMonitors();
@@ -200,8 +200,7 @@ namespace Mantid
           Algorithm * alg);
 
       /// Load a spectra mapping from the given file
-      static Geometry::ISpectraDetectorMap * loadSpectraMapping(const std::string & filename, Geometry::Instrument_const_sptr inst,
-          const bool monitorsOnly, const std::string entry_name, Mantid::Kernel::Logger & g_log);
+      bool loadSpectraMapping(const std::string& filename, const bool monitorsOnly, const std::string& entry_name);
 
     private:
 

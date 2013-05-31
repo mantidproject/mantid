@@ -55,7 +55,7 @@ public:
   void test_detectorID_handling()
   {
     SpectrumTester s;
-    TS_ASSERT_EQUALS( s.getDetectorIDs().size(), 0);
+    TS_ASSERT( s.getDetectorIDs().empty() );
     s.addDetectorID(123);
     TS_ASSERT_EQUALS( s.getDetectorIDs().size(), 1);
     TS_ASSERT_EQUALS( *s.getDetectorIDs().begin(), 123);
@@ -68,8 +68,30 @@ public:
     TS_ASSERT( !s.hasDetectorID(666) ); //No devil! ;)
     TS_ASSERT( !s.hasDetectorID(999) );
 
+    int detids[] = {10,20,30,40,50,60,70,80,90};
+    s.setDetectorIDs(std::set<detid_t>(detids,detids+3));
+    TS_ASSERT_EQUALS( s.getDetectorIDs().size(), 3 );
+    TS_ASSERT( s.hasDetectorID(20) );
+    s.addDetectorIDs(std::set<detid_t>(detids+3,detids+6));
+    TS_ASSERT_EQUALS( s.getDetectorIDs().size(), 6 );
+    TS_ASSERT( s.hasDetectorID(20) );
+    TS_ASSERT( s.hasDetectorID(60) );
+    s.addDetectorIDs(std::set<detid_t>());
+    TS_ASSERT_EQUALS( s.getDetectorIDs().size(), 6 );
+    s.addDetectorIDs(std::vector<detid_t>(detids+4,detids+9)); // N.B. check unique elements
+    TS_ASSERT_EQUALS( s.getDetectorIDs().size(), 9 );
+    TS_ASSERT( s.hasDetectorID(10) );
+    TS_ASSERT( s.hasDetectorID(70) );
+    s.addDetectorIDs(std::vector<detid_t>());
+    TS_ASSERT_EQUALS( s.getDetectorIDs().size(), 9 );
+
     s.clearDetectorIDs();
-    TS_ASSERT_EQUALS( s.getDetectorIDs().size(), 0);
+    TS_ASSERT( s.getDetectorIDs().empty() );
+
+    s.addDetectorID(987);
+    TS_ASSERT_EQUALS( s.getDetectorIDs().size(), 1);
+    s.setDetectorIDs(std::set<detid_t>());
+    TS_ASSERT( s.getDetectorIDs().empty() );
   }
 
 

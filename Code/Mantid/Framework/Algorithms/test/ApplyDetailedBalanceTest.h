@@ -153,7 +153,6 @@ private:
       ws2D->setData(i,yv,ev);
       ws2D->getSpectrum(i)->setSpectrumNo(i);
     }
-    ws2D->generateSpectraMap();
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);
 

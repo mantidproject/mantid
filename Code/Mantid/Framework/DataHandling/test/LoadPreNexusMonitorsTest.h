@@ -59,6 +59,11 @@ public:
     TS_ASSERT_EQUALS( ws->dataX(1)[3424], 3424.0);
     TS_ASSERT_EQUALS( ws->dataY(1)[3424], 858);
 
+    for ( int i = 0; i < 3; ++i )
+    {
+      TS_ASSERT_EQUALS( *ws->getSpectrum(i)->getDetectorIDs().begin(), -1*(i+1) );
+    }
+
     Mantid::API::AnalysisDataService::Instance().remove(outWS);
 
   }

@@ -5,7 +5,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 
 #include <boost/lexical_cast.hpp>
 #include <iostream>
@@ -102,24 +101,6 @@ specid_t SpectraAxis::spectraNo(const std::size_t& index) const
 
   return m_parentWS->getSpectrum(index)->getSpectrumNo();
 }
-
-/** Returns a map where index is the key and spectra is the value
- *  This is used for efficient search of spectra number within a workspace
- *  @param  map Reference to the map
- */
-void SpectraAxis::getIndexSpectraMap(index2spec_map& map)const
-{
-  size_t nel = length();
-
-  if (nel==0)
-    throw std::runtime_error("getSpectraIndexMap(),  zero elements");
-  map.clear();
-  for (size_t i=0; i < nel; ++i )
-  {
-    map.insert(std::make_pair(i, m_parentWS->getSpectrum(i)->getSpectrumNo()));
-  }
-}
-
 
 /** Returns a map where spectra is the key and index is the value
  *  This is used for efficient search of spectra number within a workspace

@@ -91,7 +91,6 @@ namespace Mantid
       // Get the integrated input workspace
       MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace();
 
-      // Get hold of the spectraDetectorMap and axis
       std::vector<detid_t> deadDets;
       int countSpec = 0, countDets = 0;
 

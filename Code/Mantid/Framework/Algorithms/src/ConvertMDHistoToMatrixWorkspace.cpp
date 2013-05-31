@@ -135,7 +135,6 @@ void ConvertMDHistoToMatrixWorkspace::exec()
     outputWorkspace->dataX(0)[i] = wsCoord[id];
   }
 
-  outputWorkspace->generateSpectraMap();
   boost::shared_ptr<Kernel::Units::Label> labelX = boost::dynamic_pointer_cast<Kernel::Units::Label>(
     Kernel::UnitFactory::Instance().create("Label")
     );

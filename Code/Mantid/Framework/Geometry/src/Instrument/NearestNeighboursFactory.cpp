@@ -2,7 +2,6 @@
 #include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
-//using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -31,7 +30,7 @@ namespace Geometry
   @param ignoreMasked : True to ignore masked detectors 
   */
   NearestNeighbours* NearestNeighboursFactory::create(boost::shared_ptr<const Instrument> instrument,
-                        const ISpectraDetectorMap & spectraMap, bool ignoreMasked)
+                        const ISpectrumDetectorMapping & spectraMap, bool ignoreMasked)
   {
     return new NearestNeighbours(instrument, spectraMap, ignoreMasked);
   }
@@ -44,7 +43,7 @@ namespace Geometry
   @param ignoreMasked : True to ignore masked detectors 
   */
   NearestNeighbours* NearestNeighboursFactory::create(int numberOfNeighbours, boost::shared_ptr<const Instrument> instrument,
-        const ISpectraDetectorMap & spectraMap, bool ignoreMasked)
+        const ISpectrumDetectorMapping & spectraMap, bool ignoreMasked)
   {
     return new NearestNeighbours(numberOfNeighbours, instrument, spectraMap, ignoreMasked);
   }

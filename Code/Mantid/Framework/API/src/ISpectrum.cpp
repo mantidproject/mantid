@@ -149,7 +149,7 @@ namespace API
    *
    * @param detIDs :: set of detector IDs to insert in set.
    */
-  void ISpectrum::addDetectorIDs(const std::set<detid_t> detIDs)
+  void ISpectrum::addDetectorIDs(const std::set<detid_t>& detIDs)
   {
     if (detIDs.size() == 0) return;
     this->detectorIDs.insert( detIDs.begin(), detIDs.end() );
@@ -159,7 +159,7 @@ namespace API
    *
    * @param detIDs :: vector of detector IDs to insert in set.
    */
-  void ISpectrum::addDetectorIDs(const std::vector<detid_t> detIDs)
+  void ISpectrum::addDetectorIDs(const std::vector<detid_t>& detIDs)
   {
     if (detIDs.size() == 0) return;
     this->detectorIDs.insert( detIDs.begin(), detIDs.end() );
@@ -174,6 +174,28 @@ namespace API
   {
     this->detectorIDs.clear();
     this->detectorIDs.insert( detID );
+  }
+
+  /** Set the detector IDs to be the set given.
+   *  Will clear any previous IDs (unlike addDetectorIDs).
+   *  @param detIDs The new list of detector ID numbers
+   */
+  void ISpectrum::setDetectorIDs(const std::set<detid_t>& detIDs)
+  {
+    detectorIDs = detIDs;
+  }
+
+  /** Set the detector IDs to be the set given (move version).
+   *  Will clear any previous IDs (unlike addDetectorIDs).
+   *  @param detIDs The new list of detector ID numbers
+   */
+  void ISpectrum::setDetectorIDs(std::set<detid_t>&& detIDs)
+  {
+#if !(defined(__INTEL_COMPILER))
+    detectorIDs = std::move(detIDs);
+#else
+    detectorIDs = detIDs; // No moving on the Mac :(
+#endif
   }
 
   // --------------------------------------------------------------------------

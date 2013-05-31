@@ -153,10 +153,7 @@ void MaskDetectors::exec()
   else if ( ! detectorList.empty() )
   {
     // Convert from detectors to workspace indexes
-    // This call can be way too slow! Go back to the old way pending improving that
-    //    WS->getIndicesFromDetectorIDs(detectorList, indexList);
-    std::vector<specid_t> mySpectraList = WS->spectraMap().getSpectra(detectorList);
-    fillIndexListFromSpectra(indexList,mySpectraList,WS);
+    WS->getIndicesFromDetectorIDs(detectorList, indexList);
   }
   // If we have a workspace that could contain masking,copy that in too
 

@@ -9,7 +9,8 @@
 
 #include "MantidGeometry/Instrument/NearestNeighboursFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
+
+#include "NearestNeighboursTest.h"
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -26,7 +27,7 @@ public:
   void testCreateObject()
   {
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    const ISpectrumDetectorMapping spectramap = NearestNeighboursTest::buildSpectrumDetectorMapping(1, 18);
     // Default parameter map.
     ParameterMap_sptr pmap(new ParameterMap());
     // Parameterized instrument
@@ -35,7 +36,7 @@ public:
     NearestNeighboursFactory factory;
     NearestNeighbours* nn = NULL;
 
-    TSM_ASSERT_THROWS_NOTHING("Create on Factory should not throw", nn = factory.create(instrument, *spectramap););
+    TSM_ASSERT_THROWS_NOTHING("Create on Factory should not throw", nn = factory.create(instrument, spectramap););
     TSM_ASSERT("Null object created", nn != NULL);
     delete nn;
   }
@@ -43,7 +44,7 @@ public:
   void testCreateObjectAsINearestNeighbourFactory()
   {
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new OneToOneSpectraDetectorMap(1, 18));
+    const ISpectrumDetectorMapping spectramap = NearestNeighboursTest::buildSpectrumDetectorMapping(1, 18);
     // Default parameter map.
     ParameterMap_sptr pmap(new ParameterMap());
     // Parameterized instrument
@@ -53,7 +54,7 @@ public:
     //Create the alias
     INearestNeighboursFactory& ifactory = factory;
     //The following will break if NearestNeighbours is not an INearestNeighbours object.
-    INearestNeighbours* nn = ifactory.create(instrument, *spectramap);
+    INearestNeighbours* nn = ifactory.create(instrument, spectramap);
     //For consistency.
     TSM_ASSERT("Product should be a NearestNeighbours object.", NULL != dynamic_cast<NearestNeighbours*>(nn));
     delete nn;

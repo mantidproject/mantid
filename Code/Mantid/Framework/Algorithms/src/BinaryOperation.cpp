@@ -277,10 +277,6 @@ namespace Mantid
       applyMaskingToOutput(m_out);
       setOutputUnits(m_lhs,m_rhs,m_out);
 
-      //For EventWorkspaces, redo the spectra to detector ID to make sure it is up-to-date. This may only be necessary for the Plus algorithm!
-      if (m_eout) m_eout->generateSpectraMap();
-
-
       // Assign the result to the output workspace property
       setProperty(outputPropName(),m_out);
 
@@ -986,13 +982,8 @@ namespace Mantid
       // Initialize the table; filled with -1 meaning no match
       table->resize(lhs_nhist, -1);
 
-      // We'll need maps from WI to Spectrum Number.
-      Timer timer1;
-      //std::cout << timer1.elapsed() << " sec to getWorkspaceIndexToSpectrumMap\n";
-
       detid2index_map * rhs_det_to_wi;
       rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap(false);
-      //std::cout << timer1.elapsed() << " sec to getDetectorIDToWorkspaceIndexMap\n";
 
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
@@ -1081,7 +1072,6 @@ namespace Mantid
 //          throw std::runtime_error(mess.str());
         }
       }
-      //std::cout << timer1.elapsed() << " sec to do the rest\n";
 
       return table;
     }

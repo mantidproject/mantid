@@ -6,7 +6,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidTestHelpers/FakeObjects.h"
 

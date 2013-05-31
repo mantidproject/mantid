@@ -442,20 +442,25 @@ namespace MantidQt
       size_t max_spec_index=0; 
       size_t aux; 
       // this is a costly opperation and should be done just once for each file
-      Mantid::index2detid_map * map =  mws_sptr->getWorkspaceIndexToDetectorIDMap();
-      Mantid::index2detid_map::iterator it; 
-      for (it=map->begin(); it!= map->end(); ++it)
+      for ( size_t i = 0; i < mws_sptr->getNumberHistograms(); ++i )
       {
-        // if detector id inside the range
-        if (it->second >= rectDet->getMinimumDetectorId() && it->second <= rectDet->getMaximumDetectorId()){
-          aux = it->first; 
-          if (aux > max_spec_index)
-            max_spec_index = aux; 
-          if (aux < min_spec_index)
-            min_spec_index = aux;
+        const ISpectrum * const spec = mws_sptr->getSpectrum(i);
+        auto detIDs = spec->getDetectorIDs();
+        if ( ! detIDs.empty() )
+        {
+          // Assuming 1 detector per spectrum (the old code would have failed if it wasn't)
+          const detid_t detID = *detIDs.begin();
+          // if detector id inside the range
+          if (detID >= rectDet->getMinimumDetectorId() && detID <= rectDet->getMaximumDetectorId())
+          {
+            aux = spec->getSpectrumNo();
+            if (aux > max_spec_index)
+              max_spec_index = aux;
+            if (aux < min_spec_index)
+              min_spec_index = aux;
+          }
         }
       }
-	delete map; // release memory allocated by getWorkspaceIndexToDetectorIDMap.
       if ( min_spec_index == ULONG_MAX || max_spec_index == 0){
         g_log.error()<<"Error : The instrument does not have data associated to the RectangularDetector " << rectDet->getDetectorName().toStdString()<<std::endl;
       }

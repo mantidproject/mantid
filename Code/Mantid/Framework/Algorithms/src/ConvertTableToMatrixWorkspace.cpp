@@ -78,7 +78,6 @@ void ConvertTableToMatrixWorkspace::exec()
   outputWorkspace->dataY(0).assign(Y.begin(),Y.end());
   outputWorkspace->dataE(0).assign(E.begin(),E.end());
 
-  outputWorkspace->generateSpectraMap();
   boost::shared_ptr<Kernel::Units::Label> labelX = boost::dynamic_pointer_cast<Kernel::Units::Label>(
     Kernel::UnitFactory::Instance().create("Label")
     );

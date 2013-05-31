@@ -14,15 +14,6 @@
 
 namespace Mantid
 {
-
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-namespace Geometry
-{
-  class ISpectraDetectorMap;
-}
-
 namespace API
 {
 //----------------------------------------------------------------------
@@ -73,7 +64,6 @@ public:
   specid_t spectraNo(const std::size_t& index) const;
   // Get a map that contains the spectra index as the key and the index in the array as teh value
   void getSpectraIndexMap(spec2index_map&) const;
-  void getIndexSpectraMap(index2spec_map& map) const;
 
   double getMin() const;
   double getMax() const;

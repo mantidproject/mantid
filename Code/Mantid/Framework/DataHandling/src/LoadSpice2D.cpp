@@ -15,7 +15,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 
 #include <boost/regex.hpp>
@@ -441,10 +440,6 @@ namespace Mantid
         throw std::runtime_error(error.str());
       }
 
-      const size_t ndet = nxbins*nybins + nMonitors;
-      boost::shared_array<detid_t> udet(new detid_t[ndet]);
-      boost::shared_array<specid_t> spec(new specid_t[ndet]);
-
       // Generate mapping of detector/channel IDs to spectrum ID
 
       // Detector/channel counter
@@ -453,8 +448,7 @@ namespace Mantid
       // Monitor: IDs start at 1 and increment by 1
       for(int i=0; i<nMonitors; i++)
       {
-        spec[icount] = icount;
-        udet[icount] = icount+1;
+        localWorkspace->getSpectrum(icount)->setDetectorID(icount+1);
         icount++;
       }
 
@@ -463,14 +457,11 @@ namespace Mantid
       {
         for(int iy=0; iy<nybins; iy++)
         {
-          spec[icount] = icount;
-          udet[icount] = 1000000 + iy*1000 + ix;
+          localWorkspace->getSpectrum(icount)->setDetectorID(1000000 + iy*1000 + ix);
           icount++;
         }
       }
 
-      // Populate the Spectra Map with parameters
-      localWorkspace->replaceSpectraMap(new API::SpectraDetectorMap(spec.get(), udet.get(), ndet));
     }
 
 
