@@ -166,6 +166,28 @@
   <value val="1.2"/>
 </parameter>
 
+<!--  -->
+<!--  Bleeding corrections   -->
+
+<!--  the number of pixels ignored within the bleed test diagnostic -->
+<parameter name="bleed_pixels">
+    <value val="0"/>
+</parameter>
+<!--  the maximum framerate allowed in a tube -->
+<parameter name="bleed_maxrate">
+    <value val="0"/>
+</parameter>
+
+<parameter name="use_bleeding">
+    <value val="0"/>
+</parameter>
+
+<!-- norm_method- normalistion monitor-1,monitor-2,uamph current -->
+<parameter name="norm_method",type="string">
+    <value val="monitor-1"/>
+</parameter>
+
+
 <!-- -->
 </component-link>
 

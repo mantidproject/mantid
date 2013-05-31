@@ -65,7 +65,7 @@
 </parameter>
 
 <parameter name="vanadium-mass">
-  <value val="30.1"/>
+  <value val="20.79"/>
 </parameter>
 
 <!-- Diagnostic defaults -->
