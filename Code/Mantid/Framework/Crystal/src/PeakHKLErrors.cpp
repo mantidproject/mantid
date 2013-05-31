@@ -1,3 +1,39 @@
+/*WIKI*
+  ==
+ This function calculates, for each peak, its h,k,and l offsets from an integer using goniometer settings and/or tilt and sample offsets from the parameters.
+
+The original PeaksWorkspace is unchanged.
+
+===Attributes===
+
+# OptRuns : a list of run numbers whose sample orientations are to be optimized.  The list is separated by "/".
+# PeakWorkspaceName : The name of the PeaksWorkspace in the AnalysisDataService
+
+
+===Parameters===
+
+#SampleXOffset- XOffset of Goniometer center from instrument center in meters
+#SampleYOffset- YOffset of Goniometer center from instrument center in meters
+#SampleZOffset- YOffset of Goniometer center from instrument center in meters
+
+#GonRotx- For Goniometer tilt. Rotation about x-axis in degrees where Tilt = Rotx(GonRotx)*Roty(GonRoty)*Rotz(GonRotz)
+#GonRoty- For Goniometer tilt. Rotation about y-axis
+#GonRotz- For Goniometer tilt. Rotation about z-axis( done 1st AFTER phi-chi-omega rotations)
+
+#chixxx - xxx is a run number from OptRuns. This is the chi angle in degrees that will be used for that run( before tilting)
+#phixxx - xxx is a run number from OptRuns. This is the phi angle in degrees that will be used for that run
+#omegaxxx - xxx is a run number from OptRuns. This is the omega angle in degrees that will be used for that run
+
+NOTE:When used in fitting, some or all of the first 6 parameters could be tied to zero.
+
+===Outputs===
+The PeaksWorkspace is NOT changed.
+
+The argument out in function1D has ,for each peak, the h,k, and l offsets from an integer using the current parameter values.
+
+
+*WIKI*/
+
 /*
  * PeakHKLErrors.cpp
  *
@@ -281,6 +317,8 @@ namespace Mantid
    *  @param  axis   either x,y,z, or X,Y, or Z.
    *
    *  @return The matrix that corresponds to this action.
+   *
+   *  Replace by Quats?
    */
    Matrix<double> PeakHKLErrors::RotationMatrixAboutRegAxis( double theta, char axis)
     {
@@ -337,6 +375,15 @@ namespace Mantid
      return Res*(M_PI/180.);
     }
 
+   /**
+    * Calculates the h,k, and l offsets from an integer for (some of )the peaks, given the parameter values.
+    *
+    * @param out  For each peak there are 3 consecutive elements in this array. The first is for the h offset from an
+    *             integer, the second is the k offset and the 3rd is the l offset
+    * @param xValues  xValues give the index in the PeaksWorkspace for the peak. For each peak considered there are
+    *              three consecutive entries all with the same index
+    * @param nData The size of the xValues and out arrays
+    */
      void PeakHKLErrors::function1D  ( double *out, const double *xValues, const size_t nData )const
      {
       PeaksWorkspace_sptr Peaks =

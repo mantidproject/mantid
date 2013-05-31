@@ -148,7 +148,7 @@ public:
 
     size_t params[20] =
     { 12,12,11,11,10,10,0,1,1, 2, 2,4,4,5, 5, 6, 6,7, 7, 7 };
-   // { 2, 2,2,2,2, 2,2,2,2 , 2,2,2,2, 2,3,3,3,3, 3,3 };
+
     size_t indx[20] =
     {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 1, 2, 3, 4, 5 };
 
@@ -178,8 +178,7 @@ public:
       size_t k = indx[x];
       x++;
 
-     // std::cout<<"param,peak qxyz="<<param<<","<<k<<
-      //    "resT,resNum="<<Jac->get(k, param)<<","<< compRes[k]<<std::endl;
+
     TS_ASSERT_DELTA(Jac->get(k, param), compRes[k], .02);
 
     }
