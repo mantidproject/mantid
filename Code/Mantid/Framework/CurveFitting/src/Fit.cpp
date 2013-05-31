@@ -69,6 +69,10 @@ In case of a composite function the same notation is used for constraints and fo
 
 constrain the parameter "c" of function 1.
 
+===Fitting to data in a MatrixWorkspace===
+
+The error values in the input workspace are used to weight the data in the fit. Zero error values are not allowed and are replaced with ones.
+
 ===Output===
 
 Setting the Output property defines the names of the two output workspaces. One of them is a [[TableWorkspace]] with the fitted parameter values. The other is a [[Workspace2D]] which compares the fit with the original data. It has three spectra. The first (index 0) contains the original data, the second one the data simulated with the fitting function and the third spectrum is the difference between the first two. For example, if the Output was set to "MyResults" the parameter TableWorkspace will have name "MyResults_Parameters" and the Workspace2D will be named "MyResults_Workspace". If the function's derivatives can be evaluated an additional TableWorkspace is returned. When the Output is set to "MyResults" this TableWorkspace will have the name "MyResults_NormalisedCovarianceMatrix" and it returns a calculated correlation matrix. Denote this matrix C and its elements Cij then the diagonal elements are listed as 1.0 and the off diagnonal elements as percentages of correlation between parameter i and j equal to 100*Cij/sqrt(Cii*Cjj).
