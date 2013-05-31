@@ -528,7 +528,7 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
                                            API::MatrixWorkspace_sptr& outputWorkspace)
 { 
   EventWorkspace_sptr inputEvent = boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
-  EventWorkspace_sptr outputEvent;
+  EventWorkspace_sptr outputEvent = boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace )
