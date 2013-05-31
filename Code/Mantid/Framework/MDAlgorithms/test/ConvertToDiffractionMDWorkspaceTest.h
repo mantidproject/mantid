@@ -5,7 +5,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
+#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -19,6 +19,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 
 class ConvertToDiffractionMDWorkspaceTest : public CxxTest::TestSuite
 {
@@ -38,12 +39,10 @@ public:
   {
     EventWorkspace_sptr in_ws = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(10);
     AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
-    IAlgorithm_sptr alg;
+    IAlgorithm* alg;
 
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 6,
-        "InputWorkspace", "testInEW",
-        "OutputWorkspace", "testOutMD",
-        "OutputDimensions", "Q (lab frame)");
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
+        "InputWorkspace=testInEW;OutputWorkspace=testOutMD;OutputDimensions=Q (lab frame)",1);
     TS_ASSERT( alg->isExecuted() );
 
     MDEventWorkspace3Lean::sptr ws;
@@ -54,28 +53,28 @@ public:
     TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::API::QLab);
 
     // But you can't add to an existing one of the wrong dimensions type, if you choose Append
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 8,
-        "InputWorkspace", "testInEW",
-        "OutputWorkspace", "testOutMD",
-        "Append", "1",
-        "OutputDimensions", "HKL");
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
+        "InputWorkspace=testInEW;"
+        "OutputWorkspace=testOutMD;"
+        "Append=1;"
+        "OutputDimensions=HKL",1);
     TS_ASSERT( !alg->isExecuted() );
 
     // If Append is False, then it does work. The workspace gets replaced
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 8,
-        "InputWorkspace", "testInEW",
-        "OutputWorkspace", "testOutMD",
-        "Append", "0",
-        "OutputDimensions", "HKL");
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 
+        "InputWorkspace=testInEW;"
+        "OutputWorkspace=testOutMD;"
+        "Append=0;"
+        "OutputDimensions=HKL",1);
     TS_ASSERT( alg->isExecuted() );
 
     // Let's remove the old workspace and try again - it will work.
     AnalysisDataService::Instance().remove("testOutMD");
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 8,
-        "InputWorkspace", "testInEW",
-        "OutputWorkspace", "testOutMD",
-        "Append", "1",
-        "OutputDimensions", "HKL");
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
+        "InputWorkspace=testInEW;"
+        "OutputWorkspace=testOutMD;"
+        "Append=1;"
+        "OutputDimensions=HKL",1);
     TS_ASSERT( alg->isExecuted() );
 
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MDEventWorkspace3Lean>("testOutMD") );
@@ -85,10 +84,10 @@ public:
     TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::API::HKL);
 
     AnalysisDataService::Instance().remove("testOutMD");
-    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 6,
-        "InputWorkspace", "testInEW",
-        "OutputWorkspace", "testOutMD",
-        "OutputDimensions", "Q (sample frame)"
+    alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace",
+        "InputWorkspace=testInEW;"
+        "OutputWorkspace=testOutMD;"
+        "OutputDimensions=Q (sample frame)",1
         );
     TS_ASSERT( alg->isExecuted() );
 

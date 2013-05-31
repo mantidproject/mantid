@@ -241,16 +241,12 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
   return Transf*Scale*Wmat;
 }
 
-///** Build meaningful dimension names for different conversion modes
-//*/
-//void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
-//{
-//  //axis units: convert string representation to any availible
-//  CoordScaling ScaleID = getQScaling(QScaleRequested);
-//  this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
-//
-//}
+/** Build meaningful dimension names for different conversion modes 
+ * @param TargWSDescription the class-container to keep the dimension names and dimension unints
+ * @param FrameID -- the ID describing the target transformation frame (lab, sample, hkl)
+ * @param ScaleID -- the scale ID which define how the dimensions are scaled
 
+*/
 void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::TargetFrame FrameID,CnvrtToMD::CoordScaling ScaleID)const
 {
 
@@ -407,6 +403,11 @@ CoordScaling MDWSTransform::getQScaling(const std::string &ScID)const
 
   return CoordScaling(nScaling);
 }
+/** Method to convert enum describing target scaling to its string representation */
+std::string MDWSTransform::getQScaling(const CnvrtToMD::CoordScaling ScaleID)const
+{
+    return m_QScalingID[ScaleID];
+}
 
 /** function which convert input string representing Target coordinate frame to correspondent enum */
 TargetFrame MDWSTransform::getTargetFrame(const std::string &FrameID)const
@@ -416,6 +417,11 @@ TargetFrame MDWSTransform::getTargetFrame(const std::string &FrameID)const
   if (nFrame<0)throw(std::invalid_argument(" The Target Frame with ID: "+FrameID+" is unavalible"));
 
   return TargetFrame(nFrame);
+}
+/** Method to convert enum describing target coordinate frame to its string representation */
+std::string MDWSTransform::getTargetFrame(const CnvrtToMD::TargetFrame FrameID)const
+{
+    return m_TargFramesID[FrameID];
 }
 
 //

@@ -9,7 +9,6 @@ set ( SRC_FILES
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
 	src/ConvToMDSelector.cpp 
-	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToReflectometryQ.cpp
 	src/CoordTransformAffine.cpp
 	src/CoordTransformAffineParser.cpp
@@ -25,7 +24,6 @@ set ( SRC_FILES
 	src/MDBoxBase.cpp
 	src/MDBoxIterator.cpp
     src/MDBoxFlatTree.cpp    
-#	src/MDBoxToChange.cpp
 	src/MDBoxSaveable.cpp    
 	src/MDEventFactory.cpp
 	src/MDEventWSWrapper.cpp
@@ -69,12 +67,10 @@ set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BoxControllerNeXusIO.h        
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
-#	inc/MantidMDEvents/BoxCtrlChangesList.h 
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h
 	inc/MantidMDEvents/ConvToMDSelector.h
-	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDEvents/ConvertToReflectometryQ.h
 	inc/MantidMDEvents/CoordTransformAffine.h
 	inc/MantidMDEvents/CoordTransformAffineParser.h
@@ -90,7 +86,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/MDBoxIterator.h
     inc/MantidMDEvents/MDBoxFlatTree.h
-#	inc/MantidMDEvents/MDBoxToChange.h
 	inc/MantidMDEvents/MDBoxSaveable.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
@@ -130,7 +125,6 @@ set ( TEST_FILES
 	AffineMatrixParameterTest.h
 	BoxControllerNeXusIOTest.h                
 	BoxControllerSettingsAlgorithmTest.h
-	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToReflectometryQTest.h
 	CoordTransformAffineParserTest.h
 	CoordTransformAffineTest.h
@@ -145,7 +139,6 @@ set ( TEST_FILES
 	MDBoxIteratorTest.h
 	MDBoxTest.h
 	MDBoxSaveableTest.h    
-#	MDBoxToChangeTest.h
 	MDDimensionStatsTest.h
 	MDEventFactoryTest.h
 	MDEventInserterTest.h
