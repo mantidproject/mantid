@@ -80,7 +80,7 @@ void SplatterPlotView::render()
   pqPipelineSource *src = NULL;
   src = pqActiveObjects::instance().activeSource();
 
-  QString renderType = "Surface";
+  QString renderType = "Points";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
@@ -117,6 +117,7 @@ void SplatterPlotView::render()
   pqDataRepresentation *drep = builder->createDataRepresentation(\
            src->getOutputPort(0), this->view);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType.toStdString().c_str());
+  vtkSMPropertyHelper(drep->getProxy(), "PointSize").Set(1);
   drep->getProxy()->UpdateVTKObjects();
   pqPipelineRepresentation *prep = NULL;
   prep = qobject_cast<pqPipelineRepresentation*>(drep);
