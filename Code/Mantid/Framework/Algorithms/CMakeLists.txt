@@ -594,6 +594,7 @@ set ( TEST_FILES
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
+	RenameWorkspacesTest.h
 	RenameWorkspaceTest.h
 	ReplaceSpecialValuesTest.h
 	ResampleXTest.h
