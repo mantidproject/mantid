@@ -355,6 +355,11 @@ public:
       }
     } //(for each event)
 
+    // Free Memory
+    delete [] event_id;
+    delete [] event_time_of_flight;
+    delete event_index_ptr;
+
     //------------ Compress Events (or set sort order) ------------------
     // Do it on all the detector IDs we touched
     for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
@@ -375,7 +380,7 @@ public:
         }
       }
     }
-
+    prog->report(entry_name + ": filled events");
 
     alg->getLogger().debug() << entry_name << (pulsetimesincreasing ? " had " : " DID NOT have ") <<
         "monotonically increasing pulse times" << std::endl;
@@ -389,10 +394,7 @@ public:
       alg->bad_tofs += badTofs;
     }
 
-    // Free Memory
-    delete [] event_id;
-    delete [] event_time_of_flight;
-    delete event_index_ptr;
+
     // For Linux with tcmalloc, make sure memory goes back;
     // but don't call if more than 15% of memory is still available, since that slows down the loading.
     MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
@@ -1560,7 +1562,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
+  Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*4);
 
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
