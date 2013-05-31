@@ -8399,6 +8399,12 @@ void ApplicationWindow::pasteSelection()
   emit modified();
 }
 
+/**
+ * Clone an MDI window. TODO: if this method is to be used it needs refactoring.
+ *
+ * @param w :: A window to clone.
+ * @return :: Pointer to the cloned window if successful or NULL if failed.
+ */
 MdiSubWindow* ApplicationWindow::clone(MdiSubWindow* w)
 {
   if (!w) {
@@ -8436,9 +8442,17 @@ MdiSubWindow* ApplicationWindow::clone(MdiSubWindow* w)
     QString caption = generateUniqueName(tr("Graph"));
     QString s = g->formula();
     if (g->userFunction()){
-      UserFunction2D *f = g->userFunction();
-      nw = plotSurface(f->formula(), g->xStart(), g->xStop(), g->yStart(), g->yStop(),
-          g->zStart(), g->zStop(), f->columns(), f->rows());
+      UserFunction2D *f = dynamic_cast<UserFunction2D*>( g->userFunction() );
+      if ( f )
+      {
+          nw = plotSurface(f->formula(), g->xStart(), g->xStop(), g->yStart(), g->yStop(),
+              g->zStart(), g->zStop(), f->columns(), f->rows());
+      }
+      else
+      {
+          QMessageBox::warning(this,"MantidPlot: warning", "Function cannot be cloned.");
+          return NULL;
+      }
     } else if (g->parametricSurface()){
       UserParametricSurface *s = g->parametricSurface();
       nw = plotParametricSurface(s->xFormula(), s->yFormula(), s->zFormula(), s->uStart(), s->uEnd(),

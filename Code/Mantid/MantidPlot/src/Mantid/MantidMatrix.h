@@ -42,7 +42,7 @@ class UpdateDAEThread;
 class ProjectData;
 
 /**
- * This class helps displaying a MantidMatrix in a 2D graph
+ * This class helps displaying a MantidMatrix in a 2D or 3D graph.
  */
 class MantidMatrixFunction: public Function2D
 {
@@ -50,6 +50,7 @@ public:
   MantidMatrixFunction(MantidMatrix* wsm);
   double operator()(double x, double y);
   double getMinPositiveValue()const;
+  QString saveToString() const;
   void init();
   int numRows()const;
   int numCols()const;

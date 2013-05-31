@@ -19,13 +19,23 @@
  *         which must return the smallest positive value a user of this
  *         function can get.
  *
+ *      QString saveToString() const ;
+ *          which must record any parameters needed to re-create the function.
  *
  */
 class Function2D : public Qwt3D::Function
 {
 public:
+    Function2D();
     /// Get minimum positive value. It is needed for logarithmic scales.
     virtual double getMinPositiveValue()const = 0;
+    /// Save function parameters to a string.
+    virtual QString saveToString() const = 0;
+    unsigned int rows() const {return d_rows;}
+    unsigned int columns() const {return d_columns;}
+    void setMesh (unsigned int columns, unsigned int rows);
+private:
+      unsigned int d_rows, d_columns;
 };
 
 
@@ -39,20 +49,18 @@ public:
 class UserFunction2D : public Function2D
 {
 public:
-    UserFunction2D(const QString& s, Qwt3D::SurfacePlot& pw);
+    UserFunction2D(const QString& s);
     /// Get function value
     double operator()(double x, double y);
     /// Get minimum positive value.
     double getMinPositiveValue()const;
+    /// Save function parameters to a string.
+    QString saveToString() const;
 
-    QString formula(){return d_formula;}
-    unsigned int rows(){return d_rows;}
-    unsigned int columns(){return d_columns;}
-	void setMesh (unsigned int columns, unsigned int rows);
+    QString formula() const {return d_formula;}
 
 private:
       QString d_formula;
-	  unsigned int d_rows, d_columns;
 };
 
 #endif

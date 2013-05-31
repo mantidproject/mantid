@@ -238,9 +238,8 @@ void Graph3D::initCoord()
 	sp->coordinates()->setAutoScale(false);
 }
 
-void Graph3D::addFunction(const QString& s, double xl, double xr, double yl,
-						double yr, double zl, double zr, int columns, int rows, 
-                        Function2D* hfun)//Mantid
+void Graph3D::addFunction(Function2D* hfun, double xl, double xr, double yl,
+                        double yr, double zl, double zr, int columns, int rows)
 {
 	if (d_surface)
 		delete d_surface;
@@ -250,15 +249,13 @@ void Graph3D::addFunction(const QString& s, double xl, double xr, double yl,
 	sp->makeCurrent();
 	sp->resize(this->size());
 
-    d_func = new UserFunction2D(s, *sp);
-
-    d_func->setHlpFun(hfun);//Mantid
-
+    d_func = hfun;
+    d_func->assign( sp );
 	d_func->setMesh(columns, rows);
 	d_func->setDomain(xl, xr, yl, yr);
 	d_func->setMinZ(zl);
 	d_func->setMaxZ(zr);
-	d_func->create();
+    d_func->create();
 
 	sp->legend()->setLimits(zl, zr);
 
@@ -269,7 +266,26 @@ void Graph3D::addFunction(const QString& s, double xl, double xr, double yl,
 	}
   	sp->createCoordinateSystem(Triple(xl, yl, zl), Triple(xr, yr, zr));
 	findBestLayout();
-	update();
+    update();
+}
+
+/**
+ * Add a UserFunction2D from a string formula.
+ *
+ * @param formula :: muParser formula to define the function of two arguments x and y.
+ * @param xl :: Lower bound of the x coordinate.
+ * @param xr :: Upper bound of the x coordinate.
+ * @param yl :: Lower bound of the y coordinate.
+ * @param yr :: Upper bound of the y coordinate.
+ * @param zl :: Lower bound of the z coordinate.
+ * @param zr :: Upper bound of the z coordinate.
+ * @param columns :: Number of columns in the surface mesh.
+ * @param rows    :: Number of rows in the surface mesh.
+ */
+void Graph3D::addFunction(const QString &formula, double xl, double xr, double yl, double yr, double zl, double zr, int columns, int rows)
+{
+    UserFunction2D *fun = new UserFunction2D( formula );
+    addFunction( fun, xl, xr, yl, yr, zl, zr, columns, rows );
 }
 
 void Graph3D::addParametricSurface(const QString& xFormula, const QString& yFormula,
@@ -2268,10 +2284,10 @@ Qwt3D::COORDSTYLE Graph3D::coordStyle()
 
 QString Graph3D::formula()
 {
-	if (d_func)
-        return d_func->formula();
-	else
-		return plotAssociation;
+    UserFunction2D* fun = dynamic_cast<UserFunction2D*>(d_func);
+    if (fun)
+        return fun->formula();
+    return plotAssociation;
 }
 
 QString Graph3D::saveToString(const QString& geometry, bool)
@@ -2284,7 +2300,8 @@ QString Graph3D::saveToString(const QString& geometry, bool)
 
 	sp->makeCurrent();
 	if (d_func)
-    { s+="mantidMatrix3D\t";	s += d_func->formula() + ";" + QString::number(d_func->columns()) + ";" + QString::number(d_func->rows()) + "\t";
+    {
+        s += d_func->saveToString() + "\t";
 	}
 	else if (d_surface){
 		s += d_surface->xFormula() + "," + d_surface->yFormula() + "," + d_surface->zFormula() + ",";

@@ -73,10 +73,11 @@ public slots:
 	void copy(Graph3D* g);
 	void initPlot();
 	void initCoord();
-	void addFunction(const QString& s, double xl, double xr, double yl,
-						  double yr, double zl, double zr, int columns, int rows, 
-                          Function2D* hfun = 0);//Manid
-	void addParametricSurface(const QString& xFormula, const QString& yFormula,
+    void addFunction(Function2D* hfun, double xl, double xr, double yl,
+                          double yr, double zl, double zr, int columns, int rows);
+    void addFunction(const QString& formula, double xl, double xr, double yl,
+                          double yr, double zl, double zr, int columns, int rows);
+    void addParametricSurface(const QString& xFormula, const QString& yFormula,
 						const QString& zFormula, double ul, double ur, double vl, double vr,
 						int columns, int rows, bool uPeriodic, bool vPeriodic);
 	void insertNewData(Table* table, const QString& colName);
@@ -108,8 +109,8 @@ public slots:
 
 	//! \name User Functions
 	//@{
-    UserFunction2D* userFunction(){return d_func;};
-	QString formula();
+    Function2D* userFunction(){return d_func;};
+    QString formula();
 	//@}
 
 	//! \name Event Handlers
@@ -384,7 +385,7 @@ private:
 	Table *d_table;
 	Matrix *d_matrix;
     Qwt3D::SurfacePlot* sp;
-    UserFunction2D *d_func;
+    Function2D *d_func;
 	UserParametricSurface *d_surface;
 	Qwt3D::PLOTSTYLE style_;
 	

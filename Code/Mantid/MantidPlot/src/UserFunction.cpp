@@ -6,8 +6,20 @@
 #include "UserFunction.h"
 #include <QMessageBox>
 
-UserFunction2D::UserFunction2D(const QString& s, Qwt3D::SurfacePlot& pw)
-: Function(pw), d_formula(s), d_rows(0), d_columns(0)
+Function2D::Function2D():
+    Qwt3D::Function(), d_rows(0), d_columns(0)
+{
+}
+
+void Function2D::setMesh (unsigned int columns, unsigned int rows)
+{
+    Function::setMesh (columns, rows);
+    d_columns = columns;
+    d_rows = rows;
+}
+
+UserFunction2D::UserFunction2D(const QString& s)
+: Function2D(), d_formula(s)
 {}
 
 double UserFunction2D::operator()(double x, double y)
@@ -37,12 +49,16 @@ double UserFunction2D::operator()(double x, double y)
  */
 double UserFunction2D::getMinPositiveValue() const
 {
+    return 0.0001;
 }
 
-void UserFunction2D::setMesh (unsigned int columns, unsigned int rows)
+/**
+ * @brief UserFunction2D::saveToString
+ *
+ * @return :: Initialization string.
+ */
+QString UserFunction2D::saveToString() const
 {
-	Function::setMesh (columns, rows);
-	d_columns = columns;
-	d_rows = rows;
+    return formula() + ";" + QString::number(columns()) + ";" + QString::number(rows());
 }
 

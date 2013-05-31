@@ -281,7 +281,7 @@ void SurfaceDialog::setFunction(Graph3D *g)
 		return;
 
 	d_graph = g;
-    UserFunction2D *f = d_graph->userFunction();
+    UserFunction2D *f = dynamic_cast<UserFunction2D*>( d_graph->userFunction() );
 	if (!f)
 		return;
 

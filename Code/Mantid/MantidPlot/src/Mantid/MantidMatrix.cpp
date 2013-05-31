@@ -768,6 +768,11 @@ double MantidMatrixFunction::getMinPositiveValue()const
   return zmin;
 }
 
+QString MantidMatrixFunction::saveToString() const
+{
+    return "mantidMatrix3D\t";
+}
+
 int MantidMatrixFunction::numRows()const
 {
   return m_matrix->m_rows;
@@ -896,7 +901,7 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
   boundingRect();
   
   m_funct.init();
-  plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows(), static_cast<Function2D*>(&m_funct));
+  plot->addFunction(&m_funct, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows() );
 
   const Mantid::API::Axis* ax = m_workspace->getAxis(0);
   std::string s;
@@ -1054,9 +1059,11 @@ void MantidMatrix::removeWindow()
   foreach(MdiSubWindow *w, windows){
     //if (w->isA("Graph3D") && ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
     if (w->isA("Graph3D") )//&& ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
-    { 	UserFunction2D* fn=(dynamic_cast<Graph3D*>(w))->userFunction();
-      if(fn)
-      {	if(fn->hlpFun() == &m_funct)(dynamic_cast<Graph3D*>(w))->clearData();
+    {
+      MantidMatrixFunction* fn= dynamic_cast<MantidMatrixFunction*>( (dynamic_cast<Graph3D*>(w))->userFunction() );
+      if ( fn )
+      {
+          if ( fn == &m_funct )  (dynamic_cast<Graph3D*>(w))->clearData();
       }
 
     }else if (w->isA("Table")){
