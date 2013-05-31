@@ -3,10 +3,10 @@ mtd.initialise()
 from mantidsimple import *
 
 import os
-import boostmpi as mpi
+from mpi4py import MPI
 
 # Save typing
-comm = mpi.world
+comm = MPI.COMM_WORLD
 
 SNSPowderReduction(Instrument='PG3', RunNumber='2538', Extension='_event.nxs', PreserveEvents=False, CalibrationFile='PG3_calibrate_d2538_2012_02_21.cal', Binning='0.2,-0.0004,10.',
 BinInDspace=True, StripVanadiumPeaks=True, FilterBadPulses=True, NormalizeByCurrent=False, SaveAs='gsas', OutputDirectory='.', FinalDataUnits='dSpacing', MaxChunkSize = 0.6)

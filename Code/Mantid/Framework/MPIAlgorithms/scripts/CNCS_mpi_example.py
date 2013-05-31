@@ -1,19 +1,18 @@
 #############################################################################################
 #
 # Example script to demonstrate the use of MPI in Mantid.
-# This requires the boost.mpi python bindings, which can be obtained from
-# http://mathema.tician.de/software/boostmpi and obviously an MPI-enabled Mantid build.
+# This requires the mpi4py python bindings and obviously an MPI-enabled Mantid build.
 #
 #############################################################################################
 
-from MantidFramework import * 
-import boostmpi as mpi
+from MantidFramework import *
+from mpi4py import MPI
 from mantidsimple import *
 mtd.initialise()
 
-comm = mpi.world
-rank = comm.rank
-size = comm.size
+comm = MPI.COMM_WORLD
+rank = comm.Get_rank()
+size = comm.Get_size()
 
 print "Running on rank %d of %d" % (rank, size)
 
