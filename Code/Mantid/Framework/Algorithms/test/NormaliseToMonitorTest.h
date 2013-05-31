@@ -20,7 +20,7 @@ public:
   static NormaliseToMonitorTest *createSuite() { return new NormaliseToMonitorTest(); }
   static void destroySuite(NormaliseToMonitorTest *suite) { delete suite; }
 
-  void setUp()
+  void setUpWorkspace()
   {
     MatrixWorkspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     // Change the data in the monitor spectrum
@@ -80,6 +80,8 @@ public:
 
   void dotestExec(bool events)
   {
+    setUpWorkspace();
+
     NormaliseToMonitor norm;
     if (events)
       FrameworkManager::Instance().exec("ConvertToEventWorkspace", 8,
@@ -141,6 +143,8 @@ public:
 
   void testNormaliseByIntegratedCount()
   {
+    setUpWorkspace();
+
     NormaliseToMonitor norm2;
     norm2.initialize();
     TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("InputWorkspace","normMon") )
