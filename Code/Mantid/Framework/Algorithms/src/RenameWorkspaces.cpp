@@ -57,19 +57,25 @@ void RenameWorkspaces::init()
 void RenameWorkspaces::exec()
 {
   // Get the input workspace list
-  std::vector<std::string> inputwsName = getProperty("InputWorkspaces");
+  std::vector<std::string> inputWsName = getProperty("InputWorkspaces");
 
-  //// get the output workspace affix
-  //std::string outputwsName = getPropertyValue("OutputWorkspace");
-  //// get the prefix indicator
-  //bool isPrefix = getProperty("isPrefix");
+  // Get the workspace name list
+  std::vector<std::string> newWsName = getProperty("WorkspaceNames");
+  // Get the prefix and suffix
+  std::string prefix = getPropertyValue("Prefix");
+  std::string suffix = getPropertyValue("Suffix");
 
-  //if (getPropertyValue("OutputWorkspace") == "")
-  //{
-  //  throw std::invalid_argument("The no prefix or suffix has been supplied");
-  //}
+  // Check properties
+  if( newWsName.size() == 0 && prefix == "" && suffix == "")
+  {
+      throw std::invalid_argument("No list of Workspace names, prefix or suffix has been supplied.");
+  }
+  if( newWsName.size() > 0 && ( prefix != "" || suffix != ""))
+  {
+      throw std::invalid_argument("Both a list of workspace names and a prefix or suffix has been supplied.");
+  }
 
-  // Convert the comma separated input workspace list to an array
+ 
 
   // loop over array and rename each workspace
 
