@@ -6,10 +6,7 @@
 
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -17,32 +14,11 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::Instrument;
 
-class NormaliseToMonitorTestHelper : public NormaliseToMonitor
-{
-public:
-    void initialize(){
-        NormaliseToMonitor::initialize();
-    }
-    void checkProperties(MatrixWorkspace_sptr inputWorkspace){
-        NormaliseToMonitor::checkProperties(inputWorkspace);
-    }
-
-};
-
-
 class NormaliseToMonitorTest : public CxxTest::TestSuite
 {
-private:
-
-
 public:
-
   static NormaliseToMonitorTest *createSuite() { return new NormaliseToMonitorTest(); }
   static void destroySuite(NormaliseToMonitorTest *suite) { delete suite; }
-
-  NormaliseToMonitorTest()
-  {
-  }
 
   void setUp()
   {
@@ -85,26 +61,26 @@ public:
 
   void testName()
   {
-    NormaliseToMonitorTestHelper norm;
+    NormaliseToMonitor norm;
     TS_ASSERT_EQUALS( norm.name(), "NormaliseToMonitor" )
   }
 
   void testVersion()
   {
-    NormaliseToMonitorTestHelper norm;
+    NormaliseToMonitor norm;
     TS_ASSERT_EQUALS( norm.version(), 1 )
   }
 
   void testInit()
   {
-    NormaliseToMonitorTestHelper norm;
+    NormaliseToMonitor norm;
     TS_ASSERT_THROWS_NOTHING( norm.initialize() )
     TS_ASSERT( norm.isInitialized() )
   }
 
   void dotestExec(bool events)
   {
-    NormaliseToMonitorTestHelper norm;
+    NormaliseToMonitor norm;
     if (events)
       FrameworkManager::Instance().exec("ConvertToEventWorkspace", 8,
           "InputWorkspace", "normMon",
