@@ -78,7 +78,7 @@ public:
     TS_ASSERT( norm.isInitialized() )
   }
 
-  void dotestExec(bool events)
+  void dotestExec(bool events, bool sameOutputWS)
   {
     setUpWorkspace();
 
@@ -95,13 +95,15 @@ public:
     TS_ASSERT_THROWS( norm.execute(), std::runtime_error )
     TS_ASSERT( ! norm.isExecuted() )
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("InputWorkspace","normMon") )
-    TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("OutputWorkspace","normMon2") )
+    std::string outputWS("normMon");
+    if ( ! sameOutputWS ) outputWS.append("2");
+    TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("MonitorSpectrum","0") )
     TS_ASSERT_THROWS_NOTHING( norm.execute() )
     TS_ASSERT( norm.isExecuted() )
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("normMon2") )
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) )
 
     // Check the non-monitor spectra
     for (size_t i = 1; i < output->getNumberHistograms(); ++i)
@@ -132,12 +134,22 @@ public:
 
   void testExec()
   {
-    dotestExec(false);
+    dotestExec(false,false);
   }
 
   void testExec_Events()
   {
-    dotestExec(true);
+    dotestExec(true,false);
+  }
+
+  void testExec_inplace()
+  {
+    dotestExec(false,true);
+  }
+
+  void testExec_Events_inplace()
+  {
+    dotestExec(true,true);
   }
 
 
