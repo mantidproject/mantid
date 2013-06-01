@@ -455,7 +455,7 @@ namespace Mantid
 
       }else
       { set<string>bankNames;
-        LoadISawDetCal(newInstr,bankNames,timeOffset,preprocessFilename,
+        LoadISawDetCal(newInstr,bankNames,timeOffset,L0,preprocessFilename,
                   "bank");
         return newInstr;
       }
@@ -1276,12 +1276,12 @@ namespace Mantid
      */
     void  SCDCalibratePanels::LoadISawDetCal(
            boost::shared_ptr<const Instrument> &instrument,
-           set<string> &AllBankName,double &T0,string filename,
+           set<string> &AllBankName,double &T0,double &L0,string filename,
            string bankPrefixName)
     {
 
        V3D beamline, samplePos;
-       double beamlineLen,L0;
+       double beamlineLen;
        instrument->getInstrumentParameters(L0,beamline, beamlineLen,samplePos);
        int  count, id, nrows, ncols;
        double width, height, depth, detd, x, y,
@@ -1299,8 +1299,8 @@ namespace Mantid
               stringstream(line) >> count >> mL1 >> T0;
               double scaleL0= .01*mL1/beamlineLen;
               const IObjComponent_const_sptr source=instrument->getSource();
-              V3D NewSourcePos= samplePos-beamline*scaleL0*2.0;
-
+              V3D NewSourcePos= samplePos-beamline*scaleL0*2.0;//beamLine is 2*length.
+              L0=beamline.norm()*scaleL0*2.0;
               V3D RelSourcePos = source->getRelativePos()+NewSourcePos-source->getPos();
               pmap->addPositionCoordinate(source.get(),"x",RelSourcePos.X());
               pmap->addPositionCoordinate(source.get(),"y",RelSourcePos.Y());
