@@ -102,6 +102,17 @@ namespace Mantid
       this->setOptionalMessage("The 2nd PeaksWorkspace is set up with the correct sample orientations and UB matrices");
     }
 
+    /**
+     * Calculate indexing stats if the peaks had been indexed with given UBraw by NOT applying the goniometer settings,i.e.
+     * UBraw is applied directly to Qlab.  NOTE:The h,k,l values of the peaks are NOT changed.
+     *
+     * @param Peaks  The list of peaks
+     * @param UBraw  The UB matrix that will be applied to Qlab. No goniometer adjustments are made.
+     * @param Nindexed    The number of peaks that would be indexed at the given tolerance
+     * @param AvErrIndexed The average error in the hkl values of the peaks that would have been indexed at the given tolerance
+     * @param AvErrorAll  The average error in the hkl values of all the peaks
+     * @param tolerance  The indexing tolerance
+     */
     void GoniometerAnglesFromPhiRotation::IndexRaw(const PeaksWorkspace_sptr &Peaks,
         const Kernel::Matrix<double> &UBraw, int &Nindexed, double &AvErrIndexed, double &AvErrorAll,
         double tolerance) const
@@ -172,10 +183,6 @@ namespace Mantid
         g_log.error("Each peaks workspace MUST have only one run");
         throw std::invalid_argument("Each peaks workspace MUST have only one run");
       }
-
-      std::string changedGoniometerAngle = "Phi";
-
-      std::string Run1Phi = getProperty("Run1Phi");
 
       Kernel::Matrix<double> UB1, UB2;
 
@@ -248,9 +255,6 @@ namespace Mantid
       MinData[0] = 0.0;
       std::vector<V3D> directionList = IndexingUtils::MakeHemisphereDirections(50);
 
-      std::string phiStr = "phi" + RunNumStr;
-      std::string chiStr = "chi" + RunNumStr;
-      std::string omegStr = "omega" + RunNumStr;
       API::FrameworkManager::Instance();
 
       for (size_t d = 0; d < directionList.size(); d++)
@@ -279,6 +283,9 @@ namespace Mantid
           }
 
         }
+
+      g_log.debug()<<"Best direction unOptimized is ("<<(MinData[1]*MinData[2])<<","
+          <<(MinData[1]*MinData[3])<<","<<(MinData[1]*MinData[4])<<")"<<std::endl;
 
       //----------------------- Optimize around best -------------------------------------------
 
@@ -345,7 +352,7 @@ namespace Mantid
 
       Fit->executeAsChildAlg();
 
-      std::string status = Fit->getProperty("OutputStatus");
+      //std::string status = Fit->getProperty("OutputStatus");
 
       boost::shared_ptr<API::ITableWorkspace> results = Fit->getProperty("OutputParameters");
       double chisq = Fit->getProperty("OutputChi2overDoF");
@@ -354,6 +361,9 @@ namespace Mantid
       MinData[2] = results->Double(6, 1);
       MinData[3] = results->Double(7, 1);
       MinData[4] = results->Double(8, 1);
+
+      g_log.debug()<<"Best direction Optimized is ("<<(MinData[2])<<","
+          <<(MinData[3])<<","<<(MinData[4])<<")\n";
 
       //          ---------------------Find number indexed -----------------------
       Quat Q1 = Quat(MinData[4], V3D(0, 1, 0)) * Quat(MinData[3], V3D(0, 0, 1))
@@ -379,18 +389,18 @@ namespace Mantid
       double chi2 = acos(ax2) / M_PI * 180;
       double omega2 = atan2(ax3, -ax1) / M_PI * 180;
 
-      g_log.information() << "============================ Results ============================"
+      g_log.notice() << "============================ Results ============================"
           << std::endl;
-      g_log.information() << "     phi,chi, and omega= (" << phi2 << "," << chi2 << "," << omega2 << ")"
+      g_log.notice() << "     phi,chi, and omega= (" << phi2 << "," << chi2 << "," << omega2 << ")"
           << std::endl;
-      g_log.information() << "     #indexed =" << Nindexed << std::endl;
-      g_log.information() << "              ==============================================" << std::endl;
+      g_log.notice() << "     #indexed =" << Nindexed << std::endl;
+      g_log.notice() << "              ==============================================" << std::endl;
 
-      std::cout << "============================ Results ============================" << std::endl;
-      std::cout << "     phi,chi, and omega= (" << phi2 << "," << chi2 << "," << omega2 << ")"
-          << std::endl;
-      std::cout << "     #indexed =" << Nindexed << std::endl;
-      std::cout << "              ==============================================" << std::endl;
+      //std::cout << "============================ Results ============================" << std::endl;
+     // std::cout << "     phi,chi, and omega= (" << phi2 << "," << chi2 << "," << omega2 << ")"
+     //     << std::endl;
+     // std::cout << "     #indexed =" << Nindexed << std::endl;
+     // std::cout << "              ==============================================" << std::endl;
 
       setProperty("Phi2", phi2);
       setProperty("Chi2", chi2);

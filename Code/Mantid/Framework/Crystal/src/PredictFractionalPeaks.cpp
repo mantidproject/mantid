@@ -147,7 +147,6 @@ namespace Mantid
 
        boost::shared_ptr<IPeaksWorkspace> OutPeaks=WorkspaceFactory::Instance().createPeaks();
        OutPeaks->setInstrument(Instr);
-      // AnalysisDataService::Instance().addOrReplace(getPropertyValue("FracPeaks"),OutPeaks);
 
        V3D hkl;
        int peakNum =0;

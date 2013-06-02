@@ -111,13 +111,7 @@ public:
     TS_ASSERT_DELTA(peak.getH(),-6.5,.0001);
     TS_ASSERT_DELTA(peak.getK(),4.0,.0001);
     TS_ASSERT_DELTA(peak.getL(),-3.8,.0001);
-/*
-     std::cout<<"size="<<FracPeaks->getNumberPeaks()<<std::endl;
-    for( int i=0; i<10;i+=3)
-    {IPeak& peak= FracPeaks->getPeak(i);
-     std::cout<<"Peaknum,h,k,l="<<i<<","<<peak.getHKL()<<std::endl;
-    }
-*/
+
 
   }
 };

@@ -61,7 +61,7 @@ This Algorithm is also used by the [[PeakIntegration]] algorithm when the Fit ta
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
-#include "MantidGeometry/Surfaces/Surface.h"
+//#include "MantidGeometry/Surfaces/Surface.h"
 #include <boost/lexical_cast.hpp>
 #include <vector>
 #include "MantidAPI/Algorithm.h"
@@ -124,8 +124,24 @@ namespace Mantid
 #define NParameters  7
 
 
-    //   # std sigs  0    .25     .5     .75    1     1.25   1.5    2      2.5
-    double probs[9]={.5f,.5987f,.6915f,.7734f,.8413f,.8944f,.9322f,.9599f,.9772f};
+
+    namespace{
+      //           # std sigs  0    .25     .5     .75    1     1.25   1.5    2      2.5
+      const double probs[9]={.5f,.5987f,.6915f,.7734f,.8413f,.8944f,.9322f,.9599f,.9772f};
+
+      const int MinRowColSpan = 6;
+      const int MaxRowColSpan = 36;
+      const int MinTimeSpan =3;
+      const double NeighborhoodRadiusDivPeakRadius=1.5;
+      const double MaxNeighborhoodRadius = 10;
+      const double NStdDevPeakSpan = 2;
+      const double MaxGoodRatioFitvsExpIntenisites=2.5;
+      const double MinGoodRatioFitvsExpIntenisites=.25;
+      const double MinGoodIoverSigI = 3.0;
+      const double MinVariationInXYvalues =.6;//Peak spans one pixel only
+      const double MaxCorrCoeffinXY =.9; //otherwise all data on one line
+    }
+
     IntegratePeakTimeSlices::IntegratePeakTimeSlices() :
       Algorithm(), wi_to_detid_map(NULL), R0(-1)
     {
@@ -224,467 +240,14 @@ namespace Mantid
 
     }
 
-    DataModeHandler::DataModeHandler(const DataModeHandler & handler)
-    {
-
-      this->baseRCRadius = handler.baseRCRadius;
-      this->lastRCRadius = handler.lastRCRadius;
-      this->HalfWidthAtHalfHeightRadius = handler.HalfWidthAtHalfHeightRadius;
-      this->calcNewRCRadius = handler.calcNewRCRadius;
-      this->lastRow = handler.lastRow;
-      this->lastCol = handler.lastCol;
-      this->time = handler.time;
-      this->CellWidth = handler.CellWidth;
-      this->CellHeight = handler.CellHeight;
-      this->currentRadius = handler.currentRadius;
-      this->currentPosition = handler.currentPosition;
-      this->StatBase = handler.StatBase;
-      this->EdgeX = handler.EdgeX;
-      this->EdgeY = handler.EdgeY;
-      this->CalcVariance = handler.CalcVariance;
-      this->VarxHW = handler.VarxHW;
-      this->VaryHW = handler.VaryHW;
-      this->MaxRow = handler.MaxRow;
-      this->MaxCol = handler.MaxCol;
-      this->MinRow = handler.MinRow;
-      this->MinCol = handler.MinCol;
-      this->lastISAWIntensity=handler.lastISAWIntensity;
-      this->lastISAWVariance = handler.lastISAWIntensity;
-      this->back_calc = handler.back_calc;
-      this->Intensity_calc = handler.Intensity_calc;
-      this->row_calc = handler.row_calc;
-      this->col_calc = handler.col_calc;
-      this->Vx_calc = handler.Vx_calc;
-      this->Vy_calc = handler.Vy_calc;
-      this->Vxy_calc = handler.Vxy_calc;
-      this->case4 = handler.case4;
-    }
-
-    void DataModeHandler::CalcVariancesFromData( double background, double meanx, double meany,
-                                                        double &Varxx, double &Varxy, double &Varyy,
-                                                        std::vector<double>&StatBase)
-    {
-
-      double Den = StatBase[IIntensities]-background*StatBase[ISS1];
-      Varxx =(StatBase[ISSIxx]-2*meanx*StatBase[ISSIx]+meanx*meanx*StatBase[IIntensities]-
-               background*(StatBase[ISSxx]-2*meanx*StatBase[ISSx]+meanx*meanx*StatBase[ISS1]))
-               /Den;
-
-      Varyy=(StatBase[ISSIyy]-2*meany*StatBase[ISSIy]+meany*meany*StatBase[IIntensities]-
-          background*(StatBase[ISSyy]-2*meany*StatBase[ISSy]+meany*meany*StatBase[ISS1]))
-          /Den;
-
-      Varxy =(StatBase[ISSIxy]-meanx*StatBase[ISSIy]-meany*StatBase[ISSIx]+
-          meanx*meany*StatBase[IIntensities]-
-          background*(StatBase[ISSxy]-meanx*StatBase[ISSy]-meany*StatBase[ISSx]+meanx*meany*StatBase[ISS1]))
-          /Den;
-
-      if( CalcVariances())
-      {
-
-        Varxx =  std::min<double>(Varxx, 1.21*getInitVarx());//copied from BiVariateNormal
-        Varxx = std::max<double>(Varxx, .79*getInitVarx());
-        Varyy =  std::min<double>(Varyy, 1.21*getInitVary());
-        Varyy = std::max<double>(Varyy, .79*getInitVary());
-      }
-
-    }
-
-    std::string DataModeHandler::CalcConstraints( std::vector< std::pair<double,double> > & Bounds,
-           bool CalcVariances)
-    {
-      double TotIntensity = StatBase[IIntensities];
-      double ncells       =StatBase[ISS1];
-      double Variance = StatBase[IVariance];
-      double TotBoundaryIntensities= StatBase[ITotBoundary ];
-      double TotBoundaryVariances = StatBase[IVarBoundary];
-
-      double nBoundaryCells=   StatBase[INBoundary];
-      double back = TotBoundaryIntensities/nBoundaryCells;
-      double backVar= std::max<double>(nBoundaryCells/50.0,TotBoundaryVariances)/nBoundaryCells/nBoundaryCells;
-      double IntensVar = Variance +ncells*ncells*backVar;
-
-      double relError = .25;
-
-      if( back_calc != back )
-        relError = .45;
-
-      int N = NParameters;
-      if( CalcVariances)
-        N = N-3;
-
-      double NSigs=2;
-      if( back_calc >0)
-         NSigs = std::max<double>( 2,7-5*back_calc/back);//background too high
-      ostringstream str;
-
-      NSigs *=max<double>(1.0, Intensity_calc/(TotIntensity -ncells*back_calc));
-      str<< max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar))<<"<Background<"<<(back+NSigs*(1.8+relError)*sqrt(backVar))
-         <<","<< max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar))<<
-         "<Intensity<"<<Intensity_calc+NSigs*(1+relError)*sqrt(IntensVar);
-
-      double min =max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar));
-      double maxx =back+NSigs*(1.8+relError)*sqrt(backVar);
-      Bounds.push_back( pair<double,double>(min,maxx ));
-      Bounds.push_back( pair<double,double>(max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar)),
-                                        Intensity_calc+NSigs*(1+relError)*sqrt(IntensVar)));
-      double relErr1= relError*.75;
-      double val =col_calc;
-      double minn= std::max<double>(MinCol-.5, (1-relErr1)*val);
-      maxx =std::min<double>((1+relErr1)*val, MaxCol+.5);
-
-      str<<","<<minn <<"<"<<"Mcol"<<"<"<<maxx;
-      Bounds.push_back(pair<double,double>(minn,maxx));
-
-      val = row_calc;
-
-      minn= std::max<double>(MinRow-.5, (1-relErr1)*val);
-      maxx =std::min<double>((1+relErr1)*val, MaxRow+.5);
-      str<<","<<minn <<"<"<<"Mrow"<<"<"<<maxx;
-      Bounds.push_back(pair<double,double>(minn,maxx));
-
-      if( N >=5)
-      {
-        val = Vx_calc;
-        double valmin= val;
-        double valmax = val;
-        if( VarxHW>0)
-        {
-          valmin = std::min<double>(val, VarxHW);
-          valmax = std::max<double>(val, VarxHW);
-
-        }
-
-
-        relErr1 *=.6;//Edge peaks: need to restrict sigmas.
-        str<<","<<(1-relErr1)*valmin <<"<"<<"SScol"<<"<"<<(1+relErr1)*valmax;
-        Bounds.push_back(pair<double,double>((1-relErr1)*valmin,(1+relErr1)*valmax));
-
-        val = Vy_calc;
-        valmin= val;
-        valmax = val;
-        if( VaryHW>0)
-        {
-          valmin = std::min<double>(val, VaryHW);
-          valmax = std::max<double>(val, VaryHW);
-
-        }
-        str<<","<<(1-relErr1)*valmin <<"<"<<"SSrow"<<"<"<<(1+relErr1)*valmax;
-        Bounds.push_back(pair<double,double>((1-relErr1)*valmin,(1+relErr1)*valmax));
-
-
-     // val = Vxy_calc;
-     // str<<","<<(1-relErr1)*val <<"<"<<"SSrc"<<"<"<<(1+relErr1)*val;
-     // Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
-
-      }
-
-      return str.str();
-    }
-
-    bool IntegratePeakTimeSlices::getNeighborPixIDs( boost::shared_ptr< Geometry::IComponent> comp,
-                                                     Kernel::V3D                           &Center,
-                                                     double                                &Radius,
-                                                     int*                                  &ArryofID)
-     {
-
-          int N = ArryofID[1];
-          int MaxN= ArryofID[0];
-
-          if( N >= MaxN)
-            return false;
-
-          Geometry::BoundingBox box;
-          comp->getBoundingBox( box);
-
-          double minx = Center.X() - Radius;
-          double miny = Center.Y() - Radius;
-          double minz = Center.Z() - Radius;
-          double maxx = Center.X() + Radius;
-          double maxy = Center.Y() + Radius;
-          double maxz = Center.Z() + Radius;
-
-
-          if( box.xMin()>=maxx)
-              return true;
-
-          if( box.xMax() <=minx)
-             return true;;
-
-          if( box.yMin()>=maxy)
-              return true;
-
-          if( box.yMax() <=miny)
-             return true;
-
-          if( box.zMin()>=maxz)
-              return true;
-
-          if( box.zMax() <=minz)
-             return true;;
-
-          boost::shared_ptr<Geometry::Detector> det =   boost::dynamic_pointer_cast<Geometry::Detector>( comp);
-         // if( comp->type().compare(0,8,"Detector")==0 || comp->type().compare("RectangularDetectorPixel")==0)
-          if( det )
-           {
-                   V3D pos = det->getPos() -Center;
-                   if( pos.X()*pos.X()+pos.Y()*pos.Y()+pos.Z()*pos.Z() <Radius*Radius)
-                   {
-                     ArryofID[N]=  det->getID();
-                      N++;
-                      ArryofID[1] = N;
-
-                   }
-                  return true;
-            }
-
-           boost::shared_ptr<const Geometry::ICompAssembly> Assembly =
-               boost::dynamic_pointer_cast<const Geometry::ICompAssembly>( comp);
-
-           if( !Assembly)
-              return true;
-
-           bool b = true;
-
-           for( int i=0; i< Assembly->nelements() && b; i++)
-              b= getNeighborPixIDs( Assembly->getChild(i),Center,Radius,ArryofID);
-
-           return b;
-     }
-
-    double IntegratePeakTimeSlices::CalculatePositionSpan(  API::IPeak const &peak,
-                                                      const double                   dQ)
-   {
-
-     try
-     {
-       double Q = 0, ScatAngle = 0, dScatAngle = 0, DetSpan = 0;
-
-       Q = peak.getQLabFrame().norm();
-       Geometry::Instrument_const_sptr instr = peak.getInstrument();
-       const Geometry::IObjComponent_const_sptr  sample = instr->getSample();
-       V3D pos = peak.getDetPos()-sample->getPos();
-
-       ScatAngle = acos(pos.Z() / pos.norm());
-
-
-       dScatAngle = 2 * dQ / Q * tan(ScatAngle/2);
-
-
-       DetSpan = pos.norm() * dScatAngle; //s=r*theta
-
-       DetSpan = fabs(DetSpan);
-
-      // IDetector_sptr det = peak.getDetector();
-
-       return DetSpan;
-
-     } catch (std::exception &s)
-     {
-       std::cout << "err in getNRowsCols, reason=" << s.what() << std::endl;
-       return 0;
-     }
-
-   }
-   void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,double &chisqOverDOF,
-           bool &done,       std::vector<string>&names, std::vector<double>&params,
-           std::vector<double>&errs
-           ,double lastRow,double lastCol,double neighborRadius)
-       {
-
-          bool CalcVars = AttributeValues->CalcVariances();
-          std::vector<std::pair<double, double> > Bounds;
-          std::string Constraints = AttributeValues->CalcConstraints(Bounds, CalcVars);
-          IAlgorithm_sptr fit_alg;
-          fit_alg = createChildAlgorithm("Fit");
-          std::string fun_str = CalculateFunctionProperty_Fit();
-
-          std::string SSS("   Fit string ");
-          SSS += fun_str;
-          g_log.debug(SSS);
-          g_log.debug()<<"      TotCount=" << AttributeValues->StatBase[IIntensities] << std::endl;
-
-          fit_alg->setPropertyValue("Function", fun_str);
-
-          fit_alg->setProperty("InputWorkspace", Data);
-          fit_alg->setProperty("WorkspaceIndex", 0);
-          fit_alg->setProperty("StartX", 0.0);
-          fit_alg->setProperty("EndX", 0.0 + (double) NeighborIDs[1]);
-          fit_alg->setProperty("MaxIterations", 5000);
-          fit_alg->setProperty("CreateOutput", true);
-
-          fit_alg->setProperty("Output", "out");
-
-          fit_alg->setProperty("MaxIterations", 50);
-
-          std::string tie = getProperty("Ties");
-          if (tie.length() > (size_t) 0)
-            fit_alg->setProperty("Ties", tie);
-          if (Constraints.length() > (size_t) 0)
-            fit_alg->setProperty("Constraints", Constraints);
-          try
-          {
-            fit_alg->executeAsChildAlg();
-
-            chisqOverDOF = fit_alg->getProperty("OutputChi2overDoF");
-            std::string outputStatus = fit_alg->getProperty( "OutputStatus" );
-            g_log.debug()<<"Chisq/OutputStatus="<< chisqOverDOF<< "/"<< outputStatus<< std::endl;
-
-            names.clear(); params.clear();errs.clear();
-            ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
-            for( int prm = 0; prm < (int)RRes->rowCount()-1; prm++ )
-            {
-              names.push_back( RRes->getRef< string >( "Name", prm ) );
-              params.push_back( RRes->getRef< double >( "Value", prm ));
-              double error = RRes->getRef< double >( "Error",prm);
-              errs.push_back( error );
-            }
-            if( names.size()< 5)
-            {
-              names.push_back( ParameterNames[IVXX] );
-              names.push_back( ParameterNames[IVYY] );
-              names.push_back( ParameterNames[IVXY] );
-              double Varxx, Varxy,Varyy;
-              AttributeValues->CalcVariancesFromData( params[IBACK], params[IXMEAN], params[IYMEAN],
-                  Varxx, Varxy, Varyy, AttributeValues->StatBase);
-              params.push_back( Varxx );
-              params.push_back( Varyy );
-              params.push_back( Varxy );
-              errs.push_back( 0 );
-              errs.push_back( 0 );
-              errs.push_back( 0 );
-
-            }
-
-          } catch (std::exception &Ex1)//ties or something else went wrong in BivariateNormal
-          {
-            done = true;
-            g_log.error()<<"Bivariate Error for PeakNum="<<(int)getProperty("PeakIndex")<<":" << std::string(Ex1.what())
-                 <<std::endl;
-          }catch(...)
-          {
-            done = true;
-            g_log.error()<<"Bivariate Error A for peakNum="<<(int)getProperty("PeakIndex")<<std::endl;
-          }
-          if (!done)//Bivariate error happened
-          {
-
-           g_log.debug() << "   Thru Algorithm: chiSq=" << setw(7) << chisqOverDOF << endl;
-           g_log.debug() << "  Row,Col Radius=" << lastRow << "," << lastCol << "," << neighborRadius << std::endl;
-
-            double sqrtChisq = -1;
-            if (chisqOverDOF >= 0)
-              sqrtChisq = (chisqOverDOF);
-
-            sqrtChisq = max<double> (sqrtChisq, AttributeValues->StatBaseVals(IIntensities)
-                / AttributeValues->StatBaseVals(ISS1));
-            sqrtChisq = SQRT(sqrtChisq);
-
-            for (size_t kk = 0; kk < params.size(); kk++)
-            {
-              g_log.debug() << "   Parameter " << setw(8) << names[kk] << " " << setw(8) << params[kk];
-              // if (names[kk].substr(0, 2) != string("SS"))
-              g_log.debug() << "(" << setw(8) << (errs[kk] * sqrtChisq) << ")";
-              if (Bounds.size() > kk)
-              {
-                pair<double, double> upLow = Bounds[kk];
-                g_log.debug() << " Bounds(" << upLow.first << "," << upLow.second << ")";
-              }
-              g_log.debug() << endl;
-            }
-
-            double intensity = AttributeValues->CalcISAWIntensity( params.data());
-            g_log.debug() << "IsawIntensity= "<< intensity << std::endl;
-          }
-
-       }
-
-   // Smallest chi-sq value was not always best.
-   //TODO?:Smallest chi-sq with small errors on background, Intensity, row and
-   //        col.
-  void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,double &chisqOverDOF,
-       bool &done,       std::vector<string>&names, std::vector<double>&params,
-       std::vector<double>&errs,double lastRow,double lastCol,double neighborRadius)
-   {
-
-    double background = ParameterValues[IBACK];
-    int N = 3;
-    if( background <=0)
-    {
-      background =0;
-      N=1;
-    }
-    bool CalcVars = AttributeValues->CalcVariances();
-    int NParams =4;
-    if( !CalcVars )NParams+=3;
-
-    double minChiSqOverDOF = -1;
-    double Bestparams[7];
-    std::string Bestnames[7];
-    for( int i=0; i < N;i++)
-    {
-      Fit(Data,chisqOverDOF,done,names, params,errs,lastRow,lastCol,neighborRadius);
-      g_log.debug()<<"-----------------------"<<i<<"--------------------------"<<std::endl;
-      if(( minChiSqOverDOF < 0 || chisqOverDOF <  minChiSqOverDOF )&& (chisqOverDOF > 0) && !done)
-      {
-        for(int j=0;j<NParams;j++)
-          {
-           Bestparams[j] = ParameterValues[j];
-           Bestnames[j] = ParameterNames[j];
-          }
-        minChiSqOverDOF = chisqOverDOF;
-      }
-
-      //Next round, reduce background
-      background = background/2;
-      if( i+1 == N-1)
-        background =0;
-
-      std::vector<double> prms= AttributeValues->GetParams( background);
-
-      for( int j=0; j< NParams ; j++)
-        ParameterValues[j] = prms[j];
-    }
-    vector<std::string> ParNames( ParameterNames, ParameterNames +NParams);
-    for( int i=0; i < NParams; i++)
-    {
-      int k= find( Bestnames[i] , ParNames);
-      if( k >=0 && k < NParams)
-        ParameterValues[k] = Bestparams[k];
-
-    }
-
-    Fit(Data,chisqOverDOF,done,names, params,errs,lastRow,lastCol,neighborRadius);
-
-   }
-
-   bool IntegratePeakTimeSlices::updateNeighbors( boost::shared_ptr< Geometry::IComponent> &comp,
-       V3D CentPos,  V3D oldCenter,double NewRadius, double &neighborRadius)
-   {
-       double DD =(CentPos - oldCenter).norm();
-       bool  changed = false;
-       if(DD +NewRadius >neighborRadius)
-       {
-          int NN= int(2*NewRadius*2*NewRadius*2.25/CellWidth/CellHeight);
-          if( NeighborIDs[0]< NN)
-          {
-            delete [] NeighborIDs;
-            NeighborIDs = new int[NN+2];
-            NeighborIDs[0]=NN+2;
-          }//else
-           // NN= NeighborIDs[0]-2;
-          NeighborIDs[1]=2;
-          neighborRadius = 1.5*NewRadius;
-          //CentNghbr = CentPos;
-          getNeighborPixIDs(comp, CentPos, neighborRadius, NeighborIDs);
-          changed=true;
-
-       }else// big enough neighborhood so
-         neighborRadius -= DD;
-
-       return changed;
-   }
-
+   /**
+    * Executes this algorithm
+    *
+    * Integrates one peak
+    * -First attempts to find row/col extents, time extents to fully get most of the peak
+    * -Integrate each time slice.
+    * -Report Results
+    */
     void IntegratePeakTimeSlices::exec()
     {
       time_t seconds1;
@@ -723,7 +286,7 @@ namespace Mantid
 
       IPeak &peak = peaksW->getPeak(indx);
 
-
+      //------------------------------- Get Panel --------------------------------------
       boost::shared_ptr<const Geometry::IComponent> panel_const= peak.getInstrument()->getComponentByName( peak.getBankName());
 
       boost::shared_ptr< Geometry::IComponent>panel =
@@ -747,7 +310,7 @@ namespace Mantid
 
       FindPlane(  center,  xvec,  yvec, ROW, COL,NROWS,NCOLS, CellWidth, CellHeight, peak);
 
-     // sprintf(logInfo, std::string("   Peak Index %5d\n").c_str(), indx);
+
       g_log.debug() <<"   Peak Index "<<indx <<std::endl;
 
       double TotVariance = 0;
@@ -763,6 +326,7 @@ namespace Mantid
 
       TableWorkspace_sptr TabWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(0));
 
+      //----------------------------- get Peak extents ------------------------------
       try
       {
 
@@ -772,28 +336,26 @@ namespace Mantid
 
         double R      = CalculatePositionSpan( peak, dQ )/2;
 
-        R = min<double> (36*max<double>(CellWidth,CellHeight), R);
-        R = max<double> (6*max<double>(CellWidth,CellHeight), R);
-        R=2*R;//Gets a few more background cells.
+        R = min<double> (MaxRowColSpan*max<double>(CellWidth,CellHeight), R);
+        R = max<double> (MinRowColSpan*max<double>(CellWidth,CellHeight), R);
+
+        R=2*R;  //Gets a few more background cells.
         int Chan;
 
         const MantidVec & X = inpWkSpace->dataX(wsIndx);
         int dChan = CalculateTimeChannelSpan(peak, dQ, X, int(wsIndx), Chan);
 
-        dChan = max<int> (dChan, 3);
+        dChan = max<int> (dChan, MinTimeSpan);
 
 
         double Centy = Row0;
         double Centx = Col0;
         IDetector_const_sptr CenterDet =  peak.getDetector();
-        //std::map< specid_t, V3D > neighbors;
 
-
-        //bool done = false;
 
         double neighborRadius ;//last radius for finding neighbors
 
-        neighborRadius = min<double>(10,1.5*R);
+        neighborRadius = min<double>(MaxNeighborhoodRadius,NeighborhoodRadiusDivPeakRadius*R);
         int Nneighbors = (int)(neighborRadius*neighborRadius/CellWidth/CellHeight*4);
 
 
@@ -816,6 +378,7 @@ namespace Mantid
         int MaxChan = -1;
         double MaxCounts = -1;
 
+        //     --------------- Find Time Chan with max counts----------------
         for( int dir =1 ; dir >-2; dir -=2)
         {
           bool done = false;
@@ -870,13 +433,12 @@ namespace Mantid
         if( MaxChan >0)
             Chan =  MaxChan ;
 
-      //  sprintf(logInfo, std::string("   largest Channel,Radius,CellWidth,CellHeight = %d  %7.3f  %7.3f  %7.3f\n").c_str(),
-      //                     Chan, R, CellWidth, CellHeight);
+
         g_log.debug()<<
             "   largest Channel,Radius,CellWidth,CellHeight = "<<Chan<<" "<< R<<" "<<CellWidth<<" "
                                                  << CellHeight<<std::endl;
 
-        if (R < 2*max<double>(CellWidth, CellHeight) || dChan < 3)
+        if (R < MinRowColSpan/2*max<double>(CellWidth, CellHeight) || dChan < MinTimeSpan)
         {
           g_log.error("Not enough rows and cols or time channels ");
           throw std::runtime_error("Not enough rows and cols or time channels ");
@@ -884,7 +446,7 @@ namespace Mantid
 
         InitializeColumnNamesInTableWorkspace(TabWS);
 
-
+        //------------------------------------- Start the Integrating -------------------------------
         double time;
         int ncells;
 
@@ -996,7 +558,7 @@ namespace Mantid
 
               if( done )//try to merge
               {     done = false;
-                    //std::cout<<"TRY TO MERGE indx/xchan="<<indx<<"/"<<xchan<<std::endl;
+
                     int chanMin,chanMax;
                     if( ( dir ==1 && chan ==0 ) || lastAttributeList->CellHeight <= 0)
                     {
@@ -1090,13 +652,11 @@ namespace Mantid
                       lastAttributeList =XXX;
                     }
                     done = true;
-                   // std::cout<<"END TRY TO MERGE indx="<<indx<<"/"<<xchan<<std::endl;
+
              }
 
               //Get ready for the next round
               Data.reset();
-             // if (fit_alg)
-             //   fit_alg.reset();
 
               if (!done)
               {
@@ -1161,30 +721,176 @@ namespace Mantid
     }
 
 
-    //Finds an item in a MantidVec of time bin boundaries
-    int IntegratePeakTimeSlices::find(Mantid::MantidVec const & X, const double time)
-    {
-      int sgn = 1;
+    /**
+       * Finds all neighbors within a given Radius of the Center on the given component.
+       * @param comp -The component of interest
+       * @param Center- the center of the neighbors
+       * @param Radius - The radius from the center of neighbors to be included
+       * @param ArryofID -The detector ID's of the neighbors. The id of the pixel at the center may be included.
+       */
+      bool IntegratePeakTimeSlices::getNeighborPixIDs( boost::shared_ptr< Geometry::IComponent> comp,
+                                                       Kernel::V3D                           &Center,
+                                                       double                                &Radius,
+                                                       int*                                  &ArryofID)
+       {
 
-      if (X[0] > X[1])
-        sgn = -1;
-      
-      if (sgn * (X[0] - time) >= 0)
-        return 0;
+            int N = ArryofID[1];
+            int MaxN= ArryofID[0];
 
-      if (sgn * (time - X[X.size() - 1]) >= 0)
-        return (int) X.size() - 1;
+            if( N >= MaxN)
+              return false;
 
-      for (size_t i = 0; i < (size_t)X.size() - (size_t) 1; i++)
-      {
-        if (sgn * (time - X[i]) >= 0 && sgn * (X[i + (size_t) 1] - time) >= 0)
-          return (int) i;
-      }
+            Geometry::BoundingBox box;
+            comp->getBoundingBox( box);
 
-      return -1;
-    }
+            double minx = Center.X() - Radius;
+            double miny = Center.Y() - Radius;
+            double minz = Center.Z() - Radius;
+            double maxx = Center.X() + Radius;
+            double maxy = Center.Y() + Radius;
+            double maxz = Center.Z() + Radius;
 
 
+            if( box.xMin()>=maxx)
+                return true;
+
+            if( box.xMax() <=minx)
+               return true;;
+
+            if( box.yMin()>=maxy)
+                return true;
+
+            if( box.yMax() <=miny)
+               return true;
+
+            if( box.zMin()>=maxz)
+                return true;
+
+            if( box.zMax() <=minz)
+               return true;;
+
+            boost::shared_ptr<Geometry::Detector> det =   boost::dynamic_pointer_cast<Geometry::Detector>( comp);
+           // if( comp->type().compare(0,8,"Detector")==0 || comp->type().compare("RectangularDetectorPixel")==0)
+            if( det )
+             {
+                     V3D pos = det->getPos() -Center;
+                     if( pos.X()*pos.X()+pos.Y()*pos.Y()+pos.Z()*pos.Z() <Radius*Radius)
+                     {
+                       ArryofID[N]=  det->getID();
+                        N++;
+                        ArryofID[1] = N;
+
+                     }
+                    return true;
+              }
+
+             boost::shared_ptr<const Geometry::ICompAssembly> Assembly =
+                 boost::dynamic_pointer_cast<const Geometry::ICompAssembly>( comp);
+
+             if( !Assembly)
+                return true;
+
+             bool b = true;
+
+             for( int i=0; i< Assembly->nelements() && b; i++)
+                b= getNeighborPixIDs( Assembly->getChild(i),Center,Radius,ArryofID);
+
+             return b;
+       }
+
+
+      /**
+       * Checks and updates if needed the list of NeighborIDs
+       * @param comp  Component with the neighboring pixels
+       * @CentPos    new Center
+       * @param oldCenter   old Center
+       * @param NewRadius   new Radius
+       * &param neighborRadius  old the new neighborhood radius
+       */
+       bool IntegratePeakTimeSlices::updateNeighbors( boost::shared_ptr< Geometry::IComponent> &comp,
+           V3D CentPos,  V3D oldCenter,double NewRadius, double &neighborRadius)
+       {
+           double DD =(CentPos - oldCenter).norm();
+           bool  changed = false;
+           if(DD +NewRadius >neighborRadius)
+           {
+              int NN= int(NStdDevPeakSpan*NeighborhoodRadiusDivPeakRadius*NewRadius/CellWidth*NStdDevPeakSpan*NeighborhoodRadiusDivPeakRadius*NewRadius/CellHeight);
+              if( NeighborIDs[0]< NN)
+              {
+                delete [] NeighborIDs;
+                NeighborIDs = new int[NN+2];
+                NeighborIDs[0]=NN+2;
+              }
+              NeighborIDs[1]=2;
+              neighborRadius = NeighborhoodRadiusDivPeakRadius*NewRadius;
+
+              getNeighborPixIDs(comp, CentPos, neighborRadius, NeighborIDs);
+              changed=true;
+
+           }else// big enough neighborhood so
+             neighborRadius -= DD;
+
+           return changed;
+       }
+
+
+    /**
+     * Calculates the span in rows and columns needed to include all data within dQ of the
+     * specified peak
+     * @param peak  The peak of interest
+     * @param dQ    The offset from the peak's Q value for the data of interest
+     *
+     * NOTE: differentials of Q =mv*sin(scatAng/2)/2 were used to calculate this
+     *  Also s=r*theta was used to transfer d ScatAng to distance on a bank.
+     */
+    double IntegratePeakTimeSlices::CalculatePositionSpan(  API::IPeak const &peak,
+                                                      const double                   dQ)
+   {
+
+     try
+     {
+       double Q = 0, ScatAngle = 0, dScatAngle = 0, DetSpan = 0;
+
+       Q = peak.getQLabFrame().norm();
+       Geometry::Instrument_const_sptr instr = peak.getInstrument();
+       const Geometry::IObjComponent_const_sptr  sample = instr->getSample();
+       V3D pos = peak.getDetPos()-sample->getPos();
+
+       ScatAngle = acos(pos.Z() / pos.norm());
+
+
+       dScatAngle = 2 * dQ / Q * tan(ScatAngle/2);
+
+
+       DetSpan = pos.norm() * dScatAngle; //s=r*theta
+
+       DetSpan = fabs(DetSpan);
+
+      // IDetector_sptr det = peak.getDetector();
+
+       return DetSpan;
+
+     } catch (std::exception &s)
+     {
+       std::cout << "err in getNRowsCols, reason=" << s.what() << std::endl;
+       return 0;
+     }
+
+   }
+
+
+    /**
+     * Calculates the span of channels needed to encompass all data around the peak with Q values within dQ
+     * of this peak's Q value
+     *
+     * @param peak     The peak of interest
+     * @param dQ       The offset of peak's Q value whose data is considered part of the peak
+     * @param X        The list of time channel values.
+     * @param specNum  The spectral number for the pixel(Not Currently Used)
+     * @param Centerchan  The center time channel number( from X)
+     *
+     * @return The number of time channels around Centerchan to use
+     */
     int IntegratePeakTimeSlices::CalculateTimeChannelSpan( API::IPeak     const & peak,
                                                           const double                  dQ,
                                                           Mantid::MantidVec      const& X,
@@ -1214,95 +920,118 @@ namespace Mantid
     }
 
 
+    /**
+     * For NonFlat banks, this determines the data of a small planar region approximating the instrument
+     * close to the peak
+     *
+     * @param center  The position of the center of this plane
+     * @param xvec    The direction the column values increase
+     * @param yvec    The direction the row values increase
+     * @param ROW     The row for this peak( 0 if undefined)
+     * @param COL     The col for this peak( 0 if undefined)
+     * @param NROWS   The number? of rows for this bANK
+     * @param NCOLS    The number of columns for this bank
+     * @param pixWidthx   The width of a pixel
+     * @param pixHeighty  The height of a pixel
+     * @param peak
+     */
+     void IntegratePeakTimeSlices::FindPlane( V3D & center, V3D & xvec, V3D& yvec,
+                                              double &ROW, double &COL,int &NROWS,
+                                              int & NCOLS,double &pixWidthx, double&pixHeighty,
+                                              API::IPeak const &peak) const
+     {
+
+       NROWS= NCOLS = -1;
+       IDetector_const_sptr det = peak.getDetector();
+       V3D detPos = det->getPos();
+
+       center.setX( detPos.X());
+       center.setY( detPos.Y());
+       center.setZ( detPos.Z());
+
+       boost::shared_ptr<const Detector> dett = boost::dynamic_pointer_cast<const Detector >(det);
+
+        pixWidthx  = dett->getWidth();
+        pixHeighty = dett->getHeight();
+
+        Kernel::Quat Qt = dett->getRotation();
+        V3D yaxis0(0.0,1.0,0.0);
+
+        Qt.rotate(yaxis0);
+        yaxis0.normalize();
+
+        V3D xaxis0(1,0,0);
+        Qt.rotate( xaxis0);
+        xaxis0.normalize();
 
 
-    void IntegratePeakTimeSlices::InitializeColumnNamesInTableWorkspace(
-                                                    TableWorkspace_sptr &TabWS)
-    {
-      TabWS->setName("Log Table");
-      TabWS->addColumn("double", "Time");
-      TabWS->addColumn("double", "Channel");
-      TabWS->addColumn("double", "Background");
-      TabWS->addColumn("double", "Intensity");
-      TabWS->addColumn("double", "Mcol");
-      TabWS->addColumn("double", "Mrow");
-      TabWS->addColumn("double", "SScol");
-      TabWS->addColumn("double", "SSrow");
-      TabWS->addColumn("double", "SSrc");
-      TabWS->addColumn("double", "NCells");
-      TabWS->addColumn("double", "ChiSqrOverDOF");
-      TabWS->addColumn("double", "TotIntensity");
-      TabWS->addColumn("double", "BackgroundError");
-      TabWS->addColumn("double", "FitIntensityError");
-      TabWS->addColumn("double", "ISAWIntensity");
-      TabWS->addColumn("double", "ISAWIntensityError");
-      TabWS->addColumn("double", "TotalBoundary");
-      TabWS->addColumn("double", "NBoundaryCells");
-      TabWS->addColumn("double", "Start Row");
-      TabWS->addColumn("double", "End Row");
-      TabWS->addColumn("double", "Start Col");
-      TabWS->addColumn("double", "End Col");
-      TabWS->addColumn("double", "TotIntensityError");
-      TabWS->addColumn("str", "SpecIDs");
-    }
+        xvec.setX( xaxis0.X());
+        xvec.setY( xaxis0.Y());
+        xvec.setZ( xaxis0.Z());
+        yvec.setX( yaxis0.X());
+        yvec.setY( yaxis0.Y());
+        yvec.setZ( yaxis0.Z());
+        ROW=peak.getRow();
+        COL=peak.getCol();
+        Geometry::Instrument_const_sptr inst =peak.getInstrument();
+        if( !inst)
+           throw std::invalid_argument("No instrument for peak");
+        boost::shared_ptr< const
+              IComponent >  panel =inst->getComponentByName( peak.getBankName());
+
+        boost::shared_ptr<const RectangularDetector>ddet = boost::dynamic_pointer_cast<const RectangularDetector>(panel);
+
+        if( ddet )
+        {
+           std::pair<int,int> CR =ddet->getXYForDetectorID(det->getID());
+           ROW = CR.second;
+           COL=CR.first;
+           pixWidthx = ddet->xstep();
+           pixHeighty= ddet->ystep();
+
+           NROWS = ddet->ypixels();
+           NCOLS = ddet->xpixels();
+
+           return;
+
+        }
+        //Get NROWS and NCOLS for other panels
+       NROWS= NCOLS = -1;
+
+        if( !inst)
+          return;
+
+        if( !panel)
+          return;
+        boost::shared_ptr<const Component>compPanel =
+                         boost::dynamic_pointer_cast<const Component>(panel);
+        boost::shared_ptr<IComponent> panel1( compPanel->base()->clone());
+        BoundingBox B;
+
+        Quat rot =panel1->getRotation();
+
+        rot.inverse();
+
+        panel1->rotate(rot);
+
+        panel1->getBoundingBox(B);
 
 
+        NROWS = (int)((B.yMax()-B.yMin())/pixHeighty+.5);
+        NCOLS = (int)((B.xMax()-B.xMin())/pixWidthx+.5);
 
- /* //For Edge Peaks
-    void UpdateStats( const double          intensity,
-                                               const double          variance,
-                                               const int             Row,
-                                               const int             Col,
-                                               std::vector<double> & StatBase)
-    {
-      for( int i=StatBase.size(); i< 8*NAttributes-7*4+16//for octant max's
-                                            ; i++)
-        StatBase.push_back(0);
-      int Oct=0;
-      if( row <(int)(.5+ROW)) Oct=4;
-      if( col < (int)(.5+COL)) Oct+=2;
-      if( abs( row -(int)(.5+ROW)) <abs(col-COL))Oct++;
 
-      row = row-ROW;
-      col = col-COL;
-      //  use row = row -ROW and col =col-COL ???????
-      // To determine which octants are vacant keep  max(min) row/col fo each octant.
-      StatBase[8*ISSIxx-7*ISSIxx+Oct] += col * col * intensity;
-      StatBase[8*ISSIyy-7*ISSIxx+Oct] += intensity * row * row;
-      StatBase[8*ISSIxy-7*ISSIxx+Oct] += intensity * row * col;
-      StatBase[8*ISSxx-7*ISSIxx+Oct] += col * col;
-      StatBase[8*ISSyy-7*ISSIxx+Oct] += row * row;
-      StatBase[8*ISSxy-7*ISSIxx+Oct] += row * col;
-      StatBase[8*ISSIx-7*ISSIxx+Oct] += intensity * col;
-      StatBase[8*ISSIy-7*ISSIxx+Oct] += intensity * row;
-      StatBase[8*ISSx-7*ISSIxx+Oct] += col;
-      StatBase[8*ISSy-7*ISSIxx+Oct] += row;
-      StatBase[8*IIntensities-7*ISSIxx+Oct] += intensity;
-      StatBase[8*IVariance-7*ISSIxx+Oct] += variance;
-      int StartOcts =8*IVariance-7*ISSIxx+8;
-      if( oct >= 4 && row < StatBase[ StartOcts+2*Oct])
-        StatBase[StartOcts+2*Oct]=row;
-      else if( Oct<4 && row > StatBase[ StartOcts+2*Oct])
-        StatBase[StartOcts+2*Oct]=row;
-      if( (Oct/2) %2 ==1 && col < StatBase[StartOcts+2*Oct + 1])
-           col =StatBase[StartOcts+2*Oct + 1];
-      else if((Oct/2) %2 ==0 && col >StatBase[StartOcts+2*Oct + 1])
-          col =StatBase[StartOcts+2*Oct + 1];
-    }
+     }
 
-    //Reflect then sum octants
-   std::vector<double>  CollapseAndReflect( std::vector<double> StatBase, std::vector<int> Attr)
-    {
-
-     int StartOcts =8*IVariance-7*ISSIxx+8;
-     int StartRow = Attr[IStarRow];
-     int EndRow   = StartRow + Attr[INRows]+1;
-     int StartCol = Attr[IStarCol];
-     int EndCol  = StartCol + Attr[INCol]+1;
-
-     //return StatBase;
-    }
-*/
+    /**
+     * Updates the cumulative statistics for the data being considered
+     *
+     * @param intensity -The experimental intensity at the given pixel
+     * @param variance  -The square of the errors in the above intensity
+     * @param row       -The row of the given pixel
+     * @param col       -The column of the given pixel
+     * @param StatBase  -The data accumulator
+     */
     void IntegratePeakTimeSlices::updateStats( const double          intensity,
                                                const double          variance,
                                                const double          row,
@@ -1325,11 +1054,22 @@ namespace Mantid
       StatBase[ISS1] +=1;
 
     }
-//!!!!!!  do  testing.
+
+
+   /**
+    * Finds and saves the initial values and modes( like isEdge) for this data.
+    *
+    * @param Varx  The Variance of the x(column) values
+    * @param Vary  The Variance of the y(row)  values
+    * @param b     The background
+    *
+    * NOTE:Used only in GetParams which is used only in PreFit which is not
+    * currently used.
+    */
    std::vector<double>  DataModeHandler::InitValues( double Varx,double Vary,double b)
     {
        std::vector<double> Res(7);
-      // vector<double>StatBase = AttributeValues->StatBase;
+
        Res[IVXX]= Varx;
        Res[IVYY] = Vary;
        Res[IVXY] =0;
@@ -1340,6 +1080,7 @@ namespace Mantid
        Res[IBACK] = b;
        Res[ITINTENS] =StatBase[IIntensities] - b * nCells;
 
+       //---- Is Edge Cell ???-------
        double  NstdX = 4*( currentRadius/CellWidth - EdgeX )/sqrt( Varx );
        double  NstdY = 4*( currentRadius/CellHeight - EdgeY )/sqrt( Vary );
        double sigx=1;
@@ -1348,7 +1089,7 @@ namespace Mantid
        if( NstdY < 0) sigy=-1;
 
        double  x = 1;
-       if( sigy*NstdY < 7 && sigy*NstdY >= 0)
+       if( sigy*NstdY < 7 && sigy*NstdY >= 0) //is close to row edge
        {
          x =probs[ (int)(sigy*NstdY +.5) ];
          if( sigy < 0) x=1-x;
@@ -1359,7 +1100,7 @@ namespace Mantid
 
        }
        double  x1 = 1;
-       if( sigx*NstdX < 7 && sigx*NstdX > 0)
+       if( sigx*NstdX < 7 && sigx*NstdX > 0)//is close to x edge
        {
          x1 =probs[ (int)(sigx*NstdX +.5) ];
          if( sigx < 0) x1=1-x1;
@@ -1374,6 +1115,13 @@ namespace Mantid
        return  Res;
      }
 
+   /**
+    * Calculates the initial values of the parameters given background b.
+    * Used only in the PreFit method that is not used.
+    * @param b   the background
+    *
+    * @return The vector of parameter values.
+    */
    std::vector<double> DataModeHandler::GetParams( double b )
    {
 
@@ -1422,7 +1170,11 @@ namespace Mantid
 
    }
 
-   //Returns isEdgePeak value
+   /**
+    *  Sets the Accumulated data values into this class, then updates other information like initial values
+    *
+    *  @param StatBase  The accumulated data that is to be considered.
+    */
     bool DataModeHandler::setStatBase(std::vector<double> const &StatBase)
 
     {
@@ -1448,7 +1200,7 @@ namespace Mantid
       }
 
       double Varx,Vary;
-      Varx =StatBase[INCol]/7 ;
+      Varx =StatBase[INCol]/7 ;//Range = 3.5 standard deviations
       Vary =StatBase[INRows]/7 ;
       Varx *= Varx;
       Vary *= Vary;
@@ -1468,31 +1220,7 @@ namespace Mantid
         Intensity_calc =StatBase[IIntensities] - b * nCells;
         if( Vx_calc <=0 || Vy_calc<=0) //EdgePeak but not big enuf
           return true;
-        /*
-        double  NstdX = 4*( currentRadius/CellWidth - EdgeX )/sqrt( Varx );
-        double  NstdY = 4*( currentRadius/CellHeight - EdgeY )/sqrt( Vary );
-        double P1=0.0;
-        double P2=0;
-        if( NstdX < 0){ NstdX = -NstdX; P1 =-.5;}
-        if( NstdY < 0){ NstdY =-.5; P2=-.5;}
 
-        double  x = 1;
-        if( NstdY < 7 && NstdY > 0)
-        {
-          x =probs[ (int)(NstdY +.5) ];
-
-          if( P1 < 0) x =1-x;
-
-        }
-        double  x1 = 1;
-        if( NstdX < 7 && NstdX > 0)
-        {
-          x1 =probs[ (int)(NstdX +.5) ];
-          if( P2 < 0) x1=1-x1;
-
-         }
-        Intensity_calc /=x*x1;
-       */
         double params[]={back_calc,Intensity_calc,col_calc,row_calc,Vx_calc,Vy_calc,Vxy_calc};
         double r=CalcSampleIntensityMultiplier( params );
         Intensity_calc *=r;
@@ -1510,8 +1238,6 @@ namespace Mantid
       double RangeY = StatBase[INRows]/2;
 
 
-
-      //TODO
       while (!done && ntimes < 29)
       {
         Mx = StatBase[ISSIx] - b * StatBase[ISSx];
@@ -1550,6 +1276,11 @@ namespace Mantid
 
     }
 
+    /**
+     * Calculates the new radius for neighborhoods so as to include almost all of a peak
+     *
+     * @return the new radius
+     */
     double DataModeHandler::getNewRCRadius()
     {
       double Vx,Vy;
@@ -1574,15 +1305,23 @@ namespace Mantid
         mult *=1.35;
 
       double  DD = max<double>( sqrt(Vy)*CellHeight, sqrt(Vx)*CellWidth);
-      double NewRadius= 1.4* max<double>( 5*max<double>(CellWidth,CellHeight), 4.5*DD);
+      double NewRadius= 1.4* max<double>( MinRowColSpan*max<double>(CellWidth,CellHeight), 4.5*DD);
       NewRadius = mult*min<double>(baseRCRadius, NewRadius);
                //1.4 is needed to get more background cells. In rectangle the corners were background
 
-       NewRadius = min<double>(35*max<double>(CellWidth,CellHeight),NewRadius);
+       NewRadius = min<double>(MaxRowColSpan*max<double>(CellWidth,CellHeight),NewRadius);
 
        return NewRadius;
     }
 
+    /**
+     * For edge peaks, the sample standard deviations do not work. This attempts to estimate the peak
+     * widths by using half width at half max idea
+     *
+     * @param xvals   The x(column) values of the data to be considered
+     * @param yvals   The y(row) values of the data to be considered
+     * @param counts  The intensity at the given row and column (and timeslice)
+     */
     void DataModeHandler::setHeightHalfWidthInfo( Mantid::MantidVecPtr &xvals,
                                                  Mantid::MantidVecPtr &yvals,
                                                  Mantid::MantidVecPtr &counts)
@@ -1752,33 +1491,7 @@ namespace Mantid
         VaryHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
         return ;
       }
-     /* if( maxCount-minCount < 5 || nBoundIntCells > .2*nintCells)
-      {
-        if(nedge1Cells >10 && nBoundEdge1Cells> .7*nedge1Cells )
-        {
-          std::vector<double> blankParams;
-          double Cov;
-          CalcVariancesFromData( (double)minCount, MaxX,MaxY,VarxHW,VaryHW, Cov,StatBase);
-          HalfWidthAtHalfHeightRadius=sqrt( VarxHW+VaryHW);
-        }
-        else if( TotCx >0 && TotCy > 0)
-        {
-          VarxHW= TotRx0/TotCx;
-          VaryHW=TotRy0/TotCy;
-          HalfWidthAtHalfHeightRadius=sqrt( (TotRx0+TotRy0)/N);
-          return ;
-        }
-        else if( TotCx >0 || TotCy > 0)
-        {
-          VarxHW=VaryHW= std::max<double>(TotRx0,TotRy0)/std::max<double>(TotCx,TotCy);
 
-          HalfWidthAtHalfHeightRadius=sqrt( VarxHW);
-          return;
-         }else
-
-          return;
-      }
-      */
 
       double TotR=0,nR=-1,nRx=-1,nRy=-1;
       double MidVal = ( TotMax/nMax + TotMin/nMin )/2.0;
@@ -1835,7 +1548,19 @@ namespace Mantid
         VaryHW = -1;
 
     }
-    //Data is the slice subdate, inpWkSpace is ALl the data,
+    /**
+     * Initial phase at converting Detector data to workspace data that will be sent to the Fit Function, BivariateNormal.
+     * @param Data  workspace that will be sent to the Fit Function, BivariateNormal
+     * @param inpWkSpace -The MatrixWorkspace with all the experimental data
+     * @param  comp  -The parent of all the pixels that are neighbors of the peak being considered
+     * @param chanMin -The minimum channel to use
+     * @param chanMax-The maximum channel to be collapsed to one channel
+     * @param CentNghbr- The center of the current and next(if changed) neighbor pixels
+     * @param  neighborRadius- The radius of the current neighbor pixels
+     * @param  Radius  The current starting Radius to use for neighbors.
+     * @param spec_idList-The list of spectral id's that are neighbors
+     *
+     */
     void IntegratePeakTimeSlices::SetUpData( MatrixWorkspace_sptr          & Data,
                                              MatrixWorkspace_const_sptr    const & inpWkSpace,
                                              boost::shared_ptr< Geometry::IComponent> comp,
@@ -1853,6 +1578,7 @@ namespace Mantid
                                    + yvec*(CentY-ROW)*CellHeight;
 
       int NBadEdgeCells = getProperty("NBadEdgePixels");
+
       boost::shared_ptr<DataModeHandler> X(new DataModeHandler(Radius,Radius,CentY,CentX,
           CellWidth,CellHeight,getProperty("CalculateVariances"),NBadEdgeCells,NCOLS-NBadEdgeCells,
           NBadEdgeCells,NROWS-NBadEdgeCells));
@@ -1886,7 +1612,8 @@ namespace Mantid
 
           if(DD +NewRadius >neighborRadius)
           {
-             int NN= int(2*NewRadius*2*NewRadius*2.25/CellWidth/CellHeight);
+             int NN= int(NStdDevPeakSpan* NeighborhoodRadiusDivPeakRadius*NewRadius/CellWidth*
+                 NStdDevPeakSpan* NeighborhoodRadiusDivPeakRadius*NewRadius/CellHeight);
              if( NeighborIDs[0]< NN)
              {
                delete [] NeighborIDs;
@@ -1895,7 +1622,7 @@ namespace Mantid
              }//else
               // NN= NeighborIDs[0]-2;
              NeighborIDs[1]=2;
-             neighborRadius = 1.5*NewRadius;
+             neighborRadius = NeighborhoodRadiusDivPeakRadius*NewRadius;
              CentNghbr = CentPos;
              getNeighborPixIDs(comp, CentPos, neighborRadius, NeighborIDs);
 
@@ -1921,7 +1648,7 @@ namespace Mantid
      * @param Data: Output workspace
      * @param inpWkSpace: Input workspace
      * @param chanMin: Minimum channel
-     * @param chanMax: Maximum channel
+     * @param chanMax: Maximum channel. Will be collapsed to one channel
      * @param Radius: The radius of detectors
      * @param CentPos: Center on plane
      * @param spec_idList: List of spectra id's
@@ -1942,7 +1669,7 @@ namespace Mantid
          StatBase[ISSIxx]= -1;
         return;
       }
-      boost::shared_ptr<Workspace2D> ws = boost::dynamic_pointer_cast<Workspace2D>(Data);
+      boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>(Data);
 
       int NBadEdges = getProperty("NBadEdgePixels");
       spec_idList.clear();
@@ -2073,7 +1800,6 @@ namespace Mantid
         AttributeValues->EdgeX=0;
 
 
-
       Data->setX(0, pX);
       Data->setX(1, pX);
       Data->setX(2, pX);
@@ -2104,6 +1830,45 @@ namespace Mantid
       ParameterValues[IVXY] = AttributeValues->getInitVarxy();
     }
 
+
+    /**
+     * Finds the time channel with the given time in
+     * @param X    The vector of time values from a MatrixWorkspace
+     * @param time  The desired time
+     * @return the time channel
+     */
+    int IntegratePeakTimeSlices::find(Mantid::MantidVec const & X, const double time)
+    {
+      int sgn = 1;
+
+      if (X[0] > X[1])
+        sgn = -1;
+
+      if (sgn * (X[0] - time) >= 0)
+        return 0;
+
+      if (sgn * (time - X[X.size() - 1]) >= 0)
+        return (int) X.size() - 1;
+
+      for (size_t i = 0; i < (size_t)X.size() - (size_t) 1; i++)
+      {
+        if (sgn * (time - X[i]) >= 0 && sgn * (X[i + (size_t) 1] - time) >= 0)
+          return (int) i;
+      }
+
+      return -1;
+    }
+
+
+
+
+    /**
+     * Determines if a Peak is an edge peak
+     * @param params   The list of parameter values
+     * @param nparams  The number of parameters
+     *
+     * @return true if it is an edge peak, otherwise false.
+     */
     bool DataModeHandler::isEdgePeak( const double* params, int nparams)
     {
       double Varx = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
@@ -2116,16 +1881,22 @@ namespace Mantid
 
       if( Varx <=0 || Vary <= 0 || HalfWidthAtHalfHeightRadius <=0 )
         return true;
-      double Rx = lastRCRadius/CellWidth - EdgeX;
-      double Ry = lastRCRadius/CellHeight - EdgeY;
 
-      if( Rx*Rx < 4*std::max<double>(Varx,VarxHW) ||
-              Ry*Ry < 4*std::max<double>(Vary, VaryHW) )
+      double Rx = lastRCRadius/CellWidth - EdgeX; // span from center in x direction
+      double Ry = lastRCRadius/CellHeight - EdgeY;//span from center  in y direction
+
+      if( Rx*Rx <  NStdDevPeakSpan*NStdDevPeakSpan*std::max<double>(Varx,VarxHW) ||
+              Ry*Ry < NStdDevPeakSpan*NStdDevPeakSpan*std::max<double>(Vary, VaryHW) )
         return true;
 
       return false;
     }
 
+    /**
+     * Calculates the string for the Function Property of the Fit Algorithm
+     *
+     * @return the string for the Function Property of the Fit Algorithm
+     */
     std::string IntegratePeakTimeSlices::CalculateFunctionProperty_Fit()
     {
 
@@ -2155,7 +1926,14 @@ namespace Mantid
     }
 
 
-
+    /**
+     *  Utility to find a name in a vector of strings
+     *
+     *  @param oneName  The name to search for
+     *  @param nameList  The list of names
+     *
+     *  @return the position in the vector of oneName or -1.
+     */
     int IntegratePeakTimeSlices::find( std::string              const &oneName,
                                        std::vector<std::string> const &nameList)
 
@@ -2167,7 +1945,384 @@ namespace Mantid
       return -1;
     }
 
+    /**
+     * Constructor for class that holds mode and various settings
+     *
+     * @param handler   Copy(deep) constructor. The other handler to copy info from.
+     */
+        DataModeHandler::DataModeHandler(const DataModeHandler & handler)
+        {
 
+          this->baseRCRadius = handler.baseRCRadius;
+          this->lastRCRadius = handler.lastRCRadius;
+          this->HalfWidthAtHalfHeightRadius = handler.HalfWidthAtHalfHeightRadius;
+          this->calcNewRCRadius = handler.calcNewRCRadius;
+          this->lastRow = handler.lastRow;
+          this->lastCol = handler.lastCol;
+          this->time = handler.time;
+          this->CellWidth = handler.CellWidth;
+          this->CellHeight = handler.CellHeight;
+          this->currentRadius = handler.currentRadius;
+          this->currentPosition = handler.currentPosition;
+          this->StatBase = handler.StatBase;
+          this->EdgeX = handler.EdgeX;
+          this->EdgeY = handler.EdgeY;
+          this->CalcVariance = handler.CalcVariance;
+          this->VarxHW = handler.VarxHW;
+          this->VaryHW = handler.VaryHW;
+          this->MaxRow = handler.MaxRow;
+          this->MaxCol = handler.MaxCol;
+          this->MinRow = handler.MinRow;
+          this->MinCol = handler.MinCol;
+          this->lastISAWIntensity=handler.lastISAWIntensity;
+          this->lastISAWVariance = handler.lastISAWIntensity;
+          this->back_calc = handler.back_calc;
+          this->Intensity_calc = handler.Intensity_calc;
+          this->row_calc = handler.row_calc;
+          this->col_calc = handler.col_calc;
+          this->Vx_calc = handler.Vx_calc;
+          this->Vy_calc = handler.Vy_calc;
+          this->Vxy_calc = handler.Vxy_calc;
+          this->case4 = handler.case4;
+        }
+    /**
+     * Utility method to calculate variances from data given background and means
+     *
+     * @param background - the background to use
+     * @param meanx- the mean x( col) value to use
+     * @param meany- the mean y( row) value to use
+     * @param Varxx-The resultant variance in the x values around above mean with background removed
+     * @param Varyy-The resultant variance in the y values around above mean with background removed
+     * @param Varxy-The resultant covariance in the x and values around above mean with background removed
+     * @param StatBase- The "data".
+     */
+        void DataModeHandler::CalcVariancesFromData( double background, double meanx, double meany,
+                                                            double &Varxx, double &Varxy, double &Varyy,
+                                                            std::vector<double>&StatBase)
+        {
+
+          double Den = StatBase[IIntensities]-background*StatBase[ISS1];
+          Varxx =(StatBase[ISSIxx]-2*meanx*StatBase[ISSIx]+meanx*meanx*StatBase[IIntensities]-
+                   background*(StatBase[ISSxx]-2*meanx*StatBase[ISSx]+meanx*meanx*StatBase[ISS1]))
+                   /Den;
+
+          Varyy=(StatBase[ISSIyy]-2*meany*StatBase[ISSIy]+meany*meany*StatBase[IIntensities]-
+              background*(StatBase[ISSyy]-2*meany*StatBase[ISSy]+meany*meany*StatBase[ISS1]))
+              /Den;
+
+          Varxy =(StatBase[ISSIxy]-meanx*StatBase[ISSIy]-meany*StatBase[ISSIx]+
+              meanx*meany*StatBase[IIntensities]-
+              background*(StatBase[ISSxy]-meanx*StatBase[ISSy]-meany*StatBase[ISSx]+meanx*meany*StatBase[ISS1]))
+              /Den;
+
+          if( CalcVariances())
+          {
+
+            Varxx =  std::min<double>(Varxx, 1.21*getInitVarx());//copied from BiVariateNormal
+            Varxx = std::max<double>(Varxx, .79*getInitVarx());
+            Varyy =  std::min<double>(Varyy, 1.21*getInitVary());
+            Varyy = std::max<double>(Varyy, .79*getInitVary());
+          }
+
+        }
+    /**
+     * Calculates the string form of the constraints to be sent to the Fit Algorithm and also saves it in a vector form
+     * @param   Bounds  The vector form for the constraints
+     */
+        std::string DataModeHandler::CalcConstraints( std::vector< std::pair<double,double> > & Bounds,
+               bool CalcVariances)
+        {
+          double TotIntensity = StatBase[IIntensities];
+          double ncells       =StatBase[ISS1];
+          double Variance = StatBase[IVariance];
+          double TotBoundaryIntensities= StatBase[ITotBoundary ];
+          double TotBoundaryVariances = StatBase[IVarBoundary];
+
+          double nBoundaryCells=   StatBase[INBoundary];
+          double back = TotBoundaryIntensities/nBoundaryCells;
+          double backVar= std::max<double>(nBoundaryCells/50.0,TotBoundaryVariances)/nBoundaryCells/nBoundaryCells;
+          double IntensVar = Variance +ncells*ncells*backVar;
+
+          double relError = .25;
+
+          if( back_calc != back )
+            relError = .45;
+
+          int N = NParameters;
+          if( CalcVariances)
+            N = N-3;
+
+          double NSigs=NStdDevPeakSpan;
+          if( back_calc >0)
+             NSigs = std::max<double>( NStdDevPeakSpan,7-5*back_calc/back);//background too high
+          ostringstream str;
+
+          NSigs *=max<double>(1.0, Intensity_calc/(TotIntensity -ncells*back_calc));
+          str<< max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar))<<"<Background<"<<(back+NSigs*(1.8+relError)*sqrt(backVar))
+             <<","<< max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar))<<
+             "<Intensity<"<<Intensity_calc+NSigs*(1+relError)*sqrt(IntensVar);
+
+          double min =max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar));
+          double maxx =back+NSigs*(1.8+relError)*sqrt(backVar);
+          Bounds.push_back( pair<double,double>(min,maxx ));
+          Bounds.push_back( pair<double,double>(max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar)),
+                                            Intensity_calc+NSigs*(1+relError)*sqrt(IntensVar)));
+          double relErr1= relError*.75;
+          double val =col_calc;
+          double minn= std::max<double>(MinCol-.5, (1-relErr1)*val);
+          maxx =std::min<double>((1+relErr1)*val, MaxCol+.5);
+
+          str<<","<<minn <<"<"<<"Mcol"<<"<"<<maxx;
+          Bounds.push_back(pair<double,double>(minn,maxx));
+
+          val = row_calc;
+
+          minn= std::max<double>(MinRow-.5, (1-relErr1)*val);
+          maxx =std::min<double>((1+relErr1)*val, MaxRow+.5);
+          str<<","<<minn <<"<"<<"Mrow"<<"<"<<maxx;
+          Bounds.push_back(pair<double,double>(minn,maxx));
+
+          if( N >=5)
+          {
+            val = Vx_calc;
+            double valmin= val;
+            double valmax = val;
+            if( VarxHW>0)
+            {
+              valmin = std::min<double>(val, VarxHW);
+              valmax = std::max<double>(val, VarxHW);
+
+            }
+
+
+            relErr1 *=.6;//Edge peaks: need to restrict sigmas.
+            str<<","<<(1-relErr1)*valmin <<"<"<<"SScol"<<"<"<<(1+relErr1)*valmax;
+            Bounds.push_back(pair<double,double>((1-relErr1)*valmin,(1+relErr1)*valmax));
+
+            val = Vy_calc;
+            valmin= val;
+            valmax = val;
+            if( VaryHW>0)
+            {
+              valmin = std::min<double>(val, VaryHW);
+              valmax = std::max<double>(val, VaryHW);
+
+            }
+            str<<","<<(1-relErr1)*valmin <<"<"<<"SSrow"<<"<"<<(1+relErr1)*valmax;
+            Bounds.push_back(pair<double,double>((1-relErr1)*valmin,(1+relErr1)*valmax));
+
+
+          }
+
+          return str.str();
+        }
+
+
+
+       /**
+        * Sets up data for the Fit Algorithm call and invokes it.
+        * @param Data    The workspace with experimental results
+        * @param chisqOverDOF  the chi squared over degrees of freedom result from the Fit Algorithm
+        * @param done   Usually true except if there is not enough data or Fit Algorithm was not called
+        * @param names  The parameter names
+        * @param params  The parameter values from the Fit Algorithm
+        * @param errs The parameter errorfrom the Fit Algorithm
+        * @param lastRow  The previous row( for log info only)
+        * @param lastCol  The previous col( for log info only)
+        * @param neighborhoodRadius The neighborhood radius( for log info only)
+        */
+       void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,double &chisqOverDOF,
+               bool &done,       std::vector<string>&names, std::vector<double>&params,
+               std::vector<double>&errs
+               ,double lastRow,double lastCol,double neighborRadius)
+           {
+
+              bool CalcVars = AttributeValues->CalcVariances();
+              std::vector<std::pair<double, double> > Bounds;
+              std::string Constraints = AttributeValues->CalcConstraints(Bounds, CalcVars);
+              IAlgorithm_sptr fit_alg;
+              fit_alg = createChildAlgorithm("Fit");
+              std::string fun_str = CalculateFunctionProperty_Fit();
+
+              std::string SSS("   Fit string ");
+              SSS += fun_str;
+              g_log.debug(SSS);
+              g_log.debug()<<"      TotCount=" << AttributeValues->StatBase[IIntensities] << std::endl;
+
+              fit_alg->setPropertyValue("Function", fun_str);
+
+              fit_alg->setProperty("InputWorkspace", Data);
+              fit_alg->setProperty("WorkspaceIndex", 0);
+              fit_alg->setProperty("StartX", 0.0);
+              fit_alg->setProperty("EndX", 0.0 + (double) NeighborIDs[1]);
+              fit_alg->setProperty("MaxIterations", 5000);
+              fit_alg->setProperty("CreateOutput", true);
+
+              fit_alg->setProperty("Output", "out");
+
+              fit_alg->setProperty("MaxIterations", 50);
+
+              std::string tie = getProperty("Ties");
+              if (tie.length() > (size_t) 0)
+                fit_alg->setProperty("Ties", tie);
+              if (Constraints.length() > (size_t) 0)
+                fit_alg->setProperty("Constraints", Constraints);
+              try
+              {
+                fit_alg->executeAsChildAlg();
+
+                chisqOverDOF = fit_alg->getProperty("OutputChi2overDoF");
+                std::string outputStatus = fit_alg->getProperty( "OutputStatus" );
+                g_log.debug()<<"Chisq/OutputStatus="<< chisqOverDOF<< "/"<< outputStatus<< std::endl;
+
+                names.clear(); params.clear();errs.clear();
+                ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
+                for( int prm = 0; prm < (int)RRes->rowCount()-1; prm++ )
+                {
+                  names.push_back( RRes->getRef< string >( "Name", prm ) );
+                  params.push_back( RRes->getRef< double >( "Value", prm ));
+                  double error = RRes->getRef< double >( "Error",prm);
+                  errs.push_back( error );
+                }
+                if( names.size()< 5)
+                {
+                  names.push_back( ParameterNames[IVXX] );
+                  names.push_back( ParameterNames[IVYY] );
+                  names.push_back( ParameterNames[IVXY] );
+                  double Varxx, Varxy,Varyy;
+                  AttributeValues->CalcVariancesFromData( params[IBACK], params[IXMEAN], params[IYMEAN],
+                      Varxx, Varxy, Varyy, AttributeValues->StatBase);
+                  params.push_back( Varxx );
+                  params.push_back( Varyy );
+                  params.push_back( Varxy );
+                  errs.push_back( 0 );
+                  errs.push_back( 0 );
+                  errs.push_back( 0 );
+
+                }
+
+              } catch (std::exception &Ex1)//ties or something else went wrong in BivariateNormal
+              {
+                done = true;
+                g_log.error()<<"Bivariate Error for PeakNum="<<(int)getProperty("PeakIndex")<<":" << std::string(Ex1.what())
+                     <<std::endl;
+              }catch(...)
+              {
+                done = true;
+                g_log.error()<<"Bivariate Error A for peakNum="<<(int)getProperty("PeakIndex")<<std::endl;
+              }
+              if (!done)//Bivariate error happened
+              {
+
+               g_log.debug() << "   Thru Algorithm: chiSq=" << setw(7) << chisqOverDOF << endl;
+               g_log.debug() << "  Row,Col Radius=" << lastRow << "," << lastCol << "," << neighborRadius << std::endl;
+
+                double sqrtChisq = -1;
+                if (chisqOverDOF >= 0)
+                  sqrtChisq = (chisqOverDOF);
+
+                sqrtChisq = max<double> (sqrtChisq, AttributeValues->StatBaseVals(IIntensities)
+                    / AttributeValues->StatBaseVals(ISS1));
+                sqrtChisq = SQRT(sqrtChisq);
+
+                for (size_t kk = 0; kk < params.size(); kk++)
+                {
+                  g_log.debug() << "   Parameter " << setw(8) << names[kk] << " " << setw(8) << params[kk];
+                  // if (names[kk].substr(0, 2) != string("SS"))
+                  g_log.debug() << "(" << setw(8) << (errs[kk] * sqrtChisq) << ")";
+                  if (Bounds.size() > kk)
+                  {
+                    pair<double, double> upLow = Bounds[kk];
+                    g_log.debug() << " Bounds(" << upLow.first << "," << upLow.second << ")";
+                  }
+                  g_log.debug() << endl;
+                }
+
+                double intensity = AttributeValues->CalcISAWIntensity( params.data());
+                g_log.debug() << "IsawIntensity= "<< intensity << std::endl;
+              }
+
+           }
+
+       /**
+        * Not used. Did 3 Fit Algorithm calls and returned the one with the smallest chiSqOverDOF.
+        * Did not work well
+         * @param Data    The workspace with experimental results
+        * @param chisqOverDOF  the chi squared over degrees of freedom result from the Fit Algorithm
+        * @param done   Usually true except if there is not enough data or Fit Algorithm was not called
+        * @param names  The parameter names
+        * @param params  The parameter values from the Fit Algorithm
+        * @param errs The parameter errorfrom the Fit Algorithm
+        * @param lastRow  The previous row( for log info only)
+        * @param lastCol  The previous col( for log info only)
+        * @param neighborhoodRadius The neighborhood radius( for log info only)
+        */
+      void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,double &chisqOverDOF,
+           bool &done,       std::vector<string>&names, std::vector<double>&params,
+           std::vector<double>&errs,double lastRow,double lastCol,double neighborRadius)
+       {
+
+        double background = ParameterValues[IBACK];
+        int N = 3;
+        if( background <=0)
+        {
+          background =0;
+          N=1;
+        }
+        bool CalcVars = AttributeValues->CalcVariances();
+        int NParams =4;
+        if( !CalcVars )NParams+=3;
+
+        double minChiSqOverDOF = -1;
+        double Bestparams[7];
+        std::string Bestnames[7];
+        for( int i=0; i < N;i++)
+        {
+          Fit(Data,chisqOverDOF,done,names, params,errs,lastRow,lastCol,neighborRadius);
+          g_log.debug()<<"-----------------------"<<i<<"--------------------------"<<std::endl;
+          if(( minChiSqOverDOF < 0 || chisqOverDOF <  minChiSqOverDOF )&& (chisqOverDOF > 0) && !done)
+          {
+            for(int j=0;j<NParams;j++)
+              {
+               Bestparams[j] = ParameterValues[j];
+               Bestnames[j] = ParameterNames[j];
+              }
+            minChiSqOverDOF = chisqOverDOF;
+          }
+
+          //Next round, reduce background
+          background = background/2;
+          if( i+1 == N-1)
+            background =0;
+
+          std::vector<double> prms= AttributeValues->GetParams( background);
+
+          for( int j=0; j< NParams ; j++)
+            ParameterValues[j] = prms[j];
+        }
+        vector<std::string> ParNames( ParameterNames, ParameterNames +NParams);
+        for( int i=0; i < NParams; i++)
+        {
+          int k= find( Bestnames[i] , ParNames);
+          if( k >=0 && k < NParams)
+            ParameterValues[k] = Bestparams[k];
+
+        }
+
+        Fit(Data,chisqOverDOF,done,names, params,errs,lastRow,lastCol,neighborRadius);
+
+       }
+
+    /**
+     * Determines if the list of parameters and errors represent a "good" fit
+     *
+     * @param params    The list of parameter values
+     * @param errs      The list of the errors in the parameter values
+     * @param names     The names of the parameters
+     * @param chisqOverDOF  The fitting error
+     *
+     * @return  true if the fit is good,otherwise false
+     */
     bool IntegratePeakTimeSlices::isGoodFit(std::vector<double >              const & params,
                                             std::vector<double >              const & errs,
                                             std::vector<std::string >         const &names,
@@ -2204,7 +2359,7 @@ namespace Mantid
 
       double x = params[IIntensity] / (AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells);
 
-      if ((x < .25 || x > 2.5)&& !EdgePeak)// The fitted intensity should be close to tot intensity - background
+      if ((x < MinGoodRatioFitvsExpIntenisites || x > MaxGoodRatioFitvsExpIntenisites)&& !EdgePeak)// The fitted intensity should be close to tot intensity - background
       {
         g_log.debug()<< "   Bad Slice. Fitted Intensity & Observed Intensity(-back) too different. ratio="
                                                <<x<<std::endl;
@@ -2264,13 +2419,11 @@ namespace Mantid
       if (IsawVariance > 0)
         {
          if( GoodNums)Err= "I/sigI > 3";
-         if (IsawIntensity*IsawIntensity/IsawVariance < 9.0 )
+         if (IsawIntensity*IsawIntensity/IsawVariance < MinGoodIoverSigI*MinGoodIoverSigI )
            GoodNums = false;
         }
       else
         GoodNums = false;
-
-//TODO limit rel errors on row and col's. Weak peaks have row.col values that migrate a lot
 
 
       if (!GoodNums)
@@ -2315,8 +2468,62 @@ namespace Mantid
     }
 
 
+    /**
+     * Calculates if there is enough data to for there to be a peak
+     *
+     * @param  true if there is enough data, otherwise false
+     */
+   bool DataModeHandler::IsEnoughData( const double *ParameterValues, Kernel::Logger&  )
+    {
+      // Check if flat
+    double Varx,Vary, Cov;
 
-    //Calculate error used by ISAW. It "doubles" the background error.
+      if( StatBase.size() <=0)
+        return false;
+
+      double ncells = (int)StatBase[IIntensities];
+      if( ncells <=0)
+        return false;
+
+      double meanx = StatBase[ISSIx]/ncells;
+      double meany= StatBase[ISSIy]/ncells;
+
+      if(   !CalcVariances() )
+      {
+        meanx = ParameterValues[IXMEAN];
+        meany = ParameterValues[IYMEAN];
+        Varx =ParameterValues[IVXX];
+        Vary = ParameterValues[IVYY];
+        Cov  =ParameterValues[IVXY];
+
+      }else
+         CalcVariancesFromData( ParameterValues[0], meanx,meany, Varx,Cov,Vary, StatBase);
+
+      if( Varx <MinVariationInXYvalues || Vary <MinVariationInXYvalues)  //All data essentially the same.
+         return false;
+
+      if( Cov*Cov > MaxCorrCoeffinXY*Varx*Vary)//All data on a obtuse line
+        return false;
+
+
+
+
+      return true;
+
+    }
+
+
+    /**
+     * Calculates the error in integration closest to the latest ISAW calculations
+     *
+     * @param background    The background
+     * @param  backError    The error in this background value
+     * @param   ChiSqOverDOF  The fitting error
+     * @param  TotVariance    The Total square of the intensity errors in all the cells considered
+     * @param  ncell           The number of cells
+     *
+     * @return  The error in the integrated intensity
+     */
     double IntegratePeakTimeSlices::CalculateIsawIntegrateError(const double background,
                                                                 const double backError,
                                                                 const double ChiSqOverDOF,
@@ -2335,7 +2542,59 @@ namespace Mantid
 
     }
 
-    //returns row where info was last added
+
+    /**
+     * Initializes the column names in the output table workspace
+     *
+     * @param TabWS  The TableWorkspace
+     */
+    void IntegratePeakTimeSlices::InitializeColumnNamesInTableWorkspace(
+                                                    TableWorkspace_sptr &TabWS)
+    {
+      TabWS->setName("Log Table");
+      TabWS->addColumn("double", "Time");
+      TabWS->addColumn("double", "Channel");
+      TabWS->addColumn("double", "Background");
+      TabWS->addColumn("double", "Intensity");
+      TabWS->addColumn("double", "Mcol");
+      TabWS->addColumn("double", "Mrow");
+      TabWS->addColumn("double", "SScol");
+      TabWS->addColumn("double", "SSrow");
+      TabWS->addColumn("double", "SSrc");
+      TabWS->addColumn("double", "NCells");
+      TabWS->addColumn("double", "ChiSqrOverDOF");
+      TabWS->addColumn("double", "TotIntensity");
+      TabWS->addColumn("double", "BackgroundError");
+      TabWS->addColumn("double", "FitIntensityError");
+      TabWS->addColumn("double", "ISAWIntensity");
+      TabWS->addColumn("double", "ISAWIntensityError");
+      TabWS->addColumn("double", "TotalBoundary");
+      TabWS->addColumn("double", "NBoundaryCells");
+      TabWS->addColumn("double", "Start Row");
+      TabWS->addColumn("double", "End Row");
+      TabWS->addColumn("double", "Start Col");
+      TabWS->addColumn("double", "End Col");
+      TabWS->addColumn("double", "TotIntensityError");
+      TabWS->addColumn("str", "SpecIDs");
+    }
+
+
+
+
+    /**
+     * Updates the information in the output OutputWorkspace
+     * @param TabWS  The OutputWorkspace
+     * @param dir    The direction the time slices are going( >0 means increasing otherwise decreasing)
+     * @param chan   The number of channels away from the center channel this data corresponds to
+     * @param params  The parameter values
+     * @param errs    The error in these parameter values
+     * @param names   The names of the parameters
+     * @param Chisq   The fitting error
+     * @param time     The time for this channel
+     * @param spec_idList  The list of spectral id's used to integrate this time channel
+     *
+     * @return The last row updated
+     */
     int IntegratePeakTimeSlices::UpdateOutputWS( DataObjects::TableWorkspace_sptr         &TabWS,
                                                   const int                                  dir,
                                                   const double                                  chan,
@@ -2412,7 +2671,18 @@ namespace Mantid
     }
 
     
-    //TODO: If EdgePeak use fit intensity and error(*2?)
+    /**
+     * Updates AttributeValues with this peak information from this time slice
+     * @param params  The parameter values
+     * @param errs    The error in these parameter values
+     * @param names   The names of the parameters
+     * @param TotVariance  The total of the squares of the intensity errors from the data
+     * @param TotIntensity  The total of the intensities so far
+     * @param  TotSliceIntensity   The total intensity for this slice
+     * @param  TotSliceVariance   The total square of intensity errors for this time slice
+     * @param chisqdivDOF   The fitting error
+     * @param ncells       The number of cells
+     */
     void IntegratePeakTimeSlices::updatePeakInformation( std::vector<double >     const &params,
                                                          std::vector<double >     const &errs,
                                                          std::vector<std::string >const &names,
@@ -2427,35 +2697,26 @@ namespace Mantid
       UNUSED_ARG( TotSliceVariance );
       UNUSED_ARG( names );
       UNUSED_ARG( ncells);
-     // int Ibk = find("Background", names);
-      double err =0;
-      double intensity=0;
 
-     // if( !EdgePeak  )
-     // {
-        err = AttributeValues->CalcISAWIntensityVariance(params.data(),errs.data(), chisqdivDOF);
-            //CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
-        intensity =AttributeValues->CalcISAWIntensity( params.data());
-        TotIntensity += intensity;
-            //TotSliceIntensity - params[IBACK] * ncells;
+      double err = 0;
+      double intensity = 0;
 
-        TotVariance += err ;
-        g_log.debug()<<"TotIntensity/TotVariance="<<TotIntensity<<"/"<<TotVariance<<std::endl;
-     // }
+      err = AttributeValues->CalcISAWIntensityVariance(params.data(), errs.data(), chisqdivDOF);
 
-      /*else
-      {
-       int IInt = find("Intensity", names);
-       intensity = params[IInt];
-       TotIntensity +=intensity;
-       err = errs[IInt];
-       TotVariance += err * err;
+      intensity = AttributeValues->CalcISAWIntensity(params.data());
+      TotIntensity += intensity;
 
-      }
-     g_log.debug()<<"Slice/Tot intensity;Var="<<intensity<<";"<<err*err<<"/"<<TotIntensity<<";"<<TotVariance<<std::endl;
-     */
+      TotVariance += err;
+      g_log.debug() << "TotIntensity/TotVariance=" << TotIntensity << "/" << TotVariance << std::endl;
+
     }
 
+    /**
+     * Determines whether the Variances can be calculated. If specified yes and the peak is an edge peak then
+     * the Variances cannot be calculated.
+     *
+     * @return true if the Variances desire to be and can be calculated, otherwise false
+     */
     bool DataModeHandler::CalcVariances( )
     {
       if( !CalcVariance)
@@ -2463,104 +2724,24 @@ namespace Mantid
 
       double param[7]={back_calc,Intensity_calc,col_calc,row_calc,Vx_calc,Vy_calc, Vxy_calc};
       return !isEdgePeak( param,7);
-     /* double r = CalcSampleIntensityMultiplier(param);
 
-      if( r <= 1.2)
-        return CalcVariance;
-      else
-        return false;
-     */
     }
 
-   bool DataModeHandler::IsEnoughData( const double *ParameterValues, Kernel::Logger&  )
-    {
-
-
-      // Check if flat
-    double Varx,Vary, Cov;
-
-     // std::vector<double>PP(ParameterValues, ParameterValues+IVXY);
-      if( StatBase.size() <=0)
-        return false;
-      double ncells = (int)StatBase[IIntensities];
-      if( ncells <=0)
-        return false;
-      double meanx = StatBase[ISSIx]/ncells;
-      double meany= StatBase[ISSIy]/ncells;
-
-      if(   !CalcVariances() )
-      {
-        meanx = ParameterValues[IXMEAN];
-        meany = ParameterValues[IYMEAN];
-        Varx =ParameterValues[IVXX];
-        Vary = ParameterValues[IVYY];
-        Cov  =ParameterValues[IVXY];
-      }else
-         CalcVariancesFromData( ParameterValues[0], meanx,meany, Varx,Cov,Vary, StatBase);
-
-      if( Varx <.6 || Vary <.6)  //All data essentially the same.
-         return false;
-
-      if( Cov*Cov > .90*Varx*Vary)//All data on a obtuse line
-        return false;
-
-
-
-    /*  double VIx0_num = StatBase[ISSIxx] - 2 * ParameterValues[IXMEAN] * StatBase[ISSIx]
-          + ParameterValues[IXMEAN] * ParameterValues[IXMEAN] * StatBase[IIntensities];
-
-      double VIy0_num = StatBase[ISSIyy] - 2 * ParameterValues[IYMEAN] * StatBase[ISSIy]
-          + ParameterValues[IYMEAN] * ParameterValues[IYMEAN] * StatBase[IIntensities];
-
-      double VIxy0_num = StatBase[ISSIxy] - ParameterValues[IXMEAN] * StatBase[ISSIy]
-          - ParameterValues[IYMEAN] * StatBase[ISSIx] + ParameterValues[IYMEAN]
-          * ParameterValues[IXMEAN] * StatBase[IIntensities];
-
-      double Vx0_num = StatBase[ISSxx] - 2 * ParameterValues[IXMEAN] * StatBase[ISSx]
-          + ParameterValues[IXMEAN] * ParameterValues[IXMEAN] * StatBase[INRows]
-              * StatBase[INCol];
-
-      double Vy0_num = StatBase[ISSyy] - 2 * ParameterValues[IYMEAN] * StatBase[ISSy]
-          + ParameterValues[IYMEAN] * ParameterValues[IYMEAN] * StatBase[INRows]
-              * StatBase[INCol];
-
-      double Vxy0_num = StatBase[ISSIxy] - ParameterValues[IXMEAN] * StatBase[ISSIy]
-          - ParameterValues[IYMEAN] * StatBase[ISSIx] + ParameterValues[IYMEAN]
-          * ParameterValues[IXMEAN] * StatBase[INRows] * StatBase[INCol];
-
-      double Denominator = StatBase[IIntensities] - ParameterValues[IBACK]
-          * StatBase[INRows] * StatBase[INCol];
-
-      if( Denominator <=0)
-      {
-        g_log.debug()<<" No counts after background removed"<<std::endl;
-        return false;
-      }
-      double Vx = ( VIx0_num - ParameterValues[IBACK] * Vx0_num ) / Denominator;
-      double Vy = ( VIy0_num - ParameterValues[IBACK] * Vy0_num ) / Denominator;
-      double Vxy = ( VIxy0_num - ParameterValues[IBACK] * Vxy0_num ) / Denominator;
-
-
-
-      double Z = 4 * M_PI * M_PI * (Vx * Vy - Vxy * Vxy);
-
-      if ( fabs(Z) < .10 ) //Not high enough of a peak
-      {
-        g_log.debug()<<"   Not Enough Data, Peak Heigh "<<Z <<" is too low"<<std::endl;
-        return false;
-      }
+   /**
+    * Calculates the Intensity designed for Edge Peaks
+    *
+    * @param  The Fitted parameters
+    *
+    * @return this calculated intensity
+    *
+    * Also the variable lastISAWIntensity was updated.
     */
-      return true;
-
-    }
-
    double DataModeHandler::CalcISAWIntensity(const double* params)
    {
 
      double ExperimentalIntensity  = StatBase[IIntensities]-
                                          params[IBACK]*StatBase[ISS1];
 
-    // double FitIntensity =  params[ITINTENS];
      double r= CalcSampleIntensityMultiplier( params );
 
      double alpha =(float)( 0+.5*( r-1 ) );
@@ -2570,7 +2751,16 @@ namespace Mantid
      return lastISAWIntensity;
 
    }
+   /**
+      * Calculates the Error in the Intensity designed for Edge Peaks
+      *
+      * @param  The fitted parameter values
+      * @param errs    The error in these fitted parameters
+      * @param chiSqOvDOF The fitting error
+      *
+      * @return this calculated error in the intensity
 
+      */
    double DataModeHandler::CalcISAWIntensityVariance( const double* params,const double* errs, double chiSqOvDOF)
    {
 
@@ -2585,7 +2775,6 @@ namespace Mantid
 
      ExperimVar += IntensityBackError * IntensityBackError * ncells*ncells + params[IBACK]*ncells;
 
-    // double FitVar= errs[ITINTENS]* errs[ITINTENS]* B;
 
      double r= CalcSampleIntensityMultiplier( params );
      double alpha =(float)( 0+.5*( r - 1 ));
@@ -2595,6 +2784,13 @@ namespace Mantid
      return lastISAWVariance;
    }
 
+
+   /**
+    * Calculates the multiplier of TotIntensity - background for edge peaks to correspond to the missing data.
+    * @param params the parameter values
+    *
+    * @return  The multiplier the should adjust the TotIntensity-background for an EdgePeak
+    */
    double DataModeHandler::CalcSampleIntensityMultiplier( const double* params)const
    {
            int MinRow = (int)StatBase[ IStartRow ];
@@ -2606,6 +2802,9 @@ namespace Mantid
            if( params[IVXX] <=0 || params[IVYY]<=0)
              return 1.0;
 
+
+           //  NstdX iand NstdY are the number of 1/4 standard deviations. Elements of probs are in
+           //    1/4 standard deviations
            double NstdX = 4*min<double>(  params[ IXMEAN ]-MinCol , MaxCol-params[ IXMEAN ] )
                             /sqrt(params[ IVXX ]);
 
@@ -2650,93 +2849,6 @@ namespace Mantid
            return r;
    }
 
-    void IntegratePeakTimeSlices::FindPlane( V3D & center, V3D & xvec, V3D& yvec,
-                                             double &ROW, double &COL,int &NROWS,
-                                             int & NCOLS,double &pixWidthx, double&pixHeighty,
-                                             API::IPeak const &peak) const
-    {
-
-      NROWS= NCOLS = -1;
-      IDetector_const_sptr det = peak.getDetector();
-      V3D detPos = det->getPos();
-
-      center.setX( detPos.X());
-      center.setY( detPos.Y());
-      center.setZ( detPos.Z());
-
-      boost::shared_ptr<const Detector> dett = boost::dynamic_pointer_cast<const Detector >(det);
-
-       pixWidthx  = dett->getWidth();
-       pixHeighty = dett->getHeight();
-
-       Kernel::Quat Qt = dett->getRotation();
-       V3D yaxis0(0.0,1.0,0.0);
-
-       Qt.rotate(yaxis0);
-       yaxis0.normalize();
-
-       V3D xaxis0(1,0,0);
-       Qt.rotate( xaxis0);
-       xaxis0.normalize();
-
-
-       xvec.setX( xaxis0.X());
-       xvec.setY( xaxis0.Y());
-       xvec.setZ( xaxis0.Z());
-       yvec.setX( yaxis0.X());
-       yvec.setY( yaxis0.Y());
-       yvec.setZ( yaxis0.Z());
-       ROW=peak.getRow();
-       COL=peak.getCol();
-       Geometry::Instrument_const_sptr inst =peak.getInstrument();
-       if( !inst)
-          throw std::invalid_argument("No instrument for peak");
-       boost::shared_ptr< const
-             IComponent >  panel =inst->getComponentByName( peak.getBankName());
-
-       boost::shared_ptr<const RectangularDetector>ddet = boost::dynamic_pointer_cast<const RectangularDetector>(panel);
-
-       if( ddet )
-       {
-          std::pair<int,int> CR =ddet->getXYForDetectorID(det->getID());
-          ROW = CR.second;
-          COL=CR.first;
-          pixWidthx = ddet->xstep();
-          pixHeighty= ddet->ystep();
-
-          NROWS = ddet->ypixels();
-          NCOLS = ddet->xpixels();
-
-          return;
-
-       }
-       //Get NROWS and NCOLS for other panels
-      NROWS= NCOLS = -1;
-
-       if( !inst)
-         return;
-
-       if( !panel)
-         return;
-       boost::shared_ptr<const Component>compPanel =
-                        boost::dynamic_pointer_cast<const Component>(panel);
-       boost::shared_ptr<IComponent> panel1( compPanel->base()->clone());
-       BoundingBox B;
-
-       Quat rot =panel1->getRotation();
-
-       rot.inverse();
-
-       panel1->rotate(rot);
-
-       panel1->getBoundingBox(B);
-
-
-       NROWS = (int)((B.yMax()-B.yMin())/pixHeighty+.5);
-       NCOLS = (int)((B.xMax()-B.xMin())/pixWidthx+.5);
-
-
-    }
 }//namespace Crystal
 }//namespace Mantid
 //Attr indicies
