@@ -24,6 +24,7 @@
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidAPI/IFunction.h"
 
 #include <cassert>
 #include <vector>
@@ -82,8 +83,8 @@ namespace Mantid
       TobyFitYVector();
       /// Adds the attributes from the vector to the given model
       void addAttributes(TobyFitResolutionModel &model);
-      /// Set an attribute on/off
-      void setAttribute(const std::string & name, const int active);
+      /// Set an attribute on/off and return whether it was handled here
+      void setAttribute(const std::string & name, const API::IFunction::Attribute & value);
       /// Returns the number of random numbers required for the current number of active parameters
       unsigned int requiredRandomNums() const;
 

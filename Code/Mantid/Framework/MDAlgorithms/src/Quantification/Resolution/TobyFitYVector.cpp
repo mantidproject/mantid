@@ -59,26 +59,41 @@ namespace Mantid
     }
 
     /**
-     * Sets an attribute on/off
+     * Sets an attribute value and returns a boolean depending on whether it was handled
      * @param name :: The name of the attribute
-     * @param active :: 1 if active, 0 if not
+     * @param value :: Value of the named attribute
+     * @returns True if the attribute was handled, false otherwise
      */
-    void TobyFitYVector::setAttribute(const std::string & name, const int active)
+    void TobyFitYVector::setAttribute(const std::string & name, const API::IFunction::Attribute & value)
     {
-      const bool isOn(active != 0);
-
-      if(name == MODERATOR) m_moderator = isOn;
-      else if(name == APERTURE) m_aperture = isOn;
-      else if(name == CHOPPER_ARRIVAL) m_chopper = isOn;
-      else if(name == CHOPPER_JITTER) m_chopperJitter = isOn;
-      else if(name == SAMPLE_VOLUME) m_sampleVolume = isOn;
-      else if(name == DETECTOR_DEPTH) m_detectorDepth = isOn;
-      else if(name == DETECTOR_AREA) m_detectorArea = isOn;
-      else if(name == DETECTION_TIME) m_detectionTime = isOn;
-      else
+      // Need to move this type of stuff to IFunction::Attribute. - We should be able to interchange int/bool values
+      bool active(true);
+      try
       {
-        throw std::invalid_argument("TobyFitYVector - Unknown attribute: " + name);
+        active = value.asBool();
       }
+      catch(std::runtime_error&)
+      {
+        try
+        {
+          const int asInt = value.asInt();
+          active = (asInt != 0);
+        }
+        catch(std::runtime_error&)
+        {
+          return;
+        }
+      }
+
+      if(name == MODERATOR) m_moderator = active;
+      else if(name == APERTURE) m_aperture = active;
+      else if(name == CHOPPER_ARRIVAL) m_chopper = active;
+      else if(name == CHOPPER_JITTER) m_chopperJitter = active;
+      else if(name == SAMPLE_VOLUME) m_sampleVolume = active;
+      else if(name == DETECTOR_DEPTH) m_detectorDepth = active;
+      else if(name == DETECTOR_AREA) m_detectorArea = active;
+      else if(name == DETECTION_TIME) m_detectionTime = active;
+      else {}
     }
 
     /// Returns the length of random numbers required
