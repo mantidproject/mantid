@@ -29,7 +29,7 @@ namespace Mantid
   {
 
     // Register the class into the algorithm factory
-    DECLARE_ALGORITHM(OptimizeExtinctionParameters)
+    //DECLARE_ALGORITHM(OptimizeExtinctionParameters)
     
     /// Sets documentation strings for this algorithm
     void OptimizeExtinctionParameters::initDocs()
