@@ -59,7 +59,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("InputWorkspaces","InputWS1, InputWS2"));
     TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("WorkspaceNames","NewName1, NewName2"));
 
-    //TS_ASSERT_THROWS_NOTHING( alg3.execute());
+    TS_ASSERT_THROWS_NOTHING( alg3.execute());
     //TS_ASSERT( alg3.isExecuted());
 
     //Workspace_sptr result;
@@ -74,9 +74,43 @@ public:
     AnalysisDataService::Instance().remove("InputWS2");
   }
 
-  // void testPrefix()
+  void testPrefix()
+  {
+    MatrixWorkspace_sptr inputWS1 = createWorkspace();
+    MatrixWorkspace_sptr inputWS2 = createWorkspace();
+    AnalysisDataService::Instance().add("InputWS1", inputWS1);
+    AnalysisDataService::Instance().add("InputWS2", inputWS2);
 
-  // void testSuffix()
+    Mantid::Algorithms::RenameWorkspaces alg4;
+    alg4.initialize();
+    alg4.setPropertyValue("InputWorkspaces","InputWS1, InputWS2");
+    alg4.setRethrows( true ); // Ensure exceptions are thrown to this test
+    TS_ASSERT_THROWS_NOTHING( alg4.setPropertyValue("Prefix","A_"));
+
+    TS_ASSERT_THROWS_NOTHING( alg4.execute());
+
+    AnalysisDataService::Instance().remove("InputWS1");
+    AnalysisDataService::Instance().remove("InputWS2");
+  }
+
+  void testSuffix()
+  {
+    MatrixWorkspace_sptr inputWS1 = createWorkspace();
+    MatrixWorkspace_sptr inputWS2 = createWorkspace();
+    AnalysisDataService::Instance().add("InputWS1", inputWS1);
+    AnalysisDataService::Instance().add("InputWS2", inputWS2);
+
+    Mantid::Algorithms::RenameWorkspaces alg5;
+    alg5.initialize();
+    alg5.setPropertyValue("InputWorkspaces","InputWS1, InputWS2");
+    alg5.setRethrows( true ); // Ensure exceptions are thrown to this test
+    TS_ASSERT_THROWS_NOTHING( alg5.setPropertyValue("Suffix","_1"));
+
+    TS_ASSERT_THROWS_NOTHING( alg5.execute());
+
+    AnalysisDataService::Instance().remove("InputWS1");
+    AnalysisDataService::Instance().remove("InputWS2");
+  }
 
   void testInvalidArguments()
   {
@@ -98,6 +132,9 @@ public:
     TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
     alg6.setPropertyValue("Prefix","");
     TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
+   
+    AnalysisDataService::Instance().remove("InputWS1");
+    AnalysisDataService::Instance().remove("InputWS2");
 
   }
 

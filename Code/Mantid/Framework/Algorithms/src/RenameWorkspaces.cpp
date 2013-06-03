@@ -77,10 +77,39 @@ void RenameWorkspaces::exec()
 
  
 
+  size_t nWs = inputWsName.size();
+  if( newWsName.size() > 0) {
+    // We are using a list of new names
+    if (nWs > newWsName.size() )
+    { 
+      nWs = newWsName.size();
+      // could issue warning here
+    }
+  } 
+  else
+  { // We are using prefix and/or suffix
+    // Build new names.
+    for (size_t i=0; i<nWs; ++i)
+    {
+      newWsName.push_back(prefix+inputWsName[i]+suffix);
+    }
+  }
+
   // loop over array and rename each workspace
+  for (size_t i=0; i<nWs; ++i)
+  {
+    std::ostringstream os;
+    os << "OutputWorkspace_" << i+1;
+    declareProperty(new WorkspaceProperty<Workspace>(os.str(), newWsName[i], Direction::Output));
+    auto alg = createChildAlgorithm("RenameWorkspace");
+    alg->setPropertyValue("InputWorkspace", inputWsName[i]);
+    alg->setPropertyValue("OutputWorkspace", newWsName[i]);
 
-  //declareProperty("OutputWorkspace_" + 1);
+    alg->executeAsChildAlg();
 
+    Workspace_sptr renamedWs = alg->getProperty("OutputWorkspace"); 
+    setProperty(os.str(), renamedWs);
+  }
 
 }
 
