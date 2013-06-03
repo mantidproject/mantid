@@ -14,11 +14,8 @@ import ui.reflectometer.ui_refm_reduction
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
+    #TODO: this will need to change once we get rid of the old python API
     from reduction.instruments.reflectometer import data_manipulation
-
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -202,8 +199,8 @@ class DataReflWidget(BaseWidget):
         self._summary.waiting_label.hide()
         
         # If we do not have access to /SNS, don't display the automated reduction options
-        if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
-            self._summary.auto_reduce_check.hide()
+        #if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
+        self._summary.auto_reduce_check.hide()
         
     def _output_dir_browse(self):
         output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
@@ -330,8 +327,12 @@ class DataReflWidget(BaseWidget):
         self._summary.log_scale_chk.hide()
                  
     def _create_auto_reduce_template(self):
-        from reduction.instruments.reflectometer.refm_automated_reduction import automation_script
-        content = automation_script(self.get_editing_state())
+        """
+            Generate an auto-reduction script. This option is currently turned off.
+            It can be enabled by replacing the content variable below by a script
+            to be executed by the SNS auto-reduction infrastructure.
+        """
+        content = "# This is a placeholder for a generated auto-reduction script"
         
         # Check whether we can write to the system folder
         def _report_error(error=None):
@@ -369,7 +370,6 @@ class DataReflWidget(BaseWidget):
         
     def _auto_reduce(self, is_checked=False):
         if is_checked:
-            
             self._summary.auto_reduce_help_label.show()
             self._summary.auto_reduce_tip_label.show()
             self._summary.auto_reduce_btn.show()
