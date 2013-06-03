@@ -54,6 +54,7 @@ public:
     AnalysisDataService::Instance().add("InputWS2", inputWS2);
 
     Mantid::Algorithms::RenameWorkspaces alg3;
+    alg3.setRethrows( true ); // Ensure exceptions are thrown to this test
     alg3.initialize();
     TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("InputWorkspaces","InputWS1, InputWS2"));
     TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("WorkspaceNames","NewName1, NewName2"));
@@ -84,11 +85,19 @@ public:
     AnalysisDataService::Instance().add("InputWS1", inputWS1);
     AnalysisDataService::Instance().add("InputWS2", inputWS2);
     Mantid::Algorithms::RenameWorkspaces alg6;
+    alg6.setRethrows( true );  // Ensure it will throw any exceptions to this test
     alg6.initialize();
     alg6.setPropertyValue("InputWorkspaces","InputWS1, InputWS2");
+    // Check throw if no workspace name set
+    TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
+    // Check throw if conflicting workspace names are set
     alg6.setPropertyValue("WorkspaceNames","NewName1, NewName2");
     alg6.setPropertyValue("Prefix","A_");
-    //TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
+    TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
+    alg6.setPropertyValue("Suffix","_1");
+    TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
+    alg6.setPropertyValue("Prefix","");
+    TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
 
   }
 
