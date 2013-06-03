@@ -48,11 +48,11 @@ public:
 
   
   /** Create but don't start a MonitorLiveData thread */
-  IAlgorithm_sptr makeAlgo(std::string output, std::string accumWS="",
+  boost::shared_ptr<MonitorLiveData> makeAlgo(std::string output, std::string accumWS="",
       std::string AccumulationMethod="Replace",
       std::string EndRunBehavior="Restart", std::string UpdateEvery="1")
   {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("MonitorLiveData", -1, false);
+    auto alg = boost::dynamic_pointer_cast<MonitorLiveData>(AlgorithmManager::Instance().create("MonitorLiveData", -1, false));
     alg->setPropertyValue("Instrument", "TestDataListener");
     alg->setPropertyValue("UpdateEvery", UpdateEvery);
     alg->setPropertyValue("AccumulationMethod", AccumulationMethod);
@@ -122,11 +122,7 @@ public:
 
     // This algorithm if OK because the other is not still running
     IAlgorithm_sptr alg2 = makeAlgo("fake1");
-    Poco::ActiveResult<bool> res2 = alg2->executeAsync();
-    Poco::Thread::sleep(100); // give it some time to start
-    TS_ASSERT( alg2->isRunning() );
-    alg2->cancel();
-    res2.wait(10000);
+    TSM_ASSERT("validateInputs should give the all clear (an empty map)", alg2->validateInputs().empty() );
   }
 
 
