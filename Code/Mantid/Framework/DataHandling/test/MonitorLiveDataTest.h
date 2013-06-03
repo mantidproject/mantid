@@ -84,9 +84,8 @@ public:
     Poco::Thread::sleep(100); // give it some time to start
 
     // This algorithm dies because another thread has the same output
-    IAlgorithm_sptr alg2 = makeAlgo("fake1");
-    TS_ASSERT_THROWS_ANYTHING( alg2->execute(); );
-    TS_ASSERT( !alg2->isExecuted() );
+    boost::shared_ptr<MonitorLiveData> alg2 = makeAlgo("fake1");
+    TSM_ASSERT("validateInputs should complaing (return a non-empty map)", ! alg2->validateInputs().empty() );
 
     // Abort the thread.
     alg1->cancel();
@@ -101,9 +100,8 @@ public:
     Poco::Thread::sleep(100); // give it some time to start
 
     // This algorithm dies because another thread has the same output
-    IAlgorithm_sptr alg2 = makeAlgo("fake2", "accum1");
-    TS_ASSERT_THROWS_ANYTHING( alg2->execute() );
-    TS_ASSERT( !alg2->isExecuted() );
+    boost::shared_ptr<MonitorLiveData> alg2 = makeAlgo("fake2", "accum1");
+    TSM_ASSERT("validateInputs should complaing (return a non-empty map)", ! alg2->validateInputs().empty() );
 
     // Abort the thread.
     alg1->cancel();
