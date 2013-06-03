@@ -1,10 +1,10 @@
 /*WIKI*
 The algorithm integrates up the instrument hierarchy, and each pixel will contain the average value for the component. For example,
-assuming that for a particular instrument on workspace w1 a "tube" is made out of "pixels", w=AverageByComponent(w1,1) will integrate values of w1,
+assuming that for a particular instrument on workspace w1 a "tube" is made out of "pixels", w=IntegrateByComponent(w1,1) will integrate values of w1,
 calculate the average along the tube (LevelsUp=1) (for non-masked pixels), and replace the value of each spectrum in a tube with the average value for that tube.
 *WIKI*/
 
-#include "MantidAlgorithms/AverageByComponent.h"
+#include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/BoundedValidator.h"
 #include <gsl/gsl_statistics.h>
@@ -15,38 +15,38 @@ namespace Algorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(AverageByComponent)
+  DECLARE_ALGORITHM(IntegrateByComponent)
   
   using namespace Mantid::API;
   using namespace Mantid::Kernel;
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  AverageByComponent::AverageByComponent()
+  IntegrateByComponent::IntegrateByComponent()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  AverageByComponent::~AverageByComponent()
+  IntegrateByComponent::~IntegrateByComponent()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string AverageByComponent::name() const { return "AverageByComponent";};
+  const std::string IntegrateByComponent::name() const { return "IntegrateByComponent";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int AverageByComponent::version() const { return 1;};
+  int IntegrateByComponent::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string AverageByComponent::category() const { return "Utility\\Workspaces";}
+  const std::string IntegrateByComponent::category() const { return "Utility\\Workspaces";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void AverageByComponent::initDocs()
+  void IntegrateByComponent::initDocs()
   {
     this->setWikiSummary("Averages up the instrument hierarchy.");
     this->setOptionalMessage("Averages up the instrument hierarchy.");
@@ -55,7 +55,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void AverageByComponent::init()
+  void IntegrateByComponent::init()
   {
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input, boost::make_shared<HistogramValidator>()), "The input workspace.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The output workspace.");
@@ -68,7 +68,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void AverageByComponent::exec()
+  void IntegrateByComponent::exec()
   {
     MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
     int parents = getProperty("LevelsUp");
@@ -113,7 +113,7 @@ namespace Algorithms
               continue;
 
             // Now we have a good value
-            PARALLEL_CRITICAL(AverageByComponent_good)
+            PARALLEL_CRITICAL(IntegrateByComponent_good)
             {
               averageYInput.push_back(yValue);
               averageEInput.push_back(eValue*eValue);
@@ -152,7 +152,7 @@ namespace Algorithms
               continue;
 
             // Now we have a good value
-            PARALLEL_CRITICAL(AverageByComponent_setaverage)
+            PARALLEL_CRITICAL(IntegrateByComponent_setaverage)
             {
               integratedWS->dataY(hists[i])[0]=averageY;
               integratedWS->dataE(hists[i])[0]=averageE;
@@ -174,7 +174,7 @@ namespace Algorithms
    * @param countsWS the workspace to check for componets/parents
    * @return  vector of vectors, containing each spectrum that belongs to each group
    */
-  std::vector<std::vector<size_t> > AverageByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS)
+  std::vector<std::vector<size_t> > IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS)
   {
     std::vector<std::vector<size_t> > mymap;
     std::vector<size_t> single;
@@ -193,7 +193,7 @@ namespace Algorithms
    * @param parents  how many levels above detector to create the grouping
    * @return vector of vectors, containing each spectrum that belongs to each group
    */
-  std::vector<std::vector<size_t> > AverageByComponent::makeMap(API::MatrixWorkspace_sptr countsWS,int parents)
+  std::vector<std::vector<size_t> > IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS,int parents)
   {
     std::multimap<Mantid::Geometry::ComponentID,size_t> mymap;
 
@@ -217,7 +217,7 @@ namespace Algorithms
     }
     catch(...)
     {
-      throw std::runtime_error("AverageByComponent: not able to create detector to spectra map. Try with LevelUp=0.");
+      throw std::runtime_error("IntegrateByComponent: not able to create detector to spectra map. It is likely that detectors are already grouped.");
     }
 
     for(size_t i=0;i < countsWS->getNumberHistograms();i++)

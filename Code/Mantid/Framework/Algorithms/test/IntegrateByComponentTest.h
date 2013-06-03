@@ -1,9 +1,9 @@
-#ifndef MANTID_ALGORITHMS_AVERAGEBYCOMPONENTTEST_H_
-#define MANTID_ALGORITHMS_AVERAGEBYCOMPONENTTEST_H_
+#ifndef MANTID_ALGORITHMS_IntegrateByComponentTEST_H_
+#define MANTID_ALGORITHMS_IntegrateByComponentTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/AverageByComponent.h"
+#include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -11,35 +11,35 @@
 
 
 
-using Mantid::Algorithms::AverageByComponent;
+using Mantid::Algorithms::IntegrateByComponent;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-class AverageByComponentTest : public CxxTest::TestSuite
+class IntegrateByComponentTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AverageByComponentTest *createSuite() { return new AverageByComponentTest(); }
-  static void destroySuite( AverageByComponentTest *suite ) { delete suite; }
+  static IntegrateByComponentTest *createSuite() { return new IntegrateByComponentTest(); }
+  static void destroySuite( IntegrateByComponentTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    AverageByComponent alg;
+    IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
 
   void test_exec_0()
   {
-    std::string outputWSname("AverageByComponentTest_OutputWS_0");
-    std::string inputWSname("AverageByComponentTest_InputWS_0");
+    std::string outputWSname("IntegrateByComponentTest_OutputWS_0");
+    std::string inputWSname("IntegrateByComponentTest_InputWS_0");
     ABCtestWorkspace(inputWSname,false);
 
-    AverageByComponent alg;
+    IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inputWSname) );
@@ -64,11 +64,11 @@ public:
 
   void test_exec_1()
   {
-    std::string outputWSname("AverageByComponentTest_OutputWS_1");
-    std::string inputWSname("AverageByComponentTest_InputWS_1");
+    std::string outputWSname("IntegrateByComponentTest_OutputWS_1");
+    std::string inputWSname("IntegrateByComponentTest_InputWS_1");
     ABCtestWorkspace(inputWSname,false);
 
-    AverageByComponent alg;
+    IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inputWSname) );
@@ -94,11 +94,11 @@ public:
 
   void test_exec_2()
   {
-    std::string outputWSname("AverageByComponentTest_OutputWS_2");
-    std::string inputWSname("AverageByComponentTest_InputWS_2");
+    std::string outputWSname("IntegrateByComponentTest_OutputWS_2");
+    std::string inputWSname("IntegrateByComponentTest_InputWS_2");
     ABCtestWorkspace(inputWSname,false);
 
-    AverageByComponent alg;
+    IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inputWSname) );
@@ -126,11 +126,11 @@ public:
 
   void test_exec_3()
   {
-    std::string outputWSname("AverageByComponentTest_OutputWS_3");
-    std::string inputWSname("AverageByComponentTest_InputWS_3");
+    std::string outputWSname("IntegrateByComponentTest_OutputWS_3");
+    std::string inputWSname("IntegrateByComponentTest_InputWS_3");
     ABCtestWorkspace(inputWSname,false);
 
-    AverageByComponent alg;
+    IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inputWSname) );
@@ -155,11 +155,11 @@ public:
 
   void test_exec_15()
   {
-    std::string outputWSname("AverageByComponentTest_OutputWS_15");
-    std::string inputWSname("AverageByComponentTest_InputWS_15");
+    std::string outputWSname("IntegrateByComponentTest_OutputWS_15");
+    std::string inputWSname("IntegrateByComponentTest_InputWS_15");
     ABCtestWorkspace(inputWSname,false);
 
-    AverageByComponent alg;
+    IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inputWSname) );
@@ -184,11 +184,11 @@ public:
 
   void test_exec_2_mask()
   {
-    std::string outputWSname("AverageByComponentTest_OutputWS_2_mask");
-    std::string inputWSname("AverageByComponentTest_InputWS_2_mask");
+    std::string outputWSname("IntegrateByComponentTest_OutputWS_2_mask");
+    std::string inputWSname("IntegrateByComponentTest_InputWS_2_mask");
     ABCtestWorkspace(inputWSname,true);
 
-    AverageByComponent alg;
+    IntegrateByComponent alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", inputWSname) );
@@ -241,4 +241,4 @@ private:
 };
 
 
-#endif /* MANTID_ALGORITHMS_AVERAGEBYCOMPONENTTEST_H_ */
+#endif /* MANTID_ALGORITHMS_IntegrateByComponentTEST_H_ */

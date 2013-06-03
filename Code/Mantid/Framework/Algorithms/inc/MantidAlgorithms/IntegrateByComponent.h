@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_AVERAGEBYCOMPONENT_H_
-#define MANTID_ALGORITHMS_AVERAGEBYCOMPONENT_H_
+#ifndef MANTID_ALGORITHMS_INTEGRATEBYCOMPONENT_H_
+#define MANTID_ALGORITHMS_INTEGRATEBYCOMPONENT_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -9,7 +9,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** AverageByComponent : The algorithm integrates up the instrument hierarchy, and each pixel will contain the average value for the component
+  /** IntegrateByComponent : The algorithm integrates up the instrument hierarchy, and each pixel will contain the average value for the component
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,11 +31,11 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport AverageByComponent  : public API::Algorithm
+  class DLLExport IntegrateByComponent  : public API::Algorithm
   {
   public:
-    AverageByComponent();
-    virtual ~AverageByComponent();
+    IntegrateByComponent();
+    virtual ~IntegrateByComponent();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -56,4 +56,4 @@ namespace Algorithms
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_AVERAGEBYCOMPONENT_H_ */
+#endif  /* MANTID_ALGORITHMS_INTEGRATEBYCOMPONENT_H_ */
