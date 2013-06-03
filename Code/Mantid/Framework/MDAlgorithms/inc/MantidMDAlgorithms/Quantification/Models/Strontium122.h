@@ -23,8 +23,6 @@
 */
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 
-#include "MantidKernel/MagneticFormFactorTable.h"
-
 namespace Mantid
 {
   namespace MDAlgorithms
@@ -36,19 +34,15 @@ namespace Mantid
      */
     class DLLExport Strontium122 : public ForegroundModel
     {
-    public:
-      /// Constructor
-      Strontium122();
-
     private:
       /// String name of the model
       std::string name() const { return "Strontium122"; }
-      /// Declare the fitting parameters
-      void declareParameters();
-      /// Declare fixed attributes
-      void declareAttributes();
+
+      /// Setup the model
+      void init();
       /// Called when an attribute is set
       void setAttribute(const std::string & name, const API::IFunction::Attribute& attr);
+
       /// Returns the type of model
       ModelType modelType() const { return Broad; }
       /// Calculates the intensity for the model for the current parameters.
@@ -58,8 +52,6 @@ namespace Mantid
       int m_twinType;
       /// MultEps attribute
       bool m_multEps;
-      /// Magnetic form factor cache
-      PhysicalConstants::MagneticFormFactorTable m_formFactorTable;
     };
 
   }

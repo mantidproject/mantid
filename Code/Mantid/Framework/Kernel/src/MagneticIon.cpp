@@ -679,6 +679,30 @@ namespace Mantid
     }
 
     /**
+     * Returns a MagneticIon corresponding to the given symbol containing the atom & charge
+     * Throws std::runtime_error if one cannot be found
+     * @param symbol :: The string symbol
+     * @return A reference to the required ion
+     */
+    const MagneticIon & getMagneticIon(const std::string & symbol)
+    {
+      const IonIndex & ionIndex = ionMap();
+      std::map<std::string, MagneticIon>::const_iterator cit = ionIndex.find(symbol);
+
+      if (cit == ionIndex.end())
+      {
+        //no such combination
+        std::stringstream msg;
+        msg << "Failed to find an atom using symbol=" << symbol;
+        throw std::runtime_error(msg.str());
+      }
+      else
+      {
+        return cit->second;
+      }      
+    }
+
+    /**
      * Returns a MagneticIon corresponding  to the given symbol & charge.
      * Throws std::runtime_error if one cannot be found
      * @param symbol :: The string symbol
@@ -687,22 +711,9 @@ namespace Mantid
      */
     const MagneticIon & getMagneticIon(const std::string & symbol,const uint16_t charge)
     {
-      const IonIndex & ionIndex = ionMap();
       std::stringstream what;
       what << symbol << charge;
-      std::map<std::string, MagneticIon>::const_iterator cit = ionIndex.find(what.str());
-
-      if (cit == ionIndex.end())
-      {
-        //no such combination
-        std::stringstream msg;
-        msg << "Failed to find an atom with symbol=" << symbol << " and charge=" << charge;
-        throw std::runtime_error(msg.str());
-      }
-      else
-      {
-        return cit->second;
-      }
+      return getMagneticIon(what.str());
     }
 
     /**

@@ -3,8 +3,6 @@
 
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Math/Distributions/BoseEinsteinDistribution.h"
-#include "MantidKernel/MagneticIon.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 #include <cmath>
 
@@ -14,7 +12,6 @@ namespace Mantid
   {
     DECLARE_FOREGROUNDMODEL(Strontium122);
 
-    using PhysicalConstants::MagneticIon;
     using Kernel::Math::BoseEinsteinDistribution;
 
     namespace // anonymous
@@ -35,27 +32,21 @@ namespace Mantid
       const double TWO_PI = 2.*M_PI;
     }
 
-    Strontium122::Strontium122()
-      : m_formFactorTable(500, PhysicalConstants::getMagneticIon("Fe", 2), /*J*/0, /*L*/0)
-    {
-    }
-
     /**
-     * Declares the parameters that should participate in fitting
+     * Initialize the model
      */
-    void Strontium122::declareParameters()
+    void Strontium122::init()
     {
+      // Default form factor. Can be overridden with the FormFactorIon attribute
+      setFormFactorIon("Fe2"); 
+
+      // Declare parameters that participate in fitting
       for(unsigned int i = 0; i < NPARAMS; ++i)
       {
         declareParameter(PAR_NAMES[i], 0.0);
       }
-    }
 
-    /**
-     *  Declare fixed attributes
-     */
-    void Strontium122::declareAttributes()
-    {
+      // Declare fixed attributes
       for(unsigned int i = 0; i < NATTS; ++i)
       {
         declareAttribute(ATTR_NAMES[i], API::IFunction::Attribute(1));
@@ -63,21 +54,21 @@ namespace Mantid
     }
 
     /**
-     * Called when an attribute is set
+     * Called when an attribute is set from the Fit string
      * @param name :: The name of the attribute
      * @param attr :: The value of the attribute
      */
     void Strontium122::setAttribute(const std::string & name, const API::IFunction::Attribute& attr)
     {
-      int asInt = attr.asInt();
       if(name == ATTR_NAMES[0])
       {
-        m_multEps = (asInt > 0);
+        m_multEps = (attr.asInt() > 0);
       }
       else if(name == ATTR_NAMES[1])
       {
-        m_twinType = asInt;
+        m_twinType = attr.asInt();
       }
+      else ForegroundModel::setAttribute(name, attr); // pass it on the base
     }
 
     /**
@@ -143,7 +134,7 @@ namespace Mantid
 
       const double tempInK = exptSetup.getLogAsSingleValue("temperature_log");
       const double boseFactor = BoseEinsteinDistribution::np1Eps(eps,tempInK);
-      const double magFormFactorSqr = std::pow(m_formFactorTable.value(qsqr), 2);
+      const double magFormFactorSqr = std::pow(formFactor(qsqr), 2);
 
       const double s_eff = getCurrentParameterValue(Seff);
       const double sj_1a = getCurrentParameterValue(J1a);
