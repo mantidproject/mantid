@@ -9,6 +9,7 @@
 #include <Poco/File.h>
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetOffsetsMultiPeaks;
@@ -17,6 +18,12 @@ using Mantid::DataObjects::OffsetsWorkspace_sptr;
 class GetDetOffsetsMultiPeaksTest : public CxxTest::TestSuite
 {
 public:
+
+  GetDetOffsetsMultiPeaksTest()
+  {
+    Mantid::API::FrameworkManager::Instance();
+  }
+
   void testTheBasics()
   {
     TS_ASSERT_EQUALS( offsets.name(), "GetDetOffsetsMultiPeaks" );
