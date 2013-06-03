@@ -154,15 +154,11 @@ public:
   //--------------------------------------------------------------------------------------------
 /** Executes the given algorithm asynchronously, until you reach the given chunk number.
    * @return false if test failed*/
-  bool runAlgoUntilChunk(IAlgorithm_sptr alg1, size_t stopAtChunk)
+  bool runAlgoUntilChunk(boost::shared_ptr<MonitorLiveData> alg1, size_t stopAtChunk)
   {
-    MonitorLiveData * monitor = dynamic_cast<MonitorLiveData*>(alg1.get());
-    TS_ASSERT(monitor);
-    if (!monitor) return false;
-
     Poco::ActiveResult<bool> res1 = alg1->executeAsync();
     Poco::Thread::sleep(50);
-    while (monitor->m_chunkNumber < stopAtChunk)
+    while (alg1->m_chunkNumber < stopAtChunk)
       Poco::Thread::sleep(10);
     return true;
   }
@@ -175,7 +171,7 @@ public:
     ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "4");
     ConfigService::Instance().setString("testdatalistener.m_newStatus", "4" /* ILiveListener::EndRun */);
 
-    IAlgorithm_sptr alg1 = makeAlgo("fake1", "", "Add", "Restart", "0.15");
+    boost::shared_ptr<MonitorLiveData> alg1 = makeAlgo("fake1", "", "Add", "Restart", "0.15");
     // Run this algorithm until that chunk #
     if (!runAlgoUntilChunk(alg1, 7)) return;
 
@@ -198,7 +194,7 @@ public:
     ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "4");
     ConfigService::Instance().setString("testdatalistener.m_newStatus", "4" /* ILiveListener::EndRun */);
 
-    IAlgorithm_sptr alg1 = makeAlgo("fake1", "", "Add", "Rename", "0.15");
+    boost::shared_ptr<MonitorLiveData> alg1 = makeAlgo("fake1", "", "Add", "Rename", "0.15");
     // Run this algorithm until that chunk #
     if (!runAlgoUntilChunk(alg1, 7)) return;
 
