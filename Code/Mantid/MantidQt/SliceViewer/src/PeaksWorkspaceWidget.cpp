@@ -69,9 +69,17 @@ namespace MantidQt
       auto model = new QPeaksTableModel(this->m_ws);
       connect(model, SIGNAL(peaksSorted(const std::string&, const bool)), this, SLOT(onPeaksSorted(const std::string&, const bool)));
       ui.tblPeaks->setModel(model);
-      ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-      ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+      ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::Interactive);
+      ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
       m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();
+
+      // set the starting width of each column
+      int char_width = (ui.tblPeaks->fontMetrics().maxWidth()+ui.tblPeaks->fontMetrics().averageCharWidth());
+      char_width = static_cast<int>(.4*static_cast<double>(char_width)); // randomly determined "correct"
+      for (int i = 0; i < m_originalTableWidth; ++i)
+      {
+        ui.tblPeaks->horizontalHeader()->resizeSection(i, model->numCharacters(i) * char_width);
+      }
 
     }
 
@@ -139,27 +147,6 @@ namespace MantidQt
       if(index.isValid())
       {
         emit zoomToPeak(this->m_ws, index.row());
-      }
-    }
-
-    /**
-    Override the resizeEvent handler so that we can provide some nice behaviour for the peaks table shown in this widget.
-
-    When the widget is below a threshold width, use scroll-bars.
-    When the widget is greather then the threshold width, then we want to stretch the table to fill the full width.
-    @param event: Resize event to pass on.
-    */
-    void PeaksWorkspaceWidget::resizeEvent(QResizeEvent * event)
-    {
-      QWidget::resizeEvent(event);
-      const int currentWidth = ui.tblPeaks->horizontalHeader()->length();
-      if(currentWidth > m_originalTableWidth)
-      {
-        ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::Stretch); // Works well when the widget is expanded, but not well when it's compressed.
-      }
-      else
-      {
-        ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents); // Doesn't work well the widget is expanded, but works well when the width is compressed.
       }
     }
 
