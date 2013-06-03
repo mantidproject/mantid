@@ -1,6 +1,4 @@
-from MantidFramework import *
-mtd.initialise()
-from mantidsimple import *
+from mantid.simpleapi import *
 
 #back = 'NOM_1000_event.nxs'#'/SNS/NOM/2011_2_1B_SCI/1/1000/preNeXus/
 #van = 'NOM_1000_neutron_event.dat' # 1GB
@@ -61,7 +59,7 @@ van = focus(van)
 done = "Done " + str(1+comm.rank) + "!"
 GatherWorkspaces(InputWorkspace=van, OutputWorkspace="nomad")
 if comm.rank == 0:
-    SumSpectra("nomad","nomad")
+    SumSpectra(InputWorkspace="nomad",OutputWorkspace="nomad")
     SaveNexus(InputWorkspace="nomad",Filename="NOMAD.nxs")
 print done
 

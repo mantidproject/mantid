@@ -5,10 +5,8 @@
 #
 #############################################################################################
 
-from MantidFramework import *
 from mpi4py import MPI
-from mantidsimple import *
-mtd.initialise()
+from mantid.simpleapi import *
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()

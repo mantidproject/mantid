@@ -1,6 +1,4 @@
-from MantidFramework import *
-mtd.initialise()
-from mantidsimple import *
+from mantid.simpleapi import *
 
 import os
 from mpi4py import MPI

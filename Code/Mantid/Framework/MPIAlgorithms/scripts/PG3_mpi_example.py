@@ -5,9 +5,7 @@
 #
 #############################################################################################
 
-from MantidFramework import *
-mtd.initialise()
-from mantidsimple import *
+from mantid.simpleapi import *
 
 def focus(eventfile, wksp, binning):
     calfile = "PG3_1370_2010_09_12.cal"
