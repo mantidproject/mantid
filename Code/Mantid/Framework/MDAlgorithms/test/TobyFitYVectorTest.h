@@ -41,6 +41,7 @@ public:
 
   void test_Values_Are_Not_Used_If_Inactive()
   {
+    using Mantid::API::IFunction;
     using namespace Mantid::MDAlgorithms;
 
     const char * attrs[8] = {"Moderator", "Aperture", "Chopper", "ChopperJitter", "SampleVolume", "DetectorDepth", "DetectorArea", "DetectionTime"};
@@ -48,7 +49,7 @@ public:
     TobyFitYVector yVector;
     for(unsigned int i = 0; i < 8; ++i)
     {
-      yVector.setAttribute(attrs[i], 0);
+      yVector.setAttribute(attrs[i], IFunction::Attribute(false));
     }
 
     std::vector<double> randNums(yVector.requiredRandomNums(), 0.5);
