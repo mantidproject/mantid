@@ -6,10 +6,7 @@
 
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -17,34 +14,13 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::Instrument;
 
-class NormaliseToMonitorTestHelper : public NormaliseToMonitor
-{
-public:
-    void initialize(){
-        NormaliseToMonitor::initialize();
-    }
-    void checkProperties(MatrixWorkspace_sptr inputWorkspace){
-        NormaliseToMonitor::checkProperties(inputWorkspace);
-    }
-
-};
-
-
 class NormaliseToMonitorTest : public CxxTest::TestSuite
 {
-private:
-
-
 public:
-
   static NormaliseToMonitorTest *createSuite() { return new NormaliseToMonitorTest(); }
   static void destroySuite(NormaliseToMonitorTest *suite) { delete suite; }
 
-  NormaliseToMonitorTest()
-  {
-  }
-
-  void setUp()
+  void setUpWorkspace()
   {
     MatrixWorkspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     // Change the data in the monitor spectrum
@@ -85,26 +61,28 @@ public:
 
   void testName()
   {
-    NormaliseToMonitorTestHelper norm;
+    NormaliseToMonitor norm;
     TS_ASSERT_EQUALS( norm.name(), "NormaliseToMonitor" )
   }
 
   void testVersion()
   {
-    NormaliseToMonitorTestHelper norm;
+    NormaliseToMonitor norm;
     TS_ASSERT_EQUALS( norm.version(), 1 )
   }
 
   void testInit()
   {
-    NormaliseToMonitorTestHelper norm;
+    NormaliseToMonitor norm;
     TS_ASSERT_THROWS_NOTHING( norm.initialize() )
     TS_ASSERT( norm.isInitialized() )
   }
 
-  void dotestExec(bool events)
+  void dotestExec(bool events, bool sameOutputWS)
   {
-    NormaliseToMonitorTestHelper norm;
+    setUpWorkspace();
+
+    NormaliseToMonitor norm;
     if (events)
       FrameworkManager::Instance().exec("ConvertToEventWorkspace", 8,
           "InputWorkspace", "normMon",
@@ -117,13 +95,15 @@ public:
     TS_ASSERT_THROWS( norm.execute(), std::runtime_error )
     TS_ASSERT( ! norm.isExecuted() )
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("InputWorkspace","normMon") )
-    TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("OutputWorkspace","normMon2") )
+    std::string outputWS("normMon");
+    if ( ! sameOutputWS ) outputWS.append("2");
+    TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( norm.setPropertyValue("MonitorSpectrum","0") )
     TS_ASSERT_THROWS_NOTHING( norm.execute() )
     TS_ASSERT( norm.isExecuted() )
 
     MatrixWorkspace_const_sptr output;
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("normMon2") )
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) )
 
     // Check the non-monitor spectra
     for (size_t i = 1; i < output->getNumberHistograms(); ++i)
@@ -154,17 +134,29 @@ public:
 
   void testExec()
   {
-    dotestExec(false);
+    dotestExec(false,false);
   }
 
   void testExec_Events()
   {
-    dotestExec(true);
+    dotestExec(true,false);
+  }
+
+  void testExec_inplace()
+  {
+    dotestExec(false,true);
+  }
+
+  void testExec_Events_inplace()
+  {
+    dotestExec(true,true);
   }
 
 
   void testNormaliseByIntegratedCount()
   {
+    setUpWorkspace();
+
     NormaliseToMonitor norm2;
     norm2.initialize();
     TS_ASSERT_THROWS_NOTHING( norm2.setPropertyValue("InputWorkspace","normMon") )

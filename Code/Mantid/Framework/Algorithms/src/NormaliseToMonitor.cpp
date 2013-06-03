@@ -281,7 +281,7 @@ void NormaliseToMonitor::exec()
  *  @param inputWorkspace The input workspace
  *  @throw std::runtime_error If the properties are invalid
  */
-void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspace)
+void NormaliseToMonitor::checkProperties(const API::MatrixWorkspace_sptr& inputWorkspace)
 {
 
    // Check where the monitor spectrum should come from
@@ -349,7 +349,7 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
  *  @returns spectra number (WS ID) which is used to normalize by.
  *  @throw std::runtime_error If the properties are invalid
  */
-API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace,int &spectra_num)
+API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr& inputWorkspace,int &spectra_num)
 {
  // this is the index of the spectra within the workspace and we need to indetnify it either from DetID or fron SpecID
  // size_t spectra_num(-1);
@@ -396,7 +396,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::Matrix
  *  @returns A workspace containing the monitor spectrum only
  *  @throw std::runtime_error If the properties are invalid
  */
-API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace,int &wsID)
+API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(const API::MatrixWorkspace_sptr& inputWorkspace,int &wsID)
 {
   // Get the workspace from the ADS. Will throw if it's not there.
   MatrixWorkspace_sptr monitorWS = getProperty("MonitorWorkspace");
@@ -430,7 +430,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
  *  @param index :: The index of the spectrum to extract
  *  @returns A workspace containing the single spectrum requested
  */
-API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const std::size_t index)
+API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(const API::MatrixWorkspace_sptr& WS, const std::size_t index)
 {
   IAlgorithm_sptr childAlg = createChildAlgorithm("ExtractSingleSpectrum");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
@@ -493,7 +493,7 @@ bool NormaliseToMonitor::setIntegrationProps()
  *  @param inputWorkspace The input workspace
  *  @param outputWorkspace The result workspace
  */
-void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace,
+void NormaliseToMonitor::normaliseByIntegratedCount(const API::MatrixWorkspace_sptr& inputWorkspace,
                                                     API::MatrixWorkspace_sptr& outputWorkspace)
 {
   // Add up all the bins so it's just effectively a single value with an error
@@ -524,11 +524,11 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
  *  @param inputWorkspace The input workspace
  *  @param outputWorkspace The result workspace
  */
-void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorkspace,
+void NormaliseToMonitor::normaliseBinByBin(const API::MatrixWorkspace_sptr& inputWorkspace,
                                            API::MatrixWorkspace_sptr& outputWorkspace)
 { 
   EventWorkspace_sptr inputEvent = boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
-  EventWorkspace_sptr outputEvent;
+  EventWorkspace_sptr outputEvent = boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace )
