@@ -265,31 +265,37 @@ namespace Mantid
       bool hasOneRunNumber = true;
       int runNum = -1;
       double minDist = 10000000;
-
-      for (int i = 0; i < getNumberPeaks(); i++)
+      int NPeaks = getNumberPeaks();
+      try
       {
-        Peak pk = getPeak(i);
-        V3D Q = pk.getQLabFrame();
-        if (!lab_coords)
-          Q = pk.getQSampleFrame();
-        double D = QFrame.distance(Q);
-        if (D < minDist)
+        for (int i = 0; i < NPeaks; i++)
         {
-          minDist = D;
-          seqNum = i + 1;
+          Peak pk = getPeak(i);
+          V3D Q = pk.getQLabFrame();
+          if (!lab_coords)
+            Q = pk.getQSampleFrame();
+          double D = QFrame.distance(Q);
+          if (D < minDist)
+          {
+            minDist = D;
+            seqNum = i;
+          }
+
+          int run = pk.getRunNumber();
+          if (runNum < 0)
+            runNum = run;
+          else if (runNum != run)
+            hasOneRunNumber = false;
         }
-
-        int run = pk.getRunNumber();
-        if (runNum < 0)
-          runNum = run;
-        else if (runNum != run)
-          hasOneRunNumber = false;
+      }catch(...)
+      {
+        seqNum = -1;//peak could have been removed
       }
-
       V3D Qlab = QFrame;
       V3D Qsamp;
       Kernel::Matrix<double> Gon(3, 3, true);
-      if (seqNum >= 0)
+
+      if (seqNum >= 0 && NPeaks == getNumberPeaks())
         Gon = getPeak(seqNum).getGoniometerMatrix();
       if (lab_coords)
       {
@@ -356,8 +362,8 @@ namespace Mantid
             boost::lexical_cast<std::string>(PhiChiOmega));
         Result.push_back(GRead);
 
-        std::pair<std::string, std::string> SeqNum("Sequence Num","    "+
-            boost::lexical_cast<std::string>(seqNum));
+        std::pair<std::string, std::string> SeqNum("Seq Num,1st=1","    "+
+            boost::lexical_cast<std::string>(seqNum + 1));
         Result.push_back(SeqNum);
 
         oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(peak->getWavelength());
