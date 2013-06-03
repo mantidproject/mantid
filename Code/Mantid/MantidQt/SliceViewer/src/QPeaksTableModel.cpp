@@ -36,7 +36,7 @@ namespace MantidQt
       m_dataCache.push_back(QString::number(peak.getL()));
       m_dataCache.push_back(QString::number(peak.getDSpacing()));
       m_dataCache.push_back(QString::number(peak.getIntensity()));
-      m_dataCache.push_back(QString::number(peak.getIntensity()));
+      m_dataCache.push_back(QString::number(peak.getSigmaIntensity()));
 
       const QString COMMA(",");
 
