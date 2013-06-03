@@ -20,6 +20,11 @@ class AppendSpectraTest : public CxxTest::TestSuite
 {
 
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AppendSpectraTest *createSuite() { return new AppendSpectraTest(); }
+  static void destroySuite( AppendSpectraTest *suite ) { delete suite; }
+
   AppendSpectraTest() :
     ws1Name("ConjoinWorkspacesTest_grp1"), ws2Name("ConjoinWorkspacesTest_grp2")
   {

@@ -9,7 +9,6 @@
 #include <Poco/File.h>
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetectorOffsets;
@@ -18,12 +17,6 @@ using Mantid::DataObjects::OffsetsWorkspace_sptr;
 class GetDetectorOffsetsTest : public CxxTest::TestSuite
 {
 public:
-
-  GetDetectorOffsetsTest()
-  {
-    Mantid::API::FrameworkManager::Instance();
-  }
-
   void testTheBasics()
   {
     TS_ASSERT_EQUALS( offsets.name(), "GetDetectorOffsets" );
