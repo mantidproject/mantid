@@ -80,13 +80,6 @@ class PythonAlgorithmTest(unittest.TestCase):
     def setUp(self):
         pass
         
-    def test_existing_algorithm(self):
-        """
-            Import an existing python algorithm to make sure they 
-            are still hooked up properly
-        """
-        from mantidsimple import EQSANSTransmission
-        
     def test_child_alg_wksp_transfer(self):
         """
             Check that we can execute a Child Algorithm and pass
