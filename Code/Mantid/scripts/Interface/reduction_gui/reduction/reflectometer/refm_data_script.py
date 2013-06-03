@@ -142,7 +142,6 @@ class DataSets(BaseScriptElement):
 
     def _automated_reduction(self):
         script = "# REF_M automated reduction\n"
-                
         script += "RefReduction(DataRun='%s',\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRun='%s',\n" % str(self.norm_file)
         script += "              Instrument='REF_M',\n"
