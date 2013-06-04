@@ -866,71 +866,49 @@ namespace API
    * @param email: email of the requester   
    * 
    * @exception ScriptRepoException justifying the reason to failure.
+   *
+   * @note only local files can be removed.
   */
   void ScriptRepositoryImpl::remove(const std::string & file_path, 
                                               const std::string & comment,
                                               const std::string & author, 
                                     const std::string & email){
-    impl_remove_file(file_path, false, comment, author, email); 
-  }
-  
-  /** Remove the file from the local folder and update the internal variables to correct
-   *  display the status of the file. 
-   * 
-   * @path file_path:  The path (relative to the repository) or absolute to identify the file to remove
-   */
-  void ScriptRepositoryImpl::remove_local(const std::string & file_path){
-    impl_remove_file(file_path); 
-  }
-
-  /** method that effectivelly remove the entries locally and remotelly. It may be called with just
-   * one parameter, for removing locally
-   * @code
-   * impl_remove_file(<local_file_path>); // remove locally
-   * @endcode
-   * 
-   * Or, it requires, all the parameters, for removing from the central repository as well.
-   * 
-   * It is called inside ::remove and ::remove_local
-   * 
-   * @param file_path: identify the file
-   * @param only_local: remove the file only from local folder
-   * @param comment: git commit message
-   * @param author: identify the requester
-   * @param email: the email of the author (for the git commit)
-   * 
-   * Only local files can be removed
-   */
-  void ScriptRepositoryImpl::impl_remove_file(const std::string & file_path, 
-                                              bool only_local,
-                                              const std::string & comment,
-                                              const std::string & author, 
-                                              const std::string & email)
-    
-  {    
     std::string relative_path = convertPath(file_path);
-    const char * not_allowed_exc = "You are not allowed to remove files from the repository that you have not installed and you are not the owner"; 
    
     // get the status, because only local files can be removed
     SCRIPTSTATUS status = fileStatus(relative_path);
-    if (status == REMOTE_ONLY)
-      throw ScriptRepoException(not_allowed_exc);
-
+    std::stringstream ss;
+    bool raise_exc = false; 
+    switch(status){
+    case REMOTE_ONLY:
+      ss << "You are not allowed to remove files from the repository that you have not installed and you are not the owner";
+      raise_exc = true;
+      break;
+    case REMOTE_CHANGED: 
+    case BOTH_CHANGED:
+      ss << "There is a new version of this file, so you can not remove it from the repository before checking it out. Please download the new version, and if you still wants to remove, do it afterwards"; 
+      raise_exc = true;
+      break; 
+    case LOCAL_ONLY:
+      ss << "This operation is to remove files from the central repository. "
+         << "\nTo delete files or folders from your local folder, please, do it through your operative system,"
+         << "using your local installation folder at " << local_repository ; 
+      raise_exc = true; 
+    default: 
+      break;
+    }
+    if (raise_exc)
+      throw ScriptRepoException(ss.str()); 
 
     g_log.information() << "ScriptRepository deleting " << file_path << " ..." << std::endl; 
-    if (!only_local){
+    
+    {
       // request to remove the file from the central repository
 
-
-      // There are more restriction when trying to remove from central repository
-      // only local_changed and both_changed are acceptable for removing
-      if (!(status == BOTH_UNCHANGED || status == LOCAL_CHANGED))
-        throw ScriptRepoException(not_allowed_exc);
-      
       RepositoryEntry & entry = repo.at(relative_path);
 
       if (entry.directory)
-        throw ScriptRepoException(not_allowed_exc);
+        throw ScriptRepoException("You can not remove folders recursively from the central repository.");
       
       
       // prepare the request, and call doDeleteRemoteFile to request the server to remove the file
@@ -939,7 +917,6 @@ namespace API
       std::stringstream answer; 
       answer << doDeleteRemoteFile(remote_delete, file_path, author, email, comment);
       g_log.debug() << "Answer from doDelete: " << answer.str() << std::endl; 
-
 
       // analyze the answer from the server, to see if the file was removed or not. 
       std::string info; 
@@ -1008,32 +985,6 @@ namespace API
       
     }// file removed on central repository
 
-    //delete the file
-    // get the absolute path of this file    
-    try{
-      // now, remove file locally. 
-      std::string absolute_path = local_repository + relative_path;           
-      Poco::File local(absolute_path);
-      local.remove(true);       
-    }catch(Poco::Exception & ex){
-      throw ScriptRepoException("You do not have right to remove this file in your computer",
-                                ex.displayText()); 
-    }
-
-    RepositoryEntry & entry = repo.at(relative_path);
-    if (entry.directory){
-      listFiles(); 
-    }else{
-      if (entry.remote){
-        entry.status = REMOTE_ONLY; 
-        entry.local = false; 
-      }else{
-        // this means that this value was removed from the central repository
-        // and from the local repository. So, it can be removed from the 
-        // cached variable
-        repo.erase(relative_path);         
-      }
-    }
   }
 
   /** Implements the request to the server to delete one file. It is created as a virtual protected member
