@@ -200,7 +200,7 @@ namespace Algorithms
     std::multimap<Mantid::Geometry::ComponentID,size_t> mymap;
 
     Geometry::Instrument_const_sptr instrument = countsWS->getInstrument();
-    if (parents==0) //this should not happen in this file, but if one reuses the function and parents==0, the program has a sudded end without this check.
+    if (parents==0) //this should not happen in this file, but if one reuses the function and parents==0, the program has a sudden end without this check.
     {
         return makeInstrumentMap(countsWS);
     }
@@ -210,17 +210,6 @@ namespace Algorithms
       g_log.warning("Workspace has no instrument. LevelsUP is ignored");
       return makeInstrumentMap(countsWS);
     }
-
-    //check if not grouped. If grouped, it will throw
-    /*try
-    {
-      detid2index_map *d2i=countsWS->getDetectorIDToWorkspaceIndexMap(true);
-      d2i->clear();
-    }
-    catch(...)
-    {
-      throw std::runtime_error("IntegrateByComponent: not able to create detector to spectra map. It is likely that detectors are already grouped.");
-    }*/
 
     for(size_t i=0;i < countsWS->getNumberHistograms();i++)
     {
