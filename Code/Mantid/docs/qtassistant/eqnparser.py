@@ -184,6 +184,19 @@ class Equation:
         Removes potentially dangerous latex code, replacing it with
         a 'LaTeX sanitized' message
         """
+        # fix bad percent signs
+        if '%' in self.eqstring:
+            if self.eqstring[0] == '%':
+                self.eqstring = "\\" + self.eqstring
+            index = self.eqstring.find('%', 1)
+            while index > 0:
+                if self.eqstring[index-1] == "\\": # it is already escaped
+                    index = self.eqstring.find('%', index+1)
+                else:
+                    self.eqstring = self.eqstring[:index] + "\\" + self.eqstring[index:]
+                    index = self.eqstring.find('%', index+2) # added a character
+
+        # turn everything else bad to junky mbox
         lowercase = self.eqstring.lower()
         for tag in bad_tags:
             if tag in lowercase:
