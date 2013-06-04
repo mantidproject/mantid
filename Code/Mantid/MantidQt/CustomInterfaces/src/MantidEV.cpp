@@ -382,6 +382,8 @@ void MantidEV::setDefaultState_slot()
    setEnabledLoadEventFileParams_slot(true);
    m_uiForm.LoadDetCal_ckbx->setChecked(false);
    setEnabledLoadCalFiles_slot();
+   m_uiForm.CalFileName_ledt->setText("");
+   m_uiForm.CalFileName2_ledt->setText("");
    last_event_file.clear();
                                                     // Find Peaks tab
    m_uiForm.PeaksWorkspace_ledt->setText("");

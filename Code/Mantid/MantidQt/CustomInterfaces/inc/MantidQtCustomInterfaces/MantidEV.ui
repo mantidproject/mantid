@@ -136,7 +136,7 @@
        <property name="geometry">
         <rect>
          <x>40</x>
-         <y>470</y>
+         <y>480</y>
          <width>441</width>
          <height>23</height>
         </rect>
@@ -185,7 +185,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>250</y>
+         <y>390</y>
          <width>221</width>
          <height>18</height>
         </rect>
@@ -197,8 +197,8 @@
       <widget class="QLineEdit" name="MaxMagQ_ledt">
        <property name="geometry">
         <rect>
-         <x>290</x>
-         <y>240</y>
+         <x>300</x>
+         <y>380</y>
          <width>101</width>
          <height>31</height>
         </rect>
@@ -208,7 +208,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>290</y>
+         <y>430</y>
          <width>271</width>
          <height>23</height>
         </rect>
@@ -221,7 +221,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>330</y>
+         <y>240</y>
          <width>391</width>
          <height>23</height>
         </rect>
@@ -233,8 +233,8 @@
       <widget class="QLabel" name="CalFileName_lbl">
        <property name="geometry">
         <rect>
-         <x>100</x>
-         <y>370</y>
+         <x>110</x>
+         <y>280</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -247,7 +247,7 @@
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>370</y>
+         <y>280</y>
          <width>291</width>
          <height>31</height>
         </rect>
@@ -257,7 +257,7 @@
        <property name="geometry">
         <rect>
          <x>520</x>
-         <y>370</y>
+         <y>280</y>
          <width>91</width>
          <height>31</height>
         </rect>
@@ -269,8 +269,8 @@
       <widget class="QLabel" name="CalFileName2_lbl">
        <property name="geometry">
         <rect>
-         <x>100</x>
-         <y>420</y>
+         <x>110</x>
+         <y>330</y>
          <width>101</width>
          <height>31</height>
         </rect>
@@ -283,7 +283,7 @@
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>420</y>
+         <y>330</y>
          <width>291</width>
          <height>31</height>
         </rect>
@@ -293,7 +293,7 @@
        <property name="geometry">
         <rect>
          <x>520</x>
-         <y>420</y>
+         <y>330</y>
          <width>91</width>
          <height>31</height>
         </rect>
