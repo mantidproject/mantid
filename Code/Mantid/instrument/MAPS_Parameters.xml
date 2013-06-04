@@ -3,20 +3,41 @@
 
 <component-link name = "MAPS">
 
+<!-- files properties : -->
+
 <!-- Specify that the detector positions should be taken from the data file -->
 <parameter name="det-pos-source" type="string">
   <value val="datafile"/>
 </parameter>
+<!-- The file which defines proper (calibrated) detector positions 
+     if None - it is undefined -->
+<parameter name="det_cal_file" type="string">
+   <value val="None"/>
+</parameter>
+<!-- The file which defines detectors to spectra mapping;
+     if None - one2one map is used  -->
+<parameter name="map_file" type="string">
+   <value val="None"/>
+</parameter>
 
 
+<!-- RunNumber to use for diag instead of the input run number if none - use input run -->
+<parameter name="mask_run" type="string">
+   <value val="None"/>
+</parameter>
+
+<!-- Energy conversion mode direct/indirect/elastic (the one reducer understands) -->
 <parameter name="deltaE-mode" type="string">
   <value val="direct"/>
 </parameter>
 
+<!-- First spectra number (monitor number) to use when measuring incident energy
+    Should be spectra with well defined energy peak -->
 <parameter name="ei-mon1-spec">
   <value val="41474"/>
 </parameter>
-
+<!-- Second spectra number (monitor number) to use when measuring incident energy
+     Should be spectra with well defined energy peak -->
 <parameter name="ei-mon2-spec">
   <value val="41475"/>
 </parameter>
@@ -29,21 +50,38 @@
   <value val="1000"/>
 </parameter>
 
+<!-- integration range for background tests (in TOF) - composite property -->
 <parameter name="bkgd-range-min">
   <value val="12000"/>
 </parameter>
-
 <parameter name="bkgd-range-max">
   <value val="18000"/>
 </parameter>
+<parameter name="bkgd-range"  type="string">
+      <value val="bkgd-range-min,bkgd-range-max"/>
+</parameter>
+<!-- Remove the count rate seen in the regions of the histograms defined as the background regions -->
+<parameter name="background">
+   <value val="False"/>
+</parameter>
+<!-- True if background is to be checked UNUSED PROPERTY !!! -->
+<parameter name="check_background">
+  <value val="True"/>
+</parameter>
 
+
+
+<!--  detector_van_range- integratin in E(mev) for detector vanadium data [20,100] -->
 <parameter name="wb-integr-min">
   <value val="20"/>
 </parameter>
-
 <parameter name="wb-integr-max">
   <value val="300"/>
 </parameter>
+<parameter name="wb_integr_range"   type="string">
+    <value val="wb-integr-min,wb-integr-max"/>
+</parameter>
+
 
 <parameter name="norm-mon1-spec">
   <value val="41473"/>
@@ -81,27 +119,29 @@
   <value val="1e-10"/>
 </parameter>
 
-<!-- Absolute hi threshold for vanadium diag (huge) -->
+<!-- Absolute hi threshold for vanadium diag (large) -->
 <parameter name="diag_huge">
   <value val="1e10"/>
 </parameter>
 
-<!-- Remove zeroes in background (s_zero)-->
+<!-- Setting diag to reject zero backgrounds  -->
 <parameter name="diag_samp_zero">
-  <value val="0.0"/>
+  <value val="False"/>
 </parameter>
 
-<!-- Fraction of median to consider counting low for the white beam diag (sv_lo)-->
+<!-- Fraction of median to consider counting low for the white beam diag (diag_van_median_rate_limit_hi sv_lo)-->
 <parameter name="diag_samp_lo">
   <value val="0.0"/>
 </parameter>
-
 <!-- Fraction of median to consider counting high for the white beam diag (sv_hi)-->
 <parameter name="diag_samp_hi">
   <value val="1.5"/>
 </parameter>
 
-<!-- Error criterion as a multiple of error bar for background (sv_sig) -->
+<!-- Error criterion as a multiple of error bar for background (sv_sig) 
+  i.e. to fail the test, the magnitude of the
+  difference with respect to the median value must also exceed this number of error bars (default=3.3)
+-->  
 <parameter name="diag_samp_sig">
   <value val="3.3"/>
 </parameter>
@@ -111,35 +151,28 @@
   <value val="0.01"/>
 </parameter>
 
-<!-- Upper bound defining outliers as fraction of median value (v_out_hi)-->
+<!-- Upper bound defining outliers as fraction of median value (v_out_hi) -->
 <parameter name="diag_van_out_hi">
   <value val="100."/>
 </parameter>
 
-<!-- Fraction of median to consider counting low for the white beam diag (vv_lo)-->
+<!-- Fraction of median to consider counting low for the white beam diag (vv_lo)  vanlo=0.1  -->
 <parameter name="diag_van_lo">
-  <value val="0.1"/>
+  <value val="0.01"/>
 </parameter>
 
-<!-- Fraction of median to consider counting high for the white beam diag (vv_hi)-->
+<!-- Fraction of median to consider counting high for the white beam diag (vv_hi) vanhi=1.5 -->
 <parameter name="diag_van_hi">
   <value val="2.0"/>
 </parameter>
 
-<!-- Error criterion as a multiple of error bar for background (vv_sig) -->
+<!-- Error criterion as a multiple of error bar     van_sig  "
+    i.e. to fail the test, the magnitude of the difference with respect to the median value must also exceed this number of error bars (default=0.0)
+-->
 <parameter name="diag_van_sig">
   <value val="0.0"/>
 </parameter>
 
-<!-- True if background is to be checked -->
-<parameter name="check_background">
-  <value val="1.0"/>
-</parameter>
-
-<!-- True if the bleed tests should be run -->
-<parameter name="diag_bleed_test">
-  <value val="0.0"/>
-</parameter>
 
 <!-- Variation for ratio test with second white beam -->
 <parameter name="diag_variation">
@@ -149,7 +182,6 @@
 <!--  -->
 
 <!-- Absolute units conversion average -->
-
 <parameter name="monovan_lo_bound">
   <value val="0.01"/>
 </parameter>
@@ -165,6 +197,11 @@
 <parameter name="monovan_hi_frac">
   <value val="1.2"/>
 </parameter>
+<!-- integration for absolute units correction vanadium data 
+     if None, range is calculated from monovan_hi_frac/monovan_lo_frac -->
+<parameter name="abs_units_van_range"  type="string">
+  <value val="None"/>
+</parameter>
 
 <!--  -->
 <!--  Bleeding corrections   -->
@@ -177,18 +214,47 @@
 <parameter name="bleed_maxrate">
     <value val="0"/>
 </parameter>
-
-<parameter name="use_bleeding">
-    <value val="0"/>
+<!-- True if the bleed tests should be run use_bleeding-->
+<parameter name="diag_bleed_test">
+    <value val="False"/>
 </parameter>
 
-<!-- norm_method- normalistion monitor-1,monitor-2,uamph current -->
-<parameter name="norm_method",type="string">
+
+<!-- norm_method normalistion. Availible values are: monitor-1,monitor-2, uamph current -->
+<parameter name="norm_method" type="string">
     <value val="monitor-1"/>
 </parameter>
 
+<!-- if defined to true, fix incident energy to this value and do not calculate the energy from the run -->
+<parameter name="fixei">
+    <value val="False"/>
+</parameter>
 
-<!-- -->
+<!-- The format of output data. Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace)  -->  
+<parameter name="norm_method" type="string">
+   <value val=".spe"/>
+</parameter>
+
+
+<parameter name="sum_runs">
+   <value val="False"/>
+</parameter>
+
+<!-- List of the words which can be used as a command line arguments to define reducer keywords
+     the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a
+     each synonims met in command line are converted into appropriate reducer keyword
+
+<parameter name="synonims" type="string">
+   <value> val="normalise_method=norm_method;
+       fix_ei=fixei;   
+       save_formats=save_format;
+       sum_runs=sum;
+       wb_integr_range=detector_van_range;
+       van_mass=vanadium-mass"
+   </value>
+</parameter>
+ -->  
+  <!-- -->
 </component-link>
 
 </parameter-file>

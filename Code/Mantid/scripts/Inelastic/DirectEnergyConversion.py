@@ -827,12 +827,14 @@ class DirectEnergyConversion(object):
             self.diag_spectra = self.instrument.getStringParameter("diag_spectra")[0]
         except Exception:
             self.diag_spectra = None
-        
-        # Absolute units
-        self.monovan_lo_bound = self.get_default_parameter('monovan_lo_bound')
-        self.monovan_hi_bound = self.get_default_parameter('monovan_hi_bound')
-        self.monovan_lo_frac = self.get_default_parameter('monovan_lo_frac')
-        self.monovan_hi_frac = self.get_default_parameter('monovan_hi_frac')
+              
+        #par_names = self.instrument.getParameterNames()
+        #for name in par_names :
+        #    val,type = self.get_default_parameter_and_type(name)
+        #    if type != type(str) :
+        #        if not hasattr(self,name) :
+        #            setattr(self,name,val)
+
 
         # Mark IDF files as read
         self._idf_values_read = True
@@ -844,7 +846,23 @@ class DirectEnergyConversion(object):
         if len(values) != 1:
             raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
         return values[0]
-    
+
+    def get_default_parameter_and_type(self,name):
+        """Returns tupe with default parameter value and default parameter type. Default parameters can be strings or values
+        """
+        if self.instrument is None:
+            raise ValueError("Cannot init default parameter, instrument has not been loaded.")
+        values = self.instrument.getNumberParameter(name)
+        if len(values) != 1 :
+            values = self.instrument.getStringParameter(name)
+            if len(values) != 1 :
+                raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
+
+        return (values,type(values))
+
+            
+
+
     def log(self, msg):
         """Send a log message to the location defined
         """
@@ -852,5 +870,32 @@ class DirectEnergyConversion(object):
             print msg
         if self._log_to_mantid:
             logger.notice(msg)
+
+    def help(self,keyword=None) :
+        """function returns help on reduction parameters. 
+        
+           if provided without arguments it returns the list of the parameters availible
+        """
+        if self.instrument is None:
+             raise ValueError("instrument has not been defined, call setup(instrument_name) first.")
+
+        if keyword==None :
+            par_names = self.instrument.getParameterNames()
+            print "****: ***************************************************************************** ";
+            print "****: There are ", len(par_names), "default reduction parameters availible, namely: ";
+            for i in xrange(0,len(par_names),4):
+                print "****: {0}\t {1}\t {2}\t {3}\n".format(par_names[i],par_names[i+1],par_names[i+2],par_names[i+3]),
+            print "****:" 
+            print "****: type help(parameter_name) to get help on a parameter with  specified  name"
+            print "****: ***************************************************************************** ";
+        else:
+            if self.instrument.hasParameter(keyword) :
+                print "****: ***************************************************************************** ";        
+                print "****: help for "+keyword+" is not yet implemented, read "+self.instr_name+"_Parameters.xml\n"\
+                      "****: in folder "+config.getString('instrumentDefinition.directory')+" for help containing on this key there"
+                print "****: ***************************************************************************** ";
+            else:
+                raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % keyword)
+
 
 #-----------------------------------------------------------------
