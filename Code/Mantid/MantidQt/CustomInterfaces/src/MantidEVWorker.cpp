@@ -143,6 +143,11 @@ bool MantidEVWorker::isEventWorkspace( const std::string & event_ws_name )
  *                          MaxValues =  maxQ, maxQ, maxQ 
  *  @param do_lorentz_corr  Set true to do the Lorentz correction when
  *                          converting to reciprocal space. 
+ *  @param load_det_cal     Set true to call LoadIsawDetCal after loading
+ *                          the event file.
+ *  @param det_cal_file     Fully qualified name of the .DetCal file.
+ *  @param det_cal_file2    Fully qualified name of the second .DetCal 
+ *                          file for the second panel on SNAP.
  *
  *  @return true if the file was loaded and MD workspace was 
  *          successfully created.
