@@ -156,7 +156,7 @@ find_program ( DVIPNG_EXE dvipng )
 		      COMMAND ${QT_QCOLLECTIONGENERATOR_EXECUTABLE} ${HELP_OUT_DIR}/mantid.qhcp
 		      )
               
-   add_custom_target ( qtassistant ALL
+   add_custom_target ( qtassistant 
                        DEPENDS Framework ${HELP_OUT_DIR}/mantid.qhc
 		               ${QTASSISTANT_EXE}
                        )
@@ -172,7 +172,7 @@ find_program ( DVIPNG_EXE dvipng )
    # Installation settings
    ###########################################################################################
    set ( GUI_HELP_DEST share/doc )
-
+   # must "make qtassistant" before "make package" otherwise there will be a build failure
    install ( DIRECTORY   ${HELP_QCH_DIR} ${HELP_HTML_DIR} ${HELP_IMG_DIR}
              DESTINATION ${GUI_HELP_DEST} )
    install (FILES ${HELP_OUT_DIR}/mantid.qhc
