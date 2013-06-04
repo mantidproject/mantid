@@ -167,13 +167,11 @@ private:
      */
     class DeleteQueryBox : public QMessageBox{
     public: 
-      DeleteQueryBox(const QString & path, Mantid::API::SCRIPTSTATUS status, QWidget* parent = 0);
+      DeleteQueryBox(const QString & path, QWidget* parent = 0);
       virtual ~DeleteQueryBox(); 
-      bool deleteCentral(); 
-      QString comment(); 
+      QString comment();
     private: 
       QTextEdit * comment_te; 
-      QCheckBox * delete_ck; 
     };
 
 public:
@@ -216,9 +214,6 @@ public:
 
  signals:
     void executingThread(bool);
- protected:
-    /// Implements the  QAbstractItemModel::removeRows to allow deleting rows from the view.
-    bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
 private:
     /// auxiliary method to populate the model
     void setupModelData(RepoItem *parent);
