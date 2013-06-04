@@ -190,7 +190,7 @@ public:
     ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "4");
     ConfigService::Instance().setString("testdatalistener.m_newStatus", "4" /* ILiveListener::EndRun */);
 
-    boost::shared_ptr<MonitorLiveData> alg1 = makeAlgo("fake1", "", "Add", "Rename", "0.15");
+    boost::shared_ptr<MonitorLiveData> alg1 = makeAlgo("fake2", "", "Add", "Rename", "0.15");
     // Run this algorithm until that chunk #
     if (!runAlgoUntilChunk(alg1, 7)) return;
 
@@ -198,11 +198,11 @@ public:
     alg1->cancel();
 
     // The first workspace got cloned to a new name
-    EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1_0");
+    EventWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2_0");
     TS_ASSERT_EQUALS( ws1->getNumberEvents(), 4*200);
 
     // And this is the current run
-    EventWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1");
+    EventWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2");
     TS_ASSERT_EQUALS( ws2->getNumberEvents(), 3*200);
 
     Poco::Thread::sleep(500);
