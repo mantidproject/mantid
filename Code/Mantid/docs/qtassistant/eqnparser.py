@@ -209,6 +209,8 @@ class Equation:
         if retcode != 0:
             print ' '.join(cmd)
             print output
+            print 'RAW EQUATION "%s"' % self.contents
+            print 'TEX EQUATION "%s"' % self.eqstring
             raise RuntimeError("'%s' returned %d" % (" ".join(cmd), retcode))
 
         # names of generated files
@@ -220,6 +222,8 @@ class Equation:
         if not os.path.exists(self.dvifile):
             print ' '.join(cmd)
             print output
+            print 'RAW EQUATION "%s"' % self.contents
+            print 'TEX EQUATION "%s"' % self.eqstring
             raise RuntimeError("Failed to create dvi file '%s'" % self.dvifile)
 
 	#Open the log file and see if anything went wrong
