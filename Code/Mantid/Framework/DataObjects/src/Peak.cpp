@@ -804,6 +804,14 @@ namespace DataObjects
       throw std::runtime_error("Peak::getValueByColName() unknown column or column is not a number: " + name);
   }
 
+  /**
+  Forwarding function. Exposes the detector position directly.
+  */
+  Mantid::Kernel::V3D Peak::getDetectorPosition() const
+  {
+    return getDetector()->getPos();
+  }
+
 
 
 } // namespace Mantid
