@@ -14,6 +14,12 @@ try:
     HAS_MANTID = True
 except:
     HAS_MANTID = False    
+    
+try:
+    import mantidplot
+    IN_MANTIDPLOT = True
+except:
+    IN_MANTIDPLOT = False
 
 class HFIRDataType(DataType):
     TABLE_NAME="hfir_datatype"
@@ -29,7 +35,11 @@ class HFIRDataSet(DataSet):
     @classmethod
     def load_meta_data(cls, file_path, outputWorkspace):
         try:
-            api.LoadSpice2D(Filename=file_path, OutputWorkspace=outputWorkspace)
+            if IN_MANTIDPLOT:
+                script = "LoadSpice2D(Filename='%s', OutputWorkspace='%s')" % (file_path, outputWorkspace)
+                mantidplot.runPythonScript(script, True)
+            else:
+                api.LoadSpice2D(Filename=file_path, OutputWorkspace=outputWorkspace)
             return True
         except:
             return False
