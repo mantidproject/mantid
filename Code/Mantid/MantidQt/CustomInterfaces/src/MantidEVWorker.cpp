@@ -151,7 +151,10 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
                                          const std::string & ev_ws_name,
                                          const std::string & md_ws_name,
                                                double        maxQ,
-                                               bool          do_lorentz_corr )
+                                               bool          do_lorentz_corr,
+                                               bool          load_det_cal,
+                                         const std::string & det_cal_file,
+                                         const std::string & det_cal_file2  )
 {
   try
   {
@@ -163,6 +166,17 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
 
     if ( !alg->execute() )
       return false;
+
+    if ( load_det_cal )
+    {
+      alg = AlgorithmManager::Instance().create("LoadIsawDetCal");
+      alg->setProperty( "InputWorkspace", ev_ws_name );
+      alg->setProperty( "Filename", det_cal_file );
+      alg->setProperty( "Filename2", det_cal_file2 );
+
+      if ( !alg->execute() )
+        return false;
+    }
 
     std::ostringstream min_str;
     min_str << "-" << maxQ << ",-" << maxQ << ",-" << maxQ;
@@ -227,6 +241,8 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
 {
   try
   {
+                     // Estimate a lower bound on the distance between
+                     // based on the maximum real space cell edge
     double min_separation = 0.9 * 6.28 / max_abc;
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("FindPeaksMD");
     alg->setProperty("InputWorkspace",md_ws_name);

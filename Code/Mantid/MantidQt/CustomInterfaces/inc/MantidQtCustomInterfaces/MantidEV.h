@@ -40,7 +40,10 @@ class RunLoadAndConvertToMD : public QRunnable
                          const std::string    & ev_ws_name,
                          const std::string    & md_ws_name,
                                double           maxQ,
-                               bool             do_lorentz_corr );
+                               bool             do_lorentz_corr,
+                               bool             load_det_cal,
+                         const std::string    & det_cal_file,
+                         const std::string    & det_cal_file2 );
 
   /// Calls worker->loadAndConvertToMD from a separate thread
   void run();
@@ -52,6 +55,9 @@ class RunLoadAndConvertToMD : public QRunnable
     std::string      md_ws_name;
     double           maxQ;
     bool             do_lorentz_corr;
+    bool             load_det_cal;
+    std::string      det_cal_file;
+    std::string      det_cal_file2;
 };
 
 
@@ -203,12 +209,17 @@ private slots:
   /// Slot for the select workspace tab's Apply button 
   void selectWorkspace_slot();
 
-
   /// Slot for the Finished Editing text for loading an event file 
   void loadEventFileEntered_slot();
 
   /// Slot for the Browse button for loading an event file 
   void loadEventFile_slot();
+
+  /// Slot for the Browse button for loading the first calibration file 
+  void selectDetCalFile_slot();
+
+  /// Slot for the Browse button for loading the second calibration file 
+  void selectDetCalFile2_slot();
 
   /// Slot for the find peaks tab's Apply button 
   void findPeaks_slot();
@@ -269,6 +280,9 @@ private slots:
 
   /// Slot to enable/disable the Load Event File controls
   void setEnabledLoadEventFileParams_slot( bool on );
+
+  /// Slot to enable/disable the .DetCal file info
+  void setEnabledLoadCalFiles_slot();
 
   /// Slot to enable/disable the find peaks controls
   void setEnabledFindPeaksParams_slot( bool on );
@@ -334,6 +348,9 @@ private:
   /// Get base file name to form names for event, MD and peaks workspaces
   std::string extractBaseFileName( std::string FullFileName) const;
 
+  /// Get path name from file, or user's home directory
+  QString getFilePath( const std::string & file_name );
+
   /// Get name of file for saving peaks
   void getSavePeaksFileName();
 
@@ -360,6 +377,12 @@ private:
 
   MantidEVWorker *worker;      /// class that uses Mantid algorithms
                                /// to do the actual work
+
+  std::string  last_cal_file;  /// filename of last ISAW DetCal file for
+                               /// the whole instrument or for panel 1 of SNAP
+
+  std::string  last_cal_file2; /// filename of last ISAW DetCal file for
+                               /// panel 2 of SNAP
 
   std::string  last_UB_file;   /// filename of last UB file that was loaded
                                /// or saved from MantidEV, if any.
