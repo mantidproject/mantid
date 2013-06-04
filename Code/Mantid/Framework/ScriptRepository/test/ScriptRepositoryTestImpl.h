@@ -827,9 +827,8 @@ void test_downloading_locally_modified_file(){
   }
 
   /**This test ensure that when you remove a file from the central repository, 
-     the remove method,
-     
-     the entry can not be listed anymore, internally or externally
+
+     the entry will be available only internally as LOCAL_ONLY file. 
    */
   void test_delete_remove_valid_file_from_central_repository(){
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
@@ -845,17 +844,17 @@ void test_downloading_locally_modified_file(){
     TS_ASSERT_THROWS_NOTHING(repo->remove(file_name, "please remove it","noauthor","noemail"));
     
     // you should not find the file, so fileStatus should throw exception entry not inside repository
-    TS_ASSERT_THROWS(repo->fileStatus(file_name),ScriptRepoException);
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::LOCAL_ONLY);
 
     // even if you re-read the repository listing the files
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
 
     // you should not find this file agin
-    TS_ASSERT_THROWS(repo->fileStatus(file_name),ScriptRepoException);
+    TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::LOCAL_ONLY);
 
-    // assert file does not exists inside the local folder
+    // assert file does exist inside the local folder
     Poco::File f(std::string(local_rep).append(file_name));
-    TS_ASSERT(!f.exists());
+    TS_ASSERT(f.exists());
   }
 
  
@@ -885,31 +884,6 @@ void test_delete_remove_valid_file_from_central_repository_simulate_server_rejec
   TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED) ;
 }
 
-/**
-   Test what happens with a file is removed only locally (remove_local).
-   If the file existed in the central repository, after removing the local copy, 
-   its state must be REMOVE_ONLY
- */
- void test_delete_remove_file_locally(){
-   TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
-   TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-   std::string file_name = "TofConv/TofConverter.py";
-   // download
-   TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
-  
-  // it must be unchanged
-  TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::BOTH_UNCHANGED) ;
-
-  // now, lets delete this file locally
-  TS_ASSERT_THROWS_NOTHING(repo->remove_local(file_name)); 
-
-  // you should find the file but status REMOTE_ONLY
-  TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY) ; 
-  // nothing should change listing all the files again
-  TS_ASSERT_THROWS_NOTHING(repo->listFiles());
-  TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY) ; 
- }
-
  /** Test invalid entry for removing files, when they are not local (not downloaded)
      
      Ensure that removing from the central repository is not allowed, if the file has
@@ -919,8 +893,7 @@ void test_delete_remove_valid_file_from_central_repository_simulate_server_rejec
    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep)); 
    TS_ASSERT_THROWS_NOTHING(repo->listFiles());
    std::string file_name = "TofConv/TofConverter.py";
-
-   
+  
    // attempt to remove file that is not local (no download was done)
    // it must throw exception, to inform that it is not allowed to remove it.
    TS_ASSERT_THROWS(repo->remove(file_name, "please remove it","noauthor","noemail")

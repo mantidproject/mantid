@@ -491,13 +491,13 @@ They will work as was expected for folders @ref folders-sec.
                 const std::string & email)  = 0;
 
     /**
-       Delete the file from the local folder and from the remote repository. 
+       Delete the file from the remote repository (it does not touch the local copy). 
        After this, the file will not be available for anyone among the users. As so,
        it is required a justification of why to remove (the comment), and the current
        rule accept that only the owner of the file (which is considered the last one 
        to use the file) is allowed to remove it. 
 
-       The file must be removed from the central repository (git)
+       The file will be removed from the central repository (git)
 
        @note This operation requires internet connection.
 
@@ -517,15 +517,6 @@ They will work as was expected for folders @ref folders-sec.
     virtual void remove(const std::string & file_path, const std::string & comment,
                 const std::string & author, 
                 const std::string & email)  = 0;
-    /** Delete the file from the local repository only. It does not touch the central repository. 
-        
-        This operation does not require internet connection. Although it is not strictly necessary
-        to remove files using this method remove_local, because, the ScriptRepository does recognize
-        files being removed from the folder, it may be used for convenience. 
-
-        @param file_path for the file to be deleted.
-     */
-    virtual void remove_local(const std::string & file_path) = 0; 
 
     /** Define the file patterns that will not be listed in listFiles. 
         This is important to force the ScriptRepository to not list hidden files, 
