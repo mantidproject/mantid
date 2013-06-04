@@ -43,29 +43,13 @@ class UpdateDAEThread;
 class ProjectData;
 
 /**
- * This class helps displaying a MantidMatrix in a 2D or 3D graph.
+ * Find the minimum and maximum Y values in a matrix workspace.
+ *
+ * @param ws :: A matrix workspace.
+ * @param miny :: Variable to receive the minimum value.
+ * @param maxy :: Variable to receive the maximum value.
  */
-class MantidMatrixFunction: public Function2D
-{
-public:
-  MantidMatrixFunction(MantidMatrix* wsm);
-  double operator()(double x, double y);
-  double getMinPositiveValue()const;
-  QString saveToString() const;
-  void init();
-  int numRows()const;
-  int numCols()const;
-  double value(int row,int col)const;
-  /// Return in ymin and ymax the inetrval the row takes on the y axis
-  void getRowYRange(int row,double& ymin, double& ymax)const;
-  /// Return in xmin and xmax the inetrval the cell takes on the x axis
-  void getRowXRange(int row,double& xmin, double& xmax)const;
-  const Mantid::MantidVec& getMantidVec(int row)const;
-private:
-  QPointer<MantidMatrix> m_matrix;
-  double m_dx,m_dy;
-  double m_outside;
-};
+void findYRange(Mantid::API::MatrixWorkspace_const_sptr ws, double &miny, double &maxy);
 
 /** MantidMatrix is the class that represents a Qtiplot window for displaying workspaces.
     It has separate tabs for displaying spectrum values, bin boundaries, and errors.
@@ -100,7 +84,6 @@ class MantidMatrix : public MdiSubWindow, MantidQt::API::WorkspaceObserver
 public:
 
   MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name = QString(), int start=-1, int end=-1);
-  ~MantidMatrix();
 
   void connectTableView(QTableView*,MantidMatrixModel*);
   MantidMatrixModel * model(){return m_modelY;};
@@ -133,7 +116,6 @@ public:
 
   void setSpectrumGraph(MultiLayer* ml, Table* t=0);
   void setBinGraph(MultiLayer* ml, Table* t=0);
-  void removeWindow();
 
   bool setSelectedRows();
   bool setSelectedColumns();
@@ -258,9 +240,9 @@ protected:
   QTableView *m_table_viewY;
   QTableView *m_table_viewX;
   QTableView *m_table_viewE;
-  MantidMatrixModel *m_modelY;
-  MantidMatrixModel *m_modelX;
-  MantidMatrixModel *m_modelE;
+  QPointer<MantidMatrixModel> m_modelY;
+  QPointer<MantidMatrixModel> m_modelX;
+  QPointer<MantidMatrixModel> m_modelE;
   QColor m_bk_color;
   QPixmap m_matrix_icon;
   double x_start,             //!< X value corresponding to column 1
@@ -283,7 +265,7 @@ protected:
   QVector<MultiLayer*> m_plots2D;
   QMap< MultiLayer*,Table* > m_plots1D;
 
-  MantidMatrixFunction m_funct;
+  //MantidMatrixFunction m_funct;
   int m_column_width;
 
   QAction *m_actionShowX;
@@ -304,6 +286,9 @@ private:
 
   friend class MantidMatrixFunction;
 };
+
+/// Typedef for a shared pointer to a MantidMatrix
+typedef QSharedPointer<MantidMatrix> MantidMatrix_sptr;
 
 class ProjectData
 {

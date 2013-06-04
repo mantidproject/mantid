@@ -100,7 +100,7 @@ void MantidMatrixDialog::apply()
     d_matrix->setRange(yMin,yMax);
 }
 
-void MantidMatrixDialog::setMatrix(MantidMatrix *m)
+void MantidMatrixDialog::setMatrix(MantidMatrix* m)
 {
     if (!m)
         return;

@@ -74,9 +74,9 @@ public slots:
 	void initPlot();
 	void initCoord();
     void addFunction(Function2D* hfun, double xl, double xr, double yl,
-                          double yr, double zl, double zr, int columns, int rows);
+                          double yr, double zl, double zr, size_t columns, size_t rows);
     void addFunction(const QString& formula, double xl, double xr, double yl,
-                          double yr, double zl, double zr, int columns, int rows);
+                          double yr, double zl, double zr, size_t columns, size_t rows);
     void addParametricSurface(const QString& xFormula, const QString& yFormula,
 						const QString& zFormula, double ul, double ur, double vl, double vr,
 						int columns, int rows, bool uPeriodic, bool vPeriodic);
@@ -109,7 +109,7 @@ public slots:
 
 	//! \name User Functions
 	//@{
-    Function2D* userFunction(){return d_func;};
+    Function2D* userFunction(){ return d_func.data();  }
     QString formula();
 	//@}
 
@@ -384,8 +384,8 @@ private:
 	PointStyle pointStyle;
 	Table *d_table;
 	Matrix *d_matrix;
-    Qwt3D::SurfacePlot* sp;
-    Function2D *d_func;
+    QPointer<Qwt3D::SurfacePlot> sp;
+    QScopedPointer<Function2D> d_func;
 	UserParametricSurface *d_surface;
 	Qwt3D::PLOTSTYLE style_;
 	

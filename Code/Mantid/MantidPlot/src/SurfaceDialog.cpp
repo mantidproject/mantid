@@ -286,8 +286,8 @@ void SurfaceDialog::setFunction(Graph3D *g)
 		return;
 
     boxFunction->setCurrentText(f->formula());
-	boxFuncColumns->setValue(f->columns());
-	boxFuncRows->setValue(f->rows());
+    boxFuncColumns->setValue(static_cast<int>(f->columns()));
+    boxFuncRows->setValue(static_cast<int>(f->rows()));
 
 	boxXFrom->setText(QString::number(g->xStart()));
 	boxXTo->setText(QString::number(g->xStop()));

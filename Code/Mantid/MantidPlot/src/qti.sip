@@ -1260,7 +1260,7 @@ public:
   double dataX(int,int) const;
   double dataY(int,int) const;
   double dataE(int,int) const;
-  int indexX(int,double) const;
+  //int indexX(int,double) const;
   Graph3D* plotGraph3D(int = 3);
   MultiLayer* plotGraph2D(Graph::CurveType = Graph::ColorMap);
   void goToTab(const QString &);	 

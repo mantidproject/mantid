@@ -2,6 +2,7 @@
 #define MANTIDMATRIXDIALOG_H
 
 #include <QDialog>
+#include <QPointer>
 
 class MantidMatrix;
 class QPushButton;
@@ -32,7 +33,7 @@ private slots:
 	void showPrecisionBox(int item);
 
 private:
-    MantidMatrix *d_matrix;
+    MantidMatrix* d_matrix;
 
     QPushButton* buttonOk;
 	QPushButton* buttonCancel;

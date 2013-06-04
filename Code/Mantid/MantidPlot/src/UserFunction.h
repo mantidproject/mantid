@@ -5,6 +5,7 @@
 
 #include <qwt3d_function.h>
 #include <QString>
+#include <QObject>
 
 /**
  * @brief The Function2D class is the base class for 2D functions to be used
@@ -22,6 +23,10 @@
  *      QString saveToString() const ;
  *          which must record any parameters needed to re-create the function.
  *
+ * Concrete classes can implement virtual functions:
+ *
+ *    void connectToViewer(QObject* viewer);
+ *          to connect to a viewer object (eg Graph3D)
  */
 class Function2D : public Qwt3D::Function
 {
@@ -31,11 +36,14 @@ public:
     virtual double getMinPositiveValue()const = 0;
     /// Save function parameters to a string.
     virtual QString saveToString() const = 0;
-    unsigned int rows() const {return d_rows;}
-    unsigned int columns() const {return d_columns;}
-    void setMesh (unsigned int columns, unsigned int rows);
+    /// Connect to a viewer object
+    virtual void connectToViewer(QObject*) {}
+
+    size_t rows() const {return d_rows;}
+    size_t columns() const {return d_columns;}
+    void setMesh (size_t columns, size_t rows);
 private:
-      unsigned int d_rows, d_columns;
+      size_t d_rows, d_columns;
 };
 
 

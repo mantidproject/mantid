@@ -11,9 +11,9 @@ Function2D::Function2D():
 {
 }
 
-void Function2D::setMesh (unsigned int columns, unsigned int rows)
+void Function2D::setMesh (size_t columns, size_t rows)
 {
-    Function::setMesh (columns, rows);
+    Function::setMesh (static_cast<unsigned int>(columns), static_cast<unsigned int>(rows));
     d_columns = columns;
     d_rows = rows;
 }
