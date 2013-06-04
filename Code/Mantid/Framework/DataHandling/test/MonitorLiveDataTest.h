@@ -63,19 +63,6 @@ public:
     return alg;
   }
   
-  /** Create and run the algorithm asynchronously */
-  void test_runAsync()
-  {
-    IAlgorithm_sptr alg = makeAlgo("fake1");
-    Poco::ActiveResult<bool> res1 = alg->executeAsync();
-    Poco::Thread::sleep(100); // give it some time to start
-
-    // Abort the thread.
-    alg->cancel();
-    res1.wait(10000);
-    //TS_ASSERT( AnalysisDataService::Instance().doesExist("fake1") );
-  }
-
   /** Disallow if you detect another MonitorLiveData thread with the same */
   void test_DontAllowTwoAlgorithmsWithSameOutput()
   {
