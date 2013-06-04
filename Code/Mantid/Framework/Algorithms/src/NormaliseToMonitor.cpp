@@ -589,10 +589,10 @@ void NormaliseToMonitor::normaliseBinByBin(const API::MatrixWorkspace_sptr& inpu
     else
     {
       // ----------------------------------- Workspace2D ---------------------------------------
-      const MantidVec& inY = inputWorkspace->readY(i);
-      const MantidVec& inE = inputWorkspace->readE(i);
       MantidVec& YOut = outputWorkspace->dataY(i);
       MantidVec& EOut = outputWorkspace->dataE(i);
+      const MantidVec& inY = inputWorkspace->readY(i);
+      const MantidVec& inE = inputWorkspace->readE(i);
       outputWorkspace->dataX(i) = inputWorkspace->readX(i);
       // The code below comes more or less straight out of Divide.cpp
       for (MantidVec::size_type k = 0; k < specLength; ++k)
