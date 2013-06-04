@@ -359,7 +359,7 @@ namespace Crystal
     inWS = getProperty("InputWorkspace");
     
     // For quickly looking up workspace index from det id
-    wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap(false);
+    wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap();
 
     eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inWS );
     if(eventW)

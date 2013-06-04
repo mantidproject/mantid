@@ -557,6 +557,17 @@ public:
     TSM_ASSERT("If any detector is not masked, return false", !inst->isDetectorMasked(dets) );
   }
 
+  void test_hasGroupedDetectors()
+  {
+    auto ws = makeWorkspaceWithDetectors(5, 1);
+    bool result =ws->hasGroupedDetectors();
+    TS_ASSERT_EQUALS( ws->hasGroupedDetectors(), false);
+
+	ws->getSpectrum(0)->addDetectorID(3);
+    TS_ASSERT_EQUALS( ws->hasGroupedDetectors(), true);
+ 
+  }
+
   void test_getDetectorIDToWorkspaceIndexMap()
   {
     auto ws = makeWorkspaceWithDetectors(5, 1);
@@ -571,7 +582,7 @@ public:
 
     ws->getSpectrum(2)->addDetectorID(99); // Set a second ID on one spectrum
     TS_ASSERT_THROWS( ws->getDetectorIDToWorkspaceIndexMap(true), std::runtime_error );
-    boost::scoped_ptr<detid2index_map> idmap2(ws->getDetectorIDToWorkspaceIndexMap(false));
+    boost::scoped_ptr<detid2index_map> idmap2(ws->getDetectorIDToWorkspaceIndexMap());
     TS_ASSERT_EQUALS( idmap2->size(), 6 );
   }
 
@@ -580,7 +591,7 @@ public:
     auto ws = makeWorkspaceWithDetectors(100, 10);
     std::vector<size_t> out;
     detid_t offset = -1234;
-    TS_ASSERT_THROWS_NOTHING( ws->getDetectorIDToWorkspaceIndexVector(out, offset, false) );
+    TS_ASSERT_THROWS_NOTHING( ws->getDetectorIDToWorkspaceIndexVector(out, offset) );
     TS_ASSERT_EQUALS( offset, 0);
     TS_ASSERT_EQUALS( out.size(), 100);
     TS_ASSERT_EQUALS( out[0], 0);

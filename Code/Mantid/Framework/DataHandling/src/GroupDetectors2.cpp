@@ -484,7 +484,7 @@ void GroupDetectors2::processXMLFile(std::string fname,
     axis->getSpectraIndexMap(specs2index);
   }
 
-  detid2index_map* detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap(false);
+  detid2index_map* detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap();
 
   // 2. Load XML file
   DataHandling::LoadGroupXMLFile loader;

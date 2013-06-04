@@ -341,6 +341,30 @@ namespace Mantid
       }
     }
 
+	//---------------------------------------------------------------------------------------
+    /** Does the workspace has any grouped detectors?
+    *  @return true if the workspace has any grouped detectors, otherwise false
+    */
+    bool MatrixWorkspace::hasGroupedDetectors() const
+    {
+      bool retVal = false;
+
+      //Loop through the workspace index
+      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
+      {
+        auto detList = getSpectrum(workspaceIndex)->getDetectorIDs();
+        if (detList.size() > 1)
+        {
+			retVal=true;
+			break;
+        }
+      }
+      return retVal;
+    }
+
+
+
+
     //---------------------------------------------------------------------------------------
     /** Return a map where:
     *    KEY is the DetectorID (pixel ID)
