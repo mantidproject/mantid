@@ -193,8 +193,14 @@ class Equation:
                 if self.eqstring[index-1] == "\\": # it is already escaped
                     index = self.eqstring.find('%', index+1)
                 else:
+                    print "automatically fixing un-escaped percent signs"
                     self.eqstring = self.eqstring[:index] + "\\" + self.eqstring[index:]
                     index = self.eqstring.find('%', index+2) # added a character
+
+        # fix prime
+        if "'" in self.eqstring:
+            print "automatically fixing prime characters"
+            self.eqstring = self.eqstring.replace("'", "\prime")
 
         # turn everything else bad to junky mbox
         lowercase = self.eqstring.lower()
