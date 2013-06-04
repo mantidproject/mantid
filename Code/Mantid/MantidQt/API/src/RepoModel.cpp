@@ -410,6 +410,7 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
       }
       downloading_path = QString::fromStdString(path);
       download_index = index;
+      emit executingThread(true);
       download_threads = QtConcurrent::run(download_thread, repo_ptr, path);
       download_watcher.setFuture(download_threads);       
       ret = true;
@@ -447,7 +448,8 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
         qDebug() << "Uploading... "<< QString::fromStdString(path) << form->comment()
                    << form->author() << form->email() << endl;
         uploading_path = QString::fromStdString(path); 
-
+        upload_index = index;
+        emit executingThread(true);
         upload_threads = QtConcurrent::run(upload_thread, repo_ptr, path, form->email(), 
                                            form->author(), form->comment()); 
         upload_watcher.setFuture(upload_threads); 
@@ -532,8 +534,9 @@ bool RepoModel::setData(const QModelIndex & index, const QVariant & value,
       // we have all we need to delete from the central repository
       // execute the delete in a separate thread, we will use the upload established way, because,
       // it will connect to the same server to delete.
-      delete_index = index;
-      uploading_path = QString::fromStdString(path); 
+      upload_index = index;
+      uploading_path = QString::fromStdString(path);
+      emit executingThread(true);
       upload_threads = QtConcurrent::run(delete_thread, repo_ptr, path, 
                                          email, author, comment);
       upload_watcher.setFuture(upload_threads); 
@@ -929,6 +932,7 @@ void RepoModel::downloadFinished(void){
   }
   downloading_path = nofile_flag;
   emit dataChanged(download_index, download_index);
+  emit executingThread(false);
 }
 
   
@@ -940,7 +944,7 @@ bool RepoModel::isDownloading(const QModelIndex & index)const{
 }
 
 
-void RepoModel::uploadFinished(void){  
+void RepoModel::uploadFinished(void){
   QString info = upload_threads.result();
   bool _delete = false;
   QString title =  "Upload Failed"; 
@@ -964,11 +968,13 @@ void RepoModel::uploadFinished(void){
       repo_ptr->fileStatus(uploading_path.toStdString());
     }catch(...){
       // this means that this entry is not inside the ScriptRepository any more.
-      RepoItem * item = static_cast<RepoItem*>(delete_index.internalPointer());
+      RepoItem * item = static_cast<RepoItem*>(upload_index.internalPointer());
       removeRow(item->row(), createIndex(0,0,item->parent()));
     }
   }
   uploading_path = nofile_flag;
+  emit dataChanged(upload_index, upload_index);
+  emit executingThread(false);
 }
 
   

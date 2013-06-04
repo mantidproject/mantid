@@ -129,6 +129,7 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
     ui->setupUi(this);
     connect(ui->reloadPushButton, SIGNAL(clicked()),this,SLOT(updateModel()));
     connect(ui->pbHelp, SIGNAL(clicked()),this,SLOT(helpClicked()));
+    connect(model, SIGNAL(executingThread(bool)),ui->reloadPushButton, SLOT(setDisabled(bool)));
 
     // setup the model and delegates   
     ui->repo_treeView->setModel(model);
@@ -155,6 +156,7 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
   void ScriptRepositoryView::updateModel(){
     RepoModel * before = model; 
     model = new RepoModel(); 
+    connect(model, SIGNAL(executingThread(bool)),ui->reloadPushButton, SLOT(setDisabled(bool)));
     ui->repo_treeView->setModel(model); 
     delete before; 
   }

@@ -212,7 +212,10 @@ public:
 
     QString fileDescription(const QModelIndex & index); 
     QString filePath(const QModelIndex & index);
-    QString author(const QModelIndex& index); 
+    QString author(const QModelIndex& index);
+
+ signals:
+    void executingThread(bool);
  protected:
     /// Implements the  QAbstractItemModel::removeRows to allow deleting rows from the view.
     bool removeRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
@@ -257,7 +260,7 @@ private:
     QFutureWatcher<QString> upload_watcher;
     // keep track of the file being used to the connection with uploader
     QString uploading_path;
-    QModelIndex delete_index;
+    QModelIndex upload_index;
     // check if the file pointed by the index is inside a connection with uploader
     bool isUploading(const QModelIndex & index)const ; 
     private slots:
