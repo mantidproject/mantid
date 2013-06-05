@@ -203,6 +203,27 @@ public:
     AnalysisDataService::Instance().remove("A_InputWSA_1");
   }
 
+  void TestGroupExec()
+  {
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+    WorkspaceGroup_sptr group(new WorkspaceGroup);
+    ads.add("oldName",group);
+    MatrixWorkspace_sptr member1 = createWorkspace();
+    ads.add("oldName_1",member1);
+    group->add("oldName_1");
+    MatrixWorkspace_sptr member2 = createWorkspace();
+    ads.add("oldName_2",member2);
+    group->add("oldName_2");
+
+    Mantid::Algorithms::RenameWorkspaces algG;
+    algG.initialize();
+    algG.setRethrows( true ); // Ensure exceptions are thrown to this test
+    TS_ASSERT_THROWS_NOTHING( algG.setPropertyValue("InputWorkspaces", "oldName") );
+    TS_ASSERT_THROWS_NOTHING( algG.setPropertyValue("WorkspaceNames", "newName") );
+    TS_ASSERT_THROWS_NOTHING( algG.execute() );
+    TS_ASSERT( algG.isExecuted());
+  }
+
 
   MatrixWorkspace_sptr createWorkspace()
   {
