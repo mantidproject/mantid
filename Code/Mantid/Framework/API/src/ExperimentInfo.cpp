@@ -176,6 +176,21 @@ namespace API
     std::string paramName;
     double value; };
 
+  /** HACK -- the internal function which allows to interpret string values found in IDF parameters file as boolean 
+   *  it is hack as this funtion should be somewhere else. 
+   *
+   *@param boolType -- the string representation of the boolean value one wants to compare. 
+   *@return  True if the name within of the list of true names, and false otherwise
+  */
+  const char * TrueNames[2 ]={"True","Yes"};
+  bool convertBool(const std::string &boolType)
+  {
+      for(int i=0;i<2;i++)
+      {
+          if(std::strcmp(boolType.c_str(),TrueNames[i])==0)return true;
+      }
+      return false;
+  }
 
   //---------------------------------------------------------------------------------------
   /** Add parameters to the instrument parameter map that are defined in instrument
@@ -256,9 +271,13 @@ namespace API
       std::string paramN = ((*it).second)->m_paramName;
       std::string category = ((*it).second)->m_type;
 
-      // if category is sting no point in trying to generate a double from parameter
+      bool is_string_val =  (category.compare("string") == 0);
+      bool is_bool_val  =  (category.compare("bool") == 0);
+      bool is_double_val = !(is_string_val || is_bool_val);
+
+      // if category is not double sting no point in trying to generate a double from parameter
       double value = 0.0;
-      if ( category.compare("string") != 0 )
+      if ( is_double_val)
         value = ((*it).second)->createParamValue(dummy);
 
       if ( category.compare("fitting") == 0 )
@@ -270,10 +289,16 @@ namespace API
           << ((*it).second)->m_formulaUnit << " , " << ((*it).second)->m_resultUnit << " , " << (*(((*it).second)->m_interpolation));
         paramMap.add("fitting",((*it).second)->m_component, paramN, str.str());
       }
-      else if ( category.compare("string") == 0 )
+      else if (is_string_val)
       {
         paramMap.addString(((*it).second)->m_component, paramN, ((*it).second)->m_value);
       }
+      else if (is_bool_val )
+      {
+          bool b_val = convertBool(((*it).second)->m_value);
+          paramMap.addBool(((*it).second)->m_component,paramN,b_val);
+      }
+
       else
       {
         if (paramN.compare("x") == 0 || paramN.compare("y") == 0 || paramN.compare("z") == 0)

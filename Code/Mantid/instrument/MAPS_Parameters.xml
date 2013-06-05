@@ -61,11 +61,11 @@
       <value val="bkgd-range-min,bkgd-range-max"/>
 </parameter>
 <!-- Remove the count rate seen in the regions of the histograms defined as the background regions -->
-<parameter name="background">
+<parameter name="background"  type="bool">
    <value val="False"/>
 </parameter>
 <!-- True if background is to be checked UNUSED PROPERTY !!! -->
-<parameter name="check_background">
+<parameter name="check_background"  type="bool">
   <value val="True"/>
 </parameter>
 
@@ -215,7 +215,7 @@
     <value val="0"/>
 </parameter>
 <!-- True if the bleed tests should be run use_bleeding-->
-<parameter name="diag_bleed_test">
+<parameter name="diag_bleed_test"  type="bool">
     <value val="False"/>
 </parameter>
 
@@ -226,7 +226,7 @@
 </parameter>
 
 <!-- if defined to true, fix incident energy to this value and do not calculate the energy from the run -->
-<parameter name="fixei">
+<parameter name="fixei"  type="bool">
     <value val="False"/>
 </parameter>
 
@@ -236,7 +236,7 @@
 </parameter>
 
 
-<parameter name="sum_runs">
+<parameter name="sum_runs"  type="bool">
    <value val="False"/>
 </parameter>
 
