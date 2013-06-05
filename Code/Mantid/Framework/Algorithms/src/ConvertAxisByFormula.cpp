@@ -1,0 +1,179 @@
+#include "MantidAlgorithms/ConvertAxisByFormula.h"
+#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidGeometry/muParser_Silent.h"
+#include "MantidAPI/RefAxis.h"
+
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
+#include <sstream>
+
+namespace Mantid
+{
+namespace Algorithms
+{
+
+   using namespace Kernel;
+   using namespace API;
+   
+   // Register the class into the algorithm factory
+   DECLARE_ALGORITHM(ConvertAxisByFormula)
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   */
+  ConvertAxisByFormula::ConvertAxisByFormula()
+  {
+  }
+    
+  //----------------------------------------------------------------------------------------------
+  /** Destructor
+   */
+  ConvertAxisByFormula::~ConvertAxisByFormula()
+  {
+  }
+  
+  const std::string ConvertAxisByFormula::name() const
+  {
+    return ("ConvertAxisByFormula");
+  }
+    
+  int ConvertAxisByFormula::version() const
+  {
+    return (1);
+  }
+
+  const std::string  ConvertAxisByFormula::category() const
+  {
+    return "Transforms\\Axes";
+  }
+
+  /** Initialisation method. Declares properties to be used in algorithm.
+  *
+  */
+  void ConvertAxisByFormula::init()
+  {
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+      "Name of the input workspace");
+    declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+      "Name of the output workspace");
+
+    std::vector<std::string> axisOptions;
+    axisOptions.push_back("X");
+    axisOptions.push_back("Y");
+    declareProperty("Axis","X",boost::make_shared<StringListValidator>(axisOptions),
+      "The axis to modify (default: X)");
+
+
+    declareProperty("Formula", "", "The formula to use to convert the values, x or y may be used to refer to the axis values");
+
+
+    declareProperty("axisTitle", "", "The label of he new axis.");
+    declareProperty("AxisUnits", "", "The units of the new axis.");
+
+  }
+
+  /** Execution of the algorithm
+  *
+  */
+  void ConvertAxisByFormula::exec()
+  {
+    //get the property values
+    MatrixWorkspace_sptr inputWs=getProperty("InputWorkspace");
+    std::string axis = getProperty("Axis");
+    std::string formula = getProperty("Formula");
+    std::string axisTitle = getProperty("AxisTitle");
+    std::string axisUnits = getProperty("AxisUnits");
+
+    // Just overwrite if the change is in place
+    MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
+    if (outputWs != inputWs)
+    {
+      IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
+      duplicate->initialize();
+      duplicate->setProperty<Workspace_sptr>("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWs));
+      duplicate->execute();
+      Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
+      outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+      setProperty("OutputWorkspace", outputWs);
+    }
+
+    //Get the axis
+    int axisIndex = 0; //assume X
+    if (axis=="Y")
+    {
+      axisIndex=1;
+    }
+    Axis* axisPtr = outputWs->getAxis(axisIndex);
+
+    if (!axisPtr->isNumeric())
+    {
+      throw std::invalid_argument("This algorithm only operates on numeric axes");
+    }
+
+    bool isRefAxis = false;
+    Axis* refAxisPtr = dynamic_cast<RefAxis>(axisPtr);
+    if (refAxisPtr != NULL)
+    {
+      isRefAxis = true;
+    }
+
+    double axisValue(0);
+    //Create muparser
+    try
+    {
+      mu::Parser p;
+      //set parameter lookups for the axis value, allow both cases
+      p.DefineVar("y", &axisValue);
+      p.DefineVar("x", &axisValue);
+      p.DefineVar("Y", &axisValue);
+      p.DefineVar("X", &axisValue);
+      p.SetExpr(formula);
+      try
+      {
+        size_t axisLength = axisPtr->length();
+        for (int i=0;i>=axisLength;++i)
+        {
+          if (isRefAxis)
+          {
+            axisValue = axisPtr->getValue(i);
+            double result = p.Eval();
+            axisPtr->setValue(i,result);
+          }
+          else
+                      {
+            axisValue = axisPtr->getValue(i);
+            double result = p.Eval();
+            axisPtr->setValue(i,result);
+          }
+        }
+      }
+      catch (mu::Parser::exception_type &e)
+      {
+        std::stringstream ss;
+        ss << "Failed while processing axis values"  << ". Muparser error message is: " << e.GetMsg();
+        throw std::invalid_argument(ss.str());
+      }
+    }
+    catch (mu::Parser::exception_type &e)
+    {
+      std::stringstream ss;
+      ss << "Cannot process the formula"  << ". Muparser error message is: " << e.GetMsg();
+      throw std::invalid_argument(ss.str());
+    }
+
+    if (axisUnits!="")
+    {
+      axisPtr->setUnit(axisUnits);
+    }
+    if (axisTitle!="")
+    {
+      axisPtr->title() = axisTitle;
+    }
+
+  }
+
+
+} // namespace Algorithms
+} // namespace Mantid
