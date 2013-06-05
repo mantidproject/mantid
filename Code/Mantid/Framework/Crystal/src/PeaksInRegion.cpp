@@ -142,28 +142,33 @@ namespace Crystal
 
     const int nPeaks = ws->getNumberPeaks();
 
-    Mantid::DataObjects::TableWorkspace_sptr outputWorkspace = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    Mantid::DataObjects::TableWorkspace_sptr outputWorkspace = boost::make_shared<Mantid::DataObjects::TableWorkspace>(ws->rowCount());
     outputWorkspace->addColumn("int", "PeakIndex");
     outputWorkspace->addColumn("bool", "Intersecting");
 
     // Candidate for parallelisation.
+    PARALLEL_FOR2(ws, outputWorkspace)
     for(int i = 0; i < nPeaks; ++i)
     {
+      PARALLEL_START_INTERUPT_REGION
       IPeak* peak =  ws->getPeakPtr(i);
       V3D peakCenter = coordFrameFunc(peak);
 
       bool doesIntersect = true;
       if (peakCenter[0] < extents[0] || peakCenter[0] >= extents[1]
-      || peakCenter[1] < extents[2] || peakCenter[1] >= extents[3]
+      || peakCenter[1] < extents[2] || peakCenter[1] >= extents[3] 
       || peakCenter[2] < extents[4] || peakCenter[2] >= extents[5]) 
       {
         // Out of bounds.
         doesIntersect = false;
       }
 
-      TableRow row = outputWorkspace->appendRow();
+      TableRow row = outputWorkspace->getRow(i);
       row << i << doesIntersect;
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
+
 
     setProperty("OutputWorkspace", outputWorkspace);
   }
