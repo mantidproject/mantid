@@ -76,6 +76,8 @@ namespace Mantid
                                         const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
     {
       (void) lhsX; //Avoid compiler warning
+      if (rhsY == 0) g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero." << std::endl;
+
       // Do the right-hand part of the error calculation just once
       const double rhsFactor = pow(rhsE/rhsY,2);
       const int bins = static_cast<int>(lhsE.size());
