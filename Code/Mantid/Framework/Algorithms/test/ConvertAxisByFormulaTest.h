@@ -16,7 +16,7 @@ public:
   static ConvertAxisByFormulaTest *createSuite() { return new ConvertAxisByFormulaTest(); }
   static void destroySuite( ConvertAxisByFormulaTest *suite ) { delete suite; }
 
-   void testSquareX()
+  void testSquareXRefAxis()
   {
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
@@ -33,10 +33,19 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Formula","x*x") )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis","X") )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AxisTitle","XTitle") )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AxisUnits","XUnit") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AxisUnits","") )
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() )
     TS_ASSERT( alg.isExecuted() )
+	
+	if (!alg.isExecuted())
+	{
+		if (AnalysisDataService::Instance().doesExist(inputWs))
+		{
+			AnalysisDataService::Instance().remove(inputWs);
+		}
+		return;
+	}
 
     MatrixWorkspace_const_sptr in,result;
     TS_ASSERT_THROWS_NOTHING( in = boost::dynamic_pointer_cast<MatrixWorkspace>
@@ -51,9 +60,74 @@ public:
       TS_ASSERT_EQUALS( it->Y(), inIt->Y() )
       TS_ASSERT_EQUALS( it->E(), inIt->E() )
     }
+	
+	
+	if (AnalysisDataService::Instance().doesExist(inputWs))
+	{
+		AnalysisDataService::Instance().remove(inputWs);
+	}
+	if (AnalysisDataService::Instance().doesExist(resultWs))
+	{
+		AnalysisDataService::Instance().remove(resultWs);
+	}
+	
+	
+  }
 
-    AnalysisDataService::Instance().remove(inputWs);
-    AnalysisDataService::Instance().remove(resultWs);
+  void testTenTimesXNumericAxis()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    Mantid::Algorithms::ConvertAxisByFormula alg;
+    alg.initialize();
+
+    std::string inputWs= alg.name() + "_testSquareXNumeric_Input";
+    std::string resultWs= alg.name() + "_testSquareXNumeric_Result";
+
+    AnalysisDataService::Instance().add(inputWs,WorkspaceCreationHelper::Create2DWorkspace123(10,10));
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace",inputWs) )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace",resultWs) )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Formula","x*10") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Axis","X") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AxisTitle","XTitle") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("AxisUnits","") )
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute() )
+    TS_ASSERT( alg.isExecuted() )
+	
+	if (!alg.isExecuted())
+	{
+		if (AnalysisDataService::Instance().doesExist(inputWs))
+		{
+			AnalysisDataService::Instance().remove(inputWs);
+		}
+		return;
+	}
+
+    MatrixWorkspace_const_sptr in,result;
+    TS_ASSERT_THROWS_NOTHING( in = boost::dynamic_pointer_cast<MatrixWorkspace>
+                                (AnalysisDataService::Instance().retrieve(inputWs)) )
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<MatrixWorkspace>
+                                (AnalysisDataService::Instance().retrieve(resultWs)) )
+
+	Axis* ax= result->getAxis(0);
+	for (int i = 0;i>=ax->length();++i)
+	{
+		TS_ASSERT_DELTA(ax->getValue(i),10.0,0.0001);
+	}
+	
+	
+	if (AnalysisDataService::Instance().doesExist(inputWs))
+	{
+		AnalysisDataService::Instance().remove(inputWs);
+	}
+	if (AnalysisDataService::Instance().doesExist(resultWs))
+	{
+		AnalysisDataService::Instance().remove(resultWs);
+	}
+	
+	
   }
 
 };

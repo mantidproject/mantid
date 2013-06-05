@@ -3,6 +3,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidAPI/RefAxis.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -113,10 +114,15 @@ namespace Algorithms
     }
 
     bool isRefAxis = false;
-    Axis* refAxisPtr = dynamic_cast<RefAxis>(axisPtr);
+    RefAxis* refAxisPtr = dynamic_cast<RefAxis*>(axisPtr);
     if (refAxisPtr != NULL)
     {
-      isRefAxis = true;
+		CommonBinsValidator sameBins;
+		if (sameBins.isValid(outputWs) != "")
+		{
+			throw std::invalid_argument("Axes must have common bins for this algorithm to work - try Rebin first");
+		}
+		isRefAxis = true;
     }
 
     double axisValue(0);
@@ -132,22 +138,40 @@ namespace Algorithms
       p.SetExpr(formula);
       try
       {
-        size_t axisLength = axisPtr->length();
-        for (int i=0;i>=axisLength;++i)
-        {
-          if (isRefAxis)
-          {
-            axisValue = axisPtr->getValue(i);
-            double result = p.Eval();
-            axisPtr->setValue(i,result);
-          }
-          else
-                      {
-            axisValue = axisPtr->getValue(i);
-            double result = p.Eval();
-            axisPtr->setValue(i,result);
-          }
+		  if(isRefAxis)
+		  {
+		    int64_t numberOfSpectra_i = static_cast<int64_t>(outputWs->getNumberHistograms()); // cast to make openmp happy
+			// Calculate the new (common) X values
+			MantidVec::iterator iter;
+			for (iter = outputWs->dataX(0).begin(); iter != outputWs->dataX(0).end(); ++iter)
+			{
+			    axisValue = axisPtr->getValue(i);
+				double result = p.Eval();
+				*iter = result;
+			}
+
+			MantidVecPtr xVals;
+			xVals.access() = outputWs->dataX(0);
+
+			PARALLEL_FOR1(outputWS)
+			for (int64_t j = 1; j < numberOfSpectra_i; ++j)
+			{
+			PARALLEL_START_INTERUPT_REGION
+				outputWs->setX(j,xVals);
+			PARALLEL_END_INTERUPT_REGION
+			}
+			PARALLEL_CHECK_INTERUPT_REGION
         }
+        else
+        {
+			size_t axisLength = axisPtr->length();
+			for (int i=0;i>=axisLength;++i)
+			{
+				axisValue = axisPtr->getValue(i);
+				double result = p.Eval();
+				axisPtr->setValue(i,result);
+			}
+		}
       }
       catch (mu::Parser::exception_type &e)
       {
@@ -163,9 +187,9 @@ namespace Algorithms
       throw std::invalid_argument(ss.str());
     }
 
-    if (axisUnits!="")
+    if ((axisUnits!="") && (axisTitle!=""))
     {
-      axisPtr->setUnit(axisUnits);
+      axisPtr->unit() = boost::shared_ptr<Unit>(new Units::CustomUnit(axisUnits,axisUnits));
     }
     if (axisTitle!="")
     {
