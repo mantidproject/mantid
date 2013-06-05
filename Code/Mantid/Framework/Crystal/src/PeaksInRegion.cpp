@@ -101,7 +101,7 @@ namespace Crystal
       "  HKL"
        );
 
-    declareProperty("CheckPeakExtents", false, "Include any peak in the region that has a shape extent extending into that region.");
+    declareProperty(new PropertyWithValue<bool>("CheckPeakExtents", false), "Include any peak in the region that has a shape extent extending into that region.");
 
     declareProperty("PeakRadius", 0.0, "Effective peak radius in CoordinateFrame");
 
@@ -239,7 +239,7 @@ namespace Crystal
           for(int i = 0; i < 6; ++i)
           {
             double distance = normals[i].scalar_prod(peakCenter - faces[i][0]); // Distance between plane and peak center.
-            if(peakRadius > std::abs(normals[i].scalar_prod(peakCenter - faces[i][0]))) // Sphere passes through one of the faces, so intersects the box.
+            if(peakRadius > std::abs(distance)) // Sphere passes through one of the faces, so intersects the box.
             {
               doesIntersect = true;
               break;
