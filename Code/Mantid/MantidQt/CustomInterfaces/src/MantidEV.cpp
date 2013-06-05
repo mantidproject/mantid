@@ -30,7 +30,10 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(       MantidEVWorker * worker,
                                               const std::string    & ev_ws_name,
                                               const std::string    & md_ws_name,
                                                     double           maxQ,
-                                                    bool             do_lorentz_corr )
+                                                    bool             do_lorentz_corr,
+                                                    bool             load_det_cal,
+                                              const std::string    & det_cal_file,
+                                              const std::string    & det_cal_file2  )
 {
   this->worker          = worker;
   this->file_name       = file_name;
@@ -38,11 +41,16 @@ RunLoadAndConvertToMD::RunLoadAndConvertToMD(       MantidEVWorker * worker,
   this->md_ws_name      = md_ws_name;
   this->maxQ            = maxQ;
   this->do_lorentz_corr = do_lorentz_corr;
+  this->load_det_cal    = load_det_cal;
+  this->det_cal_file    = det_cal_file;
+  this->det_cal_file2   = det_cal_file2;
 }
 
 void RunLoadAndConvertToMD::run()
 {
-  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name, maxQ, do_lorentz_corr );
+  worker->loadAndConvertToMD( file_name, ev_ws_name, md_ws_name, 
+                              maxQ, do_lorentz_corr,
+                              load_det_cal, det_cal_file, det_cal_file2 );
 }
 
 
@@ -219,6 +227,12 @@ void MantidEV::initLayout()
    QObject::connect( m_uiForm.SelectEventFile_btn, SIGNAL(clicked()),
                      this, SLOT(loadEventFile_slot()) );
 
+   QObject::connect( m_uiForm.SelectCalFile_btn, SIGNAL(clicked()),
+                     this, SLOT(selectDetCalFile_slot()) );
+
+   QObject::connect( m_uiForm.SelectCalFile2_btn, SIGNAL(clicked()),
+                     this, SLOT(selectDetCalFile2_slot()) );
+
    QObject::connect( m_uiForm.ApplyFindPeaks_btn, SIGNAL(clicked()),
                     this, SLOT(findPeaks_slot()) );
 
@@ -275,9 +289,12 @@ void MantidEV::initLayout()
                      this, SLOT(loadEventFileEntered_slot()) );
 
                            // connect the slots for enabling and disabling
-                          // various subsets of widgets
+                           // various subsets of widgets
    QObject::connect( m_uiForm.LoadEventFile_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledLoadEventFileParams_slot(bool) ) );
+
+   QObject::connect( m_uiForm.LoadDetCal_ckbx, SIGNAL(clicked()),
+                     this, SLOT( setEnabledLoadCalFiles_slot() ) );
 
    QObject::connect( m_uiForm.FindPeaks_rbtn, SIGNAL(toggled(bool)),
                      this, SLOT( setEnabledFindPeaksParams_slot(bool) ) );
@@ -363,6 +380,10 @@ void MantidEV::setDefaultState_slot()
    m_uiForm.LorentzCorrection_ckbx->setChecked(true);
    m_uiForm.UseExistingWorkspaces_rbtn->setChecked(false);
    setEnabledLoadEventFileParams_slot(true);
+   m_uiForm.LoadDetCal_ckbx->setChecked(false);
+   setEnabledLoadCalFiles_slot();
+   m_uiForm.CalFileName_ledt->setText("");
+   m_uiForm.CalFileName2_ledt->setText("");
    last_event_file.clear();
                                                     // Find Peaks tab
    m_uiForm.PeaksWorkspace_ledt->setText("");
@@ -494,10 +515,20 @@ void MantidEV::selectWorkspace_slot()
        return;
      }
 
+     std::string det_cal_file  = m_uiForm.CalFileName_ledt->text().trimmed().toStdString();
+     std::string det_cal_file2 = m_uiForm.CalFileName2_ledt->text().trimmed().toStdString();
+     bool        load_det_cal  = m_uiForm.LoadDetCal_ckbx->isChecked();
+     if ( load_det_cal && det_cal_file.length() == 0 )
+     {
+       errorMessage("Specify the name of a .DetCal file if Load ISAW Detector Calibration is selected"); 
+       return;
+     }
+
      RunLoadAndConvertToMD* runner = new RunLoadAndConvertToMD(worker,file_name,
                                                        ev_ws_name, md_ws_name,
                                                        maxQ,
-                                                       m_uiForm.LorentzCorrection_ckbx->isChecked() );
+                                                       m_uiForm.LorentzCorrection_ckbx->isChecked(),
+                                                       load_det_cal, det_cal_file, det_cal_file2 );
      bool running = m_thread_pool->tryStart( runner );
      if ( !running )
        errorMessage( "Failed to start Load and ConvertToMD thread...previous operation not complete" );
@@ -517,9 +548,11 @@ void MantidEV::selectWorkspace_slot()
    }
 }
 
+
 /**
- *  Slot called when editing the filename is finished on loading data from an event file
- *  is pressed on the SelectData tab.
+ *  Set the default workspace names when editing the event filename is 
+ *  finished on the Select Data tab, or a file is selected with the
+ *  Browse button.
  */
 void MantidEV::loadEventFileEntered_slot()
 {
@@ -539,24 +572,14 @@ void MantidEV::loadEventFileEntered_slot()
   }
 }
 
+
 /**
  *  Slot called when the Browse button for loading data from an event file
  *  is pressed on the SelectData tab.
  */
 void MantidEV::loadEventFile_slot()
 {
-  QString file_path;
-  if ( last_event_file.length() != 0 )
-  {
-    QString Qfile_name = QString::fromStdString( last_event_file );
-    QFileInfo file_info( Qfile_name );
-    file_path = file_info.absolutePath();
-  }
-  else
-  {
-    file_path = QDir::homePath();
-  }
-
+  QString file_path  = getFilePath( last_event_file );
   QString Qfile_name = QFileDialog::getOpenFileName( this,
                               tr("Load event file"),
                               file_path,
@@ -564,17 +587,48 @@ void MantidEV::loadEventFile_slot()
 
   if ( Qfile_name.length() > 0 )
   {
-    last_event_file = Qfile_name.toStdString();
     m_uiForm.EventFileName_ledt->setText( Qfile_name );
+    loadEventFileEntered_slot();    // set up the default workspace names
+  }
+}
 
-    std::string base_name = extractBaseFileName( last_event_file );
-    std::string event_ws_name = base_name + "_event";
-    std::string md_ws_name    = base_name + "_md";
-    std::string peaks_ws_name = base_name + "_peaks";
 
-    m_uiForm.SelectEventWorkspace_ledt->setText( QString::fromStdString( event_ws_name ));
-    m_uiForm.MDworkspace_ledt->setText( QString::fromStdString( md_ws_name ));
-    m_uiForm.PeaksWorkspace_ledt->setText( QString::fromStdString( peaks_ws_name ));
+/**
+ *  Slot called when the Browse button for loading the first ISAW
+ *  .DetCal file is pressed on the SelectData tab.
+ */
+void MantidEV::selectDetCalFile_slot()
+{
+  QString file_path  = getFilePath( last_cal_file );
+  QString Qfile_name = QFileDialog::getOpenFileName( this,
+                              tr("Load calibration file"),
+                              file_path,
+                              tr("ISAW .DetCal Files (*.DetCal);; All files(*.*)"));
+
+  if ( Qfile_name.length() > 0 )
+  {
+    m_uiForm.CalFileName_ledt->setText( Qfile_name );
+    last_cal_file = Qfile_name.toStdString();
+  }
+}
+
+
+/**
+ *  Slot called when the Browse button for loading the second ISAW
+ *  .DetCal file is pressed on the SelectData tab.
+ */
+void MantidEV::selectDetCalFile2_slot()
+{
+  QString file_path  = getFilePath( last_cal_file2 );
+  QString Qfile_name = QFileDialog::getOpenFileName( this,
+                              tr("Load calibration file"),
+                              file_path,
+                              tr("ISAW .DetCal Files (*.DetCal);; All files(*.*)"));
+
+  if ( Qfile_name.length() > 0 )
+  {
+    m_uiForm.CalFileName2_ledt->setText( Qfile_name );
+    last_cal_file2 = Qfile_name.toStdString();
   }
 }
 
@@ -661,18 +715,7 @@ void MantidEV::findPeaks_slot()
  */
 void MantidEV::getLoadPeaksFileName_slot()
 {
-  QString file_path;
-  if ( last_peaks_file.length() != 0 )
-  {
-    QString Qfile_name = QString::fromStdString( last_peaks_file );
-    QFileInfo file_info( Qfile_name );
-    file_path = file_info.absolutePath();
-  }
-  else
-  {
-    file_path = QDir::homePath();
-  }
-
+  QString file_path  = getFilePath( last_peaks_file );
   QString Qfile_name = QFileDialog::getOpenFileName( this,
                          tr("Load peaks file"),
                          file_path,
@@ -692,18 +735,7 @@ void MantidEV::getLoadPeaksFileName_slot()
  */
 void MantidEV::getSavePeaksFileName()
 {
-  QString file_path;
-  if ( last_peaks_file.length() != 0 )
-  {
-    QString Qfile_name = QString::fromStdString( last_peaks_file );
-    QFileInfo file_info( Qfile_name );
-    file_path = file_info.absolutePath();
-  }
-  else
-  {
-    file_path = QDir::homePath();
-  }
-
+  QString file_path  = getFilePath( last_peaks_file );
   QString Qfile_name = QFileDialog::getSaveFileName( this,
                           tr("Save peaks file"),
                           file_path,
@@ -824,18 +856,7 @@ void MantidEV::findUB_slot()
  */
 void MantidEV::getLoadUB_FileName_slot()
 {
-  QString file_path;
-  if ( last_UB_file.length() != 0 )
-  {
-    QString Qfile_name = QString::fromStdString( last_UB_file );
-    QFileInfo file_info( Qfile_name );
-    file_path = file_info.absolutePath();
-  }
-  else
-  {
-    file_path = QDir::homePath();
-  }
-
+  QString file_path  = getFilePath( last_UB_file );
   QString Qfile_name = QFileDialog::getOpenFileName( this,
                          tr("Load matrix file"),
                          file_path,
@@ -853,18 +874,7 @@ void MantidEV::getLoadUB_FileName_slot()
  */
 void MantidEV::getSaveUB_FileName()
 {
-  QString file_path;
-  if ( last_UB_file.length() != 0 )
-  {
-    QString Qfile_name = QString::fromStdString( last_UB_file );
-    QFileInfo file_info( Qfile_name );
-    file_path = file_info.absolutePath();
-  }
-  else
-  {
-    file_path = QDir::homePath();
-  }
-
+  QString file_path  = getFilePath( last_UB_file );
   QString Qfile_name = QFileDialog::getSaveFileName( this,
                             tr("Save matrix file"),
                             file_path,
@@ -1162,18 +1172,7 @@ void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
  */
 void MantidEV::saveState_slot()
 {
-  QString file_path;
-  if ( last_ini_file.length() != 0 )
-  {
-    QString Qfile_name = QString::fromStdString( last_ini_file );
-    QFileInfo file_info( Qfile_name );
-    file_path = file_info.absolutePath();
-  }
-  else
-  {
-    file_path = QDir::homePath();
-  }
-
+  QString file_path  = getFilePath( last_ini_file );
   QString Qfile_name = QFileDialog::getSaveFileName( this,
                           tr("Save Settings File(.ini)"),
                           file_path,
@@ -1193,18 +1192,7 @@ void MantidEV::saveState_slot()
  */
 void MantidEV::loadState_slot()
 {
-  QString file_path;
-  if ( last_ini_file.length() != 0 )
-  {
-    QString Qfile_name = QString::fromStdString( last_ini_file );
-    QFileInfo file_info( Qfile_name );
-    file_path = file_info.absolutePath();
-  }
-  else
-  {
-    file_path = QDir::homePath();
-  }
-
+  QString file_path  = getFilePath( last_ini_file );
   QString Qfile_name = QFileDialog::getOpenFileName( this,
                          tr("Load Settings File(.ini)"),
                          file_path,
@@ -1404,6 +1392,40 @@ void MantidEV::setEnabledLoadEventFileParams_slot( bool on )
   m_uiForm.MaxMagQ_lbl->setEnabled( on );
   m_uiForm.MaxMagQ_ledt->setEnabled( on );
   m_uiForm.LorentzCorrection_ckbx->setEnabled( on );
+  m_uiForm.LoadDetCal_ckbx->setEnabled( on );
+  setEnabledLoadCalFiles_slot();
+}
+
+
+/**
+ * Set the enabled state of the calibration file labels,
+ * line edits and browse buttons based on the state of the 
+ * load from event file and load ISAW detector calibration
+ * buttons.
+ *
+ */
+void MantidEV::setEnabledLoadCalFiles_slot()
+{
+  bool load_events = m_uiForm.LoadEventFile_rbtn->isChecked();
+  bool load_cal    = m_uiForm.LoadDetCal_ckbx->isChecked();
+  if ( load_events && load_cal )
+  {
+    m_uiForm.CalFileName_lbl->setEnabled( true );
+    m_uiForm.CalFileName_ledt->setEnabled( true );
+    m_uiForm.SelectCalFile_btn->setEnabled( true );
+    m_uiForm.CalFileName2_lbl->setEnabled( true );
+    m_uiForm.CalFileName2_ledt->setEnabled( true );
+    m_uiForm.SelectCalFile2_btn->setEnabled( true );
+  }
+  else
+  {
+    m_uiForm.CalFileName_lbl->setEnabled( false );
+    m_uiForm.CalFileName_ledt->setEnabled( false );
+    m_uiForm.SelectCalFile_btn->setEnabled( false );
+    m_uiForm.CalFileName2_lbl->setEnabled( false );
+    m_uiForm.CalFileName2_ledt->setEnabled( false );
+    m_uiForm.SelectCalFile2_btn->setEnabled( false );
+  }
 }
 
 
@@ -1768,6 +1790,33 @@ std::string MantidEV::extractBaseFileName( std::string full_file_name ) const
 
 
 /**
+ * Get a path to use in a file dialog from the specified file_name
+ * or the user's home directory if the file_name has length 0.  
+ *
+ * @param file_name  The name of a file to use to determine a 
+ *                   file path to use when starting a QFileDialog
+ *
+ * @return The path from the specified file_name or the user's
+ *         home directory if the file_name has length 0.
+ */
+QString MantidEV::getFilePath( const std::string & file_name )
+{
+  QString file_path;
+  if ( file_name.length() != 0 )
+  {
+    QString Qfile_name = QString::fromStdString( file_name );
+    QFileInfo file_info( Qfile_name );
+    file_path = file_info.absolutePath();
+  }
+  else
+  {
+    file_path = QDir::homePath();
+  }
+  return file_path;
+}
+
+
+/**
  *  Utility to save the current state of all GUI components into the
  *  specified file name.  If the filename has length zero, the settings
  *  will be saved to a system dependent default location.  This is 
@@ -1792,6 +1841,9 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("EventFileName_ledt", m_uiForm.EventFileName_ledt->text());
   state->setValue("MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt->text());
   state->setValue("LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx->isChecked());
+  state->setValue("LoadDetCal_ckbx", m_uiForm.LoadDetCal_ckbx->isChecked());
+  state->setValue("CalFileName_ledt", m_uiForm.CalFileName_ledt->text());
+  state->setValue("CalFileName2_ledt", m_uiForm.CalFileName2_ledt->text());
   state->setValue("UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn->isChecked());
 
                                                 // Save Tab 2, Find Peaks
@@ -1856,6 +1908,8 @@ void MantidEV::saveSettings( const std::string & filename )
   state->setValue("last_event_file",QString::fromStdString(last_event_file));
   state->setValue("last_peaks_file",QString::fromStdString(last_peaks_file));
   state->setValue("last_ini_file",QString::fromStdString(last_ini_file));
+  state->setValue("last_cal_file",QString::fromStdString(last_cal_file));
+  state->setValue("last_cal_file2",QString::fromStdString(last_cal_file2));
   delete state;
 }
 
@@ -1887,8 +1941,11 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "EventFileName_ledt", m_uiForm.EventFileName_ledt );
   restore( state, "MaxMagQ_ledt", m_uiForm.MaxMagQ_ledt );
   restore( state, "LorentzCorrection_ckbx", m_uiForm.LorentzCorrection_ckbx );
+  restore( state, "LoadDetCal_ckbx", m_uiForm.LoadDetCal_ckbx );
+  restore( state, "CalFileName_ledt", m_uiForm.CalFileName_ledt );
+  restore( state, "CalFileName2_ledt", m_uiForm.CalFileName2_ledt );
+  setEnabledLoadCalFiles_slot();
   restore( state, "UseExistingWorkspaces_rbtn", m_uiForm.UseExistingWorkspaces_rbtn );
-
                                                   // Load Tab 2, Find Peaks
   restore( state, "PeaksWorkspace_ledt", m_uiForm.PeaksWorkspace_ledt );
   restore( state, "FindPeaks_rbtn", m_uiForm.FindPeaks_rbtn );
@@ -1909,6 +1966,7 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "SelectUBFile_ledt", m_uiForm.SelectUBFile_ledt );
   restore( state, "OptimizeGoniometerAngles_ckbx", m_uiForm.OptimizeGoniometerAngles_ckbx );
   restore( state, "MaxGoniometerChange_ledt", m_uiForm.MaxGoniometerChange_ledt );
+  setEnabledMaxOptimizeDegrees_slot();
   restore( state, "UseCurrentUB_rbtn", m_uiForm.UseCurrentUB_rbtn );
   restore( state, "IndexPeaks_ckbx", m_uiForm.IndexPeaks_ckbx );
   restore( state, "IndexingTolerance_ledt", m_uiForm.IndexingTolerance_ledt );
@@ -1945,12 +2003,14 @@ void MantidEV::loadSettings( const std::string & filename )
   restore( state, "PeakSize_ledt", m_uiForm.PeakSize_ledt );
   restore( state, "BackgroundInnerSize_ledt", m_uiForm.BackgroundInnerSize_ledt );
   restore( state, "BackgroundOuterSize_ledt", m_uiForm.BackgroundOuterSize_ledt );
-
+  setEnabledEllipseSizeOptions_slot();
                                                 // load info for file paths
   last_UB_file    = state->value("last_UB_file", "").toString().toStdString();
   last_event_file = state->value("last_event_file", "").toString().toStdString();
   last_peaks_file = state->value("last_peaks_file", "").toString().toStdString();
   last_ini_file   = state->value("last_ini_file", "").toString().toStdString();
+  last_cal_file   = state->value("last_cal_file", "").toString().toStdString();
+  last_cal_file2  = state->value("last_cal_file2", "").toString().toStdString();
 
   delete state;
 }
