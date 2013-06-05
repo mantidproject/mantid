@@ -145,7 +145,7 @@ namespace Algorithms
 			MantidVec::iterator iter;
 			for (iter = outputWs->dataX(0).begin(); iter != outputWs->dataX(0).end(); ++iter)
 			{
-			    axisValue = axisPtr->getValue(i);
+			    axisValue = *iter;
 				double result = p.Eval();
 				*iter = result;
 			}
@@ -153,7 +153,7 @@ namespace Algorithms
 			MantidVecPtr xVals;
 			xVals.access() = outputWs->dataX(0);
 
-			PARALLEL_FOR1(outputWS)
+			PARALLEL_FOR1(outputWs)
 			for (int64_t j = 1; j < numberOfSpectra_i; ++j)
 			{
 			PARALLEL_START_INTERUPT_REGION
