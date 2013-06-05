@@ -1,5 +1,6 @@
-from MantidFramework import *
-from mantidsimple import *
+#from MantidFramework import *
+#from mantidsimple import *
+from mantid.simpleapi import *
 from numpy import zeros, unique, arange, sqrt
 import os.path
 
@@ -146,103 +147,94 @@ class sfCalculator():
         
         nexus_file_numerator = file
         print '----> loading nexus file: ' + nexus_file_numerator
-        LoadEventNexus(Filename=nexus_file_numerator,
-                       OutputWorkspace='EventDataWks')
-        mt1 = mtd['EventDataWks']
+        EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
+#                       OutputWorkspace='EventDataWks')
+#        mt1 = mtd['EventDataWks']
         
-        proton_charge = self._getProtonCharge(mt1)
+        proton_charge = self._getProtonCharge(EventDataWks)
         print '----> rebinning '
-        rebin(InputWorkspace='EventDataWks',
-              OutputWorkspace='HistoDataWks',
+        HistoDataWks = Rebin(InputWorkspace=EventDataWks,
               Params=self.rebin_parameters)
+#              OutputWorkspace='HistoDataWks',
+#              Params=self.rebin_parameters)
         
-        mt2 = mtd['HistoDataWks']
-        x_axis = mt2.readX(0)[:]
+#        mt2 = mtd['HistoDataWks']
+#        x_axis = mt2.readX(0)[:]
+
+        x_axis = HistoDataWks.readX(0)[:]
+
         self.x_axis = x_axis
 
-        self._createIntegratedWorkspace(InputWorkspace=mt2,
-                                        OutputWorkspace='IntegratedDataWks',
+        OutputWorkspace = self._createIntegratedWorkspace(InputWorkspace=HistoDataWks,
                                         proton_charge=proton_charge,
                                         from_pixel=self.x_pixel_min,
                                         to_pixel=self.x_pixel_max)
         
         print '----> Convert to histogram'
-        ConvertToHistogram(InputWorkspace='IntegratedDataWks',
-                           OutputWorkspace='IntegratedDataWks')
+        IntegratedDataWks = ConvertToHistogram(InputWorkspace=OutputWorkspace)
 
         print '----> Transpose'
-        Transpose(InputWorkspace='IntegratedDataWks',
-                  OutputWorkspace='TransposeIntegratedDataWks')
+        TransposeIntegratedDataWks = Transpose(InputWorkspace=IntegratedDataWks)
         
         print '----> convert to histogram'
-        ConvertToHistogram(InputWorkspace='TransposeIntegratedDataWks',
-                           OutputWorkspace='TransposeIntegratedDataWks_t')
+        TransposeIntegratedDataWks_t = ConvertToHistogram(InputWorkspace=TransposeIntegratedDataWks)
         
         print '----> flat background1'
-        FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
-                       OutputWorkspace='TransposeHistoFlatDataWks_1',
+        TransposeHistoFlatDataWks_1 = FlatBackground(InputWorkspace=TransposeIntegratedDataWks_t,
                        StartX=self.back_pixel_min,
                        EndX=self.peak_pixel_min,
                        Mode='Mean',
                        OutputMode="Return Background")
         
         print '----> flat background2'
-        FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
-                       OutputWorkspace='TransposeHistoFlatDataWks_2',
+        TransposeHistoFlatDataWks_2 = FlatBackground(InputWorkspace=TransposeIntegratedDataWks_t,
                        StartX=self.peak_pixel_max,
                        EndX=self.back_pixel_max,
                        Mode='Mean',
                        OutputMode="Return Background")
         
         print '----> transpose flat background 1 -> data1'
-        Transpose(InputWorkspace='TransposeHistoFlatDataWks_1',
-                  OutputWorkspace='DataWks_1')
+        DataWks_1 = Transpose(InputWorkspace=TransposeHistoFlatDataWks_1);
         
         print '----> transpose flat background 2 -> data2'
-        Transpose(InputWorkspace='TransposeHistoFlatDataWks_2',
-                  OutputWorkspace='DataWks_2')
+        DataWks_2 = Transpose(InputWorkspace=TransposeHistoFlatDataWks_2);
         
         print '----> convert to histogram data2'
-        ConvertToHistogram(InputWorkspace='DataWks_1', 
-                           OutputWorkspace='DataWks_1')
+        DataWks_1 = ConvertToHistogram(InputWorkspace=DataWks_1);
         
         print '----> convert to histogram data1'
-        ConvertToHistogram(InputWorkspace='DataWks_2', 
-                           OutputWorkspace='DataWks_2')
+        DataWks_2 = ConvertToHistogram(InputWorkspace=DataWks_2)
         
         print '----> rebin workspace data1'
-        RebinToWorkspace(WorkspaceToRebin='DataWks_1',
-                         WorkspacetoMatch='IntegratedDataWks',
-                         OutputWorkspace='DataWks_1')
+        DataWks_1 = RebinToWorkspace(WorkspaceToRebin=DataWks_1,
+                         WorkspacetoMatch=IntegratedDataWks)
         
         print '----> rebin workspace data2'
-        RebinToWorkspace(WorkspaceToRebin='DataWks_2',
-                         WorkspacetoMatch='IntegratedDataWks',
-                         OutputWorkspace='DataWks_2')
+        DataWks_2 = RebinToWorkspace(WorkspaceToRebin=DataWks_2,
+                         WorkspacetoMatch=IntegratedDataWks)
         
         print '----> weighted mean'
-        WeightedMean(InputWorkspace1='DataWks_1',
-                     InputWorkspace2='DataWks_2',
-                     OutputWorkspace='DataWks')
+        DataWks = WeightedMean(InputWorkspace1=DataWks_1,
+                     InputWorkspace2=DataWks_2)
 
         print '----> minus'
-        Minus(LHSWorkspace='IntegratedDataWks', 
-              RHSWorkspace='DataWks',
-              OutputWorkspace='DataWks')
+        DataWks = Minus(LHSWorkspace=IntegratedDataWks, 
+              RHSWorkspace=DataWks)
         
-        mt3 = mtd['DataWks']
-        self._calculateFinalAxis(Workspace=mt3,
+#        mt3 = mtd['DataWks']
+        self._calculateFinalAxis(Workspace=DataWks,
                            bNumerator=bNumerator)
         print 'done with _calculateFinalAxis and back in calculatefinalaxis in line 236' #REMOVEME
 
         #cleanup workspaces
-        mtd.deleteWorkspace('EventDataWks')
-        mtd.deleteWorkspace('HistoDataWks')
-        mtd.deleteWorkspace('IntegratedDataWks')
-        mtd.deleteWorkspace('TransposeIntegratedDataWks')
-        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
-        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
-        mtd.deleteWorkspace('DataWks')
+        DeleteWorkspace(EventDataWks)
+        DeleteWorkspace(HistoDataWks)
+        DeleteWorkspace(IntegratedDataWks)
+        DeleteWorkspace(TransposeIntegratedDataWks)
+        DeleteWorkspace(TransposeIntegratedDataWks_t)
+        DeleteWorkspace(TransposeHistoFlatDataWks_1)
+        DeleteWorkspace(TransposeHistoFlatDataWks_2)
+        DeleteWorkspace(DataWks)
         
         print 'done with cleaning workspaces in line 247'
         
@@ -326,13 +318,12 @@ class sfCalculator():
         #normalization by proton charge
         y_axis /= (proton_charge * 1e-12)
 
-        CreateWorkspace(OutputWorkspace=OutputWorkspace,
-                        DataX=x_axis,
+        OutputWorkspace = CreateWorkspace(DataX=x_axis,
                         DataY=y_axis,
                         DataE=y_error_axis,
                         Nspec=self.alpha_pixel_nbr)
 #        mt3 = mtd[OutputWorkspace]
-#        return mt3 
+        return OutputWorkspace 
             
     def _getIndex(self, value, array):
         """
@@ -372,21 +363,18 @@ class sfCalculator():
         This is going to fit the counts_vs_tof with a linear expression and return the a and
         b coefficients (y=a+bx)
         """
-        CreateWorkspace(OutputWorkspace='DataToFit',
-                        DataX=self.x_axis_ratio,
+        DataToFit = CreateWorkspace(DataX=self.x_axis_ratio,
                         DataY=self.y_axis_ratio,
                         DataE=self.y_axis_error_ratio,
                         Nspec=1)
-        print 'entering fit in line 380'
-
+        print 'entering fit in line 370'
         
         print 'replaceSpecialValues'
-        ReplaceSpecialValues(InputWorkspace='DataToFit', 
+        DataToFit = ReplaceSpecialValues(InputWorkspace=DataToFit, 
                              NaNValue=0, 
                              NaNError=0, 
                              InfinityValue=0, 
-                             InfinityError=0, 
-                             OutputWorkspace='DataToFit')
+                             InfinityError=0)
 
 #        ResetNegatives(InputWorkspace='DataToFit',
 #                       OutputWorkspace='DataToFit',
@@ -394,9 +382,9 @@ class sfCalculator():
         
         try:
         
-            Fit(InputWorkspace='DataToFit',
+            Fit(InputWorkspace=DataToFit,
                 Function="name=UserFunction, Formula=a+b*x, a=1, b=2",
-                Output='Res')
+                Output='res')
         
         except:
             
@@ -405,21 +393,25 @@ class sfCalculator():
             xmin = xaxis[0]
             xmax = xaxis[sz/2]
             
-            CropWorkspace(InputWorkspace='DataToFit',
-                         OutputWorkspace='DataToFit',
+            DataToFit = CropWorkspace(InputWorkspace=DataToFit,
                          XMin=xmin,
                          XMax=xmax)
             
-            Fit(InputWorkspace='DataToFit',
+            Fit(InputWorkspace=DataToFit,
                 Function='name=UserFunction, Formula=a+b*x, a=1, b=2',
-                Output='Res')
+                Output='res')
         
-        res = mtd['Res_Parameters']
+        res = mtd['res_Parameters']
         
-        self.a = res.getDouble("Value", 0)
-        self.b = res.getDouble("Value", 1)        
-        self.error_a = res.getDouble("Error", 0)
-        self.error_b = res.getDouble("Error", 1)            
+        self.a = res.cell(0,1)
+        self.b = res.cell(1,1)
+        self.error_a = res.cell(0,2)
+        self.error_b = res.cell(1,2)
+        
+#        self.a = res.getDouble("Value", 0)
+#        self.b = res.getDouble("Value", 1)        
+#        self.error_a = res.getDouble("Error", 0)
+#        self.error_b = res.getDouble("Error", 1)            
 
 def plotObject(instance):
     
@@ -777,21 +769,20 @@ def getSlitsValueAndLambda(full_list_runs,
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
         print '-> ' + _full_file_name
-        LoadEventNexus(Filename=_full_file_name,
-                       OutputWorkspace='tmpWks',
+        tmpWks = LoadEventNexus(Filename=_full_file_name,
                        MetaDataOnly='1')
-        mt1 = mtd['tmpWks']
-        _s1h_value = getS1h(mt1)
-        _s2h_value = getS2h(mt1)
+#        mt1 = mtd['tmpWks']
+        _s1h_value = getS1h(tmpWks)
+        _s2h_value = getS2h(tmpWks)
         S1H[i] = _s1h_value
         S2H[i] = _s2h_value
         
-        _s1w_value = getS1w(mt1)
-        _s2w_value = getS2w(mt1)
+        _s1w_value = getS1w(tmpWks)
+        _s2w_value = getS2w(tmpWks)
         S1W[i] = _s1w_value
         S2W[i] = _s2w_value
         
-        _lambda_value = getLambdaValue(mt1)
+        _lambda_value = getLambdaValue(tmpWks)
         lambdaRequest[i] = _lambda_value
 
 def isRunsSorted(list_runs, S1H, S2H):
@@ -958,6 +949,7 @@ def calculate(string_runs=None,
     #Make sure all the lambdaRequested are identical within a given range
     lambdaRequestPrecision = 0.01 #1%
     _lr = lambdaRequest[0]
+        
     for i in lambdaRequest:
         _localValue = float(lambdaRequest[i][0])
         _localValueRate = lambdaRequestPrecision * _localValue

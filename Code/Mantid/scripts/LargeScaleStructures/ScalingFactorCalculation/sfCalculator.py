@@ -1,5 +1,7 @@
-from MantidFramework import *
-from mantidsimple import *
+#from MantidFramework import *
+#from mantidsimple import *
+import mantid
+from mantid.simpleapi import *
 from numpy import zeros
 from pylab import *
 import os.path
@@ -148,6 +150,7 @@ class sfCalculator():
         nexus_file_numerator = file
         LoadEventNexus(Filename=nexus_file_numerator,
                        OutputWorkspace='EventDataWks')
+                
         mt1 = mtd['EventDataWks']
         
         proton_charge = self._getProtonCharge(mt1)
