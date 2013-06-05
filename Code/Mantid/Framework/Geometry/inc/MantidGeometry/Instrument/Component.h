@@ -176,7 +176,7 @@ namespace Mantid
       }
 
       /**
-      * Get a parameter's type -- this is HACK untill Python can export property regardless of type properly
+      * Get a parameter's type -- this is HACK untill Python can export property regardless of the property type 
       * @param pname :: The name of the parameter
       * @param recursive :: If true the search will walk up through the parent components
       * @returns std::string describing parameter type or empty string if the type is not found

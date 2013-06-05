@@ -722,17 +722,15 @@ class DirectEnergyConversion(object):
             except:
                 self.instrument = None
                 raise RuntimeError('Cannot load instrument for prefix "%s"' % self.instr_name)
-            self.help();
-            #instr_pattern = os.path.join(idf_dir,self.instr_name + '*_Definition.xml')
-            #idf_files = glob.glob(instr_pattern)
-            #if len(idf_files) > 0:
-            #    tmp_ws_name = '__empty_' + self.instr_name
-            #    if not mtd.doesExist(tmp_ws_name):
-            #        LoadEmptyInstrument(Filename=idf_files[0],OutputWorkspace=tmp_ws_name)
-            #    self.instrument = mtd[tmp_ws_name].getInstrument()
-            #else:
-            #    self.instrument = None
-            #    raise RuntimeError('Cannot load instrument for prefix "%s"' % self.instr_name)
+      
+       # set up default parameters values from instrName_Parameters.xml file   
+        par_names = self.instrument.getParameterNames()
+        for name in par_names:
+           setattr(self, name, self.get_default_parameter(name))
+
+        # build the dictionary of necessary allowed substitution names and substitute parameters with their values
+        self.build_subst_dictionary()
+
         # Initialise IDF parameters
         self.init_idf_params()
 
@@ -740,6 +738,8 @@ class DirectEnergyConversion(object):
     def init_params(self):
         """
         Attach analysis arguments that are particular to the ElasticConversion 
+
+        specify some parameters which are not in IDF Parameters file
         """
         self.save_formats = ['.spe','.nxs','.nxspe']
         self.fix_ei=False
@@ -753,7 +753,7 @@ class DirectEnergyConversion(object):
             self.normalise_method  = 'current'
         else:
             self.facility = str(config.getFacility())
-        
+
         # The Ei requested
         self.ei_requested = None
         self.monitor_workspace = None
@@ -779,14 +779,46 @@ class DirectEnergyConversion(object):
         
         # Ki/Kf factor correction
         self.apply_kikf_correction = True
-    	
-    	# Detector calibration file
-    	self.det_cal_file = None
+
+        # Detector calibration file
+        self.det_cal_file = None
         # the workspace which contains already loaded detector calibration file and used to save time on multiple det_cal_file loadings
         self.det_cal_file_ws = None
         # Option to move detector positions based on the information
         self.relocate_dets = False
+
+        #The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :(
+        self.van_rmm = 50.9415#self.get_default_parameter("vanadium-rmm") 
+
      
+    def build_subst_dictionary(self) :
+        """Method to process the field "synonims" in the parameters string 
+
+           it takes string of synonyms in the form key1=subs1=subst2=subts3;key2=subst4 and returns the dictionary 
+           in the form dict[subs1]=key1 ; dict[subst2] = key1 ... dict[subst4]=key2
+        """
+        if not hasattr(self,'synonims') :  # nothing to do
+            return
+        if self.synonims == None : # nothing to do 
+            return
+        if type(self.synonims) == dict : # all done
+            return
+        if type(self.synonims) != str : 
+            raise AttributeError("The synonims fielf of Reducer object has to be special format string or the dictionary")
+        # we are in the right place and going to transform string into dictionary
+
+        subst_lines = self.synonims.split(";")
+        rez  = dict()
+        for lin in subst_lines :
+            lin=lin.strip()
+            keys = lin.split("=")
+            if len(keys)<2 :
+                raise AttributeError("The pairs in the synonims fields have to have form key1=key2=key3 with at least two values present")
+            for i in xrange(1,len(keys)) :
+                rez[keys[i]]=keys[0]
+
+        self.synonims = rez
+
     def init_idf_params(self):
         """
         Initialise the parameters from the IDF file if necessary
@@ -795,77 +827,44 @@ class DirectEnergyConversion(object):
             return
 
         self.ei_mon_spectra = [int(self.get_default_parameter("ei-mon1-spec")), int(self.get_default_parameter("ei-mon2-spec"))]
-        self.scale_factor = self.get_default_parameter("scale-factor")
-        self.wb_scale_factor = self.get_default_parameter("wb-scale-factor")
         self.wb_integr_range = [self.get_default_parameter("wb-integr-min"), self.get_default_parameter("wb-integr-max")]
-        self.mon1_norm_spec = int(self.get_default_parameter("norm-mon1-spec"))
         self.mon1_norm_range = [self.get_default_parameter("norm-mon1-min"), self.get_default_parameter("norm-mon1-max")]
         self.background_range = [self.get_default_parameter("bkgd-range-min"), self.get_default_parameter("bkgd-range-max")]
         self.monovan_integr_range = [self.get_default_parameter("monovan-integr-min"), self.get_default_parameter("monovan-integr-max")]
-        self.van_mass = self.get_default_parameter("vanadium-mass")
-        #The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :(
-        self.van_rmm = 50.9415#self.get_default_parameter("vanadium-rmm") 
-
-        # Diag 
-        self.diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
-                            'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation']
-        # Add an attribute for each of them
-        for par in self.diag_params:
-            setattr(self, par, self.get_default_parameter(par))
-            
-        # Bleed options
-        try:
-            self.diag_bleed_test = self.get_default_parameter('diag_bleed_test')
-            self.diag_bleed_maxrate = self.get_default_parameter('diag_bleed_maxrate')
-            self.diag_bleed_pixels = int(self.get_default_parameter('diag_bleed_pixels'))
-            self.diag_params.extend(['diag_bleed_maxrate','diag_bleed_pixels'])
-        except ValueError:
-            self.diag_bleed_test = False
-        self.diag_params.append('diag_bleed_test')
-
+           
+  
         # Do we have specified spectra to diag over
         try:
             self.diag_spectra = self.instrument.getStringParameter("diag_spectra")[0]
         except Exception:
             self.diag_spectra = None
               
-        #par_names = self.instrument.getParameterNames()
-        #for name in par_names :
-        #    val,type = self.get_default_parameter_and_type(name)
-        #    if type != type(str) :
-        #        if not hasattr(self,name) :
-        #            setattr(self,name,val)
-
 
         # Mark IDF files as read
         self._idf_values_read = True
 
     def get_default_parameter(self, name):
-        if self.instrument is None:
-            raise ValueError("Cannot init default parameter, instrument has not been loaded.")
-        try :
-            values = self.instrument.getParameter(name)
-        except :
-            pass
-        if len(values) != 1:
-            raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
-        return values[0]
-
-    def get_default_parameter_and_type(self,name):
-        """Returns tupe with default parameter value and default parameter type. Default parameters can be strings or values
-        """
-        if self.instrument is None:
+        instr = self.instrument;
+        if instr is None:
             raise ValueError("Cannot init default parameter, instrument has not been loaded.")
 
-        values = self.instrument.getParameter(name)
-        if len(values) != 1 :
-            values = self.instrument.getStringParameter(name)
-            if len(values) != 1 :
-                raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
+        type_name = instr.getParameterType(name)
+        if type_name == "bool":
+            val = instr.getBoolParameter(name)
+            return val[0]
+        elif type_name == "double":
+            val = instr.getNumberParameter(name)
+            return val[0]
+        elif type_name == "string":
+            val = instr.getStringParameter(name)
+            if val == "None" : 
+                return None
+            else :
+                return val[0]
+        else :
+            raise KeyError(" Can not find property with name "+name)
 
-        return (values,type(values))
-
-            
+           
 
 
     def log(self, msg):
@@ -888,11 +887,11 @@ class DirectEnergyConversion(object):
             par_names = self.instrument.getParameterNames()
             print "****: ***************************************************************************** "
             print "****: There are ", len(par_names), " reduction parameters availible to change, namely: "
-            for i in xrange(0,len(par_names),1):
-                #print "****: {0}\t {1}\t {2}\t {3}\n".format(par_names[i],par_names[i+1],par_names[i+2],par_names[i+3]),
-                print par_names[i],
-                print  type(self.instrument.getParameterType(par_names[i])),
-                print  self.instrument.getParameterType(par_names[i])
+            for i in xrange(0,len(par_names),4):
+                print "****: {0}\t {1}\t {2}\t {3}\n".format(par_names[i],par_names[i+1],par_names[i+2],par_names[i+3]),
+                #print par_names[i],
+                #print  type(self.instrument.getParameterType(par_names[i])),
+                #print  self.instrument.getParameterType(par_names[i])
             print "****:" 
             print "****: type help(parameter_name) to get help on a parameter with  specified  name"
             print "****: ***************************************************************************** ";

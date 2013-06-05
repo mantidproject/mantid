@@ -3,6 +3,7 @@ import CommonFunctions as common
 import time as time
 import numpy
 from mantid.simpleapi import *
+from mantid.kernel import funcreturns
 
 # the class which is responsible for data reduction
 global Reducer
@@ -121,7 +122,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
     # Deal with mandatory parameters
     print 'DGreduce run for ',inst_name,'run number ',sample_run
     try:
-        n,r=lhs('both')
+        n,r=funcreturns.lhs_info('both')
         wksp_out=r[0]
     except:
         if sample_run == 0:
@@ -140,7 +141,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
     # set rebinning range
     reducer.energy_bins = rebin
     if float(str.split(rebin,',')[2])>=float(ei_guess):
-        print 'error rebin range exceeds ei'
+        print 'Error: rebin max range {0} exceeds incident energy {1}'.format(str.split(rebin,',')[2],ei_guess)
         return
 
 
@@ -256,7 +257,6 @@ def get_failed_spectra_list(diag_workspace):
     masked in the given workspace
 
     Input:
-
      diag_workspace  -  A workspace containing masking
     """
     if type(diag_workspace) == str:

@@ -168,7 +168,7 @@ public:
     TS_ASSERT_EQUALS(ancs[0]->getName(), parent.getName());
     TS_ASSERT(ancs[0]->isParametrized());
 
-    std::string type=ancs[0]->getParameterType("Child");
+   // std::string type=ancs[0]->getParameterType("Child");
   }
 
   void testGetFullName()

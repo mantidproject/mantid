@@ -21,6 +21,7 @@
 </parameter>
 
 
+
 <!-- RunNumber to use for diag instead of the input run number if none - use input run -->
 <parameter name="mask_run" type="string">
    <value val="None"/>
@@ -235,9 +236,14 @@
    <value val=".spe"/>
 </parameter>
 
-
+<!-- If one wants to sum runs   -->  
 <parameter name="sum_runs"  type="bool">
    <value val="False"/>
+</parameter>
+
+<!-- # Run Detector Efficiency Correction -->
+<parameter name="apply_detector_eff"   type="bool">
+   <value val="True"/>
 </parameter>
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
