@@ -225,7 +225,7 @@ private:
 
   int m_minGuessedPeakWidth;
   int m_maxGuessedPeakWidth;
-  int stepGuessedPeakWidth;
+  int m_stepGuessedPeakWidth;
 
   bool m_usePeakPositionTolerance;
   double m_peakPositionTolerance;

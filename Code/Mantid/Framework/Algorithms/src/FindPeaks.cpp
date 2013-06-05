@@ -42,6 +42,8 @@
 
 #include <fstream>
 
+#define TEST 1
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -284,11 +286,6 @@ namespace Algorithms
       m_outPeakTableWS->addColumn("double", "A2");
     }
     m_outPeakTableWS->addColumn("double", "chi2");
-#if 1
-    std::vector<std::string> tablecolnames = m_outPeakTableWS->getColumnNames();
-    for (size_t i = 0; i < tablecolnames.size(); ++i)
-      g_log.information() << "Table column " << i << ": " << tablecolnames[i] << ".\n";
-#endif
 
     // Fit
     m_searchPeakPos = false;
@@ -355,18 +352,18 @@ namespace Algorithms
     int t1 = getProperty("MinGuessedPeakWidth");
     int t2 = getProperty("MaxGuessedPeakWidth");
     int t3 = getProperty("GuessedPeakWidthStep");
-    if (t1 > t2)
+    if (t1 > t2 || t1 <= 0 || t3 <= 0)
     {
       std::stringstream errss;
-      errss << "User specified minimum guessed peak with (" << t1 << ") is greater than "
-            << "maximum guessed peak width (" << t2 << ").";
+      errss << "User specified wrong guessed peak width parameters (must be postive and make sense). "
+            << "User inputs are min = " << t1 << ", max = " << t2 << ", step = " << t3;
       g_log.error(errss.str());
       throw std::runtime_error(errss.str());
     }
 
-    m_minGuessedPeakWidth = static_cast<size_t>(t1);
-    m_maxGuessedPeakWidth = static_cast<size_t>(t2);
-    stepGuessedPeakWidth = static_cast<size_t>(t3);
+    m_minGuessedPeakWidth = t1;
+    m_maxGuessedPeakWidth = t2;
+    m_stepGuessedPeakWidth = t3;
 
     m_peakPositionTolerance = getProperty("PeakPositionTolerance");
     m_usePeakPositionTolerance = true;
@@ -378,15 +375,15 @@ namespace Algorithms
     if (m_peakHeightTolerance == EMPTY_DBL())
       m_usePeakHeightTolerance = false;
 
-    // b) Get the specified peak positions, which is optional
+    // Specified peak positions, which is optional
     m_vecPeakCentre = getProperty("PeakPositions");
     m_vecFitWindows = getProperty("FitWindows");
 
-    // c) Peak and Background
+    // Peak and ground type
     m_peakFuncType = getPropertyValue("PeakFunction");
     m_backgroundType = getPropertyValue("BackgroundType");
 
-    // d) Choice of fitting approach
+    // Fit algorithm
     m_highBackground = getProperty("HighBackground");
 
     // Peak parameters are give via a table workspace
@@ -452,7 +449,6 @@ namespace Algorithms
     */
   void FindPeaks::findPeaksUsingMariscotti()
   {
-
     //At this point the data has not been smoothed yet.
     MatrixWorkspace_sptr smoothedData = this->calculateSecondDifference(m_dataWS);
 
@@ -816,7 +812,6 @@ namespace Algorithms
     {
       // within the range
       index = static_cast<int>(std::lower_bound(vecX.begin(), vecX.end(), x) - vecX.begin());
-      // static_cast<int>(getLowerBound(vecX, 0, vecX.size() - 1, x));
 
       // check lower boundary
       if (index == 0)
@@ -882,7 +877,6 @@ namespace Algorithms
                         << ", FWHM = " << FWHM_guess << ".\n";
 
     // The indices
-    // int i_left, i_right;
     int i_centre;
 
     // The X axis you are looking at
@@ -892,18 +886,6 @@ namespace Algorithms
     // Find i_center - the index of the center - The guess is within the X axis?
     i_centre = this->getVectorIndex(vecX, center_guess);
 
-    // Determine the fitting range X[]
-    /*   FWHM
-    i_left = i_centre - FWHM_guess / 2;
-    if (i_left < 0)
-      i_left = 0;
-
-    i_right = i_left + FWHM_guess;
-    if (i_right >= static_cast<int>(vecX.size()))
-      i_right = static_cast<int>(vecX.size()) - 1;
-    */
-
-    //   Get the initial estimate of the width, in # of bins
     const int fitWidth = FWHM_guess;
 
     // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
@@ -917,10 +899,14 @@ namespace Algorithms
     if (i_max >= static_cast<int>(vecX.size())-1)
       i_max = static_cast<int>(vecY.size())-2;
 
+    // Check
+    if (i_max - i_min <= 0)
+      throw std::runtime_error("Impossible to i_min >= i_max.");
+
     g_log.debug() << "Background + Peak -- Bounds Fit Range = " << vecX[i_min]
                   << ", " << vecX[i_max] << ".\n";
 
-    this->fitPeak(input, spectrum, i_min, i_max, i_centre, true);
+    fitPeak(input, spectrum, i_min, i_max, i_centre, true);
 
     return;
 
@@ -938,9 +924,14 @@ namespace Algorithms
   void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum,
                           const double centre_guess, const double xmin, const double xmax)
   {
+    // Check
     g_log.information() << "Fit Peak with given window:  Guessed center = " << centre_guess
                         << "  x-min = " << xmin
                         << ", x-max = " << xmax << "\n";
+    if (xmin >= centre_guess || xmax <= centre_guess)
+    {
+      throw std::runtime_error("Peak centre is on the edge of Fit window. ");
+    }
 
     //The X axis you are looking at
     const MantidVec &vecX = input->readX(spectrum);
@@ -949,58 +940,39 @@ namespace Algorithms
     int i_centre = this->getVectorIndex(vecX, centre_guess);
 
     //The left index
-    int i_min;
-    if (xmin < vecX.front())
-    {
-      i_min = 0;
-    }
-    else
-    {
-      i_min = static_cast<int>(getLowerBound(vecX, 0, vecX.size() - 1, xmin));
-    }
-
+    int i_min = getVectorIndex(vecX, xmin);
     if (i_min >= i_centre)
     {
       std::stringstream errss;
       errss << "Input peak centre @ " << centre_guess << " is out side of minimum x = "
             << xmin << ".  Input X ragne = " << vecX.front() << ", " << vecX.back();
+      g_log.error(errss.str());
       throw std::runtime_error(errss.str());
-      /*
-      i_left = i_centre - 1;
-      if (i_left < 0)
-        i_left = 0;
-        */
     }
 
     //The right index
-    int i_max;
-    if (xmax > vecX.back())
-    {
-      i_max = static_cast<int>(vecX.size() - 1);
-    }
-    else
-    {
-      i_max = static_cast<int>(getLowerBound(vecX, 0, vecX.size() - 1, xmax));
-    }
+    int i_max = getVectorIndex(vecX, xmax);
     if (i_max < i_centre)
     {
       std::stringstream errss;
       errss << "Input peak centre @ " << centre_guess << " is out side of maximum x = "
             << xmax;
+      g_log.error(errss.str());
       throw std::runtime_error(errss.str());
-      /*
-      i_right = i_centre + 1;
-      if (i_right > static_cast<int>(vecX.size() - 1))
-        i_right = static_cast<int>(vecX.size() - 1);
-        */
     }
 
     // look for the heigh point
     if (m_searchPeakPos)
+    {
       i_centre = getMaxHeightIndex(input->readY(spectrum), i_min, i_max);
+      if (i_centre == i_min)
+        ++ i_centre;
+      else if (i_centre == i_max)
+        -- i_centre;
+    }
 
     // finally do the actual fit
-    this->fitPeak(input, spectrum, i_min, i_max, i_centre, true);
+    fitPeak(input, spectrum, i_min, i_max, i_centre, true);
 
     return;
   }
@@ -1018,12 +990,17 @@ namespace Algorithms
   void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min,
                           const int i_max, const int i_centre, bool changeflag)
   {
-    const MantidVec &X = input->readX(spectrum);
-    const MantidVec &Y = input->readY(spectrum);
+    const MantidVec &vecX = input->readX(spectrum);
+    const MantidVec &vecY = input->readY(spectrum);
 
-    g_log.information() << "Fit Peak @ " << X[i_centre] << "  of Spectrum " << spectrum << ". Fit peak In Range "
-                        << X[i_min] << ", " << X[i_max] << "  i_min = " << i_min << ", i_max = "
+    g_log.information() << "Fit Peak @ " << vecX[i_centre] << "  of Spectrum " << spectrum << ". Fit peak In Range "
+                        << vecX[i_min] << ", " << vecX[i_max] << "  i_min = " << i_min << ", i_max = "
                         << i_max << ", i_centre = " << i_centre << ".\n";
+
+#if TEST
+    if (i_min >= i_centre || i_max <= i_centre)
+      throw std::runtime_error("This cannot happen!");
+#endif
 
     /*
     // Get the initial estimate of the width, in # of bins
@@ -1045,8 +1022,22 @@ namespace Algorithms
 
     // Estimate height, boundary, and etc for fitting
     // FIXME - Does this make sense?
-    const double bg_lowerSum = Y[i_min - 1] + Y[i_min] + Y[i_min + 1];
-    const double bg_upperSum = Y[i_max - 1] + Y[i_max] + Y[i_max + 1];
+    double bg_lowerSum;
+    if (i_min > 0)
+      bg_lowerSum = vecY[i_min - 1] + vecY[i_min] + vecY[i_min + 1];
+    else
+      bg_lowerSum = vecY[i_min + 2] + vecY[i_min] + vecY[i_min + 1];
+
+    double bg_upperSum;
+    if (i_max < static_cast<int>(vecY.size())-1)
+    {
+      bg_upperSum = vecY[i_max - 1] + vecY[i_max] + vecY[i_max + 1];
+    }
+    else
+    {
+      bg_upperSum = vecY[i_max - 1] + vecY[i_max] + vecY[i_max -2];
+    }
+
     double in_bg0 = (bg_lowerSum + bg_upperSum) / 6.0;
     double in_bg1 = (bg_upperSum - bg_lowerSum) / (3.0 * static_cast<double>(i_max - i_min + 1));
     double in_bg2 = 0.0;
@@ -1104,7 +1095,7 @@ namespace Algorithms
 
     // Loop around peak width
     for (int width = m_minGuessedPeakWidth; width <= m_maxGuessedPeakWidth; width +=
-         stepGuessedPeakWidth)
+         m_stepGuessedPeakWidth)
     {
       // Set up Child Algorithm Fit
       IAlgorithm_sptr fit;
@@ -1208,7 +1199,7 @@ namespace Algorithms
                         << " by high-background approach. \n";
 
     // Check
-    if (i_min >= i_centre || i_max <= i_centre)
+    if (i_min >= i_centre || i_max <= i_centre || i_min < 0)
     {
       std::stringstream errss;
       errss << "FitPeakHightBackground has erroreous input.  i_min = " << i_min << ", i_centre = "
@@ -1225,15 +1216,20 @@ namespace Algorithms
     estimateLinearBackground(rawX, rawY, i_min, i_max, in_bg0, in_bg1, in_bg2);
 
     // Create a pure peak workspace (Workspace2D)
-    size_t numpts = i_max-i_min+1;
+    int numpts = i_max-i_min+1;
+    if (numpts <= 0)
+      throw std::runtime_error("FitPeakHighBackground.  Pure peak workspace size <= 0.");
+
+    size_t sizex = static_cast<size_t>(numpts);
+    size_t sizey = sizex;
     API::MatrixWorkspace_sptr peakws =
-        API::WorkspaceFactory::Instance().create("Workspace2D", 1, numpts, numpts);
+        API::WorkspaceFactory::Instance().create("Workspace2D", 1,  sizex, sizey);
 
     //    set up x-axis first
     MantidVec& dataX = peakws->dataX(0);
     MantidVec& dataY = peakws->dataY(0);
     MantidVec& dataE = peakws->dataE(0);
-    for (size_t i = 0; i < numpts; ++i)
+    for (int i = 0; i < numpts; ++i)
     {
       dataX[i] = rawX[i_min+i];
     }
@@ -1242,7 +1238,7 @@ namespace Algorithms
     FunctionValues backgroundvalues(domain);
     m_backgroundFunction->function(domain, backgroundvalues);
 
-    for (size_t i = 0; i < numpts; ++i)
+    for (int i = 0; i < numpts; ++i)
     {
       dataY[i] = rawY[i_min+i] - backgroundvalues[i];
       if (dataY[i] < 0)
@@ -1300,7 +1296,7 @@ namespace Algorithms
     g_log.information("\nFitting peak by trying different peak width.");
     std::vector<double> vec_FWHM;
     for (int iwidth = m_minGuessedPeakWidth; iwidth <= m_maxGuessedPeakWidth; iwidth +=
-         stepGuessedPeakWidth)
+         m_stepGuessedPeakWidth)
     {
       int peakwssize = static_cast<int>(peakX.size());
       // There are 3 possible situation: peak at left edge, peak in proper range, peak at righ edge
@@ -1355,7 +1351,7 @@ namespace Algorithms
                                                           peakleftbound, peakrightbound);
 
     // Compare results and add result to row
-    double windowsize = input->readX(spectrum)[i_max] - input->readX(spectrum)[i_min];
+    double windowsize = rawX[i_max] - rawX[i_min];
     processFitResult(fitresult1, fitresult2, peakfunc, m_backgroundFunction, spectrum, i_min, i_max, windowsize);
 
     return;
