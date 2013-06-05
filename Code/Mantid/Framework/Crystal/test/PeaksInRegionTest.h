@@ -80,7 +80,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "OutWS");
   }
 
-  void test_badExtents()
+  void do_test_extents_throws(const std::string& message, const std::string& extents)
   {
     PeaksInRegion alg;
     alg.setRethrows(true);
@@ -88,17 +88,33 @@ public:
     TS_ASSERT( alg.isInitialized() ) ;
     alg.setProperty("InputWorkspace", WorkspaceCreationHelper::createPeaksWorkspace());
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
-    alg.setPropertyValue("Extents", "-1,1,-1,1,-1,1, -1"); // Too many
+    alg.setPropertyValue("Extents", extents);
     alg.setPropertyValue("OutputWorkspace", "OutWS");
 
-    TS_ASSERT_THROWS( alg.execute(), std::invalid_argument&);
-
-    alg.setPropertyValue("Extents", "-1"); // Too few
-
-    TS_ASSERT_THROWS( alg.execute(), std::invalid_argument&);
+    TSM_ASSERT_THROWS(message, alg.execute(), std::invalid_argument&);
   }
 
-  void do_test_within_bounds(const std::string coordFrame)
+  void test_bad_extent_format_too_few()
+  {
+    do_test_extents_throws("Too few extents", "-1,1,-1,1,-1,1,-1");
+  }
+
+   void test_bad_extent_format_too_many()
+  {
+    do_test_extents_throws("Too many extents", "-1,1,-1,1,-1,1,-1,1,-1");
+  }
+
+  void test_bad_extent_pairs()
+  {
+    do_test_extents_throws("Invalid x extents", "-1,-1,-1,1,-1,1");
+
+    do_test_extents_throws("Invalid y extents", "-1,1,-1,-1,-1,1");
+
+    do_test_extents_throws("Invalid z extents", "-1,1,-1,1,-1,-1");
+
+  }
+
+  void do_test_within_bounds_center_only(const std::string& coordFrame)
   {
     const std::string outName = "OutWS";
     const double xMinFromPeak = 1;
@@ -131,12 +147,11 @@ public:
     TSM_ASSERT_EQUALS("Peak intersect should be true", Boolean(true), outWS->cell<Boolean>(0,  1));
   }
 
-  void do_test_out_of_bounds(const std::string coordFrame, double xMinFromPeak, double xMaxFromPeak, double yMinFromPeak, double yMaxFromPeak, double zMinFromPeak, double zMaxFromPeak)
+  void do_test_out_of_bounds_center_only(const std::string& coordFrame, double xMinFromPeak, double xMaxFromPeak, double yMinFromPeak, double yMaxFromPeak, double zMinFromPeak, double zMaxFromPeak)
   {
     const std::string outName = "OutWS";
 
     PeakWorkspaceWithExtents tuple = createPeaksWorkspace(coordFrame, xMinFromPeak, xMaxFromPeak, yMinFromPeak, yMaxFromPeak, zMinFromPeak, zMaxFromPeak);
-
     PeaksInRegion alg;
     alg.setRethrows(true);
     alg.initialize();
@@ -144,6 +159,7 @@ public:
     alg.setPropertyValue("CoordinateFrame", coordFrame);
     alg.setProperty("Extents", tuple.get<1>()); 
     alg.setPropertyValue("OutputWorkspace", outName);
+    alg.setProperty("CheckPeakExtents", true);
     alg.execute();
     
     ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
@@ -151,7 +167,6 @@ public:
     TS_ASSERT_EQUALS(2, outWS->columnCount());
     TS_ASSERT_EQUALS("PeakIndex", outWS->getColumn(0)->name());
     TS_ASSERT_EQUALS("Intersecting", outWS->getColumn(1)->name());
-
     TS_ASSERT_EQUALS(1, outWS->rowCount());
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0,  0)); 
@@ -160,73 +175,168 @@ public:
 
   void test_detectorSpace_with_peak_in_bounds()
   {
-    do_test_within_bounds("Detector space");
+    do_test_within_bounds_center_only("Detector space");
   }
 
   void test_qLab_with_peak_in_bounds()
   {
-    do_test_within_bounds("Q (lab frame)");
+    do_test_within_bounds_center_only("Q (lab frame)");
   }
 
   void test_qSample_with_peak_in_bounds()
   {
-    do_test_within_bounds("Q (sample frame)");
+    do_test_within_bounds_center_only("Q (sample frame)");
   }
 
   void test_HKL_with_peak_in_bounds()
   {
-    do_test_within_bounds("HKL");
+    do_test_within_bounds_center_only("HKL");
   }
 
   void test_detectorSpace_with_peaks_out_of_bounds()
   {
     const std::string coordinateFrame = "Detector space";
-    do_test_out_of_bounds(coordinateFrame, -1, 1, 1, 1, 1, 1); // outside xmin
-    do_test_out_of_bounds(coordinateFrame, 1, -1, 1, 1, 1, 1); // outside xmax
-    do_test_out_of_bounds(coordinateFrame, 1, 1, -1, 1, 1, 1); // outside ymin
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, -1, 1, 1); // outside ymax
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, 1, -1, 1); // outside zmin
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, 1, 1, -1); // outside zmax
+    do_test_out_of_bounds_center_only(coordinateFrame, -0.5, 1, 1, 1, 1, 1); // outside xmin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, -0.5, 1, 1, 1, 1); // outside xmax
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, -0.5, 1, 1, 1); // outside ymin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, -0.5, 1, 1); // outside ymax
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, 1, -0.5, 1); // outside zmin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, 1, 1, -0.5); // outside zmax
   }
 
   void test_qLab_with_peaks_out_of_bounds()
   {
     const std::string coordinateFrame = "Q (lab frame)";
-    do_test_out_of_bounds(coordinateFrame, -1, 1, 1, 1, 1, 1); // outside xmin
-    do_test_out_of_bounds(coordinateFrame, 1, -1, 1, 1, 1, 1); // outside xmax
-    do_test_out_of_bounds(coordinateFrame, 1, 1, -1, 1, 1, 1); // outside ymin
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, -1, 1, 1); // outside ymax
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, 1, -1, 1); // outside zmin
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, 1, 1, -1); // outside zmax
+    do_test_out_of_bounds_center_only(coordinateFrame, -0.5, 1, 1, 1, 1, 1); // outside xmin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, -0.5, 1, 1, 1, 1); // outside xmax
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, -0.5, 1, 1, 1); // outside ymin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, -0.5, 1, 1); // outside ymax
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, 1, -0.5, 1); // outside zmin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, 1, 1, -0.5); // outside zmax
   }
 
  void test_qSample_with_peaks_out_of_bounds()
   {
     const std::string coordinateFrame = "Q (sample frame)";
-    do_test_out_of_bounds(coordinateFrame, -1, 1, 1, 1, 1, 1); // outside xmin
-    do_test_out_of_bounds(coordinateFrame, 1, -1, 1, 1, 1, 1); // outside xmax
-    do_test_out_of_bounds(coordinateFrame, 1, 1, -1, 1, 1, 1); // outside ymin
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, -1, 1, 1); // outside ymax
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, 1, -1, 1); // outside zmin
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, 1, 1, -1); // outside zmax
+    do_test_out_of_bounds_center_only(coordinateFrame, -0.5, 1, 1, 1, 1, 1); // outside xmin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, -0.5, 1, 1, 1, 1); // outside xmax
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, -0.5, 1, 1, 1); // outside ymin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, -0.5, 1, 1); // outside ymax
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, 1, -0.5, 1); // outside zmin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, 1, 1, -0.5); // outside zmax
   }
 
   void test_qHKL_with_peaks_out_of_bounds()
   {
     const std::string coordinateFrame = "HKL";
-    do_test_out_of_bounds(coordinateFrame, -1, 1, 1, 1, 1, 1); // outside xmin
-    do_test_out_of_bounds(coordinateFrame, 1, -1, 1, 1, 1, 1); // outside xmax
-    do_test_out_of_bounds(coordinateFrame, 1, 1, -1, 1, 1, 1); // outside ymin
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, -1, 1, 1); // outside ymax
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, 1, -1, 1); // outside zmin
-    do_test_out_of_bounds(coordinateFrame, 1, 1, 1, 1, 1, -1); // outside zmax
+    do_test_out_of_bounds_center_only(coordinateFrame, -0.5, 1, 1, 1, 1, 1); // outside xmin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, -0.5, 1, 1, 1, 1); // outside xmax
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, -0.5, 1, 1, 1); // outside ymin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, -0.5, 1, 1); // outside ymax
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, 1, -0.5, 1); // outside zmin
+    do_test_out_of_bounds_center_only(coordinateFrame, 1, 1, 1, 1, 1, -0.5); // outside zmax
+  }
+
+  void do_test_bounds_check_extents(const std::string coordFrame, double xMinFromPeak, double xMaxFromPeak, double yMinFromPeak, double yMaxFromPeak, double zMinFromPeak, double zMaxFromPeak, double radius, bool expectation)
+  {
+    const std::string outName = "OutWS";
+
+    PeakWorkspaceWithExtents tuple = createPeaksWorkspace(coordFrame, xMinFromPeak, xMaxFromPeak, yMinFromPeak, yMaxFromPeak, zMinFromPeak, zMaxFromPeak);
+    PeaksInRegion alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", tuple.get<0>());
+    alg.setPropertyValue("CoordinateFrame", coordFrame);
+    alg.setProperty("Extents", tuple.get<1>()); 
+    alg.setPropertyValue("OutputWorkspace", outName);
+    alg.setProperty("CheckPeakExtents", true);
+    alg.setProperty("PeakRadius", radius);
+    alg.execute();
+    
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+
+    TS_ASSERT_EQUALS(1, outWS->rowCount());
+    TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0,  0)); 
+    TSM_ASSERT_EQUALS("Peak intersect calculated incorrectly", Boolean(expectation), outWS->cell<Boolean>(0,  1));
+  }
+
+  void test_peak_intersects_xmin_boundary_when_radius_large_enough()
+  {
+    const std::string coordinateFrame = "Detector space";
+    const double wallDistanceFromPeakCenter = 0.5;
+
+    double peakRadius = 0.49; // not enough for the sphere to penetrate the bounding box. Expect failure
+    do_test_bounds_check_extents(coordinateFrame, -wallDistanceFromPeakCenter, 1, 1, 1, 1, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+
+    peakRadius = 0.51; // just enough for the sphere to penetrate the bounding box. Expect pass.
+    do_test_bounds_check_extents(coordinateFrame, -wallDistanceFromPeakCenter, 1, 1, 1, 1, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+  }
+
+  void test_peak_intersects_xmax_boundary_when_radius_large_enough()
+  {
+    const std::string coordinateFrame = "Detector space";
+    const double wallDistanceFromPeakCenter = 0.5;
+
+    double peakRadius = 0.49; // not enough for the sphere to penetrate the bounding box. Expect failure
+    do_test_bounds_check_extents(coordinateFrame, 1, -wallDistanceFromPeakCenter, 1, 1, 1, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+
+    peakRadius = 0.51; // just enough for the sphere to penetrate the bounding box. Expect pass.
+    do_test_bounds_check_extents(coordinateFrame, 1, -wallDistanceFromPeakCenter, 1, 1, 1, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+  }
+
+  void test_peak_intersects_ymin_boundary_when_radius_large_enough()
+  {
+    const std::string coordinateFrame = "Detector space";
+    const double wallDistanceFromPeakCenter = 0.5;
+
+    double peakRadius = 0.49; // not enough for the sphere to penetrate the bounding box. Expect failure
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, -wallDistanceFromPeakCenter,  1, 1, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+
+    peakRadius = 0.51; // just enough for the sphere to penetrate the bounding box. Expect pass.
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, -wallDistanceFromPeakCenter, 1, 1, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+  }
+
+  void test_peak_intersects_ymax_boundary_when_radius_large_enough()
+  {
+    const std::string coordinateFrame = "Detector space";
+    const double wallDistanceFromPeakCenter = 0.5;
+
+    double peakRadius = 0.49; // not enough for the sphere to penetrate the bounding box. Expect failure
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, -wallDistanceFromPeakCenter, 1, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+
+    peakRadius = 0.51; // just enough for the sphere to penetrate the bounding box. Expect pass.
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, -wallDistanceFromPeakCenter, 1, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+  }
+
+  void test_peak_intersects_zmin_boundary_when_radius_large_enough()
+  {
+    const std::string coordinateFrame = "Detector space";
+    const double wallDistanceFromPeakCenter = 0.5;
+
+    double peakRadius = 0.49; // not enough for the sphere to penetrate the bounding box. Expect failure
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, -wallDistanceFromPeakCenter, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+
+    peakRadius = 0.51; // just enough for the sphere to penetrate the bounding box. Expect pass.
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, -wallDistanceFromPeakCenter, 1, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+  }
+
+  void test_peak_intersects_zmax_boundary_when_radius_large_enough()
+  {
+    const std::string coordinateFrame = "Detector space";
+    const double wallDistanceFromPeakCenter = 0.5;
+
+    double peakRadius = 0.49; // not enough for the sphere to penetrate the bounding box. Expect failure
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, 1, -wallDistanceFromPeakCenter, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+
+    peakRadius = 0.51; // just enough for the sphere to penetrate the bounding box. Expect pass.
+    do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, 1, -wallDistanceFromPeakCenter, peakRadius, peakRadius > wallDistanceFromPeakCenter);
   }
 
 };
 
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------
-Functional Tests
+Perfomance Tests
 -------------------------------------------------------------------------------------------------------------------------------------------------------*/
 class PeaksInRegionTestPerformance : public CxxTest::TestSuite
 {
@@ -249,12 +359,12 @@ public:
 
     for (int i = 0; i < numPeaks; ++i)
     {
-      Peak peak(inst, i, i+0.5);
+      Peak peak(inst, i, i+-0.5);
       inputWS->addPeak(peak);
     }
   }
 
-  void testPerformance()
+  void test_performance_peak_centers_only()
   {
     const std::string outName = "OutPerfWS";
 
@@ -266,6 +376,29 @@ public:
     alg.setPropertyValue("CoordinateFrame", "Detector space");
     alg.setPropertyValue("Extents", "-1,1,-1,1,-1,1");
     alg.setPropertyValue("OutputWorkspace", outName);
+    alg.setProperty("CheckPeakExtents", false);
+    alg.execute();
+
+    Mantid::API::ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+
+    TS_ASSERT_EQUALS(2, outWS->columnCount());
+    TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());
+  }
+
+  void test_performance_peak_extents_checking()
+  {
+    const std::string outName = "OutPerfWS";
+
+    PeaksInRegion alg;
+    alg.setRethrows(true);
+    alg.initialize() ;
+    TS_ASSERT( alg.isInitialized() ) ;
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue("CoordinateFrame", "Detector space");
+    alg.setPropertyValue("Extents", "0.5,1,-1,1,-1,1");
+    alg.setPropertyValue("OutputWorkspace", outName);
+    alg.setProperty("CheckPeakExtents", true);
+    alg.setProperty("PeakRadius", 0.4); 
     alg.execute();
 
     Mantid::API::ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
