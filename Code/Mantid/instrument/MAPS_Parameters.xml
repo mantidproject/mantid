@@ -125,7 +125,7 @@
 </parameter>
 
 <!-- Setting diag to reject zero backgrounds  -->
-<parameter name="diag_samp_zero">
+<parameter name="diag_samp_zero"  type="bool">
   <value val="False"/>
 </parameter>
 
@@ -243,17 +243,17 @@
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
      the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a
      each synonims met in command line are converted into appropriate reducer keyword
-
+-->  
 <parameter name="synonims" type="string">
-   <value> val="normalise_method=norm_method;
+   <value val="normalise_method=norm_method;
        fix_ei=fixei;   
        save_formats=save_format;
        sum_runs=sum;
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass"
-   </value>
+    />
 </parameter>
- -->  
+ 
   <!-- -->
 </component-link>
 

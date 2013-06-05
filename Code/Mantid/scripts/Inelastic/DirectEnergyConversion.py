@@ -722,6 +722,7 @@ class DirectEnergyConversion(object):
             except:
                 self.instrument = None
                 raise RuntimeError('Cannot load instrument for prefix "%s"' % self.instr_name)
+            self.help();
             #instr_pattern = os.path.join(idf_dir,self.instr_name + '*_Definition.xml')
             #idf_files = glob.glob(instr_pattern)
             #if len(idf_files) > 0:
@@ -842,7 +843,10 @@ class DirectEnergyConversion(object):
     def get_default_parameter(self, name):
         if self.instrument is None:
             raise ValueError("Cannot init default parameter, instrument has not been loaded.")
-        values = self.instrument.getNumberParameter(name)
+        try :
+            values = self.instrument.getParameter(name)
+        except :
+            pass
         if len(values) != 1:
             raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % name)
         return values[0]
@@ -852,7 +856,8 @@ class DirectEnergyConversion(object):
         """
         if self.instrument is None:
             raise ValueError("Cannot init default parameter, instrument has not been loaded.")
-        values = self.instrument.getNumberParameter(name)
+
+        values = self.instrument.getParameter(name)
         if len(values) != 1 :
             values = self.instrument.getStringParameter(name)
             if len(values) != 1 :
@@ -881,10 +886,13 @@ class DirectEnergyConversion(object):
 
         if keyword==None :
             par_names = self.instrument.getParameterNames()
-            print "****: ***************************************************************************** ";
-            print "****: There are ", len(par_names), "default reduction parameters availible, namely: ";
-            for i in xrange(0,len(par_names),4):
-                print "****: {0}\t {1}\t {2}\t {3}\n".format(par_names[i],par_names[i+1],par_names[i+2],par_names[i+3]),
+            print "****: ***************************************************************************** "
+            print "****: There are ", len(par_names), " reduction parameters availible to change, namely: "
+            for i in xrange(0,len(par_names),1):
+                #print "****: {0}\t {1}\t {2}\t {3}\n".format(par_names[i],par_names[i+1],par_names[i+2],par_names[i+3]),
+                print par_names[i],
+                print  type(self.instrument.getParameterType(par_names[i])),
+                print  self.instrument.getParameterType(par_names[i])
             print "****:" 
             print "****: type help(parameter_name) to get help on a parameter with  specified  name"
             print "****: ***************************************************************************** ";
