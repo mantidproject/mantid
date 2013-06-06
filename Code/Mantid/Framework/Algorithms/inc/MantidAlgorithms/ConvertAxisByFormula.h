@@ -44,6 +44,8 @@ namespace Algorithms
   private:
      void init();
      void exec();
+     /// Sets documentation strings for this algorithm
+     void initDocs();
   };
 
 
