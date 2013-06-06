@@ -1,5 +1,5 @@
-#ifndef MANTID_DIFFSPHERE_H_
-#define MANTID_DIFFSPHERE_H_
+#ifndef MANTID_ELASTICDIFFSPHERE_H_
+#define MANTID_ELASTICDIFFSPHERE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,8 +10,6 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
 #include "DeltaFunction.h"
-#include "MantidCurveFitting/ElasticDiffSphere.h"
-#include "MantidCurveFitting/InelasticDiffSphere.h"
 
 namespace Mantid
 {
@@ -42,38 +40,25 @@ namespace CurveFitting
   Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-class DLLExport DiffSphere : public API::ImmutableCompositeFunction
+class DLLExport ElasticDiffSphere : public DeltaFunction
 {
 public:
+
   /// Constructor
-  DiffSphere();
+  ElasticDiffSphere();
 
   /// Destructor
-  ~DiffSphere() {};
+  virtual ~ElasticDiffSphere() {};
 
   /// overwrite IFunction base class methods
-  std::string name()const{return "DiffSphere";}
+  virtual std::string name()const{return "ElasticDiffSphere";}
 
-  virtual const std::string category() const { return "QuasiElastic";}
+  /// A rescaling of the peak intensity
+  double HeightPrefactor() const;
 
-  virtual int version() const { return 1;}
-
-  /// Propagate an attribute to member functions
-  virtual void trickleDownAttribute( const std::string& name );
-
-  /// Override parent definition
-  virtual void declareAttribute(const std::string & name,const API::IFunction::Attribute & defaultValue);
-
-  /// Override parent definition
-  virtual void setAttribute(const std::string& attName,const Attribute& att);
-
-private:
-  //API::IFunctionMW* m_elastic;    //elastic intensity of the DiffSphere structure factor
-  boost::shared_ptr<ElasticDiffSphere> m_elastic;
-  boost::shared_ptr<InelasticDiffSphere> m_inelastic;  //inelastic intensity of the DiffSphere structure factor
 };
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_DIFFSPHERE_H_*/
+#endif /*MANTID_ELASTICDIFFSPHERE_H_*/
