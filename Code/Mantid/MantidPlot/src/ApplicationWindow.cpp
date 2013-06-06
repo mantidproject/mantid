@@ -224,9 +224,9 @@ blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
 m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
 #ifdef Q_OS_MAC // Mac
-  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
+  settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
 #else
-  settings("ISIS", "MantidPlot")
+  settings("Mantid", "MantidPlot")
 #endif
 {
   QStringList empty;
@@ -240,12 +240,64 @@ blockWindowActivation(false),
 m_enableQtiPlotFitting(false),
 m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
 #ifdef Q_OS_MAC // Mac
-  settings(QSettings::IniFormat,QSettings::UserScope, "ISIS", "MantidPlot")
+  settings(QSettings::IniFormat, QSettings::UserScope, "Mantid", "MantidPlot")
 #else
-  settings("ISIS", "MantidPlot")
+  settings("Mantid", "MantidPlot")
 #endif
 {
   init(factorySettings, args);
+}
+
+/**
+ * This function is responsible for copying the old configuration
+ * information from the ISIS\MantidPlot area to the new Mantid\MantidPlot
+ * area. The old area is deleted once the trnasfer is complete. On subsequent
+ * runs, if the old configuration area is missing or empty, the copying
+ * is ignored.
+ */
+void ApplicationWindow::handleConfigDir()
+{
+#ifdef Q_OS_WIN
+  // We use the registry for settings on Windows
+  QSettings oldSettings("ISIS", "MantidPlot");
+  QStringList keys = oldSettings.allKeys();
+  // If the keys are empty, we removed the MantidPlot entries
+  if (!keys.empty())
+  {
+    foreach (QString key, keys)
+    {
+	    settings.setValue(key, oldSettings.value(key));
+    }
+    // This unfortunately cannot remove the top-level entry
+    oldSettings.remove("");
+  }
+#else
+  QFileInfo curConfig(settings.fileName());
+  QString oldPath = settings.fileName();
+  oldPath.replace("Mantid", "ISIS");
+  QFileInfo oldConfig(oldPath);
+
+  // If the old config directory exists, copy it's contents and
+  // then delete it
+  QDir oldConfigDir = oldConfig.dir();
+  if (oldConfigDir.exists())
+  {
+    QStringList entries = oldConfigDir.entryList();
+    foreach ( QString entry, entries )
+    {
+      if (!entry.startsWith("."))
+      {
+        QFileInfo oldFile(oldConfig.dir(), entry);
+        QFileInfo newFile(curConfig.dir(), entry);
+        // Qt will not overwrite files, so remove new one first
+        QFile::remove(newFile.filePath());
+        QFile::copy(oldFile.filePath(), newFile.filePath());
+        QFile::remove(oldFile.filePath());
+      }
+    }
+    oldConfigDir.rmdir(oldConfig.path());
+  }
+#endif
 }
 
 /**
@@ -254,11 +306,12 @@ m_exitCode(0), g_log(Mantid::Kernel::Logger::get("ApplicationWindow")),
 void ApplicationWindow::exitWithPresetCode()
 {
   QCoreApplication::exit(m_exitCode);
+  handleConfigDir();
 }
 
 void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 {
-  QCoreApplication::setOrganizationName("ISIS");
+  QCoreApplication::setOrganizationName("Mantid");
   QCoreApplication::setApplicationName("MantidPlot");
   setAttribute(Qt::WA_DeleteOnClose);
 

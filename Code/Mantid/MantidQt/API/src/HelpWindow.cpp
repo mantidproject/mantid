@@ -420,11 +420,11 @@ void HelpWindowImpl::determineFileLocs()
         Poco::Path path (dataLoc.toStdString(), m_cacheFile);
         m_cacheFile = path.absolute().toString();
     }
-    else if (dataLoc.endsWith("MantidPlot")) // understood to end in "ISIS/MantidPlot"
+    else if (dataLoc.endsWith("MantidPlot")) // understood to end in "Mantid/MantidPlot"
     {
         Poco::Path path(dataLoc.toStdString());
         path = path.parent(); // drop off "MantidPlot"
-        path = path.parent(); // drop off "ISIS"
+        path = path.parent(); // drop off "Mantid"
         path = Poco::Path(path, "mantidproject");
         path = Poco::Path(path, m_cacheFile);
         m_cacheFile = path.absolute().toString();
