@@ -65,7 +65,7 @@ DimensionWidget::DimensionWidget()
   m_dimensionCombo = new QComboBox();
   QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
   m_dimensionCombo->setSizePolicy(sizePolicy);
-  m_dimensionCombo->setMinimumSize(QSize(100, 0));
+  m_dimensionCombo->setMinimumSize(QSize(80, 0));
   connect(m_dimensionCombo,SIGNAL(activated(int)),this ,SLOT(dimensionSelectedListener()));
   m_axisLayout->addWidget(m_dimensionCombo, Qt::AlignLeft);
 
