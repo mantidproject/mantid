@@ -70,6 +70,9 @@ DimensionWidget::DimensionWidget()
 
   m_minBox = new QLineEdit();
   m_minBox->setValidator(new QDoubleValidator(this));
+  QSizePolicy sizePolicy1(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  m_minBox->setSizePolicy(sizePolicy1);
+  m_minBox->setMinimumSize(QSize(50, 0));
   connect(m_minBox, SIGNAL(editingFinished()), this, SLOT(minBoxListener()));
   m_axisLayout->addWidget(m_minBox, Qt::AlignLeft);
   
@@ -77,6 +80,9 @@ DimensionWidget::DimensionWidget()
 
   m_maxBox = new QLineEdit();
   m_maxBox->setValidator(new QDoubleValidator(this));
+  QSizePolicy sizePolicy2(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  m_maxBox->setSizePolicy(sizePolicy2);
+  m_maxBox->setMinimumSize(QSize(50, 0));
   connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
   m_axisLayout->addWidget(m_maxBox, Qt::AlignLeft);
 
