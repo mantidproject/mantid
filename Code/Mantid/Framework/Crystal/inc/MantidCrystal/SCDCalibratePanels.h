@@ -221,7 +221,8 @@ namespace Crystal
 
   void LoadISawDetCal(
            boost::shared_ptr<const Instrument> &instrument,
-           std::set<std::string> &AllBankName,double &T0,std::string filename,
+           std::set<std::string> &AllBankName,double &T0,
+           double &L0, std::string filename,
            std::string bankPrefixName);
   private:
     void exec ();
