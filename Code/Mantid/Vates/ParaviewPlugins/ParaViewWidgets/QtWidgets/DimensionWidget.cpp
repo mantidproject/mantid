@@ -32,43 +32,55 @@ DimensionWidget::DimensionWidget()
   m_binStackedWidget->setCurrentIndex(0);
   
   using namespace Mantid::Geometry;
-  QGridLayout* m_layout = new QGridLayout();
+  QVBoxLayout* m_layout = new QVBoxLayout();
+  m_layout->setSpacing(2);
 
-  QLabel* integratedLabel = new QLabel("Int");
-  integratedLabel->setToolTip("Collapse/Expand dimension");
-  m_layout->addWidget(integratedLabel, 0, 0, Qt::AlignLeft);
-  m_layout->setColumnMinimumWidth(0, 30); //Set column to fixed minimum width!
+  m_dimensionLabel = new QLabel();
+  m_layout->addWidget(m_dimensionLabel, Qt::AlignLeft);
+
+  QHBoxLayout* m_binLayout = new QHBoxLayout();
 
   m_ckIntegrated = new QCheckBox();
+  m_ckIntegrated->setText("Int");
   m_ckIntegrated->setToolTip("Collapse/Expand dimension");
   connect(m_ckIntegrated, SIGNAL(clicked(bool)), this, SLOT(integratedChanged(bool)));
-  m_layout->addWidget(m_ckIntegrated, 0, 1, Qt::AlignLeft);
-  
-  m_layout->addWidget(m_binStackedWidget, 0, 2, 1, 2, Qt::AlignLeft);
+  m_binLayout->addWidget(m_ckIntegrated);
+
+  QSpacerItem* spacer = new QSpacerItem(40, 20,
+                                        QSizePolicy::Maximum,
+                                        QSizePolicy::Minimum);
+  m_binLayout->addSpacerItem(spacer);
+
+  m_binLayout->addWidget(m_binStackedWidget, Qt::AlignLeft);
   connect(simple, SIGNAL(valueChanged()), this, SLOT(nBinsListener()));
   connect(lowstephigh, SIGNAL(valueChanged()), this, SLOT(nBinsListener()));
 
-  m_dimensionLabel = new QLabel();
-  m_dimensionLabel->setFixedWidth(100);
-  m_layout->addWidget(m_dimensionLabel, 1, 0, Qt::AlignLeft);
+  m_layout->addLayout(m_binLayout);
+
+  QHBoxLayout* m_axisLayout = new QHBoxLayout();
+
   m_dimensionCombo = new QComboBox();
-
+  QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+  m_dimensionCombo->setSizePolicy(sizePolicy);
+  m_dimensionCombo->setMinimumSize(QSize(100, 0));
   connect(m_dimensionCombo,SIGNAL(activated(int)),this ,SLOT(dimensionSelectedListener()));
-  m_layout->addWidget(m_dimensionCombo, 1, 1, Qt::AlignLeft);
+  m_axisLayout->addWidget(m_dimensionCombo, Qt::AlignLeft);
 
-  m_layout->addWidget(new QLabel("Min"), 1, 2, Qt::AlignLeft);
+  m_axisLayout->addWidget(new QLabel("Min"));
+
   m_minBox = new QLineEdit();
   m_minBox->setValidator(new QDoubleValidator(this));
-
   connect(m_minBox, SIGNAL(editingFinished()), this, SLOT(minBoxListener()));
-  m_layout->addWidget(m_minBox, 1, 3, Qt::AlignLeft);
+  m_axisLayout->addWidget(m_minBox, Qt::AlignLeft);
   
-  m_layout->addWidget(new QLabel("Max"), 1, 4, Qt::AlignLeft);
+  m_axisLayout->addWidget(new QLabel("Max"));
+
   m_maxBox = new QLineEdit();
   m_maxBox->setValidator(new QDoubleValidator(this));
-  
   connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
-  m_layout->addWidget(m_maxBox, 1, 5, Qt::AlignLeft);
+  m_axisLayout->addWidget(m_maxBox, Qt::AlignLeft);
+
+  m_layout->addLayout(m_axisLayout);
 
   this->setLayout(m_layout);
 }
