@@ -183,6 +183,7 @@ target_link_libraries( VatesAPI
 ${MANTID_SUBPROJECT_LIBS} 
 vtkCommonCore
 vtkCommonDataModel
+vtkIOLegacy
 )
 
 # Create test file projects
