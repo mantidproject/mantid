@@ -80,6 +80,8 @@ private:
 
   int m_currentDimensionIndex;
 
+  int m_currentBinWidgetIndex;
+
   std::string m_name;
 
   Mantid::VATES::DimensionPresenter* m_pDimensionPresenter;

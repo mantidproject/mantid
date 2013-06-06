@@ -4,6 +4,7 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QSpacerItem>
 #include <QStackedWidget>
 #include <qmessagebox.h>
 #include <stdio.h>
@@ -22,15 +23,17 @@ using namespace Mantid::VATES;
 /**
 Constructor
 */
-DimensionWidget::DimensionWidget() 
+DimensionWidget::DimensionWidget()
 {
   m_binStackedWidget = new QStackedWidget;
   BinInputWidget* simple = new SimpleBinInputWidget;
   BinInputWidget* lowstephigh = new LowHighStepInputWidget;
   m_binStackedWidget->addWidget(simple);
   m_binStackedWidget->addWidget(lowstephigh);
-  m_binStackedWidget->setCurrentIndex(0);
-  
+  m_binStackedWidget->addWidget(new QLabel(""));
+  m_currentBinWidgetIndex = 0;
+  m_binStackedWidget->setCurrentIndex(m_currentBinWidgetIndex);
+
   using namespace Mantid::Geometry;
   QVBoxLayout* m_layout = new QVBoxLayout();
   m_layout->setSpacing(2);
@@ -41,7 +44,7 @@ DimensionWidget::DimensionWidget()
   QHBoxLayout* m_binLayout = new QHBoxLayout();
 
   m_ckIntegrated = new QCheckBox();
-  m_ckIntegrated->setText("Int");
+  m_ckIntegrated->setText("Integrate");
   m_ckIntegrated->setToolTip("Collapse/Expand dimension");
   connect(m_ckIntegrated, SIGNAL(clicked(bool)), this, SLOT(integratedChanged(bool)));
   m_binLayout->addWidget(m_ckIntegrated);
@@ -75,7 +78,7 @@ DimensionWidget::DimensionWidget()
   m_minBox->setMinimumSize(QSize(50, 0));
   connect(m_minBox, SIGNAL(editingFinished()), this, SLOT(minBoxListener()));
   m_axisLayout->addWidget(m_minBox, Qt::AlignLeft);
-  
+
   m_axisLayout->addWidget(new QLabel("Max"));
 
   m_maxBox = new QLineEdit();
@@ -99,7 +102,16 @@ void DimensionWidget::initalizeViewMode(BinDisplay binDisplay)
 
 BinInputWidget* DimensionWidget::getCurrentBinInputWidget() const
 {
-  return dynamic_cast<BinInputWidget*>(m_binStackedWidget->currentWidget());
+  QWidget *w;
+  if (m_binStackedWidget->currentIndex() > 1)
+  {
+    w = m_binStackedWidget->widget(m_currentBinWidgetIndex);
+  }
+  else
+  {
+    w = m_binStackedWidget->currentWidget();
+  }
+  return dynamic_cast<BinInputWidget*>(w);
 }
 
 double DimensionWidget::getMinimum() const
@@ -144,7 +156,7 @@ void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr
   setDimensionName(m_pDimensionPresenter->getLabel());
   double max = m_pDimensionPresenter->getModel()->getMaximum();
   double min = m_pDimensionPresenter->getModel()->getMinimum();
-  m_binStackedWidget->setHidden(false);
+  m_binStackedWidget->setCurrentIndex(m_currentBinWidgetIndex);
   m_ckIntegrated->setChecked(false);
   BinInputWidget* binInputWidget = getCurrentBinInputWidget();
   if(binInputWidget->getEntry(min, max) <= 1)
@@ -172,11 +184,11 @@ void DimensionWidget::setDimensionName(const std::string& name)
   this->setToolTip(name.c_str());
 }
 
-  
+
 void DimensionWidget::showAsIntegrated()
 {
   setDimensionName(m_pDimensionPresenter->getModel()->getDimensionId());
-  m_binStackedWidget->setHidden(true);
+  m_binStackedWidget->setCurrentIndex(2);
   m_ckIntegrated->setChecked(true);
 }
 
@@ -219,7 +231,7 @@ void DimensionWidget::configureStrongly()
   m_minBox->setText(minValueString.c_str());
   setViewMode(m_initialBinDisplay);
 }
-      
+
 void DimensionWidget::accept(Mantid::VATES::DimensionPresenter* pDimensionPresenter)
 {
   m_pDimensionPresenter = pDimensionPresenter;
@@ -278,7 +290,7 @@ std::string DimensionWidget::getVisDimensionName() const
   }
   else
   {
-    return m_dimensionCombo->currentText().toStdString(); 
+    return m_dimensionCombo->currentText().toStdString();
   }
 }
 
@@ -288,14 +300,22 @@ void DimensionWidget::setViewMode(Mantid::VATES::BinDisplay mode)
   double min = m_pDimensionPresenter->getModel()->getMinimum();
   BinInputWidget* binInputWidget = getCurrentBinInputWidget();
   int nBins = binInputWidget->getEntry(min, max);
-  
+
   if(mode == Simple)
   {
-    m_binStackedWidget->setCurrentIndex(0);
+    m_currentBinWidgetIndex = 0;
+    if (!m_ckIntegrated->isChecked())
+    {
+      m_binStackedWidget->setCurrentIndex(m_currentBinWidgetIndex);
+    }
   }
   else if(mode == LowHighStep)
   {
-    m_binStackedWidget->setCurrentIndex(1);
+    m_currentBinWidgetIndex = 1;
+    if (!m_ckIntegrated->isChecked())
+    {
+      m_binStackedWidget->setCurrentIndex(m_currentBinWidgetIndex);
+    }
   }
   else
   {
