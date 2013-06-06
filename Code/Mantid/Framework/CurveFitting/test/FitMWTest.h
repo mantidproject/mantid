@@ -106,7 +106,7 @@ public:
     TS_ASSERT_EQUALS(covar->Double(1,2), 100.0);
     TS_ASSERT(fabs(covar->Double(0,2)) < 100.0);
     TS_ASSERT(fabs(covar->Double(0,2)) > 0.0);
-    TS_ASSERT_EQUALS(covar->Double(0,2), covar->Double(1,1));
+    TS_ASSERT_DELTA(covar->Double(0,2), covar->Double(1,1), 0.000001);
 
     TS_ASSERT_DIFFERS( fun->getError(0), 0.0 );
     TS_ASSERT_DIFFERS( fun->getError(1), 0.0 );
@@ -375,6 +375,8 @@ public:
       ws->dataY(0)[3] = 1.0 / zero;
       ws->dataY(0)[5] = log(-one);
       ws->dataE(0)[7] = 0;
+      ws->dataE(0)[9] = 1.0 / zero;
+      ws->dataE(0)[11] = log(-one);
 
       FunctionDomain_sptr domain;
       IFunctionValues_sptr values;
@@ -393,7 +395,7 @@ public:
       FunctionValues *val = dynamic_cast<FunctionValues*>(values.get());
       for(size_t i = 0; i < val->size(); ++i)
       {
-          if ( i == 3 || i == 5 || i == 7 )
+          if ( i == 3 || i == 5 || i == 7 || i == 9 || i == 11 )
           {
               TS_ASSERT_EQUALS( val->getFitWeight(i), 0.0 );
           }
@@ -452,7 +454,7 @@ private:
   API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram)
   {
     MatrixWorkspace_sptr ws2(new WorkspaceTester);
-    ws2->initialize(2,10,10);
+    ws2->initialize(2,20,20);
 
     for(size_t is = 0; is < ws2->getNumberHistograms(); ++is)
     {
