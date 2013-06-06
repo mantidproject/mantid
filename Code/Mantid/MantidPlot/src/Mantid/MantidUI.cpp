@@ -1510,7 +1510,7 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 * Renames selected workspace
 * @param wsName :: selected workspace name
 */
-void MantidUI::renameWorkspace(QString wsName)
+void MantidUI::renameWorkspace(QStringList wsName)
 { 
   // If the wsname is blank look for an active window and assume this workspace is
   // the one to rename
@@ -1519,7 +1519,7 @@ void MantidUI::renameWorkspace(QString wsName)
     MantidMatrix *matrix = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
     if( matrix )
     {
-      wsName = matrix->workspaceName();
+      wsName[0] = matrix->workspaceName();
     }
     else
     {
@@ -1556,7 +1556,7 @@ void MantidUI::renameWorkspace(QString wsName)
     int index=count-1;
     while(count>1)
     {
-      int selectedIndex=combo->findText(wsName,Qt::MatchExactly );
+      int selectedIndex=combo->findText(wsName[0],Qt::MatchExactly );
       if(selectedIndex!=index)
       {
         combo->removeItem(index);
