@@ -290,11 +290,12 @@ namespace CurveFitting
   * @param dataws :  data workspace holding diffraction data for peak calculation
   * @param workspaceindex:  workpace index of the data for peak calculation in dataws
   * @param zerobackground:  flag if the data is zero background
-  * @param allpeaksvalues:  output vector storing peaks' values calculated
+  * @param vec_summedpeaks:  output vector storing peaks' values calculated
   *
   * Return: True if all peaks' height are physical.  False otherwise
   */
-  bool LeBailFunction::calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues)
+  bool LeBailFunction::calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground,
+                                                 vector<double>& vec_summedpeaks)
   {
     // Divide peaks into groups from peak's parameters
     vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > > peakgroupvec;
@@ -309,7 +310,7 @@ namespace CurveFitting
 
       zerobackground = true;
       bool peakheightsphysical = calculateGroupPeakIntensities(peakgroupvec[ig], vecX, vecY, zerobackground,
-                                                               allpeaksvalues);
+                                                               vec_summedpeaks);
 
       if (!peakheightsphysical)
         allpeakheightsphysical = false;
@@ -327,10 +328,11 @@ namespace CurveFitting
    * @param dataws:  data workspace for the peaks
    * @param wsindex: workspace index of the peaks data in dataws
    * @param zerobackground: true if background is zero
+   * @param vec_summedpeaks :: vector of summation of all peaks
    */
   bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup,
                                                      const vector<double>& vecX, const vector<double>& vecY, bool zerobackground,
-                                                     vector<double>& allpeaksvalues)
+                                                     vector<double>& vec_summedpeaks)
   {
     // 1. Sort by d-spacing
     if (peakgroup.empty())
@@ -345,10 +347,10 @@ namespace CurveFitting
       sort(peakgroup.begin(), peakgroup.end());
 
     // Check input vector validity
-    if (allpeaksvalues.size() != vecY.size())
+    if (vec_summedpeaks.size() != vecY.size())
     {
       stringstream errss;
-      errss << "Input vector 'allpeaksvalues' has wrong size = " << allpeaksvalues.size()
+      errss << "Input vector 'allpeaksvalues' has wrong size = " << vec_summedpeaks.size()
             << " != data workspace Y's size = " << vecY.size();
       g_log.error(errss.str());
       throw runtime_error(errss.str());
@@ -359,9 +361,14 @@ namespace CurveFitting
     double leftbound = leftpeak->centre() - PEAKRANGECONSTANT * leftpeak->fwhm();
     if (leftbound < vecX[0])
     {
-      g_log.information() << "Peak group's left boundary " << leftbound << " is out side of "
-                          << "input data workspace's left bound (" << vecX[0]
-                          << ")! Accuracy of its peak intensity might be affected.\n";
+      int h, k, l;
+      leftpeak->getMillerIndex(h, k, l);
+      g_log.warning() << "Peak group's left boundary " << leftbound << " is out side of "
+                      << "input data workspace's left bound (" << vecX[0]
+                      << ")! Accuracy of its peak intensity might be affected."
+                      << "Peaks group has " << peakgroup.size() << " peaks, where the left most peak "
+                      << "is at " << leftpeak->centre() << " (HKL) = " << h << ", " << k << ", " << l << ".\n"
+                      << "[DBx] " << leftpeak->asString() << ".\n";
       leftbound = vecX[0] + 0.1;
     }
     IPowderDiffPeakFunction_sptr rightpeak = peakgroup.back().second;
@@ -557,7 +564,7 @@ namespace CurveFitting
       // Add peak's value to peaksvalues
       for (size_t i = ileft; i < iright; ++i)
       {
-        allpeaksvalues[i] += (intensity * peakvalues[ipk][i-ileft]);
+        vec_summedpeaks[i] += (intensity * peakvalues[ipk][i-ileft]);
       }
 
     } // ENDFOR each peak
@@ -668,7 +675,7 @@ namespace CurveFitting
           continue;
 
         // Set new parameter to each peak
-        for (size_t ipk = 0; ipk < m_numPeaks; ++i)
+        for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
         {
           IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
           peak->setParameter(i, newvalue);

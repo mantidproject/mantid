@@ -71,9 +71,9 @@ public:
     parammap.insert(make_pair("Beta0t", 96.864));
     parammap.insert(make_pair("Beta1t", 96.864));
 
-    parammap.insert(make_pair("Sig2",  11.380));
-    parammap.insert(make_pair("Sig1",   9.901));
-    parammap.insert(make_pair("Sig0",  17.370));
+    parammap.insert(make_pair("Sig2",  sqrt(11.380)));
+    parammap.insert(make_pair("Sig1",  sqrt(9.901)));
+    parammap.insert(make_pair("Sig0",  sqrt(17.370)));
 
     parammap.insert(make_pair("Width", 1.0055));
     parammap.insert(make_pair("Tcross", 0.4700));
@@ -130,8 +130,8 @@ public:
     vector<double> out(nData);
 
     // Calculate peak intensities
-    vector<double> peakheights;
-    lebailfunction.calculatePeaksIntensities(vecX, vecY, true, peakheights);
+    vector<double> summedpeaksvalue(vecY.size(), 0.);
+    lebailfunction.calculatePeaksIntensities(vecX, vecY, true, summedpeaksvalue);
 
     // Calculate diffraction patters
     lebailfunction.function(out, vecX, true);

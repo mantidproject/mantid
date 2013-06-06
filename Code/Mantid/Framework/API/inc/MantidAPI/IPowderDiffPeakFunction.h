@@ -118,18 +118,21 @@ protected:
   /// Defines the area around the centre where the peak values are to be calculated (in FWHM).
   static int s_peakRadius;
 
-  /// An indicator to re-calculate peak d-space position
-  bool m_cellParamValueChanged;
-
   /// Centre of the peak
-  mutable bool m_centre;
+  mutable double m_centre;
+  /// Centre of the peak in d-space
+  mutable double m_dcentre;
   /// Peak intensity
-  bool m_intensity;
+  double m_intensity;
   /// Peak's FWHM
-  mutable bool m_fwhm;
-  /// Flag if any parameter value changed
-  bool m_hasNewParameterValue;
+  mutable double m_fwhm;
 
+  /// Flag if any parameter value changed
+  mutable bool m_hasNewParameterValue;
+  /// An indicator to re-calculate peak d-space position
+  mutable bool m_cellParamValueChanged;
+
+  /// Peak profile parameters names in ascending order
   std::vector<std::string> m_sortedProfileParameterNames;
 
   /// Unit cell
@@ -140,6 +143,12 @@ protected:
 
   /// Flag to indicate whether peaks' parameters value can generate a valid peak
   mutable bool m_parameterValid;
+
+  /// Miller Indices
+  int mH;
+  int mK;
+  int mL;
+  bool mHKLSet;
 
 };
 

@@ -140,10 +140,9 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Constructor
  */
-  ThermalNeutronBk2BkExpConvPVoigt::ThermalNeutronBk2BkExpConvPVoigt():mHKLSet(false),
-    m_cancel(false),m_parallelException(false)
+  ThermalNeutronBk2BkExpConvPVoigt::ThermalNeutronBk2BkExpConvPVoigt() : IPowderDiffPeakFunction()
   {
-
+    mHKLSet = false;
   }
     
   //------------------------------------------------------------------------------------------------
@@ -199,7 +198,6 @@ namespace CurveFitting
 
     // Set flag
     m_cellParamValueChanged = true;
-    m_newValueSet = true;
 
     return;
   }
@@ -269,8 +267,10 @@ namespace CurveFitting
   double ThermalNeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname)
   {
     // 1. Calculate peak parameters if required
-    if (m_newValueSet)
+    if (m_hasNewParameterValue)
+    {
       calculateParameters(false);
+    }
 
     // 2. Get value
     double paramvalue;
@@ -287,6 +287,8 @@ namespace CurveFitting
       paramvalue = m_dcentre;
     else if (paramname.compare("Eta") == 0)
       paramvalue = m_eta;
+    else if (paramname.compare("TOF_h") == 0)
+      paramvalue = m_centre;
     else
     {
       stringstream errss;
@@ -403,10 +405,11 @@ namespace CurveFitting
             << ", alph0 = " << alph0 << ", alph1 = " << alph1 << "\n";
       errss << "  n = " << n << ", beta_e = " << beta_e << ", beta_t = " << beta_t << "\n";
       errss << " dh = " << dh << ", beta0t = " << beta0t << ", beta1t = " << beta1t << "\n";
-      g_log.error(errss.str());
+      g_log.information(errss.str());
     }
 
-    m_newValueSet = false;
+    // Reset the flag
+    m_hasNewParameterValue = false;
 
     return;
   }
@@ -424,7 +427,7 @@ namespace CurveFitting
     // double d_h, tof_h, alpha, beta, H, sigma2, eta, N, gamma;
     // d_h, tof_h, eta, alpha, beta, H, sigma2, gamma, N,
 
-    if (m_newValueSet)
+    if (m_hasNewParameterValue)
       calculateParameters(false);
 
     double peakrange = m_fwhm*PEAKRANGE;
@@ -494,7 +497,7 @@ namespace CurveFitting
     const double HEIGHT = getParameter(0);
     const double INVERT_SQRT2SIGMA = 1.0/sqrt(2.0*m_Sigma2);
 
-    if (m_newValueSet)
+    if (m_hasNewParameterValue)
       calculateParameters(false);
 
     const double RANGE = m_fwhm*PEAKRANGE;
@@ -605,9 +608,9 @@ namespace CurveFitting
  *  This is the core component to calcualte peak profile
  */
   double ThermalNeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta, const double N,
-                                                const double alpha, const double beta, const double H,
-                                                const double sigma2, const double invert_sqrt2sigma,
-                                                const bool explicitoutput) const
+                                                    const double alpha, const double beta, const double H,
+                                                    const double sigma2, const double invert_sqrt2sigma,
+                                                    const bool explicitoutput) const
   {
     const double u = 0.5*alpha*(alpha*sigma2+2.*x);
     const double y = (alpha*sigma2 + x)*invert_sqrt2sigma;
@@ -658,15 +661,7 @@ namespace CurveFitting
     return omega;
   }
 
-  //-------------------------  External Functions ---------------------------------------------------
-  /*
-    /// Override setting a new value to the i-th parameter
-    void setParameter(size_t i, const double& value, bool explicitlySet);
-
-    /// Override setting a new value to a parameter by name
-    void setParameter(const std::string& name, const double& value, bool explicitlySet);
-    */
-
+  //----------------------------------------------------------------------------------------------
   /** Override setting parameter by parameter index
     */
   void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i, const double& value, bool explicitlySet)
@@ -679,7 +674,7 @@ namespace CurveFitting
         // If change in value is non-trivial
         m_cellParamValueChanged = true;
         ParamFunction::setParameter(i, value, explicitlySet);
-        m_newValueSet = true;
+        m_hasNewParameterValue = true;
         m_unitCellSize = value;
       }
     }
@@ -687,12 +682,13 @@ namespace CurveFitting
     {
       // Non lattice parameter
       ParamFunction::setParameter(i, value, explicitlySet);
-      m_newValueSet = true;
+      m_hasNewParameterValue = true;
     }
 
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Overriding setting parameter by parameter name
     */
   void ThermalNeutronBk2BkExpConvPVoigt::setParameter(const std::string& name, const double& value, bool explicitlySet)
@@ -705,14 +701,14 @@ namespace CurveFitting
         // If change in value is non-trivial
         m_cellParamValueChanged = true;
         ParamFunction::setParameter(23, value, explicitlySet);
-        m_newValueSet = true;
+        m_hasNewParameterValue = true;
         m_unitCellSize = value;
       }
     }
     else
     {
       ParamFunction::setParameter(name, value, explicitlySet);
-      m_newValueSet = true;
+      m_hasNewParameterValue = true;
     }
 
     return;
@@ -809,7 +805,7 @@ namespace CurveFitting
    */
   void ThermalNeutronBk2BkExpConvPVoigt::function1D(double* out, const double* xValues, const size_t nData)const
   {
-    double c = this->centre();
+    double c = centre();
     double dx = fabs(s_peakRadius*this->fwhm());
     int i0 = -1;
     int n = 0;

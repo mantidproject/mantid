@@ -133,12 +133,6 @@ namespace CurveFitting
 
     //------------------------------------------  Variables --------------------------------------
 
-    /// Miller Indices
-    int mH;
-    int mK;
-    int mL;
-    bool mHKLSet;
-
     /// BackToBackExponential parameters
     mutable double m_Alpha;
     mutable double m_Beta;
@@ -146,11 +140,11 @@ namespace CurveFitting
     mutable double m_Gamma;
 
     /// FWHM
-    mutable double m_fwhm;
+    // mutable double m_fwhm;
 
     /// Centre
-    mutable double m_centre;
-    mutable double m_dcentre;
+    // mutable double m_centre;
+    // mutable double m_dcentre;
 
     /// Thermal/Epithermal neutron related
     mutable double m_eta;
@@ -165,16 +159,11 @@ namespace CurveFitting
     mutable bool m_cancel;
     /// Set if an exception is thrown, and not caught, within a parallel region
     mutable bool m_parallelException;
-    /// Reference to the logger class
-
-    /// Flag to show cell parameter value changed.
-    mutable bool m_cellParamValueChanged;
-
     /// Flag to show whether the unit cell has been calcualted
     mutable bool m_dspaceCalculated;
 
     /// Flag to indicate whether there is new parameter value set after calculating parameters
-    mutable bool m_newValueSet;
+    // mutable bool m_newValueSet;
     
 };
 

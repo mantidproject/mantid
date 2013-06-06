@@ -109,7 +109,7 @@ namespace CurveFitting
     void setFixPeakHeights();
 
     /// Calculate peak intensities by Le Bail algorithm
-    bool calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground, vector<double>& allpeaksvalues);
+    bool calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground, vector<double>& vec_summedpeaks);
 
     mutable std::vector<double> heights;
 
@@ -136,7 +136,7 @@ namespace CurveFitting
     /// Calculate the peaks intensities in same group
     bool calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup,
                                        const vector<double> &vecX, const vector<double> &vecY, bool zerobackground,
-                                       vector<double>& allpeaksvalues);
+                                       vector<double>& vec_summedpeaks);
 
     /// Group close peaks together
     void groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec);
