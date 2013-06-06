@@ -1,5 +1,6 @@
 #include "MantidVatesAPI/LoadVTK.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/Progress.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <boost/make_shared.hpp>
@@ -7,7 +8,8 @@
 #include <vtkStructuredPoints.h>
 #include <vtkPointData.h>
 #include <vtkDataArray.h>
-
+#include <vtkUnsignedCharArray.h>
+#include <vtkUnsignedShortArray.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -55,13 +57,12 @@ namespace Mantid
        const std::string signalArrayName = getProperty("SignalArrayName");
        const std::string errorSQArrayName = getProperty("ErrorSQArrayName");
 
+       Progress prog(this, 0, 3, 3); 
+       prog.report("Loading vtkFile");
        auto reader = vtkStructuredPointsReader::New();
        reader->SetFileName(filename.c_str());
        reader->Update();
        vtkStructuredPoints* output = reader->GetOutput();
-
-       int nPoints = output->GetNumberOfPoints();
-       int nCellx = output->GetNumberOfCells();
 
        int dimensions[3];
        output->GetDimensions(dimensions);
@@ -73,18 +74,35 @@ namespace Mantid
        auto dimY = boost::make_shared<MDHistoDimension>("Y", "Y", "", bounds[2], bounds[3], dimensions[1]);
        auto dimZ = boost::make_shared<MDHistoDimension>("Z", "Z", "", bounds[4], bounds[5], dimensions[2]);
        
+       prog.report("Converting to MD Workspace");
        MDHistoWorkspace_sptr outputWS = boost::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
-       vtkDataArray* signals = output->GetPointData()->GetArray(signalArrayName.c_str());
+       const size_t nPoints = outputWS->getNPoints();
+       vtkUnsignedShortArray* signals = vtkUnsignedShortArray::SafeDownCast(output->GetPointData()->GetArray(signalArrayName.c_str()));
        if(signals == NULL)
        {
          throw std::invalid_argument("Signal array: " + signalArrayName + " does not exist");
        }
-       vtkDataArray* errorsSQ = output->GetPointData()->GetArray(errorSQArrayName.c_str());
+      
+       vtkUnsignedShortArray* errorsSQ = vtkUnsignedShortArray::SafeDownCast(output->GetPointData()->GetArray(errorSQArrayName.c_str()));
        if(!errorSQArrayName.empty() && errorsSQ == NULL)
        {
          throw std::invalid_argument("Error squared array: " + errorSQArrayName + " does not exist");
        }
+
        this->setProperty("OutputWorkspace", outputWS);
+
+       double* destinationSignals = outputWS->getSignalArray();
+       double* destinationErrorsSQ = outputWS->getErrorSquaredArray();
+       
+       // Might be a able to run through this in parallel. 
+       for(size_t i = 0; i < nPoints; ++i)
+       {
+         destinationSignals[i] = signals->GetValue(i);
+
+         // TODO errors sq.
+       }
+       prog.report("Complete");
+
        
        output->Delete();
        return;
