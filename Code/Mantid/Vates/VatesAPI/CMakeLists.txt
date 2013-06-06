@@ -13,6 +13,7 @@ src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
 src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
+src/LoadVTK.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
 src/MDEWRebinningPresenter.cpp
 src/MDEWLoadingPresenter.cpp
@@ -63,6 +64,7 @@ inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/GeometryPresenter.h
 inc/MantidVatesAPI/GeometryView.h
+inc/MantidVatesAPI/LoadVTK.h
 inc/MantidVatesAPI/MDEWEventNexusLoadingPresenter.h
 inc/MantidVatesAPI/MDEWLoadingPresenter.h
 inc/MantidVatesAPI/MDEWInMemoryLoadingPresenter.h
@@ -132,6 +134,7 @@ test/vtkMDHistoLineFactoryTest.h
 test/vtkMDHistoQuadFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
+test/LoadVTKTest.h
 test/MDLoadingViewAdapterTest.h
 test/MDRebinningViewAdapterTest.h
 test/MDEWEventNexusLoadingPresenterTest.h
