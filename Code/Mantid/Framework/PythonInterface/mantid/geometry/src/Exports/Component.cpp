@@ -33,7 +33,7 @@ void export_Component()
     .def("getStringParameter", &Component::getStringParameter, Component_getStringParameter())
     // HACK -- python should return parameters regardless of type. this is untill rows below this do not work
     .def("getParameterType", &Component::getParameterType, Component_getParameterType())
-
+    // this does not work for some obvious or not obvious reasons 
     .def("getParameter", &Component::getNumberParameter, Component_getNumberParameter())
     .def("getParameter", &Component::getBoolParameter, Component_getBoolParameter())
     .def("getParameter", &Component::getStringParameter, Component_getStringParameter())

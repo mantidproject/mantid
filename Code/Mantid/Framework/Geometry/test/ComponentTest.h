@@ -168,7 +168,11 @@ public:
     TS_ASSERT_EQUALS(ancs[0]->getName(), parent.getName());
     TS_ASSERT(ancs[0]->isParametrized());
 
-   // std::string type=ancs[0]->getParameterType("Child");
+    // HACK: 06/06/2013
+    // something very dodgy occurs here as pq has no name e.g. 
+    // std::string type= pq.getParameterType("Child"); is "" -- it does not find Child! 
+    // And this throws as parent is not parameterized
+    // std::string type= parent.getParameterType("Child");
   }
 
   void testGetFullName()
