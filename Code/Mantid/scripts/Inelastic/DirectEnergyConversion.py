@@ -566,7 +566,7 @@ class DirectEnergyConversion(object):
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
         return output
             
-    def calc_average(self, data_ws):
+    def calc_average(self, data_ws,energy_incident):
         """
         Compute the average Y value of a workspace.
         
@@ -578,6 +578,10 @@ class DirectEnergyConversion(object):
             
         where only those detectors that are unmasked are used and the weight[i] = 1/errorValue[i].
         """
+        if self.monovan_integr_range is None :
+            self.monovan_integr_range[0] = energy_incident*self.monovan_lo_frac;
+            self.monovan_integr_range[1] = energy_incident*self.monovan_hi_frac;            
+            
         e_low = self.monovan_integr_range[0]
         e_upp = self.monovan_integr_range[1]
         if e_low > e_upp:
@@ -623,13 +627,14 @@ class DirectEnergyConversion(object):
         The given workspace must contain an Ei value. This will have happened if GetEi
         has been run
         """
-        absnorm_factor = self.calc_average(ei_workspace)
         #  Scale by vanadium cross-section which is energy dependent up to a point
         run = ei_workspace.getRun()
         try:
             ei_prop = run['Ei']
         except KeyError:
             raise RuntimeError('The given workspace "%s" does not contain an Ei value. Run GetEi first.' % str(ei_workspace))
+        
+        absnorm_factor = self.calc_average(ei_workspace,ei_prop)
         
         ei_value = ei_prop.value
         if ei_value >= 200.0:
@@ -695,17 +700,15 @@ class DirectEnergyConversion(object):
         # Instrument and default parameter setup
         self.initialise(instr_name)
 
-    def initialise(self, instr_name):
+    def initialise(self, instr_name,reload_instrument=False):
         """
         Initialise the attributes of the class
         """
+
         # Instrument name might be a prefix, query Mantid for the full name
         self.instr_name = config.getFacility().instrument(instr_name).name()
         config['default.instrument'] = self.instr_name
         self.setup_mtd_instrument()
-        # Initialize the default parameters from the instrument as attributes of the
-        # class
-        self.init_params()
 
     def setup_mtd_instrument(self, workspace = None):
         if workspace != None:
@@ -723,23 +726,22 @@ class DirectEnergyConversion(object):
                 self.instrument = None
                 raise RuntimeError('Cannot load instrument for prefix "%s"' % self.instr_name)
       
-       # set up default parameters values from instrName_Parameters.xml file   
-        par_names = self.instrument.getParameterNames()
-        for name in par_names:
-           setattr(self, name, self.get_default_parameter(name))
 
-        # build the dictionary of necessary allowed substitution names and substitute parameters with their values
-        self.build_subst_dictionary()
-
-        # Initialise IDF parameters
+        # Initialise other IDF parameters
         self.init_idf_params()
+ 
 
-        
-    def init_params(self):
+    def init_idf_params(self, reload_instrument=False):
+        """
+        Initialise some default parameters and add the one from the IDF file
+        """
+        if self._idf_values_read == True and reload_instrument == False:
+            return
+           
         """
         Attach analysis arguments that are particular to the ElasticConversion 
 
-        specify some parameters which are not in IDF Parameters file
+        specify some parameters which may be not in IDF Parameters file
         """
         self.save_formats = ['.spe','.nxs','.nxspe']
         self.fix_ei=False
@@ -775,31 +777,84 @@ class DirectEnergyConversion(object):
         self.sample_rmm = 1.0
         
         # Detector Efficiency Correction
-        self.apply_detector_eff = True
+        #self.apply_detector_eff = True
         
         # Ki/Kf factor correction
-        self.apply_kikf_correction = True
+        #self.apply_kikf_correction = True
 
         # Detector calibration file
-        self.det_cal_file = None
+        #self.det_cal_file = None
         # the workspace which contains already loaded detector calibration file and used to save time on multiple det_cal_file loadings
-        self.det_cal_file_ws = None
+        #self.det_cal_file_ws = None
         # Option to move detector positions based on the information
-        self.relocate_dets = False
+        #self.relocate_dets = False
 
         #The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :(
         self.van_rmm = 50.9415#self.get_default_parameter("vanadium-rmm") 
+  
+        # Do we have specified spectra to diag over
+        try:
+            self.diag_spectra = self.get_default_parameter("diag_spectra")
+        except Exception:
+            self.diag_spectra = None
+        try:           
+            self.synonims = self.get_default_parameter("synonims")
+        except Exception:
+            self.synonims=dict();
 
-     
+        par_names = self.instrument.getParameterNames()
+        if len(par_names) == 0 :
+            raise RuntimeError("Can not obtain instrument parameters describing inelastic conversion ")
+
+        # build the dictionary of necessary allowed substitution names and substitute parameters with their values
+        self.build_subst_dictionary()
+
+        # build the dictionary which allows to process coupled property, namely the property, expressed through other properties values
+        self.build_coupled_keys_dict(par_names)
+
+        # Add IDF parameters as properties to the reducer 
+        self.build_idf_parameters(par_names)
+                
+
+        # Mark IDF files as read
+        self._idf_values_read = True
+
+    def get_default_parameter(self, name):
+        instr = self.instrument;
+        if instr is None:
+            raise ValueError("Cannot init default parameter, instrument has not been loaded.")
+
+        type_name = instr.getParameterType(name)
+        if type_name == "double":
+            val = instr.getNumberParameter(name)
+        elif type_name == "bool":
+            val = instr.getBoolParameter(name)
+        elif type_name == "string":
+            val = instr.getStringParameter(name)
+            if val[0] == "None" : 
+                return None        
+        elif type_name == "int" :
+              val = instr.getIntParameter(name)
+        else :
+            raise KeyError(" Can not find property with name "+name)
+
+        return val[0]
+
+
     def build_subst_dictionary(self) :
         """Method to process the field "synonims" in the parameters string 
 
            it takes string of synonyms in the form key1=subs1=subst2=subts3;key2=subst4 and returns the dictionary 
            in the form dict[subs1]=key1 ; dict[subst2] = key1 ... dict[subst4]=key2
+
+           e.g. if one wants to use the IDF key word my_detector instead of e.g. norm-mon1-spec, he has to type 
+           norm-mon1-spec=my_detector in the synonims field of the IDF parameters file. 
         """
         if not hasattr(self,'synonims') :  # nothing to do
+            self.synonims = dict();
             return
         if self.synonims == None : # nothing to do 
+            self.synonims = dict();
             return
         if type(self.synonims) == dict : # all done
             return
@@ -815,57 +870,99 @@ class DirectEnergyConversion(object):
             if len(keys)<2 :
                 raise AttributeError("The pairs in the synonims fields have to have form key1=key2=key3 with at least two values present")
             for i in xrange(1,len(keys)) :
-                rez[keys[i]]=keys[0]
+                rez[keys[i]]=keys[0].strip()
 
         self.synonims = rez
-
-    def init_idf_params(self):
-        """
-        Initialise the parameters from the IDF file if necessary
-        """
-        if self._idf_values_read == True:
-            return
-
-        self.ei_mon_spectra = [int(self.get_default_parameter("ei-mon1-spec")), int(self.get_default_parameter("ei-mon2-spec"))]
-        self.wb_integr_range = [self.get_default_parameter("wb-integr-min"), self.get_default_parameter("wb-integr-max")]
-        self.mon1_norm_range = [self.get_default_parameter("norm-mon1-min"), self.get_default_parameter("norm-mon1-max")]
-        self.background_range = [self.get_default_parameter("bkgd-range-min"), self.get_default_parameter("bkgd-range-max")]
-        self.monovan_integr_range = [self.get_default_parameter("monovan-integr-min"), self.get_default_parameter("monovan-integr-max")]
            
-  
-        # Do we have specified spectra to diag over
-        try:
-            self.diag_spectra = self.instrument.getStringParameter("diag_spectra")[0]
-        except Exception:
-            self.diag_spectra = None
-              
-
-        # Mark IDF files as read
-        self._idf_values_read = True
-
-    def get_default_parameter(self, name):
+    def build_coupled_keys_dict(self,par_names) :
+        """Method to build the dictionary of the keys which are expressed through other keys values
+           
+          e.g. to substitute key1 = key2,key3  with key = [value[key1],value[key2]]
+        """
         instr = self.instrument;
         if instr is None:
             raise ValueError("Cannot init default parameter, instrument has not been loaded.")
 
-        type_name = instr.getParameterType(name)
-        if type_name == "bool":
-            val = instr.getBoolParameter(name)
-            return val[0]
-        elif type_name == "double":
-            val = instr.getNumberParameter(name)
-            return val[0]
-        elif type_name == "string":
-            val = instr.getStringParameter(name)
-            if val == "None" : 
-                return None
-            else :
-                return val[0]
-        else :
-            raise KeyError(" Can not find property with name "+name)
+        # dictinary used for substituting composite keys values.
+        composite_keys_subst = dict();
+        # set of keys which are composite keys
+        composite_keys_set = set();
 
+
+        for name in par_names :
+            if instr.getParameterType(name)=="string":
+               val = self.get_default_parameter(name)
+               if val is None :
+                   continue
+               val = val.strip()
+               keys = val.split(":")
+               n_keys = len(keys)
+               if n_keys>1 : # this is the property we want
+                   for i in xrange(0,len(keys)) :
+                       key = keys[i];
+                       if key in self.synonims:
+                           key = self.synonims[key];
+                       
+                       final_name = name
+                       if final_name in self.synonims:
+                           final_name = self.synonims[name];
+
+                       composite_keys_subst[key] = (final_name,i,n_keys);
+                       composite_keys_set.add(name)
+
+        self.composite_keys_subst = composite_keys_subst
+        self.composite_keys_set   = composite_keys_set
+
+    def build_idf_parameters(self,list_param_names) :
+        """Method to process idf parameters, substitute duplicate values and 
+           add the attributes with the names, defined in IDF to the object
+
+           also sets composite names through component values, e.g creating 
+           self.key1 = [value[key1],value[key2]] where key1 was defined as key1 = key2,key3 
            
+           @param Reducer object with defined coposite_keys dictionary and synonimus dictionary
+           @param list of parameter names to transform
+        """
+        instr = self.instrument;
+        if instr is None:
+            raise ValueError("Cannot init default parameter, instrument has not been loaded.")
 
+        new_comp_name_set = set();
+        # process all default parameters and create property names from them 
+        for name in list_param_names :
+
+            key_name = name;           
+            if key_name in self.synonims: # replace name with its equivalent
+                key_name = self.synonims[name]
+
+            # redefine compostie keys set through synonims names for the future usage
+            if name in self.composite_keys_set:
+                new_comp_name_set.add(key_name)
+                continue # komposite names are created through their values
+
+             # create or fill in additional values to the composite key
+            if key_name in self.composite_keys_subst : 
+                composite_prop_name,index,nc = self.composite_keys_subst[key_name]
+
+                if not hasattr(self,composite_prop_name): # create new attribute value
+                    val = [0]*nc;  
+                else:              # key is already created, get its value
+                    val = getattr(self,composite_prop_name)
+                    if val is None: # some composie property names were set to none. leave them this way. 
+                        continue
+
+                val[index] = self.get_default_parameter(name)
+                setattr(self,composite_prop_name, val);
+            else :
+                # just new ordinary key, assighn the value to it
+            #if hasattr(self,key_name): 
+            #    raise KeyError(" Dublicate key "+key_name+" found in IDF property file")
+            #else:
+    
+                setattr(self,key_name, self.get_default_parameter(name));
+
+        # reset the list of composite names defined using synonims
+        self.composite_keys_set=new_comp_name_set
 
     def log(self, msg):
         """Send a log message to the location defined
@@ -898,6 +995,13 @@ class DirectEnergyConversion(object):
         else:
             if self.instrument.hasParameter(keyword) :
                 print "****: ***************************************************************************** ";        
+                print "****: IDF value for keyword: ",keyword," is ",get_default_parameter(self,keyword)
+                if keyword in self.synonims :
+                    fieldName = self.synonims[keyword]
+                    print "****: This keyword is reamed by reducer to: ",fieldName," and its value is: ",self.fieldName
+                else:
+                    print "****: Its current value in reducer is: ",self.keyword
+
                 print "****: help for "+keyword+" is not yet implemented, read "+self.instr_name+"_Parameters.xml\n"\
                       "****: in folder "+config.getString('instrumentDefinition.directory')+" for help containing on this key there"
                 print "****: ***************************************************************************** ";

@@ -271,9 +271,10 @@ namespace API
       std::string paramN = ((*it).second)->m_paramName;
       std::string category = ((*it).second)->m_type;
 
+      bool is_int_val =  (category.compare("int") == 0);
       bool is_string_val =  (category.compare("string") == 0);
       bool is_bool_val  =  (category.compare("bool") == 0);
-      bool is_double_val = !(is_string_val || is_bool_val);
+      bool is_double_val = !(is_string_val || is_bool_val || is_int_val);
 
       // if category is not double sting no point in trying to generate a double from parameter
       double value = 0.0;
@@ -298,6 +299,12 @@ namespace API
           bool b_val = convertBool(((*it).second)->m_value);
           paramMap.addBool(((*it).second)->m_component,paramN,b_val);
       }
+      else if (is_int_val )
+      {
+          int i_val = boost::lexical_cast<int>(((*it).second)->m_value);
+          paramMap.addInt(((*it).second)->m_component,paramN,i_val);
+      }
+
 
       else
       {

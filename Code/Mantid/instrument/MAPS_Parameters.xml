@@ -34,14 +34,19 @@
 
 <!-- First spectra number (monitor number) to use when measuring incident energy
     Should be spectra with well defined energy peak -->
-<parameter name="ei-mon1-spec">
+<parameter name="ei-mon1-spec"  type="int">
   <value val="41474"/>
 </parameter>
 <!-- Second spectra number (monitor number) to use when measuring incident energy
      Should be spectra with well defined energy peak -->
-<parameter name="ei-mon2-spec">
+<parameter name="ei-mon2-spec"  type="int">
   <value val="41475"/>
 </parameter>
+<parameter name="ei_mon_spectra"  type="string">
+  <value val="ei-mon1-spec:ei-mon2-spec"/>
+</parameter>
+
+
 
 <parameter name="scale-factor">
   <value val="1.7016e8"/>
@@ -52,14 +57,14 @@
 </parameter>
 
 <!-- integration range for background tests (in TOF) - composite property -->
-<parameter name="bkgd-range-min">
-  <value val="12000"/>
+<parameter name="bkgd-range-min"> 
+  <value val="15000"/>
 </parameter>
 <parameter name="bkgd-range-max">
-  <value val="18000"/>
+  <value val="19000"/>
 </parameter>
-<parameter name="bkgd-range"  type="string">
-      <value val="bkgd-range-min,bkgd-range-max"/>
+<parameter name="background_range"  type="string">
+      <value val="bkgd-range-min:bkgd-range-max"/>
 </parameter>
 <!-- Remove the count rate seen in the regions of the histograms defined as the background regions -->
 <parameter name="background"  type="bool">
@@ -77,10 +82,10 @@
   <value val="20"/>
 </parameter>
 <parameter name="wb-integr-max">
-  <value val="300"/>
+  <value val="100"/>
 </parameter>
 <parameter name="wb_integr_range"   type="string">
-    <value val="wb-integr-min,wb-integr-max"/>
+    <value val="wb-integr-min:wb-integr-max"/>
 </parameter>
 
 
@@ -88,21 +93,29 @@
   <value val="41473"/>
 </parameter>
 
+
 <parameter name="norm-mon1-min">
   <value val="1000"/>
 </parameter>
-
 <parameter name="norm-mon1-max">
   <value val="2000"/>
 </parameter>
+<parameter name="mon_norm_range"  type="string">
+  <value val="norm-mon1-min:norm-mon1-max"/>
+</parameter>
+
 
 <parameter name="monovan-integr-min">
   <value val="-1"/>
 </parameter>
-
 <parameter name="monovan-integr-max">
   <value val="1"/>
 </parameter>
+<parameter name="monovan_integr_range"  type="string">
+    <value val="monovan-integr-min:monovan-integr-max"/>
+</parameter>
+
+
 
 <parameter name="vanadium-mass">
   <value val="30.1"/>
@@ -194,12 +207,24 @@
 <parameter name="monovan_lo_frac">
   <value val="0.8"/>
 </parameter>
+<parameter name="monovan_lo_value">
+  <value val="-40."/>
+</parameter>
+
 
 <parameter name="monovan_hi_frac">
   <value val="1.2"/>
 </parameter>
-<!-- integration for absolute units correction vanadium data 
-     if None, range is calculated from monovan_hi_frac/monovan_lo_frac -->
+<parameter name="monovan_hi_value">
+  <value val="40."/>
+</parameter>
+
+<!-- energy range for integration calculating absolute units correction vanadium data 
+     if None, range is calculated from monovan_hi_frac/monovan_lo_frac 
+     - providing the fractions of the incident energy      
+     if one wants to specify the energy values here it has to be defined in the form:
+    <value val="monovan_lo_value,monovan_hi_value"/>     
+ -->    
 <parameter name="abs_units_van_range"  type="string">
   <value val="None"/>
 </parameter>
@@ -242,7 +267,7 @@
 </parameter>
 
 <!-- # Run Detector Efficiency Correction -->
-<parameter name="apply_detector_eff"   type="bool">
+<parameter name="apply_detector_eff"  type="bool">
    <value val="True"/>
 </parameter>
 
@@ -252,11 +277,13 @@
 -->  
 <parameter name="synonims" type="string">
    <value val="normalise_method=norm_method;
-       fix_ei=fixei;   
+       fix_ei=fixei;
        save_formats=save_format;
        sum_runs=sum;
        wb_integr_range=detector_van_range;
-       van_mass=vanadium-mass"
+       van_mass=vanadium-mass;
+       background_range=bkgd_range;
+       monovan_integr_range=abs_units_van_range"
     />
 </parameter>
  
