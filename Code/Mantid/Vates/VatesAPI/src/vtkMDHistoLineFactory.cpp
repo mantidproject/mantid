@@ -95,8 +95,8 @@ namespace Mantid
         Mantid::coord_t in[3]; 
         Mantid::coord_t out[3];
 
-        double progressFactor = 50/double(nBinsX);
-        double progressOffset = 50;
+        double progressFactor = 0.5/double(nBinsX);
+        double progressOffset = 0.5;
 
         //Loop through dimensions
         for (int i = 0; i < nPointsX; i++)
