@@ -15,6 +15,7 @@ Determines which peaks intersect a defined region in either QLab, QSample or HKL
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/Progress.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -216,13 +217,18 @@ namespace Crystal
       normals[i].normalize();
     }
 
-    // Candidate for parallelisation.
+
+     Progress prog(this, 0, nPeaks, nPeaks);
+
      PARALLEL_FOR2(ws, outputWorkspace)
       for(int i = 0; i < nPeaks; ++i)
       {
       PARALLEL_START_INTERUPT_REGION
       IPeak* peak =  ws->getPeakPtr(i);
       V3D peakCenter = coordFrameFunc(peak);
+
+      if(i%100 == 0)
+        prog.doReport();
 
       bool doesIntersect = true;
       if (peakCenter[0] < extents[0] || peakCenter[0] >= extents[1]
