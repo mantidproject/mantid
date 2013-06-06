@@ -142,7 +142,8 @@ namespace Algorithms
 
     vector<string> logboundoptions;
     logboundoptions.push_back("Centre");
-    logboundoptions.push_back("other");
+    logboundoptions.push_back("Left");
+    logboundoptions.push_back("Other");
     auto logvalidator = boost::make_shared<StringListValidator>(logboundoptions);
     declareProperty("LogBoundary", "Centre", logvalidator,
                     "How to treat log values as being measured in the centre of time.");
