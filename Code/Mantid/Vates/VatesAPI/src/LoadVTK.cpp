@@ -1,11 +1,15 @@
 #include "MantidVatesAPI/LoadVTK.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include <boost/make_shared.hpp>
 #include <vtkStructuredPointsReader.h>
 #include <vtkStructuredPoints.h>
+#include <vtkPointData.h>
+#include <vtkDataArray.h>
 
 
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
@@ -35,13 +39,21 @@ namespace Mantid
      {
        std::vector<std::string> exts;
        exts.push_back("vtk");
-       this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), "VTK file to load");
-       declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspace","", Mantid::Kernel::Direction::Output), "MDHistoWorkspace equivalent of vtkRectilinearInput.");
+       this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts), "Binary legacy VTK rectilinear structured image file to load.");
+
+       auto manditorySignalArrayName = boost::make_shared<MandatoryValidator<std::string> >(); 
+
+       this->declareProperty("SignalArrayName", "", manditorySignalArrayName, "Cell data array name to import as signal/intesity values in the MD workspace."); 
+       this->declareProperty("ErrorSQArrayName", "", "Cell data array name to import as error squared values in the MD workspace."); 
+
+       declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspace","", Direction::Output), "MDHistoWorkspace equivalent of vtkRectilinearInput.");
      }
 
      void LoadVTK::exec()
      {
-       std::string filename = getProperty("Filename");
+       const std::string filename = getProperty("Filename");
+       const std::string signalArrayName = getProperty("SignalArrayName");
+       const std::string errorSQArrayName = getProperty("ErrorSQArrayName");
 
        auto reader = vtkStructuredPointsReader::New();
        reader->SetFileName(filename.c_str());
@@ -62,7 +74,16 @@ namespace Mantid
        auto dimZ = boost::make_shared<MDHistoDimension>("Z", "Z", "", bounds[4], bounds[5], dimensions[2]);
        
        MDHistoWorkspace_sptr outputWS = boost::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
-
+       vtkDataArray* signals = output->GetPointData()->GetArray(signalArrayName.c_str());
+       if(signals == NULL)
+       {
+         throw std::invalid_argument("Signal array: " + signalArrayName + " does not exist");
+       }
+       vtkDataArray* errorsSQ = output->GetPointData()->GetArray(errorSQArrayName.c_str());
+       if(!errorSQArrayName.empty() && errorsSQ == NULL)
+       {
+         throw std::invalid_argument("Error squared array: " + errorSQArrayName + " does not exist");
+       }
        this->setProperty("OutputWorkspace", outputWS);
        
        output->Delete();

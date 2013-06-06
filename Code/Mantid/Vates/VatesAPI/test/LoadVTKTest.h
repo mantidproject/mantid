@@ -34,6 +34,7 @@ public:
     loadVTK.initialize();
     TS_ASSERT_THROWS_NOTHING(loadVTK.setPropertyValue("Filename", "iron_protein.vtk"));
     TS_ASSERT_THROWS_NOTHING(loadVTK.setPropertyValue("OutputWorkspace", "OutWS"));
+    TS_ASSERT_THROWS_NOTHING(loadVTK.setPropertyValue("SignalArrayName", "scalars"));
     TS_ASSERT( loadVTK.isInitialized() )
   }
 
@@ -46,6 +47,31 @@ public:
     TSM_ASSERT_EQUALS("Number of bins is wrong.", dimension->getNBins(), expectedNBins);
   }
 
+  void do_test_bad_arrays(const std::string& signalArrayName, const std::string& errorSQArrayName="")
+  {
+    LoadVTK loadVTK;
+    loadVTK.setRethrows(true);
+    loadVTK.initialize();
+    loadVTK.setPropertyValue("Filename", "iron_protein.vtk");
+    loadVTK.setPropertyValue("OutputWorkspace", "OutWS");
+    loadVTK.setPropertyValue("SignalArrayName", signalArrayName);
+    loadVTK.setPropertyValue("ErrorSQArrayName", errorSQArrayName);
+    TS_ASSERT_THROWS(loadVTK.execute(), std::invalid_argument&);
+  }
+
+  void test_badSignalArray()
+  {
+    const std::string signalArray = "?!"; // Not a name that exists.
+    do_test_bad_arrays(signalArray);
+  }
+
+  void test_badErrorSQArray()
+  {
+    const std::string signalArray = "signals";  // Does exist
+    const std::string errorSQArray = "?!"; // Not a name that exists.
+    do_test_bad_arrays(signalArray, errorSQArray);
+  }
+
   void test_LoadVTKFile()
   {
     const std::string outWSName = "OutWS";
@@ -55,6 +81,8 @@ public:
     loadVTK.initialize();
     loadVTK.setPropertyValue("Filename", "iron_protein.vtk");
     loadVTK.setPropertyValue("OutputWorkspace", outWSName);
+    loadVTK.setPropertyValue("SignalArrayName", "scalars");
+    loadVTK.setPropertyValue("ErrorSQArrayName", "scalars");
     loadVTK.execute();
 
     IMDHistoWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName);
