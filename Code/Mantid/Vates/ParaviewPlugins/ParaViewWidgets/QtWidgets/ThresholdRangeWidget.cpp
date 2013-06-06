@@ -13,9 +13,9 @@ ThresholdRangeWidget::ThresholdRangeWidget(double min, double max)
 {
   QVBoxLayout* layout = new QVBoxLayout;
 
-  //QHLayout* headerLayout = new QGridLayout();
-  layout->addWidget(new QLabel("Thresholds"), Qt::AlignCenter);
-  //layout->addLayout(headerLayout);
+  QGridLayout* headerLayout = new QGridLayout();
+  headerLayout->addWidget(new QLabel("Thresholds"), 0, 0, 1, 2, Qt::AlignCenter);
+  layout->addLayout(headerLayout);
 
   m_thresholdStrategyComboBox = new QComboBox;
   m_thresholdStrategyComboBox->addItem("Ignore Zeros");
