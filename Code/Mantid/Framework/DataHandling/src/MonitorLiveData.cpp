@@ -17,6 +17,7 @@ For details on the way to specify the data processing steps, see: [[LoadLiveData
 #include <Poco/Thread.h>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/WriteLock.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -90,6 +91,7 @@ namespace DataHandling
         // Give a buffer of 3 times the size of the workspace
         if (size_t(3)*bytesUsed < bytesAvail)
         {
+          WriteLock _lock(*original);
           Algorithm_sptr cloner = createChildAlgorithm("CloneWorkspace", 0, 0, false);
           cloner->setPropertyValue("InputWorkspace", originalName);
           cloner->setPropertyValue("OutputWorkspace", newName);
