@@ -21,6 +21,8 @@ class EQSANSNormalise(PythonAlgorithm):
         return "EQSANSNormalise"
 
     def PyInit(self):
+        self.setOptionalMessage("Normalise detector counts by accelerator current and beam spectrum")
+        self.setWikiSummary("Normalise detector counts by accelerator current and beam spectrum")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty("NormaliseToBeam", True, 

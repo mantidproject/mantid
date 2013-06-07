@@ -1,5 +1,5 @@
 """*WIKI* 
-Compute I(q) for reduced EQSANS data
+Compute the transmission using the direct beam method on EQSANS
 *WIKI*"""
 from mantid.api import *
 from mantid.kernel import *
@@ -15,6 +15,8 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
         return 'EQSANSDirectBeamTransmission'
     
     def PyInit(self):
+        self.setOptionalMessage("Compute the transmission using the direct beam method on EQSANS")
+        self.setWikiSummary("Compute the transmission using the direct beam method on EQSANS")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(FileProperty("SampleDataFilename", "",

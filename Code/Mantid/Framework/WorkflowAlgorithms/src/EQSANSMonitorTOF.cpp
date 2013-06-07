@@ -1,7 +1,6 @@
 /*WIKI* 
 
-Documentation to come.
-
+Converts the TOF into a wavelength for the beam monitor. This algorithm needs to be run once on every data set.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -30,7 +29,7 @@ DECLARE_ALGORITHM(EQSANSMonitorTOF)
 void EQSANSMonitorTOF::initDocs()
 {
   this->setWikiSummary("Converts the TOF into a wavelength for the beam monitor. This algorithm needs to be run once on every data set. ");
-  this->setOptionalMessage("Converts the TOF into a wavelength for the beam monitor.. This algorithm needs to be run once on every data set.");
+  this->setOptionalMessage("Converts the TOF into a wavelength for the beam monitor. This algorithm needs to be run once on every data set.");
 }
 
 

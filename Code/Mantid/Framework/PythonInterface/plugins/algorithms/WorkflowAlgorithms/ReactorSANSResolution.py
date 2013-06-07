@@ -22,6 +22,8 @@ class ReactorSANSResolution(PythonAlgorithm):
         return "ReactorSANSResolution"
 
     def PyInit(self):
+        self.setOptionalMessage("Compute the resolution in Q according to Mildner-Carpenter")
+        self.setWikiSummary("Compute the resolution in Q according to Mildner-Carpenter")
         # Input workspace
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "",
                                                      direction=Direction.Input),
