@@ -102,7 +102,7 @@ namespace Mantid
         "The axis to modify (default: X)");
 
       declareProperty("Formula", "", "The formula to use to convert the values, x or y may be used to refer to the axis values");
-      declareProperty("axisTitle", "", "The label of he new axis. If not set then the title will not change.");
+      declareProperty("AxisTitle", "", "The label of he new axis. If not set then the title will not change.");
       declareProperty("AxisUnits", "", "The units of the new axis. If not set then the unit will not change");
 
     }
@@ -200,7 +200,7 @@ namespace Mantid
           else
           {
             size_t axisLength = axisPtr->length();
-            for (int i=0;i<axisLength;++i)
+            for (size_t i=0;i<axisLength;++i)
             {
               axisValue = axisPtr->getValue(i);
               double result = p.Eval();
