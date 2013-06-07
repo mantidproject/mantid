@@ -340,7 +340,7 @@ public:
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     auto detectorIds = ws->getInstrument()->getDetectorIDs();
     Peak& peak = ws->getPeak(0);
-    peak.setHKL(Mantid::Kernel::V3D(0, 0, 2)); // This point is actually on the y = 0 plane, i.e. satisfies the plane equation. aX + bY + cZ = 0, but is outside the box.
+    peak.setHKL(Mantid::Kernel::V3D(2, 0, 0)); // This point is actually on the y = 0 plane, i.e. satisfies the plane equation. aX + bY + cZ = 0, but is outside the box.
 
     const std::string outName = "OutWS";
 
