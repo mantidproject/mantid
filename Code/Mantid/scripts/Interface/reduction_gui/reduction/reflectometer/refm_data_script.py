@@ -61,7 +61,12 @@ class DataSets(BaseScriptElement):
         """
         if for_automated_reduction:
             return self._automated_reduction()
-        
+
+        script = "import mantid\n"
+        script += "from mantid.api import *\n"
+        script += "from mantid.kernel import *\n"
+        script += "from mantid.simpleapi import *\n"
+
         script = "a = RefReduction(DataRun='%s',\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRun='%s',\n" % str(self.norm_file)
         script += "              Instrument='REF_M',\n"
@@ -108,10 +113,15 @@ class DataSets(BaseScriptElement):
         script += "              OutputWorkspacePrefix='reflectivity_%s')\n" % basename
         script += "\n"
         
-        script += "output_msg = a.getPropertyValue('OutputMessage')\n"
-        script += "from reduction.command_interface import ReductionSingleton\n"
+        # Store the log output so it can be shown in the UI
+        script += "from reduction_workflow.command_interface import ReductionSingleton\n"
         script += "reducer_log = ReductionSingleton()\n"
-        script += "reducer_log.log_text += output_msg\n\n"
+        script += "output_log = 'Please make sure the new-style Python API is turned ON by default\\n'\n"
+        script += "output_log += 'In MantiPlot, go in View > Preferences > Mantid > Options '\n"
+        script += "output_log += 'and check the appropriate box at the bottom.'\n"
+        script += "for item in a:\n"
+        script += "    if type(item)==str: output_log = item\n"
+        script += "reducer_log.log_text += output_log\n\n"
 
         # Save the reduced data
         script += "ws_list = ['reflectivity_%s-Off_Off',\n" % basename
@@ -124,7 +134,7 @@ class DataSets(BaseScriptElement):
         script += "    outdir = os.path.expanduser('~')\n\n"
         
         script += "for ws in ws_list:\n"
-        script += "    if mtd.workspaceExists(ws):\n"
+        script += "    if AnalysisDataService.doesExist(ws):\n"
         script += "        outpath = os.path.join(outdir, ws+'.txt')\n"
         script += "        SaveAscii(Filename=outpath, InputWorkspace=ws, Separator='Space')\n\n"
 
@@ -136,10 +146,10 @@ class DataSets(BaseScriptElement):
         script += "              NormalizationRun='%s',\n" % str(self.norm_file)
         script += "              Instrument='REF_M',\n"
         script += "              PolarizedData=True,\n"
-        script += "              SignalPeakPixelRange=[peak_min, peak_max],\n"
+        script += "              SignalPeakPixelRange=%s,\n" % str(self.DataPeakPixels)
         script += "              SubtractSignalBackground=False,\n"
         script += "              PerformNormalization=%s,\n" % str(self.NormFlag)
-        script += "              NormPeakPixelRange=[peak_min_norm, peak_max_norm],\n"
+        script += "              NormPeakPixelRange=%s,\n" % str(self.NormPeakPixels)
         script += "              SubtractNormBackground=False,\n"
                         
         script += "              CropLowResDataAxis=%s,\n" % str(self.data_x_range_flag)
