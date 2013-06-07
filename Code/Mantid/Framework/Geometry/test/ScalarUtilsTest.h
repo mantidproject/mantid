@@ -105,6 +105,20 @@ public:
     return UB;
   }
 
+
+  static Matrix<double> getTopaz7424UB()          // monoclinic C, TOPAZ 7424
+  {
+    Matrix<double> UB(3,3,false);
+    V3D row_0( -0.04245285, -0.13219620,  0.23046029 );
+    V3D row_1( -0.00363704, -0.17688150, -0.02742737 );
+    V3D row_2(  0.20357264, -0.03033733, -0.02246710 );
+    UB.setRow( 0, row_0 );
+    UB.setRow( 1, row_1 );
+    UB.setRow( 2, row_2 );
+    return UB;
+  }
+
+
   static Matrix<double> getTestNiggliUB()         // triclinic P 
   {                                               // artifical example
     Matrix<double> UB(3,3,false);
@@ -160,8 +174,8 @@ public:
   void test_GetCellForForm()
   {
     size_t good_forms[] = { 1, 2, 9, 19, 10, 20, 27, 31 };
-    double errors[]     = { 0.0074298, 0.0129461, 0.0042329, 0.0050197,
-                            0.0057950, 0.0053089, 0.0050197, 0.0000000 };
+    double errors[]     = { 0.0050198, 0.0095369, 0.0042328, 0.0050198, 
+                            0.0053090, 0.0053090, 0.0012747, 0.0000000 };
    
     Matrix<double> UB = getSiliconNiggliUB();   // cubic case
     for ( size_t i = 0; i < 8; i++ )
@@ -263,52 +277,78 @@ public:
   }
 
 
-  void test_GetSignRelatedUBs()
+  void test_GetRelatedUBs()
   {
-    double FeSi[4][9] = { {  0.220642,  0.021551,  0.019386,
-                            -0.014454, -0.045777,  0.216631,
-                             0.024937, -0.216371, -0.044267 },
-                          { -0.220642, -0.021551,  0.019386,
-                             0.014454,  0.045777,  0.216631,
-                            -0.024937,  0.216371, -0.044267 },
-                          { -0.220642,  0.021551, -0.019386,
-                             0.014454, -0.045777, -0.216631,
-                            -0.024937, -0.216371,  0.044267 },
-                          {  0.220642, -0.021551, -0.019386,
-                            -0.014454,  0.045777, -0.216631,
-                             0.024937,  0.216371,  0.044267 } };
 
-    double         tolerance  = 3;
+    double TOPAZ_7424_mats[6][9] = { { -0.042452, -0.132196,  0.230460, 
+                                       -0.003637, -0.176881, -0.027427, 
+                                        0.203573, -0.030337, -0.022467  },
+                                     {  0.042452,  0.230460, -0.132196, 
+                                        0.003637, -0.027427, -0.176881, 
+                                       -0.203573, -0.022467, -0.030337  },
+                                     { -0.132196,  0.230460, -0.042452, 
+                                       -0.176881, -0.027427, -0.003637, 
+                                       -0.030337, -0.022467,  0.203573  },
+                                     {  0.132196, -0.042452,  0.230460, 
+                                        0.176881, -0.003637, -0.027427, 
+                                        0.030337,  0.203573, -0.022467  }, 
+                                     {  0.230460, -0.042452, -0.132196, 
+                                       -0.027427, -0.003637, -0.176881, 
+                                       -0.022467,  0.203573, -0.030337  }, 
+                                     { -0.230460, -0.132196, -0.042452, 
+                                        0.027427, -0.176881, -0.003637, 
+                                        0.022467, -0.030337,  0.203573  } }; 
 
+    double         tolerance  = 3;      // tolerance on angles, in degrees
+    double         factor     = 1.05;   // tolerance factor for equal sides
+
+                // Artificial triclinic case. No sides equal, no angles
+                // near 90 degrees, so only one cell
+    Matrix<double> Triclinic_UB = getTestNiggliUB();
+    std::vector< Matrix<double> > Triclinic_list;
+    Triclinic_list = ScalarUtils::GetRelatedUBs( Triclinic_UB, factor, tolerance );
+    TS_ASSERT_EQUALS( Triclinic_list.size(), 1 );
+
+                // Silicon UB.  Three angles 60 degrees, none near 90.  Three equal
+                // sides so only six permutations are possible, no reflections.
     Matrix<double> silicon_UB = getSiliconNiggliUB();
     std::vector< Matrix<double> > silicon_list;
-    silicon_list = ScalarUtils::GetSignRelatedUBs( silicon_UB, tolerance );
-    TS_ASSERT_EQUALS( silicon_list.size(), 1 );
-                                                 // all angles 60 deg, only
-                                                 // original matrix possible
+    silicon_list = ScalarUtils::GetRelatedUBs( silicon_UB, factor, tolerance );
+    TS_ASSERT_EQUALS( silicon_list.size(), 6 );
 
-    
+
+                // Quartz UB. Two 90 degree angles and a=b<c.  Thus two extra 
+                // reflections are possible and for each of those two orderings
+                // are possible, so six related cells in all.
     Matrix<double> quartz_UB = getQuartzNiggliUB();
     std::vector< Matrix<double> > quartz_list;
-    quartz_list = ScalarUtils::GetSignRelatedUBs( quartz_UB, tolerance );
-    TS_ASSERT_EQUALS( quartz_list.size(), 3 );
-                                                 // two angles 90 deg, two
-                                                 // extra reflections possible
+    quartz_list = ScalarUtils::GetRelatedUBs( quartz_UB, factor, tolerance );
+    TS_ASSERT_EQUALS( quartz_list.size(), 6 );
 
-
+                // FeSi UB. Cubic P, so 24 related cells counting three extra
+                // reflections of pairs and 6 permutations of sides for
+                // each combination of reflections.
     Matrix<double> FeSi_UB = getFeSiNiggliUB();
     std::vector< Matrix<double> > FeSi_list;
-    FeSi_list = ScalarUtils::GetSignRelatedUBs( FeSi_UB, tolerance );
-    TS_ASSERT_EQUALS( FeSi_list.size(), 4 );
-                                                // three angles 90 deg, three
-                                                // extra reflections possible.
-                                                // Check all returned matrices
-    for ( size_t i = 0; i < FeSi_list.size(); i++ )
+    FeSi_list = ScalarUtils::GetRelatedUBs( FeSi_UB, factor, tolerance );
+    TS_ASSERT_EQUALS( FeSi_list.size(), 24 );
+
+                // No angles near 90 degrees, but three equal sides so only six
+                // permutations for related UBs.
+    Matrix<double> TOPAZ_7424_UB = getTopaz7424UB();
+    std::vector< Matrix<double> > TOPAZ_7424_list;
+    TOPAZ_7424_list = ScalarUtils::GetRelatedUBs( TOPAZ_7424_UB, factor, tolerance );
+    TS_ASSERT_EQUALS( TOPAZ_7424_list.size(), 6 );
+
+                 // Check all of the related UBs that are returned in this case
+    for ( size_t i = 0; i < TOPAZ_7424_list.size(); i++ )
+    {
       for ( size_t j = 0; j < 9; j++ )
       {
-        std::vector<double> entry_list = FeSi_list[i].getVector();
-        TS_ASSERT_DELTA( entry_list[j], FeSi[i][j], 1.0e-4 );
+        std::vector<double> entry_list = TOPAZ_7424_list[i].getVector();
+        TS_ASSERT_DELTA( entry_list[j], TOPAZ_7424_mats[i][j], 1.0e-4 );
       }
+    }
   }
 
 };
