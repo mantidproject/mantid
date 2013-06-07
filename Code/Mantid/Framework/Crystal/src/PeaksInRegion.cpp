@@ -245,7 +245,7 @@ namespace Crystal
           for(int i = 0; i < 6; ++i)
           {
             double distance = normals[i].scalar_prod(peakCenter - faces[i][0]); // Distance between plane and peak center.
-            if(peakRadius > std::abs(distance)) // Sphere passes through one of the faces, so intersects the box.
+            if(peakRadius >= std::abs(distance)) // Sphere passes through one of the faces, so intersects the box.
             {
               doesIntersect = true;
               break;
