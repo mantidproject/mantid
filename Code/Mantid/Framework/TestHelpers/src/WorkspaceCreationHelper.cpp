@@ -120,6 +120,21 @@ namespace WorkspaceCreationHelper
     return out;
   }
 
+  Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins)
+  {
+
+    Workspace2D_sptr outputWS = Create2DWorkspaceBinned(nHist, nBins);
+    NumericAxis* const newAxis = new NumericAxis(nHist);
+    outputWS->replaceAxis(1,newAxis);
+    newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+    for (int i=0;i<nHist;++i)
+    {
+      newAxis->setValue(i,i+1);
+    }
+    
+    return outputWS;
+  }
+
 
   Workspace2D_sptr Create2DWorkspaceWithValues(int64_t nHist, int64_t nBins,bool isHist,
                                         const std::set<int64_t> & maskedWorkspaceIndices,
