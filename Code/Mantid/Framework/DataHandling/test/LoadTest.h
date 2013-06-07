@@ -370,6 +370,7 @@ public:
 
   void testList()
   {
+    AnalysisDataService::Instance().clear();
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "MUSR15189,15190,15191.nxs");

@@ -441,7 +441,7 @@ namespace Mantid
         Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(wsM);
         ws->setInstrument(newInstr);
         ws->populateInstrumentParameters();
-        ws->setName("rrrr");
+        //ws->setName("rrrr");
 
         boost::shared_ptr<Algorithm> loadParFile = createChildAlgorithm("LoadParameterFile");
         loadParFile->initialize();

@@ -1809,7 +1809,6 @@ namespace Mantid
       ws->setData(2, Yvals);
       AttributeValues->setHeightHalfWidthInfo(xvals,Yvals,yvals);
 
-      ws->setName("index0");
       StatBase[IStartRow] = minRow;
       StatBase[IStartCol] =minCol;
       StatBase[INRows] = maxRow-minRow+1;

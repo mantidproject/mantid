@@ -159,7 +159,7 @@ public:
 
     // Create the peaks workspace
     PeaksWorkspace_sptr pkws(new PeaksWorkspace());
-    pkws->setName("TOPAZ");
+    //pkws->setName("TOPAZ");
 
     // Create a single peak on that particular detector
     Peak PeakObj(in_ws->getInstrument(),5050,2.,V3D(1,1,1));

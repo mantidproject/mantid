@@ -193,7 +193,7 @@ public:
   void test_areNamesSimilar()
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup());
-    group->setName("name");
+    //group->setName("name");
     TSM_ASSERT( "Empty group is not similar", !group->areNamesSimilar() );
 
     boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());

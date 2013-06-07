@@ -233,13 +233,11 @@ void AlignAndFocusPowder::exec()
 
       //Cast to the matrixOutputWS and save it
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-      m_outputW->setName(getProperty("OutputWorkspace"));
     }
     else
     {
       // Not-an-event workspace
       m_outputW = WorkspaceFactory::Instance().create(m_inputW);
-      m_outputW->setName(getProperty("OutputWorkspace"));
     }
   }
 

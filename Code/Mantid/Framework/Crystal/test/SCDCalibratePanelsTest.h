@@ -64,7 +64,7 @@ public:
      alg= AlgorithmFactory::Instance().create("SCDCalibratePanels", 1);
 
      alg->initialize();
-     Peakws->setName("PeaksWsp");
+     //Peakws->setName("PeaksWsp");
      alg->setProperty("PeakWorkspace", Peakws );
 
      alg->setProperty("a",14.0);

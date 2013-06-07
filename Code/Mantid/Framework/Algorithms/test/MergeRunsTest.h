@@ -49,10 +49,10 @@ private:
   {
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
-    a->setName("a1");
-    b->setName("b1");
+    //a->setName("a1");
+    //b->setName("b1");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->setName("group1");
+    //group->setName("group1");
     group->addWorkspace(a);
     group->addWorkspace(b); // No multiperiod logs added.
     AnalysisDataService::Instance().addOrReplace(a->name(), a);
@@ -66,10 +66,10 @@ private:
   {
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
-    a->setName("a2");
-    b->setName("b2");
+    //a->setName("a2");
+    //b->setName("b2");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->setName("group2");
+    //group->setName("group2");
     group->addWorkspace(a);
     group->addWorkspace(b); // No multiperiod logs added.
     const bool calculateNPeriods = false;
@@ -86,10 +86,10 @@ private:
   {
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
-    a->setName("a4");
-    b->setName("b4");
+    //a->setName("a4");
+    //b->setName("b4");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->setName("group4");
+    //group->setName("group4");
     group->addWorkspace(a);
     group->addWorkspace(b); // No multiperiod logs added.
     const bool calculateNPeriods = false;
@@ -106,10 +106,10 @@ private:
   {
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
-    a->setName("a3");
-    b->setName("b3");
+    //a->setName("a3");
+    //b->setName("b3");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->setName("group3");
+    //group->setName("group3");
     group->addWorkspace(a);
     group->addWorkspace(b);
     add_periods_logs(group);
@@ -710,7 +710,7 @@ public:
     WorkspaceGroup_sptr aCorrupted = boost::make_shared<WorkspaceGroup>();
     aCorrupted->addWorkspace(second);
     aCorrupted->addWorkspace(first);
-    aCorrupted->setName("aCorrupted");
+    //aCorrupted->setName("aCorrupted");
     Mantid::API::AnalysisDataService::Instance().addOrReplace(aCorrupted->getName(), aCorrupted);
 
     do_test_validation_throws(aCorrupted, a);

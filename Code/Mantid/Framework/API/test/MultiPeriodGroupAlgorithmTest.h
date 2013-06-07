@@ -112,10 +112,10 @@ private:
   {
     MatrixWorkspace_sptr a = MatrixWorkspace_sptr(new WorkspaceTester);
     MatrixWorkspace_sptr b = MatrixWorkspace_sptr(new WorkspaceTester);
-    a->setName(name + "_1");
-    b->setName(name + "_2");
+    //a->setName(name + "_1");
+    //b->setName(name + "_2");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->setName(name);
+    //group->setName(name);
     group->addWorkspace(a);
     group->addWorkspace(b);
     add_periods_logs(group);

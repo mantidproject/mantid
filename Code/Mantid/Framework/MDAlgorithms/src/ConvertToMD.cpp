@@ -640,8 +640,8 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
 
     if(storeInDataService)
       API::AnalysisDataService::Instance().addOrReplace(OutWSName,TargTableWS);
-    else
-      TargTableWS->setName(OutWSName);
+//    else
+//      TargTableWS->setName(OutWSName);
 
   
    // check if we got what we wanted:
