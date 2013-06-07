@@ -74,26 +74,6 @@ void testNoNameThrows()
       std::runtime_error);
 }
 
-void testCreateXMLWithWorkspace() //Uses the workspace setter.
-{
-  MockImplicitFunction* pImpFunction = new MockImplicitFunction;
-  EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
-
-  MockIMDWorkspace* pWorkspace = new MockIMDWorkspace("name");
-
-  boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
-  Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
-  RebinningKnowledgeSerializer generator;
-
-  //Apply setters.
-  generator.setImplicitFunction(impFunction);
-  generator.setWorkspace(workspace);
-
-  std::string xml = generator.createXMLString();
-
-  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation></MDWorkspaceLocation>"
-      + workspace->getGeometryXML() + "<ImplicitFunction/></MDInstruction>" ,xml)
-}
 
 void testCreateXMLWithComponents() //Uses individual setters for geometry, location and name.
 {
