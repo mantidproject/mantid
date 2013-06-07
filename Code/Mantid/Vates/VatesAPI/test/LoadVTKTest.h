@@ -67,7 +67,7 @@ public:
 
   void test_badErrorSQArray()
   {
-    const std::string signalArray = "signals";  // Does exist
+    const std::string signalArray = "scalar_array";  // Does exist
     const std::string errorSQArray = "?!"; // Not a name that exists.
     do_test_bad_arrays(signalArray, errorSQArray);
   }
@@ -81,8 +81,8 @@ public:
     loadVTK.initialize();
     loadVTK.setPropertyValue("Filename", "iron_protein.vtk");
     loadVTK.setPropertyValue("OutputWorkspace", outWSName);
-    loadVTK.setPropertyValue("SignalArrayName", "scalars");
-    loadVTK.setPropertyValue("ErrorSQArrayName", "scalars");
+    loadVTK.setPropertyValue("SignalArrayName", "scalar_array");
+    loadVTK.setPropertyValue("ErrorSQArrayName", "scalar_array");
     loadVTK.execute();
 
     IMDHistoWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName);
@@ -91,6 +91,11 @@ public:
     do_check_dimension(outWS->getDimension(0), "X", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim x.
     do_check_dimension(outWS->getDimension(1), "Y", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim y.
     do_check_dimension(outWS->getDimension(2), "Z", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim z.
+
+    // Quick check of loaded data.
+    TS_ASSERT_EQUALS(10, outWS->getSignalAt(0));
+    TS_ASSERT_EQUALS(std::sqrt(10), outWS->getErrorAt(0));
+
   }
 
 };
