@@ -33,6 +33,8 @@ namespace Crystal
    */
   FindUBUsingMinMaxD::FindUBUsingMinMaxD()
   {
+    useAlgorithm("FindUBUsingFFT");
+    deprecatedDate("2013-06-03");
   }
     
   //--------------------------------------------------------------------------
@@ -41,7 +43,22 @@ namespace Crystal
   FindUBUsingMinMaxD::~FindUBUsingMinMaxD()
   {
   }
-  
+
+  const std::string FindUBUsingMinMaxD::name() const
+  {
+    return "FindUBUsingMinMaxD";
+  }
+
+  int FindUBUsingMinMaxD::version() const
+  {
+    return 1;
+  }
+
+  const std::string FindUBUsingMinMaxD::category() const
+  {
+    return "Crystal";
+  }
+
   //--------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void FindUBUsingMinMaxD::initDocs()

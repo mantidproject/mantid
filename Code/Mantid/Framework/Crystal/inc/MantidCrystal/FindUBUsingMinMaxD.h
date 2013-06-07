@@ -3,6 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid
@@ -37,23 +38,20 @@ namespace Crystal
     <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport FindUBUsingMinMaxD : public API::Algorithm
+  class DLLExport FindUBUsingMinMaxD : public API::Algorithm, public API::DeprecatedAlgorithm
   {
   public:
     FindUBUsingMinMaxD();
     ~FindUBUsingMinMaxD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const 
-            { return "FindUBUsingMinMaxD";};
+    virtual const std::string name() const;
 
     /// Algorithm's version for identification 
-    virtual int version() const 
-            { return 1;};
+    virtual int version() const;
 
     /// Algorithm's category for identification
-    virtual const std::string category() const 
-            { return "Crystal";}
+    virtual const std::string category() const;
     
   private:
 
