@@ -14,6 +14,8 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         return "SANSAzimuthalAverage1D"
     
     def PyInit(self):
+        self.setOptionalMessage("Compute I(q) for reduced SANS data")
+        self.setWikiSummary("Compute I(q) for reduced SANS data")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
 

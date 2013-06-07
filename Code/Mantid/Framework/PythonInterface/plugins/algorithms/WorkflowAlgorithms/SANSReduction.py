@@ -1,6 +1,6 @@
 """*WIKI*
  
-Base class for SANS reduction workflow
+Basic SANS reduction workflow
 
 *WIKI*"""
 import mantid.simpleapi as api
@@ -16,6 +16,8 @@ class SANSReduction(PythonAlgorithm):
         return 'SANSReduction'
 
     def PyInit(self):
+        self.setOptionalMessage("Basic SANS reduction workflow")
+        self.setWikiSummary("Basic SANS reduction workflow")
         self._py_init()
 
     def PyExec(self):

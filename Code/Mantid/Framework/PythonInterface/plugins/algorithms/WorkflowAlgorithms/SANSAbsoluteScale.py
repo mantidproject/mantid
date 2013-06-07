@@ -22,6 +22,8 @@ class SANSAbsoluteScale(PythonAlgorithm):
         return "SANSAbsoluteScale"
 
     def PyInit(self):
+        self.setOptionalMessage("Calculate and apply absolute scale correction for SANS data")
+        self.setWikiSummary("Calculate and apply absolute scale correction for SANS data")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
