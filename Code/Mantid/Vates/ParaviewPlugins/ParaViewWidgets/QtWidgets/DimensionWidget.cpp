@@ -4,6 +4,7 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QCheckBox>
+#include <QSpacerItem>
 #include <QStackedWidget>
 #include <qmessagebox.h>
 #include <stdio.h>
@@ -22,53 +23,73 @@ using namespace Mantid::VATES;
 /**
 Constructor
 */
-DimensionWidget::DimensionWidget() 
+DimensionWidget::DimensionWidget()
 {
   m_binStackedWidget = new QStackedWidget;
   BinInputWidget* simple = new SimpleBinInputWidget;
   BinInputWidget* lowstephigh = new LowHighStepInputWidget;
   m_binStackedWidget->addWidget(simple);
   m_binStackedWidget->addWidget(lowstephigh);
-  m_binStackedWidget->setCurrentIndex(0);
-  
-  using namespace Mantid::Geometry;
-  QGridLayout* m_layout = new QGridLayout();
+  m_binStackedWidget->addWidget(new QLabel(""));
+  m_currentBinWidgetIndex = 0;
+  m_binStackedWidget->setCurrentIndex(m_currentBinWidgetIndex);
 
-  QLabel* integratedLabel = new QLabel("Int");
-  integratedLabel->setToolTip("Collapse/Expand dimension");
-  m_layout->addWidget(integratedLabel, 0, 0, Qt::AlignLeft);
-  m_layout->setColumnMinimumWidth(0, 30); //Set column to fixed minimum width!
+  using namespace Mantid::Geometry;
+  QVBoxLayout* m_layout = new QVBoxLayout();
+  m_layout->setSpacing(2);
+
+  m_dimensionLabel = new QLabel();
+  m_layout->addWidget(m_dimensionLabel, Qt::AlignLeft);
+
+  QHBoxLayout* m_binLayout = new QHBoxLayout();
 
   m_ckIntegrated = new QCheckBox();
+  m_ckIntegrated->setText("Integrate");
   m_ckIntegrated->setToolTip("Collapse/Expand dimension");
   connect(m_ckIntegrated, SIGNAL(clicked(bool)), this, SLOT(integratedChanged(bool)));
-  m_layout->addWidget(m_ckIntegrated, 0, 1, Qt::AlignLeft);
-  
-  m_layout->addWidget(m_binStackedWidget, 0, 2, 1, 2, Qt::AlignLeft);
+  m_binLayout->addWidget(m_ckIntegrated);
+
+  QSpacerItem* spacer = new QSpacerItem(40, 20,
+                                        QSizePolicy::Maximum,
+                                        QSizePolicy::Minimum);
+  m_binLayout->addSpacerItem(spacer);
+
+  m_binLayout->addWidget(m_binStackedWidget, Qt::AlignLeft);
   connect(simple, SIGNAL(valueChanged()), this, SLOT(nBinsListener()));
   connect(lowstephigh, SIGNAL(valueChanged()), this, SLOT(nBinsListener()));
 
-  m_dimensionLabel = new QLabel();
-  m_dimensionLabel->setFixedWidth(100);
-  m_layout->addWidget(m_dimensionLabel, 1, 0, Qt::AlignLeft);
+  m_layout->addLayout(m_binLayout);
+
+  QHBoxLayout* m_axisLayout = new QHBoxLayout();
+
   m_dimensionCombo = new QComboBox();
-
+  QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
+  m_dimensionCombo->setSizePolicy(sizePolicy);
+  m_dimensionCombo->setMinimumSize(QSize(80, 0));
   connect(m_dimensionCombo,SIGNAL(activated(int)),this ,SLOT(dimensionSelectedListener()));
-  m_layout->addWidget(m_dimensionCombo, 1, 1, Qt::AlignLeft);
+  m_axisLayout->addWidget(m_dimensionCombo, Qt::AlignLeft);
 
-  m_layout->addWidget(new QLabel("Min"), 1, 2, Qt::AlignLeft);
+  m_axisLayout->addWidget(new QLabel("Min"));
+
   m_minBox = new QLineEdit();
   m_minBox->setValidator(new QDoubleValidator(this));
-
+  QSizePolicy sizePolicy1(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  m_minBox->setSizePolicy(sizePolicy1);
+  m_minBox->setMinimumSize(QSize(50, 0));
   connect(m_minBox, SIGNAL(editingFinished()), this, SLOT(minBoxListener()));
-  m_layout->addWidget(m_minBox, 1, 3, Qt::AlignLeft);
-  
-  m_layout->addWidget(new QLabel("Max"), 1, 4, Qt::AlignLeft);
+  m_axisLayout->addWidget(m_minBox, Qt::AlignLeft);
+
+  m_axisLayout->addWidget(new QLabel("Max"));
+
   m_maxBox = new QLineEdit();
   m_maxBox->setValidator(new QDoubleValidator(this));
-  
+  QSizePolicy sizePolicy2(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  m_maxBox->setSizePolicy(sizePolicy2);
+  m_maxBox->setMinimumSize(QSize(50, 0));
   connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
-  m_layout->addWidget(m_maxBox, 1, 5, Qt::AlignLeft);
+  m_axisLayout->addWidget(m_maxBox, Qt::AlignLeft);
+
+  m_layout->addLayout(m_axisLayout);
 
   this->setLayout(m_layout);
 }
@@ -81,7 +102,16 @@ void DimensionWidget::initalizeViewMode(BinDisplay binDisplay)
 
 BinInputWidget* DimensionWidget::getCurrentBinInputWidget() const
 {
-  return dynamic_cast<BinInputWidget*>(m_binStackedWidget->currentWidget());
+  QWidget *w;
+  if (m_binStackedWidget->currentIndex() > 1)
+  {
+    w = m_binStackedWidget->widget(m_currentBinWidgetIndex);
+  }
+  else
+  {
+    w = m_binStackedWidget->currentWidget();
+  }
+  return dynamic_cast<BinInputWidget*>(w);
 }
 
 double DimensionWidget::getMinimum() const
@@ -126,7 +156,7 @@ void DimensionWidget::showAsNotIntegrated(Mantid::Geometry::VecIMDDimension_sptr
   setDimensionName(m_pDimensionPresenter->getLabel());
   double max = m_pDimensionPresenter->getModel()->getMaximum();
   double min = m_pDimensionPresenter->getModel()->getMinimum();
-  m_binStackedWidget->setHidden(false);
+  m_binStackedWidget->setCurrentIndex(m_currentBinWidgetIndex);
   m_ckIntegrated->setChecked(false);
   BinInputWidget* binInputWidget = getCurrentBinInputWidget();
   if(binInputWidget->getEntry(min, max) <= 1)
@@ -154,11 +184,11 @@ void DimensionWidget::setDimensionName(const std::string& name)
   this->setToolTip(name.c_str());
 }
 
-  
+
 void DimensionWidget::showAsIntegrated()
 {
   setDimensionName(m_pDimensionPresenter->getModel()->getDimensionId());
-  m_binStackedWidget->setHidden(true);
+  m_binStackedWidget->setCurrentIndex(2);
   m_ckIntegrated->setChecked(true);
 }
 
@@ -201,7 +231,7 @@ void DimensionWidget::configureStrongly()
   m_minBox->setText(minValueString.c_str());
   setViewMode(m_initialBinDisplay);
 }
-      
+
 void DimensionWidget::accept(Mantid::VATES::DimensionPresenter* pDimensionPresenter)
 {
   m_pDimensionPresenter = pDimensionPresenter;
@@ -260,7 +290,7 @@ std::string DimensionWidget::getVisDimensionName() const
   }
   else
   {
-    return m_dimensionCombo->currentText().toStdString(); 
+    return m_dimensionCombo->currentText().toStdString();
   }
 }
 
@@ -270,14 +300,22 @@ void DimensionWidget::setViewMode(Mantid::VATES::BinDisplay mode)
   double min = m_pDimensionPresenter->getModel()->getMinimum();
   BinInputWidget* binInputWidget = getCurrentBinInputWidget();
   int nBins = binInputWidget->getEntry(min, max);
-  
+
   if(mode == Simple)
   {
-    m_binStackedWidget->setCurrentIndex(0);
+    m_currentBinWidgetIndex = 0;
+    if (!m_ckIntegrated->isChecked())
+    {
+      m_binStackedWidget->setCurrentIndex(m_currentBinWidgetIndex);
+    }
   }
   else if(mode == LowHighStep)
   {
-    m_binStackedWidget->setCurrentIndex(1);
+    m_currentBinWidgetIndex = 1;
+    if (!m_ckIntegrated->isChecked())
+    {
+      m_binStackedWidget->setCurrentIndex(m_currentBinWidgetIndex);
+    }
   }
   else
   {
