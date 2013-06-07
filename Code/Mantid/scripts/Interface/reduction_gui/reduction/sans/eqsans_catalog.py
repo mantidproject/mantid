@@ -38,6 +38,8 @@ class EQSANSDataSet(DataSet):
             if IN_MANTIDPLOT:
                 script = "LoadEventNexus(Filename='%s', OutputWorkspace='%s', MetaDataOnly=True)" % (file_path, outputWorkspace)
                 mantidplot.runPythonScript(script, True)
+                if not AnalysisDataService.doesExist(outputWorkspace):
+                    return False
             else:
                 api.LoadEventNexus(Filename=file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
             return True

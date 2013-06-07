@@ -38,6 +38,8 @@ class HFIRDataSet(DataSet):
             if IN_MANTIDPLOT:
                 script = "LoadSpice2D(Filename='%s', OutputWorkspace='%s')" % (file_path, outputWorkspace)
                 mantidplot.runPythonScript(script, True)
+                if not AnalysisDataService.doesExist(outputWorkspace):
+                    return False
             else:
                 api.LoadSpice2D(Filename=file_path, OutputWorkspace=outputWorkspace)
             return True
