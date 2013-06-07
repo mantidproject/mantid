@@ -133,9 +133,42 @@ public:
     vector<double> summedpeaksvalue(vecY.size(), 0.);
     lebailfunction.calculatePeaksIntensities(vecX, vecY, true, summedpeaksvalue);
 
+    // IPowderDiffPeakFunction_sptr peak111 = lebailfunction.getPeak(0);
+    // IPowderDiffPeakFunction_sptr peak110 = lebailfunction.getPeak(1);
+    double height111 = lebailfunction.getPeakParameter(p111, "Height");
+    double height110 = lebailfunction.getPeakParameter(p110, "Height");
+    size_t imax111, imax110;
+    double max111 = lebailfunction.getPeakMaximumValue(p111, vecX, imax111);
+    double max110 = lebailfunction.getPeakMaximumValue(p110, vecX, imax110);
+    cout << "Peak(111): height = " << height111 << ", Max = " << max111 << " @ TOF = " << vecX[imax111] << ".\n";
+    cout << "Peak(110): height = " << height110 << ", Max = " << max110 << " @ TOF = " << vecX[imax110] << ".\n";
+
+    TS_ASSERT_DELTA(max111, 1380.5173, 10.);
+    TS_ASSERT_DELTA(max110, 667.17743, 5.);
+    TS_ASSERT_DELTA(vecX[imax111], 71240.195, 0.01);
+    TS_ASSERT_DELTA(vecX[imax110], 87244.031, 0.01);
+    cout << "Max value of peak 110 is at TOF = " << vecX[imax111] << " as the " << imax111 << "-th points.\n";
+
     // Calculate diffraction patters
+    lebailfunction.function(out, vecX, false);
+    TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(out, vecX, true));
+
+    /*
+    map<string, double> bkgdparmap;
+    bkgdparmap.insert(make_pair("A0", 0.001));
+    bkgdparmap.insert(make_pair("A1", 0.));
+    */
+    vector<double> bkgdvec(2);
+    bkgdvec[0] = 0.01;
+    bkgdvec[1] = 0.;
+    lebailfunction.addBackgroundFunction("Polynomial", bkgdvec);
+
     lebailfunction.function(out, vecX, true);
 
+    double v1 = out[imax111];
+    double v2 = out[imax110];
+    TS_ASSERT_DELTA(v1, 1380.5173, 10.);
+    TS_ASSERT_DELTA(v2, 667.17743, 5.);
 
  #if 0
 
@@ -284,8 +317,7 @@ public:
     }
   }
 
-  /*
-   * Generate a set of powder diffraction data with 2 peaks
+  /** Generate a set of powder diffraction data with 2 peaks
    */
   void generateData(std::vector<double>& vecX, std::vector<double>& vecY, std::vector<double>& vecE)
   {

@@ -71,7 +71,7 @@ namespace CurveFitting
 
     m_peakParameterNameVec = peakfunc->getParameterNames();
     m_orderedProfileParameterNames = m_peakParameterNameVec;
-    sort(m_peakParameterNameVec.begin(), m_peakParameterNameVec.end());
+    sort(m_orderedProfileParameterNames.begin(), m_orderedProfileParameterNames.end());
 
     // Peak parameter values
     for (size_t i = 0; i < m_peakParameterNameVec.size(); ++i)
@@ -119,14 +119,24 @@ namespace CurveFitting
     // Peaks
     for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
     {
+      // Reset temporary vector for output 
+      ::fill(temp.begin(), temp.end(), 0.);
       IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
       peak->function(temp, xvalues);
+#if 1
+      g_log.notice() << "Peak " << ipk << "  Y[26] = " << temp[26] << ".\n";
+#endif
       transform(out.begin(), out.end(), temp.begin(), out.begin(), ::plus<double>());
     }
 
     // Background if required
     if (includebkgd)
     {
+      if (!m_background)
+      {
+        throw runtime_error("Must define background first!");
+      }
+
       FunctionDomain1DVector domain(xvalues);
       FunctionValues values(domain);
       m_background->function(domain, values);
@@ -334,14 +344,14 @@ namespace CurveFitting
                                                      const vector<double>& vecX, const vector<double>& vecY, bool zerobackground,
                                                      vector<double>& vec_summedpeaks)
   {
-    // 1. Sort by d-spacing
+    // Check input peaks group and sort peak by d-spacing
     if (peakgroup.empty())
     {
       throw runtime_error("Programming error such that input peak group cannot be empty!");
     }
     else
     {
-      g_log.debug() << "[DBx155] Peaks group size = " << peakgroup.size() << "\n";
+      g_log.information() << "[DBx155] Peaks group size = " << peakgroup.size() << "\n";
     }
     if (peakgroup.size() > 1)
       sort(peakgroup.begin(), peakgroup.end());
@@ -356,7 +366,7 @@ namespace CurveFitting
       throw runtime_error(errss.str());
     }
 
-    // 2. Check boundary
+    // Check boundary
     IPowderDiffPeakFunction_sptr leftpeak = peakgroup[0].second;
     double leftbound = leftpeak->centre() - PEAKRANGECONSTANT * leftpeak->fwhm();
     if (leftbound < vecX[0])
@@ -375,13 +385,13 @@ namespace CurveFitting
     double rightbound = rightpeak->centre() + PEAKRANGECONSTANT * rightpeak->fwhm();
     if (rightbound > vecX.back())
     {
-      g_log.information() << "Peak group's right boundary " << rightbound << " is out side of "
-                          << "input data workspace's right bound (" << vecX.back()
-                          << ")! Accuracy of its peak intensity might be affected.\n";
+      g_log.warning() << "Peak group's right boundary " << rightbound << " is out side of "
+                      << "input data workspace's right bound (" << vecX.back()
+                      << ")! Accuracy of its peak intensity might be affected.\n";
       rightbound = vecX.back() - 0.1;
     }
 
-    // 3. Calculate calculation range to input workspace: [ileft, iright)
+    // Determine calculation range to input workspace: [ileft, iright)
     vector<double>::const_iterator cviter;
 
     cviter = lower_bound(vecX.begin(), vecX.end(), leftbound);
@@ -394,10 +404,8 @@ namespace CurveFitting
     if (iright <= vecX.size()-1)
       ++ iright;
 
-    // 4. Integrate
-    // a) Data structure to hold result
     size_t ndata = iright-ileft;
-    if (ndata == 0 || ndata > iright)
+    if (ileft >= iright)
     {
       stringstream errss;
       errss << "[Calcualte Peak Intensity] Group range is unphysical.  iLeft = " << ileft << ", iRight = "
@@ -420,34 +428,36 @@ namespace CurveFitting
       throw runtime_error(errss.str());
     }
 
-    //   Partial data range
+    // Generate a subset of vecX and vecY to calculate peak intensities
     vector<double> datax(vecX.begin()+ileft, vecX.begin()+iright);
     vector<double> datay(vecY.begin()+ileft, vecY.begin()+iright);
     if (datax.size() != ndata)
     {
-      g_log.error() << "Partial peak size = " << datax.size() << " != ndata = " << ndata << "\n";
-      throw runtime_error("ndata error!");
+      stringstream errmsg;
+      errmsg << "Impossible: Partial peak data size = " << datax.size() << " != ndata = " << ndata;
+      g_log.error(errmsg.str());
+      throw runtime_error(errmsg.str());
     }
-
-    // FunctionDomain1DVector xvalues(datax);
-
     g_log.debug() << "[DBx356] Number of data points = " << ndata << " index from " << ileft
                   << " to " << iright << ";  Size(datax, datay) = " << datax.size() << "\n";
 
+    // Prepare to integrate dataY to calculate peak intensity
     vector<double> sumYs(ndata, 0.0);
     size_t numPeaks(peakgroup.size());
     vector<vector<double> > peakvalues(numPeaks);
 
-    // b) Integrage peak by peak
+    // Integrage peak by peak
     for (size_t ipk = 0; ipk < numPeaks; ++ipk)
     {
-      // calculate peak function value
+      // calculate peak function value.  Peak height should be set to a non-zero value
       IPowderDiffPeakFunction_sptr peak = peakgroup[ipk].second;
-      // FunctionValues localpeakvalue(xvalues);
+      peak->setHeight(1.0);
       vector<double> localpeakvalue(ndata, 0.0);
-
-      // peak->function(xvalues, localpeakvalue);
       peak->function(localpeakvalue, datax);
+#if 0
+      for (size_t i = 0; i < localpeakvalue.size(); ++i)
+        g_log.notice() << "Point " << i << " : " << localpeakvalue[i] << ".\n";
+#endif
 
       // check data
       size_t numbadpts(0);
@@ -499,6 +509,20 @@ namespace CurveFitting
       FunctionValues bkgdvalue(xvalues);
       m_background->function(xvalues, bkgdvalue);
 
+#if 0
+      if (!m_background)
+      {
+        throw runtime_error("No background defined");
+      }
+      else
+      {
+        size_t numbkgdpars = m_background->nParams();
+        for (size_t i = 0; i < numbkgdpars; ++i)
+          g_log.notice() << m_background->parameterName(i) << " = " << m_background->getParameter(i) << ".\n";
+      }
+      throw runtime_error("Debug Stop!");
+#endif
+
       for (size_t i = 0; i < ndata; ++i)
         pureobspeaksintensity[i] = datay[i] - bkgdvalue[i];
     }
@@ -508,6 +532,14 @@ namespace CurveFitting
     {
       IPowderDiffPeakFunction_sptr peak = peakgroup[ipk].second;
       double intensity = 0.0;
+
+
+#if 0
+      g_log.notice() << "nData = " << ndata << ".\n";
+      g_log.notice() << "Data X from " << datax.front() << " to " << datax.back() << ".\n";
+      for (size_t i = 0; i < ndata; ++i)
+        g_log.notice() << datax[i] << "\t\t" << sumYs[i] << ".\n";
+#endif
 
       for (size_t i = 0; i < ndata; ++i)
       {
@@ -558,7 +590,7 @@ namespace CurveFitting
         intensity = 0.0;
       }
 
-      g_log.debug() << "[DBx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
+      g_log.information() << "[DBx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
       peak->setHeight(intensity);
 
       // Add peak's value to peaksvalues
@@ -765,15 +797,23 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Add background function
+  /** Add background function.
+    * The supported background types are Polynomial/Linear/Flat and Chebyshev
     * @param backgroundtype :: string, type of background, such as Polynomial, Chebyshev
-    * @param bkgdparmap :: map of parameter name (string) and value (double) of background function
+    * @param vecparvalues :: vector of parameter values from order 0.
     */
-  void LeBailFunction::addBackgroundFunction(string backgroundtype, map<string, double> bkgdparmap)
+  void LeBailFunction::addBackgroundFunction(string backgroundtype, std::vector<double>& vecparvalues)
   {
-    throw runtime_error("Who calls me!");
+    // Check
+    if (backgroundtype.compare("Polynomial") && backgroundtype.compare("Chebyshev"))
+    {
+      stringstream warnss;
+      warnss << "Cliet specified background type " << backgroundtype << " may not be supported properly.";
+      g_log.warning(warnss.str());
+    }
 
-    size_t order = bkgdparmap.size();
+    // Determine order from number of input parameters
+    size_t order = vecparvalues.size();
 
     // Create background function from factory
     auto background = FunctionFactory::Instance().createFunction(backgroundtype);
@@ -784,12 +824,11 @@ namespace CurveFitting
     m_background->initialize();
 
     // Set parameters
-    map<string, double>::iterator miter;
-    for (miter = bkgdparmap.begin(); miter != bkgdparmap.end(); ++miter)
+    for (size_t i = 0; i < order; ++i)
     {
-      string parname = miter->first;
-      double parvalue = miter->second;
-      m_background->setParameter(parname, parvalue);
+      m_background->setParameter(i, vecparvalues[i]);
+      g_log.information() << "Background function: set " << m_background->parameterName(i)
+                          << " = " << vecparvalues[i] << ".\n";
     }
 
     return;
@@ -906,8 +945,6 @@ namespace CurveFitting
 
     return;
   }
-
-
 
   /*
    * Calculate peak parameters for a peak at d (d-spacing value)
@@ -1134,6 +1171,8 @@ namespace CurveFitting
    */
   void LeBailFunction::setPeakHeights(std::vector<double> inheights)
   {
+    throw runtime_error("It is not implemented properly.");
+
     if (inheights.size() != heights.size())
     {
       g_log.error() << "Input number of peaks (height) is not same as peaks. " << std::endl;
@@ -1211,6 +1250,8 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Retrieve peak's parameter.  may be native or calculated
+    * @param peak :: shared pointer to peak function
+    * @param parname :: name of the peak parameter
     */
   double LeBailFunction::getPeakParameterValue(API::IPowderDiffPeakFunction_sptr peak, std::string parname) const
   {
@@ -1250,9 +1291,33 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Get the maximum value of a peak in a given set of data points
+    */
+  double LeBailFunction::getPeakMaximumValue(std::vector<int> hkl, const std::vector<double>& xvalues, size_t& ix)
+  {
+    // Search peak in map
+    map<vector<int>, IPowderDiffPeakFunction_sptr>::const_iterator fiter;
+    fiter = m_mapHKLPeak.find(hkl);
+    if (fiter == m_mapHKLPeak.end())
+    {
+      stringstream errss;
+      errss << "Peak with Miller index (" << hkl[0] << ", " << hkl[1] << ","
+            << hkl[2] << ") does not exist in Le Bail function.";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    IPowderDiffPeakFunction_sptr peak = fiter->second;
+
+    double maxvalue = peak->getMaximumValue(xvalues, ix);
+
+    return maxvalue;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Calculate d-space value of a Bragg peak of a cubic unit cell.
     * d = a/sqrt(h**2+k**2+l**2)
-    */
+
   double calCubicDSpace(double a, int h, int k, int l)
   {
     double hklfactor = sqrt(double(h*h)+double(k*k)+double(l*l));
@@ -1261,6 +1326,6 @@ namespace CurveFitting
 
     return d;
   }
-
+  */
 } // namespace Mantid
 } // namespace CurveFitting

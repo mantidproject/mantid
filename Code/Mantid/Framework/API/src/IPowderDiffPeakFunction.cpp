@@ -92,11 +92,11 @@ namespace API
 
   //----------------------------------------------------------------------------------------------
   /** Get peak height
-    */
   double IPowderDiffPeakFunction::height() const
   {
     return m_intensity;
   }
+  */
 
   //----------------------------------------------------------------------------------------------
   /**  Set peak height (intensity indeed)
@@ -117,6 +117,30 @@ namespace API
       calculateParameters(false);
 
     return m_fwhm;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get maximum value on a given set of data points
+    */
+  double IPowderDiffPeakFunction::getMaximumValue(const std::vector<double>& xValues, size_t& indexmax) const
+  {
+    // Calculate function with given data points
+    vector<double> out(xValues.size(), 0.);
+    function(out, xValues);
+
+    // Find out the maximum value
+    double max = -DBL_MAX;
+    indexmax = 0;
+    for (size_t i = 0; i < out.size(); ++i)
+    {
+      if (out[i] > max)
+      {
+        max = out[i];
+        indexmax = i;
+      }
+    }
+
+    return max;
   }
 
 

@@ -52,7 +52,7 @@ namespace CurveFitting
     /// Overwrite IPeakFunction base class methods
     /*
     virtual double centre()const;
-    virtual double height()const;
+
     virtual double fwhm()const;
     virtual void setHeight(const double h);
     virtual void setPeakRadius(const int& r);
@@ -89,6 +89,11 @@ namespace CurveFitting
 
     /// Override setting a new value to a parameter by name
     void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
+
+    /// Set peak's height
+    virtual void setHeight(const double h);
+    /// Get peak's height
+    virtual double height()const;
 
     using IFunction1D::function;
     virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const;

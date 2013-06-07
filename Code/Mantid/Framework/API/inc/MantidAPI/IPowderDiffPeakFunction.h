@@ -57,7 +57,7 @@ public:
   /// Get peak's centre
   virtual double centre() const;
   /// Get peak's intensity
-  virtual double height() const;
+  virtual double height() const = 0;
   /// Get peakl's FWHM
   virtual double fwhm()const;
   /// Set peak's height
@@ -100,7 +100,11 @@ public:
 
   /// Calculate function in a range
   using IFunction1D::function;
+
   virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const = 0;
+
+  /// Get maximum value on a given set of data points
+  virtual double getMaximumValue(const std::vector<double> &xValues, size_t& indexmax) const;
 
 protected:
   /// Local function for GSL minimizer
@@ -122,8 +126,6 @@ protected:
   mutable double m_centre;
   /// Centre of the peak in d-space
   mutable double m_dcentre;
-  /// Peak intensity
-  double m_intensity;
   /// Peak's FWHM
   mutable double m_fwhm;
 
@@ -149,6 +151,10 @@ protected:
   int mK;
   int mL;
   bool mHKLSet;
+
+private:
+  /// Peak intensity
+  double m_intensity;
 
 };
 

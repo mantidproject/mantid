@@ -79,7 +79,7 @@ namespace CurveFitting
     void addPeaks(std::vector<std::vector<int> > peakhkls);
 
     /// Add background function
-    void addBackgroundFunction(string backgroundtype, map<string, double> bkgdparmap);
+    void addBackgroundFunction(string backgroundtype, vector<double> &vecparvalues);
 
     /// Get number of peaks
     size_t getNumberOfPeaks() const { return m_numPeaks; }
@@ -111,7 +111,8 @@ namespace CurveFitting
     /// Calculate peak intensities by Le Bail algorithm
     bool calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground, vector<double>& vec_summedpeaks);
 
-    mutable std::vector<double> heights;
+    /// Get the maximum value of a peak in a given set of data points
+    double getPeakMaximumValue(std::vector<int> hkl, const vector<double> &xvalues, size_t& ix);
 
   private:
     /// Log
@@ -173,6 +174,7 @@ namespace CurveFitting
     /// Has first value set up
     bool m_isInputValue;
 
+    std::vector<double> heights;
 
     /*
     double mL1;

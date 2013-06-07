@@ -159,7 +159,7 @@ namespace CurveFitting
   void ThermalNeutronBk2BkExpConvPVoigt::init()
   {
     // Peak height (0)
-    declareParameter("Height", 1.0);
+    declareParameter("Height", 1.0, "Intensity of peak");
 
     // Instrument geometry related (1 ~ 8)
     declareParameter("Dtt1", 1.0, "coefficient 1 for d-spacing calculation for epithermal neutron part");
@@ -497,6 +497,10 @@ namespace CurveFitting
     const double HEIGHT = getParameter(0);
     const double INVERT_SQRT2SIGMA = 1.0/sqrt(2.0*m_Sigma2);
 
+#if 0
+    g_log.notice() << "HEIGHT = " << HEIGHT << ".\n";
+
+#endif
     if (m_hasNewParameterValue)
       calculateParameters(false);
 
@@ -548,22 +552,23 @@ namespace CurveFitting
    */
 
   /** Set peak height
-
+   */
   void ThermalNeutronBk2BkExpConvPVoigt::setHeight(const double h)
   {
     setParameter(0, h);
+
     return;
   }
- */
+
 
   /** Get peak's height
-
+    */
   double ThermalNeutronBk2BkExpConvPVoigt::height() const
   {
     double height = this->getParameter(0);
     return height;
   }
-     */
+
 
   /** Get peak's FWHM
 
