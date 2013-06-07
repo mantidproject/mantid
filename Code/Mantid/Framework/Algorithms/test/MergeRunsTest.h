@@ -55,9 +55,9 @@ private:
     //group->setName("group1");
     group->addWorkspace(a);
     group->addWorkspace(b); // No multiperiod logs added.
-    AnalysisDataService::Instance().addOrReplace(a->name(), a);
-    AnalysisDataService::Instance().addOrReplace(b->name(), b);
-    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+    AnalysisDataService::Instance().addOrReplace("a1", a);
+    AnalysisDataService::Instance().addOrReplace("b1", b);
+    AnalysisDataService::Instance().addOrReplace("group1", group);
     return group;
   }
 
@@ -75,9 +75,12 @@ private:
     const bool calculateNPeriods = false;
     const int nPeriods = 0;
     add_periods_logs(group, calculateNPeriods, nPeriods);
-    AnalysisDataService::Instance().addOrReplace(a->name(), a);
-    AnalysisDataService::Instance().addOrReplace(a->name(), b);
-    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+    // the two workspaces get same name?
+//    AnalysisDataService::Instance().addOrReplace(a->name(), a);
+//    AnalysisDataService::Instance().addOrReplace(a->name(), b);
+    AnalysisDataService::Instance().addOrReplace("a2", a);
+    AnalysisDataService::Instance().addOrReplace("b2", b);
+    AnalysisDataService::Instance().addOrReplace("group2", group);
     return group;
   }
 
@@ -95,9 +98,12 @@ private:
     const bool calculateNPeriods = false;
     const int nPeriods = 5;
     add_periods_logs(group, calculateNPeriods, nPeriods);
-    AnalysisDataService::Instance().addOrReplace(a->name(), a);
-    AnalysisDataService::Instance().addOrReplace(a->name(), b);
-    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+    // the two workspaces get same name?
+//    AnalysisDataService::Instance().addOrReplace(a->name(), a);
+//    AnalysisDataService::Instance().addOrReplace(a->name(), b);
+    AnalysisDataService::Instance().addOrReplace("a4", a);
+    AnalysisDataService::Instance().addOrReplace("b4", b);
+    AnalysisDataService::Instance().addOrReplace("group4", group);
     return group;
   }
 
@@ -113,9 +119,9 @@ private:
     group->addWorkspace(a);
     group->addWorkspace(b);
     add_periods_logs(group);
-    AnalysisDataService::Instance().addOrReplace(a->name(), a);
-    AnalysisDataService::Instance().addOrReplace(b->name(), b);
-    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+    AnalysisDataService::Instance().addOrReplace("a3", a);
+    AnalysisDataService::Instance().addOrReplace("b3", b);
+    AnalysisDataService::Instance().addOrReplace("group3", group);
     return group;
   }
 
@@ -711,7 +717,7 @@ public:
     aCorrupted->addWorkspace(second);
     aCorrupted->addWorkspace(first);
     //aCorrupted->setName("aCorrupted");
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(aCorrupted->getName(), aCorrupted);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace("aCorrupted", aCorrupted);
 
     do_test_validation_throws(aCorrupted, a);
   }

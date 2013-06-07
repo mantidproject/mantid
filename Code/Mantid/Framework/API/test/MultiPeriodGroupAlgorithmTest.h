@@ -119,9 +119,11 @@ private:
     group->addWorkspace(a);
     group->addWorkspace(b);
     add_periods_logs(group);
-    AnalysisDataService::Instance().addOrReplace(a->name(), a);
-    AnalysisDataService::Instance().addOrReplace(b->name(), b);
-    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+//    AnalysisDataService::Instance().addOrReplace(a->name(), a);
+//    AnalysisDataService::Instance().addOrReplace(b->name(), b);
+    AnalysisDataService::Instance().addOrReplace(name+"_1", a);
+    AnalysisDataService::Instance().addOrReplace(name+"_2", b);
+    AnalysisDataService::Instance().addOrReplace(name, group);
     return group;
   }
 

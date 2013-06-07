@@ -194,6 +194,7 @@ public:
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup());
     //group->setName("name");
+    AnalysisDataService::Instance().add("name",group);
     TSM_ASSERT( "Empty group is not similar", !group->areNamesSimilar() );
 
     boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());

@@ -935,6 +935,7 @@ namespace WorkspaceCreationHelper
    {
      RebinnedOutput_sptr outputWS = Mantid::DataObjects::RebinnedOutput_sptr(new RebinnedOutput());
      //outputWS->setName("rebinTest");
+     Mantid::API::AnalysisDataService::Instance().add("rebinTest",outputWS);
 
      // Set Q ('y') axis binning
      MantidVec qbins;
