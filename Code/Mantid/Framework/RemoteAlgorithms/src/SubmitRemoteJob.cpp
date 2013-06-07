@@ -1,3 +1,9 @@
+/*WIKI*
+
+Submit a job to be executed on the specified remote compute resource.
+
+*WIKI*/
+
 #include "MantidRemoteAlgorithms/SubmitRemoteJob.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -11,6 +17,12 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+
+namespace Mantid
+{
+namespace RemoteAlgorithms
+{
+
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SubmitRemoteJob)
@@ -115,3 +127,5 @@ void SubmitRemoteJob::exec()
   }
 }
 
+} // end namespace RemoteAlgorithms
+} // end namespace Mantid

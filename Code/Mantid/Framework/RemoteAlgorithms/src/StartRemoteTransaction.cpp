@@ -7,6 +7,11 @@
 
 #include "boost/make_shared.hpp"
 
+namespace Mantid
+{
+namespace RemoteAlgorithms
+{
+    
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StartRemoteTransaction)
 
@@ -59,3 +64,5 @@ void StartRemoteTransaction::exec()
   }
 }
 
+} // end namespace RemoteAlgorithms
+} // end namespace Mantid

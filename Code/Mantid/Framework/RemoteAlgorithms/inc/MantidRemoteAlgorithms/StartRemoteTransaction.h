@@ -3,6 +3,9 @@
 
 #include "MantidAPI/Algorithm.h"
 
+namespace Mantid {
+namespace RemoteAlgorithms {
+
 class StartRemoteTransaction : public Mantid::API::Algorithm
 {
 public:
@@ -25,4 +28,6 @@ private:
 
 };
 
+} // end namespace RemoteAlgorithms
+} // end namespace Mantid
 #endif /*STARTREMOTETRANSACTION_H_*/

@@ -1,3 +1,10 @@
+/*WIKI*
+
+Uploads a file to the specified compute resource.  Presumably, the file is a python script
+or input data necessary to run a Mantid algorithm on the remote compute resource.
+
+*WIKI*/
+
 #include "MantidRemoteAlgorithms/UploadRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -6,6 +13,11 @@
 #include "MantidKernel/ListValidator.h"
 
 #include "boost/make_shared.hpp"
+
+namespace Mantid
+{
+namespace RemoteAlgorithms
+{
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(UploadRemoteFile)
@@ -67,3 +79,5 @@ void UploadRemoteFile::exec()
 
 }
 
+} // end namespace RemoteAlgorithms
+} // end namespace Mantid

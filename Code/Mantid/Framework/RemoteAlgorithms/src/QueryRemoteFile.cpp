@@ -9,6 +9,11 @@
 
 #include "boost/make_shared.hpp"
 
+namespace Mantid
+{
+namespace RemoteAlgorithms
+{
+    
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(QueryRemoteFile)
 
@@ -71,3 +76,5 @@ void QueryRemoteFile::exec()
   }
 }
 
+} // end namespace RemoteAlgorithms
+} // end namespace Mantid
