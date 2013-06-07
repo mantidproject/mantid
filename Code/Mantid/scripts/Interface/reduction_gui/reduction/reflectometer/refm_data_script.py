@@ -132,16 +132,6 @@ class DataSets(BaseScriptElement):
 
     def _automated_reduction(self):
         script = "# REF_M automated reduction\n"
-        
-        script += "estimates = RefEstimates(RunNumber=runNumber)\n"
-        script += "peak_min = estimates.getProperty('PeakMin').value\n"
-        script += "peak_max = estimates.getProperty('PeakMax').value\n"
-        script += "ref_pixel = (peak_max+peak_min)/2.0\n\n"
-        
-        script += "estimates = RefEstimates(RunNumber=%s)\n" % str(self.norm_file)
-        script += "peak_min_norm = estimates.getProperty('PeakMin').value\n"
-        script += "peak_max_norm = estimates.getProperty('PeakMax').value\n\n"
-        
         script += "RefReduction(DataRun='%s',\n" % ','.join([str(i) for i in self.data_files])
         script += "              NormalizationRun='%s',\n" % str(self.norm_file)
         script += "              Instrument='REF_M',\n"

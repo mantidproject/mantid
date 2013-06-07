@@ -52,7 +52,6 @@ set ( TEST_PY_FILES
   PythonAlgorithmTest.py
   RunOldPythonScriptTest.py
   SANSMaskCommandsTest.py
-  SANSWorkflowTest.py
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py
   MantidSimpleTest.py
