@@ -154,7 +154,7 @@ namespace Crystal
       && testPoint[2]>= extents[4] && testPoint[2] <= extents[5];
   }
 
-  void checkTouchPoint(const V3D& touchPoint,const  V3D& normal,const  V3D& peakCenter,const  V3D& faceVertex, const double distance)
+  void checkTouchPoint(const V3D& touchPoint,const  V3D& normal,const  V3D& faceVertex)
   {
      if( normal.scalar_prod(touchPoint - faceVertex) != 0)
      {
@@ -269,7 +269,7 @@ namespace Crystal
               // Check that it is actually within the face boundaries.
               V3D touchPoint = (normals[i] * distance) + peakCenter; // Vector equation of line give touch point on plane.
               
-              //checkTouchPoint(touchPoint, normals[i], peakCenter, faces[i][0], distance); // Debugging line.
+              //checkTouchPoint(touchPoint, normals[i], faces[i][0]); // Debugging line.
               
               if(pointInsideAllExtents(touchPoint, extents))
               {
