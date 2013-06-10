@@ -118,7 +118,7 @@ namespace Mantid
     {
       if(coeffs.empty())
       {
-        throw std::invalid_argument("NCSCountRate - Hermite polynomial string is empty!");
+        throw std::invalid_argument("GramCharlierComptonProfile - Hermite polynomial string is empty!");
       }
       m_hermite.clear();
       m_hermite.reserve(3); // Maximum guess
@@ -247,8 +247,23 @@ namespace Mantid
      */
     void GramCharlierComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start)
     {
-    }
+      // Check for FSE term...
 
+      const size_t nData = ySpace().size();
+      std::vector<double> result(nData, 0.0);
+      size_t col(0);
+      for(unsigned int i = 0; i < m_hermite.size(); ++i)
+      {
+        if(m_hermite[i] == 0) continue;
+        const unsigned int npoly = 2*i;
+        addMassProfile(result.data(), nData, npoly);
+        convoluteVoigt(result.data(), nData, result);
+        cmatrix.setColumn(start + col, result);
+
+        std::fill_n(result.begin(), nData, 0.0);
+        ++col;
+      }
+    }
 
     /**
      * Uses a Gram-Charlier series approximation for the mass and convolutes it with the Voigt
@@ -266,28 +281,43 @@ namespace Mantid
 
       const double amp(1.0), wg(getParameter(WIDTH_PARAM));
       const double ampNorm = amp/(std::sqrt(2.0*M_PI)*wg);
+
       // Sum over polynomials for each y
       std::vector<double> sumH(NFINE_Y);
       for(unsigned int i = 0; i < nhermite; ++i)
       {
         if(m_hermite[i] == 0) continue;
-
-        const int npoly = 2*i; // Only even ones
-
-        std::ostringstream os;
-        os << HERMITE_PREFIX << npoly;
-        const double hermiteCoeff = getParameter(os.str());
-        for(int j = 0; j < NFINE_Y; ++j)
-        {
-          const double y = m_yfine[j]/std::sqrt(2.)/wg;
-          const double hermiteI = Math::hermitePoly(npoly,y);
-          const double factorial = gsl_sf_fact(i);
-          sumH[j] += ampNorm*std::exp(-y*y)*hermiteI*hermiteCoeff/((std::pow(2.0,npoly))*factorial);
-        }
+        const unsigned int npoly = 2*i; // Only even ones
+        addMassProfile(sumH.data(), NFINE_Y, npoly);
       }
-
       addFSETerm(sumH, ampNorm, wg);
       convoluteVoigt(result, nData, sumH);
+    }
+
+    /**
+     * Uses a Gram-Charlier series approximation for the mass and convolutes it with the Voigt
+     * instrument resolution function. Also multiplies by the mass*e_i^0.1/q. Sums it with the given result
+     * @param result An pre-sized output array that should be filled with the results
+     * @param nData The length of the array
+     * @param npoly An integer denoting the polynomial to calculate
+     */
+    void GramCharlierComptonProfile::addMassProfile(double * result, const size_t nData, const unsigned int npoly) const
+    {
+      using namespace Mantid::Kernel;
+
+      const double amp(1.0), wg(getParameter(WIDTH_PARAM));
+      const double ampNorm = amp/(std::sqrt(2.0*M_PI)*wg);
+
+      std::ostringstream os;
+      os << HERMITE_PREFIX << npoly;
+      const double hermiteCoeff = getParameter(os.str());
+      for(size_t j = 0; j < nData; ++j)
+      {
+        const double y = m_yfine[j]/std::sqrt(2.)/wg;
+        const double hermiteI = Math::hermitePoly(npoly,y);
+        const double factorial = gsl_sf_fact(npoly/2);
+        result[j] += ampNorm*std::exp(-y*y)*hermiteI*hermiteCoeff/((std::pow(2.0,npoly))*factorial);
+      }
     }
 
     /**
@@ -310,20 +340,18 @@ namespace Mantid
     }
 
     /**
-     * Convolute with resolution
+     * Convolute with resolution and multiply by the final ei^0.1*mass/q prefactor
      * @param result Output array that holds the result of the convolution
      * @param nData The length of the array
      * @param profile The input mass profile
      */
     void GramCharlierComptonProfile::convoluteVoigt(double * result, const size_t nData, const std::vector<double> & profile) const
     {
-      const auto & yspace = ySpace();
       const auto & modq = modQ();
       const auto & ei = e0();
 
       // Now convolute with the Voigt function (pre-calculated in setWorkspace as its expensive)
-      const size_t ncoarseY(yspace.size());
-      for(size_t i = 0; i < ncoarseY; ++i)
+      for(size_t i = 0; i < nData; ++i)
       {
         const std::vector<double> & voigt = m_voigt[i];
         // Multiply voigt with polynomial sum and put result in voigt to save using another vector

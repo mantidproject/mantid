@@ -62,6 +62,8 @@ namespace CurveFitting
     void fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t index);
     /// Compute the sum for all Hermite polynomial coefficents
     void massProfile(double * result, const size_t nData) const;
+    /// Compute the contribution to mass profile nth Hermite polynomial coefficient
+    void addMassProfile(double * result, const size_t nData, const unsigned int npoly) const;
 
     /// Add FSE term based on current parameter setting
     void addFSETerm(std::vector<double> & lhs, const double amplitude, const double width) const;
