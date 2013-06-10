@@ -469,7 +469,6 @@ namespace Mantid
         if(BoxStructureOnly)
         {
             ibox  = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType),bc,extentsVector);
-            //box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector);
         }
         else // !BoxStructureOnly)
         {
@@ -477,22 +476,18 @@ namespace Mantid
           if(FileBackEnd)
           {
               ibox  = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType),bc,extentsVector,m_Depth[i]);
-              //box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,UNDEF_SIZET);
               // Mark the box as file backed and indicate that the box was saved
               ibox->setFileBacked(indexStart,numEvents,true);
           }
           else
           {
               ibox  = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType),bc,extentsVector,m_Depth[i],numEvents);
-            //box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,int64_t(numEvents));
           }           
         } // ifBoxStructureOnly
-        //ibox = box;
       }
       else if (box_type == 2)
       {
         // --- Make a MDGridBox -----
-        //ibox = new MDGridBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector);
           ibox = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType+1),bc,extentsVector,m_Depth[i]);
       }
       else
@@ -583,17 +578,17 @@ namespace Mantid
                       throw Kernel::Exception::FileError("Trying to open MDWorkspace nexus file with the the events: "+eventType+
                       "\n different from workspace type: "  +WSEventType,fileName);
             }
-            else // it is possible that woerkspace group has been created by somebody else and there are no this kind of attribute attached to it. 
+            else // it is possible that workspace group has been created by somebody else and there are no this kind of attribute attached to it. 
             {
                 if(readOnly) 
                     throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace opened in read-only mode but \n"
                                                        " does not have necessary attribute describing the event type used",fileName);
                  hFile->putAttr("event_type", WSEventType);
             }
-            // check dimesions dataset
+            // check dimensions dataset
             bool dimDatasetExist(false);
             hFile->getEntries(groupEntries);
-            if(groupEntries.find("dimensions")!=groupEntries.end()) //dimesnions dataset exist
+            if(groupEntries.find("dimensions")!=groupEntries.end()) //dimensions dataset exist
                 dimDatasetExist = true;
 
               if(dimDatasetExist)

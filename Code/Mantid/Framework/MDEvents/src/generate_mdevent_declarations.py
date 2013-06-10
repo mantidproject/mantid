@@ -118,7 +118,7 @@ def find_num_dim(lines):
 
 
 
-def parce_file(file_name,start_marker,end_marker) :
+def parse_file(file_name,start_marker,end_marker) :
     """Read the file and separate it into three parts with the part between input markers to be generated and two others left unchanged. 
 
     @param -- file_name -- full file name to open
@@ -159,7 +159,7 @@ def generate():
     # All of the classes to instantiate
     classes = classes_cpp + mdevent_types
 
-    padding,lines,lines_after=parce_file("../inc/MantidMDEvents/MDEventFactory.h",
+    padding,lines,lines_after=parse_file("../inc/MantidMDEvents/MDEventFactory.h",
                                                  "//### BEGIN AUTO-GENERATED CODE ###",
                                                  "//### END AUTO-GENERATED CODE ###");
 
@@ -211,7 +211,7 @@ def generate():
 
 
     # =========== Do the Source File ===========
-    padding,lines,lines_after=parce_file("./MDEventFactory.cpp",
+    padding,lines,lines_after=parse_file("./MDEventFactory.cpp",
                                          "//### BEGIN AUTO-GENERATED CODE ###",
                                          "//### END AUTO-GENERATED CODE ###");
 
