@@ -39,7 +39,11 @@ namespace Mantid
       this->setWikiSummary("The Minus algorithm will subtract the data values and calculate the corresponding [[Error Values|error values]] for two compatible workspaces.");
       this->setOptionalMessage("The Minus algorithm will subtract the data values and calculate the corresponding error values for two compatible workspaces.");
     }
-    
+
+    const std::string Minus::alias() const
+    {
+      return "Subtract";
+    }
 
     void Minus::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                        const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
