@@ -10,6 +10,7 @@
 #include <vtkDataArray.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnsignedShortArray.h>
+#include <vtkSmartPointer.h>
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Memory.h"
 
@@ -68,7 +69,21 @@ namespace Mantid
       auto reader = vtkStructuredPointsReader::New();
       reader->SetFileName(filename.c_str());
       reader->Update();
-      vtkStructuredPoints* output = reader->GetOutput();
+
+      vtkSmartPointer<vtkStructuredPoints> output;
+      output.TakeReference(reader->GetOutput());
+
+      MemoryStats memoryStats;
+      const size_t freeMemory = memoryStats.availMem(); // in kB
+      const size_t memoryCost = MDHistoWorkspace::sizeOfElement() * output->GetNumberOfPoints() / 1000; // in kB
+      if (memoryCost > freeMemory)
+      {
+        std::string basicMessage = "Loading this file requires more free memory than you have available.";
+        std::stringstream sstream;
+        sstream << basicMessage << " Requires " << memoryCost << " KB of contiguous memory. You have " << freeMemory << " KB.";
+        g_log.notice(sstream.str());
+        throw std::runtime_error(basicMessage);
+      }
 
       int dimensions[3];
       output->GetDimensions(dimensions);
@@ -98,18 +113,6 @@ namespace Mantid
       if (!errorSQArrayName.empty() && errorsSQ == NULL)
       {
         throw std::invalid_argument("Error squared array: " + errorSQArrayName + " does not exist");
-      }
-
-      MemoryStats memoryStats;
-      const size_t freeMemory = memoryStats.availMem(); // in kB
-      const size_t memoryCost = MDHistoWorkspace::sizeOfElement() * output->GetNumberOfPoints() / 1000 ; // in kB
-      if(memoryCost > freeMemory)
-      {
-        std::string basicMessage = "Loading this file requires more free memory than you have available.";
-        std::stringstream sstream;
-        sstream << basicMessage << " Requires " <<  memoryCost << " KB of contiguous memory.";
-        g_log.notice(sstream.str());
-        throw std::runtime_error(basicMessage);
       }
 
       this->setProperty("OutputWorkspace", outputWS);
@@ -142,7 +145,6 @@ namespace Mantid
      }
 
 prog.report("Complete");
-output->Delete();
 return;
 }
 }
