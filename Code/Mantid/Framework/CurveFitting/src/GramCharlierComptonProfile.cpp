@@ -23,6 +23,7 @@ namespace Mantid
       const char * HERMITE_PREFIX = "C_";
       const char * KFSE_NAME = "FSECoeff";
       const char * HERMITE_C_NAME = "HermiteCoeffs";
+      const int NFINE_Y = 1000;
 
       /**
        * Computes the area under the curve given a set of [X,Y] points using
@@ -43,13 +44,31 @@ namespace Mantid
         area = stepsize/2*(yv[0] + 2*area + yv[endpoint]); // final step
         return area;
       }
+
+      // Cannot put these inside massProfile definition as you can't use local types as template
+      // arguments on some compilers
+
+      // massProfile needs to sort 1 vector but keep another in order. Use a struct of combined points
+      // and a custom comparator
+      struct Point
+      {
+        Point(double yvalue = 0.0, double qvalue = 0.0) : y(yvalue), q(qvalue) {}
+        double y;
+        double q;
+      };
+
+      struct InY
+      {
+        /// Sort by the y field
+        bool operator()(Point const &a, Point const &b) { return a.y < b.y; }
+      };
       ///@endcond
     }
 
     /**
      */
     GramCharlierComptonProfile::GramCharlierComptonProfile()
-      : ComptonProfile(), m_hermite()
+      : ComptonProfile(), m_hermite(), m_yfine(), m_qfine(), m_voigt(), m_voigtProfile()
     {
     }
 
@@ -136,6 +155,77 @@ namespace Mantid
       }
     }
 
+
+    /**
+     * Used to cache some values when the workspace has been set
+     * @param ws A pointer to the workspace
+     */
+    void GramCharlierComptonProfile::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
+    {
+      ComptonProfile::setWorkspace(ws); // Do base-class calculation first
+
+      const auto & yspace = ySpace();
+      const auto & modq = modQ();
+
+      // massProfile is calculated over a large range of Y, constructed by interpolation
+      // This is done over an interpolated range between ymin & ymax and y and hence q must be sorted
+      const size_t ncoarseY(yspace.size());
+      std::vector<Point> points(ncoarseY);
+      for(size_t i = 0; i < ncoarseY; ++i)
+      {
+        points[i] = Point(yspace[i], modq[i]);
+      }
+      std::sort(points.begin(), points.end(), InY());
+      // Separate back into vectors as GSL requires them separate
+      std::vector<double> sortedy(ncoarseY), sortedq(ncoarseY);
+      for(size_t i = 0; i < ncoarseY; ++i)
+      {
+        const auto & p = points[i];
+        sortedy[i] = p.y;
+        sortedq[i] = p.q;
+      }
+
+      // Generate a more-finely grained y axis and interpolate Q values
+      m_yfine.resize(NFINE_Y);
+      m_qfine.resize(NFINE_Y);
+      const double miny(sortedy.front()), maxy(sortedy.back());
+      const double step = (maxy-miny)/static_cast<double>((NFINE_Y-1));
+
+      // Set up GSL interpolater
+      gsl_interp_accel *acc = gsl_interp_accel_alloc ();
+      gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, ncoarseY); // Actually a linear interpolater
+      gsl_spline_init(spline, sortedy.data(), sortedq.data(), ncoarseY);
+      for(int i = 0; i < NFINE_Y - 1; ++i)
+      {
+        const double xi = miny + step*i;
+        m_yfine[i] = xi;
+        m_qfine[i] = gsl_spline_eval(spline, xi, acc);
+      }
+      // Final value to ensure it ends at maxy
+      m_yfine.back() = maxy;
+      m_qfine.back() = gsl_spline_eval(spline, maxy, acc);
+      gsl_spline_free(spline);
+      gsl_interp_accel_free(acc);
+
+      // Cache voigt function over yfine
+      std::vector<double> minusYFine(NFINE_Y);
+      std::transform(m_yfine.begin(), m_yfine.end(), minusYFine.begin(), std::bind2nd(std::multiplies<double>(), -1.0));
+      std::vector<double> ym(NFINE_Y); // Holds result of (y[i] - yfine) for each original y
+      m_voigt.resize(ncoarseY);
+
+      for(size_t i = 0; i < ncoarseY; ++i)
+      {
+        std::vector<double> & voigt = m_voigt[i];
+        voigt.resize(NFINE_Y);
+
+        const double yi = yspace[i];
+        std::transform(minusYFine.begin(), minusYFine.end(), ym.begin(), std::bind2nd(std::plus<double>(), yi)); //yfine is actually -yfine
+        voigtApprox(voigt,ym,0,1.0,lorentzFWHM(),resolutionFWHM());
+      }
+
+      m_voigtProfile.resize(NFINE_Y); // Value holder for later to avoid repeated memory allocations when creating a new vector
+    }
+
     /**
      * @returns integer giving number of required columns
      */
@@ -157,88 +247,19 @@ namespace Mantid
      */
     void GramCharlierComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start)
     {
-      std::vector<double> result(ySpace().size());
-
-
-
-      cmatrix.setColumn(start, result);
     }
 
-
-    namespace
-    {
-      ///@cond
-      // Cannot put these inside massProfile definition as you can't use local types as template
-      // arguments on some compilers
-
-      // massProfile needs to sort 1 vector but keep another in order. Use a struct of combined points
-      // and a custom comparator
-      struct Point
-      {
-        Point(double yvalue = 0.0, double qvalue = 0.0) : y(yvalue), q(qvalue) {}
-        double y;
-        double q;
-      };
-      struct InY
-      {
-        /// Sort by the y field
-        bool operator()(Point const &a, Point const &b) { return a.y < b.y; }
-      };
-      ///@endcond
-    }
 
     /**
      * Uses a Gram-Charlier series approximation for the mass and convolutes it with the Voigt
-     * instrument resolution function
+     * instrument resolution function. Also multiplies by the mass*e_i^0.1/q
      * @param result An pre-sized output array that should be filled with the results
      * @param nData The length of the array
      */
     void GramCharlierComptonProfile::massProfile(double * result, const size_t nData) const
     {
+      UNUSED_ARG(nData);
       using namespace Mantid::Kernel;
-      const auto & yspace = ySpace();
-      const auto & modq = modQ();
-      const auto & ei = e0();
-
-      // First compute product of gaussian momentum distribution with Hermite polynomials.
-      // This is done over an interpolated range between ymin & ymax and y and hence q must be sorted
-      const size_t ncoarseY(yspace.size());
-      std::vector<Point> points(ncoarseY);
-      for(size_t i = 0; i < ncoarseY; ++i)
-      {
-        points[i] = Point(yspace[i], modq[i]);
-      }
-      std::sort(points.begin(), points.end(), InY());
-      // Separate back into vectors as GSL requires them separate
-      std::vector<double> sortedy(ncoarseY), sortedq(ncoarseY);
-      for(size_t i = 0; i < ncoarseY; ++i)
-      {
-        const auto & p = points[i];
-        sortedy[i] = p.y;
-        sortedq[i] = p.q;
-      }
-
-      // Generate a more-finely grained y axis and interpolate Q values
-      const int nfineY(1000);
-      const double miny(sortedy.front()), maxy(sortedy.back());
-      const double step = (maxy-miny)/static_cast<double>((nfineY-1));
-      std::vector<double> yfine(nfineY),qfine(nfineY);
-
-      // Set up GSL interpolater
-      gsl_interp_accel *acc = gsl_interp_accel_alloc ();
-      gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, ncoarseY); // Actually a linear interpolater
-      gsl_spline_init(spline, sortedy.data(), sortedq.data(), ncoarseY);
-      for(int i = 0; i < nfineY - 1; ++i)
-      {
-        const double xi = miny + step*i;
-        yfine[i] = xi;
-        qfine[i] = gsl_spline_eval(spline, xi, acc);
-      }
-      // Final value to ensure it ends at maxy
-      yfine.back() = maxy;
-      qfine.back() = gsl_spline_eval(spline, maxy, acc);
-      gsl_spline_free(spline);
-      gsl_interp_accel_free(acc);
 
       // Hermite expansion (only even terms) + FSE term
       const size_t nhermite(m_hermite.size());
@@ -246,49 +267,70 @@ namespace Mantid
       const double amp(1.0), wg(getParameter(WIDTH_PARAM));
       const double ampNorm = amp/(std::sqrt(2.0*M_PI)*wg);
       // Sum over polynomials for each y
-      std::vector<double> sumH(nfineY);
+      std::vector<double> sumH(NFINE_Y);
       for(unsigned int i = 0; i < nhermite; ++i)
       {
         if(m_hermite[i] == 0) continue;
 
         const int npoly = 2*i; // Only even ones
+
         std::ostringstream os;
         os << HERMITE_PREFIX << npoly;
         const double hermiteCoeff = getParameter(os.str());
-        for(int j = 0; j < nfineY; ++j)
+        for(int j = 0; j < NFINE_Y; ++j)
         {
-          const double y = yfine[j]/std::sqrt(2.)/wg;
+          const double y = m_yfine[j]/std::sqrt(2.)/wg;
           const double hermiteI = Math::hermitePoly(npoly,y);
           const double factorial = gsl_sf_fact(i);
           sumH[j] += ampNorm*std::exp(-y*y)*hermiteI*hermiteCoeff/((std::pow(2.0,npoly))*factorial);
         }
       }
 
-      // Plus the FSE term
-      const double kfse = getParameter(KFSE_NAME);
-      for(int j = 0; j < nfineY; ++j)
-      {
-        const double y = yfine[j]/std::sqrt(2.)/wg;
-        const double he3 = Math::hermitePoly(3,y);
-        sumH[j] += ampNorm*std::exp(-y*y)*he3*(kfse/qfine[j]);
-      }
+      addFSETerm(sumH, ampNorm, wg);
+      convoluteVoigt(result, nData, sumH);
+    }
 
-      // Now convolute with the Voigt function
-      std::vector<double> minusYFine(nfineY);
-      std::transform(yfine.begin(), yfine.end(), minusYFine.begin(), std::bind2nd(std::multiplies<double>(), -1.0));
-      std::vector<double> ym(nfineY); // Holds result of (y[i] - yfine) for each original y
-      std::vector<double> voigt(nfineY); // Holds results of voigt calculation
+    /**
+     * Adds the FSE term to the result in the vector given
+     * @param lhs Existing vector that the result should be added to
+     * @param amplitude The value to be used as the amplitude. It is not normalised by this function
+     */
+    void GramCharlierComptonProfile::addFSETerm(std::vector<double> & lhs, const double amplitude, const double width) const
+    {
+      assert(static_cast<size_t>(NFINE_Y) == lhs.size());
+      using namespace Mantid::Kernel;
+
+      const double kfse = getParameter(KFSE_NAME);
+      for(int j = 0; j < NFINE_Y; ++j)
+      {
+        const double y = m_yfine[j]/std::sqrt(2.)/width;
+        const double he3 = Math::hermitePoly(3,y);
+        lhs[j] += amplitude*std::exp(-y*y)*he3*(kfse/m_qfine[j]);
+      }
+    }
+
+    /**
+     * Convolute with resolution
+     * @param result Output array that holds the result of the convolution
+     * @param nData The length of the array
+     * @param profile The input mass profile
+     */
+    void GramCharlierComptonProfile::convoluteVoigt(double * result, const size_t nData, const std::vector<double> & profile) const
+    {
+      const auto & yspace = ySpace();
+      const auto & modq = modQ();
+      const auto & ei = e0();
+
+      // Now convolute with the Voigt function (pre-calculated in setWorkspace as its expensive)
+      const size_t ncoarseY(yspace.size());
       for(size_t i = 0; i < ncoarseY; ++i)
       {
-        const double yi = yspace[i];
-        std::transform(minusYFine.begin(), minusYFine.end(), ym.begin(), std::bind2nd(std::plus<double>(), yi)); //yfine is actually -yfine
-        voigtApprox(voigt,ym,0,1.0,lorentzFWHM(),resolutionFWHM());
+        const std::vector<double> & voigt = m_voigt[i];
         // Multiply voigt with polynomial sum and put result in voigt to save using another vector
-        std::transform(voigt.begin(), voigt.end(), sumH.begin(), voigt.begin(), std::multiplies<double>());
+        std::transform(voigt.begin(), voigt.end(), profile.begin(), m_voigtProfile.begin(), std::multiplies<double>());
         const double prefactor = std::pow(ei[i],0.1)*mass()/modq[i];
-        result[i] = prefactor*trapzf(yfine, voigt);
+        result[i] = prefactor*trapzf(m_yfine, m_voigtProfile);
       }
-
     }
 
   } // namespace CurveFitting

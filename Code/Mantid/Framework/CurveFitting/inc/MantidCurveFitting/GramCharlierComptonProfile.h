@@ -53,6 +53,8 @@ namespace CurveFitting
     void setHermiteCoefficients(const std::string & coeffs);
     /// Declare the Gram-Charlier (Hermite) coefficients
     void declareGramCharlierParameters();
+    /// Called by the framework when a workspace is set
+    void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
 
     /// Return the number of columns required in the constraint matrix
     size_t numConstraintMatrixColumns() const;
@@ -61,8 +63,22 @@ namespace CurveFitting
     /// Compute the sum for all Hermite polynomial coefficents
     void massProfile(double * result, const size_t nData) const;
 
+    /// Add FSE term based on current parameter setting
+    void addFSETerm(std::vector<double> & lhs, const double amplitude, const double width) const;
+    /// Convolute with resolution
+    void convoluteVoigt(double * result, const size_t nData, const std::vector<double> & profile) const;
+
     /// The active hermite coefficents
     std::vector<short> m_hermite;
+    ///Y values over a finer range
+    std::vector<double> m_yfine;
+    /// Interpolated Q values over a finer Y range
+    std::vector<double> m_qfine;
+
+    /// Holds the value of the Voigt function for each coarse y-space point as this is an expensive calculation
+    std::vector<std::vector<double>> m_voigt;
+    /// Holds the result Voigt multiplied by the profile function for the extended Y space range
+    mutable std::vector<double> m_voigtProfile;
   };
 
 

@@ -258,10 +258,10 @@ namespace CurveFitting
   void ComptonProfile::voigtApprox(std::vector<double> & voigt, const std::vector<double> & yspace, const double lorentzPos,
                                  const double lorentzAmp, const double lorentzWidth, const double gaussWidth) const
   {
-    m_voigt->setParameter("LorentzAmp",lorentzAmp);
-    m_voigt->setParameter("LorentzPos",lorentzPos);
-    m_voigt->setParameter("LorentzFWHM",lorentzWidth);
-    m_voigt->setParameter("GaussianFWHM",gaussWidth);
+    m_voigt->setParameter(0,lorentzAmp);
+    m_voigt->setParameter(1,lorentzPos);
+    m_voigt->setParameter(2,lorentzWidth);
+    m_voigt->setParameter(3,gaussWidth);
     assert(voigt.size() == yspace.size());
     m_voigt->functionLocal(voigt.data(), yspace.data(), yspace.size());
 
