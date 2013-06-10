@@ -120,7 +120,7 @@ namespace Crystal
     setPropertySettings("PeakRadius", new EnabledWhenProperty("CheckPeakExtents", IS_NOT_DEFAULT) );
   }
 
-  void validateExtentsInput(std::vector<double>& extents)
+  void validateExtentsInput(const std::vector<double>& extents)
   {
     if(extents.size() != 6)
     {
@@ -138,6 +138,28 @@ namespace Crystal
     {
       throw std::invalid_argument("zmin >= zmax");
     }
+  }
+
+  bool pointOutsideAnyExtents(const V3D& testPoint, const std::vector<double>& extents)
+  {
+    return testPoint[0] < extents[0] || testPoint[0] > extents[1]
+      || testPoint[1] < extents[2] || testPoint[1] > extents[3] 
+      || testPoint[2] < extents[4] || testPoint[2] > extents[5];
+  }
+
+  bool pointInsideAllExtents(const V3D& testPoint, const std::vector<double>& extents)
+  {
+    return testPoint[0] >= extents[0] && testPoint[0] <= extents[1]
+      && testPoint[1] >= extents[2] && testPoint[1] <= extents[3] 
+      && testPoint[2]>= extents[4] && testPoint[2] <= extents[5];
+  }
+
+  void checkTouchPoint(const V3D& touchPoint,const  V3D& normal,const  V3D& faceVertex)
+  {
+     if( normal.scalar_prod(touchPoint - faceVertex) != 0)
+     {
+       throw std::runtime_error("Debugging. Calculation is wrong. touch point should always be on the plane!"); // Remove this line later. Check that geometry is setup properly.
+     }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -217,8 +239,8 @@ namespace Crystal
       normals[i].normalize();
     }
 
-
-     Progress prog(this, 0, nPeaks, nPeaks);
+    const int reportEveryNumber = 100;
+    Progress prog(this, 0, nPeaks/reportEveryNumber, nPeaks/reportEveryNumber);
 
      PARALLEL_FOR2(ws, outputWorkspace)
       for(int i = 0; i < nPeaks; ++i)
@@ -227,15 +249,12 @@ namespace Crystal
       IPeak* peak =  ws->getPeakPtr(i);
       V3D peakCenter = coordFrameFunc(peak);
 
-      if(i%100 == 0)
-        prog.doReport();
+      if(i%reportEveryNumber == 0)
+        prog.report();
 
       bool doesIntersect = true;
-      if (peakCenter[0] < extents[0] || peakCenter[0] >= extents[1]
-      || peakCenter[1] < extents[2] || peakCenter[1] >= extents[3] 
-      || peakCenter[2] < extents[4] || peakCenter[2] >= extents[5]) 
+      if (pointOutsideAnyExtents(peakCenter, extents))
       {
-      
         // Out of bounds.
         doesIntersect = false;
         
@@ -244,11 +263,19 @@ namespace Crystal
           // Take account of radius spherical extents.
           for(int i = 0; i < 6; ++i)
           {
-            double distance = normals[i].scalar_prod(peakCenter - faces[i][0]); // Distance between plane and peak center.
-            if(peakRadius > std::abs(distance)) // Sphere passes through one of the faces, so intersects the box.
+            double distance = normals[i].scalar_prod(faces[i][0] - peakCenter); // Distance between plane and peak center.
+            if(peakRadius >= std::abs(distance)) // Sphere passes through one of the PLANES defined by the box faces.
             {
-              doesIntersect = true;
-              break;
+              // Check that it is actually within the face boundaries.
+              V3D touchPoint = (normals[i] * distance) + peakCenter; // Vector equation of line give touch point on plane.
+              
+              //checkTouchPoint(touchPoint, normals[i], faces[i][0]); // Debugging line.
+              
+              if(pointInsideAllExtents(touchPoint, extents))
+              {
+                doesIntersect = true;
+                break;
+              }
             }
           }
         }
