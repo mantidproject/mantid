@@ -11,6 +11,7 @@
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnsignedShortArray.h>
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/Memory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -97,6 +98,18 @@ namespace Mantid
       if (!errorSQArrayName.empty() && errorsSQ == NULL)
       {
         throw std::invalid_argument("Error squared array: " + errorSQArrayName + " does not exist");
+      }
+
+      MemoryStats memoryStats;
+      const size_t freeMemory = memoryStats.availMem(); // in kB
+      const size_t memoryCost = MDHistoWorkspace::sizeOfElement() * output->GetNumberOfPoints() / 1000 ; // in kB
+      if(memoryCost > freeMemory)
+      {
+        std::string basicMessage = "Loading this file requires more free memory than you have available.";
+        std::stringstream sstream;
+        sstream << basicMessage << " Requires " <<  memoryCost << " KB of contiguous memory.";
+        g_log.notice(sstream.str());
+        throw std::runtime_error(basicMessage);
       }
 
       this->setProperty("OutputWorkspace", outputWS);
