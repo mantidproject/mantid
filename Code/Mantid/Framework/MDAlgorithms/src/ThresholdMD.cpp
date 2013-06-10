@@ -7,6 +7,8 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/MultiThreaded.h"
+#include "MantidAPI/Progress.h"
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
@@ -132,14 +134,29 @@ namespace Mantid
         comparitor = boost::bind(std::greater<double>(),_1, currentValue);
       }
 
+      Progress prog(this, 0, 1, 100);
+      int frequency = nPoints;
+      if(nPoints > 100)
+      {
+        frequency = nPoints/100;
+      }
+
+      PARALLEL_FOR2(inputWS, outWS)
       for(int i = 0; i < nPoints; ++i)
       {
+        PARALLEL_START_INTERUPT_REGION
         const double signalAt = inputWS->getSignalAt(i);
         if(comparitor( signalAt ))
         {
           outWS->setSignalAt(i, customOverwriteValue );
         }
+        if(i%frequency == 0)
+        {
+          prog.report();
+        }
+        PARALLEL_END_INTERUPT_REGION
       }
+      PARALLEL_CHECK_INTERUPT_REGION
 
       setProperty("OutputWorkspace", outWS);
     }
