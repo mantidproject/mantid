@@ -50,7 +50,7 @@ namespace CurveFitting
     void declareParameters();
 
     /// Compute the function
-    void massProfile(std::vector<double> & result,const double lorentzFWHM, const double resolutionFWHM) const;
+    void massProfile(std::vector<double> & result) const;
   };
 
 

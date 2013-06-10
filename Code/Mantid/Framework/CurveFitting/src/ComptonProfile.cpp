@@ -27,7 +27,8 @@ namespace CurveFitting
       m_log(Kernel::Logger::get("ComptonProfile")),
       m_workspace(), m_wsIndex(0), m_mass(0.0),  m_l1(0.0), m_sigmaL1(0.0),
       m_l2(0.0), m_sigmaL2(0.0), m_theta(0.0), m_sigmaTheta(0.0), m_e1(0.0),
-      m_t0(0.0), m_hwhmGaussE(0.0), m_hwhmLorentzE(0.0), m_voigt()
+      m_t0(0.0), m_hwhmGaussE(0.0), m_hwhmLorentzE(0.0), m_voigt(),
+      m_yspace(), m_modQ(), m_e0(),m_resolutionSigma(0.0), m_lorentzFWHM(0.0)
   {}
 
   /**
@@ -89,28 +90,8 @@ namespace CurveFitting
     m_t0 = getComponentParameter(*det,"t0")*1e-6; // Convert to seconds
     m_hwhmLorentzE = getComponentParameter(*det, "hwhm_energy_lorentz");
     m_hwhmGaussE = STDDEV_TO_HWHM*getComponentParameter(*det, "sigma_energy_gauss");
-  }
 
-  /*
-   * Creates the internal caches
-   */
-  void ComptonProfile::setUpForFit()
-  {
-    using namespace Mantid::API;
-    m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Voigt"));
-  }
-
-  //-------------------------------------- Function evaluation -----------------------------------------
-
-  /**
-   * Calculates the value of the function for each x value and stores in the given output array
-   * @param out An array of size nData to store the results
-   * @param xValues The input X data array of size nData. It is assumed to be times in microseconds
-   * @param nData The length of the out & xValues arrays
-   */
-  void ComptonProfile::function1D(double* out, const double* xValues, const size_t nData) const
-  {
-    m_log.notice() << "--------------------- Mass=" << m_mass << " -----------------------" << std::endl;
+    // ------ Fixed coefficients related to resolution & Y-space transforms ------------------
     const double mn = PhysicalConstants::NeutronMassAMU;
     const double mevToK = PhysicalConstants::E_mev_toNeutronWavenumberSq;
     const double massToMeV = 0.5*PhysicalConstants::NeutronMass/PhysicalConstants::meV; // Includes factor of 1/2
@@ -119,11 +100,11 @@ namespace CurveFitting
     const double k1 = std::sqrt(m_e1/mevToK);
     const double l2l1 = m_l2/m_l1;
 
-    // -------------------------------------- Resolution dependence -------------------------------------
+    // Resolution dependence
     double x0(0.0),x1(0.0);
     gsl_poly_solve_quadratic(m_mass-1.0, 2.0*std::cos(m_theta), -(m_mass+1.0), &x0, &x1);
     const double k0k1 = std::max(x0,x1); // K0/K1 at y=0
-    double qy0(0.0), wgauss(0.0), lorentzFWHM(0.0);
+    double qy0(0.0), wgauss(0.0);
 ;
     if(m_mass > 1.0)
     {
@@ -133,14 +114,14 @@ namespace CurveFitting
       double r2 = 1.0 - l2l1*k0k1p3 + l2l1*std::pow(k0k1,2)*std::cos(m_theta) - k0k1*std::cos(m_theta);
 
       double factor = (0.2413/qy0)*((m_mass/mn)*r1 - r2);
-      lorentzFWHM = std::abs(factor*m_hwhmLorentzE*2);
+      m_lorentzFWHM = std::abs(factor*m_hwhmLorentzE*2);
       wgauss = std::abs(factor*m_hwhmGaussE*2);
     }
     else
     {
       qy0 = k1*std::tan(m_theta);
       double factor = (0.2413*2.0/k1)*std::abs((std::cos(m_theta) + l2l1)/std::sin(m_theta));
-      lorentzFWHM = m_hwhmLorentzE*factor;
+      m_lorentzFWHM = m_hwhmLorentzE*factor;
       wgauss = m_hwhmGaussE*factor;
     }
 
@@ -150,26 +131,30 @@ namespace CurveFitting
     double wl1 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,2)/(qy0*m_l1))*common)*m_sigmaL1;
     double wl2 = 2.0*STDDEV_TO_HWHM*std::abs((std::pow(k0y0,3)/(k1*qy0*m_l1))*common)*m_sigmaL2;
 
-    const double resolutionSigma = std::sqrt(std::pow(wgauss,2) + std::pow(wtheta,2) + std::pow(wl1,2) + std::pow(wl2,2));
+    m_resolutionSigma = std::sqrt(std::pow(wgauss,2) + std::pow(wtheta,2) + std::pow(wl1,2) + std::pow(wl2,2));
 
+    m_log.notice() << "--------------------- Mass=" << m_mass << " -----------------------" << std::endl;
     m_log.notice() << "w_l1 (FWHM)=" << wl2 << std::endl;
     m_log.notice() << "w_l0 (FWHM)=" << wl1 << std::endl;
     m_log.notice() << "w_theta (FWHM)=" << wtheta << std::endl;
-    m_log.notice() << "w_foil_lorentz (FWHM)=" << lorentzFWHM << std::endl;
+    m_log.notice() << "w_foil_lorentz (FWHM)=" << m_lorentzFWHM << std::endl;
     m_log.notice() << "w_foil_gauss (FWHM)=" << wgauss << std::endl;
 
-    // -------------------------------------- Profile factor --------------------------------------------------------------
+    // Calculate energy dependent factors and transform q to Y-space
+    const auto & xValues = m_workspace->readX(m_wsIndex);
+    const bool isHistogram = m_workspace->isHistogramData();
+    const size_t nData = (isHistogram) ? xValues.size() - 1: xValues.size();
 
-    // Calculate energy dependent factors and transform q to Yspace
-    std::vector<double> e0(nData,0.0);
+    m_e0.resize(nData);
     m_modQ.resize(nData);
     m_yspace.resize(nData);
     for(size_t i = 0; i < nData; ++i)
     {
-      const double tseconds = xValues[i]*1e-6;
+      const double tof = (isHistogram) ? 0.5*(xValues[i] + xValues[i+1]) : xValues[i];
+      const double tseconds = tof*1e-6;
       const double v0 = m_l1/(tseconds - m_t0 - (m_l2/v1));
       const double ei = massToMeV*v0*v0;
-      e0[i] = ei;
+      m_e0[i] = ei;
       const double w = ei - m_e1;
       const double k0 = std::sqrt(ei/mevToK);
       const double q = std::sqrt(k0*k0 + k1*k1 - 2.0*k0*k1*std::cos(m_theta));
@@ -177,13 +162,38 @@ namespace CurveFitting
       m_yspace[i] = 0.2393*(m_mass/q)*(w - (mevToK*q*q/m_mass));
     }
 
+  }
+
+  /*
+   * Creates the internal caches
+   */
+  void ComptonProfile::setUpForFit()
+  {
+    // Voigt
+    using namespace Mantid::API;
+    m_voigt = boost::dynamic_pointer_cast<IPeakFunction>(FunctionFactory::Instance().createFunction("Voigt"));
+  }
+
+  //-------------------------------------- Function evaluation -----------------------------------------
+
+
+  /**
+   * Calculates the value of the function for each x value and stores in the given output array
+   * @param out An array of size nData to store the results
+   * @param xValues The input X data array of size nData. It is assumed to be times in microseconds
+   * @param nData The length of the out & xValues arrays
+   */
+  void ComptonProfile::function1D(double* out, const double* xValues, const size_t nData) const
+  {
+    UNUSED_ARG(xValues);
+    // ------------------------------- Profile factor ---------------------------
     std::vector<double> profile(nData);
-    this->massProfile(profile,lorentzFWHM, resolutionSigma);
+    this->massProfile(profile);
 
     // Multiply by the mass & final prefactor e0^0.1/q
     for(size_t j = 0; j < nData; ++j)
     {
-      out[j] = std::pow(e0[j],0.1)*m_mass*profile[j]/m_modQ[j];
+      out[j] = std::pow(m_e0[j],0.1)*m_mass*profile[j]/m_modQ[j];
     }
 
     m_log.setEnabled(false);

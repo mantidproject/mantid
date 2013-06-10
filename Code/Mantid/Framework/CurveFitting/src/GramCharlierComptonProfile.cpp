@@ -162,10 +162,8 @@ namespace Mantid
      * Uses a Gram-Charlier series approximation for the mass and convolutes it with the Voigt
      * instrument resolution function
      * @param result An pre-sized output vector that should be filled with the results
-     * @param lorentzFWHM The lorentz width for the resolution
-     * @param resolutionFWHM The sum-squared value of the resolution errors
      */
-    void GramCharlierComptonProfile::massProfile(std::vector<double> & result,const double lorentzFWHM, const double resolutionFWHM) const
+    void GramCharlierComptonProfile::massProfile(std::vector<double> & result) const
     {
       using namespace Mantid::Kernel;
       const auto & yspace = ySpace();
@@ -253,7 +251,7 @@ namespace Mantid
       {
         const double yi = yspace[i];
         std::transform(minusYFine.begin(), minusYFine.end(), ym.begin(), std::bind2nd(std::plus<double>(), yi)); //yfine is actually -yfine
-        voigtApprox(voigt,ym,0,1.0,lorentzFWHM,resolutionFWHM);
+        voigtApprox(voigt,ym,0,1.0,lorentzFWHM(),resolutionFWHM());
         // Multiply voigt with polynomial sum and put result in voigt to save using another vector
         std::transform(voigt.begin(), voigt.end(), sumH.begin(), voigt.begin(), std::multiplies<double>());
         result[i] = trapzf(yfine, voigt);

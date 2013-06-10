@@ -56,13 +56,19 @@ namespace CurveFitting
     /// Set an attribute value (and possibly cache its value)
     void setAttribute(const std::string& name,const Attribute& value);
 
-    /// Override to calculate the value of the profile for this mass
-    virtual void massProfile(std::vector<double> & result,const double lorentzFWHM, const double resolutionFWHM) const = 0;
+    /// Override to calculate the value of the profile for this mass and store in the given vector
+    virtual void massProfile(std::vector<double> & result) const = 0;
 
-    /// Access current y-values
+    /// Access y-values cache
     inline const std::vector<double> & ySpace() const { return m_yspace; }
-    /// Access current Q values
+    /// Access Q values cache
     inline const std::vector<double> & modQ() const { return m_modQ; }
+    /// Access e0 values
+    inline const std::vector<double> & e0() const { return m_e0; }
+    /// Access total resolution width
+    inline double resolutionFWHM() const { return m_resolutionSigma; }
+    /// Access lorentz FWHM
+    inline double lorentzFWHM() const { return m_lorentzFWHM; }
 
     /// Compute Voigt function interpolated around the given values
     void voigtApproxDiff(std::vector<double> & voigtDiff, const std::vector<double> & yspace, const double lorentzPos, const double lorentzAmp,
@@ -113,10 +119,16 @@ namespace CurveFitting
 
     /** @name Caches for commonly used values*/
     ///@{
-    /// Current y-values
-    mutable std::vector<double> m_yspace;
-    /// Current Q values
-    mutable std::vector<double> m_modQ;
+    /// Y-values
+    std::vector<double> m_yspace;
+    /// Q-values
+    std::vector<double> m_modQ;
+    /// Incident energies
+    std::vector<double> m_e0;
+    /// Total resolution width
+    double m_resolutionSigma;
+    /// Lorentz FWHM
+    double m_lorentzFWHM;
     ///@}
 
   };

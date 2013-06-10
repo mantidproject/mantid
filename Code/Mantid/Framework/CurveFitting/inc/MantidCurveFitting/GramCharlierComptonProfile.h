@@ -54,9 +54,8 @@ namespace CurveFitting
     /// Declare the Gram-Charlier (Hermite) coefficients
     void declareGramCharlierParameters();
 
-    /// Compute the function
-    void massProfile(std::vector<double> & result,const double lorentzFWHM, const double resolutionFWHM) const;
-
+    /// Compute the sum for all Hermite polynomial coefficents
+    void massProfile(std::vector<double> & result) const;
 
     /// The active hermite coefficents
     std::vector<short> m_hermite;
