@@ -1,6 +1,7 @@
 from numpy import zeros, arctan2, arange, shape
-from mantidsimple import *
-from MantidFramework import *
+#from mantidsimple import *
+from mantid.simpleapi import *
+#from MantidFramework import *
 import math
 import os.path
 
