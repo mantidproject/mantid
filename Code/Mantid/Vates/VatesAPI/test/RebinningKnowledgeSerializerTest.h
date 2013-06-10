@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include <boost/shared_ptr.hpp>
 #include "MockObjects.h"
 
@@ -47,8 +48,8 @@ void testNoWorkspaceThrows()
 void testNoLocationDoesNotThrow()
 {
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
-  pWorkspace->setName("someName");
   Mantid::API::IMDWorkspace_sptr workspace(pWorkspace);
+  Mantid::API::AnalysisDataService::Instance().addOrReplace("someName",workspace);
 
   MockImplicitFunction* pImpFunction = new MockImplicitFunction;
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
