@@ -7,6 +7,8 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -19,6 +21,16 @@ namespace Mantid
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(ThresholdMD)
+
+    std::string LessThan()
+    {
+      return "Less Than";
+    }
+
+    std::string GreaterThan()
+    {
+      return "Greater Than";
+    }
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
@@ -72,10 +84,10 @@ namespace Mantid
           "An input workspace.");
 
       std::vector<std::string> propOptions;
-      propOptions.push_back("Less Than");
-      propOptions.push_back("Greater Than");
+      propOptions.push_back(LessThan());
+      propOptions.push_back(GreaterThan());
 
-      declareProperty("Condition", "Less Than", boost::make_shared<StringListValidator>(propOptions),
+      declareProperty("Condition", LessThan(), boost::make_shared<StringListValidator>(propOptions),
           "Selected threshold condition?");
 
       declareProperty("CurrentValue", 0.0, "Comparator value used by the Condition.");
@@ -83,7 +95,7 @@ namespace Mantid
       declareProperty("OverwriteWithZero", true,
           "Flag for enabling overwriting with a custom value. Defaults to overwrite signals with zeros.");
 
-      declareProperty("CustomOverwriteValue", 0,
+      declareProperty("CustomOverwriteValue", 0.0,
           "Custom overwrite value for the signal. Defaults to zero.");
       setPropertySettings("CustomOverwriteValue",
           new EnabledWhenProperty("OverwriteWithZero", IS_NOT_DEFAULT));
@@ -96,6 +108,40 @@ namespace Mantid
      */
     void ThresholdMD::exec()
     {
+      IMDHistoWorkspace_sptr inputWS = getProperty("InputWorkspace");
+      const std::string condition = getProperty("Condition");
+      const double currentValue = getProperty("CurrentValue");
+      const bool doOverwriteWithZero = getProperty("OverwriteWithZero");
+      double customOverwriteValue = getProperty("CustomOverwriteValue");
+      if(doOverwriteWithZero)
+      {
+        customOverwriteValue = 0;
+      }
+
+      IAlgorithm_sptr alg = createChildAlgorithm("CloneMDWorkspace");
+      alg->setProperty("InputWorkspace", inputWS);
+      alg->executeAsChildAlg();
+      IMDWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+      auto outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+
+      const int nPoints = inputWS->getNPoints();
+
+      boost::function<bool(double)> comparitor = boost::bind(std::less<double>(),_1, currentValue);
+      if(condition == GreaterThan())
+      {
+        comparitor = boost::bind(std::greater<double>(),_1, currentValue);
+      }
+
+      for(int i = 0; i < nPoints; ++i)
+      {
+        const double signalAt = inputWS->getSignalAt(i);
+        if(comparitor( signalAt ))
+        {
+          outWS->setSignalAt(i, customOverwriteValue );
+        }
+      }
+
+      setProperty("OutputWorkspace", outWS);
     }
 
   } // namespace MDAlgorithms
