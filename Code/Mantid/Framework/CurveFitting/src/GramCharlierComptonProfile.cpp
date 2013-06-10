@@ -136,6 +136,35 @@ namespace Mantid
       }
     }
 
+    /**
+     * @returns integer giving number of required columns
+     */
+    size_t GramCharlierComptonProfile::numConstraintMatrixColumns() const
+    {
+      size_t required(0);
+      for(size_t i = 0; i < m_hermite.size(); ++i)
+      {
+        if(m_hermite[i] > 0) ++required;
+      }
+      return required;
+    }
+
+
+    /**
+     * Fills in a column for each active hermite polynomial, starting at the given index
+     * @param cmatrix InOut matrix whose columns should be set to the mass profile for each active hermite polynomial
+     * @param start Index of the column to start on
+     */
+    void GramCharlierComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start)
+    {
+      std::vector<double> result(ySpace().size());
+
+
+
+      cmatrix.setColumn(start, result);
+    }
+
+
     namespace
     {
       ///@cond
@@ -161,13 +190,15 @@ namespace Mantid
     /**
      * Uses a Gram-Charlier series approximation for the mass and convolutes it with the Voigt
      * instrument resolution function
-     * @param result An pre-sized output vector that should be filled with the results
+     * @param result An pre-sized output array that should be filled with the results
+     * @param nData The length of the array
      */
-    void GramCharlierComptonProfile::massProfile(std::vector<double> & result) const
+    void GramCharlierComptonProfile::massProfile(double * result, const size_t nData) const
     {
       using namespace Mantid::Kernel;
       const auto & yspace = ySpace();
       const auto & modq = modQ();
+      const auto & ei = e0();
 
       // First compute product of gaussian momentum distribution with Hermite polynomials.
       // This is done over an interpolated range between ymin & ymax and y and hence q must be sorted
@@ -254,7 +285,8 @@ namespace Mantid
         voigtApprox(voigt,ym,0,1.0,lorentzFWHM(),resolutionFWHM());
         // Multiply voigt with polynomial sum and put result in voigt to save using another vector
         std::transform(voigt.begin(), voigt.end(), sumH.begin(), voigt.begin(), std::multiplies<double>());
-        result[i] = trapzf(yfine, voigt);
+        const double prefactor = std::pow(ei[i],0.1)*mass()/modq[i];
+        result[i] = prefactor*trapzf(yfine, voigt);
       }
 
     }

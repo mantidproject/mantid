@@ -49,7 +49,10 @@ private:
   struct FakeComptonProfile : ComptonProfile
   {
     std::string name() const { return "FakeComptonProfile"; }
-    void massProfile(std::vector<double> &, const double, const double) const {}
+    size_t numConstraintMatrixColumns() const { return 0; }
+    void fillConstraintMatrix(Mantid::Kernel::DblMatrix &,const size_t) {}
+
+    void massProfile(double *,const size_t) const {}
   };
 
   Mantid::API::IFunction_sptr createFunction()

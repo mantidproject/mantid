@@ -49,8 +49,16 @@ namespace CurveFitting
     /// Declare the function parameters
     void declareParameters();
 
+    /// Return the number of columns required in the constraint matrix
+    size_t numConstraintMatrixColumns() const { return 1; }
+    /// Fill in the columns of the matrix for this mass
+    void fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t index);
+
     /// Compute the function
-    void massProfile(std::vector<double> & result) const;
+    void massProfile(double * result, const size_t nData) const;
+
+    /// Helper to allow the amplitude to be specified separately
+    void massProfile(double * result, const size_t nData, const double amplitude) const;
   };
 
 

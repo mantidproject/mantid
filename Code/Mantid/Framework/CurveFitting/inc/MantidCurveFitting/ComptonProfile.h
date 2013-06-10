@@ -50,14 +50,20 @@ namespace CurveFitting
     void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
     ///@}
 
+    /// Returns the number of columns in the constraint matrix that are required for this mass
+    virtual size_t numConstraintMatrixColumns() const = 0;
+    /// Fill the appropriate columns of the given matrix with the values
+    /// of the mass profile
+    virtual void fillConstraintMatrix(Kernel::DblMatrix & cmatrix,const size_t start) = 0;
+
   protected:
     /// Declare parameters that will never participate in the fit
     void declareAttributes();
     /// Set an attribute value (and possibly cache its value)
     void setAttribute(const std::string& name,const Attribute& value);
 
-    /// Override to calculate the value of the profile for this mass and store in the given vector
-    virtual void massProfile(std::vector<double> & result) const = 0;
+    /// Override to calculate the value of the profile for this mass and store in the given array
+    virtual void massProfile(double * result, const size_t nData) const = 0;
 
     /// Access y-values cache
     inline const std::vector<double> & ySpace() const { return m_yspace; }
@@ -65,6 +71,8 @@ namespace CurveFitting
     inline const std::vector<double> & modQ() const { return m_modQ; }
     /// Access e0 values
     inline const std::vector<double> & e0() const { return m_e0; }
+    /// Access the mass
+    inline double mass() const { return m_mass; }
     /// Access total resolution width
     inline double resolutionFWHM() const { return m_resolutionSigma; }
     /// Access lorentz FWHM

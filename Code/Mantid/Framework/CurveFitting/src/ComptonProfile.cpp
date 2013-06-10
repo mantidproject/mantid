@@ -186,15 +186,9 @@ namespace CurveFitting
   void ComptonProfile::function1D(double* out, const double* xValues, const size_t nData) const
   {
     UNUSED_ARG(xValues);
-    // ------------------------------- Profile factor ---------------------------
-    std::vector<double> profile(nData);
-    this->massProfile(profile);
 
-    // Multiply by the mass & final prefactor e0^0.1/q
-    for(size_t j = 0; j < nData; ++j)
-    {
-      out[j] = std::pow(m_e0[j],0.1)*m_mass*profile[j]/m_modQ[j];
-    }
+    // ------------------------------- Profile factor ---------------------------
+    this->massProfile(out, nData);
 
     m_log.setEnabled(false);
   }

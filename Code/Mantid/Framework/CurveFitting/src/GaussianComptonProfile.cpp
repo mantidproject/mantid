@@ -41,29 +41,58 @@ namespace Mantid
     }
 
     /**
+     * Fills in a column of the matrix with this mass profile, starting at the given index
+     * @param cmatrix InOut matrix whose column should be set to the mass profile for each active hermite polynomial
+     * @param start Index of the column to start on
+     */
+    void GaussianComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start)
+    {
+      std::vector<double> result(ySpace().size());
+      const double amplitude = 1.0;
+      this->massProfile(result.data(), ySpace().size(), amplitude);
+      cmatrix.setColumn(start, result);
+    }
+
+    /**
+     * Uses a Gaussian approximation for the mass and convolutes it with the Voigt
+     * instrument resolution function
+     * @param result An pre-sized output array that should be filled with the results
+     * @param nData The size of the array
+     */
+    void GaussianComptonProfile::massProfile(double * result, const size_t nData) const
+    {
+      const double amplitude(getParameter(1));
+      this->massProfile(result, nData, amplitude);
+    }
+
+    /**
      * Uses a Gaussian approximation for the mass and convolutes it with the Voigt
      * instrument resolution function
      * @param result An pre-sized output vector that should be filled with the results
+     * @param nData The size of the array
+     * @param amplitude A fixed value for the amplitude
      */
-    void GaussianComptonProfile::massProfile(std::vector<double> & result) const
+    void GaussianComptonProfile::massProfile(double * result, const size_t nData, const double amplitude) const
     {
-      double lorentzPos(0.0), gaussWidth(getParameter(0)), amplitude(getParameter(1));
+      double lorentzPos(0.0), gaussWidth(getParameter(0));
       double gaussFWHM = std::sqrt(std::pow(resolutionFWHM(),2) + std::pow(2.0*STDDEV_TO_HWHM*gaussWidth,2));
 
       const auto & yspace = ySpace();
-
       // Gaussian already folded into Voigt
-      voigtApprox(result, yspace, lorentzPos, amplitude, lorentzFWHM(), gaussFWHM);
-      std::vector<double> voigtDiffResult(yspace.size());
+      std::vector<double> voigt(yspace.size()), voigtDiffResult(yspace.size());
+      voigtApprox(voigt, yspace, lorentzPos, amplitude, lorentzFWHM(), gaussFWHM);
       voigtApproxDiff(voigtDiffResult, yspace, lorentzPos, amplitude, lorentzFWHM(), gaussFWHM);
 
       const auto & modq = modQ();
-      const size_t nData(result.size());
+      const auto & ei = e0();
+      // Include e_i^0.1*mass/q pre-factor
       for(size_t j = 0; j < nData; ++j)
       {
-        const double factor = std::pow(gaussWidth,4.0)/(3.0*modq[j]);
-        result[j] -= factor*voigtDiffResult[j];
+        const double q = modq[j];
+        const double prefactor = mass()*std::pow(ei[j],0.1)/q;
+        result[j] = prefactor*(voigt[j] - std::pow(gaussWidth,4.0)*voigtDiffResult[j]/(3.0*q));
       }
+
     }
 
 

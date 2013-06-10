@@ -54,8 +54,12 @@ namespace CurveFitting
     /// Declare the Gram-Charlier (Hermite) coefficients
     void declareGramCharlierParameters();
 
+    /// Return the number of columns required in the constraint matrix
+    size_t numConstraintMatrixColumns() const;
+    /// Fill in the columns of the matrix for this mass
+    void fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t index);
     /// Compute the sum for all Hermite polynomial coefficents
-    void massProfile(std::vector<double> & result) const;
+    void massProfile(double * result, const size_t nData) const;
 
     /// The active hermite coefficents
     std::vector<short> m_hermite;
