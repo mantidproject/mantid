@@ -84,7 +84,7 @@ namespace Mantid
 
       prog.report("Converting to MD Workspace");
       MDHistoWorkspace_sptr outputWS = boost::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
-      const size_t nPoints = outputWS->getNPoints();
+      const int64_t nPoints = static_cast<int64_t>( outputWS->getNPoints() );
       vtkUnsignedShortArray* signals = vtkUnsignedShortArray::SafeDownCast(
           output->GetPointData()->GetArray(signalArrayName.c_str()));
       if (signals == NULL)
@@ -107,7 +107,7 @@ namespace Mantid
       if (errorsSQ == NULL)
       {
         PARALLEL_FOR_NO_WSP_CHECK()
-        for (size_t i = 0; i < nPoints; ++i)
+        for (int64_t i = 0; i < nPoints; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           destinationSignals[i] = signals->GetValue(i);
@@ -118,7 +118,7 @@ namespace Mantid
      else
      {
        PARALLEL_FOR_NO_WSP_CHECK()
-       for (size_t i = 0; i < nPoints; ++i)
+       for (int64_t i = 0; i < nPoints; ++i)
        {
          PARALLEL_START_INTERUPT_REGION
          destinationSignals[i] = signals->GetValue(i);
