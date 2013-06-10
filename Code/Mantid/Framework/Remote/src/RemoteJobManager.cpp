@@ -331,7 +331,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::uploadFile( const st
   JobManagerErrorCode reqErr = JM_OK;
 
   // Verify that the file we want to upload actually exists
-  std::ifstream infile( localFileName, std::ios_base::binary);
+  std::ifstream infile( localFileName.c_str(), std::ios_base::binary);
   if (! infile.good())
   {
     serverErr = "Could not open local file: " + localFileName;
@@ -509,7 +509,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::downloadFile( const 
   else
   {
     // Successfully downloaded the file.  Now try to save it.
-    std::ofstream outfile( localFileName, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+    std::ofstream outfile( localFileName.c_str(), std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
     if (outfile.good())
     {
       outfile << responseStream.rdbuf();
