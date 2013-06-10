@@ -130,6 +130,7 @@ def process_algorithm(name, versions, qhp, outputdir, fetchimages, **kwargs): # 
         if len(alias) > 0:
             htmlfile.h3("Alias")
             htmlfile.p("This algorithm is also called '%s'" % alias)
+            qhp.addFile(os.path.join(HTML_DIR, outfile), alias)
 
         htmlfile.h3("Properties")
         htmlfile.openTag("table", {"border":"1", "cellpadding":"5", "cellspacing":"0"})
