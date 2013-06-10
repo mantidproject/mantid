@@ -4,6 +4,7 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidMDEvents/MDEventFactory.h"
 #include <Poco/File.h>
 
 #if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
@@ -261,28 +262,6 @@ namespace Mantid
     auto hFile = file_holder_type(createOrOpenMDWSgroup(fileName,size_t(m_nDim),m_eventType,true));
 
 
-    //// How many dimensions?
-    //std::vector<int32_t> vecDims;
-    //hFile->readData("dimensions", vecDims);
-    //if (vecDims.empty())
-    //    throw std::runtime_error("LoadBoxStructure:: Error loading number of dimensions.");
-
-    //m_nDim = vecDims[0];
-    //if (m_nDim<= 0)
-    //    throw std::runtime_error("loadBoxStructure:: number of dimensions <= 0.");
-
-      // Now load all the dimension xml
-      //this->loadDimensions();
-
-      //if (entryName == "MDEventWorkspace")
-      //{
-      //  //The type of event
-      //  std::string eventType;
-      //  file->getAttr("event_type", eventType);
-
-      //  // Use the factory to make the workspace of the right type
-      //  IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(m_numDims, eventType);
-      //}
     this->loadBoxStructure(hFile.get(),onlyEventInfo);
 
     // close workspace group
@@ -447,7 +426,6 @@ namespace Mantid
 
 
 
-  template<typename MDE,size_t nd>
   uint64_t MDBoxFlatTree::restoreBoxTree(std::vector<API::IMDNode *>&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly)
   {
 
@@ -458,14 +436,22 @@ namespace Mantid
     m_nDim = int(bc->getNDims());
     if(m_nDim<=0||m_nDim>11 )throw std::runtime_error("Workspace dimesnions are not defined properly");
 
+    int iEventType(0);
+    if(m_eventType=="MDLeanEvent")
+        iEventType=0;
+    else if(m_eventType=="MDEvent")
+         iEventType=2;
+    else
+        throw std::invalid_argument(" Unknown event type provided for MDBoxFlatTree::restoreBoxTree");
+
     for (size_t i=0; i<numBoxes; i++)
     {
 
       size_t box_type = m_BoxType[i];
       if (box_type == 0)continue;
 
-      MDBoxBase<MDE,nd> * ibox = NULL;
-      MDBox<MDE,nd> * box;
+
+      API::IMDNode * ibox = NULL;
 
       // Extents of the box, as a vector
       std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(m_nDim);
@@ -476,34 +462,33 @@ namespace Mantid
       uint64_t indexStart = m_BoxEventIndex[i*2];
       uint64_t numEvents  = m_BoxEventIndex[i*2+1];
 
-         totalNumEvents+=numEvents;
+      totalNumEvents+=numEvents;
       if (box_type == 1)
       {
         // --- Make a MDBox -----
         if(BoxStructureOnly)
         {
-            box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector);
+            ibox  = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType),bc,extentsVector);
         }
         else // !BoxStructureOnly)
         {
 
           if(FileBackEnd)
           {
-              box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,UNDEF_SIZET);
+              ibox  = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType),bc,extentsVector,m_Depth[i]);
               // Mark the box as file backed and indicate that the box was saved
-              box->setFileBacked(indexStart,numEvents,true);
+              ibox->setFileBacked(indexStart,numEvents,true);
           }
           else
           {
-            box = new MDBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector,int64_t(numEvents));
+              ibox  = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType),bc,extentsVector,m_Depth[i],numEvents);
           }           
         } // ifBoxStructureOnly
-        ibox = box;
       }
       else if (box_type == 2)
       {
         // --- Make a MDGridBox -----
-        ibox = new MDGridBox<MDE,nd>(bc.get(), m_Depth[i], extentsVector);
+          ibox = MDEventFactory::createBox(size_t(m_nDim),MDEventFactory::BoxType(iEventType+1),bc,extentsVector,m_Depth[i]);
       }
       else
         continue;
@@ -593,17 +578,17 @@ namespace Mantid
                       throw Kernel::Exception::FileError("Trying to open MDWorkspace nexus file with the the events: "+eventType+
                       "\n different from workspace type: "  +WSEventType,fileName);
             }
-            else // it is possible that woerkspace group has been created by somebody else and there are no this kind of attribute attached to it. 
+            else // it is possible that workspace group has been created by somebody else and there are no this kind of attribute attached to it. 
             {
                 if(readOnly) 
                     throw Kernel::Exception::FileError("The NXdata group: MDEventWorkspace opened in read-only mode but \n"
                                                        " does not have necessary attribute describing the event type used",fileName);
                  hFile->putAttr("event_type", WSEventType);
             }
-            // check dimesions dataset
+            // check dimensions dataset
             bool dimDatasetExist(false);
             hFile->getEntries(groupEntries);
-            if(groupEntries.find("dimensions")!=groupEntries.end()) //dimesnions dataset exist
+            if(groupEntries.find("dimensions")!=groupEntries.end()) //dimensions dataset exist
                 dimDatasetExist = true;
 
               if(dimDatasetExist)
@@ -645,27 +630,6 @@ namespace Mantid
   }
 
 
-  // TODO: Get rid of this --> create  the box generator and move all below into MDBoxFactory!
   
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<1>, 1>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<2>, 2>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<3>, 3>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<4>, 4>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<5>, 5>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<6>, 6>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<7>, 7>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<8>, 8>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDLeanEvent<9>, 9>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<1>, 1>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<2>, 2>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<3>, 3>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<4>, 4>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<5>, 5>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<6>, 6>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<7>, 7>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<8>, 8>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-  template DLLExport uint64_t MDBoxFlatTree::restoreBoxTree<MDEvent<9>, 9>(std::vector<API::IMDNode * >&Boxes,API::BoxController_sptr bc, bool FileBackEnd,bool BoxStructureOnly);
-
   }
 }
