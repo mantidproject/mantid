@@ -943,6 +943,42 @@ bool MantidEVWorker::showUB( const std::string & peaks_ws_name )
 
 
 /**
+ *  Get the current UB matrix from the specified peaks workspace.
+ *
+ *  @param peaks_ws_name  The name of the peaks workspace with the UB
+ *                        matrix.
+ *  @param UB             3x3 matrix of doubles to be filled out with
+ *                        the UB matrix if one exists in the specified
+ *                        peaks workspace.
+ *  @return true if the UB matrix was found and returned in the UB
+ *               parameter.
+ */
+bool MantidEVWorker::getUB( const std::string & peaks_ws_name,
+                                  Mantid::Kernel::Matrix<double> & UB )
+{
+  if ( !isPeaksWorkspace( peaks_ws_name ) )
+  {
+    return false;
+  }
+
+  const auto& ADS = AnalysisDataService::Instance();
+  IPeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+
+  try
+  {
+    Mantid::Geometry::OrientedLattice o_lattice = peaks_ws->mutableSample().getOrientedLattice();
+    UB = o_lattice.getUB();
+  }
+  catch(...)
+  {
+    return false;
+  }
+
+  return true;
+}
+
+
+/**
  * Get information about a specified Q-position from the specified peaks
  * workspace.
  *

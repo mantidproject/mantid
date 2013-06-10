@@ -164,6 +164,10 @@ public:
   /// Display UB and lattice parameters in MantidPlot
   bool showUB( const std::string & peaks_ws_name );
 
+  /// Get the current UB matrix from the peaks workspace
+  bool getUB( const std::string & peaks_ws_name,
+                    Mantid::Kernel::Matrix<double> & UB );
+
   /// Get Info about a Q-Vector from a PeaksWorkspace
   std::vector< std::pair< std::string, std::string > >
                                PointInfo( const std::string & peaks_ws_name, 

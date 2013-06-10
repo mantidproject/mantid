@@ -396,6 +396,9 @@ private:
   std::string  last_ini_file;  /// filename of last settings file that was
                                /// loaded or saved, if any. 
 
+  Mantid::Kernel::V3D last_Q;  /// the last_Q vector that was received from
+                               /// the SelectionNotificationService
+
   QThreadPool  *m_thread_pool; /// local thread pool with only one thread to 
                                /// allow running precisely one operation 
                                /// at a time in a separate thread.
