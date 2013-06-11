@@ -623,6 +623,14 @@ def do_make_wiki(algo_name, version, latest_version):
         out += " " + create_function_signature(alg, algo_name) + "\n\n" 
     out += "<br clear=all>\n\n" 
     out += custom_usage
+
+    # If there is an alias put it in
+    alias = alg.alias().strip()
+    if len(alias) > 0:
+        out += ("== Alias ==\n\n")
+        out += "This algorithm is also called '%s'\n\n" % alias
+
+    # Table of properties
     out += "== Properties ==\n\n"
     
     out += """{| border="1" cellpadding="5" cellspacing="0" 
