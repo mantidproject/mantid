@@ -1669,7 +1669,7 @@ namespace Mantid
          StatBase[ISSIxx]= -1;
         return;
       }
-      boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>(Data);
+      boost::shared_ptr<Workspace2D> ws = boost::dynamic_pointer_cast<Workspace2D>(Data);
 
       int NBadEdges = getProperty("NBadEdgePixels");
       spec_idList.clear();
