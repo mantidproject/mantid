@@ -55,6 +55,16 @@ void vtkPeaksSource::SetPeakDimension(int dim)
   this->Modified();
 }
 
+/**
+ * Setter for the unintegrated peak marker size
+ * @param mSize : size for the marker
+ */
+void vtkPeaksSource::SetUnintPeakMarkerSize(double mSize)
+{
+  m_uintPeakMarkerSize = mSize;
+  this->Modified();
+}
+
 int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
                                 vtkInformationVector *outputVector)
 {
@@ -91,7 +101,7 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
     {
       vtkAxes* axis = vtkAxes::New();
       axis->SymmetricOn();
-      axis->SetScaleFactor(0.3);
+      axis->SetScaleFactor(m_uintPeakMarkerSize);
 
       vtkTransform* transform = vtkTransform::New();
       const double rotationDegrees = 45;
