@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADPSI_H_
-#define MANTID_DATAHANDLING_LOADPSI_H_
+#ifndef MANTID_DATAHANDLING_LOADSINQ_H_
+#define MANTID_DATAHANDLING_LOADSINQ_H_
 
 //---------------------------------------------------
 // Includes
@@ -85,4 +85,4 @@ private:
 } // namespace DataHandling
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADPSI_H_ */
+#endif  /* MANTID_DATAHANDLING_LOADSINQ_H_ */

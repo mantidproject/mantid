@@ -169,6 +169,8 @@ std::string LoadSINQ::getInstrumentName(NeXus::NXEntry& entry) {
 		if (it->nxclass == "NXinstrument") {
 			m_nexusInstrumentEntryName = it->nxname;
 			std::string insNamePath = m_nexusInstrumentEntryName + "/name";
+			if ( !entry.isValid(insNamePath) )
+				throw std::runtime_error("Error reading the instrument name: " + insNamePath + " is not a valid path!");
 			instrumentName = entry.getString(insNamePath);
 			g_log.debug() << "Instrument Name: " << instrumentName
 					<< " in NxPath: " << insNamePath << std::endl;
