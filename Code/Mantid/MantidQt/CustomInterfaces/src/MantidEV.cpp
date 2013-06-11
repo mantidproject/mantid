@@ -1154,8 +1154,8 @@ void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
    info.push_back( Q_dist_str );
 
    Mantid::Kernel::Matrix<double> UB(3,3,false);
-   if ( worker->getUB( peaks_ws_name, UB ) )      // if the peaks workspace has a UB, also find the
-   {                                              // distance between points in HKL.
+   if ( worker->getUB( peaks_ws_name, lab_coords, UB ) ) // if the peaks workspace has a UB, also find the
+   {                                                     // distance between points in HKL.
      Mantid::Kernel::Matrix<double> UBinv( UB ); 
      UBinv.Invert();
      Mantid::Kernel::V3D  hkl_1 = UBinv * last_Q;
