@@ -218,6 +218,7 @@ namespace API
   class IEventWorkspace;
   class IMDHistoWorkspace;
   class IFunction;
+  class IAlgorithm;
 }
 namespace DataObjects
 {
@@ -303,6 +304,7 @@ std::string getUnmangledTypeName(const std::type_info& type)
     // FunctionProperty
     typestrings.insert(make_pair(typeid(boost::shared_ptr<IFunction>).name(),
                                         string("Function")));
+    typestrings.insert(make_pair(typeid(boost::shared_ptr<IAlgorithm>).name(), string("IAlgorithm")));
 
   }
   std::map<std::string, std::string>::const_iterator mitr = typestrings.find(type.name());

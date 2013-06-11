@@ -203,9 +203,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeFileBacked","0") );
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
-
+    std::string this_filename = alg.getProperty("Filename");
     ws->clearFileBacked(false);
-    if (Poco::File(filename).exists()) Poco::File(filename).remove();
+    if (Poco::File(this_filename).exists()) Poco::File(this_filename).remove();
 
   }
 
@@ -235,11 +235,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeFileBacked","0") );
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
-
+    std::string this_filename = alg.getProperty("Filename");
     ws->clearFileBacked(false);
-    if (Poco::File(filename).exists())
+    if (Poco::File(this_filename).exists())
     {
-      Poco::File(filename).remove();
+      Poco::File(this_filename).remove();
     }
   }
 

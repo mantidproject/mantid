@@ -220,6 +220,44 @@ AlgorithmFactory.subscribe(%(name)s)
         
         # Ensure the files are removed promptly
         del a,b
+        
+    def test_optional_workspaces_are_ignored_if_not_present_in_output_even_if_given_as_input(self):
+        # Test algorithm
+        from mantid.api import AlgorithmManager,PropertyMode,PythonAlgorithm,MatrixWorkspaceProperty,WorkspaceFactory
+        from mantid.kernel import Direction
+        class OptionalWorkspace(PythonAlgorithm):
+            def PyInit(self):
+                self.declareProperty(MatrixWorkspaceProperty("RequiredWorkspace", "", Direction.Output))
+                self.declareProperty(MatrixWorkspaceProperty("OptionalWorkspace", "", Direction.Output, PropertyMode.Optional))
+ 
+            def PyExec(self):
+                ws = WorkspaceFactory.create("Workspace2D", NVectors=1, YLength=1,XLength=1)
+                ws.dataY(0)[0] = 5
+                self.setProperty("RequiredWorkspace", ws)
+                self.getLogger().notice("done!")
+        AlgorithmFactory.subscribe(OptionalWorkspace)
+        
+        # temporarily attach it to simpleapi module
+        name="OptionalWorkspace"
+        algm_object = AlgorithmManager.createUnmanaged(name, 1)
+        algm_object.initialize()
+        simpleapi._create_algorithm(name, 1, algm_object) # Create the wrapper
+
+        # Call with no optional output specified
+        result = simpleapi.OptionalWorkspace(RequiredWorkspace="required")
+        self.assertTrue(isinstance(result, MatrixWorkspace))
+        self.assertAlmostEqual(5, result.readY(0)[0], places=12)
+        mtd.remove("required")
+        
+        # Call with both outputs specified
+        result = simpleapi.OptionalWorkspace(RequiredWorkspace="required",OptionalWorkspace="optional")
+        self.assertTrue(isinstance(result, MatrixWorkspace))
+        self.assertAlmostEqual(5, result.readY(0)[0], places=12)
+        mtd.remove("required")
+        
+        # Tidy up simple api function
+        del simpleapi.OptionalWorkspace
+        
 
 if __name__ == '__main__':
     unittest.main()

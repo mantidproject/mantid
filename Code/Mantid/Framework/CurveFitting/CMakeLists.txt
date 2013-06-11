@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/DeltaFunction.cpp
 	src/DerivMinimizer.cpp
 	src/DiffSphere.cpp
+	src/ElasticDiffSphere.cpp
 	src/EndErfc.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
@@ -38,6 +39,7 @@ set ( SRC_FILES
 	src/Gaussian1D2.cpp
 	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
+	src/InelasticDiffSphere.cpp
 	src/LeBailFit.cpp
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
@@ -104,6 +106,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DerivMinimizer.h
 	inc/MantidCurveFitting/DiffSphere.h
 	inc/MantidCurveFitting/DllConfig.h
+	inc/MantidCurveFitting/ElasticDiffSphere.h
 	inc/MantidCurveFitting/EmptyValues.h
 	inc/MantidCurveFitting/EndErfc.h
 	inc/MantidCurveFitting/ExpDecay.h
@@ -127,6 +130,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian1D2.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
+	inc/MantidCurveFitting/InelasticDiffSphere.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LeBailFunction.h

@@ -832,9 +832,6 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
     outIndex ++;
   }
   
-  // Refresh the spectraDetectorMap
-  outputWS->generateSpectraMap();
-
   if ( bhv == 1 && requireDivide )
   {
     g_log.debug() << "Running Divide algorithm to perform averaging.\n";
@@ -1000,8 +997,6 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::Mat
       interruption_point();
     }
   }
-  // Refresh the spectraDetectorMap
-  outputWS->generateSpectraMap();
 
   g_log.debug() << name() << " copied " << unGroupedSet.size()-1 << " ungrouped spectra\n";
 }

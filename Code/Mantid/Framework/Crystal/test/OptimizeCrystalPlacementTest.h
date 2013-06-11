@@ -22,6 +22,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid;
 using namespace Crystal;
@@ -32,6 +33,7 @@ using Mantid::DataObjects::TableWorkspace_sptr;
 using Mantid::Geometry::Goniometer;
 using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::IObjComponent_const_sptr;
+using Mantid::API::ITableWorkspace;
 
 class OptimizeCrystalPlacementTest: public CxxTest::TestSuite
 {
@@ -73,7 +75,8 @@ public:
 
   }
   void test_basic()
-  { init();
+  {
+    init();
     OptimizeCrystalPlacement alg;
     alg.initialize();
     alg.setPropertyValue("PeaksWorkspace", "abcd");
@@ -85,7 +88,7 @@ public:
     alg.setPropertyValue("ModifiedPeaksWorkspace", "ModPeaks");
     peaks1 = alg.getProperty("ModifiedPeaksWorkspace");
     alg.setPropertyValue("FitInfoTable", "FitInfoTable");
-    TableWorkspace_sptr table = alg.getProperty("FitInfoTable");
+    boost::shared_ptr<ITableWorkspace> table = alg.getProperty("FitInfoTable");
 
 
     Kernel::Matrix<double> Gon;
@@ -190,7 +193,7 @@ public:
     alg.setProperty("OptimizeGoniometerTilt", true);
     alg.execute();
     alg.setPropertyValue("FitInfoTable", "FitInfoTable2");
-    TableWorkspace_sptr table = alg.getProperty("FitInfoTable");
+    boost::shared_ptr<ITableWorkspace> table = alg.getProperty("FitInfoTable");
 
     Kernel::V3D Rotxyz;
     for (size_t i = 0; i < table->rowCount(); ++i)
@@ -261,7 +264,7 @@ public:
     alg.execute();
 
     alg.setPropertyValue("FitInfoTable", "FitInfoTable2");
-    TableWorkspace_sptr table = alg.getProperty("FitInfoTable");
+    boost::shared_ptr<ITableWorkspace> table = alg.getProperty("FitInfoTable");
 
 
     TS_ASSERT_DELTA(table->Double(0, 1), 0, .00024);

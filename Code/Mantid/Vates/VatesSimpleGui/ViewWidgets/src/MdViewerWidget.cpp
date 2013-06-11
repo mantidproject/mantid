@@ -386,6 +386,10 @@ void MdViewerWidget::setParaViewComponentsForView()
                      SIGNAL(applied()),
                      spv,
                      SLOT(checkPeaksCoordinates()));
+    QObject::connect(spv,
+                     SIGNAL(toggleOrthographicProjection(bool)),
+                     this->ui.parallelProjButton,
+                     SLOT(setChecked(bool)));
   }
 
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
@@ -770,7 +774,8 @@ void MdViewerWidget::updateAppState()
   this->viewSettings->updateEnableState();
 
   ThreeSliceView *tsv = dynamic_cast<ThreeSliceView *>(this->currentView);
-  if (tsv)
+  SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
+  if (NULL != tsv || NULL != spv)
   {
     this->currentView->onLodThresholdChange(false, this->lodThreshold);
     this->lodAction->setChecked(false);

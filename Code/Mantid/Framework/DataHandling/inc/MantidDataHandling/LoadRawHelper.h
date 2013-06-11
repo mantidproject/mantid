@@ -19,6 +19,11 @@ class ISISRAW2;
 
 namespace Mantid
 {
+  namespace API
+  {
+    class SpectrumDetectorMapping;
+  }
+
   namespace DataHandling
   {
     /** @class LoadRawHelper DataHandling/LoadRawHelper.h
@@ -121,7 +126,7 @@ namespace Mantid
       void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);
 
       ///gets the monitor spectrum list from the workspace
-      void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<specid_t>& monitorSpecList);
+      std::vector<specid_t> getmonitorSpectrumList(const API::SpectrumDetectorMapping& mapping);
 
       /// sets the workspace property 
       void setWorkspaceProperty(const std::string & propertyName,const std::string& title,

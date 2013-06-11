@@ -44,7 +44,7 @@ namespace Mantid
       : MDResolutionConvolution(), m_randomNumbers(),
         m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4),m_mcRelErrorTol(1e-5),
         m_foregroundOnly(false), m_mosaicActive(true),
-        m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
+        m_bmatrix(1), m_yvector(1), m_etaInPlane(1, 0.0), m_etaOutPlane(1, 0.0), m_deltaQE(1,std::vector<double>(4, 0.0)),
         m_exptCache()
     {
     }
@@ -59,7 +59,7 @@ namespace Mantid
       : MDResolutionConvolution(fittedFunction, fgModel), m_randomNumbers(),
         m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4), m_mcRelErrorTol(1e-5),
         m_foregroundOnly(false), m_mosaicActive(true),
-        m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
+        m_bmatrix(1), m_yvector(1), m_etaInPlane(1,0.0), m_etaOutPlane(1,0.0), m_deltaQE(1,std::vector<double>(4, 0.0)),
         m_exptCache()
     {
     }
@@ -196,9 +196,10 @@ namespace Mantid
       }
       else
       {
+        std::cerr << "Setting attribute on TobyFitYVector " << name << "\n";
         for(auto iter = m_yvector.begin(); iter != m_yvector.end(); ++iter)
         {
-          iter->setAttribute(name, value.asInt());
+          iter->setAttribute(name, value);
         }
       }
     }
@@ -466,10 +467,11 @@ namespace Mantid
     void TobyFitResolutionModel::setNThreads(int nthreads)
     {
       if(nthreads <= 0) nthreads = 1; // Ensure we have a sensible number
+      if(nthreads == 1 ) return;
 
       m_randomNumbers = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads);
-      m_bmatrix = std::vector<TobyFitBMatrix>(nthreads, TobyFitBMatrix());
-      m_yvector = std::vector<TobyFitYVector>(nthreads, TobyFitYVector());
+      m_bmatrix = std::vector<TobyFitBMatrix>(nthreads, m_bmatrix[0]); // Initialize with copy of current
+      m_yvector = std::vector<TobyFitYVector>(nthreads, m_yvector[0]);
       m_etaInPlane = std::vector<double>(nthreads, 0.0);
       m_etaOutPlane = std::vector<double>(nthreads, 0.0);
       m_deltaQE = std::vector<std::vector<double> >(nthreads, std::vector<double>(4, 0.0));

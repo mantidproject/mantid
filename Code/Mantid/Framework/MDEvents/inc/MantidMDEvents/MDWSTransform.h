@@ -81,10 +81,12 @@ public:
   /// return the list of possible scalings for momentums
    std::vector<std::string> getQScalings()const{return m_QScalingID;}
    CnvrtToMD::CoordScaling getQScaling(const std::string &ScID)const;
+   std::string getQScaling(const CnvrtToMD::CoordScaling ScaleID)const;
    /// returns the list of possible target frames to convert to
    std::vector<std::string> getTargetFrames()const{return m_TargFramesID;}
    /// converts the target frame string representation into the frame ID
    CnvrtToMD::TargetFrame getTargetFrame(const std::string &FrameID)const;
+   std::string getTargetFrame(const CnvrtToMD::TargetFrame FrameID)const;
 private:
     bool m_isUVdefault;
     /** vectors, which describe the projection plain the target ws is based on (notional or cryst cartezian coordinate system). The transformation matrix below 

@@ -60,19 +60,6 @@ class ShowPeakHKLOffsetsTest: public CxxTest::TestSuite
 
      TS_ASSERT_DELTA( Offsets->Double(23,0) , -0.00976605,.1)
 
-    /* std::cout<<Offsets->Double(3,1)<<std::endl;
-     std::cout<<Offsets->Double(5,3)<<std::endl;
-
-     std::cout<<Offsets->Int(8,4)<<std::endl;
-
-     std::cout<<Offsets->Int(13,5)<<std::endl;
-
-     std::cout<<Offsets->Double(23,0)<<std::endl;
-*/
-
-
-
-
 
   }
 };

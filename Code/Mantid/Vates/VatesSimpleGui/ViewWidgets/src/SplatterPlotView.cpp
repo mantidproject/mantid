@@ -1,5 +1,8 @@
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 
+#include "MantidQtAPI/SelectionNotificationService.h"
+#include "MantidVatesAPI/vtkPeakMarkerFactory.h"
+
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -14,13 +17,19 @@
 #include <pqRenderView.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
+#include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMSourceProxy.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
 
+#include <QKeyEvent>
 #include <QMessageBox>
+
+using namespace MantidQt::API;
+using namespace Mantid::VATES;
 
 namespace Mantid
 {
@@ -44,11 +53,46 @@ SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent)
                    this,
                    SLOT(onOverridePeakCoordToggled(bool)));
 
+  // Set connection to toggle button for pick mode checking
+  QObject::connect(this->ui.pickModeButton,
+                   SIGNAL(toggled(bool)),
+                   this,
+                   SLOT(onPickModeToggled(bool)));
+
   this->view = this->createRenderView(this->ui.renderFrame);
+  this->installEventFilter(this);
 }
 
 SplatterPlotView::~SplatterPlotView()
 {
+}
+
+/**
+ * This function is an event filter for handling pick mode. The release
+ * of the p key triggers the automatic accept feature and then calls the
+ * read and send function.
+ * @param obj : Object causing event
+ * @param ev : Event object
+ * @return true if the event is handled
+ */
+bool SplatterPlotView::eventFilter(QObject *obj, QEvent *ev)
+{
+  if (this->ui.pickModeButton->isChecked())
+  {
+    this->setFocus();
+    if (QEvent::KeyRelease == ev->type() && this == obj)
+    {
+      QKeyEvent *kev = static_cast<QKeyEvent *>(ev);
+      if (Qt::Key_P == kev->key())
+      {
+        emit this->triggerAccept();
+        this->readAndSendCoordinates();
+        return true;
+      }
+    }
+    return false;
+  }
+  return false;
 }
 
 void SplatterPlotView::destroyView()
@@ -58,6 +102,10 @@ void SplatterPlotView::destroyView()
   {
     this->destroyPeakSources();
     pqActiveObjects::instance().setActiveSource(this->origSrc);
+  }
+  if (this->probeSource)
+  {
+    builder->destroy(this->probeSource);
   }
   if (this->threshSource)
   {
@@ -80,7 +128,7 @@ void SplatterPlotView::render()
   pqPipelineSource *src = NULL;
   src = pqActiveObjects::instance().activeSource();
 
-  QString renderType = "Surface";
+  QString renderType = "Points";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
   // Do not allow overplotting of MDWorkspaces
@@ -117,6 +165,7 @@ void SplatterPlotView::render()
   pqDataRepresentation *drep = builder->createDataRepresentation(\
            src->getOutputPort(0), this->view);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType.toStdString().c_str());
+  vtkSMPropertyHelper(drep->getProxy(), "PointSize").Set(1);
   drep->getProxy()->UpdateVTKObjects();
   pqPipelineRepresentation *prep = NULL;
   prep = qobject_cast<pqPipelineRepresentation*>(drep);
@@ -195,6 +244,36 @@ void SplatterPlotView::checkView()
   this->noOverlay = false;
 }
 
+/**
+ * This function is responsible for setting up and tearing down the VTK
+ * probe filter for use in pick mode.
+ * @param state : True if button is toggled, false if not
+ */
+void SplatterPlotView::onPickModeToggled(bool state)
+{
+  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+  if (state)
+  {
+    pqPipelineSource *src = NULL;
+    if (NULL != this->threshSource)
+    {
+      src = this->threshSource;
+    }
+    else
+    {
+      src = this->splatSource;
+    }
+    this->probeSource = builder->createFilter("filters", "ProbePoint", src);
+    emit this->triggerAccept();
+  }
+  else
+  {
+    builder->destroy(this->probeSource);
+  }
+  emit this->toggleOrthographicProjection(state);
+  this->onParallelProjection(state);
+}
+
 void SplatterPlotView::resetCamera()
 {
   this->view->resetCamera();
@@ -206,6 +285,42 @@ void SplatterPlotView::destroyPeakSources()
   for( int i = 0; i < this->peaksSource.size(); ++i )
   {
     builder->destroy(this->peaksSource.at(i));
+  }
+}
+
+/**
+ * This function reads the coordinates from the probe point plugin and
+ * passes them on to a listening serivce that will handle them in the
+ * appropriate manner.
+ */
+void SplatterPlotView::readAndSendCoordinates()
+{
+  QList<vtkSMProxy *> pList = this->probeSource->getHelperProxies("Source");
+  vtkSMDoubleVectorProperty *coords = vtkSMDoubleVectorProperty::SafeDownCast(\
+        pList[0]->GetProperty("Center"));
+
+  if (NULL != coords)
+  {
+    // Get coordinate type
+    int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
+                                             "SpecialCoordinates").GetAsInt();
+    // Make commensurate with vtkPeakMarkerFactory
+    peakViewCoords--;
+
+    if (peakViewCoords < vtkPeakMarkerFactory::Peak_in_HKL)
+    {
+      // For Qlab and Qsample coordinate data
+      // Qlab needs to be true, but enum is 0
+      bool coordType = !(static_cast<bool>(peakViewCoords));
+      SelectionNotificationService::Instance().sendQPointSelection(coordType,
+                                                                   coords->GetElement(0),
+                                                                   coords->GetElement(1),
+                                                                   coords->GetElement(2));
+    }
+  }
+  else
+  {
+    return;
   }
 }
 

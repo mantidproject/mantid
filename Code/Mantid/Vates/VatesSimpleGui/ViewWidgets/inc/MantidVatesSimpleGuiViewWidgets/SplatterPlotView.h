@@ -86,6 +86,10 @@ public:
    */
   void resetDisplay();
 
+signals:
+  /// Change the state of the orthographic projection mode
+  void toggleOrthographicProjection(bool state);
+
 public slots:
   /// Check the coordinates for the peaks overlay if necessary
   void checkPeaksCoordinates();
@@ -93,6 +97,8 @@ public slots:
 protected slots:
   /// Check state of toggle button with respect to peak coordinates.
   void onOverridePeakCoordToggled(bool state);
+  /// Check state of toggle button for pick mode
+  void onPickModeToggled(bool state);
   /**
    * Create and apply a threshold filter to the data.
    */
@@ -103,9 +109,14 @@ private:
 
   /// Destroy all peak sources.
   void destroyPeakSources();
+  /// Filter events for pick mode.
+  bool eventFilter(QObject *obj, QEvent *ev);
+  /// Read the coordinates and send to service.
+  void readAndSendCoordinates();
 
   bool noOverlay; ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource> > peaksSource; ///< A list of peaks sources
+  QPointer<pqPipelineSource> probeSource; ///< The VTK probe filter
   QPointer<pqPipelineRepresentation> splatRepr; ///< The splatter plot representation
   QPointer<pqPipelineSource> splatSource; ///< The splatter plot source
   QPointer<pqPipelineSource> threshSource; ///< The thresholding filter source

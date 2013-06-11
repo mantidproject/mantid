@@ -258,7 +258,6 @@ private:
       ws2D->setData(i,yv,ev);
       ws2D->getSpectrum(i)->setSpectrumNo(i);
     }
-    ws2D->generateSpectraMap();
 
     AnalysisDataService::Instance().add(inputWSname, ws2D);
 
@@ -266,12 +265,7 @@ private:
 
   void createEventWorkspace()
   {
-    EventWorkspace_sptr event = WorkspaceCreationHelper::CreateEventWorkspace(1,5,5,0,0.9,2,0);  
-
-//std::cout<<event->getEventList(0).getEvent(0).m_tof<<" ";
-//std::cout<<event->getEventList(0).getEvent(1).m_tof<<" "<<std::endl;
-
-
+    EventWorkspace_sptr event = WorkspaceCreationHelper::CreateEventWorkspace(1,5,5,0,0.9,2,0);
     event->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE"); 
     AnalysisDataService::Instance().add(inputEvWSname, event);
   }

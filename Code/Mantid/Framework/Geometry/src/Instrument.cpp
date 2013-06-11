@@ -461,7 +461,7 @@ namespace Mantid
     }
 
     /**	Gets a pointer to the detector from its ID
-    *  Note that for getting the detector associated with a spectrum, the SpectraDetectorMap::getDetector
+    *  Note that for getting the detector associated with a spectrum, the MatrixWorkspace::getDetector
     *  method should be used rather than this one because it takes account of the possibility of more
     *  than one detector contibuting to a single spectrum
     *  @param   detector_id The requested detector ID

@@ -10,7 +10,6 @@ It also assumes that the beam monitor files are in the same directory as the run
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/BinaryFile.h"
 
 #include <Poco/Path.h>
@@ -197,10 +196,6 @@ void LoadPreNexusMonitors::exec()
   MatrixWorkspace_sptr localWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nMonitors,
       numberTimeBins, tchannels);
 
-  // a temporary place to put the spectra/detector numbers
-  boost::shared_array<int> spectra_numbers(new int[nMonitors]);
-  boost::shared_array<int> detector_numbers(new int[nMonitors]);
-
   // temp buffer for file reading
   std::vector < uint32_t > buffer;
 
@@ -224,9 +219,9 @@ void LoadPreNexusMonitors::exec()
     localWorkspace->dataY(i) = intensity;
     localWorkspace->dataE(i) = error;
     // Just have spectrum number be the same as the monitor number but -ve.
-    detector_numbers[i] = -monitorIDs[i];
-    spectra_numbers[i] = monitorIDs[i];
-    localWorkspace->getSpectrum(i)->setSpectrumNo(monitorIDs[i]);
+    ISpectrum * spectrum = localWorkspace->getSpectrum(i);
+    spectrum->setSpectrumNo(monitorIDs[i]);
+    spectrum->setDetectorID(-monitorIDs[i]);
   }
 
   g_log.debug() << "Setting axis zero to TOF" << std::endl;
@@ -238,10 +233,6 @@ void LoadPreNexusMonitors::exec()
 
   // Actually load the instrument
   this->runLoadInstrument(instrumentName, localWorkspace);
-
-  // Populate the Spectra Map
-  localWorkspace->replaceSpectraMap(new API::SpectraDetectorMap(spectra_numbers.get(), detector_numbers.get(),
-								nMonitors));
 
   // Set the property
   setProperty("OutputWorkspace", localWorkspace);

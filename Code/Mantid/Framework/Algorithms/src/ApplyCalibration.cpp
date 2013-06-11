@@ -12,7 +12,6 @@ The PositionTable must have columns ''Detector ID'' and ''Detector Position''. T
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include <boost/scoped_ptr.hpp>
 

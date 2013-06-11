@@ -18,7 +18,7 @@ Loads a Nexus file created from an ISIS instrument.
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
@@ -194,8 +194,7 @@ namespace Mantid
         parameterString="not found";
       }
       if( parameterString == "not found") {
-        //Populate the Spectra Map with parameters from IDF file and use LoadInstrument algorithm
-        local_workspace->replaceSpectraMap(new SpectraDetectorMap(spec(),udet(),udet.dim0()));
+        local_workspace->updateSpectraUsing(SpectrumDetectorMapping(spec(),udet(),udet.dim0()));
         runLoadInstrument(local_workspace);
       } else {  // Use parameters got from instrument section of Nexus file
         local_workspace->readParameterMap(parameterString);
@@ -216,7 +215,6 @@ namespace Mantid
       }
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, local_workspace);
-      local_workspace->updateSpectraUsingMap();
       
       // Clone the workspace at this point to provide a base object for future workspace generation.
       DataObjects::Workspace2D_sptr period_free_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>

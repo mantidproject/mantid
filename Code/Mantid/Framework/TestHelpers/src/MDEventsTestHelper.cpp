@@ -14,6 +14,7 @@
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include <boost/make_shared.hpp>
+#include <Poco/File.h>
 
 
 using Mantid::DataObjects::EventWorkspace_sptr;
@@ -323,6 +324,20 @@ namespace MDEventsTestHelper
     return ws_sptr;
   }
 
+  /**
+   * Delete a file from disk
+   * @param filename : File name to check and delete
+   */
+  void checkAndDeleteFile(std::string filename)
+  {
+    if (!filename.empty())
+    {
+      if (Poco::File(filename).exists())
+      {
+        Poco::File(filename).remove();
+      }
+    }
+  }
 
 } // namespace
 }

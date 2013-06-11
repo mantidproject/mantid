@@ -18,7 +18,8 @@ import os
 all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 if 'GatherWorkspaces' in all_algs:
     HAVE_MPI = True
-    import boostmpi as mpi
+    from mpi4py import MPI
+    rank = MPI.COMM_WORLD.Get_rank()
 else:
     HAVE_MPI = False
 
@@ -249,17 +250,8 @@ class SNSPowderReduction(PythonAlgorithm):
 
         tableprop = ITableWorkspaceProperty("SplittersWorkspace", "", Direction.Input, PropertyMode.Optional)
         self.declareProperty(tableprop, "Splitters workspace for split event workspace.")
-        # self.declareProperty("KeepRemainder", True, "Keeping the remainder events workspace if true.")
-
-        """ Disabled Due To #
-        self.declareProperty("FilterByLogValue", "", "Name of log value to filter by")
-        self.declareProperty("FilterMinimumValue", 0.0, "Minimum log value for which to keep events.")
-        self.declareProperty("FilterMaximumValue", 0.0, "Maximum log value for which to keep events.")
-        self.declareProperty("FilterByTimeMin", 0.,
-                             "Relative time to start filtering by in seconds. Applies only to sample.")
-        self.declareProperty("FilterByTimeMax", 0.,
-                             "Relative time to stop filtering by in seconds. Applies only to sample.")
-        """
+        infotableprop = ITableWorkspaceProperty("SplitInformationWorkspace", "", Direction.Input, PropertyMode.Optional)
+        self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
         return
 
@@ -312,6 +304,8 @@ class SNSPowderReduction(PythonAlgorithm):
         else:
             timeFilterWall = (0.0, 0.0)
             self.log().information("SplittersWorkspace is None, and thus there is NO time filter wall. ")
+
+        self._splitinfotablews = self.getProperty("SplitInformationWorkspace").value
 
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
@@ -411,7 +405,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if canRun > 0:
                 canFile = "%s_%d" % (self._instrument, canRun)+".nxs"
                 if HAVE_MPI and os.path.exists(canFile):
-                    if mpi.world.rank == 0:                     
+                    if rank == 0:                     
                         canRun = "%s_%d" % (self._instrument, canRun)
                         canRun = api.Load(Filename=canFile, OutputWorkspace=canRun)
                 elif ("%s_%d" % (self._instrument, canRun)) in mtd:
@@ -426,7 +420,7 @@ class SNSPowderReduction(PythonAlgorithm):
                                preserveEvents=preserveEvents)
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                     if HAVE_MPI:
-                        if mpi.world.rank == 0:
+                        if rank == 0:
                             api.SaveNexus(InputWorkspace=canRun, Filename=canFile)
                 workspacelist.append(str(canRun))
             else:
@@ -444,7 +438,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if vanRun > 0:
                 vanFile = "%s_%d" % (self._instrument, vanRun)+".nxs"
                 if HAVE_MPI and os.path.exists(vanFile):
-                    if mpi.world.rank == 0:                     
+                    if rank == 0:                     
                         vanRun = "%s_%d" % (self._instrument, vanRun)
                         vanRun = api.Load(Filename=vanFile, OutputWorkspace=vanRun)
                 elif ("%s_%d" % (self._instrument, vanRun)) in mtd:
@@ -470,7 +464,7 @@ class SNSPowderReduction(PythonAlgorithm):
                             vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, (0., 0.), calib,
                                preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
                         if HAVE_MPI:
-                            if mpi.world.rank == 0:
+                            if rank == 0:
                                 vnoiseRun = api.ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
                                 vnoiseRun = api.FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
                                           Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
@@ -524,7 +518,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         workspacelist.append(str(vbackRun))
 
                     if HAVE_MPI:
-                        if mpi.world.rank > 0:
+                        if rank > 0:
                             return
                     if self.getProperty("StripVanadiumPeaks").value:
                         vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
@@ -540,14 +534,14 @@ class SNSPowderReduction(PythonAlgorithm):
                     vanRun = api.SetUncertainties(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     if HAVE_MPI:
-                        if mpi.world.rank == 0:
+                        if rank == 0:
                             api.SaveNexus(InputWorkspace=vanRun, Filename=vanFile)
                 workspacelist.append(str(vanRun))
             else:
                 vanRun = None
 
             if HAVE_MPI:
-                if mpi.world.rank > 0:
+                if rank > 0:
                     return
             if samRun == 0:
                 return
@@ -577,7 +571,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # write out the files
             if HAVE_MPI:
-                if mpi.world.rank == 0:
+                if rank == 0:
                     self._save(samRun, self._info, normalized, False)
                     samRun = str(samRun)
             else:
@@ -624,7 +618,7 @@ class SNSPowderReduction(PythonAlgorithm):
             self.log().debug("Load run %s: unable to get events of %s.  Error message: %s" % (str(runnumber), str(wksp), str(e)))
 
         if HAVE_MPI:
-            msg = "MPI Task = %s ;" % (str(mpi.world.rank))
+            msg = "MPI Task = %s ;" % (str(rank))
             try: 
                 msg += "Number Events = " + str(wksp.getNumberEvents())
             except Exception as e: 
@@ -736,8 +730,16 @@ class SNSPowderReduction(PythonAlgorithm):
                 if dosplit:
                     # Splitting workspace
                     basename = str(temp) 
-                    api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename, 
-                            SplitterWorkspace=splitwksp, GroupWorkspaces=True)
+                    if self._splitinfotablews is None: 
+                        api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename, 
+                                SplitterWorkspace=splitwksp, GroupWorkspaces=True)
+                    else:
+                        self.log().information("SplitterWorkspace = %s, Information Workspace = %s. " % (
+                            str(splitwksp), str(self._splitinfotablews)))
+                        api.FilterEvents(InputWorkspace=temp, OutputWorkspaceBaseName=basename, 
+                                SplitterWorkspace=splitwksp, InformationWorkspace = str(self._splitinfotablews),
+                                GroupWorkspaces=True)
+                    # ENDIF
                     wsgroup = mtd[basename]
                     tempwsnamelist = wsgroup.getNames()
 

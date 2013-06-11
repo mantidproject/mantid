@@ -42,10 +42,7 @@ namespace Algorithms
     <LI> IncludePartialBins  - Scales counts in end bins if min/max not on bin boundary. </LI>
     </UL>
 
-    @author Russell Taylor, Tessella Support Services plc
-    @date 30/09/2008
-
-    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -84,16 +81,16 @@ private:
   void exec();
 
 protected: // for testing
-  void checkProperties(API::MatrixWorkspace_sptr inputWorkspace);
-  API::MatrixWorkspace_sptr getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace, int &spectra_num);
-  API::MatrixWorkspace_sptr getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace,int &workspaceIndex);
-  API::MatrixWorkspace_sptr extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const std::size_t index);
+  void checkProperties(const API::MatrixWorkspace_sptr& inputWorkspace);
+  API::MatrixWorkspace_sptr getInWSMonitorSpectrum(const API::MatrixWorkspace_sptr& inputWorkspace, int &spectra_num);
+  API::MatrixWorkspace_sptr getMonitorWorkspace(const API::MatrixWorkspace_sptr& inputWorkspace,int &workspaceIndex);
+  API::MatrixWorkspace_sptr extractMonitorSpectrum(const API::MatrixWorkspace_sptr& WS, std::size_t index);
   bool setIntegrationProps();
 
-  void normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace, 
+  void normaliseByIntegratedCount(const API::MatrixWorkspace_sptr& inputWorkspace,
                                   API::MatrixWorkspace_sptr& outputWorkspace);
 
-  void normaliseBinByBin(API::MatrixWorkspace_sptr inputWorkspace,
+  void normaliseBinByBin(const API::MatrixWorkspace_sptr& inputWorkspace,
                          API::MatrixWorkspace_sptr& outputWorkspace);
   void normalisationFactor(const MantidVec& X, MantidVec* Y, MantidVec* E);
 //

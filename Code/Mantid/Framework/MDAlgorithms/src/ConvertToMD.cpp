@@ -294,7 +294,7 @@ ConvertToMD::init()
 
     declareProperty(new PropertyWithValue<bool>("UpdateMasks", false, Direction::Input),
 "if PreprocessDetectorWS is used to build the workspace with preprocessed detectors at first algorithm "
-"call and the input workspaces instruments are different by just different masked monitors, setting this "
+"call and the input workspaces instruments are different by just different masked detectors, setting this "
 "option to true forces [[PreprocessDetectorsToMD]] update only the detectors masks for all subsequent "
 "calls to this algorithm. <span style=\"color:#FF0000\">This is temporary solution necessary until Mantid "
 "masks spectra by 0 rather then by NaN</span> "
@@ -427,11 +427,24 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
   ei->mutableRun().addProperty("RUBW_MATRIX",targWSDescr.m_Wtransf.getVector(),true);
   ei->mutableRun().addProperty("W_MATRIX",targWSDescr.getPropertyValueAsType<std::vector<double> >("W_MATRIX"),true);
 
+  // run index as the number of experiment into megred within this run. It is possible to interpret it differently 
+  // and should never expect it to start with 0 (for first experiment info)
   uint16_t runIndex = mdEventWS->addExperimentInfo(ei);
 
   const MantidVec & binBoundaries = m_InWS2D->readX(0);
-  auto mapping = m_InWS2D->spectraMap().createIDGroupsMap();
 
+  // Replacement for SpectraDetectorMap::createIDGroupsMap using the ISpectrum objects instead
+  auto mapping = boost::make_shared<det2group_map>();
+  for ( size_t i = 0; i < m_InWS2D->getNumberHistograms(); ++i )
+  {
+    const auto& dets = m_InWS2D->getSpectrum(i)->getDetectorIDs();
+    if(!dets.empty())
+    {
+      std::vector<detid_t> id_vector;
+      std::copy(dets.begin(), dets.end(), std::back_inserter(id_vector));
+      mapping->insert(std::make_pair(id_vector.front(), id_vector));
+    }
+  }
 
   uint16_t nexpts = mdEventWS->getNumExperimentInfo();
   for(uint16_t i = 0; i < nexpts; ++i)
@@ -441,9 +454,9 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::
     expt->cacheDetectorGroupings(*mapping);
   }
 
- // and add it to the target workspace description for further usage as identifier for the workspaces, which come from this run. 
-   targWSDescr.addProperty("RUN_INDEX",runIndex,true);
-  
+ // add rinindex to the target workspace description for further usage as the identifier for the events, which come from this run. 
+    targWSDescr.addProperty("RUN_INDEX",runIndex,true);  
+
 }
 
 /** Constructor */
@@ -502,12 +515,13 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
         // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace 
         // and derived from input parameters. 
         oldWSDescr.setUpMissingParameters(targWSDescr);      
-        // check inconsistencies
+       // set up target coordinate system and the dimension names/units
+        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);   
+
+        // check inconsistencies, if the existing workspace can be used as target workspace. 
         oldWSDescr.checkWSCorresponsMDWorkspace(targWSDescr);
         // reset new ws description name
         targWSDescr =oldWSDescr;
-       // set up target coordinate system
-        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);   
     }
     return createNewTargetWs;
 }

@@ -149,6 +149,8 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   // Get or add an EventList
   EventList& getOrAddEventList(const std::size_t workspace_index);
 
+  // Resizes the workspace to contain the number of spectra/event lists given
+  void resizeTo(const std::size_t numSpectra);
   // Pad pixels in the workspace using the loaded spectra. Requires a non-empty spectra-detector map
   void padSpectra();
   // Remove pixels in the workspace that do not contain events.

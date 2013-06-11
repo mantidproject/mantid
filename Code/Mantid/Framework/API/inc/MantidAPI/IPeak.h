@@ -45,6 +45,7 @@ namespace API
     virtual void setL(double m_L) = 0;
     virtual void setHKL(double H, double K, double L) = 0;
     virtual void setHKL(Mantid::Kernel::V3D HKL) = 0;
+    virtual Mantid::Kernel::V3D getDetectorPosition() const = 0;
 
     virtual Mantid::Kernel::V3D getQLabFrame() const = 0;
     virtual Mantid::Kernel::V3D getQSampleFrame() const = 0;

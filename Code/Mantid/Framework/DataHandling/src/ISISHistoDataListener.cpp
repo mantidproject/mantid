@@ -3,7 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ConfigService.h"
@@ -388,8 +388,7 @@ namespace DataHandling
       std::vector<int> spec;
       getIntArray( "UDET", udet, ndet);
       getIntArray( "SPEC", spec, ndet);
-      localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spec.data(), udet.data(), ndet));
-
+      localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(spec, udet));
     }
 
     /** Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw).

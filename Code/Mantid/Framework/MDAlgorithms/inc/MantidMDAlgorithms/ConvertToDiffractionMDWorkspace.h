@@ -11,13 +11,12 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** ConvertToDiffractionMDWorkspace :
@@ -26,11 +25,11 @@ namespace MDEvents
    * @author Janik Zikovsky, SNS
    * @date 2011-03-01 13:14:48.236513
    */
-  class DLLExport ConvertToDiffractionMDWorkspace  : public BoxControllerSettingsAlgorithm
+  class DLLExport ConvertToDiffractionMDWorkspace  : public MDEvents::BoxControllerSettingsAlgorithm
   {
   public:
     ConvertToDiffractionMDWorkspace();
-    ~ConvertToDiffractionMDWorkspace();
+    ~ConvertToDiffractionMDWorkspace(){};
     
     /// Algorithm's name for identification 
     virtual const std::string name() const { return "ConvertToDiffractionMDWorkspace";};

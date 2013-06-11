@@ -3,7 +3,6 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 // Nearest neighbours library
 #include "MantidKernel/ANN/ANN.h"
@@ -24,7 +23,7 @@ namespace Mantid
      * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored.
      */
     NearestNeighbours::NearestNeighbours(boost::shared_ptr<const Instrument> instrument,
-                                         const ISpectraDetectorMap & spectraMap, bool ignoreMaskedDetectors) : 
+                                         const ISpectrumDetectorMapping & spectraMap, bool ignoreMaskedDetectors) :
       m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale(), m_radius(0), m_bIgnoreMaskedDetectors(ignoreMaskedDetectors)
     {
       this->build(m_noNeighbours);
@@ -39,7 +38,7 @@ namespace Mantid
      * @param ignoreMaskedDetectors :: flag indicating that masked detectors should be ignored.
      */
     NearestNeighbours::NearestNeighbours(int nNeighbours, boost::shared_ptr<const Instrument> instrument,
-                                         const ISpectraDetectorMap & spectraMap, bool ignoreMaskedDetectors) : 
+                                         const ISpectrumDetectorMapping & spectraMap, bool ignoreMaskedDetectors) :
       m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(nNeighbours), m_cutoff(-DBL_MAX), m_scale(), m_radius(0), m_bIgnoreMaskedDetectors(ignoreMaskedDetectors)
     {
       this->build(m_noNeighbours);
@@ -254,26 +253,20 @@ namespace Mantid
      */
     std::map<specid_t, IDetector_const_sptr>
     NearestNeighbours::getSpectraDetectors(boost::shared_ptr<const Instrument> instrument,
-                                           const ISpectraDetectorMap & spectraMap)
+                                           const ISpectrumDetectorMapping & spectraMap)
     {
       std::map<specid_t, IDetector_const_sptr> spectra;
-      if( spectraMap.nElements() == 0 ) return spectra;
-      ISpectraDetectorMap::const_iterator cend = spectraMap.cend();
-      specid_t lastSpectrum(INT_MAX);
-      for( ISpectraDetectorMap::const_iterator citr = spectraMap.cbegin(); citr != cend; ++citr )
+      if( spectraMap.empty() ) return spectra;
+      ISpectrumDetectorMapping::const_iterator cend = spectraMap.cend();
+      for( ISpectrumDetectorMapping::const_iterator citr = spectraMap.cbegin(); citr != cend; ++citr )
       {
-        specid_t spectrumNo = citr->first;
-        if( spectrumNo != lastSpectrum )
+        const std::vector<detid_t> detIDs(citr->second.begin(),citr->second.end());
+        IDetector_const_sptr det = instrument->getDetectorG(detIDs);
+        //Always ignore monitors and ignore masked detectors if requested.
+        bool heedMasking = !m_bIgnoreMaskedDetectors && det->isMasked();
+        if( !det->isMonitor() && !heedMasking )
         {
-          std::vector<int> detIDs = spectraMap.getDetectors(spectrumNo);
-          IDetector_const_sptr det = instrument->getDetectorG(detIDs);
-          //Always ignore monitors and ignore masked detectors if requested.
-          bool heedMasking = !m_bIgnoreMaskedDetectors && det->isMasked();
-          if( !det->isMonitor() && !heedMasking ) 
-          {
-            spectra.insert(std::make_pair(spectrumNo, det));
-          }
-          lastSpectrum = spectrumNo;
+          spectra.insert(std::make_pair(citr->first, det));
         }
       }
       return spectra;

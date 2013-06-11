@@ -28,34 +28,21 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/FunctionTask.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 
-#include <fstream>
-#include <sstream>
-#include <climits>
-#include <boost/algorithm/string/replace.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
-#include <Poco/File.h>
-#include <Poco/Path.h>
+
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
+#include "MantidAPI/SpectrumDetectorMapping.h"
 
 using std::endl;
 using std::map;
@@ -63,9 +50,6 @@ using std::string;
 using std::vector;
 
 using namespace ::NeXus;
-using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
-using namespace Mantid::Kernel;
 
 namespace Mantid
 {
@@ -75,13 +59,10 @@ namespace DataHandling
 DECLARE_ALGORITHM(LoadEventNexus)
 DECLARE_LOADALGORITHM(LoadEventNexus)
 
-
-
 using namespace Kernel;
+using namespace Geometry;
 using namespace API;
-using Geometry::Instrument;
-
-
+using namespace DataObjects;
 
 //===============================================================================================
 //===============================================================================================
@@ -355,6 +336,11 @@ public:
       }
     } //(for each event)
 
+    // Free Memory
+    delete [] event_id;
+    delete [] event_time_of_flight;
+    delete event_index_ptr;
+
     //------------ Compress Events (or set sort order) ------------------
     // Do it on all the detector IDs we touched
     for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
@@ -375,7 +361,7 @@ public:
         }
       }
     }
-
+    prog->report(entry_name + ": filled events");
 
     alg->getLogger().debug() << entry_name << (pulsetimesincreasing ? " had " : " DID NOT have ") <<
         "monotonically increasing pulse times" << std::endl;
@@ -389,10 +375,7 @@ public:
       alg->bad_tofs += badTofs;
     }
 
-    // Free Memory
-    delete [] event_id;
-    delete [] event_time_of_flight;
-    delete event_index_ptr;
+
     // For Linux with tcmalloc, make sure memory goes back;
     // but don't call if more than 15% of memory is still available, since that slows down the loading.
     MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
@@ -914,7 +897,7 @@ private:
 
 /// Empty default constructor
 LoadEventNexus::LoadEventNexus() : IDataFileChecker(),
- m_allBanksPulseTimes(NULL)
+    event_id_is_spec(false), m_allBanksPulseTimes(NULL)
 {
 }
 
@@ -1528,8 +1511,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   if (WS->getInstrument()->hasParameter("remove-unused-banks")) deleteBanks(WS, bankNames);
   //----------------- Pad Empty Pixels -------------------------------
   // Create the required spectra mapping so that the workspace knows what to pad to
-  createSpectraMapping(m_filename, WS, monitors, onebank);
-  WS->padSpectra();
+  createSpectraMapping(m_filename, monitors, onebank);
 
   //This map will be used to find the workspace index
   if( this->event_id_is_spec )
@@ -1560,7 +1542,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
+  Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*4);
 
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
@@ -2030,16 +2012,13 @@ void LoadEventNexus::deleteBanks(API::MatrixWorkspace_sptr workspace, std::vecto
  * the mapping is read from there, otherwise a 1:1 map with the instrument is created (along
  * with the associated spectra axis)
  * @param nxsfile :: The name of a nexus file to load the mapping from
- * @param workspace :: The workspace to contain the spectra mapping
  * @param monitorsOnly :: Load only the monitors is true
  * @param bankName :: An optional bank name for loading a single bank
  */
 void LoadEventNexus::createSpectraMapping(const std::string &nxsfile, 
-    API::MatrixWorkspace_sptr workspace, const bool monitorsOnly,
-    const std::string & bankName)
+    const bool monitorsOnly, const std::string & bankName)
 {
-  Geometry::ISpectraDetectorMap *spectramap(NULL);
-  this->event_id_is_spec = false;
+  bool spectramap = false;
   if( !monitorsOnly && !bankName.empty() )
   {
     // Only build the map for the single bank
@@ -2047,14 +2026,14 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
     WS->getInstrument()->getDetectorsInBank(dets, bankName);
     if (!dets.empty())
     {
-      SpectraDetectorMap *singlebank = new API::SpectraDetectorMap;
+      WS->resizeTo(dets.size());
       // Make an event list for each.
       for(size_t wi=0; wi < dets.size(); wi++)
       {
         const detid_t detID = dets[wi]->getID();
-        singlebank->addSpectrumEntries(specid_t(wi+1), std::vector<detid_t>(1, detID));
+        WS->getSpectrum(wi)->setDetectorID(detID);
       }
-      spectramap = singlebank;
+      spectramap = true;
       g_log.debug() << "Populated spectra map for single bank " << bankName << "\n";
     }
     else
@@ -2064,7 +2043,7 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
   }
   else
   {
-    spectramap = loadSpectraMapping(nxsfile, WS->getInstrument(), monitorsOnly, m_top_entry_name, g_log);
+    spectramap = loadSpectraMapping(nxsfile, monitorsOnly, m_top_entry_name);
     // Did we load one? If so then the event ID is the spectrum number and not det ID
     if( spectramap ) this->event_id_is_spec = true;
   }
@@ -2073,13 +2052,9 @@ void LoadEventNexus::createSpectraMapping(const std::string &nxsfile,
   {
     g_log.debug() << "No custom spectra mapping found, continuing with default 1:1 mapping of spectrum:detectorID\n";
     // The default 1:1 will suffice but exclude the monitors as they are always in a separate workspace
-    workspace->rebuildSpectraMapping(false);
+    WS->padSpectra();
     g_log.debug() << "Populated 1:1 spectra map for the whole instrument \n";
   }
-  else
-  {
-    workspace->replaceSpectraMap(spectramap);
-  }    
 }
 
 //-----------------------------------------------------------------------------
@@ -2155,14 +2130,11 @@ void LoadEventNexus::runLoadMonitors()
  * Load a spectra mapping from the given file. This currently checks for the existence of
  * an isis_vms_compat block in the file, if it exists it pulls out the spectra mapping listed there
  * @param filename :: A filename
- * @param inst :: The current instrument
  * @param monitorsOnly :: If true then only the monitor spectra are loaded
  * @param entry_name :: name of the NXentry to open.
- * @param g_log :: Handle to the logger
- * @returns A pointer to a new map or NULL if the block does not exist
+ * @returns True if the mapping was loaded or false if the block does not exist
  */
-Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::string & filename, Geometry::Instrument_const_sptr inst,
-                                   const bool monitorsOnly, const std::string entry_name, Mantid::Kernel::Logger & g_log)
+bool LoadEventNexus::loadSpectraMapping(const std::string& filename, const bool monitorsOnly, const std::string& entry_name )
 {
   ::NeXus::File file(filename);
   try
@@ -2172,9 +2144,8 @@ Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::st
   }
   catch(::NeXus::Exception&)
   {
-    return NULL; // Doesn't exist
+    return false; // Doesn't exist
   }
-  API::SpectraDetectorMap *spectramap = new API::SpectraDetectorMap;
   // UDET
   file.openData("UDET");
   std::vector<int32_t> udet;
@@ -2199,12 +2170,13 @@ Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::st
     throw std::runtime_error(os.str());
   }
   // Monitor filtering/selection
-  const std::vector<detid_t> monitors = inst->getMonitors();
+  const std::vector<detid_t> monitors = WS->getInstrument()->getMonitors();
+  const size_t nmons(monitors.size());
   if( monitorsOnly )
   {
     g_log.debug() << "Loading only monitor spectra from " << filename << "\n";
     // Find the det_ids in the udet array. 
-    const size_t nmons(monitors.size());
+    WS->resizeTo(nmons);
     for( size_t i = 0; i < nmons; ++i )
     {
       // Find the index in the udet array
@@ -2212,21 +2184,21 @@ Geometry::ISpectraDetectorMap * LoadEventNexus::loadSpectraMapping(const std::st
       std::vector<int32_t>::const_iterator it = std::find(udet.begin(), udet.end(), id);
       if( it != udet.end() )
       {
+        auto spectrum = WS->getSpectrum(i);
         const specid_t & specNo = spec[it - udet.begin()];
-        spectramap->addSpectrumEntries(specid_t(specNo), std::vector<detid_t>(1, id));
+        spectrum->setSpectrumNo(specNo);
+        spectrum->setDetectorID(id);
       }
     }
   }
   else
   {
     g_log.debug() << "Loading only detector spectra from " << filename << "\n";
-    // We need to filter the monitors out as they are included in the block also. Here we assume that they
-    // occur in a contiguous block
-    spectramap->populate(spec.data(), udet.data(), ndets, 
-                         std::set<detid_t>(monitors.begin(), monitors.end()));
+    SpectrumDetectorMapping mapping(spec,udet);
+    WS->resizeTo(mapping.getMapping().size()-nmons);
+    WS->updateSpectraUsing(mapping);
   }
-  g_log.debug() << "Found " << spectramap->nSpectra() << " unique spectra and a total of " << spectramap->nElements() << " elements\n"; 
-  return spectramap;
+  return true;
 }
 
 /**
@@ -2363,7 +2335,6 @@ void LoadEventNexus::loadTimeOfFlight(const std::string &nexusfilename, DataObje
           if (it->first == "time_of_flight" || it->first == "event_time_bins")
           {
             loadTimeOfFlightData(file,WS,it->first);
-            done = true;
           }
         }
         file.closeGroup();

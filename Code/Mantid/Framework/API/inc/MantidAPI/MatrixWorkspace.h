@@ -4,28 +4,17 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Axis.h"
+#include <boost/scoped_ptr.hpp>
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceIterator.h"
-#include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Unit.h"
-#include <set>
-#include "MantidAPI/ISpectrum.h"
-#include "MantidKernel/DateAndTime.h"
-#include <boost/scoped_ptr.hpp>
-#include "MantidAPI/IMDIterator.h"
-
-using Mantid::API::MDNormalization;
 
 namespace Mantid
 {
@@ -35,13 +24,12 @@ namespace Mantid
   namespace Geometry
   {
     class ParameterMap;
-    class ISpectraDetectorMap;
     class INearestNeighbours;
     class INearestNeighboursFactory;
   }
   namespace API
   {
-    class SpectraDetectorMap;
+    class SpectrumDetectorMapping;
 
     //----------------------------------------------------------------------
     /** Base MatrixWorkspace Abstract Class.
@@ -98,6 +86,8 @@ namespace Mantid
       /** @name Nearest neighbours */
       /// Build and populate the NearestNeighbours object
       void buildNearestNeighbours(const bool ignoreMaskedDetectors=false) const;
+      /// Causes the nearest neighbours map to be rebuilt
+      void rebuildNearestNeighbours();
       /// Query the NearestNeighbours object for a detector
       std::map<specid_t, Mantid::Kernel::V3D> getNeighbours(const Geometry::IDetector *comp, const double radius = 0.0, const bool ignoreMaskedDetectors=false) const;
       /// Query the NearestNeighbours object for a given spectrum index using a search radius
@@ -106,20 +96,12 @@ namespace Mantid
       std::map<specid_t, Mantid::Kernel::V3D> getNeighboursExact(specid_t spec, const int nNeighbours, const bool ignoreMaskedDetectors=false) const;
       //@}
 
-      /// Const access to the spectra-detector map
-      const Geometry::ISpectraDetectorMap& spectraMap() const;
-      /// Replace the current spectra map with a new one
-      void replaceSpectraMap(const Geometry::ISpectraDetectorMap* spectramap);
-      void updateSpectraUsingMap();
+      void updateSpectraUsing(const SpectrumDetectorMapping& map);
       /// Build the default spectra mapping, most likely wanted after an instrument update
       void rebuildSpectraMapping(const bool includeMonitors = true);
-      
-      void generateSpectraMap();
 
       // More mapping
-      index2spec_map * getWorkspaceIndexToSpectrumMap() const;
       spec2index_map * getSpectrumToWorkspaceIndexMap() const;
-      index2detid_map * getWorkspaceIndexToDetectorIDMap() const;
       detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
       void getDetectorIDToWorkspaceIndexVector( std::vector<size_t> & out, detid_t & offset, bool throwIfMultipleDets) const;
       void getSpectrumToWorkspaceIndexVector(std::vector<size_t> & out, specid_t & offset) const;
@@ -265,8 +247,6 @@ namespace Mantid
       /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
       typedef std::map<size_t,double> MaskList;
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
-      // Causes the nearest neighbours map to be rebuilt.
-      void rebuildNearestNeighbours();
 
       void saveInstrumentNexus(::NeXus::File * file) const;
       void loadInstrumentNexus(::NeXus::File * file);
@@ -334,9 +314,6 @@ namespace Mantid
 
       /// Has this workspace been initialised?
       bool m_isInitialized;
-
-      /// A shared pointer to the spectra-detector map
-      boost::shared_ptr<const Geometry::ISpectraDetectorMap> m_spectraMap;
 
       /// The unit for the data values (e.g. Counts)
       std::string m_YUnit;

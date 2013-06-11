@@ -1,3 +1,68 @@
+/*WIKI*
+ *This fit function is used for calibrating RectangularDetectors by adjusting L0, time offset, panel width,
+panel height, panel center, panel orientation, and allow for the sample being offset from the instrument center.
+
+
+===Attributes===
+This fit function is used for calibrating RectangularDetectors by adjusting L0, time offset, panel width,
+panel height, panel center, panel orientation, and allow for the sample being offset from the instrument center.
+
+
+===Attributes===
+* a  -The lattice parameter a
+* b  -The lattice parameter b
+* c  -The lattice parameter c
+* alpha  -The lattice parameter alpha in degrees
+* beta  -The lattice parameter beta in degrees
+* gamma  -The lattice parameter gamma in degrees
+* PeakWorkspaceName-The name of the PeaksWorkspace in the Analysis Data Service.
+:This peak must be indexed by a UB matrix whose lattice parameters are CLOSE to the above
+:lattice paramters
+* NGroups-The number of grouping of banks to be considered
+* BankNames-a list of banknames separated by "/" or a "!" if the next bank is in a different group.
+:Bank names from the same group belong together("Requirement" for use with the  Fit algorithm)
+* startX- -1 or starting position in the workspace( see below) to start calculating the outputs
+* endX-  -1 or 1+ ending position in the workspace( see below) to start calculating the outputs
+* RotateCenters-Boolean. If false Rotations are only about the center of the banks. Otherwise rotations are ALSO
+:around center of the instrument( For groups of banks, this will result in a rotation about the center of all pixels.)
+* SampleOffsets-Boolean. A sample being off from the center of the goniometer can result in larger errors.
+
+===Workspace===
+
+A Workspace2D with 1 spectra.  The xvalues of the spectra are for each peak, the peak index repeated 3 times.  The
+y values are all zero and the errors are all 1.0
+
+This spectra may have to be copied 3 times because of requirements from the fitting system.
+
+===Parameters===
+* l0- the initial Flight path in units from Peak.getL1
+* t0-Time offset in the same units returned with Peak.getTOF)
+* SampleX-Sample x offset in the same units returned with Peak.getDetPos().norm()
+* SampleY-Sample y offset in the same units returned with Peak.getDetPos().norm()
+* SampleZ-Sample z offset in the same units returned with Peak.getDetPos().norm()
+* f*_detWidthScale-panel Width for Group* in the same units returned with Peak.getDetPos().norm()
+* f*_detHeightScale-panel Height  for Group* in the same units returned with Peak.getDetPos().norm()
+* f*_Xoffset-Panel Center x offsets for Group* banks in the same units returned with Peak.getDetPos().norm()
+* f*_Yoffset-Panel Center y offsets for Group* banks in the same units returned with Peak.getDetPos().norm()
+* f*_Zoffset-Panel Center z offsets for Group* banks in the same units returned with Peak.getDetPos().norm()
+* f*_Xrot-Rotations(degrees) for Group*  banks around  "Center" in x axis direction
+* f*_Yrot-Rotations(degrees) for Group*  banks around  "Center" in y axis direction
+* f*_Zrot-Rotations(degrees) for Group*  banks around "Center" in z axis direction
+* SampleX -sample X offset in meters(Really Goniometer X offset)
+* SampleY- sample Y offset in meters
+* SampleZ- sample Z offset in meters
+
+The order of rotations correspond to the order used in all of Mantid.
+
+===Output===
+The argument out from function1D ,for each peak, gives the error in qx, qy, and qz.
+The theoretical values for the qx, qy and qz are found as follows:
+* Calculating the best fitting UB for the given indexing and parameter values
+* Find U
+* The theoretical UB is then U*B<sub>0</sub> where B<sub>0</sub> is formed from the supplied lattice parameters
+* The theoretical qx,qy,and qz can be obtained by multiplying the hkl for the peak by this matrix(/2&pi;)
+
+ *WIKI*/
 /*
  * SCDPanelErrors.cpp
  *
@@ -121,11 +186,6 @@ namespace Mantid
       setAttribute("RotateCenters",Attribute(0));
       setAttribute("SampleOffsets", Attribute(0));
       init();
-#if defined(_WIN32) && !defined(_WIN64)
-
-     // g_log.setLevel(7);
-#endif
-      //g_log.setLevel(7);
 
     }
 
@@ -1306,533 +1366,6 @@ namespace Mantid
 
       }//for each group
     }
-/*//Old one without sample offsets
-    void SCDPanelErrors::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData)
-    {
-
-      size_t StartPos=2;
-      size_t StartRot = 5;
-
-       size_t L0param = parameterIndex("l0");
-       size_t T0param = parameterIndex("t0");
-
-       size_t StartX ;
-       size_t EndX ;
-       double rr;
-       vector<int> row, col, peakIndx, NPanelrows, NPanelcols;
-       vector<V3D> pos, xvec, yvec, hkl, qlab, qXtal;
-       vector<V3D> PanelCenter;
-       vector<double> time;
-       double K, L0;
-
-       string lastBankName = "";
-       V3D last_xvec, last_yvec, last_Center;
-       int last_Nrows, last_Ncols;
-       double velocity;
-       Matrix<double> InvhklThkl(3, 3);
-       Matrix<double> UB(3, 3);
-       map<string, size_t> bankName2Group;
-       vector<string> Groups;
-
-      CheckSizetMax(StartPos, L0param,T0param,"Start deriv");
-      if (nData <= 0)
-        return;
-      if (NLatticeParametersSet < (int) nAttributes()-2)
-      {
-        g_log.error("Not all lattice parameters have been set");
-        throw std::invalid_argument("Not all lattice parameters have been set");
-      }
-
-
-      if (startX < 0 || endX < 0 || endX < startX)
-      {
-        StartX = 0;
-        EndX =  nData - 1;
-      }else
-      {
-        StartX =(size_t)startX;
-        EndX = (size_t) endX;
-        if( EndX >= nData || EndX < StartX)
-          EndX = nData -1;
-      }
-
-      rr =checkForNonsenseParameters();
-
-      if( rr > 0 )
-      {
-        for( size_t i = 0; i< nParams(); ++i )
-          for(size_t k = 0; k<nData;  ++k )
-            out->set( k, i, 10 + rr );
-
-        return;
-      }
-
-      CheckSizetMax(StartX,EndX,EndX,"Deriv calc StartX,EndX");
-      peaks = getPeaks();
-      Check(peaks, xValues, nData);
-
-
-      Instrument_sptr instrNew = getNewInstrument(peaks->getPeak(0));
-
-      boost::shared_ptr<ParameterMap> pmap = instrNew->getParameterMap();
-
-      V3D SamplePos = instrNew->getSample()->getPos();
-      V3D SourcePos = instrNew->getSource()->getPos();
-      IPeak & ppeak = peaks->getPeak(0);
-      L0 = ppeak.getL1();
-
-      velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
-      K = 2 * M_PI / ppeak.getWavelength() / velocity;//2pi/lambda = K*velocity
-
-      for (size_t xval = StartX; xval <= EndX; xval += 3)
-      {
-
-        double x = floor(xValues[xval]);
-        Peak peak;
-        V3D HKL;
-        string thisBankName;
-        Quat Rot;
-        IPeak& peak_old = peaks->getPeak((int) x);
-
-        peak = createNewPeak(peak_old, instrNew);
-
-        peakIndx.push_back((int) x);
-        qlab.push_back(peak.getQLabFrame());
-        qXtal.push_back(peak.getQSampleFrame());
-        row.push_back(peak.getRow());
-        col.push_back(peak.getCol());
-        time.push_back(peak.getTOF());
-
-        HKL = peak.getHKL();
-        hkl.push_back(V3D(floor(.5 + HKL.X()), floor(.5 + HKL.Y()), floor(.5 + HKL.Z())));
-
-        pos.push_back(peak.getDetPos());
-
-        thisBankName = peak.getBankName();
-
-        if (thisBankName == lastBankName)
-        {
-          xvec.push_back(last_xvec);
-          yvec.push_back(last_yvec);
-          PanelCenter.push_back(last_Center);
-          NPanelrows.push_back(last_Nrows);
-          NPanelcols.push_back(last_Ncols);
-
-        }
-        else
-        {
-          V3D x_vec(1, 0, 0);
-          V3D y_vec(0, 1, 0);
-          boost::shared_ptr<const IComponent> panel = instrNew->getComponentByName(thisBankName);
-          Rot = panel->getRotation();
-          Rot.rotate(x_vec);
-          Rot.rotate(y_vec);
-
-          boost::shared_ptr<const RectangularDetector> rPanel = boost::dynamic_pointer_cast<
-              const RectangularDetector>(panel);
-          x_vec *= rPanel->xstep();
-          y_vec *= rPanel->ystep();
-          int Nrows = rPanel->ypixels();
-
-          int Ncols = rPanel->xpixels();
-
-          NPanelrows.push_back(Nrows);
-          NPanelcols.push_back(Ncols);
-
-          last_Nrows = Nrows;
-          last_Ncols = Ncols;
-
-          PanelCenter.push_back(rPanel->getPos());
-          last_Center= rPanel->getPos();
-          xvec.push_back(x_vec);
-          yvec.push_back(y_vec);
-          last_xvec = x_vec;
-          last_yvec = y_vec;
-          lastBankName = thisBankName;
-        }
-      }
-      Matrix<double> Mhkl(hkl.size(), 3);
-
-      for (size_t rw = 0; rw <  hkl.size(); ++rw)
-        for (size_t cl = 0; cl < 3; ++cl)
-          Mhkl[rw][cl] = hkl[rw][cl];
-
-      Matrix<double> MhklT(Mhkl);
-      MhklT.Transpose();
-
-      InvhklThkl = MhklT * Mhkl;
-
-      InvhklThkl.Invert();
-
-
-      try
-      {
-        Geometry::IndexingUtils::Optimize_UB(UB, hkl, qXtal);
-
-      } catch (std::exception & s)
-      {
-
-        g_log.error("Not enough points to find Optimized UB1 =" + std::string(s.what()));
-        throw std::runtime_error("Not enough good points to find Optimized UB");
-      } catch (char * s1)
-      {
-        g_log.error("Not enough points to find Optimized UB2=" + std::string(s1));
-        throw std::runtime_error("Not enough good points to find Optimized UB");
-      } catch (...)
-      {
-        g_log.error("Not enough points to find Optimized UB3");
-        throw std::runtime_error("Not enough good points to find Optimized UB");
-      }
-
-
-
-      boost::split( Groups, BankNames, boost::is_any_of("!"));
-
-      for( size_t gr=0; gr< Groups.size(); ++gr)
-      {
-        vector<string> banknames;
-        boost::split(banknames, Groups[gr],boost::is_any_of("/"));
-        for( vector<string>::iterator it=banknames.begin(); it != banknames.end(); ++it)
-          bankName2Group[(*it)]=gr;
-      }
-
-      vector<V3D> Unrot_dQ[3];
-      Matrix<double> Result(3, qlab.size());
-
-      for( size_t gr=0; gr< (size_t)NGroups; ++gr)
-      {
-        Unrot_dQ[0].clear();
-        Unrot_dQ[1].clear();
-        Unrot_dQ[2].clear();
-
-      //-------- xyz offset parameters ----------------------
-       StartPos = parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xoffset");
-
-       for (size_t param = StartPos; param <=StartPos+(size_t)2; ++param)
-
-      {
-
-        V3D parxyz(0,0,0);
-        parxyz[param-StartPos]=1;
-
-        Matrix<double> Result(3, qlab.size());
-        CheckSizetMax(gr,param,param,"xyzoffset1 Deriv");
-        for (size_t peak = 0; peak <  qlab.size(); ++peak)
-        if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
-        {   Unrot_dQ[param - StartPos].push_back(V3D(0.0,0.0,0.0));//Save for later calculations
-
-
-        Result[0][peak] = 0;
-        Result[1][peak] = 0;
-        Result[2][peak] = 0;
-
-        }else {
-
-          double L1 = pos[peak].norm();
-          double velMag = (L0 + L1) / time[peak];
-          double t1 = time[peak] - L0 / velMag;
-
-
-          double dt1 = parxyz.scalar_prod(pos[peak]) * L0 / velMag / velMag / time[peak] / L1;
-
-          V3D dQlab;
-          V3D vel = pos[peak] / L1 * velMag;
-
-
-        //  if(  gr==0 && peak==0 && ddd)
-       //     std::cout<<"DerivCalc1="<<param<<","<<L1<<","<<velMag<<","<<t1
-       //       << dt1<<","<<vel<<parxyz<<L0<<pos[peak]<<time[peak]<<std::endl;
-          double r = (K / t1 * dt1);
-          dQlab.setX(vel.scalar_prod(V3D(1, 0, 0)) * r);
-          dQlab.setY(vel.scalar_prod(V3D(0, 1, 0)) * r);
-          dQlab.setZ(vel.scalar_prod(V3D(0, 0, 1)) * r);
-
-
-          r = -K / t1;
-          dQlab.setX(dQlab.X() + parxyz.scalar_prod(V3D(1, 0, 0) * r));
-          dQlab.setY(dQlab.Y() + parxyz.scalar_prod(V3D(0, 1, 0) * r));
-          dQlab.setZ(dQlab.Z() + parxyz.scalar_prod(V3D(0, 0, 1) * r));
-
-          double dvMag = parxyz.scalar_prod(pos[peak]) / time[peak] / L1;
-
-          dQlab.setZ(dQlab.Z() + K * dvMag);
-
-
-       //   if( param== StartPos+1 && gr==0&& peak==0&&ddd)
-       //               std::cout<<"ereRot="<<dQlab<<std::endl;
-          Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
-          GonMatrix.Invert();
-          V3D dQsamp = GonMatrix * dQlab;
-
-
-          Unrot_dQ[param - StartPos].push_back(dQlab);//Save for later calculations
-
-
-          Result[0][peak] = dQsamp.X();
-          Result[1][peak] = dQsamp.Y();
-          Result[2][peak] = dQsamp.Z();
-        //  if( gr==0 && peak <2&&ddd)
-        //  std::cout<<"Deriv to xyzoffsets wrt "<<param <<dQsamp<<std::endl;
-        }
-
-
-
-        Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
-
-       // for (size_t w = 0; w < nData; w++)
-      //    out->set(w, param, 0.0);
-
-
-        size_t x = StartX;
-        for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
-          for (size_t roww = 0; roww < 3; ++roww)
-          {
-            CheckSizetMax(coll,roww,x,"deriv xyz final");
-            out->set(x, param, Deriv[roww][coll]);
-            x++;
-          }
-      }
-
-
-      //-------------------- Derivatives with respect to rotx,roty, and rotz ---------
-      StartRot = parameterIndex("f"+boost::lexical_cast<string>(gr)+"_Xrot");
-
-      for (size_t param = StartRot; param <= StartRot+2; ++param)
-      {
-        Matrix<double> Result(3, qlab.size());
-        Matrix<double> Rot2dRot(3, 3); //deriv of rot matrix at angle=0
-        Rot2dRot.zeroMatrix();
-        int r1 = (int)param - (int)StartRot;
-        int r = (r1 + 1) % 3;
-
-        Rot2dRot[r][(r + 1) % 3] = -1;
-        r = (r + 1) % 3;
-        Rot2dRot[r][(r + 2) % 3] = +1;
-        Rot2dRot *= M_PI / 180.;
-
-        for (size_t peak = 0; peak <  qlab.size(); ++peak)
-           if (bankName2Group[peaks->getPeak(peakIndx[peak]).getBankName()] != gr)
-            {
-              Result[0][peak] = 0;
-              Result[1][peak] = 0;
-              Result[2][peak] = 0;
-
-            }else{
-              CheckSizetMax(gr,param,param,"Deriv rot A");
-          int Nwrt = 3;
-          int NderOf = 3;
-          Matrix<double> Bas(NderOf, Nwrt); //partial Qxyz wrt xyx
-          Bas.zeroMatrix();
-
-          for (int rr = 0; rr < NderOf; ++rr)
-            for (int cc = 0; cc < Nwrt; ++cc)
-            {
-              Bas[rr][cc] = Unrot_dQ[cc][peak][rr];
-
-            }
-
-          V3D dXvec = Rot2dRot * xvec[peak];
-          V3D dYvec = Rot2dRot * yvec[peak];
-          //TODO check new stuff dCenter def next 2 lines , used after
-          V3D Center = PanelCenter[peak];
-          V3D dCenter = Rot2dRot*Center;
-          if( !RotateCenters)
-            dCenter=V3D(0,0,0);
-          V3D dxyz2theta = dXvec * (col[peak] - NPanelcols[peak] / 2.0 + .5) + dYvec * (row[peak]
-              - NPanelrows[peak] / 2.0 + .5)+dCenter;
-
-          //dxyz2theta is partials xyz wrt rot x
-          V3D unRotDeriv = Bas * dxyz2theta;
-
-        // std::cout<<"dCenter for group #"<<gr<<dCenter<<"wrt"<<param-StartRot<<
-        //     Rot2dRot<<Center<<std::endl;
-       if(doMethod ==0)
-       {   Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
-          GonMatrix.Invert();
-
-          V3D RotDeriv = GonMatrix * unRotDeriv;
-
-          for (int kk = 0; kk < 3; ++kk)
-            Result[kk][peak] = RotDeriv[kk];
-       }else
-          updateDerivResult( peaks, unRotDeriv, Result, peak, peakIndx);
-        }
-
-        Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
-
-        //for (size_t w = 0; w < nData; w++)
-       //   out->set(w, param, 0.0);
-
-
-        size_t x = StartX;
-        for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
-          for (int roww = 0; roww < 3; ++roww)
-          { CheckSizetMax(coll,roww,x,"deriv rot final");
-            out->set(x, param, Deriv[roww][coll]);
-            x++;
-          }
-      }
-
-      size_t param =  parameterIndex("f"+boost::lexical_cast<string>(gr)+"_detWidthScale");
-
-      for (size_t peak = 0; peak <  qlab.size(); ++peak)
-        if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
-        {
-          Result[0][peak] = 0;
-          Result[1][peak] = 0;
-          Result[2][peak] = 0;
-
-        }
-        else{
-          CheckSizetMax(gr,peak,peak,"deriv detw A");
-        int Nwrt = 3;
-        int NderOf = 3;
-        Matrix<double> Bas(NderOf, Nwrt);
-        Bas.zeroMatrix();
-        for (int rr = 0; rr < NderOf; ++rr)
-          for (int cc = 0; cc < Nwrt; ++cc)
-            Bas[rr][cc] = Unrot_dQ[cc][peak][rr];
-
-        V3D Xvec = xvec[peak] * (col[peak] - NPanelcols[peak] / 2);//partial xyz wrt widthScale
-
-
-        V3D unRotDeriv = Bas * Xvec;
-        if( doMethod ==0)
-          {Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
-        GonMatrix.Invert();
-
-        V3D RotDeriv = GonMatrix * unRotDeriv;
-
-        for (int kk = 0; kk < 3; ++kk)
-          Result[kk][peak] = RotDeriv[kk];
-          }else
-        updateDerivResult( peaks, unRotDeriv, Result, peak, peakIndx);
-      }
-
-      Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
-
-
-      size_t x = StartX;
-      for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
-        for (int roww = 0; roww < 3; ++roww)
-        {
-          CheckSizetMax(coll,roww,x,"deriv scalew final");
-          out->set(x, param, Deriv[roww][coll]);
-          x++;
-        }
-
-      param =  parameterIndex("f"+boost::lexical_cast<string>(gr)+"_detHeightScale");
-
-      Result.zeroMatrix();
-      for (size_t peak = 0; peak <  qlab.size(); ++peak)
-        if( bankName2Group[ peaks->getPeak(peakIndx[peak]).getBankName()]!=gr)
-        {
-          Result[0][peak] = 0;
-          Result[1][peak] = 0;
-          Result[2][peak] = 0;
-
-         }
-        else{
-         CheckSizetMax(gr,peak,peak,"deriv detH A");
-        int Nwrt = 3;
-        int NderOf = 3;
-        Matrix<double> Bas(NderOf, Nwrt);
-        Bas.zeroMatrix();
-
-        for (int rr = 0; rr < NderOf; ++rr)
-          for (int cc = 0; cc < Nwrt; ++cc)
-            Bas[rr][cc] = Unrot_dQ[cc][peak][rr];
-
-        V3D Yvec = yvec[peak] * (row[peak] - NPanelrows[peak] / 2);//partial xyz wrt heightScale
-
-        V3D unRotDeriv = Bas * Yvec;
-
-       if( doMethod==0)
-         {Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
-        GonMatrix.Invert();
-
-        V3D RotDeriv = GonMatrix * unRotDeriv;
-
-        for (int kk = 0; kk < 3; ++kk)
-          Result[kk][peak] = RotDeriv[kk];
-         }else
-        updateDerivResult( peaks, unRotDeriv, Result, peak, peakIndx);
-      }
-
-      Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
-      for (size_t w = 0; w < nData; ++w)
-        out->set(w, param, 0.0);
-
-      x = StartX;
-      for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
-        for (int roww = 0; roww < 3; ++roww)
-        { CheckSizetMax(coll,roww,x,"deriv scaleH final");
-          out->set(x, param, Deriv[roww][coll]);
-          x++;
-        }
-
-    }//for each group
-
-      size_t param = L0param;//L0.  partial unRotQxyz wrt L0 = unRotQxyz/|v|/tof
-
-      Result.zeroMatrix();
-      for (size_t peak = 0; peak <  qlab.size(); ++peak)
-      {
-
-        double L1 = pos[peak].norm();
-        double velMag = (L0 + L1) / time[peak];
-        double KK = 1 / velMag / time[peak];
-
-        V3D unRotDeriv = qlab[peak] * KK;
-
-
-        updateDerivResult( peaks, unRotDeriv, Result, peak, peakIndx);
-
-      }
-
-      Kernel::DblMatrix Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
-      //for (size_t w = 0; w < nData; w++)
-      //   out->set(w, param, 0.0);
-
-      size_t x = StartX;
-      for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
-        for (int roww = 0; roww < 3; ++roww)
-        { CheckSizetMax(coll,roww,x,"deriv L0 final");
-          out->set(x, param, Deriv[roww][coll]);
-          x++;
-        }
-
-      param = T0param;//t0 partial unRotQxyz wrt t0 = -unRotQxyz/tof
-      Result.zeroMatrix();
-      for (size_t peak = 0; peak <  qlab.size(); ++peak)
-      {
-        double KK = -1 / time[peak];
-        V3D unRotDeriv = qlab[peak] * KK;
-
-        Matrix<double> GonMatrix = peaks->getPeak(peakIndx[peak]).getGoniometerMatrix();
-        GonMatrix.Invert();
-        V3D RotDeriv = GonMatrix * unRotDeriv;
-
-        for (int kk = 0; kk < 3; ++kk)
-          Result[kk][peak] = RotDeriv[kk];
-
-      }
-
-      Deriv = CalcDiffDerivFromdQ(Result, Mhkl, MhklT, InvhklThkl, UB);
-      // for (size_t w = 0; w < nData; w++)
-      //   out->set(w, param, 0.0);
-      x = StartX;
-      for (size_t coll = 0; coll <  Deriv.numCols(); ++coll)
-        for (int roww = 0; roww < 3; ++roww)
-        { CheckSizetMax(coll,roww,x,"deriv t0 final");
-          out->set(x, param, Deriv[roww][coll]);
-          x++;
-        }
-
-
-    }
-
-*/
 
 
     DataObjects::Workspace2D_sptr SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr & pwks,

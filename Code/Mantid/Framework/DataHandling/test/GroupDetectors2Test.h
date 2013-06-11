@@ -66,9 +66,6 @@ public:
     }
     space->setInstrument(instr);
 
-    // Populate the spectraDetectorMap with fake data to make spectrum number = detector id = workspace index
-    space->generateSpectraMap();
-
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(inputWS, space);
   }

@@ -9,7 +9,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** ClearMaskFlag : TODO: DESCRIPTION
+  /** ClearMaskFlag : Delete the mask flag/bit on all spectra in a workspace
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

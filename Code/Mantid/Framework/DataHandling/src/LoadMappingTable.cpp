@@ -8,8 +8,8 @@ The association is one to many, i.e. a spectrum can have one or many detectors c
 *WIKI*/
 #include "MantidDataHandling/LoadMappingTable.h"
 #include "LoadRaw/isisraw2.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 
 namespace Mantid
 {
@@ -49,7 +49,7 @@ void LoadMappingTable::exec()
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
         
   /// ISISRAW class instance which does raw file reading. Shared pointer to prevent memory leak when an exception is thrown.
-  boost::shared_ptr<ISISRAW2> iraw(new ISISRAW2);
+  boost::scoped_ptr<ISISRAW2> iraw(new ISISRAW2);
 
   if (iraw->readFromFile(m_filename.c_str(),0) != 0) // ReadFrom File with no data
   {
@@ -62,10 +62,9 @@ void LoadMappingTable::exec()
   {
     g_log.warning("The spectra to detector mapping table is empty");
   }
-  //Populate the Spectra Map with parameters
-  localWorkspace->replaceSpectraMap(new SpectraDetectorMap(iraw->spec,iraw->udet,number_spectra));
+  // Fill in the mapping in the workspace's ISpectrum objects
+  localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(iraw->spec,iraw->udet,number_spectra));
   progress(1);
-  iraw.reset();
 
   return;
 }

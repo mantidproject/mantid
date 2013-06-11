@@ -158,6 +158,8 @@ void CropWorkspace::exec()
         outAxis1->setValue(j, inAxis1->operator()(i));
       }
     }
+    // Copy spectrum number & detectors
+    outputWorkspace->getSpectrum(j)->copyInfoFrom(*m_inputWorkspace->getSpectrum(i));
 
     if ( !m_commonBoundaries ) this->cropRagged(outputWorkspace,i,j);
     
@@ -174,10 +176,6 @@ void CropWorkspace::exec()
       }
     }
     prog.report();
-  }
-  if( inAxis1->isSpectra() )
-  {
-    outputWorkspace->updateSpectraUsingMap();
   }
 
   setProperty("OutputWorkspace", outputWorkspace);
@@ -321,19 +319,8 @@ void CropWorkspace::execEvent()
     }
     outEL.setSortOrder(el.getSortType());
 
-    std::set<detid_t>& dets = eventW->getEventList(i).getDetectorIDs();
-    std::set<detid_t>::iterator k;
-    for (k = dets.begin(); k != dets.end(); ++k)
-    {
-      outEL.addDetectorID(*k);
-    }
-    // Spectrum number
-    ISpectrum * inSpec = m_inputWorkspace->getSpectrum(i);
-    ISpectrum * outSpec = outputWorkspace->getSpectrum(j);
-    if( inSpec && outSpec )
-    {
-      outSpec->setSpectrumNo(inSpec->getSpectrumNo());
-    }
+    // Copy spectrum number & detector IDs
+    outEL.copyInfoFrom(el);
 
     if (!m_commonBoundaries)
       // If the X axis is NOT common, then keep the initial X axis, just clear the events
@@ -364,10 +351,6 @@ void CropWorkspace::execEvent()
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-
-  if( m_inputWorkspace->axes() > 1 && m_inputWorkspace->getAxis(1)->isSpectra() )
-  // Backwards compatability while the spectra axis is still here
-  outputWorkspace->generateSpectraMap();
 
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));
 }

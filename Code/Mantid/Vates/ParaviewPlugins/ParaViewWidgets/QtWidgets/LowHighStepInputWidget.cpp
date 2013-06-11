@@ -41,7 +41,7 @@ LowHighStepInputWidget::LowHighStepInputWidget()
   m_step->setValidator(stepValidator);
 
   QHBoxLayout* layout = new QHBoxLayout;
-  layout->addWidget(new QLabel("Step:"));
+  layout->addWidget(new QLabel("Step"));
   layout->addWidget(m_step);
 
   this->setLayout(layout);

@@ -1,10 +1,15 @@
 /*WIKI*
 
-This algorithm basically optimizes h,k, and l offsets from an integer by varying the parameter sample positions, sample orientations
+This algorithm basically optimizes h,k, and l offsets from an integer by varying the parameters sample positions, sample orientations
 ( chi,phi, and omega), and/or the tilt of the goniometer for an experiment.
 
 -If the crystal orientation matrix, UB, was created from one run, that run may not need to have its goniometer
-settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings changed.
+settings optimized.  There is a property to list the run numbers to NOT have their goniometer settings changed. This
+entry is IGNORED if the tilt or sample positions are included in the optimization. In this case NONE of the goniometer angles,
+relative to any tilt, will be changed.
+
+-The goniometer angles displayed are relative to the tilt,i,e, phi is the rotation around the axis perpendicular to the tilted
+plane. The resultant PeaksWorkspace has the goniometer angles relative to the Y and Z axes at that time.
 
 -The crystal orientation matrix, UB, from the PeaksWorkspace should index all the runs "very well". Otherwise iterations
 that slowly build a UB with corrected sample orientations may be needed.
@@ -12,11 +17,12 @@ that slowly build a UB with corrected sample orientations may be needed.
 -The parameters for the tilt are GonRotx, GonRoty, and GonRotz in degrees.  The usage for this information is as follows:
      rotate('x',GonRotx)*rotate('y',GonRoty)*rotate('z',GonRotz)* SampleOrientation( i.e. omegaRot*chiRot*phiRot)).
 
- -Note: Varying all parameters at once may NOT be desirable.  Varying sample position parameters tend to result in parameter
-        values with large errors. It would be best to use the tilt parameters without any of the other parameters and only if
-        the goniometer seems tilted.  Then that result can be used with the other non-tilt parameters.
+ -Note: To optimize by the tilt in the goniometer and then by the angles or by the sample position, it is possible to
+ run with one optimization, then using the resultant PeaksWorkspace for input, run another optimization.
 
-
+ Rerunning the same optimization with the result is also a good idea. If the first guess is very close, the optimize algorithm
+ does try cases far away and may not get back to the best value.  Check the chisquared values.  If they increase, that optimization
+ should probably not be used.
 
  *WIKI*/
 /*
@@ -25,29 +31,29 @@ that slowly build a UB with corrected sample orientations may be needed.
  *  Created on: Jan 26, 2013
  *      Author: ruth
  */
-#include "MantidCrystal/OptimizeCrystalPlacement.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Crystal/IndexingUtils.h"
-#include <boost/lexical_cast.hpp>
-
-#include <math.h>
-#include "MantidKernel/V3D.h"
-#include <iostream>
-#include <sstream>
-#include <map>
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IPeak.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidCrystal/OptimizeCrystalPlacement.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/IPropertySettings.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/V3D.h"
+#include <boost/lexical_cast.hpp>
+#include <cstdarg>
+#include <iostream>
+#include <map>
+
+#include <math.h>
+#include <sstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -64,6 +70,49 @@ namespace Mantid
     Kernel::Logger& OptimizeCrystalPlacement::g_log = Kernel::Logger::get("OptimizeCrystalPlacement");
 
     DECLARE_ALGORITHM( OptimizeCrystalPlacement )
+
+    class OrEnabledWhenProperties:public Kernel::IPropertySettings
+      {
+      public:
+        OrEnabledWhenProperties( std::string prop1Name,ePropertyCriterion prop1Crit,std::string prop1Value,
+            std::string prop2Name,ePropertyCriterion prop2Crit,std::string prop2Value ):IPropertySettings()
+      {
+          propName1=prop1Name;
+          propName2=prop2Name;
+          Criteria1=prop1Crit;
+          Criteria2=prop2Crit;
+          value1=prop1Value;
+          value2=prop2Value;
+          Prop1 = new Kernel::EnabledWhenProperty(propName1,Criteria1,value1);
+          Prop2= new Kernel::EnabledWhenProperty(propName2,Criteria2,value2);
+
+      }
+        ~ OrEnabledWhenProperties()//responsible for deleting all supplied EnabledWhenProperites
+        {
+          delete Prop1;
+          delete Prop2;
+        }
+
+        IPropertySettings *   clone ()
+        {
+          return new OrEnabledWhenProperties(propName1,Criteria1,value1,
+              propName2,Criteria2,value2);
+        }
+
+        bool   isEnabled (const IPropertyManager *algo) const
+        {
+          bool P1= Prop1->isEnabled( algo);
+          bool P2=Prop2->isEnabled(algo);
+          std::cout<<"isEnabled="<<P1<<","<<P2<<std::endl;
+          return Prop1->isEnabled( algo)&& Prop2->isEnabled(algo);
+        }
+      private:
+       std::string propName1,propName2;
+       ePropertyCriterion Criteria1,Criteria2;
+       std::string value1,value2;
+       Kernel::EnabledWhenProperty *Prop1,*Prop2;
+
+      };
 
     OptimizeCrystalPlacement::OptimizeCrystalPlacement() :
       Algorithm()
@@ -93,7 +142,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<PeaksWorkspace> ("ModifiedPeaksWorkspace", "",
           Direction::Output), "Output Workspace of Peaks with optimized sample Orientations");
 
-      declareProperty(new WorkspaceProperty<TableWorkspace> ("FitInfoTable", "FitInfoTable", Direction::Output),
+      declareProperty(new WorkspaceProperty<ITableWorkspace> ("FitInfoTable", "FitInfoTable", Direction::Output),
           "Workspace of Results");
 
 
@@ -130,13 +179,25 @@ namespace Mantid
       setPropertySettings("MaxSamplePositionChange_meters",new EnabledWhenProperty("AdjustSampleOffsets",
             Kernel::IS_EQUAL_TO, "1" ));
 
-      //-------- Output values----------------------------------
-      //Sample offset and goniometer tilt. Can be retrieved from tables, but....
+
+      setPropertySettings("KeepGoniometerFixedfor",new OrEnabledWhenProperties("AdjustSampleOffsets",
+          Kernel::IS_EQUAL_TO, "0","OptimizeGoniometerTilt",
+             Kernel::IS_EQUAL_TO, "0"  ));
+
+
 
 
 
     }
 
+    /**
+     * Execute algorithm. Steps:
+     * a) Get property values
+     * b) Set up data for call to PeakHKLErrors fitting function
+     * c) execute and get results
+     * d) Convert results to output information
+     *
+     */
     void OptimizeCrystalPlacement::exec()
     {
       PeaksWorkspace_sptr Peaks = getProperty( "PeaksWorkspace" );
@@ -154,6 +215,8 @@ namespace Mantid
       Matrix<double> UBinv( X );
       UBinv.Invert();
 
+      //--------------------------------- Set up data for call to PeakHKLErrors fitting function  ----------
+      //              ---- Setting up workspace supplied to PeakHKLErrors ---------------
       std::vector<int> RunNumList;
       std::vector< V3D> ChiPhiOmega;
       Mantid::MantidVecPtr pX;
@@ -195,7 +258,7 @@ namespace Mantid
         }
 
         if ( use)                             // add to lists for workspace 
-	{
+	      {
           nPeaksUsed++;
           xRef.push_back( ( double ) i );
           yvalB.push_back( 0.0 );
@@ -216,7 +279,7 @@ namespace Mantid
       if ( nPeaksUsed < 1 )
       {
          g_log.error()<<"Error in UB too large. 0 peaks indexed at "<< HKLintOffsetMax << std::endl;
-	 throw std::invalid_argument( "Error in UB too large. 0 peaks indexed "); 
+	       throw std::invalid_argument( "Error in UB too large. 0 peaks indexed ");
       }
 
       int N = 3*nPeaksUsed;//Peaks->getNumberPeaks();
@@ -224,11 +287,13 @@ namespace Mantid
       mwkspc->setX( 0 , pX );
       mwkspc->setData( 0 , yvals , errs );
 
+
       std::string FuncArg = "name=PeakHKLErrors,PeakWorkspaceName=" + getPropertyValue( "PeaksWorkspace" )
           + "";
 
       std::string OptRunNums;
 
+            //--------- Setting Function and Constraint argumens to PeakHKLErrors ---------------
       std::vector<std::string> ChRunNumList;
       std::string predChar="";
       for ( std::vector<int>::iterator it = RunNumList.begin(); it != RunNumList.end(); ++it )
@@ -250,7 +315,20 @@ namespace Mantid
       }
 
 
-      if ( OptRunNums.size() > 0 )
+
+      bool omitRuns =(bool)getProperty("AdjustSampleOffsets") || (bool)getProperty("OptimizeGoniometerTilt");
+      if( omitRuns)
+      {
+        NOoptimizeRuns=RunNumList;
+        OptRunNums ="";
+        std::string message="No Goniometer Angles ";
+        if( (bool)getProperty("OptimizeGoniometerTilt"))
+          message += "relative to the tilted Goniometer ";
+        message += "will be 'changed'";
+        g_log.notice( message);
+
+      }
+      if ( OptRunNums.size() > 0 && !omitRuns)
         FuncArg += ",OptRuns=" + OptRunNums;
 
       //------------- Add initial parameter values to FuncArg -----------
@@ -264,6 +342,8 @@ namespace Mantid
       int nParams=3;
       double DegreeTol=getProperty("MaxAngularChange");
       std::string startConstraint ="";
+
+
       for ( size_t i = 0; i < RunNumList.size(); i++ )
       {
         int runNum = RunNumList[i];
@@ -296,10 +376,13 @@ namespace Mantid
 
       oss<< ",SampleXOffset="<<sampPos.X()<<",SampleYOffset="<<sampPos.Y()<<",SampleZOffset="<<sampPos.Z();
       oss<<",GonRotx=0.0,GonRoty=0.0,GonRotz=0.0";
+
       double maxSampshift = getProperty("MaxSamplePositionChange_meters");
       oss1 << startConstraint << sampPos.X()-maxSampshift<<"<SampleXOffset<"<<sampPos.X()+maxSampshift<<","<<sampPos.Y()-maxSampshift<<
           "<SampleYOffset<"<<sampPos.Y()+maxSampshift <<","<<sampPos.Z()-maxSampshift<<"<SampleZOffset<" <<sampPos.Z()+maxSampshift;
+
       oss1<<","<<-DegreeTol<<"<GonRotx<"<<DegreeTol<<","<<-DegreeTol<<"<GonRoty<"<<DegreeTol<<","<<-DegreeTol<<"<GonRotz<"<<DegreeTol;
+
       FuncArg += oss.str();
       std::string Constr = oss1.str();
 
@@ -321,6 +404,7 @@ namespace Mantid
       fit_alg->setProperty( "CreateOutput" , true );
 
       std::string Ties ="";
+
       if( !(bool)getProperty("AdjustSampleOffsets"))
       {
         std::ostringstream oss3( std::ostringstream::out );
@@ -503,10 +587,11 @@ namespace Mantid
       setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
       setProperty( "ModifiedPeaksWorkspace", OutPeaks);
       setProperty("nIndexed", nIndexed);
-
+      g_log.notice()<< "Number indexed after optimization= " << nIndexed << " at tolerance = " << HKLintOffsetMax << std::endl;
 
 
     }//exec
+
 
 
   }//namespace Crystal

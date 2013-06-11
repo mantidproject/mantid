@@ -453,20 +453,17 @@ def _gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
         # is resolved: ticket #5157
         if _is_workspace_property(prop):
             value_str = prop.valueAsStr
-            if value_str == "":
+            try:
+                retvals.append(_ads[value_str])
+            except KeyError:
                 if not prop.isOptional():
-                    raise RuntimeError("Logical error. Output workspace property '%s' on '%s' is mandatory but has no value."
+                    raise RuntimeError("Internal error. Output workspace property '%s' on algorithm '%s' has not been stored correctly."
                                        "Please contact development team." % (name,  algm_obj.name()))
-            else:
-                try:
-                    retvals.append(_ads[value_str])
-                except KeyError:
-                    raise RuntimeError("Internal error: WorkspaceProperty does not have its output in the ADS. Please contact development team.")
         else:
             if hasattr(prop, 'value'):
                 retvals.append(prop.value)
             else:
-                raise RuntimeError('Unknown property type encountered. "%s" on "%s" is not understood by '
+                raise RuntimeError('Internal error. Unknown property type encountered. "%s" on algorithm "%s" is not understood by '
                        'Python. Please contact development team' % (name, algm_obj.name()))
                 
 

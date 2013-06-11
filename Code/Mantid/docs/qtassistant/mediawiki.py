@@ -210,6 +210,19 @@ class MediaWiki:
             text = text.replace(item, formatted)
         return text
 
+    def __fixPre(self,text):
+        start = 0
+        while start >= 0:
+          start = text.find("<pre>", start)
+          if start < 0:
+            break
+          stop = text.find("</pre>", start)
+          if stop < start:
+            break
+          orig = text[start+5:stop]
+          start = stop
+          text = text.replace("<pre>" + orig + "</pre>", "<pre>"+orig.replace("<","&lt;").replace(">","&gt;")+"</pre>")
+        return text            
 
     def __annotate(self, text):
         for line in text:
@@ -247,6 +260,7 @@ class MediaWiki:
         text = self.__fixHEADERS(text)
         #print "04>>>", text, "<<<"
         text = self.__fixUL(text)
+        text = self.__fixPre(text)
         
 
         #fix links

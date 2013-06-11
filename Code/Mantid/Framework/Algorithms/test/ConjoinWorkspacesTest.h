@@ -175,6 +175,7 @@ public:
     TS_ASSERT_EQUALS( output->getSpectrum(0)->getSpectrumNo(), ws1->getSpectrum(0)->getSpectrumNo() );
     // and the joining point
     TS_ASSERT_EQUALS( output->getSpectrum(10)->getSpectrumNo(), start);
+    TS_ASSERT( ! output->getSpectrum(11)->getDetectorIDs().empty() );
 
     AnalysisDataService::Instance().remove(ws1_name);
   }

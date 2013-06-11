@@ -67,8 +67,6 @@ namespace Mantid
         spec->setSpectrumNo(specid_t(i+1));
         spec->setDetectorID(detid_t(i+1));
       }
-      // To be removed
-      this->generateSpectraMap();
     }
 
     

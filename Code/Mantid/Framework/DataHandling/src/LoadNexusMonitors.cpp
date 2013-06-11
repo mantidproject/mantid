@@ -385,7 +385,6 @@ void LoadNexusMonitors::exec()
     WS->getSpectrum(i)->setSpectrumNo(spectra_numbers[i]);
     WS->getSpectrum(i)->setDetectorID(detector_numbers[i]);
   }
-  WS->generateSpectraMap();
 
   //add filename
   WS->mutableRun().addProperty("Filename",this->filename);

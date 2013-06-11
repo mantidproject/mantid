@@ -24,7 +24,6 @@ set ( SRC_FILES
 	src/Instrument/NearestNeighboursFactory.cpp
 	src/Instrument/ObjCompAssembly.cpp
 	src/Instrument/ObjComponent.cpp
-	src/Instrument/OneToOneSpectraDetectorMap.cpp
 	src/Instrument/ParComponentFactory.cpp
 	src/Instrument/Parameter.cpp
 	src/Instrument/ParameterMap.cpp
@@ -113,7 +112,6 @@ set ( INC_FILES
 	inc/MantidGeometry/IComponent.h
 	inc/MantidGeometry/IDetector.h
 	inc/MantidGeometry/IObjComponent.h
-	inc/MantidGeometry/ISpectraDetectorMap.h
 	inc/MantidGeometry/Instrument.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
@@ -130,7 +128,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/NearestNeighboursFactory.h
 	inc/MantidGeometry/Instrument/ObjCompAssembly.h
 	inc/MantidGeometry/Instrument/ObjComponent.h
-	inc/MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h
 	inc/MantidGeometry/Instrument/ParComponentFactory.h
 	inc/MantidGeometry/Instrument/Parameter.h
 	inc/MantidGeometry/Instrument/ParameterFactory.h
@@ -236,7 +233,6 @@ set ( TEST_FILES
 	ObjCompAssemblyTest.h
 	ObjComponentTest.h
 	ObjectTest.h
-	OneToOneSpectraDetectorMapTest.h
 	OrientedLatticeTest.h
 	ParCompAssemblyTest.h
 	ParComponentFactoryTest.h

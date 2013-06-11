@@ -71,7 +71,7 @@ to an [[EventWorkspace]] but with no events for empty bins.
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/ConvertToDiffractionMDWorkspace.h"
+#include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
@@ -85,7 +85,7 @@ using namespace Mantid::Geometry;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   bool DODEBUG = true;
@@ -109,11 +109,7 @@ namespace MDEvents
   }
     
   //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  ConvertToDiffractionMDWorkspace::~ConvertToDiffractionMDWorkspace()
-  {
-  }
+
 
 
   //----------------------------------------------------------------------------------------------
@@ -174,7 +170,7 @@ namespace MDEvents
 
 
   /// Our MDLeanEvent dimension
-  typedef MDLeanEvent<3> MDE;
+  typedef MDEvents::MDLeanEvent<3> MDE;
 
   //----------------------------------------------------------------------------------------------
   /** Convert one spectrum to MDEvents.
@@ -237,7 +233,7 @@ namespace MDEvents
   void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex, EventList & el)
   {
     size_t numEvents = el.getNumberEvents();
-    MDBoxBase<MDLeanEvent<3>,3> * box = ws->getBox();
+    MDEvents::MDBoxBase<MDEvents::MDLeanEvent<3>,3> * box = ws->getBox();
 
     // Get the position of the detector there.
     const std::set<detid_t>& detectors = el.getDetectorIDs();
@@ -392,7 +388,7 @@ namespace MDEvents
 
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
-    ws = boost::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>,3> >( i_out );
+    ws = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDLeanEvent<3>,3> >( i_out );
 
     // Initalize the matrix to 3x3 identity
     mat = Kernel::Matrix<double>(3,3, true);
@@ -447,8 +443,8 @@ namespace MDEvents
     {
       // Create an output workspace with 3 dimensions.
       size_t nd = 3;
-      i_out = MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
-      ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(i_out);
+      i_out = MDEvents::MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
+      ws = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace3Lean>(i_out);
 
       // ---------------- Get the extents -------------
       std::vector<double> extents = getProperty("Extents");

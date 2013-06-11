@@ -648,10 +648,6 @@ void LoadTOFRawNexus::exec()
     WS->getAxis(0)->setUnit("TOF");
   WS->setYUnit("Counts");
 
-  // Method that will eventually go away.
-  g_log.debug() << "generateSpectraMap()" << std::endl;
-  WS->generateSpectraMap();
-
   // Set to the output
   setProperty("OutputWorkspace", WS);
 

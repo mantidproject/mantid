@@ -6,7 +6,7 @@
 #include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DeltaEMode.h"

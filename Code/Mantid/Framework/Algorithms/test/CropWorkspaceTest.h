@@ -50,9 +50,7 @@ public:
         }
         space2D->setData(j, boost::shared_ptr<Mantid::MantidVec>(new std::vector<double>(a+(5*j), a+(5*j)+5)),
                          boost::shared_ptr<Mantid::MantidVec>(new std::vector<double>(e+(5*j), e+(5*j)+5)));
-        space2D->getAxis(1)->setValue(j, j);
       }
-      space2D->updateSpectraUsingMap();
       // Register the workspace in the data service
       AnalysisDataService::Instance().add(name, space);
     }
@@ -181,6 +179,7 @@ public:
       }
       TS_ASSERT_EQUALS( output->readX(i)[3], input->readX(i+2)[4] );
       TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i+2) );
+      TS_ASSERT_EQUALS( output->getSpectrum(i)->getDetectorIDs(), input->getSpectrum(i+2)->getDetectorIDs() );
     }
   }
 
@@ -209,6 +208,7 @@ public:
     for (int i = 0; i < 5; ++i)
     {
       TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(i), input->getAxis(1)->spectraNo(i) );
+      TS_ASSERT_EQUALS( output->getSpectrum(i)->getDetectorIDs(), input->getSpectrum(i)->getDetectorIDs() );
     }
   }
 

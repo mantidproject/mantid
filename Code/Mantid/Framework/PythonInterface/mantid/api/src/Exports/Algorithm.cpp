@@ -23,6 +23,7 @@ void export_algorithm()
     .def("fromString", &Algorithm::fromString, "Initialize the algorithm from a string representation")
     .staticmethod("fromString")
     
+    .def("setOptionalMessage", &Algorithm::setOptionalMessage)
     .def("createChildAlgorithm", &Algorithm::createChildAlgorithm, 
          (arg("name"),arg("startProgress")=-1.0,arg("endProgress")=-1.0,
           arg("enableLogging")=true,arg("version")=-1), "Creates and intializes a named child algorithm. Output workspaces are given a dummy name.")

@@ -24,7 +24,7 @@ If the optional 'spectrum' properties are set for a multiperiod dataset, then th
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidKernel/DateAndTime.h"
 
 #include <cmath>
@@ -543,7 +543,7 @@ namespace Mantid
           g_log.error("Unable to read detector information (SPEC) from DAE " + m_daename);
           throw Exception::FileError("Unable to read detector information (SPEC) from DAE " , m_daename);
         }
-        localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spec.get(), udet.get(), ndet));
+        localWorkspace->updateSpectraUsing(SpectrumDetectorMapping(spec.get(), udet.get(), ndet));
       }
 
     }

@@ -207,8 +207,6 @@ void ConjoinWorkspaces::fixSpectrumNumbers(API::MatrixWorkspace_const_sptr ws1, 
     origid = output->getSpectrum(i)->getSpectrumNo();
     output->getSpectrum(i)->setSpectrumNo(origid + ws1max);
   }
-  // To be deprecated:
-  output->generateSpectraMap();
 }
 
 /// Appends the removal of the empty group after execution to the Algorithm::processGroups() method

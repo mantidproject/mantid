@@ -22,6 +22,8 @@ namespace Crystal
         This algorithm basically indexes peaks with the crystal orientation matrix stored in the peaks workspace.
         The optimization is on the goniometer settings for the runs in the peaks workspace and also the sample
         orientation .
+      @author Ruth Mikkelson, SNS,ORNL
+      @date 01/26/2013
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

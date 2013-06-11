@@ -1,11 +1,13 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/Material.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::API::Sample;
 using Mantid::Geometry::OrientedLattice;
+using Mantid::Kernel::Material;
 using namespace boost::python;
 
 void export_Sample()
@@ -25,6 +27,8 @@ void export_Sample()
     .def("getThickness", &Sample::getThickness, "Return the thickness in mm")
     .def("getHeight", &Sample::getHeight, "Return the height in mm")
     .def("getWidth", &Sample::getWidth, "Return the width in mm")
+    .def("getMaterial", (const Material& (Sample::*)() const)(&Sample::getMaterial),
+         return_value_policy<reference_existing_object>(), "The material the sample is composed of")
     // -------------------------Operators -------------------------------------
     .def("__len__", &Sample::size)
     .def("__getitem__", &Sample::operator[], return_internal_reference<>())

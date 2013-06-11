@@ -27,6 +27,14 @@
 
 namespace Mantid
 {
+  //----------------------------------------------------------------------------
+  // Forward declarations
+  //----------------------------------------------------------------------------
+  namespace PhysicalConstants
+  {
+    class MagneticFormFactorTable;
+  }
+
   namespace MDAlgorithms
   {
     /**
@@ -48,6 +56,8 @@ namespace Mantid
       ForegroundModel();
       /// Constructor taking the fitted function to access the current parameter values
       ForegroundModel(const API::IFunction & fittingFunction);
+      /// Destructor
+      ~ForegroundModel();
 
       /// Returns the type of model
       virtual ModelType modelType() const = 0;
@@ -58,6 +68,8 @@ namespace Mantid
       void setFunctionUnderMinimization(const API::IFunction & fitFunction);
       /// Declares the parameters
       void declareParameters();
+      /// Called when an attribute value is set
+      void setAttribute(const std::string & name, const API::IFunction::Attribute & attr);
       /// Return the initial value of the parameter according to the fit by index
       double getInitialParameterValue(size_t index) const;
       /// Return the initial value of the parameter according to the fit by name
@@ -71,11 +83,18 @@ namespace Mantid
       /// Returns a reference to the fitting function
       const API::IFunction & functionUnderMinimization() const;
 
+      /// Set the default ion type for the form factor calculation
+      void setFormFactorIon(const std::string & ionType);
+      /// Returns the form factor for the given q^2 value
+      double formFactor(const double qsqr) const;
+
     private:
       DISABLE_COPY_AND_ASSIGN(ForegroundModel);
 
       /// Required by the interface
       void function(const Mantid::API::FunctionDomain&, Mantid::API::FunctionValues&) const {}
+      /// Add attributes common to all models
+      void addAttributes();
 
       /// Hide these
       using ParamFunction::getParameter;
@@ -84,6 +103,9 @@ namespace Mantid
       const API::IFunction * m_fittingFunction;
       /// An offset for the number of parameters that were declared before this one
       size_t m_parOffset;
+
+      /// Owned pointer to magnetic form factor cache
+      PhysicalConstants::MagneticFormFactorTable *m_formFactorTable;
     };
 
     /// boost::shared_ptr typedef

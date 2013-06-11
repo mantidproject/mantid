@@ -3,6 +3,9 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
+
+#include <algorithm>
+
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
@@ -18,6 +21,22 @@ using namespace Mantid::Geometry;
 using Mantid::Kernel::CPUTimer;
 using Mantid::Kernel::ReadLock;
 
+
+namespace
+{
+  // ----------------------------------------------------------------------------------------------
+  /*
+   * Comparator function to sort boxes in order of decreasing normalized signal.
+   */
+  bool CompareNormalizedSignal( const IMDNode * box_1, const IMDNode * box_2 )
+  {
+    double signal_1 = box_1->getSignalNormalized();
+    double signal_2 = box_2->getSignalNormalized();
+    return ( signal_1 > signal_2 );
+  }
+}
+
+
 namespace Mantid
 {
   namespace VATES
@@ -27,8 +46,9 @@ namespace Mantid
   @Param thresholdRange : Threshold range strategy
   @scalarName : Name for scalar signal array.
   */
-  vtkSplatterPlotFactory::vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t numPoints) :
-  m_thresholdRange(thresholdRange), m_scalarName(scalarName), m_numPoints(numPoints)
+  vtkSplatterPlotFactory::vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t numPoints, const double percentToUse ) :
+  m_thresholdRange(thresholdRange), m_scalarName(scalarName), 
+  m_numPoints(numPoints), m_percentToUse(percentToUse)
   {
   }
 
@@ -36,6 +56,7 @@ namespace Mantid
   vtkSplatterPlotFactory::~vtkSplatterPlotFactory()
   {
   }
+
 
   //-------------------------------------------------------------------------------------------------
   /* Generate the vtkDataSet from the objects input MDEventWorkspace (of a given type an dimensionality 3+)
@@ -50,14 +71,24 @@ namespace Mantid
     // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
     ReadLock lock(*ws);
 
-    // Find out how many events to skip before making a point
+    // Find out how many events to plot, and the percentage of the largest boxes to use.
     size_t totalPoints = ws->getNPoints();
-    size_t interval = totalPoints / m_numPoints;
-    if (interval == 0) interval = 1;
+    size_t numPoints = m_numPoints;
+    if ( numPoints > totalPoints )
+    {
+      numPoints = totalPoints;
+    }
 
-    // How many points will we ACTUALLY have?
-    size_t numPoints = (totalPoints / interval);
-    std::cout << "Plotting points at an interval of " << interval << ", will give " << numPoints << " points." << std::endl;
+    double percent_to_use = m_percentToUse;  
+    if ( percent_to_use <= 0 )                   // fail safe limits on fraction of boxes to use
+    {
+      percent_to_use = 5;
+    }
+
+    if ( percent_to_use > 100 )
+    {
+      percent_to_use = 100;
+    }
 
     // First we get all the boxes, up to the given depth; with or wo the slice function
     std::vector<API::IMDNode *> boxes;
@@ -66,13 +97,76 @@ namespace Mantid
     else
       ws->getBox()->getBoxes(boxes, 1000, true);
 
-    if (VERBOSE) std::cout << tim << " to retrieve the " << boxes.size() << " boxes down." << std::endl;
+    if (VERBOSE) std::cout << tim <<" to retrieve the "<< boxes.size() <<" boxes down."<< std::endl;
+
+                                                // get list of boxes with signal > 0 and sort
+                                                // the list in order of decreasing signal
+    std::vector< MDBox<MDE,nd> * > sorted_boxes;
+    sorted_boxes.reserve( 100000 );
+    for ( size_t i = 0; i < boxes.size(); i++ )
+    {
+      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+      if (box)
+      {
+        size_t newPoints = box->getNPoints();
+        if (newPoints > 0)
+        {
+          sorted_boxes.push_back( box );
+        } // box has any points
+      } // box is valid MDBox
+    } // For each box
+
+    if ( VERBOSE ) std::cout << "START SORTING" << std::endl;
+    std::sort( sorted_boxes.begin(), sorted_boxes.end(), CompareNormalizedSignal );
+    if ( VERBOSE ) std::cout << "DONE SORTING" << std::endl;
+
+    size_t num_boxes_to_use = (size_t)(percent_to_use * (double)sorted_boxes.size() / 100.0);
+    if ( num_boxes_to_use <= 0 )
+    {
+      num_boxes_to_use = 1;
+    }
+
+    if ( num_boxes_to_use >= sorted_boxes.size() )
+    {
+      num_boxes_to_use = sorted_boxes.size()-1;
+    }
+
+                                            // restrict the number of points to the
+                                            // number of points in boxes being used
+    size_t total_points_available = 0;
+    for ( size_t i = 0; i < num_boxes_to_use; i++ )
+    {
+      size_t newPoints = sorted_boxes[ i ]->getNPoints();
+      total_points_available += newPoints;
+    }
+
+    if ( numPoints > total_points_available )
+    {
+      numPoints = total_points_available;
+    }
+
+    size_t points_per_box = 0;             // calculate the average number of points to
+    if ( num_boxes_to_use > 0 )            // to use per box
+      points_per_box = numPoints / num_boxes_to_use;
+
+    if ( points_per_box < 1 )
+      points_per_box = 1;
+
+    if ( VERBOSE )
+    {
+      std::cout << "numPoints                 = " << numPoints << std::endl;
+      std::cout << "num boxes in all          = " << boxes.size() << std::endl;
+      std::cout << "num boxes above zero      = " << sorted_boxes.size() << std::endl;
+      std::cout << "num boxes to use          = " << num_boxes_to_use << std::endl;
+      std::cout << "total_points_available    = " << total_points_available << std::endl;
+      std::cout << "points needed per box     = " << points_per_box << std::endl;
+    }
 
     // Create all the points
     vtkPoints *points = vtkPoints::New();
     points->Allocate(numPoints);
     points->SetNumberOfPoints(numPoints);
-    
+
     // Same number of scalars. Create them all
     vtkFloatArray * signals = vtkFloatArray::New();
     signals->Allocate(numPoints);
@@ -83,83 +177,61 @@ namespace Mantid
     this->dataSet = visualDataSet;
     visualDataSet->Allocate(numPoints);
 
-    // Point we are creating
-    size_t pointIndex = 0;
-    // A counter for points
-    size_t pointsCounted = 0;
-
     // The list of IDs to use
     vtkIdType * ids = new vtkIdType[numPoints];
 
-    // This can be parallelized
-    for (int ii=0; ii<int(boxes.size()); ii++)
+                                // Now get the events from the boxes that we are using.  
+                                // For each box, get up to the average number of points
+                                // we want from each box, limited by the number of points
+                                // in the box.  NOTE: since boxes have different numbers 
+                                // of events, we will not get all the events we expected. 
+                                // Also, if we are using a smaller number of points, we
+                                // won't get points from some of the boxes with lower signal.
+    size_t pointIndex = 0;
+    size_t box_index  = 0;
+    bool   done       = false;
+    while ( box_index < num_boxes_to_use && !done )                // "For" each box
     {
-      // Get the box here
-      size_t i = size_t(ii);
-      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
-      if (box)
+      MDBox<MDE,nd> * box = sorted_boxes[box_index];
+      box_index++;
+      float signal_normalized = float(box->getSignalNormalized());
+      size_t newPoints = box->getNPoints();
+      size_t num_from_this_box = points_per_box;
+      if ( num_from_this_box > newPoints )
       {
-        size_t newPoints = box->getNPoints();
-        if (newPoints > 0)
+        num_from_this_box = newPoints;
+      }
+      const std::vector<MDE> & events = box->getConstEvents();
+      size_t startPointIndex = pointIndex;
+      size_t event_index = 0;
+      while ( event_index < num_from_this_box && !done )          // "For" each event we
+      {                                                           // get from this box
+        const MDE & ev = events[ event_index ];
+        event_index++;
+        const coord_t * center = ev.getCenter();  
+        points->SetPoint(pointIndex, center);
+        ids[pointIndex] = pointIndex;
+        pointIndex++;
+        if ( pointIndex >= numPoints )
         {
-          if (pointsCounted + newPoints > interval)
-          {
-            // Cache the normalized signal
-            float signal_normalized = float(box->getSignalNormalized());
-            // Where in the ID list does this box start?
-            size_t startPointIndex = pointIndex;
+          done = true;
+        }
+      }
+      box->releaseEvents();
+      signals->InsertNextTuple1(signal_normalized);
+      visualDataSet->InsertNextCell(VTK_POLY_VERTEX, pointIndex-startPointIndex, ids+startPointIndex);
+    } 
 
-            // Show at least an event from this box
-            const std::vector<MDE> & events = box->getConstEvents();
-            // Start here
-            size_t j = interval-pointsCounted;
-            for (; j < events.size(); j += interval)
-            {
-              const MDE & ev = events[j];
-              const coord_t * center = ev.getCenter();
-              // TODO: Handle reduced dimensions
-              //std::cout << box->getId() << " event at " << ev.getCenter(0) << "," << ev.getCenter(1) << "," << ev.getCenter(2) << std::endl;
-              //points->SetPoint(pointIndex, center[0], center[1], center[2]);
-              points->SetPoint(pointIndex, center);
-              // Save for the point set
-              ids[pointIndex] = pointIndex;
-              pointIndex++;
-              if (pointIndex > numPoints)
-              {
-                std::cout << "Exceeded allocated points!" << std::endl;
-                ii = int(boxes.size());
-                break;
-              }
-            }
-            // Set the points counted to the remainder of what was skipped
-            pointsCounted = (events.size() - (j-interval));
-            // Done with the event list
-            box->releaseEvents();
-
-            // The signal will match that point
-            signals->InsertNextTuple1(signal_normalized);
-            // Create a "poly vertex" set of vertexes starting at this point in the box
-            visualDataSet->InsertNextCell(VTK_POLY_VERTEX, pointIndex-startPointIndex, ids+startPointIndex);
-          }
-          else
-          {
-            // Skip it. Too few events, we are going on
-            pointsCounted += newPoints;
-          }
-        } // box has any points
-      } // box is valid MDBox
-    } // For each box
     if (VERBOSE) std::cout << tim << " to create " << pointIndex << " points." << std::endl;
 
     //Shrink to fit
-//    points->Squeeze();
+    //points->Squeeze();
     signals->Squeeze();
     visualDataSet->Squeeze();
 
     //Add points and scalars
     visualDataSet->SetPoints(points);
     visualDataSet->GetCellData()->SetScalars(signals);
-
   }
 
 
@@ -252,6 +324,26 @@ namespace Mantid
   void vtkSplatterPlotFactory::SetNumberOfPoints(size_t points)
   {
     m_numPoints = points;
+  }
+
+
+  /**
+   *  Set the size of the initial portion of the sorted list of boxes that 
+   *  will will be used when getting events to plot as points.
+   *
+   *  @percentToUse  The portion of the list to use, as a percentage. 
+   *                 NOTE: This must be more than 0 and no more than 100
+   *                 and whatever value is passed in will be restricted
+   *                 to the interval (0,100].
+   */
+  void vtkSplatterPlotFactory::SetPercentToUse( double percentToUse )
+  {
+    if ( percentToUse <= 0 )
+      m_percentToUse = 5;
+    else if ( percentToUse > 100 )
+      m_percentToUse = 100;
+    else 
+      m_percentToUse = percentToUse;
   }
 
   }

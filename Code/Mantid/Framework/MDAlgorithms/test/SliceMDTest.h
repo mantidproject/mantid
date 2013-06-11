@@ -147,9 +147,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "SliceMDTest_outWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputFilename", OutputFilename));
 
-    std::string fullName = alg.getPropertyValue("OutputFilename");
-    if (fullName!="")
-      if(Poco::File(fullName).exists()) Poco::File(fullName).remove();
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
 
@@ -177,11 +174,10 @@ public:
     // Clean up file
     out->clearFileBacked(false);
 
+    MDEventsTestHelper::checkAndDeleteFile(alg.getPropertyValue("OutputFilename"));
+
     AnalysisDataService::Instance().remove("SliceMDTest_ws");
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");
-
- 
-
   }
 
 

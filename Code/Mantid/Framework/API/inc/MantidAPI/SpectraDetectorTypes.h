@@ -17,22 +17,17 @@ namespace Mantid
 #ifndef HAS_UNORDERED_MAP_H
   /// Map with key = spectrum number, value = workspace index
   typedef std::map<specid_t,size_t> spec2index_map;
-  /// Map with key = workspace index, value = spectrum number
-  typedef std::map<size_t, specid_t> index2spec_map;
   /// Map with key = detector ID, value = workspace index
   typedef std::map<detid_t, size_t> detid2index_map;
-  /// Map with key = workspace index, value = detector ID
-  typedef std::map<size_t, detid_t> index2detid_map;
 #else
   /// Map with key = spectrum number, value = workspace index
   typedef std::tr1::unordered_map<specid_t,size_t> spec2index_map;
-  /// Map with key = workspace index, value = spectrum number
-  typedef std::tr1::unordered_map<size_t,specid_t> spec2index_map;
   /// Map with key = detector ID, value = workspace index
   typedef std::tr1::unordered_map<detid_t, size_t> detid2index_map;
-  /// Map with key = workspace index, value = detector ID
-  typedef std::tr1::unordered_map<size_t, detid_t> index2detid_map;
 #endif
+
+  /// Map single det ID of group to its members
+  typedef std::map<detid_t, std::vector<detid_t> > det2group_map;
 
 }
 

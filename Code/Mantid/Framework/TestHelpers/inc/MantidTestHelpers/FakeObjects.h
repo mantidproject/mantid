@@ -14,7 +14,6 @@
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/INearestNeighbours.h"
 #include <iostream>
@@ -72,8 +71,8 @@ protected:
 class WorkspaceTester : public MatrixWorkspace
 {
 public:
-  WorkspaceTester(Mantid::Geometry::INearestNeighboursFactory* nnFactory) : MatrixWorkspace(nnFactory){}
-  WorkspaceTester() : MatrixWorkspace() {}
+  WorkspaceTester(Mantid::Geometry::INearestNeighboursFactory* nnFactory) : MatrixWorkspace(nnFactory), spec(0) {}
+  WorkspaceTester() : MatrixWorkspace(), spec(0) {}
   virtual ~WorkspaceTester() {}
 
   // Empty overrides of virtual methods
@@ -96,8 +95,6 @@ public:
     m_axes.resize(2);
     m_axes[0] = new Mantid::API::RefAxis(j, this);
     m_axes[1] = new Mantid::API::SpectraAxis(this);
-
-    generateSpectraMap();
   }
   size_t size() const {return vec.size() * blocksize();}
   size_t blocksize() const {return vec[0].dataY().size();}

@@ -261,9 +261,9 @@ void CrossCorrelate::exec()
                 PARALLEL_END_INTERUPT_REGION
 	}
         PARALLEL_CHECK_INTERUPT_REGION
-        out->generateSpectraMap();
-   	setProperty("OutputWorkspace",out);
-   	return;
+
+  setProperty("OutputWorkspace",out);
+  return;
 }
 
 

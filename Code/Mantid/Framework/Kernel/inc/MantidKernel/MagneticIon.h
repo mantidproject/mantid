@@ -47,6 +47,8 @@ namespace PhysicalConstants
 
   /// Returns the magnetic ion for the given symbol and charge
   MANTID_KERNEL_DLL const MagneticIon & getMagneticIon(const std::string &symbol,const uint16_t charge);
+  /// Returns the magnetic ion from a combined symbol and charge given as string
+  MANTID_KERNEL_DLL const MagneticIon & getMagneticIon(const std::string &symbol);
   /// Returns the Lth-coefficients for the given ion
   MANTID_KERNEL_DLL std::vector <double> getJL(const std::string &symbol,const uint16_t charge, const uint16_t l = 0);
 

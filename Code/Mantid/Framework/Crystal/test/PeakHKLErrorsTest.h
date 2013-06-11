@@ -134,55 +134,6 @@ public:
         TS_ASSERT_DELTA( Jac->get(200,1), -8.24138, .4);
         TS_ASSERT_DELTA( Jac->get(160,2), -12.7745,.1);
         TS_ASSERT_DELTA( Jac->get(80,4),-.0943 ,.1);
-
-        /*   std::cout<<"Derivatives"<<std::endl;
-        std::cout<< Jac->get(1,0)<<std::endl;
-        std::cout<< Jac->get(3,1)<<std::endl;
-        std::cout<< Jac->get(10,2)<<std::endl;
-        std::cout<< Jac->get(55,3)<<std::endl;
-        std::cout<< Jac->get(85,3)<<std::endl;
-        std::cout<< Jac->get(235,4)<<std::endl;
-        std::cout<< Jac->get(110,5)<<std::endl;
-        std::cout<< Jac->get(100,0)<<std::endl;
-        std::cout<< Jac->get(200,1)<<std::endl;
-        std::cout<< Jac->get(160,2)<<std::endl;
-        std::cout<< Jac->get(80,4)<<std::endl;
-
-         double offset =.0001;
-        for( size_t param=0; param < peakErrs.nParams(); param++)
-        {
-         // std::cout<<"Result for param="<<param<< peakErrs.parameterName(param)<<std::endl;
-          double paramValSav= peakErrs.getParameter(param);
-          peakErrs.setParameter(param, paramValSav+offset);
-          peakErrs.function1D( out.data(),xValues.data(),(size_t) 3*NPeaks);
-
-          peakErrs.setParameter(param, paramValSav-offset);
-          peakErrs.function1D( out1.data(),xValues.data(),(size_t) 3*NPeaks);
-
-          peakErrs.setParameter(param, paramValSav);
-          for( int p = 0; p <= 3*peaks->getNumberPeaks(); p += 10 )
-          {
-            double calc= (out[p] - out1[p]) / (2*offset);
-            //std::cout<<"("<<calc<<","<<Jac->get(p,param)<<")";
-            //if( (p+1) %350 ==0)
-            //  std::cout<<std::endl;
-            double delta =.8;
-
-            if( param >= 3) delta =.003;
-            if( fabs( calc-Jac->get(p,param)) >  delta)
-            {   std::cout<<"param and peak="<<param<<","<<p<<","<< fabs( calc-Jac->get(p,param))<<std::endl;
-                std::cout<<"      out2,out1,offset="<<out1[p]<<","<<out[p]<<","<<offset<<","<<Jac->get(p,param)<<std::endl;
-          //  TS_ASSERT_DELTA( calc,Jac->get(p,param), delta );//NOTE: may differ a LOT when 2 of hkl values are about as
-                                                             //far from int on different sides
-            }
-          }
-          if( param >= 2)
-            offset =.05;
-          if(param >= 5)
-            offset =.001;
-
-        }*/
-
       }
     };
 

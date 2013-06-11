@@ -53,7 +53,6 @@ public:
       space2D->getSpectrum(j)->setDetectorID(j);
     }
     space->setInstrument(instr);
-    space->generateSpectraMap();
 
     // set the mask on a bunch of spectra
     Mantid::Geometry::ParameterMap& pmap = space->instrumentParameters();

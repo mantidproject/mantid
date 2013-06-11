@@ -355,8 +355,6 @@ void Q1D2::exec()
   //finally divide the number of counts in each output Q bin by its weighting
   normalize(normSum, normError2, YOut, EOutTo2);
 
-  outputWS->updateSpectraUsingMap();
-
   setProperty("OutputWorkspace",outputWS);
 }
 

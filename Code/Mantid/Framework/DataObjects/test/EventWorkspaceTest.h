@@ -63,38 +63,42 @@ public:
    * 500 pixels
    * 1000 histogrammed bins.
    */
-  EventWorkspace_sptr createEventWorkspace(int initialize_pixels, int setX, bool evenTOFs=false)
+  EventWorkspace_sptr createEventWorkspace(bool initialize_pixels, bool setX, bool evenTOFs=false)
   {
 
     EventWorkspace_sptr retVal(new EventWorkspace);
     if (initialize_pixels)
-      retVal->initialize(NUMPIXELS,1,1);
-    else
-      retVal->initialize(1,1,1);
-
-    //Make fake events
-    for (int pix=0; pix<NUMPIXELS; pix++)
     {
-      for (int i=0; i<NUMBINS-1; i++)
+      retVal->initialize(NUMPIXELS,1,1);
+
+      //Make fake events
+      for (int pix=0; pix<NUMPIXELS; pix++)
       {
-        double tof = 0;
-        if (evenTOFs)
+        for (int i=0; i<NUMBINS-1; i++)
         {
-          tof = (i+0.5)*BIN_DELTA; 
+          double tof = 0;
+          if (evenTOFs)
+          {
+            tof = (i+0.5)*BIN_DELTA;
+          }
+          else
+          {
+            //Two events per bin
+            tof = (pix+i+0.5)*BIN_DELTA;
+          }
+          size_t pulse_time = static_cast<size_t>(tof);
+          retVal->getEventList(pix) += TofEvent(tof, pulse_time);
+          retVal->getEventList(pix) += TofEvent(tof, pulse_time);
         }
-        else
-        {
-          //Two events per bin
-          tof = (pix+i+0.5)*BIN_DELTA;
-        }
-        size_t pulse_time = static_cast<size_t>(tof);
-        retVal->getEventList(pix) += TofEvent(tof, pulse_time);
-        retVal->getEventList(pix) += TofEvent(tof, pulse_time);
+        retVal->getEventList(pix).addDetectorID(pix);
+        retVal->getEventList(pix).setSpectrumNo(pix);
       }
-      retVal->getEventList(pix).addDetectorID(pix);
-      retVal->getEventList(pix).setSpectrumNo(pix);
+      retVal->doneAddingEventLists();
     }
-    retVal->doneAddingEventLists();
+    else
+    {
+      retVal->initialize(1,1,1);
+    }
 
     if (setX)
     {
@@ -264,19 +268,29 @@ public:
     TS_ASSERT_EQUALS( ws->getEventList(2).getNumberEvents(), 0);
   }
 
-
+  void test_resizeTo()
+  {
+    ew = createEventWorkspace(false, false);
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), 1 );
+    ew->resizeTo(3);
+    TS_ASSERT_EQUALS( ew->getNumberHistograms(), 3 );
+    for ( size_t i = 0; i < ew->getNumberHistograms(); ++i )
+    {
+      TS_ASSERT_EQUALS( ew->getSpectrum(i)->getSpectrumNo(), i+1 );
+      //TS_ASSERT( ew->getEventList(i).empty() );
+      TS_ASSERT_EQUALS( ew->readX(i).size(), 2);
+    }
+  }
 
   //------------------------------------------------------------------------------
   void test_padSpectra()
   {
     bool timing = false;
-    ew = createEventWorkspace(1, 0);
+    ew = createEventWorkspace(true, false);
 
     int numpixels = timing ? 900000 : 1800;
     //Make an instrument with lots of pixels
     ew->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(numpixels/9));
-    // Build a spectra map to match it
-    ew->rebuildSpectraMapping();
 
     Timer timer;
     ew->padSpectra();
@@ -293,11 +307,6 @@ public:
       if (b)
         if (badcount++ > 40) break;
     }
-
-    index2detid_map *map = ew->getWorkspaceIndexToDetectorIDMap();
-    TS_ASSERT_EQUALS(map->size(), numpixels);
-    TS_ASSERT_EQUALS((*map)[50], 51); //for example
-    delete map;
 
   }
 
@@ -864,7 +873,7 @@ public:
 
   void test_getEventXMinMax()
   {
-    EventWorkspace_sptr wksp = createEventWorkspace(1, 1, true);
+    EventWorkspace_sptr wksp = createEventWorkspace(true, true, true);
     TS_ASSERT_DELTA(wksp->getEventXMin(), 500, .01);
     TS_ASSERT_DELTA(wksp->getEventXMax(), 1023500, .01);
   }

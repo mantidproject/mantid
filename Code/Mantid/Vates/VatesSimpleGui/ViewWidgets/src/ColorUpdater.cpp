@@ -53,6 +53,8 @@ QPair<double, double> ColorUpdater::autoScale(pqPipelineRepresentation *repr)
   if (NULL != stc)
   {
     stc->setScalarRange(range.first, range.second);
+    this->minScale = range.first;
+    this->maxScale = range.second;
   }
   else
   {
@@ -111,15 +113,24 @@ void ColorUpdater::colorScaleChange(pqPipelineRepresentation *repr,
   {
     stc->setScalarRange(min, max);
     repr->getProxy()->UpdateVTKObjects();
+    this->minScale = min;
+    this->maxScale = max;
   }
 }
 
 void ColorUpdater::logScale(pqPipelineRepresentation *repr, int state)
 {
   pqScalarsToColors *lut = repr->getLookupTable();
+  QPair<double, double> bounds = lut->getScalarRange();
+  // Handle "bug" with lower limit being dropped.
+  if (bounds.first != this->minScale)
+  {
+    lut->setScalarRange(this->minScale, this->maxScale);
+  }
   pqSMAdaptor::setElementProperty(lut->getProxy()->GetProperty("UseLogScale"),
                                   state);
   lut->getProxy()->UpdateVTKObjects();
+  this->logScaleState = state;
 }
 
 /**

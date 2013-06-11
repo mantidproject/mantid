@@ -65,6 +65,15 @@ set ( CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}/zlib123 )
 find_package ( ZLIB REQUIRED )
 set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
 
+find_package ( PythonInterp )
+if ( MSVC )
+  # Wrapper script to call either python or python_d depending on directory contents
+  set ( PYTHON_EXE_WRAPPER_SRC "${CMAKE_MODULE_PATH}/../win_python.bat" )
+  set ( PYTHON_EXE_WRAPPER "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/win_python.bat" )
+else()
+  set ( PYTHON_EXE_WRAPPER ${PYTHON_EXECUTABLE} )
+endif()
+
 ###########################################################################
 # Look for Git. Used for version headers - faked if not found.
 # Also makes sure our commit hooks are linked in the right place.

@@ -1,14 +1,11 @@
 #############################################################################################
 #
 # Example script to demonstrate the use of MPI in Mantid.
-# This requires the boost.mpi python bindings, which can be obtained from
-# http://mathema.tician.de/software/boostmpi and obviously an MPI-enabled Mantid build.
+# This requires the mpi4py python bindings and obviously an MPI-enabled Mantid build.
 #
 #############################################################################################
 
-from MantidFramework import *
-mtd.initialise()
-from mantidsimple import *
+from mantid.simpleapi import *
 
 def focus(eventfile, wksp, binning):
     calfile = "PG3_1370_2010_09_12.cal"
@@ -29,17 +26,18 @@ runs = [2421, 2423, 2425, 2427, 2429]
 binning = (1.4,-.0004,8.)
 
 def mpimethod():
-    import boostmpi as mpi
+    from mpi4py import MPI
+    world = MPI.COMM_WORLD
 
-    if mpi.world.size != len(runs)+1:
+    if world.size != len(runs)+1:
         print "This script must be run with " + str(len(runs)+1) + " MPI processes!"
         from sys import exit
         exit()
 
-    if mpi.world.rank == len(runs):
+    if world.rank == len(runs):
         van = focus("PG3_1875_event.nxs", "PG3_1875", binning)
     else:
-        name = "PG3_%d" % runs[mpi.world.rank]
+        name = "PG3_%d" % runs[world.rank]
         data = focus(name + "_event.nxs", name, binning)
         van = None
 
@@ -47,7 +45,7 @@ def mpimethod():
     # that call it just hang (at least with OpenMPI).
     BroadcastWorkspace(InputWorkspace=van,OutputWorkspace="Vanadium",BroadcasterRank=len(runs))
 
-    if mpi.world.rank < len(runs):
+    if world.rank < len(runs):
         van = mtd["Vanadium"]
         data /= van
     else:
@@ -57,7 +55,7 @@ def mpimethod():
     # that call it just hang (at least with OpenMPI).
     GatherWorkspaces(InputWorkspace=data, OutputWorkspace="Mn5Si3")
 
-    if mpi.world.rank == 0:
+    if world.rank == 0:
         SaveNexus(InputWorkspace="Mn5Si3",Filename="mpi.nxs")
 
 def loopmethod():

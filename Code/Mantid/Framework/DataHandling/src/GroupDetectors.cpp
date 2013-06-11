@@ -200,8 +200,6 @@ void GroupDetectors::exec()
     progress.report();
   }
 
-  // Replace the old map
-  WS->generateSpectraMap();
 }
 
 } // namespace DataHandling

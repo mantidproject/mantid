@@ -110,7 +110,6 @@ public:
     }
 
     space->setInstrument(instr);
-    space->generateSpectraMap();
 
   // Register the workspace in the data service
     AnalysisDataService::Instance().addOrReplace(name, space);

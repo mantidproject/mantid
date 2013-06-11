@@ -4,7 +4,7 @@
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidKernel/UnitFactory.h"
@@ -404,39 +404,34 @@ namespace Mantid
     }
 
     /** This method returns the monitor spectrum list 
-     *  @param localWorkspace ::  shared pointer to  workspace
-     *  @param monitorSpecList :: a list holding the spectrum indexes of the monitors
+     *  @param mapping The spectrum number to detector mapping
+     *  @return monitorSpecList The spectrum numbers of the monitors
      */
-    void LoadRawHelper::getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,
-        std::vector<specid_t>& monitorSpecList)
+    std::vector<specid_t> LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping& mapping)
     {
+      std::vector<specid_t> spectrumIndices;
+
       if (!m_monitordetectorList.empty())
       {
-        std::vector<specid_t> specList;
-
-        //get the monitor spectrum list from SpectraDetectorMap
-        localWorkspace->getSpectraFromDetectorIDs(m_monitordetectorList, specList);
-
-        // Old way to get the spectra # for these detectors
-        const Geometry::ISpectraDetectorMap& specdetMap = localWorkspace->spectraMap();
-        specList = specdetMap.getSpectra(m_monitordetectorList);
-
-        // remove duplicates by calling  sort & unique algorithms
-        sort(specList.begin(), specList.end(), std::less<int>());
-        std::vector<specid_t>::iterator uEnd;
-        uEnd = unique(specList.begin(), specList.end());
-        std::vector<specid_t> newVec;
-        newVec.assign(specList.begin(), uEnd);
-        //remove if zeroes are  there in the Spectra list
-        std::vector<specid_t>::iterator itr;
-        itr = find(newVec.begin(), newVec.end(), 0);
-        if (itr != newVec.end())
-          newVec.erase(itr);
-        monitorSpecList.assign(newVec.begin(), newVec.end());
+        const auto& map = mapping.getMapping();
+        for ( auto it = map.begin(); it != map.end(); ++it )
+        {
+          auto detIDs = it->second;
+          // Both m_monitordetectorList & detIDs should be (very) short so the nested loop shouldn't be too evil
+          for ( auto detIt = detIDs.begin(); detIt != detIDs.end(); ++ detIt )
+          {
+            if ( std::find(m_monitordetectorList.begin(), m_monitordetectorList.end(), *detIt) != m_monitordetectorList.end() )
+            {
+              spectrumIndices.push_back(it->first);
+            }
+          }
+        }
       }
       else{
         g_log.error() << "monitor detector id list is empty  for the selected workspace" << std::endl;
       }
+
+      return spectrumIndices;
     }
 
 

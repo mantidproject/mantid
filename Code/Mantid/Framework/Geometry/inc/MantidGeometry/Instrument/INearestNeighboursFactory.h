@@ -38,10 +38,10 @@ namespace Mantid
     public:
       /// Factory method
       virtual INearestNeighbours* create(boost::shared_ptr<const Instrument> instrument,
-        const ISpectraDetectorMap & spectraMap, bool ignoreMasked=false) = 0;
+        const ISpectrumDetectorMapping & spectraMap, bool ignoreMasked=false) = 0;
       /// Factory method
       virtual INearestNeighbours* create(int numberOfNeighbours, boost::shared_ptr<const Instrument> instrument,
-        const ISpectraDetectorMap & spectraMapbool, bool ignoreMasked=false) = 0;
+        const ISpectrumDetectorMapping & spectraMap, bool ignoreMasked=false) = 0;
       /// Destructor
       virtual ~INearestNeighboursFactory(){};
     };

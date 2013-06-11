@@ -92,8 +92,6 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
   child->setInstrument(parent->getInstrument());  // This call also copies the SHARED POINTER to the parameter map
   // This call will (should) perform a COPY of the parameter map.
   child->instrumentParameters();
-  // TODO: Deprecate this
-  child->m_spectraMap = parent->m_spectraMap;
   child->m_sample = parent->m_sample;
   child->m_run = parent->m_run;
   child->setYUnit(parent->m_YUnit);

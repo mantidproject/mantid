@@ -83,12 +83,23 @@ public:
     LoadMDTest::do_compare_MDEW(ws1, ws2);
     
     // Check that the custom file name file exists
-    std::string realFile;
-    if (fileBacked && !Filename.empty())
+    std::string file1;
+    std::string file2;
+    if (fileBacked)// && !Filename.empty())
     {
-      realFile = alg.getPropertyValue("Filename");
-      TS_ASSERT( Poco::File( realFile ).exists() );
+      if (!Filename.empty())
+      {
+        file1 = alg.getPropertyValue("Filename");
+        TS_ASSERT( Poco::File( file1 ).exists() );
+        file2 = ws1->getBoxController()->getFileIO()->getFileName();
+      }
+      else
+      {
+        file1 = ws1->getBoxController()->getFileIO()->getFileName();
+        file2 = ws2->getBoxController()->getFileIO()->getFileName();
+      }
     }
+
     // Clean up files
     ws1->clearFileBacked(false);
     ws2->clearFileBacked(false);
@@ -101,6 +112,8 @@ public:
     TS_ASSERT_DELTA( ws1->getDimension(0)->getMinimum(), oldMin, 1e-5);
     TSM_ASSERT_DELTA("Dimensions of the cloned WS are deep copies of the original.", ws2->getDimension(0)->getMinimum(), oldMin*20.0+1.0, 1e-5);
 
+    MDEventsTestHelper::checkAndDeleteFile(file1);
+    MDEventsTestHelper::checkAndDeleteFile(file2);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove("CloneMDWorkspaceTest_ws");

@@ -61,8 +61,7 @@ namespace MDEvents
     //---------------------------------------------------------------------------------------------------------------------
     /// convert MDWS box structure into flat structure used for saving/loading on hdd 
     void initFlatStructure(API::IMDEventWorkspace_sptr pws,const std::string &fileName);
-    /**Method resotores the interconnected box structure in memory, namely the nodes and their connectivity -->TODO: refactor this into single fucntion and move templating into MDEventFactory */
-    template<typename MDE,size_t nd>
+    /** Method resotores the interconnected box structure in memory, namely the nodes and their connectivity*/
     uint64_t restoreBoxTree(std::vector<API::IMDNode *>&Boxes ,API::BoxController_sptr bc, bool FileBackEnd,bool NoFileInfo=false);
 
     /*** this function tries to set file positions of the boxes to 

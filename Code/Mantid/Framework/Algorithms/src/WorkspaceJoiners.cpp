@@ -202,7 +202,6 @@ namespace Algorithms
       m_progress->report();
     }
 
-    //This will make the spectramap axis.
     output->doneAddingEventLists();
 
     //Set the same bins for all output pixels

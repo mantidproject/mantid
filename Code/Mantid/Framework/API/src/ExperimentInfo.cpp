@@ -382,7 +382,6 @@ namespace API
   //---------------------------------------------------------------------------------------
   /**
    * Caches a lookup for the detector IDs of the members that are part of the same group
-   * Allows much more efficient lookup than going through the SpectraDetectorMap
    * @param mapping :: A map between a detector ID and the other IDs that are part of the same
    * group.
    */

@@ -68,7 +68,6 @@ namespace WorkspaceCreationHelper
     retVal->initialize(1,size,size);
     retVal->setX(0,x1);
     retVal->setData(0,y1,e1);
-    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -84,7 +83,6 @@ namespace WorkspaceCreationHelper
     retVal->initialize(1,size,size);
     retVal->setX(0,x1);
     retVal->setData(0,y1,e1);
-    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -99,7 +97,6 @@ namespace WorkspaceCreationHelper
     retVal->initialize(1,size,size);
     retVal->setX(0,x1);
     retVal->setData(0,y1,e1);
-    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -120,8 +117,22 @@ namespace WorkspaceCreationHelper
     for (int wi=0; wi < nhist; wi++)
       for (int x=0; x<numBoundaries; x++)
         out->dataY(wi)[x] = wi*1.0;
-    out->generateSpectraMap();
     return out;
+  }
+
+  Workspace2D_sptr create2DWorkspaceThetaVsTOF(int nHist, int nBins)
+  {
+
+    Workspace2D_sptr outputWS = Create2DWorkspaceBinned(nHist, nBins);
+    NumericAxis* const newAxis = new NumericAxis(nHist);
+    outputWS->replaceAxis(1,newAxis);
+    newAxis->unit() = boost::shared_ptr<Unit>(new Units::Degrees);
+    for (int i=0;i<nHist;++i)
+    {
+      newAxis->setValue(i,i+1);
+    }
+    
+    return outputWS;
   }
 
 
@@ -142,7 +153,6 @@ namespace WorkspaceCreationHelper
       retVal->getSpectrum(i)->setDetectorID(i);
       retVal->getSpectrum(i)->setSpectrumNo(i);
     }
-    retVal->generateSpectraMap();
     retVal = maskSpectra(retVal, maskedWorkspaceIndices);
     return retVal;
   }
@@ -184,7 +194,6 @@ namespace WorkspaceCreationHelper
         instrument->markAsDetector(det);
       }
       workspace->setInstrument(instrument);
-      workspace->generateSpectraMap();
     }
 
     ParameterMap& pmap = workspace->instrumentParameters();
@@ -237,7 +246,6 @@ namespace WorkspaceCreationHelper
       retVal->setX(i,x);
       retVal->setData(i,y,e);
     }
-    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -262,7 +270,6 @@ namespace WorkspaceCreationHelper
       retVal->setX(i,x);
       retVal->setData(i,y,e);
     }
-    retVal->generateSpectraMap();
     return retVal;
   }
 
@@ -362,8 +369,6 @@ namespace WorkspaceCreationHelper
     testInst->add(sample);
     testInst->markAsSamplePos(sample);
 
-    space->generateSpectraMap();
-
     return space;
   }
 
@@ -388,7 +393,6 @@ namespace WorkspaceCreationHelper
       ws->getSpectrum(wi)->setDetectorID(detid_t(numPixels*numPixels + wi));
       ws->getSpectrum(wi)->setSpectrumNo(specid_t(wi));
     }
-    ws->generateSpectraMap();
 
     return ws;
   }
@@ -648,7 +652,6 @@ namespace WorkspaceCreationHelper
         spec->addDetectorID(g*9+i);
       spec->setSpectrumNo(g+1); // Match detector ID and spec NO
     }
-    retVal->generateSpectraMap();
     return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
   }
 
@@ -666,7 +669,6 @@ namespace WorkspaceCreationHelper
         spec->addDetectorID(g*9+i);
         spec->setSpectrumNo(g+1); // Match detector ID and spec NO
     }
-    retVal->generateSpectraMap();
     return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
 
   }
@@ -831,7 +833,6 @@ namespace WorkspaceCreationHelper
    //   spec->addDetectorID(g*9);
    //   spec->setSpectrumNo(g+1); // Match detector ID and spec NO
     }
-    ws->generateSpectraMap();
 
     double dE = (Emax-Emin)/double(numBins);    
     for( size_t j=0;j<numPixels;j++){

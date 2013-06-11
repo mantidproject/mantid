@@ -70,7 +70,6 @@ namespace Mantid
       using ADARA::Parser::rxPacket;
       //virtual bool rxPacket( const ADARA::Packet &pkt);
       //virtual bool rxPacket( const ADARA::RawDataPkt &pkt);
-      virtual bool rxPacket( const ADARA::RTDLPkt &pkt);
       virtual bool rxPacket( const ADARA::BankedEventPkt &pkt);
       virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
       virtual bool rxPacket( const ADARA::BeamlineInfoPkt &pkt);

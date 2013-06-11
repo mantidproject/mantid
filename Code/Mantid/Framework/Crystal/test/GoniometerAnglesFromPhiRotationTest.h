@@ -72,7 +72,7 @@ public:
      }
 
      GoniometerAnglesFromPhiRotation Gonr;
-     //boost::shared_ptr<Algorithm> GonRot =Mantid::API::AlgorithmFactory::Instance().create("GoniometerAnglesFromPhiRotation");
+
      Gonr.initialize();
      Gonr.setPropertyValue("PeaksWorkspace1","abc");
      Gonr.setPropertyValue("PeaksWorkspace2","def");
@@ -88,19 +88,6 @@ public:
      TS_ASSERT_DELTA((double)Gonr.getProperty("Phi2"),45,.5);
      TS_ASSERT_DELTA((double)Gonr.getProperty("Chi2"),135.069,.5);
      TS_ASSERT_DELTA((double)Gonr.getProperty("Omega2"),-3.0035,.5);
-
- /*    std::cout<< (int)Gonr.getProperty("Nindexed")<<","
-           <<(double)Gonr.getProperty("AvErrIndex")<<","
-           <<(double)Gonr.getProperty("AvErrAll")<<","
-           <<(double)Gonr.getProperty("Phi2")<<","
-           <<(double)Gonr.getProperty("Chi2")<<","
-           <<(double)Gonr.getProperty("Omega2")<<std::endl;
-
-//430,0.0384297,0.039254,45,135.069,-3.00351
-*/
-
-
-
   }
 };
 

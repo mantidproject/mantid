@@ -277,16 +277,17 @@ IAlgorithm* FrameworkManagerImpl::exec(const std::string& algName, const std::st
  */
 IAlgorithm_sptr FrameworkManagerImpl::exec(const std::string& algorithmName, int count, ...)
 {
-  // Create the algorithm
+  if (count % 2 == 1)
+  {
+    throw std::runtime_error("Must have an even number of parameter/value string arguments");
+  }
+
+ // Create the algorithm
   IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algorithmName, -1);
   alg->initialize();
   if (!alg->isInitialized())
     throw std::runtime_error(algorithmName + " was not initialized.");
 
-  if (count % 2 == 1)
-  {
-    throw std::runtime_error("Must have an even number of parameter/value string arguments");
-  }
 
   va_list Params;
   va_start(Params, count);

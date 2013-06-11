@@ -4,7 +4,32 @@
  *  Created on: Apr 15, 2013
  *      Author: ruth
  */
+/**
+ Finds Goniometer angles for a 2nd run with the same chi and omega rotationa and only phi rotation changes by a specified amount.
 
+ @author Ruth Mikkelson, SNS, ORNL
+ @date 04/15/2013
+
+ Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+ This file is part of Mantid.
+
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ File change history is stored at: <https://github.com/mantidproject/mantid>
+ Code Documentation is available at: <http://doxygen.mantidproject.org>
+ */
 #ifndef GoniometerAnglesFromPhiRotation_H_
 #define GoniometerAnglesFromPhiRotation_H_
 

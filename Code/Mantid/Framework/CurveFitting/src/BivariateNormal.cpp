@@ -1,3 +1,43 @@
+/*WIKI*
+
+    Provides a peak shape function interface for a peak on one time slice of a Rectangular detector.
+
+Formula: V=Background+Intensity*Normal( μ<sub>x</sub>, μ<sub>y</sub>, σ<sub>x</sub>, σ<sub>y</sub>)
+
+The Normal(..) is the Normal probability density function. Its integral over all x(col) and y(row) values is one. This means that Intensity is the total intensity with background removed.
+
+
+===Attributes===
+
+There is only one Attribute: '''CalcVariances'''. This attribute is boolean.
+
+If true, the variances are calculated from the data, given the means, variances and covariance.
+Otherwise they will become parameters and fit.
+
+CalcVariances = true gives better/more stable results for peaks interior to the Rectangular Detector.  For peaks close to the edge, CalcVariances should be false.
+
+===Parameters===
+
+# Background - The background of the peak
+# Intensity - The intensity of data for the peak on this time slice
+# Mcol -  The col(x) of the center of the peak
+# Mrow - The row(y) of the center of the peak on this slice
+# ------- If CalcVariances is false, the following 3 parameters are also fit---------
+# SScol -The variance of the column(x) values in the peak for this time slice
+# SSrow - The variance of the row(y) values in the peak for this time slice
+# SSrc - The covariance of the row(x) and column(y) values in the peak for this time slice
+
+===Usage===
+The workspace can be "any" MatrixWorkspace where
+# dataY(1) is the column(x) values for the pixels to be considered
+# dataY(2) is the row(y) values for the pixels to be considered
+# dataY(0)is the experimental data at the corresponding row and column for a panel and time slice( or merged time slices or...)
+
+The data can have missing row and column values and need not represent a square or contiguous subregion of a panel
+
+The values for out in function1D are, for each pixel, the difference of V(see formula) and dataY(0).
+
+ *WIKI*/
 #include "MantidCurveFitting/BivariateNormal.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -389,9 +429,6 @@ void BivariateNormal::init()
   declareParameter("Intensity" , 0.00);
   declareParameter("Mcol" , 0.00, "Mean column(x) value");
   declareParameter("Mrow" , 0.00, "Mean row(y) value");
-// declareParameter("SScol", 0.00, "Variance of the column(x) values");
- //declareParameter("SSrow", 0.00, "Variance of the row(y) values");
- //declareParameter("SSrc" , 0.00, "Covariance of the column(x) and row(y) values");
 
   CalcVariances = false;
 
@@ -525,22 +562,6 @@ double BivariateNormal::initCommon()
         }
 
 
-
- /*//Cannot seem to change penalyt factor for LevenBerg algorithm. Causes
-   //  gsl_multifit_fdfsolver_set(m_gslSolver, &gslContainer, m_data->initFuncParams); to seg fault??
-    for( int p=0; p < (int)nParams();p++)
-        {
-          boost::shared_ptr<IConstraint> constr( getConstraint( p ));
-          if(constr.get())
-          {
-            double penalty = constr->getPenaltyFactor() + 10 * MaxD;
-            std::cout<<"initCommon G"<<p<<","<<penalty<<std::endl;
-            constr->setPenaltyFactor( penalty );
-
-          }
-        } std::cout<<"initCommon H"<<std::endl;
-
-*/
       if (CalcVariances && nParams() >6)
         {
           std::ostringstream ssxx, ssyy, ssxy;
@@ -600,48 +621,6 @@ double BivariateNormal::initCommon()
         for (size_t i = 0; i < nParams(); i++)
           LastParams[i] = getParameter(i);
   }
-        /*
-        double Varxx;// = LastParams[IVXX];
-
-        if (CalcVxx || nParams() <6)
-        {
-          Varxx = (SIxx + (getParameter("Mcol") - mIx) * (getParameter("Mcol") - mIx) * TotI
-              - getParameter("Background") * Sxx - getParameter("Background") * (getParameter("Mcol")
-              - (mx)) * (getParameter("Mcol") - (mx)) * TotN) / (TotI - getParameter("Background")
-              * TotN);
-          LastParams[IVXX] = Varxx;
-
-        }else
-          Varxx = LastParams[IVXX];
-
-       double Varyy ;//= LastParams[IVYY];
-
-        if (CalcVyy|| nParams() <6)
-        {
-          Varyy = (SIyy + (getParameter("Mrow") - (mIy)) * (getParameter("Mrow") - (mIy)) * TotI
-              - getParameter("Background") * (Syy) - getParameter("Background") * (getParameter("Mrow")
-              - (my)) * (getParameter("Mrow") - (my)) * TotN) / (TotI - getParameter("Background")
-              * TotN);
-          LastParams[IVYY] = Varyy;
-        }else
-          Varyy = LastParams[IVYY];
-
-        double Varxy;// = LastParams[IVXY];
-
-        if (CalcVxy|| nParams() <6)
-        {
-          Varxy = ((SIxy) + (getParameter("Mcol") - (mIx)) * (getParameter("Mrow") - (mIy)) * TotI
-              - getParameter("Background") * (Sxy) - getParameter("Background") * (getParameter("Mcol")
-              - (mx)) * (getParameter("Mrow") - (my)) * TotN) / (TotI - getParameter("Background")
-              * TotN);
-
-          LastParams[IVXY] = Varxy;
-        }else
-          Varxy = LastParams[IVXY];
-
-
-  }
-*/
 
   if (!CommonsOK || !ParamsOK)
   {
@@ -715,8 +694,6 @@ double BivariateNormal::initCoeff( const MantidVec &D,
 
 
      double Mrow = getParameter("Mrow");
-     //double Mcol = getParameter("Mcol");
-    // double Intens = getParameter(ITINTENS);
 
      if( CalcVyy||nParams() <6)
      {

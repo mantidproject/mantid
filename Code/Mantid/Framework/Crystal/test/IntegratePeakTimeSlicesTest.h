@@ -39,6 +39,7 @@
 #include <math.h>
 
 #include <map>
+#include "MantidAPI/ITableWorkspace.h"
 using namespace Mantid;
 using namespace DataObjects;
 using namespace Geometry;
@@ -90,10 +91,7 @@ public:
 
     boost::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(PeakCol, PeakRow);
 
-    /*for( int r=PeakRow-3; r<=PeakRow+3;r++)
-      for( int c=PeakCol-3;c<=PeakCol+3;c++)
-        std::cout<<"("<<r<<","<<c<<")pos="<<bankR->getAtXY(c,r)->getPos()<<std::endl;
-    */
+
     Geometry::IDetector_const_sptr pix= wsPtr->getDetector(522);
 
     //Now get Peak.
@@ -191,7 +189,7 @@ public:
    
        double intensity = algP.getProperty("Intensity");
        double sigma = algP.getProperty("SigmaIntensity");
-       TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
+       boost::shared_ptr<TableWorkspace> Twk = algP.getProperty("OutputWorkspace");
   
 
        TS_ASSERT_LESS_THAN(fabs(intensity -60300), 1500.0);
@@ -221,63 +219,7 @@ public:
       
   
 
-      /*
 
-          std::vector<std::string> names = Twk->getColumnNames();
-
-      std::cout<<"Intensitty="<<intensity<<"   sigma="<<sigma<<
-               "  Theoret intensity="<<TotIntensity<<std::endl;
-      std::cout<<std::setw(15)<<"Act Int";
-      for( int j=12; j< 12+(int)Twk->rowCount();j++)
-             std::cout<< setw(12)<<T[j];
-      std::cout<<std::endl;
-
-       for( int i=0; i+1<(int)Twk->columnCount();i++)
-       {
-         std::cout<<std::setw(15)<<names[i];
-       for( int j=0; j< (int)Twk->rowCount();j++)
-       {  std::cout<< setw(12);
-         if( i+1< (int)Twk->columnCount())
-           std::cout <<Twk->cell<double>(j,i);
-         else
-           std::cout <<Twk->cell<string>(j,i)<<"::";
-
-       }
-
-       std::cout<<std::endl;
-
-       }
-
-
-Intensity=58989.5   sigma=539.266  Theoret intensity=60000
-        Act Int        3750        7500       11250       15000       11250        7500        3750
-           Time       19200       19350       19450       19550       19650       19750       19900
-        Channel        11.5          13          14          15          16          17        18.5
-     Background     2.78004      1.2619     1.26187     1.26226     1.26187      1.2619     2.78004
-      Intensity     3751.16     7556.68     11309.8       15063     11309.8     7556.68     3751.16
-           Mcol          27          27          27          27          27          27          27
-           Mrow     22.0001     22.0001     22.0001     22.0001     22.0001     22.0001     22.0001
-          SScol     4.45014     4.45002     4.45012     4.45013     4.45012     4.45002     4.45014
-          SSrow      4.4498     4.45009     4.45004     4.45006     4.45004     4.45009      4.4498
-           SSrc 0.000203427 0.000317585 0.000485281 0.000653647 0.000485281 0.000317585 0.000203427
-         NCells         553         553         553         553         553         553         553
-  ChiSqrOverDOF     9.58119     26.8175     60.4183     107.505     60.4183     26.8175     9.58119
-   TotIntensity      5298.4      8274.2     12024.2     15774.2     12024.2      8274.2      5298.4
-BackgroundError    0.144835    0.242935    0.367252    0.491398    0.367252    0.242935    0.144835
-FitIntensityError     33.4156      56.727     88.5118     119.975     88.5118      56.727     33.4156
-  ISAWIntensity     3761.04     7576.37     11326.4     15076.2     11326.4     7576.37     3761.04
-ISAWIntensityError     115.112     164.378     232.309     300.527     232.309     164.378     115.112
-  TotalBoundary       347.2       173.6       173.6       173.6       173.6       173.6       347.2
- NBoundaryCells         124         124         124         124         124         124         124
-      Start Row           9           9           9           9           9           9           9
-        End Row          35          35          35          35          35          35          35
-      Start Col          14          14          14          14          14          14          14
-        End Col          40          40          40          40          40          40          40
-TotIntensityError     72.7901     90.9626     109.655     125.595     109.655     90.9626     72.7901
-
-
-
-       */
     } catch (char * s)
     {
       std::cout << "Error= " << s << std::endl;
@@ -292,100 +234,7 @@ TotIntensityError     72.7901     90.9626     109.655     125.595     109.655   
   }
 
 
-  /**
-   *  Example program only. Not a test program
-   */
-  void SampleProgram()
-  {
 
-    boost::shared_ptr<Mantid::API::Algorithm> loadSNSNexus;
-    boost::shared_ptr<Mantid::API::Algorithm> Rebin;
-    try
-    {
-
-      loadSNSNexus = Mantid::API::AlgorithmFactory::Instance(). create(string("LoadEventNexus"), 1);
-
-    } catch (std::runtime_error& e)
-    {
-      printf("ERRRRR  %s\n", e.what());
-    }
-    try
-    {
-      loadSNSNexus->initialize();
-      loadSNSNexus->setProperty<std::string> (std::string("Filename"), std::string(
-          "/home/ruth/Mantid/Test/AutoTestData/TOPAZ_3176_event.nxs"));
-
-      Workspace2D_sptr WS2D;
-      loadSNSNexus->setPropertyValue(std::string("BankName"), std::string("bank26"));
-      loadSNSNexus->setPropertyValue(std::string("OutputWorkspace"), "aaa");
-
-      loadSNSNexus->execute();
-
-      EventWorkspace_sptr evwsP = boost::dynamic_pointer_cast<EventWorkspace>(
-          AnalysisDataService::Instance().retrieve("aaa"));
-
-
-      Rebin = Mantid::API::AlgorithmFactory::Instance(). create(std::string("Rebin"), 1);
-      ;
-      Rebin->initialize();
-
-      Rebin->setProperty<MatrixWorkspace_sptr> ("InputWorkspace", boost::dynamic_pointer_cast<
-          MatrixWorkspace>(evwsP));
-
-      Rebin->setProperty<bool> ("PreserveEvents", false);
-
-      Rebin->setPropertyValue(std::string("OutputWorkspace"), std::string("RebinResult"));
-      Rebin->setPropertyValue(std::string("Params"), std::string("17258.2,-.004,33500"));
-
-      Rebin->execute();
-
-      Workspace2D_sptr wsPtr = boost::dynamic_pointer_cast<Workspace2D>(
-          AnalysisDataService::Instance().retrieve("RebinResult"));
-
-      Geometry::Instrument_const_sptr instP = wsPtr->getInstrument();
-
-      IComponent_const_sptr bankC = instP->getComponentByName(std::string("bank26"));
-
-      if (bankC->type().compare("RectangularDetector") != 0)
-        throw std::runtime_error(" No Rect bank named bank 26");
-
-      boost::shared_ptr<const Geometry::RectangularDetector> bankR = boost::dynamic_pointer_cast<
-          const Geometry::RectangularDetector>(bankC);
-
-      boost::shared_ptr<Geometry::Detector> pixelp = bankR->getAtXY(57, 214);
-
-      //std::cout<<"pixel ID="<<pixelp->getID()<<std::endl;
-      Peak peak(instP, pixelp->getID(), 6.955836);
-
-      PeaksWorkspace_sptr pks(new PeaksWorkspace());
-      pks->setName("Peaks3");
-      pks->addPeak(peak);
-
-      IntegratePeakTimeSlices algP;
-      algP.initialize();
-      algP.setProperty("PeakIndex", 0);
-      algP.setProperty("PeakQspan", .003);
-      algP.setPropertyValue("OutputWorkspace", "ccc");
-      algP.setProperty<MatrixWorkspace_sptr> ("InputWorkspace", wsPtr);
-      algP.setProperty<PeaksWorkspace_sptr> ("Peaks", pks);
-      algP.execute();
-      algP.setPropertyValue("OutputWorkspace", "ccc");
-      TableWorkspace_sptr Table = (algP.getProperty("OutputWorkspace"));
-
-      if (!Table)
-      {
-        Table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(
-            "ccc");
-        if (!Table)
-          std::cout << "Could Not retrieve frome Analysys data service" << std::endl;
-      }
-
-      std::vector<std::string> names = Table->getColumnNames();
-    } catch (std::exception &s)
-    {
-      std::cout << "error =" << s.what() << std::endl;
-    }
-  }
 
 
 

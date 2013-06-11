@@ -48,7 +48,6 @@ The ChildAlgorithms used by LoadMuonNexus are:
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/UnitFactory.h"
@@ -188,7 +187,7 @@ namespace Mantid
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
       std::string localWSName = ws->value();
-      // If multiperiod, will need to hold the Instrument, Sample & SpectraDetectorMap for copying
+      // If multiperiod, will need to hold the Instrument & Sample for copying
       boost::shared_ptr<Instrument> instrument;
       boost::shared_ptr<Sample> sample;
 
@@ -254,7 +253,6 @@ namespace Mantid
           {
             loadRunDetails(localWorkspace);
             runLoadInstrument(localWorkspace );
-            runLoadMappingTable(localWorkspace );
           }
         }
 
@@ -263,7 +261,6 @@ namespace Mantid
           // Only run the Child Algorithms once
           loadRunDetails(localWorkspace);
           runLoadInstrument(localWorkspace );
-          runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
           localWorkspace->populateInstrumentParameters();
         }
@@ -412,9 +409,6 @@ namespace Mantid
             DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
               (API::WorkspaceFactory::Instance().create(localWorkspace, ngroups, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
 
-            boost::shared_array<specid_t> spec(new specid_t[numHists]);
-            boost::shared_array<detid_t> dets(new detid_t[numHists]);
-
             //Compile the groups
             for (int i = 0; i < numHists; ++i)
             {    
@@ -431,8 +425,9 @@ namespace Mantid
 
               //Copy all the X data
               groupedWS->dataX(k) = localWorkspace->dataX(i);
-              spec[i] = k + 1;
-              dets[i] = i + 1;
+              ISpectrum * spec = groupedWS->getSpectrum(k);
+              spec->setSpectrumNo(k+1);
+              spec->setDetectorID(i+1);
             }
 
             m_groupings.clear();
@@ -442,8 +437,6 @@ namespace Mantid
             {
               groupedWS->getAxis(1)->setValue(k, k + 1);
             }
-
-            groupedWS->replaceSpectraMap(new API::SpectraDetectorMap(spec.get(),dets.get(),numHists));
 
             // Assign the result to the output workspace property
             if(m_numberOfPeriods>1)
@@ -586,21 +579,6 @@ namespace Mantid
       }
 
       if ( !executionSuccessful ) g_log.error("No instrument definition loaded");      
-    }
-
-    /// Run the LoadMappingTable Child Algorithm to fill the SpectraToDetectorMap
-    void LoadMuonNexus1::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)
-    {
-      NXRoot root(m_filename);
-      NXInt number = root.openNXInt("run/instrument/detector/number");
-      number.load();
-      detid_t ndet = static_cast<detid_t>(number[0]/m_numberOfPeriods);
-      boost::shared_array<detid_t> det(new detid_t[ndet]);
-      for(detid_t i=0;i<ndet;i++)
-      {
-        det[i] = i + 1;
-      }
-      localWorkspace->replaceSpectraMap(new API::SpectraDetectorMap(det.get(),det.get(),ndet));
     }
 
     /// Run the LoadLog Child Algorithm

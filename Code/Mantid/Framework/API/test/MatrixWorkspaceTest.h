@@ -5,10 +5,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
@@ -111,38 +110,32 @@ public:
     }
   }
 
-  void test_replaceSpectraMap()
+  void test_updateSpectraUsing()
   {
     WorkspaceTester testWS;
-    testWS.initialize(1,1,1);
-    // Default one
-    TS_ASSERT_EQUALS(testWS.getSpectrum(0)->getSpectrumNo(), 1);
+    testWS.initialize(3,1,1);
 
-    ISpectraDetectorMap * spectraMap = new OneToOneSpectraDetectorMap(1,10);
-    testWS.replaceSpectraMap(spectraMap);
-    // Has it been replaced
-    for (size_t i=0; i<testWS.getNumberHistograms(); i++)
-    {
-      TS_ASSERT_EQUALS(testWS.getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
-      TS_ASSERT(testWS.getSpectrum(i)->hasDetectorID(detid_t(i+1)));
-    }
+    specid_t specs[] = {1,2,2,3};
+    detid_t detids[] = {10,99,20,30};
+    TS_ASSERT_THROWS_NOTHING( testWS.updateSpectraUsing(SpectrumDetectorMapping(specs, detids, 4)) );
+
+    TS_ASSERT( testWS.getSpectrum(0)->hasDetectorID(10) );
+    TS_ASSERT( testWS.getSpectrum(1)->hasDetectorID(20) );
+    TS_ASSERT( testWS.getSpectrum(1)->hasDetectorID(99) );
+    TS_ASSERT( testWS.getSpectrum(2)->hasDetectorID(30) );
   }
-  
-  void testSpectraMapCopiedWhenAWorkspaceIsCopied()
+
+  void testDetectorMappingCopiedWhenAWorkspaceIsCopied()
   {
     boost::shared_ptr<MatrixWorkspace> parent(new WorkspaceTester);
     parent->initialize(1,1,1);
-    ISpectraDetectorMap * spectraMap = new OneToOneSpectraDetectorMap(1,10);
-    parent->replaceSpectraMap(spectraMap);
+    parent->getSpectrum(0)->setSpectrumNo(99);
+    parent->getSpectrum(0)->setDetectorID(999);
 
-    MatrixWorkspace_sptr copied = WorkspaceFactory::Instance().create(parent,1,1,1);
-
+    MatrixWorkspace_sptr copied = WorkspaceFactory::Instance().create(parent);
     // Has it been copied?
-    for (size_t i=0; i<copied->getNumberHistograms(); i++)
-    {
-      TS_ASSERT_EQUALS(copied->getSpectrum(i)->getSpectrumNo(), specid_t(i+1));
-      TS_ASSERT(copied->getSpectrum(i)->hasDetectorID(detid_t(i+1)));
-    }
+    TS_ASSERT_EQUALS(copied->getSpectrum(0)->getSpectrumNo(), 99);
+    TS_ASSERT(copied->getSpectrum(0)->hasDetectorID(999));
   }
 
   void testGetMemorySize()
@@ -562,6 +555,24 @@ public:
     TSM_ASSERT("If all detectors are not masked, return true", inst->isDetectorMasked(dets) );
     dets.insert(10);
     TSM_ASSERT("If any detector is not masked, return false", !inst->isDetectorMasked(dets) );
+  }
+
+  void test_getDetectorIDToWorkspaceIndexMap()
+  {
+    auto ws = makeWorkspaceWithDetectors(5, 1);
+    boost::scoped_ptr<detid2index_map> idmap(ws->getDetectorIDToWorkspaceIndexMap(true));
+    TS_ASSERT_EQUALS( idmap->size(), 5 );
+    int i = 0;
+    for ( auto it = idmap->begin(); it != idmap->end(); ++it, ++i )
+    {
+      TS_ASSERT_EQUALS( idmap->count(i), 1 );
+      TS_ASSERT_EQUALS( (*idmap)[i], i );
+    }
+
+    ws->getSpectrum(2)->addDetectorID(99); // Set a second ID on one spectrum
+    TS_ASSERT_THROWS( ws->getDetectorIDToWorkspaceIndexMap(true), std::runtime_error );
+    boost::scoped_ptr<detid2index_map> idmap2(ws->getDetectorIDToWorkspaceIndexMap(false));
+    TS_ASSERT_EQUALS( idmap2->size(), 6 );
   }
 
   void test_getDetectorIDToWorkspaceIndexVector()

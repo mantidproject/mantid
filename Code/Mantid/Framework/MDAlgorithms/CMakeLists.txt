@@ -12,6 +12,8 @@ set ( SRC_FILES
 	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
+	src/ConvertToDiffractionMDWorkspace.cpp    
+	src/ConvertToDiffractionMDWorkspace2.cpp        
 	src/ConvertToMD.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
@@ -79,6 +81,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
+	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h    
+	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h        
 	inc/MantidMDAlgorithms/ConvertToMD.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
@@ -148,6 +152,8 @@ set ( TEST_FILES
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
 	ConvertToDetectorFaceMDTest.h
+	ConvertToDiffractionMDWorkspaceTest.h    
+	ConvertToDiffractionMDWorkspace2Test.h        
 	ConvertToMDComponentsTest.h
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h

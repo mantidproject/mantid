@@ -130,7 +130,10 @@ class DataSet(object):
             if process_files:
                 log_ws = "__log"                
                 if cls.load_meta_data(file_path, outputWorkspace=log_ws):
-                    return cls.read_properties(log_ws, run, cursor)
+                    try:
+                        return cls.read_properties(log_ws, run, cursor)
+                    except:
+                        return None
                 else:
                     return None
             else:

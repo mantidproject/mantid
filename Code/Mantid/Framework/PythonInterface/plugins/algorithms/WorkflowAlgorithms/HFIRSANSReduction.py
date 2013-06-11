@@ -18,6 +18,8 @@ class HFIRSANSReduction(PythonAlgorithm):
         return "HFIRSANSReduction"
     
     def PyInit(self):
+        self.setOptionalMessage("HFIR SANS reduction workflow")
+        self.setWikiSummary("HFIR SANS reduction workflow")
         self.declareProperty('Filename', '', doc='List of input file paths')
         self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(), doc='Property manager name for the reduction')
         self.declareProperty('OutputWorkspace', '', doc='Reduced workspace')
