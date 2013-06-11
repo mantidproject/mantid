@@ -60,6 +60,7 @@ void testNoLocationDoesNotThrow()
   generator.setWorkspace(workspace);
 
   TSM_ASSERT_THROWS_NOTHING("The location is not mandatory, should not throw", generator.createXMLString());
+  Mantid::API::AnalysisDataService::Instance().clear();
 }
 
 void testNoNameThrows()
