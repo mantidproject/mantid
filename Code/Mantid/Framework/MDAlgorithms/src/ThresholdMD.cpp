@@ -132,7 +132,7 @@ namespace Mantid
         outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
       }
 
-      const uint64_t nPoints = inputWS->getNPoints();
+      const int64_t nPoints = inputWS->getNPoints();
 
       boost::function<bool(double)> comparitor = boost::bind(std::less<double>(),_1, referenceValue);
       if(condition == GreaterThan())
@@ -141,14 +141,14 @@ namespace Mantid
       }
 
       Progress prog(this, 0, 1, 100);
-      uint64_t frequency = nPoints;
+      int64_t frequency = nPoints;
       if(nPoints > 100)
       {
         frequency = nPoints/100;
       }
 
       PARALLEL_FOR2(inputWS, outWS)
-      for(uint64_t i = 0; i < nPoints; ++i)
+      for(int64_t i = 0; i < nPoints; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         const double signalAt = inputWS->getSignalAt(i);
