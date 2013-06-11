@@ -434,7 +434,7 @@ namespace MDEvents
   /** Return the memory used, in bytes */
   size_t MDHistoWorkspace::getMemorySize() const
   {
-    return m_length * 2 * sizeof(signal_t);
+    return m_length * ( sizeOfElement() );
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1297,6 +1297,15 @@ namespace MDEvents
     {
     }
     return result;
+  }
+
+  /**
+   * Static helper method.
+   * @return The size of an element in the MDEventWorkspace.
+   */
+  size_t MDHistoWorkspace::sizeOfElement()
+  {
+    return (3 * sizeof(signal_t) ) + sizeof(bool);
   }
 
 } // namespace Mantid

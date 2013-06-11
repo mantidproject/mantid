@@ -398,6 +398,8 @@ namespace MDEvents
     uint64_t sumNContribEvents()const;
     void updateSum(){m_nEventsContributed = sumNContribEvents();}
 
+    /// Get the size of an element in the HistoWorkspace.
+    static size_t sizeOfElement();
   private:
 
     void initVertexesArray();
