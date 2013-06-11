@@ -365,10 +365,10 @@ namespace Mantid
    *  Set the size of the initial portion of the sorted list of boxes that 
    *  will will be used when getting events to plot as points.
    *
-   *  @percentToUse  The portion of the list to use, as a percentage. 
-   *                 NOTE: This must be more than 0 and no more than 100
-   *                 and whatever value is passed in will be restricted
-   *                 to the interval (0,100].
+   *  @param percentToUse  The portion of the list to use, as a percentage. 
+   *                       NOTE: This must be more than 0 and no more than 100
+   *                       and whatever value is passed in will be restricted
+   *                       to the interval (0,100].
    */
   void vtkSplatterPlotFactory::SetPercentToUse( double percentToUse )
   {
