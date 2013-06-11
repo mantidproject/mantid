@@ -239,27 +239,39 @@ namespace Mantid
       return required;
     }
 
-
     /**
      * Fills in a column for each active hermite polynomial, starting at the given index
      * @param cmatrix InOut matrix whose columns should be set to the mass profile for each active hermite polynomial
      * @param start Index of the column to start on
+     * @param errors Data errors array
      */
-    void GramCharlierComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start)
+    void GramCharlierComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start,
+                                                          const std::vector<double>& errors) const
     {
-      // Check for FSE term...
-
-      const size_t nData = ySpace().size();
+      std::vector<double> profile(NFINE_Y, 0.0);
+      const size_t nData(ySpace().size());
       std::vector<double> result(nData, 0.0);
+
       size_t col(0);
       for(unsigned int i = 0; i < m_hermite.size(); ++i)
       {
         if(m_hermite[i] == 0) continue;
+
         const unsigned int npoly = 2*i;
-        addMassProfile(result.data(), nData, npoly);
-        convoluteVoigt(result.data(), nData, result);
+        addMassProfile(profile.data(), npoly);
+        convoluteVoigt(result.data(), nData, profile);
+        if(i==0) // first term includes FSE convoluted separately with Voigt
+        {
+          std::vector<double> fse(NFINE_Y, 0.0);
+          std::vector<double> convolved(nData,0.0);
+          addFSETerm(fse);
+          convoluteVoigt(convolved.data(), nData, fse);
+          std::transform(result.begin(), result.end(), convolved.begin(), result.begin(), std::plus<double>());
+        }
+        std::transform(result.begin(), result.end(), errors.begin(), result.begin(), std::divides<double>());
         cmatrix.setColumn(start + col, result);
 
+        std::fill_n(profile.begin(), NFINE_Y, 0.0);
         std::fill_n(result.begin(), nData, 0.0);
         ++col;
       }
@@ -279,29 +291,25 @@ namespace Mantid
       // Hermite expansion (only even terms) + FSE term
       const size_t nhermite(m_hermite.size());
 
-      const double amp(1.0), wg(getParameter(WIDTH_PARAM));
-      const double ampNorm = amp/(std::sqrt(2.0*M_PI)*wg);
-
       // Sum over polynomials for each y
       std::vector<double> sumH(NFINE_Y);
       for(unsigned int i = 0; i < nhermite; ++i)
       {
         if(m_hermite[i] == 0) continue;
         const unsigned int npoly = 2*i; // Only even ones
-        addMassProfile(sumH.data(), NFINE_Y, npoly);
+        addMassProfile(sumH.data(), npoly);
       }
-      addFSETerm(sumH, ampNorm, wg);
+      addFSETerm(sumH);
       convoluteVoigt(result, nData, sumH);
     }
 
     /**
      * Uses a Gram-Charlier series approximation for the mass and convolutes it with the Voigt
      * instrument resolution function. Also multiplies by the mass*e_i^0.1/q. Sums it with the given result
-     * @param result An pre-sized output array that should be filled with the results
-     * @param nData The length of the array
+     * @param result An pre-sized output array that should be filled with the results. Size is fixed at NFINE_Y
      * @param npoly An integer denoting the polynomial to calculate
      */
-    void GramCharlierComptonProfile::addMassProfile(double * result, const size_t nData, const unsigned int npoly) const
+    void GramCharlierComptonProfile::addMassProfile(double * result, const unsigned int npoly) const
     {
       using namespace Mantid::Kernel;
 
@@ -311,12 +319,14 @@ namespace Mantid
       std::ostringstream os;
       os << HERMITE_PREFIX << npoly;
       const double hermiteCoeff = getParameter(os.str());
-      for(size_t j = 0; j < nData; ++j)
+      const double factorial = gsl_sf_fact(npoly/2);
+      const double denom = ((std::pow(2.0,npoly))*factorial);
+
+      for(int j = 0; j < NFINE_Y; ++j)
       {
         const double y = m_yfine[j]/std::sqrt(2.)/wg;
         const double hermiteI = Math::hermitePoly(npoly,y);
-        const double factorial = gsl_sf_fact(npoly/2);
-        result[j] += ampNorm*std::exp(-y*y)*hermiteI*hermiteCoeff/((std::pow(2.0,npoly))*factorial);
+        result[j] += ampNorm*std::exp(-y*y)*hermiteI*hermiteCoeff/denom;
       }
     }
 
@@ -325,17 +335,20 @@ namespace Mantid
      * @param lhs Existing vector that the result should be added to
      * @param amplitude The value to be used as the amplitude. It is not normalised by this function
      */
-    void GramCharlierComptonProfile::addFSETerm(std::vector<double> & lhs, const double amplitude, const double width) const
+    void GramCharlierComptonProfile::addFSETerm(std::vector<double> & lhs) const
     {
       assert(static_cast<size_t>(NFINE_Y) == lhs.size());
       using namespace Mantid::Kernel;
 
-      const double kfse = getParameter(KFSE_NAME);
+      const double amp(1.0), wg(getParameter(WIDTH_PARAM));
+      const double ampNorm = amp/(std::sqrt(2.0*M_PI)*wg);
+
+      const double kfse = getParameter("C_0")*getParameter(KFSE_NAME);
       for(int j = 0; j < NFINE_Y; ++j)
       {
-        const double y = m_yfine[j]/std::sqrt(2.)/width;
+        const double y = m_yfine[j]/std::sqrt(2.)/wg;
         const double he3 = Math::hermitePoly(3,y);
-        lhs[j] += amplitude*std::exp(-y*y)*he3*(kfse/m_qfine[j]);
+        lhs[j] += ampNorm*std::exp(-y*y)*he3*(kfse/m_qfine[j]);
       }
     }
 
@@ -359,6 +372,7 @@ namespace Mantid
         const double prefactor = std::pow(ei[i],0.1)*mass()/modq[i];
         result[i] = prefactor*trapzf(m_yfine, m_voigtProfile);
       }
+
     }
 
   } // namespace CurveFitting

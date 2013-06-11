@@ -50,7 +50,7 @@ private:
   {
     std::string name() const { return "FakeComptonProfile"; }
     size_t numConstraintMatrixColumns() const { return 0; }
-    void fillConstraintMatrix(Mantid::Kernel::DblMatrix &,const size_t) {}
+    void fillConstraintMatrix(Mantid::Kernel::DblMatrix &,const size_t,const std::vector<double>&) const {}
 
     void massProfile(double *,const size_t) const {}
   };

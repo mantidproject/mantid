@@ -52,7 +52,7 @@ namespace CurveFitting
     /// Return the number of columns required in the constraint matrix
     size_t numConstraintMatrixColumns() const { return 1; }
     /// Fill in the columns of the matrix for this mass
-    void fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t index);
+    void fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start, const std::vector<double>& errors) const;
 
     /// Compute the function
     void massProfile(double * result, const size_t nData) const;

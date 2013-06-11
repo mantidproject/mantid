@@ -59,14 +59,14 @@ namespace CurveFitting
     /// Return the number of columns required in the constraint matrix
     size_t numConstraintMatrixColumns() const;
     /// Fill in the columns of the matrix for this mass
-    void fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t index);
+    void fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t index,const std::vector<double>& errors) const;
     /// Compute the sum for all Hermite polynomial coefficents
     void massProfile(double * result, const size_t nData) const;
     /// Compute the contribution to mass profile nth Hermite polynomial coefficient
-    void addMassProfile(double * result, const size_t nData, const unsigned int npoly) const;
+    void addMassProfile(double * result, const unsigned int npoly) const;
 
     /// Add FSE term based on current parameter setting
-    void addFSETerm(std::vector<double> & lhs, const double amplitude, const double width) const;
+    void addFSETerm(std::vector<double> & lhs) const;
     /// Convolute with resolution
     void convoluteVoigt(double * result, const size_t nData, const std::vector<double> & profile) const;
 

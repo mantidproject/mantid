@@ -54,7 +54,8 @@ namespace CurveFitting
     virtual size_t numConstraintMatrixColumns() const = 0;
     /// Fill the appropriate columns of the given matrix with the values
     /// of the mass profile
-    virtual void fillConstraintMatrix(Kernel::DblMatrix & cmatrix,const size_t start) = 0;
+    virtual void fillConstraintMatrix(Kernel::DblMatrix & cmatrix,const size_t start,
+                                      const std::vector<double>& errors) const = 0;
 
   protected:
     /// Declare parameters that will never participate in the fit

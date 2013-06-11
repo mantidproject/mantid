@@ -44,12 +44,15 @@ namespace Mantid
      * Fills in a column of the matrix with this mass profile, starting at the given index
      * @param cmatrix InOut matrix whose column should be set to the mass profile for each active hermite polynomial
      * @param start Index of the column to start on
+     * @param errors The data errors
      */
-    void GaussianComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start)
+    void GaussianComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start,
+                                                      const std::vector<double>& errors) const
     {
       std::vector<double> result(ySpace().size());
       const double amplitude = 1.0;
       this->massProfile(result.data(), ySpace().size(), amplitude);
+      std::transform(result.begin(), result.end(), errors.begin(), result.begin(), std::divides<double>());
       cmatrix.setColumn(start, result);
     }
 
