@@ -59,6 +59,8 @@ private:
   void init();
   ///Execution code
   void exec();
+  /// Print out the list of information for the material
+  void logMaterial(const Kernel::Material *mat);
 
 };
 

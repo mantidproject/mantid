@@ -63,6 +63,16 @@ namespace DataHandling
   using namespace Mantid::API;
   using namespace Kernel;
 
+  void SetSampleMaterial::logMaterial(const Material *mat)
+  {
+    g_log.notice() << "Sample number density = "
+                   << mat->numberDensity() << " atoms/angstrom^3\n"
+                   << "Scattering Cross Section = "
+                   << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << " barns\n"
+                   << "Attenuation Cross Section = "
+                   << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< " barns\n";
+  }
+
   /**
    * Initialize the algorithm
    */
@@ -147,23 +157,19 @@ namespace DataHandling
     {
     	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
     			0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
-        Material *mat = new Material(chemicalSymbol, *neutron, rho);
-        workspace->mutableSample().setMaterial(*mat);
-        g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-        g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
-        g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< "\n";
+      Material *mat = new Material(chemicalSymbol, *neutron, rho);
+      workspace->mutableSample().setMaterial(*mat);
+      logMaterial(mat);
     	return;
     }
 
     // Use chemical symbol if given by user
     try
     {
-		Atom myAtom = getAtom(chemicalSymbol, static_cast<uint16_t>(a_number));
-		Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
-		workspace->mutableSample().setMaterial(*mat);
-		g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-		g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
-		g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< "\n";
+      Atom myAtom = getAtom(chemicalSymbol, static_cast<uint16_t>(a_number));
+      Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
+      workspace->mutableSample().setMaterial(*mat);
+      logMaterial(mat);
     }
     catch (...)
     {
@@ -186,10 +192,8 @@ namespace DataHandling
 			NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
 					0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
     		Material *mat = new Material(chemicalSymbol, *neutron, rho);
-	        g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-	        g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
-	        g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< "\n";
-    		workspace->mutableSample().setMaterial(*mat);
+        workspace->mutableSample().setMaterial(*mat);
+        logMaterial(mat);
     	}
         catch (...)
         {
@@ -199,10 +203,8 @@ namespace DataHandling
 				Atom myAtom = getAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number));
 				Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
 				workspace->mutableSample().setMaterial(*mat);
-				g_log.notice() << "Sample number density = "<< mat->numberDensity() << "\n";
-				g_log.notice() << "Scattering X Section = " << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
-				g_log.notice() << "Attenuation X Section = " << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< "\n";
-			}
+        logMaterial(mat);
+      }
 			catch(std::invalid_argument&)
 			{
 				g_log.notice("ChemicalFormula or AtomicNumber was not found in table.");
