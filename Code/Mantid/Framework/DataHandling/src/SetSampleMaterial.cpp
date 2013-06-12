@@ -36,8 +36,10 @@ Neutron scattering lengths and cross sections of the elements and their isotopes
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -65,9 +67,11 @@ namespace DataHandling
 
   void SetSampleMaterial::logMaterial(const Material *mat)
   {
-    g_log.notice() << "Sample number density = "
-                   << mat->numberDensity() << " atoms/angstrom^3\n"
-                   << "Scattering Cross Section = "
+    g_log.notice() << "Sample number density ";
+    if (mat->numberDensity() == 1.)
+      g_log.notice() << "(NOT SPECIFIED) ";
+    g_log.notice() << "= " << mat->numberDensity() << " atoms/angstrom^3\n";
+    g_log.notice() << "Scattering Cross Section = "
                    << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << " barns\n"
                    << "Attenuation Cross Section = "
                    << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< " barns\n";
@@ -111,29 +115,39 @@ namespace DataHandling
     declareProperty("MassNumber", 0, "Mass number if ion (default is 0)");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
-    declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
-        "Unit cell volume in Angstoms^3 needed for chemical formulas with more than 1 atom");
+    declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
+        "Optional:  This number density of the sample in number of atoms per cubic angstrom will be used instead of calculated");
     declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
         "Number of formulas in the unit cell needed for chemical formulas with more than 1 atom");
+    declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
+        "Unit cell volume in Angstoms^3 needed for chemical formulas with more than 1 atom");
     declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
         "Optional:  This absorption cross-section for the sample material in barns will be used instead of calculated");
     declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
         "Optional:  This scattering cross-section (coherent + incoherent) for the sample material in barns will be used instead of calculated");
-    declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-        "Optional:  This number density of the sample in number of atoms per cubic angstrom will be used instead of calculated");
-	
-	// Perform Group Associations.
-	std::string formulaGrp("By Formula or Atomic Number");
-	setPropertyGroup("ChemicalFormula", formulaGrp);
-	setPropertyGroup("AtomicNumber", formulaGrp);
-	setPropertyGroup("MassNumber", formulaGrp);
-	setPropertyGroup("UnitCellVolume", formulaGrp);
-	setPropertyGroup("ZParameter", formulaGrp);
 
-	std::string specificValuesGrp("Enter Specific Values");
-	setPropertyGroup("AttenuationXSection", specificValuesGrp);
-	setPropertyGroup("ScatteringXSection", specificValuesGrp);
-	setPropertyGroup("SampleNumberDensity", specificValuesGrp);
+	
+    // Perform Group Associations.
+    std::string formulaGrp("By Formula or Atomic Number");
+    setPropertyGroup("ChemicalFormula", formulaGrp);
+    setPropertyGroup("AtomicNumber", formulaGrp);
+    setPropertyGroup("MassNumber", formulaGrp);
+
+    std::string densityGrp("Sample Density");
+    setPropertyGroup("SampleNumberDensity", densityGrp);
+    setPropertyGroup("ZParameter", densityGrp);
+    setPropertyGroup("UnitCellVolume", densityGrp);
+
+    std::string specificValuesGrp("Enter Specific Values");
+    setPropertyGroup("AttenuationXSection", specificValuesGrp);
+    setPropertyGroup("ScatteringXSection", specificValuesGrp);
+
+    // Extra property settings
+    setPropertySettings("AtomicNumber", new Kernel::EnabledWhenProperty("ChemicalFormula", Kernel::IS_DEFAULT));
+    setPropertySettings("MassNumber", new Kernel::EnabledWhenProperty("ChemicalFormula", Kernel::IS_DEFAULT));
+    setPropertySettings("UnitCellVolume", new Kernel::EnabledWhenProperty("SampleNumberDensity", Kernel::IS_DEFAULT));
+    setPropertySettings("ZParameter", new Kernel::EnabledWhenProperty("SampleNumberDensity", Kernel::IS_DEFAULT));
+
   }
 
   /**
@@ -144,13 +158,26 @@ namespace DataHandling
     // Get the input workspace
     MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
 
-    // get the sample number density
-    double unitCellVolume = getProperty("UnitCellVolume"); // in Angstroms^3
-    double zParameter = getProperty("ZParameter"); // in Angstroms^3
+    // determine the sample number density
     double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
     if (isEmpty(rho))
     {
-      rho = zParameter / unitCellVolume;
+      // if rho isn't set then just choose it to be one
+      rho = 1.;
+
+      double unitCellVolume = getProperty("UnitCellVolume"); // in Angstroms^3
+      double zParameter = getProperty("ZParameter"); // number of atoms
+
+      // get the unit cell volume from the workspace if it isn't set
+      if (isEmpty(unitCellVolume) && workspace->sample().hasOrientedLattice())
+      {
+        unitCellVolume = workspace->sample().getOrientedLattice().volume();
+        g_log.notice() << "found unit cell volume " << unitCellVolume << " Angstrom^-3\n";
+      }
+      // density is just number of atoms in the unit cell
+      // ...but only calculate it if you have both numbers
+      if ((!isEmpty(zParameter)) && (!isEmpty(unitCellVolume)))
+        rho = zParameter / unitCellVolume;
     }
 
     // get the scattering information
