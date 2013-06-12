@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <exception>
 
@@ -932,6 +933,56 @@ bool MantidEVWorker::showUB( const std::string & peaks_ws_name )
              o_lattice.erroralpha(),o_lattice.errorbeta(),o_lattice.errorgamma());
 
     g_log.notice( std::string( logInfo));
+  }
+  catch(...)
+  {
+    return false;
+  }
+
+  return true;
+}
+
+
+/**
+ *  Get the current UB matrix from the specified peaks workspace.
+ *
+ *  @param peaks_ws_name  The name of the peaks workspace with the UB
+ *                        matrix.
+ *  @param  lab_coords    If true, multiply the goniometer matrix
+ *                        times UB before returning it, so that
+ *                        the UB is expressed in lab-coordinates,
+ *                        otherwise, return the UB as it is stored
+ *                        in the sample.
+ *  @param UB             3x3 matrix of doubles to be filled out with
+ *                        the UB matrix if one exists in the specified
+ *                        peaks workspace.
+ *  @return true if the UB matrix was found and returned in the UB
+ *               parameter.
+ */
+bool MantidEVWorker::getUB( const std::string & peaks_ws_name,
+                                  bool          lab_coords,
+                                  Mantid::Kernel::Matrix<double> & UB )
+{
+  if ( !isPeaksWorkspace( peaks_ws_name ) )
+  {
+    return false;
+  }
+
+  const auto& ADS = AnalysisDataService::Instance();
+  IPeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+
+  try
+  {
+    Mantid::Geometry::OrientedLattice o_lattice = peaks_ws->mutableSample().getOrientedLattice();
+    UB = o_lattice.getUB();
+
+    if ( lab_coords )    // Try to get goniometer matrix from first peak 
+    {                    // and adjust UB for goniometer rotation
+      Mantid::DataObjects::Peak peak = Mantid::DataObjects::Peak(peaks_ws->getPeak(0));
+      Mantid::Kernel::Matrix<double> goniometer_matrix(3, 3, true);
+      goniometer_matrix = peak.getGoniometerMatrix();
+      UB = goniometer_matrix * UB;
+    }
   }
   catch(...)
   {

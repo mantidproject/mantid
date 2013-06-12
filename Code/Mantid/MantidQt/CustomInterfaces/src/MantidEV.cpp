@@ -189,6 +189,7 @@ void RunEllipsoidIntegrate::run()
  */
 MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
 {
+  last_Q        = V3D(0,0,0);
   worker        = new MantidEVWorker();
   m_thread_pool = new QThreadPool( this );
   m_thread_pool->setMaxThreadCount(1);
@@ -1121,7 +1122,7 @@ void MantidEV::QPointSelection_slot( bool lab_coords, double qx, double qy, doub
  *
  *  @param  lab_coords  Will be true if the Q-components are in lab coordinates
  *                      and false if they are in sample coordinates.
- *  @param q_point Vector containing the Q-coordinates.
+ *  @param  q_point     Vector containing the Q-coordinates.
  */
 void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
 {
@@ -1148,6 +1149,26 @@ void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
      info = worker->PointInfo( peaks_ws_name, lab_coords, q_point );
    }
 
+   double q_dist = ( q_point - last_Q ).norm();
+   std::pair<std::string, std::string> Q_dist_str("|Q2-Q1|", boost::lexical_cast<std::string>(q_dist));
+   info.push_back( Q_dist_str );
+
+   Mantid::Kernel::Matrix<double> UB(3,3,false);
+   if ( worker->getUB( peaks_ws_name, lab_coords, UB ) ) // if the peaks workspace has a UB, also find the
+   {                                                     // distance between points in HKL.
+     Mantid::Kernel::Matrix<double> UBinv( UB ); 
+     UBinv.Invert();
+     Mantid::Kernel::V3D  hkl_1 = UBinv * last_Q;
+     Mantid::Kernel::V3D  hkl_2 = UBinv * q_point;
+     hkl_1 = hkl_1 / (2 * M_PI); 
+     hkl_2 = hkl_2 / (2 * M_PI);
+     double hkl_dist = (hkl_2 - hkl_1).norm();
+     std::pair<std::string, std::string> hkl_dist_str("|hkl2-hkl1|", boost::lexical_cast<std::string>(hkl_dist));
+     info.push_back( hkl_dist_str );
+   }
+
+   last_Q = q_point;
+   
    m_uiForm.SelectedPoint_tbl->setRowCount((int)info.size());
    m_uiForm.SelectedPoint_tbl->setColumnCount(2);
    m_uiForm.SelectedPoint_tbl->verticalHeader()->hide();
