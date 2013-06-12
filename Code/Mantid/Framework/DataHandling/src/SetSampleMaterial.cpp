@@ -70,11 +70,12 @@ namespace DataHandling
     g_log.notice() << "Sample number density ";
     if (mat->numberDensity() == 1.)
       g_log.notice() << "(NOT SPECIFIED) ";
-    g_log.notice() << "= " << mat->numberDensity() << " atoms/angstrom^3\n";
-    g_log.notice() << "Scattering Cross Section = "
-                   << mat->totalScatterXSection(NeutronAtom::ReferenceLambda) << " barns\n"
-                   << "Attenuation Cross Section = "
-                   << mat->absorbXSection(NeutronAtom::ReferenceLambda)<< " barns\n";
+    g_log.notice() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
+    g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << "Angstroms\n"
+                   << "Coherent "   << mat->cohScatterXSection() << " barns\n"
+                   << "Incoherent " << mat->incohScatterXSection() << " barns\n"
+                   << "Total "      << mat->totalScatterXSection() << " barns\n"
+                   << "Absorption " << mat->absorbXSection() << " barns\n";
   }
 
   /**
@@ -212,26 +213,23 @@ namespace DataHandling
       try
       {
         Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbol);
-        sigma_s = 0.0;
-        sigma_atten = 0.0;
-        double numAtoms = 0.;
-        g_log.notice() << "Found " << CF.atoms.size() << " atoms in \"" << chemicalSymbol << "\"\n"; // REMOVE
+        g_log.notice() << "Found " << CF.atoms.size() << " atoms in \"" << chemicalSymbol << "\"\n";
+
+        double numAtoms = 0.; // number of atoms in formula
+        NeutronAtom neutron(0, 0., 0., 0., 0., 0., 0.); // starting thing for neutronic information
         for (size_t i=0; i<CF.atoms.size(); i++)
         {
           Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
-          Material *atom = new Material(CF.atoms[i], myAtom.neutron, myAtom.number_density);
-          g_log.notice() << myAtom << " sigma_s = "<< atom->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
-          g_log.notice() << myAtom << " sigma_atten = "<< atom->absorbXSection(NeutronAtom::ReferenceLambda) << "\n";
-          sigma_s +=  static_cast<double>(CF.numberAtoms[i]) * atom->totalScatterXSection(NeutronAtom::ReferenceLambda);
-          sigma_atten +=  static_cast<double>(CF.numberAtoms[i]) * atom->absorbXSection(NeutronAtom::ReferenceLambda);
+          neutron = neutron + CF.numberAtoms[i] * myAtom.neutron;
+
+          g_log.information() << myAtom << ": " << myAtom.neutron << "\n";
           numAtoms += static_cast<double>(CF.numberAtoms[i]);
         }
         // normalize the accumulated number by the number of atoms
-        sigma_atten /= numAtoms;
-        sigma_s /= numAtoms;
-        NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
-                                               0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
-        Material *mat = new Material(chemicalSymbol, *neutron, rho);
+        neutron = (1. / numAtoms) * neutron; // funny syntax b/c of operators in neutron atom
+
+        // create the material
+        Material *mat = new Material(chemicalSymbol, neutron, rho);
         workspace->mutableSample().setMaterial(*mat);
         logMaterial(mat);
       }
