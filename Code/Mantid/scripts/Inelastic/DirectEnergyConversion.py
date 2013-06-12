@@ -37,8 +37,10 @@ from mantid.simpleapi import *
 from mantid.kernel import funcreturns
 from mantid import api
 import glob
+import sys
 import os.path
 import math
+import unittest
 
 def setup_reducer(inst_name):
     """
@@ -690,15 +692,18 @@ class DirectEnergyConversion(object):
     # Behind the scenes stuff
     #---------------------------------------------------------------------------
 
-    def __init__(self, instr_name):
+    def __init__(self, instr_name=None):
         """
         Constructor
         """
         self._to_stdout = True
         self._log_to_mantid = False
         self._idf_values_read = False
+        if instr_name is None or len(instr_name)==0 :
+            self.instr_name=None
+        else:
         # Instrument and default parameter setup
-        self.initialise(instr_name)
+            self.initialise(instr_name)
 
     def initialise(self, instr_name,reload_instrument=False):
         """
@@ -776,18 +781,17 @@ class DirectEnergyConversion(object):
         self.sample_mass = 1.0
         self.sample_rmm = 1.0
         
+        # All this stuff should go to IDF file
         # Detector Efficiency Correction
-        #self.apply_detector_eff = True
+        self.apply_detector_eff = True
         
         # Ki/Kf factor correction
-        #self.apply_kikf_correction = True
+        self.apply_kikf_correction = True
 
-        # Detector calibration file
-        #self.det_cal_file = None
-        # the workspace which contains already loaded detector calibration file and used to save time on multiple det_cal_file loadings
+        # the workspace which contains already loaded detector calibration file and used to save time on multiple det_cal_file loadings  -- not yet implemented
         #self.det_cal_file_ws = None
         # Option to move detector positions based on the information
-        #self.relocate_dets = False
+        self.relocate_dets = False
 
         #The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :(
         self.van_rmm = 50.9415#self.get_default_parameter("vanadium-rmm") 
@@ -807,7 +811,7 @@ class DirectEnergyConversion(object):
             raise RuntimeError("Can not obtain instrument parameters describing inelastic conversion ")
 
         # build the dictionary of necessary allowed substitution names and substitute parameters with their values
-        self.build_subst_dictionary()
+        self.synonims = build_subst_dictionary(self.synonims)
 
         # build the dictionary which allows to process coupled property, namely the property, expressed through other properties values
         self.build_coupled_keys_dict(par_names)
@@ -840,9 +844,9 @@ class DirectEnergyConversion(object):
 
         return val[0]
 
-
-    def build_subst_dictionary(self) :
-        """Method to process the field "synonims" in the parameters string 
+    @staticmethod
+    def build_subst_dictionary(synonims_list=None) :
+        """Method to process the field "synonims_list" in the parameters string 
 
            it takes string of synonyms in the form key1=subs1=subst2=subts3;key2=subst4 and returns the dictionary 
            in the form dict[subs1]=key1 ; dict[subst2] = key1 ... dict[subst4]=key2
@@ -850,19 +854,15 @@ class DirectEnergyConversion(object):
            e.g. if one wants to use the IDF key word my_detector instead of e.g. norm-mon1-spec, he has to type 
            norm-mon1-spec=my_detector in the synonims field of the IDF parameters file. 
         """
-        if not hasattr(self,'synonims') :  # nothing to do
-            self.synonims = dict();
-            return
-        if self.synonims == None : # nothing to do 
-            self.synonims = dict();
-            return
-        if type(self.synonims) == dict : # all done
-            return
-        if type(self.synonims) != str : 
-            raise AttributeError("The synonims fielf of Reducer object has to be special format string or the dictionary")
+        if not synonims_list :  # nothing to do            
+            return dict();
+        if type(synonims_list) == dict : # all done
+            return synonims_list
+        if type(synonims_list) != str : 
+            raise AttributeError("The synonims field of Reducer object has to be special format string or the dictionary")
         # we are in the right place and going to transform string into dictionary
 
-        subst_lines = self.synonims.split(";")
+        subst_lines = synonims_list.split(";")
         rez  = dict()
         for lin in subst_lines :
             lin=lin.strip()
@@ -872,7 +872,7 @@ class DirectEnergyConversion(object):
             for i in xrange(1,len(keys)) :
                 rez[keys[i]]=keys[0].strip()
 
-        self.synonims = rez
+        return rez;
            
     def build_coupled_keys_dict(self,par_names) :
         """Method to build the dictionary of the keys which are expressed through other keys values
@@ -1008,5 +1008,36 @@ class DirectEnergyConversion(object):
             else:
                 raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % keyword)
 
+#-----------------------------------------------------------------
+class TestReducer(unittest.TestCase):
+    def setUp(self):
+        self.reducer = DirectEnergyConversion();
+
+    def test_build_subst_dictionary(self):
+       self.assertEqual(dict(), DirectEnergyConversion.build_subst_dictionary(""))
+       self.assertEqual(dict(),DirectEnergyConversion.build_subst_dictionary())
+
+       #self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary(10))
+       #self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary("A="))
+       #self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary("B=C;A="))
+
+       rez=dict();
+       rez['A']='B';
+       self.assertEqual(rez, DirectEnergyConversion.build_subst_dictionary(rez))
+
+       myDict =  DirectEnergyConversion.build_subst_dictionary("A=B")
+       self.assertEqual(myDict['B'],'A')
+
+       myDict =  DirectEnergyConversion.build_subst_dictionary("A=B;C=DD")
+       self.assertEqual(myDict['B'],'A')
+       self.assertEqual(myDict['DD'],'C')
+       myDict =  DirectEnergyConversion.build_subst_dictionary("A=B=C=DD")
+       self.assertEqual(myDict['B'],'A')
+       self.assertEqual(myDict['DD'],'A')
+       self.assertEqual(myDict['C'],'A')
+
+
 
 #-----------------------------------------------------------------
+if __name__=="__main__":
+    unittest.main()

@@ -152,8 +152,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
     dictionay  = Reducer.combine_keys(dictionary)
 
     for key in dictionary :
+        default_value = str(getattr(Reducer,key))
+        print " Replacing default value of: "+key+" from :"+default_vlaue+" to : ",dictionary.get(key)
         setattr(Reducer,key,dictionary.get(key));
-        print " Setting "+key+" to : ",dictionary.get(key)
+
 
     # map file in parameters overrides defaults
     if map_file != None :
@@ -198,14 +200,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         RenameWorkspace(InputWorkspace=accum,OutputWorkspace=inst_name+str(sample_run[0])+'.raw')
         sample_run=sample_run[0]
     
-    if kwargs.has_key('hardmaskPlus'):
-        HardMaskFile = kwargs.get('hardmaskPlus')
-        print 'Use hardmask from ', HardMaskFile
-        #hardMaskSpec=common.load_mask(HardMaskFile)
-        #MaskDetectors(Workspace='masking',SpectraList=hardMaskSpec)
-    else:
-        HardMaskFile=None
-    
+   
     if kwargs.has_key('hardmaskOnly'):
         totalmask = kwargs.get('hardmaskOnly')
         print 'Using hardmask from ', totalmask

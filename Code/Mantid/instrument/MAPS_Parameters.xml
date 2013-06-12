@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "MAPS" date = "2010-05-05T00:00:00">
+<parameter-file instrument = "MAPS" date = "2013-06-12T00:00:00">
 
 <component-link name = "MAPS">
 
@@ -20,6 +20,23 @@
    <value val="None"/>
 </parameter>
 
+<!-- The network name of the machine responsible for controlling DAE -->
+<parameter name="inst_dae_name" type="string">
+   <value val="ndxmerlin"/>
+</parameter>
+<!-- Extension of the data files obtained from DAE -->
+<parameter name="data_file_ext" type="string">
+   <value val=".RAW"/>
+</parameter>
+<!-- The name of the hard mas file to use  -->
+<parameter name="hard_mask_file" type="string">
+    <value val="None"/>
+</parameter>
+<!-- The if true, use only hard mask file specified above and do not run diagnostics procedures -->
+<parameter name="use_hard_mask_only" type="bool">
+    <value val="False"/>
+</parameter>
+
 
 
 <!-- RunNumber to use for diag instead of the input run number if none - use input run -->
@@ -27,10 +44,25 @@
    <value val="None"/>
 </parameter>
 
-<!-- Energy conversion mode direct/indirect/elastic (the one reducer understands) -->
+<!-- Energy conversion mode direct/indirect/elastic (the one the reducer understands) -->
 <parameter name="deltaE-mode" type="string">
   <value val="direct"/>
 </parameter>
+
+<!-- Monitor used to estimate total current on the sample -->
+<parameter name="norm-mon1-spec">
+  <value val="41473"/>
+</parameter>
+<parameter name="norm-mon1-min">
+  <value val="1000"/>
+</parameter>
+<parameter name="norm-mon1-max">
+  <value val="2000"/>
+</parameter>
+<parameter name="mon_norm_range"  type="string">
+  <value val="norm-mon1-min:norm-mon1-max"/>
+</parameter>
+
 
 <!-- First spectra number (monitor number) to use when measuring incident energy
     Should be spectra with well defined energy peak -->
@@ -89,20 +121,6 @@
 </parameter>
 
 
-<parameter name="norm-mon1-spec">
-  <value val="41473"/>
-</parameter>
-
-
-<parameter name="norm-mon1-min">
-  <value val="1000"/>
-</parameter>
-<parameter name="norm-mon1-max">
-  <value val="2000"/>
-</parameter>
-<parameter name="mon_norm_range"  type="string">
-  <value val="norm-mon1-min:norm-mon1-max"/>
-</parameter>
 
 
 <parameter name="monovan-integr-min">
@@ -121,7 +139,7 @@
   <value val="30.1"/>
 </parameter>
 
-<!-- Diagnostic defaults -->
+<!-- --------------------------- DIAGNOSTICS DEFAILTS ---------------------------------------- -->
 
 <!-- Perform diag by bank. These are the spectrum numbers -->
 <parameter name="diag_spectra" type="string">
@@ -193,6 +211,7 @@
   <value val="1.1"/>
 </parameter>
 
+<!-- ------------------ DIAGNOSTICS DEFAILTS END ---------------               -->
 <!--  -->
 
 <!-- Absolute units conversion average -->
@@ -283,7 +302,9 @@
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass;
        background_range=bkgd_range;
-       monovan_integr_range=abs_units_van_range"
+       monovan_integr_range=abs_units_van_range;
+       hard_mask_file=hardmaskPlus,
+       use_hard_mask_only=hardmaskOnly"
     />
 </parameter>
  
