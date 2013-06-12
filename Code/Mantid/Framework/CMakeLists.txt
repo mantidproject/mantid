@@ -102,12 +102,12 @@ set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
 if(MAKE_REMOTE_JOBS)
   include_directories (Remote/inc)
+  add_subdirectory (Remote)
+  set ( MANTIDLIBS ${MANTIDLIBS} Remote )
   add_subdirectory (RemoteAlgorithms)  # this line needs to come after the include_directories
                                        # line in order for things to compile.  This probably
                                        # means I've done something wrong somewhere else...
                                        # RGM - 30 April 2013
-  add_subdirectory (Remote)
-  set ( MANTIDLIBS ${MANTIDLIBS} Remote )
 endif(MAKE_REMOTE_JOBS)
 
 add_subdirectory (Nexus)
