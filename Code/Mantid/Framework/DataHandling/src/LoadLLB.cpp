@@ -132,7 +132,8 @@ void LoadLLB::exec() {
 	setInstrumentName(entry);
 
 	initWorkSpace(entry);
-
+	runLoadInstrument(); // just to get IDF
+	loadTimeDetails(entry);
 	loadDataIntoTheWorkSpace(entry);
 
 	loadRunDetails(entry);
@@ -166,6 +167,8 @@ std::string LoadLLB::getInstrumentName(NeXus::NXEntry& entry) {
 		if (it->nxclass == "NXinstrument" || it->nxname == "nxinstrument") {
 			m_nexusInstrumentEntryName = it->nxname;
 			std::string insNamePath = m_nexusInstrumentEntryName + "/name";
+			if ( !entry.isValid(insNamePath) )
+				throw std::runtime_error("Error reading the instrument name: " + insNamePath + " is not a valid path!");
 			instrumentName = entry.getString(insNamePath);
 			g_log.debug() << "Instrument Name: " << instrumentName
 					<< " in NxPath: " << insNamePath << std::endl;
@@ -212,26 +215,37 @@ void LoadLLB::initWorkSpace(NeXus::NXEntry& entry) {
 
 }
 
+/**
+ *
+ */
+void LoadLLB::loadTimeDetails(NeXus::NXEntry& entry) {
+
+	m_wavelength = entry.getFloat("nxbeam/incident_wavelength");
+	// Apparently this is in the wrong units
+	// http://iramis.cea.fr/Phocea/file.php?class=page&reload=1227895533&file=21/How_to_install_and_use_the_Fitmib_suite_v28112008.pdf
+	m_channelWidth = entry.getInt("nxmonitor/channel_width") * 0.1 ;
+
+	g_log.debug("Nexus Data:");
+	g_log.debug() << " ChannelWidth: " << m_channelWidth << std::endl;
+	g_log.debug() << " Wavelength: " << m_wavelength << std::endl;
+
+}
+
+
 void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 
 	// read in the data
 	NXData dataGroup = entry.openNXData("nxdata");
-	NXInt data = dataGroup.openIntData();
+	NXFloat data = dataGroup.openFloatData();
 	data.load();
 
-	NXFloat timeBinning = entry.openNXFloat("nxdata/x_axis");
-	timeBinning.load();
+	// EPP
+	int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(data);
 
-
-	size_t numberOfBins = static_cast<size_t>(timeBinning.dim1()) + 1; // boundaries
-	g_log.debug() << "Number of bins: " << numberOfBins << std::endl;
+	std::vector<double> timeBinning = getTimeBinning(calculatedDetectorElasticPeakPosition, m_channelWidth);
 
 	// Assign time bin to first X entry
-	float* timeBinning_p = &timeBinning[0];
-	std::vector<double> timeBinningTmp(numberOfBins);
-	timeBinningTmp.assign(timeBinning_p,timeBinning_p + numberOfBins);
-	timeBinningTmp[numberOfBins-1] = timeBinningTmp[numberOfBins-2]+timeBinningTmp[1]-timeBinningTmp[0];
-	m_localWorkspace->dataX(0).assign(timeBinningTmp.begin(),timeBinningTmp.end());
+	m_localWorkspace->dataX(0).assign(timeBinning.begin(),timeBinning.end());
 
 	Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 	size_t spec = 0;
@@ -242,7 +256,7 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 				m_localWorkspace->dataX(spec) = m_localWorkspace->readX(0);
 			}
 			// Assign Y
-			int* data_p = &data(static_cast<int>(i), static_cast<int>(j));
+			float* data_p = &data(static_cast<int>(i), static_cast<int>(j));
 			m_localWorkspace->dataY(spec).assign(data_p,
 					data_p + m_numberOfChannels);
 
@@ -257,6 +271,99 @@ void LoadLLB::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	}
 
 	g_log.debug() << "Data loading inti WS done...." << std::endl;
+}
+
+int LoadLLB::getDetectorElasticPeakPosition(const NeXus::NXFloat &data) {
+
+	std::vector<int> listOfFoundEPP;
+
+
+	std::vector<int> cumulatedSumOfSpectras(m_numberOfChannels, 0);
+	for (size_t i = 0; i < m_numberOfTubes; i++) {
+		float* data_p = &data(static_cast<int>(i), 0);
+		std::vector<int> thisSpectrum(data_p, data_p + m_numberOfChannels);
+		// sum spectras
+		std::transform(thisSpectrum.begin(), thisSpectrum.end(),
+				cumulatedSumOfSpectras.begin(), cumulatedSumOfSpectras.begin(),
+				std::plus<int>());
+	}
+	auto it = std::max_element(cumulatedSumOfSpectras.begin(),cumulatedSumOfSpectras.end());
+
+	int calculatedDetectorElasticPeakPosition;
+	if (it == cumulatedSumOfSpectras.end()) {
+		throw std::runtime_error("No Elastic peak position found while analyzing the data!");
+	} else {
+		//calculatedDetectorElasticPeakPosition = *it;
+		calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(cumulatedSumOfSpectras.begin(), it));
+
+		if (calculatedDetectorElasticPeakPosition == 0) {
+			throw std::runtime_error("No Elastic peak position found while analyzing the data. Elastic peak position is ZERO!");
+		} else {
+			g_log.debug() << "Calculated Detector EPP: "
+					<< calculatedDetectorElasticPeakPosition << std::endl;
+		}
+	}
+	return calculatedDetectorElasticPeakPosition;
+}
+
+std::vector<double> LoadLLB::getTimeBinning(int elasticPeakPosition, double channelWidth) {
+
+  double l1 = getL1();
+  double l2 = getL2();
+
+  double theoreticalElasticTOF = (calculateTOF(l1) + calculateTOF(l2)) * 1e6; //microsecs
+
+  g_log.debug() << "elasticPeakPosition : "
+	<< static_cast<float>(elasticPeakPosition) << std::endl;
+    g_log.debug() << "l1 : " << l1 << std::endl;
+    g_log.debug() << "l2 : " << l2 << std::endl;
+    g_log.debug() << "theoreticalElasticTOF : " << theoreticalElasticTOF << std::endl;
+
+  std::vector<double> detectorTofBins(m_numberOfChannels + 1);
+
+  for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+    detectorTofBins[i] = theoreticalElasticTOF
+	+ channelWidth
+	    * static_cast<double>(static_cast<int>(i)
+		- elasticPeakPosition)
+	- channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
+
+  }
+  return detectorTofBins;
+}
+
+double LoadLLB::getL1() {
+
+  Geometry::Instrument_const_sptr instrument =
+      m_localWorkspace->getInstrument();
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  double l1 = instrument->getSource()->getDistance(*sample);
+  return l1;
+}
+
+double LoadLLB::getL2(int detId) {
+  // Get a pointer to the instrument contained in the workspace
+  Geometry::Instrument_const_sptr instrument =
+      m_localWorkspace->getInstrument();
+  // Get the distance between the source and the sample (assume in metres)
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  // Get the sample-detector distance for this detector (in metres)
+  double l2 = m_localWorkspace->getDetector(detId)->getPos().distance(
+      sample->getPos());
+  return l2;
+}
+
+/**
+ * Calculate TOF from distance
+ *  @param distance :: distance in meters
+ *  @return tof in seconds
+ */
+double LoadLLB::calculateTOF(double distance) {
+
+  double velocity = PhysicalConstants::h
+      / (PhysicalConstants::NeutronMass * m_wavelength * 1e-10); //m/s
+
+  return distance / velocity;
 }
 
 void LoadLLB::loadRunDetails(NXEntry & entry) {

@@ -54,7 +54,13 @@ private:
 	void setInstrumentName(NeXus::NXEntry& entry);
 	std::string getInstrumentName(NeXus::NXEntry& entry);
 	void initWorkSpace(NeXus::NXEntry&);
+	void loadTimeDetails(NeXus::NXEntry& entry);
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry&);
+	int getDetectorElasticPeakPosition(const NeXus::NXFloat&);
+	std::vector<double> getTimeBinning(int, double);
+	double getL1();
+	double getL2(int detId = 1);
+	double calculateTOF(double);
 	/// Calculate error for y
 	static double calculateError(double in) {
 		return sqrt(in);
@@ -72,6 +78,8 @@ private:
 	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
 	size_t m_numberOfChannels; // time channels - Z
 	size_t m_numberOfHistograms;
+	double m_wavelength;
+	double m_channelWidth;
 
 };
 
