@@ -587,6 +587,59 @@ public:
     TS_ASSERT_EQUALS("QSample", coordinateToString(Mantid::API::QSample));
   }
 
+  void test_getPeaksSizeOnProjection()
+  {
+    const int nPeaks = 1;
+    const double occupancyInView = 0.07;
+
+    // Create a mock view object/product that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView); 
+    EXPECT_CALL(*pMockView, positionOnly()).WillOnce(Return(true)); // A peak repesentation without an absolute size.
+    EXPECT_CALL(*pMockView, getOccupancyInView()).WillOnce(Return(occupancyInView)); // The occupancy that the VIEW returns.
+    // Create a widget factory mock
+    auto pMockViewFactory = new MockPeakOverlayFactory;
+    PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+
+    auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
+    presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
+    auto concretePresenter = presenterBuilder.create();
+
+    TS_ASSERT_EQUALS(occupancyInView, concretePresenter->getPeakSizeOnProjection()); 
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
+  void test_getPeaksSizeIntoProjection()
+  {
+    const int nPeaks = 1;
+    const double occupancyIntoView = 0.05;
+
+    // Create a mock view object/product that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView); 
+    EXPECT_CALL(*pMockView, positionOnly()).WillOnce(Return(true)); // A peak repesentation without an absolute size.
+    EXPECT_CALL(*pMockView, getOccupancyIntoView()).WillOnce(Return(occupancyIntoView)); // The occupancy that the VIEW returns.
+    // Create a widget factory mock
+    auto pMockViewFactory = new MockPeakOverlayFactory;
+    PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+
+    auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
+    presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
+    auto concretePresenter = presenterBuilder.create();
+
+    TS_ASSERT_EQUALS(occupancyIntoView, concretePresenter->getPeakSizeIntoProjection()); 
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
+
 };
 
 

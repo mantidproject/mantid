@@ -339,12 +339,22 @@ namespace MantidQt
 
     double ConcretePeaksPresenter::getPeakSizeOnProjection() const
     {
-      throw std::runtime_error("Not implemented");
+      double result = 0;
+      if (m_viewPeaks != NULL && m_viewPeaks->positionOnly())
+      {
+        result = m_viewPeaks->getOccupancyInView();
+      }
+      return result;
     }
 
     double ConcretePeaksPresenter::getPeakSizeIntoProjection() const
     {
-      throw std::runtime_error("Not implemented");
+      double result = 0;
+      if (m_viewPeaks != NULL && m_viewPeaks->positionOnly())
+      {
+        result = m_viewPeaks->getOccupancyIntoView();
+      }
+      return result;
     }
 
   }
