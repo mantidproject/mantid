@@ -106,8 +106,8 @@ namespace Mantid
         // Array with true where the voxel should be shown
         bool * voxelShown = new bool[nBinsX*nBinsY];
 
-        double progressFactor = 50/double(nBinsX);
-        double progressOffset = 50;
+        double progressFactor = 0.5/double(nBinsX);
+        double progressOffset = 0.5;
 
         size_t index = 0;
         for (int i = 0; i < nBinsX; i++)
