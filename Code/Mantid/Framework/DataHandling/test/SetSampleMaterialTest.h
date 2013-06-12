@@ -52,7 +52,7 @@ public:
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(wsName, testWS);
 
-    TS_ASSERT_THROWS_NOTHING( setmat->setProperty<MatrixWorkspace_sptr>("InputWorkspace", wsName) );
+	TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("InputWorkspace", wsName) );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ChemicalFormula","Al2-O3") );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("SampleNumberDensity","0.0236649") );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ScatteringXSection","15.7048") );
@@ -83,8 +83,8 @@ public:
 	
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(wsName, testWS);
-
-    TS_ASSERT_THROWS_NOTHING( setmat->setProperty<MatrixWorkspace_sptr>("InputWorkspace", wsName) );
+	
+	TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("InputWorkspace", wsName) );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ChemicalFormula","Al2-O3") );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("UnitCellVolume","253.54") );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ZParameter","6") );
