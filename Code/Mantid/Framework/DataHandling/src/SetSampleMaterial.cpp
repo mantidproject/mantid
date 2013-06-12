@@ -120,7 +120,7 @@ namespace DataHandling
     declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
         "Optional:  This scattering cross-section (coherent + incoherent) for the sample material in barns will be used instead of calculated");
     declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-        "Optional:  This number density of the sample in number per cubic angstrom will be used instead of calculated");
+        "Optional:  This number density of the sample in number of atoms per cubic angstrom will be used instead of calculated");
 	
 	// Perform Group Associations.
 	std::string formulaGrp("By Formula or Atomic Number");
