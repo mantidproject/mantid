@@ -143,14 +143,22 @@ namespace DataHandling
   {
     // Get the input workspace
     MatrixWorkspace_sptr workspace = getProperty("InputWorkspace");
+
+    // get the sample number density
+    double unitCellVolume = getProperty("UnitCellVolume"); // in Angstroms^3
+    double zParameter = getProperty("ZParameter"); // in Angstroms^3
+    double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
+    if (isEmpty(rho))
+    {
+      rho = zParameter / unitCellVolume;
+    }
+
+    // get the scattering information
     const std::string chemicalSymbol = getProperty("ChemicalFormula");
     const int z_number = getProperty("AtomicNumber");
     const int a_number = getProperty("MassNumber");
     double sigma_atten = getProperty("AttenuationXSection"); // in barns
     double sigma_s = getProperty("ScatteringXSection"); // in barns
-    double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
-    double unitCellVolume = getProperty("UnitCellVolume"); // in Angstroms^3
-    double zParameter = getProperty("ZParameter"); // in Angstroms^3
 
     // Use user variables if all three are given
     if (sigma_atten != EMPTY_DBL() && sigma_s != EMPTY_DBL() && rho != EMPTY_DBL())
@@ -179,6 +187,7 @@ namespace DataHandling
         Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbol);
         sigma_s = 0.0;
         sigma_atten = 0.0;
+        double numAtoms = 0.;
         g_log.notice() << "Found " << CF.atoms.size() << " atoms in \"" << chemicalSymbol << "\"\n"; // REMOVE
         for (size_t i=0; i<CF.atoms.size(); i++)
         {
@@ -188,8 +197,11 @@ namespace DataHandling
           g_log.notice() << myAtom << " sigma_atten = "<< atom->absorbXSection(NeutronAtom::ReferenceLambda) << "\n";
           sigma_s +=  static_cast<double>(CF.numberAtoms[i]) * atom->totalScatterXSection(NeutronAtom::ReferenceLambda);
           sigma_atten +=  static_cast<double>(CF.numberAtoms[i]) * atom->absorbXSection(NeutronAtom::ReferenceLambda);
+          numAtoms += static_cast<double>(CF.numberAtoms[i]);
         }
-        rho = zParameter / unitCellVolume;
+        // normalize the accumulated number by the number of atoms
+        sigma_atten /= numAtoms;
+        sigma_s /= numAtoms;
         NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
                                                0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
         Material *mat = new Material(chemicalSymbol, *neutron, rho);
