@@ -112,7 +112,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_METHOD1(changeForegroundColour, void(const QColor));
     MOCK_METHOD1(changeBackgroundColour, void(const QColor));
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
-    MOCK_CONST_METHOD0(getBoundingBox, PeakBoundingBox());
+    MOCK_CONST_METHOD1(getBoundingBox, PeakBoundingBox(const int));
     MOCK_METHOD1(changeOccupancyInView, void(const double));
     MOCK_METHOD1(changeOccupancyIntoView, void(const double));
     MOCK_CONST_METHOD0(getOccupancyInView, double());
@@ -127,7 +127,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
   class MockPeakOverlayFactory : public PeakOverlayViewFactory
   {
   public:
-    MOCK_CONST_METHOD2(createView, boost::shared_ptr<PeakOverlayView>(const int, PeakTransform_const_sptr));
+    MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(PeakTransform_const_sptr));
     MOCK_CONST_METHOD0(getPlotXLabel, std::string());
     MOCK_CONST_METHOD0(getPlotYLabel, std::string());
     MOCK_METHOD0(updateView, void());

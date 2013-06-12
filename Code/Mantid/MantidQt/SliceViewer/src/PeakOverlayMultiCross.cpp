@@ -143,11 +143,12 @@ namespace MantidQt
     }
 
     /**
+    @param peakIndex: Index of the peak to fetch the bounding box for.
     @return bounding box for peak in windows coordinates.
     */
-    PeakBoundingBox PeakOverlayMultiCross::getBoundingBox() const
+    PeakBoundingBox PeakOverlayMultiCross::getBoundingBox(const int peakIndex) const
     {
-      return m_physicalPeaks[0]->getBoundingBox(); // Hack
+      return m_physicalPeaks[peakIndex]->getBoundingBox(); 
     }
 
     /**
@@ -158,7 +159,6 @@ namespace MantidQt
     {
       for(int i = 0; i < m_physicalPeaks.size(); ++i)
       {
-
         m_physicalPeaks[i]->setOccupancyInView(fraction);
       }
     }
@@ -177,18 +177,12 @@ namespace MantidQt
 
     double PeakOverlayMultiCross::getOccupancyInView() const
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
-      {
-        return m_physicalPeaks[i]->getOccupancyInView();
-      }
+      return m_physicalPeaks[0]->getOccupancyInView();
     }
 
     double PeakOverlayMultiCross::getOccupancyIntoView() const
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
-      {
-        return m_physicalPeaks[i]->getOccupancyIntoView();
-      }
+      return m_physicalPeaks[0]->getOccupancyIntoView();
     }
 
     bool PeakOverlayMultiCross::positionOnly() const

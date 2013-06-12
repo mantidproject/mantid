@@ -154,12 +154,12 @@ namespace MantidQt
     }
 
     /**
+     @param peakIndex: Index of the peak to fetch the bounding box for.
      @return bounding box for peak in windows coordinates.
      */
-    PeakBoundingBox PeakOverlayMultiSphere::getBoundingBox() const
+    PeakBoundingBox PeakOverlayMultiSphere::getBoundingBox(const int peakIndex) const
     {
-      //return m_physicalPeak.getBoundingBox();
-      throw std::runtime_error("PeakOverlayMultiSphere::getBoundingBox not implemented yet");
+      return m_physicalPeaks[peakIndex]->getBoundingBox();
     }
 
     void PeakOverlayMultiSphere::changeOccupancyInView(const double)

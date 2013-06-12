@@ -39,7 +39,7 @@ namespace MantidQt
     {
     }
 
-    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiCrossFactory::createView(const int, PeakTransform_const_sptr transform) const
+    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiCrossFactory::createView(PeakTransform_const_sptr transform) const
     {
       // Construct all physical peaks
       VecPhysicalCrossPeak physicalPeaks(m_peaksWS->rowCount());

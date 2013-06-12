@@ -45,7 +45,7 @@ namespace MantidQt
      */
     void ConcretePeaksPresenter::produceViews()
     {
-      m_viewPeaks = m_viewFactory->createView(0, m_transform);
+      m_viewPeaks = m_viewFactory->createView(m_transform);
     }
 
     /**
@@ -284,16 +284,19 @@ namespace MantidQt
           }
           m_viewPeaks->updateView();
       }
-        
     }
 
     /**
      @param peakIndex: index into contained peaks workspace.
      @return the bounding box corresponding to the peakIndex.
      */
-    PeakBoundingBox ConcretePeaksPresenter::getBoundingBox(const int) const
+    PeakBoundingBox ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const
     {
-      throw std::runtime_error("Not implemented yet");
+      if(peakIndex < 0 || peakIndex > m_peaksWS->rowCount())
+      {
+        throw std::out_of_range("Index given to ConcretePeaksPresenter::getBoundingBox() is out of range.");
+      }
+      return m_viewPeaks->getBoundingBox(peakIndex);
     }
 
     void ConcretePeaksPresenter::sortPeaksWorkspace(const std::string& byColumnName,
@@ -326,7 +329,6 @@ namespace MantidQt
     {
       m_viewPeaks->changeOccupancyInView(fraction);
       m_viewPeaks->updateView();
-        
     }
 
     void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
