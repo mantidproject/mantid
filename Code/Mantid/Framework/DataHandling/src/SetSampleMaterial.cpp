@@ -1,9 +1,35 @@
 /*WIKI* 
 
-Sets the neutrons information in the sample.
+Sets the neutrons information in the sample. You can either enter details about the chemical formula or atomic number, 
+or you can provide specific values for the attenuation and scattering cross sections and the sample number density.  
+If you decide to provide specific values you must give values for all three (attenuation and scattering cross sections and the sample number density), and any formula information will be ignored.
+If you miss any of the three specific values then the other will be ignored.
 
-
+Neutron scattering lengths and cross sections of the elements and their isotopes have been taken from [http://www.ncnr.nist.gov/resources/n-lengths/list.html].
  *WIKI*/
+/*WIKI_USAGE* 
+=====Setting the sample by simple formula=====
+ SetSampleMaterial(InputWorkspace='IRS26173',ChemicalFormula='Fe')
+ 
+=====Setting the sample by a more complex formula=====
+ SetSampleMaterial(InputWorkspace='IRS26173',ChemicalFormula='Al2-O3', UnitCellVolume='253.54', ZParameter='6')
+
+=====Setting the sample by specific values (all three must be specified)=====
+ SetSampleMaterial(InputWorkspace='IRS26173',AttenuationXSection=2.56,ScatteringXSection=11.62,SampleNumberDensity=0.0849106)
+
+=====Extracting the set values out by python=====
+ sam = ws.sample()
+ mat = sam.getMaterial()
+ print mat.absorbXSection()
+  1.3374
+ print mat.cohScatterXSection()
+  339.1712
+ print mat.name()
+  C2 H4
+ print mat.totalScatterXSection()
+  339.1712
+
+ *WIKI_USAGE*/
 //--------------------------------
 // Includes
 //--------------------------------
@@ -44,7 +70,7 @@ namespace DataHandling
   {
     using namespace Mantid::Kernel;
     declareProperty(
-        new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
+        new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::InOut),
         "The workspace with which to associate the sample ");
     declareProperty("ChemicalFormula", "", "ChemicalFormula or AtomicNumber must be given. "
         "Enter a composition as a molecular formula of \n"
@@ -76,7 +102,7 @@ namespace DataHandling
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
-        "Unit cell volumne in Angstoms^3 needed for chemical formulas with more than 1 atom");
+        "Unit cell volume in Angstoms^3 needed for chemical formulas with more than 1 atom");
     declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
         "Number of formulas in the unit cell needed for chemical formulas with more than 1 atom");
     declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
@@ -85,6 +111,19 @@ namespace DataHandling
         "Optional:  This scattering cross-section (coherent + incoherent) for the sample material in barns will be used instead of calculated");
     declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
         "Optional:  This number density of the sample in number per cubic angstrom will be used instead of calculated");
+	
+	// Perform Group Associations.
+	std::string formulaGrp("By Formula or Atomic Number");
+	setPropertyGroup("ChemicalFormula", formulaGrp);
+	setPropertyGroup("AtomicNumber", formulaGrp);
+	setPropertyGroup("MassNumber", formulaGrp);
+	setPropertyGroup("UnitCellVolume", formulaGrp);
+	setPropertyGroup("ZParameter", formulaGrp);
+
+	std::string specificValuesGrp("Enter Specific Values");
+	setPropertyGroup("AttenuationXSection", specificValuesGrp);
+	setPropertyGroup("ScatteringXSection", specificValuesGrp);
+	setPropertyGroup("SampleNumberDensity", specificValuesGrp);
   }
 
   /**
