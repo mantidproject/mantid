@@ -155,12 +155,12 @@ namespace DataHandling
     // Use user variables if all three are given
     if (sigma_atten != EMPTY_DBL() && sigma_s != EMPTY_DBL() && rho != EMPTY_DBL())
     {
-    	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
-    			0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
+      NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
+                                             0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
       Material *mat = new Material(chemicalSymbol, *neutron, rho);
       workspace->mutableSample().setMaterial(*mat);
       logMaterial(mat);
-    	return;
+      return;
     }
 
     // Use chemical symbol if given by user
@@ -173,44 +173,45 @@ namespace DataHandling
     }
     catch (...)
     {
-        // Use chemical formula if given by user
-    	try
-    	{
-			Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbol);
-        	sigma_s = 0.0;
-        	sigma_atten = 0.0;
-        	for (size_t i=0; i<CF.atoms.size(); i++)
-        	{
-        		Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
-        		Material *atom = new Material(CF.atoms[i], myAtom.neutron, myAtom.number_density);
-        		g_log.notice() << myAtom << " sigma_s = "<< atom->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
-        		g_log.notice() << myAtom << " sigma_atten = "<< atom->absorbXSection(NeutronAtom::ReferenceLambda) << "\n";
-        		sigma_s +=  static_cast<double>(CF.numberAtoms[i]) * atom->totalScatterXSection(NeutronAtom::ReferenceLambda);
-        		sigma_atten +=  static_cast<double>(CF.numberAtoms[i]) * atom->absorbXSection(NeutronAtom::ReferenceLambda);
-        	}
-			rho = zParameter / unitCellVolume;
-			NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
-					0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
-    		Material *mat = new Material(chemicalSymbol, *neutron, rho);
+      // Use chemical formula if given by user
+      try
+      {
+        Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbol);
+        sigma_s = 0.0;
+        sigma_atten = 0.0;
+        g_log.notice() << "Found " << CF.atoms.size() << " atoms in \"" << chemicalSymbol << "\"\n"; // REMOVE
+        for (size_t i=0; i<CF.atoms.size(); i++)
+        {
+          Atom myAtom = getAtom(CF.atoms[i], CF.aNumbers[i]);
+          Material *atom = new Material(CF.atoms[i], myAtom.neutron, myAtom.number_density);
+          g_log.notice() << myAtom << " sigma_s = "<< atom->totalScatterXSection(NeutronAtom::ReferenceLambda) << "\n";
+          g_log.notice() << myAtom << " sigma_atten = "<< atom->absorbXSection(NeutronAtom::ReferenceLambda) << "\n";
+          sigma_s +=  static_cast<double>(CF.numberAtoms[i]) * atom->totalScatterXSection(NeutronAtom::ReferenceLambda);
+          sigma_atten +=  static_cast<double>(CF.numberAtoms[i]) * atom->absorbXSection(NeutronAtom::ReferenceLambda);
+        }
+        rho = zParameter / unitCellVolume;
+        NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number),
+                                               0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
+        Material *mat = new Material(chemicalSymbol, *neutron, rho);
         workspace->mutableSample().setMaterial(*mat);
         logMaterial(mat);
-    	}
-        catch (...)
-        {
-			// Use atomic and mass number if chemical formula does not work
-			try
-			{
-				Atom myAtom = getAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number));
-				Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
-				workspace->mutableSample().setMaterial(*mat);
-        logMaterial(mat);
       }
-			catch(std::invalid_argument&)
-			{
-				g_log.notice("ChemicalFormula or AtomicNumber was not found in table.");
-				throw std::invalid_argument("ChemicalFormula or AtomicNumber was not found in table");
-			}
+      catch (...)
+      {
+        // Use atomic and mass number if chemical formula does not work
+        try
+        {
+          Atom myAtom = getAtom(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number));
+          Material *mat = new Material(chemicalSymbol, myAtom.neutron, myAtom.number_density);
+          workspace->mutableSample().setMaterial(*mat);
+          logMaterial(mat);
         }
+        catch(std::invalid_argument&)
+        {
+          g_log.notice("ChemicalFormula or AtomicNumber was not found in table.");
+          throw std::invalid_argument("ChemicalFormula or AtomicNumber was not found in table");
+        }
+      }
     }
     // Done!
     progress(1);
