@@ -106,7 +106,7 @@ namespace CurveFitting
     * @param xvalues :: input vector
     * @param includebkgd :: if true, then calculate background and add to output.  otherwise, assume zero background
     */
-  void LeBailFunction::function(std::vector<double>& out, const std::vector<double>& xvalues, bool includebkgd) const
+  void LeBailFunction::function(std::vector<double>& out, const std::vector<double>& xvalues, bool calpeaks, bool calbkgd) const
   {
     if (out.size() != xvalues.size())
       throw runtime_error("xvalues and out have different sizes.");
@@ -117,20 +117,20 @@ namespace CurveFitting
     vector<double> temp(xvalues.size());
 
     // Peaks
-    for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
+    if (calpeaks)
     {
-      // Reset temporary vector for output 
-      ::fill(temp.begin(), temp.end(), 0.);
-      IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
-      peak->function(temp, xvalues);
-#if 1
-      g_log.notice() << "Peak " << ipk << "  Y[26] = " << temp[26] << ".\n";
-#endif
-      transform(out.begin(), out.end(), temp.begin(), out.begin(), ::plus<double>());
+      for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
+      {
+        // Reset temporary vector for output
+        ::fill(temp.begin(), temp.end(), 0.);
+        IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
+        peak->function(temp, xvalues);
+        transform(out.begin(), out.end(), temp.begin(), out.begin(), ::plus<double>());
+      }
     }
 
     // Background if required
-    if (includebkgd)
+    if (calbkgd)
     {
       if (!m_background)
       {
@@ -147,6 +147,26 @@ namespace CurveFitting
 
     return;
   }
+
+  /**  Calculate a single peak's value
+    */
+  void LeBailFunction::calPeak(size_t ipk, std::vector<double>& out, const std::vector<double>& xvalues) const
+  {
+    if (ipk >= m_numPeaks)
+    {
+      stringstream errss;
+      errss << "Try to calculate peak indexed " << ipk << ". But number of peaks = " << m_numPeaks;
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    ::fill(out.begin(), out.end(), 0.);
+    IPowderDiffPeakFunction_sptr peak = m_vecPeaks[ipk];
+    peak->function(out, xvalues);
+
+    return;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Check whether a parameter is a profile parameter
@@ -262,6 +282,8 @@ namespace CurveFitting
 
     m_numPeaks = m_vecPeaks.size();
 
+    g_log.information() << "Total " << m_numPeaks << " after trying to add " << peakhkls.size() << " peaks. \n";
+
     return;
   } // END of addPeaks()
 
@@ -297,14 +319,13 @@ namespace CurveFitting
   * (a) Assign peaks into groups; each group contains either (1) one peak or (2) peaks overlapped
   * (b) Calculate peak intensities for every peak per group
   *
-  * @param dataws :  data workspace holding diffraction data for peak calculation
-  * @param workspaceindex:  workpace index of the data for peak calculation in dataws
-  * @param zerobackground:  flag if the data is zero background
+  * @param vecX :: vector for x values
+  * @param vecY :: vector for data with background removed
   * @param vec_summedpeaks:  output vector storing peaks' values calculated
   *
   * Return: True if all peaks' height are physical.  False otherwise
   */
-  bool LeBailFunction::calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground,
+  bool LeBailFunction::calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY,
                                                  vector<double>& vec_summedpeaks)
   {
     // Divide peaks into groups from peak's parameters
@@ -318,8 +339,7 @@ namespace CurveFitting
       g_log.debug() << "[Fx351] Calculate peaks heights for (peak) group " << ig
                     << " : number of peaks = " << peakgroupvec[ig].size() << "\n";
 
-      zerobackground = true;
-      bool peakheightsphysical = calculateGroupPeakIntensities(peakgroupvec[ig], vecX, vecY, zerobackground,
+      bool peakheightsphysical = calculateGroupPeakIntensities(peakgroupvec[ig], vecX, vecY,
                                                                vec_summedpeaks);
 
       if (!peakheightsphysical)
@@ -332,16 +352,13 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Calculate peak's intensities in a group and set the calculated peak height
    * to the corresponding peak function.
-   * @param allpeaksvalues:  vector containing the peaks values.  Increment will be made on each
-   *                      peak group
    * @param peakgroup:  vector of peak-centre-dpsace value and peak function pair for peaks that are overlapped
-   * @param dataws:  data workspace for the peaks
-   * @param wsindex: workspace index of the peaks data in dataws
-   * @param zerobackground: true if background is zero
-   * @param vec_summedpeaks :: vector of summation of all peaks
+   * @param vecX:  vector of X array
+   * @param vecY:  vector for data with background removed.
+   * @param vec_summedpeaks :: vector of summation of all peaks, i.e., output of sum_peaks
    */
   bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup,
-                                                     const vector<double>& vecX, const vector<double>& vecY, bool zerobackground,
+                                                     const vector<double>& vecX, const vector<double>& vecY,
                                                      vector<double>& vec_summedpeaks)
   {
     // Check input peaks group and sort peak by d-spacing
@@ -494,49 +511,17 @@ namespace CurveFitting
       peakvalues[ipk].assign(localpeakvalue.begin(), localpeakvalue.end());
     } // For All peaks
 
-    // 5. Calculate intensity of all peaks
-    vector<double> pureobspeaksintensity(ndata);
-
-    // a) Remove background
-    if (zerobackground)
-    {
-      pureobspeaksintensity.assign(datay.begin(), datay.end());
-    }
-    else
-    {
-      // Non-zero background.  Remove the background
-      FunctionDomain1DVector xvalues(datax);
-      FunctionValues bkgdvalue(xvalues);
-      m_background->function(xvalues, bkgdvalue);
-
-#if 0
-      if (!m_background)
-      {
-        throw runtime_error("No background defined");
-      }
-      else
-      {
-        size_t numbkgdpars = m_background->nParams();
-        for (size_t i = 0; i < numbkgdpars; ++i)
-          g_log.notice() << m_background->parameterName(i) << " = " << m_background->getParameter(i) << ".\n";
-      }
-      throw runtime_error("Debug Stop!");
-#endif
-
-      for (size_t i = 0; i < ndata; ++i)
-        pureobspeaksintensity[i] = datay[i] - bkgdvalue[i];
-    }
-
+    // Calculate intensity of all peaks
     bool peakheightsphysical = true;
     for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
     {
       IPowderDiffPeakFunction_sptr peak = peakgroup[ipk].second;
       double intensity = 0.0;
 
-
 #if 0
       g_log.notice() << "nData = " << ndata << ".\n";
-      g_log.notice() << "Data X from " << datax.front() << " to " << datax.back() << ".\n";
+      g_log.notice() << "Data X from " << datax.front() << " to " << datax.back()
+                     << " for X and Sum[Y] " << ".\n";
       for (size_t i = 0; i < ndata; ++i)
         g_log.notice() << datax[i] << "\t\t" << sumYs[i] << ".\n";
 #endif
@@ -548,7 +533,10 @@ namespace CurveFitting
         {
           // Reasonable non-zero value
           double peaktogroupratio = peakvalues[ipk][i]/sumYs[i];
-          temp = pureobspeaksintensity[i] * peaktogroupratio;
+          temp = datay[i] * peaktogroupratio;
+#if 0
+          g_log.debug() << "Data " << i << " is " << datay[i] << ", Peak Ratio = " << peaktogroupratio << ".\n";
+#endif
         }
         else
         {
@@ -560,6 +548,10 @@ namespace CurveFitting
           deltax = datax[1] - datax[0];
         else
           deltax = datax[i] - datax[i-1];
+
+#if 0
+        g_log.notice() << "Intensity = " << intensity << " by increment = " << temp << " x " << deltax << ".\n";
+#endif
         intensity += temp * deltax;
       } // for data points
 
@@ -588,6 +580,7 @@ namespace CurveFitting
       {
         // No negative intensity
         intensity = 0.0;
+        g_log.warning("Set intensity to 0.0 because it was negative.");
       }
 
       g_log.information() << "[DBx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";

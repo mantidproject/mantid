@@ -85,7 +85,10 @@ namespace CurveFitting
     size_t getNumberOfPeaks() const { return m_numPeaks; }
 
     /// Calculate
-    void function(std::vector<double>& out, const std::vector<double> &xvalues, bool includebkgd) const;
+    void function(std::vector<double>& out, const std::vector<double> &xvalues, bool calpeaks, bool calbkgd) const;
+
+    ///  Calculate a single peak's value
+    void calPeak(size_t ipk, std::vector<double>& out, const std::vector<double>& xvalues) const;
 
     /// Return the composite function
     API::IFunction_sptr getFunction();
@@ -109,7 +112,7 @@ namespace CurveFitting
     void setFixPeakHeights();
 
     /// Calculate peak intensities by Le Bail algorithm
-    bool calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, bool zerobackground, vector<double>& vec_summedpeaks);
+    bool calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY, vector<double> &vec_summedpeaks);
 
     /// Get the maximum value of a peak in a given set of data points
     double getPeakMaximumValue(std::vector<int> hkl, const vector<double> &xvalues, size_t& ix);
@@ -136,8 +139,7 @@ namespace CurveFitting
 
     /// Calculate the peaks intensities in same group
     bool calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup,
-                                       const vector<double> &vecX, const vector<double> &vecY, bool zerobackground,
-                                       vector<double>& vec_summedpeaks);
+                                       const vector<double> &vecX, const vector<double> &vecY, vector<double> &vec_summedpeaks);
 
     /// Group close peaks together
     void groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec);

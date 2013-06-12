@@ -122,7 +122,7 @@ public:
     TS_ASSERT_DELTA(gamma_d2, 0.0, 0.01);
 
     // Calculate peak
-    MatrixWorkspace_sptr testws = createDataWorkspace();
+    MatrixWorkspace_sptr testws = createDataWorkspace(1);
     const vector<double> vecX = testws->readX(0);
     const vector<double> vecY = testws->readY(0);
 
@@ -131,7 +131,7 @@ public:
 
     // Calculate peak intensities
     vector<double> summedpeaksvalue(vecY.size(), 0.);
-    lebailfunction.calculatePeaksIntensities(vecX, vecY, true, summedpeaksvalue);
+    lebailfunction.calculatePeaksIntensities(vecX, vecY, summedpeaksvalue);
 
     // IPowderDiffPeakFunction_sptr peak111 = lebailfunction.getPeak(0);
     // IPowderDiffPeakFunction_sptr peak110 = lebailfunction.getPeak(1);
@@ -150,8 +150,8 @@ public:
     cout << "Max value of peak 110 is at TOF = " << vecX[imax111] << " as the " << imax111 << "-th points.\n";
 
     // Calculate diffraction patters
-    lebailfunction.function(out, vecX, false);
-    TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(out, vecX, true));
+    lebailfunction.function(out, vecX, true, false);
+    TS_ASSERT_THROWS_ANYTHING(lebailfunction.function(out, vecX, true, true));
 
     /*
     map<string, double> bkgdparmap;
@@ -163,119 +163,119 @@ public:
     bkgdvec[1] = 0.;
     lebailfunction.addBackgroundFunction("Polynomial", bkgdvec);
 
-    lebailfunction.function(out, vecX, true);
+    lebailfunction.function(out, vecX, true, true);
 
     double v1 = out[imax111];
     double v2 = out[imax110];
     TS_ASSERT_DELTA(v1, 1380.5173, 10.);
     TS_ASSERT_DELTA(v2, 667.17743, 5.);
 
- #if 0
-
-    // TS_ASSERT_EQUALS(fitalg.asString(),
-    // "name=LeBailFunction,Dtt1=1,Dtt2=1,Dtt1t=1,Dtt2t=1,Zero=0,Zerot=0,Width=1,Tcross=1,Alph0=1.6,Alph1=1.5,Beta0=1.6,Beta1=1.5,Alph0t=1.6,Alph1t=1.5,Beta0t=1.6,Beta1t=1.5,Sig0=1,Sig1=1,Sig2=1,Gam0=0,Gam1=0,Gam2=0");
+    return;
+  }
 
 
+  //----------------------------------------------------------------------------------------------
+  /** Test LeBailFunction on calculating overalapped peaks
+   *  The test data are of reflection (932) and (852) @ TOF = 12721.91 and 12790.13
+   */
+  void test_CalculateHeightsOfOverlappedPeaks()
+  {
+    LeBailFunction lebailfunction("ThermalNeutronBk2BkExpConvPVoigt");
 
-    fitalg.setParameter("LatticeConstant", 4.156890);
+    // Add peak parameters
+    map<string, double> parammap;
 
-    // double d1 = 2.399981; // 1 1 1
-    double h1 = 1370.0/0.008;
-    // double d2 = 2.939365; // 1 1 0
-    double h2 = 660.0/0.0064;
+    parammap.insert(make_pair("Dtt1", 29671.7500));
+    parammap.insert(make_pair("Dtt2", 0.0));
+    parammap.insert(make_pair("Dtt1t", 29671.750));
+    parammap.insert(make_pair("Dtt2t", 0.30));
 
-    std::vector<int> p111;
-    p111.push_back(1); p111.push_back(1); p111.push_back(1);
-    std::vector<int> p110;
-    p110.push_back(1); p110.push_back(1); p110.push_back(0);
-    std::vector<std::vector<int> > peaks;
-    peaks.push_back(p111); peaks.push_back(p110);
+    parammap.insert(make_pair("Zero", 0.0));
+    parammap.insert(make_pair("Zerot", 33.70));
 
-    std::vector<double> peakheights;
-    peakheights.push_back(h1); peakheights.push_back(h2);
+    parammap.insert(make_pair("Alph0", 4.026));
+    parammap.insert(make_pair("Alph1", 7.362));
+    parammap.insert(make_pair("Beta0", 3.489));
+    parammap.insert(make_pair("Beta1", 19.535));
 
-    fitalg.addPeaks(peaks, peakheights);
+    parammap.insert(make_pair("Alph0t", 60.683));
+    parammap.insert(make_pair("Alph1t", 39.730));
+    parammap.insert(make_pair("Beta0t", 96.864));
+    parammap.insert(make_pair("Beta1t", 96.864));
 
-    // 2. Calculate
-    std::vector<double> vecX;
-    std::vector<double> vecY;
-    std::vector<double> vecE;
-    // std::string filename("/home/wzz/Mantid/mantid/Code/release/LB4917b1_unittest.dat");
-    // importDataFromColumnFile(filename, vecX, vecY,  vecE);
-    generateData(vecX, vecY, vecE);
+    parammap.insert(make_pair("Sig2",  sqrt(11.380)));
+    parammap.insert(make_pair("Sig1",  sqrt(9.901)));
+    parammap.insert(make_pair("Sig0",  sqrt(17.370)));
 
-    size_t nData = vecX.size();
-    double* xvalues = new double[nData];
-    double* out = new double[nData];
-    for (size_t i = 0; i < nData; ++i)
-    {
-      xvalues[i] = vecX[i];
-      out[i] = 0.0;
-    }
+    parammap.insert(make_pair("Width", 1.0055));
+    parammap.insert(make_pair("Tcross", 0.4700));
 
-    fitalg.calPeaks(out, xvalues, nData);
+    parammap.insert(make_pair("Gam0", 0.0));
+    parammap.insert(make_pair("Gam1", 0.0));
+    parammap.insert(make_pair("Gam2", 0.0));
 
+    parammap.insert(make_pair("LatticeConstant", 4.156890));
 
-    std::stringstream outstring;
-    for (size_t id = 0; id < nData; ++id)
-    {
-      outstring << xvalues[id] << "\t\t" << out[id] << std::endl;
-    }
-    std::ofstream ofile;
-    ofile.open("peaks_gen.dat");
-    ofile << outstring.str();
-    ofile.close();
+    lebailfunction.setProfileParameterValues(parammap);
 
 
-    // 3. Evaluate
-    double tof_h_d1 = fitalg.getPeakParameter(0, "TOF_h");
-    double alpha_d1 = fitalg.getPeakParameter(0, "Alpha");
-    double beta_d1 = fitalg.getPeakParameter(0, "Beta");
-    double sigma2_d1 = fitalg.getPeakParameter(0, "Sigma2");
-    double gamma_d1 = fitalg.getPeakParameter(0, "Gamma");
-    TS_ASSERT_DELTA(tof_h_d1, 71229.45, 0.1);
-    TS_ASSERT_DELTA(alpha_d1, 0.02977, 0.0001);
-    TS_ASSERT_DELTA(beta_d1, 0.01865, 0.0001);
-    TS_ASSERT_DELTA(sigma2_d1, 451.94833, 0.1);
-    TS_ASSERT_DELTA(gamma_d1, 0.0, 0.01);
+    // Add peaks
+    int xp932[] = {9, 3, 2};
+    std::vector<int> p932(xp932, xp932+sizeof(xp932)/sizeof(int));
+    int xp852[] = {8, 5, 2};
+    std::vector<int> p852(xp852, xp852+sizeof(xp852)/sizeof(int));
+    std::vector<std::vector<int> > hkls;
+    hkls.push_back(p932);
+    hkls.push_back(p852);
+    lebailfunction.addPeaks(hkls);
 
-    double tof_h_d2 = fitalg.getPeakParameter(1, "TOF_h");
-    double alpha_d2 = fitalg.getPeakParameter(1, "Alpha");
-    double beta_d2 = fitalg.getPeakParameter(1, "Beta");
-    double sigma2_d2 = fitalg.getPeakParameter(1, "Sigma2");
-    double gamma_d2 = fitalg.getPeakParameter(1, "Gamma");
-    TS_ASSERT_DELTA(tof_h_d2, 87235.37, 0.1);
-    TS_ASSERT_DELTA(alpha_d2, 0.02632, 0.0001);
-    TS_ASSERT_DELTA(beta_d2, 0.01597, 0.0001);
-    TS_ASSERT_DELTA(sigma2_d2, 952.39972, 0.1);
-    TS_ASSERT_DELTA(gamma_d2, 0.0, 0.01);
+    // Prepare data
+    MatrixWorkspace_sptr dataws = createDataWorkspace(2);
+    const MantidVec& vecX = dataws->readX(0);
+    const MantidVec& vecY = dataws->readY(0);
+    vector<double> vecoutput(vecY.size(), 0.);
 
-    // 4. Calcualte data
-    double y25 = 1360.27;
-    double y59 = 0.285529;
-    double y86 = 648.998;
+    // Calculate peaks' intensities
+    lebailfunction.calculatePeaksIntensities(vecX, vecY, vecoutput);
 
-    TS_ASSERT_DELTA(out[25], y25, 0.01);
-    TS_ASSERT_DELTA(out[59], y59, 0.0001);
-    TS_ASSERT_DELTA(out[86], y86, 0.001);
-
-    delete[] xvalues;
-    delete[] out;
-#endif
+    // Check
+    size_t ipeak1 = 6;
+    size_t ipeak2 = 12;
+    TS_ASSERT_DELTA(vecoutput[ipeak1], vecY[ipeak1], 5.0);
+    TS_ASSERT_DELTA(vecoutput[ipeak2], vecY[ipeak2], 10.0);
 
     return;
   }
 
+
   //----------------------------------------------------------------------------------------------
   /** Create a test data workspace
     */
-  MatrixWorkspace_sptr createDataWorkspace()
+  MatrixWorkspace_sptr createDataWorkspace(int option)
   {
     // Create vectors
     std::vector<double> vecX;
     std::vector<double> vecY;
     std::vector<double> vecE;
-    generateData(vecX, vecY, vecE);
+
+    switch (option)
+    {
+      case 1:
+        cout << "Generating 2 separated peaks data; " << ".\n";
+        generateData(vecX, vecY, vecE);
+
+        break;
+
+      case 2:
+        cout << "Generating 2 overlapped peaks data; " << ".\n";
+        generateTwinPeakData(vecX, vecY, vecE);
+
+        break;
+
+      default:
+        throw runtime_error("Option is not supported.");
+        break;
+    }
 
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(
           "Workspace2D", 1, vecX.size(), vecY.size());
@@ -456,6 +456,39 @@ public:
         e = sqrt(vecY[i]);
       vecE.push_back(e);
     }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Generate data (vectors) containg twin peak w/o background
+   */
+  void generateTwinPeakData(std::vector<double>& vecX, std::vector<double>& vecY, std::vector<double>& vecE)
+  {
+    // These data of reflection (932) and (852)
+    vecX.push_back(12646.470);    vecY.push_back(  0.56916749     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12658.333);    vecY.push_back(  0.35570398     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12670.196);    vecY.push_back(  0.85166878     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12682.061);    vecY.push_back(   4.6110063     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12693.924);    vecY.push_back(   24.960907     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12705.787);    vecY.push_back(   135.08231     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12717.650);    vecY.push_back(   613.15887     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12729.514);    vecY.push_back(   587.66174     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12741.378);    vecY.push_back(   213.99724     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12753.241);    vecY.push_back(   85.320320     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12765.104);    vecY.push_back(   86.317253     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12776.968);    vecY.push_back(   334.30905     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12788.831);    vecY.push_back(   1171.0187     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12800.695);    vecY.push_back(   732.47943     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12812.559);    vecY.push_back(   258.37717     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12824.422);    vecY.push_back(   90.549515     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12836.285);    vecY.push_back(   31.733501     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12848.148);    vecY.push_back(   11.121155     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12860.013);    vecY.push_back(   3.9048645     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12871.876);    vecY.push_back(  4.15836312E-02 );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12883.739);    vecY.push_back(  0.22341134     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12895.603);    vecY.push_back(   1.2002950     );  vecE.push_back(  1000.0000 );
+    vecX.push_back(12907.466);    vecY.push_back(   6.4486742     );  vecE.push_back(  1000.0000 );
 
     return;
   }

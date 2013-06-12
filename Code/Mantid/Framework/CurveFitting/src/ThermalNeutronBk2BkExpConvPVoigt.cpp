@@ -289,6 +289,8 @@ namespace CurveFitting
       paramvalue = m_eta;
     else if (paramname.compare("TOF_h") == 0)
       paramvalue = m_centre;
+    else if (paramname.compare("FWHM") == 0)
+      paramvalue = m_fwhm;
     else
     {
       stringstream errss;
