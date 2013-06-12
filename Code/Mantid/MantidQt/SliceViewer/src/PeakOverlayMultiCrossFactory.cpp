@@ -1,5 +1,5 @@
-#include "MantidQtSliceViewer/PeakOverlayMultiFactory.h"
-#include "MantidQtSliceViewer/PeakOverlayMulti.h"
+#include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
+#include "MantidQtSliceViewer/PeakOverlayMultiCross.h"
 #include "MantidQtSliceViewer/PhysicalCrossPeak.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/IPeak.h"
@@ -17,7 +17,7 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-    PeakOverlayMultiFactory::PeakOverlayMultiFactory(boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransform_const_sptr transform, IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber)
+    PeakOverlayMultiCrossFactory::PeakOverlayMultiCrossFactory(boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransform_const_sptr transform, IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber)
     : PeakOverlayViewFactoryBase(plot, parent, colourNumber),
       m_peaksWS(peaksWS),
       m_zMax(0),
@@ -35,11 +35,11 @@ namespace MantidQt
       }
     }
 
-    PeakOverlayMultiFactory::~PeakOverlayMultiFactory()
+    PeakOverlayMultiCrossFactory::~PeakOverlayMultiCrossFactory()
     {
     }
 
-    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiFactory::createView(const int peakIndex, PeakTransform_const_sptr transform) const
+    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiCrossFactory::createView(const int peakIndex, PeakTransform_const_sptr transform) const
     {
       // Construct all physical peaks
       VecPhysicalCrossPeak physicalPeaks(m_peaksWS->rowCount());
@@ -51,10 +51,10 @@ namespace MantidQt
       }
 
       // Make the overlay widget.
-      return boost::make_shared<PeakOverlayMulti>(m_plot, m_parent, physicalPeaks, this->m_peakColour);
+      return boost::make_shared<PeakOverlayMultiCross>(m_plot, m_parent, physicalPeaks, this->m_peakColour);
     }
 
-    int PeakOverlayMultiFactory::FOM() const
+    int PeakOverlayMultiCrossFactory::FOM() const
     {
       return 2; // HACK. Large value means that this is always chosen.
     }

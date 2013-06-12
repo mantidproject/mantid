@@ -24,7 +24,7 @@
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlaySphereFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayCrossFactory.h"
-#include "MantidQtSliceViewer/PeakOverlayMultiFactory.h"
+#include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
 #include "MantidQtSliceViewer/PeakTransformHKL.h"
 #include "MantidQtSliceViewer/PeakTransformQSample.h"
 #include "MantidQtSliceViewer/PeakTransformQLab.h"
@@ -2222,9 +2222,8 @@ void SliceViewer::peakOverlay_toggled(bool checked)
           const size_t numberOfChildPresenters = m_peaksPresenter->size();
 
           PeakOverlayViewFactorySelector_sptr viewFactorySelector = boost::make_shared<PeakOverlayViewFactorySelector>();
-          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlaySphereFactory>(peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
-          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlayCrossFactory>(m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
-          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlayMultiFactory>(m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
+          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlaySphereFactory>(peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters)); //TODO
+          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlayMultiCrossFactory>(m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
           try
           {
             m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(viewFactorySelector->makeSelection(), peaksWS, m_ws, transformFactory));

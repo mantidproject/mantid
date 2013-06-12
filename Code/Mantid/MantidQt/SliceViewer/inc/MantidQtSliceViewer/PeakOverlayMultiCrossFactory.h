@@ -1,5 +1,5 @@
-#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYMULTI_FACTORY_H_
-#define MANTID_SLICEVIEWER_PEAKOVERLAYMULTI_FACTORY_H_
+#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_FACTORY_H_
+#define MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_FACTORY_H_
 
 #include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -11,7 +11,7 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-    /** Concrete view factory. For creating instances of PeakOverlayMulti widget.
+    /** Concrete view factory. For creating instances of PeakOverlayMultiCross widget.
 
     @date 2013-06-10
 
@@ -35,11 +35,11 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport PeakOverlayMultiFactory : public PeakOverlayViewFactoryBase
+    class DLLExport PeakOverlayMultiCrossFactory : public PeakOverlayViewFactoryBase
     {
       public:
-      PeakOverlayMultiFactory(boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransform_const_sptr transform, Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
-      virtual ~PeakOverlayMultiFactory();
+      PeakOverlayMultiCrossFactory(boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransform_const_sptr transform, Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
+      virtual ~PeakOverlayMultiCrossFactory();
       virtual boost::shared_ptr<PeakOverlayView> createView(const int peakIndex, PeakTransform_const_sptr transform) const;
       virtual int FOM() const;
     private:

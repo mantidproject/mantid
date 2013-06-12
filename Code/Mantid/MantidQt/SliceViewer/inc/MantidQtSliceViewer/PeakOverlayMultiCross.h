@@ -1,5 +1,5 @@
-#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYMULTI_H_
-#define MANTID_SLICEVIEWER_PEAKOVERLAYCROSS_H_
+#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_H_
+#define MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_H_
 
 #include "DllOption.h"
 #include "MantidKernel/System.h"
@@ -43,15 +43,15 @@ namespace SliceViewer
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayMulti : public QWidget, public PeakOverlayView
+  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayMultiCross : public QWidget, public PeakOverlayView
   {
     Q_OBJECT
 
   public:
     /// Constructor
-    PeakOverlayMulti(QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak& vecPhysicalPeaks, const QColor& peakColour);
+    PeakOverlayMultiCross(QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak& vecPhysicalPeaks, const QColor& peakColour);
     /// Destructor
-    virtual ~PeakOverlayMulti();
+    virtual ~PeakOverlayMultiCross();
     /// Set the slice point at position.
     virtual void setSlicePoint(const double& point); 
     /// Hide the view.
