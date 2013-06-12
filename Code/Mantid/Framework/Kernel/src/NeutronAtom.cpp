@@ -585,7 +585,14 @@ bool operator!=(const NeutronAtom& left, const NeutronAtom& right)
  */
 std::ostream& operator<<(std::ostream& out, const NeutronAtom &atom)
 {
-  out << "NeutronAtom(" << atom.z_number << ", " << atom.a_number << ")";
+  out <<  "coh_real " << atom.coh_scatt_length_real
+      << " coh_img "  << atom.coh_scatt_length_img
+      << " inc_real " << atom.inc_scatt_length_real
+      << " inc_img "  << atom.inc_scatt_length_img
+      << " coh_xs " << atom.coh_scatt_xs
+      << " inc_xs " << atom.inc_scatt_xs
+      << " tot_xs " << atom.tot_scatt_xs
+      << " abs_xs " << atom.abs_scatt_xs;
   return out;
 }
 
@@ -602,6 +609,67 @@ bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
   else {
     return (left.z_number < right.z_number);
   }
+}
+
+/**
+ * Adding two NeutronAtoms together sets a_number=z_number=0 and adds
+ * all of the scattering information.
+ */
+NeutronAtom operator+(const NeutronAtom& left, const NeutronAtom& right)
+{
+  // copy left
+  NeutronAtom result(left);
+  // reset the atom information since it is senseless
+  result.a_number = 0;
+  result.z_number = 0;
+
+  // do the math
+  result.coh_scatt_length_real = left.coh_scatt_length_real + right.coh_scatt_length_real;
+  result.coh_scatt_length_img = left.coh_scatt_length_img + right.coh_scatt_length_img;
+  result.inc_scatt_length_real = left.inc_scatt_length_real + right.inc_scatt_length_real;
+  result.inc_scatt_length_img = left.inc_scatt_length_img + right.inc_scatt_length_img;
+  result.coh_scatt_xs = left.coh_scatt_xs + right.coh_scatt_xs;
+  result.inc_scatt_xs = left.inc_scatt_xs + right.inc_scatt_xs;
+  result.tot_scatt_xs = left.tot_scatt_xs + right.tot_scatt_xs;
+  result.abs_scatt_xs = left.abs_scatt_xs + right.abs_scatt_xs;
+
+  return result;
+}
+
+
+/**
+ * Multiplying a NeutronAtom by a number sets a_number=z_number=0
+ * and multiplies all of the scattering information.
+ */
+NeutronAtom operator*(const NeutronAtom& left, const double right)
+{
+  // copy left
+  NeutronAtom result(left);
+  // reset the atom information since it is senseless
+  result.a_number = 0;
+  result.z_number = 0;
+
+  // do the math
+  result.coh_scatt_length_real = left.coh_scatt_length_real * right;
+  result.coh_scatt_length_img = left.coh_scatt_length_img * right;
+  result.inc_scatt_length_real = left.inc_scatt_length_real * right;
+  result.inc_scatt_length_img = left.inc_scatt_length_img * right;
+  result.coh_scatt_xs = left.coh_scatt_xs * right;
+  result.inc_scatt_xs = left.inc_scatt_xs * right;
+  result.tot_scatt_xs = left.tot_scatt_xs * right;
+  result.abs_scatt_xs = left.abs_scatt_xs * right;
+
+  return result;
+}
+
+/**
+ * This calls @link operator*(const NeutronAtom&, const double)
+ * with the parameters reversed.
+ */
+NeutronAtom operator*(const double left, const NeutronAtom& right)
+{
+  // the operation is just abelian
+  return right * left;
 }
 
 /** Retrieve a copy of NeutronAtom
