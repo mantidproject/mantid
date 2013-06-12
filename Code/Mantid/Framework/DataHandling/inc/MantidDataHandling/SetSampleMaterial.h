@@ -5,6 +5,7 @@
 // Includes
 //--------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/NeutronAtom.h"
 
 namespace Mantid
 {
@@ -51,6 +52,8 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Sample;DataHandling"; }
+  /// @inheritdocs
+  virtual std::map<std::string, std::string> validateInputs();
 
 private:
   /// Sets documentation strings for this algorithm
@@ -60,8 +63,9 @@ private:
   ///Execution code
   void exec();
   /// Print out the list of information for the material
-  void logMaterial(const Kernel::Material *mat);
-
+  void fixNeutron(Kernel::NeutronAtom &neutron,
+                  double coh_xs, double inc_xs,
+                  double abs_xs, double tot_xs);
 };
 
 }
