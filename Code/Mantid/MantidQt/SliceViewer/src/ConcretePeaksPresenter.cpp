@@ -45,11 +45,7 @@ namespace MantidQt
      */
     void ConcretePeaksPresenter::produceViews()
     {
-      // Loop through the peaks workspace, and use the factory to create a view from each peaks.
-      for (int i = 0; i < m_peaksWS->getNumberPeaks(); ++i)
-      {
-        m_viewPeaks[i] = m_viewFactory->createView(i, m_transform);
-      }
+      m_viewPeaks = m_viewFactory->createView(0, m_transform);
     }
 
     /**
@@ -102,8 +98,7 @@ namespace MantidQt
      @param transformFactory : Peak Transformation Factory. This is about interpreting the MODEL.
      */
     ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, IPeaksWorkspace_sptr peaksWS,
-        boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) :
-        m_viewPeaks(peaksWS->getNumberPeaks()), m_viewFactory(viewFactory), m_peaksWS(peaksWS), m_transformFactory(
+        boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) : m_viewFactory(viewFactory), m_peaksWS(peaksWS), m_transformFactory(
             transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0),
             g_log(Mantid::Kernel::Logger::get("PeaksPresenter"))
     {
@@ -126,10 +121,7 @@ namespace MantidQt
      */
     void ConcretePeaksPresenter::update()
     {
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        (*it)->updateView();
-      }
+        m_viewPeaks->updateView();
     }
 
     /**
@@ -140,10 +132,7 @@ namespace MantidQt
     {
       if (m_slicePoint != slicePoint) // only update if required.
       {
-        for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-        {
-          (*it)->setSlicePoint(slicePoint);
-        }
+        m_viewPeaks->setSlicePoint(slicePoint);
         m_slicePoint = slicePoint;
       }
     }
@@ -168,10 +157,7 @@ namespace MantidQt
 
       if (transformSucceeded)
       {
-        for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-        {
-          (*it)->movePosition(m_transform);
-        }
+        m_viewPeaks->movePosition(m_transform);
       }
       return transformSucceeded;
     }
@@ -224,14 +210,8 @@ namespace MantidQt
      */
     void ConcretePeaksPresenter::showAll()
     {
-      // Show all views.
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        if ((*it) != NULL)
-        {
-          (*it)->showView();
-        }
-      }
+      if(m_viewPeaks!=NULL)
+        m_viewPeaks->showView();
     }
 
     /**
@@ -240,13 +220,8 @@ namespace MantidQt
     void ConcretePeaksPresenter::hideAll()
     {
       // Hide all views.
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        if ((*it) != NULL)
-        {
-          (*it)->hideView();
-        }
-      }
+      if(m_viewPeaks!=NULL)
+        m_viewPeaks->hideView();
     }
 
     /**
@@ -263,26 +238,20 @@ namespace MantidQt
     void ConcretePeaksPresenter::setForegroundColour(const QColor colour)
     {
       // Change foreground colours
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if(m_viewPeaks!=NULL)
       {
-        if ((*it) != NULL)
-        {
-          (*it)->changeForegroundColour(colour);
-          (*it)->updateView();
-        }
+        m_viewPeaks->changeForegroundColour(colour);
+        m_viewPeaks->updateView();
       }
     }
 
     void ConcretePeaksPresenter::setBackgroundColour(const QColor colour)
     {
       // Change background colours
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if(m_viewPeaks!=NULL)
       {
-        if ((*it) != NULL)
-        {
-          (*it)->changeBackgroundColour(colour);
-          (*it)->updateView();
-        }
+      m_viewPeaks->changeBackgroundColour(colour);
+      m_viewPeaks->updateView();
       }
     }
 
@@ -294,48 +263,37 @@ namespace MantidQt
     void ConcretePeaksPresenter::showBackgroundRadius(const bool show)
     {
       // Change background colours
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if(m_viewPeaks!=NULL)
       {
-        if ((*it) != NULL)
-        {
-          (*it)->showBackgroundRadius(show);
-          (*it)->updateView();
-        }
+      m_viewPeaks->showBackgroundRadius(show);
+      m_viewPeaks->updateView();
       }
     }
 
     void ConcretePeaksPresenter::setShown(const bool shown)
     {
-      // Change background colours
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if(m_viewPeaks!=NULL)
       {
-        PeakOverlayView_sptr view = (*it);
-        if ((*it) != NULL)
-        {
-          if (shown)
+       if (shown)
           {
-            view->showView();
+            m_viewPeaks->showView();
           }
           else
           {
-            view->hideView();
+            m_viewPeaks->hideView();
           }
-          view->updateView();
-        }
+          m_viewPeaks->updateView();
       }
+        
     }
 
     /**
      @param peakIndex: index into contained peaks workspace.
      @return the bounding box corresponding to the peakIndex.
      */
-    PeakBoundingBox ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const
+    PeakBoundingBox ConcretePeaksPresenter::getBoundingBox(const int) const
     {
-      if (peakIndex < 0 || peakIndex > static_cast<int>(m_viewPeaks.size()))
-      {
-        throw std::out_of_range("PeakIndex is out of range");
-      }
-      return this->m_viewPeaks[peakIndex]->getBoundingBox();
+      throw std::runtime_error("Not implemented yet");
     }
 
     void ConcretePeaksPresenter::sortPeaksWorkspace(const std::string& byColumnName,
@@ -360,64 +318,31 @@ namespace MantidQt
       this->produceViews();
 
       // Give the new views the current slice point.
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        (*it)->setSlicePoint(this->m_slicePoint);
-      }
+      m_viewPeaks->setSlicePoint(this->m_slicePoint);
+      
     }
 
     void ConcretePeaksPresenter::setPeakSizeOnProjection(const double fraction)
     {
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        if ((*it) != NULL)
-        {
-          (*it)->changeOccupancyInView(fraction);
-          (*it)->updateView();
-        }
-      }
+      m_viewPeaks->changeOccupancyInView(fraction);
+      m_viewPeaks->updateView();
+        
     }
 
     void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
     {
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        if ((*it) != NULL)
-        {
-          (*it)->changeOccupancyIntoView(fraction);
-          (*it)->updateView();
-        }
-      }
+      m_viewPeaks->changeOccupancyIntoView(fraction);
+      m_viewPeaks->updateView();
     }
 
     double ConcretePeaksPresenter::getPeakSizeOnProjection() const
     {
-      double result = 0;
-      for (VecPeakOverlayView::const_iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        PeakOverlayView_sptr view = (*it);
-        if (view != NULL && view->positionOnly())
-        {
-          result = m_viewPeaks.front()->getOccupancyInView();
-          break;
-        }
-      }
-      return result;
+      throw std::runtime_error("Not implemented");
     }
 
     double ConcretePeaksPresenter::getPeakSizeIntoProjection() const
     {
-      double result = 0;
-      for (VecPeakOverlayView::const_iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        PeakOverlayView_sptr view = (*it);
-        if (view != NULL && view->positionOnly())
-        {
-          result = m_viewPeaks.front()->getOccupancyIntoView();
-          break;
-        }
-      }
-      return result;
+      throw std::runtime_error("Not implemented");
     }
 
   }

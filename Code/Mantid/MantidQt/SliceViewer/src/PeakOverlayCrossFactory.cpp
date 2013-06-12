@@ -47,7 +47,7 @@ namespace MantidQt
 
     int PeakOverlayCrossFactory::FOM() const
     {
-      return 1; // It's always possible to represent a peak position. FOM is the lowest valid value.
+      return 1; 
     }
   }
 }

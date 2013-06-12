@@ -83,6 +83,8 @@ namespace MantidQt
       DISABLE_COPY_AND_ASSIGN(PhysicalCrossPeak)
     };
 
+    typedef boost::shared_ptr<PhysicalCrossPeak> PhysicalCrossPeak_stpr;
+    typedef std::vector<PhysicalCrossPeak_stpr> VecPhysicalCrossPeak;
   }
 }
 
