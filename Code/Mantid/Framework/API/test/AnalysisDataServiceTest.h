@@ -331,6 +331,27 @@ public:
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","0");
   }
 
+  void test_deepRemoveGroup()
+  {
+      addToADS("some_workspace");
+      auto group = addGroupToADS("group");
+      TS_ASSERT_EQUALS( ads.size(), 4);
+
+      // name doesn't exist
+      TS_ASSERT_THROWS( ads.deepRemoveGroup("abc"), std::runtime_error );
+      // workspace isn't a group
+      TS_ASSERT_THROWS( ads.deepRemoveGroup("group_1"), std::runtime_error );
+      TS_ASSERT_THROWS_NOTHING( ads.deepRemoveGroup("group") );
+      TS_ASSERT_EQUALS( ads.size(), 1);
+
+      // check a group containing another group
+      group = addGroupWithGroupToADS("group");
+      TS_ASSERT_EQUALS( ads.size(), 6);
+      TS_ASSERT_THROWS_NOTHING( ads.deepRemoveGroup("group") );
+      TS_ASSERT_EQUALS( ads.size(), 1);
+      ads.clear();
+  }
+
 private:
 
   /// If replace=true then usea addOrReplace
@@ -371,6 +392,29 @@ private:
     MockWorkspace_sptr space = MockWorkspace_sptr(new MockWorkspace);
     ads.add(name, space);
     return space;
+  }
+
+  /// Add a group with 2 simple workspaces to the ADS
+  Workspace_sptr addGroupToADS(const std::string & name)
+  {
+      WorkspaceGroup_sptr group( new WorkspaceGroup );
+      group->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      group->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      ads.add(name, group);
+      return group;
+  }
+
+  /// Add a group with 1 simple workspace and 1 group with 2 simple ws to the ADS
+  Workspace_sptr addGroupWithGroupToADS(const std::string & name)
+  {
+      WorkspaceGroup_sptr group( new WorkspaceGroup );
+      group->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      WorkspaceGroup_sptr group1( new WorkspaceGroup );
+      group1->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      group1->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      group->addWorkspace( group1 );
+      ads.add(name, group);
+      return group;
   }
 
   /// Add or replace the given name

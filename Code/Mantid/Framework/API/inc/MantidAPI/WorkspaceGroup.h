@@ -87,8 +87,6 @@ public:
   void remove(const std::string& name);
   /// Remove all names from the group but do not touch the ADS
   void removeAll();
-  /// Remove all names from the group and also from the ADS
-  void deepRemoveAll();
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
   bool areNamesSimilar() const;

@@ -143,6 +143,35 @@ namespace Mantid
       ws->setName( newName );
     }
 
+    /**
+     * Remove a workspace group and all its members from the ADS.
+     * @param name :: A group to remove.
+     */
+    void AnalysisDataServiceImpl::deepRemoveGroup(const std::string &name)
+    {
+        WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>( name );
+        if ( !group )
+        {
+            throw std::runtime_error("Workspace " + name + " is not a workspace group.");
+        }
+        group->observeADSNotifications( false );
+        for(size_t i = 0; i < group->size(); ++i)
+        {
+            auto ws = group->getItem(i);
+            WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>( ws );
+            if ( gws )
+            {
+                // if a member is a group remove its items as well
+                deepRemoveGroup( gws->name() );
+            }
+            else
+            {
+                remove( ws->name() );
+            }
+        }
+        remove( name );
+    }
+
     //-------------------------------------------------------------------------
     // Private methods
     //-------------------------------------------------------------------------

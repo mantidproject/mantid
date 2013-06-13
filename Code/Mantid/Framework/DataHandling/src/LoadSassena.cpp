@@ -29,6 +29,7 @@ Dataset '''fqt''' is split into two workspaces, one for the real part and the ot
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -338,10 +339,12 @@ void LoadSassena::exec()
   //auto gws=boost::dynamic_pointer_cast<API::WorkspaceGroup>(getProperty("OutputWorkspace"));
   //API::WorkspaceGroup_sptr gws=getProperty("OutputWorkspace");
   API::Workspace_sptr ows=getProperty("OutputWorkspace");
+
   API::WorkspaceGroup_sptr gws=boost::dynamic_pointer_cast<API::WorkspaceGroup>(ows);
-  if(gws)
+  if(gws && API::AnalysisDataService::Instance().doesExist( gws->name() ) )
   {
-    gws->deepRemoveAll(); // remove workspace members
+    //gws->deepRemoveAll(); // remove workspace members
+    API::AnalysisDataService::Instance().deepRemoveGroup( gws->name() );
   }
   else
   {

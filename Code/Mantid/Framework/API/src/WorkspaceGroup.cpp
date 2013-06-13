@@ -173,19 +173,6 @@ void WorkspaceGroup::remove(const std::string& wsName)
   updated();
 }
 
-/// Removes all members of the group from the group AND from the AnalysisDataService
-void WorkspaceGroup::deepRemoveAll()
-{
-  Poco::Mutex::ScopedLock _lock(m_mutex);
-  if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-  while (!m_workspaces.empty())
-  {
-    AnalysisDataService::Instance().remove(m_workspaces.back()->name());
-	  m_workspaces.pop_back();
-  }
-  if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-}
-
 /// Print the names of all the workspaces in this group to the logger (at debug level)
 void WorkspaceGroup::print() const
 {
