@@ -104,6 +104,19 @@ bool ScreenPickerTool::eventFilter(QObject *obj, QEvent *event)
 	return QwtPlotPicker::eventFilter(obj, event);
 }
 
+/**
+ *  This overrides the base class trackerText() function so that we can
+ *  adjust the text returned.
+ *
+ *  @param pos  The current mouse location.
+ */
+QwtText ScreenPickerTool::trackerText( const QwtDoublePoint & pos ) const
+{	
+	QString info;
+    info.sprintf("%g; %g", pos.x(), pos.y());
+	return QwtText(info);
+}
+
 DrawPointTool::DrawPointTool(ApplicationWindow *app, Graph *graph, const QObject *status_target, const char *status_slot)
 	: ScreenPickerTool(graph, status_target, status_slot),
 	d_app(app)
