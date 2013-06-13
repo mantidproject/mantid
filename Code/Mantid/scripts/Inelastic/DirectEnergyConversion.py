@@ -22,7 +22,7 @@ reducer = DirectEnergyConversion('MARI')
 reducer.normalise_method = 'monitor-2'
 reducer.background = False
 reducer.fix_ei = True
-reducer.save_formats = ['.spe']
+reducer.save_format = ['.spe']
 # 
 Set parameters for these runs
 reducer.map_file = 'mari_res.map'
@@ -665,6 +665,10 @@ class DirectEnergyConversion(object):
         if type(formats) == str:
             formats = [formats]
         #Make sure we just have a file stem
+        ext = self.save_format
+        if len(ext) == 0:
+            ext = '.spe'
+
         save_path = os.path.splitext(save_path)[0]
         for ext in formats:
             filename = save_path + ext
@@ -699,9 +703,8 @@ class DirectEnergyConversion(object):
         self._to_stdout = True
         self._log_to_mantid = False
         self._idf_values_read = False
-        if instr_name is None or len(instr_name)==0 :
-            self.instr_name=None
-        else:
+        self.instr_name=None
+        if not (instr_name is None or len(instr_name)==0) :
         # Instrument and default parameter setup
             self.initialise(instr_name)
 
@@ -709,13 +712,17 @@ class DirectEnergyConversion(object):
         """
         Initialise the attributes of the class
         """
-
         # Instrument name might be a prefix, query Mantid for the full name
-        self.instr_name = config.getFacility().instrument(instr_name).name()
-        config['default.instrument'] = self.instr_name
-        self.setup_mtd_instrument()
+        new_name = config.getFacility().instrument(instr_name).shortName()
+        if new_name != self.instr_name:
+            reload_instrument =True
 
-    def setup_mtd_instrument(self, workspace = None):
+        self.instr_name = new_name
+
+        config['default.instrument'] = self.instr_name
+        self.setup_mtd_instrument(None,reload_instrument)
+
+    def setup_mtd_instrument(self, workspace = None,reload_instrument=False):
         if workspace != None:
             self.instrument = workspace.getInstrument()
         else:
@@ -733,7 +740,7 @@ class DirectEnergyConversion(object):
       
 
         # Initialise other IDF parameters
-        self.init_idf_params()
+        self.init_idf_params(reload_instrument)
  
 
     def init_idf_params(self, reload_instrument=False):
@@ -761,6 +768,7 @@ class DirectEnergyConversion(object):
         else:
             self.facility = str(config.getFacility())
 
+        # These should be reconsidered on moving into _Parameters.xml
         # The Ei requested
         self.ei_requested = None
         self.monitor_workspace = None
@@ -811,7 +819,7 @@ class DirectEnergyConversion(object):
             raise RuntimeError("Can not obtain instrument parameters describing inelastic conversion ")
 
         # build the dictionary of necessary allowed substitution names and substitute parameters with their values
-        self.synonims = build_subst_dictionary(self.synonims)
+        self.synonims = self.build_subst_dictionary(self.synonims)
 
         # build the dictionary which allows to process coupled property, namely the property, expressed through other properties values
         self.build_coupled_keys_dict(par_names)
@@ -867,13 +875,63 @@ class DirectEnergyConversion(object):
         for lin in subst_lines :
             lin=lin.strip()
             keys = lin.split("=")
-            if len(keys)<2 :
+            if len(keys) < 2 :
                 raise AttributeError("The pairs in the synonims fields have to have form key1=key2=key3 with at least two values present")
+            if len(keys[0]) == 0:
+                raise AttributeError("The pairs in the synonims fields have to have form key1=key2=key3 with at least two values present, but the first key is empty")
             for i in xrange(1,len(keys)) :
-                rez[keys[i]]=keys[0].strip()
+                if len(keys[i]) == 0 :
+                    raise AttributeError("The pairs in the synonims fields have to have form key1=key2=key3 with at least two values present, but the key"+str(i)+" is empty")
+                kkk = keys[i].strip();
+                rez[kkk]=keys[0].strip()
 
         return rez;
-           
+
+    def set_input_parameters(self,**kwargs):
+        """ Method analyzes input parameters list, substitutes the synonims in this list with predefined synonims 
+            and sets the existing class parameters with its non-default values taken from input
+
+            returns the list of changed properties. 
+        """
+
+        properties_changed=[];
+        for par_name,value in kwargs.items() :
+
+            if par_name in self.synonims :
+                par_name = self.synonims[par_name]
+
+            # may be a problem, one tries to set up non-existing value
+            if not hasattr(self,par_name) :
+                # it still can be a composite key which sets parts of the composite property
+                if par_name in self.composite_keys_subst :
+                    composite_prop_name,index,nc = self.composite_keys_subst[par_name]
+                    val = getattr(self,composite_prop_name)
+                    val[index] = value;
+                    setattr(self,composite_prop_name,val)
+                    properties_changed.append(composite_prop_name)
+                    continue
+                else:
+                    raise KeyError("Attempt to set unknown parameter: "+par_name)
+            # whole composite key is modified by input parameters
+            if par_name in self.composite_keys_set :
+               val = getattr(self,par_name) # get default value
+               if type(val) != type(value):
+                   raise KeyError("Attempt to change range property: "+par_name+" of type : "+str(type(val))+ " with wrong type value: "+str(type(value)))
+               if len(val) != len(value) :
+                    raise KeyError("Attempt to change range property : "+par_name+" with default value: ["+",".join(str(vv) for vv in val)+
+                                   "] to wrong length value: ["+",".join(str(vv) for vv in value)+"]\n")
+               else:
+                   setattr(self,par_name,value)
+                   properties_changed.append(par_name)
+                   continue
+
+            # simple case of setting simple value
+            setattr(self,par_name,value)
+            properties_changed.append(par_name)
+
+        return properties_changed
+
+
     def build_coupled_keys_dict(self,par_names) :
         """Method to build the dictionary of the keys which are expressed through other keys values
            
@@ -932,6 +990,9 @@ class DirectEnergyConversion(object):
         for name in list_param_names :
 
             key_name = name;           
+            if key_name == 'synonims' : # this is special key we have already dealt with
+                continue
+
             if key_name in self.synonims: # replace name with its equivalent
                 key_name = self.synonims[name]
 
@@ -1009,17 +1070,24 @@ class DirectEnergyConversion(object):
                 raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % keyword)
 
 #-----------------------------------------------------------------
-class TestReducer(unittest.TestCase):
+class DirectEnergyConversionTest(unittest.TestCase):
+    def __init__(self, methodName):
+        self.reducer = None
+        return super(DirectEnergyConversionTest, self).__init__(methodName)
+
     def setUp(self):
-        self.reducer = DirectEnergyConversion();
+        if self.reducer == None or type(self.reducer) != type(DirectEnergyConversion):
+            self.reducer = DirectEnergyConversion("MAPS");
+    def tearDown(self):
+        pass
 
     def test_build_subst_dictionary(self):
        self.assertEqual(dict(), DirectEnergyConversion.build_subst_dictionary(""))
        self.assertEqual(dict(),DirectEnergyConversion.build_subst_dictionary())
 
-       #self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary(10))
-       #self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary("A="))
-       #self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary("B=C;A="))
+       self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary,10)
+       self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary,"A=")
+       self.assertRaises(AttributeError,DirectEnergyConversion.build_subst_dictionary,"B=C;A=")
 
        rez=dict();
        rez['A']='B';
@@ -1036,6 +1104,91 @@ class TestReducer(unittest.TestCase):
        self.assertEqual(myDict['DD'],'A')
        self.assertEqual(myDict['C'],'A')
 
+       myDict =  DirectEnergyConversion.build_subst_dictionary("A = B = C=DD")
+       self.assertEqual(myDict['B'],'A')
+       self.assertEqual(myDict['DD'],'A')
+       self.assertEqual(myDict['C'],'A')
+
+   #def test_build_coupled_keys_dict_simple(self):
+   #    params = ["];
+ 
+    def test_init_reducer(self):
+        self.reducer.initialise("MAP",True);
+        self.assertTrue(self.reducer._idf_values_read)
+        self.assertEqual(self.reducer.instr_name,"MAP")
+
+    def test_set_non_default_wrong_value(self):
+        tReducer = self.reducer
+        # should do nothing as already initialized above
+        tReducer.initialise("MAP")
+
+        # non-existing property can not be set!
+        self.assertRaises(KeyError,tReducer.set_input_parameters,non_existing_property="Something_Meaningfull")
+
+    def test_set_non_default_simple_value(self):
+        tReducer = self.reducer
+        # should do nothing as already initialized above
+        tReducer.initialise("MAP");
+
+        prop_changed=tReducer.set_input_parameters(van_mass=100,det_cal_file='det4to1_1912.dat')
+        self.assertTrue("van_mass" in prop_changed)
+        self.assertTrue("det_cal_file" in prop_changed)
+
+        self.assertEqual(tReducer.van_mass,100);
+        self.assertEqual(tReducer.det_cal_file,'det4to1_1912.dat');
+       
+        self.assertAlmostEqual(tReducer.van_sig,0.,7)
+        kw=dict();
+        kw["vanadium-mass"]=200
+        kw["diag_van_median_sigma"]=1
+        kw["det_cal_file"]=None
+        prop_changed=tReducer.set_input_parameters(**kw)
+
+        self.assertTrue("van_mass" in prop_changed,"vanadium-mass should correspond to van_mass")
+        self.assertTrue("van_sig" in prop_changed," diag_van_median_sigma should correspond to van_sig ") 
+
+        self.assertEqual(tReducer.van_mass,200);
+        self.assertEqual(tReducer.det_cal_file,None);
+        self.assertAlmostEqual(tReducer.van_sig,1.,7)
+
+    def test_set_non_default_comples_value(self):
+        tReducer = self.reducer
+        # should do nothing as already initialized above, but if not will initiate the instrument
+        tReducer.initialise("MAP");
+
+        self.assertEqual(tReducer.mon_norm_range,[1000.,2000.]," Default integration range on MAPS should be as described in MAPS_Parameters.xml file")
+        self.assertEqual(tReducer.ei_mon_spectra,[41474,41475]," Default ei monitors on MAPS should be as described in MAPS_Parameters.xml file")
+
+        self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=1)
+        self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=[10,100,100])
+        
+        kw=dict();
+        kw["mon_norm_range"]=[50,1050]
+        kw["ei-mon1-spec"]=10
+        prop_changed=tReducer.set_input_parameters(**kw)
+
+        self.assertAlmostEqual(tReducer.mon_norm_range,[50,1050],7)
+        self.assertEqual(tReducer.ei_mon_spectra,[10,41475])
+
+        self.assertTrue("mon_norm_range" in prop_changed,"mon_norm_range should change")
+        self.assertTrue("ei_mon_spectra" in prop_changed,"changing ei-mon1-spec should change ei_mon_spectra") 
+
+    def test_set_non_default_comples_value_synonims(self):
+        tReducer = self.reducer
+        # should do nothing as already initialized above, but if not will initiate the instrument
+        tReducer.initialise("MAP");
+        # 
+        kw = dict();
+        kw["test_ei2_mon_spectra"]=10000
+        prop_changed=tReducer.set_input_parameters(**kw)
+
+        self.assertEqual(tReducer.ei_mon_spectra,[41474,10000])
+        self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_ei2_mon_spectra should change ei_mon_spectra") 
+
+        prop_changed=tReducer.set_input_parameters(test_mon_spectra_composite=[10000,2000])
+
+        self.assertEqual(tReducer.ei_mon_spectra,[10000,2000])
+        self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_mon_spectra_composite should change ei_mon_spectra") 
 
 
 #-----------------------------------------------------------------

@@ -20,15 +20,11 @@
    <value val="None"/>
 </parameter>
 
-<!-- The network name of the machine responsible for controlling DAE -->
-<parameter name="inst_dae_name" type="string">
-   <value val="ndxmerlin"/>
-</parameter>
 <!-- Extension of the data files obtained from DAE -->
 <parameter name="data_file_ext" type="string">
    <value val=".RAW"/>
 </parameter>
-<!-- The name of the hard mas file to use  -->
+<!-- The name of the hard mas file to use together with diag masking -->
 <parameter name="hard_mask_file" type="string">
     <value val="None"/>
 </parameter>
@@ -53,6 +49,7 @@
 <parameter name="norm-mon1-spec">
   <value val="41473"/>
 </parameter>
+<!-- Time interval used for integration to estimate current on the sample -->
 <parameter name="norm-mon1-min">
   <value val="1000"/>
 </parameter>
@@ -139,7 +136,7 @@
   <value val="30.1"/>
 </parameter>
 
-<!-- --------------------------- DIAGNOSTICS DEFAILTS ---------------------------------------- -->
+<!-- ******************************** DIAGNOSTICS DEFAILTS **************************************** -->
 
 <!-- Perform diag by bank. These are the spectrum numbers -->
 <parameter name="diag_spectra" type="string">
@@ -156,7 +153,7 @@
   <value val="1e10"/>
 </parameter>
 
-<!-- Setting diag to reject zero backgrounds  -->
+<!-- Setting diag to reject zero backgrounds; If true then zeroes in (vanadium) data are masked as fail  -->
 <parameter name="diag_samp_zero"  type="bool">
   <value val="False"/>
 </parameter>
@@ -211,7 +208,7 @@
   <value val="1.1"/>
 </parameter>
 
-<!-- ------------------ DIAGNOSTICS DEFAILTS END ---------------               -->
+<!-- **************************************** DIAGNOSTICS DEFAILTS END ****************************************    -->
 <!--  -->
 
 <!-- Absolute units conversion average -->
@@ -265,8 +262,8 @@
 </parameter>
 
 
-<!-- norm_method normalistion. Availible values are: monitor-1,monitor-2, uamph current -->
-<parameter name="norm_method" type="string">
+<!-- normalise_method normalistion. Availible values are: monitor-1,monitor-2, uamph current -->
+<parameter name="normalise_method" type="string">
     <value val="monitor-1"/>
 </parameter>
 
@@ -275,9 +272,11 @@
     <value val="False"/>
 </parameter>
 
-<!-- The format of output data. Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace)  -->  
-<parameter name="norm_method" type="string">
-   <value val=".spe"/>
+<!-- The format of output data. Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace) 
+     Unlike anything else, three possible v values are defined in DirectEnergy conversion. 
+     If None is there, no internal script saving occurs-->  
+<parameter name="save_format" type="string">
+   <value val=".nxspe"/>
 </parameter>
 
 <!-- If one wants to sum runs   -->  
@@ -291,20 +290,34 @@
 </parameter>
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
-     the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a
-     each synonims met in command line are converted into appropriate reducer keyword
+     the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
+     the reducer keywords are the leftmost values of the keyword assignements below
+     Each keyword met in command line or file above are converted into reducer keyword as below
 -->  
 <parameter name="synonims" type="string">
    <value val="normalise_method=norm_method;
        fix_ei=fixei;
-       save_formats=save_format;
        sum_runs=sum;
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass;
        background_range=bkgd_range;
        monovan_integr_range=abs_units_van_range;
-       hard_mask_file=hardmaskPlus,
-       use_hard_mask_only=hardmaskOnly"
+       hard_mask_file=hardmaskPlus;
+       use_hard_mask_only=hardmaskOnly;
+       van_out_lo = diag_van_median_rate_limit_lo=diag_van_out_lo;
+       van_out_hi = diag_van_median_rate_limit_hi=diag_van_out_hi;
+       van_lo     = diag_van_median_sigma_lo=diag_van_lo;
+       van_hi     = diag_van_median_sigma_hi=diag_van_hi;
+       van_sig    = diag_van_median_sigma=diag_van_sig;
+       tiny       = diag_tiny;
+       huge       = diag_huge=large;
+       samp_zero  = diag_remove_zero=diag_samp_zero;
+       samp_lo    = diag_samp_median_sigma_lo=diag_samp_lo;
+       samp_hi    = diag_samp_median_sigma_hi=diag_samp_hi;
+       samp_sig   = diag_samp_median_sigma=diag_samp_sig;
+       bleed_test=bleed=diag_bleed_test;
+       ei-mon2-spec = test_ei2_mon_spectra;
+       ei_mon_spectra=test_mon_spectra_composite"
     />
 </parameter>
  
