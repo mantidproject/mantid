@@ -203,10 +203,16 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     }
     if ( chisq > m_maxChiSq)
     {
-      if (chisq != 1.e10)
-        g_log.error() << "StripPeaks():  Peak Index = " << i << " @ " << centre 
-           << "  Error: Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
+      if (chisq != DBL_MAX)
+        g_log.error() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
+                      << "  Error: Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
       continue;
+    }
+    else if (chisq <= 0.)
+    {
+      g_log.warning() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
+                      << ". Error: Peak fit with too wide peak width" << width
+                      << " denoted by chi^2 = " << chisq << " <= 0. \n";
     }
 
     g_log.debug() << "Subtracting peak " << i << " from spectrum " << peakslist->getRef<int>("spectrum",i)
