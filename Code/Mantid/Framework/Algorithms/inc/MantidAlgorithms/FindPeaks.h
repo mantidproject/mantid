@@ -162,7 +162,7 @@ private:
                                            API::MatrixWorkspace_sptr dataws, size_t datawsindex,
                                            API::IPeakFunction_sptr peak,
                                            double in_centre, double in_height, std::vector<double> in_fwhms,
-                                           double peakleftboundary, double peakrightboundary);
+                                           double peakleftboundary, double peakrightboundary, double user_centre);
 
   /// Set parameters values to a peak function
   void setFunctionParameterValue(API::IFunction_sptr function, std::map<std::string, double> parvalues);

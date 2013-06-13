@@ -1207,6 +1207,7 @@ namespace Algorithms
       g_log.error(errss.str());
       throw std::runtime_error(errss.str());
     }
+    double user_centre = input->readX(spectrum)[i_centre];
 
     // Prepare
     const MantidVec &rawX = input->readX(spectrum);
@@ -1332,7 +1333,7 @@ namespace Algorithms
     double peakleftbound = peakX.front();
     double peakrightbound = peakX.back();
     PeakFittingRecord fitresult1 = multiFitPeakBackground(peakws, 0, input, spectrum, peakfunc, in_centre, g_height,vec_FWHM,
-                                                          peakleftbound, peakrightbound);
+                                                          peakleftbound, peakrightbound, user_centre);
 
     // Fit upon observation
     g_log.information("\nFitting peak with starting value from observation. ");
@@ -1348,7 +1349,7 @@ namespace Algorithms
     vec_FWHM.clear();
     vec_FWHM.push_back(g_fwhm);
     PeakFittingRecord fitresult2 = multiFitPeakBackground(peakws, 0, input, spectrum, peakfunc, in_centre, g_height,vec_FWHM,
-                                                          peakleftbound, peakrightbound);
+                                                          peakleftbound, peakrightbound, user_centre);
 
     // Compare results and add result to row
     double windowsize = rawX[i_max] - rawX[i_min];
@@ -1369,12 +1370,13 @@ namespace Algorithms
     * @param in_sigmas :: starting value of peak width
     * @param peakleftboundary :: left boundary of peak
     * @param peakrightboundary :: right boundary of peak
+    * @param user_centre :: peak centre input by user
     */
   PeakFittingRecord FindPeaks::multiFitPeakBackground(MatrixWorkspace_sptr purepeakws, size_t purepeakindex,
                                                       MatrixWorkspace_sptr dataws, size_t datawsindex,
                                                       IPeakFunction_sptr peak,
                                                       double in_centre, double in_height, std::vector<double> in_fwhms,
-                                                      double peakleftboundary, double peakrightboundary)
+                                                      double peakleftboundary, double peakrightboundary, double user_centre)
   {
     g_log.information() << "Fit peak with " << in_fwhms.size() << " starting sigmas.\n";
     if (in_fwhms.size() == 0)
@@ -1437,6 +1439,7 @@ namespace Algorithms
       {
         double f_height = peak->height();
         double f_centre = peak->centre();
+
         if (f_height <= 0.)
         {
           rwp1 = DBL_MAX;
@@ -1446,6 +1449,14 @@ namespace Algorithms
         {
           rwp1 = DBL_MAX;
           failreason = "Peak centre out of constraint range.";
+        }
+        else if (m_usePeakPositionTolerance)
+        {
+          if (fabs(f_centre - user_centre) > m_peakPositionTolerance)
+          {
+            rwp1 = DBL_MAX;
+            failreason = "Peak centre out of tolerance";
+          }
         }
       }
       else
@@ -1550,6 +1561,38 @@ namespace Algorithms
     // double endx = peak->centre()+2.*peak->fwhm();
     double rwp2 = fitPeakBackgroundFunction(compfunc, dataws, datawsindex, startx, endx, peakcentreconstraint,
                                             rwp1best);
+    std::string failreason;
+    if (rwp2 < DBL_MAX)
+    {
+      double f_height = peak->height();
+      double f_centre = peak->centre();
+
+      if (f_height <= 0.)
+      {
+        rwp2 = DBL_MAX;
+        failreason = "Negative peak height.";
+      }
+      else if (f_centre < peakleftboundary || f_centre > peakrightboundary)
+      {
+        rwp2 = DBL_MAX;
+        failreason = "Peak centre out of constraint range.";
+      }
+      else if (m_usePeakPositionTolerance)
+      {
+        if (fabs(f_centre - user_centre) > m_peakPositionTolerance)
+        {
+          rwp2 = DBL_MAX;
+          failreason = "Peak centre out of tolerance";
+        }
+      }
+    }
+    else
+    {
+      failreason = "(Single-step) Fit returns a DBL_MAX.";
+    }
+
+    g_log.debug() << "[Fx418] Fit (2) failed due to reason " << failreason << ".\n";
+
     std::map<std::string, double> parameters = getFunctionParameters(peak);
     std::map<std::string, double> bkgdmap2 = getFunctionParameters(m_backgroundFunction);
     vecParameters.push_back(parameters);
@@ -1682,6 +1725,7 @@ namespace Algorithms
     }
 
     double peakwidth = peak->fwhm();
+    // Use negative Rwp for super wide peak (apparently a false one)
     if (peakwidth > windowsize)
       finalrwp = -1*finalrwp;
 
@@ -2562,12 +2606,12 @@ namespace Algorithms
     if (isfitgood)
     {
       final_rwp = calculateFunctionRwp(peakbkgdfunc, dataws, wsindex, startx, endx);
-      g_log.debug() << "DBX " << "Rwp = " << final_rwp << "\n";
+
+      std::stringstream dbss;
 
       std::vector<std::string> parnames = peakbkgdfunc->getParameterNames();
-      std::stringstream dbss;
-      dbss << "Fit Peak (+background) Status = " << fitpeakstatus << ". Starting Rwp = "
-           << init_rwp << ".  Result Rwp = " << final_rwp << ".\n";
+      dbss << "[Fx357] Fit Peak (+background) Status = " << fitpeakstatus << ". Starting Rwp = "
+           << init_rwp << ".  Final Rwp = " << final_rwp << ".\n";
       for (size_t i = 0; i < parnames.size(); ++i)
         dbss << parnames[i] << "\t = " << peakbkgdfunc->getParameter(parnames[i]) << "\n";
       g_log.debug(dbss.str());

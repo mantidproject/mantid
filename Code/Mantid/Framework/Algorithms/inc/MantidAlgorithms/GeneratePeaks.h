@@ -74,6 +74,9 @@ namespace Algorithms
 
     double getTableValue(DataObjects::TableWorkspace_const_sptr tableWS, std::string colname, size_t index);
 
+    /// Get the IPeakFunction part in the input function
+    API::IPeakFunction_sptr getPeakFunction(API::IFunction_sptr infunction);
+
     std::map<specid_t, specid_t> mSpectrumMap;
   };
 

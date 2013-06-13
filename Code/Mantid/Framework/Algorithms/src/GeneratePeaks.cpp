@@ -244,9 +244,13 @@ namespace Algorithms
     const std::size_t bkgOffset = getBkgOffset(columnNames, isRaw);
     g_log.information() << "isRaw=" << isRaw << " bkgOffset=" << bkgOffset << "\n";
 
+    // Create data structure for all peaks functions
+    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > > functionmap;
+    std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator mapiter;
+
     for (size_t ipk = 0; ipk < numpeaks; ipk ++)
     {
-      // 1. Get to know workspace index
+      // Get to know workspace index
       specid_t specid = static_cast<specid_t>(getTableValue(peakparameters, "spectrum", ipk));
       specid_t wsindex;
       if (newWSFromParent)
@@ -254,41 +258,96 @@ namespace Algorithms
       else
         wsindex = mSpectrumMap[specid];
 
-      // 2. Generate peak function
+      // Existed?
+      mapiter = functionmap.find(wsindex);
+      if (mapiter == functionmap.end())
+      {
+        std::vector<std::pair<double, API::IFunction_sptr> > tempvector;
+        std::pair<std::map<specid_t, std::vector<std::pair<double, API::IFunction_sptr> > >::iterator, bool> ret;
+        ret = functionmap.insert(std::make_pair(wsindex, tempvector));
+        mapiter = ret.first;
+      }
+
+      // Generate peak function
       double chi2 = getTableValue(peakparameters, "chi2", ipk);
       double centre, fwhm; // output parameters
-      auto mfunc = createFunction(peakfunction, columnNames, isRaw, generateBackground, peakparameters, bkgOffset, ipk,
-                                  centre, fwhm);
+      API::IFunction_sptr mfunc = createFunction(peakfunction, columnNames, isRaw, generateBackground, peakparameters, bkgOffset, ipk,
+                                                 centre, fwhm);
+
       if (chi2 > maxchi2)
       {
         g_log.notice() << "Skip Peak " << ipk << " (chi^2 " << chi2 << " > " << maxchi2 << ") at " << centre << "\n";
         continue;
       }
-      g_log.debug() << "Peak " << ipk << ": Spec = " << specid << " -> WSIndex = " << wsindex
-                    << " func: " << mfunc->asString() << "\n";
-
-
-      // 3. Build domain & function
-      const MantidVec& X = dataWS->dataX(wsindex);
-      std::vector<double>::const_iterator left = std::lower_bound(X.begin(), X.end(), centre - numWidths*fwhm);
-      if (left == X.end())
-        left = X.begin();
-      std::vector<double>::const_iterator right = std::lower_bound(left + 1, X.end(), centre + numWidths*fwhm);
-      API::FunctionDomain1DVector domain(left, right); //dataWS->dataX(wsindex));
-
-      // 4. Evaluate the function
-      API::FunctionValues values(domain);
-      mfunc->function(domain, values);
-
-      // 5. Put to output
-      std::size_t offset = (left-X.begin());
-      std::size_t numY = values.size();
-      for (std::size_t i = 0; i < numY; i ++)
+      else
       {
-        dataWS->dataY(wsindex)[i + offset] += values[i];
+        mapiter->second.push_back(std::make_pair(centre, mfunc));
       }
 
-    } // for peak
+      g_log.debug() << "Peak " << ipk << ": Spec = " << specid << " -> WSIndex = " << wsindex
+                    << " func: " << mfunc->asString() << "\n";
+    }
+
+    for (mapiter = functionmap.begin(); mapiter != functionmap.end(); ++mapiter)
+    {
+      // Sort functions in same spectrum by centre
+      std::vector<std::pair<double, API::IFunction_sptr> >& vecfuncs = mapiter->second;
+      std::sort(vecfuncs.begin(), vecfuncs.end());
+      specid_t wsindex = mapiter->first;
+
+      // Plot each
+      for (size_t ipk = 0; ipk < mapiter->second.size(); ++ipk)
+      {
+        // Basic parameters of the peak
+        API::IFunction_sptr mfunc = vecfuncs[ipk].second;
+        API::IPeakFunction_sptr mpeak = getPeakFunction(mfunc);
+        if (!mpeak)
+          throw std::runtime_error("Function in array does not contain any peak function!");
+
+        double centre = vecfuncs[ipk].first;
+        double fwhm = mpeak->fwhm();
+
+        // Determine boundary
+        const MantidVec& X = dataWS->dataX(wsindex);
+        double leftbound = centre - numWidths*fwhm;
+        if (ipk > 0)
+        {
+          // Not left most peak.
+          double middle = 0.5*(centre + vecfuncs[ipk-1].first);
+          if (leftbound < middle)
+            leftbound = middle;
+        }
+        std::vector<double>::const_iterator left = std::lower_bound(X.begin(), X.end(), leftbound);
+        if (left == X.end())
+          left = X.begin();
+
+        double rightbound = centre + numWidths*fwhm;
+        if (ipk != vecfuncs.size()-1)
+        {
+          // Not the rightmost peak
+          double middle = 0.5*(centre + vecfuncs[ipk+1].first);
+          if (rightbound > middle)
+            rightbound = middle;
+        }
+        std::vector<double>::const_iterator right = std::lower_bound(left + 1, X.end(), rightbound);
+
+        // Build domain & function
+        API::FunctionDomain1DVector domain(left, right); //dataWS->dataX(wsindex));
+
+        // 4. Evaluate the function
+        API::FunctionValues values(domain);
+        mfunc->function(domain, values);
+
+        // 5. Put to output
+        std::size_t offset = (left-X.begin());
+        std::size_t numY = values.size();
+        for (std::size_t i = 0; i < numY; i ++)
+        {
+          dataWS->dataY(wsindex)[i + offset] += values[i];
+        }
+      } // for peak
+
+    } // for spectra
 
     return;
   }
@@ -299,9 +358,9 @@ namespace Algorithms
    * @return The requested function to fit.
    */
   API::IFunction_sptr GeneratePeaks::createFunction(const std::string &peakFuncType, const std::vector<std::string> &colNames,
-                                     const bool isRaw, const bool withBackground,
-                                     DataObjects::TableWorkspace_const_sptr peakParmsWS,
-                                     const std::size_t bkg_offset, const std::size_t rowNum, double &centre, double &fwhm)
+                                                    const bool isRaw, const bool withBackground,
+                                                    DataObjects::TableWorkspace_const_sptr peakParmsWS,
+                                                    const std::size_t bkg_offset, const std::size_t rowNum, double &centre, double &fwhm)
   {
     // create the peak
     auto tempPeakFunc = API::FunctionFactory::Instance().createFunction(peakFuncType);
@@ -377,7 +436,7 @@ namespace Algorithms
     double x0 = binparameters[0];
     double dx = binparameters[1];
     double xf = binparameters[2];
-    if (x0 < xf || (xf - x0) < dx || dx == 0.)
+    if (x0 >= xf || (xf - x0) < dx || dx == 0.)
     {
       std::stringstream errss;
       errss << "Order of input binning parameters is not correct.  It is not logical to have "
@@ -464,6 +523,33 @@ namespace Algorithms
     }
 
     return (*col)[index];
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get the IPeakFunction part in the input function
+    */
+  API::IPeakFunction_sptr GeneratePeaks::getPeakFunction(API::IFunction_sptr infunction)
+  {
+    // Not a composite function
+    API::CompositeFunction_sptr compfunc = boost::dynamic_pointer_cast<API::CompositeFunction>(infunction);
+
+    // If it is a composite function (complete part for return)
+    if (compfunc)
+    {
+      for (size_t i = 0; i < compfunc->nFunctions(); ++i)
+      {
+        API::IFunction_sptr subfunc = compfunc->getFunction(i);
+        API::IPeakFunction_sptr peakfunc = boost::dynamic_pointer_cast<API::IPeakFunction>(subfunc);
+        if (peakfunc)
+          return peakfunc;
+      }
+
+    }
+
+    // Return if not a composite function
+    API::IPeakFunction_sptr peakfunc = boost::dynamic_pointer_cast<API::IPeakFunction>(infunction);
+
+    return peakfunc;
   }
 
 } // namespace Mantid
