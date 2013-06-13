@@ -121,7 +121,7 @@ void ColorUpdater::colorScaleChange(pqPipelineRepresentation *repr,
 void ColorUpdater::logScale(pqPipelineRepresentation *repr, int state)
 {
   pqScalarsToColors *lut = repr->getLookupTable();
-  if (nullptr == lut)
+  if (NULL == lut)
   {
     // Got a bad proxy, so just return
     return;
