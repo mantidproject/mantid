@@ -109,6 +109,7 @@ add_subdirectory ( Framework )
 include_directories ( Framework/Kernel/inc )
 include_directories ( Framework/Geometry/inc )
 include_directories ( Framework/API/inc )
+
 set ( CORE_MANTIDLIBS Kernel Geometry API )
 
 # Add a target for all GUI tests
@@ -127,7 +128,13 @@ endif ( UNIX )
 
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
-set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?") 
+set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?")
+set ( MAKE_REMOTE_JOBS OFF CACHE BOOL "Add code for executing algorithms on a remote cluster") 
+
+if ( MAKE_REMOTE_JOBS )
+  include_directories ( Framework/Remote/inc )
+  LIST( APPEND CORE_MANTIDLIBS Remote)
+endif (MAKE_REMOTE_JOBS)
 
 if ( MAKE_VATES )
   add_subdirectory ( Vates )
