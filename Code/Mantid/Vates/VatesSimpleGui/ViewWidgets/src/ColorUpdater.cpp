@@ -121,6 +121,11 @@ void ColorUpdater::colorScaleChange(pqPipelineRepresentation *repr,
 void ColorUpdater::logScale(pqPipelineRepresentation *repr, int state)
 {
   pqScalarsToColors *lut = repr->getLookupTable();
+  if (nullptr == lut)
+  {
+    // Got a bad proxy, so just return
+    return;
+  }
   QPair<double, double> bounds = lut->getScalarRange();
   // Handle "bug" with lower limit being dropped.
   if (bounds.first != this->minScale)
