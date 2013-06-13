@@ -589,7 +589,7 @@ def do_make_wiki(algo_name, version, latest_version):
     """ 
     
     external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
-    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000; padding-left:5px;'></anchor>\n\n" % (external_image, external_image)  
+    out = "<anchor url='%s'><img width=400px src='%s' style='position:relative; z-index:1000; padding-left:5px; float:right;'></anchor>\n\n" % (external_image, external_image)  
     
     # Deprecated algorithms: Simply return the deprecation message
     print "Creating... ", algo_name, version
