@@ -481,6 +481,15 @@
 
 </facility>
 
+<!--  Reactor Orphee (France) -->
+<facility name="LLB" FileExtensions=".nxs,.hdf">
+  <instrument name="MIBEMOL">
+    <technique>Neutron Spectroscopy</technique> 
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+  </instrument>
+</facility>
+
+
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
    <livedata listener="MockILiveListener"/>
