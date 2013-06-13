@@ -825,17 +825,26 @@ void MantidEV::findUB_slot()
        if ( optimize_angles )
        {
          double max_degrees = 5;
-         if (!getPositiveDouble( m_uiForm.MaxGoniometerChange_ledt,max_degrees))
-           return;
-
-         if ( !worker->optimizePhiChiOmega( peaks_ws_name, max_degrees ) )
+         if ( getPositiveDouble( m_uiForm.MaxGoniometerChange_ledt,max_degrees) )
+         { 
+           if ( !worker->optimizePhiChiOmega( peaks_ws_name, max_degrees ) )
+           {
+             errorMessage("Failed to Optimize Phi, Chi and Omega");
+             // Don't return here, since we did still change UB by loading it.
+             // proceed to copyLattice, below.
+           }
+         }
+         else
          {
-           errorMessage("Failed to Optimize Phi, Chi and Omega");
-           return;
+           errorMessage( "Enter a POSITIVE number for Maximum Change (degrees)" );
          }
        }
      }
    }
+                               // Now that we set a UB copy it to md_workspace.  If
+                               // copy fails a log notice is output by copyLattice
+   std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+   worker->copyLattice( peaks_ws_name, md_ws_name );
 
    if ( index_peaks )
    {
@@ -867,7 +876,7 @@ void MantidEV::getLoadUB_FileName_slot()
     last_UB_file = Qfile_name.toStdString();
     m_uiForm.SelectUBFile_ledt->setText( Qfile_name );
   }
-}
+} 
 
 
 /**
@@ -943,6 +952,13 @@ void MantidEV::chooseCell_slot()
        errorMessage("Failed to Select the Requested Form Number");
      }
    }
+
+   if ( select_cell_type || select_cell_form )
+   {                                 // Try to copy the UB to md_workspace.  If it
+                                     // fails a log notice is output by copyLattice
+     std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+     worker->copyLattice( peaks_ws_name, md_ws_name );
+   }
 }
 
 
@@ -972,6 +988,11 @@ void MantidEV::changeHKL_slot()
    {
      errorMessage( "Failed to Change the Miller Indicies and UB" );
    }
+
+                                     // Try to copy the UB to md_workspace.  If it
+                                     // fails a log notice is output by copyLattice
+   std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+   worker->copyLattice( peaks_ws_name, md_ws_name );
 }
 
 

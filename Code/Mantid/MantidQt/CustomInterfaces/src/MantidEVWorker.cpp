@@ -207,11 +207,13 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
 
     if ( !alg->execute() )
       return false;
-  }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not load file and convert to MD" <<std::endl;
     return false; 
@@ -259,11 +261,13 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
 
     if ( alg->execute() )
       return true;
-  }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not findPeaks" <<std::endl;
     return false; 
@@ -350,7 +354,9 @@ bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
   alg->setProperty("Tolerance",tolerance);
 
   if ( alg->execute() )
+  { 
     return true;
+  }
 
   return false;
 }
@@ -711,11 +717,13 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
 
     std::cout << "Integrated temporary MD workspace FAILED" << std::endl; 
     return false;
-  }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not Integrated temporary MD workspace" <<std::endl;
     return false; 
@@ -789,11 +797,13 @@ bool MantidEVWorker::fitIntegrate(  const std::string & peaks_ws_name,
     }
 
     std::cout << "Integrated temporary FIT workspace FAILED" << std::endl;
-  }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not Integrated temporary FIT workspace" <<std::endl;
     return false; 
@@ -857,11 +867,13 @@ bool MantidEVWorker::ellipsoidIntegrate( const std::string & peaks_ws_name,
     }
 
     std::cout << "IntegrateEllipsoids FAILED" << std::endl;
- }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not IntegratedEllipsoids" <<std::endl;
     return false; 
@@ -990,6 +1002,56 @@ bool MantidEVWorker::getUB( const std::string & peaks_ws_name,
   }
 
   return true;
+}
+
+
+/**
+ *  Copy the the current oriented lattice with the UB matrix from the 
+ *  specified peaks workspace to the specified MD workspace.
+ *
+ *  @param peaks_ws_name  The name of the peaks workspace to copy the
+ *                        lattice from.
+ *  @param md_ws_name     The name of the md workspace to copy the
+ *                        lattice to.
+ *  @return true if the copy was done, false if something went wrong.
+ */
+bool MantidEVWorker::copyLattice( const std::string & peaks_ws_name,
+                                  const std::string & md_ws_name )
+                           
+{
+  if ( !isPeaksWorkspace( peaks_ws_name ) )
+  {
+    return false;
+  }
+
+  if ( !isMDWorkspace( md_ws_name ) )
+  {
+    return false;
+  }
+
+  try
+  {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CopySample");
+    alg->setProperty("InputWorkspace",peaks_ws_name);
+    alg->setProperty("OutputWorkspace",md_ws_name);
+    alg->setProperty("CopyName",       false);
+    alg->setProperty("CopyMaterial",   false);
+    alg->setProperty("CopyEnvironment",false);
+    alg->setProperty("CopyShape",      false);
+    alg->setProperty("CopyLattice",    true);
+    alg->execute();
+  }
+  catch(...)
+  {
+    g_log.notice() << std::endl;
+    g_log.notice() << "CopySample from " << peaks_ws_name <<
+                                 " to " << md_ws_name << " FAILED" << std::endl;
+    g_log.notice() << std::endl;
+    return false;
+  }
+
+  return true;
+
 }
 
 
