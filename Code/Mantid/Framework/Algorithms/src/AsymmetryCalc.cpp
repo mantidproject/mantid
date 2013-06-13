@@ -74,8 +74,8 @@ void AsymmetryCalc::exec()
 {
   std::vector<int> forward_list = getProperty("ForwardSpectra");
   std::vector<int> backward_list = getProperty("BackwardSpectra");
-  int forward = forward_list.size() ? forward_list[0] : 0;
-  int backward = backward_list.size() ? backward_list[0] : 1;
+  int forward = forward_list.size() ? forward_list[0] : 1;
+  int backward = backward_list.size() ? backward_list[0] : 2;
   double alpha = getProperty("Alpha");
 
   //Get original workspace
@@ -102,9 +102,17 @@ void AsymmetryCalc::exec()
     backward = 1;
   }
   else
+  {
     tmpWS = inputWS;
-
-  //setProperty("OutputWorkspace", tmpWS); return;
+    // get workspace indices from spectra ids for forward and backward
+    std::vector<specid_t> specIDs(2);
+    specIDs[0] = forward;
+    specIDs[1] = backward;
+    std::vector<size_t> indices;
+    tmpWS->getIndicesFromSpectra( specIDs, indices );
+    forward = static_cast<int>( indices[0] );
+    backward = static_cast<int>( indices[1] );
+  }
 
   //Create a workspace with only one spectra for forward
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS, 1,
