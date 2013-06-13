@@ -18,6 +18,7 @@ class RemoteJob
 public:
 
     enum JobStatus { JOB_COMPLETE, JOB_RUNNING, JOB_QUEUED, JOB_ABORTED, JOB_REMOVED, JOB_DEFERRED, JOB_IDLE, JOB_STATUS_UNKNOWN };
+    // Note: make sure JOB_STATUS_UNKNOWN is always the last option.
 
     RemoteJob( const std::string & jobId, RemoteJobManager * manager, JobStatus status, const std::string &name,
                Mantid::Kernel::DateAndTime submitTime = Mantid::Kernel::DateAndTime())
