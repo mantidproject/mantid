@@ -158,7 +158,6 @@ set ( TEST_FILES
 	QueryMDWorkspaceTest.h
 	ReflectometryTransformQxQzTest.h
         Integrate3DEventsTest.h
-#       IntegrateEllipsoidsTest.h
 	SaveIsawQvectorTest.h
 	SkippingPolicyTest.h
 	UnitsConversionHelperTest.h
