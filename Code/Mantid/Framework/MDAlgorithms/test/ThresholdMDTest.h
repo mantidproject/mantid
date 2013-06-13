@@ -44,7 +44,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  IMDHistoWorkspace_sptr doExecute(IMDHistoWorkspace_sptr inWS, const std::string& condition, const double& currentValue)
+  IMDHistoWorkspace_sptr doExecute(IMDHistoWorkspace_sptr inWS, const std::string& condition, const double& referenceValue)
   {
     const std::string outWSName = "OutWS";
     ThresholdMD alg;
@@ -52,7 +52,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("Condition", condition);
-    alg.setProperty("CurrentValue", currentValue);
+    alg.setProperty("ReferenceValue", referenceValue);
     alg.setPropertyValue("OutputWorkspace", outWSName);
     alg.execute();
 
@@ -101,7 +101,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
     alg.setProperty("Condition", "Less Than");
-    alg.setProperty("CurrentValue", 3.0);
+    alg.setProperty("ReferenceValue", 3.0);
     alg.setProperty("OverwriteWithZero", false);
     alg.setProperty("CustomOverwriteValue", 9.0);
     alg.setPropertyValue("OutputWorkspace", outWSName);

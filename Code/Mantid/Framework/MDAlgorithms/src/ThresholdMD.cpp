@@ -90,9 +90,9 @@ namespace Mantid
       propOptions.push_back(GreaterThan());
 
       declareProperty("Condition", LessThan(), boost::make_shared<StringListValidator>(propOptions),
-          "Selected threshold condition?");
+          "Selected threshold condition. Any value which does meet this condition with respect to the ReferenceValue will be overwritten.");
 
-      declareProperty("CurrentValue", 0.0, "Comparator value used by the Condition.");
+      declareProperty("ReferenceValue", 0.0, "Comparator value used by the Condition.");
 
       declareProperty("OverwriteWithZero", true,
           "Flag for enabling overwriting with a custom value. Defaults to overwrite signals with zeros.");
@@ -112,37 +112,43 @@ namespace Mantid
     {
       IMDHistoWorkspace_sptr inputWS = getProperty("InputWorkspace");
       const std::string condition = getProperty("Condition");
-      const double currentValue = getProperty("CurrentValue");
+      const double referenceValue = getProperty("ReferenceValue");
       const bool doOverwriteWithZero = getProperty("OverwriteWithZero");
       double customOverwriteValue = getProperty("CustomOverwriteValue");
+      const std::string outWSName = getPropertyValue("OutputWorkspace");
       if(doOverwriteWithZero)
       {
         customOverwriteValue = 0;
       }
 
-      IAlgorithm_sptr alg = createChildAlgorithm("CloneMDWorkspace");
-      alg->setProperty("InputWorkspace", inputWS);
-      alg->executeAsChildAlg();
-      IMDWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
-      auto outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+      IMDHistoWorkspace_sptr outWS = inputWS; // Shallow copy
+      if (outWSName != inputWS->getName())
+      {
+        g_log.debug("Deep copy input workspace as output workspace.");
+        IAlgorithm_sptr alg = createChildAlgorithm("CloneMDWorkspace");
+        alg->setProperty("InputWorkspace", inputWS);
+        alg->executeAsChildAlg();
+        IMDWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
+        outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+      }
 
-      const int nPoints = inputWS->getNPoints();
+      const int64_t nPoints = inputWS->getNPoints();
 
-      boost::function<bool(double)> comparitor = boost::bind(std::less<double>(),_1, currentValue);
+      boost::function<bool(double)> comparitor = boost::bind(std::less<double>(),_1, referenceValue);
       if(condition == GreaterThan())
       {
-        comparitor = boost::bind(std::greater<double>(),_1, currentValue);
+        comparitor = boost::bind(std::greater<double>(),_1, referenceValue);
       }
 
       Progress prog(this, 0, 1, 100);
-      int frequency = nPoints;
+      int64_t frequency = nPoints;
       if(nPoints > 100)
       {
         frequency = nPoints/100;
       }
 
       PARALLEL_FOR2(inputWS, outWS)
-      for(int i = 0; i < nPoints; ++i)
+      for(int64_t i = 0; i < nPoints; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         const double signalAt = inputWS->getSignalAt(i);
