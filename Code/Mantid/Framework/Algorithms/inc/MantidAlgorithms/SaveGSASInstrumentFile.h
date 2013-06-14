@@ -2,12 +2,32 @@
 #define MANTID_ALGORITHMS_SAVEGSASINSTRUMENTFILE_H_
 
 #include "MantidKernel/System.h"
-
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
 namespace Algorithms
 {
+
+class ChopperConfiguration
+{
+  // FIXME :: Add std:: to string and vectors
+public:
+  ChopperConfiguration(double freq, string bankidstr, string cwlstr, string mndspstr, string mxdspstr, string maxtofstr, string splitdstr, string vrunstr);
+  ~ChopperConfiguration();
+
+private:
+  parseString();
+
+  double m_frequency;
+  std::vector<double> m_CWL;
+  vector<double> m_mindsps;
+  vector<double> m_maxdsps;
+  vector<double> m_maxtofs;
+  vector<int> m_bankIDs;
+  vector<double> m_splitds;
+  vector<int> m_vruns;
+};
 
   /** SaveGSASInstrumentFile : TODO: DESCRIPTION
     
@@ -31,11 +51,38 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SaveGSASInstrumentFile 
+  class DLLExport SaveGSASInstrumentFile : public API::Algorithm
   {
   public:
     SaveGSASInstrumentFile();
     virtual ~SaveGSASInstrumentFile();
+    /// Algorithm's name
+    virtual const std::string name() const { return "SaveGSASInstrumentFile"; }
+    /// Algorithm's version
+    virtual int version() const { return (1); }
+    /// Algorithm's category for identification
+    virtual const std::string category() const { return "Diffraction;Algorithm\\Text"; }
+
+  private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
+    /// Initialisation code
+    void init();
+    /// Execution code
+    void exec();
+
+
+    /// Instrument
+    std::string m_instrumetn;
+    /// L1
+    double m_L1;
+    /// L2
+    double m_L2;
+    /// 2Theta
+    double m_2theta;
+    /// Frequency
+    double m_frequency;
+
     
   };
 
