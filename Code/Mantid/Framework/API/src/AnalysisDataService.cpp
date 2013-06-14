@@ -172,6 +172,26 @@ namespace Mantid
         remove( name );
     }
 
+    /**
+     * Remove a workspace from a group but not from the ADS.
+     *
+     * @param groupName :: Name of a workspace group.
+     * @param wsName :: Name of a workspace to remove.
+     */
+    void AnalysisDataServiceImpl::removeFromGroup(const std::string &groupName, const std::string &wsName)
+    {
+        WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>( groupName );
+        if ( !group )
+        {
+            throw std::runtime_error("Workspace " + groupName + " is not a workspace group.");
+        }
+        if ( !group->contains(wsName) )
+        {
+            throw std::runtime_error("WorkspaceGroup " + groupName + " does not containt workspace " + wsName);
+        }
+        group->removeByADS( wsName );
+    }
+
     //-------------------------------------------------------------------------
     // Private methods
     //-------------------------------------------------------------------------

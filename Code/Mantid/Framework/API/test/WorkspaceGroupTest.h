@@ -161,6 +161,25 @@ public:
     AnalysisDataService::Instance().clear();
 }
 
+  void test_removeItem()
+  {
+    WorkspaceGroup_sptr group1 = makeGroup();
+    TS_ASSERT_THROWS( group1->removeItem(1), std::runtime_error );
+
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    Workspace_sptr ws1(new WorkspaceTester());
+    group->addWorkspace( ws1 );
+    Workspace_sptr ws2(new WorkspaceTester());
+    group->addWorkspace( ws2 );
+
+    TS_ASSERT_EQUALS( group->size(), 2 );
+    TS_ASSERT_THROWS_NOTHING( group->removeItem(1) );
+    TS_ASSERT_EQUALS( group->size(), 1 );
+    TS_ASSERT_EQUALS( group->getItem(0), ws1 );
+
+    AnalysisDataService::Instance().clear();
+}
+
   void test_removeAll()
   {
     WorkspaceGroup_sptr group = makeGroup();
@@ -225,45 +244,45 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void testUpdated()
-  {
-    WorkspaceGroupTest_WorkspaceGroupObserver observer;
-    WorkspaceGroup_sptr group(new WorkspaceGroup());
-    AnalysisDataService::Instance().add( "group", group );
-    TS_ASSERT( !observer.received );
+//  void testUpdated()
+//  {
+//    WorkspaceGroupTest_WorkspaceGroupObserver observer;
+//    WorkspaceGroup_sptr group(new WorkspaceGroup());
+//    AnalysisDataService::Instance().add( "group", group );
+//    TS_ASSERT( !observer.received );
 
-    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
-    ws->initialize(2,3,4);
-    AnalysisDataService::Instance().addOrReplace("name_0", ws);
+//    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+//    ws->initialize(2,3,4);
+//    AnalysisDataService::Instance().addOrReplace("name_0", ws);
 
-    ws.reset(new WorkspaceTester());
-    ws->initialize(2,3,4);
-    AnalysisDataService::Instance().addOrReplace("name_12", ws);
+//    ws.reset(new WorkspaceTester());
+//    ws->initialize(2,3,4);
+//    AnalysisDataService::Instance().addOrReplace("name_12", ws);
 
-    group->add( "name_0" );
-    TS_ASSERT( observer.received );
-    observer.received = false;
+//    group->add( "name_0" );
+//    TS_ASSERT( observer.received );
+//    observer.received = false;
 
-    group->observeADSNotifications( false );
+//    group->observeADSNotifications( false );
 
-    group->add( "name_12" );
-    TS_ASSERT( !observer.received );
-    observer.received = false;
+//    group->add( "name_12" );
+//    TS_ASSERT( !observer.received );
+//    observer.received = false;
 
-    group->observeADSNotifications( true );
+//    group->observeADSNotifications( true );
 
-    group->remove( "name_12" );
-    TS_ASSERT( observer.received );
-    observer.received = false;
+//    group->remove( "name_12" );
+//    TS_ASSERT( observer.received );
+//    observer.received = false;
 
-    group->observeADSNotifications( false );
+//    group->observeADSNotifications( false );
 
-    group->remove( "name_0" );
-    TS_ASSERT( !observer.received );
-    observer.received = false;
+//    group->remove( "name_0" );
+//    TS_ASSERT( !observer.received );
+//    observer.received = false;
 
-    AnalysisDataService::Instance().clear();
-  }
+//    AnalysisDataService::Instance().clear();
+//  }
 
   void test_not_multiperiod_with_less_than_one_element()
   {

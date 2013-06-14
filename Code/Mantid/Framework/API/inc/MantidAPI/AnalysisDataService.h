@@ -132,6 +132,7 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    //@{
 
    void deepRemoveGroup(const std::string& name);
+   void removeFromGroup(const std::string& groupName, const std::string& wsName);
 
    //@}
 

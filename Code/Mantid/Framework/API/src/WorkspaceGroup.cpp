@@ -158,7 +158,7 @@ void WorkspaceGroup::removeAll()
 /** Remove the named workspace from the group. Does not delete the workspace from the AnalysisDataService.
  *  @param wsName :: The name of the workspace to be removed from the group.
  */
-void WorkspaceGroup::remove(const std::string& wsName)
+void WorkspaceGroup::removeByADS(const std::string& wsName)
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
   auto it = m_workspaces.begin();
@@ -170,7 +170,6 @@ void WorkspaceGroup::remove(const std::string& wsName)
       break;
     }
   }
-  updated();
 }
 
 /// Print the names of all the workspaces in this group to the logger (at debug level)
@@ -181,6 +180,29 @@ void WorkspaceGroup::print() const
   {
     g_log.debug() << "Workspace name in group vector =  " << (**itr).name() << std::endl;
   }
+}
+
+/**
+ * Remove a workspace pointed to by an index. The workspace remains in the ADS if it was there
+ *
+ * @param index :: Index of a workspace to delete.
+ */
+void WorkspaceGroup::removeItem(const size_t index)
+{
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+    // do not allow this way of removing for groups in the ADS
+    if ( ! name().empty() )
+    {
+        throw std::runtime_error("AnalysisDataService must be used to remove a workspace from group.");
+    }
+    if( index >= this->size() )
+    {
+      std::ostringstream os;
+      os << "WorkspaceGroup - index out of range. Requested=" << index << ", current size=" << this->size();
+      throw std::out_of_range(os.str());
+    }
+    auto it = m_workspaces.begin() + index;
+    m_workspaces.erase( it );
 }
 
 /** Callback for a workspace delete notification
@@ -198,7 +220,7 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
 
   if( deletedName != this->getName() )
   {
-    this->remove(deletedName);
+    this->removeByADS(deletedName);
     if(isEmpty())
     {
       //We are about to get deleted so we don't want to recieve any notifications

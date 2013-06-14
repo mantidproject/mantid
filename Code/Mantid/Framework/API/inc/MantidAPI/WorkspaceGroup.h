@@ -66,11 +66,7 @@ public:
   /// Turn ADS observations on/off
   void observeADSNotifications(const bool observeADS);
   /// Adds a workspace to the group.
-  void add(const std::string& wsName);
-  /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
-  /// Does a workspace exist within the group
-  bool contains(const std::string & wsName) const;
   /// Returns the names of workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
   std::vector<std::string> getNames() const;
   /// Return the number of entries within the group
@@ -83,8 +79,8 @@ public:
   Workspace_sptr getItem(const std::string wsName) const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
-  /// Remove a name from the group
-  void remove(const std::string& name);
+  /// Remove a workspace from the group
+  void removeItem(const size_t index);
   /// Remove all names from the group but do not touch the ADS
   void removeAll();
   /// This method returns true if the group is empty (no member workspace)
@@ -94,12 +90,26 @@ public:
   void updated() const;
   /// Inidicates that the workspace group can be treated as multiperiod.
   bool isMultiperiod() const;
+
+  /// @name Wrapped ADS calls
+  //@{
+
+  /// Adds a workspace to the group.
+  void add(const std::string& wsName);
+  /// Remove a name from the group
+  void remove(const std::string& name) { AnalysisDataService::Instance().removeFromGroup( this->name(), name); }
+  /// Does a workspace exist within the group
+  bool contains(const std::string & wsName) const;
+
+  //@}
  
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
+  /// Remove a name from the group
+  void removeByADS(const std::string& name);
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
   /// Observer for workspace delete notfications
@@ -116,6 +126,8 @@ private:
   mutable Poco::Mutex m_mutex;
   /// Static reference to the logger
   static Kernel::Logger& g_log;
+
+  friend class AnalysisDataServiceImpl;
 };
 
 /// Shared pointer to a workspace group class

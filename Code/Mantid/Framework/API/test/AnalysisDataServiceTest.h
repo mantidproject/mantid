@@ -352,6 +352,33 @@ public:
       ads.clear();
   }
 
+  void test_removeFromGroup()
+  {
+      auto group = addGroupToADS("group");
+      TS_ASSERT_EQUALS( ads.size(), 3);
+      TS_ASSERT_EQUALS( group->size(), 2);
+      ads.removeFromGroup("group","group_2");
+      TS_ASSERT_EQUALS( ads.size(), 3);
+      TS_ASSERT_EQUALS( group->size(), 1);
+
+      TS_ASSERT_THROWS( ads.removeFromGroup("group","noworkspace"), std::runtime_error );
+      TS_ASSERT_THROWS( ads.removeFromGroup("nogroup","noworkspace"), std::runtime_error );
+      TS_ASSERT_THROWS( ads.removeFromGroup("nogroup","group_1"), std::runtime_error );
+      ads.clear();
+  }
+
+  void test_removeFromGroup_group()
+  {
+      auto group = addGroupWithGroupToADS("group");
+      TS_ASSERT_EQUALS( ads.size(), 5);
+      TS_ASSERT_EQUALS( group->size(), 2);
+      // remove group from group
+      ads.removeFromGroup("group","group_2");
+      TS_ASSERT_EQUALS( ads.size(), 5);
+      TS_ASSERT_EQUALS( group->size(), 1);
+      ads.clear();
+  }
+
 private:
 
   /// If replace=true then usea addOrReplace
@@ -395,7 +422,7 @@ private:
   }
 
   /// Add a group with 2 simple workspaces to the ADS
-  Workspace_sptr addGroupToADS(const std::string & name)
+  WorkspaceGroup_sptr addGroupToADS(const std::string & name)
   {
       WorkspaceGroup_sptr group( new WorkspaceGroup );
       group->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
@@ -405,7 +432,7 @@ private:
   }
 
   /// Add a group with 1 simple workspace and 1 group with 2 simple ws to the ADS
-  Workspace_sptr addGroupWithGroupToADS(const std::string & name)
+  WorkspaceGroup_sptr addGroupWithGroupToADS(const std::string & name)
   {
       WorkspaceGroup_sptr group( new WorkspaceGroup );
       group->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
