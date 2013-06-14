@@ -107,6 +107,9 @@ namespace Algorithms
 
     this->declareProperty("MaxAllowedChi2", 100.0, "Maximum chi^2 of the peak allowed to calculate. Default 100.");
 
+    declareProperty("IgnoreWidePeaks", false, "If selected, the peaks that are wider than fit window "
+                    "(denoted by negative chi^2) are ignored.");
+
     return;
   }
 
@@ -220,6 +223,7 @@ namespace Algorithms
     // Special properties related
     double maxchi2 = this->getProperty("MaxAllowedChi2");
     double numWidths = this->getProperty("NumberWidths");
+    bool ignorewidepeaks = getProperty("IgnoreWidePeaks");
     bool generateBackground = this->getProperty("GenerateBackground");
 
     size_t numpeaks = peakparameters->rowCount();
@@ -278,6 +282,10 @@ namespace Algorithms
       {
         g_log.notice() << "Skip Peak " << ipk << " (chi^2 " << chi2 << " > " << maxchi2 << ") at " << centre << "\n";
         continue;
+      }
+      else if (chi2 < 0. && ignorewidepeaks)
+      {
+        g_log.notice() << "Skip Peak " << ipk << " (chi^2 " << chi2 << " < 0 ) at " << centre << "\n";
       }
       else
       {
