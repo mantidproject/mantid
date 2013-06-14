@@ -14,6 +14,8 @@ public:
   vtkGetStringMacro(FileName);
   int CanReadFile(const char* fname);
   void SetDimensions(int dimensions);
+  /// Setter for the unitegrated peak marker size
+  void SetUnintPeakMarkerSize(double mSize);
   /// Called by presenter to force progress information updating.
   void updateAlgorithmProgress(double progress, const std::string& message);
   /// Getter for the workspace type
@@ -41,6 +43,9 @@ private:
   
   /// Cached PeaksWs Name
   std::string m_wsTypeName;
+
+  /// Size for the unintegrated peak markers
+  double m_uintPeakMarkerSize;
 
   /// Cached PeaksWS
   Mantid::API::IPeaksWorkspace_sptr  m_PeakWS;
