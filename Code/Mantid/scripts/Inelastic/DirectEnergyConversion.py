@@ -144,7 +144,7 @@ class DirectEnergyConversion(object):
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
             background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
-            background_int *= 1.7016e8
+            background_int *= self.scale_factor
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
             kwargs['sample_counts'] = total_counts
@@ -549,8 +549,8 @@ class DirectEnergyConversion(object):
                 CloneWorkspace(InputWorkspace=data_ws, OutputWorkspace=result_name)
             output = mtd[result_name]
         elif method == 'monitor-1':
-            range_min = self.mon1_norm_range[0] + range_offset
-            range_max = self.mon1_norm_range[1] + range_offset
+            range_min = self.norm_mon_integration_range[0] + range_offset
+            range_max = self.norm_mon_integration_range[1] + range_offset
             if mon_number is None:
                 mon_spectr_num=int(self.mon1_norm_spec)
             else:
@@ -580,9 +580,10 @@ class DirectEnergyConversion(object):
             
         where only those detectors that are unmasked are used and the weight[i] = 1/errorValue[i].
         """
+
         if self.monovan_integr_range is None :
-            self.monovan_integr_range[0] = energy_incident*self.monovan_lo_frac;
-            self.monovan_integr_range[1] = energy_incident*self.monovan_hi_frac;            
+            self.monovan_integr_range = [self.monovan_lo_frac*energy_incident,self.monovan_hi_frac*energy_incident];
+
             
         e_low = self.monovan_integr_range[0]
         e_upp = self.monovan_integr_range[1]
@@ -635,10 +636,11 @@ class DirectEnergyConversion(object):
             ei_prop = run['Ei']
         except KeyError:
             raise RuntimeError('The given workspace "%s" does not contain an Ei value. Run GetEi first.' % str(ei_workspace))
+
+        ei_value = ei_prop.value        
+        absnorm_factor = self.calc_average(ei_workspace,ei_value)
         
-        absnorm_factor = self.calc_average(ei_workspace,ei_prop)
-        
-        ei_value = ei_prop.value
+
         if ei_value >= 200.0:
             xsection = 421.0
         else:
@@ -1160,21 +1162,21 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # should do nothing as already initialized above, but if not will initiate the instrument
         tReducer.initialise("MAP");
 
-        self.assertEqual(tReducer.mon_norm_range,[1000.,2000.]," Default integration range on MAPS should be as described in MAPS_Parameters.xml file")
+        self.assertEqual(tReducer.norm_mon_integration_range,[1000.,2000.]," Default integration range on MAPS should be as described in MAPS_Parameters.xml file")
         self.assertEqual(tReducer.ei_mon_spectra,[41474,41475]," Default ei monitors on MAPS should be as described in MAPS_Parameters.xml file")
 
         self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=1)
         self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=[10,100,100])
         
         kw=dict();
-        kw["mon_norm_range"]=[50,1050]
+        kw["norm_mon_integration_range"]=[50,1050]
         kw["ei-mon1-spec"]=10
         prop_changed=tReducer.set_input_parameters(**kw)
 
-        self.assertAlmostEqual(tReducer.mon_norm_range,[50,1050],7)
+        self.assertAlmostEqual(tReducer.norm_mon_integration_range,[50,1050],7)
         self.assertEqual(tReducer.ei_mon_spectra,[10,41475])
 
-        self.assertTrue("mon_norm_range" in prop_changed,"mon_norm_range should change")
+        self.assertTrue("norm_mon_integration_range" in prop_changed,"mon_norm_range should change")
         self.assertTrue("ei_mon_spectra" in prop_changed,"changing ei-mon1-spec should change ei_mon_spectra") 
 
     def test_set_non_default_comples_value_synonims(self):
@@ -1193,6 +1195,15 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         self.assertEqual(tReducer.ei_mon_spectra,[10000,2000])
         self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_mon_spectra_composite should change ei_mon_spectra") 
+
+    def test_set_mono_range(self):
+        tReducer = self.reducer
+        # should do nothing as already initialized above, but if not will initiate the instrument
+        tReducer.initialise("MAP");
+
+        energy_incident = 100
+        if tReducer.monovan_integr_range is None :
+            tReducer.monovan_integr_range = [tReducer.monovan_lo_frac*energy_incident,tReducer.monovan_hi_frac*energy_incident]
 
 
 #-----------------------------------------------------------------

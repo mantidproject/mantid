@@ -17,7 +17,7 @@
 <!-- The file which defines detectors to spectra mapping;
      if None - one2one map is used  -->
 <parameter name="map_file" type="string">
-   <value val="4to1_124.map"/>
+   <value val="4to1.map"/>
 </parameter>
 
 <!-- Extension of the data files obtained from DAE -->
@@ -45,18 +45,19 @@
   <value val="direct"/>
 </parameter>
 
-<!-- Monitor used to estimate total current on the sample -->
+<!-- Monitor used to estimate total current on the sample.  -->
 <parameter name="norm-mon1-spec">
   <value val="41473"/>
 </parameter>
-<!-- Time interval used for integration to estimate current on the sample -->
+<!-- Time interval used for integration to estimate current on the sample 
+    This interval is usually taken around the monitor peak-->
 <parameter name="norm-mon1-min">
   <value val="1000"/>
 </parameter>
 <parameter name="norm-mon1-max">
   <value val="2000"/>
 </parameter>
-<parameter name="mon_norm_range"  type="string">
+<parameter name="norm_mon_integration_range"  type="string">
   <value val="norm-mon1-min:norm-mon1-max"/>
 </parameter>
 
@@ -300,6 +301,9 @@
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass;
        background_range=bkgd_range;
+       mon1_norm_spec=norm-mon1-spec;
+       scale_factor=scale-factor;
+       wb_scale_factor=wb-scale-factor;
        monovan_integr_range=abs_units_van_range;
        hard_mask_file=hardmaskPlus;
        use_hard_mask_only=hardmaskOnly;
