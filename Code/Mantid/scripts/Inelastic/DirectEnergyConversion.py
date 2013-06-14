@@ -111,7 +111,7 @@ class DirectEnergyConversion(object):
         for par in self.diag_params:
             arg = par.lstrip('diag_')
             if arg not in kwargs:
-                kwargs[arg] = getattr(self, par)
+                kwargs[arg] = getattr(self, arg)
                 
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
@@ -802,13 +802,13 @@ class DirectEnergyConversion(object):
         self.relocate_dets = False
 
         #The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :(
-        self.van_rmm = 50.9415#self.get_default_parameter("vanadium-rmm") 
+        self.van_rmm = 50.9415
   
-        # Do we have specified spectra to diag over
-        try:
-            self.diag_spectra = self.get_default_parameter("diag_spectra")
-        except Exception:
-            self.diag_spectra = None
+        # Diag parameters -- keys used by diag method to pick from default parameters
+        self.diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
+                            'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation']
+
+        # special property -- synonims -- how to treat external parameters. 
         try:           
             self.synonims = self.get_default_parameter("synonims")
         except Exception:

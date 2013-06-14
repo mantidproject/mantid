@@ -202,7 +202,6 @@
   <value val="0.0"/>
 </parameter>
 
-
 <!-- Variation for ratio test with second white beam -->
 <parameter name="diag_variation">
   <value val="1.1"/>
@@ -315,6 +314,7 @@
        samp_lo    = diag_samp_median_sigma_lo=diag_samp_lo;
        samp_hi    = diag_samp_median_sigma_hi=diag_samp_hi;
        samp_sig   = diag_samp_median_sigma=diag_samp_sig;
+       variation  = diag_variation;
        bleed_test=bleed=diag_bleed_test;
        ei-mon2-spec = test_ei2_mon_spectra;
        ei_mon_spectra=test_mon_spectra_composite"
