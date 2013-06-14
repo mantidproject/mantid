@@ -101,6 +101,61 @@ namespace Crystal
           Direction::Output), "The average HKL indexing error if apply==true.");
   }
 
+  Kernel::Matrix<double> SelectCellWithForm::DetermineErrors( std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
+                                             const PeaksWorkspace_sptr &ws, double tolerance)
+  {
+
+        std::vector<V3D> miller_ind;
+        std::vector<V3D> q_vectors;
+        std::vector<V3D>q_vectors0;
+        int npeaks = ws->getNumberPeaks();
+        double fit_error;
+        miller_ind.reserve( npeaks );
+        q_vectors.reserve( npeaks );
+        q_vectors0.reserve(npeaks);
+        for( int i=0;i<npeaks;i++)
+          q_vectors0.push_back(ws->getPeak(i).getQSampleFrame());
+
+        Kernel::Matrix<double>newUB1(3,3);
+        IndexingUtils::GetIndexedPeaks(UB, q_vectors0, tolerance,
+                            miller_ind, q_vectors, fit_error );
+        IndexingUtils::Optimize_UB(newUB1, miller_ind,q_vectors,sigabc);
+
+        int nindexed_old = (int)q_vectors.size();
+        int nindexed_new = IndexingUtils::NumberIndexed( newUB1,q_vectors0,tolerance);
+        bool latErrorsValid =true;
+        if( nindexed_old < .8*nindexed_new || .8*nindexed_old >  nindexed_new )
+           latErrorsValid = false;
+        else
+        {
+          double maxDiff=0;
+          double maxEntry =0;
+          for( int row=0; row <3; row++)
+            for( int col=0; col< 3; col++)
+            {
+              double diff= fabs( UB[row][col]- newUB1[row][col]);
+              double V = std::max<double>(fabs(UB[row][col]), fabs(newUB1[row][col]));
+              if( diff > maxDiff)
+                maxDiff = diff;
+              if(V > maxEntry)
+                maxEntry = V;
+            }
+          if( maxEntry==0 || maxDiff/maxEntry >.1)
+            latErrorsValid=false;
+        }
+
+        if( !latErrorsValid)
+        {
+          for( size_t i = 0; i < sigabc.size(); i++ )
+            sigabc[i]=0;
+          return UB;
+
+        }else
+
+          return newUB1;
+
+  }
+
   //--------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -138,89 +193,49 @@ namespace Crystal
     g_log.notice( std::string(message) );
 
     if ( apply )
-    { bool latErrorsValid=true;
+    {
     //----------------------------------- Try to optimize(LSQ) to find lattice errors ------------------------
     //                       UB matrix may NOT have been found by unconstrained least squares optimization
-     std::vector<double> sigabc(7);
-     std::vector<V3D> miller_ind;
-     std::vector<V3D> q_vectors;
-     std::vector<V3D>q_vectors0;
-     int npeaks = ws->getNumberPeaks();
-     double fit_error;
-     miller_ind.reserve( npeaks );
-     q_vectors.reserve( npeaks );
-     q_vectors0.reserve(npeaks);
-     for( int i=0;i<npeaks;i++)
-       q_vectors0.push_back(ws->getPeak(i).getQSampleFrame());
-
-     Kernel::Matrix<double>newUB1(3,3);
-     IndexingUtils::GetIndexedPeaks(newUB, q_vectors0, tolerance,
-                         miller_ind, q_vectors, fit_error );
-     IndexingUtils::Optimize_UB(newUB1, miller_ind,q_vectors,sigabc);
-
-     int nindexed_old = (int)q_vectors.size();
-     int nindexed_new = IndexingUtils::NumberIndexed( newUB1,q_vectors0,tolerance);
-     if( nindexed_old<.8*nindexed_new || .8*nindexed_old>  nindexed_new )
-        latErrorsValid = false;
-     else
-     {
-       double maxDiff=0;
-       double maxEntry =0;
-       for( int row=0; row <3; row++)
-         for( int col=0; col< 3; col++)
-         {
-           double diff= fabs( newUB[row][col]- newUB1[row][col]);
-           double V = std::max<double>(fabs(newUB[row][col]), fabs(newUB1[row][col]));
-           if( diff > maxDiff)
-             maxDiff = diff;
-           if(V > maxEntry)
-             maxEntry = V;
-         }
-       if( maxEntry==0 || maxDiff/maxEntry >.1)
-         latErrorsValid=false;
-       else
-         newUB = newUB1;
-
-     }
-
 
      //----------------------------------------------
     o_lattice.setUB( newUB );
-    if( latErrorsValid)
-       o_lattice.setError( sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
+    std::vector<double> sigabc(6);
+    DetermineErrors(sigabc,newUB,ws, tolerance);
 
-      ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) ); 
+    o_lattice.setError( sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
 
-      std::vector<Peak> &peaks = ws->getPeaks();
-      size_t n_peaks = ws->getNumberPeaks();
+    ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
 
-      int    num_indexed   = 0;
-      double average_error = 0.0;
-      std::vector<V3D> miller_indices;
-      q_vectors.clear();
-      for ( size_t i = 0; i < n_peaks; i++ )
-      {
-        q_vectors.push_back( peaks[i].getQSampleFrame() );
-      }
+    std::vector<Peak> &peaks = ws->getPeaks();
+    size_t n_peaks = ws->getNumberPeaks();
 
-      num_indexed = IndexingUtils::CalculateMillerIndices( newUB, q_vectors,
-                                                           tolerance,
-                                                           miller_indices,
-                                                           average_error );
+    int    num_indexed   = 0;
+    double average_error = 0.0;
+    std::vector<V3D> miller_indices;
+    std::vector<V3D> q_vectors;
+    for ( size_t i = 0; i < n_peaks; i++ )
+    {
+      q_vectors.push_back( peaks[i].getQSampleFrame() );
+    }
 
-      for ( size_t i = 0; i < n_peaks; i++ )
-      {
-        peaks[i].setHKL( miller_indices[i] );
-      }
+    num_indexed = IndexingUtils::CalculateMillerIndices( newUB, q_vectors,
+                                                         tolerance,
+                                                         miller_indices,
+                                                         average_error );
 
-      // Tell the user what happened.
-      g_log.notice() << "Re-indexed the peaks with the new UB. " << std::endl;
-      g_log.notice() << "Now, " << num_indexed << " are indexed with average error " << average_error << std::endl;
+    for ( size_t i = 0; i < n_peaks; i++ )
+    {
+      peaks[i].setHKL( miller_indices[i] );
+    }
 
-      // Save output properties
+    // Tell the user what happened.
+    g_log.notice() << "Re-indexed the peaks with the new UB. " << std::endl;
+    g_log.notice() << "Now, " << num_indexed << " are indexed with average error " << average_error << std::endl;
 
-      this->setProperty("NumIndexed", num_indexed);
-      this->setProperty("AverageError", average_error);
+    // Save output properties
+
+    this->setProperty("NumIndexed", num_indexed);
+    this->setProperty("AverageError", average_error);
     }
   }
 
