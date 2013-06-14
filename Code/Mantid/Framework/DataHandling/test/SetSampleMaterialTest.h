@@ -93,7 +93,7 @@ public:
 
     const Material *m_sampleMaterial = &(testWS->sample().getMaterial());
     TS_ASSERT_DELTA( m_sampleMaterial->numberDensity(), 0.0236649, 0.0001 );
-    TS_ASSERT_DELTA( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda), 3.1409, 0.0001);
+    TS_ASSERT_DELTA( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda), 3.1404, 0.0001);
     TS_ASSERT_DELTA( m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.0925, 0.0001);
 	
 	AnalysisDataService::Instance().remove(wsName);
