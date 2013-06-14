@@ -56,6 +56,36 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
+  void SaveGSASInstrumentFile::init()
+  {
+    /**
+      """ Set Property
+      """
+      instruments = ["PG3", "NOM", "VULCAN", "SNAP"]
+      frequencies = ["10", "30", "60"]
+
+      self.declareProperty("Instrument", "PG3", Validator=ListValidator(instruments),
+              Description="SNS Instrument Name")
+      self.declareFileProperty("InputFile", "", FileAction.Load, [".irf", ".pcr"],
+              Description="Resolution (Fullprof, .irf) file")
+      self.declareProperty("IDLine", "", Description="ID Line in output GSAS instrument file")
+      self.declareProperty("Sample", "", Description="Sample information written to header (title)")
+      self.declareListProperty("Banks", [1], Validator=ArrayBoundedValidator(Lower=0),
+              Description="Banks to be written into output file")
+      self.declareProperty("Frequency", "60", Validator=ListValidator(frequencies),
+              Description="Frequency of the instrument file corresponds to")
+      self.declareProperty("L1", -1.0)
+      self.declareProperty("L2", -1.0,
+              Description="Distance from sample to detector.  If 2Theta is given, this won't work. ")
+      self.declareProperty("2Theta", 1001.0,
+              Description="Angle of the detector bank.  It is to calculate L2 with given Dtt1")
+      self.declareFileProperty("OutputFile", "", FileAction.Save, [".iparm", ".prm"],
+              Description="Output .iparm or .prm file")
+    */
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   void SaveGSASInstrumentFile::exec()
   {
     // Get properties
@@ -560,12 +590,11 @@ double calL2FromDtt1(double difc, double L1, double twotheta)
     return l2;
 }
 
-
-
-
 /** Initialize constant library
   */
 void initConstantLib()
 {
 
 }
+
+
