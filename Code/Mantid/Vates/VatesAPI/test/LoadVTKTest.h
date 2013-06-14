@@ -59,20 +59,20 @@ public:
     TS_ASSERT_THROWS(loadVTK.execute(), std::invalid_argument&);
   }
 
-  void test_badSignalArray()
+  void test_bad_signal_array()
   {
     const std::string signalArray = "?!"; // Not a name that exists.
     do_test_bad_arrays(signalArray);
   }
 
-  void test_badErrorSQArray()
+  void test_bad_errorSQ_array()
   {
     const std::string signalArray = "scalar_array";  // Does exist
     const std::string errorSQArray = "?!"; // Not a name that exists.
     do_test_bad_arrays(signalArray, errorSQArray);
   }
 
-  void test_LoadVTKFile()
+  void test_load_VTK_file_as_histo()
   {
     const std::string outWSName = "OutWS";
 
@@ -93,8 +93,59 @@ public:
     do_check_dimension(outWS->getDimension(2), "Z", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim z.
 
     // Quick check of loaded data.
-    TS_ASSERT_EQUALS(10, outWS->getSignalAt(0));
-    TS_ASSERT_EQUALS(std::sqrt(10), outWS->getErrorAt(0));
+    TS_ASSERT_EQUALS(0, outWS->getSignalAt(0));
+    TS_ASSERT_EQUALS(1, outWS->getSignalAt(1));
+    TS_ASSERT_EQUALS(2, outWS->getSignalAt(2));
+    TS_ASSERT_EQUALS(3, outWS->getSignalAt(3));
+  }
+
+  void test_KeepTopPercent_bounds()
+  {
+    LoadVTK loadVTK;
+    loadVTK.initialize();
+    loadVTK.setRethrows(true);
+
+    TSM_ASSERT_THROWS_NOTHING("Within bounds", loadVTK.setProperty("KeepTopPercent", 1.0));
+    TSM_ASSERT_THROWS("Too low", loadVTK.setProperty("KeepTopPercent", -0.01), std::invalid_argument&);
+    TSM_ASSERT_THROWS("Too high", loadVTK.setProperty("KeepTopPercent", 100.01), std::invalid_argument&);
+  }
+
+  void test_load_vtk_file_as_mdevent()
+  {
+    const std::string outWSName = "OutWS";
+
+    LoadVTK loadVTK;
+    loadVTK.setRethrows(true);
+    loadVTK.initialize();
+    loadVTK.setProperty("AdaptiveBinned", true);
+    loadVTK.setPropertyValue("Filename", "iron_protein.vtk");
+    loadVTK.setPropertyValue("OutputWorkspace", outWSName);
+    loadVTK.setPropertyValue("SignalArrayName", "scalar_array");
+    loadVTK.setPropertyValue("ErrorSQArrayName", "scalar_array");
+    loadVTK.execute();
+
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(
+        outWSName);
+
+    TS_ASSERT_EQUALS(3, outWS->getNumDims());
+    do_check_dimension(outWS->getDimension(0), "X", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim x.
+    do_check_dimension(outWS->getDimension(1), "Y", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim y.
+    do_check_dimension(outWS->getDimension(2), "Z", 0, 67, 68); // These numbers are expected min, max, and nbins known from the input file for dim z.
+
+    double topPercent = loadVTK.getProperty("KeepTopPercent");
+    TSM_ASSERT_EQUALS("Should default to 25%", 25, topPercent);
+
+    const int expectedSignalMax = 9999; //Known from file
+    const int expectedSignalMin = 0; // Known from file
+    const int expectedSignalThreshold = (1-0.25)*(expectedSignalMax - expectedSignalMin)+expectedSignalMin;
+    const int actualSignalMin = loadVTK.getProperty("SignalMinimum");
+    const int actualSignalMax = loadVTK.getProperty("SignalMaximum");
+    const int actualSignalThreshold = loadVTK.getProperty("SignalThreshold");
+    TS_ASSERT_EQUALS(expectedSignalMin, actualSignalMin);
+    TS_ASSERT_EQUALS(expectedSignalMax, actualSignalMax);
+    TS_ASSERT_EQUALS(expectedSignalThreshold, actualSignalThreshold);
+
+    TS_ASSERT(outWS->getNEvents() > 0);
 
   }
 
