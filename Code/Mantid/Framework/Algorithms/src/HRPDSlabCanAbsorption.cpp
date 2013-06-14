@@ -55,7 +55,7 @@ void HRPDSlabCanAbsorption::init()
   declareProperty("SampleScatteringXSection",  EMPTY_DBL(), mustBePositive,
     "The scattering cross-section (coherent + incoherent) for the sample material in barns if not set with SetSampleMaterial");
   declareProperty("SampleNumberDensity",  EMPTY_DBL(), mustBePositive,
-    "The number density of the sample in number per cubic angstrom if not set with SetSampleMaterial");
+    "The number density of the sample in number of atoms per cubic angstrom if not set with SetSampleMaterial");
 
   std::vector<std::string> thicknesses(4);
   thicknesses[0] = "0.2";

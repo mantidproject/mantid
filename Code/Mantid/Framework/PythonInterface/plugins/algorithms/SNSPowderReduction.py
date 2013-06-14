@@ -413,7 +413,7 @@ class SNSPowderReduction(PythonAlgorithm):
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 else:
                     if self.getProperty("FilterCharacterizations").value:
-                        canRun = self._focusChunks(canRun, SUFFIX, filterWall, calib,
+                        canRun = self._focusChunks(canRun, SUFFIX, timeFilterWall, calib,
                                preserveEvents=preserveEvents)
                     else:
                         canRun = self._focusChunks(canRun, SUFFIX, (0., 0.), calib,
@@ -450,7 +450,7 @@ class SNSPowderReduction(PythonAlgorithm):
                     else:
                         vnoiseRun = self._info.vnoise # noise run for the vanadium
                     if self.getProperty("FilterCharacterizations").value:
-                        vanRun = self._focusChunks(vanRun, SUFFIX, filterWall, calib,
+                        vanRun = self._focusChunks(vanRun, SUFFIX, timeFilterWall, calib,
                                preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
                     else:
                         vanRun = self._focusChunks(vanRun, SUFFIX, (0., 0.), calib,
@@ -458,7 +458,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
                     if (vnoiseRun > 0):
                         if self.getProperty("FilterCharacterizations").value:
-                            vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, filterWall, calib,
+                            vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, timeFilterWall, calib,
                                preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
                         else:
                             vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, (0., 0.), calib,
@@ -509,7 +509,7 @@ class SNSPowderReduction(PythonAlgorithm):
                             vbackRun = mtd["%s_%d" % (self._instrument, vbackRun)]
                         else:
                             if self.getProperty("FilterCharacterizations").value:
-                                vbackRun = self._focusChunks(vbackRun, SUFFIX, filterWall, calib,
+                                vbackRun = self._focusChunks(vbackRun, SUFFIX, timeFilterWall, calib,
                                    preserveEvents=False)
                             else:
                                 vbackRun = self._focusChunks(vbackRun, SUFFIX, (0., 0.), calib,

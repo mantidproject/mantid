@@ -63,7 +63,7 @@ void SphericalAbsorption::init()
   declareProperty("ScatteringXSection", EMPTY_DBL(), mustBePositive,
     "The (coherent + incoherent) scattering cross-section for the sample material in barns.");
   declareProperty("SampleNumberDensity", EMPTY_DBL(), mustBePositive,
-    "TThe number density of the sample in number per cubic angstrom, if not set with SetSampleMaterial");
+    "TThe number density of the sample in number of atoms per cubic angstrom, if not set with SetSampleMaterial");
   declareProperty("SphericalSampleRadius", EMPTY_DBL(), mustBePositive,
     "The radius of the spherical sample in centimetres");
 

@@ -146,7 +146,8 @@ void SplatterPlotView::render()
     return;
   }
 
-  if (!this->isPeaksWorkspace(src))
+  bool isPeaksWorkspace = this->isPeaksWorkspace(src);
+  if (!isPeaksWorkspace)
   {
     this->origSrc = src;
     this->splatSource = builder->createFilter("filters",
@@ -165,11 +166,17 @@ void SplatterPlotView::render()
   pqDataRepresentation *drep = builder->createDataRepresentation(\
            src->getOutputPort(0), this->view);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType.toStdString().c_str());
-  vtkSMPropertyHelper(drep->getProxy(), "PointSize").Set(1);
+  if (!isPeaksWorkspace)
+  {
+    vtkSMPropertyHelper(drep->getProxy(), "PointSize").Set(1);
+  }
   drep->getProxy()->UpdateVTKObjects();
-  pqPipelineRepresentation *prep = NULL;
-  prep = qobject_cast<pqPipelineRepresentation*>(drep);
-  prep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  if (!isPeaksWorkspace)
+  {
+    pqPipelineRepresentation *prep = NULL;
+    prep = qobject_cast<pqPipelineRepresentation*>(drep);
+    prep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  }
 
   this->resetDisplay();
   if (this->peaksSource.isEmpty())

@@ -239,7 +239,7 @@ void MantidUI::addMenuItems(QMenu *menu)
   actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
   actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
   menu->addAction(actionToggleAlgorithms);
-
+  
   if (m_fitFunction)
   {
     actionToggleFitFunction = m_fitFunction->toggleViewAction();

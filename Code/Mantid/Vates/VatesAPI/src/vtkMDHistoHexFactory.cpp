@@ -127,11 +127,10 @@ namespace VATES
     memset(pointNeeded, 0, nPointsX*nPointsY*nPointsZ*sizeof(bool));
     // Array with true where the voxel should be shown
     bool * voxelShown = new bool[nBinsX*nBinsY*nBinsZ];
-    double progressFactor = 50/double(nBinsZ);
-    double progressOffset = 50;
+    double progressFactor = 0.5/double(nBinsZ);
+    double progressOffset = 0.5;
 
     size_t index = 0;
-
     for (int z = 0; z < nBinsZ; z++)
     {
       //Report progress updates for the first 50%
@@ -191,6 +190,7 @@ namespace VATES
     // Array with the point IDs (only set where needed)
     vtkIdType * pointIDs = new vtkIdType[nPointsX*nPointsY*nPointsZ];
     index = 0;
+    progressFactor = 0.5/static_cast<double>(nPointsZ);
 
     for (int z = 0; z < nPointsZ; z++)
     {

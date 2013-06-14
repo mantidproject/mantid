@@ -162,35 +162,25 @@ namespace Mantid
       std::cout << "points needed per box     = " << points_per_box << std::endl;
     }
 
-    // Create all the points
-    vtkPoints *points = vtkPoints::New();
-    points->Allocate(numPoints);
-    points->SetNumberOfPoints(numPoints);
-
-    // Same number of scalars. Create them all
-    vtkFloatArray * signals = vtkFloatArray::New();
-    signals->Allocate(numPoints);
-    signals->SetName(m_scalarName.c_str());
-
-    // Create the data set
-    vtkUnstructuredGrid * visualDataSet = vtkUnstructuredGrid::New();
-    this->dataSet = visualDataSet;
-    visualDataSet->Allocate(numPoints);
-
-    // The list of IDs to use
-    vtkIdType * ids = new vtkIdType[numPoints];
-
-                                // Now get the events from the boxes that we are using.  
+                                // First save the events and signals that we actually use.  
                                 // For each box, get up to the average number of points
                                 // we want from each box, limited by the number of points
                                 // in the box.  NOTE: since boxes have different numbers 
-                                // of events, we will not get all the events we expected. 
+                                // of events, we will not get all the events requested. 
                                 // Also, if we are using a smaller number of points, we
                                 // won't get points from some of the boxes with lower signal.
+
+    std::vector<float>            saved_signals;
+    std::vector<const coord_t*>   saved_centers;
+    std::vector<size_t>           saved_n_points_in_cell;
+    saved_signals.reserve( numPoints );
+    saved_centers.reserve( numPoints );
+    saved_n_points_in_cell.reserve( numPoints );
+  
     size_t pointIndex = 0;
     size_t box_index  = 0;
     bool   done       = false;
-    while ( box_index < num_boxes_to_use && !done )                // "For" each box
+    while ( box_index < num_boxes_to_use && !done )                   // "For" each box
     {
       MDBox<MDE,nd> * box = sorted_boxes[box_index];
       box_index++;
@@ -204,13 +194,12 @@ namespace Mantid
       const std::vector<MDE> & events = box->getConstEvents();
       size_t startPointIndex = pointIndex;
       size_t event_index = 0;
-      while ( event_index < num_from_this_box && !done )          // "For" each event we
-      {                                                           // get from this box
+      while ( event_index < num_from_this_box && !done )              // "For" each event we
+      {                                                               // get from this box
         const MDE & ev = events[ event_index ];
         event_index++;
         const coord_t * center = ev.getCenter();  
-        points->SetPoint(pointIndex, center);
-        ids[pointIndex] = pointIndex;
+        saved_centers.push_back( center );                            // save location
         pointIndex++;
         if ( pointIndex >= numPoints )
         {
@@ -218,9 +207,54 @@ namespace Mantid
         }
       }
       box->releaseEvents();
-      signals->InsertNextTuple1(signal_normalized);
-      visualDataSet->InsertNextCell(VTK_POLY_VERTEX, pointIndex-startPointIndex, ids+startPointIndex);
+      saved_signals.push_back( signal_normalized );                   // save signal
+      saved_n_points_in_cell.push_back( pointIndex-startPointIndex ); // save cell size
     } 
+
+    numPoints = saved_centers.size();
+    size_t numCells = saved_signals.size();
+
+    if (VERBOSE)
+    {
+      std::cout << "Recorded data for all points" << std::endl;
+      std::cout << "numPoints = " << numPoints << std::endl;
+      std::cout << "numCells  = " << numCells << std::endl;
+    }
+
+    // Create the point list, one position for each point actually used
+    vtkPoints *points = vtkPoints::New();
+    points->Allocate(numPoints);
+    points->SetNumberOfPoints(numPoints);
+
+    // The list of IDs of points used, one ID per point, since points
+    // are not reused to form polygon facets, etc.
+    vtkIdType * ids = new vtkIdType[numPoints];
+
+    // Only one scalar for each cell, NOT one per point
+    vtkFloatArray * signals = vtkFloatArray::New();
+    signals->Allocate(numCells);
+    signals->SetName(m_scalarName.c_str());
+
+    // Create the data set.  Need space for each cell, not for each point
+    vtkUnstructuredGrid * visualDataSet = vtkUnstructuredGrid::New();
+    this->dataSet = visualDataSet;
+    visualDataSet->Allocate(numCells);
+                                                                 // Now copy the saved point, cell
+                                                                 // and signal info into vtk data
+                                                                 // structures
+    pointIndex = 0;
+    for ( size_t cell_i = 0; cell_i < numCells; cell_i++ )       // for each cell
+    {
+      size_t startPointIndex = pointIndex;
+      for ( size_t point_i = 0; point_i < saved_n_points_in_cell[ cell_i ]; point_i++ )  // for each point in cell
+      {
+        points->SetPoint( pointIndex, saved_centers[pointIndex] );
+        ids[pointIndex] = pointIndex;
+        pointIndex++;
+      }
+      signals->InsertNextTuple1( saved_signals[cell_i] );
+      visualDataSet->InsertNextCell(VTK_POLY_VERTEX, saved_n_points_in_cell[ cell_i ], ids+startPointIndex);
+    }
 
     if (VERBOSE) std::cout << tim << " to create " << pointIndex << " points." << std::endl;
 
@@ -331,10 +365,10 @@ namespace Mantid
    *  Set the size of the initial portion of the sorted list of boxes that 
    *  will will be used when getting events to plot as points.
    *
-   *  @percentToUse  The portion of the list to use, as a percentage. 
-   *                 NOTE: This must be more than 0 and no more than 100
-   *                 and whatever value is passed in will be restricted
-   *                 to the interval (0,100].
+   *  @param percentToUse  The portion of the list to use, as a percentage. 
+   *                       NOTE: This must be more than 0 and no more than 100
+   *                       and whatever value is passed in will be restricted
+   *                       to the interval (0,100].
    */
   void vtkSplatterPlotFactory::SetPercentToUse( double percentToUse )
   {

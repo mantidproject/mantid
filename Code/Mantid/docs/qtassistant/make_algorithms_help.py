@@ -42,10 +42,21 @@ def appendCatElement(doc, ul, category):
 
 def appendAlgoElement(doc, ul, name, versions):
     li = addEle(doc, "li", ul)
-    text = "%s v%d" % (name, versions[-1])
-    addTxtEle(doc, "a", text, li, {'href':'Algo_%s.html' % (name)})
+    writeVersions = True
+    try:
+        url = 'Algo_%s.html' % (name)
+        text = "%s v%d" % (name, versions[-1])
+    except TypeError, e:
+        if versions.startswith("ALIAS:"):
+            (temp, real) = versions.split(":")
+            text = name
+            url = 'Algo_%s.html' % (real)
+            writeVersions = False
+        else:
+            raise e
+    addTxtEle(doc, "a", text, li, {'href':url})
 
-    if len(versions) > 1:
+    if writeVersions and len(versions) > 1:
         text = ''
         text += ', ' + ', '.join(['v'+str(version) for version in versions[:-1]])
         text = doc.createTextNode(text)
@@ -97,6 +108,7 @@ def process(algos, qhp, outputdir, options):
         versions = algos[name]
 
         alg = mantid.FrameworkManager.createAlgorithm(name, versions[-1])
+        alias = alg.alias().strip()
         alg_categories = alg.categories()
         try:
             alg_categories = alg_categories.split(';')
@@ -107,6 +119,8 @@ def process(algos, qhp, outputdir, options):
             if not categories.has_key(category):
                 categories[category] = []
             categories[category].append((name, versions))
+            if len(alias) > 0:
+                categories[category].append((alias, "ALIAS:"+name))
     categories_list = categories.keys()
     categories_list.sort()
 
@@ -118,6 +132,14 @@ def process(algos, qhp, outputdir, options):
         if not letter_groups.has_key(letter):
             letter_groups[letter] = []
         letter_groups[letter].append((str(name), versions))
+
+        # add in the alias
+        alias = mantid.FrameworkManager.createAlgorithm(name, versions[-1]).alias().strip()
+        if len(alias) > 0:
+            letter = str(name)[0].upper()
+            if not letter_groups.has_key(letter):
+                letter_groups[letter] = []
+            letter_groups[letter].append((alias, "ALIAS:"+name))
 
     ##### put together the top of the html document
     doc = Document()

@@ -3228,7 +3228,9 @@ bool operator!=(const Atom& left, const Atom & right)
 
 std::ostream& operator<<(std::ostream& out, const Atom &atom)
 {
-  out << atom.symbol << atom.a_number;
+  out << atom.symbol;
+  if (atom.a_number != 0)
+    out << atom.a_number;
   return out;
 }
 

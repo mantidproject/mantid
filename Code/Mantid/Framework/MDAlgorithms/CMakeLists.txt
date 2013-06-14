@@ -12,8 +12,8 @@ set ( SRC_FILES
 	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
-	src/ConvertToDiffractionMDWorkspace.cpp    
-	src/ConvertToDiffractionMDWorkspace2.cpp        
+	src/ConvertToDiffractionMDWorkspace.cpp
+	src/ConvertToDiffractionMDWorkspace2.cpp
 	src/ConvertToMD.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
@@ -60,6 +60,7 @@ set ( SRC_FILES
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
 	src/Stitch1DMD.cpp
+	src/ThresholdMD.cpp
 	src/TransformMD.cpp
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
@@ -81,8 +82,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
-	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h    
-	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h        
+	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
+	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
@@ -130,6 +131,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SliceMD.h
 	inc/MantidMDAlgorithms/SlicingAlgorithm.h
 	inc/MantidMDAlgorithms/Stitch1DMD.h
+	inc/MantidMDAlgorithms/ThresholdMD.h
 	inc/MantidMDAlgorithms/TransformMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
@@ -152,8 +154,8 @@ set ( TEST_FILES
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
 	ConvertToDetectorFaceMDTest.h
-	ConvertToDiffractionMDWorkspaceTest.h    
-	ConvertToDiffractionMDWorkspace2Test.h        
+	ConvertToDiffractionMDWorkspace2Test.h
+	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToMDComponentsTest.h
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
@@ -195,6 +197,7 @@ set ( TEST_FILES
 	SlicingAlgorithmTest.h
 	Stitch1DMDTest.h
 	Strontium122Test.h
+	ThresholdMDTest.h
 	TobyFitBMatrixTest.h
 	TobyFitResolutionModelTest.h
 	TobyFitYVectorTest.h

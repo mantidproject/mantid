@@ -5,6 +5,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/RemoteJobManagerFactory.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -28,7 +29,8 @@ Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
   */
 FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
   m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(), m_extensions(),
-  m_soapEndPoint(), m_archiveSearch(), m_instruments(), m_catalogName(), m_liveListener()
+  m_soapEndPoint(), m_archiveSearch(), m_instruments(), m_catalogName(), m_liveListener(),
+  m_computeResources()
 {
   if (m_name.empty())
   {
@@ -44,6 +46,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   fillArchiveNames(elem);
   fillCatalogName(elem);
   fillLiveListener(elem);
+  fillComputeResources(elem);
   fillInstruments(elem); // Make sure this is last as it picks up some defaults that are set above
 }
 
@@ -201,6 +204,31 @@ void FacilityInfo::fillLiveListener(const Poco::XML::Element* elem)
   }
 }
 
+/// Called from constructor to fill compute resources map
+void FacilityInfo::fillComputeResources(const Poco::XML::Element* elem)
+{
+  Poco::XML::NodeList* pNL_compute = elem->getElementsByTagName("computeResource");
+  unsigned long n = pNL_compute->length();
+  for (unsigned long i = 0; i < n; i++)
+  {
+    Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_compute->item(i));
+    std::string type = elem->getAttribute("type");
+    std::string name = elem->getAttribute("name");
+
+    if (RemoteJobManagerFactory::Instance().exists(type))
+    {
+      m_computeResources.insert( make_pair(name, RemoteJobManagerFactory::Instance().create(elem)));
+    }
+    else
+    {
+      // Log a warning about not having an instantiator for the requested type...
+      g_log.warning( "No instantiator registered for compute resource \"" + name + "\" of type \"" + type + "\"");
+    }
+  }
+  pNL_compute->release();
+
+}
+
 /**
   * Returns instrument with given name
   * @param  iName Instrument name
@@ -260,6 +288,39 @@ std::vector<InstrumentInfo> FacilityInfo::instruments(const std::string& tech)co
     }
   }
   return out;
+}
+
+/**
+  * Returns a vector of the available compute resources
+  * @return vector of strings of the compute resource names
+  */
+std::vector<std::string> FacilityInfo::computeResources() const
+{
+  std::vector<std::string> names;
+  std::map< std::string, boost::shared_ptr<RemoteJobManager> >::const_iterator it = m_computeResources.begin();
+  while (it != m_computeResources.end())
+  {
+    names.push_back( (*it).first);
+    it++;
+  }
+
+  return names;
+}
+
+/**
+  * Returns a reference to the requested remote job manager
+  * @param name :: Name of the cluster we want to submit jobs to
+  * @return a shared pointer to the RemoteJobManager instance (or
+  * Null if the name wasn't recognized)
+  */
+boost::shared_ptr <RemoteJobManager> FacilityInfo::getRemoteJobManager( const std::string &name) const
+{
+  auto it = m_computeResources.find( name);
+  if (it == m_computeResources.end())
+  {
+    return boost::shared_ptr<RemoteJobManager>();  // return Null
+  }
+  return (*it).second;
 }
 
 } // namespace Kernel
