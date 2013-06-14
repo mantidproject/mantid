@@ -69,6 +69,24 @@ private:
   void init();
   ///Execution code
   void exec();
+  ///Converting to theta.
+  void createThetaMap(const std::string & target);
+  ///Converting to Q and QSquared
+  void createElasticQMap(const std::string & target);
+  ///Creates an output workspace.
+  API::MatrixWorkspace_sptr createOutputWorkspace(const std::string & target);
+  
+  //Stores the input workspace.
+  API::MatrixWorkspace_const_sptr m_inputWS;
+  //Map to which the conversion to the unit is stored.
+  std::multimap<double,size_t> m_indexMap;
+  //Stores the number of bins.
+  size_t m_nBins;
+  //Stores the number of x bins.
+  size_t m_nxBins;
+  //Stores the number of histograms.
+  size_t m_nHist;
+  
   ///Getting Efixed
   double getEfixed(Geometry::IDetector_const_sptr detector, API::MatrixWorkspace_const_sptr inputWS, int emode) const;
 };

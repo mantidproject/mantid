@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/ConvertSpectrumAxis2.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidKernel\UnitFactory.h"
 
 using namespace Mantid::API;
 
@@ -37,26 +38,47 @@ private:
 
 public:
 
-	void testName()
+	void estName()
 	{
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     TS_ASSERT_EQUALS( conv.name(), "ConvertSpectrumAxis" );
 	}
 
-	void testVersion()
+	void estVersion()
 	{
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     TS_ASSERT_EQUALS( conv.version(), 2 );
 	}
 
-  void testInit()
+  void estInit()
   {
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     TS_ASSERT_THROWS_NOTHING( conv.initialize() );
     TS_ASSERT( conv.isInitialized() );
   }
 
-  void testTargetSignedTheta()
+  void estTargetSignedThetaOld() // Old version of alg did not follow the naming convention for units. Keep till the old version is deprecated.
+  {
+    const std::string inputWS("inWS");
+    const std::string outputSignedThetaAxisWS("outSignedThetaWS");
+
+    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS);
+
+    MatrixWorkspace_const_sptr outputSignedTheta;
+    TS_ASSERT_THROWS_NOTHING( outputSignedTheta = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSignedThetaAxisWS) );
+    
+    // Check the signed theta axis
+    const Axis* thetaAxis = 0;
+    TS_ASSERT_THROWS_NOTHING( thetaAxis = outputSignedTheta->getAxis(1) );
+    TS_ASSERT( thetaAxis->isNumeric() );
+    TS_ASSERT_EQUALS( thetaAxis->unit()->caption(), "Scattering angle" );
+    TS_ASSERT_EQUALS( thetaAxis->unit()->label(), "degrees" );
+
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(outputSignedThetaAxisWS);
+  }
+    
+  void estTargetSignedThetaNew() // The new version of this alg follows the standard for the naming of units.
   {
     const std::string inputWS("inWS");
     const std::string outputSignedThetaAxisWS("outSignedThetaWS");
@@ -77,6 +99,139 @@ public:
     AnalysisDataService::Instance().remove(outputSignedThetaAxisWS);
   }
 
+  void estTargetThetaOld() // Old version of alg did not follow the naming convention for units. Keep till the old version is deprecated.
+  {
+    const std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+   
+    do_algorithm_run("theta", inputWS, outputWS);
+    
+    MatrixWorkspace_const_sptr input,output;
+    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
+    
+    // Should now have a numeric axis up the side, with units of angle
+    const Axis* thetaAxis = 0;
+    TS_ASSERT_THROWS_NOTHING( thetaAxis = output->getAxis(1) );
+    TS_ASSERT( thetaAxis->isNumeric() );
+    TS_ASSERT_EQUALS( thetaAxis->unit()->caption(), "Scattering angle" );
+    TS_ASSERT_EQUALS( thetaAxis->unit()->label(), "degrees" );
+    TS_ASSERT_DELTA( (*thetaAxis)(0), 6.0883, 0.0001 );
+    TS_ASSERT_DELTA( (*thetaAxis)(1), 180.0, 0.0001 );
+    // Check axis is correct length
+    TS_ASSERT_THROWS( (*thetaAxis)(2), Mantid::Kernel::Exception::IndexError );
+
+    // Data should be swapped over
+    TS_ASSERT_EQUALS( input->readX(0), output->readX(1) );
+    TS_ASSERT_EQUALS( input->readY(0), output->readY(1) );
+    TS_ASSERT_EQUALS( input->readE(0), output->readE(1) );
+    TS_ASSERT_EQUALS( input->readX(1), output->readX(0) );
+    TS_ASSERT_EQUALS( input->readY(1), output->readY(0) );
+    TS_ASSERT_EQUALS( input->readE(1), output->readE(0) );
+
+    //Clean up
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(outputWS);
+  }
+
+  void estTargetThetaNew() // The new version of this alg follows the standard for the naming of units.
+  {
+    const std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+   
+    do_algorithm_run("Theta", inputWS, outputWS);
+    
+    MatrixWorkspace_const_sptr input,output;
+    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
+    
+    // Should now have a numeric axis up the side, with units of angle
+    const Axis* thetaAxis = 0;
+    TS_ASSERT_THROWS_NOTHING( thetaAxis = output->getAxis(1) );
+    TS_ASSERT( thetaAxis->isNumeric() );
+    TS_ASSERT_EQUALS( thetaAxis->unit()->caption(), "Scattering angle" );
+    TS_ASSERT_EQUALS( thetaAxis->unit()->label(), "degrees" );
+    TS_ASSERT_DELTA( (*thetaAxis)(0), 6.0883, 0.0001 );
+    TS_ASSERT_DELTA( (*thetaAxis)(1), 180.0, 0.0001 );
+    // Check axis is correct length
+    TS_ASSERT_THROWS( (*thetaAxis)(2), Mantid::Kernel::Exception::IndexError );
+
+    // Data should be swapped over
+    TS_ASSERT_EQUALS( input->readX(0), output->readX(1) );
+    TS_ASSERT_EQUALS( input->readY(0), output->readY(1) );
+    TS_ASSERT_EQUALS( input->readE(0), output->readE(1) );
+    TS_ASSERT_EQUALS( input->readX(1), output->readX(0) );
+    TS_ASSERT_EQUALS( input->readY(1), output->readY(0) );
+    TS_ASSERT_EQUALS( input->readE(1), output->readE(0) );
+
+    //Clean up
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(outputWS);
+  }
+
+  void estTargetElasticQ() // The new version of this alg follows the standard for the naming of units.
+  {
+    std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+   
+    do_algorithm_run("ElasticQ", inputWS, outputWS);
+    
+    MatrixWorkspace_const_sptr input,output;
+    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
+       
+    // Should now have a numeric axis up the side, with units of Q
+    const Axis* qAxis = 0;
+    TS_ASSERT_THROWS_NOTHING( qAxis = output->getAxis(1) );
+    TS_ASSERT( qAxis->isNumeric() );
+    TS_ASSERT_EQUALS( qAxis->unit()->unitID(), "MomentumTransfer");
+    //TS_ASSERT_EQUALS( qAxis->unit()->label(), Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer")->label() )
+    // Check axis is correct length
+    TS_ASSERT_THROWS( (*qAxis)(2), Mantid::Kernel::Exception::IndexError );
+
+    TS_ASSERT_EQUALS( input->readX(0), output->readX(0) );
+    TS_ASSERT_EQUALS( input->readY(0), output->readY(0) );
+    TS_ASSERT_EQUALS( input->readE(0), output->readE(0) );
+    TS_ASSERT_EQUALS( input->readX(1), output->readX(1) );
+    TS_ASSERT_EQUALS( input->readY(1), output->readY(1) );
+    TS_ASSERT_EQUALS( input->readE(1), output->readE(1) );
+
+    //Clean up
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(outputWS);
+    }
+
+  void testTargetElasticQSquared() // The new version of this alg follows the standard for the naming of units.
+  {
+    std::string inputWS("inWS");
+    const std::string outputWS("outWS");
+   
+    do_algorithm_run("ElasticQSquared", inputWS, outputWS);
+    
+    MatrixWorkspace_const_sptr input,output;
+    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
+       
+    // Should now have a numeric axis up the side, with units of Q
+    const Axis* qAxis = 0;
+    TS_ASSERT_THROWS_NOTHING( qAxis = output->getAxis(1) );
+    TS_ASSERT( qAxis->isNumeric() );
+    TS_ASSERT_EQUALS( qAxis->unit()->unitID(), "QSquared");
+    //TS_ASSERT_EQUALS( qAxis->unit()->label(), Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer")->label() )
+    // Check axis is correct length
+    TS_ASSERT_THROWS( (*qAxis)(2), Mantid::Kernel::Exception::IndexError );
+
+    TS_ASSERT_EQUALS( input->readX(0), output->readX(0) );
+    TS_ASSERT_EQUALS( input->readY(0), output->readY(0) );
+    TS_ASSERT_EQUALS( input->readE(0), output->readE(0) );
+    TS_ASSERT_EQUALS( input->readX(1), output->readX(1) );
+    TS_ASSERT_EQUALS( input->readY(1), output->readY(1) );
+    TS_ASSERT_EQUALS( input->readE(1), output->readE(1) );
+
+    //Clean up
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(outputWS);
+    }
 };
 
 #endif /*CONVERTSPECTRUMAXIS2TEST_H_*/
