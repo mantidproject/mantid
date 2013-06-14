@@ -110,7 +110,7 @@ namespace Mantid
      */
     double Material::totalScatterXSection(const double lambda) const
     {
-      return (cohScatterXSection(lambda) + incohScatterXSection(lambda));
+      return m_element.tot_scatt_xs;
     }
 
     /**

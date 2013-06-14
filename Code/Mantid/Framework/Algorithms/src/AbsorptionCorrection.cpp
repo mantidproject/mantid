@@ -69,7 +69,7 @@ void AbsorptionCorrection::init()
   declareProperty("ScatteringXSection",  EMPTY_DBL(), mustBePositive,
     "The (coherent + incoherent) scattering cross-section for the sample material in barns. Column 7 of a table generated from http://www.ncnr.nist.gov/resources/n-lengths/.");
   declareProperty("SampleNumberDensity",  EMPTY_DBL(), mustBePositive,
-    "The number density of the sample in number per cubic angstrom if not set with SetSampleMaterial");
+    "The number density of the sample in number of atoms per cubic angstrom if not set with SetSampleMaterial");
 
   auto positiveInt = boost::make_shared<BoundedValidator<int64_t> >();
   positiveInt->setLower(1);
