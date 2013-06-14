@@ -333,7 +333,6 @@ namespace Mantid
     /**
      * Adds the FSE term to the result in the vector given
      * @param lhs Existing vector that the result should be added to
-     * @param amplitude The value to be used as the amplitude. It is not normalised by this function
      */
     void GramCharlierComptonProfile::addFSETerm(std::vector<double> & lhs) const
     {
