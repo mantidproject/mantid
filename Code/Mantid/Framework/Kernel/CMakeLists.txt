@@ -40,10 +40,11 @@ set ( SRC_FILES
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
-	src/Material.cpp
 	src/MaskedProperty.cpp
+	src/Material.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
+	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
 	src/Memory.cpp
@@ -161,10 +162,11 @@ set ( INC_FILES
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
-	inc/MantidKernel/Material.h
 	inc/MantidKernel/MaskedProperty.h
+	inc/MantidKernel/Material.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
+	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
 	inc/MantidKernel/Memory.h
@@ -272,8 +274,8 @@ set ( TEST_FILES
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
 	MandatoryValidatorTest.h
-	MaterialTest.h
 	MaskedPropertyTest.h
+	MaterialTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
 	MemoryTest.h
@@ -296,6 +298,7 @@ set ( TEST_FILES
 	RebinHistogramTest.h
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
+	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h
