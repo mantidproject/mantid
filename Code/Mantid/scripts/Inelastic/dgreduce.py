@@ -33,6 +33,7 @@ def help(keyword=None) :
     """function returns help on reduction parameters. 
        
        Returns the list of the parameters availible if provided without arguments
+       or the description and the default value for the key requested 
     """
     if Reducer == None:
         raise ValueError("Reducer has not been defined, call setup(instrument_name) first.")
@@ -139,42 +140,37 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         DeleteWorkspace(Workspace=inst_name+'00000.raw')
 
     # set rebinning range
-    reducer.energy_bins = rebin
+    Reducer.energy_bins = rebin
     if float(str.split(rebin,',')[2])>=float(ei_guess):
         print 'Error: rebin max range {0} exceeds incident energy {1}'.format(str.split(rebin,',')[2],ei_guess)
         return
 
-
-    # check if all optional keys provided as parameters are acceptable and have been defined in IDF 
-    # also replaces legacy synonimus with the DirectEnergy conversion keywords
-    dictionary = Reducer.check_keys_exist(kwargs)
-    # combine proper single paremeter keywords into the 2-3 parameters keywords, if such are defined
-    dictionay  = Reducer.combine_keys(dictionary)
-
-    for key in dictionary :
-        default_value = str(getattr(Reducer,key))
-        print " Replacing default value of: "+key+" from :"+default_vlaue+" to : ",dictionary.get(key)
-        setattr(Reducer,key,dictionary.get(key));
+    # Process old legacy parameters which are easy to define in dgrecue then transfer through Mantid
+    program_args = process_legacy_parameters(kwargs)
 
 
-    # map file in parameters overrides defaults
+    # set non-default reducers parameters and check if all optional keys provided as parameters are acceptable and have been defined in IDF 
+    changed_Keys=Reducer.set_input_parameters(**program_args);
+
+
+    # map file in parameters overrides default map file
     if map_file != None :
-        reducer.map_file = map_file
+        Reducer.map_file = map_file
     # defaults can be None too, but can be a file 
-    if  reducer.map_file != None:      
+    if  Reducer.map_file != None:      
        fileName, fileExtension = os.path.splitext(map_file)
        if (not fileExtension):
            map_file=map_file+'.map'    
-       reducer.map_file = map_file
+       Reducer.map_file = map_file
     else:
-       print 'one2one selected'       
+       print 'one2one map selected'       
 
     
-    #repopulate defualts
-    if reducer.mask_run == None :
+    #process complex parameters
+    if Reducer.mask_run == None :
         mask_run=sample_run
           
-    if  reducer.det_cal_file != None : 
+    if  Reducer.det_cal_file != None : 
         reducer.relocate_dets = True
         print 'Setting detector calibration file to ',reducer.det_cal_file
     else:
@@ -182,7 +178,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         print 'Setting detector calibration to detector block info from ', sample_run
 
     
-    if mtd.doesExist(str(sample_run))==True and reducer.det_cal_file != None:
+    if mtd.doesExist(str(sample_run))==True and Reducer.det_cal_file != None:
         print 'For data input type: workspace detector calibration must be specified'
         print 'use Keyword det_cal_file with a valid detctor file or run number'
         return
@@ -199,31 +195,32 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workpsace
         RenameWorkspace(InputWorkspace=accum,OutputWorkspace=inst_name+str(sample_run[0])+'.raw')
         sample_run=sample_run[0]
+
     
-   
-    if kwargs.has_key('hardmaskOnly'):
-        totalmask = kwargs.get('hardmaskOnly')
-        print 'Using hardmask from ', totalmask
+
+    if Reducer.use_hard_mask_only: # if it is string, it is treated as bool
+        totalmask = Reducer.hard_mask_file
+        
+        print 'Using hardmask from: ', totalmask
         #next stable version can replace this with loadmask algoritum
         specs=diag_load_mask(totalmask)
         CloneWorkspace(InputWorkspace=sample_run,OutputWorkspace='mask_wksp')
         MaskDetectors(Workspace='mask_wksp',SpectraList=specs)
         masking=mtd['mask_wksp']
-    else:
-    
+    else:    
          masking = reducer.diagnose(wb_run, mask_run,
               second_white = None,
               bkgd_range=background_range, 
               variation=1.1,
               print_results=True)
-              
+    # provide masking workspace for the reducer              
     reducer.spectra_masks=masking
     fail_list=get_failed_spectra_list(masking)
     
     print 'Diag found ', len(fail_list),'bad spectra'
     
     #Run the conversion
-    deltaE_wkspace = reducer.convert_to_energy(sample_run, ei_guess, wb_run)
+    deltaE_wkspace = Reducer.convert_to_energy(sample_run, ei_guess, wb_run)
     end_time=time.time()
     results_name=str(sample_run)+'.spe'
     
@@ -246,6 +243,20 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
 
 def abs_units(wb_run,sample_run,mono_van,wb_mono,samp_rmm,samp_mass,ei_guess,rebin,map_file,monovan_mapfile,**kwargs):
     pass
+
+def process_legacy_parameters(**kwargs) :
+    """ The method to deal with old parameters which have logic different from default and easy to process using 
+        subprogram 
+    """
+    params = dict();
+    for key,value in kwargs.iterable():
+        if key == 'hardmaskOnly': # legacy key defines other mask file here
+            params["hard_mask_file"] = value;
+            params["use_hard_mask_only"] = True;
+        else:
+            params[key]=value;    
+
+
 
 def get_failed_spectra_list(diag_workspace):
     """Compile a list of spectra numbers that are marked as

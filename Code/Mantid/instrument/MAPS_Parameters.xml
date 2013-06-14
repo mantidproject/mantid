@@ -17,16 +17,16 @@
 <!-- The file which defines detectors to spectra mapping;
      if None - one2one map is used  -->
 <parameter name="map_file" type="string">
-   <value val="None"/>
+   <value val="4to1_124.map"/>
 </parameter>
 
 <!-- Extension of the data files obtained from DAE -->
 <parameter name="data_file_ext" type="string">
    <value val=".RAW"/>
 </parameter>
-<!-- The name of the hard mas file to use together with diag masking -->
+<!-- The name of the hard mask file to use together with diag masking -->
 <parameter name="hard_mask_file" type="string">
-    <value val="None"/>
+    <value val="4to1_124mod.msk"/>
 </parameter>
 <!-- The if true, use only hard mask file specified above and do not run diagnostics procedures -->
 <parameter name="use_hard_mask_only" type="bool">

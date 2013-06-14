@@ -1043,25 +1043,29 @@ class DirectEnergyConversion(object):
 
         if keyword==None :
             par_names = self.instrument.getParameterNames()
+            n_params = len(par_names)
             print "****: ***************************************************************************** "
-            print "****: There are ", len(par_names), " reduction parameters availible to change, namely: "
-            for i in xrange(0,len(par_names),4):
-                print "****: {0}\t {1}\t {2}\t {3}\n".format(par_names[i],par_names[i+1],par_names[i+2],par_names[i+3]),
+            print "****: There are ",n_params, " reduction parameters availible to change, namely: "
+            for i in xrange(0,n_params,4):
+                print "****: ",
+                for j in xrange(0,min(n_params-i,4)):
+                    print "\t{0}".format(par_names[i+j]),
+                print ""
                 #print par_names[i],
                 #print  type(self.instrument.getParameterType(par_names[i])),
                 #print  self.instrument.getParameterType(par_names[i])
             print "****:" 
-            print "****: type help(parameter_name) to get help on a parameter with  specified  name"
+            print "****: type help(parameter_name) to get help on a parameter with the name requested"
             print "****: ***************************************************************************** ";
         else:
             if self.instrument.hasParameter(keyword) :
                 print "****: ***************************************************************************** ";        
-                print "****: IDF value for keyword: ",keyword," is ",get_default_parameter(self,keyword)
+                print "****: IDF value for keyword: ",keyword," is: ",self.get_default_parameter(keyword)
                 if keyword in self.synonims :
                     fieldName = self.synonims[keyword]
                     print "****: This keyword is reamed by reducer to: ",fieldName," and its value is: ",self.fieldName
                 else:
-                    print "****: Its current value in reducer is: ",self.keyword
+                    print "****: Its current value in reducer is: ",getattr(self,keyword)
 
                 print "****: help for "+keyword+" is not yet implemented, read "+self.instr_name+"_Parameters.xml\n"\
                       "****: in folder "+config.getString('instrumentDefinition.directory')+" for help containing on this key there"
