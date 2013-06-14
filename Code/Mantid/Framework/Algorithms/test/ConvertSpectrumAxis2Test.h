@@ -169,7 +169,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
   }
 
-  void estTargetElasticQ() // The new version of this alg follows the standard for the naming of units.
+  void testTargetElasticQ() // The new version of this alg follows the standard for the naming of units.
   {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
@@ -185,6 +185,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( qAxis = output->getAxis(1) );
     TS_ASSERT( qAxis->isNumeric() );
     TS_ASSERT_EQUALS( qAxis->unit()->unitID(), "MomentumTransfer");
+    
+    TS_ASSERT_DELTA( (*qAxis)(0), 0.0000, 0.0001 );
+
     //TS_ASSERT_EQUALS( qAxis->unit()->label(), Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer")->label() )
     // Check axis is correct length
     TS_ASSERT_THROWS( (*qAxis)(2), Mantid::Kernel::Exception::IndexError );
@@ -201,7 +204,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
     }
 
-  void testTargetElasticQSquared() // The new version of this alg follows the standard for the naming of units.
+  void estTargetElasticQSquared() // The new version of this alg follows the standard for the naming of units.
   {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
@@ -212,14 +215,19 @@ public:
     TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
        
-    // Should now have a numeric axis up the side, with units of Q
-    const Axis* qAxis = 0;
-    TS_ASSERT_THROWS_NOTHING( qAxis = output->getAxis(1) );
-    TS_ASSERT( qAxis->isNumeric() );
-    TS_ASSERT_EQUALS( qAxis->unit()->unitID(), "QSquared");
-    //TS_ASSERT_EQUALS( qAxis->unit()->label(), Mantid::Kernel::UnitFactory::Instance().create("MomentumTransfer")->label() )
+    // Should now have a numeric axis up the side, with units of Q^2
+    const Axis* q2Axis = 0;
+    TS_ASSERT_THROWS_NOTHING( q2Axis = output->getAxis(1) );
+    TS_ASSERT( q2Axis->isNumeric() );
+    TS_ASSERT_EQUALS( q2Axis->unit()->unitID(), "QSquared");
+    
+    TS_ASSERT_DELTA( (*q2Axis)(0), 0.0000, 0.0001 );
+    
+    //double efixed = Mantid::Algorithms::ConvertSpectrumAxis2::getEfixed(;
+    //TS_ASSERT_DELTA( (*q2Axis)(1), ((sqrt(2 * Mantid::Algorithms::ConvertSpectrumAxis2::getEfixed * Mantid::PhysicalConstants::NeutronMass)) * 4 * M_PI/(Mantid::PhysicalConstants::h)), 0.0001 );
+
     // Check axis is correct length
-    TS_ASSERT_THROWS( (*qAxis)(2), Mantid::Kernel::Exception::IndexError );
+    TS_ASSERT_THROWS( (*q2Axis)(2), Mantid::Kernel::Exception::IndexError );
 
     TS_ASSERT_EQUALS( input->readX(0), output->readX(0) );
     TS_ASSERT_EQUALS( input->readY(0), output->readY(0) );

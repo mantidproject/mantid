@@ -148,15 +148,11 @@ namespace Algorithms
     if (emodeStr == "Direct") emode=1;
     else if (emodeStr == "Indirect") emode=2;
     const double delta = 0.0;
-    double efixed, sineTheta, wavelength, k, elasticQ, elasticQSquared;
       
     for ( size_t i = 0; i < m_nHist; i++ )
     {
-      std::vector<double> xval;
-      xval.push_back(m_inputWS->readX(i).front());
-      xval.push_back(m_inputWS->readX(i).back());
       IDetector_const_sptr detector = m_inputWS->getDetector(i);
-      double twoTheta, l1val, l2;
+      double twoTheta, l1val, l2, efixed;
       if ( ! detector->isMonitor() )
       {
         twoTheta = m_inputWS->detectorTwoTheta(detector);
@@ -172,26 +168,25 @@ namespace Algorithms
         efixed = DBL_MIN;
       }
 
-      sineTheta = sin(twoTheta/2);
+      const double sineTheta = sin(twoTheta/2);
         
       //Calculate the wavelength to allow it to be used to convert to elasticQ. 
-      wavelength = Mantid::PhysicalConstants::h/(sqrt(2*efixed*Mantid::PhysicalConstants::NeutronMass));
+      double wavelength = Mantid::PhysicalConstants::h/(sqrt(2*efixed*Mantid::PhysicalConstants::NeutronMass));
       //The constant k.
-      k = (2*M_PI)/wavelength;
-        
-       
+      const double k = (2*M_PI)/wavelength;
+      
+      // MomentumTransfer     
+      double elasticQ = k*2*sineTheta;
+
       if(targetUnit == "ElasticQ")
       {
-        // MomentumTransfer            
-        elasticQ = k*2*sineTheta;
-          
         m_indexMap.insert(std::make_pair(elasticQ, i));
       } 
     
       else if(targetUnit == "ElasticQSquared")
       {
         // QSquared
-        elasticQSquared = (k*2*sineTheta)*(k*2*sineTheta);
+        double elasticQSquared = elasticQ*elasticQ;
         
         m_indexMap.insert(std::make_pair(elasticQSquared, i));
       }
