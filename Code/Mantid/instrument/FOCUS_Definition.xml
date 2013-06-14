@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
+<instrument name="FOCUS" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-05-29 15:20:14">
+  <!-- Author: ricardo.leal@ill.fr -->
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+             y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+  <component type="moderator">
+    <location z="-0.499700" />
+  </component>
+  <type name="moderator" is="Source"></type>
+  <!-- Sample position -->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0" />
+  </component>
+  <type name="sample-position" is="SamplePos" />
+  <idlist idname="detectors">
+    <id start="1" end="375" />
+  </idlist>
+  <!-- Detector list def -->
+  <component type="detectors" idlist="detectors">
+    <location />
+  </component>
+  <!-- Detector Banks -->
+  <type name="detectors">
+    <component type="lowerBank">
+      <location />
+    </component>
+    <component type="bank1">
+      <location />
+    </component>
+    <component type="upperBank">
+      <location />
+    </component>
+  </type>
+  <!-- Definition of every bank -->
+  <type name="lowerBank">
+    <component type="pack">
+      <location x="-0.739587" y="-0.855050" z="2.229776" name="det1"></location>
+      <location x="-0.771616" y="-0.855050" z="2.218896" name="det2"></location>
+      <location x="-0.803485" y="-0.855050" z="2.207556" name="det3"></location>
+      <location x="-0.835187" y="-0.855050" z="2.195758" name="det4"></location>
+      <location x="-0.866716" y="-0.855050" z="2.183505" name="det5"></location>
+      <location x="-0.931111" y="-0.855050" z="2.156831" name="det6"></location>
+      <location x="-0.962069" y="-0.855050" z="2.143201" name="det7"></location>
+      <location x="-0.992828" y="-0.855050" z="2.129127" name="det8"></location>
+      <location x="-1.023381" y="-0.855050" z="2.114611" name="det9"></location>
+      <location x="-1.053722" y="-0.855050" z="2.099657" name="det10"></location>
+      <location x="-1.115548" y="-0.855050" z="2.067472" name="det11"></location>
+      <location x="-1.145200" y="-0.855050" z="2.051196" name="det12"></location>
+      <location x="-1.174616" y="-0.855050" z="2.034494" name="det13"></location>
+      <location x="-1.203788" y="-0.855050" z="2.017371" name="det14"></location>
+      <location x="-1.232710" y="-0.855050" z="1.999829" name="det15"></location>
+      <location x="-1.291495" y="-0.855050" z="1.962379" name="det16"></location>
+      <location x="-1.319616" y="-0.855050" z="1.943580" name="det17"></location>
+      <location x="-1.347464" y="-0.855050" z="1.924378" name="det18"></location>
+      <location x="-1.375032" y="-0.855050" z="1.904777" name="det19"></location>
+      <location x="-1.402316" y="-0.855050" z="1.884781" name="det20"></location>
+      <location x="-1.457613" y="-0.855050" z="1.842350" name="det21"></location>
+      <location x="-1.483989" y="-0.855050" z="1.821172" name="det22"></location>
+      <location x="-1.510057" y="-0.855050" z="1.799616" name="det23"></location>
+      <location x="-1.535812" y="-0.855050" z="1.777687" name="det24"></location>
+      <location x="-1.561249" y="-0.855050" z="1.755389" name="det25"></location>
+      <location x="-1.597669" y="-0.855050" z="1.722308" name="det26"></location>
+      <location x="-1.622302" y="-0.855050" z="1.699125" name="det27"></location>
+      <location x="-1.646598" y="-0.855050" z="1.675590" name="det28"></location>
+      <location x="-1.670553" y="-0.855050" z="1.651708" name="det29"></location>
+      <location x="-1.694162" y="-0.855050" z="1.627484" name="det30"></location>
+      <location x="-1.727874" y="-0.855050" z="1.591647" name="det31"></location>
+      <location x="-1.750612" y="-0.855050" z="1.566603" name="det32"></location>
+      <location x="-1.772988" y="-0.855050" z="1.541235" name="det33"></location>
+      <location x="-1.794995" y="-0.855050" z="1.515546" name="det34"></location>
+      <location x="-1.816631" y="-0.855050" z="1.489544" name="det35"></location>
+      <location x="-1.847427" y="-0.855050" z="1.451173" name="det36"></location>
+      <location x="-1.868130" y="-0.855050" z="1.424422" name="det37"></location>
+      <location x="-1.888446" y="-0.855050" z="1.397376" name="det38"></location>
+      <location x="-1.908370" y="-0.855050" z="1.370041" name="det39"></location>
+      <location x="-1.927899" y="-0.855050" z="1.342421" name="det40"></location>
+      <location x="-1.955590" y="-0.855050" z="1.301752" name="det41"></location>
+      <location x="-1.974130" y="-0.855050" z="1.273460" name="det42"></location>
+      <location x="-1.992261" y="-0.855050" z="1.244903" name="det43"></location>
+      <location x="-2.009980" y="-0.855050" z="1.216088" name="det44"></location>
+      <location x="-2.027281" y="-0.855050" z="1.187022" name="det45"></location>
+      <location x="-2.051695" y="-0.855050" z="1.144305" name="det46"></location>
+      <location x="-2.067959" y="-0.855050" z="1.114645" name="det47"></location>
+      <location x="-2.083794" y="-0.855050" z="1.084754" name="det48"></location>
+      <location x="-2.099197" y="-0.855050" z="1.054639" name="det49"></location>
+      <location x="-2.114164" y="-0.855050" z="1.024304" name="det50"></location>
+      <location x="-2.212423" y="-0.855050" z="0.789984" name="det51"></location>
+      <location x="-2.223568" y="-0.855050" z="0.758047" name="det52"></location>
+      <location x="-2.234252" y="-0.855050" z="0.725952" name="det53"></location>
+      <location x="-2.244473" y="-0.855050" z="0.693707" name="det54"></location>
+      <location x="-2.254229" y="-0.855050" z="0.661319" name="det55"></location>
+      <location x="-2.267584" y="-0.855050" z="0.613964" name="det56"></location>
+      <location x="-2.276189" y="-0.855050" z="0.581251" name="det57"></location>
+      <location x="-2.284322" y="-0.855050" z="0.548417" name="det58"></location>
+      <location x="-2.291982" y="-0.855050" z="0.515470" name="det59"></location>
+      <location x="-2.299166" y="-0.855050" z="0.482415" name="det60"></location>
+      <location x="-2.308765" y="-0.855050" z="0.434159" name="det61"></location>
+      <location x="-2.314777" y="-0.855050" z="0.400872" name="det62"></location>
+      <location x="-2.320309" y="-0.855050" z="0.367501" name="det63"></location>
+      <location x="-2.325360" y="-0.855050" z="0.334054" name="det64"></location>
+      <location x="-2.329928" y="-0.855050" z="0.300538" name="det65"></location>
+      <location x="-2.335711" y="-0.855050" z="0.251677" name="det66"></location>
+      <location x="-2.339093" y="-0.855050" z="0.218021" name="det67"></location>
+      <location x="-2.341990" y="-0.855050" z="0.184319" name="det68"></location>
+      <location x="-2.344401" y="-0.855050" z="0.150578" name="det69"></location>
+      <location x="-2.346326" y="-0.855050" z="0.116807" name="det70"></location>
+      <location x="-2.348257" y="-0.855050" z="0.067644" name="det71"></location>
+      <location x="-2.348988" y="-0.855050" z="0.033825" name="det72"></location>
+      <location x="-2.349232" y="-0.855050" z="0.000000" name="det73"></location>
+      <location x="-2.348988" y="-0.855050" z="-0.033825" name="det74"></location>
+      <location x="-2.348257" y="-0.855050" z="-0.067644" name="det75"></location>
+      <location x="-2.346326" y="-0.855050" z="-0.116807" name="det76"></location>
+      <location x="-2.344401" y="-0.855050" z="-0.150578" name="det77"></location>
+      <location x="-2.341990" y="-0.855050" z="-0.184319" name="det78"></location>
+      <location x="-2.339093" y="-0.855050" z="-0.218021" name="det79"></location>
+      <location x="-2.335711" y="-0.855050" z="-0.251677" name="det80"></location>
+      <location x="-2.329928" y="-0.855050" z="-0.300538" name="det81"></location>
+      <location x="-2.325360" y="-0.855050" z="-0.334054" name="det82"></location>
+      <location x="-2.320309" y="-0.855050" z="-0.367501" name="det83"></location>
+      <location x="-2.314777" y="-0.855050" z="-0.400872" name="det84"></location>
+      <location x="-2.308765" y="-0.855050" z="-0.434159" name="det85"></location>
+      <location x="-2.299166" y="-0.855050" z="-0.482415" name="det86"></location>
+      <location x="-2.291982" y="-0.855050" z="-0.515470" name="det87"></location>
+      <location x="-2.284322" y="-0.855050" z="-0.548417" name="det88"></location>
+      <location x="-2.276189" y="-0.855050" z="-0.581251" name="det89"></location>
+      <location x="-2.267584" y="-0.855050" z="-0.613964" name="det90"></location>
+      <location x="-2.254229" y="-0.855050" z="-0.661319" name="det91"></location>
+      <location x="-2.244473" y="-0.855050" z="-0.693707" name="det92"></location>
+      <location x="-2.234252" y="-0.855050" z="-0.725952" name="det93"></location>
+      <location x="-2.223568" y="-0.855050" z="-0.758047" name="det94"></location>
+      <location x="-2.212423" y="-0.855050" z="-0.789984" name="det95"></location>
+      <location x="-2.195393" y="-0.855050" z="-0.836145" name="det96"></location>
+      <location x="-2.183126" y="-0.855050" z="-0.867668" name="det97"></location>
+      <location x="-2.170407" y="-0.855050" z="-0.899012" name="det98"></location>
+      <location x="-2.157238" y="-0.855050" z="-0.930169" name="det99"></location>
+      <location x="-2.143621" y="-0.855050" z="-0.961134" name="det100"></location>
+      <location x="-2.123022" y="-0.855050" z="-1.005816" name="det101"></location>
+      <location x="-2.108320" y="-0.855050" z="-1.036280" name="det102"></location>
+      <location x="-2.093181" y="-0.855050" z="-1.066529" name="det103"></location>
+      <location x="-2.077607" y="-0.855050" z="-1.096557" name="det104"></location>
+      <location x="-2.061603" y="-0.855050" z="-1.126358" name="det105"></location>
+      <location x="-2.037562" y="-0.855050" z="-1.169285" name="det106"></location>
+      <location x="-2.020515" y="-0.855050" z="-1.198502" name="det107"></location>
+      <location x="-2.003049" y="-0.855050" z="-1.227470" name="det108"></location>
+      <location x="-1.985168" y="-0.855050" z="-1.256184" name="det109"></location>
+      <location x="-1.966875" y="-0.855050" z="-1.284637" name="det110"></location>
+      <location x="-1.939540" y="-0.855050" z="-1.325546" name="det111"></location>
+      <location x="-1.920253" y="-0.855050" z="-1.353335" name="det112"></location>
+      <location x="-1.900568" y="-0.855050" z="-1.380844" name="det113"></location>
+      <location x="-1.880489" y="-0.855050" z="-1.408066" name="det114"></location>
+      <location x="-1.860020" y="-0.855050" z="-1.434996" name="det115"></location>
+    </component>
+  </type>
+  <type name="upperBank">
+    <component type="pack">
+      <location x="-0.739587" y="0.855050" z="2.229776" name="det116"></location>
+      <location x="-0.771616" y="0.855050" z="2.218896" name="det117"></location>
+      <location x="-0.803485" y="0.855050" z="2.207556" name="det118"></location>
+      <location x="-0.835187" y="0.855050" z="2.195758" name="det119"></location>
+      <location x="-0.866716" y="0.855050" z="2.183505" name="det120"></location>
+      <location x="-0.931111" y="0.855050" z="2.156831" name="det121"></location>
+      <location x="-0.962069" y="0.855050" z="2.143201" name="det122"></location>
+      <location x="-0.992828" y="0.855050" z="2.129127" name="det123"></location>
+      <location x="-1.023381" y="0.855050" z="2.114611" name="det124"></location>
+      <location x="-1.053722" y="0.855050" z="2.099657" name="det125"></location>
+      <location x="-1.115548" y="0.855050" z="2.067472" name="det126"></location>
+      <location x="-1.145200" y="0.855050" z="2.051196" name="det127"></location>
+      <location x="-1.174616" y="0.855050" z="2.034494" name="det128"></location>
+      <location x="-1.203788" y="0.855050" z="2.017371" name="det129"></location>
+      <location x="-1.232710" y="0.855050" z="1.999829" name="det130"></location>
+      <location x="-1.291495" y="0.855050" z="1.962379" name="det131"></location>
+      <location x="-1.319616" y="0.855050" z="1.943580" name="det132"></location>
+      <location x="-1.347464" y="0.855050" z="1.924378" name="det133"></location>
+      <location x="-1.375032" y="0.855050" z="1.904777" name="det134"></location>
+      <location x="-1.402316" y="0.855050" z="1.884781" name="det135"></location>
+      <location x="-1.457613" y="0.855050" z="1.842350" name="det136"></location>
+      <location x="-1.483989" y="0.855050" z="1.821172" name="det137"></location>
+      <location x="-1.510057" y="0.855050" z="1.799616" name="det138"></location>
+      <location x="-1.535812" y="0.855050" z="1.777687" name="det139"></location>
+      <location x="-1.561249" y="0.855050" z="1.755389" name="det140"></location>
+      <location x="-1.597669" y="0.855050" z="1.722308" name="det141"></location>
+      <location x="-1.622302" y="0.855050" z="1.699125" name="det142"></location>
+      <location x="-1.646598" y="0.855050" z="1.675590" name="det143"></location>
+      <location x="-1.670553" y="0.855050" z="1.651708" name="det144"></location>
+      <location x="-1.694162" y="0.855050" z="1.627484" name="det145"></location>
+      <location x="-1.727874" y="0.855050" z="1.591647" name="det146"></location>
+      <location x="-1.750612" y="0.855050" z="1.566603" name="det147"></location>
+      <location x="-1.772988" y="0.855050" z="1.541235" name="det148"></location>
+      <location x="-1.794995" y="0.855050" z="1.515546" name="det149"></location>
+      <location x="-1.816631" y="0.855050" z="1.489544" name="det150"></location>
+      <location x="-1.847427" y="0.855050" z="1.451173" name="det151"></location>
+      <location x="-1.868130" y="0.855050" z="1.424422" name="det152"></location>
+      <location x="-1.888446" y="0.855050" z="1.397376" name="det153"></location>
+      <location x="-1.908370" y="0.855050" z="1.370041" name="det154"></location>
+      <location x="-1.927899" y="0.855050" z="1.342421" name="det155"></location>
+      <location x="-1.955590" y="0.855050" z="1.301752" name="det156"></location>
+      <location x="-1.974130" y="0.855050" z="1.273460" name="det157"></location>
+      <location x="-1.992261" y="0.855050" z="1.244903" name="det158"></location>
+      <location x="-2.009980" y="0.855050" z="1.216088" name="det159"></location>
+      <location x="-2.027281" y="0.855050" z="1.187022" name="det160"></location>
+      <location x="-2.051695" y="0.855050" z="1.144305" name="det161"></location>
+      <location x="-2.067959" y="0.855050" z="1.114645" name="det162"></location>
+      <location x="-2.083794" y="0.855050" z="1.084754" name="det163"></location>
+      <location x="-2.099197" y="0.855050" z="1.054639" name="det164"></location>
+      <location x="-2.114164" y="0.855050" z="1.024304" name="det165"></location>
+      <location x="-2.135152" y="0.855050" z="0.979804" name="det166"></location>
+      <location x="-2.149038" y="0.855050" z="0.948959" name="det167"></location>
+      <location x="-2.162479" y="0.855050" z="0.917918" name="det168"></location>
+      <location x="-2.175471" y="0.855050" z="0.886686" name="det169"></location>
+      <location x="-2.188013" y="0.855050" z="0.855271" name="det170"></location>
+      <location x="-2.308765" y="0.855050" z="0.434159" name="det171"></location>
+      <location x="-2.314777" y="0.855050" z="0.400872" name="det172"></location>
+      <location x="-2.320309" y="0.855050" z="0.367501" name="det173"></location>
+      <location x="-2.325360" y="0.855050" z="0.334054" name="det174"></location>
+      <location x="-2.329928" y="0.855050" z="0.300538" name="det175"></location>
+      <location x="-2.335711" y="0.855050" z="0.251677" name="det176"></location>
+      <location x="-2.339093" y="0.855050" z="0.218021" name="det177"></location>
+      <location x="-2.341990" y="0.855050" z="0.184319" name="det178"></location>
+      <location x="-2.344401" y="0.855050" z="0.150578" name="det179"></location>
+      <location x="-2.346326" y="0.855050" z="0.116807" name="det180"></location>
+      <location x="-2.348257" y="0.855050" z="0.067644" name="det181"></location>
+      <location x="-2.348988" y="0.855050" z="0.033825" name="det182"></location>
+      <location x="-2.349232" y="0.855050" z="0.000000" name="det183"></location>
+      <location x="-2.348988" y="0.855050" z="-0.033825" name="det184"></location>
+      <location x="-2.348257" y="0.855050" z="-0.067644" name="det185"></location>
+      <location x="-2.346326" y="0.855050" z="-0.116807" name="det186"></location>
+      <location x="-2.344401" y="0.855050" z="-0.150578" name="det187"></location>
+      <location x="-2.341990" y="0.855050" z="-0.184319" name="det188"></location>
+      <location x="-2.339093" y="0.855050" z="-0.218021" name="det189"></location>
+      <location x="-2.335711" y="0.855050" z="-0.251677" name="det190"></location>
+      <location x="-2.329928" y="0.855050" z="-0.300538" name="det191"></location>
+      <location x="-2.325360" y="0.855050" z="-0.334054" name="det192"></location>
+      <location x="-2.320309" y="0.855050" z="-0.367501" name="det193"></location>
+      <location x="-2.314777" y="0.855050" z="-0.400872" name="det194"></location>
+      <location x="-2.308765" y="0.855050" z="-0.434159" name="det195"></location>
+      <location x="-2.299166" y="0.855050" z="-0.482415" name="det196"></location>
+      <location x="-2.291982" y="0.855050" z="-0.515470" name="det197"></location>
+      <location x="-2.284322" y="0.855050" z="-0.548417" name="det198"></location>
+      <location x="-2.276189" y="0.855050" z="-0.581251" name="det199"></location>
+      <location x="-2.267584" y="0.855050" z="-0.613964" name="det200"></location>
+      <location x="-2.254229" y="0.855050" z="-0.661319" name="det201"></location>
+      <location x="-2.244473" y="0.855050" z="-0.693707" name="det202"></location>
+      <location x="-2.234252" y="0.855050" z="-0.725952" name="det203"></location>
+      <location x="-2.223568" y="0.855050" z="-0.758047" name="det204"></location>
+      <location x="-2.212423" y="0.855050" z="-0.789984" name="det205"></location>
+      <location x="-2.195393" y="0.855050" z="-0.836145" name="det206"></location>
+      <location x="-2.183126" y="0.855050" z="-0.867668" name="det207"></location>
+      <location x="-2.170407" y="0.855050" z="-0.899012" name="det208"></location>
+      <location x="-2.157238" y="0.855050" z="-0.930169" name="det209"></location>
+      <location x="-2.143621" y="0.855050" z="-0.961134" name="det210"></location>
+      <location x="-2.123022" y="0.855050" z="-1.005816" name="det211"></location>
+      <location x="-2.108320" y="0.855050" z="-1.036280" name="det212"></location>
+      <location x="-2.093181" y="0.855050" z="-1.066529" name="det213"></location>
+      <location x="-2.077607" y="0.855050" z="-1.096557" name="det214"></location>
+      <location x="-2.061603" y="0.855050" z="-1.126358" name="det215"></location>
+      <location x="-2.037562" y="0.855050" z="-1.169285" name="det216"></location>
+      <location x="-2.020515" y="0.855050" z="-1.198502" name="det217"></location>
+      <location x="-2.003049" y="0.855050" z="-1.227470" name="det218"></location>
+      <location x="-1.985168" y="0.855050" z="-1.256184" name="det219"></location>
+      <location x="-1.966875" y="0.855050" z="-1.284637" name="det220"></location>
+      <location x="-1.939540" y="0.855050" z="-1.325546" name="det221"></location>
+      <location x="-1.920253" y="0.855050" z="-1.353335" name="det222"></location>
+      <location x="-1.900568" y="0.855050" z="-1.380844" name="det223"></location>
+      <location x="-1.880489" y="0.855050" z="-1.408066" name="det224"></location>
+      <location x="-1.860020" y="0.855050" z="-1.434996" name="det225"></location>
+    </component>
+  </type>
+  <type name="bank1">
+    <component type="pack">
+      <location r="2.500000" t="-9.640000" p="0.000000" name="det226"></location>
+      <location r="2.500000" t="-10.420000" p="0.000000" name="det227"></location>
+      <location r="2.500000" t="-11.220000" p="0.000000" name="det228"></location>
+      <location r="2.500000" t="-12.000000" p="0.000000" name="det229"></location>
+      <location r="2.500000" t="-12.780000" p="0.000000" name="det230"></location>
+      <location r="2.500000" t="-13.570000" p="0.000000" name="det231"></location>
+      <location r="2.500000" t="-14.360000" p="0.000000" name="det232"></location>
+      <location r="2.500000" t="-9.640000" p="0.000000" name="det233"></location>
+      <location r="2.500000" t="-10.420000" p="0.000000" name="det234"></location>
+      <location r="2.500000" t="-11.220000" p="0.000000" name="det235"></location>
+      <location r="2.500000" t="-17.500000" p="0.000000" name="det236"></location>
+      <location r="2.500000" t="-18.290000" p="0.000000" name="det237"></location>
+      <location r="2.500000" t="-19.080000" p="0.000000" name="det238"></location>
+      <location r="2.500000" t="-19.860000" p="0.000000" name="det239"></location>
+      <location r="2.500000" t="-20.640000" p="0.000000" name="det240"></location>
+      <location r="2.500000" t="-21.440000" p="0.000000" name="det241"></location>
+      <location r="2.500000" t="-22.220000" p="0.000000" name="det242"></location>
+      <location r="2.500000" t="-23.010000" p="0.000000" name="det243"></location>
+      <location r="2.500000" t="-23.790000" p="0.000000" name="det244"></location>
+      <location r="2.500000" t="-24.570000" p="0.000000" name="det245"></location>
+      <location r="2.500000" t="-25.370000" p="0.000000" name="det246"></location>
+      <location r="2.500000" t="-26.150000" p="0.000000" name="det247"></location>
+      <location r="2.500000" t="-26.940000" p="0.000000" name="det248"></location>
+      <location r="2.500000" t="-27.720000" p="0.000000" name="det249"></location>
+      <location r="2.500000" t="-28.510000" p="0.000000" name="det250"></location>
+      <location r="2.500000" t="-29.300000" p="0.000000" name="det251"></location>
+      <location r="2.500000" t="-30.080000" p="0.000000" name="det252"></location>
+      <location r="2.500000" t="-30.870000" p="0.000000" name="det253"></location>
+      <location r="2.500000" t="-31.650000" p="0.000000" name="det254"></location>
+      <location r="2.500000" t="-32.440000" p="0.000000" name="det255"></location>
+      <location r="2.500000" t="-33.230000" p="0.000000" name="det256"></location>
+      <location r="2.500000" t="-34.010000" p="0.000000" name="det257"></location>
+      <location r="2.500000" t="-34.800000" p="0.000000" name="det258"></location>
+      <location r="2.500000" t="-35.580000" p="0.000000" name="det259"></location>
+      <location r="2.500000" t="-36.370000" p="0.000000" name="det260"></location>
+      <location r="2.500000" t="-37.160000" p="0.000000" name="det261"></location>
+      <location r="2.500000" t="-37.940000" p="0.000000" name="det262"></location>
+      <location r="2.500000" t="-38.730000" p="0.000000" name="det263"></location>
+      <location r="2.500000" t="-39.520000" p="0.000000" name="det264"></location>
+      <location r="2.500000" t="-40.300000" p="0.000000" name="det265"></location>
+      <location r="2.500000" t="-41.090000" p="0.000000" name="det266"></location>
+      <location r="2.500000" t="-41.870000" p="0.000000" name="det267"></location>
+      <location r="2.500000" t="-42.660000" p="0.000000" name="det268"></location>
+      <location r="2.500000" t="-43.450000" p="0.000000" name="det269"></location>
+      <location r="2.500000" t="-44.230000" p="0.000000" name="det270"></location>
+      <location r="2.500000" t="-45.020000" p="0.000000" name="det271"></location>
+      <location r="2.500000" t="-45.800000" p="0.000000" name="det272"></location>
+      <location r="2.500000" t="-46.590000" p="0.000000" name="det273"></location>
+      <location r="2.500000" t="-47.380000" p="0.000000" name="det274"></location>
+      <location r="2.500000" t="-48.160000" p="0.000000" name="det275"></location>
+      <location r="2.500000" t="-48.950000" p="0.000000" name="det276"></location>
+      <location r="2.500000" t="-49.730000" p="0.000000" name="det277"></location>
+      <location r="2.500000" t="-50.520000" p="0.000000" name="det278"></location>
+      <location r="2.500000" t="-51.310000" p="0.000000" name="det279"></location>
+      <location r="2.500000" t="-52.090000" p="0.000000" name="det280"></location>
+      <location r="2.500000" t="-52.880000" p="0.000000" name="det281"></location>
+      <location r="2.500000" t="-53.670000" p="0.000000" name="det282"></location>
+      <location r="2.500000" t="-54.450000" p="0.000000" name="det283"></location>
+      <location r="2.500000" t="-55.240000" p="0.000000" name="det284"></location>
+      <location r="2.500000" t="-56.020000" p="0.000000" name="det285"></location>
+      <location r="2.500000" t="-56.810000" p="0.000000" name="det286"></location>
+      <location r="2.500000" t="-57.600000" p="0.000000" name="det287"></location>
+      <location r="2.500000" t="-58.380000" p="0.000000" name="det288"></location>
+      <location r="2.500000" t="-59.170000" p="0.000000" name="det289"></location>
+      <location r="2.500000" t="-59.950000" p="0.000000" name="det290"></location>
+      <location r="2.500000" t="-60.740000" p="0.000000" name="det291"></location>
+      <location r="2.500000" t="-61.530000" p="0.000000" name="det292"></location>
+      <location r="2.500000" t="-62.310000" p="0.000000" name="det293"></location>
+      <location r="2.500000" t="-63.100000" p="0.000000" name="det294"></location>
+      <location r="2.500000" t="-63.880000" p="0.000000" name="det295"></location>
+      <location r="2.500000" t="-64.680000" p="0.000000" name="det296"></location>
+      <location r="2.500000" t="-65.460000" p="0.000000" name="det297"></location>
+      <location r="2.500000" t="-66.240000" p="0.000000" name="det298"></location>
+      <location r="2.500000" t="-67.030000" p="0.000000" name="det299"></location>
+      <location r="2.500000" t="-67.810000" p="0.000000" name="det300"></location>
+      <location r="2.500000" t="-71.230000" p="0.000000" name="det301"></location>
+      <location r="2.500000" t="-72.020000" p="0.000000" name="det302"></location>
+      <location r="2.500000" t="-72.810000" p="0.000000" name="det303"></location>
+      <location r="2.500000" t="-73.590000" p="0.000000" name="det304"></location>
+      <location r="2.500000" t="-74.380000" p="0.000000" name="det305"></location>
+      <location r="2.500000" t="-75.160000" p="0.000000" name="det306"></location>
+      <location r="2.500000" t="-75.950000" p="0.000000" name="det307"></location>
+      <location r="2.500000" t="-76.740000" p="0.000000" name="det308"></location>
+      <location r="2.500000" t="-77.520000" p="0.000000" name="det309"></location>
+      <location r="2.500000" t="-78.310000" p="0.000000" name="det310"></location>
+      <location r="2.500000" t="-79.090000" p="0.000000" name="det311"></location>
+      <location r="2.500000" t="-79.880000" p="0.000000" name="det312"></location>
+      <location r="2.500000" t="-80.670000" p="0.000000" name="det313"></location>
+      <location r="2.500000" t="-81.450000" p="0.000000" name="det314"></location>
+      <location r="2.500000" t="-82.240000" p="0.000000" name="det315"></location>
+      <location r="2.500000" t="-83.020000" p="0.000000" name="det316"></location>
+      <location r="2.500000" t="-83.820000" p="0.000000" name="det317"></location>
+      <location r="2.500000" t="-84.600000" p="0.000000" name="det318"></location>
+      <location r="2.500000" t="-85.380000" p="0.000000" name="det319"></location>
+      <location r="2.500000" t="-86.170000" p="0.000000" name="det320"></location>
+      <location r="2.500000" t="-86.950000" p="0.000000" name="det321"></location>
+      <location r="2.500000" t="-87.750000" p="0.000000" name="det322"></location>
+      <location r="2.500000" t="-88.530000" p="0.000000" name="det323"></location>
+      <location r="2.500000" t="-89.310000" p="0.000000" name="det324"></location>
+      <location r="2.500000" t="-90.100000" p="0.000000" name="det325"></location>
+      <location r="2.500000" t="-90.890000" p="0.000000" name="det326"></location>
+      <location r="2.500000" t="-91.670000" p="0.000000" name="det327"></location>
+      <location r="2.500000" t="-92.460000" p="0.000000" name="det328"></location>
+      <location r="2.500000" t="-93.240000" p="0.000000" name="det329"></location>
+      <location r="2.500000" t="-94.030000" p="0.000000" name="det330"></location>
+      <location r="2.500000" t="-94.820000" p="0.000000" name="det331"></location>
+      <location r="2.500000" t="-95.600000" p="0.000000" name="det332"></location>
+      <location r="2.500000" t="-96.390000" p="0.000000" name="det333"></location>
+      <location r="2.500000" t="-97.170000" p="0.000000" name="det334"></location>
+      <location r="2.500000" t="-97.970000" p="0.000000" name="det335"></location>
+      <location r="2.500000" t="-98.750000" p="0.000000" name="det336"></location>
+      <location r="2.500000" t="-99.530000" p="0.000000" name="det337"></location>
+      <location r="2.500000" t="-100.320000" p="0.000000" name="det338"></location>
+      <location r="2.500000" t="-101.100000" p="0.000000" name="det339"></location>
+      <location r="2.500000" t="-101.900000" p="0.000000" name="det340"></location>
+      <location r="2.500000" t="-102.680000" p="0.000000" name="det341"></location>
+      <location r="2.500000" t="-103.460000" p="0.000000" name="det342"></location>
+      <location r="2.500000" t="-104.250000" p="0.000000" name="det343"></location>
+      <location r="2.500000" t="-105.030000" p="0.000000" name="det344"></location>
+      <location r="2.500000" t="-105.830000" p="0.000000" name="det345"></location>
+      <location r="2.500000" t="-106.610000" p="0.000000" name="det346"></location>
+      <location r="2.500000" t="-107.390000" p="0.000000" name="det347"></location>
+      <location r="2.500000" t="-108.180000" p="0.000000" name="det348"></location>
+      <location r="2.500000" t="-108.970000" p="0.000000" name="det349"></location>
+      <location r="2.500000" t="-109.760000" p="0.000000" name="det350"></location>
+      <location r="2.500000" t="-110.540000" p="0.000000" name="det351"></location>
+      <location r="2.500000" t="-111.320000" p="0.000000" name="det352"></location>
+      <location r="2.500000" t="-112.110000" p="0.000000" name="det353"></location>
+      <location r="2.500000" t="-112.900000" p="0.000000" name="det354"></location>
+      <location r="2.500000" t="-113.690000" p="0.000000" name="det355"></location>
+      <location r="2.500000" t="-114.470000" p="0.000000" name="det356"></location>
+      <location r="2.500000" t="-115.250000" p="0.000000" name="det357"></location>
+      <location r="2.500000" t="-116.050000" p="0.000000" name="det358"></location>
+      <location r="2.500000" t="-116.830000" p="0.000000" name="det359"></location>
+      <location r="2.500000" t="-117.620000" p="0.000000" name="det360"></location>
+      <location r="2.500000" t="-118.400000" p="0.000000" name="det361"></location>
+      <location r="2.500000" t="-119.180000" p="0.000000" name="det362"></location>
+      <location r="2.500000" t="-119.980000" p="0.000000" name="det363"></location>
+      <location r="2.500000" t="-120.760000" p="0.000000" name="det364"></location>
+      <location r="2.500000" t="-121.550000" p="0.000000" name="det365"></location>
+      <location r="2.500000" t="-122.330000" p="0.000000" name="det366"></location>
+      <location r="2.500000" t="-123.120000" p="0.000000" name="det367"></location>
+      <location r="2.500000" t="-123.910000" p="0.000000" name="det368"></location>
+      <location r="2.500000" t="-124.690000" p="0.000000" name="det369"></location>
+      <location r="2.500000" t="-125.480000" p="0.000000" name="det370"></location>
+      <location r="2.500000" t="-126.260000" p="0.000000" name="det371"></location>
+      <location r="2.500000" t="-127.050000" p="0.000000" name="det372"></location>
+      <location r="2.500000" t="-127.840000" p="0.000000" name="det373"></location>
+      <location r="2.500000" t="-128.620000" p="0.000000" name="det374"></location>
+      <location r="2.500000" t="-129.400000" p="0.000000" name="det375"></location>
+    </component>
+  </type>
+  <type name="pack" is="detector">
+    <cuboid id="pack-pixel-shape">
+      <left-front-bottom-point z="-0.005" y="-0.2" x="-0.01" />
+      <left-front-top-point z="-0.005" y="0.2" x="-0.01" />
+      <left-back-bottom-point z="-0.005" y="-0.2" x="0.01" />
+      <right-front-bottom-point z="0.005" y="-0.2" x="-0.01" />
+    </cuboid>
+    <algebra val="pack-pixel-shape" />
+  </type>
+</instrument>

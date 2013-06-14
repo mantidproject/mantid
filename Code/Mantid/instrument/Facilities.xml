@@ -406,7 +406,7 @@
   </instrument>
 
 </facility>
-    
+
 <facility name="SINQ" FileExtensions=".hdf">
 
   <instrument name="HRPT">
@@ -452,7 +452,7 @@
   <instrument name="FOCUS">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
-  </instrument>
+  </instrument> 
 
   <instrument name="Rita-II">
     <technique>Triple Axis Spectroscopy</technique>
