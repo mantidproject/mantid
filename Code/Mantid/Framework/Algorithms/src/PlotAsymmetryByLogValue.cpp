@@ -40,17 +40,49 @@ There is a python script PlotAsymmetryByLogValue.py which if called in MantidPlo
 #include <iomanip>
 #include <sstream>
 
+#include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAlgorithms/PlotAsymmetryByLogValue.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
 
 #include <boost/shared_ptr.hpp>
-#include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
+#include <boost/lexical_cast.hpp>
+
+namespace // anonymous
+{
+
+/**
+ * Convert a log property to a double value.
+ *
+ * @param property :: Pointer to a TimeSeriesProperty.
+ * @param value :: Returned double value.
+ * @return :: True if successful
+ */
+template<typename T>
+bool convertLogToDouble(const Mantid::Kernel::Property *property, double &value)
+{
+    const Mantid::Kernel::TimeSeriesProperty<T>* log = dynamic_cast<const Mantid::Kernel::TimeSeriesProperty<T>*>( property );
+    if ( log )
+    {
+        value = static_cast<double>( log->lastValue() );
+        return true;
+    }
+    auto tlog = dynamic_cast<const Mantid::Kernel::PropertyWithValue<T>*>( property );
+    if ( tlog )
+    {
+        value = static_cast<double>(*tlog);
+        return true;
+    }
+    return false;
+}
+
+} // anonymous
 
 namespace Mantid
 {
@@ -193,16 +225,10 @@ namespace Mantid
         if (!wsGroup)
         {
           ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmp);
-          TimeSeriesProperty<double>* logp = 
-              dynamic_cast<TimeSeriesProperty<double>*>(ws_red->run().getLogData(logName));
-          if (!logp)
-          {
-            throw std::invalid_argument("Log "+logName+" does not exist or not a double type");
-          }
           double Y,E; 
           calcIntAsymmetry(ws_red,Y,E);
           outWS->dataY(0)[i-is] = Y;
-          outWS->dataX(0)[i-is] = logp->lastValue();
+          outWS->dataX(0)[i-is] = getLogValue( *ws_red, logName );
           outWS->dataE(0)[i-is] = E;
         }
         else
@@ -218,16 +244,10 @@ namespace Mantid
             {
               Workspace_sptr tmpff = loadNexus->getProperty(wsProp);
               ws_red = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(tmpff);
-              TimeSeriesProperty<double>* logp = 
-                dynamic_cast<TimeSeriesProperty<double>*>(ws_red->run().getLogData(logName));
-              if (!logp)
-              {
-                throw std::invalid_argument("Log "+logName+" does not exist or not a double type");
-              }
               double Y,E; 
               calcIntAsymmetry(ws_red,Y,E);
               outWS->dataY(0)[i-is] = Y;
-              outWS->dataX(0)[i-is] = logp->lastValue();
+              outWS->dataX(0)[i-is] = getLogValue( *ws_red, logName );
               outWS->dataE(0)[i-is] = E;
             }
             else // red & green
@@ -250,33 +270,28 @@ namespace Mantid
           {
             if (!ws_red || !ws_green)
               throw std::invalid_argument("Red or green period is out of range");
-            TimeSeriesProperty<double>* logp = 
-                dynamic_cast<TimeSeriesProperty<double>*>(ws_red->run().getLogData(logName));
-            if (!logp)
-            {
-              throw std::invalid_argument("Log "+logName+" does not exist or not a double type");
-            }
             double Y,E; 
             double Y1,E1;
+            double logValue = getLogValue( *ws_red, logName );
             calcIntAsymmetry(ws_red,Y,E);
             calcIntAsymmetry(ws_green,Y1,E1);
             outWS->dataY(1)[i-is] = Y;
-            outWS->dataX(1)[i-is] = logp->lastValue();
+            outWS->dataX(1)[i-is] = logValue;
             outWS->dataE(1)[i-is] = E;
 
             outWS->dataY(2)[i-is] = Y1;
-            outWS->dataX(2)[i-is] = logp->lastValue();
+            outWS->dataX(2)[i-is] = logValue;
             outWS->dataE(2)[i-is] = E1;
 
             outWS->dataY(3)[i-is] = Y + Y1;
-            outWS->dataX(3)[i-is] = logp->lastValue();
+            outWS->dataX(3)[i-is] = logValue;
             outWS->dataE(3)[i-is] = sqrt(E*E+E1*E1);
 
             // move to last for safety since some grouping takes place in the
             // calcIntAsymmetry call below
             calcIntAsymmetry(ws_red,ws_green,Y,E);
             outWS->dataY(0)[i-is] = Y;
-            outWS->dataX(0)[i-is] = logp->lastValue();
+            outWS->dataX(0)[i-is] = logValue;
             outWS->dataE(0)[i-is] = E;
           }
           else
@@ -483,6 +498,50 @@ namespace Mantid
       group->setProperty("KeepUngroupedSpectra",true);
       group->execute();
       ws = group->getProperty("OutputWorkspace");
+    }
+
+    /**
+     * Get log value from a workspace. Convert to double if possible.
+     *
+     * @param ws :: The input workspace.
+     * @param logName :: Name of the log file.
+     * @return :: Log value.
+     * @throw :: std::invalid_argument if the log cannot be converted to a double or doesn't exist.
+     */
+    double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws, const std::string &logName)
+    {
+        auto *property = ws.run().getLogData(logName);
+        if ( !property )
+        {
+            throw std::invalid_argument("Log "+logName+" does not exist.");
+        }
+
+        double value = 0;
+        // try different property types
+        if ( convertLogToDouble<double>(property, value) )              return value;
+        if ( convertLogToDouble<float>(property, value) )               return value;
+        if ( convertLogToDouble<int>(property, value) )                 return value;
+        if ( convertLogToDouble<long>(property, value) )                return value;
+        if ( convertLogToDouble<long long>(property, value) )           return value;
+        if ( convertLogToDouble<unsigned int>(property, value) )        return value;
+        if ( convertLogToDouble<unsigned long>(property, value) )       return value;
+        if ( convertLogToDouble<unsigned long long>(property, value) )  return value;
+        // try if it's a string and can be lexically cast to double
+        auto slog = dynamic_cast<const Mantid::Kernel::PropertyWithValue<std::string>*>( property );
+        if ( slog )
+        {
+            try
+            {
+                value = boost::lexical_cast<double>(slog->value());
+                return value;
+            }
+            catch(std::exception&)
+            {
+                // do nothing, goto throw
+            }
+        }
+
+        throw std::invalid_argument("Log "+logName+" cannot be converted to a double type.");
     }
 
   } // namespace Algorithm

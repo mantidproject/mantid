@@ -2,6 +2,7 @@
 #define ASYMMETRYCALCTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -12,6 +13,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include <stdexcept>
+#include <algorithm>
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -45,24 +47,11 @@ public:
     TS_ASSERT_THROWS_NOTHING( loader.execute() );
     TS_ASSERT_EQUALS(loader.isExecuted(),true);
 
-    //Create the forward and backward groups
-    group1.initialize();
-    group1.setPropertyValue("Workspace","EMU6473");
-    group1.setPropertyValue("SpectraList", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
-    TS_ASSERT_THROWS_NOTHING( group1.execute() );
-    TS_ASSERT_EQUALS(group1.isExecuted(),true);
-	  
-    group2.initialize();
-    group2.setPropertyValue("SpectraList", "17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32");
-    group2.setPropertyValue("Workspace","EMU6473");
-    TS_ASSERT_THROWS_NOTHING( group2.execute() );
-    TS_ASSERT_EQUALS(group2.isExecuted(),true);
-
     asymCalc.setPropertyValue("InputWorkspace", "EMU6473");
     asymCalc.setPropertyValue("OutputWorkspace", "Result");
     asymCalc.setPropertyValue("Alpha", "1.0");
-    asymCalc.setPropertyValue("ForwardSpectra", "0");
-    asymCalc.setPropertyValue("BackwardSpectra", "16");
+    asymCalc.setPropertyValue("ForwardSpectra", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
+    asymCalc.setPropertyValue("BackwardSpectra", "17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32");
   }
 
   void testProperties()
@@ -87,6 +76,29 @@ public:
 
     //Use a range as cxxtest seems to complain about the accuracy
     TS_ASSERT_DELTA(outputWS->dataY(0)[100],0.2965,0.005);
+  }
+
+  void test_single_spectra()
+  {
+      auto ws = WorkspaceCreationHelper::Create2DWorkspace(3,10);
+      for(size_t i = 0; i < ws->getNumberHistograms(); ++i)
+      {
+          auto &y = ws->dataY(i);
+          std::fill(y.begin(),y.end(), static_cast<double>(i+1));
+      }
+
+      AsymmetryCalc alg;
+      alg.initialize();
+      alg.setProperty("InputWorkspace", ws);
+      alg.setPropertyValue("OutputWorkspace", "Result");
+      alg.setPropertyValue("ForwardSpectra", "1");
+      alg.setPropertyValue("BackwardSpectra", "3");
+      alg.execute();
+
+      MatrixWorkspace_const_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("Result");
+      TS_ASSERT_EQUALS( outputWS->readY(0)[0], -0.5 ); // == (1 - 3)/(1 + 3)
+      TS_ASSERT_EQUALS( outputWS->readY(0)[6], -0.5 ); // == (1 - 3)/(1 + 3)
+      TS_ASSERT_EQUALS( outputWS->readY(0)[9], -0.5 ); // == (1 - 3)/(1 + 3)
   }
 
 private:

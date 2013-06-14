@@ -72,6 +72,7 @@ public:
           TS_ASSERT_EQUALS(axis->label(2),"Green");
           TS_ASSERT_EQUALS(axis->label(3),"Red+Green");
         }
+        AnalysisDataService::Instance().clear();
     }
   
     void testDifferential()
@@ -108,7 +109,70 @@ public:
         TS_ASSERT_DELTA(Y[8],0.029188,0.00001);
         TS_ASSERT_DELTA(Y[9],0.009614,0.00001);
         TS_ASSERT_DELTA(Y[10],0.007757,0.00001);
+        AnalysisDataService::Instance().clear();
     }
+
+    void test_int_log()
+    {
+        PlotAsymmetryByLogValue alg;
+        alg.initialize();
+        alg.setPropertyValue("FirstRun",firstRun);
+        alg.setPropertyValue("LastRun",lastRun);
+        alg.setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueTest_WS");
+        alg.setPropertyValue("LogValue","nspectra");
+        alg.setPropertyValue("Red","2");
+        alg.setPropertyValue("Green","1");
+        alg.execute();
+
+        TS_ASSERT(alg.isExecuted());
+
+        MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS")
+          );
+
+        TS_ASSERT(outWS);
+        AnalysisDataService::Instance().clear();
+    }
+
+    void test_string_log()
+    {
+        PlotAsymmetryByLogValue alg;
+        alg.initialize();
+        alg.setPropertyValue("FirstRun",firstRun);
+        alg.setPropertyValue("LastRun",lastRun);
+        alg.setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueTest_WS");
+        alg.setPropertyValue("LogValue","run_number");
+        alg.setPropertyValue("Red","2");
+        alg.setPropertyValue("Green","1");
+        alg.execute();
+
+        TS_ASSERT(alg.isExecuted());
+
+        MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve("PlotAsymmetryByLogValueTest_WS")
+          );
+
+        TS_ASSERT(outWS);
+        AnalysisDataService::Instance().clear();
+    }
+
+    void test_text_log()
+    {
+        PlotAsymmetryByLogValue alg;
+        alg.initialize();
+        alg.setPropertyValue("FirstRun",firstRun);
+        alg.setPropertyValue("LastRun",lastRun);
+        alg.setPropertyValue("OutputWorkspace","PlotAsymmetryByLogValueTest_WS");
+        alg.setPropertyValue("LogValue","run_title");
+        alg.setPropertyValue("Red","2");
+        alg.setPropertyValue("Green","1");
+        alg.execute();
+
+        TS_ASSERT( ! alg.isExecuted() );
+
+        AnalysisDataService::Instance().clear();
+    }
+
 private:
   std::string firstRun,lastRun;
   
