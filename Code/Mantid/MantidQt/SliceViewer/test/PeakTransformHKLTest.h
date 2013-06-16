@@ -200,6 +200,7 @@ void test_getFriendlyName()
 {
   PeakTransformHKL transform;
   TS_ASSERT_EQUALS(PeakTransformHKL::name(), transform.getFriendlyName());
+  TS_ASSERT_EQUALS("HKL", transform.getFriendlyName());
 }
 
 void test_getCoordinateSystem()
