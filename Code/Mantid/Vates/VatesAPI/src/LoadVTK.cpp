@@ -118,11 +118,11 @@ namespace Mantid
 
     void LoadVTK::execMDEvent(vtkDataSet* readDataset, vtkUnsignedShortArray* signals, vtkUnsignedShortArray* errorsSQ, MDHistoDimension_sptr dimX, MDHistoDimension_sptr dimY, MDHistoDimension_sptr dimZ, Progress& prog, const int64_t nPoints, const int64_t frequency)
     {
-      uint min = std::numeric_limits<uint>::max();
-      uint max = std::numeric_limits<uint>::min();
+      unsigned int min = std::numeric_limits<unsigned int>::max();
+      unsigned int max = std::numeric_limits<unsigned int>::min();
       for (unsigned int i = 0; i < readDataset->GetNumberOfPoints(); ++i)
       {
-        uint cv = signals->GetValue(i);
+        unsigned int  cv = signals->GetValue(i);
         min = std::min(cv, min);
         max = std::max(cv, max);
       }
