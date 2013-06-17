@@ -109,7 +109,7 @@ void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::st
 {
   UNUSED_ARG(description);
   API::AnalysisDataService::Instance().add( wsName, ws );
-  gws->add(wsName);
+  gws->addWorkspace(ws);
 }
 
 /**

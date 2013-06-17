@@ -144,6 +144,23 @@ namespace Mantid
     }
 
     /**
+     * Add a workspace to a group. The group and the workspace must be in the ADS.
+     * @param groupName :: A group name.
+     * @param wsName :: Name of a workspace to add to the group.
+     */
+    void AnalysisDataServiceImpl::addToGroup(const std::string &groupName, const std::string &wsName)
+    {
+        WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>( groupName );
+        if ( !group )
+        {
+            throw std::runtime_error("Workspace " + groupName + " is not a workspace group.");
+        }
+        auto ws = retrieve( wsName );
+        group->addWorkspace( ws );
+        notificationCenter.postNotification(new GroupUpdatedNotification( groupName ));
+    }
+
+    /**
      * Remove a workspace group and all its members from the ADS.
      * @param name :: A group to remove.
      */
@@ -190,6 +207,7 @@ namespace Mantid
             throw std::runtime_error("WorkspaceGroup " + groupName + " does not containt workspace " + wsName);
         }
         group->removeByADS( wsName );
+        notificationCenter.postNotification(new GroupUpdatedNotification( groupName ));
     }
 
     //-------------------------------------------------------------------------

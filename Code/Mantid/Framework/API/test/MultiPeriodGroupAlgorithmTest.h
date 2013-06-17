@@ -237,7 +237,7 @@ public:
     TS_ASSERT_EQUALS(a->size(), wsgroup->size());
   }
 
-  void test_process_groups_with_workspace_type_inputs()
+  void xtest_process_groups_with_workspace_type_inputs()
   {
     WorkspaceGroup_sptr a = create_good_multiperiod_workspace_group("a");
     WorkspaceGroup_sptr b = create_good_multiperiod_workspace_group("b");

@@ -199,6 +199,7 @@ namespace WorkspaceCreationHelper
   WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins, const std::string & stem)
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup);
+    AnalysisDataService::Instance().add(stem, group);
     for(int i = 0; i < nEntries; ++i)
     {
       Workspace2D_sptr ws = Create2DWorkspace(nHist,nBins);
@@ -207,7 +208,6 @@ namespace WorkspaceCreationHelper
       AnalysisDataService::Instance().add(os.str(), ws);
       group->add(os.str());
     }
-    AnalysisDataService::Instance().add(stem, group);
     return group;
   }
 

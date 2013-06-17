@@ -57,16 +57,6 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
   }
 }
 
-/** Add the named workspace to the group. The workspace must exist in the ADS
- *  @param name :: The name of the workspace (in the AnalysisDataService) to add
- */
-void WorkspaceGroup::add(const std::string& name)
-{
-  Workspace_sptr ws = AnalysisDataService::Instance().retrieve( name );
-  addWorkspace( ws );
-  g_log.debug() << "workspacename added to group vector =  " << name <<std::endl;
-}
-
 /**
  * Adds a workspace to the group. The workspace does not have to be in the ADS
  * @param workspace :: A shared pointer to a workspace to add. If the workspace already exists give a warning.
@@ -79,7 +69,6 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
   if ( it == m_workspaces.end() )
   {
     m_workspaces.push_back( workspace );
-    updated();
   }
   else
   {
@@ -292,27 +281,6 @@ bool WorkspaceGroup::areNamesSimilar() const
       return false;
   }
   return true;
-}
-
-//------------------------------------------------------------------------------
-/**
- * If the group observes the ADS it will send the GroupUpdatedNotification.
- */
-void WorkspaceGroup::updated() const
-{
-  Poco::Mutex::ScopedLock _lock(m_mutex);
-  if ( m_observingADS )
-  {
-    try
-    {
-      AnalysisDataService::Instance().notificationCenter.postNotification(
-        new GroupUpdatedNotification( name() ));
-    }
-    catch( ... )
-    {
-      // if this workspace is not in the ADS do nothing
-    }
-  }
 }
 
 //------------------------------------------------------------------------------

@@ -208,6 +208,7 @@ private:
   void createData()
   {
     m_wsg.reset(new WorkspaceGroup);
+    AnalysisDataService::Instance().add("PlotPeakGroup",m_wsg);
     const int N = 3;
     for(int iWS=0;iWS<N;++iWS)
     {
@@ -224,7 +225,6 @@ private:
       WorkspaceCreationHelper::storeWS(wsName.str(), ws);
       m_wsg->add(wsName.str());
     }
-    AnalysisDataService::Instance().add("PlotPeakGroup",m_wsg);
   }
 
   void deleteData()

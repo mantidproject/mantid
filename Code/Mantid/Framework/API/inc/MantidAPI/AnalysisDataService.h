@@ -131,6 +131,7 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    /** @name Methods to work with workspace groups */
    //@{
 
+   void addToGroup(const std::string& groupName, const std::string& wsName);
    void deepRemoveGroup(const std::string& name);
    void removeFromGroup(const std::string& groupName, const std::string& wsName);
 

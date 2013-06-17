@@ -74,10 +74,10 @@ public:
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i), ws);
     }
     WorkspaceGroup_sptr group(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group", group);
     group->add("ws0");
     group->add("ws1");
     group->add("ws2");
-    AnalysisDataService::Instance().addOrReplace("group", group);
     return group;
   }
 
@@ -178,7 +178,7 @@ public:
     TS_ASSERT_EQUALS( group->getItem(0), ws1 );
 
     AnalysisDataService::Instance().clear();
-}
+  }
 
   void test_removeAll()
   {

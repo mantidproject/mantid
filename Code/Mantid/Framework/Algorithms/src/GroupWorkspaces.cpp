@@ -72,7 +72,7 @@ void GroupWorkspaces::exec()
             Direction::Output));
         setProperty(outws, ws_sptr);
         //add to output group
-        addworkspacetoGroup(outgrp_sptr, (*itr), firstWs);
+        addworkspacetoGroup(outgrp_sptr, ws_sptr, firstWs);
       }
       inws_sptr.reset();
       ingrp_sptr.reset();
@@ -91,7 +91,7 @@ void GroupWorkspaces::exec()
       declareProperty(new WorkspaceProperty<Workspace> (outws, wsName, Direction::Output));
       setProperty(outws, ws_sptr);
       //add to output group
-      addworkspacetoGroup(outgrp_sptr, *citr, firstWs);
+      addworkspacetoGroup(outgrp_sptr, ws_sptr, firstWs);
     }
   }//end of for loop for input workspaces
 
@@ -109,10 +109,9 @@ void GroupWorkspaces::exec()
 // *  @param firstWs ::   the first workspace type (not including table workspaces)
 // *  @retval boolean  true if two workspaces are of same types else false
 // */
-bool GroupWorkspaces::isCompatibleWorkspaces(const std::string &wsName, std::string& firstWs)
+bool GroupWorkspaces::isCompatibleWorkspaces(Workspace_sptr ws, std::string& firstWs)
 {
   bool bStatus(true);
-  Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
   //check to see if compatible with each other (exception for TableWorkspaces.)
   if ( ws->id() != "TableWorkspace" )
   {
@@ -136,14 +135,13 @@ bool GroupWorkspaces::isCompatibleWorkspaces(const std::string &wsName, std::str
 // *  @param wsName ::   name of the workspace to add to group
 // *  @param firstWs ::   the first workspace type (not including table workspaces)
 // */
-void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr outgrp_sptr, const std::string &wsName, std::string &firstWs)
+void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr outgrp_sptr, Workspace_sptr ws, std::string &firstWs)
 {
-  std::vector<std::string> groupVec = outgrp_sptr->getNames();
-  if (!groupVec.empty())
+  if (!outgrp_sptr->isEmpty())
   {
-    if( isCompatibleWorkspaces( wsName, firstWs ) )
+    if( isCompatibleWorkspaces( ws, firstWs ) )
     {
-      outgrp_sptr->add(wsName);
+      outgrp_sptr->addWorkspace(ws);
     }
     else
     {
@@ -153,7 +151,7 @@ void GroupWorkspaces::addworkspacetoGroup(WorkspaceGroup_sptr outgrp_sptr, const
   }
   else
   {
-    outgrp_sptr->add(wsName);
+    outgrp_sptr->addWorkspace(ws);
   }
 }
 

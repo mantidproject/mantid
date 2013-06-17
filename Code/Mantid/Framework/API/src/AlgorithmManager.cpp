@@ -127,7 +127,21 @@ namespace Mantid
 
     std::size_t AlgorithmManagerImpl::size() const
     {
-      return m_managed_algs.size();
+        return m_managed_algs.size();
+    }
+
+    /**
+     * Set new maximum number of algorithms that can be stored.
+     *
+     * @param n :: The new maximum.
+     */
+    void AlgorithmManagerImpl::setMaxAlgorithms(int n)
+    {
+        if ( n < 0 )
+        {
+            throw std::runtime_error("Maximum number of algorithms stored in AlgorithmManager cannot be negative.");
+        }
+        m_max_no_algs = n;
     }
 
     /**

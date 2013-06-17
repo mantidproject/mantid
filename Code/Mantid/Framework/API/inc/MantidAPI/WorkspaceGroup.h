@@ -67,8 +67,6 @@ public:
   void observeADSNotifications(const bool observeADS);
   /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
-  /// Returns the names of workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
-  std::vector<std::string> getNames() const;
   /// Return the number of entries within the group
   int getNumberOfEntries() const { return static_cast<int>(this->size()); }
   /// Return the size of the group, so it is more like a container
@@ -77,8 +75,6 @@ public:
   Workspace_sptr getItem(const size_t index) const;
   /// Return the workspace by name
   Workspace_sptr getItem(const std::string wsName) const;
-  /// Prints the group to the screen using the logger at debug
-  void print() const;
   /// Remove a workspace from the group
   void removeItem(const size_t index);
   /// Remove all names from the group but do not touch the ADS
@@ -86,20 +82,22 @@ public:
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
   bool areNamesSimilar() const;
-  /// Posts a notification informing the ADS observers that group was modified
-  void updated() const;
   /// Inidicates that the workspace group can be treated as multiperiod.
   bool isMultiperiod() const;
+  /// Prints the group to the screen using the logger at debug
+  void print() const;
 
   /// @name Wrapped ADS calls
   //@{
 
   /// Adds a workspace to the group.
-  void add(const std::string& wsName);
+  void add(const std::string& wsName) { AnalysisDataService::Instance().addToGroup( this->name(), wsName); }
   /// Remove a name from the group
-  void remove(const std::string& name) { AnalysisDataService::Instance().removeFromGroup( this->name(), name); }
+  void remove(const std::string& wsName) { AnalysisDataService::Instance().removeFromGroup( this->name(), wsName); }
   /// Does a workspace exist within the group
   bool contains(const std::string & wsName) const;
+  /// Returns the names of workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
+  std::vector<std::string> getNames() const;
 
   //@}
  
@@ -108,7 +106,7 @@ private:
   WorkspaceGroup(const WorkspaceGroup& ref);
   /// Private, unimplemented copy assignment operator
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
-  /// Remove a name from the group
+  /// ADS removes a member of this group using this method. It doesn't send notifications in contrast to remove(name).
   void removeByADS(const std::string& name);
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
