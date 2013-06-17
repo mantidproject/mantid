@@ -4,6 +4,7 @@
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
+#include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
 #include "MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h"
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
@@ -632,6 +633,12 @@ void MdViewerWidget::createMenus()
   QObject::connect(this->lodAction, SIGNAL(toggled(bool)),
                    this, SLOT(onLodToggled(bool)));
   viewMenu->addAction(this->lodAction);
+
+  QAction *screenShotAction = new QAction(QApplication::tr("Save Screenshot"), this);
+  screenShotAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+R"));
+  screenShotAction->setStatusTip(QApplication::tr("Save a screenshot of the current view."));
+  this->screenShot = new SaveScreenshotReaction(screenShotAction);
+  viewMenu->addAction(screenShotAction);
 
   QAction *settingsAction = new QAction(QApplication::tr("View Settings..."), this);
   settingsAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+S"));
