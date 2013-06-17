@@ -81,6 +81,22 @@ Corr = \frac{T_0^A - 1}{A \ln(T_0)}
 Which is the OutputWorkspace of SANSWideAngleCorrection.
 
 This parameter enters inside [[Q1D]] as WavePixelAdj. But, this is all done for you inside the Reduction Script.
+
+== Comparison with Wide Angle Correction at SNS ==
+
+The transmission correction applied at SNS is described [http://www.mantidproject.org/HFIR_SANS#Transmission_correction here], and it is applied through the [[ApplyTransmissionCorrection]] algorithm. The correction applied there is an approximation for the same equations described here. The picture above compare their results 
+
+[[File:SNS_ISIS_WideAngleCorrections.png]]
+
+Note a difference among them is when they are applied. At SNS, the correction is applied before averaging the counters per bin inside [[Q1D]] algorithm, while at ISIS, it is used after, inside the [[Q1D]] algorithm, for the division of the counters per bin normalized by the transmission counters.
+
+
+== References == 
+
+Annie Brulet et al. - Improvement of data treatment in SANS - J. Appl. Cryst. (2007). 40
+
+Ghosh, Egelhaaf & Rennie - Computing guide for Small Angle Scattering Experiments
+
 *WIKI*"""
 
 """*WIKI_USAGE*
