@@ -14,7 +14,7 @@
 #include <pqSettings.h>
 #include <pqTabbedMultiViewWidget.h>
 #include <pqView.h>
-#include <vtkImageData.h>
+#include "MantidVatesAPI/vtkImageData_Silent.h"
 #include <vtkPVXMLElement.h>
 #include <vtkSmartPointer.h>
 #include <vtkPVConfig.h>
