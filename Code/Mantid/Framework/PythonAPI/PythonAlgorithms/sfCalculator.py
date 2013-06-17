@@ -7,7 +7,9 @@ import os.path
 PRECISION = 0.020
 
 class sfCalculator():      
-    
+
+    INDEX = 0
+
     tof_min = None  #microS
     tof_max = None  #microS
 
@@ -316,13 +318,13 @@ class sfCalculator():
                                    OutputWorkspace=None,
                                    proton_charge=None,
                                    from_pixel=0,
-                                   to_pixel=303):
+                                   to_pixel=255):
         """
         This creates the integrated workspace over the second pixel range 
         (beta_pixel_nbr here) and
         returns the new workspace handle
         """
-        
+
         print '-----> Create Integrated workspace '
         x_axis = InputWorkspace.readX(0)[:]
         x_size = to_pixel - from_pixel + 1 
@@ -451,6 +453,29 @@ class sfCalculator():
 #        ResetNegatives(InputWorkspace='DataToFit',
 #                       OutputWorkspace='DataToFit',
 #                       AddMinimum=0)        
+        
+        #output the data to fit to DEBUG
+        x_axis = DataToFit.readX(0)[:]
+        y_axis = DataToFit.readY(0)[:]
+        y_error_axis = DataToFit.readE(0)[:]
+        
+        print 'create sfOutputTest#'
+        filename = "/home/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+        print filename
+        sfCalculator.INDEX += 1
+        
+        f=open(filename,'w')
+
+        for i in range(len(x_axis)):
+            f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+        
+        f.close
+
+        #end of debug
+        
+        
+        
+        
         
         try:
         
