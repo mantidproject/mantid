@@ -21,12 +21,14 @@ namespace Algorithms
     ~PDFFourierTransform();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "PDFFourierTransform";};
+    virtual const std::string name() const;
     /// Algorithm's version for identification 
-    virtual int version() const { return 1;};
+    virtual int version() const;
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "Diffraction";}  // category better be in diffraction than general
-    
+    virtual const std::string category() const;  // category better be in diffraction than general
+    /// @copydoc Algorithm::validateInputs()
+    virtual std::map<std::string, std::string> validateInputs();
+
   private:
     API::MatrixWorkspace_const_sptr Sspace;
     API::MatrixWorkspace_sptr Gspace;
@@ -41,9 +43,6 @@ namespace Algorithms
     double CalculateGrFromQ(double r, double& egr, double qmin, double qmax, bool sofq);
     /// Calculate PDF, i.e., G(r), for a certain r value from S(d)
     double CalculateGrFromD(double r, double& egr, double qmin, double qmax, bool sofq);
-
-    std::string gtype1;
-
   };
 
 
