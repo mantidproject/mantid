@@ -58,16 +58,6 @@ void SaveScreenshotReaction::updateEnableState()
 //-----------------------------------------------------------------------------
 void SaveScreenshotReaction::saveScreenshot()
 {
-  pqTabbedMultiViewWidget* viewManager = qobject_cast<pqTabbedMultiViewWidget*>(
-        pqApplicationCore::instance()->manager("MULTIVIEW_WIDGET"));
-  if (!viewManager)
-  {
-    qCritical("Could not locate pqTabbedMultiViewWidget. "
-              "If using custom-widget as the "
-              "central widget, you cannot use SaveScreenshotReaction.");
-    return;
-  }
-
   pqView* view = pqActiveObjects::instance().activeView();
   if (!view)
   {
@@ -77,7 +67,6 @@ void SaveScreenshotReaction::saveScreenshot()
 
   pqSaveSnapshotDialog ssDialog(pqCoreUtilities::mainWidget());
   ssDialog.setViewSize(view->getSize());
-  ssDialog.setAllViewsSize(viewManager->clientSize());
 
   if (ssDialog.exec() != QDialog::Accepted)
   {
@@ -135,7 +124,7 @@ void SaveScreenshotReaction::saveScreenshot()
   }
 
   SaveScreenshotReaction::saveScreenshot(file,
-                                         size, ssDialog.quality(), ssDialog.saveAllViews());
+                                         size, ssDialog.quality());
 
   // restore palette.
   if (!palette.isEmpty())
@@ -152,26 +141,11 @@ void SaveScreenshotReaction::saveScreenshot()
 
 //-----------------------------------------------------------------------------
 void SaveScreenshotReaction::saveScreenshot(const QString& filename,
-                                            const QSize& size, int quality,
-                                            bool all_views)
+                                            const QSize& size, int quality)
 {
-  pqTabbedMultiViewWidget* viewManager = qobject_cast<pqTabbedMultiViewWidget*>(
-        pqApplicationCore::instance()->manager("MULTIVIEW_WIDGET"));
-  if (!viewManager)
-  {
-    qCritical("Could not locate pqTabbedMultiViewWidget. "
-              "If using custom-widget as the "
-              "central widget, you cannot use SaveScreenshotReaction.");
-    return;
-  }
   pqView* view = pqActiveObjects::instance().activeView();
   vtkSmartPointer<vtkImageData> img;
-  if (all_views)
-  {
-    img.TakeReference(
-          viewManager->captureImage(size.width(), size.height()));
-  }
-  else if (view)
+  if (view)
   {
     img.TakeReference(view->captureImage(size));
   }

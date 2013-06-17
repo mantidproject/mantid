@@ -54,8 +54,7 @@ public:
   static void saveScreenshot();
   static void saveScreenshot(const QString& filename,
                              const QSize& size,
-                             int quality,
-                             bool all_views=false);
+                             int quality);
 
 public slots:
   /// Updates the enabled state. Applications need not explicitly call this.
