@@ -76,63 +76,20 @@ void QueryRemoteJob::exec()
 
   std::string errMsg;
   RemoteJob::JobStatus status;
+
   if (jobManager->jobStatus( getPropertyValue("JobID"), status, errMsg))
-  {
+  {      
     setProperty( "JobStatusCode", (unsigned)status);
-    setProperty( "JobStatusString", mapStatusToString( status));
+
+    // Create a temporary RemoteJob object just so we can call statusString() on it
+    setProperty( "JobStatusString",  RemoteJob("", NULL, status, "").statusString());
   }
   else
   {
     throw( std::runtime_error( "Error querying remote jobs: " + errMsg));
   }
-
-
-  
 }
 
-std::string QueryRemoteJob::mapStatusToString( unsigned status)
-{
-  std::string retVal;
-  switch (status)
-  {
-  case (unsigned)RemoteJob::JOB_COMPLETE:
-    retVal = "Job complete";
-    break;
-
-  case (unsigned)RemoteJob::JOB_RUNNING:
-    retVal = "Job running";
-    break;
-
-  case (unsigned)RemoteJob::JOB_QUEUED:
-    retVal = "Job queued";
-    break;
-
-  case (unsigned)RemoteJob::JOB_ABORTED:
-    retVal = "Job aborted";
-    break;
-
-  case (unsigned)RemoteJob::JOB_REMOVED:
-    retVal = "Job removed";
-    break;
-
-  case (unsigned)RemoteJob::JOB_DEFERRED:
-    retVal = "Job defferred";
-    break;
-
-  case (unsigned)RemoteJob::JOB_IDLE:
-    retVal = "Job idle";
-    break;
-
-  case (unsigned)RemoteJob::JOB_STATUS_UNKNOWN:
-    retVal = "Unknown job status";
-    break;
-
-  default:
-    retVal = "Error querying job status.";
-  }
-
-  return retVal;
-}
 
 } // end namespace RemoteAlgorithms
 } // end namespace Mantid

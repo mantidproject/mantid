@@ -25,8 +25,6 @@ private:
   void init();
   ///Execution code
   void exec();
-  /// Helper func for converting RemoteJob::JobStatus enums into strings
-  std::string mapStatusToString( unsigned status);
 
 };
 
