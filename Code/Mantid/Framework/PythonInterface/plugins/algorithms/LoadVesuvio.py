@@ -9,7 +9,7 @@ from mantid.api import *
 from mantid.simpleapi import (CropWorkspace, LoadEmptyInstrument, LoadRaw, Plus, 
                               DeleteWorkspace)
 
-
+import copy
 import numpy as np
 import os
 
@@ -223,21 +223,19 @@ class LoadVesuvio(PythonAlgorithm):
         self._raw_grp, self._raw_monitors = self._load_and_sum_runs(spectra)
         nperiods = self._raw_grp.size()
 
+        first_ws = self._raw_grp[0]
         self._nperiods = nperiods
-        self._goodframes = self._raw_grp[0].getRun().getLogData("goodfrm").value
+        self._goodframes = first_ws.getRun().getLogData("goodfrm").value
         
-        # X arrays won't change so store a copy of them
-        raw_t = self._raw_grp[0].readX(0)
-        self.raw_x = raw_t # For the final workspace
-        
-        # Convert the times to microseconds
-        self.pt_times = 0.5*(raw_t[1:] + raw_t[:-1])
-        self.delta_t = (raw_t[1:] - raw_t[:-1]) # Numpy does difference between successive elements
+        # Convert bin times to pts
+        raw_t = first_ws.readX(0)
+        self.delta_t = (raw_t[1:] - raw_t[:-1])
+        self.pt_times = 0.5*(raw_t[:-1] + raw_t[1:]) # Convert to points
 
         mon_raw_t = self._raw_monitors[0].readX(0)
         # Convert the times to 
-        self.mon_pt_times = 0.5*(mon_raw_t[1:] + mon_raw_t[:-1])
         self.delta_tmon = (mon_raw_t[1:] - mon_raw_t[:-1])
+        self.mon_pt_times = 0.5*(mon_raw_t[:-1] + mon_raw_t[1:])
 
 #----------------------------------------------------------------------------------------
     def _load_and_sum_runs(self, spectra):
@@ -352,21 +350,33 @@ class LoadVesuvio(PythonAlgorithm):
     def _create_foil_workspaces(self):
         """
             Create the workspaces that will hold the foil out, thin & thick results
+            The output will be a point workspace
         """
         first_ws = self._raw_grp[0]
-        self.foil_out = WorkspaceFactory.create(first_ws) # This will be used as the result workspace
+        ndata_bins = first_ws.blocksize()
+        nhists = first_ws.getNumberHistograms()
+        data_kwargs = {'NVectors':nhists,'XLength':ndata_bins,'YLength':ndata_bins}
+        
+        self.foil_out = WorkspaceFactory.create(first_ws, **data_kwargs) # This will be used as the result workspace
         self.foil_out.setDistribution(True)
-        self.foil_thin = WorkspaceFactory.create(first_ws)
+        self.foil_thin = WorkspaceFactory.create(first_ws, **data_kwargs)
+
+        # Monitors will be a different size
         first_monws = self._raw_monitors[0]
-        self.mon_out = WorkspaceFactory.create(first_monws, NVectors=first_ws.getNumberHistograms())
-        self.mon_thin = WorkspaceFactory.create(first_monws,NVectors=first_ws.getNumberHistograms())
+        nmonitor_bins = first_monws.blocksize()
+        monitor_kwargs = copy.deepcopy(data_kwargs)
+        monitor_kwargs['XLength'] = nmonitor_bins
+        monitor_kwargs['YLength'] = nmonitor_bins
+
+        self.mon_out = WorkspaceFactory.create(first_monws, **monitor_kwargs)
+        self.mon_thin = WorkspaceFactory.create(first_monws, **monitor_kwargs)
 
         if self._nperiods == 2:
             self.foil_thick = None
             self.mon_thick = None
         else:
-            self.foil_thick = WorkspaceFactory.create(first_ws)
-            self.mon_thick = WorkspaceFactory.create(first_monws,NVectors=first_ws.getNumberHistograms())
+            self.foil_thick = WorkspaceFactory.create(first_ws, **data_kwargs)
+            self.mon_thick = WorkspaceFactory.create(first_monws, **monitor_kwargs)
 
 #----------------------------------------------------------------------------------------
     
@@ -527,7 +537,8 @@ class LoadVesuvio(PythonAlgorithm):
         else:
             raise RuntimeError("Unknown difference type requested: %d" % self._diff_opt)
 
-        self.foil_out.setX(wsindex, self.raw_x)
+        finalx = (self.pt_times - 0.5*self.delta_t)
+        self.foil_out.setX(wsindex, finalx)
 #----------------------------------------------------------------------------------------
 
     def _calculate_thin_difference(self, ws_index):
