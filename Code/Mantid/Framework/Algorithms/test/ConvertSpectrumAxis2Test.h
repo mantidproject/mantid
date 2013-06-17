@@ -38,26 +38,26 @@ private:
 
 public:
 
-	void estName()
+	void testName()
 	{
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     TS_ASSERT_EQUALS( conv.name(), "ConvertSpectrumAxis" );
 	}
 
-	void estVersion()
+	void testVersion()
 	{
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     TS_ASSERT_EQUALS( conv.version(), 2 );
 	}
 
-  void estInit()
+  void testInit()
   {
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
     TS_ASSERT_THROWS_NOTHING( conv.initialize() );
     TS_ASSERT( conv.isInitialized() );
   }
 
-  void estTargetSignedThetaOld() // Old version of alg did not follow the naming convention for units. Keep till the old version is deprecated.
+  void testTargetSignedThetaOld() // Old version of alg did not follow the naming convention for units. Keep till the old version is deprecated.
   {
     const std::string inputWS("inWS");
     const std::string outputSignedThetaAxisWS("outSignedThetaWS");
@@ -78,7 +78,7 @@ public:
     AnalysisDataService::Instance().remove(outputSignedThetaAxisWS);
   }
     
-  void estTargetSignedThetaNew() // The new version of this alg follows the standard for the naming of units.
+  void testTargetSignedThetaNew() // The new version of this alg follows the standard for the naming of units.
   {
     const std::string inputWS("inWS");
     const std::string outputSignedThetaAxisWS("outSignedThetaWS");
@@ -99,7 +99,7 @@ public:
     AnalysisDataService::Instance().remove(outputSignedThetaAxisWS);
   }
 
-  void estTargetThetaOld() // Old version of alg did not follow the naming convention for units. Keep till the old version is deprecated.
+  void testTargetThetaOld() // Old version of alg did not follow the naming convention for units. Keep till the old version is deprecated.
   {
     const std::string inputWS("inWS");
     const std::string outputWS("outWS");
@@ -134,7 +134,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
   }
 
-  void estTargetThetaNew() // The new version of this alg follows the standard for the naming of units.
+  void testTargetThetaNew() // The new version of this alg follows the standard for the naming of units.
   {
     const std::string inputWS("inWS");
     const std::string outputWS("outWS");
@@ -204,7 +204,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
     }
 
-  void estTargetElasticQSquared() // The new version of this alg follows the standard for the naming of units.
+  void testTargetElasticQSquared() // The new version of this alg follows the standard for the naming of units.
   {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
@@ -223,8 +223,9 @@ public:
     
     TS_ASSERT_DELTA( (*q2Axis)(0), 0.0000, 0.0001 );
     
-    //double efixed = Mantid::Algorithms::ConvertSpectrumAxis2::getEfixed(;
-    //TS_ASSERT_DELTA( (*q2Axis)(1), ((sqrt(2 * Mantid::Algorithms::ConvertSpectrumAxis2::getEfixed * Mantid::PhysicalConstants::NeutronMass)) * 4 * M_PI/(Mantid::PhysicalConstants::h)), 0.0001 );
+    // double efixed = Mantid::Algorithms::ConvertSpectrumAxis2::getEfixed; ((32 * M_PI * M_PI * Mantid::Algorithms::ConvertSpectrumAxis2::getEfixed * Mantid::PhysicalConstants::NeutronMass)/(Mantid::PhysicalConstants::h * Mantid::PhysicalConstants::h))
+    // TS_ASSERT_DELTA( (*q2Axis)(1), Mantid::Algorithms::ConvertSpectrumAxis2().m_elasticQSquared , 0.0001 );
+    TS_ASSERT_DELTA( (*q2Axis)(1), ( 16 * pow(M_PI, 2.0)/pow(Mantid::Algorithms::ConvertSpectrumAxis2().m_wavelength, 2.0)) , 0.0001 )
 
     // Check axis is correct length
     TS_ASSERT_THROWS( (*q2Axis)(2), Mantid::Kernel::Exception::IndexError );

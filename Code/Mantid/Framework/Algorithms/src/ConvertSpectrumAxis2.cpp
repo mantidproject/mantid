@@ -138,9 +138,7 @@ namespace Algorithms
   {
     IObjComponent_const_sptr source = m_inputWS->getInstrument()->getSource();
     IObjComponent_const_sptr sample = m_inputWS->getInstrument()->getSample();
-
-    // Kernel::Unit_sptr unit;
-
+    
     std::vector<double> emptyVector;
     const double l1 = source->getDistance(*sample);
     const std::string emodeStr = getProperty("EMode");
@@ -171,11 +169,11 @@ namespace Algorithms
       const double sineTheta = sin(twoTheta/2);
         
       //Calculate the wavelength to allow it to be used to convert to elasticQ. 
-      double wavelength = Mantid::PhysicalConstants::h/(sqrt(2*efixed*Mantid::PhysicalConstants::NeutronMass));
+      m_wavelength = Mantid::PhysicalConstants::h/(sqrt(2*efixed*Mantid::PhysicalConstants::NeutronMass));
       //The constant k.
-      const double k = (2*M_PI)/wavelength;
+      const double k = (2*M_PI)/m_wavelength;
       
-      // MomentumTransfer     
+      // The MomentumTransfer value.
       double elasticQ = k*2*sineTheta;
 
       if(targetUnit == "ElasticQ")
@@ -185,7 +183,7 @@ namespace Algorithms
     
       else if(targetUnit == "ElasticQSquared")
       {
-        // QSquared
+        // The QSquared value.
         double elasticQSquared = elasticQ*elasticQ;
         
         m_indexMap.insert(std::make_pair(elasticQSquared, i));
