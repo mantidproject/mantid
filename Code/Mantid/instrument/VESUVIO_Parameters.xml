@@ -33,11 +33,6 @@
   <value val="1000"/>
 </parameter>
 
-<!-- Dead-time correction ratio (tau). -->
-<parameter name="dead_time_fraction">
-  <value val="1.0"/>
-</parameter>
-
 <!-- Double-difference mixing parameter (beta) -->
 <parameter name="double_diff_mixing">
   <value val="0.28"/>

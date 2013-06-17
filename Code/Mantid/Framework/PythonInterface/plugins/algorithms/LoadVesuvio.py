@@ -87,7 +87,6 @@ class LoadVesuvio(PythonAlgorithm):
 
                 self._integrate_periods()
                 self._sum_foil_periods()
-                self._apply_dead_time_correction()
                 self._normalise_by_monitor()
                 self._normalise_to_foil_out()
                 self._calculate_diffs()
@@ -188,7 +187,6 @@ class LoadVesuvio(PythonAlgorithm):
 
         self._backward_spectra_list = to_int_list(self.backward_scatter_spectra)
         self._forward_spectra_list = to_int_list(self.forward_scatter_spectra)
-        self._tau = self.dead_time_fraction
         self._mon_scale = self.monitor_scale
         self._beta =  self.double_diff_mixing
         self._tof_max = self.tof_max
@@ -465,37 +463,6 @@ class LoadVesuvio(PythonAlgorithm):
             
         outY /= self.delta_tmon
 
-#----------------------------------------------------------------------------------------
-    def _apply_dead_time_correction(self):
-        """
-            Corrects the count arrays for each foil state for dead time in the detectors
-            for the current spectrum
-        """
-        # Calculate number of frames
-        sum3_total = self.sum3[0] + self.sum3[1] + self.sum3[2]
-        nframes = np.ones(3)
-        if sum3_total != 0.0:
-            for i in range(3):
-                nframes[i] = self._goodframes*self.sum3[i]/sum3_total
-                if nframes[i] == 0.0:
-                    self.getLogger().warning("nframes=0 for period %d in spectrum %d. Using nframes=1" % (i, self._spectrum_no))
-        else:
-            self.getLogger().warning("Sum of counts across all foil periods = 0 for spectrum %d. "
-                                     "Using nframes=1 for all periods in this spectrum" % self._spectrum_no)
-        
-        wsindex = self._ws_index
-        def dead_time_correct(foil_ws, period):
-            """Correct for dead time"""
-            for arr_func in (foil_ws.dataY, foil_ws.dataE):
-                values = arr_func(wsindex)
-                values /= nframes[period]
-                values /= (1.0 - self._tau*values)
-                values *= nframes[period]
-
-        dead_time_correct(self.foil_out, IOUT)
-        dead_time_correct(self.foil_thin, ITHIN)
-        if self._nperiods != 2:
-            dead_time_correct(self.foil_thick, ITHICK)
 
 #----------------------------------------------------------------------------------------
     def _normalise_by_monitor(self):
