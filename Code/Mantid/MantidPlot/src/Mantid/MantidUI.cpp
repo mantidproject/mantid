@@ -1527,14 +1527,19 @@ void MantidUI::renameWorkspace(QStringList wsName)
     }
   }
 
-  //execute the algorithm
-  std::string algName("RenameWorkspace");
+  //determine the algorithm
+  std::string algName("RenameWorkspace"); 
+  if(wsName.size() > 1)
+  {
+     algName = std::string("RenameWorkspaces");
+  }
   int version=-1;
+
+  // execute the algorithm
   Mantid::API::IAlgorithm_sptr alg;
   try
   {
     alg = Mantid::API::AlgorithmManager::Instance().create(algName,version);
-
   }
   catch(...)
   {
@@ -1546,26 +1551,19 @@ void MantidUI::renameWorkspace(QStringList wsName)
     return;
   }
   MantidQt::API::InterfaceManager interfaceManager;
-  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_appWindow);
-  if( !dlg ) return;
-  //getting the combo box which has input workspaces and removing the workspaces except the selected one
-  QComboBox *combo = dlg->findChild<QComboBox*>();
-  if(combo)
-  {
-    int count=combo->count();
-    int index=count-1;
-    while(count>1)
-    {
-      int selectedIndex=combo->findText(wsName[0],Qt::MatchExactly );
-      if(selectedIndex!=index)
-      {
-        combo->removeItem(index);
-        count=combo->count();
-      }
-      index=index-1;
+  QHash<QString,QString> presets;
 
-    }
-  }//end of if loop for combo
+  if(wsName.size() == 1)
+  {
+     presets["InputWorkspace"] = wsName[0];
+  }
+  else
+  {
+  }
+
+  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_appWindow,false,presets);
+  if( !dlg ) return;
+  
   if ( dlg->exec() == QDialog::Accepted)
   {
     delete dlg;
