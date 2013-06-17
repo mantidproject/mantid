@@ -114,30 +114,65 @@ class sfCalculator():
         
         #perform calculation for numerator
         self._calculateFinalYAxis(bNumerator=True)
+
+        #DEBUGGING
+         
+        #output the data to fit to DEBUG
+        x_axis = self.x_axis_ratio
+        y_axis = self.y_axis_numerator
+        y_error_axis = self.y_axis_error_numerator
+          
+        print 'create sfOutputTest#'
+        filename = "/home/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+        print filename
+        sfCalculator.INDEX += 1
+          
+        f=open(filename,'w')
+  
+        for i in range(len(x_axis)):
+            f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+          
+        f.close
+        #END of DEBUGGING
         
         #perform calculation for denominator
         self._calculateFinalYAxis(bNumerator=False)
+
+        #DEBUGGING
+         
+        #output the data to fit to DEBUG
+        x_axis = self.x_axis_ratio
+        y_axis = self.y_axis_denominator
+        y_error_axis = self.y_axis_error_denominator
+          
+        print 'create sfOutputTest#'
+        filename = "/home/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+        print filename
+        sfCalculator.INDEX += 1
+          
+        f=open(filename,'w')
+  
+        for i in range(len(x_axis)):
+            f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+          
+        f.close
+        #END of DEBUGGING
         
         #calculate y_axis of numerator/denominator
 #        self._x_axis_ratio = self._x_axis
         self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
-        
-#        #DEBUGGING
-#        print self.y_axis_ratio
-#        
-#        f=open('/home/j35/Desktop/RatioNumDen.txt','w')
-#        for i in range(len(self.y_axis_ratio)):
-#            f.write(str(self.x_axis_ratio[i]) + "," + str(self.y_axis_ratio[i]) + "\n")
-#        f.close
-#        
-#        #end debugging
-        
+                
         self.y_axis_error_ratio = ((self.y_axis_error_numerator / 
                                     self.y_axis_numerator) ** 2 + 
                                     (self.y_axis_error_denominator / 
                                      self.y_axis_denominator) ** 2)
         self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
         self.y_axis_error_ratio *= self.y_axis_ratio
+        
+
+               
+        
+        
         
     def _calculateFinalYAxis(self, bNumerator=True):
         """
@@ -454,28 +489,24 @@ class sfCalculator():
 #                       OutputWorkspace='DataToFit',
 #                       AddMinimum=0)        
         
-        #output the data to fit to DEBUG
-        x_axis = DataToFit.readX(0)[:]
-        y_axis = DataToFit.readY(0)[:]
-        y_error_axis = DataToFit.readE(0)[:]
-        
-        print 'create sfOutputTest#'
-        filename = "/home/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
-        print filename
-        sfCalculator.INDEX += 1
-        
-        f=open(filename,'w')
-
-        for i in range(len(x_axis)):
-            f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
-        
-        f.close
-
-        #end of debug
-        
-        
-        
-        
+#         #DEBUG
+#         #output the data to fit to DEBUG
+#         x_axis = DataToFit.readX(0)[:]
+#         y_axis = DataToFit.readY(0)[:]
+#         y_error_axis = DataToFit.readE(0)[:]
+#         
+#         print 'create sfOutputTest#'
+#         filename = "/home/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+#         print filename
+#         sfCalculator.INDEX += 1
+#         
+#         f=open(filename,'w')
+# 
+#         for i in range(len(x_axis)):
+#             f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+#         
+#         f.close
+#         #END OF DEBUG
         
         try:
         
