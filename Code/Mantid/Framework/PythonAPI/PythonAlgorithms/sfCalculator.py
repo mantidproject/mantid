@@ -123,7 +123,7 @@ class sfCalculator():
         y_error_axis = self.y_axis_error_numerator
           
         print 'create sfOutputTest#'
-        filename = "/home/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+        filename = "/SNS/users/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
         print filename
         sfCalculator.INDEX += 1
           
@@ -146,7 +146,7 @@ class sfCalculator():
         y_error_axis = self.y_axis_error_denominator
           
         print 'create sfOutputTest#'
-        filename = "/home/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+        filename = "/SNS/users/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
         print filename
         sfCalculator.INDEX += 1
           
