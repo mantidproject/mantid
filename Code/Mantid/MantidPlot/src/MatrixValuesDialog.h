@@ -56,9 +56,6 @@ public:
 
 private slots:
 	bool apply();
-	void addCell();
-	void insertFunction();
-	void insertExplain(int index);
 
 private:
 	Matrix *matrix;
@@ -67,16 +64,9 @@ private:
 	void customEvent( QEvent *e);
 
 	ScriptEditor* commands;
-    QComboBox* functions;
-    QPushButton* btnAddFunction;
-	QPushButton* btnAddCell;
     QPushButton* btnCancel;
-    QTextEdit* explain;
 	QSpinBox *startRow, *endRow, *startCol, *endCol;
 	QPushButton *btnApply;
-#ifdef SCRIPTING_PYTHON
-	QCheckBox *boxMuParser;
-#endif
 };
 
 #endif //
