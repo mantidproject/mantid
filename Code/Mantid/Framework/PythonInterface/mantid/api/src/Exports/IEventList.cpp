@@ -36,6 +36,10 @@ void export_IEventList()
     .def("maskTof", &IEventList::maskTof, "Mask out events that have a tof between tofMin and tofMax (inclusively)")
     .def("getTofs", (std::vector<double>(IEventList::*)(void)const) &IEventList::getTofs,
         "Get a vector of the TOFs of the events")
+	.def("getWeights", (std::vector<double>(IEventList::*)(void)const) &IEventList::getWeights,
+        "Get a vector of the weights of the events")
+	.def("getWeightErrors", (std::vector<double>(IEventList::*)(void)const) &IEventList::getWeightErrors,
+        "Get a vector of the weights of the events")
     .def("getPulseTimes", &IEventList::getPulseTimes, "Get a vector of the pulse times of the events")
     .def("getTofMin", &IEventList::getTofMin, "The minimum tof value for the list of the events.")
     .def("getTofMax", &IEventList::getTofMax, "The maximum tof value for the list of the events.")

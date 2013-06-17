@@ -2604,6 +2604,114 @@ namespace DataObjects
     return tofs;
   }
 
+  
+
+  // --------------------------------------------------------------------------
+  /** Get the weight member of all events in a list
+   *
+   * @param events :: source vector of events
+   * @param weights :: vector to fill
+   */
+  template<class T>
+  void EventList::getWeightsHelper(const std::vector<T> & events, std::vector<double> & weights)
+  {
+    typename std::vector<T>::const_iterator itev;
+    typename std::vector<T>::const_iterator itev_end = events.end(); //cache for speed
+    weights.clear();
+    for (itev = events.begin(); itev != itev_end; itev++)
+      weights.push_back(itev->weight());
+  }
+
+
+  /** Fill a vector with the list of Weights
+   *  @param weights :: A reference to the vector to be filled
+   */
+  void EventList::getWeights(std::vector<double>& weights) const
+  {
+    // Set the capacity of the vector to avoid multiple resizes
+    weights.reserve(this->getNumberEvents());
+
+    //Convert the list
+    switch (eventType)
+    {
+    case WEIGHTED:
+      this->getWeightsHelper(this->weightedEvents, weights);
+      break;
+    case WEIGHTED_NOTIME:
+      this->getWeightsHelper(this->weightedEventsNoTime, weights);
+      break;
+	default:
+	  //not a weighted event type, return 1.0 for all.
+	  weights.assign(this->getNumberEvents(),1.0);
+	  break;
+    }
+  }
+
+  /** Get the weight of each event in this EventList.
+   *
+   * @return by copy a vector of doubles of the weight() value
+   */
+  std::vector<double> EventList::getWeights() const
+  {
+    std::vector<double> weights;
+    this->getWeights(weights);
+    return weights;
+  }
+
+  
+
+  // --------------------------------------------------------------------------
+  /** Get the weight error member of all events in a list
+   *
+   * @param events :: source vector of events
+   * @param weightErrors :: vector to fill
+   */
+  template<class T>
+  void EventList::getWeightErrorsHelper(const std::vector<T> & events, std::vector<double> & weightErrors)
+  {
+    typename std::vector<T>::const_iterator itev;
+    typename std::vector<T>::const_iterator itev_end = events.end(); //cache for speed
+    weightErrors.clear();
+    for (itev = events.begin(); itev != itev_end; itev++)
+      weightErrors.push_back(itev->error());
+  }
+
+
+  /** Fill a vector with the list of Weight Errors
+   *  @param weightErrors :: A reference to the vector to be filled
+   */
+  void EventList::getWeightErrors(std::vector<double>& weightErrors) const
+  {
+    // Set the capacity of the vector to avoid multiple resizes
+    weightErrors.reserve(this->getNumberEvents());
+
+    //Convert the list
+    switch (eventType)
+    {
+    case WEIGHTED:
+      this->getWeightErrorsHelper(this->weightedEvents, weightErrors);
+      break;
+    case WEIGHTED_NOTIME:
+      this->getWeightErrorsHelper(this->weightedEventsNoTime, weightErrors);
+      break;
+	default:
+	  //not a weighted event type, return 1.0 for all.
+	  weightErrors.assign(this->getNumberEvents(),1.0);
+	  break;
+    }
+  }
+
+  /** Get the weight error of each event in this EventList.
+   *
+   * @return by copy a vector of doubles of the weight() value
+   */
+  std::vector<double> EventList::getWeightErrors() const
+  {
+    std::vector<double> weightErrors;
+    this->getWeightErrors(weightErrors);
+    return weightErrors;
+  }
+
   // --------------------------------------------------------------------------
   /** Get the pulsetimes of all events in a list
    *
