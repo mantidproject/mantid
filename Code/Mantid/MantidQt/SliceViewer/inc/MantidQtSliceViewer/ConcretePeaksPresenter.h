@@ -49,8 +49,8 @@ namespace MantidQt
       virtual double getPeakSizeOnProjection() const;
       virtual double getPeakSizeIntoProjection() const;
     private:
-      /// Peak overlay views.
-      VecPeakOverlayView m_viewPeaks;
+      /// Peak overlay view.
+      PeakOverlayView_sptr m_viewPeaks;
       /// View factory
       boost::shared_ptr<PeakOverlayViewFactory> m_viewFactory;
       /// Peaks workspace.

@@ -119,6 +119,9 @@ namespace MantidQt
       DISABLE_COPY_AND_ASSIGN(PhysicalSphericalPeak)
     };
 
+    typedef boost::shared_ptr<PhysicalSphericalPeak> PhysicalSphericalPeak_sptr;
+    typedef std::vector<PhysicalSphericalPeak_sptr> VecPhysicalSphericalPeak;
+
   }
 }
 

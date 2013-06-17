@@ -1,8 +1,9 @@
-#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYSPHERE_FACTORY_H_
-#define MANTID_SLICEVIEWER_PEAKOVERLAYSPHERE_FACTORY_H_
+#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_FACTORY_H_
+#define MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_FACTORY_H_
 
 #include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/MDGeometry.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt
@@ -10,9 +11,9 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-    /** Concrete view factory. For creating instances of PeakOverlaySphere widget.
+    /** Concrete view factory. For creating instances of PeakOverlayMultiCross widget.
 
-    @date 2012-08-24
+    @date 2013-06-10
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -34,21 +35,19 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport PeakOverlaySphereFactory : public PeakOverlayViewFactoryBase
+    class DLLExport PeakOverlayMultiCrossFactory : public PeakOverlayViewFactoryBase
     {
-    private:
-      double m_peakRadius;
-      double m_backgroundInnerRadius;
-      double m_backgroundOuterRadius;
-      Mantid::API::IPeaksWorkspace_sptr m_peaksWS;
-      int m_FOM;
-    public:
-      PeakOverlaySphereFactory(Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
-      virtual ~PeakOverlaySphereFactory();
-      virtual boost::shared_ptr<PeakOverlayView> createView(const int peakIndex, PeakTransform_const_sptr transform) const;
+      public:
+      PeakOverlayMultiCrossFactory(boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransform_const_sptr transform, Mantid::API::IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
+      virtual ~PeakOverlayMultiCrossFactory();
+      virtual boost::shared_ptr<PeakOverlayView> createView(PeakTransform_const_sptr transform) const;
       virtual int FOM() const;
+    private:
+      /// Peaks workspace.
+      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
+      double m_zMax;
+      double m_zMin;
     };
   }
 }
-
-#endif /*MANTID_SLICEVIEWER_PEAKOVERLAYSPHERE_FACTORY_H_*/
+#endif

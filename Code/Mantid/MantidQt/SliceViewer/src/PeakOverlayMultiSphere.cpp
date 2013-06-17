@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/PeakOverlaySphere.h"
+#include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
@@ -16,11 +16,8 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    PeakOverlaySphere::PeakOverlaySphere(QwtPlot * plot, QWidget * parent,
-        const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius,
-        const double& backgroundOuterRadius, const QColor& peakColour, const QColor& backColour) :
-        QWidget(parent), m_plot(plot), m_physicalPeak(origin, peakRadius, backgroundInnerRadius,
-            backgroundOuterRadius), m_peakColour(peakColour), m_backColour(backColour)
+    PeakOverlayMultiSphere::PeakOverlayMultiSphere(QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks , const QColor& peakColour, const QColor& backColour) :
+        QWidget(parent), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_peakColour(peakColour), m_backColour(backColour)
     {
       setAttribute(Qt::WA_NoMousePropagation, false);
       this->setVisible(true);
@@ -32,20 +29,22 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Destructor
      */
-    PeakOverlaySphere::~PeakOverlaySphere()
+    PeakOverlayMultiSphere::~PeakOverlayMultiSphere()
     {
     }
 
-    void PeakOverlaySphere::setSlicePoint(const double& z)
+    void PeakOverlayMultiSphere::setSlicePoint(const double& z)
     {
-      m_physicalPeak.setSlicePoint(z);
-
+      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      { 
+        m_physicalPeaks[i]->setSlicePoint(z);
+      }
       this->update(); //repaint
     }
 
     //----------------------------------------------------------------------------------------------
     /// Return the recommended size of the widget
-    QSize PeakOverlaySphere::sizeHint() const
+    QSize PeakOverlayMultiSphere::sizeHint() const
     {
       //TODO: Is there a smarter way to find the right size?
       return QSize(20000, 20000);
@@ -53,30 +52,32 @@ namespace MantidQt
       //return m_plot->canvas()->size();
     }
 
-    QSize PeakOverlaySphere::size() const
+    QSize PeakOverlayMultiSphere::size() const
     {
       return m_plot->canvas()->size();
     }
-    int PeakOverlaySphere::height() const
+    int PeakOverlayMultiSphere::height() const
     {
       return m_plot->canvas()->height();
     }
-    int PeakOverlaySphere::width() const
+    int PeakOverlayMultiSphere::width() const
     {
       return m_plot->canvas()->width();
     }
 
     //----------------------------------------------------------------------------------------------
     /// Paint the overlay
-    void PeakOverlaySphere::paintEvent(QPaintEvent * /*event*/)
+    void PeakOverlayMultiSphere::paintEvent(QPaintEvent * /*event*/)
     {
-      if (m_physicalPeak.isViewablePeak())
+      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      { 
+      if (m_physicalPeaks[i]->isViewablePeak())
       {
         const QwtDoubleInterval intervalY = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
         const QwtDoubleInterval intervalX = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval();
 
         // Calculate the physical drawing aspects using the Physical Peak.
-        auto drawObject = m_physicalPeak.draw(height(), width(), intervalY.width(), intervalX.width());
+        auto drawObject = m_physicalPeaks[i]->draw(height(), width(), intervalY.width(), intervalX.width());
 
         // Linear Transform from MD coordinates into Windows/Qt coordinates for ellipse rendering. TODO: This can be done outside of paintEvent.
         const int xOrigin = m_plot->transform(QwtPlot::xBottom, drawObject.peakOrigin.X());
@@ -95,7 +96,7 @@ namespace MantidQt
         pen.setStyle(Qt::DashLine);
         painter.strokePath(peakRadiusInnerPath, pen);
 
-        if (m_physicalPeak.isViewableBackground())
+        if (m_physicalPeaks[i]->isViewableBackground())
         {
           QPainterPath backgroundOuterPath;
           backgroundOuterPath.setFillRule(Qt::WindingFill);
@@ -108,72 +109,80 @@ namespace MantidQt
           painter.fillPath(backgroundRadiusFill, m_backColour);
         }
       }
+      }
     }
 
-    void PeakOverlaySphere::updateView()
+    void PeakOverlayMultiSphere::updateView()
     {
       this->update();
     }
 
-    void PeakOverlaySphere::hideView()
+    void PeakOverlayMultiSphere::hideView()
     {
       this->hide();
     }
 
-    void PeakOverlaySphere::showView()
+    void PeakOverlayMultiSphere::showView()
     {
       this->show();
     }
 
-    void PeakOverlaySphere::movePosition(PeakTransform_sptr transform)
+    void PeakOverlayMultiSphere::movePosition(PeakTransform_sptr transform)
     {
-      m_physicalPeak.movePosition(transform);
+      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      { 
+        m_physicalPeaks[i]->movePosition(transform);
+      }
     }
 
-    void PeakOverlaySphere::changeForegroundColour(const QColor colour)
+    void PeakOverlayMultiSphere::changeForegroundColour(const QColor colour)
     {
       this->m_peakColour = colour;
     }
 
-    void PeakOverlaySphere::changeBackgroundColour(const QColor colour)
+    void PeakOverlayMultiSphere::changeBackgroundColour(const QColor colour)
     {
       this->m_backColour = colour;
     }
 
-    void PeakOverlaySphere::showBackgroundRadius(const bool show)
+    void PeakOverlayMultiSphere::showBackgroundRadius(const bool show)
     {
-      m_physicalPeak.showBackgroundRadius(show);
+      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      { 
+        m_physicalPeaks[i]->showBackgroundRadius(show);
+      }
     }
 
     /**
+     @param peakIndex: Index of the peak to fetch the bounding box for.
      @return bounding box for peak in windows coordinates.
      */
-    PeakBoundingBox PeakOverlaySphere::getBoundingBox() const
+    PeakBoundingBox PeakOverlayMultiSphere::getBoundingBox(const int peakIndex) const
     {
-      return m_physicalPeak.getBoundingBox();
+      return m_physicalPeaks[peakIndex]->getBoundingBox();
     }
 
-    void PeakOverlaySphere::changeOccupancyInView(const double)
-    {
-      // DO NOTHING
-    }
-
-    void PeakOverlaySphere::changeOccupancyIntoView(const double)
+    void PeakOverlayMultiSphere::changeOccupancyInView(const double)
     {
       // DO NOTHING
     }
 
-    double PeakOverlaySphere::getOccupancyInView() const
+    void PeakOverlayMultiSphere::changeOccupancyIntoView(const double)
+    {
+      // DO NOTHING
+    }
+
+    double PeakOverlayMultiSphere::getOccupancyInView() const
     {
       throw std::runtime_error("PeakOverlaySphere::getOccupancyInView() not implemented");
     }
 
-    double PeakOverlaySphere::getOccupancyIntoView() const
+    double PeakOverlayMultiSphere::getOccupancyIntoView() const
     {
       throw std::runtime_error("PeakOverlaySphere::getOccupancyIntoView() not implemented");
     }
 
-    bool PeakOverlaySphere::positionOnly() const
+    bool PeakOverlayMultiSphere::positionOnly() const
     {
       return false;
     }

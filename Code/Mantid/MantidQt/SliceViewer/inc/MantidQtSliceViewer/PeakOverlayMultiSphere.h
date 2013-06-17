@@ -1,5 +1,5 @@
-#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYSPHERE_H_
-#define MANTID_SLICEVIEWER_PEAKOVERLAYSPHERE_H_
+#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYMULTISPHERE_H_
+#define MANTID_SLICEVIEWER_PEAKOVERLAYMULTISPHERE_H_
 
 #include "DllOption.h"
 #include "MantidKernel/System.h"
@@ -43,15 +43,15 @@ namespace SliceViewer
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlaySphere : public QWidget, public PeakOverlayView
+  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayMultiSphere : public QWidget, public PeakOverlayView
   {
     Q_OBJECT
 
   public:
     /// Constructor
-    PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius, const QColor& peakColour, const QColor& backColour);
+    PeakOverlayMultiSphere(QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, const QColor& peakColour, const QColor& backColour);
     /// Destructor
-    virtual ~PeakOverlaySphere();
+    virtual ~PeakOverlayMultiSphere();
     /// Set the slice point at position.
     virtual void setSlicePoint(const double& point); 
     /// Hide the view.
@@ -69,7 +69,7 @@ namespace SliceViewer
     /// Show the background radius
     virtual void showBackgroundRadius(const bool show);
     /// Get a bounding box for this peak.
-    virtual PeakBoundingBox getBoundingBox() const;
+    virtual PeakBoundingBox getBoundingBox(const int peakIndex) const;
     /// Changes the size of the overlay to be the requested fraction of the current view width.
     virtual void changeOccupancyInView(const double fraction);
     /// Changes the size of the overlay to be the requested fraction of the view depth.
@@ -93,7 +93,7 @@ namespace SliceViewer
     /// QwtPlot containing this
     QwtPlot * m_plot;
     /// Physical peak object
-    PhysicalSphericalPeak m_physicalPeak;
+    VecPhysicalSphericalPeak m_physicalPeaks;
     /// Peak colour
     QColor m_peakColour;
     /// Back colour
