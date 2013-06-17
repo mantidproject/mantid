@@ -372,7 +372,6 @@ void AnvredCorrection::execEvent()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  correctionFactors->doneAddingEventLists();
   // set the absorption correction values in the run parameters
   API::Run & run = correctionFactors->mutableRun();
   run.addProperty<double>("Radius", radius, true);

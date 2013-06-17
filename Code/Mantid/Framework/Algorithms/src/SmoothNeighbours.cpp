@@ -906,8 +906,6 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws)
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  //Finalize the data
-  outWS->doneAddingEventLists();
 
   //Give the 0-th X bins to all the output spectra.
   Kernel::cow_ptr<MantidVec> outX = inWS->refX(0);

@@ -363,8 +363,6 @@ void MergeRuns::execEvent()
     m_progress->report();
   }
 
-  //Finalize the workspace, since it might have more entries now.
-  outWS->doneAddingEventLists();
 
   // Set the final workspace to the output property
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(outWS));

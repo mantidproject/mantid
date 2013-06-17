@@ -514,7 +514,6 @@ namespace Algorithms
         workspaceIndex += 1;
       }
     }
-    outputWS->doneAddingEventLists();
 
     // Clear
     pixel_to_wkspindex.clear();

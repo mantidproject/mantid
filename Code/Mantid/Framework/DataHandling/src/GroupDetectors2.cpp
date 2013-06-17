@@ -926,8 +926,6 @@ size_t GroupDetectors2::formGroupsEvent( DataObjects::EventWorkspace_const_sptr 
     outIndex ++;
   }
 
-  // Refresh the spectraDetectorMap
-  outputWS->doneAddingEventLists();
 
   if ( bhv == 1 && requireDivide )
   {
@@ -1051,8 +1049,6 @@ void GroupDetectors2::moveOthersEvent(const std::set<int64_t> &unGroupedSet, Dat
       interruption_point();
     }
   }
-  // Refresh the spectraDetectorMap
-  outputWS->doneAddingEventLists();
 
   g_log.debug() << name() << " copied " << unGroupedSet.size()-1 << " ungrouped spectra\n";
 }

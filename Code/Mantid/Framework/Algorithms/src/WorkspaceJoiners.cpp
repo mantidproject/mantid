@@ -202,7 +202,6 @@ namespace Algorithms
       m_progress->report();
     }
 
-    output->doneAddingEventLists();
 
     //Set the same bins for all output pixels
     output->setAllX(XValues);

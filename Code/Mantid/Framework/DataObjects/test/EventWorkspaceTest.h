@@ -93,7 +93,6 @@ public:
         retVal->getEventList(pix).addDetectorID(pix);
         retVal->getEventList(pix).setSpectrumNo(pix);
       }
-      retVal->doneAddingEventLists();
     }
     else
     {
@@ -142,7 +141,6 @@ public:
 //      retVal->getEventList(pix).addDetectorID(pix);
 //      retVal->getEventList(pix).setSpectrumNo(pix);
 //    }
-//    retVal->doneAddingEventLists();
 //
 //    //Create the x-axis for histogramming.
 //    Kernel::cow_ptr<MantidVec> axis;
@@ -217,7 +215,6 @@ public:
     TS_ASSERT_EQUALS( el.getDetectorIDs().size(), 0);
     TS_ASSERT( !el.hasDetectorID(1023) );
 
-    ew->doneAddingEventLists();
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 1023+1);
 
   }
@@ -330,7 +327,6 @@ public:
       uneven->getEventList(wi).setSpectrumNo(pix);
       wi++;
     }
-    uneven->doneAddingEventLists();
 
     //Create the x-axis for histogramming.
     Kernel::cow_ptr<MantidVec> axis;
