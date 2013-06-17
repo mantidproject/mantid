@@ -42,11 +42,13 @@ void QueryAllRemoteJobs::init()
   // Password doesn't get echoed to the screen...
   declareProperty( new MaskedProperty<std::string>( "Password", "", requireValue, Direction::Input), "");
 
-  // ID's for all the jobs the user has submitted
-  declareProperty( "JobIDs", std::vector<std::string>(), nullValidator, "", Direction::Output);
-
-
-
+  // Mantid can't store arbitrary structs in its properties, so we're going to declare several
+  // array properties for different pieces of data.  Values from the same array index are for
+  // the same job.
+  declareProperty( new ArrayProperty<std::string>("JobId", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("JobStatusString", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<unsigned>("JobStatusNum", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("JobName", nullValidator, Direction::Output));
 }
 
 void QueryAllRemoteJobs::exec()
@@ -70,7 +72,22 @@ void QueryAllRemoteJobs::exec()
 
   if (jobManager->jobStatusAll( jobList, errMsg))
   {
-    setProperty( "JobStatusIDs", jobList);
+    std::vector<std::string> jobIds;
+    std::vector<std::string> jobStatusStrs;
+    std::vector<unsigned> jobStatusNums;
+    std::vector<std::string> jobNames;
+    for (unsigned i = 0; i < jobList.size(); i++)
+    {
+      jobIds.push_back(jobList[i].m_jobId);
+      jobStatusStrs.push_back( jobList[i].statusString());
+      jobStatusNums.push_back((unsigned)jobList[i].m_status);
+      jobNames.push_back(jobList[i].m_algName);
+    }
+
+    setProperty( "JobId", jobIds);
+    setProperty( "JobStatusString", jobStatusStrs);
+    setProperty( "JobStatusNum", jobStatusNums);
+    setProperty( "JobName", jobNames);
   }
   else
   {
