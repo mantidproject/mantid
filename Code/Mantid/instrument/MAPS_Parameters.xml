@@ -14,7 +14,7 @@
 <parameter name="det_cal_file" type="string">
    <value val="None"/>
 </parameter>
-<!-- The file which defines detectors to spectra mapping;
+<!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
      if None - one2one map is used  -->
 <parameter name="map_file" type="string">
    <value val="4to1.map"/>
@@ -86,16 +86,6 @@
   <value val="1000"/>
 </parameter>
 
-<!-- integration range for background tests (in TOF) - composite property -->
-<parameter name="bkgd-range-min"> 
-  <value val="15000"/>
-</parameter>
-<parameter name="bkgd-range-max">
-  <value val="19000"/>
-</parameter>
-<parameter name="background_range"  type="string">
-      <value val="bkgd-range-min:bkgd-range-max"/>
-</parameter>
 <!-- Remove the count rate seen in the regions of the histograms defined as the background regions -->
 <parameter name="background"  type="bool">
    <value val="False"/>
@@ -119,8 +109,6 @@
 </parameter>
 
 
-
-
 <parameter name="monovan-integr-min">
   <value val="-1"/>
 </parameter>
@@ -131,10 +119,20 @@
     <value val="monovan-integr-min:monovan-integr-max"/>
 </parameter>
 
-
-
 <parameter name="vanadium-mass">
   <value val="30.1"/>
+</parameter>
+
+
+<!-- integration range for background tests  (in TOF) - composite property -->
+<parameter name="bkgd-range-min"> 
+  <value val="15000"/>
+</parameter>
+<parameter name="bkgd-range-max">
+  <value val="19000"/>
+</parameter>
+<parameter name="background_range"  type="string">
+      <value val="bkgd-range-min:bkgd-range-max"/>
 </parameter>
 
 <!-- ******************************** DIAGNOSTICS DEFAILTS **************************************** -->
@@ -207,7 +205,8 @@
 <parameter name="diag_variation">
   <value val="1.1"/>
 </parameter>
-
+<parameter name="diag_background_range">
+</parameter>
 <!-- **************************************** DIAGNOSTICS DEFAILTS END ****************************************    -->
 <!--  -->
 
@@ -220,30 +219,48 @@
   <value val="100"/>
 </parameter>
 
+<!-- This property is the part of the composite definition for abs_units_van_range
+ It specifies the relative to incident energy lower integration limit for monochromatic vanadium in the mono-vanadium integration -->
 <parameter name="monovan_lo_frac">
   <value val="0.8"/>
 </parameter>
+
+<!-- This property is the part of the composite definition for abs_units_van_range
+ It specifies the the lower limit of energy range in the monochromatic-vanadium integration 
+ Used only if abs_units_van_range is set to val="monovan_lo_value,monovan_hi_value"-->
 <parameter name="monovan_lo_value">
   <value val="-40."/>
 </parameter>
 
-
+<!-- This property is the part of the composite definition for abs_units_van_range
+ It specifies the relative to incident energy higher integration limit for monochromatic vanadium in the mono-vanadium integration -->
 <parameter name="monovan_hi_frac">
   <value val="1.2"/>
 </parameter>
+<!-- This property is the part of the composite definition for abs_units_van_range
+ It specifies the the higher limit of energy range in the monochromatic-vanadium integration 
+ Used only if abs_units_van_range is set to val="monovan_lo_value,monovan_hi_value"-->
 <parameter name="monovan_hi_value">
   <value val="40."/>
 </parameter>
 
-<!-- energy range for integration calculating absolute units correction vanadium data 
+<!-- energy range for integration calculating absolute units correction vanadium data. 
      if None, range is calculated from monovan_hi_frac/monovan_lo_frac 
      - providing the fractions of the incident energy      
      if one wants to specify the energy values here it has to be defined in the form:
-    <value val="monovan_lo_value,monovan_hi_value"/>     
- -->    
+    <value val="monovan_lo_value,monovan_hi_value"/>      -->    
 <parameter name="abs_units_van_range"  type="string">
   <value val="None"/>
 </parameter>
+<!-- Sample mass should usually be changed by user-->
+<parameter name="sample_mass">
+  <value val="1"/>
+</parameter>
+<!-- Sample rmm should usually be changed by user -->
+<parameter name="sample_rmm">
+  <value val="1"/>
+</parameter>
+
 
 <!--  -->
 <!--  Bleeding corrections   -->
@@ -300,13 +317,13 @@
        sum_runs=sum;
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass;
-       background_range=bkgd_range;
        mon1_norm_spec=norm-mon1-spec;
        scale_factor=scale-factor;
        wb_scale_factor=wb-scale-factor;
        monovan_integr_range=abs_units_van_range;
        hard_mask_file=hardmaskPlus;
        use_hard_mask_only=hardmaskOnly;
+       background_range = bkgd_range;
        van_out_lo = diag_van_median_rate_limit_lo=diag_van_out_lo;
        van_out_hi = diag_van_median_rate_limit_hi=diag_van_out_hi;
        van_lo     = diag_van_median_sigma_lo=diag_van_lo;
@@ -319,7 +336,7 @@
        samp_hi    = diag_samp_median_sigma_hi=diag_samp_hi;
        samp_sig   = diag_samp_median_sigma=diag_samp_sig;
        variation  = diag_variation;
-       bleed_test=bleed=diag_bleed_test;
+       bleed_test = bleed = diag_bleed_test;
        ei-mon2-spec = test_ei2_mon_spectra;
        ei_mon_spectra=test_mon_spectra_composite"
     />

@@ -4,6 +4,7 @@ import time as time
 import numpy
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
+import unittest
 
 # the class which is responsible for data reduction
 global Reducer
@@ -121,7 +122,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         raise ValueError("instrument has not been defined, call setup(instrument_name) first.")
 
     # Deal with mandatory parameters
-    print 'DGreduce run for ',inst_name,'run number ',sample_run
+    print 'DGreduce run for ',Reducer.instr_name,'run number ',sample_run
     try:
         n,r=funcreturns.lhs_info('both')
         wksp_out=r[0]
@@ -139,6 +140,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         print 'Deleteing previous instance of temp data'
         DeleteWorkspace(Workspace=inst_name+'00000.raw')
 
+
     # set rebinning range
     Reducer.energy_bins = rebin
     if float(str.split(rebin,',')[2])>=float(ei_guess):
@@ -146,23 +148,23 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         return
 
     # Process old legacy parameters which are easy to define in dgrecue then transfer through Mantid
-    program_args = process_legacy_parameters(kwargs)
+    program_args = process_legacy_parameters(**kwargs)
 
 
     # set non-default reducers parameters and check if all optional keys provided as parameters are acceptable and have been defined in IDF 
     changed_Keys=Reducer.set_input_parameters(**program_args);
 
 
-    # map file in parameters overrides default map file
+    # map file given in parameters overrides default map file
     if map_file != None :
         Reducer.map_file = map_file
+        fileName, fileExtension = os.path.splitext(map_file)
+        if (not fileExtension):
+            map_file=map_file+'.map'    
+        Reducer.map_file = map_file
+
     # defaults can be None too, but can be a file 
-    if  Reducer.map_file != None:      
-       fileName, fileExtension = os.path.splitext(map_file)
-       if (not fileExtension):
-           map_file=map_file+'.map'    
-       Reducer.map_file = map_file
-    else:
+    if  Reducer.map_file == None:      
        print 'one2one map selected'       
 
     
@@ -171,10 +173,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         mask_run=sample_run
           
     if  Reducer.det_cal_file != None : 
-        reducer.relocate_dets = True
+        Reducer.relocate_dets = True
         print 'Setting detector calibration file to ',reducer.det_cal_file
     else:
-        reducer.relocate_dets = False
+        Reducer.relocate_dets = False
         print 'Setting detector calibration to detector block info from ', sample_run
 
     
@@ -185,8 +187,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
     
            
     
-    print 'output will be normalised to', reducer.normalise_method
-    if (numpy.size(sample_run)) > 1 and reducer.sum_runs:
+    print 'Output will be normalised to', Reducer.normalise_method
+    if (numpy.size(sample_run)) > 1 and Reducer.sum_runs:
         #this sums the runs together before passing the summed file to the rest of the reduction
         #this circumvents the inbuilt method of summing which fails to sum the files for diag
         
@@ -196,6 +198,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         RenameWorkspace(InputWorkspace=accum,OutputWorkspace=inst_name+str(sample_run[0])+'.raw')
         sample_run=sample_run[0]
 
+#-------------------------------------------------------------------------------------------------------------------------------------------------------
+ # Here we give control to the Reducer
     
 
     if Reducer.use_hard_mask_only: # if it is string, it is treated as bool
@@ -208,16 +212,18 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
         MaskDetectors(Workspace='mask_wksp',SpectraList=specs)
         masking=mtd['mask_wksp']
     else:    
-         masking = reducer.diagnose(wb_run, mask_run,
-              second_white = None,
-              bkgd_range=background_range, 
-              variation=1.1,
-              print_results=True)
+         masking = Reducer.diagnose(wb_run,sample = mask_run,
+                                    second_white = None,variation=1.1,print_results=True)
+
     # provide masking workspace for the reducer              
-    reducer.spectra_masks=masking
-    fail_list=get_failed_spectra_list(masking)
+    Reducer.spectra_masks=masking
+    sumSp = SumSpectra(InputWorkspace=masking,OutputWorkspace="sumSpectra");
+
+    nSpectra       = sumSp.getRun().getLogData("NumAllSpectra").value
+    nMaskedSpectra = int(sumSp.readY(0)[0])
     
-    print 'Diag found ', len(fail_list),'bad spectra'
+    print 'Diag processed workspace with {0:d} spectra and found {1:d} bad spectra'.format(nSpectra,nMaskedSpectra)
+    DeleteWorkspace(sumSp);
     
     #Run the conversion
     deltaE_wkspace = Reducer.convert_to_energy(sample_run, ei_guess, wb_run)
@@ -241,21 +247,22 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,**kwargs):
     
     return mtd[wksp_out]
 
-def abs_units(wb_run,sample_run,mono_van,wb_mono,samp_rmm,samp_mass,ei_guess,rebin,map_file,monovan_mapfile,**kwargs):
-    pass
-
 def process_legacy_parameters(**kwargs) :
     """ The method to deal with old parameters which have logic different from default and easy to process using 
-        subprogram 
+        subprogram. All other parameters just copiet to output 
     """
     params = dict();
-    for key,value in kwargs.iterable():
+    for key,value in kwargs.iteritems():
         if key == 'hardmaskOnly': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = True;
         else:
             params[key]=value;    
 
+    return params
+
+def abs_units(wb_run,sample_run,mono_van,wb_mono,samp_rmm,samp_mass,ei_guess,rebin,map_file,monovan_mapfile,**kwargs):
+    pass
 
 
 def get_failed_spectra_list(diag_workspace):
@@ -281,13 +288,38 @@ def get_failed_spectra_list(diag_workspace):
 
     return failed_spectra
 
+class DgreduceTest(unittest.TestCase):
+    def __init__(self, methodName):
+        setup("MAPS")
+        return super(DgreduceTest, self).__init__(methodName)
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_run_help(self):
+        self.assertRaises(ValueError,help,'rubbish')
+        help("monovan_lo_bound")
+    def test_process_legacy_parameters(self):
+        kw=dict();
+        kw["hardmaskOnly"]="someFileName"
+        kw["someKeyword"] ="aaaa"
+        params = process_legacy_parameters(**kw);
+        self.assertEqual(len(params),3)
+        self.assertTrue("someKeyword" in params);
+        self.assertTrue("hard_mask_file" in params);
+        self.assertTrue("use_hard_mask_only" in params)
+
+
 
 if __name__=="__main__":
+    unittest.main()
 
-    setup("MAPS")
 
-    help()
-    help("monovan_lo_bound")
+
+    #help()
     #help("rubbish")
 
     #for attr in dir(Reducer):

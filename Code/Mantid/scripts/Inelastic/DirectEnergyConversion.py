@@ -108,7 +108,7 @@ class DirectEnergyConversion(object):
             var_name = "diag_mask"
 
         # Check for any keywords that have not been supplied and put in the defaults
-        for par in self.diag_params:
+        for par in self.__diag_params:
             arg = par.lstrip('diag_')
             if arg not in kwargs:
                 kwargs[arg] = getattr(self, arg)
@@ -230,7 +230,7 @@ class DirectEnergyConversion(object):
         monovan = self._do_mono(sample_data, sample_data, result_name, ei_guess, 
                                 white_run, map_file, spectra_masks, Tzero)
         # Normalize by vanadium sample weight
-        monovan /= float(self.van_mass)/float(self.van_rmm)
+        monovan /= float(self.van_mass)/float(self.__van_rmm)
         return monovan
 
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
@@ -593,13 +593,13 @@ class DirectEnergyConversion(object):
         data_ws=ConvertToMatrixWorkspace(InputWorkspace=data_ws,OutputWorkspace= data_ws)
 
         args = {}
-        args['tiny'] = self.diag_tiny
-        args['huge'] = self.diag_huge
+        args['tiny'] = self.tiny
+        args['huge'] = self.huge
         args['van_out_lo'] = self.monovan_lo_bound
         args['van_out_hi'] = self.monovan_hi_bound
         args['van_lo'] = self.monovan_lo_frac
         args['van_hi'] = self.monovan_hi_frac
-        args['van_sig'] = self.diag_samp_sig
+        args['van_sig'] = self.samp_sig
 
         diagnostics.diagnose(data_ws, **args)
         monovan_masks,det_ids = ExtractMask(InputWorkspace=data_ws,OutputWorkspace='monovan_masks')
@@ -663,11 +663,16 @@ class DirectEnergyConversion(object):
             pass
 
         if formats is None:
-            formats = self.save_formats
+            formats = self.__save_formats
         if type(formats) == str:
             formats = [formats]
         #Make sure we just have a file stem
         ext = self.save_format
+
+        # if ext is none, no need to write anything
+        if ext == None :
+            return
+
         if len(ext) == 0:
             ext = '.spe'
 
@@ -757,7 +762,13 @@ class DirectEnergyConversion(object):
 
         specify some parameters which may be not in IDF Parameters file
         """
-        self.save_formats = ['.spe','.nxs','.nxspe']
+        # fomats availible for saving. As the reducer has to have a method to process one of this, it is private property
+        self.__save_formats = ['.spe','.nxs','.nxspe']
+        # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word
+        self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
+                              'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
+                              'diag_bleed_test']
+
         self.fix_ei=False
         self.energy_bins = None
         self.background = False
@@ -788,8 +799,6 @@ class DirectEnergyConversion(object):
         # Absolute normalisation
         self.abs_map_file = None
         self.abs_spectra_masks = None
-        self.sample_mass = 1.0
-        self.sample_rmm = 1.0
         
         # All this stuff should go to IDF file
         # Detector Efficiency Correction
@@ -804,11 +813,8 @@ class DirectEnergyConversion(object):
         self.relocate_dets = False
 
         #The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :(
-        self.van_rmm = 50.9415
+        self.__van_rmm = 50.9415
   
-        # Diag parameters -- keys used by diag method to pick from default parameters
-        self.diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
-                            'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation']
 
         # special property -- synonims -- how to treat external parameters. 
         try:           
@@ -1065,17 +1071,20 @@ class DirectEnergyConversion(object):
                 print "****: IDF value for keyword: ",keyword," is: ",self.get_default_parameter(keyword)
                 if keyword in self.synonims :
                     fieldName = self.synonims[keyword]
-                    print "****: This keyword is reamed by reducer to: ",fieldName," and its value is: ",self.fieldName
+                    print "****: This keyword is known to reducer as: ",fieldName," and its value is: ",self.fieldName
                 else:
                     print "****: Its current value in reducer is: ",getattr(self,keyword)
 
                 print "****: help for "+keyword+" is not yet implemented, read "+self.instr_name+"_Parameters.xml\n"\
-                      "****: in folder "+config.getString('instrumentDefinition.directory')+" for help containing on this key there"
+                      "****: in folder "+config.getString('instrumentDefinition.directory')+" for its description there"
                 print "****: ***************************************************************************** ";
             else:
                 raise ValueError('Instrument parameter file does not contain a definition for "%s". Cannot continue' % keyword)
 
-#-----------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------------------
 class DirectEnergyConversionTest(unittest.TestCase):
     def __init__(self, methodName):
         self.reducer = None
@@ -1204,6 +1213,13 @@ class DirectEnergyConversionTest(unittest.TestCase):
         energy_incident = 100
         if tReducer.monovan_integr_range is None :
             tReducer.monovan_integr_range = [tReducer.monovan_lo_frac*energy_incident,tReducer.monovan_hi_frac*energy_incident]
+
+    #def test_diag_call(self):
+    #    tReducer = self.reducer
+    #    # should do nothing as already initialized above, but if not will initiate the instrument
+    #    tReducer.initialise("MAP")
+
+    #    tReducet.di
 
 
 #-----------------------------------------------------------------

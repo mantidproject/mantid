@@ -129,7 +129,21 @@ def diagnose(white_int, **kwargs):
         DeleteWorkspace(__bleed_masks)
     
     if hasattr(parser, 'print_results') and parser.print_results:
-        print_test_summary(test_results)
+       start_index_name = "from: start"
+       default=True
+       if 'start_index' in kwargs:
+           default = False
+           start_index_name = "from: "+str(kwargs['start_index'])
+       end_index_name=" to: end"
+       if 'end_index' in kwargs : 
+           default = False
+           end_index_name = " to: "+str(kwargs['end_index'])
+
+       testName=start_index_name+end_index_name
+       if not default :
+           testName = " For bank: "+start_index_name+end_index_name
+
+       print_test_summary(test_results,testName)
 
 #-------------------------------------------------------------------------------
 
@@ -284,8 +298,8 @@ def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
                                                  SignificanceTest=sigma, 
                                                  LowThreshold=median_lo, HighThreshold=median_hi, 
                                                  LowOutlier=0.0, HighOutlier=1e100, ExcludeZeroesFromMedian=True)
-
-    return mask_bkgd, num_failures
+    #TODO: Looks like hack! why it returns negative value
+    return mask_bkgd, abs(num_failures)
 
 #-------------------------------------------------------------------------------
 
@@ -323,7 +337,7 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
 
 #-------------------------------------------------------------------------------
 
-def print_test_summary(test_results):
+def print_test_summary(test_results,test_name=None):
     """Print a summary of the failures per test run.
 
     Input:
@@ -350,8 +364,10 @@ def print_test_summary(test_results):
         ['Background test:',test_results[3]], \
         ['PSD Bleed test :',test_results[4]] \
         )
-
-    print '==== Diagnostic Test Summary ===='
+    if test_name == None:
+        print '==== Diagnostic Test Summary ===='
+    else:
+        print '==== Diagnostic Test Summary {0} ===='.format(test_name)
 
     max_name_length = -1
     max_ws_length = -1
