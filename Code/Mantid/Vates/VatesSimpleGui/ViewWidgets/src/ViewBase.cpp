@@ -425,33 +425,6 @@ void ViewBase::handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate)
 }
 
 /**
- * This function is lifted directly from ParaView. It allows the center of
- * rotation of the view to be placed at the center of the mesh associated
- * with the visualized data.
- */
-void ViewBase::onResetCenterToData()
-{
-  pqRenderView *renderView = this->getPvActiveView();
-  pqDataRepresentation* repr = pqActiveObjects::instance().activeRepresentation();
-  if (!repr || !renderView)
-  {
-    //qDebug() << "Active source not shown in active view. Cannot set center.";
-    return;
-  }
-
-  double bounds[6];
-  if (repr->getDataBounds(bounds))
-  {
-    double center[3];
-    center[0] = (bounds[1]+bounds[0])/2.0;
-    center[1] = (bounds[3]+bounds[2])/2.0;
-    center[2] = (bounds[5]+bounds[4])/2.0;
-    renderView->setCenterOfRotation(center);
-    renderView->render();
-  }
-}
-
-/**
  * This function takes a given set of coordinates and resets the center of
  * rotation of the view to that given point.
  * @param x the x coordinate of the center point
