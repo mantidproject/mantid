@@ -163,6 +163,10 @@ public:
     TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
     alg6.setPropertyValue("Prefix","");
     TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
+    // Check throw if duplicate workspace names are set
+    alg6.setPropertyValue("Suffix","");
+    alg6.setPropertyValue("WorkspaceNames","NewName3, NewName3");
+    TS_ASSERT_THROWS(alg6.execute(),std::invalid_argument);
    
     AnalysisDataService::Instance().remove("InputWS7");
     AnalysisDataService::Instance().remove("InputWS8");
