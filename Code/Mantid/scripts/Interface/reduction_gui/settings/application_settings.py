@@ -12,6 +12,7 @@ class GeneralSettings(QtCore.QObject):
     last_file = ''
     instrument_name = ''
     facility_name = ''
+    data_output_dir = None
     
     # Mantid Python API version
     api2 = True

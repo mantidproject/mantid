@@ -179,8 +179,9 @@ class DetectorWidget(BaseWidget):
         """
         popup_warning = ""
         # Beam finder
-        self._content.x_pos_edit.setText(QtCore.QString("%6.4f" % state.x_position))
-        self._content.y_pos_edit.setText(QtCore.QString("%6.4f" % state.y_position))
+        if state.x_position is not None and state.y_position is not None:
+            self._content.x_pos_edit.setText(QtCore.QString("%6.4f" % state.x_position))
+            self._content.y_pos_edit.setText(QtCore.QString("%6.4f" % state.y_position))
         self._content.use_beam_finder_checkbox.setChecked(state.use_finder)
         self._content.beam_data_file_edit.setText(QtCore.QString(state.beam_file))
         self._content.beam_radius_edit.setText(QtCore.QString(str(state.beam_radius)))

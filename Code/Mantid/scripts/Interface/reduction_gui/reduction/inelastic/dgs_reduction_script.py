@@ -26,7 +26,8 @@ class DgsReductionScripter(BaseReductionScripter):
             Generate reduction script
             @param file_name: name of the file to write the script to
         """     
-        script = "config['default.facility']=\"%s\"\n" % self.facility_name
+        script = "from mantid.simpleapi import *\n"
+        script += "config['default.facility']=\"%s\"\n" % self.facility_name
         script += "\n"
         script +=  "%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
         for item in self._observers:

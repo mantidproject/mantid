@@ -124,6 +124,27 @@ class InstrumentInterface(object):
             self._error_report(traceback.format_exc())
             return None
         
+    def cluster_submit(self, user, pwd, resource=None,
+                       nodes=4, cores_per_node=4):
+        """
+            Pass the interface data to the scripter for parallel reduction
+        """
+        self.scripter.update()
+        try:
+            # Determine where the write the script
+            job_data_dir = self._settings.data_output_dir
+            if job_data_dir is None:
+                job_data_dir = os.path.expanduser('~')
+                
+            self.scripter.cluster_submit(job_data_dir, user, pwd, resource, nodes, cores_per_node)
+        except:
+            msg = "The following error was encountered:\n\n%s" % sys.exc_value
+            msg += "\n\nPlease check your reduction parameters\n"
+            log_path = os.path.join(self.ERROR_REPORT_DIR, self.ERROR_REPORT_NAME)
+            msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
+            self._warning("Reduction Parameters Incomplete", msg)
+            self._error_report(traceback.format_exc())
+
     def reduce(self):
         """
             Pass the interface data to the scripter and reduce
@@ -201,6 +222,12 @@ class InstrumentInterface(object):
         """
         return False
         
+    def is_cluster_enabled(self):
+        """
+            Returns true if the instrument is compatible with remote submission
+        """
+        return False
+    
     def reset(self):
         """
             Reset the interface

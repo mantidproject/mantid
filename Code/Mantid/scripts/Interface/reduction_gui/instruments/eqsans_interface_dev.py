@@ -65,3 +65,9 @@ class EQSANSInterface(InstrumentInterface):
             Returns true if the instrument has simple and advanced views
         """
         return True
+    
+    def is_cluster_enabled(self):
+        """
+            Returns true if the instrument is compatible with remote submission
+        """
+        return True
