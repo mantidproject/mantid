@@ -24,6 +24,8 @@ And r is from 0 to RMax with step size DeltaR.
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
+#include <sstream>
+#include <math.h>
 
 namespace Mantid 
 {
@@ -117,6 +119,8 @@ namespace Mantid
 
       declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,
                       "Step size of r of G(r) to calculate.  Default = <math>\\frac{\\pi}{Q_{max}}</math>.");
+      declareProperty("rho0", EMPTY_DBL(), mustBePositive,
+                      "Average number density used for g(r) and RDF(r) conversions");
       declareProperty("Qmin", EMPTY_DBL(), mustBePositive,
                       "Minimum Q in S(Q) to calculate in Fourier transform.");
       declareProperty("Qmax", EMPTY_DBL(), mustBePositive,
@@ -129,7 +133,7 @@ namespace Mantid
       outputTypes.push_back(RDF_OF_R);
       declareProperty("PDFType", BIG_G_OF_R, boost::make_shared<StringListValidator>(outputTypes),
 				"Type of output PDF including G(r)");
-		}
+    }
 
     std::map<string, string> PDFFourierTransform::validateInputs()
     {
@@ -141,6 +145,12 @@ namespace Mantid
         if (Qmax <= Qmin)
           result["Qmax"] = "Must be greater than Qmin";
 
+      API::MatrixWorkspace_const_sptr inputWS =  getProperty("InputWorkspace");
+      if (inputWS->getNumberHistograms() != 1)
+      {
+        result["InputWorkspace"] = "Input workspace must have only one spectrum";
+      }
+
       return result;
     }
 
@@ -148,222 +158,214 @@ namespace Mantid
 		/** Execute the algorithm.
 		*/
 		void PDFFourierTransform::exec() {
-			// Accept d-space S(d)
-			//
-			// 1. Generate a Workspace for G
-			const double rmax = getProperty("RMax");
-			const double deltarc = getProperty("DeltaR");
-			double qmax = getProperty("Qmax");
-			double qmin = getProperty("Qmin");
-			std::string typeSofQ = getProperty("InputSofQType");
-			//std::string typeGofR = getProperty("PDFType");
+      // get input data
+      API::MatrixWorkspace_const_sptr inputWS =  getProperty("InputWorkspace");
+      MantidVec inputQ = inputWS->dataX(0);     //  x for input
+      MantidVec inputDQ = inputWS->dataDx(0);   // dx for input
+      MantidVec inputFOfQ = inputWS->dataY(0);  //  y for input
+      MantidVec inputDfOfQ = inputWS->dataE(0); // dy for input
+      if (inputDQ.empty())
+        inputDQ.assign(inputQ.size(), 0.);
 
-			// b) Process input, including defaults
-			double deltar;
-			if (deltarc <= 0){
-				deltar = M_PI/qmax;
-			}
-			else
-			{
-				deltar = deltarc;
-			}
-			int sizer = static_cast<int>(rmax/deltar);
+      // transform input data into Q/MomentumTransfer
+      const std::string inputXunit = inputWS->getAxis(0)->unit()->unitID();
+      if (inputXunit == "MomentumTransfer")
+      {
+        // nothing to do
+      }
+      else if (inputXunit == "dSpacing")
+      {
+        // convert the x-units to Q/MomentumTransfer
+        const double PI_2(2.*M_PI);
+        std::transform(inputQ.begin(), inputQ.end(), inputQ.begin(),
+                       std::bind1st(std::divides<double>(), PI_2));
 
-			bool sofq = true;
-			if (typeSofQ == "S(Q)-1")
-			{
-				sofq = false;
-				g_log.information() << "Input is S(Q)-1" << std::endl;
-			} 
-			else 
-			{
-				g_log.information() << "Input is S(Q)" << std::endl;
-			}
+        // reverse all of the arrays
+        std::reverse(inputQ.begin(), inputQ.end());
+        std::reverse(inputFOfQ.begin(), inputFOfQ.end());
+        std::reverse(inputDfOfQ.begin(), inputDfOfQ.end());
+      }
+      else
+      {
+        std::stringstream msg;
+        msg << "Input data x-axis with unit \"" << inputXunit
+            << "\" is not supported (use \"MomentumTransfer\" or \"dSpacing\")";
+        throw std::invalid_argument(msg.str());
+      }
+      g_log.debug() << "Input unit is " << inputXunit << "\n";
 
-			// 2. Set up G(r) dataX(0)
-			Gspace
-				= WorkspaceFactory::Instance().create("Workspace2D", 1, sizer, sizer);
-			Gspace->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
-			Unit_sptr unit = Gspace->getAxis(0)->unit();
-			boost::shared_ptr<Units::Label> label = boost::dynamic_pointer_cast<Units::Label>(unit);
-			label->setLabel("AtomicDistance", "Angstrom");
-			// Gspace->getAxis(0)->unit()->setLabel("caption", "label");
-			Gspace->setYUnitLabel("PDF");
-			MantidVec& vr = Gspace->dataX(0);
-			MantidVec& vg = Gspace->dataY(0);
-			MantidVec& vge = Gspace->dataE(0);
-			for (int i = 0; i < sizer; i++) 
-			{
-				vr[i] = deltar * (1 + i);
-			}
+      // convert from histogram to density
+      if (!inputWS->isHistogramData())
+      {
+        g_log.warning() << "This algorithm has not been tested on density data (only on histograms)\n";
+        /* Don't do anything for now
+        double deltaQ;
+        for (size_t i = 0; i < inputFOfQ.size(); ++i)
+        {
+          deltaQ = inputQ[i+1] -inputQ[i];
+          inputFOfQ[i] = inputFOfQ[i]/deltaQ;
+          inputDfOfQ[i] = inputDfOfQ[i]/deltaQ; // TODO feels wrong
+          inputQ[i] += .5*deltaQ;
+          inputDQ[i] += .5*(inputDQ[i] + inputDQ[i+1]); // TODO running average
+        }
+        inputQ.pop_back();
+        inputDQ.pop_back();
+        */
+      }
 
-			Sspace = getProperty("InputWorkspace");
+      // convert to Q[S(Q)-1]
+      string soqType = getProperty("InputSofQType");
+      if (soqType == S_OF_Q)
+      {
+        g_log.information() << "Subtracting one from all values\n";
+        std::transform(inputFOfQ.begin(), inputFOfQ.end(), inputFOfQ.begin(),
+                       std::bind2nd(std::minus<double>(), 1.));
+        soqType = S_OF_Q_MINUS_ONE;
+      }
+      if (soqType == S_OF_Q_MINUS_ONE)
+      {
+        g_log.information() << "Multiplying all values by Q\n";
+        std::transform(inputFOfQ.begin(), inputFOfQ.end(), inputQ.begin(), inputFOfQ.begin(),
+                       std::multiplies<double>());
+        // TODO error propogation
+        soqType = Q_S_OF_Q_MINUS_ONE;
+      }
+      if (soqType != Q_S_OF_Q_MINUS_ONE)
+      {
+        // should never get here
+        std::stringstream msg;
+        msg << "Do not understand InputSofQType = " << soqType;
+        throw std::runtime_error(msg.str());
+      }
 
-			// 3. Check input workgroup, esp. the UNIT
-			std::string strunit;
-			Unit_sptr& iunit = Sspace->getAxis(0)->unit();
-			if (iunit->unitID() == "dSpacing") 
-			{
-				strunit = "d";
-			} 
-			else if (iunit->unitID() == "MomentumTransfer") 
-			{
-				strunit = "Q";
-			} 
-			else 
-			{
-				g_log.error() << "Unit " << iunit->unitID() << " is not supported"
-					<< std::endl;
-				throw std::invalid_argument("Unit of input Workspace is not supported");
-			}
+      // determine Q-range
+      double qmin = getProperty("Qmin");
+      double qmax = getProperty("Qmax");
+      if (isEmpty(qmin))
+        qmin = inputQ.front();
+      if (isEmpty(qmax))
+        qmax = inputQ.back();
 
-			g_log.information() << "Range of Q for F.T. : (" << qmin << ", " << qmax << ")\n";
+      // check Q-range and print information
+      if (qmin < inputQ.front())
+      {
+        g_log.information() << "Specified Qmin < range of data. Adjusting to data range.\n";
+        qmin = inputQ.front();
+      }
+      if (qmax > inputQ.back())
+      {
+        g_log.information() << "Specified Qmax > range of data. Adjusting to data range.\n";
+      }
+      g_log.debug() << "Using Qmin = " << qmin << "Angstroms^-1 and Qmax = "
+                          << qmax << "Angstroms^-1\n";
+      // get pointers for the data range
+      size_t qmin_index;
+      size_t qmax_index;
+      { // make variable scope small
+        auto qmin_ptr = std::upper_bound(inputQ.begin(), inputQ.end(), qmin);
+        qmin_index = std::distance(inputQ.begin(), qmin_ptr);
+        if (qmin_index == 0)
+          qmin_index += 1; // so there doesn't have to be a check below
+        auto qmax_ptr = std::lower_bound(inputQ.begin(), inputQ.end(), qmax);
+        qmax_index = std::distance(inputQ.begin(), qmax_ptr);
+      }
+      g_log.notice() << "Adjusting to data: Qmin = " << inputQ[qmin_index] << " Qmax = " << inputQ[qmax_index] << "\n";
 
-			// 4. Check datamax, datamin and do Fourier transform
-			const MantidVec& inputx = Sspace->readX(0);
-			double error;
+      // determine r axis for result
+      const double rmax = getProperty("RMax");
+      double rdelta = getProperty("DeltaR");
+      if (isEmpty(rdelta))
+        rdelta = M_PI/qmax;
+      size_t sizer = static_cast<size_t>(rmax/rdelta);
 
-			if (strunit == "d") {
-				// d-Spacing
-				g_log.information()<< "Fourier Transform in d-Space" << std::endl;
-
-				double datadmax = 2 * M_PI / inputx[inputx.size() - 1];
-				double datadmin = 2 * M_PI / inputx[0];
-				double dmin = 2*M_PI/qmax;
-				double dmax = 2*M_PI/qmin;
-
-				if (dmin < datadmin)
-				{
-					g_log.notice() << "User input dmin = " << dmin << "is out of range.  Using Min(d) = " << datadmin << "instead\n";
-					dmin = datadmin;
-				}
-				if (dmax > datadmax) 
-				{
-					g_log.notice() << "User input dmax = " << dmax << "is out of range.  Using Max(d) = " << datadmax << "instead\n";
-					dmax = datadmax;
-				}
-
-				for (int i = 0; i < sizer; i ++)
-				{
-					vg[i] = CalculateGrFromD(vr[i], error, dmin, dmax, sofq);
-					vge[i] = error;
-				}
-
-			} 
-			else if (strunit == "Q")
-			{
-				// Q-spacing
-				g_log.information()<< "Fourier Transform in Q-Space" << std::endl;
-
-				double dataqmin = inputx[0];
-				double dataqmax = inputx[inputx.size() - 1];
-
-				if (qmin < dataqmin) 
-				{
-					g_log.notice() << "User input qmin = " << qmin << "is out of range.  Using Min(Q) = " << dataqmin << "instead\n";
-					qmin = dataqmin;
-				}
-				if (qmax > dataqmax) 
-				{
-					g_log.notice() << "User input qmax = " << qmax << "is out of range.  Using Max(Q) = " << dataqmax << "instead\n";
-					qmax = dataqmax;
-				}
-
-				for (int i = 0; i < sizer; i ++){
-					vg[i] = CalculateGrFromQ(vr[i], error, qmin, qmax, sofq);
-					vge[i] = error;
-				}
-
-			} // ENDIF unit
-
-			// 4. Set property
-			setProperty("OutputWorkspace", Gspace);
-
-			return;
-		}
+      API::MatrixWorkspace_sptr outputWS
+          = WorkspaceFactory::Instance().create("Workspace2D", 1, sizer, sizer);
+      outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+      Unit_sptr unit = outputWS->getAxis(0)->unit();
+      boost::shared_ptr<Units::Label> label = boost::dynamic_pointer_cast<Units::Label>(unit);
+      label->setLabel("AtomicDistance", "Angstrom");
+      outputWS->setYUnitLabel("PDF");
+      MantidVec& outputR = outputWS->dataX(0);
+      for (size_t i = 0; i < sizer; i++)
+      {
+        outputR[i] = rdelta * static_cast<double>(1 + i);
+      }
+      g_log.information() << "Using rmin = " << outputR.front() << "Angstroms and rmax = "
+                          << outputR.back() << "Angstroms\n";
+      // always calculate G(r) then convert
+      MantidVec& outputY = outputWS->dataY(0);
+      MantidVec& outputE = outputWS->dataE(0);
 
 
-		/**
-		*  Fourier transform to a specific r value in G(r)
-		*  @param r:: atomic distance vlaue
-		*  @param egr: error of G(r)
-		*  @param qmin: mininum value of Q
-		*  @param qmax: maximum value of Q
-		*  @param sofq: true if input is S(Q), false if input is S(Q)-1
-		*/
-		double PDFFourierTransform::CalculateGrFromD(double r, double& egr, double qmin, double qmax, bool sofq) 
-		{
+      // do the math
+      for (size_t r_index = 0; r_index < sizer; r_index ++){
+        const double r = outputR[r_index];
+        double fs = 0;
+        double error = 0;
+        for (size_t q_index = qmin_index; q_index < qmax_index; q_index++)
+        {
+          double q = inputQ[q_index];
+          double deltaq = inputQ[q_index] - inputQ[q_index - 1];
+          double sinus  = sin(q * r) * deltaq;
+          fs    += sinus * inputFOfQ[q_index];
+          error += q * q * (sinus*inputDfOfQ[q_index]) * (sinus*inputDfOfQ[q_index]);
+          // g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
+          // g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
+        }
 
-			double gr = 0;
+        // put the information into the output
+        outputY[r_index] = fs * 2 / M_PI;
+        outputE[r_index] = error*2/M_PI; //TODO: Wrong!
+      }
 
-			const MantidVec& vd = Sspace->readX(0);
-			const MantidVec& vs = Sspace->readY(0);
-			const MantidVec& ve = Sspace->readE(0);
+      // convert to the correct form of PDF
+      string pdfType = getProperty("PDFType");
+      double rho0 = getProperty("rho0");
+      if (isEmpty(rho0))
+      {
+        const Kernel::Material &material = inputWS->sample().getMaterial();
+        double materialDensity = material.numberDensity();
 
-			double temp, s, deltad;
-			double error = 0;
-			double dmin = 2.0 * M_PI / qmax;
-			double dmax = 2.0 * M_PI / qmin;
-			for (size_t i = 1; i < vd.size(); i++)
-			{
-				double d = vd[i];
-				if (d >= dmin && d <= dmax) 
-				{
-					if (sofq){
-						s = vs[i]-1;
-					} else {
-						s = vs[i];
-					}
-					deltad = vd[i] - vd[i - 1];
-					temp = (s) * sin(2 * M_PI * r / d) * 4 * M_PI * M_PI / (d * d * d)
-						* deltad;
-					gr += temp;
-					error += ve[i] * ve[i];
-				}
-			}
+        if (!isEmpty(materialDensity) && materialDensity > 0)
+          rho0 = materialDensity;
+        else
+          rho0 = 1.;
+        // write out that it was reset if the value is coming into play
+        if (pdfType == LITTLE_G_OF_R || pdfType == RDF_OF_R)
+          g_log.information() << "Using rho0 = " << rho0 << "\n";
+      }
+      if (pdfType == BIG_G_OF_R)
+      {
+        // nothing to do
+      }
+      else if (pdfType == LITTLE_G_OF_R)
+      {
+        const double factor = 1./(4.*M_PI*rho0);
+        for (size_t i = 0; i < outputY.size(); ++i)
+        {
+          outputY[i] = 1. + factor*outputY[i]/outputR[i];
+          // TODO error propogation
+        }
+      }
+      else if (pdfType == RDF_OF_R)
+      {
+        const double factor = 4.*M_PI*rho0;
+        for (size_t i = 0; i < outputY.size(); ++i)
+        {
+          outputY[i] = outputR[i] * outputY[i] + factor * outputR[i] * outputR[i];
+          // TODO error propogation
+        }
+      }
+      else
+      {
+        // should never get here
+        std::stringstream msg;
+        msg << "Do not understand PDFType = " << pdfType;
+        throw std::runtime_error(msg.str());
+      }
 
-			gr = gr * 2 / M_PI;
-			egr = sqrt(error); //TODO: Wrong!
-
-			return gr;
-		}
-
-		double PDFFourierTransform::CalculateGrFromQ(double r, double& egr, double qmin, double qmax, bool sofq) 
-		{
-
-			const MantidVec& vq = Sspace->readX(0);
-			const MantidVec& vs = Sspace->readY(0);
-			const MantidVec& ve = Sspace->readE(0);
-
-			double sinus, q, s, deltaq, fs, error;
-
-			fs = 0;
-			error = 0;
-			for (size_t i = 1; i < vq.size(); i++) 
-			{
-				q = vq[i];
-				if (q >= qmin && q <= qmax) 
-				{
-					if (sofq)
-					{
-						s = vs[i]-1;
-					} else {
-						s = vs[i];
-					}
-					deltaq = vq[i] - vq[i - 1];
-					sinus  = sin(q * r) * q * deltaq;
-					fs    += sinus * (s);
-					error += (sinus*ve[i]) * (sinus*ve[i]);
-					// g_log.debug() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
-					// g_log.debug() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
-				}
-			}
-
-			// Summarize
-			double gr = fs * 2 / M_PI;
-			egr = error*2/M_PI; //TODO: Wrong!
-
-			return gr;
+      // set property
+      setProperty("OutputWorkspace", outputWS);
 		}
 
 	} // namespace Mantid
