@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidCurveFitting/GaussianLinearBG1D.h"
 
 #include <fstream>
 
@@ -18,14 +17,14 @@ using namespace Mantid::API;
 class FindPeaksTest : public CxxTest::TestSuite
 {
 public:
-  void PtestTheBasics()
+  void testTheBasics()
   {
     FindPeaks finder;
     TS_ASSERT_EQUALS( finder.name(), "FindPeaks" );
     TS_ASSERT_EQUALS( finder.version(), 1 );
   }
 
-  void PtestInit()
+  void testInit()
   {
     FindPeaks finder;
     TS_ASSERT_THROWS_NOTHING( finder.initialize() );
@@ -34,17 +33,20 @@ public:
 
   void testExec()
   {
+    // Load data file
     Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
     loader.setProperty("Filename","focussed.nxs");
+    loader.setProperty("OutputWorkspace", "FindPeaksTest_peaksWS");
     loader.execute();
 
+    // Find peaks (Test)
     FindPeaks finder;
     if ( !finder.isInitialized() ) finder.initialize();
 
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("InputWorkspace","FindPeaksTest_peaksWS") );
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("WorkspaceIndex","4") );
-//    TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("SmoothedData","smoothed") );
+    // TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("SmoothedData","smoothed") );
     TS_ASSERT_THROWS_NOTHING( finder.setPropertyValue("PeaksList","FindPeaksTest_foundpeaks") );
 
     TS_ASSERT_THROWS_NOTHING( finder.execute() );
@@ -71,7 +73,7 @@ public:
     Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
     loader.setProperty("Filename","PG3_733_focussed.nxs");
-    loader.setProperty("OutputWorkspace","FindPeaksTest_vanadium");
+    loader.setProperty("OutputWorkspace", "FindPeaksTest_vanadium");
     loader.execute();
   }
 
