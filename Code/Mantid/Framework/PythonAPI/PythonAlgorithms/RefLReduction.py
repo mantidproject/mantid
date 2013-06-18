@@ -5,8 +5,7 @@ Liquids Reflectometer (REFL) reduction
 *WIKI*"""
 
 from MantidFramework import *
-#from mantidsimple import *
-from mantid.simpleapi import *
+from mantidsimple import *
 from numpy import zeros, shape, arange
 import math
 import sfCalculator
@@ -95,7 +94,7 @@ class RefLReduction(PythonAlgorithm):
             if _mt.find('_reflectivity') != -1:
                 mtd.remove(_mt)
             
-#        from mantidsimple import mtd    
+        from mantidsimple import mtd    
 
         bDebug = True
         if bDebug:
@@ -105,7 +104,7 @@ class RefLReduction(PythonAlgorithm):
 
         backSubMethod = 2   #1 uses RefRoi, 2 used own method
 
-#        mtd.sendLogMessage("RefLReduction: processing %s" % run_numbers)
+        mtd.sendLogMessage("RefLReduction: processing %s" % run_numbers)
 
         #run with normalization or not    
         NormFlag = self.getProperty("NormFlag")
@@ -196,14 +195,16 @@ class RefLReduction(PythonAlgorithm):
                     msg += "Add your data folder to your User Data Directories in the File menu"
                     raise RuntimeError(msg)
                 
-                if not mtd.doesExist(ws_event_data):
-                    ws_event_data = LoadEventNexus(Filename=data_file)
+                if not mtd.workspaceExists(ws_event_data):
+                    LoadEventNexus(Filename=data_file, 
+                                   OutputWorkspace=ws_event_data)
                 else:
-                    tmp = LoadEventNexus(Filename=data_file)
-#                    mt1 = mtd[ws_event_data]
-#                    mt2 = mtd['tmp']
+                    LoadEventNexus(Filename=data_file, 
+                                   OutputWorkspace='tmp')
+                    mt1 = mtd[ws_event_data]
+                    mt2 = mtd['tmp']
                     Plus(LHSWorkspace=ws_event_data,
-                         RHSWorkspace=tmp, 
+                         RHSWorkspace='tmp',
                          OutputWorkspace=ws_event_data)
         else:
 
@@ -216,13 +217,12 @@ class RefLReduction(PythonAlgorithm):
                 msg += "Add your data folder to your User Data Directories in the File menu"
                 raise RuntimeError(msg)
 
-            if not mtd.doesExist(ws_event_data):
-                ws_event_data = LoadEventNexus(Filename=data_file)
+            if not mtd.workspaceExists(ws_event_data):
+                LoadEventNexus(Filename=data_file, 
+                               OutputWorkspace=ws_event_data)
         
         # Get metadata
-        #mt_run = mtd[ws_event_data].getRun()
-        mt_run = ws_event_data.getRun()
-        
+        mt_run = mtd[ws_event_data].getRun()
         ##get angles value
         thi_value = mt_run.getProperty('thi').value[0]
         thi_units = mt_run.getProperty('thi').units
@@ -1029,6 +1029,6 @@ class RefLReduction(PythonAlgorithm):
         
         print
         
-mantid.registerPyAlgorithm(RefLReduction())
+mtd.registerPyAlgorithm(RefLReduction())
 
 

@@ -1,7 +1,6 @@
 from numpy import zeros, arctan2, arange, shape
-#from mantidsimple import *
-from mantid.simpleapi import *
-#from MantidFramework import *
+from mantidsimple import *
+from MantidFramework import *
 import math
 import os.path
 
@@ -797,22 +796,19 @@ def applySF(InputWorkspace,
         s1h_value = abs(s1h)
         s2h_value = abs(s2h)
      
+        #retrieve s1w and s2w values
+        s1w = getS1w(mtd[InputWorkspace])
+        s2w = getS2w(mtd[InputWorkspace])
+        
+        s1w_value = abs(s1w)
+        s2w_value = abs(s2w)
+        
+#        print sfFactorTable
+
         print '--> Data Lambda Requested: {0:2f}'.format(_lr_value)
         print '--> Data S1H: {0:2f}'.format(s1h_value)
         print '--> Data S2H: {0:2f}'.format(s2h_value)
-
-        #retrieve s1w and s2w values
-        try:
-            s1w = getS1w(mtd[InputWorkspace])
-            s1w_value = abs(s1w)
-            print '--> Data S1W: {0:2f}'.format(s1w_value)
-        except:
-            s1w_value = 'N/A';
-            print '--> Data S1W: N/A';
-            slitsWidthFlag = False;
-
-        s2w = getS2w(mtd[InputWorkspace])
-        s2w_value = abs(s2w)
+        print '--> Data S1W: {0:2f}'.format(s1w_value)
         print '--> Data S2W: {0:2f}'.format(s2w_value)
 
         for i in range(nbr_row):
