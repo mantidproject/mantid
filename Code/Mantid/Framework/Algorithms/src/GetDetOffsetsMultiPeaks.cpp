@@ -618,39 +618,7 @@ namespace Algorithms
       }
     }
 
-#if 1
-    // FIXME - Remove this section after debugging
-    if (s == 3695 || s == 3693)
-    {
-      std::stringstream dbmsgss;
-      bool highbkgd = getProperty("HighBackground");
-      dbmsgss << "FindPeaks(" << s << "): FWHM = 7, Tolerance = 4, PeakFunction = " << m_peakType << ", "
-              << "BackgroundType = " << m_backType << ", High background = " << highbkgd
-              << ", MinGuessedPeakWidth = 4, MaxGuessPeakWidth = 4" << ".\n";
-      dbmsgss << "Peak positions: ";
-      for (size_t i = 0; i < peakPosToFit.size(); ++i)
-      {
-        dbmsgss << peakPosToFit[i] << ", ";
-      }
-      dbmsgss << ".\n";
-      if (useFitWindows)
-      {
-        dbmsgss << "Fit windows: ";
-        for (size_t i = 0; i < fitWindowsToUse.size(); ++i)
-          dbmsgss << fitWindowsToUse[i] << ", ";
-        dbmsgss << ".\n";
-      }
-      else
-      {
-        dbmsgss << "No fit windows are set up to use.\n";
-      }
-      g_log.notice(dbmsgss.str());
-    }
-
-#endif
-
     double minpeakheight = getProperty("MinimumPeakHeight");
-
 
     API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
     findpeaks->setProperty("InputWorkspace", inputW);
@@ -697,15 +665,7 @@ namespace Algorithms
       peakWidFitted.push_back(width);
       peakHighFitted.push_back(height);
       peakBackground.push_back(background);
-#if 1
       chisq.push_back(chi2);
-#else
-      // Experiment to use peak height as a fitting fact
-      if (height > 0)
-        chisq.push_back(chi2/height);
-      else
-        chisq.push_back(1.0E10);
-#endif
     }
 
     // first remove things that just didn't fit (center outside of window, bad chisq, ...)

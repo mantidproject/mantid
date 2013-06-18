@@ -1860,8 +1860,8 @@ namespace Algorithms
 
     fwhm = leftfwhm + rightfwhm;
 
-    g_log.information() << "Estimated peak parameters: Centre = " << centre << ", Height = "
-                        << height << ", FWHM = " << fwhm << ".\n";
+    g_log.debug() << "Estimated peak parameters: Centre = " << centre << ", Height = "
+                  << height << ", FWHM = " << fwhm << ".\n";
 
     return true;
   }
@@ -1928,7 +1928,7 @@ namespace Algorithms
         m_backgroundFunction->setParameter("A2", 0.0);
     }
 
-    g_log.information() << "Estimated background: A0 = " << out_bg0 << ", A1 = "
+    g_log.debug() << "Estimated background: A0 = " << out_bg0 << ", A1 = "
                         << out_bg1 << ".\n";
 
     return;
@@ -1984,7 +1984,7 @@ namespace Algorithms
         m_backgroundFunction->setParameter("A2", 0.0);
     }
 
-    g_log.information() << "Estimated flat background: A0 = " << out_bg0 << ".\n";
+    g_log.debug() << "Estimated flat background: A0 = " << out_bg0 << ".\n";
 
     return;
   }
@@ -2057,7 +2057,7 @@ namespace Algorithms
         for (std::vector<double>::const_iterator it = rawParams.begin(); it != rawParams.end(); ++it)
         {
           t << (*it);
-          g_log.information() << (*it) << " ";
+          g_log.debug() << (*it) << " ";
         }
       }
       else
@@ -2065,12 +2065,12 @@ namespace Algorithms
         for (std::vector<double>::const_iterator it = params.begin(); it != params.end(); ++it)
         {
           t << (*it);
-          g_log.information() << (*it) << " ";
+          g_log.debug() << (*it) << " ";
         }
       }
 
       t << mincost;
-      g_log.information() << "Chi2 = " << mincost << "\n";
+      g_log.debug() << "Chi2 = " << mincost << "\n";
     }
   }
 
@@ -2483,9 +2483,9 @@ namespace Algorithms
     double startx = newX[0];
     double endx = newX.back();
 
-    g_log.information() << "Background Type = " << m_backgroundType << "  Function: "
-                        << m_backgroundFunction->asString() << "  StartX = "
-                        << startx << " EndX = " << endx << ".\n";
+    g_log.debug() << "Background Type = " << m_backgroundType << "  Function: "
+                  << m_backgroundFunction->asString() << "  StartX = "
+                  << startx << " EndX = " << endx << ".\n";
 
     // Set up the background fitting
     IAlgorithm_sptr fit;
