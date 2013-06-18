@@ -70,7 +70,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
     if (!output) return;
 
-    TS_ASSERT_DELTA( output->dataY(0)[0], -0.00196, 0.0002);
+    TS_ASSERT_DELTA( output->dataY(0)[0], 0.0506, 0.0002);
 
     AnalysisDataService::Instance().remove(outputWS);
 
