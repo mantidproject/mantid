@@ -74,8 +74,20 @@ void RenameWorkspaces::exec()
   {
       throw std::invalid_argument("Both a list of workspace names and a prefix or suffix has been supplied.");
   }
+  if( newWsName.size() > 1) 
+  {
+     for( size_t i=0; i<newWsName.size()-1; ++i) 
+     {
+       for( size_t j=i+1; j<newWsName.size(); ++j)
+       {
+         if(newWsName[i] == newWsName[j])
+         {
+           throw std::invalid_argument("Duplicate '"+newWsName[i]+"' found in WorkspaceNames.");
+         }
+       }
+     }
+  }
 
- 
 
   size_t nWs = inputWsName.size();
   if( newWsName.size() > 0) {
