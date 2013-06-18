@@ -1,8 +1,8 @@
-/*WIKI* 
+/*WIKI*
 
 
-Generate a workspace by summing over the peak functions.  
-The peaks' parameters are given in a [[TableWorkspace]].  
+Generate a workspace by summing over the peak functions.
+The peaks' parameters are given in a [[TableWorkspace]].
 
 ==== Peak Parameters ====
 Peak parameters must have the following parameters, which are case sensitive in input [[TableWorkspace]]
@@ -15,6 +15,7 @@ Peak parameters must have the following parameters, which are case sensitive in 
  7. A2
  8. chi2
 
+=======
  ==== Output ====
  Output will include
  1. pure peak
@@ -22,6 +23,7 @@ Peak parameters must have the following parameters, which are case sensitive in 
  3. peak + background
 
 [[Category:Algorithms]]
+
 {{AlgorithmLinks|GeneratePeaks}}
 
 
