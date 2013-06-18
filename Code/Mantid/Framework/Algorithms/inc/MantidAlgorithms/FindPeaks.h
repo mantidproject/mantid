@@ -242,6 +242,9 @@ private:
 
   std::string m_minimizer;
 
+  /// Minimum peak height
+  double m_minHeight;
+
 };
 
 } // namespace Algorithms

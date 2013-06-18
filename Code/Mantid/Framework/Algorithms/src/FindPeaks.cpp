@@ -48,7 +48,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-const double MINHEIGHT = 2.00000001;
+// const double MINHEIGHT = 2.00000001;
 
 namespace Mantid
 {
@@ -238,6 +238,10 @@ namespace Algorithms
     declareProperty("RawPeakParameters", false,
                     "false generates table with effective centre/width/height parameters. true generates a table with peak function parameters");
 
+
+    declareProperty("MinimumPeakHeight", DBL_MIN, "Minimum allowed peak height. ");
+
+
     // Debug Workspaces
     /*
        declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("BackgroundWorkspace", "", Direction::Output),
@@ -390,6 +394,9 @@ namespace Algorithms
 
     // Peak parameters are give via a table workspace
     m_rawPeaksTable = getProperty("RawPeakParameters");
+
+    // Minimum peak height
+    m_minHeight = getProperty("MinimumPeakHeight");
 
     return;
   }
@@ -1899,7 +1906,7 @@ namespace Algorithms
       error = "Flat spectrum";
       return false;
     }
-    else if (height <= MINHEIGHT)
+    else if (height <= m_minHeight)
     {
       error = "Fluctuation is less than minimum allowed value.";
       return false;

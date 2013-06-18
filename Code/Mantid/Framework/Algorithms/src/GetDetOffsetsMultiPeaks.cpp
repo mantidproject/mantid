@@ -151,6 +151,8 @@ namespace Algorithms
                     "An output workspace containing the mask.");
     declareProperty("MaxOffset", 1.0, "Maximum absolute value of offsets; default is 1");
     declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
+
+    declareProperty("MinimumPeakHeight", 2.0, "Minimum value allowed for peak height.");
     //Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
 
@@ -647,6 +649,9 @@ namespace Algorithms
 
 #endif
 
+    double minpeakheight = getProperty("MinimumPeakHeight");
+
+
     API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
     findpeaks->setProperty("InputWorkspace", inputW);
     findpeaks->setProperty<int>("FWHM",7);
@@ -663,6 +668,7 @@ namespace Algorithms
     findpeaks->setProperty<bool>("HighBackground", this->getProperty("HighBackground"));
     findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
     findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
+    findpeaks->setProperty<double>("MinimumPeakHeight", minpeakheight);
     findpeaks->executeAsChildAlg();
     ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
     std::vector<size_t> banned;
