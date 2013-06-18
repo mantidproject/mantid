@@ -1,3 +1,41 @@
+/*WIKI*
+
+Loads a legacy binary format VTK uniform structured image as an MDWorkspace. Allows the user to provide the name of two scalar arrays expected to be
+located on the PointData. One array is loaded as the MDWorkspace signal data and is mandatory. The other array is optional and provides the error squared data.
+Both arrays are expected to be of the type vtkUnsignedShortArray.
+
+== Choosing Output Types ==
+
+=== Direct Image Format ===
+If the AdaptiveBinned parameter is off, the data is loaded into Mantid's multidimensional image format as an [[MDHistoWorkspace]]. All data
+in the file is loaded verbatim. This is not a lossy process, so sparse regions of data are carried through to Mantid. This can lead to very large in-memory
+object sizes. The algorithm will abort before the data is converted, if it is determined that you have insufficient resources. Loading data in this format
+is suitable for usage with the [[SliceViewer|Slice Viewer]], but users should not try to visualise large workspaces of this type using the 3D visualisation tools
+[[VatesSimpleInterface|Vates Simple Interface]], as this is designed for use with sparse datasets of moderate size.
+
+Unless it is very important that all data is loaded, we recommend that you switch the AdaptiveBinned parameter on (see below).
+
+=== Adaptive Rebinned Format ===
+For the majority of problems encountered with visualisation of neutron data, regions of interest occupy a very small fraction of otherwise empty/noisy space. It
+therefore makes sense to focus high resolution in the regions of interest rather than wasting resources storing sparse data. The [[MDEventWorkspace]] format naturally
+recursively splits itself up where there are high numbers of observations.
+
+For imaging, we highly recommend using the AdaptiveBinned parameter set on, in combination with the KeepTopPercent parameter.
+
+The [[MDEventWorkspace]] can be rebinned to a regular grid using [[SliceMD]] and [[BinMD]] both the [[SliceViewer|Slice Viewer]] and the [[VatesSimpleInterface|Vates Simple Interface]]
+support rebinning in-situ as part of the visualisation process.
+*WIKI*/
+/*WIKI_USAGE*
+==Adaptive Binning Example==
+ outputs = LoadVTK(Filename='fly.vtk',SignalArrayName='volume_scalars',AdaptiveBinned=True)
+ demo = outputs[0]
+ plotSlice(source=demo)
+==Direct Conversion Example==
+ outputs = LoadVTK(Filename='fly.vtk',SignalArrayName='volume_scalars',AdaptiveBinned=False)
+ demo = outputs[0]
+ plotSlice(source=demo)
+
+*WIKI_USAGE*/
 #include "MantidVatesAPI/LoadVTK.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
@@ -17,8 +55,6 @@
 #include <vtkUnsignedShortArray.h>
 #include <algorithm>
 #include <vtkSmartPointer.h>
-
-
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -46,21 +82,27 @@ namespace Mantid
       return "MDAlgorithms";
     }
 
+    void LoadVTK::initDocs()
+    {
+      this->setWikiSummary("Loads a legacy binary format VTK uniform structured image as an MDWorkspace.");
+      this->setOptionalMessage(this->getWikiDescription());
+    }
+
     void LoadVTK::init()
     {
       std::vector<std::string> exts;
       exts.push_back("vtk");
       this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-          "Binary legacy VTK rectilinear structured image file to load.");
+          "Binary legacy VTK uniform structured image file to load.");
 
       auto manditorySignalArrayName = boost::make_shared<MandatoryValidator<std::string> >();
 
       this->declareProperty("SignalArrayName", "", manditorySignalArrayName,
-          "Cell data array name to import as signal/intesity values in the MD workspace.");
+          "Point data array name to import as signal/intesity values in the MD workspace.");
       this->declareProperty("ErrorSQArrayName", "",
-          "Cell data array name to import as error squared values in the MD workspace.");
+          "Point data array name to import as error squared values in the MD workspace.");
 
-      this->declareProperty("AdaptiveBinned", false, "What type of output workspace to produce. If selected produces an MDEventWorkspace, otherwise an MDHistoWorkspace is made.");
+      this->declareProperty("AdaptiveBinned", true, "What type of output workspace to produce. If selected produces an [[MDEventWorkspace]], otherwise an [[MDHistoWorkspace]] is made.");
 
       auto rangeValidator = boost::make_shared<BoundedValidator<double> >(0, 100);
       this->declareProperty("KeepTopPercent", 25.0, rangeValidator, "Only keep the top percentage of SignalArray values in the range min to max. Allow sparse regions to be ignored. Defaults to 25%.");
@@ -69,7 +111,7 @@ namespace Mantid
                 new EnabledWhenProperty("AdaptiveBinned", IS_NOT_DEFAULT));
 
       declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "", Direction::Output),
-          "MDHistoWorkspace equivalent of vtkRectilinearInput.");
+          "MDWorkspace equivalent of vtkStructuredPoints input.");
 
       declareProperty(new PropertyWithValue<int>("SignalMaximum", 0, Direction::Output), "Maximum signal value determined from input array." );
       declareProperty(new PropertyWithValue<int>("SignalMinimum", 0, Direction::Output), "Minimum signal value determined from input array." );
@@ -78,6 +120,19 @@ namespace Mantid
 
     void LoadVTK::execMDHisto(vtkUnsignedShortArray* signals, vtkUnsignedShortArray* errorsSQ, MDHistoDimension_sptr dimX, MDHistoDimension_sptr dimY, MDHistoDimension_sptr dimZ, Progress& prog, const int64_t nPoints, const int64_t frequency)
     {
+      MemoryStats memoryStats;
+      const size_t freeMemory = memoryStats.availMem(); // in kB
+      const size_t memoryCost = MDHistoWorkspace::sizeOfElement() * nPoints / 1000; // in kB
+      if (memoryCost > freeMemory)
+      {
+      std::string basicMessage = "Loading this file requires more free memory than you have available.";
+      std::stringstream sstream;
+      sstream << basicMessage << " Requires " << memoryCost << " KB of contiguous memory. You have "
+      << freeMemory << " KB.";
+      g_log.notice(sstream.str());
+      throw std::runtime_error(basicMessage);
+      }
+
       prog.report("Converting to MD Histogram Workspace");
       MDHistoWorkspace_sptr outputWS = boost::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
 
@@ -220,19 +275,6 @@ namespace Mantid
 
       vtkSmartPointer<vtkStructuredPoints> readDataset;
       readDataset.TakeReference(reader->GetOutput());
-
-      MemoryStats memoryStats;
-      const size_t freeMemory = memoryStats.availMem(); // in kB
-      const size_t memoryCost = MDHistoWorkspace::sizeOfElement() * readDataset->GetNumberOfPoints() / 1000; // in kB
-      if (memoryCost > freeMemory)
-      {
-      std::string basicMessage = "Loading this file requires more free memory than you have available.";
-      std::stringstream sstream;
-      sstream << basicMessage << " Requires " << memoryCost << " KB of contiguous memory. You have "
-      << freeMemory << " KB.";
-      g_log.notice(sstream.str());
-      throw std::runtime_error(basicMessage);
-      }
 
       vtkUnsignedShortArray* signals = vtkUnsignedShortArray::SafeDownCast(
           readDataset->GetPointData()->GetArray(signalArrayName.c_str()));

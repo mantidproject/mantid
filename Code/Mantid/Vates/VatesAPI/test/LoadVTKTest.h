@@ -83,6 +83,7 @@ public:
     loadVTK.setPropertyValue("OutputWorkspace", outWSName);
     loadVTK.setPropertyValue("SignalArrayName", "scalar_array");
     loadVTK.setPropertyValue("ErrorSQArrayName", "scalar_array");
+    loadVTK.setProperty("AdaptiveBinned", false);
     loadVTK.execute();
 
     IMDHistoWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName);
