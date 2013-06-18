@@ -1321,7 +1321,10 @@ void MantidDockWidget::renameWorkspace()
   QStringList selctedwsNames;
   if(!selectedItems.empty())
   {
-    selctedwsNames.append(selectedItems[0]->text(0));
+    for(int i=0; i < selectedItems.size(); ++i)
+    {
+       selctedwsNames.append(selectedItems[i]->text(0));
+    }
   }
   m_mantidUI->renameWorkspace(selctedwsNames);
 }
