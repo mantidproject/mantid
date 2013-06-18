@@ -201,7 +201,7 @@ void test_getFriendlyName()
 {
   PeakTransformQLab transform;
   TS_ASSERT_EQUALS(PeakTransformQLab::name(), transform.getFriendlyName());
-  TS_ASSERT_EQUALS("QLab", transform.getFriendlyName());
+  TS_ASSERT_EQUALS("Q (lab frame)", transform.getFriendlyName());
 }
 
 void test_getCoordinateSystem()
