@@ -1006,29 +1006,6 @@ namespace Algorithms
                         << vecX[i_min] << ", " << vecX[i_max] << "  i_min = " << i_min << ", i_max = "
                         << i_max << ", i_centre = " << i_centre << ".\n";
 
-#if TEST
-    if (i_min >= i_centre || i_max <= i_centre)
-      throw std::runtime_error("This cannot happen!");
-#endif
-
-    /*
-    // Get the initial estimate of the width, in # of bins
-    const int fitWidth = i0 - i2;
-
-    // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
-    size_t i_min = 1;
-    if (i0 > static_cast<int>(5 * fitWidth))
-      i_min = i0 - 5 * fitWidth;
-    size_t i_max = i0 + 5 * fitWidth;
-    // Bounds checks
-    if (i_min < 1)
-      i_min = 1;
-    if (i_max >= Y.size() - 1)
-      i_max = static_cast<size_t>(Y.size() - 2); // TODO this is dangerous
-
-    g_log.debug() << "Background + Peak -- Bounds = " << X[i_min] << ", " << X[i_max] << std::endl;
-    */
-
     // Estimate height, boundary, and etc for fitting
     // FIXME - Does this make sense?
     double bg_lowerSum;
@@ -1261,32 +1238,8 @@ namespace Algorithms
       dataY[i] = rawY[i_min+i] - backgroundvalues[i];
       if (dataY[i] < 0)
         dataY[i] = 0.;
-#if 0
-      if (dataY[i] >= 1.0)
-        dataE[i] = sqrt(dataY[i]);
-      else
-        dataE[i] = 1.0;
-#else
       dataE[i] = 1.0;
-#endif
     }
-
-#if 0
-    std::ofstream opeakfile;
-    std::stringstream filenamess;
-    filenamess << "purepeak_" << icentre << ".dat";
-    opeakfile.open(filenamess.str());
-    for (size_t i = 0; i < numpts; ++i)
-      opeakfile << dataX[i] << "\t\t" << dataY[i] << "\t\t1.0" "\n";
-    opeakfile.close();
-
-    std::stringstream filename2ss;
-    filename2ss << "rawpeak_" << icentre << ".dat";
-    opeakfile.open(filename2ss.str());
-    for (size_t i = 0; i < numpts; ++i)
-      opeakfile << rawX[i+i_min] << "\t\t" << rawY[i+i_min] << "\t\t1.0" "\n";
-    opeakfile.close();
-#endif
 
     // Estimate/observe peak parameters
     const MantidVec& peakX = peakws->readX(0);
@@ -1438,15 +1391,6 @@ namespace Algorithms
     compfunc->addFunction(peak);
     compfunc->addFunction(m_backgroundFunction);
 
-#if 0
-    std::stringstream dbss;
-    dbss << "[DB_Bkgd_A] ";
-    std::vector<std::string> dbnames = m_backgroundFunction->getParameterNames();
-    for (size_t i = 0; i < m_backgroundFunction->nParams(); ++i)
-      dbss << " " << dbnames[i] << " = " << m_backgroundFunction->getParameter(i) << ", ";
-    g_log.debug(dbss.str());
-#endif
-
     // Fit PEAK function without background
     std::string peakcentreconstraint = makePeakCentreConstraint(peak, peakleftboundary, peakrightboundary, false);
     double startx = purepeakws->readX(purepeakindex)[0];
@@ -1465,15 +1409,6 @@ namespace Algorithms
       double in_rwp;
       double rwp1 = fitPeakBackgroundFunction(peak, purepeakws, purepeakindex, startx, endx, peakcentreconstraint,
                                               in_rwp);
-
-#if 0
-      std::stringstream dbssx;
-      dbssx << "[DB_Bkgd_" << i << "] ";
-      std::vector<std::string> dbnames = m_backgroundFunction->getParameterNames();
-      for (size_t i = 0; i < m_backgroundFunction->nParams(); ++i)
-        dbssx << " " << dbnames[i] << " = " << m_backgroundFunction->getParameter(i) << ", ";
-      g_log.debug(dbssx.str());
-#endif
 
       // Check boundaries.  GSL fit may not be able to limit the value in the boundary
       std::string failreason;
@@ -1545,20 +1480,6 @@ namespace Algorithms
     g_log.information() << "Best fit result is No. " << bestindex << " with guess sigma = "
                         << in_fwhms[bestindex] << ".\n";
 
-#if 0
-    std::ofstream of1;
-    std::stringstream filenamess;
-    filenamess << "purepeak_" << in_sigmas.size() << ".dat";
-    of1.open(filenamess.str());
-    FunctionDomain1DVector ppdomain(purepeakws->readX(purepeakindex));
-    FunctionValues ppvalues(ppdomain);
-    peak->function(ppdomain, ppvalues);
-    for (size_t i = 0; i < ppdomain.size(); ++i)
-      of1 << ppdomain[i] << "\t\t" << purepeakws->readY(purepeakindex)[i] << "\t\t"
-          << ppvalues[i] << ".\n";
-    of1.close();
-#endif
-
     // Fit background with better esitmation on peak (: m_backgroundFunction)
     //   Unfix background parameters
     g_log.information("\tFit background from fitted peak.");
@@ -1582,19 +1503,6 @@ namespace Algorithms
       g_log.warning("Fitting background by excluding peak failed.");
     }
     std::map<std::string, double> bkgdmap1 = getFunctionParameters(m_backgroundFunction);
-
-#if 0
-    FunctionDomain1DVector compdomain(X);
-    FunctionValues compvalues(compdomain);
-    compfunc->function(compdomain, compvalues);
-    std::ofstream of2;
-    std::stringstream filenamess2;
-    filenamess2 << "rawpeak_" << in_sigmas.size() << ".dat";
-    of2.open(filenamess2.str());
-    for (int i = i_min; i < i_max; ++i)
-      of2 << X[i] << "\t\t" << Y[i] << "\t\t" << compvalues[i] << "\n";
-    of2.close();
-#endif
 
     // Fit with new background and every data points
     peakcentreconstraint = makePeakCentreConstraint(peak, peakleftboundary, peakrightboundary, true);
@@ -1938,14 +1846,6 @@ namespace Algorithms
         // Ideal case
         leftfwhm = centre - 0.5*(vecX[i] + vecX[i+1]);
       }
-#if 0
-      No use;
-      else if (yright < 0.5*height)
-      {
-        // Weird case.  but it should work.
-        leftfwhm = centre - vecX[i+1];
-      }
-#endif
     }
 
     // Slope at the right side of peak
@@ -1958,14 +1858,6 @@ namespace Algorithms
       {
         rightfwhm = 0.5*(vecX[i] + vecX[i-1]) - centre;
       }
-#if 0
-      else if (yleft < 0.5*height)
-      {
-        // A weird case
-        leftfwhm = vecX[i-1] - centre;
-      }
-#endif
-
     }
 
     if (leftfwhm <= 0 || rightfwhm <= 0)
@@ -2055,17 +1947,6 @@ namespace Algorithms
 
     g_log.information() << "Estimated background: A0 = " << out_bg0 << ", A1 = "
                         << out_bg1 << ".\n";
-
-#if 0
-    if (specdb == 11 || specdb == 13 || specdb == 20)
-    {
-      std::stringstream dbss;
-      dbss << "Spectrum = " << specdb << ". Number of Average = " << numavg << ", (X0, Y0) = " << x0 << ", " << y0 << "; (Xf, Yf) = "
-           << xf << ", " << yf << "; A0 = " << out_bg0 << ", A1 = " << out_bg1;
-      g_log.notice(dbss.str());
-      throw std::runtime_error(dbss.str());
-    }
-#endif
 
     return;
   }
@@ -2450,11 +2331,7 @@ namespace Algorithms
     // put the two together and return
     CompositeFunction* fitFunc = new CompositeFunction();
     fitFunc->addFunction(peakFunc);
-#if 1
     fitFunc->addFunction(background);
-#else
-    fitFunc->addFunction(m_backgroundFunction);
-#endif
 
     return boost::shared_ptr<IFunction>(fitFunc);
   }
@@ -2783,57 +2660,6 @@ namespace Algorithms
     }
 
     return final_rwp;
-
-#if 0
-    DO NOT KNOW HOW TO DEAL WITH THEM!
-
-    // check to see if the last one went through
-    if (bestparams.empty())
-    {
-      this->addInfoRow(spectrum, bestparams, bestRawParams, mincost, false);
-      return;
-    }
-
-    // h) Fit again with everything altogether
-    IAlgorithm_sptr lastfit;
-    try
-    {
-      // Fitting the candidate peaks to a Gaussian
-      lastfit = createChildAlgorithm("Fit", -1, -1, true);
-    } catch (Exception::NotFoundError &)
-    {
-      g_log.error("The StripPeaks algorithm requires the CurveFitting library");
-      throw;
-    }
-
-    // c) Set initial fitting parameters
-    IFunction_sptr peakAndBackgroundFunction = this->createFunction(bestparams[2], bestparams[0],
-                                                                    bestparams[1], bestparams[3], bestparams[4], bestparams[5], true);
-    g_log.debug() << "(High Background) Final Fit Function: " << peakAndBackgroundFunction->asString()
-                  << std::endl;
-
-    // d) complete fit
-    lastfit->setProperty("Function", peakAndBackgroundFunction);
-    lastfit->setProperty("InputWorkspace", input);
-    lastfit->setProperty("WorkspaceIndex", spectrum);
-    lastfit->setProperty("MaxIterations", 50);
-    lastfit->setProperty("StartX", in_centre - windowSize);
-    lastfit->setProperty("EndX", in_centre + windowSize);
-    lastfit->setProperty("Minimizer", "Levenberg-Marquardt");
-    lastfit->setProperty("CostFunction", "Least squares");
-
-    // e) Fit and get result
-    lastfit->executeAsChildAlg();
-
-    this->updateFitResults(lastfit, bestparams, bestRawParams, mincost, in_centre, in_height);
-
-    if (!bestparams.empty())
-      this->addInfoRow(spectrum, bestparams, bestRawParams, mincost,
-                       (bestparams[0] < X.front() || bestparams[0] > X.back()));
-    else
-      this->addInfoRow(spectrum, bestparams, bestRawParams, mincost, true);
-#endif
-
   }
 
   //----------------------------------------------------------------------------------------------
