@@ -124,6 +124,9 @@ class DataSetsWidget(BaseWidget):
             self._content.background_plot_button.hide()
             self._content.bck_empty_plot_button.hide()
             self._content.bck_sample_plot_button.hide()
+            
+        #if not self._settings.api2:
+        #    self._content.separate_jobs_check.hide()
         
     def _background_plot_clicked(self):
         self.show_instrument(file_name=self._content.background_edit.text)
@@ -173,6 +176,7 @@ class DataSetsWidget(BaseWidget):
         current_file = ''
         if len(data_files)>0:
             current_file = data_files[0].strip()
+        self._content.separate_jobs_check.setChecked(state.separate_jobs)
         
         self._content.data_file_edit.setText(QtCore.QString(';'.join(state.data_files)))
         if len(state.data_files)>0:
@@ -242,6 +246,7 @@ class DataSetsWidget(BaseWidget):
         
         # Data file
         m.data_files = self._get_data_files()
+        m.separate_jobs = self._content.separate_jobs_check.isChecked()
         
         # Background
         b = m.background
