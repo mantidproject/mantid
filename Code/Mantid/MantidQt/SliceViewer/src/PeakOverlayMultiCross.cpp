@@ -47,7 +47,7 @@ namespace MantidQt
     void PeakOverlayMultiCross::setSlicePoint(const double& z, const std::vector<bool>& viewablePeaks)
     {
       m_viewablePeaks = viewablePeaks;
-      for(int i = 0; i < m_viewablePeaks.size(); ++i)
+      for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
       {
         if(m_viewablePeaks[i]) // is peak at this index visible.
         {
@@ -79,7 +79,7 @@ namespace MantidQt
     /// Paint the overlay
     void PeakOverlayMultiCross::paintEvent(QPaintEvent * /*event*/)
     {
-      for(int i = 0; i < m_viewablePeaks.size(); ++i)
+      for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
       {
         if(m_viewablePeaks[i]) // Only draw those peaks that are viewable.
         {
@@ -128,7 +128,7 @@ namespace MantidQt
 
     void PeakOverlayMultiCross::movePosition(PeakTransform_sptr transform)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_physicalPeaks.size(); ++i)
       {
         m_physicalPeaks[i]->movePosition(transform);
       }
@@ -159,7 +159,7 @@ namespace MantidQt
     */
     void PeakOverlayMultiCross::changeOccupancyInView(const double fraction)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_physicalPeaks.size(); ++i)
       {
         m_physicalPeaks[i]->setOccupancyInView(fraction);
       }
@@ -171,7 +171,7 @@ namespace MantidQt
     */
     void PeakOverlayMultiCross::changeOccupancyIntoView(const double fraction)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_physicalPeaks.size(); ++i)
       {
         m_physicalPeaks[i]->setOccupancyIntoView(fraction);
       }

@@ -155,7 +155,7 @@ namespace MantidQt
       alg->execute();
       ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
       std::vector<bool> viewablePeaks(outTable->rowCount());
-      for (int i = 0; i < outTable->rowCount(); ++i)
+      for (size_t i = 0; i < outTable->rowCount(); ++i)
       {
         viewablePeaks[i] = outTable->cell<Boolean>(i, 1);
       }
@@ -332,7 +332,7 @@ namespace MantidQt
      */
     PeakBoundingBox ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const
     {
-      if(peakIndex < 0 || peakIndex > m_peaksWS->rowCount())
+      if(peakIndex < 0 || peakIndex > static_cast<int>(m_peaksWS->rowCount()))
       {
         throw std::out_of_range("Index given to ConcretePeaksPresenter::getBoundingBox() is out of range.");
       }

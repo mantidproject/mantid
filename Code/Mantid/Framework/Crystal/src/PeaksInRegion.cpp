@@ -248,7 +248,7 @@ namespace Crystal
     }
 
 
-    int frequency = ws->rowCount();
+    size_t frequency = ws->rowCount();
     if(frequency > 100)
     {
       frequency = ws->rowCount()/100;

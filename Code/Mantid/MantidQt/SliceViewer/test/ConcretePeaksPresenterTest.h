@@ -190,7 +190,10 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
 
 public:
 
-
+  void setUp()
+  {
+    FrameworkManager::Instance();
+  }
 
   void test_construction()
   {
