@@ -11,7 +11,7 @@ If the AdaptiveBinned parameter is off, the data is loaded into Mantid's multidi
 in the file is loaded verbatim. This is not a lossy process, so sparse regions of data are carried through to Mantid. This can lead to very large in-memory
 object sizes. The algorithm will abort before the data is converted, if it is determined that you have insufficient resources. Loading data in this format
 is suitable for usage with the [[SliceViewer|Slice Viewer]], but users should not try to visualise large workspaces of this type using the 3D visualisation tools
-[[VatesSimpleInterface|Vates Simple Interface]], as this is designed for use with sparse datasets of moderate size.
+[[VatesSimpleInterface_v2|Vates Simple Interface]], as this is designed for use with sparse datasets of moderate size.
 
 Unless it is very important that all data is loaded, we recommend that you switch the AdaptiveBinned parameter on (see below).
 
@@ -22,7 +22,7 @@ recursively splits itself up where there are high numbers of observations.
 
 For imaging, we highly recommend using the AdaptiveBinned parameter set on, in combination with the KeepTopPercent parameter.
 
-The [[MDEventWorkspace]] can be rebinned to a regular grid using [[SliceMD]] and [[BinMD]] both the [[SliceViewer|Slice Viewer]] and the [[VatesSimpleInterface|Vates Simple Interface]]
+The [[MDEventWorkspace]] can be rebinned to a regular grid using [[SliceMD]] and [[BinMD]] both the [[SliceViewer|Slice Viewer]] and the [[VatesSimpleInterface_v2|Vates Simple Interface]]
 support rebinning in-situ as part of the visualisation process.
 *WIKI*/
 /*WIKI_USAGE*
