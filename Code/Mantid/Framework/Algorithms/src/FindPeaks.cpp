@@ -916,8 +916,8 @@ namespace Algorithms
     *  @param input    The input workspace
     *  @param spectrum The spectrum index of the peak (is actually the WorkspaceIndex)
     *  @param centre_guess ::  Channel number of peak candidate i0 - the higher side of the peak (right side)
-    *  @param left     Minimum x value to find the peak
-    *  @param right    Maximum x value to find the peak
+    *  @param xmin    Minimum x value to find the peak
+    *  @param xmax    Maximum x value to find the peak
     */
   void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum,
                           const double centre_guess, const double xmin, const double xmax)
@@ -981,9 +981,9 @@ namespace Algorithms
     *
     *  @param input ::    The input workspace
     *  @param spectrum :: The spectrum index of the peak (is actually the WorkspaceIndex)
-    *  @param i0 ::       Channel number of peak candidate i0 - the higher side of the peak (right side)
-    *  @param i2 ::       Channel number of peak candidate i2 - the lower side of the peak (left side)
-    *  @param i4 ::       Channel number of peak candidate i4 - the center of the peak
+    *  @param i_max ::    Channel number of peak candidate i0 - the higher side of the peak (right side)
+    *  @param i_min ::    Channel number of peak candidate i2 - the lower side of the peak (left side)
+    *  @param i_centre :  Channel number of peak candidate i4 - the center of the peak
     */
   void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min,
                           const int i_max, const int i_centre)
@@ -1038,22 +1038,18 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Fit 1 peak in one step, i.e., one function combining both Gaussian and background
     *
-    * @param  X, Y, Z: MantidVec&
-    * @param i0: bin index of right end of peak
-    * @param i2: bin index of left end of peak
-    * @param i4: bin index of center of peak
-    * @param i_min: bin index of left bound of fit range
-    * @param i_max: bin index of right bound of fit range
+    * @param input:: input Matrix workspace
+    * @param spectrum :: workspace index of the spectrum to find peaks
+    * @param i_max:: bin index of right end of data to find peak
+    * @param i_min:: bin index of left end of data to find peak
+    * @param i_centre:: bin index of center of peak
     * @param in_bg0: guessed value of a0 (in/out)
     * @param in_bg1: guessed value of a1 (in/out)
     * @param in_bg2: guessed value of a2 (in/out)
-    * @param backgroundtype: type of background (linear or quadratic)
     */
   void FindPeaks::fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum,
                                  const int& i_min, const int& i_max, const int& i_centre,
                                  const double& in_bg0, const double& in_bg1, const double& in_bg2)
-  //                               const int& i0, const int& i2, const int& i4, const double& in_bg0, const double& in_bg1,
-  //                               const double& in_bg2)
   {
     g_log.information("Fitting Peak in a one-step approach. ");
 
@@ -1157,9 +1153,7 @@ namespace Algorithms
     *
     * @param input :: matrix workspace to fit with
     * @param spectrum :: workspace index of the spetrum to fit with
-    * @param ileft: bin index of right end of peak (raw/input data workspace)
-    * param iright: bin index of left end of peak (raw/input data workspace)
-    * param icentre: bin index of center of peak (raw/input data workspace)
+    * @param i_centre: bin index of center of peak (raw/input data workspace)
     * @param i_min: bin index of left bound of fit range (raw/input data workspace)
     * @param i_max: bin index of right bound of fit range (raw/input data workspace)
     * @param in_bg0: guessed value of a0 (output)
@@ -1196,7 +1190,7 @@ namespace Algorithms
     }
     else
     {
-      estimateLinearBackground(rawX, rawY, i_min, i_max, in_bg0, in_bg1, in_bg2, spectrum);
+      estimateLinearBackground(rawX, rawY, i_min, i_max, in_bg0, in_bg1, in_bg2);
     }
 
     // Create a pure peak workspace (Workspace2D)
@@ -1351,7 +1345,7 @@ namespace Algorithms
     * @param peak :: peak function to fit
     * @param in_centre :: starting value of peak centre
     * @param in_height :: starting value of peak height
-    * @param in_sigmas :: starting value of peak width
+    * @param in_fhwm :: starting value of peak width
     * @param peakleftboundary :: left boundary of peak
     * @param peakrightboundary :: right boundary of peak
     * @param user_centre :: peak centre input by user
@@ -1594,8 +1588,8 @@ namespace Algorithms
     * @param peak :: peak function that is fitted
     * @param bkgdfunc :: background function that is fitted
     * @param spectrum :: spectrum where peak is
-    * @param ileft :: index of peak's left boundary point in input workspace
-    * @param iright :: index of peak's right boundary point in input workspace
+    * @param imin :: index of peak's left boundary point in input workspace
+    * @param imax :: index of peak's right boundary point in input workspace
     * @param windowsize :: size of the window (range) for fitting the peak
     */
   void FindPeaks::processFitResult(PeakFittingRecord& r1, PeakFittingRecord& r2, IPeakFunction_sptr peak,
@@ -1884,7 +1878,7 @@ namespace Algorithms
     * @param out_bg2 :: a2 = 0
     */
   void FindPeaks::estimateLinearBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
-                                           double& out_bg0, double& out_bg1, double& out_bg2, size_t specdb)
+                                           double& out_bg0, double& out_bg1, double& out_bg2)
   {
     // Validate input
     if (i_min >= i_max)
@@ -1918,8 +1912,8 @@ namespace Algorithms
     xf = xf / static_cast<double>(numavg);
     yf = yf / static_cast<double>(numavg);
 
-    g_log.debug() << "[F1145] Spec = " << specdb << "(X0, Y0) = " << x0 << ", " << y0 << "; (Xf, Yf) = "
-                  << xf << ", " << yf << ". (Averaged from " << numavg << " background points.)" << "\n";
+    // g_log.debug() << "[F1145] Spec = " << specdb << "(X0, Y0) = " << x0 << ", " << y0 << "; (Xf, Yf) = "
+    //              << xf << ", " << yf << ". (Averaged from " << numavg << " background points.)" << "\n";
 
     // Esitmate
     out_bg2 = 0.;

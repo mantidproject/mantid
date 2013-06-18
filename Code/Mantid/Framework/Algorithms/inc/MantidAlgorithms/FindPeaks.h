@@ -171,7 +171,7 @@ private:
   std::string makePeakCentreConstraint(API::IFunction_sptr peak, double peakleftboundary, double peakrightboundary, bool composite);
 
   void estimateLinearBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
-                                double& out_bg0, double& out_bg1, double& out_bg2, size_t specdb);
+                                double& out_bg0, double& out_bg1, double& out_bg2);
 
   void estimateFlatBackground(const MantidVec& Y, const size_t i_min, const size_t i_max,
                               double& out_bg0, double& out_bg1, double& out_bg2);
