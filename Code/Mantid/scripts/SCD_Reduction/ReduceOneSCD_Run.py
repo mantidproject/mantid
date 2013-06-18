@@ -64,6 +64,7 @@ centering                 = params_dictionary[ "centering" ]
 num_peaks_to_find         = params_dictionary[ "num_peaks_to_find" ]
 min_d                     = params_dictionary[ "min_d" ]
 max_d                     = params_dictionary[ "max_d" ]
+max_Q                     = params_dictionary[ "max_Q" ]
 tolerance                 = params_dictionary[ "tolerance" ]
 integrate_predicted_peaks = params_dictionary[ "integrate_predicted_peaks" ]
 min_pred_wl               = params_dictionary[ "min_pred_wl" ]
@@ -140,13 +141,16 @@ integrated_monitor_ws = Integration( InputWorkspace=monitor_ws,
 monitor_count = integrated_monitor_ws.dataY(0)[0]
 print "\n", run, " has calculated monitor count", monitor_count, "\n"
 
+
+minVals= "-"+max_Q +",-"+max_Q +",-"+max_Q
+maxVals = max_Q +","+max_Q +","+ max_Q 
 #
 # Make MD workspace using Lorentz correction, to find peaks 
 #
 MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                     dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
-   	            LorentzCorrection='1', MinValues="-50,-50,-50", MaxValues="50,50,50",
-                    SplitInto='2', SplitThreshold='50',MaxRecursionDepth='11' )
+   	            LorentzCorrection='1', MinValues=minVals, MaxValues=maxVals,
+                    SplitInto='2', SplitThreshold='50',MaxRecursionDepth='14' )
 #
 # Find the requested number of peaks.  Once the peaks are found, we no longer
 # need the weighted MD event workspace, so delete it.
@@ -200,7 +204,7 @@ if use_sphere_integration:
 #
   MDEW = ConvertToMD( InputWorkspace=event_ws, QDimensions="Q3D",
                     dEAnalysisMode="Elastic", QConversionScales="Q in A^-1",
-                    LorentzCorrection='0', MinValues="-50,-50,-50", MaxValues="50,50,50",
+                    LorentzCorrection='0', MinValues=minVals, MaxValues=maxVals,
                     SplitInto='2', SplitThreshold='500',MaxRecursionDepth='10' )
 
   peaks_ws = IntegratePeaksMD( InputWorkspace=MDEW, PeakRadius=peak_radius,
