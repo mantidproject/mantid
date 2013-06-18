@@ -1,6 +1,8 @@
 set( SRC_FILES
 	src/DownloadRemoteFile.cpp
+	src/QueryAllRemoteJobs.cpp
 	src/QueryRemoteFile.cpp
+	src/QueryRemoteJob.cpp
 	src/StartRemoteTransaction.cpp
 	src/StopRemoteTransaction.cpp
 	src/SubmitRemoteJob.cpp
@@ -9,7 +11,9 @@ set( SRC_FILES
 
 set( INC_FILES
 	inc/MantidRemoteAlgorithms/DownloadRemoteFile.h
+	inc/MantidRemoteAlgorithms/QueryAllRemoteJobs.h
 	inc/MantidRemoteAlgorithms/QueryRemoteFile.h
+	inc/MantidRemoteAlgorithms/QueryRemoteJob.h
 	inc/MantidRemoteAlgorithms/StartRemoteTransaction.h
 	inc/MantidRemoteAlgorithms/StopRemoteTransaction.h
 	inc/MantidRemoteAlgorithms/SubmitRemoteJob.h
