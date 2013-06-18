@@ -1020,7 +1020,7 @@ void SliceViewer::resetZoom()
   // Make sure the view updates
   m_plot->replot();
   autoRebinIfRequired();
-  m_peaksPresenter->update();
+  updatePeaksOverlay();
 }
 
 //------------------------------------------------------------------------------------
@@ -1157,6 +1157,9 @@ void SliceViewer::zoomBy(double factor)
   // Perform the move
   this->setXYLimits(x_min, x_max, y_min, y_max);
   autoRebinIfRequired();
+
+  // Peaks in region will change.
+  this->updatePeaksOverlay();
 }
 
 //------------------------------------------------------------------------------------
@@ -1480,11 +1483,8 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->itemChanged();
   m_plot->replot();
 
-  /// Update the peak positions if peak relevant slider has changed.
-  if(m_peaksSliderWidget != NULL)
-  {
-    m_peaksPresenter->updateWithSlicePoint(m_peaksSliderWidget->getSlicePoint()); 
-  }
+  // Peaks overlays may need redrawing
+  updatePeaksOverlay();
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
@@ -1825,7 +1825,7 @@ void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, doubl
   m_plot->setAxisScale( m_spect->yAxis(), ybottom, ytop);
   // Make sure the view updates
   m_plot->replot();
-  m_peaksPresenter->update();
+  updatePeaksOverlay();
 }
 
 //------------------------------------------------------------------------------------
@@ -2135,6 +2135,8 @@ Event handler for plot panning.
 void SliceViewer::panned(int, int)
 {
   autoRebinIfRequired();
+
+  this->updatePeaksOverlay();
 }
 
 /**
@@ -2143,6 +2145,8 @@ Event handler for changing magnification.
 void SliceViewer::magnifierRescaled(double)
 {
   autoRebinIfRequired();
+
+  this->updatePeaksOverlay();
 }
 
 /**
@@ -2270,11 +2274,30 @@ void SliceViewer::updatePeakOverlaySliderWidget()
       if(m_peaksPresenter->isLabelOfFreeAxis(widget->getDimName()))
       {
         m_peaksSliderWidget = widget; // Cache the widget being used for this.
-        m_peaksPresenter->updateWithSlicePoint(m_peaksSliderWidget->getSlicePoint()); // Ensure that the presenter is up-to-date with the change
+        auto xInterval = getXLimits();
+        auto yInterval = getYLimits();
+        PeakBoundingBox viewableRegion(Left(xInterval.minValue()), Right(xInterval.maxValue()), Top(yInterval.maxValue()), Bottom(yInterval.minValue()), SlicePoint(m_peaksSliderWidget->getSlicePoint()));
+
+        updatePeaksOverlay(); // Ensure that the presenter is up-to-date with the change
       }
     }
   }
 }
+
+/**
+ * Update the peaks presenter. Use the slice position as well as the plot region to update the collection of peaks presetners.
+ */
+void SliceViewer::updatePeaksOverlay()
+{
+  if(m_peaksSliderWidget != NULL)
+  {
+    auto xInterval = getXLimits();
+    auto yInterval = getYLimits();
+    PeakBoundingBox viewableRegion(Left(xInterval.minValue()), Right(xInterval.maxValue()), Top(yInterval.maxValue()), Bottom(yInterval.minValue()), SlicePoint(m_peaksSliderWidget->getSlicePoint()));
+    m_peaksPresenter->updateWithSlicePoint(viewableRegion);
+  }
+}
+
 
 /**
 Decide whether to enable peak overlays, then reflect the ui controls to indicate this.

@@ -41,7 +41,7 @@ namespace MantidQt
     {
     public:
       /// Set the position of the slice point.
-      virtual void setSlicePoint(const double&) = 0; 
+      virtual void setSlicePoint(const double&, const std::vector<bool>&) = 0;
       /// Update the view.
       virtual void updateView() = 0;
       /// Hide the view.
@@ -68,6 +68,8 @@ namespace MantidQt
       virtual double getOccupancyIntoView() const = 0;
       /// Get the flag indicating that the view represents the position only.
       virtual bool positionOnly() const = 0;
+      /// Get radius or effective radius of view items.
+      virtual double getRadius() const = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

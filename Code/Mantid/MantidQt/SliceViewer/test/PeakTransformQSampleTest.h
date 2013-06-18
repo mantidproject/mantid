@@ -201,7 +201,7 @@ void test_getFriendlyName()
 {
   PeakTransformQSample transform;
   TS_ASSERT_EQUALS(PeakTransformQSample::name(), transform.getFriendlyName());
-  TS_ASSERT_EQUALS("QSample", transform.getFriendlyName());
+  TS_ASSERT_EQUALS("Q (sample frame)", transform.getFriendlyName());
 }
 
 void test_getCoordinateSystem()

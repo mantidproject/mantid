@@ -107,11 +107,11 @@ public:
 
   void test_bad_extent_pairs()
   {
-    do_test_extents_throws("Invalid x extents", "-1,-1,-1,1,-1,1");
+    do_test_extents_throws("Invalid x extents", "-1,-1.1,-1,1,-1,1");
 
-    do_test_extents_throws("Invalid y extents", "-1,1,-1,-1,-1,1");
+    do_test_extents_throws("Invalid y extents", "-1,1,-1,-1.1,-1,1");
 
-    do_test_extents_throws("Invalid z extents", "-1,1,-1,1,-1,-1");
+    do_test_extents_throws("Invalid z extents", "-1,1,-1,1,-1,-1.1");
 
   }
 

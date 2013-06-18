@@ -44,7 +44,7 @@ namespace MantidQt
     Overriden updateWithSlicePoint
     @param point : Slice point to update with 
     */
-    void CompositePeaksPresenter::updateWithSlicePoint(const double& point)
+    void CompositePeaksPresenter::updateWithSlicePoint(const PeakBoundingBox& point)
     {
       if(useDefault())
       {

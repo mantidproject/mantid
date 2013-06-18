@@ -24,6 +24,8 @@ namespace MantidQt
       virtual Mantid::Kernel::V3D transform(const Mantid::Kernel::V3D& original) const;
       /// Perform Transform
       virtual Mantid::Kernel::V3D transformPeak(const Mantid::API::IPeak& peak) const = 0;
+      /// Perform reverse transform.
+      Mantid::Kernel::V3D transformBack(const Mantid::Kernel::V3D& transformed) const;
       /// Get a regex to find the axis of the free peak.
       boost::regex getFreePeakAxisRegex() const;
       /// Virtual constructor.
@@ -36,9 +38,14 @@ namespace MantidQt
       PeakTransform(const PeakTransform& other);
       std::string m_xPlotLabel;
       std::string m_yPlotLabel;
+      // For mapping/orientation from peak coordinates to plot coordinate
       int m_indexOfPlotX;
       int m_indexOfPlotY;
       int m_indexOfPlotZ;
+      // For mapping/orientation from plot coordinates to peak coordinate
+      int m_indexOfPeakX;
+      int m_indexOfPeakY;
+      int m_indexOfPeakZ;
       boost::regex m_FirstRegex;
       boost::regex m_SecondRegex;
       boost::regex m_ThirdRegex;
