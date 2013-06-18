@@ -153,8 +153,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
                     if hasattr(item.state(), "options"):
                         script += item.state().options()
 
-            script += "ReductionProperties='%s')" % table_ws
-            
+            script += "ReductionProperties='%s')" % table_ws            
             mantidplot.runPythonScript(script, True)
             return table_ws
         else:
