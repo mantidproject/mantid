@@ -120,7 +120,7 @@ private:
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
 
   /// Fit peak
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max, const int i_centre, bool changeflag);
+  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max, const int i_centre);
 
 
   int getVectorIndex(const MantidVec &vecX, double x);
@@ -182,9 +182,6 @@ private:
   /// Calulate a function with given data range, and its goodness of fit, Rwp.
   double calculateFunctionRwp(API::IFunction_sptr function, API::MatrixWorkspace_sptr dataws,
                               size_t wsindex, double startx, double endx);
-
-  ///
-  API::MatrixWorkspace_sptr createOutputDataWorkspace();
 
   /// Compare 2 fit results and record the better one
   void processFitResult(PeakFittingRecord& r1, PeakFittingRecord& r2, API::IPeakFunction_sptr peak, API::IFunction_sptr bkgdfunc, size_t spectrum,

@@ -176,9 +176,6 @@ namespace Algorithms
     declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
                     "Name of the workspace to search");
 
-    declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "", Direction::Output, PropertyMode::Optional),
-                    "Name of the output workspace containing original data and fitted peaks.");
-
     auto min = boost::make_shared<BoundedValidator<int> >();
     min->setLower(1);
     // The estimated width of a peak in terms of number of channels
@@ -322,14 +319,6 @@ namespace Algorithms
                         << " peaks found and successfully fitted." << std::endl;
     setProperty("PeaksList", m_outPeakTableWS);
 
-    std::string outwsname = getPropertyValue("OutputWorkspace");
-    g_log.information() << "Output workspace name is " << outwsname << " (length = "
-                        << outwsname.size() << "). " << "\n";
-    if (outwsname.size() > 0)
-    {
-      API::MatrixWorkspace_sptr outWS = createOutputDataWorkspace();
-      setProperty("OutputWorkspace", outWS);
-    }
     return;
   } // END: exec()
 
@@ -643,7 +632,7 @@ namespace Algorithms
           if (i_max >= wssize)
             i_max = wssize - 1;
 
-          this->fitPeak(m_dataWS, k, i_min, i_max, i4, true);
+          this->fitPeak(m_dataWS, k, i_min, i_max, i4);
 
           // reset and go searching for the next peak
           i1 = 0, i2 = 0, i3 = 0, i4 = 0, i5 = 0;
@@ -915,7 +904,7 @@ namespace Algorithms
     g_log.debug() << "Background + Peak -- Bounds Fit Range = " << vecX[i_min]
                   << ", " << vecX[i_max] << ".\n";
 
-    fitPeak(input, spectrum, i_min, i_max, i_centre, true);
+    fitPeak(input, spectrum, i_min, i_max, i_centre);
 
     return;
 
@@ -981,7 +970,7 @@ namespace Algorithms
     }
 
     // finally do the actual fit
-    fitPeak(input, spectrum, i_min, i_max, i_centre, true);
+    fitPeak(input, spectrum, i_min, i_max, i_centre);
 
     return;
   }
@@ -997,7 +986,7 @@ namespace Algorithms
     *  @param i4 ::       Channel number of peak candidate i4 - the center of the peak
     */
   void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min,
-                          const int i_max, const int i_centre, bool changeflag)
+                          const int i_max, const int i_centre)
   {
     const MantidVec &vecX = input->readX(spectrum);
     const MantidVec &vecY = input->readY(spectrum);
@@ -2584,6 +2573,9 @@ namespace Algorithms
                                               MatrixWorkspace_sptr dataws, size_t wsindex,
                                               double startx, double endx, std::string constraint, double& init_rwp)
   {
+    // FIXME - Constraint is not used for better performance at this moment.
+    UNUSED_ARG(constraint);
+
     if (!peakbkgdfunc)
       throw std::runtime_error("FitPeakBackgroundFunction has a null peak input.");
     else
@@ -2661,71 +2653,6 @@ namespace Algorithms
 
     return final_rwp;
   }
-
-  //----------------------------------------------------------------------------------------------
-  /** Create the output data workspace
-    */
-  API::MatrixWorkspace_sptr FindPeaks::createOutputDataWorkspace()
-  {
-    // TODO - consider to remove this feature
-
-    size_t lenX = m_dataWS->readX(0).size();
-    size_t lenY = m_dataWS->readY(0).size();
-
-    MatrixWorkspace_sptr outws = WorkspaceFactory::Instance().create(m_dataWS, 1, lenX, lenY);
-
-    const MantidVec& vecInX = m_dataWS->readX(0);
-    MantidVec& vecX = outws->dataX(0);
-    MantidVec& vecY = outws->dataY(0);
-
-    // X - axis
-    for (size_t i = 0; i < vecX.size(); ++i)
-    {
-      vecX[i] = vecInX[i];
-    }
-    for (size_t i = 0; i < vecY.size(); ++i)
-    {
-      vecY[i] = 0.;
-    }
-
-    // Calculation
-    g_log.information() << "Plot total " << m_fitFunctions.size() << " functions" << ".\n";
-    FunctionDomain1DVector domain(vecX);
-    FunctionValues values(domain);
-
-    for (size_t fi = 0; fi < m_fitFunctions.size(); ++fi)
-    {
-      // calcualte function
-      IFunction_sptr tfunc = m_fitFunctions[fi];
-      tfunc->function(domain, values);
-
-      // determine range to apply
-      size_t ileft = m_peakLeftIndexes[fi];
-      size_t iright = m_peakRightIndexes[fi];
-      size_t idelta = iright-ileft;
-      size_t i_left, i_right;
-      if (ileft > idelta)
-        i_left = static_cast<size_t>(ileft - idelta);
-      else
-        i_left = 0;
-      if (static_cast<size_t>(iright) < vecY.size() - 2*idelta - 1)
-        i_right = static_cast<size_t>(iright + 2*idelta);
-      else
-        i_right = vecY.size()-1;
-
-      for (size_t i = i_left; i <= i_right; ++i)
-      {
-        vecY[i] = values[i];
-      }
-
-      g_log.information() << "Peak " << fi << " Range = " << vecX[i_left]
-                          << ", " << vecX[i_right] << ".\n";
-
-    }
-
-    return outws;
-  }
-
 
 
 } // namespace Algorithms
