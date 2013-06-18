@@ -296,17 +296,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if not "histo" in self.getProperty("Extension"):
             SortEvents(InputWorkspace=wksp, SortBy="X Value")
         # Sum pixelbin X pixelbin blocks of pixels
-        clonewsname = str(str(wksp)+"_Input")
-        CloneWorkspace(InputWorkspace=str(wksp), OutputWorkspace=clonewsname)
-        if self._xpixelbin*self._ypixelbin>1: 
-            SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp, SumX=self._xpixelbin, SumY=self._ypixelbin)
+        if self._xpixelbin*self._ypixelbin>1:
+                SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp, SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
-        if not "histo" in self.getProperty("Extension"): 
-            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-            Rebin(InputWorkspace=clonewsname, OutputWorkspace=clonewsname,Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
+        if not "histo" in self.getProperty("Extension"):
+        	Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
         CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         if len(self._smoothGroups) > 0:
-            print "[DBx322] Data is smoothed 1"
             SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp, NPoints=self._smoothGroups, GroupingWorkspace=str(wksp)+"group")
         # Remove old calibration files
         cmd = "rm "+calib
@@ -316,12 +312,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             DReference=self._peakpos, FitWindowMaxWidth=self.getProperty("PeakWindowMax"), BackgroundType=self.getProperty("BackgroundType"),
             MaxOffset=self._maxoffset, NumberPeaksWorkspace=str(wksp)+"peaks", MaskWorkspace=str(wksp)+"mask")
         #Fixed SmoothNeighbours for non-rectangular and rectangular
-        if self._smoothoffsets and self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed 
-            print "[DBx322] Data is smoothed 2"
-            SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset", WeightedSum="Flat",
+        if self._smoothoffsets and self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
+                SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset", WeightedSum="Flat",
                                  AdjX=self._xpixelbin, AdjY=self._ypixelbin)
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        CloneWorkspace(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"_Output")
         lcinst = str(self._instrument)
         
         if "dspacemap" in self._outTypes:
@@ -445,7 +439,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                                 RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref)
             else:
 		ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun, Target="TOF")
-            CloneWorkspace(InputWorkspace=str(samRun), OutputWorkspace="NewlyLoaded")
             samRun = self._focus(samRun, calib, filterLogs)
             RenameWorkspace(InputWorkspace=samRun,OutputWorkspace=str(samRun)+"_calibrated")
 
