@@ -237,8 +237,7 @@ namespace Mantid
       const std::string outName = outputWorkspaceProperty->value();
 
       size_t nPeriods = m_multiPeriodGroups[0]->size();
-      const bool doObserveADSNotifications = true;
-      WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>(!doObserveADSNotifications);
+      WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>();
       AnalysisDataService::Instance().addOrReplace(outName, outputWS);
 
       // Loop through all the periods. Create spawned algorithms of the same type as this to process pairs from the input groups.
@@ -279,7 +278,6 @@ namespace Mantid
 
       }
 
-      outputWS->observeADSNotifications(doObserveADSNotifications);
       this->setProperty("OutputWorkspace", outputWS);
       this->setExecuted(true);
       return true;

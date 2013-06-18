@@ -351,7 +351,6 @@ void LoadSassena::exec()
     gws = boost::make_shared<API::WorkspaceGroup>();
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<API::Workspace>(gws));
   }
-  gws->observeADSNotifications( false ); // Prevent sending unnecessary notifications
 
   //populate m_validSets
   int nvalidSets = 4;
@@ -393,7 +392,6 @@ void LoadSassena::exec()
       this->g_log.information("Dataset "+setName+" not present in file");
   }// end of iterate over the valid sets
 
-  gws->observeADSNotifications( true ); // Restore notification sending
   H5Fclose(h5file);
 } // end of LoadSassena::exec()
 

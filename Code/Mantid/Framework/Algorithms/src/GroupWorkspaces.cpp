@@ -39,8 +39,6 @@ void GroupWorkspaces::exec()
   }
   //creates workspace group pointer
   WorkspaceGroup_sptr outgrp_sptr = WorkspaceGroup_sptr(new WorkspaceGroup);
-  // prevent sending unnecessary notifications
-  outgrp_sptr->observeADSNotifications( false );
 
   setProperty("OutputWorkspace", outgrp_sptr);
 
@@ -94,9 +92,6 @@ void GroupWorkspaces::exec()
       addworkspacetoGroup(outgrp_sptr, ws_sptr, firstWs);
     }
   }//end of for loop for input workspaces
-
-  // restore notification sending
-  outgrp_sptr->observeADSNotifications( true );
 
   // Notify listeners that a new grop has been created
   Mantid::API::AnalysisDataService::Instance().notificationCenter.postNotification(

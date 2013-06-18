@@ -71,6 +71,7 @@ namespace Mantid
       // if a group is added add its members as well
       auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
       if ( !group ) return;
+      group->observeADSNotifications( true );
       for(size_t i = 0; i < group->size(); ++i)
       {
         auto ws = group->getItem( i );
@@ -109,6 +110,7 @@ namespace Mantid
       // if a group is added add its members as well
       auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
       if ( !group ) return;
+      group->observeADSNotifications( true );
       for(size_t i = 0; i < group->size(); ++i)
       {
         auto ws = group->getItem( i );

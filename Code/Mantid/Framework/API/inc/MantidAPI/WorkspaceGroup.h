@@ -23,6 +23,10 @@ namespace Kernel
 
 namespace API
 {
+//----------------------------------------------------------------------
+// Forward Declarations
+//----------------------------------------------------------------------
+class Algorithm;
 
 /** Class to hold a set of workspaces.
     The workspace group can be an entry in the AnalysisDataService. 
@@ -56,15 +60,13 @@ class MANTID_API_DLL WorkspaceGroup : public Workspace
 {
 public:
   /// Default constructor.
-  WorkspaceGroup(const bool observeADS = true);
+  WorkspaceGroup();
   /// Destructor
   ~WorkspaceGroup();
   /// Return a string ID of the class
   virtual const std::string id() const { return "WorkspaceGroup"; }
   /// The collection itself is considered to take up no space
   virtual size_t getMemorySize() const { return 0; }
-  /// Turn ADS observations on/off
-  void observeADSNotifications(const bool observeADS);
   /// Adds a workspace to the group.
   void addWorkspace(Workspace_sptr workspace);
   /// Return the number of entries within the group
@@ -108,6 +110,8 @@ private:
   const WorkspaceGroup& operator=(const WorkspaceGroup&);
   /// ADS removes a member of this group using this method. It doesn't send notifications in contrast to remove(name).
   void removeByADS(const std::string& name);
+  /// Turn ADS observations on/off
+  void observeADSNotifications(const bool observeADS);
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
   /// Observer for workspace delete notfications
@@ -126,6 +130,7 @@ private:
   static Kernel::Logger& g_log;
 
   friend class AnalysisDataServiceImpl;
+  friend class Algorithm;
 };
 
 /// Shared pointer to a workspace group class

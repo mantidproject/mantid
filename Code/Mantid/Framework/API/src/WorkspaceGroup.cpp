@@ -16,13 +16,12 @@ namespace API
 
 Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
-WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
+WorkspaceGroup::WorkspaceGroup() :
   Workspace(), 
   m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
   m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
   m_workspaces(), m_observingADS(false)
 {
-  observeADSNotifications(observeADS);
 }
 
 WorkspaceGroup::~WorkspaceGroup()
