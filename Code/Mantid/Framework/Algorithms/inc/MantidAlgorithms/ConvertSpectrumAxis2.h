@@ -61,9 +61,6 @@ public:
   virtual int version() const { return (2); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Transforms\\Units;Transforms\\Axes"; }
-  
-  //Stores the value of the wavelength for unit test purposes
-  double m_wavelength;
 
 private:
   /// Sets documentation strings for this algorithm

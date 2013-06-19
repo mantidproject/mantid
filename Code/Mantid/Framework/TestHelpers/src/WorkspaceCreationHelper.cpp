@@ -297,7 +297,7 @@ namespace WorkspaceCreationHelper
    * pervious. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
-  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors)
+  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors, bool startYNegative)
   {
     if( includeMonitors && nhist < 2 )
     {
@@ -325,7 +325,9 @@ namespace WorkspaceCreationHelper
       std::ostringstream lexer;
       lexer << "pixel-" << i << ")";
       Detector * physicalPixel = new Detector(lexer.str(), space->getAxis(1)->spectraNo(i), pixelShape, testInst.get());
-      const double ypos = i*2.0*pixelRadius;
+      int ycount(i);
+      if(startYNegative) ycount -= 1;
+      const double ypos = ycount*2.0*pixelRadius;
       physicalPixel->setPos(detXPos, ypos,0.0);
       testInst->add(physicalPixel);
       testInst->markAsDetector(physicalPixel);
