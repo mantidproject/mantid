@@ -253,6 +253,7 @@ namespace Mantid
       if (soqType == S_OF_Q)
       {
         g_log.information() << "Subtracting one from all values\n";
+        // there is no error propagation for subtracting one
         std::transform(inputFOfQ.begin(), inputFOfQ.end(), inputFOfQ.begin(),
                        std::bind2nd(std::minus<double>(), 1.));
         soqType = S_OF_Q_MINUS_ONE;
@@ -260,9 +261,14 @@ namespace Mantid
       if (soqType == S_OF_Q_MINUS_ONE)
       {
         g_log.information() << "Multiplying all values by Q\n";
+        // error propagation
+        for (size_t i = 0; i < inputDfOfQ.size(); ++i)
+        {
+          inputDfOfQ[i] = inputQ[i] * inputDfOfQ[i] + inputFOfQ[i] * inputDQ[i];
+        }
+        // convert the function
         std::transform(inputFOfQ.begin(), inputFOfQ.end(), inputQ.begin(), inputFOfQ.begin(),
                        std::multiplies<double>());
-        // TODO error propogation
         soqType = Q_S_OF_Q_MINUS_ONE;
       }
       if (soqType != Q_S_OF_Q_MINUS_ONE)
@@ -380,8 +386,10 @@ namespace Mantid
         const double factor = 1./(4.*M_PI*rho0);
         for (size_t i = 0; i < outputY.size(); ++i)
         {
+          // error propogation - assuming uncertainty in r = 0
+          outputE[i] = outputE[i] / outputR[i];
+          // transform the data
           outputY[i] = 1. + factor*outputY[i]/outputR[i];
-          // TODO error propogation
         }
       }
       else if (pdfType == RDF_OF_R)
@@ -389,8 +397,10 @@ namespace Mantid
         const double factor = 4.*M_PI*rho0;
         for (size_t i = 0; i < outputY.size(); ++i)
         {
+          // error propogation - assuming uncertainty in r = 0
+          outputE[i] = outputE[i] * outputR[i];
+          // transform the data
           outputY[i] = outputR[i] * outputY[i] + factor * outputR[i] * outputR[i];
-          // TODO error propogation
         }
       }
       else
