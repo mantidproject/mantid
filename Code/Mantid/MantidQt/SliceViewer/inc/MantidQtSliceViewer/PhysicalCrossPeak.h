@@ -40,11 +40,6 @@ namespace MantidQt
       void movePosition(PeakTransform_sptr peakTransform);
       /// Draw
       CrossPeakPrimitives draw(const double& windowHeight, const double& windowWidth) const;
-      /// Determine wheter the peak is viewable given the current slice position
-      inline bool isViewable() const
-      {
-        return (m_opacityAtDistance != m_opacityMin);
-      }
       /// Get the bounding box.
       PeakBoundingBox getBoundingBox() const;
       /// Set the size of the cross peak in the viewing plane

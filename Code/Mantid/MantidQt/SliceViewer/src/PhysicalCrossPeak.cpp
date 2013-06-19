@@ -38,15 +38,8 @@ namespace MantidQt
     m_slicePoint = z;
     const double distanceAbs = std::abs(z - m_origin.Z());
     
-    if(distanceAbs < m_effectiveRadius)
-    {
-      // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
-      m_opacityAtDistance = (m_opacityGradient * distanceAbs)  + m_opacityMax;
-    }
-    else
-    {
-      m_opacityAtDistance =  m_opacityMin;
-    }
+    // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
+    m_opacityAtDistance = (m_opacityGradient * distanceAbs)  + m_opacityMax;
   }
 
   /**
@@ -64,11 +57,12 @@ namespace MantidQt
   @param windowWidth : Width of the window (pixels)
   @return structure of primitive information for drawing.
   */
-  MantidQt::SliceViewer::CrossPeakPrimitives PhysicalCrossPeak::draw(const double& windowHeight, const double& windowWidth) const
-  {
-    CrossPeakPrimitives drawingObjects = {0,0,0,0.0,Mantid::Kernel::V3D()};
-    if(isViewable())
+    MantidQt::SliceViewer::CrossPeakPrimitives PhysicalCrossPeak::draw(const double& windowHeight,
+        const double& windowWidth) const
     {
+      CrossPeakPrimitives drawingObjects =
+      { 0, 0, 0, 0.0, Mantid::Kernel::V3D() };
+
       const int halfCrossHeight = int(windowHeight * m_crossViewFraction);
       const int halfCrossWidth = int(windowWidth * m_crossViewFraction);
 
@@ -79,9 +73,9 @@ namespace MantidQt
       drawingObjects.peakLineWidth = 2;
       drawingObjects.peakOpacityAtDistance = m_opacityAtDistance;
       drawingObjects.peakOrigin = m_origin;
+
+      return drawingObjects;
     }
-    return drawingObjects;
-  }
 
   /**
   @return bounding box for peak in natural coordinates.

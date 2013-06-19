@@ -41,13 +41,18 @@ namespace MantidQt
     /** Set the distance between the plane and the center of the peak in md coordinates
 
     @param z : position of the plane slice in the z dimension.
+    @param viewablePeaks: collection of flags indicating the index of the peaks which are viewable.
 
     */
-    void PeakOverlayMultiCross::setSlicePoint(const double& z)
+    void PeakOverlayMultiCross::setSlicePoint(const double& z, const std::vector<bool>& viewablePeaks)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      m_viewablePeaks = viewablePeaks;
+      for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
       {
-        m_physicalPeaks[i]->setSlicePoint(z);
+        if(m_viewablePeaks[i]) // is peak at this index visible.
+        {
+          m_physicalPeaks[i]->setSlicePoint(z);
+        }
       }
       this->update(); //repaint
     }
@@ -74,12 +79,9 @@ namespace MantidQt
     /// Paint the overlay
     void PeakOverlayMultiCross::paintEvent(QPaintEvent * /*event*/)
     {
-
-
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
       {
-
-        if(m_physicalPeaks[i]->isViewable()) // This check will not be necessary when we move to using PeaksInRegion!
+        if(m_viewablePeaks[i]) // Only draw those peaks that are viewable.
         {
           auto drawObject = m_physicalPeaks[i]->draw(height(), width());
 
@@ -126,7 +128,7 @@ namespace MantidQt
 
     void PeakOverlayMultiCross::movePosition(PeakTransform_sptr transform)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_physicalPeaks.size(); ++i)
       {
         m_physicalPeaks[i]->movePosition(transform);
       }
@@ -157,7 +159,7 @@ namespace MantidQt
     */
     void PeakOverlayMultiCross::changeOccupancyInView(const double fraction)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_physicalPeaks.size(); ++i)
       {
         m_physicalPeaks[i]->setOccupancyInView(fraction);
       }
@@ -169,7 +171,7 @@ namespace MantidQt
     */
     void PeakOverlayMultiCross::changeOccupancyIntoView(const double fraction)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_physicalPeaks.size(); ++i)
       {
         m_physicalPeaks[i]->setOccupancyIntoView(fraction);
       }
@@ -188,6 +190,11 @@ namespace MantidQt
     bool PeakOverlayMultiCross::positionOnly() const
     {
       return true;
+    }
+
+    double PeakOverlayMultiCross::getRadius() const
+    {
+      return m_physicalPeaks[0]->getEffectiveRadius();
     }
 
   } // namespace Mantid

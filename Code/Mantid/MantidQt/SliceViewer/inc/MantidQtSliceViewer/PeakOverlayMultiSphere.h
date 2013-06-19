@@ -53,7 +53,7 @@ namespace SliceViewer
     /// Destructor
     virtual ~PeakOverlayMultiSphere();
     /// Set the slice point at position.
-    virtual void setSlicePoint(const double& point); 
+    virtual void setSlicePoint(const double& point, const std::vector<bool>& viewablePeaks);
     /// Hide the view.
     virtual void hideView();
     /// Show the view.
@@ -80,6 +80,8 @@ namespace SliceViewer
     virtual double getOccupancyIntoView() const;
     /// Getter indicating that the view is position only
     virtual bool positionOnly() const;
+    /// Get the radius of the peak objects.
+    virtual double getRadius() const;
   private:
 
     //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
@@ -98,6 +100,8 @@ namespace SliceViewer
     QColor m_peakColour;
     /// Back colour
     QColor m_backColour;
+    /// Peaks in the workspace that are viewable in the present view.
+    std::vector<bool> m_viewablePeaks;
   };
 
 

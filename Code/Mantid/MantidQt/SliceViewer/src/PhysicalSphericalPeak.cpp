@@ -109,13 +109,12 @@ namespace MantidQt
         drawingObjects.peakOpacityAtDistance = m_cachedOpacityAtDistance;
         drawingObjects.peakOrigin = m_origin;
 
-        if(this->isViewablePeak())
-        {
-          // Create the return object.
-          drawingObjects.peakInnerRadiusX = scaleX * m_peakRadiusAtDistance.get();
-          drawingObjects.peakInnerRadiusY = scaleY * m_peakRadiusAtDistance.get();
-        }
-        if(this->isViewableBackground())
+
+        // Create the return object.
+        drawingObjects.peakInnerRadiusX = scaleX * m_peakRadiusAtDistance.get();
+        drawingObjects.peakInnerRadiusY = scaleY * m_peakRadiusAtDistance.get();
+
+        if(this->m_showBackgroundRadius)
         {
           drawingObjects.backgroundOuterRadiusX = scaleX * m_backgroundOuterRadiusAtDistance.get();
           drawingObjects.backgroundOuterRadiusY = scaleY * m_backgroundOuterRadiusAtDistance.get();
@@ -147,6 +146,24 @@ namespace MantidQt
         SlicePoint slicePoint(m_origin.Z());
 
         return PeakBoundingBox(left, right, top, bottom, slicePoint);
+      }
+
+      /**
+       * Get radius
+       * @return The radius.
+       */
+      double PhysicalSphericalPeak::getRadius() const
+      {
+        return m_showBackgroundRadius ?  m_backgroundOuterRadius : m_peakRadius ;
+      }
+
+      /**
+       *
+       * @return True if the background radius should be shown.
+       */
+      bool PhysicalSphericalPeak::getShowBackgroundRadius() const
+      {
+        return m_showBackgroundRadius;
       }
   }
 }

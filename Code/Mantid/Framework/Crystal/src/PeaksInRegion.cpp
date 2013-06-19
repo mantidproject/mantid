@@ -25,22 +25,22 @@ namespace Mantid
 namespace Crystal
 {
 
-  std::string detectorSpaceFrame()
+  std::string PeaksInRegion::detectorSpaceFrame()
   {
     return "Detector space";
   }
 
-  std::string qLabFrame()
+  std::string PeaksInRegion::qLabFrame()
   {
     return "Q (lab frame)";
   }
 
-  std::string qSampleFrame()
+  std::string PeaksInRegion::qSampleFrame()
   {
     return "Q (sample frame)";
   }
 
-  std::string hklFrame()
+  std::string PeaksInRegion::hklFrame()
   {
     return "HKL";
   }
@@ -122,21 +122,25 @@ namespace Crystal
 
   void validateExtentsInput(const std::vector<double>& extents)
   {
+    std::stringstream outbuff;
     if(extents.size() != 6)
     {
       throw std::invalid_argument("Six commma separated entries for the extents expected");
     }
-    if(extents[0] >= extents[1])
+    if(extents[0] > extents[1])
     {
-      throw std::invalid_argument("xmin >= xmax");
+      outbuff << "xmin > xmax " << extents[0] << " > " << extents[1];
+      throw std::invalid_argument(outbuff.str());
     }
-    if(extents[2] >= extents[3])
+    if(extents[2] > extents[3])
     {
-      throw std::invalid_argument("ymin >= ymax");
+      outbuff << "ymin > ymax " << extents[2] << " > " << extents[3];
+      throw std::invalid_argument(outbuff.str());
     }
-    if(extents[4] >= extents[5])
+    if(extents[4] > extents[5])
     {
-      throw std::invalid_argument("zmin >= zmax");
+      outbuff << "zmin > zmax " << extents[2] << " > " << extents[3];
+      throw std::invalid_argument(outbuff.str());
     }
   }
 
@@ -189,6 +193,10 @@ namespace Crystal
       coordFrameFunc = &IPeak::getQSampleFrame;
     }
 
+    std::stringstream buff;
+    buff << extents[0] << "\t" << extents[1] << "\t" << extents[2] <<"\t"<< extents[3] <<"\t"<<  extents[4] <<"\t"<<  extents[5];
+    g_log.debug(buff.str());
+
     const int nPeaks = ws->getNumberPeaks();
 
     Mantid::DataObjects::TableWorkspace_sptr outputWorkspace = boost::make_shared<Mantid::DataObjects::TableWorkspace>(ws->rowCount());
@@ -239,8 +247,13 @@ namespace Crystal
       normals[i].normalize();
     }
 
-    const int reportEveryNumber = 100;
-    Progress prog(this, 0, nPeaks/reportEveryNumber, nPeaks/reportEveryNumber);
+
+    size_t frequency = ws->rowCount();
+    if(frequency > 100)
+    {
+      frequency = ws->rowCount()/100;
+    }
+    Progress prog(this, 0, 1, 100);
 
      PARALLEL_FOR2(ws, outputWorkspace)
       for(int i = 0; i < nPeaks; ++i)
@@ -249,7 +262,7 @@ namespace Crystal
       IPeak* peak =  ws->getPeakPtr(i);
       V3D peakCenter = coordFrameFunc(peak);
 
-      if(i%reportEveryNumber == 0)
+      if(i%frequency == 0)
         prog.report();
 
       bool doesIntersect = true;
