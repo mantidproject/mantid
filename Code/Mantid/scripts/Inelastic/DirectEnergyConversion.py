@@ -144,7 +144,7 @@ class DirectEnergyConversion(object):
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
             background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
-            Logger.notice("Diagnose: finisthed convertUnits ")
+            logger.notice("Diagnose: finisthed convertUnits ")
             background_int *= self.scale_factor
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
@@ -199,7 +199,7 @@ class DirectEnergyConversion(object):
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
-        Logger.notice("do_white: finisthed convertUnits ")
+        logger.notice("do_white: finisthed convertUnits ")
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
         low = self.wb_integr_range[0]
         upp = self.wb_integr_range[1]
@@ -397,7 +397,7 @@ class DirectEnergyConversion(object):
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
-        Logger.notice("_do_mono: finished ConvertUnits")
+        logger.notice("_do_mono: finished ConvertUnits")
         
         if not self.energy_bins is None:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
@@ -410,7 +410,7 @@ class DirectEnergyConversion(object):
                 ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
             else:
                 DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
-                Logger.notice("_do_mono: finished DetectorEfficiencyCor")
+                logger.notice("_do_mono: finished DetectorEfficiencyCor")
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
@@ -497,7 +497,7 @@ class DirectEnergyConversion(object):
         
         return sample_wkspace
 #----------------------------------------------------------------------------------
-#              COMPLEX SETTERS/GETTERS   
+#              Complex setters/getters
 #----------------------------------------------------------------------------------
     def __getattribute__(self, name):
         if name == "van_rmm":

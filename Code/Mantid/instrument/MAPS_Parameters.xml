@@ -22,7 +22,7 @@
 
 <!-- Extension of the data files obtained from DAE -->
 <parameter name="data_file_ext" type="string">
-   <value val=".RAW"/>
+   <value val=".raw"/>
 </parameter>
 <!-- The name of the hard mask file to use together with diag masking 4to1_124mod.msk-->
 <parameter name="hard_mask_file" type="string">

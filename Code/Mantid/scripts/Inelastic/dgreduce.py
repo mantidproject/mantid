@@ -253,7 +253,14 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
 
     # calculate absolute units integral and apply it to the workspace
     if monovan_run != None or Reducer.mono_correction_factor != None :
-        deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_run,wksp_out)
+        deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_run)
+        results_name = deltaE_wkspace_sample.name();
+    else:
+        results_name=str(sample_run)+'.spe'   
+
+    if mtd.doesExist(results_name)==True and results_name != wksp_out:
+            deltaE_wkspace_sample=RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
+
 
     ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value) 
     print 'Incident energy found for sample run: ',ei,' meV'
@@ -264,14 +271,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
     if mtd.doesExist('_wksp.spe-white')==True:
         DeleteWorkspace(Workspace='_wksp.spe-white')
 
-    results_name=str(sample_run)+'.spe'   
-    if mtd.doesExist(results_name)==True:
-        deltaE_wkspace_sample=RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
     
     return deltaE_wkspace_sample
 
 
-def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_mono,wksp_out):
+def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_mono):
     """  Function applies absolute normalization factor to the target workspace 
          and calculates this factor if nececcary
 
@@ -288,6 +292,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
          print '      Value : ', absnorm_factor                
 
     else:
+        # TODO: !!!! 
         if Reducer.monovan_integr_range is None: # integration in the range relative to incident energy
             Reducer.monovan_integr_range = [Reducer.monovan_lo_frac*ei_guess,Reducer.monovan_hi_frac*ei_guess]
         print '##### Evaluate the integral from the monovan run and calculate the correction factor ######'
@@ -304,19 +309,12 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
         (absnorm_factorL,absnorm_factorSS,absnorm_factorP,absnorm_factTGP) = get_abs_normalization_factor(Reducer,deltaE_wkspace_monovan.getName(),ei_monovan)
         print '      Absolute correction factor S^2 =',absnorm_factorSS,' Libisis: ',absnorm_factorL,' Puasonian: ',absnorm_factorP, ' TGP : ',absnorm_factTGP
         absnorm_factor = absnorm_factTGP;
-         
-
+                     
     
-    if mtd.doesExist('_wksp.spe-white')==True:
-        DeleteWorkspace(Workspace='_wksp.spe-white')
-        
-    
-    
-    ws_out = RenameWorkspace(InputWorkspace=deltaE_wkspace_sample,OutputWorkspace=wksp_out)
-    ws_out = ws_out/absnorm_factor;
+    deltaE_wkspace_sample = deltaE_wkspace_sample/absnorm_factor;
 
 
-    return ws_out 
+    return deltaE_wkspace_sample  
 def check_some_parameters(Reducer) :
     monovan_mapfile
     pass
