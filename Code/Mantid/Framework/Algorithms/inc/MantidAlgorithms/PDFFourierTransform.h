@@ -10,9 +10,6 @@ namespace Algorithms
 {
 
   /** PDFFourierTransform : TODO: DESCRIPTION
-   * 
-   * @author
-   * @date 2011-03-22 13:55:27.513553
    */
   class DLLExport PDFFourierTransform  : public API::Algorithm
   {
