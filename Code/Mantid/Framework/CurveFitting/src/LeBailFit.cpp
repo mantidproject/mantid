@@ -296,12 +296,15 @@ namespace CurveFitting
 
       case FIT:
         // LeBail Fit
-        g_log.notice() << "Function: Do LeBail Fit.\n";
-        execLeBailFit();
+        g_log.notice() << "Function: Do LeBail Fit ==> Monte Carlo.\n";
+        // execLeBailFit();
+
+      case MONTECARLO:
+        // Monte carlo Le Bail refinement
+        g_log.notice("Function: Do LeBail Fit By Monte Carlo Random Walk.");
+        execRandomWalkMinimizer(m_numMinimizeSteps, m_funcParameters);
 
         break;
-
-
 
       case BACKGROUNDPROCESS:
         // Calculating background
@@ -310,12 +313,6 @@ namespace CurveFitting
         execRefineBackground();
         break;
 
-      case MONTECARLO:
-        // Monte carlo Le Bail refinement
-        g_log.notice("Function: Do LeBail Fit By Monte Carlo Random Walk.");
-        execRandomWalkMinimizer(m_numMinimizeSteps, m_funcParameters);
-
-        break;
 
       default:
         // Impossible
@@ -1914,9 +1911,9 @@ namespace CurveFitting
    */
   void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, map<string, Parameter>& parammap)
   {
-    // 1. Initialization
+    // Set up random walk parameters
+    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
     const MantidVec& vecInY = m_dataWS->readY(m_wsIndex);
-    // const MantidVec& vecE = m_dataWS->readE(m_wsIndex);
     size_t numpts = vecInY.size();
 
     const MantidVec& domain = m_dataWS->readX(m_wsIndex);
@@ -1932,50 +1929,37 @@ namespace CurveFitting
     {
       setupBuiltInRandomWalkStrategy();
     }
-
-    //    Set up a parameter map for new ...
-    map<string, Parameter> newparammap = parammap;
-
-    //    Random seed
-    int randomseed = getProperty("RandomSeed");
-    srand(randomseed);
-
-    //    R-factors used for MC procedure
-    Rfactor startR(-DBL_MAX, -DBL_MAX), currR(-DBL_MAX, -DBL_MAX), newR(-DBL_MAX, -DBL_MAX);
-
-    // Annealing temperature
-    m_Temperature = getProperty("AnnealingTemperature");
-    if (m_Temperature < 0)
-      m_Temperature = fabs(m_Temperature);
-    m_useAnnealing = getProperty("UseAnnealing");
-
-    // Walking style
+    //   Walking style/algorithm
     bool usedrunkenwalk = getProperty("DrunkenWalk");
     if (usedrunkenwalk)
       m_walkStyle = DRUNKENWALK;
     else
       m_walkStyle = RANDOMWALK;
+    //    Annealing temperature
+    m_Temperature = getProperty("AnnealingTemperature");
+    if (m_Temperature < 0)
+      m_Temperature = fabs(m_Temperature);
+    m_useAnnealing = getProperty("UseAnnealing");
+    //    Random seed
+    int randomseed = getProperty("RandomSeed");
 
-    // 2. Process background.
-    // a) Retrieve background
-    MantidVec& background = m_outputWS->dataY(INPUTBKGDINDEX);
+    //    R-factors used for MC procedure
+    Rfactor startR(-DBL_MAX, -DBL_MAX), currR(-DBL_MAX, -DBL_MAX), newR(-DBL_MAX, -DBL_MAX);
+    //    Set up a parameter map for new ...
+    map<string, Parameter> newparammap = parammap;
 
-    // b) Reset LeBailFunction's background component to 'zero'
-    vector<string> bkgdnames = m_backgroundFunction->getParameterNames();
-    for (size_t i = 0; i < bkgdnames.size(); ++i)
-    {
-      m_backgroundFunction->setParameter(i, 0.0);
-    }
+    // Process background to make a pure peak spectrum in output workspace
+    MantidVec& vecBkgd = m_outputWS->dataY(INPUTBKGDINDEX);
+    m_lebailFunction->function(vecBkgd, vecX, false, true);
+    MantidVec& dataPurePeak = m_outputWS->dataY(INPUTPUREPEAKINDEX);
+    transform(vecInY.begin(), vecInY.end(), vecBkgd.begin(), dataPurePeak.begin(), ::minus<double>());
 
-    // 3. Calcualte starting Rwp and etc
-    // a) Do calculation
+    // Calcualte starting Rwp and etc
+    const MantidVec& vecPurePeak = m_outputWS->readY(INPUTPUREPEAKINDEX);
+
     map<string, double> pardblmap = convertToDoubleMap(parammap);
     m_lebailFunction->setProfileParameterValues(pardblmap);
-    const MantidVec& vecX = m_outputWS->readX(INPUTPUREPEAKINDEX);
-    const MantidVec& vecPureY = m_outputWS->readY(INPUTPUREPEAKINDEX);
-    bool startvaluevalid = calculateDiffractionPatternMC(vecX, vecPureY, false, false, background, purepeakvalues, startR);
-    // m_outputWS, INPUTPUREPEAKINDEX, parammap,background, purepeakvalues, startR
-
+    bool startvaluevalid = calculateDiffractionPatternMC(vecX, vecPurePeak, false, false, vecBkgd, purepeakvalues, startR);
     if (!startvaluevalid)
     {
       // Throw exception if starting values are not valid for all
@@ -1983,25 +1967,25 @@ namespace CurveFitting
                           " unphyiscal parameters values.");
     }
 
-    // b) Set starting parameters
+    //    Set starting parameters
     currR = startR;
-
     m_bestRwp = currR.Rwp + 0.001;
     m_bestRp = currR.Rp + 0.001;
-
-    bookKeepBestMCResult(parammap, background, currR, 0);
-
-    // c) Set to output
-    MantidVec& initcalVec = m_outputWS->dataY(INPUTCALDATAINDEX);
-    for (size_t i = 0; i < numpts; ++i)
-    {
-      initcalVec[i] = purepeakvalues[i] + background[i];
-    }
+    bookKeepBestMCResult(parammap, vecBkgd, currR, 0);
 
     g_log.notice() << "[DBx255] Random-walk Starting Rwp = " << currR.Rwp
                    << ", Rp = " << currR.Rp << "\n";
 
-    // 4. Random walk loops
+    // c) Set to output
+    /* WHY THIS?
+    MantidVec& initcalVec = m_outputWS->dataY(INPUTCALDATAINDEX);
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      initcalVec[i] = purepeakvalues[i] + vecBkgd[i];
+    }
+    */
+
+    // Random walk loops
     // generate some MC trace structure
     vector<double> vecIndex(maxcycles+1);
     vector<Rfactor> vecR(maxcycles+1);
@@ -2014,6 +1998,8 @@ namespace CurveFitting
     int numRecentSteps = 0;
 
     // Loop start
+    srand(randomseed);
+
     for (size_t icycle = 1; icycle <= maxcycles; ++icycle)
     {
       // a) Refine parameters (for all parameters in turn) to data with background removed
@@ -2035,9 +2021,9 @@ namespace CurveFitting
         // ii.  Evaluate
         map<string, double> newpardblmap = convertToDoubleMap(newparammap);
         m_lebailFunction->setProfileParameterValues(newpardblmap);
-        bool validparams = calculateDiffractionPatternMC(vecX, vecPureY, false, false, background,
+        bool validparams = calculateDiffractionPatternMC(vecX, vecPurePeak, false, false, vecBkgd,
                                                          purepeakvalues, newR);
-        //  m_outputWS, INPUTPUREPEAKINDEX, newparammap, background, purepeakvalues, newR
+        g_log.information() << "[Calculation] Rwp = " << newR.Rwp << ", Rp = " << newR.Rp << ".\n";
 
         // iii. Determine whether to take the change or not
         bool acceptchange;
@@ -2075,7 +2061,7 @@ namespace CurveFitting
           if (currR.Rwp < m_bestRwp)
           {
             // Book keep the best
-            bookKeepBestMCResult(parammap, background, currR, icycle);
+            bookKeepBestMCResult(parammap, vecBkgd, currR, icycle);
           }
           // FIXME - After determining to use Rp or Rwp, this should be got into bookKeepBestMCResult
           if (currR.Rp < m_bestRp)
@@ -2171,7 +2157,7 @@ namespace CurveFitting
     writeRfactorsToFile(vecIndex, vecR, filenamess.str());
 
     // c) Calculate again
-    calculateDiffractionPatternMC(vecX, vecPureY, false, false, background, purepeakvalues, currR);
+    calculateDiffractionPatternMC(vecX, vecPurePeak, false, false, vecBkgd, purepeakvalues, currR);
     // m_outputWS, INPUTPUREPEAKINDEX, m_bestParameters, background, purepeakvalues, currR
 
     MantidVec& vecCalY = m_outputWS->dataY(CALDATAINDEX);
@@ -2181,7 +2167,7 @@ namespace CurveFitting
     for (size_t i = 0; i < numpts; ++i)
     {
       // Calculated (refined) data
-      vecCalY[i] = purepeakvalues[i] + background[i];
+      vecCalY[i] = purepeakvalues[i] + vecBkgd[i];
       // Diff
       vecDiff[i] = vecInY[i] - vecCalY[i];
       // Calcualted without background (pure peaks)
@@ -2206,6 +2192,8 @@ namespace CurveFitting
    */
   void LeBailFit::setupRandomWalkStrategyFromTable(DataObjects::TableWorkspace_sptr tablews)
   {
+    g_log.information("Set up random walk strategy from table.");
+
     // Scan the table
     size_t numrows = tablews->rowCount();
     for (size_t i = 0; i < numrows; ++i)
@@ -2266,6 +2254,8 @@ namespace CurveFitting
    */
   void LeBailFit::setupBuiltInRandomWalkStrategy()
   {
+    g_log.information("Set up random walk strategy from build-in. ");
+
     stringstream dboutss;
     dboutss << "Monte Carlo minimizer refines: ";
 
@@ -2439,11 +2429,12 @@ namespace CurveFitting
    *  (2) m_lebailFunction will NOT be used;
    *  (3) background will not be calculated.
    *
-   * @param dataws  :  workspace of the data
-   * @param wsindex :  workspace index of observed data with background removed.
-   * @param funparammap:  map of Parameters of the function to optimize
-   * @param vecBkgd:   vector for background values
-   * @param values:   (output) function values, i.e., summation of all peaks but no background
+   * @param vecX :: vector of X
+   * @param vecY ::  vector of Y (may be raw data or pure peak data/background removed)
+   * @param inputraw ::  True if vecY is raw data. Otherwise, with background removed
+   * @param outputwithbkgd :: output vector (values) should include background values
+   * @param vecBkgd:: vector of background values (input)
+   * @param values :: (output) function values, i.e., summation of all peaks and background in option
    * @param rfactor:  R-factor (Rwp and Rp) as output
    *
    * @return :: boolean value.  whether all the peaks' parameters are physical.
@@ -2475,13 +2466,13 @@ namespace CurveFitting
       if (vecBkgd.size() == vecY.size())
       {
         // Use input background
-        g_log.information() << "Calculate diffraction pattern from raw and input background vector. " << ".\n";
+        g_log.debug() << "Calculate diffraction pattern from raw and input background vector. " << ".\n";
         ::transform(vecY.begin(), vecY.end(), vecBkgd.begin(), vecPureY.begin(), ::minus<double>());
       }
       else
       {
         // Calculate background
-        g_log.information() << "Calculate diffraction pattern from input data and newly calculated background. " << ".\n";
+        g_log.debug() << "Calculate diffraction pattern from input data and newly calculated background. " << ".\n";
         veccalbkgd.assign(vecY.size(), 0.);
         m_lebailFunction->function(veccalbkgd, vecX, false, true);
         ::transform(vecY.begin(), vecY.end(), veccalbkgd.begin(), vecPureY.begin(), ::minus<double>());
@@ -2493,7 +2484,7 @@ namespace CurveFitting
     else
     {
       // Calculate peaks intensities
-      g_log.information() << "Calculate diffraction pattern from input data with background removed. " << ".\n";
+      g_log.debug() << "Calculate diffraction pattern from input data with background removed. " << ".\n";
       peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX, vecY, values);
     }
 
@@ -2569,29 +2560,28 @@ namespace CurveFitting
   {
     // TODO: Study the possibility to merge curparammap and newparammap
 
-    // 1. Set up some flags
-    bool anyparameterrefined = false;
+    // Initialize some flags
+    bool anyparamtorefine = false;
 
-    // 2. Find out parameters to refine in this step/MC group
-    g_log.debug() << "BigTrouble.  Parameter Number In Group = " << mcgroup.size() << "\n";
+    // Find out parameters to refine in this step/MC group
+    g_log.debug() << "Parameter Number In Group = " << mcgroup.size() << "\n";
     for (size_t i = 0; i < mcgroup.size(); ++i)
     {
-      // a) Find out i-th parameter to be refined or not
+      // Find out the i-th parameter to be refined or not
       string paramname = mcgroup[i];
       Parameter param = curparammap[paramname];
       if (param.fit)
-        anyparameterrefined = true;
+        anyparamtorefine = true;
       else
         continue;
 
-      // b) Pick a random number between -1 and 1 and calculate step size
+      // Pick a random number between -1 and 1 and calculate step size
       double randomnumber = 2*static_cast<double>(rand())/static_cast<double>(RAND_MAX) - 1.0;
-      g_log.debug() << "[TestRandom] random = " << randomnumber << "\n";
 
       // FIXME - [RPRWP] Try using Rp this time.
       double stepsize = m_dampingFactor * r.Rwp * (param.curvalue * param.mcA1 + param.mcA0) * randomnumber;
 
-      // c) Direction of new value: drunk walk or random walk
+      // Direction of new value: drunk walk or random walk
       double newvalue;
       if (m_walkStyle == RANDOMWALK)
       {
@@ -2634,14 +2624,14 @@ namespace CurveFitting
         throw runtime_error("Unrecoganized walk style. ");
       }
 
-      // d) Restriction on the new value: non-negative
+      // Restriction on the new value: non-negative
       if (param.nonnegative && newvalue < 0)
       {
         // If not allowed to be negative
         newvalue = fabs(newvalue);
       }
 
-      // e) Restriction on the new value: keep the new value in the boundary
+      // Restriction on the new value: keep the new value in the boundary
       if (newvalue < param.minvalue)
       {
         int toss = rand()%2;
@@ -2655,8 +2645,10 @@ namespace CurveFitting
         newvalue = limitProposedValueInBound(param, newvalue, direction, toss);
       }
 
-      // f) Apply to new parameter map
+      // Apply to new parameter map
       newparammap[paramname].curvalue = newvalue;
+      g_log.information() << "[ProposeNewValue] " << paramname << " --> " << newvalue
+                          << "; random number = " << randomnumber << "\n";
 
       // g) record some trace
       Parameter& p = curparammap[paramname];
@@ -2689,7 +2681,7 @@ namespace CurveFitting
                     << stepsize << "), totRwp = " << r.Rwp << "\n";
     } // ENDFOR (i): Each parameter in this MC group/step
 
-    return anyparameterrefined;
+    return anyparamtorefine;
   }
 
   //-----------------------------------------------------------------------------------------------

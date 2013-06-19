@@ -328,6 +328,9 @@ namespace CurveFitting
   bool LeBailFunction::calculatePeaksIntensities(const vector<double>& vecX, const vector<double>& vecY,
                                                  vector<double>& vec_summedpeaks)
   {
+    // Clear inputs
+    std::fill(vec_summedpeaks.begin(), vec_summedpeaks.end(), 0.0);
+
     // Divide peaks into groups from peak's parameters
     vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > > peakgroupvec;
     groupPeaks(peakgroupvec);
@@ -368,7 +371,7 @@ namespace CurveFitting
     }
     else
     {
-      g_log.information() << "[DBx155] Peaks group size = " << peakgroup.size() << "\n";
+      g_log.debug() << "[Fx155] Peaks group size = " << peakgroup.size() << "\n";
     }
     if (peakgroup.size() > 1)
       sort(peakgroup.begin(), peakgroup.end());
@@ -583,7 +586,7 @@ namespace CurveFitting
         g_log.warning("Set intensity to 0.0 because it was negative.");
       }
 
-      g_log.information() << "[DBx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
+      g_log.debug() << "[Fx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
       peak->setHeight(intensity);
 
       // Add peak's value to peaksvalues
