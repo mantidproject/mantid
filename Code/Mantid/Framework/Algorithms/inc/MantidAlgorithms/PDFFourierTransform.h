@@ -36,8 +36,6 @@ namespace Algorithms
     void init();
     /// Run the algorithm
     void exec();
-    /// Calculate PDF, i.e., G(r), for a certain r value from S(Q)
-    void calculateGr(const double qmin, const double qmax, const double r, double &gr, double& egr);
   };
 
 

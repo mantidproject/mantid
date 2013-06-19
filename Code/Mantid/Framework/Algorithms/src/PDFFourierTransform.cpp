@@ -1,19 +1,38 @@
 /*WIKI*
 
-The algorithm PDFFourierTransform imports S(Q) (or S(d)) or S(Q)-1 (or S(d)-1) in a Workspace object, does Fourier transform to it, 
-and then store the resulted PDF (paired distribution function) in another Workspace object. 
+The algorithm PDFFourierTransform transforms <math>S(Q)</math>, <math>S(Q)-1</math>, or <math>Q[S(Q)-1]</math>
+(as a fuction of MomentumTransfer or dSpacing) to a PDF (pair distribution function) as described below.
 
-The input Workspace can have the unit in d-space of Q-space.  The algorithm itself is able to identify the unit.  The allowed unit are MomentumTransfer and d-spacing. 
+The input Workspace can have the unit in d-space of Q-space.  The algorithm itself is able to identify
+the unit.  The allowed unit are MomentumTransfer and d-spacing.
 
-=== Output Option 1: G(r) ===
+'''Note:''' All other forms are calculated by transforming <math>G(r)</math>.
 
-:<math> G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]sin(Qr)dQ </math>
+==== Output Options ====
+
+=====G(r)=====
+
+<math> G(r) = 4\pi r[\rho(r)-\rho_0] = \frac{2}{\pi} \int_{0}^{\infty} Q[S(Q)-1]sin(Qr)dQ </math>
 
 and in this algorithm, it is implemented as
 
-:<math> G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]sin(Qr)\Delta Q </math>
-In Algorithm's input parameter "PDFType", it is noted as "G(r) = 4pi*r[rho(r)-rho_0]".  
-And r is from 0 to RMax with step size DeltaR.
+<math> G(r) =  \frac{2}{\pi} \sum_{Q_{min}}^{Q_{max}} Q[S(Q)-1]sin(Qr)\Delta Q </math>
+
+=====g(r)=====
+
+<math>G(r) = 4 \pi \rho_0 r [g(r)-1]</math>
+
+transforms to
+
+<math>g(r) = \frac{G(r)}{4 \pi \rho_0 r} + 1</math>
+
+=====RDF(r)=====
+
+<math>RDF(r) = 4 \pi \rho_0 r^2 g(r)</math>
+
+transforms to
+
+<math>RDF(r) = r G(r) + 4 \pi \rho_0 r^2</math>
 
 *WIKI*/
 
@@ -115,16 +134,10 @@ namespace Mantid
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
 
-      declareProperty("Rmax", 20., mustBePositive, "Maximum r for G(r) to calculate.");
-
-      declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,
-                      "Step size of r of G(r) to calculate.  Default = <math>\\frac{\\pi}{Q_{max}}</math>.");
-      declareProperty("rho0", EMPTY_DBL(), mustBePositive,
-                      "Average number density used for g(r) and RDF(r) conversions");
       declareProperty("Qmin", EMPTY_DBL(), mustBePositive,
-                      "Minimum Q in S(Q) to calculate in Fourier transform.");
+                      "Minimum Q in S(Q) to calculate in Fourier transform (optional).");
       declareProperty("Qmax", EMPTY_DBL(), mustBePositive,
-                      "Maximum Q in S(Q) to calculate in Fourier transform.  It is the cut-off of Q in summation.");
+                      "Maximum Q in S(Q) to calculate in Fourier transform. (optional)");
 
       // Set up output data type
       std::vector<std::string> outputTypes;
@@ -132,7 +145,25 @@ namespace Mantid
       outputTypes.push_back(LITTLE_G_OF_R);
       outputTypes.push_back(RDF_OF_R);
       declareProperty("PDFType", BIG_G_OF_R, boost::make_shared<StringListValidator>(outputTypes),
-				"Type of output PDF including G(r)");
+        "Type of output PDF including G(r)");
+
+
+      declareProperty("DeltaR", EMPTY_DBL(), mustBePositive,
+                      "Step size of r of G(r) to calculate.  Default = <math>\\frac{\\pi}{Q_{max}}</math>.");
+      declareProperty("Rmax", 20., mustBePositive, "Maximum r for G(r) to calculate.");
+      declareProperty("rho0", EMPTY_DBL(), mustBePositive,
+                      "Average number density used for g(r) and RDF(r) conversions (optional)");
+
+      string recipGroup("Reciprocal Space");
+      setPropertyGroup("InputSofQType", recipGroup);
+      setPropertyGroup("Qmin", recipGroup);
+      setPropertyGroup("Qmax", recipGroup);
+
+      string realGroup("Real Space");
+      setPropertyGroup("PDFType", realGroup);
+      setPropertyGroup("DeltaR", realGroup);
+      setPropertyGroup("Rmax", realGroup);
+      setPropertyGroup("rho0", realGroup);
     }
 
     std::map<string, string> PDFFourierTransform::validateInputs()
@@ -176,12 +207,16 @@ namespace Mantid
       else if (inputXunit == "dSpacing")
       {
         // convert the x-units to Q/MomentumTransfer
+        std::transform(inputDQ.begin(), inputDQ.end(), inputQ.begin(), inputDQ.begin(),
+                       std::divides<double>());
         const double PI_2(2.*M_PI);
         std::transform(inputQ.begin(), inputQ.end(), inputQ.begin(),
                        std::bind1st(std::divides<double>(), PI_2));
 
+
         // reverse all of the arrays
         std::reverse(inputQ.begin(), inputQ.end());
+        std::reverse(inputDQ.begin(), inputDQ.end());
         std::reverse(inputFOfQ.begin(), inputFOfQ.end());
         std::reverse(inputDfOfQ.begin(), inputDfOfQ.end());
       }
@@ -203,13 +238,13 @@ namespace Mantid
         for (size_t i = 0; i < inputFOfQ.size(); ++i)
         {
           deltaQ = inputQ[i+1] -inputQ[i];
-          inputFOfQ[i] = inputFOfQ[i]/deltaQ;
-          inputDfOfQ[i] = inputDfOfQ[i]/deltaQ; // TODO feels wrong
-          inputQ[i] += .5*deltaQ;
+          inputFOfQ[i] = inputFOfQ[i]*deltaQ;
+          inputDfOfQ[i] = inputDfOfQ[i]*deltaQ; // TODO feels wrong
+          inputQ[i] += -.5*deltaQ;
           inputDQ[i] += .5*(inputDQ[i] + inputDQ[i+1]); // TODO running average
         }
-        inputQ.pop_back();
-        inputDQ.pop_back();
+        inputQ.push_back(inputQ.back()+deltaQ);
+        inputDQ.push_back(inputDQ.back()); // copy last value
         */
       }
 
@@ -256,12 +291,13 @@ namespace Mantid
       {
         g_log.information() << "Specified Qmax > range of data. Adjusting to data range.\n";
       }
-      g_log.debug() << "Using Qmin = " << qmin << "Angstroms^-1 and Qmax = "
+      g_log.debug() << "User specified Qmin = " << qmin << "Angstroms^-1 and Qmax = "
                           << qmax << "Angstroms^-1\n";
+
       // get pointers for the data range
       size_t qmin_index;
       size_t qmax_index;
-      { // make variable scope small
+      { // keep variable scope small
         auto qmin_ptr = std::upper_bound(inputQ.begin(), inputQ.end(), qmin);
         qmin_index = std::distance(inputQ.begin(), qmin_ptr);
         if (qmin_index == 0)
@@ -278,6 +314,7 @@ namespace Mantid
         rdelta = M_PI/qmax;
       size_t sizer = static_cast<size_t>(rmax/rdelta);
 
+      // create the output workspace
       API::MatrixWorkspace_sptr outputWS
           = WorkspaceFactory::Instance().create("Workspace2D", 1, sizer, sizer);
       outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
