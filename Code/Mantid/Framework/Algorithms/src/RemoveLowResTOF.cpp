@@ -74,6 +74,9 @@ void RemoveLowResTOF::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
+  declareProperty(new WorkspaceProperty<MatrixWorkspace>("LowResTOFWorkspace", "", Direction::Output, PropertyMode::Optional),
+                  "The name of the optional output workspace that contains low resolution TOF which are removed "
+                  "from input workspace.");
 
   auto validator = boost::make_shared<BoundedValidator<double> >();
   validator->setLower(0.01);
@@ -116,6 +119,13 @@ void RemoveLowResTOF::exec()
   m_wavelengthMin = this->getProperty("MinWavelength");
 
   m_numberOfSpectra = m_inputWS->getNumberHistograms();
+
+  std::string lowreswsname = getPropertyValue("LowResTOFWorkspace");
+  if (lowreswsname.size() > 0)
+    m_outputLowResTOF = true;
+  else
+    m_outputLowResTOF = false;
+
 
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
@@ -164,6 +174,8 @@ void RemoveLowResTOF::exec()
   this->runMaskDetectors();
 }
 
+/** Remove low resolution TOF from an EventWorkspace
+  */
 void RemoveLowResTOF::execEvent()
 {
   // set up the output workspace
@@ -183,6 +195,21 @@ void RemoveLowResTOF::execEvent()
     matrixOutW = boost::dynamic_pointer_cast<MatrixWorkspace>(outW);
     this->setProperty("OutputWorkspace", matrixOutW);
   }
+
+  MatrixWorkspace_sptr matrixLowResW = getProperty("LowResTOFWorkspace");
+  DataObjects::EventWorkspace_sptr lowW;
+  if (m_outputLowResTOF)
+  {
+    // Duplicate input workspace to output workspace
+    lowW = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
+          API::WorkspaceFactory::Instance().create("EventWorkspace", m_numberOfSpectra, 2, 1));
+    API::WorkspaceFactory::Instance().initializeFromParent(m_inputWS, lowW, false);
+    lowW->copyDataFrom((*m_inputEvWS));
+
+    matrixLowResW = boost::dynamic_pointer_cast<MatrixWorkspace>(lowW);
+    setProperty("LowResTOFWorkspace", matrixLowResW);
+  }
+
   g_log.debug() << "TOF range was " << m_inputEvWS->getTofMin() << " to "
                       << m_inputEvWS->getTofMax() << " microseconds\n";
 
@@ -204,17 +231,44 @@ void RemoveLowResTOF::execEvent()
       double tmin = this->calcTofMin(workspaceIndex);
       if (tmin != tmin)
       {
+        // Problematic
         g_log.warning() << "tmin for workspaceIndex " << workspaceIndex << " is nan. Clearing out data.\n";
         outW->getEventList(workspaceIndex).clear(false);
         numClearedEventLists += 1;
+
+        if (m_outputLowResTOF)
+          lowW->getEventList(workspaceIndex).clear(false);
       }
       else if (tmin > 0.)
       {
+        // there might be events between 0 and tmin (i.e., low resolution)
         outW->getEventList(workspaceIndex).maskTof(0., tmin);
         if (outW->getEventList(workspaceIndex).getNumberEvents() == 0)
           numClearedEventLists += 1;
+
+        if (m_outputLowResTOF)
+        {
+          double tmax = lowW->getEventList(workspaceIndex).getTofMax();
+          if (tmax != tmax)
+          {
+            g_log.warning() << "tmax for workspaceIndex " << workspaceIndex << " is nan. Clearing out data.\n";
+            lowW->getEventList(workspaceIndex).clear(false);
+          }
+          else
+          {
+            lowW->getEventList(workspaceIndex).maskTof(tmin, tmax+DBL_MIN);
+          }
+        }
       }
-      // do nothing if tmin <= 0.
+      else
+      {
+        // do nothing if tmin <= 0. for outW
+        if (m_outputLowResTOF)
+        {
+          // tmin = 0.  no event will be in low resolution
+          lowW->getEventList(workspaceIndex).clear(false);
+        }
+      } //
     }
   }
   g_log.information() << "Went from " << numEventsOrig << " events to "
@@ -253,6 +307,10 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex)
     if (sqrtdmin <= 0.)
       return 0.;
     tmin = sqrtdmin * sqrtdmin / dspmap;
+    if (tmin != tmin)
+    {
+      g_log.warning() << "tmin is nan because dspmap = " << dspmap << ".\n";
+    }
   }
   else
   {
@@ -272,6 +330,7 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex)
   }
 
   g_log.debug() << "tmin[" << workspaceIndex << "] " << tmin << "\n";
+
   return tmin;
 }
 
