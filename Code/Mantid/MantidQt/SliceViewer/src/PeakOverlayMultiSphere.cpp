@@ -133,7 +133,7 @@ namespace MantidQt
 
     void PeakOverlayMultiSphere::movePosition(PeakTransform_sptr transform)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_physicalPeaks.size(); ++i)
       { 
         m_physicalPeaks[i]->movePosition(transform);
       }

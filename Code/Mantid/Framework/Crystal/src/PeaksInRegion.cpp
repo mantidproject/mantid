@@ -25,22 +25,22 @@ namespace Mantid
 namespace Crystal
 {
 
-  std::string detectorSpaceFrame()
+  std::string PeaksInRegion::detectorSpaceFrame()
   {
     return "Detector space";
   }
 
-  std::string qLabFrame()
+  std::string PeaksInRegion::qLabFrame()
   {
     return "Q (lab frame)";
   }
 
-  std::string qSampleFrame()
+  std::string PeaksInRegion::qSampleFrame()
   {
     return "Q (sample frame)";
   }
 
-  std::string hklFrame()
+  std::string PeaksInRegion::hklFrame()
   {
     return "HKL";
   }

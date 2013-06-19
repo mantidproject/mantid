@@ -136,7 +136,6 @@ namespace MantidQt
       PeakBoundingBox transformedViewableRegion = m_slicePoint.makeSliceBox(1e-6); //TODO, could actually be calculated as a single plane with z = 0 thickness.
       transformedViewableRegion.transformBox(m_transform);
 
-      m_viewPeaks->getOccupancyIntoView();
       double effectiveRadius = m_viewPeaks->getRadius(); // Effective radius of each peak representation.
 
       Mantid::API::IPeaksWorkspace_sptr peaksWS =

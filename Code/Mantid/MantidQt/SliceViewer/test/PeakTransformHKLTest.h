@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidQtSliceViewer/PeakTransformHKL.h"
+#include "MantidCrystal/PeaksInRegion.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
 
@@ -236,6 +237,11 @@ void test_getFriendlyName()
   PeakTransformHKL transform;
   TS_ASSERT_EQUALS(PeakTransformHKL::name(), transform.getFriendlyName());
   TS_ASSERT_EQUALS("HKL", transform.getFriendlyName());
+}
+
+void test_friendlyname_against_PeaksInRegion()
+{
+  TSM_ASSERT_EQUALS("These labels must be compatible", PeakTransformHKL::name(), Mantid::Crystal::PeaksInRegion::hklFrame());
 }
 
 void test_getCoordinateSystem()
