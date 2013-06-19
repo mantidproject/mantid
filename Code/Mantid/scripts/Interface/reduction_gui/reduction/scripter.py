@@ -548,7 +548,8 @@ class BaseReductionScripter(object):
         content += "MPI_SUFFIX=_compat_openmpi\n"
         content += "MPI_HOME=/usr/lib64/compat-openmpi\n"
         
-        content += "PREFIX=/sw/fermi/mantid-mpi/mantid-mpi-2.4.0-1.el6.x86_64\n"
+        #content += "PREFIX=/sw/fermi/mantid-mpi/mantid-mpi-2.4.0-1.el6.x86_64\n"
+        content += "PREFIX=/sw/fermi/mantid-mpi/mantid-mpi-2.5.502-1.el6.x86_64\n"
         content += "PATH=$PATH:$PREFIX/bin\n"
         # Second one is to pick up boostmpi (not openmpi itself which comes from the compat package above)
         content += "LD_LIBRARY_PATH=$PREFIX/lib:/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH\n"
@@ -559,8 +560,8 @@ class BaseReductionScripter(object):
 
         content += "# Kick off python on the computes...\n"
         content += "# Note: any MANTIDPLOT_* environment variables are set by MantidPlot when it submits the job\n"
-        #content += "/usr/lib64/openmpi/bin/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE python job_submission.py\n"
-        content += "$MPI_BIN/mpirun -n $MANTIDPLOT_NUM_NODES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE -x PATH=$PATH -x LD_LIBRARY_PATH=$LD_LIBRARY_PATH -x PYTHONPATH=$PYTHONPATH python %s\n" % script_name
+        content += "/usr/lib64/openmpi/bin/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE python job_submission.py\n"
+        #content += "$MPI_BIN/mpirun -n $MANTIDPLOT_NUM_NODES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE -x PATH=$PATH -x LD_LIBRARY_PATH=$LD_LIBRARY_PATH -x PYTHONPATH=$PYTHONPATH python %s\n" % script_name
         fd = open(file_path, 'w')
         fd.write(content)
         fd.close()
