@@ -500,7 +500,6 @@ void LoadEventPreNexus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
       workspaceIndex += 1;
     }
   }
-  workspace->doneAddingEventLists();
 
   //For slight speed up
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);

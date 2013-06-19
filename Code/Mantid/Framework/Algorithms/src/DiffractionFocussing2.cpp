@@ -498,9 +498,6 @@ void DiffractionFocussing2::execEvent()
     PARALLEL_CHECK_INTERUPT_REGION
   } // (done with parallel by groups)
 
-  //Finalize the maps
-  out->doneAddingEventLists();
-
   //Now that the data is cleaned up, go through it and set the X vectors to the input workspace we first talked about.
   delete prog; prog = new Progress(this,0.9,1.0,nGroups);
   for (size_t workspaceIndex = 0; workspaceIndex < this->m_validGroups.size(); workspaceIndex++)

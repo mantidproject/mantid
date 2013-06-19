@@ -74,7 +74,6 @@ public:
         spaceEvent->getEventList(j).setDetectorID(j);
         spaceEvent->getAxis(1)->setValue(j, j);
       }
-      spaceEvent->doneAddingEventLists();
       x.access().push_back(0.0);
       x.access().push_back(10.0);
       spaceEvent->setAllX(x);
