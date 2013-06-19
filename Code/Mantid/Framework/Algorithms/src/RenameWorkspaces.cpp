@@ -1,7 +1,7 @@
 /*WIKI* 
 
 Renames a list of workspaces to a different name in the data service.
-This renaming is done by either replacing with new names in a list or adding a prefix, suffix or both.
+This renaming is done by either replacing with new names in a list or adding a prefix, suffix or both prefix and suffix.
 The Renaming is implemented by calling RenameWorkspace as a child algorithm having defined the output workspace appropriately.
 
 If run on a group workspace, the members of the group will be renamed in the same manner as done by RemameWorkspace
