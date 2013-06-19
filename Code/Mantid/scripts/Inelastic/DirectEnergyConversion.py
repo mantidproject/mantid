@@ -107,7 +107,7 @@ class DirectEnergyConversion(object):
         else:
             var_name = "diag_mask"
 
-        # Check for any keywords that have not been supplied and put in the defaults
+        # Check for any keywords that have not been supplied and put in the values set on reducer
         for par in self.__diag_params:
             arg = par.lstrip('diag_')
             if arg not in kwargs:
@@ -144,6 +144,7 @@ class DirectEnergyConversion(object):
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
             background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
+            Logger.notice("Diagnose: finisthed convertUnits ")
             background_int *= self.scale_factor
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
@@ -198,6 +199,7 @@ class DirectEnergyConversion(object):
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
+        Logger.notice("do_white: finisthed convertUnits ")
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
         low = self.wb_integr_range[0]
         upp = self.wb_integr_range[1]
@@ -367,7 +369,7 @@ class DirectEnergyConversion(object):
                         CopyInstrumentParameters(InputWorkspace=self.det_cal_file_ws,OutputWorkspace=result_name)
 
         if self.background == True:
-            # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
+            # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
             ConvertToDistribution(Workspace=result_name)    
             if (self.facility == "SNS"):
                 FlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
@@ -395,6 +397,7 @@ class DirectEnergyConversion(object):
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
+        Logger.notice("_do_mono: finished ConvertUnits")
         
         if not self.energy_bins is None:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
@@ -407,6 +410,7 @@ class DirectEnergyConversion(object):
                 ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
             else:
                 DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
+                Logger.notice("_do_mono: finished DetectorEfficiencyCor")
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
@@ -492,11 +496,37 @@ class DirectEnergyConversion(object):
         common.clear_loaded_data()
         
         return sample_wkspace
+#----------------------------------------------------------------------------------
+#              COMPLEX SETTERS/GETTERS   
+#----------------------------------------------------------------------------------
+    def __getattribute__(self, name):
+        if name == "van_rmm":
+            return self.__van_rmm
+        else:
+            return object.__getattribute__(self,name);
+
+    def __setattr__(self, name,value):
+        if name == 'energy_bins':
+            if value != None:
+                if isinstance(value,str):
+                    list = str.split(value,',');
+                    value = [float(list[0]),float(list[1]),float(list[2])]
+                if len(value) != 3:
+                    raise KeyError("Energy_bin value has to be either list of 3 numbers or string, representing these three number separated by commas")
+
+        if name == 'map_file' or name == 'monovan_mapfile':
+            if value != None:
+                fileName, fileExtension = os.path.splitext(value)
+                if (not fileExtension):
+                    value=value+'.map'    
+
+
+        object.__setattr__(self, name, value)
+
 
 #----------------------------------------------------------------------------------
 #                        Reduction steps
 #----------------------------------------------------------------------------------
-
      
     def get_ei(self, input_ws, resultws_name, ei_guess):
         """
@@ -541,6 +571,11 @@ class DirectEnergyConversion(object):
         """
         Apply normalisation using specified source
         """
+        if method is None :
+            method = "undefined"
+        if not method in self.__normalization_methods:           
+            raise KeyError("Normaliation method: "+method+" is not among known normalization methods")
+
         # Make sure we don't call this twice
         method = method.lower()
         done_log = "DirectInelasticReductionNormalisedBy"
@@ -562,7 +597,7 @@ class DirectEnergyConversion(object):
             NormaliseByCurrent(InputWorkspace=data_ws, OutputWorkspace=result_name)
             output = mtd[result_name]
         else:
-            raise RuntimeError('Normalisation scheme ' + reference + ' not found. It must be one of monitor-1, current, peak or none')
+            raise RuntimeError('Normalisation scheme ' + reference + ' not found. It must be one of monitor-1, current, or none')
 
         # Add a log to the workspace to say that the normalisation has been done
         AddSampleLog(Workspace=output, LogName=done_log,LogText=method)
@@ -764,70 +799,50 @@ class DirectEnergyConversion(object):
         """
         # fomats availible for saving. As the reducer has to have a method to process one of this, it is private property
         self.__save_formats = ['.spe','.nxs','.nxspe']
+
+        ## Detector diagnosis
         # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word
         self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
-                              'diag_bleed_test']
-
-        self.fix_ei=False
-        self.energy_bins = None
-        self.background = False
-        self.normalise_method = 'monitor-1'
-        self.map_file = None
+                              'diag_bleed_test','diag_hard_mask']
         
+        self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
+        self.energy_bins = None
+        
+        # should come from Mantid
         if (self.instr_name == "CNCS" or self.instr_name == "ARCS" or self.instr_name == "SEQUOIA" or self.instr_name == "HYSPEC"):
             self.facility = "SNS"
             self.normalise_method  = 'current'
         else:
             self.facility = str(config.getFacility())
 
+        # Motor names-- SNS stuff -- psi used by nxspe file
         # These should be reconsidered on moving into _Parameters.xml
-        # The Ei requested
-        self.ei_requested = None
-        self.monitor_workspace = None
-        
-        self.time_bins = None
-                
-        # Motor names
+        self.monitor_workspace = None  # looks like unused parameter                  
         self.motor = None
         self.motor_offset = None
-        self.psi = None
+        self.psi = float('NaN')
                 
-        # Detector diagnosis
-        self.spectra_masks = None
+       
         
-        # Absolute normalisation
-        self.abs_map_file = None
-        self.abs_spectra_masks = None
-        
-        # All this stuff should go to IDF file
-        # Detector Efficiency Correction
-        self.apply_detector_eff = True
-        
-        # Ki/Kf factor correction
-        self.apply_kikf_correction = True
-
-        # the workspace which contains already loaded detector calibration file and used to save time on multiple det_cal_file loadings  -- not yet implemented
-        #self.det_cal_file_ws = None
-        # Option to move detector positions based on the information
+        # Option to move detector positions based on the information 
         self.relocate_dets = False
 
         #The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :(
-        self.__van_rmm = 50.9415
-  
+        self.__van_rmm = 50.9415 
 
         # special property -- synonims -- how to treat external parameters. 
         try:           
-            self.synonims = self.get_default_parameter("synonims")
+            self.__synonims = self.get_default_parameter("synonims")
         except Exception:
-            self.synonims=dict();
+            self.__synonims=dict();
 
         par_names = self.instrument.getParameterNames()
         if len(par_names) == 0 :
             raise RuntimeError("Can not obtain instrument parameters describing inelastic conversion ")
 
         # build the dictionary of necessary allowed substitution names and substitute parameters with their values
-        self.synonims = self.build_subst_dictionary(self.synonims)
+        self.__synonims = self.build_subst_dictionary(self.__synonims)
 
         # build the dictionary which allows to process coupled property, namely the property, expressed through other properties values
         self.build_coupled_keys_dict(par_names)
@@ -905,8 +920,8 @@ class DirectEnergyConversion(object):
         properties_changed=[];
         for par_name,value in kwargs.items() :
 
-            if par_name in self.synonims :
-                par_name = self.synonims[par_name]
+            if par_name in self.__synonims :
+                par_name = self.__synonims[par_name]
 
             # may be a problem, one tries to set up non-existing value
             if not hasattr(self,par_name) :
@@ -966,12 +981,12 @@ class DirectEnergyConversion(object):
                if n_keys>1 : # this is the property we want
                    for i in xrange(0,len(keys)) :
                        key = keys[i];
-                       if key in self.synonims:
-                           key = self.synonims[key];
+                       if key in self.__synonims:
+                           key = self.__synonims[key];
                        
                        final_name = name
-                       if final_name in self.synonims:
-                           final_name = self.synonims[name];
+                       if final_name in self.__synonims:
+                           final_name = self.__synonims[name];
 
                        composite_keys_subst[key] = (final_name,i,n_keys);
                        composite_keys_set.add(name)
@@ -1001,8 +1016,8 @@ class DirectEnergyConversion(object):
             if key_name == 'synonims' : # this is special key we have already dealt with
                 continue
 
-            if key_name in self.synonims: # replace name with its equivalent
-                key_name = self.synonims[name]
+            if key_name in self.__synonims: # replace name with its equivalent
+                key_name = self.__synonims[name]
 
             # redefine compostie keys set through synonims names for the future usage
             if name in self.composite_keys_set:
@@ -1032,6 +1047,15 @@ class DirectEnergyConversion(object):
 
         # reset the list of composite names defined using synonims
         self.composite_keys_set=new_comp_name_set
+
+    #def __getattribute__(self, name):
+    #    if name == "monovan_integr_range":
+    #        if self.monovan_integr_range is None:
+    #            ei = self.energy
+    #            self.monovan_integr_range = 
+    #        return super(DirectEnergyConversion, self).__getattribute__(name)
+    #    else:
+    #        return super(DirectEnergyConversion, self).__getattribute__(name)
 
     def log(self, msg):
         """Send a log message to the location defined
@@ -1069,8 +1093,8 @@ class DirectEnergyConversion(object):
             if self.instrument.hasParameter(keyword) :
                 print "****: ***************************************************************************** ";        
                 print "****: IDF value for keyword: ",keyword," is: ",self.get_default_parameter(keyword)
-                if keyword in self.synonims :
-                    fieldName = self.synonims[keyword]
+                if keyword in self.__synonims :
+                    fieldName = self.__synonims[keyword]
                     print "****: This keyword is known to reducer as: ",fieldName," and its value is: ",self.fieldName
                 else:
                     print "****: Its current value in reducer is: ",getattr(self,keyword)
@@ -1205,14 +1229,40 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(tReducer.ei_mon_spectra,[10000,2000])
         self.assertTrue("ei_mon_spectra" in prop_changed,"changing test_mon_spectra_composite should change ei_mon_spectra") 
 
-    def test_set_mono_range(self):
+    def test_set_get_mono_range(self):
         tReducer = self.reducer
         # should do nothing as already initialized above, but if not will initiate the instrument
         tReducer.initialise("MAP");
 
-        energy_incident = 100
+        energy_incident = 100 
         if tReducer.monovan_integr_range is None :
             tReducer.monovan_integr_range = [tReducer.monovan_lo_frac*energy_incident,tReducer.monovan_hi_frac*energy_incident]
+
+    def test_comlex_get(self):
+        tReducer = self.reducer
+
+        van_rmm = tReducer.van_rmm;
+        self.assertEqual(50.9415,van_rmm)
+
+    def test_comlex_set(self):
+        tReducer = self.reducer
+
+        tReducer.energy_bins='-30,3,10'
+        self.assertEqual([-30,3,10],tReducer.energy_bins)
+        
+        tReducer.energy_bins=[-20,4,100]
+        self.assertEqual([-20,4,100],tReducer.energy_bins)
+
+        tReducer.map_file = "some_map"
+        self.assertEqual("some_map.map",tReducer.map_file)
+        tReducer.monovan_mapfile = "other_map"
+        self.assertEqual("other_map.map",tReducer.monovan_mapfile)
+
+        tReducer.monovan_mapfile = "other_map.myExt"
+        self.assertEqual("other_map.myExt",tReducer.monovan_mapfile)
+
+        #self.assertRaises(KeyError,tReducer.energy_bins=20,None)
+         
 
     #def test_diag_call(self):
     #    tReducer = self.reducer

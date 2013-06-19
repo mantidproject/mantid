@@ -24,14 +24,20 @@
 <parameter name="data_file_ext" type="string">
    <value val=".RAW"/>
 </parameter>
-<!-- The name of the hard mask file to use together with diag masking -->
+<!-- The name of the hard mask file to use together with diag masking 4to1_124mod.msk-->
 <parameter name="hard_mask_file" type="string">
-    <value val="4to1_124mod.msk"/>
+    <value val="None"/>
 </parameter>
 <!-- The if true, use only hard mask file specified above and do not run diagnostics procedures -->
 <parameter name="use_hard_mask_only" type="bool">
     <value val="False"/>
 </parameter>
+<!-- The map file used when calculating absolute units conversion integrals 
+     This map usually groups together large areas of detectors to obtain proper vanadium statistics  -->
+<parameter name="monovan_mapfile" type="string">
+   <value val="4to1_mid_lowang.map"/>
+</parameter>
+
 
 
 
@@ -97,39 +103,25 @@
 
 
 
-<!--  detector_van_range- integratin in E(mev) for detector vanadium data [20,100] -->
+<!--  detector_van_range- integratin in E(mev) for detector(white beam) vanadium data [20,100] -->
 <parameter name="wb-integr-min">
   <value val="20"/>
 </parameter>
 <parameter name="wb-integr-max">
-  <value val="100"/>
+  <value val="300"/>
 </parameter>
 <parameter name="wb_integr_range"   type="string">
     <value val="wb-integr-min:wb-integr-max"/>
 </parameter>
 
 
-<parameter name="monovan-integr-min">
-  <value val="-1"/>
-</parameter>
-<parameter name="monovan-integr-max">
-  <value val="1"/>
-</parameter>
-<parameter name="monovan_integr_range"  type="string">
-    <value val="monovan-integr-min:monovan-integr-max"/>
-</parameter>
-
-<parameter name="vanadium-mass">
-  <value val="30.1"/>
-</parameter>
-
 
 <!-- integration range for background tests  (in TOF) - composite property -->
 <parameter name="bkgd-range-min"> 
-  <value val="15000"/>
+  <value val="12000"/>
 </parameter>
 <parameter name="bkgd-range-max">
-  <value val="19000"/>
+  <value val="18000"/>
 </parameter>
 <parameter name="background_range"  type="string">
       <value val="bkgd-range-min:bkgd-range-max"/>
@@ -186,7 +178,7 @@
 
 <!-- Fraction of median to consider counting low for the white beam diag (vv_lo)  vanlo=0.1  -->
 <parameter name="diag_van_lo">
-  <value val="0.01"/>
+  <value val="0.1"/>
 </parameter>
 
 <!-- Fraction of median to consider counting high for the white beam diag (vv_hi) vanhi=1.5 -->
@@ -207,9 +199,27 @@
 </parameter>
 <parameter name="diag_background_range">
 </parameter>
-<!-- **************************************** DIAGNOSTICS DEFAILTS END ****************************************    -->
-<!--  -->
 
+<!--  -->
+<!--  Bleeding corrections   -->
+
+<!--  the number of pixels ignored within the bleed test diagnostic -->
+<parameter name="bleed_pixels">
+    <value val="0"/>
+</parameter>
+<!--  the maximum framerate allowed in a tube -->
+<parameter name="bleed_maxrate">
+    <value val="0"/>
+</parameter>
+<!-- True if the bleed tests should be run use_bleeding-->
+<parameter name="diag_bleed_test"  type="bool">
+    <value val="False"/>
+</parameter>
+
+<!-- **************************************** DIAGNOSTICS DEFAILTS END ****************************************    -->
+
+
+<!-- **************************************** ABSOLUTE UNITS CORRECTION DEFAULTS ********************************  -->
 <!-- Absolute units conversion average -->
 <parameter name="monovan_lo_bound">
   <value val="0.01"/>
@@ -252,34 +262,34 @@
 <parameter name="abs_units_van_range"  type="string">
   <value val="None"/>
 </parameter>
-<!-- Sample mass should usually be changed by user-->
+<!-- Sample mass used in absolute units normalization and should usually be changed by user-->
 <parameter name="sample_mass">
   <value val="1"/>
 </parameter>
-<!-- Sample rmm should usually be changed by user -->
+<!-- Sample rmm used in absolute units normalization should usually be changed by user -->
 <parameter name="sample_rmm">
   <value val="1"/>
 </parameter>
-
-
-<!--  -->
-<!--  Bleeding corrections   -->
-
-<!--  the number of pixels ignored within the bleed test diagnostic -->
-<parameter name="bleed_pixels">
-    <value val="0"/>
+<!-- Vanaduim mass used in absolute units normalization and is usually instrument specific (changes rarely) -->
+<parameter name="vanadium-mass">
+  <value val="30.1"/>
 </parameter>
-<!--  the maximum framerate allowed in a tube -->
-<parameter name="bleed_maxrate">
-    <value val="0"/>
+<!-- if this value set to true, modo-vanadium run is not analyzed and masks obtained for arbitrary units are used for mono-vanadium -->
+<parameter name="use_sam_msk_on_monovan" type = "bool">
+  <value val="False"/>
 </parameter>
-<!-- True if the bleed tests should be run use_bleeding-->
-<parameter name="diag_bleed_test"  type="bool">
-    <value val="False"/>
+<!-- if this value is provided (nont None) it is string reperesentation of the number used instead of calculating mono-vanadium based normalization factor 
+   one does not need to provide mono-vanadium run if this value is provided as it will be used instead
+  -->
+<parameter name="mono_correction_factor" type="string">
+  <value val="None"/>
 </parameter>
+  
+<!-- **************************************** ABSOLUTE UNITS CORRECTION DEFAULTS END ****************************  -->
 
-
-<!-- normalise_method normalistion. Availible values are: monitor-1,monitor-2, uamph current -->
+<!-- normalise_method normalistion. Availible values are: none (-largely meaningles), monitor-1, current 
+     the acceptable values are defined in DirectEnergyConversion init routine as recognized by direct energy conversion normalize method
+     these three are currently disabled/unknown: monitor-2, uamph peak-->
 <parameter name="normalise_method" type="string">
     <value val="monitor-1"/>
 </parameter>
@@ -289,11 +299,11 @@
     <value val="False"/>
 </parameter>
 
-<!-- The format of output data. Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace) 
-     Unlike anything else, three possible v values are defined in DirectEnergy conversion. 
+<!-- This parameter controls the format of output data writteb by reducer. Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace) 
+     Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs-->  
 <parameter name="save_format" type="string">
-   <value val=".nxspe"/>
+   <value val="None"/>
 </parameter>
 
 <!-- If one wants to sum runs   -->  
@@ -305,6 +315,12 @@
 <parameter name="apply_detector_eff"  type="bool">
    <value val="True"/>
 </parameter>
+<!-- # Multiply result by ki/kf value -->
+<parameter name="apply_kikf_correction"  type="bool">
+   <value val="True"/>
+</parameter>
+
+
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
      the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
@@ -321,9 +337,11 @@
        scale_factor=scale-factor;
        wb_scale_factor=wb-scale-factor;
        monovan_integr_range=abs_units_van_range;
-       hard_mask_file=hardmaskPlus;
+       monovan_lo_value = monovan-integr-min;
+       monovan_hi_value = monovan-integr-max;       
        use_hard_mask_only=hardmaskOnly;
        background_range = bkgd_range;
+       hard_mask  = hard_mask_file=hardmaskPlus;       
        van_out_lo = diag_van_median_rate_limit_lo=diag_van_out_lo;
        van_out_hi = diag_van_median_rate_limit_hi=diag_van_out_hi;
        van_lo     = diag_van_median_sigma_lo=diag_van_lo;
