@@ -26,8 +26,8 @@ namespace MDEvents
    *        calculating distance.
    * @return
    */
-  CoordTransformDistance::CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed)
-  : CoordTransform(inD, 1)
+  CoordTransformDistance::CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed, const size_t outD)
+  : CoordTransform(inD, outD)
   {
     // Create and copy the arrays.
     m_center = new coord_t[inD];
@@ -70,17 +70,39 @@ namespace MDEvents
    */
   void CoordTransformDistance::apply(const coord_t * inputVector, coord_t * outVector) const
   {
-    coord_t distanceSquared = 0;
-    for (size_t d=0; d<inD; d++)
-    {
-      if (m_dimensionsUsed[d])
-      {
-        coord_t dist = inputVector[d] - m_center[d];
-        distanceSquared += (dist * dist);
-      }
-    }
-    /// Return the only output dimension
-    outVector[0] = distanceSquared;
+	if(outD == 1)
+	{
+	coord_t distanceSquared = 0;
+	for (size_t d=0; d<inD; d++)
+	{
+	  if (m_dimensionsUsed[d])
+	  {
+		coord_t dist = inputVector[d] - m_center[d];
+		distanceSquared += (dist * dist);
+	  }
+	}
+	/// Return the only output dimension
+	outVector[0] = distanceSquared;
+	}
+	else
+	{
+		// Cylinder 2D output radius and length
+		coord_t lenQdata = 0.0;
+		coord_t lenQpeak = 0.0;
+		coord_t cosAng = 0.0;
+		for (size_t d=0; d<inD; d++)
+		{
+			lenQdata += inputVector[d] * inputVector[d];
+			lenQpeak += m_center[d] * m_center[d];
+			cosAng += m_center[d] * inputVector[d];
+		}
+		lenQdata = std::sqrt(lenQdata);
+		lenQpeak = std::sqrt(lenQpeak);
+		cosAng /= (lenQpeak * lenQdata);
+		coord_t angle = std::acos(cosAng);
+		outVector[0] = lenQdata * std::sin(angle);
+		outVector[1] = 2 * std::fabs(lenQdata * cosAng - lenQpeak);
+	}
   }
 
   //----------------------------------------------------------------------------------------------

@@ -138,6 +138,9 @@ namespace MDAlgorithms
         "The signal density around the peak (BackgroundInnerRadius < r < BackgroundOuterRadius) is used to estimate the background under the peak.\n"
         "If smaller than PeakRadius, no background measurement is done." );
 
+    declareProperty(new PropertyWithValue<double>("CylinderLength",0.0,Direction::Input),
+        "Length of cylinder in which to integrate (in the same units as the workspace; 0.0 for sphere).");
+
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::Input),
         "A PeaksWorkspace containing the peaks to integrate.");
 
@@ -182,6 +185,9 @@ namespace MDAlgorithms
     double BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
     /// Start radius of the background
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
+    /// Cylinder Length to use around peaks for cylinder
+    double CylinderLength = getProperty("CylinderLength");
+    CylinderLength /= (2.0 * M_PI);
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
@@ -241,11 +247,19 @@ namespace MDAlgorithms
         center[d] = static_cast<coord_t>(pos[d]);
       }
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
+      CoordTransformDistance cylinder(nd, center, dimensionsUsed, 2);
 
       // Perform the integration into whatever box is contained within.
       signal_t signal = 0;
       signal_t errorSquared = 0;
-      ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), signal, errorSquared);
+      if (CylinderLength == 0.0)
+      {
+    	  ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), signal, errorSquared);
+      }
+      else
+      {
+    	  ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(CylinderLength), signal, errorSquared);
+      }
 
       // Integrate around the background radius
       signal_t bgSignal = 0;
@@ -253,7 +267,14 @@ namespace MDAlgorithms
       if (BackgroundOuterRadius > PeakRadius)
       {
         // Get the total signal inside "BackgroundOuterRadius"
-        ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundOuterRadius*BackgroundOuterRadius), bgSignal, bgErrorSquared);
+    	  if (CylinderLength == 0.0)
+    	  {
+    		  ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundOuterRadius*BackgroundOuterRadius), bgSignal, bgErrorSquared);
+    	  }
+          else
+          {
+        	  ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(CylinderLength), bgSignal, bgErrorSquared);
+          }
 
         // Evaluate the signal inside "BackgroundInnerRadius"
         signal_t interiorSignal = 0;
@@ -261,7 +282,16 @@ namespace MDAlgorithms
 
         // Integrate this 3rd radius, if needed
         if (BackgroundInnerRadius != PeakRadius)
-          ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundInnerRadius*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
+        {
+        	if (CylinderLength == 0.0)
+        	{
+        		ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundInnerRadius*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
+        	}
+            else
+            {
+            	ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundInnerRadius), static_cast<coord_t>(CylinderLength), interiorSignal, interiorErrorSquared);
+            }
+        }
         else
         {
           // PeakRadius == BackgroundInnerRadius, so use the previous value

@@ -167,7 +167,18 @@ public:
    * @param[out] signal :: set to the integrated signal
    */
     virtual void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
-
+    /** Cylinder (peak) integration
+     * The CoordTransform object could be used for more cylinder
+     * reduces the dimensions to two values.
+     *
+     * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
+     *        dimensions to the distance (squared) from the center of the sphere.
+     * @param radius :: radius of cylinder below which to integrate
+     * @param length :: length of cylinder below which to integrate
+     * @param signal [out] :: set to the integrated signal
+     * @param errorSquared [out] :: set to the integrated squared error.
+      */
+    virtual void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared) const = 0;
 
     /** Split sub-boxes, if this is possible and neede for this box */
     virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)=0; 
