@@ -215,8 +215,10 @@ class Equation:
         Compiles the Tex file into a DVI.  If there's an error, raise it.
         """
         self._logger.info("Generating dvi file")
+        if self._latex is None:
+            raise RuntimeError("Failed to specify latex executable")
         if not os.path.exists(self._latex):
-            raise RuntimeError("latex executable ('%s') does not exist" % LATEX)
+            raise RuntimeError("latex executable ('%s') does not exist" % self._latex)
 
         # run latex
         cmd = [self._latex, self.texfile]
@@ -263,8 +265,10 @@ class Equation:
         Encodes the original latex as an HTML comment.
         """
         self._logger.info("Generating png file")
+        if self._dvipng is None:
+            raise RuntimeError("Failed to specify dvipng executable")
         if not os.path.exists(self._dvipng):
-            raise RuntimeError("dvipng executable ('%s') does not exist" % DVIPNG)
+            raise RuntimeError("dvipng executable ('%s') does not exist" % self._dvipng)
 
         # this command works on RHEL6
         cmd = [self._dvipng, '-Ttight','-D120','-z9','-bg Transparent','--strict',
@@ -278,7 +282,7 @@ class Equation:
         if retcode != 0:
             print ' '.join(cmd)
             print output
-            raise RuntimeError()#"'%s' returned %d" % (" ".join(cmd), retcode))
+            raise RuntimeError("'%s' returned %d" % (" ".join(cmd), retcode))
 
         # verify the png file exists
         if not os.path.exists(self.pngfile):
