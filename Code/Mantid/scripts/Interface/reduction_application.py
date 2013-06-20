@@ -379,8 +379,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             
         dialog.exec_()
         if dialog.result()==1:
-            self.general_settings.cluster_user = dialog.username_edit.text()
-            self.general_settings.cluster_pass = dialog.pass_edit.text()
+            self.general_settings.cluster_user = str(dialog.username_edit.text())
+            self.general_settings.cluster_pass = str(dialog.pass_edit.text())
             self._cluster_details_set = True
             self._number_of_nodes = int(dialog.nodes_box.value())
             self._cores_per_node = int(dialog.cores_box.value())
