@@ -11,25 +11,30 @@ namespace Algorithms
 
 class ChopperConfiguration
 {
-  // FIXME :: Add std:: to string and vectors
 public:
-  ChopperConfiguration(double freq, string bankidstr, string cwlstr, string mndspstr, string mxdspstr, string maxtofstr, string splitdstr, string vrunstr);
+  ChopperConfiguration(double freq, std::string bankidstr, std::string cwlstr, std::string mndspstr,
+                       std::string mxdspstr, std::string maxtofstr);
   ~ChopperConfiguration();
 
 private:
-  parseString();
+  std::string parseString();
 
   double m_frequency;
-  std::vector<double> m_CWL;
-  vector<double> m_mindsps;
-  vector<double> m_maxdsps;
-  vector<double> m_maxtofs;
-  vector<int> m_bankIDs;
-  vector<double> m_splitds;
-  vector<int> m_vruns;
+  std::vector<double> m_vecCWL;
+  std::vector<double> m_mindsps;
+  std::vector<double> m_maxdsps;
+  std::vector<double> m_maxtofs;
+  std::vector<int> m_bankIDs;
+  std::vector<double> m_splitds;
+  std::vector<int> m_vruns;
+
+  /// Parse string to a double vector
+  std::vector<double> parseStringDbl(std::string instring);
+  /// Parse string to an integer vector
+  std::vector<int> parseStringInt(std::string instring);
 };
 
-  /** SaveGSASInstrumentFile : TODO: DESCRIPTION
+/** SaveGSASInstrumentFile : TODO: DESCRIPTION
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -51,40 +56,69 @@ private:
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SaveGSASInstrumentFile : public API::Algorithm
-  {
-  public:
-    SaveGSASInstrumentFile();
-    virtual ~SaveGSASInstrumentFile();
-    /// Algorithm's name
-    virtual const std::string name() const { return "SaveGSASInstrumentFile"; }
-    /// Algorithm's version
-    virtual int version() const { return (1); }
-    /// Algorithm's category for identification
-    virtual const std::string category() const { return "Diffraction;Algorithm\\Text"; }
+class DLLExport SaveGSASInstrumentFile : public API::Algorithm
+{
+public:
+  SaveGSASInstrumentFile();
+  virtual ~SaveGSASInstrumentFile();
+  /// Algorithm's name
+  virtual const std::string name() const { return "SaveGSASInstrumentFile"; }
+  /// Algorithm's version
+  virtual int version() const { return (1); }
+  /// Algorithm's category for identification
+  virtual const std::string category() const { return "Diffraction;Algorithm\\Text"; }
 
-  private:
-    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
-    /// Initialisation code
-    void init();
-    /// Execution code
-    void exec();
+private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
+  /// Initialisation code
+  void init();
+  /// Execution code
+  void exec();
+
+  /// Set up some constant by default
+  void initConstants(double chopperfrequency);
+
+  ///
+  ChopperConfiguration setupPG3Constants(int intfrequency);
+  ///
+  ChopperConfiguration setupNOMConstants(int intfrequency);
+
+  /// Convert to GSAS instrument file
+  void convertToGSAS(std::vector<int> banks, std::string gsasinstrfilename);
+
+  /// Build a data structure for GSAS's tabulated peak profile
+  void buildGSASTabulatedProfile(int bank);
+
+  /// Write out .prm/.iparm file
+  void writePRM(int bank, size_t numbanks, std::string prmfilename, bool isfirstbank);
+
+  ///
+  void makeParameterConsistent();
+
+  /// Caclualte L2 from DIFFC and L1
+  double calL2FromDtt1(double difc, double L1, double twotheta);
 
 
-    /// Instrument
-    std::string m_instrumetn;
-    /// L1
-    double m_L1;
-    /// L2
-    double m_L2;
-    /// 2Theta
-    double m_2theta;
-    /// Frequency
-    double m_frequency;
+  /// Instrument
+  std::string m_instrument;
+  /// L1
+  double m_L1;
+  /// L2
+  double m_L2;
+  /// 2Theta
+  double m_2theta;
+  /// Frequency
+  double m_frequency;
+  /// User input ID line
+  std::string m_id_line;
+  /// Sample
+  std::string m_sample;
 
-    
-  };
+};
+
+/// Examine whether str1's last few characters are same as str2
+bool endswith(std::string str1, std::string str2) { throw std::runtime_error("Implement soon!");}
 
 
 } // namespace Algorithms
