@@ -44,6 +44,10 @@ namespace CurveFitting
   private:
     /// String identifier
     std::string name() const { return "ComptonScatteringCountRate"; }
+    /// Set an attribute value (and possibly cache its value)
+    void setAttribute(const std::string& name,const Attribute& value);
+    /// Takes the string & constructs the constraint matrix
+    void parseIntensityConstraintMatrix(const std::string & value);
 
     /// Called by the framework just before an iteration is starting
     void iterationStarting();
@@ -54,6 +58,11 @@ namespace CurveFitting
 
     /// Cache reference to workspace for use in setupForFit
     void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+    /// Cache ptrs to the individial profiles
+    void cacheComptonProfiles();
+    /// Set up the constraint matrices
+    void createConstraintMatrices();
+
     
     /// Holder for non-owning functions cast as ComptonProfiles
     std::vector<ComptonProfile*> m_profiles;

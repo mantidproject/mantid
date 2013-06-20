@@ -190,6 +190,7 @@ set ( TEST_FILES
 	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonProfileTest.h
+	ComptonScatteringCountRateTest.h
 	ConvolutionTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h

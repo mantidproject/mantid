@@ -8,6 +8,12 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    /// Name of the intensity constraint matrix attribute
+    const char * CONSTRAINT_MATRIX_NAME = "IntensityConstraints";
+  }
+
   using Kernel::Math::SLSQPMinimizer;
 
   DECLARE_FUNCTION(ComptonScatteringCountRate)
@@ -19,15 +25,41 @@ namespace CurveFitting
     : CompositeFunction(), m_profiles(), m_fixedParamIndices(), m_cmatrix(), 
     m_eqMatrix(), m_errors(), m_dataErrorRatio()
   {
+    // Must be a string to be able to be passed through Fit
+    declareAttribute(CONSTRAINT_MATRIX_NAME, IFunction::Attribute(""));
   }
 
   //----------------------------------------------------------------------------------------------
   // Private methods
   //----------------------------------------------------------------------------------------------
 
+  /**
+   * @param name The name of the attribute that is being set
+   * @param value The attribute's value
+   */
+  void ComptonScatteringCountRate::setAttribute(const std::string& name, const API::IFunction::Attribute& value)
+  {
+    CompositeFunction::setAttribute(name, value);
+    if(name == CONSTRAINT_MATRIX_NAME) parseIntensityConstraintMatrix(value.asString());
+
+  }
+
+  /**
+   * @param value The string is assumed to be of the form "[0 1 0][1 1 0]..." where
+   * each [] pair specifies the row and the number of columns is given by the number of
+   * entries within the brackets. The number of columns must ultimately match the
+   * total number of intensities within the problem
+   */
+  void ComptonScatteringCountRate::parseIntensityConstraintMatrix(const std::string & value)
+  {
+    if(value.empty()) throw std::invalid_argument("ComptonScatteringCountRate::parseIntensityConstraintMatrix - Empty string not allowed.");
+    std::istringstream is(value);
+    Mantid::Kernel::fillFromStream(is, m_eqMatrix, '|');
+  }
+
   namespace
   {
-    ///cond
+    ///@cond
     struct Norm2
     {
       /// Compute the value of the objective function
@@ -78,7 +110,7 @@ namespace CurveFitting
 
     // Compute minimization with of Cx where the amplitudes are set to 1.0 for J(y)
     std::vector<double> x0(nparams, 1);
-    setFixedParameterValues(x0);    
+    setFixedParameterValues(x0);
     // Compute the constraint matrix
     this->updateCMatrixValues();
 
@@ -143,13 +175,22 @@ namespace CurveFitting
     // Grab the workspace index - Assumes it's the same for all functions
     int wsIndex = this->getFunction(0)->getAttribute("WorkspaceIndex").asInt();
     const auto & values = matrix->readY(wsIndex);
-    const auto & errors = matrix->readE(wsIndex);
     
     // Keep the errors for the constraint calculation
-    m_errors = errors;
-    m_dataErrorRatio.resize(errors.size());
-    std::transform(values.begin(), values.end(), errors.begin(), m_dataErrorRatio.begin(), std::divides<double>());
+    m_errors = matrix->readE(wsIndex);
+    m_dataErrorRatio.resize(m_errors.size());
+    std::transform(values.begin(), values.end(), m_errors.begin(), m_dataErrorRatio.begin(), std::divides<double>());
 
+    cacheComptonProfiles();
+    createConstraintMatrices();
+  }
+
+  /*
+   * Casts the points to ComptonProfiles to avoid overhead during fit. Also
+   * stores the indices, within the composite, of all of the intensity parameters.
+   */
+  void ComptonScatteringCountRate::cacheComptonProfiles()
+  {
     // Cache ptrs cast to ComptonProfile functions to that we can compute the constraint matrix
     const size_t nfuncs = this->nFunctions();
     m_profiles.resize(nfuncs);
@@ -170,23 +211,61 @@ namespace CurveFitting
         }
       }
       else
-      { 
+      {
         std::ostringstream os;
         os << "ComptonScatteringCountRate - Invalid function member at index '" << i << "'. "
            << "All members must be of type ComptonProfile";
         throw std::runtime_error(os.str());
       }
     }
-   
-    size_t nColsCMatrix(m_fixedParamIndices.size());
-    m_cmatrix = Kernel::DblMatrix(errors.size(),nColsCMatrix);
-    m_eqMatrix = Kernel::DblMatrix(1, nColsCMatrix);
-    m_eqMatrix[0][0] = 0.0;
-    m_eqMatrix[0][1] = 0.0;
-    m_eqMatrix[0][2] = 1.0;
-    m_eqMatrix[0][3] = 0.0;
-    m_eqMatrix[0][4] = -4.0;
   }
+
+  /*
+   * The equality constraint matrix is padded out to allow for any
+   * additional intensity constraints required each specific Compton profile.
+   * Also creates the inequality matrix
+   */
+  void ComptonScatteringCountRate::createConstraintMatrices()
+  {
+    const size_t nmasses = this->nFunctions();
+
+    // Sanity check that equality constraints matrix has the same number of columns as masses
+    if(m_eqMatrix.numCols() != nmasses)
+    {
+      std::ostringstream os;
+      os << "ComptonScatteringCountRate - Equality constraint matrix (Aeq) has incorrect number of columns (" << m_eqMatrix.numCols()
+                << "). The number of columns should match the number of masses (" << nmasses << ")";
+      throw std::invalid_argument(os.str());
+    }
+
+    // Constraint matrix
+    size_t nColsCMatrix(m_fixedParamIndices.size());
+    m_cmatrix = Kernel::DblMatrix(m_errors.size(),nColsCMatrix);
+
+    // Equality constraint
+    // The user-specified equality matrix needs to be padded on the left with the copies of the first column
+    // until the number of cols match those of the C matrix
+    auto userMatrix = m_eqMatrix; //copy original
+    const size_t nconstr = userMatrix.numRows();
+    const auto firstMassIndices = m_profiles.front()->intensityParameterIndices();
+    const size_t numExtraCols = (nColsCMatrix - nmasses);
+
+    m_eqMatrix = Kernel::DblMatrix(nconstr, nColsCMatrix);
+    for(size_t i = 0 ; i < nconstr; ++i)
+    {
+      const double * userRow = userMatrix[i];
+      double * destRow = m_eqMatrix[i];
+      for(size_t j = 0; j < nColsCMatrix; ++j)
+      {
+        for(size_t k = 0; k < numExtraCols; ++k)
+        {
+          destRow[k] = userRow[0];
+        }
+        destRow[j+numExtraCols] = userRow[j];
+      }
+    }
+  }
+
 
 } // namespace CurveFitting
 } // namespace Mantid
