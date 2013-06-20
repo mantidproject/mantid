@@ -34,10 +34,19 @@ namespace Mantid
      */
     void GaussianComptonProfile::declareParameters()
     {
-      // DO NOT REORDER WITHOUT CHANGING THE GETPARAMETER calls
+      // DO NOT REORDER WITHOUT CHANGING THE getParameter AND 
+      // intensityParameterIndices methods
       //
       declareParameter(WIDTH_PARAM, 1.0, "Gaussian width parameter");
       declareParameter(AMP_PARAM, 1.0, "Gaussian intensity parameter");
+    }
+
+   
+    /*
+     */
+    std::vector<size_t> GaussianComptonProfile::intensityParameterIndices() const
+    {
+      return std::vector<size_t>(1, this->parameterIndex(AMP_PARAM));
     }
 
     /**
@@ -45,15 +54,17 @@ namespace Mantid
      * @param cmatrix InOut matrix whose column should be set to the mass profile for each active hermite polynomial
      * @param start Index of the column to start on
      * @param errors The data errors
+     * @returns The number of columns filled
      */
-    void GaussianComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start,
-                                                      const std::vector<double>& errors) const
+    size_t GaussianComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start,
+                                                        const std::vector<double>& errors) const
     {
       std::vector<double> result(ySpace().size());
       const double amplitude = 1.0;
       this->massProfile(result.data(), ySpace().size(), amplitude);
       std::transform(result.begin(), result.end(), errors.begin(), result.begin(), std::divides<double>());
       cmatrix.setColumn(start, result);
+      return 1;
     }
 
     /**

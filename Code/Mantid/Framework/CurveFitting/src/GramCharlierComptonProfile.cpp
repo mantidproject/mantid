@@ -155,88 +155,24 @@ namespace Mantid
       }
     }
 
-
-    /**
-     * Used to cache some values when the workspace has been set
-     * @param ws A pointer to the workspace
+    /*
      */
-    void GramCharlierComptonProfile::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
+    std::vector<size_t> GramCharlierComptonProfile::intensityParameterIndices() const
     {
-      ComptonProfile::setWorkspace(ws); // Do base-class calculation first
+      assert(!m_hermite.empty());
 
-      const auto & yspace = ySpace();
-      const auto & modq = modQ();
-
-      // massProfile is calculated over a large range of Y, constructed by interpolation
-      // This is done over an interpolated range between ymin & ymax and y and hence q must be sorted
-      const size_t ncoarseY(yspace.size());
-      std::vector<Point> points(ncoarseY);
-      for(size_t i = 0; i < ncoarseY; ++i)
-      {
-        points[i] = Point(yspace[i], modq[i]);
-      }
-      std::sort(points.begin(), points.end(), InY());
-      // Separate back into vectors as GSL requires them separate
-      std::vector<double> sortedy(ncoarseY), sortedq(ncoarseY);
-      for(size_t i = 0; i < ncoarseY; ++i)
-      {
-        const auto & p = points[i];
-        sortedy[i] = p.y;
-        sortedq[i] = p.q;
-      }
-
-      // Generate a more-finely grained y axis and interpolate Q values
-      m_yfine.resize(NFINE_Y);
-      m_qfine.resize(NFINE_Y);
-      const double miny(sortedy.front()), maxy(sortedy.back());
-      const double step = (maxy-miny)/static_cast<double>((NFINE_Y-1));
-
-      // Set up GSL interpolater
-      gsl_interp_accel *acc = gsl_interp_accel_alloc ();
-      gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, ncoarseY); // Actually a linear interpolater
-      gsl_spline_init(spline, sortedy.data(), sortedq.data(), ncoarseY);
-      for(int i = 0; i < NFINE_Y - 1; ++i)
-      {
-        const double xi = miny + step*i;
-        m_yfine[i] = xi;
-        m_qfine[i] = gsl_spline_eval(spline, xi, acc);
-      }
-      // Final value to ensure it ends at maxy
-      m_yfine.back() = maxy;
-      m_qfine.back() = gsl_spline_eval(spline, maxy, acc);
-      gsl_spline_free(spline);
-      gsl_interp_accel_free(acc);
-
-      // Cache voigt function over yfine
-      std::vector<double> minusYFine(NFINE_Y);
-      std::transform(m_yfine.begin(), m_yfine.end(), minusYFine.begin(), std::bind2nd(std::multiplies<double>(), -1.0));
-      std::vector<double> ym(NFINE_Y); // Holds result of (y[i] - yfine) for each original y
-      m_voigt.resize(ncoarseY);
-
-      for(size_t i = 0; i < ncoarseY; ++i)
-      {
-        std::vector<double> & voigt = m_voigt[i];
-        voigt.resize(NFINE_Y);
-
-        const double yi = yspace[i];
-        std::transform(minusYFine.begin(), minusYFine.end(), ym.begin(), std::bind2nd(std::plus<double>(), yi)); //yfine is actually -yfine
-        voigtApprox(voigt,ym,0,1.0,lorentzFWHM(),resolutionFWHM());
-      }
-
-      m_voigtProfile.resize(NFINE_Y); // Value holder for later to avoid repeated memory allocations when creating a new vector
-    }
-
-    /**
-     * @returns integer giving number of required columns
-     */
-    size_t GramCharlierComptonProfile::numConstraintMatrixColumns() const
-    {
-      size_t required(0);
+      std::vector<size_t> indices;
+      indices.reserve(m_hermite.size());
       for(size_t i = 0; i < m_hermite.size(); ++i)
       {
-        if(m_hermite[i] > 0) ++required;
+        if(m_hermite[i] > 0)
+        {
+          std::ostringstream os;
+          os << HERMITE_PREFIX << 2*i; //refactor to have method that produces the name
+          indices.push_back(this->parameterIndex(os.str()));
+        }
       }
-      return required;
+      return indices;
     }
 
     /**
@@ -244,9 +180,10 @@ namespace Mantid
      * @param cmatrix InOut matrix whose columns should be set to the mass profile for each active hermite polynomial
      * @param start Index of the column to start on
      * @param errors Data errors array
+     * @returns The number of columns filled
      */
-    void GramCharlierComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start,
-                                                          const std::vector<double>& errors) const
+    size_t GramCharlierComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start,
+                                                            const std::vector<double>& errors) const
     {
       std::vector<double> profile(NFINE_Y, 0.0);
       const size_t nData(ySpace().size());
@@ -275,6 +212,7 @@ namespace Mantid
         std::fill_n(result.begin(), nData, 0.0);
         ++col;
       }
+      return col;
     }
 
     /**
@@ -373,6 +311,77 @@ namespace Mantid
       }
 
     }
+
+    /**
+     * Used to cache some values when the workspace has been set
+     * @param ws A pointer to the workspace
+     */
+    void GramCharlierComptonProfile::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
+    {
+      ComptonProfile::setWorkspace(ws); // Do base-class calculation first
+
+      const auto & yspace = ySpace();
+      const auto & modq = modQ();
+
+      // massProfile is calculated over a large range of Y, constructed by interpolation
+      // This is done over an interpolated range between ymin & ymax and y and hence q must be sorted
+      const size_t ncoarseY(yspace.size());
+      std::vector<Point> points(ncoarseY);
+      for(size_t i = 0; i < ncoarseY; ++i)
+      {
+        points[i] = Point(yspace[i], modq[i]);
+      }
+      std::sort(points.begin(), points.end(), InY());
+      // Separate back into vectors as GSL requires them separate
+      std::vector<double> sortedy(ncoarseY), sortedq(ncoarseY);
+      for(size_t i = 0; i < ncoarseY; ++i)
+      {
+        const auto & p = points[i];
+        sortedy[i] = p.y;
+        sortedq[i] = p.q;
+      }
+
+      // Generate a more-finely grained y axis and interpolate Q values
+      m_yfine.resize(NFINE_Y);
+      m_qfine.resize(NFINE_Y);
+      const double miny(sortedy.front()), maxy(sortedy.back());
+      const double step = (maxy-miny)/static_cast<double>((NFINE_Y-1));
+
+      // Set up GSL interpolater
+      gsl_interp_accel *acc = gsl_interp_accel_alloc ();
+      gsl_spline *spline = gsl_spline_alloc(gsl_interp_linear, ncoarseY); // Actually a linear interpolater
+      gsl_spline_init(spline, sortedy.data(), sortedq.data(), ncoarseY);
+      for(int i = 0; i < NFINE_Y - 1; ++i)
+      {
+        const double xi = miny + step*i;
+        m_yfine[i] = xi;
+        m_qfine[i] = gsl_spline_eval(spline, xi, acc);
+      }
+      // Final value to ensure it ends at maxy
+      m_yfine.back() = maxy;
+      m_qfine.back() = gsl_spline_eval(spline, maxy, acc);
+      gsl_spline_free(spline);
+      gsl_interp_accel_free(acc);
+
+      // Cache voigt function over yfine
+      std::vector<double> minusYFine(NFINE_Y);
+      std::transform(m_yfine.begin(), m_yfine.end(), minusYFine.begin(), std::bind2nd(std::multiplies<double>(), -1.0));
+      std::vector<double> ym(NFINE_Y); // Holds result of (y[i] - yfine) for each original y
+      m_voigt.resize(ncoarseY);
+
+      for(size_t i = 0; i < ncoarseY; ++i)
+      {
+        std::vector<double> & voigt = m_voigt[i];
+        voigt.resize(NFINE_Y);
+
+        const double yi = yspace[i];
+        std::transform(minusYFine.begin(), minusYFine.end(), ym.begin(), std::bind2nd(std::plus<double>(), yi)); //yfine is actually -yfine
+        voigtApprox(voigt,ym,0,1.0,lorentzFWHM(),resolutionFWHM());
+      }
+
+      m_voigtProfile.resize(NFINE_Y); // Value holder for later to avoid repeated memory allocations when creating a new vector
+    }
+
 
   } // namespace CurveFitting
 } // namespace Mantid

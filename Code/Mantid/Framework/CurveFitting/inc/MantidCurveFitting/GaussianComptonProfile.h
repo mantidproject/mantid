@@ -49,10 +49,10 @@ namespace CurveFitting
     /// Declare the function parameters
     void declareParameters();
 
-    /// Return the number of columns required in the constraint matrix
-    size_t numConstraintMatrixColumns() const { return 1; }
+    /// Returns the indices of the intensity parameters
+    std::vector<size_t> intensityParameterIndices() const;
     /// Fill in the columns of the matrix for this mass
-    void fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start, const std::vector<double>& errors) const;
+    size_t fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start, const std::vector<double>& errors) const;
 
     /// Compute the function
     void massProfile(double * result, const size_t nData) const;

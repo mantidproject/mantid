@@ -618,6 +618,7 @@ namespace CurveFitting
     {
       iter++;
       g_log.debug() << "Starting iteration " << iter << "\n";
+      m_function->iterationStarting();
       if ( !minimizer->iterate() )
       {
         errorString = minimizer->getError();
@@ -631,6 +632,7 @@ namespace CurveFitting
         break;
       }
       prog.report();
+      m_function->iterationFinished();
     }
     g_log.information() << "Number of minimizer iterations=" << iter << "\n";
 

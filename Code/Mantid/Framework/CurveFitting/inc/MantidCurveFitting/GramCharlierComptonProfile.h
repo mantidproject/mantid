@@ -53,13 +53,11 @@ namespace CurveFitting
     void setHermiteCoefficients(const std::string & coeffs);
     /// Declare the Gram-Charlier (Hermite) coefficients
     void declareGramCharlierParameters();
-    /// Called by the framework when a workspace is set
-    void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
 
-    /// Return the number of columns required in the constraint matrix
-    size_t numConstraintMatrixColumns() const;
+    /// Returns the indices of the intensity parameters
+    std::vector<size_t> intensityParameterIndices() const;
     /// Fill in the columns of the matrix for this mass
-    void fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t index,const std::vector<double>& errors) const;
+    size_t fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t index,const std::vector<double>& errors) const;
     /// Compute the sum for all Hermite polynomial coefficents
     void massProfile(double * result, const size_t nData) const;
     /// Compute the contribution to mass profile nth Hermite polynomial coefficient
@@ -69,6 +67,8 @@ namespace CurveFitting
     void addFSETerm(std::vector<double> & lhs) const;
     /// Convolute with resolution
     void convoluteVoigt(double * result, const size_t nData, const std::vector<double> & profile) const;
+    /// Called by the framework when a workspace is set
+    void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
 
     /// The active hermite coefficents
     std::vector<short> m_hermite;

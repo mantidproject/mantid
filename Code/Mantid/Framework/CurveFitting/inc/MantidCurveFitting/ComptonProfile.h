@@ -50,12 +50,12 @@ namespace CurveFitting
     void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
     ///@}
 
-    /// Returns the number of columns in the constraint matrix that are required for this mass
-    virtual size_t numConstraintMatrixColumns() const = 0;
+    /// Returns the indices of the intensity parameters
+    virtual std::vector<size_t> intensityParameterIndices() const = 0;
     /// Fill the appropriate columns of the given matrix with the values
-    /// of the mass profile
-    virtual void fillConstraintMatrix(Kernel::DblMatrix & cmatrix,const size_t start,
-                                      const std::vector<double>& errors) const = 0;
+    /// of the mass profile 
+    virtual size_t fillConstraintMatrix(Kernel::DblMatrix & cmatrix,const size_t start,
+                                        const std::vector<double>& errors) const = 0;
 
   protected:
     /// Declare parameters that will never participate in the fit
