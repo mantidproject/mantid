@@ -79,84 +79,6 @@ namespace Kernel
     template void indexSort(const std::vector<int>&,std::vector<int>&);
   }
 
-  /**
-   * Write an object to a stream. Format should be Matrix(nrows,ncols)x_00,x_01...,x_10,x_11
-   * @param os :: output stream
-   * @param matrix :: Matrix to write out
-   * @return The output stream (of)
-  */
-template<typename T>
-std::ostream& operator<<(std::ostream& os,const Matrix<T>& matrix)
-{
-  size_t nrows(matrix.numRows()), ncols(matrix.numCols());
-  os << "Matrix(" << nrows << "," << ncols << ")";
-  for( size_t i = 0; i < nrows; ++i )
-  {
-    for( size_t j = 0; j < ncols; ++j )
-    {
-      os << matrix[i][j];
-      if( i < nrows - 1 || j < ncols - 1 ) os << ",";
-    }
-    //os << std::endl;
-  }
-  return os;
-}
-
-/**
- * Fill an object from a stream. Format should be Matrix(nrows,ncols)x_00,x_01...,x_10,x_11
- * @param is :: A stream object
- * @param in :: An object to fill
- * @returns A reference to the stream
- */
-template<typename T>
-std::istream& operator>>(std::istream& is, Kernel::Matrix<T>& in)
-{
-  // Stream should start with Matrix(
-  char dump;
-  std::string start(7, ' ');
-  for (int i = 0; i < 7; ++i) 
-  {
-    is >> dump;
-    start[i] = dump;
-    if( !is ) throw std::invalid_argument("Unexpected character when reading Matrix from stream.");
-  }
-  if( start != "Matrix(" ) throw std::invalid_argument("Incorrect input format for Matrix stream.");
-  // Now read a nrows,ncols and )
-  size_t nrows(0), ncols(0);
-  is >> nrows;
-  if( !is ) throw std::invalid_argument("Expected number of rows when reading Matrix from stream, found something else.");
-  is >> dump;
-  is >> ncols;
-  if( !is ) throw std::invalid_argument("Expected number of columns when reading Matrix from stream, found something else.");
-  is >> dump;
-  if( dump != ')' ) throw std::invalid_argument("Expected closing parenthesis after ncols when reading Matrix from stream, found something else.");
-
-  // Resize the matrix
-  in.setMem(nrows,ncols);
-
-  // Use getline with the delimiter set to "," to read 
-  std::string value_str;
-  size_t row(0), col(0);
-  while( !is.eof() && std::getline(is, value_str, ',') )
-  {
-    try
-    {
-      T value = boost::lexical_cast<T>(value_str);
-      in.V[row][col] = value;
-    }
-    catch(boost::bad_lexical_cast &)
-    {
-      throw std::invalid_argument("Unexpected type found while reading Matrix from stream: \"" + value_str + "\"");
-    }
-    ++col;
-    if( col == ncols ) // New row
-    {
-      col = 0;
-      ++row;
-    }
-  }
-  return is;
-}
 
 
 template<typename T>
@@ -1821,6 +1743,110 @@ Matrix<T>::str() const
   return cx.str();
 }
 
+/**
+ * Write an object to a stream. Format will be Matrix(nrows,ncols)x_00,x_01...,x_10,x_11
+ * @param os :: output stream
+ * @param matrix :: Matrix to write out
+ * @return The output stream (of)
+*/
+template<typename T>
+std::ostream& operator<<(std::ostream& os,const Matrix<T>& matrix)
+{
+  dumpToStream(os, matrix, ',');
+  return os;
+}
+
+/**
+ * Write a Matrix to a stream. Format will be Matrix(nrowsSEPncols)x_00SEPx_01...SEPx_10SEPx_11
+ * @param os :: output stream
+ * @param matrix :: Matrix to write out
+ * @param delimiter :: A character to use as delimiter for the string
+*/
+template<typename T>
+void dumpToStream(std::ostream& os, const Kernel::Matrix<T>& matrix, const char delimiter)
+{
+  size_t nrows(matrix.numRows()), ncols(matrix.numCols());
+  os << "Matrix(" << nrows << delimiter << ncols << ")";
+  for( size_t i = 0; i < nrows; ++i )
+  {
+    for( size_t j = 0; j < ncols; ++j )
+    {
+      os << matrix[i][j];
+      if( i < nrows - 1 || j < ncols - 1 ) os << delimiter;
+    }
+  }
+}
+
+/**
+* Fill an object from a stream. Format should be Matrix(nrows,ncols)x_00,x_01...,x_10,x_11
+* @param is :: A stream object
+* @param in :: An object to fill
+* @returns A reference to the stream
+*/
+template<typename T>
+std::istream& operator>>(std::istream& is, Kernel::Matrix<T>& in)
+{
+  fillFromStream(is, in, ',');
+  return is;
+}
+
+/**
+* Fill a Matrix from a stream using the given separator. Format should be Matrix(nrowsSEPncols)x_00SEPx_01...SEPx_10SEPx_11
+* where SEP is replaced by the given separator
+* @param is :: A stream object
+* @param in :: An Matrix object to fill
+* @param delimiter :: A single character separator that delimits the entries
+*/
+template<typename T>
+void fillFromStream(std::istream& is, Kernel::Matrix<T>& in, const char delimiter)
+{
+  // Stream should start with Matrix(
+  char dump;
+  std::string start(7, ' ');
+  for (int i = 0; i < 7; ++i)
+  {
+    is >> dump;
+    start[i] = dump;
+    if( !is ) throw std::invalid_argument("Unexpected character when reading Matrix from stream.");
+  }
+  if( start != "Matrix(" ) throw std::invalid_argument("Incorrect input format for Matrix stream.");
+  // Now read a nrows,ncols and )
+  size_t nrows(0), ncols(0);
+  is >> nrows;
+  if( !is ) throw std::invalid_argument("Expected number of rows when reading Matrix from stream, found something else.");
+  is >> dump;
+  is >> ncols;
+  if( !is ) throw std::invalid_argument("Expected number of columns when reading Matrix from stream, found something else.");
+  is >> dump;
+  if( dump != ')' ) throw std::invalid_argument("Expected closing parenthesis after ncols when reading Matrix from stream, found something else.");
+
+  // Resize the matrix
+  in.setMem(nrows,ncols);
+
+  // Use getline with the delimiter set to "," to read
+  std::string value_str;
+  size_t row(0), col(0);
+  while( !is.eof() && std::getline(is, value_str, delimiter) )
+  {
+    try
+    {
+      T value = boost::lexical_cast<T>(value_str);
+      in.V[row][col] = value;
+    }
+    catch(boost::bad_lexical_cast &)
+    {
+      throw std::invalid_argument("Unexpected type found while reading Matrix from stream: \"" + value_str + "\"");
+    }
+    ++col;
+    if( col == ncols ) // New row
+    {
+      col = 0;
+      ++row;
+    }
+  }
+}
+
+
 ///\cond TEMPLATE
 
 // Symbol definitions for common types
@@ -1829,11 +1855,19 @@ template class MANTID_KERNEL_DLL Matrix<int>;
 template class MANTID_KERNEL_DLL Matrix<float>;
 
 template MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const DblMatrix&);
+template MANTID_KERNEL_DLL void dumpToStream(std::ostream&, const DblMatrix&, const char);
 template MANTID_KERNEL_DLL std::istream& operator>>(std::istream&, DblMatrix&);
+template MANTID_KERNEL_DLL void fillFromStream(std::istream&, DblMatrix&, const char);
+
 template MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const Matrix<float>&);
+template MANTID_KERNEL_DLL void dumpToStream(std::ostream&, const Matrix<float>&, const char);
 template MANTID_KERNEL_DLL std::istream& operator>>(std::istream&, Matrix<float>&);
+template MANTID_KERNEL_DLL void fillFromStream(std::istream&, Matrix<float>&, const char);
+
 template MANTID_KERNEL_DLL std::ostream& operator<<(std::ostream&, const IntMatrix&);
+template MANTID_KERNEL_DLL void dumpToStream(std::ostream&, const IntMatrix&, const char);
 template MANTID_KERNEL_DLL std::istream& operator>>(std::istream&, IntMatrix&);
+template MANTID_KERNEL_DLL void fillFromStream(std::istream&, IntMatrix&, const char);
 ///\endcond TEMPLATE
 
 } // namespace Kernel
