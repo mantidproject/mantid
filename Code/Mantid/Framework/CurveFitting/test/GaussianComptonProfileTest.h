@@ -19,14 +19,14 @@ public:
   void test_Name_Is_As_Expected()
   {
     // These are used in scripts so should not change!
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     TS_ASSERT_EQUALS("GaussianComptonProfile", profile->name());
   }
 
 
   void test_Initialized_Function_Has_Expected_Parameters_In_Right_Order()
   {
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     static const size_t nparams(2);
     const char * expectedParams[nparams] = {"Width", "Intensity"};
 
@@ -42,9 +42,18 @@ public:
     }
   }
 
+  void test_Function_Has_One_Intensity_Coefficient()
+  {
+    boost::shared_ptr<Mantid::CurveFitting::ComptonProfile> profile = createFunction();
+
+    auto intensityIndices = profile->intensityParameterIndices();
+    TS_ASSERT_EQUALS(1, intensityIndices.size());
+  }
+
+
   void test_Initialized_Function_Has_Expected_Attributes()
   {
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     static const size_t nattrs(2);
     const char * expectedAttrs[nattrs] = {"WorkspaceIndex", "Mass"};
 
@@ -63,13 +72,12 @@ public:
         TSM_ASSERT_EQUALS("Expected " + name + " to be found as attribute but it was not.", 1, keyCount);
       }
     }
-
-
   }
+
 
 private:
 
-  Mantid::API::IFunction_sptr createFunction()
+  boost::shared_ptr<GaussianComptonProfile> createFunction()
   {
     auto profile = boost::make_shared<GaussianComptonProfile>();
     profile->initialize();

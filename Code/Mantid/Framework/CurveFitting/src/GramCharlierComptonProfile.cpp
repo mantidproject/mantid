@@ -162,7 +162,7 @@ namespace Mantid
       assert(!m_hermite.empty());
 
       std::vector<size_t> indices;
-      indices.reserve(m_hermite.size());
+      indices.reserve(m_hermite.size()+1);
       for(size_t i = 0; i < m_hermite.size(); ++i)
       {
         if(m_hermite[i] > 0)
@@ -172,6 +172,13 @@ namespace Mantid
           indices.push_back(this->parameterIndex(os.str()));
         }
       }
+      // Include Kfse if it is not fixed
+      const size_t kIndex = this->parameterIndex(KFSE_NAME);
+      if(!isFixed(kIndex))
+      {
+        indices.push_back(kIndex);
+      }
+
       return indices;
     }
 
@@ -189,6 +196,17 @@ namespace Mantid
       const size_t nData(ySpace().size());
       std::vector<double> result(nData, 0.0);
 
+      // If the FSE term is fixed then it's contribution is convoluted with Voigt and summed with the first column
+      // otherwise it gets a column of it's own at the end.
+      // Either way it needs to be computed, so do this first
+      const size_t kIndex = this->parameterIndex(KFSE_NAME);
+      const bool kfseFixed = isFixed(kIndex);
+
+      std::vector<double> fse(NFINE_Y, 0.0);
+      std::vector<double> convolvedFSE(nData,0.0);
+      addFSETerm(fse);
+      convoluteVoigt(convolvedFSE.data(), nData, fse);
+
       size_t col(0);
       for(unsigned int i = 0; i < m_hermite.size(); ++i)
       {
@@ -197,19 +215,22 @@ namespace Mantid
         const unsigned int npoly = 2*i;
         addMassProfile(profile.data(), npoly);
         convoluteVoigt(result.data(), nData, profile);
-        if(i==0) // first term includes FSE convoluted separately with Voigt
+        if(i == 0 && kfseFixed)
         {
-          std::vector<double> fse(NFINE_Y, 0.0);
-          std::vector<double> convolved(nData,0.0);
-          addFSETerm(fse);
-          convoluteVoigt(convolved.data(), nData, fse);
-          std::transform(result.begin(), result.end(), convolved.begin(), result.begin(), std::plus<double>());
+          std::transform(result.begin(), result.end(), convolvedFSE.begin(), result.begin(), std::plus<double>());
         }
         std::transform(result.begin(), result.end(), errors.begin(), result.begin(), std::divides<double>());
         cmatrix.setColumn(start + col, result);
 
         std::fill_n(profile.begin(), NFINE_Y, 0.0);
         std::fill_n(result.begin(), nData, 0.0);
+        ++col;
+      }
+
+      if(!kfseFixed) // Extra column for He3
+      {
+        std::transform(convolvedFSE.begin(), convolvedFSE.end(), errors.begin(), convolvedFSE.begin(), std::divides<double>());
+        cmatrix.setColumn(start + col, convolvedFSE);
         ++col;
       }
       return col;

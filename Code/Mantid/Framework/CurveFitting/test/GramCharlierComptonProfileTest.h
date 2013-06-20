@@ -18,25 +18,25 @@ public:
   void test_Name_Is_As_Expected()
   {
     // These are used in scripts so should not change!
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     TS_ASSERT_EQUALS("GramCharlierComptonProfile", profile->name());
   }
 
   void test_initialized_object_has_expected_attributes()
   {
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     checkDefaultAttrsExist(*profile);
   }
 
   void test_Default_Initialized_Function_Has_Expected_Parameters_In_Right_Order()
   {
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     checkDefaultAttrsExist(*profile);
   }
 
   void test_Setting_HermiteCoefficients_Attribute_Adds_Expected_Parameters()
   {
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     profile->setAttributeValue("HermiteCoeffs", "1 0 1"); // turn on C_0 & C_4
 
     checkDefaultAttrsExist(*profile);
@@ -53,9 +53,28 @@ public:
     }
   }
 
+  void test_Function_Returns_Same_Number_Intensity_Coefficents_As_Active_Hermite_Coefficients_If_KFSE_Is_Fixed()
+  {
+    boost::shared_ptr<Mantid::CurveFitting::ComptonProfile> profile = createFunction();
+    profile->setAttributeValue("HermiteCoeffs", "1 0 1"); // turn on C_0 & C_4
+    profile->fix(profile->parameterIndex("FSECoeff"));
+
+    auto intensityIndices = profile->intensityParameterIndices();
+    TS_ASSERT_EQUALS(2, intensityIndices.size());
+  }
+
+  void test_Function_Returns_Same_Number_Intensity_Coefficents_As_Active_Hermite_Coefficients_Plus_One_If_KFSE_Is_Free()
+  {
+    boost::shared_ptr<Mantid::CurveFitting::ComptonProfile> profile = createFunction();
+    profile->setAttributeValue("HermiteCoeffs", "1 0 1"); // turn on C_0 & C_4
+
+    auto intensityIndices = profile->intensityParameterIndices();
+    TS_ASSERT_EQUALS(3, intensityIndices.size());
+  }
+
 private:
 
-  Mantid::API::IFunction_sptr createFunction()
+  boost::shared_ptr<GramCharlierComptonProfile> createFunction()
   {
     auto profile = boost::make_shared<GramCharlierComptonProfile>();
     profile->initialize();
