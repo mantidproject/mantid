@@ -432,7 +432,6 @@ namespace WorkspaceCreationHelper
       ws->getEventList(wi).setDetectorID(detID);
       detID++;
     }
-    ws->doneAddingEventLists();
     return ws;
   }
 
@@ -524,7 +523,6 @@ namespace WorkspaceCreationHelper
         workspaceIndex++;
       }
     }
-    retVal->doneAddingEventLists();
 
     //Create the x-axis for histogramming.
     MantidVecPtr x1;
@@ -564,7 +562,6 @@ namespace WorkspaceCreationHelper
       }
     }
 
-    retVal->doneAddingEventLists();
 
     //Create the x-axis for histogramming.
     MantidVecPtr x1;
@@ -627,7 +624,6 @@ namespace WorkspaceCreationHelper
       }
       events.addDetectorID( detid_t(i) );
     }
-    retVal->doneAddingEventLists();
     retVal->setAllX(axis);
     retVal->replaceAxis(0,pAxis0); 
 
@@ -937,7 +933,6 @@ namespace WorkspaceCreationHelper
           workspaceIndex += 1;
         }
       }
-      outputWS->doneAddingEventLists();
 
       // Clear
       pixel_to_wkspindex.clear();

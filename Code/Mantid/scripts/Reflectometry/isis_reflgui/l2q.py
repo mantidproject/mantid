@@ -1,6 +1,5 @@
 import math
-from mantidsimple import *
-#from mantid.simpleapi import *  # New API
+from mantid.simpleapi import *  
 
 def l2q(ws,whichDet,theta):
 	'''	
@@ -26,7 +25,8 @@ def l2q(ws,whichDet,theta):
 	#ws = mantid.getMatrixWorkspace(ws)
 	
 	# pick up the sample to detector distance 
-	if ws.isGroup():
+	from mantid.api import WorkspaceGroup # (only required as while the old API still exists.)
+	if isinstance(ws, WorkspaceGroup):	
 		wsg = ws.getName() + '_1'
 		inst = mtd[wsg].getInstrument()
 	else:
@@ -46,10 +46,10 @@ def l2q(ws,whichDet,theta):
 	print x, y, z
 	print whichDet
 	# Move the detector ianto the correct spot
-	MoveInstrumentComponent(ws,ComponentName=whichDet,X=x,Y=y,Z=z,RelativePosition=False)
+	MoveInstrumentComponent(Workspace=mtd[ws.name()],ComponentName=whichDet,X=x,Y=y,Z=z,RelativePosition=False)
 			
 	# Now convert to momentum transfer
-	ConvertUnits(InputWorkspace=ws,OutputWorkspace="IvsQ",Target="MomentumTransfer",AlignBins="1")
+	ConvertUnits(InputWorkspace=mtd[ws.name()],OutputWorkspace="IvsQ",Target="MomentumTransfer",AlignBins="1")
 	return mtd["IvsQ"]
 
 

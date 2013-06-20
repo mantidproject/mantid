@@ -42,11 +42,11 @@ public:
     pdfft.setProperty("InputWorkspace", ws);
     pdfft.setProperty("OutputWorkspace", "PDFGofR");
     pdfft.setProperty("InputSofQType", "S(Q)");
-    pdfft.setProperty("RMax", 20.0);
+    pdfft.setProperty("Rmax", 20.0);
     pdfft.setProperty("DeltaR", 0.01);
     pdfft.setProperty("Qmin", 0.0);
     pdfft.setProperty("Qmax", 30.0);
-    pdfft.setProperty("PDFType", "G(r)=4pi*r[rho(r)-rho_0]");
+    pdfft.setProperty("PDFType", "G(r)");
 
     pdfft.execute();
 
@@ -65,11 +65,11 @@ public:
     pdfft->setProperty("InputWorkspace", ws);
     pdfft->setProperty("OutputWorkspace", "PDFGofR");
     pdfft->setProperty("InputSofQType", "S(Q)");
-    pdfft->setProperty("RMax", 20.0);
+    pdfft->setProperty("Rmax", 20.0);
     pdfft->setProperty("DeltaR", 0.01);
     pdfft->setProperty("Qmin", 0.0);
     pdfft->setProperty("Qmax", 30.0);
-    pdfft->setProperty("PDFType", "G(r)=4pi*r[rho(r)-rho_0]");
+    pdfft->setProperty("PDFType", "G(r)");
 
     pdfft->execute();
 

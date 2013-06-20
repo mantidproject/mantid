@@ -33,11 +33,15 @@ namespace MantidQt
     {
     }
 
-    void PeakOverlayMultiSphere::setSlicePoint(const double& z)
+    void PeakOverlayMultiSphere::setSlicePoint(const double& z, const std::vector<bool>& viewablePeaks)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      m_viewablePeaks = viewablePeaks;
+      for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
       { 
-        m_physicalPeaks[i]->setSlicePoint(z);
+        if(m_viewablePeaks[i])
+        {
+          m_physicalPeaks[i]->setSlicePoint(z);
+        }
       }
       this->update(); //repaint
     }
@@ -69,10 +73,10 @@ namespace MantidQt
     /// Paint the overlay
     void PeakOverlayMultiSphere::paintEvent(QPaintEvent * /*event*/)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
-      { 
-      if (m_physicalPeaks[i]->isViewablePeak())
+      for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
       {
+        if(m_viewablePeaks[i])
+        {
         const QwtDoubleInterval intervalY = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
         const QwtDoubleInterval intervalX = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval();
 
@@ -96,7 +100,7 @@ namespace MantidQt
         pen.setStyle(Qt::DashLine);
         painter.strokePath(peakRadiusInnerPath, pen);
 
-        if (m_physicalPeaks[i]->isViewableBackground())
+        if (m_physicalPeaks[i]->getShowBackgroundRadius())
         {
           QPainterPath backgroundOuterPath;
           backgroundOuterPath.setFillRule(Qt::WindingFill);
@@ -129,7 +133,7 @@ namespace MantidQt
 
     void PeakOverlayMultiSphere::movePosition(PeakTransform_sptr transform)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_physicalPeaks.size(); ++i)
       { 
         m_physicalPeaks[i]->movePosition(transform);
       }
@@ -147,7 +151,7 @@ namespace MantidQt
 
     void PeakOverlayMultiSphere::showBackgroundRadius(const bool show)
     {
-      for(int i = 0; i < m_physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < m_physicalPeaks.size(); ++i)
       { 
         m_physicalPeaks[i]->showBackgroundRadius(show);
       }
@@ -185,6 +189,11 @@ namespace MantidQt
     bool PeakOverlayMultiSphere::positionOnly() const
     {
       return false;
+    }
+
+    double PeakOverlayMultiSphere::getRadius() const
+    {
+      return m_physicalPeaks[0]->getRadius();
     }
 
   } // namespace Mantid

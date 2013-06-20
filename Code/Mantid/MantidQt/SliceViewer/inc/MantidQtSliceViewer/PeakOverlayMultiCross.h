@@ -53,7 +53,7 @@ namespace SliceViewer
     /// Destructor
     virtual ~PeakOverlayMultiCross();
     /// Set the slice point at position.
-    virtual void setSlicePoint(const double& point); 
+    virtual void setSlicePoint(const double& point, const std::vector<bool>& viewablePeaks);
     /// Hide the view.
     virtual void hideView();
     /// Show the view.
@@ -78,6 +78,8 @@ namespace SliceViewer
     virtual double getOccupancyIntoView() const;
     /// Flag indicating that the peak is position only.
     bool positionOnly() const;
+    /// Get the effective radius.
+    virtual double getRadius() const;
 
   private:
 
@@ -95,6 +97,8 @@ namespace SliceViewer
     VecPhysicalCrossPeak m_physicalPeaks;
     /// Peak colour
     QColor m_peakColour;
+    /// Peaks in the workspace that are viewable in the present view.
+    std::vector<bool> m_viewablePeaks;
   };
 
 

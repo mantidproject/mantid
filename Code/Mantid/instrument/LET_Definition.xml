@@ -17,7 +17,6 @@
        <handedness val="right"/>
        <origin val="beam" /> 
      </reference-frame>
-     <offsets spherical="vectors" />
      <default-view view="cylindrical_y"/>
      <!-- Comment "components-are-facing" out if you dont want the
      components defined in this file to face a position by default -->    

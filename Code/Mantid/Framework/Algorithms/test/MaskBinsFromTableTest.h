@@ -10,10 +10,16 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidGeometry/Instrument.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+
+using namespace std;
 
 class MaskBinsFromTableTest : public CxxTest::TestSuite
 {
@@ -23,8 +29,7 @@ public:
   static MaskBinsFromTableTest *createSuite() { return new MaskBinsFromTableTest(); }
   static void destroySuite( MaskBinsFromTableTest *suite ) { delete suite; }
 
-  /*
-   * In-place single mask test.
+  /** In-place single mask test.
    * Same as the test in MaskBins()
    */
   void test_MaskBinWithSingleLine()
@@ -70,8 +75,7 @@ public:
     return;
   }
 
-  /*
-   * Out-of-place single mask test.
+  /** Out-of-place single mask test.
    * Same as the test in MaskBins()
    */
   void test_MaskBinWithSingleLineOutPlace()
@@ -121,8 +125,7 @@ public:
   }
 
 
-  /*
-   * Multiple lines out-of-place test.
+  /** Multiple lines out-of-place test.
    * This is a real test
    */
   void test_MaskBinWithMultiLines()
@@ -221,8 +224,7 @@ public:
     return;
   }
 
-  /*
-   * In-place single mask test.
+  /** In-place single mask test.
    * Same as the test in MaskBins()
    * With TableWorkspace of column in different order
    */
@@ -269,7 +271,111 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test to mask detectors by detectors IDs
+    */
+  void test_maskBinWithDetectorIDsList()
+  {
+    // Create a workspace to mask: 5 spectra, 10 bins
+    const std::string workspaceName("raggedMask5");
+    int nBins = 10;
+    MatrixWorkspace_sptr dataws = WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+    AnalysisDataService::Instance().add(workspaceName,dataws);
+
+    // Find out mapping between spectra/workspace indexes and detectors IDs
+    for (size_t i = 0; i < 5; ++i)
+    {
+      ISpectrum *spec = dataws->getSpectrum(i);
+      if (!spec)
+      {
+        cout << "There is no spectrum mapping to workspace index " << i << ".\n";
+        return;
+      }
+      else
+      {
+        std::set<detid_t> detidset = spec->getDetectorIDs();
+        set<detid_t>::iterator setiter;
+        for (setiter = detidset.begin(); setiter != detidset.end(); ++setiter)
+          cout << "WorkspaceIndex = " << i << ":  Detector ID = " << *setiter << ".\n";
+      }
+    }
+
+    // Generate a TableWorksapce
+    TableWorkspace_sptr tablews(new TableWorkspace());
+    tablews->addColumn("str", "DetectorIDsList");
+    tablews->addColumn("double", "XMin");
+    tablews->addColumn("double", "XMax");
+    AnalysisDataService::Instance().addOrReplace("MaskInfoTable", tablews);
+
+    API::TableRow row0 = tablews->appendRow();
+    row0 << "2-4" << 3.0 << 6.0;
+
+    // Call the algorithm
+    MaskBinsFromTable maskalg;
+    TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
+    maskalg.setPropertyValue("InputWorkspace", workspaceName);
+    maskalg.setPropertyValue("OutputWorkspace",workspaceName);
+    maskalg.setProperty("MaskingInformation", "MaskInfoTable");
+    TS_ASSERT_THROWS_NOTHING(maskalg.execute());
+    TS_ASSERT(maskalg.isExecuted());
+
+    // Check
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve(workspaceName));
+    TS_ASSERT(outws);
+    for (int wi=1; wi<=3; wi++)
+    {
+      for (int bin=3; bin<6;bin++)
+      {
+        TS_ASSERT_EQUALS( outws->dataY(wi)[bin], 0.0 );
+      }
+    }
+
+    // Clean
+    AnalysisDataService::Instance().remove("raggedMask5");
+    AnalysisDataService::Instance().remove("MaskInfoTable");
+
+  }
+
+
+
+
 };
 
 
 #endif /* MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

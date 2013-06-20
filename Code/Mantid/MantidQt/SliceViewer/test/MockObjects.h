@@ -39,7 +39,7 @@ namespace
   {
   public:
     MOCK_METHOD0(update, void());
-    MOCK_METHOD1(updateWithSlicePoint, void(const double&));
+    MOCK_METHOD1(updateWithSlicePoint, void(const PeakBoundingBox&));
     MOCK_METHOD0(changeShownDim, bool());
     MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string&));
     MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
@@ -105,7 +105,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
   public:
     MOCK_METHOD1(setPlaneDistance, void(const double&));
     MOCK_METHOD0(updateView, void());
-    MOCK_METHOD1(setSlicePoint, void(const double&));
+    MOCK_METHOD2(setSlicePoint, void(const double&, const std::vector<bool>&));
     MOCK_METHOD0(hideView, void());
     MOCK_METHOD0(showView, void());
     MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
@@ -118,6 +118,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_CONST_METHOD0(getOccupancyInView, double());
     MOCK_CONST_METHOD0(getOccupancyIntoView, double());
     MOCK_CONST_METHOD0(positionOnly, bool());
+    MOCK_CONST_METHOD0(getRadius, double());
     ~MockPeakOverlayView(){}
   };
 

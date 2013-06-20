@@ -83,6 +83,7 @@ set ( SRC_FILES
 	src/ExportTimeSeriesLog.cpp
 	src/ExtractFFTSpectrum.cpp
 	src/ExtractMask.cpp
+	src/ExtractMaskToTable.cpp
 	src/ExtractMasking.cpp
 	src/ExtractSingleSpectrum.cpp
 	src/FFT.cpp
@@ -173,6 +174,7 @@ set ( SRC_FILES
 	src/RemoveLowResTOF.cpp
 	src/RemovePromptPulse.cpp
 	src/RenameWorkspace.cpp
+        src/RenameWorkspaces.cpp
 	src/ReplaceSpecialValues.cpp
 	src/ResampleX.cpp
 	src/ResetNegatives.cpp
@@ -300,6 +302,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExportTimeSeriesLog.h
 	inc/MantidAlgorithms/ExtractFFTSpectrum.h
 	inc/MantidAlgorithms/ExtractMask.h
+	inc/MantidAlgorithms/ExtractMaskToTable.h
 	inc/MantidAlgorithms/ExtractMasking.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
 	inc/MantidAlgorithms/FFT.h
@@ -391,6 +394,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RenameWorkspace.h
+        inc/MantidAlgorithms/RenameWorkspaces.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
 	inc/MantidAlgorithms/ResampleX.h
 	inc/MantidAlgorithms/ResetNegatives.h
@@ -523,6 +527,7 @@ set ( TEST_FILES
 	ExportTimeSeriesLogTest.h
 	ExtractFFTSpectrumTest.h
 	ExtractMaskTest.h
+	ExtractMaskToTableTest.h
 	ExtractSingleSpectrumTest.h
 	FFTDerivativeTest.h
 	FFTSmooth2Test.h
@@ -601,6 +606,7 @@ set ( TEST_FILES
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
+	RenameWorkspacesTest.h
 	RenameWorkspaceTest.h
 	ReplaceSpecialValuesTest.h
 	ResampleXTest.h

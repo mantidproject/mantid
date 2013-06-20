@@ -43,9 +43,9 @@ namespace MantidQt
     {
       // Construct all physical peaks
       VecPhysicalCrossPeak physicalPeaks(m_peaksWS->rowCount());
-      for(int i = 0; i < physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < physicalPeaks.size(); ++i)
       {
-        const IPeak& peak = m_peaksWS->getPeak(i);
+        const IPeak& peak = m_peaksWS->getPeak(static_cast<int>(i));
         auto position = transform->transformPeak(peak);
         physicalPeaks[i] = boost::make_shared<PhysicalCrossPeak>(position, m_zMax, m_zMin);
       }

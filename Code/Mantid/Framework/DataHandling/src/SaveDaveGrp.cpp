@@ -71,7 +71,8 @@ namespace DataHandling
       std::size_t nBins = ws->blocksize();
       if(nSpectra*nBins==0) throw std::invalid_argument("Either the number of bins or the number of histograms is 0");
       bool isHist=ws->isHistogramData();
-      std::string xcaption=ws->getAxis(0)->unit()->caption(),ycaption=ws->getAxis(1)->unit()->caption();
+      std::string xcaption=ws->getAxis(0)->unit()->caption();
+      std::string ycaption=ws->getAxis(1)->unit()->caption();
       if (xcaption.length()==0) xcaption="X";
       if (ycaption.length()==0) ycaption="Y";
 

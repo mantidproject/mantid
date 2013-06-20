@@ -37,6 +37,7 @@ private:
   double m_wavelengthMin; ///< The minimum wavelength accessible in the frame
   std::size_t m_numberOfSpectra; ///< The number of spectra in the workspace
   API::Progress* m_progress;   ///< Progress reporting
+  double m_outputLowResTOF; /// Flag to generate low resolution TOF workspace
 };
 
 } // namespace Algorithms

@@ -1,6 +1,7 @@
 #include <MantidQtSliceViewer/QPeaksTableModel.h>
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
+#include <MantidKernel/ConfigService.h>
 #include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;
@@ -31,20 +32,20 @@ namespace MantidQt
       m_dataCache.clear();
       m_dataCache.push_back(QString::number(peak.getRunNumber()));
       m_dataCache.push_back(QString::number(peak.getDetectorID()));
-      m_dataCache.push_back(QString::number(peak.getH()));
-      m_dataCache.push_back(QString::number(peak.getK()));
-      m_dataCache.push_back(QString::number(peak.getL()));
-      m_dataCache.push_back(QString::number(peak.getDSpacing()));
+      m_dataCache.push_back(QString::number(peak.getH(), 'f', m_hklPrec));
+      m_dataCache.push_back(QString::number(peak.getK(), 'f', m_hklPrec));
+      m_dataCache.push_back(QString::number(peak.getL(), 'f', m_hklPrec));
+      m_dataCache.push_back(QString::number(peak.getDSpacing(), 'f', 4));
       m_dataCache.push_back(QString::number(peak.getIntensity()));
       m_dataCache.push_back(QString::number(peak.getSigmaIntensity()));
 
       const QString COMMA(",");
 
       const Mantid::Kernel::V3D qlab = peak.getQLabFrame();
-      m_dataCache.push_back(QString::number(qlab.X()) + COMMA + QString::number(qlab.Y()) + COMMA + QString::number(qlab.Z()));
+      m_dataCache.push_back(QString::number(qlab.X(), 'f', 4) + COMMA + QString::number(qlab.Y(), 'f', 4) + COMMA + QString::number(qlab.Z(), 'f', 4));
 
       const Mantid::Kernel::V3D qsample = peak.getQSampleFrame();
-      m_dataCache.push_back(QString::number(qsample.X()) + COMMA + QString::number(qsample.Y()) + COMMA + QString::number(qsample.Z()));
+      m_dataCache.push_back(QString::number(qsample.X(), 'f', 4) + COMMA + QString::number(qsample.Y(), 'f', 4) + COMMA + QString::number(qsample.Z(), 'f', 4));
     }
 
     /**
@@ -61,21 +62,21 @@ namespace MantidQt
       else if (column == 1) // DETID
         return 7;
       else if (column == 2) // H
-        return 3;
+        return 3+m_hklPrec;
       else if (column == 3) // K
-        return 3;
+        return 3+m_hklPrec;
       else if (column == 4) // L
-        return 3;
+        return 3+m_hklPrec;
       else if (column == 5) // DSPACING
-        return 7;
+        return 6;
       else if (column == 6) // INT
         return 5;
       else if (column == 7) // SIGMINT
           return 5;
       else if (column == 8) // QLAB
-          return 3*7;
+          return 3*6;
       else if (column == 9) // QSAMPLE
-          return 3*7;
+          return 3*6;
       else
         return 3;
     }
@@ -110,6 +111,9 @@ namespace MantidQt
       m_sortableColumns.insert(std::make_pair(SIGMINT, true));
       m_sortableColumns.insert(std::make_pair(QLAB, false));
       m_sortableColumns.insert(std::make_pair(QSAMPLE, false));
+
+      if (!Mantid::Kernel::ConfigService::Instance().getValue("PeakColumn.hklPrec", m_hklPrec))
+        m_hklPrec = 2;
     }
 
     /**
@@ -157,6 +161,10 @@ namespace MantidQt
     */
     QVariant QPeaksTableModel::data(const QModelIndex &index, int role) const
     {
+
+      if (role == Qt::TextAlignmentRole)
+        return Qt::AlignRight;
+
       if( role != Qt::DisplayRole ) 
         return QVariant();
 

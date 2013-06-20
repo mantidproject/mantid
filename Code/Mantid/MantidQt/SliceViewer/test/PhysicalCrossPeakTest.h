@@ -19,67 +19,6 @@ class PhysicalCrossPeakTest : public CxxTest::TestSuite
 {
 public:
 
-  void test_not_isViewable_after_construction()
-  {
-    V3D origin(0, 0, 0);
-    const double maxZ = 1;
-    const double minZ = 0;
-    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
-
-    TSM_ASSERT("Should NOT be viewable until a slice point < r is set.", !physicalPeak.isViewable());
-  }
-
-  void test_isViewable_after_setSlicePoint_to_intersect()
-  {
-    V3D origin(0, 0, 0);
-    const double maxZ = 1;
-    const double minZ = 0;
-    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
-
-    const double delta = 0.01;
-    const double effectiveRadius = 0.015 * (maxZ - minZ);
-    const double slicePoint = effectiveRadius - delta;
-    physicalPeak.setSlicePoint(slicePoint);
-
-    TSM_ASSERT("Should be viewable since slice point < r.", physicalPeak.isViewable());
-  }
-
-  void test_not_isViewable_after_setSlicePoint_beyond_range()
-  {
-    V3D origin(0, 0, 0);
-    const double maxZ = 1;
-    const double minZ = 0;
-    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
-
-    const double delta = 0.01;
-    const double effectiveRadius = 0.015 * (maxZ - minZ);
-    const double slicePoint = effectiveRadius + delta;
-    physicalPeak.setSlicePoint(slicePoint);
-
-    TSM_ASSERT("Should NOT be viewable until a slice point > r is set.", !physicalPeak.isViewable());
-  }
-
-  void test_constructor_defaults()
-  {
-    V3D origin(0, 0, 0);
-    const double maxZ = 1;
-    const double minZ = 0;
-    PhysicalCrossPeak physicalPeak(origin, maxZ, minZ);
-
-    // Scale 1:1 on both x and y for simplicity.
-    const double windowHeight = 200;
-    const double windowWidth = 200;
-
-    TSM_ASSERT("Should NOT be viewable until a slice point > r is set.", !physicalPeak.isViewable());
-    auto drawObject = physicalPeak.draw(windowHeight, windowWidth);
-
-    // Quick white-box calculations of the outputs to expect.
-    TS_ASSERT_EQUALS(0, drawObject.peakHalfCrossWidth);
-    TS_ASSERT_EQUALS(0, drawObject.peakHalfCrossHeight);
-    TS_ASSERT_EQUALS(0, drawObject.peakOpacityAtDistance);
-    TS_ASSERT_EQUALS(0, drawObject.peakLineWidth);
-  }
-
   void test_setSlicePoint_to_intersect()
   {
     V3D origin(0, 0, 0);

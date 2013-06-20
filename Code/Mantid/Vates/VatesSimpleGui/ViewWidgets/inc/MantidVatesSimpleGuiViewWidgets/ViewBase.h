@@ -130,8 +130,6 @@ public slots:
   void onLogScale(int state);
   /// Set the view to use a parallel projection.
   void onParallelProjection(bool state);
-  /// Reset center of rotation to center of data volume.
-  void onResetCenterToData();
   /// Reset center of rotation to given point.
   void onResetCenterToPoint(double x, double y, double z);
   /// Set color scaling for a view.

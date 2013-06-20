@@ -500,7 +500,6 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   /** Either return an existing EventList from the list, or
    * create a new one if needed and expand the list.
-   * NOTE: After you are done adding event lists, call doneAddingEventLists()
    *  to finalize the stuff that needs to.
    **
    * @param workspace_index :: The workspace index number.
@@ -607,17 +606,6 @@ namespace DataObjects
     this->clearMRU();
   }
 
-
-  //-----------------------------------------------------------------------------
-  /** Call this method when you are done manually adding event lists
-   *  at specific workspace indices.
-   *  Used to deal with the axis and spectramapping. Doesn't really do anything any longer.
-   */
-  void EventWorkspace::doneAddingEventLists()
-  {
-    //Clearing the MRU list is a good idea too.
-    this->clearMRU();
-  }
 
 
 

@@ -179,7 +179,7 @@ if ( CXXTEST_FOUND )
   )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-  target_link_libraries( SliceViewerTest MantidQtSliceViewer DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( SliceViewerTest MantidQtSliceViewer DataObjects Crystal ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
 
   add_dependencies( GUITests SliceViewerTest )
   # Add to the 'UnitTests' group in VS

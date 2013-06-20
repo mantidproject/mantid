@@ -190,7 +190,10 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
 
 public:
 
-
+  void setUp()
+  {
+    FrameworkManager::Instance();
+  }
 
   void test_construction()
   {
@@ -290,7 +293,7 @@ public:
 
     // Create a mock view object that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    EXPECT_CALL(*pMockView, setSlicePoint(slicePoint)).Times(1); // Only one widget for this presenter
+    EXPECT_CALL(*pMockView, setSlicePoint(slicePoint, _)).Times(1); // Only one widget for this presenter
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
@@ -305,6 +308,7 @@ public:
     // Create a mock transform object.
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, getFriendlyName()).WillOnce(Return("HKL"));
     EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
 
     // Create a mock transform factory.
@@ -317,7 +321,8 @@ public:
     ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, mdWS, peakTransformFactory);
 
     // Updating should cause all of the held views to be updated too.
-    presenter.updateWithSlicePoint(slicePoint);
+    PeakBoundingBox region(Left(-1), Right(1), Top(1), Bottom(-1), SlicePoint(slicePoint));
+    presenter.updateWithSlicePoint(region);
 
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
     TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
@@ -531,7 +536,7 @@ public:
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
-    EXPECT_CALL(*pMockView, setSlicePoint(_)).Times(1); // Expect that the slice point will be re-set upon sorting.
+    EXPECT_CALL(*pMockView, setSlicePoint(_,_)).Times(1); // Expect that the slice point will be re-set upon sorting.
 
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;

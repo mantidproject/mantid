@@ -25,7 +25,7 @@ namespace MantidQt
       
       // Overrriden methods from Peaks Presenter
       virtual void update();
-      virtual void updateWithSlicePoint(const double&);
+      virtual void updateWithSlicePoint(const PeakBoundingBox&);
       virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
       SetPeaksWorkspaces presentedWorkspaces() const;

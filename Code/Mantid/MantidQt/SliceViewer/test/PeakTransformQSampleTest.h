@@ -2,6 +2,7 @@
 #define SLICE_VIEWER_PEAKTRANSFORMQSAMPLE_TEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidCrystal/PeaksInRegion.h"
 #include "MantidQtSliceViewer/PeakTransformQSample.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
@@ -201,13 +202,18 @@ void test_getFriendlyName()
 {
   PeakTransformQSample transform;
   TS_ASSERT_EQUALS(PeakTransformQSample::name(), transform.getFriendlyName());
-  TS_ASSERT_EQUALS("QSample", transform.getFriendlyName());
+  TS_ASSERT_EQUALS("Q (sample frame)", transform.getFriendlyName());
 }
 
 void test_getCoordinateSystem()
 {
   PeakTransformQSample transform;
   TS_ASSERT_EQUALS(Mantid::API::QSample, transform.getCoordinateSystem())
+}
+
+void test_friendlyname_against_PeaksInRegion()
+{
+  TSM_ASSERT_EQUALS("These labels must be compatible", PeakTransformQSample::name(), Mantid::Crystal::PeaksInRegion::qSampleFrame());
 }
 
 

@@ -412,12 +412,6 @@ void MdViewerWidget::setParaViewComponentsForView()
                    this->ui.timeControlWidget,
                    SLOT(updateAnimationControls(double, double, int)));
 
-  // Set the connections for the rotation center button
-  QObject::connect(this->ui.resetCenterToDataButton,
-                   SIGNAL(clicked()),
-                   this->currentView,
-                   SLOT(onResetCenterToData()));
-
   // Set the connection for the parallel projection button
   QObject::connect(this->ui.parallelProjButton,
                    SIGNAL(toggled(bool)),
