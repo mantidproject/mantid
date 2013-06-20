@@ -140,7 +140,7 @@ class DirectEnergyConversion(object):
                 bkgd_range = kwargs['bkgd_range']
                 del kwargs['bkgd_range']
             else:
-                bkgd_range = self.background_range
+                bkgd_range = self.bkgd_range
             background_int = Integration(result_ws,
                                          RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
                                          IncludePartialBins=True)
@@ -334,7 +334,7 @@ class DirectEnergyConversion(object):
         if (self.facility == "SNS"):
             if self.background == True:
                 # Extract the time range for the background determination before we throw it away
-                background_bins = "%s,%s,%s" % (self.background_range[0] + bin_offset, (self.background_range[1]-self.background_range[0]), self.background_range[1] + bin_offset)
+                background_bins = "%s,%s,%s" % (self.bkgd_range[0] + bin_offset, (self.bkgd_range[1]-self.bkgd_range[0]), self.bkgd_range[1] + bin_offset)
                 Rebin(InputWorkspace=result_name,OutputWorkspace= "background_origin_ws",Params=background_bins)
             # Convert to Et
             ConvertUnits(InputWorkspace=result_name,OutputWorkspace= "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
@@ -375,7 +375,7 @@ class DirectEnergyConversion(object):
             ConvertToDistribution(Workspace=result_name)    
             if (self.facility == "SNS"):
                 FlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
-                               StartX= self.background_range[0] + bin_offset,EndX= self.background_range[1] + bin_offset,
+                               StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
                                WorkspaceIndexList= '',Mode= 'Mean',OutputMode= 'Return Background')
                 # Delete the raw data background region workspace
                 DeleteWorkspace("background_origin_ws")
@@ -387,7 +387,7 @@ class DirectEnergyConversion(object):
                 DeleteWorkspace("background_ws")
             else:
                 FlatBackground(InputWorkspace=result_name,OutputWorkspace=result_name,
-                               StartX= self.background_range[0] + bin_offset,EndX= self.background_range[1] + bin_offset,
+                               StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
                                WorkspaceIndexList= '',Mode= 'Mean')
             ConvertFromDistribution(Workspace=result_name)  
 
@@ -803,10 +803,11 @@ class DirectEnergyConversion(object):
         self.__save_formats = ['.spe','.nxs','.nxspe']
 
         ## Detector diagnosis
-        # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word
+        # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word 
+        # and picks correspondent parameters
         self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
-                              'diag_bleed_test','diag_hard_mask']
+                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask','diag_bkgd_range']
         
         self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
 

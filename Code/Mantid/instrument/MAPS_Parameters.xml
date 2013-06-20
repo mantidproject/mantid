@@ -155,7 +155,7 @@
 </parameter>
 <!-- Fraction of median to consider counting high for the white beam diag (sv_hi)-->
 <parameter name="diag_samp_hi">
-  <value val="1.5"/>
+  <value val="2."/>
 </parameter>
 
 <!-- Error criterion as a multiple of error bar for background (sv_sig) 
@@ -163,7 +163,7 @@
   difference with respect to the median value must also exceed this number of error bars (default=3.3)
 -->  
 <parameter name="diag_samp_sig">
-  <value val="3.3"/>
+  <value val="3."/>
 </parameter>
 
 <!-- Lower bound defining outliers as fraction of median value (v_out_lo)-->
@@ -183,7 +183,7 @@
 
 <!-- Fraction of median to consider counting high for the white beam diag (vv_hi) vanhi=1.5 -->
 <parameter name="diag_van_hi">
-  <value val="2.0"/>
+  <value val="1.5"/>
 </parameter>
 
 <!-- Error criterion as a multiple of error bar     van_sig  "
@@ -340,7 +340,7 @@
        monovan_lo_value = monovan-integr-min;
        monovan_hi_value = monovan-integr-max;       
        use_hard_mask_only=hardmaskOnly;
-       background_range = bkgd_range;
+       bkgd_range = background_range;
        hard_mask  = hard_mask_file=hardmaskPlus;       
        van_out_lo = diag_van_median_rate_limit_lo=diag_van_out_lo;
        van_out_hi = diag_van_median_rate_limit_hi=diag_van_out_hi;
