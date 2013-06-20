@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reduction_main.ui'
 #
-# Created: Wed Apr 24 09:46:21 2013
+# Created: Thu Jun 20 11:11:32 2013
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -112,6 +112,7 @@ class Ui_SANSReduction(object):
         self.interface_chk.setText(QtGui.QApplication.translate("SANSReduction", "Advanced interface", None, QtGui.QApplication.UnicodeUTF8))
         self.reduce_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to execute reduction.", None, QtGui.QApplication.UnicodeUTF8))
         self.reduce_button.setText(QtGui.QApplication.translate("SANSReduction", "Reduce", None, QtGui.QApplication.UnicodeUTF8))
+        self.cluster_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to send the reduction job to a remote compute resource", None, QtGui.QApplication.UnicodeUTF8))
         self.cluster_button.setText(QtGui.QApplication.translate("SANSReduction", "Send cluster", None, QtGui.QApplication.UnicodeUTF8))
         self.save_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to save your reduction parameters.", None, QtGui.QApplication.UnicodeUTF8))
         self.save_button.setText(QtGui.QApplication.translate("SANSReduction", "Save", None, QtGui.QApplication.UnicodeUTF8))

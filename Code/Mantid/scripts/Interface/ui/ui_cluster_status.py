@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/cluster_status.ui'
 #
-# Created: Wed Jun 19 15:33:04 2013
+# Created: Thu Jun 20 11:14:07 2013
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -62,18 +62,6 @@ class Ui_Frame(object):
         self.horizontalLayout.addWidget(self.password_edit)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem)
-        self.login_status_edit = QtGui.QLineEdit(Frame)
-        self.login_status_edit.setEnabled(False)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.login_status_edit.sizePolicy().hasHeightForWidth())
-        self.login_status_edit.setSizePolicy(sizePolicy)
-        self.login_status_edit.setAcceptDrops(False)
-        self.login_status_edit.setFrame(False)
-        self.login_status_edit.setReadOnly(True)
-        self.login_status_edit.setObjectName("login_status_edit")
-        self.horizontalLayout.addWidget(self.login_status_edit)
         self.refresh_button = QtGui.QPushButton(Frame)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -94,5 +82,6 @@ class Ui_Frame(object):
         self.username_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter compute resource username", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Frame", "Password:", None, QtGui.QApplication.UnicodeUTF8))
         self.password_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter compute resource password", None, QtGui.QApplication.UnicodeUTF8))
+        self.refresh_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to refresh the job list", None, QtGui.QApplication.UnicodeUTF8))
         self.refresh_button.setText(QtGui.QApplication.translate("Frame", "Refresh", None, QtGui.QApplication.UnicodeUTF8))
 

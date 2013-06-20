@@ -53,8 +53,7 @@ class RemoteJobsWidget(BaseWidget):
         for res in compute_resources:
             self._content.resource_combo.addItem(QtGui.QApplication.translate("Dialog", res, None, QtGui.QApplication.UnicodeUTF8))
 
-        # Update the table
-        #self._update_content(False)
+        self._clear_table()
         
     def tableWidgetContext(self, point):
         '''Create a menu for the tableWidget and associated actions'''
@@ -85,7 +84,17 @@ class RemoteJobsWidget(BaseWidget):
                         
         QtGui.QApplication.clipboard().setText(selected_text)
         
-    def _update_content(self):
+    def paintEvent(self, event):
+        """
+            Catch the paint events and update the credential info.
+        """
+        super(RemoteJobsWidget, self).paintEvent(event) 
+        self._fill_in_defaults()
+        
+    def _fill_in_defaults(self):
+        """
+            Fill in the credentials boxes if we have the information
+        """
         if self._settings.compute_resource is not None:
             for i in range(self._content.resource_combo.count()):
                 if self._content.resource_combo.itemText(i)==self._settings.compute_resource:
@@ -94,36 +103,49 @@ class RemoteJobsWidget(BaseWidget):
 
         if self._settings.cluster_user is not None \
             and self._settings.cluster_pass is not None:
+            self._content.username_edit.setText(self._settings.cluster_user)
+            self._content.password_edit.setText(self._settings.cluster_pass)
+        
+    def _clear_table(self):
+        """
+            Clear the job table and set the headers
+        """
+        self._content.job_table.clear()
+        headers = ["Job ID", "Title", "Status", "Start", "End"]
+        self._content.job_table.setColumnCount(len(headers))
+        self._content.job_table.setHorizontalHeaderLabels(headers)        
+        # Stretch the columns evenly
+        h = self._content.job_table.horizontalHeader()
+        h.setStretchLastSection(True)
+        h.setResizeMode(1)
+        
+    def _update_content(self):
+        """
+            Get the job status from the compute resource and
+            update the job table content.
+        """
+        self._fill_in_defaults()
+        
+        user = str(self._content.username_edit.text())
+        pwd = str(self._content.password_edit.text())
+        if len(user)==0 or len(pwd)==0:
+            util.set_valid(self._content.username_edit, False)
+            util.set_valid(self._content.password_edit, False)
+            return
+        else:
+            self._settings.cluster_user = user
+            self._settings.cluster_pass = pwd
             util.set_valid(self._content.username_edit, True)
             util.set_valid(self._content.password_edit, True)
-            self._content.username_edit.setText(self._settings.cluster_user)
-            self._content.password_edit.setText("password")
-            self._content.login_status_edit.setText("Credential ready")
-        else:
-            user = str(self._content.username_edit.text())
-            pwd = str(self._content.password_edit.text())
-            if len(user)==0 or len(pwd)==0:
-                util.set_valid(self._content.username_edit, False)
-                util.set_valid(self._content.password_edit, False)
-                self._content.login_status_edit.setText("Enter credentials")
-                return
-            else:
-                self._settings.cluster_user = user
-                self._settings.cluster_pass = pwd
-                self._content.login_status_edit.setText("Credential ready")
         
         job_info = api.QueryAllRemoteJobs(ComputeResource=str(self._settings.compute_resource),
                                           UserName=str(self._settings.cluster_user),
-                                          Password=str(self._settings.cluster_pass))
-            
+                                          Password=str(self._settings.cluster_pass))    
         job_list = zip(*(job_info[0], job_info[1], job_info[3]))
         
-        self._content.job_table.clear()
+        self._clear_table()
         self._content.job_table.setSortingEnabled(False)
         self._content.job_table.setRowCount(len(job_list))
-        headers = ["Job ID", "Title", "Status", "Start", "End"]
-        self._content.job_table.setColumnCount(len(headers))
-        self._content.job_table.setHorizontalHeaderLabels(headers)
 
         for i in range(len(job_list)):
             # Job ID
@@ -140,13 +162,12 @@ class RemoteJobsWidget(BaseWidget):
             item = QtGui.QTableWidgetItem(str(job_list[i][1]))
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
             self._content.job_table.setItem(i, 2, item)
+            
+            # Start/Stop time
+            #TODO currently unavailable
           
         self._content.job_table.setSortingEnabled(True)
         self._content.job_table.sortItems(0)
-        # Stretch the columns evenly
-        h = self._content.job_table.horizontalHeader()
-        h.setStretchLastSection(True)
-        h.setResizeMode(1)
     
     def get_state(self):
         return RemoteJobs()

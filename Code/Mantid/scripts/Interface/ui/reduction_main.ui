@@ -133,6 +133,9 @@ p, li { white-space: pre-wrap; }
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Click to send the reduction job to a remote compute resource</string>
+        </property>
         <property name="text">
          <string>Send cluster</string>
         </property>
