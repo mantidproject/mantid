@@ -259,7 +259,9 @@ void RemoveLowResTOF::execEvent()
           }
           else
           {
-            lowW->getEventList(workspaceIndex).maskTof(tmin, tmax+DBL_MIN);
+            // There is possibility that tmin calculated is larger than TOF-MAX of the spectrum
+            if (tmax+DBL_MIN > tmin)
+              lowW->getEventList(workspaceIndex).maskTof(tmin, tmax+DBL_MIN);
           }
         }
       }
