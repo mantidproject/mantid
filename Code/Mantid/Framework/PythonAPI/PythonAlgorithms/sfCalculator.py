@@ -116,22 +116,23 @@ class sfCalculator():
         self._calculateFinalYAxis(bNumerator=True)
 
         #DEBUGGING
-         
+          
         #output the data to fit to DEBUG
         x_axis = self.x_axis_ratio
         y_axis = self.y_axis_numerator
         y_error_axis = self.y_axis_error_numerator
-          
+           
         print 'create sfOutputTest#'
-        filename = "/SNS/users/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+#         filename = "/SNS/users/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+        filename = "/home/j35/Desktop/sfOutputTest#%d.txt" % sfCalculator.INDEX
         print filename
         sfCalculator.INDEX += 1
-          
+           
         f=open(filename,'w')
-  
+   
         for i in range(len(x_axis)):
             f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
-          
+           
         f.close
         #END of DEBUGGING
         
@@ -139,22 +140,23 @@ class sfCalculator():
         self._calculateFinalYAxis(bNumerator=False)
 
         #DEBUGGING
-         
+          
         #output the data to fit to DEBUG
         x_axis = self.x_axis_ratio
         y_axis = self.y_axis_denominator
         y_error_axis = self.y_axis_error_denominator
-          
+           
         print 'create sfOutputTest#'
-        filename = "/SNS/users/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+#         filename = "/SNS/users/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+        filename = "/home/j35/Desktop/sfOutputTest#%d.txt" % sfCalculator.INDEX
         print filename
         sfCalculator.INDEX += 1
-          
+           
         f=open(filename,'w')
-  
+   
         for i in range(len(x_axis)):
             f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
-          
+           
         f.close
         #END of DEBUGGING
         
@@ -427,6 +429,7 @@ class sfCalculator():
 
         #normalization by proton beam
         y_axis /= (proton_charge * 1e-12)
+        y_error_axis /= (proton_charge * 1e-12)
         
         OutputWorkspace = CreateWorkspace(DataX=x_axis,
                         DataY=y_axis,
@@ -464,8 +467,11 @@ class sfCalculator():
         
         product.x_axis_ratio = self.x_axis_ratio
         product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
-        product.y_axis_error_ratio = sqrt((other.y_axis_ratio * self.y_axis_error_ratio) ** 2 + 
-                                          (other.y_axis_error_ratio * self.y_axis_ratio) ** 2)
+#         product.y_axis_error_ratio = sqrt((other.y_axis_ratio * self.y_axis_error_ratio) ** 2 + 
+#                                           (other.y_axis_error_ratio * self.y_axis_ratio) ** 2)
+
+        product.y_axis_error_ratio = product.y_axis_ratio * sqrt((other.y_axis_error_ratio / other.y_axis_ratio)**2 + (self.y_axis_error_ratio / self.y_axis_ratio)**2)
+
         return product
     
     def fit(self):
