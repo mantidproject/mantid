@@ -112,9 +112,9 @@ class RemoteJobsWidget(BaseWidget):
                 self._settings.cluster_pass = pwd
                 self._content.login_status_edit.setText("Credential ready")
         
-        job_info = api.QueryAllRemoteJobs(ComputeResource=self._settings.compute_resource,
-                                          UserName=self._settings.cluster_user,
-                                          Password=self._settings.cluster_pass)
+        job_info = api.QueryAllRemoteJobs(ComputeResource=str(self._settings.compute_resource),
+                                          UserName=str(self._settings.cluster_user),
+                                          Password=str(self._settings.cluster_pass))
             
         job_list = zip(*(job_info[0], job_info[1], job_info[3]))
         
