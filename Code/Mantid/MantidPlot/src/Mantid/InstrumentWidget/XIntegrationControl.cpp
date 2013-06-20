@@ -229,8 +229,10 @@ m_maximum(1)
   QHBoxLayout* layout = new QHBoxLayout();
   m_minText = new QLineEdit(this);
   m_minText->setMaximumWidth(100);
+  m_minText->setToolTip("Minimum x value");
   m_maxText = new QLineEdit(this);
   m_maxText->setMaximumWidth(100);
+  m_maxText->setToolTip("Maximum x value");
   m_units = new QLabel("TOF",this);
   
   layout->addWidget(m_units,0);
