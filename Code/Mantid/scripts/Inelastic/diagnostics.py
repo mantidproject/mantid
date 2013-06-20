@@ -55,8 +55,6 @@ def diagnose(white_int, **kwargs):
     if white_int is None and str(white_int) != '':
         raise RuntimeError("No white beam integral specified. This is the minimum required to run diagnostics")
     
-    for key,val in kwargs.iteritems():
-            print "diag  for key:\t {0:<20}\t Value: {1:<20}".format(key, str(val))
     # Grab the arguments
     parser = ArgumentParser(kwargs)
     start_index = parser.start_index
