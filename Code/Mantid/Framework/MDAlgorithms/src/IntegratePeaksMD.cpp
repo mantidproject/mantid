@@ -138,8 +138,6 @@ namespace MDAlgorithms
         "The signal density around the peak (BackgroundInnerRadius < r < BackgroundOuterRadius) is used to estimate the background under the peak.\n"
         "If smaller than PeakRadius, no background measurement is done." );
 
-    declareProperty(new PropertyWithValue<double>("CylinderLength",0.0,Direction::Input),
-        "Length of cylinder in which to integrate (in the same units as the workspace; 0.0 for sphere).");
 
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::Input),
         "A PeaksWorkspace containing the peaks to integrate.");
@@ -153,6 +151,14 @@ namespace MDAlgorithms
 
     declareProperty("IntegrateIfOnEdge", true, "Only warning if all of peak outer radius is not on detector (default).\n"
         "If false, do not integrate if the outer radius is not on a detector.");
+
+    declareProperty("Cylinder", false, "Default is sphere.  Add next two parameters for cylinder.");
+
+    declareProperty(new PropertyWithValue<double>("CylinderLength",0.0,Direction::Input),
+        "Length of cylinder in which to integrate (in the same units as the workspace; 0.0 for sphere).");
+
+    declareProperty(new PropertyWithValue<double>("PercentBackground",0.0,Direction::Input),
+        "Percent of CylinderLength that is background (20 is 20%)");
 
   }
 
@@ -186,11 +192,15 @@ namespace MDAlgorithms
     /// Start radius of the background
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
     /// Cylinder Length to use around peaks for cylinder
-    double CylinderLength = getProperty("CylinderLength");
-    CylinderLength /= (2.0 * M_PI);
+    double cylinderLength = getProperty("CylinderLength");
+    cylinderLength /= (2.0 * M_PI);
+    double backgroundCylinder = cylinderLength;
+    double percentBackground = getProperty("PercentBackground");
+    cylinderLength *= 1.0 - (percentBackground/100.);
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
+    bool cylinderBool = getProperty("Cylinder");
     if (BackgroundInnerRadius < PeakRadius)
       BackgroundInnerRadius = PeakRadius;
 
@@ -252,28 +262,29 @@ namespace MDAlgorithms
       // Perform the integration into whatever box is contained within.
       signal_t signal = 0;
       signal_t errorSquared = 0;
-      if (CylinderLength == 0.0)
+      if (!cylinderBool)
       {
     	  ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), signal, errorSquared);
       }
       else
       {
-    	  ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(CylinderLength), signal, errorSquared);
+    	  ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(cylinderLength), signal, errorSquared);
       }
 
       // Integrate around the background radius
       signal_t bgSignal = 0;
       signal_t bgErrorSquared = 0;
-      if (BackgroundOuterRadius > PeakRadius)
+      if (BackgroundOuterRadius > PeakRadius || percentBackground > 0.0)
       {
         // Get the total signal inside "BackgroundOuterRadius"
-    	  if (CylinderLength == 0.0)
+    	  if (!cylinderBool)
     	  {
     		  ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundOuterRadius*BackgroundOuterRadius), bgSignal, bgErrorSquared);
     	  }
           else
           {
-        	  ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(CylinderLength), bgSignal, bgErrorSquared);
+        	  if (BackgroundOuterRadius < PeakRadius ) BackgroundOuterRadius = PeakRadius;
+        	  ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared);
           }
 
         // Evaluate the signal inside "BackgroundInnerRadius"
@@ -283,13 +294,13 @@ namespace MDAlgorithms
         // Integrate this 3rd radius, if needed
         if (BackgroundInnerRadius != PeakRadius)
         {
-        	if (CylinderLength == 0.0)
+        	if (!cylinderBool)
         	{
         		ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundInnerRadius*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
         	}
             else
             {
-            	ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundInnerRadius), static_cast<coord_t>(CylinderLength), interiorSignal, interiorErrorSquared);
+            	ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundInnerRadius), static_cast<coord_t>(cylinderLength), interiorSignal, interiorErrorSquared);
             }
         }
         else
@@ -306,18 +317,33 @@ namespace MDAlgorithms
 
         // Relative volume of peak vs the BackgroundOuterRadius sphere
         double ratio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume = ratio * ratio * ratio;
+        double peakVolume;
+        if (!cylinderBool)
+        {
+        	peakVolume = ratio * ratio * ratio;
+        }
+        else
+        {
+        	peakVolume = ratio * ratio * (1-percentBackground/100.);
+        }
 
-        // Relative volume of the interior of the shell vs overall background
+        // Relative volume of the interior of the shell vs overall backgroundratio * ratio
         double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
         // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
-        double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+        double bgVolume;
+        if (!cylinderBool)
+        {
+        	bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+        }
+        else
+        {
+        	bgVolume = 1.0 - interiorRatio * interiorRatio * (percentBackground/100.);
+        }
 
         // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
         double scaleFactor = peakVolume / bgVolume;
         bgSignal *= scaleFactor;
         bgErrorSquared *= scaleFactor;
-
         // Adjust the integrated values.
         signal -= bgSignal;
         // But we add the errors together
