@@ -143,7 +143,8 @@ public:
               << ", Low Res = " << lowresws->getNumberEvents() << ".\n";
     TS_ASSERT(num_events > ws->getNumberEvents());
     TS_ASSERT(num_events > lowresws->getNumberEvents());
-    TS_ASSERT_EQUALS(ws->getNumberEvents() + lowresws->getNumberEvents(), num_events);
+    // There are 400 events in 4 spectra that are cleared
+    TS_ASSERT_EQUALS(ws->getNumberEvents() + lowresws->getNumberEvents() + 400, num_events);
 
     // pixel 0 shouldn't be adjusted
     TS_ASSERT_EQUALS(min_event0, ws->getEventList(0).getTofMin());

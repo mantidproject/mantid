@@ -222,6 +222,7 @@ void RemoveLowResTOF::execEvent()
 
   this->getTminData(true);
   size_t numClearedEventLists = 0;
+  size_t numClearedEvents = 0;
 
   // do the actual work
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
@@ -232,9 +233,11 @@ void RemoveLowResTOF::execEvent()
       if (tmin != tmin)
       {
         // Problematic
-        g_log.warning() << "tmin for workspaceIndex " << workspaceIndex << " is nan. Clearing out data.\n";
-        outW->getEventList(workspaceIndex).clear(false);
+        g_log.warning() << "tmin for workspaceIndex " << workspaceIndex << " is nan. Clearing out data. "
+                        << "There are " << outW->getEventList(workspaceIndex).getNumberEvents() << " of it. \n";
         numClearedEventLists += 1;
+        numClearedEvents +=  outW->getEventList(workspaceIndex).getNumberEvents();
+        outW->getEventList(workspaceIndex).clear(false);
 
         if (m_outputLowResTOF)
           lowW->getEventList(workspaceIndex).clear(false);
@@ -251,7 +254,7 @@ void RemoveLowResTOF::execEvent()
           double tmax = lowW->getEventList(workspaceIndex).getTofMax();
           if (tmax != tmax)
           {
-            g_log.warning() << "tmax for workspaceIndex " << workspaceIndex << " is nan. Clearing out data.\n";
+            g_log.warning() << "tmax for workspaceIndex " << workspaceIndex << " is nan. Clearing out data. \n";
             lowW->getEventList(workspaceIndex).clear(false);
           }
           else
@@ -276,9 +279,9 @@ void RemoveLowResTOF::execEvent()
                       << (static_cast<double>(numEventsOrig - outW->getNumberEvents())*100./static_cast<double>(numEventsOrig)) << "% removed)\n";
   if (numClearedEventLists > 0)
     g_log.warning() << numClearedEventLists << " spectra of " << m_numberOfSpectra
-                    << " had all data removed\n";
+                    << " had all data removed.  The number of removed events is " << numClearedEvents << ".\n";
   g_log.debug() << "TOF range is now " << outW->getTofMin() << " to "
-                      << outW->getTofMax() << " microseconds\n";
+                << outW->getTofMax() << " microseconds\n";
   outW->clearMRU();
   this->runMaskDetectors();
 }
