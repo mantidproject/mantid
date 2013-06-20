@@ -229,13 +229,13 @@
   <value val="100"/>
 </parameter>
 
-<!-- This property is the part of the composite definition for abs_units_van_range
+<!-- This property is the part of the composite definition for abs_units_van_range: 
  It specifies the relative to incident energy lower integration limit for monochromatic vanadium in the mono-vanadium integration -->
 <parameter name="monovan_lo_frac">
   <value val="0.8"/>
 </parameter>
 
-<!-- This property is the part of the composite definition for abs_units_van_range
+<!-- This property is the part of the composite definition for abs_units_van_range:
  It specifies the the lower limit of energy range in the monochromatic-vanadium integration 
  Used only if abs_units_van_range is set to val="monovan_lo_value,monovan_hi_value"-->
 <parameter name="monovan_lo_value">

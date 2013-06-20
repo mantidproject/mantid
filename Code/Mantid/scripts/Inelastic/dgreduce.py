@@ -123,9 +123,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
     global Reducer
     if Reducer is None or Reducer.instrument is None:
         raise ValueError("instrument has not been defined, call setup(instrument_name) first.")
+# --------------------------------------------------------------------------------------------------------
+#    Deal with mandatory parameters for this and may be some top level procedures
+# --------------------------------------------------------------------------------------------------------
+    Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run number: '+str(sample_run))
 
-    # Deal with mandatory parameters
-    print 'DGreduce run for ',Reducer.instr_name,'run number ',sample_run
     try:
         n,r=funcreturns.lhs_info('both')
         wksp_out=r[0]
@@ -133,29 +135,64 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
         if sample_run == 0:
             #deal with the current run being parsed as 0 rather than 00000
             sample_run='00000'
-        wksp_out=inst_name+str(sample_run)+'.spe'
+        wksp_out=Reducer.instr_name+str(sample_run)+'.spe'
         if kwargs.has_key('sum') and kwargs.get('sum')==True:
             wksp_out=inst_name+str(sample_run[0])+'sum'+'.spe'
         
     start_time=time.time()
     
     if sample_run=='00000' and mtd.doesExist(inst_name+'00000.raw')==True:
-        print 'Deleteing previous instance of temp data'
+        Reducer.log('Deleteing previous instance of temp data')
         DeleteWorkspace(Workspace=inst_name+'00000.raw')
 
 
+    # we may want to run absolute units normalization and this function has been called with monovan run or helper procedure
+    abs_units_defaults_check = False
+    if monovan_run != None :
+       # check if mono-vanadium is provided as multiple files list or just put in brackets ocasionally
+        Reducer.log(' Output will be in absolute units of mb/str/mev/fu')
+        if isinstance(monovan_run,list):
+                if len(monovan_run)>1:
+                    raise IOError(' Can currently work only with single monovan file but list supplied')
+                else:
+                    monovan_run = monovan_run[0];
+        abs_units_defaults_check =True
+        if '_defaults_have_changed' in kwargs: 
+            del kwargs['_defaults_have_changed']
+            abs_units_defaults_check =False
+    if "wb_for_monovanadium" in kwargs :
+         wb_for_monovanadium = kwargs['wb_for_monovanadium']
+         del kwargs['wb_for_monovanadium']
+    else:
+         wb_for_monovanadium = wb_run;
+
+
+
+    if isinstance(ei_guess,str):
+        ei_guess = float(ei_guess)
+
     # set rebinning range
     Reducer.energy_bins = rebin
-    if Reducer.energy_bins[2] >= float(ei_guess):
-        print 'Error: rebin max rebin range {0:f} exceeds incident energy {1:f}'.format(energy_bins[2],ei_guess)
+    if Reducer.energy_bins[2] >= ei_guess:
+        Reducer.log('Error: rebin max rebin range {0:f} exceeds incident energy {1:f}'.format(energy_bins[2],ei_guess),'Error')
         return
 
-    # Process old legacy parameters which are easy to define in dgreduce then transfer through Mantid
+    # Process old legacy parameters which are easy to re-define in dgreduce rather then transfer through Mantid
     program_args = process_legacy_parameters(**kwargs)
-
 
     # set non-default reducers parameters and check if all optional keys provided as parameters are acceptable and have been defined in IDF 
     changed_Keys=Reducer.set_input_parameters(**program_args);
+
+    # inform user about changed parameters
+    for key in changed_Keys:
+        val = getattr(Reducer,key);
+        Reducer.log("  Value of "+key+"\t is set to non-default value:\t "+str(val))
+
+
+    #do we run absolute units normalization and need to warn users if the parameters needed for that have not changed from defaults
+    if abs_units_defaults_check :
+        Reducer.check_abs_norm_defaults_changed(changed_Keys);
+
 
     # map file given in parameters overrides default map file
     if map_file != None :
@@ -163,7 +200,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
 
     # defaults can be None too, but can be a file 
     if  Reducer.map_file == None:      
-        print 'one2one map selected'       
+        Reducer.log('one2one map selected')
 
     
     #process complex parameters
@@ -172,10 +209,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
           
     if  Reducer.det_cal_file != None : 
         Reducer.relocate_dets = True
-        print 'Setting detector calibration file to ',reducer.det_cal_file
+        Reducer.log('Setting detector calibration file to '+reducer.det_cal_file)
     else:
         Reducer.relocate_dets = False
-        print 'Setting detector calibration to detector block info from ', sample_run
+        Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
 
     
     if mtd.doesExist(str(sample_run))==True and Reducer.det_cal_file != None:
@@ -196,8 +233,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
         sample_run=sample_run[0]
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
- # Here we give control to the Reducer
-    
+#  Here we give control to the Reducer
+# --------------------------------------------------------------------------------------------------------    
     # diag the sample and detector vanadium
     if Reducer.use_hard_mask_only: # if it is string, it is treated as bool
         totalmask = Reducer.hard_mask_file
@@ -214,23 +251,13 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
 
    # Calculate absolute units:    
     if monovan_run != None and Reducer.mono_correction_factor == None :
-       # check if mono-vanadium is provided as multiple files list or just put in brackets ocasionally
-        if isinstance(monovan_run,list):
-                if len(monovan_run)>1:
-                    raise IOError(' Can currently work only with single monovan file but list supplied')
-                else:
-                    monovan_run = monovan_run[0];
 
         if Reducer.use_sam_msk_on_monovan == True:
              print 'applying sample run mask to mono van'
         else:
              print '########### Run diagnose for monochromatic vanadium run ##############'
-             if "wb_mono" in kwargs :
-                 wb_mono = kwargs["wb_mono"]
-             else:
-                 wb_mono = wb_run;
 
-             masking2 = Reducer.diagnose(wb_mono,sample=monovan_run,
+             masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
                                          second_white = None,variation=1.1,print_results=True)
                   
              masking=masking+masking2               
@@ -239,12 +266,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
     Reducer.spectra_masks=masking              
   
     # estimate and report the number of failing detectors
-    sumSp = SumSpectra(InputWorkspace=masking,OutputWorkspace="sumSpectra");
-
-    nSpectra       = sumSp.getRun().getLogData("NumAllSpectra").value
-    nMaskedSpectra = int(sumSp.readY(0)[0])       
+    failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
+    nMaskedSpectra = len(failed_sp_list)
     print 'Diag processed workspace with {0:d} spectra and found {1:d} bad spectra'.format(nSpectra,nMaskedSpectra)
-    DeleteWorkspace(sumSp);
+
   
   
     
@@ -254,12 +279,11 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
     # calculate absolute units integral and apply it to the workspace
     if monovan_run != None or Reducer.mono_correction_factor != None :
         deltaE_wkspace_sample = apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_run)
-        results_name = deltaE_wkspace_sample.name();
-    else:
-        results_name=str(sample_run)+'.spe'   
 
-    if mtd.doesExist(results_name)==True and results_name != wksp_out:
-            deltaE_wkspace_sample=RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
+
+    results_name = deltaE_wkspace_sample.name();
+    if results_name != wksp_out:
+       RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
 
 
     ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value) 
@@ -315,9 +339,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
 
 
     return deltaE_wkspace_sample  
-def check_some_parameters(Reducer) :
-    monovan_mapfile
-    pass
+
 
 def process_legacy_parameters(**kwargs) :
     """ The method to deal with old parameters which have logic different from default and easy to process using 
@@ -470,11 +492,11 @@ def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
     DeleteWorkspace(Workspace=data_ws)
     return (absnorm_factorLibISIS,absnorm_factorSigSq,absnorm_factorPuason,absnorm_factorTGP)
 
-def abs_units(wb_run,sample_run,mono_van,wb_mono,samp_rmm,samp_mass,ei_guess,rebin,map_file,monovan_mapfile,**kwargs):
+def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file,monovan_mapfile,**kwargs):
     """     
     dgreduce.abs_units(wb_run          Whitebeam run number or file name or workspace
                   sample_run          Sample run run number or file name or workspace       
-                  mono_van          Monochromatic run run number or file name or workspace
+                  monovan_run          Monochromatic run run number or file name or workspace
                   wb_mono          White beam for Monochromatic run run number or file name or workspace
                   samp_rmm          Mass of forumula unit of sample
                   samp_mass          Actual sample mass
@@ -552,7 +574,36 @@ def abs_units(wb_run,sample_run,mono_van,wb_mono,samp_rmm,samp_mass,ei_guess,reb
     
     mono_correction_factor=float User specified correction factor for absolute units normalisation
     """     
-    pass
+
+    kwargs['monovan_mapfile']    = monovan_mapfile
+    kwargs['wb_for_monovanadium']= wb_for_monovanadium
+    kwargs['sample_mass']        = samp_mass
+    kwargs['sample_rmm']         = samp_rmm
+
+    # service property, which tells arb_units that here defaults have changed and no need to check they are changed
+    kwargs['_defaults_have_changed']  = True
+    try:
+        n,r=funcreturns.lhs_info('both')
+        wksp_out=r[0]
+        
+    except:
+        if sample_run == 0:
+            #deal with the current run being parsed as 0 rather than 00000
+            sample_run='00000'
+        wksp_out=Reducer.instr_name+str(sample_run)+'.spe'
+        if kwargs.has_key('sum') and kwargs.get('sum')==True:
+            wksp_out=inst_name+str(sample_run[0])+'sum'+'.spe'
+
+
+    results_name = wksp_out
+    wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,**kwargs)
+
+
+    if  results_name != wksp_out.getName():
+        RenameWorkspace(InputWorkspace=wksp_out,OutputWorkspace=results_name)
+
+    return wksp_out
+
 
 
 def sum_files(accumulator, files):
@@ -595,6 +646,24 @@ def get_failed_spectra_list(diag_workspace):
        failed_spectra.append(spectrum.getSpectrumNo())
 
     return failed_spectra
+
+def get_failed_spectra_list_from_masks(masking_wksp):
+    """Compile a list of spectra numbers that are marked as
+       masked in the masking workspace
+
+    Input:
+     masking_workspace -  A special masking workspace containing masking data
+    """
+    if type(masking_wksp) == str:
+        masking_wksp = mtd[masking_wksp]
+    
+    failed_spectra = []
+    n_spectra = masking_wksp.getNumberHistograms()
+    for i in xrange(n_spectra):
+        if masking_wksp.readY(i)[0] >0.99 : # spectrum is masked
+            failed_spectra.append(masking_wksp.getSpectrum(i).getSpectrumNo())
+
+    return (failed_spectra,n_spectra)
 
 class DgreduceTest(unittest.TestCase):
     def __init__(self, methodName):

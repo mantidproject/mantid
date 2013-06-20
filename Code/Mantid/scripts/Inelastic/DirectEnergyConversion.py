@@ -144,7 +144,7 @@ class DirectEnergyConversion(object):
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
             background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
-            logger.notice("Diagnose: finisthed convertUnits ")
+            self.log("Diagnose: finisthed convertUnits ")
             background_int *= self.scale_factor
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
@@ -199,7 +199,7 @@ class DirectEnergyConversion(object):
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
-        logger.notice("do_white: finisthed convertUnits ")
+        self.log("do_white: finisthed convertUnits ")
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
         low = self.wb_integr_range[0]
         upp = self.wb_integr_range[1]
@@ -279,7 +279,7 @@ class DirectEnergyConversion(object):
             if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
             else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
                  
-            logger.debug("mono_run = %s (%s)" % (mono_run,type(mono_run)))
+            self.log("mono_run = %s (%s)" % (mono_run,type(mono_run)),'debug')
           
             if mono_run.endswith("_event.nxs"):
                 monitor_ws=LoadNexusMonitors(Filename=mono_run)
@@ -397,7 +397,7 @@ class DirectEnergyConversion(object):
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
-        logger.notice("_do_mono: finished ConvertUnits")
+        self.log("_do_mono: finished ConvertUnits")
         
         if not self.energy_bins is None:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
@@ -410,7 +410,7 @@ class DirectEnergyConversion(object):
                 ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
             else:
                 DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
-                logger.notice("_do_mono: finished DetectorEfficiencyCor")
+                self.log("_do_mono: finished DetectorEfficiencyCor")
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
@@ -807,6 +807,9 @@ class DirectEnergyConversion(object):
                               'diag_bleed_test','diag_hard_mask']
         
         self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
+
+        # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
+        self.__abs_units_par_to_change=['sample_mass','sample_rmm']
         self.energy_bins = None
         
         # should come from Mantid
@@ -853,6 +856,21 @@ class DirectEnergyConversion(object):
 
         # Mark IDF files as read
         self._idf_values_read = True
+
+    def check_abs_norm_defaults_changed(self,changed_param_list) :
+        """ Method checks if the parameters mentioned as need to changed were indeed changed from defaults
+            If not changed, warn users about it
+        """
+        n_warnings =0
+        for key in self.__abs_units_par_to_change:
+            if key not in changed_param_list :
+                value = getattr(self,key)
+                message = 'Absolute units reduction parameter : '+key + ' still has its default value: '+str(value)+' which may need to change for correct reduction'
+                n_warnings += 1
+                self.log(message,'warning')
+
+        
+        return n_warnings
 
     def get_default_parameter(self, name):
         instr = self.instrument;
@@ -1048,22 +1066,22 @@ class DirectEnergyConversion(object):
         # reset the list of composite names defined using synonims
         self.composite_keys_set=new_comp_name_set
 
-    #def __getattribute__(self, name):
-    #    if name == "monovan_integr_range":
-    #        if self.monovan_integr_range is None:
-    #            ei = self.energy
-    #            self.monovan_integr_range = 
-    #        return super(DirectEnergyConversion, self).__getattribute__(name)
-    #    else:
-    #        return super(DirectEnergyConversion, self).__getattribute__(name)
-
-    def log(self, msg):
+  
+    
+    def log(self, msg,level="notice"):
         """Send a log message to the location defined
         """
+        log_options = \
+        {"notice" :      lambda (msg):   logger.notice(msg),    
+         "warning" :     lambda (msg):   logger.warning(msg),    
+         "error" :       lambda (msg):   logger.error(msg),
+         "information" : lambda (msg):   logger.information(msg),
+         "debug" :       lambda (msg):   logger.debug(msg)}
         if self._to_stdout:
             print msg
         if self._log_to_mantid:
-            logger.notice(msg)
+            log_options[level](msg)
+
 
     def help(self,keyword=None) :
         """function returns help on reduction parameters. 
@@ -1262,7 +1280,18 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual("other_map.myExt",tReducer.monovan_mapfile)
 
         #self.assertRaises(KeyError,tReducer.energy_bins=20,None)
-         
+    def test_default_warnings(self):
+        tReducer = self.reducer
+
+        keys_changed=['somethins_else1','sample_mass','sample_rmm','somethins_else2']
+
+        self.assertEqual(0,tReducer.check_abs_norm_defaults_changed(keys_changed))
+
+        keys_changed=['somethins_else1','sample_rmm','somethins_else2']
+        self.assertEqual(1,tReducer.check_abs_norm_defaults_changed(keys_changed))
+
+        keys_changed=['somethins_else1','somethins_else2']
+        self.assertEqual(2,tReducer.check_abs_norm_defaults_changed(keys_changed))
 
     #def test_diag_call(self):
     #    tReducer = self.reducer

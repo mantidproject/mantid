@@ -150,6 +150,7 @@ void CheckWorkspacesMatch::init()
   declareProperty(new WorkspaceProperty<Workspace>("Workspace2","",Direction::Input), "The name of the second input workspace.");
 
   declareProperty("Tolerance",0.0, "The maximum amount by which values may differ between the workspaces.");
+  declareProperty("ToleranceRelerr",false, "Treat tolerance as relative error rather then the absolute error");   
   
   declareProperty("CheckType",true, "Whether to check that the data types (Workspace2D vs EventWorkspace) match.");
   declareProperty("CheckAxes",true, "Whether to check that the axes match.");
@@ -157,6 +158,7 @@ void CheckWorkspacesMatch::init()
   declareProperty("CheckInstrument",true, "Whether to check that the instruments match. ");
   declareProperty("CheckMasking",true, "Whether to check that the bin masking matches. ");
   declareProperty("CheckSample",false, "Whether to check that the sample (e.g. logs).");    // Have this one false by default - the logs are brittle
+
   
   declareProperty("Result","",Direction::Output);
 }
@@ -164,6 +166,7 @@ void CheckWorkspacesMatch::init()
 void CheckWorkspacesMatch::exec()
 {
   result.clear();
+  m_ErrorIsRelative = getProperty("ToleranceRelerr");
   this->doComparison();
   
   if ( result != "")
@@ -481,9 +484,35 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
       const MantidVec& Y2 = ws2->readY(i);
       const MantidVec& E2 = ws2->readE(i);
 
+      bool RelErr = m_ErrorIsRelative;
       for ( int j = 0; j < static_cast<int>(numBins); ++j )
       {
-        if ( std::abs(X1[j]-X2[j]) > tolerance || std::abs(Y1[j]-Y2[j]) > tolerance || std::abs(E1[j]-E2[j]) > tolerance )
+        bool err;
+        if (RelErr)
+        {
+            double s1=0.5*(X1[j]+X2[j]);
+            if (s1>tolerance)
+                err = (std::abs(X1[j]-X2[j])/s1 > tolerance);
+            else
+                err = (std::abs(X1[j]-X2[j]) > tolerance);
+
+            double s2=0.5*(Y1[j]+Y2[j]);
+            if (s2>tolerance)
+               err = ((std::abs(Y1[j]-Y2[j])/s2 > tolerance)||err);
+            else
+               err = ((std::abs(Y1[j]-Y2[j]) > tolerance)||err);
+
+
+            double s3=0.5*(E1[j]+E2[j]);
+            if (s3>tolerance)
+               err = ((std::abs(E1[j]-E2[j])/s3 > tolerance)||err);
+            else
+               err = ((std::abs(E1[j]-E2[j]) > tolerance)||err);
+        }
+        else
+            err = (std::abs(X1[j]-X2[j]) > tolerance || std::abs(Y1[j]-Y2[j]) > tolerance || std::abs(E1[j]-E2[j]) > tolerance);
+
+        if (err)
         {
           g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
           g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
