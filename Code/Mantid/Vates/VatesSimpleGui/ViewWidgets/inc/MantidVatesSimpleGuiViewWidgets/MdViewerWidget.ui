@@ -78,6 +78,12 @@
         <iconset resource="../../icons/ViewWidgetsIcons.qrc">
          <normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</iconset>
        </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
        <property name="checkable">
         <bool>true</bool>
        </property>
@@ -130,6 +136,12 @@
        <property name="icon">
         <iconset resource="../../icons/ViewWidgetsIcons.qrc">
          <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -194,8 +206,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>142</width>
-              <height>402</height>
+              <width>98</width>
+              <height>28</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout">
