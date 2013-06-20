@@ -74,13 +74,13 @@ void QueryAllRemoteJobs::exec()
   {
     std::vector<std::string> jobIds;
     std::vector<std::string> jobStatusStrs;
-    std::vector<unsigned> jobStatusNums;
+    std::vector<int> jobStatusNums;
     std::vector<std::string> jobNames;
     for (unsigned i = 0; i < jobList.size(); i++)
     {
       jobIds.push_back(jobList[i].m_jobId);
       jobStatusStrs.push_back( jobList[i].statusString());
-      jobStatusNums.push_back((unsigned)jobList[i].m_status);
+      jobStatusNums.push_back((int)jobList[i].m_status);
       jobNames.push_back(jobList[i].m_algName);
     }
 
