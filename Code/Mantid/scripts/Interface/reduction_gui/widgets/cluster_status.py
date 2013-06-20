@@ -9,7 +9,7 @@ import mantid.simpleapi as api
 from mantid.kernel import ConfigService
 
 from reduction_gui.reduction.scripter import BaseScriptElement
-class Catalog(BaseScriptElement):
+class RemoteJobs(BaseScriptElement):
     def __init__(self):
         pass
     
@@ -150,7 +150,10 @@ class RemoteJobsWidget(BaseWidget):
           
         self._content.job_table.setSortingEnabled(True)
         self._content.job_table.sortItems(0)
-        self._content.job_table.resizeColumnsToContents()
+        # Stretch the columns evenly
+        h = self._content.job_table.horizontalHeader()
+        h.setStretchLastSection(True)
+        h.setResizeMode(1)
     
     def get_state(self):
         return Catalog()
