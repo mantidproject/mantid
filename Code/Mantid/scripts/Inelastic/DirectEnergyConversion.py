@@ -112,7 +112,9 @@ class DirectEnergyConversion(object):
             arg = par.lstrip('diag_')
             if arg not in kwargs:
                 kwargs[arg] = getattr(self, arg)
-                
+        
+        for key,val in kwargs.iteritems():
+            print "diag  for key:\t {0:<20}\t Value: {1:<20}".format(key, str(val))
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
         if 'second_white' in kwargs:

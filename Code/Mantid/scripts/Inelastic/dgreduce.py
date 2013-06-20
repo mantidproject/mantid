@@ -186,7 +186,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
     # inform user about changed parameters
     for key in changed_Keys:
         val = getattr(Reducer,key);
-        Reducer.log("  Value of "+key+"\t is set to non-default value:\t "+str(val))
+        Reducer.log("  Value of key: {0:<25} is set to non-default value: {1:<20} ".format(key,val))
 
 
     #do we run absolute units normalization and need to warn users if the parameters needed for that have not changed from defaults
