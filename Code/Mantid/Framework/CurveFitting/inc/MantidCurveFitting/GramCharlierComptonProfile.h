@@ -81,6 +81,9 @@ namespace CurveFitting
     std::vector<std::vector<double>> m_voigt;
     /// Holds the result Voigt multiplied by the profile function for the extended Y space range
     mutable std::vector<double> m_voigtProfile;
+
+    /// Flag to hold whether the FSE parameter is fixed by the user
+    bool m_userFixedFSE;
   };
 
 

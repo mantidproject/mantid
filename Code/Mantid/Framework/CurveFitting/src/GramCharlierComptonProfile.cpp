@@ -68,7 +68,7 @@ namespace Mantid
     /**
      */
     GramCharlierComptonProfile::GramCharlierComptonProfile()
-      : ComptonProfile(), m_hermite(), m_yfine(), m_qfine(), m_voigt(), m_voigtProfile()
+      : ComptonProfile(), m_hermite(), m_yfine(), m_qfine(), m_voigt(), m_voigtProfile(), m_userFixedFSE(false)
     {
     }
 
@@ -196,11 +196,9 @@ namespace Mantid
       const size_t nData(ySpace().size());
       std::vector<double> result(nData, 0.0);
 
-      // If the FSE term is fixed then it's contribution is convoluted with Voigt and summed with the first column
+      // If the FSE term is fixed by user then it's contribution is convoluted with Voigt and summed with the first column
       // otherwise it gets a column of it's own at the end.
       // Either way it needs to be computed, so do this first
-      const size_t kIndex = this->parameterIndex(KFSE_NAME);
-      const bool kfseFixed = isFixed(kIndex);
 
       std::vector<double> fse(NFINE_Y, 0.0);
       std::vector<double> convolvedFSE(nData,0.0);
@@ -215,7 +213,7 @@ namespace Mantid
         const unsigned int npoly = 2*i;
         addMassProfile(profile.data(), npoly);
         convoluteVoigt(result.data(), nData, profile);
-        if(i == 0 && kfseFixed)
+        if(i == 0 && m_userFixedFSE)
         {
           std::transform(result.begin(), result.end(), convolvedFSE.begin(), result.begin(), std::plus<double>());
         }
@@ -227,7 +225,7 @@ namespace Mantid
         ++col;
       }
 
-      if(!kfseFixed) // Extra column for He3
+      if(!m_userFixedFSE) // Extra column for He3
       {
         std::transform(convolvedFSE.begin(), convolvedFSE.end(), errors.begin(), convolvedFSE.begin(), std::divides<double>());
         cmatrix.setColumn(start + col, convolvedFSE);
@@ -301,7 +299,9 @@ namespace Mantid
       const double amp(1.0), wg(getParameter(WIDTH_PARAM));
       const double ampNorm = amp/(std::sqrt(2.0*M_PI)*wg);
 
-      const double kfse = getParameter("C_0")*getParameter(KFSE_NAME);
+      double kfse(getParameter(KFSE_NAME));
+      if(m_userFixedFSE) kfse *= getParameter("C_0");
+
       for(int j = 0; j < NFINE_Y; ++j)
       {
         const double y = m_yfine[j]/std::sqrt(2.)/wg;
@@ -340,6 +340,10 @@ namespace Mantid
     void GramCharlierComptonProfile::setWorkspace(boost::shared_ptr<const API::Workspace> ws)
     {
       ComptonProfile::setWorkspace(ws); // Do base-class calculation first
+
+      // Is FSE fixed at the moment?
+      // The ComptonScatteringCountRate fixes it but we still need to know if the user wanted it fixed
+      m_userFixedFSE = this->isFixed(this->parameterIndex(KFSE_NAME));
 
       const auto & yspace = ySpace();
       const auto & modq = modQ();
