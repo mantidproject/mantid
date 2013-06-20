@@ -47,7 +47,7 @@ void QueryAllRemoteJobs::init()
   // the same job.
   declareProperty( new ArrayProperty<std::string>("JobId", nullValidator, Direction::Output));
   declareProperty( new ArrayProperty<std::string>("JobStatusString", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<unsigned>("JobStatusNum", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<int>("JobStatusNum", nullValidator, Direction::Output));
   declareProperty( new ArrayProperty<std::string>("JobName", nullValidator, Direction::Output));
 }
 

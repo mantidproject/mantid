@@ -560,8 +560,8 @@ class BaseReductionScripter(object):
 
         content += "# Kick off python on the computes...\n"
         content += "# Note: any MANTIDPLOT_* environment variables are set by MantidPlot when it submits the job\n"
-        content += "/usr/lib64/openmpi/bin/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE python job_submission.py\n"
-        #content += "$MPI_BIN/mpirun -n $MANTIDPLOT_NUM_NODES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE -x PATH=$PATH -x LD_LIBRARY_PATH=$LD_LIBRARY_PATH -x PYTHONPATH=$PYTHONPATH python %s\n" % script_name
+        #content += "/usr/lib64/openmpi/bin/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE python job_submission.py\n"
+        content += "$MPI_BIN/mpirun -n $MANTIDPLOT_NUM_NODES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE -x PATH=$PATH -x LD_LIBRARY_PATH=$LD_LIBRARY_PATH -x PYTHONPATH=$PYTHONPATH python %s\n" % script_name
         fd = open(file_path, 'w')
         fd.write(content)
         fd.close()
