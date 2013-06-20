@@ -491,6 +491,7 @@ class BaseReductionScripter(object):
                 
                 # Submit the job
                 submit_cmd = "SubmitRemoteJob(ComputeResource='%s', " % resource
+                submit_cmd += "TaskName='%s'," % self.instrument_name
                 submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
                 submit_cmd += "UserName='%s', GroupName='users', Password='%s', " % (user, pwd)
                 submit_cmd += "TransactionID='mantid_remote', "

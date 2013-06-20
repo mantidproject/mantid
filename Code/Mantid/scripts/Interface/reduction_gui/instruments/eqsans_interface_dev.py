@@ -60,7 +60,7 @@ class EQSANSInterface(InstrumentInterface):
         # Tabs that only make sense within MantidPlot
         if IS_IN_MANTIDPLOT:
             # Remote jobs status
-            if self.is_cluster_enabled():
+            if self.remote_resources_available():
                 self.attach(RemoteJobsWidget(settings = self._settings))
             # Stitcher
             self.attach(StitcherWidget(settings = self._settings))

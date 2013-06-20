@@ -124,7 +124,7 @@ class InstrumentInterface(object):
             self._error_report(traceback.format_exc())
             return None
         
-    def is_cluster_enabled(self):
+    def remote_resources_available(self):
         """
             Returns whether or not the application is cluster-enabled.
             The Remote algorithms have to be available and the 
