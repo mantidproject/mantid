@@ -156,4 +156,4 @@ class RemoteJobsWidget(BaseWidget):
         h.setResizeMode(1)
     
     def get_state(self):
-        return Catalog()
+        return RemoteJobs()
