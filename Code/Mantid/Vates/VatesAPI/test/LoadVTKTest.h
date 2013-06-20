@@ -138,7 +138,7 @@ public:
 
     const int expectedSignalMax = 9999; //Known from file
     const int expectedSignalMin = 0; // Known from file
-    const int expectedSignalThreshold = (1-0.25)*(expectedSignalMax - expectedSignalMin)+expectedSignalMin;
+    const int expectedSignalThreshold = static_cast<int>((1-0.25)*(expectedSignalMax - expectedSignalMin)+expectedSignalMin);
     const int actualSignalMin = loadVTK.getProperty("SignalMinimum");
     const int actualSignalMax = loadVTK.getProperty("SignalMaximum");
     const int actualSignalThreshold = loadVTK.getProperty("SignalThreshold");

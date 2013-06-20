@@ -216,7 +216,7 @@ namespace Mantid
             PARALLEL_START_INTERUPT_REGION
             double coordinates[3];
             readDataset->GetPoint(i, coordinates);
-            double signal = signals->GetValue(i);
+            float signal = signals->GetValue(i);
 
               if(signal > lowerBounds)
               {
@@ -237,8 +237,8 @@ namespace Mantid
              PARALLEL_START_INTERUPT_REGION
              double coordinates[3];
              readDataset->GetPoint(i, coordinates);
-             double signal = signals->GetValue(i);
-             double errorSQ = errorsSQ->GetValue(i);
+             float signal = signals->GetValue(i);
+             float errorSQ = errorsSQ->GetValue(i);
                if(signal > lowerBounds)
                {
                  MDLeanEvent<3> event(signal, errorSQ, coordinates);
@@ -304,7 +304,7 @@ namespace Mantid
           dimensions[2]);
 
       const int64_t nPoints = static_cast<int64_t>( readDataset->GetNumberOfPoints() );
-      int frequency = nPoints;
+      int64_t frequency = nPoints;
       if(nPoints > 100)
       {
         frequency = nPoints/100;
