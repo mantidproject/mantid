@@ -6,7 +6,7 @@ class ReferenceFrameTest(object):
         self.assertFalse(can_be_instantiated(Instrument))
 
     def test_ReferenceFrame_has_expected_attrs(self):
-        expected_attrs = ["pointingAlongBeam", "pointingUp"]
+        expected_attrs = ["pointingAlongBeam", "pointingUp", "vecPointingAlongBeam", "vecPointingUp"]
         for att in expected_attrs:
             self.assertTrue(att in attrs)
             

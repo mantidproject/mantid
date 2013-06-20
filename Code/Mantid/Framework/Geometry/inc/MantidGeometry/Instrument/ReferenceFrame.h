@@ -60,9 +60,9 @@ namespace Geometry
     /// Destructor
     virtual ~ReferenceFrame();
     /// Convert up axis into a 3D direction
-    const Mantid::Kernel::V3D& vecPointingUp() const;
+    const Mantid::Kernel::V3D vecPointingUp() const;
     /// Convert along beam axis into a 3D direction
-    const Mantid::Kernel::V3D& vecPointingAlongBeam() const;
+    const Mantid::Kernel::V3D vecPointingAlongBeam() const;
   private:
     /// Common setup
     void init();
