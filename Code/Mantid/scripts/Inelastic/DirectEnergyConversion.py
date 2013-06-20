@@ -112,9 +112,7 @@ class DirectEnergyConversion(object):
             arg = par.lstrip('diag_')
             if arg not in kwargs:
                 kwargs[arg] = getattr(self, arg)
-        
-        for key,val in kwargs.iteritems():
-            print "diag  for key:\t {0:<20}\t Value: {1:<20}".format(key, str(val))
+  
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
         if 'second_white' in kwargs:
@@ -124,6 +122,7 @@ class DirectEnergyConversion(object):
             else:
                 other_whiteintegrals = self.do_white(second_white, None, None,None) # No grouping yet
                 kwargs['second_white'] = other_whiteintegrals
+
 
         # Get the background/total counts from the sample if present
         if 'sample' in kwargs:
@@ -156,7 +155,8 @@ class DirectEnergyConversion(object):
         if 'hard_mask' in kwargs:
             if 'instrument_name' not in kwargs:
                 kwargs['instrument_name'] = self.instr_name
-        
+
+        logger.debug("------------------------------------------------------------------------------------------------------------")        
         # Check how we should run diag
         if self.diag_spectra is None:
             # Do the whole lot at once
@@ -176,6 +176,8 @@ class DirectEnergyConversion(object):
                 kwargs['start_index'] = bank[0] - 1
                 kwargs['end_index'] = bank[1] - 1
                 diagnostics.diagnose(whiteintegrals, **kwargs)
+                logger.debug("------------------------------------------------------------------------------------------------------------")        
+                #raise AssertionError("Stop here")
                 
         if 'sample_counts' in kwargs:
             DeleteWorkspace(Workspace='background_int')
