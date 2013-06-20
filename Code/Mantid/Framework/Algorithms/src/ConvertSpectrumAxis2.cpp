@@ -164,7 +164,7 @@ namespace Algorithms
         efixed = DBL_MIN;
       }
 
-      const double sineTheta = sin(twoTheta/2);
+      const double sineTheta = sin(twoTheta);
         
       //Calculate the wavelength to allow it to be used to convert to elasticQ. 
       double wavelength = Mantid::PhysicalConstants::h/(sqrt(2*efixed*Mantid::PhysicalConstants::NeutronMass));
@@ -172,19 +172,20 @@ namespace Algorithms
       const double k = (2*M_PI)/wavelength;
       
       // The MomentumTransfer value.
-      double elasticQ = k*2*sineTheta;
+      double elasticQInMetres = k*2*sineTheta;
+      double elasticQInAngstroms = elasticQInMetres * pow(10, -10);
 
       if(targetUnit == "ElasticQ")
       {
-        m_indexMap.insert(std::make_pair(elasticQ, i));
+        m_indexMap.insert(std::make_pair(elasticQInAngstroms, i));
       } 
     
       else if(targetUnit == "ElasticQSquared")
       {
         // The QSquared value.
-        double elasticQSquared = elasticQ*elasticQ;
+        double elasticQSquaredInAngstroms = elasticQInAngstroms*elasticQInAngstroms;
         
-        m_indexMap.insert(std::make_pair(elasticQSquared, i));
+        m_indexMap.insert(std::make_pair(elasticQSquaredInAngstroms, i));
       }
     }
   }
@@ -250,8 +251,7 @@ namespace Algorithms
         }
         else
         {
-          throw std::invalid_argument("Could not retrieve Efixed. Please provide a value.");
-          g_log.warning() << "Efixed could not be found for detector " << detector->getID() << ", please provide a value\n";
+          throw std::invalid_argument("Could not retrieve Efixed from the workspace. Please provide a value.");
         }
       }
       else if( emode == 2 )
@@ -270,8 +270,8 @@ namespace Algorithms
         }
         else
         {
-          throw std::invalid_argument("Could not retrieve Efixed. Please provide a value.");
           g_log.warning() << "Efixed could not be found for detector " << detector->getID() << ", please provide a value\n";
+          throw std::invalid_argument("Could not retrieve Efixed from the detector. Please provide a value.");
         }
       }
     }
