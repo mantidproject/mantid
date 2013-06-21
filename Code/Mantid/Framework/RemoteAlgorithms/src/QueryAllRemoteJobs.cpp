@@ -47,8 +47,10 @@ void QueryAllRemoteJobs::init()
   // the same job.
   declareProperty( new ArrayProperty<std::string>("JobId", nullValidator, Direction::Output));
   declareProperty( new ArrayProperty<std::string>("JobStatusString", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<unsigned>("JobStatusNum", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<int>("JobStatusNum", nullValidator, Direction::Output));
   declareProperty( new ArrayProperty<std::string>("JobName", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("JobStartTime", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("JobCompletionTime", nullValidator, Direction::Output));
 }
 
 void QueryAllRemoteJobs::exec()
@@ -74,20 +76,26 @@ void QueryAllRemoteJobs::exec()
   {
     std::vector<std::string> jobIds;
     std::vector<std::string> jobStatusStrs;
-    std::vector<unsigned> jobStatusNums;
+    std::vector<int> jobStatusNums;
     std::vector<std::string> jobNames;
+    std::vector<std::string> jobStartTimes;
+    std::vector<std::string> jobCompletionTimes;
     for (unsigned i = 0; i < jobList.size(); i++)
     {
       jobIds.push_back(jobList[i].m_jobId);
       jobStatusStrs.push_back( jobList[i].statusString());
-      jobStatusNums.push_back((unsigned)jobList[i].m_status);
+      jobStatusNums.push_back((int)jobList[i].m_status);
       jobNames.push_back(jobList[i].m_algName);
+      jobStartTimes.push_back(jobList[i].m_startTime.toISO8601String());
+      jobCompletionTimes.push_back(jobList[i].m_completionTime.toISO8601String());
     }
 
     setProperty( "JobId", jobIds);
     setProperty( "JobStatusString", jobStatusStrs);
     setProperty( "JobStatusNum", jobStatusNums);
     setProperty( "JobName", jobNames);
+    setProperty( "JobStartTime", jobStartTimes);
+    setProperty( "JobCompletionTime", jobCompletionTimes);
   }
   else
   {
