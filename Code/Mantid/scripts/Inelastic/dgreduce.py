@@ -242,11 +242,6 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
         Reducer.log(' Using hardmask only from: '+totalmask)
         #Return masking workspace
         masking = LoadMask(Instrument=Reducer.instr_name,InputFile=Reducer.hard_mask)
-        if Reducer.map_file != None:
-              masking=GroupDetectors(InputWorkspace=masking,OutputWorkspace=masking,
-                                     MapFile= Reducer.map_file, KeepUngroupedSpectra=0, Behaviour='Average')
-
-        # load runs and mask them using masking workspace
         mask_workspace(wb_run,masking)
         mask_workspace(sample_run,masking)
     else:  
@@ -312,9 +307,9 @@ def mask_workspace(run_number,mask_ws) :
     """
     run_ws=common.load_run(run_number)
 
-    if Reducer.map_file != None:
-        run_ws=GroupDetectors(InputWorkspace=run_ws,OutputWorkspace=run_ws,
-                              MapFile= Reducer.map_file, KeepUngroupedSpectra=0, Behaviour='Average')
+    #if Reducer.map_file != None:
+    #    run_ws=GroupDetectors(InputWorkspace=run_ws,OutputWorkspace=run_ws,
+    #                          MapFile= Reducer.map_file, KeepUngroupedSpectra=0, Behaviour='Average')
 
     MaskDetectors(Workspace=run_ws, MaskedWorkspace=mask_ws)
 
@@ -447,14 +442,14 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
     """
     if Reducer.mono_correction_factor != None :
          absnorm_factor=float(Reducer.mono_correction_factor)
-         print '##### Using supplied workspace correction factor                          ######'
-         print '      Value : ', absnorm_factor                
+         Reducer.log('##### Using supplied workspace correction factor                          ######')
+         Reducer.log('      Value : '+str(absnorm_factor))
 
     else:
         # TODO: !!!! 
         if Reducer.monovan_integr_range is None: # integration in the range relative to incident energy
             Reducer.monovan_integr_range = [Reducer.monovan_lo_frac*ei_guess,Reducer.monovan_hi_frac*ei_guess]
-        print '##### Evaluate the integral from the monovan run and calculate the correction factor ######'
+        Reducer.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######')
         print '      Using absolute units vanadion integration range : ', Reducer.monovan_integr_range                
        #now on the mono_vanadium run swap the mapping file
         map_file            = Reducer.map_file;
@@ -463,10 +458,12 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
         deltaE_wkspace_monovan = Reducer.convert_to_energy(monovan_run, ei_guess, wb_mono)
         Reducer.map_file = map_file
         ei_monovan = deltaE_wkspace_monovan.getRun().getLogData("Ei").value
-        print '      Incident energy found for monovanadium run: ',ei_monovan,' meV'
+        Reducer.log('      Incident energy found for monovanadium run: '+str(ei_monovan)+' meV')
+
        
         (absnorm_factorL,absnorm_factorSS,absnorm_factorP,absnorm_factTGP) = get_abs_normalization_factor(Reducer,deltaE_wkspace_monovan.getName(),ei_monovan)
-        print '      Absolute correction factor S^2 =',absnorm_factorSS,' Libisis: ',absnorm_factorL,' Puasonian: ',absnorm_factorP, ' TGP : ',absnorm_factTGP
+
+        Reducer.log('Absolute correction factor S^2: {0:10.4f} Libisis: {1:10.4f} Puasonian: {2:10.4f}  TGP: {3:10.4f} '.format(absnorm_factorSS,absnorm_factorL,absnorm_factorP,absnorm_factTGP))
         absnorm_factor = absnorm_factTGP;
                      
     
