@@ -275,6 +275,20 @@ public:
   std::vector<double> getTofs() const;
 
   template<class T>
+  static void getWeightsHelper(const std::vector<T> & events, std::vector<double> & weights);
+  /// Return the list of event weight  values
+  std::vector<double> getWeights() const;
+  /// Return the list of event weight values
+  void getWeights(std::vector<double>& weights) const;
+  
+  template<class T>
+  static void getWeightErrorsHelper(const std::vector<T> & events, std::vector<double> & weightErrors);
+  /// Return the list of event weight  error values
+  std::vector<double> getWeightErrors() const;
+  /// Return the list of event weight error values
+  void getWeightErrors(std::vector<double>& weightErrors) const;
+
+  template<class T>
   static void getPulseTimesHelper(const std::vector<T> & events, std::vector<Mantid::Kernel::DateAndTime> & times);
   std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const;
 
