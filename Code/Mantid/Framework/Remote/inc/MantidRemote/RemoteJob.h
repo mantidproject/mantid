@@ -37,6 +37,8 @@ public:
         // default to current time
         m_submitTime = Mantid::Kernel::DateAndTime::getCurrentTime();
       }
+      m_startTime = Mantid::Kernel::DateAndTime::minimum();
+      m_completionTime = Mantid::Kernel::DateAndTime::minimum();
     }
     // At this point, the default copy constructor and assignment operator are valid and
     // useful.  If that changes, we'll either need to explicitly implement them or else
@@ -44,6 +46,12 @@ public:
 
     // Allow for sorting based on the job id
     bool operator< ( const RemoteJob & rval) const { return (m_jobId.compare(rval.m_jobId) < 0); }
+
+    // Set the start time of the job
+    void setStartTime(Mantid::Kernel::DateAndTime time) { m_startTime = time; }
+
+    // Set the completion time of the job
+    void setCompletionTime(Mantid::Kernel::DateAndTime time) { m_completionTime = time; }
 
     // Returns a string representation of m_status
     std::string statusString() const
@@ -77,6 +85,8 @@ public:
     JobStatus m_status;             // Job is running, held, aborted, etc...
     std::string m_algName;          // A meaningful name that can be displayed in the GUI ("Hello World", "NOMAD Reduce", etc..)
     Mantid::Kernel::DateAndTime m_submitTime;   // Time when the job was submitted
+    Mantid::Kernel::DateAndTime m_startTime;
+    Mantid::Kernel::DateAndTime m_completionTime;
 
     /************************
     // Not sure if I need these....
