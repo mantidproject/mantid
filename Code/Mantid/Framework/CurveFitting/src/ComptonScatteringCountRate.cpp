@@ -118,13 +118,6 @@ namespace CurveFitting
     SLSQPMinimizer lsqmin(nparams, objfunc, m_eqMatrix, m_cmatrix);
     auto res = lsqmin.minimize(x0);
 
-    // std::cerr << "\n\nParameters [";
-    // for(size_t i = 0; i < nparams; ++i)
-    // {
-    //   std::cerr << res[i] << ",";
-    // }
-    // std::cerr << "]\n";
-    
     // Set the parameters for the 'real' function calls
     setFixedParameterValues(res);
   }
@@ -257,13 +250,10 @@ namespace CurveFitting
       double * destRow = m_eqMatrix[i];
       for(size_t j = 0; j < nColsCMatrix; ++j)
       {
-        for(size_t k = 0; k < numExtraCols; ++k)
-        {
-          destRow[k] = userRow[0];
-        }
-        destRow[j+numExtraCols] = userRow[j];
+        destRow[j] = (j < numExtraCols) ? userRow[0] : userRow[j-numExtraCols];
       }
     }
+
   }
 
 
