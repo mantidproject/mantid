@@ -383,7 +383,12 @@ void AlignAndFocusPowder::exec()
   if(minwl > 0.)
   {
       g_log.information() << "running RemoveLowResTOF(MinWavelength=" << minwl
-                          << ",Tmin=" << tmin << ")\n";
+                          << ",Tmin=" << tmin << ". ";
+      EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+      if (ews)
+        g_log.information() << "Number of events = " << ews->getNumberEvents() << ". ";
+      g_log.information("\n");
+
 	  API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("OutputWorkspace", m_outputW);
@@ -395,12 +400,17 @@ void AlignAndFocusPowder::exec()
 	  removeAlg->executeAsChildAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
 	  if (m_processLowResTOF)
-		m_lowResW = removeAlg->getProperty("RemoveLowResTOF");
+		m_lowResW = removeAlg->getProperty("LowResTOFWorkspace");
   }
   else if(DIFCref > 0.)
   {
       g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                           << ",K=3.22)\n";
+      EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+      if (ews)
+        g_log.information() << "Number of events = " << ews->getNumberEvents() << ". ";
+      g_log.information("\n");
+
 	  API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("OutputWorkspace", m_outputW);
@@ -413,7 +423,21 @@ void AlignAndFocusPowder::exec()
 	  removeAlg->executeAsChildAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
 	  if (m_processLowResTOF)
-		m_lowResW = removeAlg->getProperty("RemoveLowResTOF");
+		m_lowResW = removeAlg->getProperty("LowResTOFWorkspace");
+  }
+
+  EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  if (ews)
+  {
+    size_t numhighevents = ews->getNumberEvents();
+    size_t numlowevents = 0;
+    if (m_processLowResTOF)
+    {
+      EventWorkspace_sptr lowes = boost::dynamic_pointer_cast<EventWorkspace>(m_lowResW);
+      numlowevents = lowes->getNumberEvents();
+      g_log.information() << "Number of high TOF events = " << numhighevents << "; "
+                          << "Number of low TOF events = " << numlowevents << ".\n";
+    }
   }
 
   // Convert units
@@ -450,7 +474,7 @@ void AlignAndFocusPowder::exec()
     doSortEvents(m_lowResW);
 
   // Diffraction focus
-  g_log.information() << "running DiffractionFocussing\n";
+  g_log.information() << "running DiffractionFocussing. \n";
   API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", m_outputW);
   focusAlg->setProperty("OutputWorkspace", m_outputW);
