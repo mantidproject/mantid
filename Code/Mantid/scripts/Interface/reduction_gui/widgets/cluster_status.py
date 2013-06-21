@@ -7,6 +7,7 @@ import ui.ui_cluster_status
 
 import mantid.simpleapi as api
 from mantid.kernel import ConfigService
+from mantid.api import AlgorithmManager
 
 from reduction_gui.reduction.scripter import BaseScriptElement
 class RemoteJobs(BaseScriptElement):
@@ -138,10 +139,19 @@ class RemoteJobsWidget(BaseWidget):
             util.set_valid(self._content.username_edit, True)
             util.set_valid(self._content.password_edit, True)
         
-        job_info = api.QueryAllRemoteJobs(ComputeResource=str(self._settings.compute_resource),
-                                          UserName=str(self._settings.cluster_user),
-                                          Password=str(self._settings.cluster_pass))    
-        job_list = zip(*(job_info[0], job_info[1], job_info[3]))
+        alg = AlgorithmManager.create("QueryAllRemoteJobs")
+        alg.initialize()
+        alg.setProperty("ComputeResource", str(self._settings.compute_resource))
+        alg.setProperty("UserName", str(self._settings.cluster_user))
+        alg.setProperty("Password", str(self._settings.cluster_pass))
+        alg.execute()
+        job_id = alg.getProperty("JobId")
+        job_status = alg.getProperty("JobStatusString")
+        job_name = alg.getProperty("JobName")
+        job_start = alg.getProperty("JobStartTime")
+        job_end = alg.getProperty("JobCompletionTime")
+                
+        job_list = zip(*(job_id, job_status, job_name, job_start, job_end))
         
         self._clear_table()
         self._content.job_table.setSortingEnabled(False)
@@ -163,8 +173,15 @@ class RemoteJobsWidget(BaseWidget):
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
             self._content.job_table.setItem(i, 2, item)
             
-            # Start/Stop time
-            #TODO currently unavailable
+            # Start time
+            item = QtGui.QTableWidgetItem(str(job_list[i][3]))
+            item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
+            self._content.job_table.setItem(i, 3, item)
+            
+            # Completion time
+            item = QtGui.QTableWidgetItem(str(job_list[i][4]))
+            item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
+            self._content.job_table.setItem(i, 4, item)
           
         self._content.job_table.setSortingEnabled(True)
         self._content.job_table.sortItems(0)
