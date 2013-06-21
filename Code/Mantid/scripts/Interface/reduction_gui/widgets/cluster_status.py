@@ -163,7 +163,7 @@ class RemoteJobsWidget(BaseWidget):
         for i in range(len(job_list)):
             
             # Make sure that only recent jobs are displayed
-            oldest = DateAndTime(self._content.date_time_edit.dateTime().toString(QtCore.Qt.ISODate))
+            oldest = DateAndTime(str(self._content.date_time_edit.dateTime().toString(QtCore.Qt.ISODate)))
             this_job = DateAndTime(str(job_list[i][4]))
             if this_job<oldest:
                 continue
