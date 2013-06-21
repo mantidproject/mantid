@@ -101,7 +101,7 @@ namespace MDEvents
 		cosAng /= (lenQpeak * lenQdata);
 		coord_t angle = std::acos(cosAng);
 		outVector[0] = lenQdata * std::sin(angle);
-		outVector[1] = 2 * std::fabs(lenQdata * cosAng - lenQpeak);
+		outVector[1] = lenQdata * cosAng - lenQpeak;
 	}
   }
 

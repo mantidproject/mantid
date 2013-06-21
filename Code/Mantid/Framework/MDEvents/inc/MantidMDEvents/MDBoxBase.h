@@ -121,7 +121,7 @@ namespace MDEvents
     virtual void centroidSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, coord_t * centroid, signal_t & signal) const = 0;
 
     /** Cylinder (peak) integration */
-    virtual void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared) const = 0;
+    virtual void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const = 0;
 
     // -------------------------------------------------------------------------------------------
     /// @return the const box controller for this box.

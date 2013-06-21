@@ -178,7 +178,7 @@ public:
      * @param signal [out] :: set to the integrated signal
      * @param errorSquared [out] :: set to the integrated squared error.
       */
-    virtual void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared) const = 0;
+    virtual void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const = 0;
 
     /** Split sub-boxes, if this is possible and neede for this box */
     virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)=0; 

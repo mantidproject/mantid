@@ -1319,7 +1319,7 @@ namespace MDEvents
    * @param errorSquared [out] :: set to the integrated squared error.
    */
   TMDE(
-  void MDGridBox)::integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared) const
+  void MDGridBox)::integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const
   {
     // We start by looking at the vertices at every corner of every box contained,
     // to see which boxes are partially contained/fully contained.
@@ -1366,7 +1366,7 @@ namespace MDEvents
       // Is this vertex contained?
       coord_t out[nd];
       radiusTransform.apply(vertexCoord, out);
-      if (out[0] < radius && out[1] < length)
+      if (out[0] < radius && std::fabs(out[1]) < 0.5*length)
       {
         // Yes, this vertex is contained within the integration volume!
 //        std::cout << "vertex at " << vertexCoord[0] << ", " << vertexCoord[1] << ", " << vertexCoord[2] << " is contained\n";
@@ -1437,7 +1437,7 @@ namespace MDEvents
         coord_t out[nd];
         radiusTransform.apply(boxCenter, out);
 
-        if (out[0] < diagonalSquared*0.72 + radius && out[1] < diagonalSquared*0.72 + length)
+        if (out[0] < diagonalSquared*0.72 + radius && std::fabs(out[1]) < diagonalSquared*0.72 + 0.5*length)
         {
           // If the center is closer than the size of the box, then it MIGHT be touching.
           // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).
@@ -1456,7 +1456,7 @@ namespace MDEvents
       if (partialBox)
       {
         // Use the detailed integration method.
-        box->integrateCylinder(radiusTransform, radius, length, signal, errorSquared);
+        box->integrateCylinder(radiusTransform, radius, length, signal, errorSquared, signal_fit);
 //        std::cout << ".signal=" << signal << "\n";
         numPartiallyContained++;
       }

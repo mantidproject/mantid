@@ -256,98 +256,133 @@ namespace MDAlgorithms
         dimensionsUsed[d] = true; // Use all dimensions
         center[d] = static_cast<coord_t>(pos[d]);
       }
-      CoordTransformDistance sphere(nd, center, dimensionsUsed);
-      CoordTransformDistance cylinder(nd, center, dimensionsUsed, 2);
-
-      // Perform the integration into whatever box is contained within.
-      signal_t signal = 0;
-      signal_t errorSquared = 0;
+	  signal_t signal = 0;
+	  signal_t errorSquared = 0;
+	  signal_t bgSignal = 0;
+	  signal_t bgErrorSquared = 0;
       if (!cylinderBool)
-      {
-    	  ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), signal, errorSquared);
-      }
+	  {
+			CoordTransformDistance sphere(nd, center, dimensionsUsed);
+
+			// Perform the integration into whatever box is contained within.
+			ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), signal, errorSquared);
+
+			// Integrate around the background radius
+
+			if (BackgroundOuterRadius > PeakRadius )
+			{
+				// Get the total signal inside "BackgroundOuterRadius"
+				ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundOuterRadius*BackgroundOuterRadius), bgSignal, bgErrorSquared);
+
+				// Evaluate the signal inside "BackgroundInnerRadius"
+				signal_t interiorSignal = 0;
+				signal_t interiorErrorSquared = 0;
+
+				// Integrate this 3rd radius, if needed
+				if (BackgroundInnerRadius != PeakRadius)
+				{
+					ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundInnerRadius*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
+				}
+				else
+				{
+					// PeakRadius == BackgroundInnerRadius, so use the previous value
+					interiorSignal = signal;
+					interiorErrorSquared = errorSquared;
+				}
+		        // Subtract the peak part to get the intensity in the shell (BackgroundInnerRadius < r < BackgroundOuterRadius)
+		        bgSignal -= interiorSignal;
+		        // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
+		        bgErrorSquared -= interiorErrorSquared;
+
+		        // Relative volume of peak vs the BackgroundOuterRadius sphere
+		        double ratio = (PeakRadius / BackgroundOuterRadius);
+		        double peakVolume = ratio * ratio * ratio;
+
+		        // Relative volume of the interior of the shell vs overall backgroundratio * ratio
+		        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+		        // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
+		        double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+
+		        // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
+		        double scaleFactor = peakVolume / bgVolume;
+		        bgSignal *= scaleFactor;
+		        bgErrorSquared *= scaleFactor;
+		        // Adjust the integrated values.
+		        signal -= bgSignal;
+		        // But we add the errors together
+		        errorSquared += bgErrorSquared;
+			}
+	  }
       else
       {
-    	  ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(cylinderLength), signal, errorSquared);
-      }
+			CoordTransformDistance cylinder(nd, center, dimensionsUsed, 2);
 
-      // Integrate around the background radius
-      signal_t bgSignal = 0;
-      signal_t bgErrorSquared = 0;
-      if (BackgroundOuterRadius > PeakRadius || percentBackground > 0.0)
-      {
-        // Get the total signal inside "BackgroundOuterRadius"
-    	  if (!cylinderBool)
-    	  {
-    		  ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundOuterRadius*BackgroundOuterRadius), bgSignal, bgErrorSquared);
-    	  }
-          else
-          {
-        	  if (BackgroundOuterRadius < PeakRadius ) BackgroundOuterRadius = PeakRadius;
-        	  ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared);
-          }
+			// Perform the integration into whatever box is contained within.
+			std::vector<signal_t> signal_fit;
 
-        // Evaluate the signal inside "BackgroundInnerRadius"
-        signal_t interiorSignal = 0;
-        signal_t interiorErrorSquared = 0;
+			double deltaQ = 0.004/(2*M_PI);
+			int numSteps=static_cast<int>((cylinderLength/deltaQ) + 1);
+			signal_fit.clear();
+			for (int j=0; j<numSteps; j++)signal_fit.push_back(0.0);
+			ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(cylinderLength), signal, errorSquared, signal_fit);
+			for (size_t j=0; j<signal_fit.size(); j++)std::cout << signal_fit[j]<<"  ";
+			std::cout <<i<<"\n";
 
-        // Integrate this 3rd radius, if needed
-        if (BackgroundInnerRadius != PeakRadius)
-        {
-        	if (!cylinderBool)
-        	{
-        		ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundInnerRadius*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
-        	}
-            else
-            {
-            	ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundInnerRadius), static_cast<coord_t>(cylinderLength), interiorSignal, interiorErrorSquared);
-            }
-        }
-        else
-        {
-          // PeakRadius == BackgroundInnerRadius, so use the previous value
-          interiorSignal = signal;
-          interiorErrorSquared = errorSquared;
-        }
 
-        // Subtract the peak part to get the intensity in the shell (BackgroundInnerRadius < r < BackgroundOuterRadius)
-        bgSignal -= interiorSignal;
-        // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
-        bgErrorSquared -= interiorErrorSquared;
+			// Integrate around the background radius
+			if (BackgroundOuterRadius > PeakRadius || percentBackground > 0.0)
+			{
+				// Get the total signal inside "BackgroundOuterRadius"
 
-        // Relative volume of peak vs the BackgroundOuterRadius sphere
-        double ratio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume;
-        if (!cylinderBool)
-        {
-        	peakVolume = ratio * ratio * ratio;
-        }
-        else
-        {
-        	peakVolume = ratio * ratio * (1-percentBackground/100.);
-        }
+				if (BackgroundOuterRadius < PeakRadius ) BackgroundOuterRadius = PeakRadius;
+				double deltaQ = 0.004/(2*M_PI);
+				int numSteps=static_cast<int>((backgroundCylinder/deltaQ) + 1);
+				signal_fit.clear();
+				for (int j=0; j<numSteps; j++)signal_fit.push_back(0.0);
+				ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared, signal_fit);
+				for (size_t j=0; j<signal_fit.size(); j++)std::cout << signal_fit[j]<<"  ";
+				std::cout <<i<<"\n";
 
-        // Relative volume of the interior of the shell vs overall backgroundratio * ratio
-        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
-        // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
-        double bgVolume;
-        if (!cylinderBool)
-        {
-        	bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
-        }
-        else
-        {
-        	bgVolume = 1.0 - interiorRatio * interiorRatio * (percentBackground/100.);
-        }
 
-        // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
-        double scaleFactor = peakVolume / bgVolume;
-        bgSignal *= scaleFactor;
-        bgErrorSquared *= scaleFactor;
-        // Adjust the integrated values.
-        signal -= bgSignal;
-        // But we add the errors together
-        errorSquared += bgErrorSquared;
+				// Evaluate the signal inside "BackgroundInnerRadius"
+				signal_t interiorSignal = 0;
+				signal_t interiorErrorSquared = 0;
+
+				// Integrate this 3rd radius, if needed
+				if (BackgroundInnerRadius != PeakRadius)
+				{
+					ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundInnerRadius), static_cast<coord_t>(cylinderLength), interiorSignal, interiorErrorSquared, signal_fit);
+					for (size_t j=0; j<signal_fit.size(); j++)std::cout << signal_fit[j]<<"  ";
+					std::cout <<i<<"\n";
+				}
+				else
+				{
+					// PeakRadius == BackgroundInnerRadius, so use the previous value
+					interiorSignal = signal;
+					interiorErrorSquared = errorSquared;
+				}
+		        // Subtract the peak part to get the intensity in the shell (BackgroundInnerRadius < r < BackgroundOuterRadius)
+		        bgSignal -= interiorSignal;
+		        // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
+		        bgErrorSquared -= interiorErrorSquared;
+		        // Relative volume of peak vs the BackgroundOuterRadius sphere
+		        double ratio = (PeakRadius / BackgroundOuterRadius);
+		        double peakVolume = ratio * ratio * (1-percentBackground/100.);
+
+		        // Relative volume of the interior of the shell vs overall backgroundratio * ratio
+		        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+		        // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
+		        double bgVolume = 1.0 - interiorRatio * interiorRatio * (percentBackground/100.);
+
+		        // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
+		        double scaleFactor = peakVolume / bgVolume;
+		        bgSignal *= scaleFactor;
+		        bgErrorSquared *= scaleFactor;
+		        // Adjust the integrated values.
+		        signal -= bgSignal;
+		        // But we add the errors together
+		        errorSquared += bgErrorSquared;
+			}
       }
 
 
