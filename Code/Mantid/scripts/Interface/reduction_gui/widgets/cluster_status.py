@@ -6,7 +6,7 @@ from reduction_gui.widgets import util
 import ui.ui_cluster_status
 
 import mantid.simpleapi as api
-from mantid.kernel import ConfigService
+from mantid.kernel import ConfigService, DateAndTime
 from mantid.api import AlgorithmManager
 
 from reduction_gui.reduction.scripter import BaseScriptElement
@@ -48,6 +48,9 @@ class RemoteJobsWidget(BaseWidget):
         self.connect(self._content.job_table, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.tableWidgetContext)
         
         self.connect(self._content.refresh_button, QtCore.SIGNAL("clicked()"), self._update_content)
+
+        # Set the time of the oldest displayed job to 2 days ago
+        self._content.date_time_edit.setDateTime(QtCore.QDateTime().currentDateTime().addDays(-2))   
         
         compute_resources = ConfigService.Instance().getFacility().computeResources()
         self._content.resource_combo.clear()
@@ -158,6 +161,13 @@ class RemoteJobsWidget(BaseWidget):
         self._content.job_table.setRowCount(len(job_list))
 
         for i in range(len(job_list)):
+            
+            # Make sure that only recent jobs are displayed
+            oldest = DateAndTime(self._content.date_time_edit.dateTime().toString(QtCore.Qt.ISODate))
+            this_job = DateAndTime(str(job_list[i][4]))
+            if this_job<oldest:
+                continue
+
             # Job ID
             item = QtGui.QTableWidgetItem(str(job_list[i][0]))
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
@@ -174,7 +184,7 @@ class RemoteJobsWidget(BaseWidget):
             self._content.job_table.setItem(i, 2, item)
             
             # Start time
-            item = QtGui.QTableWidgetItem(str(job_list[i][3]))
+            item = QtGui.QTableWidgetItem(str(job_list[i][3]).replace('T', ' '))
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
             self._content.job_table.setItem(i, 3, item)
             
