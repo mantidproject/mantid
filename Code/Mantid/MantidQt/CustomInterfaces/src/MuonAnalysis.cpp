@@ -2035,7 +2035,7 @@ QStringList MuonAnalysis::getPeriodLabels() const
  * @param wsName workspace name
  * @param wsIndex workspace index
  */
-void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex)
+void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale)
 {
     // create first part of plotting Python string
     QString gNum = QString::number(wsIndex);
@@ -2073,9 +2073,10 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex)
       else
       {
         max = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
-      }
-
+      }     
       pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
+      //pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ", type=Layer.Ln)\n";
+      pyS += "l.logYlinX()\n";
     }
 
     // plot the spectrum
@@ -2177,6 +2178,8 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     }
     else if (plotType.compare("Logorithm") == 0)
     {
+      // nothing to do since plot as count but with the y-axis set to logarithm scale
+/*
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Logarithm");
       alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString());
       alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString());
@@ -2197,6 +2200,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
         alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString() + "_Raw");
         alg->execute();  
       }
+*/
     }
     else
     {
