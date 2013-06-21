@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
 {
@@ -76,6 +77,9 @@ private:
   /// Execution code
   void exec();
 
+  /// Process properties
+  void processProperties();
+
   /// Set up some constant by default
   void initConstants(double chopperfrequency);
 
@@ -99,6 +103,8 @@ private:
   /// Caclualte L2 from DIFFC and L1
   double calL2FromDtt1(double difc, double L1, double twotheta);
 
+  /// Input workspace
+  DataObjects::TableWorkspace_sptr m_inpWS;
 
   /// Instrument
   std::string m_instrument;
@@ -109,11 +115,17 @@ private:
   /// 2Theta
   double m_2theta;
   /// Frequency
-  double m_frequency;
+  int m_frequency;
   /// User input ID line
   std::string m_id_line;
   /// Sample
   std::string m_sample;
+
+  /// Banks IDs to process
+  std::vector<unsigned int> m_bankIDsOutput;
+
+  /// Output file name
+  std::string m_gsasFileName;
 
 };
 
