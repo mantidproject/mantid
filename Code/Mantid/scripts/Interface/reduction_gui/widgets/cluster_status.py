@@ -145,11 +145,11 @@ class RemoteJobsWidget(BaseWidget):
         alg.setProperty("UserName", str(self._settings.cluster_user))
         alg.setProperty("Password", str(self._settings.cluster_pass))
         alg.execute()
-        job_id = alg.getProperty("JobId")
-        job_status = alg.getProperty("JobStatusString")
-        job_name = alg.getProperty("JobName")
-        job_start = alg.getProperty("JobStartTime")
-        job_end = alg.getProperty("JobCompletionTime")
+        job_id = alg.getProperty("JobId").value
+        job_status = alg.getProperty("JobStatusString").value
+        job_name = alg.getProperty("JobName").value
+        job_start = alg.getProperty("JobStartTime").value
+        job_end = alg.getProperty("JobCompletionTime").value
                 
         job_list = zip(*(job_id, job_status, job_name, job_start, job_end))
         
