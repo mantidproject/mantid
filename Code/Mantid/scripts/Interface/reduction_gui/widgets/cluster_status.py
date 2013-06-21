@@ -168,7 +168,9 @@ class RemoteJobsWidget(BaseWidget):
             unavailable = DateAndTime(0)
             unavailable.setToMinimum()
             if this_job>unavailable and this_job<oldest:
+                self._content.job_table.setRowHidden(i, True)
                 continue
+            self._content.job_table.setRowHidden(i, False)
 
             # Job ID
             item = QtGui.QTableWidgetItem(str(job_list[i][0]))
