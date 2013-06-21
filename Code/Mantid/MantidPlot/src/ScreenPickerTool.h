@@ -61,7 +61,8 @@ class ScreenPickerTool : public QwtPlotPicker, public PlotToolInterface
 	protected:
         virtual bool eventFilter(QObject *obj, QEvent *event);
 		virtual void append(const QPoint &point);
-        QwtText trackerText(const QwtDoublePoint &) const;
+        virtual QwtText trackerText(const QPoint &) const;
+        virtual QwtText trackerText(const QwtDoublePoint &) const;
 		QwtPlotMarker d_selection_marker;
 };
 
