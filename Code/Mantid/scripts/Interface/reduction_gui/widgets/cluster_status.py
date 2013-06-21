@@ -179,12 +179,12 @@ class RemoteJobsWidget(BaseWidget):
             self._content.job_table.setItem(i, 3, item)
             
             # Completion time
-            item = QtGui.QTableWidgetItem(str(job_list[i][4]))
+            item = QtGui.QTableWidgetItem(str(job_list[i][4]).replace('T', ' '))
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
             self._content.job_table.setItem(i, 4, item)
           
         self._content.job_table.setSortingEnabled(True)
-        self._content.job_table.sortItems(0)
+        self._content.job_table.sortItems(0, 1)
     
     def get_state(self):
         return RemoteJobs()
