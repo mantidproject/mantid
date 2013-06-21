@@ -165,7 +165,9 @@ class RemoteJobsWidget(BaseWidget):
             # Make sure that only recent jobs are displayed
             oldest = DateAndTime(str(self._content.date_time_edit.dateTime().toString(QtCore.Qt.ISODate)))
             this_job = DateAndTime(str(job_list[i][4]))
-            if this_job<oldest:
+            unavailable = DateAndTime(0)
+            unavailable.setToMinimum()
+            if this_job>unavailable and this_job<oldest:
                 continue
 
             # Job ID
