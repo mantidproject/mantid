@@ -1075,6 +1075,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const
 {
   (void) WS;
+  menu->addAction(m_showData);
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries())
   {
