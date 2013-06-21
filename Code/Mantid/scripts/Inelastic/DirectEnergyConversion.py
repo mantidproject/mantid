@@ -156,7 +156,6 @@ class DirectEnergyConversion(object):
             if 'instrument_name' not in kwargs:
                 kwargs['instrument_name'] = self.instr_name
 
-        logger.debug("------------------------------------------------------------------------------------------------------------")        
         # Check how we should run diag
         if self.diag_spectra is None:
             # Do the whole lot at once
@@ -176,8 +175,6 @@ class DirectEnergyConversion(object):
                 kwargs['start_index'] = bank[0] - 1
                 kwargs['end_index'] = bank[1] - 1
                 diagnostics.diagnose(whiteintegrals, **kwargs)
-                logger.debug("------------------------------------------------------------------------------------------------------------")        
-                #raise AssertionError("Stop here")
                 
         if 'sample_counts' in kwargs:
             DeleteWorkspace(Workspace='background_int')
