@@ -549,8 +549,6 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
     progress.report();
   }
 
-  //Finalize spectra map etc.
-  outputWorkspace->doneAddingEventLists();
 
   //Set all X bins on the output
   cow_ptr<MantidVec> XValues;

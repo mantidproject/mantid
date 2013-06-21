@@ -33,9 +33,9 @@ namespace MantidQt
     {
       // Construct all physical peaks
       VecPhysicalSphericalPeak physicalPeaks(m_peaksWS->rowCount());
-      for(int i = 0; i < physicalPeaks.size(); ++i)
+      for(size_t i = 0; i < physicalPeaks.size(); ++i)
       {
-        const IPeak& peak = m_peaksWS->getPeak(i);
+        const IPeak& peak = m_peaksWS->getPeak(static_cast<int>(i));
         auto position = transform->transformPeak(peak);
         physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, m_peakRadius, m_backgroundInnerRadius, m_backgroundOuterRadius);
       }

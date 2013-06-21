@@ -8,5 +8,5 @@ Useful links
  * Homepage: http://www.mantidproject.org
  * Download: http://download.mantidproject.org
  * Asking for help: http://download.mantidproject.org/webmailer/index.php
- * Issue tracking: http://trac.mantidproject.org
+ * Issue tracking: http://trac.mantidproject.org/mantid/
  * Build servers: http://download.mantidproject.org/jenkins and https://builds.sns.gov/

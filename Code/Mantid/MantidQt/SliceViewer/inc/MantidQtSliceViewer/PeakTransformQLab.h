@@ -15,7 +15,7 @@ namespace MantidQt
     class DLLExport PeakTransformQLab : public PeakTransform
     {
     public:
-      static std::string name(){ return "QLab"; }
+      static std::string name(){ return "Q (lab frame)"; }
       /// Constructor
       PeakTransformQLab();
       /// Constructor

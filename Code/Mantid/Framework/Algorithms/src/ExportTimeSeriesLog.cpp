@@ -242,7 +242,6 @@ namespace Algorithms
 	  double dtmsec = static_cast<double>(dt)/1000.0;
 	  outEL.addEventQuickly( WeightedEventNoTime( dtmsec, values[i], values[i]) );
 	}
-	outEventWS->doneAddingEventLists();
 	// Ensure thread-safety
 	outEventWS->sortAll(TOF_SORT, NULL);
 

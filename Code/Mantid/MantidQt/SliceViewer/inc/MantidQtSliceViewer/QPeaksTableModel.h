@@ -81,6 +81,9 @@ namespace MantidQt
       static const QString QLAB;
       static const QString QSAMPLE;
 
+      /// The number of digits past the decimal to display in the table
+      int m_hklPrec;
+
       mutable std::vector<QString> m_dataCache;
       mutable int m_dataCachePeakIndex;
 

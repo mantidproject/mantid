@@ -80,8 +80,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._filename = None
         
         # Cluster credentials and options
-        self._cluster_user = None
-        self._cluster_pass = None
+        self._cluster_details_set = False
         self._number_of_nodes = 1
         self._cores_per_node = 16
         self._compute_resources = ['Fermi']
@@ -364,20 +363,28 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.resource_combo.clear()
                 for res in compute_resources:
                     self.resource_combo.addItem(QtGui.QApplication.translate("Dialog", res, None, QtGui.QApplication.UnicodeUTF8))
-                
+            
+        # Fill out the defaults    
         dialog = ClusterDialog(self._compute_resources)
-        if self._cluster_user is not None:
-            dialog.username_edit.setText(QtCore.QString(str(self._cluster_user)))
+        if self.general_settings.cluster_user is not None:
+            dialog.username_edit.setText(QtCore.QString(str(self.general_settings.cluster_user)))
+            dialog.pass_edit.setText(QtCore.QString(str(self.general_settings.cluster_pass)))
+            
         dialog.nodes_box.setValue(int(self._number_of_nodes))
         dialog.cores_box.setValue(int(self._cores_per_node))
-        
+        for i in range(dialog.resource_combo.count()):
+            if dialog.resource_combo.itemText(i)==self.general_settings.compute_resource:
+                dialog.resource_combo.setCurrentIndex(i)
+                break
+            
         dialog.exec_()
         if dialog.result()==1:
-            self._cluster_user = dialog.username_edit.text()
-            self._cluster_pass = dialog.pass_edit.text()
+            self.general_settings.cluster_user = str(dialog.username_edit.text())
+            self.general_settings.cluster_pass = str(dialog.pass_edit.text())
+            self._cluster_details_set = True
             self._number_of_nodes = int(dialog.nodes_box.value())
             self._cores_per_node = int(dialog.cores_box.value())
-            self._compute_resource = dialog.resource_combo.currentText()
+            self.general_settings.compute_resource = dialog.resource_combo.currentText()
             
     def _clear_and_close(self):
         """
@@ -465,14 +472,15 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
             Submit for parallel reduction
         """
-        if self._cluster_user is None and self._cluster_pass is None:
+        if not self._cluster_details_set:
             self._cluster_details_dialog()
         
         if self._interface is not None \
-        and self._cluster_user is not None \
-        and self._cluster_pass is not None:
-            self._interface.cluster_submit(self._cluster_user, self._cluster_pass,
-                                           resource=self._compute_resource,
+        and self.general_settings.cluster_user is not None \
+        and self.general_settings.cluster_pass is not None:
+            self._interface.cluster_submit(self.general_settings.cluster_user, 
+                                           self.general_settings.cluster_pass,
+                                           resource=self.general_settings.compute_resource,
                                            nodes=self._number_of_nodes,
                                            cores_per_node=self._cores_per_node)
         

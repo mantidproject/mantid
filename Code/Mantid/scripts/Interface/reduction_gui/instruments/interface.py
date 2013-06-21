@@ -124,6 +124,27 @@ class InstrumentInterface(object):
             self._error_report(traceback.format_exc())
             return None
         
+    def remote_resources_available(self):
+        """
+            Returns whether or not the application is cluster-enabled.
+            The Remote algorithms have to be available and the 
+            cluster submission property has to be ON.
+        """
+        # Check whether Mantid is available
+        try:
+            from mantid.kernel import ConfigService
+            from mantid.api import AlgorithmFactory
+
+            if "SubmitRemoteJob" in AlgorithmFactory.getRegisteredAlgorithms(True):
+                config = ConfigService.Instance()
+                if config.hasProperty("cluster.submission") \
+                and config.getString("cluster.submission").lower()=='on':
+                    return True
+                
+            return False
+        except:
+            return False
+
     def cluster_submit(self, user, pwd, resource=None,
                        nodes=4, cores_per_node=4):
         """

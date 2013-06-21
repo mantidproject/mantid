@@ -491,6 +491,7 @@ class BaseReductionScripter(object):
                 
                 # Submit the job
                 submit_cmd = "SubmitRemoteJob(ComputeResource='%s', " % resource
+                submit_cmd += "TaskName='%s'," % self.instrument_name
                 submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
                 submit_cmd += "UserName='%s', GroupName='users', Password='%s', " % (user, pwd)
                 submit_cmd += "TransactionID='mantid_remote', "
@@ -548,7 +549,8 @@ class BaseReductionScripter(object):
         content += "MPI_SUFFIX=_compat_openmpi\n"
         content += "MPI_HOME=/usr/lib64/compat-openmpi\n"
         
-        content += "PREFIX=/sw/fermi/mantid-mpi/mantid-mpi-2.4.0-1.el6.x86_64\n"
+        #content += "PREFIX=/sw/fermi/mantid-mpi/mantid-mpi-2.4.0-1.el6.x86_64\n"
+        content += "PREFIX=/sw/fermi/mantid-mpi/mantid-mpi-2.5.502-1.el6.x86_64\n"
         content += "PATH=$PATH:$PREFIX/bin\n"
         # Second one is to pick up boostmpi (not openmpi itself which comes from the compat package above)
         content += "LD_LIBRARY_PATH=$PREFIX/lib:/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH\n"

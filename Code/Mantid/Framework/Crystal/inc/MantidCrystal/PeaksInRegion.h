@@ -41,6 +41,11 @@ namespace Crystal
     virtual int version() const;
     virtual const std::string category() const;
 
+    static std::string detectorSpaceFrame();
+    static std::string qLabFrame();
+    static std::string qSampleFrame();
+    static std::string hklFrame();
+
   private:
     virtual void initDocs();
     void init();

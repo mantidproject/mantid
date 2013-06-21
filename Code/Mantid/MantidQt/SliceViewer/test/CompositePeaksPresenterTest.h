@@ -47,8 +47,9 @@ public:
      NullPeaksPresenter expected;
      TS_ASSERT_THROWS_NOTHING(expected.update());
      TS_ASSERT_THROWS_NOTHING(composite.update());
-     TS_ASSERT_THROWS_NOTHING(expected.updateWithSlicePoint(0));
-     TS_ASSERT_THROWS_NOTHING(composite.updateWithSlicePoint(0));
+     PeakBoundingBox region;
+     TS_ASSERT_THROWS_NOTHING(expected.updateWithSlicePoint(region));
+     TS_ASSERT_THROWS_NOTHING(composite.updateWithSlicePoint(region));
      TS_ASSERT_EQUALS(expected.changeShownDim(), composite.changeShownDim());
      TS_ASSERT_EQUALS(expected.isLabelOfFreeAxis("") , composite.isLabelOfFreeAxis(""));
   }
@@ -86,8 +87,9 @@ public:
     NullPeaksPresenter expected;
     TS_ASSERT_THROWS_NOTHING(expected.update());
     TS_ASSERT_THROWS_NOTHING(composite.update());
-    TS_ASSERT_THROWS_NOTHING(expected.updateWithSlicePoint(0));
-    TS_ASSERT_THROWS_NOTHING(composite.updateWithSlicePoint(0));
+    PeakBoundingBox region;
+    TS_ASSERT_THROWS_NOTHING(expected.updateWithSlicePoint(region));
+    TS_ASSERT_THROWS_NOTHING(composite.updateWithSlicePoint(region));
     TS_ASSERT_EQUALS(expected.changeShownDim(), composite.changeShownDim());
     TS_ASSERT_EQUALS(expected.isLabelOfFreeAxis("") , composite.isLabelOfFreeAxis(""));
   }
@@ -105,7 +107,8 @@ public:
     // Create the composite.
     CompositePeaksPresenter composite(&_fakeZoomableView, defaultPresenter);
     // Call the method on the composite.
-    composite.updateWithSlicePoint(0);
+    PeakBoundingBox region;
+    composite.updateWithSlicePoint(region);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockDefault));
   }
@@ -121,7 +124,8 @@ public:
     // add the subject presenter.
     composite.addPeaksPresenter(presenter);
     // Call the method on the composite.
-    composite.updateWithSlicePoint(0);
+    PeakBoundingBox region;
+    composite.updateWithSlicePoint(region);
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockPresenter));
   }

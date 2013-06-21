@@ -14,6 +14,11 @@ class GeneralSettings(QtCore.QObject):
     facility_name = ''
     data_output_dir = None
     
+    # User information for remote submission
+    cluster_user = None
+    cluster_pass = None
+    compute_resource = "Fermi"
+    
     # Mantid Python API version
     api2 = True
     

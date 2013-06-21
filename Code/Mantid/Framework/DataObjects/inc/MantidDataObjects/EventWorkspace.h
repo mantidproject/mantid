@@ -155,11 +155,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void padSpectra();
   // Remove pixels in the workspace that do not contain events.
   void deleteEmptyLists();
-
-  // Make all the mapping stuff
-  void doneAddingEventLists();
-
-
+  
   //------------------------------------------------------------
   // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const;

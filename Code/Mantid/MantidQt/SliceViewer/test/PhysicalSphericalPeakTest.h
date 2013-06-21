@@ -19,7 +19,7 @@ class PhysicalSphericalPeakTest : public CxxTest::TestSuite
 {
 public:
 
-  void test_not_isViewable_after_construction()
+  void test_getRadius()
   {
     V3D origin(0, 0, 0);
     const double radius = 1;
@@ -27,38 +27,14 @@ public:
     const double outerBackgroundRadius = 3;
     PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
-    TSM_ASSERT("Should NOT be viewable until a slice point < r is set.", !physicalPeak.isViewablePeak());
+    TSM_ASSERT("Not considered by default", !physicalPeak.getShowBackgroundRadius());
+    TSM_ASSERT(radius, physicalPeak.getRadius());
+
+    physicalPeak.showBackgroundRadius(true);
+    TSM_ASSERT("Background should be shown now", physicalPeak.getShowBackgroundRadius());
+    TSM_ASSERT(outerBackgroundRadius, physicalPeak.getRadius());
   }
 
-  void test_isViewable_after_setSlicePoint_to_intersect()
-  {
-    V3D origin(0, 0, 0);
-    const double radius = 1;
-    const double innerBackgroundRadius = 2;
-    const double outerBackgroundRadius = 3;
-    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
-
-    const double delta = 0.01;
-    const double slicePoint = radius - delta;
-    physicalPeak.setSlicePoint(slicePoint);
-
-    TSM_ASSERT("Should be viewable since slice point < r.", physicalPeak.isViewablePeak());
-  }
-
-  void test_not_isViewable_after_setSlicePoint_beyond_range()
-  {
-    V3D origin(0, 0, 0);
-    const double radius = 1;
-    const double innerBackgroundRadius = 2;
-    const double outerBackgroundRadius = 3;
-    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
-
-    const double delta = 0.01;
-    const double slicePoint = radius + delta;
-    physicalPeak.setSlicePoint(slicePoint);
-
-    TSM_ASSERT("Should NOT be viewable if a slice point > r is set.", !physicalPeak.isViewablePeak());
-  }
 
   void test_handleBackgroundOuterRadius_zero()
   {
@@ -84,30 +60,6 @@ public:
     TS_ASSERT_EQUALS(drawObject.backgroundOuterRadiusX, drawObject.backgroundInnerRadiusX);
     TS_ASSERT_EQUALS(drawObject.backgroundOuterRadiusY, drawObject.backgroundInnerRadiusY);
 
-    TSM_ASSERT("Should be viewable since slice point == Background Inner Radius.", physicalPeak.isViewableBackground());
-  }
-
-  void test_draw_defaults()
-  {
-    V3D origin(0, 0, 0);
-    const double radius = 1;
-    const double innerBackgroundRadius = 2;
-    const double outerBackgroundRadius = 3;
-    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
-
-    // Scale 1:1 on both x and y for simplicity.
-    const double windowHeight = 1;
-    const double windowWidth = 1;
-    const double viewHeight = 1;
-    const double viewWidth = 1;
-
-    TSM_ASSERT("Should NOT be viewable until a slice point < r is set.", !physicalPeak.isViewablePeak());
-    auto drawObject = physicalPeak.draw(windowHeight, windowWidth, viewHeight, viewWidth);
-
-    // The Return object should be initialized to zero in every field.
-    TS_ASSERT_EQUALS(0, drawObject.peakOpacityAtDistance);
-    TS_ASSERT_EQUALS(0, drawObject.peakInnerRadiusX);
-    TS_ASSERT_EQUALS(0, drawObject.peakInnerRadiusY);
   }
 
   void test_setSlicePoint_to_intersect_and_draw()
@@ -127,7 +79,6 @@ public:
     const double viewHeight = 1;
     const double viewWidth = 1;
 
-    TSM_ASSERT("Should be viewable since slice point < r is set.", physicalPeak.isViewablePeak());
     auto drawObject = physicalPeak.draw(windowHeight, windowWidth, viewHeight, viewWidth);
 
     // Quick white-box calculations of the outputs to expect.
@@ -158,43 +109,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockTransform));
   }
 
-  void test_no_viewable_background_while_background_not_shown()
-  {
-    V3D origin(0, 0, 0);
-    const double radius = 1;
-    const double innerBackgroundRadius = 2;
-    const double outerBackgroundRadius = 3;
-    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
-    
-    const double delta = 0.01;
-    double slicePoint = outerBackgroundRadius - delta; // should be within the cut-off, so viewable if the background is to be shown.
-    physicalPeak.setSlicePoint(slicePoint);
-    
-    physicalPeak.showBackgroundRadius(true); // Do show the background radius.
-    TS_ASSERT(physicalPeak.isViewableBackground());
-
-    physicalPeak.showBackgroundRadius(false); // do NOT show the background radius.
-    TS_ASSERT(!physicalPeak.isViewableBackground());
-  }
-
-  void test_viewable_when_rendering_background_too()
-  {
-    V3D origin(0, 0, 0);
-    const double radius = 1;
-    const double innerBackgroundRadius = 2;
-    const double outerBackgroundRadius = 3;
-    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
-    physicalPeak.showBackgroundRadius(true); // show the background radius, now viewability should be limited by the outer background radius.
-    const double delta = 0.01;
-
-    double slicePoint = outerBackgroundRadius - delta;
-    physicalPeak.setSlicePoint(slicePoint);
-    TS_ASSERT(physicalPeak.isViewableBackground());
-
-    slicePoint = outerBackgroundRadius + delta;
-    physicalPeak.setSlicePoint(slicePoint);
-    TS_ASSERT(!physicalPeak.isViewableBackground());
-  }
 
   void test_getBoundingBox()
   {

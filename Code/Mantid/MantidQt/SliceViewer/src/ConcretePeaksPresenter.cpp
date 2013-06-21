@@ -99,7 +99,7 @@ namespace MantidQt
      */
     ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, IPeaksWorkspace_sptr peaksWS,
         boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) : m_viewFactory(viewFactory), m_peaksWS(peaksWS), m_transformFactory(
-            transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0),
+            transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
             g_log(Mantid::Kernel::Logger::get("PeaksPresenter"))
     {
       // Check that the workspaces appear to be compatible. Log if otherwise.
@@ -124,16 +124,55 @@ namespace MantidQt
         m_viewPeaks->updateView();
     }
 
+
     /**
-     Allow all view to redraw themselfs following an update to the slice point intersecting plane.
-     @param slicePoint : The new slice position (z) against the x-y plot of data.
+     * Find the peaks in the region.
+     * Update the view with all those peaks that could be viewable.
+     *
+     * Also takes into account the peak radius, so needs to be re-executed when the user changes the effective radius of the peaks markers.
      */
-    void ConcretePeaksPresenter::updateWithSlicePoint(const double& slicePoint)
+    void ConcretePeaksPresenter::doFindPeaksInRegion()
     {
-      if (m_slicePoint != slicePoint) // only update if required.
+      PeakBoundingBox transformedViewableRegion = m_slicePoint.makeSliceBox(1e-6); //TODO, could actually be calculated as a single plane with z = 0 thickness.
+      transformedViewableRegion.transformBox(m_transform);
+
+      double effectiveRadius = m_viewPeaks->getRadius(); // Effective radius of each peak representation.
+
+      Mantid::API::IPeaksWorkspace_sptr peaksWS =
+          boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
+
+      Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PeaksInRegion");
+      alg->setChild(true);
+      alg->setRethrows(true);
+      alg->initialize();
+      alg->setProperty("InputWorkspace", peaksWS);
+      alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
+      alg->setProperty("Extents", transformedViewableRegion.toExtents());
+      alg->setProperty("CheckPeakExtents", true);
+      alg->setProperty("PeakRadius", effectiveRadius);
+      alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
+      alg->execute();
+      ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
+      std::vector<bool> viewablePeaks(outTable->rowCount());
+      for (size_t i = 0; i < outTable->rowCount(); ++i)
       {
-        m_viewPeaks->setSlicePoint(slicePoint);
-        m_slicePoint = slicePoint;
+        viewablePeaks[i] = outTable->cell<Boolean>(i, 1);
+      }
+      m_viewablePeaks = viewablePeaks;
+
+      m_viewPeaks->setSlicePoint(m_slicePoint.slicePoint(), m_viewablePeaks);
+    }
+
+    /**
+     Allow all view to redraw themselves following an update to the slice point intersecting plane.
+     @param viewableRegion : The new slice position (z) against the x-y plot of data.
+     */
+    void ConcretePeaksPresenter::updateWithSlicePoint(const PeakBoundingBox& viewableRegion)
+    {
+      if (m_slicePoint != viewableRegion) // only update if required.
+      {
+        m_slicePoint = viewableRegion;
+        doFindPeaksInRegion();
       }
     }
 
@@ -250,8 +289,8 @@ namespace MantidQt
       // Change background colours
       if(m_viewPeaks!=NULL)
       {
-      m_viewPeaks->changeBackgroundColour(colour);
-      m_viewPeaks->updateView();
+        m_viewPeaks->changeBackgroundColour(colour);
+        m_viewPeaks->updateView();
       }
     }
 
@@ -265,8 +304,8 @@ namespace MantidQt
       // Change background colours
       if(m_viewPeaks!=NULL)
       {
-      m_viewPeaks->showBackgroundRadius(show);
-      m_viewPeaks->updateView();
+        m_viewPeaks->showBackgroundRadius(show);
+        doFindPeaksInRegion();
       }
     }
 
@@ -292,7 +331,7 @@ namespace MantidQt
      */
     PeakBoundingBox ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const
     {
-      if(peakIndex < 0 || peakIndex > m_peaksWS->rowCount())
+      if(peakIndex < 0 || peakIndex > static_cast<int>(m_peaksWS->rowCount()))
       {
         throw std::out_of_range("Index given to ConcretePeaksPresenter::getBoundingBox() is out of range.");
       }
@@ -321,7 +360,7 @@ namespace MantidQt
       this->produceViews();
 
       // Give the new views the current slice point.
-      m_viewPeaks->setSlicePoint(this->m_slicePoint);
+      m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(), m_viewablePeaks);
       
     }
 
@@ -334,7 +373,8 @@ namespace MantidQt
     void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
     {
       m_viewPeaks->changeOccupancyIntoView(fraction);
-      m_viewPeaks->updateView();
+      doFindPeaksInRegion();
+      //m_viewPeaks->updateView();
     }
 
     double ConcretePeaksPresenter::getPeakSizeOnProjection() const

@@ -117,7 +117,6 @@ set ( SRC_FILES
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
 	src/SaveCanSAS1D2.cpp
-	src/SaveDASC.cpp
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorMasks.cpp
 	src/SaveDetectorsGrouping.cpp
@@ -258,7 +257,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
 	inc/MantidDataHandling/SaveCanSAS1D2.h
-	inc/MantidDataHandling/SaveDASC.h
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorMasks.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
@@ -389,7 +387,6 @@ set ( TEST_FILES
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
 	SaveCanSAS1dTest2.h
-	SaveDASCTest.h
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
 	SaveDspacemapTest.h

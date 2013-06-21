@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
+#include <stdexcept>
 
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
@@ -78,6 +79,89 @@ public:
     Material testB;
     th.reopenFile();
     TS_ASSERT_THROWS_NOTHING( testB.loadNexus(th.file, "material"); );
+  }
+
+  void test_parseMaterial()
+  {
+    Material::ChemicalFormula cf;
+
+    cf = Material::parseChemicalFormula("F60");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
+    TS_ASSERT_EQUALS(cf.atoms[0], "F");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 60);
+
+    cf = Material::parseChemicalFormula("(F60)");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
+    TS_ASSERT_EQUALS(cf.atoms[0], "F");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 60);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
+
+    cf = Material::parseChemicalFormula("C60");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
+    TS_ASSERT_EQUALS(cf.atoms[0], "C");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 60);
+
+    cf = Material::parseChemicalFormula("(C60)");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 1);
+    TS_ASSERT_EQUALS(cf.atoms[0], "C");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 60);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 1);
+
+    cf = Material::parseChemicalFormula("H2O");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
+    TS_ASSERT_EQUALS(cf.atoms[0], "H");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
+    TS_ASSERT_EQUALS(cf.atoms[1], "O");
+    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+
+    cf = Material::parseChemicalFormula("(H1)2O");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
+    TS_ASSERT_EQUALS(cf.atoms[0], "H");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 1);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
+    TS_ASSERT_EQUALS(cf.atoms[1], "O");
+    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+
+    cf = Material::parseChemicalFormula("D2O");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
+    TS_ASSERT_EQUALS(cf.atoms[0], "H");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 2);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
+    TS_ASSERT_EQUALS(cf.atoms[1], "O");
+    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+
+    cf = Material::parseChemicalFormula("H2 O");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
+    TS_ASSERT_EQUALS(cf.atoms[0], "H");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
+    TS_ASSERT_EQUALS(cf.atoms[1], "O");
+    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+
+    cf = Material::parseChemicalFormula("H2-O");
+    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
+    TS_ASSERT_EQUALS(cf.atoms[0], "H");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
+    TS_ASSERT_EQUALS(cf.atoms[1], "O");
+    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
+
+    TS_ASSERT_THROWS(cf = Material::parseChemicalFormula("H2*O"), std::runtime_error);
+    TS_ASSERT_EQUALS(cf.atoms.size(), 2);
+    TS_ASSERT_EQUALS(cf.atoms[0], "H");
+    TS_ASSERT_EQUALS(cf.aNumbers[0], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[0], 2);
+    TS_ASSERT_EQUALS(cf.atoms[1], "O");
+    TS_ASSERT_EQUALS(cf.aNumbers[1], 0);
+    TS_ASSERT_EQUALS(cf.numberAtoms[1], 1);
   }
 
 };

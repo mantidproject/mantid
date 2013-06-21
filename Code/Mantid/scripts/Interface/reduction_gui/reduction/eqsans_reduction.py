@@ -77,7 +77,6 @@ class EQSANSReductionScripter(BaseReductionScripter):
         data_options = None
         for item in self._observers:
             state = item.state()
-            print state.__class__.__name__
             if state is not None and state.__class__.__name__=="DataSets":
                 data_options = state
         

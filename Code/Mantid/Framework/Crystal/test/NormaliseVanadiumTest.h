@@ -104,7 +104,6 @@ public:
 
     }
 
-    retVal->doneAddingEventLists();
     /// Clean up the generators
     for (size_t d=0; d<nd; ++d)
       delete gens[d];
