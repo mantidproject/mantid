@@ -36,7 +36,14 @@ class IEventWorkspaceTest(unittest.TestCase):
         el = self._test_ws.getEventList(0)
         self.assertTrue(isinstance(el, IEventList))
         self.assertEquals(el.getNumberEvents(), 200)
-        
+    
+    def test_event_list_getWeights(self):
+        el = self._test_ws.getEventList(0)
+        self.assertTrue(isinstance(el, IEventList))
+        TofList = el.getTofs()
+        self.assertEquals(len(TofList), el.getNumberEvents()) #check length
+        self.assertAlmostEquals(TofList[0], 0.5) #first value
+    
     def test_event_list_getWeights(self):
         el = self._test_ws.getEventList(0)
         self.assertTrue(isinstance(el, IEventList))
