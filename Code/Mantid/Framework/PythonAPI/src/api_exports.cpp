@@ -601,6 +601,10 @@ void export_dataitem()
         .def("maskTof", &IEventList::maskTof)
         .def("getTofs", (std::vector<double>(IEventList::*)(void)const) &IEventList::getTofs,
             "Get a vector of the TOFs of the events")
+		.def("getWeights", (std::vector<double>(IEventList::*)(void)const) &IEventList::getWeights,
+            "Get a vector of the weights of the events")
+		.def("getWeightErrors", (std::vector<double>(IEventList::*)(void)const) &IEventList::getWeightErrors,
+            "Get a vector of the weight errors of the events")
         .def("getPulseTimes", &IEventList::getPulseTimes, "Get a vector of the pulse times of the events")
         .def("getTofMin", &IEventList::getTofMin)
         .def("getTofMax", &IEventList::getTofMax)
