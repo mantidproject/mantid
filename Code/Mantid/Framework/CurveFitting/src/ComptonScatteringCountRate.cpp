@@ -229,8 +229,8 @@ namespace CurveFitting
   {
     const size_t nmasses = this->nFunctions();
 
-    // Sanity check that equality constraints matrix has the same number of columns as masses
-    if(m_eqMatrix.numCols() != nmasses)
+    // Sanity check that equality constraints matrix has the same number of columns as masses or is zero-sized
+    if(m_eqMatrix.numCols() > 0 && m_eqMatrix.numCols() != nmasses)
     {
       std::ostringstream os;
       os << "ComptonScatteringCountRate - Equality constraint matrix (Aeq) has incorrect number of columns (" << m_eqMatrix.numCols()
