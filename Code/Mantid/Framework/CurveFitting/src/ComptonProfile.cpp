@@ -59,14 +59,14 @@ namespace CurveFitting
     m_workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
     if(!m_workspace)
     {
-      throw std::invalid_argument("NCSCountRate expected an object of type MatrixWorkspace, type=" + ws->id());
+      throw std::invalid_argument("ComptonProfile expected an object of type MatrixWorkspace, type=" + ws->id());
     }
     auto inst = m_workspace->getInstrument();
     auto sample = inst->getSample();
     auto source = inst->getSource();
     if(!sample || !source)
     {
-      throw std::invalid_argument("NCSCountRate - Workspace has no source/sample.");
+      throw std::invalid_argument("ComptonProfile - Workspace has no source/sample.");
     }
     Geometry::IDetector_const_sptr det;
     try
@@ -75,7 +75,7 @@ namespace CurveFitting
     }
     catch (Kernel::Exception::NotFoundError &)
     {
-      throw std::invalid_argument("NCSCountRate - Workspace has not detector attached to histogram at index " + boost::lexical_cast<std::string>(m_wsIndex));
+      throw std::invalid_argument("ComptonProfile - Workspace has no detector attached to histogram at index " + boost::lexical_cast<std::string>(m_wsIndex));
     }
 
     m_l1 = sample->getDistance(*source);
@@ -101,11 +101,23 @@ namespace CurveFitting
     const double l2l1 = m_l2/m_l1;
 
     // Resolution dependence
-    double x0(0.0),x1(0.0);
-    gsl_poly_solve_quadratic(m_mass-1.0, 2.0*std::cos(m_theta), -(m_mass+1.0), &x0, &x1);
-    const double k0k1 = std::max(x0,x1); // K0/K1 at y=0
+
+    // Find K0/K1 at y=0 by taking the largest root of (M-1)s^2 + 2cos(theta)s - (M+1) = 0
+    // Quadratic if M != 1 but simple linear if it does
+    double k0k1(0.0);
+    if((m_mass-1.0) > DBL_EPSILON)
+    {
+      double x0(0.0),x1(0.0);
+      gsl_poly_solve_quadratic(m_mass-1.0, 2.0*std::cos(m_theta), -(m_mass+1.0), &x0, &x1);
+      k0k1 = std::max(x0,x1); // K0/K1 at y=0
+    }
+    else
+    {
+      // solution is simply s = 1/cos(theta)
+      k0k1 = 1.0/std::cos(m_theta);
+    }
     double qy0(0.0), wgauss(0.0);
-;
+
     if(m_mass > 1.0)
     {
       qy0 = std::sqrt(k1*k1*m_mass*(k0k1*k0k1 - 1));
@@ -285,7 +297,7 @@ namespace CurveFitting
     }
     else
     {
-      throw std::invalid_argument("NCSCountRate - Unable to find component parameter \"" + name + "\".");
+      throw std::invalid_argument("ComptonProfile - Unable to find component parameter \"" + name + "\".");
     }
   }
 

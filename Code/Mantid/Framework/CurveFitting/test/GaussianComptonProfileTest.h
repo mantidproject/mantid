@@ -2,8 +2,10 @@
 #define MANTID_CURVEFITTING_GAUSSIANCOMPTONPROFILETEST_H_
 
 #include <cxxtest/TestSuite.h>
-
 #include "MantidCurveFitting/GaussianComptonProfile.h"
+
+#include "MantidAPI/FunctionDomain1D.h"
+#include "ComptonProfileTestHelpers.h"
 
 using Mantid::CurveFitting::GaussianComptonProfile;
 
@@ -74,8 +76,38 @@ public:
     }
   }
 
+  void test_Expected_Results_Returned_Given_Data()
+  {
+    using namespace Mantid::API;
+
+    auto func = createFunctionWithParamsSet();
+    double x0(370.0),x1(371.0),dx(0.5); //chosen to give put us near the peak for this mass & spectrum
+    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+    func->setWorkspace(testWS);
+    const auto & dataX = testWS->readX(0);
+    FunctionDomain1DView domain(dataX.data(), dataX.size());
+    FunctionValues values(domain);
+
+    TS_ASSERT_THROWS_NOTHING(func->function(domain, values));
+
+    const double tol(1e-10);
+    TS_ASSERT_DELTA(0.1048941000, values.getCalculated(0), tol);
+    TS_ASSERT_DELTA(0.1044889285, values.getCalculated(1), tol);
+    TS_ASSERT_DELTA(0.1029765223, values.getCalculated(2), tol);
+  }
 
 private:
+
+  boost::shared_ptr<GaussianComptonProfile> createFunctionWithParamsSet()
+  {
+    auto func = createFunction();
+    func->setAttributeValue("WorkspaceIndex",0);
+    func->setAttributeValue("Mass",30.0);
+    func->setParameter("Intensity", 4.0);
+    func->setParameter("Width", 13.0);
+    func->setUpForFit();
+    return func;
+  }
 
   boost::shared_ptr<GaussianComptonProfile> createFunction()
   {
@@ -83,7 +115,6 @@ private:
     profile->initialize();
     return profile;
   }
-
 };
 
 
