@@ -186,12 +186,18 @@ class RemoteJobsWidget(BaseWidget):
             self._content.job_table.setItem(i, 2, item)
             
             # Start time
-            item = QtGui.QTableWidgetItem(str(job_list[i][3]).replace('T', ' '))
+            time_displayed = str(job_list[i][3]).replace('T', ' ')
+            if DateAndTime(str(job_list[i][3])) == unavailable:
+                time_displayed = ''
+            item = QtGui.QTableWidgetItem(time_displayed)
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
             self._content.job_table.setItem(i, 3, item)
             
             # Completion time
-            item = QtGui.QTableWidgetItem(str(job_list[i][4]).replace('T', ' '))
+            time_displayed = str(job_list[i][4]).replace('T', ' ')
+            if DateAndTime(str(job_list[i][4])) == unavailable:
+                time_displayed = ''
+            item = QtGui.QTableWidgetItem(time_displayed)
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
             self._content.job_table.setItem(i, 4, item)
           
