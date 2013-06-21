@@ -154,22 +154,26 @@ class RemoteJobsWidget(BaseWidget):
         job_start = alg.getProperty("JobStartTime").value
         job_end = alg.getProperty("JobCompletionTime").value
                 
-        job_list = zip(*(job_id, job_status, job_name, job_start, job_end))
+        full_job_list = zip(*(job_id, job_status, job_name, job_start, job_end))
+        
+        # Pruning: since Qt has issues appending row, determine
+        # what the relevant jobs are first.
+        unavailable = DateAndTime(0)
+        unavailable.setToMinimum()
+        oldest = DateAndTime(str(self._content.date_time_edit.dateTime().toString(QtCore.Qt.ISODate)))
+
+        job_list = []
+        for job in full_job_list:
+            # Make sure that only recent jobs are displayed
+            this_job = DateAndTime(job[4])
+            if this_job==unavailable or this_job>=oldest:
+                job_list.append(job)
         
         self._clear_table()
         self._content.job_table.setSortingEnabled(False)
         self._content.job_table.setRowCount(len(job_list))
 
         for i in range(len(job_list)):
-            
-            # Make sure that only recent jobs are displayed
-            oldest = DateAndTime(str(self._content.date_time_edit.dateTime().toString(QtCore.Qt.ISODate)))
-            this_job = DateAndTime(str(job_list[i][4]))
-            unavailable = DateAndTime(0)
-            unavailable.setToMinimum()
-            if this_job>unavailable and this_job<oldest:
-                continue
-
             # Job ID
             item = QtGui.QTableWidgetItem(str(job_list[i][0]))
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
