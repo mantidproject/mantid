@@ -27,7 +27,7 @@ DECLARE_ALGORITHM( RenameWorkspaces)
 void RenameWorkspaces::initDocs()
 {
   this->setWikiSummary("Used to Rename a list workspaces in the [[Analysis Data Service]]. This is the algorithm that is run if 'Rename' is chosen from the context menu of a workspace and several workspaces have been selected.");
-  this->setOptionalMessage("Rename the Workspace.");
+  this->setOptionalMessage("Rename the Workspace. Please provide either a comma-separated list of new workspace names in WorkspaceNames or Prefix and/or Suffix to add to existing names");
 }
 
 using namespace Kernel;
