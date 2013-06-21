@@ -245,9 +245,7 @@ namespace Algorithms
       {
         if( inputWS->run().hasProperty("Ei") )
         {
-          Kernel::Property *p = inputWS->run().getProperty("Ei");
-          Kernel::PropertyWithValue<double> *doublep = dynamic_cast<Kernel::PropertyWithValue<double>*>(p); 
-          efixed = (*doublep)();
+          efixed = inputWS->run().getLogAsSingleValue("Ei");
         }
         else
         {

@@ -182,24 +182,7 @@ public:
     TS_ASSERT( !conv.isExecuted() );
    }
 
-  void test_Target_ElasticQ_Uses_Algorithm_EFixed_Value_If_Provided()
-  {
-    std::string inputWS("inWS");
-    const std::string outputWS("outWS");
-    const std::string target("ElasticQ");
-    
-    auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1, false, true);
-    AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
- 
-    Mantid::Algorithms::ConvertSpectrumAxis2 conv;
-    conv.initialize();
-    conv.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("InputWorkspace",inputWS) );
-    TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("OutputWorkspace",outputWS) );
-    TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("Target",target) );
-  }
-
-  void test_Target_ElasticQ_Returns_Correct_Value_When_EFixed_Is_Provided()
+  void test_Target_ElasticQ_Returns_Correct_Value_When_EFixed_Is_Set()
   {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
@@ -238,7 +221,7 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
     }
 
-  void test_Target_ElasticQSquared_Returns_Correct_Value_When_EFixed_Is_Provided()
+  void test_Target_ElasticQSquared_Returns_Correct_Value_When_EFixed_Is_Set()
   {
     std::string inputWS("inWS");
     const std::string outputWS("outWS");
@@ -275,6 +258,104 @@ public:
     //Clean up
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);
+    }
+
+    void test_Target_ElasticQ_For_Direct_Uses_Workspace_Ei_If_No_EFixed_Is_Set_In_Algorithm()
+    {
+      std::string inputWS("inWS");
+      const std::string outputWS("outWS");
+      const std::string target("ElasticQ");
+      const std::string emode("Direct");
+      const double efixed(2.5);
+
+      auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1, false);
+      auto & run = testWS->mutableRun();
+      run.addProperty("Ei",efixed);
+      AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
+ 
+      Mantid::Algorithms::ConvertSpectrumAxis2 conv;
+      conv.initialize();
+      TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("InputWorkspace",inputWS) );
+      TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("OutputWorkspace",outputWS) );
+      TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("Target",target) );
+      TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("EMode",emode) );
+
+      conv.execute();
+
+      TS_ASSERT( conv.isExecuted() );
+            
+      MatrixWorkspace_const_sptr input,output;
+      TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
+      TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
+      
+      // Should now have a numeric axis up the side, with units of Q
+      const Axis* qAxis = 0;
+      TS_ASSERT_THROWS_NOTHING( qAxis = output->getAxis(1) );
+      TS_ASSERT( qAxis->isNumeric() );
+      TS_ASSERT_EQUALS( qAxis->unit()->unitID(), "MomentumTransfer");
+    
+      TS_ASSERT_DELTA( (*qAxis)(0), 0.000, 0.001 );
+      TS_ASSERT_DELTA( (*qAxis)(1), 3.470e9, 1.0000e6 );
+      TS_ASSERT_DELTA( (*qAxis)(2), 6.936e9, 1.0000e6 );
+
+      // Check axis is correct length
+      TS_ASSERT_THROWS( (*qAxis)(3), Mantid::Kernel::Exception::IndexError );
+    }
+
+    void test_Target_ElasticQ_For_Indirect_Uses_Detector_If_No_EFixed_Is_Set_In_Algorithm()
+    {
+      std::string inputWS("inWS");
+      const std::string outputWS("outWS");
+      const std::string target("ElasticQ");
+      const std::string emode("Indirect");
+    
+      auto testWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 1, false);      
+      AnalysisDataService::Instance().addOrReplace(inputWS, testWS);
+      
+      auto & pmap = testWS->instrumentParameters();  
+
+      auto det0 = testWS->getDetector(0);
+      pmap.addDouble(det0.get(),"Efixed",0.4);
+          
+      auto det1 = testWS->getDetector(1);
+      pmap.addDouble(det1.get(),"Efixed",0.1);
+                
+      auto det2 = testWS->getDetector(2);
+      pmap.addDouble(det2.get(),"Efixed",0.025);
+ 
+      Mantid::Algorithms::ConvertSpectrumAxis2 conv;
+      conv.initialize();
+
+      TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("InputWorkspace",inputWS) );
+      TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("OutputWorkspace",outputWS) );
+      TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("Target",target) );
+      TS_ASSERT_THROWS_NOTHING( conv.setPropertyValue("EMode",emode) );
+      
+      conv.execute();
+
+      MatrixWorkspace_const_sptr input,output;
+      TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
+      TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
+             
+      // Should now have a numeric axis up the side, with units of Q
+      const Axis* qAxis = 0;
+      TS_ASSERT_THROWS_NOTHING( qAxis = output->getAxis(1) );
+      TS_ASSERT( qAxis->isNumeric() );
+      TS_ASSERT_EQUALS( qAxis->unit()->unitID(), "MomentumTransfer");
+    
+      TS_ASSERT_DELTA( (*qAxis)(0), 0.000, 0.001 );
+      TS_ASSERT_DELTA( (*qAxis)(1), 6.936e8, 1.0000e5 );
+      TS_ASSERT_DELTA( (*qAxis)(2), 6.941e8, 1.0000e5 );
+
+      // Check axis is correct length
+      TS_ASSERT_THROWS( (*qAxis)(3), Mantid::Kernel::Exception::IndexError );
+      
+      TS_ASSERT( conv.isExecuted() );
+
+      //Clean up
+      AnalysisDataService::Instance().remove(inputWS);
+      AnalysisDataService::Instance().remove(outputWS);
+
     }
 };
 
