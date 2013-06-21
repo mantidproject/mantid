@@ -9,7 +9,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/assign/list_of.hpp>
 
-using Mantid::Crystal::PeaksInRegion;
+using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
@@ -68,6 +68,13 @@ public:
   // This means the constructor isn't called when running other tests
   static PeaksInRegionTest *createSuite() { return new PeaksInRegionTest(); }
   static void destroySuite( PeaksInRegionTest *suite ) { delete suite; }
+
+  void test_numberOfFaces()
+  {
+    PeaksInRegion alg;
+    PeaksIntersection& baseAlg = alg;
+    TS_ASSERT_EQUALS(6, baseAlg.numberOfFaces());
+  }
 
   void test_setProperties()
   {

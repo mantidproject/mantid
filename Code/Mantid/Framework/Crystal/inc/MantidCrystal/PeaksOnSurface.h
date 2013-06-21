@@ -1,17 +1,15 @@
-#ifndef MANTID_CRYSTAL_PEAKSINREGION_H_
-#define MANTID_CRYSTAL_PEAKSINREGION_H_
+#ifndef MANTID_CRYSTAL_PEAKSONSURFACE_H_
+#define MANTID_CRYSTAL_PEAKSONSURFACE_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidCrystal/PeaksIntersection.h"
-
 
 namespace Mantid
 {
 namespace Crystal
 {
 
-  /** PeaksInRegion : Find peaks that are either inside a box region, or that have a radius of sufficent size, that they intersect the box.
+  /** PeaksOnSurface : TODO: DESCRIPTION
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -33,31 +31,21 @@ namespace Crystal
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport PeaksInRegion  : public PeaksIntersection
+  class DLLExport PeaksOnSurface  : public API::Algorithm
   {
   public:
-    PeaksInRegion();
-    virtual ~PeaksInRegion();
+    PeaksOnSurface();
+    virtual ~PeaksOnSurface();
     
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
 
-
   private:
     virtual void initDocs();
     void init();
     void exec();
-    virtual void validateExtentsInput() const;
-    virtual int numberOfFaces() const;
-    virtual VecVecV3D createFaces() const;
 
-    virtual bool pointOutsideAnyExtents(const Mantid::Kernel::V3D& testPoint) const;
-    virtual bool pointInsideAllExtents(const Mantid::Kernel::V3D& testPoints) const; 
-    virtual void checkTouchPoint(const Mantid::Kernel::V3D& touchPoint,const Mantid::Kernel::V3D& normal,const  Mantid::Kernel::V3D& faceVertex) const;
-
-    /// Extents.
-    std::vector<double> m_extents;
 
   };
 
@@ -65,4 +53,4 @@ namespace Crystal
 } // namespace Crystal
 } // namespace Mantid
 
-#endif  /* MANTID_CRYSTAL_PEAKSINREGION_H_ */
+#endif  /* MANTID_CRYSTAL_PEAKSONSURFACE_H_ */
