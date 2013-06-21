@@ -1,10 +1,14 @@
 /*WIKI* 
 
-Renames a list of workspaces to a different name in the data service.
+Renames a list of workspaces in the data service.
 This renaming is done by either replacing with new names in a list or adding a prefix, suffix or both prefix and suffix.
 The Renaming is implemented by calling RenameWorkspace as a child algorithm having defined the output workspace appropriately.
 
-If run on a group workspace, the members of the group will be renamed in the same manner as done by RemameWorkspace
+If run on a group workspace, the members of the group will be renamed in the same manner as done by RemameWorkspace.
+
+The new names can be either explicitly defined by a comma separated list or by adding a prefix, suffix or both a prefix and suffix.
+
+'''Warning:''' No new name can be the same as any existing workspace, even if that existing workspace is also being renamed. Duplicate names may cause the loss of a workspace.
 
 *WIKI*/
 //----------------------------------------------------------------------
@@ -27,7 +31,7 @@ DECLARE_ALGORITHM( RenameWorkspaces)
 void RenameWorkspaces::initDocs()
 {
   this->setWikiSummary("Used to Rename a list workspaces in the [[Analysis Data Service]]. This is the algorithm that is run if 'Rename' is chosen from the context menu of a workspace and several workspaces have been selected.");
-  this->setOptionalMessage("Rename the Workspace.");
+  this->setOptionalMessage("Rename the Workspace. Please provide either a comma-separated list of new workspace names in WorkspaceNames or Prefix and/or Suffix to add to existing names");
 }
 
 using namespace Kernel;
