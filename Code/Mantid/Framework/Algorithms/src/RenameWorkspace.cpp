@@ -113,6 +113,7 @@ bool RenameWorkspace::processGroups()
       }
     }
   }
+  setProperty("OutputWorkspace", inputWS);
 
   // We finished successfully.
   setExecuted(true);
