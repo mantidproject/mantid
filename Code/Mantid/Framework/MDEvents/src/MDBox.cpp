@@ -4,7 +4,7 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidMDEvents/MDGridBox.h"
-
+#include <math.h>
 
 using namespace Mantid::API;
 
@@ -634,7 +634,7 @@ namespace MDEvents
       {
        
         // add event to appropriate y channel
-        int xchannel = static_cast<int>(std::round((out[1] / deltaQ))) + (numSteps / 2);
+        int xchannel = static_cast<int>(round((out[1] / deltaQ))) + (numSteps / 2);
         if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel]++;
 
         signal += static_cast<signal_t>(it->getSignal());
