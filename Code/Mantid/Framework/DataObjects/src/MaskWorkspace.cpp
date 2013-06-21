@@ -260,6 +260,16 @@ namespace DataObjects
         return "MaskWorkspace";
     }
 
+    /**
+     * @return :: A pointer to the created info node.
+     */
+    API::Workspace::InfoNode *MaskWorkspace::createInfoNode() const
+    {
+        auto node = SpecialWorkspace2D::createInfoNode();
+        node->addLine( "Mased: " + boost::lexical_cast<std::string>(getNumberMasked()) );
+        return node;
+    }
+
 } //namespace DataObjects
 } //namespace Mantid
 

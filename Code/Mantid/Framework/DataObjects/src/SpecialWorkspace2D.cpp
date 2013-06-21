@@ -100,6 +100,17 @@ namespace DataObjects
     Workspace2D::init(NVectors, XLength, YLength);
   }
 
+  /**
+   * @return :: A pointer to the created info node.
+   */
+  API::Workspace::InfoNode *SpecialWorkspace2D::createInfoNode() const
+  {
+      auto node = new InfoNode(*this);
+      node->addLine( "Title: " + getTitle() );
+      node->addLine( "Histograms: " + boost::lexical_cast<std::string>(getNumberHistograms()) );
+      return node;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Return the special value (Y) in the workspace at the given detector ID
    *

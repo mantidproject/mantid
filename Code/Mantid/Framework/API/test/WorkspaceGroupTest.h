@@ -244,46 +244,6 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-//  void testUpdated()
-//  {
-//    WorkspaceGroupTest_WorkspaceGroupObserver observer;
-//    WorkspaceGroup_sptr group(new WorkspaceGroup());
-//    AnalysisDataService::Instance().add( "group", group );
-//    TS_ASSERT( !observer.received );
-
-//    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
-//    ws->initialize(2,3,4);
-//    AnalysisDataService::Instance().addOrReplace("name_0", ws);
-
-//    ws.reset(new WorkspaceTester());
-//    ws->initialize(2,3,4);
-//    AnalysisDataService::Instance().addOrReplace("name_12", ws);
-
-//    group->add( "name_0" );
-//    TS_ASSERT( observer.received );
-//    observer.received = false;
-
-//    group->observeADSNotifications( false );
-
-//    group->add( "name_12" );
-//    TS_ASSERT( !observer.received );
-//    observer.received = false;
-
-//    group->observeADSNotifications( true );
-
-//    group->remove( "name_12" );
-//    TS_ASSERT( observer.received );
-//    observer.received = false;
-
-//    group->observeADSNotifications( false );
-
-//    group->remove( "name_0" );
-//    TS_ASSERT( !observer.received );
-//    observer.received = false;
-
-//    AnalysisDataService::Instance().clear();
-//  }
-
   void test_not_multiperiod_with_less_than_one_element()
   {
     WorkspaceGroup group;
@@ -322,6 +282,37 @@ public:
     group->addWorkspace(a);
     add_periods_logs(group, 1); 
     TS_ASSERT(group->isMultiperiod());
+  }
+
+  void test_InfoNode()
+  {
+      WorkspaceGroup_sptr group = makeGroup();
+      Mantid::API::Workspace::InfoNode rootNode( *group );
+      group->addInfoNodeTo( rootNode );
+      Mantid::API::Workspace::InfoNode &node = *rootNode.nodes()[0];
+      TS_ASSERT_EQUALS( node.nodes().size(), 3 );
+
+      TS_ASSERT_EQUALS( node.lines()[0], "group" );          // workspace name
+      TS_ASSERT_EQUALS( node.lines()[1], "WorkspaceGroup" ); // workspace id
+  }
+
+  void test_isInGroup()
+  {
+      WorkspaceGroup_sptr group = makeGroup();
+      auto ws1 = group->getItem(1);
+      TS_ASSERT( group->isInGroup( *ws1 ) );
+      Workspace_sptr a = boost::make_shared<WorkspaceTester>();
+      TS_ASSERT( !group->isInGroup( *a ) );
+
+      WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+      group1->addWorkspace( a );
+      group->addWorkspace( group1 );
+      TS_ASSERT( group->isInGroup( *a ) );
+
+      // catch a cycle
+      group1->addWorkspace( group );
+      Workspace_sptr b = boost::make_shared<WorkspaceTester>();
+      TS_ASSERT_THROWS( group->isInGroup( *b ), std::runtime_error );
   }
 
 };

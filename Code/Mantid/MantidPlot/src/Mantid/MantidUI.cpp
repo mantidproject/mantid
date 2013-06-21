@@ -1833,19 +1833,19 @@ void MantidUI::showAlgMonitor()
   m_algMonitor->showDialog();
 }
 
-void MantidUI::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr pNf)
+void MantidUI::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr)
 {
-  emit workspace_added(QString::fromStdString(pNf->object_name()),(pNf->object()));
+    emit ADS_updated();
 }
 
-void MantidUI::handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
+void MantidUI::handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr)
 {
-  emit workspace_replaced(QString::fromStdString(pNf->object_name()),(pNf->object()));
+  emit ADS_updated();
 }
 
-void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
+void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr )
 {
-  emit workspace_removed(QString::fromStdString(pNf->object_name()));
+    emit ADS_updated();
 }
 
 void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
@@ -1853,30 +1853,22 @@ void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
   emit workspaces_cleared();
 }
 
-void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf)
+void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr )
 {
-  emit workspace_renamed(QString::fromStdString(pNf->object_name()), QString::fromStdString(pNf->new_objectname()));
+    emit ADS_updated();
 }
-void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr pNf)
+void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr)
 {
-  const std::vector<std::string> wsvec=pNf->inputworkspacenames();
-  QStringList wsList;
-  std::vector<std::string>::const_iterator citr;
-  for(citr=wsvec.begin();citr!=wsvec.end();++citr)
-  {
-    wsList.append(QString::fromStdString(*citr));
-  }
-  emit workspaces_grouped(wsList);
+    emit ADS_updated();
 }
-void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf)
+void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr)
 {
-  emit workspace_ungrouped(QString::fromStdString(pNf->object_name()), pNf->object());
+    emit ADS_updated();
 }
 
-void MantidUI::handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf)
+void MantidUI::handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr)
 {
-  QString name = QString::fromStdString(pNf->object_name());
-  emit workspace_group_updated( name );
+    emit ADS_updated();
 }
 
 void MantidUI::handleConfigServiceUpdate(Mantid::Kernel::ConfigValChangeNotification_ptr pNf){

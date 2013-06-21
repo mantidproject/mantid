@@ -212,6 +212,36 @@ namespace Mantid
         notificationCenter.postNotification(new GroupUpdatedNotification( groupName ));
     }
 
+    /**
+     * @return A pointer to the root node of the info tree.
+     */
+    Workspace::InfoNode *AnalysisDataServiceImpl::createInfoTree() const
+    {
+        auto workspaces = getObjects();
+
+        // collect all groups and put them into temporary rootGroup
+        WorkspaceGroup rootGroup;
+        for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+        {
+            WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>( *ws );
+            if ( group )
+            {
+                rootGroup.addWorkspace( group );
+            }
+        }
+
+        // build the tree
+        Workspace::InfoNode *root = new Workspace::InfoNode(this);
+        for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+        {
+            if ( !rootGroup.isInChildGroup(**ws) )
+            {
+                (**ws).addInfoNodeTo( *root );
+            }
+        }
+        return root;
+    }
+
     //-------------------------------------------------------------------------
     // Private methods
     //-------------------------------------------------------------------------

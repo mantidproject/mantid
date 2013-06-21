@@ -86,6 +86,8 @@ public:
   bool areNamesSimilar() const;
   /// Inidicates that the workspace group can be treated as multiperiod.
   bool isMultiperiod() const;
+  /// Check if a workspace is included in this group or any nested groups.
+  bool isInGroup( const Workspace& workspace, size_t level = 0 ) const;
   /// Prints the group to the screen using the logger at debug
   void print() const;
 
@@ -102,7 +104,11 @@ public:
   std::vector<std::string> getNames() const;
 
   //@}
- 
+
+protected:
+  /// Create and return a new InfoNode describing this workspace.
+  virtual InfoNode *createInfoNode() const;
+
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);
@@ -112,6 +118,8 @@ private:
   void removeByADS(const std::string& name);
   /// Turn ADS observations on/off
   void observeADSNotifications(const bool observeADS);
+  /// Check if a workspace is included in any child groups and groups in them.
+  bool isInChildGroup( const Workspace& workspace ) const;
   /// Callback when a delete notification is received
   void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
   /// Observer for workspace delete notfications
@@ -128,6 +136,8 @@ private:
   mutable Poco::Mutex m_mutex;
   /// Static reference to the logger
   static Kernel::Logger& g_log;
+  /// Maximum allowed depth for nested groups.
+  static size_t g_maximum_depth;
 
   friend class AnalysisDataServiceImpl;
   friend class Algorithm;

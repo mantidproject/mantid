@@ -15,6 +15,7 @@ namespace API
 {
 
 Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
+size_t WorkspaceGroup::g_maximum_depth = 100;
 
 WorkspaceGroup::WorkspaceGroup() :
   Workspace(), 
@@ -54,6 +55,25 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
       m_observingADS = false;
     }
   }
+}
+
+/**
+ * @param workspace :: A workspace to check.
+ * @return :: True if the workspace is found.
+ */
+bool WorkspaceGroup::isInChildGroup(const Workspace &workspace) const
+{
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+    for(auto ws = m_workspaces.begin(); ws != m_workspaces.end(); ++ws)
+    {
+        // check child groups only
+        WorkspaceGroup *group = dynamic_cast<WorkspaceGroup*>( ws->get() );
+        if ( group )
+        {
+            if ( group->isInGroup( workspace ) ) return true;
+        }
+    }
+    return false;
 }
 
 /**
@@ -103,6 +123,21 @@ std::vector<std::string> WorkspaceGroup::getNames() const
     out.push_back( (**it).name() );
   }
   return out;
+}
+
+/**
+ * Create InfoNode for this workspace group and add nodes for all its members.
+ * @return
+ */
+Workspace::InfoNode *WorkspaceGroup::createInfoNode() const
+{
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+    InfoNode *node = new InfoNode(*this);
+    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+    {
+        (**it).addInfoNodeTo( *node );
+    }
+    return node;
 }
 
 /**
@@ -326,6 +361,31 @@ bool WorkspaceGroup::isMultiperiod() const
     ++iterator;
   }
   return true;
+}
+
+/**
+ * @param workspace :: A workspace to check.
+ * @param level :: The current nesting level. Intended for internal use only by WorkspaceGroup.
+ * @return :: True if the worspace is found in any of the nested groups in this group.
+ */
+bool WorkspaceGroup::isInGroup(const Workspace &workspace, size_t level) const
+{
+    // Check for a cycle.
+    if ( level > g_maximum_depth )
+    {
+        throw std::runtime_error("WorkspaceGroup nesting level is too deep.");
+    }
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+    for(auto ws = m_workspaces.begin(); ws != m_workspaces.end(); ++ws)
+    {
+        if ( ws->get() == &workspace ) return true;
+        WorkspaceGroup *group = dynamic_cast<WorkspaceGroup*>( ws->get() );
+        if ( group )
+        {
+            if ( group->isInGroup( workspace, level + 1 ) ) return true;
+        }
+    }
+    return false;
 }
 
 } // namespace API

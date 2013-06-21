@@ -300,15 +300,8 @@ signals:
   // These signals are to be fired from methods run in threads other than the main one
   // (e.g. handlers of algorithm notifications)
 
-  // Signals that the UI needs to be updated.
-  void workspace_added(const QString &, Mantid::API::Workspace_sptr);
-  void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
-  void workspace_removed(const QString &);
   void workspaces_cleared();
-  void workspace_renamed(const QString &, const QString &);
-  void workspaces_grouped(const QStringList&);
-  void workspace_ungrouped(const QString&, Mantid::API::Workspace_sptr);
-  void workspace_group_updated(const QString&);
+  void ADS_updated();
 
   void needToCreateLoadDAEMantidMatrix(const QString&);
 

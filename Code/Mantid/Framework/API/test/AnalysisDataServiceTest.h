@@ -379,6 +379,51 @@ public:
       ads.clear();
   }
 
+  void test_addToGroup()
+  {
+      auto group = addGroupToADS("group");
+      addToADS("workspace");
+      TS_ASSERT( !group->contains("workspace") );
+      ads.addToGroup("group","workspace");
+      TS_ASSERT( group->contains("workspace") );
+      ads.clear();
+  }
+
+  void test_addToGroup_group()
+  {
+      auto group = addGroupWithGroupToADS("group");
+      addToADS("workspace");
+
+      WorkspaceGroup_sptr grp = ads.retrieveWS<WorkspaceGroup>("group_2");
+      TS_ASSERT( grp );
+      TS_ASSERT( !group->contains("workspace") );
+      TS_ASSERT( !grp->contains("workspace") );
+      ads.addToGroup("group_2","workspace");
+      TS_ASSERT( !group->contains("workspace") );
+      TS_ASSERT( grp->contains("workspace") );
+      ads.clear();
+  }
+
+  void test_createInfoTree()
+  {
+      // this adds 1 group to the ADS (5 ws's altogether)
+      auto group = addGroupWithGroupToADS("group");
+      // plus 1 more ws
+      addToADS("workspace");
+      // ADS must have 6 ws's now
+      TS_ASSERT_EQUALS( ads.size(), 6 );
+
+      auto root = ads.createInfoTree();
+      TS_ASSERT( root );
+      // there are 2 ws's at top level
+      TS_ASSERT_EQUALS( root->nodes().size(), 2 );
+      TS_ASSERT_EQUALS( root->nodes()[0]->nodes().size(), 2 );
+      TS_ASSERT_EQUALS( root->nodes()[1]->nodes().size(), 0 );
+
+      delete root;
+      ads.clear();
+  }
+
 private:
 
   /// If replace=true then usea addOrReplace

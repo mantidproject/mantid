@@ -137,6 +137,9 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
 
    //@}
 
+   /// Create an info tree out of InfoNodes to describe the current state of the ADS.
+   Workspace::InfoNode *createInfoTree() const;
+
 private:
    /// Checks the name is valid, throwing if not
    void verifyName(const std::string & name);
