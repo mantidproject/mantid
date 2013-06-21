@@ -246,7 +246,8 @@ void AlignAndFocusPowder::exec()
     }
   }
   std::string lowreswsname = getPropertyValue("LowResTOFWorkspace");
-  if (lowreswsname.size() > 0)
+  MatrixWorkspace_sptr tempws = getProperty("LowResTOFWorkspace");
+  if (lowreswsname.size() > 0 || tempws)
   {
     // Process low resolution TOF
     m_processLowResTOF = true;
@@ -260,13 +261,6 @@ void AlignAndFocusPowder::exec()
       //Make a brand new EventWorkspace
       m_lowResEW = boost::dynamic_pointer_cast<EventWorkspace>(
             WorkspaceFactory::Instance().create("EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
-#if 0
-      COPYING OVER MIGHT NOT BE NECESSARY
-      //Copy geometry over.
-      WorkspaceFactory::Instance().initializeFromParent(m_inputEW, m_lowResEW, false);
-      //You need to copy over the data as well.
-      m_outputEW->copyDataFrom( (*m_inputEW) );
-#endif
 
       //Cast to the matrixOutputWS and save it
       m_lowResW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_lowResEW);
