@@ -622,8 +622,8 @@ namespace MDEvents
     const std::vector<MDE> & events = this->getConstEvents();
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
-    double deltaQ = 0.004/(2*M_PI);
-    int numSteps=static_cast<int>((length/deltaQ) + 1);
+    int numSteps = 100;
+    double deltaQ = length/static_cast<double>(numSteps-1);
 
     // For each MDLeanEvent
     for (; it != it_end; ++it)
@@ -632,10 +632,9 @@ namespace MDEvents
       radiusTransform.apply(it->getCenter(), out);
       if (out[0] < radius && std::fabs(out[1]) < 0.5*length)
       {
-       
         // add event to appropriate y channel
         int xchannel = static_cast<int>(floor((out[1] / deltaQ))+0.5) + (numSteps / 2);
-        if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel]++;
+        if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += static_cast<signal_t>(it->getSignal());
 
         signal += static_cast<signal_t>(it->getSignal());
         errorSquared += static_cast<signal_t>(it->getErrorSquared());

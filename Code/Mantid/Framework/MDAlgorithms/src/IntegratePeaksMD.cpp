@@ -193,7 +193,6 @@ namespace MDAlgorithms
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
     /// Cylinder Length to use around peaks for cylinder
     double cylinderLength = getProperty("CylinderLength");
-    cylinderLength /= (2.0 * M_PI);
     double backgroundCylinder = cylinderLength;
     double percentBackground = getProperty("PercentBackground");
     cylinderLength *= 1.0 - (percentBackground/100.);
@@ -320,8 +319,8 @@ namespace MDAlgorithms
 			// Perform the integration into whatever box is contained within.
 			std::vector<signal_t> signal_fit;
 
-			double deltaQ = 0.004/(2*M_PI);
-			int numSteps=static_cast<int>((cylinderLength/deltaQ) + 1);
+			int numSteps = 20;
+			double deltaQ = cylinderLength/static_cast<double>(numSteps-1);
 			signal_fit.clear();
 			for (int j=0; j<numSteps; j++)signal_fit.push_back(0.0);
 			ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(cylinderLength), signal, errorSquared, signal_fit);
@@ -335,7 +334,6 @@ namespace MDAlgorithms
 				// Get the total signal inside "BackgroundOuterRadius"
 
 				if (BackgroundOuterRadius < PeakRadius ) BackgroundOuterRadius = PeakRadius;
-				double deltaQ = 0.004/(2*M_PI);
 				int numSteps=static_cast<int>((backgroundCylinder/deltaQ) + 1);
 				signal_fit.clear();
 				for (int j=0; j<numSteps; j++)signal_fit.push_back(0.0);

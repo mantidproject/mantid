@@ -1354,6 +1354,8 @@ namespace MDEvents
     size_t boxIndex[nd]; Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
     size_t indexMaker[nd]; Utils::NestedForLoop::SetUpIndexMaker(nd, indexMaker, split);
 
+    int numSteps = 100;
+    double deltaQ = length/static_cast<double>(numSteps-1);
     bool allDone = false;
     while (!allDone)
     {
@@ -1415,6 +1417,14 @@ namespace MDEvents
       // Is this box fully contained?
       if (verticesContained[i] >= maxVertices)
       {
+        coord_t boxCenter[nd];
+        box->getCenter(boxCenter);
+        // transform center of box to cylinder
+        coord_t out[nd];
+        radiusTransform.apply(boxCenter, out);
+        // add event to appropriate y channel
+        int xchannel = static_cast<int>(floor((out[1] / deltaQ))+0.5) + (numSteps / 2);
+        if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += box->getSignal();
         // Use the integrated sum of signal in the box
         signal += box->getSignal();
         errorSquared += box->getErrorSquared();
@@ -1437,7 +1447,7 @@ namespace MDEvents
         coord_t out[nd];
         radiusTransform.apply(boxCenter, out);
 
-        if (out[0] < diagonalSquared*0.72 + radius && std::fabs(out[1]) < diagonalSquared*0.72 + 0.5*length)
+        if (out[0] < std::sqrt(diagonalSquared*0.72 + radius*radius) && std::fabs(out[1]) < std::sqrt(diagonalSquared*0.72 + 0.25*length*length))
         {
           // If the center is closer than the size of the box, then it MIGHT be touching.
           // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).
