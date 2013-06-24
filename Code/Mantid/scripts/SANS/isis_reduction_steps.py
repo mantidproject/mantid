@@ -301,6 +301,11 @@ class LoadRun(object):
             @param run_number_width: ISIS instruments often produce files with a fixed number of digits padded with zeros
         """
         pieces = run_string.split('.')
+        if len(pieces) > 2: 
+            # this means that the foldername has '.',  so costruct the pieces to ignore foldername with '.' 
+            extension = pieces[-1]
+            body = '.'.join(pieces[:-1])
+            pieces = [body, extension]
         if len(pieces) != 2:
              raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
         
