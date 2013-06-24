@@ -24,6 +24,7 @@
 #include <sstream>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
+#include <boost/shared_ptr.hpp>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -258,6 +259,7 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
   //used in numeric time series below, the default filter value
   int filter = 0;
   int key = item->data(1, Qt::UserRole).toInt();
+  Mantid::Kernel::Property * logData = NULL;
   switch (key)
   {
     case numeric :
@@ -276,6 +278,9 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
                                      item->data(0, Qt::UserRole).toString());
       break;
     case numericArray :
+	  logData=m_ei->getLog(item->text(0).toStdString());
+	  if (!logData) return;
+	  m_mantidUI->importString(item->text(0),QString::fromStdString(logData->value()) );
       break;
     default :
       throw std::invalid_argument("Error importing log entry, wrong data type");
@@ -426,7 +431,9 @@ void MantidSampleLogDialog::init()
       treeItem->setText(2, QString::fromStdString((*pItr)->value()));
     }
     else if( dynamic_cast<Mantid::Kernel::ArrayProperty<int> *>(*pItr) ||
-      dynamic_cast<Mantid::Kernel::ArrayProperty<double> *>(*pItr))
+      dynamic_cast<Mantid::Kernel::ArrayProperty<double> *>(*pItr) ||
+	  dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<double>> *>(*pItr) ||
+	  dynamic_cast<Mantid::Kernel::PropertyWithValue<std::vector<int>> *>(*pItr))
     {
       treeItem->setText(1, "numeric array");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(numericArray)); //Save the "role" as numeric array.
