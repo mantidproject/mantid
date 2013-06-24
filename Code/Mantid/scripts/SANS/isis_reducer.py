@@ -345,9 +345,9 @@ class ISISReducer(SANSReducer):
         # to the SampleLog, to be connected to the workspace, and be available outside. These values
         # are current being used for saving CanSAS (ticket #6929)
         if self.__transmission_sample:
-            AddSampleLog(Workspace=self.output_wksp,LogName= "Transmission", LogText=self.__transmission_sample)
+            AddSampleLog(Workspace=self.output_wksp,LogName= "Transmission", LogText=self.__transmission_sample + str('_unfitted'))
         if self.__transmission_can:
-            AddSampleLog(Workspace=self.output_wksp,LogName= "TransmissionCan", LogText=self.__transmission_can)
+            AddSampleLog(Workspace=self.output_wksp,LogName= "TransmissionCan", LogText=self.__transmission_can + str('_unfitted'))
 	
         for role in self._temporys.keys():
             try:
