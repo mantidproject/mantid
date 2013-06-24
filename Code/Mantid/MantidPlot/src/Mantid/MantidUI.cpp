@@ -2298,7 +2298,23 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
 */
 void MantidUI::importString(const QString &logName, const QString &data)
 {
-  Table* t = new Table(appWindow()->scriptingEnv(), 1, 1, "", appWindow(), 0);
+	importString(logName,data,QString(""));
+}
+
+/** Displays a string in a Qtiplot table
+*  @param logName :: the title of the table is based on this
+*  @param data :: the string to display
+*  @param sep :: the seperator character
+*/
+void MantidUI::importString(const QString &logName, const QString &data, const QString &sep)
+{
+  QStringList loglines =  QStringList(data);
+  if (sep.length() > 0)
+  {
+    loglines = data.split(sep, QString::SkipEmptyParts);
+  }
+
+  Table* t = new Table(appWindow()->scriptingEnv(), loglines.size(), 1, "", appWindow(), 0);
   if( !t ) return;
   //Have to replace "_" since the legend widget uses them to separate things
   QString label = logName;
@@ -2309,7 +2325,10 @@ void MantidUI::importString(const QString &logName, const QString &data)
   t->setColName(0, "Log entry");
   t->setReadOnlyColumn(0, true); //Read-only
 
-  t->setText(0, 0, data);
+  for (int i=0; i<loglines.size(); ++i)
+  {
+    t->setText(i, 0, loglines[i]);
+  }
 
   //Show table
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,

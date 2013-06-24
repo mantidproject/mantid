@@ -112,7 +112,7 @@ private:
     numTSeries,                       ///< for time series properties that contain numbers
     stringTSeries,                    ///< for logs that are string time series properties
     numeric,                          ///< for logs that are single numeric values (int or double)
-    numericArray                      ///< for logs that are an array of numberic values (int or double)
+    numericArray                      ///< for logs that are an array of numeric values (int or double)
   };
 };
 
