@@ -886,7 +886,10 @@ void RepoModel::downloadFinished(void){
                           .arg(info));  
   }
   downloading_path = nofile_flag;
-  emit dataChanged(download_index, download_index);
+  RepoItem * repo_item = static_cast<RepoItem*>(download_index.internalPointer());
+  QModelIndex top_left = createIndex(0,0,repo_item);
+  QModelIndex bottom_right = createIndex(0,3,repo_item);
+  emit dataChanged(top_left, bottom_right);
   emit executingThread(false);
 }
 
@@ -912,11 +915,13 @@ void RepoModel::uploadFinished(void){
                           title,
                           QString("<html><body><p>%1</p></body></html>")
                           .arg(info));
-    return;
   }
   
   uploading_path = nofile_flag;
-  emit dataChanged(upload_index, upload_index);
+  RepoItem * repo_item = static_cast<RepoItem*>(upload_index.internalPointer());
+  QModelIndex top_left = createIndex(0,0,repo_item);
+  QModelIndex bottom_right = createIndex(0,3,repo_item);
+  emit dataChanged(top_left, bottom_right);
   emit executingThread(false);
 }
 
