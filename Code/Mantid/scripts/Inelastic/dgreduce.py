@@ -235,48 +235,50 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 #  Here we give control to the Reducer
 # --------------------------------------------------------------------------------------------------------    
-    # diag the sample and detector vanadium
-    if Reducer.use_hard_mask_only: # if it is string, it is treated as bool
-        totalmask = Reducer.hard_mask
-        
-        Reducer.log(' Using hardmask only from: '+totalmask)
-        #Return masking workspace
-        masking = LoadMask(Instrument=Reducer.instr_name,InputFile=Reducer.hard_mask)
-        mask_workspace(wb_run,masking)
-        mask_workspace(sample_run,masking)
-    else:  
-         masking = Reducer.diagnose(wb_run,sample = mask_run,
+    # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
+    masking = Reducer.diagnose(wb_run,sample = mask_run,
                                     second_white = None,variation=1.1,print_results=True)
+    if(mask_run!=sample_run) :
+        copy_masks(mask_run,samle_run)
+
 
    # Calculate absolute units:    
-    if monovan_run != None and Reducer.mono_correction_factor == None :
-
-        if Reducer.use_sam_msk_on_monovan == True or Reducer.use_hard_mask_only:
-            Reducer.log('  Applying sample run mask to mono van ')
-            mask_workspace(monovan_run,masking)
-            if wb_for_monovanadium != wb_run:
-                mask_workspace(monovan_run,masking)
-        else:
-             print '########### Run diagnose for monochromatic vanadium run ##############'
-
-             masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
+    if monovan_run != None :
+        if Reducer.mono_correction_factor == None :
+            if Reducer.use_sam_msk_on_monovan == True:
+                Reducer.log('  Applying sample run mask to mono van NOT IMPLEMENTED')
+                #TODO:
+                #monovan_ws=common.load_run(monovan_run)
+                #MaskDetectors(Workspace=monovan_ws, MaskedWorkspace=masking)
+                #if wb_for_monovanadium != wb_run:
+                #    wb_for_monovan_ws=common.load_run(wb_for_monovanadium)
+                #    MaskDetectors(Workspace=wb_for_monovan_ws, MaskedWorkspace=masking)
+            else:
+                print '########### Run diagnose for monochromatic vanadium run ##############'
+                masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
                                          second_white = None,variation=1.1,print_results=True)
-                  
-             masking=masking+masking2               
+
+                if wb_for_monovanadium != wb_run:
+                    pass
+                    # combine monovan_run and sample_run masks
+                    #TODO
+                     #MaskDetectors(Workspace=monovan_run,MaskedWorkspace=masking)
+                    # MaskDetectors(Workspace=sample_run,MaskedWorkspace=masking2)
+                else: # masks have already been combined through common wb_run
+                    pass
+ 
     
-    # end monodvan diagnosis    
-    Reducer.spectra_masks=masking              
-  
+
+        else: # if Reducer.mono_correction_factor != None :
+            pass
+   
     # estimate and report the number of failing detectors
-    failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
+    failed_sp_list,nSpectra = get_failed_spectra_list_from_ws(masking)
     nMaskedSpectra = len(failed_sp_list)
     print 'Diag processed workspace with {0:d} spectra and found {1:d} bad spectra'.format(nSpectra,nMaskedSpectra)
-
-  
-  
-    
-    #Run the conversion first on the sample
+     #Run the conversion first on the sample
     deltaE_wkspace_sample = Reducer.convert_to_energy(sample_run, ei_guess, wb_run)
+    
 
     # calculate absolute units integral and apply it to the workspace
     if monovan_run != None or Reducer.mono_correction_factor != None :

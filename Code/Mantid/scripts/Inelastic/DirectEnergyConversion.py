@@ -183,9 +183,6 @@ class DirectEnergyConversion(object):
             DeleteWorkspace(Workspace=kwargs['second_white'])
         # Return a mask workspace
         diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=var_name)
-        if self.do_checkpoint_savings :
-            file_name = self.make_ckpt_name('white_integrals_masked',white)
-            SaveNexus(whiteintegrals,file_name)
 
         DeleteWorkspace(Workspace=whiteintegrals)
         self.spectra_masks = diag_mask
@@ -226,11 +223,8 @@ class DirectEnergyConversion(object):
         white_ws = self.remap(white_ws, spectra_masks, map_file)
 
         # White beam scale factor
-        white_ws *= self.wb_scale_factor
-        if self.do_checkpoint_savings :
-            result_fileName=self.make_ckpt_name('do_white',white_run, spectra_masks, map_file,mon_number)
-            SaveNexus(white_ws,result_fileName +'.nxs')	
-
+        white_ws *= self.wb_scale_factor    
+        self.workspaces_list['white_ws'] = white_ws
         return white_ws
 
     def mono_van(self, mono_van, ei_guess, white_run=None, map_file=None,
@@ -248,6 +242,7 @@ class DirectEnergyConversion(object):
                                 white_run, map_file, spectra_masks, Tzero)
         # Normalize by vanadium sample weight
         monovan /= float(self.van_mass)/float(self.__van_rmm)
+        self.workspaces_list['monovan_ws'] = monovan
         return monovan
 
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
@@ -261,8 +256,9 @@ class DirectEnergyConversion(object):
         if result_name is None:
             result_name = common.create_resultname(mono_run, prefix=self.instr_name)
 
-        return self._do_mono(sample_data, sample_data, result_name, ei_guess, 
+        self.workspaces_list['sample_ws']=self._do_mono(sample_data, sample_data, result_name, ei_guess, 
                                   white_run, map_file, spectra_masks, Tzero)
+        return self.workspaces_list['sample_ws']
 
 
 # -------------------------------------------------------------------------------------------
@@ -575,9 +571,7 @@ class DirectEnergyConversion(object):
         Mask and group detectors based on input parameters
         """
         if not spec_masks is None:
-            MaskDetectors(Workspace=result_ws, MaskedWorkspace=spec_masks)
-            print " check workspace masks for ws: ",result_ws.name()
-            ar = raw_input("Enter something to continue: ")
+            MaskDetectors(Workspace=result_ws, MaskedWorkspace=spec_masks)       
         if not map_file is None:
             result_ws = GroupDetectors(InputWorkspace=result_ws,OutputWorkspace=result_ws,
                                        MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
@@ -728,14 +722,14 @@ class DirectEnergyConversion(object):
         # if ext is none, no need to write anything
         if len(ext) == 1 and ext[0] == None :
             return
-
+        self.psi = 1000000; # for test
         save_path = os.path.splitext(save_path)[0]
         for ext in formats:
             if ext in self.__save_formats :
                 filename = save_path + ext
                 self.__save_formats[ext](workspace,filename)            
             else:
-                self.log('Unknown file format "{0} requested while saving results.'.format(ext))
+                self.log("Unknown file format {0} requested while saving results.".format(ext))
     
 
     #-------------------------------------------------------------------------------
@@ -821,18 +815,19 @@ class DirectEnergyConversion(object):
 
         ## Detector diagnosis
         # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word 
-        # and picks correspondent parameters
+        # and tries to get rest from the correspondent dgreduced attributes
         self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
-                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask','diag_bkgd_range']
+                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask','diag_use_hard_mask_only','diag_bkgd_range']
         
         self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
 
-        # the list of the reduction parameters which can be used number of times
-        self.__reusable_parameters = {}
+        # the list of the workspaces used by the reducer
+        self.workspace_list = {}
+
         # mandatrory command line parameter
         self.energy_bins = None
         

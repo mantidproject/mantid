@@ -278,6 +278,7 @@
 <parameter name="use_sam_msk_on_monovan" type = "bool">
   <value val="False"/>
 </parameter>
+
 <!-- if this value is provided (nont None) it is string reperesentation of the number used instead of calculating mono-vanadium based normalization factor 
    one does not need to provide mono-vanadium run if this value is provided as it will be used instead
   -->
@@ -319,15 +320,6 @@
 </parameter>
 <!-- # Multiply result by ki/kf value -->
 <parameter name="apply_kikf_correction"  type="bool">
-   <value val="True"/>
-</parameter>
-
-<!-- # Try to keep and maintain the list of the integrals/operations which can be reusded number of times -->
-<parameter name="cash_reusable_parameters"  type="bool">
-   <value val="True"/>
-</parameter>
-<!-- # Save intermediate workspaces/intergals for debugging purposes  -->
-<parameter name="do_checkpoint_savings"  type="bool">
    <value val="True"/>
 </parameter>
 
