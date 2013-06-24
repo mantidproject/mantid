@@ -32,6 +32,54 @@ private:
     TS_ASSERT( conv.isExecuted() );
   }
 
+  void check_output_values_for_signed_theta_conversion(std::string outputWSSignedTheta)
+  {
+    MatrixWorkspace_const_sptr outputSignedTheta;
+    TS_ASSERT_THROWS_NOTHING( outputSignedTheta = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSSignedTheta) );
+
+    // Check the signed theta axes of the workspaces.
+    const Axis* thetaAxis = 0;
+    TS_ASSERT_THROWS_NOTHING( thetaAxis = outputSignedTheta->getAxis(1) );
+    TS_ASSERT( thetaAxis->isNumeric() );
+
+    // Check axis is correct length for the workspaces.
+    TS_ASSERT_THROWS( (*thetaAxis)(3), Mantid::Kernel::Exception::IndexError );
+
+    // Check the outputs for the workspaces are correct.
+    TS_ASSERT_EQUALS( thetaAxis->unit()->caption(), "Scattering angle" );
+    TS_ASSERT_EQUALS( thetaAxis->unit()->label(), "degrees" );
+    TS_ASSERT_DELTA( (*thetaAxis)(0), -1.1458, 0.0001 );
+    TS_ASSERT_DELTA( (*thetaAxis)(1), 0.0000, 0.0001 );
+    TS_ASSERT_DELTA( (*thetaAxis)(2), 1.1458, 0.0001 );        
+  }
+
+  void check_output_values_for_theta_conversion(std::string inputWSTheta, std::string outputWSTheta)
+  {
+    MatrixWorkspace_const_sptr input, output;
+    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSTheta) );
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSTheta) );        
+    // Workspaces should now have a numeric axes up the side, with units of angle.
+    const Axis* thetaAxis = 0;
+    TS_ASSERT_THROWS_NOTHING( thetaAxis = output->getAxis(1) );
+    TS_ASSERT( thetaAxis->isNumeric() );
+    TS_ASSERT_EQUALS( thetaAxis->unit()->caption(), "Scattering angle" );
+    TS_ASSERT_EQUALS( thetaAxis->unit()->label(), "degrees" );
+    TS_ASSERT_DELTA( (*thetaAxis)(0), 0.0000, 0.0001 );
+    TS_ASSERT_DELTA( (*thetaAxis)(1), 1.1458, 0.0001 );
+            
+    // Data in the workspaces should be swapped over.
+    TS_ASSERT_EQUALS( input->readX(0), output->readX(2) );
+    TS_ASSERT_EQUALS( input->readY(0), output->readY(2) );
+    TS_ASSERT_EQUALS( input->readE(0), output->readE(2) );
+    TS_ASSERT_EQUALS( input->readX(1), output->readX(1) );
+    TS_ASSERT_EQUALS( input->readY(1), output->readY(1) );
+    TS_ASSERT_EQUALS( input->readE(1), output->readE(1) );
+
+    // Check workspace axes are of correct length.
+    TS_ASSERT_THROWS( (*thetaAxis)(3), Mantid::Kernel::Exception::IndexError );
+  }
+
+
   void clean_up_workspaces(const std::string inputWS, const std::string outputWS)
   {
     AnalysisDataService::Instance().remove(inputWS);
@@ -64,101 +112,38 @@ public:
   {
     const std::string inputWS("inWS");
     const std::string outputSignedThetaAxisWS("outSignedThetaWS");
-    const std::string inputWS2("inWS2");
     const std::string outputSignedThetaAxisWS2("outSignedThetaWS2");
-        
-    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS);
-    do_algorithm_run("SignedTheta", inputWS2, outputSignedThetaAxisWS2);
-
-    MatrixWorkspace_const_sptr outputSignedTheta,outputSignedTheta2;
-    TS_ASSERT_THROWS_NOTHING( outputSignedTheta = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSignedThetaAxisWS) );
-    TS_ASSERT_THROWS_NOTHING( outputSignedTheta2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputSignedThetaAxisWS2) );
     
-    // Check the signed theta axes of the workspaces.
-    const Axis* thetaAxis = 0;
-    TS_ASSERT_THROWS_NOTHING( thetaAxis = outputSignedTheta->getAxis(1) );
-    TS_ASSERT( thetaAxis->isNumeric() );
-    const Axis* thetaAxis2 = 0;
-    TS_ASSERT_THROWS_NOTHING( thetaAxis2 = outputSignedTheta2->getAxis(1) );
-    TS_ASSERT( thetaAxis2->isNumeric() );
-
-    // Check axis is correct length for the workspaces.
-    TS_ASSERT_THROWS( (*thetaAxis)(3), Mantid::Kernel::Exception::IndexError );
-    TS_ASSERT_THROWS( (*thetaAxis2)(3), Mantid::Kernel::Exception::IndexError );
-
-    // Check the outputs for the workspaces are correct.
-    TS_ASSERT_EQUALS( thetaAxis->unit()->caption(), "Scattering angle" );
-    TS_ASSERT_EQUALS( thetaAxis->unit()->label(), "degrees" );
-    TS_ASSERT_DELTA( (*thetaAxis)(0), -1.1458, 0.0001 );
-    TS_ASSERT_DELTA( (*thetaAxis)(1), 0.0000, 0.0001 );
-    TS_ASSERT_DELTA( (*thetaAxis)(2), 1.1458, 0.0001 );
-        
-    TS_ASSERT_EQUALS( thetaAxis2->unit()->caption(), "Scattering angle" );
-    TS_ASSERT_EQUALS( thetaAxis2->unit()->label(), "degrees" );
-    TS_ASSERT_DELTA( (*thetaAxis2)(0), -1.1458, 0.0001 );
-    TS_ASSERT_DELTA( (*thetaAxis2)(1), 0.0000, 0.0001 );
-    TS_ASSERT_DELTA( (*thetaAxis2)(2), 1.1458, 0.0001 );
-
-    // Clean up the workspaces. 
+    do_algorithm_run("signed_theta", inputWS, outputSignedThetaAxisWS);
+    
+    // Check output values for the workspace then clean up.
+    check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS);
     clean_up_workspaces(inputWS, outputSignedThetaAxisWS);
-    clean_up_workspaces(inputWS2, outputSignedThetaAxisWS2);
+
+    do_algorithm_run("SignedTheta", inputWS, outputSignedThetaAxisWS2);
+    
+    // Check output values for the workspace then clean up.
+    check_output_values_for_signed_theta_conversion(outputSignedThetaAxisWS2);
+    clean_up_workspaces(inputWS, outputSignedThetaAxisWS2);
   }
 
   void test_Target_Theta_Returns_Correct_Value()
   {
     const std::string inputWS("inWS");
     const std::string outputWS("outWS");
-    const std::string inputWS2("inWS2");
     const std::string outputWS2("outWS2");
    
     do_algorithm_run("theta", inputWS, outputWS);
-    do_algorithm_run("Theta", inputWS2, outputWS2);
-    
-    MatrixWorkspace_const_sptr input,output,input2,output2;
-    TS_ASSERT_THROWS_NOTHING( input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS) );
-    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
-    TS_ASSERT_THROWS_NOTHING( input2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWS2) );
-    TS_ASSERT_THROWS_NOTHING( output2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS2) );
-    
-    // Workspaces should now have a numeric axes up the side, with units of angle.
-    const Axis* thetaAxis = 0;
-    TS_ASSERT_THROWS_NOTHING( thetaAxis = output->getAxis(1) );
-    TS_ASSERT( thetaAxis->isNumeric() );
-    TS_ASSERT_EQUALS( thetaAxis->unit()->caption(), "Scattering angle" );
-    TS_ASSERT_EQUALS( thetaAxis->unit()->label(), "degrees" );
-    TS_ASSERT_DELTA( (*thetaAxis)(0), 0.0000, 0.0001 );
-    TS_ASSERT_DELTA( (*thetaAxis)(1), 1.1458, 0.0001 );
-             
-    const Axis* thetaAxis2 = 0;
-    TS_ASSERT_THROWS_NOTHING( thetaAxis2 = output2->getAxis(1) );
-    TS_ASSERT( thetaAxis2->isNumeric() );
-    TS_ASSERT_EQUALS( thetaAxis2->unit()->caption(), "Scattering angle" );
-    TS_ASSERT_EQUALS( thetaAxis2->unit()->label(), "degrees" );
-    TS_ASSERT_DELTA( (*thetaAxis2)(0), 0.0000, 0.0001 );
-    TS_ASSERT_DELTA( (*thetaAxis2)(1), 1.1458, 0.0001 );
-    
-    // Data in the workspaces should be swapped over.
-    TS_ASSERT_EQUALS( input->readX(0), output->readX(2) );
-    TS_ASSERT_EQUALS( input->readY(0), output->readY(2) );
-    TS_ASSERT_EQUALS( input->readE(0), output->readE(2) );
-    TS_ASSERT_EQUALS( input->readX(1), output->readX(1) );
-    TS_ASSERT_EQUALS( input->readY(1), output->readY(1) );
-    TS_ASSERT_EQUALS( input->readE(1), output->readE(1) );
 
-    TS_ASSERT_EQUALS( input2->readX(0), output2->readX(2) );
-    TS_ASSERT_EQUALS( input2->readY(0), output2->readY(2) );
-    TS_ASSERT_EQUALS( input2->readE(0), output2->readE(2) );
-    TS_ASSERT_EQUALS( input2->readX(1), output2->readX(1) );
-    TS_ASSERT_EQUALS( input2->readY(1), output2->readY(1) );
-    TS_ASSERT_EQUALS( input2->readE(1), output2->readE(1) );
-
-    // Check workspace axes are of correct length.
-    TS_ASSERT_THROWS( (*thetaAxis)(3), Mantid::Kernel::Exception::IndexError );
-    TS_ASSERT_THROWS( (*thetaAxis2)(3), Mantid::Kernel::Exception::IndexError );
-
-    // Clean up workspaces.    
-    clean_up_workspaces(inputWS, outputWS);  
-    clean_up_workspaces(inputWS2, outputWS2);
+    // Check output values for the workspace then clean up.
+    check_output_values_for_theta_conversion(inputWS, outputWS);
+    clean_up_workspaces(inputWS, outputWS);
+    
+    do_algorithm_run("Theta", inputWS, outputWS2);
+    
+    // Check output values for the workspace then clean up.
+    check_output_values_for_theta_conversion(inputWS, outputWS2);
+    clean_up_workspaces(inputWS, outputWS2);
   }
 
   void test_Target_ElasticQ_Throws_When_No_Efixed_Set_In_Algorithm_And_Not_In_Workspace()
