@@ -1,8 +1,6 @@
 #ifndef MANTID_CRYSTAL_PEAKSINREGION_H_
 #define MANTID_CRYSTAL_PEAKSINREGION_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/PeaksIntersection.h"
 
 
@@ -48,12 +46,13 @@ namespace Crystal
     virtual void initDocs();
     void init();
     void exec();
+
+    // Overriden base class methods.
     virtual void validateExtentsInput() const;
     virtual int numberOfFaces() const;
     virtual VecVecV3D createFaces() const;
-
     virtual bool pointOutsideAnyExtents(const Mantid::Kernel::V3D& testPoint) const;
-    virtual bool pointInsideAllExtents(const Mantid::Kernel::V3D& testPoints) const; 
+    virtual bool pointInsideAllExtents(const Mantid::Kernel::V3D& testPoints, const Mantid::Kernel::V3D& peakCenter) const; 
     virtual void checkTouchPoint(const Mantid::Kernel::V3D& touchPoint,const Mantid::Kernel::V3D& normal,const  Mantid::Kernel::V3D& faceVertex) const;
 
     /// Extents.

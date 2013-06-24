@@ -83,6 +83,14 @@ namespace Crystal
   }
 
   /**
+  Getter for the peak radius.
+  */
+  double PeaksIntersection::getPeakRadius() const
+  {
+    return m_peakRadius;
+  }
+
+  /**
   Run the algorithm. 
   @param checkPeakExtents : If set true, checks the peak radius interaction with the surfaces.
   */
@@ -91,7 +99,7 @@ namespace Crystal
     const std::string coordinateFrame = this->getPropertyValue("CoordinateFrame");
     IPeaksWorkspace_sptr ws = this->getProperty("InputWorkspace");
     
-    const double peakRadius = this->getProperty("PeakRadius");
+    m_peakRadius = this->getProperty("PeakRadius");
 
     // Find the coordinate frame to use an set up boost function for this.
     boost::function<V3D(IPeak*)> coordFrameFunc = &IPeak::getHKL;
@@ -156,14 +164,14 @@ namespace Crystal
           for(int i = 0; i < numberOfFaces; ++i)
           {
             double distance = normals[i].scalar_prod(faces[i][0] - peakCenter); // Distance between plane and peak center.
-            if(peakRadius >= std::abs(distance)) // Sphere passes through one of the PLANES defined by the box faces.
+            if(m_peakRadius >= std::abs(distance)) // Sphere passes through one of the PLANES defined by the box faces.
             {
               // Check that it is actually within the face boundaries.
               V3D touchPoint = (normals[i] * distance) + peakCenter; // Vector equation of line give touch point on plane.
               
               checkTouchPoint(touchPoint, normals[i], faces[i][0]); // Debugging line.
               
-              if(pointInsideAllExtents(touchPoint))
+              if(pointInsideAllExtents(touchPoint, peakCenter))
               {
                 doesIntersect = true;
                 break;

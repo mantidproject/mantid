@@ -5,7 +5,6 @@
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/Algorithm.h"
 
-
 namespace Mantid
 {
 namespace Crystal
@@ -14,7 +13,7 @@ namespace Crystal
   typedef std::vector<Mantid::Kernel::V3D> VecV3D;
   typedef std::vector<VecV3D > VecVecV3D;
 
-  /** PeaksIntersection : Base algorithm class for algorithms that identify peaks interacting with one or more surfaces
+  /** PeaksIntersection : Abstract base algorithm class for algorithms that identify peaks interacting with one or more surfaces
     i.e. a flat surface or a box made out of flat surfaces.
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -56,7 +55,10 @@ namespace Crystal
     void initBaseProperties();
     
     /// Run the algorithm.
-    void executePeaksIntersection(const bool checkExtents);
+    void executePeaksIntersection(const bool checkExtents=true);
+
+    /// Get the peak radius.
+    double getPeakRadius() const;
 
   private:
 
@@ -67,10 +69,13 @@ namespace Crystal
     /// Check that a point is outside any of the extents
     virtual bool pointOutsideAnyExtents(const Mantid::Kernel::V3D& testPoint) const = 0;
     /// Check that a point is inside ALL of the extents
-    virtual bool pointInsideAllExtents(const Mantid::Kernel::V3D& testPoints) const = 0; 
+    virtual bool pointInsideAllExtents(const Mantid::Kernel::V3D& testPoints, const Mantid::Kernel::V3D& peakCenter) const = 0; 
 
     /// Verfifies that the normals have been set up correctly such that the touch point falls onto the plane. Use for debugging.
     virtual void checkTouchPoint(const Mantid::Kernel::V3D& touchPoint,const Mantid::Kernel::V3D& normal,const  Mantid::Kernel::V3D& faceVertex) const = 0;
+
+    // The peak radius.
+    double m_peakRadius;
   };
 
   

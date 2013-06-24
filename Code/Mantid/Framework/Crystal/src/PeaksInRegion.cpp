@@ -1,5 +1,5 @@
 /*WIKI*
-Determines which peaks intersect a defined region in either QLab, QSample or HKL space.
+Determines which peaks intersect a defined box region in either QLab, QSample or HKL space. Similar to [[PeaksOnSurface]].
 *WIKI*/
 
 
@@ -50,7 +50,7 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void PeaksInRegion::initDocs()
   {
-    this->setWikiSummary("Find peaks intersecting a region.");
+    this->setWikiSummary("Find peaks intersecting a box region.");
     this->setOptionalMessage(this->getWikiSummary());
   }
 
@@ -106,7 +106,7 @@ namespace Crystal
       || testPoint[2] < m_extents[4] || testPoint[2] > m_extents[5];
   }
 
-  bool PeaksInRegion::pointInsideAllExtents(const V3D& testPoint) const
+  bool PeaksInRegion::pointInsideAllExtents(const V3D& testPoint, const Mantid::Kernel::V3D&) const
   {
     return testPoint[0] >= m_extents[0] && testPoint[0] <= m_extents[1]
       && testPoint[1] >= m_extents[2] && testPoint[1] <= m_extents[3] 
