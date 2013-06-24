@@ -280,7 +280,7 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
     case numericArray :
 	  logData=m_ei->getLog(item->text(0).toStdString());
 	  if (!logData) return;
-	  m_mantidUI->importString(item->text(0),QString::fromStdString(logData->value()) );
+	  m_mantidUI->importString(item->text(0),QString::fromStdString(logData->value()), QString::fromStdString(",") );
       break;
     default :
       throw std::invalid_argument("Error importing log entry, wrong data type");
