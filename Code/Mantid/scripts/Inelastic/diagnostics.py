@@ -70,6 +70,8 @@ def diagnose(white_int, **kwargs):
         LoadMask(Instrument=kwargs.get('instrument_name',''),InputFile=parser.hard_mask,
                  OutputWorkspace='hard_mask_ws')
         MaskDetectors(Workspace=white_int, MaskedWorkspace='hard_mask_ws')
+        print 'check masks for workspace: ',white_int.name()
+        var = raw_input("Enter something to continue: ")
         # Find out how many detectors we hard masked
         _dummy_ws,masked_list = ExtractMask(InputWorkspace='hard_mask_ws')
         DeleteWorkspace('_dummy_ws')

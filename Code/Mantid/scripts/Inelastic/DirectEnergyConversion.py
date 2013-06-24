@@ -183,14 +183,25 @@ class DirectEnergyConversion(object):
             DeleteWorkspace(Workspace=kwargs['second_white'])
         # Return a mask workspace
         diag_mask, det_ids = ExtractMask(InputWorkspace=whiteintegrals,OutputWorkspace=var_name)
+        if self.do_checkpoint_savings :
+            file_name = self.make_ckpt_name('white_integrals_masked',white)
+            SaveNexus(whiteintegrals,file_name)
+
         DeleteWorkspace(Workspace=whiteintegrals)
         self.spectra_masks = diag_mask
         return diag_mask
     
+
     def do_white(self, white_run, spectra_masks, map_file,mon_number=None): 
         """
-        Normalise to a specified white-beam run
+        Create the workspace, which each spectra containing the correspondent white beam integral (single value)
+
+        These intergrals are used as estimate for detector efficiency in wide range of energies 
+        (rather the detector electronic's efficientcy as the geuger counters are very different in efficiency) 
+        and is used to remove the influence of this efficiency to the different detectors.
         """
+          
+
         whitews_name = common.create_resultname(white_run, suffix='-white')
         if whitews_name in mtd:
             DeleteWorkspace(Workspace=whitews_name)
@@ -216,6 +227,9 @@ class DirectEnergyConversion(object):
 
         # White beam scale factor
         white_ws *= self.wb_scale_factor
+        if self.do_checkpoint_savings :
+            result_fileName=self.make_ckpt_name('do_white',white_run, spectra_masks, map_file,mon_number)
+            SaveNexus(white_ws,result_fileName +'.nxs')	
 
         return white_ws
 
@@ -562,6 +576,8 @@ class DirectEnergyConversion(object):
         """
         if not spec_masks is None:
             MaskDetectors(Workspace=result_ws, MaskedWorkspace=spec_masks)
+            print " check workspace masks for ws: ",result_ws.name()
+            ar = raw_input("Enter something to continue: ")
         if not map_file is None:
             result_ws = GroupDetectors(InputWorkspace=result_ws,OutputWorkspace=result_ws,
                                        MapFile= map_file, KeepUngroupedSpectra=0, Behaviour='Average')
@@ -699,30 +715,27 @@ class DirectEnergyConversion(object):
             pass
 
         if formats is None:
-            formats = self.__save_formats
+            formats = [self.save_format]
         if type(formats) == str:
             formats = [formats]
         #Make sure we just have a file stem
-        ext = self.save_format
+        ext = formats
 
-        # if ext is none, no need to write anything
-        if ext == None :
-            return
 
         if len(ext) == 0:
             ext = '.spe'
 
+        # if ext is none, no need to write anything
+        if len(ext) == 1 and ext[0] == None :
+            return
+
         save_path = os.path.splitext(save_path)[0]
         for ext in formats:
-            filename = save_path + ext
-            if ext == '.spe':
-                SaveSPE(InputWorkspace=workspace,Filename= filename)
-            elif ext == '.nxs':
-                SaveNexus(InputWorkspace=workspace,Filename= filename)
-            elif ext == '.nxspe':
-                SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
+            if ext in self.__save_formats :
+                filename = save_path + ext
+                self.__save_formats[ext](workspace,filename)            
             else:
-                self.log('Unknown file format "%s" encountered while saving results.')
+                self.log('Unknown file format "{0} requested while saving results.'.format(ext))
     
 
     #-------------------------------------------------------------------------------
@@ -799,7 +812,12 @@ class DirectEnergyConversion(object):
         specify some parameters which may be not in IDF Parameters file
         """
         # fomats availible for saving. As the reducer has to have a method to process one of this, it is private property
-        self.__save_formats = ['.spe','.nxs','.nxspe']
+        self.__save_formats = {}
+        self.__save_formats['.spe']   = lambda workspace,filename : SaveSPE(InputWorkspace=workspace,Filename= filename)
+        self.__save_formats['.nxspe'] = lambda workspace,filename : SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
+        self.__save_formats['.nxs']   = lambda workspace,filename : SaveNexus(InputWorkspace=workspace,Filename= filename)
+
+
 
         ## Detector diagnosis
         # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word 
@@ -812,6 +830,10 @@ class DirectEnergyConversion(object):
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
+
+        # the list of the reduction parameters which can be used number of times
+        self.__reusable_parameters = {}
+        # mandatrory command line parameter
         self.energy_bins = None
         
         # should come from Mantid
@@ -1068,6 +1090,11 @@ class DirectEnergyConversion(object):
         # reset the list of composite names defined using synonims
         self.composite_keys_set=new_comp_name_set
 
+    @staticmethod
+    def make_ckpt_name(*argi) :
+        """ Make the name of the checkpoint from the function arguments
+        """
+        return ''.join(str(arg) for arg in argi if arg is not None)
   
     
     def log(self, msg,level="notice"):
@@ -1294,6 +1321,13 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         keys_changed=['somethins_else1','somethins_else2']
         self.assertEqual(2,tReducer.check_abs_norm_defaults_changed(keys_changed))
+    def test_do_white(self) :
+        tReducer = self.reducer
+        monovan = 1000
+        data = None
+        name = tReducer.make_ckpt_name('do_white',monovan,data,'t1')
+        self.assertEqual('do_white1000t1',name)
+
 
     #def test_diag_call(self):
     #    tReducer = self.reducer

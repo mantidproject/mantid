@@ -299,11 +299,13 @@
     <value val="False"/>
 </parameter>
 
+<!--  ****************************************  Workflow control **************************** -->
+
 <!-- This parameter controls the format of output data writteb by reducer. Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace) 
      Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
-     If None is there, no internal script saving occurs-->  
+     If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">
-   <value val="None"/>
+   <value val=".nxs"/>
 </parameter>
 
 <!-- If one wants to sum runs   -->  
@@ -320,6 +322,14 @@
    <value val="True"/>
 </parameter>
 
+<!-- # Try to keep and maintain the list of the integrals/operations which can be reusded number of times -->
+<parameter name="cash_reusable_parameters"  type="bool">
+   <value val="True"/>
+</parameter>
+<!-- # Save intermediate workspaces/intergals for debugging purposes  -->
+<parameter name="do_checkpoint_savings"  type="bool">
+   <value val="True"/>
+</parameter>
 
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords

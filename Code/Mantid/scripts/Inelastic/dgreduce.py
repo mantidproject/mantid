@@ -450,7 +450,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
         if Reducer.monovan_integr_range is None: # integration in the range relative to incident energy
             Reducer.monovan_integr_range = [Reducer.monovan_lo_frac*ei_guess,Reducer.monovan_hi_frac*ei_guess]
         Reducer.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######')
-        print '      Using absolute units vanadion integration range : ', Reducer.monovan_integr_range                
+        Reducer.log('      Using absolute units vanadion integration range : '+str(Reducer.monovan_integr_range))
        #now on the mono_vanadium run swap the mapping file
         map_file            = Reducer.map_file;
         Reducer.map_file    = Reducer.monovan_mapfile;
