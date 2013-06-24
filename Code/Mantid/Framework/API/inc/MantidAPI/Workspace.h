@@ -61,7 +61,7 @@ public:
      * InfoNodes can contian other nodes and form a tree.
      * The purpose is to be returned by the ADS for displaying in the GUI.
      */
-    class InfoNode
+    class MANTID_API_DLL InfoNode
     {
     public:
         enum IconType {Default = 0, Matrix, Group, MD, Table};
