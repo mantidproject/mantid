@@ -72,6 +72,9 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 namespace Mantid
 {
@@ -193,13 +196,25 @@ namespace MDAlgorithms
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
     /// Cylinder Length to use around peaks for cylinder
     double cylinderLength = getProperty("CylinderLength");
+    Workspace2D_sptr ws2D;
+    size_t numSteps;
+    double deltaQ;
+    bool cylinderBool = getProperty("Cylinder");
+    if (cylinderBool)
+    {
+        numSteps = 15;
+        deltaQ = cylinderLength/static_cast<double>(numSteps-1);
+        size_t histogramNumber = peakWS->getNumberPeaks();
+        Workspace_sptr wsFit= WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,numSteps,numSteps);
+        ws2D = boost::dynamic_pointer_cast<Workspace2D>(wsFit);
+        AnalysisDataService::Instance().addOrReplace("ProfilesToFit", ws2D);
+    }
     double backgroundCylinder = cylinderLength;
     double percentBackground = getProperty("PercentBackground");
     cylinderLength *= 1.0 - (percentBackground/100.);
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
-    bool cylinderBool = getProperty("Cylinder");
     if (BackgroundInnerRadius < PeakRadius)
       BackgroundInnerRadius = PeakRadius;
 
@@ -319,14 +334,9 @@ namespace MDAlgorithms
 			// Perform the integration into whatever box is contained within.
 			std::vector<signal_t> signal_fit;
 
-			int numSteps = 20;
-			double deltaQ = cylinderLength/static_cast<double>(numSteps-1);
 			signal_fit.clear();
-			for (int j=0; j<numSteps; j++)signal_fit.push_back(0.0);
+			for (size_t j=0; j<numSteps; j++)signal_fit.push_back(0.0);
 			ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(cylinderLength), signal, errorSquared, signal_fit);
-			for (size_t j=0; j<signal_fit.size(); j++)std::cout << signal_fit[j]<<"  ";
-			std::cout <<i<<"\n";
-
 
 			// Integrate around the background radius
 			if (BackgroundOuterRadius > PeakRadius || percentBackground > 0.0)
@@ -334,13 +344,15 @@ namespace MDAlgorithms
 				// Get the total signal inside "BackgroundOuterRadius"
 
 				if (BackgroundOuterRadius < PeakRadius ) BackgroundOuterRadius = PeakRadius;
-				int numSteps=static_cast<int>((backgroundCylinder/deltaQ) + 1);
 				signal_fit.clear();
-				for (int j=0; j<numSteps; j++)signal_fit.push_back(0.0);
+				for (size_t j=0; j<numSteps; j++)signal_fit.push_back(0.0);
 				ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared, signal_fit);
-				for (size_t j=0; j<signal_fit.size(); j++)std::cout << signal_fit[j]<<"  ";
-				std::cout <<i<<"\n";
-
+				for (size_t j = 0; j < numSteps; j++)
+				{
+					 ws2D->dataX(i)[j] = -0.5*backgroundCylinder + static_cast<double>(j) * deltaQ;
+					 ws2D->dataY(i)[j] = signal_fit[j];
+					 ws2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
+				}
 
 				// Evaluate the signal inside "BackgroundInnerRadius"
 				signal_t interiorSignal = 0;
@@ -350,8 +362,6 @@ namespace MDAlgorithms
 				if (BackgroundInnerRadius != PeakRadius)
 				{
 					ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundInnerRadius), static_cast<coord_t>(cylinderLength), interiorSignal, interiorErrorSquared, signal_fit);
-					for (size_t j=0; j<signal_fit.size(); j++)std::cout << signal_fit[j]<<"  ";
-					std::cout <<i<<"\n";
 				}
 				else
 				{
@@ -380,6 +390,15 @@ namespace MDAlgorithms
 		        signal -= bgSignal;
 		        // But we add the errors together
 		        errorSquared += bgErrorSquared;
+			}
+			else
+			{
+				for (size_t j = 0; j < numSteps; j++)
+				{
+					 ws2D->dataX(i)[j] = -0.5*cylinderLength + static_cast<double>(j) * deltaQ;
+					 ws2D->dataY(i)[j] = signal_fit[j];
+					 ws2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
+				}
 			}
       }
 

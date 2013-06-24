@@ -1354,7 +1354,7 @@ namespace MDEvents
     size_t boxIndex[nd]; Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
     size_t indexMaker[nd]; Utils::NestedForLoop::SetUpIndexMaker(nd, indexMaker, split);
 
-    int numSteps = 100;
+    size_t numSteps = signal_fit.size();
     double deltaQ = length/static_cast<double>(numSteps-1);
     bool allDone = false;
     while (!allDone)
@@ -1423,7 +1423,7 @@ namespace MDEvents
         coord_t out[nd];
         radiusTransform.apply(boxCenter, out);
         // add event to appropriate y channel
-        int xchannel = static_cast<int>(floor((out[1] / deltaQ))+0.5) + (numSteps / 2);
+        size_t xchannel = static_cast<int>(floor((out[1] / deltaQ))+0.5) + (numSteps / 2);
         if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += box->getSignal();
         // Use the integrated sum of signal in the box
         signal += box->getSignal();
