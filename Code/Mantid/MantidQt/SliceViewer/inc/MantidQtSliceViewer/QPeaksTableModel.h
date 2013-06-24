@@ -82,8 +82,12 @@ namespace MantidQt
       static const QString L;
       /// Label for wavelength column
       static const QString WAVELENGTH;
-      /// Label for energy column
+      /// Label for change in energy column
       static const QString ENERGY;
+      /// Label for initial energy column
+      static const QString INITIAL_ENERGY;
+      /// Label for final energy column
+      static const QString FINAL_ENERGY;
       /// Label for time-of-flight column
       static const QString TOF;
       /// Label for d-spacing column
@@ -92,6 +96,8 @@ namespace MantidQt
       static const QString INT;
       /// Label for uncertainty in integrated intensity column
       static const QString SIGMINT;
+      /// Label for ratio of intensity/uncertainty
+      static const QString INT_SIGINT;
       /// Label for bin count column
       static const QString BINCOUNT;
       /// Label for bank name column
@@ -117,8 +123,12 @@ namespace MantidQt
       static const int COL_L;
       /// Index for wavelength column
       static const int COL_WAVELENGTH;
-      /// Index for energy column
+      /// Index for change in energy column
       static const int COL_ENERGY;
+      /// Index for initial energy column
+      static const int COL_INITIAL_ENERGY;
+      /// Index for final energy column
+      static const int COL_FINAL_ENERGY;
       /// Index for time-of-flight column
       static const int COL_TOF;
       /// Index for d-spacing column
@@ -127,6 +137,8 @@ namespace MantidQt
       static const int COL_INT;
       /// Index for uncertainty in integrated intensity column
       static const int COL_SIGMINT;
+      /// Label for ratio of intensity/uncertainty
+      static const int COL_INT_SIGINT;
       /// Index for bin count column
       static const int COL_BINCOUNT;
       /// Index for bank name column
