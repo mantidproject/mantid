@@ -87,6 +87,7 @@ namespace API
     void updateModel();
     void 	currentChanged ( const QModelIndex & current );
     void helpClicked();
+    void openFolderLink(QString);
 
 
   private:
