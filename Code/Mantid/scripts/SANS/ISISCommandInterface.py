@@ -495,6 +495,16 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 mergedQ -= (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
             
             RenameWorkspace(InputWorkspace=mergedQ,OutputWorkspace= retWSname_merged)
+
+            # save the properties Transmission and TransmissionCan inside the merged workspace
+            # get these values from the rear_workspace because they are the same value as the front one.
+            # ticket #6929
+            rear_ws = mtd[retWSname_rear]
+            for prop in ['Transmission','TransmissionCan']:
+                if rear_ws.getRun().hasProperty(prop):
+                    ws_name = rear_ws.getRun().getLogData(prop).value
+                    if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
+                        AddSampleLog(Workspace=retWSname_merged,LogName= prop, LogText=ws_name)
         else:
             issueWarning('rear and front data has no overlapping q-region. Merged workspace no calculated')
         
