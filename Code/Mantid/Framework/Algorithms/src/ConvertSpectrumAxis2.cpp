@@ -1,9 +1,9 @@
 /*WIKI* 
 
 
-Converts the representation of the vertical axis (the one up the side of a matrix in MantidPlot) of a Workspace2D from its default of holding the spectrum number to the target unit given.
+Converts the representation of the vertical axis (the one up the side of a matrix in MantidPlot) of a Workspace2D from its default of holding the spectrum number to the target unit given - theta, elastic Q and elastic Q^2.
 
-The spectra will be reordered in increasing order by the new unit and duplicates will not be aggregated. Any spectrum for which a detector is not found (i.e. if the instrument definition is incomplete) will not appear in the output workspace..
+The spectra will be reordered in increasing order by the new unit and duplicates will not be aggregated. Any spectrum for which a detector is not found (i.e. if the instrument definition is incomplete) will not appear in the output workspace.
 
 
 *WIKI*/
@@ -217,9 +217,9 @@ namespace Algorithms
     size_t currentIndex = 0;
     for (it = m_indexMap.begin(); it != m_indexMap.end(); ++it)
     {
-      // Set the axis value
+      // Set the axis value.
       newAxis->setValue(currentIndex,it->first);
-      // Now copy over the data
+      // Copy over the data.
       outputWorkspace->dataX(currentIndex) = m_inputWS->dataX(it->second);
       outputWorkspace->dataY(currentIndex) = m_inputWS->dataY(it->second);
       outputWorkspace->dataE(currentIndex) = m_inputWS->dataE(it->second);
