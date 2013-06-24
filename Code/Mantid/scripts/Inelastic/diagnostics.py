@@ -128,18 +128,19 @@ def diagnose(white_int, **kwargs):
             test_results[4] = [str(__bleed_masks), failures]
             add_masking(white_int, __bleed_masks)
             DeleteWorkspace(__bleed_masks)
-    
-        if hasattr(parser, 'print_results') and parser.print_results:
-            start_index_name = "from: start"
-            default=True
-        if 'start_index' in kwargs:
-               default = False
-               start_index_name = "from: "+str(kwargs['start_index'])
-               end_index_name=" to: end"
-        if 'end_index' in kwargs : 
-                default = False
-                end_index_name = " to: "+str(kwargs['end_index'])
     # endif not hard_mask_only
+    start_index_name = "from: start"    
+    end_index_name=" to: end"
+    default = True
+    if hasattr(parser, 'print_results') and parser.print_results:
+            default=True
+    if 'start_index' in kwargs:
+            default = False
+            start_index_name = "from: "+str(kwargs['start_index'])
+    if 'end_index' in kwargs : 
+            default = False
+            end_index_name = " to: "+str(kwargs['end_index'])
+
 
     testName=start_index_name+end_index_name
     if not default :

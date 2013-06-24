@@ -238,8 +238,6 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
     # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
     masking = Reducer.diagnose(wb_run,sample = mask_run,
                                     second_white = None,variation=1.1,print_results=True)
-    if(mask_run!=sample_run) :
-        copy_masks(mask_run,samle_run)
 
 
    # Calculate absolute units:    
@@ -266,14 +264,15 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
                     # MaskDetectors(Workspace=sample_run,MaskedWorkspace=masking2)
                 else: # masks have already been combined through common wb_run
                     pass
- 
+                masking +=  masking2
     
 
         else: # if Reducer.mono_correction_factor != None :
             pass
-   
+
+    Reducer.spectra_masks=masking
     # estimate and report the number of failing detectors
-    failed_sp_list,nSpectra = get_failed_spectra_list_from_ws(masking)
+    failed_sp_list,nSpectra = get_failed_spectra_list(masking)
     nMaskedSpectra = len(failed_sp_list)
     print 'Diag processed workspace with {0:d} spectra and found {1:d} bad spectra'.format(nSpectra,nMaskedSpectra)
      #Run the conversion first on the sample
@@ -303,17 +302,6 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
     return deltaE_wkspace_sample
 
 
-def mask_workspace(run_number,mask_ws) :
-    """
-    mask workspace defined by the run number with masks defined in masking workspace
-    """
-    run_ws=common.load_run(run_number)
-
-    #if Reducer.map_file != None:
-    #    run_ws=GroupDetectors(InputWorkspace=run_ws,OutputWorkspace=run_ws,
-    #                          MapFile= Reducer.map_file, KeepUngroupedSpectra=0, Behaviour='Average')
-
-    MaskDetectors(Workspace=run_ws, MaskedWorkspace=mask_ws)
 
 def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file,monovan_mapfile,**kwargs):
     """     

@@ -224,7 +224,7 @@ class DirectEnergyConversion(object):
 
         # White beam scale factor
         white_ws *= self.wb_scale_factor    
-        self.workspaces_list['white_ws'] = white_ws
+        self.workspace_list['white_ws'] = white_ws
         return white_ws
 
     def mono_van(self, mono_van, ei_guess, white_run=None, map_file=None,
@@ -242,7 +242,7 @@ class DirectEnergyConversion(object):
                                 white_run, map_file, spectra_masks, Tzero)
         # Normalize by vanadium sample weight
         monovan /= float(self.van_mass)/float(self.__van_rmm)
-        self.workspaces_list['monovan_ws'] = monovan
+        self.workspace_list['monovan_ws'] = monovan
         return monovan
 
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
@@ -507,33 +507,6 @@ class DirectEnergyConversion(object):
         common.clear_loaded_data()
         
         return sample_wkspace
-#----------------------------------------------------------------------------------
-#              Complex setters/getters
-#----------------------------------------------------------------------------------
-    def __getattribute__(self, name):
-        if name == "van_rmm":
-            return self.__van_rmm
-        else:
-            return object.__getattribute__(self,name);
-
-    def __setattr__(self, name,value):
-        if name == 'energy_bins':
-            if value != None:
-                if isinstance(value,str):
-                    list = str.split(value,',');
-                    value = [float(list[0]),float(list[1]),float(list[2])]
-                if len(value) != 3:
-                    raise KeyError("Energy_bin value has to be either list of 3 numbers or string, representing these three number separated by commas")
-
-        if name == 'map_file' or name == 'monovan_mapfile':
-            if value != None:
-                fileName, fileExtension = os.path.splitext(value)
-                if (not fileExtension):
-                    value=value+'.map'    
-
-
-        object.__setattr__(self, name, value)
-
 
 #----------------------------------------------------------------------------------
 #                        Reduction steps
@@ -756,7 +729,70 @@ class DirectEnergyConversion(object):
         self.instr_name=None
         if not (instr_name is None or len(instr_name)==0) :
         # Instrument and default parameter setup
+        # fomats availible for saving. As the reducer has to have a method to process one of this, it is private property
+            self.__save_formats = {}
+            self.__save_formats['.spe']   = lambda workspace,filename : SaveSPE(InputWorkspace=workspace,Filename= filename)
+            self.__save_formats['.nxspe'] = lambda workspace,filename : SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
+            self.__save_formats['.nxs']   = lambda workspace,filename : SaveNexus(InputWorkspace=workspace,Filename= filename)
+
             self.initialise(instr_name)
+
+#----------------------------------------------------------------------------------
+#              Complex setters/getters
+#----------------------------------------------------------------------------------
+    @property 
+    def van_rmm(self):
+       return self.__van_rmm
+
+    @property 
+    def save_format(self):
+        return self._save_format
+
+    @save_format.setter
+    def save_format(self, value):
+        if value not in self.__save_formats :
+            self.log("Trying to set unknown format: \""+str(value)+"\" No saving will occur")
+            value = None
+        self._save_format = value
+
+    @property 
+    def energy_bins(self):
+        return self._energy_bins;
+    @energy_bins.setter
+    def energy_bins(self,value):
+       if value != None:
+          if isinstance(value,str):
+             list = str.split(value,',');
+             value = [float(list[0]),float(list[1]),float(list[2])]
+          if len(value) != 3:
+             raise KeyError("Energy_bin value has to be either list of 3 numbers or string, representing these three number separated by commas")
+
+       self._energy_bins= value;
+    @property 
+    def map_file(self):
+        return self._map_file;
+    @map_file.setter
+    def map_file(self,value):
+        if value != None:
+           fileName, fileExtension = os.path.splitext(value)
+           if (not fileExtension):
+               value=value+'.map'    
+
+        self._map_file = value
+
+    @property 
+    def monovan_mapfile(self):
+        return self._monovan_mapfile;
+    @monovan_mapfile.setter
+    def monovan_mapfile(self,value):
+        if value != None:
+           fileName, fileExtension = os.path.splitext(value)
+           if (not fileExtension):
+               value=value+'.map'    
+
+        self._monovan_mapfile = value
+
+
 
     def initialise(self, instr_name,reload_instrument=False):
         """
@@ -805,12 +841,6 @@ class DirectEnergyConversion(object):
 
         specify some parameters which may be not in IDF Parameters file
         """
-        # fomats availible for saving. As the reducer has to have a method to process one of this, it is private property
-        self.__save_formats = {}
-        self.__save_formats['.spe']   = lambda workspace,filename : SaveSPE(InputWorkspace=workspace,Filename= filename)
-        self.__save_formats['.nxspe'] = lambda workspace,filename : SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
-        self.__save_formats['.nxs']   = lambda workspace,filename : SaveNexus(InputWorkspace=workspace,Filename= filename)
-
 
 
         ## Detector diagnosis
@@ -1302,6 +1332,14 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         tReducer.monovan_mapfile = "other_map.myExt"
         self.assertEqual("other_map.myExt",tReducer.monovan_mapfile)
+
+        tReducer.save_format = 'unknown'
+        self.assertTrue(tReducer.save_format is None)
+
+        tReducer.save_format = '.spe'
+        self.assertEqual('.spe',tReducer.save_format)
+
+
 
         #self.assertRaises(KeyError,tReducer.energy_bins=20,None)
     def test_default_warnings(self):
