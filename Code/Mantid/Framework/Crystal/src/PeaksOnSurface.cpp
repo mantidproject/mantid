@@ -109,57 +109,29 @@ namespace Crystal
     return true; 
   }
 
-
-  V3D calculateClosestPoint(const V3D& line, const V3D& lineStart, const V3D& peakCenter)
+  bool lineIntersectsSphere(const V3D& line, const V3D& lineStart, const V3D& peakCenter, const double peakRadius)
   {
-    V3D ptv = peakCenter - lineStart;
+    V3D peakToStart = peakCenter - lineStart;
     V3D unitLine = line;
     unitLine.normalize();
-    double proj = ptv.scalar_prod(unitLine);
+    double proj = peakToStart.scalar_prod(unitLine); // All we are doing here is projecting the peak to segment start vector onto the segment itself.
+
     V3D closestPointOnSegment;
-    if(proj <= 0)
+    if(proj <= 0) // The projection is outside the segment. So use the start point of the segment.
     {
       closestPointOnSegment = lineStart; // Start of line
     }
-    else if(proj >= line.norm() )
+    else if(proj >= line.norm() ) // The projection is greater than the segment length. So use the end point of the segment.
     {
       closestPointOnSegment = lineStart + line; // End of line.
     }
-    else
+    else // The projection falls somewhere between the start and end of the line segment.
     {
       V3D projectionVector = unitLine * proj;
       closestPointOnSegment = projectionVector + lineStart;
     }
-    return closestPointOnSegment;
-  }
 
-  bool lineIntersectsSphere(const V3D& line, const V3D& lineStart, const V3D& peakCenter, const double peakRadius)
-  {
-    
-    V3D closestPoint = calculateClosestPoint(line, lineStart, peakCenter);
-    V3D distanceV = peakCenter - closestPoint;
-    double distance = distanceV.norm();
-    return distance <= peakRadius;
-
-
-    //const double a = line.scalar_prod(line);
-    //const double b = 2 * ( (line.X() * ( lineStart.X() - peakCenter.X())) + (line.Y() * ( lineStart.Y() - peakCenter.Y())) + (line.Z() * ( lineStart.Z() - peakCenter.Z())) );
-    //const double c = peakCenter.scalar_prod(peakCenter) + lineStart.scalar_prod(lineStart) - (2 * peakCenter.scalar_prod(lineStart)) - peakRadiusSQ; 
-
-    ////const double c = peakCenter.X()*peakCenter.X() + peakCenter.Y()*peakCenter.Y() + peakCenter.Z()*peakCenter.Z() + lineStart.X()*lineStart.X() + lineStart.Y()*lineStart.Y() + lineStart.Z()*lineStart.Z() - 2*(peakCenter.X() * lineStart.X()  + peakCenter.Y() * lineStart.Y() + peakCenter.Z() * lineStart.Z()) - peakRadiusSQ;
-
-    ////completing the square.
-    //const double f = (b*b - 4 * a * c);
-    //// Solutions to quadratic.
-    //const double u1 = (-b + f) / (2 * a);
-    //const double u2 = (-b - f) / (2 * a);
-
-    //// Test for line segment passes through sphere in two points.
-    //if (((u2 > 0) && (u1 < 1)) || ((u1 > 0) && (u2 < 1)))
-    //{
-    //  return true;
-    //}
-    //return false;
+    return (peakCenter - closestPointOnSegment).norm() <= peakRadius;
   }
 
   bool PeaksOnSurface::pointInsideAllExtents(const V3D& testPoint, const V3D& peakCenter) const
