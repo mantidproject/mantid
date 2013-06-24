@@ -165,12 +165,15 @@ public:
 
     ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
-    TS_ASSERT_EQUALS(2, outWS->columnCount());
+    TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS("PeakIndex", outWS->getColumn(0)->name());
     TS_ASSERT_EQUALS("Intersecting", outWS->getColumn(1)->name());
+    TS_ASSERT_EQUALS("Distance", outWS->getColumn(2)->name());
     TS_ASSERT_EQUALS(1, outWS->rowCount());
+
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0,  0)); 
     TSM_ASSERT_EQUALS("Peak intersect should be true", Boolean(true), outWS->cell<Boolean>(0,  1));
+    TSM_ASSERT_DELTA("Wrong distance calculated", 1.0, outWS->cell<double>(0, 2), 0.0001);
   }
 
   
@@ -251,6 +254,7 @@ public:
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0,  0)); 
     TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(false), outWS->cell<Boolean>(0,  1));
+    TSM_ASSERT_EQUALS("Wrong distance calculated", 0.0, outWS->cell<double>(0, 2));
   }
 
       /*
@@ -290,6 +294,7 @@ public:
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0,  0)); 
     TSM_ASSERT_EQUALS("Peak intersect should be false", Boolean(true), outWS->cell<Boolean>(0,  1));
+    TSM_ASSERT_EQUALS("Wrong distance calculated", 0.0, outWS->cell<double>(0, 2));
   }
 
   void test_line_intersects_sphere_facility()
@@ -364,7 +369,7 @@ public:
 
     Mantid::API::ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
-    TS_ASSERT_EQUALS(2, outWS->columnCount());
+    TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());
   }
 };

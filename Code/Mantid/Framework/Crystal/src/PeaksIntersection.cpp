@@ -134,6 +134,7 @@ namespace Crystal
     Mantid::DataObjects::TableWorkspace_sptr outputWorkspace = boost::make_shared<Mantid::DataObjects::TableWorkspace>(ws->rowCount());
     outputWorkspace->addColumn("int", "PeakIndex");
     outputWorkspace->addColumn("bool", "Intersecting");
+    outputWorkspace->addColumn("double", "Distance");
 
     size_t frequency = nPeaks;
     if(frequency > 100)
@@ -153,6 +154,7 @@ namespace Crystal
         prog.report();
 
       bool doesIntersect = true;
+      double distance = 0;
       if (pointOutsideAnyExtents(peakCenter))
       {
         // Out of bounds.
@@ -163,13 +165,13 @@ namespace Crystal
           // Take account of radius spherical extents.
           for(int i = 0; i < numberOfFaces; ++i)
           {
-            double distance = normals[i].scalar_prod(faces[i][0] - peakCenter); // Distance between plane and peak center.
+            distance = normals[i].scalar_prod(faces[i][0] - peakCenter); // Distance between plane and peak center.
             if(m_peakRadius >= std::abs(distance)) // Sphere passes through one of the PLANES defined by the box faces.
             {
               // Check that it is actually within the face boundaries.
               V3D touchPoint = (normals[i] * distance) + peakCenter; // Vector equation of line give touch point on plane.
               
-              checkTouchPoint(touchPoint, normals[i], faces[i][0]); // Debugging line.
+              //checkTouchPoint(touchPoint, normals[i], faces[i][0]); // Debugging line.
               
               if(pointInsideAllExtents(touchPoint, peakCenter))
               {
@@ -182,7 +184,7 @@ namespace Crystal
       }
 
       TableRow row = outputWorkspace->getRow(i);
-      row << i << doesIntersect;
+      row << i << doesIntersect << distance;
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
