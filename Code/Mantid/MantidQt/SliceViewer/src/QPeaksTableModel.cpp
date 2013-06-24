@@ -16,11 +16,36 @@ namespace MantidQt
     const QString QPeaksTableModel::H = "h";
     const QString QPeaksTableModel::K= "k";
     const QString QPeaksTableModel::L = "l";
+    const QString QPeaksTableModel::WAVELENGTH("Wavelength");
+    const QString QPeaksTableModel::ENERGY("delta E");
+    const QString QPeaksTableModel::TOF("TOF");
     const QString QPeaksTableModel::DSPACING = "DSpacing";
     const QString QPeaksTableModel::INT = "Intens";
     const QString QPeaksTableModel::SIGMINT = "SigInt";
+    const QString QPeaksTableModel::BINCOUNT("BinCount");
+    const QString QPeaksTableModel::BANKNAME("BankName");
+    const QString QPeaksTableModel::ROW("Row");
+    const QString QPeaksTableModel::COL("Col");
     const QString QPeaksTableModel::QLAB = "QLab";
     const QString QPeaksTableModel::QSAMPLE = "QSample";
+
+    const int QPeaksTableModel::COL_RUNNUMBER(0);
+    const int QPeaksTableModel::COL_DETID(1);
+    const int QPeaksTableModel::COL_H(2);
+    const int QPeaksTableModel::COL_K(3);
+    const int QPeaksTableModel::COL_L(4);
+    const int QPeaksTableModel::COL_WAVELENGTH(5);
+    const int QPeaksTableModel::COL_ENERGY(6);
+    const int QPeaksTableModel::COL_TOF(7);
+    const int QPeaksTableModel::COL_DSPACING(8);
+    const int QPeaksTableModel::COL_INT(9);
+    const int QPeaksTableModel::COL_SIGMINT(10);
+    const int QPeaksTableModel::COL_BINCOUNT(11);
+    const int QPeaksTableModel::COL_BANKNAME(12);
+    const int QPeaksTableModel::COL_ROW(13);
+    const int QPeaksTableModel::COL_COL(14);
+    const int QPeaksTableModel::COL_QLAB(15);
+    const int QPeaksTableModel::COL_QSAMPLE(16);
 
     void QPeaksTableModel::updateDataCache(const Mantid::API::IPeak& peak, const int row) const
     {
@@ -35,9 +60,16 @@ namespace MantidQt
       m_dataCache.push_back(QString::number(peak.getH(), 'f', m_hklPrec));
       m_dataCache.push_back(QString::number(peak.getK(), 'f', m_hklPrec));
       m_dataCache.push_back(QString::number(peak.getL(), 'f', m_hklPrec));
+      m_dataCache.push_back(QString::number(peak.getWavelength(), 'f', 4));
+      m_dataCache.push_back(QString::number(peak.getInitialEnergy() - peak.getFinalEnergy(), 'f', 4));
+      m_dataCache.push_back(QString::number(peak.getTOF(), 'f', 1));
       m_dataCache.push_back(QString::number(peak.getDSpacing(), 'f', 4));
-      m_dataCache.push_back(QString::number(peak.getIntensity()));
-      m_dataCache.push_back(QString::number(peak.getSigmaIntensity()));
+      m_dataCache.push_back(QString::number(peak.getIntensity(), 'g', 1));
+      m_dataCache.push_back(QString::number(peak.getSigmaIntensity(), 'g', 1));
+      m_dataCache.push_back(QString::number(peak.getBinCount()));
+      m_dataCache.push_back(QString(peak.getBankName().c_str()));
+      m_dataCache.push_back(QString::number(peak.getRow()));
+      m_dataCache.push_back(QString::number(peak.getCol()));
 
       const QString COMMA(",");
 
@@ -57,25 +89,39 @@ namespace MantidQt
      */
     int QPeaksTableModel::numCharacters(const int column) const
     {
-      if (column == 0) // RUNNUMBER
+      if (column == COL_RUNNUMBER)
         return 5;
-      else if (column == 1) // DETID
+      else if (column == COL_DETID)
         return 7;
-      else if (column == 2) // H
+      else if (column == COL_H)
         return 3+m_hklPrec;
-      else if (column == 3) // K
+      else if (column == COL_K)
         return 3+m_hklPrec;
-      else if (column == 4) // L
+      else if (column == COL_L)
         return 3+m_hklPrec;
-      else if (column == 5) // DSPACING
+      else if (column == COL_WAVELENGTH)
         return 6;
-      else if (column == 6) // INT
+      else if (column == COL_ENERGY)
+        return 6;
+      else if (column == COL_TOF)
+        return 6;
+      else if (column == COL_DSPACING)
+        return 6;
+      else if (column == COL_INT)
         return 5;
-      else if (column == 7) // SIGMINT
-          return 5;
-      else if (column == 8) // QLAB
+      else if (column == COL_SIGMINT)
+        return 5;
+      else if (column == COL_BINCOUNT)
+        return 5;
+      else if (column == COL_BANKNAME)
+        return 6;
+      else if (column == COL_ROW)
+        return 3;
+      else if (column == COL_COL)
+        return 3;
+      else if (column == COL_QLAB)
           return 3*6;
-      else if (column == 9) // QSAMPLE
+      else if (column == COL_QSAMPLE)
           return 3*6;
       else
         return 3;
@@ -95,9 +141,16 @@ namespace MantidQt
       m_columnNameMap.insert(std::make_pair(index++, H));
       m_columnNameMap.insert(std::make_pair(index++, K));
       m_columnNameMap.insert(std::make_pair(index++, L));
+      m_columnNameMap.insert(std::make_pair(index++, WAVELENGTH));
+      m_columnNameMap.insert(std::make_pair(index++, ENERGY));
+      m_columnNameMap.insert(std::make_pair(index++, TOF));
       m_columnNameMap.insert(std::make_pair(index++, DSPACING));
       m_columnNameMap.insert(std::make_pair(index++, INT));
       m_columnNameMap.insert(std::make_pair(index++, SIGMINT));
+      m_columnNameMap.insert(std::make_pair(index++, BINCOUNT));
+      m_columnNameMap.insert(std::make_pair(index++, BANKNAME));
+      m_columnNameMap.insert(std::make_pair(index++, ROW));
+      m_columnNameMap.insert(std::make_pair(index++, COL));
       m_columnNameMap.insert(std::make_pair(index++, QLAB));
       m_columnNameMap.insert(std::make_pair(index++, QSAMPLE));
 
@@ -106,9 +159,16 @@ namespace MantidQt
       m_sortableColumns.insert(std::make_pair(H,true));
       m_sortableColumns.insert(std::make_pair(K,true));
       m_sortableColumns.insert(std::make_pair(L,true));
+      m_sortableColumns.insert(std::make_pair(WAVELENGTH,true));
+      m_sortableColumns.insert(std::make_pair(ENERGY,true));
+      m_sortableColumns.insert(std::make_pair(TOF,true));
       m_sortableColumns.insert(std::make_pair(DSPACING, true));
       m_sortableColumns.insert(std::make_pair(INT, true));
       m_sortableColumns.insert(std::make_pair(SIGMINT, true));
+      m_sortableColumns.insert(std::make_pair(BINCOUNT, true));
+      m_sortableColumns.insert(std::make_pair(BANKNAME, true));
+      m_sortableColumns.insert(std::make_pair(ROW, true));
+      m_sortableColumns.insert(std::make_pair(COL, true));
       m_sortableColumns.insert(std::make_pair(QLAB, false));
       m_sortableColumns.insert(std::make_pair(QSAMPLE, false));
 

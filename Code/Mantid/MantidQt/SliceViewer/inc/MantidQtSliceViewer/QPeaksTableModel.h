@@ -70,16 +70,75 @@ namespace MantidQt
       typedef std::map<ColumnNameType, bool> ColumnNameSortableMap;
       typedef std::map<int, ColumnNameType> ColumnIndexNameMap;
 
+      /// Label for run number column
       static const QString RUNNUMBER;
+      /// Label for detector id column
       static const QString DETID;
+      /// Label for h column
       static const QString H;
+      /// Label for k column
       static const QString K;
+      /// Label for l column
       static const QString L;
+      /// Label for wavelength column
+      static const QString WAVELENGTH;
+      /// Label for energy column
+      static const QString ENERGY;
+      /// Label for time-of-flight column
+      static const QString TOF;
+      /// Label for d-spacing column
       static const QString DSPACING;
+      /// Label for integrated intensity column
       static const QString INT;
+      /// Label for uncertainty in integrated intensity column
       static const QString SIGMINT;
+      /// Label for bin count column
+      static const QString BINCOUNT;
+      /// Label for bank name column
+      static const QString BANKNAME;
+      /// Label for detector row column
+      static const QString ROW;
+      /// Label for detector column column
+      static const QString COL;
+      /// Label for Q-vector in the lab frame column
       static const QString QLAB;
+      /// Label for Q-vector in the sample column
       static const QString QSAMPLE;
+
+      /// Index for run number column
+      static const int COL_RUNNUMBER;
+      /// Index for detector id column
+      static const int COL_DETID;
+      /// Index for h column
+      static const int COL_H;
+      /// Index for k column
+      static const int COL_K;
+      /// Index for l column
+      static const int COL_L;
+      /// Index for wavelength column
+      static const int COL_WAVELENGTH;
+      /// Index for energy column
+      static const int COL_ENERGY;
+      /// Index for time-of-flight column
+      static const int COL_TOF;
+      /// Index for d-spacing column
+      static const int COL_DSPACING;
+      /// Index for integrated intensity column
+      static const int COL_INT;
+      /// Index for uncertainty in integrated intensity column
+      static const int COL_SIGMINT;
+      /// Index for bin count column
+      static const int COL_BINCOUNT;
+      /// Index for bank name column
+      static const int COL_BANKNAME;
+      /// Index for detector row column
+      static const int COL_ROW;
+      /// Index for detector column column
+      static const int COL_COL;
+      /// Index for Q-vector in the lab frame column
+      static const int COL_QLAB;
+      /// Index for Q-vector in the sample column
+      static const int COL_QSAMPLE;
 
       /// The number of digits past the decimal to display in the table
       int m_hklPrec;
