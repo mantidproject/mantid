@@ -292,8 +292,8 @@ public:
       Mantid::API::Workspace::InfoNode &node = *rootNode.nodes()[0];
       TS_ASSERT_EQUALS( node.nodes().size(), 3 );
 
-      TS_ASSERT_EQUALS( node.lines()[0], "group" );          // workspace name
-      TS_ASSERT_EQUALS( node.lines()[1], "WorkspaceGroup" ); // workspace id
+      TS_ASSERT_EQUALS( node.workspaceName(), "group" );     // workspace name
+      TS_ASSERT_EQUALS( node.lines()[0], "WorkspaceGroup" ); // workspace id
   }
 
   void test_isInGroup()
