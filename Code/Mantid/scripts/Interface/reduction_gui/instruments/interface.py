@@ -146,7 +146,7 @@ class InstrumentInterface(object):
             return False
 
     def cluster_submit(self, user, pwd, resource=None,
-                       nodes=4, cores_per_node=4):
+                       nodes=4, cores_per_node=4, job_name=None):
         """
             Pass the interface data to the scripter for parallel reduction
         """
@@ -157,7 +157,7 @@ class InstrumentInterface(object):
             if job_data_dir is None:
                 job_data_dir = os.path.expanduser('~')
                 
-            self.scripter.cluster_submit(job_data_dir, user, pwd, resource, nodes, cores_per_node)
+            self.scripter.cluster_submit(job_data_dir, user, pwd, resource, nodes, cores_per_node, job_name)
         except:
             msg = "The following error was encountered:\n\n%s" % sys.exc_value
             msg += "\n\nPlease check your reduction parameters\n"

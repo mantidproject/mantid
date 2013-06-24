@@ -478,11 +478,19 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if self._interface is not None \
         and self.general_settings.cluster_user is not None \
         and self.general_settings.cluster_pass is not None:
+            # Chose a name for the job
+            if self._filename is not None:
+                job_name = os.path.basename(self._filename).strip()
+                toks = os.path.splitext(job_name)
+                job_name = toks[0]
+            else:
+                job_name = ''
             self._interface.cluster_submit(self.general_settings.cluster_user, 
                                            self.general_settings.cluster_pass,
                                            resource=self.general_settings.compute_resource,
                                            nodes=self._number_of_nodes,
-                                           cores_per_node=self._cores_per_node)
+                                           cores_per_node=self._cores_per_node,
+                                           job_name=job_name)
         
     def open_file(self, file_path=None):
         """

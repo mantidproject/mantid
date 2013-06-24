@@ -461,7 +461,7 @@ class BaseReductionScripter(object):
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 
     def cluster_submit(self, output_dir, user, pwd, resource=None,
-                       nodes=4, cores_per_node=4):
+                       nodes=4, cores_per_node=4, job_name=None):
         """
             Submit the reduction job to a cluster
             @param output_dir: directory where the output data will be written
@@ -489,9 +489,18 @@ class BaseReductionScripter(object):
                 os.chmod(script_path, st.st_mode | stat.S_IEXEC)
                 Logger.get("scripter").notice("Execution script: %s" % script_path)
                 
+                lower_case_instr = self.instrument_name.lower()
+                job_name_lower = job_name.lower()
+                if job_name is None or len(job_name)==0:
+                    job_name = lower_case_instr
+                elif job_name_lower.find(lower_case_instr)>=0:
+                    job_name = job_name.strip()
+                else:
+                    job_name = "%s_%s" % (lower_case_instr, job_name.strip())
+
                 # Submit the job
                 submit_cmd = "SubmitRemoteJob(ComputeResource='%s', " % resource
-                submit_cmd += "TaskName='%s'," % self.instrument_name
+                submit_cmd += "TaskName='%s'," % job_name
                 submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
                 submit_cmd += "UserName='%s', GroupName='users', Password='%s', " % (user, pwd)
                 submit_cmd += "TransactionID='mantid_remote', "
