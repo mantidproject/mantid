@@ -266,7 +266,7 @@ namespace DataObjects
     API::Workspace::InfoNode *MaskWorkspace::createInfoNode() const
     {
         auto node = SpecialWorkspace2D::createInfoNode();
-        node->addLine( "Mased: " + boost::lexical_cast<std::string>(getNumberMasked()) );
+        node->addLine( "Masked: " + boost::lexical_cast<std::string>(getNumberMasked()) );
         return node;
     }
 

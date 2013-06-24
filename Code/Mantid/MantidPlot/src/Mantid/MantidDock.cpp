@@ -201,7 +201,7 @@ Mantid::API::Workspace_sptr MantidDockWidget::getSelectedWorkspace() const
  * @param node :: An InfoNode of the workspace to display.
  * @param parentItem :: A pointer to the parent item to add to. If NULL the item is added at top level.
  */
-void MantidDockWidget::addWorkspaceTreeEntry( Workspace::InfoNode &node, QTreeWidgetItem *parentItem )
+QTreeWidgetItem *MantidDockWidget::addWorkspaceTreeEntry( Workspace::InfoNode &node, QTreeWidgetItem *parentItem )
 {
     // name of a top-level item == workspace name
     QString wsName = QString::fromStdString(node.workspaceName());
@@ -223,6 +223,7 @@ void MantidDockWidget::addWorkspaceTreeEntry( Workspace::InfoNode &node, QTreeWi
     {
         m_tree->addTopLevelItem( wsItem );
     }
+    return wsItem;
 }
 
 /**
@@ -436,13 +437,30 @@ void MantidDockWidget::updateTree()
     // do not update until the counter is zero
     if ( m_updateCount.deref() ) return;
 
+    // find all expanded top-level entries
+    QStringList expanded;
+    int n = m_tree->topLevelItemCount();
+    for(int i = 0; i < n; ++i)
+    {
+      auto item = m_tree->topLevelItem(i);
+      if ( item->isExpanded() )
+      {
+        expanded << item->text(0);
+      }
+    }
+
+    // create a new tree
     m_tree->clear();
     if ( m_rootInfoNode ) delete m_rootInfoNode;
     m_rootInfoNode = Mantid::API::AnalysisDataService::Instance().createInfoTree();
     auto &nodes = m_rootInfoNode->nodes();
     for( size_t i = 0; i < nodes.size(); ++i )
     {
-        addWorkspaceTreeEntry( *nodes[i] );
+        auto entry = addWorkspaceTreeEntry( *nodes[i] );
+        if ( expanded.contains( entry->text(0) ) )
+        {
+          entry->setExpanded( true );
+        }
     }
 }
 

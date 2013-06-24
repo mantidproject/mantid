@@ -52,9 +52,6 @@ public:
   QString getSelectedWorkspaceName() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const;
 
-signals:
-  void rerunFindAbandonedWorkspaces();
-
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
   void deleteWorkspaces();
@@ -70,7 +67,7 @@ protected slots:
   void workspaceSelected();
 
 private slots:
-  void addWorkspaceTreeEntry(Mantid::API::Workspace::InfoNode &node, QTreeWidgetItem* parentItem = NULL);
+  QTreeWidgetItem *addWorkspaceTreeEntry(Mantid::API::Workspace::InfoNode &node, QTreeWidgetItem* parentItem = NULL);
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();

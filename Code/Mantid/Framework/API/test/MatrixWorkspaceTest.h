@@ -709,6 +709,25 @@ public:
     TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
   }
 
+  void test_InfoNode()
+  {
+    Mantid::API::Workspace::InfoNode rootNode( *ws );
+    ws->addInfoNodeTo( rootNode );
+    auto &node = *rootNode.nodes()[0];
+    TS_ASSERT_EQUALS( node.nodes().size(), 0 );
+    TS_ASSERT_EQUALS( node.lines().size(), 8 );
+    TS_ASSERT_EQUALS( node.lines()[0], "WorkspaceTester" );
+    TS_ASSERT_EQUALS( node.lines()[1], "Title: " );
+    TS_ASSERT_EQUALS( node.lines()[2], "Histograms: 1" );
+    TS_ASSERT_EQUALS( node.lines()[3], "Bins: 1" );
+    TS_ASSERT_EQUALS( node.lines()[4], "Data points" );
+    TS_ASSERT_EQUALS( node.lines()[5], "X axis:  / " );
+    TS_ASSERT_EQUALS( node.lines()[6], "Y axis: something per " );
+    TS_ASSERT_EQUALS( node.lines()[7].substr(0,11), "Instrument:" );
+    TS_ASSERT_EQUALS( node.workspaceName(), "" );
+    TS_ASSERT_EQUALS( node.getMemorySize(), 304 );
+  }
+
 private:
   boost::shared_ptr<MatrixWorkspace> ws;
 

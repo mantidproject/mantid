@@ -609,6 +609,25 @@ public:
     ws->setCoordinateSystem(Mantid::API::QLab);
     TS_ASSERT_EQUALS(Mantid::API::QLab, ws->getSpecialCoordinateSystem());
   }
+
+  void test_InfoNode()
+  {
+    MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 1 /*event per box*/);
+
+    Mantid::API::Workspace::InfoNode rootNode( *ws );
+    ws->addInfoNodeTo( rootNode );
+    auto &node = *rootNode.nodes()[0];
+    TS_ASSERT_EQUALS( node.nodes().size(), 0 );
+    TS_ASSERT_EQUALS( node.lines().size(), 7 );
+    TS_ASSERT_EQUALS( node.lines()[0], "MDEventWorkspace<MDLeanEvent,1>" );
+    TS_ASSERT_EQUALS( node.lines()[1], "Title: " );
+    TS_ASSERT_EQUALS( node.lines()[2], "Dim 0: (Axis0) 0 to 10 in 10 bins" );
+    TS_ASSERT_EQUALS( node.lines()[3], "10 MDBoxes (1 kB)" );
+    TS_ASSERT_EQUALS( node.lines()[4], "1 MDGridBoxes (0 kB)" );
+    TS_ASSERT_EQUALS( node.lines()[5], "Not file backed." );
+    TS_ASSERT_EQUALS( node.lines()[6], "Events: 10" );
+  }
+
 };
 
 
