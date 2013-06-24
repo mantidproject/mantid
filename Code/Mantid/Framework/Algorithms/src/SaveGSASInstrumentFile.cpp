@@ -208,7 +208,7 @@ namespace Algorithms
 
     makeParameterConsistent();
 
-    convertToGSAS(banks, outputfilename);
+    convertToGSAS(m_bankIDsOutput, m_gsasFileName);
 
     return;
   }
@@ -269,7 +269,7 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  ChopperConfiguration SaveGSASInstrumentFile::setupPG3Constants(int intfrequency)
+  ChopperConfiguration_sptr SaveGSASInstrumentFile::setupPG3Constants(int intfrequency)
   {
     string bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr;
 
@@ -311,14 +311,16 @@ namespace Algorithms
     // Create configuration
     ChopperConfiguration conf(static_cast<double>(intfrequency), bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
 
-    return conf;
+    ChopperConfiguration_sptr confsptr = boost::make_shared<ChopperConfiguration>(conf);
+
+    return confsptr;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Set up the converting constants for NOMAD
     * @param intfrequency :: frequency in integer
     */
-  ChopperConfiguration SaveGSASInstrumentFile::setupNOMConstants(int intfrequency)
+  ChopperConfiguration_sptr SaveGSASInstrumentFile::setupNOMConstants(int intfrequency)
   {
     // Set up string
     string bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr;
@@ -340,8 +342,9 @@ namespace Algorithms
 
     // Create configuration
     ChopperConfiguration conf(static_cast<float>(intfrequency), bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
+    ChopperConfiguration_sptr confsptr = boost::make_shared<ChopperConfiguration>(conf);
 
-    return conf;
+    return confsptr;
   }
 
 
@@ -388,9 +391,9 @@ namespace Algorithms
     * @param banks : list of banks (sorted) to .iparm or prm file
     * @param gsasinstrfilename: string
     */
-  void SaveGSASInstrumentFile::convertToGSAS(vector<int> banks, string gsasinstrfilename)
+  void SaveGSASInstrumentFile::convertToGSAS(vector<unsigned int> banks, string gsasinstrfilename)
   {
-    if (!m_config)
+    if (!m_configuration)
       throw runtime_error("Not set up yet!");
 
 
@@ -400,7 +403,7 @@ namespace Algorithms
     for (size_t ib = 0; ib < banks.size(); ++ib)
     {
       int bankid = banks[ib];
-      if (m_config.hasBank(bankid))
+      if (m_configuration->hasBank(bankid))
       {
         buildGSASTabulatedProfile(bankid);
         writePRM(bankid, banks.size(), gsasinstrfilename, isfirstbank);
@@ -425,10 +428,54 @@ namespace Algorithms
 
     @param pardict ::
   */
-  void SaveGSASInstrumentFile::buildGSASTabulatedProfile(int bank)
+  void SaveGSASInstrumentFile::buildGSASTabulatedProfile(unsigned int bankid)
   {
     // Init data structure
-    vector<double> gdsp(90, 0.);
+    vector<double> gdsp(90, 0.);   // TOF_thermal(d_k)
+    vector<double> gtof(90, 0.);   // TOF_thermal(d_k) - TOF(d_k)
+    vector<double> galpha(90, 0.); // delta(alpha)
+    vector<double> gbeta(90, 0.);  // delta(beta)
+    vector<double> gpkX(90, 0.);   // ratio (n) b/w thermal and epithermal neutron
+
+    double twotheta = m_configuration->getParameter(bankid, "TwoTheta");
+    double mx = m_configuration->getParameter(bankid, "Tcross");
+    double mxb = m_configuration->getParameter(bankid, "Width");
+
+    double zero = m_configuration->getParameter(bankid, "Zero");
+    double zerot = m_configuration->getParameter(bankid, "Zerot");
+    double dtt1 = m_configuration->getParameter(bankid, "Dtt1");
+    double dtt1t = m_configuration->getParameter(bankid, "Dtt1t");
+    double dtt2 = m_configuration->getParameter(bankid, "Dtt2");
+
+    double alph0 = m_configuration->getParameter(bankid, "Alph0");
+    double alph1 = m_configuration->getParameter(bankid, "Alph1");
+    double alph0t = m_configuration->getParameter(bankid, "Alph0t");
+    double alph1t = m_configuration->getParameter(bankid, "Alph1t");
+
+    double beta0 = m_configuration->getParameter(bankid, "Beta0");
+    double beta1 = m_configuration->getParameter(bankid, "Beat1");
+    double beta0t = m_configuration->getParameter(bankid, "Beta0t");
+    double beta1t = m_configuration->getParameter(bankid, "Beta1t");
+
+    double instC = dtt1 - 4*(alph0+alph1);
+
+    double mxdsp = m_configuration->getParameter(bankid, "MaxDsp");
+    double mndsp = m_configuration->getParameter(bankid, "MinDsp");
+
+
+    double ddstep = ((1.05*mxdsp)-(0.9*mndsp))/90.;
+
+    for (size_t k = 0; k < 90; ++k)
+    {
+      gdsp[k] = (0.9*mndsp)+(static_cast<double>(k)*ddstep);
+      double rd = 1.0/gdsp[k];
+      double dmX = mx-rd;
+      gpkX[k] = 0.5*erfc(mxb*dmX); //  # this is n in the formula
+      gtof[k] = calTOF(gpkX[k], zero, dtt1 ,dtt2, zerot, dtt1t, -dtt2, gdsp[k]);
+      gdt[k] = gtof[k] - (instC*gdsp[k]);
+      galpha[k] = aaba(gpkX[k], alph0, alph1, alph0t, alph1t, gdsp[k]);
+      gbeta[k] = aaba(gpkX[k], beta0, beta1, beta0t, beta1t, gdsp[k]);
+    }
 
     /** To translate
     gdsp = np.zeros(90) # d_k
@@ -485,23 +532,21 @@ namespace Algorithms
   }
 
 
-  /**  Write out .prm/.iparm file
-
-  Arguments:
-- bank : integer, bank ID
-- numbanks: integer, total number of banks written in file
-- prmfilename: output file name
-- isfirstbank: bool
-  */
-  void SaveGSASInstrumentFile::writePRM(int bank, size_t numbanks, std::string prmfilename, bool isfirstbank)
+  //----------------------------------------------------------------------------------------------
+  /** Write out .prm/.iparm file
+    * @bankid : integer, bank ID
+    * @numbanks: integer, total number of banks written in file
+    * @prmfilename: output file name
+    * @isfirstbank: bool
+    */
+  void SaveGSASInstrumentFile::writePRM(unsigned int bankid, size_t numbanks, std::string prmfilename, bool isfirstbank)
   {
-    // Obtrain instrument parameters
-    map<string, double>& pardict = m_dict[bank];
-
-    double dtt1 = getParameter(pardict, "Dtt1");
-    double alph0 = getParameter(pardict, "Alph0");
-    double alph1 = getParameter(pardict, "Alph1");
-    double cwl = getParameter(pardict, "CWL");
+    double zero = m_configuration->getParameter(bankid, "Zero");
+    double dtt1 = m_configuration->getParameter(bankid, "Dtt1");
+    double alph0 = m_configuration->getParameter(bankid, "Alph0");
+    double alph1 = m_configuration->getParameter(bankid, "Alph1");
+    double twotheta = m_configuration->getParameter(bankid, "TwoTheta");
+    double cwl = m_configuration->getParameter(bankid, "CWL");
 
     // FIXME ::
     throw runtime_error("Test (compile and run) to use fprintf() in Mantid");
@@ -529,6 +574,11 @@ namespace Algorithms
               << "INS FPATH1 " << m_L1 << "\n"
               << "INS HTYPE PNTR \n";
     }
+
+    printf("INS %2d ICONS%10.3f%10.3f%10.3f %10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
+    printf("INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0, 0, 0.2, 1, 1);
+
+
 
     /** To translate
 
@@ -610,6 +660,47 @@ namespace Algorithms
   }
 
 
+  /** Calculate TOF difference
+   * @param ep :: zero
+   * @param eq :: dtt1
+   * @param er :: dtt2
+   * @param tp :: zerot
+   * @param tq :: dtt1t
+   * @param er :: dtt2t
+  */
+  double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er, double tp, double tq, double tr, double dsp)
+  {
+      // Epithermal
+      // double te = zero  + d*dtt1  + 0.5*dtt2*erfc( (1/d-1.05)*10 );
+      // Thermal
+      // double tt = zerot + d*dtt1t + dtt2t/d;
+      // Total TOF
+      // double t  = n*te + (1-n) tt
+
+      // FIXME Is this equation for TOF^e correct?
+      double te = ep + (eq*dsp) + er*0.5*erfc(((1.0/dsp)-1.05)*10.0);
+      double tt = tp + (tq*dsp) + (tr/dsp);
+      double t = (n*te) + tt - (n*tt);
+
+      return t;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Calculate a value related to alph0, alph1, alph0t, alph1t or
+    * beta0, beta1, beta0t, beta1t
+    */
+  double SaveGSASInstrumentFile::aaba(double n, double ea1, double ea2, double ta1, double ta2, double dsp)
+  {
+    double ea = ea1 + (ea2*dsp);
+    double ta = ta1 - (ta2/dsp);
+    double am1 = (n*ea) + ta - (n*ta);
+    double a = 1.0/am1;
+
+    return a;
+  }
+
+
+
 } // namespace Algorithms
 } // namespace Mantid
 
@@ -622,30 +713,7 @@ namespace Algorithms
 // from random import *
 // import numpy as np
 
-/** Calculate TOF difference
- * @param ep :: zero
- * @param eq :: dtt1
- * @param er :: dtt2
- * @param tp :: zerot
- * @param tq :: dtt1t
- * @param er :: dtt2t
-*/
-double tofh(double n, double ep, double eq, double er, double tp, double tq, double tr, double dsp)
-{
-    // Epithermal
-    // double te = zero  + d*dtt1  + 0.5*dtt2*erfc( (1/d-1.05)*10 );
-    // Thermal
-    // double tt = zerot + d*dtt1t + dtt2t/d;
-    // Total TOF
-    // double t  = n*te + (1-n) tt
 
-    // FIXME Is this equation for TOF^e correct?
-    double te = ep + (eq*dsp) + er*0.5*erfc(((1.0/dsp)-1.05)*10.0);
-    double tt = tp + (tq*dsp) + (tr/dsp);
-    double t = (n*te) + tt - (n*tt);
-
-    return t;
-}
 
 
 /** Complementary error function
@@ -663,23 +731,7 @@ double erfc(double xx)
   return y;
 }
 
-/** Calculate a value related to alph0, alph1, alph0t, alph1t or
-    beta0, beta1, beta0t, beta1t
-*/
-double aaba(double n, double ea1, double ea2, double ta1, double ta2, double dsp)
-{
-    /*
-    double g  = g0  + g1*d;
-    double gt = gt1 + g1t*d;
-    a = 1/(n*g + (1-n)gt)
-    */
-    double ea = ea1 + (ea2*dsp);
-    double ta = ta1 - (ta2/dsp);
-    double am1 = (n*ea) + ta - (n*ta);
-    double a = 1.0/am1;
 
-    return a;
-}
 
 
 /** Initialize constant library

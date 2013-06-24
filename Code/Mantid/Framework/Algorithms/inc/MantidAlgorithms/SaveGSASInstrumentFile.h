@@ -17,6 +17,11 @@ public:
                        std::string mxdspstr, std::string maxtofstr);
   ~ChopperConfiguration();
 
+  /// Check wehther a bank is defined
+  bool hasBank(unsigned int bankid);
+  /// Get a parameter for bank
+  double getParameter(unsigned int bankid, std::string paramname);
+
 private:
   std::string parseString();
 
@@ -33,7 +38,10 @@ private:
   std::vector<double> parseStringDbl(std::string instring);
   /// Parse string to an integer vector
   std::vector<int> parseStringInt(std::string instring);
+
 };
+
+typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
 
 /** SaveGSASInstrumentFile : TODO: DESCRIPTION
     
@@ -84,24 +92,30 @@ private:
   void initConstants(double chopperfrequency);
 
   ///
-  ChopperConfiguration setupPG3Constants(int intfrequency);
+  ChopperConfiguration_sptr setupPG3Constants(int intfrequency);
   ///
-  ChopperConfiguration setupNOMConstants(int intfrequency);
+  ChopperConfiguration_sptr setupNOMConstants(int intfrequency);
 
   /// Convert to GSAS instrument file
-  void convertToGSAS(std::vector<int> banks, std::string gsasinstrfilename);
+  void convertToGSAS(std::vector<unsigned int> banks, std::string gsasinstrfilename);
 
   /// Build a data structure for GSAS's tabulated peak profile
-  void buildGSASTabulatedProfile(int bank);
+  void buildGSASTabulatedProfile(unsigned int bankid);
 
   /// Write out .prm/.iparm file
-  void writePRM(int bank, size_t numbanks, std::string prmfilename, bool isfirstbank);
+  void writePRM(unsigned int bankid, size_t numbanks, std::string prmfilename, bool isfirstbank);
 
   ///
   void makeParameterConsistent();
 
   /// Caclualte L2 from DIFFC and L1
   double calL2FromDtt1(double difc, double L1, double twotheta);
+
+  /// Calculate TOF difference
+  double calTOF(double n, double ep, double eq, double er, double tp, double tq, double tr, double dsp);
+
+  /// Calculate a value related to (alph0, alph1, alph0t, alph1t) or (beta0, beta1, beta0t, beta1t)
+  double aaba(double n, double ea1, double ea2, double ta1, double ta2, double dsp);
 
   /// Input workspace
   DataObjects::TableWorkspace_sptr m_inpWS;
@@ -126,6 +140,9 @@ private:
 
   /// Output file name
   std::string m_gsasFileName;
+
+  /// Chopper configuration
+  ChopperConfiguration_sptr m_configuration;
 
 };
 
