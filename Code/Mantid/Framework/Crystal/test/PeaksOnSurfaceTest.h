@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidCrystal/PeaksOnSurface.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 
@@ -12,6 +13,10 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------
+Functional Tests
+-------------------------------------------------------------------------------------------------------------------------------------------------------*/
 class PeaksOnSurfaceTest : public CxxTest::TestSuite
 {
 private:
@@ -308,9 +313,60 @@ public:
 
     TSM_ASSERT("Line segment does Just intersect sphere", lineIntersectsSphere(line, lineStart, peakCenter, peakRadius + delta));
   }
-
-
 };
 
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------
+Perfomance Tests
+-------------------------------------------------------------------------------------------------------------------------------------------------------*/
+class PeaksOnSurfaceTestPerformance : public CxxTest::TestSuite
+{
+
+private:
+
+  Mantid::API::IPeaksWorkspace_sptr inputWS;
+
+public:
+
+  static PeaksOnSurfaceTestPerformance *createSuite() { return new PeaksOnSurfaceTestPerformance(); }
+  static void destroySuite( PeaksOnSurfaceTestPerformance *suite ) { delete suite; }
+
+  PeaksOnSurfaceTestPerformance()
+  {
+    int numPeaks = 4000;
+    inputWS = boost::make_shared<PeaksWorkspace>();
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 200);
+    inputWS->setInstrument(inst);
+
+    for (int i = 0; i < numPeaks; ++i)
+    {
+      Peak peak(inst, i, i+-0.5);
+      inputWS->addPeak(peak);
+    }
+  }
+
+  void test_performance()
+  {
+    const std::string outName = "OutPerfWS";
+
+    PeaksOnSurface alg;
+    alg.setRethrows(true);
+    alg.initialize() ;
+    TS_ASSERT( alg.isInitialized() ) ;
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.setPropertyValue("CoordinateFrame", "Detector space");
+    alg.setPropertyValue("Vertex1", "0.5, -1, 1");
+    alg.setPropertyValue("Vertex2", "0.5, 1, 1");
+    alg.setPropertyValue("Vertex3", "1, 1, 1");
+    alg.setPropertyValue("Vertex4", "1, -1, 1");
+    alg.setPropertyValue("OutputWorkspace", outName);
+    alg.setProperty("PeakRadius", 0.4); 
+    alg.execute();
+
+    Mantid::API::ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+
+    TS_ASSERT_EQUALS(2, outWS->columnCount());
+    TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());
+  }
+};
 
 #endif /* MANTID_CRYSTAL_PEAKSONSURFACETEST_H_ */

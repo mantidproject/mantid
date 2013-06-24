@@ -95,11 +95,9 @@ namespace Crystal
       throw std::invalid_argument("Input vertexes are not coplanar.");
     }
 
-    V3D d = m_vertex2 - m_vertex3; 
+    V3D d = m_vertex4 - m_vertex2; 
 
-    double angle1 = a.angle(b);
-    double angle2 = d.angle(b);
-    if(angle1 != angle2)
+    if(b.norm2() != d.norm2())
     {
       throw std::invalid_argument("Defined surface is not square sided.");
     }
