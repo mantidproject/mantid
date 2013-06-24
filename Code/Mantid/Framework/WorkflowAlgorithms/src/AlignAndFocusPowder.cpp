@@ -74,6 +74,9 @@ void AlignAndFocusPowder::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The result of diffraction focussing of InputWorkspace" );
+  declareProperty(
+        new WorkspaceProperty<MatrixWorkspace>("LowResTOFWorkspace", "", Direction::Output, PropertyMode::Optional),
+        "The name of the workspace containing the filtered low resolution TOF data.");
   declareProperty(new FileProperty("CalFileName", "", FileProperty::OptionalLoad, ".cal"),
 		  "The name of the CalFile with offset, masking, and grouping data" );
   declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace","",Direction::Input, PropertyMode::Optional),
@@ -233,14 +236,41 @@ void AlignAndFocusPowder::exec()
 
       //Cast to the matrixOutputWS and save it
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-      m_outputW->setName(getProperty("OutputWorkspace"));
+      // m_outputW->setName(getProperty("OutputWorkspace"));
     }
     else
     {
       // Not-an-event workspace
       m_outputW = WorkspaceFactory::Instance().create(m_inputW);
-      m_outputW->setName(getProperty("OutputWorkspace"));
+      // m_outputW->setName(getProperty("OutputWorkspace"));
     }
+  }
+  std::string lowreswsname = getPropertyValue("LowResTOFWorkspace");
+  MatrixWorkspace_sptr tempws = getProperty("LowResTOFWorkspace");
+  if (lowreswsname.size() > 0 || tempws)
+  {
+    // Process low resolution TOF
+    m_processLowResTOF = true;
+
+    if (!m_inputEW)
+    {
+      throw std::runtime_error("Input workspace is not EventWorkspace.  It is not supported now.");
+    }
+    else
+    {
+      //Make a brand new EventWorkspace
+      m_lowResEW = boost::dynamic_pointer_cast<EventWorkspace>(
+            WorkspaceFactory::Instance().create("EventWorkspace", m_inputEW->getNumberHistograms(), 2, 1));
+
+      //Cast to the matrixOutputWS and save it
+      m_lowResW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_lowResEW);
+      // m_lowResW->setName(lowreswsname);
+    }
+  }
+  else
+  {
+    // Ignore low resolution TOF
+    m_processLowResTOF = false;
   }
 
   // filter the input events if appropriate
@@ -308,7 +338,7 @@ void AlignAndFocusPowder::exec()
   m_outputW = maskAlg->getProperty("Workspace");
 
   if(!dspace)
-    this->rebin();
+    this->rebin(m_outputW);
 
   g_log.information() << "running AlignDetectors\n";
   API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
@@ -329,6 +359,7 @@ void AlignAndFocusPowder::exec()
 	  m_outputW = convert1Alg->getProperty("OutputWorkspace");
   }
 
+  // Beyond this point, low resolution TOF workspace is considered.
   if(LRef > 0.)
   {
       g_log.information() << "running UnwrapSNS(LRef=" << LRef
@@ -346,46 +377,98 @@ void AlignAndFocusPowder::exec()
   if(minwl > 0.)
   {
       g_log.information() << "running RemoveLowResTOF(MinWavelength=" << minwl
-                          << ",Tmin=" << tmin << ")\n";
+                          << ",Tmin=" << tmin << ". ";
+      EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+      if (ews)
+        g_log.information() << "Number of events = " << ews->getNumberEvents() << ". ";
+      g_log.information("\n");
+
 	  API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("OutputWorkspace", m_outputW);
 	  removeAlg->setProperty("MinWavelength",minwl);
 	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
+	  if (m_processLowResTOF)
+		removeAlg->setProperty("LowResTOFWorkspace", m_lowResW);
+
 	  removeAlg->executeAsChildAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
+	  if (m_processLowResTOF)
+		m_lowResW = removeAlg->getProperty("LowResTOFWorkspace");
   }
   else if(DIFCref > 0.)
   {
       g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                           << ",K=3.22)\n";
+      EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+      if (ews)
+        g_log.information() << "Number of events = " << ews->getNumberEvents() << ". ";
+      g_log.information("\n");
+
 	  API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("OutputWorkspace", m_outputW);
 	  removeAlg->setProperty("ReferenceDIFC",DIFCref);
 	  removeAlg->setProperty("K",3.22);
 	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
+	  if (m_processLowResTOF)
+		removeAlg->setProperty("LowResTOFWorkspace", m_lowResW);
+
 	  removeAlg->executeAsChildAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
+	  if (m_processLowResTOF)
+		m_lowResW = removeAlg->getProperty("LowResTOFWorkspace");
   }
 
+  EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  if (ews)
+  {
+    size_t numhighevents = ews->getNumberEvents();
+    size_t numlowevents = 0;
+    if (m_processLowResTOF)
+    {
+      EventWorkspace_sptr lowes = boost::dynamic_pointer_cast<EventWorkspace>(m_lowResW);
+      numlowevents = lowes->getNumberEvents();
+      g_log.information() << "Number of high TOF events = " << numhighevents << "; "
+                          << "Number of low TOF events = " << numlowevents << ".\n";
+    }
+  }
+
+  // Convert units
   if(LRef > 0. || minwl > 0. || DIFCref > 0.)
   {
-      g_log.information() << "running ConvertUnits(Target=dSpacing)\n";
-	  API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
-	  convert2Alg->setProperty("InputWorkspace", m_outputW);
-	  convert2Alg->setProperty("OutputWorkspace", m_outputW);
-	  convert2Alg->setProperty("Target","dSpacing");
-	  convert2Alg->executeAsChildAlg();
-	  m_outputW = convert2Alg->getProperty("OutputWorkspace");
+    g_log.information() << "running ConvertUnits(Target=dSpacing)\n";
+    API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
+    convert2Alg->setProperty("InputWorkspace", m_outputW);
+    convert2Alg->setProperty("OutputWorkspace", m_outputW);
+    convert2Alg->setProperty("Target","dSpacing");
+    convert2Alg->executeAsChildAlg();
+    m_outputW = convert2Alg->getProperty("OutputWorkspace");
+
+    if (m_processLowResTOF)
+    {
+      API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
+      convert2Alg->setProperty("InputWorkspace", m_lowResW);
+      convert2Alg->setProperty("OutputWorkspace", m_lowResW);
+      convert2Alg->setProperty("Target","dSpacing");
+      convert2Alg->executeAsChildAlg();
+      m_lowResW = convert2Alg->getProperty("OutputWorkspace");
+    }
   }
 
   if(dspace)
-    this->rebin();
+  {
+    this->rebin(m_outputW);
+    if (m_processLowResTOF)
+      rebin(m_lowResW);
+  }
 
   doSortEvents(m_outputW);
+  if (m_processLowResTOF)
+    doSortEvents(m_lowResW);
 
-  g_log.information() << "running DiffractionFocussing\n";
+  // Diffraction focus
+  g_log.information() << "running DiffractionFocussing. \n";
   API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", m_outputW);
   focusAlg->setProperty("OutputWorkspace", m_outputW);
@@ -393,13 +476,29 @@ void AlignAndFocusPowder::exec()
   focusAlg->setProperty("PreserveEvents", m_preserveEvents);
   focusAlg->executeAsChildAlg();
   m_outputW = focusAlg->getProperty("OutputWorkspace");
+  if (m_processLowResTOF)
+  {
+    API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
+    focusAlg->setProperty("InputWorkspace", m_lowResW);
+    focusAlg->setProperty("OutputWorkspace", m_lowResW);
+    focusAlg->setProperty("GroupingWorkspace", m_groupWS);
+    focusAlg->setProperty("PreserveEvents", m_preserveEvents);
+    focusAlg->executeAsChildAlg();
+    m_lowResW = focusAlg->getProperty("OutputWorkspace");
+  }
 
   doSortEvents(m_outputW);
+  if (m_processLowResTOF)
+    doSortEvents(m_lowResW);
 
   // this next call should probably be in for rebin as well
   // but it changes the system tests
   if (dspace && m_resampleX != 0)
-    this->rebin();
+  {
+    this->rebin(m_outputW);
+    if (m_processLowResTOF)
+      rebin(m_lowResW);
+  }
 
   if (l1 > 0)
   {
@@ -414,8 +513,23 @@ void AlignAndFocusPowder::exec()
     editAlg->setProperty("Azimuthal", phis);
     editAlg->executeAsChildAlg();
     m_outputW = editAlg->getProperty("Workspace");
+
+    if (m_processLowResTOF)
+    {
+      API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
+      editAlg->setProperty("Workspace", m_lowResW);
+      editAlg->setProperty("NewInstrument", false);
+      editAlg->setProperty("PrimaryFlightPath", l1);
+      editAlg->setProperty("Polar", tths);
+      editAlg->setProperty("SpectrumIDs", specids);
+      editAlg->setProperty("L2", l2s);
+      editAlg->setProperty("Azimuthal", phis);
+      editAlg->executeAsChildAlg();
+      m_lowResW = editAlg->getProperty("Workspace");
+    }
   }
 
+  // Convert units to TOF
   g_log.information() << "running ConvertUnits\n";
   API::IAlgorithm_sptr convert3Alg = createChildAlgorithm("ConvertUnits");
   convert3Alg->setProperty("InputWorkspace", m_outputW);
@@ -423,6 +537,16 @@ void AlignAndFocusPowder::exec()
   convert3Alg->setProperty("Target","TOF");
   convert3Alg->executeAsChildAlg();
   m_outputW = convert3Alg->getProperty("OutputWorkspace");
+
+  if (m_processLowResTOF)
+  {
+    API::IAlgorithm_sptr convert3Alg = createChildAlgorithm("ConvertUnits");
+    convert3Alg->setProperty("InputWorkspace", m_lowResW);
+    convert3Alg->setProperty("OutputWorkspace", m_lowResW);
+    convert3Alg->setProperty("Target","TOF");
+    convert3Alg->executeAsChildAlg();
+    m_lowResW = convert3Alg->getProperty("OutputWorkspace");
+  }
 
   if ((!m_params.empty()) && (m_params.size() != 1))
   {
@@ -434,22 +558,29 @@ void AlignAndFocusPowder::exec()
   if (!m_dmaxs.empty())
     m_dmaxs.clear();
 
-  this->rebin();
+  this->rebin(m_outputW);
+  if (m_processLowResTOF)
+    rebin(m_lowResW);
 
   // return the output workspace
   setProperty("OutputWorkspace",m_outputW);
+  if (m_processLowResTOF)
+    setProperty("LowResTOFWorkspace", m_lowResW);
 }
 
-void AlignAndFocusPowder::rebin()
+/** Rebin
+  */
+void AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws)
 {
   if (m_resampleX != 0)
   {
+    // ResampleX
     g_log.information() << "running ResampleX(NumberBins=" << abs(m_resampleX)
                         << ", LogBinning=" << (m_resampleX < 0)
                         << ", dMin(" << m_dmins.size() << "), dmax(" << m_dmaxs.size() << "))\n";
     API::IAlgorithm_sptr alg = createChildAlgorithm("ResampleX");
-    alg->setProperty("InputWorkspace", m_outputW);
-    alg->setProperty("OutputWorkspace", m_outputW);
+    alg->setProperty("InputWorkspace", matrixws);
+    alg->setProperty("OutputWorkspace", matrixws);
     if ((!m_dmins.empty()) && (!m_dmaxs.empty()))
     {
       size_t numHist = m_outputW->getNumberHistograms();
@@ -467,7 +598,7 @@ void AlignAndFocusPowder::rebin()
     alg->setProperty("NumberBins", abs(m_resampleX));
     alg->setProperty("LogBinning", (m_resampleX < 0));
     alg->executeAsChildAlg();
-    m_outputW = alg->getProperty("OutputWorkspace");
+    matrixws = alg->getProperty("OutputWorkspace");
   }
   else
   {
@@ -476,11 +607,11 @@ void AlignAndFocusPowder::rebin()
       g_log.information() << (*param) << " ";
     g_log.information() << ")\n";
     API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
-    rebin3Alg->setProperty("InputWorkspace", m_outputW);
-    rebin3Alg->setProperty("OutputWorkspace", m_outputW);
+    rebin3Alg->setProperty("InputWorkspace", matrixws);
+    rebin3Alg->setProperty("OutputWorkspace", matrixws);
     rebin3Alg->setProperty("Params",m_params);
     rebin3Alg->executeAsChildAlg();
-    m_outputW = rebin3Alg->getProperty("OutputWorkspace");
+    matrixws = rebin3Alg->getProperty("OutputWorkspace");
   }
 }
 
