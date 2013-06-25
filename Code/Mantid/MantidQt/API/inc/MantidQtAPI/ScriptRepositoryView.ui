@@ -13,9 +13,16 @@
   <property name="windowTitle">
    <string>Script Repository</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QWidget" name="">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+<layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
@@ -44,47 +51,51 @@
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="MantidQt::API::RepoTreeView" name="repo_treeView"/>
-   </item>
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLabel" name="desc_label">
-         <property name="text">
-          <string>Description</string>
-         </property>
-        </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>228</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="authorNameLabel">
-         <property name="text">
-          <string>AuthorName</string>
-         </property>
-        </widget>
+        <widget class="MantidQt::API::RepoTreeView" name="repo_treeView"/>
        </item>
       </layout>
-     </item>
-     <item>
-      <widget class="QTextBrowser" name="desc_textBrowser"/>
-     </item>
-    </layout>
+     </widget>
+     <widget class="QWidget" name="">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="desc_label">
+           <property name="text">
+            <string>Description</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>228</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="authorNameLabel">
+           <property name="text">
+            <string>AuthorName</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QTextBrowser" name="desc_textBrowser"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,10">
