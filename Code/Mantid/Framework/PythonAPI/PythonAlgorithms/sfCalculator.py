@@ -164,19 +164,28 @@ class sfCalculator():
         
         #calculate y_axis of numerator/denominator
 #        self._x_axis_ratio = self._x_axis
-        self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
-                
-        self.y_axis_error_ratio = ((self.y_axis_error_numerator / 
-                                    self.y_axis_numerator) ** 2 + 
-                                    (self.y_axis_error_denominator / 
-                                     self.y_axis_denominator) ** 2)
-        self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
-        self.y_axis_error_ratio *= self.y_axis_ratio
         
-
-               
+        ## code to replace this
+        #self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
+        sz = size(self.y_axis_numerator)
+        new_y_axis_ratio = zeros(sz)
+        for i in range(sz):
+            new_y_axis_ratio[i] = float(self.y_axis_numerator[i]) / float(self.y_axis_denominator[i])
+        self.y_axis_ratio = new_y_axis_ratio
         
-        
+        ## code to replace this
+#         self.y_axis_error_ratio = ((self.y_axis_error_numerator / 
+#                                     self.y_axis_numerator) ** 2 + 
+#                                     (self.y_axis_error_denominator / 
+#                                      self.y_axis_denominator) ** 2)
+#         self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
+#         self.y_axis_error_ratio *= self.y_axis_ratio
+        new_y_axis_error_ratio = zeros(sz)
+        for i in range(sz):
+            tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + (float(self.y_axis_denominator[i]) / float(self.y_axis_denominator[i])) **2
+            tmp_value = math.sqrt(tmp_value)
+            new_y_axis_error_ratio[i] = self.y_axis_ratio[i]* tmp_value
+        self.y_axis_error_ratio = new_y_axis_error_ratio        
         
     def _calculateFinalYAxis(self, bNumerator=True):
         """
@@ -633,12 +642,24 @@ class sfCalculator():
         product.denominator = self.denominator + '*' + other.denominator
         
         product.x_axis_ratio = self.x_axis_ratio
-        product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
-#         product.y_axis_error_ratio = sqrt((other.y_axis_ratio * self.y_axis_error_ratio) ** 2 + 
-#                                           (other.y_axis_error_ratio * self.y_axis_ratio) ** 2)
 
-        product.y_axis_error_ratio = product.y_axis_ratio * sqrt((other.y_axis_error_ratio / other.y_axis_ratio)**2 + (self.y_axis_error_ratio / self.y_axis_ratio)**2)
-
+        ## replace code by
+        #product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
+        sz = len(self.y_axis_ratio)
+        new_y_axis_ratio = zeros(sz)
+        for i in range(sz):
+            new_y_axis_ratio[i] = self.y_axis_ratio[i] * other.y_axis_ratio[i]
+        product.y_axis_ratio = new_y_axis_ratio
+        
+        ## replace code by
+        #product.y_axis_error_ratio = product.y_axis_ratio * sqrt((other.y_axis_error_ratio / other.y_axis_ratio)**2 + (self.y_axis_error_ratio / self.y_axis_ratio)**2)
+        new_y_axis_error_ratio = zeros(sz)
+        for i in range(sz):
+            tmp_product = (other.y_axis_error_ratio[i] / other.y_axis_ratio[i]) ** 2 + (self.y_axis_error_ratio[i] / self.y_axis_ratio[i]) ** 2
+            tmp_product = math.sqrt(tmp_product)
+            new_y_axis_error_ratio[i] = tmp_product * product.y_axis_ratio[i]
+        product.y_axis_error_ratio = new_y_axis_error_ratio
+            
         return product
     
     def fit(self):
