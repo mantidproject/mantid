@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/Expression.cpp
 	src/FermiChopperModel.cpp
 	src/FileFinder.cpp
+	src/FileLoaderRegistry.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
 	src/FuncMinimizerFactory.cpp
@@ -152,6 +153,7 @@ set ( INC_FILES
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FermiChopperModel.h
 	inc/MantidAPI/FileFinder.h
+	inc/MantidAPI/FileLoaderRegistry.h
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
 	inc/MantidAPI/FuncMinimizerFactory.h
@@ -282,6 +284,7 @@ set ( TEST_FILES
 	ExpressionTest.h
 	FermiChopperModelTest.h
 	FileFinderTest.h
+	FileLoaderRegistryTest.h
 	FilePropertyTest.h
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
