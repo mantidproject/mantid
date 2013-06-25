@@ -114,7 +114,7 @@ private:
   long long computePhi(const int& w) const;
 
   /// Fit peak confined in a given window (x-min, x-max)
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double centre, const double xmin, const double xmax);
+  void fitPeakInWindow(const API::MatrixWorkspace_sptr &input, const int spectrum, const double centre, const double xmin, const double xmax);
 
   /// Fit peak by given/guessed FWHM
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
