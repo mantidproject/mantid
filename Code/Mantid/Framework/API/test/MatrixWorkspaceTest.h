@@ -725,7 +725,7 @@ public:
     TS_ASSERT_EQUALS( node.lines()[6], "Y axis: something per " );
     TS_ASSERT_EQUALS( node.lines()[7].substr(0,11), "Instrument:" );
     TS_ASSERT_EQUALS( node.workspaceName(), "" );
-    TS_ASSERT_EQUALS( node.getMemorySize(), 304 );
+    TS_ASSERT_DIFFERS( node.getMemorySize(), 0 );
   }
 
 private:
