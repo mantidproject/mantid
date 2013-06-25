@@ -170,6 +170,10 @@ class sfCalculator():
         sz = size(self.y_axis_numerator)
         new_y_axis_ratio = zeros(sz)
         for i in range(sz):
+            
+            if self.y_axis_denominator[i] == 0:
+                self.y_axis_denominator[i] = 1
+            
             new_y_axis_ratio[i] = float(self.y_axis_numerator[i]) / float(self.y_axis_denominator[i])
         self.y_axis_ratio = new_y_axis_ratio
         
@@ -182,6 +186,10 @@ class sfCalculator():
 #         self.y_axis_error_ratio *= self.y_axis_ratio
         new_y_axis_error_ratio = zeros(sz)
         for i in range(sz):
+            
+            if self.y_axis_numerator[i] == 0:
+                self.y_axis_numerator[i] = 1
+            
             tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + (float(self.y_axis_denominator[i]) / float(self.y_axis_denominator[i])) **2
             tmp_value = math.sqrt(tmp_value)
             new_y_axis_error_ratio[i] = self.y_axis_ratio[i]* tmp_value
@@ -655,6 +663,13 @@ class sfCalculator():
         #product.y_axis_error_ratio = product.y_axis_ratio * sqrt((other.y_axis_error_ratio / other.y_axis_ratio)**2 + (self.y_axis_error_ratio / self.y_axis_ratio)**2)
         new_y_axis_error_ratio = zeros(sz)
         for i in range(sz):
+            
+            # make sure we don't divide b 0
+            if other.y_axis_ratio[i] == 0:
+                other.y_axis_ratio[i] = 1
+            if self.y_axis_ratio[i] == 0:
+                self.y_axis_ratio[i] = 1
+                
             tmp_product = (other.y_axis_error_ratio[i] / other.y_axis_ratio[i]) ** 2 + (self.y_axis_error_ratio[i] / self.y_axis_ratio[i]) ** 2
             tmp_product = math.sqrt(tmp_product)
             new_y_axis_error_ratio[i] = tmp_product * product.y_axis_ratio[i]
