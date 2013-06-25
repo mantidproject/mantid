@@ -76,7 +76,7 @@ def diagnose(white_int, **kwargs):
         test_results[0][0] = os.path.basename(parser.hard_mask)
         test_results[0][1] = len(masked_list)
 
-    if not kwargs.get('hard_mask_only', False):
+    if not parser.use_hard_mask_only :
         # White beam Test
         __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge, 
                                                   parser.van_out_lo, parser.van_out_hi,

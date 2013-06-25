@@ -112,6 +112,30 @@ class DirectEnergyConversion(object):
             arg = par.lstrip('diag_')
             if arg not in kwargs:
                 kwargs[arg] = getattr(self, arg)
+        # If we have a hard_mask, check the instrument name is defined
+        if 'hard_mask' in kwargs:
+            if 'instrument_name' not in kwargs:
+                kwargs['instrument_name'] = self.instr_name
+
+        if 'use_hard_mask_only' in kwargs :
+            if mtd.doesExist('hard_mask_ws'):
+                diag_mask = mtd['hard_mask_ws']
+            else: # build hard mask 
+                # in this peculiar way we can obtain working mask which accounts for initial data grouping in the data file. 
+                # SNS or 1 to 1 maps may probably awoid this stuff and load masks directly
+                whitews_name = common.create_resultname(white, suffix='-white')
+                if whitews_name in mtd:
+                    DeleteWorkspace(Workspace=whitews_name)
+                # Load
+                white_data = self.load_data(white,whitews_name)
+                        
+                diag_mask= LoadMask(Instrument=self.instr_name,InputFile=kwargs['hard_mask'],
+                               OutputWorkspace='hard_mask_ws')
+                MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
+                diag_mask,masked_list = ExtractMask(InputWorkspace=white_data)
+                DeleteWorkspace(Workspace=whitews_name)
+
+            return diag_mask
   
         # Get the white beam vanadium integrals
         whiteintegrals = self.do_white(white, None, None,None) # No grouping yet
@@ -151,11 +175,6 @@ class DirectEnergyConversion(object):
             kwargs['background_int'] = background_int
             kwargs['sample_counts'] = total_counts
         
-        # If we have a hard_mask, check the instrument name is defined
-        if 'hard_mask' in kwargs:
-            if 'instrument_name' not in kwargs:
-                kwargs['instrument_name'] = self.instr_name
-
         # Check how we should run diag
         if self.diag_spectra is None:
             # Do the whole lot at once
@@ -695,7 +714,7 @@ class DirectEnergyConversion(object):
         # if ext is none, no need to write anything
         if len(ext) == 1 and ext[0] == None :
             return
-        #self.psi = 1000000; # for test
+        self.psi = 1000000; # for test
         save_path = os.path.splitext(save_path)[0]
         for ext in formats:
             if ext in self.__save_formats :
@@ -706,12 +725,14 @@ class DirectEnergyConversion(object):
     
 
     #-------------------------------------------------------------------------------
-    def load_data(self, runs):
+    def load_data(self, runs,new_ws_name=None):
         """
         Load a run or list of runs. If a list of runs is given then
         they are summed into one.
         """
         result_ws = common.load_runs(runs, sum=True)
+        if new_ws_name != None :
+            result_ws = RenameWorkspace(InputWorkspace=result_ws,OutputWorkspace=new_ws_name)
         self.setup_mtd_instrument(result_ws)
         return result_ws
 
@@ -742,7 +763,15 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
     @property 
     def van_rmm(self):
-       return self.__van_rmm
+      """The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :( """
+      return 50.9415
+    @van_rmm.setter
+    def van_rmm(self):
+        pass
+    @van_rmm.deleter
+    def van_rmm(self):
+        pass
+
 
     @property 
     def save_format(self):
@@ -899,8 +928,7 @@ class DirectEnergyConversion(object):
         # Option to move detector positions based on the information 
         self.relocate_dets = False
 
-        #The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :(
-        self.__van_rmm = 50.9415 
+      
 
         # special property -- synonims -- how to treat external parameters. 
         try:           

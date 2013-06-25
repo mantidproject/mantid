@@ -248,8 +248,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                 print '########### Run diagnose for monochromatic vanadium run ##############'
                 masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
                                          second_white = None,variation=1.1,print_results=True)
-
-                masking +=  masking2
+                if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace 
+                    masking +=  masking2
     
 
         else: # if Reducer.mono_correction_factor != None :
@@ -259,7 +259,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     # estimate and report the number of failing detectors
     failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
     nMaskedSpectra = len(failed_sp_list)
-    print 'Diag processed workspace with {0:d} spectra and found {1:d} bad spectra'.format(nSpectra,nMaskedSpectra)
+    # this tells turkey in case of hard mask only but everythin else semems work fine
+    print 'Diag processed workspace with {0:d} spectra and masked {1:d} bad spectra'.format(nSpectra,nMaskedSpectra)
      #Run the conversion first on the sample
     deltaE_wkspace_sample = Reducer.convert_to_energy(sample_run, ei_guess, wb_run)
     
@@ -427,11 +428,18 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
         Reducer.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######')
         Reducer.log('      Using absolute units vanadium integration range : '+str(Reducer.monovan_integr_range))
        #now on the mono_vanadium run swap the mapping file
-        map_file            = Reducer.map_file;
-        Reducer.map_file    = Reducer.monovan_mapfile;
-        Reducer.save_format = None;
-        deltaE_wkspace_monovan = Reducer.convert_to_energy(monovan_run, ei_guess, wb_mono)
-        Reducer.map_file = map_file
+        result_ws_name = common.create_resultname(monovan_run)
+        # check the case when the sample is monovan itself (for testing purposes)
+        if result_ws_name == deltaE_wkspace_sample.name() :
+            deltaE_wkspace_monovan = CloneWorkspace(InputWorkspace=deltaE_wkspace_sample,OutputWorkspace=result_ws_name+'-monovan');
+            deltaE_wkspace_monovan=Reducer.remap(deltaE_wkspace_monovan,None,Reducer.monovan_mapfile)
+        else:
+            # convert to monovan to energy 
+            map_file            = Reducer.map_file;
+            Reducer.map_file    = Reducer.monovan_mapfile;
+            deltaE_wkspace_monovan = Reducer.convert_to_energy(monovan_run, ei_guess, wb_mono)
+            Reducer.map_file = map_file
+
         ei_monovan = deltaE_wkspace_monovan.getRun().getLogData("Ei").value
         Reducer.log('      Incident energy found for monovanadium run: '+str(ei_monovan)+' meV')
 
