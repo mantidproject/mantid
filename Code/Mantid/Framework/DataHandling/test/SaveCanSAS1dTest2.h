@@ -178,7 +178,7 @@ public:
     std::getline(testFile, fileLine);// transmission spectrum start
     TS_ASSERT_EQUALS(fileLine, "\t\t<SAStransmission_spectrum name=\"sample\">"); 
 
-    idataline="\t\t\t<Tdata><Lambda unit=\"A\">3543.75</Lambda><T unit=\"Counts\">111430</T><Tdev unit=\"none\">333.811</Tdev></Tdata>"; 
+    idataline="\t\t\t<Tdata><Lambda unit=\"Wavelength\">3543.75</Lambda><T unit=\"Counts\">111430</T><Tdev unit=\"none\">333.811</Tdev></Tdata>"; 
     std::getline(testFile, fileLine);// transmission spectrum data
     TS_ASSERT_EQUALS(fileLine, idataline); 
 
