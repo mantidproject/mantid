@@ -17,6 +17,8 @@
  ==== Fit Window ====
  If FitWindows is defined, then a peak's range to fit (i.e., x-min and x-max) is confined by this window.
 
+ If FitWindows is defined, starting peak centres are NOT user's input, but found by highest value within peak window. (Is this correct???)
+
  ==== References ====
  # M.A.Mariscotti, ''A method for automatic identification of peaks in the presence of background and its application to spectrum analysis'', NIM '''50''' (1967) 309.
 
@@ -429,7 +431,7 @@ namespace Algorithms
         if (x_center > datax.front() && x_center < datax.back())
         {
           if (useWindows)
-            fitPeak(m_dataWS, spec, x_center, fitwindows[2 * i], fitwindows[2 * i + 1]);
+            fitPeakInWindow(m_dataWS, spec, x_center, fitwindows[2 * i], fitwindows[2 * i + 1]);
           else
             fitPeak(m_dataWS, spec, x_center, m_inputPeakFWHM);
         }
@@ -919,8 +921,8 @@ namespace Algorithms
     *  @param xmin    Minimum x value to find the peak
     *  @param xmax    Maximum x value to find the peak
     */
-  void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum,
-                          const double centre_guess, const double xmin, const double xmax)
+  void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input, const int spectrum,
+                                  const double centre_guess, const double xmin, const double xmax)
   {
     // Check
     g_log.information() << "Fit Peak with given window:  Guessed center = " << centre_guess
@@ -1165,7 +1167,7 @@ namespace Algorithms
                                         double& in_bg0, double& in_bg1, double& in_bg2)
   {
     g_log.information() << "Fitting a peak assumed at " << input->dataX(spectrum)[i_centre]
-                        << " by high-background approach. \n";
+                        << " (index = " << i_centre << ") by high-background approach. \n";
 
     // Check
     if (i_min >= i_centre || i_max <= i_centre || i_min < 0)
@@ -1249,22 +1251,28 @@ namespace Algorithms
         addNonFitRecord(spectrum);
         return;
       }
-
-      // Peak is on the edge.  It is not possible to fit!
-      std::stringstream errmsg;
-      errmsg << "No idea how to deal with this!\n";
-      errmsg << "Spectrum " << spectrum << ": Find peak between " << rawX[i_min] << "(i = " << i_min
-             << ") and " << rawX[i_max] << "(i = " << i_max << ").";
-      errmsg << "\nError reason: " << errormessage;
-      errmsg << "Background: " << m_backgroundFunction->asString() << "\n";
-      for (size_t i = 0; i < static_cast<size_t>(numpts); ++i)
+      else
       {
-        errmsg << domain[i] << "\t\t" << backgroundvalues[i] << "\n";
+        // Peak is on the edge.  It is not possible to fit!
+        std::stringstream errmsg;
+        errmsg << "Unable to estimate peak parameter for ";
+        errmsg << "Spectrum " << spectrum << ": Atttemp to find peak between " << rawX[i_min] << "(i = " << i_min
+               << ") and " << rawX[i_max] << "(i = " << i_max << ").";
+        errmsg << "Assumed peak is at " << user_centre << ".";
+        errmsg << "\nError reason: " << errormessage;
+        /*
+        errmsg << "Background: " << m_backgroundFunction->asString() << "; Background points are as follow.\n";
+        for (size_t i = 0; i < static_cast<size_t>(numpts); ++i)
+        {
+          errmsg << domain[i] << "\t\t" << backgroundvalues[i] << "\n";
+        }
+        */
+
+        g_log.warning(errmsg.str());
+
+        addNonFitRecord(spectrum);
+        return;
       }
-
-      g_log.warning(errmsg.str());
-      throw std::runtime_error(errmsg.str());
-
     }
 
     // Create peak function
@@ -1851,8 +1859,10 @@ namespace Algorithms
              << "Estimated peak centre @ " << vecX[icentre] << "(" << icentre << ") with height = " << height
              << "; Lowest Y value = " << lowest
              << "; Output error: .  leftfwhm = " << leftfwhm << ", right fwhm = " << rightfwhm << ".\n";
+      /*
       for (size_t i = i_min; i <= i_max; ++i)
         errmsg << vecX[i] << "\t\t" << vecY[i] << ".\n";
+        */
       error = errmsg.str();
       g_log.warning(error);
       return false;
