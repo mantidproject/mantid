@@ -60,6 +60,7 @@ namespace MantidQt
       Qt::ItemFlags flags(const QModelIndex &index) const;
       void sort (int column, Qt::SortOrder);
       int numCharacters(const int column) const;
+      std::vector<int> defaultHideCols();
       ~QPeaksTableModel();
      signals:
       void peaksSorted(const std::string&, const bool);

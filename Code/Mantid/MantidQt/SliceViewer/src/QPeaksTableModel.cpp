@@ -1,7 +1,10 @@
-#include <MantidQtSliceViewer/QPeaksTableModel.h>
+#include "MantidQtSliceViewer/QPeaksTableModel.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
-#include <MantidKernel/ConfigService.h>
+#include "MantidGeometry/IComponent.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;
@@ -45,7 +48,7 @@ namespace MantidQt
     const int QPeaksTableModel::COL_DSPACING(10);
     const int QPeaksTableModel::COL_INT(11);
     const int QPeaksTableModel::COL_SIGMINT(12);
-     const int QPeaksTableModel::COL_INT_SIGINT(13);
+    const int QPeaksTableModel::COL_INT_SIGINT(13);
     const int QPeaksTableModel::COL_BINCOUNT(14);
     const int QPeaksTableModel::COL_BANKNAME(15);
     const int QPeaksTableModel::COL_ROW(16);
@@ -288,6 +291,74 @@ namespace MantidQt
     {
       if (!index.isValid()) return 0;
       return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    }
+
+    /**
+     * @return List of columns to hide by default.
+     */
+    std::vector<int> QPeaksTableModel::defaultHideCols()
+    {
+      std::vector<int> result;
+
+      // figure out if there are any rectangular detectors
+      Mantid::Geometry::Instrument_const_sptr instr = m_peaksWS->getInstrument();
+      { // shrink variable scope
+        std::vector<Mantid::detid_t> ids = instr->getDetectorIDs(true);
+        size_t numToCheck(ids.size());
+        if (numToCheck > 20) // arbitrary cutoff
+          numToCheck = 20;
+        bool hasRectDet(false);
+        const std::string RECT_DET("RectangularDetector");
+        for (size_t i = 0; i < numToCheck; ++i)
+        {
+          boost::shared_ptr<const Mantid::Geometry::IComponent> component = instr->getDetector(ids[i]);
+          if (component->type().compare(RECT_DET) == 0)
+          {
+            hasRectDet = true;
+            break;
+          }
+          else
+          {
+            component = component->getParent();
+            if (component->type().compare(RECT_DET) == 0)
+            {
+              hasRectDet = true;
+              break;
+            }
+          }
+        }
+      }
+
+      // only show bank name for SNS instruments
+      std::string instrName = instr->getName();
+      Mantid::Kernel::InstrumentInfo instrInfo
+          = Mantid::Kernel::ConfigService::Instance().getInstrument(instrName);
+      if (instrInfo.facility().name() != "SNS")
+        result.push_back(COL_BANKNAME);
+
+      // hide some columns based on the techniques
+      { // shrink variable scope
+        std::set<std::string> techniques = instrInfo.techniques();
+        // required for ???
+        const std::string SCD("Single Crystal Diffraction");
+        // required for showing final and delta energy
+        const std::string IGS("TOF Indirect Geometry Spectroscopy");
+        // required for showing initial and delta energy
+        const std::string DGS("TOF Direct Geometry Spectroscopy");
+        bool showEnergy(false);
+        if (techniques.find(DGS) == techniques.end())
+          result.push_back(COL_FINAL_ENERGY);
+        else
+          showEnergy = true;
+        if (techniques.find(IGS) == techniques.end())
+          result.push_back(COL_INITIAL_ENERGY);
+        else
+          showEnergy = true;
+        if (!showEnergy)
+          result.push_back(COL_ENERGY);
+      }
+
+      return result;
     }
 
     /// Destructor
