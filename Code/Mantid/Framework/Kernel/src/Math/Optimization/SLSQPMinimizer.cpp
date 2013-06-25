@@ -201,6 +201,7 @@ namespace Mantid { namespace Kernel {
 
 namespace
 {
+  ///@cond
 
   //---------------------------------------------------------------------------------------------------//
   //
@@ -229,6 +230,56 @@ namespace
     x = (*a >= 0 ? *a : - *a);
     return( *b >= 0 ? x : -x);
   }
+
+  // --------------------- Forward declarations of helpers ---------------------
+  int slsqpb_(int *, int *, int *,
+          int *, double *, double *, double *, double *,
+           double *, double *, double *, double *, int *
+          , int *, double *, double *, double *, double
+          *, double *, double *, double *, double *,
+          int *);
+  int dcopy___(int *n, double *dx, int *incx,
+      double *dy, int *incy);
+  int daxpy_sl__(int *n, double *da, double *dx,
+                 int *incx, double *dy, int *incy);
+  int lsq_(int *m, int *meq, int *n, int *nl,
+           int *la, double *l, double *g, double *a, double *
+           b, double *xl, double *xu, double *x, double *y,
+           double *w, int *jw, int *mode);
+  double ddot_sl__(int *n, double *dx, int *incx, double * dy,
+                   int *incy);
+  int dscal_sl__(int *n, double *da, double *dx,
+                 int *incx);
+  double linmin_(int *mode, double *ax, double *bx, double *
+                 f, double *tol);
+  double dnrm2___(int *n, double *dx, int *incx);
+  int ldl_(int *n, double *a, double *z__,
+           double *sigma, double *w);
+  int lsei_(double *c__, double *d__, double *e,
+            double *f, double *g, double *h__, int *lc, int *
+            mc, int *le, int *me, int *lg, int *mg, int *n,
+            double *x, double *xnrm, double *w, int *jw, int * mode);
+  int h12_(int *mode, int *lpivot, int *l1,
+           int *m, double *u, int *iue, double *up, double *c__,
+           int *ice, int *icv, int *ncv);
+  int hfti_(double *a, int *mda, int *m, int *n,
+            double *b, int *mdb, int *nb, double *tau, int
+            *krank, double *rnorm, double *h__, double *g, int *ip);
+  int lsi_(double *e, double *f, double *g,
+           double *h__, int *le, int *me, int *lg, int *mg,
+           int *n, double *x, double *xnorm, double *w, int *jw,
+           int *mode);
+  int ldp_(double *g, int *mg, int *m, int *n,
+           double *h__, double *x, double *xnorm, double *w,
+           int *index, int *mode);
+  int nnls_(double *a, int *mda, int *m, int *n,
+            double *b, double *x, double *rnorm, double *w,
+            double *z__, int *index, int *mode);
+  int dsrotg_(double *da, double *db, double *c__,
+              double *s);
+  int dsrot_(int *n, double *dx, int *incx,
+             double *dy, int *incy, double *c__, double *s);
+  //----------------------------------------------------------------------------
 
   /*      ALGORITHM 733, COLLECTED ALGORITHMS FROM ACM. */
   /*      TRANSACTIONS ON MATHEMATICAL SOFTWARE, */
@@ -263,7 +314,7 @@ namespace
   /* *********************************************************************** */
   /*                              optimizer                               * */
   /* *********************************************************************** */
-  /* Subroutine */ int slsqp_(int *m, int *meq, int *la, int *n,
+  int slsqp_(int *m, int *meq, int *la, int *n,
      double *x, double *xl, double *xu, double *f,
     double *c__, double *g, double *a, double *acc,
     int *iter, int *mode, double *w, int *l_w__, int *
@@ -274,12 +325,6 @@ namespace
 
       /* Local variables */
       static int n1, il, im, ir, is, iu, iv, iw, ix, mineq;
-      extern /* Subroutine */ int slsqpb_(int *, int *, int *,
-        int *, double *, double *, double *, double *,
-         double *, double *, double *, double *, int *
-        , int *, double *, double *, double *, double
-        *, double *, double *, double *, double *,
-        int *);
 
   /*   SLSQP       S EQUENTIAL  L EAST  SQ UARES  P ROGRAMMING */
   /*            TO SOLVE GENERAL NONLINEAR OPTIMIZATION PROBLEMS */
@@ -503,7 +548,7 @@ namespace
       return 0;
   } /* slsqp_ */
 
-  /* Subroutine */ int slsqpb_(int *m, int *meq, int *la, int *
+  int slsqpb_(int *m, int *meq, int *la, int *
     n, double *x, double *xl, double *xu, double *f,
     double *c__, double *g, double *a, double *acc,
     int *iter, int *mode, double *r__, double *l,
@@ -524,31 +569,15 @@ namespace
       double d__1, d__2;
 
       /* Local variables */
-      extern /* Subroutine */ int dscal_sl__(int *, double *,
-        double *, int *), daxpy_sl__(int *, double *,
-        double *, int *, double *, int *);
       static int i__, j, k;
       static double t, f0, h1, h2, h3, h4;
       static int n1, n2, n3;
       static double t0, gs;
-      extern /* Subroutine */ int ldl_(int *, double *, double *,
-        double *, double *);
       static double tol;
-      extern /* Subroutine */ int lsq_(int *, int *, int *, int
-        *, int *, double *, double *, double *,
-        double *, double *, double *, double *,
-        double *, double *, int *, int *);
       static int line;
       static double alpha;
-      extern double dnrm2___(int *, double *, int *);
       static int iexact;
-      extern /* Subroutine */ int dcopy___(int *, double *, int *,
-        double *, int *);
-      extern double linmin_(int *, double *, double *,
-        double *, double *);
       static int incons, ireset, itermx;
-      extern double ddot_sl__(int *, double *, int *,
-        double *, int *);
 
   /*   NONLINEAR PROGRAMMING BY SOLVING SEQUENTIALLY QUADRATIC PROGRAMS */
   /*        -  L1 - LINE SEARCH,  POSITIVE DEFINITE  BFGS UPDATE  - */
@@ -882,7 +911,7 @@ namespace
       return 0;
   } /* slsqpb_ */
 
-  /* Subroutine */ int lsq_(int *m, int *meq, int *n, int *nl,
+  int lsq_(int *m, int *meq, int *n, int *nl,
     int *la, double *l, double *g, double *a, double *
     b, double *xl, double *xu, double *x, double *y,
     double *w, int *jw, int *mode)
@@ -897,21 +926,11 @@ namespace
       double d__1;
 
       /* Local variables */
-      extern /* Subroutine */ int dscal_sl__(int *, double *,
-        double *, int *);
       static int i__, i1, i2, i3, i4, m1, n1, n2, n3, ic, id, ie, if__, ig,
         ih, il, im, ip, iu, iw;
       static double diag;
-      extern /* Subroutine */ int lsei_(double *, double *, double *
-        , double *, double *, double *, int *, int *,
-        int *, int *, int *, int *, int *, double
-        *, double *, double *, int *, int *);
       static int mineq;
       static double xnorm;
-      extern /* Subroutine */ int dcopy___(int *, double *, int *,
-        double *, int *);
-      extern double ddot_sl__(int *, double *, int *,
-        double *, int *);
 
   /*   MINIMIZE with respect to X */
   /*             ||E*X - F|| */
@@ -1080,7 +1099,7 @@ namespace
       return 0;
   } /* lsq_ */
 
-  /* Subroutine */ int lsei_(double *c__, double *d__, double *e,
+  int lsei_(double *c__, double *d__, double *e,
     double *f, double *g, double *h__, int *lc, int *
     mc, int *le, int *me, int *lg, int *mg, int *n,
     double *x, double *xnrm, double *w, int *jw, int *
@@ -1099,22 +1118,8 @@ namespace
       /* Local variables */
       static int i__, j, k, l;
       static double t;
-      extern /* Subroutine */ int h12_(int *, int *, int *, int
-        *, double *, int *, double *, double *, int *,
-         int *, int *);
       static int ie, if__, ig, iw, mc1;
-      extern /* Subroutine */ int lsi_(double *, double *, double *,
-         double *, int *, int *, int *, int *,
-        int *, double *, double *, double *, int *,
-        int *), hfti_(double *, int *, int *, int *,
-        double *, int *, int *, double *, int *,
-        double *, double *, double *, int *);
       static int krank;
-      extern double dnrm2___(int *, double *, int *);
-      extern /* Subroutine */ int dcopy___(int *, double *, int *,
-        double *, int *);
-      extern double ddot_sl__(int *, double *, int *,
-        double *, int *);
 
   /*     FOR MODE=1, THE SUBROUTINE RETURNS THE SOLUTION X OF */
   /*     EQUALITY & INEQUALITY CONSTRAINED LEAST SQUARES PROBLEM LSEI : */
@@ -1299,10 +1304,10 @@ namespace
       return 0;
   } /* lsei_ */
 
-  /* Subroutine */ int lsi_(double *e, double *f, double *g,
-    double *h__, int *le, int *me, int *lg, int *mg,
-    int *n, double *x, double *xnorm, double *w, int *
-    jw, int *mode)
+  int lsi_(double *e, double *f, double *g,
+           double *h__, int *le, int *me, int *lg, int *mg,
+           int *n, double *x, double *xnorm, double *w, int *
+           jw, int *mode)
   {
       /* Initialized data */
 
@@ -1314,17 +1319,8 @@ namespace
       double d__1;
 
       /* Local variables */
-      extern /* Subroutine */ int daxpy_sl__(int *, double *,
-        double *, int *, double *, int *);
       static int i__, j;
       static double t;
-      extern /* Subroutine */ int h12_(int *, int *, int *, int
-        *, double *, int *, double *, double *, int *,
-         int *, int *), ldp_(double *, int *, int *,
-        int *, double *, double *, double *, double *,
-         int *, int *);
-      extern double dnrm2___(int *, double *, int *), ddot_sl__(
-        int *, double *, int *, double *, int *);
 
   /*     FOR MODE=1, THE SUBROUTINE RETURNS THE SOLUTION X OF */
   /*     INEQUALITY CONSTRAINED LINEAR LEAST SQUARES PROBLEM: */
@@ -1430,7 +1426,7 @@ namespace
       return 0;
   } /* lsi_ */
 
-  /* Subroutine */ int ldp_(double *g, int *mg, int *m, int *n,
+  int ldp_(double *g, int *mg, int *m, int *n,
     double *h__, double *x, double *xnorm, double *w,
     int *index, int *mode)
   {
@@ -1444,20 +1440,10 @@ namespace
       double d__1;
 
       /* Local variables */
-      extern /* Subroutine */ int daxpy_sl__(int *, double *,
-        double *, int *, double *, int *);
       static int i__, j, n1, if__, iw, iy, iz;
       static double fac;
-      extern /* Subroutine */ int nnls_(double *, int *, int *,
-        int *, double *, double *, double *, double *,
-         double *, int *, int *);
       static double rnorm;
-      extern double dnrm2___(int *, double *, int *);
-      extern /* Subroutine */ int dcopy___(int *, double *, int *,
-        double *, int *);
       static int iwdual;
-      extern double ddot_sl__(int *, double *, int *,
-        double *, int *);
 
   /*                     T */
   /*     MINIMIZE   1/2 X X    SUBJECT TO   G * X >= H. */
@@ -1567,9 +1553,9 @@ namespace
       return 0;
   } /* ldp_ */
 
-  /* Subroutine */ int nnls_(double *a, int *mda, int *m, int *
-    n, double *b, double *x, double *rnorm, double *w,
-    double *z__, int *index, int *mode)
+  int nnls_(double *a, int *mda, int *m, int *
+            n, double *b, double *x, double *rnorm, double *w,
+            double *z__, int *index, int *mode)
   {
       /* Initialized data */
 
@@ -1582,28 +1568,15 @@ namespace
       double d__1;
 
       /* Local variables */
-      extern /* Subroutine */ int daxpy_sl__(int *, double *,
-        double *, int *, double *, int *);
       static double c__;
       static int i__, j, k, l;
       static double s, t;
-      extern /* Subroutine */ int h12_(int *, int *, int *, int
-        *, double *, int *, double *, double *, int *,
-         int *, int *);
       static int ii, jj, ip, iz, jz;
       static double up;
       static int iz1, iz2, npp1, iter;
       static double wmax, alpha, asave;
       static int itmax, izmax, nsetp;
-      extern /* Subroutine */ int dsrot_(int *, double *, int *,
-        double *, int *, double *, double *);
       static double unorm;
-      extern double dnrm2___(int *, double *, int *);
-      extern /* Subroutine */ int dcopy___(int *, double *, int *,
-        double *, int *), dsrotg_(double *, double *,
-        double *, double *);
-      extern double ddot_sl__(int *, double *, int *,
-        double *, int *);
 
   /*     C.L.LAWSON AND R.J.HANSON, JET PROPULSION LABORATORY: */
   /*     'SOLVING LEAST SQUARES PROBLEMS'. PRENTICE-HALL.1974 */
@@ -1845,7 +1818,7 @@ namespace
       return 0;
   } /* nnls_ */
 
-  /* Subroutine */ int hfti_(double *a, int *mda, int *m, int *
+  int hfti_(double *a, int *mda, int *m, int *
     n, double *b, int *mdb, int *nb, double *tau, int
     *krank, double *rnorm, double *h__, double *g, int *
     ip)
@@ -1861,14 +1834,9 @@ namespace
 
       /* Local variables */
       static int i__, j, k, l;
-      extern /* Subroutine */ int h12_(int *, int *, int *, int
-        *, double *, int *, double *, double *, int *,
-         int *, int *);
       static int jb, kp1;
       static double tmp, hmax;
       static int lmax, ldiag;
-      extern double dnrm2___(int *, double *, int *), ddot_sl__(
-        int *, double *, int *, double *, int *);
 
   /*     RANK-DEFICIENT LEAST SQUARES ALGORITHM AS DESCRIBED IN: */
   /*     C.L.LAWSON AND R.J.HANSON, JET PROPULSION LABORATORY, 1973 JUN 12 */
@@ -2074,7 +2042,7 @@ namespace
       return 0;
   } /* hfti_ */
 
-  /* Subroutine */ int h12_(int *mode, int *lpivot, int *l1,
+  int h12_(int *mode, int *lpivot, int *l1,
     int *m, double *u, int *iue, double *up, double *
     c__, int *ice, int *icv, int *ncv)
   {
@@ -2207,7 +2175,7 @@ namespace
       return 0;
   } /* h12_ */
 
-  /* Subroutine */ int ldl_(int *n, double *a, double *z__,
+  int ldl_(int *n, double *a, double *z__,
     double *sigma, double *w)
   {
       /* Initialized data */
@@ -2530,7 +2498,7 @@ namespace
   } /* linmin_ */
 
   /* ## Following a selection from BLAS Level 1 */
-  /* Subroutine */ int daxpy_sl__(int *n, double *da, double *dx,
+  int daxpy_sl__(int *n, double *da, double *dx,
     int *incx, double *dy, int *incy)
   {
       /* System generated locals */
@@ -2602,7 +2570,7 @@ namespace
       return 0;
   } /* daxpy_sl__ */
 
-  /* Subroutine */ int dcopy___(int *n, double *dx, int *incx,
+  int dcopy___(int *n, double *dx, int *incx,
     double *dy, int *incy)
   {
       /* System generated locals */
@@ -2978,7 +2946,7 @@ namespace
       return ret_val;
   } /* dnrm2___ */
 
-  /* Subroutine */ int dsrot_(int *n, double *dx, int *incx,
+  int dsrot_(int *n, double *dx, int *incx,
     double *dy, int *incy, double *c__, double *s)
   {
       /* System generated locals */
@@ -3033,7 +3001,7 @@ namespace
       return 0;
   } /* dsrot_ */
 
-  /* Subroutine */ int dsrotg_(double *da, double *db, double *c__,
+  int dsrotg_(double *da, double *db, double *c__,
     double *s)
   {
       /* Initialized data */
@@ -3081,7 +3049,7 @@ namespace
       return 0;
   } /* dsrotg_ */
 
-  /* Subroutine */ int dscal_sl__(int *n, double *da, double *dx,
+  int dscal_sl__(int *n, double *da, double *dx,
     int *incx)
   {
       /* System generated locals */
@@ -3140,6 +3108,8 @@ namespace
       }
       return 0;
   } /* dscal_sl__ */
+
+  ///@endcond
 
 } // <anonymous>
 
