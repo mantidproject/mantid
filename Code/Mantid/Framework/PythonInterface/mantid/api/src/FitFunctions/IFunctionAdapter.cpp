@@ -14,7 +14,7 @@ namespace Mantid
 
     /**
      * Construct the wrapper and stores the reference to the PyObject
-     * * @param self A reference to the calling Python object
+     * @param self A reference to the calling Python object
      */
     IFunctionAdapter::IFunctionAdapter(PyObject* self)
       : IFunction(), m_name(self->ob_type->tp_name), m_self(self)
@@ -125,9 +125,10 @@ namespace Mantid
 
     /**
      * Sets the value of i-th active parameter. If this functions is overridden
-     * in Python then it should set the value of the ith active parameter
-     * If calls the base class function
+     * in Python then it should set the value of the ith active parameter.
+     * If not calls the base class function
      * @param i The index of the parameter
+     * @param value The new value of the active parameter
      */
     void IFunctionAdapter::setActiveParameter(size_t i, double value)
     {

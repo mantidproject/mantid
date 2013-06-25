@@ -55,9 +55,9 @@ namespace Mantid
       /// Get a named attribute value
       PyObject * getAttributeValue(const std::string & name);
       /// Returns the attribute's value as a Python object
-      PyObject * getAttributeValue(const API::IFunction::Attribute & att);
+      PyObject * getAttributeValue(const API::IFunction::Attribute & attr);
       /// Called by the framework when an attribute has been set
-      void setAttribute(const std::string& attName,const API::IFunction::Attribute& att);
+      void setAttribute(const std::string& attName,const API::IFunction::Attribute& attr);
 
       // Each overload of declareParameter requires a different name as we
       // can't use a function pointer with a virtual base class
@@ -65,8 +65,8 @@ namespace Mantid
       /**
        * Declare a named parameter with initial value & description
        * @param name :: The name of the parameter
-       * @initValue name :: The initial value
-       * @description name :: A short description of the parameter
+       * @param initValue :: The initial value
+       * @param description :: A short description of the parameter
        */
       inline void declareFitParameter(const std::string& name, double initValue,
                                       const std::string& description)
@@ -77,7 +77,7 @@ namespace Mantid
       /**
        * Declare a named parameter with initial value
        * @param name :: The name of the parameter
-       * @initValue name :: The initial value
+       * @param initValue :: The initial value
        */
       inline void declareFitParameterNoDescr(const std::string& name, double initValue)
       {
