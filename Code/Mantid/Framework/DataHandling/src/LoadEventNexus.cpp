@@ -1754,7 +1754,7 @@ bool LoadEventNexus::LoadInstrument(const std::string &nexusfilename, MatrixWork
   // Open the instrument
    nxfile.openGroup("instrument", "NXinstrument");
 
-   bool foundInstrument = LoadInstrumentFromNexus( &nxfile, localWorkspace);
+   bool foundInstrument = runLoadIDFFromNexus( &nxfile, localWorkspace);
 
    if(!foundInstrument) foundInstrument = runLoadInstrument( nexusfilename, localWorkspace, top_entry_name, alg );
 
@@ -1768,7 +1768,7 @@ bool LoadEventNexus::LoadInstrument(const std::string &nexusfilename, MatrixWork
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  *  @return true if successful
  */
-bool LoadEventNexus::LoadInstrumentFromNexus(::NeXus::File * cppFile, API::MatrixWorkspace_sptr localWorkspace)
+bool LoadEventNexus::runLoadIDFFromNexus(::NeXus::File * cppFile, API::MatrixWorkspace_sptr localWorkspace)
 {
    // Code to be added here. In meantime, fail to find instrument
    return false;
