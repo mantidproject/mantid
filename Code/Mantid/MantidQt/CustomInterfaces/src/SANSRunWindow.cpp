@@ -2996,7 +2996,10 @@ void SANSRunWindow::resetDefaultOutput(const QString & wsName)
 
   if ( ! m_userFname )
   {
-    m_uiForm.outfile_edit->setText(wsName);
+    if (m_uiForm.detbank_sel->currentIndex() == 2)// both selected
+      m_uiForm.outfile_edit->setText(""); 
+    else
+      m_uiForm.outfile_edit->setText(wsName);
   }
 }
 /** Passes information about the selected transmission runs to the Python objects
