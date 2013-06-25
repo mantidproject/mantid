@@ -193,6 +193,14 @@ namespace Mantid
       static void loadEntryMetadata(const std::string &nexusfilename, Mantid::API::MatrixWorkspace_sptr WS,
           const std::string &entry_name);
 
+      /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file 
+      static bool LoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+          const std::string & top_entry_name, Algorithm * alg);
+
+      /// Load instrument for Nexus file
+      static bool LoadInstrumentFromNexus(::NeXus::File * cppFile, API::MatrixWorkspace_sptr localWorkspace);
+
+      /// Load instrument from IDF file specified by Nexus file
       static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
           const std::string & top_entry_name, Algorithm * alg);
 

@@ -1733,15 +1733,54 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
   file.close();
 }
 
+//-----------------------------------------------------------------------------
+/** Load the instrument from the nexus file or if not found from the IDF file
+ *  specified by the info in the Nexus file
+ *
+ *  @param nexusfilename :: The Nexus file name
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+ *  @param top_entry_name :: entry name at the top of the Nexus file
+ *  @param alg :: Handle of the algorithm 
+ *  @return true if successful
+ */
+bool LoadEventNexus::LoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
+    const std::string & top_entry_name, Algorithm * alg) 
+{
 
+   // Get the instrument group in the Nexus file
+   ::NeXus::File nxfile(nexusfilename);
+  //Start with the base entry
+   nxfile.openGroup(top_entry_name, "NXentry");
+  // Open the instrument
+   nxfile.openGroup("instrument", "NXinstrument");
+
+   bool foundInstrument = LoadInstrumentFromNexus( &nxfile, localWorkspace);
+
+   if(!foundInstrument) foundInstrument = runLoadInstrument( nexusfilename, localWorkspace, top_entry_name, alg );
+
+   return foundInstrument;
+}
 
 //-----------------------------------------------------------------------------
-/** Load the instrument geometry file using info in the NXS file.
+/** Load the instrument from the nexus file
+ *
+ *  @param nxfile :: C++ interface to Nexus file with instrumentr group opened
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+ *  @return true if successful
+ */
+bool LoadEventNexus::LoadInstrumentFromNexus(::NeXus::File * cppFile, API::MatrixWorkspace_sptr localWorkspace)
+{
+   // Code to be added here. In meantime, fail to find instrument
+   return false;
+}
+
+//-----------------------------------------------------------------------------
+/** Load the instrument defination file specified by info in the NXS file.
  *
  *  @param nexusfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  *  @param top_entry_name :: entry name at the top of the NXS file
- *  @param alg :: Handle of an algorithm for logging access
+ *  @param alg :: Handle of the algorithm 
  *  @return true if successful
  */
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
