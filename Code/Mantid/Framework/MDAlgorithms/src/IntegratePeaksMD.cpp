@@ -202,7 +202,7 @@ namespace MDAlgorithms
     bool cylinderBool = getProperty("Cylinder");
     if (cylinderBool)
     {
-        numSteps = 15;
+        numSteps = 100;
         deltaQ = cylinderLength/static_cast<double>(numSteps-1);
         size_t histogramNumber = peakWS->getNumberPeaks();
         Workspace_sptr wsFit= WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,numSteps,numSteps);

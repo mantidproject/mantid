@@ -1417,20 +1417,28 @@ namespace MDEvents
       // Is this box fully contained?
       if (verticesContained[i] >= maxVertices)
       {
-        coord_t boxCenter[nd];
-        box->getCenter(boxCenter);
-        // transform center of box to cylinder
-        coord_t out[nd];
-        radiusTransform.apply(boxCenter, out);
-        // add event to appropriate y channel
-        size_t xchannel = static_cast<int>(floor((out[1] / deltaQ))+0.5) + (numSteps / 2);
-        if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += box->getSignal();
+		std::vector<coord_t> coordTable;
+		size_t nColumns;
+		box->getEventsData(coordTable, nColumns);
+		size_t nEvents = coordTable.size()/nColumns;
+    	for (size_t k=0; k<nEvents; k++)
+    	{
+    		coord_t eventCenter[nd];
+    		eventCenter[0] = coordTable[k*nColumns+2];
+    		eventCenter[1] = coordTable[k*nColumns+3];
+    		eventCenter[2] = coordTable[k*nColumns+4];
+    		coord_t out[nd];
+    		radiusTransform.apply(eventCenter, out);
+			// add event to appropriate y channel
+			size_t xchannel = static_cast<int>(floor((out[1] / deltaQ))+0.5) + (numSteps / 2);
+			if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += coordTable[k*nColumns];
+    	}
+        //box->releaseEvents();
         // Use the integrated sum of signal in the box
         signal += box->getSignal();
         errorSquared += box->getErrorSquared();
 
 //        std::cout << "box at " << i << " (" << box->getExtentsStr() << ") is fully contained. Vertices = " << verticesContained[i] << "\n";
-
         numFullyContained++;
         // Go on to the next box
         continue;
