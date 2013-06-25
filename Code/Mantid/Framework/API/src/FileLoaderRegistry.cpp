@@ -1,5 +1,6 @@
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 
 #include <Poco/File.h>
 
@@ -13,7 +14,7 @@ namespace Mantid
     /**
      * Creates an empty registry
      */
-    FileLoaderRegistry::FileLoaderRegistry()
+    FileLoaderRegistry::FileLoaderRegistry() : m_log(Kernel::Logger::get("FileLoaderRegistry"))
     {
     }
 
@@ -29,6 +30,7 @@ namespace Mantid
         throw std::invalid_argument("FileLoaderRegistry::subscribe - Cannot subscribe '"
             + name + "'. An entry with that name already exists");
       }
+      m_log.debug() << "Registered '" << name << "' as file loader\n";
     }
 
     /**
@@ -43,6 +45,8 @@ namespace Mantid
       {
         throw std::invalid_argument("FileLoaderRegistry::chooserLoader - Cannot open file '" + filename + "'");
       }
+      m_log.debug() << "Attempting to find loader for '" << filename << "'\n";
+      throw std::runtime_error("not implemented yet");
     }
 
     //----------------------------------------------------------------------------------------------

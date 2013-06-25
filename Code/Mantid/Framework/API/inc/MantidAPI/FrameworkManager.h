@@ -1,5 +1,5 @@
-#ifndef MANTID_KERNEL_FRAMEWORKMANAGER_H_
-#define MANTID_KERNEL_FRAMEWORKMANAGER_H_
+#ifndef MANTID_API_FRAMEWORKMANAGER_H_
+#define MANTID_API_FRAMEWORKMANAGER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -11,6 +11,7 @@
 #endif
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidKernel/SingletonHolder.h"
 #include <boost/shared_ptr.hpp>
 
@@ -89,6 +90,11 @@ namespace Mantid
       /// Creates an algorithm and runs it, with variadic arguments
       boost::shared_ptr<IAlgorithm> exec(const std::string& algorithmName, int count, ...);
 
+      /// Returns a const version of the main registry of file loader algorithms
+      inline const FileLoaderRegistry & fileLoaderRegistry() const { return m_fileLoaderRegistry; }
+      /// Returns a non-const version of the main registry of file loader algorithms
+      inline FileLoaderRegistry & fileLoaderRegistry() { return m_fileLoaderRegistry; }
+
       /// Returns a shared pointer to the workspace requested
       Workspace* getWorkspace(const std::string& wsName);
 
@@ -116,9 +122,12 @@ namespace Mantid
       /// Silence NeXus output
       void disableNexusOutput();
 
-      Kernel::Logger& g_log;    ///< Reference to the logger class
+      /// The registry of FileLoader algorithms
+      FileLoaderRegistry m_fileLoaderRegistry;
+      /// Reference to the logger class
+      Kernel::Logger& g_log;
 
-#ifdef MPI_BUILD
+      #ifdef MPI_BUILD
       /** Member variable that initialises the MPI environment on construction (in the
        *  FrameworkManager constructor) and finalises it on destruction.
        *  The class has no non-static member functions, so is not exposed in the class interface.
@@ -137,4 +146,4 @@ namespace Mantid
   } // namespace Kernel
 } // namespace Mantid
 
-#endif /*MANTID_KERNEL_FRAMEWORKMANAGER_H_*/
+#endif /*MANTID_API_FRAMEWORKMANAGER_H_*/

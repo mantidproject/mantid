@@ -8,11 +8,20 @@
 
 namespace Mantid
 {
+  // Forward declaration
+  namespace Kernel
+  {
+    class Logger;
+  }
   namespace API
   {
 
     /**
+    Keeps a registry of algorithm's that are file loading algorithms to allow them to be searched
+    to find the correct one to load a particular file. Uses FileLoaderPicker to do the most of the work
 
+    A macro, DECLARE_FILELOADER_ALGORITHM is defined in RegisterFileLoader.h. Use this in place of the standard
+    DECLARE_ALGORITHM macro
 
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -50,6 +59,8 @@ namespace Mantid
     private:
       /// The registered names
       std::set<std::string> m_names;
+      /// Reference to a logger
+      Kernel::Logger & m_log;
     };
 
   } // namespace API
