@@ -7,6 +7,11 @@
 // Define helper functions to create test workspaces with appropriate instruments set up
 namespace ComptonProfileTestHelpers
 {
+  struct ones
+  {
+    double operator()(const double, size_t) { return 1.0; } // don't care about Y values, just use 1.0 everywhere
+  };
+
   static Mantid::API::MatrixWorkspace_sptr createSingleSpectrumTestWorkspace(const double x0, const double x1, const double dx)
   {
     using Mantid::Kernel::V3D;
@@ -14,12 +19,8 @@ namespace ComptonProfileTestHelpers
 
     int nhist(1);
     bool isHist(false);
-    struct func
-    {
-      double operator()(const double, size_t) { return 1.0; } // don't care about Y values, just use 1.0 everywhere
-    };
 
-    auto ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(func(), nhist, x0,x1,dx,isHist);
+    auto ws2d = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(ones(), nhist, x0,x1,dx,isHist);
     // Requires an instrument.
     auto inst = boost::make_shared<Instrument>();
     ws2d->setInstrument(inst);
