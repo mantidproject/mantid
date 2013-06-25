@@ -29,6 +29,7 @@ class vtkDataSetToNonOrthogonalDataSetTest : public CxxTest::TestSuite
 private:
 
   std::string createMantidWorkspace(bool nonUnityTransform,
+                                    bool wrongCoords = false,
                                     bool forgetUB = false,
                                     bool forgetWmat = false,
                                     bool forgetAffmat = false,
@@ -38,6 +39,16 @@ private:
     // information necessary for the non-orthogonal axes
     std::string wsName = "simpleWS";
     IMDEventWorkspace_sptr ws = makeAnyMDEW<MDEvent<4>, 4>(1, 0.0, 1.0, 1, wsName);
+
+    // Set the coordinate system
+    if (!wrongCoords)
+    {
+      ws->setCoordinateSystem(HKL);
+    }
+    else
+    {
+      ws->setCoordinateSystem(QSample);
+    }
 
     // Set the UB matrix
     ExperimentInfo_sptr expInfo = ExperimentInfo_sptr(new ExperimentInfo());
@@ -230,7 +241,7 @@ public:
     ds->Delete();
   }
 
-  void testThrowsSimpleDatasetNoUB()
+  void testThrowsSimpleDatasetWrongCoords()
   {
     std::string wsName = createMantidWorkspace(false, true);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
@@ -239,7 +250,7 @@ public:
     ds->Delete();
   }
 
-  void testThrowsSimpleDatasetNoWMatrix()
+  void testThrowsSimpleDatasetNoUB()
   {
     std::string wsName = createMantidWorkspace(false, false, true);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
@@ -248,9 +259,18 @@ public:
     ds->Delete();
   }
 
-  void testNoThrowsSimpleDataSetNoAffineMatrix()
+  void testThrowsSimpleDatasetNoWMatrix()
   {
     std::string wsName = createMantidWorkspace(false, false, false, true);
+    vtkUnstructuredGrid *ds = createSingleVoxelPoints();
+    vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
+    TS_ASSERT_THROWS(converter.execute(), std::invalid_argument);
+    ds->Delete();
+  }
+
+  void testNoThrowsSimpleDataSetNoAffineMatrix()
+  {
+    std::string wsName = createMantidWorkspace(false, false, false, false, true);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
     TS_ASSERT_THROWS_NOTHING(converter.execute());
@@ -300,7 +320,7 @@ public:
 
   void testScaledSimpleDataset()
   {
-    std::string wsName = createMantidWorkspace(false, false, false, false, 2.0);
+    std::string wsName = createMantidWorkspace(false, false, false, false, false, 2.0);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
     TS_ASSERT_THROWS_NOTHING(converter.execute());
@@ -310,7 +330,7 @@ public:
 
   void testScaledNonUnitySimpleDataset()
   {
-    std::string wsName = createMantidWorkspace(true, false, false, false, 2.0);
+    std::string wsName = createMantidWorkspace(true, false, false, false, false, 2.0);
     vtkUnstructuredGrid *ds = createSingleVoxelPoints();
     vtkDataSetToNonOrthogonalDataSet converter(ds, wsName);
     TS_ASSERT_THROWS_NOTHING(converter.execute());
