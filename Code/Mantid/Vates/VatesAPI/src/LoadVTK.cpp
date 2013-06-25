@@ -48,7 +48,7 @@ support rebinning in-situ as part of the visualisation process.
 #include "MantidKernel/Memory.h"
 #include <boost/make_shared.hpp>
 #include <vtkStructuredPointsReader.h>
-#include <vtkStructuredPoints.h>
+#include "MantidVatesAPI/vtkStructuredPoints_Silent.h"
 #include <vtkPointData.h>
 #include <vtkDataArray.h>
 #include <vtkUnsignedCharArray.h>
