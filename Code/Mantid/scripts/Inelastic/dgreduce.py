@@ -42,7 +42,7 @@ def help(keyword=None) :
     Reducer.help(keyword)
 
 
-def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**kwargs):
+def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=None,**kwargs):
     """
     arb_units(wb_run,sample_run,ei_guess,rebin,mapfile,**kwargs)
     
@@ -195,9 +195,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
 
 
     # map file given in parameters overrides default map file
-    if map_file != None :
+    if map_file != 'default' :
         Reducer.map_file = map_file
-
     # defaults can be None too, but can be a file 
     if  Reducer.map_file == None:      
         Reducer.log('one2one map selected')
@@ -244,26 +243,12 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
     if monovan_run != None :
         if Reducer.mono_correction_factor == None :
             if Reducer.use_sam_msk_on_monovan == True:
-                Reducer.log('  Applying sample run mask to mono van NOT IMPLEMENTED')
-                #TODO:
-                #monovan_ws=common.load_run(monovan_run)
-                #MaskDetectors(Workspace=monovan_ws, MaskedWorkspace=masking)
-                #if wb_for_monovanadium != wb_run:
-                #    wb_for_monovan_ws=common.load_run(wb_for_monovanadium)
-                #    MaskDetectors(Workspace=wb_for_monovan_ws, MaskedWorkspace=masking)
+                Reducer.log('  Applying sample run mask to mono van')
             else:
                 print '########### Run diagnose for monochromatic vanadium run ##############'
                 masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
                                          second_white = None,variation=1.1,print_results=True)
 
-                if wb_for_monovanadium != wb_run:
-                    pass
-                    # combine monovan_run and sample_run masks
-                    #TODO
-                     #MaskDetectors(Workspace=monovan_run,MaskedWorkspace=masking)
-                    # MaskDetectors(Workspace=sample_run,MaskedWorkspace=masking2)
-                else: # masks have already been combined through common wb_run
-                    pass
                 masking +=  masking2
     
 
@@ -272,7 +257,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
 
     Reducer.spectra_masks=masking
     # estimate and report the number of failing detectors
-    failed_sp_list,nSpectra = get_failed_spectra_list(masking)
+    failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
     nMaskedSpectra = len(failed_sp_list)
     print 'Diag processed workspace with {0:d} spectra and found {1:d} bad spectra'.format(nSpectra,nMaskedSpectra)
      #Run the conversion first on the sample
@@ -303,7 +288,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file=None,monovan_run=None,**
 
 
 
-def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file,monovan_mapfile,**kwargs):
+def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
     """     
     dgreduce.abs_units(wb_run          Whitebeam run number or file name or workspace
                   sample_run          Sample run run number or file name or workspace       
@@ -440,7 +425,7 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
         if Reducer.monovan_integr_range is None: # integration in the range relative to incident energy
             Reducer.monovan_integr_range = [Reducer.monovan_lo_frac*ei_guess,Reducer.monovan_hi_frac*ei_guess]
         Reducer.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######')
-        Reducer.log('      Using absolute units vanadion integration range : '+str(Reducer.monovan_integr_range))
+        Reducer.log('      Using absolute units vanadium integration range : '+str(Reducer.monovan_integr_range))
        #now on the mono_vanadium run swap the mapping file
         map_file            = Reducer.map_file;
         Reducer.map_file    = Reducer.monovan_mapfile;

@@ -256,9 +256,9 @@ class DirectEnergyConversion(object):
         if result_name is None:
             result_name = common.create_resultname(mono_run, prefix=self.instr_name)
 
-        self.workspaces_list['sample_ws']=self._do_mono(sample_data, sample_data, result_name, ei_guess, 
+        self.workspace_list['sample_ws']=self._do_mono(sample_data, sample_data, result_name, ei_guess, 
                                   white_run, map_file, spectra_masks, Tzero)
-        return self.workspaces_list['sample_ws']
+        return self.workspace_list['sample_ws']
 
 
 # -------------------------------------------------------------------------------------------
@@ -695,7 +695,7 @@ class DirectEnergyConversion(object):
         # if ext is none, no need to write anything
         if len(ext) == 1 and ext[0] == None :
             return
-        self.psi = 1000000; # for test
+        #self.psi = 1000000; # for test
         save_path = os.path.splitext(save_path)[0]
         for ext in formats:
             if ext in self.__save_formats :
@@ -750,22 +750,41 @@ class DirectEnergyConversion(object):
 
     @save_format.setter
     def save_format(self, value):
-        if value not in self.__save_formats :
-            self.log("Trying to set unknown format: \""+str(value)+"\" No saving will occur")
-            value = None
+        if value is None:
+            self._save_format = None
+
+        if isinstance(value,str):
+            if value not in self.__save_formats :
+                self.log("Trying to set unknown format: \""+str(value)+"\" No saving will occur")
+                value = None
+        elif isinstance(value,list):
+            if len(value) > 0 :
+                value = value[0]
+            else:
+                value = None
+            self.save_format = value
+            
         self._save_format = value
 
     @property 
     def energy_bins(self):
         return self._energy_bins;
+
     @energy_bins.setter
     def energy_bins(self,value):
-       if value != None:
+       if value != None:          
           if isinstance(value,str):
              list = str.split(value,',');
-             value = [float(list[0]),float(list[1]),float(list[2])]
-          if len(value) != 3:
-             raise KeyError("Energy_bin value has to be either list of 3 numbers or string, representing these three number separated by commas")
+             nBlocks = len(list);
+             for i in xrange(0,nBlocks,3):
+                value = [float(list[i]),float(list[i+1]),float(list[i+2])]
+          else: 
+              nBlocks = len(value);
+          if nBlocks%3 != 0:
+               raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
+
+
+
 
        self._energy_bins= value;
     @property 
@@ -1005,6 +1024,8 @@ class DirectEnergyConversion(object):
             # whole composite key is modified by input parameters
             if par_name in self.composite_keys_set :
                val = getattr(self,par_name) # get default value
+               if isinstance(value,str) and value.lower()[0:7] == 'default' : # Property changed but default value requesed explicitly
+                   value = val
                if type(val) != type(value):
                    raise KeyError("Attempt to change range property: "+par_name+" of type : "+str(type(val))+ " with wrong type value: "+str(type(value)))
                if len(val) != len(value) :
@@ -1016,6 +1037,8 @@ class DirectEnergyConversion(object):
                    continue
 
             # simple case of setting simple value
+            if isinstance(value,str) and value.lower()[0:7] == 'default' : # Property changed but default value requesed explicitly
+                value = getattr(self,par_name)
             setattr(self,par_name,value)
             properties_changed.append(par_name)
 
