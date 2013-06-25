@@ -580,6 +580,10 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
     if (this->pluginMode && QEvent::Hide == ev->type() &&
         !ev->spontaneous())
     {
+      if (this->ui.parallelProjButton->isChecked())
+      {
+        this->ui.parallelProjButton->toggle();
+      }
       pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
       builder->destroySources();
       this->ui.modeControlWidget->setToStandardView();
