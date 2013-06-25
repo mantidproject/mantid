@@ -1424,9 +1424,7 @@ namespace MDEvents
     	for (size_t k=0; k<nEvents; k++)
     	{
     		coord_t eventCenter[nd];
-    		eventCenter[0] = coordTable[k*nColumns+2];
-    		eventCenter[1] = coordTable[k*nColumns+3];
-    		eventCenter[2] = coordTable[k*nColumns+4];
+    		for (size_t l=0; l<nd; l++)eventCenter[l] = coordTable[k*nColumns+2+l];
     		coord_t out[nd];
     		radiusTransform.apply(eventCenter, out);
 			// add event to appropriate y channel
