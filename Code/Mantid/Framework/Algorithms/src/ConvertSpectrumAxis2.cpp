@@ -137,49 +137,46 @@ namespace Algorithms
     IObjComponent_const_sptr source = m_inputWS->getInstrument()->getSource();
     IObjComponent_const_sptr sample = m_inputWS->getInstrument()->getSample();
     
-    std::vector<double> emptyVector;
-    const double l1 = source->getDistance(*sample);
     const std::string emodeStr = getProperty("EMode");
     int emode = 0;
     if (emodeStr == "Direct") emode=1;
     else if (emodeStr == "Indirect") emode=2;
     const double delta = 0.0;
+
+    // Get conversion factor from energy(meV) to wavelength(angstroms)
+    Kernel::Units::Energy energyUnit;
+    double wavelengthFactor(0.0), wavelengthPower(0.0);
+    energyUnit.quickConversion("Wavelength", wavelengthFactor,wavelengthPower);
       
     for ( size_t i = 0; i < m_nHist; i++ )
     {
       IDetector_const_sptr detector = m_inputWS->getDetector(i);
-      double twoTheta, l1val, l2, efixed;
+      double twoTheta, efixed;
       if ( ! detector->isMonitor() )
       {
         twoTheta = m_inputWS->detectorTwoTheta(detector);
-        l2 = detector->getDistance(*sample);
-        l1val = l1;
         efixed = getEfixed(detector, m_inputWS, emode); //get efixed
       }
       else
       {
         twoTheta = 0.0;
-        l2 = l1;
-        l1val = 0.0;
         efixed = DBL_MIN;
       }
 
       const double sineTheta = sin(twoTheta);
         
       //Calculate the wavelength to allow it to be used to convert to elasticQ. 
-      double wavelength = Mantid::PhysicalConstants::h/(sqrt(2*efixed*Mantid::PhysicalConstants::NeutronMass));
+      double wavelength = wavelengthFactor*std::pow(efixed, wavelengthPower);
       //The constant k.
       const double k = (2*M_PI)/wavelength;
       
       // The MomentumTransfer value.
-      double elasticQInMetres = k*2*sineTheta;
-      double elasticQInAngstroms = elasticQInMetres * pow(10, -10);
+      double elasticQInAngstroms = k*2*sineTheta;
 
       if(targetUnit == "ElasticQ")
       {
         m_indexMap.insert(std::make_pair(elasticQInAngstroms, i));
-      } 
-    
+      }    
       else if(targetUnit == "ElasticQSquared")
       {
         // The QSquared value.
