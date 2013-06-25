@@ -277,7 +277,8 @@ namespace Mantid
       os << HERMITE_PREFIX << npoly;
       const double hermiteCoeff = getParameter(os.str());
       const double factorial = gsl_sf_fact(npoly/2);
-      const double denom = ((std::pow(2.0,npoly))*factorial);
+      // Intel compiler doesn't overload pow for unsigned types
+      const double denom = ((std::pow(2.0, static_cast<int>(npoly)))*factorial);
 
       for(int j = 0; j < NFINE_Y; ++j)
       {
