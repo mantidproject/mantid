@@ -56,6 +56,10 @@ namespace Algorithms
     /// Run the algorithm
     void exec();
 
+    bool m_renameDetID;
+    /// L1
+    double m_L1;
+
   };
 
 
