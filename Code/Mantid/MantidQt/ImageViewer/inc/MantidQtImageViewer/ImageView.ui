@@ -261,6 +261,7 @@
     <property name="title">
      <string>Help</string>
     </property>
+    <addaction name="actionOnline_Help_Page"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -361,6 +362,11 @@
   <action name="actionLoadColormap">
    <property name="text">
     <string>Load Colormap</string>
+   </property>
+  </action>
+  <action name="actionOnline_Help_Page">
+   <property name="text">
+    <string>Online Help Page</string>
    </property>
   </action>
  </widget>

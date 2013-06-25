@@ -2,6 +2,8 @@
 #include <iostream>
 #include <qwt_plot_canvas.h>
 
+#include <QDesktopServices>
+
 #include "MantidQtAPI/MantidColorMap.h"
 
 #include "MantidQtImageViewer/IVConnections.h"
@@ -43,7 +45,7 @@ IVConnections::IVConnections( Ui_ImageViewer* ui,
   iv_ui->actionOffset_Vertically->setDisabled(true);
   iv_ui->actionOffset_Diagonally->setDisabled(true);
   iv_ui->actionGraph_Rebinned_Data->setDisabled(true);
-  iv_ui->menuHelp->setDisabled(true);
+  iv_ui->menuHelp->setDisabled(false);
  
   this->iv_main_window = iv_main_window;
   QObject::connect( iv_ui->actionClose, SIGNAL(triggered()),
@@ -255,6 +257,10 @@ IVConnections::IVConnections( Ui_ImageViewer* ui,
                                     QwtPicker::DragSelection  );
   QObject::connect( v_graph_picker, SIGNAL(mouseMoved()),
                     this, SLOT(v_graphPicker_moved()) );
+
+  QObject::connect( iv_ui->actionOnline_Help_Page, SIGNAL(triggered()),
+                    this, SLOT(online_help_slot()) );
+
 }
 
 
@@ -542,6 +548,12 @@ void IVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
   delete[] rgb_data;
 }
 
+
+void IVConnections::online_help_slot()
+{
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_ImageViewer"));
+
+}
 
 } // namespace MantidQt 
 } // namespace ImageView 
