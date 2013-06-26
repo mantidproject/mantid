@@ -360,8 +360,8 @@ void MdViewerWidget::setParaViewComponentsForView()
   pqActiveObjects *activeObjects = &pqActiveObjects::instance();
   QObject::connect(activeObjects, SIGNAL(portChanged(pqOutputPort*)),
                    this->ui.propertiesPanel, SLOT(setOutputPort(pqOutputPort*)));
-  QObject::connect(activeObjects, SIGNAL(representationChanged(pqRepresentation*)),
-                   this->ui.propertiesPanel, SLOT(setRepresentation(pqRepresentation*)));
+  //QObject::connect(activeObjects, SIGNAL(representationChanged(pqRepresentation*)),
+  //                 this->ui.propertiesPanel, SLOT(setRepresentation(pqRepresentation*)));
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView*)),
                    this->ui.propertiesPanel, SLOT(setView(pqView*)));
 
