@@ -90,10 +90,10 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(func->function(domain, values));
 
-    const double tol(1e-10);
-    TS_ASSERT_DELTA(0.1048941000, values.getCalculated(0), tol);
-    TS_ASSERT_DELTA(0.1044889285, values.getCalculated(1), tol);
-    TS_ASSERT_DELTA(0.1029765223, values.getCalculated(2), tol);
+    const double tol(1e-8);
+    TS_ASSERT_DELTA(0.10489410, values.getCalculated(0), tol);
+    TS_ASSERT_DELTA(0.10448893, values.getCalculated(1), tol);
+    TS_ASSERT_DELTA(0.10297652, values.getCalculated(2), tol);
   }
 
 private:
