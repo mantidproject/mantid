@@ -71,6 +71,7 @@ namespace MantidQt
       typedef std::map<ColumnNameType, bool> ColumnNameSortableMap;
       typedef std::map<int, ColumnNameType> ColumnIndexNameMap;
 
+    public:
       /// Label for run number column
       static const QString RUNNUMBER;
       /// Label for detector id column
@@ -112,6 +113,7 @@ namespace MantidQt
       /// Label for Q-vector in the sample column
       static const QString QSAMPLE;
 
+    private:
       /// Index for run number column
       static const int COL_RUNNUMBER;
       /// Index for detector id column

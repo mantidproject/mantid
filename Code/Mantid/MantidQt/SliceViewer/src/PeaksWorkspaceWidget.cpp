@@ -45,6 +45,30 @@ namespace MantidQt
       populate();
     }
 
+    std::set<QString> PeaksWorkspaceWidget::getShownColumns()
+    {
+
+      std::set<QString> result;
+      auto numCols = ui.tblPeaks->model()->columnCount();
+      for (auto i = 0; i < numCols; ++i)
+      {
+        if (!ui.tblPeaks->isColumnHidden(i))
+          result.insert(ui.tblPeaks->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString());
+      }
+      return result;
+    }
+
+    void PeaksWorkspaceWidget::setShownColumns(std::set<QString> & cols)
+    {
+      auto numCols = ui.tblPeaks->model()->columnCount();
+      for (auto i = 0; i < numCols; ++i)
+      {
+        const QString name = ui.tblPeaks->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
+        bool hide(cols.find(name) == cols.end());
+        ui.tblPeaks->setColumnHidden(i, hide);
+      }
+    }
+
     /**
     Populate controls with data ready for rendering.
     */
