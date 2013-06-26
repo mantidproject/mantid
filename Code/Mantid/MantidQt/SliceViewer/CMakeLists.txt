@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/PeakOverlayViewFactoryBase.cpp
 	src/PeakOverlayViewFactorySelector.cpp  
 	src/PeakPalette.cpp
+	src/PeaksTableColumnsDialog.cpp
 	src/PeakTransform.cpp
 	src/PeakTransformHKL.cpp
 	src/PeakTransformQSample.cpp
@@ -59,6 +60,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakOverlayViewFactorySelector.h
 	inc/MantidQtSliceViewer/PeakPalette.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
+	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtSliceViewer/PeakTransformHKL.h
 	inc/MantidQtSliceViewer/PeakTransformQSample.h
 	inc/MantidQtSliceViewer/PeakTransformQLab.h
@@ -89,6 +91,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.h
  	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h
+	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
@@ -108,6 +111,7 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.ui
 	inc/MantidQtSliceViewer/ColorBarWidget.ui
 	inc/MantidQtSliceViewer/SnapToGridDialog.ui
+	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.ui
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.ui
 	inc/MantidQtSliceViewer/PeaksViewerOptionsDialog.ui
 	inc/MantidQtSliceViewer/XYLimitsDialog.ui

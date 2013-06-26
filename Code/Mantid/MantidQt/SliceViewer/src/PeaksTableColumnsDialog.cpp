@@ -1,4 +1,4 @@
-#include "PeaksTableColumnsDialog.h"
+#include "MantidQtSliceViewer/PeaksTableColumnsDialog.h"
 #include "ui_PeaksTableColumnsDialog.h"
 
 PeaksTableColumnsDialog::PeaksTableColumnsDialog(QWidget *parent) :
