@@ -1428,7 +1428,9 @@ namespace MDEvents
     		coord_t out[nd];
     		radiusTransform.apply(eventCenter, out);
 			// add event to appropriate y channel
-			size_t xchannel = static_cast<int>(floor((out[1] / deltaQ))+0.5) + (numSteps / 2);
+			size_t xchannel;
+			if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2);
+			else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2);
 			if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += coordTable[k*nColumns];
     	}
         //box->releaseEvents();

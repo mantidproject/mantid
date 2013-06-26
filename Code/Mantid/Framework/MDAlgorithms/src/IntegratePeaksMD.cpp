@@ -75,6 +75,7 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid
 {
@@ -155,13 +156,21 @@ namespace MDAlgorithms
     declareProperty("IntegrateIfOnEdge", true, "Only warning if all of peak outer radius is not on detector (default).\n"
         "If false, do not integrate if the outer radius is not on a detector.");
 
-    declareProperty("Cylinder", false, "Default is sphere.  Add next two parameters for cylinder.");
+    declareProperty("Cylinder", false, "Default is sphere.  Use next three parameters for cylinder.");
 
     declareProperty(new PropertyWithValue<double>("CylinderLength",0.0,Direction::Input),
-        "Length of cylinder in which to integrate (in the same units as the workspace; 0.0 for sphere).");
+        "Length of cylinder in which to integrate (in the same units as the workspace).");
 
     declareProperty(new PropertyWithValue<double>("PercentBackground",0.0,Direction::Input),
         "Percent of CylinderLength that is background (20 is 20%)");
+    std::vector<std::string> fitFunction(4);
+    fitFunction[0] = "Gaussian";
+    fitFunction[1] = "ConvolutionExpGaussian";
+    fitFunction[2] = "ConvolutionBackToBackGaussian";
+    fitFunction[3] = "NoFit";
+    auto fitvalidator = boost::make_shared<StringListValidator>(fitFunction);
+    declareProperty("ProfileFunction", "ConvolutionExpGaussian", fitvalidator, "Fitting function for profile "
+                    "used only with Cylinder integration.");
 
   }
 
@@ -349,7 +358,7 @@ namespace MDAlgorithms
 				ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared, signal_fit);
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					 ws2D->dataX(i)[j] = -0.5*backgroundCylinder + static_cast<double>(j) * deltaQ;
+					 ws2D->dataX(i)[j] = static_cast<double>(j) * deltaQ; //-0.5*backgroundCylinder
 					 ws2D->dataY(i)[j] = signal_fit[j];
 					 ws2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
 				}
@@ -395,27 +404,78 @@ namespace MDAlgorithms
 			{
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					 ws2D->dataX(i)[j] = -0.5*cylinderLength + static_cast<double>(j) * deltaQ;
+					 ws2D->dataX(i)[j] = static_cast<double>(j) * deltaQ;  //-0.5*cylinderLength
 					 ws2D->dataY(i)[j] = signal_fit[j];
 					 ws2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
 				}
 			}
-      }
 
+			IAlgorithm_sptr fit_alg;
+			try
+			{
+			fit_alg = createChildAlgorithm("Fit", -1, -1, false);
+			} catch (Exception::NotFoundError&)
+			{
+			g_log.error("Can't locate Fit algorithm");
+			throw ;
+			}
 
-      // Save it back in the peak object.
-      if (signal != 0. || replaceIntensity)
-      {
-        p.setIntensity(signal);
-        p.setSigmaIntensity( sqrt(errorSquared) );
-      }
+			size_t half = numSteps/2;
+			double Centre = ws2D->dataX(i)[half];
+            double Sigma = 0.02;
+			double peakHeight = ws2D->dataY(i)[half];
+            double Lifetime = 0.01;
+            std::string profileFunction = getProperty("ProfileFunction");
+			std::ostringstream fun_str;
+			if (profileFunction.compare("Gaussian") == 0)
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=Gaussian,Height="<<peakHeight<<",Sigma="<<Sigma<<",PeakCentre="<<Centre;
+			else if (profileFunction.compare("ConvolutionExpGaussian") == 0)
+			{
+				peakHeight = std::sqrt(2*peakHeight);
+				Sigma =0.008;
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
+						";name=ExpDecay,Height="<<peakHeight<<",Lifetime="<<Lifetime<<")";
+			}
+			else if (profileFunction.compare("ConvolutionBackToBackGaussian") == 0)
+			{
+				peakHeight = std::sqrt(2*peakHeight);
+				Sigma =0.008;
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
+						";name=BackToBackExponential,I="<<peakHeight<<",A=100.0,B=100.0,X0="<<Centre<<",S="<<Sigma<<")";
+			}
+			if (profileFunction.compare("NoFit") != 0)
+			{
+				fit_alg->setPropertyValue("Function", fun_str.str());
+				fit_alg->setProperty("InputWorkspace", ws2D);
+				fit_alg->setProperty("WorkspaceIndex", i);
+				fit_alg->setProperty("CreateOutput", true);
+				fit_alg->setProperty("Output", "fit");
+				fit_alg->executeAsChildAlg();
+				MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
+				std::string fun = fit_alg->getProperty("Function");
+				g_log.notice() << "Peak " << i <<": " << fun<<"\n";
+				//Evaluate fit at points
+				const Mantid::MantidVec& y = fitWS->readY(1);
 
-      g_log.information() << "Peak " << i << " at " << pos << ": signal "
-          << signal << " (sig^2 " << errorSquared << "), with background "
-          << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
-          << std::endl;
+				//Calculate intensity
+				signal = 0.0;
+				for (size_t j = 0; j < numSteps; j++) if ( !boost::math::isnan(y[j]) && !boost::math::isinf(y[j]))signal+= y[j];
+				errorSquared = std::fabs(signal);
+			}
+      	  }
+		  // Save it back in the peak object.
+		  if (signal != 0. || replaceIntensity)
+		  {
+			p.setIntensity(signal);
+			p.setSigmaIntensity( sqrt(errorSquared) );
+		  }
+
+		  g_log.information() << "Peak " << i << " at " << pos << ": signal "
+			  << signal << " (sig^2 " << errorSquared << "), with background "
+			  << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
+			  << std::endl;
+
     }
-
     // This flag is used by the PeaksWorkspace to evaluate whether it has been integrated.
     peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true); 
     // These flags are specific to the algorithm.
