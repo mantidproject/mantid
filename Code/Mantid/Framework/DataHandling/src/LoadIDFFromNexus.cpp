@@ -54,7 +54,8 @@ void LoadIDFFromNexus::init()
 		  ".nxs or .NXS" );
 
   declareProperty("InstrumentPath",std::string(""),"Path name within the Nexus tree of the folder containing the instrument folder."
-      "This is usually 'raw_data_1' for a raw Nexus file and 'mantid_workspace_1' for a processed nexus file",Direction::Input);
+      "This is usually 'raw_data_1' for a raw Nexus file and 'mantid_workspace_1' for a processed nexus file."
+      "Only a one level path is curently supported",Direction::Input);
 }
 
 /** Executes the algorithm. Reading in the file and creating and populating
@@ -73,7 +74,18 @@ void LoadIDFFromNexus::exec()
   // Get the instrument path
   std::string instrumentPath = getPropertyValue("InstrumentPath");
 
-  // Code to be added.
+  // Get the instrument group in the Nexus file
+   ::NeXus::File nxfile(m_filename);
+  // Assume one level in instrument path
+   nxfile.openGroup(instrumentPath, "NXentry");
+  // Open the instrument
+  // nxfile.openGroup("instrument", "NXinstrument");
+
+  // Will this work?
+   std::string parameterString;
+   localWorkspace->loadExperimentInfoNexus( &nxfile, parameterString );
+   localWorkspace->readParameterMap(parameterString);
+
 
   return;
 }
