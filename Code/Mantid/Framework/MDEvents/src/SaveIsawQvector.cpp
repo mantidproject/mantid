@@ -85,7 +85,7 @@ namespace MDEvents
     exts.push_back(".bin");
 
     declareProperty(new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
-        "Optional path to an hkl file to save.");
+        "Optional path to an hkl file to save.  Vectors returned if no file requested.");
     declareProperty("RightHanded", true, "Save the Q-vector as k_f - k_i");
     declareProperty("ISAWcoords", true, "Save the Q-vector with y gravitationally up and x pointing downstream");
     std::vector<double>Qx_save,Qy_save,Qz_save;
@@ -189,21 +189,25 @@ namespace MDEvents
         {
           buffer[dim] = static_cast<float>(coord_signs[dim] * locCoord[coord_map[dim]]);
         }
-        Qx_save.push_back(static_cast<double>(buffer[0]));
-        Qy_save.push_back(static_cast<double>(buffer[1]));
-        Qz_save.push_back(static_cast<double>(buffer[2]));
-        if (!filename.empty()) handle.write(reinterpret_cast<char*>(buffer), BUFF_SIZE);
+        if (filename.empty())
+        {
+			Qx_save.push_back(static_cast<double>(buffer[0]));
+			Qy_save.push_back(static_cast<double>(buffer[1]));
+			Qz_save.push_back(static_cast<double>(buffer[2]));
+        }
+        else handle.write(reinterpret_cast<char*>(buffer), BUFF_SIZE);
       } // end of loop over events in list
 
       prog.report();
     } // end of loop over spectra
-    setProperty("Qx_vector", Qx_save);
-    setProperty("Qy_vector", Qy_save);
-    setProperty("Qz_vector", Qz_save);
+    if (filename.empty())
+    {
+		setProperty("Qx_vector", Qx_save);
+		setProperty("Qy_vector", Qy_save);
+		setProperty("Qz_vector", Qz_save);
+    }
+    else handle.close(); // cleanup
 
-
-    // cleanup
-    if (!filename.empty())handle.close();
   }
 
   /**
