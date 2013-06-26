@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/EnvironmentHistory.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
+	src/FileDescriptor.cpp
 	src/FileValidator.cpp
 	src/FilterChannel.cpp
 	src/FilteredTimeSeriesProperty.cpp
@@ -40,8 +41,8 @@ set ( SRC_FILES
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
-	src/Material.cpp
 	src/MaskedProperty.cpp
+	src/Material.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
 	src/Matrix.cpp
@@ -135,6 +136,7 @@ set ( INC_FILES
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
 	inc/MantidKernel/Fast_Exponential.h
+	inc/MantidKernel/FileDescriptor.h
 	inc/MantidKernel/FileValidator.h
 	inc/MantidKernel/FilterChannel.h
 	inc/MantidKernel/FilteredTimeSeriesProperty.h
@@ -161,8 +163,8 @@ set ( INC_FILES
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
-	inc/MantidKernel/Material.h
 	inc/MantidKernel/MaskedProperty.h
+	inc/MantidKernel/Material.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
 	inc/MantidKernel/Matrix.h
@@ -251,6 +253,7 @@ set ( TEST_FILES
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
 	FacilitiesTest.h
+	FileDescriptorTest.h
 	FileValidatorTest.h
 	FilterChannelTest.h
 	FilteredTimeSeriesPropertyTest.h
@@ -272,8 +275,8 @@ set ( TEST_FILES
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
 	MandatoryValidatorTest.h
-	MaterialTest.h
 	MaskedPropertyTest.h
+	MaterialTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
 	MemoryTest.h
