@@ -248,7 +248,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                 print '########### Run diagnose for monochromatic vanadium run ##############'
                 masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
                                          second_white = None,variation=1.1,print_results=True)
-                if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace 
+                if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that. 
                     masking +=  masking2
     
 
@@ -275,8 +275,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
        RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
 
 
-    ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value) 
-    print 'Incident energy found for sample run: ',ei,' meV'
+    #ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value) 
+    print 'Incident energy found for sample run: ',Reducer.eifixed,' meV'
     
     end_time=time.time()
     print 'Elapsed time =',end_time-start_time, 's'
@@ -422,9 +422,6 @@ def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_gu
          Reducer.log('      Value : '+str(absnorm_factor))
 
     else:
-        # TODO: !!!! 
-        if Reducer.monovan_integr_range is None: # integration in the range relative to incident energy
-            Reducer.monovan_integr_range = [Reducer.monovan_lo_frac*ei_guess,Reducer.monovan_hi_frac*ei_guess]
         Reducer.log('##### Evaluate the integral from the monovan run and calculate the correction factor ######')
         Reducer.log('      Using absolute units vanadium integration range : '+str(Reducer.monovan_integr_range))
        #now on the mono_vanadium run swap the mapping file

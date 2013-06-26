@@ -232,7 +232,7 @@
 <!-- This property is the part of the composite definition for abs_units_van_range: 
  It specifies the relative to incident energy lower integration limit for monochromatic vanadium in the mono-vanadium integration -->
 <parameter name="monovan_lo_frac">
-  <value val="0.8"/>
+  <value val="-0.6"/>
 </parameter>
 
 <!-- This property is the part of the composite definition for abs_units_van_range:
@@ -245,7 +245,7 @@
 <!-- This property is the part of the composite definition for abs_units_van_range
  It specifies the relative to incident energy higher integration limit for monochromatic vanadium in the mono-vanadium integration -->
 <parameter name="monovan_hi_frac">
-  <value val="1.2"/>
+  <value val="0.7"/>
 </parameter>
 <!-- This property is the part of the composite definition for abs_units_van_range
  It specifies the the higher limit of energy range in the monochromatic-vanadium integration 
@@ -306,7 +306,7 @@
      Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">
-   <value val=".nxs"/>
+   <value val="None"/>
 </parameter>
 
 <!-- If one wants to sum runs   -->  

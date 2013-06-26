@@ -117,7 +117,7 @@ class DirectEnergyConversion(object):
             if 'instrument_name' not in kwargs:
                 kwargs['instrument_name'] = self.instr_name
 
-        if 'use_hard_mask_only' in kwargs :
+        if kwargs['use_hard_mask_only'] :
             if mtd.doesExist('hard_mask_ws'):
                 diag_mask = mtd['hard_mask_ws']
             else: # build hard mask 
@@ -350,10 +350,12 @@ class DirectEnergyConversion(object):
             mon1_peak = 0.0
             # apply T0 shift
             ChangeBinOffset(InputWorkspace=data_ws,OutputWorkspace= result_name,Offset=-tzero)
+            self.ei_guess = ei_value
         else:
             # Do ISIS stuff for Ei
             # Both are these should be run properties really
             ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
+            self.ei_guess = ei_value
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in FlatBackground and normalisation
         bin_offset = -mon1_peak
@@ -383,20 +385,21 @@ class DirectEnergyConversion(object):
                 else:
                     raise RuntimeError('Cannot run LoadDetectorInfo: "Filename" property not found on input mono workspace')
                 if self.relocate_dets: 
-                    self.log('Moving detectors to positions specified in RAW file.')
+                    self.log('_do_mono: Moving detectors to positions specified in RAW file.'+filename)
                     
                 LoadDetectorInfo(Workspace=result_name,DataFilename=filename,RelocateDets=self.relocate_dets)
             else:
-                self.log('Raw file detector header is superceeded') 
+                self.log('_do_mono: Raw file detector header is superceeded') 
                 if self.relocate_dets: 
-                    self.log('Moving detectors to positions specified in cal file.')
+                    self.log('_do_mono: Moving detectors to positions specified in cal file ')
                     if self.det_cal_file_ws == None :
-                        self.log('Loading detector info from file ' + self.det_cal_file)                    
+                        self.log('_do_mono: Loading detector info from file ' + self.det_cal_file)                    
                         LoadDetectorInfo(Workspace=result_name,DataFilename=self.det_cal_file,RelocateDets= self.relocate_dets)
-                        self.log('Loading detector info completed ')                                            
+                        self.log('_do_mono: Loading detector info completed ')                                            
                     else:
-                        self.log('Copying detectors positions from det_cal_file workspace: '+self.det_cal_file_ws.name())                    
+                        self.log('_do_mono: Copying detectors positions from det_cal_file workspace: '+self.det_cal_file_ws.name())                    
                         CopyInstrumentParameters(InputWorkspace=self.det_cal_file_ws,OutputWorkspace=result_name)
+                        self.log('_do_mono: Copying detectors positions complete')
 
         if self.background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
@@ -427,7 +430,7 @@ class DirectEnergyConversion(object):
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
-        self.log("_do_mono: finished ConvertUnits")
+        self.log("_do_mono: finished ConvertUnits for "+result_name)
         
         if not self.energy_bins is None:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
@@ -440,13 +443,13 @@ class DirectEnergyConversion(object):
                 ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="DeltaE",EMode='Direct', EFixed=ei_value)
             else:
                 DetectorEfficiencyCor(InputWorkspace=result_name,OutputWorkspace=result_name)
-                self.log("_do_mono: finished DetectorEfficiencyCor")
+                self.log("_do_mono: finished DetectorEfficiencyCor for: "+result_name)
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
             self.log('Start Applying ki/kf corrections to the workpsace : '+result_name)                                
             CorrectKiKf(InputWorkspace=result_name,OutputWorkspace= result_name, EMode='Direct')
-            self.log('finished applying ki/kf corrections')                                            
+            self.log('finished applying ki/kf corrections for'+result_name)                                            
 
         # Make sure that our binning is consistent
         if not self.energy_bins is None:
@@ -474,6 +477,7 @@ class DirectEnergyConversion(object):
         """
         One-shot function to convert the given runs to energy
         """
+        self.ei_guess = ei;
         # Check if we need to perform the absolute normalisation first
         if not mono_van is None:
             if abs_ei is None:
@@ -506,10 +510,17 @@ class DirectEnergyConversion(object):
             sample_wkspace /= norm_factor
         
         #calculate psi from sample environment motor and offset 
-        if (offset is None):
-            self.motor_offset = 0
+        
+        if self.facility == 'ISIS' :
+            default_offset=float('NaN')
+            if not (motor is None) and sample_wkspace.getRun().hasProperty(motor):
+                default_offset = 0
         else:
-            self.motor_offset = float(offset)
+            default_offset=0
+        if (offset is None):
+              self.motor_offset = default_offset
+        else:
+             self.motor_offset = float(offset)
         
         self.motor=0
         if not (motor is None):
@@ -714,7 +725,7 @@ class DirectEnergyConversion(object):
         # if ext is none, no need to write anything
         if len(ext) == 1 and ext[0] == None :
             return
-        self.psi = 1000000; # for test
+
         save_path = os.path.splitext(save_path)[0]
         for ext in formats:
             if ext in self.__save_formats :
@@ -761,22 +772,33 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
 #              Complex setters/getters
 #----------------------------------------------------------------------------------
+    # Vanadium rmm
     @property 
     def van_rmm(self):
       """The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :( """
       return 50.9415
-    @van_rmm.setter
-    def van_rmm(self):
-        pass
     @van_rmm.deleter
     def van_rmm(self):
         pass
 
+    # integration range for monochromatic vanadium,
+    @property
+    def monovan_integr_range(self):
+        if self._monovan_integr_range is None:
+            ei = self.efixed
+            range = [self.monovan_lo_frac*ei,self.monovan_hi_frac*ei]
+            return range
+        else:
+            return self._monovan_integr_range
+    @monovan_integr_range.setter
+    def monovan_integr_range(self,value):
+        self._monovan_integr_range = value
 
+
+    # format to save data
     @property 
     def save_format(self):
         return self._save_format
-
     @save_format.setter
     def save_format(self, value):
         if value is None:
@@ -784,21 +806,24 @@ class DirectEnergyConversion(object):
 
         if isinstance(value,str):
             if value not in self.__save_formats :
-                self.log("Trying to set unknown format: \""+str(value)+"\" No saving will occur")
+                self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur")
                 value = None
         elif isinstance(value,list):
             if len(value) > 0 :
                 value = value[0]
+                if len(value)>1 :
+                    self.log("Only one default save format is currenctly allowed. Will try to use: \""+str(value)+"\" format ")
             else:
                 value = None
+            # set single default save format recursively
             self.save_format = value
             
         self._save_format = value
 
+    # bin ranges
     @property 
     def energy_bins(self):
         return self._energy_bins;
-
     @energy_bins.setter
     def energy_bins(self,value):
        if value != None:          
@@ -811,11 +836,10 @@ class DirectEnergyConversion(object):
               nBlocks = len(value);
           if nBlocks%3 != 0:
                raise KeyError("Energy_bin value has to be either list of n-blocks of 3 number each or string representation of this list with numbers separated by commas")
+       #TODO: implement single value settings according to rebin
+       self._energy_bins= value
 
-
-
-
-       self._energy_bins= value;
+    # map file name
     @property 
     def map_file(self):
         return self._map_file;
@@ -828,6 +852,7 @@ class DirectEnergyConversion(object):
 
         self._map_file = value
 
+    # monovanadium map file name
     @property 
     def monovan_mapfile(self):
         return self._monovan_mapfile;
@@ -889,7 +914,7 @@ class DirectEnergyConversion(object):
 
         specify some parameters which may be not in IDF Parameters file
         """
-
+        self.efixed = 0
 
         ## Detector diagnosis
         # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word 
