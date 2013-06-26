@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include <set>
+#include <sstream>
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -67,20 +68,21 @@ public:
 
   /// algorithm factory specific function to subscribe algorithms, calls the dynamic factory subscribe function internally
   template <class C>
-  void subscribe()
+  std::string subscribe()
   {
     Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
-    this->subscribe(newI);
+    return this->subscribe(newI);
   }
 
   /**
    * Subscribes an algorithm using a custom instantiator. This
    * object takes ownership of the instantiator
    * @param instantiator - A pointer to a custom instantiator
-   * @param replaceExisting - Defines what happens if an algorithm of the same name/verson already exists, see SubscribeAction
+   * @param replaceExisting - Defines what happens if an algorithm of the same name/version already exists, see SubscribeAction
+   * @returns The classname that was registered
    */
   template<class T>
-  void subscribe(Kernel::AbstractInstantiator<T> *instantiator, const SubscribeAction replaceExisting = ErrorIfExists)
+  std::string subscribe(Kernel::AbstractInstantiator<T> *instantiator, const SubscribeAction replaceExisting = ErrorIfExists)
   {
     boost::shared_ptr<IAlgorithm> tempAlg = instantiator-> createInstance();
     const int version = extractAlgVersion(tempAlg);
@@ -97,16 +99,19 @@ public:
       {
         if(version == it->second && replaceExisting == ErrorIfExists)
         {
-          g_log.fatal() << "Cannot register algorithm " << className << " twice with the same version\n";
-          return;
+          std::ostringstream os;
+          os << "Cannot register algorithm " << className << " twice with the same version\n";
+          throw std::runtime_error(os.str());
         }
         if(version > it->second)
         {
           m_vmap[className]=version;
         }
-      }  
+      }
       Kernel::DynamicFactory<Algorithm>::subscribe(key, instantiator, replaceExisting);
     }
+    else throw std::invalid_argument("Cannot register empty algorithm name");
+    return className;
   }
   /// Unsubscribe the given algorithm
   void unsubscribe(const std::string & algorithmName, const int version);
