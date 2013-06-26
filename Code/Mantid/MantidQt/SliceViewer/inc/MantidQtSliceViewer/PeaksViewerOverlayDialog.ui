@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PeaksViewerOptionsDialog</class>
- <widget class="QDialog" name="PeaksViewerOptionsDialog">
+ <class>PeaksViewerOverlayDialog</class>
+ <widget class="QDialog" name="PeaksViewerOverlayDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -298,7 +298,7 @@
   <connection>
    <sender>btnGroupControls</sender>
    <signal>accepted()</signal>
-   <receiver>PeaksViewerOptionsDialog</receiver>
+   <receiver>PeaksViewerOverlayDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -314,7 +314,7 @@
   <connection>
    <sender>btnGroupControls</sender>
    <signal>rejected()</signal>
-   <receiver>PeaksViewerOptionsDialog</receiver>
+   <receiver>PeaksViewerOverlayDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

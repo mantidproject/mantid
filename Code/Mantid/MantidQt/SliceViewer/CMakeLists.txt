@@ -7,7 +7,7 @@ set ( SRC_FILES
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
 	src/PeakBoundingBox.cpp
-	src/PeaksViewerOptionsDialog.cpp
+	src/PeaksViewerOverlayDialog.cpp
 	src/PeakOverlayMultiCross.cpp
 	src/PeakOverlayMultiCrossFactory.cpp
 	src/PeakOverlayMultiSphere.cpp
@@ -68,7 +68,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakTransformFactory.h 
 	inc/MantidQtSliceViewer/PeakTransformSelector.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
-	inc/MantidQtSliceViewer/PeaksViewerOptionsDialog.h
+	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.h
 	inc/MantidQtSliceViewer/PhysicalCrossPeak.h
 	inc/MantidQtSliceViewer/PhysicalSphericalPeak.h
@@ -98,7 +98,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/SnapToGridDialog.h
 	inc/MantidQtSliceViewer/PeaksViewer.h
-	inc/MantidQtSliceViewer/PeaksViewerOptionsDialog.h
+	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.h
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.h
 	inc/MantidQtSliceViewer/XYLimitsDialog.h
 	inc/MantidQtSliceViewer/QPeaksTableModel.h
@@ -113,7 +113,7 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/SnapToGridDialog.ui
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.ui
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.ui
-	inc/MantidQtSliceViewer/PeaksViewerOptionsDialog.ui
+	inc/MantidQtSliceViewer/PeaksViewerOverlayDialog.ui
 	inc/MantidQtSliceViewer/XYLimitsDialog.ui
 )
 
