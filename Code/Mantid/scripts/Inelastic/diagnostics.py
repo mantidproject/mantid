@@ -30,7 +30,7 @@ def diagnose(white_int, **kwargs):
                           If a run/file is given it simply loaded and integrated across the whole range
           sample_counts - A workspace containing the total integrated counts from a sample run
           second_white - If provided an additional set of tests is performed on this.
-          hard_mask  - A file specifying those spectra that should be masked without testing 
+          hard_mask_file  - A file specifying those spectra that should be masked without testing 
           tiny        - Minimum threshold for acceptance 
           huge       - Maximum threshold for acceptance
           van_out_lo  - Lower bound defining outliers as fraction of median value 
@@ -65,15 +65,15 @@ def diagnose(white_int, **kwargs):
     test_results = [ [None, None], [None, None], [None, None], [None, None], [None, None]]
 
     # Hard mask
-    hardmask_file = kwargs.get('hard_mask', None)
+    hardmask_file = kwargs.get('hard_mask_file', None)
     if hardmask_file is not None:
-        LoadMask(Instrument=kwargs.get('instrument_name',''),InputFile=parser.hard_mask,
+        LoadMask(Instrument=kwargs.get('instrument_name',''),InputFile=parser.hard_mask_file,
                  OutputWorkspace='hard_mask_ws')
         MaskDetectors(Workspace=white_int, MaskedWorkspace='hard_mask_ws')
         # Find out how many detectors we hard masked
         _dummy_ws,masked_list = ExtractMask(InputWorkspace='hard_mask_ws')
         DeleteWorkspace('_dummy_ws')
-        test_results[0][0] = os.path.basename(parser.hard_mask)
+        test_results[0][0] = os.path.basename(parser.hard_mask_file)
         test_results[0][1] = len(masked_list)
 
     if not parser.use_hard_mask_only :

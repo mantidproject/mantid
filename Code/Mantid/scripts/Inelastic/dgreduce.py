@@ -231,36 +231,55 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         RenameWorkspace(InputWorkspace=accum,OutputWorkspace=inst_name+str(sample_run[0])+'.raw')
         sample_run=sample_run[0]
 
+    masks_done=False
+    if Reducer.save_and_reuse_masks :
+        raise NotImplementedError("Save and reuse masks option is not yet implemented")
+        mask_file_name = common.create_resultname(str(mask_run),Reducer.instr_name,'_masks.xml')
+        mask_full_file = FileFinder.getFullPath(mask_file_name)
+        if len(mask_full_file) > 0 :
+            masking = LoadMask(Instrument=Reducer.instr_name,InputFile=mask_full_file,OutputWorkspace=mask_file_name)
+            #Reducer.hard_mask_file = mask_full_file;
+            #Reducer.use_hard_mask_only = True
+            masks_done=True
+            header="Masking loaded "
+        else:
+            pass
 #-------------------------------------------------------------------------------------------------------------------------------------------------------
 #  Here we give control to the Reducer
 # --------------------------------------------------------------------------------------------------------    
-    # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
-    masking = Reducer.diagnose(wb_run,sample = mask_run,
+     # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
+    if not   masks_done:
+        masking = Reducer.diagnose(wb_run,sample = mask_run,
                                     second_white = None,variation=1.1,print_results=True)
+        header = "Diag Processed "
 
 
    # Calculate absolute units:    
-    if monovan_run != None :
-        if Reducer.mono_correction_factor == None :
-            if Reducer.use_sam_msk_on_monovan == True:
-                Reducer.log('  Applying sample run mask to mono van')
-            else:
-                print '########### Run diagnose for monochromatic vanadium run ##############'
-                masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
+        if monovan_run != None :
+            if Reducer.mono_correction_factor == None :
+                if Reducer.use_sam_msk_on_monovan == True:
+                    Reducer.log('  Applying sample run mask to mono van')
+                else:
+                    print '########### Run diagnose for monochromatic vanadium run ##############'
+                    masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
                                          second_white = None,variation=1.1,print_results=True)
-                if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that. 
-                    masking +=  masking2
+                    if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that. 
+                        masking +=  masking2
     
 
-        else: # if Reducer.mono_correction_factor != None :
-            pass
+            else: # if Reducer.mono_correction_factor != None :
+                pass
+
+    # save mask if it does not exist and has been already loaded
+    if Reducer.save_and_reuse_masks and not masks_done:
+        SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
 
     Reducer.spectra_masks=masking
     # estimate and report the number of failing detectors
     failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
     nMaskedSpectra = len(failed_sp_list)
     # this tells turkey in case of hard mask only but everythin else semems work fine
-    print 'Diag processed workspace with {0:d} spectra and masked {1:d} bad spectra'.format(nSpectra,nMaskedSpectra)
+    print '{0} workspace with {1:d} spectra and masked {2:d} bad spectra'.format(header,nSpectra,nMaskedSpectra)
      #Run the conversion first on the sample
     deltaE_wkspace_sample = Reducer.convert_to_energy(sample_run, ei_guess, wb_run)
     
@@ -276,7 +295,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
 
     #ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value) 
-    print 'Incident energy found for sample run: ',Reducer.eifixed,' meV'
+    print 'Incident energy found for sample run: ',Reducer.incident_en,' meV'
     
     end_time=time.time()
     print 'Elapsed time =',end_time-start_time, 's'
@@ -325,7 +344,7 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
     bkgd_range  =[15000,19000]  :integration range for background tests
     
     second_white    - If provided an additional set of tests is performed on this. (default = None)
-    hard_mask       - A file specifying those spectra that should be masked without testing (default=None)
+    hard_mask_file       - A file specifying those spectra that should be masked without testing (default=None)
     tiny            - Minimum threshold for acceptance (default = 1e-10)
     large           - Maximum threshold for acceptance (default = 1e10)
     bkgd_range      - A list of two numbers indicating the background range (default=instrument defaults)

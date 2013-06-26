@@ -28,10 +28,6 @@
 <parameter name="hard_mask_file" type="string">
     <value val="None"/>
 </parameter>
-<!-- The if true, use only hard mask file specified above and do not run diagnostics procedures -->
-<parameter name="use_hard_mask_only" type="bool">
-    <value val="False"/>
-</parameter>
 <!-- The map file used when calculating absolute units conversion integrals 
      This map usually groups together large areas of detectors to obtain proper vanadium statistics  -->
 <parameter name="monovan_mapfile" type="string">
@@ -323,6 +319,19 @@
    <value val="True"/>
 </parameter>
 
+<!-- The if true, use only hard mask file specified above and do not run diagnostics procedures -->
+<parameter name="use_hard_mask_only" type="bool">
+    <value val="False"/>
+</parameter>
+
+<!-- If this parameter is set to true, dgreduce will try to load mask from the mask file
+     correspondent to the run if finds it and uses this mask as hard mask only (does not run diagnostics). 
+     If such file has not been found, it will run diagnostics and save the masks into mask file for reuse 
+     Hard Mask file, provided separately or as additional hard mask file is ignored in this case -->
+<parameter name="save_and_reuse_masks"  type="bool">
+   <value val="False"/>
+</parameter>
+
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
      the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
@@ -343,7 +352,7 @@
        monovan_hi_value = monovan-integr-max;       
        use_hard_mask_only=hardmaskOnly;
        bkgd_range = background_range;
-       hard_mask  = hard_mask_file=hardmaskPlus;       
+       hard_mask_file=hard_mask  = =hardmaskPlus;       
        van_out_lo = diag_van_median_rate_limit_lo=diag_van_out_lo;
        van_out_hi = diag_van_median_rate_limit_hi=diag_van_out_hi;
        van_lo     = diag_van_median_sigma_lo=diag_van_lo;

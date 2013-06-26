@@ -113,7 +113,7 @@ class DirectEnergyConversion(object):
             if arg not in kwargs:
                 kwargs[arg] = getattr(self, arg)
         # If we have a hard_mask, check the instrument name is defined
-        if 'hard_mask' in kwargs:
+        if 'hard_mask_file' in kwargs:
             if 'instrument_name' not in kwargs:
                 kwargs['instrument_name'] = self.instr_name
 
@@ -122,14 +122,14 @@ class DirectEnergyConversion(object):
                 diag_mask = mtd['hard_mask_ws']
             else: # build hard mask 
                 # in this peculiar way we can obtain working mask which accounts for initial data grouping in the data file. 
-                # SNS or 1 to 1 maps may probably awoid this stuff and load masks directly
+                # SNS or 1 to 1 maps may probably awoid this stuff and can load masks directly
                 whitews_name = common.create_resultname(white, suffix='-white')
                 if whitews_name in mtd:
                     DeleteWorkspace(Workspace=whitews_name)
                 # Load
                 white_data = self.load_data(white,whitews_name)
                         
-                diag_mask= LoadMask(Instrument=self.instr_name,InputFile=kwargs['hard_mask'],
+                diag_mask= LoadMask(Instrument=self.instr_name,InputFile=kwargs['hard_mask_file'],
                                OutputWorkspace='hard_mask_ws')
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 diag_mask,masked_list = ExtractMask(InputWorkspace=white_data)
@@ -350,12 +350,12 @@ class DirectEnergyConversion(object):
             mon1_peak = 0.0
             # apply T0 shift
             ChangeBinOffset(InputWorkspace=data_ws,OutputWorkspace= result_name,Offset=-tzero)
-            self.ei_guess = ei_value
+            self.incident_en = ei_value
         else:
             # Do ISIS stuff for Ei
             # Both are these should be run properties really
             ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
-            self.ei_guess = ei_value
+            self.incident_en = ei_value
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in FlatBackground and normalisation
         bin_offset = -mon1_peak
@@ -477,7 +477,7 @@ class DirectEnergyConversion(object):
         """
         One-shot function to convert the given runs to energy
         """
-        self.ei_guess = ei;
+        self.incident_en = ei;
         # Check if we need to perform the absolute normalisation first
         if not mono_van is None:
             if abs_ei is None:
@@ -556,11 +556,13 @@ class DirectEnergyConversion(object):
         else:
             raise TypeError('Unknown option passed to get_ei "%s"' % fix_ei)
 
+        self.incident_en= ei_guess
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
             GetEi(InputWorkspace=input_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
                   EnergyEstimate=ei_guess,FixEi=self.fix_ei)
 
+        self.incident_en = ei
         # Adjust the TOF such that the first monitor peak is at t=0
         ChangeBinOffset(InputWorkspace=input_ws,OutputWorkspace= resultws_name,Offset= -float(str(mon1_peak)))
         mon1_det = input_ws.getDetector(mon1_index)
@@ -921,7 +923,7 @@ class DirectEnergyConversion(object):
         # and tries to get rest from the correspondent dgreduced attributes
         self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
-                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask','diag_use_hard_mask_only','diag_bkgd_range']
+                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_bkgd_range']
         
         self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
 
