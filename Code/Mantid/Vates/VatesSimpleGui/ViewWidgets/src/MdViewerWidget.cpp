@@ -53,7 +53,6 @@
 #include <pqDeleteBehavior.h>
 #include <pqFixPathsInStateFilesBehavior.h>
 #include <pqInterfaceTracker.h>
-#include <pqMultiServerBehavior.h>
 #include <pqObjectPickingBehavior.h>
 //#include <pqPersistentMainWindowStateBehavior.h>
 #include <pqPipelineContextMenuBehavior.h>
@@ -282,7 +281,6 @@ void MdViewerWidget::setupParaViewBehaviors()
   //new pqPersistentMainWindowStateBehavior(mainWindow);
   new pqObjectPickingBehavior(this);
   new pqCollaborationBehavior(this);
-  new pqMultiServerBehavior(this);
   new pqViewStreamingBehavior(this);
 }
 
@@ -356,7 +354,7 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
 void MdViewerWidget::setParaViewComponentsForView()
 {
   // Extra setup stuff to hook up view to other items
-  this->ui.propertiesPanel->setView(this->currentView->getView());
+  //this->ui.propertiesPanel->setView(this->currentView->getView());
   this->ui.pipelineBrowser->setActiveView(this->currentView->getView());
 
   pqActiveObjects *activeObjects = &pqActiveObjects::instance();
