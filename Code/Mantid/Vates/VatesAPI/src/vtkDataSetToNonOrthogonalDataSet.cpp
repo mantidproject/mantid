@@ -49,7 +49,8 @@ vtkDataSetToNonOrthogonalDataSet::vtkDataSetToNonOrthogonalDataSet(vtkDataSet *d
   m_basisNorm(),
   m_basisX(1, 0, 0),
   m_basisY(0, 1, 0),
-  m_basisZ(0, 0, 1)
+  m_basisZ(0, 0, 1),
+  m_coordType(API::HKL)
 {
   if (NULL == m_dataSet)
   {
@@ -93,6 +94,11 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
     {
       API::IMDHistoWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
       m_numDims = infoWs->getNumDims();
+      m_coordType = infoWs->getSpecialCoordinateSystem();
+      if (API::HKL != m_coordType)
+      {
+        throw std::invalid_argument("Cannot create non-orthogonal view for non-HKL coordinates");
+      }
       const API::Sample sample = infoWs->getExperimentInfo(0)->sample();
       if (!sample.hasOrientedLattice())
       {
@@ -123,6 +129,11 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
     {
       API::IMDEventWorkspace_const_sptr infoWs = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
       m_numDims = infoWs->getNumDims();
+      m_coordType = infoWs->getSpecialCoordinateSystem();
+      if (API::HKL != m_coordType)
+      {
+        throw std::invalid_argument("Cannot create non-orthogonal view for non-HKL coordinates");
+      }
       const API::Sample sample = infoWs->getExperimentInfo(0)->sample();
       if (!sample.hasOrientedLattice())
       {
