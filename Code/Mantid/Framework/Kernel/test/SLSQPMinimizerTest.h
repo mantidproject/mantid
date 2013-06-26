@@ -112,8 +112,8 @@ public:
     TS_ASSERT_EQUALS(m_nparams, res.size());
     if(res.size() == m_nparams)
     {
-      TS_ASSERT_DELTA(1.46973601, res[0], 1e-8);
-      TS_ASSERT_DELTA(0.2939472, res[1], 1e-8);
+      TS_ASSERT_DELTA(1.46973601, res[0], 1e-7);
+      TS_ASSERT_DELTA(0.2939472, res[1], 1e-7);
     }
   }
 
