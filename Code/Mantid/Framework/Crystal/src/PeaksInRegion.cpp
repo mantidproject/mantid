@@ -165,12 +165,12 @@ namespace Crystal
     const int numberOfFaces = this->numberOfFaces();
     VecVecV3D faces(numberOfFaces);
     int faceIndex = 0;
-    faces[faceIndex++] = list_of(point1)(point5)(point6); // These define a face normal to x at xmin.
-    faces[faceIndex++] = list_of(point4)(point7)(point8); // These define a face normal to x at xmax.
-    faces[faceIndex++] = list_of(point1)(point4)(point8); // These define a face normal to y at ymin.
-    faces[faceIndex++] = list_of(point2)(point3)(point7); // These define a face normal to y at ymax.
-    faces[faceIndex++] = list_of(point1)(point2)(point3); // These define a face normal to z at zmin.
-    faces[faceIndex++] = list_of(point5)(point6)(point7); // These define a face normal to z at zmax.
+    faces[faceIndex++] = list_of(point1)(point5)(point6).convert_to_container<VecV3D>(); // These define a face normal to x at xmin.
+    faces[faceIndex++] = list_of(point4)(point7)(point8).convert_to_container<VecV3D>(); // These define a face normal to x at xmax.
+    faces[faceIndex++] = list_of(point1)(point4)(point8).convert_to_container<VecV3D>(); // These define a face normal to y at ymin.
+    faces[faceIndex++] = list_of(point2)(point3)(point7).convert_to_container<VecV3D>(); // These define a face normal to y at ymax.
+    faces[faceIndex++] = list_of(point1)(point2)(point3).convert_to_container<VecV3D>(); // These define a face normal to z at zmin.
+    faces[faceIndex++] = list_of(point5)(point6)(point7).convert_to_container<VecV3D>(); // These define a face normal to z at zmax.
     return faces;
   }
 
