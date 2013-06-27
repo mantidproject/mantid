@@ -206,8 +206,8 @@ namespace MDAlgorithms
     /// Cylinder Length to use around peaks for cylinder
     double cylinderLength = getProperty("CylinderLength");
     Workspace2D_sptr ws2D;
-    size_t numSteps;
-    double deltaQ;
+    size_t numSteps = 0;
+    double deltaQ = 0.0;
     bool cylinderBool = getProperty("Cylinder");
     if (cylinderBool)
     {
@@ -453,7 +453,8 @@ namespace MDAlgorithms
 				fit_alg->executeAsChildAlg();
 				MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
 				std::string fun = fit_alg->getProperty("Function");
-				g_log.notice() << "Peak " << i <<": " << fun<<"\n";
+				double chisq = fit_alg->getProperty("OutputChi2overDoF");
+				g_log.notice() << "Peak " << i <<": Chisq = " << chisq << " " << fun<<"\n";
 				//Evaluate fit at points
 				const Mantid::MantidVec& y = fitWS->readY(1);
 
