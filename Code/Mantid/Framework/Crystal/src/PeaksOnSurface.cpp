@@ -58,8 +58,6 @@ namespace Crystal
    */
   void PeaksOnSurface::init()
   {
-    declareProperty(new PropertyWithValue<bool>("CheckPeakExtents", false), "Include any peak in the region that has a shape extent extending into that region.");
-
     this->initBaseProperties();
 
     auto manditoryExtents = boost::make_shared<Mantid::Kernel::MandatoryValidator<std::vector<double> > >();
