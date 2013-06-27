@@ -2,9 +2,11 @@
 #define MANTID_API_FILELOADERREGISTRY_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/AlgorithmFactory.h"
 
 #include <set>
 #include <string>
+#include <vector>
 
 namespace Mantid
 {
@@ -46,19 +48,41 @@ namespace Mantid
     class MANTID_API_DLL FileLoaderRegistry
     {
     public:
+
+      /// Defines types of possible file
+      enum LoaderFormat { NonHDF, HDF };
+
+    public:
       /// Default constructor
       FileLoaderRegistry();
 
       /// @returns the number of entries in the registry
-      inline size_t size() const { return m_names.size(); }
-      /// Adds an entry
-      void subscribe(const std::string & name);
-      /// Pick the best loader for the given filename
-      std::string findLoader(const std::string & filename) const;
+      inline size_t size() const { return m_totalSize; }
+
+      /**
+       * Registers a loader whose format is one of the known formats given in LoaderFormat. It
+       * also passes this registration on to the AlgorithmFactory so that it can be created.
+       * The template type should be the class being registered. The name is taken from the string
+       * returned by the name() method on the object.
+       * @param format The type of loader being subscribed, see LoaderFormat
+       * @throws std::invalid_argument if an entry with this name already exists
+       */
+      template<typename Type>
+      void subscribe(LoaderFormat format)
+      {
+        const std::string name = AlgorithmFactory::Instance().subscribe<Type>();
+        // If the factory didn't throw then the name is valid
+        m_names[format].insert(name);
+        m_totalSize += 1;
+        m_log.debug() << "Registered '" << name << "' as file loader\n";
+      }
 
     private:
-      /// The registered names
-      std::set<std::string> m_names;
+      /// The list of names. The index pointed to by LoaderFormat defines a set for that format
+      std::vector<std::set<std::string> > m_names;
+      /// Total number of names registered
+      size_t m_totalSize;
+
       /// Reference to a logger
       Kernel::Logger & m_log;
     };

@@ -2,6 +2,7 @@
 #define MANTID_API_FILELOADERREGISTRYTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 
 using Mantid::API::FileLoaderRegistry;
@@ -25,27 +26,35 @@ public:
   {
     FileLoaderRegistry registry;
 
-    TS_ASSERT_THROWS_NOTHING(registry.subscribe("LoadEventNexus"));
+    TS_ASSERT_THROWS_NOTHING(registry.subscribe<StubAlgorithm>(FileLoaderRegistry::NonHDF));
     TS_ASSERT_EQUALS(1, registry.size());
+
+    // We can't mock the factory as it's a singleton so make sure we clean up
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("StubAlgorithm", 1);
   }
 
   // ======================== Failure cases ===================================
   void test_Adding_Entry_That_Already_Exists_Throws_Error_And_Keeps_The_Size_The_Same()
   {
     FileLoaderRegistry registry;
-    registry.subscribe("LoadEventNexus");
+    registry.subscribe<StubAlgorithm>(FileLoaderRegistry::NonHDF);
 
-    TS_ASSERT_THROWS(registry.subscribe("LoadEventNexus"), std::invalid_argument);
+    TS_ASSERT_THROWS(registry.subscribe<StubAlgorithm>(FileLoaderRegistry::NonHDF), std::runtime_error);
     TS_ASSERT_EQUALS(1, registry.size());
+
+    // We can't mock the factory as it's a singleton so make sure we clean up
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("StubAlgorithm", 1);
   }
 
-  void test_Finding_A_Loader_Throws_Invalid_Argument_If_Filename_Does_Not_Point_To_Valid_File()
+  private:
+  // Stub algorithm for test
+  struct StubAlgorithm : Mantid::API::Algorithm
   {
-    FileLoaderRegistry registry;
-
-    TS_ASSERT_THROWS(registry.findLoader(""), std::invalid_argument);
-    TS_ASSERT_THROWS(registry.findLoader("__notafile.txt__"), std::invalid_argument);
-  }
+    const std::string name() const { return "StubAlgorithm"; }
+    int version() const { return 1; }
+    void init() {};
+    void exec() {};
+  };
 
 };
 
