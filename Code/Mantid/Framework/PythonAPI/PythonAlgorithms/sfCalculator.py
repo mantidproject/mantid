@@ -167,12 +167,18 @@ class sfCalculator():
         
         ## code to replace this
         #self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
+
         sz = size(self.y_axis_numerator)
         new_y_axis_ratio = zeros(sz)
         for i in range(sz):
             
             if self.y_axis_denominator[i] == 0:
                 self.y_axis_denominator[i] = 1
+            
+#             print i
+#             print self.y_axis_numerator[i]
+#             print self.y_axis_denominator[i]
+#             print
             
             new_y_axis_ratio[i] = float(self.y_axis_numerator[i]) / float(self.y_axis_denominator[i])
         self.y_axis_ratio = new_y_axis_ratio
@@ -190,7 +196,7 @@ class sfCalculator():
             if self.y_axis_numerator[i] == 0:
                 self.y_axis_numerator[i] = 1
             
-            tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + (float(self.y_axis_denominator[i]) / float(self.y_axis_denominator[i])) **2
+            tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + (float(self.y_axis_error_denominator[i]) / float(self.y_axis_denominator[i])) **2
             tmp_value = math.sqrt(tmp_value)
             new_y_axis_error_ratio[i] = self.y_axis_ratio[i]* tmp_value
         self.y_axis_error_ratio = new_y_axis_error_ratio        
@@ -306,8 +312,8 @@ class sfCalculator():
         print 'done with _calculateFinalAxis and back in calculatefinalaxis' #REMOVEME
 
         #cleanup workspaces
-#         DeleteWorkspace(EventDataWks)
-#         DeleteWorkspace(HistoDataWks)
+        DeleteWorkspace(EventDataWks)
+        DeleteWorkspace(HistoDataWks)
 #         DeleteWorkspace(IntegratedDataWks)
 #         DeleteWorkspace(TransposeIntegratedDataWks)
 #         DeleteWorkspace(TransposeIntegratedDataWks_t)
@@ -340,7 +346,6 @@ class sfCalculator():
 #             counts_vs_tof_error += mt.readE(x)[:] ** 2
 #         counts_vs_tof_error = sqrt(counts_vs_tof_error)
 
-
 #         
 #        #for DEBUGGING
 #        #output data into ascii file
@@ -355,31 +360,20 @@ class sfCalculator():
 #            sys.exit("Stop in _calculateFinalAxis")
 ##        end of for DEBUGGING #so far, so good !
         
-        
-#        print 'x_axis'
-#        print x_axis
-#        print 'self.tof_min:'
-#        print self.tof_min
-#        print 'self.tof_max:'
-#        print self.tof_max
-        
         index_tof_min = self._getIndex(self.tof_min, x_axis)
         index_tof_max = self._getIndex(self.tof_max, x_axis)
 
-#        print 'index_tof_min'
-#        print index_tof_min
-#        print 'index_tof_max'
-#        print index_tof_max
-
         if (bNumerator is True):
-            self.y_axis_numerator = counts_vs_tof[index_tof_min:index_tof_max]
-            self.y_axis_error_numerator = counts_vs_tof_error[index_tof_min:index_tof_max]
-            self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max]
+            self.y_axis_numerator = counts_vs_tof[index_tof_min:index_tof_max].copy()
+            self.y_axis_error_numerator = counts_vs_tof_error[index_tof_min:index_tof_max].copy()
+            self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max].copy()
         else:
-            self.y_axis_denominator = counts_vs_tof[index_tof_min:index_tof_max]
-            self.y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max]
-            self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max]
+            self.y_axis_denominator = counts_vs_tof[index_tof_min:index_tof_max].copy()
+            self.y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max].copy()
+            self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max].copy()
+
         print 'done with _calculateFinalAxis'
+        
         
         
     def _createIntegratedWorkspace(self,
