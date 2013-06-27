@@ -68,25 +68,15 @@ m_userEditing(true)
   // main layout
   QVBoxLayout* layout=new QVBoxLayout(this);
 
-  m_masking_on = new QRadioButton("Mask");
-  m_grouping_on = new QRadioButton("Group");
-  m_masking_on->setChecked(true);
-  connect(m_masking_on,SIGNAL(toggled(bool)),this,SLOT(toggleMaskGroup(bool)));
-  QHBoxLayout* radioLayout = new QHBoxLayout();
-  radioLayout->addWidget(m_masking_on);
-  radioLayout->addWidget(m_grouping_on);
-  radioLayout->setMargin(0);
-  QWidget* radioGroup = new QWidget();
-  radioGroup->setLayout(radioLayout);
-
-  layout->addWidget(radioGroup);
+  m_activeTool = new QLabel(this);
+  layout->addWidget(m_activeTool);
 
   // Create the tool buttons
 
   m_move = new QPushButton();
   m_move->setCheckable(true);
   m_move->setAutoExclusive(true);
-  m_move->setIcon(QIcon(":/PickTools/selection-tube.png"));
+  m_move->setIcon(QIcon(":/PickTools/zoom.png"));
   m_move->setToolTip("Move the instrument (Ctrl+Alt+M)");
   m_move->setShortcut(QKeySequence("Ctrl+Alt+M"));
 
@@ -147,6 +137,20 @@ m_userEditing(true)
   toolGroup->setLayout(toolBox);
 
   layout->addWidget(toolGroup);
+
+  // create mask/group switch
+  m_masking_on = new QRadioButton("Mask");
+  m_grouping_on = new QRadioButton("Group");
+  m_masking_on->setChecked(true);
+  connect(m_masking_on,SIGNAL(toggled(bool)),this,SLOT(toggleMaskGroup(bool)));
+  QHBoxLayout* radioLayout = new QHBoxLayout();
+  radioLayout->addWidget(m_masking_on);
+  radioLayout->addWidget(m_grouping_on);
+  radioLayout->setMargin(0);
+  QWidget* radioGroup = new QWidget();
+  radioGroup->setLayout(radioLayout);
+
+  layout->addWidget(radioGroup);
 
   // Create property browser
 
@@ -340,35 +344,41 @@ void InstrumentWindowMaskTab::setActivity()
   {
     m_activity = Move;
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+    m_activeTool->setText("Tool: Navigation");
   }
   else if (m_pointer->isChecked())
   {
     m_activity = Select;
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Selection");
   }
   else if (m_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
     m_instrWindow->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Ellipse");
   }
   else if (m_rectangle->isChecked())
   {
     m_activity = DrawRectangle;
     m_instrWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Rectangle");
   }
   else if (m_ring_ellipse->isChecked())
   {
     m_activity = DrawEllipticalRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Elliptical ring");
   }
   else if (m_ring_rectangle->isChecked())
   {
     m_activity = DrawRectangularRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Rectangular ring");
   }
   m_instrWindow->updateInfoText();
 }
@@ -448,6 +458,7 @@ void InstrumentWindowMaskTab::showEvent (QShowEvent *)
   m_instrWindow->setMouseTracking(true);
   enableApplyButtons();
   m_instrWindow->updateInstrumentView(true);
+  m_instrWindow->getSurface()->changeBorderColor( getShapeBorderColor() );
 }
 
 void InstrumentWindowMaskTab::clearProperties()

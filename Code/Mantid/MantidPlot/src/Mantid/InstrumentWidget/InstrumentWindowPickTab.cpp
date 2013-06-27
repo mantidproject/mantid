@@ -160,6 +160,24 @@ m_freezePlot(false)
   m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
   m_tube->setToolTip("Select whole tube");
 
+  m_rectangle = new QPushButton();
+  m_rectangle->setCheckable(true);
+  m_rectangle->setAutoExclusive(true);
+  m_rectangle->setIcon(QIcon(":/PickTools/selection-box.png"));
+  m_rectangle->setToolTip("Draw a rectangle");
+
+  m_ellipse = new QPushButton();
+  m_ellipse->setCheckable(true);
+  m_ellipse->setAutoExclusive(true);
+  m_ellipse->setIcon(QIcon(":/PickTools/selection-circle.png"));
+  m_ellipse->setToolTip("Draw a ellipse");
+
+  m_edit = new QPushButton();
+  m_edit->setCheckable(true);
+  m_edit->setAutoExclusive(true);
+  m_edit->setIcon(QIcon(":/PickTools/selection-edit.png"));
+  m_edit->setToolTip("Edit a shape");
+
   m_peak = new QPushButton();
   m_peak->setCheckable(true);
   m_peak->setAutoExclusive(true);
@@ -172,19 +190,25 @@ m_freezePlot(false)
   m_peakSelect->setIcon(QIcon(":/PickTools/eraser.png"));
   m_peakSelect->setToolTip("Erase single crystal peak(s)");
 
-  QHBoxLayout* toolBox = new QHBoxLayout();
-  toolBox->addWidget(m_zoom);
-  toolBox->addWidget(m_one);
-  toolBox->addWidget(m_tube);
-  toolBox->addWidget(m_peak);
-  toolBox->addWidget(m_peakSelect);
-  toolBox->addStretch();
+  QGridLayout* toolBox = new QGridLayout();
+  toolBox->addWidget(m_zoom,0,0);
+  toolBox->addWidget(m_one,0,1);
+  toolBox->addWidget(m_tube,0,2);
+  toolBox->addWidget(m_peak,0,3);
+  toolBox->addWidget(m_peakSelect,0,4);
+  toolBox->addWidget(m_edit,1,0);
+  toolBox->addWidget(m_ellipse,1,1);
+  toolBox->addWidget(m_rectangle,1,2);
+  toolBox->setColStretch(5,1);
   toolBox->setSpacing(2);
   connect(m_zoom,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_one,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_tube,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_peak,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_peakSelect,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_rectangle,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_ellipse,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_edit,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   setSelectionType();
 
   // lay out the widgets
@@ -652,6 +676,26 @@ void InstrumentWindowPickTab::setSelectionType()
     m_activeTool->setText("Tool: Erase crystal peak(s)");
     surfaceMode = ProjectionSurface::EraseMode;
   }
+  else if (m_rectangle->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Rectangle");
+    surfaceMode = ProjectionSurface::DrawMode;
+    m_instrWindow->getSurface()->startCreatingShape2D("rectangle",Qt::green,QColor(255,255,255,80));
+  }
+  else if (m_ellipse->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Ellipse");
+    surfaceMode = ProjectionSurface::DrawMode;
+    m_instrWindow->getSurface()->startCreatingShape2D("ellipse",Qt::green,QColor(255,255,255,80));
+  }
+  else if (m_edit->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Shape editing");
+    surfaceMode = ProjectionSurface::DrawMode;
+  }
   auto surface = m_instrWindow->getSurface();
   if ( surface ) 
   {
@@ -757,6 +801,7 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
   setSelectionType();
   // make sure picking updated
   m_instrWindow->updateInstrumentView(true);
+  m_instrWindow->getSurface()->changeBorderColor( getShapeBorderColor() );
 }
 
 /**
@@ -1069,6 +1114,15 @@ QString InstrumentWindowPickTab::getNonDetectorInfo()
     return text;
 }
 
+/**
+ * Get the color of the overlay shapes in this tab.
+ * @return
+ */
+QColor InstrumentWindowPickTab::getShapeBorderColor() const
+{
+    return QColor( Qt::green );
+}
+
 
 /**
  * Save data plotted on the miniplot into a MatrixWorkspace.
@@ -1213,6 +1267,7 @@ void InstrumentWindowPickTab::initSurface()
     connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
     connect(surface,SIGNAL(peaksWorkspaceAdded()),this,SLOT(updateSelectionInfoDisplay()));
     connect(surface,SIGNAL(peaksWorkspaceDeleted()),this,SLOT(updateSelectionInfoDisplay()));
+    connect(surface,SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
 }
 
 /**
@@ -1271,6 +1326,12 @@ void InstrumentWindowPickTab::selectTool(const ToolType tool)
     break;
   case PeakErase: m_peakSelect->setChecked(true);
     break;
+  case DrawRectangle: m_rectangle->setChecked(true);
+    break;
+  case DrawEllipse: m_ellipse->setChecked(true);
+    break;
+  case EditShape: m_edit->setChecked(true);
+    break;
   default: throw std::invalid_argument("Invalid tool type.");
   }
   setSelectionType();
@@ -1298,5 +1359,13 @@ void InstrumentWindowPickTab::singleDetectorPicked(int detid)
 void InstrumentWindowPickTab::updateSelectionInfoDisplay()
 {
     updateSelectionInfo(m_currentDetID);
+}
+
+/**
+ * Respond to the shapeCreated signal from the surface.
+ */
+void InstrumentWindowPickTab::shapeCreated()
+{
+    selectTool( EditShape );
 }
 

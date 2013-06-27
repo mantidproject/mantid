@@ -172,6 +172,7 @@ void InputControllerDrawShape::mousePressEvent(QMouseEvent *event)
       }
       m_x = event->x();
       m_y = event->y();
+      m_rect.setRect( event->x(), event->y(), 1, 1 );
     }
 }
 
@@ -189,8 +190,13 @@ void InputControllerDrawShape::mouseMoveEvent(QMouseEvent *event)
         else
         {
             emit moveBy( event->x() - m_x, event->y() - m_y );
+            m_rect.setBottomRight(QPoint( event->x(), event->y() ));
             m_x = event->x();
             m_y = event->y();
+            if ( m_rect.width() > 1 || m_rect.height() > 1 )
+            {
+                emit setSelection( m_rect );
+            }
         }
     }
     else
@@ -207,6 +213,10 @@ void InputControllerDrawShape::mouseReleaseEvent(QMouseEvent *)
     m_isButtonPressed = false;
     m_creating = false;
     m_shapeType = "";
+    if ( m_rect.width() > 1 || m_rect.height() > 1 )
+    {
+        emit finishSelection( m_rect );
+    }
 }
 
 /**

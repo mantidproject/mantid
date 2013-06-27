@@ -368,7 +368,7 @@ void InstrumentWindow::setSurfaceType(int type)
         tab->initSurface();
     }
 
-    connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
+    //connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
     connect(surface,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),this,SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)));
     connect(surface,SIGNAL(updateInfoText()),this,SLOT(updateInfoText()),Qt::QueuedConnection);
     QApplication::restoreOverrideCursor();

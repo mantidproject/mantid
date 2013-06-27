@@ -148,6 +148,10 @@ signals:
     void removeSelectedShapes();
     /// Restore the cursor to its default image
     void restoreOverrideCursor();
+    /// Update the rubber band selection
+    void setSelection(const QRect&);
+    /// Rubber band selection is done
+    void finishSelection(const QRect&);
 
 public slots:
     void startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor);

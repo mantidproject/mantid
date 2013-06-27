@@ -74,6 +74,8 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
   connect(drawController,SIGNAL(removeSelectedShapes()),&m_maskShapes,SLOT(removeSelectedShapes()));
   connect(drawController,SIGNAL(deselectAll()),&m_maskShapes,SLOT(deselectAll()));
   connect(drawController,SIGNAL(restoreOverrideCursor()),&m_maskShapes,SLOT(restoreOverrideCursor()));
+  connect(drawController,SIGNAL(setSelection(QRect)),this,SLOT(setSelectionRect(QRect)));
+  connect(drawController,SIGNAL(finishSelection(QRect)),this,SLOT(selectMultipleMasks(QRect)));
 
   // create and connect the peak eraser controller
   InputControllerErase* eraseController = new InputControllerErase(this);
@@ -699,7 +701,10 @@ void ProjectionSurface::setShowPeakLabelsFlag(bool on)
   */
 void ProjectionSurface::setSelectionRect(const QRect &rect)
 {
-    m_selectRect = rect;
+    if ( m_interactionMode != DrawMode || !m_maskShapes.hasSelection() )
+    {
+        m_selectRect = rect;
+    }
 }
 
 /**
@@ -718,6 +723,19 @@ void ProjectionSurface::selectMultipleDetectors()
     QList<int> detList;
     getSelectedDetectors(detList);
     emit multipleDetectorsSelected(detList);
+    emptySelectionRect();
+}
+
+/**
+ * Select multiple mask shapes as a result of a rubber-band selection
+ * @param rect :: The rubber band rect.
+ */
+void ProjectionSurface::selectMultipleMasks(const QRect &rect)
+{
+    if ( !m_maskShapes.hasSelection() )
+    {
+        m_maskShapes.selectIn( rect );
+    }
     emptySelectionRect();
 }
 

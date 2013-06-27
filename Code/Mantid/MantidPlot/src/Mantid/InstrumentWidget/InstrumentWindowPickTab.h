@@ -42,8 +42,8 @@ public:
   ///            a peak to the attached peaks workspace
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to select peak
   ///               markers. Selected peaks can be deleted by pressing the Delete key.
-  enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube};
-  enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase};
+  enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube, Draw};
+  enum ToolType {Zoom,PixelSelect,TubeSelect,PeakSelect,PeakErase, DrawEllipse, DrawRectangle, EditShape};
   enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,NUMBER_OF_UNITS};
 
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
@@ -73,6 +73,7 @@ private slots:
   void singleDetectorTouched(int detid);
   void singleDetectorPicked(int detid);
   void updateSelectionInfoDisplay();
+  void shapeCreated();
 private:
   void showEvent (QShowEvent *);
   void updatePlot(int detid);
@@ -101,6 +102,7 @@ private:
     TubeXUnits getTubeXUnits(const QString& name) const;
     QString getTubeXUnitsName(TubeXUnits unit) const;
   QString getNonDetectorInfo();
+  QColor getShapeBorderColor() const;
 
   /* Pick tab controls */
   OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors
@@ -110,6 +112,9 @@ private:
   QPushButton *m_tube;  ///< Button switching on detector's parent selection mode
   QPushButton *m_peak;  ///< Button switching on peak creation mode
   QPushButton *m_peakSelect;   ///< Button switching on peak selection mode
+  QPushButton *m_rectangle;    ///< Button switching on drawing a rectangular selection region
+  QPushButton *m_ellipse;      ///< Button switching on drawing a elliptical selection region
+  QPushButton *m_edit;         ///< Button switching on edditing the selection region
   bool m_plotSum;
 
   // Actions to set integration option for the detector's parent selection mode

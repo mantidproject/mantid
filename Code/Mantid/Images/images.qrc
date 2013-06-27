@@ -40,6 +40,7 @@
         <file>selection-text.png</file>
         <file>selection-peak.png</file>
         <file>selection-peaks.png</file>
+        <file>selection-edit.png</file>
         <file>eraser.png</file>
     </qresource>
     <qresource prefix="/MaskTools">

@@ -174,9 +174,12 @@ void Shape2DCollection::addShape(const QString& type,int x,int y, const QColor &
   m_currentShape->setColor(borderColor);
   m_currentShape->setFillColor(fillColor);
   addShape( m_currentShape );
-  m_currentShape->edit(true);
-  m_currentCP = 2;
-  emit shapeSelected();
+  if ( m_currentShape )
+  {
+      m_currentShape->edit(true);
+      m_currentCP = 2;
+      emit shapeSelected();
+  }
 }
 
 Shape2D* Shape2DCollection::createShape(const QString& type,int x,int y) const
@@ -277,7 +280,14 @@ void Shape2DCollection::moveShapeOrControlPointBy(int dx, int dy)
         QPointF screenP0 = m_transform.map( p0 );
         QPointF screenP1 = screenP0 + QPointF( dx, dy );
         QPointF p1 = m_transform.inverted().map( screenP1 );
-        m_currentShape->moveBy( p1 - p0 );
+        QPointF dp = p1 - p0;
+        foreach(Shape2D* shape,m_shapes)
+        {
+          if ( shape->isEditing() )
+          {
+            shape->moveBy( dp );
+          }
+        }
     }
     if ( !m_overridingCursor )
     {
@@ -338,6 +348,7 @@ bool Shape2DCollection::selectIn(const QRect& rect)
   RectF r( m_transform.inverted().mapRect( QRectF(rect) ) );
   bool selected = false;
   deselectAll();
+  int i = 0;
   foreach(Shape2D* shape,m_shapes)
   {
     bool sel = false;
@@ -356,6 +367,7 @@ bool Shape2DCollection::selectIn(const QRect& rect)
     {
       shape->edit( true );
       selected = true;
+      m_currentShape = shape;
     }
   }
   return selected;
@@ -370,6 +382,22 @@ void Shape2DCollection::select(int i)
   {
     select(m_shapes[i]);
   }
+}
+
+/**
+ * Check if any of the shapes is selected.
+ * @return :: True if there is a selection.
+ */
+bool Shape2DCollection::hasSelection() const
+{
+    foreach(Shape2D* shape,m_shapes)
+    {
+      if ( shape->isEditing() )
+      {
+        return true;
+      }
+    }
+    return false;
 }
 
 /**

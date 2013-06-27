@@ -50,6 +50,7 @@ public:
   bool isEmpty()const{return m_shapes.isEmpty();}
   size_t size()const {return static_cast<size_t>(m_shapes.size());}
   void select(int i);
+  bool hasSelection() const;
 
   RectF getCurrentBoundingRect()const;
   void setCurrentBoundingRect(const RectF &rect);
