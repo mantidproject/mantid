@@ -70,7 +70,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="controlsLayout" stretch="0,0,0,0,0">
+    <layout class="QHBoxLayout" name="controlsLayout" stretch="0,0,0,0,0,0">
      <item>
       <widget class="QFrame" name="infoFrame">
        <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -280,6 +280,22 @@
         </widget>
        </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::MinimumExpanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
