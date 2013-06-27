@@ -18,7 +18,8 @@ set ( TEST_FILES
 # Add the target for this directory
 add_library ( Remote ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Remote PROPERTIES OUTPUT_NAME MantidRemote )
+set_target_properties ( Remote PROPERTIES OUTPUT_NAME MantidRemote
+                                          COMPILE_DEFINITIONS IN_MANTID_REMOTE )
 # Add to the 'Framework' group in VS
 set_property ( TARGET Remote PROPERTY FOLDER "MantidFramework" )
 
