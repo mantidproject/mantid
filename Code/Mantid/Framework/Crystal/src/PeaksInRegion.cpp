@@ -77,8 +77,9 @@ namespace Crystal
 
   void PeaksInRegion::validateExtentsInput() const
   {
+    const size_t numberOfFaces = this->numberOfFaces();
     std::stringstream outbuff;
-    if(m_extents.size() != this->numberOfFaces())
+    if(m_extents.size() != numberOfFaces)
     {
       throw std::invalid_argument("Six commma separated entries for the extents expected");
     }
