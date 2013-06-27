@@ -413,8 +413,11 @@ void SliceViewer::initMenus()
 
   // --------------- Peaks Menu ----------------------------------------
   m_menuPeaks = new QMenu("&Peak", this);
-  action = new QAction(QPixmap(), "&Peaks Overlay Options", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(onPeaksViewerOptions()));
+  action = new QAction(QPixmap(), "&Overlay Options", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(onPeaksViewerOverlayOptions()));
+  m_menuPeaks->addAction(action);
+  action = new QAction(QPixmap(), "&Visable Columns", this);
+  connect(action, SIGNAL(triggered()), this, SIGNAL(peaksTableColumnOptions())); // just re-emit
   m_menuPeaks->addAction(action);
   m_menuPeaks->setEnabled(false);// Until a PeaksWorkspace is selected.
 
@@ -2356,7 +2359,7 @@ void SliceViewer::resetView()
   this->resetZoom();
 }
 
-void SliceViewer::onPeaksViewerOptions()
+void SliceViewer::onPeaksViewerOverlayOptions()
 {
   PeaksViewerOverlayDialog dlg(this->m_peaksPresenter);
   dlg.exec();
