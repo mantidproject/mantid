@@ -242,8 +242,7 @@ class DirectEnergyConversion(object):
         white_ws = self.remap(white_ws, spectra_masks, map_file)
 
         # White beam scale factor
-        white_ws *= self.wb_scale_factor    
-        self.workspace_list['white_ws'] = white_ws
+        white_ws *= self.wb_scale_factor            
         return white_ws
 
     def mono_van(self, mono_van, ei_guess, white_run=None, map_file=None,
@@ -261,7 +260,6 @@ class DirectEnergyConversion(object):
                                 white_run, map_file, spectra_masks, Tzero)
         # Normalize by vanadium sample weight
         monovan /= float(self.van_mass)/float(self.van_rmm)
-        self.workspace_list['monovan_ws'] = monovan
         return monovan
 
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
@@ -275,9 +273,9 @@ class DirectEnergyConversion(object):
         if result_name is None:
             result_name = common.create_resultname(mono_run, prefix=self.instr_name)
 
-        self.workspace_list['sample_ws']=self._do_mono(sample_data, sample_data, result_name, ei_guess, 
+        mono_s=self._do_mono(sample_data, sample_data, result_name, ei_guess, 
                                   white_run, map_file, spectra_masks, Tzero)
-        return self.workspace_list['sample_ws']
+        return mono_s
 
 
 # -------------------------------------------------------------------------------------------
@@ -766,13 +764,6 @@ class DirectEnergyConversion(object):
         self._idf_values_read = False
         self.instr_name=None
         if not (instr_name is None or len(instr_name)==0) :
-        # Instrument and default parameter setup
-        # fomats availible for saving. As the reducer has to have a method to process one of this, it is private property
-            self.__save_formats = {}
-            self.__save_formats['.spe']   = lambda workspace,filename : SaveSPE(InputWorkspace=workspace,Filename= filename)
-            self.__save_formats['.nxspe'] = lambda workspace,filename : SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
-            self.__save_formats['.nxs']   = lambda workspace,filename : SaveNexus(InputWorkspace=workspace,Filename= filename)
-
             self.initialise(instr_name)
 
 #----------------------------------------------------------------------------------
@@ -877,6 +868,26 @@ class DirectEnergyConversion(object):
         """
         Initialise the attributes of the class
         """
+
+        # Instrument and default parameter setup
+        # fomats availible for saving. As the reducer has to have a method to process one of this, it is private property
+        self.__save_formats = {}
+        self.__save_formats['.spe']   = lambda workspace,filename : SaveSPE(InputWorkspace=workspace,Filename= filename)
+        self.__save_formats['.nxspe'] = lambda workspace,filename : SaveNXSPE(InputWorkspace=workspace,Filename= filename, KiOverKfScaling=self.apply_kikf_correction,Psi=self.psi)
+        self.__save_formats['.nxs']   = lambda workspace,filename : SaveNexus(InputWorkspace=workspace,Filename= filename)
+        ## Detector diagnosis
+        # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word 
+        # and tries to get rest from the correspondent dgreduced attributes
+        self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
+                              'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
+                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_bkgd_range']
+
+        
+        self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
+
+        # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
+        self.__abs_units_par_to_change=['sample_mass','sample_rmm']
+
         # Instrument name might be a prefix, query Mantid for the full name
         new_name = config.getFacility().instrument(instr_name).shortName()
         if new_name != self.instr_name:
@@ -922,21 +933,8 @@ class DirectEnergyConversion(object):
         """
         self.efixed = 0
 
-        ## Detector diagnosis
-        # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word 
-        # and tries to get rest from the correspondent dgreduced attributes
-        self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
-                              'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
-                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_bkgd_range']
-        
-        self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
 
-        # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
-        self.__abs_units_par_to_change=['sample_mass','sample_rmm']
-
-        # the list of the workspaces used by the reducer
-        self.workspace_list = {}
-
+   
         # mandatrory command line parameter
         self.energy_bins = None
         
@@ -1390,8 +1388,11 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.initialise("MAP");
 
         energy_incident = 100 
-        if tReducer.monovan_integr_range is None :
-            tReducer.monovan_integr_range = [tReducer.monovan_lo_frac*energy_incident,tReducer.monovan_hi_frac*energy_incident]
+        tReducer.efixed = energy_incident
+        hi_frac = tReducer.monovan_hi_frac
+        lo_frac = tReducer.monovan_lo_frac
+        tReducer.monovan_integr_range = None
+        self.assertEqual(tReducer.monovan_integr_range,[lo_frac*energy_incident,hi_frac*energy_incident])
 
     def test_comlex_get(self):
         tReducer = self.reducer
