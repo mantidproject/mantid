@@ -228,8 +228,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     
     if mtd.doesExist(str(sample_run))==True and Reducer.det_cal_file != None:
-        print 'For data input type: workspace detector calibration must be specified'
-        print 'use Keyword det_cal_file with a valid detctor file or run number'
+        Reducer.log('For data input type: workspace detector calibration must be specified','error')
+        Reducer.log('use Keyword det_cal_file with a valid detctor file or run number','error')
         return
               
     
@@ -278,6 +278,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                                          second_white = None,variation=1.1,print_results=True)
                     if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that. 
                         masking +=  masking2
+                        DeleteWorkspace(masking2)
     
 
             else: # if Reducer.mono_correction_factor != None :
@@ -287,6 +288,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     if Reducer.save_and_reuse_masks and not masks_done:
         SaveMask(InputWorkspace=masking,OutputFile = mask_file_name,GroupedDetectors=True)
 
+    # Very important statement propagating masks for further usage in convert_to_energy 
     Reducer.spectra_masks=masking
     # estimate and report the number of failing detectors
     failed_sp_list,nSpectra = get_failed_spectra_list_from_masks(masking)
@@ -307,8 +309,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
        RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=wksp_out)
 
 
-    #ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value) 
-    print 'Incident energy found for sample run: ',Reducer.incident_en,' meV'
+    ei= (deltaE_wkspace_sample.getRun().getLogData("Ei").value) 
+    print 'Incident energy found for sample run: ',ei,' meV'
     
     end_time=time.time()
     print 'Elapsed time =',end_time-start_time, 's'
@@ -435,8 +437,6 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
 
  
 
-
-
 def apply_absolute_normalization(Reducer,deltaE_wkspace_sample,monovan_run,ei_guess,wb_mono):
     """  Function applies absolute normalization factor to the target workspace 
          and calculates this factor if nececcary
@@ -498,6 +498,7 @@ def process_legacy_parameters(**kwargs) :
             params[key]=value;    
 
     return params
+
 
 def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
     """get absolute normalization factor for monochromatic vanadium

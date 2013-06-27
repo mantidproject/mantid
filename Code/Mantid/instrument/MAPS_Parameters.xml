@@ -104,7 +104,7 @@
   <value val="20"/>
 </parameter>
 <parameter name="wb-integr-max">
-  <value val="300"/>
+  <value val="100"/>
 </parameter>
 <parameter name="wb_integr_range"   type="string">
     <value val="wb-integr-min:wb-integr-max"/>

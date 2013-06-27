@@ -433,7 +433,7 @@ class DirectEnergyConversion(object):
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
         self.log("_do_mono: finished ConvertUnits for "+result_name)
-        iws = mtd[result_name]
+      
 
                 
         if not self.energy_bins is None:
