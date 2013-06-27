@@ -8,8 +8,7 @@
 '''
 
 import math
-from mantidsimple import *
-#from mantid.simpleapi import *  # New API
+from mantid.simpleapi import *  # New API
 
 def l2q(ws,whichDet,theta):
 	'''	
@@ -34,8 +33,9 @@ def l2q(ws,whichDet,theta):
 	'''
 	#ws = mantid.getMatrixWorkspace(ws)
 	
-	# pick up the sample to detector distance 
-	if ws.isGroup():
+	# pick up the sample to detector distance
+	from mantid.api import WorkspaceGroup
+	if isinstance(ws, WorkspaceGroup):
 		wsg = ws.getName() + '_1'
 		inst = mtd[wsg].getInstrument()
 	else:
