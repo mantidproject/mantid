@@ -260,7 +260,7 @@ class DirectEnergyConversion(object):
         monovan = self._do_mono(sample_data, sample_data, result_name, ei_guess, 
                                 white_run, map_file, spectra_masks, Tzero)
         # Normalize by vanadium sample weight
-        monovan /= float(self.van_mass)/float(self.__van_rmm)
+        monovan /= float(self.van_mass)/float(self.van_rmm)
         self.workspace_list['monovan_ws'] = monovan
         return monovan
 
@@ -290,6 +290,7 @@ class DirectEnergyConversion(object):
         Convert units of a given workspace to deltaE, including possible 
         normalisation to a white-beam vanadium run.
         """
+        prefix='new'
 
         # Special load monitor stuff.    
         if (self.instr_name == "CNCS" or self.instr_name == "HYSPEC"):
@@ -426,12 +427,16 @@ class DirectEnergyConversion(object):
         # TODO: This really should be done as soon as possible after loading
         self.normalise(mtd[result_name], result_name, self.normalise_method, range_offset=bin_offset)
 
+       
+
         # This next line will fail the SystemTests
         #ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
         # But this one passes...
         ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="DeltaE",EMode='Direct')
         self.log("_do_mono: finished ConvertUnits for "+result_name)
-        
+        iws = mtd[result_name]
+
+                
         if not self.energy_bins is None:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
         
@@ -459,14 +464,15 @@ class DirectEnergyConversion(object):
         result_ws = mtd[result_name]
         result_ws = self.remap(result_ws, spectra_masks, map_file)
 
+
         ConvertToDistribution(Workspace=result_ws)
         # White beam correction
         if white_run is not None:
             white_ws = self.do_white(white_run, spectra_masks, map_file,None)
             result_ws /= white_ws
-        
         # Overall scale factor
         result_ws *= self.scale_factor
+        #CloneWorkspace(InputWorkspace=result_ws,OutputWorkspace='StepLastConvertUnits'+prefix)
         return result_ws
 
 #-------------------------------------------------------------------------------

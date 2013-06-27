@@ -1,4 +1,4 @@
-from DirectEnergyConversion import *
+import DirectEnergyConversion as DRC 
 import CommonFunctions as common
 import time as time
 import numpy
@@ -10,6 +10,8 @@ import unittest
 global Reducer
 Reducer = None
 
+DRC=reload(DRC)
+
 def setup(instname=None,reload=False):
     """
     setup('mar')
@@ -18,6 +20,7 @@ def setup(instname=None,reload=False):
     if the instrument has already been defined, does nothing unless 
     reload = True is specified
     """
+
     global Reducer
     if instname == None :
         instname = config['default.instrument']  
@@ -28,7 +31,7 @@ def setup(instname=None,reload=False):
             if not reload :
                 return  # has been already defined
 
-    Reducer = setup_reducer(instname)
+    Reducer = DRC.setup_reducer(instname)
 
 def help(keyword=None) :
     """function returns help on reduction parameters. 
