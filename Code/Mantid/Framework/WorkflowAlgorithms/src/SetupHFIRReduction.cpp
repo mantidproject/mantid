@@ -710,6 +710,7 @@ void SetupHFIRReduction::exec()
     iqAlg->setProperty("LogBinning", log_binning);
     iqAlg->setPropertyValue("NumberOfSubpixels", n_subpix);
     iqAlg->setProperty("ErrorWeighting", err_weighting);
+    iqAlg->setProperty("ComputeResolution", true);
     iqAlg->setPropertyValue("ReductionProperties", reductionManagerName);
 
     algProp = new AlgorithmProperty("IQAlgorithm");
