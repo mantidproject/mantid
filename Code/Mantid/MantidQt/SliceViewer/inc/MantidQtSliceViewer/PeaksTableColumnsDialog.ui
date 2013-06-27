@@ -19,83 +19,111 @@
      <property name="widgetResizable">
       <bool>true</bool>
      </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents">
+     <widget class="QWidget" name="scrollAreaForCheckboxes">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>362</width>
-        <height>302</height>
+        <width>380</width>
+        <height>246</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <widget class="QCheckBox" name="checkBox">
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="3" column="0">
+        <widget class="QCheckBox" name="cb_wavelength">
          <property name="text">
-          <string>CheckBox</string>
+          <string>Wavelength</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_2">
+       <item row="5" column="0">
+        <widget class="QCheckBox" name="cb_ei">
          <property name="text">
-          <string>CheckBox</string>
+          <string>E_i</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_7">
+       <item row="9" column="0">
+        <widget class="QCheckBox" name="cb_bincount">
          <property name="text">
-          <string>CheckBox</string>
+          <string>BinCount</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_4">
+       <item row="11" column="0">
+        <widget class="QCheckBox" name="cb_row">
          <property name="text">
-          <string>CheckBox</string>
+          <string>Row</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_8">
+       <item row="13" column="0">
+        <widget class="QCheckBox" name="cb_qLab">
          <property name="text">
-          <string>CheckBox</string>
+          <string>QLab</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_10">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="cb_runnumber">
          <property name="text">
-          <string>CheckBox</string>
+          <string>Run</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_9">
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="cb_detID">
          <property name="text">
-          <string>CheckBox</string>
+          <string>DetID</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_5">
+       <item row="3" column="1">
+        <widget class="QCheckBox" name="cb_deltaE">
          <property name="text">
-          <string>CheckBox</string>
+          <string>delta E</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_6">
+       <item row="5" column="1">
+        <widget class="QCheckBox" name="cb_ef">
          <property name="text">
-          <string>CheckBox</string>
+          <string>E_f</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QCheckBox" name="checkBox_3">
+       <item row="6" column="1">
+        <widget class="QCheckBox" name="cb_dspacing">
          <property name="text">
-          <string>CheckBox</string>
+          <string>DSpacing</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QCheckBox" name="cb_tof">
+         <property name="text">
+          <string>TOF</string>
+         </property>
+        </widget>
+       </item>
+       <item row="9" column="1">
+        <widget class="QCheckBox" name="cb_bankname">
+         <property name="text">
+          <string>BankName</string>
+         </property>
+        </widget>
+       </item>
+       <item row="11" column="1">
+        <widget class="QCheckBox" name="cb_column">
+         <property name="text">
+          <string>Col</string>
+         </property>
+        </widget>
+       </item>
+       <item row="13" column="1">
+        <widget class="QCheckBox" name="cb_qSample">
+         <property name="text">
+          <string>QSample</string>
          </property>
         </widget>
        </item>
