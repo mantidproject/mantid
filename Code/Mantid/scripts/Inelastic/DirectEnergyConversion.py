@@ -290,7 +290,6 @@ class DirectEnergyConversion(object):
         Convert units of a given workspace to deltaE, including possible 
         normalisation to a white-beam vanadium run.
         """
-        prefix='new'
 
         # Special load monitor stuff.    
         if (self.instr_name == "CNCS" or self.instr_name == "HYSPEC"):
@@ -472,7 +471,6 @@ class DirectEnergyConversion(object):
             result_ws /= white_ws
         # Overall scale factor
         result_ws *= self.scale_factor
-        #CloneWorkspace(InputWorkspace=result_ws,OutputWorkspace='StepLastConvertUnits'+prefix)
         return result_ws
 
 #-------------------------------------------------------------------------------
@@ -994,7 +992,8 @@ class DirectEnergyConversion(object):
         for key in self.__abs_units_par_to_change:
             if key not in changed_param_list :
                 value = getattr(self,key)
-                message = 'Absolute units reduction parameter : '+key + ' still has its default value: '+str(value)+' which may need to change for correct reduction'
+                message = '\n***WARNING!: Absolute units reduction parameter : '+key + ' has its default value: '+str(value)+\
+                          '\n             This may need to change for correct absolute units'
                 n_warnings += 1
                 self.log(message,'warning')
 

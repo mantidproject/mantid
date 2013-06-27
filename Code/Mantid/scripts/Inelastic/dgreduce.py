@@ -10,6 +10,7 @@ import unittest
 global Reducer
 Reducer = None
 
+# Statement used at debug time to pull changes in DirectEnergyConversion into Mantid
 DRC=reload(DRC)
 
 def setup(instname=None,reload=False):
@@ -46,28 +47,37 @@ def help(keyword=None) :
 
 
 def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=None,**kwargs):
-    """
-    arb_units(wb_run,sample_run,ei_guess,rebin,mapfile,**kwargs)
-    
-    arb_units(wb_run   Whitebeam run number or file name or workspace
-           sample_run  sample run number or file name or workspace
-           ei_guess    Ei guess
-           rebin       Rebin parameters
-           mapfile     Mapfile -- if absent/nonde the defaults from IDF will be used
-           monovan_run If present will do the absolute units normalization. Number of additional parameters  
-                       specified in **kwargs is usually requested for this. If they are absent, program uses defaults,
-                       but the defaults (e.g. sample_mass or sample_rmm ) are usually incorrect for a particular run. 
-           kwargs      Additional keyword arguments    
+    """ One step conversion of run into workspace containing information about energy transfer
+    Usage:
+    >>arb_units(wb_run,sample_run,ei_guess,rebin)
 
-    with run numbers as input:
-    dgreduce.arb_units(1000,10001,80,[-10,.1,70],'mari_res', additional keywords as required)
+    >>arb_units(wb_run,sample_run,ei_guess,rebin,**arguments)
+
+    >>arb_units(wb_run,sample_run,ei_guess,rebin,mapfile,**arguments)
     
-    dgreduce.arb_units(1000,10001,80,'-10,.1,70','mari_res',fixei=True)
+    >>arb_units(wb_run   Whitebeam run number or file name or workspace
+                sample_run  sample run number or file name or workspace
+                ei_guess    Ei guess
+                rebin       Rebin parameters
+                mapfile     Mapfile -- if absent/'default' the defaults from IDF are used
+                monovan_run If present will do the absolute units normalization. Number of additional parameters  
+                            specified in **kwargs is usually requested for this. If they are absent, program uses defaults,
+                            but the defaults (e.g. sample_mass or sample_rmm ) are usually incorrect for a particular run. 
+                arguments   The dictionary containing additional keyword arguments. 
+                            The list of allowed additional arguments is defined in InstrName_Parameters.xml file, located in 
+                            MantidPlot->View->Preferences->Mantid->Directories->Parameter Definitions
+
+    with run numbers as input: 
+    >>dgreduce.arb_units(1000,10001,80,[-10,.1,70])  # will run on default instrument
+
+    >>dgreduce.arb_units(1000,10001,80,[-10,.1,70],'mari_res', additional keywords as required)
+    
+    >>dgreduce.arb_units(1000,10001,80,'-10,.1,70','mari_res',fixei=True)
     
     A detector calibration file must be specified if running the reduction with workspaces as input    
     namely:   
-    w2=iliad("wb_wksp","run_wksp",ei,rebin_params,mapfile,det_cal_file=cal_file
-    ,diag_remove_zero=False,norm_method='current')
+    >>w2=iliad("wb_wksp","run_wksp",ei,rebin_params,mapfile,det_cal_file=cal_file
+               ,diag_remove_zero=False,norm_method='current')
 
    
     type help() for the list of all available keywords. All availible keywords are provided in InstName_Parameters.xml file
@@ -646,28 +656,6 @@ def sum_files(accumulator, files):
 
 
 
-def get_failed_spectra_list(diag_workspace):
-    """Compile a list of spectra numbers that are marked as
-    masked in the given workspace
-
-    Input:
-     diag_workspace  -  A workspace containing masking
-    """
-    if type(diag_workspace) == str:
-        diag_workspace = mtd[diag_workspace]
-    
-    failed_spectra = []
-    for i in range(diag_workspace.getNumberHistograms()):
-      try:
-        det = diag_workspace.getDetector(i)
-      except RuntimeError:
-        continue
-  
-    if det.isMasked():
-       spectrum = diag_workspace.getSpectrum(i)
-       failed_spectra.append(spectrum.getSpectrumNo())
-
-    return failed_spectra
 
 def get_failed_spectra_list_from_masks(masking_wksp):
     """Compile a list of spectra numbers that are marked as
