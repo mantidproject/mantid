@@ -1785,10 +1785,10 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::
   }
   catch (std::runtime_error&)
   {
-    alg->getLogger().error("No IDF found in "+nexusfilename+" at raw_data_1/Instrument");
+    alg->getLogger().information("No IDF found in "+nexusfilename+" at raw_data_1/Instrument");
   }
 
-  if ( !loadInst->isExecuted() ) alg->getLogger().error("No IDF loaded from Nexus file.");   
+  if ( !loadInst->isExecuted() ) alg->getLogger().information("No IDF loaded from Nexus file.");   
   return loadInst->isExecuted();
 }
 
