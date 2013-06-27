@@ -30,7 +30,7 @@ namespace
   /// Boost macro for "looping" over builtin types
   #define BUILTIN_TYPES \
     BOOST_PP_TUPLE_TO_LIST( \
-        6, (double, std::string, int, int64_t, bool, float) \
+        6, (double, std::string, int, int64_t, float) \
     )
   #define USER_TYPES \
     BOOST_PP_TUPLE_TO_LIST( \
@@ -46,6 +46,12 @@ namespace
    */
   PyObject *getValue(Mantid::API::Column_const_sptr column, const std::type_info & typeID, const int row)
   {
+    if(typeID == typeid(Mantid::API::Boolean))
+    {
+      bool res = column->cell<Mantid::API::Boolean>(row);
+      return to_python_value<const bool&>()(res);
+    }
+
     #define GET_BUILTIN(R, _, T) \
     else if(typeID == typeid(T)) \
     {\
@@ -80,6 +86,12 @@ namespace
    */
   void setValue(const Column_sptr column, const int row, const bpl::object & value)
   {
+    if(column->get_type_info() == typeid(Mantid::API::Boolean))
+    {
+      column->cell<Mantid::API::Boolean>(row) = bpl::extract<bool>(value)();
+      return;
+    }
+
 #define SET_CELL(R, _, T) \
     else if(typeID == typeid(T)) \
     {\

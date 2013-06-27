@@ -99,6 +99,15 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEquals(insertedrow, nextrow)
         insertedrow = table.row(0)
         self.assertEquals(insertedrow, nextrow)
+    
+    def test_set_and_extract_boolean_columns(self):
+        table = WorkspaceFactory.createTable()
+        table.addColumn(type='bool', name='yes_no')
+        table.addRow([True])
+        table.addRow([False])
+        
+        self.assertTrue(table.cell(0, 0))
+        self.assertFalse(table.cell(1, 0))
         
 if __name__ == '__main__':
     unittest.main()
