@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
 	src/Glob.cpp
+	src/HDFDescriptor.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
@@ -144,6 +145,7 @@ set ( INC_FILES
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
 	inc/MantidKernel/Glob.h
+	inc/MantidKernel/HDFDescriptor.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
 	inc/MantidKernel/ISaveable.h
@@ -262,6 +264,7 @@ set ( TEST_FILES
 	FunctionTaskTest.h
 	GlobTest.h
 	HermitePolynomialsTest.h
+	HDFDescriptorTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
