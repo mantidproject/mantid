@@ -18,7 +18,7 @@ namespace Mantid
 
   namespace DataHandling
   {
-    /** @class LoadInstrumentFromNexus LoadInstrumentFromNexus.h DataHandling/LoadInstrumentFromNexus.h
+    /** @class LoadIDFFromNexus LoadInstrumentFromNexus.h DataHandling/LoadIDFFromNexus.h
 
     Load an IDF from a Nexus file, if found there.
 
@@ -36,9 +36,8 @@ namespace Mantid
     <LI> Workspace - The name of the workspace in which to use as a basis for any data to be added.</LI>
     </UL>
 
-    @author Anders Markvardsen, ISIS, RAL (LoadInstrumentFromRaw)
-    @date 2/5/2008
-    @author Ronald Fowler, ISIS, RAL (LoadInstrumentFromNexus)
+    @author Karl Palmen, ISIS, RAL (LoadInstrumentFromRaw)
+
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
