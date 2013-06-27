@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Wed Nov 16 13:57:35 2011
+# Created: Thu Jun 27 16:46:08 2013
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -498,7 +498,7 @@ class Ui_Frame(object):
         self.wavelength_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to force the wavelength to a given value.", None, QtGui.QApplication.UnicodeUTF8))
         self.wavelength_chk.setText(QtGui.QApplication.translate("Frame", "Wavelength [Angstrom]", None, QtGui.QApplication.UnicodeUTF8))
         self.wavelength_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the value of the neutron wavelength.", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_10.setText(QtGui.QApplication.translate("Frame", "Wavelength spread [Angstrom]", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_10.setText(QtGui.QApplication.translate("Frame", "Wavelength spread [ratio]", None, QtGui.QApplication.UnicodeUTF8))
         self.wavelength_spread_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the value of the neutron wavelength spread.", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Mask", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Frame", "Choose a file to set your mask. Note that only the mask information, not the data, will be used in the reduction.\n"
