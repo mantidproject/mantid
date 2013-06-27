@@ -141,7 +141,6 @@ namespace Algorithms
     int emode = 0;
     if (emodeStr == "Direct") emode=1;
     else if (emodeStr == "Indirect") emode=2;
-    const double delta = 0.0;
 
     // Get conversion factor from energy(meV) to wavelength(angstroms)
     Kernel::Units::Energy energyUnit;
