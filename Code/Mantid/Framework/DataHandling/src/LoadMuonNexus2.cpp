@@ -52,7 +52,7 @@ Version 1 supports the loading version 1.0 of the muon nexus format.  This is st
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -74,8 +74,7 @@ namespace Mantid
   namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadMuonNexus2)
-    DECLARE_LOADALGORITHM(LoadMuonNexus2)
+    DECLARE_HDF_FILELOADER_ALGORITHM(LoadMuonNexus2);
 
     using namespace Kernel;
     using namespace API;
@@ -104,8 +103,8 @@ namespace Mantid
       std::string filePath = getPropertyValue("Filename");
       LoadMuonNexus1 load1; load1.initialize();
 
-      int confidence1 = load1.fileCheck( filePath );
-      int confidence2 = this->fileCheck( filePath );
+      int confidence1 = load1.confidence( filePath );
+      int confidence2 = this->confidence( filePath );
 
       // if none can load the file throw
       if ( confidence1 < 80 && confidence2 < 80)
@@ -483,15 +482,16 @@ namespace Mantid
       }
     }
 
-    /**checks the file by opening it and reading few lines 
-    *  @param filePath :: name of the file inluding its path
-    *  @return an integer value how much this algorithm can load the file 
-    */
-    int LoadMuonNexus2::fileCheck(const std::string& filePath)
-    {   
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadMuonNexus2::confidence(const Kernel::HDFDescriptor & descriptor) const
+    {
       try
       {
-        NXRoot root(filePath);
+        NXRoot root(descriptor.filename());
         NXEntry entry = root.openFirstEntry();
         if ( ! entry.containsDataSet( "definition" ) ) return 0;
         std::string versionField = "IDF_version";

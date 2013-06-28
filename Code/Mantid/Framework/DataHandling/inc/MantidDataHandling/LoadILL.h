@@ -4,8 +4,7 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IHDFFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
@@ -39,14 +38,13 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-  class DLLExport LoadILL: public API::IDataFileChecker {
+  class DLLExport LoadILL: public API::IHDFFileLoader 
+  {
   public:
     /// Constructor
-    LoadILL() :
-      API::IDataFileChecker(), m_instrumentName(""),
-      //m_nexusInstrumentEntryName(""),
-      m_wavelength(0), m_channelWidth(0) {
-
+    LoadILL() : API::IHDFFileLoader(), m_instrumentName(""),
+      m_wavelength(0), m_channelWidth(0) 
+    {
       supportedInstruments.push_back("IN4");
       supportedInstruments.push_back("IN5");
       supportedInstruments.push_back("IN6");
@@ -67,11 +65,10 @@ namespace DataHandling {
     virtual const std::string category() const {
       return "DataHandling";
     }
-    ///checks the file can be loaded by reading 1st 100 bytes and looking at the file extension.
-    bool quickFileCheck(const std::string& filePath, size_t nread,
-			const file_header& header);
-    /// check the structure of the file and if this file can be loaded return a value between 1 and 100
-    int fileCheck(const std::string& filePath);
+
+    /// Returns a confidence value that this algorithm can load a file
+    int confidence(const Kernel::HDFDescriptor & descriptor) const;
+
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
@@ -81,7 +78,7 @@ namespace DataHandling {
     void exec();
 
     void setInstrumentName(NeXus::NXEntry& entry);
-    std::string getInstrumentName(NeXus::NXEntry& entry);
+    std::string getInstrumentName(NeXus::NXEntry& entry) const;
     void initWorkSpace(NeXus::NXEntry& entry);
     void initInstrumentSpecific();
     void loadRunDetails(NeXus::NXEntry & entry);
@@ -121,10 +118,6 @@ namespace DataHandling {
     double m_l2; //=4.0;
 
     std::vector<std::string> supportedInstruments;
-
-    // Nexus instrument entry is of the format /entry0/<XXX>/
-    // XXX changes from version to version
-    std::string m_nexusInstrumentEntryName;
 
 };
 

@@ -11,11 +11,10 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadILL.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument.h"
-
+#include "MantidKernel/UnitFactory.h"
 
 #include <limits>
 #include <algorithm>
@@ -30,11 +29,7 @@ namespace Mantid {
     using namespace API;
     using namespace NeXus;
 
-    // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(LoadILL)
-
-    //register the algorithm into loadalgorithm factory
-    DECLARE_LOADALGORITHM(LoadILL)
+    DECLARE_HDF_FILELOADER_ALGORITHM(LoadILL);
 
     /**
      * tostring operator to print the contents of NXClassInfo
@@ -52,6 +47,24 @@ namespace Mantid {
       this->setOptionalMessage("Loads a ILL nexus file.");
     }
 
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadILL::confidence(const Kernel::HDFDescriptor & descriptor) const
+    {
+      // Create the root Nexus class
+      NXRoot root(descriptor.filename());
+      NXEntry entry = root.openFirstEntry();
+      if (std::find(supportedInstruments.begin(), supportedInstruments.end(),
+                    getInstrumentName(entry)) != supportedInstruments.end()) {
+        // FOUND
+        return 80;
+      }
+      return 0;
+    }
+    
     //---------------------------------------------------
     // Private member functions
     //---------------------------------------------------
@@ -105,7 +118,7 @@ namespace Mantid {
      * @param entry :: The Nexus entry
      * @return instrument name
      */
-    std::string LoadILL::getInstrumentName(NeXus::NXEntry& entry) {
+    std::string LoadILL::getInstrumentName(NeXus::NXEntry& entry) const {
 
       // Old format: /entry0/IN5/name
       // New format: /entry0/instrument/name
@@ -118,8 +131,7 @@ namespace Mantid {
       std::vector<NXClassInfo> v = entry.groups();
       for (auto it = v.begin(); it < v.end(); it++) {
         if (it->nxclass == "NXinstrument") {
-          m_nexusInstrumentEntryName = it->nxname;
-          std::string insNamePath = m_nexusInstrumentEntryName + "/name";
+          std::string insNamePath = it->nxname + "/name";
           instrumentName = entry.getString(insNamePath);
           g_log.debug() << "Instrument Name: " << instrumentName
                         << " in NxPath: " << insNamePath << std::endl;
@@ -546,52 +558,6 @@ namespace Mantid {
           progress.report();
         }
       }
-    }
-
-    /**
-     * This method does a quick file check by checking the no.of bytes read nread params and header buffer
-     *  @param filePath- path of the file including name.
-     *  @param nread :: no.of bytes read
-     *  @param header :: The first 100 bytes of the file as a union
-     *  @return true if the given file is of type which can be loaded by this algorithm
-     */
-    bool LoadILL::quickFileCheck(const std::string& filePath, size_t nread,
-                                 const file_header& header) {
-      std::string extn = extension(filePath);
-      bool bnexs(false);
-      (!extn.compare("nxs") || !extn.compare("nx5")) ? bnexs = true : bnexs =
-        false;
-      /*
-       * HDF files have magic cookie in the first 4 bytes
-       */
-      if (((nread >= sizeof(unsigned))
-           && (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs) {
-        //hdf
-        return true;
-      } else if ((nread >= sizeof(g_hdf5_signature))
-                 && (!memcmp(header.full_hdr, g_hdf5_signature,
-                             sizeof(g_hdf5_signature)))) {
-        //hdf5
-        return true;
-      }
-      return false;
-    }
-
-    /**
-     * Checks the file by opening it and reading few lines
-     * @param filePath :: name of the file inluding its path
-     * @return an integer value how much this algorithm can load the file 
-     */
-    int LoadILL::fileCheck(const std::string& filePath) {
-      // Create the root Nexus class
-      NXRoot root(filePath);
-      NXEntry entry = root.openFirstEntry();
-      if (std::find(supportedInstruments.begin(), supportedInstruments.end(),
-                    getInstrumentName(entry)) != supportedInstruments.end()) {
-        // FOUND
-        return 80;
-      }
-      return 0;
     }
 
     /**

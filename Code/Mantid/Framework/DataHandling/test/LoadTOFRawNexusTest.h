@@ -32,13 +32,13 @@ public:
     LoadTOFRawNexus alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     alg.setPropertyValue("Filename", "REF_L_32035.nxs");
-    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 80 );
+    TS_ASSERT_EQUALS( alg.confidence(alg.getPropertyValue("Filename")), 80 );
     alg.setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 20 );
+    TS_ASSERT_EQUALS( alg.confidence(alg.getPropertyValue("Filename")), 20 );
     alg.setPropertyValue("Filename", "argus0026577.nxs");
-    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 0 );
+    TS_ASSERT_EQUALS( alg.confidence(alg.getPropertyValue("Filename")), 0 );
     alg.setPropertyValue("Filename", "PG3_733.nxs");
-    TS_ASSERT_EQUALS( alg.fileCheck(alg.getPropertyValue("Filename")), 0 );
+    TS_ASSERT_EQUALS( alg.confidence(alg.getPropertyValue("Filename")), 0 );
 
   }
 

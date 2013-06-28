@@ -2,8 +2,7 @@
 #define MANTID_DATAHANDLING_LOADMCSTASNEXUS_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IHDFFileLoader.h"
 
 namespace Mantid
 {
@@ -32,7 +31,7 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMcStasNexus  : public API::IDataFileChecker
+  class DLLExport LoadMcStasNexus  : public API::IHDFFileLoader
   {
   public:
     LoadMcStasNexus();
@@ -42,10 +41,8 @@ namespace DataHandling
     virtual int version() const;
     virtual const std::string category() const;
 
-    /// do a quick check that this file can be loaded 
-    virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-    /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-    virtual int fileCheck(const std::string& filePath);
+    /// Returns a confidence value that this algorithm can load a file
+    virtual int confidence(const Kernel::HDFDescriptor & descriptor) const;
 
   private:
     virtual void initDocs();

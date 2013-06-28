@@ -26,6 +26,15 @@ public:
   {
   }
 
+  void test_File_Check_Confidence()
+  {
+    Mantid::DataHandling::LoadQKK loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "QKK0029775.nx.hdf"); // find the full path
+
+    TS_ASSERT_EQUALS(80, loader.confidence(loader.getPropertyValue("Filename")));
+  }
+
   void testInit()
   {
     Mantid::DataHandling::LoadQKK load;

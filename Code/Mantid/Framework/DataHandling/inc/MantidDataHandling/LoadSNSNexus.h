@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include <climits>
@@ -17,8 +16,8 @@
 
 namespace Mantid
 {
-namespace DataHandling
-{
+  namespace DataHandling
+  {
     /** @class LoadSNSNexus LoadSNSNexus.h NeXus/LoadSNSNexus.h
     Loads a NeXus file that conforms to the TOFRaw instrument definition format and stores it in a 2D workspace.
     LoadTOFRawNeXus is an algorithm and as such inherits  from the Algorithm class, via DataHandlingCommand, and overrides
@@ -43,25 +42,27 @@ namespace DataHandling
 
     File change history is stored at: <https://github.com/mantidproject/mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
+     */
     class DLLExport LoadSNSNexus : public LoadTOFRawNexus, public API::DeprecatedAlgorithm
     {
     public:
-        /// Default constructor
-        LoadSNSNexus();
-        /// Destructor
-        ~LoadSNSNexus() {}
-        /// Algorithm's name for identification overriding a virtual method
-        virtual const std::string name() const;
+      /// Default constructor
+      LoadSNSNexus();
+      /// Destructor
+      ~LoadSNSNexus() {}
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const;
 
-        /// Algorithm's version for identification overriding a virtual method
-        virtual int version() const;
-		/// category 
-		virtual const std::string category() const { return "Deprecated"; }
-        int fileCheck(const std::string& filePath);
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const;
+      /// category
+      virtual const std::string category() const { return "Deprecated"; }
+
+      /// Returns a confidence value that this algorithm can load a file (Required by base class)
+      virtual int confidence(const Kernel::HDFDescriptor &) const { return 0; }
     };
 
-} // namespace DataHandling
+  } // namespace DataHandling
 } // namespace Mantid
 
 #endif /*MANTID_DATAHANDLING_LOADSNSNEXUS_H_*/

@@ -45,9 +45,9 @@ The ChildAlgorithms used by LoadMuonNexus are:
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/UnitFactory.h"
@@ -69,8 +69,7 @@ namespace Mantid
   namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadMuonNexus1)
-    DECLARE_LOADALGORITHM(LoadMuonNexus1)
+    DECLARE_HDF_FILELOADER_ALGORITHM(LoadMuonNexus1);
 
     /// Sets documentation strings for this algorithm
     void LoadMuonNexus1::initDocs()
@@ -635,15 +634,16 @@ namespace Mantid
 
     }
 
-    /**checks the file by opening it and reading few lines 
-    *  @param filePath :: name of the file inluding its path
-    *  @return an integer value how much this algorithm can load the file 
-    */
-    int LoadMuonNexus1::fileCheck(const std::string& filePath)
-    {     
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadMuonNexus1::confidence(const Kernel::HDFDescriptor & descriptor) const
+    {
       try
       {
-        NXRoot root(filePath);
+        NXRoot root(descriptor.filename());
         NXEntry entry = root.openFirstEntry();
         if ( ! entry.containsDataSet( "analysis" ) ) return 0;
         std::string versionField = "IDF_version";

@@ -144,7 +144,7 @@ namespace Mantid
       {
         updateFromAscii(filename);
       }
-      else if(isisNexus.fileCheck(filename) > 0)
+      else if(isisNexus.confidence(filename) > 0)
       {
         updateFromNeXus(filename);
       }

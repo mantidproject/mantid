@@ -9,7 +9,7 @@ For more information about McStas and its general usage for simulating neutron s
 #include "MantidDataHandling/LoadMcStasNexus.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
@@ -25,10 +25,7 @@ namespace DataHandling
   using namespace Kernel;
   using namespace API;
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LoadMcStasNexus);
-  DECLARE_LOADALGORITHM(LoadMcStasNexus);
-
+  DECLARE_HDF_FILELOADER_ALGORITHM(LoadMcStasNexus);
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -54,6 +51,43 @@ namespace DataHandling
   
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string LoadMcStasNexus::category() const { return "DataHandling";}
+
+  /**
+   * Return the confidence with with this algorithm can load the file
+   * @param descriptor A descriptor for the file
+   * @returns An integer specifying the confidence level. 0 indicates it will not be used
+   */
+  int LoadMcStasNexus::confidence(const Kernel::HDFDescriptor & descriptor) const
+  {
+    using namespace ::NeXus;
+	  // We will look at the first entry and check for a
+	  // simulation class that contains a name attribute with the value=mcstas
+	  int confidence(0);
+	  try
+	  {
+		  ::NeXus::File file = ::NeXus::File(descriptor.filename());
+		  auto entries = file.getEntries();
+		  if(!entries.empty())
+		  {
+			  auto firstIt = entries.begin();
+			  file.openGroup(firstIt->first,firstIt->second);
+			  file.openGroup("simulation", "NXsimulation");
+			  file.openData("information");
+
+			  std::string nameAttrValue;
+			  file.getAttr("name", nameAttrValue);
+			  if(boost::iequals(nameAttrValue, "mcstas")) confidence = 80;
+
+			  file.closeData();
+			  file.closeGroup();
+			  file.closeGroup();
+		  }
+	  }
+	  catch(::NeXus::Exception&)
+	  {
+	  }
+	  return confidence;
+  }
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
@@ -196,69 +230,6 @@ namespace DataHandling
 
     setProperty("OutputWorkspace", outputGroup);
   }
-  
-   /**
-    * This method does a quick file type check by looking at the first 100 bytes of the file 
-    *  @param filePath- path of the file including name.
-    *  @param nread :: no.of bytes read
-    *  @param header :: The first 100 bytes of the file as a union
-    *  @return true if the given file is of type which can be loaded by this algorithm
-    */
-    bool LoadMcStasNexus::quickFileCheck(const std::string& filePath, size_t nread,const file_header& header)
-    {
-      UNUSED_ARG(filePath);
-      // HDF files have magic cookie in the first 4 bytes
-      if ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes) == g_hdf_cookie))
-      {
-        //hdf
-        return true;
-      }
-      // HDF5 files have a different signature
-      else if ( (nread >= sizeof(g_hdf5_signature)) && 
-                (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
-      { 
-        //hdf5
-        return true;
-      }
-      return false;
-    }
-    
-    /**
-     * Checks the file by opening it and reading few lines 
-     *  @param filePath :: name of the file inluding its path
-     *  @return an integer value how much this algorithm can load the file 
-     */
-    int LoadMcStasNexus::fileCheck(const std::string& filePath)
-    {
-      using namespace ::NeXus;
-	  // We will look at the first entry and check for a 
-	  // simulation class that contains a name attribute with the value=mcstas
-	  int confidence(0);
-      try
-      {
-        ::NeXus::File file = ::NeXus::File(filePath);
-        auto entries = file.getEntries();
-        if(!entries.empty())
-        {
-          auto firstIt = entries.begin();
-          file.openGroup(firstIt->first,firstIt->second);
-          file.openGroup("simulation", "NXsimulation");
-          file.openData("information");
-          
-          std::string nameAttrValue;
-          file.getAttr("name", nameAttrValue);
-          if(boost::iequals(nameAttrValue, "mcstas")) confidence = 80;
-          
-          file.closeData();
-          file.closeGroup();
-          file.closeGroup();
-        }
-      }
-      catch(::NeXus::Exception&)
-      {
-      }
-      return confidence;
-    }
 
 } // namespace DataHandling
 } // namespace Mantid

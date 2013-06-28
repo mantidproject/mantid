@@ -7,9 +7,9 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadQKK.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -32,10 +32,19 @@ namespace Mantid
   {
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(LoadQKK)
+    DECLARE_HDF_FILELOADER_ALGORITHM(LoadQKK);
 
-    //register the algorithm into loadalgorithm factory
-    DECLARE_LOADALGORITHM(LoadQKK)
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadQKK::confidence(const Kernel::HDFDescriptor & descriptor) const
+    {
+      const auto & firstEntryName = descriptor.firstEntryNameType().first;
+      if(descriptor.pathExists("/" + firstEntryName + "/data/hmm_xy")) return 80;
+      else return 0;
+    }
 
     /// Sets documentation strings for this algorithm
     void LoadQKK::initDocs()
@@ -196,62 +205,6 @@ namespace Mantid
       // and can be retrieved by its name.
       setProperty("OutputWorkspace", outputWorkspace);
 
-    }
-
-    /**This method does a quick file type check by checking the first 100 bytes of the file
-     *  @param filePath :: path of the file including name.
-     *  @param nread :: no.of bytes read
-     *  @param header :: The first 100 bytes of the file as a union
-     *  @return true if the given file is of type which can be loaded by this algorithm
-     */
-    bool LoadQKK::quickFileCheck(const std::string& filePath, size_t nread, const file_header& header)
-    {
-      std::string extn=extension(filePath);
-      bool bnexs(false);
-      (!extn.compare("nxs")||!extn.compare("nx5")||!extn.compare("nx.hdf"))?bnexs=true:bnexs=false;
-      /*
-      * HDF files have magic cookie in the first 4 bytes
-      */
-      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs )
-      {
-        //hdf
-        return true;
-      }
-      else if ( (nread >= sizeof(g_hdf5_signature)) && 
-                (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
-      { 
-        //hdf5
-        return true;
-      }
-      return false;
-    }
-
-    /** Checks the file by opening it and reading few lines
-     *  @param filePath :: name of the file including its path
-     *  @return an integer value how much this algorithm can load the file
-     */
-    int LoadQKK::fileCheck(const std::string& filePath)
-    {
-      NeXus::NXRoot root(filePath);
-
-      try
-      {
-        // Check if there exists a data set with name hmm_xy
-        NeXus::NXEntry entry = root.openFirstEntry();
-        if (entry.containsGroup("data"))
-        {
-          NeXus::NXData data = entry.openNXData("data");
-          if (data.getDataSetInfo("hmm_xy").stat != NX_ERROR)
-          {
-            return 80; // Give it an 80% chance that the file is readable
-          }
-        }
-      }
-      catch(...)
-      {
-        return 0;
-      }
-      return 0;
     }
 
   }//namespace

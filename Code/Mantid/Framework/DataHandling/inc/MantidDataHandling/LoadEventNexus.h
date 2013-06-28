@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IHDFFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -68,7 +68,7 @@ namespace Mantid
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     */
-    class DLLExport LoadEventNexus : public API::IDataFileChecker
+    class DLLExport LoadEventNexus : public API::IHDFFileLoader
     {
     public:
       /// Sets documentation strings for this algorithm
@@ -80,10 +80,8 @@ namespace Mantid
       virtual int version() const { return 1;};
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
-      /// do a quick check that this file can be loaded 
-      bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-      int fileCheck(const std::string& filePath);
+      /// Returns a confidence value that this algorithm can load a file
+      int confidence(const Kernel::HDFDescriptor & descriptor) const;
 
       /** Sets whether the pixel counts will be pre-counted.
        * @param value :: true if you want to precount. */

@@ -18,7 +18,7 @@ namespace DataHandling
 {
 
 DECLARE_ALGORITHM(LoadSNSEventNexus)
-DECLARE_LOADALGORITHM(LoadSNSEventNexus)
+//DECLARE_LOADALGORITHM(LoadSNSEventNexus)
 
 LoadSNSEventNexus::LoadSNSEventNexus()
 {
