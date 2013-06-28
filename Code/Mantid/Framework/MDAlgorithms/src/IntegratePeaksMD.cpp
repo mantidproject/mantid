@@ -433,14 +433,14 @@ namespace MDAlgorithms
 			{
 				peakHeight = std::sqrt(2*peakHeight);
 				Sigma =0.008;
-				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution,FixResolution=false;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
 						";name=ExpDecay,Height="<<peakHeight<<",Lifetime="<<Lifetime<<")";
 			}
 			else if (profileFunction.compare("ConvolutionBackToBackGaussian") == 0)
 			{
 				peakHeight = std::sqrt(2*peakHeight);
 				Sigma =0.008;
-				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution,FixResolution=false;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
 						";name=BackToBackExponential,I="<<peakHeight<<",A=100.0,B=100.0,X0="<<Centre<<",S="<<Sigma<<")";
 			}
 			if (profileFunction.compare("NoFit") != 0)
