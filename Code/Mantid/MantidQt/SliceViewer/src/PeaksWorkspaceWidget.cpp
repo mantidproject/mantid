@@ -78,13 +78,13 @@ namespace MantidQt
       ui.lblWorkspaceName->setText(nameText);
       ui.lblWorkspaceName->setToolTip(nameText);
 
-      const QString integratedText = m_ws->hasIntegratedPeaks() ? "Yes" : "No";
+      const QString integratedText = "Integrated: " + QString(m_ws->hasIntegratedPeaks() ? "Yes" : "No");
 
       ui.lblWorkspaceState->setText(integratedText);
       ui.lblWorkspaceState->setToolTip(integratedText);
 
       const QString coordinateText = QString(m_coordinateSystem.c_str());
-      ui.lblWorkspaceCoordinates->setText(coordinateText);
+      ui.lblWorkspaceCoordinates->setText("Coords: " + coordinateText);
       ui.lblWorkspaceCoordinates->setToolTip(coordinateText);
 
       ui.btnBackgroundColor->setBackgroundColor(m_backgroundColour);
