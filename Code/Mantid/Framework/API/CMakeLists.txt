@@ -177,6 +177,7 @@ set ( INC_FILES
 	inc/MantidAPI/IDomainCreator.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
+	inc/MantidAPI/IFileLoader.h
 	inc/MantidAPI/IFuncMinimizer.h
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunction1D.h
@@ -184,6 +185,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionValues.h
 	inc/MantidAPI/IFunctionWithLocation.h
+	inc/MantidAPI/IHDFFileLoader.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/ILocatedData.h
 	inc/MantidAPI/IMDEventWorkspace.h

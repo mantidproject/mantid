@@ -77,6 +77,9 @@ namespace Mantid
         m_log.debug() << "Registered '" << name << "' as file loader\n";
       }
 
+      /// Returns the name of an Algorithm that can load the given filename
+      const std::string chooseLoader(const std::string &filename) const;
+
     private:
       /// The list of names. The index pointed to by LoaderFormat defines a set for that format
       std::vector<std::set<std::string> > m_names;
