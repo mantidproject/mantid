@@ -50,7 +50,7 @@ def setup_reducer(inst_name):
     try:
         return DirectEnergyConversion(inst_name)
     except RuntimeError, exc:
-        raise RuntimeError('Unknown instrument "%s", cannot continue' % inst_name)
+        raise RuntimeError('Unknown instrument "%s" or wrong IDF file for this instrument, cannot continue' % inst_name)
     
 
 class DirectEnergyConversion(object):
@@ -348,12 +348,12 @@ class DirectEnergyConversion(object):
             mon1_peak = 0.0
             # apply T0 shift
             ChangeBinOffset(InputWorkspace=data_ws,OutputWorkspace= result_name,Offset=-tzero)
-            self.incident_en = ei_value
+            self.incident_energy = ei_value
         else:
             # Do ISIS stuff for Ei
             # Both are these should be run properties really
             ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
-            self.incident_en = ei_value
+            self.incident_energy = ei_value
 
         # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in FlatBackground and normalisation
         bin_offset = -mon1_peak
@@ -479,7 +479,7 @@ class DirectEnergyConversion(object):
         """
         One-shot function to convert the given runs to energy
         """
-        self.incident_en = ei;
+        self.incident_energy = ei;
         # Check if we need to perform the absolute normalisation first
         if not mono_van is None:
             if abs_ei is None:
@@ -558,13 +558,13 @@ class DirectEnergyConversion(object):
         else:
             raise TypeError('Unknown option passed to get_ei "%s"' % fix_ei)
 
-        self.incident_en= ei_guess
+        self.incident_energy= ei_guess
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
             GetEi(InputWorkspace=input_ws, Monitor1Spec=int(self.ei_mon_spectra[0]), Monitor2Spec=int(self.ei_mon_spectra[1]), 
                   EnergyEstimate=ei_guess,FixEi=self.fix_ei)
 
-        self.incident_en = ei
+        self.incident_energy = ei
         # Adjust the TOF such that the first monitor peak is at t=0
         ChangeBinOffset(InputWorkspace=input_ws,OutputWorkspace= resultws_name,Offset= -float(str(mon1_peak)))
         mon1_det = input_ws.getDetector(mon1_index)
@@ -782,7 +782,7 @@ class DirectEnergyConversion(object):
     @property
     def monovan_integr_range(self):
         if self._monovan_integr_range is None:
-            ei = self.efixed
+            ei = self.incident_energy
             range = [self.monovan_lo_frac*ei,self.monovan_hi_frac*ei]
             return range
         else:
@@ -877,7 +877,7 @@ class DirectEnergyConversion(object):
         self.__save_formats['.nxs']   = lambda workspace,filename : SaveNexus(InputWorkspace=workspace,Filename= filename)
         ## Detector diagnosis
         # Diag parameters -- keys used by diag method to pick from default parameters. Diag cuts these keys removing diag_ word 
-        # and tries to get rest from the correspondent dgreduced attributes
+        # and tries to get rest from the correspondent Direct Energy conversion attributes.
         self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
                               'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_bkgd_range']
@@ -931,7 +931,7 @@ class DirectEnergyConversion(object):
 
         specify some parameters which may be not in IDF Parameters file
         """
-        self.efixed = 0
+        self.incident_energy= 0
 
 
    
@@ -1388,7 +1388,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.initialise("MAP");
 
         energy_incident = 100 
-        tReducer.efixed = energy_incident
+        tReducer.incident_energy = energy_incident
         hi_frac = tReducer.monovan_hi_frac
         lo_frac = tReducer.monovan_lo_frac
         tReducer.monovan_integr_range = None

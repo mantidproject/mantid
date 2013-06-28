@@ -139,7 +139,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
-    Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run number: '+str(sample_run))
+    if isinstance(sample_run,int):
+        Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run number: '+str(sample_run))
+    else:
+        Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run for workspace name: '+str(sample_run))
 
     try:
         n,r=funcreturns.lhs_info('both')
@@ -221,13 +224,13 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
           
     if  Reducer.det_cal_file != None : 
         Reducer.relocate_dets = True
-        Reducer.log('Setting detector calibration file to '+reducer.det_cal_file)
+        Reducer.log('Setting detector calibration file to '+Reducer.det_cal_file)
     else:
         Reducer.relocate_dets = False
         Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
 
     
-    if mtd.doesExist(str(sample_run))==True and Reducer.det_cal_file != None:
+    if mtd.doesExist(str(sample_run))==True and Reducer.det_cal_file == None:
         Reducer.log('For data input type: workspace detector calibration must be specified','error')
         Reducer.log('use Keyword det_cal_file with a valid detctor file or run number','error')
         return
