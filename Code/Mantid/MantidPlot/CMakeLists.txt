@@ -172,6 +172,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/MantidDock.cpp
                    src/Mantid/MantidMatrix.cpp
                    src/Mantid/MantidMatrixCurve.cpp
+                   src/Mantid/MantidMatrixFunction.cpp
                    src/Mantid/MantidMDCurve.cpp
                    src/Mantid/MantidMDCurveDialog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
@@ -401,6 +402,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/MantidMDCurveDialog.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
+                   src/Mantid/MantidMatrixFunction.h
                    src/Mantid/MantidAlgorithmMetatype.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidUI.h
@@ -664,6 +666,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidMDCurveDialog.h
                        src/Mantid/MantidMatrixDialog.h
                        src/Mantid/MantidMatrix.h
+                       src/Mantid/MantidMatrixFunction.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidUI.h
                        src/Mantid/MantidWSIndexDialog.h

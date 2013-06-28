@@ -807,20 +807,6 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
   return t;
 }
 
-void MantidUI::removeWindowFromLists(MdiSubWindow* m)
-{
-  if (!m)
-    return;
-
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-  if (m->isA("MantidMatrix"))
-  {static_cast<MantidMatrix*>(m)->removeWindow();
-  }
-
-  QApplication::restoreOverrideCursor();
-}
-
 void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
   if (w->isA("MantidMatrix"))

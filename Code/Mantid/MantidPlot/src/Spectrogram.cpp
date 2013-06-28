@@ -36,6 +36,7 @@
 #include <QPainter>
 #include <qwt_symbol.h>
 #include "Mantid/MantidMatrix.h"
+#include "Mantid/MantidMatrixFunction.h"
 
 #include <iostream>
 #include <numeric>
@@ -80,7 +81,7 @@ Spectrogram::Spectrogram(Matrix *m):
   setContourLevels(contourLevels);
 }
 
-Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz)
+Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz)
 :	QObject(), QwtPlotSpectrogram(),
  	d_matrix(0),d_funct(f),
  	color_axis(QwtPlot::yRight),
@@ -99,7 +100,7 @@ Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,double left,
 
 }
 
-Spectrogram::Spectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz)
+Spectrogram::Spectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz)
 :	QObject(), QwtPlotSpectrogram(),
  	d_color_map_pen(false),
  	d_matrix(0),
@@ -907,7 +908,7 @@ QImage Spectrogram::renderImage(
     // image2matrix_yMap[image_row] ->  matrix_row or -1
     std::vector<int> image2matrix_yMap(rect.height(),-1);
 
-    for(int row = 0;row<mantidFun->numRows();++row)
+    for(size_t row = 0; row < mantidFun->rows(); ++row)
     {
       double ymin,ymax;
       mantidFun->getRowYRange(row,ymin,ymax);
@@ -938,7 +939,7 @@ QImage Spectrogram::renderImage(
 
     int imageWidth = rect.width();
     int row0 = -2;
-    for(int i=0; i < static_cast<int>(image2matrix_yMap.size()) ;++i)
+    for(size_t i=0; i < image2matrix_yMap.size() ;++i)
     {
       int row = image2matrix_yMap[i];
       if (row < 0)
@@ -947,8 +948,8 @@ QImage Spectrogram::renderImage(
       }
       if (row == row0)
       {
-        unsigned char *line = image.scanLine(i);
-        unsigned char *line0 = image.scanLine(i-1);
+        unsigned char *line = image.scanLine(static_cast<int>(i));
+        unsigned char *line0 = image.scanLine(static_cast<int>(i-1));
         std::copy(line0,line0+imageWidth,line);
         continue;
       }
@@ -968,7 +969,7 @@ QImage Spectrogram::renderImage(
       }
       if (jmin < 0) jmin = 0;
 
-      unsigned char *line = image.scanLine(i)+jmin;
+      unsigned char *line = image.scanLine(static_cast<int>(i))+jmin;
       const Mantid::MantidVec& X = mantidFun->getMantidVec(row);
       int col = 0;
       int nX = static_cast<int>(X.size())-1;
