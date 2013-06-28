@@ -223,10 +223,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         mask_run=sample_run
           
     if  Reducer.det_cal_file != None : 
-        Reducer.relocate_dets = True
         Reducer.log('Setting detector calibration file to '+Reducer.det_cal_file)
     else:
-        Reducer.relocate_dets = False
         Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
 
     

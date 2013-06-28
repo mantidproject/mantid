@@ -390,13 +390,13 @@ class DirectEnergyConversion(object):
                 self.log('_do_mono: Raw file detector header is superceeded') 
                 if self.relocate_dets: 
                     self.log('_do_mono: Moving detectors to positions specified in cal file ')
-                    if self.det_cal_file_ws == None :
+                    if self.__det_cal_file_ws == None :
                         self.log('_do_mono: Loading detector info from file ' + self.det_cal_file)                    
                         LoadDetectorInfo(Workspace=result_name,DataFilename=self.det_cal_file,RelocateDets= self.relocate_dets)
                         self.log('_do_mono: Loading detector info completed ')                                            
                     else:
                         self.log('_do_mono: Copying detectors positions from det_cal_file workspace: '+self.det_cal_file_ws.name())                    
-                        CopyInstrumentParameters(InputWorkspace=self.det_cal_file_ws,OutputWorkspace=result_name)
+                        CopyInstrumentParameters(InputWorkspace=self.__det_cal_file_ws,OutputWorkspace=result_name)
                         self.log('_do_mono: Copying detectors positions complete')
 
         if self.background == True:
@@ -769,6 +769,49 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
 #              Complex setters/getters
 #----------------------------------------------------------------------------------
+    @property
+    def instr_name(self):
+        return _instr_name
+    @instr_name.setter
+    def instr_name(self,new_name):
+       if new_name is None:
+           self._instr_name = None
+           return
+
+       # Instrument name might be a prefix, query Mantid for the full name
+       new_name = config.getFacility().instrument(instr_name).shortName()
+       if len(new_name)==0 :
+          raise KeyError(" Can not find/set-up the instrument: "+instr_name)
+
+       if new_name == self.instr_name:
+           return
+
+ 
+       self._instr_name = new_name
+
+       config['default.instrument'] = self.instr_name
+
+       if self.instrument.getName() != instr_name : 
+            # Load an empty instrument if one isn't already there
+            idf_dir = config.getString('instrumentDefinition.directory')
+            try:
+                idf_file=api.ExperimentInfo.getInstrumentFilename(self.instr_name)
+                tmp_ws_name = '__empty_' + self.instr_name
+                if not mtd.doesExist(tmp_ws_name):
+                    LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
+                self.instrument = mtd[tmp_ws_name].getInstrument()
+            except:
+                self.instrument = None
+                self._instr_name = None
+                raise RuntimeError('Cannot load instrument for prefix "%s"' % new_name)
+      
+
+    # Initialise other IDF parameters
+    self.init_idf_params(reload_instrument)
+ 
+
+
+
     # Vanadium rmm
     @property 
     def van_rmm(self):
@@ -861,8 +904,12 @@ class DirectEnergyConversion(object):
                value=value+'.map'    
 
         self._monovan_mapfile = value
-
-
+    @property
+    def relocate_dets(self) :
+        if self.det_cal_file != None or self.__det_cal_file_ws != None:
+            return True
+        else:
+            return False
 
     def initialise(self, instr_name,reload_instrument=False):
         """
@@ -888,35 +935,14 @@ class DirectEnergyConversion(object):
         # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
 
-        # Instrument name might be a prefix, query Mantid for the full name
-        new_name = config.getFacility().instrument(instr_name).shortName()
-        if new_name != self.instr_name:
-            reload_instrument =True
 
-        self.instr_name = new_name
-
-        config['default.instrument'] = self.instr_name
-        self.setup_mtd_instrument(None,reload_instrument)
+        self.instr_name = instr_name
 
     def setup_mtd_instrument(self, workspace = None,reload_instrument=False):
         if workspace != None:
+            # TODO: Check it!
             self.instrument = workspace.getInstrument()
-        else:
-            # Load an empty instrument if one isn't already there
-            idf_dir = config.getString('instrumentDefinition.directory')
-            try:
-                idf_file=api.ExperimentInfo.getInstrumentFilename(self.instr_name)
-                tmp_ws_name = '__empty_' + self.instr_name
-                if not mtd.doesExist(tmp_ws_name):
-                    LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
-                self.instrument = mtd[tmp_ws_name].getInstrument()
-            except:
-                self.instrument = None
-                raise RuntimeError('Cannot load instrument for prefix "%s"' % self.instr_name)
-      
-
-        # Initialise other IDF parameters
-        self.init_idf_params(reload_instrument)
+            self.instr_name = self.instrument.getName()
  
 
     def init_idf_params(self, reload_instrument=False):
@@ -931,12 +957,13 @@ class DirectEnergyConversion(object):
 
         specify some parameters which may be not in IDF Parameters file
         """
-        self.incident_energy= 0
-
-
-   
+       # mandatrory command line parameter 
+        self.incident_energy= -666
         # mandatrory command line parameter
         self.energy_bins = None
+
+        #TODO Non yet implemented. 
+        self.__det_cal_file_ws = None
         
         # should come from Mantid
         if (self.instr_name == "CNCS" or self.instr_name == "ARCS" or self.instr_name == "SEQUOIA" or self.instr_name == "HYSPEC"):
@@ -954,8 +981,6 @@ class DirectEnergyConversion(object):
                 
        
         
-        # Option to move detector positions based on the information 
-        self.relocate_dets = False
 
       
 
