@@ -806,8 +806,8 @@ class DirectEnergyConversion(object):
                 raise RuntimeError('Cannot load instrument for prefix "%s"' % new_name)
       
 
-    # Initialise other IDF parameters
-    self.init_idf_params(reload_instrument)
+       # Initialise other IDF parameters
+       self.init_idf_params(reload_instrument)
  
 
 
@@ -962,7 +962,7 @@ class DirectEnergyConversion(object):
         # mandatrory command line parameter
         self.energy_bins = None
 
-        #TODO Non yet implemented. 
+        #TODO Non yet implemented. make property USE_Det_CalFile_WS or something similar
         self.__det_cal_file_ws = None
         
         # should come from Mantid
