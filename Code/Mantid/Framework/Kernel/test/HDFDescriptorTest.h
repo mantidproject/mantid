@@ -105,6 +105,16 @@ public:
     TS_ASSERT_THROWS(HDFDescriptor fd(m_testNonHDFPath), std::invalid_argument);
   }
 
+  void test_hasRootAttr_Returns_True_For_Existing_Attr()
+  {
+    TS_ASSERT(m_testHDF5->hasRootAttr("file_time"));
+  }
+
+  void test_hasRootAttr_Returns_False_For_Non_Existing_Attr()
+  {
+    TS_ASSERT(!m_testHDF5->hasRootAttr("not_attr"));
+  }
+
   void test_PathExists_Returns_False_For_Path_Not_In_File()
   {
     TS_ASSERT(!m_testHDF5->pathExists("/raw_data_1/bank1"));

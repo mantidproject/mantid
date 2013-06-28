@@ -5,6 +5,7 @@
 #include "MantidKernel/DllConfig.h"
 
 #include <map>
+#include <set>
 #include <string>
 
 namespace Mantid
@@ -71,6 +72,8 @@ namespace Mantid
        */
       inline const std::string & extension() const { return m_extension; }
 
+      /// Query if the given attribute exists on the root node
+      bool hasRootAttr(const std::string &name) const;
       /// Query if a path exists
       bool pathExists(const std::string& path) const;
       /// Query if a path exists of a given type
@@ -89,6 +92,8 @@ namespace Mantid
       std::string m_filename;
       /// Extension
       std::string m_extension;
+      /// Root attributes
+      std::set<std::string> m_rootAttrs;
       /// Map of types to full path strings.
       std::multimap<std::string, std::string> *m_typesToPaths;
     };

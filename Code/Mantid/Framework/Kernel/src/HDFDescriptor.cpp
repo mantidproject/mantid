@@ -98,7 +98,7 @@ namespace Mantid
      * involves simply checking for the signature if a HDF file at the start of the file
      */
     HDFDescriptor::HDFDescriptor(const std::string & filename)
-      : m_filename(), m_extension(), m_typesToPaths(NULL)
+      : m_filename(), m_extension(), m_rootAttrs(), m_typesToPaths(NULL)
     {
       if(filename.empty())
       {
@@ -125,6 +125,15 @@ namespace Mantid
       delete m_typesToPaths;
     }
 
+
+    /**
+     * @param name The name of an attribute
+     * @return True if the attribute exists, false otherwise
+     */
+    bool HDFDescriptor::hasRootAttr(const std::string &name) const
+    {
+      return (m_rootAttrs.count(name) == 1); 
+    }
 
     /**
      * @param path A string giving a path using UNIX-style path separators (/), e.g. /raw_data_1, /entry/bank1
@@ -179,11 +188,13 @@ namespace Mantid
       m_extension = "." + Poco::Path(filename).getExtension();
 
       ::NeXus::File file(this->filename());
+      auto attrInfos = file.getAttrInfos();
+      for(size_t i = 0; i < attrInfos.size(); ++i)
+      {
+        m_rootAttrs.insert(attrInfos[i].name);
+      }
       m_typesToPaths = file.getTypeMap();
     }
-
-
-
 
   } // namespace Kernel
 } // namespace Mantid
