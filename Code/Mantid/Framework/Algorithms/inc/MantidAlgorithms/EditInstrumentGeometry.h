@@ -54,10 +54,6 @@ namespace Algorithms
     void init();
     /// Run the algorithm
     void exec();
-
-    /// L1
-    double m_L1;
-
   };
 
 

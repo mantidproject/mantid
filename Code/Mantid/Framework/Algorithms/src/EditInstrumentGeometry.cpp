@@ -95,12 +95,13 @@ namespace Algorithms
     // L1
     declareProperty("PrimaryFlightPath", EMPTY_DBL(), "Primary flight path L1 of the powder diffractomer. ");
 
-    auto required = boost::make_shared<MandatoryValidator<std::vector<double> > >();
 
     // Spectrum ID for the spectrum to have instrument geometry edited
-    declareProperty(new ArrayProperty<int32_t>("SpectrumIDs", boost::make_shared<MandatoryValidator<std::vector<int32_t>>>()),
+    declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
                     "Spectrum IDs (note that it is not detector ID or workspace indices). "
                     "Number of spectrum IDs must be same as workspace's histogram number.");
+
+    auto required = boost::make_shared<MandatoryValidator<std::vector<double> > >();
 
     // Vector for L2
     declareProperty(new ArrayProperty<double>("L2", required),
@@ -111,7 +112,7 @@ namespace Algorithms
                     "Polar angles (two thetas) for detectors. Number of 2theta given must be same as number of histogram.");
 
     // Vector for Azimuthal angle
-    declareProperty(new ArrayProperty<double>("Azimuthal", required),
+    declareProperty(new ArrayProperty<double>("Azimuthal"),
                     "Azimuthal angles (out-of-plain) for detectors. "
                     "Number of azimuthal angles given must be same as number of histogram.");
 
@@ -193,48 +194,44 @@ namespace Algorithms
     const bool newinstrument = getProperty("NewInstrument");
 
     // get the primary flight path
-    m_L1 = this->getProperty("PrimaryFlightPath");
+    double l1 = this->getProperty("PrimaryFlightPath");
     // Check validity of the input properties
-    if (isEmpty(m_L1))
+    if (isEmpty(l1))
     {
       Kernel::V3D sourcepos = originstrument->getSource()->getPos();
-      m_L1 = fabs(sourcepos.Z());
+      l1 = fabs(sourcepos.Z());
       g_log.information() << "Retrieve L1 from input data workspace. Source position = " << sourcepos.X()
                             << ", " << sourcepos.Y() << ", " << sourcepos.Z() << std::endl;
     }
-    g_log.information() << "Using L1 = " << m_L1 << "\n";
+    g_log.information() << "Using L1 = " << l1 << "\n";
 
-    // take care of the rest of the input parameters
-    const std::vector<int32_t> specids = this->getProperty("SpectrumIDs");
-    const std::vector<double> l2s = this->getProperty("L2");
-    const std::vector<double> tths = this->getProperty("Polar");
-    const std::vector<double> phis = this->getProperty("Azimuthal");
+    // get spectra number in case they are in a funny order
+    std::vector<int32_t> specids = this->getProperty("SpectrumIDs");
+    if (specids.empty()) // they are using the order of the input workspace
+    {
+      size_t numHist = workspace->getNumberHistograms();
+      for (size_t i = 0; i < numHist; ++i)
+      {
+        specids.push_back(workspace->getSpectrum(i)->getSpectrumNo());
+      }
+    }
+
+    // get the detector ids - empsy means ignore it
     const vector<int> vec_detids = getProperty("DetectorIDs");
-
     const bool renameDetID(!vec_detids.empty());
 
-    // TODO allow empty SpectrumIDs which would just keep input workspace the same
+    // individual detector geometries
+    const std::vector<double> l2s = this->getProperty("L2");
+    const std::vector<double> tths = this->getProperty("Polar");
+    std::vector<double> phis = this->getProperty("Azimuthal");
 
-    if (specids.size() != l2s.size() || l2s.size() != tths.size() || phis.size() != l2s.size())
+    // empty list of phi means that they are all zero
+    if (phis.empty())
     {
-      // Error: Sizes of input vectors are different.
-      stringstream errmsg;
-      errmsg << "Input vector for SpectrumID, L2 (Secondary Flight Paths), Polar angles (Two Thetas) "
-             << "and Azimuthal have different items number";
-      g_log.error(errmsg.str());
-      throw std::invalid_argument(errmsg.str());
+      phis.assign(l2s.size(), 0.);
     }
 
-    if (renameDetID && specids.size() != vec_detids.size())
-    {
-      // DectorIDs are not given right (number)
-      stringstream errmsg;
-      errmsg << "Input vector for Detector IDs is neither zero nor same number of spectra (" << specids.size()
-             << " vs. " << vec_detids.size() << ". ";
-      g_log.error(errmsg.str());
-      throw std::invalid_argument(errmsg.str());
-
-    }
+    // only did work down to here
 
     for (size_t ib = 0; ib < l2s.size(); ib ++)
     {
@@ -379,7 +376,7 @@ namespace Algorithms
     Geometry::ObjComponent *source = new Geometry::ObjComponent("Source", instrument.get());
     instrument->add(source);
     instrument->markAsSource(source);
-    source->setPos(0.0, 0.0, -1.0 * m_L1);
+    source->setPos(0.0, 0.0, -1.0 * l1);
 
     // d) Set the new instrument
     workspace->setInstrument(instrument);
