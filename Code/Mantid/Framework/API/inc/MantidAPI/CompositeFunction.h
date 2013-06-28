@@ -144,9 +144,6 @@ public:
   /// Remove a constraint
   void removeConstraint(const std::string& parName);
 
-  /// Set a value to attribute attName
-  virtual void setAttribute(const std::string& attName,const Attribute& );
-
              /* CompositeFunction own methods */
 
   /// Add a function at the back of the internal function list
@@ -169,8 +166,6 @@ public:
   std::string parameterLocalName(size_t i)const;
   /// Check the function.
   void checkFunction();
-  /// Enable/disable numeric derivative calculation
-  void useNumericDerivatives( bool yes ) const;
 
   /// Returns the number of attributes associated with the function
   virtual size_t nLocalAttributes()const {return 0;}
@@ -221,7 +216,6 @@ private:
   /// Function counter to be used in nextConstraint
   mutable size_t m_iConstraintFunction;
   /// Flag set to use numerical derivatives
-  mutable bool m_useNumericDerivatives;
 };
 
 ///shared pointer to the composite function base class
