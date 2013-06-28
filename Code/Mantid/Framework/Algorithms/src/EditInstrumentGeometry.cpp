@@ -49,18 +49,29 @@ namespace Algorithms
   /** Constructor
    */
   EditInstrumentGeometry::EditInstrumentGeometry()
-  {
-    // TODO Auto-generated constructor stub
-  }
+  { }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   EditInstrumentGeometry::~EditInstrumentGeometry()
+  { }
+
+  const std::string EditInstrumentGeometry::name() const
   {
-    // TODO Auto-generated destructor stub
+    return "EditInstrumentGeometry";
   }
-  
+
+  const std::string EditInstrumentGeometry::category() const
+  {
+    return "Diffraction";
+  }
+
+  int EditInstrumentGeometry::version() const
+  {
+    return 1;
+  }
+
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void EditInstrumentGeometry::initDocs()
@@ -112,45 +123,97 @@ namespace Algorithms
     declareProperty("NewInstrument", false, "Add detectors information from scratch");
   }
 
+  template <typename NumT>
+  std::string checkValues(const std::vector<NumT> &thingy,
+                          const size_t numHist)
+  {
+    if ((!thingy.empty()) && thingy.size() != numHist)
+    {
+      stringstream msg;
+      msg << "Must equal number of spectra or be empty (" << numHist
+            << " != " << thingy.size() << ")";
+      return msg.str();
+    }
+    else
+    {
+      return "";
+    }
+  }
+
+  std::map<std::string, std::string> EditInstrumentGeometry::validateInputs()
+  {
+    std::map<std::string, std::string> result;
+
+    // everything depends on being parallel to the workspace # histo
+    size_t numHist(0);
+    {
+      MatrixWorkspace_const_sptr workspace = getProperty("Workspace");
+      numHist = workspace->getNumberHistograms();
+    }
+
+    std::string error;
+
+    const std::vector<int32_t> specids = this->getProperty("SpectrumIDs");
+    error = checkValues(specids, numHist);
+    if (!error.empty())
+      result["SpectrumIDs"] = error;
+
+    const std::vector<double> l2 = this->getProperty("L2");
+    error = checkValues(l2, numHist);
+    if (!error.empty())
+      result["L2"] = error;
+
+    const std::vector<double> tth = this->getProperty("Polar");
+    error = checkValues(tth, numHist);
+    if (!error.empty())
+      result["Polar"] = error;
+
+    const std::vector<double> phi = this->getProperty("Azimuthal");
+    error = checkValues(phi, numHist);
+    if (!error.empty())
+      result["Azimuthal"] = error;
+
+    const vector<int> detids = getProperty("DetectorIDs");
+    error = checkValues(detids, numHist);
+    if (!error.empty())
+      result["DetectorIDs"] = error;
+
+    // TODO verify that SpectrumIDs, L2, Polar, Azimuthal, and DetectorIDs are parallel or not specified
+    return result;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
   void EditInstrumentGeometry::exec()
   {
-    // Process properties
+    // lots of things have to do with the input workspace
     MatrixWorkspace_sptr workspace = getProperty("Workspace");
+    Geometry::Instrument_const_sptr originstrument = workspace->getInstrument();
+    const bool newinstrument = getProperty("NewInstrument");
+
+    // get the primary flight path
     m_L1 = this->getProperty("PrimaryFlightPath");
+    // Check validity of the input properties
+    if (isEmpty(m_L1))
+    {
+      Kernel::V3D sourcepos = originstrument->getSource()->getPos();
+      m_L1 = fabs(sourcepos.Z());
+      g_log.information() << "Retrieve L1 from input data workspace. Source position = " << sourcepos.X()
+                            << ", " << sourcepos.Y() << ", " << sourcepos.Z() << std::endl;
+    }
+    g_log.information() << "Using L1 = " << m_L1 << "\n";
+
+    // take care of the rest of the input parameters
     const std::vector<int32_t> specids = this->getProperty("SpectrumIDs");
     const std::vector<double> l2s = this->getProperty("L2");
     const std::vector<double> tths = this->getProperty("Polar");
     const std::vector<double> phis = this->getProperty("Azimuthal");
     const vector<int> vec_detids = getProperty("DetectorIDs");
-    const bool newinstrument = getProperty("NewInstrument");
 
-    if (vec_detids.size() == 0)
-      m_renameDetID = false;
-    else
-      m_renameDetID = true;
+    const bool renameDetID(!vec_detids.empty());
 
-    // Check validity of the input properties
-    if (m_L1 != EMPTY_DBL())
-    {
-      g_log.information() << "Use user-specified L1 = " << m_L1 << "  # Detector = \n";
-    }
-    else
-    {
-      g_log.information("Use current instrument's L1 value");
-    }
-
-    if (specids.size() != workspace->getNumberHistograms())
-    {
-      stringstream errss;
-      errss << "Number of input spectrum ID/L2/Azimuthal angle/2theta angle (" << specids.size()
-            << ") is different from number of spectra (" << workspace->getNumberHistograms()
-            << ").  Algorithm is unable to handle this situation. ";
-      g_log.error(errss.str());
-      throw runtime_error(errss.str());
-    }
+    // TODO allow empty SpectrumIDs which would just keep input workspace the same
 
     if (specids.size() != l2s.size() || l2s.size() != tths.size() || phis.size() != l2s.size())
     {
@@ -162,7 +225,7 @@ namespace Algorithms
       throw std::invalid_argument(errmsg.str());
     }
 
-    if (m_renameDetID && specids.size() != vec_detids.size())
+    if (renameDetID && specids.size() != vec_detids.size())
     {
       // DectorIDs are not given right (number)
       stringstream errmsg;
@@ -187,27 +250,6 @@ namespace Algorithms
       {
         throw std::invalid_argument("L2 cannot be less or equal to 0");
       }
-    }
-
-    // Get information from original: L1
-    Geometry::Instrument_const_sptr originstrument = workspace->getInstrument();
-    if (m_L1 != EMPTY_DBL() && m_L1 > 0.)
-    {
-      // Use user specified L1 anyway.  Even it can overwrite the original instrument's L1
-    }
-    else if (newinstrument)
-    {
-      // User input L1's exception: new instrument but no/invalid L1
-      g_log.error() << "For 'NewInstrument', input L1 (" << m_L1 << ") must be given and larger than 0. " << ".\n";
-      throw std::invalid_argument("Input L1 is not allowed.");
-    }
-    else
-    {
-      // Retrive from current instrumetn
-      Kernel::V3D sourcepos = originstrument->getSource()->getPos();
-      m_L1 = fabs(sourcepos.Z());
-      g_log.information() << "Retrieve L1 from input data workspace. Source position = " << sourcepos.X()
-                            << ", " << sourcepos.Y() << ", " << sourcepos.Z() << std::endl;
     }
 
     // Keep original instrument and set the new instrument, if necessary
@@ -256,7 +298,7 @@ namespace Algorithms
       storL2s[workspaceindex] = l2s[i];
       stor2Thetas[workspaceindex] = tths[i];
       storPhis[workspaceindex] = phis[i];
-      if (m_renameDetID)
+      if (renameDetID)
         storDetIDs[workspaceindex] = vec_detids[i];
 
       g_log.debug() << "workspace index = " << workspaceindex << " is for Spectrum " << specids[i] << std::endl;
@@ -298,7 +340,7 @@ namespace Algorithms
         {
           // more than 1 detectors
           storable[i] = false;
-          if (m_renameDetID)
+          if (renameDetID)
           {
             // newinstrument = true;
             g_log.notice() << "Spectrum at workspace index " << i << " has more than 1 (" << detids.size()
@@ -311,20 +353,15 @@ namespace Algorithms
 
     // Generate a new instrument
     // Name of the new instrument
-    std::string name = "";
+    std::string name = originstrument->getName();
     if (newinstrument)
     {
-      std::string tempname = getProperty("InstrumentName");
-      name += tempname;
-    }
-    else
-    {
-      name += originstrument->getName();
+      name = std::string(getProperty("InstrumentName"));
     }
 
     // b) Create a new instrument from scratch any way.
     Geometry::Instrument_sptr instrument(new Geometry::Instrument(name));
-    if (instrument.get() == 0)
+    if (!bool(instrument))
     {
       delete spec2indexmap;
       stringstream errss;
@@ -354,7 +391,7 @@ namespace Algorithms
         // a) Create a new detector.
         //    (Instrument will take ownership of pointer so no need to delete.)
         detid_t newdetid;
-        if (m_renameDetID)
+        if (renameDetID)
           newdetid = storDetIDs[i];
         else
           newdetid = detid_t(i)+100;
