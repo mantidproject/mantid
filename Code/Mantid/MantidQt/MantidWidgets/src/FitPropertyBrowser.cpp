@@ -212,6 +212,10 @@ void FitPropertyBrowser::init()
                << "Conjugate gradient (Polak-Ribiere imp.)"
                << "BFGS"
                << "Damping";
+
+  m_ignoreInvalidData = m_boolManager->addProperty("Ignore invalid data");
+  setIgnoreInvalidData( settings.value("Ignore invalid data",false).toBool() );
+
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
   m_costFunction = m_enumManager->addProperty("Cost function");
   m_costFunctions << "Least squares";
@@ -239,6 +243,7 @@ void FitPropertyBrowser::init()
   // Include minimiser and plot difference under a different settings section.
   settingsGroup->addSubProperty(m_output);
   settingsGroup->addSubProperty(m_minimizer);
+  settingsGroup->addSubProperty(m_ignoreInvalidData);
   settingsGroup->addSubProperty(m_costFunction);
   settingsGroup->addSubProperty(m_plotDiff);
   settingsGroup->addSubProperty(m_plotCompositeMembers);
@@ -1099,6 +1104,18 @@ std::string FitPropertyBrowser::minimizer(bool withProperties)const
   return minimStr.toStdString();
 }
 
+/// Get the ignore invalid data option
+bool FitPropertyBrowser::ignoreInvalidData() const
+{
+    return m_boolManager->value( m_ignoreInvalidData );
+}
+
+/// Set the ignore invalid data option
+void FitPropertyBrowser::setIgnoreInvalidData(bool on)
+{
+    m_boolManager->setValue( m_ignoreInvalidData, on );
+}
+
 /// Get the cost function
 std::string FitPropertyBrowser::costFunction()const
 {
@@ -1180,7 +1197,7 @@ void FitPropertyBrowser::boolChanged(QtProperty* prop)
 {
   if ( ! m_changeSlotsEnabled ) return;
 
-  if (prop == m_plotDiff || prop == m_plotCompositeMembers)
+  if ( prop == m_plotDiff || prop == m_plotCompositeMembers || prop == m_ignoreInvalidData )
   {
     QSettings settings;
     settings.beginGroup("Mantid/FitBrowser");
@@ -1520,6 +1537,7 @@ void FitPropertyBrowser::doFit(int maxIterations)
     alg->setProperty("EndX",endX());
     alg->setPropertyValue("Output",outputName());
     alg->setPropertyValue("Minimizer",minimizer(true));
+    alg->setProperty("IgnoreInvalidData",ignoreInvalidData());
     alg->setPropertyValue("CostFunction",costFunction());
     alg->setProperty( "MaxIterations", maxIterations );
     // Always output each composite function but not necessarily plot it

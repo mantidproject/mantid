@@ -20,7 +20,7 @@ namespace API
     DomainType domainType):
   m_manager( manager ),
   m_workspacePropertyNames( workspacePropertyNames ),
-  m_domainType( domainType ), m_outputCompositeMembers(false)
+    m_domainType( domainType ), m_outputCompositeMembers( false ), m_ignoreInvalidData( false )
   {}
 
   /**

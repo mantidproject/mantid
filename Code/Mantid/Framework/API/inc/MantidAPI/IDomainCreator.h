@@ -59,7 +59,7 @@ namespace Mantid
         const std::vector<std::string>& workspacePropertyNames,
         DomainType domainType = Simple);
       /// Virtual destructor
-      virtual ~IDomainCreator() {};
+      virtual ~IDomainCreator() {}
       /// Initialize
       virtual void initialize(Kernel::IPropertyManager* , const std::string&, DomainType) {}
 
@@ -103,6 +103,9 @@ namespace Mantid
       /// Return the size of the domain to be created.
       virtual size_t getDomainSize() const = 0;
 
+      /// Set to ignore invalid data
+      void ignoreInvalidData( bool yes ) {m_ignoreInvalidData = yes;}
+
     protected:
       /// Declare a property to the algorithm
       void declareProperty(Kernel::Property* prop,const std::string& doc);
@@ -114,6 +117,8 @@ namespace Mantid
       DomainType m_domainType;
       /// Output separate composite function values
       bool m_outputCompositeMembers;
+      /// Flag to ignore nans, infinities and zero errors.
+      bool m_ignoreInvalidData;
     };
 
     /// Typedef for a shared pointer to IDomainCreator.
