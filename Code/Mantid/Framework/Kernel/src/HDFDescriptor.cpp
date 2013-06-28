@@ -98,7 +98,7 @@ namespace Mantid
      * involves simply checking for the signature if a HDF file at the start of the file
      */
     HDFDescriptor::HDFDescriptor(const std::string & filename)
-      : m_filename(), m_extension()
+      : m_filename(), m_extension(), m_typesToPaths(NULL)
     {
       if(filename.empty())
       {
@@ -108,8 +108,23 @@ namespace Mantid
       {
         throw std::invalid_argument("HDFDescriptor() - File '" + filename + "' does not exist");
       }
-      initialize(filename);
+      try
+      {
+        initialize(filename);
+      }
+      catch(::NeXus::Exception &)
+      {
+        throw std::invalid_argument("HDFDescriptor::initialize - File '" + filename + "' does not look like a HDF file.");
+      }
     }
+
+    /**
+     */
+    HDFDescriptor::~HDFDescriptor()
+    {
+      delete m_typesToPaths;
+    }
+
 
     /**
      * @param path A string giving a path using UNIX-style path separators (/), e.g. /raw_data_1, /entry/bank1
@@ -117,8 +132,23 @@ namespace Mantid
      */
     bool HDFDescriptor::pathExists(const std::string& path) const
     {
-      return true;
+      auto iend = m_typesToPaths->end();
+      for(auto it = m_typesToPaths->begin(); it != iend; ++it)
+      {
+        if(path == it->second) return true;
+      }
+      return false;
     }
+
+    /**
+     * @param classType A string name giving a class type
+     * @return True if the type exists in the file, false otherwise
+     */
+    bool HDFDescriptor::classTypeExists(const std::string & classType) const
+    {
+      return (m_typesToPaths->find(classType) != m_typesToPaths->end());
+    }
+
 
     //---------------------------------------------------------------------------------------------------------------------------
     // HDFDescriptor private methods
@@ -132,29 +162,11 @@ namespace Mantid
       m_filename = filename;
       m_extension = "." + Poco::Path(filename).getExtension();
 
-      try
-      {
-        ::NeXus::File file(this->filename());
-      }
-      catch(::NeXus::Exception &)
-      {
-        throw std::invalid_argument("HDFDescriptor::initialize - File '" + filename + "' does not look like a HDF file.");
-      }
-//      // Root node has no type and is named "/"
-//      m_root->name = "/";
-//
-//      addChildren(file, "/", m_root);
-//
-
-//      auto rootEntries = file.getEntries();
-//      for(auto it = rootEntries.begin(); rootEntries.end(); ++it)
-//      {
-//        auto node = boost::make_shared<Node>();
-//        node->name = it->first;
-//        node->type = it->second;
-//        m_roots.insert(std::make_pair(it->first, node));
-//      }
+      ::NeXus::File file(this->filename());
+      m_typesToPaths = file.getTypeMap();
     }
+
+
 
 
   } // namespace Kernel

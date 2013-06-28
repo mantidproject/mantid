@@ -4,6 +4,7 @@
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
 
+#include <map>
 #include <string>
 
 namespace Mantid
@@ -56,6 +57,9 @@ namespace Mantid
     public:
       /// Constructor accepting a filename
       HDFDescriptor(const std::string & filename);
+      /// Destructor
+      ~HDFDescriptor();
+
       /**
        * Access the filename
        * @returns A reference to a const string containing the filename
@@ -68,7 +72,9 @@ namespace Mantid
       inline const std::string & extension() const { return m_extension; }
 
       /// Query if a path exists
-      bool pathExists(const std::string&) const;
+      bool pathExists(const std::string& path) const;
+      /// Query if a given type exists somewhere in the file
+      bool classTypeExists(const std::string & classType) const;
 
     private:
       DISABLE_DEFAULT_CONSTRUCT(HDFDescriptor);
@@ -77,11 +83,12 @@ namespace Mantid
       /// Initialize object with filename
       void initialize(const std::string& filename);
 
-
       /// Full filename
       std::string m_filename;
       /// Extension
       std::string m_extension;
+      /// Map of types to full path strings.
+      std::multimap<std::string, std::string> *m_typesToPaths;
     };
 
 

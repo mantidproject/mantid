@@ -5,6 +5,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/HDFDescriptor.h"
 
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
@@ -43,6 +46,8 @@ public:
       throw std::runtime_error("Unable to find test files for FileDescriptorTest. "
           "The AutoTestData directory needs to be in the search path");
     }
+
+    m_testHDF5 = boost::make_shared<HDFDescriptor>(m_testHDF5Path);
   }
 
   //=================================== Static isHDF methods ======================================
@@ -81,10 +86,8 @@ public:
 
   void test_Constructor_Initializes_Object_Correctly_Given_HDF_File()
   {
-    HDFDescriptor descr(m_testHDF5Path);
-
-    TS_ASSERT_EQUALS(m_testHDF5Path, descr.filename());
-    TS_ASSERT_EQUALS(".nxs", descr.extension());
+    TS_ASSERT_EQUALS(m_testHDF5Path, m_testHDF5->filename());
+    TS_ASSERT_EQUALS(".nxs", m_testHDF5->extension());
   }
 
   void test_Constructor_Throws_With_Empty_filename()
@@ -104,25 +107,30 @@ public:
 
   void test_PathExists_Returns_False_For_Path_Not_In_File()
   {
-    HDFDescriptor fd(m_testHDF5Path);
-
-    TS_ASSERT(!fd.pathExists("/raw_data_1/bank1"));
+    TS_ASSERT(!m_testHDF5->pathExists("/raw_data_1/bank1"));
   }
 
   void test_PathExists_Returns_False_For_Invalid_Path_Specification()
   {
-    HDFDescriptor fd(m_testHDF5Path);
-
-    TS_ASSERT(!fd.pathExists("raw_data_1\\bank1"));
+    TS_ASSERT(!m_testHDF5->pathExists("raw_data_1\\bank1"));
   }
 
-
-  void test_PathExists_Returns_True_For_Valid_Path_In_File()
+  void test_PathExists_Returns_False_For_Root_Path_Along()
   {
-    HDFDescriptor fd(m_testHDF5Path);
+    TS_ASSERT(!m_testHDF5->pathExists("/"));
+  }
 
-    TS_ASSERT(fd.pathExists("/entry/bank1"));
+  void test_PathExists_Returns_True_For_Path_At_Any_Level_In_File()
+  {
+    TS_ASSERT(m_testHDF5->pathExists("/entry"));
+    TS_ASSERT(m_testHDF5->pathExists("/entry/bank1/data_x_y"));
+  }
 
+  void test_classTypeExists_Returns_True_For_Type_At_Any_Level_In_File()
+  {
+    TS_ASSERT(m_testHDF5->classTypeExists("NXentry"));
+    TS_ASSERT(m_testHDF5->classTypeExists("NXevent_data"));
+    TS_ASSERT(m_testHDF5->classTypeExists("NXlog"));
   }
 
 private:
@@ -130,6 +138,7 @@ private:
   std::string m_testHDF5Path;
   std::string m_testHDF4Path;
   std::string m_testNonHDFPath;
+  boost::shared_ptr<HDFDescriptor> m_testHDF5;
 };
 
 
