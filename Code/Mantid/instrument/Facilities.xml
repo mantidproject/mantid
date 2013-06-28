@@ -11,7 +11,7 @@
 
   <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
   </soapEndPoint>
-
+  
   <instrument name="ALF">  
     <technique>Single Crystal Diffraction</technique>
     <livedata address="NDXALF:6789" />
@@ -477,6 +477,15 @@
 
   <instrument name="ECHO">
     <technique>UNKOWN</technique>
+  </instrument>
+
+</facility>
+
+<facility name="SmuS" FileExtensions=".nxs,.xml">
+
+  <instrument name="GPD">
+    <zeropadding size="3"/>
+    <technique>Muon spectroscopy</technique>
   </instrument>
 
 </facility>
