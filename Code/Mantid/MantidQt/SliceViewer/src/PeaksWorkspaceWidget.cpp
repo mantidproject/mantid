@@ -73,12 +73,15 @@ namespace MantidQt
       ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
       m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();
 
+      // calculate the average width (in pixels) of numbers
+      QString allNums("0123456789");
+      double char_width = static_cast<double>(ui.tblPeaks->fontMetrics().boundingRect(allNums).width())
+          / static_cast<double>(allNums.size());
       // set the starting width of each column
-      int char_width = (ui.tblPeaks->fontMetrics().maxWidth()+ui.tblPeaks->fontMetrics().averageCharWidth());
-      char_width = static_cast<int>(.4*static_cast<double>(char_width)); // randomly determined "correct"
       for (int i = 0; i < m_originalTableWidth; ++i)
       {
-        ui.tblPeaks->horizontalHeader()->resizeSection(i, model->numCharacters(i) * char_width);
+        double width = static_cast<double>(model->numCharacters(i) + 3) * char_width;
+        ui.tblPeaks->horizontalHeader()->resizeSection(i, static_cast<int>(width));
       }
 
     }
