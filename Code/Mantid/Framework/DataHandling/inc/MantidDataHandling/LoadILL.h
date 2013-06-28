@@ -39,92 +39,92 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILL: public API::IDataFileChecker {
-public:
-	/// Constructor
-	LoadILL() :
-			API::IDataFileChecker(), m_instrumentName(""),
-			//m_nexusInstrumentEntryName(""),
-			m_wavelength(0), m_channelWidth(0) {
+  class DLLExport LoadILL: public API::IDataFileChecker {
+  public:
+    /// Constructor
+    LoadILL() :
+      API::IDataFileChecker(), m_instrumentName(""),
+      //m_nexusInstrumentEntryName(""),
+      m_wavelength(0), m_channelWidth(0) {
 
-		supportedInstruments.push_back("IN4");
-		supportedInstruments.push_back("IN5");
-		supportedInstruments.push_back("IN6");
+      supportedInstruments.push_back("IN4");
+      supportedInstruments.push_back("IN5");
+      supportedInstruments.push_back("IN6");
 
-	}
-	/// Virtual destructor
-	virtual ~LoadILL() {
-	}
-	/// Algorithm's name
-	virtual const std::string name() const {
-		return "LoadILL";
-	}
-	/// Algorithm's version
-	virtual int version() const {
-		return (1);
-	}
-	/// Algorithm's category for identification
-	virtual const std::string category() const {
-		return "DataHandling";
-	}
-	///checks the file can be loaded by reading 1st 100 bytes and looking at the file extension.
-	bool quickFileCheck(const std::string& filePath, size_t nread,
+    }
+    /// Virtual destructor
+    virtual ~LoadILL() {
+    }
+    /// Algorithm's name
+    virtual const std::string name() const {
+      return "LoadILL";
+    }
+    /// Algorithm's version
+    virtual int version() const {
+      return (1);
+    }
+    /// Algorithm's category for identification
+    virtual const std::string category() const {
+      return "DataHandling";
+    }
+    ///checks the file can be loaded by reading 1st 100 bytes and looking at the file extension.
+    bool quickFileCheck(const std::string& filePath, size_t nread,
 			const file_header& header);
-	/// check the structure of the file and if this file can be loaded return a value between 1 and 100
-	int fileCheck(const std::string& filePath);
-private:
-	/// Sets documentation strings for this algorithm
-	virtual void initDocs();
-	// Initialisation code
-	void init();
-	// Execution code
-	void exec();
+    /// check the structure of the file and if this file can be loaded return a value between 1 and 100
+    int fileCheck(const std::string& filePath);
+  private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
+    // Initialisation code
+    void init();
+    // Execution code
+    void exec();
 
-	void setInstrumentName(NeXus::NXEntry& entry);
-	std::string getInstrumentName(NeXus::NXEntry& entry);
-	void initWorkSpace(NeXus::NXEntry& entry);
-	void initInstrumentSpecific();
-	void loadRunDetails(NeXus::NXEntry & entry);
-	void loadExperimentDetails(NeXus::NXEntry & entry);
-	int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
-	void loadTimeDetails(NeXus::NXEntry& entry);
-	NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
-	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry);
+    void setInstrumentName(NeXus::NXEntry& entry);
+    std::string getInstrumentName(NeXus::NXEntry& entry);
+    void initWorkSpace(NeXus::NXEntry& entry);
+    void initInstrumentSpecific();
+    void loadRunDetails(NeXus::NXEntry & entry);
+    void loadExperimentDetails(NeXus::NXEntry & entry);
+    int getDetectorElasticPeakPosition(const NeXus::NXInt &data);
+    void loadTimeDetails(NeXus::NXEntry& entry);
+    NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
+    void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry);
 
-	double calculateEnergy(double);
-	double calculateTOF(double);
-	void runLoadInstrument();
+    double calculateEnergy(double);
+    double calculateTOF(double);
+    void runLoadInstrument();
 
-	std::string getDateTimeInIsoFormat(std::string dateToParse);
-	// Load all the nexus file information
+    std::string getDateTimeInIsoFormat(std::string dateToParse);
+    // Load all the nexus file information
 
-	/// Calculate error for y
-	static double calculateError(double in) { return sqrt(in);}
+    /// Calculate error for y
+    static double calculateError(double in) { return sqrt(in);}
 
-	API::MatrixWorkspace_sptr m_localWorkspace;
+    API::MatrixWorkspace_sptr m_localWorkspace;
 
-	std::string m_filename; ///< The file to load
-	std::string m_instrumentName; ///< Name of the instrument
+    std::string m_filename; ///< The file to load
+    std::string m_instrumentName; ///< Name of the instrument
 
-	// Variables describing the data in the detector
-	size_t m_numberOfTubes; // number of tubes - X
-	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
-	size_t m_numberOfChannels; // time channels - Z
-	size_t m_numberOfHistograms;
+    // Variables describing the data in the detector
+    size_t m_numberOfTubes; // number of tubes - X
+    size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
+    size_t m_numberOfChannels; // time channels - Z
+    size_t m_numberOfHistograms;
 
-	/* Values parsed from the nexus file */
-	int m_monitorElasticPeakPosition;
-	double m_wavelength;
-	double m_channelWidth;
+    /* Values parsed from the nexus file */
+    int m_monitorElasticPeakPosition;
+    double m_wavelength;
+    double m_channelWidth;
 
-	double m_l1; //=2.0;
-	double m_l2; //=4.0;
+    double m_l1; //=2.0;
+    double m_l2; //=4.0;
 
-	std::vector<std::string> supportedInstruments;
+    std::vector<std::string> supportedInstruments;
 
-	// Nexus instrument entry is of the format /entry0/<XXX>/
-	// XXX changes from version to version
-	std::string m_nexusInstrumentEntryName;
+    // Nexus instrument entry is of the format /entry0/<XXX>/
+    // XXX changes from version to version
+    std::string m_nexusInstrumentEntryName;
 
 };
 
