@@ -249,7 +249,7 @@ namespace DataHandling
     detid2index_map * detID_to_wi = NULL;
     if (doMask)
     {
-      detID_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap( false );
+      detID_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap();
     }
 
     // not all of these should be doubles, but to make reading work read as double then recast to int
