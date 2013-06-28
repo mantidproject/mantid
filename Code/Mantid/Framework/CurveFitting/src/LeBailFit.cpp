@@ -872,7 +872,7 @@ namespace CurveFitting
     }
 
     // 2. Call Fit to fit LeBail function.
-    m_lebailFunction->useNumericDerivatives( true );
+    m_lebailFunction->setAttributeValue( "NumDeriv", true );
     string fitstatus;
     int numiterations = static_cast<int>(m_numMinimizeSteps);
     minimizeFunction(m_dataWS, m_wsIndex, boost::shared_ptr<API::IFunction>(m_lebailFunction),
@@ -1283,7 +1283,7 @@ namespace CurveFitting
     // 1. Generate the composite function
     API::CompositeFunction compfunction;
     m_lebailFunction = boost::make_shared<API::CompositeFunction>(compfunction);
-    m_lebailFunction->useNumericDerivatives(true);
+    m_lebailFunction->setAttributeValue( "NumDeriv", true );
 
     // 2. Add peaks to LeBail Function
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
