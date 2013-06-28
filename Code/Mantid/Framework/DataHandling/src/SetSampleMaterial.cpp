@@ -154,12 +154,12 @@ namespace DataHandling
     setPropertySettings("ZParameter", new Kernel::EnabledWhenProperty("SampleNumberDensity", Kernel::IS_DEFAULT));
 
     //output properties
-    declareProperty("SampleNumberDensityResult", EMPTY_DBL(), "The provided or calculated sample number density in atoms/Angstrom^3"); 
-    declareProperty("ReferenceWavelength", EMPTY_DBL(), "The reference wavelength in Angstroms");
-    declareProperty("TotalXSectionResult", EMPTY_DBL(), "The provided or calculated total cross-section for the sample material in barns.");
-    declareProperty("IncoherentXSectionResult", EMPTY_DBL(), "The provided or calculated incoherent cross-section for the sample material in barns.");
-    declareProperty("CoherentXSectionResult", EMPTY_DBL(), "The provided or calculated coherent cross-section for the sample material in barns.");
-    declareProperty("AbsorptionXSectionResult", EMPTY_DBL(),"The provided or calculated Absorption cross-section for the sample material in barns.");
+    declareProperty("SampleNumberDensityResult", EMPTY_DBL(), "The provided or calculated sample number density in atoms/Angstrom^3", Direction::Output); 
+    declareProperty("ReferenceWavelength", EMPTY_DBL(), "The reference wavelength in Angstroms", Direction::Output);
+    declareProperty("TotalXSectionResult", EMPTY_DBL(), "The provided or calculated total cross-section for the sample material in barns.", Direction::Output);
+    declareProperty("IncoherentXSectionResult", EMPTY_DBL(), "The provided or calculated incoherent cross-section for the sample material in barns.", Direction::Output);
+    declareProperty("CoherentXSectionResult", EMPTY_DBL(), "The provided or calculated coherent cross-section for the sample material in barns.", Direction::Output);
+    declareProperty("AbsorptionXSectionResult", EMPTY_DBL(),"The provided or calculated Absorption cross-section for the sample material in barns.", Direction::Output);
     
   }
 
