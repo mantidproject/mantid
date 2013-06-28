@@ -115,6 +115,8 @@ signals:
   void showPeaksViewer(bool);
   /// Signal emitted when someone uses setWorkspace() on SliceViewer
   void workspaceChanged();
+  /// Signal emitted when someone wants to see the options dialog
+  void peaksTableColumnOptions();
 
 public slots:
   void helpSliceViewer();
@@ -149,7 +151,7 @@ public slots:
   QPixmap getImage();
   void saveImage(const QString & filename = QString());
   void copyImageToClipboard();
-  void onPeaksViewerOptions();
+  void onPeaksViewerOverlayOptions();
 
   // Synced checkboxes
   void LineMode_toggled(bool);

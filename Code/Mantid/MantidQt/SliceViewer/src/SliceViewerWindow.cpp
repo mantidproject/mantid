@@ -103,6 +103,10 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
   // Connect the SliceViewer and the PeaksViewer together
   QObject::connect( m_slicer, SIGNAL(showPeaksViewer(bool)), this, SLOT(showPeaksViewer(bool)));
 
+  // Connect the sliceviewer visible peaks column dialog to its dialog
+  QObject::connect(m_slicer, SIGNAL(peaksTableColumnOptions()),
+                   m_peaksViewer, SLOT(showPeaksTableColumnOptions()));
+
   // Drag-dropping the line around
   QObject::connect( m_slicer->getLineOverlay(), SIGNAL(lineChanging(QPointF, QPointF, double)),
             this, SLOT(lineChanging(QPointF, QPointF, double)) );
@@ -399,7 +403,6 @@ void SliceViewerWindow::changePlanarWidth(double width)
   m_slicer->getLineOverlay()->update();
 }
 
-
 //------------------------------------------------------------------------------------------------
 /** Signal to close this window if the workspace has just been deleted */
 void SliceViewerWindow::preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
@@ -424,6 +427,5 @@ void SliceViewerWindow::afterReplaceHandle(const std::string& wsName,const boost
     emit needToUpdate();
   }
 }
-
 }//namespace SliceViewer
 }//namespace MantidQt

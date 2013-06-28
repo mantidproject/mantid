@@ -45,6 +45,30 @@ namespace MantidQt
       populate();
     }
 
+    std::set<QString> PeaksWorkspaceWidget::getShownColumns()
+    {
+
+      std::set<QString> result;
+      auto numCols = ui.tblPeaks->model()->columnCount();
+      for (auto i = 0; i < numCols; ++i)
+      {
+        if (!ui.tblPeaks->isColumnHidden(i))
+          result.insert(ui.tblPeaks->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString());
+      }
+      return result;
+    }
+
+    void PeaksWorkspaceWidget::setShownColumns(std::set<QString> & cols)
+    {
+      auto numCols = ui.tblPeaks->model()->columnCount();
+      for (auto i = 0; i < numCols; ++i)
+      {
+        const QString name = ui.tblPeaks->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
+        bool hide(cols.find(name) == cols.end());
+        ui.tblPeaks->setColumnHidden(i, hide);
+      }
+    }
+
     /**
     Populate controls with data ready for rendering.
     */
@@ -69,6 +93,9 @@ namespace MantidQt
       auto model = new QPeaksTableModel(this->m_ws);
       connect(model, SIGNAL(peaksSorted(const std::string&, const bool)), this, SLOT(onPeaksSorted(const std::string&, const bool)));
       ui.tblPeaks->setModel(model);
+      const std::vector<int> hideCols = model->defaultHideCols();
+      for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
+        ui.tblPeaks->setColumnHidden(*it,true);
       ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::Interactive);
       ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
       m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();

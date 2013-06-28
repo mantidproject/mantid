@@ -1,8 +1,8 @@
 #include <QDialogButtonBox>
 #include <QUrl>
 #include <QDesktopServices>
-#include "MantidQtSliceViewer/PeaksViewerOptionsDialog.h"
-#include "ui_PeaksViewerOptionsDialog.h"
+#include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
+#include "ui_PeaksViewerOverlayDialog.h"
 
 namespace MantidQt
 {
@@ -60,8 +60,8 @@ namespace MantidQt
      * @param peaksPresenter : Peaks presenter to use
      * @param parent : Parent widget
      */
-    PeaksViewerOptionsDialog::PeaksViewerOptionsDialog(PeaksPresenter_sptr peaksPresenter, QWidget *parent) :
-        QDialog(parent), ui(new Ui::PeaksViewerOptionsDialog), m_peaksPresenter(peaksPresenter)
+    PeaksViewerOverlayDialog::PeaksViewerOverlayDialog(PeaksPresenter_sptr peaksPresenter, QWidget *parent) :
+        QDialog(parent), ui(new Ui::PeaksViewerOverlayDialog), m_peaksPresenter(peaksPresenter)
     {
     ui->setupUi(this);
 
@@ -82,7 +82,7 @@ namespace MantidQt
   }
 
     /// Destructor
-  PeaksViewerOptionsDialog::~PeaksViewerOptionsDialog()
+  PeaksViewerOverlayDialog::~PeaksViewerOverlayDialog()
   {
     delete ui;
   }
@@ -91,7 +91,7 @@ namespace MantidQt
    * Handler for moving the slider associated with ON the current projection.
    * @param value: New slider position
    */
-  void PeaksViewerOptionsDialog::onSliderOnProjectionMoved(int value)
+  void PeaksViewerOverlayDialog::onSliderOnProjectionMoved(int value)
   {
     auto newFractionOccupancy = calculateFraction(value);
     m_peaksPresenter->setPeakSizeOnProjection(newFractionOccupancy);
@@ -102,7 +102,7 @@ namespace MantidQt
    * Handler for moving the slider associated with INTO the current projection.
    * @param value: New slider position
    */
-  void PeaksViewerOptionsDialog::onSliderIntoProjectionMoved(int value)
+  void PeaksViewerOverlayDialog::onSliderIntoProjectionMoved(int value)
   {
     auto newFractionOccupancy = calculateFraction(value);
     m_peaksPresenter->setPeakSizeIntoProjection(newFractionOccupancy);
@@ -112,7 +112,7 @@ namespace MantidQt
   /**
    * Handler for the reset event.
    */
-  void PeaksViewerOptionsDialog::onReset()
+  void PeaksViewerOverlayDialog::onReset()
   {
     m_peaksPresenter->setPeakSizeOnProjection( m_originalOnProjectionFraction );
     m_peaksPresenter->setPeakSizeIntoProjection( m_originalIntoProjectionFraction );
@@ -126,7 +126,7 @@ namespace MantidQt
    * Handler for the on-complete click event of the button group.
    * @param button : Button clicked.
    */
-  void PeaksViewerOptionsDialog::onCompleteClicked(QAbstractButton* button)
+  void PeaksViewerOverlayDialog::onCompleteClicked(QAbstractButton* button)
   {
     QDialogButtonBox::ButtonRole role = ui->btnGroupControls->buttonRole(button);
     if(role == QDialogButtonBox::RejectRole)
@@ -139,7 +139,7 @@ namespace MantidQt
    * Handler for the on-close event.
    * @param event : Close event
    */
-  void PeaksViewerOptionsDialog::closeEvent(QCloseEvent *event)
+  void PeaksViewerOverlayDialog::closeEvent(QCloseEvent *event)
   {
     onReset();
     QDialog::closeEvent(event);
@@ -148,7 +148,7 @@ namespace MantidQt
   /**
    * Handler for the reject event.
    */
-  void PeaksViewerOptionsDialog::reject()
+  void PeaksViewerOverlayDialog::reject()
   {
     onReset();
     QDialog::reject();
@@ -157,7 +157,7 @@ namespace MantidQt
   /**
    * Handler for the help-clicked event.
    */
-  void PeaksViewerOptionsDialog::onHelp()
+  void PeaksViewerOverlayDialog::onHelp()
   {
     QString helpPage = "PeaksViewer#Preference_Options";
     QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));

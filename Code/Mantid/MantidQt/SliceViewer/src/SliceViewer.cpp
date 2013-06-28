@@ -29,7 +29,7 @@
 #include "MantidQtSliceViewer/PeakTransformQLab.h"
 #include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
-#include "MantidQtSliceViewer/PeaksViewerOptionsDialog.h"
+#include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
@@ -413,8 +413,11 @@ void SliceViewer::initMenus()
 
   // --------------- Peaks Menu ----------------------------------------
   m_menuPeaks = new QMenu("&Peak", this);
-  action = new QAction(QPixmap(), "&PeaksViewer Options", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(onPeaksViewerOptions()));
+  action = new QAction(QPixmap(), "&Overlay Options", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(onPeaksViewerOverlayOptions()));
+  m_menuPeaks->addAction(action);
+  action = new QAction(QPixmap(), "&Visable Columns", this);
+  connect(action, SIGNAL(triggered()), this, SIGNAL(peaksTableColumnOptions())); // just re-emit
   m_menuPeaks->addAction(action);
   m_menuPeaks->setEnabled(false);// Until a PeaksWorkspace is selected.
 
@@ -2356,9 +2359,9 @@ void SliceViewer::resetView()
   this->resetZoom();
 }
 
-void SliceViewer::onPeaksViewerOptions()
+void SliceViewer::onPeaksViewerOverlayOptions()
 {
-  PeaksViewerOptionsDialog dlg(this->m_peaksPresenter);
+  PeaksViewerOverlayDialog dlg(this->m_peaksPresenter);
   dlg.exec();
 }
 
