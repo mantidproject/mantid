@@ -14,8 +14,8 @@ Neutron scattering lengths and cross sections of the elements and their isotopes
 =====Setting the sample by a more complex formula=====
  SetSampleMaterial(InputWorkspace='IRS26173',ChemicalFormula='Al2-O3', UnitCellVolume='253.54', ZParameter='6')
 
-=====Setting the sample by specific values (all three must be specified)=====
- SetSampleMaterial(InputWorkspace='IRS26173',AttenuationXSection=2.56,ScatteringXSection=11.62,SampleNumberDensity=0.0849106)
+=====Setting the sample by specific values=====
+ SetSampleMaterial(InputWorkspace='IRS26173',AtomicNumber=26,AttenuationXSection=2.56,ScatteringXSection=11.62,SampleNumberDensity=0.0849106)
 
 =====Extracting the set values out by python=====
  sam = ws.sample()
@@ -312,7 +312,8 @@ namespace DataHandling
                      << "    Incoherent " << mat->incohScatterXSection() << " barns\n"
                      << "    Total "      << mat->totalScatterXSection() << " barns\n"
                      << "    Absorption " << mat->absorbXSection() << " barns\n";
-           setProperty("IncoherentXSectionResult", mat->incohScatterXSection()); // in barns
+      setProperty("CoherentXSectionResult", mat->cohScatterXSection()); // in barns
+      setProperty("IncoherentXSectionResult", mat->incohScatterXSection()); // in barns
       setProperty("TotalXSectionResult",mat->totalScatterXSection()); // in barns
       setProperty("AbsorptionXSectionResult",mat->absorbXSection()); // in barns
       setProperty("ReferenceWavelength",NeutronAtom::ReferenceLambda); // in Angstroms
