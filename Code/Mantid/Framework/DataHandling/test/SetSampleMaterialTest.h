@@ -40,7 +40,7 @@ public:
 
   void testExec()
   {
-	std::string wsName = "SetSampleMaterialTestWS";
+	  std::string wsName = "SetSampleMaterialTestWS";
     IAlgorithm* setmat = Mantid::API::FrameworkManager::Instance().createAlgorithm("SetSampleMaterial");
     if ( !setmat->isInitialized() ) setmat->initialize();
 
@@ -52,7 +52,7 @@ public:
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(wsName, testWS);
 
-	TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("InputWorkspace", wsName) );
+	  TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("InputWorkspace", wsName) );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ChemicalFormula","Al2-O3") );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("SampleNumberDensity","0.0236649") );
     TS_ASSERT_THROWS_NOTHING( setmat->setPropertyValue("ScatteringXSection","15.7048") );
@@ -66,7 +66,9 @@ public:
     TS_ASSERT_DELTA( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda), 15.7048, 0.0001);
     TS_ASSERT_DELTA( m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.46257, 0.0001);
 
-	AnalysisDataService::Instance().remove(wsName);
+    checkOutputProperties(setmat,m_sampleMaterial);
+
+	  AnalysisDataService::Instance().remove(wsName);
 
   }
   void testExecMat_Formula()
@@ -95,8 +97,25 @@ public:
     TS_ASSERT_DELTA( m_sampleMaterial->numberDensity(), 0.0236649, 0.0001 );
     TS_ASSERT_DELTA( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda), 3.1404, 0.0001);
     TS_ASSERT_DELTA( m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda), 0.0925, 0.0001);
-	
+	  
+    checkOutputProperties(setmat,m_sampleMaterial);
+
 	AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void checkOutputProperties(const IAlgorithm* alg,const Material *material)
+  {
+    //test output properties
+    double testvalue = alg->getProperty("AbsorptionXSectionResult");
+    TS_ASSERT_DELTA(material->absorbXSection(), testvalue, 0.0001);
+    testvalue = alg->getProperty("CoherentXSectionResult");
+    TS_ASSERT_DELTA(material->cohScatterXSection(), testvalue, 0.0001);
+    testvalue = alg->getProperty("IncoherentXSectionResult");
+    TS_ASSERT_DELTA(material->incohScatterXSection(),  testvalue, 0.0001);
+    testvalue = alg->getProperty("TotalXSectionResult");
+    TS_ASSERT_DELTA(material->totalScatterXSection(), testvalue, 0.0001);
+    testvalue = alg->getProperty("SampleNumberDensityResult");
+    TS_ASSERT_DELTA(material->numberDensity(), testvalue, 0.0001);
   }
 
 };
