@@ -59,7 +59,7 @@ class Sample(object):
             @param reload: if this sample should be reloaded before the first reduction  
             @param period: the period within the sample to be analysed
         """
-        self.run_option = run
+        self.run_option = str(run) #to self-guard against keeping reference to workspace
         self.reload_option = reload
         self.period_option = period
 
