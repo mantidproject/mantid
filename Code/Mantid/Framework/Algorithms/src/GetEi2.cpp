@@ -9,7 +9,7 @@ Not all neutrons arrive at the monitors at the same time because their kinetic e
 # the half height is half the above number
 # examine bins to the left of the bin with the highest number of counts looking for a bin with less than half that number above background
 # interpolate between this point bin and the one immediately previous to find the first half height location
-# repeat the steps 3 and 4 looking to the left of the highest point to get the second half height point
+# repeat the steps 3 and 4 looking to the right of the highest point to get the second half height point
 # the mean of the X-values of the two half height points is the TOF arrival time of the neutrons
 
 The above process is illustrated on a peak is shown below in the image below
