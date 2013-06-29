@@ -24,7 +24,7 @@ This algorithm cannot load a file created by [[SaveAscii]] if it has X errors wr
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include <fstream>
@@ -38,10 +38,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadAscii)
-    //register the algorithm into loadalgorithm factory
-    DECLARE_LOADALGORITHM(LoadAscii)
+    DECLARE_FILELOADER_ALGORITHM(LoadAscii);
     
     /// Sets documentation strings for this algorithm
     void LoadAscii::initDocs()
@@ -59,72 +56,28 @@ namespace Mantid
     {
     }
 
-    /** This method does a quick file check by checking the no.of bytes read nread params and header buffer
-    *  @param filePath :: path of the file including name.
-    *  @param nread :: no.of bytes read
-    *  @param header :: The first 100 bytes of the file as a union
-    *  @return true if the given file is of type which can be loaded by this algorithm
-    */
-    bool LoadAscii::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-    {
-      std::string extn=extension(filePath);
-      if (!extn.compare("dat")||!extn.compare("csv")|| !extn.compare("txt")|| !extn.compare("")) //If the file is of type ascii then have a go
-      {
-        return true;
-      }
-      else //See if file looks like Ascii and have a go at doing something about it
-      {
-        bool is_ascii (true);
-        if( filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0)
-        	is_ascii =false;
-        else if( filePath.compare(filePath.size()-6,6,".peaks") == 0)
-        	is_ascii =false;
-        else if( filePath.compare(filePath.size()-10,10,".integrate") == 0)
-        	is_ascii =false;
-        for(size_t i=0; i<nread; i++)
-        {
-          if (!isascii(header.full_hdr[i]))
-            is_ascii =false;
-        }
-        return (is_ascii);
-      }
-    }
-
     /**
-    * Checks the file by opening it and reading few lines 
-    * @param filePath name of the file including its path
-    * @return an integer value how much this algorithm can load the file 
-    */
-    int LoadAscii::fileCheck(const std::string& filePath)
-    {      
-      FILE* file = fopen(filePath.c_str(), "rb");
-      if (!file)
-      {
-        g_log.error("Unable to open file: " + filePath);
-        throw Exception::FileError("Unable to open file: " , filePath);
-      }
-      
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadAscii::confidence(Kernel::FileDescriptor & descriptor) const
+    {
+      const std::string & filePath = descriptor.filename();
+      const size_t filenameLength = filePath.size();
+
+      // Avoid some known file types that have different loaders
       int confidence(0);
-      if( filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0)
+      if( filePath.compare(filenameLength - 12,12,"_runinfo.xml") == 0 ||
+          filePath.compare(filenameLength - 6,6,".peaks") == 0 ||
+          filePath.compare(filenameLength - 10,10,".integrate") == 0 )
       {
-        fclose(file);
-        return confidence;
+        confidence = 0;
       }
-      else if( filePath.compare(filePath.size()-6,6,".peaks") == 0)
+      else if(Kernel::FileDescriptor::isAscii(descriptor.data()))
       {
-        fclose(file);
-        return confidence;
+        confidence = 10; // Low so that others may try
       }
-      else if( filePath.compare(filePath.size()-10,10,".integrate") == 0)
-      {
-        fclose(file);
-        return confidence;
-      }
-      if (isAscii(file))
-      {
-        confidence = 10; //Lower because should load other files first
-      }
-      fclose(file);
       return confidence;
     }
 

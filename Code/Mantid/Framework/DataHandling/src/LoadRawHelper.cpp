@@ -15,7 +15,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidDataHandling/LoadAscii.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -1043,75 +1042,26 @@ namespace Mantid
 
     }
 
-
-    /** 
-     * Check if the buffer looks like a RAW file header by looking at
-     * at the "address of RUN and INST section" attribute - if there, it's an ISIS raw file.
-     * @param nread The number of bytes in the buffer
-     * @param buffer A buffer of nread bytes of the file
-     * @returns True if this looks like an ISIS raw file
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
-    bool LoadRawHelper::isRawFileHeader(const int nread, const unsigned char* buffer) const
+    int LoadRawHelper::confidence(Kernel::FileDescriptor & descriptor) const
     {
-      if( nread > 88 && (buffer[84] == 32) && (buffer[88] == 126) )
+      auto & stream = descriptor.data();
+      // 85th character is a space & 89th character is a ~
+      stream.seekg(84, std::ios::beg);
+      int c = stream.get();
+      int confidence(0);
+      if(c == 32)
       {
-        return true;
+        stream.seekg(3, std::ios::cur);
+        int c = stream.get();
+        if(c == 126) confidence = 80;
       }
-      else return false;
+      return confidence;
     }
-
-
-    /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
-     *  @param filePath- path of the file including name.
-     *  @param nread :: no.of bytes read
-     *  @param header :: The first 100 bytes of the file as a union
-     *  @return true if the given file is of type which can be loaded by this algorithm
-     */
-    bool LoadRawHelper::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-    {
-      std::string extn=extension(filePath);
-      bool braw = (!extn.compare("raw")||!extn.compare("add")||(extn.length() > 0 && extn[0]=='s')) ? true : false;
-      if( isRawFileHeader(static_cast<int>(nread), header.full_hdr) || braw )
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-    /**Checks the file by opening it and reading few lines 
-     *  @param filePath :: name of the file inluding its path
-     *  @return an integer value how much this algorithm can load the file 
-     */
-    int LoadRawHelper::fileCheck(const std::string& filePath)
-    {
-      /* Open the file and read in the first bufferSize bytes - these will
-       * be used to determine the type of the file
-       */
-      int bret=0;
-      FILE* fp = fopen(filePath.c_str(), "rb");
-      if (fp == NULL)
-      {
-        return bret;
-      }
-      file_header header;
-      int nread(static_cast<int>(fread(
-          &header,sizeof(unsigned char), IDataFileChecker::g_hdr_bytes, fp)));
-      header.full_hdr[IDataFileChecker::g_hdr_bytes] = '\0';
-
-      if (fclose(fp) != 0)
-      {
-      } 
-
-      if( isRawFileHeader(nread, header.full_hdr) )
-      {
-        bret=80;
-      }
-      return bret;
-    }
-
-
 
   } // namespace DataHandling
 } // namespace Mantid

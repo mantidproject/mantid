@@ -14,6 +14,19 @@ namespace Mantid
       //----------------------------------------------------------------------------------------------
       // Anonymous namespace helpers
       //----------------------------------------------------------------------------------------------
+      /// @cond
+      template<typename T>
+      struct DescriptorCallback
+      {
+        void apply(T &) {} //general one does nothing
+      };
+      template<>
+      struct DescriptorCallback<Kernel::FileDescriptor>
+      {
+        void apply(Kernel::FileDescriptor & descriptor) { descriptor.resetStreamToStart(); }
+      };
+      ///endcond
+
       /**
        * @param descriptor A descriptor object describing the file
        * @param names The collection of names to search through
@@ -22,12 +35,13 @@ namespace Mantid
        * was found
        */
       template<typename DescriptorType, typename FileLoaderType>
-      const std::string searchForLoader(const DescriptorType & descriptor,const std::set<std::string> & names,
+      const std::string searchForLoader(DescriptorType & descriptor,const std::set<std::string> & names,
                                         Kernel::Logger & logger)
       {
         const auto & factory = AlgorithmFactory::Instance();
         std::string bestLoader;
         int maxConfidence(0);
+        DescriptorCallback<DescriptorType> callback;
 
         auto iend = names.end();
         for(auto it = names.begin(); it != iend; ++it)
@@ -39,6 +53,8 @@ namespace Mantid
           try
           {
             const int confidence = alg->confidence(descriptor);
+            callback.apply(descriptor);
+
             if(confidence > maxConfidence) // strictly greater
             {
               bestLoader = name;

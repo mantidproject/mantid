@@ -17,11 +17,11 @@ The file types include
 *WIKI*/
 #include "MantidDataHandling/LoadPDFgetNFile.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 
 #include <fstream>
 #include <boost/algorithm/string.hpp>
@@ -43,10 +43,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  DECLARE_ALGORITHM(LoadPDFgetNFile)
-
-  // register the algorithm into loadalgorithm factory
-  DECLARE_LOADALGORITHM(LoadPDFgetNFile)
+  DECLARE_FILELOADER_ALGORITHM(LoadPDFgetNFile);
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -72,67 +69,31 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** This method does a quick file type check by checking the first 100 bytes of the file
-   *  @param filePath- path of the file including name.
-   *  @param nread :: no.of bytes read
-   *  @param header :: The first 100 bytes of the file as a union
-   *  @return true if the given file is of type which can be loaded by this algorithm
+  /**
+   * Return the confidence with with this algorithm can load the file
+   * @param descriptor A descriptor for the file
+   * @returns An integer specifying the confidence level. 0 indicates it will not be used
    */
-  bool LoadPDFgetNFile::quickFileCheck(const std::string& filePath, size_t nread, const file_header& header)
+  int LoadPDFgetNFile::confidence(Kernel::FileDescriptor & descriptor) const
   {
-    UNUSED_ARG(nread);
-    UNUSED_ARG(header);
-
     // check the file extension
-    std::string extn = extension(filePath);
-    bool bascii;
-    if (extn.compare("sq"))
-      bascii = true;
-    else if (extn.compare("sqa"))
-      bascii = true;
-    else if (extn.compare("sqb"))
-      bascii = true;
-    else if (extn.compare("gr"))
-      bascii = true;
-    else if (extn.compare("ain"))
-      bascii = true;
-    else if (extn.compare("braw"))
-      bascii = true;
-    else if (extn.compare("bsmo"))
-      bascii = true;
-    else
-      bascii = false;
-
-    /* check the bit of header
-    bool is_ascii(true);
-    for (size_t i = 0; i < nread; i++)
+    const std::string & extn = descriptor.extension();
+    // Only allow known file extensions
+    if(extn.compare("sq") != 0 && extn.compare("sqa") != 0 && extn.compare("sqb") != 0 &&
+       extn.compare("gr") != 0 && extn.compare("ain") != 0 && extn.compare("braw") != 0 &&
+       extn.compare("bsmo")!= 0)
     {
-      if (!isascii(header.full_hdr[i]))
-        is_ascii = false;
+      return 0;
     }
-     return (is_ascii || bascii);
-    */
 
-    return (bascii);
-  }
+    auto & file = descriptor.data();
+    if(!Kernel::FileDescriptor::isAscii(file)) return 0;
 
-  /** checks the file by opening it and reading few lines
-   *  @param filePath :: name of the file including its path
-   *  @return an integer value how much this algorithm can load the file
-   */
-  int LoadPDFgetNFile::fileCheck(const std::string& filePath)
-  {
-    std::ifstream file(filePath.c_str());
-    if (!file)
-    {
-      g_log.error("Unable to open file: " + filePath);
-      throw Exception::FileError("Unable to open file: ", filePath);
-    }
     std::string str;
-    getline(file, str);//workspace title first line
+    std::getline(file, str); //workspace title first line
     while (!file.eof())
     {
-      getline(file, str);
+      std::getline(file, str);
       if (startsWith(str, "#L"))
       {
         return 80;
@@ -256,7 +217,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Check whether the line starts with some specific character
     */
-  bool LoadPDFgetNFile::startsWith(std::string s, std::string header)
+  bool LoadPDFgetNFile::startsWith(const std::string & s, const std::string&  header) const
   {
     bool answer = true;
 

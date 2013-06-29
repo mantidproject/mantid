@@ -11,7 +11,7 @@ namespace Mantid
 namespace DataHandling
 {
 /**
-     Loads a Quokka data file. Implements API::IDataFileChecker and its file check methods to
+     Loads a Quokka data file. Implements API::IFileLoader and its file check methods to
      recognise a file as the one containing QUOKKA data.
 
      @author Roman Tolchenov, Tessella plc

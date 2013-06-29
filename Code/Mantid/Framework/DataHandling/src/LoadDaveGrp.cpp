@@ -8,9 +8,9 @@ This algorithm loads data from a DAVE grouped ASCII file. These have been genera
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
@@ -21,11 +21,7 @@ namespace Mantid
 {
 namespace DataHandling
 {
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadDaveGrp)
-
-// Register the algorithm into the LoadAlgorithmFactory
-DECLARE_LOADALGORITHM(LoadDaveGrp)
+DECLARE_FILELOADER_ALGORITHM(LoadDaveGrp);
 
 /// Sets documentation strings for this algorithm
 void LoadDaveGrp::initDocs()
@@ -38,66 +34,57 @@ LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0)
 {
 }
 
-bool LoadDaveGrp::quickFileCheck(const std::string& filePath, std::size_t nread,
-    const file_header& header)
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadDaveGrp::confidence(Kernel::FileDescriptor & descriptor) const
 {
-  std::string extn = this->extension(filePath);
-  bool bdgrp(false);
-  (!extn.compare("grp") || !extn.compare("sqe") || !extn.compare("txt")) ? bdgrp = true : bdgrp = false;
-  bool is_ascii(true);
-  for(std::size_t i = 0; i < nread; i++)
-  {
-    if (!isascii(header.full_hdr[i]))
-      is_ascii = false;
-  }
-  return(is_ascii || bdgrp ? true : false);
-}
+  const std::string & extn = descriptor.extension();
+  if(extn.compare(".grp") != 0 && extn.compare(".sqe") != 0 && extn.compare(".txt") != 0) return 0;
 
-int LoadDaveGrp::fileCheck(const std::string& filePath)
-{
-  this->ifile.open(filePath.c_str());
-  if (!this->ifile.is_open())
-  {
-    g_log.error("Unable to open file: " + filePath);
-    throw Kernel::Exception::FileError("Unable to open file: " , filePath);
-  }
+  if(!descriptor.isAscii(descriptor.data())) return 0;
+
+
+  bool daveGrp(false);
+  std::string curline;
 
   // First line is a comment: #
-  bool bdgrp(false);
-  this->readLine();
-  if (this->line.substr(0,1) == "#")
+  std::getline(descriptor.data(), curline);
+  if (curline.substr(0,1) == "#")
   {
-    bdgrp = true;
-  } else return 0;
+    daveGrp = true;
+  }
+  else return 0;
 
   // Second line is an integer
-  this->readLine();
+  std::getline(descriptor.data(), curline);
   unsigned int value;
-  std::istringstream is(this->line);
+  std::istringstream is(curline);
   is >> value;
-  bdgrp = bdgrp && !is.fail();
+  daveGrp = daveGrp && !is.fail();
+
   // Third line is a comment: #
-  this->readLine();
-  if (this->line.substr(0,1) == "#")
+  std::getline(descriptor.data(), curline);
+  if (curline.substr(0,1) == "#")
   {
-    bdgrp = bdgrp && true;
-  } else return 0;
+    daveGrp = daveGrp && true;
+  }
+  else return 0;
 
   // Fourth line is an integer
-  this->readLine();
+  std::getline(descriptor.data(), curline);
   // Clear all stream bits regardless of what happened before
   is.clear();
-  is.str(this->line);
+  is.str(curline);
   is >> value;
-  bdgrp = bdgrp && !is.fail();
-  this->ifile.close();
+  daveGrp = daveGrp && !is.fail();
 
-  if (bdgrp)
-  {
-    return 80;
-  }
-  return 0;
+  if (daveGrp) return 80;
+  else return 0;
 }
+
 void LoadDaveGrp::init()
 {
   std::vector<std::string> exts;

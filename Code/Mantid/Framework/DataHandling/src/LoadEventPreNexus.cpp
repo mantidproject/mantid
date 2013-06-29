@@ -16,7 +16,7 @@ Specific pulse ID and mapping files can be specified if needed; these are guesse
 
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -52,9 +52,8 @@ namespace Mantid
 {
 namespace DataHandling
 {
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadEventPreNexus)
-DECLARE_LOADALGORITHM(LoadEventPreNexus)
+
+DECLARE_FILELOADER_ALGORITHM(LoadEventPreNexus);
 
 /// Sets documentation strings for this algorithm
 void LoadEventPreNexus::initDocs()
@@ -103,7 +102,7 @@ static const double TOF_CONVERSION = .1;
 /// Conversion factor between picoColumbs and microAmp*hours
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
-LoadEventPreNexus::LoadEventPreNexus() : Mantid::API::IDataFileChecker(), eventfile(NULL), max_events(0)
+LoadEventPreNexus::LoadEventPreNexus() : Mantid::API::IFileLoader(), eventfile(NULL), max_events(0)
 {
 }
 
@@ -113,52 +112,25 @@ LoadEventPreNexus::~LoadEventPreNexus()
 }
 
 /**
- * Returns the name of the property to be considered as the Filename for Load
- * @returns A character string containing the file property's name
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-const char * LoadEventPreNexus::filePropertyName() const
+int LoadEventPreNexus::confidence(Kernel::FileDescriptor & descriptor) const
 {
-  return EVENT_PARAM.c_str();
-}
+  if(descriptor.extension().rfind("dat") == std::string::npos) return 0;
 
-/**
- * Do a quick file type check by looking at the first 100 bytes of the file 
- *  @param filePath :: path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
- */
-bool LoadEventPreNexus::quickFileCheck(const std::string& filePath,size_t,const file_header&)
-{
-  std::string ext = extension(filePath);
-  return (ext.rfind("dat") != std::string::npos);
-}
+  // If this looks like a binary file where the exact file length is a multiple
+  // of the DasEvent struct then we're probably okay.
+  const size_t objSize = sizeof(DasEvent);
+  auto &handle = descriptor.data();
+  // get the size of the file in bytes and reset the handle back to the beginning
+  handle.seekg(0, std::ios::end);
+  const size_t filesize = static_cast<size_t>(handle.tellg());
+  handle.seekg(0, std::ios::beg);
 
-/**
- * Checks the file by opening it and reading few lines 
- *  @param filePath :: name of the file inluding its path
- *  @return an integer value how much this algorithm can load the file 
- */
-int LoadEventPreNexus::fileCheck(const std::string& filePath)
-{
-  int confidence(0);
-  try
-  {
-    // If this looks like a binary file where the exact file length is a multiple
-    // of the DasEvent struct then we're probably okay.
-    // NOTE: Putting this on the stack gives a segfault on Windows when for some reason
-    // the BinaryFile destructor is called twice! I'm sure there is something I don't understand there
-    // but heap allocation seems to work so go for that.
-    BinaryFile<DasEvent> *event_file = new BinaryFile<DasEvent>(filePath);
-    confidence = 80;
-    delete event_file;
-  }
-  catch(std::runtime_error &)
-  {
-    // This BinaryFile constructor throws if the file does not contain an
-    // exact multiple of the sizeof(DasEvent) objects.
-  }
-  return confidence;
+  if (filesize % objSize != 0) return 80;
+  else return 0;
 }
 
 

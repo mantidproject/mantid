@@ -106,7 +106,15 @@ namespace Mantid
      */
     void FileDescriptor::resetStreamToStart()
     {
-      m_file.seekg(0);
+      // If the stream was closed, reopen it
+      if(!m_file.is_open())
+      {
+        m_file.open(m_filename.c_str(), std::ios::in | std::ios::binary);
+      }
+      else
+      {
+        m_file.seekg(0);
+      }
     }
 
     //----------------------------------------------------------------------------------------------
