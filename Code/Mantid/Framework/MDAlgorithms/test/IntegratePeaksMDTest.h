@@ -49,7 +49,7 @@ public:
   /** Run the IntegratePeaksMD with the given peak radius integration param */
   static void doRun(double PeakRadius, double BackgroundRadius,
       std::string OutputWorkspace = "IntegratePeaksMDTest_peaks",
-      double BackgroundStartRadius = 0.0, bool edge = true)
+      double BackgroundStartRadius = 0.0, bool edge = true, bool cyl = false, std::string fnct = "NoFit")
   {
     IntegratePeaksMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -62,6 +62,10 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("IntegrateIfOnEdge", edge ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMDTest_peaks" ) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", OutputWorkspace) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Cylinder", cyl ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("CylinderLength", 4.0 ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PercentBackground", 20.0 ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("ProfileFunction", fnct ) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
   }
@@ -120,6 +124,34 @@ public:
     TS_ASSERT_EQUALS( peakWS0->getPeak(0).getIntensity(), 0.0);
     AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks",peakWS0);
 
+    // ------------- Integrating with cylinder ------------------------
+    doRun(1.0,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true);
+
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 1000.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
+    std::string fnct = "Gaussian";
+    doRun(1.0,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 1000.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
+    /*fnct = "ConvolutionBackToBackGaussian";
+    doRun(1.0,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 1000.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
+    fnct = "ConvolutionExpGaussian";
+    doRun(1.0,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 1000.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);*/
     // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge false------------------------
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,false);
 
@@ -127,6 +159,7 @@ public:
 
     // Error is also calculated
     TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    
     AnalysisDataService::Instance().remove("IntegratePeaksMDTest_peaks");
 
     // --- Make a fake PeaksWorkspace ---

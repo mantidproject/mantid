@@ -98,7 +98,7 @@ namespace MDEvents
 		}
 		lenQdata = std::sqrt(lenQdata);
 		lenQpeak = std::sqrt(lenQpeak);
-		cosAng /= (lenQpeak * lenQdata);
+		if(lenQpeak * lenQdata != 0.0) cosAng /= (lenQpeak * lenQdata);
 		coord_t angle = std::acos(cosAng);
 		outVector[0] = lenQdata * std::sin(angle);
 		outVector[1] = lenQdata * cosAng - lenQpeak;

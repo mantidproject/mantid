@@ -1417,22 +1417,27 @@ namespace MDEvents
       // Is this box fully contained?
       if (verticesContained[i] >= maxVertices)
       {
-		std::vector<coord_t> coordTable;
-		size_t nColumns;
-		box->getEventsData(coordTable, nColumns);
-		size_t nEvents = coordTable.size()/nColumns;
-    	for (size_t k=0; k<nEvents; k++)
-    	{
-    		coord_t eventCenter[nd];
-    		for (size_t l=0; l<nd; l++)eventCenter[l] = coordTable[k*nColumns+2+l];
-    		coord_t out[nd];
-    		radiusTransform.apply(eventCenter, out);
-			// add event to appropriate y channel
-			size_t xchannel;
-			if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2);
-			else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2);
-			if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += coordTable[k*nColumns];
-    	}
+        std::vector<coord_t> coordTable;
+        size_t nColumns;
+        box->getEventsData(coordTable, nColumns);
+        if (nColumns > 0) 
+        {
+          size_t nEvents = coordTable.size()/nColumns;
+          size_t skipCol = 2; //lean events
+          if(nColumns == 7) skipCol += 2; //events
+    	  for (size_t k=0; k<nEvents; k++)
+          {
+            coord_t eventCenter[nd];
+            for (size_t l=0; l<nd; l++)eventCenter[l] = coordTable[k*nColumns+skipCol+l];
+            coord_t out[nd];
+            radiusTransform.apply(eventCenter, out);
+            // add event to appropriate y channel
+            size_t xchannel;
+            if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2);
+            else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2);
+            if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += coordTable[k*nColumns];
+          }
+        }
         //box->releaseEvents();
         // Use the integrated sum of signal in the box
         signal += box->getSignal();

@@ -169,7 +169,7 @@ namespace MDAlgorithms
     fitFunction[2] = "ConvolutionBackToBackGaussian";
     fitFunction[3] = "NoFit";
     auto fitvalidator = boost::make_shared<StringListValidator>(fitFunction);
-    declareProperty("ProfileFunction", "ConvolutionExpGaussian", fitvalidator, "Fitting function for profile "
+    declareProperty("ProfileFunction", "Gaussian", fitvalidator, "Fitting function for profile "
                     "used only with Cylinder integration.");
 
   }
@@ -422,26 +422,22 @@ namespace MDAlgorithms
 
 			size_t half = numSteps/2;
 			double Centre = ws2D->dataX(i)[half];
-            double Sigma = 0.02;
+			double Sigma = 0.02;
 			double peakHeight = ws2D->dataY(i)[half];
-            double Lifetime = 0.01;
-            std::string profileFunction = getProperty("ProfileFunction");
+			std::string profileFunction = getProperty("ProfileFunction");
 			std::ostringstream fun_str;
 			if (profileFunction.compare("Gaussian") == 0)
 				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=Gaussian,Height="<<peakHeight<<",Sigma="<<Sigma<<",PeakCentre="<<Centre;
 			else if (profileFunction.compare("ConvolutionExpGaussian") == 0)
 			{
-				peakHeight = std::sqrt(2*peakHeight);
-				Sigma =0.008;
+				double Lifetime = 700.0;
 				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution,FixResolution=false;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
 						";name=ExpDecay,Height="<<peakHeight<<",Lifetime="<<Lifetime<<")";
 			}
 			else if (profileFunction.compare("ConvolutionBackToBackGaussian") == 0)
 			{
-				peakHeight = std::sqrt(2*peakHeight);
-				Sigma =0.008;
 				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution,FixResolution=false;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
-						";name=BackToBackExponential,I="<<peakHeight<<",A=100.0,B=100.0,X0="<<Centre<<",S="<<Sigma<<")";
+						";name=BackToBackExponential,I="<<peakHeight<<",A=700.0,B=70.0,X0="<<Centre<<",S="<<Sigma<<")";
 			}
 			if (profileFunction.compare("NoFit") != 0)
 			{
