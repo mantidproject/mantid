@@ -7,6 +7,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 
 namespace Mantid
 {
@@ -72,6 +73,8 @@ namespace Mantid
        */
       inline const std::string & extension() const { return m_extension; }
 
+      /// Returns the name & type of the first entry in the file
+      const std::pair<std::string,std::string> & firstEntryNameType() const;
       /// Query if the given attribute exists on the root node
       bool hasRootAttr(const std::string &name) const;
       /// Query if a path exists
@@ -92,6 +95,8 @@ namespace Mantid
       std::string m_filename;
       /// Extension
       std::string m_extension;
+      /// First entry name/type
+      std::pair<std::string, std::string> m_firstEntryNameType;
       /// Root attributes
       std::set<std::string> m_rootAttrs;
       /// Map of types to full path strings.

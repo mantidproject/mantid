@@ -98,7 +98,8 @@ namespace Mantid
      * involves simply checking for the signature if a HDF file at the start of the file
      */
     HDFDescriptor::HDFDescriptor(const std::string & filename)
-      : m_filename(), m_extension(), m_rootAttrs(), m_typesToPaths(NULL)
+      : m_filename(), m_extension(), m_firstEntryNameType(),
+        m_rootAttrs(), m_typesToPaths(NULL)
     {
       if(filename.empty())
       {
@@ -125,6 +126,11 @@ namespace Mantid
       delete m_typesToPaths;
     }
 
+    /// Returns the name & type of the first entry in the file
+    const std::pair<std::string,std::string> & HDFDescriptor::firstEntryNameType() const
+    {
+      return m_firstEntryNameType;
+    }
 
     /**
      * @param name The name of an attribute
@@ -193,6 +199,9 @@ namespace Mantid
       {
         m_rootAttrs.insert(attrInfos[i].name);
       }
+      auto entries = file.getEntries();
+      auto entryIter = entries.begin();
+      m_firstEntryNameType = std::make_pair(entryIter->first, entryIter->second);
       m_typesToPaths = file.getTypeMap();
     }
 

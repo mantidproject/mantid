@@ -105,6 +105,13 @@ public:
     TS_ASSERT_THROWS(HDFDescriptor fd(m_testNonHDFPath), std::invalid_argument);
   }
 
+  void test_firstEntryNameType_Returns_Correct_Details()
+  {
+    auto entryType = m_testHDF5->firstEntryNameType();
+    TS_ASSERT_EQUALS("entry", entryType.first);
+    TS_ASSERT_EQUALS("NXentry", entryType.second);
+  }
+
   void test_hasRootAttr_Returns_True_For_Existing_Attr()
   {
     TS_ASSERT(m_testHDF5->hasRootAttr("file_time"));
