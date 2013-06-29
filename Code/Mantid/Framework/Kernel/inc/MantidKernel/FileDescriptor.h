@@ -41,6 +41,12 @@ namespace Mantid
     class MANTID_KERNEL_DLL FileDescriptor
     {
     public:
+      /// Returns true if the file is considered ascii
+      static bool isAscii(const std::string & filename, const size_t nbytes=256);
+      /// Returns true if the stream is considered ascii
+      static bool isAscii(std::istream & data, const size_t nbytes=256);
+
+    public:
       /// Constructor accepting a filename
       FileDescriptor(const std::string & filename);
       /// Destructor
