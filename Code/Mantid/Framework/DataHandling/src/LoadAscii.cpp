@@ -74,7 +74,7 @@ namespace Mantid
       {
         confidence = 0;
       }
-      else if(Kernel::FileDescriptor::isAscii(descriptor.data()))
+      else if(descriptor.isAscii())
       {
         confidence = 10; // Low so that others may try
       }

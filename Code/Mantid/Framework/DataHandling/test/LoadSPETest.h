@@ -9,6 +9,19 @@ using namespace Mantid::API;
 class LoadSPETest : public CxxTest::TestSuite
 {
 public:
+  void testConfidence()
+  {
+    using namespace Mantid::DataHandling;
+    using namespace Mantid::Kernel;
+    LoadSPE loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "Example.spe");
+
+    FileDescriptor descriptor(loader.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(80, loader.confidence(descriptor));
+  }
+
+
   void testName()
   {
     TS_ASSERT_EQUALS( loader.name(), "LoadSPE" );

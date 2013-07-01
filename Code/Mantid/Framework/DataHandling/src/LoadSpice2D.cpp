@@ -8,8 +8,8 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -27,6 +27,8 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/DOM/Text.h>
+#include <Poco/SAX/InputSource.h>
+
 #include <iostream>
 //-----------------------------------------------------------------------
 
@@ -94,18 +96,55 @@ namespace Mantid
 
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_ALGORITHM(LoadSpice2D)
+    DECLARE_FILELOADER_ALGORITHM(LoadSpice2D);
 
-    //register the algorithm into loadalgorithm factory
-     DECLARE_LOADALGORITHM(LoadSpice2D)
-     
-     /// Sets documentation strings for this algorithm
-     void LoadSpice2D::initDocs()
-     {
-       this->setWikiSummary("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
-       this->setOptionalMessage("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
-     }
-     
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadSpice2D::confidence(Kernel::FileDescriptor & descriptor) const
+    {
+      if(descriptor.extension().compare(".xml") != 0) return 0;
+
+      std::istream & is = descriptor.data();
+      int confidence(0);
+
+      {// start of inner scope
+        Poco::XML::InputSource src(is);
+        // Set up the DOM parser and parse xml file
+        DOMParser pParser;
+        Document* pDoc;
+        try
+        {
+          pDoc = pParser.parse(&src);
+        }
+        catch (...)
+        {
+          throw Kernel::Exception::FileError("Unable to parse File:", descriptor.filename());
+        }
+        // Get pointer to root element
+        Element* pRootElem = pDoc->documentElement();
+        if(pRootElem)
+        {
+          if(pRootElem->tagName().compare("SPICErack") == 0)
+          {
+            confidence = 80;
+          }
+        }
+        pDoc->release();
+      }// end of inner scope
+
+      return confidence;
+    }
+
+    /// Sets documentation strings for this algorithm
+    void LoadSpice2D::initDocs()
+    {
+      this->setWikiSummary("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
+      this->setOptionalMessage("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
+    }
+
 
     /// Constructor
     LoadSpice2D::LoadSpice2D() {}
@@ -477,58 +516,6 @@ namespace Mantid
       {
         throw Kernel::Exception::NotFoundError(name + " element not found in Spice XML file", fileName);
       }
-    }
-
-/**This method does a quick file check by checking the no.of bytes read nread params and header buffer
- *  @param filePath- path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
- */
-    bool LoadSpice2D::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-    {
-      std::string extn=extension(filePath);
-      bool bspice2d(false);
-      (!extn.compare("xml"))?bspice2d=true:bspice2d=false;
-
-      const char* full_hdr = reinterpret_cast<const char*>(header.full_hdr);
-      const char* xml_header="<?xml version=";
-      if ( ((unsigned)nread >= strlen(xml_header)) && 
-        !strncmp(full_hdr, xml_header, strlen(xml_header)) )
-      {
-      }
-      return(bspice2d?true:false);
-    }
-
-/**checks the file by opening it and reading few lines 
- *  @param filePath :: name of the file inluding its path
- *  @return an integer value how much this algorithm can load the file 
- */
-    int LoadSpice2D::fileCheck(const std::string& filePath)
-    {      
-      // Set up the DOM parser and parse xml file
-      DOMParser pParser;
-      Document* pDoc;
-      try
-      {
-        pDoc = pParser.parse(filePath);
-      } catch (...)
-      {
-        throw Kernel::Exception::FileError("Unable to parse File:", filePath);
-      }
-
-      int confidence(0);
-      // Get pointer to root element
-      Element* pRootElem = pDoc->documentElement();
-      if(pRootElem)
-      {
-        if(pRootElem->tagName().compare("SPICErack") == 0)
-        {
-          confidence = 80;
-        }
-      }
-      pDoc->release();
-      return confidence;
     }
 }
 }

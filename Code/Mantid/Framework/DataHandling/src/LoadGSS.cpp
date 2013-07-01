@@ -46,7 +46,7 @@ namespace Mantid
      */
     int LoadGSS::confidence(Kernel::FileDescriptor & descriptor) const
     {
-      if(!descriptor.isAscii(descriptor.filename())) return 0;
+      if(!descriptor.isAscii()) return 0;
 
       std::string str;
       std::istream & file = descriptor.data();

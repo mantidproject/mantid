@@ -44,7 +44,7 @@ int LoadDaveGrp::confidence(Kernel::FileDescriptor & descriptor) const
   const std::string & extn = descriptor.extension();
   if(extn.compare(".grp") != 0 && extn.compare(".sqe") != 0 && extn.compare(".txt") != 0) return 0;
 
-  if(!descriptor.isAscii(descriptor.data())) return 0;
+  if(!descriptor.isAscii()) return 0;
 
 
   bool daveGrp(false);

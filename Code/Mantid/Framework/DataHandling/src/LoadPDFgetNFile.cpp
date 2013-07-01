@@ -86,9 +86,9 @@ namespace DataHandling
       return 0;
     }
 
-    auto & file = descriptor.data();
-    if(!Kernel::FileDescriptor::isAscii(file)) return 0;
+    if(!descriptor.isAscii()) return 0;
 
+    auto & file = descriptor.data();
     std::string str;
     std::getline(file, str); //workspace title first line
     while (!file.eof())
