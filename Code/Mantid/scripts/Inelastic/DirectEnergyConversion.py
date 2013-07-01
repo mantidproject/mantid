@@ -112,6 +112,12 @@ class DirectEnergyConversion(object):
             arg = par.lstrip('diag_')
             if arg not in kwargs:
                 kwargs[arg] = getattr(self, arg)
+
+        # if input parameter is workspace rather then run, we want to keep it
+        self._keep_wb_workspace = False
+        if isinstance(white,str) and white in mtd:
+         self._keep_wb_workspace = True
+
         # If we have a hard_mask, check the instrument name is defined
         if 'hard_mask_file' in kwargs:
             if 'instrument_name' not in kwargs:
@@ -127,7 +133,7 @@ class DirectEnergyConversion(object):
                 if whitews_name in mtd:
                     DeleteWorkspace(Workspace=whitews_name)
                 # Load
-                white_data = self.load_data(white,whitews_name)
+                white_data = self.load_data(white,whitews_name,self._keep_wb_workspace)
                         
                 diag_mask= LoadMask(Instrument=self.instr_name,InputFile=kwargs['hard_mask_file'],
                                OutputWorkspace='hard_mask_ws')
@@ -222,7 +228,8 @@ class DirectEnergyConversion(object):
         if whitews_name in mtd:
             DeleteWorkspace(Workspace=whitews_name)
         # Load
-        white_data = self.load_data(white_run)
+        white_data = self.load_data(white_run,whitews_name,self._keep_wb_workspace)
+        
         # Normalise
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
         # Units conversion
@@ -359,7 +366,7 @@ class DirectEnergyConversion(object):
         bin_offset = -mon1_peak
         
         # For event mode, we are going to histogram in energy first, then go back to TOF
-        if (self.facility == "SNS"):
+        if (self.__facility == "SNS"):
             if self.background == True:
                 # Extract the time range for the background determination before we throw it away
                 background_bins = "%s,%s,%s" % (self.bkgd_range[0] + bin_offset, (self.bkgd_range[1]-self.bkgd_range[0]), self.bkgd_range[1] + bin_offset)
@@ -402,7 +409,7 @@ class DirectEnergyConversion(object):
         if self.background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
             ConvertToDistribution(Workspace=result_name)    
-            if (self.facility == "SNS"):
+            if (self.__facility == "SNS"):
                 FlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
                                StartX= self.bkgd_range[0] + bin_offset,EndX= self.bkgd_range[1] + bin_offset,
                                WorkspaceIndexList= '',Mode= 'Mean',OutputMode= 'Return Background')
@@ -438,7 +445,7 @@ class DirectEnergyConversion(object):
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
         
         if self.apply_detector_eff:
-            if (self.facility == "SNS"):
+            if (self.__facility == "SNS"):
                 # Need to be in lambda for detector efficiency correction
                 ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
                 He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
@@ -513,7 +520,7 @@ class DirectEnergyConversion(object):
         
         #calculate psi from sample environment motor and offset 
         
-        if self.facility == 'ISIS' :
+        if self.__facility == 'ISIS' :
             default_offset=float('NaN')
             if not (motor is None) and sample_wkspace.getRun().hasProperty(motor):
                 default_offset = 0
@@ -740,14 +747,18 @@ class DirectEnergyConversion(object):
     
 
     #-------------------------------------------------------------------------------
-    def load_data(self, runs,new_ws_name=None):
+    def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):
         """
         Load a run or list of runs. If a list of runs is given then
         they are summed into one.
         """
         result_ws = common.load_runs(runs, sum=True)
         if new_ws_name != None :
-            result_ws = RenameWorkspace(InputWorkspace=result_ws,OutputWorkspace=new_ws_name)
+            if keep_previous_ws:
+                result_ws = CloneWorkspace(InputWorkspace = result_ws,OutputWorkspace = new_ws_name)
+            else:
+                result_ws = RenameWorkspace(InputWorkspace=result_ws,OutputWorkspace=new_ws_name)
+
         self.setup_mtd_instrument(result_ws)
         return result_ws
 
@@ -762,8 +773,10 @@ class DirectEnergyConversion(object):
         self._to_stdout = True
         self._log_to_mantid = False
         self._idf_values_read = False
-        self.instr_name=None
-        if not (instr_name is None or len(instr_name)==0) :
+        self._keep_wb_workspace=False #  when input data for reducer is wb workspace rather then run number, we want to keep this workspace. But usually not
+
+        self.instr_name = instr_name       
+        if not (instr_name is None or len(instr_name)==0) : # first time run or empty run
             self.initialise(instr_name)
 
 #----------------------------------------------------------------------------------
@@ -771,32 +784,54 @@ class DirectEnergyConversion(object):
 #----------------------------------------------------------------------------------
     @property
     def instr_name(self):
-        return _instr_name
+        return self._instr_name
     @instr_name.setter
     def instr_name(self,new_name):
+
+       if not hasattr(self,'instr_name') :
+           self._instr_name=None
+
        if new_name is None:
-           self._instr_name = None
            return
 
        # Instrument name might be a prefix, query Mantid for the full name
-       new_name = config.getFacility().instrument(instr_name).shortName()
-       if len(new_name)==0 :
-          raise KeyError(" Can not find/set-up the instrument: "+instr_name)
+       short_name=''
+       try :
+        short_name = config.getFacility().instrument(new_name).shortName()
+       except:
+           # it is possible to have wrong facility:
+           facilities = config.getString('supported.facilities')
+           facilities = facilities.split(';')
+           for fac_name in facilities:
+               #config.setFacility(fac_name);
+               config.setString('default.facility',fac_name)
+               try :
+                   short_name = config.getFacility().instrument(new_name).shortName()
+                   if len(short_name)>0 :
+                       break
+               except:
+                   pass
+           if len(short_name)==0 :
+            raise KeyError(" Can not find/set-up the instrument: "+new_name+' in any supported facility')
 
+       new_name = short_name
+       self.__facility = str(config.getFacility())
        if new_name == self.instr_name:
            return
 
  
        self._instr_name = new_name
 
-       config['default.instrument'] = self.instr_name
+       config['default.instrument'] = new_name
 
-       if self.instrument.getName() != instr_name : 
+
+
+       if not hasattr(self,'instument') or self.instrument.getName() != instr_name : 
             # Load an empty instrument if one isn't already there
             idf_dir = config.getString('instrumentDefinition.directory')
             try:
-                idf_file=api.ExperimentInfo.getInstrumentFilename(self.instr_name)
-                tmp_ws_name = '__empty_' + self.instr_name
+                idf_file=api.ExperimentInfo.getInstrumentFilename(new_name)
+                tmp_ws_name = '__empty_' + new_name
                 if not mtd.doesExist(tmp_ws_name):
                     LoadEmptyInstrument(Filename=idf_file,OutputWorkspace=tmp_ws_name)
                 self.instrument = mtd[tmp_ws_name].getInstrument()
@@ -807,7 +842,7 @@ class DirectEnergyConversion(object):
       
 
        # Initialise other IDF parameters
-       self.init_idf_params(reload_instrument)
+       self.init_idf_params(True)
  
 
 
@@ -820,6 +855,10 @@ class DirectEnergyConversion(object):
     @van_rmm.deleter
     def van_rmm(self):
         pass
+
+    @property
+    def facility(self):
+        return self.__facility
 
     # integration range for monochromatic vanadium,
     @property
@@ -913,7 +952,7 @@ class DirectEnergyConversion(object):
 
     def initialise(self, instr_name,reload_instrument=False):
         """
-        Initialise the attributes of the class
+        Initialise the private attributes of the class and the nullify the attributes which expected to be always set-up from a calling script
         """
 
         # Instrument and default parameter setup
@@ -935,7 +974,7 @@ class DirectEnergyConversion(object):
         # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
         self.__abs_units_par_to_change=['sample_mass','sample_rmm']
 
-
+        # set/reset instument name in case if this function is called separately. May call lengthy procedure of changing instrument
         self.instr_name = instr_name
 
     def setup_mtd_instrument(self, workspace = None,reload_instrument=False):
@@ -957,7 +996,7 @@ class DirectEnergyConversion(object):
 
         specify some parameters which may be not in IDF Parameters file
         """
-       # mandatrory command line parameter 
+       # mandatrory command line parameter. Real value can not vbe negative
         self.incident_energy= -666
         # mandatrory command line parameter
         self.energy_bins = None
@@ -966,12 +1005,6 @@ class DirectEnergyConversion(object):
         self.__det_cal_file_ws = None
         
         # should come from Mantid
-        if (self.instr_name == "CNCS" or self.instr_name == "ARCS" or self.instr_name == "SEQUOIA" or self.instr_name == "HYSPEC"):
-            self.facility = "SNS"
-            self.normalise_method  = 'current'
-        else:
-            self.facility = str(config.getFacility())
-
         # Motor names-- SNS stuff -- psi used by nxspe file
         # These should be reconsidered on moving into _Parameters.xml
         self.monitor_workspace = None  # looks like unused parameter                  
@@ -979,8 +1012,8 @@ class DirectEnergyConversion(object):
         self.motor_offset = None
         self.psi = float('NaN')
                 
-       
-        
+        if self.__facility == 'SNS':
+            self.normalise_method  = 'current'        
 
       
 
@@ -1330,9 +1363,25 @@ class DirectEnergyConversionTest(unittest.TestCase):
    #    params = ["];
  
     def test_init_reducer(self):
-        self.reducer.initialise("MAP",True);
-        self.assertTrue(self.reducer._idf_values_read)
-        self.assertEqual(self.reducer.instr_name,"MAP")
+        tReducer = self.reducer
+        self.assertTrue(tReducer._idf_values_read)
+
+        tReducer.initialise("MAP",True);
+        self.assertEqual(tReducer.instr_name,"MAP")
+
+        #config.setFacility("SNS")
+        #config.setString('default.facility','SNS')
+        tReducer.instr_name = 'SEQ'
+        self.assertTrue(tReducer._idf_values_read)
+        self.assertEqual(tReducer.instr_name,"SEQ")
+        self.assertEqual(tReducer.facility,'SNS')
+        
+        tReducer.instr_name = 'MER'
+        self.assertEqual(tReducer.instr_name,"MER")
+        self.assertEqual(tReducer.facility,'ISIS')
+
+        self.assertRaises(KeyError,setattr,tReducer,'instr_name','NonExistingInstrument')
+
 
     def test_set_non_default_wrong_value(self):
         tReducer = self.reducer

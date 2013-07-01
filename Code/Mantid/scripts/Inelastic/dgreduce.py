@@ -141,8 +141,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------
     if isinstance(sample_run,int):
         Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run number: '+str(sample_run))
+
     else:
         Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run for workspace name: '+str(sample_run))
+
 
     try:
         n,r=funcreturns.lhs_info('both')
@@ -264,7 +266,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
      # diag the sample and detector vanadium. It will deal with hard mask only if it is set that way
     if not   masks_done:
         masking = Reducer.diagnose(wb_run,sample = mask_run,
-                                    second_white = None,variation=1.1,print_results=True)
+                                    second_white = None,print_results=True)
         header = "Diag Processed "
 
 
@@ -276,7 +278,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
                 else:
                     print '########### Run diagnose for monochromatic vanadium run ##############'
                     masking2 = Reducer.diagnose(wb_for_monovanadium,sample=monovan_run,
-                                         second_white = None,variation=1.1,print_results=True)
+                                         second_white = None,rint_results=True)
                     if not Reducer.use_hard_mask_only : # in this case the masking2 is different but points to the same workspace Should be better soulution for that. 
                         masking +=  masking2
                         DeleteWorkspace(masking2)
