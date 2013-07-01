@@ -63,11 +63,14 @@ namespace Mantid
        */
       inline const std::string & extension() const { return m_extension; }
       /**
+       * Returns true if the descriptor is looking at an ascii file
+       */
+      inline bool isAscii() const { return m_ascii; }
+      /**
        * Access the open file stream. DO NOT CLOSE IT
        * @returns The current stream
        */
-      inline std::ifstream & data() { return m_file; }
-
+      inline std::istream & data() { return m_file; }
       /// Reset the file stream to the start of the file
       void resetStreamToStart();
 
@@ -84,6 +87,8 @@ namespace Mantid
       std::string m_extension;
       /// Open file stream
       std::ifstream m_file;
+      /// Flag indicating the file is pure ascii
+      bool m_ascii;
     };
 
 

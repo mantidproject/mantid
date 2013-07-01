@@ -78,7 +78,7 @@ namespace Mantid
      * @throws std::invalid_argument if the filename is empty or the file does not exist
      */
     FileDescriptor::FileDescriptor(const std::string & filename) :
-        m_filename(), m_extension(), m_file(NULL)
+        m_filename(), m_extension(), m_file(NULL), m_ascii(false)
     {
       if(filename.empty())
       {
@@ -132,6 +132,8 @@ namespace Mantid
 
       m_file.open(m_filename.c_str(), std::ios::in | std::ios::binary);
       if(!m_file) throw std::runtime_error("FileDescriptor::initialize - Cannot open file '" + filename + "' for reading");
+
+      m_ascii = FileDescriptor::isAscii(m_file);
     }
 
   } // namespace Kernel

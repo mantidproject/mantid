@@ -45,12 +45,18 @@ public:
   //===================== Success cases ============================================
   void test_isAscii_Returns_True_For_Ascii_Filename()
   {
-    TS_ASSERT(FileDescriptor::isAscii(m_testAsciiPath));
+    TS_ASSERT(FileDescriptor::isAscii(m_testAsciiPath)); //static method
+
+    FileDescriptor descr(m_testAsciiPath);
+    TS_ASSERT(descr.isAscii());
   }
 
   void test_isAscii_Returns_False_For_Binary_Filename()
   {
-    TS_ASSERT(!FileDescriptor::isAscii(m_testNonNexusPath));
+    TS_ASSERT(!FileDescriptor::isAscii(m_testNonNexusPath)); //static method
+
+    FileDescriptor descr(m_testNonNexusPath);
+    TS_ASSERT(!descr.isAscii());
   }
 
   void test_isAscii_Returns_True_For_Stream_Pointing_At_Ascii_File_And_Stream_Is_Returned_To_Position_On_Entry()
@@ -81,12 +87,6 @@ public:
 
     TS_ASSERT_EQUALS(filename, descr.filename());
     TS_ASSERT_EQUALS(".nxs", descr.extension());
-  }
-
-  void test_File_Is_Opened_After_Object_Is_Constructed()
-  {
-    FileDescriptor descr(m_testNexusPath);
-    TS_ASSERT(descr.data().is_open());
   }
 
   void test_Intial_Stream_Is_Positioned_At_Start_Of_File()
