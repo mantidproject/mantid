@@ -54,14 +54,12 @@ namespace Mantid {
      */
     int LoadILL::confidence(const Kernel::HDFDescriptor & descriptor) const
     {
-      // Create the root Nexus class
-      NXRoot root(descriptor.filename());
-      NXEntry entry = root.openFirstEntry();
-      if (std::find(supportedInstruments.begin(), supportedInstruments.end(),
-                    getInstrumentName(entry)) != supportedInstruments.end()) {
-        // FOUND
-        return 80;
+      const std::string root =  "/" + descriptor.firstEntryNameType().first + "/";
+      for(auto it = supportedInstruments.begin(); it != supportedInstruments.end() ; ++it)
+      {
+        if(descriptor.pathExists(root + *it)) return 80;
       }
+
       return 0;
     }
     

@@ -63,14 +63,8 @@ const std::string LoadLLB::category() const {
  */
 int LoadLLB::confidence(const Kernel::HDFDescriptor & descriptor) const
 {
-  // Create the root Nexus class
-  NXRoot root(descriptor.filename());
-  NXEntry entry = root.openFirstEntry();
-  if (std::find(supportedInstruments.begin(), supportedInstruments.end(),
-                getInstrumentName(entry)) != supportedInstruments.end()) {
-    // FOUND
-    return 80;
-  }
+  const auto & firstEntry = descriptor.firstEntryNameType();
+  if(descriptor.pathExists("/" + firstEntry.first + "/nxinstrument/name")) return 80;
   return 0;
 }
 
@@ -136,7 +130,7 @@ std::string LoadLLB::getInstrumentName(NeXus::NXEntry& entry) const {
 
 	std::string instrumentName = "";
 
-	std::vector<NXClassInfo> v = entry.groups();
+	std::vector<NXClassInfo> & v = entry.groups();
 	for (auto it = v.begin(); it < v.end(); it++) {
 		if (it->nxclass == "NXinstrument" || it->nxname == "nxinstrument") {
 			std::string insNamePath = it->nxname + "/name";
