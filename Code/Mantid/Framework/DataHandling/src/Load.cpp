@@ -32,12 +32,15 @@ Loading multiple files is also possible with <code>Load</code>, as well as works
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/Load.h"
-#include "MantidAPI/MultipleFileProperty.h"
-#include "MantidAPI/IEventWorkspace.h"
-#include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IWorkspaceProperty.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/MultipleFileProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 
 #include <Poco/Path.h>
@@ -47,7 +50,6 @@ Loading multiple files is also possible with <code>Load</code>, as well as works
 #include <functional>
 #include <numeric>
 #include <set>
-#include "MantidAPI/IMDEventWorkspace.h"
 #include <cstdio>
 
 namespace
@@ -164,7 +166,7 @@ namespace Mantid
     //--------------------------------------------------------------------------
 
     /// Default constructor
-    Load::Load() : IDataFileChecker(), m_baseProps()
+    Load::Load() : Algorithm(), m_baseProps(), m_loader(), m_filenamePropName()
     {
     }
 
@@ -177,7 +179,7 @@ namespace Mantid
     {
       // Call base class method in all cases.
       // For a filename property is deals with resolving the full path.
-      IDataFileChecker::setPropertyValue(name, value);
+      Algorithm::setPropertyValue(name, value);
 
       std::string NAME(name);
       std::transform(name.begin(),name.end(),NAME.begin(),toupper);
@@ -186,21 +188,20 @@ namespace Mantid
         // Get back full path before passing to getFileLoader method, and also
         // find out whether this is a multi file load.
         std::vector<std::string> fileNames = flattenVecOfVec(getProperty("Filename"));
-        // If it's a single file load, then it's fine to change loader.
+        //If it's a single file load, then it's fine to change loader.
         if(fileNames.size() == 1)
         {
-          IDataFileChecker_sptr loader = getFileLoader(getPropertyValue(name));
+          IAlgorithm_sptr loader = getFileLoader(getPropertyValue(name));
           assert(loader); // (getFileLoader should throw if no loader is found.)
           declareLoaderProperties(loader);
         }
-
         // Else we've got multiple files, and must enforce the rule that only one type of loader is allowed.
         // Allowing more than one would mean that "extra" properties defined by the class user (for example
         // "LoadLogFiles") are potentially ambiguous.
         else if(fileNames.size() > 1)
         {
-          IDataFileChecker_sptr loader = getFileLoader(fileNames[0]);
-          
+          IAlgorithm_sptr loader = getFileLoader(fileNames[0]);
+
           // If the first file has a loader ...
           if( loader )
           {
@@ -226,109 +227,118 @@ namespace Mantid
     // Private methods
     //--------------------------------------------------------------------------
 
-    /**
-    * Quick file always returns false here
-    * @param filePath :: File path
-    * @param nread :: Number of bytes read
-    * @param header :: A buffer containing the nread bytes
-    */
-    bool Load::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-    {
-      (void)filePath; (void)nread; (void)header;
-      return false;
-    }
-
-    /**
-    * File check by looking at the structure of the data file
-    * @param filePath :: The full file path
-    * @returns -1
-    */
-    int Load::fileCheck(const std::string& filePath)
-    {
-      (void)filePath;
-      return -1;
-    }
-
     /** 
     * Get a shared pointer to the load algorithm with highest preference for loading
     * @param filePath :: path of the file
     * @returns A shared pointer to the unmanaged algorithm
     */
-    API::IDataFileChecker_sptr Load::getFileLoader(const std::string& filePath)
+    API::IAlgorithm_sptr Load::getFileLoader(const std::string& filePath)
     {
-      /* Open the file and read in the first bufferSize bytes - these will
-      * be used to determine the type of the file
-      */
-      FILE* fp = fopen(filePath.c_str(), "rb");
-      if (fp == NULL)
+//      /* Open the file and read in the first bufferSize bytes - these will
+//      * be used to determine the type of the file
+//      */
+//      FILE* fp = fopen(filePath.c_str(), "rb");
+//      if (fp == NULL)
+//      {
+//        throw Kernel::Exception::FileError("Unable to open the file:", filePath);
+//      }
+//      file_header header;
+//      size_t nread = fread(&header,sizeof(unsigned char), g_hdr_bytes, fp);
+//      // Ensure the character string is null terminated.
+//      header.full_hdr[g_hdr_bytes] = '\0';
+//
+//      if (fclose(fp) != 0)
+//      {
+//        throw std::runtime_error("Error while closing file \"" + filePath + "\"");
+//      }
+//
+//      Poco::Mutex::ScopedLock lock( m_mutex );
+//
+//      // Iterate through all loaders and attempt to find the best qualified for the job.
+//      // Each algorithm has a quick and long file check. The long version returns an integer
+//      // giving its certainty about be able to load the file. The highest wins.
+//      std::vector<std::string> loaderNames = API::LoadAlgorithmFactory::Instance().getKeys();
+//      int highestPref(0);
+//      API::IDataFileChecker_sptr winningLoader;
+//      std::vector<std::string>::const_iterator cend = loaderNames.end();
+//      for( std::vector<std::string>::const_iterator citr = loaderNames.begin(); citr != cend;
+//        ++citr )
+//      {
+//        IDataFileChecker_sptr loader = API::LoadAlgorithmFactory::Instance().create(*citr);
+//        try
+//        {
+//          if( loader->quickFileCheck(filePath, nread, header) )
+//          {
+//            int pref = loader->fileCheck(filePath);
+//            // Can't just pick the first as there might be one later in the list with a higher
+//            // preference
+//            if( pref > highestPref )
+//            {
+//              highestPref = pref;
+//              winningLoader = loader;
+//            }
+//          }
+//        }
+//        catch (std::exception & e)
+//        {
+//          g_log.debug() << "Error running file check of " <<  loader->name() << std::endl;
+//          g_log.debug() << e.what() << std::endl;
+//
+//        }
+//
+//      }
+//
+//      if( !winningLoader )
+//      {
+//        // Clear what may have been here previously
+//        setPropertyValue("LoaderName", "");
+//        throw std::runtime_error("Cannot find an algorithm that is able to load \"" + filePath + "\".\n"
+//                                 "Check that the file is a supported type.");
+//      }
+//      g_log.debug() << "Winning loader is " <<  winningLoader->name() << std::endl;
+//      setPropertyValue("LoaderName", winningLoader->name());
+//      winningLoader->initialize();
+//      setUpLoader(winningLoader);
+//      return winningLoader;
+      std::string winningLoader;
+      try
       {
-        throw Kernel::Exception::FileError("Unable to open the file:", filePath);
+        CALLGRIND_START_INSTRUMENTATION;
+        winningLoader = API::FileLoaderRegistry::Instance().chooseLoader(filePath);
+        CALLGRIND_STOP_INSTRUMENTATION;
       }
-      file_header header;
-      size_t nread = fread(&header,sizeof(unsigned char), g_hdr_bytes, fp);
-      // Ensure the character string is null terminated.
-      header.full_hdr[g_hdr_bytes] = '\0';
-
-      if (fclose(fp) != 0)
-      {
-        throw std::runtime_error("Error while closing file \"" + filePath + "\"");
-      } 
-
-      Poco::Mutex::ScopedLock lock( m_mutex );
-
-      // Iterate through all loaders and attempt to find the best qualified for the job.
-      // Each algorithm has a quick and long file check. The long version returns an integer
-      // giving its certainty about be able to load the file. The highest wins.
-      std::vector<std::string> loaderNames = API::LoadAlgorithmFactory::Instance().getKeys();
-      int highestPref(0);
-      API::IDataFileChecker_sptr winningLoader;
-      std::vector<std::string>::const_iterator cend = loaderNames.end();
-      for( std::vector<std::string>::const_iterator citr = loaderNames.begin(); citr != cend;
-        ++citr )
-      {
-        IDataFileChecker_sptr loader = API::LoadAlgorithmFactory::Instance().create(*citr);
-        try
-        {
-          if( loader->quickFileCheck(filePath, nread, header) )
-          {
-            int pref = loader->fileCheck(filePath);
-            // Can't just pick the first as there might be one later in the list with a higher
-            // preference
-            if( pref > highestPref )
-            {
-              highestPref = pref;
-              winningLoader = loader;
-            }
-          }
-        }
-        catch (std::exception & e)
-        {
-          g_log.debug() << "Error running file check of " <<  loader->name() << std::endl;
-          g_log.debug() << e.what() << std::endl;
-
-        }
-
-      }
-
-      if( !winningLoader )
+      catch(Exception::NotFoundError&)
       {
         // Clear what may have been here previously
         setPropertyValue("LoaderName", "");
         throw std::runtime_error("Cannot find an algorithm that is able to load \"" + filePath + "\".\n"
-                                 "Check that the file is a supported type.");
+            "Check that the file is a supported type.");
       }
-      g_log.debug() << "Winning loader is " <<  winningLoader->name() << std::endl;
-      setPropertyValue("LoaderName", winningLoader->name());
-      winningLoader->initialize();
-      setUpLoader(winningLoader);
-      return winningLoader;
+      const IAlgorithm_sptr loader = AlgorithmManager::Instance().create(winningLoader,-1);
+      loader->initialize();
+      // Use the first file property as the main Filename
+      const auto & props = loader->getProperties();
+      for(auto it = props.begin(); it != props.end(); ++it)
+      {
+        if(auto *fp = dynamic_cast<API::FileProperty*>(*it))
+        {
+          m_filenamePropName = fp->name();
+          break;
+        }
+      }
+      if(m_filenamePropName.empty())
+      {
+        setPropertyValue("LoaderName", "");
+        throw std::runtime_error("Cannot find FileProperty on " + winningLoader + " algorithm.");
+      }
+      return loader;
     }
 
     /**
     * Declare any additional properties of the concrete loader here
     * @param loader A pointer to the concrete loader
     */
-    void Load::declareLoaderProperties(const IDataFileChecker_sptr loader)
+    void Load::declareLoaderProperties(const API::IAlgorithm_sptr & loader)
     {
       // If we have switch loaders then the concrete loader will have different properties
       // so take care of ensuring Load has the correct ones
@@ -345,12 +355,11 @@ namespace Mantid
       }
 
       const std::vector<Property*> &loaderProps = loader->getProperties();
-      const std::string filePropName(loader->filePropertyName());
       size_t numProps(loaderProps.size());
       for (size_t i = 0; i < numProps; ++i)
       {
         Property* loadProp = loaderProps[i];
-        if( loadProp->name() == filePropName ) continue;
+        if( loadProp->name() == m_filenamePropName ) continue;
         try
         {
           Property * propClone = loadProp->clone();
@@ -447,7 +456,7 @@ namespace Mantid
         {
           m_loader->setPropertyValue(propName, getPropertyValue(propName));
         }
-        else if( propName == m_loader->filePropertyName() )
+        else if( propName == m_filenamePropName )
         {
           m_loader->setPropertyValue(propName, getPropertyValue("Filename"));
         }
@@ -554,11 +563,10 @@ namespace Mantid
     * algorithm where this child algorithm ends
     * @param logging :: Set to false to disable logging from the child algorithm
     */
-    API::IDataFileChecker_sptr Load::createLoader(const std::string & name, const double startProgress, 
+    API::IAlgorithm_sptr Load::createLoader(const std::string & name, const double startProgress,
       const double endProgress, const bool logging) const
     {
-      IDataFileChecker_sptr loader = boost::static_pointer_cast<IDataFileChecker>(
-        API::AlgorithmManager::Instance().createUnmanaged(name));
+      API::IAlgorithm_sptr loader = API::AlgorithmManager::Instance().createUnmanaged(name);
       loader->initialize();
       if( !loader )
       {
@@ -575,8 +583,8 @@ namespace Mantid
      * @param endProgress :: The end progress fraction
      * @param logging:: If true, enable logging
      */
-    void Load::setUpLoader(API::IDataFileChecker_sptr loader, const double startProgress, 
-			   const double endProgress, const bool logging) const
+    void Load::setUpLoader(API::IAlgorithm_sptr & loader, const double startProgress,
+        const double endProgress, const bool logging) const
     {
       //Set as a child so that we are in control of output storage
       loader->setChild(true);
@@ -604,7 +612,7 @@ namespace Mantid
     * Set the output workspace(s) if the load's return workspace has type API::Workspace
     * @param loader :: Shared pointer to load algorithm
     */
-    void Load::setOutputWorkspace(const API::IDataFileChecker_sptr & loader)
+    void Load::setOutputWorkspace(const API::IAlgorithm_sptr & loader)
     {
       // Go through each OutputWorkspace property and check whether we need to make a counterpart here
       const std::vector<Property*> & loaderProps = loader->getProperties();
@@ -634,7 +642,7 @@ namespace Mantid
     * @returns A pointer to the OutputWorkspace property of the Child Algorithm
     */
     API::Workspace_sptr Load::getOutputWorkspace(const std::string & propName,
-      const API::IDataFileChecker_sptr & loader) const
+      const API::IAlgorithm_sptr & loader) const
     {
       // @todo Need to try and find a better way using the getValue methods
       try

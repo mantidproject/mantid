@@ -22,7 +22,16 @@ class LoadIsawPeaksTest : public CxxTest::TestSuite
 {
 public:
 
-    
+  void test_Confidence()
+  {
+    LoadIsawPeaks alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", "TOPAZ_1241.integrate");
+
+    Mantid::Kernel::FileDescriptor descriptor(alg.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(95, alg.confidence(descriptor));
+  }
+
   void test_Init()
   {
     LoadIsawPeaks alg;

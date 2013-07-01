@@ -913,7 +913,7 @@ namespace Mantid
        * @param consumeEOL :: set to true to remove the new lines at the end of the line
        * @return a string with the word read in
        */
-      std::string getWord( std::ifstream &in ,  bool consumeEOL )
+      std::string getWord( std::istream &in ,  bool consumeEOL )
       {
         std::string s;
         char c = 0;
@@ -949,7 +949,7 @@ namespace Mantid
        * @param in :: stream input
        * @param ConsumeEOL :: set to true to remove the new lines at the end of the line
        */
-      void readToEndOfLine( std::ifstream& in ,  bool ConsumeEOL )
+      void readToEndOfLine( std::istream& in ,  bool ConsumeEOL )
       {
         while( in.good() && getWord( in ,  false ).length() > 0  )
           getWord( in ,  false );
