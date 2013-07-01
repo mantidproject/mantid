@@ -3,6 +3,7 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include <set>
 #include <string>
@@ -20,7 +21,7 @@ namespace Mantid
 
     /**
     Keeps a registry of algorithm's that are file loading algorithms to allow them to be searched
-    to find the correct one to load a particular file. Uses FileLoaderPicker to do the most of the work
+    to find the correct one to load a particular file.
 
     A macro, DECLARE_FILELOADER_ALGORITHM is defined in RegisterFileLoader.h. Use this in place of the standard
     DECLARE_ALGORITHM macro
@@ -45,7 +46,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class MANTID_API_DLL FileLoaderRegistry
+    class MANTID_API_DLL FileLoaderRegistryImpl
     {
     public:
 
@@ -53,9 +54,6 @@ namespace Mantid
       enum LoaderFormat { NonHDF, HDF };
 
     public:
-      /// Default constructor
-      FileLoaderRegistry();
-
       /// @returns the number of entries in the registry
       inline size_t size() const { return m_totalSize; }
 
@@ -81,6 +79,14 @@ namespace Mantid
       const std::string chooseLoader(const std::string &filename) const;
 
     private:
+      /// Friend so that CreateUsingNew
+      friend struct Mantid::Kernel::CreateUsingNew<FileLoaderRegistryImpl>;
+
+      /// Default constructor (for singleton)
+      FileLoaderRegistryImpl();
+      /// Destructor
+      ~FileLoaderRegistryImpl();
+
       /// The list of names. The index pointed to by LoaderFormat defines a set for that format
       std::vector<std::set<std::string> > m_names;
       /// Total number of names registered
@@ -89,6 +95,15 @@ namespace Mantid
       /// Reference to a logger
       Kernel::Logger & m_log;
     };
+
+    ///Forward declaration of a specialisation of SingletonHolder for FileLoaderRegistryImpl (needed for dllexport/dllimport) and a typedef for it.
+    #ifdef _WIN32
+      // this breaks new namespace declaration rules; need to find a better fix
+      template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<FileLoaderRegistryImpl>;
+    #endif /* _WIN32 */
+
+    /// Type for the actual singleton instance
+    typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FileLoaderRegistryImpl> FileLoaderRegistry;
 
   } // namespace API
 } // namespace Mantid

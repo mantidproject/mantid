@@ -1,8 +1,7 @@
 #ifndef MANTID_API_REGISTERFILELOADER_H_
 #define MANTID_API_REGISTERFILELOADER_H_
 
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/FileLoaderRegistry.h"
 
 /**
  * DECLARE_FILELOADER_ALGORITHM should be used in place of the standard
@@ -16,7 +15,7 @@
   {\
     Mantid::Kernel::RegistrationHelper \
       reg_loader_##classname((Mantid::API::\
-        FrameworkManager::Instance().fileLoaderRegistry().subscribe<classname>(Mantid::API::FileLoaderRegistry::NonHDF), 0));\
+        FileLoaderRegistry::Instance().subscribe<classname>(Mantid::API::FileLoaderRegistryImpl::NonHDF), 0));\
   }
 
 /**
@@ -31,7 +30,7 @@
   {\
     Mantid::Kernel::RegistrationHelper \
       reg_hdf_loader_##classname((Mantid::API::\
-        FrameworkManager::Instance().fileLoaderRegistry().subscribe<classname>(Mantid::API::FileLoaderRegistry::HDF), 0)); \
+        FileLoaderRegistry::Instance().subscribe<classname>(Mantid::API::FileLoaderRegistryImpl::HDF), 0)); \
   }
 
 

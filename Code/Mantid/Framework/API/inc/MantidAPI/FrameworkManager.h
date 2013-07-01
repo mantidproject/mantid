@@ -90,11 +90,6 @@ namespace Mantid
       /// Creates an algorithm and runs it, with variadic arguments
       boost::shared_ptr<IAlgorithm> exec(const std::string& algorithmName, int count, ...);
 
-      /// Returns a const version of the main registry of file loader algorithms
-      inline const FileLoaderRegistry & fileLoaderRegistry() const { return m_fileLoaderRegistry; }
-      /// Returns a non-const version of the main registry of file loader algorithms
-      inline FileLoaderRegistry & fileLoaderRegistry() { return m_fileLoaderRegistry; }
-
       /// Returns a shared pointer to the workspace requested
       Workspace* getWorkspace(const std::string& wsName);
 
@@ -122,8 +117,6 @@ namespace Mantid
       /// Silence NeXus output
       void disableNexusOutput();
 
-      /// The registry of FileLoader algorithms
-      FileLoaderRegistry m_fileLoaderRegistry;
       /// Reference to the logger class
       Kernel::Logger& g_log;
 

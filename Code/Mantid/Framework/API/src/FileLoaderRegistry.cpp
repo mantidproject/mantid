@@ -73,14 +73,6 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     // Public members
     //----------------------------------------------------------------------------------------------
-    /**
-     * Creates an empty registry
-     */
-    FileLoaderRegistry::FileLoaderRegistry() :
-        m_names(2, std::set<std::string>()), m_totalSize(0),
-        m_log(Kernel::Logger::get("FileLoaderRegistry"))
-    {
-    }
 
     /**
      * Queries each registered algorithm and asks it how confident it is that it can
@@ -89,7 +81,7 @@ namespace Mantid
      * @return A string containing the name of an algorithm to load the file
      * @throws Exception::NotFoundError if an algorithm cannot be found
      */
-    const std::string FileLoaderRegistry::chooseLoader(const std::string &filename) const
+    const std::string FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const
     {
       using Kernel::FileDescriptor;
       using Kernel::HDFDescriptor;
@@ -122,6 +114,20 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     // Private members
     //----------------------------------------------------------------------------------------------
+    /**
+     * Creates an empty registry
+     */
+    FileLoaderRegistryImpl::FileLoaderRegistryImpl() :
+        m_names(2, std::set<std::string>()), m_totalSize(0),
+        m_log(Kernel::Logger::get("FileLoaderRegistry"))
+    {
+    }
+
+    /**
+     */
+    FileLoaderRegistryImpl::~FileLoaderRegistryImpl()
+    {
+    }
 
   } // namespace API
 } // namespace Mantid

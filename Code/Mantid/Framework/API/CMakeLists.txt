@@ -286,7 +286,6 @@ set ( TEST_FILES
 	ExpressionTest.h
 	FermiChopperModelTest.h
 	FileFinderTest.h
-	FileLoaderRegistryTest.h
 	FilePropertyTest.h
 	FrameworkManagerTest.h
 	FuncMinimizerFactoryTest.h
