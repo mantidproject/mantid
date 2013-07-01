@@ -1768,7 +1768,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::
 {
   // Code to be added here. In meantime, fail to find instrument
 
-  IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus");
+  IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus",-1,-1,false);
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
@@ -1776,7 +1776,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::
   {
     loadInst->setPropertyValue("Filename", nexusfilename);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-    loadInst->setPropertyValue("InstrumentPath","raw_data_1");
+    loadInst->setPropertyValue("InstrumentParentPath","/raw_data_1");
     loadInst->execute();
   }
   catch( std::invalid_argument&)

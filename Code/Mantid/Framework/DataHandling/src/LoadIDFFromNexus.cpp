@@ -53,8 +53,8 @@ void LoadIDFFromNexus::init()
 		  "attempt to load the instrument from. The file extension must either be "
 		  ".nxs or .NXS" );
 
-  declareProperty("InstrumentPath",std::string(""),"Path name within the Nexus tree of the folder containing the instrument folder."
-      "This is usually 'raw_data_1' for a raw Nexus file and 'mantid_workspace_1' for a processed nexus file."
+  declareProperty("InstrumentParentPath",std::string(""),"Path name within the Nexus tree of the folder containing the instrument folder."
+      "For example it is 'raw_data_1' for an ISIS raw Nexus file and 'mantid_workspace_1' for a processed nexus file."
       "Only a one level path is curently supported",Direction::Input);
 }
 
@@ -72,12 +72,12 @@ void LoadIDFFromNexus::exec()
   const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
 
   // Get the instrument path
-  std::string instrumentPath = getPropertyValue("InstrumentPath");
+  std::string instrumentParentPath = getPropertyValue("InstrumentParentPath");
 
   // Get the instrument group in the Nexus file
    ::NeXus::File nxfile(m_filename);
   // Assume one level in instrument path
-   nxfile.openGroup(instrumentPath, "NXentry");
+   nxfile.openPath(instrumentParentPath);
   // Open the instrument
   // nxfile.openGroup("instrument", "NXinstrument");
 
