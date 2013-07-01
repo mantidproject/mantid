@@ -196,7 +196,27 @@ namespace MDAlgorithms
             }
             else//indirect
             {
-                double Ef=DBL_MAX;
+                double Ef=-DBL_MAX,Eftemp=Ef;
+                const Geometry::ParameterMap& pmap = ws->constInstrumentParameters();
+                for(size_t i=0;i<ws->getNumberHistograms();i++)
+                {
+                    Geometry::IDetector_const_sptr spDet;
+                    try
+                    {
+                      spDet= ws->getDetector(i);
+                      Geometry::Parameter_sptr par = pmap.getRecursive(spDet.get(),"eFixed");
+                      if(par) Eftemp=par->value<double>();
+                      if(Eftemp>Ef) Ef=Eftemp;
+                    }
+                    catch(...)
+                    {
+                      continue;
+                    }
+                    if(Ef<=0)
+                    {
+                        throw std::runtime_error("Could not find a fixed final energy for indirect geometry instrument.");
+                    }
+                }
                 qmax=std::sqrt(energyToK*Ef)+std::sqrt(energyToK*(Ef+deltaEmax));
             }
         }
