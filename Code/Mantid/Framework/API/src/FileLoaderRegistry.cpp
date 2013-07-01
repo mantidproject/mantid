@@ -53,8 +53,6 @@ namespace Mantid
           try
           {
             const int confidence = alg->confidence(descriptor);
-            callback.apply(descriptor);
-
             if(confidence > maxConfidence) // strictly greater
             {
               bestLoader = name;
@@ -65,6 +63,7 @@ namespace Mantid
           {
             logger.warning() << "Checking loader '" << name << "' raised an error: '" << exc.what() << "'. Loader skipped." << std::endl;
           }
+          callback.apply(descriptor);
         }
         return bestLoader;
       }
