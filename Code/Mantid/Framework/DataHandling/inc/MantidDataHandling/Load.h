@@ -79,7 +79,7 @@ namespace Mantid
       /// Overrides the cancel() method to call m_loader->cancel()
       void cancel();
       /// Create the concrete instance use for the actual loading.
-      API::IAlgorithm_sptr createLoader(const std::string & name, const double startProgress = -1.0,
+      API::IAlgorithm_sptr createLoader(const double startProgress = -1.0,
           const double endProgress=-1.0, const bool logging = true) const;
       /// Set the loader option for use as a Child Algorithm.
       void setUpLoader(API::IAlgorithm_sptr & loader, const double startProgress = -1.0,

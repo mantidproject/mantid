@@ -68,7 +68,7 @@ public:
 
   /// algorithm factory specific function to subscribe algorithms, calls the dynamic factory subscribe function internally
   template <class C>
-  std::string subscribe()
+  std::pair<std::string,int> subscribe()
   {
     Kernel::Instantiator<C, Algorithm>* newI = new Kernel::Instantiator<C, Algorithm>;
     return this->subscribe(newI);
@@ -82,7 +82,7 @@ public:
    * @returns The classname that was registered
    */
   template<class T>
-  std::string subscribe(Kernel::AbstractInstantiator<T> *instantiator, const SubscribeAction replaceExisting = ErrorIfExists)
+  std::pair<std::string,int> subscribe(Kernel::AbstractInstantiator<T> *instantiator, const SubscribeAction replaceExisting = ErrorIfExists)
   {
     boost::shared_ptr<IAlgorithm> tempAlg = instantiator-> createInstance();
     const int version = extractAlgVersion(tempAlg);
@@ -110,8 +110,9 @@ public:
       }
       Kernel::DynamicFactory<Algorithm>::subscribe(key, instantiator, replaceExisting);
     }
-    else throw std::invalid_argument("Cannot register empty algorithm name");
-    return className;
+    else
+      throw std::invalid_argument("Cannot register empty algorithm name");
+    return std::make_pair(className,version);
   }
   /// Unsubscribe the given algorithm
   void unsubscribe(const std::string & algorithmName, const int version);

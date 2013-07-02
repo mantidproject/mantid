@@ -8,6 +8,7 @@
 #include <Poco/Path.h>
 
 #include <cstring>
+#include <iostream>
 
 namespace Mantid
 {
@@ -200,8 +201,12 @@ namespace Mantid
         m_rootAttrs.insert(attrInfos[i].name);
       }
       auto entries = file.getEntries();
-      auto entryIter = entries.begin();
-      m_firstEntryNameType = std::make_pair(entryIter->first, entryIter->second);
+      for(auto it = entries.begin(); it != entries.end(); ++it)
+      {
+        if(it->second == "CDF0.0") continue;
+        m_firstEntryNameType = std::make_pair(it->first, it->second);
+        break;
+      }
       m_typesToPaths = file.getTypeMap();
     }
 

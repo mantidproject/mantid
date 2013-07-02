@@ -43,7 +43,6 @@ int LoadRKH::confidence(Kernel::FileDescriptor & descriptor) const
 {
   if(!descriptor.isAscii()) return 0;
 
-  int confidence = 0;
   typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
   boost::char_separator<char> sep(" ");
 

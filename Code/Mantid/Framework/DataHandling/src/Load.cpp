@@ -234,90 +234,23 @@ namespace Mantid
     */
     API::IAlgorithm_sptr Load::getFileLoader(const std::string& filePath)
     {
-//      /* Open the file and read in the first bufferSize bytes - these will
-//      * be used to determine the type of the file
-//      */
-//      FILE* fp = fopen(filePath.c_str(), "rb");
-//      if (fp == NULL)
-//      {
-//        throw Kernel::Exception::FileError("Unable to open the file:", filePath);
-//      }
-//      file_header header;
-//      size_t nread = fread(&header,sizeof(unsigned char), g_hdr_bytes, fp);
-//      // Ensure the character string is null terminated.
-//      header.full_hdr[g_hdr_bytes] = '\0';
-//
-//      if (fclose(fp) != 0)
-//      {
-//        throw std::runtime_error("Error while closing file \"" + filePath + "\"");
-//      }
-//
-//      Poco::Mutex::ScopedLock lock( m_mutex );
-//
-//      // Iterate through all loaders and attempt to find the best qualified for the job.
-//      // Each algorithm has a quick and long file check. The long version returns an integer
-//      // giving its certainty about be able to load the file. The highest wins.
-//      std::vector<std::string> loaderNames = API::LoadAlgorithmFactory::Instance().getKeys();
-//      int highestPref(0);
-//      API::IDataFileChecker_sptr winningLoader;
-//      std::vector<std::string>::const_iterator cend = loaderNames.end();
-//      for( std::vector<std::string>::const_iterator citr = loaderNames.begin(); citr != cend;
-//        ++citr )
-//      {
-//        IDataFileChecker_sptr loader = API::LoadAlgorithmFactory::Instance().create(*citr);
-//        try
-//        {
-//          if( loader->quickFileCheck(filePath, nread, header) )
-//          {
-//            int pref = loader->fileCheck(filePath);
-//            // Can't just pick the first as there might be one later in the list with a higher
-//            // preference
-//            if( pref > highestPref )
-//            {
-//              highestPref = pref;
-//              winningLoader = loader;
-//            }
-//          }
-//        }
-//        catch (std::exception & e)
-//        {
-//          g_log.debug() << "Error running file check of " <<  loader->name() << std::endl;
-//          g_log.debug() << e.what() << std::endl;
-//
-//        }
-//
-//      }
-//
-//      if( !winningLoader )
-//      {
-//        // Clear what may have been here previously
-//        setPropertyValue("LoaderName", "");
-//        throw std::runtime_error("Cannot find an algorithm that is able to load \"" + filePath + "\".\n"
-//                                 "Check that the file is a supported type.");
-//      }
-//      g_log.debug() << "Winning loader is " <<  winningLoader->name() << std::endl;
-//      setPropertyValue("LoaderName", winningLoader->name());
-//      winningLoader->initialize();
-//      setUpLoader(winningLoader);
-//      return winningLoader;
-      std::string winningLoader;
+      API::IAlgorithm_sptr winningLoader;
       try
       {
-        CALLGRIND_START_INSTRUMENTATION;
         winningLoader = API::FileLoaderRegistry::Instance().chooseLoader(filePath);
-        CALLGRIND_STOP_INSTRUMENTATION;
       }
       catch(Exception::NotFoundError&)
       {
         // Clear what may have been here previously
         setPropertyValue("LoaderName", "");
+        setProperty("LoaderVersion", -1);
         throw std::runtime_error("Cannot find an algorithm that is able to load \"" + filePath + "\".\n"
             "Check that the file is a supported type.");
       }
-      const IAlgorithm_sptr loader = AlgorithmManager::Instance().create(winningLoader,-1);
-      loader->initialize();
+      winningLoader->initialize();
+      setUpLoader(winningLoader,0,1);
       // Use the first file property as the main Filename
-      const auto & props = loader->getProperties();
+      const auto & props = winningLoader->getProperties();
       for(auto it = props.begin(); it != props.end(); ++it)
       {
         if(auto *fp = dynamic_cast<API::FileProperty*>(*it))
@@ -329,9 +262,12 @@ namespace Mantid
       if(m_filenamePropName.empty())
       {
         setPropertyValue("LoaderName", "");
-        throw std::runtime_error("Cannot find FileProperty on " + winningLoader + " algorithm.");
+        setProperty("LoaderVersion", -1);
+        throw std::runtime_error("Cannot find FileProperty on " + winningLoader->name() + " algorithm.");
       }
-      return loader;
+      setPropertyValue("LoaderName", winningLoader->name());
+      setProperty("LoaderVersion", winningLoader->version());
+      return winningLoader;
     }
 
     /**
@@ -402,6 +338,8 @@ namespace Mantid
 
       declareProperty("LoaderName", std::string(""), "When an algorithm has been found that will load the given file, its name is set here.", 
         Direction::Output);
+      declareProperty("LoaderVersion", -1, "When an algorithm has been found that will load the given file, its version is set here.",
+        Direction::Output);
       // Save for later what the base Load properties are
       const std::vector<Property*> & props = this->getProperties();
       for( size_t i = 0; i < this->propertyCount(); ++i )
@@ -437,11 +375,10 @@ namespace Mantid
       {
         m_loader = getFileLoader(getPropertyValue("Filename"));
         loaderName = m_loader->name();
-        setPropertyValue("LoaderName",loaderName);
       }
       else
       {
-        m_loader = createLoader(loaderName,0,1);
+        m_loader = createLoader(0,1);
       }
       g_log.information() << "Using " << loaderName << " version " << m_loader->version() << ".\n";
       ///get the list properties for the concrete loader load algorithm
@@ -556,17 +493,17 @@ namespace Mantid
 
     /** 
     * Create the concrete instance use for the actual loading.
-    * @param name :: The name of the loader to instantiate
     * @param startProgress :: The percentage progress value of the overall 
     * algorithm where this child algorithm starts
     * @param endProgress :: The percentage progress value of the overall 
     * algorithm where this child algorithm ends
     * @param logging :: Set to false to disable logging from the child algorithm
     */
-    API::IAlgorithm_sptr Load::createLoader(const std::string & name, const double startProgress,
-      const double endProgress, const bool logging) const
+    API::IAlgorithm_sptr Load::createLoader(const double startProgress, const double endProgress, const bool logging) const
     {
-      API::IAlgorithm_sptr loader = API::AlgorithmManager::Instance().createUnmanaged(name);
+      std::string name = getPropertyValue("LoaderName");
+      int version = getProperty("LoaderVersion");
+      API::IAlgorithm_sptr loader = API::AlgorithmManager::Instance().createUnmanaged(name, version);
       loader->initialize();
       if( !loader )
       {

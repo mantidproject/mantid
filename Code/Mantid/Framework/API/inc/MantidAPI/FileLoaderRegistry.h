@@ -5,7 +5,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
-#include <set>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -18,6 +18,8 @@ namespace Mantid
   }
   namespace API
   {
+    // Forward declaration
+    class IAlgorithm;
 
     /**
     Keeps a registry of algorithm's that are file loading algorithms to allow them to be searched
@@ -68,15 +70,15 @@ namespace Mantid
       template<typename Type>
       void subscribe(LoaderFormat format)
       {
-        const std::string name = AlgorithmFactory::Instance().subscribe<Type>();
+        const auto nameVersion = AlgorithmFactory::Instance().subscribe<Type>();
         // If the factory didn't throw then the name is valid
-        m_names[format].insert(name);
+        m_names[format].insert(nameVersion);
         m_totalSize += 1;
-        m_log.debug() << "Registered '" << name << "' as file loader\n";
+        m_log.debug() << "Registered '" << nameVersion.first << "' version '" << nameVersion.second << "' as file loader\n";
       }
 
       /// Returns the name of an Algorithm that can load the given filename
-      const std::string chooseLoader(const std::string &filename) const;
+      const boost::shared_ptr<IAlgorithm> chooseLoader(const std::string &filename) const;
 
     private:
       /// Friend so that CreateUsingNew
@@ -88,7 +90,7 @@ namespace Mantid
       ~FileLoaderRegistryImpl();
 
       /// The list of names. The index pointed to by LoaderFormat defines a set for that format
-      std::vector<std::set<std::string> > m_names;
+      std::vector<std::multimap<std::string,int> > m_names;
       /// Total number of names registered
       size_t m_totalSize;
 

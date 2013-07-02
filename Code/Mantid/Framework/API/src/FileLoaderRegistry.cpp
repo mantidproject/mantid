@@ -35,27 +35,29 @@ namespace Mantid
        * was found
        */
       template<typename DescriptorType, typename FileLoaderType>
-      const std::string searchForLoader(DescriptorType & descriptor,const std::set<std::string> & names,
-                                        Kernel::Logger & logger)
+      const IAlgorithm_sptr searchForLoader(DescriptorType & descriptor,const std::multimap<std::string, int> & names,
+                                            Kernel::Logger & logger)
       {
         const auto & factory = AlgorithmFactory::Instance();
-        std::string bestLoader;
+        IAlgorithm_sptr bestLoader;
         int maxConfidence(0);
         DescriptorCallback<DescriptorType> callback;
 
         auto iend = names.end();
         for(auto it = names.begin(); it != iend; ++it)
         {
-          const std::string & name = *it;
-          logger.debug() << "Checking " << name << std::endl;
+          const std::string & name = it->first;
+          const int version = it->second;
+          logger.debug() << "Checking " << name << " version " << version << std::endl;
 
-          auto alg = boost::static_pointer_cast<FileLoaderType>(factory.create(name, -1)); // highest version
+          auto alg = boost::static_pointer_cast<FileLoaderType>(factory.create(name, version)); // highest version
           try
           {
             const int confidence = alg->confidence(descriptor);
+            logger.debug() << name << " returned with confidence=" << confidence << std::endl;
             if(confidence > maxConfidence) // strictly greater
             {
-              bestLoader = name;
+              bestLoader = alg;
               maxConfidence = confidence;
             }
           }
@@ -81,32 +83,33 @@ namespace Mantid
      * @return A string containing the name of an algorithm to load the file
      * @throws Exception::NotFoundError if an algorithm cannot be found
      */
-    const std::string FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const
+    const boost::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const
     {
       using Kernel::FileDescriptor;
       using Kernel::HDFDescriptor;
+      using Kernel::Logger;
 
-      m_log.debug() << "Trying to find loader for '" << filename << "'" << std::endl;
+      if(m_log.is(Logger::Priority::PRIO_DEBUG)) m_log.debug() << "Trying to find loader for '" << filename << "'" << std::endl;
 
-      std::string bestLoader;
+      IAlgorithm_sptr bestLoader;
       if(HDFDescriptor::isHDF(filename))
       {
-        m_log.debug() << filename << " looks like a HDF file. Checking registered HDF loaders\n";
+        if(m_log.is(Logger::Priority::PRIO_DEBUG)) m_log.debug() << filename << " looks like a HDF file. Checking registered HDF loaders\n";
         HDFDescriptor descriptor(filename);
         bestLoader = searchForLoader<HDFDescriptor,IHDFFileLoader>(descriptor, m_names[HDF], m_log);
       }
       else
       {
-        m_log.debug() << "Checking registered non-HDF loaders\n";
+        if(m_log.is(Logger::Priority::PRIO_DEBUG)) m_log.debug() << "Checking registered non-HDF loaders\n";
         FileDescriptor descriptor(filename);
         bestLoader = searchForLoader<FileDescriptor,IFileLoader>(descriptor, m_names[NonHDF], m_log);
       }
 
-      if(bestLoader.empty())
+      if(!bestLoader)
       {
         throw Kernel::Exception::NotFoundError(filename, "Unable to find loader");
       }
-      m_log.debug() << "Found loader " << bestLoader << " for file '" << filename << "'" << std::endl;
+      if(m_log.is(Logger::Priority::PRIO_DEBUG)) m_log.debug() << "Found loader " << bestLoader->name() << " for file '" << filename << "'" << std::endl;
       return bestLoader;
     }
 
@@ -118,7 +121,7 @@ namespace Mantid
      * Creates an empty registry
      */
     FileLoaderRegistryImpl::FileLoaderRegistryImpl() :
-        m_names(2, std::set<std::string>()), m_totalSize(0),
+        m_names(2, std::multimap<std::string,int>()), m_totalSize(0),
         m_log(Kernel::Logger::get("FileLoaderRegistry"))
     {
     }

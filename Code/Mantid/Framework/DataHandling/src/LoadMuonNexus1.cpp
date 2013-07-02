@@ -641,26 +641,34 @@ namespace Mantid
      */
     int LoadMuonNexus1::confidence(const Kernel::HDFDescriptor & descriptor) const
     {
+      const auto & firstEntryNameType = descriptor.firstEntryNameType();
+      const std::string root = "/" + firstEntryNameType.first;
+      if(!descriptor.pathExists(root + "/analysis")) return 0;
+
+      bool upperIDF(true);
+      if(descriptor.pathExists(root + "/IDF_version")) upperIDF = true;
+      else
+      {
+        if(descriptor.pathExists(root + "/idf_version")) upperIDF = false;
+        else return 0;
+      }
+
       try
       {
         NXRoot root(descriptor.filename());
         NXEntry entry = root.openFirstEntry();
-        if ( ! entry.containsDataSet( "analysis" ) ) return 0;
-        std::string versionField = "IDF_version";
-        if ( ! entry.containsDataSet( versionField ) )
-        {
-          versionField = "idf_version";
-          if ( ! entry.containsDataSet( versionField ) ) return 0;
-        }
+        std::string versionField = "idf_version";
+        if(upperIDF) versionField = "IDF_version";
+
         if ( entry.getInt( versionField ) != 1 ) return 0;
         std::string definition = entry.getString( "analysis" );
         if ( definition == "muonTD" || definition == "pulsedTD" )
         {
-          // If all this succeeded then we'll assume this is an ISIS Muon NeXus file version 1
+          // If all this succeeded then we'll assume this is an ISIS Muon NeXus file version 2
           return 81;
         }
       }
-      catch(...)
+      catch( ... )
       {
       }
       return 0;
