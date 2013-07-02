@@ -219,6 +219,7 @@ bool Shape2DEllipse::selectAt(const QPointF& p)const
 
 bool Shape2DEllipse::contains(const QPointF& p)const
 {
+  if ( m_boundingRect.isEmpty() ) return false;
   QPointF pp = m_boundingRect.center() - p;
   double a = m_boundingRect.xSpan() / 2;
   if (a == 0.0) a = 1.0;

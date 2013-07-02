@@ -39,6 +39,7 @@
 #include <QSignalMapper>
 #include <QPixmap>
 #include <QSettings>
+#include <QApplication>
 
 #include <numeric>
 #include <cfloat>
@@ -172,6 +173,18 @@ m_freezePlot(false)
   m_ellipse->setIcon(QIcon(":/PickTools/selection-circle.png"));
   m_ellipse->setToolTip("Draw a ellipse");
 
+  m_ring_ellipse = new QPushButton();
+  m_ring_ellipse->setCheckable(true);
+  m_ring_ellipse->setAutoExclusive(true);
+  m_ring_ellipse->setIcon(QIcon(":/PickTools/selection-circle-ring.png"));
+  m_ring_ellipse->setToolTip("Draw an elliptical ring");
+
+  m_ring_rectangle = new QPushButton();
+  m_ring_rectangle->setCheckable(true);
+  m_ring_rectangle->setAutoExclusive(true);
+  m_ring_rectangle->setIcon(QIcon(":/PickTools/selection-box-ring.png"));
+  m_ring_rectangle->setToolTip("Draw a rectangular ring");
+
   m_edit = new QPushButton();
   m_edit->setCheckable(true);
   m_edit->setAutoExclusive(true);
@@ -192,14 +205,16 @@ m_freezePlot(false)
 
   QGridLayout* toolBox = new QGridLayout();
   toolBox->addWidget(m_zoom,0,0);
-  toolBox->addWidget(m_one,0,1);
-  toolBox->addWidget(m_tube,0,2);
-  toolBox->addWidget(m_peak,0,3);
-  toolBox->addWidget(m_peakSelect,0,4);
-  toolBox->addWidget(m_edit,1,0);
-  toolBox->addWidget(m_ellipse,1,1);
-  toolBox->addWidget(m_rectangle,1,2);
-  toolBox->setColStretch(5,1);
+  toolBox->addWidget(m_edit,0,1);
+  toolBox->addWidget(m_ellipse,0,2);
+  toolBox->addWidget(m_rectangle,0,3);
+  toolBox->addWidget(m_ring_ellipse,0,4);
+  toolBox->addWidget(m_ring_rectangle,0,5);
+  toolBox->addWidget(m_one,1,0);
+  toolBox->addWidget(m_tube,1,1);
+  toolBox->addWidget(m_peak,1,2);
+  toolBox->addWidget(m_peakSelect,1,3);
+  toolBox->setColStretch(6,1);
   toolBox->setSpacing(2);
   connect(m_zoom,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_one,SIGNAL(clicked()),this,SLOT(setSelectionType()));
@@ -208,6 +223,8 @@ m_freezePlot(false)
   connect(m_peakSelect,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_rectangle,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_ellipse,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_ring_ellipse,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_ring_rectangle,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_edit,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   setSelectionType();
 
@@ -371,7 +388,16 @@ void InstrumentWindowPickTab::plotContextMenu()
   if (m_selectionType > SingleDetectorSelection)
   {// only for multiple detector selectors
     context.addActions(m_summationType->actions());
-    m_sumDetectors->setChecked(m_plotSum);
+    if ( m_selectionType == Draw )
+    {
+        m_sumDetectors->setChecked(true);
+        m_integrateTimeBins->setEnabled(false);
+    }
+    else
+    {
+        m_sumDetectors->setChecked(m_plotSum);
+        m_integrateTimeBins->setEnabled(true);
+    }
     context.addSeparator();
   }
 
@@ -641,6 +667,20 @@ void InstrumentWindowPickTab::setSelectionType()
     surfaceMode = ProjectionSurface::DrawMode;
     m_instrWindow->getSurface()->startCreatingShape2D("ellipse",Qt::green,QColor(255,255,255,80));
   }
+  else if (m_ring_ellipse->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Elliptical ring");
+    surfaceMode = ProjectionSurface::DrawMode;
+    m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",Qt::green,QColor(255,255,255,80));
+  }
+  else if (m_ring_rectangle->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Rectangular ring");
+    surfaceMode = ProjectionSurface::DrawMode;
+    m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",Qt::green,QColor(255,255,255,80));
+  }
   else if (m_edit->isChecked())
   {
     m_selectionType = Draw;
@@ -652,9 +692,16 @@ void InstrumentWindowPickTab::setSelectionType()
   {
     surface->setInteractionMode( surfaceMode );
   }
-  m_plot->clearAll();
-  m_plot->replot();
-  setPlotCaption();
+  if ( m_selectionType != Draw )
+  {
+      m_plot->clearAll();
+      m_plot->replot();
+      setPlotCaption();
+  }
+  else
+  {
+      updatePlotMultipleDetectors();
+  }
   m_instrWindow->updateInfoText();
 }
 
@@ -1104,7 +1151,14 @@ void InstrumentWindowPickTab::savePlotToWorkspace()
     std::vector<double> x,y,e;
     // split the label to get the detector id and selection type 
     QStringList parts = label.split(QRegExp("[()]"));
-    if (parts.size() == 3)
+    if ( label == "multiple" )
+    {
+        QList<int> dets;
+        getSurface()->getMaskedDetectors( dets );
+        m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y );
+        unitX = parentWorkspace->getAxis(0)->unit()->unitID();
+    }
+    else if (parts.size() == 3)
     {
       int detid = parts[1].toInt();
       QString SumOrIntegral = parts[2].trimmed();
@@ -1285,7 +1339,6 @@ void InstrumentWindowPickTab::selectTool(const ToolType tool)
   case DrawEllipse: m_ellipse->setChecked(true);
     break;
   case EditShape: m_edit->setChecked(true);
-      updatePlotMultipleDetectors();
     break;
   default: throw std::invalid_argument("Invalid tool type.");
   }
@@ -1332,12 +1385,15 @@ void InstrumentWindowPickTab::updatePlotMultipleDetectors()
     QList<int> dets;
     getSurface()->getMaskedDetectors( dets );
     std::vector<double> x,y;
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y );
+    QApplication::restoreOverrideCursor();
     m_plot->clearAll();
     if ( !x.empty() )
     {
         m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrWindow->getInstrumentActor()->getWorkspace()->getAxis(0)->unit()->unitID());
     }
+    m_plot->setLabel("multiple");
     m_plot->replot();
 }
 

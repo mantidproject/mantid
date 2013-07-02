@@ -83,7 +83,7 @@ m_userEditing(true)
   m_pointer = new QPushButton();
   m_pointer->setCheckable(true);
   m_pointer->setAutoExclusive(true);
-  m_pointer->setIcon(QIcon(":/MaskTools/selection-pointer.png"));
+  m_pointer->setIcon(QIcon(":/MaskTools/selection-edit.png"));
   m_pointer->setToolTip("Select and edit shapes (Ctrl+Alt+P)");
   m_pointer->setShortcut(QKeySequence("Ctrl+Alt+P"));
 
@@ -350,7 +350,7 @@ void InstrumentWindowMaskTab::setActivity()
   {
     m_activity = Select;
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
-    m_activeTool->setText("Tool: Selection");
+    m_activeTool->setText("Tool: Shape editing");
   }
   else if (m_ellipse->isChecked())
   {

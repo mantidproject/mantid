@@ -113,7 +113,9 @@ private:
   QPushButton *m_peakSelect;   ///< Button switching on peak selection mode
   QPushButton *m_rectangle;    ///< Button switching on drawing a rectangular selection region
   QPushButton *m_ellipse;      ///< Button switching on drawing a elliptical selection region
-  QPushButton *m_edit;         ///< Button switching on edditing the selection region
+  QPushButton *m_ring_ellipse; ///< Button switching on drawing a elliptical ring selection region
+  QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular ring selection region
+  QPushButton *m_edit;           ///< Button switching on edditing the selection region
   bool m_plotSum;
 
   // Actions to set integration option for the detector's parent selection mode
