@@ -78,7 +78,7 @@ namespace Mantid
      * @throws std::invalid_argument if the filename is empty or the file does not exist
      */
     FileDescriptor::FileDescriptor(const std::string & filename) :
-        m_filename(), m_extension(), m_file(NULL), m_ascii(false)
+        m_filename(), m_extension(), m_file(), m_ascii(false)
     {
       if(filename.empty())
       {
@@ -106,6 +106,7 @@ namespace Mantid
      */
     void FileDescriptor::resetStreamToStart()
     {
+      m_file.close(); // reset all flags
       // If the stream was closed, reopen it
       if(!m_file.is_open())
       {
