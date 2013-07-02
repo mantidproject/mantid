@@ -9,6 +9,11 @@
 #include <string>
 #include <utility>
 
+namespace NeXus
+{
+  class File;
+}
+
 namespace Mantid
 {
   namespace Kernel
@@ -90,6 +95,9 @@ namespace Mantid
 
       /// Initialize object with filename
       void initialize(const std::string& filename);
+      /// Walk the tree and cache the structure
+      void walkFile(::NeXus::File & file, const std::string & rootPath, const std::string & className,
+                    std::map<std::string, std::string> & pmap, int level);
 
       /// Full filename
       std::string m_filename;
@@ -99,8 +107,8 @@ namespace Mantid
       std::pair<std::string, std::string> m_firstEntryNameType;
       /// Root attributes
       std::set<std::string> m_rootAttrs;
-      /// Map of types to full path strings.
-      std::multimap<std::string, std::string> *m_typesToPaths;
+      /// Map of full path strings to types. Can check if path exists quickly
+      std::map<std::string, std::string> m_pathsToTypes;
     };
 
 

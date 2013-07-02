@@ -8,7 +8,6 @@
 #include <Poco/Path.h>
 
 #include <cstring>
-#include <iostream>
 
 namespace Mantid
 {
@@ -100,7 +99,7 @@ namespace Mantid
      */
     HDFDescriptor::HDFDescriptor(const std::string & filename)
       : m_filename(), m_extension(), m_firstEntryNameType(),
-        m_rootAttrs(), m_typesToPaths(NULL)
+        m_rootAttrs(), m_pathsToTypes()
     {
       if(filename.empty())
       {
@@ -124,7 +123,6 @@ namespace Mantid
      */
     HDFDescriptor::~HDFDescriptor()
     {
-      delete m_typesToPaths;
     }
 
     /// Returns the name & type of the first entry in the file
@@ -148,12 +146,7 @@ namespace Mantid
      */
     bool HDFDescriptor::pathExists(const std::string& path) const
     {
-      auto iend = m_typesToPaths->end();
-      for(auto it = m_typesToPaths->begin(); it != iend; ++it)
-      {
-        if(path == it->second) return true;
-      }
-      return false;
+      return (m_pathsToTypes.find(path) != m_pathsToTypes.end());
     }
 
     /**
@@ -163,13 +156,12 @@ namespace Mantid
      */
     bool HDFDescriptor::pathOfTypeExists(const std::string& path, const std::string & type) const
     {
-      auto it = m_typesToPaths->lower_bound(type);
-      auto itend = m_typesToPaths->upper_bound(type);
-      for(; it != itend; ++it)
+      auto it = m_pathsToTypes.find(path);
+      if(it != m_pathsToTypes.end())
       {
-        if(it->second == path) return true;
+        return (it->second == type);
       }
-      return false;
+      else return false;
     }
 
     /**
@@ -178,9 +170,13 @@ namespace Mantid
      */
     bool HDFDescriptor::classTypeExists(const std::string & classType) const
     {
-      return (m_typesToPaths->find(classType) != m_typesToPaths->end());
+      auto iend = m_pathsToTypes.end();
+      for(auto it = m_pathsToTypes.begin(); it != iend; ++it)
+      {
+        if(classType == it->second) return true;
+      }
+      return false;
     }
-
 
     //---------------------------------------------------------------------------------------------------------------------------
     // HDFDescriptor private methods
@@ -195,20 +191,65 @@ namespace Mantid
       m_extension = "." + Poco::Path(filename).getExtension();
 
       ::NeXus::File file(this->filename());
-      auto attrInfos = file.getAttrInfos();
-      for(size_t i = 0; i < attrInfos.size(); ++i)
-      {
-        m_rootAttrs.insert(attrInfos[i].name);
-      }
-      auto entries = file.getEntries();
-      for(auto it = entries.begin(); it != entries.end(); ++it)
-      {
-        if(it->second == "CDF0.0") continue;
-        m_firstEntryNameType = std::make_pair(it->first, it->second);
-        break;
-      }
-      m_typesToPaths = file.getTypeMap();
+
+      file.openPath("/");
+      m_rootAttrs.clear();
+      m_pathsToTypes.clear();
+      walkFile(file, "", "", m_pathsToTypes,0);
     }
+
+    /**
+     * Cache the structure in the given maps
+     * @param file An open NeXus File object
+     * @param rootPath The current path that is open in the file
+     * @param className The class of the current open path
+     * @param tmap [Out] An output map filled with mappings of type->path
+     * @param pmap [Out] An output map filled with mappings of path->type
+     * @param level An integer defining the current level in the file
+     */
+    void HDFDescriptor::walkFile(::NeXus::File & file,const std::string & rootPath, const std::string & className,
+                                 std::map<std::string, std::string> & pmap, int level)
+    {
+      if (!rootPath.empty())
+      {
+        pmap.insert(std::make_pair(rootPath, className));
+      }
+      if(level == 0)
+      {
+        auto attrInfos = file.getAttrInfos();
+        for(size_t i = 0; i < attrInfos.size(); ++i)
+        {
+          m_rootAttrs.insert(attrInfos[i].name);
+        }
+      }
+
+      auto dirents = file.getEntries();
+      auto itend = dirents.end();
+      for (auto it = dirents.begin(); it != itend; ++it)
+      {
+        const std::string & entryName = it->first;
+        const std::string & entryClass = it->second;
+        const std::string entryPath = rootPath + "/" + entryName;
+        if(entryClass == "SDS")
+        {
+          //tmap.insert(std::make_pair(entryClass, entryPath));
+          pmap.insert(std::make_pair(entryPath, entryClass));
+        }
+        else if(entryClass == "CDF0.0")
+        {
+          // Do nothing with this
+        }
+        else
+        {
+          if(level == 0) m_firstEntryNameType = (*it); //copy first entry name & type
+          file.openGroup(entryName, entryClass);
+          walkFile(file, entryPath, entryClass, pmap,level+1);
+        }
+      }
+      file.closeGroup();
+    }
+
+
 
   } // namespace Kernel
 } // namespace Mantid

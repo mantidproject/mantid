@@ -505,11 +505,12 @@ namespace Mantid
       {
         NXRoot root(descriptor.filename());
         NXEntry entry = root.openFirstEntry();
+
         std::string versionField = "idf_version";
         if(upperIDF) versionField = "IDF_version";
 
-        if ( entry.getInt( versionField ) != 2 ) return 0;
-        std::string definition = entry.getString( "definition" );
+        if ( entry.getInt(versionField) != 2 ) return 0;
+        std::string definition = entry.getString("definition");
         if ( definition == "muonTD" || definition == "pulsedTD" )
         {
           // If all this succeeded then we'll assume this is an ISIS Muon NeXus file version 2
