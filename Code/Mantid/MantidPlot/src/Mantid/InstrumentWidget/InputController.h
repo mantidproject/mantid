@@ -140,6 +140,8 @@ signals:
     void moveRightBottomTo(int,int);
     /// Select a shape or a conrol point at a location on the screen.
     void selectAt(int,int);
+    /// Select a shape with ctrl key pressed at a location on the screen.
+    void selectCtrlAt(int,int);
     /// Move selected shape or a control point by a displacement vector.
     void moveBy(int,int);
     /// Sent when the mouse is moved to a new position with the buttons up

@@ -462,20 +462,6 @@ void InstrumentWindow::changeColormap(const QString &filename)
   }
 }
 
-void InstrumentWindow::showPickOptions()
-{
-  if ( !m_selectedDetectors.empty() )
-  {
-    QMenu context(m_InstrumentDisplay);
-
-    context.addAction(mInfoAction);
-    context.addAction(mPlotAction);
-    context.addAction(mDetTableAction);
-
-    context.exec(QCursor::pos());
-  }
-}
-
 /**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected
  */
@@ -931,12 +917,6 @@ void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
 void InstrumentWindow::setBinRange(double xmin,double xmax)
 {
   m_xIntegration->setRange(xmin,xmax);
-}
-
-void InstrumentWindow::multipleDetectorsSelected(QList<int>& detlist)
-{
-  m_selectedDetectors = detlist;
-  showPickOptions();
 }
 
 /**

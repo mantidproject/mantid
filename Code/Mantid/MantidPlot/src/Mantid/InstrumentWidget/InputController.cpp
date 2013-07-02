@@ -166,6 +166,10 @@ void InputControllerDrawShape::mousePressEvent(QMouseEvent *event)
       {
         emit addShape( m_shapeType, event->x(), event->y(), m_borderColor, m_fillColor );
       }
+      else if ( event->modifiers() & Qt::ControlModifier )
+      {
+          emit selectCtrlAt( event->x(), event->y() );
+      }
       else
       {
           emit selectAt( event->x(), event->y() );

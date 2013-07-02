@@ -44,7 +44,8 @@ public:
   
   void keyPressEvent(QKeyEvent*);
 
-  bool selectAtXY(int x,int y);
+  bool selectAtXY(int x,int y, bool edit = true);
+  void deselectAtXY(int x,int y);
   bool selectIn(const QRect& rect);
   void removeCurrentShape();
   bool isEmpty()const{return m_shapes.isEmpty();}
@@ -89,6 +90,7 @@ public slots:
   void deselectAll();
   void moveRightBottomTo(int,int);
   void selectShapeOrControlPointAt(int x,int y);
+  void addToSelectionShapeAt(int x,int y);
   void moveShapeOrControlPointBy(int dx,int dy);
   void touchShapeOrControlPointAt(int x,int y);
   void removeSelectedShapes();
@@ -106,6 +108,7 @@ protected:
   bool isOverCurrentAt(int x,int y);
   bool isOverSelectionAt(int x,int y);
   void addToSelection(Shape2D* shape);
+  void removeFromSelection(Shape2D* shape);
   void edit(Shape2D* shape);
   void finishEdit();
   QList<Shape2D*> getSelectedShapes() const {return m_selectedShapes;}

@@ -260,6 +260,26 @@ void Shape2DCollection::selectShapeOrControlPointAt(int x, int y)
 }
 
 /**
+ * Add a shape under the cursor to the selection.
+ * @param x :: Mouse x coordinate.
+ * @param y :: Mouse y coordinate.
+ */
+void Shape2DCollection::addToSelectionShapeAt(int x, int y)
+{
+    // if there is a selected shape under the cursor deselect it
+    if ( isOverSelectionAt( x, y ) )
+    {
+        deselectAtXY(x,y);
+        return;
+    }
+    // try selecting a shape without editing it
+    if ( !selectAtXY( x, y, false ) )
+    {
+        deselectAll();
+    }
+}
+
+/**
   * Move the current control point or entire shape by (dx,dy).
   * @param dx :: Shift in the x direction in screen pixels.
   * @param dy :: Shift in the y direction in screen pixels.
@@ -319,9 +339,13 @@ void Shape2DCollection::touchShapeOrControlPointAt(int x, int y)
 /**
  * Select a shape which contains a point (x,y) of the screen.
  */
-bool Shape2DCollection::selectAtXY(int x,int y)
+bool Shape2DCollection::selectAtXY(int x, int y, bool edit)
 {
-  deselectAll();
+    if ( edit )
+    {
+        // if shape has to be edited (resized) it must be the only selection
+        deselectAll();
+    }
   QPointF p = m_transform.inverted().map(QPointF(x,y));
   foreach(Shape2D* shape,m_shapes)
   {
@@ -333,6 +357,25 @@ bool Shape2DCollection::selectAtXY(int x,int y)
     }
   }
   return false;
+}
+
+/**
+ * Deselect a shape under the cursor.
+ * @param x :: Mouse x coordinate.
+ * @param y :: Mouse y coordinate.
+ */
+void Shape2DCollection::deselectAtXY(int x, int y)
+{
+    QPointF p = m_transform.inverted().map(QPointF(x,y));
+    foreach(Shape2D* shape,m_shapes)
+    {
+      bool picked = shape->selectAt(p);
+      if (picked)
+      {
+        removeFromSelection(shape);
+        return;
+      }
+    }
 }
 
 /**
@@ -397,8 +440,8 @@ bool Shape2DCollection::hasSelection() const
 }
 
 /**
- * Make a shape current.
- * @param shape :: Pointer to a shape which is to become current. The shape must be in the collection.
+ * Add a shape to selection. If it's the only selection start editing it.
+ * @param shape :: Pointer to a shape which is to become select.
  */
 void Shape2DCollection::addToSelection(Shape2D* shape)
 {
@@ -408,6 +451,24 @@ void Shape2DCollection::addToSelection(Shape2D* shape)
         shape->setSelected( true );
         m_selectedShapes.append( shape );
         if ( m_selectedShapes.size() == 1 ) edit( shape );
+    }
+}
+
+/**
+ * Remove a shape from selection.
+ * @param shape :: Pointer to a shape to deselect.
+ */
+void Shape2DCollection::removeFromSelection(Shape2D *shape)
+{
+    foreach(Shape2D* s, m_selectedShapes)
+    {
+        if ( s == shape )
+        {
+            shape->setSelected(false);
+            shape->edit(false);
+            m_selectedShapes.removeOne(shape);
+            return;
+        }
     }
 }
 
