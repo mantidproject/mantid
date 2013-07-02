@@ -26,7 +26,7 @@
 </parameter>
 <!-- The name of the hard mask file to use together with diag masking 4to1_124mod.msk-->
 <parameter name="hard_mask_file" type="string">
-    <value val="None"/>
+    <value val="4to1_022.msk"/>
 </parameter>
 <!-- The map file used when calculating absolute units conversion integrals 
      This map usually groups together large areas of detectors to obtain proper vanadium statistics  -->
@@ -37,7 +37,8 @@
 
 
 
-<!-- RunNumber to use for diag instead of the input run number if none - use input run -->
+<!-- RunNumber to use for diag instead of the input run number if none - use input run 
+     if yes, will probably change from command line-->
 <parameter name="mask_run" type="string">
    <value val="None"/>
 </parameter>
