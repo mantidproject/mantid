@@ -400,7 +400,7 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
     		if (std::abs(WS->readX(0)[i] - WS->readX(j)[i]) > 1.0E-7 ) return false;
     	}
     }
-    else if ( std::abs(commonSum-sum)/std::max<double>(commonSum,sum) > 1.0E-7 ) return false;
+    else if ( std::abs(commonSum-sum)/std::max<double>(std::abs(commonSum),std::abs(sum)) > 1.0E-7 ) return false;
   }
   return true;
 }
@@ -428,7 +428,7 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
   		if (std::abs(ws1->readX(0)[i] - ws2->readX(0)[i]) > 1.0E-7 ) return false;
   	}
   }
-  else if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
+  else if ( std::abs(firstWS-secondWS)/std::max<double>(std::abs(firstWS),std::abs(secondWS)) > 1.0E-7 ) return false;
 
   // If we were only asked to check the first spectrum, return now
   if (firstOnly) return true;
@@ -456,7 +456,7 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
     		if (std::abs(ws1->readX(i)[j] - ws2->readX(i)[j]) > 1.0E-7 ) return false;
     	}
     }
-    else if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
+    else if ( std::abs(firstWS-secondWS)/std::max<double>(std::abs(firstWS),std::abs(secondWS)) > 1.0E-7 ) return false;
   }
 
   return true;
