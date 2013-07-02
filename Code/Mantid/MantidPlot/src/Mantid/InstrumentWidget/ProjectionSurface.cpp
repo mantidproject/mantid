@@ -76,6 +76,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
   connect(drawController,SIGNAL(restoreOverrideCursor()),&m_maskShapes,SLOT(restoreOverrideCursor()));
   connect(drawController,SIGNAL(setSelection(QRect)),this,SLOT(setSelectionRect(QRect)));
   connect(drawController,SIGNAL(finishSelection(QRect)),this,SLOT(selectMultipleMasks(QRect)));
+  connect(drawController,SIGNAL(finishSelection(QRect)),this,SIGNAL(shapeChangeFinished()));
 
   // create and connect the peak eraser controller
   InputControllerErase* eraseController = new InputControllerErase(this);
@@ -473,8 +474,7 @@ QString ProjectionSurface::getInfoText() const
     {
     case PickSingleMode:
     case PickTubeMode:
-        return "Move cursor over instrument to see detector information. "
-                "Left click and drag to select multiple detectors.";
+        return "Move cursor over instrument to see detector information. ";
     case AddPeakMode:
         return "Click on a detector then click on the mini-plot to add a peak.";
     case DrawMode:

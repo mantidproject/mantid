@@ -49,7 +49,7 @@ public:
   void removeCurrentShape();
   bool isEmpty()const{return m_shapes.isEmpty();}
   size_t size()const {return static_cast<size_t>(m_shapes.size());}
-  void select(int i);
+  void addToSelection(int i);
   bool hasSelection() const;
 
   RectF getCurrentBoundingRect()const;
@@ -81,6 +81,7 @@ signals:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+  void shapeChangeFinished();
   void cleared();
 
 public slots:
@@ -103,18 +104,22 @@ protected:
   bool selectControlPointAt(int x,int y);
   void deselectControlPoint();
   bool isOverCurrentAt(int x,int y);
-  void select(Shape2D* shape);
-  QList<Shape2D*> getSelectedShapes() const;
+  bool isOverSelectionAt(int x,int y);
+  void addToSelection(Shape2D* shape);
+  void edit(Shape2D* shape);
+  void finishEdit();
+  QList<Shape2D*> getSelectedShapes() const {return m_selectedShapes;}
 
   QList<Shape2D*> m_shapes;
-  mutable RectF m_surfaceRect; // original surface window in "real" coordinates
+  mutable RectF m_surfaceRect;       ///< original surface window in "real" coordinates
   mutable double m_wx,m_wy;
-  mutable int m_h; // original screen viewport height
-  mutable QRect m_viewport;  // current screen viewport
-  mutable QTransform m_transform; // current transform
+  mutable int m_h;                   ///< original screen viewport height
+  mutable QRect m_viewport;          ///< current screen viewport
+  mutable QTransform m_transform;    ///< current transform
 
-  Shape2D*  m_currentShape;
-  size_t m_currentCP;
+  Shape2D*  m_currentShape;          ///< shape selected to edit (change size/shape)
+  size_t m_currentCP;                ///< control point of m_currentShape selected to edit
+  QList<Shape2D*> m_selectedShapes;  ///< A list of selected shapes (can be moved or deleted)
   bool m_overridingCursor;
 };
 

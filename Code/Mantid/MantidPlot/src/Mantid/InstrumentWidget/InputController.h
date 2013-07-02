@@ -155,6 +155,7 @@ signals:
 
 public slots:
     void startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor);
+    void onDisabled();
 
 private:
     bool m_creating; ///< a shape is being created with a mouse

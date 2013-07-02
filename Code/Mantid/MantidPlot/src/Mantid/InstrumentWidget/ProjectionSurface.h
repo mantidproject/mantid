@@ -199,6 +199,7 @@ signals:
   void shapesDeselected();
   void shapeChanged();
   void shapesCleared();
+  void shapeChangeFinished();
 
   // peaks
   void peaksWorkspaceAdded();

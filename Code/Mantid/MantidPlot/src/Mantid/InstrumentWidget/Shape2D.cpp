@@ -12,7 +12,8 @@
 
 // number of control points common for all shapes
 const size_t Shape2D::NCommonCP = 4;
-const double Shape2D::sizeCP = 2;
+// size (== width/2 == height/2) of each control point
+const double Shape2D::sizeCP = 3;
 
 /**
   * Set default border color to red and fill color to default Qt color (==QColor()).
@@ -22,6 +23,7 @@ Shape2D::Shape2D():
     m_fill_color(QColor()),
     m_scalable(true),
     m_editing(false),
+    m_selected(false),
     m_visible(true)
 {
 }
@@ -37,19 +39,32 @@ void Shape2D::draw(QPainter& painter) const
   if ( !m_visible ) return;
   painter.setPen(m_color);
   this->drawShape(painter);
-  if (m_editing)
+  if ( m_editing || m_selected )
   {
     QColor c(255,255,255,100);
     painter.setPen(c);
-    painter.setCompositionMode(QPainter::CompositionMode_Plus);
     painter.drawRect(m_boundingRect.toQRectF());
-    for(size_t i = 0; i < getNControlPoints(); ++i)
+    size_t np = NCommonCP;
+    double rsize = 2;
+    int alpha = 100;
+    if ( m_editing )
+    {
+        // if editing show all CP, make them bigger and opaque
+        np =  getNControlPoints();
+        rsize = sizeCP;
+        alpha = 255;
+    }
+    for(size_t i = 0; i < np; ++i)
     {
       QPointF p = painter.transform().map(getControlPoint(i));
-      QRectF r(p - QPointF(sizeCP,sizeCP),p + QPointF(sizeCP,sizeCP));
+      QRectF r(p - QPointF(rsize,rsize),p + QPointF(rsize,rsize));
       painter.save();
       painter.resetTransform();
+      QColor c(255,255,255,alpha);
       painter.fillRect(r,c);
+      r.adjust(-1,-1,0,0);
+      painter.setPen( QColor( 0,0,0, alpha) );
+      painter.drawRect(r);
       painter.restore();
     }
   }

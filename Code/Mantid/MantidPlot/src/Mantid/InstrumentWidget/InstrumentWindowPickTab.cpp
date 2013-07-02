@@ -487,55 +487,6 @@ void InstrumentWindowPickTab::updatePick(int detid)
 }
 
 /**
- * Find the offsets in the spectrum's x vector of the bounds of integration.
- * @param wi :: The works[ace index of the spectrum.
- * @param imin :: Index of the lower bound: x_min == readX(wi)[imin]
- * @param imax :: Index of the upper bound: x_max == readX(wi)[imax]
- */
-void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax)
-{
-  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-  const Mantid::MantidVec& x = ws->readX(wi);
-  Mantid::MantidVec::const_iterator x_begin = x.begin();
-  Mantid::MantidVec::const_iterator x_end = x.end();
-  if (x_begin == x_end)
-  {
-    throw std::runtime_error("No bins found to plot");
-  }
-  if (ws->isHistogramData())
-  {
-    --x_end;
-  }
-  if (instrActor->wholeRange())
-  {
-    imin = 0;
-    imax = static_cast<size_t>(x_end - x_begin);
-  }
-  else
-  {
-    Mantid::MantidVec::const_iterator x_from = std::lower_bound(x_begin,x_end,instrActor->minBinValue());
-    Mantid::MantidVec::const_iterator x_to = std::upper_bound(x_begin,x_end,instrActor->maxBinValue());
-    imin = static_cast<size_t>(x_from - x_begin);
-    imax = static_cast<size_t>(x_to - x_begin);
-    if (imax <= imin)
-    {
-      if (x_from == x_end)
-      {
-        --x_from;
-        x_to = x_end;
-      }
-      else
-      {
-        x_to = x_from + 1;
-      }
-      imin = static_cast<size_t>(x_from - x_begin);
-      imax = static_cast<size_t>(x_to - x_begin);
-    }
-  }
-}
-
-/**
  * Plot data for a detector.
  * @param detid :: ID of the detector to be plotted.
  */
@@ -862,7 +813,7 @@ void InstrumentWindowPickTab::prepareDataForSinglePlot(
 
   // find min and max for x
   size_t imin,imax;
-  getBinMinMaxIndex(wi,imin,imax);
+  instrActor->getBinMinMaxIndex(wi,imin,imax);
 
   x.assign(X.begin() + imin,X.begin() + imax);
   y.assign(Y.begin() + imin,Y.begin() + imax);
@@ -905,7 +856,7 @@ void InstrumentWindowPickTab::prepareDataForSumsPlot(
     return; // Detector doesn't have a workspace index relating to it
   }
   size_t imin,imax;
-  getBinMinMaxIndex(wi,imin,imax);
+  instrActor->getBinMinMaxIndex(wi,imin,imax);
 
   const Mantid::MantidVec& X = ws->readX(wi);
   x.assign(X.begin() + imin, X.begin() + imax);
@@ -988,7 +939,7 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
   }
   // imin and imax give the bin integration range
   size_t imin,imax;
-  getBinMinMaxIndex(wi,imin,imax);
+  instrActor->getBinMinMaxIndex(wi,imin,imax);
 
   const int n = ass->nelements();
   if (n == 0)
@@ -1268,6 +1219,9 @@ void InstrumentWindowPickTab::initSurface()
     connect(surface,SIGNAL(peaksWorkspaceAdded()),this,SLOT(updateSelectionInfoDisplay()));
     connect(surface,SIGNAL(peaksWorkspaceDeleted()),this,SLOT(updateSelectionInfoDisplay()));
     connect(surface,SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
+    connect(surface,SIGNAL(shapeChangeFinished()),this,SLOT(updatePlotMultipleDetectors()));
+    connect(surface,SIGNAL(shapesCleared()),this,SLOT(updatePlotMultipleDetectors()));
+    connect(surface,SIGNAL(shapesDeselected()),this,SLOT(updatePlotMultipleDetectors()));
 }
 
 /**
@@ -1331,6 +1285,7 @@ void InstrumentWindowPickTab::selectTool(const ToolType tool)
   case DrawEllipse: m_ellipse->setChecked(true);
     break;
   case EditShape: m_edit->setChecked(true);
+      updatePlotMultipleDetectors();
     break;
   default: throw std::invalid_argument("Invalid tool type.");
   }
@@ -1342,7 +1297,6 @@ void InstrumentWindowPickTab::singleDetectorTouched(int detid)
 {
   if (canUpdateTouchedDetector())
   {
-    //mInteractionInfo->setText(cursorPos.display());
     updatePick(detid);
   }
 }
@@ -1367,5 +1321,23 @@ void InstrumentWindowPickTab::updateSelectionInfoDisplay()
 void InstrumentWindowPickTab::shapeCreated()
 {
     selectTool( EditShape );
+}
+
+/**
+ * Update the mini-plot with information from multiple detector
+ * selected with drawn shapes.
+ */
+void InstrumentWindowPickTab::updatePlotMultipleDetectors()
+{
+    QList<int> dets;
+    getSurface()->getMaskedDetectors( dets );
+    std::vector<double> x,y;
+    m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y );
+    m_plot->clearAll();
+    if ( !x.empty() )
+    {
+        m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrWindow->getInstrumentActor()->getWorkspace()->getAxis(0)->unit()->unitID());
+    }
+    m_plot->replot();
 }
 

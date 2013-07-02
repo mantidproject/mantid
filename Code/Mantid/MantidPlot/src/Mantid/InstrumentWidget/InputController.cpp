@@ -193,10 +193,7 @@ void InputControllerDrawShape::mouseMoveEvent(QMouseEvent *event)
             m_rect.setBottomRight(QPoint( event->x(), event->y() ));
             m_x = event->x();
             m_y = event->y();
-            if ( m_rect.width() > 1 || m_rect.height() > 1 )
-            {
-                emit setSelection( m_rect );
-            }
+            emit setSelection( m_rect );
         }
     }
     else
@@ -213,10 +210,7 @@ void InputControllerDrawShape::mouseReleaseEvent(QMouseEvent *)
     m_isButtonPressed = false;
     m_creating = false;
     m_shapeType = "";
-    if ( m_rect.width() > 1 || m_rect.height() > 1 )
-    {
-        emit finishSelection( m_rect );
-    }
+    emit finishSelection( m_rect );
 }
 
 /**
@@ -250,6 +244,14 @@ void InputControllerDrawShape::startCreatingShape2D(const QString& type,const QC
   m_fillColor = fillColor;
 }
 
+/**
+ * Action on disabling.
+ */
+void InputControllerDrawShape::onDisabled()
+{
+    m_creating = false;
+    emit disabled();
+}
 //--------------------------------------------------------------------------------
 
 /**

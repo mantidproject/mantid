@@ -74,14 +74,13 @@ private slots:
   void singleDetectorPicked(int detid);
   void updateSelectionInfoDisplay();
   void shapeCreated();
+  void updatePlotMultipleDetectors();
 private:
   void showEvent (QShowEvent *);
   void updatePlot(int detid);
   void updateSelectionInfo(int detid);
   void plotSingle(int detid);
   void plotTube(int detid);
-  /// Calc indexes for min and max bin values defined in the instrument Actor
-  void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax);
   void plotTubeSums(int detid);
   void plotTubeIntegrals(int detid);
   void prepareDataForSinglePlot(
