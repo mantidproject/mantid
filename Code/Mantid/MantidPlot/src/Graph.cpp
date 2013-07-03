@@ -6005,7 +6005,6 @@ void Graph::updateDataCurves()
     else if (MantidMatrixCurve *mc = dynamic_cast<MantidMatrixCurve*>(pc))
       mc->loadData();
   }
-  replot();
   QApplication::restoreOverrideCursor();
 }
 
