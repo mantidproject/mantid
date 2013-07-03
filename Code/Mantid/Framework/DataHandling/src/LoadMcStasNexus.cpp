@@ -57,7 +57,7 @@ namespace DataHandling
    * @param descriptor A descriptor for the file
    * @returns An integer specifying the confidence level. 0 indicates it will not be used
    */
-  int LoadMcStasNexus::confidence(const Kernel::HDFDescriptor & descriptor) const
+  int LoadMcStasNexus::confidence(Kernel::HDFDescriptor & descriptor) const
   {
     using namespace ::NeXus;
 	  // We will look at the first entry and check for a

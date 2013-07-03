@@ -70,7 +70,7 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling\\Nexus;Muon"; }
 
       /// Returns a confidence value that this algorithm can load a file
-      virtual int confidence(const Kernel::HDFDescriptor & descriptor) const;
+      virtual int confidence(Kernel::HDFDescriptor & descriptor) const;
 
     private:
       /// Sets documentation strings for this algorithm

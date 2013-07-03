@@ -79,6 +79,7 @@ namespace Mantid
       inline const std::string & extension() const { return m_extension; }
       /**
        * Access the open NeXus File object
+       * @returns A reference to the open ::NeXus file object
        */
       inline ::NeXus::File & data() { return *m_file; }
 

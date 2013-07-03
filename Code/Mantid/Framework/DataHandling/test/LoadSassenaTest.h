@@ -28,7 +28,8 @@ public:
   {
     if( !m_alg.isInitialized() ) m_alg.initialize();
     m_alg.setPropertyValue( "Filename", m_inputFile );
-    TS_ASSERT_EQUALS(m_alg.confidence(m_alg.getPropertyValue("Filename")), 99);
+    Mantid::Kernel::HDFDescriptor descr(m_alg.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(m_alg.confidence(descr), 99);
   }
 
   void test_exec()

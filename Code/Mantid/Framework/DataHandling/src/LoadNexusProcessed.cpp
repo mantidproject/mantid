@@ -93,7 +93,7 @@ LoadNexusProcessed::~LoadNexusProcessed()
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadNexusProcessed::confidence(const Kernel::HDFDescriptor & descriptor) const
+int LoadNexusProcessed::confidence(Kernel::HDFDescriptor & descriptor) const
 {
   if(descriptor.pathExists("/mantid_workspace_1")) return 80;
   else return 0;

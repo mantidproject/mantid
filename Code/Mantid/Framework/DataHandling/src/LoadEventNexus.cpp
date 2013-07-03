@@ -914,7 +914,7 @@ LoadEventNexus::~LoadEventNexus()
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadEventNexus::confidence(const Kernel::HDFDescriptor & descriptor) const
+int LoadEventNexus::confidence(Kernel::HDFDescriptor & descriptor) const
 {
   int confidence(0);
   if(descriptor.classTypeExists("NXevent_data"))

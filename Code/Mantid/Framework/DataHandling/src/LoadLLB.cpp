@@ -61,7 +61,7 @@ const std::string LoadLLB::category() const {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadLLB::confidence(const Kernel::HDFDescriptor & descriptor) const
+int LoadLLB::confidence(Kernel::HDFDescriptor & descriptor) const
 {
   const auto & firstEntry = descriptor.firstEntryNameType();
   if(descriptor.pathExists("/" + firstEntry.first + "/nxinstrument/name")) return 80;

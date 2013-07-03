@@ -72,7 +72,7 @@ void LoadSINQ::initDocs() {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadSINQ::confidence(const Kernel::HDFDescriptor & descriptor) const
+int LoadSINQ::confidence(Kernel::HDFDescriptor & descriptor) const
 {
   const std::string root =  "/" + descriptor.firstEntryNameType().first + "/";
   for(auto it = supportedInstruments.begin(); it != supportedInstruments.end() ; ++it)

@@ -103,8 +103,9 @@ namespace Mantid
       std::string filePath = getPropertyValue("Filename");
       LoadMuonNexus1 load1; load1.initialize();
 
-      int confidence1 = load1.confidence( filePath );
-      int confidence2 = this->confidence( filePath );
+      Kernel::HDFDescriptor descriptor(filePath);
+      int confidence1 = load1.confidence(descriptor);
+      int confidence2 = this->confidence(descriptor);
 
       // if none can load the file throw
       if ( confidence1 < 80 && confidence2 < 80)
@@ -487,7 +488,7 @@ namespace Mantid
      * @param descriptor A descriptor for the file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
-    int LoadMuonNexus2::confidence(const Kernel::HDFDescriptor & descriptor) const
+    int LoadMuonNexus2::confidence(Kernel::HDFDescriptor & descriptor) const
     {
       const auto & firstEntryNameType = descriptor.firstEntryNameType();
       const std::string root = "/" + firstEntryNameType.first;
@@ -503,15 +504,18 @@ namespace Mantid
 
       try
       {
-        NXRoot root(descriptor.filename());
-        NXEntry entry = root.openFirstEntry();
-
         std::string versionField = "idf_version";
         if(upperIDF) versionField = "IDF_version";
 
-        if ( entry.getInt(versionField) != 2 ) return 0;
-        std::string definition = entry.getString("definition");
-        if ( definition == "muonTD" || definition == "pulsedTD" )
+        auto &file = descriptor.data();
+        file.openPath(root + "/" + versionField);
+        int32_t version = 0;
+        file.getData(&version);
+        if ( version != 2 ) return 0;
+
+        file.openPath(root + "/definition");
+        std::string def = file.getStrData();
+        if ( def == "muonTD" || def == "pulsedTD" )
         {
           // If all this succeeded then we'll assume this is an ISIS Muon NeXus file version 2
           return 81;

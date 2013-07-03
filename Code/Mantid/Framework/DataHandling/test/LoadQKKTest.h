@@ -31,8 +31,8 @@ public:
     Mantid::DataHandling::LoadQKK loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "QKK0029775.nx.hdf"); // find the full path
-
-    TS_ASSERT_EQUALS(80, loader.confidence(loader.getPropertyValue("Filename")));
+    Mantid::Kernel::HDFDescriptor descr(loader.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(80, loader.confidence(descr));
   }
 
   void testInit()

@@ -137,8 +137,10 @@ namespace Mantid
       if(HDFDescriptor::isHDF(filename))
       {
         LoadISISNexus2 isisNexus;
-        if(isisNexus.confidence(filename) > 0)
+        auto *descriptor = new Kernel::HDFDescriptor(filename);
+        if(isisNexus.confidence(*descriptor) > 0)
         {
+          delete descriptor;
           updateFromNeXus(filename);
           return;
         }

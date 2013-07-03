@@ -37,7 +37,7 @@ namespace Mantid
     {
     public:
       /// Returns a confidence value that this algorithm can load a file
-      virtual int confidence(const Kernel::HDFDescriptor & descriptor) const = 0;
+      virtual int confidence(Kernel::HDFDescriptor & descriptor) const = 0;
     };
 
   } // namespace API

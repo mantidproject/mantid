@@ -67,7 +67,7 @@ namespace DataHandling {
     }
 
     /// Returns a confidence value that this algorithm can load a file
-    int confidence(const Kernel::HDFDescriptor & descriptor) const;
+    int confidence(Kernel::HDFDescriptor & descriptor) const;
 
   private:
     /// Sets documentation strings for this algorithm

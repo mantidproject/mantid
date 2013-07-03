@@ -81,7 +81,7 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
       /// Returns a confidence value that this algorithm can load a file
-      int confidence(const Kernel::HDFDescriptor & descriptor) const;
+      int confidence(Kernel::HDFDescriptor & descriptor) const;
 
       /** Sets whether the pixel counts will be pre-counted.
        * @param value :: true if you want to precount. */
