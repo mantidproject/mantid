@@ -64,22 +64,28 @@ void ElasticWindow::exec()
 
   MatrixWorkspace_sptr outputQ;
   MatrixWorkspace_sptr outputQSquared;
-
+  
+  const bool childAlgLogging(true);
+  double startProgress(0.0), stepProgress(0.0), endProgress(0.0);
   // Determine if we need to use the second time range...
   if ( ! ( ( enR2S == enR2E ) && ( enR2S == EMPTY_DBL() ) ) )
   {
+    stepProgress = 1.0/6.0;
+    
     // ... FlatBackground, Minus, Integration...
-    IAlgorithm_sptr flatBG = createChildAlgorithm("FlatBackground");
+    IAlgorithm_sptr flatBG = createChildAlgorithm("FlatBackground",startProgress, endProgress,childAlgLogging);
     flatBG->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
     flatBG->setProperty<double>("StartX", enR2S);
     flatBG->setProperty<double>("EndX", enR2E);
     flatBG->setPropertyValue("Mode", "Mean");
     flatBG->setPropertyValue("OutputWorkspace", "flatBG");
     flatBG->execute();
+    startProgress += stepProgress;
+    endProgress += stepProgress;
 
     MatrixWorkspace_sptr flatBGws = flatBG->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr integ = createChildAlgorithm("Integration");
+    IAlgorithm_sptr integ = createChildAlgorithm("Integration",startProgress, endProgress,childAlgLogging);
     integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", flatBGws);
     integ->setProperty<double>("RangeLower", enR1S);
     integ->setProperty<double>("RangeUpper", enR1E);
@@ -90,8 +96,10 @@ void ElasticWindow::exec()
   }
   else
   {
+    stepProgress = 1.0/5.0;
+
     // ... Just Integration ...
-    IAlgorithm_sptr integ = createChildAlgorithm("Integration");
+    IAlgorithm_sptr integ = createChildAlgorithm("Integration",startProgress, endProgress,childAlgLogging);
     integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
     integ->setProperty<double>("RangeLower", enR1S);
     integ->setProperty<double>("RangeUpper", enR1E);
@@ -100,36 +108,50 @@ void ElasticWindow::exec()
 
     integWS = integ->getProperty("OutputWorkspace");
   }
+  startProgress += stepProgress;
+  endProgress += stepProgress;
 
-  // ... ConvertSpectrumAxis (MomentumTransfer) ...
-  IAlgorithm_sptr csaQ = createChildAlgorithm("ConvertSpectrumAxis");
+  // ... ConvertSpectrumAxis (ElasticQ). Version 2 to give the correct number
+  const int version = 2;
+  IAlgorithm_sptr csaQ = createChildAlgorithm("ConvertSpectrumAxis",startProgress,endProgress,childAlgLogging,version);
   csaQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
   csaQ->setPropertyValue("Target", "ElasticQ");
   csaQ->setPropertyValue("EMode", "Indirect");
   csaQ->setPropertyValue("OutputWorkspace", "csaQ");
   csaQ->execute();
   MatrixWorkspace_sptr csaQws = csaQ->getProperty("OutputWorkspace");
+  startProgress += stepProgress;
+  endProgress += stepProgress;
+  
   // ... ConvertSpectrumAxis (Q2) ...
-  IAlgorithm_sptr csaQ2 = createChildAlgorithm("ConvertSpectrumAxis");
+  IAlgorithm_sptr csaQ2 = createChildAlgorithm("ConvertSpectrumAxis",startProgress,endProgress,childAlgLogging,version);
   csaQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
   csaQ2->setPropertyValue("Target", "ElasticQSquared");
   csaQ2->setPropertyValue("EMode", "Indirect");
   csaQ2->setPropertyValue("OutputWorkspace", "csaQ2");
   csaQ2->execute();
   MatrixWorkspace_sptr csaQ2ws = csaQ2->getProperty("OutputWorkspace");
+  startProgress += stepProgress;
+  endProgress += stepProgress;
+
 
   // ... Transpose A ...
-  IAlgorithm_sptr tranQ = createChildAlgorithm("Transpose");
+  IAlgorithm_sptr tranQ = createChildAlgorithm("Transpose",startProgress,endProgress,childAlgLogging);
   tranQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace",csaQws);
   tranQ->setPropertyValue("OutputWorkspace", "outQ");
   tranQ->execute();
   outputQ = tranQ->getProperty("OutputWorkspace");
+  startProgress += stepProgress;
+  endProgress += stepProgress;
+
   // ... Transpose B ...
-  IAlgorithm_sptr tranQ2 = createChildAlgorithm("Transpose");
+  IAlgorithm_sptr tranQ2 = createChildAlgorithm("Transpose", startProgress,endProgress,childAlgLogging);
   tranQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace",csaQ2ws);
   tranQ2->setPropertyValue("OutputWorkspace", "outQSquared");
   tranQ2->execute();
   outputQSquared = tranQ2->getProperty("OutputWorkspace");
+  startProgress += stepProgress;
+  endProgress += stepProgress;
 
 
   setProperty("OutputInQ", outputQ);
