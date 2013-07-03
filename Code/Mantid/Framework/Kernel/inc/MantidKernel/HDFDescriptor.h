@@ -77,6 +77,10 @@ namespace Mantid
        * @returns A reference to a const string containing the file extension
        */
       inline const std::string & extension() const { return m_extension; }
+      /**
+       * Access the open NeXus File object
+       */
+      inline ::NeXus::File & data() { return *m_file; }
 
       /// Returns the name & type of the first entry in the file
       const std::pair<std::string,std::string> & firstEntryNameType() const;
@@ -109,6 +113,9 @@ namespace Mantid
       std::set<std::string> m_rootAttrs;
       /// Map of full path strings to types. Can check if path exists quickly
       std::map<std::string, std::string> m_pathsToTypes;
+
+      /// Open NeXus handle
+      ::NeXus::File *m_file;
     };
 
 

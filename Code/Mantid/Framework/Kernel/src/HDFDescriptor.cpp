@@ -99,7 +99,7 @@ namespace Mantid
      */
     HDFDescriptor::HDFDescriptor(const std::string & filename)
       : m_filename(), m_extension(), m_firstEntryNameType(),
-        m_rootAttrs(), m_pathsToTypes()
+        m_rootAttrs(), m_pathsToTypes(), m_file(NULL)
     {
       if(filename.empty())
       {
@@ -123,6 +123,7 @@ namespace Mantid
      */
     HDFDescriptor::~HDFDescriptor()
     {
+      delete m_file;
     }
 
     /// Returns the name & type of the first entry in the file
@@ -190,12 +191,12 @@ namespace Mantid
       m_filename = filename;
       m_extension = "." + Poco::Path(filename).getExtension();
 
-      ::NeXus::File file(this->filename());
+      m_file = new ::NeXus::File(this->filename());
 
-      file.openPath("/");
+      m_file->openPath("/");
       m_rootAttrs.clear();
       m_pathsToTypes.clear();
-      walkFile(file, "", "", m_pathsToTypes,0);
+      walkFile(*m_file, "", "", m_pathsToTypes,0);
     }
 
     /**

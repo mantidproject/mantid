@@ -8,6 +8,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include <nexus/NeXusFile.hpp>
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
@@ -103,6 +104,12 @@ public:
   void test_Constructor_Throws_When_Given_File_Not_Identified_As_HDF()
   {
     TS_ASSERT_THROWS(HDFDescriptor fd(m_testNonHDFPath), std::invalid_argument);
+  }
+
+  void test_File_Handle_Returned_By_Data_Is_Valid()
+  {
+    auto & file = m_testHDF5->data();
+    TS_ASSERT_EQUALS("", file.getPath())
   }
 
   void test_firstEntryNameType_Returns_Correct_Details()
