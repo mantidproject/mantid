@@ -117,6 +117,8 @@ class DirectEnergyConversion(object):
         self._keep_wb_workspace = False
         if isinstance(white,str) and white in mtd:
          self._keep_wb_workspace = True
+        if isinstance(white,api.Workspace) : # it is workspace itself
+            self._keep_wb_workspace = True
 
         # If we have a hard_mask, check the instrument name is defined
         if 'hard_mask_file' in kwargs:
@@ -397,14 +399,17 @@ class DirectEnergyConversion(object):
                 self.log('_do_mono: Raw file detector header is superceeded') 
                 if self.relocate_dets: 
                     self.log('_do_mono: Moving detectors to positions specified in cal file ')
+                    if str(self.det_cal_file) in mtd: # it is already workspace 
+                        self.__det_cal_file_ws = self.det_cal_file
+
                     if self.__det_cal_file_ws == None :
-                        self.log('_do_mono: Loading detector info from file ' + self.det_cal_file)                    
+                        self.log('_do_mono: Loading detector info from file ' + self.det_cal_file,'debug')                    
                         LoadDetectorInfo(Workspace=result_name,DataFilename=self.det_cal_file,RelocateDets= self.relocate_dets)
                         self.log('_do_mono: Loading detector info completed ')                                            
                     else:
-                        self.log('_do_mono: Copying detectors positions from det_cal_file workspace: '+self.det_cal_file_ws.name())                    
+                        self.log('_do_mono: Copying detectors positions from det_cal_file workspace: '+self.__det_cal_file_ws.name())                    
                         CopyInstrumentParameters(InputWorkspace=self.__det_cal_file_ws,OutputWorkspace=result_name)
-                        self.log('_do_mono: Copying detectors positions complete')
+                        self.log('_do_mono: Copying detectors positions complete','debug')
 
         if self.background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
@@ -775,7 +780,6 @@ class DirectEnergyConversion(object):
         self._idf_values_read = False
         self._keep_wb_workspace=False #  when input data for reducer is wb workspace rather then run number, we want to keep this workspace. But usually not
 
-        self.instr_name = instr_name       
         if not (instr_name is None or len(instr_name)==0) : # first time run or empty run
             self.initialise(instr_name)
 
@@ -1408,6 +1412,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         kw["vanadium-mass"]=200
         kw["diag_van_median_sigma"]=1
         kw["det_cal_file"]=None
+        kw["save_format"]=''
         prop_changed=tReducer.set_input_parameters(**kw)
 
         self.assertTrue("van_mass" in prop_changed,"vanadium-mass should correspond to van_mass")
@@ -1416,6 +1421,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(tReducer.van_mass,200);
         self.assertEqual(tReducer.det_cal_file,None);
         self.assertAlmostEqual(tReducer.van_sig,1.,7)
+
+
 
     def test_set_non_default_comples_value(self):
         tReducer = self.reducer
@@ -1497,7 +1504,11 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.save_format = '.spe'
         self.assertEqual('.spe',tReducer.save_format)
 
+    def test_set_format(self):
+        tReducer = self.reducer
 
+        tReducer.save_format = '';
+        self.assertTrue(tReducer.save_format is None)
 
         #self.assertRaises(KeyError,tReducer.energy_bins=20,None)
     def test_default_warnings(self):

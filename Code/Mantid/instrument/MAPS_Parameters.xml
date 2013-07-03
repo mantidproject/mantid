@@ -22,7 +22,7 @@
 
 <!-- Extension of the data files obtained from DAE -->
 <parameter name="data_file_ext" type="string">
-   <value val=".raw"/>
+   <value val=".RAW"/>
 </parameter>
 <!-- The name of the hard mask file to use together with diag masking 4to1_124mod.msk-->
 <parameter name="hard_mask_file" type="string">
@@ -114,10 +114,10 @@
 
 <!-- integration range for background tests  (in TOF) - composite property -->
 <parameter name="bkgd-range-min"> 
-  <value val="12000"/>
+  <value val="15000"/>
 </parameter>
 <parameter name="bkgd-range-max">
-  <value val="18000"/>
+  <value val="19000"/>
 </parameter>
 <parameter name="background_range"  type="string">
       <value val="bkgd-range-min:bkgd-range-max"/>
@@ -298,7 +298,8 @@
 
 <!--  ****************************************  Workflow control **************************** -->
 
-<!-- This parameter controls the format of output data writteb by reducer. Three values are currently supported, namely spe, nxspe, and nexus (mantid workspace) 
+<!-- This parameter controls the format of output data written by reducer. 
+    Three values are currently supported, namely .spe, .nxspe, and nexus (mantid workspace) (.nxs)
      Three possible values for this are defined inin DirectEnergyConversion init routine as recognized by save method 
      If None is there, no internal script saving occurs and one needs to use external save operations -->  
 <parameter name="save_format" type="string">

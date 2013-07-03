@@ -14,10 +14,11 @@
 <parameter name="det_cal_file" type="string">
    <value val="None"/>
 </parameter>
+<!--  mari.cal -->
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
      if None - one2one map is used  -->
 <parameter name="map_file" type="string">
-   <value val="None"/>
+   <value val="mari_res"/>
 </parameter>
 
 <!-- Extension of the data files obtained from DAE -->
@@ -31,7 +32,7 @@
 <!-- The map file used when calculating absolute units conversion integrals 
      This map usually groups together large areas of detectors to obtain proper vanadium statistics  -->
 <parameter name="monovan_mapfile" type="string">
-   <value val="None"/>
+   <value val="mari_res"/>
 </parameter>
 
 
@@ -229,7 +230,7 @@
   *** ??? should be negative?
 -->
 <parameter name="monovan_lo_frac">
-  <value val="0.8"/>
+  <value val="-0.8"/>
 </parameter>
 
 <!-- This property is the part of the composite definition for abs_units_van_range:
@@ -242,7 +243,7 @@
 <!-- This property is the part of the composite definition for abs_units_van_range
  It specifies the relative to incident energy higher integration limit for monochromatic vanadium in the mono-vanadium integration -->
 <parameter name="monovan_hi_frac">
-  <value val="1.2"/>
+  <value val="0.8"/>
 </parameter>
 <!-- This property is the part of the composite definition for abs_units_van_range
  It specifies the the higher limit of energy range in the monochromatic-vanadium integration 

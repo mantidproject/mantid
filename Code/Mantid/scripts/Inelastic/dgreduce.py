@@ -27,8 +27,8 @@ def setup(instname=None,reload=False):
         instname = config['default.instrument']  
 
 
-    if Reducer != None :
-        if  Reducer.instr_name.upper()[0:2] == instname.upper()[0:2] :
+    if not (Reducer is None) :
+        if  Reducer.instr_name.upper()[0:3] == instname.upper()[0:3] :
             if not reload :
                 return  # has been already defined
 
@@ -191,8 +191,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     # set rebinning range
     Reducer.energy_bins = rebin
-    if Reducer.energy_bins[2] >= ei_guess:
-        Reducer.log('Error: rebin max rebin range {0:f} exceeds incident energy {1:f}'.format(energy_bins[2],ei_guess),'Error')
+    if Reducer.energy_bins[2] > ei_guess:
+        Reducer.log('Error: rebin max rebin range {0:f} exceeds incident energy {1:f}'.format(Reducer.energy_bins[2],ei_guess),'Error')
         return
 
     # Process old legacy parameters which are easy to re-define in dgreduce rather then transfer through Mantid
@@ -225,7 +225,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         mask_run=sample_run
           
     if  Reducer.det_cal_file != None : 
-        Reducer.log('Setting detector calibration file to '+Reducer.det_cal_file)
+        if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file in mtd : # it is a file
+            Reducer.log('Setting detector calibration file to '+Reducer.det_cal_file)
+        else:
+           Reducer.log('Setting detector calibration to {0}, which is probably a workspace '.format(str(Reducer.det_cal_file)))
     else:
         Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
 
@@ -497,9 +500,12 @@ def process_legacy_parameters(**kwargs) :
         if key == 'hardmaskOnly': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = True;
+        elif key == 'normalise_method' or key == 'norm_method':
+            params[key]=value.lower();    
         else:
             params[key]=value;    
 
+        
     return params
 
 
@@ -590,7 +596,7 @@ def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
    #---------------- Loop finished
    
     if( weight1_sum==0.0 or weight2_sum == 0.0 or weight3_sum == 0.0 or weight4_sum == 0.0) :
-        print "WB integral has been calculated incorrectrly, look at van_int workspace and input workspace: ",deltaE_wkspaceName
+        print "WB integral has been calculated incorrectrly, look at van_int workspace in the input workspace: ",deltaE_wkspaceName
         raise IOError(" divided by 0 weight")
         
     integral_monovanLibISIS=signal1_sum / weight1_sum
@@ -699,11 +705,37 @@ class DgreduceTest(unittest.TestCase):
         kw=dict();
         kw["hardmaskOnly"]="someFileName"
         kw["someKeyword"] ="aaaa"
+        kw["normalise_method"] ="Monitor-1"
         params = process_legacy_parameters(**kw);
-        self.assertEqual(len(params),3)
+        self.assertEqual(len(params),4)
         self.assertTrue("someKeyword" in params);
         self.assertTrue("hard_mask_file" in params);
         self.assertTrue("use_hard_mask_only" in params)
+        self.assertEqual(params['normalise_method'],'monitor-1')
+
+    def test_setup(self):
+
+        setup('mari')
+        self.assertTrue(not (Reducer is None))
+
+        self.assertEqual(Reducer.instr_name,'MAR')
+
+        Reducer.save_format = ''
+        self.assertTrue(Reducer.save_format is None)
+
+        Reducer.save_format = 'none'
+        self.assertTrue(Reducer.save_format is None)
+
+        Reducer.save_format = []
+        self.assertTrue(Reducer.save_format is None)
+
+    def test_setup_empty(self):
+        # clear up singleton
+        global Reducer
+        Reducer = None
+
+
+        setup(None)
 
 
 
