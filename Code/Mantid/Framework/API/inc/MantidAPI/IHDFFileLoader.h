@@ -1,8 +1,7 @@
 #ifndef MANTID_API_IHDFFILELOADER_H_
 #define MANTID_API_IHDFFILELOADER_H_
 
-#include "MantidAPI/IFileLoader.h"
-#include "MantidKernel/FileDescriptor.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidKernel/HDFDescriptor.h"
 
 namespace Mantid

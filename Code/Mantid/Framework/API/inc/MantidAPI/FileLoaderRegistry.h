@@ -1,9 +1,12 @@
 #ifndef MANTID_API_FILELOADERREGISTRY_H_
 #define MANTID_API_FILELOADERREGISTRY_H_
 
-#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/IHDFFileLoader.h"
 #include "MantidKernel/SingletonHolder.h"
+
+#include <boost/type_traits/is_base_of.hpp>
 
 #include <map>
 #include <string>
@@ -70,6 +73,7 @@ namespace Mantid
       template<typename Type>
       void subscribe(LoaderFormat format)
       {
+        SubscriptionValidator<Type>::check(format);
         const auto nameVersion = AlgorithmFactory::Instance().subscribe<Type>();
         // If the factory didn't throw then the name is valid
         m_names[format].insert(nameVersion);
@@ -88,6 +92,33 @@ namespace Mantid
       FileLoaderRegistryImpl();
       /// Destructor
       ~FileLoaderRegistryImpl();
+
+      /// Helper for subscribe to check base class
+      template <typename T>
+      struct SubscriptionValidator
+      {
+        static void check(LoaderFormat format)
+        {
+          switch(format)
+          {
+          case HDF:
+            if(!boost::is_base_of<IHDFFileLoader,T>::value)
+            {
+              throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
+                                       "' registered as HDF loader but it does not inherit from Mantid::API::IHDFFileLoader");
+            }
+            break;
+          case NonHDF:
+            if(!boost::is_base_of<IFileLoader,T>::value)
+            {
+              throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
+                "' registered as Non-HDF loader but it does not inherit from Mantid::API::IFileLoader");
+            }
+          break;
+            default: throw std::runtime_error("Invalid LoaderFormat given");
+          }
+        }
+      };
 
       /// The list of names. The index pointed to by LoaderFormat defines a set for that format
       std::vector<std::multimap<std::string,int> > m_names;
