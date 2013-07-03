@@ -1771,7 +1771,6 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::
   IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus",-1,-1,false);
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  bool executionSuccessful(true);
   try
   {
     loadInst->setPropertyValue("Filename", nexusfilename);
