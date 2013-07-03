@@ -20,15 +20,15 @@ namespace Mantid
   {
     /** @class LoadInstrumentFromNexus LoadInstrumentFromNexus.h DataHandling/LoadInstrumentFromNexus.h
 
-    Attempt to load information about the instrument from a ISIS NeXus file. In particular attempt to
+    Attempts to load information about the instrument from a ISIS NeXus file. In particular attempt to
     read L2 and 2-theta detector position values and add detectors which are positioned relative
     to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source
     and samplepos components to instrument.
-    As this information appears to be absent from the existing NeXus Muon sample files, it seems that
-    little to this can be done at present. The new version of Muon nexus files may be more useful.
 
     LoadInstrumentFromNexus is intended to be used as a child algorithm of
     other Loadxxx algorithms, rather than being used directly.
+    It is used by LoadMuonNexus version 1.
+
     LoadInstrumentFromNexus is an algorithm and as such inherits
     from the Algorithm class, via DataHandlingCommand, and overrides
     the init() & exec()  methods.
