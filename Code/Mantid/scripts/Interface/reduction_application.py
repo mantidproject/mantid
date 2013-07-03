@@ -1,12 +1,19 @@
+"""
+    Main window for reduction UIs
+"""
 import sys, os
 import traceback
 from PyQt4 import QtGui, QtCore, uic
+import math
 
 # Check whether Mantid is available
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
     IS_IN_MANTIDPLOT = True
+    from mantid.kernel import ConfigService
+    from mantid.api import AlgorithmFactory
+    CLUSTER_ENABLED = "SubmitRemoteJob" in AlgorithmFactory.getRegisteredAlgorithms(True)
 except:
     pass
 
@@ -33,6 +40,7 @@ from reduction_gui.instruments.instrument_factory import instrument_factory, INS
 from reduction_gui.settings.application_settings import GeneralSettings
 import ui.ui_reduction_main
 import ui.ui_instrument_dialog
+import ui.ui_cluster_details_dialog
 
 class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
     def __init__(self, instrument=None, instrument_list=None):
@@ -69,8 +77,17 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._last_export_directory = unicode(settings.value("last_export_directory", QtCore.QVariant('.')).toString())
         
         # Current file name
-        self._filename = None   
+        self._filename = None
         
+        # Cluster credentials and options
+        self._cluster_details_set = False
+        self._number_of_nodes = 1
+        self._cores_per_node = 16
+        self._compute_resources = ['Fermi']
+        if IS_IN_MANTIDPLOT \
+        and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
+                self._compute_resources = ConfigService.Instance().getFacility().computeResources()
+
         # Internal flag for clearing all settings and restarting the application
         self._clear_and_restart = False
         
@@ -82,6 +99,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Event connections
         if not IS_IN_MANTIDPLOT:
             self.reduce_button.hide()
+        self.cluster_button.hide()
         self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
         self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
         self.connect(self.save_button, QtCore.SIGNAL("clicked()"), self._save)  
@@ -98,9 +116,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self.connect(w, QtCore.SIGNAL("shutting_down()"), self.close)
             
         self.general_settings.progress.connect(self._progress_updated)    
-        
-        # Flag to let use know that we need to close the window as soon as possible
-        self._quit_asap = False 
         
     def _set_window_title(self):
         """
@@ -124,35 +139,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.progress_bar.hide()
 
         if self._instrument == '' or self._instrument is None:
-            self._change_instrument()
-            return
-
-        # Commented out to solve a bug where setting ARCS as your default
-        # instrument means you get the DGS interface when clicking ORNL_SANS..
-#        if self._instrument == '' or self._instrument is None:
-#            if IS_IN_MANTIDPLOT:
-#                from mantid.kernel import ConfigService
-#                c = ConfigService.Instance()
-#                facility = str(c.getFacility())
-#                if facility in INSTRUMENT_DICT.keys():
-#                    instr = str(c.getFacility().instrument(""))
-#                    instr = instr.replace("-","")
-#                    if instr in INSTRUMENT_DICT[facility].keys():
-#                        self._instrument = instr
-#                        
-#                # If we still can't find an instrument, show the
-#                # instrument selection dialog
-#                if self._instrument == '' or self._instrument is None:
-#                    self._change_instrument()
-#                    return
-#            else:
-#                self._change_instrument()
-#                return
-#                
-#        if self._instrument == '' or self._instrument is None:
-#            self.close()
-#            self._quit_asap = True
-#            return
+            return self._change_instrument()
         
         self._update_file_menu()
 
@@ -183,11 +170,24 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.interface_chk.show()
             else:
                 self.interface_chk.hide()
+
+            # Show the parallel reduction button if enabled
+            if self._interface.is_cluster_enabled() and IS_IN_MANTIDPLOT \
+            and CLUSTER_ENABLED:
+                config = ConfigService.Instance()
+                if config.hasProperty("cluster.submission") \
+                and config.getString("cluster.submission").lower()=='on':
+                    self.cluster_button.show()
+                    self.connect(self.cluster_button, QtCore.SIGNAL("clicked()"), self.cluster_clicked)  
+            else:
+                self.cluster_button.hide()
             
             if load_last:
                 self._interface.load_last_reduction()
         else:
             self.close()
+            
+        return True
             
     def _update_file_menu(self):
         """
@@ -263,6 +263,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.tools_menu.addAction(instrAction)
         self.tools_menu.addAction(debugAction)
         self.tools_menu.addAction(apiAction)
+        # Cluster submission details
+        if IS_IN_MANTIDPLOT and CLUSTER_ENABLED:
+            jobAction = QtGui.QAction("Remote submission details", self)
+            jobAction.setShortcut("Ctrl+R")
+            jobAction.setStatusTip("Set the cluster information for remote job submission")
+            self.connect(jobAction, QtCore.SIGNAL("triggered()"), self._cluster_details_dialog)
+            self.tools_menu.addAction(jobAction)
         
         recent_files = []
         for fname in self._recent_files:
@@ -340,6 +347,44 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self._facility = dialog.facility_combo.currentText()
             self.setup_layout()
             self._new()
+            return True
+        else:
+            self.close()
+            return False      
+            
+    def _cluster_details_dialog(self):
+        """
+            Show dialog to get cluster submission details
+        """ 
+        class ClusterDialog(QtGui.QDialog, ui.ui_cluster_details_dialog.Ui_Dialog): 
+            def __init__(self, compute_resources=None):
+                QtGui.QDialog.__init__(self)
+                self.setupUi(self)
+                self.resource_combo.clear()
+                for res in compute_resources:
+                    self.resource_combo.addItem(QtGui.QApplication.translate("Dialog", res, None, QtGui.QApplication.UnicodeUTF8))
+            
+        # Fill out the defaults    
+        dialog = ClusterDialog(self._compute_resources)
+        if self.general_settings.cluster_user is not None:
+            dialog.username_edit.setText(QtCore.QString(str(self.general_settings.cluster_user)))
+            dialog.pass_edit.setText(QtCore.QString(str(self.general_settings.cluster_pass)))
+            
+        dialog.nodes_box.setValue(int(self._number_of_nodes))
+        dialog.cores_box.setValue(int(self._cores_per_node))
+        for i in range(dialog.resource_combo.count()):
+            if dialog.resource_combo.itemText(i)==self.general_settings.compute_resource:
+                dialog.resource_combo.setCurrentIndex(i)
+                break
+            
+        dialog.exec_()
+        if dialog.result()==1:
+            self.general_settings.cluster_user = str(dialog.username_edit.text())
+            self.general_settings.cluster_pass = str(dialog.pass_edit.text())
+            self._cluster_details_set = True
+            self._number_of_nodes = int(dialog.nodes_box.value())
+            self._cores_per_node = int(dialog.cores_box.value())
+            self.general_settings.compute_resource = dialog.resource_combo.currentText()
             
     def _clear_and_close(self):
         """
@@ -423,6 +468,30 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.file_menu.setEnabled(True)
         self.tools_menu.setEnabled(True)
 
+    def cluster_clicked(self):
+        """
+            Submit for parallel reduction
+        """
+        if not self._cluster_details_set:
+            self._cluster_details_dialog()
+        
+        if self._interface is not None \
+        and self.general_settings.cluster_user is not None \
+        and self.general_settings.cluster_pass is not None:
+            # Chose a name for the job
+            if self._filename is not None:
+                job_name = os.path.basename(self._filename).strip()
+                toks = os.path.splitext(job_name)
+                job_name = toks[0]
+            else:
+                job_name = ''
+            self._interface.cluster_submit(self.general_settings.cluster_user, 
+                                           self.general_settings.cluster_pass,
+                                           resource=self.general_settings.compute_resource,
+                                           nodes=self._number_of_nodes,
+                                           cores_per_node=self._cores_per_node,
+                                           job_name=job_name)
+        
     def open_file(self, file_path=None):
         """
             Open an XML file and populate the UI

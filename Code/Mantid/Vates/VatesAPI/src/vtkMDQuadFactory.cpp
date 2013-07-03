@@ -90,8 +90,8 @@ namespace Mantid
         Mantid::coord_t out[2];
         bool* useBox = new bool[it->getDataSize()];
 
-        double progressFactor = 50/double(it->getDataSize());
-        double progressOffset = 50;
+        double progressFactor = 0.5/double(it->getDataSize());
+        double progressOffset = 0.5;
 
         for(size_t iBox = 0; iBox < it->getDataSize(); ++iBox)
         {

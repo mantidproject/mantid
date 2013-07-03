@@ -29,6 +29,15 @@
           Set the peak dimensions to plot.
         </Documentation>
       </IntVectorProperty>
+      <DoubleVectorProperty
+        name="Unintegrated Peak Marker Size"
+        command="SetUnintPeakMarkerSize"
+        number_of_elements="1"
+        default_values="0.3">
+        <Documentation>
+          Set the size of the unintegrated peak markers.
+        </Documentation>
+      </DoubleVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End PeaksSource -->

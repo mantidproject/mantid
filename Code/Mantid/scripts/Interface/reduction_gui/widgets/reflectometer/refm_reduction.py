@@ -14,11 +14,9 @@ import ui.reflectometer.ui_refm_reduction
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
+    from mantid.api import *
+    #TODO: this will need to change once we get rid of the old python API
     from reduction.instruments.reflectometer import data_manipulation
-
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -202,8 +200,8 @@ class DataReflWidget(BaseWidget):
         self._summary.waiting_label.hide()
         
         # If we do not have access to /SNS, don't display the automated reduction options
-        if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
-            self._summary.auto_reduce_check.hide()
+        #if not self._settings.debug and not os.path.isdir("/SNS/%s" % self.instrument_name):
+        self._summary.auto_reduce_check.hide()
         
     def _output_dir_browse(self):
         output_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
@@ -330,8 +328,12 @@ class DataReflWidget(BaseWidget):
         self._summary.log_scale_chk.hide()
                  
     def _create_auto_reduce_template(self):
-        from reduction.instruments.reflectometer.refm_automated_reduction import automation_script
-        content = automation_script(self.get_editing_state())
+        """
+            Generate an auto-reduction script. This option is currently turned off.
+            It can be enabled by replacing the content variable below by a script
+            to be executed by the SNS auto-reduction infrastructure.
+        """
+        content = "# This is a placeholder for a generated auto-reduction script"
         
         # Check whether we can write to the system folder
         def _report_error(error=None):
@@ -369,7 +371,6 @@ class DataReflWidget(BaseWidget):
         
     def _auto_reduce(self, is_checked=False):
         if is_checked:
-            
             self._summary.auto_reduce_help_label.show()
             self._summary.auto_reduce_tip_label.show()
             self._summary.auto_reduce_btn.show()
@@ -909,40 +910,40 @@ class DataReflWidget(BaseWidget):
         ws_base = "__%s" % basename
     
         ws_output_base_ff = "Counts vs X pixel - " + basename + " Off_Off" 
-        if mtd.workspaceExists(ws_output_base_ff):
-            mtd.deleteWorkspace(ws_output_base_ff)
+        if AnalysisDataService.doesExist(ws_output_base_ff):
+            AnalysisDataService.remove(ws_output_base_ff)
             ws_output_base_1 = ws_output_base_ff + "_2D"
-            mtd.deleteWorkspace(ws_output_base_1)            
+            AnalysisDataService.remove(ws_output_base_1)            
             ws_output_base_2 = ws_base + " - Off_Off"
-            mtd.deleteWorkspace(ws_output_base_2)
+            AnalysisDataService.remove(ws_output_base_2)
         
         ws_output_base_nf = "Counts vs X pixel - " + basename + " On_Off" 
-        if mtd.workspaceExists(ws_output_base_nf):
-            mtd.deleteWorkspace(ws_output_base_nf)
+        if AnalysisDataService.doesExist(ws_output_base_nf):
+            AnalysisDataService.remove(ws_output_base_nf)
             ws_output_base_1 = ws_output_base_nf + "_2D"
-            mtd.deleteWorkspace(ws_output_base_1)            
+            AnalysisDataService.remove(ws_output_base_1)            
             ws_output_base_2 = ws_base + " - On_Off"
-            mtd.deleteWorkspace(ws_output_base_2)
+            AnalysisDataService.remove(ws_output_base_2)
         
         ws_output_base_fn = "Counts vs X pixel - " + basename + " Off_On" 
-        if mtd.workspaceExists(ws_output_base_fn):
-            mtd.deleteWorkspace(ws_output_base_fn)
+        if AnalysisDataService.doesExist(ws_output_base_fn):
+            AnalysisDataService.remove(ws_output_base_fn)
             ws_output_base_1 = ws_output_base_fn + "_2D"
-            mtd.deleteWorkspace(ws_output_base_1)            
+            AnalysisDataService.remove(ws_output_base_1)            
             ws_output_base_2 = ws_base + " - Off_On"
-            mtd.deleteWorkspace(ws_output_base_2)
+            AnalysisDataService.remove(ws_output_base_2)
 
         ws_output_base_nn = "Counts vs X pixel - " + basename + " On_On" 
-        if mtd.workspaceExists(ws_output_base_nn):
-            mtd.deleteWorkspace(ws_output_base_nn)
+        if AnalysisDataService.doesExist(ws_output_base_nn):
+            AnalysisDataService.remove(ws_output_base_nn)
             ws_output_base_1 = ws_output_base_nn + "_2D"
-            mtd.deleteWorkspace(ws_output_base_1)            
+            AnalysisDataService.remove(ws_output_base_1)            
             ws_output_base_2 = ws_base + " - On_On"
-            mtd.deleteWorkspace(ws_output_base_2)
+            AnalysisDataService.remove(ws_output_base_2)
 
         ws_output_base_all = ws_base + '_all' 
-        if mtd.workspaceExists(ws_output_base_all):
-            mtd.deleteWorkspace(ws_output_base_all)
+        if AnalysisDataService.doesExist(ws_output_base_all):
+            AnalysisDataService.remove(ws_output_base_all)
 
         data_manipulation.counts_vs_pixel_distribution(file_path, 
                                                        is_pixel_y=False, 

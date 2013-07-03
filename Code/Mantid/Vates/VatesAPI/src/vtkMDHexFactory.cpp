@@ -240,10 +240,10 @@ namespace Mantid
         // Direct 3D, so no slicing
         this->slice = false;
       }
-      progressUpdating.eventRaised(10);
+      progressUpdating.eventRaised(0.1);
       // Macro to call the right instance of the
       CALL_MDEVENT_FUNCTION(this->doCreate, imdws);
-      progressUpdating.eventRaised(100);
+      progressUpdating.eventRaised(1.0);
 
       // Clean up
       if (this->slice)

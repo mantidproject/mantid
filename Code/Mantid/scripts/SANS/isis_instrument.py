@@ -720,6 +720,34 @@ class SANS2D(ISISInstrument):
         #as spectrum numbers of the first detector have changed we'll move those in the second too  
         second.place_after(first)
 
+    def _getDetValues(self, ws_name):
+        """
+        Retrive the values of Front_Det_Z, Front_Det_X, Front_Det_Rot, Rear_Det_Z and Rear_Det_X from
+        the workspace. If it does not find the value at the run info, it takes as default value the
+        self.FRONT_DET_Z, self... which are extracted from the sample workspace at apply_detector_log.
+        
+        This is done to allow the function move_components to use the correct values and not to use 
+        all the values for TRANS ans SAMPLE the same, as sometimes, this assumption is not valid.
+
+        The reason for this method is explained at the ticket http://trac.mantidproject.org/mantid/ticket/7314.
+        """
+        # set the default value for these variables
+        values = [self.FRONT_DET_Z, self.FRONT_DET_X, self.FRONT_DET_ROT, self.REAR_DET_Z, self.REAR_DET_X]
+        # get these variables from the workspace run
+        run_info = mtd[str(ws_name)].run()
+        ind = 0
+        for name in ('Front_Det_Z', 'Front_Det_X', 'Front_Det_Rot',
+                     'Rear_Det_Z','Rear_Det_X'):
+            try:
+                var = run_info.get(name).value[0]
+                values[ind] = float(var)
+            except:
+                pass # ignore, because we do have a default value            
+            ind+=1
+        #return these variables
+        return tuple(values)
+        
+
     def  move_components(self, ws, xbeam, ybeam):
         """
             Move the locations of the sample and detector bank based on the passed beam center
@@ -730,17 +758,19 @@ class SANS2D(ISISInstrument):
             @param ybeam: y-position of the beam in meters
             @return: the locations of (in the new coordinates) beam center, center of detector bank
         """
-
         frontDet = self.getDetector('front')
         rearDet = self.getDetector('rear')
+
+        FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X = self._getDetValues(ws)
+
         # Deal with front detector
         # 9/1/2  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
 		# the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
 		# Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
         # rotate front detector according to value in log file and correction value provided in user file
-        rotateDet = (-self.FRONT_DET_ROT - frontDet.rot_corr)
+        rotateDet = (-FRONT_DET_ROT - frontDet.rot_corr)
         RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X="0.", Y="1.0", Z="0.", Angle=rotateDet)       
-        RotRadians = math.pi*(self.FRONT_DET_ROT + frontDet.rot_corr)/180.
+        RotRadians = math.pi*(FRONT_DET_ROT + frontDet.rot_corr)/180.
         # The rear detector is translated to the beam position using the beam centre coordinates in the user file.
 		# (Note that the X encoder values in NOT used for the rear detector.)
 		# The front detector is translated using the difference in X encoder values, with a correction from the user file.
@@ -750,13 +780,13 @@ class SANS2D(ISISInstrument):
 		# this inserts *(1.0-math.cos(RotRadians)) into xshift, and 
 		# - frontDet.side_corr*math.sin(RotRadians) into zshift.
 		# (Note we may yet need to introduce further corrections for parallax errors in the detectors, which may be wavelength dependent!)
-        xshift = (self.REAR_DET_X + rearDet.x_corr -frontDet.x_corr - self.FRONT_DET_X  -frontDet.side_corr*(1-math.cos(RotRadians)) + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
+        xshift = (REAR_DET_X + rearDet.x_corr -frontDet.x_corr - FRONT_DET_X  -frontDet.side_corr*(1-math.cos(RotRadians)) + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*math.sin(RotRadians) )/1000. - self.FRONT_DET_DEFAULT_X_M - xbeam
         yshift = (frontDet.y_corr/1000.  - ybeam)
         # Note don't understand the comment below (9/1/12 these are comments from the original python code, you may remove them if you like!)
         # default in instrument description is 23.281m - 4.000m from sample at 19,281m !
         # need to add ~58mm to det1 to get to centre of detector, before it is rotated.
 		# 21/3/12 RKH add .radius_corr
-        zshift = (self.FRONT_DET_Z + frontDet.z_corr + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*(1 - math.cos(RotRadians)) - frontDet.side_corr*math.sin(RotRadians))/1000.
+        zshift = (FRONT_DET_Z + frontDet.z_corr + (self.FRONT_DET_RADIUS +frontDet.radius_corr)*(1 - math.cos(RotRadians)) - frontDet.side_corr*math.sin(RotRadians))/1000.
         zshift -= self.FRONT_DET_DEFAULT_SD_M
         MoveInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")
         
@@ -765,7 +795,7 @@ class SANS2D(ISISInstrument):
                
         xshift = -xbeam
         yshift = -ybeam
-        zshift = (self.REAR_DET_Z + rearDet.z_corr)/1000.
+        zshift = (REAR_DET_Z + rearDet.z_corr)/1000.
         zshift -= self.REAR_DET_DEFAULT_SD_M
         sanslog.notice("Setup move "+str(xshift*1000.)+" "+str(yshift*1000.)+" "+str(zshift*1000.))
         MoveInstrumentComponent(Workspace=ws,ComponentName= rearDet.name(), X = xshift, Y = yshift, Z = zshift, RelativePosition="1")    

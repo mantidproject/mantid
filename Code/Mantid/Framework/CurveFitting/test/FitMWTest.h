@@ -106,7 +106,7 @@ public:
     TS_ASSERT_EQUALS(covar->Double(1,2), 100.0);
     TS_ASSERT(fabs(covar->Double(0,2)) < 100.0);
     TS_ASSERT(fabs(covar->Double(0,2)) > 0.0);
-    TS_ASSERT_EQUALS(covar->Double(0,2), covar->Double(1,1));
+    TS_ASSERT_DELTA(covar->Double(0,2), covar->Double(1,1), 0.000001);
 
     TS_ASSERT_DIFFERS( fun->getError(0), 0.0 );
     TS_ASSERT_DIFFERS( fun->getError(1), 0.0 );
@@ -361,13 +361,100 @@ public:
 
   }
 
+#ifdef _WIN32
+#pragma warning( push )
+// Disable division by 0 warning
+#pragma warning( disable: 4723 )
+#endif
+
+  void test_ignore_invalid_data()
+  {
+      auto ws = createTestWorkspace(false);
+      const double zero = 0.0;
+      const double one = 1.0;
+      ws->dataY(0)[3] = 1.0 / zero;
+      ws->dataY(0)[5] = log(-one);
+      ws->dataE(0)[7] = 0;
+      ws->dataE(0)[9] = 1.0 / zero;
+      ws->dataE(0)[11] = log(-one);
+
+      FunctionDomain_sptr domain;
+      IFunctionValues_sptr values;
+
+      // Requires a property manager to make a workspce
+      auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+      const std::string wsPropName = "TestWorkspaceInput";
+      propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
+      propManager->setProperty<Workspace_sptr>(wsPropName, ws);
+
+      FitMW fitmw(propManager.get(), wsPropName);
+      fitmw.declareDatasetProperties("", true);
+      fitmw.ignoreInvalidData(true);
+      fitmw.createDomain(domain, values);
+
+      FunctionValues *val = dynamic_cast<FunctionValues*>(values.get());
+      for(size_t i = 0; i < val->size(); ++i)
+      {
+          if ( i == 3 || i == 5 || i == 7 || i == 9 || i == 11 )
+          {
+              TS_ASSERT_EQUALS( val->getFitWeight(i), 0.0 );
+          }
+          else
+          {
+              TS_ASSERT_DIFFERS( val->getFitWeight(i), 0.0 );
+          }
+      }
+
+      API::IFunction_sptr fun(new ExpDecay);
+      fun->setParameter("Height",1.);
+      fun->setParameter("Lifetime",1.0);
+
+      Fit fit;
+      fit.initialize();
+
+      fit.setProperty("Function",fun);
+      fit.setProperty("InputWorkspace",ws);
+      fit.setProperty("WorkspaceIndex",0);
+
+      fit.execute();
+      TS_ASSERT(! fit.isExecuted());
+
+      fit.setProperty("IgnoreInvalidData",true);
+      fit.setProperty("Minimizer","Levenberg-Marquardt");
+      fit.execute();
+      TS_ASSERT(fit.isExecuted());
+
+      TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-3);
+      TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
+
+      // check Levenberg-MarquardtMD minimizer
+      fun->setParameter("Height",1.);
+      fun->setParameter("Lifetime",1.0);
+      Fit fit1;
+      fit1.initialize();
+      fit1.setProperty("Function",fun);
+      fit1.setProperty("InputWorkspace",ws);
+      fit1.setProperty("WorkspaceIndex",0);
+      fit1.setProperty("IgnoreInvalidData",true);
+      fit1.setProperty("Minimizer","Levenberg-MarquardtMD");
+      fit1.execute();
+      TS_ASSERT(fit1.isExecuted());
+
+      TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-3);
+      TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
+
+  }
+
+#ifdef _WIN32
+#pragma warning ( pop ) // Re-enable the warning
+#endif
 
 private:
 
   API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram)
   {
     MatrixWorkspace_sptr ws2(new WorkspaceTester);
-    ws2->initialize(2,10,10);
+    ws2->initialize(2,20,20);
 
     for(size_t is = 0; is < ws2->getNumberHistograms(); ++is)
     {

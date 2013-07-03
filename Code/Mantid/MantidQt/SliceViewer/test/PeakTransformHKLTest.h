@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidQtSliceViewer/PeakTransformHKL.h"
+#include "MantidCrystal/PeaksInRegion.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
 
@@ -48,6 +49,11 @@ public:
     TS_ASSERT_EQUALS(transformed.Y(), original.Y());
     TS_ASSERT_EQUALS(transformed.Z(), original.Z());
 
+    V3D backToOriginal = transform.transformBack(transformed);
+    TS_ASSERT_EQUALS(backToOriginal.X(), original.X());
+    TS_ASSERT_EQUALS(backToOriginal.Y(), original.Y());
+    TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
+
     boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
   }
 
@@ -59,6 +65,11 @@ void test_transformHKL()
   TS_ASSERT_EQUALS(transformed.X(), original.X());
   TS_ASSERT_EQUALS(transformed.Y(), original.Y());
   TS_ASSERT_EQUALS(transformed.Z(), original.Z());
+
+  V3D backToOriginal = transform.transformBack(transformed);
+  TS_ASSERT_EQUALS(backToOriginal.X(), original.X());
+  TS_ASSERT_EQUALS(backToOriginal.Y(), original.Y());
+  TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
 
   boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
 }
@@ -72,6 +83,11 @@ void test_transformHLK()
   TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> L
   TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> K
 
+  V3D backToOriginal = transform.transformBack(transformed);
+  TS_ASSERT_EQUALS(backToOriginal.X(), original.X());
+  TS_ASSERT_EQUALS(backToOriginal.Y(), original.Y());
+  TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
+
   boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
 }
 
@@ -83,6 +99,11 @@ void test_transformLKH()
   TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> L
   TS_ASSERT_EQUALS(transformed.Y(), original.Y()); // Y -> K
   TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> H
+
+  V3D backToOriginal = transform.transformBack(transformed);
+  TS_ASSERT_EQUALS(backToOriginal.X(), original.X());
+  TS_ASSERT_EQUALS(backToOriginal.Y(), original.Y());
+  TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
 
   boost::regex_match("H (Lattice)", transform.getFreePeakAxisRegex());
 }
@@ -96,6 +117,11 @@ void test_transformLHK()
   TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> H
   TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> K
 
+  V3D backToOriginal = transform.transformBack(transformed);
+  TS_ASSERT_EQUALS(backToOriginal.X(), original.X());
+  TS_ASSERT_EQUALS(backToOriginal.Y(), original.Y());
+  TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
+
   boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
 }
 
@@ -108,6 +134,11 @@ void test_transformKLH()
   TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> L
   TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> H
 
+  V3D backToOriginal = transform.transformBack(transformed);
+  TS_ASSERT_EQUALS(backToOriginal.X(), original.X());
+  TS_ASSERT_EQUALS(backToOriginal.Y(), original.Y());
+  TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
+
   boost::regex_match("H (Lattice)", transform.getFreePeakAxisRegex());
 }
 
@@ -119,6 +150,11 @@ void test_transformKHL()
   TS_ASSERT_EQUALS(transformed.X(), original.Y()); // X -> K
   TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> H
   TS_ASSERT_EQUALS(transformed.Z(), original.Z()); // Z -> L
+
+  V3D backToOriginal = transform.transformBack(transformed);
+  TS_ASSERT_EQUALS(backToOriginal.X(), original.X());
+  TS_ASSERT_EQUALS(backToOriginal.Y(), original.Y());
+  TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
 
   boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
 }
@@ -200,6 +236,12 @@ void test_getFriendlyName()
 {
   PeakTransformHKL transform;
   TS_ASSERT_EQUALS(PeakTransformHKL::name(), transform.getFriendlyName());
+  TS_ASSERT_EQUALS("HKL", transform.getFriendlyName());
+}
+
+void test_friendlyname_against_PeaksInRegion()
+{
+  TSM_ASSERT_EQUALS("These labels must be compatible", PeakTransformHKL::name(), Mantid::Crystal::PeaksInRegion::hklFrame());
 }
 
 void test_getCoordinateSystem()

@@ -45,11 +45,7 @@ namespace MantidQt
      */
     void ConcretePeaksPresenter::produceViews()
     {
-      // Loop through the peaks workspace, and use the factory to create a view from each peaks.
-      for (int i = 0; i < m_peaksWS->getNumberPeaks(); ++i)
-      {
-        m_viewPeaks[i] = m_viewFactory->createView(i, m_transform);
-      }
+      m_viewPeaks = m_viewFactory->createView(m_transform);
     }
 
     /**
@@ -102,9 +98,8 @@ namespace MantidQt
      @param transformFactory : Peak Transformation Factory. This is about interpreting the MODEL.
      */
     ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, IPeaksWorkspace_sptr peaksWS,
-        boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) :
-        m_viewPeaks(peaksWS->getNumberPeaks()), m_viewFactory(viewFactory), m_peaksWS(peaksWS), m_transformFactory(
-            transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0),
+        boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) : m_viewFactory(viewFactory), m_peaksWS(peaksWS), m_transformFactory(
+            transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
             g_log(Mantid::Kernel::Logger::get("PeaksPresenter"))
     {
       // Check that the workspaces appear to be compatible. Log if otherwise.
@@ -126,25 +121,58 @@ namespace MantidQt
      */
     void ConcretePeaksPresenter::update()
     {
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+        m_viewPeaks->updateView();
+    }
+
+
+    /**
+     * Find the peaks in the region.
+     * Update the view with all those peaks that could be viewable.
+     *
+     * Also takes into account the peak radius, so needs to be re-executed when the user changes the effective radius of the peaks markers.
+     */
+    void ConcretePeaksPresenter::doFindPeaksInRegion()
+    {
+      PeakBoundingBox transformedViewableRegion = m_slicePoint.makeSliceBox(1e-6); //TODO, could actually be calculated as a single plane with z = 0 thickness.
+      transformedViewableRegion.transformBox(m_transform);
+
+      double effectiveRadius = m_viewPeaks->getRadius(); // Effective radius of each peak representation.
+
+      Mantid::API::IPeaksWorkspace_sptr peaksWS =
+          boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(this->m_peaksWS);
+
+      Mantid::API::IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PeaksInRegion");
+      alg->setChild(true);
+      alg->setRethrows(true);
+      alg->initialize();
+      alg->setProperty("InputWorkspace", peaksWS);
+      alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
+      alg->setProperty("Extents", transformedViewableRegion.toExtents());
+      alg->setProperty("CheckPeakExtents", true);
+      alg->setProperty("PeakRadius", effectiveRadius);
+      alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
+      alg->execute();
+      ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
+      std::vector<bool> viewablePeaks(outTable->rowCount());
+      for (size_t i = 0; i < outTable->rowCount(); ++i)
       {
-        (*it)->updateView();
+        viewablePeaks[i] = outTable->cell<Boolean>(i, 1);
       }
+      m_viewablePeaks = viewablePeaks;
+
+      m_viewPeaks->setSlicePoint(m_slicePoint.slicePoint(), m_viewablePeaks);
     }
 
     /**
-     Allow all view to redraw themselfs following an update to the slice point intersecting plane.
-     @param slicePoint : The new slice position (z) against the x-y plot of data.
+     Allow all view to redraw themselves following an update to the slice point intersecting plane.
+     @param viewableRegion : The new slice position (z) against the x-y plot of data.
      */
-    void ConcretePeaksPresenter::updateWithSlicePoint(const double& slicePoint)
+    void ConcretePeaksPresenter::updateWithSlicePoint(const PeakBoundingBox& viewableRegion)
     {
-      if (m_slicePoint != slicePoint) // only update if required.
+      if (m_slicePoint != viewableRegion) // only update if required.
       {
-        for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-        {
-          (*it)->setSlicePoint(slicePoint);
-        }
-        m_slicePoint = slicePoint;
+        m_slicePoint = viewableRegion;
+        doFindPeaksInRegion();
       }
     }
 
@@ -168,10 +196,7 @@ namespace MantidQt
 
       if (transformSucceeded)
       {
-        for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-        {
-          (*it)->movePosition(m_transform);
-        }
+        m_viewPeaks->movePosition(m_transform);
       }
       return transformSucceeded;
     }
@@ -224,14 +249,8 @@ namespace MantidQt
      */
     void ConcretePeaksPresenter::showAll()
     {
-      // Show all views.
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        if ((*it) != NULL)
-        {
-          (*it)->showView();
-        }
-      }
+      if(m_viewPeaks!=NULL)
+        m_viewPeaks->showView();
     }
 
     /**
@@ -240,13 +259,8 @@ namespace MantidQt
     void ConcretePeaksPresenter::hideAll()
     {
       // Hide all views.
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        if ((*it) != NULL)
-        {
-          (*it)->hideView();
-        }
-      }
+      if(m_viewPeaks!=NULL)
+        m_viewPeaks->hideView();
     }
 
     /**
@@ -263,26 +277,20 @@ namespace MantidQt
     void ConcretePeaksPresenter::setForegroundColour(const QColor colour)
     {
       // Change foreground colours
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if(m_viewPeaks!=NULL)
       {
-        if ((*it) != NULL)
-        {
-          (*it)->changeForegroundColour(colour);
-          (*it)->updateView();
-        }
+        m_viewPeaks->changeForegroundColour(colour);
+        m_viewPeaks->updateView();
       }
     }
 
     void ConcretePeaksPresenter::setBackgroundColour(const QColor colour)
     {
       // Change background colours
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if(m_viewPeaks!=NULL)
       {
-        if ((*it) != NULL)
-        {
-          (*it)->changeBackgroundColour(colour);
-          (*it)->updateView();
-        }
+        m_viewPeaks->changeBackgroundColour(colour);
+        m_viewPeaks->updateView();
       }
     }
 
@@ -294,34 +302,26 @@ namespace MantidQt
     void ConcretePeaksPresenter::showBackgroundRadius(const bool show)
     {
       // Change background colours
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if(m_viewPeaks!=NULL)
       {
-        if ((*it) != NULL)
-        {
-          (*it)->showBackgroundRadius(show);
-          (*it)->updateView();
-        }
+        m_viewPeaks->showBackgroundRadius(show);
+        doFindPeaksInRegion();
       }
     }
 
     void ConcretePeaksPresenter::setShown(const bool shown)
     {
-      // Change background colours
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if(m_viewPeaks!=NULL)
       {
-        PeakOverlayView_sptr view = (*it);
-        if ((*it) != NULL)
-        {
-          if (shown)
+       if (shown)
           {
-            view->showView();
+            m_viewPeaks->showView();
           }
           else
           {
-            view->hideView();
+            m_viewPeaks->hideView();
           }
-          view->updateView();
-        }
+          m_viewPeaks->updateView();
       }
     }
 
@@ -331,11 +331,11 @@ namespace MantidQt
      */
     PeakBoundingBox ConcretePeaksPresenter::getBoundingBox(const int peakIndex) const
     {
-      if (peakIndex < 0 || peakIndex > static_cast<int>(m_viewPeaks.size()))
+      if(peakIndex < 0 || peakIndex > static_cast<int>(m_peaksWS->rowCount()))
       {
-        throw std::out_of_range("PeakIndex is out of range");
+        throw std::out_of_range("Index given to ConcretePeaksPresenter::getBoundingBox() is out of range.");
       }
-      return this->m_viewPeaks[peakIndex]->getBoundingBox();
+      return m_viewPeaks->getBoundingBox(peakIndex);
     }
 
     void ConcretePeaksPresenter::sortPeaksWorkspace(const std::string& byColumnName,
@@ -360,47 +360,29 @@ namespace MantidQt
       this->produceViews();
 
       // Give the new views the current slice point.
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        (*it)->setSlicePoint(this->m_slicePoint);
-      }
+      m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(), m_viewablePeaks);
+      
     }
 
     void ConcretePeaksPresenter::setPeakSizeOnProjection(const double fraction)
     {
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        if ((*it) != NULL)
-        {
-          (*it)->changeOccupancyInView(fraction);
-          (*it)->updateView();
-        }
-      }
+      m_viewPeaks->changeOccupancyInView(fraction);
+      m_viewPeaks->updateView();
     }
 
     void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction)
     {
-      for (VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-      {
-        if ((*it) != NULL)
-        {
-          (*it)->changeOccupancyIntoView(fraction);
-          (*it)->updateView();
-        }
-      }
+      m_viewPeaks->changeOccupancyIntoView(fraction);
+      doFindPeaksInRegion();
+      //m_viewPeaks->updateView();
     }
 
     double ConcretePeaksPresenter::getPeakSizeOnProjection() const
     {
       double result = 0;
-      for (VecPeakOverlayView::const_iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if (m_viewPeaks != NULL && m_viewPeaks->positionOnly())
       {
-        PeakOverlayView_sptr view = (*it);
-        if (view != NULL && view->positionOnly())
-        {
-          result = m_viewPeaks.front()->getOccupancyInView();
-          break;
-        }
+        result = m_viewPeaks->getOccupancyInView();
       }
       return result;
     }
@@ -408,14 +390,9 @@ namespace MantidQt
     double ConcretePeaksPresenter::getPeakSizeIntoProjection() const
     {
       double result = 0;
-      for (VecPeakOverlayView::const_iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      if (m_viewPeaks != NULL && m_viewPeaks->positionOnly())
       {
-        PeakOverlayView_sptr view = (*it);
-        if (view != NULL && view->positionOnly())
-        {
-          result = m_viewPeaks.front()->getOccupancyIntoView();
-          break;
-        }
+        result = m_viewPeaks->getOccupancyIntoView();
       }
       return result;
     }

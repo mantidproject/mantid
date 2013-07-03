@@ -82,12 +82,6 @@ def getRunTitle(workspace):
     title = ins + runNo + '-' + title
     return title
 
-def getDetectorTwoTheta(detector, samplePos, beamPos): #fix 'cos getTwoTheta is incorrectly gettwoTheta in new API
-    if hasattr(detector, 'getTwotheta'):
-        return detector.getTwotheta(samplePos, beamPos)
-    else:
-        return detector.getTwoTheta(samplePos, beamPos)
-
 def createQaxis(inputWS):
     result = []
     ws = mtd[inputWS]
@@ -99,7 +93,7 @@ def createQaxis(inputWS):
         for i in range(0,nHist):
             efixed = getEfixed(inputWS, i)
             detector = ws.getDetector(i)
-            theta = getDetectorTwoTheta(detector, samplePos, beamPos) / 2
+            theta = detector.getTwoTheta(samplePos, beamPos) / 2
             lamda = math.sqrt(81.787/efixed)
             q = 4 * math.pi * math.sin(theta) / lamda
             result.append(q)
@@ -126,7 +120,7 @@ def GetWSangles(inWS,verbose=False):
     angles = []										# will be list of angles
     for index in range(0, nhist):
         detector = mtd[inWS].getDetector(index)					# get index
-        twoTheta = getDetectorTwoTheta(detector, samplePos, beamPos)*180.0/math.pi		# calc angle
+        twoTheta = detector.getTwoTheta(samplePos, beamPos)*180.0/math.pi		# calc angle
         angles.append(twoTheta)						# add angle
     return angles
 
@@ -143,7 +137,7 @@ def GetThetaQ(inWS):
     Q = []
     for index in range(0,nhist):
         detector = mtd[inWS].getDetector(index)					# get index
-        twoTheta = getDetectorTwoTheta(detector, samplePos, beamPos)*180.0/math.pi		# calc angle
+        twoTheta = detector.getTwoTheta(samplePos, beamPos)*180.0/math.pi		# calc angle
         theta.append(twoTheta)						# add angle
         Q.append(k0*math.sin(0.5*twoTheta*d2r))
     return theta,Q

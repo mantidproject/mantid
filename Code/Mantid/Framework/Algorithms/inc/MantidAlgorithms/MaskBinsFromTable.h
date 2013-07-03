@@ -55,6 +55,22 @@ namespace Algorithms
     // Implement abstract Algorithm methods
     void exec();
 
+    /// Process input Mask bin TableWorkspace.
+    void processMaskBinWorkspace(DataObjects::TableWorkspace_sptr masktblws, API::MatrixWorkspace_sptr dataws);
+    /// Call MaskBins
+    void maskBins(API::MatrixWorkspace_sptr dataws);
+    /// Convert a list of detector IDs list (string) to a list of spectra/workspace indexes list
+    std::string convertToSpectraList(API::MatrixWorkspace_sptr dataws, std::string detidliststr);
+
+    /// Column indexes of XMin, XMax, SpectraList, DetectorIDsList
+    int id_xmin, id_xmax, id_spec, id_dets;
+    bool m_useDetectorID;
+    bool m_useSpectrumID;
+
+    /// Vector to store XMin, XMax and SpectraList
+    std::vector<double> m_xminVec, m_xmaxVec;
+    std::vector<std::string> m_spectraVec;
+
   };
 
 

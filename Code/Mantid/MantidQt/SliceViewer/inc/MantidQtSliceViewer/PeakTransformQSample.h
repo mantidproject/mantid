@@ -16,7 +16,7 @@ namespace MantidQt
     {
     public:
       /// Transform name.
-      static std::string name(){ return "QLab"; }
+      static std::string name(){ return "Q (sample frame)"; }
       /// Constructor
       PeakTransformQSample();
       /// Constructor

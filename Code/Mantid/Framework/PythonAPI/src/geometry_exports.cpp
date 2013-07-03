@@ -162,6 +162,8 @@ namespace Mantid
     class_< Geometry::ReferenceFrame, boost::noncopyable>("ReferenceFrame", no_init)
       .def( "pointingAlongBeam", &Geometry::ReferenceFrame::pointingAlongBeam)
       .def( "pointingUp", &Geometry::ReferenceFrame::pointingUp)
+      .def( "vecPointingUp", &Geometry::ReferenceFrame::vecPointingUp )
+      .def( "vecPointingAlongBeam", &Geometry::ReferenceFrame::vecPointingAlongBeam )
       ;
   }
 

@@ -43,7 +43,8 @@ namespace MantidQt
     }
 
     /**
-     * @param loggerControl Controls whether the log-level applies globally or only to this channel
+     * @param logLevelControl Controls whether this display shows the right-click option to change
+     * the global log level
      * @param parent An optional parent widget
      */
     MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)

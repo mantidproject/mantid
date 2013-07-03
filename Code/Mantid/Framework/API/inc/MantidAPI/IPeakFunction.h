@@ -64,6 +64,9 @@ protected:
   static int s_peakRadius; 
 };
 
+typedef boost::shared_ptr<IPeakFunction> IPeakFunction_sptr;
+typedef boost::shared_ptr<const IPeakFunction> IPeakFunction_const_sptr;
+
 } // namespace API
 } // namespace Mantid
 

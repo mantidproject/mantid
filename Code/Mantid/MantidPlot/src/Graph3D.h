@@ -44,9 +44,9 @@
 
 using namespace Qwt3D;
 
-class UserFunction;
+class UserFunction2D;
 class UserParametricSurface;
-class UserHelperFunction;//Mantid
+class Function2D;//Mantid
 
 /**\brief 3D graph widget.
  *
@@ -73,10 +73,11 @@ public slots:
 	void copy(Graph3D* g);
 	void initPlot();
 	void initCoord();
-	void addFunction(const QString& s, double xl, double xr, double yl,
-						  double yr, double zl, double zr, int columns, int rows, 
-                          UserHelperFunction* hfun = 0);//Manid
-	void addParametricSurface(const QString& xFormula, const QString& yFormula,
+    void addFunction(Function2D* hfun, double xl, double xr, double yl,
+                          double yr, double zl, double zr, size_t columns, size_t rows);
+    void addFunction(const QString& formula, double xl, double xr, double yl,
+                          double yr, double zl, double zr, size_t columns, size_t rows);
+    void addParametricSurface(const QString& xFormula, const QString& yFormula,
 						const QString& zFormula, double ul, double ur, double vl, double vr,
 						int columns, int rows, bool uPeriodic, bool vPeriodic);
 	void insertNewData(Table* table, const QString& colName);
@@ -108,8 +109,8 @@ public slots:
 
 	//! \name User Functions
 	//@{
-	UserFunction* userFunction(){return d_func;};
-	QString formula();
+    Function2D* userFunction(){ return d_func.data();  }
+    QString formula();
 	//@}
 
 	//! \name Event Handlers
@@ -383,8 +384,8 @@ private:
 	PointStyle pointStyle;
 	Table *d_table;
 	Matrix *d_matrix;
-    Qwt3D::SurfacePlot* sp;
-	UserFunction *d_func;
+    QPointer<Qwt3D::SurfacePlot> sp;
+    QScopedPointer<Function2D> d_func;
 	UserParametricSurface *d_surface;
 	Qwt3D::PLOTSTYLE style_;
 	

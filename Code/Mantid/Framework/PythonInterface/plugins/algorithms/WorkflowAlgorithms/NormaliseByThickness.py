@@ -20,6 +20,8 @@ class NormaliseByThickness(PythonAlgorithm):
         return "NormaliseByThickness"
 
     def PyInit(self):
+        self.setOptionalMessage("Normalise detector counts by the sample thickness")
+        self.setWikiSummary("Normalise detector counts by the sample thickness")
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 

@@ -60,7 +60,9 @@ signals:
   void minSet();
   void nBinsSet();
 private:
-  QGridLayout* m_layout;
+  QVBoxLayout* m_layout;
+  QHBoxLayout* m_binLayout;
+  QHBoxLayout* m_axisLayout;
 
   //QLineEdit* m_nBinsBox;
 
@@ -77,6 +79,8 @@ private:
   QLabel* m_dimensionLabel;
 
   int m_currentDimensionIndex;
+
+  int m_currentBinWidgetIndex;
 
   std::string m_name;
 

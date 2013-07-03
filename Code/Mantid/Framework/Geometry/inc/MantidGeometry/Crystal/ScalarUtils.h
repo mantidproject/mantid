@@ -90,10 +90,11 @@ class MANTID_GEOMETRY_DLL ScalarUtils
                               bool                            use_triclinic );
 
   /// Get list of related cells obtained by reflecting pairs of sides with
-  /// nearly a 90 degree angle between the sides.  
-  static std::vector<Kernel::DblMatrix> GetSignRelatedUBs(
-                                  const Kernel::DblMatrix  & UB,
-                                        double               angle_tolerance );
+  /// nearly a 90 degree angle between the sides, and permuting sides.  
+  static std::vector<Kernel::DblMatrix> GetRelatedUBs(
+                                  const Kernel::DblMatrix & UB,
+                                        double              factor,
+                                        double              angle_tolerance );
 
   private:
   /// Add conventional cell to list if it has the least error for its form num 

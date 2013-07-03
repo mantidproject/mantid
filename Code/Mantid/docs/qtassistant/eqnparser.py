@@ -184,6 +184,25 @@ class Equation:
         Removes potentially dangerous latex code, replacing it with
         a 'LaTeX sanitized' message
         """
+        # fix bad percent signs
+        if '%' in self.eqstring:
+            if self.eqstring[0] == '%':
+                self.eqstring = "\\" + self.eqstring
+            index = self.eqstring.find('%', 1)
+            while index > 0:
+                if self.eqstring[index-1] == "\\": # it is already escaped
+                    index = self.eqstring.find('%', index+1)
+                else:
+                    print "automatically fixing un-escaped percent signs"
+                    self.eqstring = self.eqstring[:index] + "\\" + self.eqstring[index:]
+                    index = self.eqstring.find('%', index+2) # added a character
+
+        # fix prime
+        if "'" in self.eqstring:
+            print "automatically fixing prime characters"
+            self.eqstring = self.eqstring.replace("'", "\prime")
+
+        # turn everything else bad to junky mbox
         lowercase = self.eqstring.lower()
         for tag in bad_tags:
             if tag in lowercase:
@@ -196,8 +215,10 @@ class Equation:
         Compiles the Tex file into a DVI.  If there's an error, raise it.
         """
         self._logger.info("Generating dvi file")
+        if self._latex is None:
+            raise RuntimeError("Failed to specify latex executable")
         if not os.path.exists(self._latex):
-            raise RuntimeError("latex executable ('%s') does not exist" % LATEX)
+            raise RuntimeError("latex executable ('%s') does not exist" % self._latex)
 
         # run latex
         cmd = [self._latex, self.texfile]
@@ -209,6 +230,8 @@ class Equation:
         if retcode != 0:
             print ' '.join(cmd)
             print output
+            print 'RAW EQUATION "%s"' % self.contents
+            print 'TEX EQUATION "%s"' % self.eqstring
             raise RuntimeError("'%s' returned %d" % (" ".join(cmd), retcode))
 
         # names of generated files
@@ -220,6 +243,8 @@ class Equation:
         if not os.path.exists(self.dvifile):
             print ' '.join(cmd)
             print output
+            print 'RAW EQUATION "%s"' % self.contents
+            print 'TEX EQUATION "%s"' % self.eqstring
             raise RuntimeError("Failed to create dvi file '%s'" % self.dvifile)
 
 	#Open the log file and see if anything went wrong
@@ -240,8 +265,10 @@ class Equation:
         Encodes the original latex as an HTML comment.
         """
         self._logger.info("Generating png file")
+        if self._dvipng is None:
+            raise RuntimeError("Failed to specify dvipng executable")
         if not os.path.exists(self._dvipng):
-            raise RuntimeError("dvipng executable ('%s') does not exist" % DVIPNG)
+            raise RuntimeError("dvipng executable ('%s') does not exist" % self._dvipng)
 
         # this command works on RHEL6
         cmd = [self._dvipng, '-Ttight','-D120','-z9','-bg Transparent','--strict',
@@ -255,7 +282,7 @@ class Equation:
         if retcode != 0:
             print ' '.join(cmd)
             print output
-            raise RuntimeError()#"'%s' returned %d" % (" ".join(cmd), retcode))
+            raise RuntimeError("'%s' returned %d" % (" ".join(cmd), retcode))
 
         # verify the png file exists
         if not os.path.exists(self.pngfile):

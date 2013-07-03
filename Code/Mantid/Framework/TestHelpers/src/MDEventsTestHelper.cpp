@@ -77,7 +77,6 @@ namespace MDEventsTestHelper
       }
       retVal->getEventList(pix).addDetectorID(pix);
     }
-    retVal->doneAddingEventLists();
 
     //Create the x-axis for histogramming.
     Mantid::MantidVecPtr x1;

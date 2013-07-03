@@ -563,6 +563,7 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const
 {
   (void) WS;
+  menu->addAction(m_showData);
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries())
   {
@@ -806,12 +807,15 @@ void MantidDockWidget::renameWorkspace()
 {
   //get selected workspace
   QList<QTreeWidgetItem*>selectedItems=m_tree->selectedItems();
-  QString selctedwsName;
+  QStringList selctedwsNames;
   if(!selectedItems.empty())
   {
-    selctedwsName=selectedItems[0]->text(0);
+    for(int i=0; i < selectedItems.size(); ++i)
+    {
+       selctedwsNames.append(selectedItems[i]->text(0));
+    }
   }
-  m_mantidUI->renameWorkspace(selctedwsName);
+  m_mantidUI->renameWorkspace(selctedwsNames);
 }
 
 void MantidDockWidget::showDetectorTable()

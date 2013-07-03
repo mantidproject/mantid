@@ -127,6 +127,10 @@ public:
   void setOutputName(const std::string&);
   /// Get the minimizer
   std::string minimizer(bool withProperties = false)const;
+  /// Get the ignore invalid data option
+  bool ignoreInvalidData() const;
+  /// Set the ignore invalid data option
+  void setIgnoreInvalidData(bool on);
   /// Get the cost function
   std::string costFunction()const;
 
@@ -351,6 +355,7 @@ protected:
   QtProperty *m_endX;
   QtProperty *m_output;
   QtProperty *m_minimizer;
+  QtProperty *m_ignoreInvalidData;
   QtProperty *m_costFunction;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;

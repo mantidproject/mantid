@@ -216,13 +216,13 @@ def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSE
         @param reload: must be set to True
         @param period: the period (entry) number to load, default is the first period
     """    
-    mes = 'AssignCan("' + can_run + '"'
+    mes = 'AssignCan("' + str(can_run) + '"'
     if period != isis_reduction_steps.LoadRun.UNSET_PERIOD:
         mes += ', ' + str(period)
     mes += ')'
     _printMessage(mes)
 
-    if (not can_run) or can_run.startswith('.'):
+    if (not can_run) or (isinstance(can_run,str) and can_run.startswith('.')):
         ReductionSingleton().background_subtracter = None
         return '', None
 
@@ -243,8 +243,8 @@ def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = 
         @param period_t: the entry number of the transmission run (default single entry file)  
         @param period_d: the entry number of the direct run (default single entry file)
     """  
-    _printMessage('TransmissionSample("' + sample + '","' + direct + '")')
-    ReductionSingleton().set_trans_sample(sample, direct, True, period_t, period_d)
+    _printMessage('TransmissionSample("' + str(sample) + '","' + str(direct) + '")')
+    ReductionSingleton().set_trans_sample(sample, direct, reload, period_t, period_d)
     return ReductionSingleton().samp_trans_load.execute(
                                         ReductionSingleton(), None)
 
@@ -257,8 +257,8 @@ def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
         @param period_t: the entry number of the transmission run (default single entry file)  
         @param period_d: the entry number of the direct run (default single entry file)
     """
-    _printMessage('TransmissionCan("' + can + '","' + direct + '")')
-    ReductionSingleton().set_trans_can(can, direct, True, period_t, period_d)
+    _printMessage('TransmissionCan("' + str(can) + '","' + str(direct) + '")')
+    ReductionSingleton().set_trans_can(can, direct, reload, period_t, period_d)
     return ReductionSingleton().can_trans_load.execute(
                                             ReductionSingleton(), None) 
     
@@ -271,7 +271,7 @@ def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRu
         @param reload: must be set to True
         @param period: the period (entry) number to load, default is the first period
     """
-    mes = 'AssignSample("' + sample_run + '"'
+    mes = 'AssignSample("' + str(sample_run) + '"'
     if period != isis_reduction_steps.LoadRun.UNSET_PERIOD:
         mes += ', ' + str(period)
     mes += ')'
@@ -495,6 +495,16 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 mergedQ -= (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
             
             RenameWorkspace(InputWorkspace=mergedQ,OutputWorkspace= retWSname_merged)
+
+            # save the properties Transmission and TransmissionCan inside the merged workspace
+            # get these values from the rear_workspace because they are the same value as the front one.
+            # ticket #6929
+            rear_ws = mtd[retWSname_rear]
+            for prop in ['Transmission','TransmissionCan']:
+                if rear_ws.getRun().hasProperty(prop):
+                    ws_name = rear_ws.getRun().getLogData(prop).value
+                    if mtd.doesExist(ws_name): # ensure the workspace has not been deleted
+                        AddSampleLog(Workspace=retWSname_merged,LogName= prop, LogText=ws_name)
         else:
             issueWarning('rear and front data has no overlapping q-region. Merged workspace no calculated')
         

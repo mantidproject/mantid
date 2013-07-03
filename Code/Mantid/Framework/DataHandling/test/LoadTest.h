@@ -575,4 +575,34 @@ public:
   }
 };
 
+
+//-------------------------------------------------------------------------------------------------
+// Performance test
+//
+// This simple checks how long it takes to run the search for a Loader, which is done when
+// the file property is set
+//-------------------------------------------------------------------------------------------------
+
+class LoadTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadTestPerformance *createSuite() { return new LoadTestPerformance(); }
+  static void destroySuite( LoadTestPerformance *suite ) { delete suite; }
+
+  void test_find_loader_performance()
+  {
+    const size_t ntimes(5);
+
+    for(size_t i = 0; i < ntimes; ++i)
+    {
+      Mantid::DataHandling::Load loader;
+      loader.initialize();
+      loader.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    }
+  }
+};
+
+
 #endif /*LOADTEST_H_*/

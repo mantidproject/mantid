@@ -189,6 +189,7 @@ void RunEllipsoidIntegrate::run()
  */
 MantidEV::MantidEV(QWidget *parent) : UserSubWindow(parent)
 {
+  last_Q        = V3D(0,0,0);
   worker        = new MantidEVWorker();
   m_thread_pool = new QThreadPool( this );
   m_thread_pool->setMaxThreadCount(1);
@@ -824,17 +825,26 @@ void MantidEV::findUB_slot()
        if ( optimize_angles )
        {
          double max_degrees = 5;
-         if (!getPositiveDouble( m_uiForm.MaxGoniometerChange_ledt,max_degrees))
-           return;
-
-         if ( !worker->optimizePhiChiOmega( peaks_ws_name, max_degrees ) )
+         if ( getPositiveDouble( m_uiForm.MaxGoniometerChange_ledt,max_degrees) )
+         { 
+           if ( !worker->optimizePhiChiOmega( peaks_ws_name, max_degrees ) )
+           {
+             errorMessage("Failed to Optimize Phi, Chi and Omega");
+             // Don't return here, since we did still change UB by loading it.
+             // proceed to copyLattice, below.
+           }
+         }
+         else
          {
-           errorMessage("Failed to Optimize Phi, Chi and Omega");
-           return;
+           errorMessage( "Enter a POSITIVE number for Maximum Change (degrees)" );
          }
        }
      }
    }
+                               // Now that we set a UB copy it to md_workspace.  If
+                               // copy fails a log notice is output by copyLattice
+   std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+   worker->copyLattice( peaks_ws_name, md_ws_name );
 
    if ( index_peaks )
    {
@@ -866,7 +876,7 @@ void MantidEV::getLoadUB_FileName_slot()
     last_UB_file = Qfile_name.toStdString();
     m_uiForm.SelectUBFile_ledt->setText( Qfile_name );
   }
-}
+} 
 
 
 /**
@@ -942,6 +952,13 @@ void MantidEV::chooseCell_slot()
        errorMessage("Failed to Select the Requested Form Number");
      }
    }
+
+   if ( select_cell_type || select_cell_form )
+   {                                 // Try to copy the UB to md_workspace.  If it
+                                     // fails a log notice is output by copyLattice
+     std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+     worker->copyLattice( peaks_ws_name, md_ws_name );
+   }
 }
 
 
@@ -971,6 +988,11 @@ void MantidEV::changeHKL_slot()
    {
      errorMessage( "Failed to Change the Miller Indicies and UB" );
    }
+
+                                     // Try to copy the UB to md_workspace.  If it
+                                     // fails a log notice is output by copyLattice
+   std::string md_ws_name = m_uiForm.MDworkspace_ledt->text().trimmed().toStdString();
+   worker->copyLattice( peaks_ws_name, md_ws_name );
 }
 
 
@@ -1121,7 +1143,7 @@ void MantidEV::QPointSelection_slot( bool lab_coords, double qx, double qy, doub
  *
  *  @param  lab_coords  Will be true if the Q-components are in lab coordinates
  *                      and false if they are in sample coordinates.
- *  @param q_point Vector containing the Q-coordinates.
+ *  @param  q_point     Vector containing the Q-coordinates.
  */
 void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
 {
@@ -1148,6 +1170,26 @@ void MantidEV::showInfo( bool lab_coords, Mantid::Kernel::V3D  q_point )
      info = worker->PointInfo( peaks_ws_name, lab_coords, q_point );
    }
 
+   double q_dist = ( q_point - last_Q ).norm();
+   std::pair<std::string, std::string> Q_dist_str("|Q2-Q1|", boost::lexical_cast<std::string>(q_dist));
+   info.push_back( Q_dist_str );
+
+   Mantid::Kernel::Matrix<double> UB(3,3,false);
+   if ( worker->getUB( peaks_ws_name, lab_coords, UB ) ) // if the peaks workspace has a UB, also find the
+   {                                                     // distance between points in HKL.
+     Mantid::Kernel::Matrix<double> UBinv( UB ); 
+     UBinv.Invert();
+     Mantid::Kernel::V3D  hkl_1 = UBinv * last_Q;
+     Mantid::Kernel::V3D  hkl_2 = UBinv * q_point;
+     hkl_1 = hkl_1 / (2 * M_PI); 
+     hkl_2 = hkl_2 / (2 * M_PI);
+     double hkl_dist = (hkl_2 - hkl_1).norm();
+     std::pair<std::string, std::string> hkl_dist_str("|hkl2-hkl1|", boost::lexical_cast<std::string>(hkl_dist));
+     info.push_back( hkl_dist_str );
+   }
+
+   last_Q = q_point;
+   
    m_uiForm.SelectedPoint_tbl->setRowCount((int)info.size());
    m_uiForm.SelectedPoint_tbl->setColumnCount(2);
    m_uiForm.SelectedPoint_tbl->verticalHeader()->hide();

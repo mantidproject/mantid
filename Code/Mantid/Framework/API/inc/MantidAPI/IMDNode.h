@@ -187,6 +187,10 @@ public:
     virtual  uint32_t getDepth() const=0;
     virtual signal_t getSignalNormalized() const=0;
 
+    virtual void calcVolume()=0;
+    virtual void setInverseVolume(const coord_t )=0;
+    virtual void setSignal(const signal_t )=0;
+    virtual void setErrorSquared(const signal_t )=0;
 
     // -------------------------------- Geometry/vertexes-Related -------------------------------------------
     virtual std::vector<Mantid::Kernel::VMD> getVertexes() const =0;

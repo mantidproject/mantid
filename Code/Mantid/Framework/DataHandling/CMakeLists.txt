@@ -50,6 +50,7 @@ set ( SRC_FILES
 	src/LoadInstrumentFromNexus.cpp
 	src/LoadInstrumentFromRaw.cpp
 	src/LoadIsawDetCal.cpp
+	src/LoadLLB.cpp
 	src/LoadLOQDistancesFromRaw.cpp
 	src/LoadLiveData.cpp
 	src/LoadLog.cpp
@@ -69,6 +70,7 @@ set ( SRC_FILES
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
 	src/LoadPDFgetNFile.cpp
+	src/LoadSINQ.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
 	src/LoadPreNexusMonitors.cpp
@@ -115,7 +117,6 @@ set ( SRC_FILES
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
 	src/SaveCanSAS1D2.cpp
-	src/SaveDASC.cpp
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorMasks.cpp
 	src/SaveDetectorsGrouping.cpp
@@ -194,6 +195,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
 	inc/MantidDataHandling/LoadIsawDetCal.h
+	inc/MantidDataHandling/LoadLLB.h
 	inc/MantidDataHandling/LoadLOQDistancesFromRaw.h
 	inc/MantidDataHandling/LoadLiveData.h
 	inc/MantidDataHandling/LoadLog.h
@@ -213,6 +215,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
 	inc/MantidDataHandling/LoadPDFgetNFile.h
+	inc/MantidDataHandling/LoadSINQ.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
@@ -254,7 +257,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
 	inc/MantidDataHandling/SaveCanSAS1D2.h
-	inc/MantidDataHandling/SaveDASC.h
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorMasks.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
@@ -287,7 +289,6 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-  LoadDAETest.h
 	#LoadSNSNexusTest.h # TODO has no active tests in it
 	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
 	ADARAPacketTest.h
@@ -315,6 +316,7 @@ set ( TEST_FILES
 	LoadAsciiTest.h
 	LoadCalFileTest.h
 	LoadCanSAS1dTest.h
+	LoadDAETest.h
 	LoadDaveGrpTest.h
 	LoadDetectorInfoTest.h
 	LoadDetectorsGroupingFileTest.h
@@ -330,12 +332,13 @@ set ( TEST_FILES
 	LoadInstrumentFromRawTest.h
 	LoadInstrumentTest.h
 	LoadIsawDetCalTest.h
+	LoadLLBTest.h
 	LoadLiveDataTest.h
 	LoadLogTest.h
 	LoadLogsFromSNSNexusTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
-	LoadMcStasNexusTest.h	
+	LoadMcStasNexusTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
@@ -343,8 +346,9 @@ set ( TEST_FILES
 	LoadNexusLogsTest.h
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h
-	LoadNexusTest.h	
+	LoadNexusTest.h
 	LoadPDFgetNFileTest.h
+	LoadSINQTest.h
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h
@@ -383,7 +387,6 @@ set ( TEST_FILES
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
 	SaveCanSAS1dTest2.h
-	SaveDASCTest.h
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
 	SaveDspacemapTest.h
@@ -400,7 +403,7 @@ set ( TEST_FILES
 	SaveRKHTest.h
 	SaveSPETest.h
 	SaveToSNSHistogramNexusTest.h
-        SetSampleMaterialTest.h
+	SetSampleMaterialTest.h
 	SetScalingPSDTest.h
 	StartLiveDataTest.h
 	UpdateInstrumentFromFileTest.h

@@ -1783,7 +1783,67 @@ public:
 
   }
 
+  
+  void test_getWeights()
+  {
+	std::vector<double> result;
+	
+	//TOF data should return 1.0
+	fake_data();
+	TS_ASSERT_EQUALS( el.getEventType(), TOF );
+	TS_ASSERT_THROWS_NOTHING(result = el.getWeights());
+	TS_ASSERT_EQUALS (result.size(),el.getNumberEvents()); // right number of entries
+	TS_ASSERT_DELTA (result[0],1.0,0.000001); // first value
+	TS_ASSERT_DELTA (result[el.getNumberEvents()-1],1.0,0.000001); // last value
 
+	//weighted data test data has 2.0 uniform data
+	fake_uniform_data_weights();
+	TS_ASSERT_THROWS_NOTHING(result = el.getWeights());
+    TS_ASSERT_EQUALS( el.getEventType(), WEIGHTED );
+	TS_ASSERT_THROWS_NOTHING(result = el.getWeights());
+	TS_ASSERT_EQUALS (result.size(),el.getNumberEvents()); // right number of entries
+	TS_ASSERT_DELTA (result[0],2.0,0.000001); // first value
+	TS_ASSERT_DELTA (result[el.getNumberEvents()-1],2.0,0.000001); // last value
+
+	//compress the events to no time weighted events
+	el.compressEvents(0, &el);
+    TS_ASSERT_EQUALS( el.getEventType(), WEIGHTED_NOTIME );
+	TS_ASSERT_THROWS_NOTHING(result = el.getWeights());
+	TS_ASSERT_EQUALS (result.size(),el.getNumberEvents()); // right number of entries
+	TS_ASSERT_DELTA (result[0],2.0,0.000001); // first value
+	TS_ASSERT_DELTA (result[el.getNumberEvents()-1],2.0,0.000001); // last value
+
+  }
+
+  void test_getWeightErrors()
+  {
+	std::vector<double> result;
+	  
+	//TOF data should return 1.0
+	fake_data();
+	TS_ASSERT_EQUALS( el.getEventType(), TOF );
+	TS_ASSERT_THROWS_NOTHING(result = el.getWeightErrors());
+	TS_ASSERT_EQUALS (result.size(),el.getNumberEvents()); // right number of entries
+	TS_ASSERT_DELTA (result[0],1.0,0.000001); // first value
+	TS_ASSERT_DELTA (result[el.getNumberEvents()-1],1.0,0.000001); // last value
+
+	//weighted data test data has 2.5 uniform data
+	fake_uniform_data_weights();
+    TS_ASSERT_EQUALS( el.getEventType(), WEIGHTED );
+	TS_ASSERT_THROWS_NOTHING(result = el.getWeightErrors());
+	TS_ASSERT_EQUALS (result.size(),el.getNumberEvents()); // right number of entries
+	TS_ASSERT_DELTA (result[0],2.5,0.000001); // first value
+	TS_ASSERT_DELTA (result[el.getNumberEvents()-1],2.5,0.000001); // last value
+
+	//compress the events to no time weighted events
+	el.compressEvents(0, &el);
+    TS_ASSERT_EQUALS( el.getEventType(), WEIGHTED_NOTIME );
+	TS_ASSERT_THROWS_NOTHING(result = el.getWeightErrors());
+	TS_ASSERT_EQUALS (result.size(),el.getNumberEvents()); // right number of entries
+	TS_ASSERT_DELTA (result[0],2.5,0.000001); // first value
+	TS_ASSERT_DELTA (result[el.getNumberEvents()-1],2.5,0.000001); // last value
+
+  }
 
   //==================================================================================
   // Mocking functions
@@ -2052,7 +2112,7 @@ public:
     double integ = el_sorted.integrate(25e3, 75e3, false);
     TS_ASSERT_DELTA( integ, 5e6, 1);
   }
-
+  
 };
 
 #endif /// EVENTLISTTEST_H_

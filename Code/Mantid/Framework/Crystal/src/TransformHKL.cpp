@@ -16,6 +16,7 @@ Given a PeaksWorkspace with a UB matrix stored with the sample, this algoritm wi
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/Matrix.h"
 #include <cstdio>
+#include "MantidCrystal/SelectCellWithForm.h"
 
 namespace Mantid
 {
@@ -149,17 +150,21 @@ namespace Crystal
              "ERROR: The determinant of the matrix is negative.\n" +
               hkl_tran_string ); 
     }
+    double tolerance = this->getProperty("Tolerance");
+
                                         // Transform looks OK so update UB and
                                         // transform the hkls
     UB = UB * hkl_tran_inverse;
     o_lattice.setUB( UB );
-
+    std::vector<double> sigabc(6);
+    SelectCellWithForm::DetermineErrors(sigabc,UB,ws, tolerance);
+    o_lattice.setError( sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
     ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
 
     std::vector<Peak> &peaks = ws->getPeaks();
     size_t n_peaks = ws->getNumberPeaks();
 
-    double tolerance = this->getProperty("Tolerance");
+
 
                                       // transform all the HKLs and record the new HKL
                                       // and q-vectors for peaks ORIGINALLY indexed

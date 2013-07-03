@@ -4,7 +4,6 @@ from l2q import *
 from mantidsimple import *  # Old API
 #from mantid.simpleapi import *  # New API
 #from mantidplot import *
-from PyQt4 import QtCore, uic
 import math
 
 

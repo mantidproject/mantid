@@ -8,6 +8,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/InstrumentInfo.h"
 
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #include <string>
 
@@ -21,6 +22,8 @@ namespace Poco
     class Element;
   }
 }
+
+class RemoteJobManager;
 
 namespace Mantid
 {
@@ -49,6 +52,7 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+
 class MANTID_KERNEL_DLL FacilityInfo
 {
 public:
@@ -82,6 +86,10 @@ public:
   std::vector<InstrumentInfo> instruments(const std::string& tech) const;
   /// Returns instruments with given name
   const InstrumentInfo & instrument(std::string iName = "") const;
+  /// Returns a vector of the available compute resources
+  std::vector<std::string> computeResources() const;
+  /// Returns the RemoteJobManager for the named compute resource
+  boost::shared_ptr<RemoteJobManager> getRemoteJobManager( const std::string &name) const;
 
 private:
   void fillZeroPadding(const Poco::XML::Element* elem);
@@ -92,6 +100,8 @@ private:
   void fillCatalogName(const Poco::XML::Element* elem);
   void fillInstruments(const Poco::XML::Element* elem);
   void fillLiveListener(const Poco::XML::Element* elem);
+  void fillHTTPProxy(const Poco::XML::Element* elem);
+  void fillComputeResources( const Poco::XML::Element* elem);
 
   /// Add new extension
   void addExtension(const std::string& ext);
@@ -105,6 +115,10 @@ private:
   std::vector<InstrumentInfo> m_instruments;   ///< list of instruments of this facility
   std::string m_catalogName;                   ///< name of the catalog system of this facility
   std::string m_liveListener;                  ///< name of the default live listener
+  std::map< std::string, boost::shared_ptr<RemoteJobManager> > m_computeResources;
+    ///< list of compute resources (clusters, etc...) available at this facility
+    ///< sorted by their names
+    // Note that this is a map of pointers!  RemoteJobManager is an abstract base class.
   static Logger& g_log;                        ///< logger
 };
 

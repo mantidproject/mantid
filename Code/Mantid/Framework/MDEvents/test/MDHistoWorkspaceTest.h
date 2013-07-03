@@ -44,6 +44,11 @@ private:
     }
     return numberMasked;
   }
+  /// Helper method returns the size of an element in the MDHistoWorkspace
+  size_t sizeOfElement()
+  {
+    return (sizeof(double)*3 + sizeof(bool));
+  }
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -85,7 +90,7 @@ public:
 
     TS_ASSERT_EQUALS( ws.getNumDims(), 4);
     TS_ASSERT_EQUALS( ws.getNPoints(), 5*5*5*5);
-    TS_ASSERT_EQUALS( ws.getMemorySize(), 5*5*5*5 * sizeof(double)*2);
+    TS_ASSERT_EQUALS( ws.getMemorySize(), 5*5*5*5 * sizeOfElement());
     TS_ASSERT_EQUALS( ws.getXDimension(), dimX);
     TS_ASSERT_EQUALS( ws.getYDimension(), dimY);
     TS_ASSERT_EQUALS( ws.getZDimension(), dimZ);
@@ -152,7 +157,7 @@ public:
 
     TS_ASSERT_EQUALS( ws.getNumDims(), 2);
     TS_ASSERT_EQUALS( ws.getNPoints(), 5*5);
-    TS_ASSERT_EQUALS( ws.getMemorySize(), 5*5 * sizeof(double)*2);
+    TS_ASSERT_EQUALS( ws.getMemorySize(), 5*5 * sizeOfElement());
     TS_ASSERT_EQUALS( ws.getXDimension(), dimX);
     TS_ASSERT_EQUALS( ws.getYDimension(), dimY);
     TS_ASSERT_THROWS_ANYTHING( ws.getZDimension());
@@ -184,7 +189,7 @@ public:
 
     TS_ASSERT_EQUALS( ws.getNumDims(), 7);
     TS_ASSERT_EQUALS( ws.getNPoints(), 3*3*3*3*3*3*3);
-    TS_ASSERT_EQUALS( ws.getMemorySize(), ws.getNPoints() * sizeof(double)*2);
+    TS_ASSERT_EQUALS( ws.getMemorySize(), ws.getNPoints() * sizeOfElement());
 
     // Setting and getting
     ws.setSignalAt(5,2.3456);
@@ -311,7 +316,7 @@ public:
 
     TS_ASSERT_EQUALS( ws.getNumDims(), 4);
     TS_ASSERT_EQUALS( ws.getNPoints(), 5*10*20*10);
-    TS_ASSERT_EQUALS( ws.getMemorySize(), 5*10*20*10 * sizeof(double)*2);
+    TS_ASSERT_EQUALS( ws.getMemorySize(), 5*10*20*10 * sizeOfElement());
 
     // Setting and getting
     size_t index = 5*10*20*10-1; // The last point

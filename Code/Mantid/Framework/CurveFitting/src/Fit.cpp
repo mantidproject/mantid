@@ -514,6 +514,7 @@ namespace CurveFitting
     mustBePositive->setLower(0);
     declareProperty("MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
+    declareProperty("IgnoreInvalidData",false,"Flag to ignore infinities, NaNs and data with zero errors.");
     declareProperty("OutputStatus","", Kernel::Direction::Output);
     getPointerToProperty("OutputStatus")->setDocumentation( "Whether the fit was successful" );
     declareProperty("OutputChi2overDoF",0.0, "Returns the goodness of the fit", Kernel::Direction::Output);
@@ -583,6 +584,7 @@ namespace CurveFitting
 
     API::FunctionDomain_sptr domain;
     API::IFunctionValues_sptr values;
+    m_domainCreator->ignoreInvalidData(getProperty("IgnoreInvalidData"));
     m_domainCreator->createDomain(domain,values);
 
     // do something with the function which may depend on workspace

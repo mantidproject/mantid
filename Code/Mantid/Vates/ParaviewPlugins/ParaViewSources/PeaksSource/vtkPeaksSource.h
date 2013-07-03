@@ -43,6 +43,8 @@ public:
   
   void SetWsName(std::string wsName);
   void SetPeakDimension(int dim);
+  /// Setter for the unitegrated peak marker size
+  void SetUnintPeakMarkerSize(double mSize);
   /// Update the algorithm progress.
   void updateAlgorithmProgress(double progress, const std::string& message);
   /// Getter for the workspace type
@@ -60,6 +62,9 @@ private:
 
   /// Cache for the workspace type name
   std::string m_wsTypeName;
+
+  /// Size for the unintegrated peak markers
+  double m_uintPeakMarkerSize;
 
   /// View coodinate to show
   Mantid::VATES::vtkPeakMarkerFactory::ePeakDimensions m_dimToShow;

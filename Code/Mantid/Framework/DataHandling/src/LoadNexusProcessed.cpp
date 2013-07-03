@@ -312,8 +312,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  // Clean up some stuff
-  ws->doneAddingEventLists();
 
   return ws;
 }

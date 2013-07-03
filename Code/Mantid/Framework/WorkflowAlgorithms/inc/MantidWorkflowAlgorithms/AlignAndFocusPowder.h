@@ -75,7 +75,7 @@ namespace Mantid
       void init();
       void exec();
       void loadCalFile(const std::string &calFileName);
-      void rebin();
+      void rebin(API::MatrixWorkspace_sptr matrixws);
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
       DataObjects::EventWorkspace_sptr m_inputEW;
@@ -103,6 +103,13 @@ namespace Mantid
       double tmax;
       bool m_preserveEvents;
       void doSortEvents(Mantid::API::Workspace_sptr ws);
+
+      /// Low resolution TOF matrix workspace
+      API::MatrixWorkspace_sptr m_lowResW;
+      /// Low resolution TOF event workspace
+      DataObjects::EventWorkspace_sptr m_lowResEW;
+      /// Process low resolution workspace
+      bool m_processLowResTOF;
 
     };
 

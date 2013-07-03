@@ -5,36 +5,70 @@
 
 #include <qwt3d_function.h>
 #include <QString>
-using namespace Qwt3D;
+#include <QObject>
 
-class UserHelperFunction
+/**
+ * @brief The Function2D class is the base class for 2D functions to be used
+ *  in MantidPlot graphics.
+ *
+ * Concrete classes must implement virtual functions:
+ *
+ *      double operator()(double x, double y);
+ *         which must return the function value at point (x,y)
+ *
+ *      double getMinPositiveValue()const ;
+ *         which must return the smallest positive value a user of this
+ *         function can get.
+ *
+ *      QString saveToString() const ;
+ *          which must record any parameters needed to re-create the function.
+ *
+ * Concrete classes can implement virtual functions:
+ *
+ *    void connectToViewer(QObject* viewer);
+ *          to connect to a viewer object (eg Graph3D)
+ */
+class Function2D : public Qwt3D::Function
 {
 public:
-    virtual ~UserHelperFunction() {};
-    virtual double operator()(double x, double y)=0;
+    Function2D();
+    /// Get minimum positive value. It is needed for logarithmic scales.
     virtual double getMinPositiveValue()const = 0;
+    /// Save function parameters to a string.
+    virtual QString saveToString() const = 0;
+    /// Connect to a viewer object
+    virtual void connectToViewer(QObject*) {}
+
+    size_t rows() const {return d_rows;}
+    size_t columns() const {return d_columns;}
+    void setMesh (size_t columns, size_t rows);
+private:
+      size_t d_rows, d_columns;
 };
 
 
-//! Class for user defined surfaces
-class UserFunction : public Function
+/**
+ * @brief The UserFunction2D class implements a user defined 2D function.
+ *
+ * The function is defined as a muParser-style string expression. It must use
+ * x and y for the function arguments.
+ *
+ */
+class UserFunction2D : public Function2D
 {
 public:
-    UserFunction(const QString& s, SurfacePlot& pw);
-
+    UserFunction2D(const QString& s);
+    /// Get function value
     double operator()(double x, double y);
-	QString function(){return formula;};
+    /// Get minimum positive value.
+    double getMinPositiveValue()const;
+    /// Save function parameters to a string.
+    QString saveToString() const;
 
-	unsigned int rows(){return d_rows;};
-	unsigned int columns(){return d_columns;};
-	void setMesh (unsigned int columns, unsigned int rows);
-    void setHlpFun(UserHelperFunction* hlp){m_hlpFun = hlp;}//Mantid
-    UserHelperFunction* hlpFun(){return m_hlpFun;}
+    QString formula() const {return d_formula;}
 
 private:
-	  QString formula;
-	  unsigned int d_rows, d_columns;
-      UserHelperFunction* m_hlpFun;//Mantid
+      QString d_formula;
 };
 
 #endif

@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <exception>
 
@@ -206,11 +207,13 @@ bool MantidEVWorker::loadAndConvertToMD( const std::string & file_name,
 
     if ( !alg->execute() )
       return false;
-  }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not load file and convert to MD" <<std::endl;
     return false; 
@@ -258,11 +261,13 @@ bool MantidEVWorker::findPeaks( const std::string & md_ws_name,
 
     if ( alg->execute() )
       return true;
-  }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not findPeaks" <<std::endl;
     return false; 
@@ -349,7 +354,9 @@ bool MantidEVWorker::findUBUsingFFT( const std::string & peaks_ws_name,
   alg->setProperty("Tolerance",tolerance);
 
   if ( alg->execute() )
+  { 
     return true;
+  }
 
   return false;
 }
@@ -710,11 +717,13 @@ bool MantidEVWorker::sphereIntegrate(  const std::string & peaks_ws_name,
 
     std::cout << "Integrated temporary MD workspace FAILED" << std::endl; 
     return false;
-  }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not Integrated temporary MD workspace" <<std::endl;
     return false; 
@@ -788,11 +797,13 @@ bool MantidEVWorker::fitIntegrate(  const std::string & peaks_ws_name,
     }
 
     std::cout << "Integrated temporary FIT workspace FAILED" << std::endl;
-  }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not Integrated temporary FIT workspace" <<std::endl;
     return false; 
@@ -856,11 +867,13 @@ bool MantidEVWorker::ellipsoidIntegrate( const std::string & peaks_ws_name,
     }
 
     std::cout << "IntegrateEllipsoids FAILED" << std::endl;
- }catch( std::exception &e)
+  }
+  catch( std::exception &e)
   {
     g_log.error()<<"Error:" << e.what() <<std::endl;
     return false;
-  }catch(...)
+  }
+  catch(...)
   {
     g_log.error()<<"Error: Could Not IntegratedEllipsoids" <<std::endl;
     return false; 
@@ -939,6 +952,106 @@ bool MantidEVWorker::showUB( const std::string & peaks_ws_name )
   }
 
   return true;
+}
+
+
+/**
+ *  Get the current UB matrix from the specified peaks workspace.
+ *
+ *  @param peaks_ws_name  The name of the peaks workspace with the UB
+ *                        matrix.
+ *  @param  lab_coords    If true, multiply the goniometer matrix
+ *                        times UB before returning it, so that
+ *                        the UB is expressed in lab-coordinates,
+ *                        otherwise, return the UB as it is stored
+ *                        in the sample.
+ *  @param UB             3x3 matrix of doubles to be filled out with
+ *                        the UB matrix if one exists in the specified
+ *                        peaks workspace.
+ *  @return true if the UB matrix was found and returned in the UB
+ *               parameter.
+ */
+bool MantidEVWorker::getUB( const std::string & peaks_ws_name,
+                                  bool          lab_coords,
+                                  Mantid::Kernel::Matrix<double> & UB )
+{
+  if ( !isPeaksWorkspace( peaks_ws_name ) )
+  {
+    return false;
+  }
+
+  const auto& ADS = AnalysisDataService::Instance();
+  IPeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+
+  try
+  {
+    Mantid::Geometry::OrientedLattice o_lattice = peaks_ws->mutableSample().getOrientedLattice();
+    UB = o_lattice.getUB();
+
+    if ( lab_coords )    // Try to get goniometer matrix from first peak 
+    {                    // and adjust UB for goniometer rotation
+      Mantid::DataObjects::Peak peak = Mantid::DataObjects::Peak(peaks_ws->getPeak(0));
+      Mantid::Kernel::Matrix<double> goniometer_matrix(3, 3, true);
+      goniometer_matrix = peak.getGoniometerMatrix();
+      UB = goniometer_matrix * UB;
+    }
+  }
+  catch(...)
+  {
+    return false;
+  }
+
+  return true;
+}
+
+
+/**
+ *  Copy the the current oriented lattice with the UB matrix from the 
+ *  specified peaks workspace to the specified MD workspace.
+ *
+ *  @param peaks_ws_name  The name of the peaks workspace to copy the
+ *                        lattice from.
+ *  @param md_ws_name     The name of the md workspace to copy the
+ *                        lattice to.
+ *  @return true if the copy was done, false if something went wrong.
+ */
+bool MantidEVWorker::copyLattice( const std::string & peaks_ws_name,
+                                  const std::string & md_ws_name )
+                           
+{
+  if ( !isPeaksWorkspace( peaks_ws_name ) )
+  {
+    return false;
+  }
+
+  if ( !isMDWorkspace( md_ws_name ) )
+  {
+    return false;
+  }
+
+  try
+  {
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CopySample");
+    alg->setProperty("InputWorkspace",peaks_ws_name);
+    alg->setProperty("OutputWorkspace",md_ws_name);
+    alg->setProperty("CopyName",       false);
+    alg->setProperty("CopyMaterial",   false);
+    alg->setProperty("CopyEnvironment",false);
+    alg->setProperty("CopyShape",      false);
+    alg->setProperty("CopyLattice",    true);
+    alg->execute();
+  }
+  catch(...)
+  {
+    g_log.notice() << std::endl;
+    g_log.notice() << "CopySample from " << peaks_ws_name <<
+                                 " to " << md_ws_name << " FAILED" << std::endl;
+    g_log.notice() << std::endl;
+    return false;
+  }
+
+  return true;
+
 }
 
 

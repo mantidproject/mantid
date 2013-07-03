@@ -16,6 +16,12 @@ try:
 except:
     HAS_MANTID = False    
 
+try:
+    import mantidplot
+    IN_MANTIDPLOT = True
+except:
+    IN_MANTIDPLOT = False
+    
 class EQSANSDataType(DataType):
     TABLE_NAME="eqsans_datatype"
 
@@ -29,7 +35,13 @@ class EQSANSDataSet(DataSet):
     @classmethod
     def load_meta_data(cls, file_path, outputWorkspace):
         try:
-            api.LoadEventNexus(Filename=file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
+            if IN_MANTIDPLOT:
+                script = "LoadEventNexus(Filename='%s', OutputWorkspace='%s', MetaDataOnly=True)" % (file_path, outputWorkspace)
+                mantidplot.runPythonScript(script, True)
+                if not AnalysisDataService.doesExist(outputWorkspace):
+                    return False
+            else:
+                api.LoadEventNexus(Filename=file_path, OutputWorkspace=outputWorkspace, MetaDataOnly=True)
             return True
         except:
             return False

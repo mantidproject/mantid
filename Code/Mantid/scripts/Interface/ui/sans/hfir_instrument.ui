@@ -1007,7 +1007,7 @@ Values can be selected by hand by checking the boxes below.</string>
             <item row="3" column="0">
              <widget class="QLabel" name="label_10">
               <property name="text">
-               <string>Wavelength spread [Angstrom]</string>
+               <string>Wavelength spread [ratio]</string>
               </property>
               <property name="indent">
                <number>23</number>

@@ -221,7 +221,7 @@ void SaveCanSAS1D2::createSASTransElement(std::string& sasTrans, const std::stri
         << name 
         << "\">";
   std::string t_unit = m_ws->YUnitLabel(); 
-  std::string lambda_unit;// = m_ws->getUnits(); FIXME: how to get the unit
+  std::string lambda_unit = m_ws->getAxis(0)->unit()->caption();
   if (t_unit.empty())
     t_unit = "none"; 
   if (lambda_unit.empty())
@@ -232,7 +232,7 @@ void SaveCanSAS1D2::createSASTransElement(std::string& sasTrans, const std::stri
   const MantidVec& edata = m_ws->readE(0);
   const bool isHistogram = m_ws->isHistogramData();
   double lambda, trans_value, trans_err; 
-  for (size_t j = 0; j < m_workspace->blocksize(); ++j)
+  for (size_t j = 0; j < m_ws->blocksize(); ++j)
   {
     // x data is the Lambda in xml. If histogramdata take the mean
     lambda = isHistogram ? (xdata[j] + xdata[j+1])/2: xdata[j];

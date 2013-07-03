@@ -159,7 +159,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
     auto pMockViewFactory = new MockPeakOverlayFactory;
     
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -190,12 +190,15 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
 
 public:
 
-
+  void setUp()
+  {
+    FrameworkManager::Instance();
+  }
 
   void test_construction()
   {
     // Expected number of peaks to create
-    const size_t expectedNumberPeaks = 3;
+    const size_t expectedNumberPeaks = 1;
 
     // Peaks workspace IS INTEGRATED.
     IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
@@ -210,7 +213,7 @@ public:
     // Mock View Factory for integrated peaks. We expect that this will never be used.
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_,_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_)).Times(1).WillRepeatedly(Return(mockView)); // Create a single widget/view for all peaks
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -248,10 +251,10 @@ public:
 
     // Create a mock view object that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    EXPECT_CALL(*pMockView, updateView()).Times(expectedNumberPeaks);
+    EXPECT_CALL(*pMockView, updateView()).Times(1); // Single view, for this presenter, will only update once.
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
     
-    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -290,10 +293,10 @@ public:
 
     // Create a mock view object that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    EXPECT_CALL(*pMockView, setSlicePoint(slicePoint)).Times(expectedNumberPeaks);
+    EXPECT_CALL(*pMockView, setSlicePoint(slicePoint, _)).Times(1); // Only one widget for this presenter
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    EXPECT_CALL(*mockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -305,6 +308,7 @@ public:
     // Create a mock transform object.
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, getFriendlyName()).WillOnce(Return("HKL"));
     EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
 
     // Create a mock transform factory.
@@ -317,7 +321,8 @@ public:
     ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, mdWS, peakTransformFactory);
 
     // Updating should cause all of the held views to be updated too.
-    presenter.updateWithSlicePoint(slicePoint);
+    PeakBoundingBox region(Left(-1), Right(1), Top(1), Bottom(-1), SlicePoint(slicePoint));
+    presenter.updateWithSlicePoint(region);
 
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
     TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
@@ -335,7 +340,7 @@ public:
     EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    EXPECT_CALL(*mockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -375,7 +380,7 @@ public:
     EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks); // This will be called automatically because the presenter won't be able to map Qx (below).
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    EXPECT_CALL(*mockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("Qx")); // Not either H, K or L
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     // Create an input MODEL Peaks workspace (INTEGRATED)
@@ -407,12 +412,12 @@ public:
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView); 
-    EXPECT_CALL(*pMockView, changeForegroundColour(colourToChangeTo)).Times(nPeaks); // Expect that the foreground colour of each widget will be changed.
-    EXPECT_CALL(*pMockView, updateView()).Times(nPeaks); // Expect that the background colour of each widget will be changed.
+    EXPECT_CALL(*pMockView, changeForegroundColour(colourToChangeTo)).Times(1); // Expect that the foreground colour will be changed.
+    EXPECT_CALL(*pMockView, updateView()).Times(1); // Only one view for this presenter.
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -433,12 +438,12 @@ public:
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
-    EXPECT_CALL(*pMockView, changeBackgroundColour(colourToChangeTo)).Times(nPeaks); // Expect that the background colour on each widget will be changed.
-    EXPECT_CALL(*pMockView, updateView()).Times(nPeaks); // Expect that each widget will be updated.
+    EXPECT_CALL(*pMockView, changeBackgroundColour(colourToChangeTo)).Times(1); // Expect that the background colour will be changed.
+    EXPECT_CALL(*pMockView, updateView()).Times(1); // Expect that each widget will be updated.
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -459,13 +464,13 @@ public:
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
-    EXPECT_CALL(*pMockView, showView()).Times(expectedNumberOfPeaks); // Expect that the view will be forced to SHOW.
-    EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberOfPeaks); // Expect that the view will be forced to HIDE.
-    EXPECT_CALL(*pMockView, updateView()).Times(2*expectedNumberOfPeaks); // Expect that each widget will be updated.
+    EXPECT_CALL(*pMockView, showView()).Times(1); // Expect that the view will be forced to SHOW.
+    EXPECT_CALL(*pMockView, hideView()).Times(1); // Expect that the view will be forced to HIDE.
+    EXPECT_CALL(*pMockView, updateView()).Times(2); // Expect that each widget will be updated.
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -505,12 +510,12 @@ public:
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
-    EXPECT_CALL(*pMockView, getBoundingBox()).Times(1).WillOnce(Return(PeakBoundingBox())); // Expect that the bounding box will be requested.
+    EXPECT_CALL(*pMockView, getBoundingBox(_)).Times(1).WillOnce(Return(PeakBoundingBox())); // Expect that the bounding box will be requested.
 
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -531,12 +536,12 @@ public:
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
-    EXPECT_CALL(*pMockView, setSlicePoint(_)).Times(1); // Expect that the slice point will be re-set upon sorting.
+    EXPECT_CALL(*pMockView, setSlicePoint(_,_)).Times(1); // Expect that the slice point will be re-set upon sorting.
 
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -586,6 +591,59 @@ public:
     TS_ASSERT_EQUALS("QLab", coordinateToString(Mantid::API::QLab));
     TS_ASSERT_EQUALS("QSample", coordinateToString(Mantid::API::QSample));
   }
+
+  void test_getPeaksSizeOnProjection()
+  {
+    const int nPeaks = 1;
+    const double occupancyInView = 0.07;
+
+    // Create a mock view object/product that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView); 
+    EXPECT_CALL(*pMockView, positionOnly()).WillOnce(Return(true)); // A peak repesentation without an absolute size.
+    EXPECT_CALL(*pMockView, getOccupancyInView()).WillOnce(Return(occupancyInView)); // The occupancy that the VIEW returns.
+    // Create a widget factory mock
+    auto pMockViewFactory = new MockPeakOverlayFactory;
+    PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+
+    auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
+    presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
+    auto concretePresenter = presenterBuilder.create();
+
+    TS_ASSERT_EQUALS(occupancyInView, concretePresenter->getPeakSizeOnProjection()); 
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
+  void test_getPeaksSizeIntoProjection()
+  {
+    const int nPeaks = 1;
+    const double occupancyIntoView = 0.05;
+
+    // Create a mock view object/product that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView); 
+    EXPECT_CALL(*pMockView, positionOnly()).WillOnce(Return(true)); // A peak repesentation without an absolute size.
+    EXPECT_CALL(*pMockView, getOccupancyIntoView()).WillOnce(Return(occupancyIntoView)); // The occupancy that the VIEW returns.
+    // Create a widget factory mock
+    auto pMockViewFactory = new MockPeakOverlayFactory;
+    PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+
+    auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
+    presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
+    auto concretePresenter = presenterBuilder.create();
+
+    TS_ASSERT_EQUALS(occupancyIntoView, concretePresenter->getPeakSizeIntoProjection()); 
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
 
 };
 

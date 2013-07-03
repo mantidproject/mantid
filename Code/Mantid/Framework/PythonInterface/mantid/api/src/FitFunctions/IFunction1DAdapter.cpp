@@ -21,7 +21,7 @@ namespace Mantid
 
     /**
      * Construct the "wrapper" and stores the reference to the PyObject
-     * * @param self A reference to the calling Python object
+     * @param self A reference to the calling Python object
      */
     IFunction1DAdapter::IFunction1DAdapter(PyObject* self)
       : API::ParamFunction(), API::IFunction1D(), IFunctionAdapter(self), m_derivOveridden(false)
@@ -70,9 +70,8 @@ namespace Mantid
     /**
      * Python-type signature version of above to be called directly from Python
      * @param xvals The input X values in read-only numpy array
-     * @param out A read/write numpy array of doubles to store the results
      */
-    object IFunction1DAdapter::function1D(const object & xvals) const
+    boost::python::object IFunction1DAdapter::function1D(const boost::python::object & xvals) const
     {
       return CallMethod1<object,object>::dispatchWithException(getSelf(), "function1D", xvals);
     }

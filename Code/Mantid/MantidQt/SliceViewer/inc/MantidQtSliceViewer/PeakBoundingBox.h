@@ -3,6 +3,10 @@
 
 #include "MantidKernel/System.h"
 
+#include <string>
+#include <vector>
+#include "MantidQtSliceViewer/PeakTransform.h"
+
 namespace MantidQt
 {
   namespace SliceViewer
@@ -30,6 +34,8 @@ namespace MantidQt
     typedef DoubleParam<2> Top;
     typedef DoubleParam<3> Bottom;
     typedef DoubleParam<4> SlicePoint;
+    typedef DoubleParam<5> Front;
+    typedef DoubleParam<6> Back;
 
     /** A bounding box for a peak. Allows the SliceViewer to zoom to that region.
     
@@ -67,22 +73,32 @@ namespace MantidQt
       Top m_top;
       /// Bottom edge.
       Bottom m_bottom;
-
-      /// Slice parellel to projection (z) position
+      /// Slice parallel to projection (z) position
       SlicePoint m_slicePoint;
+      /// Front edge
+      Front m_front;
+      /// Back edge
+      Back m_back;
+      /// Check boundaries
+      void validateBoundaries();
 
     public:
       /// Default constructor
       PeakBoundingBox();
       /// Constructor
       PeakBoundingBox(const Left& left, const Right& right, const Top& top, const Bottom& bottom, const SlicePoint& slicePoint);
+      /// Constructor
+      PeakBoundingBox(const Left& left, const Right& right, const Top& top, const Bottom& bottom, const SlicePoint& slicePoint, const Front& front, const Back& back);
       /// Destructor
       ~PeakBoundingBox();
       /// Copy constructor
       PeakBoundingBox(const PeakBoundingBox& other);
       /// Assignment
       PeakBoundingBox& operator=(const PeakBoundingBox& other);
-
+      /// Equals
+      bool operator==(const PeakBoundingBox &other) const;
+      /// Not equals
+      bool operator!=(const PeakBoundingBox &other) const;
       /// Get the box left edge
       double left() const;
       /// Get the box right edge
@@ -93,7 +109,18 @@ namespace MantidQt
       double bottom() const;
       /// Get the slice point
       double slicePoint() const;
-
+      /// Get the back edge
+      double front() const;
+      /// Get the front edge
+      double back() const;
+      /// Serialize as a vector of extents.
+      std::vector<double> toExtents() const;
+      /// Serialize as set of comma separated values
+      std::string toExtentsString() const;
+      /// Transform the box.
+      void transformBox(PeakTransform_sptr transform);
+      /// Make a new box based on the slice
+      PeakBoundingBox makeSliceBox(const double& sliceDelta) const;
     };
   }
 }

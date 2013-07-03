@@ -11,7 +11,7 @@
 
   <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
   </soapEndPoint>
-
+  
   <instrument name="ALF">  
     <technique>Single Crystal Diffraction</technique>
     <livedata address="NDXALF:6789" />
@@ -259,6 +259,13 @@
       <archiveSearch plugin="SNSDataSearchICAT2" />
    </archive>
 
+   <computeResource name="Fermi" type="MWS">
+      <baseURL>https://fermi.ornl.gov/moab</baseURL>
+      <configFileURL>https://fermi.ornl.gov/moab/config.xml</configFileURL>
+      <mpirunExecutable>/usr/lib64/openmpi/bin/mpirun</mpirunExecutable>
+      <pythonExecutable>/usr/bin/python</pythonExecutable>
+   </computeResource>
+
    <instrument name="DAS"> 
       <technique>technique</technique>
    </instrument> 
@@ -399,7 +406,7 @@
   </instrument>
 
 </facility>
-    
+
 <facility name="SINQ" FileExtensions=".hdf">
 
   <instrument name="HRPT">
@@ -445,7 +452,7 @@
   <instrument name="FOCUS">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
-  </instrument>
+  </instrument> 
 
   <instrument name="Rita-II">
     <technique>Triple Axis Spectroscopy</technique>
@@ -473,6 +480,24 @@
   </instrument>
 
 </facility>
+
+<facility name="SmuS" FileExtensions=".nxs,.xml">
+
+  <instrument name="GPD">
+    <zeropadding size="3"/>
+    <technique>Muon spectroscopy</technique>
+  </instrument>
+
+</facility>
+
+<!--  Reactor Orphee (France) -->
+<facility name="LLB" FileExtensions=".nxs,.hdf">
+  <instrument name="MIBEMOL">
+    <technique>Neutron Spectroscopy</technique> 
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+  </instrument>
+</facility>
+
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 

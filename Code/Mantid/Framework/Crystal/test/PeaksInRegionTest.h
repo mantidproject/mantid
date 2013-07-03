@@ -7,6 +7,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidCrystal/PeaksInRegion.h"
 #include <boost/tuple/tuple.hpp>
+#include <boost/assign/list_of.hpp>
 
 using Mantid::Crystal::PeaksInRegion;
 using namespace Mantid::API;
@@ -106,11 +107,11 @@ public:
 
   void test_bad_extent_pairs()
   {
-    do_test_extents_throws("Invalid x extents", "-1,-1,-1,1,-1,1");
+    do_test_extents_throws("Invalid x extents", "-1,-1.1,-1,1,-1,1");
 
-    do_test_extents_throws("Invalid y extents", "-1,1,-1,-1,-1,1");
+    do_test_extents_throws("Invalid y extents", "-1,1,-1,-1.1,-1,1");
 
-    do_test_extents_throws("Invalid z extents", "-1,1,-1,1,-1,-1");
+    do_test_extents_throws("Invalid z extents", "-1,1,-1,1,-1,-1.1");
 
   }
 
@@ -330,6 +331,35 @@ public:
 
     peakRadius = 0.51; // just enough for the sphere to penetrate the bounding box. Expect pass.
     do_test_bounds_check_extents(coordinateFrame, 1, 1, 1, 1, 1, -wallDistanceFromPeakCenter, peakRadius, peakRadius > wallDistanceFromPeakCenter);
+  }
+
+  void test_false_intersection_when_check_peak_extents()
+  {
+    std::vector<double> extents  = boost::assign::list_of(0)(1)(0)(1)(0)(1); // Extents go from 0, 1 in each dimension.
+
+    PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
+    auto detectorIds = ws->getInstrument()->getDetectorIDs();
+    Peak& peak = ws->getPeak(0);
+    peak.setHKL(Mantid::Kernel::V3D(2, 0, 0)); // This point is actually on the y = 0 plane, i.e. satisfies the plane equation. aX + bY + cZ = 0, but is outside the box.
+
+    const std::string outName = "OutWS";
+
+    PeaksInRegion alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("CoordinateFrame", "HKL");
+    alg.setProperty("Extents", extents); 
+    alg.setPropertyValue("OutputWorkspace", outName);
+    alg.setProperty("CheckPeakExtents", true); // This wouldn't happen if CheckPeak extents = false.
+    alg.setProperty("PeakRadius", 0.1); 
+    alg.execute();
+    
+    ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
+
+    TS_ASSERT_EQUALS(1, outWS->rowCount());
+    TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0,  0)); 
+    TSM_ASSERT_EQUALS("Peak does NOT intersect the box", Boolean(false), outWS->cell<Boolean>(0,  1));
   }
 
 };

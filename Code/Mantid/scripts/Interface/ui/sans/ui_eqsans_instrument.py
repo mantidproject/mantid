@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_instrument.ui'
 #
-# Created: Thu Nov 15 09:47:58 2012
+# Created: Wed Jun 19 11:05:08 2013
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -350,7 +350,7 @@ class Ui_Frame(object):
         sizePolicy.setHeightForWidth(self.log_binning_radio.sizePolicy().hasHeightForWidth())
         self.log_binning_radio.setSizePolicy(sizePolicy)
         self.log_binning_radio.setMinimumSize(QtCore.QSize(120, 0))
-        self.log_binning_radio.setMaximumSize(QtCore.QSize(120, 16777215))
+        self.log_binning_radio.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.log_binning_radio.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.log_binning_radio.setObjectName("log_binning_radio")
         self.horizontalLayout_9.addWidget(self.log_binning_radio)

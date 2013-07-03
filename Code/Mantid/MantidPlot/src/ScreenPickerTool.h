@@ -34,6 +34,7 @@
 #include <qwt_double_rect.h>
 #include <qwt_plot_marker.h>
 #include <qwt_plot_picker.h>
+#include <qwt_text.h>
 
 class ApplicationWindow;
 class Table;
@@ -60,6 +61,8 @@ class ScreenPickerTool : public QwtPlotPicker, public PlotToolInterface
 	protected:
         virtual bool eventFilter(QObject *obj, QEvent *event);
 		virtual void append(const QPoint &point);
+        virtual QwtText trackerText(const QPoint &) const;
+        virtual QwtText trackerText(const QwtDoublePoint &) const;
 		QwtPlotMarker d_selection_marker;
 };
 

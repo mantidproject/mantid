@@ -34,7 +34,7 @@ namespace MantidQt
       ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, Mantid::API::IPeaksWorkspace_sptr peaksWS, boost::shared_ptr<Mantid::API::MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory);
       virtual ~ConcretePeaksPresenter();
       virtual void update();
-      virtual void updateWithSlicePoint(const double& slicePoint);
+      virtual void updateWithSlicePoint(const PeakBoundingBox& slicePoint);
       virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
       SetPeaksWorkspaces presentedWorkspaces() const;
@@ -49,8 +49,8 @@ namespace MantidQt
       virtual double getPeakSizeOnProjection() const;
       virtual double getPeakSizeIntoProjection() const;
     private:
-      /// Peak overlay views.
-      VecPeakOverlayView m_viewPeaks;
+      /// Peak overlay view.
+      PeakOverlayView_sptr m_viewPeaks;
       /// View factory
       boost::shared_ptr<PeakOverlayViewFactory> m_viewFactory;
       /// Peaks workspace.
@@ -60,9 +60,11 @@ namespace MantidQt
       /// Peak transformer
       PeakTransform_sptr m_transform;
       /// current slicing point.
-      double m_slicePoint;
+      PeakBoundingBox m_slicePoint;
       /// Logger object
       Mantid::Kernel::Logger & g_log;
+      /// Viewable Peaks
+      std::vector<bool> m_viewablePeaks;
       /// Configurre peak transformations
       bool configureMappingTransform();
       /// Hide all views
@@ -77,6 +79,8 @@ namespace MantidQt
       void produceViews();
       /// Check workspace compatibilities.
       void checkWorkspaceCompatibilities(boost::shared_ptr<Mantid::API::MDGeometry> mdWS);
+      /// Find peaks interacting with the slice and update the view.
+      void doFindPeaksInRegion();
     };
 
   }

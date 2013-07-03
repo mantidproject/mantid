@@ -51,6 +51,15 @@ void vtkNexusPeaksReader::SetDimensions(int dimensions)
   this->Modified();
 }
 
+/**
+ * Setter for the unintegrated peak marker size
+ * @param mSize : size for the marker
+ */
+void vtkNexusPeaksReader::SetUnintPeakMarkerSize(double mSize)
+{
+  m_uintPeakMarkerSize = mSize;
+  this->Modified();
+}
 
 int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
@@ -91,7 +100,7 @@ int vtkNexusPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   {
     vtkAxes* axis = vtkAxes::New();
     axis->SymmetricOn();
-    axis->SetScaleFactor(0.3);
+    axis->SetScaleFactor(m_uintPeakMarkerSize);
 
     vtkTransform* transform = vtkTransform::New();
     const double rotationDegrees = 45;

@@ -589,7 +589,7 @@ def do_make_wiki(algo_name, version, latest_version):
     """ 
     
     external_image = "http://download.mantidproject.org/algorithm_screenshots/ScreenShotImages/%s_dlg.png" % algo_name  
-    out = "<anchor url='%s'><img width=400px align='right' src='%s' style='position:relative; z-index:1000; padding-left:5px;'></anchor>\n\n" % (external_image, external_image)  
+    out = "<anchor url='%s'><img width=400px src='%s' style='position:relative; z-index:1000; padding-left:5px; float:right;'></anchor>\n\n" % (external_image, external_image)  
     
     # Deprecated algorithms: Simply return the deprecation message
     print "Creating... ", algo_name, version
@@ -623,6 +623,14 @@ def do_make_wiki(algo_name, version, latest_version):
         out += " " + create_function_signature(alg, algo_name) + "\n\n" 
     out += "<br clear=all>\n\n" 
     out += custom_usage
+
+    # If there is an alias put it in
+    alias = alg.alias().strip()
+    if len(alias) > 0:
+        out += ("== Alias ==\n\n")
+        out += "This algorithm is also called '%s'\n\n" % alias
+
+    # Table of properties
     out += "== Properties ==\n\n"
     
     out += """{| border="1" cellpadding="5" cellspacing="0" 

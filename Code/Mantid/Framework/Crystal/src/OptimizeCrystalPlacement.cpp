@@ -75,14 +75,10 @@ namespace Mantid
       {
       public:
         OrEnabledWhenProperties( std::string prop1Name,ePropertyCriterion prop1Crit,std::string prop1Value,
-            std::string prop2Name,ePropertyCriterion prop2Crit,std::string prop2Value ):IPropertySettings()
+            std::string prop2Name,ePropertyCriterion prop2Crit,std::string prop2Value ):IPropertySettings(),propName1(prop1Name),
+            propName2(prop2Name),Criteria1(prop1Crit),Criteria2(prop2Crit),value1(prop1Value),value2(prop2Value)
+
       {
-          propName1=prop1Name;
-          propName2=prop2Name;
-          Criteria1=prop1Crit;
-          Criteria2=prop2Crit;
-          value1=prop1Value;
-          value2=prop2Value;
           Prop1 = new Kernel::EnabledWhenProperty(propName1,Criteria1,value1);
           Prop2= new Kernel::EnabledWhenProperty(propName2,Criteria2,value2);
 
@@ -166,17 +162,17 @@ namespace Mantid
       declareProperty(
           "MaxHKLPeaks2Use", -1.0,
           "If less than 0 all peaks are used, otherwise only peaks whose h,k, and l values are below the level are used(def=-1)");
-      declareProperty("MaxSamplePositionChange_meters", .0005,
+      declareProperty("MaxSamplePositionChangeMeters", .0005,
           "Maximum Change in Sample position in meters(def=.0005)");
 
 
       setPropertyGroup("MaxAngularChange", "Tolerance settings");
 
-      setPropertyGroup("MaxSamplePositionChange_meters", "Tolerance settings");
+      setPropertyGroup("MaxSamplePositionChangeMeters", "Tolerance settings");
       setPropertyGroup("MaxHKLPeaks2Use", "Tolerance settings");
       setPropertyGroup("MaxIndexingError", "Tolerance settings");
 
-      setPropertySettings("MaxSamplePositionChange_meters",new EnabledWhenProperty("AdjustSampleOffsets",
+      setPropertySettings("MaxSamplePositionChangeMeters",new EnabledWhenProperty("AdjustSampleOffsets",
             Kernel::IS_EQUAL_TO, "1" ));
 
 
@@ -377,7 +373,7 @@ namespace Mantid
       oss<< ",SampleXOffset="<<sampPos.X()<<",SampleYOffset="<<sampPos.Y()<<",SampleZOffset="<<sampPos.Z();
       oss<<",GonRotx=0.0,GonRoty=0.0,GonRotz=0.0";
 
-      double maxSampshift = getProperty("MaxSamplePositionChange_meters");
+      double maxSampshift = getProperty("MaxSamplePositionChangeMeters");
       oss1 << startConstraint << sampPos.X()-maxSampshift<<"<SampleXOffset<"<<sampPos.X()+maxSampshift<<","<<sampPos.Y()-maxSampshift<<
           "<SampleYOffset<"<<sampPos.Y()+maxSampshift <<","<<sampPos.Z()-maxSampshift<<"<SampleZOffset<" <<sampPos.Z()+maxSampshift;
 

@@ -48,7 +48,7 @@ namespace MantidQt
     {
     public:
       /// Create a peak view from the index of a peak in the peaks workspace
-      virtual boost::shared_ptr<PeakOverlayView> createView(const int peakIndex, PeakTransform_const_sptr transform) const = 0;
+      virtual boost::shared_ptr<PeakOverlayView> createView(PeakTransform_const_sptr transform) const = 0;
       /// Destructor
       virtual ~PeakOverlayViewFactory()
       {

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>958</width>
-    <height>670</height>
+    <width>974</width>
+    <height>710</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,23 +30,10 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <property name="spacing">
       <number>1</number>
      </property>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
      <item>
       <widget class="Mantid::Vates::SimpleGui::TimeControlWidget" name="timeControlWidget" native="true"/>
      </item>
@@ -80,29 +67,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="pqCameraToolbar" name="widget" native="true"/>
-     </item>
-     <item>
-      <widget class="QToolButton" name="resetCenterToDataButton">
-       <property name="toolTip">
-        <string>Reset Center to Data Center</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-         <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToData24.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToData24.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="resetCenterToPointButton">
-       <property name="toolTip">
-        <string>Reset Center to Point</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
-         <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</iconset>
-       </property>
-      </widget>
+      <widget class="pqCameraToolbar" name="cameraWidget" native="true"/>
      </item>
      <item>
       <widget class="QToolButton" name="parallelProjButton">
@@ -112,6 +77,12 @@
        <property name="icon">
         <iconset resource="../../icons/ViewWidgetsIcons.qrc">
          <normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/parallel_projection.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
        </property>
        <property name="checkable">
         <bool>true</bool>
@@ -134,7 +105,7 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <property name="spacing">
       <number>1</number>
      </property>
@@ -143,6 +114,39 @@
      </item>
      <item>
       <spacer name="horizontalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="pqAxesToolbar" name="axesWidget" native="true"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="resetCenterToPointButton">
+       <property name="toolTip">
+        <string>Reset Center to Point</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+         <normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/pqResetCenterToPoint24.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -202,8 +206,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>126</width>
-              <height>237</height>
+              <width>98</width>
+              <height>28</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout">
@@ -287,6 +291,12 @@
    <class>Mantid::Vates::SimpleGui::ColorSelectionWidget</class>
    <extends>QWidget</extends>
    <header>MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqAxesToolbar</class>
+   <extends>QWidget</extends>
+   <header>pqAxesToolbar.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

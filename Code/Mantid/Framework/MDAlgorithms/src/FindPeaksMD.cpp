@@ -139,7 +139,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  FindPeaksMD::FindPeaksMD() : m_addDetectors(true), m_densityScaleFactor(1e-6)
+  FindPeaksMD::FindPeaksMD() : m_addDetectors(true), m_densityScaleFactor(1e-6),prog(NULL)
   {
   }
     

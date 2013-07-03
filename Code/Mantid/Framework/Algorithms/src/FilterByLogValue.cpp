@@ -294,7 +294,6 @@ void FilterByLogValue::exec()
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-    outputWS->doneAddingEventLists();
 
     //To split/filter the runs, first you make a vector with just the one output run
     std::vector< LogManager *> output_runs;

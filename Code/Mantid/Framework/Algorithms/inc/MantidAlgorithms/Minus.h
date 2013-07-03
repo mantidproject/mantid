@@ -53,6 +53,8 @@ namespace Mantid
       virtual ~Minus() {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Minus";}
+      /// Algorithm's alias for identification overriding a virtual method
+      virtual const std::string alias() const;
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
 

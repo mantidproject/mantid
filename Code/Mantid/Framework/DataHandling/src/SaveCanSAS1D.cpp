@@ -623,10 +623,6 @@ void SaveCanSAS1D::createSASProcessElement(std::string& sasProcess)
   {
     user_file = run.getLogData("UserFile")->value();
   }
-  else
-  {
-    g_log.warning()<< "Run does not contain \"UserFile\" information. A blank entry will be written." <<std::endl;
-  }
 
   std::string sasProcuserfile="\n\t\t\t<term name=\"user_file\">";
   sasProcuserfile+=user_file;

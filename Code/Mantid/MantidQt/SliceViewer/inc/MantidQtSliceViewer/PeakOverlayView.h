@@ -41,7 +41,7 @@ namespace MantidQt
     {
     public:
       /// Set the position of the slice point.
-      virtual void setSlicePoint(const double&) = 0; 
+      virtual void setSlicePoint(const double&, const std::vector<bool>&) = 0;
       /// Update the view.
       virtual void updateView() = 0;
       /// Hide the view.
@@ -61,13 +61,15 @@ namespace MantidQt
       /// Changes the size of the overlay to be the requested fraction of the view depth.
       virtual void changeOccupancyIntoView(const double fraction) = 0;
       /// Get a bounding box around the peak in windows coordinates.
-      virtual PeakBoundingBox getBoundingBox() const = 0;
+      virtual PeakBoundingBox getBoundingBox(const int peakIndex) const = 0;
       /// Get the peak size (width/2 as a fraction of total width)  on projection
       virtual double getOccupancyInView() const = 0;
       /// Get the peaks size into the projection (effective radius as a fraction of z range)
       virtual double getOccupancyIntoView() const = 0;
       /// Get the flag indicating that the view represents the position only.
       virtual bool positionOnly() const = 0;
+      /// Get radius or effective radius of view items.
+      virtual double getRadius() const = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

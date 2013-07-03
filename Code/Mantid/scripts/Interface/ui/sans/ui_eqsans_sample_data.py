@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/eqsans_sample_data.ui'
 #
-# Created: Wed Nov 16 13:57:36 2011
+# Created: Wed May  8 13:10:38 2013
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -96,6 +96,12 @@ class Ui_Frame(object):
         spacerItem3 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem3)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
+        self.horizontalLayout_13 = QtGui.QHBoxLayout()
+        self.horizontalLayout_13.setObjectName("horizontalLayout_13")
+        self.separate_jobs_check = QtGui.QCheckBox(self.scrollAreaWidgetContents_2)
+        self.separate_jobs_check.setObjectName("separate_jobs_check")
+        self.horizontalLayout_13.addWidget(self.separate_jobs_check)
+        self.verticalLayout_2.addLayout(self.horizontalLayout_13)
         spacerItem4 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         self.verticalLayout_2.addItem(spacerItem4)
         self.groupBox = QtGui.QGroupBox(self.scrollAreaWidgetContents_2)
@@ -440,6 +446,7 @@ class Ui_Frame(object):
         self.data_file_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_thickness_label.setText(QtGui.QApplication.translate("Frame", "Sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_thickness_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
+        self.separate_jobs_check.setText(QtGui.QApplication.translate("Frame", "Treat comma-separated files as separate reduction jobs", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Transmission", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_label.setText(QtGui.QApplication.translate("Frame", "Sample direct beam data file", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))

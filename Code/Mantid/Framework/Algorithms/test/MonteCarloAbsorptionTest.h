@@ -73,17 +73,17 @@ public:
     // Pick out some random values
     const double delta(1e-08);
     const size_t middle_index = (nbins/2) - 1;
-    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.00478216, delta);
-    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000134138, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.00477768, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000134089, delta);
     TS_ASSERT_DELTA(factorWS->readY(0).back(), 1.18e-7, delta);
         
     // Different spectra
-    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.00868813, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.000177928, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.000131067, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.00868274, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.000177871, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.000131046, delta);
 
-    TS_ASSERT_DELTA(factorWS->readY(8).front(), 0.00654715, delta);
-    TS_ASSERT_DELTA(factorWS->readY(8)[middle_index], 0.00022438, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8).front(), 0.00654336, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8)[middle_index], 0.000224293, delta);
     TS_ASSERT_DELTA(factorWS->readY(8).back(), 1.14231e-5, delta);
 
     dataStore.remove(inputName);
@@ -116,7 +116,7 @@ public:
     // Pick out some random values
     const double delta(1e-08);
     const size_t middle_index = (nbins/2) - 1;
-    TS_ASSERT_DELTA(factorWS->readY(0).front(), 1.96018e-05, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).front(), 1.9588e-05, delta);
     TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 6.56478e-09, 1e-9);
     TS_ASSERT_DELTA(factorWS->readY(0).back(), 2.3604e-11, 1e-12);
 

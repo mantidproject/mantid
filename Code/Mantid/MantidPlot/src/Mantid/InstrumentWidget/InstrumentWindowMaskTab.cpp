@@ -8,6 +8,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMaskWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+// #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
@@ -177,9 +179,6 @@ m_userEditing(true)
   m_clear_all->setToolTip("Clear all masking that have not been applied to the data.");
   connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
 
-  m_savegroupdet = new QCheckBox("Grouped Detectors");
-  m_savegroupdet->setToolTip("If checked, then save masked with grouped detectors. ");
-  m_savegroupdet->setChecked(false);
 
   m_save_as_workspace_exclude = new QAction("As Mask to workspace",this);
   m_save_as_workspace_exclude->setToolTip("Save current mask to mask workspace.");
@@ -205,6 +204,13 @@ m_userEditing(true)
   m_save_as_cal_file_include->setToolTip("Save current mask as ROI to cal file.");
   connect(m_save_as_cal_file_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToCalFile()));
 
+  m_save_as_table_xrange_exclude = new QAction("As Mask to table", this);
+  m_save_as_table_xrange_exclude->setToolTip("Save current mask to a table workspace with x-range. "
+                                             "The name of output table workspace is 'MaskBinTable'. "
+                                             "If the output table workspace has alrady exist, then "
+                                             "the newly masked detectors will be added to output workspace.");
+  connect(m_save_as_table_xrange_exclude, SIGNAL(activated()), this, SLOT(saveMaskToTable()));
+
   m_save_group_file_include = new QAction("As include group to file",this);
   m_save_group_file_include->setToolTip("Save current mask as include group to a file.");
   connect(m_save_group_file_include,SIGNAL(activated()),this,SLOT(saveIncludeGroupToFile()));
@@ -221,6 +227,7 @@ m_userEditing(true)
   m_sum_to_workspace->setToolTip("Sum detectors to workspace.");
   connect(m_sum_to_workspace,SIGNAL(activated()),this,SLOT(sumDetsToWorkspace()));
 
+
   // Save button and its menus
   m_saveButton = new QPushButton("Apply and Save");
   m_saveButton->setToolTip("Save current masking/grouping to a file or a workspace.");
@@ -234,6 +241,8 @@ m_userEditing(true)
   m_saveMask->addSeparator();
   m_saveMask->addAction(m_save_as_cal_file_include);
   m_saveMask->addAction(m_save_as_cal_file_exclude);
+  m_saveMask->addSeparator();
+  m_saveMask->addAction(m_save_as_table_xrange_exclude);
   connect(m_saveMask,SIGNAL(hovered(QAction*)),this,SLOT(showSaveMenuTooltip(QAction*)));
 
   m_saveButton->setMenu(m_saveMask);
@@ -251,7 +260,6 @@ m_userEditing(true)
   buttons->addWidget(m_apply_to_view,0,0,1,2);
   buttons->addWidget(m_saveButton,1,0);
   buttons->addWidget(m_clear_all,1,1);
-  buttons->addWidget(m_savegroupdet, 2, 0, 1, 2);
 
   box->setLayout(buttons);
   layout->addWidget(box);
@@ -625,6 +633,11 @@ void InstrumentWindowMaskTab::saveInvertedMaskToCalFile()
     saveMaskingToCalFile(true);
 }
 
+void InstrumentWindowMaskTab::saveMaskToTable()
+{
+  saveMaskingToTableWorkspace(false);
+}
+
 /**
   * Extract selected detectors to a new workspace
   */
@@ -736,6 +749,15 @@ void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
   storeMask();
   setSelectActivity();
   createMaskWorkspace(invertMask, false);
+
+#if 0
+  // TESTCASE
+  double minbinvalue = m_instrWindow->getInstrumentActor()->minBinValue();
+  double maxbinvalue = m_instrWindow->getInstrumentActor()->maxBinValue();
+  std::cout << "Range of X: " << minbinvalue << ", " << maxbinvalue << ".\n";
+
+#endif
+
   enableApplyButtons();
   QApplication::restoreOverrideCursor();
 }
@@ -761,14 +783,11 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
 
     if (!fileName.isEmpty())
     {
-      // Check option "GroupedDetectors"
-      bool groupeddetectors = m_savegroupdet->isChecked();
 
       // Call "SaveMask()"
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveMask",-1);
       alg->setProperty("InputWorkspace",boost::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
       alg->setPropertyValue("OutputFile",fileName.toStdString());
-      alg->setProperty("GroupedDetectors", groupeddetectors);
       alg->execute();
     }
     Mantid::API::AnalysisDataService::Instance().remove( outputWS->name() );
@@ -808,6 +827,91 @@ void InstrumentWindowMaskTab::saveMaskingToCalFile(bool invertMask)
     enableApplyButtons();
     QApplication::restoreOverrideCursor();
 }
+
+/**
+  * Apply and save the mask to a TableWorkspace with X-range
+  * @param invertMask :: if true, the selected mask will be inverted; if false, the mask will be used as is
+  */
+void InstrumentWindowMaskTab::saveMaskingToTableWorkspace(bool invertMask)
+{
+  UNUSED_ARG(invertMask);
+
+  // Set override cursor
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+  // Make sure that we have stored the mask in the helper Mask workspace
+  storeMask();
+  setSelectActivity();
+
+  // Apply the view (no workspace) to a buffered mask workspace
+  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrWindow->getInstrumentActor()->getMaskMatrixWorkspace();
+
+  /*
+  Mantid::Geometry::Instrument_const_sptr instrument = outputMaskWS->getInstrument();
+  std::vector<int> detids = instrument->getDetectorIDs();
+  size_t maskedcount = 0;
+  for (size_t i = 0; i < detids.size(); ++i)
+  {
+    int detid = detids[i];
+    Mantid::Geometry::IDetector_const_sptr det = instrument->getDetector(detid);
+    if (det->isMasked())
+      ++ maskedcount;
+  }
+  std::cout << "There are " << maskedcount << " detectors out of total " << detids.size() << " detectors.\n";
+  */
+
+  // Extract from MaskWorkspace to a TableWorkspace
+  double xmin = m_instrWindow->getInstrumentActor()->minBinValue();
+  double xmax = m_instrWindow->getInstrumentActor()->maxBinValue();
+  // std::cout << "[DB] Selected x-range: " << xmin << ", " << xmax << ".\n";
+
+  // Always use the same name
+  const std::string outputWorkspaceName("MaskBinTable");
+
+  // Check whether it is going to add a line in an existing workspace
+  Mantid::API::ITableWorkspace_sptr temptablews;
+  bool overwrite = false;
+  try
+  {
+    temptablews = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(outputWorkspaceName));
+  }
+  catch (Mantid::Kernel::Exception::NotFoundError)
+  {
+    std::cout << "TableWorkspace " << outputWorkspaceName << " cannot be found in ADS." << ".\n";
+  }
+
+  if (temptablews)
+    overwrite = true;
+
+  std::cout << "[DB] MaskTableWorkspace is found? = " << overwrite << ". " << ".\n";
+
+  Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMaskToTable",-1);
+  alg->setProperty("InputWorkspace", inputWS);
+  if (overwrite)
+    alg->setPropertyValue("MaskTableWorkspace", outputWorkspaceName);
+  alg->setPropertyValue("OutputWorkspace",outputWorkspaceName);
+  alg->setProperty("Xmin", xmin);
+  alg->setProperty("Xmax", xmax);
+  alg->execute();
+
+  if (!alg->isExecuted())
+  {
+    throw std::runtime_error("Algorithm ExtractMaskToTable fails to execute. ");
+  }
+
+    // Mantid::API::MatrixWorkspace_sptr outputWS
+  Mantid::API::ITableWorkspace_sptr outputWS =
+      boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve( outputWorkspaceName ));
+
+  outputWS->setTitle("MaskBinTable");
+
+  // Restore the previous state
+  enableApplyButtons();
+  QApplication::restoreOverrideCursor();
+}
+
 
 /**
   * Generate a unique name for the mask worspace which will be saved in the ADS.
@@ -906,38 +1010,38 @@ QtProperty *InstrumentWindowMaskTab::addDoubleProperty(const QString &name) cons
  */
 void InstrumentWindowMaskTab::storeMask()
 {
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    m_pointer->setChecked(true);
-    setActivity();
-    m_instrWindow->updateInstrumentView(); // to refresh the pick image
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  m_pointer->setChecked(true);
+  setActivity();
+  m_instrWindow->updateInstrumentView(); // to refresh the pick image
 
-    QList<int> dets;
-    // get detectors covered by the shapes
-    m_instrWindow->getSurface()->getMaskedDetectors(dets);
-    if (!dets.isEmpty())
+  QList<int> dets;
+  // get detectors covered by the shapes
+  m_instrWindow->getSurface()->getMaskedDetectors(dets);
+  if (!dets.isEmpty())
+  {
+    std::set<Mantid::detid_t> detList;
+    foreach(int id,dets)
     {
-      std::set<Mantid::detid_t> detList;
-      foreach(int id,dets)
-      {
-        detList.insert( id );
-      }
-      if ( !detList.empty() )
-      {
-          // try to mask each detector separatly and ignore any failure
-          for(auto det = detList.begin(); det != detList.end(); ++det)
-          {
-              try
-              {
-                  m_instrWindow->getInstrumentActor()->getMaskWorkspace()->setMasked( *det );
-              }
-              catch(...){}
-          }
-          // update detector colours
-          m_instrWindow->getInstrumentActor()->update();
-          m_instrWindow->updateInstrumentDetectors();
-      }
+      detList.insert( id );
     }
-    // remove masking shapes
-    clearShapes();
-    QApplication::restoreOverrideCursor();
+    if ( !detList.empty() )
+    {
+      // try to mask each detector separatly and ignore any failure
+      for(auto det = detList.begin(); det != detList.end(); ++det)
+      {
+        try
+        {
+          m_instrWindow->getInstrumentActor()->getMaskWorkspace()->setMasked( *det );
+        }
+        catch(...){}
+      }
+      // update detector colours
+      m_instrWindow->getInstrumentActor()->update();
+      m_instrWindow->updateInstrumentDetectors();
+    }
+  }
+  // remove masking shapes
+  clearShapes();
+  QApplication::restoreOverrideCursor();
 }

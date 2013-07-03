@@ -61,11 +61,19 @@ namespace API
     virtual void addPulsetime(const double seconds) = 0;
     /// Mask a given TOF range
     virtual void maskTof(const double tofMin, const double tofMax) = 0;
-    /// Return the list of TOF values
-    virtual void getTofs(std::vector<double>& tofs) const = 0;
-    /// Return the list of TOF values
+	/// Return the list of TOF values
     virtual std::vector<double> getTofs() const = 0;
     /// Return the list of TOF values
+    virtual void getTofs(std::vector<double>& tofs) const = 0;
+    /// Return the list of event weight  values
+    virtual std::vector<double> getWeights() const = 0;
+	/// Return the list of event weight values
+    virtual void getWeights(std::vector<double>& weights) const = 0;
+	/// Return the list of event weight error values
+    virtual std::vector<double> getWeightErrors() const = 0;
+	/// Return the list of event weight error values
+    virtual void getWeightErrors(std::vector<double>& weightErrors) const = 0;
+    /// Return the list of pulse time values
     virtual std::vector<Mantid::Kernel::DateAndTime> getPulseTimes() const = 0;
     /// Get the minimum TOF from the list
     virtual double getTofMin() const = 0;

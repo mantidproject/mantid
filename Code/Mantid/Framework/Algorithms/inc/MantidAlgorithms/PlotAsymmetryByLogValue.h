@@ -84,6 +84,8 @@ namespace Mantid
           API::MatrixWorkspace_sptr ws_geen,double& Y, double& E);
       /// Group detectors
       void groupDetectors(API::MatrixWorkspace_sptr& ws,const std::vector<int>& spectraList);
+      /// Get log value
+      double getLogValue(API::MatrixWorkspace& ws,const std::string& logName);
 
       /// Stores property "Int"
       bool m_int;

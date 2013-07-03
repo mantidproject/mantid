@@ -16,7 +16,7 @@ namespace Mantid
 
     /**
      * Construct the "wrapper" and stores the reference to the PyObject
-     * * @param self A reference to the calling Python object
+     * @param self A reference to the calling Python object
      */
     AlgorithmWrapper::AlgorithmWrapper(PyObject* self)
       : PythonAlgorithm(), m_self(self)

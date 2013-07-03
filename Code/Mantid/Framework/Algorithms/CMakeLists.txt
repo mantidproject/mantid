@@ -20,7 +20,7 @@ set ( SRC_FILES
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalculateEfficiency.cpp
-        src/CalculateFlatBackground.cpp
+	src/CalculateFlatBackground.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateZscore.cpp
@@ -34,6 +34,7 @@ set ( SRC_FILES
 	src/CloneWorkspace.cpp
 	src/CommutativeBinaryOperation.cpp
 	src/ConjoinWorkspaces.cpp
+	src/ConvertAxisByFormula.cpp
 	src/ConvertFromDistribution.cpp
 	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpectrumAxis.cpp
@@ -82,6 +83,7 @@ set ( SRC_FILES
 	src/ExportTimeSeriesLog.cpp
 	src/ExtractFFTSpectrum.cpp
 	src/ExtractMask.cpp
+	src/ExtractMaskToTable.cpp
 	src/ExtractMasking.cpp
 	src/ExtractSingleSpectrum.cpp
 	src/FFT.cpp
@@ -118,6 +120,7 @@ set ( SRC_FILES
 	src/He3TubeEfficiency.cpp
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
+	src/IntegrateByComponent.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
 	src/InvertMask.cpp
@@ -131,6 +134,7 @@ set ( SRC_FILES
 	src/MergeRuns.cpp
 	src/Min.cpp
 	src/Minus.cpp
+	src/ModeratorTzero.cpp
 	src/ModeratorTzeroLinear.cpp
 	src/MonteCarloAbsorption.cpp
 	src/MultipleScatteringCylinderAbsorption.cpp
@@ -170,6 +174,7 @@ set ( SRC_FILES
 	src/RemoveLowResTOF.cpp
 	src/RemovePromptPulse.cpp
 	src/RenameWorkspace.cpp
+        src/RenameWorkspaces.cpp
 	src/ReplaceSpecialValues.cpp
 	src/ResampleX.cpp
 	src/ResetNegatives.cpp
@@ -248,6 +253,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
+	inc/MantidAlgorithms/ConvertAxisByFormula.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
@@ -296,6 +302,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExportTimeSeriesLog.h
 	inc/MantidAlgorithms/ExtractFFTSpectrum.h
 	inc/MantidAlgorithms/ExtractMask.h
+	inc/MantidAlgorithms/ExtractMaskToTable.h
 	inc/MantidAlgorithms/ExtractMasking.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
 	inc/MantidAlgorithms/FFT.h
@@ -333,6 +340,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/He3TubeEfficiency.h
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
+	inc/MantidAlgorithms/IntegrateByComponent.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
 	inc/MantidAlgorithms/InvertMask.h
@@ -346,6 +354,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/MergeRuns.h
 	inc/MantidAlgorithms/Min.h
 	inc/MantidAlgorithms/Minus.h
+	inc/MantidAlgorithms/ModeratorTzero.h
 	inc/MantidAlgorithms/ModeratorTzeroLinear.h
 	inc/MantidAlgorithms/MonteCarloAbsorption.h
 	inc/MantidAlgorithms/MultipleScatteringCylinderAbsorption.h
@@ -385,6 +394,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RenameWorkspace.h
+        inc/MantidAlgorithms/RenameWorkspaces.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
 	inc/MantidAlgorithms/ResampleX.h
 	inc/MantidAlgorithms/ResetNegatives.h
@@ -474,6 +484,7 @@ set ( TEST_FILES
 	CommutativeBinaryOperationTest.h
 	CompressedRebinTest.h
 	ConjoinWorkspacesTest.h
+	ConvertAxisByFormulaTest.h
 	ConvertFromDistributionTest.h
 	ConvertSpectrumAxisTest.h
 	ConvertTableToMatrixWorkspaceTest.h
@@ -516,6 +527,7 @@ set ( TEST_FILES
 	ExportTimeSeriesLogTest.h
 	ExtractFFTSpectrumTest.h
 	ExtractMaskTest.h
+	ExtractMaskToTableTest.h
 	ExtractSingleSpectrumTest.h
 	FFTDerivativeTest.h
 	FFTSmooth2Test.h
@@ -547,6 +559,7 @@ set ( TEST_FILES
 	He3TubeEfficiencyTest.h
 	IQTransformTest.h
 	IdentifyNoisyDetectorsTest.h
+	IntegrateByComponentTest.h
 	IntegrationTest.h
 	InterpolatingRebinTest.h
 	InvertMaskTest.h
@@ -557,6 +570,7 @@ set ( TEST_FILES
 	MedianDetectorTestTest.h
 	MergeRunsTest.h
 	MinusTest.h
+	ModeratorTzeroTest.h
 	ModeratorTzeroLinearTest.h
 	MonteCarloAbsorptionTest.h
 	MultipleScatteringCylinderAbsorptionTest.h
@@ -592,6 +606,7 @@ set ( TEST_FILES
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
+	RenameWorkspacesTest.h
 	RenameWorkspaceTest.h
 	ReplaceSpecialValuesTest.h
 	ResampleXTest.h

@@ -15,6 +15,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include "MantidTestHelpers/FakeObjects.h"
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -107,6 +109,55 @@ public:
 
 };
 
+class ConvolutionTest_Lorentz: public IPeakFunction
+{
+public:
+  ConvolutionTest_Lorentz()
+  {
+    declareParameter("c");
+    declareParameter("h",1.);
+    declareParameter("w",1.);
+  }
+
+  std::string name()const{return "ConvolutionTest_Lorentz";}
+
+  void functionLocal(double* out, const double* xValues, const size_t nData)const
+  {
+      const double height = getParameter("h");
+      const double peakCentre = getParameter("c");
+      const double hwhm = getParameter("w");
+
+      for (size_t i = 0; i < nData; i++) {
+          double diff=xValues[i]-peakCentre;
+          out[i] = height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) );
+      }
+  }
+
+  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
+  {
+      const double height = getParameter("h");
+      const double peakCentre = getParameter("c");
+      const double hwhm = getParameter("w");
+
+      for (size_t i = 0; i < nData; i++) {
+          double diff = xValues[i]-peakCentre;
+          double invDenominator =  1/((diff*diff+hwhm*hwhm));
+          out->set(i,0, hwhm*hwhm*invDenominator);
+          out->set(i,1, 2.0*height*diff*hwhm*hwhm*invDenominator*invDenominator);
+          out->set(i,2, height*(-hwhm*hwhm*invDenominator+1)*2.0*hwhm*invDenominator);
+      }
+
+  }
+
+  double centre()const {return getParameter(0);}
+  double height()const {return getParameter(1);}
+  double fwhm()const{return getParameter(2);}
+
+  void setCentre(const double c){setParameter(0,c);}
+  void setHeight(const double h){setParameter(1,h);}
+  void setFwhm(const double w){setParameter(2,w);}
+
+};
 
 class ConvolutionTest_Linear: public ParamFunction, public IFunction1D
 {
@@ -141,6 +192,7 @@ public:
 };
 
 DECLARE_FUNCTION(ConvolutionTest_Gauss);
+DECLARE_FUNCTION(ConvolutionTest_Lorentz);
 DECLARE_FUNCTION(ConvolutionTest_Linear);
 
 class ConvolutionTest : public CxxTest::TestSuite
@@ -350,6 +402,79 @@ public:
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT( categories.size() == 1 );
     TS_ASSERT( categories[0] == "General" );
+  }
+
+  void testConvolution_fit_resolution()
+  {
+
+    boost::shared_ptr<WorkspaceTester> data(new WorkspaceTester());
+    data->init(1,100,100);
+    for(size_t i = 0; i < data->blocksize(); i++)
+    {
+        data->dataX(0)[i] = -10.0 + 0.2 * double( i );
+    }
+
+    boost::shared_ptr<Convolution> conv( new Convolution );
+
+    boost::shared_ptr<ConvolutionTest_Gauss> res( new ConvolutionTest_Gauss );
+    res->setParameter("c",0);
+    res->setParameter("h",1);
+    res->setParameter("s",2);
+
+    conv->addFunction(res);
+
+    boost::shared_ptr<ConvolutionTest_Lorentz> fun( new ConvolutionTest_Lorentz );
+    fun->setParameter("c",0);
+    fun->setParameter("h",2);
+    fun->setParameter("w",0.5);
+
+    conv->addFunction(fun);
+
+    auto &x = data->dataX(0);
+    auto &y = data->dataY(0);
+
+    FunctionDomain1DView xView( &x[0], x.size() );
+    FunctionValues voigt( xView );
+    conv->function( xView, voigt );
+
+    for(size_t i = 0; i < x.size(); i++)
+    {
+        y[i] = voigt.getCalculated(i);
+    }
+
+    conv->setParameter("f0.h", 0.5);
+    conv->setParameter("f0.s", 0.5);
+    conv->setParameter("f1.h", 1);
+    conv->setParameter("f1.w", 1);
+
+    Fit fit;
+    fit.initialize();
+
+    fit.setPropertyValue("Function",conv->asString());
+    fit.setProperty("InputWorkspace",data);
+    fit.setProperty("WorkspaceIndex",0);
+    fit.execute();
+
+    IFunction_sptr out = fit.getProperty("Function");
+    // by default convolution keeps parameters of the resolution (function #0) fixed
+    TS_ASSERT_EQUALS( out->getParameter("f0.h"), conv->getParameter("f0.h") );
+    TS_ASSERT_EQUALS( out->getParameter("f0.s"), conv->getParameter("f0.s") );
+    // fit is not very good
+    TS_ASSERT_LESS_THAN( 0.1, fabs(out->getParameter("f1.w") - conv->getParameter("f1.w")) );
+
+    conv->setAttributeValue("FixResolution",false);
+    Fit fit1;
+    fit1.initialize();
+    fit1.setProperty("Function",boost::dynamic_pointer_cast<IFunction>( conv ));
+    fit1.setProperty("InputWorkspace",data);
+    fit1.setProperty("WorkspaceIndex",0);
+    fit1.execute();
+
+    out = fit1.getProperty("Function");
+    // resolution parameters change and close to the initial values
+    TS_ASSERT_DELTA( out->getParameter("f0.s"), 2.0, 0.00001 );
+    TS_ASSERT_DELTA( out->getParameter("f1.w"), 0.5, 0.00001 );
+
   }
 
 };

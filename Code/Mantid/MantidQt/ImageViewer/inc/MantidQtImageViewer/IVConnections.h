@@ -94,7 +94,8 @@ public slots:
   void multi_color_scale();
   void spectrum_color_scale();
   void load_color_map();
-
+  void online_help_slot();
+ 
 private:
 
   Ui_ImageViewer*  iv_ui;

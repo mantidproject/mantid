@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
@@ -67,6 +68,9 @@ private:
   std::string m_backType;
   std::string m_peakType;
   double m_maxChiSq;
+
+  DataObjects::TableWorkspace_sptr m_infoTableWS;
+  DataObjects::TableWorkspace_sptr m_peakOffsetTableWS;
 };
 
 } // namespace Algorithm

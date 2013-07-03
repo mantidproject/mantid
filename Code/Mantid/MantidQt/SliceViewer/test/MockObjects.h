@@ -39,7 +39,7 @@ namespace
   {
   public:
     MOCK_METHOD0(update, void());
-    MOCK_METHOD1(updateWithSlicePoint, void(const double&));
+    MOCK_METHOD1(updateWithSlicePoint, void(const PeakBoundingBox&));
     MOCK_METHOD0(changeShownDim, bool());
     MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string&));
     MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
@@ -105,19 +105,20 @@ class MockPeakTransformFactory : public PeakTransformFactory
   public:
     MOCK_METHOD1(setPlaneDistance, void(const double&));
     MOCK_METHOD0(updateView, void());
-    MOCK_METHOD1(setSlicePoint, void(const double&));
+    MOCK_METHOD2(setSlicePoint, void(const double&, const std::vector<bool>&));
     MOCK_METHOD0(hideView, void());
     MOCK_METHOD0(showView, void());
     MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
     MOCK_METHOD1(changeForegroundColour, void(const QColor));
     MOCK_METHOD1(changeBackgroundColour, void(const QColor));
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
-    MOCK_CONST_METHOD0(getBoundingBox, PeakBoundingBox());
+    MOCK_CONST_METHOD1(getBoundingBox, PeakBoundingBox(const int));
     MOCK_METHOD1(changeOccupancyInView, void(const double));
     MOCK_METHOD1(changeOccupancyIntoView, void(const double));
     MOCK_CONST_METHOD0(getOccupancyInView, double());
     MOCK_CONST_METHOD0(getOccupancyIntoView, double());
     MOCK_CONST_METHOD0(positionOnly, bool());
+    MOCK_CONST_METHOD0(getRadius, double());
     ~MockPeakOverlayView(){}
   };
 
@@ -127,7 +128,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
   class MockPeakOverlayFactory : public PeakOverlayViewFactory
   {
   public:
-    MOCK_CONST_METHOD2(createView, boost::shared_ptr<PeakOverlayView>(const int, PeakTransform_const_sptr));
+    MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(PeakTransform_const_sptr));
     MOCK_CONST_METHOD0(getPlotXLabel, std::string());
     MOCK_CONST_METHOD0(getPlotYLabel, std::string());
     MOCK_METHOD0(updateView, void());

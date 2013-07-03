@@ -2364,7 +2364,7 @@ void ApplicationWindow::newSurfacePlot()
 }
 
 Graph3D* ApplicationWindow::plotSurface(const QString& formula, double xl, double xr,
-    double yl, double yr, double zl, double zr, int columns, int rows)
+    double yl, double yr, double zl, double zr, size_t columns, size_t rows)
 {
   QString label = generateUniqueName(tr("Graph"));
 
@@ -8452,6 +8452,12 @@ void ApplicationWindow::pasteSelection()
   emit modified();
 }
 
+/**
+ * Clone an MDI window. TODO: if this method is to be used it needs refactoring.
+ *
+ * @param w :: A window to clone.
+ * @return :: Pointer to the cloned window if successful or NULL if failed.
+ */
 MdiSubWindow* ApplicationWindow::clone(MdiSubWindow* w)
 {
   if (!w) {
@@ -8489,9 +8495,17 @@ MdiSubWindow* ApplicationWindow::clone(MdiSubWindow* w)
     QString caption = generateUniqueName(tr("Graph"));
     QString s = g->formula();
     if (g->userFunction()){
-      UserFunction *f = g->userFunction();
-      nw = plotSurface(f->function(), g->xStart(), g->xStop(), g->yStart(), g->yStop(),
-          g->zStart(), g->zStop(), f->columns(), f->rows());
+      UserFunction2D *f = dynamic_cast<UserFunction2D*>( g->userFunction() );
+      if ( f )
+      {
+          nw = plotSurface(f->formula(), g->xStart(), g->xStop(), g->yStart(), g->yStop(),
+              g->zStart(), g->zStop(), f->columns(), f->rows());
+      }
+      else
+      {
+          QMessageBox::warning(this,"MantidPlot: warning", "Function cannot be cloned.");
+          return NULL;
+      }
     } else if (g->parametricSurface()){
       UserParametricSurface *s = g->parametricSurface();
       nw = plotParametricSurface(s->xFormula(), s->yFormula(), s->zFormula(), s->uStart(), s->uEnd(),
@@ -8881,9 +8895,7 @@ void ApplicationWindow::removeWindowFromLists(MdiSubWindow* w)
     remove3DMatrixPlots(dynamic_cast<Matrix*>(w));
   }
 
-  else
-  {   mantidUI->removeWindowFromLists(w);
-  }
+  else  {  }
 
   if (hiddenWindows->contains(w))
   {
@@ -11012,13 +11024,13 @@ void ApplicationWindow::openMantidMatrix(const QStringList &list)
   QString s=list[0];
   QStringList qlist=s.split("\t");
   QString wsName=qlist[1];
-  MantidMatrix *m=newMantidMatrix(wsName,-1,-1);//mantidUI->importMatrixWorkspace(wsName,-1,-1,false,false);
+  auto m=newMantidMatrix(wsName,-1,-1);//mantidUI->importMatrixWorkspace(wsName,-1,-1,false,false);
   //if(!m)throw std::runtime_error("Error on opening matrixworkspace ");
   if(!m) 
     return;
   //adding the mantid matrix windows opened to a list.
   //this list is used for find the MantidMatrix window pointer to open a 3D/2DGraph
-  m_mantidmatrixWindows<<m;
+  m_mantidmatrixWindows << m;
   QStringList::const_iterator line = list.begin();
   for (line++; line!=list.end(); ++line)
   {	
@@ -11980,12 +11992,11 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
     QStringList linefivelst=linefive.split("\t");
     QString name=linefivelst[1];
     QStringList qlist=name.split(" ");
-    std::string graph3DwsName=qlist[1].toStdString();
-    MantidMatrix *m=0;
-    QList<MantidMatrix*>::const_iterator matrixItr;;
-    for( matrixItr=m_mantidmatrixWindows.begin();matrixItr!=m_mantidmatrixWindows.end();++matrixItr)
+    std::string graph3DwsName = qlist.size() > 1 ? qlist[1].toStdString() : "";
+    MantidMatrix *m = NULL;
+    for(auto matrixItr=m_mantidmatrixWindows.begin();matrixItr!=m_mantidmatrixWindows.end();++matrixItr)
     {
-      if(graph3DwsName==(*matrixItr)->getWorkspaceName()) m=*matrixItr;
+        if ( *matrixItr && graph3DwsName == (*matrixItr)->getWorkspaceName() ) m = *matrixItr;
     }
     QString linethree=lst[3];
     qlist.clear();
@@ -12066,7 +12077,9 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
     plot->setOrthogonal(fList[1].toInt());
   }
 
-  plot->setStyle(lst[3].split("\t", QString::SkipEmptyParts));
+  QStringList style = lst[3].split("\t", QString::SkipEmptyParts);
+  style.removeFirst();
+  plot->setStyle( style );
   plot->setIgnoreFonts(true);
   plot->update();
   return plot;
@@ -12153,13 +12166,13 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
     }
 
   }
-  MantidMatrix *m=0;
+  MantidMatrix* m = NULL;
   //getting the mantidmatrix object  for the saved spectrogram  inthe project file
-  QList<MantidMatrix*>::const_iterator matrixItr;;
-  for( matrixItr=m_mantidmatrixWindows.begin();matrixItr!=m_mantidmatrixWindows.end();++matrixItr)
+
+  for(auto matrixItr=m_mantidmatrixWindows.begin();matrixItr!=m_mantidmatrixWindows.end();++matrixItr)
   {
-    if(specgramwsName==(*matrixItr)->getWorkspaceName())
-      m=*matrixItr;
+    if( *matrixItr && specgramwsName==(*matrixItr)->getWorkspaceName() )
+      m = *matrixItr;
   }
   if(!m) return 0 ;
   Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,prjData);

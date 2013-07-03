@@ -239,7 +239,7 @@ void MantidUI::addMenuItems(QMenu *menu)
   actionToggleAlgorithms = m_exploreAlgorithms->toggleViewAction();
   actionToggleAlgorithms->setShortcut( tr("Ctrl+Shift+A") );
   menu->addAction(actionToggleAlgorithms);
-
+  
   if (m_fitFunction)
   {
     actionToggleFitFunction = m_fitFunction->toggleViewAction();
@@ -805,20 +805,6 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
   if (makeVisible) t->showNormal();
   else t->showMinimized();
   return t;
-}
-
-void MantidUI::removeWindowFromLists(MdiSubWindow* m)
-{
-  if (!m)
-    return;
-
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-  if (m->isA("MantidMatrix"))
-  {static_cast<MantidMatrix*>(m)->removeWindow();
-  }
-
-  QApplication::restoreOverrideCursor();
 }
 
 void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
@@ -1510,7 +1496,7 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 * Renames selected workspace
 * @param wsName :: selected workspace name
 */
-void MantidUI::renameWorkspace(QString wsName)
+void MantidUI::renameWorkspace(QStringList wsName)
 { 
   // If the wsname is blank look for an active window and assume this workspace is
   // the one to rename
@@ -1519,7 +1505,7 @@ void MantidUI::renameWorkspace(QString wsName)
     MantidMatrix *matrix = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
     if( matrix )
     {
-      wsName = matrix->workspaceName();
+      wsName[0] = matrix->workspaceName();
     }
     else
     {
@@ -1527,14 +1513,19 @@ void MantidUI::renameWorkspace(QString wsName)
     }
   }
 
-  //execute the algorithm
-  std::string algName("RenameWorkspace");
+  //determine the algorithm
+  std::string algName("RenameWorkspace"); 
+  if(wsName.size() > 1)
+  {
+     algName = std::string("RenameWorkspaces");
+  }
   int version=-1;
+
+  // execute the algorithm
   Mantid::API::IAlgorithm_sptr alg;
   try
   {
     alg = Mantid::API::AlgorithmManager::Instance().create(algName,version);
-
   }
   catch(...)
   {
@@ -1546,26 +1537,20 @@ void MantidUI::renameWorkspace(QString wsName)
     return;
   }
   MantidQt::API::InterfaceManager interfaceManager;
-  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_appWindow);
-  if( !dlg ) return;
-  //getting the combo box which has input workspaces and removing the workspaces except the selected one
-  QComboBox *combo = dlg->findChild<QComboBox*>();
-  if(combo)
-  {
-    int count=combo->count();
-    int index=count-1;
-    while(count>1)
-    {
-      int selectedIndex=combo->findText(wsName,Qt::MatchExactly );
-      if(selectedIndex!=index)
-      {
-        combo->removeItem(index);
-        count=combo->count();
-      }
-      index=index-1;
+  QHash<QString,QString> presets;
 
-    }
-  }//end of if loop for combo
+  if(wsName.size() == 1)
+  {
+    presets["InputWorkspace"] = wsName[0];
+  }
+  else
+  {
+    presets["InputWorkspaces"] = wsName.join(",");
+  }
+
+  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_appWindow,false,presets);
+  if( !dlg ) return;
+  
   if ( dlg->exec() == QDialog::Accepted)
   {
     delete dlg;
@@ -2291,7 +2276,23 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
 */
 void MantidUI::importString(const QString &logName, const QString &data)
 {
-  Table* t = new Table(appWindow()->scriptingEnv(), 1, 1, "", appWindow(), 0);
+	importString(logName,data,QString(""));
+}
+
+/** Displays a string in a Qtiplot table
+*  @param logName :: the title of the table is based on this
+*  @param data :: the string to display
+*  @param sep :: the seperator character
+*/
+void MantidUI::importString(const QString &logName, const QString &data, const QString &sep)
+{
+  QStringList loglines =  QStringList(data);
+  if (sep.length() > 0)
+  {
+    loglines = data.split(sep, QString::SkipEmptyParts);
+  }
+
+  Table* t = new Table(appWindow()->scriptingEnv(), loglines.size(), 1, "", appWindow(), 0);
   if( !t ) return;
   //Have to replace "_" since the legend widget uses them to separate things
   QString label = logName;
@@ -2302,7 +2303,10 @@ void MantidUI::importString(const QString &logName, const QString &data)
   t->setColName(0, "Log entry");
   t->setReadOnlyColumn(0, true); //Read-only
 
-  t->setText(0, 0, data);
+  for (int i=0; i<loglines.size(); ++i)
+  {
+    t->setText(i, 0, loglines[i]);
+  }
 
   //Show table
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,

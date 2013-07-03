@@ -28,6 +28,11 @@ def GPSANS():
     SolidAngle()
     AzimuthalAverage()
 
+def DataPath(path):
+    ReductionSingleton().set_data_path(path)
+    ReductionSingleton().set_output_path(path)
+    ReductionSingleton().reduction_properties["OutputDirectory"] = path
+
 def DirectBeamCenter(datafile):
     datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["BeamCenterMethod"]="DirectBeam"

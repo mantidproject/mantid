@@ -37,6 +37,28 @@ Some features:
 
  6) Maximum changes in the quantities that are altered during optimization are now settable.
 
+== "A" Workflow ==
+
+Optimizing all variables at once may not be the best option.  The errors become too large, so optimization in several stages
+subsets of the variables are optimized at each stage.
+
+First: NOTE that the input PeaksWorkspace does NOT CHANGE. This means you should be able to keep trying different sets of
+variables until things look good.
+
+To work on another set of variables with the optimized first round of optimized values
+
+#Use Preprocessinstrument to apply the previous DetCal or xml file before optimizing AND
+
+#Change the name of the target DetCal file, in case the choice of variables is not good. Then you will not clobber the good
+DetCal file. AND
+
+#Change the name of the ResultWorkspace in the properties list.  This means you will have a copy of the results from the
+previous trial(s)( along with chiSq values) to compare results.
+
+Do check the chiSquared values.  If they do not decrease, you were close to a minimum and the optimization could not get back
+to that minimum. It makes a large jump at the beginning.
+
+
 == After Calibration ==
 
 After calibration, you can save the workspace to Nexus (or Nexus processed) and get it back by loading in a later Mantid session.
@@ -87,6 +109,7 @@ To do so select the workspace, which you have calibrated as the InputWorkspace a
 #include "MantidAPI/IFunction.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
+#include "../../API/inc/MantidAPI/WorkspaceHistory.h"
 
 using namespace Mantid::DataObjects;
 using namespace  Mantid::API;
@@ -630,12 +653,12 @@ namespace Mantid
            g_log.warning()<<"        Index with conventional orientation matrix???"<<std::endl;
         }
 
-      bool use_L0 = getProperty("use_L0");
-      bool use_timeOffset = getProperty("use_timeOffset");
-      bool use_PanelWidth = getProperty("use_PanelWidth");
-      bool use_PanelHeight = getProperty("use_PanelHeight");
-      bool use_PanelPosition = getProperty("use_PanelPosition");
-      bool use_PanelOrientation = getProperty("use_PanelOrientation");
+      bool useL0 = getProperty("useL0");
+      bool useTimeOffset = getProperty("useTimeOffset");
+      bool use_PanelWidth = getProperty("usePanelWidth");
+      bool use_PanelHeight = getProperty("usePanelHeight");
+      bool use_PanelPosition = getProperty("usePanelPosition");
+      bool use_PanelOrientation = getProperty("usePanelOrientation");
 
       string Grouping = getProperty( "PanelGroups");
       string bankPrefix = getProperty("PanelNamePrefix");
@@ -869,7 +892,7 @@ namespace Mantid
         if( i == 0)
           oss2 <<  (minDetHWScale*L0) << "<" <<  "l0<"  <<  (maxDetHWScale*L0 ) << ",-5<" <<  "t0<5" ;
 
-        double MaxRotOffset = getProperty("MaxRotationChange_degrees");
+        double MaxRotOffset = getProperty("MaxRotationChangeDegrees");
         oss2 <<  "," << (minDetHWScale)*detWidthScale0 << "<" << Gprefix << "detWidthScale<" << (maxDetHWScale)*detWidthScale0
           << "," << (minDetHWScale)*detHeightScale0 << "<" << Gprefix << "detHeightScale<" << (maxDetHWScale)*detHeightScale0
           <<","<< -maxXYOffset+Xoffset0 << "<" << Gprefix << "Xoffset<" << maxXYOffset+Xoffset0
@@ -887,7 +910,7 @@ namespace Mantid
 
 
 //Constraints for sample offsets
-     maxXYOffset = getProperty("MaxSamplePositionChange_meters");
+     maxXYOffset = getProperty("MaxSamplePositionChangeMeters");
 
      if( getProperty("AllowSampleShift"))
      {
@@ -906,7 +929,7 @@ namespace Mantid
         Constraints += oss2.str();
       }
 
-      if(!use_L0)
+      if(!useL0)
       {
         if( !first)
           oss1 << ",";
@@ -916,7 +939,7 @@ namespace Mantid
 
       }
 
-      if(!use_timeOffset)
+      if(!useTimeOffset)
       {
         if( !first)
           oss1 << ",";
@@ -1030,8 +1053,8 @@ namespace Mantid
       nVars *= NGroups ;
       nVars += 2;
 
-      if( !use_L0)nVars--;
-      if( !use_timeOffset)nVars--;
+      if( !useL0)nVars--;
+      if( !useTimeOffset)nVars--;
 
       // g_log.notice() << "      nVars=" <<nVars<< endl;
       int NDof = ( (int)ws->dataX( 0).size()- nVars);
@@ -1050,7 +1073,7 @@ namespace Mantid
       int nn(0);
       if( getProperty("AllowSampleShift"))
         nn=3;
-      TableWorkspace_sptr Result( new TableWorkspace( 1+2*(10 + nn)));
+      TableWorkspace_sptr Result( new TableWorkspace( 2*(10 + nn)));
 
       Result->addColumn( "str","Field");
 
@@ -1083,9 +1106,9 @@ namespace Mantid
       }
       for( int p=0; p< (int)TableFieldNames.size(); p++)
         Result->cell< string >( p,0) =  TableFieldNames[p];
-      Result->cell<string>(TableFieldNames.size(),0)="Errors";
+     // Result->cell<string>(TableFieldNames.size(),0)="Errors";
       for( int p=0; p< (int)TableFieldNames.size(); p++)
-        Result->cell<string>(TableFieldNames.size()+p+1,0)=TableFieldNames[p];
+        Result->cell<string>(TableFieldNames.size()+p,0)="Err_"+TableFieldNames[p];
 
 
       for( int p = 0; p < (int)names.size(); ++p )
@@ -1117,7 +1140,7 @@ namespace Mantid
           col = atoi( fieldName.substr( 1,dotPos).c_str())+1;
         }
         Result->cell<double>(FieldNum,col)=params[p];
-        Result->cell<double>(FieldNum+10+nn+1,col)=errs[p];
+        Result->cell<double>(FieldNum+10+nn,col)=errs[p];
 
 
       }
@@ -1125,7 +1148,10 @@ namespace Mantid
 
       string ResultWorkspaceName= getPropertyValue( "ResultWorkspace");
       AnalysisDataService::Instance().addOrReplace(ResultWorkspaceName, Result);
+
       setPropertyValue( "ResultWorkspace", ResultWorkspaceName);
+      setProperty( "ResultWorkspace", Result);
+
       Result->setComment(string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
 
 
@@ -1137,7 +1163,7 @@ namespace Mantid
       boost::shared_ptr<const Instrument> NewInstrument( new Instrument( instrument->baseInstrument(), pmap));
 
       i = -1;
-      // cout<<"Ere set new values into instrument"<<endl;
+
       for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )
       {
         i++;
@@ -1515,12 +1541,12 @@ namespace Mantid
       declareProperty("beta", 0.0, "Lattice Parameter beta in degrees");
       declareProperty("gamma", 0.0, "Lattice Parameter gamma in degrees");
 
-      declareProperty("use_L0", true, "Fit the L0(source to sample) distance");
-      declareProperty("use_timeOffset", true, "Fit the time offset value");
-      declareProperty("use_PanelWidth", true, "Fit the Panel Width value");
-      declareProperty("use_PanelHeight", true, "Fit the Panel Height");
-      declareProperty("use_PanelPosition", true, "Fit the PanelPosition");
-      declareProperty("use_PanelOrientation", true, "Fit the PanelOrientation");
+      declareProperty("useL0", true, "Fit the L0(source to sample) distance");
+      declareProperty("usetimeOffset", true, "Fit the time offset value");
+      declareProperty("usePanelWidth", true, "Fit the Panel Width value");
+      declareProperty("usePanelHeight", true, "Fit the Panel Height");
+      declareProperty("usePanelPosition", true, "Fit the PanelPosition");
+      declareProperty("usePanelOrientation", true, "Fit the PanelOrientation");
       declareProperty("RotateCenters", false,"Rotate bank Centers with panel orientations");
       declareProperty("AllowSampleShift",false,"Allow and fit for a sample that is off center");
 
@@ -1566,14 +1592,14 @@ namespace Mantid
       //------------------------------------ Tolerance settings-------------------------
 
       declareProperty( "NumIterations",60,"Number of iterations");
-      declareProperty("MaxRotationChange_degrees",5.0,"Maximum Change in Rotations about x,y,or z in degrees(def=5)");
+      declareProperty("MaxRotationChangeDegrees",5.0,"Maximum Change in Rotations about x,y,or z in degrees(def=5)");
       declareProperty("MaxPositionChange_meters",.010,"Maximum Change in Panel positions in meters(def=.01)");
-      declareProperty("MaxSamplePositionChange_meters",.005,"Maximum Change in Sample position in meters(def=.005)");
+      declareProperty("MaxSamplePositionChangeMeters",.005,"Maximum Change in Sample position in meters(def=.005)");
 
       setPropertyGroup("NumIterations", "Tolerance settings");
-      setPropertyGroup("MaxRotationChange_degrees", "Tolerance settings");
+      setPropertyGroup("MaxRotationChangeDegrees", "Tolerance settings");
       setPropertyGroup("MaxPositionChange_meters", "Tolerance settings");
-      setPropertyGroup("MaxSamplePositionChange_meters", "Tolerance settings");
+      setPropertyGroup("MaxSamplePositionChangeMeters", "Tolerance settings");
 
 
       declareProperty("ChiSqOverDOF",-1.0,"ChiSqOverDOF",Kernel::Direction::Output);
@@ -1590,10 +1616,10 @@ namespace Mantid
       setPropertySettings("InitialTimeOffset", new EnabledWhenProperty("PreProcessInstrument",
         Kernel::IS_EQUAL_TO, "C)Apply a LoadParameter.xml type file"));
 
-      setPropertySettings("MaxSamplePositionChange_meters",new EnabledWhenProperty("AllowSampleShift",
+      setPropertySettings("MaxSamplePositionChangeMeters",new EnabledWhenProperty("AllowSampleShift",
           Kernel::IS_EQUAL_TO, "1" ));
 
-      setPropertySettings("MaxRotationChange_degrees",new EnabledWhenProperty("use_PanelOrientation",
+      setPropertySettings("MaxRotationChangeDegrees",new EnabledWhenProperty("usePanelOrientation",
           Kernel::IS_EQUAL_TO, "1" ));
 
     }

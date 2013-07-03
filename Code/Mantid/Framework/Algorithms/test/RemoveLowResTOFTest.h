@@ -58,7 +58,7 @@ public:
     NUMBINS = 50;
   }
 
-  void test_RemoveLowResEventsInplace()
+  void Ptest_RemoveLowResEventsInplace()
   {
     // setup
     std::string name("RemoveLowResTOF");
@@ -92,6 +92,70 @@ public:
     // pixel NUMPIXELS - 1 should be moved
     TS_ASSERT(min_eventN < ws->getEventList(NUMPIXELS - 1).getTofMin());
     TS_ASSERT_EQUALS(max_eventN, ws->getEventList(NUMPIXELS - 1).getTofMax());
+  }
+
+  /** Test the functionality to output the removed low resolution TOF events to additional
+    * workspace.
+    */
+  void test_OutputRemovedLowRefTOF()
+  {
+    // setup
+    std::string name("RemoveLowResTOF");
+    this->makeFakeEventWorkspace(name);
+    EventWorkspace_sptr ws
+         = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
+    size_t num_events = ws->getNumberEvents();
+    double min_event0 = ws->getEventList(0).getTofMin();
+    double max_event0 = ws->getEventList(0).getTofMax();
+    double min_eventN = ws->getEventList(NUMPIXELS - 1).getTofMin();
+    double max_eventN = ws->getEventList(NUMPIXELS - 1).getTofMax();
+
+    // run the algorithm
+    RemoveLowResTOF algo;
+    if (!algo.isInitialized()) algo.initialize();
+
+    std::string lowreswsname("LowResolutionTOF");
+
+    algo.setPropertyValue("InputWorkspace", name);
+    algo.setPropertyValue("OutputWorkspace", name);
+    algo.setPropertyValue("LowResTOFWorkspace", lowreswsname);
+    algo.setProperty("ReferenceDIFC", 5.);
+    TS_ASSERT(algo.execute());
+    TS_ASSERT(algo.isExecuted());
+
+    // verify the output workspaces
+    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(name);
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    EventWorkspace_sptr lowresws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(lowreswsname);
+    TS_ASSERT(lowresws);
+    if (!lowresws)
+      return;
+
+    // shouldn't drop histograms
+    TS_ASSERT_EQUALS(NUMPIXELS, ws->getNumberHistograms());
+    TS_ASSERT_EQUALS(NUMPIXELS, lowresws->getNumberHistograms());
+
+    // should drop events, but summed should be same as original
+    std::cout << "Events (Input) = " << num_events << "; Result = " << ws->getNumberEvents()
+              << ", Low Res = " << lowresws->getNumberEvents() << ".\n";
+    TS_ASSERT(num_events > ws->getNumberEvents());
+    TS_ASSERT(num_events > lowresws->getNumberEvents());
+    // There are 400 events in 4 spectra that are cleared
+    TS_ASSERT_EQUALS(ws->getNumberEvents() + lowresws->getNumberEvents() + 400, num_events);
+
+    // pixel 0 shouldn't be adjusted
+    TS_ASSERT_EQUALS(min_event0, ws->getEventList(0).getTofMin());
+    TS_ASSERT_EQUALS(max_event0, ws->getEventList(0).getTofMax());
+    TS_ASSERT_EQUALS(lowresws->getEventList(0).getNumberEvents(), 0);
+
+    // pixel NUMPIXELS - 1 should be moved
+    TS_ASSERT(min_eventN < ws->getEventList(NUMPIXELS - 1).getTofMin());
+    TS_ASSERT_EQUALS(max_eventN, ws->getEventList(NUMPIXELS - 1).getTofMax());
+    TS_ASSERT_EQUALS(min_eventN, lowresws->getEventList(NUMPIXELS-1).getTofMin());
+    TS_ASSERT(max_eventN > lowresws->getEventList(NUMPIXELS-1).getTofMax());
   }
 
 
