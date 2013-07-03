@@ -812,6 +812,22 @@ namespace DataObjects
     return getDetector()->getPos();
   }
 
+  /**
+  Forwarding function. Exposes the detector position directly, but checks that the detector is not null before
+  accessing its position. Throws if null.
+  */
+  Mantid::Kernel::V3D Peak::getDetectorPositionSafe() const
+  {
+    auto det = getDetector();
+    if(det == NULL)
+    {
+      std::stringstream stream;
+      stream << "Peak at row " << this->m_Row;
+      throw Mantid::Kernel::Exception::NotFoundError("Detector cannot be found.", stream.str());
+    }
+    return getDetector()->getPos();
+  }
+
 
 
 } // namespace Mantid

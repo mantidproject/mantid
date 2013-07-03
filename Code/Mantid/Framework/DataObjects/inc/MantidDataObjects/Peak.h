@@ -70,6 +70,7 @@ namespace DataObjects
     Mantid::Kernel::V3D getQLabFrame() const;
     Mantid::Kernel::V3D getQSampleFrame() const;
     Mantid::Kernel::V3D getDetectorPosition() const;
+    Mantid::Kernel::V3D getDetectorPositionSafe() const;
 
     void setQSampleFrame(Mantid::Kernel::V3D QSampleFrame, double detectorDistance=1.0);
     void setQLabFrame(Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0);
