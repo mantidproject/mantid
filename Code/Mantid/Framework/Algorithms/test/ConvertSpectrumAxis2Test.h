@@ -187,8 +187,8 @@ public:
     TS_ASSERT_EQUALS( qAxis->unit()->unitID(), "MomentumTransfer");
     
     TS_ASSERT_DELTA( (*qAxis)(0), 0.0000, 0.0001 );
-    TS_ASSERT_DELTA( (*qAxis)(1), 0.0878, 1.0000e-4 );
-    TS_ASSERT_DELTA( (*qAxis)(2), 0.1756, 1.0000e-4 );
+    TS_ASSERT_DELTA( (*qAxis)(1), 0.04394, 1.0000e-4 );
+    TS_ASSERT_DELTA( (*qAxis)(2), 0.0878, 1.0000e-4 );
 
     // Check axis is correct length
     TS_ASSERT_THROWS( (*qAxis)(3), Mantid::Kernel::Exception::IndexError );
@@ -225,8 +225,8 @@ public:
     TS_ASSERT_EQUALS( q2Axis->unit()->unitID(), "QSquared");
         
     TS_ASSERT_DELTA( (*q2Axis)(0), 0.0000, 0.0001 );
-    TS_ASSERT_DELTA( (*q2Axis)(1), 0.0077, 1.0000e-4 );
-    TS_ASSERT_DELTA( (*q2Axis)(2), 0.0308, 1.0000e-4 );
+    TS_ASSERT_DELTA( (*q2Axis)(1), 0.00193, 1.0000e-5 );
+    TS_ASSERT_DELTA( (*q2Axis)(2), 0.00771, 1.0000e-5 );
     
     // Check axis is correct length
     TS_ASSERT_THROWS( (*q2Axis)(3), Mantid::Kernel::Exception::IndexError );
@@ -281,8 +281,8 @@ public:
     TS_ASSERT_EQUALS( qAxis->unit()->unitID(), "MomentumTransfer");
     
     TS_ASSERT_DELTA( (*qAxis)(0), 0.000, 0.001 );
-    TS_ASSERT_DELTA( (*qAxis)(1), 0.0439, 1.0000e-4 );
-    TS_ASSERT_DELTA( (*qAxis)(2), 0.0878, 1.0000e-4 );
+    TS_ASSERT_DELTA( (*qAxis)(1), 0.02196, 1.0000e-5 );
+    TS_ASSERT_DELTA( (*qAxis)(2), 0.0439, 1.0000e-4 );
 
     // Check axis is of correct length.
     TS_ASSERT_THROWS( (*qAxis)(3), Mantid::Kernel::Exception::IndexError );
@@ -334,8 +334,8 @@ public:
     TS_ASSERT_EQUALS( qAxis->unit()->unitID(), "MomentumTransfer");
     
     TS_ASSERT_DELTA( (*qAxis)(0), 0.000, 0.001 );
-    TS_ASSERT_DELTA( (*qAxis)(1), 0.0087, 1.0000e-4 );
-    TS_ASSERT_DELTA( (*qAxis)(2), 0.0087, 1.0000e-4 );
+    TS_ASSERT_DELTA( (*qAxis)(1), 0.004391, 1.0000e-6 );
+    TS_ASSERT_DELTA( (*qAxis)(2), 0.004393, 1.0000e-6 );
 
     // Check axis is of correct length.
     TS_ASSERT_THROWS( (*qAxis)(3), Mantid::Kernel::Exception::IndexError );

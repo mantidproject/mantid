@@ -150,27 +150,24 @@ namespace Algorithms
     for ( size_t i = 0; i < m_nHist; i++ )
     {
       IDetector_const_sptr detector = m_inputWS->getDetector(i);
-      double twoTheta, efixed;
+      double theta(0.0), efixed(0.0);
       if ( ! detector->isMonitor() )
       {
-        twoTheta = m_inputWS->detectorTwoTheta(detector);
+        theta = m_inputWS->detectorTwoTheta(detector)/2.0;
         efixed = getEfixed(detector, m_inputWS, emode); //get efixed
       }
       else
       {
-        twoTheta = 0.0;
+        theta = 0.0;
         efixed = DBL_MIN;
       }
 
-      const double sineTheta = sin(twoTheta);
+      const double stheta = std::sin(theta);
         
       //Calculate the wavelength to allow it to be used to convert to elasticQ. 
       double wavelength = wavelengthFactor*std::pow(efixed, wavelengthPower);
-      //The constant k.
-      const double k = (2*M_PI)/wavelength;
-      
       // The MomentumTransfer value.
-      double elasticQInAngstroms = k*2*sineTheta;
+      double elasticQInAngstroms = 4.0*M_PI*stheta/wavelength;
 
       if(targetUnit == "ElasticQ")
       {
