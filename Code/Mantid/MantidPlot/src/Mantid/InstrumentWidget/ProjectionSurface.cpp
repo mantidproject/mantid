@@ -48,6 +48,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
   connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SIGNAL(shapeCreated()));
   connect(&m_maskShapes,SIGNAL(shapeSelected()),this,SIGNAL(shapeSelected()));
   connect(&m_maskShapes,SIGNAL(shapesDeselected()),this,SIGNAL(shapesDeselected()));
+  connect(&m_maskShapes,SIGNAL(shapesRemoved()),this,SIGNAL(shapesRemoved()));
   connect(&m_maskShapes,SIGNAL(shapeChanged()),this,SIGNAL(shapeChanged()));
   connect(&m_maskShapes,SIGNAL(cleared()),this,SIGNAL(shapesCleared()));
 

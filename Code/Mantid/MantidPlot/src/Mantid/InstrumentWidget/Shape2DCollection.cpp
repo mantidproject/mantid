@@ -97,8 +97,9 @@ void Shape2DCollection::addShape(Shape2D* shape,bool slct)
 /**
  * Remove a shape from collection
  * @param shape :: Pointer to the shape to remove.
+ * @param sendSignal :: Flag to send shapesRemoved() signal.
  */
-void Shape2DCollection::removeShape(Shape2D* shape)
+void Shape2DCollection::removeShape(Shape2D* shape, bool sendSignal)
 {
   if (shape && m_shapes.contains(shape))
   {
@@ -106,9 +107,16 @@ void Shape2DCollection::removeShape(Shape2D* shape)
     m_selectedShapes.removeOne(shape);
     delete shape;
   }
-  if (m_shapes.isEmpty())
+  if ( sendSignal )
   {
-      emit cleared();
+      if (m_shapes.isEmpty())
+      {
+          emit cleared();
+      }
+      else
+      {
+          emit shapesRemoved();
+      }
   }
 }
 
@@ -124,11 +132,15 @@ void Shape2DCollection::removeShapes(const QList<Shape2D*>& shapeList)
     {
       m_currentShape = NULL;
     }
-    removeShape( shape );
+    removeShape( shape, false );
   }
   if (m_shapes.isEmpty())
   {
       emit cleared();
+  }
+  else
+  {
+      emit shapesRemoved();
   }
 }
 

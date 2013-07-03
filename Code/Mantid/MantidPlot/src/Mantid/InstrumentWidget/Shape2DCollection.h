@@ -38,7 +38,7 @@ public:
   void setWindow(const RectF& surface,const QRect& viewport) const;
   virtual void draw(QPainter& painter) const;
   virtual void addShape(Shape2D*,bool slct = false);
-  virtual void removeShape(Shape2D*);
+  virtual void removeShape(Shape2D*, bool sendSignal = true);
   virtual void removeShapes(const QList<Shape2D*>&);
   virtual void clear();
   
@@ -81,6 +81,7 @@ signals:
   void shapeCreated();
   void shapeSelected();
   void shapesDeselected();
+  void shapesRemoved();
   void shapeChanged();
   void shapeChangeFinished();
   void cleared();

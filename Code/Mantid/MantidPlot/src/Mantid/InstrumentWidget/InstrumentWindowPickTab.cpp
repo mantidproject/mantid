@@ -5,6 +5,7 @@
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
 #include "UnwrappedSurface.h"
+#include "Projection3D.h"
 #include "PeakMarker2D.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -691,16 +692,17 @@ void InstrumentWindowPickTab::setSelectionType()
   if ( surface ) 
   {
     surface->setInteractionMode( surfaceMode );
-  }
-  if ( m_selectionType != Draw )
-  {
-      m_plot->clearAll();
-      m_plot->replot();
-      setPlotCaption();
-  }
-  else
-  {
-      updatePlotMultipleDetectors();
+    auto interactionMode = surface->getInteractionMode();
+    if ( interactionMode == ProjectionSurface::DrawMode || interactionMode == ProjectionSurface::MoveMode )
+    {
+        updatePlotMultipleDetectors();
+    }
+    else
+    {
+        m_plot->clearAll();
+        m_plot->replot();
+        setPlotCaption();
+    }
   }
   m_instrWindow->updateInfoText();
 }
@@ -1275,7 +1277,12 @@ void InstrumentWindowPickTab::initSurface()
     connect(surface,SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
     connect(surface,SIGNAL(shapeChangeFinished()),this,SLOT(updatePlotMultipleDetectors()));
     connect(surface,SIGNAL(shapesCleared()),this,SLOT(updatePlotMultipleDetectors()));
-    connect(surface,SIGNAL(shapesDeselected()),this,SLOT(updatePlotMultipleDetectors()));
+    connect(surface,SIGNAL(shapesRemoved()),this,SLOT(updatePlotMultipleDetectors()));
+    Projection3D *p3d = dynamic_cast<Projection3D*>( surface );
+    if ( p3d )
+    {
+        connect(p3d,SIGNAL(finishedMove()),this,SLOT(updatePlotMultipleDetectors()));
+    }
 }
 
 /**
@@ -1382,13 +1389,20 @@ void InstrumentWindowPickTab::shapeCreated()
  */
 void InstrumentWindowPickTab::updatePlotMultipleDetectors()
 {
+    if ( !isVisible() ) return;
+    ProjectionSurface &surface = *getSurface();
+    m_plot->clearAll();
+    if ( !surface.hasMasks() )
+    {
+        m_plot->replot();
+        return;
+    }
     QList<int> dets;
-    getSurface()->getMaskedDetectors( dets );
+    surface.getMaskedDetectors( dets );
     std::vector<double> x,y;
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y );
     QApplication::restoreOverrideCursor();
-    m_plot->clearAll();
     if ( !x.empty() )
     {
         m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrWindow->getInstrumentActor()->getWorkspace()->getAxis(0)->unit()->unitID());
