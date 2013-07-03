@@ -83,8 +83,7 @@ namespace Mantid
       int confidence(0);
       const auto & rootPathNameType = descriptor.firstEntryNameType();
       if(rootPathNameType.second != "NXentry") return 0;
-      if(descriptor.pathExists("/" + rootPathNameType.first + "MDEventWorkspace") ||
-         descriptor.pathExists("/" + rootPathNameType.first + "MDHistoWorkspace"))
+      if(descriptor.pathExists("/MDEventWorkspace") || descriptor.pathExists("/MDHistoWorkspace"))
       {
         return 95;
       }
