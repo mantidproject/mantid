@@ -199,6 +199,8 @@ int LoadEventPreNexus2::confidence(Kernel::FileDescriptor & descriptor) const
 
   // If this looks like a binary file where the exact file length is a multiple
   // of the DasEvent struct then we're probably okay.
+  if(descriptor.isAscii()) return 0;
+
   const size_t objSize = sizeof(DasEvent);
   auto &handle = descriptor.data();
   // get the size of the file in bytes and reset the handle back to the beginning
@@ -206,7 +208,7 @@ int LoadEventPreNexus2::confidence(Kernel::FileDescriptor & descriptor) const
   const size_t filesize = static_cast<size_t>(handle.tellg());
   handle.seekg(0, std::ios::beg);
 
-  if (filesize % objSize != 0) return 80;
+  if (filesize % objSize == 0) return 80;
   else return 0;
 }
 

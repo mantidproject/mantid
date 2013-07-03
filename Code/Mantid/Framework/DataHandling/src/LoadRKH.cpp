@@ -43,9 +43,6 @@ int LoadRKH::confidence(Kernel::FileDescriptor & descriptor) const
 {
   if(!descriptor.isAscii()) return 0;
 
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  boost::char_separator<char> sep(" ");
-
   auto &file = descriptor.data();
   std::string fileline("");
 
@@ -54,15 +51,16 @@ int LoadRKH::confidence(Kernel::FileDescriptor & descriptor) const
 
   // -- First line --
   std::getline(file, fileline);
-  // LOQ or SANS2D
-  if(fileline.find("LOQ") == std::string::npos && fileline.find("SANS2D") == std::string::npos) return 0;
+  // LOQ or SANS2D (case insensitive)
+  if(boost::ifind_first(fileline, "loq").empty() && boost::ifind_first(fileline, "sans2d").empty()) return 0;
+
   // Next should be date time string
   static const char* MONTHS[12] = {"-JAN-", "-FEB-", "-MAR-", "-APR-", "-MAY-", "-JUN-", "-JUL-", "-AUG-", "-SEP-", "-OCT-", "-NOV-", "-DEC-"};
 
   bool foundMonth(false);
   for(size_t i = 0 ; i < 12; ++i)
   {
-    if(fileline.find(MONTHS[i]) != std::string::npos)
+    if(!boost::ifind_first(fileline, MONTHS[i]).empty())
     {
       foundMonth = true;
       break;
@@ -73,13 +71,13 @@ int LoadRKH::confidence(Kernel::FileDescriptor & descriptor) const
  // there are no constraints on the second line
   std::getline(file, fileline);
 
-  // read 3rd line - should contain sequence "    0    0    0    1"
+  // read 3rd line - should contain sequence "0    0    0    1"
   std::getline(file, fileline);
-  if(fileline.find("    0    0    0    1") == std::string::npos) return 0;
+  if(fileline.find("0    0    0    1") == std::string::npos) return 0;
 
-  // read 4th line - should contain sequence "    0    0    0    1"
+  // read 4th line - should contain sequence ""0         0         0         0"
   std::getline(file, fileline);
-  if(fileline.find("         0         0         0         0") == std::string::npos) return 0;
+  if(fileline.find("0         0         0         0") == std::string::npos) return 0;
 
   // read 5th line - should contain sequence "3 (F12.5,2E16.6)"
   std::getline(file, fileline);
