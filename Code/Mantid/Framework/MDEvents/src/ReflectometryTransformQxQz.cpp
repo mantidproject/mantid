@@ -51,26 +51,11 @@ namespace Mantid
     */
     IMDEventWorkspace_sptr ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const
     {
-      const size_t nbinsx = 10;
-      const size_t nbinsz = 10;
 
-      auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<2>,2> >();
-      MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", static_cast<Mantid::coord_t>(m_qxMin), static_cast<Mantid::coord_t>(m_qxMax), nbinsx)); 
-      MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension("Qz","qz","(Ang^-1)", static_cast<Mantid::coord_t>(m_qzMin), static_cast<Mantid::coord_t>(m_qzMax), nbinsz)); 
+      MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", static_cast<Mantid::coord_t>(m_qxMin), static_cast<Mantid::coord_t>(m_qxMax), m_nbinsx));
+      MDHistoDimension_sptr qzDim = MDHistoDimension_sptr(new MDHistoDimension("Qz","qz","(Ang^-1)", static_cast<Mantid::coord_t>(m_qzMin), static_cast<Mantid::coord_t>(m_qzMax), m_nbinsz));
 
-      ws->addDimension(qxDim);
-      ws->addDimension(qzDim);
-
-      // Set some reasonable values for the box controller
-      BoxController_sptr bc = ws->getBoxController();
-      bc->setSplitInto(2);
-      bc->setSplitThreshold(10);
-
-      // Initialize the workspace.
-      ws->initialize();
-
-      // Start with a MDGridBox.
-      ws->splitBox();
+      auto ws = createWorkspace(qxDim, qzDim);
 
       auto spectraAxis = inputWs->getAxis(1);
       for(size_t index = 0; index < inputWs->getNumberHistograms(); ++index)

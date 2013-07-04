@@ -46,26 +46,10 @@ namespace Mantid
 
     Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformP::execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
     {
-      const size_t nbinsx = 10;
-      const size_t nbinsz = 10;
+      MDHistoDimension_sptr pSumDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i + Pz_f","sum_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pSumMin), static_cast<Mantid::coord_t>(m_pSumMax), m_nbinsx));
+      MDHistoDimension_sptr pDiffDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i - Pz_f","diff_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pDiffMin), static_cast<Mantid::coord_t>(m_pDiffMax), m_nbinsz));
 
-      auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<2>,2> >();
-      MDHistoDimension_sptr pSumDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i + Pz_f","sum_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pSumMin), static_cast<Mantid::coord_t>(m_pSumMax), nbinsx)); 
-      MDHistoDimension_sptr pDiffDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i - Pz_f","diff_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pDiffMin), static_cast<Mantid::coord_t>(m_pDiffMax), nbinsz)); 
-
-      ws->addDimension(pSumDim);
-      ws->addDimension(pDiffDim);
-
-      // Set some reasonable values for the box controller
-      BoxController_sptr bc = ws->getBoxController();
-      bc->setSplitInto(2);
-      bc->setSplitThreshold(10);
-
-      // Initialize the workspace.
-      ws->initialize();
-
-      // Start with a MDGridBox.
-      ws->splitBox();
+      auto ws = createWorkspace(pSumDim, pDiffDim);
 
       auto spectraAxis = inputWs->getAxis(1);
       for(size_t index = 0; index < inputWs->getNumberHistograms(); ++index)
