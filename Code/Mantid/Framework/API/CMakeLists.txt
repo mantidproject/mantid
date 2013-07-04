@@ -39,7 +39,6 @@ set ( SRC_FILES
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
-	src/IDataFileChecker.cpp
 	src/IDomainCreator.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
@@ -69,7 +68,6 @@ set ( SRC_FILES
 	src/JointDomain.cpp
 	src/LinearScale.cpp
 	src/LiveListenerFactory.cpp
-	src/LoadAlgorithmFactory.cpp
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
 	src/LogManager.cpp
@@ -172,7 +170,6 @@ set ( INC_FILES
 	inc/MantidAPI/ICatalog.h
 	inc/MantidAPI/IConstraint.h
 	inc/MantidAPI/ICostFunction.h
-	inc/MantidAPI/IDataFileChecker.h
 	inc/MantidAPI/IDataItem.h
 	inc/MantidAPI/IDomainCreator.h
 	inc/MantidAPI/IEventList.h
@@ -216,7 +213,6 @@ set ( INC_FILES
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LinearScale.h
 	inc/MantidAPI/LiveListenerFactory.h
-	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
 	inc/MantidAPI/LogManager.h

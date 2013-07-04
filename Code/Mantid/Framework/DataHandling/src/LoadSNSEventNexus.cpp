@@ -6,7 +6,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadSNSEventNexus.h"
-#include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 
 using namespace ::NeXus;
 using namespace Mantid::Geometry;
@@ -16,9 +15,6 @@ namespace Mantid
 {
 namespace DataHandling
 {
-
-DECLARE_ALGORITHM(LoadSNSEventNexus)
-//DECLARE_LOADALGORITHM(LoadSNSEventNexus)
 
 LoadSNSEventNexus::LoadSNSEventNexus()
 {
@@ -34,17 +30,6 @@ int LoadSNSEventNexus::version() const
 const std::string LoadSNSEventNexus::name() const
 {
   return "LoadSNSEventNexus";
-}
-
-/**
- * Checks the file by opening it and reading few lines
- *  @param filePath :: name of the file inluding its path
- *  @return an integer value how much this algorithm can load the file
- */
-int LoadSNSEventNexus::fileCheck(const std::string& filePath)
-{
-  UNUSED_ARG(filePath);
-  return 0;
 }
 
 } // namespace DataHandling

@@ -15,7 +15,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 
 #include <boost/regex.hpp>
 #include <boost/shared_array.hpp>
@@ -44,6 +43,9 @@ namespace Mantid
 {
   namespace DataHandling
   {
+    // Register the algorithm into the AlgorithmFactory
+    DECLARE_FILELOADER_ALGORITHM(LoadSpice2D);
+
     // Parse string and convert to numeric type
     template <class T>
     bool from_string(T& t, const std::string& s, std::ios_base& (*f)(std::ios_base&))
@@ -93,10 +95,6 @@ namespace Mantid
       E[0] = error;
       ws->getSpectrum(specID)->setSpectrumNo(specID);
     }
-
-
-    // Register the algorithm into the AlgorithmFactory
-    DECLARE_FILELOADER_ALGORITHM(LoadSpice2D);
 
     /**
      * Return the confidence with with this algorithm can load the file

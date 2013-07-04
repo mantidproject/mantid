@@ -38,7 +38,6 @@ Loading multiple files is also possible with <code>Load</code>, as well as works
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/FacilityInfo.h"
