@@ -41,7 +41,7 @@ set ( SRC_FILES
 	src/LoadEventPreNexus.cpp
 	src/LoadEventPreNexus2.cpp
 	src/LoadGSS.cpp
-	src/LoadILL.cpp
+#	src/LoadILL.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
@@ -57,6 +57,7 @@ set ( SRC_FILES
 	src/LoadMask.cpp
 	src/LoadMaskingFile.cpp
 	src/LoadMcStasNexus.cpp
+	src/LoadMcStasEventNexus.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
 	src/LoadMuonNexus1.cpp
@@ -182,7 +183,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus.h
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadGSS.h
-	inc/MantidDataHandling/LoadILL.h
+#	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
@@ -198,6 +199,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMaskingFile.h
 	inc/MantidDataHandling/LoadMcStasNexus.h
+	inc/MantidDataHandling/LoadMcStasEventNexus.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
 	inc/MantidDataHandling/LoadMuonNexus1.h
@@ -318,7 +320,7 @@ set ( TEST_FILES
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
 	LoadGSSTest.h
-	LoadILLTest.h
+#	LoadILLTest.h
 	LoadISISNexusTest.h
 	LoadInstrumentFromRawTest.h
 	LoadInstrumentTest.h
@@ -328,6 +330,8 @@ set ( TEST_FILES
 	LoadLogsFromSNSNexusTest.h
 	LoadMappingTableTest.h
 	LoadMaskTest.h
+	LoadMcStasNexusTest.h
+	LoadMcStasEventNexusTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
