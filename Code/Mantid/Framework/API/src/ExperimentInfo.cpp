@@ -854,13 +854,11 @@ namespace API
 
     file->writeData("instrument_source", Poco::Path(instrument->getFilename()).getFileName());
 
-    // Now the parameter map, as a NXnote
-    const Geometry::ParameterMap& params = constInstrumentParameters();
-    std::string str = params.asString();
-    file->makeGroup("instrument_parameter_map", "NXnote", true);
-    file->writeData("data", str);
-    file->writeData("type", "text/plain"); // mimetype
-    file->closeGroup();
+    // Now the parameter map, as a NXnote via its saveNexus method
+    if(instrument->isParametrized()){
+      const Geometry::ParameterMap& params = constInstrumentParameters();
+      params.saveNexus( file, "instrument_parameter_map" );
+    }
 
     // Add physical detector and monitor data
     std::vector<detid_t> detectorIDs;
