@@ -398,14 +398,15 @@ class DirectEnergyConversion(object):
             else:
                 self.log('_do_mono: Raw file detector header is superceeded') 
                 if self.relocate_dets: 
-                    self.log('_do_mono: Moving detectors to positions specified in cal file ')
+                    self.log('_do_mono: Moving detectors to positions specified in cal file ','debug')
                     if str(self.det_cal_file) in mtd: # it is already workspace 
                         self.__det_cal_file_ws = self.det_cal_file
 
                     if self.__det_cal_file_ws == None :
-                        self.log('_do_mono: Loading detector info from file ' + self.det_cal_file,'debug')                    
-                        LoadDetectorInfo(Workspace=result_name,DataFilename=self.det_cal_file,RelocateDets= self.relocate_dets)
-                        self.log('_do_mono: Loading detector info completed ')                                            
+                        self.log('_do_mono: Loading detector info from file ' +str(self.det_cal_file),'debug')    
+                        file = common.find_file(self.det_cal_file)
+                        LoadDetectorInfo(Workspace=result_name,DataFilename=file,RelocateDets= self.relocate_dets)
+                        self.log('_do_mono: Loading detector info completed ','debug')                                            
                     else:
                         self.log('_do_mono: Copying detectors positions from det_cal_file workspace: '+self.__det_cal_file_ws.name())                    
                         CopyInstrumentParameters(InputWorkspace=self.__det_cal_file_ws,OutputWorkspace=result_name)

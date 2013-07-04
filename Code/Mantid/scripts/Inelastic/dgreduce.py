@@ -662,7 +662,7 @@ def sum_files(accumulator, files):
 
 
     if type(files) == list:
-         tmp_suffix = '_plus_tmp'
+         #tmp_suffix = '_plus_tmp'
 
          for filename in files:
               print 'Summing run ',filename,' to workspace ',accumulator
