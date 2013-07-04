@@ -83,6 +83,8 @@ namespace Mantid
 
       /// Returns the name of an Algorithm that can load the given filename
       const boost::shared_ptr<IAlgorithm> chooseLoader(const std::string &filename) const;
+      /// Checks whether the given algorithm can load the file
+      bool canLoad(const std::string & algorithmName,const std::string & filename) const;
 
     private:
       /// Friend so that CreateUsingNew

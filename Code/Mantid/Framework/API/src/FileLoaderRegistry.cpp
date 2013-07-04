@@ -28,19 +28,20 @@ namespace Mantid
       ///endcond
 
       /**
-       * @param descriptor A descriptor object describing the file
+       * @param filename A string giving a filename
        * @param names The collection of names to search through
        * @param logger A reference to a Mantid Logger object
        * @return  A string containing the name of an algorithm to load the file, or an empty string if nothing
        * was found
        */
       template<typename DescriptorType, typename FileLoaderType>
-      const IAlgorithm_sptr searchForLoader(DescriptorType & descriptor,const std::multimap<std::string, int> & names,
+      const IAlgorithm_sptr searchForLoader(const std::string & filename,const std::multimap<std::string, int> & names,
                                             Kernel::Logger & logger)
       {
         const auto & factory = AlgorithmFactory::Instance();
         IAlgorithm_sptr bestLoader;
         int maxConfidence(0);
+        DescriptorType descriptor(filename);
         DescriptorCallback<DescriptorType> callback;
 
         auto iend = names.end();
@@ -87,32 +88,62 @@ namespace Mantid
     {
       using Kernel::FileDescriptor;
       using Kernel::HDFDescriptor;
-      using Kernel::Logger;
 
-      if(m_log.is(Logger::Priority::PRIO_DEBUG)) m_log.debug() << "Trying to find loader for '" << filename << "'" << std::endl;
+      m_log.debug() << "Trying to find loader for '" << filename << "'" << std::endl;
 
       IAlgorithm_sptr bestLoader;
       if(HDFDescriptor::isHDF(filename))
       {
-        if(m_log.is(Logger::Priority::PRIO_DEBUG)) m_log.debug() << filename << " looks like a HDF file. Checking registered HDF loaders\n";
-        HDFDescriptor descriptor(filename);
-        bestLoader = searchForLoader<HDFDescriptor,IHDFFileLoader>(descriptor, m_names[HDF], m_log);
+        m_log.debug() << filename << " looks like a HDF file. Checking registered HDF loaders\n";
+        bestLoader = searchForLoader<HDFDescriptor,IHDFFileLoader>(filename, m_names[HDF], m_log);
       }
       else
       {
-        if(m_log.is(Logger::Priority::PRIO_DEBUG)) m_log.debug() << "Checking registered non-HDF loaders\n";
-        FileDescriptor descriptor(filename);
-        bestLoader = searchForLoader<FileDescriptor,IFileLoader>(descriptor, m_names[NonHDF], m_log);
+        m_log.debug() << "Checking registered non-HDF loaders\n";
+        bestLoader = searchForLoader<FileDescriptor,IFileLoader>(filename, m_names[NonHDF], m_log);
       }
 
       if(!bestLoader)
       {
         throw Kernel::Exception::NotFoundError(filename, "Unable to find loader");
       }
-      if(m_log.is(Logger::Priority::PRIO_DEBUG)) m_log.debug() << "Found loader " << bestLoader->name() << " for file '" << filename << "'" << std::endl;
+      m_log.debug() << "Found loader " << bestLoader->name() << " for file '" << filename << "'" << std::endl;
       return bestLoader;
     }
 
+    /**
+     * Perform a check that that the given algorithm can load the file
+     * @param algorithmName The name of the algorithm to check
+     * @param filename The name of file to check
+     * @returns True if the algorithm can load the file, false otherwise
+     * @throws std::invalid_argument if the loader does not exist
+     */
+    bool FileLoaderRegistryImpl::canLoad(const std::string & algorithmName,const std::string & filename) const
+    {
+      using Kernel::FileDescriptor;
+      using Kernel::HDFDescriptor;
+
+      // Check if it is in one of our lists
+      bool hdf(false),nonHDF(false);
+      if(m_names[HDF].find(algorithmName) != m_names[HDF].end()) hdf = true;
+      else if(m_names[NonHDF].find(algorithmName) != m_names[NonHDF].end()) nonHDF = true;
+
+      if(!hdf && !nonHDF) throw std::invalid_argument("FileLoaderRegistryImpl::canLoad - Algorithm '" + algorithmName + "' is not registered as a loader.");
+
+      std::multimap<std::string,int> names;
+      names.insert(std::make_pair(algorithmName, -1));
+      IAlgorithm_sptr loader;
+      if(hdf && HDFDescriptor::isHDF(filename))
+      {
+        loader = searchForLoader<HDFDescriptor,IHDFFileLoader>(filename, names, m_log);
+      }
+      else
+      {
+        loader = searchForLoader<FileDescriptor,IFileLoader>(filename, names, m_log);
+      }
+      if(loader) return true;
+      else return false;
+    }
 
     //----------------------------------------------------------------------------------------------
     // Private members
