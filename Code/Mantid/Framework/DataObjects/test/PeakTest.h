@@ -330,14 +330,14 @@ public:
     TS_ASSERT_EQUALS( p2.getDetectorID(), 19999);
   }
 
-  void test_getDetectorPositionSafe()
+  void test_getDetectorPosition()
   {
     const int detectorId = 19999;
     const double wavelength = 2;
     Peak p(inst, detectorId, wavelength);
 
     V3D a = p.getDetectorPosition();
-    V3D b = p.getDetectorPositionSafe();
+    V3D b = p.getDetectorPositionNoCheck();
 
     TSM_ASSERT_EQUALS("Results should be the same", a, b);
   }
@@ -347,9 +347,9 @@ public:
     const int detectorId = 19999;
     const double wavelength = 2;
     Peak p(inst, detectorId, wavelength);
-    TSM_ASSERT_THROWS_NOTHING("Nothing wrong here, detector is valid", p.getDetectorPositionSafe());
+    TSM_ASSERT_THROWS_NOTHING("Nothing wrong here, detector is valid", p.getDetectorPosition());
     p.setQLabFrame(V3D(1,1,1), 1); // This sets the detector pointer to null and detector id to -1;
-    TSM_ASSERT_THROWS("Detector is not valid", p.getDetectorPositionSafe(), Mantid::Kernel::Exception::NotFoundError&);
+    TSM_ASSERT_THROWS("Detector is not valid", p.getDetectorPosition(), Mantid::Kernel::Exception::NotFoundError&);
   }
 
 private:

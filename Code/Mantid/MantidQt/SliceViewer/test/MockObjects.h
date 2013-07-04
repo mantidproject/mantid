@@ -236,7 +236,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
       double());
     MOCK_CONST_METHOD0(getDetectorPosition,
       Mantid::Kernel::V3D());
-    MOCK_CONST_METHOD0(getDetectorPositionSafe,
+    MOCK_CONST_METHOD0(getDetectorPositionNoCheck,
           Mantid::Kernel::V3D());
   };
 

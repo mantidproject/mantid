@@ -807,7 +807,7 @@ namespace DataObjects
   /**
   Forwarding function. Exposes the detector position directly.
   */
-  Mantid::Kernel::V3D Peak::getDetectorPosition() const
+  Mantid::Kernel::V3D Peak::getDetectorPositionNoCheck() const
   {
     return getDetector()->getPos();
   }
@@ -816,7 +816,7 @@ namespace DataObjects
   Forwarding function. Exposes the detector position directly, but checks that the detector is not null before
   accessing its position. Throws if null.
   */
-  Mantid::Kernel::V3D Peak::getDetectorPositionSafe() const
+  Mantid::Kernel::V3D Peak::getDetectorPosition() const
   {
     auto det = getDetector();
     if(det == NULL)
