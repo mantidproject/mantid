@@ -81,7 +81,7 @@ class DirectEnergyConversion(object):
               hard_mask  - A file specifying those spectra that should be masked without testing (default=None)
               tiny        - Minimum threshold for acceptance (default = 1e-10)
               huge        - Maximum threshold for acceptance (default = 1e10)
-              bkgd_range - A list of two numbers indicating the background range (default=instrument defaults)
+              background_test_range - A list of two numbers indicating the background range (default=instrument defaults)
               van_out_lo  - Lower bound defining outliers as fraction of median value (default = 0.01)
               van_out_hi  - Upper bound defining outliers as fraction of median value (default = 100.)
               van_lo      - Fraction of median to consider counting low for the white beam diag (default = 0.1)
@@ -167,11 +167,11 @@ class DirectEnergyConversion(object):
             # Set up the background integrals
             result_ws = common.load_runs(sample)
             result_ws = self.normalise(result_ws, result_ws.name(), self.normalise_method)
-            if 'bkgd_range' in kwargs:
-                bkgd_range = kwargs['bkgd_range']
-                del kwargs['bkgd_range']
+            if 'background_test_range' in kwargs:
+                bkgd_range = kwargs['background_test_range']
+                del kwargs['background_test_range']
             else:
-                bkgd_range = self.bkgd_range
+                bkgd_range = self.background_test_range
             background_int = Integration(result_ws,
                                          RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],
                                          IncludePartialBins=True)
@@ -954,6 +954,42 @@ class DirectEnergyConversion(object):
         else:
             return False
 
+    @property
+    def normalise_method(self):
+        return self._normalise_method
+    @normalise_method.setter
+    def normalise_method(self,value):
+        if value is None:
+            value = 'none'
+        if not isinstance(value,str):
+            self.log('Normalization method should be a string or None','error')
+
+        value = value.lower()
+        if value in self.__normalization_methods:
+            self._normalise_method = value
+        else:
+            self.log('Attempt to set up unknown normalization method {0}'.format(value),'error') 
+            raise KeyError('Attempt to set up unknown normalization method {0}'.format(value))
+
+    @property 
+    def background_test_range(self):
+        if not hasattr(self,'_background_test_range') or self._background_test_range is None:
+            return self.bkgd_range;
+        else:
+            return self._background_test_range
+    @background_test_range.setter
+    def background_test_range(self,value):
+        if value is None:
+            self._background_test_range=None
+            return
+        if isinstance(value,str):
+            value = str.split(value,',')
+        if len(value) != 2:
+            raise ValueError("background test range can be set to a 2 element list of floats")
+
+        self._background_test_range=[float(value[0]),float(value[1])]
+
+
     def initialise(self, instr_name,reload_instrument=False):
         """
         Initialise the private attributes of the class and the nullify the attributes which expected to be always set-up from a calling script
@@ -970,7 +1006,7 @@ class DirectEnergyConversion(object):
         # and tries to get rest from the correspondent Direct Energy conversion attributes.
         self.__diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
-                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_bkgd_range']
+                              'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_background_test_range']
 
         
         self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment

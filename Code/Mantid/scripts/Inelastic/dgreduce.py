@@ -3,6 +3,7 @@ import CommonFunctions as common
 import time as time
 import numpy
 from mantid.simpleapi import *
+from mantid import api
 from mantid.kernel import funcreturns
 import unittest
 
@@ -139,11 +140,10 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
-    if isinstance(sample_run,int):
-        Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run number: '+str(sample_run))
-
-    else:
+    if isinstance(sample_run,api.Workspace):
         Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run for workspace name: '+str(sample_run))
+    else:
+        Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run number/s: '+str(sample_run))
 
 
     try:
@@ -211,6 +211,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     if abs_units_defaults_check :
         Reducer.check_abs_norm_defaults_changed(changed_Keys);
 
+    #process complex parameters
+
 
     # map file given in parameters overrides default map file
     if map_file != 'default' :
@@ -220,9 +222,6 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         Reducer.log('one2one map selected')
 
     
-    #process complex parameters
-    if Reducer.mask_run == None :
-        mask_run=sample_run
           
     if  Reducer.det_cal_file != None : 
         if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file in mtd : # it is a file
@@ -243,12 +242,17 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     if (numpy.size(sample_run)) > 1 and Reducer.sum_runs:
         #this sums the runs together before passing the summed file to the rest of the reduction
         #this circumvents the inbuilt method of summing which fails to sum the files for diag
-        
-        sumfilename=str(sample_run[0])+'sum'
-        accum=sum_files(sumfilename, sample_run)
-        #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workpsace
-        RenameWorkspace(InputWorkspace=accum,OutputWorkspace=inst_name+str(sample_run[0])+'.raw')
-        sample_run=sample_run[0]
+
+        #the D.E.C. tries to be too clever so we have to fool it into thinking the raw file is already exists as a workpsace        
+        sumfilename=Reducer.instr_name+str(sample_run[0])+'.raw'
+        sample_run =sum_files(sumfilename, sample_run)
+
+        #sample_run = RenameWorkspace(InputWorkspace=accum,OutputWorkspace=inst_name+str(sample_run[0])+'.raw')
+
+
+    if Reducer.mask_run == None :
+        mask_run=sample_run
+
 
     masks_done=False
     if Reducer.save_and_reuse_masks :
@@ -500,8 +504,6 @@ def process_legacy_parameters(**kwargs) :
         if key == 'hardmaskOnly': # legacy key defines other mask file here
             params["hard_mask_file"] = value;
             params["use_hard_mask_only"] = True;
-        elif key == 'normalise_method' or key == 'norm_method':
-            params[key]=value.lower();    
         else:
             params[key]=value;    
 
@@ -649,20 +651,37 @@ def get_abs_normalization_factor(Reducer,deltaE_wkspaceName,ei_monovan) :
 
 
 def sum_files(accumulator, files):
+    """ Custom sum for multiple runs
+
+        Left for compartibility as internal summation had some unspecified problems. 
+        Will go in a future
+    """
+    accum_name = accumulator
+    if isinstance(accum_name,api.Workspace): # it is actually workspace
+        accum_name  = accumulator.name()
+
+
     if type(files) == list:
          tmp_suffix = '_plus_tmp'
 
          for filename in files:
               print 'Summing run ',filename,' to workspace ',accumulator
               temp = common.load_run(filename, force=False)
-              if mtd.workspaceExists(accumulator)==False:
-                   #check for existance of output workpsace if false clone and zero
-                   print 'create output file'
-                   CloneWorkspace(temp,accumulator)
-                   CreateSingleValuedWorkspace(OutputWorkspace="tmp",DataValue="0",ErrorValue="0")
-                   Multiply(LHSWorkspace=accumulator,RHSWorkspace="tmp",OutputWorkspace=accumulator)
-              Plus(accumulator, temp, accumulator)
+
+              if accum_name in mtd: # add current workspace to the existing one
+                  if not isinstance(accumulator,api.Workspace):
+                      accumulator = mtd[accum_name]
+                  accumulator+=  temp
+                  DeleteWorkspace(Workspace=temp)
+              else:
+                   print 'Create output workspace: '
+                   accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
+
          return accumulator
+    else:
+        temp = common.load_run(files, force=False)
+        accumulator=RenameWorkspace(InputWorkspace=temp,OutputWorkspace=accum_name)
+        return accumulator;
 
 
 

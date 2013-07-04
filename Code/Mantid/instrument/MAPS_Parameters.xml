@@ -193,8 +193,12 @@
 <parameter name="diag_variation">
   <value val="1.1"/>
 </parameter>
-<parameter name="diag_background_range">
+<!-- The range used in diagnostics and rejecting high background.
+  If none, the diag background range uses background ranges from background_range. Has to be directly set otherwise -->
+<parameter name="diag_background_test_range"  type="string" >
+    <value val="None"/>
 </parameter>
+
 
 <!--  -->
 <!--  Bleeding corrections   -->
@@ -306,7 +310,8 @@
    <value val="None"/>
 </parameter>
 
-<!-- If one wants to sum runs   -->  
+<!-- If one wants to sum runs. By default no, as in addition to the key word one has to provide list of input run-numbers
+     but presence of this key here allows to propagate this key word for to the reducer   -->  
 <parameter name="sum_runs"  type="bool">
    <value val="False"/>
 </parameter>
@@ -353,6 +358,7 @@
        monovan_hi_value = monovan-integr-max;       
        use_hard_mask_only=hardmaskOnly;
        bkgd_range = background_range;
+       background_test_range = diag_background_test_range;
        hard_mask_file=hard_mask  =hardmaskPlus;       
        van_out_lo = diag_van_median_rate_limit_lo=diag_van_out_lo;
        van_out_hi = diag_van_median_rate_limit_hi=diag_van_out_hi;
@@ -367,6 +373,8 @@
        samp_sig   = diag_samp_median_sigma=diag_samp_sig;
        variation  = diag_variation;
        bleed_test = bleed = diag_bleed_test;
+       bleed_maxrate = diag_bleed_maxrate;
+       bleed_pixels  = diag_bleed_pixels;
        ei-mon2-spec = test_ei2_mon_spectra;
        ei_mon_spectra=test_mon_spectra_composite"
     />
