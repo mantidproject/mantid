@@ -92,14 +92,11 @@ namespace Mantid
       boost::char_separator<char> sep(" ");
       bool snsspec(false);
 
-      while(!file.eof())
+      while(std::getline(file,str))
       {
-        //read line
-        std::getline(file,str);
-        if(str.empty())
-        {
-          continue;
-        }
+        // File is opened in binary mode so getline will leave a \r at the end of an empty line if it exists
+        if(str.empty() || str == "\r") continue;
+ 
         try
         {
           //if it's comment line
