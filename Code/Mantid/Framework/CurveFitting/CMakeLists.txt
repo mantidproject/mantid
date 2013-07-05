@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
+	src/CubicSpline.cpp
 	src/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
 	src/DerivMinimizer.cpp
@@ -35,8 +36,8 @@ set ( SRC_FILES
 	src/GausOsc.cpp
 	src/Gaussian.cpp
 	src/Gaussian1D.cpp
-	src/GaussianComptonProfile.cpp
 	src/Gaussian1D2.cpp
+	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
 	src/InelasticDiffSphere.cpp
@@ -101,6 +102,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
+	inc/MantidCurveFitting/CubicSpline.h
 	inc/MantidCurveFitting/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DerivMinimizer.h
@@ -126,8 +128,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GausOsc.h
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/Gaussian1D.h
-	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/Gaussian1D2.h
+	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/InelasticDiffSphere.h
@@ -189,6 +191,7 @@ set ( TEST_FILES
 	CompositeFunctionTest.h
 	ComptonProfileTest.h
 	ConvolutionTest.h
+	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
 	EndErfcTest.h
