@@ -49,8 +49,16 @@ namespace CurveFitting
     /// Declare the function parameters
     void declareParameters();
 
+    /// Returns the indices of the intensity parameters
+    std::vector<size_t> intensityParameterIndices() const;
+    /// Fill in the columns of the matrix for this mass
+    size_t fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start, const std::vector<double>& errors) const;
+
     /// Compute the function
-    void massProfile(std::vector<double> & result,const double lorentzFWHM, const double resolutionFWHM) const;
+    void massProfile(double * result, const size_t nData) const;
+
+    /// Helper to allow the amplitude to be specified separately
+    void massProfile(double * result, const size_t nData, const double amplitude) const;
   };
 
 

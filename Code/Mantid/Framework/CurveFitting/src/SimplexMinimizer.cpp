@@ -43,7 +43,9 @@ double SimplexMinimizer::fun(const gsl_vector * x, void *params)
 }
 
 
-SimplexMinimizer::SimplexMinimizer():
+SimplexMinimizer::SimplexMinimizer(const double epsabs):
+m_epsabs(epsabs),
+m_costFunction(),
 m_size(1.0),
 m_simplexStepSize(NULL),
 m_startGuess(NULL),
@@ -93,7 +95,7 @@ bool SimplexMinimizer::iterate()
     return false;
   }
   double size = gsl_multimin_fminimizer_size(m_gslSolver);
-  status = gsl_multimin_test_size(size, 1e-2);
+  status = gsl_multimin_test_size(size, 1e-6);
   if (status != GSL_CONTINUE)
   {
     m_errorString = gsl_strerror(status);
