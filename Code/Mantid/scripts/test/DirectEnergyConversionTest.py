@@ -1,7 +1,3 @@
-import CommonFunctions as common
-import diagnostics
-from mantid.simpleapi import *
-from mantid.kernel import funcreturns
 import DirectEnergyConversion
 import unittest
 
@@ -222,3 +218,5 @@ class DirectEnergyConversionTest(unittest.TestCase):
     #    tReducer.initialise("MAP")
 
     #    tReducet.di
+
+    

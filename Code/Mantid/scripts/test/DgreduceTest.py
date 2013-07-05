@@ -51,3 +51,6 @@ class DgreduceTest(unittest.TestCase):
 
 
         setup(None)
+        
+if __name__=="__main__":
+    unittest.main()        
