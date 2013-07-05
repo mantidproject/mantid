@@ -266,7 +266,7 @@ namespace Algorithms
     }
 
     // Keep original instrument and set the new instrument, if necessary
-    spec2index_map *spec2indexmap = workspace->getSpectrumToWorkspaceIndexMap();
+    boost::shared_ptr<std::map<specid_t,size_t> > spec2indexmap(workspace->getSpectrumToWorkspaceIndexMap());
 
     // ??? Condition: spectrum has 1 and only 1 detector
     size_t nspec = workspace->getNumberHistograms();
@@ -323,7 +323,6 @@ namespace Algorithms
     Geometry::Instrument_sptr instrument(new Geometry::Instrument(name));
     if (!bool(instrument))
     {
-      delete spec2indexmap;
       stringstream errss;
       errss << "Trying to use a Parametrized Instrument as an Instrument.";
       g_log.error(errss.str());
@@ -370,6 +369,8 @@ namespace Algorithms
       if (!spectrum)
       {
         // Error!
+        delete detector;
+
         stringstream errss;
         errss << "Spectrum ID " << specids[i]
               << " does not exist!  Skip setting detector parameters to this spectrum. ";
@@ -389,8 +390,6 @@ namespace Algorithms
       instrument->markAsDetector(detector);
 
     } // ENDFOR workspace index
-
-    delete spec2indexmap;
 
     return;
   }
