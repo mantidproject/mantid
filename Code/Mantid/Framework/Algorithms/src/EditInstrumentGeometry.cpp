@@ -26,6 +26,7 @@ There are some limitations of this algorithm.
 #include "MantidAlgorithms/EditInstrumentGeometry.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/IObjComponent.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -89,9 +90,6 @@ namespace Algorithms
     declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
                     "Workspace to edit the detector information");
 
-    // Instrument Name
-    declareProperty("InstrumentName", "GenericPowder", "Name of the instrument. ");
-
     // L1
     declareProperty("PrimaryFlightPath", EMPTY_DBL(), "Primary flight path L1 of the powder diffractomer. ");
 
@@ -120,8 +118,11 @@ namespace Algorithms
     declareProperty(new ArrayProperty<int>("DetectorIDs"), "User specified detector IDs of the spectra. "
                     "Number of specified detector IDs must be either zero or number of histogram");
 
-    // Indicator if it is a new instrument
-    declareProperty("NewInstrument", false, "Add detectors information from scratch");
+    // Instrument Name
+    declareProperty("InstrumentName", "", "Name of the newly built instrument.  If left empty, "
+                    "the original instrument will be used. ");
+
+    return;
   }
 
   template <typename NumT>
@@ -188,24 +189,30 @@ namespace Algorithms
    */
   void EditInstrumentGeometry::exec()
   {
-    // lots of things have to do with the input workspace
+    // Lots of things have to do with the input workspace
     MatrixWorkspace_sptr workspace = getProperty("Workspace");
     Geometry::Instrument_const_sptr originstrument = workspace->getInstrument();
-    const bool newinstrument = getProperty("NewInstrument");
 
-    // get the primary flight path
+    // Get and check the primary flight path
     double l1 = this->getProperty("PrimaryFlightPath");
-    // Check validity of the input properties
     if (isEmpty(l1))
     {
-      Kernel::V3D sourcepos = originstrument->getSource()->getPos();
-      l1 = fabs(sourcepos.Z());
-      g_log.information() << "Retrieve L1 from input data workspace. Source position = " << sourcepos.X()
-                            << ", " << sourcepos.Y() << ", " << sourcepos.Z() << std::endl;
+      // Use the original L1
+      if (!originstrument)
+      {
+        std::string errmsg("It is not supported that L1 is not given, ",
+                           "while there is no instrument associated to input workspace.");
+        g_log.error(errmsg);
+        throw std::runtime_error(errmsg);
+      }
+      Geometry::IObjComponent_const_sptr source = originstrument->getSource();
+      Geometry::IObjComponent_const_sptr sample = originstrument->getSample();
+      l1 = source->getDistance(*sample);
+      g_log.information() << "Retrieve L1 from input data workspace. \n";
     }
     g_log.information() << "Using L1 = " << l1 << "\n";
 
-    // get spectra number in case they are in a funny order
+    // Get spectra number in case they are in a funny order
     std::vector<int32_t> specids = this->getProperty("SpectrumIDs");
     if (specids.empty()) // they are using the order of the input workspace
     {
@@ -216,14 +223,24 @@ namespace Algorithms
       }
     }
 
-    // get the detector ids - empsy means ignore it
+    // Get the detector ids - empsy means ignore it
     const vector<int> vec_detids = getProperty("DetectorIDs");
     const bool renameDetID(!vec_detids.empty());
 
-    // individual detector geometries
+    // Get individual detector geometries ordered by input spectrum IDs
     const std::vector<double> l2s = this->getProperty("L2");
     const std::vector<double> tths = this->getProperty("Polar");
     std::vector<double> phis = this->getProperty("Azimuthal");
+
+    // empty list of L2 and 2-theta is not allowed
+    if (l2s.empty())
+    {
+      throw std::runtime_error("User must specify L2 for all spectra. ");
+    }
+    if (tths.empty())
+    {
+      throw std::runtime_error("User must specify 2theta for all spectra.");
+    }
 
     // empty list of phi means that they are all zero
     if (phis.empty())
@@ -231,8 +248,7 @@ namespace Algorithms
       phis.assign(l2s.size(), 0.);
     }
 
-    // only did work down to here
-
+    // Validate
     for (size_t ib = 0; ib < l2s.size(); ib ++)
     {
       g_log.information() << "Detector " << specids[ib] << "  L2 = " << l2s[ib] << "  2Theta = " << tths[ib] << std::endl;
@@ -252,27 +268,17 @@ namespace Algorithms
     // Keep original instrument and set the new instrument, if necessary
     spec2index_map *spec2indexmap = workspace->getSpectrumToWorkspaceIndexMap();
 
-    //  ???  Condition: spectrum has 1 and only 1 detector
+    // ??? Condition: spectrum has 1 and only 1 detector
     size_t nspec = workspace->getNumberHistograms();
 
     std::vector<bool> wsindexsetflag(nspec, false);
+
+    // Initialize another set of L2/2-theta/Phi/DetectorIDs vector ordered by workspace index
     std::vector<bool> storable(nspec, false);
     std::vector<double> storL2s(nspec, 0.);
     std::vector<double> stor2Thetas(nspec, 0.);
     std::vector<double> storPhis(nspec, 0.);
     vector<int> storDetIDs(nspec, 0);
-
-    /*
-    for (size_t i = 0; i < ; i ++)
-    {
-      wsindexsetflag.push_back(false);
-      storable.push_back(false);
-      storL2s.push_back(0.0);
-      stor2Thetas.push_back(0.0);
-      storPhis.push_back(0.0);
-      //storDetids.push_back(0);
-    }
-    */
 
     // Map the properties from spectrum ID to workspace index
     for (size_t i = 0; i < specids.size(); i ++)
@@ -302,10 +308,14 @@ namespace Algorithms
     }
 
     // Reset detector information of each spectrum
+#if 0
+    NOT USED
     for (size_t i = 0; i < workspace->getNumberHistograms(); i ++)
     {
       if (!wsindexsetflag[i])
       {
+        throw std::runtime_error("Ever reached?");
+
         // Won't be set
         API::ISpectrum *spectrum = workspace->getSpectrum(i);
         std::set<detid_t> detids = spectrum->getDetectorIDs();
@@ -347,16 +357,25 @@ namespace Algorithms
         }
       }
     }
+#endif
 
     // Generate a new instrument
     // Name of the new instrument
-    std::string name = originstrument->getName();
-    if (newinstrument)
+    std::string name = std::string(getProperty("InstrumentName"));
+    if (name.empty())
     {
-      name = std::string(getProperty("InstrumentName"));
+      // Use the original L1
+      if (!originstrument)
+      {
+        std::string errmsg("It is not supported that InstrumentName is not given, ",
+                           "while there is no instrument associated to input workspace.");
+        g_log.error(errmsg);
+        throw std::runtime_error(errmsg);
+      }
+      name = originstrument->getName();
     }
 
-    // b) Create a new instrument from scratch any way.
+    // Create a new instrument from scratch any way.
     Geometry::Instrument_sptr instrument(new Geometry::Instrument(name));
     if (!bool(instrument))
     {
