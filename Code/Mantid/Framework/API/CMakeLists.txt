@@ -325,6 +325,7 @@ set ( TEST_FILES
 	WorkspaceFactoryTest.h
 	WorkspaceGroupTest.h
 	WorkspaceHistoryTest.h
+	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
 )
 
