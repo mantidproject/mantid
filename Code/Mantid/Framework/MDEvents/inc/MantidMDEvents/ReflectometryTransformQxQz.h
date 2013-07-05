@@ -115,14 +115,14 @@ namespace Mantid
     const double m_qxMax;
     const double m_qzMin;
     const double m_qzMax;
-    /// Object performing raw caclcation to determine Qx
+    /// Object performing raw calculation to determine Qx
     mutable CalculateReflectometryQx m_QxCalculation;
     /// Object performing raw calculation to determine Qx
     mutable CalculateReflectometryQz m_QzCalculation;
   public:
 
     /// Constructor
-    ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta);
+    ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta, Mantid::API::BoxController_sptr boxController);
     /// Destructor
     virtual ~ReflectometryTransformQxQz();
     /// Execute transformation

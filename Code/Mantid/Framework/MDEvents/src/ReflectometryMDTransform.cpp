@@ -7,8 +7,8 @@ namespace Mantid
   namespace MDEvents
   {
 
-    ReflectometryMDTransform::ReflectometryMDTransform() :
-        m_nbinsx(10), m_nbinsz(10)
+    ReflectometryMDTransform::ReflectometryMDTransform(BoxController_sptr boxController) :
+        m_nbinsx(10), m_nbinsz(10), m_boxController(boxController)
     {
     }
 
@@ -24,10 +24,10 @@ namespace Mantid
       ws->addDimension(a);
       ws->addDimension(b);
 
-      // Set some reasonable values for the box controller
-      BoxController_sptr bc = ws->getBoxController();
-      bc->setSplitInto(2);
-      bc->setSplitThreshold(10);
+      BoxController_sptr wsbc = ws->getBoxController();// Get the box controller
+      wsbc->setSplitInto(m_boxController->getSplitInto(0));
+      wsbc->setMaxDepth(m_boxController->getMaxDepth());
+      wsbc->setSplitThreshold(m_boxController->getSplitThreshold());
 
       // Initialize the workspace.
       ws->initialize();

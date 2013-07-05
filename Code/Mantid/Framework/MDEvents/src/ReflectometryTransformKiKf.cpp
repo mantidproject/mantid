@@ -19,9 +19,10 @@ namespace MDEvents
     @param kfMin: min kf value (extent)
     @param kfMax; max kf value (extent)
     @param incidentTheta: Predetermined incident theta value
+    @param boxController: box controller to apply on output workspace.
   */
-  ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta) 
-    :  m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
+  ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, BoxController_sptr boxController)
+    : ReflectometryMDTransform(boxController),  m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
   {
       if(kiMin >= kiMax)
       {
@@ -75,8 +76,9 @@ namespace MDEvents
 
           ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
         }
-        ws->splitAllIfNeeded(NULL);
       }
+      ws->splitAllIfNeeded(NULL);
+      ws->refreshCache();
       return ws;
   }
 

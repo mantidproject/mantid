@@ -13,6 +13,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include <boost/assign.hpp>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -158,6 +159,45 @@ public:
      TS_ASSERT(ws != NULL);
      TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
 
+  }
+
+  void test_box_controller_defaults()
+  {
+    auto alg = make_standard_algorithm();
+    alg->setProperty("Extents", "-1,1,0.999,1");
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    std::string outWSName = alg->getPropertyValue("OutputWorkspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName);
+    auto bc = outWS->getBoxController();
+
+    TS_ASSERT_EQUALS(2, bc->getSplitInto(0));
+    TS_ASSERT_EQUALS(2, bc->getSplitInto(1));
+    TS_ASSERT_EQUALS(50, bc->getSplitThreshold());
+    TS_ASSERT_EQUALS(10, bc->getMaxDepth());
+  }
+
+  void test_apply_box_controller_settings()
+  {
+    auto alg = make_standard_algorithm();
+    alg->setProperty("Extents", "-1,1,0.999,1");
+
+    const int splitThreshold = 3;
+    const int splitInto = 6;
+    const int maxDepth = 12;
+    alg->setProperty("SplitThreshold", splitThreshold);
+    alg->setProperty("SplitInto", boost::assign::list_of(splitInto).convert_to_container<std::vector<int> >());
+    alg->setProperty("MaxRecursionDepth", maxDepth);
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    std::string outWSName = alg->getPropertyValue("OutputWorkspace");
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(outWSName);
+    auto bc = outWS->getBoxController();
+
+    // Check that the box controller settings percolate through to the output workspace.
+    TS_ASSERT_EQUALS(splitInto, bc->getSplitInto(0));
+    TS_ASSERT_EQUALS(splitInto, bc->getSplitInto(1));
+    TS_ASSERT_EQUALS(splitThreshold, bc->getSplitThreshold());
+    TS_ASSERT_EQUALS(maxDepth, bc->getMaxDepth());
   }
 };
 

@@ -26,9 +26,10 @@ namespace Mantid
     @param qzMin: min qz value (extent)
     @param qzMax; max qz value (extent)
     @param incidentTheta: Predetermined incident theta value
+    @param boxController: Box controller to apply to output workspace
     */
-    ReflectometryTransformQxQz::ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta):
-    m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_QxCalculation(incidentTheta), m_QzCalculation(incidentTheta)
+    ReflectometryTransformQxQz::ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta, BoxController_sptr boxController):
+        ReflectometryMDTransform(boxController), m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_QxCalculation(incidentTheta), m_QzCalculation(incidentTheta)
     {
       if(qxMin >= qxMax)
       {
@@ -77,8 +78,9 @@ namespace Mantid
 
           ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
         }
-        ws->splitAllIfNeeded(NULL);
       }
+      ws->splitAllIfNeeded(NULL);
+      ws->refreshCache();
       return ws;
     }
 

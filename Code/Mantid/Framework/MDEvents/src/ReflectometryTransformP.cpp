@@ -19,9 +19,10 @@ namespace Mantid
     @param pDiffMin: p diff min value (extent)
     @param pDiffMax: p diff max value (extent)
     @param incidentTheta: Predetermined incident theta value
+    @param boxController: Box controller to apply on output workspace
     */
-    ReflectometryTransformP::ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta)
-      : m_pSumMin(pSumMin), m_pSumMax(pSumMax), m_pDiffMin(pDiffMin), m_pDiffMax(pDiffMax), m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta)
+    ReflectometryTransformP::ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta, BoxController_sptr boxController)
+      : ReflectometryMDTransform(boxController),  m_pSumMin(pSumMin), m_pSumMax(pSumMax), m_pDiffMin(pDiffMin), m_pDiffMax(pDiffMax), m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta)
     {
       if(pSumMin >= m_pSumMax)
       {
@@ -71,8 +72,9 @@ namespace Mantid
 
           ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
         }
-        ws->splitAllIfNeeded(NULL);
       }
+      ws->splitAllIfNeeded(NULL);
+      ws->refreshCache();
       return ws;
     }
 

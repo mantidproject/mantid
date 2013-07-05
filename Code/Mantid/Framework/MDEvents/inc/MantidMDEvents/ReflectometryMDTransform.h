@@ -5,6 +5,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidAPI/BoxController.h"
 
 namespace Mantid
 {
@@ -38,6 +39,10 @@ namespace MDEvents
   class DLLExport ReflectometryMDTransform 
   {
 
+  private:
+
+    Mantid::API::BoxController_sptr m_boxController;
+
   protected:
 
   const size_t m_nbinsx;
@@ -52,7 +57,7 @@ namespace MDEvents
     virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
 
     virtual ~ReflectometryMDTransform();
-    ReflectometryMDTransform();
+    ReflectometryMDTransform(Mantid::API::BoxController_sptr boxController);
   };
 }
 }

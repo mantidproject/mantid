@@ -1,8 +1,7 @@
 #ifndef MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQ_H_
 #define MANTID_MDEVENTS_CONVERTTOREFLECTOMETRYQ_H_
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid
 {
@@ -33,7 +32,7 @@ namespace MDEvents
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ConvertToReflectometryQ  : public API::Algorithm
+  class DLLExport ConvertToReflectometryQ  : public BoxControllerSettingsAlgorithm
   {
   public:
     ConvertToReflectometryQ();
