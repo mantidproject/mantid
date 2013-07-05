@@ -271,10 +271,7 @@ namespace Algorithms
     // ??? Condition: spectrum has 1 and only 1 detector
     size_t nspec = workspace->getNumberHistograms();
 
-    std::vector<bool> wsindexsetflag(nspec, false);
-
     // Initialize another set of L2/2-theta/Phi/DetectorIDs vector ordered by workspace index
-    std::vector<bool> storable(nspec, false);
     std::vector<double> storL2s(nspec, 0.);
     std::vector<double> stor2Thetas(nspec, 0.);
     std::vector<double> storPhis(nspec, 0.);
@@ -297,7 +294,6 @@ namespace Algorithms
       // Store and set value
       size_t workspaceindex = it->second;
 
-      wsindexsetflag[workspaceindex] = true;
       storL2s[workspaceindex] = l2s[i];
       stor2Thetas[workspaceindex] = tths[i];
       storPhis[workspaceindex] = phis[i];
@@ -306,58 +302,6 @@ namespace Algorithms
 
       g_log.debug() << "workspace index = " << workspaceindex << " is for Spectrum " << specids[i] << std::endl;
     }
-
-    // Reset detector information of each spectrum
-#if 0
-    NOT USED
-    for (size_t i = 0; i < workspace->getNumberHistograms(); i ++)
-    {
-      if (!wsindexsetflag[i])
-      {
-        throw std::runtime_error("Ever reached?");
-
-        // Won't be set
-        API::ISpectrum *spectrum = workspace->getSpectrum(i);
-        std::set<detid_t> detids = spectrum->getDetectorIDs();
-        if (detids.size() == 1)
-        {
-          // Case: 1 and only 1 detector
-          storable[i] = true;
-
-          // a) get DetectorID
-          detid_t detid = 0;
-          std::set<detid_t>::iterator it;
-          for (it=detids.begin(); it!=detids.end(); ++it)
-          {
-            detid = *it;
-          }
-          // b) get Detector
-          Geometry::IDetector_const_sptr stodet = originstrument->getDetector(detid);
-          double rt, thetat, phit;
-          stodet->getPos().getSpherical(rt, thetat, phit);
-
-          // c) Store
-          //storDetids[i] = detid;
-          storL2s[i] = rt;
-          stor2Thetas[i] = thetat;
-          storPhis[i] = phit;
-
-        }
-        else
-        {
-          // more than 1 detectors
-          storable[i] = false;
-          if (renameDetID)
-          {
-            // newinstrument = true;
-            g_log.notice() << "Spectrum at workspace index " << i << " has more than 1 (" << detids.size()
-                           << "detectors.  A new instrument is required to create from sctrach regardless of "
-                           << "user's choice." << ".\n";
-          }
-        }
-      }
-    }
-#endif
 
     // Generate a new instrument
     // Name of the new instrument
@@ -386,7 +330,7 @@ namespace Algorithms
       throw std::runtime_error(errss.str());
     }
 
-    // c) Source and sample information
+    // Set up source and sample information
     Geometry::ObjComponent *samplepos = new Geometry::ObjComponent("Sample", instrument.get());
     instrument->add(samplepos);
     instrument->markAsSamplePos(samplepos);
@@ -397,54 +341,54 @@ namespace Algorithms
     instrument->markAsSource(source);
     source->setPos(0.0, 0.0, -1.0 * l1);
 
-    // d) Set the new instrument
+    // Add the new instrument
     workspace->setInstrument(instrument);
 
-    // 6. Add or copy detector information
+    // Add/copy detector information
     for (size_t i = 0; i < workspace->getNumberHistograms(); i ++)
     {
-      if (wsindexsetflag[i] || storable[i]){
-        // a) Create a new detector.
-        //    (Instrument will take ownership of pointer so no need to delete.)
-        detid_t newdetid;
-        if (renameDetID)
-          newdetid = storDetIDs[i];
-        else
-          newdetid = detid_t(i)+100;
-        Geometry::Detector *detector = new Geometry::Detector("det", newdetid, samplepos);
+      // Create a new detector.
+      //    (Instrument will take ownership of pointer so no need to delete.)
+      detid_t newdetid;
+      if (renameDetID)
+        newdetid = storDetIDs[i];
+      else
+        newdetid = detid_t(i)+100;
+      Geometry::Detector *detector = new Geometry::Detector("det", newdetid, samplepos);
 
-        // b) Set the new instrument
-        double l2 = storL2s[i];
-        double tth = stor2Thetas[i];
-        double phi = storPhis[i];
+      // Set up new detector parameters related to new instrument
+      double l2 = storL2s[i];
+      double tth = stor2Thetas[i];
+      double phi = storPhis[i];
 
-        Kernel::V3D pos;
-        pos.spherical(l2, tth, phi);
-        detector->setPos(pos);
+      Kernel::V3D pos;
+      pos.spherical(l2, tth, phi);
+      detector->setPos(pos);
 
-        // c) add copy to instrument and mark it
-        API::ISpectrum *spectrum = workspace->getSpectrum(i);
-        if (!spectrum)
-        {
-          stringstream errss;
-          errss << "Spectrum ID " << specids[i]
-                << " does not exist!  Skip setting detector parameters to this spectrum" << std::endl;
-          g_log.error(errss.str());
-          throw runtime_error(errss.str());
-        }
-        else
-        {
-          g_log.debug() << "Raw: Spectrum " << spectrum->getSpectrumNo()
-                        << ": # Detectors =  " << spectrum->getDetectorIDs().size() << std::endl;
-        }
-
-        spectrum->clearDetectorIDs();
-        spectrum->addDetectorID(newdetid);
-        instrument->add(detector);
-        instrument->markAsDetector(detector);
+      // Add new detector to spectrum and instrument
+      API::ISpectrum *spectrum = workspace->getSpectrum(i);
+      if (!spectrum)
+      {
+        // Error!
+        stringstream errss;
+        errss << "Spectrum ID " << specids[i]
+              << " does not exist!  Skip setting detector parameters to this spectrum. ";
+        g_log.error(errss.str());
+        throw runtime_error(errss.str());
+      }
+      else
+      {
+        // Good and do some debug output
+        g_log.debug() << "Orignal spectrum " << spectrum->getSpectrumNo()
+                      << "has " << spectrum->getDetectorIDs().size() << " detectors. \n";
       }
 
-    } // for i
+      spectrum->clearDetectorIDs();
+      spectrum->addDetectorID(newdetid);
+      instrument->add(detector);
+      instrument->markAsDetector(detector);
+
+    } // ENDFOR workspace index
 
     delete spec2indexmap;
 
