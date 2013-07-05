@@ -40,7 +40,6 @@ import glob
 import sys
 import os.path
 import math
-import unittest
 
 def setup_reducer(inst_name):
     """
