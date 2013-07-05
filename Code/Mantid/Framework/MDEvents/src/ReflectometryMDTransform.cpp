@@ -8,7 +8,7 @@ namespace Mantid
   {
 
     ReflectometryMDTransform::ReflectometryMDTransform(BoxController_sptr boxController) :
-        m_nbinsx(10), m_nbinsz(10), m_boxController(boxController)
+        m_boxController(boxController), m_nbinsx(10), m_nbinsz(10)
     {
     }
 

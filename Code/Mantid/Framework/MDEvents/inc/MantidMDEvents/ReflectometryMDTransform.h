@@ -48,8 +48,6 @@ namespace MDEvents
   const size_t m_nbinsx;
   const size_t m_nbinsz;
 
-
-
   boost::shared_ptr<MDEventWorkspace2Lean> createWorkspace(Mantid::Geometry::IMDDimension_sptr, Mantid::Geometry::IMDDimension_sptr) const;
 
   public:
