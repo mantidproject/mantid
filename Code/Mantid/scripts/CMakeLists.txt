@@ -1,7 +1,7 @@
 set ( TEST_PY_FILES 
       test/ReducerTest.py
-      test/DgreduceTest.py
-      test/DirectEnergyConversionTest.py 
+      #test/DgreduceTest.py
+      #test/DirectEnergyConversionTest.py 
     )
 
 # python unit tests
