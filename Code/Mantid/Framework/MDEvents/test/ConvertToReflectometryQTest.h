@@ -31,7 +31,7 @@ private:
 
   Makes the tests much more readable like this.
   */
-  boost::shared_ptr<ConvertToReflectometryQ> make_standard_algorithm()
+  boost::shared_ptr<ConvertToReflectometryQ> make_standard_algorithm(const std::string outputdimensions="Q (lab frame)")
   {
     MatrixWorkspace_sptr in_ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     in_ws->getAxis(0)->setUnit("Wavelength");
@@ -48,7 +48,7 @@ private:
     TS_ASSERT_THROWS_NOTHING( alg->initialize() )
     TS_ASSERT( alg->isInitialized() )
     alg->setProperty("InputWorkspace", in_ws);
-    alg->setProperty("OutputDimensions", "Q (lab frame)");
+    alg->setProperty("OutputDimensions", outputdimensions);
     alg->setPropertyValue("OutputWorkspace", "OutputTransformedWorkspace");
     alg->setProperty("OverrideIncidentTheta", true);
     alg->setProperty("IncidentTheta", 0.5);
@@ -151,14 +151,29 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
-  void test_execute()
+  void test_execute_qxqz()
   {
      auto alg = make_standard_algorithm();
      alg->execute();
      auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
      TS_ASSERT(ws != NULL);
      TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
+  }
 
+  void test_execute_kikf()
+  {
+     auto alg = make_standard_algorithm("K (incident, final)");
+     TS_ASSERT_THROWS_NOTHING(alg->execute());
+     auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
+     TS_ASSERT(ws != NULL);
+  }
+
+  void test_execute_pipf()
+  {
+     auto alg = make_standard_algorithm("P (lab frame)");
+     TS_ASSERT_THROWS_NOTHING(alg->execute());
+     auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
+     TS_ASSERT(ws != NULL);
   }
 
   void test_box_controller_defaults()
