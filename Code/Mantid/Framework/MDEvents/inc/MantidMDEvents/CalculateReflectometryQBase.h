@@ -1,6 +1,8 @@
 #ifndef MANTID_MDEVENTS_CALCULATE_REFLECTOMETRYQ_BASE_H_
 #define MANTID_MDEVENTS_CALCULATE_REFLECTOMETRYQ_BASE_H_
 
+#include "MantidKernel/System.h"
+
 namespace Mantid
 {
   namespace Geometry
@@ -16,7 +18,7 @@ namespace Mantid
     /**
     Base class for reflectometry Q transformations
     */
-    class CalculateReflectometryQBase
+    class DLLExport CalculateReflectometryQBase
     {
     protected:
       const double to_radians_factor;
