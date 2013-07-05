@@ -183,7 +183,7 @@ namespace Mantid
 
       /// Set the date from which the instrument definition begins to be valid.
       /// @param val :: date
-      void setValidFromDate(const Kernel::DateAndTime val) { m_ValidFrom = val; }
+      void setValidFromDate(const Kernel::DateAndTime val);
 
       /// Set the date at which the instrument definition is no longer valid.
       /// @param val :: date
