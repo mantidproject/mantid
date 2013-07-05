@@ -400,6 +400,8 @@ class DirectEnergyConversion(object):
                 if self.relocate_dets: 
                     self.log('_do_mono: Moving detectors to positions specified in cal file ','debug')
                     if str(self.det_cal_file) in mtd: # it is already workspace 
+                        self.__det_cal_file_ws = mtd[str(self.det_cal_file)]
+                    if isinstance(self.det_cal_file,api.Workspace): # it is already workspace 
                         self.__det_cal_file_ws = self.det_cal_file
 
                     if self.__det_cal_file_ws == None :
