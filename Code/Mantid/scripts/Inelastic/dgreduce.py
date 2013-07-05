@@ -12,7 +12,7 @@ global Reducer
 Reducer = None
 
 # Statement used at debug time to pull changes in DirectEnergyConversion into Mantid
-DRC=reload(DRC)
+#DRC=reload(DRC)
 
 def setup(instname=None,reload=False):
     """
@@ -140,7 +140,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------
 #    Deal with mandatory parameters for this and may be some top level procedures
 # --------------------------------------------------------------------------------------------------------
-    if isinstance(sample_run,api.Workspace):
+    if isinstance(sample_run,api.Workspace) or (isinstance(sample_run,str) and sample_run in mtd):
         Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run for workspace name: '+str(sample_run))
     else:
         Reducer.log('DGreduce run for: '+Reducer.instr_name+' Run number/s: '+str(sample_run))
