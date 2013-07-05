@@ -41,7 +41,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
+#include "MantidAPI/LoadAlgorithmFactory.h" 
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 using std::endl;
@@ -1326,7 +1326,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   //Load the instrument
   prog->report("Loading instrument");
-  instrument_loaded_correctly = runLoadInstrument(m_filename, WS, m_top_entry_name, this);
+  instrument_loaded_correctly = loadInstrument(m_filename, WS, m_top_entry_name, this);
 
   if (!this->instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! Loading cannot continue.");
@@ -1733,15 +1733,71 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
   file.close();
 }
 
+//-----------------------------------------------------------------------------
+/** Load the instrument from the nexus file or if not found from the IDF file
+ *  specified by the info in the Nexus file
+ *
+ *  @param nexusfilename :: The Nexus file name
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+ *  @param top_entry_name :: entry name at the top of the Nexus file
+ *  @param alg :: Handle of the algorithm 
+ *  @return true if successful
+ */
+bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
+    const std::string & top_entry_name, Algorithm * alg) 
+{
 
+   // Get the instrument group in the Nexus file
+   ::NeXus::File nxfile(nexusfilename);
+
+   bool foundInstrument = runLoadIDFFromNexus( nexusfilename, localWorkspace, alg);
+
+   if(!foundInstrument) foundInstrument = runLoadInstrument( nexusfilename, localWorkspace, top_entry_name, alg );
+
+   return foundInstrument;
+}
 
 //-----------------------------------------------------------------------------
-/** Load the instrument geometry file using info in the NXS file.
+/** Load the instrument from the nexus file
+ *
+ *  @param nxfile :: C++ interface to Nexus file with instrumentr group opened
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+ *  @return true if successful
+ */
+bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
+{
+  // Code to be added here. In meantime, fail to find instrument
+
+  IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus",-1,-1,false);
+
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try
+  {
+    loadInst->setPropertyValue("Filename", nexusfilename);
+    loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+    loadInst->setPropertyValue("InstrumentParentPath","/raw_data_1");
+    loadInst->execute();
+  }
+  catch( std::invalid_argument&)
+  {
+    alg->getLogger().error("Invalid argument to LoadIDFFromNexus Child Algorithm ");
+  }
+  catch (std::runtime_error&)
+  {
+    alg->getLogger().information("No IDF found in "+nexusfilename+" at raw_data_1/Instrument");
+  }
+
+  if ( !loadInst->isExecuted() ) alg->getLogger().information("No IDF loaded from Nexus file.");   
+  return loadInst->isExecuted();
+}
+
+//-----------------------------------------------------------------------------
+/** Load the instrument defination file specified by info in the NXS file.
  *
  *  @param nexusfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  *  @param top_entry_name :: entry name at the top of the NXS file
- *  @param alg :: Handle of an algorithm for logging access
+ *  @param alg :: Handle of the algorithm 
  *  @return true if successful
  */
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
