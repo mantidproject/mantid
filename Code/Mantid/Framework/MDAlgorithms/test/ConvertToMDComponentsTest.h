@@ -87,7 +87,7 @@ void testPreprocDetLogic()
      auto TableWS3= pAlg->preprocessDetectorsPositions(ws2Dp);
      TS_ASSERT(TableWSs.get()!=TableWS3.get());
 
-     TS_ASSERT_EQUALS("ServiceTableWS",TableWS3->getName());
+     TS_ASSERT_EQUALS("",TableWS3->getName()); // if WS isn't in the ADS it doesn't have a name
      TSM_ASSERT("Should not add service WS to the data service",!AnalysisDataService::Instance().doesExist("ServiceTableWS"));
 
      // now it does not calulates new workspace and takes old from data service

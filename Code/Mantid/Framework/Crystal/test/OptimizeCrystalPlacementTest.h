@@ -71,7 +71,7 @@ public:
     loadUB.setProperty("Filename", "ls5637.mat");
     loadUB.execute();
 
-    peaks->setName("abcd");
+    //peaks->setName("abcd");
 
   }
   void test_basic()

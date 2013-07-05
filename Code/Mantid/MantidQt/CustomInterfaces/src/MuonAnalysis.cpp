@@ -1553,7 +1553,6 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
         QMessageBox::information(this, "Mantid - Muon Analysis", "This kind of workspace is not compatible with applying dead times");
         return;
       }
-      deadTimeTables->deepRemoveAll();
       Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
     }
   }

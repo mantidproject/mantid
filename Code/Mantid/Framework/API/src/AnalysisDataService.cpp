@@ -71,6 +71,7 @@ namespace Mantid
       // if a group is added add its members as well
       auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
       if ( !group ) return;
+      group->observeADSNotifications( true );
       for(size_t i = 0; i < group->size(); ++i)
       {
         auto ws = group->getItem( i );
@@ -109,6 +110,7 @@ namespace Mantid
       // if a group is added add its members as well
       auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
       if ( !group ) return;
+      group->observeADSNotifications( true );
       for(size_t i = 0; i < group->size(); ++i)
       {
         auto ws = group->getItem( i );
@@ -141,6 +143,103 @@ namespace Mantid
       //Attach the new name to the workspace
       auto ws = retrieve( newName );
       ws->setName( newName );
+    }
+
+    /**
+     * Add a workspace to a group. The group and the workspace must be in the ADS.
+     * @param groupName :: A group name.
+     * @param wsName :: Name of a workspace to add to the group.
+     */
+    void AnalysisDataServiceImpl::addToGroup(const std::string &groupName, const std::string &wsName)
+    {
+        WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>( groupName );
+        if ( !group )
+        {
+            throw std::runtime_error("Workspace " + groupName + " is not a workspace group.");
+        }
+        auto ws = retrieve( wsName );
+        group->addWorkspace( ws );
+        notificationCenter.postNotification(new GroupUpdatedNotification( groupName ));
+    }
+
+    /**
+     * Remove a workspace group and all its members from the ADS.
+     * @param name :: A group to remove.
+     */
+    void AnalysisDataServiceImpl::deepRemoveGroup(const std::string &name)
+    {
+        WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>( name );
+        if ( !group )
+        {
+            throw std::runtime_error("Workspace " + name + " is not a workspace group.");
+        }
+        group->observeADSNotifications( false );
+        for(size_t i = 0; i < group->size(); ++i)
+        {
+            auto ws = group->getItem(i);
+            WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<WorkspaceGroup>( ws );
+            if ( gws )
+            {
+                // if a member is a group remove its items as well
+                deepRemoveGroup( gws->name() );
+            }
+            else
+            {
+                remove( ws->name() );
+            }
+        }
+        remove( name );
+    }
+
+    /**
+     * Remove a workspace from a group but not from the ADS.
+     *
+     * @param groupName :: Name of a workspace group.
+     * @param wsName :: Name of a workspace to remove.
+     */
+    void AnalysisDataServiceImpl::removeFromGroup(const std::string &groupName, const std::string &wsName)
+    {
+        WorkspaceGroup_sptr group = retrieveWS<WorkspaceGroup>( groupName );
+        if ( !group )
+        {
+            throw std::runtime_error("Workspace " + groupName + " is not a workspace group.");
+        }
+        if ( !group->contains(wsName) )
+        {
+            throw std::runtime_error("WorkspaceGroup " + groupName + " does not containt workspace " + wsName);
+        }
+        group->removeByADS( wsName );
+        notificationCenter.postNotification(new GroupUpdatedNotification( groupName ));
+    }
+
+    /**
+     * @return A pointer to the root node of the info tree.
+     */
+    Workspace::InfoNode *AnalysisDataServiceImpl::createInfoTree() const
+    {
+        auto workspaces = getObjects();
+
+        // collect all groups and put them into temporary rootGroup
+        WorkspaceGroup rootGroup;
+        for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+        {
+            WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>( *ws );
+            if ( group )
+            {
+                rootGroup.addWorkspace( group );
+            }
+        }
+
+        // build the tree
+        Workspace::InfoNode *root = new Workspace::InfoNode(this);
+        for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+        {
+            if ( !rootGroup.isInChildGroup(**ws) )
+            {
+                (**ws).addInfoNodeTo( *root );
+            }
+        }
+        return root;
     }
 
     //-------------------------------------------------------------------------

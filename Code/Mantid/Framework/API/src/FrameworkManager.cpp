@@ -350,7 +350,7 @@ bool FrameworkManagerImpl::deleteWorkspace(const std::string& wsName)
   if(ws_grpsptr)
   {
     //  selected workspace is a group workspace
-    ws_grpsptr->deepRemoveAll();
+      AnalysisDataService::Instance().deepRemoveGroup( wsName );
   }
   // Make sure we drop the references so the memory will get freed when we expect it to
   ws_sptr.reset();

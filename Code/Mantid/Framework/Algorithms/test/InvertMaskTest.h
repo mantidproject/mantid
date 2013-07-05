@@ -36,7 +36,7 @@ public:
     // 1. Create Mask Workspaces
     Mantid::Geometry::Instrument_sptr inst1 = ComponentCreationHelper::createTestInstrumentCylindrical(5);
     Mantid::DataObjects::MaskWorkspace_sptr ws1(new  Mantid::DataObjects::MaskWorkspace(inst1));
-    ws1->setName("OriginalMask");
+    //ws1->setName("OriginalMask");
     AnalysisDataService::Instance().addOrReplace("OriginalMask", ws1);
 
     std::cout << "Input MaskWorkspace Size = " << ws1->getNumberHistograms() << std::endl;

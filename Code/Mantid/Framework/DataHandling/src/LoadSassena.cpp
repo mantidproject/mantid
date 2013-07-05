@@ -29,6 +29,7 @@ Dataset '''fqt''' is split into two workspaces, one for the real part and the ot
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
@@ -108,7 +109,7 @@ void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::st
 {
   UNUSED_ARG(description);
   API::AnalysisDataService::Instance().add( wsName, ws );
-  gws->add(wsName);
+  gws->addWorkspace(ws);
 }
 
 /**
@@ -338,17 +339,18 @@ void LoadSassena::exec()
   //auto gws=boost::dynamic_pointer_cast<API::WorkspaceGroup>(getProperty("OutputWorkspace"));
   //API::WorkspaceGroup_sptr gws=getProperty("OutputWorkspace");
   API::Workspace_sptr ows=getProperty("OutputWorkspace");
+
   API::WorkspaceGroup_sptr gws=boost::dynamic_pointer_cast<API::WorkspaceGroup>(ows);
-  if(gws)
+  if(gws && API::AnalysisDataService::Instance().doesExist( gws->name() ) )
   {
-    gws->deepRemoveAll(); // remove workspace members
+    //gws->deepRemoveAll(); // remove workspace members
+    API::AnalysisDataService::Instance().deepRemoveGroup( gws->name() );
   }
   else
   {
     gws = boost::make_shared<API::WorkspaceGroup>();
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<API::Workspace>(gws));
   }
-  gws->observeADSNotifications( false ); // Prevent sending unnecessary notifications
 
   //populate m_validSets
   int nvalidSets = 4;
@@ -390,7 +392,6 @@ void LoadSassena::exec()
       this->g_log.information("Dataset "+setName+" not present in file");
   }// end of iterate over the valid sets
 
-  gws->observeADSNotifications( true ); // Restore notification sending
   H5Fclose(h5file);
 } // end of LoadSassena::exec()
 

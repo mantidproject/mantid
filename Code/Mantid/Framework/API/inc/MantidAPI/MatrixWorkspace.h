@@ -303,6 +303,9 @@ namespace Mantid
       /// Initialises the workspace. Sets the size and lengths of the arrays. Must be overloaded.
       virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) = 0;
 
+      /// Create and return a new InfoNode describing this workspace.
+      virtual InfoNode *createInfoNode() const;
+
       /// A vector of pointers to the axes for this workspace
       std::vector<Axis*> m_axes;
 

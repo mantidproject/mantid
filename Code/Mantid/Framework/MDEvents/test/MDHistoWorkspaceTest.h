@@ -970,6 +970,19 @@ public:
   }
 
 
+  void test_InfoNode()
+  {
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
+
+    Mantid::API::Workspace::InfoNode rootNode( *ws );
+    ws->addInfoNodeTo( rootNode );
+    auto &node = *rootNode.nodes()[0];
+    TS_ASSERT_EQUALS( node.nodes().size(), 0 );
+    TS_ASSERT_EQUALS( node.lines().size(), 3 );
+    TS_ASSERT_EQUALS( node.lines()[0], "MDHistoWorkspace" );
+    TS_ASSERT_EQUALS( node.lines()[1], "Title: " );
+    TS_ASSERT_EQUALS( node.lines()[2], "Dim 0: (x) 0 to 10 in 10 bins" );
+  }
 
 
 

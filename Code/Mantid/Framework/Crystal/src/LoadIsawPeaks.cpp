@@ -599,7 +599,6 @@ namespace Crystal
   {
     // Create the workspace
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
-    ws->setName(getPropertyValue("OutputWorkspace"));
 
     // This loads (appends) the peaks
     this->appendFile( ws, getPropertyValue("Filename") );

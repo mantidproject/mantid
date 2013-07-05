@@ -68,7 +68,21 @@ void ITableWorkspace::modified()
   ITableWorkspace_sptr tws = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
   if (!tws) return;
   AnalysisDataService::Instance().notificationCenter.postNotification(
-    new Kernel::DataService<API::Workspace>::AfterReplaceNotification(this->getName(),tws));
+              new Kernel::DataService<API::Workspace>::AfterReplaceNotification(this->getName(),tws));
+}
+
+/**
+ * Implement Workspace's virtual method to fill the info node with info
+ * descriding this table workspace.
+ *
+ * @return :: A pointer to the created node.
+ */
+Workspace::InfoNode *ITableWorkspace::createInfoNode() const
+{
+    auto node = new InfoNode(*this);
+    node->addLine("Columns: " + boost::lexical_cast<std::string>(columnCount()));
+    node->addLine("Rows: " + boost::lexical_cast<std::string>(rowCount()));
+    return node;
 }
 
 

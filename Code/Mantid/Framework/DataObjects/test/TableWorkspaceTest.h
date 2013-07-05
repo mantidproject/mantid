@@ -447,6 +447,23 @@ public:
     TS_ASSERT_EQUALS("TableWorkspace", Mantid::Kernel::getUnmangledTypeName(*property.type_info()));
   }
 
+  void testInfoNode()
+  {
+    TableWorkspace tw(2);
+    tw.addColumn("int","Number");
+    tw.addColumn("double","Ratio");
+    tw.addColumn("str","Name");
+    tw.addColumn("bool","OK");
+    Mantid::API::Workspace::InfoNode rootNode( tw );
+    tw.addInfoNodeTo( rootNode );
+    auto &node = *rootNode.nodes()[0];
+    TS_ASSERT_EQUALS( node.nodes().size(), 0 );
+    TS_ASSERT_EQUALS( node.lines().size(), 3 );
+    TS_ASSERT_EQUALS( node.lines()[0], "TableWorkspace" );
+    TS_ASSERT_EQUALS( node.lines()[1], "Columns: 4" );
+    TS_ASSERT_EQUALS( node.lines()[2], "Rows: 2" );
+  }
+
 };
 
 

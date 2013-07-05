@@ -1139,11 +1139,11 @@ namespace Mantid
       for (size_t owp=0; owp<m_pureOutputWorkspaceProps.size(); owp++)
       {
         Property * prop = dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
-        // Do not observe ADS notifications while constructing the group
-        WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup(false));
+        WorkspaceGroup_sptr outWSGrp = WorkspaceGroup_sptr(new WorkspaceGroup());
         outGroups.push_back(outWSGrp);
         // Put the GROUP in the ADS
         AnalysisDataService::Instance().addOrReplace(prop->value(), outWSGrp );
+        outWSGrp->observeADSNotifications(false);
       }
 
       // Go through each entry in the input group(s)
@@ -1219,12 +1219,10 @@ namespace Mantid
 
       } // for each entry in each group
 
-      // Finish up
+      // restore group notifications
       for (size_t i=0; i<outGroups.size(); i++)
       {
-        // Go back to observing ADS in each group.
         outGroups[i]->observeADSNotifications(true);
-        outGroups[i]->updated();
       }
 
       // We finished successfully.

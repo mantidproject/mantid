@@ -53,6 +53,10 @@ namespace API
                                    bool skipError = false) const = 0;
 
     virtual void clearMRU() const = 0;
+
+  protected:
+      /// Create and return a new InfoNode describing this workspace.
+      virtual InfoNode *createInfoNode() const;
   };
 
   ///shared pointer to the matrix workspace base class

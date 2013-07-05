@@ -10,12 +10,41 @@
 template MANTID_API_DLL class Mantid::API::workspace_iterator<Mantid::API::LocatedDataRef,Mantid::API::IEventWorkspace>;
 template MANTID_API_DLL class Mantid::API::workspace_iterator<const Mantid::API::LocatedDataRef, const Mantid::API::IEventWorkspace>;
 
-/*
- * In order to be able to cast PropertyWithValue classes correctly a definition for the PropertyWithValue<IEventWorkspace> is required 
- *
- */
 namespace Mantid
 {
+
+namespace API
+{
+
+/**
+ * @return :: A pointer to the created info node.
+ */
+API::Workspace::InfoNode *IEventWorkspace::createInfoNode() const
+{
+    auto node = MatrixWorkspace::createInfoNode();
+    std::string extra("");
+    switch ( getEventType() )
+    {
+    case WEIGHTED:
+      extra = " (weighted)";
+      break;
+    case WEIGHTED_NOTIME:
+      extra = " (weighted, no times)";
+      break;
+    case TOF:
+      extra = "";
+      break;
+    }
+    node->addLine( "Events: " + boost::lexical_cast<std::string>(getNumberEvents()) + extra );
+    return node;
+}
+
+}
+
+/*
+ * In order to be able to cast PropertyWithValue classes correctly a definition for the PropertyWithValue<IEventWorkspace> is required
+ *
+ */
 namespace Kernel
 {
 
@@ -52,7 +81,9 @@ Mantid::API::IEventWorkspace_const_sptr IPropertyManager::getValue<Mantid::API::
 }
 
 
-} // namespace Kernel
+}
+
+// namespace Kernel
 } // namespace Mantid
 
 ///\endcond TEMPLATE
