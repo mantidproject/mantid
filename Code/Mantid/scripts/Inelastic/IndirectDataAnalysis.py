@@ -579,6 +579,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
     if ( Plot != 'None' ):
         furyfitPlotSeq(fitWS, Plot)
     EndTime('FuryFit')
+    return mtd[fitWS]
 
 def furyfitMultParsToWS(Table, Data):
 #   Q = createQaxis(Data)
