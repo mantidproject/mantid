@@ -1,4 +1,11 @@
-import dgreduce
+import DirectEnergyConversion as DRC 
+import CommonFunctions as common
+import time as time
+import numpy
+from mantid.simpleapi import *
+from mantid import api
+from mantid.kernel import funcreturns
+
 import unittest
 
 # the class which is responsible for data reduction
