@@ -36,6 +36,8 @@ namespace Mantid
     class DLLExport IHDFFileLoader : public API::Algorithm
     {
     public:
+      /// Virtual destructor (required by linker on some versions of OS X/Intel compiler)
+      virtual ~IHDFFileLoader() {}
       /// Returns a confidence value that this algorithm can load a file
       virtual int confidence(Kernel::HDFDescriptor & descriptor) const = 0;
     };
