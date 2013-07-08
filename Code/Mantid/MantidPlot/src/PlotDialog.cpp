@@ -1161,6 +1161,22 @@ void PlotDialog::initPercentilePage()
 	connect(boxFillSymbols, SIGNAL(clicked()), this, SLOT(fillBoxSymbols()));
 }
 
+/*
+ * Hides the "Custom color map" button when the user has not selected that specific button.
+ */
+void PlotDialog::showColorMapEditor(bool)
+{
+  if (grayScaleBox->isChecked() || defaultScaleBox->isChecked())
+  {
+    mSelectColormap->hide();
+  }
+  else
+  {
+    mSelectColormap->show();
+    connect(mSelectColormap,SIGNAL(clicked()),this,SLOT(changeColormap()));
+  }
+}
+
 void PlotDialog::initSpectrogramPage()
 {
   	spectrogramPage = new QWidget();
@@ -1170,14 +1186,14 @@ void PlotDialog::initSpectrogramPage()
 
 	QVBoxLayout *vl = new QVBoxLayout();
   	grayScaleBox = new QRadioButton(tr("&Gray Scale"));
-	//connect(grayScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
+	connect(grayScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
     vl->addWidget(grayScaleBox);
   	defaultScaleBox = new QRadioButton(tr("&Default Color Map"));
-	//connect(defaultScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
+	connect(defaultScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
     vl->addWidget(defaultScaleBox);
   	customScaleBox = new QRadioButton(tr("&Custom Color Map"));
-	//connect(customScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
-	connect(customScaleBox, SIGNAL(toggled(bool)), this, SLOT(showSelectColorMapButton(bool)));
+	connect(customScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
+//	connect(customScaleBox, SIGNAL(toggled(bool)), this, SLOT(showSelectColorMapButton(bool)));
     vl->addWidget(customScaleBox);
 
     QHBoxLayout *hl = new QHBoxLayout(imageGroupBox);
@@ -2886,26 +2902,6 @@ void PlotDialog::customVectorsPage(bool angleMag)
 		labelPosition->hide();
 		vectPosBox->hide();
 	}
-}
-
-void PlotDialog::showColorMapEditor(bool)
-{
-//  if (grayScaleBox->isChecked() || defaultScaleBox->isChecked())
-//	{
-//    colorMapEditor->hide();
-//    mSelectColormap->hide();
-//	}
-//  else
-//  {
-//    colorMapEditor->show();
-//    colorMapEditor->setFocus();
-//  }
-}
-
-void PlotDialog::showSelectColorMapButton(bool )
-{
-  mSelectColormap->show();
-	connect(mSelectColormap,SIGNAL(clicked()),this,SLOT(changeColormap()));
 }
 
 /**
