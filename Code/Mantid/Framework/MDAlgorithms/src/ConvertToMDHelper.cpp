@@ -1,5 +1,15 @@
 /*WIKI*
-The algorithm will try to calculate the MinValues and MaxValues limits that are required in the ConvertToMD algorithm.
+The algorithm will try to calculate the MinValues and MaxValues limits that are required in the ConvertToMD algorithm, using the following procedure:
+
+1. If QDimensions is CopyToMD the first value in MinValues is going to be the workspace minimum X coordinate, and the first value in MaxValues is going to be the maximum X coordinate
+2. If QDimensions is |Q| or Q3D, first we calculate the maximum momentum transfer, Qmax. If dEAnalysisMode is Elastic, we convert to Momentum units, find the maximum value, and multiply by 2, since the maximum momentum transfer occurs when the incident beam and the scattered beam are anti-parallel.
+If dEAnalysisMode is Direct or Indirect, we convert to DeltaE units, find the minimum and maximum (dEmin, dEmax), calculate to ki and kf. The maximum momentum transfer is ki+kf.
+3. If QDimensions is |Q|, the first value of the MinValues is 0, and the first value of MaxValues is Qmax
+4. If QDimensions is Q3D, and Q3DFrames is Q the first three values of the MinValues are -Qmax, -Qmax, -Qmax, and the first three values of MaxValues are Qmax, Qmax, Qmax
+5. If QDimensions is Q3D, and Q3DFrames is HKL the first three values of the MinValues are -Qmax*a/(2*pi), -Qmax*b/(2*pi), -Qmax*c/(2*pi), and the first three values of MaxValues are Qmax*a/(2*pi), Qmax*b/(2*pi), Qmax*c/(2*pi). Note: for HKL mode one needs to have an OrientedLattice attached to the sample.
+6. If QDimensions is |Q| or Q3D, and dEAnalysisMode is Elastic or Inelastic, the next value in MinValues is dEmin, and the next value in MaxValues is dEmax
+7. If any OtherDimensions are added, the last values in MinValues (MaxValues) are the minimum (maximum) of each of the sample log values selected
+
 *WIKI*/
 
 #include "MantidMDAlgorithms/ConvertToMDHelper.h"
@@ -71,8 +81,8 @@ namespace MDAlgorithms
       ws_valid->add<InstrumentValidator>();
       // the validator which checks if the workspace has axis and any units
       ws_valid->add<WorkspaceUnitValidator>("");
-
-
+      //histogram needed by ConvertUnits
+      ws_valid->add<HistogramValidator>();
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,ws_valid),
            "An input Matrix Workspace (Workspace2D or Event workspace) ");
 
@@ -127,11 +137,11 @@ namespace MDAlgorithms
   void ConvertToMDHelper::exec()
   {
     std::vector<double> MinValues,MaxValues;
-
     std::string QDimension=getPropertyValue("QDimensions");
     std::string GeometryMode=getPropertyValue("dEAnalysisMode");
     std::string Q3DFrames=getPropertyValue("Q3DFrames");
     std::vector<std::string> OtherDimensions=getProperty("OtherDimensions");
+
     MatrixWorkspace_sptr ws=getProperty("InputWorkspace"),wstemp;
     DataObjects::EventWorkspace_sptr evWS;
     double xmin,xmax;
@@ -154,6 +164,7 @@ namespace MDAlgorithms
             conv->setProperty("Target","Momentum");
             conv->setProperty("Emode","Elastic");
             conv->executeAsChildAlg();
+
             wstemp=conv->getProperty("OutputWorkspace");
             evWS=boost::dynamic_pointer_cast< Mantid::DataObjects::EventWorkspace >(wstemp);
             if (evWS)
@@ -268,7 +279,6 @@ namespace MDAlgorithms
         MinValues.push_back(p->getStatistics().minimum);
         MaxValues.push_back(p->getStatistics().maximum);
     }
-
 
     setProperty("MinValues",MinValues);
     setProperty("MaxValues",MaxValues);
