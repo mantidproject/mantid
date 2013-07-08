@@ -405,7 +405,7 @@ class DirectEnergyConversion(object):
 
                     if self.__det_cal_file_ws == None :
                         self.log('_do_mono: Loading detector info from file ' +str(self.det_cal_file),'debug')    
-                        file = common.find_file(self.det_cal_file)
+                        file = FileFinder.getFullPath(self.det_cal_file)
                         LoadDetectorInfo(Workspace=result_name,DataFilename=file,RelocateDets= self.relocate_dets)
                         self.log('_do_mono: Loading detector info completed ','debug')                                            
                     else:

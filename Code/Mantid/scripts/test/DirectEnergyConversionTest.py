@@ -223,4 +223,5 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     #    tReducet.di
 
-    
+if __name__=="__main__":   
+    unittest.main()
