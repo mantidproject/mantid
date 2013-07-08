@@ -52,8 +52,6 @@ public:
   void setNanColor(int r, int g, int b);
 
   void setupDefaultMap();
-  
-  void buildColorMap(std::string);
 
   QRgb rgb(const QwtDoubleInterval & interval, double value) const;
 

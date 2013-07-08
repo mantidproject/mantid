@@ -304,9 +304,8 @@ void Spectrogram::setGrayScale()
 
 void Spectrogram::setDefaultColorMap()
 {
-  //Pass the spectrogram default (__standard) string to use as colormap.
+  //Use the default (__standard) colormap from MantidColorMap.
   mColorMap.setupDefaultMap();
-
   setColorMap(mColorMap);
   color_map_policy = Default;
 
