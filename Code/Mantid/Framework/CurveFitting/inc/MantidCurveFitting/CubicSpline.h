@@ -62,9 +62,17 @@ namespace Mantid
       /// Set a value to attribute attName
       void setAttribute(const std::string& attName,const Attribute& );
 
+      void setXAttribute(const size_t index, double x);
+
     private:
-      gsl_interp_accel *acc;
-      gsl_spline *spline;
+      gsl_interp_accel *m_acc;
+      gsl_spline *m_spline;
+
+      //minimum number of data points in spline
+      static const int M_MIN_POINTS;
+
+      ///reallocate the spline object to use n data points
+      void realloc_spline(const int n);
 
     };
 
