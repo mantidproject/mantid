@@ -502,6 +502,9 @@ void AlignAndFocusPowder::exec()
 
   if (l1 > 0)
   {
+    // Edit instrument
+    throw std::runtime_error("Need to polish this part.");
+
     g_log.information() << "running EditInstrumentGeometry\n";
     API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
     editAlg->setProperty("Workspace", m_outputW);

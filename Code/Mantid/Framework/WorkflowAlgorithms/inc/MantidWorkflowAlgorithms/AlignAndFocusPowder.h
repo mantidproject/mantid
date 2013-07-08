@@ -108,7 +108,7 @@ namespace Mantid
       API::MatrixWorkspace_sptr m_lowResW;
       /// Low resolution TOF event workspace
       DataObjects::EventWorkspace_sptr m_lowResEW;
-      /// Process low resolution workspace
+      /// Flag to process low resolution workspace
       bool m_processLowResTOF;
 
     };
