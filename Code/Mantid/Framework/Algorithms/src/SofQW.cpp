@@ -94,7 +94,8 @@ void SofQW::createInputProperties(API::Algorithm & alg)
 void SofQW::exec()
 {
   using namespace Geometry;
-  
+  double efixed;
+
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   // Do the full check for common binning
   if ( ! WorkspaceHelpers::commonBoundaries(inputWorkspace) )
@@ -113,7 +114,35 @@ void SofQW::exec()
   int emode = 0;
   if (emodeStr == "Direct") emode=1;
   else if (emodeStr == "Indirect") emode=2;
-  
+   // Retrieve the emode & efixed properties
+
+    // Check whether they should have supplied an EFixed value
+  if(emode == 1 ) // Direct
+  {
+
+      // If GetEi was run then it will have been stored in the workspace, if not the user will need to enter one
+      if ( inputWorkspace->run().hasProperty("Ei") )
+      {
+          Kernel::Property *p = inputWorkspace->run().getProperty("Ei");
+          Kernel::PropertyWithValue<double> *eiProp = dynamic_cast<Kernel::PropertyWithValue<double>*>(p);
+          if( !eiProp )
+          {
+            throw std::runtime_error("Input workspace contains Ei but its property type is not a double.");
+          }
+          efixed = (*eiProp)();
+       }
+       else
+       {
+         efixed = getProperty("EFixed");
+         if (efixed == 0)
+         {
+            throw std::invalid_argument("Input workspace does not contain an EFixed value. Please provide one or run GetEi.");
+         }
+       }
+
+  }
+
+
   // Get a pointer to the instrument contained in the workspace
   Instrument_const_sptr instrument = inputWorkspace->getInstrument();
   // Get the parameter map
@@ -151,9 +180,9 @@ void SofQW::exec()
       IDetector_const_sptr spectrumDet = inputWorkspace->getDetector(i);
       if( spectrumDet->isMonitor() ) continue;
       // If an indirect instrument, try getting Efixed from the geometry
-      double efixed = getProperty("EFixed");
       if (emode==2)
       {
+        efixed = getProperty("EFixed");
         try {
           Parameter_sptr par = pmap.get(spectrumDet.get(),"EFixed");
           if (par) 
@@ -202,6 +231,13 @@ void SofQW::exec()
           {
             ei = efixed;
             ef = efixed - deltaE;
+            if (ef<0)
+            {
+                std::string mess = "Energy transfer requested in Indirect mode exceeds incident energy.\n Found for det ID: "+boost::lexical_cast<std::string>(idet)+
+                    " bin No "+boost::lexical_cast<std::string>(j)+" with Ei="+boost::lexical_cast<std::string>(efixed)+" and energy transfer: "+
+                    boost::lexical_cast<std::string>(deltaE);
+                throw std::runtime_error(mess);
+            }
           }
           else
           {
