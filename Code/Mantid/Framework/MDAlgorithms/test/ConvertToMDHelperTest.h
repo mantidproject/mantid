@@ -24,7 +24,7 @@ public:
   static ConvertToMDHelperTest *createSuite() { return new ConvertToMDHelperTest(); }
   static void destroySuite( ConvertToMDHelperTest *suite ) { delete suite; }
 
-  ConvertToMDHelperTest::ConvertToMDHelperTest():WSName("CMDHTest")
+  ConvertToMDHelperTest():WSName("CMDHTest")
   {
 
   }
