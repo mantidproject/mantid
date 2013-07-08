@@ -21,39 +21,40 @@ class CubicSplineTest: public CxxTest::TestSuite
 {
 public:
 
-//  void testKnownInterpolationValues()
-//  {
-//    CubicSpline cspline;
-//    int nData = 10;
-//    double ref[nData];
-//    double xVals[nData];
-//
-//    setupCubicSpline(cspline, nData);
-//
-//    //calculate a reference set to check against
-//    for (int i = 0; i < nData; ++i)
-//    {
-//      double x_val = i;
-//      xVals[i] = x_val;
-//      ref[i] = splineYFunction(x_val);
-//    }
-//
-//    FunctionDomain1DView view(xVals, nData);
-//    FunctionValues testDataValues(view);
-//
-//    cspline.function(view, testDataValues);
-//
-//    //compare reference data with output data
-//    for (int i = 0; i < nData; ++i)
-//    {
-//      TS_ASSERT_DELTA(ref[i], testDataValues[i], 1e-7);
-//    }
-//
-//  }
+  void testKnownInterpolationValues()
+  {
+    CubicSpline cspline;
+
+    int nData = 10;
+    int testDataSize = 10;
+
+    double x[testDataSize];
+    double referenceSet[testDataSize];
+
+    setupCubicSpline(cspline, nData);
+
+    //generate a set of test points
+    for (int i = 0; i < testDataSize; ++i)
+    {
+      x[i] = i;
+      referenceSet[i] = splineYFunction(x[i]);
+    }
+
+    FunctionDomain1DView view(x, nData);
+    FunctionValues testDataValues(view);
+
+    cspline.function(view, testDataValues);
+
+    //compare reference data with output data
+    for (int i = 0; i < testDataSize; ++i)
+    {
+      TS_ASSERT_EQUALS(referenceSet[i], testDataValues[i]);
+    }
+
+  }
 
   void testUnknowntInterpolationValues()
   {
-
     CubicSpline cspline;
 
     int nData = 10;
@@ -62,16 +63,9 @@ public:
     double x[testDataSize];
     double referenceSet[testDataSize];
 
-    //set up class for testing
-    cspline.setAttributeValue("n", nData);
+    setupCubicSpline(cspline, nData);
 
-    //calculate a reference set to check against
-    for (int i = 0; i < nData; ++i)
-    {
-      cspline.setXAttribute(i, i);
-      cspline.setParameter(static_cast<size_t>(i), splineYFunction(i));
-    }
-
+    //generate a set of test points
     for (int i = 0; i < testDataSize; ++i)
     {
       x[i] = (i * 0.3);
@@ -86,13 +80,8 @@ public:
     //compare reference data with output data
     for (int i = 0; i < testDataSize; ++i)
     {
-      std::cout << "Ref: " << referenceSet[i] << std::endl;
-      std::cout << "Out: " << testDataValues[i] << std::endl;
-
       TS_ASSERT_DELTA(referenceSet[i], testDataValues[i], 1e-4);
     }
-
-    std::cout << cspline.asString() << std::endl;
   }
 
 private:
@@ -100,12 +89,20 @@ private:
   //function which we wish to use to generate our corresponding y data
   double splineYFunction(double x)
   {
-    return sin((2*M_PI/18) * x);
+    return sin((2 * M_PI / 18) * x);
   }
 
+  //setup a CubicSpline class for testing
   void setupCubicSpline(CubicSpline& cspline, int nData)
   {
+    cspline.setAttributeValue("n", nData);
 
+    //calculate a reference set to check against
+    for (int i = 0; i < nData; ++i)
+    {
+      cspline.setXAttribute(i, i);
+      cspline.setParameter(static_cast<size_t>(i), splineYFunction(i));
+    }
   }
 
 };
