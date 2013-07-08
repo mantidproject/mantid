@@ -21,7 +21,6 @@ For more information about McStas and its general usage for simulating neutron s
 #include "MantidDataHandling/LoadMcStasEventNexus.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IEventWorkspace.h"
@@ -45,9 +44,10 @@ For more information about McStas and its general usage for simulating neutron s
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+
+#include "MantidAPI/RegisterFileLoader.h"
 
 #include <fstream>
 #include <sstream>
@@ -71,13 +71,12 @@ namespace DataHandling
   using namespace Kernel;
   using namespace API;
 
-using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
-using namespace Mantid::Kernel;
+  using namespace Mantid::Geometry;
+  using namespace Mantid::DataObjects;
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LoadMcStasEventNexus);
-  DECLARE_LOADALGORITHM(LoadMcStasEventNexus);
+  //DECLARE_ALGORITHM(LoadMcStasEventNexus);
+  DECLARE_HDF_FILELOADER_ALGORITHM(LoadMcStasEventNexus);
 
 
   //----------------------------------------------------------------------------------------------
@@ -335,68 +334,20 @@ using namespace Mantid::Kernel;
     setProperty("OutputWorkspace", outputGroup);
   }
   
-   /**
-    * This method does a quick file type check by looking at the first 100 bytes of the file 
-    *  @param filePath- path of the file including name.
-    *  @param nread :: no.of bytes read
-    *  @param header :: The first 100 bytes of the file as a union
-    *  @return true if the given file is of type which can be loaded by this algorithm
-    */
-    bool LoadMcStasEventNexus::quickFileCheck(const std::string& filePath, size_t nread,const file_header& header)
-    {
-      // HDF files have magic cookie in the first 4 bytes
-      if ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes) == g_hdf_cookie))
-      {
-        //hdf
-        return true;
-      }
-      // HDF5 files have a different signature
-      else if ( (nread >= sizeof(g_hdf5_signature)) && 
-                (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
-      { 
-        //hdf5
-        return true;
-      }
-      return false;
-    }
-    
-    /**
-     * Checks the file by opening it and reading few lines 
-     *  @param filePath :: name of the file inluding its path
-     *  @return an integer value how much this algorithm can load the file 
-     */
-    int LoadMcStasEventNexus::fileCheck(const std::string& filePath)
-    {
-      using namespace ::NeXus;
-	  // We will look at the first entry and check for a 
-	  // simulation class that contains a name attribute with the value=mcstas
-	  int confidence(0);
-      try
-      {
-        ::NeXus::File file = ::NeXus::File(filePath);
-        auto entries = file.getEntries();
-        if(!entries.empty())
-        {
-          auto firstIt = entries.begin();
-          file.openGroup(firstIt->first,firstIt->second);
-          file.openGroup("simulation", "NXsimulation");
-          file.openData("information");
-          
-          std::string nameAttrValue;
-          file.getAttr("name", nameAttrValue); 
-          if(boost::iequals(nameAttrValue, "mcstassssss")) confidence = 80; //  Not implemented for August 2013 release. Scheduled for autumn releas 2013. 
-          
-          file.closeData();
-          file.closeGroup();
-          file.closeGroup();
-        }
-      }
-      catch(::NeXus::Exception&)
-      {
-      }
-      return confidence;
-    }
 
+
+  /**
+   * Return the confidence with with this algorithm can load the file
+   * @param descriptor A descriptor for the file
+   * @returns An integer specifying the confidence level. 0 indicates it will not be used
+   */
+  int LoadMcStasEventNexus::confidence(Kernel::HDFDescriptor & descriptor) const
+  {
+    UNUSED_ARG(descriptor)
+    // Not implemented yet therefore return no confidence
+	  int confidence(0);
+	  return confidence;
+  }
 
 } // namespace DataHandling
 } // namespace Mantid
