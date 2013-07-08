@@ -61,7 +61,6 @@ For more information about McStas and its general usage for simulating neutron s
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -202,8 +201,8 @@ using namespace Mantid::Kernel;
         std::string dataType = eit->second;
         if( dataName == "content_nxs" || dataType != "NXdata" ) continue;
         g_log.debug() << "Opening " << dataName << "   " << dataType << std::endl;
-          
-          
+
+
         // read the data you need from this nexus entry
         nxFile.openGroup(dataName, dataType);
         std::vector<double> data;
@@ -212,35 +211,33 @@ using namespace Mantid::Kernel;
         // Each event detector has the nexus attribute: 
         // @long_name = data ' Intensity Position Position Neutron_ID Velocity Time_Of_Flight Monitor (Square)'
         // if Neutron_ID present we have event data
-        
-		auto nxdataEntries = nxFile.getEntries();
+
+        auto nxdataEntries = nxFile.getEntries();
 
         for(auto nit = nxdataEntries.begin(); nit != nxdataEntries.end(); ++nit)
-		{
-		  if(nit->second == "NXparameters") continue;
-		  nxFile.openData(nit->first);
-		  if(nxFile.hasAttr("long_name") )
-		  {
-			std::string nameAttrValue;
-			nxFile.getAttr("long_name", nameAttrValue);
+        {
+          if(nit->second == "NXparameters") continue;
+          nxFile.openData(nit->first);
+          if(nxFile.hasAttr("long_name") )
+          {
+            std::string nameAttrValue;
+            nxFile.getAttr("long_name", nameAttrValue);
 
-			// C++98 style
             std::string str         = nameAttrValue;
             std::string str2        = "Neutron_ID";
             std::size_t found       = str.find(str2);
 
             if (found!=std::string::npos)
             {
-			  nxFile.openData("data");
-			  nxFile.getData(data);
-			}
-		  }
+              nxFile.openData("data");
+              nxFile.getData(data);
+            }
+          }
           nxFile.closeData();
         }
 
         nxFile.closeGroup(); // close event data 
 
-							  	
 
         // create and prepare an event workspace ready to receive the mcstas events
         EventWorkspace_sptr eventWS(new EventWorkspace());
@@ -262,23 +259,23 @@ using namespace Mantid::Kernel;
         // the one is here for the moment for backward compatibility
         eventWS->rebuildSpectraMapping(true);
 
-                    
+
         // Need to take into account that the nexus readData method reads a multi-column data entry
         // into a vector  
         // The number of data column for each neutron is here hardcoded to (p, x,  y,  n, id, t)
         // Thus  we have
         // column  0 : p 	neutron wight
-		// column  1 : x 	x coordinate
-		// column  2 : y 	y coordinate
-		// column  3 : n 	accumulated number of neutrons
-		// column  4 : id 	pixel id
-		// column  5 : t 	time
-        
-        
+        // column  1 : x 	x coordinate
+        // column  2 : y 	y coordinate
+        // column  3 : n 	accumulated number of neutrons
+        // column  4 : id 	pixel id
+        // column  5 : t 	time
+
+
         size_t numberOfDataColumn = 6;
         // The number of neutrons 
         size_t nNeutrons = data.size() / numberOfDataColumn;
-        
+
         // to store shortest and longest recorded TOF
         double shortestTOF; 
         double longestTOF;
@@ -301,14 +298,13 @@ using namespace Mantid::Kernel;
             if ( detector_time > longestTOF )
               longestTOF = detector_time;
           }
-      
+
           size_t workspaceIndex = (*detIDtoWSindex_map)[detectorID]; 
           int64_t pulse_time = 0;
           //eventWS->getEventList(workspaceIndex) += TofEvent(detector_time,pulse_time);
           //eventWS->getEventList(workspaceIndex) += TofEvent(detector_time);
           eventWS->getEventList(workspaceIndex) += WeightedEvent(detector_time, pulse_time, data[numberOfDataColumn*in], 1.0);
         }		      
-        eventWS->doneAddingEventLists();
 
 
         // Create a default TOF-vector for histogramming, for now just 2 bins
