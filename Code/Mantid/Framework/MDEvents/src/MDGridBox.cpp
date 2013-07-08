@@ -1366,7 +1366,7 @@ namespace MDEvents
                         //static_cast<coord_t>(vertexIndex[d]) * boxSize[d] + this->extents[d].min
 
       // Is this vertex contained?
-      coord_t out[nd];
+      coord_t out[2]; // radius and length of cylinder
       radiusTransform.apply(vertexCoord, out);
       if (out[0] < radius && std::fabs(out[1]) < 0.5*length)
       {

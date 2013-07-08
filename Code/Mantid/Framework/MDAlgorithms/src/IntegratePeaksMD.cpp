@@ -425,7 +425,8 @@ namespace MDAlgorithms
 			double Sigma = 0.02;
 			double peakHeight = ws2D->dataY(i)[half];
 			std::string profileFunction = getProperty("ProfileFunction");
-			std::ostringstream fun_str;
+			std::ostringstream fun_str, plot_str;
+			plot_str << "FitPeak" << i;
 			if (profileFunction.compare("Gaussian") == 0)
 				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=Gaussian,Height="<<peakHeight<<",Sigma="<<Sigma<<",PeakCentre="<<Centre;
 			else if (profileFunction.compare("ConvolutionExpGaussian") == 0)
@@ -445,7 +446,7 @@ namespace MDAlgorithms
 				fit_alg->setProperty("InputWorkspace", ws2D);
 				fit_alg->setProperty("WorkspaceIndex", i);
 				fit_alg->setProperty("CreateOutput", true);
-				fit_alg->setProperty("Output", "fit");
+				fit_alg->setProperty("Output", plot_str.str());
 				fit_alg->executeAsChildAlg();
 				MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
 				std::string fun = fit_alg->getProperty("Function");
@@ -453,6 +454,7 @@ namespace MDAlgorithms
 				g_log.notice() << "Peak " << i <<": Chisq = " << chisq << " " << fun<<"\n";
 				//Evaluate fit at points
 				const Mantid::MantidVec& y = fitWS->readY(1);
+				AnalysisDataService::Instance().addOrReplace(plot_str.str(), fitWS);
 
 				//Calculate intensity
 				signal = 0.0;

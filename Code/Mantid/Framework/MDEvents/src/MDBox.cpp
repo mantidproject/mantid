@@ -628,7 +628,7 @@ namespace MDEvents
     // For each MDLeanEvent
     for (; it != it_end; ++it)
     {
-      coord_t out[nd];
+      coord_t out[2];  // radius and length of cylinder
       radiusTransform.apply(it->getCenter(), out);
       if (out[0] < radius && std::fabs(out[1]) < 0.5*length)
       {
@@ -636,7 +636,7 @@ namespace MDEvents
 		size_t xchannel;
 		if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2);
 		else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2);
-        if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += static_cast<signal_t>(it->getSignal());
+        if (xchannel < numSteps ) signal_fit[xchannel] += static_cast<signal_t>(it->getSignal());
 
         signal += static_cast<signal_t>(it->getSignal());
         errorSquared += static_cast<signal_t>(it->getErrorSquared());
