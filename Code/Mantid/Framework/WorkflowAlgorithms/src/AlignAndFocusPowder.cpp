@@ -505,7 +505,6 @@ void AlignAndFocusPowder::exec()
     g_log.information() << "running EditInstrumentGeometry\n";
     API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
     editAlg->setProperty("Workspace", m_outputW);
-    editAlg->setProperty("NewInstrument", false);
     editAlg->setProperty("PrimaryFlightPath", l1);
     editAlg->setProperty("Polar", tths);
     editAlg->setProperty("SpectrumIDs", specids);
@@ -518,7 +517,6 @@ void AlignAndFocusPowder::exec()
     {
       API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
       editAlg->setProperty("Workspace", m_lowResW);
-      editAlg->setProperty("NewInstrument", false);
       editAlg->setProperty("PrimaryFlightPath", l1);
       editAlg->setProperty("Polar", tths);
       editAlg->setProperty("SpectrumIDs", specids);
