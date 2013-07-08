@@ -16,6 +16,7 @@ The input workspace must contain histogram data with common binning on all spect
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "Poco/File.h"
 #include <cstdio>
 #include <cmath>
 #include <stdexcept>
@@ -106,75 +107,58 @@ namespace Mantid
       }
       try
       {
+        //write to the file being ready to catch it if something happens during writing
       WriteSPEFile(outSPE_File, inputWS);
-      // Close the file
       fclose(outSPE_File);
       }
       catch (std::exception e)
       {
         fclose(outSPE_File);
-        //remove the file
+        Poco::File(filename).remove();
+        //throw the exception again so the base class can deal with it too in it's own way
         throw;
       }
     }
     
+    /** Write the data to the SPE file
+    *  @param outFile :: the file object to write to
+    *  @param inputWS :: the workspace to be saved
+    */
     void SaveSPE::WriteSPEFile(FILE * outSPE_File, const API::MatrixWorkspace_const_sptr &inputWS){
       const size_t nHist = inputWS->getNumberHistograms();
       m_nBins = inputWS->blocksize();
       // Number of Workspaces and Number of Energy Bins
-      if (int charcount = fprintf(outSPE_File,"%8u%8u\n",static_cast<int>(nHist), static_cast<int>(m_nBins)) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
-
+      FPRINTF_WITH_EXCEPTION(outSPE_File,"%8u%8u\n",static_cast<int>(nHist), static_cast<int>(m_nBins));
       // Write the angle grid (dummy if no 'vertical' axis)
       size_t phiPoints(0);
       if ( inputWS->axes() > 1 && inputWS->getAxis(1)->isNumeric() )
       {
         const Axis& axis = *inputWS->getAxis(1);
         const std::string commentLine = "### " + axis.unit()->caption() + " Grid\n";
-        if (int charcount = fprintf(outSPE_File,"%s",commentLine.c_str()) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+        FPRINTF_WITH_EXCEPTION(outSPE_File,"%s",commentLine.c_str());
         const size_t axisLength = axis.length();
         phiPoints = (axisLength==nHist) ? axisLength+1 : axisLength;
         for (size_t i = 0; i < phiPoints; i++)
         {
           const double value = (i < axisLength) ? axis(i) : axis(axisLength-1)+1;
-          if (int charcount = fprintf(outSPE_File,NUM_FORM,value) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+          FPRINTF_WITH_EXCEPTION(outSPE_File,NUM_FORM,value);
           if ( (i + 1) % 8 == 0 )
           {
-            if (int charcount = fprintf(outSPE_File,"\n") <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+            FPRINTF_WITH_EXCEPTION(outSPE_File,"\n");
           }
         }
       }
       else
       {
-        if (int charcount = fprintf(outSPE_File,"### Phi Grid\n") <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+        FPRINTF_WITH_EXCEPTION(outSPE_File,"### Phi Grid\n");
         phiPoints = nHist + 1; // Pretend this is binned
         for (size_t i = 0; i < phiPoints; i++)
         {
           const double value = static_cast<int>(i) + 0.5;
-          if (int charcount = fprintf(outSPE_File,NUM_FORM,value) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+          FPRINTF_WITH_EXCEPTION(outSPE_File,NUM_FORM,value);
           if ( (i + 1) % 8 == 0 )
           {
-            if (int charcount = fprintf(outSPE_File,"\n") <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+            FPRINTF_WITH_EXCEPTION(outSPE_File,"\n");
           }
         }
       }
@@ -182,44 +166,29 @@ namespace Mantid
       // If the number of points written isn't a factor of 8 then we need to add an extra newline
       if (phiPoints % 8 != 0)
       {
-        if (int charcount = fprintf(outSPE_File,"\n") <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+        FPRINTF_WITH_EXCEPTION(outSPE_File,"\n");
       }
 
       // Get the Energy Axis (X) of the first spectra (they are all the same - checked above)
       const MantidVec& X = inputWS->readX(0);
 
       // Write the energy grid
-      if (int charcount = fprintf(outSPE_File,"### Energy Grid\n") <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+      FPRINTF_WITH_EXCEPTION(outSPE_File,"### Energy Grid\n");
       const size_t energyPoints = m_nBins + 1; // Validator enforces binned data
       size_t i = NUM_PER_LINE-1;
       for (  ; i < energyPoints; i += NUM_PER_LINE)
       {// output a whole line of numbers at once
-        if (int charcount = fprintf(outSPE_File,NUMS_FORM,
-          X[i-7],X[i-6],X[i-5],X[i-4],X[i-3],X[i-2],X[i-1],X[i]) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+        FPRINTF_WITH_EXCEPTION(outSPE_File,NUMS_FORM,
+          X[i-7],X[i-6],X[i-5],X[i-4],X[i-3],X[i-2],X[i-1],X[i]);
       }
       // if the last line is not a full line enter them individually
       if ( energyPoints % NUM_PER_LINE != 0 )
       {// the condition above means that the last line has less than the maximum number of digits
         for (i-=7; i < energyPoints; ++i)
         {
-          if (int charcount = fprintf(outSPE_File,NUM_FORM,X[i]) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+          FPRINTF_WITH_EXCEPTION(outSPE_File,NUM_FORM,X[i]);
         }
-        if (int charcount = fprintf(outSPE_File,"\n") <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+        FPRINTF_WITH_EXCEPTION(outSPE_File,"\n");
       }
 
       writeHists(inputWS, outSPE_File);
@@ -279,16 +248,10 @@ namespace Mantid
     */
     void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const
     {
-      if (int charcount = fprintf(outFile,"%s", Y_HEADER) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+      FPRINTF_WITH_EXCEPTION(outFile,"%s", Y_HEADER);
       writeBins(WS->readY(specIn), outFile);
 
-      if (int charcount = fprintf(outFile,"%s", E_HEADER) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+      FPRINTF_WITH_EXCEPTION(outFile,"%s", E_HEADER);
       writeBins(WS->readE(specIn), outFile);
     }
     /** Write the mask flags for in a histogram entry
@@ -296,16 +259,10 @@ namespace Mantid
     */
     void SaveSPE::writeMaskFlags(FILE * const outFile) const
     {
-      if (int charcount = fprintf(outFile,"%s", Y_HEADER) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+      FPRINTF_WITH_EXCEPTION(outFile,"%s", Y_HEADER);
       writeValue(MASK_FLAG, outFile);
 
-      if (int charcount = fprintf(outFile,"%s", E_HEADER) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+      FPRINTF_WITH_EXCEPTION(outFile,"%s", E_HEADER);
       writeValue(MASK_ERROR, outFile);
     }
     /** Write the the values in the array to the file in the correct format
@@ -316,25 +273,16 @@ namespace Mantid
     {
       for(size_t j = NUM_PER_LINE-1; j < m_nBins; j+=NUM_PER_LINE)
       {// output a whole line of numbers at once
-        if (int charcount = fprintf(outFile,NUMS_FORM,
-          Vs[j-7],Vs[j-6],Vs[j-5],Vs[j-4],Vs[j-3],Vs[j-2],Vs[j-1],Vs[j]) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+        FPRINTF_WITH_EXCEPTION(outFile,NUMS_FORM,
+          Vs[j-7],Vs[j-6],Vs[j-5],Vs[j-4],Vs[j-3],Vs[j-2],Vs[j-1],Vs[j]);
       }
       if (m_remainder)
       {
         for ( size_t l = m_nBins - m_remainder; l < m_nBins; ++l)
         {
-          if (int charcount = fprintf(outFile,NUM_FORM,Vs[l]) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+          FPRINTF_WITH_EXCEPTION(outFile,NUM_FORM,Vs[l]);
         }
-        if (int charcount = fprintf(outFile,"\n") <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+        FPRINTF_WITH_EXCEPTION(outFile,"\n");
       }
     }
     /** Write the the value the file a number of times given by m_nbins
@@ -345,25 +293,16 @@ namespace Mantid
     {
       for(size_t j = NUM_PER_LINE-1; j < m_nBins; j+=NUM_PER_LINE)
       {// output a whole line of numbers at once
-        if (int charcount = fprintf(outFile,NUMS_FORM,
-          value,value,value,value,value,value,value,value) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+        FPRINTF_WITH_EXCEPTION(outFile,NUMS_FORM,
+          value,value,value,value,value,value,value,value);
       }
       if (m_remainder)
       {
         for ( size_t l = m_nBins - m_remainder; l < m_nBins; ++l)
         {
-          if (int charcount = fprintf(outFile,NUM_FORM,value) <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+          FPRINTF_WITH_EXCEPTION(outFile,NUM_FORM,value);
         }
-        if (int charcount = fprintf(outFile,"\n") <= 0)
-    {
-      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");
-    }
+        FPRINTF_WITH_EXCEPTION(outFile,"\n");
       }
     }
     /**Write a summary information about what the algorithm had managed to save to the
