@@ -24,6 +24,11 @@ public:
   static ConvertToMDHelperTest *createSuite() { return new ConvertToMDHelperTest(); }
   static void destroySuite( ConvertToMDHelperTest *suite ) { delete suite; }
 
+  ConvertToMDHelperTest::ConvertToMDHelperTest():WSName("CMDHTest")
+  {
+
+  }
+
 
   void test_Init()
   {
@@ -172,7 +177,7 @@ public:
   }
 
 private:
-  std::string WSName="CMDHelper";
+  std::string WSName;
 
 
   Mantid::API::MatrixWorkspace_sptr MakeWorkspace(double xmin,double dx,bool deltaEUnits,
