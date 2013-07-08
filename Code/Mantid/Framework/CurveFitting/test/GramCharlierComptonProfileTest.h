@@ -2,8 +2,9 @@
 #define MANTID_CURVEFITTING_GRAMCHARLIERCOMPTONPROFILETEST_H_
 
 #include <cxxtest/TestSuite.h>
-
 #include "MantidCurveFitting/GramCharlierComptonProfile.h"
+
+#include "ComptonProfileTestHelpers.h"
 
 using Mantid::CurveFitting::GramCharlierComptonProfile;
 
@@ -18,25 +19,25 @@ public:
   void test_Name_Is_As_Expected()
   {
     // These are used in scripts so should not change!
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     TS_ASSERT_EQUALS("GramCharlierComptonProfile", profile->name());
   }
 
   void test_initialized_object_has_expected_attributes()
   {
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     checkDefaultAttrsExist(*profile);
   }
 
   void test_Default_Initialized_Function_Has_Expected_Parameters_In_Right_Order()
   {
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     checkDefaultAttrsExist(*profile);
   }
 
   void test_Setting_HermiteCoefficients_Attribute_Adds_Expected_Parameters()
   {
-    auto profile = createFunction();
+    Mantid::API::IFunction_sptr profile = createFunction();
     profile->setAttributeValue("HermiteCoeffs", "1 0 1"); // turn on C_0 & C_4
 
     checkDefaultAttrsExist(*profile);
@@ -53,9 +54,65 @@ public:
     }
   }
 
+  void test_Function_Returns_Same_Number_Intensity_Coefficents_As_Active_Hermite_Coefficients_If_KFSE_Is_Fixed()
+  {
+    boost::shared_ptr<Mantid::CurveFitting::ComptonProfile> profile = createFunction();
+    profile->setAttributeValue("HermiteCoeffs", "1 0 1"); // turn on C_0 & C_4
+    profile->fix(profile->parameterIndex("FSECoeff"));
+
+    auto intensityIndices = profile->intensityParameterIndices();
+    TS_ASSERT_EQUALS(2, intensityIndices.size());
+  }
+
+  void test_Function_Returns_Same_Number_Intensity_Coefficents_As_Active_Hermite_Coefficients_Plus_One_If_KFSE_Is_Free()
+  {
+    boost::shared_ptr<Mantid::CurveFitting::ComptonProfile> profile = createFunction();
+    profile->setAttributeValue("HermiteCoeffs", "1 0 1"); // turn on C_0 & C_4
+
+    auto intensityIndices = profile->intensityParameterIndices();
+    TS_ASSERT_EQUALS(3, intensityIndices.size());
+  }
+
+  void test_Expected_Results_Returned_Given_Data()
+  {
+    using namespace Mantid::API;
+
+     auto func = createFunctionWithParamsSet();
+     double x0(165.0),x1(166.0),dx(0.5); //chosen to give put us near the peak for this mass & spectrum
+     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+     func->setWorkspace(testWS);
+     const auto & dataX = testWS->readX(0);
+     FunctionDomain1DView domain(dataX.data(), dataX.size());
+     FunctionValues values(domain);
+
+     TS_ASSERT_THROWS_NOTHING(func->function(domain, values));
+
+     const double tol(1e-10);
+     TS_ASSERT_DELTA(0.0027169802, values.getCalculated(0), tol);
+     TS_ASSERT_DELTA(0.0027279881, values.getCalculated(1), tol);
+     TS_ASSERT_DELTA(0.0027315600, values.getCalculated(2), tol);
+  }
+
 private:
 
-  Mantid::API::IFunction_sptr createFunction()
+  Mantid::API::IFunction_sptr createFunctionWithParamsSet()
+  {
+    auto func = createFunction();
+    func->setAttributeValue("WorkspaceIndex",0);
+    func->setAttributeValue("Mass",1.0);
+    // must be before C_0 C_4 parameter calls as they are created by this attribute
+    func->setAttributeValue("HermiteCoeffs","1 0 1");
+
+    func->setParameter("C_0", 21.0);
+    func->setParameter("C_4", 33.0);
+    func->setParameter("FSECoeff", 0.82);
+    func->setParameter("Width", 5.0);
+    func->setUpForFit();
+    return func;
+  }
+
+
+  boost::shared_ptr<GramCharlierComptonProfile> createFunction()
   {
     auto profile = boost::make_shared<GramCharlierComptonProfile>();
     profile->initialize();

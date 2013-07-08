@@ -491,7 +491,6 @@ namespace Mantid
           Workspace_sptr secondWS = loadFileToWs(*filename,  "__@loadsum_temp@");
           sumWS = plusWs(sumWS, secondWS);
         }
-        sumWS->setName(*wsName);
 
         API::WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(sumWS);
         if(group)
@@ -502,7 +501,9 @@ namespace Mantid
           for( ; childWsName != childWsNames.end(); ++childWsName, ++count )
           {
             Workspace_sptr childWs = group->getItem(*childWsName);
-            childWs->setName(group->getName() + "_" + boost::lexical_cast<std::string>(count));
+            const std::string childName = group->getName() + "_" + boost::lexical_cast<std::string>(count);
+            API::AnalysisDataService::Instance().addOrReplace(childName, childWs);
+            //childWs->setName(group->getName() + "_" + boost::lexical_cast<std::string>(count));
           }
         }
         // Add the sum to the list of loaded workspace names.
@@ -527,7 +528,9 @@ namespace Mantid
           if( *childWsName == outputWsName )
           {
             Mantid::API::Workspace_sptr child = group->getItem(*childWsName);
-            child->setName(child->getName() + "_" + boost::lexical_cast<std::string>(count));
+            //child->setName(child->getName() + "_" + boost::lexical_cast<std::string>(count));
+            const std::string childName = child->getName() + "_" + boost::lexical_cast<std::string>(count);
+            API::AnalysisDataService::Instance().addOrReplace(childName, child);
             count++;
           }
         }
@@ -745,7 +748,8 @@ namespace Mantid
       loadAlg->executeAsChildAlg();
 
       Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
-      ws->setName(wsName);
+      //ws->setName(wsName);
+      AnalysisDataService::Instance().addOrReplace(wsName, ws);
       return ws;
     }
 
@@ -828,7 +832,7 @@ namespace Mantid
           {
             Workspace_sptr childWs = isGroup->getItem(*childName);
             isGroup->remove(*childName);
-            childWs->setName(isGroup->getName() + "_" + boost::lexical_cast<std::string>(count));
+            //childWs->setName(isGroup->getName() + "_" + boost::lexical_cast<std::string>(count));
             group->addWorkspace(childWs);
           }
         }

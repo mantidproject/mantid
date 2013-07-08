@@ -8,6 +8,8 @@
 #include "MantidAPI/CompositeDomain.h"
 #include "MantidAPI/FunctionValues.h"
 
+#include <iomanip>
+
 namespace
 {
   const bool debug = false;
@@ -19,6 +21,12 @@ namespace CurveFitting
 {
 
 DECLARE_COSTFUNCTION(CostFuncLeastSquares,Least squares)
+
+/**
+ * Constructor
+ */
+CostFuncLeastSquares::CostFuncLeastSquares() : CostFuncFitting(),m_value(0),m_pushed(false),
+  m_log(Kernel::Logger::get("CostFuncLeastSquares")) {}
 
 /** Calculate value of cost function
  * @return :: The value of the function
@@ -452,8 +460,41 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double ep
   {
     valDerivHessian();
   }
+  if(m_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
+  {
+    m_log.information() << "== Hessian (H) ==\n";
+    std::ios::fmtflags prevState = m_log.information().flags();
+    m_log.information() << std::left << std::fixed;
+    for(size_t i = 0; i < m_hessian.size1(); ++i)
+    {
+      for(size_t j = 0; j < m_hessian.size2(); ++j)
+      {
+        m_log.information() << std::setw(10);
+        m_log.information() << m_hessian.get(i,j) << "  ";
+      }
+      m_log.information() << "\n";
+    }
+    m_log.information().flags(prevState);
+  }
   covar = m_hessian;
   covar.invert();
+  if(m_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
+  {
+    m_log.information() << "== Covariance matrix (H^-1) ==\n";
+    std::ios::fmtflags prevState = m_log.information().flags();
+    m_log.information() << std::left << std::fixed;
+    for(size_t i = 0; i < covar.size1(); ++i)
+    {
+      for(size_t j = 0; j < covar.size2(); ++j)
+      {
+        m_log.information() << std::setw(10);
+        m_log.information() << covar.get(i,j) << "  ";
+      }
+      m_log.information() << "\n";
+    }
+    m_log.information().flags(prevState);
+  }
+
 }
 
 } // namespace CurveFitting

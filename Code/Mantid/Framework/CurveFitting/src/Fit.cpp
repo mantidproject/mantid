@@ -613,13 +613,12 @@ namespace CurveFitting
     size_t iter = 0;
     bool success = false;
     std::string errorString;
-    //double costFuncVal = 0;
-    //do
     g_log.debug("Starting minimizer iteration\n");
     while (static_cast<int>(iter) < maxIterations)
     {
       iter++;
       g_log.debug() << "Starting iteration " << iter << "\n";
+      m_function->iterationStarting();
       if ( !minimizer->iterate() )
       {
         errorString = minimizer->getError();
@@ -633,6 +632,11 @@ namespace CurveFitting
         break;
       }
       prog.report();
+      m_function->iterationFinished();
+      if(g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
+      {
+        g_log.information() << "Iteration " << iter << ", cost function = " << minimizer->costFunctionVal() << "\n";
+      }
     }
     g_log.information() << "Number of minimizer iterations=" << iter << "\n";
 

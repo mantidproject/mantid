@@ -50,7 +50,6 @@ public:
   void testInitalizeWithWrongWorkspaceTypeThrows()
   {
     IMDWorkspace* ws = new MockIMDWorkspace;
-    ws->setName("OTHER_WS_TYPE");
 
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     TSM_ASSERT_THROWS("This is an invalid workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);

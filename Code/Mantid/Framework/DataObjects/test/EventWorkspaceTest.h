@@ -873,6 +873,25 @@ public:
     TS_ASSERT_DELTA(wksp->getEventXMin(), 500, .01);
     TS_ASSERT_DELTA(wksp->getEventXMax(), 1023500, .01);
   }
+
+  void test_InfoNode()
+  {
+    Mantid::API::Workspace::InfoNode rootNode( *ew );
+    ew->addInfoNodeTo( rootNode );
+    auto &node = *rootNode.nodes()[0];
+    TS_ASSERT_EQUALS( node.nodes().size(), 0 );
+    TS_ASSERT_EQUALS( node.lines().size(), 9 );
+    TS_ASSERT_EQUALS( node.lines()[0], "EventWorkspace" );
+    TS_ASSERT_EQUALS( node.lines()[1], "Title: " );
+    TS_ASSERT_EQUALS( node.lines()[2], "Histograms: 500" );
+    TS_ASSERT_EQUALS( node.lines()[3], "Bins: 1024" );
+    TS_ASSERT_EQUALS( node.lines()[4], "Histogram" );
+    TS_ASSERT_EQUALS( node.lines()[5], "X axis:  / " );
+    TS_ASSERT_EQUALS( node.lines()[6], "Y axis: " );
+    TS_ASSERT_EQUALS( node.lines()[7].substr(0,11), "Instrument:" );
+    TS_ASSERT_EQUALS( node.lines()[8], "Events: 1024000" );
+  }
+
 };
 
 #endif /* EVENTWORKSPACETEST_H_ */

@@ -583,6 +583,7 @@ public:
     if (names.size() >= 1)
     {
       WorkspaceGroup_sptr wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+      AnalysisDataService::Instance().addOrReplace(group1, wsGroup);
       std::vector<std::string>::iterator it = names.begin();
       for (; it != names.end(); it++)
       {
@@ -591,7 +592,6 @@ public:
         AnalysisDataService::Instance().addOrReplace(*it,ws);
         wsGroup->add(*it);
       }
-      AnalysisDataService::Instance().addOrReplace(group1, wsGroup);
     }
   }
 

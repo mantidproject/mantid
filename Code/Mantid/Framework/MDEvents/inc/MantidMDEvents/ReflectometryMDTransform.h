@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidAPI/BoxController.h"
 
 namespace Mantid
 {
@@ -36,9 +38,24 @@ namespace MDEvents
     */
   class DLLExport ReflectometryMDTransform 
   {
+
+  private:
+
+    Mantid::API::BoxController_sptr m_boxController;
+
+  protected:
+
+  const size_t m_nbinsx;
+  const size_t m_nbinsz;
+
+  boost::shared_ptr<MDEventWorkspace2Lean> createWorkspace(Mantid::Geometry::IMDDimension_sptr, Mantid::Geometry::IMDDimension_sptr) const;
+
   public:
     //Execute the strategy to produce the a transformed, output MDWorkspace
     virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
+
+    virtual ~ReflectometryMDTransform();
+    ReflectometryMDTransform(Mantid::API::BoxController_sptr boxController);
   };
 }
 }

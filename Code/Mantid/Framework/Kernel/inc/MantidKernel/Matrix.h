@@ -158,8 +158,8 @@ namespace Mantid
       // Transform to a rotation matrix
       std::vector<T> toRotation();
     private:
-      template<typename TYPE> friend std::ostream& operator<<(std::ostream&,const Kernel::Matrix<TYPE>&);
-      template<typename TYPE> friend std::istream& operator>>(std::istream&, Kernel::Matrix<TYPE>&);
+      template<typename TYPE> friend void dumpToStream(std::ostream&, const Kernel::Matrix<TYPE>&, const char);
+      template<typename TYPE> friend void fillFromStream(std::istream&, Kernel::Matrix<TYPE>&, const char);
     };
 
     //-------------------------------------------------------------------------
@@ -176,7 +176,12 @@ namespace Mantid
     template<typename T>
     DLLExport std::ostream& operator<<(std::ostream&,const Kernel::Matrix<T>&);
     template<typename T>
+    DLLExport void dumpToStream(std::ostream&, const Kernel::Matrix<T>&, const char);
+
+    template<typename T>
     DLLExport std::istream& operator>>(std::istream&, Kernel::Matrix<T>&);
+    template<typename T>
+    DLLExport void fillFromStream(std::istream&, Kernel::Matrix<T>&, const char);
 
   }
 }  

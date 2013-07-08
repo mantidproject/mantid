@@ -63,7 +63,7 @@ public:
     size_t numpulses = 5;
 
     DataObjects::EventWorkspace_sptr eventws = createEventWorkspace(runstart_i64, pulsedt, tofdt, numpulses);
-    eventws->setName("Test01");
+    //eventws->setName("Test01");
 
     TS_ASSERT_EQUALS(eventws->getNumberEvents(), 500);
 

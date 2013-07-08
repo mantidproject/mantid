@@ -67,9 +67,9 @@ public:
     dataStore.add(testName2, testWS2);
 
     auto group = WorkspaceGroup_sptr( new WorkspaceGroup );
+    dataStore.add("group", group);
     group->add( testName1 );
     group->add( testName2 );
-    dataStore.add("group", group);
 
     TS_ASSERT_EQUALS(dataStore.size(), 3);
 

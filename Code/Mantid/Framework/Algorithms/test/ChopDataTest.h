@@ -90,8 +90,7 @@ public:
 
     // Cleanup
     AnalysisDataService::Instance().remove("chopdatatest_input");
-    wsgroup->deepRemoveAll();
-    AnalysisDataService::Instance().remove("chopdatatest_output");
+    AnalysisDataService::Instance().deepRemoveGroup("chopdatatest_output");
   }
 
 private:

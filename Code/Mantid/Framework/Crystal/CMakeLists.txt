@@ -27,6 +27,8 @@ set ( SRC_FILES
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
 	src/PeaksInRegion.cpp
+	src/PeaksIntersection.cpp
+	src/PeaksOnSurface.cpp
 	src/PredictFractionalPeaks.cpp
 	src/PredictPeaks.cpp
 	src/SCDCalibratePanels.cpp
@@ -78,6 +80,8 @@ set ( INC_FILES
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PeaksInRegion.h
+	inc/MantidCrystal/PeaksIntersection.h
+	inc/MantidCrystal/PeaksOnSurface.h
 	inc/MantidCrystal/PredictFractionalPeaks.h
 	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SCDCalibratePanels.h
@@ -126,6 +130,7 @@ set ( TEST_FILES
 	PeakIntegrationTest.h
 	PeakIntensityVsRadiusTest.h
 	PeaksInRegionTest.h
+	PeaksOnSurfaceTest.h
 	PredictFractionalPeaksTest.h
 	PredictPeaksTest.h
 	SCDCalibratePanelsTest.h

@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/AffineMatrixParameterParser.cpp
 	src/BoxControllerNeXusIO.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
+        src/CalculateReflectometryQBase.cpp  
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
@@ -41,6 +42,7 @@ set ( SRC_FILES
 	src/MDWSTransform.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
+	src/ReflectometryMDTransform.cpp
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
@@ -67,6 +69,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BoxControllerNeXusIO.h        
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
+        inc/MantidMDEvents/CalculateReflectometryQBase.h
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h

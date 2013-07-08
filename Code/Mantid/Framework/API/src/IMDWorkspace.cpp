@@ -3,6 +3,8 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/VMD.h"
 
+#include <sstream>
+
 using Mantid::Kernel::VMD;
 
 namespace Mantid
@@ -57,7 +59,32 @@ namespace Mantid
       signal_t IMDWorkspace::getSignalAtVMD(const Mantid::Kernel::VMD & coords,
           const Mantid::API::MDNormalization & normalization) const
       {
-        return this->getSignalAtCoord(coords.getBareArray(), normalization);
+          return this->getSignalAtCoord(coords.getBareArray(), normalization);
+      }
+
+      //-----------------------------------------------------------------------------------------------
+      /**
+       * @return :: A pointer to the created info node.
+       */
+      Workspace::InfoNode *IMDWorkspace::createInfoNode() const
+      {
+          auto node = new InfoNode(*this);
+          node->addLine( "Title: " + getTitle() );
+          for (size_t i=0; i < getNumDims(); i++)
+          {
+              std::ostringstream mess;
+              Geometry::IMDDimension_const_sptr dim = getDimension(i);
+              mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
+              // Also show the dimension ID string, if different than name
+              if (dim->getDimensionId() != dim->getName())
+                mess << ". Id=" << dim->getDimensionId();
+              node->addLine( mess.str() );
+          }
+          if ( hasOriginalWorkspace() )
+          {
+              node->addLine("Binned from '" + getOriginalWorkspace()->getName() + "'");
+          }
+          return node;
       }
 
       //-----------------------------------------------------------------------------------------------

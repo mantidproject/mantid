@@ -202,9 +202,12 @@ public:
 
   }
 
-  /** Keep the right number of algorithms in the list */
+  /** Keep the right number of algorithms in the list.
+   *  This also tests setMaxAlgorithms().
+   */
   void testDroppingOldOnes()
   {
+    AlgorithmManager::Instance().setMaxAlgorithms( 5 );
     AlgorithmManager::Instance().clear();
     TS_ASSERT_EQUALS(AlgorithmManager::Instance().size(),0);
 

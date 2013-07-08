@@ -65,7 +65,7 @@ void ChopData::exec()
   const double maxX = inputWS->readX(0)[nBins];
   std::map<int, double> intMap;
   int prelow = -1;
-  std::vector<std::string> workspaces;
+  std::vector<MatrixWorkspace_sptr> workspaces;
   if ( maxX < step )
   {
     throw std::invalid_argument("Step value provided larger than size of workspace.");
@@ -157,20 +157,19 @@ void ChopData::exec()
     std::stringstream name;
     name << output << "-" << i+1;
     std::string wsname = name.str();
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(wsname, workspace);
 
     declareProperty(new WorkspaceProperty<>(wsname, wsname, Direction::Output));
     setProperty(wsname, workspace);
 
-    workspaces.push_back(wsname);
+    workspaces.push_back(workspace);
   }
 
   // Create workspace group that holds output workspaces
   WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
 
-  for ( std::vector<std::string>::iterator it = workspaces.begin(); it != workspaces.end(); ++it )
+  for ( auto it = workspaces.begin(); it != workspaces.end(); ++it )
   {
-    wsgroup->add(*it);
+    wsgroup->addWorkspace(*it);
   }
   // set the output property
   setProperty("OutputWorkspace", wsgroup);

@@ -50,7 +50,8 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
    *  If it fails to install, them, it will not be able to create the widget, and it will fail gracelly. 
    *  
    *  In normal condition, it will create the widget (Ui::ScriptRepositoryView) and populate it with the 
-   *  RepoModel, and define the delegates ScriptRepositoryView::RepoDelegate and ScriptRepositoryView::CheckBoxDelegate.
+   *  RepoModel, and define the delegates ScriptRepositoryView::RepoDelegate and ScriptRepositoryView::CheckBoxDelegate
+   *  and ScriptRepositoryView::RemoveEntryDelegate.
    *  
    */
   ScriptRepositoryView::ScriptRepositoryView(QWidget * parent):
@@ -128,11 +129,13 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
     ui->setupUi(this);
     connect(ui->reloadPushButton, SIGNAL(clicked()),this,SLOT(updateModel()));
     connect(ui->pbHelp, SIGNAL(clicked()),this,SLOT(helpClicked()));
+    connect(model, SIGNAL(executingThread(bool)),ui->reloadPushButton, SLOT(setDisabled(bool)));
 
     // setup the model and delegates   
     ui->repo_treeView->setModel(model);
     ui->repo_treeView->setItemDelegateForColumn(1, new RepoDelegate(this));
     ui->repo_treeView->setItemDelegateForColumn(2, new CheckBoxDelegate(this));
+    ui->repo_treeView->setItemDelegateForColumn(3, new RemoveEntryDelegate(this));
     ui->repo_treeView->setColumnWidth(0,290);
     
 
@@ -167,6 +170,7 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
   void ScriptRepositoryView::updateModel(){
     RepoModel * before = model; 
     model = new RepoModel(); 
+    connect(model, SIGNAL(executingThread(bool)),ui->reloadPushButton, SLOT(setDisabled(bool)));
     ui->repo_treeView->setModel(model); 
     delete before; 
   }
@@ -219,6 +223,11 @@ Mantid::Kernel::Logger & ScriptRepositoryView::g_log = Mantid::Kernel::Logger::g
       return;
     }
   }
+
+  /** Open the ScriptRepository Page on Web Browser*/
+void ScriptRepositoryView::helpClicked(){
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/ScriptRepository"));
+} 
 
 //////////////////////////////////////////////////
 // DELEGATE : Allow to display and interact with the View in a nicer way. Improve the User Experience. 
@@ -415,10 +424,93 @@ bool ScriptRepositoryView::CheckBoxDelegate::editorEvent(QEvent *event,
    return true;// Does not allow the event to be catched by another one
  }
 }
-  /** Open the ScriptRepository Page on Web Browser*/
-void ScriptRepositoryView::helpClicked(){
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/ScriptRepository"));
-} 
+/////////////////////
+// RemoveEntryDelegate
+/////////////////////
+
+ScriptRepositoryView::RemoveEntryDelegate::RemoveEntryDelegate(QObject *parent)
+  :QStyledItemDelegate(parent)
+{}
+  /** Draws the column 3 (delete) of ScriptRepositoryView. 
+   *
+   *  This function is called every time the ScriptRepository needs to draw the widget 
+   *  for the delete column of the file/folder inside the ScriptRepository. 
+   *  It displays a trash icon to indicate user that it is used to remove entries.
+   * 
+   * @param painter: Required to draw the widget
+   * @param option: Provided by the framework and has information displaying the widget. 
+   * @param index: Identifies the entry inside the RepoModel (indirectly the file / folder).
+   */
+void ScriptRepositoryView::RemoveEntryDelegate::paint(
+       QPainter* painter,
+       const QStyleOptionViewItem & option,
+       const QModelIndex & index
+       ) const
+{
+  
+  if (!index.isValid())
+    return;
+  if (painter->device() ==0)
+    return;
+
+  QIcon icon ; 
+  // get the state and chose the best fit icon
+  QString entry_type = index.model()->data(index, Qt::DisplayRole).toString();
+
+  if (entry_type == "protected")
+    return;
+  icon =  QIcon::fromTheme("emptytrash", QIcon(QPixmap(":/win/emptytrash")));
+
+  // define the region to draw the icon
+  QRect buttonRect( option.rect);  
+  int min_val = buttonRect.width()<buttonRect.height() ? buttonRect.width() : buttonRect.height();
+  // make it square
+  buttonRect.setWidth(min_val); 
+  buttonRect.setHeight(min_val); 
+  buttonRect.moveCenter(option.rect.center());
+
+  // define the options to draw a push button with the icon displayed
+  QStyleOptionButton button;
+  button.rect = buttonRect;
+  button.icon = icon;
+  int icon_size =(int) (min_val*.8); 
+  button.iconSize = QSize(icon_size,icon_size);
+  button.state =  QStyle::State_Enabled;
+  // draw a push button
+  QApplication::style()->drawControl
+    (QStyle::CE_PushButton, &button, painter);
+}
+
+/** Reacts to the iteraction with the user when he clicks on the buttons displayed at paint. 
+ *
+ *  Clicking on the delete icon there is only on available action (to delete the entry). So, 
+ *  it is enough to get the event that the user interact with the pushbutton to decide what 
+ *  to do. 
+ *  
+ *  It will filter the event in order to get the Left-Click of mouse. If it gets the 
+ *  click of the mouse, it will trigger the action delete to the model 
+ *  
+ * @param event: The event given by the framework
+ * @param model: Pointer to the model needed to retrive the status of the entry
+ * @param index: identifies the entry (file/folder)
+ * @param option: Provided by the framewor, and passed on to the base class.
+ * @return true if it handles or false to ignore.
+*/
+bool  ScriptRepositoryView::RemoveEntryDelegate::editorEvent(QEvent *event,
+                                   QAbstractItemModel *model,
+                                                      const QStyleOptionViewItem &/*option*/,
+                                   const QModelIndex &index) {
+  // if event is mouse click 
+  if (event->type() == QEvent::MouseButtonPress){
+    QString entry = index.model()->data(index, Qt::DisplayRole).toString();
+    if (entry == "protected")
+      return true;
+    QString action = "delete";
+    return model->setData(index, action, Qt::EditRole);  
+  }else{
+    return true; //Does not allow others events to be processed (example: double-click)
+  }   
+}
 
 void ScriptRepositoryView::openFolderLink(QString link){
   QDesktopServices::openUrl(QUrl(link));

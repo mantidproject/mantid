@@ -166,8 +166,8 @@ public:
     pks->addPeak(peak);
 
     IntegratePeakTimeSlices algP;
-    wsPtr->setName("InputWorkspace");
-    pks->setName("PeaksWorkspace");
+    //wsPtr->setName("InputWorkspace");
+    //pks->setName("PeaksWorkspace");
     try
     {
       algP.initialize();
@@ -232,9 +232,6 @@ public:
     }
 
   }
-
-
-
 
 
 
