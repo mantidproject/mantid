@@ -298,6 +298,7 @@ set ( TEST_FILES
 	ISpectrumTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
+	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
 	LiveListenerFactoryTest.h
 	MDGeometryTest.h
