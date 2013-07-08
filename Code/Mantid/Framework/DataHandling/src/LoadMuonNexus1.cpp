@@ -45,9 +45,9 @@ The ChildAlgorithms used by LoadMuonNexus are:
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/UnitFactory.h"
@@ -69,8 +69,7 @@ namespace Mantid
   namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadMuonNexus1)
-    DECLARE_LOADALGORITHM(LoadMuonNexus1)
+    DECLARE_HDF_FILELOADER_ALGORITHM(LoadMuonNexus1);
 
     /// Sets documentation strings for this algorithm
     void LoadMuonNexus1::initDocs()
@@ -635,28 +634,41 @@ namespace Mantid
 
     }
 
-    /**checks the file by opening it and reading few lines 
-    *  @param filePath :: name of the file inluding its path
-    *  @return an integer value how much this algorithm can load the file 
-    */
-    int LoadMuonNexus1::fileCheck(const std::string& filePath)
-    {     
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadMuonNexus1::confidence(Kernel::HDFDescriptor & descriptor) const
+    {
+      const auto & firstEntryNameType = descriptor.firstEntryNameType();
+      const std::string root = "/" + firstEntryNameType.first;
+      if(!descriptor.pathExists(root + "/analysis")) return 0;
+
+      bool upperIDF(true);
+      if(descriptor.pathExists(root + "/IDF_version")) upperIDF = true;
+      else
+      {
+        if(descriptor.pathExists(root + "/idf_version")) upperIDF = false;
+        else return 0;
+      }
+
       try
       {
-        NXRoot root(filePath);
-        NXEntry entry = root.openFirstEntry();
-        if ( ! entry.containsDataSet( "analysis" ) ) return 0;
-        std::string versionField = "IDF_version";
-        if ( ! entry.containsDataSet( versionField ) )
+        std::string versionField = "idf_version";
+        if(upperIDF) versionField = "IDF_version";
+
+        auto &file = descriptor.data();
+        file.openPath(root + "/" + versionField);
+        int32_t version = 0;
+        file.getData(&version);
+        if ( version != 1 ) return 0;
+
+        file.openPath(root + "/analysis");
+        std::string def = file.getStrData();
+        if (def == "muonTD" || def == "pulsedTD")
         {
-          versionField = "idf_version";
-          if ( ! entry.containsDataSet( versionField ) ) return 0;
-        }
-        if ( entry.getInt( versionField ) != 1 ) return 0;
-        std::string definition = entry.getString( "analysis" );
-        if ( definition == "muonTD" || definition == "pulsedTD" )
-        {
-          // If all this succeeded then we'll assume this is an ISIS Muon NeXus file version 1
+          // If all this succeeded then we'll assume this is an ISIS Muon NeXus file version 2
           return 81;
         }
       }

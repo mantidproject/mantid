@@ -20,12 +20,14 @@ set ( SRC_FILES
 	src/EnvironmentHistory.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
+	src/FileDescriptor.cpp
 	src/FileValidator.cpp
 	src/FilterChannel.cpp
 	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
 	src/Glob.cpp
+	src/HDFDescriptor.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
@@ -136,6 +138,7 @@ set ( INC_FILES
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
 	inc/MantidKernel/Fast_Exponential.h
+	inc/MantidKernel/FileDescriptor.h
 	inc/MantidKernel/FileValidator.h
 	inc/MantidKernel/FilterChannel.h
 	inc/MantidKernel/FilteredTimeSeriesProperty.h
@@ -143,6 +146,7 @@ set ( INC_FILES
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
 	inc/MantidKernel/Glob.h
+	inc/MantidKernel/HDFDescriptor.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
 	inc/MantidKernel/ISaveable.h
@@ -253,6 +257,7 @@ set ( TEST_FILES
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
 	FacilitiesTest.h
+	FileDescriptorTest.h
 	FileValidatorTest.h
 	FilterChannelTest.h
 	FilteredTimeSeriesPropertyTest.h
@@ -261,6 +266,7 @@ set ( TEST_FILES
 	FunctionTaskTest.h
 	GlobTest.h
 	HermitePolynomialsTest.h
+	HDFDescriptorTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h

@@ -41,7 +41,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/LoadAlgorithmFactory.h" 
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 using std::endl;
@@ -56,8 +56,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-DECLARE_ALGORITHM(LoadEventNexus)
-DECLARE_LOADALGORITHM(LoadEventNexus)
+DECLARE_HDF_FILELOADER_ALGORITHM(LoadEventNexus);
 
 using namespace Kernel;
 using namespace Geometry;
@@ -896,7 +895,7 @@ private:
 //===============================================================================================
 
 /// Empty default constructor
-LoadEventNexus::LoadEventNexus() : IDataFileChecker(),
+LoadEventNexus::LoadEventNexus() : IHDFFileLoader(),
     event_id_is_spec(false), m_allBanksPulseTimes(NULL)
 {
 }
@@ -910,60 +909,19 @@ LoadEventNexus::~LoadEventNexus()
 }
 
 /**
- * Do a quick file type check by looking at the first 100 bytes of the file 
- *  @param filePath :: path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-bool LoadEventNexus::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
-{
-  std::string ext = this->extension(filePath);
-  g_log.debug() << "LoadEventNexus::quickFileCheck() - File extension is: " << ext << std::endl;
-
-  // If the extension is nxs then give it a go
-  if( ext.compare("nxs") == 0 ) return true;
-  // If the extension is h5 then give it a go
-  if( ext.compare("h5") == 0 ) return true;
-
-
-  // If not then let's see if it is a HDF file by checking for the magic cookie
-  if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
-  return false;
-}
-
-/**
- * Checks the file by opening it and reading few lines 
- *  @param filePath :: name of the file inluding its path
- *  @return an integer value how much this algorithm can load the file 
- */
-int LoadEventNexus::fileCheck(const std::string& filePath)
+int LoadEventNexus::confidence(Kernel::HDFDescriptor & descriptor) const
 {
   int confidence(0);
-  typedef std::map<std::string,std::string> string_map_t; 
-  try
+  if(descriptor.classTypeExists("NXevent_data"))
   {
-    ::NeXus::File file = ::NeXus::File(filePath);
-    string_map_t entries = file.getEntries();
-    for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
+    if(descriptor.pathOfTypeExists("/entry", "NXentry") || descriptor.pathOfTypeExists("/raw_data_1", "NXentry"))
     {
-      if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") ) 
-      {
-        file.openGroup(it->first, it->second);
-        string_map_t entries2 = file.getEntries();
-        for(string_map_t::const_iterator it2 = entries2.begin(); it2 != entries2.end(); ++it2)
-        {
-          if (it2->second == "NXevent_data")
-          {
-            confidence = 80;
-          }
-        }
-        file.closeGroup();
-      }
+      confidence = 80;
     }
-  }
-  catch(::NeXus::Exception&)
-  {
   }
   return confidence;
 }

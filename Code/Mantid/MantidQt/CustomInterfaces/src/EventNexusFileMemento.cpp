@@ -1,9 +1,10 @@
 #include "MantidQtCustomInterfaces/EventNexusFileMemento.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/HDFDescriptor.h"
+#include "MantidKernel/Matrix.h"
 #include <iostream>
 #include <fstream>
 #include <boost/regex.hpp>
@@ -35,9 +36,9 @@ namespace MantidQt
           throw std::invalid_argument("EventNexusFileMemento:: File doesn't exist");
         }
 
-        //Detailed check of file structure.
-        IDataFileChecker_sptr alg = LoadAlgorithmFactory::Instance().create("LoadEventNexus");
-        if(!alg->fileCheck(m_fileName))
+        // Check that it can be loaded by LoadEventNexus
+
+        if(!FileLoaderRegistry::Instance().canLoad("LoadEventNexus", fileName))
         {
           throw std::invalid_argument("Expecting Event Nexus files. This file type is not recognised");
         }
@@ -96,7 +97,7 @@ namespace MantidQt
       {
         checkStillThere();
 
-        IDataFileChecker_sptr alg = LoadAlgorithmFactory::Instance().create("LoadEventNexus");
+        auto alg = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
         alg->initialize();
         alg->setRethrows(true);
         alg->setProperty("Filename", m_fileName);

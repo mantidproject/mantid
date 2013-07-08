@@ -4,10 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <climits>
 
 //----------------------------------------------------------------------
@@ -60,12 +58,6 @@ namespace Mantid
       virtual int version() const { return 3; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Raw"; }
-
-      /// do a quick check that this file can be loaded
-      virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-      virtual int fileCheck(const std::string& filePath);
-
 
     private:
       /// Sets documentation strings for this algorithm

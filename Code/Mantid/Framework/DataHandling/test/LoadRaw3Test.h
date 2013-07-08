@@ -31,6 +31,17 @@ public:
     inputFile = "HET15869.raw";
   }
 
+  void testConfidence()
+  {
+    using Mantid::Kernel::FileDescriptor;
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", inputFile);
+
+    FileDescriptor descriptor(loader.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(80, loader.confidence(descriptor));
+  }
+
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( loader.initialize());

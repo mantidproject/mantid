@@ -29,6 +29,7 @@ LoadRaw version 1 and 2 are no longer available in Mantid.  Version 3 has been v
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -38,7 +39,6 @@ LoadRaw version 1 and 2 are no longer available in Mantid.  Version 3 has been v
 #include "MantidAPI/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include <boost/shared_ptr.hpp>
@@ -50,9 +50,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadRaw3)
-    DECLARE_LOADALGORITHM(LoadRaw3)
+    DECLARE_FILELOADER_ALGORITHM(LoadRaw3);
 
     /// Sets documentation strings for this algorithm
     void LoadRaw3::initDocs()
@@ -724,27 +722,6 @@ namespace Mantid
         }
       }
     }
-
-    /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
-     *  @param filePath- path of the file including name.
-     *  @param nread :: no.of bytes read
-     *  @param header :: The first 100 bytes of the file as a union
-     *  @return true if the given file is of type which can be loaded by this algorithm
-     */
-    bool LoadRaw3::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-    {
-      return LoadRawHelper::quickFileCheck(filePath,nread,header);
-
-    }
-    /**checks the file by opening it and reading few lines
-     *  @param filePath :: name of the file inluding its path
-     *  @return an integer value how much this algorithm can load the file
-     */
-    int LoadRaw3::fileCheck(const std::string& filePath)
-    {
-      return LoadRawHelper::fileCheck(filePath);
-    }
-
 
   } // namespace DataHandling
 } // namespace Mantid

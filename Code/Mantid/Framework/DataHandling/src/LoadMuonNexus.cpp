@@ -162,42 +162,14 @@ namespace Mantid
       }
     }
 
-
-    /**This method does a quick file type check by looking at the first 100 bytes of the file 
-    *  @param filePath- path of the file including name.
-    *  @param nread :: no.of bytes read
-    *  @param header :: The first 100 bytes of the file as a union
-    *  @return true if the given file is of type which can be loaded by this algorithm
-    */
-    bool LoadMuonNexus::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadMuonNexus::confidence(Kernel::HDFDescriptor &) const
     {
-      std::string extn=extension(filePath);
-      bool bnexs(false);
-      (!extn.compare("nxs")||!extn.compare(".nx5"))?bnexs=true:bnexs=false;
-      /*
-      * HDF files have magic cookie in the first 4 bytes
-      */
-      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs )
-      {
-        //hdf
-        return true;
-      }
-      else if ( (nread >= sizeof(g_hdf5_signature)) && 
-        (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
-      { 
-        //hdf5
-        return true;
-      }
-      return false;
-    }
-    /**checks the file by opening it and reading few lines 
-    *  @param filePath :: name of the file inluding its path
-    *  @return an integer value how much this algorithm can load the file 
-    */
-    int LoadMuonNexus::fileCheck(const std::string& filePath)
-    {     
-      UNUSED_ARG( filePath );
-      throw Kernel::Exception::NotImplementedError("LoadMuonNexus cannot be used as a file checker.");
+      return 0; // Not to be used but LoadMuonNexus2, which inherits from this will
     }
 
   } // namespace DataHandling

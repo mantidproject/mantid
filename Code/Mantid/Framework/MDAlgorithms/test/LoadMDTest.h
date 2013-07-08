@@ -26,7 +26,7 @@ using namespace Mantid::Kernel;
 class LoadMDTest : public CxxTest::TestSuite
 {
 public:
-    
+
   void test_Init()
   {
     LoadMD alg;

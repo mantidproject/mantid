@@ -2,9 +2,8 @@
 #define MANTID_CRYSTAL_LOADISAWPEAKS_H_
     
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidAPI/IDataFileChecker.h"
 
 namespace Mantid
 {
@@ -17,7 +16,7 @@ namespace Crystal
    * @author Janik Zikovsky, SNS
    * @date 2011-03-07 15:22:11.897153
    */
-  class DLLExport LoadIsawPeaks  : public API::IDataFileChecker
+  class DLLExport LoadIsawPeaks  : public API::IFileLoader
   {
   public:
     LoadIsawPeaks();
@@ -30,10 +29,8 @@ namespace Crystal
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Crystal;DataHandling\\Isaw";}
 
-    /// do a quick check that this file can be loaded
-    bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-    /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-    int fileCheck(const std::string& filePath);
+    /// Returns a confidence value that this algorithm can load a file
+    virtual int confidence(Kernel::FileDescriptor & descriptor) const;
     
   private:
     /// Sets documentation strings for this algorithm

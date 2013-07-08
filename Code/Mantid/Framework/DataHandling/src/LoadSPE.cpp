@@ -11,10 +11,10 @@ The workspace will have X units of [[Unit_Factory|Energy transfer]]. The other a
 #include "MantidDataHandling/LoadSPE.h"
 #include "MantidDataHandling/SaveSPE.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidKernel/UnitFactory.h"
 #include <cstdio>
 #include <limits>
 #include <fstream>
@@ -27,11 +27,42 @@ namespace DataHandling
 using namespace Kernel;
 using namespace API;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadSPE)
+DECLARE_FILELOADER_ALGORITHM(LoadSPE);
 
-//register the algorithm into loadalgorithm factory
-DECLARE_LOADALGORITHM(LoadSPE)
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadSPE::confidence(Kernel::FileDescriptor & descriptor) const
+{
+  if(!descriptor.isAscii()) return 0;
+
+  auto &file = descriptor.data();
+
+  std::string fileline;
+  // First line - expected to be a line 2 columns which is  histogram  & bin numbers
+  std::getline(file,fileline);
+  std::istringstream is(fileline);
+  unsigned int dummy(0);
+  is >> dummy >> dummy;
+  if(is.fail())
+  {
+    return 0; // Couldn't read 2 numbers so fail
+  }
+  // Trying to read another should produce eof
+  is >> dummy;
+  if(!is.eof()) return 0;
+
+  // Next line should be comment line: "### Phi Grid" or "### Q Grid"
+  std::getline(file,fileline);
+  if(fileline.find("Phi Grid") != std::string::npos || fileline.find("Q Grid") != std::string::npos )
+  {
+    return 80;
+  }
+  else return 0;
+}
+
 
 /// Sets documentation strings for this algorithm
 void LoadSPE::initDocs()
@@ -226,79 +257,6 @@ void LoadSPE::reportFormatError(const std::string& what)
   g_log.error("Unexpected formatting in file " + m_filename + " : " + what);
   throw Exception::FileError("Unexpected formatting in file: " , m_filename);
 }
-
-/**This method does a quick file check by checking the no.of bytes read nread params and header buffer
- *  @param filePath- path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
- */
-bool LoadSPE::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-{
-  std::string extn=extension(filePath);
-  bool bspe(false);
-  (!extn.compare("spe"))?bspe=true:bspe=false;
-  bool is_ascii (true);
-  for(size_t i=0; i<nread; i++)
-  {
-    if (!isascii(header.full_hdr[i]))
-      is_ascii =false;
-  }
-  return(is_ascii|| bspe?true:false);
-}
-
-/**checks the file by opening it and reading few lines 
- * @param filePath :: name of the file inluding its path
- * @return an integer value how much this algorithm can load the file 
- */
-int LoadSPE::fileCheck(const std::string& filePath)
-{  
-  std::ifstream file(filePath.c_str());
-  if (!file)
-  {
-    g_log.error("Unable to open file: " + filePath);
-    throw Exception::FileError("Unable to open file: " , filePath);
-  }
-  std::string fileline;
-  //read first line
-  getline(file,fileline);
-  boost::char_separator<char> sep(" ");
-  int ncols=0;
-  bool isnumeric(false);
-  bool b(true);
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-  tokenizer tok(fileline,sep);
-  //in the spe file first line is expecetd to be a line 2 colomns which is  histogram  & bin numbers
-  for (tokenizer::iterator beg=tok.begin();beg!=tok.end();++beg)
-  {
-    ++ncols;
-    std::stringstream stream(*beg);
-    unsigned int hist_bin;
-    stream>>hist_bin;
-    b=b&&(!stream.fail());
-    
-  }
-  isnumeric =b;
-  bool bspe(false); 
-  //if the first line has two numeric data columns
-  if(ncols==2 && isnumeric)
-  {
-   bspe=true;
-  }
-  // Next line should be comment line: "### Phi Grid" or "### Q Grid"
-  std::string commentline;
-  getline(file,commentline);
-  if(commentline.find("Phi Grid")!=std::string::npos|| commentline.find("Q Grid")!=std::string::npos )
-  {
-   if(bspe)
-   {
-     return 80;
-   }
-  }
- 
-  return 0;
-}
-
 
 } // namespace DataHandling
 } // namespace Mantid

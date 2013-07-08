@@ -2,8 +2,7 @@
 #define MANTID_DATAHANDLING_LOADLLB_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IHDFFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid
@@ -33,7 +32,7 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadLLB: public API::IDataFileChecker  {
+class DLLExport LoadLLB: public API::IHDFFileLoader  {
 public:
 	LoadLLB();
 	virtual ~LoadLLB();
@@ -41,18 +40,16 @@ public:
 	virtual const std::string name() const;
 	virtual int version() const;
 	virtual const std::string category() const;
-	///checks the file can be loaded by reading 1st 100 bytes and looking at the file extension.
-	bool quickFileCheck(const std::string& filePath, size_t nread,
-			const file_header& header);
-	/// check the structure of the file and if this file can be loaded return a value between 1 and 100
-	int fileCheck(const std::string& filePath);
+
+    /// Returns a confidence value that this algorithm can load a file
+    virtual int confidence(Kernel::HDFDescriptor & descriptor) const;
 
 private:
 	virtual void initDocs();
 	void init();
 	void exec();
 	void setInstrumentName(NeXus::NXEntry& entry);
-	std::string getInstrumentName(NeXus::NXEntry& entry);
+	std::string getInstrumentName(NeXus::NXEntry& entry) const;
 	void initWorkSpace(NeXus::NXEntry&);
 	void loadTimeDetails(NeXus::NXEntry& entry);
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry&);
@@ -71,7 +68,6 @@ private:
 	void runLoadInstrument();
 
 	std::vector<std::string> supportedInstruments;
-	std::string m_nexusInstrumentEntryName;
 	std::string m_instrumentName;
 	API::MatrixWorkspace_sptr m_localWorkspace;
 	size_t m_numberOfTubes; // number of tubes - X
