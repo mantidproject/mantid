@@ -19,7 +19,6 @@ For more information about McStas and its general usage for simulating neutron s
 
 
 #include "MantidDataHandling/LoadMcStasEventNexus.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -31,38 +30,8 @@ For more information about McStas and its general usage for simulating neutron s
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-
-#include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/FunctionTask.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ThreadSchedulerMutexes.h"
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-
 #include "MantidAPI/RegisterFileLoader.h"
-
-#include <fstream>
-#include <sstream>
-#include <climits>
-#include <boost/algorithm/string/replace.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/CPUTimer.h"
-
-#include <boost/algorithm/string.hpp>
 
 namespace Mantid
 {
@@ -70,12 +39,9 @@ namespace DataHandling
 {
   using namespace Kernel;
   using namespace API;
-
-  using namespace Mantid::Geometry;
-  using namespace Mantid::DataObjects;
+  using namespace DataObjects;
 
   // Register the algorithm into the AlgorithmFactory
-  //DECLARE_ALGORITHM(LoadMcStasEventNexus);
   DECLARE_HDF_FILELOADER_ALGORITHM(LoadMcStasEventNexus);
 
 
