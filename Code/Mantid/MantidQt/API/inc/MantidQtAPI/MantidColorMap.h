@@ -53,6 +53,8 @@ public:
 
   void setupDefaultMap();
   
+  void buildColorMap(std::string);
+
   QRgb rgb(const QwtDoubleInterval & interval, double value) const;
 
   double normalize(const QwtDoubleInterval &interval, double value) const;

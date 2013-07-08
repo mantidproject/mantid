@@ -179,7 +179,7 @@ void MantidColorMap::setNanColor(int r, int g, int b)
  */
 void MantidColorMap::setupDefaultMap()
 {
-  // The coldfire map distrubuted with qtiplot is the default and putting this into a string with an @ separator was the
+  // The __standard map distrubuted with qtiplot is the default and putting this into a string with an @ separator was the
   // easiest way to construct it as it doesn't have a regular pattern so a loop wouldn't work.
   std::string colorstring = 
     "0 172 252@0 170 252@0 168 252@0 164 252@0 160 252@0 156 252@0 152 252@0 152 252@0 148 252@0 144 252@0 140 252@0 136 252"
@@ -218,7 +218,7 @@ void MantidColorMap::setupDefaultMap()
     std::stringstream reader(line);
     reader >> red >> green >> blue;
     m_colors.push_back(qRgb((unsigned char)(red), (unsigned char)green, (unsigned char)blue));
-  }  
+  }
   this->setNanColor(255,255,255);
 }
 
