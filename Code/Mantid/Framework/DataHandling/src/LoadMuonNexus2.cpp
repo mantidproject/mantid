@@ -52,7 +52,7 @@ Version 1 supports the loading version 1.0 of the muon nexus format.  This is st
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -74,8 +74,7 @@ namespace Mantid
   namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadMuonNexus2)
-    DECLARE_LOADALGORITHM(LoadMuonNexus2)
+    DECLARE_HDF_FILELOADER_ALGORITHM(LoadMuonNexus2);
 
     using namespace Kernel;
     using namespace API;
@@ -104,8 +103,9 @@ namespace Mantid
       std::string filePath = getPropertyValue("Filename");
       LoadMuonNexus1 load1; load1.initialize();
 
-      int confidence1 = load1.fileCheck( filePath );
-      int confidence2 = this->fileCheck( filePath );
+      Kernel::HDFDescriptor descriptor(filePath);
+      int confidence1 = load1.confidence(descriptor);
+      int confidence2 = this->confidence(descriptor);
 
       // if none can load the file throw
       if ( confidence1 < 80 && confidence2 < 80)
@@ -483,26 +483,39 @@ namespace Mantid
       }
     }
 
-    /**checks the file by opening it and reading few lines 
-    *  @param filePath :: name of the file inluding its path
-    *  @return an integer value how much this algorithm can load the file 
-    */
-    int LoadMuonNexus2::fileCheck(const std::string& filePath)
-    {   
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadMuonNexus2::confidence(Kernel::HDFDescriptor & descriptor) const
+    {
+      const auto & firstEntryNameType = descriptor.firstEntryNameType();
+      const std::string root = "/" + firstEntryNameType.first;
+      if(!descriptor.pathExists(root + "/definition")) return 0;
+
+      bool upperIDF(true);
+      if(descriptor.pathExists(root + "/IDF_version")) upperIDF = true;
+      else
+      {
+        if(descriptor.pathExists(root + "/idf_version")) upperIDF = false;
+        else return 0;
+      }
+
       try
       {
-        NXRoot root(filePath);
-        NXEntry entry = root.openFirstEntry();
-        if ( ! entry.containsDataSet( "definition" ) ) return 0;
-        std::string versionField = "IDF_version";
-        if ( ! entry.containsDataSet( versionField ) )
-        {
-          versionField = "idf_version";
-          if ( ! entry.containsDataSet( versionField ) ) return 0;
-        }
-        if ( entry.getInt( versionField ) != 2 ) return 0;
-        std::string definition = entry.getString( "definition" );
-        if ( definition == "muonTD" || definition == "pulsedTD" )
+        std::string versionField = "idf_version";
+        if(upperIDF) versionField = "IDF_version";
+
+        auto &file = descriptor.data();
+        file.openPath(root + "/" + versionField);
+        int32_t version = 0;
+        file.getData(&version);
+        if ( version != 2 ) return 0;
+
+        file.openPath(root + "/definition");
+        std::string def = file.getStrData();
+        if ( def == "muonTD" || def == "pulsedTD" )
         {
           // If all this succeeded then we'll assume this is an ISIS Muon NeXus file version 2
           return 81;

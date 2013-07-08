@@ -61,9 +61,6 @@ namespace Mantid
       virtual int version() const;
 	  /// category
 	  virtual const std::string category() const { return "Deprecated"; }
-
-      int fileCheck(const std::string& filePath);
-
     };
 
   } // namespace DataHandling

@@ -17,7 +17,7 @@ Loads a Nexus file created from an ISIS instrument.
 #include "MantidKernel/UnitFactory.h"
 
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include "MantidGeometry/Instrument/Detector.h"
@@ -43,9 +43,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadISISNexus2)
-    DECLARE_LOADALGORITHM(LoadISISNexus2)
+    DECLARE_HDF_FILELOADER_ALGORITHM(LoadISISNexus2);
     
     using namespace Kernel;
     using namespace API;
@@ -60,6 +58,17 @@ namespace Mantid
     m_entrynumber(0), m_range_supplied(true), m_tof_data(), m_proton_charge(0.),
     m_spec(), m_monitors(), m_logCreator(), m_progress()
     {}
+
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadISISNexus2::confidence(Kernel::HDFDescriptor & descriptor) const
+    {
+      if(descriptor.pathOfTypeExists("/raw_data_1","NXentry")) return 80;
+      return 0;
+    }
 
     /// Initialisation method.
     void LoadISISNexus2::init()
@@ -854,54 +863,5 @@ namespace Mantid
       return sqrt(in);
     }
 
- /**This method does a quick file type check by looking at the first 100 bytes of the file 
-    *  @param filePath- path of the file including name.
-    *  @param nread :: no.of bytes read
-    *  @param header :: The first 100 bytes of the file as a union
-    *  @return true if the given file is of type which can be loaded by this algorithm
-    */
-    bool LoadISISNexus2::quickFileCheck(const std::string& filePath, size_t nread,const file_header& header)
-    {
-      std::string extn=extension(filePath);
-      bool bnexs(false);
-      (!extn.compare("nxs")||!extn.compare("nx5"))?bnexs=true:bnexs=false;
-      /*
-      * HDF files have magic cookie in the first 4 bytes
-      */
-      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs )
-      {
-        //hdf
-        return true;
-      }
-      else if ( (nread >= sizeof(g_hdf5_signature)) && 
-                (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
-      { 
-        //hdf5
-        return true;
-      }
-      return false;
-    }
-     /**checks the file by opening it and reading few lines 
-    *  @param filePath :: name of the file inluding its path
-    *  @return an integer value how much this algorithm can load the file 
-    */
-    int LoadISISNexus2::fileCheck(const std::string& filePath)
-    {
-      using namespace ::NeXus;
-
-      int confidence(0);
-      try
-      {
-        ::NeXus::File file = ::NeXus::File(filePath);
-        // Open the base group called 'entry'
-        file.openGroup("raw_data_1", "NXentry");
-        // If all this succeeded then we'll assume this is an ISIS NeXus file
-        confidence = 80;
-      }
-      catch(::NeXus::Exception&)
-      {
-      }
-      return confidence;
-    }
   } // namespace DataHandling
 } // namespace Mantid

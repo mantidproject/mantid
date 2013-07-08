@@ -8,10 +8,10 @@
 
 #include "MantidDataHandling/LoadSINQ.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/UnitFactory.h"
 
 #include <limits>
 #include <algorithm>
@@ -26,10 +26,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadSINQ)
-//register the algorithm into loadalgorithm factory
-DECLARE_LOADALGORITHM(LoadSINQ)
+DECLARE_HDF_FILELOADER_ALGORITHM(LoadSINQ);
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -70,44 +67,20 @@ void LoadSINQ::initDocs() {
 	this->setOptionalMessage("Loads PSI nexus file.");
 }
 
-bool LoadSINQ::quickFileCheck(const std::string& filePath, size_t nread,
-		const file_header& header) {
-	std::string extn = extension(filePath);
-	bool bnexs(false);
-	(!extn.compare("nxs") || !extn.compare("nx5")) ? bnexs = true : bnexs =
-																false;
-	/*
-	 * HDF files have magic cookie in the first 4 bytes
-	 */
-	if (((nread >= sizeof(unsigned))
-			&& (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs) {
-		//hdf
-		return true;
-	} else if ((nread >= sizeof(g_hdf5_signature))
-			&& (!memcmp(header.full_hdr, g_hdf5_signature,
-					sizeof(g_hdf5_signature)))) {
-		//hdf5
-		return true;
-	}
-	return false;
-}
-
 /**
- * Checks the file by opening it and reading few lines
- * @param filePath :: name of the file inluding its path
- * @return an integer value how much this algorithm can load the file
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadSINQ::fileCheck(const std::string& filePath) {
-	// Create the root Nexus class
-	NXRoot root(filePath);
-	NXEntry entry = root.openFirstEntry();
-	std::string instrumentName = getInstrumentName(entry);
-	if (std::find(supportedInstruments.begin(), supportedInstruments.end(),
-			instrumentName) != supportedInstruments.end()) {
-		// FOUND
-		return 80;
-	}
-	return 0;
+int LoadSINQ::confidence(Kernel::HDFDescriptor & descriptor) const
+{
+  const std::string root =  "/" + descriptor.firstEntryNameType().first + "/";
+  for(auto it = supportedInstruments.begin(); it != supportedInstruments.end() ; ++it)
+  {
+    if(descriptor.pathExists(root + *it)) return 80;
+  }
+
+  return 0;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -148,7 +121,7 @@ void LoadSINQ::exec() {
 
 void LoadSINQ::setInstrumentName(NeXus::NXEntry& entry) {
 
-	m_instrumentName = getInstrumentName(entry);
+	m_instrumentName = getInstrumentName(entry,m_nexusInstrumentEntryName);
 	if (m_instrumentName == "") {
 		std::string message(
 				"Cannot read the instrument name from the Nexus file!");
@@ -158,7 +131,7 @@ void LoadSINQ::setInstrumentName(NeXus::NXEntry& entry) {
 
 }
 
-std::string LoadSINQ::getInstrumentName(NeXus::NXEntry& entry) {
+std::string LoadSINQ::getInstrumentName(NeXus::NXEntry& entry, std::string &nexusInstrumentName) const {
 
 	// format: /entry0/?????/name
 
@@ -167,8 +140,8 @@ std::string LoadSINQ::getInstrumentName(NeXus::NXEntry& entry) {
 	std::vector<NXClassInfo> v = entry.groups();
 	for (auto it = v.begin(); it < v.end(); it++) {
 		if (it->nxclass == "NXinstrument") {
-			m_nexusInstrumentEntryName = it->nxname;
-			std::string insNamePath = m_nexusInstrumentEntryName + "/name";
+		  nexusInstrumentName = it->nxname;
+		  std::string insNamePath = nexusInstrumentName + "/name";
 			if ( !entry.isValid(insNamePath) )
 				throw std::runtime_error("Error reading the instrument name: " + insNamePath + " is not a valid path!");
 			instrumentName = entry.getString(insNamePath);

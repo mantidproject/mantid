@@ -91,13 +91,13 @@ public:
 };
 
 
-class WorkspaceAlgorithm : public Algorithm
+class StubbedWorkspaceAlgorithm : public Algorithm
 {
 public:
-  WorkspaceAlgorithm() : Algorithm() {}
-  virtual ~WorkspaceAlgorithm() {}
+  StubbedWorkspaceAlgorithm() : Algorithm() {}
+  virtual ~StubbedWorkspaceAlgorithm() {}
 
-  const std::string name() const { return "WorkspaceAlgorithm";}
+  const std::string name() const { return "StubbedWorkspaceAlgorithm";}
   int version() const  { return 1;}
   const std::string category() const { return "Cat;Leopard;Mink";}
   void init()
@@ -127,17 +127,17 @@ public:
     setProperty("OutputWorkspace2", out2);
   }
 };
-DECLARE_ALGORITHM( WorkspaceAlgorithm)
+DECLARE_ALGORITHM( StubbedWorkspaceAlgorithm)
 
 
-class WorkspaceAlgorithm2 : public Algorithm
+class StubbedWorkspaceAlgorithm2 : public Algorithm
 {
 public:
-  WorkspaceAlgorithm2() : Algorithm() {}
-  virtual ~WorkspaceAlgorithm2() {}
+  StubbedWorkspaceAlgorithm2() : Algorithm() {}
+  virtual ~StubbedWorkspaceAlgorithm2() {}
 
-  const std::string name() const { return "WorkspaceAlgorithm2";}
-  int version() const  { return 1;}
+  const std::string name() const { return "StubbedWorkspaceAlgorithm2";}
+  int version() const  { return 2;}
   const std::string category() const { return "Cat;Leopard;Mink";}
   void init()
   {
@@ -148,14 +148,14 @@ public:
   {
   }
 };
-DECLARE_ALGORITHM(WorkspaceAlgorithm2)
+DECLARE_ALGORITHM(StubbedWorkspaceAlgorithm2)
 
 class AlgorithmWithValidateInputs : public Algorithm
 {
 public:
   AlgorithmWithValidateInputs() : Algorithm() {}
   virtual ~AlgorithmWithValidateInputs() {}
-  const std::string name() const { return "WorkspaceAlgorithm2";}
+  const std::string name() const { return "StubbedWorkspaceAlgorithm2";}
   int version() const  { return 1;}
   const std::string category() const { return "Cat;Leopard;Mink";}
   void init()
@@ -500,7 +500,7 @@ public:
       boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i), ws);
     }
-    WorkspaceAlgorithm alg;
+    StubbedWorkspaceAlgorithm alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace1", in1);
     alg.setPropertyValue("InputWorkspace2", in2);
@@ -542,7 +542,7 @@ public:
       // Get a write lock.
       WriteLock _lock(*ws1);
       // The algorithm would hang waiting for the write-lock to release if the property were locking.
-      WorkspaceAlgorithm2 alg;
+      StubbedWorkspaceAlgorithm2 alg;
       alg.initialize();
       alg.setPropertyValue("NonLockingInputWorkspace", "ws1");
       alg.execute();
@@ -552,7 +552,7 @@ public:
       // Acquire a scoped read-lock on ws1.
       ReadLock _lock(*ws1);
       // The algo would lock up when trying to WRITE-lock the workspace again
-      WorkspaceAlgorithm2 alg;
+      StubbedWorkspaceAlgorithm2 alg;
       alg.initialize();
       alg.setPropertyValue("NonLockingOutputWorkspace", "ws1");
       alg.execute();
@@ -608,7 +608,7 @@ public:
     makeWorkspaceGroup(group2, contents2);
     makeWorkspaceGroup(group3, contents3);
 
-    WorkspaceAlgorithm alg;
+    StubbedWorkspaceAlgorithm alg;
     alg.initialize();
     alg.setPropertyValue("InputWorkspace1", group1);
     alg.setPropertyValue("InputWorkspace2", group2);

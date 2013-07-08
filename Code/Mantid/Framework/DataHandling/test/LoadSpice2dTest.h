@@ -29,6 +29,17 @@ public:
   {
      inputFile = "BioSANS_exp61_scan0004_0001.xml";
   }
+
+  void testConfidence()
+  {
+    Mantid::DataHandling::LoadSpice2D loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", inputFile);
+
+    Mantid::Kernel::FileDescriptor descriptor(loader.getPropertyValue("Filename"));
+    TS_ASSERT_EQUALS(80, loader.confidence(descriptor));
+  }
+
   void testInit()
   {
     TS_ASSERT_THROWS_NOTHING( spice2d.initialize());

@@ -4,9 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/IDataFileChecker.h"
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
 //----------------------------------------------------------------------
@@ -54,7 +53,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class DLLExport LoadCanSAS1D : public API::IDataFileChecker
+    class DLLExport LoadCanSAS1D : public API::IFileLoader
     {
     public:
       ///default constructor
@@ -68,10 +67,8 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\XML"; }
 
-       /// do a quick check that this file can be loaded 
-      virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-      virtual int fileCheck(const std::string& filePath);
+      /// Returns a confidence value that this algorithm can load a file
+      virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
     protected:
       /// Sets documentation strings for this algorithm

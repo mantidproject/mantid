@@ -108,7 +108,7 @@ public:
   void testVersionFail()
   {
     const size_t nalgs = AlgorithmFactory::Instance().getKeys().size();
-    TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<AlgTestFail>());
+    TS_ASSERT_THROWS(AlgorithmFactory::Instance().subscribe<AlgTestFail>(), std::runtime_error);
     // Size should be the same
     TS_ASSERT_EQUALS(AlgorithmFactory::Instance().getKeys().size(), nalgs);
   }
