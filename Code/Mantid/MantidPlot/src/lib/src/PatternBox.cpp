@@ -46,8 +46,7 @@ const Qt::BrushStyle PatternBox::patterns[] = {
     Qt::Dense4Pattern,
     Qt::Dense5Pattern,
     Qt::Dense6Pattern,
-    Qt::Dense7Pattern,
-    Qt::NoBrush
+    Qt::Dense7Pattern
 };
 
 PatternBox::PatternBox(QWidget *parent) : QComboBox(parent)
@@ -144,10 +143,6 @@ void PatternBox::init()
   p.fillRect(r, br);
   p.drawRect(r);
   this->addItem(icon, tr( "Dense7" ) );
-
-  p.eraseRect(r);
-  p.drawRect(r);
-  this->addItem(icon, tr( "None" ) );
   p.end();
 }
 
@@ -163,12 +158,7 @@ void PatternBox::setPattern(const Qt::BrushStyle& style)
       return;
     }
   }
-  setCurrentIndex(14); // default pattern is none.
-//  const Qt::BrushStyle*ite = std::find(patterns, patterns + sizeof(patterns), style);
-//  if (ite == patterns + sizeof(patterns))
-//    this->setCurrentIndex(14); // default pattern is none.
-//  else
-//    this->setCurrentIndex(int(ite - patterns));
+  setCurrentIndex(0); // default pattern is solid.
 }
 
 Qt::BrushStyle PatternBox::brushStyle(int index)
@@ -176,7 +166,7 @@ Qt::BrushStyle PatternBox::brushStyle(int index)
   if (index < (int)sizeof(patterns))
     return patterns[index];
   else
-    return Qt::NoBrush; // default patterns is none. 
+    return Qt::SolidPattern; // default patterns is solid.
 }
 
 Qt::BrushStyle PatternBox::getSelectedPattern() const
@@ -185,7 +175,7 @@ Qt::BrushStyle PatternBox::getSelectedPattern() const
   if (i < sizeof(patterns))
     return patterns[i];
   else
-    return Qt::NoBrush; // default patterns is none. 
+    return Qt::SolidPattern; // default patterns is solid.
 }
 
 int PatternBox::patternIndex(const Qt::BrushStyle& style)
@@ -199,10 +189,5 @@ int PatternBox::patternIndex(const Qt::BrushStyle& style)
       return int(i);
     }
   }
-  return 14; // default pattern is none.
-//  const Qt::BrushStyle*ite = std::find(patterns, patterns + sizeof(patterns), style);
-//  if (ite == patterns + sizeof(patterns))
-//    return 14; // default pattern is none.
-//  else
-//    return (int(ite - patterns));
+  return 0; // default pattern is solid.
 }

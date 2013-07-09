@@ -2142,7 +2142,6 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
     fillGroupBox->setChecked(c->brush().style() != Qt::NoBrush );
     fillGroupBox->blockSignals(false);
     boxAreaColor->setColor(c->brush().color());
-    boxPattern->setPattern(c->brush().style());
 
     //symbol page
     const QwtSymbol s = c->symbol();
