@@ -21,7 +21,8 @@ class CubicSplineTest: public CxxTest::TestSuite
 {
 public:
 
-  void testSetNAttribute() {
+  void testSetNAttribute()
+  {
     CubicSpline cspline;
 
     //cspline created with 3 attributes
@@ -33,9 +34,9 @@ public:
     TS_ASSERT(cspline.getAttribute("n").asInt() == 10);
 
     //Check that resizing the spline has initialised the attributes/parameters
-    for(int i = 0; i < 10; ++i)
+    for (int i = 0; i < 10; ++i)
     {
-      std::string index =  boost::lexical_cast<std::string>(i);
+      std::string index = boost::lexical_cast<std::string>(i);
 
       std::string xAttrName = "x" + index;
       std::string yAttrName = "y" + index;
@@ -50,15 +51,13 @@ public:
     CubicSpline cspline;
 
     //cubic splines must have at least 3 points
-    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 2),
-        std::invalid_argument);
+    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 2), std::invalid_argument);
 
     //set the number of points to something sensible
     cspline.setAttributeValue("n", 5);
 
     //attempt to make it smaller than it already is
-    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 4),
-        std::invalid_argument);
+    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 4), std::invalid_argument);
 
     size_t oldAttrN = cspline.nAttributes();
 
@@ -75,12 +74,12 @@ public:
     //setup x and y  values
     cspline.setAttributeValue("n", 10);
 
-    for(int i = 0; i< 10; ++i)
+    for (int i = 0; i < 10; ++i)
     {
       //set the x values to be some arbitary value
-      cspline.setXAttribute(i,i*2);
+      cspline.setXAttribute(i, i * 2);
 
-      std::string index =  boost::lexical_cast<std::string>(i);
+      std::string index = boost::lexical_cast<std::string>(i);
       std::string xAttrName = "x" + index;
 
       //check x value is equal to what we set
@@ -94,11 +93,9 @@ public:
     CubicSpline cspline;
 
     //check that an invalid index throws errors
-    TS_ASSERT_THROWS(cspline.setXAttribute(4, 0),
-        std::range_error);
+    TS_ASSERT_THROWS(cspline.setXAttribute(4, 0), std::range_error);
 
-    TS_ASSERT_THROWS(cspline.setXAttribute(-1, 4),
-        std::range_error);
+    TS_ASSERT_THROWS(cspline.setXAttribute(-1, 4), std::range_error);
   }
 
   void testKnownInterpolationValues()
@@ -171,7 +168,7 @@ private:
   //function which we wish to use to generate our corresponding y data
   double splineYFunction(double x)
   {
-    return sin((2 * M_PI / 18) * x) +1;
+    return sin((2 * M_PI / 18) * x) + 1;
   }
 
   //setup a CubicSpline class for testing
@@ -182,8 +179,8 @@ private:
     //calculate a reference set to check against
     for (int i = 0; i < nData; ++i)
     {
-      cspline.setXAttribute(i, i*xModify);
-      cspline.setParameter(static_cast<size_t>(i), splineYFunction(i*xModify));
+      cspline.setXAttribute(i, i * xModify);
+      cspline.setParameter(static_cast<size_t>(i), splineYFunction(i * xModify));
     }
   }
 

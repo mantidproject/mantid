@@ -7,6 +7,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/FunctionDomain1D.h"
 #include "MantidCurveFitting/CubicSpline.h"
 #include "MantidAPI/FunctionFactory.h"
 
@@ -27,19 +28,20 @@ namespace Mantid
 
     const int CubicSpline::M_MIN_POINTS = 3;
 
-    CubicSpline::CubicSpline()
-      : m_acc(gsl_interp_accel_alloc()),
-        m_spline(gsl_spline_alloc(gsl_interp_cspline, M_MIN_POINTS))
+    CubicSpline::CubicSpline() :
+        m_acc(gsl_interp_accel_alloc()),
+        m_spline(gsl_spline_alloc(gsl_interp_cspline, M_MIN_POINTS)),
+        m_interp(gsl_interp_alloc(gsl_interp_cspline, M_MIN_POINTS)),
+        m_recalculateSpline(true),
+        m_recalculateDeriv(true)
     {
-      //set the number of attributes to the default
+      //setup class with a default set of attributes
       declareAttribute("n", Attribute(M_MIN_POINTS));
 
-      //init some default x values
       declareAttribute("x0", Attribute(0.0));
       declareAttribute("x1", Attribute(1.0));
       declareAttribute("x2", Attribute(2.0));
 
-      //declare corresponding y values with value 0
       declareParameter("y0", 0);
       declareParameter("y1", 0);
       declareParameter("y2", 0);
@@ -47,17 +49,29 @@ namespace Mantid
 
     void CubicSpline::function1D(double* out, const double* xValues, const size_t nData) const
     {
-      //get the number of parameters constraining the spline
-      int n = getAttribute("n").asInt();
+      //check if spline needs recalculating
+      if (m_recalculateSpline)
+      {
+        int n = getAttribute("n").asInt();
 
-      //Vectors to store the parameters/attributes
-      std::vector<double> x(n);
-      std::vector<double> y(n);
+        double x[n];
+        double y[n];
 
-      //Get the cached attributes/parameters
+        //setup the reference points and calculate
+        setupInput(x, y, n);
+        calculateSpline(out, xValues, nData);
+
+        m_recalculateSpline = false;
+      }
+    }
+
+    void CubicSpline::setupInput(double* x, double* y, const int n) const
+    {
+      //Populate data points from the input attributes and parameters
       for (int i = 0; i < n; ++i)
       {
         std::string num = boost::lexical_cast<std::string>(i);
+
         std::string xName = "x" + num;
         std::string yName = "y" + num;
 
@@ -65,34 +79,112 @@ namespace Mantid
         y[i] = getParameter(yName);
       }
 
-      //Calculate y from spline for each desired point
-      gsl_spline_init(m_spline, x.data(), y.data(), n);
+      //init the gsl structures as required
+      if(m_recalculateSpline)
+      {
+        gsl_spline_init(m_spline, x, y, n);
+      }
+
+      if(m_recalculateDeriv)
+      {
+        gsl_interp_init(m_interp, x, y, n);
+      }
+    }
+
+    void CubicSpline::derivative(const API::FunctionDomain& domain, API::FunctionValues& values,
+        const size_t order) const
+    {
+      const API::FunctionDomain1D* data = dynamic_cast<const API::FunctionDomain1D*>(&domain);
+
+      //check if the cast was unsuccessful
+      if (data == NULL)
+      {
+        throw std::invalid_argument("CubicSpline: only accepts 1D data set.");
+      }
+      else
+      {
+        //check if a recalculating is needed
+        if(m_recalculateDeriv)
+        {
+          int n = getAttribute("n").asInt();
+
+          double x[n];
+          double y[n];
+
+          //setup the reference points and calculate
+          setupInput(x,y,n);
+          calculateDerivative(x,y,data,values, order);
+
+          m_recalculateDeriv = false;
+        }
+      }
+    }
+
+    void CubicSpline::calculateSpline(double* out, const double* xValues, const size_t nData) const
+    {
+      //calculate spline for given input set
       for (size_t i = 0; i < nData; ++i)
       {
         out[i] = gsl_spline_eval(m_spline, xValues[i], m_acc);
       }
     }
 
+    void CubicSpline::calculateDerivative(const double* x, const double* y,
+        const API::FunctionDomain1D* domain, API::FunctionValues& values,
+           const size_t order) const
+    {
+      double x_deriv = 0;
+
+      for(size_t i = 0; i < domain->size(); ++i)
+      {
+        //choose the order of the derivative
+        if(order == 1)
+        {
+          x_deriv = gsl_interp_eval_deriv(m_interp,x,y,(*domain)[i],m_acc);
+          values.setCalculated(i, x_deriv);
+        }
+        else if (order == 2)
+        {
+          x_deriv = gsl_interp_eval_deriv2(m_interp,x,y,(*domain)[i],m_acc);
+          values.setCalculated(i, x_deriv);
+        }
+        else
+        {
+          //throw error if the order is not the 1st or 2nd derivative
+          throw std::invalid_argument("CubicSpline: order of derivative must be either 1 or 2");
+        }
+      }
+    }
+
+    void CubicSpline::setParameter(size_t i, const double& value, bool explicitlySet)
+    {
+      //Call parent setParameter implementation
+      ParamFunction::setParameter(i, value, explicitlySet);
+
+      //recalculate if necessary
+      m_recalculateSpline = true;
+      m_recalculateDeriv = true;
+    }
+
     void CubicSpline::setAttribute(const std::string& attName, const API::IFunction::Attribute& att)
     {
-      //set the number of data points that define the spline
       if (attName == "n")
       {
-        //get current and new number of data points
+        //get the new and old number of data points
         int n = att.asInt();
         int oldN = getAttribute("n").asInt();
 
-        //check if the new n is valid
+        //check that the number of data points is in a valid range
         if (n > oldN)
         {
-          //get the current highest x attribute
-          std::string oldXName = "x" + boost::lexical_cast<std::string>(oldN-1);
+          //get the name of the last x data point
+          std::string oldXName = "x" + boost::lexical_cast<std::string>(oldN - 1);
           double oldX = getAttribute(oldXName).asDouble();
 
-          //resize the spline object
-          realloc_spline(n);
+          //reallocate gsl object to new size
+          realloc_gsl_objects(n);
 
-          //create and initialise new attributes + parameters
+          //create blank a number of new blank parameters and attributes
           for (int i = oldN; i < n; ++i)
           {
             std::string num = boost::lexical_cast<std::string>(i);
@@ -100,11 +192,15 @@ namespace Mantid
             std::string newXName = "x" + num;
             std::string newYName = "y" + num;
 
-            declareAttribute(newXName, Attribute(oldX + static_cast<double>(i - oldN+1)));
+            declareAttribute(newXName, Attribute(oldX + static_cast<double>(i - oldN + 1)));
             declareParameter(newYName, 0);
           }
+
+          //flag that the spline+derivatives will now need to be recalculated
+          m_recalculateSpline = true;
+          m_recalculateDeriv = true;
         }
-        else if(n < oldN)
+        else if (n < oldN)
         {
           throw std::invalid_argument("Cubic Spline: Can't decrease the number of attributes");
         }
@@ -115,15 +211,17 @@ namespace Mantid
 
     void CubicSpline::setXAttribute(const size_t index, double x)
     {
-      //get existing value of n
       size_t n = static_cast<size_t>(getAttribute("n").asInt());
 
-      //check indexed value in within range
-      if(index < n)
+      //check that setting the x attribute is within our range
+      if (index < n)
       {
-        //set the new value of the attribute
         std::string xName = "x" + boost::lexical_cast<std::string>(index);
         setAttributeValue(xName, x);
+
+        //attributes updated, flag for recalculation
+        m_recalculateSpline = true;
+        m_recalculateDeriv = true;
       }
       else
       {
@@ -131,17 +229,20 @@ namespace Mantid
       }
     }
 
-    void CubicSpline::realloc_spline(const int n)
+    void CubicSpline::realloc_gsl_objects(const int n)
     {
+      gsl_interp_free(m_interp);
       gsl_spline_free(m_spline);
+
       m_spline = gsl_spline_alloc(gsl_interp_cspline, n);
+      m_interp = gsl_interp_alloc(gsl_interp_cspline, n);
     }
 
     CubicSpline::~CubicSpline()
     {
       gsl_spline_free(m_spline);
+      gsl_interp_free(m_interp);
       gsl_interp_accel_free(m_acc);
     }
-
   } // namespace CurveFitting
 } // namespace Mantid

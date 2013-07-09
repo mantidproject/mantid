@@ -15,7 +15,7 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    Implements CubicSpline polynomial expansion.
+    Implements CubicSpline Interpolation.
 
     Attributes: int n - the highest polynomial order.
     Parameters: n+1 expansion coefficients \f$a_i\f$ as in expression:
@@ -23,7 +23,7 @@ namespace Mantid
 
     Uses the Clenshaw algorithm to evaluate the expansion.
 
-    @author Roman Tolchenov, Tessella inc
+    @author Samuel Jackson, STFC
     @date 14/05/2010
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -58,6 +58,9 @@ namespace Mantid
       std::string name()const{return "CubicSpline";}
       virtual const std::string category() const { return "Background";}
       void function1D(double* out, const double* xValues, const size_t nData)const;
+      void derivative(const API::FunctionDomain& domain, API::FunctionValues& values,
+          const size_t order) const;
+      void setParameter(size_t i, const double& value, bool explicitlySet);
 
       /// Set a value to attribute attName
       void setAttribute(const std::string& attName,const Attribute& );
@@ -66,15 +69,37 @@ namespace Mantid
       void setXAttribute(const size_t index, double x);
 
     private:
-      gsl_interp_accel *m_acc;
-      gsl_spline *m_spline;
+      /// GSL interpolation accelerator object
+      gsl_interp_accel* m_acc;
 
-      /// minimum number of data points in spline
+      /// GSL data structure used to calculate spline
+      gsl_spline* m_spline;
+
+      /// GSL data structure used to calculate derivatives
+      gsl_interp* m_interp;
+
+      /// Flag for checking if the spline needs recalculating
+      mutable bool m_recalculateSpline;
+
+      /// Flag for checking if the derivatives need recalculating
+      mutable bool m_recalculateDeriv;
+
+      /// Minimum number of data points in spline
       static const int M_MIN_POINTS;
 
-      ///reallocate the spline object to use n data points
-      void realloc_spline(const int n);
+      /// Reallocate the spline object to use n data points
+      void realloc_gsl_objects(const int n);
 
+      /// Method to setup the gsl function
+      void setupInput(double* x, double* y, const int n) const;
+
+      /// Calculate the spline
+      void calculateSpline(double* out, const double* xValues, const size_t nData) const;
+
+      /// Calculate the derivative
+      void calculateDerivative(const double* x, const double* y,
+          const API::FunctionDomain1D* domain, API::FunctionValues& values,
+            const size_t order) const;
     };
 
 
