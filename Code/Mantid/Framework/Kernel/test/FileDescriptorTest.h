@@ -61,7 +61,7 @@ public:
 
   void test_isAscii_Returns_True_For_Stream_Pointing_At_Ascii_File_And_Stream_Is_Returned_To_Position_On_Entry()
   {
-    std::ifstream is(m_testAsciiPath, std::ios::in|std::ios::binary);
+    std::ifstream is(m_testAsciiPath.c_str(), std::ios::in|std::ios::binary);
     // move stream along one to check it is returned to here
     is.seekg(1);
 
@@ -71,7 +71,7 @@ public:
 
   void test_isAscii_Returns_False_For_Stream_Pointing_At_Ascii_File_And_Stream_Is_Returned_To_Position_On_Entry()
   {
-    std::ifstream is(m_testNonNexusPath, std::ios::in|std::ios::binary);
+    std::ifstream is(m_testNonNexusPath.c_str(), std::ios::in|std::ios::binary);
     // move stream along one to check it is returned to here
     is.seekg(1);
 
