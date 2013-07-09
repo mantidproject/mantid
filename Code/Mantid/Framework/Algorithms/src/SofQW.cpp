@@ -94,7 +94,7 @@ void SofQW::createInputProperties(API::Algorithm & alg)
 void SofQW::exec()
 {
   using namespace Geometry;
-  double efixed;
+  double efixed(-1000.);
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   // Do the full check for common binning
