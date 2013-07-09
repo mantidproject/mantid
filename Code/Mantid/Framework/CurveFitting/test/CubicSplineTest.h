@@ -21,24 +21,100 @@ class CubicSplineTest: public CxxTest::TestSuite
 {
 public:
 
+  void testSetNAttribute() {
+    CubicSpline cspline;
+
+    //cspline created with 3 attributes
+    TS_ASSERT(cspline.getAttribute("n").asInt() == 3);
+
+    //resize to have 10 attributes
+    cspline.setAttributeValue("n", 10);
+
+    TS_ASSERT(cspline.getAttribute("n").asInt() == 10);
+
+    //Check that resizing the spline has initialised the attributes/parameters
+    for(int i = 0; i < 10; ++i)
+    {
+      std::string index =  boost::lexical_cast<std::string>(i);
+
+      std::string xAttrName = "x" + index;
+      std::string yAttrName = "y" + index;
+
+      TS_ASSERT_EQUALS(cspline.getAttribute(xAttrName).asDouble(), i);
+      TS_ASSERT_EQUALS(cspline.getParameter(yAttrName), 0);
+    }
+  }
+
+  void testSetNAttributeBoundary()
+  {
+    CubicSpline cspline;
+
+    //cubic splines must have at least 3 points
+    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 2),
+        std::invalid_argument);
+
+    //set the number of points to something sensible
+    cspline.setAttributeValue("n", 5);
+
+    //attempt to make it smaller than it already is
+    TS_ASSERT_THROWS(cspline.setAttributeValue("n", 4),
+        std::invalid_argument);
+
+    size_t oldAttrN = cspline.nAttributes();
+
+    //attempt to set the attribute to the same value doesn't
+    //change anything
+    TS_ASSERT_THROWS_NOTHING(cspline.setAttributeValue("n", 5));
+    TS_ASSERT_EQUALS(oldAttrN, cspline.nAttributes());
+  }
+
+  void testSetXAttributeValue()
+  {
+    CubicSpline cspline;
+
+    //setup x and y  values
+    cspline.setAttributeValue("n", 10);
+
+    for(int i = 0; i< 10; ++i)
+    {
+      //set the x values to be some arbitary value
+      cspline.setXAttribute(i,i*2);
+
+      std::string index =  boost::lexical_cast<std::string>(i);
+      std::string xAttrName = "x" + index;
+
+      //check x value is equal to what we set
+      TS_ASSERT_EQUALS(cspline.getAttribute(xAttrName).asDouble(), i*2);
+    }
+
+  }
+
+  void testSetXAttributeValueBoundary()
+  {
+    CubicSpline cspline;
+
+    //check that an invalid index throws errors
+    TS_ASSERT_THROWS(cspline.setXAttribute(4, 0),
+        std::range_error);
+
+    TS_ASSERT_THROWS(cspline.setXAttribute(-1, 4),
+        std::range_error);
+  }
+
   void testKnownInterpolationValues()
   {
     CubicSpline cspline;
 
-    int nData = 10;
-    int testDataSize = 10;
+    int nData = 10; //number of data points to fit too
 
-    double x[testDataSize];
-    double referenceSet[testDataSize];
+    double x[nData];
+    double referenceSet[nData];
 
-    setupCubicSpline(cspline, nData);
+    //setup spline with n data points seperated by 1
+    setupCubicSpline(cspline, nData, 1);
 
     //generate a set of test points
-    for (int i = 0; i < testDataSize; ++i)
-    {
-      x[i] = i;
-      referenceSet[i] = splineYFunction(x[i]);
-    }
+    generateTestData(nData, referenceSet, x, 1);
 
     FunctionDomain1DView view(x, nData);
     FunctionValues testDataValues(view);
@@ -46,7 +122,7 @@ public:
     cspline.function(view, testDataValues);
 
     //compare reference data with output data
-    for (int i = 0; i < testDataSize; ++i)
+    for (int i = 0; i < nData; ++i)
     {
       TS_ASSERT_EQUALS(referenceSet[i], testDataValues[i]);
     }
@@ -57,20 +133,17 @@ public:
   {
     CubicSpline cspline;
 
-    int nData = 10;
+    int nData = 20;
     int testDataSize = 30;
 
     double x[testDataSize];
     double referenceSet[testDataSize];
 
-    setupCubicSpline(cspline, nData);
+    //init spline with 10 data points
+    setupCubicSpline(cspline, nData, 1);
 
-    //generate a set of test points
-    for (int i = 0; i < testDataSize; ++i)
-    {
-      x[i] = (i * 0.3);
-      referenceSet[i] = splineYFunction(x[i]);
-    }
+    //generate three test points for every data point
+    generateTestData(testDataSize, referenceSet, x, 0.3);
 
     FunctionDomain1DView view(x, testDataSize);
     FunctionValues testDataValues(view);
@@ -85,23 +158,32 @@ public:
   }
 
 private:
+  //generate a set of uniform points to test the spline
+  void generateTestData(int numTests, double* refSet, double* xValues, double xModify)
+  {
+    for (int i = 0; i < numTests; ++i)
+    {
+      xValues[i] = (i * xModify);
+      refSet[i] = splineYFunction(xValues[i]);
+    }
+  }
 
   //function which we wish to use to generate our corresponding y data
   double splineYFunction(double x)
   {
-    return sin((2 * M_PI / 18) * x);
+    return sin((2 * M_PI / 18) * x) +1;
   }
 
   //setup a CubicSpline class for testing
-  void setupCubicSpline(CubicSpline& cspline, int nData)
+  void setupCubicSpline(CubicSpline& cspline, int nData, double xModify)
   {
     cspline.setAttributeValue("n", nData);
 
     //calculate a reference set to check against
     for (int i = 0; i < nData; ++i)
     {
-      cspline.setXAttribute(i, i);
-      cspline.setParameter(static_cast<size_t>(i), splineYFunction(i));
+      cspline.setXAttribute(i, i*xModify);
+      cspline.setParameter(static_cast<size_t>(i), splineYFunction(i*xModify));
     }
   }
 
