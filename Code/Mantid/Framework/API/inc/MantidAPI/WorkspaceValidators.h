@@ -369,14 +369,14 @@ private:
    */
   std::string checkValidity( const MatrixWorkspace_sptr& value ) const
   {
-    // Take X values for the first spectrum
-    Mantid::MantidVec xData = value->dataX(0);
+    // 0 for X axis
+    Axis* xAxis = value->getAxis(0);
     
     // Left-most axis value should be less than the right-most
-    if(xData.front() < xData.back())
+    if(xAxis->getValue(0) < xAxis->getValue(xAxis->length() - 1))
       return "";
     else
-      return "X data of the workspace should be increasing from left to right";
+      return "X axis of the workspace should be increasing from left to right";
   }
 };
 
