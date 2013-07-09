@@ -42,15 +42,7 @@ namespace DataHandling {
   {
   public:
     /// Constructor
-    LoadILL() : API::IHDFFileLoader(), m_instrumentName(""),
-      m_wavelength(0), m_channelWidth(0) 
-    {
-      supportedInstruments.push_back("IN4");
-      supportedInstruments.push_back("IN5");
-      supportedInstruments.push_back("IN6");
-
-    }
-    /// Virtual destructor
+	LoadILL();	/// Virtual destructor
     virtual ~LoadILL() {
     }
     /// Algorithm's name
@@ -87,6 +79,10 @@ namespace DataHandling {
     void loadTimeDetails(NeXus::NXEntry& entry);
     NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
     void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry);
+
+	double getL1();
+	double getL2(int detId=1);
+	double getInstrumentProperty(std::string);
 
     double calculateEnergy(double);
     double calculateTOF(double);

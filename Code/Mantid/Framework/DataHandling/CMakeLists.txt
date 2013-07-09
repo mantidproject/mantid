@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/LiveDataAlgorithm.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
+	src/LoadHelper.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -45,6 +46,7 @@ set ( SRC_FILES
 	src/LoadGSS.cpp
 	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
+	src/LoadILLSANS.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
@@ -176,6 +178,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LiveDataAlgorithm.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
+	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -192,6 +195,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILL.h
+	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
@@ -331,6 +335,7 @@ set ( TEST_FILES
 	LoadEventPreNexusTest.h
 	LoadFullprofResolutionTest.h
 	LoadGSSTest.h
+	LoadILLSANSTest.h
 	LoadILLTest.h
 	LoadISISNexusTest.h
 	LoadInstrumentFromRawTest.h

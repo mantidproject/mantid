@@ -14,6 +14,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <limits>
@@ -41,6 +42,7 @@ namespace Mantid {
                   << c.nxclass;
     }
 
+
     /// Sets documentation strings for this algorithm
     void LoadILL::initDocs() {
       this->setWikiSummary("Loads a ILL nexus file. ");
@@ -66,6 +68,19 @@ namespace Mantid {
     //---------------------------------------------------
     // Private member functions
     //---------------------------------------------------
+
+LoadILL::LoadILL() :
+  API::IHDFFileLoader() {
+	m_instrumentName = "";
+	m_wavelength = 0;
+	m_channelWidth = 0;
+
+	supportedInstruments.push_back("IN4");
+	supportedInstruments.push_back("IN5");
+	supportedInstruments.push_back("IN6");
+
+}
+
 
     /**
      * Initialise the algorithm
@@ -93,10 +108,11 @@ namespace Mantid {
 
       setInstrumentName(entry);
 
-      initInstrumentSpecific();
-
       loadTimeDetails(entry);
       initWorkSpace(entry);
+
+	runLoadInstrument(); // just to get IDF contents
+	initInstrumentSpecific();
 
       loadDataIntoTheWorkSpace(entry);
 
@@ -130,6 +146,8 @@ namespace Mantid {
       for (auto it = v.begin(); it < v.end(); it++) {
         if (it->nxclass == "NXinstrument") {
           std::string insNamePath = it->nxname + "/name";
+			if ( !entry.isValid(insNamePath) )
+				throw std::runtime_error("Error reading the instrument name: " + insNamePath + " is not a valid path!");
           instrumentName = entry.getString(insNamePath);
           g_log.debug() << "Instrument Name: " << instrumentName
                         << " in NxPath: " << insNamePath << std::endl;
@@ -151,7 +169,8 @@ namespace Mantid {
 
       m_instrumentName = getInstrumentName(entry);
       if (m_instrumentName == "") {
-        std::string message("Cannot read the instrument name from the Nexus file!");
+		std::string message(
+				"Cannot read the instrument name from the Nexus file!");
         g_log.error(message);
         throw std::runtime_error(message);
       }
@@ -179,7 +198,8 @@ namespace Mantid {
       m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
       g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-      g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << std::endl;
+	g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
+			<< std::endl;
       g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
 
       // Now create the output workspace
@@ -199,27 +219,16 @@ namespace Mantid {
 
     /**
      * Function to do specific instrument stuff
-     * This is very ugly. We have to find a place where to put this
-     * I can't get this from the instrument parameters because it wasn't
-     * initilialised yet!
+ *
      */
     void LoadILL::initInstrumentSpecific() {
-      if (std::string::npos != m_instrumentName.find("IN5")) {
-        m_l1 = 2.0;
-        m_l2 = 4.0;
+	m_l1 = getL1();
+	// this will be mainly for IN5 (flat PSD detector)
+	m_l2 = getInstrumentProperty("l2");
+	if ( m_l2 == EMPTY_DBL() ){
+		g_log.debug("Calculating L2 from the IDF.");
+		m_l2 = getL2();
       }
-      else if (std::string::npos != m_instrumentName.find("IN6")) {
-        m_l1 = 2.0;
-        m_l2 = 2.48;
-      }
-      else if (std::string::npos != m_instrumentName.find("IN4")) {
-        m_l1 = 2.0;
-        m_l2 = 2.0;
-      }
-      else{
-        g_log.warning("initInstrumentSpecific : Couldn't find instrument: " +  m_instrumentName);
-      }
-
     }
 
     /**
@@ -227,7 +236,6 @@ namespace Mantid {
      * @param entry :: The Nexus entry
      */
     void LoadILL::loadTimeDetails(NeXus::NXEntry& entry) {
-
 
       m_wavelength = entry.getFloat("wavelength");
 
@@ -245,7 +253,8 @@ namespace Mantid {
 
       m_monitorElasticPeakPosition = entry.getInt(monitorName + "/elasticpeak");
 
-      NXFloat time_of_flight_data = entry.openNXFloat(monitorName + "/time_of_flight");
+	NXFloat time_of_flight_data = entry.openNXFloat(
+			monitorName + "/time_of_flight");
       time_of_flight_data.load();
 
       // The entry "monitor/time_of_flight", has 3 fields:
@@ -318,7 +327,7 @@ namespace Mantid {
       //runDetails.addProperty<double>("wavelength", m_wavelength);
       runDetails.addProperty("wavelength", wavelength);
       double ei = calculateEnergy(m_wavelength);
-      runDetails.addProperty<double>("Ei", ei,true); //overwrite
+	runDetails.addProperty<double>("Ei", ei, true); //overwrite
       //std::string ei_str = boost::lexical_cast<std::string>(ei);
       //runDetails.addProperty("Ei", ei_str);
 
@@ -370,7 +379,6 @@ namespace Mantid {
 //	m_localWorkspace->mutableSample().setWidth(static_cast<double> (isis_raw->spb.e_width));
 
     }
-
 
     ///**
 // * Gets the experimental Elastic Peak Position in the dectector
@@ -452,7 +460,6 @@ namespace Mantid {
       //get limits in the m_numberOfTubes
       size_t tubesToRemove = m_numberOfTubes / 7;
 
-
       std::vector<int> cumulatedSumOfSpectras(m_numberOfChannels, 0);
       for (size_t i = tubesToRemove; i < m_numberOfTubes - tubesToRemove; i++) {
         int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
@@ -462,7 +469,8 @@ namespace Mantid {
                        cumulatedSumOfSpectras.begin(), cumulatedSumOfSpectras.begin(),
                        std::plus<int>());
       }
-      auto it = std::max_element(cumulatedSumOfSpectras.begin(),cumulatedSumOfSpectras.end());
+	auto it = std::max_element(cumulatedSumOfSpectras.begin(),
+			cumulatedSumOfSpectras.end());
 
       int calculatedDetectorElasticPeakPosition;
       if (it == cumulatedSumOfSpectras.end()) {
@@ -473,13 +481,15 @@ namespace Mantid {
 
       } else {
         //calculatedDetectorElasticPeakPosition = *it;
-        calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(cumulatedSumOfSpectras.begin(), it));
+		calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(
+				cumulatedSumOfSpectras.begin(), it));
 
         if (calculatedDetectorElasticPeakPosition == 0) {
           g_log.warning()
-            << "Elastic peak position is ZERO Assuming the EPP in the Nexus file: "
-            << m_monitorElasticPeakPosition << std::endl;
-          calculatedDetectorElasticPeakPosition = m_monitorElasticPeakPosition;
+					<< "Elastic peak position is ZERO Assuming the EPP in the Nexus file: "
+					<< m_monitorElasticPeakPosition << std::endl;
+			calculatedDetectorElasticPeakPosition =
+					m_monitorElasticPeakPosition;
 
         } else {
           g_log.debug() << "Calculated Detector EPP: "
@@ -510,7 +520,8 @@ namespace Mantid {
       int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(
         data);
 
-      double theoreticalElasticTOF = (calculateTOF(m_l1) + calculateTOF(m_l2)) * 1e6; //microsecs
+	double theoreticalElasticTOF = (calculateTOF(m_l1) + calculateTOF(m_l2))
+			* 1e6; //microsecs
 
       // Calculate the real tof (t1+t2) put it in tof array
       std::vector<double> detectorTofBins(m_numberOfChannels + 1);
@@ -519,7 +530,7 @@ namespace Mantid {
           + m_channelWidth
           * static_cast<double>(static_cast<int>(i)
                                 - calculatedDetectorElasticPeakPosition)
-          - m_channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
+				- m_channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
 
       }
       //g_log.debug() << "Detector TOF bins: ";
@@ -533,7 +544,8 @@ namespace Mantid {
                           << std::endl;
 
       // Assign calculated bins to first X axis
-      m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),detectorTofBins.end());
+	m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),
+			detectorTofBins.end());
 
       Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
       size_t spec = 0;
@@ -550,7 +562,8 @@ namespace Mantid {
 
           // Assign Error
           MantidVec& E = m_localWorkspace->dataE(spec);
-          std::transform(data_p, data_p + m_numberOfChannels, E.begin(), LoadILL::calculateError);
+			std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
+					LoadILL::calculateError);
 
           ++spec;
           progress.report();
@@ -602,10 +615,48 @@ namespace Mantid {
      *  @return tof in seconds
      */
     double LoadILL::calculateEnergy(double wavelength) {
-      double e = (PhysicalConstants::h * PhysicalConstants::h) /
-        (2 * PhysicalConstants::NeutronMass * wavelength*wavelength * 1e-20)/
-        PhysicalConstants::meV;
+	double e = (PhysicalConstants::h * PhysicalConstants::h)
+			/ (2 * PhysicalConstants::NeutronMass * wavelength * wavelength
+					* 1e-20) / PhysicalConstants::meV;
       return e;
+    }
+
+
+double LoadILL::getL1() {
+  Geometry::Instrument_const_sptr instrument =
+      m_localWorkspace->getInstrument();
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  double l1 = instrument->getSource()->getDistance(*sample);
+  return l1;
+}
+
+double LoadILL::getL2(int detId) {
+  // Get a pointer to the instrument contained in the workspace
+  Geometry::Instrument_const_sptr instrument =
+      m_localWorkspace->getInstrument();
+  // Get the distance between the source and the sample (assume in metres)
+  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+  // Get the sample-detector distance for this detector (in metres)
+  double l2 = m_localWorkspace->getDetector(detId)->getPos().distance(
+      sample->getPos());
+  return l2;
+}
+
+/*
+ * Get instrument property as double
+ * @s - input property name
+ *
+ */
+double LoadILL::getInstrumentProperty(std::string s) {
+	std::vector<std::string> prop = m_localWorkspace->getInstrument()->getStringParameter(s);
+	if (prop.empty()) {
+		g_log.debug("Property <" + s + "> doesn't exist!");
+		return EMPTY_DBL();
+	}
+	else {
+		g_log.debug() << "Property <" + s + "> = " << prop[0] << std::endl;
+		return boost::lexical_cast<double>(prop[0]);
+	}
     }
 
 
