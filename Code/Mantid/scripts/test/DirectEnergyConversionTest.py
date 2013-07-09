@@ -110,12 +110,14 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 
-    def test_set_non_default_comples_value(self):
+    def test_set_non_default_complex_value(self):
         tReducer = self.reducer
         # should do nothing as already initialized above, but if not will initiate the instrument
         tReducer.initialise("MAP");
 
-        self.assertEqual(tReducer.norm_mon_integration_range,[1000.,2000.]," Default integration range on MAPS should be as described in MAPS_Parameters.xml file")
+        range = tReducer.norm_mon_integration_range
+        self.assertAlmostEqual(range[0],1000.,7," Default integration min range on MAPS should be as described in MAPS_Parameters.xml file")
+        self.assertAlmostEqual(range[1],2000.,7," Default integration max range on MAPS should be as described in MAPS_Parameters.xml file")
         self.assertEqual(tReducer.ei_mon_spectra,[41474,41475]," Default ei monitors on MAPS should be as described in MAPS_Parameters.xml file")
 
         self.assertRaises(KeyError,tReducer.set_input_parameters,mon_norm_range=1)
@@ -132,7 +134,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertTrue("norm_mon_integration_range" in prop_changed,"mon_norm_range should change")
         self.assertTrue("ei_mon_spectra" in prop_changed,"changing ei-mon1-spec should change ei_mon_spectra") 
 
-    def test_set_non_default_comples_value_synonims(self):
+    def test_set_non_default_complex_value_synonims(self):
         tReducer = self.reducer
         # should do nothing as already initialized above, but if not will initiate the instrument
         tReducer.initialise("MAP");
