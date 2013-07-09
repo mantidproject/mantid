@@ -584,11 +584,11 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       {
         this->ui.parallelProjButton->toggle();
       }
+      this->ui.colorSelectionWidget->reset();
+      this->currentView->setColorScaleState(this->ui.colorSelectionWidget);
       pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
       builder->destroySources();
       this->ui.modeControlWidget->setToStandardView();
-      this->ui.colorSelectionWidget->reset();
-      this->currentView->setColorScaleState(this->ui.colorSelectionWidget);
       return true;
     }
   }
