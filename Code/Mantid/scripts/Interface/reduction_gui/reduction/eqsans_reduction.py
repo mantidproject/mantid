@@ -123,7 +123,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
             else:
                 script += "SaveIqAscii(process=%r)\n" % xml_process
     
-            script += "Reduce()\n"            
+            script += "Reduce(log_file='reduction_%s.log')\n" % name            
             scripts.append(script)
             
         return scripts
