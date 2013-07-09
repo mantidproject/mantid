@@ -17,6 +17,8 @@ The [[Linear]] algorithm is used when the Mode = Linear Fit. From the resulting 
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
@@ -136,8 +138,8 @@ void CalculateFlatBackground::exec()
       // Now call the function the user selected to calculate the background
       const double background = std::string(getProperty("mode")) == "Mean" ?
         this->Mean(outputWS, currentSpec, startX, endX, variance) :
-        this->LinearFit(outputWS, currentSpec, startX, endX);  // THIS FUNCTION USES DEPRECATED CHILD ALGORITHM!
-      
+        this->LinearFit(outputWS, currentSpec, startX, endX);
+
       if (background < 0)
       {
         g_log.warning() << "Problem with calculating the background number of counts spectrum with index "
@@ -345,30 +347,46 @@ double CalculateFlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, c
   // return mean number of counts in each bin, the sum of the number of counts in all the bins divided by the number of bins used in that sum
   return background;
 }
-/// Calls Linear as a Child Algorithm to do the fitting
+
+/** 
+ * Uses linear algorithm to do the fitting.
+ * 
+ * @param spectrum The spectrum index to fit, using the workspace numbering of the spectra
+ * @param startX An X value in the first bin to be included in the fit
+ * @param endX An X value in the last bin to be included in the fit
+ *
+ * @return The value of the flat background
+ */
 double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX)
 {
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Linear"); // Linear is DEPRECATED code will need replacing
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit");
+
+  IFunction_sptr func = API::FunctionFactory::Instance().createFunction("LinearBackground");
+
+  childAlg->setProperty<IFunction_sptr>("Function", func);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
+  childAlg->setProperty<bool>("CreateOutput", true);
   childAlg->setProperty<int>("WorkspaceIndex",spectrum);
   childAlg->setProperty<double>("StartX",startX);
   childAlg->setProperty<double>("EndX",endX);
   childAlg->executeAsChildAlg();
 
-  std::string fitStatus = childAlg->getProperty("FitStatus");
-  if ( fitStatus != "success" )
+  std::string outputStatus = childAlg->getProperty("OutputStatus");
+  if ( outputStatus != "success" )
   {
-    g_log.warning("Unable to successfully fit the data");
+    g_log.warning("Unable to successfully fit the data. \n" + outputStatus);
     return -1.0;
   }
 
-  // Calculate the value of the flat background by taking the value at the centre point of the fit
-  const double c = childAlg->getProperty("FitIntercept");
-  const double m = childAlg->getProperty("FitSlope");
-  const double centre = (startX+endX)/2.0;
-  const double background = m*centre + c;
+  // Linear function is defined as A0 + A1*x
+  const double intercept = childAlg->getProperty("A0");
+  const double slope = childAlg->getProperty("A1");
 
-  return background;
+  const double centre = (startX+endX)/2.0;
+
+  // Calculate the value of the flat background by taking the value at the 
+  // centre point of the fit
+  return slope*centre + intercept;
 }
 
 
