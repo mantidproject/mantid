@@ -206,7 +206,7 @@ class SampleData(BaseScriptElement):
                 for f in data_file_list:
                     script += "AppendDataFile([\"%s\"])\n" % f
         else:
-            parts = os.path.split(str(self.data_files[str(data_file)]).strip())
+            parts = os.path.split(str(data_file).strip())
             if len(parts[0])>0:
                 script += "DataPath(\"%s\")\n" % parts[0]
             else:

@@ -106,7 +106,7 @@ class EQSANSReductionScripter(BaseReductionScripter):
             
             for item in self._observers:
                 if item.state() is not None:
-                    if state.__class__.__name__=="SampleData":
+                    if item.state().__class__.__name__=="DataSets":
                         script += item.state().to_script(data_file=data_file)
                     else:
                         script += str(item.state())
