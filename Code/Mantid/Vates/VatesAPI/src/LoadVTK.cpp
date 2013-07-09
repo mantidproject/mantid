@@ -108,7 +108,7 @@ namespace Mantid
       this->declareProperty("KeepTopPercent", 25.0, rangeValidator, "Only keep the top percentage of SignalArray values in the range min to max. Allow sparse regions to be ignored. Defaults to 25%.");
 
       setPropertySettings("KeepTopPercent",
-                new EnabledWhenProperty("AdaptiveBinned", IS_NOT_DEFAULT));
+                new EnabledWhenProperty("AdaptiveBinned", IS_DEFAULT));
 
       declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "", Direction::Output),
           "MDWorkspace equivalent of vtkStructuredPoints input.");
