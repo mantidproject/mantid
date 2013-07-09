@@ -1177,6 +1177,14 @@ void PlotDialog::showColorMapEditor(bool)
   }
 }
 
+
+void PlotDialog::showSelectColorMapButton(bool )
+{
+  mSelectColormap->show();
+  connect(mSelectColormap,SIGNAL(clicked()),this,SLOT(changeColormap()));
+
+}
+
 void PlotDialog::initSpectrogramPage()
 {
   	spectrogramPage = new QWidget();
@@ -1193,7 +1201,6 @@ void PlotDialog::initSpectrogramPage()
     vl->addWidget(defaultScaleBox);
   	customScaleBox = new QRadioButton(tr("&Custom Color Map"));
 	connect(customScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
-//	connect(customScaleBox, SIGNAL(toggled(bool)), this, SLOT(showSelectColorMapButton(bool)));
     vl->addWidget(customScaleBox);
 
     QHBoxLayout *hl = new QHBoxLayout(imageGroupBox);
