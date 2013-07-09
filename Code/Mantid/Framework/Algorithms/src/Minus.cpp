@@ -216,7 +216,7 @@ namespace Mantid
         }
         else
         {
-          return "Number of histograms not identical";
+          return "Number of histograms not identical.";
         }
       }
       else

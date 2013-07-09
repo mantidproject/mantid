@@ -332,14 +332,7 @@ namespace Mantid
       std::string checkSizeCompatibilityResult = checkSizeCompatibility(lhs,rhs); 
       if (!checkSizeCompatibilityResult.empty())
       {
-        std::ostringstream ostr;
-        ostr<<"The sizes of the two workspaces " <<
-            "(" << lhs->getName() << ": " << lhs->getNumberHistograms() << " spectra, blocksize " << lhs->blocksize() << ")"
-            << " and " <<
-            "(" << rhs->getName() << ": " << rhs->getNumberHistograms() << " spectra, blocksize " << rhs->blocksize() << ")"
-            << " are not compatible for algorithm "<<this->name()<<". " << checkSizeCompatibilityResult;
-        //g_log.error() << ostr.str() << std::endl;
-        throw std::invalid_argument( ostr.str() );
+        throw std::invalid_argument(checkSizeCompatibilityResult);
       }
 
       return true;
@@ -389,7 +382,7 @@ namespace Mantid
         }
         else
         {
-          return "Number of histograms not identical";
+          return "Number of histograms not identical.";
         }
 
       // Otherwise they must match both ways, or horizontally or vertically with the other rhs dimension=1
@@ -419,12 +412,12 @@ namespace Mantid
         //blocksize check failed, but still check the number of spectra to see if that was wrong too
         if ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec )
         {
-          return "Number of y values not equal on left and right sides";
+          return "Number of y values not equal on left and right sides.";
         }
         else
         {
           //can't be more specific as if this is reached both failed and only one or both are needed
-          return "Number of y values not equal on left and right sides and neither the right side contained only one spectra or the left and right sides the same amount of spectra.";
+          return "Number of y values not equal on left and right sides and the right side contained neither only one spectra or the same amount of spectra as the left.";
         }
       }
     }

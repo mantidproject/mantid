@@ -56,7 +56,7 @@ namespace Mantid
       }
       else
       {
-        return "Workspaces not identically sized";
+        return "Workspaces not identically sized.";
       }
     }
 
