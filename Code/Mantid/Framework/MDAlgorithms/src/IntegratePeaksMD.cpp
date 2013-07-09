@@ -75,6 +75,8 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidKernel/Utils.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid
@@ -205,7 +207,7 @@ namespace MDAlgorithms
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
     /// Cylinder Length to use around peaks for cylinder
     double cylinderLength = getProperty("CylinderLength");
-    Workspace2D_sptr ws2D;
+    Workspace2D_sptr wsProfile2D,wsFit2D,wsDiff2D;
     size_t numSteps = 0;
     double deltaQ = 0.0;
     bool cylinderBool = getProperty("Cylinder");
@@ -214,9 +216,34 @@ namespace MDAlgorithms
         numSteps = 100;
         deltaQ = cylinderLength/static_cast<double>(numSteps-1);
         size_t histogramNumber = peakWS->getNumberPeaks();
+        Workspace_sptr wsProfile= WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,numSteps,numSteps);
+        wsProfile2D = boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+        AnalysisDataService::Instance().addOrReplace("ProfilesData", wsProfile2D);
         Workspace_sptr wsFit= WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,numSteps,numSteps);
-        ws2D = boost::dynamic_pointer_cast<Workspace2D>(wsFit);
-        AnalysisDataService::Instance().addOrReplace("ProfilesToFit", ws2D);
+        wsFit2D = boost::dynamic_pointer_cast<Workspace2D>(wsFit);
+        AnalysisDataService::Instance().addOrReplace("ProfilesFit", wsFit2D);
+        Workspace_sptr wsDiff= WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,numSteps,numSteps);
+        wsDiff2D = boost::dynamic_pointer_cast<Workspace2D>(wsDiff);
+        AnalysisDataService::Instance().addOrReplace("ProfilesFitDiff", wsDiff2D);
+	    TextAxis* const newAxis1 = new TextAxis(peakWS->getNumberPeaks());
+	    TextAxis* const newAxis2 = new TextAxis(peakWS->getNumberPeaks());
+	    TextAxis* const newAxis3 = new TextAxis(peakWS->getNumberPeaks());
+        wsProfile2D->replaceAxis(1, newAxis1);
+        wsFit2D->replaceAxis(1, newAxis2);
+        wsDiff2D->replaceAxis(1, newAxis3);
+        for (int i=0; i < peakWS->getNumberPeaks(); ++i)
+        {
+			// Get a direct ref to that peak.
+			IPeak & p = peakWS->getPeak(i);
+			std::ostringstream label;
+			label << Utils::round(-p.getH())
+			<< "_" << Utils::round(-p.getK())
+			<<  "_" << Utils::round(-p.getL())
+			<<  "_" << p.getRunNumber();
+			newAxis1->setLabel(i, label.str());
+			newAxis2->setLabel(i, label.str());
+			newAxis3->setLabel(i, label.str());
+        }
     }
     double backgroundCylinder = cylinderLength;
     double percentBackground = getProperty("PercentBackground");
@@ -358,9 +385,9 @@ namespace MDAlgorithms
 				ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared, signal_fit);
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					 ws2D->dataX(i)[j] = static_cast<double>(j) * deltaQ; //-0.5*backgroundCylinder
-					 ws2D->dataY(i)[j] = signal_fit[j];
-					 ws2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
+					 wsProfile2D->dataX(i)[j] = static_cast<double>(j) * deltaQ; //-0.5*backgroundCylinder
+					 wsProfile2D->dataY(i)[j] = signal_fit[j];
+					 wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
 				}
 
 				// Evaluate the signal inside "BackgroundInnerRadius"
@@ -404,9 +431,9 @@ namespace MDAlgorithms
 			{
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					 ws2D->dataX(i)[j] = static_cast<double>(j) * deltaQ;  //-0.5*cylinderLength
-					 ws2D->dataY(i)[j] = signal_fit[j];
-					 ws2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
+					 wsProfile2D->dataX(i)[j] = static_cast<double>(j) * deltaQ;  //-0.5*cylinderLength
+					 wsProfile2D->dataY(i)[j] = signal_fit[j];
+					 wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
 				}
 			}
 
@@ -421,9 +448,9 @@ namespace MDAlgorithms
 			}
 
 			size_t half = numSteps/2;
-			double Centre = ws2D->dataX(i)[half];
+			double Centre = wsProfile2D->dataX(i)[half];
 			double Sigma = 0.02;
-			double peakHeight = ws2D->dataY(i)[half];
+			double peakHeight = wsProfile2D->dataY(i)[half];
 			std::string profileFunction = getProperty("ProfileFunction");
 			std::ostringstream fun_str, plot_str;
 			plot_str << "FitPeak" << i;
@@ -442,7 +469,7 @@ namespace MDAlgorithms
 			if (profileFunction.compare("NoFit") != 0)
 			{
 				fit_alg->setPropertyValue("Function", fun_str.str());
-				fit_alg->setProperty("InputWorkspace", ws2D);
+				fit_alg->setProperty("InputWorkspace", wsProfile2D);
 				fit_alg->setProperty("WorkspaceIndex", i);
 				fit_alg->setProperty("CreateOutput", true);
 				fit_alg->setProperty("Output", plot_str.str());
@@ -452,8 +479,13 @@ namespace MDAlgorithms
 				double chisq = fit_alg->getProperty("OutputChi2overDoF");
 				g_log.notice() << "Peak " << i <<": Chisq = " << chisq << " " << fun<<"\n";
 				//Evaluate fit at points
+				const Mantid::MantidVec& x = fitWS->readX(1);
 				const Mantid::MantidVec& y = fitWS->readY(1);
-				AnalysisDataService::Instance().addOrReplace(plot_str.str(), fitWS);
+				const Mantid::MantidVec& e = fitWS->readY(2);
+				wsFit2D->dataX(i) = x;
+				wsDiff2D->dataX(i) = x;
+				wsFit2D->dataY(i) = y;
+				wsDiff2D->dataY(i) = e;
 
 				//Calculate intensity
 				signal = 0.0;
