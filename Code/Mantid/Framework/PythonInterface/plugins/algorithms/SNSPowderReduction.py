@@ -253,6 +253,8 @@ class SNSPowderReduction(PythonAlgorithm):
         infotableprop = ITableWorkspaceProperty("SplitInformationWorkspace", "", Direction.Input, PropertyMode.Optional)
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
+        self.declareProperty("ReduceLowResolutionTOF", False, "If chosen, low resolution TOF will be reduced after being filtered out.  Otherwise, ignored.")
+
         return
 
 
@@ -522,9 +524,13 @@ class SNSPowderReduction(PythonAlgorithm):
                             return
                     if self.getProperty("StripVanadiumPeaks").value:
                         vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
+                        api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_Raw")
                         vanRun = api.StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
                                            PeakPositionTolerance=self.getProperty("VanadiumPeakTol").value,
                                            BackgroundType="Quadratic", HighBackground=True)
+                        api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_PostStrip")
+                    else:
+                        self.log().information("Not strip vanadium peaks")
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     vanRun = api.FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
@@ -784,13 +790,32 @@ class SNSPowderReduction(PythonAlgorithm):
                 # Align and focus
                 self.log().information("[F1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk))
                 # print "[DB1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk)
-                temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
+
+                self._outputLowResTOF = self.getProperty("ReduceLowResolutionTOF").value
+
+                if self._outputLowResTOF is True:
+                    print "Reducing Low resolution TOF"
+                    lowreswsname = str(temp)+"_LowRes"
+                else:
+                    print "Ignoring Low resolution TOF"
+                    lowreswsname = ""
+
+                tempout = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, LowResTOFWorkspace=lowreswsname, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                     DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
                     PreserveEvents=preserveEvents,
                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
                     UnwrapRef=self._LRef, LowResRef=self._DIFCref,
                     CropWavelengthMin=self._wavelengthMin, **(self._config.getFocusPos()))
+
+                if self._outputLowResTOF is True:
+                    temphighws = tempout[0]
+                    templowws = tempout[1]
+                    temp = api.AppendSpectra(InputWorkspace1=temphighws, InputWorkspace2=templowws, OutputWorkspace=str(temphighws))
+                    api.DeleteWorkspace(Workspace=str(templowws)) 
+                else:
+                    temp = tempout 
+
                 # try: 
                 #     if temp.__class__.__name__.count("IEvent") > 0: 
                 #         print "[DB1050-3] Number of events = %d of chunk %d" % (temp.getNumberEvents(), ichunk)
