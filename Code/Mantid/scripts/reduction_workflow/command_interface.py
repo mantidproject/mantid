@@ -79,11 +79,11 @@ def OutputPath(path):
     ReductionSingleton().set_output_path(path)
     ReductionSingleton().reduction_properties["OutputDirectory"] = path
 
-def Reduce1D(log_file=None):
-    return ReductionSingleton().reduce(log_file=log_file)
+def Reduce1D():
+    return ReductionSingleton().reduce()
         
-def Reduce(log_file=None):
-    return ReductionSingleton().reduce(log_file=log_file)
+def Reduce():
+    return ReductionSingleton().reduce()
         
 def AppendDataFile(datafile, workspace=None):
     """
