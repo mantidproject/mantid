@@ -111,7 +111,12 @@ class EQSANSReductionScripter(BaseReductionScripter):
                     else:
                         script += str(item.state())
             
-            xml_process = "None"
+            # Save the process description
+            base_name = os.path.basename(data_file)
+            name, ext = os.path.splitext(base_name)
+            xml_process = os.path.join(self._output_directory, "%s_process.xml" % name)
+            xml_process = os.path.normpath(xml_process)
+            self.to_xml(xml_process)
             
             if self._settings.api2:
                 script += "SaveIq(process=%r)\n" % xml_process

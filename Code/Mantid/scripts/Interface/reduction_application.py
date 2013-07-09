@@ -509,6 +509,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             msg = "The file you attempted to load doesn't have a recognized format.\n\n"
             msg += "Please make sure it has been produced by this application."
             QtGui.QMessageBox.warning(self, "Error loading reduction parameter file", msg)
+            print sys.exc_value
             return
          
         if not found_instrument == self._instrument:
