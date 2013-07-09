@@ -498,6 +498,9 @@ class BaseReductionScripter(object):
                 else:
                     job_name = "%s_%s" % (lower_case_instr, job_name.strip())
 
+                # Make sure we have unique job names
+                if len(scripts)>1:
+                    job_name += "_%s" % i
                 # Submit the job
                 submit_cmd = "SubmitRemoteJob(ComputeResource='%s', " % resource
                 submit_cmd += "TaskName='%s'," % job_name
