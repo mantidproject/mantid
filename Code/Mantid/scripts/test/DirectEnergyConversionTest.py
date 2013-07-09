@@ -1,9 +1,8 @@
+from mantid.simpleapi import *
+from mantid import api
 import unittest
 import inspect
 import os, sys
-#test_path = (os.path.realpath(__file__))
-#lib_path = os.path.abspath(test_path+'/../../Inelastic')
-#sys.path.append(lib_path)
 from DirectEnergyConversion import DirectEnergyConversion
 
 

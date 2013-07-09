@@ -1,7 +1,7 @@
+from mantid.simpleapi import *
+from mantid import api
 import unittest
 import os, sys
-#lib_path = os.path.abspath('../Inelastic')
-#sys.path.append(lib_path)
 from dgreduce import *
 
 
