@@ -1,8 +1,8 @@
 import unittest
 import os, sys
-lib_path = os.path.abspath('../Inelastic')
-sys.path.append(lib_path)
-import dgreduce
+#lib_path = os.path.abspath('../Inelastic')
+#sys.path.append(lib_path)
+from dgreduce import *
 
 
 
@@ -30,11 +30,13 @@ class DgreduceTest(unittest.TestCase):
         self.assertTrue("someKeyword" in params);
         self.assertTrue("hard_mask_file" in params);
         self.assertTrue("use_hard_mask_only" in params)
-        self.assertEqual(params['normalise_method'],'monitor-1')
+        self.assertEqual(params['normalise_method'],'Monitor-1')
 
     def test_setup(self):
+       
 
         setup('mari')
+        Reducer = getReducer()
         self.assertTrue(not (Reducer is None))
 
         self.assertEqual(Reducer.instr_name,'MAR')

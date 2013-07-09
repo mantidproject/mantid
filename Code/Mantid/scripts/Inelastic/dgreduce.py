@@ -14,6 +14,8 @@ Reducer = None
 
 # Statement used at debug time to pull changes in DirectEnergyConversion into Mantid
 #DRC=reload(DRC)
+def getReducer():
+    return Reducer
 
 def setup(instname=None,reload=False):
     """
