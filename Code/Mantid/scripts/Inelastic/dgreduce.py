@@ -207,7 +207,6 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         val = getattr(Reducer,key);
         Reducer.log("  Value of : {0:<25} is set to : {1:<20} ".format(key,val))
 
-
     #do we run absolute units normalization and need to warn users if the parameters needed for that have not changed from defaults
     if abs_units_defaults_check :
         Reducer.check_abs_norm_defaults_changed(changed_Keys);
@@ -238,6 +237,8 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         Reducer.log('use Keyword det_cal_file with a valid detctor file or run number','error')
         return
               
+    # check if reducer can find all non-run files necessary for the reduction before starting long run. 
+    Reducer.check_necessary_files();
     
     print 'Output will be normalised to', Reducer.normalise_method
     if (numpy.size(sample_run)) > 1 and Reducer.sum_runs:

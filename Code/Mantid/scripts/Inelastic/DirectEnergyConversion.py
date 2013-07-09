@@ -405,7 +405,10 @@ class DirectEnergyConversion(object):
 
                     if self.__det_cal_file_ws == None :
                         self.log('_do_mono: Loading detector info from file ' +str(self.det_cal_file),'debug')    
-                        file = FileFinder.getFullPath(self.det_cal_file)
+                        file = FileFinder.getFullPath(str(self.det_cal_file))
+                        if len(file) == 0: # try to find run
+                            file = common.find_file(self.det_cal_file)
+
                         LoadDetectorInfo(Workspace=result_name,DataFilename=file,RelocateDets= self.relocate_dets)
                         self.log('_do_mono: Loading detector info completed ','debug')                                            
                     else:
@@ -1010,7 +1013,9 @@ class DirectEnergyConversion(object):
                               'diag_van_out_lo', 'diag_van_out_hi', 'diag_van_lo', 'diag_van_hi', 'diag_van_sig', 'diag_variation',\
                               'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_background_test_range']
 
-        
+        # before starting long run, makes sence to verify if all files requested for the run are in fact availible. Here we specify the properties which describe files
+        self.__file_properties = ['det_cal_file','map_file','hard_mask_file','monovan_mapfile']
+
         self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
 
         # list of the parameters which should usually be changed by user and if not, user should be warn about it. 
@@ -1302,7 +1307,33 @@ class DirectEnergyConversion(object):
         """
         return ''.join(str(arg) for arg in argi if arg is not None)
   
-    
+    def check_necessary_files(self):
+        """ Method verifies if all files necessary for a run are availible.
+
+           usefull for long runs to check if all files necessary for it are present/accessible
+        """
+        file_missing = False
+        for prop in self.__file_properties :
+            file = getattr(self,prop)
+            if not (file is None) and isinstance(file,str):
+                file_path = FileFinder.getFullPath(file)
+                if len(file_path) == 0: 
+                    # it still can be run number
+                    try:
+                        file_path = common.find_file(file)
+                    except:
+                        file_path=''
+
+                    if len(file_path)==0:
+                        self.log(" Can not find file ""{0}"" for property: {1} ".format(file,prop),'error')
+                        file_missing=True
+
+        if file_missing:
+             raise RuntimeError(" Files needed for the run are missing ")
+
+
+
+
     def log(self, msg,level="notice"):
         """Send a log message to the location defined
         """
