@@ -76,6 +76,10 @@ namespace Mantid
       void exec();
       void loadCalFile(const std::string &calFileName);
       void rebin(API::MatrixWorkspace_sptr matrixws);
+
+      API::MatrixWorkspace_sptr conjoinWorkspaces(API::MatrixWorkspace_sptr ws1, API::MatrixWorkspace_sptr ws2,
+                                                  size_t offset);
+
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
       DataObjects::EventWorkspace_sptr m_inputEW;
@@ -110,6 +114,8 @@ namespace Mantid
       DataObjects::EventWorkspace_sptr m_lowResEW;
       /// Flag to process low resolution workspace
       bool m_processLowResTOF;
+      /// Offset to low resolution TOF spectra
+      size_t m_lowResSpecOffset;
 
     };
 
