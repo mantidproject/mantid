@@ -431,14 +431,13 @@ namespace MDAlgorithms
 				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=Gaussian,Height="<<peakHeight<<",Sigma="<<Sigma<<",PeakCentre="<<Centre;
 			else if (profileFunction.compare("ConvolutionExpGaussian") == 0)
 			{
-				double Lifetime = 700.0;
 				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution,FixResolution=false;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
-						";name=ExpDecay,Height="<<peakHeight<<",Lifetime="<<Lifetime<<")";
+						";name=ExpDecay,Height="<<-peakHeight<<",Lifetime=0.01)";
 			}
 			else if (profileFunction.compare("ConvolutionBackToBackGaussian") == 0)
 			{
 				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution,FixResolution=false;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
-						";name=BackToBackExponential,I="<<peakHeight<<",A=700.0,B=70.0,X0="<<Centre<<",S="<<Sigma<<")";
+						";name=BackToBackExponential,I="<<-peakHeight<<",A=20000.0,B=0.0005,X0=0.02,S=-0.006)";
 			}
 			if (profileFunction.compare("NoFit") != 0)
 			{
