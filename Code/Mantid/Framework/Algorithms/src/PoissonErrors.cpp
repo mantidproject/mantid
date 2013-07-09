@@ -32,13 +32,20 @@ namespace Mantid
     /** Performs a simple check to see if the sizes of two workspaces are identically sized
     * @param lhs :: the first workspace to compare
     * @param rhs :: the second workspace to compare
-    * @retval true The two workspaces are size compatible
-    * @retval false The two workspaces are NOT size compatible
+    * @retval "" The two workspaces are size compatible
+    * @retval "<reason why not compatible>" The two workspaces are NOT size compatible
     */
-    bool PoissonErrors::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    std::string PoissonErrors::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       //in order to be size compatible then the workspaces must be identically sized
-      return (lhs->size() == rhs->size());
+      if (lhs->size() == rhs->size())
+      {
+        return "";
+      }
+      else
+      {
+        return "Workspaces not identically sized";
+      }
     }
 
     void PoissonErrors::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,

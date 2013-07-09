@@ -12,10 +12,10 @@ namespace Mantid
      * must divide be the size of the smaller workspace leaving no remainder
      * @param lhs :: the workspace treated as the lhs to compare
      * @param rhs :: the workspace treated as the rhs to compare
-     * @retval true The two workspaces are size compatible
-     * @retval false The two workspaces are NOT size compatible
+     * @retval "" The two workspaces are size compatible
+     * @retval "<reason why not compatible>" The two workspaces are NOT size compatible
      */
-    bool CommutativeBinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    std::string CommutativeBinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       // Don't allow this for EventWorkspaces. See for instance Multiply::checkSizeCompatability
       if( boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(lhs) || 
