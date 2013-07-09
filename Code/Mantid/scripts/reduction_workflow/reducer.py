@@ -143,7 +143,7 @@ class Reducer(object):
         """ 
         pass
         
-    def reduce(self):
+    def reduce(self, log_file=None):
         """
             Go through the list of reduction steps
         """
@@ -206,7 +206,11 @@ class Reducer(object):
                 output_dir = os.path.expanduser('~')
 
         self.log_text += "Reduction completed in %g sec\n" % (time.time()-t_0)
-        log_path = os.path.join(output_dir,"%s_reduction.log" % self.instrument_name)
+        if log_file is not None:
+            base_name = os.path.basename(log_file)
+            log_path = os.path.join(output_dir, base_name)
+        else:
+            log_path = os.path.join(output_dir,"%s_reduction.log" % self.instrument_name)
         self.log_text += "Log saved to %s" % log_path
         
         # Write the log to file
