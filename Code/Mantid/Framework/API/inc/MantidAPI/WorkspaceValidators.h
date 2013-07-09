@@ -372,11 +372,13 @@ private:
     // 0 for X axis
     Axis* xAxis = value->getAxis(0);
     
-    // Left-most axis value should be less than the right-most
-    if(xAxis->getValue(0) < xAxis->getValue(xAxis->length() - 1))
-      return "";
-    else
+    // Left-most axis value should be less than the right-most, if ws has
+    // more than one X axis value
+    if(xAxis->length() > 1 && xAxis->getValue(0) >= xAxis->getValue(xAxis->length() - 1))
       return "X axis of the workspace should be increasing from left to right";
+    else
+      return "";
+      
   }
 };
 
