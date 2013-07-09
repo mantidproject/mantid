@@ -128,7 +128,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         kw["ei-mon1-spec"]=10
         prop_changed=tReducer.set_input_parameters(**kw)
 
-        self.assertAlmostEqual(tReducer.norm_mon_integration_range,[50,1050],7)
+        range=tReducer.norm_mon_integration_range 
+        self.assertAlmostEqual(range[0],50.,7)
+        self.assertAlmostEqual(range[1],1050.,7)
         self.assertEqual(tReducer.ei_mon_spectra,[10,41475])
 
         self.assertTrue("norm_mon_integration_range" in prop_changed,"mon_norm_range should change")
@@ -173,10 +175,17 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer = self.reducer
 
         tReducer.energy_bins='-30,3,10'
-        self.assertEqual([-30,3,10],tReducer.energy_bins)
+        bins = tReducer.energy_bins
+        self.assertAlmostEqual(bins[0],-30)
+        self.assertAlmostEqual(bins[1],3)
+        self.assertAlmostEqual(bins[2],10)
+
         
         tReducer.energy_bins=[-20,4,100]
-        self.assertEqual([-20,4,100],tReducer.energy_bins)
+        bins = tReducer.energy_bins
+        self.assertAlmostEqual(bins[0],-20)
+        self.assertAlmostEqual(bins[1],4)
+        self.assertAlmostEqual(bins[2],100)
 
         tReducer.map_file = "some_map"
         self.assertEqual("some_map.map",tReducer.map_file)
