@@ -358,6 +358,7 @@ namespace WorkflowAlgorithms
 
     if(LRef > 0. || minwl > 0. || DIFCref > 0.)
     {
+#if 0
       g_log.information() << "running ConvertUnits(Target=TOF)\n";
       API::IAlgorithm_sptr convert1Alg = createChildAlgorithm("ConvertUnits");
       convert1Alg->setProperty("InputWorkspace", m_outputW);
@@ -365,6 +366,9 @@ namespace WorkflowAlgorithms
       convert1Alg->setProperty("Target","TOF");
       convert1Alg->executeAsChildAlg();
       m_outputW = convert1Alg->getProperty("OutputWorkspace");
+#else
+      m_outputW = convertUnits(m_outputW, "TOF");
+#endif
     }
 
     // Beyond this point, low resolution TOF workspace is considered.
@@ -442,11 +446,12 @@ namespace WorkflowAlgorithms
       }
     }
 
-    // FIXME - Refactor beyond this point!
+    // FIXED - Refactor beyond this point!
 
     // Convert units
     if(LRef > 0. || minwl > 0. || DIFCref > 0.)
     {
+#if 0
       g_log.information() << "running ConvertUnits(Target=dSpacing)\n";
       API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
       convert2Alg->setProperty("InputWorkspace", m_outputW);
@@ -464,6 +469,11 @@ namespace WorkflowAlgorithms
         convert2Alg->executeAsChildAlg();
         m_lowResW = convert2Alg->getProperty("OutputWorkspace");
       }
+#else
+      m_outputW = convertUnits(m_outputW, "dSpacing");
+      if (m_processLowResTOF)
+        m_lowResW = convertUnits(m_lowResW, "dSpacing");
+#endif
     }
 
     if(dspace)
@@ -478,6 +488,7 @@ namespace WorkflowAlgorithms
       doSortEvents(m_lowResW);
 
     // Diffraction focus
+#if 0
     g_log.information() << "running DiffractionFocussing. \n";
     API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
     focusAlg->setProperty("InputWorkspace", m_outputW);
@@ -496,6 +507,11 @@ namespace WorkflowAlgorithms
       focusAlg->executeAsChildAlg();
       m_lowResW = focusAlg->getProperty("OutputWorkspace");
     }
+#else
+    m_outputW = diffractionFocus(m_outputW);
+    if (m_processLowResTOF)
+      m_lowResW = diffractionFocus(m_lowResW);
+#endif
 
     doSortEvents(m_outputW);
     if (m_processLowResTOF)
@@ -525,6 +541,7 @@ namespace WorkflowAlgorithms
       std::copy(phis.begin(), (phis.begin()+numreg), vec_azimuthal_reg.begin());
 
       // Edit instrument
+#if 0
       g_log.information() << "running EditInstrumentGeometry\n";
       API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
       editAlg->setProperty("Workspace", m_outputW);
@@ -535,6 +552,9 @@ namespace WorkflowAlgorithms
       editAlg->setProperty("Azimuthal", vec_azimuthal_reg);
       editAlg->executeAsChildAlg();
       m_outputW = editAlg->getProperty("Workspace");
+#else
+      m_outputW = editInstrument(m_outputW, vec_polar_reg, vec_specid_reg, vec_l2_reg, vec_azimuthal_reg);
+#endif
 
       if (m_processLowResTOF)
       {
@@ -547,6 +567,7 @@ namespace WorkflowAlgorithms
         std::vector<double> vec_azimuthal_low(numlow, 0.);
         std::copy((phis.begin()+numreg), phis.end(), vec_azimuthal_low.begin());
 
+#if 0
         API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
         editAlg->setProperty("Workspace", m_lowResW);
         editAlg->setProperty("PrimaryFlightPath", l1);
@@ -556,6 +577,9 @@ namespace WorkflowAlgorithms
         editAlg->setProperty("Azimuthal", vec_azimuthal_low);
         editAlg->executeAsChildAlg();
         m_lowResW = editAlg->getProperty("Workspace");
+#else
+        m_lowResW = editInstrument(m_lowResW, vec_polar_low, vec_specid_low, vec_l2_low, vec_azimuthal_low);
+#endif
       }
     }
 
@@ -566,6 +590,7 @@ namespace WorkflowAlgorithms
     }
 
     // Convert units to TOF
+#if 0
     g_log.information() << "running ConvertUnits\n";
     API::IAlgorithm_sptr convert3Alg = createChildAlgorithm("ConvertUnits");
     convert3Alg->setProperty("InputWorkspace", m_outputW);
@@ -573,6 +598,9 @@ namespace WorkflowAlgorithms
     convert3Alg->setProperty("Target","TOF");
     convert3Alg->executeAsChildAlg();
     m_outputW = convert3Alg->getProperty("OutputWorkspace");
+#else
+    m_outputW = convertUnits(m_outputW, "TOF");
+#endif
 
     /*
     if (m_processLowResTOF)
@@ -609,6 +637,66 @@ namespace WorkflowAlgorithms
     //  setProperty("LowResTOFWorkspace", m_lowResW);
 
     return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Call edit instrument geometry
+    */
+  API::MatrixWorkspace_sptr AlignAndFocusPowder::editInstrument(API::MatrixWorkspace_sptr ws, std::vector<double> polars,
+                                                                std::vector<specid_t> specids, std::vector<double> l2s,
+                                                                std::vector<double> phis)
+  {
+    g_log.information() << "running EditInstrumentGeometry\n";
+
+    API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
+    editAlg->setProperty("Workspace", ws);
+    editAlg->setProperty("PrimaryFlightPath", l1);
+    editAlg->setProperty("Polar", polars);
+    editAlg->setProperty("SpectrumIDs", specids);
+    editAlg->setProperty("L2", l2s);
+    editAlg->setProperty("Azimuthal", phis);
+    editAlg->executeAsChildAlg();
+
+    ws = editAlg->getProperty("Workspace");
+
+    return ws;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Call diffraction focus to a matrix workspace.
+    */
+  API::MatrixWorkspace_sptr AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws)
+  {
+    g_log.information() << "running DiffractionFocussing. \n";
+
+    API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
+    focusAlg->setProperty("InputWorkspace", ws);
+    focusAlg->setProperty("OutputWorkspace", ws);
+    focusAlg->setProperty("GroupingWorkspace", m_groupWS);
+    focusAlg->setProperty("PreserveEvents", m_preserveEvents);
+    focusAlg->executeAsChildAlg();
+    ws = focusAlg->getProperty("OutputWorkspace");
+
+    return ws;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Convert units
+    */
+  API::MatrixWorkspace_sptr AlignAndFocusPowder::convertUnits(API::MatrixWorkspace_sptr matrixws, std::string target)
+  {
+    g_log.information() << "running ConvertUnits(Target=dSpacing)\n";
+
+    API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
+    convert2Alg->setProperty("InputWorkspace", matrixws);
+    convert2Alg->setProperty("OutputWorkspace", matrixws);
+    convert2Alg->setProperty("Target", target);
+    convert2Alg->executeAsChildAlg();
+
+    matrixws = convert2Alg->getProperty("OutputWorkspace");
+
+    return matrixws;
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -665,12 +753,14 @@ namespace WorkflowAlgorithms
   MatrixWorkspace_sptr AlignAndFocusPowder::conjoinWorkspaces(API::MatrixWorkspace_sptr ws1,
                                                               API::MatrixWorkspace_sptr ws2, size_t offset)
   {
-    // Get information from ws1: maximum spectrum number
+    // Get information from ws1: maximum spectrum number, and store original spectrum IDs
     size_t nspec1 = ws1->getNumberHistograms();
     specid_t maxspecid1 = 0;
+    std::vector<specid_t> origspecids;
     for (size_t i = 0; i < nspec1; ++i)
     {
       specid_t tmpspecid = ws1->getSpectrum(i)->getSpectrumNo();
+      origspecids.push_back(tmpspecid);
       if (tmpspecid > maxspecid1)
         maxspecid1 = tmpspecid;
     }
@@ -693,10 +783,16 @@ namespace WorkflowAlgorithms
 
     API::MatrixWorkspace_sptr outws = alg->getProperty("OutputWorkspace");
 
-    // FIXME : Need to store the original spectrum ID and reset!
+    // FIXED : Restore the original spectrum IDs to spectra from ws1
     for (size_t i = 0; i < nspec1; ++i)
-      g_log.information() << "[DBx540] Conjoined spectrum " << i << ": spectrum number = "
-                          << outws->getSpectrum(i)->getSpectrumNo() << ".\n";
+    {
+      specid_t tmpspecid = outws->getSpectrum(i)->getSpectrumNo();
+      outws->getSpectrum(i)->setSpectrumNo(origspecids[i]);
+
+      g_log.information() << "[DBx540] Conjoined spectrum " << i << ": restore spectrum number to "
+                          << outws->getSpectrum(i)->getSpectrumNo() << " from spectrum number = "
+                          << tmpspecid << ".\n";
+    }
 
     // Rename spectrum number
     if (offset > 0)

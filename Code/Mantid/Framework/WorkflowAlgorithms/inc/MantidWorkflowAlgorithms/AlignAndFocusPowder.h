@@ -80,6 +80,17 @@ namespace Mantid
       API::MatrixWorkspace_sptr conjoinWorkspaces(API::MatrixWorkspace_sptr ws1, API::MatrixWorkspace_sptr ws2,
                                                   size_t offset);
 
+      /// Call diffraction focus to a matrix workspace.
+      API::MatrixWorkspace_sptr diffractionFocus(API::MatrixWorkspace_sptr ws);
+
+      /// Convert units
+      API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws, std::string target);
+
+      /// Call edit instrument geometry
+      API::MatrixWorkspace_sptr editInstrument(API::MatrixWorkspace_sptr ws, std::vector<double> polars,
+                                                                    std::vector<specid_t> specids, std::vector<double> l2s,
+                                                                    std::vector<double> phis);
+
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
       DataObjects::EventWorkspace_sptr m_inputEW;
