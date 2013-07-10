@@ -821,9 +821,7 @@ namespace DataObjects
     auto det = getDetector();
     if(det == NULL)
     {
-      std::stringstream stream;
-      stream << "Peak at row " << this->m_Row;
-      throw Mantid::Kernel::Exception::NotFoundError("Detector cannot be found.", stream.str());
+      throw Mantid::Kernel::Exception::NotFoundError("Detector cannot be found.", "");
     }
     return getDetector()->getPos();
   }
