@@ -548,8 +548,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
             for iws in xrange(samRun.getNumberHistograms()):
                 spec1 = samRun.getSpectrum(iws)
-                spec2 = vanRun.getSpectrum(iws)
-                self.log().information("[DBx157] ws %d: sample spectrum ID = %d; vanadium spectrum ID = %d" % ( iws, spec1.getSpectrumNo(), spec2.getSpectrumNo() ))
+                self.log().information("[DBx157] ws %d: sample spectrum ID = %d;" % ( iws, spec1.getSpectrumNo()))
 
             if HAVE_MPI:
                 if rank > 0:
