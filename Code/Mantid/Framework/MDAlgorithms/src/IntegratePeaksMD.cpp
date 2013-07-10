@@ -236,9 +236,9 @@ namespace MDAlgorithms
 			// Get a direct ref to that peak.
 			IPeak & p = peakWS->getPeak(i);
 			std::ostringstream label;
-			label << Utils::round(-p.getH())
-			<< "_" << Utils::round(-p.getK())
-			<<  "_" << Utils::round(-p.getL())
+			label << Utils::round(p.getH())
+			<< "_" << Utils::round(p.getK())
+			<<  "_" << Utils::round(p.getL())
 			<<  "_" << p.getRunNumber();
 			newAxis1->setLabel(i, label.str());
 			newAxis2->setLabel(i, label.str());
@@ -449,22 +449,29 @@ namespace MDAlgorithms
 
 			size_t half = numSteps/2;
 			double Centre = wsProfile2D->dataX(i)[half];
-			double Sigma = 0.02;
-			double peakHeight = wsProfile2D->dataY(i)[half];
+			const Mantid::MantidVec& Y = wsProfile2D->readY(i);
+			double peakHeight = Y[half];
+			size_t iStep;
+			for (iStep=0; iStep <= half; iStep++)
+			{
+				if(((Y[iStep]-peakHeight*0.75)*(Y[iStep+1]-peakHeight*0.75))<0.)break;
+			}
+			double Sigma = fabs(Centre-wsProfile2D->dataX(i)[iStep]);
 			std::string profileFunction = getProperty("ProfileFunction");
 			std::ostringstream fun_str, plot_str;
 			plot_str << "FitPeak" << i;
 			if (profileFunction.compare("Gaussian") == 0)
+			{
 				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=Gaussian,Height="<<peakHeight<<",Sigma="<<Sigma<<",PeakCentre="<<Centre;
+			}
 			else if (profileFunction.compare("ConvolutionExpGaussian") == 0)
 			{
-				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution,FixResolution=false;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
-						";name=ExpDecay,Height="<<-peakHeight<<",Lifetime=0.01)";
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=250.0,B=0.0,X0="<<Centre<<",S="<<Sigma;
+				fit_alg->setProperty("Ties", "f1.B=0.0");
 			}
 			else if (profileFunction.compare("ConvolutionBackToBackGaussian") == 0)
 			{
-				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution,FixResolution=false;name=Gaussian,Height="<<peakHeight<<",PeakCentre="<<Centre<<",Sigma="<<Sigma<<
-						";name=BackToBackExponential,I="<<-peakHeight<<",A=20000.0,B=0.0005,X0=0.02,S=-0.006)";
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=250.0,B=250.0,X0="<<Centre<<",S="<<Sigma;
 			}
 			if (profileFunction.compare("NoFit") != 0)
 			{
