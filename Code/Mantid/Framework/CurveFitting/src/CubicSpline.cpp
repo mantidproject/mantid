@@ -55,8 +55,9 @@ namespace Mantid
       {
         int n = getAttribute("n").asInt();
 
-        double x[n];
-        double y[n];
+
+        boost::scoped_array<double> x(new double[n]);
+        boost::scoped_array<double> y(new double[n]);
 
         //setup the reference points and calculate
         setupInput(x, y, n);
@@ -66,7 +67,7 @@ namespace Mantid
       }
     }
 
-    void CubicSpline::setupInput(double* x, double* y, int n) const
+    void CubicSpline::setupInput(boost::scoped_array<double>& x, boost::scoped_array<double>& y, int n) const
     {
       //Populate data points from the input attributes and parameters
       bool xSortFlag = false;
@@ -94,7 +95,7 @@ namespace Mantid
       if(xSortFlag)
       {
         g_log.warning() << "Spline x parameters are not in ascending order. Values will be sorted." << std::endl;
-        std::sort(x, x+n);
+        std::sort(x.get(), x.get()+n);
       }
 
       //pass values to GSL objects
@@ -118,13 +119,13 @@ namespace Mantid
         {
           int n = getAttribute("n").asInt();
 
-          double x[n];
-          double y[n];
+          boost::scoped_array<double> x(new double[n]);
+          boost::scoped_array<double> y(new double[n]);
 
           //setup the reference points and calculate
           setupInput(x,y,n);
-
           calculateDerivative(x,y,data,values, order);
+
           m_recalculateDeriv = false;
         }
       }
@@ -146,7 +147,7 @@ namespace Mantid
       }
     }
 
-    void CubicSpline::calculateDerivative(const double* x, const double* y,
+    void CubicSpline::calculateDerivative(const boost::scoped_array<double>& x, const boost::scoped_array<double>& y,
         const API::FunctionDomain1D* domain, API::FunctionValues& values,
            const size_t order) const
     {
@@ -158,13 +159,13 @@ namespace Mantid
         //choose the order of the derivative
         if(order == 1)
         {
-          x_deriv = gsl_interp_eval_deriv(m_interp,x,y,(*domain)[i],m_acc);
-          errorCode = gsl_interp_eval_deriv_e (m_interp,x,y,(*domain)[i],m_acc,&x_deriv);
+          x_deriv = gsl_interp_eval_deriv(m_interp,x.get(),y.get(),(*domain)[i],m_acc);
+          errorCode = gsl_interp_eval_deriv_e (m_interp,x.get(),y.get(),(*domain)[i],m_acc,&x_deriv);
         }
         else if (order == 2)
         {
-          x_deriv = gsl_interp_eval_deriv2(m_interp,x,y,(*domain)[i],m_acc);
-          errorCode = gsl_interp_eval_deriv2_e (m_interp,x,y,(*domain)[i],m_acc,&x_deriv);
+          x_deriv = gsl_interp_eval_deriv2(m_interp,x.get(),y.get(),(*domain)[i],m_acc);
+          errorCode = gsl_interp_eval_deriv2_e (m_interp,x.get(),y.get(),(*domain)[i],m_acc,&x_deriv);
         }
         else
         {
@@ -264,17 +265,17 @@ namespace Mantid
       }
     }
 
-    void CubicSpline::initGSLObjects(double* x, double* y, int n) const
+    void CubicSpline::initGSLObjects(boost::scoped_array<double>& x, boost::scoped_array<double>& y, int n) const
     {
       //init the gsl structures if required
       if(m_recalculateSpline)
       {
-        gsl_spline_init(m_spline, x, y, n);
+        gsl_spline_init(m_spline, x.get(), y.get(), n);
       }
 
       if(m_recalculateDeriv)
       {
-        gsl_interp_init(m_interp, x, y, n);
+        gsl_interp_init(m_interp, x.get(), y.get(), n);
       }
     }
 

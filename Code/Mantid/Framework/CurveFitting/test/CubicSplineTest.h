@@ -121,7 +121,7 @@ public:
     //compare reference data with output data
     for (int i = 0; i < nData; ++i)
     {
-      TS_ASSERT_EQUALS(referenceSet[i], testDataValues[i]);
+      TS_ASSERT_DELTA(referenceSet[i], testDataValues[i], 1e-4);
     }
 
   }
