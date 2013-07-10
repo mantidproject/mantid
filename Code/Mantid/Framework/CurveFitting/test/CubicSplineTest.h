@@ -1,6 +1,7 @@
 #ifndef CubicSplineTEST_H_
 #define CubicSplineTEST_H_
 
+#include <boost/scoped_array.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <iostream>
@@ -104,8 +105,8 @@ public:
 
     int nData = 10; //number of data points to fit too
 
-    double x[nData];
-    double referenceSet[nData];
+    boost::scoped_array<double> x(new double[nData]);
+    boost::scoped_array<double> referenceSet(new double[nData]);
 
     //setup spline with n data points separated by 1
     setupCubicSpline(cspline, nData, 1);
@@ -113,7 +114,7 @@ public:
     //generate a set of test points
     generateTestData(nData, referenceSet, x, 1);
 
-    FunctionDomain1DView view(x, nData);
+    FunctionDomain1DView view(x.get(), nData);
     FunctionValues testDataValues(view);
 
     cspline.function(view, testDataValues);
@@ -138,12 +139,12 @@ public:
 
     int testDataSize = 5;
 
-    double x[testDataSize];
-    double refSet[testDataSize];
+    boost::scoped_array<double> x(new double[testDataSize]);
+    boost::scoped_array<double> refSet(new double[testDataSize]);
 
     generateTestData(testDataSize, refSet, x, 1);
 
-    FunctionDomain1DView view(x, testDataSize);
+    FunctionDomain1DView view(x.get(), testDataSize);
     FunctionValues testDataValues(view);
 
     cspline.function(view, testDataValues);
@@ -163,8 +164,8 @@ public:
     int nData = 20;
     int testDataSize = 30;
 
-    double x[testDataSize];
-    double referenceSet[testDataSize];
+    boost::scoped_array<double> x(new double[testDataSize]);
+    boost::scoped_array<double> referenceSet(new double[testDataSize]);
 
     //init spline with 10 data points
     setupCubicSpline(cspline, nData, 1);
@@ -172,7 +173,7 @@ public:
     //generate three test points for every data point
     generateTestData(testDataSize, referenceSet, x, 0.3);
 
-    FunctionDomain1DView view(x, testDataSize);
+    FunctionDomain1DView view(x.get(), testDataSize);
     FunctionValues testDataValues(view);
 
     cspline.function(view, testDataValues);
@@ -191,13 +192,13 @@ public:
     int nData = 10;
     int testDataSize = 30;
 
-    double x[testDataSize];
-    double refSet[testDataSize];
+    boost::scoped_array<double> x(new double[testDataSize]);
+    boost::scoped_array<double> refSet(new double[testDataSize]);
 
     setupCubicSpline(cspline, nData, 1);
     generateDerviTestData(testDataSize, refSet, x, 0.3, 1);
 
-    FunctionDomain1DView* view = new FunctionDomain1DView(x, testDataSize);
+    FunctionDomain1DView* view = new FunctionDomain1DView(x.get(), testDataSize);
     FunctionValues testDataValues(*view);
     FunctionDomain* domain = dynamic_cast<FunctionDomain*>(view);
 
@@ -212,7 +213,7 @@ public:
 
 private:
   //generate a set of uniform points to test the spline
-  void generateTestData(int numTests, double* refSet, double* xValues, double xModify)
+  void generateTestData(int numTests,boost::scoped_array<double>& refSet, boost::scoped_array<double>& xValues, double xModify)
   {
     for (int i = 0; i < numTests; ++i)
     {
@@ -221,7 +222,7 @@ private:
     }
   }
 
-  void generateDerviTestData(int numTests, double* refSet, double* xValues, double xModify, double h)
+  void generateDerviTestData(int numTests, boost::scoped_array<double>& refSet, boost::scoped_array<double>& xValues, double xModify, double h)
   {
     for(int i =0; i < numTests; ++i)
     {
