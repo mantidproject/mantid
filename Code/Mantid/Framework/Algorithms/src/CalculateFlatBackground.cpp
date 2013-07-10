@@ -21,6 +21,7 @@ The [[Linear]] algorithm is used when the Mode = Linear Fit. From the resulting 
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include <algorithm>
 #include <climits>
 #include "MantidKernel/ListValidator.h"
@@ -362,11 +363,12 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spec
   IAlgorithm_sptr childAlg = createChildAlgorithm("Fit");
 
   IFunction_sptr func = API::FunctionFactory::Instance().createFunction("LinearBackground");
-
   childAlg->setProperty<IFunction_sptr>("Function", func);
+
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<bool>("CreateOutput", true);
   childAlg->setProperty<int>("WorkspaceIndex",spectrum);
+  childAlg->setProperty<std::string>("Minimizer", "Levenberg-MarquardtMD");
   childAlg->setProperty<double>("StartX",startX);
   childAlg->setProperty<double>("EndX",endX);
   childAlg->executeAsChildAlg();
@@ -374,13 +376,20 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spec
   std::string outputStatus = childAlg->getProperty("OutputStatus");
   if ( outputStatus != "success" )
   {
-    g_log.warning("Unable to successfully fit the data. \n" + outputStatus);
+    g_log.warning("Unable to successfully fit the data: " + outputStatus);
     return -1.0;
   }
 
+  Mantid::API::ITableWorkspace_sptr output = childAlg->getProperty("OutputParameters");
+
+  size_t rowA0, rowA1;
+
+  output->find(static_cast<std::string>("A0"), rowA0, 0);
+  output->find(static_cast<std::string>("A1"), rowA1, 0);
+
   // Linear function is defined as A0 + A1*x
-  const double intercept = childAlg->getProperty("A0");
-  const double slope = childAlg->getProperty("A1");
+  const double intercept = output->cell<double>(rowA0, 1);
+  const double slope = output->cell<double>(rowA1, 1);
 
   const double centre = (startX+endX)/2.0;
 
