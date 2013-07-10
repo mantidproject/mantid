@@ -137,9 +137,10 @@ namespace Mantid
       for (size_t i = 0; i < nData; ++i)
       {
         y = gsl_spline_eval(m_spline, xValues[i], m_acc);
+        int errorCode = gsl_spline_eval_e(m_spline, xValues[i], m_acc, &y);
 
         //check if GSL function returned an error
-        //checkGSLError(y, GSL_EDOM);
+        checkGSLError(errorCode, GSL_EDOM);
 
         out[i] = y;
       }
@@ -150,6 +151,7 @@ namespace Mantid
            const size_t order) const
     {
       double x_deriv = 0;
+      int errorCode = 0;
 
       for(size_t i = 0; i < domain->size(); ++i)
       {
@@ -157,10 +159,12 @@ namespace Mantid
         if(order == 1)
         {
           x_deriv = gsl_interp_eval_deriv(m_interp,x,y,(*domain)[i],m_acc);
+          errorCode = gsl_interp_eval_deriv_e (m_interp,x,y,(*domain)[i],m_acc,&x_deriv);
         }
         else if (order == 2)
         {
           x_deriv = gsl_interp_eval_deriv2(m_interp,x,y,(*domain)[i],m_acc);
+          errorCode = gsl_interp_eval_deriv2_e (m_interp,x,y,(*domain)[i],m_acc,&x_deriv);
         }
         else
         {
@@ -169,7 +173,7 @@ namespace Mantid
         }
 
         //check GSL functions didn't return an error
-        //checkGSLError(x_deriv, GSL_EDOM);
+        checkGSLError(errorCode, GSL_EDOM);
 
         //record the value
         values.setCalculated(i, x_deriv);

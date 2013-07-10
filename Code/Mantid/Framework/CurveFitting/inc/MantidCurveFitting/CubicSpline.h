@@ -17,14 +17,12 @@ namespace Mantid
     /**
     Implements CubicSpline Interpolation.
 
-    Attributes: int n - the highest polynomial order.
-    Parameters: n+1 expansion coefficients \f$a_i\f$ as in expression:
-    \f$\sum_{i=0}^{n} a_i T_i(x)\f$
+    Attributes: int n - number of interpolation points
+    Parameters: n
 
-    Uses the Clenshaw algorithm to evaluate the expansion.
 
     @author Samuel Jackson, STFC
-    @date 14/05/2010
+    @date 05/07/2013
 
     Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
