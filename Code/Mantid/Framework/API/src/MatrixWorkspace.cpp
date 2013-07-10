@@ -1018,7 +1018,19 @@ namespace Mantid
     size_t MatrixWorkspace::getMemorySize() const
     {
       //3 doubles per histogram bin.
-      return 3*size()*sizeof(double) + m_run->getMemorySize();
+      if (m_run.operator ->())
+      {
+        return 3*size()*sizeof(double) + m_run->getMemorySize();
+      }
+      else
+      {
+        std::stringstream errss;
+        errss << "m_run is empty! for workspace " << this->name();
+        g_log.error(errss.str());
+        throw std::runtime_error(errss.str());
+      }
+
+      return 0;
     }
 
     /** Returns the memory used (in bytes) by the X axes, handling ragged bins.
