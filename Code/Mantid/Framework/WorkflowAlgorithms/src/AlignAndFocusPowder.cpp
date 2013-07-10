@@ -529,12 +529,24 @@ namespace WorkflowAlgorithms
     if (l1 > 0)
     {
       size_t numreg = m_outputW->getNumberHistograms();
-      size_t numlow = 0;
+
+      // Check size
+      if (tths.size() < numreg)
+        throw std::runtime_error("Input number of 2thetas is smaller than number of histogram.");
+      if (l2s.size() < numreg)
+        throw std::runtime_error("Input number of L2s is smaller than number of histogram.");
+      if (phis.size() < numreg)
+        throw std::runtime_error("Input number of azimuthals is smaller than number of histogram.");
+
+      std::vector<int32_t> vec_specid_reg;
+      if (specids.size() >= numreg)
+      {
+        vec_specid_reg.resize(numreg, 0);
+        std::copy(specids.begin(), (specids.begin()+numreg), vec_specid_reg.begin());
+      }
 
       std::vector<double> vec_polar_reg(numreg, 0.);
       std::copy(tths.begin(), (tths.begin()+numreg), vec_polar_reg.begin());
-      std::vector<int32_t> vec_specid_reg(numreg, 0);
-      std::copy(specids.begin(), (specids.begin()+numreg), vec_specid_reg.begin());
       std::vector<double> vec_l2_reg(numreg, 0.);
       std::copy(l2s.begin(), (l2s.begin()+numreg), vec_l2_reg.begin());
       std::vector<double> vec_azimuthal_reg(numreg, 0.);
@@ -558,10 +570,35 @@ namespace WorkflowAlgorithms
 
       if (m_processLowResTOF)
       {
+        size_t numlow = m_lowResW->getNumberHistograms();
+
+        // Check size
+        if (tths.size() < numreg+numlow)
+          throw std::runtime_error("Input number of 2thetas is smaller than number of histogram (low).");
+        if (l2s.size() < numreg+numlow)
+          throw std::runtime_error("Input number of L2s is smaller than number of histogram (low).");
+        if (phis.size() < numreg+numlow)
+          throw std::runtime_error("Input number of azimuthals is smaller than number of histogram (low).");
+
+        std::vector<int32_t> vec_specid_low;
+        if (specids.size() == numreg+numlow)
+        {
+          vec_specid_low.resize(numlow, 0);
+          std::copy((specids.begin()+numreg), specids.end(), vec_specid_low.begin());
+        }
+        else if (specids.size() == 0)
+        {
+          ;
+        }
+        else
+        {
+          std::stringstream errss;
+          errss << "SpecIDs has a weird size = " << specids.size() << ", OutputW's size = " << numreg
+                << ", LowResW's size = " << numlow << ".\n";
+        }
+
         std::vector<double> vec_polar_low(numlow, 0.);
         std::copy((tths.begin()+numreg), tths.end(), vec_polar_low.begin());
-        std::vector<int32_t> vec_specid_low(numlow, 0);
-        std::copy((specids.begin()+numreg), specids.end(), vec_specid_low.begin());
         std::vector<double> vec_l2_low(numlow, 0.);
         std::copy((l2s.begin()+numreg), l2s.end(), vec_l2_low.begin());
         std::vector<double> vec_azimuthal_low(numlow, 0.);
