@@ -372,10 +372,10 @@ public:
       auto ws = createTestWorkspace(false);
       const double zero = 0.0;
       const double one = 1.0;
-      ws->dataY(0)[3] = 1.0 / zero;
+      ws->dataY(0)[3] = std::numeric_limits<double>::infinity();
       ws->dataY(0)[5] = log(-one);
       ws->dataE(0)[7] = 0;
-      ws->dataE(0)[9] = 1.0 / zero;
+      ws->dataE(0)[9] = std::numeric_limits<double>::infinity();
       ws->dataE(0)[11] = log(-one);
 
       FunctionDomain_sptr domain;
