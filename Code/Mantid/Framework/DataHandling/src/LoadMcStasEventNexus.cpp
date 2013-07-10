@@ -103,7 +103,6 @@ namespace DataHandling
     ::NeXus::File nxFile(filename);
     auto entries = nxFile.getEntries();
     auto itend = entries.end();
-    size_t workspaceCount(0);
     std::string prefix = getPropertyValue("OutputWorkspace");
     WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);
 
@@ -215,7 +214,7 @@ namespace DataHandling
         eventWS->setInstrument(instrument);
         // assign detector ID to eventlists
         std::vector<detid_t> detIDs = instrument->getDetectorIDs();
-        for (auto i = 0; i < instrument->getNumberDetectors(); i++)
+        for (size_t i = 0; i < instrument->getNumberDetectors(); i++)
         {
           eventWS->getEventList(i).addDetectorID(detIDs[i]);
           // spectrum number are treated as equal to detector IDs for McStas data
@@ -242,8 +241,8 @@ namespace DataHandling
         size_t nNeutrons = data.size() / numberOfDataColumn;
 
         // to store shortest and longest recorded TOF
-        double shortestTOF; 
-        double longestTOF;
+        double shortestTOF(0.0); 
+        double longestTOF(0.0);
 
         // populate workspace with McStas events          
         detid2index_map* detIDtoWSindex_map =	eventWS->getDetectorIDToWorkspaceIndexMap(true); 
