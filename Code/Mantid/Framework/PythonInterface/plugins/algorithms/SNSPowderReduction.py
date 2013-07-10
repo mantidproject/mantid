@@ -253,7 +253,7 @@ class SNSPowderReduction(PythonAlgorithm):
         infotableprop = ITableWorkspaceProperty("SplitInformationWorkspace", "", Direction.Input, PropertyMode.Optional)
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
-        self.declareProperty("ReduceLowResolutionTOF", False, "If chosen, low resolution TOF will be reduced after being filtered out.  Otherwise, ignored.")
+        self.declareProperty("LowResolutionSpectraOffset", -1,  "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
 
         return
 
@@ -546,6 +546,11 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 vanRun = None
 
+            for iws in xrange(samRun.getNumberHistograms()):
+                spec1 = samRun.getSpectrum(iws)
+                spec2 = vanRun.getSpectrum(iws)
+                self.log().information("[DBx157] ws %d: sample spectrum ID = %d; vanadium spectrum ID = %d" % ( iws, spec1.getSpectrumNo(), spec2.getSpectrumNo() ))
+
             if HAVE_MPI:
                 if rank > 0:
                     return
@@ -566,9 +571,17 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 normalized = False
 
+            for iws in xrange(samRun.getNumberHistograms()):
+                spec1 = samRun.getSpectrum(iws)
+                self.log().information("[DBx209] ws %d: sample spectrum ID = %d;" % ( iws, spec1.getSpectrumNo() ))
+
             if not "histo" in SUFFIX and preserveEvents and HAVE_MPI is False:
                 samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns/
+
+            for iws in xrange(samRun.getNumberHistograms()):
+                spec1 = samRun.getSpectrum(iws)
+                self.log().information("[DBx210] ws %d: sample spectrum ID = %d;" % ( iws, spec1.getSpectrumNo() ))
 
             # make sure there are no negative values - gsas hates them
             if self.getProperty("PushDataPositive").value != "None":
@@ -582,8 +595,14 @@ class SNSPowderReduction(PythonAlgorithm):
                     samRun = str(samRun)
             else:
                 self._save(samRun, self._info, normalized, False)
+                samRunws = samRun
                 samRun = str(samRun)
             #mtd.releaseFreeMemory()
+
+            for iws in xrange(samRunws.getNumberHistograms()):
+                spec1 = samRunws.getSpectrum(iws)
+                self.log().information("[DBx211] ws %s spec %d-th: sample spectrum ID = %d;" % ( str(samRunws), iws, spec1.getSpectrumNo() ))
+
         # ENDFOR
 
         # convert everything into d-spacing
@@ -591,6 +610,9 @@ class SNSPowderReduction(PythonAlgorithm):
         if HAVE_MPI is False:
             for wksp in workspacelist:
                 wksp = api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
+                for iws in xrange(wksp.getNumberHistograms()):
+                    spec1 = wksp.getSpectrum(iws)
+                    self.log().information("[DBx212] ws %s spec %d-th: sample spectrum ID = %d;" % ( str(wksp), iws, spec1.getSpectrumNo() ))
 
         return
 
@@ -791,30 +813,54 @@ class SNSPowderReduction(PythonAlgorithm):
                 self.log().information("[F1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk))
                 # print "[DB1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk)
 
-                self._outputLowResTOF = self.getProperty("ReduceLowResolutionTOF").value
+                self._lowResTOFoffset = self.getProperty("LowResolutionSpectraOffset").value
 
-                if self._outputLowResTOF is True:
+                focuspos = self._config.getFocusPos()
+
+                if self._lowResTOFoffset >= 0:
                     print "Reducing Low resolution TOF"
-                    lowreswsname = str(temp)+"_LowRes"
+
+                    # Dealing with the parameters for editing instrument parameters
+                    if focuspos.has_key("PrimaryFlightPath") is True:
+                        l1 = focuspos["PrimaryFlightPath"]
+                        if l1 > 0:
+                            specids = focuspos['SpectrumIDs']
+                            l2s = focuspos['L2'] 
+                            polars = focuspos['Polar']
+                            phis = focuspos['Azimuthal']
+
+                            specids.extend(specids) 
+                            l2s.extend(l2s) 
+                            polars.extend(polars)
+                            phis.extend(phis)
+
+                            focuspos['SpectrumIDs'] = specids
+                            focuspos['L2'] = l2s
+                            focuspos['Polar'] = polars
+                            focuspos['Azimuthal'] = phis
+
                 else:
                     print "Ignoring Low resolution TOF"
-                    lowreswsname = ""
 
-                tempout = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, LowResTOFWorkspace=lowreswsname, CalFileName=calib,
+                temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                     DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
                     PreserveEvents=preserveEvents,
                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
-                    UnwrapRef=self._LRef, LowResRef=self._DIFCref,
-                    CropWavelengthMin=self._wavelengthMin, **(self._config.getFocusPos()))
+                    UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset, 
+                    CropWavelengthMin=self._wavelengthMin, **(focuspos))
 
-                if self._outputLowResTOF is True:
-                    temphighws = tempout[0]
-                    templowws = tempout[1]
-                    temp = api.AppendSpectra(InputWorkspace1=temphighws, InputWorkspace2=templowws, OutputWorkspace=str(temphighws))
-                    api.DeleteWorkspace(Workspace=str(templowws)) 
-                else:
-                    temp = tempout 
+                for iws in xrange(temp.getNumberHistograms()):
+                    spec = temp.getSpectrum(iws)
+                    self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
+
+                # if self._outputLowResTOF is True:
+                #     temphighws = tempout[0]
+                #     templowws = tempout[1]
+                #     temp = api.AppendSpectra(InputWorkspace1=temphighws, InputWorkspace2=templowws, OutputWorkspace=str(temphighws))
+                #     api.DeleteWorkspace(Workspace=str(templowws)) 
+                # else:
+                #     temp = tempout 
 
                 # try: 
                 #     if temp.__class__.__name__.count("IEvent") > 0: 
