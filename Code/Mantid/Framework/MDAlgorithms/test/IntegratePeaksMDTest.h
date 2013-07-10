@@ -148,10 +148,10 @@ public:
     fnct = "ConvolutionExpGaussian";
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
 
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);*/
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);*/
     // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge false------------------------
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,false);
 
