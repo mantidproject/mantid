@@ -240,7 +240,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         return
               
     # check if reducer can find all non-run files necessary for the reduction before starting long run. 
-    Reducer.check_necessary_files();
+    Reducer.check_necessary_files(monovan_run);
     
     print 'Output will be normalised to', Reducer.normalise_method
     if (numpy.size(sample_run)) > 1 and Reducer.sum_runs:

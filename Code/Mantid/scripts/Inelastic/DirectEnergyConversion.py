@@ -1014,7 +1014,8 @@ class DirectEnergyConversion(object):
                               'diag_bleed_test','diag_bleed_pixels','diag_bleed_maxrate','diag_hard_mask_file','diag_use_hard_mask_only','diag_background_test_range']
 
         # before starting long run, makes sence to verify if all files requested for the run are in fact availible. Here we specify the properties which describe files
-        self.__file_properties = ['det_cal_file','map_file','hard_mask_file','monovan_mapfile']
+        self.__file_properties = ['det_cal_file','map_file','hard_mask_file']
+        self.__abs_norm_file_properties = ['monovan_mapfile']
 
         self.__normalization_methods=['none','monitor-1','current'] # 'monitor-2','uamph', peak -- disabled/unknown at the moment
 
@@ -1307,28 +1308,37 @@ class DirectEnergyConversion(object):
         """
         return ''.join(str(arg) for arg in argi if arg is not None)
   
-    def check_necessary_files(self):
+    def check_necessary_files(self,monovan_run):
         """ Method verifies if all files necessary for a run are availible.
 
            usefull for long runs to check if all files necessary for it are present/accessible
         """
-        file_missing = False
-        for prop in self.__file_properties :
-            file = getattr(self,prop)
-            if not (file is None) and isinstance(file,str):
-                file_path = FileFinder.getFullPath(file)
-                if len(file_path) == 0: 
-                    # it still can be run number
-                    try:
-                        file_path = common.find_file(file)
-                    except:
-                        file_path=''
 
-                    if len(file_path)==0:
-                        self.log(" Can not find file ""{0}"" for property: {1} ".format(file,prop),'error')
-                        file_missing=True
+        def check_files_list(files_list):
+            file_missing = False
+            for prop in files_list :
+                file = getattr(self,prop)
+                if not (file is None) and isinstance(file,str):
+                    file_path = FileFinder.getFullPath(file)
+                    if len(file_path) == 0: 
+                        # it still can be run number
+                        try:
+                            file_path = common.find_file(file)
+                        except:
+                            file_path=''
 
-        if file_missing:
+                        if len(file_path)==0:
+                            self.log(" Can not find file ""{0}"" for property: {1} ".format(file,prop),'error')
+                            file_missing=True
+
+            return file_missing
+        
+        base_file_missing = check_files_list(self.__file_properties)
+        abs_file_missing=False
+        if not (monovan_run is None):
+            abs_file_missing = check_files_list(self.__abs_norm_file_properties)
+
+        if  base_file_missing or abs_file_missing:
              raise RuntimeError(" Files needed for the run are missing ")
 
 
