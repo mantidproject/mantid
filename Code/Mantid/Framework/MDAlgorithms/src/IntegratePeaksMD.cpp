@@ -373,6 +373,12 @@ namespace MDAlgorithms
 			signal_fit.clear();
 			for (size_t j=0; j<numSteps; j++)signal_fit.push_back(0.0);
 			ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(cylinderLength), signal, errorSquared, signal_fit);
+			for (size_t j = 0; j < numSteps; j++)
+			{
+				 wsProfile2D->dataX(i)[j] = static_cast<double>(j) * deltaQ; //-0.5*backgroundCylinder
+				 wsProfile2D->dataY(i)[j] = signal_fit[j];
+				 wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
+			}
 
 			// Integrate around the background radius
 			if (BackgroundOuterRadius > PeakRadius || percentBackground > 0.0)
@@ -478,6 +484,11 @@ namespace MDAlgorithms
 				fit_alg->setPropertyValue("Function", fun_str.str());
 				fit_alg->setProperty("InputWorkspace", wsProfile2D);
 				fit_alg->setProperty("WorkspaceIndex", i);
+				if (profileFunction.compare("ConvolutionExpGaussian") == 0)
+				{
+			        fit_alg->setProperty("StartX", Centre - 4.0 * Sigma);
+			        fit_alg->setProperty("EndX", Centre + 4.0 * Sigma);
+				}
 				fit_alg->setProperty("CreateOutput", true);
 				fit_alg->setProperty("Output", plot_str.str());
 				fit_alg->executeAsChildAlg();
