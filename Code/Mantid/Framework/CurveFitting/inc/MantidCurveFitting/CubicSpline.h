@@ -60,7 +60,8 @@ namespace Mantid
       void function1D(double* out, const double* xValues, const size_t nData)const;
       void derivative(const API::FunctionDomain& domain, API::FunctionValues& values,
           const size_t order) const;
-      void setParameter(size_t i, const double& value, bool explicitlySet);
+      void setParameter(size_t i, const double& value, bool explicitlySet=true);
+      using ParamFunction::setParameter;
 
       /// Set a value to attribute attName
       void setAttribute(const std::string& attName,const Attribute& );
@@ -88,10 +89,10 @@ namespace Mantid
       static const int M_MIN_POINTS;
 
       /// Reallocate the spline object to use n data points
-      void realloc_gsl_objects(const int n);
+      void reallocGSLObjects(const int n);
 
       /// Method to setup the gsl function
-      void setupInput(double* x, double* y, const int n) const;
+      void setupInput(double* x, double* y, int n) const;
 
       /// Calculate the spline
       void calculateSpline(double* out, const double* xValues, const size_t nData) const;
@@ -100,6 +101,12 @@ namespace Mantid
       void calculateDerivative(const double* x, const double* y,
           const API::FunctionDomain1D* domain, API::FunctionValues& values,
             const size_t order) const;
+
+      /// Initialise GSL objects if required
+      void initGSLObjects(double* x, double* y, int n) const;
+
+      /// Check if an error occurred and throw appropriate message
+      void checkGSLError(const double status, const int errorType) const;
     };
 
 

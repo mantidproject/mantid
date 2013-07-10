@@ -11,6 +11,7 @@
 #include "MantidCurveFitting/CubicSpline.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <stdexcept>
@@ -65,9 +66,11 @@ namespace Mantid
       }
     }
 
-    void CubicSpline::setupInput(double* x, double* y, const int n) const
+    void CubicSpline::setupInput(double* x, double* y, int n) const
     {
       //Populate data points from the input attributes and parameters
+      bool xSortFlag = false;
+
       for (int i = 0; i < n; ++i)
       {
         std::string num = boost::lexical_cast<std::string>(i);
@@ -76,19 +79,26 @@ namespace Mantid
         std::string yName = "y" + num;
 
         x[i] = getAttribute(xName).asDouble();
+
+        //if x[i] is out of order with its neighbours
+        if(i>1 && i < n &&
+            (x[i-1] < x[i-2] || x[i-1] > x[i]))
+        {
+          xSortFlag = true;
+        }
+
         y[i] = getParameter(yName);
       }
 
-      //init the gsl structures as required
-      if(m_recalculateSpline)
+      //sort the data points if necessary
+      if(xSortFlag)
       {
-        gsl_spline_init(m_spline, x, y, n);
+        g_log.warning() << "Spline x parameters are not in ascending order. Values will be sorted." << std::endl;
+        std::sort(x, x+n);
       }
 
-      if(m_recalculateDeriv)
-      {
-        gsl_interp_init(m_interp, x, y, n);
-      }
+      //pass values to GSL objects
+      initGSLObjects(x,y,n);
     }
 
     void CubicSpline::derivative(const API::FunctionDomain& domain, API::FunctionValues& values,
@@ -113,8 +123,8 @@ namespace Mantid
 
           //setup the reference points and calculate
           setupInput(x,y,n);
-          calculateDerivative(x,y,data,values, order);
 
+          calculateDerivative(x,y,data,values, order);
           m_recalculateDeriv = false;
         }
       }
@@ -123,9 +133,15 @@ namespace Mantid
     void CubicSpline::calculateSpline(double* out, const double* xValues, const size_t nData) const
     {
       //calculate spline for given input set
+      double y = 0;
       for (size_t i = 0; i < nData; ++i)
       {
-        out[i] = gsl_spline_eval(m_spline, xValues[i], m_acc);
+        y = gsl_spline_eval(m_spline, xValues[i], m_acc);
+
+        //check if GSL function returned an error
+        //checkGSLError(y, GSL_EDOM);
+
+        out[i] = y;
       }
     }
 
@@ -141,18 +157,22 @@ namespace Mantid
         if(order == 1)
         {
           x_deriv = gsl_interp_eval_deriv(m_interp,x,y,(*domain)[i],m_acc);
-          values.setCalculated(i, x_deriv);
         }
         else if (order == 2)
         {
           x_deriv = gsl_interp_eval_deriv2(m_interp,x,y,(*domain)[i],m_acc);
-          values.setCalculated(i, x_deriv);
         }
         else
         {
           //throw error if the order is not the 1st or 2nd derivative
           throw std::invalid_argument("CubicSpline: order of derivative must be either 1 or 2");
         }
+
+        //check GSL functions didn't return an error
+        //checkGSLError(x_deriv, GSL_EDOM);
+
+        //record the value
+        values.setCalculated(i, x_deriv);
       }
     }
 
@@ -182,7 +202,7 @@ namespace Mantid
           double oldX = getAttribute(oldXName).asDouble();
 
           //reallocate gsl object to new size
-          realloc_gsl_objects(n);
+          reallocGSLObjects(n);
 
           //create blank a number of new blank parameters and attributes
           for (int i = oldN; i < n; ++i)
@@ -229,13 +249,40 @@ namespace Mantid
       }
     }
 
-    void CubicSpline::realloc_gsl_objects(const int n)
+    void CubicSpline::checkGSLError(const double status, const int errorType) const
+    {
+      //check GSL functions didn't return an error
+      if(status == errorType)
+      {
+        std::string message("CubicSpline: ");
+        message.append(gsl_strerror(errorType));
+        throw std::runtime_error(message);
+      }
+    }
+
+    void CubicSpline::initGSLObjects(double* x, double* y, int n) const
+    {
+      //init the gsl structures if required
+      if(m_recalculateSpline)
+      {
+        gsl_spline_init(m_spline, x, y, n);
+      }
+
+      if(m_recalculateDeriv)
+      {
+        gsl_interp_init(m_interp, x, y, n);
+      }
+    }
+
+    void CubicSpline::reallocGSLObjects(const int n)
     {
       gsl_interp_free(m_interp);
       gsl_spline_free(m_spline);
 
       m_spline = gsl_spline_alloc(gsl_interp_cspline, n);
       m_interp = gsl_interp_alloc(gsl_interp_cspline, n);
+
+      gsl_interp_accel_reset (m_acc);
     }
 
     CubicSpline::~CubicSpline()

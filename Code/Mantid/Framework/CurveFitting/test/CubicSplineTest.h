@@ -107,7 +107,7 @@ public:
     double x[nData];
     double referenceSet[nData];
 
-    //setup spline with n data points seperated by 1
+    //setup spline with n data points separated by 1
     setupCubicSpline(cspline, nData, 1);
 
     //generate a set of test points
@@ -122,6 +122,36 @@ public:
     for (int i = 0; i < nData; ++i)
     {
       TS_ASSERT_EQUALS(referenceSet[i], testDataValues[i]);
+    }
+
+  }
+
+  void testOutOfOrderInterploationPoints()
+  {
+    CubicSpline cspline;
+
+    setupCubicSpline(cspline, 10, 1);
+
+    //swap the values of some points
+    cspline.setXAttribute(3, 1);
+    cspline.setXAttribute(1, 3);
+
+    int testDataSize = 5;
+
+    double x[testDataSize];
+    double refSet[testDataSize];
+
+    generateTestData(testDataSize, refSet, x, 1);
+
+    FunctionDomain1DView view(x, testDataSize);
+    FunctionValues testDataValues(view);
+
+    cspline.function(view, testDataValues);
+
+    //compare reference data with output data
+    for (int i = 0; i < testDataSize; ++i)
+    {
+      TS_ASSERT_DELTA(refSet[i], testDataValues[i], 1e-4);
     }
 
   }
@@ -154,6 +184,32 @@ public:
     }
   }
 
+  void testCalculateDerivative()
+  {
+    CubicSpline cspline;
+
+    int nData = 10;
+    int testDataSize = 30;
+
+    double x[testDataSize];
+    double refSet[testDataSize];
+
+    setupCubicSpline(cspline, nData, 1);
+    generateDerviTestData(testDataSize, refSet, x, 0.3, 1);
+
+    FunctionDomain1DView* view = new FunctionDomain1DView(x, testDataSize);
+    FunctionValues testDataValues(*view);
+    FunctionDomain* domain = dynamic_cast<FunctionDomain*>(view);
+
+    cspline.derivative(*domain, testDataValues, 1);
+
+    //compare reference data with output data
+    for (int i = 0; i < testDataSize; ++i)
+    {
+      TS_ASSERT_DELTA(refSet[i], testDataValues[i], 1e-2);
+    }
+  }
+
 private:
   //generate a set of uniform points to test the spline
   void generateTestData(int numTests, double* refSet, double* xValues, double xModify)
@@ -162,6 +218,15 @@ private:
     {
       xValues[i] = (i * xModify);
       refSet[i] = splineYFunction(xValues[i]);
+    }
+  }
+
+  void generateDerviTestData(int numTests, double* refSet, double* xValues, double xModify, double h)
+  {
+    for(int i =0; i < numTests; ++i)
+    {
+      xValues[i] = (i * xModify);
+      refSet[i] =  (splineYFunction(xValues[i] + h) - splineYFunction(xValues[i] - h))/2*h;
     }
   }
 
