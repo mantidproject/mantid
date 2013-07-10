@@ -368,9 +368,12 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spec
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<bool>("CreateOutput", true);
   childAlg->setProperty<int>("WorkspaceIndex",spectrum);
-  childAlg->setProperty<std::string>("Minimizer", "Levenberg-MarquardtMD");
   childAlg->setProperty<double>("StartX",startX);
   childAlg->setProperty<double>("EndX",endX);
+  // Default minimizer doesn't work properly even on the easiest cases,
+  // so Levenberg-MarquardtMD is used instead
+  childAlg->setProperty<std::string>("Minimizer", "Levenberg-MarquardtMD");
+  
   childAlg->executeAsChildAlg();
 
   std::string outputStatus = childAlg->getProperty("OutputStatus");
@@ -382,8 +385,8 @@ double CalculateFlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spec
 
   Mantid::API::ITableWorkspace_sptr output = childAlg->getProperty("OutputParameters");
 
+  // Find rows with parameters we are after
   size_t rowA0, rowA1;
-
   output->find(static_cast<std::string>("A0"), rowA0, 0);
   output->find(static_cast<std::string>("A1"), rowA1, 0);
 
