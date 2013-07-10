@@ -923,7 +923,19 @@ void MantidMatrix::repaintAll()
 
 void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  if( wsName != m_strName || !ws ) return;
+  if ( !ws ) return;
+  if( wsName != m_strName )
+  {
+    if ( ws == m_workspace ) // i.e. this is a rename
+    {
+      m_strName = wsName;
+      QString qwsName = QString::fromStdString(wsName);
+      setWindowTitle(qwsName);
+      setName(qwsName);
+      setObjectName(qwsName);
+    }
+    return;
+  }
 
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
   emit needWorkspaceChange( new_workspace ); 
