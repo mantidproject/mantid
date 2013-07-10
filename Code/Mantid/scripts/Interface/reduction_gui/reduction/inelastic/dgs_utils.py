@@ -71,7 +71,7 @@ class InstrumentParameters(object):
         try:
             self._self_check()
         except ValueError:
-            return default
+            return default            
 
         param = self.get_parameter(parname)
         if param < 0 :

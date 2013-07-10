@@ -238,6 +238,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         param = tReducer.get_default_parameter('background')
         self.assertTrue(isinstance(param,bool))
 
+        print "Instr_type :",type(tReducer.instrument)
+
 
 
 
