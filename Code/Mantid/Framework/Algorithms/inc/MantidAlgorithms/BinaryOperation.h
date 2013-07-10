@@ -24,13 +24,6 @@ namespace Mantid
       eNumber = 2
     };
 
-//    struct OpRequirements
-//    {
-//      bool matchXSize;
-//      bool keepEventWorkspace;
-//    };
-
-
     /** 
     BinaryOperation supports the implementation of a binary operation on two input workspaces.
     It inherits from the Algorithm class, and overrides the init() & exec() methods.
