@@ -245,7 +245,7 @@ public slots:
 
 
   //  *****                            *****  //
-  void renameWorkspace(QStringList);
+  void renameWorkspace(QStringList = QStringList());
 
 public:
 

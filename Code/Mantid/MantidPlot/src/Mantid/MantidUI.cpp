@@ -1505,7 +1505,7 @@ void MantidUI::renameWorkspace(QStringList wsName)
     MantidMatrix *matrix = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
     if( matrix )
     {
-      wsName[0] = matrix->workspaceName();
+      wsName.append(matrix->workspaceName());
     }
     else
     {
