@@ -55,7 +55,18 @@ namespace API
     void IFunction1D::derivative(const FunctionDomain& domain, FunctionValues& values,
         const size_t order) const
     {
-      throw Kernel::Exception::NotImplementedError("Derivative is not implemented for this function.");
+      const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
+      if (!d1d)
+      {
+        throw std::invalid_argument("Unexpected domain in IFunction1D");
+      }
+
+      derivative1D(values.getPointerToCalculated(0), d1d->getPointerAt(0), d1d->size(), order);
+    }
+
+    void IFunction1D::derivative1D(double* out, const double* xValues, size_t nData, const size_t order) const
+    {
+       throw Kernel::Exception::NotImplementedError("Derivative is not implemented for this function.");
     }
 
     void IFunction1D::functionDeriv1D(Jacobian* jacobian, const double* xValues, const size_t nData)

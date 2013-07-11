@@ -68,6 +68,10 @@ public:
 
   /// Function you want to fit to.
   virtual void function1D(double* out, const double* xValues, const size_t nData)const = 0;
+
+  /// Function to calculate the derivatives of the data set
+  virtual void derivative1D(double* out, const double* xValues, const size_t nData, const size_t order)const;
+
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData);
 
