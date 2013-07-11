@@ -484,11 +484,11 @@ namespace MDAlgorithms
 				fit_alg->setPropertyValue("Function", fun_str.str());
 				fit_alg->setProperty("InputWorkspace", wsProfile2D);
 				fit_alg->setProperty("WorkspaceIndex", i);
-				if (profileFunction.compare("ConvolutionExpGaussian") == 0)
+				/*if (profileFunction.compare("ConvolutionExpGaussian") == 0)
 				{
 			        fit_alg->setProperty("StartX", Centre - 4.0 * Sigma);
 			        fit_alg->setProperty("EndX", Centre + 4.0 * Sigma);
-				}
+				}*/
 				fit_alg->setProperty("CreateOutput", true);
 				fit_alg->setProperty("Output", plot_str.str());
 				fit_alg->executeAsChildAlg();
