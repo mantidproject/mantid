@@ -136,11 +136,6 @@
    <addaction name="InstrumentSelectionMenu"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionLETFlux">
-   <property name="text">
-    <string>LETFlux</string>
-   </property>
-  </action>
   <action name="actionLET">
    <property name="checkable">
     <bool>true</bool>
@@ -154,6 +149,9 @@
    <property name="text">
     <string>LET</string>
    </property>
+   <property name="toolTip">
+    <string>Select LET</string>
+   </property>
   </action>
   <action name="actionMARI">
    <property name="checkable">
@@ -164,6 +162,9 @@
    </property>
    <property name="text">
     <string>MARI</string>
+   </property>
+   <property name="toolTip">
+    <string>Select MARI</string>
    </property>
   </action>
   <action name="actionMAPS">
@@ -176,6 +177,9 @@
    <property name="text">
     <string>MAPS</string>
    </property>
+   <property name="toolTip">
+    <string>Select MAPS</string>
+   </property>
   </action>
   <action name="actionMERLIN">
    <property name="checkable">
@@ -186,6 +190,9 @@
    </property>
    <property name="text">
     <string>MERLIN</string>
+   </property>
+   <property name="toolTip">
+    <string>Select MERLIN</string>
    </property>
   </action>
  </widget>

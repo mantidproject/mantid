@@ -21,8 +21,14 @@ class MainWindow(QtGui.QMainWindow):
         QtCore.QObject.connect( self.ui.calcButton, QtCore.SIGNAL("clicked()"), self.calculate )
         QtCore.QObject.connect( self.ui.Plot, QtCore.SIGNAL("clicked()"), self.plotData )
         QtCore.QObject.connect( self.ui.OverPlot, QtCore.SIGNAL("clicked()"), self.addPlot)
-        QtCore.QObject.connect( self.ui.ClearFlux, QtCore.SIGNAL("clicked()"), self.clearFluxAndRes)        
+        QtCore.QObject.connect( self.ui.ClearFlux, QtCore.SIGNAL("clicked()"), self.clearFluxAndRes)       
+        
+        QtCore.QObject.connect(self.ui.actionLET,QtCore.SIGNAL("triggered()"), self.letSelected)
+        QtCore.QObject.connect(self.ui.actionMARI,QtCore.SIGNAL("triggered()"), lambda  : self.otherInstrumentSelected('MAR'))        
+        QtCore.QObject.connect(self.ui.actionMERLIN,QtCore.SIGNAL("triggered()"),lambda : self.otherInstrumentSelected('MER'))
+        QtCore.QObject.connect(self.ui.actionMAPS,QtCore.SIGNAL("triggered()"), lambda :  self.otherInstrumentSelected('MAP'))        
 
+        
         self.graph=None;
 
         self.loadData()
@@ -101,7 +107,19 @@ class MainWindow(QtGui.QMainWindow):
         result = self.interpolation(self.frequencies, ei)#returns the value for the specific energy required ei.
         return result
         
-
+    def letSelected(self):
+         QtGui.QMessageBox.warning(self, "Currently You have to switch gui to select another instrument")
+         self.ui.actionLET.setChecked(True)        
+    def otherInstrumentSelected(self,INAME):
+        reply = QtGui.QMessageBox.question(self, 'Selecting : '+INAME,
+        "Do you want to switch GUI?", QtGui.QMessageBox.Yes, QtGui.QMessageBox.No)    
+        if reply == QtGui.QMessageBox.Yes:
+            config['default.instrument'] = INAME
+            self.deleteLater()
+        else:
+            pass
+        #QtGui.QMessageBox.setText(self,'Currently You have to switch GUI to have other instrument selected')
+        
     def calculate(self):
         """returns the results of interpolation and prints them in the window.   
         """
@@ -121,13 +139,13 @@ class MainWindow(QtGui.QMainWindow):
             self.setUpTable()        
             #self.ui.list.clear()
             string = 'Energy selected:' +'  '+ str(self.ei)
-            self.ui.list.addItem(string) 
+            self.ui.list.insertItem(0,string) 
             string_title = 'Frequency(Hz)    Flux(n/s/cm^2)           Resolution[ueV]'
-            self.ui.list.addItem(string_title) 
+            self.ui.list.insertItem(1,string_title) 
             t=self.t;
             for i in xrange(0, len(self.frequencies)):
                 string1 = str(self.frequencies[i])+'                    '+ "%e" % t.cell(2,i+1)+'              '+ "%e"% t.cell(3,i+1)
-                self.ui.list.addItem(string1) 
+                self.ui.list.insertItem(2+i,string1) 
         return self
         
     def clearFluxAndRes(self):
