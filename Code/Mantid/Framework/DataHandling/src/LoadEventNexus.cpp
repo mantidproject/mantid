@@ -156,14 +156,15 @@ public:
                   size_t numEvents, size_t startAt,
                   boost::shared_ptr<std::vector<uint64_t> > event_index,
                   BankPulseTimes * thisBankPulseTimes,
-                  bool have_weight, boost::shared_array<float> event_weight)
+                  bool have_weight, boost::shared_array<float> event_weight,
+                  detid_t min_event_id, detid_t max_event_id)
   : Task(),
     alg(alg), entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
     prog(prog), scheduler(scheduler),
     event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
     event_index(event_index),
     thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
-    event_weight(event_weight)
+    event_weight(event_weight), m_min_id(min_event_id), m_max_id(max_event_id)
   {
     // Cost is approximately proportional to the number of events to process.
     m_cost = static_cast<double>(numEvents);
@@ -185,25 +186,23 @@ public:
     // ---- Pre-counting events per pixel ID ----
     if (alg->precount)
     {
-      std::vector<size_t> counts;
-      // key = pixel ID, value = count
-      counts.resize(alg->eventid_max+1);
+      std::vector<size_t> counts(m_max_id-m_min_id+1, 0);
       for (size_t i=0; i < numEvents; i++)
       {
         detid_t thisId = detid_t(event_id[i]);
-        if (thisId <= alg->eventid_max)
-          counts[thisId]++;
+        if (thisId >= m_min_id && thisId <= m_max_id)
+          counts[thisId-m_min_id]++;
       }
 
       // Now we pre-allocate (reserve) the vectors of events in each pixel counted
-      for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
+      for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++)
       {
-        if (counts[pixID] > 0)
+        if (counts[pixID-m_min_id] > 0)
         {
           //Find the the workspace index corresponding to that pixel ID
           size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
           // Allocate it
-          alg->WS->getEventList(wi).reserve( counts[pixID] );
+          alg->WS->getEventList(wi).reserve( counts[pixID-m_min_id] );
           if (alg->getCancel()) break; // User cancellation
         }
       }
@@ -406,6 +405,10 @@ private:
   bool have_weight;
   /// event weights array
   boost::shared_array<float> event_weight;
+  /// Minimum pixel id
+  detid_t m_min_id;
+  /// Maximum pixel id
+  detid_t m_max_id;
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
 };
@@ -636,7 +639,6 @@ public:
         if (temp < m_min_id) m_min_id = temp;
         if (temp > m_max_id) m_max_id = temp;
       }
-      std::cout << "******" << m_min_id << " - " << m_max_id << std::endl; // REMOVE
     }
   }
 
@@ -846,9 +848,14 @@ public:
     boost::shared_array<float> event_weight_shrd(m_event_weight);
     boost::shared_ptr<std::vector<uint64_t> > event_index_shrd(event_index_ptr);
 
+    // fixup the maximum pixel id
+    if (m_max_id > static_cast<uint32_t>(alg->eventid_max)) m_max_id = static_cast<uint32_t>(alg->eventid_max);
+
+    // schedule the job to generate the event lists
     ProcessBankData * newTask = new ProcessBankData(alg, entry_name, prog,scheduler,
         event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
-        thisBankPulseTimes, m_have_weight, event_weight_shrd);
+        thisBankPulseTimes, m_have_weight, event_weight_shrd,
+        m_min_id, m_max_id);
     scheduler->push(newTask);
   }
 
