@@ -277,14 +277,18 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,
 			prob1.append(yprob[1])
 			prob2.append(yprob[2])
 		fitWS = fname+'_Result'
-		fout = fitWS +'_'+ str(m)
+		if nsam > 1:
+			fout = fitWS +'_'+ str(m)
+		else:
+			fout = fitWS
 		CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
 			Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
 		if m == 0:
 			group = fout
 		else:
 			group += ',' + fout
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
+	if nsam > 1:
+		GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
 	if program == 'QL':
 		yPr0 = np.array([prob0[0]])
 		yPr1 = np.array([prob1[0]])
