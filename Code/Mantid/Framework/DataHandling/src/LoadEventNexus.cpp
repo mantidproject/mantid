@@ -43,6 +43,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidKernel/Timer.h"
 
 using std::endl;
 using std::map;
@@ -378,6 +379,8 @@ public:
     // For Linux with tcmalloc, make sure memory goes back;
     // but don't call if more than 15% of memory is still available, since that slows down the loading.
     MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
+
+    alg->getLogger().debug() << "Time to process " << entry_name << " " << m_timer << "\n";
   }
 
 
@@ -412,6 +415,8 @@ private:
   bool have_weight;
   /// event weights array
   float * event_weight;
+  /// timer for performance
+  Mantid::Kernel::Timer m_timer;
 };
 
 
