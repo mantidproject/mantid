@@ -1,6 +1,6 @@
 from mantid import config
 from PyChop import fluxGUI
-from PyChop import PyChopUI
+from PyChop import PyChopGUI
 from PyQt4 import QtGui
 import sys
 
@@ -15,8 +15,8 @@ def qapp():
 app = qapp()
 instr_name = config['default.instrument']
 if instr_name[0:3] == 'LET':
-    Resolution = fluxGUI.MainWindow()#the main ui class in this file is called MainWindow
+    Resolution = fluxGUI.MainWindow()#the main ui class for LET resolution
 else:
-    Resolution = PyChopGUI.MainWindos()
+    Resolution = PyChopGUI.MainWindow()
 Resolution.show()
 app.exec_()
