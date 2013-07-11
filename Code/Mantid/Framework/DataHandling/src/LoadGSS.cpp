@@ -90,6 +90,8 @@ namespace Mantid
           "The input filename of the stored data");
       declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
                       "Workspace name to load into.");
+
+      declareProperty("UseBankIDasSpectrumNumber", false, "If true, spectrum number corresponding to one bank should be its bank ID. ");
     }
 
     /**
@@ -99,6 +101,8 @@ namespace Mantid
     {
       using namespace Mantid::API;
       std::string filename = getPropertyValue("Filename");
+
+      bool m_useBankAsSpectrum = getProperty("UseBankIDasSpectrumNumber");
 
       std::vector<MantidVec*> gsasDataX;
       std::vector<MantidVec*> gsasDataY;
@@ -408,6 +412,10 @@ namespace Mantid
       }
 
       // 2.2 Put data from MatidVec's into outputWorkspace
+      if (detectorIDs.size() != static_cast<size_t>(nHist))
+      {
+        throw std::runtime_error("It seems not possible to have mismatch spectrum numbers and nHist.");
+      }
       for (int i = 0; i < nHist; ++i)
       {
         // Move data across
@@ -418,6 +426,13 @@ namespace Mantid
         delete gsasDataX[i];
         delete gsasDataY[i];
         delete gsasDataE[i];
+
+        // Reset spectrum number if
+        if (m_useBankAsSpectrum)
+        {
+          specid_t specno = static_cast<specid_t>(detectorIDs[i]);
+          outputWorkspace->getSpectrum(i)->setSpectrumNo(specno);
+        }
       }
 
       // 2.3 Build instrument geometry
