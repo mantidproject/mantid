@@ -370,7 +370,6 @@ public:
   void test_ignore_invalid_data()
   {
       auto ws = createTestWorkspace(false);
-      const double zero = 0.0;
       const double one = 1.0;
       ws->dataY(0)[3] = std::numeric_limits<double>::infinity();
       ws->dataY(0)[5] = log(-one);
