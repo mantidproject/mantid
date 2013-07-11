@@ -174,10 +174,9 @@ size_t MantidMatrixFunction::indexX(size_t row,double s)const
   if (n == 0 || s < X[0] || s > X[n-1]) return std::numeric_limits<size_t>::max();
 
   size_t i = 0, j = n-1, k = n/2;
-  double ss;
   for(size_t it = 0; it < n; it++)
   {
-    ss = X[k];
+    const double ss = X[k];
     if (ss == s ) return k;
     if (abs(static_cast<int>(i) - static_cast<int>(j)) <2)
     {
@@ -218,10 +217,9 @@ size_t MantidMatrixFunction::indexY(double s)const
   }
 
   size_t i = i0, j = n-1, k = n/2;
-  double ss;
   for(size_t it = 0; it < n; it++)
   {
-    ss = yAxis(k);
+    const double ss = yAxis(k);
     if (ss == s ) return k;
     if (abs(static_cast<int>(i) - static_cast<int>(j)) <2)
     {
