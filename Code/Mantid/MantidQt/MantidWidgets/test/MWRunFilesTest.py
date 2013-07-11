@@ -1,6 +1,7 @@
 import sys
 import unittest
 from PyQt4 import QtCore, QtGui
+import mantid
 import mantidqtpython
 
 # Create the application only once per test; otherwise I get a segfault
