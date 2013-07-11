@@ -92,6 +92,11 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
 )
 
+# Python unit tests
+set ( TEST_PY_FILES
+  test/MWRunFilesTest.py
+)
+
 include_directories ( ../../QtPropertyBrowser/src )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
@@ -115,6 +120,14 @@ target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser
     ${QT_LIBRARIES} ${QWT_LIBRARIES} 
     ${QSCINTILLA_LIBRARIES}
     )
+
+###########################################################################
+# Unit tests setup
+###########################################################################
+
+if ( PYUNITTEST_FOUND )
+  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}/test MantidWidgetsTest ${TEST_PY_FILES} )
+endif ()
 
 ###########################################################################
 # Installation settings
