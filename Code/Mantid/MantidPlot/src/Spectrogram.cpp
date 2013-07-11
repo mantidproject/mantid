@@ -675,7 +675,7 @@ void Spectrogram::setContourLinePen(int index, const QPen &pen)
 }
 
 double MatrixData::value(double x, double y) const
-{		
+{
   x += 0.5*dx;
   y -= 0.5*dy;
 

@@ -161,7 +161,7 @@ PlotDialog::PlotDialog(bool showExtended, ApplicationWindow* app, MultiLayer *ml
 
 	QShortcut *shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
     connect(shortcut, SIGNAL(activated()), this, SLOT(removeSelectedCurve()));
-	
+
   setMultiLayer(ml);
 }
 
@@ -274,7 +274,7 @@ void PlotDialog::initContourLinesPage()
 	//privateTabWidget->addTab(layerGeometryPage, tr("Contour Lines"));
 }
 void PlotDialog::setEquidistantLevels()
-{	
+{
 	QTreeWidgetItem *it = listBox->currentItem();
     if (!it)
         return;
@@ -287,7 +287,7 @@ void PlotDialog::setEquidistantLevels()
 	Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
 	if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
 		return;
-	
+
 
 	QwtValueList levels;
 	double firstVal = firstContourLineBox->value();
@@ -436,7 +436,7 @@ void PlotDialog::changePlotType(int plotType)
 
 
 
-/** 
+/**
 * Changes the graph's plot stlye from somewhere other than the plot dialog.
 *
 * @params plotType :: This is the plot style number. i.e line is 0 and scatter is 1.
@@ -461,7 +461,7 @@ void PlotDialog::setPlotType(int plotType, int curveNum, const QString & color)
 		graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
 	else if (plotType == Graph::LineSymbols)
 		graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
-    
+
   if (color != "Default")
     s.setPen(QPen(QColor(color)));
 
@@ -808,7 +808,7 @@ void PlotDialog::initLabelsPage()
 	gl->addWidget(labelsColumnLbl, 0, 0);
     boxLabelsColumn = new QComboBox();
     gl->addWidget(boxLabelsColumn, 0, 1);
-	  
+
     gl->addWidget(new QLabel(tr( "Color" )), 1, 0);
     boxLabelsColor = new ColorBox();
     gl->addWidget(boxLabelsColor, 1, 1);
@@ -835,7 +835,7 @@ void PlotDialog::initLabelsPage()
     boxLabelsXOffset->setRange(-INT_MAX, INT_MAX);
     boxLabelsXOffset->setSingleStep(10);
     gl->addWidget(boxLabelsXOffset, 4, 1);
-	
+
     gl->addWidget(new QLabel(tr("Y Offset (font height %)")), 5, 0);
     boxLabelsYOffset = new QSpinBox();
     boxLabelsYOffset->setRange(-INT_MAX, INT_MAX);
@@ -1173,94 +1173,36 @@ void PlotDialog::showColorMapEditor(bool)
   else
   {
     mSelectColormap->show();
-    connect(mSelectColormap,SIGNAL(clicked()),this,SLOT(changeColormap()));
   }
-}
-
-
-void PlotDialog::showSelectColorMapButton(bool )
-{
-  mSelectColormap->show();
-  connect(mSelectColormap,SIGNAL(clicked()),this,SLOT(changeColormap()));
-
 }
 
 void PlotDialog::initSpectrogramPage()
 {
-  	spectrogramPage = new QWidget();
+  spectrogramPage = new QWidget();
 
-  	imageGroupBox = new QGroupBox(tr( "Image" ));
-  	imageGroupBox->setCheckable (true);
+  imageGroupBox = new QGroupBox(tr( "Image" ));
+  imageGroupBox->setCheckable (true);
 
-	QVBoxLayout *vl = new QVBoxLayout();
-  	grayScaleBox = new QRadioButton(tr("&Gray Scale"));
-	connect(grayScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
-    vl->addWidget(grayScaleBox);
-  	defaultScaleBox = new QRadioButton(tr("&Default Color Map"));
-	connect(defaultScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
-    vl->addWidget(defaultScaleBox);
-  	customScaleBox = new QRadioButton(tr("&Custom Color Map"));
-	connect(customScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
-    vl->addWidget(customScaleBox);
+  QVBoxLayout *vl = new QVBoxLayout();
 
-    QHBoxLayout *hl = new QHBoxLayout(imageGroupBox);
-	//colorMapEditor = new ColorMapEditor();
-    hl->addLayout(vl);
-	//hl->addWidget(colorMapEditor);
+  grayScaleBox = new QRadioButton(tr("&Gray Scale"));
+  connect(grayScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
+  vl->addWidget(grayScaleBox);
 
-	mSelectColormap = new QPushButton(tr("Select ColorMap"));
-	if(mSelectColormap) mSelectColormap->hide();
-	hl->addWidget(mSelectColormap);
+  defaultScaleBox = new QRadioButton(tr("&Default Color Map"));
+  connect(defaultScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
+  vl->addWidget(defaultScaleBox);
 
-  	/*levelsGroupBox = new QGroupBox(tr( "Contour Lines" ));
-  	levelsGroupBox->setCheckable(true);
+  customScaleBox = new QRadioButton(tr("&Custom Color Map"));
+  connect(customScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
+  vl->addWidget(customScaleBox);
 
-    QHBoxLayout *hl1 = new QHBoxLayout();
-    hl1->addWidget(new QLabel(tr( "Levels" )));
+  QHBoxLayout *hl = new QHBoxLayout(imageGroupBox);
+  hl->addLayout(vl);
 
-  	levelsBox = new QSpinBox();
-  	levelsBox->setRange(2, 1000);
-	hl1->addWidget(levelsBox);
-    hl1->addStretch();
-
-    QVBoxLayout *vl1 = new QVBoxLayout();
-    vl1->addLayout(hl1);
-
-  	autoContourBox = new QRadioButton(tr("Use &Color Map"));
-  	connect(autoContourBox, SIGNAL(toggled(bool)), this, SLOT(showDefaultContourLinesBox(bool)));
-    vl1->addWidget(autoContourBox);
-
-  	defaultContourBox = new QRadioButton(tr("Use Default &Pen"));
-  	connect(defaultContourBox, SIGNAL(toggled(bool)), this, SLOT(showDefaultContourLinesBox(bool)));
-    vl1->addWidget(defaultContourBox);
-
-    QHBoxLayout *hl2 = new QHBoxLayout(levelsGroupBox);
-    hl2->addLayout(vl1);
-
-  	defaultPenBox = new QGroupBox();
-    QGridLayout *gl1 = new QGridLayout(defaultPenBox);
-    gl1->addWidget(new QLabel(tr( "Color" )), 0, 0);
-
-  	levelsColorBox = new ColorButton(defaultPenBox);
-    gl1->addWidget(levelsColorBox, 0, 1);
-
-    gl1->addWidget(new QLabel(tr( "Width" )), 1, 0);
-  	contourWidthBox = new DoubleSpinBox('f');
-  contourWidthBox->setLocale(d_app->locale());
-	contourWidthBox->setSingleStep(0.1);
-    contourWidthBox->setRange(0, 100);
-    gl1->addWidget(contourWidthBox, 1, 1);
-
-    gl1->addWidget(new QLabel(tr( "Style" )), 2, 0);
-  	boxContourStyle = new QComboBox();
-	boxContourStyle->setEditable(false);
-  	boxContourStyle->addItem("_____");
-  	boxContourStyle->addItem("_ _ _");
-  	boxContourStyle->addItem(".....");
-  	boxContourStyle->addItem("_._._");
-  	boxContourStyle->addItem("_.._..");
-    gl1->addWidget(boxContourStyle, 2, 1);
-    hl2->addWidget(defaultPenBox);*/
+  mSelectColormap = new QPushButton(tr("Select ColorMap"));
+  hl->addWidget(mSelectColormap);
+  connect(mSelectColormap,SIGNAL(clicked()),this,SLOT(changeColormap()));
 
   	axisScaleBox = new QGroupBox(tr( "Color Bar Scale" ));
   	axisScaleBox->setCheckable (true);
@@ -1743,12 +1685,12 @@ void PlotDialog::updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *
     {
       clearTabWidget();
       int plot_type = setPlotType(curveItem);
-      if (plot_type >= 0) 
+      if (plot_type >= 0)
       {
 	insertTabs(plot_type);
       }
       if (!curvePlotTypeBox->isVisible())
-      { 
+      {
 	curvePlotTypeBox->show();
       }
     }
@@ -1771,7 +1713,7 @@ void PlotDialog::updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *
     privateTabWidget->addTab(printPage, tr("Print"));
     privateTabWidget->addTab(fontsPage, tr("Fonts"));
     privateTabWidget->showPage(printPage);
-    
+
     curvePlotTypeBox->hide();
     btnWorksheet->hide();
     btnEditCurve->hide();
@@ -2054,22 +1996,22 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
         grayScaleBox->setChecked(sp->colorMapPolicy() == Spectrogram::GrayScale);
         defaultScaleBox->setChecked(sp->colorMapPolicy() == Spectrogram::Default);
         customScaleBox->setChecked(sp->colorMapPolicy() == Spectrogram::Custom);
-		
+
         //colorMapEditor->setRange(sp->data().range().minValue(), sp->data().range().maxValue());
         //colorMapEditor->setColorMap((const QwtLinearColorMap &)sp->colorMap());
 
         levelsGroupBox->setChecked(sp->testDisplayMode(QwtPlotSpectrogram::ContourMode));
         levelsBox->setValue(sp->levels());
-			
+
         //autoContourBox->setChecked(sp->defaultContourPen().style() == Qt::NoPen);
 		autoContourBox->setChecked(sp->useColorMapPen()&& sp->defaultContourPen().style() == Qt::NoPen);
 		//customPenBtn->setChecked(sp->defaultContourPen().style() == Qt::NoPen);
 		customPenBtn->setChecked(!sp->useColorMapPen()&& sp->defaultContourPen().style() == Qt::NoPen);
 	    defaultContourBox->setChecked((sp->defaultContourPen().style() != Qt::NoPen) && !(sp->useColorMapPen()) );
-		
+
         levelsColorBox->setColor(sp->defaultContourPen().color());
 		contourWidthBox->setValue(sp->defaultContourPen().widthF());
-		
+
         if (sp->defaultContourPen().style() != Qt::NoPen)
             boxContourStyle->setCurrentIndex(sp->defaultContourPen().style() - 1);
 	     else
@@ -2080,7 +2022,7 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
         axisScaleBox->setChecked(sp->hasColorScale());
         colorScaleBox->setCurrentItem((int)sp->colorScaleAxis());
         colorScaleWidthBox->setValue(sp->colorBarWidth());
-		
+
         //labels page
 
         showAllLabelControls(false);
@@ -2400,10 +2342,10 @@ bool PlotDialog::acceptParams()
 	}
 
     QTreeWidgetItem *it = listBox->currentItem();
-	
+
     if (!it)
         return false;
-	
+
 		CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(it);
 		QwtPlotItem *plotItem = dynamic_cast<QwtPlotItem *>(item->plotItem());
     if (!plotItem)
@@ -2458,7 +2400,7 @@ bool PlotDialog::acceptParams()
 	  Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
 
 	  if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) { return false; }
-		
+
 	  if (defaultContourBox->isChecked())
 	  {
 	    QPen pen = QPen(levelsColorBox->color(), contourWidthBox->value(),Graph::getPenStyle(boxContourStyle->currentIndex()));
@@ -2485,7 +2427,7 @@ bool PlotDialog::acceptParams()
 		if (!fillGroupBox->isChecked())
 			br = QBrush();
 		graph->setCurveBrush(index, br);
-		
+
 		QPen pen = QPen(boxLineColor->color(), boxLineWidth->value(), Graph::getPenStyle(boxLineStyle->currentIndex()));
 		QwtPlotCurve *curve = dynamic_cast<QwtPlotCurve *>(plotItem);
 		curve->setPen(pen);
@@ -2623,7 +2565,7 @@ bool PlotDialog::acceptParams()
 				b->setWhiskersRange(boxWhiskersRange->currentIndex(), (double)boxWhiskersCoef->value());
 		}
 	} else if (privateTabWidget->currentPage() == labelsPage){
-	
+
 		Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
   	    if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
 			sp->setLabelsRotation(boxLabelsAngle->value());
@@ -2631,11 +2573,11 @@ bool PlotDialog::acceptParams()
   	    	sp->showContourLineLabels(labelsGroupBox->isChecked());
 			sp->setLabelsWhiteOut(boxLabelsWhiteOut->isChecked());
 			sp->setLabelsOffset((double)boxLabelsXOffset->value(), (double)boxLabelsYOffset->value());
-			
+
 		} else {
 			DataCurve *c = dynamic_cast<DataCurve *>(plotItem);
       if (!c) return false;
-		
+
 			QString text = item->text(0);
 			QStringList t = text.split(": ", QString::SkipEmptyParts);
 			QString table = t[0];
@@ -2664,7 +2606,7 @@ bool PlotDialog::acceptParams()
 			c->setLabelsAlignment(labelsAlignment());
 		}
 	}
-    
+
 	graph->replot();
 	graph->notifyChanges();
 	return true;
@@ -2912,7 +2854,7 @@ void PlotDialog::customVectorsPage(bool angleMag)
 }
 
 /**
-     This slot gets called on clicking slect colormap button 
+     This slot gets called on clicking slect colormap button
 */
 void PlotDialog::changeColormap(const QString &filename)
 {
@@ -2938,7 +2880,7 @@ void PlotDialog::changeColormap(const QString &filename)
     fileselection = QFileInfo(filename).absoluteFilePath();
     if( !QFileInfo(fileselection).exists() ) return;
   }
-  
+
   if( fileselection == mCurrentColorMap ) return;
 
   mCurrentColorMap = fileselection;
