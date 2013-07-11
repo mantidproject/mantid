@@ -358,17 +358,7 @@ namespace WorkflowAlgorithms
 
     if(LRef > 0. || minwl > 0. || DIFCref > 0.)
     {
-#if 0
-      g_log.information() << "running ConvertUnits(Target=TOF)\n";
-      API::IAlgorithm_sptr convert1Alg = createChildAlgorithm("ConvertUnits");
-      convert1Alg->setProperty("InputWorkspace", m_outputW);
-      convert1Alg->setProperty("OutputWorkspace", m_outputW);
-      convert1Alg->setProperty("Target","TOF");
-      convert1Alg->executeAsChildAlg();
-      m_outputW = convert1Alg->getProperty("OutputWorkspace");
-#else
       m_outputW = convertUnits(m_outputW, "TOF");
-#endif
     }
 
     // Beyond this point, low resolution TOF workspace is considered.
@@ -451,29 +441,9 @@ namespace WorkflowAlgorithms
     // Convert units
     if(LRef > 0. || minwl > 0. || DIFCref > 0.)
     {
-#if 0
-      g_log.information() << "running ConvertUnits(Target=dSpacing)\n";
-      API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
-      convert2Alg->setProperty("InputWorkspace", m_outputW);
-      convert2Alg->setProperty("OutputWorkspace", m_outputW);
-      convert2Alg->setProperty("Target","dSpacing");
-      convert2Alg->executeAsChildAlg();
-      m_outputW = convert2Alg->getProperty("OutputWorkspace");
-
-      if (m_processLowResTOF)
-      {
-        API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
-        convert2Alg->setProperty("InputWorkspace", m_lowResW);
-        convert2Alg->setProperty("OutputWorkspace", m_lowResW);
-        convert2Alg->setProperty("Target","dSpacing");
-        convert2Alg->executeAsChildAlg();
-        m_lowResW = convert2Alg->getProperty("OutputWorkspace");
-      }
-#else
       m_outputW = convertUnits(m_outputW, "dSpacing");
       if (m_processLowResTOF)
         m_lowResW = convertUnits(m_lowResW, "dSpacing");
-#endif
     }
 
     if(dspace)
@@ -488,30 +458,9 @@ namespace WorkflowAlgorithms
       doSortEvents(m_lowResW);
 
     // Diffraction focus
-#if 0
-    g_log.information() << "running DiffractionFocussing. \n";
-    API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
-    focusAlg->setProperty("InputWorkspace", m_outputW);
-    focusAlg->setProperty("OutputWorkspace", m_outputW);
-    focusAlg->setProperty("GroupingWorkspace", m_groupWS);
-    focusAlg->setProperty("PreserveEvents", m_preserveEvents);
-    focusAlg->executeAsChildAlg();
-    m_outputW = focusAlg->getProperty("OutputWorkspace");
-    if (m_processLowResTOF)
-    {
-      API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
-      focusAlg->setProperty("InputWorkspace", m_lowResW);
-      focusAlg->setProperty("OutputWorkspace", m_lowResW);
-      focusAlg->setProperty("GroupingWorkspace", m_groupWS);
-      focusAlg->setProperty("PreserveEvents", m_preserveEvents);
-      focusAlg->executeAsChildAlg();
-      m_lowResW = focusAlg->getProperty("OutputWorkspace");
-    }
-#else
     m_outputW = diffractionFocus(m_outputW);
     if (m_processLowResTOF)
       m_lowResW = diffractionFocus(m_lowResW);
-#endif
 
     doSortEvents(m_outputW);
     if (m_processLowResTOF)
@@ -553,20 +502,7 @@ namespace WorkflowAlgorithms
       std::copy(phis.begin(), (phis.begin()+numreg), vec_azimuthal_reg.begin());
 
       // Edit instrument
-#if 0
-      g_log.information() << "running EditInstrumentGeometry\n";
-      API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
-      editAlg->setProperty("Workspace", m_outputW);
-      editAlg->setProperty("PrimaryFlightPath", l1);
-      editAlg->setProperty("Polar", vec_polar_reg);
-      editAlg->setProperty("SpectrumIDs", vec_specid_reg);
-      editAlg->setProperty("L2", vec_l2_reg);
-      editAlg->setProperty("Azimuthal", vec_azimuthal_reg);
-      editAlg->executeAsChildAlg();
-      m_outputW = editAlg->getProperty("Workspace");
-#else
       m_outputW = editInstrument(m_outputW, vec_polar_reg, vec_specid_reg, vec_l2_reg, vec_azimuthal_reg);
-#endif
 
       if (m_processLowResTOF)
       {
@@ -589,9 +525,9 @@ namespace WorkflowAlgorithms
           throw std::runtime_error(errss.str());
         }
         if (l2s.size() != numall)
-          throw std::runtime_error("Input number of L2s is smaller than number of histogram (low).");
+          throw std::runtime_error("Input number of L2s is not equal to the number of low and high histograms.");
         if (phis.size() != numall)
-          throw std::runtime_error("Input number of azimuthals is smaller than number of histogram (low).");
+          throw std::runtime_error("Input number of azimuthals is not equal to the number of low and high histograms.");
 
         std::vector<int32_t> vec_specid_low;
         if (specids.size() == numall)
@@ -615,22 +551,6 @@ namespace WorkflowAlgorithms
                 << ", LowResW's size = " << numlow << ".\n";
         }
 
-#if 0
-        std::vector<double> vec_polar_low(numlow, 0.);
-        std::copy((tths.begin()+numreg), tths.end(), vec_polar_low.begin());
-        for (size_t i = 0; i < numlow; ++i)
-          g_log.information() << i << " : " << vec_polar_low[i] << ".\n";
-
-        std::vector<double> vec_l2_low(numlow, 0.);
-        std::copy((l2s.begin()+numreg), l2s.end(), vec_l2_low.begin());
-        for (size_t i = 0; i < numlow; ++i)
-          g_log.information() << i << " : " << vec_l2_low[i] << ".\n";
-
-        std::vector<double> vec_azimuthal_low(numlow, 0.);
-        std::copy((phis.begin()+numreg), phis.end(), vec_azimuthal_low.begin());
-        for (size_t i = 0; i < numlow; ++i)
-          g_log.information() << i << " : " << vec_azimuthal_low[i] << ".\n";
-#else
         std::vector<double> vec_polar_low, vec_l2_low, vec_azimuthal_low;
         for (size_t i = 0; i < numlow; ++i)
         {
@@ -638,18 +558,8 @@ namespace WorkflowAlgorithms
           vec_l2_low.push_back(l2s[numreg+i]);
           vec_azimuthal_low.push_back(phis[numreg+i]);
         }
-#endif
 
-#if 1
-        g_log.information() << vec_polar_low.size() << ".\n";
-        g_log.information() << vec_specid_low.size() << ".\n";
-        g_log.information() << vec_l2_low.size() << ".\n";
-        g_log.information() << vec_azimuthal_low.size() << ".\n";
         m_lowResW = editInstrument(m_lowResW, vec_polar_low, vec_specid_low, vec_l2_low, vec_azimuthal_low);
-#else
-        m_lowResW = editInstrument(m_lowResW, vec_polar_reg, vec_specid_reg, vec_l2_reg, vec_azimuthal_reg);
-#endif
-
       }
     }
 
@@ -660,29 +570,7 @@ namespace WorkflowAlgorithms
     }
 
     // Convert units to TOF
-#if 0
-    g_log.information() << "running ConvertUnits\n";
-    API::IAlgorithm_sptr convert3Alg = createChildAlgorithm("ConvertUnits");
-    convert3Alg->setProperty("InputWorkspace", m_outputW);
-    convert3Alg->setProperty("OutputWorkspace", m_outputW);
-    convert3Alg->setProperty("Target","TOF");
-    convert3Alg->executeAsChildAlg();
-    m_outputW = convert3Alg->getProperty("OutputWorkspace");
-#else
     m_outputW = convertUnits(m_outputW, "TOF");
-#endif
-
-    /*
-    if (m_processLowResTOF)
-    {
-      API::IAlgorithm_sptr convert3Alg = createChildAlgorithm("ConvertUnits");
-      convert3Alg->setProperty("InputWorkspace", m_lowResW);
-      convert3Alg->setProperty("OutputWorkspace", m_lowResW);
-      convert3Alg->setProperty("Target","TOF");
-      convert3Alg->executeAsChildAlg();
-      m_lowResW = convert3Alg->getProperty("OutputWorkspace");
-    }
-    */
 
     if ((!m_params.empty()) && (m_params.size() != 1))
     {
@@ -695,16 +583,9 @@ namespace WorkflowAlgorithms
       m_dmaxs.clear();
 
     this->rebin(m_outputW);
-    /*
-    if (m_processLowResTOF)
-      rebin(m_lowResW);
-    */
 
     // return the output workspace
     setProperty("OutputWorkspace",m_outputW);
-
-    //if (m_processLowResTOF)
-    //  setProperty("LowResTOFWorkspace", m_lowResW);
 
     return;
   }
