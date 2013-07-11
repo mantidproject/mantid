@@ -31,6 +31,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <boost/shared_array.hpp>
 
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/UnitFactory.h"
@@ -149,15 +150,18 @@ public:
    * @return
    */
   ProcessBankData(LoadEventNexus * alg, std::string entry_name,
-      Progress * prog, ThreadScheduler * scheduler,
-      uint32_t * event_id, float * event_time_of_flight,
-      size_t numEvents, size_t startAt, std::vector<uint64_t> * event_index_ptr,
-      BankPulseTimes * thisBankPulseTimes, bool have_weight, float * event_weight)
+                  Progress * prog, ThreadScheduler * scheduler,
+                  boost::shared_array<uint32_t> event_id,
+                  boost::shared_array<float> event_time_of_flight,
+                  size_t numEvents, size_t startAt,
+                  boost::shared_ptr<std::vector<uint64_t> > event_index,
+                  BankPulseTimes * thisBankPulseTimes,
+                  bool have_weight, boost::shared_array<float> event_weight)
   : Task(),
     alg(alg), entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
     prog(prog), scheduler(scheduler),
     event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
-    event_index_ptr(event_index_ptr), event_index(*event_index_ptr),
+    event_index(event_index),
     thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
     event_weight(event_weight)
   {
@@ -208,12 +212,6 @@ public:
     // Check for cancelled algorithm
     if (alg->getCancel())
     {
-      delete [] event_id;
-      delete [] event_time_of_flight;
-      if (have_weight)
-      {
-        delete [] event_weight;
-      }
       return;
     }
 
@@ -228,7 +226,7 @@ public:
 
     // And there are this many pulses
     int numPulses = static_cast<int>(thisBankPulseTimes->numPulses);
-    if (numPulses > static_cast<int>(event_index.size()))
+    if (numPulses > static_cast<int>(event_index->size()))
     {
       alg->getLogger().warning() << "Entry " << entry_name << "'s event_index vector is smaller than the event_time_zero field. This is inconsistent, so we cannot find pulse times for this entry.\n";
       //This'll make the code skip looking for any pulse times.
@@ -254,7 +252,7 @@ public:
       {
         bool breakOut = false;
         //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
-        while ( !((i+startAt >= event_index[pulse_i]) && (i+startAt < event_index[pulse_i+1])))
+        while ( !((i+startAt >= (*event_index)[pulse_i]) && (i+startAt < (*event_index)[pulse_i+1])))
         {
           pulse_i++;
           // Check once every new pulse if you need to cancel (checking on every event might slow things down more)
@@ -336,11 +334,6 @@ public:
       }
     } //(for each event)
 
-    // Free Memory
-    delete [] event_id;
-    delete [] event_time_of_flight;
-    delete event_index_ptr;
-
     //------------ Compress Events (or set sort order) ------------------
     // Do it on all the detector IDs we touched
     for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
@@ -398,23 +391,21 @@ private:
   /// ThreadScheduler running this task
   ThreadScheduler * scheduler;
   /// event pixel ID array
-  uint32_t * event_id;
+  boost::shared_array<uint32_t> event_id;
   /// event TOF array
-  float * event_time_of_flight;
+  boost::shared_array<float> event_time_of_flight;
   /// # of events in arrays
   size_t numEvents;
   /// index of the first event from event_index
   size_t startAt;
-  /// ptr to a vector of event index vs time (length of # of pulses)
-  std::vector<uint64_t> * event_index_ptr;
   /// vector of event index (length of # of pulses)
-  std::vector<uint64_t> & event_index;
+  boost::shared_ptr<std::vector<uint64_t> > event_index;
   /// Pulse times for this bank
   BankPulseTimes * thisBankPulseTimes;
   /// Flag for simulated data
   bool have_weight;
   /// event weights array
-  float * event_weight;
+  boost::shared_array<float> event_weight;
   /// timer for performance
   Mantid::Kernel::Timer m_timer;
 };
@@ -454,6 +445,8 @@ public:
   {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
+    m_min_id = std::numeric_limits<uint32_t>::max();
+    m_max_id = 0;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -634,6 +627,16 @@ public:
         m_loadError = true;
       }
       file.closeData();
+
+      // determine the range of pixel ids
+      uint32_t temp;
+      for (auto i = 0; i < m_loadSize[0]; ++i)
+      {
+        temp = m_event_id[i];
+        if (temp < m_min_id) m_min_id = temp;
+        if (temp > m_max_id) m_max_id = temp;
+      }
+      std::cout << "******" << m_min_id << " - " << m_max_id << std::endl; // REMOVE
     }
   }
 
@@ -836,9 +839,16 @@ public:
     // No error? Launch a new task to process that data.
     size_t numEvents = m_loadSize[0];
     size_t startAt = m_loadStart[0];
+
+    // convert things to shared_arrays
+    boost::shared_array<uint32_t> event_id_shrd(m_event_id);
+    boost::shared_array<float> event_time_of_flight_shrd(m_event_time_of_flight);
+    boost::shared_array<float> event_weight_shrd(m_event_weight);
+    boost::shared_ptr<std::vector<uint64_t> > event_index_shrd(event_index_ptr);
+
     ProcessBankData * newTask = new ProcessBankData(alg, entry_name, prog,scheduler,
-        m_event_id, m_event_time_of_flight, numEvents, startAt, event_index_ptr,
-        thisBankPulseTimes, m_have_weight, m_event_weight);
+        event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
+        thisBankPulseTimes, m_have_weight, event_weight_shrd);
     scheduler->push(newTask);
   }
 
@@ -883,8 +893,12 @@ private:
   std::vector<int> m_loadStart;
   /// How much to load in the file
   std::vector<int> m_loadSize;
-  /// Event pxiel ID data
+  /// Event pixel ID data
   uint32_t * m_event_id;
+  /// Minimum pixel ID in this data
+  uint32_t m_min_id;
+  /// Maximum pixel ID in this data
+  uint32_t m_max_id;
   /// TOF data
   float * m_event_time_of_flight;
   /// Flag for simulated data
