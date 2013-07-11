@@ -10,8 +10,8 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
-import re
 import itertools
+import os
 
 timeRegimeToDRange = {
      1.17e4: tuple([ 0.7,  2.5]),
@@ -144,7 +144,9 @@ def isInRanges(rangeList, n):
 class OSIRISDiffractionReduction(PythonAlgorithm):
     """ Handles the reduction of OSIRIS Diffraction Data.
     """
-    
+    def category(self):
+        return 'Diffraction;PythonAlgorithms'
+
     def PyInit(self):
         wiki="This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS \
               into dSpacing, by correcting for the monitor and linking the various d-ranges together."
@@ -154,13 +156,13 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                    There should be five of these in most cases. Enter them as comma separated values.'
         self.declareProperty('Sample', '', doc=runs_desc)
         self.declareProperty('Vanadium', '', doc=runs_desc)
-        self.declareProperty('CalFile', '', 
+        self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and [[DiffractionFocussing]] child algorithms.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output), 
                              doc="Name to give the output workspace. If no name is provided, one will be generated based on the run numbers.")
+        self.declareProperty("Mode", "DiffOnly", StringListValidator(["DiffOnly","DiffSpec"]), 
+                             doc="Indicates the mode the instrument was in when the data was collection: diffraction or spectroscopy.")
         
-        self._sams = []
-        self._vans = []
         self._cal = None
         self._outputWsName = None
         
@@ -170,24 +172,30 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
     def PyExec(self):
         # Set OSIRIS as default instrument.
         config["default.instrument"] = 'OSIRIS'
-        
-        # Set all algo inputs to local vars.  Some validation/parsing via FileFinder,
-        # which is helpful since this is an algorithm that could be called outside of
-        # of the Indirect Diffraction interface.
-        self._outputWsName = self.getPropertyValue("OutputWorkspace")
-        for sam in re.compile(r',').split(self.getProperty("Sample").value):
-            try:
-                val = FileFinder.findRuns(sam)[0]
-            except IndexError:
-                raise RuntimeError("Could not locate sample file: " + sam)
-            self._sams.append(val)
-        for van in re.compile(r',').split(self.getProperty("Vanadium").value):
-            try:
-                val = FileFinder.findRuns(van)[0]
-            except IndexError:
-                raise RuntimeError("Could not locate vanadium file: " + van)
-            self._vans.append(val)
+
         self._cal = self.getProperty("CalFile").value
+        self._outputWsName = self.getPropertyValue("OutputWorkspace")
+
+        sampleRuns = self.findRuns(self.getPropertyValue("Sample"))
+        
+        mode = self.getProperty("Mode").value
+        if mode == "DiffOnly":
+            self.execDiffOnly(sampleRuns)
+        elif mode == "DiffSpec":
+            van_runs = self.getPropertyValue("Vanadium")
+            if len(van_runs) > 0:
+                self.getLogger().warning("Vanadium runs supplied to DiffSpec mode. They will be ignored")
+            self.execDiffSpec(sampleRuns)
+        else:
+            raise ValueError("Unknown Mode parameter '%s'. Currently only support DiffOnly,DiffSpec" % mode)
+
+    def execDiffOnly(self, sampleRuns):
+        """
+            Execute the algorithm in diffraction-only mode
+            @param sampleRuns A list of files pointing to the sample runs
+        """
+        self._sams = sampleRuns
+        self._vans = self.findRuns(self.getPropertyValue("Vanadium"))
         
         # Load all sample and vanadium files, and add the resulting workspaces to the DRangeToWsMaps.
         for file in self._sams + self._vans:
@@ -236,10 +244,12 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         
         if len(samWsNamesList) > 1:
             # Merge the sample files into one.
-            MergeRuns(InputWorkspaces=','.join(samWsNamesList), OutputWorkspace=self._outputWsName)
+            MergeRuns(InputWorkspaces=samWsNamesList, OutputWorkspace=self._outputWsName)
+            for name in samWsNamesList:
+                DeleteWorkspace(Workspace=name)
         else:
-            CloneWorkspace(InputWorkspace=samWsNamesList[0],
-                           OutputWorkspace=self._outputWsName)
+            RenameWorkspace(InputWorkspace=samWsNamesList[0],OutputWorkspace=self._outputWsName)
+
         result = mtd[self._outputWsName]
         
         # Create scalar data to cope with where merge has combined overlapping data.
@@ -259,12 +269,51 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         Divide(LHSWorkspace=result, RHSWorkspace=scalar, OutputWorkspace=result)
         
         # Delete all workspaces we've created, except the result.
-        for ws in self._vanMap.getMap().values() + self._samMap.getMap().values() + [scalar]:
+        for ws in self._vanMap.getMap().values() + [scalar]:
             DeleteWorkspace(Workspace=ws)
         
         self.setProperty("OutputWorkspace", result)
-        
-    def category(self):
-        return 'Diffraction;PythonAlgorithms'
+
+    def execDiffSpec(self, sampleRuns):
+        """
+            Execute the algorithm in spectroscopy mode
+            @param sampleRuns A list of files pointing to the sample runs
+        """
+        # Do conversion for each file
+        wkspaces = []
+        for runFile in sampleRuns:
+            wsname = "__" + os.path.basename(runFile)
+            Load(Filename=runFile, OutputWorkspace=wsname)
+            NormaliseToMonitor(InputWorkspace=wsname,OutputWorkspace=wsname,MonitorSpectrum=1)
+            AlignDetectors(InputWorkspace=wsname, OutputWorkspace=wsname, CalibrationFile=self._cal)
+            DiffractionFocussing(InputWorkspace=wsname, OutputWorkspace=wsname, GroupingFileName=self._cal)
+            wkspaces.append(wsname)
+
+        # Now merge them together if there is more than 1
+        if len(wkspaces) > 1:
+            MergeRuns(InputWorkspaces=wkspaces, OutputWorkspace=self._outputWsName)
+            # Delete loaded file workspaces
+            for name in wkspaces:
+                DeleteWorkspace(name)
+        else:
+            RenameWorkspace(InputWorkspace=wkspaces[0],OutputWorkspace=self._outputWsName)
+
+        result = mtd[self._outputWsName]
+        self.setProperty("OutputWorkspace", result)
+
+    def findRuns(self, run_str):
+        """
+           Use the FileFinder to find search for the runs given by the string of comma-separated run numbers
+           @param run_str A string of run numbers to find
+           @returns A list of filepaths
+        """
+        runs = run_str.split(",")
+        run_files = []
+        for run in runs:
+            try:
+                run_files.append(FileFinder.findRuns(run)[0])
+            except IndexError:
+                raise RuntimeError("Could not locate sample file: " + run)
+        return run_files
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
