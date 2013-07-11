@@ -136,32 +136,33 @@ def CheckBinning(nbins):
 	return nbin,nrbin
 
 # QLines programs
-	
 def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,Save):
 	StartTime(program)
 	workdir = config['defaultsave.directory']
-	array_len = 4096                           # length of array in Fortran
+	facility = config['default.facility']
+	array_len = 4096						   # length of array in Fortran
 	CheckXrange(erange,'Energy')
 	nbin,nrbin = CheckBinning(nbins)
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
 		logger.notice('Resolution is ' + resWS)
-	CheckAnalysers(samWS,resWS,Verbose)
+	if facility == 'ISIS':
+		CheckAnalysers(samWS,resWS,Verbose)
+		efix = getEfixed(samWS)
+		theta,Q = GetThetaQ(samWS)
 	nsam,ntc = CheckHistZero(samWS)
 	if Loop != True:
 		nsam = 1
-	efix = getEfixed(samWS)
-	theta,Q = GetThetaQ(samWS)
 	nres,ntr = CheckHistZero(resWS)
 	if program == 'QL':
 		if nres == 1:
-			prog = 'QLr'                        # res file
+			prog = 'QLr'						# res file
 		else:
-			prog = 'QLd'                        # data file
+			prog = 'QLd'						# data file
 			CheckHistSame(samWS,'Sample',resWS,'Resolution')
 	if program == 'QSe':
 		if nres == 1:
-			prog = 'QSe'                        # res file
+			prog = 'QSe'						# res file
 		else:
 			error = 'Stretched Exp ONLY works with RES file'			
 			logger.notice('ERROR *** ' + error)
@@ -194,7 +195,7 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,
 	wrkr.ljust(140,' ')
 	wrk = [wrks, wrkr]
 #
-	if program == 'QL':                           # initialise probability list
+	if program == 'QL':						   # initialise probability list
 		prob0 = []
 		prob1 = []
 		prob2 = []
@@ -217,7 +218,7 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,
 			mm = m
 		else:
 			mm = 0
-		Nb,Xb,Yb,Eb = GetXYE(resWS,mm,array_len)     # get resolution data
+		Nb,Xb,Yb,Eb = GetXYE(resWS,mm,array_len)	 # get resolution data
 		numb = [nsam, nsp, ntc, Ndat, nbin, Imin, Imax, Nb, nrbin]
 		rscl = 1.0
 		reals = [efix, theta[m], rscl, bnorm]
@@ -226,18 +227,19 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,
 												   Xdat,Xb,Yb,Wy,We,dtn,xsc,
 												   wrks,wrkr,lwrk)
 			message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
+			if Verbose:
+				logger.notice(message)
 		if prog == 'QLd':
 			nd,xout,yout,eout,yfit,yprob=QLd.qldata(numb,Xv,Yv,Ev,reals,fitOp,
-												    Xdat,Xb,Yb,Eb,Wy,We,
+													Xdat,Xb,Yb,Eb,Wy,We,
 													wrks,wrkr,lwrk)
 			message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])+' '+str(yprob[2])+' '+str(yprob[3])
+			if Verbose:
+				logger.notice(message)
 		if prog == 'QSe':
 			nd,xout,yout,eout,yfit,yprob=Qse.qlstexp(numb,Xv,Yv,Ev,reals,fitOp,
 													Xdat,Xb,Yb,Wy,We,dtn,xsc,
 													wrks,wrkr,lwrk)
-			message = ' Log(prob) : '+str(yprob[0])+' '+str(yprob[1])
-		if Verbose:
-			logger.notice(message)
 		dataX = xout[:nd]
 		dataX = np.append(dataX,2*xout[nd-1]-xout[nd-2])
 		yfit_list = np.split(yfit[:4*nd],4)
@@ -247,34 +249,43 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,
 			dataF2 = yfit_list[2]
 			dataF3 = yfit_list[3]
 		dataG = np.zeros(nd)
-		if m == 0:
-			CreateWorkspace(OutputWorkspace=fname+'_Data', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],
-				Nspec=1, UnitX='DeltaE')
-			CreateWorkspace(OutputWorkspace=fname+'_Fit1', DataX=dataX, DataY=dataF1[:nd], DataE=dataG,
-				Nspec=1, UnitX='DeltaE')
-			if program == 'QL':
-				CreateWorkspace(OutputWorkspace=fname+'_Fit2', DataX=dataX, DataY=dataF2[:nd], DataE=dataG,
-					Nspec=1, UnitX='DeltaE')
-		else:
-			CreateWorkspace(OutputWorkspace='__datmp', DataX=dataX, DataY=yout[:nd], DataE=eout[:nd],
-				Nspec=1, UnitX='DeltaE')
-			ConjoinWorkspaces(InputWorkspace1=fname+'_Data', InputWorkspace2='__datmp',CheckOverlapping=False)				
-			CreateWorkspace(OutputWorkspace='__f1tmp', DataX=dataX, DataY=dataF1[:nd], DataE=dataG,
-				Nspec=1, UnitX='DeltaE')
-			ConjoinWorkspaces(InputWorkspace1=fname+'_Fit1', InputWorkspace2='__f1tmp',CheckOverlapping=False)				
-			if program == 'QL':
-				CreateWorkspace(OutputWorkspace='__f2tmp', DataX=dataX, DataY=dataF2[:nd], DataE=dataG,
-					Nspec=1, UnitX='DeltaE')
-				ConjoinWorkspaces(InputWorkspace1=fname+'_Fit2', InputWorkspace2='__f2tmp',CheckOverlapping=False)				
-		Minus(LHSWorkspace=fname+'_Fit1', RHSWorkspace=fname+'_Data', OutputWorkspace=fname+'_Res1')
+		datX = dataX
+		datY = yout[:nd]
+		datE = eout[:nd]
+		datX = np.append(datX,dataX)
+		datY = np.append(datY,dataF1[:nd])
+		datE = np.append(datE,dataG)
+		res1 = dataF1[:nd] - yout[:nd]
+		datX = np.append(datX,dataX)
+		datY = np.append(datY,res1)
+		datE = np.append(datE,dataG)
+		nsp = 3
+		names = 'data,fit.1,diff.1'
+		res_plot = [0, 1, 2]
 		if program == 'QL':
-			Minus(LHSWorkspace=fname+'_Fit2', RHSWorkspace=fname+'_Data', OutputWorkspace=fname+'_Res2')
+			datX = np.append(datX,dataX)
+			datY = np.append(datY,dataF2[:nd])
+			datE = np.append(datE,dataG)
+			res2 = dataF2[:nd] - yout[:nd]
+			datX = np.append(datX,dataX)
+			datY = np.append(datY,res2)
+			datE = np.append(datE,dataG)
+			nsp += 2
+			names += ',fit.2,diff.2'
+			res_plot.append(4)
 			prob0.append(yprob[0])
 			prob1.append(yprob[1])
 			prob2.append(yprob[2])
+		fitWS = fname+'_Result'
+		fout = fitWS +'_'+ str(m)
+		CreateWorkspace(OutputWorkspace=fout, DataX=datX, DataY=datY, DataE=datE,
+			Nspec=nsp, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
+		if m == 0:
+			group = fout
+		else:
+			group += ',' + fout
+	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
 	if program == 'QL':
-		group = fname+'_Data,'+fname+'_Fit1,'+fname+'_Res1,'+fname+'_Fit2,'+fname+'_Res2'
-		GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
 		yPr0 = np.array([prob0[0]])
 		yPr1 = np.array([prob1[0]])
 		yPr2 = np.array([prob2[0]])
@@ -287,23 +298,20 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,
 		yProb = np.append(yProb,yPr2)
 		CreateWorkspace(OutputWorkspace=probWS, DataX=xProb, DataY=yProb, DataE=eProb,
 			Nspec=3, UnitX='MomentumTransfer')
-	if program == 'QSe':
-		group = fname+'_Data,'+fname+'_Fit1,'+fname+'_Res1'
-		GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
-	if program == 'QL':
 		C2Fw(samWS[:-4],fname)
 		if (Plot != 'None'):
-			QLPlotQL(fname,Plot,Loop)
+			QLPlotQL(fname,Plot,res_plot,Loop)
 	if program == 'QSe':
 		C2Se(fname)
 		if (Plot != 'None'):
-			QLPlotQSe(fname,Plot,Loop)
+			QLPlotQSe(fname,Plot,res_plot,Loop)
 	if Save:
 		fit_path = os.path.join(workdir,fitWS+'.nxs')
 		SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
 		if Verbose:
 			logger.notice('Output file created : ' + fit_path)
 	EndTime(program)
+
 
 def LorBlock(a,first,nl):                                 #read Ascii block of Integers
 	line1 = a[first]
@@ -547,7 +555,7 @@ def C2Se(sname):
 	opath = os.path.join(workdir,fname+'_Parameters.nxs')
 	SaveNexusProcessed(InputWorkspace=fname+'_Parameters', Filename=opath)
 
-def QLPlotQL(inputWS,Plot,Loop):
+def QLPlotQL(inputWS,Plot,res_plot,Loop):
 	if Loop:
 		if (Plot == 'Prob' or Plot == 'All'):
 			pWS = inputWS+'_Prob'
@@ -559,10 +567,10 @@ def QLPlotQL(inputWS,Plot,Loop):
 			wWS = [inputWS+'_FW11', inputWS+'_FW21', inputWS+'_FW22']
 			w_plot=mp.plotSpectrum(wWS,0,True)
 	if (Plot == 'Fit' or Plot == 'All'):
-		fWS = [inputWS+'_Data', inputWS+'_Fit1', inputWS+'_Res1', inputWS+'_Res2']
-		f_plot=mp.plotSpectrum(fWS,0,False)
+		fWS = inputWS+'_Result_0'
+		f_plot=mp.plotSpectrum(fWS,res_plot,False)
 
-def QLPlotQSe(inputWS,Plot,Loop):
+def QLPlotQSe(inputWS,Plot,res_plot,Loop):
 	if Loop:
 		if (Plot == 'Intensity' or Plot == 'All'):
 			i_plot=mp.plotSpectrum(inputWS+'_Inty',0,True)
@@ -571,8 +579,8 @@ def QLPlotQSe(inputWS,Plot,Loop):
 		if (Plot == 'Beta' or Plot == 'All'):
 			s_plot=mp.plotSpectrum(inputWS+'_Beta',0,True)
 	if (Plot == 'Fit' or Plot == 'All'):
-		fWS = [inputWS+'_Data', inputWS+'_Fit1', inputWS+'_Res1']
-		f_plot=mp.plotSpectrum(fWS,0,False)
+		fWS = inputWS+'_Result_0'
+		f_plot=mp.plotSpectrum(fWS,res_plot,False)
 
 # Quest programs
 
