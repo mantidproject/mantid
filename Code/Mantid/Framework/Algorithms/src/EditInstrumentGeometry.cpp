@@ -220,6 +220,7 @@ namespace Algorithms
       for (size_t i = 0; i < numHist; ++i)
       {
         specids.push_back(workspace->getSpectrum(i)->getSpectrumNo());
+        g_log.information() << "Add spectrum " << workspace->getSpectrum(i)->getSpectrumNo() << ".\n";
       }
     }
 
