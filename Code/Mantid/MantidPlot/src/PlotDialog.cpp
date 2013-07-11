@@ -79,18 +79,18 @@ PlotDialog::PlotDialog(bool showExtended, ApplicationWindow* app, MultiLayer *ml
   d_ml(0)
 {
     setName( "PlotDialog" );
-	setWindowTitle( tr( "MantidPlot - Plot details" ) );
-	setModal(true);
-	setSizeGripEnabled(true);
-	listBox = new QTreeWidget();
+  setWindowTitle( tr( "MantidPlot - Plot details" ) );
+  setModal(true);
+  setSizeGripEnabled(true);
+  listBox = new QTreeWidget();
     listBox->setColumnCount(1);
-	listBox->header()->hide();
+  listBox->header()->hide();
     listBox->setIndentation(15);
 
     QGridLayout *gl = new QGridLayout(this);
     gl->addWidget(listBox, 0, 0);
 
-	privateTabWidget = new QTabWidget();
+  privateTabWidget = new QTabWidget();
     gl->addWidget(privateTabWidget, 0, 1);
 
     curvePlotTypeBox = new QWidget();
@@ -101,65 +101,65 @@ PlotDialog::PlotDialog(bool showExtended, ApplicationWindow* app, MultiLayer *ml
     hb1->addWidget(boxPlotType);
     gl->addWidget(curvePlotTypeBox, 1, 0);
 
-	initAxesPage();
-	initLinePage();
-	initSymbolsPage();
-	initHistogramPage();
-	initErrorsPage();
-	initSpacingPage();
-	initVectPage();
-	initBoxPage();
-	initPercentilePage();
-	initSpectrogramPage();
-	initPiePage();
-	initPieGeometryPage();
-	initPieLabelsPage();
-	initLayerPage();
-	initLayerGeometryPage();
-	initFontsPage();
-	initPrintPage();
-	initLabelsPage();
-	initContourLinesPage();
+  initAxesPage();
+  initLinePage();
+  initSymbolsPage();
+  initHistogramPage();
+  initErrorsPage();
+  initSpacingPage();
+  initVectPage();
+  initBoxPage();
+  initPercentilePage();
+  initSpectrogramPage();
+  initPiePage();
+  initPieGeometryPage();
+  initPieLabelsPage();
+  initLayerPage();
+  initLayerGeometryPage();
+  initFontsPage();
+  initPrintPage();
+  initLabelsPage();
+  initContourLinesPage();
 
-	clearTabWidget();
+  clearTabWidget();
 
     QHBoxLayout* hb2 = new QHBoxLayout();
-	btnMore = new QPushButton("&<<");
-	btnMore->setFixedWidth(30);
-	btnMore->setCheckable(true);
-	if (showExtended)
-		btnMore->toggle ();
+  btnMore = new QPushButton("&<<");
+  btnMore->setFixedWidth(30);
+  btnMore->setCheckable(true);
+  if (showExtended)
+    btnMore->toggle ();
     hb2->addWidget(btnMore);
-	btnWorksheet = new QPushButton(tr( "&Worksheet" ) );
+  btnWorksheet = new QPushButton(tr( "&Worksheet" ) );
     hb2->addWidget(btnWorksheet);
-	buttonOk = new QPushButton(tr( "&OK" ));
-	buttonOk->setDefault( true );
+  buttonOk = new QPushButton(tr( "&OK" ));
+  buttonOk->setDefault( true );
     hb2->addWidget(buttonOk);
-	buttonCancel = new QPushButton(tr( "&Cancel" ));
+  buttonCancel = new QPushButton(tr( "&Cancel" ));
     hb2->addWidget(buttonCancel);
     buttonApply = new QPushButton(tr( "&Apply" ));
     hb2->addWidget(buttonApply);
-	btnEditCurve = new QPushButton(tr("&Plot Associations..."));
+  btnEditCurve = new QPushButton(tr("&Plot Associations..."));
     hb2->addWidget(btnEditCurve);
     hb2->addStretch();
     gl->addLayout(hb2, 1, 1);
 
-	connect(btnMore, SIGNAL(toggled(bool)), this, SLOT(showAll(bool)));
+  connect(btnMore, SIGNAL(toggled(bool)), this, SLOT(showAll(bool)));
 
-	connect( buttonOk, SIGNAL(clicked()), this, SLOT(quit()));
-	connect( buttonCancel, SIGNAL(clicked()), this, SLOT(close()));
-	connect( buttonApply, SIGNAL(clicked() ), this, SLOT(acceptParams()));
-	connect( btnWorksheet, SIGNAL(clicked()), this, SLOT(showWorksheet()));
-	connect( btnEditCurve, SIGNAL(clicked()), this, SLOT(editCurve()));
-	connect(listBox, SIGNAL(itemDoubleClicked( QTreeWidgetItem *, int)),
+  connect( buttonOk, SIGNAL(clicked()), this, SLOT(quit()));
+  connect( buttonCancel, SIGNAL(clicked()), this, SLOT(close()));
+  connect( buttonApply, SIGNAL(clicked() ), this, SLOT(acceptParams()));
+  connect( btnWorksheet, SIGNAL(clicked()), this, SLOT(showWorksheet()));
+  connect( btnEditCurve, SIGNAL(clicked()), this, SLOT(editCurve()));
+  connect(listBox, SIGNAL(itemDoubleClicked( QTreeWidgetItem *, int)),
             this, SLOT(showPlotAssociations( QTreeWidgetItem *, int)));
-	connect(listBox, SIGNAL(currentItemChanged (QTreeWidgetItem *, QTreeWidgetItem *)),
+  connect(listBox, SIGNAL(currentItemChanged (QTreeWidgetItem *, QTreeWidgetItem *)),
             this, SLOT(updateTabWindow(QTreeWidgetItem *, QTreeWidgetItem *)));
     connect(listBox, SIGNAL(itemCollapsed(QTreeWidgetItem *)), this, SLOT(updateTreeWidgetItem(QTreeWidgetItem *)));
     connect(listBox, SIGNAL(itemExpanded(QTreeWidgetItem *)), this, SLOT(updateTreeWidgetItem(QTreeWidgetItem *)));
-	connect(boxPlotType, SIGNAL(currentIndexChanged(int)), this, SLOT(changePlotType(int)));
+  connect(boxPlotType, SIGNAL(currentIndexChanged(int)), this, SLOT(changePlotType(int)));
 
-	QShortcut *shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
+  QShortcut *shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
     connect(shortcut, SIGNAL(activated()), this, SLOT(removeSelectedCurve()));
 
   setMultiLayer(ml);
@@ -167,115 +167,115 @@ PlotDialog::PlotDialog(bool showExtended, ApplicationWindow* app, MultiLayer *ml
 
 void PlotDialog::showAll(bool all)
 {
-	if(all){
-		listBox->show();
-		listBox->setFocus();
+  if(all){
+    listBox->show();
+    listBox->setFocus();
 
-		QTreeWidgetItem *item = listBox->currentItem();
-    	if (item->type() == CurveTreeItem::PlotCurveTreeItem)
-        	curvePlotTypeBox->show();
+    QTreeWidgetItem *item = listBox->currentItem();
+      if (item->type() == CurveTreeItem::PlotCurveTreeItem)
+          curvePlotTypeBox->show();
 
-		btnMore->setText("&>>");
-	} else {
-		listBox->hide();
-		curvePlotTypeBox->hide();
-		btnMore->setText("&<<");
-	}
+    btnMore->setText("&>>");
+  } else {
+    listBox->hide();
+    curvePlotTypeBox->hide();
+    btnMore->setText("&<<");
+  }
 }
 void PlotDialog::initContourLinesPage()
 {
-	QLocale locale = d_app->locale();
+  QLocale locale = d_app->locale();
 
-  	contourLinesPage = new QWidget();
+    contourLinesPage = new QWidget();
 
-  	levelsGroupBox = new QGroupBox(tr("&Show Contour Lines"));
-  	levelsGroupBox->setCheckable(true);
-  	QHBoxLayout *hl0 = new QHBoxLayout();
+    levelsGroupBox = new QGroupBox(tr("&Show Contour Lines"));
+    levelsGroupBox->setCheckable(true);
+    QHBoxLayout *hl0 = new QHBoxLayout();
 
-	QGroupBox *gb1 = new QGroupBox(tr("Set Equidistant Levels"));
+  QGroupBox *gb1 = new QGroupBox(tr("Set Equidistant Levels"));
     QGridLayout *hl1 = new QGridLayout(gb1);
 
-	hl1->addWidget(new QLabel(tr("Levels")), 0, 0);
-  	levelsBox = new QSpinBox();
-  	levelsBox->setRange(2, 1000);
-	hl1->addWidget(levelsBox, 0, 1);
+  hl1->addWidget(new QLabel(tr("Levels")), 0, 0);
+    levelsBox = new QSpinBox();
+    levelsBox->setRange(2, 1000);
+  hl1->addWidget(levelsBox, 0, 1);
 
     hl1->addWidget(new QLabel(tr("Start")), 1, 0);
-  	firstContourLineBox = new DoubleSpinBox();
-  	firstContourLineBox->setLocale(locale);
-	firstContourLineBox->setDecimals(6);
-	hl1->addWidget(firstContourLineBox, 1, 1);
+    firstContourLineBox = new DoubleSpinBox();
+    firstContourLineBox->setLocale(locale);
+  firstContourLineBox->setDecimals(6);
+  hl1->addWidget(firstContourLineBox, 1, 1);
 
     hl1->addWidget(new QLabel(tr("Step")), 2, 0);
     contourLinesDistanceBox = new DoubleSpinBox();
     contourLinesDistanceBox->setLocale(locale);
-	contourLinesDistanceBox->setDecimals(6);
-	hl1->addWidget(contourLinesDistanceBox, 2, 1);
+  contourLinesDistanceBox->setDecimals(6);
+  hl1->addWidget(contourLinesDistanceBox, 2, 1);
 
-	btnSetEquidistantLevels = new QPushButton(tr("Set &Levels"));
-	connect(btnSetEquidistantLevels, SIGNAL(clicked()), this, SLOT(setEquidistantLevels()));
-	hl1->addWidget(btnSetEquidistantLevels, 3, 1);
+  btnSetEquidistantLevels = new QPushButton(tr("Set &Levels"));
+  connect(btnSetEquidistantLevels, SIGNAL(clicked()), this, SLOT(setEquidistantLevels()));
+  hl1->addWidget(btnSetEquidistantLevels, 3, 1);
 
-	hl1->setColumnStretch(1, 10);
-	hl1->setRowStretch(4, 1);
+  hl1->setColumnStretch(1, 10);
+  hl1->setRowStretch(4, 1);
 
   contourLinesEditor = new ContourLinesEditor(d_app->locale());
-	hl0->addWidget(contourLinesEditor);
-	hl0->addWidget(gb1);
+  hl0->addWidget(contourLinesEditor);
+  hl0->addWidget(gb1);
 
-	QGroupBox *penGroupBox = new QGroupBox(tr("Pen"));
-	QHBoxLayout *hl2 = new QHBoxLayout(penGroupBox);
+  QGroupBox *penGroupBox = new QGroupBox(tr("Pen"));
+  QHBoxLayout *hl2 = new QHBoxLayout(penGroupBox);
 
     QVBoxLayout *vl1 = new QVBoxLayout;
-  	autoContourBox = new QRadioButton(tr("Use &Color Map"));
-  	connect(autoContourBox, SIGNAL(toggled(bool)), this, SLOT(showDefaultContourLinesBox(bool)));
+    autoContourBox = new QRadioButton(tr("Use &Color Map"));
+    connect(autoContourBox, SIGNAL(toggled(bool)), this, SLOT(showDefaultContourLinesBox(bool)));
     vl1->addWidget(autoContourBox);
 
-  	defaultContourBox = new QRadioButton(tr("Use Default &Pen"));
-  	connect(defaultContourBox, SIGNAL(toggled(bool)), this, SLOT(showDefaultContourLinesBox(bool)));
+    defaultContourBox = new QRadioButton(tr("Use Default &Pen"));
+    connect(defaultContourBox, SIGNAL(toggled(bool)), this, SLOT(showDefaultContourLinesBox(bool)));
     vl1->addWidget(defaultContourBox);
 
     customPenBtn = new QRadioButton(tr("Use &Table Custom Pen"));
-  	connect(customPenBtn, SIGNAL(toggled(bool)), this, SLOT(showCustomPenColumn(bool)));
+    connect(customPenBtn, SIGNAL(toggled(bool)), this, SLOT(showCustomPenColumn(bool)));
     vl1->addWidget(customPenBtn);
 
-	hl2->addLayout(vl1);
+  hl2->addLayout(vl1);
 
-  	defaultPenBox = new QGroupBox();
+    defaultPenBox = new QGroupBox();
     QGridLayout *gl1 = new QGridLayout(defaultPenBox);
     gl1->addWidget(new QLabel(tr( "Color" )), 0, 0);
 
-  	levelsColorBox = new ColorButton(defaultPenBox);
+    levelsColorBox = new ColorButton(defaultPenBox);
     gl1->addWidget(levelsColorBox, 0, 1);
 
     gl1->addWidget(new QLabel(tr( "Width" )), 1, 0);
-  	contourWidthBox = new DoubleSpinBox('f');
-	contourWidthBox->setLocale(locale);
-	contourWidthBox->setSingleStep(0.1);
+    contourWidthBox = new DoubleSpinBox('f');
+  contourWidthBox->setLocale(locale);
+  contourWidthBox->setSingleStep(0.1);
     contourWidthBox->setRange(0, 100);
     gl1->addWidget(contourWidthBox, 1, 1);
 
     gl1->addWidget(new QLabel(tr( "Style" )), 2, 0);
-  	//penContourStyle = new PenStyleBox();
-	boxContourStyle = new PenStyleBox();
+    //penContourStyle = new PenStyleBox();
+  boxContourStyle = new PenStyleBox();
     //gl1->addWidget((QWidget*)penContourStyle, 2, 1);
-	gl1->addWidget(boxContourStyle, 2, 1);
+  gl1->addWidget(boxContourStyle, 2, 1);
     hl2->addWidget(defaultPenBox);
 
-	QVBoxLayout *vl0 = new QVBoxLayout(levelsGroupBox);
-	vl0->addLayout(hl0);
-	vl0->addWidget(penGroupBox);
-	vl0->addStretch();
+  QVBoxLayout *vl0 = new QVBoxLayout(levelsGroupBox);
+  vl0->addLayout(hl0);
+  vl0->addWidget(penGroupBox);
+  vl0->addStretch();
 
-  	QVBoxLayout* vl2 = new QVBoxLayout(contourLinesPage);
-  	vl2->addWidget(levelsGroupBox);
+    QVBoxLayout* vl2 = new QVBoxLayout(contourLinesPage);
+    vl2->addWidget(levelsGroupBox);
 
-  	privateTabWidget->insertTab(contourLinesPage, tr("Contour Lines"));
-	//privateTabWidget->addTab(layerGeometryPage, tr("Contour Lines"));
+    privateTabWidget->insertTab(contourLinesPage, tr("Contour Lines"));
+  //privateTabWidget->addTab(layerGeometryPage, tr("Contour Lines"));
 }
 void PlotDialog::setEquidistantLevels()
 {
-	QTreeWidgetItem *it = listBox->currentItem();
+  QTreeWidgetItem *it = listBox->currentItem();
     if (!it)
         return;
 
@@ -284,33 +284,33 @@ void PlotDialog::setEquidistantLevels()
     if (!plotItem)
         return;
 
-	Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
-	if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
-		return;
+  Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
+  if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
+    return;
 
 
-	QwtValueList levels;
-	double firstVal = firstContourLineBox->value();
-	for (int i = 0; i < levelsBox->value(); i++)
-		levels << firstVal + i*contourLinesDistanceBox->value();
-	sp->setContourLevels(levels);
-	sp->plot()->replot();
-	contourLinesEditor->updateContents();
+  QwtValueList levels;
+  double firstVal = firstContourLineBox->value();
+  for (int i = 0; i < levelsBox->value(); i++)
+    levels << firstVal + i*contourLinesDistanceBox->value();
+  sp->setContourLevels(levels);
+  sp->plot()->replot();
+  contourLinesEditor->updateContents();
 }
 void PlotDialog::showCustomPenColumn(bool on)
 {
-  	contourLinesEditor->showPenColumn(on);
-  	if (on)
-		defaultPenBox->hide();
+    contourLinesEditor->showPenColumn(on);
+    if (on)
+    defaultPenBox->hide();
 }
 
 void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int)
 {
-	if (!item)
-		return;
+  if (!item)
+    return;
 
   if (!d_app)
-		return;
+    return;
 
     if (item->type() != CurveTreeItem::PlotCurveTreeItem)
         return;
@@ -322,21 +322,21 @@ void PlotDialog::showPlotAssociations(QTreeWidgetItem *item, int)
     if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
     {
         Spectrogram *sp = dynamic_cast<Spectrogram*>(it);
-  	    if (sp->matrix())
-  	    	sp->matrix()->showMaximized();
+        if (sp->matrix())
+          sp->matrix()->showMaximized();
         return;
     }
 
-	hide();
-	if (dynamic_cast<PlotCurve *>(it)->type() == Graph::Function){
+  hide();
+  if (dynamic_cast<PlotCurve *>(it)->type() == Graph::Function){
         FunctionDialog *fd = d_app->showFunctionDialog((dynamic_cast<CurveTreeItem*>(item))->graph(), dynamic_cast<CurveTreeItem*>(item)->plotItemIndex());
-		if (fd)
-			connect((QObject *)fd, SIGNAL(destroyed()), this, SLOT(show()));
-	} else {
+    if (fd)
+      connect((QObject *)fd, SIGNAL(destroyed()), this, SLOT(show()));
+  } else {
         AssociationsDialog* ad = d_app->showPlotAssociations(dynamic_cast<CurveTreeItem*>(item)->plotItemIndex());
-		if (ad)
-			connect((QObject *)ad, SIGNAL(destroyed()), this, SLOT(show()));
-	}
+    if (ad)
+      connect((QObject *)ad, SIGNAL(destroyed()), this, SLOT(show()));
+  }
 }
 
 void PlotDialog::editCurve()
@@ -348,28 +348,28 @@ void PlotDialog::editCurve()
     if (item->type() != CurveTreeItem::PlotCurveTreeItem)
         return;
 
-	int index = item->plotItemIndex();
-	int curveType = dynamic_cast<PlotCurve *>(item->plotItem())->type();
+  int index = item->plotItemIndex();
+  int curveType = dynamic_cast<PlotCurve *>(item->plotItem())->type();
 
-	hide();
+  hide();
 
   if (d_app){
-		if (curveType == Graph::Function){
+    if (curveType == Graph::Function){
       FunctionDialog *fd = d_app->showFunctionDialog(item->graph(), index);
-			if (fd)
-				connect(reinterpret_cast<QObject *>(fd), SIGNAL(destroyed()), this, SLOT(show()));
-		} else {
+      if (fd)
+        connect(reinterpret_cast<QObject *>(fd), SIGNAL(destroyed()), this, SLOT(show()));
+    } else {
       AssociationsDialog* ad = d_app->showPlotAssociations(index);
-			if (ad)
-				connect(reinterpret_cast<QObject *>(ad), SIGNAL(destroyed()), this, SLOT(show()));
-		}
-	}
+      if (ad)
+        connect(reinterpret_cast<QObject *>(ad), SIGNAL(destroyed()), this, SLOT(show()));
+    }
+  }
 }
 
 void PlotDialog::changePlotType(int plotType)
 {
     if (boxPlotType->count() == 1)
-		return;
+    return;
 
     CurveTreeItem *item = dynamic_cast<CurveTreeItem *>(listBox->currentItem());
     if (!item)
@@ -380,58 +380,58 @@ void PlotDialog::changePlotType(int plotType)
     if (!graph)
         return;
 
-	int curveType = item->plotItemType();
-	if (curveType == Graph::ColorMap || curveType == Graph::Contour || curveType == Graph::GrayScale)
-  		clearTabWidget();
-  	else if (curveType == Graph::VectXYAM || curveType == Graph::VectXYXY)
-	{
-		if ((plotType && curveType == Graph::VectXYAM) ||
+  int curveType = item->plotItemType();
+  if (curveType == Graph::ColorMap || curveType == Graph::Contour || curveType == Graph::GrayScale)
+      clearTabWidget();
+    else if (curveType == Graph::VectXYAM || curveType == Graph::VectXYXY)
+  {
+    if ((plotType && curveType == Graph::VectXYAM) ||
             (!plotType && curveType == Graph::VectXYXY))
-			return;
+      return;
 
-		clearTabWidget();
-		insertTabs(curveType);
+    clearTabWidget();
+    insertTabs(curveType);
 
-		VectorCurve *v = dynamic_cast<VectorCurve*>(item->plotItem());
-		if (plotType)
-		{
-			graph->setCurveType(item->plotItemIndex(), Graph::VectXYAM);
-			v->setVectorStyle(VectorCurve::XYAM);
-		}
-		else
-		{
-			graph->setCurveType(item->plotItemIndex(), Graph::VectXYXY);
-			v->setVectorStyle(VectorCurve::XYXY);
-		}
-		customVectorsPage(plotType);
-	}
-	else
-	{
-		clearTabWidget();
-		insertTabs(plotType);
+    VectorCurve *v = dynamic_cast<VectorCurve*>(item->plotItem());
+    if (plotType)
+    {
+      graph->setCurveType(item->plotItemIndex(), Graph::VectXYAM);
+      v->setVectorStyle(VectorCurve::XYAM);
+    }
+    else
+    {
+      graph->setCurveType(item->plotItemIndex(), Graph::VectXYXY);
+      v->setVectorStyle(VectorCurve::XYXY);
+    }
+    customVectorsPage(plotType);
+  }
+  else
+  {
+    clearTabWidget();
+    insertTabs(plotType);
 
-		graph->setCurveType(item->plotItemIndex(), plotType);
+    graph->setCurveType(item->plotItemIndex(), plotType);
 
-		boxConnect->setCurrentIndex(1);//show line for Line and LineSymbol plots
+    boxConnect->setCurrentIndex(1);//show line for Line and LineSymbol plots
 
-		QwtSymbol s = QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(9,9));
-		if (plotType == Graph::Line)
-			s.setStyle(QwtSymbol::NoSymbol);
-		else if (plotType == Graph::Scatter)
-			graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
-		else if (plotType == Graph::LineSymbols)
-			graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
+    QwtSymbol s = QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(9,9));
+    if (plotType == Graph::Line)
+      s.setStyle(QwtSymbol::NoSymbol);
+    else if (plotType == Graph::Scatter)
+      graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
+    else if (plotType == Graph::LineSymbols)
+      graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
 
         graph->setCurveSymbol(item->plotItemIndex(), s);
 
-		if (plotType)
-		{
-			boxSymbolStyle->setCurrentIndex(1);
-			boxFillSymbol->setChecked(true);
-			boxFillColor->setEnabled(true);
-		}
-	}
-	acceptParams();
+    if (plotType)
+    {
+      boxSymbolStyle->setCurrentIndex(1);
+      boxFillSymbol->setChecked(true);
+      boxFillColor->setEnabled(true);
+    }
+  }
+  acceptParams();
 }
 
 
@@ -456,11 +456,11 @@ void PlotDialog::setPlotType(int plotType, int curveNum, const QString & color)
 
   QwtSymbol s = QwtSymbol(QwtSymbol::Ellipse, QBrush(), QPen(), QSize(5,5));
   if (plotType == Graph::Line)
-		s.setStyle(QwtSymbol::NoSymbol);
-	else if (plotType == Graph::Scatter)
-		graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
-	else if (plotType == Graph::LineSymbols)
-		graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
+    s.setStyle(QwtSymbol::NoSymbol);
+  else if (plotType == Graph::Scatter)
+    graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::NoCurve);
+  else if (plotType == Graph::LineSymbols)
+    graph->setCurveStyle(item->plotItemIndex(), QwtPlotCurve::Lines);
 
   if (color != "Default")
     s.setPen(QPen(QColor(color)));
@@ -475,26 +475,26 @@ void PlotDialog::initFontsPage()
   QGridLayout *fl = new QGridLayout(boxFonts);
 
   btnTitle = new QPushButton(tr("Titles"));
-	btnAxesLabels = new QPushButton(tr("Axes Labels"));
-	btnAxesNumbers = new QPushButton(tr("Axes Numbers"));
-	btnLegend = new QPushButton(tr("Legends"));
+  btnAxesLabels = new QPushButton(tr("Axes Labels"));
+  btnAxesNumbers = new QPushButton(tr("Axes Numbers"));
+  btnLegend = new QPushButton(tr("Legends"));
 
-	fl->addWidget(btnTitle, 0, 0);
-	fl->addWidget(btnAxesLabels, 0, 1);
-	fl->addWidget(btnAxesNumbers, 0, 2);
-	fl->addWidget(btnLegend, 0, 3);
-	fl->setRowStretch(1, 1);
-	fl->setColumnStretch(4, 1);
+  fl->addWidget(btnTitle, 0, 0);
+  fl->addWidget(btnAxesLabels, 0, 1);
+  fl->addWidget(btnAxesNumbers, 0, 2);
+  fl->addWidget(btnLegend, 0, 3);
+  fl->setRowStretch(1, 1);
+  fl->setColumnStretch(4, 1);
 
-	fontsPage = new QWidget();
-	QHBoxLayout *hl = new QHBoxLayout(fontsPage);
+  fontsPage = new QWidget();
+  QHBoxLayout *hl = new QHBoxLayout(fontsPage);
   hl->addWidget(boxFonts);
-	privateTabWidget->addTab(fontsPage, tr( "Fonts" ) );
+  privateTabWidget->addTab(fontsPage, tr( "Fonts" ) );
 
   connect( btnTitle, SIGNAL( clicked() ), this, SLOT( setTitlesFont() ) );
-	connect( btnAxesLabels, SIGNAL( clicked() ), this, SLOT( setAxesLabelsFont() ) );
-	connect( btnAxesNumbers, SIGNAL( clicked() ), this, SLOT( setAxesNumbersFont() ) );
-	connect( btnLegend, SIGNAL( clicked() ), this, SLOT( setLegendsFont() ) );
+  connect( btnAxesLabels, SIGNAL( clicked() ), this, SLOT( setAxesLabelsFont() ) );
+  connect( btnAxesNumbers, SIGNAL( clicked() ), this, SLOT( setAxesNumbersFont() ) );
+  connect( btnLegend, SIGNAL( clicked() ), this, SLOT( setLegendsFont() ) );
 }
 
 void PlotDialog::initLayerPage()
@@ -557,28 +557,28 @@ void PlotDialog::initLayerPage()
 
     privateTabWidget->addTab(layerPage, tr("Layer"));
 
-	connect(boxBackgroundTransparency, SIGNAL(valueChanged(int)), this, SLOT(updateBackgroundTransparency(int)));
-	connect(boxCanvasTransparency, SIGNAL(valueChanged(int)), this, SLOT(updateCanvasTransparency(int)));
-	connect(boxAntialiasing, SIGNAL(toggled(bool)), this, SLOT(updateAntialiasing(bool)));
-	connect(boxMargin, SIGNAL(valueChanged (int)), this, SLOT(changeMargin(int)));
-	connect(boxBorderColor, SIGNAL(colorChanged()), this, SLOT(pickBorderColor()));
-	connect(boxBackgroundColor, SIGNAL(colorChanged()), this, SLOT(pickBackgroundColor()));
-	connect(boxCanvasColor, SIGNAL(colorChanged()), this, SLOT(pickCanvasColor()));
-	connect(boxBorderWidth,SIGNAL(valueChanged (int)), this, SLOT(updateBorder(int)));
+  connect(boxBackgroundTransparency, SIGNAL(valueChanged(int)), this, SLOT(updateBackgroundTransparency(int)));
+  connect(boxCanvasTransparency, SIGNAL(valueChanged(int)), this, SLOT(updateCanvasTransparency(int)));
+  connect(boxAntialiasing, SIGNAL(toggled(bool)), this, SLOT(updateAntialiasing(bool)));
+  connect(boxMargin, SIGNAL(valueChanged (int)), this, SLOT(changeMargin(int)));
+  connect(boxBorderColor, SIGNAL(colorChanged()), this, SLOT(pickBorderColor()));
+  connect(boxBackgroundColor, SIGNAL(colorChanged()), this, SLOT(pickBackgroundColor()));
+  connect(boxCanvasColor, SIGNAL(colorChanged()), this, SLOT(pickCanvasColor()));
+  connect(boxBorderWidth,SIGNAL(valueChanged (int)), this, SLOT(updateBorder(int)));
 }
 
 void PlotDialog::initLayerGeometryPage()
 {
     layerGeometryPage = new QWidget();
 
-	QGroupBox *gb1 = new QGroupBox(tr("Origin"));
-	boxX = new QSpinBox();
-	boxX->setRange(0, 2000);
-	boxX->setSuffix(tr(" pixels"));
+  QGroupBox *gb1 = new QGroupBox(tr("Origin"));
+  boxX = new QSpinBox();
+  boxX->setRange(0, 2000);
+  boxX->setSuffix(tr(" pixels"));
 
-	boxY = new QSpinBox();
-	boxY->setRange(0, 2000);
-	boxY->setSuffix(tr(" pixels"));
+  boxY = new QSpinBox();
+  boxY->setRange(0, 2000);
+  boxY->setSuffix(tr(" pixels"));
 
     QGridLayout *gl1 = new QGridLayout(gb1);
     gl1->addWidget(new QLabel( tr("X= ")), 0, 0);
@@ -623,60 +623,60 @@ void PlotDialog::initLayerGeometryPage()
 
     privateTabWidget->addTab(layerGeometryPage, tr("Geometry"));
 
-	connect( boxLayerWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerHeight(int) ) );
-	connect( boxLayerHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerWidth(int) ) );
+  connect( boxLayerWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerHeight(int) ) );
+  connect( boxLayerHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerWidth(int) ) );
 }
 
 void PlotDialog::initPiePage()
 {
-	piePage = new QWidget();
+  piePage = new QWidget();
 
-	QGridLayout *gl1 = new QGridLayout();
-	gl1->addWidget(new QLabel( tr( "Color" )), 0, 0);
+  QGridLayout *gl1 = new QGridLayout();
+  gl1->addWidget(new QLabel( tr( "Color" )), 0, 0);
 
-	boxPieLineColor = new ColorBox();
-	gl1->addWidget(boxPieLineColor, 0, 1);
+  boxPieLineColor = new ColorBox();
+  gl1->addWidget(boxPieLineColor, 0, 1);
 
-	gl1->addWidget(new QLabel(tr( "Style" )), 1, 0);
-	boxPieLineStyle = new QComboBox();
-	boxPieLineStyle->insertItem("_____");
-	boxPieLineStyle->insertItem("- - -");
-	boxPieLineStyle->insertItem(".....");
-	boxPieLineStyle->insertItem("_._._");
-	boxPieLineStyle->insertItem("_.._..");
-	gl1->addWidget(boxPieLineStyle);
+  gl1->addWidget(new QLabel(tr( "Style" )), 1, 0);
+  boxPieLineStyle = new QComboBox();
+  boxPieLineStyle->insertItem("_____");
+  boxPieLineStyle->insertItem("- - -");
+  boxPieLineStyle->insertItem(".....");
+  boxPieLineStyle->insertItem("_._._");
+  boxPieLineStyle->insertItem("_.._..");
+  gl1->addWidget(boxPieLineStyle);
 
-	gl1->addWidget(new QLabel(tr( "Width")), 2, 0);
-	boxPieLineWidth = new DoubleSpinBox('f');
-	boxPieLineWidth->setSingleStep(0.1);
-	boxPieLineWidth->setMinimum(0.0);
+  gl1->addWidget(new QLabel(tr( "Width")), 2, 0);
+  boxPieLineWidth = new DoubleSpinBox('f');
+  boxPieLineWidth->setSingleStep(0.1);
+  boxPieLineWidth->setMinimum(0.0);
   boxPieLineWidth->setLocale(d_app->locale());
-	gl1->addWidget(boxPieLineWidth, 2, 1);
-	gl1->setRowStretch(3,1);
+  gl1->addWidget(boxPieLineWidth, 2, 1);
+  gl1->setRowStretch(3,1);
 
-	QGroupBox *gb1 = new QGroupBox(tr( "Border" ));
-	gb1->setLayout(gl1);
+  QGroupBox *gb1 = new QGroupBox(tr( "Border" ));
+  gb1->setLayout(gl1);
 
-	QGridLayout *gl2 = new QGridLayout();
-	gl2->addWidget(new QLabel( tr( "First color" )), 0, 0);
+  QGridLayout *gl2 = new QGridLayout();
+  gl2->addWidget(new QLabel( tr( "First color" )), 0, 0);
 
-	boxFirstColor = new ColorBox();
-	gl2->addWidget(boxFirstColor, 0, 1);
+  boxFirstColor = new ColorBox();
+  gl2->addWidget(boxFirstColor, 0, 1);
 
-	gl2->addWidget(new QLabel( tr( "Pattern" )), 1, 0);
-	boxPiePattern = new PatternBox();
-	gl2->addWidget(boxPiePattern, 1, 1);
-	gl2->setRowStretch(2, 1);
+  gl2->addWidget(new QLabel( tr( "Pattern" )), 1, 0);
+  boxPiePattern = new PatternBox();
+  gl2->addWidget(boxPiePattern, 1, 1);
+  gl2->setRowStretch(2, 1);
 
-	QGroupBox *gb2 = new QGroupBox(tr( "Fill" ));
-	gb2->setLayout(gl2);
+  QGroupBox *gb2 = new QGroupBox(tr( "Fill" ));
+  gb2->setLayout(gl2);
 
-	QHBoxLayout* hl = new QHBoxLayout();
-	hl->addWidget(gb1);
-	hl->addWidget(gb2);
-	piePage->setLayout(hl);
+  QHBoxLayout* hl = new QHBoxLayout();
+  hl->addWidget(gb1);
+  hl->addWidget(gb2);
+  piePage->setLayout(hl);
 
-	privateTabWidget->addTab(piePage, tr( "Pattern" ) );
+  privateTabWidget->addTab(piePage, tr( "Pattern" ) );
 }
 
 void PlotDialog::initPieGeometryPage()
@@ -685,55 +685,55 @@ void PlotDialog::initPieGeometryPage()
 
   QLocale locale = d_app->locale();
 
-	QGroupBox *gb3 = new QGroupBox(tr( "3D View" ));
-	QGridLayout *gl3 = new QGridLayout(gb3);
-	gl3->addWidget(new QLabel( tr( "View Angle (deg)" )), 0, 0);
-	boxPieViewAngle = new DoubleSpinBox('f');
-	boxPieViewAngle->setWrapping(true);
-	boxPieViewAngle->setRange(0.0, 90.0);
-	boxPieViewAngle->setLocale(locale);
-	gl3->addWidget(boxPieViewAngle, 0, 1);
+  QGroupBox *gb3 = new QGroupBox(tr( "3D View" ));
+  QGridLayout *gl3 = new QGridLayout(gb3);
+  gl3->addWidget(new QLabel( tr( "View Angle (deg)" )), 0, 0);
+  boxPieViewAngle = new DoubleSpinBox('f');
+  boxPieViewAngle->setWrapping(true);
+  boxPieViewAngle->setRange(0.0, 90.0);
+  boxPieViewAngle->setLocale(locale);
+  gl3->addWidget(boxPieViewAngle, 0, 1);
 
     gl3->addWidget(new QLabel( tr( "Thickness (% of radius)" )), 1, 0);
-	boxPieThickness = new DoubleSpinBox('f');
-	boxPieThickness->setLocale(locale);
-	boxPieThickness->setRange(0.0, 300.0);
-	gl3->addWidget(boxPieThickness, 1, 1);
-	gl3->setRowStretch(2, 1);
+  boxPieThickness = new DoubleSpinBox('f');
+  boxPieThickness->setLocale(locale);
+  boxPieThickness->setRange(0.0, 300.0);
+  gl3->addWidget(boxPieThickness, 1, 1);
+  gl3->setRowStretch(2, 1);
 
-	QGroupBox *gb1 = new QGroupBox(tr( "Rotation" ));
-	QGridLayout *gl1 = new QGridLayout(gb1);
-	gl1->addWidget(new QLabel( tr( "Starting Azimuth (deg)" )), 0, 0);
-	boxPieStartAzimuth = new DoubleSpinBox('f');
-	boxPieStartAzimuth->setRange(0.0, 360.0);
-	boxPieStartAzimuth->setWrapping(true);
-	boxPieStartAzimuth->setSingleStep(10.0);
-	boxPieStartAzimuth->setLocale(locale);
-	gl1->addWidget(boxPieStartAzimuth, 0, 1);
+  QGroupBox *gb1 = new QGroupBox(tr( "Rotation" ));
+  QGridLayout *gl1 = new QGridLayout(gb1);
+  gl1->addWidget(new QLabel( tr( "Starting Azimuth (deg)" )), 0, 0);
+  boxPieStartAzimuth = new DoubleSpinBox('f');
+  boxPieStartAzimuth->setRange(0.0, 360.0);
+  boxPieStartAzimuth->setWrapping(true);
+  boxPieStartAzimuth->setSingleStep(10.0);
+  boxPieStartAzimuth->setLocale(locale);
+  gl1->addWidget(boxPieStartAzimuth, 0, 1);
 
     boxPieConterClockwise = new QCheckBox(tr("Counter cloc&kwise"));
-	gl1->addWidget(boxPieConterClockwise, 1, 0);
-	gl1->setRowStretch(2, 1);
+  gl1->addWidget(boxPieConterClockwise, 1, 0);
+  gl1->setRowStretch(2, 1);
 
-	QGroupBox *gb2 = new QGroupBox(tr( "Radius/Center" ));
-	QGridLayout *gl2 = new QGridLayout(gb2);
-	gl2->addWidget(new QLabel( tr( "Radius (% of frame)" )), 0, 0);
-	boxRadius = new QSpinBox();
-	boxRadius->setRange(0, 300);
-	boxRadius->setSingleStep(5);
-	gl2->addWidget(boxRadius, 0, 1);
+  QGroupBox *gb2 = new QGroupBox(tr( "Radius/Center" ));
+  QGridLayout *gl2 = new QGridLayout(gb2);
+  gl2->addWidget(new QLabel( tr( "Radius (% of frame)" )), 0, 0);
+  boxRadius = new QSpinBox();
+  boxRadius->setRange(0, 300);
+  boxRadius->setSingleStep(5);
+  gl2->addWidget(boxRadius, 0, 1);
     gl2->addWidget(new QLabel( tr( "Horizontal Offset (% of frame)" )), 1, 0);
     boxPieOffset = new QSpinBox();
-	boxPieOffset->setRange(-100, 100);
-	gl2->addWidget(boxPieOffset, 1, 1);
-	gl2->setRowStretch(2, 1);
+  boxPieOffset->setRange(-100, 100);
+  gl2->addWidget(boxPieOffset, 1, 1);
+  gl2->setRowStretch(2, 1);
 
-	QVBoxLayout* vl = new QVBoxLayout(pieGeometryPage);
-	vl->addWidget(gb3);
-	vl->addWidget(gb1);
-	vl->addWidget(gb2);
+  QVBoxLayout* vl = new QVBoxLayout(pieGeometryPage);
+  vl->addWidget(gb3);
+  vl->addWidget(gb1);
+  vl->addWidget(gb2);
 
-	privateTabWidget->addTab(pieGeometryPage, tr( "Pie Geometry" ) );
+  privateTabWidget->addTab(pieGeometryPage, tr( "Pie Geometry" ) );
 
     connect(boxPieConterClockwise, SIGNAL(toggled(bool)), this, SLOT(acceptParams()));
     connect(boxPieViewAngle, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
@@ -745,57 +745,57 @@ void PlotDialog::initPieGeometryPage()
 
 void PlotDialog::initPieLabelsPage()
 {
-	pieLabelsPage = new QWidget();
+  pieLabelsPage = new QWidget();
 
     pieAutoLabelsBox = new QGroupBox(tr("Automatic &Format"));
-	pieAutoLabelsBox->setCheckable(true);
+  pieAutoLabelsBox->setCheckable(true);
 
-	QGridLayout *gl1 = new QGridLayout(pieAutoLabelsBox);
-	boxPieValues = new QCheckBox(tr("&Values"));
-	gl1->addWidget(boxPieValues, 0, 0);
+  QGridLayout *gl1 = new QGridLayout(pieAutoLabelsBox);
+  boxPieValues = new QCheckBox(tr("&Values"));
+  gl1->addWidget(boxPieValues, 0, 0);
 
-	boxPiePercentages = new QCheckBox(tr("&Percentages"));
-	gl1->addWidget(boxPiePercentages, 1, 0);
+  boxPiePercentages = new QCheckBox(tr("&Percentages"));
+  gl1->addWidget(boxPiePercentages, 1, 0);
 
-	boxPieCategories = new QCheckBox(tr("Categories/&Rows"));
-	gl1->addWidget(boxPieCategories, 2, 0);
+  boxPieCategories = new QCheckBox(tr("Categories/&Rows"));
+  gl1->addWidget(boxPieCategories, 2, 0);
 
-	gl1->setRowStretch(3, 1);
+  gl1->setRowStretch(3, 1);
 
     boxPieWedge = new QGroupBox(tr( "Associate Position with &Wedge" ));
-	boxPieWedge->setCheckable(true);
+  boxPieWedge->setCheckable(true);
 
-	QGridLayout *gl2 = new QGridLayout(boxPieWedge);
-	gl2->addWidget(new QLabel( tr( "Dist. from Pie Edge" )), 0, 0);
-	boxPieEdgeDist = new DoubleSpinBox('f');
-	boxPieEdgeDist->setRange(-100, 100);
+  QGridLayout *gl2 = new QGridLayout(boxPieWedge);
+  gl2->addWidget(new QLabel( tr( "Dist. from Pie Edge" )), 0, 0);
+  boxPieEdgeDist = new DoubleSpinBox('f');
+  boxPieEdgeDist->setRange(-100, 100);
   boxPieEdgeDist->setLocale(d_app->locale());
-	gl2->addWidget(boxPieEdgeDist, 0, 1);
-	gl2->setRowStretch(1, 1);
+  gl2->addWidget(boxPieEdgeDist, 0, 1);
+  gl2->setRowStretch(1, 1);
 
-	QVBoxLayout* vl = new QVBoxLayout(pieLabelsPage);
-	vl->addWidget(pieAutoLabelsBox);
-	vl->addWidget(boxPieWedge);
+  QVBoxLayout* vl = new QVBoxLayout(pieLabelsPage);
+  vl->addWidget(pieAutoLabelsBox);
+  vl->addWidget(boxPieWedge);
 
-	privateTabWidget->addTab(pieLabelsPage, tr( "Labels" ) );
+  privateTabWidget->addTab(pieLabelsPage, tr( "Labels" ) );
 
     connect(boxPieEdgeDist, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
 }
 
 void PlotDialog::initPrintPage()
 {
-	QGroupBox *gb = new QGroupBox();
+  QGroupBox *gb = new QGroupBox();
     QVBoxLayout *vl = new QVBoxLayout(gb);
-	boxScaleLayers = new QCheckBox(tr("&Scale layers to paper size"));
-	vl->addWidget(boxScaleLayers);
-	boxPrintCrops = new QCheckBox(tr("Print Crop&marks"));
-	vl->addWidget(boxPrintCrops);
+  boxScaleLayers = new QCheckBox(tr("&Scale layers to paper size"));
+  vl->addWidget(boxScaleLayers);
+  boxPrintCrops = new QCheckBox(tr("Print Crop&marks"));
+  vl->addWidget(boxPrintCrops);
     vl->addStretch();
 
-	printPage = new QWidget();
-	QHBoxLayout* hlayout = new QHBoxLayout(printPage);
-	hlayout->addWidget(gb);
-	privateTabWidget->addTab(printPage, tr( "Print" ) );
+  printPage = new QWidget();
+  QHBoxLayout* hlayout = new QHBoxLayout(printPage);
+  hlayout->addWidget(gb);
+  privateTabWidget->addTab(printPage, tr( "Print" ) );
 }
 
 void PlotDialog::initLabelsPage()
@@ -804,8 +804,8 @@ void PlotDialog::initLabelsPage()
     labelsGroupBox->setCheckable (true);
 
     QGridLayout *gl = new QGridLayout(labelsGroupBox);
-	labelsColumnLbl = new QLabel(tr( "Column" ));
-	gl->addWidget(labelsColumnLbl, 0, 0);
+  labelsColumnLbl = new QLabel(tr( "Column" ));
+  gl->addWidget(labelsColumnLbl, 0, 0);
     boxLabelsColumn = new QComboBox();
     gl->addWidget(boxLabelsColumn, 0, 1);
 
@@ -815,7 +815,7 @@ void PlotDialog::initLabelsPage()
     boxLabelsWhiteOut = new QCheckBox(tr("White O&ut"));
     gl->addWidget(boxLabelsWhiteOut, 1, 2);
 
-  	justifyLabelsLbl = new QLabel(tr( "Justify" ));
+    justifyLabelsLbl = new QLabel(tr( "Justify" ));
     gl->addWidget(justifyLabelsLbl, 2, 0);
     boxLabelsAlign = new QComboBox();
     boxLabelsAlign->addItem( tr( "Center" ) );
@@ -844,11 +844,11 @@ void PlotDialog::initLabelsPage()
     gl->setRowStretch (6, 1);
     gl->setColumnStretch (3, 1);
 
-	labelsPage = new QWidget();
-	QHBoxLayout* hlayout = new QHBoxLayout(labelsPage);
-	hlayout->addWidget(labelsGroupBox);
-	privateTabWidget->addTab(labelsPage, tr("Labels"));
-	//privateTabWidget->setTabEnabled(3,true);
+  labelsPage = new QWidget();
+  QHBoxLayout* hlayout = new QHBoxLayout(labelsPage);
+  hlayout->addWidget(labelsGroupBox);
+  privateTabWidget->addTab(labelsPage, tr("Labels"));
+  //privateTabWidget->setTabEnabled(3,true);
 
     connect(labelsGroupBox, SIGNAL(toggled(bool)), this, SLOT(acceptParams()));
     connect(boxLabelsColumn, SIGNAL(activated(int)), this, SLOT(acceptParams()));
@@ -863,215 +863,215 @@ void PlotDialog::initLabelsPage()
 
 void PlotDialog::initAxesPage()
 {
-	QGroupBox *gb = new QGroupBox(tr( "Attach curve to: "));
+  QGroupBox *gb = new QGroupBox(tr( "Attach curve to: "));
     QGridLayout *gl = new QGridLayout(gb);
     gl->addWidget(new QLabel( tr( "x Axis" )), 0, 0);
-	boxXAxis = new QComboBox();
-	boxXAxis->setEditable(false);
-	boxXAxis->addItem(tr("Bottom"));
-	boxXAxis->addItem(tr("Top"));
-	gl->addWidget(boxXAxis, 0, 1);
-	gl->addWidget(new QLabel( tr( "y Axis" )), 1, 0);
-	boxYAxis = new QComboBox();
-	boxYAxis->setEditable(false);
-	boxYAxis->addItem(tr("Left"));
-	boxYAxis->addItem(tr("Right"));
-	gl->addWidget(boxYAxis, 1, 1);
+  boxXAxis = new QComboBox();
+  boxXAxis->setEditable(false);
+  boxXAxis->addItem(tr("Bottom"));
+  boxXAxis->addItem(tr("Top"));
+  gl->addWidget(boxXAxis, 0, 1);
+  gl->addWidget(new QLabel( tr( "y Axis" )), 1, 0);
+  boxYAxis = new QComboBox();
+  boxYAxis->setEditable(false);
+  boxYAxis->addItem(tr("Left"));
+  boxYAxis->addItem(tr("Right"));
+  gl->addWidget(boxYAxis, 1, 1);
     gl->setRowStretch (2, 1);
 
-	axesPage = new QWidget();
-	QHBoxLayout* hlayout = new QHBoxLayout(axesPage);
-	hlayout->addWidget(gb);
-	privateTabWidget->addTab(axesPage, tr( "Axes" ) );
+  axesPage = new QWidget();
+  QHBoxLayout* hlayout = new QHBoxLayout(axesPage);
+  hlayout->addWidget(gb);
+  privateTabWidget->addTab(axesPage, tr( "Axes" ) );
 }
 
 void PlotDialog::initLinePage()
 {
-	QGroupBox *gb = new QGroupBox();
-	QGridLayout *gl1 = new QGridLayout(gb);
+  QGroupBox *gb = new QGroupBox();
+  QGridLayout *gl1 = new QGridLayout(gb);
     gl1->addWidget(new QLabel( tr( "Connect" )), 0, 0);
 
-	boxConnect = new QComboBox();
-	boxConnect->setEditable(false);
-	boxConnect->addItem(tr("No line"));
-	boxConnect->addItem(tr("Lines"));
-	boxConnect->addItem(tr("Sticks"));
-	boxConnect->addItem(tr("Horizontal Steps"));
-	boxConnect->addItem(tr("Dots"));
-	boxConnect->addItem(tr("Spline"));
-	boxConnect->addItem(tr("Vertical Steps"));
-	gl1->addWidget(boxConnect, 0, 1);
+  boxConnect = new QComboBox();
+  boxConnect->setEditable(false);
+  boxConnect->addItem(tr("No line"));
+  boxConnect->addItem(tr("Lines"));
+  boxConnect->addItem(tr("Sticks"));
+  boxConnect->addItem(tr("Horizontal Steps"));
+  boxConnect->addItem(tr("Dots"));
+  boxConnect->addItem(tr("Spline"));
+  boxConnect->addItem(tr("Vertical Steps"));
+  gl1->addWidget(boxConnect, 0, 1);
 
-	gl1->addWidget(new QLabel(tr( "Style" )), 1, 0);
-	boxLineStyle = new QComboBox();
-	boxLineStyle->setEditable(false);
-	boxLineStyle->addItem("_____");
-	boxLineStyle->addItem("_ _ _");
-	boxLineStyle->addItem(".....");
-	boxLineStyle->addItem("_._._");
-	boxLineStyle->addItem("_.._..");
-	gl1->addWidget(boxLineStyle, 1, 1);
+  gl1->addWidget(new QLabel(tr( "Style" )), 1, 0);
+  boxLineStyle = new QComboBox();
+  boxLineStyle->setEditable(false);
+  boxLineStyle->addItem("_____");
+  boxLineStyle->addItem("_ _ _");
+  boxLineStyle->addItem(".....");
+  boxLineStyle->addItem("_._._");
+  boxLineStyle->addItem("_.._..");
+  gl1->addWidget(boxLineStyle, 1, 1);
 
-	gl1->addWidget(new QLabel(tr( "Width" )), 2, 0);
-	boxLineWidth = new DoubleSpinBox('f');
+  gl1->addWidget(new QLabel(tr( "Width" )), 2, 0);
+  boxLineWidth = new DoubleSpinBox('f');
   boxLineWidth->setLocale(d_app->locale());
-	boxLineWidth->setSingleStep(0.1);
-	boxLineWidth->setMinimum(0.1);
-	boxLineWidth->setValue( 1 );
-	gl1->addWidget(boxLineWidth, 2, 1);
+  boxLineWidth->setSingleStep(0.1);
+  boxLineWidth->setMinimum(0.1);
+  boxLineWidth->setValue( 1 );
+  gl1->addWidget(boxLineWidth, 2, 1);
 
-	gl1->addWidget(new QLabel(tr( "Color" )), 3, 0);
-	boxLineColor = new ColorBox();
-	gl1->addWidget(boxLineColor, 3, 1);
+  gl1->addWidget(new QLabel(tr( "Color" )), 3, 0);
+  boxLineColor = new ColorBox();
+  gl1->addWidget(boxLineColor, 3, 1);
     gl1->setRowStretch (4, 1);
 
-	fillGroupBox = new QGroupBox(tr( "Fill area under curve" ));
-	fillGroupBox->setCheckable(true);
-	QGridLayout *gl2 = new QGridLayout(fillGroupBox);
+  fillGroupBox = new QGroupBox(tr( "Fill area under curve" ));
+  fillGroupBox->setCheckable(true);
+  QGridLayout *gl2 = new QGridLayout(fillGroupBox);
     gl2->addWidget(new QLabel(tr( "Fill color" )), 0, 0);
-	boxAreaColor = new ColorBox();
-	gl2->addWidget(boxAreaColor, 0, 1);
-	gl2->addWidget(new QLabel(tr( "Pattern" )), 1, 0);
-	boxPattern = new PatternBox();
-	gl2->addWidget(boxPattern, 1, 1);
-	gl2->setRowStretch (2, 1);
+  boxAreaColor = new ColorBox();
+  gl2->addWidget(boxAreaColor, 0, 1);
+  gl2->addWidget(new QLabel(tr( "Pattern" )), 1, 0);
+  boxPattern = new PatternBox();
+  gl2->addWidget(boxPattern, 1, 1);
+  gl2->setRowStretch (2, 1);
 
-	linePage = new QWidget();
-	QHBoxLayout* hlayout = new QHBoxLayout(linePage);
-	hlayout->addWidget(gb);
-	hlayout->addWidget(fillGroupBox);
-	privateTabWidget->addTab( linePage, tr( "Line" ) );
+  linePage = new QWidget();
+  QHBoxLayout* hlayout = new QHBoxLayout(linePage);
+  hlayout->addWidget(gb);
+  hlayout->addWidget(fillGroupBox);
+  privateTabWidget->addTab( linePage, tr( "Line" ) );
 
-	connect(boxLineWidth, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
-	connect(boxLineColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxConnect, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxLineStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxAreaColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxPattern, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(fillGroupBox, SIGNAL(toggled(bool)), this, SLOT(showAreaColor(bool)));
-	connect(fillGroupBox, SIGNAL(clicked()), this, SLOT(acceptParams()));
+  connect(boxLineWidth, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
+  connect(boxLineColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxConnect, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxLineStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxAreaColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxPattern, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(fillGroupBox, SIGNAL(toggled(bool)), this, SLOT(showAreaColor(bool)));
+  connect(fillGroupBox, SIGNAL(clicked()), this, SLOT(acceptParams()));
 }
 
 void PlotDialog::initSymbolsPage()
 {
-	QGroupBox *gb = new QGroupBox();
+  QGroupBox *gb = new QGroupBox();
     QGridLayout *gl = new QGridLayout(gb);
     gl->addWidget(new QLabel(tr( "Style" )), 0, 0);
-	boxSymbolStyle = new SymbolBox();
+  boxSymbolStyle = new SymbolBox();
     gl->addWidget(boxSymbolStyle, 0, 1);
     gl->addWidget(new QLabel(tr( "Size" )), 1, 0);
-	boxSymbolSize = new QSpinBox();
+  boxSymbolSize = new QSpinBox();
     boxSymbolSize->setRange(1, 100);
-	boxSymbolSize->setValue(5);
+  boxSymbolSize->setValue(5);
     gl->addWidget(boxSymbolSize, 1, 1);
-	boxFillSymbol = new QCheckBox( tr( "Fill Color" ));
+  boxFillSymbol = new QCheckBox( tr( "Fill Color" ));
     gl->addWidget(boxFillSymbol, 2, 0);
-	boxFillColor = new ColorBox();
+  boxFillColor = new ColorBox();
     gl->addWidget(boxFillColor, 2, 1);
     gl->addWidget(new QLabel(tr( "Edge Color" )), 3, 0);
-	boxSymbolColor = new ColorBox();
+  boxSymbolColor = new ColorBox();
     gl->addWidget(boxSymbolColor, 3, 1);
     gl->addWidget(new QLabel(tr( "Edge Width" )), 4, 0);
-	boxPenWidth = new DoubleSpinBox('f');
+  boxPenWidth = new DoubleSpinBox('f');
   boxPenWidth->setLocale(d_app->locale());
-	boxPenWidth->setSingleStep(0.1);
+  boxPenWidth->setSingleStep(0.1);
     boxPenWidth->setRange(0.1, 100);
     gl->addWidget(boxPenWidth, 4, 1);
     gl->setRowStretch (5, 1);
 
     symbolPage = new QWidget();
-	QHBoxLayout* hl = new QHBoxLayout(symbolPage);
-	hl->addWidget(gb);
+  QHBoxLayout* hl = new QHBoxLayout(symbolPage);
+  hl->addWidget(gb);
 
-	privateTabWidget->insertTab(symbolPage, tr( "Symbol" ));
+  privateTabWidget->insertTab(symbolPage, tr( "Symbol" ));
 
-	connect(boxSymbolColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxSymbolStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxFillColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxFillSymbol, SIGNAL(clicked()), this, SLOT(fillSymbols()));
+  connect(boxSymbolColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxSymbolStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxFillColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxFillSymbol, SIGNAL(clicked()), this, SLOT(fillSymbols()));
 }
 
 void PlotDialog::initBoxPage()
 {
-	QGroupBox *gb1 = new QGroupBox(tr( "Box" ));
+  QGroupBox *gb1 = new QGroupBox(tr( "Box" ));
     QGridLayout *gl1 = new QGridLayout(gb1);
     gl1->addWidget(new QLabel(tr( "Type" )), 0, 0);
 
-	boxType = new QComboBox();
+  boxType = new QComboBox();
     boxType->setEditable(false);
-	boxType->addItem(tr("No Box"));
-	boxType->addItem(tr("Rectangle"));
-	boxType->addItem(tr("Diamond"));
-	boxType->addItem(tr("Perc 10, 25, 75, 90"));
-	boxType->addItem(tr("Notch"));
+  boxType->addItem(tr("No Box"));
+  boxType->addItem(tr("Rectangle"));
+  boxType->addItem(tr("Diamond"));
+  boxType->addItem(tr("Perc 10, 25, 75, 90"));
+  boxType->addItem(tr("Notch"));
     gl1->addWidget(boxType, 0, 1);
 
-	boxRangeLabel = new QLabel(tr( "Range" ));
+  boxRangeLabel = new QLabel(tr( "Range" ));
     gl1->addWidget(boxRangeLabel, 1, 0);
-	boxRange = new QComboBox();
+  boxRange = new QComboBox();
     boxRange->setEditable(false);
-	boxRange->addItem(tr("Standard Deviation"));
-	boxRange->addItem(tr("Standard Error"));
-	boxRange->addItem(tr("Perc 25, 75"));
-	boxRange->addItem(tr("Perc 10, 90"));
-	boxRange->addItem(tr("Perc 5, 95"));
-	boxRange->addItem(tr("Perc 1, 99"));
-	boxRange->addItem(tr("Max-Min"));
-	boxRange->addItem(tr("Constant"));
+  boxRange->addItem(tr("Standard Deviation"));
+  boxRange->addItem(tr("Standard Error"));
+  boxRange->addItem(tr("Perc 25, 75"));
+  boxRange->addItem(tr("Perc 10, 90"));
+  boxRange->addItem(tr("Perc 5, 95"));
+  boxRange->addItem(tr("Perc 1, 99"));
+  boxRange->addItem(tr("Max-Min"));
+  boxRange->addItem(tr("Constant"));
     gl1->addWidget(boxRange, 1, 1);
 
-	boxCoeffLabel = new QLabel(tr( "Percentile (%)" ));
+  boxCoeffLabel = new QLabel(tr( "Percentile (%)" ));
     gl1->addWidget(boxCoeffLabel, 2, 0);
-	boxCoef = new QSpinBox();
+  boxCoef = new QSpinBox();
     boxCoef->setRange(50, 100);
     boxCoef->setSingleStep(5);
     gl1->addWidget(boxCoef, 2, 1);
 
-	boxCntLabel = new QLabel(tr( "Coefficient" ));
+  boxCntLabel = new QLabel(tr( "Coefficient" ));
     gl1->addWidget(boxCntLabel, 3, 0);
-	boxCnt = new QDoubleSpinBox();
-	boxCnt->setRange(0.0, 100.0);
+  boxCnt = new QDoubleSpinBox();
+  boxCnt->setRange(0.0, 100.0);
     boxCnt->setSingleStep(0.01);
-	boxCnt->setValue(1.0);
+  boxCnt->setValue(1.0);
     gl1->addWidget(boxCnt, 3, 1);
 
     gl1->addWidget(new QLabel(tr( "Box Width" )), 4, 0);
-	boxWidth = new QSpinBox();
+  boxWidth = new QSpinBox();
     boxWidth->setRange(0, 100);
     boxWidth->setSingleStep(5);
     gl1->addWidget(boxWidth, 4, 1);
 
-	QGroupBox *gb2 = new QGroupBox(tr( "Whiskers" ));
+  QGroupBox *gb2 = new QGroupBox(tr( "Whiskers" ));
     QGridLayout *gl2 = new QGridLayout(gb2);
     whiskerRangeLabel = new QLabel(tr( "Range" ));
     gl2->addWidget(whiskerRangeLabel, 0, 0);
 
-	boxWhiskersRange = new QComboBox();
+  boxWhiskersRange = new QComboBox();
     boxWhiskersRange->setEditable(false);
-	boxWhiskersRange->addItem(tr("No Whiskers"));
-	boxWhiskersRange->addItem(tr("Standard Deviation"));
-	boxWhiskersRange->addItem(tr("Standard Error"));
-	boxWhiskersRange->addItem(tr("75-25"));
-	boxWhiskersRange->addItem(tr("90-10"));
-	boxWhiskersRange->addItem(tr("95-5"));
-	boxWhiskersRange->addItem(tr("99-1"));
-	boxWhiskersRange->addItem(tr("Max-Min"));
-	boxWhiskersRange->addItem(tr("Constant"));
+  boxWhiskersRange->addItem(tr("No Whiskers"));
+  boxWhiskersRange->addItem(tr("Standard Deviation"));
+  boxWhiskersRange->addItem(tr("Standard Error"));
+  boxWhiskersRange->addItem(tr("75-25"));
+  boxWhiskersRange->addItem(tr("90-10"));
+  boxWhiskersRange->addItem(tr("95-5"));
+  boxWhiskersRange->addItem(tr("99-1"));
+  boxWhiskersRange->addItem(tr("Max-Min"));
+  boxWhiskersRange->addItem(tr("Constant"));
     gl2->addWidget(boxWhiskersRange, 0, 1);
 
-	whiskerCoeffLabel = new QLabel(tr( "Percentile (%)" ));
+  whiskerCoeffLabel = new QLabel(tr( "Percentile (%)" ));
     gl2->addWidget(whiskerCoeffLabel, 1, 0);
-	boxWhiskersCoef = new QSpinBox();
+  boxWhiskersCoef = new QSpinBox();
     boxWhiskersCoef->setRange(50, 100);
     boxWhiskersCoef->setSingleStep(5);
     gl2->addWidget(boxWhiskersCoef, 1, 1);
 
-	whiskerCntLabel = new QLabel(tr( "Coef" ));
+  whiskerCntLabel = new QLabel(tr( "Coef" ));
     gl2->addWidget(whiskerCntLabel, 2, 0);
-	whiskerCnt = new QDoubleSpinBox();
-	whiskerCnt->setRange(0.0, 100.0);
+  whiskerCnt = new QDoubleSpinBox();
+  whiskerCnt->setRange(0.0, 100.0);
     whiskerCnt->setSingleStep(0.01);
-	whiskerCnt->setValue(1.0);
+  whiskerCnt->setValue(1.0);
     gl2->addWidget(whiskerCnt, 2, 1);
 
     QVBoxLayout *vl1 = new QVBoxLayout();
@@ -1083,82 +1083,82 @@ void PlotDialog::initBoxPage()
     vl2->addStretch();
 
     boxPage = new QWidget();
-	QHBoxLayout* hl = new QHBoxLayout(boxPage);
-	hl->addLayout(vl1);
-	hl->addLayout(vl2);
+  QHBoxLayout* hl = new QHBoxLayout(boxPage);
+  hl->addLayout(vl1);
+  hl->addLayout(vl2);
     privateTabWidget->insertTab(boxPage, tr( "Box/Whiskers" ) );
 
-	connect(boxType, SIGNAL(activated(int)), this, SLOT(setBoxType(int)));
-	connect(boxRange, SIGNAL(activated(int)), this, SLOT(setBoxRangeType(int)));
-	connect(boxWhiskersRange, SIGNAL(activated(int)), this, SLOT(setWhiskersRange(int)));
+  connect(boxType, SIGNAL(activated(int)), this, SLOT(setBoxType(int)));
+  connect(boxRange, SIGNAL(activated(int)), this, SLOT(setBoxRangeType(int)));
+  connect(boxWhiskersRange, SIGNAL(activated(int)), this, SLOT(setWhiskersRange(int)));
 }
 
 void PlotDialog::initPercentilePage()
 {
-	QGroupBox *gb1 = new QGroupBox(tr( "Type" ) );
+  QGroupBox *gb1 = new QGroupBox(tr( "Type" ) );
     QGridLayout *gl1 = new QGridLayout(gb1);
     gl1->addWidget(new QLabel(tr( "Max" )), 0, 0);
 
-	boxMaxStyle = new SymbolBox();
+  boxMaxStyle = new SymbolBox();
     gl1->addWidget(boxMaxStyle, 0, 1);
 
     gl1->addWidget(new QLabel(tr( "99%" )), 1, 0);
-	box99Style = new SymbolBox();
+  box99Style = new SymbolBox();
     gl1->addWidget(box99Style, 1, 1);
 
     gl1->addWidget(new QLabel(tr( "Mean" )), 2, 0);
-	boxMeanStyle = new SymbolBox();
+  boxMeanStyle = new SymbolBox();
     gl1->addWidget(boxMeanStyle, 2, 1);
 
     gl1->addWidget(new QLabel(tr( "1%" )), 3, 0);
-	box1Style = new SymbolBox();
+  box1Style = new SymbolBox();
     gl1->addWidget(box1Style, 3, 1);
 
     gl1->addWidget(new QLabel(tr( "Min" )), 4, 0);
-	boxMinStyle = new SymbolBox();
+  boxMinStyle = new SymbolBox();
     gl1->addWidget(boxMinStyle, 4, 1);
     gl1->setRowStretch(5, 1);
 
-	QGroupBox *gb2 = new QGroupBox(tr( "Symbol" ));
+  QGroupBox *gb2 = new QGroupBox(tr( "Symbol" ));
     QGridLayout *gl2 = new QGridLayout(gb2);
     gl2->addWidget(new QLabel(tr( "Size" )), 0, 0);
 
-	boxPercSize = new QSpinBox();
-	boxPercSize->setMinValue( 1 );
+  boxPercSize = new QSpinBox();
+  boxPercSize->setMinValue( 1 );
     gl2->addWidget(boxPercSize, 0, 1);
 
     boxFillSymbols = new QCheckBox(tr( "Fill Color" ));
     gl2->addWidget(boxFillSymbols, 1, 0);
-	boxPercFillColor = new ColorBox();
+  boxPercFillColor = new ColorBox();
     gl2->addWidget(boxPercFillColor, 1, 1);
 
     gl2->addWidget(new QLabel(tr( "Edge Color" )), 2, 0);
-	boxEdgeColor = new ColorBox();
+  boxEdgeColor = new ColorBox();
     gl2->addWidget(boxEdgeColor, 2, 1);
 
     gl2->addWidget(new QLabel(tr( "Edge Width" )), 3, 0);
-	boxEdgeWidth = new DoubleSpinBox('f');
+  boxEdgeWidth = new DoubleSpinBox('f');
   boxEdgeWidth->setLocale(d_app->locale());
-	boxEdgeWidth->setSingleStep(0.1);
+  boxEdgeWidth->setSingleStep(0.1);
     boxEdgeWidth->setRange(0, 100);
     gl2->addWidget(boxEdgeWidth, 3, 1);
     gl2->setRowStretch(4, 1);
 
     percentilePage = new QWidget();
-	QHBoxLayout* hl = new QHBoxLayout(percentilePage);
-	hl->addWidget(gb1);
-	hl->addWidget(gb2);
+  QHBoxLayout* hl = new QHBoxLayout(percentilePage);
+  hl->addWidget(gb1);
+  hl->addWidget(gb2);
     privateTabWidget->insertTab(percentilePage, tr( "Percentile" ) );
 
-	connect(boxMeanStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxMinStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxMaxStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(box99Style, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(box1Style, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(box1Style, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxEdgeColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxPercFillColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-	connect(boxFillSymbols, SIGNAL(clicked()), this, SLOT(fillBoxSymbols()));
+  connect(boxMeanStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxMinStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxMaxStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(box99Style, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(box1Style, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(box1Style, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxEdgeColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxPercFillColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
+  connect(boxFillSymbols, SIGNAL(clicked()), this, SLOT(fillBoxSymbols()));
 }
 
 /*
@@ -1204,152 +1204,150 @@ void PlotDialog::initSpectrogramPage()
   hl->addWidget(mSelectColormap);
   connect(mSelectColormap,SIGNAL(clicked()),this,SLOT(changeColormap()));
 
-  	axisScaleBox = new QGroupBox(tr( "Color Bar Scale" ));
-  	axisScaleBox->setCheckable (true);
+  axisScaleBox = new QGroupBox(tr( "Color Bar Scale" ));
+  axisScaleBox->setCheckable (true);
 
-    QGridLayout *gl2 = new QGridLayout(axisScaleBox);
-    gl2->addWidget(new QLabel(tr( "Axis" )), 0, 0);
+  QGridLayout *gl2 = new QGridLayout(axisScaleBox);
+  gl2->addWidget(new QLabel(tr( "Axis" )), 0, 0);
 
-  	colorScaleBox = new QComboBox();
-  	colorScaleBox->addItem(tr("Left"));
-  	colorScaleBox->addItem(tr("Right"));
-  	colorScaleBox->addItem(tr("Bottom"));
-  	colorScaleBox->addItem(tr("Top"));
-    gl2->addWidget(colorScaleBox, 0, 1);
+  colorScaleBox = new QComboBox();
+  colorScaleBox->addItem(tr("Left"));
+  colorScaleBox->addItem(tr("Right"));
+  colorScaleBox->addItem(tr("Bottom"));
+  colorScaleBox->addItem(tr("Top"));
+  gl2->addWidget(colorScaleBox, 0, 1);
+  gl2->addWidget(new QLabel(tr( "Width" )), 1, 0);
+  colorScaleWidthBox = new QSpinBox();
+  colorScaleWidthBox->setRange(2, 10000);
+  gl2->addWidget(colorScaleWidthBox, 1, 1);
 
-    gl2->addWidget(new QLabel(tr( "Width" )), 1, 0);
-  	colorScaleWidthBox = new QSpinBox();
-  	colorScaleWidthBox->setRange(2, 10000);
-    gl2->addWidget(colorScaleWidthBox, 1, 1);
+  QVBoxLayout* vl2 = new QVBoxLayout(spectrogramPage);
+  vl2->addWidget(imageGroupBox);
+  vl2->addWidget(axisScaleBox);
+  vl2->addStretch();
 
-  	QVBoxLayout* vl2 = new QVBoxLayout(spectrogramPage);
-  	vl2->addWidget(imageGroupBox);
-  	//vl2->addWidget(levelsGroupBox);
-  	vl2->addWidget(axisScaleBox);
-    vl2->addStretch();
-
-  	privateTabWidget->insertTab(spectrogramPage, tr("Contour") + " / " + tr("Image"));
+  privateTabWidget->insertTab(spectrogramPage, tr("Contour") + " / " + tr("Image"));
 }
 
 void PlotDialog::fillBoxSymbols()
 {
-	boxPercFillColor->setEnabled(boxFillSymbols->isChecked());
-	acceptParams();
+  boxPercFillColor->setEnabled(boxFillSymbols->isChecked());
+  acceptParams();
 }
 
 void PlotDialog::fillSymbols()
 {
-	boxFillColor->setEnabled(boxFillSymbol->isChecked());
-	acceptParams();
+  boxFillColor->setEnabled(boxFillSymbol->isChecked());
+  acceptParams();
 }
 
 void PlotDialog::initErrorsPage()
 {
-	QGroupBox *gb1 = new QGroupBox(tr( "Direction" ));
+  QGroupBox *gb1 = new QGroupBox(tr( "Direction" ));
 
     QVBoxLayout* vl = new QVBoxLayout(gb1);
-	plusBox = new QCheckBox(tr( "Plus" ));
+  plusBox = new QCheckBox(tr( "Plus" ));
     vl->addWidget(plusBox);
-	minusBox = new QCheckBox(tr( "Minus" ));
+  minusBox = new QCheckBox(tr( "Minus" ));
     vl->addWidget(minusBox);
-	xBox = new QCheckBox(tr( "&X Error Bar" ));
+  xBox = new QCheckBox(tr( "&X Error Bar" ));
     vl->addWidget(xBox);
     vl->addWidget(xBox);
     vl->addStretch();
 
-	QGroupBox *gb2 = new QGroupBox(tr( "Style" ));
+  QGroupBox *gb2 = new QGroupBox(tr( "Style" ));
     QGridLayout *gl = new QGridLayout(gb2);
     gl->addWidget(new QLabel(tr( "Color" )), 0, 0);
 
-	colorBox = new ColorButton();
+  colorBox = new ColorButton();
     gl->addWidget(colorBox, 0, 1);
 
     gl->addWidget(new QLabel(tr( "Line Width" )), 1, 0);
-	widthBox = new DoubleSpinBox('f');
+  widthBox = new DoubleSpinBox('f');
   widthBox->setLocale(d_app->locale());
-	widthBox->setSingleStep(0.1);
+  widthBox->setSingleStep(0.1);
     widthBox->setRange(0, 100);
     gl->addWidget(widthBox, 1, 1);
 
     gl->addWidget(new QLabel(tr( "Cap Width" )), 2, 0);
-	capBox = new QComboBox();
-	capBox->addItem( tr( "8" ) );
-	capBox->addItem( tr( "10" ) );
-	capBox->addItem( tr( "12" ) );
-	capBox->addItem( tr( "16" ) );
-	capBox->addItem( tr( "20" ) );
-	capBox->setEditable (true);
+  capBox = new QComboBox();
+  capBox->addItem( tr( "8" ) );
+  capBox->addItem( tr( "10" ) );
+  capBox->addItem( tr( "12" ) );
+  capBox->addItem( tr( "16" ) );
+  capBox->addItem( tr( "20" ) );
+  capBox->setEditable (true);
     gl->addWidget(capBox, 2, 1);
 
-	throughBox = new QCheckBox(tr( "Through Symbol" ));
+  throughBox = new QCheckBox(tr( "Through Symbol" ));
     gl->addWidget(throughBox, 3, 0);
     gl->setRowStretch (4, 1);
 
     errorsPage = new QWidget();
-	QHBoxLayout* hl = new QHBoxLayout(errorsPage);
-	hl->addWidget(gb1);
-	hl->addWidget(gb2);
+  QHBoxLayout* hl = new QHBoxLayout(errorsPage);
+  hl->addWidget(gb1);
+  hl->addWidget(gb2);
     privateTabWidget->insertTab( errorsPage, tr( "Error Bars" ) );
 
-	connect(widthBox, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
-	connect(colorBox, SIGNAL(colorChanged()), this, SLOT(pickErrorBarsColor()));
-	connect(xBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsType()));
-	connect(plusBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsPlus()));
-	connect(minusBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsMinus()));
-	connect(throughBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsThrough()));
+  connect(widthBox, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
+  connect(colorBox, SIGNAL(colorChanged()), this, SLOT(pickErrorBarsColor()));
+  connect(xBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsType()));
+  connect(plusBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsPlus()));
+  connect(minusBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsMinus()));
+  connect(throughBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsThrough()));
 }
 
 void PlotDialog::initHistogramPage()
 {
     QHBoxLayout* hl = new QHBoxLayout();
-	automaticBox = new QCheckBox(tr( "Automatic Binning" ));
+  automaticBox = new QCheckBox(tr( "Automatic Binning" ));
     hl->addWidget(automaticBox);
     hl->addStretch();
-	buttonStatistics = new QPushButton(tr( "&Show statistics" ));
+  buttonStatistics = new QPushButton(tr( "&Show statistics" ));
     hl->addWidget(buttonStatistics);
 
-	GroupBoxH = new QGroupBox();
+  GroupBoxH = new QGroupBox();
     QGridLayout *gl = new QGridLayout(GroupBoxH);
     gl->addWidget(new QLabel(tr( "Bin Size" )), 0, 0);
-	binSizeBox = new QLineEdit();
+  binSizeBox = new QLineEdit();
     gl->addWidget(binSizeBox, 0, 1);
     gl->addWidget(new QLabel(tr( "Begin" )), 1, 0);
-	histogramBeginBox = new QLineEdit();
+  histogramBeginBox = new QLineEdit();
     gl->addWidget(histogramBeginBox, 1, 1);
     gl->addWidget(new QLabel(tr( "End" )), 2, 0);
-	histogramEndBox = new QLineEdit();
+  histogramEndBox = new QLineEdit();
     gl->addWidget(histogramEndBox, 2, 1);
 
     histogramPage = new QWidget();
-	QVBoxLayout* vl = new QVBoxLayout(histogramPage);
-	vl->addLayout(hl);
-	vl->addWidget(GroupBoxH);
+  QVBoxLayout* vl = new QVBoxLayout(histogramPage);
+  vl->addLayout(hl);
+  vl->addWidget(GroupBoxH);
     vl->addStretch();
 
     privateTabWidget->insertTab( histogramPage, tr( "Histogram Data" ) );
 
-	connect(automaticBox, SIGNAL(clicked()), this, SLOT(setAutomaticBinning()));
-	connect(buttonStatistics, SIGNAL(clicked()), this, SLOT(showStatistics() ) );
+  connect(automaticBox, SIGNAL(clicked()), this, SLOT(setAutomaticBinning()));
+  connect(buttonStatistics, SIGNAL(clicked()), this, SLOT(showStatistics() ) );
 }
 
 void PlotDialog::initSpacingPage()
 {
-	spacingPage = new QWidget();
+  spacingPage = new QWidget();
 
     QGridLayout *gl = new QGridLayout(spacingPage);
     gl->addWidget(new QLabel(tr( "Gap Between Bars (in %)" )), 0, 0);
-	gapBox = new QSpinBox();
+  gapBox = new QSpinBox();
     gapBox->setRange(0, 100);
     gapBox->setSingleStep(10);
     gl->addWidget(gapBox, 0, 1);
     gl->addWidget(new QLabel(tr( "Offset (in %)" )), 1, 0);
-	offsetBox = new QSpinBox();
+  offsetBox = new QSpinBox();
     offsetBox->setRange(-1000, 1000);
     offsetBox->setSingleStep(50);
     gl->addWidget(offsetBox, 1, 1);
     gl->setRowStretch (2, 1);
 
-	privateTabWidget->insertTab( spacingPage, tr( "Spacing" ));
+  privateTabWidget->insertTab( spacingPage, tr( "Spacing" ));
 }
 
 void PlotDialog::initVectPage()
@@ -1357,48 +1355,48 @@ void PlotDialog::initVectPage()
     QGroupBox *gb1 = new QGroupBox();
     QGridLayout *gl1 = new QGridLayout(gb1);
     gl1->addWidget(new QLabel(tr( "Color" )), 0, 0);
-	vectColorBox = new ColorBox();
+  vectColorBox = new ColorBox();
     gl1->addWidget(vectColorBox, 0, 1);
     gl1->addWidget(new QLabel(tr( "Line Width" )), 1, 0);
-	vectWidthBox = new DoubleSpinBox('f');
+  vectWidthBox = new DoubleSpinBox('f');
   vectWidthBox->setLocale(d_app->locale());
-	vectWidthBox->setSingleStep(0.1);
+  vectWidthBox->setSingleStep(0.1);
     vectWidthBox->setRange(0, 100);
     gl1->addWidget(vectWidthBox, 1, 1);
 
-	QGroupBox *gb2 = new QGroupBox(tr( "Arrowheads" ));
+  QGroupBox *gb2 = new QGroupBox(tr( "Arrowheads" ));
     QGridLayout *gl2 = new QGridLayout(gb2);
     gl2->addWidget(new QLabel(tr( "Length" )), 0, 0);
-	headLengthBox = new QSpinBox();
+  headLengthBox = new QSpinBox();
     headLengthBox->setRange(0, 100);
     gl2->addWidget(headLengthBox, 0, 1);
     gl2->addWidget(new QLabel(tr( "Angle" )), 1, 0);
-	headAngleBox = new QSpinBox();
+  headAngleBox = new QSpinBox();
     headAngleBox->setRange(0, 85);
     headAngleBox->setSingleStep(5);
     gl2->addWidget(headAngleBox, 1, 1);
-	filledHeadBox = new QCheckBox(tr( "&Filled" ));
+  filledHeadBox = new QCheckBox(tr( "&Filled" ));
     gl2->addWidget(filledHeadBox, 2, 0);
     gl2->setRowStretch(3, 1);
 
-	GroupBoxVectEnd = new QGroupBox(tr( "End Point" ));
+  GroupBoxVectEnd = new QGroupBox(tr( "End Point" ));
     QGridLayout *gl3 = new QGridLayout(GroupBoxVectEnd);
     labelXEnd = new QLabel(tr( "X End" ));
     gl3->addWidget(labelXEnd, 0, 0);
-	xEndBox = new QComboBox();
+  xEndBox = new QComboBox();
     gl3->addWidget(xEndBox, 0, 1);
 
-	labelYEnd = new QLabel(tr( "Y End" ));
+  labelYEnd = new QLabel(tr( "Y End" ));
     gl3->addWidget(labelYEnd, 1, 0);
-	yEndBox = new  QComboBox();
+  yEndBox = new  QComboBox();
     gl3->addWidget(yEndBox, 1, 1);
 
-	labelPosition = new QLabel(tr( "Position" ));
+  labelPosition = new QLabel(tr( "Position" ));
     gl3->addWidget(labelPosition, 2, 0);
-	vectPosBox = new  QComboBox();
-	vectPosBox->addItem(tr("Tail"));
-	vectPosBox->addItem(tr("Middle"));
-	vectPosBox->addItem(tr("Head"));
+  vectPosBox = new  QComboBox();
+  vectPosBox->addItem(tr("Tail"));
+  vectPosBox->addItem(tr("Middle"));
+  vectPosBox->addItem(tr("Head"));
     gl3->addWidget(vectPosBox, 2, 1);
     gl3->setRowStretch(3, 1);
 
@@ -1408,11 +1406,11 @@ void PlotDialog::initVectPage()
     vl1->addWidget(gb1);
     vl1->addWidget(gb2);
 
-	QHBoxLayout *hl = new QHBoxLayout(vectPage);
+  QHBoxLayout *hl = new QHBoxLayout(vectPage);
     hl->addLayout(vl1);
     hl->addWidget(GroupBoxVectEnd);
 
-	privateTabWidget->insertTab( vectPage, tr( "Vector" ) );
+  privateTabWidget->insertTab( vectPage, tr( "Vector" ) );
 }
 
 void PlotDialog::setMultiLayer(MultiLayer *ml)
@@ -1437,28 +1435,28 @@ void PlotDialog::setMultiLayer(MultiLayer *ml)
 
         if (g == ml->activeGraph()){
           layer->setExpanded(true);
-        	layer->setActive(true);
-        	listBox->setCurrentItem(layer);
+          layer->setActive(true);
+          listBox->setCurrentItem(layer);
 
-        	keepRatioOnResizeBox->setChecked(g->isFixedAspectRatioEnabled());
-        	if (g->isSpectrogram()) keepRatioOnResizeBox->show();
-        	else keepRatioOnResizeBox->hide();
+          keepRatioOnResizeBox->setChecked(g->isFixedAspectRatioEnabled());
+          if (g->isSpectrogram()) keepRatioOnResizeBox->show();
+          else keepRatioOnResizeBox->hide();
         }
     }
 }
 
 void PlotDialog::selectCurve(int index)
 {
-	LayerItem *layerItem = dynamic_cast<LayerItem*>(listBox->currentItem());
-	if (!layerItem)
+  LayerItem *layerItem = dynamic_cast<LayerItem*>(listBox->currentItem());
+  if (!layerItem)
         return;
     if (layerItem->type() != LayerItem::LayerTreeItem)
         return;
-	QTreeWidgetItem *item = layerItem->child(index);
-	if (item){
-			(dynamic_cast<CurveTreeItem*>(item))->setActive(true);
+  QTreeWidgetItem *item = layerItem->child(index);
+  if (item){
+      (dynamic_cast<CurveTreeItem*>(item))->setActive(true);
         listBox->setCurrentItem(item);
-	}
+  }
 }
 
 void PlotDialog::showStatistics()
@@ -1476,9 +1474,9 @@ void PlotDialog::showStatistics()
     if (!plotItem)
         return;
 
-	QwtHistogram *h = dynamic_cast<QwtHistogram*>(plotItem);
-	if (!h)
-		return;
+  QwtHistogram *h = dynamic_cast<QwtHistogram*>(plotItem);
+  if (!h)
+    return;
 
     QString tableName = d_app->generateUniqueName(tr("Bins"));
     Table *t = d_app->newTable(h->dataSize(), 4, tableName, tr("Histogram and Probabilities for") + " " + h->title().text());
@@ -1499,22 +1497,22 @@ void PlotDialog::showStatistics()
         }
         t->setHeader(QStringList() << tr("Bins") << tr("Quantity") << tr("Sum") << tr("Percent"));
         t->showMaximized();
-	}
+  }
 
     QDateTime dt = QDateTime::currentDateTime();
-	QString info = dt.toString(Qt::LocalDate)+"\t"+tr("Histogram and Probabilities for") + " " + h->title().text()+"\n";
-	info += tr("Mean")+" = "+QString::number(h->mean())+"\t";
-	info += tr("Standard Deviation")+" = "+QString::number(h->standardDeviation())+"\n";
-	info += tr("Minimum")+" = "+QString::number(h->minimum())+"\t";
-	info += tr("Maximum")+" = "+QString::number(h->maximum())+"\t";
-	info += tr("Bins")+" = "+QString::number(h->dataSize())+"\n";
-	info += "-------------------------------------------------------------\n";
+  QString info = dt.toString(Qt::LocalDate)+"\t"+tr("Histogram and Probabilities for") + " " + h->title().text()+"\n";
+  info += tr("Mean")+" = "+QString::number(h->mean())+"\t";
+  info += tr("Standard Deviation")+" = "+QString::number(h->standardDeviation())+"\n";
+  info += tr("Minimum")+" = "+QString::number(h->minimum())+"\t";
+  info += tr("Maximum")+" = "+QString::number(h->maximum())+"\t";
+  info += tr("Bins")+" = "+QString::number(h->dataSize())+"\n";
+  info += "-------------------------------------------------------------\n";
     if (!info.isEmpty()){
         d_app->current_folder->appendLogInfo(info);
         d_app->showResults(true);
     }
 
-	close();
+  close();
 }
 
 void PlotDialog::contextMenuEvent(QContextMenuEvent *e)
@@ -1525,24 +1523,24 @@ void PlotDialog::contextMenuEvent(QContextMenuEvent *e)
     if (item->type() != CurveTreeItem::PlotCurveTreeItem)
         return;
     QwtPlotItem *it = dynamic_cast<QwtPlotItem *>(dynamic_cast<CurveTreeItem*>(item)->plotItem());
-	if (!it)
-		return;
+  if (!it)
+    return;
 
-	QPoint pos = listBox->viewport()->mapFromGlobal(QCursor::pos());
-	QRect rect = listBox->visualItemRect(listBox->currentItem());
-	if (rect.contains(pos))
-	{
-	   QMenu contextMenu(this);
-	   contextMenu.insertItem(tr("&Delete"), this, SLOT(removeSelectedCurve()));
+  QPoint pos = listBox->viewport()->mapFromGlobal(QCursor::pos());
+  QRect rect = listBox->visualItemRect(listBox->currentItem());
+  if (rect.contains(pos))
+  {
+     QMenu contextMenu(this);
+     contextMenu.insertItem(tr("&Delete"), this, SLOT(removeSelectedCurve()));
 
-	   if (it->rtti() == QwtPlotItem::Rtti_PlotCurve)
-	   {
-						if (dynamic_cast<PlotCurve *>(it)->type() == Graph::Function)
+     if (it->rtti() == QwtPlotItem::Rtti_PlotCurve)
+     {
+            if (dynamic_cast<PlotCurve *>(it)->type() == Graph::Function)
                 contextMenu.insertItem(tr("&Edit..."), this, SLOT(editCurve()));
             else
                 contextMenu.insertItem(tr("&Plot Associations..."), this, SLOT(editCurve()));
-	   }
-	   contextMenu.exec(QCursor::pos());
+     }
+     contextMenu.exec(QCursor::pos());
     }
     e->accept();
 }
@@ -1580,9 +1578,9 @@ void PlotDialog::changeErrorBarsPlus()
     if (!graph)
         return;
 
-	graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),widthBox->value(),
-			capBox->currentText().toInt(),colorBox->color(), plusBox->isChecked(),minusBox->isChecked(),
-			throughBox->isChecked());
+  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),widthBox->value(),
+      capBox->currentText().toInt(),colorBox->color(), plusBox->isChecked(),minusBox->isChecked(),
+      throughBox->isChecked());
 }
 
 void PlotDialog::changeErrorBarsMinus()
@@ -1597,9 +1595,9 @@ void PlotDialog::changeErrorBarsMinus()
     if (!graph)
         return;
 
-	graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),widthBox->value(),
-			capBox->currentText().toInt(), colorBox->color(),plusBox->isChecked(),minusBox->isChecked(),
-			throughBox->isChecked());
+  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),widthBox->value(),
+      capBox->currentText().toInt(), colorBox->color(),plusBox->isChecked(),minusBox->isChecked(),
+      throughBox->isChecked());
 }
 
 void PlotDialog::changeErrorBarsThrough()
@@ -1614,9 +1612,9 @@ void PlotDialog::changeErrorBarsThrough()
     if (!graph)
         return;
 
-	graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),widthBox->value(),
-			capBox->currentText().toInt(), colorBox->color(),plusBox->isChecked(),minusBox->isChecked(),
-			throughBox->isChecked());
+  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),widthBox->value(),
+      capBox->currentText().toInt(), colorBox->color(),plusBox->isChecked(),minusBox->isChecked(),
+      throughBox->isChecked());
 }
 
 void PlotDialog::changeErrorBarsType()
@@ -1631,9 +1629,9 @@ void PlotDialog::changeErrorBarsType()
     if (!graph)
         return;
 
-	graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(), widthBox->value(),
-			capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(), minusBox->isChecked(),
-			throughBox->isChecked());
+  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(), widthBox->value(),
+      capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(), minusBox->isChecked(),
+      throughBox->isChecked());
 }
 
 void PlotDialog::pickErrorBarsColor()
@@ -1648,15 +1646,15 @@ void PlotDialog::pickErrorBarsColor()
     if (!graph)
         return;
 
-	graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(), widthBox->value(),
-			capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(), minusBox->isChecked(),
-			throughBox->isChecked());
+  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(), widthBox->value(),
+      capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(), minusBox->isChecked(),
+      throughBox->isChecked());
 }
 
 void PlotDialog::showAreaColor(bool show)
 {
-	boxAreaColor->setEnabled(show);
-	boxPattern->setEnabled(show);
+  boxAreaColor->setEnabled(show);
+  boxPattern->setEnabled(show);
 }
 
 void PlotDialog::updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *previousItem)
@@ -1687,11 +1685,11 @@ void PlotDialog::updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *
       int plot_type = setPlotType(curveItem);
       if (plot_type >= 0)
       {
-	insertTabs(plot_type);
+  insertTabs(plot_type);
       }
       if (!curvePlotTypeBox->isVisible())
       {
-	curvePlotTypeBox->show();
+  curvePlotTypeBox->show();
       }
     }
     setActiveCurve(curveItem);
@@ -1724,82 +1722,82 @@ void PlotDialog::updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *
 void PlotDialog::insertTabs(int plot_type)
 {
     if (plot_type == Graph::Pie)
-	{
-		privateTabWidget->addTab (piePage, tr("Pattern"));
-		privateTabWidget->addTab (pieGeometryPage, tr("Pie Geometry"));
-		privateTabWidget->addTab (pieLabelsPage, tr("Labels"));
-		privateTabWidget->showPage(piePage);
-		return;
-	}
+  {
+    privateTabWidget->addTab (piePage, tr("Pattern"));
+    privateTabWidget->addTab (pieGeometryPage, tr("Pie Geometry"));
+    privateTabWidget->addTab (pieLabelsPage, tr("Labels"));
+    privateTabWidget->showPage(piePage);
+    return;
+  }
 
     privateTabWidget->addTab (axesPage, tr("Axes"));
-	if (plot_type == Graph::Line)
-	{
-		boxConnect->setEnabled(true);
-		privateTabWidget->addTab (linePage, tr("Line"));
-		privateTabWidget->showPage(linePage);
-	}
-	else if (plot_type == Graph::Scatter)
-	{
-		boxConnect->setEnabled(true);
-		privateTabWidget->addTab (symbolPage, tr("Symbol"));
-		privateTabWidget->showPage(symbolPage);
-	}
-	else if (plot_type == Graph::LineSymbols)
-	{
-		boxConnect->setEnabled(true);
-		privateTabWidget->addTab (linePage, tr("Line"));
-		privateTabWidget->addTab (symbolPage, tr("Symbol"));
-		privateTabWidget->showPage(symbolPage);
-	}
-	else if (plot_type == Graph::VerticalBars ||
-			plot_type == Graph::HorizontalBars ||
-			plot_type == Graph::Histogram)
-	{
-		boxConnect->setEnabled(false);
-		privateTabWidget->addTab (linePage, tr("Pattern"));
-		privateTabWidget->addTab (spacingPage, tr("Spacing"));
+  if (plot_type == Graph::Line)
+  {
+    boxConnect->setEnabled(true);
+    privateTabWidget->addTab (linePage, tr("Line"));
+    privateTabWidget->showPage(linePage);
+  }
+  else if (plot_type == Graph::Scatter)
+  {
+    boxConnect->setEnabled(true);
+    privateTabWidget->addTab (symbolPage, tr("Symbol"));
+    privateTabWidget->showPage(symbolPage);
+  }
+  else if (plot_type == Graph::LineSymbols)
+  {
+    boxConnect->setEnabled(true);
+    privateTabWidget->addTab (linePage, tr("Line"));
+    privateTabWidget->addTab (symbolPage, tr("Symbol"));
+    privateTabWidget->showPage(symbolPage);
+  }
+  else if (plot_type == Graph::VerticalBars ||
+      plot_type == Graph::HorizontalBars ||
+      plot_type == Graph::Histogram)
+  {
+    boxConnect->setEnabled(false);
+    privateTabWidget->addTab (linePage, tr("Pattern"));
+    privateTabWidget->addTab (spacingPage, tr("Spacing"));
 
-		if (plot_type == Graph::Histogram)
-		{
-			privateTabWidget->addTab (histogramPage, tr("Histogram Data"));
-			privateTabWidget->showPage(histogramPage);
-		}
-		else
-			privateTabWidget->showPage(linePage);
-	}
-	else if (plot_type == Graph::VectXYXY || plot_type == Graph::VectXYAM)
-	{
-		boxConnect->setEnabled(true);
-		privateTabWidget->addTab (linePage, tr("Line"));
-		privateTabWidget->addTab (vectPage, tr("Vector"));
-		customVectorsPage(plot_type == Graph::VectXYAM);
-		privateTabWidget->showPage(vectPage);
-	}
-	else if (plot_type == Graph::ErrorBars)
-	{
-		privateTabWidget->addTab (errorsPage, tr("Error Bars"));
-		privateTabWidget->showPage(errorsPage);
-	}
-	else if (plot_type == Graph::Box)
-	{
-		boxConnect->setEnabled(false);
-		privateTabWidget->addTab (linePage, tr("Pattern"));
-		privateTabWidget->addTab (boxPage, tr("Box/Whiskers"));
-		privateTabWidget->addTab (percentilePage, tr("Percentile"));
-		privateTabWidget->showPage(linePage);
-		return;
-	}
-	else if (plot_type == Graph::ColorMap || plot_type == Graph::GrayScale || plot_type == Graph::Contour || plot_type == Graph::ColorMapContour)
-  	{
-  		privateTabWidget->addTab(spectrogramPage, tr("Colors"));
-		privateTabWidget->addTab(contourLinesPage, tr("Contour Lines"));
-  	    privateTabWidget->showPage(spectrogramPage);
-		privateTabWidget->addTab(labelsPage, tr("Labels"));
-  	    return;
-  	}
+    if (plot_type == Graph::Histogram)
+    {
+      privateTabWidget->addTab (histogramPage, tr("Histogram Data"));
+      privateTabWidget->showPage(histogramPage);
+    }
+    else
+      privateTabWidget->showPage(linePage);
+  }
+  else if (plot_type == Graph::VectXYXY || plot_type == Graph::VectXYAM)
+  {
+    boxConnect->setEnabled(true);
+    privateTabWidget->addTab (linePage, tr("Line"));
+    privateTabWidget->addTab (vectPage, tr("Vector"));
+    customVectorsPage(plot_type == Graph::VectXYAM);
+    privateTabWidget->showPage(vectPage);
+  }
+  else if (plot_type == Graph::ErrorBars)
+  {
+    privateTabWidget->addTab (errorsPage, tr("Error Bars"));
+    privateTabWidget->showPage(errorsPage);
+  }
+  else if (plot_type == Graph::Box)
+  {
+    boxConnect->setEnabled(false);
+    privateTabWidget->addTab (linePage, tr("Pattern"));
+    privateTabWidget->addTab (boxPage, tr("Box/Whiskers"));
+    privateTabWidget->addTab (percentilePage, tr("Percentile"));
+    privateTabWidget->showPage(linePage);
+    return;
+  }
+  else if (plot_type == Graph::ColorMap || plot_type == Graph::GrayScale || plot_type == Graph::Contour || plot_type == Graph::ColorMapContour)
+    {
+      privateTabWidget->addTab(spectrogramPage, tr("Colors"));
+    privateTabWidget->addTab(contourLinesPage, tr("Contour Lines"));
+        privateTabWidget->showPage(spectrogramPage);
+    privateTabWidget->addTab(labelsPage, tr("Labels"));
+        return;
+    }
 
-  	QTreeWidgetItem *item = listBox->currentItem();
+    QTreeWidgetItem *item = listBox->currentItem();
     if (!item || item->type() != CurveTreeItem::PlotCurveTreeItem)
         return;
 
@@ -1807,44 +1805,44 @@ void PlotDialog::insertTabs(int plot_type)
     if (!c) return;
     if (c && c->type() != Graph::Function){
         privateTabWidget->addTab (labelsPage, tr("Labels"));
-		if (c->hasSelectedLabels())
-			privateTabWidget->showPage(labelsPage);
-	}
+    if (c->hasSelectedLabels())
+      privateTabWidget->showPage(labelsPage);
+  }
 }
 
 void PlotDialog::clearTabWidget()
 {
   privateTabWidget->removeTab(privateTabWidget->indexOf(labelsPage));
   privateTabWidget->removeTab(privateTabWidget->indexOf(axesPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(linePage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(symbolPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(errorsPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(histogramPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(spacingPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(vectPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(boxPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(percentilePage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(spectrogramPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(piePage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(pieGeometryPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(pieLabelsPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(layerPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(layerGeometryPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(fontsPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(printPage));
-	privateTabWidget->removeTab(privateTabWidget->indexOf(contourLinesPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(linePage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(symbolPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(errorsPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(histogramPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(spacingPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(vectPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(boxPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(percentilePage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(spectrogramPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(piePage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(pieGeometryPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(pieLabelsPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(layerPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(layerGeometryPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(fontsPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(printPage));
+  privateTabWidget->removeTab(privateTabWidget->indexOf(contourLinesPage));
 }
 
 void PlotDialog::quit()
 {
-	if (acceptParams())
-		close();
+  if (acceptParams())
+    close();
 }
 
 void PlotDialog::showWorksheet()
 {
   if (!d_app)
-		return;
+    return;
 
     CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(listBox->currentItem());
     if (!item)
@@ -1853,58 +1851,58 @@ void PlotDialog::showWorksheet()
         return;
 
   d_app->showCurveWorksheet(item->graph(), item->plotItemIndex());
-	close();
+  close();
 }
 
 int PlotDialog::setPlotType(CurveTreeItem *item)
 {
-	int curveType = item->plotItemType();
-	if (curveType >= 0){
-		boxPlotType->clear();
+  int curveType = item->plotItemType();
+  if (curveType >= 0){
+    boxPlotType->clear();
 
-		if (curveType == Graph::ErrorBars)
-			boxPlotType->addItem( tr( "Error Bars" ) );
+    if (curveType == Graph::ErrorBars)
+      boxPlotType->addItem( tr( "Error Bars" ) );
         else if (curveType == Graph::Pie)
-			boxPlotType->addItem( tr( "Pie" ) );
-		else if (curveType == Graph::VerticalBars)
-			boxPlotType->addItem( tr( "Vertical Bars" ) );
-		else if (curveType == Graph::HorizontalBars)
-			boxPlotType->addItem( tr( "Horizontal Bars" ) );
-		else if (curveType == Graph::Histogram)
-			boxPlotType->addItem( tr( "Histogram" ) );
-		else if (curveType == Graph::VectXYXY || curveType == Graph::VectXYAM){
-			boxPlotType->addItem( tr( "Vector XYXY" ) );
-			boxPlotType->addItem( tr( "Vector XYAM" ) );
-			if (curveType == Graph::VectXYAM)
-				boxPlotType->setCurrentIndex(1);
-		} else if (curveType == Graph::Box)
-			boxPlotType->addItem( tr( "Box" ) );
-		else if (curveType == Graph::ColorMap || curveType == Graph::GrayScale || curveType == Graph::Contour
-		    || curveType == Graph::ColorMapContour)
-  	    	boxPlotType->insertItem(tr("Contour") + " / " + tr("Image"));
-		else {
-			boxPlotType->addItem( tr( "Line" ) );
-			boxPlotType->addItem( tr( "Scatter" ) );
-			boxPlotType->addItem( tr( "Line + Symbol" ) );
+      boxPlotType->addItem( tr( "Pie" ) );
+    else if (curveType == Graph::VerticalBars)
+      boxPlotType->addItem( tr( "Vertical Bars" ) );
+    else if (curveType == Graph::HorizontalBars)
+      boxPlotType->addItem( tr( "Horizontal Bars" ) );
+    else if (curveType == Graph::Histogram)
+      boxPlotType->addItem( tr( "Histogram" ) );
+    else if (curveType == Graph::VectXYXY || curveType == Graph::VectXYAM){
+      boxPlotType->addItem( tr( "Vector XYXY" ) );
+      boxPlotType->addItem( tr( "Vector XYAM" ) );
+      if (curveType == Graph::VectXYAM)
+        boxPlotType->setCurrentIndex(1);
+    } else if (curveType == Graph::Box)
+      boxPlotType->addItem( tr( "Box" ) );
+    else if (curveType == Graph::ColorMap || curveType == Graph::GrayScale || curveType == Graph::Contour
+        || curveType == Graph::ColorMapContour)
+          boxPlotType->insertItem(tr("Contour") + " / " + tr("Image"));
+    else {
+      boxPlotType->addItem( tr( "Line" ) );
+      boxPlotType->addItem( tr( "Scatter" ) );
+      boxPlotType->addItem( tr( "Line + Symbol" ) );
 
-			QwtPlotCurve *c = dynamic_cast<QwtPlotCurve*>(item->plotItem());
-			if (!c)
-				return -1;
+      QwtPlotCurve *c = dynamic_cast<QwtPlotCurve*>(item->plotItem());
+      if (!c)
+        return -1;
 
-			QwtSymbol s = c->symbol();
-			if (s.style() == QwtSymbol::NoSymbol){
-				boxPlotType->setCurrentIndex(0);
-				return Graph::Line;
-			} else if (c->style() == QwtPlotCurve::NoCurve) {
-				boxPlotType->setCurrentIndex(1);
-				return Graph::Scatter;
-			} else {
-				boxPlotType->setCurrentIndex(2);
-				return Graph::LineSymbols;
-			}
-		}
-	}
-	return curveType;
+      QwtSymbol s = c->symbol();
+      if (s.style() == QwtSymbol::NoSymbol){
+        boxPlotType->setCurrentIndex(0);
+        return Graph::Line;
+      } else if (c->style() == QwtPlotCurve::NoCurve) {
+        boxPlotType->setCurrentIndex(1);
+        return Graph::Scatter;
+      } else {
+        boxPlotType->setCurrentIndex(2);
+        return Graph::LineSymbols;
+      }
+    }
+  }
+  return curveType;
 }
 
 void PlotDialog::setActiveLayer(LayerItem *item)
@@ -1917,7 +1915,7 @@ void PlotDialog::setActiveLayer(LayerItem *item)
     if (!g)
         return;
 
-	curvePlotTypeBox->hide();
+  curvePlotTypeBox->hide();
     btnWorksheet->hide();
     btnEditCurve->hide();
 
@@ -1927,48 +1925,48 @@ void PlotDialog::setActiveLayer(LayerItem *item)
 
     Plot *p = g->plotWidget();
     boxMargin->setValue(p->margin());
-	boxBorderWidth->setValue(p->lineWidth());
-	boxBorderColor->setColor(p->frameColor());
+  boxBorderWidth->setValue(p->lineWidth());
+  boxBorderColor->setColor(p->frameColor());
 
-	QColor c = p->paletteBackgroundColor();
-	boxBackgroundTransparency->setValue(c.alpha());
-	boxBackgroundColor->setEnabled(c.alpha());
-	c.setAlpha(255);
-	boxBackgroundColor->setColor(c);
+  QColor c = p->paletteBackgroundColor();
+  boxBackgroundTransparency->setValue(c.alpha());
+  boxBackgroundColor->setEnabled(c.alpha());
+  c.setAlpha(255);
+  boxBackgroundColor->setColor(c);
 
-	c = p->canvasBackground();
-	boxCanvasTransparency->setValue(c.alpha());
-	boxCanvasColor->setEnabled(c.alpha());
-	c.setAlpha(255);
-	boxCanvasColor->setColor(c);
+  c = p->canvasBackground();
+  boxCanvasTransparency->setValue(c.alpha());
+  boxCanvasColor->setEnabled(c.alpha());
+  c.setAlpha(255);
+  boxCanvasColor->setColor(c);
 
-	boxAntialiasing->setChecked(g->antialiasing());
+  boxAntialiasing->setChecked(g->antialiasing());
 
     boxBackgroundTransparency->blockSignals(false);
     boxCanvasTransparency->blockSignals(false);
     boxBorderWidth->blockSignals(false);
 
-	boxX->setValue(g->pos().x());
-	boxY->setValue(g->pos().y());
+  boxX->setValue(g->pos().x());
+  boxY->setValue(g->pos().y());
 
-	boxLayerWidth->blockSignals(true);
-	boxLayerWidth->setValue(p->size().width());
-	boxLayerWidth->blockSignals(false);
+  boxLayerWidth->blockSignals(true);
+  boxLayerWidth->setValue(p->size().width());
+  boxLayerWidth->blockSignals(false);
 
-	boxLayerHeight->blockSignals(true);
-	boxLayerHeight->setValue(p->size().height());
-	boxLayerHeight->blockSignals(false);
+  boxLayerHeight->blockSignals(true);
+  boxLayerHeight->setValue(p->size().height());
+  boxLayerHeight->blockSignals(false);
 
-	aspect_ratio = (double)p->size().width()/(double)p->size().height();
+  aspect_ratio = (double)p->size().width()/(double)p->size().height();
 }
 void PlotDialog::updateContourLevelsDisplay(Spectrogram *sp)
 {
-	QwtValueList levels = sp->contourLevels();
-	levelsBox->setValue(levels.size());
-	if (levels.size() >= 1)
-		firstContourLineBox->setValue(levels[0]);
-	if (levels.size() >= 2)
-		contourLinesDistanceBox->setValue(fabs(levels[1] - levels[0]));
+  QwtValueList levels = sp->contourLevels();
+  levelsBox->setValue(levels.size());
+  if (levels.size() >= 1)
+    firstContourLineBox->setValue(levels[0]);
+  if (levels.size() >= 2)
+    contourLinesDistanceBox->setValue(fabs(levels[1] - levels[0]));
 }
 void PlotDialog::setActiveCurve(CurveTreeItem *item)
 {
@@ -1979,8 +1977,8 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
     if (!i)
         return;
 
-	item->setActive(true);
-	btnWorksheet->show();
+  item->setActive(true);
+  btnWorksheet->show();
     btnEditCurve->show();
 
     //axes page
@@ -2004,20 +2002,20 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
         levelsBox->setValue(sp->levels());
 
         //autoContourBox->setChecked(sp->defaultContourPen().style() == Qt::NoPen);
-		autoContourBox->setChecked(sp->useColorMapPen()&& sp->defaultContourPen().style() == Qt::NoPen);
-		//customPenBtn->setChecked(sp->defaultContourPen().style() == Qt::NoPen);
-		customPenBtn->setChecked(!sp->useColorMapPen()&& sp->defaultContourPen().style() == Qt::NoPen);
-	    defaultContourBox->setChecked((sp->defaultContourPen().style() != Qt::NoPen) && !(sp->useColorMapPen()) );
+    autoContourBox->setChecked(sp->useColorMapPen()&& sp->defaultContourPen().style() == Qt::NoPen);
+    //customPenBtn->setChecked(sp->defaultContourPen().style() == Qt::NoPen);
+    customPenBtn->setChecked(!sp->useColorMapPen()&& sp->defaultContourPen().style() == Qt::NoPen);
+      defaultContourBox->setChecked((sp->defaultContourPen().style() != Qt::NoPen) && !(sp->useColorMapPen()) );
 
         levelsColorBox->setColor(sp->defaultContourPen().color());
-		contourWidthBox->setValue(sp->defaultContourPen().widthF());
+    contourWidthBox->setValue(sp->defaultContourPen().widthF());
 
         if (sp->defaultContourPen().style() != Qt::NoPen)
             boxContourStyle->setCurrentIndex(sp->defaultContourPen().style() - 1);
-	     else
+       else
             boxContourStyle->setCurrentIndex(0);
-		contourLinesEditor->setSpectrogram(sp);
-		updateContourLevelsDisplay(sp);
+    contourLinesEditor->setSpectrogram(sp);
+    updateContourLevelsDisplay(sp);
 
         axisScaleBox->setChecked(sp->hasColorScale());
         colorScaleBox->setCurrentItem((int)sp->colorScaleAxis());
@@ -2029,31 +2027,31 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
 
         labelsGroupBox->blockSignals(true);
         labelsGroupBox->setEnabled(sp->testDisplayMode(QwtPlotSpectrogram::ContourMode));
-		labelsGroupBox->setChecked(sp->hasLabels() && sp->testDisplayMode(QwtPlotSpectrogram::ContourMode));
-		boxLabelsColor->setColor(sp->labelsColor());
-		boxLabelsAngle->setValue(sp->labelsRotation());
+    labelsGroupBox->setChecked(sp->hasLabels() && sp->testDisplayMode(QwtPlotSpectrogram::ContourMode));
+    boxLabelsColor->setColor(sp->labelsColor());
+    boxLabelsAngle->setValue(sp->labelsRotation());
 
-		boxLabelsXOffset->blockSignals(true);
-		boxLabelsXOffset->setValue(qRound(sp->labelsXOffset()));
-		boxLabelsXOffset->blockSignals(false);
+    boxLabelsXOffset->blockSignals(true);
+    boxLabelsXOffset->setValue(qRound(sp->labelsXOffset()));
+    boxLabelsXOffset->blockSignals(false);
 
-		boxLabelsYOffset->blockSignals(true);
-		boxLabelsYOffset->setValue(qRound(sp->labelsYOffset()));
-		boxLabelsYOffset->blockSignals(false);
-		boxLabelsWhiteOut->setChecked(sp->labelsWhiteOut());
-		labelsGroupBox->blockSignals(false);
+    boxLabelsYOffset->blockSignals(true);
+    boxLabelsYOffset->setValue(qRound(sp->labelsYOffset()));
+    boxLabelsYOffset->blockSignals(false);
+    boxLabelsWhiteOut->setChecked(sp->labelsWhiteOut());
+    labelsGroupBox->blockSignals(false);
 
-		if (sp->hasSelectedLabels())
-			privateTabWidget->showPage(labelsPage);
-	      return;
+    if (sp->hasSelectedLabels())
+      privateTabWidget->showPage(labelsPage);
+        return;
     }
     PlotCurve *c = dynamic_cast<PlotCurve*>(i);
-	if (c->type() == Graph::Function)
+  if (c->type() == Graph::Function)
         btnEditCurve->setText(tr("&Edit..."));
     else
         btnEditCurve->setText(tr("&Plot Associations..."));
 
-	int curveType = item->plotItemType();
+  int curveType = item->plotItemType();
     if (curveType == Graph::Pie){
         QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(i);
         boxPiePattern->setPattern(pie->pattern());
@@ -2063,32 +2061,32 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
         boxFirstColor->setCurrentIndex(pie->firstColor());
 
         boxPieViewAngle->blockSignals(true);
-		boxPieViewAngle->setValue(pie->viewAngle());
-		boxPieViewAngle->blockSignals(false);
-		boxPieThickness->blockSignals(true);
-		boxPieThickness->setValue(pie->thickness());
-		boxPieThickness->blockSignals(false);
-		boxPieStartAzimuth->blockSignals(true);
-		boxPieStartAzimuth->setValue(pie->startAzimuth());
-		boxPieStartAzimuth->blockSignals(false);
-		boxPieConterClockwise->blockSignals(true);
-		boxPieConterClockwise->setChecked(pie->counterClockwise());
-		boxPieConterClockwise->blockSignals(false);
-		boxRadius->blockSignals(true);
+    boxPieViewAngle->setValue(pie->viewAngle());
+    boxPieViewAngle->blockSignals(false);
+    boxPieThickness->blockSignals(true);
+    boxPieThickness->setValue(pie->thickness());
+    boxPieThickness->blockSignals(false);
+    boxPieStartAzimuth->blockSignals(true);
+    boxPieStartAzimuth->setValue(pie->startAzimuth());
+    boxPieStartAzimuth->blockSignals(false);
+    boxPieConterClockwise->blockSignals(true);
+    boxPieConterClockwise->setChecked(pie->counterClockwise());
+    boxPieConterClockwise->blockSignals(false);
+    boxRadius->blockSignals(true);
         boxRadius->setValue(pie->radius());
         boxRadius->blockSignals(false);
         boxPieOffset->blockSignals(true);
         boxPieOffset->setValue((int)pie->horizontalOffset());
         boxPieOffset->blockSignals(false);
 
-		pieAutoLabelsBox->setChecked(pie->labelsAutoFormat());
-		boxPieValues->setChecked(pie->labelsValuesFormat());
-		boxPiePercentages->setChecked(pie->labelsPercentagesFormat());
-		boxPieCategories->setChecked(pie->labelCategories());
-		boxPieEdgeDist->blockSignals(true);
-		boxPieEdgeDist->setValue(pie->labelsEdgeDistance());
-		boxPieEdgeDist->blockSignals(false);
-		boxPieWedge->setChecked(pie->fixedLabelsPosition());
+    pieAutoLabelsBox->setChecked(pie->labelsAutoFormat());
+    boxPieValues->setChecked(pie->labelsValuesFormat());
+    boxPiePercentages->setChecked(pie->labelsPercentagesFormat());
+    boxPieCategories->setChecked(pie->labelCategories());
+    boxPieEdgeDist->blockSignals(true);
+    boxPieEdgeDist->setValue(pie->labelsEdgeDistance());
+    boxPieEdgeDist->blockSignals(false);
+    boxPieWedge->setChecked(pie->fixedLabelsPosition());
         return;
     }
     //line page
@@ -2107,7 +2105,6 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
     fillGroupBox->setChecked(c->brush().style() != Qt::NoBrush );
     fillGroupBox->blockSignals(false);
     boxAreaColor->setColor(c->brush().color());
-    boxPattern->setPattern(c->brush().style());
 
     //symbol page
     const QwtSymbol s = c->symbol();
@@ -2123,8 +2120,8 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
         return;
 
     if (curveType == Graph::VerticalBars || curveType == Graph::HorizontalBars ||
-				curveType == Graph::Histogram){//spacing page
-				QwtBarCurve *b = dynamic_cast<QwtBarCurve*>(i);
+        curveType == Graph::Histogram){//spacing page
+        QwtBarCurve *b = dynamic_cast<QwtBarCurve*>(i);
         if (b){
             gapBox->setValue(b->gap());
             offsetBox->setValue(b->offset());
@@ -2158,29 +2155,29 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
     if (curveType == Graph::ErrorBars){
         QwtErrorPlotCurve *err = dynamic_cast<QwtErrorPlotCurve*>(i);
         if (err){
-			widthBox->blockSignals(true);
+      widthBox->blockSignals(true);
             widthBox->setValue(err->width());
-			widthBox->blockSignals(false);
+      widthBox->blockSignals(false);
             capBox->setEditText(QString::number(err->capLength()));
 
-			colorBox->blockSignals(true);
+      colorBox->blockSignals(true);
             colorBox->setColor(err->color());
-			colorBox->blockSignals(false);
+      colorBox->blockSignals(false);
 
-			throughBox->blockSignals(true);
+      throughBox->blockSignals(true);
             throughBox->setChecked(err->throughSymbol());
-			throughBox->blockSignals(false);
-			plusBox->blockSignals(true);
+      throughBox->blockSignals(false);
+      plusBox->blockSignals(true);
             plusBox->setChecked(err->plusSide());
-			plusBox->blockSignals(false);
-			minusBox->blockSignals(true);
+      plusBox->blockSignals(false);
+      minusBox->blockSignals(true);
             minusBox->setChecked(err->minusSide());
-			minusBox->blockSignals(false);
-			xBox->blockSignals(true);
-			xBox->setChecked(err->xErrors());
-			xBox->blockSignals(false);
+      minusBox->blockSignals(false);
+      xBox->blockSignals(true);
+      xBox->setChecked(err->xErrors());
+      xBox->blockSignals(false);
         }
-		return;
+    return;
     }
 
     if (curveType == Graph::Box){
@@ -2216,15 +2213,15 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
             else
                 boxWhiskersCoef->setValue((int)b->whiskersRange());
         }
-		return;
+    return;
     }
 
     const DataCurve *dc = dynamic_cast<const DataCurve *>(i);
     if (!dc) return;
-	if (!dc->table()){
-		privateTabWidget->removeTab(privateTabWidget->indexOf(labelsPage));
-		return;
-	}
+  if (!dc->table()){
+    privateTabWidget->removeTab(privateTabWidget->indexOf(labelsPage));
+    return;
+  }
     labelsGroupBox->blockSignals(true);
     labelsGroupBox->setChecked(dc->hasLabels());
 
@@ -2243,68 +2240,68 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
     boxLabelsYOffset->setValue(dc->labelsYOffset());
     boxLabelsWhiteOut->setChecked(dc->labelsWhiteOut());
     switch(dc->labelsAlignment()){
-		case Qt::AlignHCenter:
-			boxLabelsAlign->setCurrentIndex(0);
-			break;
-		case Qt::AlignLeft:
-			boxLabelsAlign->setCurrentIndex(1);
-			break;
-		case Qt::AlignRight:
-			boxLabelsAlign->setCurrentIndex(2);
-			break;
-	}
-	labelsGroupBox->blockSignals(false);
+    case Qt::AlignHCenter:
+      boxLabelsAlign->setCurrentIndex(0);
+      break;
+    case Qt::AlignLeft:
+      boxLabelsAlign->setCurrentIndex(1);
+      break;
+    case Qt::AlignRight:
+      boxLabelsAlign->setCurrentIndex(2);
+      break;
+  }
+  labelsGroupBox->blockSignals(false);
 }
 void PlotDialog::showAllLabelControls(bool show)
 {
-	if (show){
-		boxLabelsColumn->show();
-		boxLabelsAlign->show();
-		justifyLabelsLbl->show();
-		labelsColumnLbl->show();
-	} else {
-		boxLabelsColumn->hide();
-		boxLabelsAlign->hide();
-		justifyLabelsLbl->hide();
-		labelsColumnLbl->hide();
-	}
+  if (show){
+    boxLabelsColumn->show();
+    boxLabelsAlign->show();
+    justifyLabelsLbl->show();
+    labelsColumnLbl->show();
+  } else {
+    boxLabelsColumn->hide();
+    boxLabelsAlign->hide();
+    justifyLabelsLbl->hide();
+    labelsColumnLbl->hide();
+  }
 }
 void PlotDialog::updateEndPointColumns(const QString& text)
 {
-	QStringList cols=text.split(",", QString::SkipEmptyParts);
-	QStringList aux=cols[0].split(":", QString::SkipEmptyParts);
-	QString table=aux[0];
-	QStringList list;
-	for (int i=0; i<(int)columnNames.count(); i++)
-	{
-		QString s=columnNames[i];
-		if (s.contains(table))
-			list<<s;
-	}
+  QStringList cols=text.split(",", QString::SkipEmptyParts);
+  QStringList aux=cols[0].split(":", QString::SkipEmptyParts);
+  QString table=aux[0];
+  QStringList list;
+  for (int i=0; i<(int)columnNames.count(); i++)
+  {
+    QString s=columnNames[i];
+    if (s.contains(table))
+      list<<s;
+  }
 
-	xEndBox->clear();
-	xEndBox->insertStringList(list);
-	xEndBox->setCurrentText(table + "_" + cols[2].remove("(X)").remove("(A)"));
+  xEndBox->clear();
+  xEndBox->insertStringList(list);
+  xEndBox->setCurrentText(table + "_" + cols[2].remove("(X)").remove("(A)"));
 
-	yEndBox->clear();
-	yEndBox->insertStringList(list);
-	yEndBox->setCurrentText(table + "_" + cols[3].remove("(Y)").remove("(M)"));
+  yEndBox->clear();
+  yEndBox->insertStringList(list);
+  yEndBox->setCurrentText(table + "_" + cols[3].remove("(Y)").remove("(M)"));
 }
 
 bool PlotDialog::acceptParams()
 {
      if (privateTabWidget->currentWidget() == fontsPage){
-		d_ml->setFonts(titleFont, axesFont, numbersFont, legendFont);
-		return true;
+    d_ml->setFonts(titleFont, axesFont, numbersFont, legendFont);
+    return true;
     } else if (privateTabWidget->currentWidget() == printPage){
-		d_ml->setScaleLayersOnPrint(boxScaleLayers->isChecked());
-		d_ml->printCropmarks(boxPrintCrops->isChecked());
-		return true;
+    d_ml->setScaleLayersOnPrint(boxScaleLayers->isChecked());
+    d_ml->printCropmarks(boxPrintCrops->isChecked());
+    return true;
     } else if (privateTabWidget->currentWidget() == layerPage){
-		if (!boxAll->isChecked())
-			return true;
+    if (!boxAll->isChecked())
+      return true;
 
-		QList<Graph *> layers = d_ml->layersList();
+    QList<Graph *> layers = d_ml->layersList();
         foreach(Graph *g, layers){
             g->setFrame(boxBorderWidth->value(), boxBorderColor->color());
             g->setMargin(boxMargin->value());
@@ -2318,36 +2315,36 @@ bool PlotDialog::acceptParams()
             g->setCanvasBackground(c);
 
             g->setAntialiasing(boxAntialiasing->isChecked());
-		}
-		return true;
-	} else if (privateTabWidget->currentWidget() == layerGeometryPage){
-		LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
+    }
+    return true;
+  } else if (privateTabWidget->currentWidget() == layerGeometryPage){
+    LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
         if (!item)
             return false;
         Graph *g = item->graph();
-		if (!g)
-			return false;
+    if (!g)
+      return false;
 
     g->enableFixedAspectRatio(keepRatioOnResizeBox->isChecked());
 
-		QPoint pos = QPoint(boxX->value(), boxY->value());
-		QSize size = QSize(boxLayerWidth->value(), boxLayerHeight->value());
-		if (g->pos() == pos && g->size() == size)
-			return true;
+    QPoint pos = QPoint(boxX->value(), boxY->value());
+    QSize size = QSize(boxLayerWidth->value(), boxLayerHeight->value());
+    if (g->pos() == pos && g->size() == size)
+      return true;
 
-		g->setGeometry(QRect(pos, size));
+    g->setGeometry(QRect(pos, size));
     g->plotWidget()->resize(size);
-		d_ml->repaint();
-		return true;
-	}
+    d_ml->repaint();
+    return true;
+  }
 
     QTreeWidgetItem *it = listBox->currentItem();
 
     if (!it)
         return false;
 
-		CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(it);
-		QwtPlotItem *plotItem = dynamic_cast<QwtPlotItem *>(item->plotItem());
+    CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(it);
+    QwtPlotItem *plotItem = dynamic_cast<QwtPlotItem *>(item->plotItem());
     if (!plotItem)
         return false;
 
@@ -2355,191 +2352,191 @@ bool PlotDialog::acceptParams()
     if (!graph)
         return false;
 
-	if (privateTabWidget->currentPage() == axesPage)
-	{
-	  plotItem->setAxis(boxXAxis->currentIndex() + 2, boxYAxis->currentIndex());
-		graph->setAutoScale();
-		return true;
-	}
-	else if (privateTabWidget->currentPage() == spectrogramPage)
-	{
-	  Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
-
-	  if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) { return false; }
-
-	  if (grayScaleBox->isChecked())
-	  {
-	    sp->setGrayScale();
-	  }
-	  else if (defaultScaleBox->isChecked())
-	  {
-	    sp->setDefaultColorMap();
-	  }
-	   //if customScaleBox radiobutton is selected it loads the colormap file and
-	   //updates the spectrogram,colormap widget with the loaded file
-	  else if (customScaleBox->isChecked())
-	  {
-	    sp->mutableColorMap().loadMap(mCurrentColorMap);
-	    // sp->setDefaultColorMap();
-	    sp->setCustomColorMap(sp->mutableColorMap());
-	    //sets the selected colormapfile name to spectrogram
-	    sp->setColorMapFileName(mCurrentColorMap);
-	    //saves the settings
-	    sp->saveSettings();
-	  }
-
-	  sp->showColorScale((QwtPlot::Axis)colorScaleBox->currentItem(), axisScaleBox->isChecked());
-	  sp->setColorBarWidth(colorScaleWidthBox->value());
-
-	  //Update axes page
-	  boxXAxis->setCurrentItem(sp->xAxis()-2);
-	  boxYAxis->setCurrentItem(sp->yAxis());
-	}
-	else if (privateTabWidget->currentPage() == contourLinesPage)
-	{
-	  Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
-
-	  if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) { return false; }
-
-	  if (defaultContourBox->isChecked())
-	  {
-	    QPen pen = QPen(levelsColorBox->color(), contourWidthBox->value(),Graph::getPenStyle(boxContourStyle->currentIndex()));
-	      pen.setCosmetic(true);
-	    sp->setDefaultContourPen(pen);
-	    sp->setColorMapPen(false);
-		}
-	  else if (customPenBtn->isChecked())
-				contourLinesEditor->updateContourPens();
-		else
-			sp->setColorMapPen();
-
-	  contourLinesEditor->updateContourLevels();
-		sp->setDisplayMode(QwtPlotSpectrogram::ContourMode, levelsGroupBox->isChecked());
-		labelsGroupBox->setChecked(levelsGroupBox->isChecked());
-		labelsGroupBox->setEnabled(levelsGroupBox->isChecked());
-		sp->showContourLineLabels(levelsGroupBox->isChecked());
+  if (privateTabWidget->currentPage() == axesPage)
+  {
+    plotItem->setAxis(boxXAxis->currentIndex() + 2, boxYAxis->currentIndex());
+    graph->setAutoScale();
+    return true;
   }
-	else if (privateTabWidget->currentPage() == linePage)
-	{
-	  int index = item->plotItemIndex();
-		graph->setCurveStyle(index, boxConnect->currentIndex());
-		QBrush br = QBrush(boxAreaColor->color(), boxPattern->getSelectedPattern());
-		if (!fillGroupBox->isChecked())
-			br = QBrush();
-		graph->setCurveBrush(index, br);
+  else if (privateTabWidget->currentPage() == spectrogramPage)
+  {
+    Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
 
-		QPen pen = QPen(boxLineColor->color(), boxLineWidth->value(), Graph::getPenStyle(boxLineStyle->currentIndex()));
-		QwtPlotCurve *curve = dynamic_cast<QwtPlotCurve *>(plotItem);
-		curve->setPen(pen);
-	}
-	else if (privateTabWidget->currentPage() == symbolPage)
-	{
-	  int size = 2*boxSymbolSize->value()+1;
-		QBrush br = QBrush(boxFillColor->color(), Qt::SolidPattern);
+    if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) { return false; }
 
-		if (!boxFillSymbol->isChecked())
-			br = QBrush();
+    if (grayScaleBox->isChecked())
+    {
+      sp->setGrayScale();
+    }
+    else if (defaultScaleBox->isChecked())
+    {
+      sp->setDefaultColorMap();
+    }
+     //if customScaleBox radiobutton is selected it loads the colormap file and
+     //updates the spectrogram,colormap widget with the loaded file
+    else if (customScaleBox->isChecked())
+    {
+      sp->mutableColorMap().loadMap(mCurrentColorMap);
+      // sp->setDefaultColorMap();
+      sp->setCustomColorMap(sp->mutableColorMap());
+      //sets the selected colormapfile name to spectrogram
+      sp->setColorMapFileName(mCurrentColorMap);
+      //saves the settings
+      sp->saveSettings();
+    }
 
-		QPen pen = QPen(boxSymbolColor->color(), boxPenWidth->value(), Qt::SolidLine);
-		QwtSymbol s = QwtSymbol(boxSymbolStyle->selectedSymbol(), br, pen, QSize(size, size));
-		QwtPlotCurve *curve = dynamic_cast<QwtPlotCurve*>(plotItem);
-		curve->setSymbol(s);
-	}
-	else if (privateTabWidget->currentPage() == histogramPage)
-	{
-	  QwtHistogram *h = dynamic_cast<QwtHistogram*>(plotItem);
-	  if (!h)
-			return false;
+    sp->showColorScale((QwtPlot::Axis)colorScaleBox->currentItem(), axisScaleBox->isChecked());
+    sp->setColorBarWidth(colorScaleWidthBox->value());
 
-	  if (validInput())
-	  {
-	    if (h->autoBinning() == automaticBox->isChecked() &&
+    //Update axes page
+    boxXAxis->setCurrentItem(sp->xAxis()-2);
+    boxYAxis->setCurrentItem(sp->yAxis());
+  }
+  else if (privateTabWidget->currentPage() == contourLinesPage)
+  {
+    Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
+
+    if (!sp || sp->rtti() != QwtPlotItem::Rtti_PlotSpectrogram) { return false; }
+
+    if (defaultContourBox->isChecked())
+    {
+      QPen pen = QPen(levelsColorBox->color(), contourWidthBox->value(),Graph::getPenStyle(boxContourStyle->currentIndex()));
+        pen.setCosmetic(true);
+      sp->setDefaultContourPen(pen);
+      sp->setColorMapPen(false);
+    }
+    else if (customPenBtn->isChecked())
+        contourLinesEditor->updateContourPens();
+    else
+      sp->setColorMapPen();
+
+    contourLinesEditor->updateContourLevels();
+    sp->setDisplayMode(QwtPlotSpectrogram::ContourMode, levelsGroupBox->isChecked());
+    labelsGroupBox->setChecked(levelsGroupBox->isChecked());
+    labelsGroupBox->setEnabled(levelsGroupBox->isChecked());
+    sp->showContourLineLabels(levelsGroupBox->isChecked());
+  }
+  else if (privateTabWidget->currentPage() == linePage)
+  {
+    int index = item->plotItemIndex();
+    graph->setCurveStyle(index, boxConnect->currentIndex());
+    QBrush br = QBrush(boxAreaColor->color(), boxPattern->getSelectedPattern());
+    if (!fillGroupBox->isChecked())
+      br = QBrush();
+    graph->setCurveBrush(index, br);
+
+    QPen pen = QPen(boxLineColor->color(), boxLineWidth->value(), Graph::getPenStyle(boxLineStyle->currentIndex()));
+    QwtPlotCurve *curve = dynamic_cast<QwtPlotCurve *>(plotItem);
+    curve->setPen(pen);
+  }
+  else if (privateTabWidget->currentPage() == symbolPage)
+  {
+    int size = 2*boxSymbolSize->value()+1;
+    QBrush br = QBrush(boxFillColor->color(), Qt::SolidPattern);
+
+    if (!boxFillSymbol->isChecked())
+      br = QBrush();
+
+    QPen pen = QPen(boxSymbolColor->color(), boxPenWidth->value(), Qt::SolidLine);
+    QwtSymbol s = QwtSymbol(boxSymbolStyle->selectedSymbol(), br, pen, QSize(size, size));
+    QwtPlotCurve *curve = dynamic_cast<QwtPlotCurve*>(plotItem);
+    curve->setSymbol(s);
+  }
+  else if (privateTabWidget->currentPage() == histogramPage)
+  {
+    QwtHistogram *h = dynamic_cast<QwtHistogram*>(plotItem);
+    if (!h)
+      return false;
+
+    if (validInput())
+    {
+      if (h->autoBinning() == automaticBox->isChecked() &&
                 h->binSize() == binSizeBox->text().toDouble() &&
                 h->begin() == histogramBeginBox->text().toDouble() &&
                 h->end() == histogramEndBox->text().toDouble()) return true;
 
-	    h->setBinning(automaticBox->isChecked(), binSizeBox->text().toDouble(),
-	        histogramBeginBox->text().toDouble(), histogramEndBox->text().toDouble());
-	    h->loadData();
+      h->setBinning(automaticBox->isChecked(), binSizeBox->text().toDouble(),
+          histogramBeginBox->text().toDouble(), histogramEndBox->text().toDouble());
+      h->loadData();
 
-	    graph->updateScale();
-	    graph->notifyChanges();
+      graph->updateScale();
+      graph->notifyChanges();
 
-	    return true;
-	  }
-	}
-	else if (privateTabWidget->currentPage() == spacingPage)
-		graph->setBarsGap(item->plotItemIndex(), gapBox->value(), offsetBox->value());
-	else if (privateTabWidget->currentPage() == vectPage){
-		int index = item->plotItemIndex();
+      return true;
+    }
+  }
+  else if (privateTabWidget->currentPage() == spacingPage)
+    graph->setBarsGap(item->plotItemIndex(), gapBox->value(), offsetBox->value());
+  else if (privateTabWidget->currentPage() == vectPage){
+    int index = item->plotItemIndex();
     if (!d_app)
-			return false;
+      return false;
 
-		QString xEndCol = xEndBox->currentText();
-		QString yEndCol = yEndBox->currentText();
+    QString xEndCol = xEndBox->currentText();
+    QString yEndCol = yEndBox->currentText();
     Table* w = d_app->table(xEndCol);
-		if (!w)
-			return false;
+    if (!w)
+      return false;
 
-		graph->updateVectorsLayout(index, vectColorBox->color(), vectWidthBox->value(),
-				headLengthBox->value(), headAngleBox->value(),
-				filledHeadBox->isChecked(), vectPosBox->currentIndex(), xEndCol, yEndCol);
+    graph->updateVectorsLayout(index, vectColorBox->color(), vectWidthBox->value(),
+        headLengthBox->value(), headAngleBox->value(),
+        filledHeadBox->isChecked(), vectPosBox->currentIndex(), xEndCol, yEndCol);
 
-		QString text = item->text(0);
-		QStringList t = text.split(": ", QString::SkipEmptyParts);
-		QString table = t[0];
+    QString text = item->text(0);
+    QStringList t = text.split(": ", QString::SkipEmptyParts);
+    QString table = t[0];
 
-		QStringList cols = t[1].split(",", QString::SkipEmptyParts);
-		if (graph->curveType(index) == Graph::VectXYXY){
-			xEndCol = xEndCol.remove(table + "_") + "(X)";
-			yEndCol = yEndCol.remove(table + "_") + "(Y)";
-		} else {
-			xEndCol = xEndCol.remove(table + "_") + "(A)";
-			yEndCol = yEndCol.remove(table + "_") + "(M)";
-		}
+    QStringList cols = t[1].split(",", QString::SkipEmptyParts);
+    if (graph->curveType(index) == Graph::VectXYXY){
+      xEndCol = xEndCol.remove(table + "_") + "(X)";
+      yEndCol = yEndCol.remove(table + "_") + "(Y)";
+    } else {
+      xEndCol = xEndCol.remove(table + "_") + "(A)";
+      yEndCol = yEndCol.remove(table + "_") + "(M)";
+    }
 
-		if (cols[2] != xEndCol || cols[3] != yEndCol){
-			cols[2] = xEndCol;
-			cols[3] = yEndCol;
-			item->setText(0, table + ": " + cols.join(","));
-		}
-		return true;
-	} else if (privateTabWidget->currentPage() == errorsPage){
-		graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(), widthBox->value(),
-				capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(), minusBox->isChecked(),
-				throughBox->isChecked());
+    if (cols[2] != xEndCol || cols[3] != yEndCol){
+      cols[2] = xEndCol;
+      cols[3] = yEndCol;
+      item->setText(0, table + ": " + cols.join(","));
+    }
+    return true;
+  } else if (privateTabWidget->currentPage() == errorsPage){
+    graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(), widthBox->value(),
+        capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(), minusBox->isChecked(),
+        throughBox->isChecked());
         return true;
-	} else if (privateTabWidget->currentPage() == piePage){
-		QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(plotItem);
-		pie->setPen(QPen(boxPieLineColor->color(), boxPieLineWidth->value(),
+  } else if (privateTabWidget->currentPage() == piePage){
+    QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(plotItem);
+    pie->setPen(QPen(boxPieLineColor->color(), boxPieLineWidth->value(),
                     Graph::getPenStyle(boxPieLineStyle->currentIndex())));
         pie->setBrushStyle(boxPiePattern->getSelectedPattern());
         pie->setFirstColor(boxFirstColor->currentIndex());
-	} else if (privateTabWidget->currentPage() == pieGeometryPage){
-		QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(plotItem);
-		pie->setViewAngle(boxPieViewAngle->value());
-		pie->setThickness(boxPieThickness->value());
-		pie->setRadius(boxRadius->value());
+  } else if (privateTabWidget->currentPage() == pieGeometryPage){
+    QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(plotItem);
+    pie->setViewAngle(boxPieViewAngle->value());
+    pie->setThickness(boxPieThickness->value());
+    pie->setRadius(boxRadius->value());
         pie->setHorizontalOffset(boxPieOffset->value());
         pie->setStartAzimuth(boxPieStartAzimuth->value());
-		pie->setCounterClockwise(boxPieConterClockwise->isChecked());
-	} else if (privateTabWidget->currentPage() == pieLabelsPage){
-		QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(plotItem);
-		pie->setLabelsAutoFormat(pieAutoLabelsBox->isChecked());
+    pie->setCounterClockwise(boxPieConterClockwise->isChecked());
+  } else if (privateTabWidget->currentPage() == pieLabelsPage){
+    QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(plotItem);
+    pie->setLabelsAutoFormat(pieAutoLabelsBox->isChecked());
         pie->setLabelValuesFormat(boxPieValues->isChecked());
         pie->setLabelPercentagesFormat(boxPiePercentages->isChecked());
-		pie->setLabelCategories(boxPieCategories->isChecked());
+    pie->setLabelCategories(boxPieCategories->isChecked());
         pie->setFixedLabelsPosition(boxPieWedge->isChecked());
         pie->setLabelsEdgeDistance(boxPieEdgeDist->value());
         graph->replot();
-	} else if (privateTabWidget->currentPage() == percentilePage){
-		BoxCurve *b = dynamic_cast<BoxCurve*>(plotItem);
-		if (b){
-			b->setMaxStyle(boxMaxStyle->selectedSymbol());
-			b->setP99Style(box99Style->selectedSymbol());
-			b->setMeanStyle(boxMeanStyle->selectedSymbol());
-			b->setP1Style(box1Style->selectedSymbol());
-			b->setMinStyle(boxMinStyle->selectedSymbol());
+  } else if (privateTabWidget->currentPage() == percentilePage){
+    BoxCurve *b = dynamic_cast<BoxCurve*>(plotItem);
+    if (b){
+      b->setMaxStyle(boxMaxStyle->selectedSymbol());
+      b->setP99Style(box99Style->selectedSymbol());
+      b->setMeanStyle(boxMeanStyle->selectedSymbol());
+      b->setP1Style(box1Style->selectedSymbol());
+      b->setMinStyle(boxMinStyle->selectedSymbol());
 
             int size = 2*boxPercSize->value() + 1;
             QBrush br = QBrush(boxPercFillColor->color(), Qt::SolidPattern);
@@ -2547,310 +2544,310 @@ bool PlotDialog::acceptParams()
                 br = QBrush();
             QwtSymbol s = QwtSymbol(QwtSymbol::NoSymbol, br, QPen(boxEdgeColor->color(),
                                     boxEdgeWidth->value(),Qt::SolidLine), QSize(size, size));
-			b->setSymbol(s);
-		}
-	} else if (privateTabWidget->currentPage() == boxPage){
-		BoxCurve *b = dynamic_cast<BoxCurve*>(plotItem);
-		if (b){
-			b->setBoxWidth(boxWidth->value());
-			b->setBoxStyle(boxType->currentIndex());
-			if (boxCnt->isVisible())
-				b->setBoxRange(boxRange->currentIndex()+1, boxCnt->value());
-			else
-				b->setBoxRange(boxRange->currentIndex()+1, (double)boxCoef->value());
+      b->setSymbol(s);
+    }
+  } else if (privateTabWidget->currentPage() == boxPage){
+    BoxCurve *b = dynamic_cast<BoxCurve*>(plotItem);
+    if (b){
+      b->setBoxWidth(boxWidth->value());
+      b->setBoxStyle(boxType->currentIndex());
+      if (boxCnt->isVisible())
+        b->setBoxRange(boxRange->currentIndex()+1, boxCnt->value());
+      else
+        b->setBoxRange(boxRange->currentIndex()+1, (double)boxCoef->value());
 
-			if (whiskerCnt->isVisible())
-				b->setWhiskersRange(boxWhiskersRange->currentIndex(), whiskerCnt->value());
-			else
-				b->setWhiskersRange(boxWhiskersRange->currentIndex(), (double)boxWhiskersCoef->value());
-		}
-	} else if (privateTabWidget->currentPage() == labelsPage){
+      if (whiskerCnt->isVisible())
+        b->setWhiskersRange(boxWhiskersRange->currentIndex(), whiskerCnt->value());
+      else
+        b->setWhiskersRange(boxWhiskersRange->currentIndex(), (double)boxWhiskersCoef->value());
+    }
+  } else if (privateTabWidget->currentPage() == labelsPage){
 
-		Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
-  	    if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
-			sp->setLabelsRotation(boxLabelsAngle->value());
-			sp->setLabelsColor(boxLabelsColor->color());
-  	    	sp->showContourLineLabels(labelsGroupBox->isChecked());
-			sp->setLabelsWhiteOut(boxLabelsWhiteOut->isChecked());
-			sp->setLabelsOffset((double)boxLabelsXOffset->value(), (double)boxLabelsYOffset->value());
+    Spectrogram *sp = dynamic_cast<Spectrogram*>(plotItem);
+        if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+      sp->setLabelsRotation(boxLabelsAngle->value());
+      sp->setLabelsColor(boxLabelsColor->color());
+          sp->showContourLineLabels(labelsGroupBox->isChecked());
+      sp->setLabelsWhiteOut(boxLabelsWhiteOut->isChecked());
+      sp->setLabelsOffset((double)boxLabelsXOffset->value(), (double)boxLabelsYOffset->value());
 
-		} else {
-			DataCurve *c = dynamic_cast<DataCurve *>(plotItem);
+    } else {
+      DataCurve *c = dynamic_cast<DataCurve *>(plotItem);
       if (!c) return false;
 
-			QString text = item->text(0);
-			QStringList t = text.split(": ", QString::SkipEmptyParts);
-			QString table = t[0];
-			QStringList cols = t[1].split(",", QString::SkipEmptyParts);
+      QString text = item->text(0);
+      QStringList t = text.split(": ", QString::SkipEmptyParts);
+      QString table = t[0];
+      QStringList cols = t[1].split(",", QString::SkipEmptyParts);
 
-			if (labelsGroupBox->isChecked()){
-				c->setLabelsColumnName(boxLabelsColumn->currentText());
+      if (labelsGroupBox->isChecked()){
+        c->setLabelsColumnName(boxLabelsColumn->currentText());
 
-				if (cols.count() == 3)
-					cols[2] = boxLabelsColumn->currentText().remove(table + "_") + "(L)";
-				else if (cols.count() == 5)//vector curves
-					cols[4] = boxLabelsColumn->currentText().remove(table + "_") + "(L)";
-				else
-					cols << boxLabelsColumn->currentText().remove(table + "_") + "(L)";
-				item->setText(0, table + ": " + cols.join(","));
-			} else {
-				c->setLabelsColumnName(QString());
-				cols.pop_back();
-				item->setText(0, table + ": " + cols.join(","));
-			}
+        if (cols.count() == 3)
+          cols[2] = boxLabelsColumn->currentText().remove(table + "_") + "(L)";
+        else if (cols.count() == 5)//vector curves
+          cols[4] = boxLabelsColumn->currentText().remove(table + "_") + "(L)";
+        else
+          cols << boxLabelsColumn->currentText().remove(table + "_") + "(L)";
+        item->setText(0, table + ": " + cols.join(","));
+      } else {
+        c->setLabelsColumnName(QString());
+        cols.pop_back();
+        item->setText(0, table + ": " + cols.join(","));
+      }
 
-			c->setLabelsRotation(boxLabelsAngle->value());
-			c->setLabelsWhiteOut(boxLabelsWhiteOut->isChecked());
-			c->setLabelsOffset(boxLabelsXOffset->value(), boxLabelsYOffset->value());
-			c->setLabelsColor(boxLabelsColor->color());
-			c->setLabelsAlignment(labelsAlignment());
-		}
-	}
+      c->setLabelsRotation(boxLabelsAngle->value());
+      c->setLabelsWhiteOut(boxLabelsWhiteOut->isChecked());
+      c->setLabelsOffset(boxLabelsXOffset->value(), boxLabelsYOffset->value());
+      c->setLabelsColor(boxLabelsColor->color());
+      c->setLabelsAlignment(labelsAlignment());
+    }
+  }
 
-	graph->replot();
-	graph->notifyChanges();
-	return true;
+  graph->replot();
+  graph->notifyChanges();
+  return true;
 }
 
 void PlotDialog::setAutomaticBinning()
 {
-	GroupBoxH->setEnabled(!automaticBox->isChecked());
+  GroupBoxH->setEnabled(!automaticBox->isChecked());
 }
 
 bool PlotDialog::validInput()
 {
-	QString from = histogramBeginBox->text();
-	QString to = histogramEndBox->text();
-	QString step = binSizeBox->text();
-	QRegExp nonDigit("\\D");
+  QString from = histogramBeginBox->text();
+  QString to = histogramEndBox->text();
+  QString step = binSizeBox->text();
+  QRegExp nonDigit("\\D");
 
-	if (histogramBeginBox->text().isEmpty())
-	{
-		QMessageBox::critical(this, tr("MantidPlot - Input error"), tr("Please enter a valid start limit!"));
-		histogramBeginBox->setFocus();
-		return false;
-	}
+  if (histogramBeginBox->text().isEmpty())
+  {
+    QMessageBox::critical(this, tr("MantidPlot - Input error"), tr("Please enter a valid start limit!"));
+    histogramBeginBox->setFocus();
+    return false;
+  }
 
-	if (histogramEndBox->text().isEmpty())
-	{
-		QMessageBox::critical(this, tr("MantidPlot - Input error"), tr("Please enter a valid end limit!"));
-		histogramEndBox->setFocus();
-		return false;
-	}
+  if (histogramEndBox->text().isEmpty())
+  {
+    QMessageBox::critical(this, tr("MantidPlot - Input error"), tr("Please enter a valid end limit!"));
+    histogramEndBox->setFocus();
+    return false;
+  }
 
-	if (binSizeBox->text().isEmpty())
-	{
-		QMessageBox::critical(this, tr("MantidPlot - Input error"), tr("Please enter a valid bin size value!"));
-		binSizeBox->setFocus();
-		return false;
-	}
+  if (binSizeBox->text().isEmpty())
+  {
+    QMessageBox::critical(this, tr("MantidPlot - Input error"), tr("Please enter a valid bin size value!"));
+    binSizeBox->setFocus();
+    return false;
+  }
 
-	from = from.remove(".");
-	to = to.remove(".");
-	step = step.remove(".");
+  from = from.remove(".");
+  to = to.remove(".");
+  step = step.remove(".");
 
-	int pos=from.find("-",0);
-	if(pos==0)
-		from=from.replace(pos,1,"");
+  int pos=from.find("-",0);
+  if(pos==0)
+    from=from.replace(pos,1,"");
 
-	pos=to.find("-",0);
-	if(pos==0)
-		to=to.replace(pos,1,"");
+  pos=to.find("-",0);
+  if(pos==0)
+    to=to.replace(pos,1,"");
 
-	double start,end, stp;
-	if (from.contains(nonDigit))
-	{
-		try
-		{
-			MyParser parser;
-			parser.SetExpr((histogramBeginBox->text()).ascii());
-			start=parser.Eval();
-		}
-		catch(mu::ParserError &e)
-		{
-			QMessageBox::critical(this, tr("MantidPlot - Start limit error"), QString::fromStdString(e.GetMsg()));
-			histogramBeginBox->setFocus();
-			return false;
-		}
-	}
-	else
-		start = histogramBeginBox->text().toDouble();
+  double start,end, stp;
+  if (from.contains(nonDigit))
+  {
+    try
+    {
+      MyParser parser;
+      parser.SetExpr((histogramBeginBox->text()).ascii());
+      start=parser.Eval();
+    }
+    catch(mu::ParserError &e)
+    {
+      QMessageBox::critical(this, tr("MantidPlot - Start limit error"), QString::fromStdString(e.GetMsg()));
+      histogramBeginBox->setFocus();
+      return false;
+    }
+  }
+  else
+    start = histogramBeginBox->text().toDouble();
 
-	if (to.contains(nonDigit))
-	{
-		try
-		{
-			MyParser parser;
-			parser.SetExpr((histogramEndBox->text()).ascii());
-			end=parser.Eval();
-		}
-		catch(mu::ParserError &e)
-		{
-			QMessageBox::critical(this, tr("MantidPlot - End limit error"), QString::fromStdString(e.GetMsg()));
-			histogramEndBox->setFocus();
-			return false;
-		}
-	}
-	else
-		end=histogramEndBox->text().toDouble();
+  if (to.contains(nonDigit))
+  {
+    try
+    {
+      MyParser parser;
+      parser.SetExpr((histogramEndBox->text()).ascii());
+      end=parser.Eval();
+    }
+    catch(mu::ParserError &e)
+    {
+      QMessageBox::critical(this, tr("MantidPlot - End limit error"), QString::fromStdString(e.GetMsg()));
+      histogramEndBox->setFocus();
+      return false;
+    }
+  }
+  else
+    end=histogramEndBox->text().toDouble();
 
-	if (start>=end)
-	{
-		QMessageBox::critical(this, tr("MantidPlot - Input error"), tr("Please enter limits that satisfy: begin < end!"));
-		histogramEndBox->setFocus();
-		return false;
-	}
+  if (start>=end)
+  {
+    QMessageBox::critical(this, tr("MantidPlot - Input error"), tr("Please enter limits that satisfy: begin < end!"));
+    histogramEndBox->setFocus();
+    return false;
+  }
 
-	if (step.contains(nonDigit))
-	{
-		try
-		{
-			MyParser parser;
-			parser.SetExpr((binSizeBox->text()).ascii());
-			stp=parser.Eval();
-		}
-		catch(mu::ParserError &e)
-		{
-			QMessageBox::critical(this, tr("MantidPlot - Bin size input error"),QString::fromStdString(e.GetMsg()));
-			binSizeBox->setFocus();
-			return false;
-		}
-	}
-	else
-		stp=binSizeBox->text().toDouble();
+  if (step.contains(nonDigit))
+  {
+    try
+    {
+      MyParser parser;
+      parser.SetExpr((binSizeBox->text()).ascii());
+      stp=parser.Eval();
+    }
+    catch(mu::ParserError &e)
+    {
+      QMessageBox::critical(this, tr("MantidPlot - Bin size input error"),QString::fromStdString(e.GetMsg()));
+      binSizeBox->setFocus();
+      return false;
+    }
+  }
+  else
+    stp=binSizeBox->text().toDouble();
 
-	if (stp <=0)
-	{
-		QMessageBox::critical(this, tr("MantidPlot - Bin size input error"), tr("Please enter a positive bin size value!"));
-		binSizeBox->setFocus();
-		return false;
-	}
+  if (stp <=0)
+  {
+    QMessageBox::critical(this, tr("MantidPlot - Bin size input error"), tr("Please enter a positive bin size value!"));
+    binSizeBox->setFocus();
+    return false;
+  }
 
-	return true;
+  return true;
 }
 void PlotDialog::setPiePenStyle(const Qt::PenStyle& style)
 {
-	if(style == Qt::SolidLine)
-		boxPieLineStyle->setCurrentItem(0);
-	if(style == Qt::DashLine)
-		boxPieLineStyle->setCurrentItem(1);
-	if(style == Qt::DotLine)
-		boxPieLineStyle->setCurrentItem(2);
-	if(style == Qt::DashDotLine)
-		boxPieLineStyle->setCurrentItem(3);
-	if(style == Qt::DashDotDotLine)
-		boxPieLineStyle->setCurrentItem(4);
+  if(style == Qt::SolidLine)
+    boxPieLineStyle->setCurrentItem(0);
+  if(style == Qt::DashLine)
+    boxPieLineStyle->setCurrentItem(1);
+  if(style == Qt::DotLine)
+    boxPieLineStyle->setCurrentItem(2);
+  if(style == Qt::DashDotLine)
+    boxPieLineStyle->setCurrentItem(3);
+  if(style == Qt::DashDotDotLine)
+    boxPieLineStyle->setCurrentItem(4);
 }
 
 void PlotDialog::setPenStyle(Qt::PenStyle style)
 {
-	switch (style)
-	{
-		case Qt::SolidLine:
-      boxLineStyle->setCurrentIndex(0);
-			break;
-		case Qt::DashLine:
-			boxLineStyle->setCurrentIndex(1);
-			break;
-		case Qt::DotLine:
-			boxLineStyle->setCurrentIndex(2);
-			break;
-		case Qt::DashDotLine:
-			boxLineStyle->setCurrentIndex(3);
-			break;
-		case Qt::DashDotDotLine:
-			boxLineStyle->setCurrentIndex(4);
-			break;
-		default:
+  switch (style)
+  {
+    case Qt::SolidLine:
       boxLineStyle->setCurrentIndex(0);
       break;
-	}
+    case Qt::DashLine:
+      boxLineStyle->setCurrentIndex(1);
+      break;
+    case Qt::DotLine:
+      boxLineStyle->setCurrentIndex(2);
+      break;
+    case Qt::DashDotLine:
+      boxLineStyle->setCurrentIndex(3);
+      break;
+    case Qt::DashDotDotLine:
+      boxLineStyle->setCurrentIndex(4);
+      break;
+    default:
+      boxLineStyle->setCurrentIndex(0);
+      break;
+  }
 }
 
 void PlotDialog::setBoxType(int index)
 {
-	boxCoeffLabel->hide();
-	boxRangeLabel->hide();
-	boxRange->hide();
-	boxCoef->hide();
-	boxCntLabel->hide();
-	boxCnt->hide();
+  boxCoeffLabel->hide();
+  boxRangeLabel->hide();
+  boxRange->hide();
+  boxCoef->hide();
+  boxCntLabel->hide();
+  boxCnt->hide();
 
-	if (index != BoxCurve::NoBox && index != BoxCurve::WindBox)
-	{
-		boxRange->show();
-		boxRangeLabel->show();
-		int id = boxRange->currentIndex() + 1;
-		if (id == BoxCurve::UserDef)
-		{
-			boxCoef->show();
-			boxCoeffLabel->show();
-		}
-		else if (id == BoxCurve::SD || id == BoxCurve::SE)
-		{
-			boxCntLabel->show();
-			boxCnt->show();
-		}
-	}
+  if (index != BoxCurve::NoBox && index != BoxCurve::WindBox)
+  {
+    boxRange->show();
+    boxRangeLabel->show();
+    int id = boxRange->currentIndex() + 1;
+    if (id == BoxCurve::UserDef)
+    {
+      boxCoef->show();
+      boxCoeffLabel->show();
+    }
+    else if (id == BoxCurve::SD || id == BoxCurve::SE)
+    {
+      boxCntLabel->show();
+      boxCnt->show();
+    }
+  }
 }
 
 void PlotDialog::setBoxRangeType(int index)
 {
-	boxCoeffLabel->hide();
-	boxCoef->hide();
-	boxCntLabel->hide();
-	boxCnt->hide();
+  boxCoeffLabel->hide();
+  boxCoef->hide();
+  boxCntLabel->hide();
+  boxCnt->hide();
 
-	index++;
-	if (index == BoxCurve::UserDef)
-	{
-		boxCoeffLabel->show();
-		boxCoef->show();
-	}
-	else if (index == BoxCurve::SD || index == BoxCurve::SE)
-	{
-		boxCntLabel->show();
-		boxCnt->show();
-	}
+  index++;
+  if (index == BoxCurve::UserDef)
+  {
+    boxCoeffLabel->show();
+    boxCoef->show();
+  }
+  else if (index == BoxCurve::SD || index == BoxCurve::SE)
+  {
+    boxCntLabel->show();
+    boxCnt->show();
+  }
 }
 
 void PlotDialog::setWhiskersRange(int index)
 {
-	whiskerCoeffLabel->hide();
-	boxWhiskersCoef->hide();
-	whiskerCntLabel->hide();
-	whiskerCnt->hide();
+  whiskerCoeffLabel->hide();
+  boxWhiskersCoef->hide();
+  whiskerCntLabel->hide();
+  whiskerCnt->hide();
 
-	if (index == BoxCurve::UserDef)
-	{
-		whiskerCoeffLabel->show();
-		boxWhiskersCoef->show();
-	}
-	else if (index == BoxCurve::SD || index == BoxCurve::SE)
-	{
-		whiskerCntLabel->show();
-		whiskerCnt->show();
-	}
+  if (index == BoxCurve::UserDef)
+  {
+    whiskerCoeffLabel->show();
+    boxWhiskersCoef->show();
+  }
+  else if (index == BoxCurve::SD || index == BoxCurve::SE)
+  {
+    whiskerCntLabel->show();
+    whiskerCnt->show();
+  }
 }
 
 void PlotDialog::customVectorsPage(bool angleMag)
 {
-	if (angleMag)
-	{
-		GroupBoxVectEnd->setTitle(tr("Vector Data"));
-		labelXEnd->setText(tr("Angle"));
-		labelYEnd->setText(tr("Magnitude"));
-		labelPosition->show();
-		vectPosBox->show();
-	}
-	else
-	{
-		GroupBoxVectEnd->setTitle(tr("End Point"));
-		labelXEnd->setText(tr("X End"));
-		labelYEnd->setText(tr("Y End"));
-		labelPosition->hide();
-		vectPosBox->hide();
-	}
+  if (angleMag)
+  {
+    GroupBoxVectEnd->setTitle(tr("Vector Data"));
+    labelXEnd->setText(tr("Angle"));
+    labelYEnd->setText(tr("Magnitude"));
+    labelPosition->show();
+    vectPosBox->show();
+  }
+  else
+  {
+    GroupBoxVectEnd->setTitle(tr("End Point"));
+    labelXEnd->setText(tr("X End"));
+    labelYEnd->setText(tr("Y End"));
+    labelPosition->hide();
+    vectPosBox->hide();
+  }
 }
 
 /**
@@ -2858,15 +2855,15 @@ void PlotDialog::customVectorsPage(bool angleMag)
 */
 void PlotDialog::changeColormap(const QString &filename)
 {
-	//loads the settings to get the colormap file name.
-	//as theres is no spectrgram valid pointer here i'm directly using Qsetting
-	// instead of Spectrogram::loadSettings()
-	//mCurrentColorMap gives the last selected colormap file name
-	QSettings settings;
-	settings.beginGroup("Mantid/2DPlotSpectrogram");
-	//Load Colormap. If the file is invalid the default stored colour map is used
-	mCurrentColorMap = settings.value("ColormapFile", "").toString();
-	settings.endGroup();
+  //loads the settings to get the colormap file name.
+  //as theres is no spectrgram valid pointer here i'm directly using Qsetting
+  // instead of Spectrogram::loadSettings()
+  //mCurrentColorMap gives the last selected colormap file name
+  QSettings settings;
+  settings.beginGroup("Mantid/2DPlotSpectrogram");
+  //Load Colormap. If the file is invalid the default stored colour map is used
+  mCurrentColorMap = settings.value("ColormapFile", "").toString();
+  settings.endGroup();
 
   QString fileselection;
   //Use a file dialog if no parameter is passed
@@ -2888,10 +2885,10 @@ void PlotDialog::changeColormap(const QString &filename)
 
 void PlotDialog::showDefaultContourLinesBox(bool)
 {
-  	if (autoContourBox->isChecked())
-  		defaultPenBox->hide();
-  	else
-  		defaultPenBox->show();
+    if (autoContourBox->isChecked())
+      defaultPenBox->hide();
+    else
+      defaultPenBox->show();
 }
 
 void PlotDialog::updateTreeWidgetItem(QTreeWidgetItem *item)
@@ -2907,22 +2904,22 @@ void PlotDialog::updateTreeWidgetItem(QTreeWidgetItem *item)
 
 void PlotDialog::updateBackgroundTransparency(int alpha)
 {
-	boxBackgroundColor->setEnabled(alpha);
+  boxBackgroundColor->setEnabled(alpha);
     QColor c = boxBackgroundColor->color();
     c.setAlpha(boxBackgroundTransparency->value());
 
-	if (boxAll->isChecked()){
-		QList<Graph *> layers = d_ml->layersList();
+  if (boxAll->isChecked()){
+    QList<Graph *> layers = d_ml->layersList();
         foreach(Graph *g, layers)
             g->setBackgroundColor(c);
-	} else {
-			LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
+  } else {
+      LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
         if (!item)
             return;
         Graph *g = item->graph();
-		if (g)
-			g->setBackgroundColor(c);
-	}
+    if (g)
+      g->setBackgroundColor(c);
+  }
 }
 
 void PlotDialog::updateCanvasTransparency(int alpha)
@@ -2931,132 +2928,132 @@ void PlotDialog::updateCanvasTransparency(int alpha)
     QColor c = boxCanvasColor->color();
     c.setAlpha(boxCanvasTransparency->value());
 
-	if (boxAll->isChecked()){
-		QList<Graph *> layers = d_ml->layersList();
+  if (boxAll->isChecked()){
+    QList<Graph *> layers = d_ml->layersList();
         foreach(Graph *g, layers)
             g->setCanvasBackground(c);
-	} else {
-		LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
+  } else {
+    LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
         if (!item)
             return;
         Graph *g = item->graph();
-		if (g)
-			g->setCanvasBackground(c);
-	}
+    if (g)
+      g->setCanvasBackground(c);
+  }
 }
 
 void PlotDialog::pickCanvasColor()
 {
-	QColor c = boxCanvasColor->color();
+  QColor c = boxCanvasColor->color();
     c.setAlpha(boxCanvasTransparency->value());
 
-	if (boxAll->isChecked()){
-		QList<Graph *> layers = d_ml->layersList();
+  if (boxAll->isChecked()){
+    QList<Graph *> layers = d_ml->layersList();
         foreach(Graph *g, layers){
             g->setCanvasBackground(c);
             g->replot();
         }
-	} else {
-		LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
+  } else {
+    LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
         if (!item)
             return;
         Graph *g = item->graph();
-		if (g){
-			g->setCanvasBackground(c);
-			g->replot();
-		}
-	}
+    if (g){
+      g->setCanvasBackground(c);
+      g->replot();
+    }
+  }
 }
 
 void PlotDialog::pickBackgroundColor()
 {
-	QColor c = boxBackgroundColor->color();
+  QColor c = boxBackgroundColor->color();
     c.setAlpha(boxBackgroundTransparency->value());
 
-	if (boxAll->isChecked()){
-		QList<Graph *> layers = d_ml->layersList();
+  if (boxAll->isChecked()){
+    QList<Graph *> layers = d_ml->layersList();
         foreach(Graph *g, layers){
             g->setBackgroundColor(c);
             g->replot();
-		}
-	} else {
-		LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
+    }
+  } else {
+    LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
         if (!item)
             return;
         Graph *g = item->graph();
-		if (g){
-			g->setBackgroundColor(c);
-			g->replot();
-		}
-	}
+    if (g){
+      g->setBackgroundColor(c);
+      g->replot();
+    }
+  }
 }
 
 void PlotDialog::pickBorderColor()
 {
-	if (boxAll->isChecked()){
-		QList<Graph *> layers = d_ml->layersList();
+  if (boxAll->isChecked()){
+    QList<Graph *> layers = d_ml->layersList();
         foreach(Graph *g, layers)
             g->setFrame(boxBorderWidth->value(), boxBorderColor->color());
-	} else {
-		LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
+  } else {
+    LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
         if (!item)
             return;
         Graph *g = item->graph();
-		if (g)
-			g->setFrame(boxBorderWidth->value(), boxBorderColor->color());
-	}
-	d_ml->notifyChanges();
+    if (g)
+      g->setFrame(boxBorderWidth->value(), boxBorderColor->color());
+  }
+  d_ml->notifyChanges();
 }
 
 void PlotDialog::updateAntialiasing(bool on)
 {
-	if (privateTabWidget->currentWidget() != layerPage)
-		return;
+  if (privateTabWidget->currentWidget() != layerPage)
+    return;
 
-	if (boxAll->isChecked())
-	{
-		QList<Graph *> layers = d_ml->layersList();
+  if (boxAll->isChecked())
+  {
+    QList<Graph *> layers = d_ml->layersList();
         foreach(Graph *g, layers)
             g->setAntialiasing(on);
-	}
-	else
-	{
-		LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
+  }
+  else
+  {
+    LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
         if (!item)
             return;
         Graph *g = item->graph();
-		if (g)
-			g->setAntialiasing(on);
-	}
+    if (g)
+      g->setAntialiasing(on);
+  }
 }
 
 void PlotDialog::updateBorder(int width)
 {
-	if (privateTabWidget->currentWidget() != layerPage)
-		return;
+  if (privateTabWidget->currentWidget() != layerPage)
+    return;
 
-	if (boxAll->isChecked())
-	{
-		QList<Graph *> layers = d_ml->layersList();
+  if (boxAll->isChecked())
+  {
+    QList<Graph *> layers = d_ml->layersList();
         foreach(Graph *g, layers)
             g->setFrame(width, boxBorderColor->color());
-	}
-	else
-	{
-		LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
+  }
+  else
+  {
+    LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
         if (!item)
             return;
         Graph *g = item->graph();
-		if (g)
-			g->setFrame(width, boxBorderColor->color());
-	}
-	d_ml->notifyChanges();
+    if (g)
+      g->setFrame(width, boxBorderColor->color());
+  }
+  d_ml->notifyChanges();
 }
 
 void PlotDialog::changeMargin(int width)
 {
-	if (privateTabWidget->currentWidget() != layerPage)
-		return;
+  if (privateTabWidget->currentWidget() != layerPage)
+    return;
 
     if (boxAll->isChecked())
     {
@@ -3077,74 +3074,74 @@ void PlotDialog::changeMargin(int width)
 
 void PlotDialog::setTitlesFont()
 {
-	bool ok;
-	QFont font = QFontDialog::getFont(&ok,titleFont,this);
-	if ( ok ) {
-		titleFont = font;
-	} else {
-		return;
-	}
+  bool ok;
+  QFont font = QFontDialog::getFont(&ok,titleFont,this);
+  if ( ok ) {
+    titleFont = font;
+  } else {
+    return;
+  }
 }
 
 void PlotDialog::setAxesLabelsFont()
 {
-	bool ok;
-	QFont font = QFontDialog::getFont(&ok,axesFont,this);
-	if ( ok ) {
-		axesFont = font;
-	} else {
-		return;
-	}
+  bool ok;
+  QFont font = QFontDialog::getFont(&ok,axesFont,this);
+  if ( ok ) {
+    axesFont = font;
+  } else {
+    return;
+  }
 }
 
 void PlotDialog::setAxesNumbersFont()
 {
-	bool ok;
-	QFont font = QFontDialog::getFont(&ok,numbersFont,this);
-	if ( ok ) {
-		numbersFont = font;
-	} else {
-		return;
-	}
+  bool ok;
+  QFont font = QFontDialog::getFont(&ok,numbersFont,this);
+  if ( ok ) {
+    numbersFont = font;
+  } else {
+    return;
+  }
 }
 
 void PlotDialog::setLegendsFont()
 {
-	bool ok;
-	QFont font = QFontDialog::getFont(&ok, legendFont,this);
-	if ( ok ) {
-		legendFont = font;
-	} else {
-		return;
-	}
+  bool ok;
+  QFont font = QFontDialog::getFont(&ok, legendFont,this);
+  if ( ok ) {
+    legendFont = font;
+  } else {
+    return;
+  }
 }
 
 void PlotDialog::initFonts(const QFont& titlefont, const QFont& axesfont, const QFont& numbersfont, const QFont& legendfont)
 {
-	axesFont = axesfont;
-	titleFont = titlefont;
-	numbersFont = numbersfont;
-	legendFont = legendfont;
+  axesFont = axesfont;
+  titleFont = titlefont;
+  numbersFont = numbersfont;
+  legendFont = legendfont;
 }
 
 void PlotDialog::adjustLayerHeight(int width)
 {
-	if (keepRatioBox->isChecked()){
-		disconnect( boxLayerHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerWidth(int) ) );
-		boxLayerHeight->setValue(static_cast<int>(width/aspect_ratio));
-		connect( boxLayerHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerWidth(int) ) );
-	} else
-		aspect_ratio = (double)width/double(boxLayerHeight->value());
+  if (keepRatioBox->isChecked()){
+    disconnect( boxLayerHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerWidth(int) ) );
+    boxLayerHeight->setValue(static_cast<int>(width/aspect_ratio));
+    connect( boxLayerHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerWidth(int) ) );
+  } else
+    aspect_ratio = (double)width/double(boxLayerHeight->value());
 }
 
 void PlotDialog::adjustLayerWidth(int height)
 {
-	if (keepRatioBox->isChecked()){
-		disconnect( boxLayerWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerHeight(int) ) );
-		boxLayerWidth->setValue(static_cast<int>(height*aspect_ratio));
-		connect( boxLayerWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerHeight(int) ) );
-	} else
-		aspect_ratio = double(boxLayerWidth->value())/(double)height;
+  if (keepRatioBox->isChecked()){
+    disconnect( boxLayerWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerHeight(int) ) );
+    boxLayerWidth->setValue(static_cast<int>(height*aspect_ratio));
+    connect( boxLayerWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerHeight(int) ) );
+  } else
+    aspect_ratio = double(boxLayerWidth->value())/(double)height;
 }
 
 void PlotDialog::closeEvent(QCloseEvent* e)
@@ -3152,7 +3149,7 @@ void PlotDialog::closeEvent(QCloseEvent* e)
   if (d_app)
     d_app->d_extended_plot_dialog = btnMore->isChecked ();
 
-	e->accept();
+  e->accept();
 }
 
 void PlotDialog::chooseLabelsFont()
@@ -3179,22 +3176,22 @@ void PlotDialog::chooseLabelsFont()
 
 int PlotDialog::labelsAlignment()
 {
-	int align = -1;
-	switch (boxLabelsAlign->currentIndex())
-	{
-		case 0:
-			align = Qt::AlignHCenter;
-			break;
+  int align = -1;
+  switch (boxLabelsAlign->currentIndex())
+  {
+    case 0:
+      align = Qt::AlignHCenter;
+      break;
 
-		case 1:
-			align = Qt::AlignLeft;
-			break;
+    case 1:
+      align = Qt::AlignLeft;
+      break;
 
-		case 2:
-			align = Qt::AlignRight;
-			break;
-	}
-	return align;
+    case 2:
+      align = Qt::AlignRight;
+      break;
+  }
+  return align;
 }
 
 /*****************************************************************************
@@ -3215,14 +3212,14 @@ LayerItem::LayerItem(Graph *g, QTreeWidgetItem *parent, const QString& s)
 void LayerItem::setActive(bool on)
 {
     if (on)
-		setIcon(0, getQPixmap("layer_enabled_xpm"));
+    setIcon(0, getQPixmap("layer_enabled_xpm"));
     else
-		setIcon(0, getQPixmap("layer_disabled_xpm"));
+    setIcon(0, getQPixmap("layer_disabled_xpm"));
 }
 
 void LayerItem::insertCurvesList()
 {
-	for (int i=0; i<d_graph->curves(); i++){
+  for (int i=0; i<d_graph->curves(); i++){
         QString plotAssociation = QString();
         QwtPlotItem *it = dynamic_cast<QwtPlotItem *>(d_graph->plotItem(i));
         if (!it)
@@ -3241,7 +3238,7 @@ void LayerItem::insertCurvesList()
             plotAssociation = it->title().text();
 
         addChild(new CurveTreeItem(it, this, plotAssociation));
-	}
+  }
 }
 
 /*****************************************************************************
@@ -3260,9 +3257,9 @@ CurveTreeItem::CurveTreeItem(QwtPlotItem *curve, LayerItem *parent, const QStrin
 void CurveTreeItem::setActive(bool on)
 {
     if (on)
-		setIcon(0, getQPixmap("graph_xpm"));
+    setIcon(0, getQPixmap("graph_xpm"));
     else
-		setIcon(0, getQPixmap("graph_disabled_xpm"));
+    setIcon(0, getQPixmap("graph_disabled_xpm"));
 }
 
 int CurveTreeItem::plotItemIndex()
