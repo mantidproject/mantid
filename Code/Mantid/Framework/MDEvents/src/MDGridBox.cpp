@@ -1306,7 +1306,190 @@ namespace MDEvents
       }
     } // (for each box)
   }
+  //-----------------------------------------------------------------------------------------------
+  /** Integrate the signal within a sphere; for example, to perform single-crystal
+   * peak integration.
+   * The CoordTransform object could be used for more complex shapes, e.g. "lentil" integration, as long
+   * as it reduces the dimensions to a single value.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param signal [out] :: set to the integrated signal
+   * @param errorSquared [out] :: set to the integrated squared error.
+   */
+  TMDE(
+  void MDGridBox)::integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const
+  {
+    // We start by looking at the vertices at every corner of every box contained,
+    // to see which boxes are partially contained/fully contained.
 
+    // One entry with the # of vertices in this box contained; start at 0.
+    size_t * verticesContained = new size_t[numBoxes];
+    memset( verticesContained, 0, numBoxes * sizeof(size_t) );
+
+    // Set to true if there is a possibility of the box at least partly touching the integration volume.
+    bool * boxMightTouch = new bool[numBoxes];
+    memset( boxMightTouch, 0, numBoxes * sizeof(bool) );
+
+    // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
+    size_t maxVertices = 1 << nd;
+
+    // set up caches for box sizes and min box values
+    coord_t boxSize[nd];
+    coord_t minBoxVal[nd];
+
+    // The number of vertices in each dimension is the # split[d] + 1
+    size_t vertices_max[nd]; Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
+    for (size_t d=0; d<nd; ++d)
+    {
+      vertices_max[d] = split[d]+1;
+      // cache box sizes and min box valyes for performance
+      boxSize[d]     = static_cast<coord_t>(m_SubBoxSize[d]);
+      minBoxVal[d]   = static_cast<coord_t>(this->extents[d].getMin());
+    }
+
+    // The index to the vertex in each dimension
+    size_t vertexIndex[nd]; Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
+    size_t boxIndex[nd]; Utils::NestedForLoop::SetUp(nd, boxIndex, 0);
+    size_t indexMaker[nd]; Utils::NestedForLoop::SetUpIndexMaker(nd, indexMaker, split);
+
+    size_t numSteps = signal_fit.size();
+    double deltaQ = length/static_cast<double>(numSteps-1);
+    bool allDone = false;
+    while (!allDone)
+    {
+      // Coordinates of this vertex
+      coord_t vertexCoord[nd];
+      for (size_t d=0; d<nd; ++d)
+        vertexCoord[d] = static_cast<coord_t>(vertexIndex[d])*boxSize[d] +minBoxVal[d];
+                        //static_cast<coord_t>(vertexIndex[d]) * boxSize[d] + this->extents[d].min
+
+      // Is this vertex contained?
+      coord_t out[2]; // radius and length of cylinder
+      radiusTransform.apply(vertexCoord, out);
+      if (out[0] < radius && std::fabs(out[1]) < 0.5*length)
+      {
+        // Yes, this vertex is contained within the integration volume!
+//        std::cout << "vertex at " << vertexCoord[0] << ", " << vertexCoord[1] << ", " << vertexCoord[2] << " is contained\n";
+
+        // This vertex is shared by up to 2^nd adjacent boxes (left-right along each dimension).
+        for (size_t neighb=0; neighb<maxVertices; ++neighb)
+        {
+          // The index of the box is the same as the vertex, but maybe - 1 in each possible combination of dimensions
+          bool badIndex = false;
+          // Build the index of the neighbor
+          for (size_t d=0; d<nd;d++)
+          {
+            boxIndex[d] = vertexIndex[d] - ((neighb & ((size_t)1 << d)) >> d); //(this does a bitwise and mask, shifted back to 1 to subtract 1 to the dimension)
+            // Taking advantage of the fact that unsigned(0)-1 = some large POSITIVE number.
+            if (boxIndex[d] >= split[d])
+            {
+              badIndex = true;
+              break;
+            }
+          }
+          if (!badIndex)
+          {
+            // Convert to linear index
+            size_t linearIndex = Utils::NestedForLoop::GetLinearIndex(nd, boxIndex, indexMaker);
+            // So we have one more vertex touching this box that is contained in the integration volume. Whew!
+            verticesContained[linearIndex]++;
+//            std::cout << "... added 1 vertex to box " << boxes[linearIndex]->getExtentsStr() << "\n";
+          }
+        }
+      }
+
+      // Increment the counter(s) in the nested for loops.
+      allDone = Utils::NestedForLoop::Increment(nd, vertexIndex, vertices_max);
+    }
+
+    // OK, we've done all the vertices. Now we go through and check each box.
+    size_t numFullyContained = 0;
+    size_t numPartiallyContained = 0;
+
+    for (size_t i=0; i < numBoxes; ++i)
+    {
+      API::IMDNode * box = m_Children[i];
+      // Box partially contained?
+      bool partialBox = false;
+
+      // Is this box fully contained?
+      if (verticesContained[i] >= maxVertices)
+      {
+        std::vector<coord_t> coordTable;
+        size_t nColumns;
+        box->getEventsData(coordTable, nColumns);
+        if (nColumns > 0) 
+        {
+          size_t nEvents = coordTable.size()/nColumns;
+          size_t skipCol = 2; //lean events
+          if(nColumns == 7) skipCol += 2; //events
+    	  for (size_t k=0; k<nEvents; k++)
+          {
+            coord_t eventCenter[nd];
+            for (size_t l=0; l<nd; l++)eventCenter[l] = coordTable[k*nColumns+skipCol+l];
+            coord_t out[nd];
+            radiusTransform.apply(eventCenter, out);
+            // add event to appropriate y channel
+            size_t xchannel;
+            if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2);
+            else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2);
+            if (xchannel >= 0 || xchannel < numSteps ) signal_fit[xchannel] += coordTable[k*nColumns];
+          }
+        }
+        //box->releaseEvents();
+        // Use the integrated sum of signal in the box
+        signal += box->getSignal();
+        errorSquared += box->getErrorSquared();
+
+//        std::cout << "box at " << i << " (" << box->getExtentsStr() << ") is fully contained. Vertices = " << verticesContained[i] << "\n";
+        numFullyContained++;
+        // Go on to the next box
+        continue;
+      }
+
+      if (verticesContained[i] == 0)
+      {
+        // There is a chance that this part of the box is within integration volume,
+        // even if no vertex of it is.
+        coord_t boxCenter[nd];
+        box->getCenter(boxCenter);
+
+        // Distance from center to the peak integration center
+        coord_t out[nd];
+        radiusTransform.apply(boxCenter, out);
+
+        if (out[0] < std::sqrt(diagonalSquared*0.72 + radius*radius) && std::fabs(out[1]) < std::sqrt(diagonalSquared*0.72 + 0.25*length*length))
+        {
+          // If the center is closer than the size of the box, then it MIGHT be touching.
+          // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).
+          // NOTE! Watch out for non-spherical transforms!
+//          std::cout << "box at " << i << " is maybe touching\n";
+          partialBox = true;
+        }
+      }
+      else
+      {
+        partialBox = true;
+//        std::cout << "box at " << i << " has a vertex touching\n";
+      }
+
+      // We couldn't rule out that the box might be partially contained.
+      if (partialBox)
+      {
+        // Use the detailed integration method.
+        box->integrateCylinder(radiusTransform, radius, length, signal, errorSquared, signal_fit);
+//        std::cout << ".signal=" << signal << "\n";
+        numPartiallyContained++;
+      }
+    } // (for each box)
+
+//    std::cout << "Depth " << this->getDepth() << " with " << numFullyContained << " fully contained; " << numPartiallyContained << " partial. Signal = " << signal <<"\n";
+
+    delete [] verticesContained;
+    delete [] boxMightTouch;
+  }
   /**
   Getter for the masking status of the gridded box.
   @return TRUE if ANY ONE of its referenced boxes is masked.
