@@ -76,6 +76,9 @@ namespace Mantid
       declareProperty("MultiplyByBinWidth", true,
           "Multiply the intensity (Y) by the bin width; default TRUE.");
       declareProperty("ExtendedHeader", false, "Add information to the header about iparm file and normalization");
+
+      declareProperty("UseSpectrumNumberAsBankID", false, "If true, then each bank's bank ID is equal to the spectrum number; "
+                      "otherwise, the continous bank IDs is applied. ");
     }
 
     /**
@@ -132,6 +135,8 @@ namespace Mantid
       std::string split_string = getProperty("SplitFiles");
       bool split = (split_string == "True");
       std::string outputFormat = getProperty("Format");
+
+      m_useSpecAsBank = getProperty("UseSpectrumNumberAsBankID");
 
       std::ostringstream number;
       std::ofstream out;
@@ -210,14 +215,25 @@ namespace Mantid
                 / (PhysicalConstants::h * 1e4)) << "\n";
           }
           out << "# Data for spectrum :" << i << std::endl;
+
+          int bankid;
+          if (m_useSpecAsBank)
+          {
+            bankid = static_cast<int>(inputWS->getSpectrum(i)->getSpectrumNo());
+          }
+          else
+          {
+            bankid = bank + i;
+          }
+
           if (RALF.compare(outputFormat) == 0)
           {
-            this->writeRALFdata(bank + i, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
+            this->writeRALFdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
                 inputWS->readE(i));
           }
           else if (SLOG.compare(outputFormat) == 0)
           {
-            this->writeSLOGdata(bank + i, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
+            this->writeSLOGdata(bankid, MultiplyByBinWidth, out, inputWS->readX(i), inputWS->readY(i),
                 inputWS->readE(i));
           }
           else
