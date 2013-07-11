@@ -280,7 +280,7 @@ namespace Mantid
     UNUSED_ARG(progressUpdating);
     validate();
 
-    size_t nd = m_workspace->getNumDims();
+    size_t nd = m_workspace->getNonIntegratedDimensions().size();
      
     Mantid::Kernel::ReadLock lock(*m_workspace);
     if (nd > 3)
