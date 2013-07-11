@@ -361,12 +361,6 @@ public:
 
   }
 
-#ifdef _WIN32
-#pragma warning( push )
-// Disable division by 0 warning
-#pragma warning( disable: 4723 )
-#endif
-
   void test_ignore_invalid_data()
   {
       auto ws = createTestWorkspace(false);
@@ -443,10 +437,6 @@ public:
       TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
 
   }
-
-#ifdef _WIN32
-#pragma warning ( pop ) // Re-enable the warning
-#endif
 
 private:
 
