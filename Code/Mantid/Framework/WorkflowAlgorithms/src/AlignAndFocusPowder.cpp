@@ -571,7 +571,8 @@ namespace WorkflowAlgorithms
       if (m_processLowResTOF)
       {
         size_t numlow = m_lowResW->getNumberHistograms();
-
+        // FIXME : There must be some bug in constructing the vectors for EditInstrumentGeometry
+#if 0
         // Check size
         if (tths.size() < numreg+numlow)
           throw std::runtime_error("Input number of 2thetas is smaller than number of histogram (low).");
@@ -585,6 +586,8 @@ namespace WorkflowAlgorithms
         {
           vec_specid_low.resize(numlow, 0);
           std::copy((specids.begin()+numreg), specids.end(), vec_specid_low.begin());
+          for (size_t i = 0; i < numlow; ++i)
+            g_log.information() << i << " : " << vec_specid_low[i] << ".\n";
         }
         else if (specids.size() == 0)
         {
@@ -599,10 +602,19 @@ namespace WorkflowAlgorithms
 
         std::vector<double> vec_polar_low(numlow, 0.);
         std::copy((tths.begin()+numreg), tths.end(), vec_polar_low.begin());
+        for (size_t i = 0; i < numlow; ++i)
+          g_log.information() << i << " : " << vec_polar_low[i] << ".\n";
+
         std::vector<double> vec_l2_low(numlow, 0.);
         std::copy((l2s.begin()+numreg), l2s.end(), vec_l2_low.begin());
+        for (size_t i = 0; i < numlow; ++i)
+          g_log.information() << i << " : " << vec_l2_low[i] << ".\n";
+
         std::vector<double> vec_azimuthal_low(numlow, 0.);
         std::copy((phis.begin()+numreg), phis.end(), vec_azimuthal_low.begin());
+        for (size_t i = 0; i < numlow; ++i)
+          g_log.information() << i << " : " << vec_azimuthal_low[i] << ".\n";
+#endif
 
 #if 0
         API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
@@ -615,7 +627,12 @@ namespace WorkflowAlgorithms
         editAlg->executeAsChildAlg();
         m_lowResW = editAlg->getProperty("Workspace");
 #else
-        m_lowResW = editInstrument(m_lowResW, vec_polar_low, vec_specid_low, vec_l2_low, vec_azimuthal_low);
+     //   g_log.information() << vec_polar_low.size() << ".\n";
+     //   g_log.information() << vec_specid_low.size() << ".\n";
+     //   g_log.information() << vec_l2_low.size() << ".\n";
+     //   g_log.information() << vec_azimuthal_low.size() << ".\n";
+     //   m_lowResW = editInstrument(m_lowResW, vec_polar_low, vec_specid_low, vec_l2_low, vec_azimuthal_low);
+        m_lowResW = editInstrument(m_lowResW, vec_polar_reg, vec_specid_reg, vec_l2_reg, vec_azimuthal_reg);
 #endif
       }
     }
