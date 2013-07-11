@@ -693,6 +693,21 @@ NeutronAtom getNeutronAtom(const uint16_t z_number, const uint16_t a_number)
 
   return *result;
 }
+const NeutronAtom getNeutronNoExceptions(const uint16_t z_number, const uint16_t a_number)
+{
+
+  NeutronAtom temp(z_number, a_number, 
+		   NAN, NAN, NAN, NAN, NAN, NAN);   // set to junk value
+
+  NeutronAtom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
+  if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number
+      || result->a_number != a_number)
+  {
+     return temp;
+  }
+  else 
+      return *result;
+}
 
 } // namespace PhysicalConstants
 } // namespace Mantid
