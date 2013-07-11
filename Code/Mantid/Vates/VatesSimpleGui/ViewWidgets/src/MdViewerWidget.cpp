@@ -391,6 +391,10 @@ void MdViewerWidget::setParaViewComponentsForView()
                      SIGNAL(toggleOrthographicProjection(bool)),
                      this->ui.parallelProjButton,
                      SLOT(setChecked(bool)));
+    QObject::connect(spv,
+                     SIGNAL(resetToStandardView()),
+                     this->ui.modeControlWidget,
+                     SLOT(setToStandardView()));
   }
 
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
