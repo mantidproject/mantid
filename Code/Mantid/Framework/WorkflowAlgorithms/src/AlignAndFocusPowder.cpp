@@ -572,22 +572,37 @@ namespace WorkflowAlgorithms
       {
         size_t numlow = m_lowResW->getNumberHistograms();
         // FIXME : There must be some bug in constructing the vectors for EditInstrumentGeometry
-#if 0
+
         // Check size
-        if (tths.size() < numreg+numlow)
-          throw std::runtime_error("Input number of 2thetas is smaller than number of histogram (low).");
-        if (l2s.size() < numreg+numlow)
+        size_t numall = numreg+numlow;
+        g_log.information() << "[DBx931] Num-All = " << numall << ".\n";
+        if (tths.size() != numall)
+        {
+          std::stringstream errss;
+          errss << "Input number of 2thetas (" << tths.size() << " is not equal to "
+                << "the number of normal and low resolution histograms " << numall << ".\n";
+          for (size_t i = 0; i < tths.size(); ++i)
+          {
+            errss << "2theta[" << i << "] = " << tths[i] << "\n";
+          }
+          g_log.error(errss.str());
+          throw std::runtime_error(errss.str());
+        }
+        if (l2s.size() != numall)
           throw std::runtime_error("Input number of L2s is smaller than number of histogram (low).");
-        if (phis.size() < numreg+numlow)
+        if (phis.size() != numall)
           throw std::runtime_error("Input number of azimuthals is smaller than number of histogram (low).");
 
         std::vector<int32_t> vec_specid_low;
-        if (specids.size() == numreg+numlow)
+        if (specids.size() == numall)
         {
-          vec_specid_low.resize(numlow, 0);
-          std::copy((specids.begin()+numreg), specids.end(), vec_specid_low.begin());
+          //   vec_specid_low.resize(numlow, 0);
+          //   std::copy((specids.begin()+numreg), specids.end(), vec_specid_low.begin());
           for (size_t i = 0; i < numlow; ++i)
+          {
+            vec_specid_low.push_back(specids[numreg+i]);
             g_log.information() << i << " : " << vec_specid_low[i] << ".\n";
+          }
         }
         else if (specids.size() == 0)
         {
@@ -600,6 +615,7 @@ namespace WorkflowAlgorithms
                 << ", LowResW's size = " << numlow << ".\n";
         }
 
+#if 0
         std::vector<double> vec_polar_low(numlow, 0.);
         std::copy((tths.begin()+numreg), tths.end(), vec_polar_low.begin());
         for (size_t i = 0; i < numlow; ++i)
@@ -614,26 +630,26 @@ namespace WorkflowAlgorithms
         std::copy((phis.begin()+numreg), phis.end(), vec_azimuthal_low.begin());
         for (size_t i = 0; i < numlow; ++i)
           g_log.information() << i << " : " << vec_azimuthal_low[i] << ".\n";
+#else
+        std::vector<double> vec_polar_low, vec_l2_low, vec_azimuthal_low;
+        for (size_t i = 0; i < numlow; ++i)
+        {
+          vec_polar_low.push_back(tths[numreg+i]);
+          vec_l2_low.push_back(l2s[numreg+i]);
+          vec_azimuthal_low.push_back(phis[numreg+i]);
+        }
 #endif
 
-#if 0
-        API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
-        editAlg->setProperty("Workspace", m_lowResW);
-        editAlg->setProperty("PrimaryFlightPath", l1);
-        editAlg->setProperty("Polar", vec_polar_low);
-        editAlg->setProperty("SpectrumIDs", vec_specid_low);
-        editAlg->setProperty("L2", vec_l2_low);
-        editAlg->setProperty("Azimuthal", vec_azimuthal_low);
-        editAlg->executeAsChildAlg();
-        m_lowResW = editAlg->getProperty("Workspace");
+#if 1
+        g_log.information() << vec_polar_low.size() << ".\n";
+        g_log.information() << vec_specid_low.size() << ".\n";
+        g_log.information() << vec_l2_low.size() << ".\n";
+        g_log.information() << vec_azimuthal_low.size() << ".\n";
+        m_lowResW = editInstrument(m_lowResW, vec_polar_low, vec_specid_low, vec_l2_low, vec_azimuthal_low);
 #else
-     //   g_log.information() << vec_polar_low.size() << ".\n";
-     //   g_log.information() << vec_specid_low.size() << ".\n";
-     //   g_log.information() << vec_l2_low.size() << ".\n";
-     //   g_log.information() << vec_azimuthal_low.size() << ".\n";
-     //   m_lowResW = editInstrument(m_lowResW, vec_polar_low, vec_specid_low, vec_l2_low, vec_azimuthal_low);
         m_lowResW = editInstrument(m_lowResW, vec_polar_reg, vec_specid_reg, vec_l2_reg, vec_azimuthal_reg);
 #endif
+
       }
     }
 
