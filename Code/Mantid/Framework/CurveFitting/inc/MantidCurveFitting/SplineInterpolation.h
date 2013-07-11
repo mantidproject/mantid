@@ -1,17 +1,15 @@
-#ifndef MANTID_CURVEFITTING_SPLINE_H_
-#define MANTID_CURVEFITTING_SPLINE_H_
+#ifndef MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_
+#define MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCurveFitting/CubicSpline.h"
 
 namespace Mantid
 {
 namespace CurveFitting
 {
 
-  /** Spline : TODO: DESCRIPTION
+  /** SplineInterpolation : TODO: DESCRIPTION
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -33,11 +31,11 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport Spline  : public API::Algorithm
+  class DLLExport SplineInterpolation  : public API::Algorithm
   {
   public:
-    Spline();
-    virtual ~Spline();
+    SplineInterpolation();
+    virtual ~SplineInterpolation();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -48,16 +46,11 @@ namespace CurveFitting
     void init();
     void exec();
 
-    void setSmoothingPoints(const boost::shared_ptr<CubicSpline> cspline,
-        API::MatrixWorkspace_const_sptr inputWorkspace) const;
 
-    void calculateSpline(const boost::shared_ptr<CubicSpline> cspline,
-      API::MatrixWorkspace_const_sptr inputWorkspace,
-      API::MatrixWorkspace_sptr outputWorkspace, int order) const;
   };
 
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_SPLINE_H_ */
+#endif  /* MANTID_CURVEFITTING_SPLINEINTERPOLATION_H_ */

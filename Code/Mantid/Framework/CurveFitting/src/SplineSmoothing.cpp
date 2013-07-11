@@ -7,7 +7,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/CubicSpline.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidCurveFitting/Spline.h"
+#include "MantidCurveFitting/SplineSmoothing.h"
 
 
 #include <algorithm>
@@ -18,7 +18,7 @@ namespace CurveFitting
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(Spline);
+  DECLARE_ALGORITHM(SplineSmoothing);
   
   using namespace API;
   using namespace Kernel;
@@ -26,31 +26,31 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  Spline::Spline()
+  SplineSmoothing::SplineSmoothing()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  Spline::~Spline()
+  SplineSmoothing::~SplineSmoothing()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string Spline::name() const { return "Spline";};
+  const std::string SplineSmoothing::name() const { return "SplineSmoothing";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int Spline::version() const { return 1;};
+  int SplineSmoothing::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string Spline::category() const { return "General";}
+  const std::string SplineSmoothing::category() const { return "General";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void Spline::initDocs()
+  void SplineSmoothing::initDocs()
   {
     this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
     this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
@@ -59,9 +59,9 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void Spline::init()
+  void SplineSmoothing::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "The workspace on which to perform the algorithm.");
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "The workspace on which to perform the smoothing algorithm.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The workspace containing the calculated points and derivatives");
 
     auto validator = boost::make_shared<BoundedValidator<int> >(0,2);
@@ -75,7 +75,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void Spline::exec()
+  void SplineSmoothing::exec()
   {
     //read in algorithm parameters
     int order = static_cast<int>(getProperty("Order"));
@@ -96,7 +96,7 @@ namespace CurveFitting
     setProperty("OutputWorkspace", outputWorkspace);
   }
 
-  void Spline::calculateSpline(const boost::shared_ptr<CubicSpline> cspline,
+  void SplineSmoothing::calculateSpline(const boost::shared_ptr<CubicSpline> cspline,
       MatrixWorkspace_const_sptr inputWorkspace,
       MatrixWorkspace_sptr outputWorkspace, int order) const
   {
@@ -122,7 +122,7 @@ namespace CurveFitting
     }
   }
 
-  void Spline::setSmoothingPoints(const boost::shared_ptr<CubicSpline> cspline,
+  void SplineSmoothing::setSmoothingPoints(const boost::shared_ptr<CubicSpline> cspline,
       MatrixWorkspace_const_sptr inputWorkspace) const
   {
     //define the spline's parameters
@@ -135,7 +135,7 @@ namespace CurveFitting
       //check number of spline points is within a valid range
       if(numPoints > xSize)
       {
-        throw std::range_error("Spline: Spline size cannot be larger than the number of data points.");
+        throw std::range_error("SplineSmoothing: SplineSmoothing size cannot be larger than the number of data points.");
       }
 
       //set number of smoothing points

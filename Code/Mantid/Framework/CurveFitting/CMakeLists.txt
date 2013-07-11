@@ -67,8 +67,9 @@ set ( SRC_FILES
 	src/SeqDomain.cpp
 	src/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
-	src/Spline.cpp
 	src/SplineBackground.cpp
+	src/SplineInterpolation.cpp
+	src/SplineSmoothing.cpp
 	src/StaticKuboToyabe.cpp
 	src/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
@@ -161,8 +162,9 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
-	inc/MantidCurveFitting/Spline.h
 	inc/MantidCurveFitting/SplineBackground.h
+	inc/MantidCurveFitting/SplineInterpolation.h
+	inc/MantidCurveFitting/SplineSmoothing.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
@@ -239,7 +241,8 @@ set ( TEST_FILES
 	SimplexTest.h
 	SpecialFunctionSupportTest.h
 	SplineBackgroundTest.h
-	SplineTest.h
+	SplineInterpolationTest.h
+	SplineSmoothingTest.h
 	StaticKuboToyabeTest.h
 	StretchExpMuonTest.h
 	StretchExpTest.h

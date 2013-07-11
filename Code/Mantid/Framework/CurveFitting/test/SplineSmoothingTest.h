@@ -4,22 +4,22 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidCurveFitting/Spline.h"
+#include "MantidCurveFitting/SplineSmoothing.h"
 
-using Mantid::CurveFitting::Spline;
+using Mantid::CurveFitting::SplineSmoothing;
 
-class SplineTest : public CxxTest::TestSuite
+class SplineSmoothingTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SplineTest *createSuite() { return new SplineTest(); }
-  static void destroySuite( SplineTest *suite ) { delete suite; }
+  static SplineSmoothingTest *createSuite() { return new SplineSmoothingTest(); }
+  static void destroySuite( SplineSmoothingTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    Spline alg;
+    SplineSmoothing alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -34,7 +34,7 @@ public:
     //number of derivatives
     int order = 2;
 
-    Spline alg;
+    SplineSmoothing alg;
 
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
