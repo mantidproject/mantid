@@ -207,7 +207,7 @@ namespace Mantid
       boost::scoped_ptr<ISISRunLogs> m_logCreator;
 
       /// Search for the log files in the workspace, and output their names as a set.
-      std::set<std::string> searchForLogFiles(const std::string& fileName, DataObjects::Workspace2D_sptr);
+      std::set<std::string> searchForLogFiles(const std::string& fileName);
       /// convert string to lower case
       std::string stringToLower(std::string strToConvert);
       /// Checks if the file is an ASCII file

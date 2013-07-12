@@ -658,38 +658,51 @@ namespace Mantid
     {
 
       //search for the log file to load, and save their names in a set.
-      //searchForLogFiles(fileName, localWorkspace);
+      std::set<std::string> logFiles = searchForLogFiles(fileName);
+
       g_log.debug("Loading the log files...");
       if( progStart < progEnd ) {
         m_prog = progStart;
       }
+
       progress(m_prog, "Reading log files...");
+
       IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
-      // Pass through the same input filename
-      loadLog->setPropertyValue("Filename", fileName);
-      // Set the workspace property to be the same one filled above
-      loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
 
-      // Enable progress reporting by Child Algorithm - if progress range has duration
-      if( progStart < progEnd ) {
-        loadLog->addObserver(m_progressObserver);
-        setChildStartProgress(progStart);
-        setChildEndProgress(progEnd);
-      }
+      std::set<std::string>::const_iterator location;
 
-
-      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-      try
+      //Iterate over the set, and load each log file into the localWorkspace.
+      for (location = logFiles.begin(); location != logFiles.end(); ++location)
       {
-        loadLog->execute();
-      } catch (std::exception&)
-      {
-        g_log.error("Unable to successfully run LoadLog Child Algorithm");
-      }
+        std::cout << *location << "\n";
+        // Pass through the same input filename
+        loadLog->setPropertyValue("Filename", *location);
 
-      if (!loadLog->isExecuted())
-      {
-        g_log.error("Unable to successfully run LoadLog Child Algorithm");
+        // Set the workspace property to be the same one filled above
+        loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+
+        // Enable progress reporting by Child Algorithm - if progress range has duration
+        if ( progStart < progEnd )
+        {
+          loadLog->addObserver(m_progressObserver);
+          setChildStartProgress(progStart);
+          setChildEndProgress(progEnd);
+        }
+
+        // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+        try
+        {
+          loadLog->execute();
+        }
+        catch (std::exception&)
+        {
+          g_log.error("Unable to successfully run LoadLog Child Algorithm");
+        }
+
+        if (!loadLog->isExecuted())
+        {
+          g_log.error("Unable to successfully run LoadLog Child Algorithm");
+        }
       }
 
       // Make log creator object and add the run status log if we have the appropriate ICP log
@@ -1075,7 +1088,7 @@ namespace Mantid
      * @param descriptor TODO
      * @returns A set containing paths to RAW related log files.
      */
-    std::set<std::string> LoadRawHelper::searchForLogFiles(const std::string& m_filename, DataObjects::Workspace2D_sptr localWorkspace)
+    std::set<std::string> LoadRawHelper::searchForLogFiles(const std::string& m_filename)
     {
       // If m_filename is the filename of a raw datafile then search for potential log files
       // in the directory of this raw datafile. Otherwise check if m_filename is a potential
@@ -1094,16 +1107,18 @@ namespace Mantid
       std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
       bool rawFile = false;// Will be true if Filename property is a name of a RAW file
 
-      if ( isAscii(m_filename) )
-      {
-        // Is it a SNS style file? If so, we load it and abort.
-        //abortion done since now potentialLogFiles would be empty.
-        if (LoadSNSText())
-        {
-          return potentialLogFiles;
-        } // Otherwise we continue.
-      }
+//      if ( isAscii(m_filename) )
+//      {
+//        // Is it a SNS style file? If so, we load it and abort.
+//        //abortion done since now potentialLogFiles would be empty.
+//        if (LoadSNSText())
+//        {
+//          return potentialLogFiles;
+//        } // Otherwise we continue.
+//      }
 
+//      FILE* file = fopen(m_filename.c_str(), "rb");
+//      if ( isAscii(file) && l_filenamePart.find("_") != std::string::npos )
       if ( isAscii(m_filename) && l_filenamePart.find("_") != std::string::npos )
       {
         // then we will assume that m_filename is an ISIS/SNS log file
@@ -1151,26 +1166,20 @@ namespace Mantid
 
         // if a .log file exists in the raw file directory
         std::string threecolumnLogfile = getThreeColumnName();
-        if( !threecolumnLogfile.empty() )
-        {
-          std::set<std::string> blockFileNameList = createthreecolumnFileLogProperty(threecolumnLogfile,localWorkspace->mutableRun());
-          //remove the file name from potential logfiles list if it's there in the .log file.
-          std::set<std::string>::const_iterator itr;
-          for(itr=blockFileNameList.begin();itr!=blockFileNameList.end();++itr)
-          {
-            std::set<std::string>::iterator litr= find(potentialLogFiles.begin(),potentialLogFiles.end(),*itr);
-            if(litr!=potentialLogFiles.end())
-            {
-              potentialLogFiles.erase(litr);
-            }
-          }
-        }
-      }
-
-      //If there are no log files by now, we have nothing else to do
-      if( !potentialLogFiles.empty() )
-      {
-        return (potentialLogFiles);
+//        if( !threecolumnLogfile.empty() )
+//        {
+//          std::set<std::string> blockFileNameList = createthreecolumnFileLogProperty(threecolumnLogfile,localWorkspace->mutableRun());
+//          //remove the file name from potential logfiles list if it's there in the .log file.
+//          std::set<std::string>::const_iterator itr;
+//          for(itr=blockFileNameList.begin();itr!=blockFileNameList.end();++itr)
+//          {
+//            std::set<std::string>::iterator litr= find(potentialLogFiles.begin(),potentialLogFiles.end(),*itr);
+//            if(litr!=potentialLogFiles.end())
+//            {
+//              potentialLogFiles.erase(litr);
+//            }
+//          }
+//        }
       }
       return (potentialLogFiles);
     }
@@ -1313,140 +1322,140 @@ namespace Mantid
       return logfilesList;
     }
 
-    /**
-     * This method reads the.log file and creates timeseries property and sets that to the run object
-     * @param logfile :: three column log(.log) file name.
-     * @param run :: The run information object
-     * @returns list of logfiles which exists as blockname in the .log file
-     */
-    std::set<std::string> LoadRawHelper::createthreecolumnFileLogProperty(const std::string& logfile,API::Run& run)
-    {
-      std::set<std::string> blockFileNameList;
-      std::string str;
-      std::string propname;
-      Mantid::Kernel::TimeSeriesProperty<double>* logd=0;
-      Mantid::Kernel::TimeSeriesProperty<std::string>* logs=0;
-      std::map<std::string,Kernel::TimeSeriesProperty<double>*> dMap;
-      std::map<std::string,Kernel::TimeSeriesProperty<std::string>*> sMap;
-      typedef std::pair<std::string,Kernel::TimeSeriesProperty<double>* > dpair;
-      typedef std::pair<std::string,Kernel::TimeSeriesProperty<std::string>* > spair;
+//    /**
+//     * This method reads the.log file and creates timeseries property and sets that to the run object
+//     * @param logfile :: three column log(.log) file name.
+//     * @param run :: The run information object
+//     * @returns list of logfiles which exists as blockname in the .log file
+//     */
+//    std::set<std::string> LoadRawHelper::createthreecolumnFileLogProperty(const std::string& logfile,API::Run& run)
+//    {
+//      std::set<std::string> blockFileNameList;
+//      std::string str;
+//      std::string propname;
+//      Mantid::Kernel::TimeSeriesProperty<double>* logd=0;
+//      Mantid::Kernel::TimeSeriesProperty<std::string>* logs=0;
+//      std::map<std::string,Kernel::TimeSeriesProperty<double>*> dMap;
+//      std::map<std::string,Kernel::TimeSeriesProperty<std::string>*> sMap;
+//      typedef std::pair<std::string,Kernel::TimeSeriesProperty<double>* > dpair;
+//      typedef std::pair<std::string,Kernel::TimeSeriesProperty<std::string>* > spair;
+//
+//      std::string path = m_filename;
+//      std::string::size_type pos = m_filename.rfind(".");
+//      if( pos != std::string::npos )
+//      {
+//        path = path.substr(0, pos);
+//      }
+//      bool isNumeric(false);
+//
+//      std::ifstream file(logfile.c_str());
+//      if (!file)
+//      {
+//        g_log.warning()<<"Cannot open log file "<<logfile<<"\n";
+//        return std::set<std::string>();
+//      }
+//      while(Mantid::Kernel::extractToEOL(file,str))
+//      {
+//        if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) || (str[0]=='#'))
+//        {    //if the line doesn't start with a time read the next line
+//          continue;
+//        }
+//        std::stringstream line(str);
+//
+//        std::string timecolumn;
+//        line >> timecolumn;
+//
+//        std::string blockcolumn;
+//        line >> blockcolumn;
+//
+//        std::string valuecolumn;
+//        line >> valuecolumn;
+//
+//        /// column two in .log file is called block column
+//        /// if any .txt file with rawfilename_blockcolumn.txt exists
+//        /// donot load that txt  files
+//        /// blockFileNameList conatins the file names to be removed from potentiallogfiles list.
+//        propname=stringToLower(blockcolumn);
+//        //check if the data is numeric
+//        std::istringstream istr(valuecolumn);
+//        double dvalue;
+//        istr >> dvalue;
+//        isNumeric = !istr.fail();
+//        if (isNumeric)
+//        {
+//          std::map<std::string,Kernel::TimeSeriesProperty<double>*>::iterator ditr = dMap.find(propname);
+//          if(ditr!=dMap.end())
+//          {
+//            Kernel::TimeSeriesProperty<double>* p=ditr->second;
+//            if (p) p->addValue(timecolumn,dvalue);
+//          }
+//          else
+//          {
+//            logd = new Kernel::TimeSeriesProperty<double>(propname);
+//            logd->addValue(timecolumn,dvalue);
+//            dMap.insert(dpair(propname,logd));
+//            std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
+//            if(blockcolumnFileExists(blockcolumnFileName))
+//            {
+//              blockFileNameList.insert(blockcolumnFileName);
+//            }
+//          }
+//        }
+//        else
+//        {
+//          std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::iterator sitr = sMap.find(propname);
+//          if(sitr != sMap.end())
+//          {
+//            Kernel::TimeSeriesProperty<std::string>* prop = sitr->second;
+//            if (prop) prop->addValue(timecolumn,valuecolumn);
+//          }
+//          else
+//          {
+//            logs = new Kernel::TimeSeriesProperty<std::string>(propname);
+//            logs->addValue(timecolumn,valuecolumn);
+//            sMap.insert(spair(propname,logs));
+//          }
+//          std::string blockcolumnFileName = path+"_"+blockcolumn+".txt";
+//          if( blockcolumnFileExists(blockcolumnFileName) )
+//          {
+//            blockFileNameList.insert(blockcolumnFileName);
+//          }
+//        }
+//      }
+//      try
+//      {
+//        std::map<std::string,Kernel::TimeSeriesProperty<double>*>::const_iterator itr = dMap.begin();
+//        for(;itr != dMap.end(); ++itr)
+//        {
+//          run.addLogData(itr->second);
+//        }
+//        std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::const_iterator sitr = sMap.begin();
+//        for(;sitr != sMap.end(); ++sitr)
+//        {
+//          run.addLogData(sitr->second);
+//        }
+//      }
+//      catch(std::invalid_argument &e)
+//      {
+//        g_log.warning() << e.what();
+//      }
+//      catch(Exception::ExistsError&e)
+//      {
+//        g_log.warning()<<e.what();
+//      }
+//      return blockFileNameList;
+//    }
 
-      std::string path = m_filename;
-      std::string::size_type pos = m_filename.rfind(".");
-      if( pos != std::string::npos )
-      {
-        path = path.substr(0, pos);
-      }
-      bool isNumeric(false);
-
-      std::ifstream file(logfile.c_str());
-      if (!file)
-      {
-        g_log.warning()<<"Cannot open log file "<<logfile<<"\n";
-        return std::set<std::string>();
-      }
-      while(Mantid::Kernel::extractToEOL(file,str))
-      {
-        if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) || (str[0]=='#'))
-        {    //if the line doesn't start with a time read the next line
-          continue;
-        }
-        std::stringstream line(str);
-
-        std::string timecolumn;
-        line >> timecolumn;
-
-        std::string blockcolumn;
-        line >> blockcolumn;
-
-        std::string valuecolumn;
-        line >> valuecolumn;
-
-        /// column two in .log file is called block column
-        /// if any .txt file with rawfilename_blockcolumn.txt exists
-        /// donot load that txt  files
-        /// blockFileNameList conatins the file names to be removed from potentiallogfiles list.
-        propname=stringToLower(blockcolumn);
-        //check if the data is numeric
-        std::istringstream istr(valuecolumn);
-        double dvalue;
-        istr >> dvalue;
-        isNumeric = !istr.fail();
-        if (isNumeric)
-        {
-          std::map<std::string,Kernel::TimeSeriesProperty<double>*>::iterator ditr = dMap.find(propname);
-          if(ditr!=dMap.end())
-          {
-            Kernel::TimeSeriesProperty<double>* p=ditr->second;
-            if (p) p->addValue(timecolumn,dvalue);
-          }
-          else
-          {
-            logd = new Kernel::TimeSeriesProperty<double>(propname);
-            logd->addValue(timecolumn,dvalue);
-            dMap.insert(dpair(propname,logd));
-            std::string blockcolumnFileName=path+"_"+blockcolumn+".txt";
-            if(blockcolumnFileExists(blockcolumnFileName))
-            {
-              blockFileNameList.insert(blockcolumnFileName);
-            }
-          }
-        }
-        else
-        {
-          std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::iterator sitr = sMap.find(propname);
-          if(sitr != sMap.end())
-          {
-            Kernel::TimeSeriesProperty<std::string>* prop = sitr->second;
-            if (prop) prop->addValue(timecolumn,valuecolumn);
-          }
-          else
-          {
-            logs = new Kernel::TimeSeriesProperty<std::string>(propname);
-            logs->addValue(timecolumn,valuecolumn);
-            sMap.insert(spair(propname,logs));
-          }
-          std::string blockcolumnFileName = path+"_"+blockcolumn+".txt";
-          if( blockcolumnFileExists(blockcolumnFileName) )
-          {
-            blockFileNameList.insert(blockcolumnFileName);
-          }
-        }
-      }
-      try
-      {
-        std::map<std::string,Kernel::TimeSeriesProperty<double>*>::const_iterator itr = dMap.begin();
-        for(;itr != dMap.end(); ++itr)
-        {
-          run.addLogData(itr->second);
-        }
-        std::map<std::string,Kernel::TimeSeriesProperty<std::string>*>::const_iterator sitr = sMap.begin();
-        for(;sitr != sMap.end(); ++sitr)
-        {
-          run.addLogData(sitr->second);
-        }
-      }
-      catch(std::invalid_argument &e)
-      {
-        g_log.warning() << e.what();
-      }
-      catch(Exception::ExistsError&e)
-      {
-        g_log.warning()<<e.what();
-      }
-      return blockFileNameList;
-    }
-
-    /**
-     * This method looks for file with second column(block column) name exists in the raw file directory
-     * @param fileName :: -name of the file
-     * @return True if the file exists
-     */
-    bool LoadRawHelper::blockcolumnFileExists(const std::string& fileName)
-    {
-      if (Poco::File(fileName).exists()) return true;
-      else return false;
-    }
+//    /**
+//     * This method looks for file with second column(block column) name exists in the raw file directory
+//     * @param fileName :: -name of the file
+//     * @return True if the file exists
+//     */
+//    bool LoadRawHelper::blockcolumnFileExists(const std::string& fileName)
+//    {
+//      if (Poco::File(fileName).exists()) return true;
+//      else return false;
+//    }
 
     /**
      * Takes as input a string and try to determine what type it is.
@@ -1521,106 +1530,106 @@ namespace Mantid
       return DateAndTime::stringIsISO8601(str.substr(0,19));
     }
 
-    /**
-     * Check if the file is SNS text; load it if it is, return false otherwise.
-     * @return true if the file was a SNS style; false otherwise.
-     */
-    bool LoadRawHelper::LoadSNSText()
-    {
-
-      // Get the SNS-specific parameter
-      std::vector<std::string> names = getProperty("Names");
-      std::vector<std::string> units = getProperty("Units");
-
-      // Get the input workspace and retrieve run from workspace.
-      // the log file(s) will be loaded into the run object of the workspace
-      const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
-
-      // open log file
-      std::ifstream inLogFile(m_filename.c_str());
-
-      // Get the first line
-      std::string aLine;
-      if (!Mantid::Kernel::extractToEOL(inLogFile,aLine))
-        return false;
-
-      std::vector<double> cols;
-      bool ret = SNSTextFormatColumns(aLine, cols);
-      // Any error?
-      if (!ret || cols.size() < 2)
-        return false;
-
-      size_t numCols = static_cast<size_t>(cols.size()-1);
-      if (names.size() != numCols)
-        throw std::invalid_argument("The Names parameter should have one fewer entry as the number of columns in a SNS-style text log file.");
-      if ((!units.empty()) && (units.size() != numCols))
-        throw std::invalid_argument("The Units parameter should have either 0 entries or one fewer entry as the number of columns in a SNS-style text log file.");
-
-      // Ok, create all the logs
-      std::vector<TimeSeriesProperty<double>*> props;
-      for(size_t i=0; i < numCols; i++)
-      {
-        TimeSeriesProperty<double>* p = new TimeSeriesProperty<double>(names[i]);
-        if (units.size() == numCols)
-          p->setUnits(units[i]);
-        props.push_back(p);
-      }
-      // Go back to start
-      inLogFile.seekg(0);
-      while(Mantid::Kernel::extractToEOL(inLogFile,aLine))
-      {
-        if (aLine.size() == 0)
-          break;
-        if (SNSTextFormatColumns(aLine, cols))
-        {
-          if (cols.size() == numCols+1)
-          {
-            DateAndTime time(cols[0], 0.0);
-            for(size_t i=0; i<numCols; i++)
-              props[i]->addValue(time, cols[i+1]);
-          }
-          else
-            throw std::runtime_error("Inconsistent number of columns while reading SNS-style text file.");
-        }
-        else
-          throw std::runtime_error("Error while reading columns in SNS-style text file.");
-      }
-      // Now add all the full logs to the workspace
-      for(size_t i=0; i < numCols; i++)
-      {
-        std::string name = props[i]->name();
-        if (localWorkspace->mutableRun().hasProperty(name))
-        {
-          localWorkspace->mutableRun().removeLogData(name);
-          g_log.information() << "Log data named " << name << " already existed and was overwritten.\n";
-        }
-        localWorkspace->mutableRun().addLogData(props[i]);
-      }
-      return true;
-    }
-
-    /**
-     * Read a line of a SNS-style text file.
-     * @param str :: The string to test
-     * @param out :: a vector that will be filled with the double values.
-     * @return false if the format is NOT SNS style or a conversion failed.
-     */
-    bool LoadRawHelper::SNSTextFormatColumns(const std::string& str, std::vector<double> & out) const
-    {
-      std::vector<std::string> strs;
-      out.clear();
-      boost::split(strs, str, boost::is_any_of("\t "));
-      double val;
-      // Every column must evaluate to a double
-      for (size_t i=0; i<strs.size(); i++)
-      {
-        if (!Strings::convert<double>(strs[i],val))
-          return false;
-        else
-          out.push_back(val);
-      }
-      // Nothing failed = it is that format.
-      return true;
-    }
+//    /**
+//     * Check if the file is SNS text; load it if it is, return false otherwise.
+//     * @return true if the file was a SNS style; false otherwise.
+//     */
+//    bool LoadRawHelper::LoadSNSText()
+//    {
+//
+//      // Get the SNS-specific parameter
+//      std::vector<std::string> names = getProperty("Names");
+//      std::vector<std::string> units = getProperty("Units");
+//
+//      // Get the input workspace and retrieve run from workspace.
+//      // the log file(s) will be loaded into the run object of the workspace
+//      const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
+//
+//      // open log file
+//      std::ifstream inLogFile(m_filename.c_str());
+//
+//      // Get the first line
+//      std::string aLine;
+//      if (!Mantid::Kernel::extractToEOL(inLogFile,aLine))
+//        return false;
+//
+//      std::vector<double> cols;
+//      bool ret = SNSTextFormatColumns(aLine, cols);
+//      // Any error?
+//      if (!ret || cols.size() < 2)
+//        return false;
+//
+//      size_t numCols = static_cast<size_t>(cols.size()-1);
+//      if (names.size() != numCols)
+//        throw std::invalid_argument("The Names parameter should have one fewer entry as the number of columns in a SNS-style text log file.");
+//      if ((!units.empty()) && (units.size() != numCols))
+//        throw std::invalid_argument("The Units parameter should have either 0 entries or one fewer entry as the number of columns in a SNS-style text log file.");
+//
+//      // Ok, create all the logs
+//      std::vector<TimeSeriesProperty<double>*> props;
+//      for(size_t i=0; i < numCols; i++)
+//      {
+//        TimeSeriesProperty<double>* p = new TimeSeriesProperty<double>(names[i]);
+//        if (units.size() == numCols)
+//          p->setUnits(units[i]);
+//        props.push_back(p);
+//      }
+//      // Go back to start
+//      inLogFile.seekg(0);
+//      while(Mantid::Kernel::extractToEOL(inLogFile,aLine))
+//      {
+//        if (aLine.size() == 0)
+//          break;
+//        if (SNSTextFormatColumns(aLine, cols))
+//        {
+//          if (cols.size() == numCols+1)
+//          {
+//            DateAndTime time(cols[0], 0.0);
+//            for(size_t i=0; i<numCols; i++)
+//              props[i]->addValue(time, cols[i+1]);
+//          }
+//          else
+//            throw std::runtime_error("Inconsistent number of columns while reading SNS-style text file.");
+//        }
+//        else
+//          throw std::runtime_error("Error while reading columns in SNS-style text file.");
+//      }
+//      // Now add all the full logs to the workspace
+//      for(size_t i=0; i < numCols; i++)
+//      {
+//        std::string name = props[i]->name();
+//        if (localWorkspace->mutableRun().hasProperty(name))
+//        {
+//          localWorkspace->mutableRun().removeLogData(name);
+//          g_log.information() << "Log data named " << name << " already existed and was overwritten.\n";
+//        }
+//        localWorkspace->mutableRun().addLogData(props[i]);
+//      }
+//      return true;
+//    }
+//
+//    /**
+//     * Read a line of a SNS-style text file.
+//     * @param str :: The string to test
+//     * @param out :: a vector that will be filled with the double values.
+//     * @return false if the format is NOT SNS style or a conversion failed.
+//     */
+//    bool LoadRawHelper::SNSTextFormatColumns(const std::string& str, std::vector<double> & out) const
+//    {
+//      std::vector<std::string> strs;
+//      out.clear();
+//      boost::split(strs, str, boost::is_any_of("\t "));
+//      double val;
+//      // Every column must evaluate to a double
+//      for (size_t i=0; i<strs.size(); i++)
+//      {
+//        if (!Strings::convert<double>(strs[i],val))
+//          return false;
+//        else
+//          out.push_back(val);
+//      }
+//      // Nothing failed = it is that format.
+//      return true;
+//    }
   } // namespace DataHandling
 } // namespace Mantid
