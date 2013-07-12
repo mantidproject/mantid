@@ -1028,7 +1028,7 @@ void ConfigDialog::refreshTreeCategories()
     QStringList subCats = catName.split('\\');
     if (subCats.size() == 1)
     {
-      QTreeWidgetItem *catItem = createCheckedTreeItem(catName,isHidden);
+      QTreeWidgetItem *catItem = createCheckedTreeItem(catName,!isHidden);
       categories.insert(catName,catItem);
       treeCategories->addTopLevelItem(catItem);
     }
@@ -1045,7 +1045,7 @@ void ConfigDialog::refreshTreeCategories()
         }
         else
         {
-          QTreeWidgetItem *newCatItem = createCheckedTreeItem(subCats[j],isHidden);
+          QTreeWidgetItem *newCatItem = createCheckedTreeItem(subCats[j],!isHidden);
           categories.insert(cn,newCatItem);
           if (!catItem)
           {
