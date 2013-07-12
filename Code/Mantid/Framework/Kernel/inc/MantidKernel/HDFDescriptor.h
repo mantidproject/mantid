@@ -91,6 +91,8 @@ namespace Mantid
       bool pathExists(const std::string& path) const;
       /// Query if a path exists of a given type
       bool pathOfTypeExists(const std::string& path, const std::string &type) const;
+      /// return the path of a given type
+      std::string pathOfType(const std::string & type);
       /// Query if a given type exists somewhere in the file
       bool classTypeExists(const std::string & classType) const;
 

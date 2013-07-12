@@ -166,6 +166,20 @@ namespace Mantid
     }
 
     /**
+     * @param type A string specifying the required type
+     * @return path A string giving a path using UNIX-style path separators (/), e.g. /raw_data_1, /entry/bank1
+     */
+	std::string HDFDescriptor::pathOfType(const std::string & type) {
+		auto iend = m_pathsToTypes.end();
+		for (auto it = m_pathsToTypes.begin(); it != iend; ++it) {
+			if (type == it->second)
+				return  it->first;
+		}
+		return  "";
+	}
+
+
+    /**
      * @param classType A string name giving a class type
      * @return True if the type exists in the file, false otherwise
      */
