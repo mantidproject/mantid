@@ -340,6 +340,47 @@ private:
   }
 };
 
+//==============================================================================
+/** 
+    @class IncreasingAxisValidator
+
+    A validator which checks that the X axis of a workspace is increasing from
+    left to right.
+
+    @author Arturs Bekasovs [arturs.bekasovs@stfc.ac.uk]
+    @date 08/07/2013
+
+    TODO: Move out to the different file.
+ */
+class DLLExport IncreasingAxisValidator : public MatrixWorkspaceValidator
+{
+public:
+  /// Get the type of the validator
+  std::string getType() const { return "IncreasingAxis"; }
+  /// Clone the current state
+  Kernel::IValidator_sptr clone() const { return boost::make_shared<IncreasingAxisValidator>(*this); }
+  
+private:
+  /** 
+   * Checks that X axis is in the right direction.
+   *
+   * @param value The workspace to check
+   * @return "" if is valid, otherwise a user level description of a problem
+   */
+  std::string checkValidity( const MatrixWorkspace_sptr& value ) const
+  {
+    // 0 for X axis
+    Axis* xAxis = value->getAxis(0);
+    
+    // Left-most axis value should be less than the right-most, if ws has
+    // more than one X axis value
+    if(xAxis->length() > 1 && xAxis->getValue(0) >= xAxis->getValue(xAxis->length() - 1))
+      return "X axis of the workspace should be increasing from left to right";
+    else
+      return "";
+      
+  }
+};
 
 } // namespace API
 } // namespace Mantid
