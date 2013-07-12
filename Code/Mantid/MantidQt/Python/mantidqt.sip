@@ -116,6 +116,7 @@ class MWRunFiles : QWidget
 %End
 public:
 void setLabelText(const QString&);
+void setLabelMinWidth(const int);
 QString getText() /PyName=text/;
 void setText(const QString&);
 };

@@ -273,6 +273,14 @@ void MWRunFiles::setLabelText(const QString & text)
   m_uiForm.textLabel->setText(text);
 }
 
+/** Set the minimum width on the label widget
+ *  @param width The new minimum width of the widget
+ */
+void MWRunFiles::setLabelMinWidth(const int width)
+{
+  m_uiForm.textLabel->setMinimumWidth(width);
+}
+
 /**
 * Return whether this widget allows multiple files to be specified within the edit box
 * @returns True if multiple files can be specified, false otherwise
