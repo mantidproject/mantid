@@ -222,6 +222,13 @@ namespace Mantid
       /// Get refernce Frame
       boost::shared_ptr<const ReferenceFrame> getReferenceFrame() const;
 
+      /// To determine whether the instrument contains elements of some type
+      enum ContainsState {Full, Partial, None};
+
+      /// Check whether instrument contains rectangular detectors.
+      /// @return Full if all detectors are rect., Partial if some, None if none 
+      ContainsState containsRectDetectors() const;
+
     private:
       /// Private copy assignment operator
       Instrument& operator=(const Instrument&);
