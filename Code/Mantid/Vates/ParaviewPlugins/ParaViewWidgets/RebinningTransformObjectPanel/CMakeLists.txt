@@ -9,6 +9,10 @@ qt4_wrap_cpp( MOC_SRCS RebinningTransformObjectPanel.h )
 add_paraview_object_panel( IFACES IFACE_SRCS 
                            CLASS_NAME RebinningTransformObjectPanel
                            XML_NAME RebinningTransformOperator XML_GROUP filters)
+# Deal with Intel compiler warnings in generated files
+if ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" )
+  set_source_files_properties ( ${IFACES} ${IFACE_SRCS} PROPERTIES COMPILE_FLAGS -wd1170 )
+endif ()
 add_paraview_plugin( MantidParaViewRebinningTransformObjectPanel "1.0"
                      GUI_INTERFACES ${IFACES}
                      SOURCES ${MOC_SRCS} ${IFACE_SRCS} ${INCLUDE_FILES} 
