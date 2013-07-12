@@ -562,8 +562,11 @@ public:
 
     if (start_event > static_cast<size_t>(dim0))
     {
-      // For bad file around SEQ_7872, Jul 15, 2011, Janik Zikovsky
-      alg->getLogger().information() << this->entry_name << "'s field 'event_index' seem to be invalid (> than the number of events in the bank). Filtering by time ignored.\n";
+      // If the frame indexes are bad then we can't construct the times of the events properly and filtering by time
+      // will not work on this data
+      alg->getLogger().warning() 
+        << this->entry_name << "'s field 'event_index' seems to be invalid (start_index > than the number of events in the bank)."
+        << "All events will appear in the same frame and filtering by time will not be possible on this data.\n";
       start_event = 0;
       stop_event =  static_cast<size_t>(dim0);
     }
