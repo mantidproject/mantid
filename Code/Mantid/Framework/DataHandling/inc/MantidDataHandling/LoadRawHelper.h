@@ -108,8 +108,7 @@ namespace Mantid
       API::WorkspaceGroup_sptr createGroupWorkspace();
 
       //Constructs the time channel (X) vector(s)     
-      std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes,
-          const int64_t& lengthIn);
+      std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes, const int64_t& lengthIn);
       /// loadinstrument Child Algorithm
       void runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr, double, double );
       /// loadinstrumentfromraw algorithm
@@ -165,7 +164,6 @@ namespace Mantid
       void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
           DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >);
 
-
       /// Has the spectrum_list property been set?
       bool m_list;
       /// Have the spectrum_min/max properties been set?
@@ -193,14 +191,11 @@ namespace Mantid
       /// The current value of the progress counter
       double m_prog;
 
-
       /// number of spectra
       specid_t m_numberOfSpectra;
 
       /// a vector holding the indexes of monitors
       std::vector<specid_t> m_monitordetectorList;
-
-
 
       /// boolean for list spectra options
       bool m_bmspeclist;
@@ -210,6 +205,35 @@ namespace Mantid
 
       /// A ptr to the log creator
       boost::scoped_ptr<ISISRunLogs> m_logCreator;
+
+      /// Search for the log files in the workspace, and output their names as a set.
+      std::set<std::string> searchForLogFiles(const std::string& fileName, DataObjects::Workspace2D_sptr);
+      /// convert string to lower case
+      std::string stringToLower(std::string strToConvert);
+      /// Checks if the file is an ASCII file
+      bool isAscii(const std::string& filenamePart);
+      /// check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
+      bool isDateTimeString(const std::string& str) const;
+      /// Return the name of the three column log file for associated with the specified file. Empty string if one doesn't exist
+      std::string getThreeColumnName() const;
+      /// Check for SNS-style text file
+      bool SNSTextFormatColumns(const std::string& str, std::vector<double> & out) const;
+      /// create timeseries property from .log file and adds taht to sample object
+      std::set<std::string> createthreecolumnFileLogProperty(const std::string& logfile, API::Run& run);
+      /// if a file with the second column(block column) name in .log file exists in the raw file directory
+      bool blockcolumnFileExists(const std::string& fileName);
+      /// if  alternate data stream named checksum exists for the raw file
+      bool adsExists();
+      /// returns the list of log files from ADS checksum
+      std::set<std::string> getLogfilenamesfromADS();
+      /// The name and path of an input file. This may be the filename of a raw datafile or the name of a specific log file.
+      std::string m_filename;
+      /// type returned by classify
+      enum kind { empty, string, number };
+      /// Takes as input a string and try to determine what type it is
+      kind classify(const std::string& s) const;
+      /// SNS text
+      bool LoadSNSText();
     };
 
   } // namespace DataHandling
