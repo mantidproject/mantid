@@ -6,11 +6,11 @@ This algorithm is under development. Currently is it only possible to read data 
 
 To generate McStas event data and the corresponding IDF for Mantid run the following commands from an xterm:
 
-- export MCSTAS_CFLAGS="-g -lm -O2 -DUSE_NEXUS -lNeXus"
-- mcrun -c templateSANS.instr --format=NeXus -n0
-- ./mcdisplay templateSANS.instr -n0 --format=Mantid
-- cp templateSANS.out.xml IDF.xml
-- mcrun templateSANS --format=NeXus
+* export MCSTAS_CFLAGS="-g -lm -O2 -DUSE_NEXUS -lNeXus"
+* mcrun -c templateSANS.instr --format=NeXus -n0
+* ./mcdisplay templateSANS.instr -n0 --format=Mantid
+* cp templateSANS.out.xml IDF.xml
+* mcrun templateSANS --format=NeXus
 
 For more information about McStas and its general usage for simulating neutron scattering instruments and experiments visit the McStas homepage http://www.mcstas.org.
 
