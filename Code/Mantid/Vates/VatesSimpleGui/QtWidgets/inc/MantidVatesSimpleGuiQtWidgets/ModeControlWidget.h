@@ -52,9 +52,6 @@ public:
   /// Default destructor.
   virtual ~ModeControlWidget();
 
-  /// Expose the standard view button.
-  void setToStandardView();
-
   /// Enumeration for the view types
   enum Views {STANDARD, THREESLICE, MULTISLICE, SPLATTERPLOT};
 
@@ -66,6 +63,8 @@ public slots:
    * @param state whether or not to enable the buttons
    */
   void enableViewButtons(bool state);
+  /// Expose the standard view button.
+  void setToStandardView();
 
 signals:
   /**
