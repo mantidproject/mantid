@@ -54,10 +54,11 @@ void IndirectDiffractionReduction::demonRun()
   }
 
   QString instName=m_uiForm.cbInst->currentText();
-  if ( instName != "OSIRIS" )
+  QString mode = m_uiForm.cbReflection->currentText();
+  if ( mode == "diffspec" )
   {
     // MSGDiffractionReduction
-    QString pfile = instName + "_diffraction_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml";
+    QString pfile = instName + "_diffraction_" + mode + "_Parameters.xml";
     QString pyInput =
       "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
       "reducer = MSGDiffractionReducer()\n"
@@ -190,43 +191,19 @@ void IndirectDiffractionReduction::instrumentSelected(int)
         }
       }
     }
-
-    if ( m_uiForm.cbReflection->count() > 1 )
-    {
-      m_uiForm.swReflections->setCurrentIndex(0);
-    }
-    else
-    {
-      m_uiForm.swReflections->setCurrentIndex(1);
-    }
-  }
-  else
-  {
-    m_uiForm.swReflections->setCurrentIndex(1);
   }
 
   reflectionSelected(m_uiForm.cbReflection->currentIndex());
   m_uiForm.cbReflection->blockSignals(false);
 
-  pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
-      "print getStringProperty('__empty_" + m_uiForm.cbInst->currentText() + "', 'Workflow.Diffraction.Correction')\n";
-
-  pyOutput = runPythonCode(pyInput).trimmed();
-
-  if ( pyOutput == "Vanadium" )
-  {
-    m_uiForm.swVanadium->setCurrentIndex(0);
-  }
-  else
-  {
-    m_uiForm.swVanadium->setCurrentIndex(1);
-  }
-
-  // Turn off summing files options for OSIRIS.
+  // Disable summing file options for OSIRIS.
   if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
     m_uiForm.dem_ckSumFiles->setEnabled(true);
   else
+  {
+    m_uiForm.dem_ckSumFiles->setChecked(true);
     m_uiForm.dem_ckSumFiles->setEnabled(false);
+  }
 
 }
 
@@ -252,6 +229,23 @@ void IndirectDiffractionReduction::reflectionSelected(int)
     m_uiForm.set_leSpecMin->setText(values[1]);
     m_uiForm.set_leSpecMax->setText(values[2]);
   }
+
+  // Determine whether we need vanadium input
+  pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
+      "print getStringProperty('__empty_" + m_uiForm.cbInst->currentText() + "', 'Workflow.Diffraction.Correction')\n";
+
+  pyOutput = runPythonCode(pyInput).trimmed();
+
+  if ( pyOutput == "Vanadium" )
+  {
+    m_uiForm.swVanadium->setCurrentIndex(0);
+  }
+  else
+  {
+    m_uiForm.swVanadium->setCurrentIndex(1);
+  }
+
+
 }
 
 void IndirectDiffractionReduction::openDirectoryDialog()
