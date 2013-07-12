@@ -453,14 +453,14 @@ namespace MDAlgorithms
 			throw ;
 			}
 
-			size_t half = numSteps/2;
-			double Centre = wsProfile2D->dataX(i)[half];
-			const Mantid::MantidVec& Y = wsProfile2D->readY(i);
-			double peakHeight = Y[half];
+			const Mantid::MantidVec& yValues = wsProfile2D->readY(i);
+                        MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
+                        const double peakHeight = *it;
+                        const double Centre = wsProfile2D->readX(i)[it - yValues.begin()];
 			size_t iStep;
-			for (iStep=0; iStep <= half; iStep++)
+			for (iStep=0; iStep < numSteps; iStep++)
 			{
-				if(((Y[iStep]-peakHeight*0.75)*(Y[iStep+1]-peakHeight*0.75))<0.)break;
+				if(((yValues[iStep]-peakHeight*0.75)*(yValues[iStep+1]-peakHeight*0.75))<0.)break;
 			}
 			double Sigma = fabs(Centre-wsProfile2D->dataX(i)[iStep]);
 			std::string profileFunction = getProperty("ProfileFunction");
@@ -486,8 +486,8 @@ namespace MDAlgorithms
 				fit_alg->setProperty("WorkspaceIndex", i);
 				/*if (profileFunction.compare("ConvolutionExpGaussian") == 0)
 				{
-			        fit_alg->setProperty("StartX", Centre - 4.0 * Sigma);
-			        fit_alg->setProperty("EndX", Centre + 4.0 * Sigma);
+			        fit_alg->setProperty("StartX", Centre - 5.0 * Sigma);
+			        fit_alg->setProperty("EndX", Centre + 5.0 * Sigma);
 				}*/
 				fit_alg->setProperty("CreateOutput", true);
 				fit_alg->setProperty("Output", plot_str.str());
