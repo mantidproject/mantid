@@ -411,6 +411,17 @@ void SmoothNeighbours::findNeighboursUbiqutious()
   */
   inWS->rebuildNearestNeighbours();
 
+  // Temporary. Added so it is easier to test containsRectDetectors on 
+  // real instruments.
+  // TODO: remove
+  Instrument::ContainsState status = inWS->getInstrument()->containsRectDetectors();
+  if(status == Instrument::ContainsState::Full)
+    g_log.debug("Consists of rectangular detectors");
+  else if(status == Instrument::ContainsState::Partial)
+    g_log.debug("Partially consists of rectangular detectors");
+  else
+    g_log.debug("No rectangular detectors");
+
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
   this->progress(0.2, "Building Neighbour Map");
 
