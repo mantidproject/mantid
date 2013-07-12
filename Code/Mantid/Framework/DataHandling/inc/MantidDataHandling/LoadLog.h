@@ -120,10 +120,6 @@ namespace Mantid
       /// if a file with the second column(block column) name in .log file exists
       /// in the raw file directory
       bool blockcolumnFileExists(const std::string& fileName);
-      /// if  alternate data stream named checksum exists for the raw file
-      bool adsExists();
-      /// returns the list of log files from ADS checksum
-      std::set<std::string> getLogfilenamesfromADS();
 
       /// TimeSeriesProperty<int> containing data periods. Created by LogParser
       boost::shared_ptr<Kernel::Property> m_periods;

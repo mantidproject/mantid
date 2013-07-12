@@ -218,28 +218,19 @@ void LoadLog::exec()
   if ( isAscii(m_filename) )
   {
     // Is it a SNS style file? If so, we load it and abort.
-    if (LoadSNSText())
+    if ( LoadSNSText() )
+    {
       return;
-    // Otherwise we continue.
+    } // Otherwise we continue.
   }
 
-//    //.if a .log file exists in the raw file directory
-//    std::string threecolumnLogfile = getThreeColumnName();
-//    if( !threecolumnLogfile.empty() )
-//    {
-//      std::set<std::string> blockFileNameList=createthreecolumnFileLogProperty(threecolumnLogfile,localWorkspace->mutableRun());
-//      //remove the file name from potential logfiles list if it's there in the .log file.
-//      std::set<std::string>::const_iterator itr;
-//      for(itr=blockFileNameList.begin();itr!=blockFileNameList.end();++itr)
-//      {
-//        std::set<std::string>::iterator litr= find(potentialLogFiles.begin(),potentialLogFiles.end(),*itr);
-//        if(litr!=potentialLogFiles.end())
-//        {
-//          potentialLogFiles.erase(litr);
-//        }
-//      }
-//    }
-//  }
+  //.if a .log file exists in the raw file directory
+  // (This is a search, so perhaps move to LoadRawHelper?)
+  std::string threecolumnLogfile = getThreeColumnName();
+  if ( !threecolumnLogfile.empty() )
+  {
+    createthreecolumnFileLogProperty( threecolumnLogfile,localWorkspace->mutableRun() );
+  }
 
   // Extract the common part of log file names (the workspace name)
   std::string ws_name = Poco::Path(m_filename).getFileName();
@@ -283,7 +274,7 @@ void LoadLog::exec()
     {
       // Make the property name by removing the workspce name and file extension from the log filename
       std::string log_name = Poco::Path(Poco::Path(m_filename).getFileName()).getBaseName();
-
+      log_name.erase(0, n_common_chars);
 //      if (rawFile)
 //      {
 //        log_name.erase(0, n_common_chars);
@@ -370,65 +361,6 @@ std::string LoadLog::getThreeColumnName() const
     return logfileName;
   }
   else return "";
-}
-
-/* this method looks for ADS with name checksum exists
- * @return True if ADS stream checksum exists
- */
-bool LoadLog::adsExists()
-{
-#ifdef _WIN32
-  std::string adsname(m_filename+":checksum");
-  std::ifstream adstream(adsname.c_str());
-  if(!adstream)
-  {
-    return false;
-  }
-  adstream.close();
-  return true;
-#else
-  return false;
-#endif
-}
-
-/* this method reads  the checksum ADS associated with the
- * raw file and returns the filensmes of the log files
- * @return list of logfile names.
- */
-std::set<std::string> LoadLog::getLogfilenamesfromADS()
-{
-  std::string adsname(m_filename+":checksum");
-  std::ifstream adstream(adsname.c_str());
-  if(!adstream)
-    return std::set<std::string>();
-  std::string str;
-  std::string path;
-  std::string logFile;
-  std::set<std::string>logfilesList;
-  Poco::Path logpath(m_filename);
-  size_t pos =m_filename.find_last_of("/");
-  if(pos==std::string::npos)
-  {
-    pos =m_filename.find_last_of("\\");
-  }
-  if(pos!=std::string::npos)
-    path=m_filename.substr(0,pos);
-  while(Mantid::Kernel::extractToEOL(adstream,str))
-  {
-    std::string fileName;
-    pos = str.find("*");
-    if(pos==std::string::npos)
-      continue;
-    fileName=str.substr(pos+1,str.length()-pos);
-    pos= fileName.find("txt");
-    if(pos==std::string::npos)
-      continue;
-    logFile=path+"/"+fileName;
-    if(logFile.empty())
-      continue;
-    logfilesList.insert(logFile);
-  }
-  return logfilesList;
 }
 
 /** This method reads the.log file and creates timeseries property and sets that to the run object
