@@ -160,8 +160,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
                              doc='Filename of the .cal file to use in the [[AlignDetectors]] and [[DiffractionFocussing]] child algorithms.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output), 
                              doc="Name to give the output workspace. If no name is provided, one will be generated based on the run numbers.")
-        self.declareProperty("Mode", "DiffOnly", StringListValidator(["DiffOnly","DiffSpec"]), 
-                             doc="Indicates the mode the instrument was in when the data was collection: diffraction or spectroscopy.")
         
         self._cal = None
         self._outputWsName = None
@@ -178,16 +176,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         sampleRuns = self.findRuns(self.getPropertyValue("Sample"))
         
-        mode = self.getProperty("Mode").value
-        if mode == "DiffOnly":
-            self.execDiffOnly(sampleRuns)
-        elif mode == "DiffSpec":
-            van_runs = self.getPropertyValue("Vanadium")
-            if len(van_runs) > 0:
-                self.getLogger().warning("Vanadium runs supplied to DiffSpec mode. They will be ignored")
-            self.execDiffSpec(sampleRuns)
-        else:
-            raise ValueError("Unknown Mode parameter '%s'. Currently only support DiffOnly,DiffSpec" % mode)
+        self.execDiffOnly(sampleRuns)
 
     def execDiffOnly(self, sampleRuns):
         """
@@ -272,33 +261,6 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for ws in self._vanMap.getMap().values() + [scalar]:
             DeleteWorkspace(Workspace=ws)
         
-        self.setProperty("OutputWorkspace", result)
-
-    def execDiffSpec(self, sampleRuns):
-        """
-            Execute the algorithm in spectroscopy mode
-            @param sampleRuns A list of files pointing to the sample runs
-        """
-        # Do conversion for each file
-        wkspaces = []
-        for runFile in sampleRuns:
-            wsname = "__" + os.path.basename(runFile)
-            Load(Filename=runFile, OutputWorkspace=wsname)
-            NormaliseToMonitor(InputWorkspace=wsname,OutputWorkspace=wsname,MonitorSpectrum=1)
-            AlignDetectors(InputWorkspace=wsname, OutputWorkspace=wsname, CalibrationFile=self._cal)
-            DiffractionFocussing(InputWorkspace=wsname, OutputWorkspace=wsname, GroupingFileName=self._cal)
-            wkspaces.append(wsname)
-
-        # Now merge them together if there is more than 1
-        if len(wkspaces) > 1:
-            MergeRuns(InputWorkspaces=wkspaces, OutputWorkspace=self._outputWsName)
-            # Delete loaded file workspaces
-            for name in wkspaces:
-                DeleteWorkspace(name)
-        else:
-            RenameWorkspace(InputWorkspace=wkspaces[0],OutputWorkspace=self._outputWsName)
-
-        result = mtd[self._outputWsName]
         self.setProperty("OutputWorkspace", result)
 
     def findRuns(self, run_str):
