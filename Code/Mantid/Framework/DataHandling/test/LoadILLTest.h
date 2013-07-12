@@ -12,7 +12,7 @@ class LoadILLTest: public CxxTest::TestSuite {
 public:
 
 	LoadILLTest() :
-			m_testFile("ILLIN5_094460.nxs")
+			m_testFile("ILLIN5_104007.nxs")
 	{
 	}
 
