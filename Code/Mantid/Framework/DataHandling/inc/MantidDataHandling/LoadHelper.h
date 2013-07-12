@@ -34,14 +34,21 @@ public:
 	LoadHelper();
 	virtual ~LoadHelper();
 
-	std::string getInstrumentName(NeXus::NXEntry&);
 	std::string findInstrumentNexusPath(const NeXus::NXEntry&);
-	std::string getStringFromNexusPath(const NeXus::NXEntry&, const std::string&);
+	std::string getStringFromNexusPath(const NeXus::NXEntry&,
+			const std::string&);
 	double getDoubleFromNexusPath(const NeXus::NXEntry&, const std::string&);
-	std::vector<double> getTimeBinningFromNexusPath(
-			const NeXus::NXEntry &, const std::string &);
-	static double calculateStandardError(double in) {return sqrt(in);}
+	std::vector<double> getTimeBinningFromNexusPath(const NeXus::NXEntry &,
+			const std::string &);
+	static double calculateStandardError(double in) {
+		return sqrt(in);
+	}
 	double calculateEnergy(double);
+	double calculateTOF(double, double);
+	double getL1(const API::MatrixWorkspace_sptr&);
+	double getL2(const API::MatrixWorkspace_sptr&, int detId = 1);
+	double getInstrumentProperty(const API::MatrixWorkspace_sptr&, std::string);
+	std::string dateTimeInIsoFormat(std::string);
 private:
 	/// Reference to the logger class
 	Kernel::Logger& g_log;

@@ -17,41 +17,6 @@ LoadHelper::LoadHelper() :
 LoadHelper::~LoadHelper() {
 }
 
-/**
- * Finds the instrument name in the nexus file
- *
- * @param entry :: The Nexus entry
- * @return instrument name
- */
-std::string LoadHelper::getInstrumentName(NeXus::NXEntry& entry) {
-
-	// Old format: /entry0/IN5/name
-	// New format: /entry0/instrument/name
-
-	// Ugly way of getting Instrument Name
-	// Instrument name is in: entry0/<NXinstrument>/name
-
-	std::string instrumentName = "";
-
-	std::vector<NeXus::NXClassInfo> v = entry.groups();
-	for (auto it = v.begin(); it < v.end(); it++) {
-		if (it->nxclass == "NXinstrument") {
-			std::string nexusInstrumentEntryName = it->nxname;
-			std::string insNamePath = nexusInstrumentEntryName + "/name";
-			if (!entry.isValid(insNamePath))
-				throw std::runtime_error(
-						"Error reading the instrument name: " + insNamePath
-								+ " is not a valid path!");
-			instrumentName = entry.getString(insNamePath);
-			g_log.debug() << "Instrument Name: " << instrumentName
-					<< " in NxPath: " << insNamePath << std::endl;
-			break;
-		}
-	}
-
-	return instrumentName;
-
-}
 
 /**
  * Finds the path for the instrument name in the nexus file
@@ -111,6 +76,89 @@ double LoadHelper::calculateEnergy(double wavelength) {
 			/ (2 * PhysicalConstants::NeutronMass * wavelength * wavelength
 					* 1e-20) / PhysicalConstants::meV;
 	return e;
+}
+
+/**
+ * Calculate TOF from distance
+ *  @param distance :: distance in meters
+ *  @return tof in seconds
+ */
+double LoadHelper::calculateTOF(double distance,double wavelength) {
+	if (wavelength <= 0) {
+		g_log.error("Wavelenght is <= 0");
+		throw std::runtime_error("Wavelenght is <= 0");
+	}
+
+	double velocity = PhysicalConstants::h
+			/ (PhysicalConstants::NeutronMass * wavelength * 1e-10); //m/s
+
+	return distance / velocity;
+}
+
+double LoadHelper::getL1(const API::MatrixWorkspace_sptr& workspace) {
+	Geometry::Instrument_const_sptr instrument =
+			workspace->getInstrument();
+	Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+	double l1 = instrument->getSource()->getDistance(*sample);
+	return l1;
+}
+
+double LoadHelper::getL2(const API::MatrixWorkspace_sptr& workspace, int detId) {
+	// Get a pointer to the instrument contained in the workspace
+	Geometry::Instrument_const_sptr instrument =
+			workspace->getInstrument();
+	// Get the distance between the source and the sample (assume in metres)
+	Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+	// Get the sample-detector distance for this detector (in metres)
+	double l2 = workspace->getDetector(detId)->getPos().distance(
+			sample->getPos());
+	return l2;
+}
+
+/*
+ * Get instrument property as double
+ * @s - input property name
+ *
+ */
+double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr& workspace, std::string s) {
+	std::vector<std::string> prop =
+			workspace->getInstrument()->getStringParameter(s);
+	if (prop.empty()) {
+		g_log.debug("Property <" + s + "> doesn't exist!");
+		return EMPTY_DBL();
+	} else {
+		g_log.debug() << "Property <" + s + "> = " << prop[0] << std::endl;
+		return boost::lexical_cast<double>(prop[0]);
+	}
+}
+
+/**
+ * Parses the date as formatted at the ILL:
+ * 29-Jun-12 11:27:26
+ * and converts it to the ISO format used in Mantid:
+ * ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
+ *
+ *  @param dateToParse :: date as string
+ *  @return date as required in Mantid
+ */
+std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
+	namespace bt = boost::posix_time;
+	// parsing format
+	const std::locale format = std::locale(std::locale::classic(),
+			new bt::time_input_facet("%d-%b-%y %H:%M:%S"));
+
+	bt::ptime pt;
+	std::istringstream is(dateToParse);
+	is.imbue(format);
+	is >> pt;
+
+	if (pt != bt::ptime()) {
+		// Converts to ISO
+		std::string s = bt::to_iso_extended_string(pt);
+		return s;
+	} else {
+		return "";
+	}
 }
 
 } // namespace DataHandling

@@ -26,7 +26,7 @@ DECLARE_HDF_FILELOADER_ALGORITHM(LoadILLSANS)
 LoadILLSANS::LoadILLSANS() :
 m_defaultBinning(2)
 {
-	supportedInstruments.push_back("D33");
+	m_supportedInstruments.push_back("D33");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -69,13 +69,21 @@ void LoadILLSANS::initDocs() {
  */
 int LoadILLSANS::confidence(Kernel::HDFDescriptor & descriptor) const
 {
-  const std::string root =  "/" + descriptor.firstEntryNameType().first + "/";
-  for(auto it = supportedInstruments.begin(); it != supportedInstruments.end() ; ++it)
-  {
-    if(descriptor.pathExists(root + *it)) return 80;
-  }
-  
-  return 0;
+	const std::string path = descriptor.pathOfType("NXinstrument");
+	g_log.debug() << "Path of type NXinstrument: " << path << std::endl;
+
+	::NeXus::File &file = descriptor.data();
+	file.openPath( path + "/name");
+	std::string instrumentName = file.getStrData();
+
+	for (auto it = m_supportedInstruments.begin();
+			it != m_supportedInstruments.end(); ++it) {
+		g_log.debug() << "\t: " << *it << std::endl;
+		if (instrumentName == *it)
+			return 80;
+	}
+
+	return 0;
 }
 
 
@@ -468,12 +476,33 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry, const std::string &i
 	std::string run_num = boost::lexical_cast<std::string>(runNum);
 	runDetails.addProperty("run_number", run_num);
 
+	if (entry.getFloat("mode") == 0.0) { // Not TOF
+		runDetails.addProperty<std::string>("tof_mode", "Non TOF");
+	}
+	else{
+		runDetails.addProperty<std::string>("tof_mode", "TOF");
+	}
+
+	std::string desc = m_loader.getStringFromNexusPath(entry,"sample_description");
+	runDetails.addProperty("sample_description", desc);
+
+	std::string start_time = entry.getString("start_time");
+	start_time = m_loader.dateTimeInIsoFormat(start_time);
+	runDetails.addProperty("run_start", start_time);
+
+	std::string end_time = entry.getString("end_time");
+	end_time = m_loader.dateTimeInIsoFormat(end_time);
+	runDetails.addProperty("run_end", end_time);
 
 	double wavelength = entry.getFloat(instrumentNamePath + "/selector/wavelength");
 	g_log.debug()<< "Wavelength found in the nexus file: " << wavelength << std::endl;
 
 	if (wavelength <= 0) {
-		g_log.error("The wavelength present in the NeXus file <= 0!!");
+		g_log.debug()<< "Mode = " << entry.getFloat("mode") << std::endl;
+		g_log.information("The wavelength present in the NeXus file <= 0.");
+		if (entry.getFloat("mode") == 0.0) { // Not TOF
+			throw std::runtime_error("Working in Non TOF mode and the wavelength in the file is <=0 !!! Check with the instrument scientist!");
+		}
 	}
 	else {
 		double wavelengthRes = entry.getFloat(instrumentNamePath + "/selector/wavelength_res");

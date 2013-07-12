@@ -88,7 +88,7 @@ private:
 
 	LoadHelper m_loader;
 	std::string m_instrumentName; ///< Name of the instrument
-	std::vector<std::string> supportedInstruments;
+	std::vector<std::string> m_supportedInstruments;
 	API::MatrixWorkspace_sptr m_localWorkspace;
 	std::vector<double> m_defaultBinning;
 
