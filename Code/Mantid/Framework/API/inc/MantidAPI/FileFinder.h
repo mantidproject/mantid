@@ -47,15 +47,15 @@ namespace Mantid
     class MANTID_API_DLL FileFinderImpl
     {
     public:
-      std::string getFullPath(const std::string& fName)const;
+      std::string getFullPath(const std::string& filename)const;
       std::string getPath(const std::vector<IArchiveSearch_sptr>& archs, const std::set<std::string>& filename, const std::vector<std::string>& extensions)const;
       /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
       std::string makeFileName(const std::string& hint, const Kernel::InstrumentInfo& instrument)const;
       void setCaseSensitive(const bool cs);
       bool getCaseSensitive() const;
-      std::string findRun(const std::string& hint,const std::set<std::string> *exts)const;
-      std::string findRun(const std::string& hint,const std::vector<std::string> &exts  = std::vector<std::string>())const;
-      std::vector<std::string> findRuns(const std::string& hint)const;
+      std::string findRun(const std::string& hintstr,const std::set<std::string> *exts)const;
+      std::string findRun(const std::string& hintstr,const std::vector<std::string> &exts  = std::vector<std::string>())const;
+      std::vector<std::string> findRuns(const std::string& hintstr)const;
       /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
       const Kernel::InstrumentInfo getInstrument(const std::string& hint) const;
       /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
