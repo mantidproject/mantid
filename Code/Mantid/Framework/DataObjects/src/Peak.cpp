@@ -821,7 +821,7 @@ namespace DataObjects
     auto det = getDetector();
     if(det == NULL)
     {
-      throw Mantid::Kernel::Exception::NotFoundError("Detector cannot be found.", "");
+      throw Mantid::Kernel::Exception::NullPointerException("Peak", "Detector");
     }
     return getDetector()->getPos();
   }
