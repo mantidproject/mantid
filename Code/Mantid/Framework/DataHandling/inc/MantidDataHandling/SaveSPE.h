@@ -65,6 +65,7 @@ private:
   ///Execution code
   void exec();
 
+  void writeSPEFile(FILE * outSPEFile, const API::MatrixWorkspace_const_sptr &inputWS);
   void writeHists(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile);
   void writeHist(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const;
   void writeMaskFlags(FILE * const outFile) const;
