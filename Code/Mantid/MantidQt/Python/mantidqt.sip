@@ -106,6 +106,22 @@ MantidQt::API::AlgorithmDialog * createDialogFromName(const QString& algorithmNa
 
 };
 
+namespace MantidWidgets
+{
+
+class MWRunFiles : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/MWRunFiles.h"
+%End
+public:
+void setLabelText(const QString&);
+QString getText() /PyName=text/;
+void setText(const QString&);
+};
+
+};
+
 namespace SliceViewer
 {
 
