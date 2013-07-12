@@ -3,10 +3,12 @@
 //-----------------------------------------------------------------
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FileFinder.h"
-#include "MantidKernel/FileValidator.h"
-#include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/FileValidator.h"
+#include "MantidKernel/Strings.h"
+
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <cctype>
@@ -124,8 +126,10 @@ bool FileProperty::isOptional() const
  */
 std::string FileProperty::setValue(const std::string & propValue)
 {
+  std::string strippedValue = Kernel::Strings::strip(propValue);
+
   // Empty value is allowed if optional
-  if( propValue.empty() )
+  if( strippedValue.empty() )
   {
     PropertyWithValue<std::string>::setValue("");
     return isEmptyValueValid();
@@ -133,27 +137,27 @@ std::string FileProperty::setValue(const std::string & propValue)
 
   // If this looks like an absolute path then don't do any searching but make sure the 
   // directory exists for a Save property
-  if( Poco::Path(propValue).isAbsolute() )
+  if( Poco::Path(strippedValue).isAbsolute() )
   {
     std::string error("");
     if( isSaveProperty() )
     {
-       error = createDirectory(propValue);
+       error = createDirectory(strippedValue);
        if( !error.empty() ) return error;
     }
 
-    return PropertyWithValue<std::string>::setValue(propValue);
+    return PropertyWithValue<std::string>::setValue(strippedValue);
   }
 
   std::string errorMsg("");
   // For relative paths, differentiate between load and save types
   if( isLoadProperty() )
   {
-    errorMsg = setLoadProperty(propValue);
+    errorMsg = setLoadProperty(strippedValue);
   }
   else
   {
-    errorMsg = setSaveProperty(propValue);
+    errorMsg = setSaveProperty(strippedValue);
   }
   return errorMsg;
 }
