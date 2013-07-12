@@ -27,7 +27,7 @@ public:
 
 	CorrectFlightPathsTest() :
 		// alter here if needed
-			m_testFile("ILLIN5_094460.nxs"),
+			m_testFile("ILLIN5_104007.nxs"),
 			m_l2(4){
 	}
 
