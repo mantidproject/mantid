@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/IHDFFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidDataHandling/LoadHelper.h"
 
 namespace Mantid
 {
@@ -49,26 +50,23 @@ private:
 	void init();
 	void exec();
 	void setInstrumentName(NeXus::NXEntry& entry);
-	std::string getInstrumentName(NeXus::NXEntry& entry) const;
 	void initWorkSpace(NeXus::NXEntry&);
 	void loadTimeDetails(NeXus::NXEntry& entry);
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry&);
 	int getDetectorElasticPeakPosition(const NeXus::NXFloat&);
 	std::vector<double> getTimeBinning(int, double);
-	double getL1();
-	double getL2(int detId = 1);
-	double calculateTOF(double);
 	/// Calculate error for y
 	static double calculateError(double in) {
 		return sqrt(in);
 	}
 	void loadExperimentDetails(NeXus::NXEntry&);
 	void loadRunDetails(NeXus::NXEntry &);
-	double calculateEnergy(double);
 	void runLoadInstrument();
 
-	std::vector<std::string> supportedInstruments;
+	std::vector<std::string> m_supportedInstruments;
 	std::string m_instrumentName;
+	std::string m_instrumentPath;///< Name of the instrument path
+
 	API::MatrixWorkspace_sptr m_localWorkspace;
 	size_t m_numberOfTubes; // number of tubes - X
 	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
@@ -76,6 +74,8 @@ private:
 	size_t m_numberOfHistograms;
 	double m_wavelength;
 	double m_channelWidth;
+
+	LoadHelper m_loader;
 
 };
 
