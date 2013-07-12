@@ -13,7 +13,7 @@ class TubeSpec:
         """     
         Creates empty tube specification for specified instrument.
         
-        @param ws: workspace containing the specified instrument with one pixel detector per spectrum.
+        :param ws: workspace containing the specified instrument with one pixel detector per spectrum.
         """	
 	self.ws = ws
         self.inst = ws.getInstrument()
@@ -33,7 +33,7 @@ class TubeSpec:
         If the tube specification is not empty this component is added to those already
         in the specification. No checking is done for repeated or overlapping components. 
         
-        @param tubeSpecString: string specifying tubes of a component of the instrument
+        :param tubeSpecString: string specifying tubes of a component of the instrument
         
         The 'tubeSpecString' may be the full path name for the component or 
         steps may be missed out provided it remains unique.
@@ -64,9 +64,9 @@ class TubeSpec:
         """     
         Determines whether the component is a tube.
          
-        @param comp: the component
+        :param comp: the component
         
-        @return Value: true if component passes test as being a tube
+        :rtype: Value, true if component passes test as being a tube
         """
         # We simply assume it's a tube if it has a large number of children
         if( hasattr( comp, "nelements")):
@@ -78,7 +78,7 @@ class TubeSpec:
          """     
          Searches the component for tubes and saves them in array, appending if array is not empty.
          
-         @param comp: the component
+         :param comp: the component
          """
          # Go through all descendents that are not a descendent of a tube and if it's a tube, store and count it.
          
@@ -96,7 +96,7 @@ class TubeSpec:
         """     
         Returns number of tubes specified. May also save info about these tubes
          
-        @return Value: number of tubes (-1 for erroneous specification)
+        :rtype: Value, number of tubes (-1 for erroneous specification)
         """
         if(self.numTubes >= 0):
             return self.numTubes
@@ -117,7 +117,7 @@ class TubeSpec:
         """     
         Returns instrument component corresponding to specification
          	
-	@Return value: instrument component
+	:rtype: instrument component
         """
         if( self.componentArray != []):
             return self.componentArray[0]
@@ -137,7 +137,7 @@ class TubeSpec:
         """     
         Returns instrument components corresponding to specification
          	
-	@Return value: array of instrument components
+	:rtype: array of instrument components
         """
         if( self.componentArray != []):
             return self.componentArray
@@ -165,9 +165,9 @@ class TubeSpec:
         Returns detector info for one tube (currently ID of first detector and number of detectors in tube)
         It assumes that all the pixels along the tube have consecutive detector IDs.
         
-        @param tubeIx:  index of Tube in specified set 
+        :param tubeIx:  index of Tube in specified set 
 	
-	@Return value: ID of first detector, number of detectors and step between detectors +1 or -1
+	:rtype: ID of first detector, number of detectors and step between detectors +1 or -1
         """	
 	nTubes = self.getNumTubes()
 	if(nTubes < 0):
@@ -207,9 +207,9 @@ class TubeSpec:
         """     
         Returns length of tube.
         
-        @param tubeIx:  index of Tube in specified set 
+        :param tubeIx:  index of Tube in specified set 
 	
-	@Return value: Length of tube (first pixel to last pixel) in metres. 0.0 if tube not found.
+	:rtype: Length of tube (first pixel to last pixel) in metres. 0.0 if tube not found.
         """	
 	nTubes = self.getNumTubes()
 	if(nTubes < 0):
@@ -235,9 +235,9 @@ class TubeSpec:
         This function is not used in tube calibration, but may be useful as a diagnostic.
         It is used in creating the peakfile, which lists the peaks found for each tube.
         
-        @param tubeIx:  index of Tube in specified set 
+        :param tubeIx:  index of Tube in specified set 
 	
-	@Return value: Name of tube as in IDF or 'unknown' if not found.
+	:rtype: Name of tube as in IDF or 'unknown' if not found.
         """	
 	nTubes = self.getNumTubes()
 	if(nTubes < 0):
@@ -262,9 +262,9 @@ class TubeSpec:
         Returns list of workspace indices of a tube set that has been specified by string
         It assumes that all the pixels along the tube have consecutive detector IDs 
         
-        @param tubeIx:  index of Tube in specified set 
+        :param tubeIx:  index of Tube in specified set 
 	
-	Return value: list of indices
+	:rtype: list of indices
         """
 	firstDet, numDet, step = self.getDetectorInfoFromTube( tubeIx )			   
         wkIds = []
@@ -308,9 +308,9 @@ class TubeSpec:
 	"""     
         Returns list of workspace indices of a tube
         
-        @param tubeIx:  index of Tube in specified set
+        :param tubeIx:  index of Tube in specified set
 	
-	Return value: list of indices
+	:rtype: list of indices
         """
         nTubes = self.getNumTubes()
         if( (0 <= tubeIx) & (tubeIx < nTubes) ):
