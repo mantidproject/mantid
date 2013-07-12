@@ -775,6 +775,7 @@ void ConfigDialog::initSendToProgramTab()
 
   //create tree diagram for all known programs that can be saved to
   treePrograms = new QTreeWidget(frame);
+  treePrograms->setSelectionMode( QAbstractItemView::ExtendedSelection );
   treePrograms->setColumnCount(1);
   treePrograms->setSortingEnabled(false);
   treePrograms->setHeaderLabel(tr("List of Current Programs"));
