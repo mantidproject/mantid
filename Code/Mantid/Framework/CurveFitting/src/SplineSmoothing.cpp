@@ -117,7 +117,7 @@ namespace CurveFitting
       outputWorkspace->setX(i, inputWorkspace->readX(i));
 
       yValues = outputWorkspace->dataY(i).data();
-      cspline->derivative1D(yValues, xValues, nData, order);
+      cspline->derivative1D(yValues, xValues, nData, i);
     }
   }
 

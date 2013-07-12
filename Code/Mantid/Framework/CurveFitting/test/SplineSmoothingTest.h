@@ -48,7 +48,8 @@ public:
     //create a binned workspace
     MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 400, 0, 0.5);
 
-    for (size_t i = 0; i <= inputWorkspace->readY(0).size(); ++i)
+    size_t iwSize = inputWorkspace->readY(0).size();
+    for (size_t i = 0; i < iwSize; ++i)
     {
       double val = static_cast<double>(i);
       inputWorkspace->dataY(0)[i] = val *2;

@@ -47,7 +47,8 @@ public:
     MatrixWorkspace_sptr matchWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 1);
     MatrixWorkspace_sptr interpolateWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 20, 0, 0.5);
 
-    for (size_t i = 0; i <= matchWorkspace->readY(0).size(); ++i)
+    size_t mwSize =  matchWorkspace->readY(0).size();
+    for (size_t i = 0; i < mwSize; ++i)
     {
       double val = static_cast<double>(i);
       matchWorkspace->dataY(0)[i] = val *2;
