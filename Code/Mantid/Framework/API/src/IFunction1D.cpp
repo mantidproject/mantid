@@ -66,7 +66,11 @@ namespace API
 
     void IFunction1D::derivative1D(double* out, const double* xValues, size_t nData, const size_t order) const
     {
-       throw Kernel::Exception::NotImplementedError("Derivative is not implemented for this function.");
+        UNUSED_ARG(out);
+        UNUSED_ARG(xValues);
+        UNUSED_ARG(nData);
+        UNUSED_ARG(order);
+        throw Kernel::Exception::NotImplementedError("Derivative is not implemented for this function.");
     }
 
     void IFunction1D::functionDeriv1D(Jacobian* jacobian, const double* xValues, const size_t nData)

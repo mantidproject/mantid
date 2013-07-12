@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/CubicSpline.h"
 
 namespace Mantid
 {
@@ -46,7 +47,12 @@ namespace CurveFitting
     void init();
     void exec();
 
+    void setInterpolationPoints(const boost::shared_ptr<CubicSpline> cspline,
+        API::MatrixWorkspace_const_sptr inputWorkspace) const;
 
+    void calculateSpline(const boost::shared_ptr<CubicSpline> cspline,
+        API::MatrixWorkspace_const_sptr inputWorkspace,
+        API::MatrixWorkspace_sptr outputWorkspace, int order) const;
   };
 
 

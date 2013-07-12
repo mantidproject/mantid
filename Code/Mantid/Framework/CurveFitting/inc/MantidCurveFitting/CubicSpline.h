@@ -103,7 +103,7 @@ namespace Mantid
       void initGSLObjects(boost::scoped_array<double>& x, boost::scoped_array<double>& y, int n) const;
 
       /// Check if an error occurred and throw appropriate message
-      void checkGSLError(const double status, const int errorType) const;
+      void checkGSLError(const int status, const int errorType) const;
     };
 
 

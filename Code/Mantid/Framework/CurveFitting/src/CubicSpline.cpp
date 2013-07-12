@@ -52,6 +52,7 @@ namespace Mantid
       declareParameter("y0", 0);
       declareParameter("y1", 0);
       declareParameter("y2", 0);
+
     };
 
     void CubicSpline::function1D(double* out, const double* xValues, const size_t nData) const
@@ -250,11 +251,14 @@ namespace Mantid
       }
     }
 
-    void CubicSpline::checkGSLError(const double status, const int errorType) const
+    void CubicSpline::checkGSLError(const int status, const int errorType) const
     {
       //check GSL functions didn't return an error
       if(status == errorType)
       {
+        m_recalculateSpline = true;
+        m_recalculateDeriv = true;
+
         std::string message("CubicSpline: ");
         message.append(gsl_strerror(errorType));
         throw std::runtime_error(message);
@@ -266,12 +270,14 @@ namespace Mantid
       //init the gsl structures if required
       if(m_recalculateSpline)
       {
-        gsl_spline_init(m_spline, x.get(), y.get(), n);
+        int status = gsl_spline_init(m_spline, x.get(), y.get(), n);
+        checkGSLError(status, GSL_EINVAL);
       }
 
       if(m_recalculateDeriv)
       {
-        gsl_interp_init(m_interp, x.get(), y.get(), n);
+        int status = gsl_interp_init(m_interp, x.get(), y.get(), n);
+        checkGSLError(status, GSL_EINVAL);
       }
     }
 

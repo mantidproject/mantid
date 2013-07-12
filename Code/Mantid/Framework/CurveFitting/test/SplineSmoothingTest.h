@@ -36,18 +36,17 @@ public:
 
     SplineSmoothing alg;
 
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
 
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("SplineSize", 5));
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Order", 2));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("SplineSize", 200));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Order", order));
 
     //create a binned workspace
-    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 20, 0, 0.5);
-
+    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 400, 0, 0.5);
 
     for (size_t i = 0; i <= inputWorkspace->readY(0).size(); ++i)
     {
@@ -66,7 +65,7 @@ public:
 
     for(size_t i = 0; i < yVals.size(); ++i)
     {
-      TS_ASSERT_EQUALS(yVals[i], i * 2);
+      TS_ASSERT_EQUALS(yVals[i], i* 2);
     }
   }
   

@@ -5,7 +5,6 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidCurveFitting/CubicSpline.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidCurveFitting/SplineSmoothing.h"
 
@@ -125,7 +124,7 @@ namespace CurveFitting
   void SplineSmoothing::setSmoothingPoints(const boost::shared_ptr<CubicSpline> cspline,
       MatrixWorkspace_const_sptr inputWorkspace) const
   {
-    //define the spline's parameters
+      //define the spline's parameters
       const auto & xIn = inputWorkspace->readX(0);
       const auto & yIn = inputWorkspace->readY(0);
 
@@ -139,11 +138,12 @@ namespace CurveFitting
       }
 
       //set number of smoothing points
-      cspline->setAttributeValue("n", numPoints);
+
 
       double deltaX = (xIn.back() - xIn.front()) / (numPoints-1);
       double targetX = 0;
       int lastIndex = 0;
+      int attrCount = 0;
 
       for (int i = 0; i < numPoints; ++i)
       {
@@ -159,9 +159,18 @@ namespace CurveFitting
         //get x value with minimum difference.
         int index = (xIn[lastIndex] - targetX < targetX - xIn[lastIndex-1]) ? lastIndex : lastIndex-1;
 
-        //set spline parameters
-        cspline->setXAttribute(i, xIn[index]);
-        cspline->setParameter(i, yIn[index]);
+        std::string attrName = "x" + boost::lexical_cast<std::string>(attrCount-1);
+        if(i == 0 || cspline->getAttribute(attrName).asDouble() != xIn[index])
+        {
+            if(attrCount >= 3)
+            {
+              cspline->setAttributeValue("n", attrCount+1);
+            }
+
+            cspline->setXAttribute(attrCount, xIn[index]);
+            cspline->setParameter(attrCount, yIn[index]);
+            attrCount++;
+        }
       }
   }
 
