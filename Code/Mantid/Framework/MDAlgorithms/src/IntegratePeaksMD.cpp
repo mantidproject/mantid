@@ -77,6 +77,7 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Utils.h"
+#include "MantidAPI/FileProperty.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid
@@ -173,6 +174,9 @@ namespace MDAlgorithms
     auto fitvalidator = boost::make_shared<StringListValidator>(fitFunction);
     declareProperty("ProfileFunction", "Gaussian", fitvalidator, "Fitting function for profile "
                     "used only with Cylinder integration.");
+
+    declareProperty(new FileProperty("ProfilesFile","", FileProperty::OptionalSave,
+      std::vector<std::string>(1,"profiles")), "Save (Optionally) as Isaw peaks file with profiles included");
 
   }
 
@@ -446,11 +450,11 @@ namespace MDAlgorithms
 			IAlgorithm_sptr fit_alg;
 			try
 			{
-			fit_alg = createChildAlgorithm("Fit", -1, -1, false);
+			 fit_alg = createChildAlgorithm("Fit", -1, -1, false);
 			} catch (Exception::NotFoundError&)
 			{
-			g_log.error("Can't locate Fit algorithm");
-			throw ;
+			 g_log.error("Can't locate Fit algorithm");
+			 throw ;
 			}
 
 			const Mantid::MantidVec& yValues = wsProfile2D->readY(i);
@@ -531,6 +535,24 @@ namespace MDAlgorithms
     peakWS->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadius, true);
     peakWS->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadius, true);
 
+    // save profiles in peaks file
+    const std::string outfile = getProperty("ProfilesFile");
+    if (outfile.length() > 0)
+    {
+		IAlgorithm_sptr alg;
+		try
+		{
+		 alg = createChildAlgorithm("SaveIsawPeaks", -1, -1, false);
+		} catch (Exception::NotFoundError&)
+		{
+		 g_log.error("Can't locate SaveIsawPeaks algorithm");
+		 throw ;
+		}
+		alg->setProperty("InputWorkspace", peakWS);
+		alg->setProperty("ProfileWorkspace", wsProfile2D);
+		alg->setPropertyValue("Filename", outfile);
+		alg->execute();
+    }
     // Save the output
     setProperty("OutputWorkspace", peakWS);
 
