@@ -405,6 +405,18 @@ void SmoothNeighbours::findNeighboursRectangular()
 void SmoothNeighbours::findNeighboursUbiqutious()
 {
    g_log.debug("SmoothNeighbours processing NOT assuming rectangular detectors.");
+
+  // Temporary. Added so it is easier to test containsRectDetectors on 
+  // real instruments.
+  // TODO: remove
+  Instrument::ContainsState status = inWS->getInstrument()->containsRectDetectors();
+  if(status == Instrument::ContainsState::Full)
+    g_log.debug("Consists of rectangular detectors");
+  else if(status == Instrument::ContainsState::Partial)
+    g_log.debug("Partially consists of rectangular detectors");
+  else
+    g_log.debug("No rectangular detectors");
+
   /*
     This will cause the Workspace to rebuild the nearest neighbours map, so that we can pick-up any of the properties specified
     for this algorithm in the constructor for the NearestNeighboursObject.
