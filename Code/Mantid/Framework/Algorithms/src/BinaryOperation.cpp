@@ -374,6 +374,7 @@ namespace Mantid
 
       //Did checkRequirements() tell us that the X histogram size did not matter?
       if (!m_matchXSize)
+      {
         //If so, only the vertical # needs to match
         
         if ( lhs->getNumberHistograms() == rhs->getNumberHistograms() )
@@ -384,7 +385,7 @@ namespace Mantid
         {
           return "Number of histograms not identical.";
         }
-
+      }
       // Otherwise they must match both ways, or horizontally or vertically with the other rhs dimension=1
       if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return "";
       // Past this point, we require the X arrays to match. Note this only checks the first spectrum
