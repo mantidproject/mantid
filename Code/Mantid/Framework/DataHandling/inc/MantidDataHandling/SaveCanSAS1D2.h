@@ -22,10 +22,8 @@ namespace Mantid
   {
     /** @class SaveCanSAS1D2  DataHandling/SaveCanSAS1D2.h
 
-    @verbatim
-
     This algorithm saves  workspace into CanSAS1d format. This is an xml format except
-    the <Idata>, </Idata> tags and all data in between must be one line, which necesitates
+    the \<Idata\>, \<\/Idata\> tags and all data in between must be one line, which necesitates
     the files be written iostream functions outside xml libraries.
 
     The second version of CanSAS1D implements the version 1.1, whose schema is found at
@@ -42,11 +40,11 @@ namespace Mantid
      - Introduction of 2 new (optional) workspace properties:
        - Transmission - The workspace for of the transmission
        - TransmissionCan - The workspace for the transmission can
-     - Extension of the ::init method in order to introduce these workspaces properties.
-     - Overide the ::createSASRootElement to conform the new header. 
-     - Introduction of the method to deal with the new element: ::createSASTransElement. 
-     - Override the ::exec method to introduce this new element when apropriated. 
-     - Override the ::writeHeader method to introduce set the correct stylesheet
+     - Extension of the SaveCanSAS1D2::init method in order to introduce these workspaces properties.
+     - Overide the SaveCanSAS1D2::createSASRootElement to conform the new header. 
+     - Introduction of the method to deal with the new element: SaveCanSAS1D2::createSASTransElement. 
+     - Override the SaveCanSAS1D2::exec method to introduce this new element when apropriated. 
+     - Override the SaveCanSAS1D2::writeHeader method to introduce set the correct stylesheet
        
     @author Gesner Passos, Rutherford Appleton Laboratory
     @date 11/04/2013
