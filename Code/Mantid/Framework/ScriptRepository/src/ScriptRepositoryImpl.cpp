@@ -29,10 +29,12 @@ using Mantid::Kernel::ConfigServiceImpl;
 #pragma warning( disable : 4250 )
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
+#include <Winhttp.h>
 #pragma warning( pop )
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
+#include <stdlib.h>
 #endif
 #include <Poco/StreamCopier.h>
 #include <Poco/Net/NetException.h>
@@ -268,7 +270,7 @@ namespace API
     }
       
     // install the two files inside the given folder
-    
+    g_log.debug() << "ScriptRepository attempt to doDownload file " << path << std::endl;
     // download the repository json
     doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
@@ -743,6 +745,14 @@ namespace API
       Poco::URI uri(remote_upload); 
       std::string path(uri.getPathAndQuery());
       HTTPClientSession session(uri.getHost(), uri.getPort()); 
+
+      // configure proxy
+      std::string proxy_config; 
+      unsigned short proxy_port; 
+      if (getProxyConfig(proxy_config, proxy_port))
+        session.setProxy(proxy_config, proxy_port);
+      // proxy end
+
       HTTPRequest req(HTTPRequest::HTTP_POST, path, 
                       HTTPMessage::HTTP_1_0); 
       HTMLForm form(HTMLForm::ENCODING_MULTIPART); 
@@ -1197,7 +1207,7 @@ namespace API
       the Mantid Web Service. This is the only method for the downloading and update
       that performs a real connection to the Mantid Web Service. 
       
-      This method was presente at the Script Repository Design, as an strategy to perform 
+      This method was present at the Script Repository Design, as an strategy to perform 
       unit tests, but also, helps the definition of a clear separation of the logic and 
       organization of the ScriptRepository, from the conneciton to the Mantid Web service, 
       making it more decoupled. 
@@ -1209,7 +1219,7 @@ namespace API
       
       url_file = "http://mantidweb/repository/README.md"
       
-      The result it to connect to the http server, and request the path given.
+      The result is to connect to the http server, and request the path given.
       
       The answer, will be inserted at the local_file_path. 
       
@@ -1222,15 +1232,28 @@ namespace API
   void ScriptRepositoryImpl::doDownloadFile(const std::string & url_file, 
                                             const std::string & local_file_path)
   {
+    g_log.debug() << "DoDownloadFile : " << url_file << " to file: " << local_file_path << std::endl; 
     // get the information from url_file
     Poco::URI uri(url_file);
     std::string path(uri.getPathAndQuery());
     if (path.empty()) path = "/";
-    std::string given_path = std::string(path.begin()+18, path.end());// remove the "/scriptrepository/" from the path
+    std::string given_path; 
+    if (path.find("/scriptrepository") != std::string::npos)
+      given_path = std::string(path.begin()+18, path.end());// remove the "/scriptrepository/" from the path
+    else
+      given_path = path; 
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-      session.setTimeout(Poco::Timespan(2,0));// 2 secconds
+      session.setTimeout(Poco::Timespan(2,0));// 2 secconds	
+
+      // configure proxy
+      std::string proxy_config; 
+      unsigned short proxy_port; 
+      if (getProxyConfig(proxy_config, proxy_port))
+        session.setProxy(proxy_config, proxy_port);
+      // proxy end
+
       Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path,
                                      Poco::Net::HTTPMessage::HTTP_1_1);
       Poco::Net::HTTPResponse response;
@@ -1592,6 +1615,66 @@ namespace API
     return path; 
   }
 
+
+bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned short& proxy_port){
+  // these variables are made static, so, to not query the system for the proxy configuration 
+  // everytime this information is needed
+  static std::string PROXYSERVER=""; 
+  static unsigned short PROXYPORT=0;
+  
+  // the first time this function is called, PROXYXERVER will be empty.
+  if (PROXYSERVER.empty()){
+    // attempt to get the proxy configuration
+    // setup the proxy. The setup of the proxy will be dealt differently 
+    // from windows and linux and macs. 
+#if defined(_WIN32) || defined(_WIN64)
+    WINHTTP_PROXY_INFO proxyInfo;
+
+    // Retrieve the default proxy configuration.
+    WinHttpGetDefaultProxyConfiguration( &proxyInfo );
+    if (proxyInfo.dwAccessType != WINHTTP_ACCESS_TYPE_NO_PROXY){
+      // this means proxy are being used.                
+      std::vector<std::string> proxy_list;
+      if (proxyInfo.lpszProxy != NULL){
+      boost:split(proxy_list, proxyInfo.lpszProxy, boost::is_any_of(" ;")); 
+        BOOST_FOREACH(std::string proxy_candidate, proxy_list){
+          Poco::URI proxy(proxy_candidate); 
+          PROXYSERVER = proxy.getHost(); 
+          PROXYPORT = proxy.getPort();
+          }
+        GlobalFree( proxyInfo.lpszProxy );  
+      }        
+      //free memory allocated to this string.
+      if (proxyInfo.lpszProxyBypass != NULL)
+        {
+          GlobalFree( proxyInfo.lpszProxyBypass );
+        }                      
+    }          
+#else  // linux and mac
+    char * proxy_var = getenv("http_proxy"); 
+    if (proxy_var == 0)
+      proxy_var = getenv("HTTP_PROXY"); 
+    
+    if (proxy_var != 0){
+      Poco::URI proxy(proxy_var); 
+      PROXYSERVER = proxy.getHost();
+      PROXYPORT = proxy.getPort(); 
+    }
+#endif    
+  }
+
+  bool ret_value; 
+  
+  if (PROXYSERVER.empty())
+    ret_value =  false;
+  
+  else{
+    proxy_server = PROXYSERVER; 
+    proxy_port = PROXYPORT;
+    ret_value = true;
+  }
+  return ret_value;
+}
 
 }// END API
 }// END MANTID
