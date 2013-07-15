@@ -240,8 +240,9 @@ public:
     // Will we need to compress?
     bool compress = (alg->compressTolerance >= 0);
 
-    // Which detector IDs were touched?
-    std::vector<bool> usedDetIds(alg->eventid_max+1, false);
+    // Which detector IDs were touched? - only matters if compress is on
+    std::vector<bool> usedDetIds;
+    if (compress) usedDetIds.assign(m_max_id-m_min_id+1, false);
 
     //Go through all events in the list
     for (std::size_t i = 0; i < numEvents; i++)
@@ -273,13 +274,13 @@ public:
           break;
       }
 
-      //Create the tofevent
-      double tof = static_cast<double>( event_time_of_flight[i] );
-      if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max))
+      // We cached a pointer to the vector<tofEvent> -> so retrieve it and add the event
+      detid_t detId = event_id[i];
+      if (detId >= m_min_id && detId <= m_max_id)
       {
-        // We cached a pointer to the vector<tofEvent> -> so retrieve it and add the event
-        detid_t detId = event_id[i];
-        if (detId <= alg->eventid_max)
+        //Create the tofevent
+        double tof = static_cast<double>( event_time_of_flight[i] );
+        if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max))
         {
           alg->m_eventVectorMutex.lock();
           // Handle simulated data if present
@@ -327,29 +328,32 @@ public:
             badTofs++;
 
           // Track all the touched wi (only necessary when compressing events, for thread safety)
-          if (compress) usedDetIds[detId] = true;
-        } // valid detector IDs
+          if (compress) usedDetIds[detId-m_min_id] = true;
+        } // valid time-of-flight
 
-      }
+      } // valid detector IDs
     } //(for each event)
 
     //------------ Compress Events (or set sort order) ------------------
     // Do it on all the detector IDs we touched
-    for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
+    if (compress)
     {
-      if (usedDetIds[pixID])
+      for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++)
       {
-        //Find the the workspace index corresponding to that pixel ID
-        size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
-        EventList * el = WS->getEventListPtr(wi);
-        if (compress)
-          el->compressEvents(alg->compressTolerance, el);
-        else
+        if (usedDetIds[pixID-m_min_id])
         {
-          if (pulsetimesincreasing)
-            el->setSortOrder(DataObjects::PULSETIME_SORT);
+          //Find the the workspace index corresponding to that pixel ID
+          size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
+          EventList * el = WS->getEventListPtr(wi);
+          if (compress)
+            el->compressEvents(alg->compressTolerance, el);
           else
-            el->setSortOrder(DataObjects::UNSORTED);
+          {
+            if (pulsetimesincreasing)
+              el->setSortOrder(DataObjects::PULSETIME_SORT);
+            else
+              el->setSortOrder(DataObjects::UNSORTED);
+          }
         }
       }
     }
@@ -827,7 +831,7 @@ public:
     //Abort if anything failed
     if (m_loadError)
     {
-      prog->reportIncrement(2, entry_name + ": skipping");
+      prog->reportIncrement(3, entry_name + ": skipping");
       delete [] m_event_id;
       delete [] m_event_time_of_flight;
       if (m_have_weight)
