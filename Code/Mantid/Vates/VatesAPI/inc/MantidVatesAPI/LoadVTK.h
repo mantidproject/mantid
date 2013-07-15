@@ -26,6 +26,9 @@ namespace Mantid
 
       virtual const std::string category() const;
 
+      /// Returns a confidence value that this algorithm can load a file
+      virtual int confidence(Kernel::FileDescriptor & descriptor) const;
+
     protected:
 
       virtual void initDocs();
