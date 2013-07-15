@@ -45,7 +45,7 @@ public:
 
     //create a binned workspaces
     MatrixWorkspace_sptr matchWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 1);
-    MatrixWorkspace_sptr interpolateWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 20, 0, 0.5);
+    MatrixWorkspace_sptr interpolateWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 15, 0.5, 0.1);
 
     size_t mwSize =  matchWorkspace->readY(0).size();
     for (size_t i = 0; i < mwSize; ++i)
@@ -62,14 +62,18 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_const_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-    const auto & xVals = interpolateWorkspace->readX(0);
     const auto & yVals = outputWorkspace->readY(0);
+    const auto & yDeriv = outputWorkspace->readY(1);
+    const auto & yDeriv2 = outputWorkspace->readY(2);
 
+    double count =1;
     for(size_t i = 0; i < yVals.size(); ++i)
     {
-      TS_ASSERT_EQUALS(yVals[i], xVals[i] * 2);
+      TS_ASSERT_DELTA(yVals[i], count*0.1, 1e-15);
+      TS_ASSERT_EQUALS(yDeriv[i], 2);
+      TS_ASSERT_EQUALS(yDeriv2[i], 0);
+      count+=2;
     }
-
   }
 
 };

@@ -4,6 +4,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidCurveFitting/SplineSmoothing.h"
@@ -79,8 +80,19 @@ namespace CurveFitting
     //read in algorithm parameters
     int order = static_cast<int>(getProperty("Order"));
 
-    MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,order+1);
+    MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+
+    inputWorkspace = convertBinnedData(inputWorkspace);
+
+    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,
+        order + 1);
+
+    //create labels for output workspace
+    API::TextAxis* tAxis = new API::TextAxis(order+1);
+    tAxis->setLabel(0, "Y");
+    tAxis->setLabel(1, "Deriv 1");
+    tAxis->setLabel(2, "Deriv 2");
+    outputWorkspace->replaceAxis(1, tAxis);
 
     //Create and instance of the cubic spline function
     auto cspline = boost::make_shared<CubicSpline>();
@@ -93,6 +105,32 @@ namespace CurveFitting
 
     //store the output workspace
     setProperty("OutputWorkspace", outputWorkspace);
+  }
+
+  MatrixWorkspace_sptr SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) const
+  {
+    if(workspace->isHistogramData())
+    {
+      const auto & xValues = workspace->readX(0);
+      const auto & yValues = workspace->readY(0);
+      size_t size = xValues.size()-1;
+
+      //make a new workspace for the point data
+      MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,1,size,size);
+      auto & newXValues = pointWorkspace->dataX(0);
+      auto & newYValues = pointWorkspace->dataY(0);
+
+      //
+      for(size_t i = 0; i < size; ++i)
+      {
+        newXValues[i] = (xValues[i] + xValues[i+1])/2;
+        newYValues[i] = yValues[i];
+      }
+
+      return pointWorkspace;
+    }
+
+    return workspace;
   }
 
   void SplineSmoothing::calculateSpline(const boost::shared_ptr<CubicSpline> cspline,
@@ -114,8 +152,7 @@ namespace CurveFitting
     //calculate the derivatives
     for(int i = 1; i <= order; ++i)
     {
-      outputWorkspace->setX(i, inputWorkspace->readX(i));
-
+      outputWorkspace->setX(i, inputWorkspace->readX(0));
       yValues = outputWorkspace->dataY(i).data();
       cspline->derivative1D(yValues, xValues, nData, i);
     }
@@ -134,12 +171,10 @@ namespace CurveFitting
       //check number of spline points is within a valid range
       if(numPoints > xSize)
       {
-        throw std::range_error("SplineSmoothing: SplineSmoothing size cannot be larger than the number of data points.");
+        throw std::range_error("SplineSmoothing: Spline size cannot be larger than the number of data points.");
       }
 
-      //set number of smoothing points
-
-
+      //choose number of smoothing points
       double deltaX = (xIn.back() - xIn.front()) / (numPoints-1);
       double targetX = 0;
       int lastIndex = 0;

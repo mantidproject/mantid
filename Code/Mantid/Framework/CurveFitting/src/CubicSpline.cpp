@@ -39,8 +39,7 @@ namespace Mantid
         m_acc(gsl_interp_accel_alloc()),
         m_spline(gsl_spline_alloc(gsl_interp_cspline, M_MIN_POINTS)),
         m_interp(gsl_interp_alloc(gsl_interp_cspline, M_MIN_POINTS)),
-        m_recalculateSpline(true),
-        m_recalculateDeriv(true)
+        m_recalculateSpline(true)
     {
       //setup class with a default set of attributes
       declareAttribute("n", Attribute(M_MIN_POINTS));
@@ -112,10 +111,6 @@ namespace Mantid
 
     void CubicSpline::derivative1D(double* out, const double* xValues, size_t nData, const size_t order) const
     {
-
-      //check if a recalculating is needed
-      if(m_recalculateDeriv)
-      {
         int n = getAttribute("n").asInt();
 
         boost::scoped_array<double> x(new double[n]);
@@ -124,9 +119,6 @@ namespace Mantid
         //setup the reference points and calculate
         setupInput(x,y,n);
         calculateDerivative(x,y,out,xValues,nData, order);
-
-        m_recalculateDeriv = false;
-      }
     }
 
     void CubicSpline::calculateSpline(double* out, const double* xValues, const size_t nData) const
@@ -185,7 +177,6 @@ namespace Mantid
 
       //recalculate if necessary
       m_recalculateSpline = true;
-      m_recalculateDeriv = true;
     }
 
     void CubicSpline::setAttribute(const std::string& attName, const API::IFunction::Attribute& att)
@@ -220,7 +211,6 @@ namespace Mantid
 
           //flag that the spline+derivatives will now need to be recalculated
           m_recalculateSpline = true;
-          m_recalculateDeriv = true;
         }
         else if (n < oldN)
         {
@@ -243,7 +233,6 @@ namespace Mantid
 
         //attributes updated, flag for recalculation
         m_recalculateSpline = true;
-        m_recalculateDeriv = true;
       }
       else
       {
@@ -257,7 +246,6 @@ namespace Mantid
       if(status == errorType)
       {
         m_recalculateSpline = true;
-        m_recalculateDeriv = true;
 
         std::string message("CubicSpline: ");
         message.append(gsl_strerror(errorType));
@@ -274,11 +262,8 @@ namespace Mantid
         checkGSLError(status, GSL_EINVAL);
       }
 
-      if(m_recalculateDeriv)
-      {
-        int status = gsl_interp_init(m_interp, x.get(), y.get(), n);
-        checkGSLError(status, GSL_EINVAL);
-      }
+       int status = gsl_interp_init(m_interp, x.get(), y.get(), n);
+       checkGSLError(status, GSL_EINVAL);
     }
 
     void CubicSpline::reallocGSLObjects(const int n)

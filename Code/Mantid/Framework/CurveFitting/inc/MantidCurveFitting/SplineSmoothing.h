@@ -48,6 +48,8 @@ namespace CurveFitting
     void init();
     void exec();
 
+    API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
+
     void setSmoothingPoints(const boost::shared_ptr<CubicSpline> cspline,
         API::MatrixWorkspace_const_sptr inputWorkspace) const;
 

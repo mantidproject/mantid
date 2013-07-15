@@ -80,9 +80,6 @@ namespace Mantid
       /// Flag for checking if the spline needs recalculating
       mutable bool m_recalculateSpline;
 
-      /// Flag for checking if the derivatives need recalculating
-      mutable bool m_recalculateDeriv;
-
       /// Minimum number of data points in spline
       static const int M_MIN_POINTS;
 
