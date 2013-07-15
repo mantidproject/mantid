@@ -2,9 +2,9 @@
 #define LOADVTK_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidAPI/IFileLoader.h"
 
 class vtkUnsignedShortArray;
 class vtkDataSet;
@@ -17,7 +17,7 @@ namespace Mantid
   }
   namespace VATES
   {
-    class DLLExport LoadVTK : public Mantid::API::Algorithm
+    class DLLExport LoadVTK : public Mantid::API::IFileLoader
     {
     public:
       virtual const std::string name() const;

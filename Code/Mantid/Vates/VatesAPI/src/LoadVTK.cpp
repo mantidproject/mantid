@@ -77,12 +77,17 @@ namespace Mantid
     {
       const std::string & fileExt = descriptor.extension();
       int confidence(0);
-      if (!descriptor.isAscii())
+      if (!descriptor.isAscii() && fileExt == ".vtk")
       {
-        if (fileExt == ".vtk")
-        {
-          confidence = 80;
-        }
+        confidence = 80;
+      }
+      else if (fileExt == ".vtk")
+      {
+        confidence = 60;
+      }
+      else if (!descriptor.isAscii())
+      {
+        confidence = 15;
       }
       else
       {

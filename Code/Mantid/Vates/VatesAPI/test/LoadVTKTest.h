@@ -5,7 +5,7 @@
 #include "MantidVatesAPI/LoadVTK.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::API;
 using namespace Mantid::VATES;
@@ -150,6 +150,21 @@ public:
 
   }
 
+  void test_dynamic_load()
+  {
+    const std::string outWSName = "OutWS";
+    auto alg = AlgorithmManager::Instance().create("Load");
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setPropertyValue("Filename", "iron_protein.vtk");
+    alg->setPropertyValue("OutputWorkspace", outWSName);
+    alg->setPropertyValue("SignalArrayName", "scalar_array");
+    alg->setPropertyValue("ErrorSQArrayName", "scalar_array");
+    alg->setProperty("AdaptiveBinned", false);
+    alg->execute();
+
+    TS_ASSERT(AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName) != NULL);
+  }
 };
 
 #endif
