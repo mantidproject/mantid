@@ -48,16 +48,16 @@ transforms to
 
 namespace Mantid 
 {
-	namespace Algorithms 
-	{
+    namespace Algorithms 
+    {
 
     using std::string;
 
     // Register the algorithm into the AlgorithmFactory
-		DECLARE_ALGORITHM( PDFFourierTransform)
+        DECLARE_ALGORITHM( PDFFourierTransform)
 
-		using namespace Mantid::Kernel;
-		using namespace Mantid::API;
+        using namespace Mantid::Kernel;
+        using namespace Mantid::API;
 
     namespace { // anonymous namespace
     /// Crystalline PDF
@@ -76,18 +76,18 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-		/** Constructor
-		*/
-		PDFFourierTransform::PDFFourierTransform() 
-		{
-		}
+        /** Constructor
+        */
+        PDFFourierTransform::PDFFourierTransform() 
+        {
+        }
 
-		//----------------------------------------------------------------------------------------------
-		/** Destructor
-		*/
-		PDFFourierTransform::~PDFFourierTransform() 
-		{
-		}
+        //----------------------------------------------------------------------------------------------
+        /** Destructor
+        */
+        PDFFourierTransform::~PDFFourierTransform() 
+        {
+        }
 
     const std::string PDFFourierTransform::name() const
     {
@@ -105,22 +105,22 @@ namespace Mantid
     }
 
     //----------------------------------------------------------------------------------------------
-		/// Sets documentation strings for this algorithm
-		void PDFFourierTransform::initDocs() 
-		{
-			this->setWikiSummary("PDFFourierTransform() does Fourier transform from S(Q) to G(r), which is paired distribution function (PDF). G(r) will be stored in another named workspace.");
-			this->setOptionalMessage("Fourier transform from S(Q) to G(r), which is paired distribution function (PDF). G(r) will be stored in another named workspace.");
-		}
+        /// Sets documentation strings for this algorithm
+        void PDFFourierTransform::initDocs() 
+        {
+            this->setWikiSummary("PDFFourierTransform() does Fourier transform from S(Q) to G(r), which is paired distribution function (PDF). G(r) will be stored in another named workspace.");
+            this->setOptionalMessage("Fourier transform from S(Q) to G(r), which is paired distribution function (PDF). G(r) will be stored in another named workspace.");
+        }
 
-		//----------------------------------------------------------------------------------------------
-		/** Initialize the algorithm's properties.
-		*/
-		void PDFFourierTransform::init() {
-			auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
+        //----------------------------------------------------------------------------------------------
+        /** Initialize the algorithm's properties.
+        */
+        void PDFFourierTransform::init() {
+            auto uv = boost::make_shared<API::WorkspaceUnitValidator>("MomentumTransfer");
 
       declareProperty(new WorkspaceProperty<> ("InputWorkspace", "", Direction::Input, uv),
                       S_OF_Q + ", " + S_OF_Q_MINUS_ONE + ", or " + Q_S_OF_Q_MINUS_ONE);
-			declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "",
+            declareProperty(new WorkspaceProperty<> ("OutputWorkspace", "",
         Direction::Output), "Result paired-distribution function");
 
       // Set up input data type
@@ -185,10 +185,10 @@ namespace Mantid
       return result;
     }
 
-		//----------------------------------------------------------------------------------------------
-		/** Execute the algorithm.
-		*/
-		void PDFFourierTransform::exec() {
+        //----------------------------------------------------------------------------------------------
+        /** Execute the algorithm.
+        */
+        void PDFFourierTransform::exec() {
       // get input data
       API::MatrixWorkspace_const_sptr inputWS =  getProperty("InputWorkspace");
       MantidVec inputQ = inputWS->dataX(0);     //  x for input
@@ -311,7 +311,9 @@ namespace Mantid
         auto qmax_ptr = std::lower_bound(inputQ.begin(), inputQ.end(), qmax);
         qmax_index = std::distance(inputQ.begin(), qmax_ptr);
       }
-      g_log.notice() << "Adjusting to data: Qmin = " << inputQ[qmin_index] << " Qmax = " << inputQ[qmax_index] << "\n";
+      size_t qmi_out = qmax_index;
+      if (qmi_out == inputQ.size())qmi_out--; // prevent unit test problem under windows (and probably other hardly identified problem)
+      g_log.notice() << "Adjusting to data: Qmin = " << inputQ[qmin_index] << " Qmax = " << inputQ[qmi_out] << "\n";
 
       // determine r axis for result
       const double rmax = getProperty("RMax");
@@ -413,8 +415,8 @@ namespace Mantid
 
       // set property
       setProperty("OutputWorkspace", outputWS);
-		}
+        }
 
-	} // namespace Mantid
+    } // namespace Mantid
 } // namespace Algorithms
 
