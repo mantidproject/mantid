@@ -206,7 +206,7 @@
        <item>
         <widget class="QGroupBox" name="gbRebin">
          <property name="title">
-          <string>Rebin in D-Spacing (Leave Blank to Not Rebin)</string>
+          <string>Rebin in D-Spacing (optional)</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
@@ -222,7 +222,7 @@
           <item>
            <widget class="QLabel" name="valRebinStart">
             <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
+             <string notr="true">color: rgb(170, 0, 0);</string>
             </property>
             <property name="text">
              <string>*</string>
@@ -242,7 +242,7 @@
           <item>
            <widget class="QLabel" name="valRebinWidth">
             <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
+             <string notr="true">color: rgb(170, 0, 0);</string>
             </property>
             <property name="text">
              <string>*</string>
@@ -262,7 +262,7 @@
           <item>
            <widget class="QLabel" name="valRebinEnd">
             <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
+             <string notr="true">color: rgb(170, 0, 0);</string>
             </property>
             <property name="text">
              <string>*</string>

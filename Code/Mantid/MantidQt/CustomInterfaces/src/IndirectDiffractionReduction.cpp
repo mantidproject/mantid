@@ -49,7 +49,7 @@ void IndirectDiffractionReduction::demonRun()
 {
   if ( !validateDemon() )
   {
-    showInformationBox("Input invalid.");
+    showInformationBox("Invalid invalid. Incorrect entries marked with red star.");
     return;
   }
 
@@ -283,6 +283,8 @@ void IndirectDiffractionReduction::initLayout()
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
 
   loadSettings();
+
+  validateDemon();
 }
 
 void IndirectDiffractionReduction::initLocalPython()
@@ -317,42 +319,49 @@ void IndirectDiffractionReduction::saveSettings()
 
 bool IndirectDiffractionReduction::validateDemon()
 {
-  bool valid = true;
+  bool rawValid = true;
+  if ( ! m_uiForm.dem_rawFiles->isValid() ) { rawValid = false; }
 
-  if ( ! m_uiForm.dem_rawFiles->isValid() ) { valid = false; }
+  QString rebStartTxt = m_uiForm.leRebinStart->text();
+  QString rebStepTxt = m_uiForm.leRebinWidth->text();
+  QString rebEndTxt = m_uiForm.leRebinEnd->text();
 
-  QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinEnd->text() +
-    "," + m_uiForm.leRebinEnd->text();
-  if ( rebin != ",," )
+  bool rebinValid = true;
+  // Need all or none
+  if(rebStartTxt.isEmpty() && rebStepTxt.isEmpty() && rebEndTxt.isEmpty() )
   {
-    // validate rebin parameters
-    if ( m_uiForm.leRebinStart->text() == "" )
-    {
-      valid = false;
-      m_uiForm.valRebinStart->setText("*");
-    } else { m_uiForm.valRebinStart->setText(""); }
+    rebinValid = true;
+    m_uiForm.valRebinStart->setText("");
+    m_uiForm.valRebinWidth->setText("");
+    m_uiForm.valRebinEnd->setText("");
+  }
+  else
+  {
+#define CHECK_VALID(text,validator)\
+    if(text.isEmpty())\
+    {\
+      rebinValid = false;\
+      validator->setText("*");\
+    }\
+    else\
+    {\
+      rebinValid = true;\
+      validator->setText("");\
+    }
 
-    if ( m_uiForm.leRebinWidth->text() == "" )
-    {
-      valid = false;
-      m_uiForm.valRebinWidth->setText("*");
-    } else { m_uiForm.valRebinWidth->setText(""); }
+    CHECK_VALID(rebStartTxt,m_uiForm.valRebinStart);
+    CHECK_VALID(rebStepTxt,m_uiForm.valRebinWidth);
+    CHECK_VALID(rebEndTxt,m_uiForm.valRebinEnd);
 
-    if ( m_uiForm.leRebinEnd->text() == "" )
+    if(rebinValid && rebStartTxt.toDouble() > rebEndTxt.toDouble())
     {
-      valid = false;
-      m_uiForm.valRebinEnd->setText("*");
-    } else { m_uiForm.valRebinEnd->setText(""); }
-
-    if ( m_uiForm.leRebinStart->text().toDouble() > m_uiForm.leRebinEnd->text().toDouble() )
-    {
-      valid = false;
+      rebinValid = false;
       m_uiForm.valRebinStart->setText("*");
       m_uiForm.valRebinEnd->setText("*");
     }
   }
 
-  return valid;
+  return rawValid && rebinValid;
 }
 
 }
