@@ -39,6 +39,7 @@ Requires: openssl-devel
 Requires: texlive-latex
 Requires: dvipng
 Requires: mantidlibs-qt-devel
+Requires: mantidlibs-qt-assistant
 Requires: scl-utils
 
 BuildArch: noarch
