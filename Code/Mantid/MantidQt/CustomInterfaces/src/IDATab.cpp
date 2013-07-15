@@ -142,7 +142,7 @@ namespace IDA
   QwtPlotCurve* IDATab::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, const QString & workspace, size_t index)
   {
     auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
-    plotMiniplot(plot, curve, ws, index);
+    return plotMiniplot(plot, curve, ws, index);
   }
 
 
