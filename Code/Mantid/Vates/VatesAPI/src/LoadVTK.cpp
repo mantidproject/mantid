@@ -76,8 +76,9 @@ namespace Mantid
     int LoadVTK::confidence(Kernel::FileDescriptor & descriptor) const
     {
       const std::string & fileExt = descriptor.extension();
+      const bool isntAscii = !descriptor.isAscii();
       int confidence(0);
-      if (!descriptor.isAscii() && fileExt == ".vtk")
+      if (isntAscii && fileExt == ".vtk")
       {
         confidence = 80;
       }
@@ -85,7 +86,7 @@ namespace Mantid
       {
         confidence = 60;
       }
-      else if (!descriptor.isAscii())
+      else if (isntAscii)
       {
         confidence = 15;
       }
