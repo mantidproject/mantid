@@ -42,7 +42,7 @@ public:
   /** Test calculation mode on calculating 2 peaks
    *  It is same as LeBailFunctionTest.test_CalculatePeakParameters()
    */
-  void Ptest_CalculationSimpleMode()
+  void test_CalculationSimpleMode()
   {
     // Create input workspaces
     API::MatrixWorkspace_sptr dataws;
@@ -143,7 +143,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on peak calcualtion with non-trivial background
    */
-  void Ptest_CalculationModeFull()
+  void test_CalculationModeFull()
   {
     // 1. Create input workspace
     API::MatrixWorkspace_sptr dataws;
@@ -220,7 +220,7 @@ public:
     * Due to the strongly correlated peak parameters, only 1 parameter
     * has its value shifted from true value for unit test purpose
    */
-  void Ptest_fit1Parameter()
+  void test_fit1Parameter()
   {
     std::string testplan("zero");
 
