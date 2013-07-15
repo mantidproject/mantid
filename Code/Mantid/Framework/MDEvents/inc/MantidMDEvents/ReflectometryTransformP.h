@@ -107,7 +107,7 @@ namespace MDEvents
   public:
     ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta, Mantid::API::BoxController_sptr boxController);
     virtual ~ReflectometryTransformP();
-    virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
     
   };
 

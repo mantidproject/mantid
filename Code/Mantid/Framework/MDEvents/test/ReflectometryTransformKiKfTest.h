@@ -13,6 +13,7 @@
 
 
 using namespace Mantid::MDEvents;
+using namespace Mantid::API;
 
 class ReflectometryTransformKiKfTest : public CxxTest::TestSuite
 {
@@ -29,7 +30,7 @@ public:
     double kfMin = 1;
     double kfMax = 2;
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta), std::invalid_argument);
+    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta, boost::make_shared<BoxController>(2)), std::invalid_argument);
   }
   
   void test_kimin_equal_to_kimax_throws()
@@ -39,7 +40,7 @@ public:
     double kfMin = 1;
     double kfMax = 2;
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta), std::invalid_argument);
+    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta, boost::make_shared<BoxController>(2)), std::invalid_argument);
   }
 
   void test_kfmin_greater_than_kfmax_throws()
@@ -49,7 +50,7 @@ public:
     double kfMin = 2;
     double kfMax = 1; //Smaller than kfMin!
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta), std::invalid_argument);
+    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta, boost::make_shared<BoxController>(2)), std::invalid_argument);
   }
   
   void test_kfmin_equal_to_kfmax_throws()
@@ -59,7 +60,7 @@ public:
     double kfMin = 1;
     double kfMax = 1; //Equal to kfMin!
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta), std::invalid_argument);
+    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta, boost::make_shared<BoxController>(2)), std::invalid_argument);
   }
 
   void test_incident_theta_negative()
@@ -69,7 +70,7 @@ public:
     double kfMin = 1;
     double kfMax = 3; 
     double incidentTheta = -0.001; //Negative
-    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta), std::out_of_range);
+    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta, boost::make_shared<BoxController>(2)), std::out_of_range);
   }
 
   void test_incident_theta_too_large()
@@ -79,7 +80,7 @@ public:
     double kfMin = 1;
     double kfMax = 3; 
     double incidentTheta = 90.001; //Too large
-    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta), std::out_of_range);
+    TS_ASSERT_THROWS(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta, boost::make_shared<BoxController>(2)), std::out_of_range);
   }
 
   void test_valid_construction_inputs()
@@ -89,7 +90,7 @@ public:
     double kfMin = 1;
     double kfMax = 2;
     double incidentTheta = 1;
-    TS_ASSERT_THROWS_NOTHING(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta));
+    TS_ASSERT_THROWS_NOTHING(ReflectometryTransformKiKf(kiMin, kiMax, kfMin, kfMax, incidentTheta, boost::make_shared<BoxController>(2)));
   }
 
   void test_calulate_k()

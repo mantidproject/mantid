@@ -52,7 +52,7 @@ namespace MDEvents
 
   public:
     //Execute the strategy to produce the a transformed, output MDWorkspace
-    virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
+    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
 
     virtual ~ReflectometryMDTransform();
     ReflectometryMDTransform(Mantid::API::BoxController_sptr boxController);

@@ -308,7 +308,7 @@ namespace MDEvents
       transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta, bc));
     }
 
-    auto outputWS = transform->execute(inputWs);
+    auto outputWS = transform->executeMD(inputWs);
 
     // Copy ExperimentInfo (instrument, run, sample) to the output WS
     ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());

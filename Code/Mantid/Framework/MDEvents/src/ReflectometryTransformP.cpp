@@ -45,7 +45,7 @@ namespace Mantid
     {
     }
 
-    Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformP::execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
+    Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformP::executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
     {
       MDHistoDimension_sptr pSumDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i + Pz_f","sum_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pSumMin), static_cast<Mantid::coord_t>(m_pSumMax), m_nbinsx));
       MDHistoDimension_sptr pDiffDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i - Pz_f","diff_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pDiffMin), static_cast<Mantid::coord_t>(m_pDiffMax), m_nbinsz));

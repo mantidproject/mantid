@@ -160,7 +160,9 @@ set ( TEST_FILES
 	OneStepMDEWTest.h
 	QueryMDWorkspaceTest.h
 	ReflectometryTransformQxQzTest.h
-        Integrate3DEventsTest.h
+	ReflectometryTransformPTest.h
+	ReflectometryTransformKiKfTest.h	
+    Integrate3DEventsTest.h
 	SaveIsawQvectorTest.h
 	SkippingPolicyTest.h
 	UnitsConversionHelperTest.h

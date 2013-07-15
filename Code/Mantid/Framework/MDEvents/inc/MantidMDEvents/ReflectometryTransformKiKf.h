@@ -69,7 +69,7 @@ namespace MDEvents
     virtual ~ReflectometryTransformKiKf();
 
     /// Execute transformation
-    virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 
   private:
 

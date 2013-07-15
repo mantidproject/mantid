@@ -50,7 +50,7 @@ namespace Mantid
     @return the constructed IMDEventWorkspace following the transformation.
     @param ws: Input MatrixWorkspace const shared pointer
     */
-    IMDEventWorkspace_sptr ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const
+    IMDEventWorkspace_sptr ReflectometryTransformQxQz::executeMD(MatrixWorkspace_const_sptr inputWs) const
     {
 
       MDHistoDimension_sptr qxDim = MDHistoDimension_sptr(new MDHistoDimension("Qx","qx","(Ang^-1)", static_cast<Mantid::coord_t>(m_qxMin), static_cast<Mantid::coord_t>(m_qxMax), m_nbinsx));
