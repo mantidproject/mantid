@@ -415,9 +415,7 @@ namespace Algorithms
     {
       detid_t tmpid = minuend[i];
       fiter = lower_bound(firstsubiter, subtrahend.end(), tmpid);
-      bool exist(false);
-      if (fiter != subtrahend.end())
-          exist = *fiter == tmpid;
+      bool exist = *fiter == tmpid;
       if (!exist)
       {
         diff.push_back(tmpid);
