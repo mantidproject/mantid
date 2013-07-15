@@ -25,13 +25,20 @@ if ( SPHINX_FOUND )
     source/index.rst
     source/changes.rst
     source/contents.rst
+    source/techiniques/calibration.rst
     source/api/mantid.rst
     source/api/mantidplot.rst
     source/_templates/indexcontent.html
     source/_templates/indexsidebar.html
     source/_templates/layout.html
+    source/images/calibrateB2Window.png
+    source/images/calibratedCurrentMerlin.png
+    source/images/calibratedMantidMerlin.png
+    source/images/calibrateExtendMarginAndExpectedValue.png
+    source/images/calibratePlotFittedData.png
+    source/images/outputOfMinimalInput.png
+    source/images/plotingPeaksDifference.png
   )
-  
   # The destination for the copied files
   set ( SPHINX_CONF_DIR ${CMAKE_CURRENT_BINARY_DIR} )
   set ( SPHINX_CONF_FILES )
