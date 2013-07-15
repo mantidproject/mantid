@@ -87,6 +87,8 @@ class SampleSetupWidget(BaseWidget):
         self._content.sample_edit.setLabelMinWidth(self._content.sample_label.minimumWidth())
         self._content.horizontalLayout.addWidget(self._content.sample_edit)
         self._content.horizontalLayout.addItem(spacer)
+        self.connect(self._content.sample_edit, QtCore.SIGNAL("fileFindingFinished()"),
+                     partial(self._validate_edit,self._content.sample_edit))
 
     def _handle_tzero_guess(self, is_enabled):
         self._content.tzero_guess_label.setEnabled(is_enabled)
@@ -105,8 +107,12 @@ class SampleSetupWidget(BaseWidget):
 
     def _validate_edit(self, ctrl=None):
         is_valid = True
-        if ctrl.text().isEmpty():
-            is_valid = False
+        if "isValid" in dir(ctrl): # For mwRunFiles widget
+            if not ctrl.isValid():
+                is_valid = False
+        else:
+            if ctrl.text().isEmpty():
+                is_valid = False
         util.set_valid(ctrl, is_valid)
 
     def _sample_browse(self):
@@ -134,8 +140,11 @@ class SampleSetupWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: SampleSetupScript object
         """
-        self._check_and_set_lineedit_content(self._content.sample_edit,
-                                             state.sample_file)
+        if IS_IN_MANTIDPLOT:
+            self._content.sample_edit.setUserInput(state.sample_file)
+        else:
+            self._check_and_set_lineedit_content(self._content.sample_edit,
+                                                 state.sample_file)
         self._content.output_ws_edit.setText(state.output_wsname)
         self._content.detcal_edit.setText(state.detcal_file)
         if "SNS" != self._facility_name:

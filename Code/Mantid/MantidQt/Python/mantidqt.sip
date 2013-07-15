@@ -118,7 +118,11 @@ public:
 void setLabelText(const QString&);
 void setLabelMinWidth(const int);
 QString getText() /PyName=text/;
+bool isValid();
+void setUserInput(const QVariant &);
 void setText(const QString&);
+signals:
+void fileFindingFinished();
 };
 
 };

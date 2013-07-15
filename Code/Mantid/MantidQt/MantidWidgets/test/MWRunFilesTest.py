@@ -20,7 +20,6 @@ class MWRunFilesTest(unittest.TestCase):
         # This is crucial! Forces the object to be deleted NOW, not when python exits
         # This prevents a segfault in Ubuntu 10.04, and is good practice.
         self.mwrunfiles.deleteLater()
-        #self.svw.show()
         # Schedule quit at the next event
         QtCore.QTimer.singleShot(0, app, QtCore.SLOT("quit()"))
         # This is required for deleteLater() to do anything (it deletes at the next event loop)
@@ -34,6 +33,11 @@ class MWRunFilesTest(unittest.TestCase):
         self.assertTrue(self.mwrunfiles.text().isEmpty())
         self.mwrunfiles.setText("a/file")
         self.assertEquals(self.mwrunfiles.text(), "a/file")
+        
+    def test_setUserInput(self):
+        self.assertFalse(self.mwrunfiles.isValid())
+        self.mwrunfiles.setUserInput("CNCS7860")
+        self.assertEquals(self.mwrunfiles.text(), "CNCS7860")
 
 if __name__ == '__main__':
     unittest.main()
