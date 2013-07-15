@@ -616,6 +616,7 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
   else if(event->matches(QKeySequence::Paste))
   {
     handled = true;
+    cursorToEnd = true;
     paste();
   }
   else if(event->matches(QKeySequence::Cut))
@@ -661,7 +662,8 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
   {
     cursorToEnd = false;
   }
-  if(cursorToEnd && indexOfCursorLine() != indexOfLastLine())
+  if(cursorToEnd && key != Qt::Key_Control &&
+      (indexOfCursorLine() != indexOfLastLine() || event->matches(QKeySequence::Paste)))
   {
     moveCursorToEnd();
   }
