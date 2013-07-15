@@ -5,7 +5,7 @@
 #include "MantidKernel/ClassMacros.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/ReflectometryMDTransform.h"
+#include "MantidMDEvents/ReflectometryTransform.h"
 
 namespace Mantid
 {

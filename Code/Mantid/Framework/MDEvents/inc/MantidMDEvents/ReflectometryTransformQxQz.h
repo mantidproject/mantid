@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/ClassMacros.h"
-#include "MantidMDEvents/ReflectometryMDTransform.h"
+#include "MantidMDEvents/ReflectometryTransform.h"
 #include "MantidMDEvents/CalculateReflectometryQBase.h"
 
 namespace Mantid

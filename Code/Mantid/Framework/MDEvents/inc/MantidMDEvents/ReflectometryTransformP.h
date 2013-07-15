@@ -2,7 +2,7 @@
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMP_H_
 
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/ReflectometryMDTransform.h"
+#include "MantidMDEvents/ReflectometryTransform.h"
 
 namespace Mantid
 {

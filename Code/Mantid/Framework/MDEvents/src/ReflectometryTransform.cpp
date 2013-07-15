@@ -1,4 +1,4 @@
-#include "MantidMDEvents/ReflectometryMDTransform.h"
+#include "MantidMDEvents/ReflectometryTransform.h"
 
 using namespace Mantid::API;
 
