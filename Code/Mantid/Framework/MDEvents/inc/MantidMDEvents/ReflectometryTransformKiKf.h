@@ -65,11 +65,11 @@ namespace MDEvents
     mutable CalculateReflectometryK m_KiCalculation;
 
   public:
-    ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, Mantid::API::BoxController_sptr boxController);
+    ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta);
     virtual ~ReflectometryTransformKiKf();
 
     /// Execute transformation
-    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const;
 
   private:
 

@@ -297,18 +297,18 @@ namespace MDEvents
     ReflectometryMDTransform_sptr transform;
     if(outputDimensions == qSpaceTransform())
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformQxQz(dim0min, dim0max, dim1min, dim1max, incidentTheta, bc));
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformQxQz(dim0min, dim0max, dim1min, dim1max, incidentTheta));
     }
     else if(outputDimensions == pSpaceTransform())
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformP(dim0min, dim0max, dim1min, dim1max, incidentTheta, bc));
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformP(dim0min, dim0max, dim1min, dim1max, incidentTheta));
     }
     else
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta, bc));
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta));
     }
 
-    auto outputWS = transform->executeMD(inputWs);
+    auto outputWS = transform->executeMD(inputWs, bc);
 
     // Copy ExperimentInfo (instrument, run, sample) to the output WS
     ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());

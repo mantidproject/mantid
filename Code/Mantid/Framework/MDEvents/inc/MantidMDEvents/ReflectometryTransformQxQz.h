@@ -122,11 +122,11 @@ namespace Mantid
   public:
 
     /// Constructor
-    ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta, Mantid::API::BoxController_sptr boxController);
+    ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta);
     /// Destructor
     virtual ~ReflectometryTransformQxQz();
     /// Execute transformation
-    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const;
 
   private:
 

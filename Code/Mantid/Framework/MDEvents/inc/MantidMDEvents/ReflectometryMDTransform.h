@@ -39,23 +39,19 @@ namespace MDEvents
   class DLLExport ReflectometryMDTransform 
   {
 
-  private:
-
-    Mantid::API::BoxController_sptr m_boxController;
-
   protected:
 
   const size_t m_nbinsx;
   const size_t m_nbinsz;
 
-  boost::shared_ptr<MDEventWorkspace2Lean> createWorkspace(Mantid::Geometry::IMDDimension_sptr, Mantid::Geometry::IMDDimension_sptr) const;
+  boost::shared_ptr<MDEventWorkspace2Lean> createMDWorkspace(Mantid::Geometry::IMDDimension_sptr, Mantid::Geometry::IMDDimension_sptr, Mantid::API::BoxController_sptr boxController) const;
 
   public:
     //Execute the strategy to produce the a transformed, output MDWorkspace
-    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
+    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const = 0;
 
     virtual ~ReflectometryMDTransform();
-    ReflectometryMDTransform(Mantid::API::BoxController_sptr boxController);
+    ReflectometryMDTransform();
   };
 }
 }

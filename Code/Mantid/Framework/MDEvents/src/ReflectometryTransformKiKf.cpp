@@ -19,10 +19,9 @@ namespace MDEvents
     @param kfMin: min kf value (extent)
     @param kfMax; max kf value (extent)
     @param incidentTheta: Predetermined incident theta value
-    @param boxController: box controller to apply on output workspace.
   */
-  ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, BoxController_sptr boxController)
-    : ReflectometryMDTransform(boxController),  m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
+  ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta)
+    : m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
   {
       if(kiMin >= kiMax)
       {
@@ -49,13 +48,14 @@ namespace MDEvents
     Execute the transformtion. Generates an output IMDEventWorkspace.
     @return the constructed IMDEventWorkspace following the transformation.
     @param ws: Input MatrixWorkspace const shared pointer
+    @param boxController: box controller to apply on output workspace.
   */
-  Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformKiKf::executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
+  Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformKiKf::executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, BoxController_sptr boxController) const
   {
       MDHistoDimension_sptr kiDim = MDHistoDimension_sptr(new MDHistoDimension("Ki","ki","(Ang^-1)", static_cast<Mantid::coord_t>(m_kiMin), static_cast<Mantid::coord_t>(m_kiMax), m_nbinsx));
       MDHistoDimension_sptr kfDim = MDHistoDimension_sptr(new MDHistoDimension("Kf","kf","(Ang^-1)", static_cast<Mantid::coord_t>(m_kfMin), static_cast<Mantid::coord_t>(m_kfMax), m_nbinsz));
 
-      auto ws = createWorkspace(kiDim, kfDim);
+      auto ws = createMDWorkspace(kiDim, kfDim, boxController);
 
       auto spectraAxis = inputWs->getAxis(1);
       for(size_t index = 0; index < inputWs->getNumberHistograms(); ++index)

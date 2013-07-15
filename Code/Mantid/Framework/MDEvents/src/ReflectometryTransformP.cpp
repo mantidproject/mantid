@@ -19,10 +19,9 @@ namespace Mantid
     @param pDiffMin: p diff min value (extent)
     @param pDiffMax: p diff max value (extent)
     @param incidentTheta: Predetermined incident theta value
-    @param boxController: Box controller to apply on output workspace
     */
-    ReflectometryTransformP::ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta, BoxController_sptr boxController)
-      : ReflectometryMDTransform(boxController),  m_pSumMin(pSumMin), m_pSumMax(pSumMax), m_pDiffMin(pDiffMin), m_pDiffMax(pDiffMax), m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta)
+    ReflectometryTransformP::ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta)
+      :  m_pSumMin(pSumMin), m_pSumMax(pSumMax), m_pDiffMin(pDiffMin), m_pDiffMax(pDiffMax), m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta)
     {
       if(pSumMin >= m_pSumMax)
       {
@@ -45,12 +44,12 @@ namespace Mantid
     {
     }
 
-    Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformP::executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
+    Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformP::executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, BoxController_sptr boxController) const
     {
       MDHistoDimension_sptr pSumDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i + Pz_f","sum_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pSumMin), static_cast<Mantid::coord_t>(m_pSumMax), m_nbinsx));
       MDHistoDimension_sptr pDiffDim = MDHistoDimension_sptr(new MDHistoDimension("Pz_i - Pz_f","diff_pz","(Ang^-1)", static_cast<Mantid::coord_t>(m_pDiffMin), static_cast<Mantid::coord_t>(m_pDiffMax), m_nbinsz));
 
-      auto ws = createWorkspace(pSumDim, pDiffDim);
+      auto ws = createMDWorkspace(pSumDim, pDiffDim, boxController);
 
       auto spectraAxis = inputWs->getAxis(1);
       for(size_t index = 0; index < inputWs->getNumberHistograms(); ++index)
