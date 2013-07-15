@@ -44,6 +44,7 @@ You will usually want to rebin using [[BinMD]] or [[SliceMD]] after transformati
 #include "MantidMDEvents/ReflectometryTransformKiKf.h"
 #include "MantidMDEvents/ReflectometryTransformP.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -288,24 +289,22 @@ namespace MDEvents
     const double dim1min = extents[2];
     const double dim1max = extents[3];
     
-    typedef boost::shared_ptr<ReflectometryMDTransform> ReflectometryMDTransform_sptr;
-
     BoxController_sptr bc = boost::make_shared<BoxController>(2);
     this->setBoxController(bc);
 
     //Select the transform strategy.
-    ReflectometryMDTransform_sptr transform;
+    ReflectometryTransform_sptr transform;
     if(outputDimensions == qSpaceTransform())
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformQxQz(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = boost::make_shared<ReflectometryTransformQxQz>(dim0min, dim0max, dim1min, dim1max, incidentTheta);
     }
     else if(outputDimensions == pSpaceTransform())
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformP(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = boost::make_shared<ReflectometryTransformP>(dim0min, dim0max, dim1min, dim1max, incidentTheta);
     }
     else
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = boost::make_shared<ReflectometryTransformKiKf>(dim0min, dim0max, dim1min, dim1max, incidentTheta);
     }
 
     auto outputWS = transform->executeMD(inputWs, bc);

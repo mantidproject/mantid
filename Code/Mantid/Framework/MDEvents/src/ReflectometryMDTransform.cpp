@@ -7,15 +7,15 @@ namespace Mantid
   namespace MDEvents
   {
 
-    ReflectometryMDTransform::ReflectometryMDTransform() : m_nbinsx(10), m_nbinsz(10)
+    ReflectometryTransform::ReflectometryTransform() : m_nbinsx(10), m_nbinsz(10)
     {
     }
 
-    ReflectometryMDTransform::~ReflectometryMDTransform()
+    ReflectometryTransform::~ReflectometryTransform()
     {
     }
 
-    boost::shared_ptr<MDEventWorkspace2Lean> ReflectometryMDTransform::createMDWorkspace(
+    boost::shared_ptr<MDEventWorkspace2Lean> ReflectometryTransform::createMDWorkspace(
         Mantid::Geometry::IMDDimension_sptr a, Mantid::Geometry::IMDDimension_sptr b, BoxController_sptr boxController) const
     {
       auto ws = boost::make_shared<MDEventWorkspace2Lean>();

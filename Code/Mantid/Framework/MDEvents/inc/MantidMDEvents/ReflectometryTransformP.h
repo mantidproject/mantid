@@ -68,7 +68,7 @@ namespace MDEvents
 
 
 
-  /** ReflectometryTransformP : TODO: DESCRIPTION
+  /** ReflectometryTransformP : Calculates workspace(s) of Pi and Pf based on the input workspace and incident theta angle.
     
     @date 2012-06-06
 
@@ -92,7 +92,7 @@ namespace MDEvents
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ReflectometryTransformP : public ReflectometryMDTransform
+  class DLLExport ReflectometryTransformP : public ReflectometryTransform
   {
   private:
     const double m_pSumMin;

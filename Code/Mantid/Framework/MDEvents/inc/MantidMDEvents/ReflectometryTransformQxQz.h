@@ -108,7 +108,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-  class DLLExport ReflectometryTransformQxQz : public ReflectometryMDTransform
+  class DLLExport ReflectometryTransformQxQz : public ReflectometryTransform
   {
   private:
     const double m_qxMin;

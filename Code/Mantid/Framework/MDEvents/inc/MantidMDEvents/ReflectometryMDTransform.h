@@ -36,7 +36,7 @@ namespace MDEvents
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-  class DLLExport ReflectometryMDTransform 
+  class DLLExport ReflectometryTransform
   {
 
   protected:
@@ -50,9 +50,12 @@ namespace MDEvents
     //Execute the strategy to produce the a transformed, output MDWorkspace
     virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const = 0;
 
-    virtual ~ReflectometryMDTransform();
-    ReflectometryMDTransform();
+    virtual ~ReflectometryTransform();
+    ReflectometryTransform();
   };
+
+  // Helper typedef for scoped pointer of this type.
+  typedef boost::shared_ptr<ReflectometryTransform> ReflectometryTransform_sptr;
 }
 }
 #endif
