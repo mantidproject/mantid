@@ -126,8 +126,8 @@ namespace Mantid
 
           if (_pSum >= m_pSumMin && _pSum <= m_pSumMax && _pDiff >= m_pDiffMin && _pDiff <= m_pDiffMax) // Check that the calculated ki and kf are in range
           {
-            const int outIndexX = (gradPSum * _pSum) + cxToIndex;
-            const int outIndexZ = (gradPDiff * _pDiff) + cyToIndex;
+            const int outIndexX = (int)((gradPSum * _pSum) + cxToIndex);
+            const int outIndexZ = (int)((gradPDiff * _pDiff) + cyToIndex);
 
             ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
             ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];

@@ -130,8 +130,8 @@ namespace MDEvents
 
           if (_ki >= m_kiMin && _ki <= m_kiMax && _kf >= m_kfMin && _kf <= m_kfMax) // Check that the calculated ki and kf are in range
           {
-            const int outIndexX = (gradKi * _ki) + cxToIndex;
-            const int outIndexZ = (gradKf * _kf) + czToIndex;
+            const int outIndexX = (int)((gradKi * _ki) + cxToIndex);
+            const int outIndexZ = (int)((gradKf * _kf) + czToIndex);
 
             ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
             ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];

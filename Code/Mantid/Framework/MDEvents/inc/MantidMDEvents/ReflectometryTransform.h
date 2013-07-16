@@ -68,12 +68,12 @@ namespace Mantid
 
     /// Create a new x-axis for the output workspace
     MantidVec createXAxis(Mantid::API::MatrixWorkspace* const ws, const double gradQx,
-        const double cxToUnit, const int nBins, const std::string& caption,
+        const double cxToUnit, const size_t nBins, const std::string& caption,
         const std::string& units);
 
     /// Create a new y(vertical)-axis for the output workspace
     void createVerticalAxis(Mantid::API::MatrixWorkspace* const ws, const MantidVec& xAxisVec,
-        const double gradQz, const double cyToUnit, const int nBins, const std::string& caption,
+        const double gradQz, const double cyToUnit, const size_t nBins, const std::string& caption,
         const std::string& units);
 
     // Helper typedef for scoped pointer of this type.

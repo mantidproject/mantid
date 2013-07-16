@@ -141,8 +141,8 @@ namespace Mantid
 
           if (_qx >= m_qxMin && _qx <= m_qxMax && _qz >= m_qzMin && _qz <= m_qzMax) // Check that the calculated qx and qz are in range
           {
-            const int outIndexX = (gradQx * _qx) + cxToIndex;
-            const int outIndexZ = (gradQz * _qz) + czToIndex;
+            const int outIndexX = int((gradQx * _qx) + cxToIndex);
+            const int outIndexZ = int((gradQz * _qz) + czToIndex);
 
             ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
             ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];

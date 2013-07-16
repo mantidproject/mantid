@@ -52,7 +52,7 @@ namespace Mantid
      * @return Vector containing increments along the axis.
      */
     MantidVec createXAxis(MatrixWorkspace* const  ws, const double gradX,
-        const double cxToUnit, const int nBins, const std::string& caption, const std::string& units)
+        const double cxToUnit, const size_t nBins, const std::string& caption, const std::string& units)
     {
       // Create an X - Axis.
       Axis* const xAxis = new NumericAxis(nBins);
@@ -64,7 +64,7 @@ namespace Mantid
       xAxis->unit() = xUnit;
       xAxis->title() = caption;
       MantidVec xAxisVec(nBins);
-      for (int i = 0; i < nBins; ++i)
+      for (size_t i = 0; i < nBins; ++i)
       {
         double qxIncrement = (1 / gradX) * (i + 1) + cxToUnit;
         xAxis->setValue(i, qxIncrement);
@@ -85,7 +85,7 @@ namespace Mantid
      * @param units : Units label for the axis
      */
     void createVerticalAxis(MatrixWorkspace* const ws, const MantidVec& xAxisVec,
-        const double gradY, const double cyToUnit, const int nBins, const std::string& caption, const std::string& units)
+        const double gradY, const double cyToUnit, const size_t nBins, const std::string& caption, const std::string& units)
     {
       // Create a Y (vertical) Axis
       Axis* const verticalAxis = new NumericAxis(nBins);
@@ -96,7 +96,7 @@ namespace Mantid
       verticalAxis->unit() = verticalUnit;
       verticalUnit->setLabel(caption, units);
       verticalAxis->title() = caption;
-      for (int i = 0; i < nBins; ++i)
+      for (size_t i = 0; i < nBins; ++i)
       {
         ws->setX(i, xAxisVec);
         double qzIncrement = (1 / gradY) * (i + 1) + cyToUnit;
