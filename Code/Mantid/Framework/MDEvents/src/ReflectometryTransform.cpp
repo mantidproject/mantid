@@ -66,7 +66,7 @@ namespace Mantid
       MantidVec xAxisVec(nBins);
       for (size_t i = 0; i < nBins; ++i)
       {
-        double qxIncrement = (1 / gradX) * (i + 1) + cxToUnit;
+        double qxIncrement = (double)((1 / gradX) * (i + 1) + cxToUnit);
         xAxis->setValue(i, qxIncrement);
         xAxisVec[i] = qxIncrement;
       }
@@ -99,7 +99,7 @@ namespace Mantid
       for (size_t i = 0; i < nBins; ++i)
       {
         ws->setX(i, xAxisVec);
-        double qzIncrement = (1 / gradY) * (i + 1) + cyToUnit;
+        double qzIncrement = (double)((1 / gradY) * (i + 1) + cyToUnit);
         verticalAxis->setValue(i, qzIncrement);
       }
     }

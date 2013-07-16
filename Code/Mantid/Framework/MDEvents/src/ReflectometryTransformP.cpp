@@ -94,8 +94,8 @@ namespace Mantid
       ws->initialize(m_nbinsz, m_nbinsx, m_nbinsx); // Create the output workspace as a distribution
 
       // Mapping so that Psum and Pdiff values calculated can be added to the matrix workspace at the correct index.
-      const double gradPSum = (m_nbinsx / (m_pSumMax - m_pSumMin)); // The x - axis
-      const double gradPDiff = (m_nbinsz / (m_pDiffMax - m_pDiffMin)); // Actually the y-axis
+      const double gradPSum = double(m_nbinsx / (m_pSumMax - m_pSumMin)); // The x - axis
+      const double gradPDiff = double(m_nbinsz / (m_pDiffMax - m_pDiffMin)); // Actually the y-axis
       const double cxToIndex = -gradPSum * m_pSumMin;
       const double cyToIndex = -gradPDiff * m_pDiffMin;
       const double cxToPSum = m_pSumMin - (1 / gradPSum);

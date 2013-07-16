@@ -99,8 +99,8 @@ namespace MDEvents
       ws->initialize(m_nbinsz, m_nbinsx, m_nbinsx); // Create the output workspace as a distribution
 
       // Mapping so that ki and kf values calculated can be added to the matrix workspace at the correct index.
-      const double gradKi = (m_nbinsx / (m_kiMax - m_kiMin)); // The x - axis
-      const double gradKf = (m_nbinsz / (m_kfMax - m_kfMin)); // Actually the y-axis
+      const double gradKi = double(m_nbinsx / (m_kiMax - m_kiMin)); // The x - axis
+      const double gradKf = double(m_nbinsz / (m_kfMax - m_kfMin)); // Actually the y-axis
       const double cxToIndex = -gradKi * m_kiMin;
       const double czToIndex = -gradKf * m_kfMin;
       const double cxToKi = m_kiMin - (1 / gradKi);

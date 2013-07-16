@@ -109,8 +109,8 @@ namespace Mantid
       ws->initialize(m_nbinsz, m_nbinsx, m_nbinsx); // Create the output workspace as a distribution
 
       // Mapping so that qx and qz values calculated can be added to the matrix workspace at the correct index.
-      const double gradQx = (m_nbinsx / (m_qxMax - m_qxMin)); // The x - axis
-      const double gradQz = (m_nbinsz / (m_qzMax - m_qzMin)); // Actually the y-axis
+      const double gradQx = double(m_nbinsx / (m_qxMax - m_qxMin)); // The x - axis
+      const double gradQz = double(m_nbinsz / (m_qzMax - m_qzMin)); // Actually the y-axis
       const double cxToIndex = -gradQx * m_qxMin;
       const double czToIndex = -gradQz * m_qzMin;
       const double cxToQ = m_qxMin - ( 1 / gradQx);
