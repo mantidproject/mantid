@@ -252,7 +252,7 @@ public:
       {
         bool breakOut = false;
         //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
-        while ( !((i+startAt >= (*event_index)[pulse_i]) && (i+startAt < (*event_index)[pulse_i+1])))
+        while ( i+startAt < event_index->operator[](pulse_i))
         {
           pulse_i++;
           // Check once every new pulse if you need to cancel (checking on every event might slow things down more)
@@ -260,6 +260,7 @@ public:
           if (pulse_i >= (numPulses-1))
             break;
         }
+
         //Save the pulse time at this index for creating those events
         pulsetime = thisBankPulseTimes->pulseTimes[pulse_i];
 
@@ -282,7 +283,6 @@ public:
         double tof = static_cast<double>( event_time_of_flight[i] );
         if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max))
         {
-          alg->m_eventVectorMutex.lock();
           // Handle simulated data if present
           if (have_weight)
           {
@@ -315,7 +315,6 @@ public:
 #endif
             }
           }
-          alg->m_eventVectorMutex.unlock();
 
           //Local tof limits
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
@@ -831,7 +830,7 @@ public:
     //Abort if anything failed
     if (m_loadError)
     {
-      prog->reportIncrement(3, entry_name + ": skipping");
+      prog->reportIncrement(4, entry_name + ": skipping");
       delete [] m_event_id;
       delete [] m_event_time_of_flight;
       if (m_have_weight)
@@ -856,11 +855,17 @@ public:
     if (m_max_id > static_cast<uint32_t>(alg->eventid_max)) m_max_id = static_cast<uint32_t>(alg->eventid_max);
 
     // schedule the job to generate the event lists
-    ProcessBankData * newTask = new ProcessBankData(alg, entry_name, prog,scheduler,
+    auto mid_id = (m_max_id + m_min_id) / 2;
+    ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,scheduler,
         event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
         thisBankPulseTimes, m_have_weight, event_weight_shrd,
-        m_min_id, m_max_id);
-    scheduler->push(newTask);
+        m_min_id, mid_id);
+    scheduler->push(newTask1);
+    ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,scheduler,
+        event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
+        thisBankPulseTimes, m_have_weight, event_weight_shrd,
+        (mid_id+1), m_max_id);
+    scheduler->push(newTask2);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -1533,7 +1538,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*4);
+  Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*5);
 
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
