@@ -36,6 +36,7 @@ You will usually want to rebin using [[BinMD]] or [[SliceMD]] after transformati
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -245,7 +246,13 @@ namespace MDEvents
 
     declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
 
+    // Create box controller properties.
     this->initBoxControllerProps("2,2", 50, 10);
+
+    // Only show box controller properties when a md workspace is returned.
+    setPropertySettings("SplitInto", new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT) );
+    setPropertySettings("SplitThreshold", new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT) );
+    setPropertySettings("MaxRecursionDepth", new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT) );
   }
 
   //----------------------------------------------------------------------------------------------
