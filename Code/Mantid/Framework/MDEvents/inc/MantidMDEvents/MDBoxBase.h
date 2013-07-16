@@ -354,11 +354,11 @@ namespace MDEvents
      * Set when refreshCache() is called. */
     mutable signal_t m_totalWeight;
 
-    /// Inverse of the volume of the cell, to be used for normalized signal.
-    coord_t m_inverseVolume;
-
     /// The box splitting controller, shared with all boxes in the hierarchy
     Mantid::API::BoxController * const m_BoxController;
+
+    /// Inverse of the volume of the cell, to be used for normalized signal.
+    coord_t m_inverseVolume;
 
     /// Recursion depth
     uint32_t m_depth;
