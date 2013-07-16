@@ -541,6 +541,7 @@ namespace Mantid
           const ComponentID id = comp->getComponentID();
           pmap_cit it_found = m_map.find(id);
           if(it_found != m_map.end() )
+          {
              if (it_found->first)
              {
                 pmap_cit itr = m_map.lower_bound(id);
@@ -554,9 +555,10 @@ namespace Mantid
                         break;
                     }
                 }
-             }
-        }
-      }
+             } // found->firdst
+          } // it_found != m_map.end()
+        } //!m_map.empty()
+      } // PARALLEL_CRITICAL(ParameterMap_get)
       return result;
     }
 
