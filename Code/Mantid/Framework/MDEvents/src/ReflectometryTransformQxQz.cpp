@@ -104,7 +104,6 @@ namespace Mantid
      */
     MatrixWorkspace_sptr ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const
     {
-
       auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
 
       ws->initialize(m_nbinsz, m_nbinsx, m_nbinsx); // Create the output workspace as a distribution

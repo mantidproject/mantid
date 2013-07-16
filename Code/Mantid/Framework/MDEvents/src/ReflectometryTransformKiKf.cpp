@@ -93,7 +93,51 @@ namespace MDEvents
    */
       Mantid::API::MatrixWorkspace_sptr ReflectometryTransformKiKf::execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
       {
-        return boost::make_shared<Mantid::DataObjects::Workspace2D>();
+        auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+
+        ws->initialize(m_nbinsz, m_nbinsx, m_nbinsx); // Create the output workspace as a distribution
+
+        // Mapping so that qx and qz values calculated can be added to the matrix workspace at the correct index.
+        const double gradKi = (m_nbinsx / (m_kiMax - m_kiMin)); // The x - axis
+        const double gradKf = (m_nbinsz / (m_kfMax - m_kfMin)); // Actually the y-axis
+        const double cxToIndex = -gradKi * m_kiMin;
+        const double czToIndex = -gradKf * m_kfMin;
+        const double cxToKi = m_kiMin - ( 1 / gradKi);
+        const double czToKf = m_kfMin - ( 1 / gradKf);
+
+        // Create an X - Axis.
+        MantidVec xAxisVec = createXAxis(ws.get(), gradKi, cxToKi, m_nbinsx, "ki", "1/Angstroms");
+        // Create a Y (vertical) Axis
+        createVerticalAxis(ws.get(), xAxisVec, gradKf, czToKf, m_nbinsz, "kf", "1/Angstroms");
+
+        // Loop over all entries in the input workspace and calculate ki and kf for each.
+        auto spectraAxis = inputWs->getAxis(1);
+        for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index)
+        {
+          auto counts = inputWs->readY(index);
+          auto wavelengths = inputWs->readX(index);
+          auto errors = inputWs->readE(index);
+          const size_t nInputBins = wavelengths.size() - 1;
+          const double theta_final = spectraAxis->getValue(index);
+          CalculateReflectometryK kfCalculation(theta_final);
+          //Loop over all bins in spectra
+          for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
+          {
+            const double wavelength = 0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
+            double _ki = m_KiCalculation.execute(wavelength);
+            double _kf = kfCalculation.execute(wavelength);
+
+            if (_ki >= m_kiMin && _ki <= m_kiMax && _kf >= m_kfMin && _kf <= m_kfMax) // Check that the calculated ki and kf are in range
+            {
+              const int outIndexX = (gradKi * _ki) + cxToIndex;
+              const int outIndexZ = (gradKf * _kf) + czToIndex;
+
+              ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
+              ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];
+            }
+          }
+        }
+        return ws;
       }
 
 
