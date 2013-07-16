@@ -72,7 +72,7 @@ public:
 	void testDefaultLoad() {
 		Mantid::DataHandling::LoadILL loader;
 		loader.initialize();
-		loader.setPropertyValue("Filename", "ILLIN5_094460.nxs");
+		loader.setPropertyValue("Filename", "ILLIN5_104007.nxs");
 		loader.setPropertyValue("OutputWorkspace", "ws");
 		TS_ASSERT( loader.execute());
 	}
