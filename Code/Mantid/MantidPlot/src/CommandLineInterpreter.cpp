@@ -642,7 +642,7 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
     cursorToEnd = false;
     int index(-1), dummy(-1);
     getCursorPosition(&dummy, &index);
-    if(index == 0) handled = true;
+    handled = handleBackspace();
   }
   else if(key == Qt::Key_Right || key == Qt::Key_Direction_R)
   {
@@ -668,6 +668,27 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
     moveCursorToEnd();
   }
   return handled;
+}
+
+bool CommandLineInterpreter::handleBackspace()
+{
+  if(hasSelectedText())
+  {
+    int lineFrom(-1), lineTo(-1), indexFrom(-1), indexTo(-1);
+    int maxLine = lines()-1;
+    getSelection(&lineFrom, &indexFrom, &lineTo, &indexTo);
+
+    //check selection is only on the last line
+    return (lineFrom < maxLine);
+  }
+  else
+  {
+    int index(-1), dummy(-1);
+    getCursorPosition(&dummy, &index);
+
+    //check if the cursor is > the start of the line
+    return (index == 0);
+  }
 }
 
 /**
