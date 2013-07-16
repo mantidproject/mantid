@@ -267,7 +267,7 @@ namespace MDAlgorithms
 		std::string outFile = getProperty("InputWorkspace");
 		outFile.append(profileFunction);
 		outFile.append(".dat");
-		out.open(outFile, std::ofstream::out);
+		out.open(outFile.c_str(), std::ofstream::out);
     }
 //
 // If the following OMP pragma is included, this algorithm seg faults
