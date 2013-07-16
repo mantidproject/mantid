@@ -66,7 +66,7 @@ namespace IDA
     QwtPlotCurve* m_cfDataCurve;
     QwtPlotCurve* m_cfCalcCurve;
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
-    std::string m_cfInputWSName;
+    QString m_cfInputWSName;
   };
 } // namespace IDA
 } // namespace CustomInterfaces

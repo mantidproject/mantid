@@ -144,7 +144,10 @@ namespace IDA
 
   void Fury::plotInput()
   {
-    std::string workspace;
+    using Mantid::API::MatrixWorkspace;
+    using Mantid::API::MatrixWorkspace_const_sptr;
+
+    MatrixWorkspace_const_sptr workspace;
     if ( uiForm().fury_cbInputType->currentIndex() == 0 )
     {
       if ( uiForm().fury_iconFile->isValid() )
@@ -152,11 +155,12 @@ namespace IDA
         QString filename = uiForm().fury_iconFile->getFirstFilename();
         QFileInfo fi(filename);
         QString wsname = fi.baseName();
-
-        QString pyInput = "LoadNexus(r'" + filename + "', '" + wsname + "')\n";
-        QString pyOutput = runPythonCode(pyInput);
-
-        workspace = wsname.toStdString();
+        workspace = runLoadNexus(filename, wsname);
+        if(!workspace)
+        {
+          showInformationBox(QString("Unable to load file: ") + filename);
+          return;
+        }
       }
       else
       {
@@ -166,10 +170,19 @@ namespace IDA
     }
     else if ( uiForm().fury_cbInputType->currentIndex() == 1 )
     {
-      workspace = uiForm().fury_wsSample->currentText().toStdString();
-      if ( workspace.empty() )
+      QString wsname = uiForm().fury_wsSample->currentText();
+      if(wsname.isEmpty())
       {
         showInformationBox("No workspace selected.");
+        return;
+      }
+      try
+      {
+        workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
+      }
+      catch(Mantid::Kernel::Exception::NotFoundError&)
+      {
+        showInformationBox(QString("Unable to retrieve workspace: " + wsname));
         return;
       }
     }
