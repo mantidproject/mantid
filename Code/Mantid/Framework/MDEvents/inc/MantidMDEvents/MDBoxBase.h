@@ -1,18 +1,17 @@
 #ifndef MDBOXBASE_H_
 #define MDBOXBASE_H_
 
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDNode.h"
+#include <iosfwd>
+#include "MantidMDEvents/MDBin.h"
+#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidAPI/BoxController.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/BoxController.h"
-//#include "MantidMDEvents/BoxCtrlChangesList.h"
-#include "MantidAPI/CoordTransform.h"
-#include "MantidMDEvents/MDBin.h"
-#include "MantidMDEvents/MDLeanEvent.h"
-#include <iosfwd>
 #include "MantidKernel/VMD.h"
 
 
@@ -70,7 +69,7 @@ namespace MDEvents
     /// sets the special id, which specify the position of this node in the chain linearly ordered nodes
     virtual void setID(const size_t &newID){m_fileID = newID;}
     // -------------------------------- Parents/Children-Related -------------------------------------------
-   /// Return a pointer to the parent box
+    /// Return a pointer to the parent box
     void setParent(IMDNode * parent)
     { m_parent = parent; }
 
@@ -87,13 +86,13 @@ namespace MDEvents
     { return this; }
 
     // -------------------------------- Events-Related -------------------------------------------
-   /** The method to convert events in a box into a table of coodrinates/signal/errors casted into coord_t type 
+    /** The method to convert events in a box into a table of coodrinates/signal/errors casted into coord_t type
      *   Used to conver events into plain data array. Does nothing for GridBox     */
-    virtual void getEventsData(std::vector<coord_t> &/*coordTable*/,size_t &/*nColumns*/)const{};
+    virtual void getEventsData(std::vector<coord_t> &/*coordTable*/,size_t &/*nColumns*/) const {}
     /** The method to convert the table of data into vector of events 
      *   Used to convert from a vector of values (2D table in Fortran representation (by rows) into box events. 
 	     Does nothing for GridBox (may be temporary) -- can be combined with build and add events	 */
-    virtual void setEventsData(const std::vector<coord_t> &/*coordTable*/){};
+    virtual void setEventsData(const std::vector<coord_t> &/*coordTable*/) {}
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 
@@ -192,7 +191,7 @@ namespace MDEvents
       return mess;
     }
 
-  /** For testing: return the internal-stored size of each box in each dimension */
+    /** For testing: return the internal-stored size of each box in each dimension */
     coord_t getBoxSize(size_t d)
     { 
       return extents[d].getSize();
@@ -371,9 +370,11 @@ namespace MDEvents
     /// The id which specify location of this box in a linear chain of ordered boxes (e.g. on file). Calculated algorithmically 
     size_t m_fileID;
     /// Mutex for modifying the event list or box averages
-    Mantid::Kernel::Mutex m_dataMutex; 
+    Mantid::Kernel::Mutex m_dataMutex;
+
   private:
-        MDBoxBase(const MDBoxBase<MDE,nd> & box);
+    MDBoxBase(const MDBoxBase<MDE,nd> & box);
+
   public:
     /// Convenience typedef for a shared pointer to a this type of class
     typedef boost::shared_ptr< MDBoxBase<MDE, nd> > sptr;
@@ -384,12 +385,7 @@ namespace MDEvents
 #pragma pack(pop) //Return to default packing size
 #endif
 
-
-
-
-
 }//namespace MDEvents
-
 }//namespace Mantid
 
 #endif /* MDBOXBASE_H_ */
