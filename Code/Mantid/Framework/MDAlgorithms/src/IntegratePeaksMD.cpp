@@ -78,7 +78,10 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Utils.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/Column.h"
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <fstream>
 
 namespace Mantid
 {
@@ -257,7 +260,15 @@ namespace MDAlgorithms
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
     if (BackgroundInnerRadius < PeakRadius)
       BackgroundInnerRadius = PeakRadius;
-
+	std::string profileFunction = getProperty("ProfileFunction");
+    std::ofstream out;
+    if (cylinderBool && profileFunction.compare("NoFit") != 0)
+    {
+		std::string outFile = getProperty("InputWorkspace");
+		outFile.append(profileFunction);
+		outFile.append(".dat");
+		out.open(outFile, std::ofstream::out);
+    }
 //
 // If the following OMP pragma is included, this algorithm seg faults
 // sporadically when processing multiple TOPAZ runs in a script, on 
@@ -467,7 +478,7 @@ namespace MDAlgorithms
 				if(((yValues[iStep]-peakHeight*0.75)*(yValues[iStep+1]-peakHeight*0.75))<0.)break;
 			}
 			double Sigma = fabs(Centre-wsProfile2D->dataX(i)[iStep]);
-			std::string profileFunction = getProperty("ProfileFunction");
+
 			std::ostringstream fun_str, plot_str;
 			plot_str << "FitPeak" << i;
 			if (profileFunction.compare("Gaussian") == 0)
@@ -497,9 +508,29 @@ namespace MDAlgorithms
 				fit_alg->setProperty("Output", plot_str.str());
 				fit_alg->executeAsChildAlg();
 				MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
-				std::string fun = fit_alg->getProperty("Function");
-				double chisq = fit_alg->getProperty("OutputChi2overDoF");
-				g_log.notice() << "Peak " << i <<": Chisq = " << chisq << " " << fun<<"\n";
+				API::ITableWorkspace_sptr paramws = fit_alg->getProperty("OutputParameters");
+	            std::vector<std::string> paramsName;
+	            std::vector<double> paramsValue, paramsError;
+	            size_t numrows = paramws->rowCount();
+	            for (size_t j = 0; j < numrows; ++j)
+	            {
+	              API::TableRow row = paramws->getRow(j);
+	              std::string parname;
+	              double parvalue, parerror;
+	              row >> parname >> parvalue >> parerror;
+	              paramsName.push_back(parname);
+	              paramsValue.push_back(parvalue);
+	              paramsError.push_back(parerror);
+	            }
+	            if (i == 0)
+	            {
+	                out << std::setw( 6 ) << "Peak";
+	            	for (size_t j = 0; j < numrows; ++j)out << std::setw( 20 ) << paramsName[j] <<" " ;
+	            	out << "\n";
+	            }
+				out << std::setw( 6 ) << i;
+				for (size_t j = 0; j < numrows; ++j)out << std::setw( 20 ) << std::fixed << std::setprecision( 10 ) << paramsValue[j] << " " ;
+				out << "\n";
 				//Evaluate fit at points
 				const Mantid::MantidVec& x = fitWS->readX(1);
 				const Mantid::MantidVec& y = fitWS->readY(1);
