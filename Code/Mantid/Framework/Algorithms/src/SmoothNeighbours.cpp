@@ -106,7 +106,6 @@ The algorithm will ignore masked detectors if this flag is set.
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::Kernel;
@@ -118,6 +117,8 @@ using std::map;
 typedef std::vector<Mantid::Kernel::Property*> VecProperties;
 typedef const VecProperties ConstVecProperties;
 
+
+
 namespace Mantid
 {
 namespace Algorithms
@@ -126,8 +127,37 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SmoothNeighbours)
 
-SmoothNeighbours::SmoothNeighbours() : API::Algorithm() , WeightedSum(new NullWeighting), m_NonUniformDetectorGroupProperty("NonUniform Detectors"), m_RectangularDetectorGroupProperty("Rectangular Detectors")
+const std::string SmoothNeighbours::G_DYNAMIC_GROUP = "Dynamic";
+
+SmoothNeighbours::SmoothNeighbours() 
+  : API::Algorithm(), WeightedSum(new NullWeighting),
+    m_mustBePositiveDouble(new Kernel::BoundedValidator<double>()),
+    m_mustBePositive(new Kernel::BoundedValidator<int>())
 {
+}
+
+void SmoothNeighbours::setPropertyValue(const std::string &name, const std::string &value)
+{
+  // Set property as normal
+  Mantid::API::Algorithm::setPropertyValue(name, value);
+
+  if(name == "InputWorkspace")
+  {
+    Mantid::API::MatrixWorkspace_sptr tmpInWs = getProperty(name);
+    Mantid::Geometry::Instrument::ContainsState status = tmpIninWS->getInstrument()->containsRectDetectors();
+
+    switch(status)
+    {
+      case Full:
+        g_log.debug("Consists of rectangular detectors");
+        break;
+      case Partial:
+        g_log.debug("Partially consists of rectangular detectors");
+        break;
+      default:
+        g_log.debug("No rectangular detectors");
+    }
+  }
 }
 
 /// Sets documentation strings for this algorithm
@@ -142,96 +172,43 @@ void SmoothNeighbours::initDocs()
  */
 void SmoothNeighbours::init()
 {
+  // Properties for validators
+  m_mustBePositiveDouble->setLower(0.0);
+  m_mustBePositive->setLower(0); 
+
   declareProperty(
-    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, boost::make_shared<InstrumentValidator>()),
-                            "The workspace containing the spectra to be averaged." );
+    new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, 
+                                           boost::make_shared<InstrumentValidator>()),
+    "The workspace containing the spectra to be averaged." );
+
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm." );
 
-  std::vector<std::string> radiusPropOptions;
-  radiusPropOptions.push_back("Meters");
-    radiusPropOptions.push_back("NumberOfPixels");
-    declareProperty("RadiusUnits", "Meters",boost::make_shared<StringListValidator>(radiusPropOptions),
-      "Units used to specify the radius?\n"
-      "  Meters : Radius is in meters.\n"
-      "  NumberOfPixels : Radius is in terms of the number of pixels."
-       );
-
-  //Unsigned double
-  auto mustBePositiveDouble = boost::make_shared<BoundedValidator<double> >();
-  mustBePositiveDouble->setLower(0.0);
-
-  //Unsigned int.
-  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
-  mustBePositive->setLower(0); 
-
-  declareProperty("Radius", 0.0, mustBePositiveDouble,
-    "The radius around a pixel to look for nearest neighbours to average. \n"
-    "If 0, will use the AdjX and AdjY parameters for rectangular detectors instead." );
-
-  declareProperty("NumberOfNeighbours", 8, mustBePositive, "Number of nearest neighbouring pixels.\n"
-    "Alternative to providing the radius. The default is 8.");
-
-  declareProperty("SumNumberOfNeighbours", 1, "Sum nearest neighbouring pixels with same parent.\n"
-    "Number of pixels will be reduced. The default is false.");
-
-  declareProperty("IgnoreMaskedDetectors", true, "If true, do not consider masked detectors in the NN search.");
-
   std::vector<std::string> propOptions;
-    propOptions.push_back("Flat");
-    propOptions.push_back("Linear");
-    propOptions.push_back("Parabolic");
-    propOptions.push_back("Gaussian");
-    declareProperty("WeightedSum", "Flat",boost::make_shared<StringListValidator>(propOptions),
-      "What sort of Weighting scheme to use?\n"
-      "  Flat: Effectively no-weighting, all weights are 1.\n"
-      "  Linear: Linear weighting 1 - r/R from origin.\n"
-      "  Parabolic : Weighting as cutoff - x + cutoff - y + 1."
-      "  Gaussian : Uses the absolute distance x^2 + y^2 ... normalised by the cutoff^2"
-       );
 
- declareProperty("Sigma", 0.5, mustBePositiveDouble, "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
+  propOptions.push_back("Flat");
+  propOptions.push_back("Linear");
+  propOptions.push_back("Parabolic");
+  propOptions.push_back("Gaussian");
+
+  declareProperty("WeightedSum", "Flat", boost::make_shared<StringListValidator>(propOptions),
+    "What sort of Weighting scheme to use?\n"
+    "  Flat: Effectively no-weighting, all weights are 1.\n"
+    "  Linear: Linear weighting 1 - r/R from origin.\n"
+    "  Gaussian : Uses the absolute distance x^2 + y^2 ... normalised by the cutoff^2"
+    "  Parabolic : Weighting as cutoff - x + cutoff - y + 1.");
+
+  declareProperty("Sigma", 0.5, m_mustBePositiveDouble,
+    "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
+
   setPropertySettings("Sigma", new EnabledWhenProperty("WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
-  declareProperty("AdjX", 1, mustBePositive,
-    "The number of X (horizontal) adjacent pixels to average together. Only for instruments with RectangularDetectors. " );
-  setPropertySettings("AdjX", new EnabledWhenProperty("Radius", IS_DEFAULT) );
-
-  declareProperty("AdjY", 1, mustBePositive,
-    "The number of Y (vertical) adjacent pixels to average together. Only for instruments with RectangularDetectors. " );
-  setPropertySettings("AdjY", new EnabledWhenProperty("Radius", IS_DEFAULT) );
-
-  declareProperty("SumPixelsX", 1, mustBePositive,
-    "The total number of X (horizontal) adjacent pixels to sum together. Only for instruments with RectangularDetectors.  AdjX will be ignored if SumPixelsX > 1." );
-  setPropertySettings("SumPixelsX", new EnabledWhenProperty("Radius", IS_DEFAULT) );
-
-  declareProperty("SumPixelsY", 1, mustBePositive,
-    "The total number of Y (vertical) adjacent pixels to sum together. Only for instruments with RectangularDetectors. AdjY will be ignored if SumPixelsY > 1" );
-  setPropertySettings("SumPixelsY", new EnabledWhenProperty("Radius", IS_DEFAULT) );
-
-  declareProperty("ZeroEdgePixels", 0, mustBePositive,
-    "The number of pixels to zero at edges. Only for instruments with RectangularDetectors. " );
-  setPropertySettings("ZeroEdgePixels", new EnabledWhenProperty("Radius", IS_DEFAULT) );
-
-  declareProperty("ForceEvaluationAsRectangularDetectors", false, "Force the algorithm to evaluate the instrument as a rectangular detector instrument.");
-
-  // Perform Group Asssociations.
-  setPropertyGroup("RadiusUnits", m_NonUniformDetectorGroupProperty);
-  setPropertyGroup("Radius", m_NonUniformDetectorGroupProperty);
-  setPropertyGroup("NumberOfNeighbours", m_NonUniformDetectorGroupProperty);
-  setPropertyGroup("SumNumberOfNeighbours", m_NonUniformDetectorGroupProperty);
-
-  // Perform Group Associations.
-  setPropertyGroup("AdjX", m_RectangularDetectorGroupProperty);
-  setPropertyGroup("AdjY", m_RectangularDetectorGroupProperty);
-  setPropertyGroup("SumPixelsX", m_RectangularDetectorGroupProperty);
-  setPropertyGroup("SumPixelsY", m_RectangularDetectorGroupProperty);
-  setPropertyGroup("ZeroEdgePixels", m_RectangularDetectorGroupProperty);
+  declareProperty("IgnoreMaskedDetectors", true, 
+    "If true, do not consider masked detectors in the NN search.");
 
   declareProperty("PreserveEvents", true,
     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
-
 }
 
 
@@ -660,6 +637,7 @@ void SmoothNeighbours::exec()
   VecProperties nonRectangularDetectorProperties;
   for(ConstVecProperties::const_iterator it = properties.begin(); it != properties.end(); ++it)
   {
+    /*
     if((*it)->getGroup() == m_RectangularDetectorGroupProperty)
     {
       rectangularDetectorProperties.push_back(*it);
@@ -668,6 +646,7 @@ void SmoothNeighbours::exec()
     {
       nonRectangularDetectorProperties.push_back(*it);
     }
+    */
   }
   
   // Decide how the algorithm should process the instrument according the the defaults in the groupings.
@@ -924,6 +903,72 @@ void SmoothNeighbours::execEvent(Mantid::DataObjects::EventWorkspace_sptr ws)
   outWS->setAllX( outX );
 }
 
+
+void SmoothNeighbours::declareRectProperties()
+{
+  declareProperty("AdjX", 1, m_mustBePositive,
+    "The number of X (horizontal) adjacent pixels to average together. "
+    "Only for instruments with RectangularDetectors.");
+
+  declareProperty("AdjY", 1, m_mustBePositive,
+    "The number of Y (vertical) adjacent pixels to average together. "
+    "Only for instruments with RectangularDetectors.");
+
+  declareProperty("SumPixelsX", 1, m_mustBePositive,
+    "The total number of X (horizontal) adjacent pixels to sum together. "
+    "Only for instruments with RectangularDetectors. "
+    "AdjX will be ignored if SumPixelsX > 1.");
+
+  declareProperty("SumPixelsY", 1, m_mustBePositive,
+    "The total number of Y (vertical) adjacent pixels to sum together. "
+    "Only for instruments with RectangularDetectors. "
+    "AdjY will be ignored if SumPixelsY > 1" );
+
+  declareProperty("ZeroEdgePixels", 0, m_mustBePositive,
+    "The number of pixels to zero at edges. "
+    "Only for instruments with RectangularDetectors. " );
+
+  setPropertyGroup("AdjX", G_DYNAMIC_GROUP);
+  setPropertyGroup("AdjY", G_DYNAMIC_GROUP);
+  setPropertyGroup("SumPixelsX", G_DYNAMIC_GROUP);
+  setPropertyGroup("SumPixelsY", G_DYNAMIC_GROUP);
+  setPropertyGroup("ZeroEdgePixels", G_DYNAMIC_GROUP);
+}
+
+void SmoothNeighbours::declareNonUniformProperties()
+{ 
+  std::vector<std::string> radiusPropOptions;
+
+  radiusPropOptions.push_back("Meters");
+  radiusPropOptions.push_back("NumberOfPixels");
+
+  declareProperty("RadiusUnits", "Meters",
+    boost::make_shared<StringListValidator>(radiusPropOptions),
+    "Units used to specify the radius?\n"
+    "  Meters : Radius is in meters.\n"
+    "  NumberOfPixels : Radius is in terms of the number of pixels.");
+
+  declareProperty("Radius", 0.0, m_mustBePositiveDouble,
+    "The radius around a pixel to look for nearest neighbours to average. \n"
+    "If 0, will use the AdjX and AdjY parameters for rectangular detectors instead." );
+
+  declareProperty("NumberOfNeighbours", 8, m_mustBePositive, 
+    "Number of nearest neighbouring pixels.\n"
+    "Alternative to providing the radius. The default is 8.");
+
+  declareProperty("SumNumberOfNeighbours", 1, 
+    "Sum nearest neighbouring pixels with same parent.\n"
+    "Number of pixels will be reduced. The default is false.");
+
+  setPropertyGroup("RadiusUnits", G_DYNAMIC_GROUP);
+  setPropertyGroup("Radius", G_DYNAMIC_GROUP);
+  setPropertyGroup("NumberOfNeighbours", G_DYNAMIC_GROUP);
+  setPropertyGroup("SumNumberOfNeighbours", G_DYNAMIC_GROUP);
+}
+
+void SmoothNeighbours::removeDynamicProperties()
+{
+}
 
 
 } // namespace Algorithms
