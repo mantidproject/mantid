@@ -81,12 +81,61 @@ namespace Mantid
       return ws;
     }
 
-    Mantid::API::MatrixWorkspace_sptr ReflectometryTransformP::execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
+    /**
+     * Convert to Pi-Pf, Pi+Pf
+     * @param inputWs : Input Matrix workspace
+     * @return workspace group containing output matrix workspaces of ki and kf
+     */
+    Mantid::API::MatrixWorkspace_sptr ReflectometryTransformP::execute(
+        Mantid::API::MatrixWorkspace_const_sptr inputWs) const
     {
-      return boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+
+      ws->initialize(m_nbinsz, m_nbinsx, m_nbinsx); // Create the output workspace as a distribution
+
+      // Mapping so that Psum and Pdiff values calculated can be added to the matrix workspace at the correct index.
+      const double gradPSum = (m_nbinsx / (m_pSumMax - m_pSumMin)); // The x - axis
+      const double gradPDiff = (m_nbinsz / (m_pDiffMax - m_pDiffMin)); // Actually the y-axis
+      const double cxToIndex = -gradPSum * m_pSumMin;
+      const double cyToIndex = -gradPDiff * m_pDiffMin;
+      const double cxToPSum = m_pSumMin - (1 / gradPSum);
+      const double cyToPDiff = m_pDiffMin - (1 / gradPDiff);
+
+      // Create an X - Axis.
+      MantidVec xAxisVec = createXAxis(ws.get(), gradPSum, cxToPSum, m_nbinsx, "Pi + Pf", "1/Angstroms");
+      // Create a Y (vertical) Axis
+      createVerticalAxis(ws.get(), xAxisVec, gradPDiff, cyToPDiff, m_nbinsz, "Pi - Pf", "1/Angstroms");
+
+      // Loop over all entries in the input workspace and calculate Psum and Pdiff for each.
+      auto spectraAxis = inputWs->getAxis(1);
+      for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index)
+      {
+        auto counts = inputWs->readY(index);
+        auto wavelengths = inputWs->readX(index);
+        auto errors = inputWs->readE(index);
+        const size_t nInputBins = wavelengths.size() - 1;
+        const double theta_final = spectraAxis->getValue(index);
+        m_pSumCalculation.setThetaFinal(theta_final);
+        m_pDiffCalculation.setThetaFinal(theta_final);
+        //Loop over all bins in spectra
+        for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
+        {
+          const double wavelength = 0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
+          double _pSum = m_pSumCalculation.execute(wavelength);
+          double _pDiff= m_pDiffCalculation.execute(wavelength);
+
+          if (_pSum >= m_pSumMin && _pSum <= m_pSumMax && _pDiff >= m_pDiffMin && _pDiff <= m_pDiffMax) // Check that the calculated ki and kf are in range
+          {
+            const int outIndexX = (gradPSum * _pSum) + cxToIndex;
+            const int outIndexZ = (gradPDiff * _pDiff) + cyToIndex;
+
+            ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
+            ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];
+          }
+        }
+      }
+      return ws;
     }
-
-
 
   } // namespace Mantid
 } // namespace MDEvents
