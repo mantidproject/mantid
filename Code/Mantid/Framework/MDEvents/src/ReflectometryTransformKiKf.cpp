@@ -20,9 +20,12 @@ namespace MDEvents
     @param kfMin: min kf value (extent)
     @param kfMax; max kf value (extent)
     @param incidentTheta: Predetermined incident theta value
+    @param numberOfBinsQx: Number of bins in the qx axis
+    @param numberOfBinsQz: Number of bins in the qz axis
   */
-  ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta)
-    : m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
+  ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta
+      , int numberOfBinsQx, int numberOfBinsQz)
+    : ReflectometryTransform(numberOfBinsQx, numberOfBinsQz), m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
   {
       if(kiMin >= kiMax)
       {

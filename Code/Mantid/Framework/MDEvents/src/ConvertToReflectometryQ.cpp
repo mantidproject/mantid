@@ -246,6 +246,12 @@ namespace MDEvents
 
     declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
 
+
+    declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQx", 100), "The number of bins along the qx axis. Optional and only applies to 2D workspaces. Defaults to 100.");
+    declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQz", 100), "The number of bins along the qx axis. Optional and only applies to 2D workspaces. Defaults to 100.");
+    setPropertySettings("NumberBinsQx", new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT) );
+    setPropertySettings("NumberBinsQz", new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT) );
+
     // Create box controller properties.
     this->initBoxControllerProps("2,2", 50, 10);
 
@@ -266,6 +272,8 @@ namespace MDEvents
     double incidentTheta = getProperty("IncidentTheta");
     const std::string outputDimensions = getPropertyValue("OutputDimensions");
     const bool outputAsMDWorkspace = getProperty("OutputAsMDWorkspace");
+    const int numberOfBinsQx = getProperty("NumberBinsQx");
+    const int numberOfBinsQz = getProperty("NumberBinsQz");
 
     //Validation of input parameters
     checkInputWorkspace(inputWs);
@@ -307,15 +315,15 @@ namespace MDEvents
 
     if(outputDimensions == qSpaceTransform())
     {
-      transform = boost::make_shared<ReflectometryTransformQxQz>(dim0min, dim0max, dim1min, dim1max, incidentTheta);
+      transform = boost::make_shared<ReflectometryTransformQxQz>(dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx, numberOfBinsQz);
     }
     else if(outputDimensions == pSpaceTransform())
     {
-      transform = boost::make_shared<ReflectometryTransformP>(dim0min, dim0max, dim1min, dim1max, incidentTheta);
+      transform = boost::make_shared<ReflectometryTransformP>(dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx, numberOfBinsQz);
     }
     else
     {
-      transform = boost::make_shared<ReflectometryTransformKiKf>(dim0min, dim0max, dim1min, dim1max, incidentTheta);
+      transform = boost::make_shared<ReflectometryTransformKiKf>(dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx, numberOfBinsQz);
     }
 
     IMDWorkspace_sptr outputWS;

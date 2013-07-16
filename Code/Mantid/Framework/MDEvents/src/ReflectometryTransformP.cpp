@@ -20,9 +20,12 @@ namespace Mantid
     @param pDiffMin: p diff min value (extent)
     @param pDiffMax: p diff max value (extent)
     @param incidentTheta: Predetermined incident theta value
+    @param numberOfBinsQx : Number of bins along the qx axis
+    @param numberOfBinsQz : Number of bins along the qz axis
     */
-    ReflectometryTransformP::ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta)
-      :  m_pSumMin(pSumMin), m_pSumMax(pSumMax), m_pDiffMin(pDiffMin), m_pDiffMax(pDiffMax), m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta)
+    ReflectometryTransformP::ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta
+        , int numberOfBinsQx, int numberOfBinsQz )
+      : ReflectometryTransform(numberOfBinsQx, numberOfBinsQz), m_pSumMin(pSumMin), m_pSumMax(pSumMax), m_pDiffMin(pDiffMin), m_pDiffMax(pDiffMax), m_pSumCalculation(incidentTheta), m_pDiffCalculation(incidentTheta)
     {
       if(pSumMin >= m_pSumMax)
       {

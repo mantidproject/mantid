@@ -55,7 +55,7 @@ namespace MDEvents
     virtual Mantid::API::MatrixWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
 
     virtual ~ReflectometryTransform();
-    ReflectometryTransform();
+    ReflectometryTransform(int numberOfBinsQx, int numberOfBinsQz);
   };
 
   // Helper typedef for scoped pointer of this type.

@@ -122,7 +122,7 @@ namespace Mantid
   public:
 
     /// Constructor
-    ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta);
+    ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta, int numberOfBinsQx=100, int numberOfBinsQz=100);
     /// Destructor
     virtual ~ReflectometryTransformQxQz();
     /// Execute transformation

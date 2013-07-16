@@ -105,7 +105,7 @@ namespace MDEvents
     mutable CalculateReflectometryDiffP m_pDiffCalculation;
 
   public:
-    ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta);
+    ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta, int numberOfBinsQx=100, int numberOfBinsQz=100);
     virtual ~ReflectometryTransformP();
     virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const;
     /// Execute transformation

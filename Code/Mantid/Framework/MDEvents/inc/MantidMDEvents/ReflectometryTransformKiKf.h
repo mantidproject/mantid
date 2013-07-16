@@ -65,7 +65,7 @@ namespace MDEvents
     mutable CalculateReflectometryK m_KiCalculation;
 
   public:
-    ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta);
+    ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, int numberOfBinsQx=100, int numberOfBinsQz=100);
     virtual ~ReflectometryTransformKiKf();
 
     /// Execute transformation

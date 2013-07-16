@@ -29,9 +29,11 @@ namespace Mantid
      @param qzMin: min qz value (extent)
      @param qzMax; max qz value (extent)
      @param incidentTheta: Predetermined incident theta value
+     @param numberOfBinsQx : Number of bins along the qx axis
+     @param numberOfBinsQz : Number of bins along the qz axis
      */
     ReflectometryTransformQxQz::ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin,
-        double qzMax, double incidentTheta) :
+        double qzMax, double incidentTheta, int numberOfBinsQx, int numberOfBinsQz) : ReflectometryTransform(numberOfBinsQx, numberOfBinsQz),
         m_qxMin(qxMin), m_qxMax(qxMax), m_qzMin(qzMin), m_qzMax(qzMax), m_QxCalculation(incidentTheta), m_QzCalculation(
             incidentTheta)
     {
@@ -133,7 +135,7 @@ namespace Mantid
       }
 
       // Create a Y (vertical) Axis
-      Axis* const verticalAxis = new NumericAxis(m_nbinsx);
+      Axis* const verticalAxis = new NumericAxis(m_nbinsz);
       ws->replaceAxis(1, verticalAxis);
       auto unitZBasePtr = UnitFactory::Instance().create("Label");
       boost::shared_ptr<Mantid::Kernel::Units::Label> verticalUnit  = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unitZBasePtr);
