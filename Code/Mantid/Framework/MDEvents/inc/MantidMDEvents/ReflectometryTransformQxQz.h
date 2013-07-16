@@ -8,10 +8,6 @@
 
 namespace Mantid
 {
-  namespace API
-  {
-    class MatrixWorkspace;
-  }
 
   namespace MDEvents
   {
@@ -146,15 +142,6 @@ namespace Mantid
       DISABLE_DEFAULT_CONSTRUCT(ReflectometryTransformQxQz)
       DISABLE_COPY_AND_ASSIGN(ReflectometryTransformQxQz)
 
-      /// Create a new x-axis for the output workspace
-      MantidVec createXAxis(Mantid::API::MatrixWorkspace* const ws, const double gradQx,
-          const double cxToUnit, const int nBins, const std::string& caption,
-          const std::string& units) const;
-
-      /// Create a new y(vertical)-axis for the output workspace
-      void createVerticalAxis(Mantid::API::MatrixWorkspace* const ws, const MantidVec& xAxisVec,
-          const double gradQz, const double cyToUnit, const int nBins, const std::string& caption,
-          const std::string& units) const;
     };
 
   } // namespace MDEvents

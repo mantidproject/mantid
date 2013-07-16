@@ -1,5 +1,10 @@
 #include "MantidMDEvents/ReflectometryTransform.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/UnitFactory.h"
+#include <boost/shared_ptr.hpp>
 
+using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace Mantid
@@ -34,6 +39,69 @@ namespace Mantid
       // Start with a MDGridBox.
       ws->splitBox();
       return ws;
+    }
+
+    /**
+     * Create a new X-Axis for the output workspace
+     * @param ws : Workspace to attach the axis to
+     * @param gradX : Gradient used in the linear transform from index to X-scale
+     * @param cxToUnit : C-offset used in the linear transform
+     * @param nBins : Number of bins along this axis
+     * @param caption : Caption for the axis
+     * @param units : Units label for the axis
+     * @return Vector containing increments along the axis.
+     */
+    MantidVec createXAxis(MatrixWorkspace* const  ws, const double gradX,
+        const double cxToUnit, const int nBins, const std::string& caption, const std::string& units)
+    {
+      // Create an X - Axis.
+      Axis* const xAxis = new NumericAxis(nBins);
+      ws->replaceAxis(0, xAxis);
+      auto unitXBasePtr = UnitFactory::Instance().create("Label");
+      boost::shared_ptr<Mantid::Kernel::Units::Label> xUnit = boost::dynamic_pointer_cast<
+          Mantid::Kernel::Units::Label>(unitXBasePtr);
+      xUnit->setLabel(caption, units);
+      xAxis->unit() = xUnit;
+      xAxis->title() = caption;
+      MantidVec xAxisVec(nBins);
+      for (int i = 0; i < nBins; ++i)
+      {
+        double qxIncrement = (1 / gradX) * (i + 1) + cxToUnit;
+        xAxis->setValue(i, qxIncrement);
+        xAxisVec[i] = qxIncrement;
+      }
+      return xAxisVec;
+    }
+
+
+    /**
+     * Create a new Y, or Vertical Axis for the output workspace
+     * @param ws : Workspace to attache the vertical axis to
+     * @param xAxisVec : Vector of x axis increments
+     * @param gradY : Gradient used in linear transform from index to Y-scale
+     * @param cyToUnit : C-offset used in the linear transform
+     * @param nBins : Number of bins along the axis
+     * @param caption : Caption for the axis
+     * @param units : Units label for the axis
+     */
+    void createVerticalAxis(MatrixWorkspace* const ws, const MantidVec& xAxisVec,
+        const double gradY, const double cyToUnit, const int nBins, const std::string& caption, const std::string& units)
+    {
+      // Create a Y (vertical) Axis
+      Axis* const verticalAxis = new NumericAxis(nBins);
+      ws->replaceAxis(1, verticalAxis);
+      auto unitZBasePtr = UnitFactory::Instance().create("Label");
+      boost::shared_ptr<Mantid::Kernel::Units::Label> verticalUnit = boost::dynamic_pointer_cast<
+          Mantid::Kernel::Units::Label>(unitZBasePtr);
+      verticalAxis->unit() = verticalUnit;
+      verticalUnit->setLabel(caption, units);
+      verticalAxis->title() = caption;
+      for (int i = 0; i < nBins; ++i)
+      {
+        ws->setX(i, xAxisVec);
+        double qzIncrement = (1 / gradY) * (i + 1) + cyToUnit;
+        verticalAxis->setValue(i, qzIncrement);
+      }
     }
 
   }
