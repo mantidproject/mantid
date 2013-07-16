@@ -25,5 +25,7 @@ set_property (TARGET ScriptRepository PROPERTY FOLDER "MantidFramework")
 include_directories(inc)
 set ( LIBS ${MANTIDLIBS} )
 target_link_libraries(ScriptRepository ${LIBS})
-
+if ( MSVC )
+target_link_libraries(ScriptRepository Winhttp)
+endif()
 install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

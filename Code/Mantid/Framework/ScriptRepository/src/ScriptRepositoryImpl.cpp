@@ -1615,56 +1615,182 @@ namespace API
     return path; 
   }
 
+#if defined(_WIN32) || defined(_WIN64)
+bool get_proxy_configuration_win(const std::string & target_url, std::string &proxy_str, std::string & err_msg){
+HINTERNET  hSession = NULL;
+  std::wstring proxy;
+  std::wstring wtarget_url;
+  if (target_url.find("http://") == std::string::npos){
+    wtarget_url = L"http://";    
+  }
+  wtarget_url += std::wstring(target_url.begin(),target_url.end());  
+  bool fail = false; 
+  std::stringstream info;
+  WINHTTP_CURRENT_USER_IE_PROXY_CONFIG ie_proxy;
+  WINHTTP_AUTOPROXY_OPTIONS proxy_options;
+  WINHTTP_PROXY_INFO proxy_info;
+  ZeroMemory( &proxy_options, sizeof(proxy_options)); 
+  ZeroMemory( &ie_proxy, sizeof(ie_proxy)); 
+  ZeroMemory( &proxy_info, sizeof(proxy_info));
+
+  // the loop is just to allow us to go out of this session whenever we want
+  while(true){
+    // Use WinHttpOpen to obtain a session handle.
+    hSession = WinHttpOpen( L"ScriptRepository FindingProxy/1.0",  
+                          WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+                          WINHTTP_NO_PROXY_NAME, 
+                          WINHTTP_NO_PROXY_BYPASS, 0 );
+    if (!hSession)
+    {
+      fail = true;
+      info << "Failed to create the session (Error Code: " << GetLastError() << ").";
+      break;
+    }
+  // get the configuration of the web browser
+  if (!WinHttpGetIEProxyConfigForCurrentUser(&ie_proxy)){
+    fail = true;
+    info << "Could not find the proxy settings (Error code :" << GetLastError();    
+    break;
+  }
+
+  if (ie_proxy.lpszProxy){
+    // the proxy was already given, 
+    // it is not necessary to query the system for the auto proxy
+    proxy = ie_proxy.lpszProxy; 
+    break;
+  }
+  
+  if (ie_proxy.fAutoDetect){
+    // if auto detect, than setup the proxy to auto detect
+    proxy_options.dwFlags |= WINHTTP_AUTOPROXY_AUTO_DETECT; 
+    proxy_options.dwAutoDetectFlags = WINHTTP_AUTO_DETECT_TYPE_DNS_A;
+  }
+  
+  if (ie_proxy.lpszAutoConfigUrl){
+    // configure to auto proxy
+    proxy_options.dwFlags |= WINHTTP_AUTOPROXY_CONFIG_URL; 
+    proxy_options.lpszAutoConfigUrl = ie_proxy.lpszAutoConfigUrl;   
+  }
+  
+  
+  if (!WinHttpGetProxyForUrl(hSession, wtarget_url.c_str(), &proxy_options, &proxy_info)){
+    info << "Could not find the proxy for this url (Error code :" << GetLastError() <<").";
+    fail = true;
+     break;
+  }
+
+  //std::cout << "get proxy for url passed" << std::endl;
+  if (proxy_info.dwAccessType == WINHTTP_ACCESS_TYPE_NO_PROXY){
+    // no proxy (return an empty proxy)
+    break;
+  }
+
+  if (proxy_info.lpszProxy){
+    //proxy found. Get it.
+      proxy = proxy_info.lpszProxy;
+      break;
+    }
+  break; // loop finished
+  }
+
+  // free memory of all possibly allocated objects
+  // ie_proxy
+  if (ie_proxy.lpszAutoConfigUrl)
+    GlobalFree(ie_proxy.lpszAutoConfigUrl); 
+  if (ie_proxy.lpszProxy)
+    GlobalFree(ie_proxy.lpszProxy); 
+  if (ie_proxy.lpszProxyBypass)
+    GlobalFree(ie_proxy.lpszProxyBypass);
+  // proxy_info
+  if (proxy_info.lpszProxyBypass)
+      GlobalFree(proxy_info.lpszProxyBypass);
+  if (proxy_info.lpszProxy)
+    GlobalFree(proxy_info.lpszProxy); 
+
+  // hSession
+  if( hSession ) WinHttpCloseHandle( hSession );
+  
+  if (fail){
+    err_msg = info.str();    
+  }
+  proxy_str = std::string(proxy.begin(),proxy.end());  
+  return !fail;
+}
+#endif
 
 bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned short& proxy_port){
   // these variables are made static, so, to not query the system for the proxy configuration 
   // everytime this information is needed
   static std::string PROXYSERVER=""; 
-  static unsigned short PROXYPORT=0;
+  static unsigned short PROXYPORT=0;   
+  static bool firstTime = true;
   
   // the first time this function is called, PROXYXERVER will be empty.
-  if (PROXYSERVER.empty()){
+  if (firstTime){
     // attempt to get the proxy configuration
     // setup the proxy. The setup of the proxy will be dealt differently 
     // from windows and linux and macs. 
 #if defined(_WIN32) || defined(_WIN64)
-    WINHTTP_PROXY_INFO proxyInfo;
-
-    // Retrieve the default proxy configuration.
-    WinHttpGetDefaultProxyConfiguration( &proxyInfo );
-    if (proxyInfo.dwAccessType != WINHTTP_ACCESS_TYPE_NO_PROXY){
-      // this means proxy are being used.                
-      std::vector<std::string> proxy_list;
-      if (proxyInfo.lpszProxy != NULL){
-      boost:split(proxy_list, proxyInfo.lpszProxy, boost::is_any_of(" ;")); 
-        BOOST_FOREACH(std::string proxy_candidate, proxy_list){
-          Poco::URI proxy(proxy_candidate); 
-          PROXYSERVER = proxy.getHost(); 
-          PROXYPORT = proxy.getPort();
+    std::string errmsg, proxy_option;
+    g_log.notice() << "Attempt to get the proxy configuration for this connection" << std::endl; 
+    if(get_proxy_configuration_win(remote_url, proxy_option,errmsg))
+    {
+      if (!proxy_option.empty()){
+        size_t pos = proxy_option.rfind(':');
+        if (pos != std::string::npos){
+          if (pos == 4 || pos == 5) // means it found http(s):
+          {
+            PROXYSERVER = proxy_option;
+            PROXYPORT = 8080; // default port for proxy
+          }else{
+          PROXYSERVER = std::string(proxy_option.begin(),proxy_option.begin()+pos);
+          std::stringstream port_str;
+          port_str << std::string(proxy_option.begin()+pos+1,proxy_option.end());
+          port_str >> PROXYPORT;
           }
-        GlobalFree( proxyInfo.lpszProxy );  
-      }        
-      //free memory allocated to this string.
-      if (proxyInfo.lpszProxyBypass != NULL)
-        {
-          GlobalFree( proxyInfo.lpszProxyBypass );
-        }                      
-    }          
+        }else{
+          PROXYSERVER = proxy_option;
+          PROXYPORT = 8080;
+        }
+        g_log.notice() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
+        } 
+    }
+    else{
+    g_log.warning() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. " 
+              << errmsg << std::endl; 
+    }
 #else  // linux and mac
     char * proxy_var = getenv("http_proxy"); 
     if (proxy_var == 0)
       proxy_var = getenv("HTTP_PROXY"); 
     
     if (proxy_var != 0){
-      Poco::URI proxy(proxy_var); 
-      PROXYSERVER = proxy.getHost();
-      PROXYPORT = proxy.getPort(); 
+      std::string proxy_option = proxy_var;
+      size_t pos = proxy_option.rfind(':');
+      if (pos != std::string::npos){
+        if (pos == 4 || pos == 5) // means it found http(s):
+          {
+            PROXYSERVER = proxy_option;
+            PROXYPORT = 8080; // default port for proxy
+          }else{
+          PROXYSERVER = std::string(proxy_option.begin(),proxy_option.begin()+pos);
+          std::stringstream port_str;
+          port_str << std::string(proxy_option.begin()+pos+1,proxy_option.end());
+          port_str >> PROXYPORT;
+        }
+      }else{
+        PROXYSERVER = proxy_option;
+        PROXYPORT = 8080;
+      }
+      g_log.notice() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
     }
 #endif    
   }
-
+  firstTime = false;
+  
   bool ret_value; 
   
+  // it means no proxy configured.
   if (PROXYSERVER.empty())
     ret_value =  false;
   
