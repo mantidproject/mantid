@@ -12,6 +12,7 @@ set ( SRC_FILES src/CreateSampleShapeDialog.cpp
                 src/PlotAsymmetryByLogValueDialog.cpp
                 src/SampleShapeHelpers.cpp
                 src/SlicingAlgorithmDialog.cpp
+                src/SmoothNeighboursDialog.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -31,6 +32,7 @@ set ( MOC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.h
                 inc/MantidQtCustomDialogs/SampleShapeHelpers.h
                 inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.h
+                inc/MantidQtCustomDialogs/SmoothNeighboursDialog.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
