@@ -117,6 +117,7 @@ class MWRunFiles : QWidget
 public:
 void setLabelText(const QString&);
 void setLabelMinWidth(const int);
+void doMultiEntry(const bool);
 QString getText() /PyName=text/;
 bool isValid();
 void setUserInput(const QVariant &);

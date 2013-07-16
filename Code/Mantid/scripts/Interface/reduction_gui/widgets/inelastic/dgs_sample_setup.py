@@ -83,6 +83,7 @@ class SampleSetupWidget(BaseWidget):
         self._content.horizontalLayout.removeWidget(self._content.sample_browse)
         spacer = self._content.horizontalLayout.takeAt(0)
         self._content.sample_edit = mantidqtpython.MantidQt.MantidWidgets.MWRunFiles()
+        self._content.sample_edit.doMultiEntry(True)
         self._content.sample_edit.setLabelText(labeltext)
         self._content.sample_edit.setLabelMinWidth(self._content.sample_label.minimumWidth())
         self._content.horizontalLayout.addWidget(self._content.sample_edit)
