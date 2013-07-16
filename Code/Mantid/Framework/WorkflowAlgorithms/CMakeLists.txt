@@ -14,7 +14,6 @@ set ( SRC_FILES
 	src/EQSANSMonitorTOF.cpp
 	src/EQSANSPatchSensitivity.cpp
 	src/EQSANSQ2D.cpp
-	src/EQSANSReduce.cpp
 	src/HFIRDarkCurrentSubtraction.cpp
 	src/HFIRInstrument.cpp
 	src/HFIRLoad.cpp
