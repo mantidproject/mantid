@@ -111,18 +111,23 @@ namespace Mantid
       // Mapping so that qx and qz values calculated can be added to the matrix workspace at the correct index.
       const double gradQx = (m_nbinsx / (m_qxMax - m_qxMin)); // The x - axis
       const double gradQz = (m_nbinsz / (m_qzMax - m_qzMin)); // Actually the y-axis
-      const double cx = -gradQx * m_qxMin;
-      const double cz = -gradQz * m_qzMin;
+      const double cxToIndex = -gradQx * m_qxMin;
+      const double czToIndex = -gradQz * m_qzMin;
+      const double cxToQ = m_qxMin - ( 1 / gradQx);
+      const double czToQ = m_qzMin - ( 1 / gradQz);
 
       // Create an X - Axis.
       Axis* const xAxis = new NumericAxis(m_nbinsx);
       ws->replaceAxis(0, xAxis);
-      xAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
-      xAxis->title() = "Qx";
+      auto unitXBasePtr = UnitFactory::Instance().create("Label");
+      boost::shared_ptr<Mantid::Kernel::Units::Label> xUnit  = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unitXBasePtr);
+      xUnit->setLabel("qx", "1/Angstrom");
+      xAxis->unit() = xUnit;
+      xAxis->title() = "qx";
       MantidVec xAxisVec(m_nbinsx);
       for (int i = 0; i < m_nbinsx; ++i)
       {
-        double qxIncrement = (1 / gradQx) * i;
+        double qxIncrement = (1 / gradQx) * (i+1) + cxToQ;
         xAxis->setValue(i, qxIncrement);
         xAxisVec[i] = qxIncrement;
       }
@@ -130,12 +135,15 @@ namespace Mantid
       // Create a Y (vertical) Axis
       Axis* const verticalAxis = new NumericAxis(m_nbinsx);
       ws->replaceAxis(1, verticalAxis);
-      verticalAxis->unit() = UnitFactory::Instance().create("MomentumTransfer");
-      verticalAxis->title() = "Qz";
+      auto unitZBasePtr = UnitFactory::Instance().create("Label");
+      boost::shared_ptr<Mantid::Kernel::Units::Label> verticalUnit  = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unitZBasePtr);
+      verticalAxis->unit() = verticalUnit;
+      verticalUnit->setLabel("qz", "1/Angstrom");
+      verticalAxis->title() = "qz";
       for (int i = 0; i < m_nbinsz; ++i)
       {
         ws->setX(i, xAxisVec);
-        double qzIncrement = (1 / gradQz) * i;
+        double qzIncrement = (1 / gradQz) * (i+1) + czToQ;
         verticalAxis->setValue(i, qzIncrement);
       }
 
@@ -159,8 +167,8 @@ namespace Mantid
 
           if (_qx >= m_qxMin && _qx <= m_qxMax && _qz >= m_qzMin && _qz <= m_qzMax) // Check that the calculated qx and qz are in range
           {
-            const int outIndexX = (gradQx * _qx) + cx;
-            const int outIndexZ = (gradQz * _qz) + cz;
+            const int outIndexX = (gradQx * _qx) + cxToIndex;
+            const int outIndexZ = (gradQz * _qz) + czToIndex;
 
             ws->dataY(outIndexZ)[outIndexX] += counts[binIndex];
             ws->dataE(outIndexZ)[outIndexX] += errors[binIndex];

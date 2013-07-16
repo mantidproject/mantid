@@ -7,7 +7,7 @@ namespace Mantid
   namespace MDEvents
   {
 
-    ReflectometryTransform::ReflectometryTransform() : m_nbinsx(50), m_nbinsz(50)
+    ReflectometryTransform::ReflectometryTransform() : m_nbinsx(100), m_nbinsz(100)
     {
     }
 
