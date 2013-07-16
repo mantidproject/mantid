@@ -47,6 +47,53 @@ namespace Algorithms
   DECLARE_ALGORITHM(SaveGSASInstrumentFile)
 
   //----------------------------------------------------------------------------------------------
+  /** Constructor of chopper configuration
+    * Removed arguments: std::string splitdstr, std::string vrunstr
+    */
+  ChopperConfiguration::ChopperConfiguration(double freq, string bankidstr, string cwlstr, string mndspstr, string mxdspstr,
+                                             string maxtofstr)
+  {
+    m_frequency = freq;
+    m_bankIDs = parseStringUnsignedInt(bankidstr);
+    m_vecCWL = parseStringDbl(cwlstr);
+    m_mindsps = parseStringDbl(mndspstr);
+    m_maxdsps = parseStringDbl(mxdspstr);
+    m_maxtofs = parseStringDbl(maxtofstr);
+    // m_splitds = parseStringDbl(splitdstr);
+    // m_vruns = parseStringInt(vrunstr);
+
+    // Check size
+    if (m_bankIDs.size() != m_vecCWL.size() || m_vecCWL.size() != m_mindsps.size() || m_vecCWL.size() != m_maxdsps.size())
+      throw "Input string has different length.  ";
+
+    // Build
+
+  }
+
+  //----------------------------------------------------------------------------------------------
+  bool ChopperConfiguration::hasBank(unsigned int bankid)
+  {
+    bool hasbank = false;
+    for (size_t i = 0; i < m_bankIDs.size(); ++i)
+      if (bankid == m_bankIDs[i])
+      {
+        hasbank = true;
+        break;
+      }
+
+    return hasbank;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  double ChopperConfiguration::getParameter(unsigned int bankid, string paramname)
+  {
+    throw std::runtime_error("Implement soon!");
+
+    return EMPTY_DBL();
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Constructor
    */
   SaveGSASInstrumentFile::SaveGSASInstrumentFile()
@@ -92,13 +139,11 @@ namespace Algorithms
     // auto instrumentval = new ListValidator<string>(instruments);
     declareProperty("Instrument", "PG3", boost::make_shared<StringListValidator>(instruments), "Name of the instrument that parameters are belonged to. ");
 
-    vector<int> vecfreq;
-    vecfreq.push_back(10);
-    vecfreq.push_back(30);
-    vecfreq.push_back(60);
-    ListValidator<int> freqva(vecfreq);
-    auto freqval = new ListValidator<int>(vecfreq);
-    declareProperty("ChopperFrequency", 60, boost::make_shared<ListValidator<int> >(freqval), "Frequency of the chopper. ");
+    vector<string> vecfreq;
+    vecfreq.push_back("10");
+    vecfreq.push_back("30");
+    vecfreq.push_back("60");
+    declareProperty("ChopperFrequency", "60", boost::make_shared<StringListValidator>(vecfreq), "Frequency of the chopper. ");
 
     declareProperty("IDLine", "", "ID line to be written in GSAS instrumetn file.");
     declareProperty("Sample", "", "Name of the sample used to calibrate the instrument parameters. ");
@@ -110,6 +155,9 @@ namespace Algorithms
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Process input properties
+   */
   void SaveGSASInstrumentFile::processProperties()
   {
     m_inpWS = getProperty("InputWorkspace");
@@ -243,31 +291,6 @@ namespace Algorithms
     throw runtime_error("ASAP");
   }
 
-
-  //----------------------------------------------------------------------------------------------
-  /** Constructor of chopper configuration
-    * Removed arguments: std::string splitdstr, std::string vrunstr
-    */
-  ChopperConfiguration::ChopperConfiguration(double freq, string bankidstr, string cwlstr, string mndspstr, string mxdspstr,
-                                             string maxtofstr)
-  {
-    m_frequency = freq;
-    m_bankIDs = parseStringInt(bankidstr);
-    m_vecCWL = parseStringDbl(cwlstr);
-    m_mindsps = parseStringDbl(mndspstr);
-    m_maxdsps = parseStringDbl(mxdspstr);
-    m_maxtofs = parseStringDbl(maxtofstr);
-    // m_splitds = parseStringDbl(splitdstr);
-    // m_vruns = parseStringInt(vrunstr);
-
-    // Check size
-    if (m_bankIDs.size() != m_vecCWL.size() || m_vecCWL.size() != m_mindsps.size() || m_vecCWL.size() != m_maxdsps.size())
-      throw "Input string has different length.  ";
-
-    // Build
-
-  }
-
   //----------------------------------------------------------------------------------------------
   ChopperConfiguration_sptr SaveGSASInstrumentFile::setupPG3Constants(int intfrequency)
   {
@@ -370,17 +393,21 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Parse string to double vector
     */
-  vector<int> ChopperConfiguration::parseStringInt(string instring)
+  vector<unsigned int> ChopperConfiguration::parseStringUnsignedInt(string instring)
   {
     vector<string> strs;
     boost::split(strs, instring, boost::is_any_of(", "));
     cout << "* size of the vector: " << strs.size() << endl;
 
-    vector<int> vecinteger;
+    vector<unsigned int> vecinteger;
     for (size_t i = 0; i < strs.size(); i++)
     {
-      double item = atoi(strs[i].c_str());
-      vecinteger.push_back(item);
+      int item = atoi(strs[i].c_str());
+      if (item < 0)
+      {
+        throw runtime_error("Found negative number in a string for unsigned integers.");
+      }
+      vecinteger.push_back(static_cast<unsigned int>(item));
     }
 
     return vecinteger;
@@ -435,6 +462,7 @@ namespace Algorithms
     vector<double> gtof(90, 0.);   // TOF_thermal(d_k) - TOF(d_k)
     vector<double> galpha(90, 0.); // delta(alpha)
     vector<double> gbeta(90, 0.);  // delta(beta)
+    vector<double> gdt(90);
     vector<double> gpkX(90, 0.);   // ratio (n) b/w thermal and epithermal neutron
 
     double twotheta = m_configuration->getParameter(bankid, "TwoTheta");
@@ -476,6 +504,12 @@ namespace Algorithms
       galpha[k] = aaba(gpkX[k], alph0, alph1, alph0t, alph1t, gdsp[k]);
       gbeta[k] = aaba(gpkX[k], beta0, beta1, beta0t, beta1t, gdsp[k]);
     }
+
+    // 3. Set to class variables 
+    m_gdsp = gdsp;
+    m_gdt = gdt;
+    m_galpha = galpha;
+    m_gbeta = gbeta;
 
     /** To translate
     gdsp = np.zeros(90) # d_k
@@ -576,7 +610,9 @@ namespace Algorithms
     }
 
     printf("INS %2d ICONS%10.3f%10.3f%10.3f %10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
-    printf("INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0, 0, 0.2, 1, 1);
+    printf("INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
+    // printf('INS %2dBAKGD 1 4 Y 0 Y\n', bankid);
+    // printf('INS %2dI HEAD %s\n', bankid, titleline);
 
 
 
@@ -592,6 +628,7 @@ namespace Algorithms
   prmfile += ('INS %2iBAKGD 1 4 Y 0 Y\n' % (bank))
   prmfile += ('INS %2iI HEAD %s\n' %
   (bank, titleline))
+
   prmfile += ('INS %2iI ITYP%5i%10.4f%10.4f%10i\n' %
   (bank, 0, self.mndsp[bank-1]*0.001*instC, self.mxtofs[bank-1], randint(10001,99999)))
   prmfile += ('INS %2iINAME powgen \n' %(bank))

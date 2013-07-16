@@ -15,7 +15,6 @@ class ChopperConfiguration
 public:
   ChopperConfiguration(double freq, std::string bankidstr, std::string cwlstr, std::string mndspstr,
                        std::string mxdspstr, std::string maxtofstr);
-  ~ChopperConfiguration();
 
   /// Check wehther a bank is defined
   bool hasBank(unsigned int bankid);
@@ -30,14 +29,14 @@ private:
   std::vector<double> m_mindsps;
   std::vector<double> m_maxdsps;
   std::vector<double> m_maxtofs;
-  std::vector<int> m_bankIDs;
+  std::vector<unsigned int> m_bankIDs;
   std::vector<double> m_splitds;
   std::vector<int> m_vruns;
 
   /// Parse string to a double vector
   std::vector<double> parseStringDbl(std::string instring);
   /// Parse string to an integer vector
-  std::vector<int> parseStringInt(std::string instring);
+  std::vector<unsigned int> parseStringUnsignedInt(std::string instring);
 
 };
 
@@ -143,6 +142,12 @@ private:
 
   /// Chopper configuration
   ChopperConfiguration_sptr m_configuration;
+
+  //
+  std::vector<double> m_gdsp;
+  std::vector<double> m_gdt;
+  std::vector<double> m_galpha;
+  std::vector<double> m_gbeta;
 
 };
 
