@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <stdexcept>
 
 using namespace Mantid::Kernel;
@@ -75,6 +76,11 @@ namespace Mantid
       ws->splitAllIfNeeded(NULL);
       ws->refreshCache();
       return ws;
+    }
+
+    Mantid::API::MatrixWorkspace_sptr ReflectometryTransformP::execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
+    {
+      return boost::make_shared<Mantid::DataObjects::Workspace2D>();
     }
 
 

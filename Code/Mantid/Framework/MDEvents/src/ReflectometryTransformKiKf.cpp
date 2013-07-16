@@ -1,6 +1,7 @@
 #include "MantidMDEvents/ReflectometryTransformKiKf.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <stdexcept>
 
 using namespace Mantid::Kernel;
@@ -81,6 +82,16 @@ namespace MDEvents
       ws->refreshCache();
       return ws;
   }
+
+  /**
+   *
+   * @param inputWs : Input Matrix workspace
+   * @return workspace group containing output matrix workspaces of ki and kf
+   */
+      Mantid::API::MatrixWorkspace_sptr ReflectometryTransformKiKf::execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
+      {
+        return boost::make_shared<Mantid::DataObjects::Workspace2D>();
+      }
 
 
 } // namespace Mantid

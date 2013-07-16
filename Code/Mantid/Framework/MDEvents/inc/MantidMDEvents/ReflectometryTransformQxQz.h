@@ -126,6 +126,8 @@ namespace Mantid
     /// Destructor
     virtual ~ReflectometryTransformQxQz();
     /// Execute transformation
+    virtual Mantid::API::MatrixWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+    /// Execute MD transformation
     virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const;
 
   private:

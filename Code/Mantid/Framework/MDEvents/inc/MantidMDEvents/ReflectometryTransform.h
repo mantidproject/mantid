@@ -47,8 +47,12 @@ namespace MDEvents
   boost::shared_ptr<MDEventWorkspace2Lean> createMDWorkspace(Mantid::Geometry::IMDDimension_sptr, Mantid::Geometry::IMDDimension_sptr, Mantid::API::BoxController_sptr boxController) const;
 
   public:
-    //Execute the strategy to produce the a transformed, output MDWorkspace
+
+    //Execute the strategy to produce a transformed, output MDWorkspace
     virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const = 0;
+
+    //Execute the strategy to produce a transformed, output group of Matrix (2D) Workspaces
+    virtual Mantid::API::MatrixWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const = 0;
 
     virtual ~ReflectometryTransform();
     ReflectometryTransform();

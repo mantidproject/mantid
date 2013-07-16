@@ -241,7 +241,9 @@ namespace MDEvents
 
     setPropertySettings("IncidentTheta", new Kernel::EnabledWhenProperty("OverrideIncidentTheta", IS_EQUAL_TO, "1") );
 
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
+    declareProperty(new Kernel::PropertyWithValue<bool>("OutputAsMDWorkspace", true), "Generate the output as a MDWorkspace, otherwise a Workspace2D is returned.");
+
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
 
     this->initBoxControllerProps("2,2", 50, 10);
   }
@@ -252,10 +254,11 @@ namespace MDEvents
   void ConvertToReflectometryQ::exec()
   {
     Mantid::API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
-    bool bUseOwnIncidentTheta = getProperty("OverrideIncidentTheta"); 
-    std::vector<double> extents = getProperty("Extents");
+    const bool bUseOwnIncidentTheta = getProperty("OverrideIncidentTheta");
+    const std::vector<double> extents = getProperty("Extents");
     double incidentTheta = getProperty("IncidentTheta");
-    std::string outputDimensions = getPropertyValue("OutputDimensions");
+    const std::string outputDimensions = getPropertyValue("OutputDimensions");
+    const bool outputAsMDWorkspace = getProperty("OutputAsMDWorkspace");
 
     //Validation of input parameters
     checkInputWorkspace(inputWs);
@@ -294,6 +297,7 @@ namespace MDEvents
 
     //Select the transform strategy.
     ReflectometryTransform_sptr transform;
+
     if(outputDimensions == qSpaceTransform())
     {
       transform = boost::make_shared<ReflectometryTransformQxQz>(dim0min, dim0max, dim1min, dim1max, incidentTheta);
@@ -307,12 +311,23 @@ namespace MDEvents
       transform = boost::make_shared<ReflectometryTransformKiKf>(dim0min, dim0max, dim1min, dim1max, incidentTheta);
     }
 
-    auto outputWS = transform->executeMD(inputWs, bc);
+    IMDWorkspace_sptr outputWS;
 
-    // Copy ExperimentInfo (instrument, run, sample) to the output WS
-    ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
-    uint16_t runIndex = outputWS->addExperimentInfo(ei);
-    UNUSED_ARG(runIndex);
+    if(outputAsMDWorkspace)
+    {
+      auto outputMDWS = transform->executeMD(inputWs, bc);
+
+      // Copy ExperimentInfo (instrument, run, sample) to the output WS
+      ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
+      outputMDWS->addExperimentInfo(ei);
+      outputWS = outputMDWS;
+    }
+    else
+    {
+      auto outputWS2D = transform->execute(inputWs);
+      outputWS2D->copyExperimentInfoFrom(inputWs.get());
+      outputWS = outputWS2D;
+    }
 
     //Execute the transform and bind to the output.
     setProperty("OutputWorkspace", outputWS);

@@ -31,7 +31,7 @@ private:
 
   Makes the tests much more readable like this.
   */
-  boost::shared_ptr<ConvertToReflectometryQ> make_standard_algorithm(const std::string outputdimensions="Q (lab frame)")
+  boost::shared_ptr<ConvertToReflectometryQ> make_standard_algorithm(const std::string outputdimensions="Q (lab frame)", bool outputAsMD = true)
   {
     MatrixWorkspace_sptr in_ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     in_ws->getAxis(0)->setUnit("Wavelength");
@@ -51,6 +51,7 @@ private:
     alg->setProperty("OutputDimensions", outputdimensions);
     alg->setPropertyValue("OutputWorkspace", "OutputTransformedWorkspace");
     alg->setProperty("OverrideIncidentTheta", true);
+    alg->setProperty("OutputAsMDWorkspace", outputAsMD);
     alg->setProperty("IncidentTheta", 0.5);
     return alg;
   }
@@ -151,7 +152,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
-  void test_execute_qxqz()
+  void test_execute_qxqz_md()
   {
      auto alg = make_standard_algorithm();
      alg->execute();
@@ -160,7 +161,7 @@ public:
      TS_ASSERT_EQUALS(2, ws->getExperimentInfo(0)->run().getLogData().size());
   }
 
-  void test_execute_kikf()
+  void test_execute_kikf_md()
   {
      auto alg = make_standard_algorithm("K (incident, final)");
      TS_ASSERT_THROWS_NOTHING(alg->execute());
@@ -168,11 +169,39 @@ public:
      TS_ASSERT(ws != NULL);
   }
 
-  void test_execute_pipf()
+  void test_execute_pipf_md()
   {
      auto alg = make_standard_algorithm("P (lab frame)");
      TS_ASSERT_THROWS_NOTHING(alg->execute());
      auto ws = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
+     TS_ASSERT(ws != NULL);
+  }
+
+  void test_execute_qxqz_2D()
+  {
+     const bool outputAsMD = false;
+     auto alg = make_standard_algorithm("Q (lab frame)", outputAsMD);
+     alg->execute();
+     auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
+     TS_ASSERT(ws != NULL);
+     TS_ASSERT_EQUALS(2, ws->run().getLogData().size());
+  }
+
+  void test_execute_kikf_2D()
+  {
+     const bool outputAsMD = false;
+     auto alg = make_standard_algorithm("K (incident, final)", outputAsMD);
+     TS_ASSERT_THROWS_NOTHING(alg->execute());
+     auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
+     TS_ASSERT(ws != NULL);
+  }
+
+  void test_execute_pipf_2D()
+  {
+     const bool outputAsMD = false;
+     auto alg = make_standard_algorithm("P (lab frame)", outputAsMD);
+     TS_ASSERT_THROWS_NOTHING(alg->execute());
+     auto ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
      TS_ASSERT(ws != NULL);
   }
 
