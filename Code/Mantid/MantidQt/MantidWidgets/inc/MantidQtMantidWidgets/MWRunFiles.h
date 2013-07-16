@@ -128,6 +128,7 @@ namespace MantidQt
       void isForRunFiles(const bool);
       QString getLabelText() const;
       void setLabelText(const QString & text);
+      void setLabelMinWidth(const int width);
       bool allowMultipleFiles() const;
       void allowMultipleFiles(const bool);
       bool isOptional() const;
