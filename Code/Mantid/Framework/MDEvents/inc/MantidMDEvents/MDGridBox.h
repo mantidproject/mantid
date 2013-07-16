@@ -17,7 +17,9 @@ namespace Mantid
 namespace MDEvents
 {
 
+#ifndef __INTEL_COMPILER // As of July 13, the packing has no effect for the Intel compiler and produces a warning
 #pragma pack(push, 4) //Ensure the structure is no larger than it needs to
+#endif
 
   //===============================================================================================
   /** Templated class for a GRIDDED multi-dimensional event "box".
@@ -243,9 +245,9 @@ namespace MDEvents
 
   };
 
-
+#ifndef __INTEL_COMPILER
 #pragma pack(pop) //Return to default packing size
-
+#endif
 
 
 
