@@ -100,12 +100,76 @@ namespace Mantid
     }
 
     /**
+     * Create a new X-Axis for the output workspace
+     * @param ws : Workspace to attach the axis to
+     * @param gradX : Gradient used in the linear transform from index to X-scale
+     * @param cxToUnit : C-offset used in the linear transform
+     * @param nBins : Number of bins along this axis
+     * @param caption : Caption for the axis
+     * @param units : Units label for the axis
+     * @return Vector containing increments along the axis.
+     */
+    MantidVec ReflectometryTransformQxQz::createXAxis(MatrixWorkspace* const  ws, const double gradX,
+        const double cxToUnit, const int nBins, const std::string& caption, const std::string& units) const
+    {
+      // Create an X - Axis.
+      Axis* const xAxis = new NumericAxis(nBins);
+      ws->replaceAxis(0, xAxis);
+      auto unitXBasePtr = UnitFactory::Instance().create("Label");
+      boost::shared_ptr<Mantid::Kernel::Units::Label> xUnit = boost::dynamic_pointer_cast<
+          Mantid::Kernel::Units::Label>(unitXBasePtr);
+      xUnit->setLabel(caption, units);
+      xAxis->unit() = xUnit;
+      xAxis->title() = caption;
+      MantidVec xAxisVec(nBins);
+      for (int i = 0; i < nBins; ++i)
+      {
+        double qxIncrement = (1 / gradX) * (i + 1) + cxToUnit;
+        xAxis->setValue(i, qxIncrement);
+        xAxisVec[i] = qxIncrement;
+      }
+      return xAxisVec;
+    }
+
+
+    /**
+     * Create a new Y, or Vertical Axis for the output workspace
+     * @param ws : Workspace to attache the vertical axis to
+     * @param xAxisVec : Vector of x axis increments
+     * @param gradY : Gradient used in linear transform from index to Y-scale
+     * @param cyToUnit : C-offset used in the linear transform
+     * @param nBins : Number of bins along the axis
+     * @param caption : Caption for the axis
+     * @param units : Units label for the axis
+     */
+    void ReflectometryTransformQxQz::createVerticalAxis(MatrixWorkspace* const ws, const MantidVec& xAxisVec,
+        const double gradY, const double cyToUnit, const int nBins, const std::string& caption, const std::string& units) const
+    {
+      // Create a Y (vertical) Axis
+      Axis* const verticalAxis = new NumericAxis(nBins);
+      ws->replaceAxis(1, verticalAxis);
+      auto unitZBasePtr = UnitFactory::Instance().create("Label");
+      boost::shared_ptr<Mantid::Kernel::Units::Label> verticalUnit = boost::dynamic_pointer_cast<
+          Mantid::Kernel::Units::Label>(unitZBasePtr);
+      verticalAxis->unit() = verticalUnit;
+      verticalUnit->setLabel(caption, units);
+      verticalAxis->title() = caption;
+      for (int i = 0; i < nBins; ++i)
+      {
+        ws->setX(i, xAxisVec);
+        double qzIncrement = (1 / gradY) * (i + 1) + cyToUnit;
+        verticalAxis->setValue(i, qzIncrement);
+      }
+    }
+
+    /**
      * Execute the transformation. Generates an output Matrix workspace.
      * @param inputWs : Input workspace with a vertical axis of signed-theta and an x-axis of wavelength
      * @return : A 2D workspace with qz on the vertical axis and qx on the horizontal axis.
      */
     MatrixWorkspace_sptr ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const
     {
+
       auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
 
       ws->initialize(m_nbinsz, m_nbinsx, m_nbinsx); // Create the output workspace as a distribution
@@ -119,35 +183,9 @@ namespace Mantid
       const double czToQ = m_qzMin - ( 1 / gradQz);
 
       // Create an X - Axis.
-      Axis* const xAxis = new NumericAxis(m_nbinsx);
-      ws->replaceAxis(0, xAxis);
-      auto unitXBasePtr = UnitFactory::Instance().create("Label");
-      boost::shared_ptr<Mantid::Kernel::Units::Label> xUnit  = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unitXBasePtr);
-      xUnit->setLabel("qx", "1/Angstrom");
-      xAxis->unit() = xUnit;
-      xAxis->title() = "qx";
-      MantidVec xAxisVec(m_nbinsx);
-      for (int i = 0; i < m_nbinsx; ++i)
-      {
-        double qxIncrement = (1 / gradQx) * (i+1) + cxToQ;
-        xAxis->setValue(i, qxIncrement);
-        xAxisVec[i] = qxIncrement;
-      }
-
+      MantidVec xAxisVec = createXAxis(ws.get(), gradQx, cxToQ, m_nbinsx, "qx", "1/Angstroms");
       // Create a Y (vertical) Axis
-      Axis* const verticalAxis = new NumericAxis(m_nbinsz);
-      ws->replaceAxis(1, verticalAxis);
-      auto unitZBasePtr = UnitFactory::Instance().create("Label");
-      boost::shared_ptr<Mantid::Kernel::Units::Label> verticalUnit  = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(unitZBasePtr);
-      verticalAxis->unit() = verticalUnit;
-      verticalUnit->setLabel("qz", "1/Angstrom");
-      verticalAxis->title() = "qz";
-      for (int i = 0; i < m_nbinsz; ++i)
-      {
-        ws->setX(i, xAxisVec);
-        double qzIncrement = (1 / gradQz) * (i+1) + czToQ;
-        verticalAxis->setValue(i, qzIncrement);
-      }
+      createVerticalAxis(ws.get(), xAxisVec, gradQz, czToQ, m_nbinsz, "qz", "1/Angstroms");
 
       // Loop over all entries in the input workspace and calculate qx and qz for each.
       auto spectraAxis = inputWs->getAxis(1);
