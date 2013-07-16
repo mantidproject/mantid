@@ -2023,5 +2023,5 @@ def warnOnV1MethodCall(frame=None):
 #---------------------------------------------------------------------------------------
 
 # -- Issue a general startup warning about the old API --
-_msg = "Notice: Version 1 of the Python API ('from mantidsimple import *') will be removed in the next major release (2.7)\n"
+_msg = "Notice: Version 1 of the Python API ('from mantidsimple import *') will be removed in the next major release\n"
 mtd.sendWarningMessage(_msg)
