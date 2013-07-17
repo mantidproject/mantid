@@ -80,6 +80,9 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
@@ -499,14 +502,22 @@ namespace MDAlgorithms
 				fit_alg->setPropertyValue("Function", fun_str.str());
 				fit_alg->setProperty("InputWorkspace", wsProfile2D);
 				fit_alg->setProperty("WorkspaceIndex", i);
-				/*if (profileFunction.compare("ConvolutionExpGaussian") == 0)
+				if (profileFunction.compare("ConvolutionExpGaussian") == 0)
 				{
 			        fit_alg->setProperty("StartX", Centre - 5.0 * Sigma);
 			        fit_alg->setProperty("EndX", Centre + 5.0 * Sigma);
-				}*/
+				}
 				fit_alg->setProperty("CreateOutput", true);
 				fit_alg->setProperty("Output", plot_str.str());
-				fit_alg->executeAsChildAlg();
+
+				try
+				{
+					fit_alg->executeAsChildAlg();
+				} catch (...)
+				{
+				 g_log.error("Can't execute Fit algorithm");
+				 continue;
+				}
 				MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
 				API::ITableWorkspace_sptr paramws = fit_alg->getProperty("OutputParameters");
 	            std::vector<std::string> paramsName;
@@ -532,17 +543,30 @@ namespace MDAlgorithms
 				for (size_t j = 0; j < numrows; ++j)out << std::setw( 20 ) << std::fixed << std::setprecision( 10 ) << paramsValue[j] << " " ;
 				out << "\n";
 				//Evaluate fit at points
-				const Mantid::MantidVec& x = fitWS->readX(1);
+				/*const Mantid::MantidVec& x = fitWS->readX(1);
 				const Mantid::MantidVec& y = fitWS->readY(1);
 				const Mantid::MantidVec& e = fitWS->readY(2);
 				wsFit2D->dataX(i) = x;
 				wsDiff2D->dataX(i) = x;
 				wsFit2D->dataY(i) = y;
-				wsDiff2D->dataY(i) = e;
+				wsDiff2D->dataY(i) = e;*/
+				IFunction_sptr ifun = fit_alg->getProperty("Function");
+				boost::shared_ptr<const CompositeFunction> fun = boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
+				const Mantid::MantidVec& x = wsProfile2D->readX(i);
+				FunctionDomain1DVector domain(x);
+				FunctionValues yy(domain);
+			    fun->function(domain, yy);
+				wsFit2D->dataX(i) = x;
+				wsDiff2D->dataX(i) = x;
+				for (size_t j = 0; j < numSteps; j++)
+				{
+					wsFit2D->dataY(i)[j] = yy[j];
+					wsDiff2D->dataY(i)[j] = yValues[j] - yy[j];
+				}
 
 				//Calculate intensity
 				signal = 0.0;
-				for (size_t j = 0; j < numSteps; j++) if ( !boost::math::isnan(y[j]) && !boost::math::isinf(y[j]))signal+= y[j];
+				for (size_t j = 0; j < numSteps; j++) if ( !boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))signal+= yy[j];
 				errorSquared = std::fabs(signal);
 			}
       	  }
