@@ -143,7 +143,12 @@ void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS
 
   }
   m_Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
-  this->addProperty("W_MATRIX",pWS->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double> >("W_MATRIX"),true);
+  // deal with the case when source MD workspace does not have any experiment infos
+  if(pWS->getNumExperimentInfo()!=0)
+  {
+      this->addProperty("W_MATRIX",pWS->getExperimentInfo(0)->run().getPropertyValueAsType<std::vector<double> >("W_MATRIX"),true);
+  }
+
 
 
 
