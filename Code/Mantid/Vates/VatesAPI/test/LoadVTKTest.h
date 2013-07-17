@@ -161,9 +161,9 @@ public:
     alg->setPropertyValue("SignalArrayName", "scalar_array");
     alg->setPropertyValue("ErrorSQArrayName", "scalar_array");
     alg->setProperty("AdaptiveBinned", false);
-    alg->execute();
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
 
-    TS_ASSERT(AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName) != NULL);
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(outWSName));
   }
 };
 
