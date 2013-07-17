@@ -42,7 +42,7 @@ namespace DataHandling
   using namespace DataObjects;
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_HDF_FILELOADER_ALGORITHM(LoadMcStasEventNexus);
+  DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasEventNexus);
 
 
   //----------------------------------------------------------------------------------------------
@@ -306,7 +306,7 @@ namespace DataHandling
    * @param descriptor A descriptor for the file
    * @returns An integer specifying the confidence level. 0 indicates it will not be used
    */
-  int LoadMcStasEventNexus::confidence(Kernel::HDFDescriptor & descriptor) const
+  int LoadMcStasEventNexus::confidence(Kernel::NexusDescriptor & descriptor) const
   {
     UNUSED_ARG(descriptor)
     // Not implemented yet therefore return no confidence

@@ -32,14 +32,14 @@ namespace Mantid
   {
 
     // Register the algorithm into the AlgorithmFactory
-    DECLARE_HDF_FILELOADER_ALGORITHM(LoadQKK);
+    DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadQKK);
 
     /**
      * Return the confidence with with this algorithm can load the file
      * @param descriptor A descriptor for the file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
-    int LoadQKK::confidence(Kernel::HDFDescriptor & descriptor) const
+    int LoadQKK::confidence(Kernel::NexusDescriptor & descriptor) const
     {
       const auto & firstEntryName = descriptor.firstEntryNameType().first;
       if(descriptor.pathExists("/" + firstEntryName + "/data/hmm_xy")) return 80;

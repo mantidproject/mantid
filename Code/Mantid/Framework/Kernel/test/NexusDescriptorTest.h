@@ -1,9 +1,9 @@
-#ifndef MANTID_KERNEL_HDFDESCRIPTORTEST_H_
-#define MANTID_KERNEL_HDFDESCRIPTORTEST_H_
+#ifndef MANTID_KERNEL_NEXUSDESCRIPTORTEST_H_
+#define MANTID_KERNEL_NEXUSDESCRIPTORTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/HDFDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -14,18 +14,18 @@
 
 #include <cstdio>
 
-using Mantid::Kernel::HDFDescriptor;
+using Mantid::Kernel::NexusDescriptor;
 
-class HDFDescriptorTest : public CxxTest::TestSuite
+class NexusDescriptorTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HDFDescriptorTest *createSuite() { return new HDFDescriptorTest(); }
-  static void destroySuite( HDFDescriptorTest *suite ) { delete suite; }
+  static NexusDescriptorTest *createSuite() { return new NexusDescriptorTest(); }
+  static void destroySuite( NexusDescriptorTest *suite ) { delete suite; }
 
 
-  HDFDescriptorTest()
+  NexusDescriptorTest()
   {
     using Mantid::Kernel::ConfigService;
     auto dataPaths = ConfigService::Instance().getDataSearchDirs();
@@ -48,42 +48,42 @@ public:
           "The AutoTestData directory needs to be in the search path");
     }
 
-    m_testHDF5 = boost::make_shared<HDFDescriptor>(m_testHDF5Path);
+    m_testHDF5 = boost::make_shared<NexusDescriptor>(m_testHDF5Path);
   }
 
   //=================================== Static isHDF methods ======================================
   void test_isHDF_Returns_False_For_Non_HDF_Filename()
   {
-    TS_ASSERT(!HDFDescriptor::isHDF(m_testNonHDFPath));
-    TS_ASSERT(!HDFDescriptor::isHDF(m_testNonHDFPath, HDFDescriptor::AnyVersion));
-    TS_ASSERT(!HDFDescriptor::isHDF(m_testNonHDFPath, HDFDescriptor::Version4));
-    TS_ASSERT(!HDFDescriptor::isHDF(m_testNonHDFPath, HDFDescriptor::Version5));
+    TS_ASSERT(!NexusDescriptor::isHDF(m_testNonHDFPath));
+    TS_ASSERT(!NexusDescriptor::isHDF(m_testNonHDFPath, NexusDescriptor::AnyVersion));
+    TS_ASSERT(!NexusDescriptor::isHDF(m_testNonHDFPath, NexusDescriptor::Version4));
+    TS_ASSERT(!NexusDescriptor::isHDF(m_testNonHDFPath, NexusDescriptor::Version5));
   }
 
   void test_isHDF_Defaults_To_All_Versions()
   {
-    TS_ASSERT(HDFDescriptor::isHDF(m_testHDF4Path));
-    TS_ASSERT(HDFDescriptor::isHDF(m_testHDF5Path));
+    TS_ASSERT(NexusDescriptor::isHDF(m_testHDF4Path));
+    TS_ASSERT(NexusDescriptor::isHDF(m_testHDF5Path));
   }
 
   void test_isHDF_With_Version4_Returns_True_Only_For_HDF4()
   {
-    TS_ASSERT(HDFDescriptor::isHDF(m_testHDF4Path, HDFDescriptor::Version4));
-    TS_ASSERT(!HDFDescriptor::isHDF(m_testHDF5Path, HDFDescriptor::Version4));
+    TS_ASSERT(NexusDescriptor::isHDF(m_testHDF4Path, NexusDescriptor::Version4));
+    TS_ASSERT(!NexusDescriptor::isHDF(m_testHDF5Path, NexusDescriptor::Version4));
   }
 
   void test_isHDF_With_Version5_Returns_True_Only_For_HDF4()
   {
-    TS_ASSERT(HDFDescriptor::isHDF(m_testHDF5Path, HDFDescriptor::Version5));
-    TS_ASSERT(!HDFDescriptor::isHDF(m_testHDF4Path, HDFDescriptor::Version5));
+    TS_ASSERT(NexusDescriptor::isHDF(m_testHDF5Path, NexusDescriptor::Version5));
+    TS_ASSERT(!NexusDescriptor::isHDF(m_testHDF4Path, NexusDescriptor::Version5));
   }
 
   void test_isHDF_Throws_With_Invalid_Filename()
   {
-    TS_ASSERT_THROWS(HDFDescriptor::isHDF(""), std::invalid_argument);
+    TS_ASSERT_THROWS(NexusDescriptor::isHDF(""), std::invalid_argument);
   }
 
-  //=================================== HDFDescriptor methods ==================================
+  //=================================== NexusDescriptor methods ==================================
 
   void test_Constructor_Initializes_Object_Correctly_Given_HDF_File()
   {
@@ -93,17 +93,17 @@ public:
 
   void test_Constructor_Throws_With_Empty_filename()
   {
-    TS_ASSERT_THROWS(HDFDescriptor(""), std::invalid_argument);
+    TS_ASSERT_THROWS(NexusDescriptor(""), std::invalid_argument);
   }
 
   void test_Constructor_Throws_With_NonExistant_filename()
   {
-    TS_ASSERT_THROWS(HDFDescriptor("__ThisShouldBeANonExistantFile.txt"), std::invalid_argument);
+    TS_ASSERT_THROWS(NexusDescriptor("__ThisShouldBeANonExistantFile.txt"), std::invalid_argument);
   }
 
   void test_Constructor_Throws_When_Given_File_Not_Identified_As_HDF()
   {
-    TS_ASSERT_THROWS(HDFDescriptor fd(m_testNonHDFPath), std::invalid_argument);
+    TS_ASSERT_THROWS(NexusDescriptor fd(m_testNonHDFPath), std::invalid_argument);
   }
 
   void test_File_Handle_Returned_By_Data_Is_Valid()
@@ -174,8 +174,8 @@ private:
   std::string m_testHDF5Path;
   std::string m_testHDF4Path;
   std::string m_testNonHDFPath;
-  boost::shared_ptr<HDFDescriptor> m_testHDF5;
+  boost::shared_ptr<NexusDescriptor> m_testHDF5;
 };
 
 
-#endif /* MANTID_KERNEL_HDFDESCRIPTORTEST_H_ */
+#endif /* MANTID_KERNEL_NEXUSDESCRIPTORTEST_H_ */

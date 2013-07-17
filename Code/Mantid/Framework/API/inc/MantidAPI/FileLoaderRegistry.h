@@ -56,7 +56,7 @@ namespace Mantid
     public:
 
       /// Defines types of possible file
-      enum LoaderFormat { NonHDF, HDF };
+      enum LoaderFormat { Nexus, Generic };
 
     public:
       /// @returns the number of entries in the registry
@@ -103,18 +103,18 @@ namespace Mantid
         {
           switch(format)
           {
-          case HDF:
+          case Nexus:
             if(!boost::is_base_of<IHDFFileLoader,T>::value)
             {
               throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                                       "' registered as HDF loader but it does not inherit from Mantid::API::IHDFFileLoader");
+                                       "' registered as Nexus loader but it does not inherit from Mantid::API::IHDFFileLoader");
             }
             break;
-          case NonHDF:
+          case Generic:
             if(!boost::is_base_of<IFileLoader,T>::value)
             {
               throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                "' registered as Non-HDF loader but it does not inherit from Mantid::API::IFileLoader");
+                "' registered as Generic loader but it does not inherit from Mantid::API::IFileLoader");
             }
           break;
             default: throw std::runtime_error("Invalid LoaderFormat given");

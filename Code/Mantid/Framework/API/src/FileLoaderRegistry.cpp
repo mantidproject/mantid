@@ -87,20 +87,20 @@ namespace Mantid
     const boost::shared_ptr<IAlgorithm> FileLoaderRegistryImpl::chooseLoader(const std::string &filename) const
     {
       using Kernel::FileDescriptor;
-      using Kernel::HDFDescriptor;
+      using Kernel::NexusDescriptor;
 
       m_log.debug() << "Trying to find loader for '" << filename << "'" << std::endl;
 
       IAlgorithm_sptr bestLoader;
-      if(HDFDescriptor::isHDF(filename))
+      if(NexusDescriptor::isHDF(filename))
       {
-        m_log.debug() << filename << " looks like a HDF file. Checking registered HDF loaders\n";
-        bestLoader = searchForLoader<HDFDescriptor,IHDFFileLoader>(filename, m_names[HDF], m_log);
+        m_log.debug() << filename << " looks like a Nexus file. Checking registered Nexus loaders\n";
+        bestLoader = searchForLoader<NexusDescriptor,IHDFFileLoader>(filename, m_names[Nexus], m_log);
       }
       else
       {
         m_log.debug() << "Checking registered non-HDF loaders\n";
-        bestLoader = searchForLoader<FileDescriptor,IFileLoader>(filename, m_names[NonHDF], m_log);
+        bestLoader = searchForLoader<FileDescriptor,IFileLoader>(filename, m_names[Generic], m_log);
       }
 
       if(!bestLoader)
@@ -121,21 +121,21 @@ namespace Mantid
     bool FileLoaderRegistryImpl::canLoad(const std::string & algorithmName,const std::string & filename) const
     {
       using Kernel::FileDescriptor;
-      using Kernel::HDFDescriptor;
+      using Kernel::NexusDescriptor;
 
       // Check if it is in one of our lists
-      bool hdf(false),nonHDF(false);
-      if(m_names[HDF].find(algorithmName) != m_names[HDF].end()) hdf = true;
-      else if(m_names[NonHDF].find(algorithmName) != m_names[NonHDF].end()) nonHDF = true;
+      bool nexus(false),nonHDF(false);
+      if(m_names[Nexus].find(algorithmName) != m_names[Nexus].end()) nexus = true;
+      else if(m_names[Generic].find(algorithmName) != m_names[Generic].end()) nonHDF = true;
 
-      if(!hdf && !nonHDF) throw std::invalid_argument("FileLoaderRegistryImpl::canLoad - Algorithm '" + algorithmName + "' is not registered as a loader.");
+      if(!nexus && !nonHDF) throw std::invalid_argument("FileLoaderRegistryImpl::canLoad - Algorithm '" + algorithmName + "' is not registered as a loader.");
 
       std::multimap<std::string,int> names;
       names.insert(std::make_pair(algorithmName, -1));
       IAlgorithm_sptr loader;
-      if(hdf && HDFDescriptor::isHDF(filename))
+      if(nexus && NexusDescriptor::isHDF(filename))
       {
-        loader = searchForLoader<HDFDescriptor,IHDFFileLoader>(filename, names, m_log);
+        loader = searchForLoader<NexusDescriptor,IHDFFileLoader>(filename, names, m_log);
       }
       else
       {

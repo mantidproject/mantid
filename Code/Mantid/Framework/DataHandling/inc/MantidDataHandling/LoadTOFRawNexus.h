@@ -64,7 +64,7 @@ public:
   static std::string getEntryName(const std::string & filename);
 
   /// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::HDFDescriptor & descriptor) const;
+  virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
   void countPixels(const std::string &nexusfilename, const std::string & entry_name,
        std::vector<std::string> & bankNames);

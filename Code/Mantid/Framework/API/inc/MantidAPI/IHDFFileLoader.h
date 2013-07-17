@@ -2,7 +2,7 @@
 #define MANTID_API_IHDFFILELOADER_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/HDFDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 namespace Mantid
 {
@@ -11,7 +11,7 @@ namespace Mantid
     /**
 
     Defines an interface to an algorithm that loads a file stored in a hierarchical data
-    format. This supports anything the HDFDescriptor can wrap, currently = NeXus, HDF5
+    format. This supports anything the NexusDescriptor can wrap, currently = NeXus, HDF5
 
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -39,7 +39,7 @@ namespace Mantid
       /// Virtual destructor (required by linker on some versions of OS X/Intel compiler)
       virtual ~IHDFFileLoader() {}
       /// Returns a confidence value that this algorithm can load a file
-      virtual int confidence(Kernel::HDFDescriptor & descriptor) const = 0;
+      virtual int confidence(Kernel::NexusDescriptor & descriptor) const = 0;
     };
 
   } // namespace API

@@ -69,7 +69,7 @@ namespace Mantid
   namespace DataHandling
   {
     // Register the algorithm into the algorithm factory
-    DECLARE_HDF_FILELOADER_ALGORITHM(LoadMuonNexus1);
+    DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1);
 
     /// Sets documentation strings for this algorithm
     void LoadMuonNexus1::initDocs()
@@ -639,7 +639,7 @@ namespace Mantid
      * @param descriptor A descriptor for the file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
-    int LoadMuonNexus1::confidence(Kernel::HDFDescriptor & descriptor) const
+    int LoadMuonNexus1::confidence(Kernel::NexusDescriptor & descriptor) const
     {
       const auto & firstEntryNameType = descriptor.firstEntryNameType();
       const std::string root = "/" + firstEntryNameType.first;

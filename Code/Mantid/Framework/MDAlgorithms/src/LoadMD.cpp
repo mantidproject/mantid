@@ -56,7 +56,7 @@ namespace Mantid
   namespace MDAlgorithms
   {
 
-    DECLARE_HDF_FILELOADER_ALGORITHM(LoadMD);
+    DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD);
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
@@ -78,7 +78,7 @@ namespace Mantid
      * @param descriptor A descriptor for the file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
-    int LoadMD::confidence(Kernel::HDFDescriptor & descriptor) const
+    int LoadMD::confidence(Kernel::NexusDescriptor & descriptor) const
     {
       int confidence(0);
       const auto & rootPathNameType = descriptor.firstEntryNameType();

@@ -45,7 +45,7 @@ would tell the algorithm to interpret the columns as:
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
-#include "MantidKernel/HDFDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 #include "LoadRaw/isisraw2.h"
@@ -134,10 +134,10 @@ namespace Mantid
       m_ignoreMonitors = (!moveMonitors);
 
       // Check file type
-      if(HDFDescriptor::isHDF(filename))
+      if(NexusDescriptor::isHDF(filename))
       {
         LoadISISNexus2 isisNexus;
-        auto *descriptor = new Kernel::HDFDescriptor(filename);
+        auto *descriptor = new Kernel::NexusDescriptor(filename);
         if(isisNexus.confidence(*descriptor) > 0)
         {
           delete descriptor;

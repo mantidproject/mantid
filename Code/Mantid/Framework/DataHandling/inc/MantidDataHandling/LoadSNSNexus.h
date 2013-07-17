@@ -59,7 +59,7 @@ namespace Mantid
       virtual const std::string category() const { return "Deprecated"; }
 
       /// Returns a confidence value that this algorithm can load a file (Required by base class)
-      virtual int confidence(Kernel::HDFDescriptor &) const { return 0; }
+      virtual int confidence(Kernel::NexusDescriptor &) const { return 0; }
     };
 
   } // namespace DataHandling

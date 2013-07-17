@@ -26,7 +26,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_HDF_FILELOADER_ALGORITHM(LoadSINQ);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQ);
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -72,7 +72,7 @@ void LoadSINQ::initDocs() {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadSINQ::confidence(Kernel::HDFDescriptor & descriptor) const
+int LoadSINQ::confidence(Kernel::NexusDescriptor & descriptor) const
 {
 	const std::string path = descriptor.pathOfType("NXinstrument");
 	g_log.debug() << "Path of type NXinstrument: " << path << std::endl;

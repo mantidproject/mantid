@@ -52,7 +52,7 @@ namespace DataHandling
     virtual const std::string category() const { return "DataHandling\\Nexus;DataHandling\\SPE;Inelastic";}
 
     /// Returns a confidence value that this algorithm can load a file
-    virtual int confidence(Kernel::HDFDescriptor & descriptor) const;
+    virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
   private:
     /// Sets documentation strings for this algorithm

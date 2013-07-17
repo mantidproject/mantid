@@ -59,7 +59,7 @@ public:
 	}
 
 	/// Returns a confidence value that this algorithm can load a file
-	int confidence(Kernel::HDFDescriptor & descriptor) const;
+        int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
 	/// Sets documentation strings for this algorithm
