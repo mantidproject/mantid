@@ -1,11 +1,12 @@
 #include "MantidQtMantidWidgets/MWRunFiles.h"
 
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/MultipleFileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MultipleFileProperty.h"
+#include "MantidAPI/LiveListenerFactory.h"
 
 #include <QStringList>
 #include <QFileDialog>
@@ -188,7 +189,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(false), 
     m_isOptional(false), m_multiEntry(false), m_buttonOpt(Text), m_fileProblem(""),
     m_entryNumProblem(""), m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
-    m_foundFiles(), m_lastDir(), m_fileFilter()
+    m_liveButtonState(Hide), m_foundFiles(), m_lastDir(), m_fileFilter()
 {
   m_thread = new FindFilesThread(this);
   
@@ -220,6 +221,8 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   }
 
   doButtonOpt(m_buttonOpt);
+
+  liveButtonState(m_liveButtonState);
 
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(m_uiForm.fileEditor);
@@ -427,11 +430,41 @@ bool MWRunFiles::extsAsSingleOption() const
 
 /**
  * Sets whether the file dialog should display the exts as a single list or as multiple items
- * @@param value :: If true the file dialog wil contain a single entry will all filters
+ * @param value :: If true the file dialog wil contain a single entry will all filters
  */
 void MWRunFiles::extsAsSingleOption(const bool value)
 {
   m_extsAsSingleOption = value;
+}
+
+/// Returns whether the live button is being shown;
+MWRunFiles::LiveButtonOpts MWRunFiles::liveButtonState() const
+{
+  return m_liveButtonState;
+}
+
+void MWRunFiles::liveButtonState(const LiveButtonOpts option)
+{
+  m_liveButtonState = option;
+  if ( m_liveButtonState == Hide )
+  {
+    m_uiForm.liveButton->hide();
+  }
+  else
+  {
+    // Checks whether it's possible to connect to the user's default instrument
+    const bool canConnect = LiveListenerFactory::Instance().checkConnection(ConfigService::Instance().getInstrument().name());
+    if ( m_liveButtonState == AlwaysShow || canConnect )
+    {
+      m_uiForm.liveButton->setEnabled(canConnect);
+      m_uiForm.liveButton->show();
+    }
+  }
+}
+
+bool MWRunFiles::liveButtonIsChecked() const
+{
+  return m_uiForm.liveButton->isChecked();
 }
 
 /**

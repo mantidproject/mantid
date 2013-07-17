@@ -100,7 +100,9 @@ namespace MantidQt
       Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE setAlgorithmProperty)
       Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
       Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
+      Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
       Q_ENUMS(ButtonOpts)
+      Q_ENUMS(LiveButtonOpts)
 
     public:
       /// options for bringing up the load file dialog
@@ -115,6 +117,13 @@ namespace MantidQt
       {
         NO_ENTRY_NUM = -1,          ///< error in the entry number setting
         ALL_ENTRIES = -2            ///< use all entries (i.e. entry number was left blank)
+      };
+      /// Options for the live button
+      enum LiveButtonOpts
+      {
+        Hide,            ///< Don't use the live button
+        AlwaysShow,      ///< Show whether a connection is possible or not (will be disabled)
+        ShowIfCanConnect ///< Only show if able to connect to the live data server
       };
 
       ///Default constructor
@@ -143,6 +152,10 @@ namespace MantidQt
       void setFileExtensions(const QStringList & extensions);
       bool extsAsSingleOption() const;
       void extsAsSingleOption(const bool value);
+      LiveButtonOpts liveButtonState() const;
+      void liveButtonState(const LiveButtonOpts);
+
+      bool liveButtonIsChecked() const;
       bool isEmpty() const;
       QString getText() const;
 
@@ -232,6 +245,8 @@ namespace MantidQt
       QStringList m_fileExtensions;
       /// If true the exts are displayed as one option in the dialog
       bool m_extsAsSingleOption;
+      /// If or when live button will be shown
+      LiveButtonOpts m_liveButtonState;
 
       /// The Ui form
       Ui::MWRunFiles m_uiForm;
