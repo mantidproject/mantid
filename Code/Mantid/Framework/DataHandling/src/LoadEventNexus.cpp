@@ -855,17 +855,23 @@ public:
     if (m_max_id > static_cast<uint32_t>(alg->eventid_max)) m_max_id = static_cast<uint32_t>(alg->eventid_max);
 
     // schedule the job to generate the event lists
-    auto mid_id = (m_max_id + m_min_id) / 2;
+    auto mid_id = m_max_id;
+    if (alg->splitProcessing)
+      mid_id = (m_max_id + m_min_id) / 2;
+
     ProcessBankData * newTask1 = new ProcessBankData(alg, entry_name, prog,scheduler,
         event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
         thisBankPulseTimes, m_have_weight, event_weight_shrd,
         m_min_id, mid_id);
     scheduler->push(newTask1);
-    ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,scheduler,
-        event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
-        thisBankPulseTimes, m_have_weight, event_weight_shrd,
-        (mid_id+1), m_max_id);
-    scheduler->push(newTask2);
+    if (alg->splitProcessing)
+    {
+      ProcessBankData * newTask2 = new ProcessBankData(alg, entry_name, prog,scheduler,
+                                           event_id_shrd, event_time_of_flight_shrd, numEvents, startAt, event_index_shrd,
+                                           thisBankPulseTimes, m_have_weight, event_weight_shrd,
+                                           (mid_id+1), m_max_id);
+      scheduler->push(newTask2);
+    }
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -1283,6 +1289,62 @@ void LoadEventNexus::resizeFrom(std::vector<WeightedEventVector_pt> &vec,
   vec.resize(size, &el.getWeightedEvents());
 }
 
+/**
+ * Get the number of events in the currently opened group.
+ *
+ * @param file The handle to the nexus file opened to the group to look at.
+ * @param hasTotalCounts Whether to try looking at the total_counts field. This
+ * variable will be changed if the field is not there.
+ * @param oldNeXusFileNames Whether to try using old names. This variable will
+ * be changed if it is determined that old names are being used.
+ *
+ * @return The number of events.
+ */
+std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts, bool &oldNeXusFileNames)
+{
+  // try getting the value of total_counts
+  if (hasTotalCounts)
+  {
+    try
+    {
+      uint64_t numEvents;
+      file.readData("total_counts", numEvents);
+      return numEvents;
+    }
+    catch (::NeXus::Exception& )
+    {
+      hasTotalCounts=false; // carry on with the field not existing
+    }
+  }
+
+  // just get the length of the event pixel ids
+  try
+  {
+    if (oldNeXusFileNames)
+      file.openData("event_pixel_id");
+    else
+      file.openData("event_id");
+  }
+  catch (::NeXus::Exception& )
+  {
+    // Older files (before Nov 5, 2010) used this field.
+    try
+    {
+      file.openData("event_pixel_id");
+      oldNeXusFileNames = true;
+    }
+    catch(::NeXus::Exception&)
+    {
+      // Some groups have neither indicating there are not events here
+      return 0;
+    }
+  }
+
+  size_t numEvents = static_cast<std::size_t>(file.getInfo().dims[0]);
+  file.closeData();
+  return numEvents;
+}
+
 //-----------------------------------------------------------------------------
 /**
  * Load events from the file
@@ -1343,6 +1405,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   ::NeXus::Info info;
   bool oldNeXusFileNames(false);
+  bool hasTotalCounts(true);
   m_haveWeights = false;
   for (; it != entries.end(); ++it)
   {
@@ -1350,36 +1413,19 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     std::string entry_class(it->second);
     if ( entry_class == classType )
     {
+      // open the group
       file.openGroup(entry_name, classType);
+
+      // get the number of events
+      std::size_t num = numEvents(file, hasTotalCounts, oldNeXusFileNames);
+      if (num == 0)
+      {
+        file.closeGroup();
+        continue;
+      }
       bankNames.push_back( entry_name );
-      try
-      {
-        if (oldNeXusFileNames)
-          file.openData("event_pixel_id");
-        else
-          file.openData("event_id");
-      }
-      catch (::NeXus::Exception& )
-      {
-        // Older files (before Nov 5, 2010) used this field.
-        try
-        {
-          file.openData("event_pixel_id");
-          oldNeXusFileNames = true;
-        }
-        catch(::NeXus::Exception&)
-        {
-          // Some groups have neither indicating there are not events here
-          file.closeGroup();
-          bankNumEvents.push_back(0);
-          continue;
-        }
-
-      }
-
-      bankNumEvents.push_back(static_cast<std::size_t>(file.getInfo().dims[0]));
-      total_events +=static_cast<std::size_t>(file.getInfo().dims[0]);
-      file.closeData();
+      bankNumEvents.push_back(num);
+      total_events += num;
 
       // Look for weights in simulated file
       try
@@ -1599,6 +1645,10 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
       bankNumEvents[i] = stop_event - start_event;
     }
   }
+
+  // split banks up if the number of cores is more than twice the number of banks
+  splitProcessing = bool(bankNames.size() * 2 < ThreadPool::getNumPhysicalCores());
+
   for (size_t i=bank0; i < bankn; i++)
   {
     // We make tasks for loading

@@ -230,7 +230,8 @@ namespace Mantid
       std::string m_top_entry_name;
       /// Set the top entry field name
       void setTopEntryName();
-
+      /// whether or not to launch multiple ProcessBankData jobs per bank
+      bool splitProcessing;
     };
 
   } // namespace DataHandling
