@@ -19,6 +19,7 @@
 //----------------------------------
 #include "DllOption.h"
 #include "InterfaceFactory.h"
+#include "PythonRunner.h"
 
 #include <QWidget>
 #include <QStringList>
@@ -153,6 +154,9 @@ private:
   bool m_isPyInitialized;
   /// Store the name of the interface
   QString m_ifacename;
+
+  /// Python executor
+  PythonRunner m_pythonRunner;
 };
 
 }
