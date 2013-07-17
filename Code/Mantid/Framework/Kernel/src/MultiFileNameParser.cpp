@@ -198,7 +198,7 @@ namespace Kernel
       m_validInstNames()
     {
       ConfigServiceImpl & config = ConfigService::Instance();
-
+      FacilityInfo facility = config.getFacility();
       std::string supportedFacilities = config.getString("supported.facilities");
 
       std::vector<std::string> allFacilityNames;
