@@ -201,7 +201,11 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
   for(size_t i=0;i<m_NDims;i++)
   {
       if(m_DimUnits[i] != NewMDWorkspaceD.m_DimUnits[i])
-        throw std::runtime_error("The existing MDEventWorkspace has different dimenson units than were requested! Either give a different worspace as the output, or change the OutputDimensions parameter.");
+      {
+        throw std::runtime_error("The target MDEventWorkspace dimension N: "+boost::lexical_cast<std::string>(i)+" has units: "+m_DimUnits[i]+ 
+                                 " different from the requested: "+NewMDWorkspaceD.m_DimUnits[i]+
+                                 "\n Either give a different worspace as the output, or change the OutputDimensions parameter.");
+      }
   }
 
 
