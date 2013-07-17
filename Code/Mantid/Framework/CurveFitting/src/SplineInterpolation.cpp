@@ -73,7 +73,7 @@ namespace Mantid
           "The workspace containing the calculated points and derivatives");
 
       auto validator = boost::make_shared<BoundedValidator<int> >(0, 2);
-      declareProperty("Order", 2, validator, "Order to derivatives to calculate.");
+      declareProperty("DerivOrder", 2, validator, "Order to derivatives to calculate.");
     }
 
     //----------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ namespace Mantid
     void SplineInterpolation::exec()
     {
       //read in algorithm parameters
-      int order = static_cast<int>(getProperty("Order"));
+      int order = static_cast<int>(getProperty("DerivOrder"));
 
       MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");
       MatrixWorkspace_sptr iws = getProperty("WorkspaceToInterpolate");
