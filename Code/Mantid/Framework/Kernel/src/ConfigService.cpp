@@ -1594,18 +1594,12 @@ const std::vector<std::string> ConfigServiceImpl::getFacilityNames()const
  */
 const FacilityInfo& ConfigServiceImpl::getFacility() const
 {
-
-/** Get the default facility
- * @return the facility information object
- */
-const FacilityInfo& ConfigServiceImpl::getFacility() const
-{
   std::string defFacility = getString("default.facility");
   if (defFacility.empty())
   {
     defFacility = "ISIS";
   }
-  return getFacility(defFacility);
+  return this->getFacility(defFacility);
 }
 
 /**

@@ -124,9 +124,9 @@ public:
 
     TS_ASSERT_LESS_THAN(0,names.size());
     TS_ASSERT_EQUALS(facilities.size(),names.size());
-    auto itFacilities = m_facilities.begin();
+    auto itFacilities = facilities.begin();
     auto itNames = names.begin();
-    for (; itFacilities != m_facilities.end(); ++itFacilities,++itNames)
+    for (; itFacilities != facilities.end(); ++itFacilities,++itNames)
     {
       TS_ASSERT_EQUALS(*itNames, (**itFacilities).name());
     }
