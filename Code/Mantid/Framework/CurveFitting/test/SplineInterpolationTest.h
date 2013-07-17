@@ -41,7 +41,7 @@ public:
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Order", 2));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DerivOrder", 2));
 
     //create a binned workspaces
     MatrixWorkspace_sptr iws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 1);
