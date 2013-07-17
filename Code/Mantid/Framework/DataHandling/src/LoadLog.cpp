@@ -111,8 +111,118 @@ void LoadLog::init()
 
 }
 
-/** Check if the file is SNS text; load it if it is, return false otherwise.
- *
+/**
+ * Executes the algorithm. Reading in ISIS log file(s)
+ * @throw Mantid::Kernel::Exception::FileError  Thrown if file is not recognised to be a raw datafile or log file
+ * @throw std::runtime_error Thrown with Workspace problems
+ */
+void LoadLog::exec()
+{
+  // Retrieve the filename from the properties and perform some initial checks on the filename
+  m_filename = getPropertyValue("Filename");
+
+  // File property checks whether the given path exists, just check that is actually a file
+  Poco::File l_path( m_filename );
+  if ( l_path.isDirectory() )
+  {
+    g_log.error("In LoadLog: " + m_filename + " must be a filename not a directory.");
+    throw Exception::FileError("Filename is a directory:" , m_filename);
+  }
+
+  // Get the input workspace and retrieve run from workspace.
+  // the log file(s) will be loaded into the run object of the workspace
+  const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
+
+  if ( isAscii(m_filename) )
+  {
+    // Is it a SNS style file? If so, we load it and abort.
+    if ( LoadSNSText() )
+    {
+      return;
+    } // Otherwise we continue.
+  }
+
+  //.if a .log file exists in the raw file directory
+  std::string threecolumnLogfile = getThreeColumnName();
+  if ( !threecolumnLogfile.empty() )
+  {
+    createthreecolumnFileLogProperty( threecolumnLogfile,localWorkspace->mutableRun() );
+    return;
+  }
+
+  std::ifstream inLogFile(m_filename.c_str());
+
+  if (!inLogFile)
+  {
+    g_log.warning("Unable to open file " + m_filename);
+  }
+
+  // Now working with two column log files (ISIS)
+  std::string logFileName = getProperty("Names");
+
+  // figure out if second column is a number or a string
+  std::string aLine;
+  if( Mantid::Kernel::extractToEOL(inLogFile,aLine) )
+  {
+    if ( !isDateTimeString(aLine) )
+    {
+      g_log.warning("File" + m_filename + " is not a standard ISIS log file. Expected to be a two column file.");
+      inLogFile.close();
+    }
+
+    std::string DateAndTime;
+    std::stringstream ins(aLine);
+    ins >> DateAndTime;
+
+    // read in what follows the date-time string in the log file and figure out what type it is
+    std::string whatType;
+    ins >> whatType;
+    kind l_kind = classify(whatType);
+
+    if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
+    {
+      g_log.warning("ISIS log file contains unrecognised second column entries: " + m_filename);
+      inLogFile.close();
+    }
+
+    try
+    {
+      Property* log = LogParser::createLogProperty(m_filename,stringToLower(extractLogName(logFileName)));
+      if (log)
+      {
+        localWorkspace->mutableRun().addLogData(log);
+      }
+    }
+    catch(std::exception&)
+    {
+      inLogFile.close();
+    }
+  }
+  inLogFile.close();
+  // operation was a success and ended normally
+  return;
+}
+
+/**
+ * Check if log file property name has been set. If it has, then return it.
+ * Otherwise we return the workspace name and log file name (e.g. HRP37129_ICPevent).
+ * @param logName :: The name of the log file.
+ * @return The name of the log file.
+ */
+std::string LoadLog::extractLogName(std::string logName)
+{
+  if(!logName.empty())
+  {
+    return (logName);
+  }
+  else
+  {
+    return (Poco::Path(Poco::Path(m_filename).getFileName()).getBaseName());
+  }
+}
+
+/**
+ * Check if the file is SNS text; load it if it is, return false otherwise.
  * @return true if the file was a SNS style; false otherwise.
  */
 bool LoadLog::LoadSNSText()
@@ -191,121 +301,10 @@ bool LoadLog::LoadSNSText()
   return true;
 }
 
-
-
-/** Executes the algorithm. Reading in ISIS log file(s)
- * 
- *  @throw Mantid::Kernel::Exception::FileError  Thrown if file is not recognised to be a raw datafile or log file
- *  @throw std::runtime_error Thrown with Workspace problems
- */
-void LoadLog::exec()
-{
-  // Retrieve the filename from the properties and perform some initial checks on the filename
-  m_filename = getPropertyValue("Filename");
-  std::string logFileName = getPropertyValue("Names");
-
-  // File property checks whether the given path exists, just check that is actually a file 
-  Poco::File l_path( m_filename );
-  if ( l_path.isDirectory() )
-  {
-    g_log.error("In LoadLog: " + m_filename + " must be a filename not a directory.");
-    throw Exception::FileError("Filename is a directory:" , m_filename);
-  }
-
-  // Get the input workspace and retrieve run from workspace.
-  // the log file(s) will be loaded into the run object of the workspace 
-  const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
-
-  if ( isAscii(m_filename) )
-  {
-    // Is it a SNS style file? If so, we load it and abort.
-    if ( LoadSNSText() )
-    {
-      return;
-    } // Otherwise we continue.
-  }
-
-  //.if a .log file exists in the raw file directory
-  // (This is a search, so perhaps move to LoadRawHelper?)
-  std::string threecolumnLogfile = getThreeColumnName();
-  if ( !threecolumnLogfile.empty() )
-  {
-    createthreecolumnFileLogProperty( threecolumnLogfile,localWorkspace->mutableRun() );
-  }
-
-  std::ifstream inLogFile(m_filename.c_str());
-
-  if (!inLogFile)
-  {
-    g_log.warning("Unable to open file " + m_filename);
-  }
-
-  // figure out if second column is a number or a string
-  std::string aLine;
-  if( Mantid::Kernel::extractToEOL(inLogFile,aLine) )
-  {
-    if ( !isDateTimeString(aLine) )
-    {
-      g_log.warning("File" + m_filename + " is not a standard ISIS log file. Expected to be a two column file.");
-      inLogFile.close();
-    }
-
-    std::string DateAndTime;
-    std::stringstream ins(aLine);
-    ins >> DateAndTime;
-
-    // read in what follows the date-time string in the log file and figure out what type it is
-    std::string whatType;
-    ins >> whatType;
-    kind l_kind = classify(whatType);
-
-    if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
-    {
-      g_log.warning("ISIS log file contains unrecognised second column entries: " + m_filename);
-      inLogFile.close();
-    }
-
-    try
-    {
-      std::cout << "FILENAME: " << m_filename << std::endl;
-      std::cout << "LOGNAME:  " << logFileName << std::endl;
-      std::cout << "LN FROM FUNCTION: " << (createLogFileName(logFileName)) << std::endl;
-      std::cout << std::endl;
-
-      Property* log = LogParser::createLogProperty(m_filename,stringToLower(createLogFileName(logFileName)));
-      if (log)
-      {
-        localWorkspace->mutableRun().addLogData(log);
-      }
-    }
-    catch(std::exception&)
-    {
-      inLogFile.close();
-    }
-  }
-  inLogFile.close();
-  // operation was a success and ended normally
-  return;
-}
-
-
-std::string LoadLog::createLogFileName(std::string fileName)
-{
-  if(fileName.empty())
-  {
-    std::string path = Poco::Path(Poco::Path(m_filename).getFileName()).getBaseName();
-    return (path.substr(path.find_first_of('_') + 1));
-//    return (path);
-  }
-  else
-  {
-    return (fileName);
-  }
-}
-
-/** Return the name of the three column log file if we have one.
+/**
+ * Return the name of the three column log file if we have one.
  * @returns A string containing the full log file path to a three column log file if one exists. An empty string otherwise.
-*/
+ */
 std::string LoadLog::getThreeColumnName() const
 {
   std::string rawID;
@@ -370,7 +369,8 @@ std::string LoadLog::getThreeColumnName() const
   else return "";
 }
 
-/** This method reads the.log file and creates timeseries property and sets that to the run object
+/**
+ * This method reads the.log file and creates timeseries property and sets that to the run object
  * @param logfile :: three column log(.log) file name.
  * @param run :: The run information object
  * @returns list of logfiles which exists as blockname in the .log file
@@ -493,7 +493,8 @@ std::set<std::string> LoadLog::createthreecolumnFileLogProperty(const std::strin
 
 }
 
-/** this method looks for file with second column(block column) name exists in the raw file directory
+/**
+ * This method looks for file with second column(block column) name exists in the raw file directory
  * @param fileName :: -name of the file
  * @return True if the file exists
  */
@@ -503,10 +504,11 @@ bool LoadLog::blockcolumnFileExists(const std::string& fileName)
   else return false;
 }
 
-/** Takes as input a string and try to determine what type it is.
- *  @param s :: The input string
- *  @param s ::  string to be classified
- *  @return A enum kind which tells what type the string is
+/**
+ * Takes as input a string and try to determine what type it is.
+ * @param s :: The input string
+ * @param s ::  string to be classified
+ * @return A enum kind which tells what type the string is
  */
 LoadLog::kind LoadLog::classify(const std::string& s) const
 {
@@ -530,7 +532,8 @@ LoadLog::kind LoadLog::classify(const std::string& s) const
   }
 }
 
-/** change each element of the string to lower case
+/**
+ * Change each element of the string to lower case
  * @param strToConvert :: The input string
  * @returns The string but with all characters in lower case
  */
@@ -540,7 +543,8 @@ std::string LoadLog::stringToLower(std::string strToConvert)
   return strToConvert;
 }
 
-/** Checks whether filename is a simple text file
+/**
+ * Checks whether filename is a simple text file
  * @param filename :: The filename to inspect
  * @returns true if the filename has the .txt extension
  */
@@ -567,7 +571,8 @@ bool LoadLog::isAscii(const std::string& filename)
   return true;
 }
 
-/** check if first 19 characters of a string is date-time string according to yyyy-mm-ddThh:mm:ss
+/**
+ * Check if first 19 characters of a string is date-time string according to yyyy-mm-ddThh:mm:ss
  * @param str :: The string to test
  * @returns true if the strings format matched the expected date format
  */
@@ -577,8 +582,8 @@ bool LoadLog::isDateTimeString(const std::string& str) const
 }
 
 
-/** Read a line of a SNS-style text file.
- *
+/**
+ * Read a line of a SNS-style text file.
  * @param str :: The string to test
  * @param out :: a vector that will be filled with the double values.
  * @return false if the format is NOT SNS style or a conversion failed.

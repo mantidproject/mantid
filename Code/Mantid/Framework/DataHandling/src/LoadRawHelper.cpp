@@ -665,24 +665,18 @@ namespace Mantid
       }
 
       progress(m_prog, "Reading log files...");
-
       IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
 
       //Iterate over the set, and load each log file into the localWorkspace.
-      std::set<std::string>::const_iterator location;
-      for (location = logFiles.begin(); location != logFiles.end(); ++location)
+      std::set<std::string>::const_iterator logFileName;
+      for (logFileName = logFiles.begin(); logFileName != logFiles.end(); ++logFileName)
       {
-        std::cout << "Location: " << *location << std::endl;
         // Pass through the same input filename
-        loadLog->setPropertyValue("Filename", *location);
+        loadLog->setPropertyValue("Filename", *logFileName);
         // Set the workspace property to be the same one filled above
         loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
-
-        // Find the name of the file
-        std::string logName = extractLogName(*location);
-
         // Pass the name of the log file explicitly to LoadLog.
-//        loadLog->setPropertyValue("Names", extractLogName(*location));
+        loadLog->setPropertyValue("Names", extractLogName(*logFileName));
 
         // Enable progress reporting by Child Algorithm - if progress range has duration
         if ( progStart < progEnd )
@@ -707,7 +701,6 @@ namespace Mantid
           g_log.error("Unable to successfully run LoadLog Child Algorithm");
         }
       }
-
       // Make log creator object and add the run status log if we have the appropriate ICP log
       m_logCreator.reset(new ISISRunLogs(localWorkspace->run(), m_numberOfPeriods));
       m_logCreator->addStatusLog(localWorkspace->mutableRun());
@@ -720,9 +713,8 @@ namespace Mantid
      */
     std::string LoadRawHelper::extractLogName(std::string path)
     {
-      std::string loc(path);
-      size_t pos = loc.find('_');
-      std::string logName = loc.substr(pos + 1);
+      size_t pos = path.find('_');
+      std::string logName = path.substr(pos + 1);
       logName.erase(logName.find_last_of('.'));
       return (logName);
     }

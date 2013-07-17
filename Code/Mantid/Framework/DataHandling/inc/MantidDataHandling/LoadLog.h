@@ -110,7 +110,7 @@ namespace Mantid
       /// Check if first 19 characters of a string is data-time string according to yyyy-mm-ddThh:mm:ss
       bool isDateTimeString(const std::string& str) const;
       /// Checks if a log file name was provided (e.g. through setPropertyValue). If not it creates one based on provided path.
-      std::string createLogFileName(std::string fileName);
+      std::string extractLogName(std::string fileName);
       /// Return the name of the three column log file for associated with the specified file. Empty string if one doesn't exist
       std::string getThreeColumnName() const;
       /// Check for SNS-style text file
