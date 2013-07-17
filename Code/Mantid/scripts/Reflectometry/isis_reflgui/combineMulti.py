@@ -1,10 +1,11 @@
 #from ReflectometerCors import *
 from l2q import *
-from mantidsimple import *
+from mantid.simpleapi import *
 #from mantid.simpleapi import *  # New API
 #from mantidplot import *
 from PyQt4 import QtCore, uic
 import math
+from mantid.api import WorkspaceGroup
 
 def combineDataMulti(wkspList,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh=1,scalefactor=-1.0,whichPeriod=1,keep=0):
 	'''
@@ -23,7 +24,7 @@ def combineDataMulti(wkspList,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning
 		defaultoverlaps = 0
 		
     #copy first workspace into temporary wksp 'currentSum'
-	CropWorkspace(wkspList[0],'currentSum')
+	CropWorkspace(InputWorkspace=wkspList[0],OutputWorkspace='currentSum')
 	print "Length: ",len(wkspList),wkspList
 	
 	for i in range(0,len(wkspList)-1):
@@ -37,17 +38,17 @@ def combineDataMulti(wkspList,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning
 			overlapHigh = endoverlap[i]
 			
         #check if multiperiod
-		if (mtd['currentSum'].isGroup()):
+		if isinstance(mtd['currentSum'], WorkspaceGroup):
 			tempwksp,sf = combine2('currentSum_'+str(whichPeriod),wkspList[i+1]+'_'+str(whichPeriod),'_currentSum',overlapLow,overlapHigh,Qmin,Qmax,binning,scalehigh)
             #if (sum(mtd['currentSum_2'].dataY(0))):
 			print tempwksp, sf
 			
-			mtd.deleteWorkspace("_currentSum")
+			DeleteWorkspace("_currentSum")
 			#CropWorkspace(wkspList[0],'currentSum')
 			print wkspList
 			combine2('currentSum',wkspList[i+1],'temp',overlapLow,overlapHigh,Qmin,Qmax,binning,scalehigh,sf)
-			CropWorkspace('temp','currentSum')
-			mtd.deleteWorkspace("temp")
+			CropWorkspace(InputWorkspace='temp',OutputWorkspace='currentSum')
+			DeleteWorkspace("temp")
             #else:
 			
 			#	combine2('currentSum_1',wkspList[i+1]+'_1','currentSum',begoverlap,endoverlap,Qmin,Qmax,binning,sf)
@@ -55,14 +56,14 @@ def combineDataMulti(wkspList,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning
 		else:
 			print "Iteration",i
 			combine2('currentSum',wkspList[i+1],'currentSum',overlapLow,overlapHigh,Qmin,Qmax,binning,scalehigh)
-	RenameWorkspace('currentSum',outputwksp)
+	RenameWorkspace(InputWorkspace='currentSum',OutputWorkspace=outputwksp)
 	if not keep:
-		names = mtd.getWorkspaceNames()
+		names = mtd.getObjectNames()
 		for ws in wkspList:
 			#print ws.rstrip("_binned")
-			mtd.deleteWorkspace(ws)
-			mtd.deleteWorkspace(ws.rstrip("_IvsQ_binned")+"_IvsLam")
-			mtd.deleteWorkspace(ws.rstrip("_IvsQ_binned")+"_IvsQ")
+			DeleteWorkspace(ws)
+			DeleteWorkspace(ws.rstrip("_IvsQ_binned")+"_IvsLam")
+			DeleteWorkspace(ws.rstrip("_IvsQ_binned")+"_IvsQ")
 	return mtd[outputwksp]
 
 
@@ -70,16 +71,16 @@ def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scal
     import numpy as np
 
     print "OVERLAPS:", begoverlap, endoverlap
-    Rebin(wksp1,wksp1+"reb",str(Qmin)+","+str(binning)+","+str(Qmax))
+    Rebin(InputWorkspace=wksp1,OutputWorkspace=wksp1+"reb",Params=str(Qmin)+","+str(binning)+","+str(Qmax))
     w1=getWorkspace(wksp1+"reb")
     #nzind=np.nonzero(w1.dataY(0))[0]
     #w1.dataY(0)[int(nzind[0])]=0.0	#set  edge of zeropadding to zero
     
-    RebinToWorkspace(wksp2,wksp1+"reb",wksp2+"reb")
+    RebinToWorkspace(WorkspaceToRebin=wksp2,WorkspaceToMatch=wksp1+"reb",OutputWorkspace=wksp2+"reb")
     w2=getWorkspace(wksp2+"reb")
     nzind=np.nonzero(w1.dataY(0))[0]
     w2.dataY(0)[int(nzind[0])]=0.0	#set  edge of zeropadding to zero
-    Rebin(wksp2,wksp2+"reb",str(Qmin)+","+str(binning)+","+str(Qmax))
+    Rebin(InputWorkspace=wksp2,OutputWorkspace=wksp2+"reb",Params=str(Qmin)+","+str(binning)+","+str(Qmax))
 
     # find the bin numbers to avoid gaps
     a1=getWorkspace(wksp1+"reb").binIndexOf(begoverlap)
@@ -90,14 +91,14 @@ def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scal
 
 
     if scalefactor <= 0.0:
-        Integration(wksp1+"reb","i1temp",str(begoverlap),str(endoverlap))
-        Integration(wksp2+"reb","i2temp",str(begoverlap),str(endoverlap))
+        Integration(InputWorkspace=wksp1+"reb",OutputWorkspace="i1temp", RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
+        Integration(InputWorkspace=wksp2+"reb",OutputWorkspace="i2temp", RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
         if scalehigh:
-            Multiply(wksp2+"reb","i1temp",wksp2+"reb")
-            Divide(wksp2+"reb","i2temp",wksp2+"reb")
+            Multiply(LHSWorkspace=wksp2+"reb",RHSWorkspace="i1temp",OutputWorkspace=wksp2+"reb")
+            Divide(LHSWorkspace=wksp2+"reb",RHSWorkspace="i2temp",OutputWorkspace=wksp2+"reb")
         else:
-            Multiply(wksp1+"reb","i2temp",wksp1+"reb")
-            Divide(wksp1+"reb","i1temp",wksp1+"reb")
+            Multiply(LHSWorkspace=wksp1+"reb",RHSWorkspace="i2temp",OutputWorkspace=wksp1+"reb")
+            Divide(LHSWorkspace=wksp1+"reb",RHSWorkspace="i1temp",OutputWorkspace=wksp1+"reb")
         
         y1=getWorkspace("i1temp").readY(0)
         y2=getWorkspace("i2temp").readY(0)
@@ -107,34 +108,34 @@ def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scal
         MultiplyRange(wksp2+"reb",wksp2+"reb","0",str(wksp2len-2),str(scalefactor))
         
     
-    MultiplyRange(wksp1+"reb","overlap1","0",str(a1-1))#-1
-    MultiplyRange("overlap1","overlap1",str(a2),str(wksp1len-2))
+    MultiplyRange(InputWorkspace=wksp1+"reb",OutputWorkspace="overlap1",StartBin=0,EndBin=a1-1)
+    MultiplyRange(InputWorkspace="overlap1", OutputWorkspace="overlap1",StartBin=a2,EndBin=wksp1len-2)
 	
-    MultiplyRange(wksp2+"reb","overlap2","0",str(a1))#-1
-    MultiplyRange("overlap2","overlap2",str(a2+1),str(wksp1len-2))
+    MultiplyRange(InputWorkspace=wksp2+"reb",OutputWorkspace="overlap2",StartBin=0,EndBin=a1)#-1
+    MultiplyRange(InputWorkspace="overlap2",OutputWorkspace="overlap2",StartBin=a2+1,EndBin=wksp1len-2)
 	
-    MultiplyRange(wksp1+"reb",wksp1+"reb",str(a1),str(wksp1len-2))
-    MultiplyRange(wksp2+"reb",wksp2+"reb","0",str(a2))
-    WeightedMean("overlap1","overlap2","overlapave")
-    Plus(wksp1+"reb","overlapave",'temp1')
-    Plus('temp1',wksp2+"reb",outputwksp)    
+    MultiplyRange(InputWorkspace=wksp1+"reb",OutputWorkspace=wksp1+"reb",StartBin=a1, EndBin=wksp1len-2)
+    MultiplyRange(InputWorkspace=wksp2+"reb",OutputWorkspace=wksp2+"reb",StartBin=0, EndBin=a2)
+    WeightedMean(InputWorkspace1="overlap1",InputWorkspace2="overlap2",OutputWorkspace="overlapave")
+    Plus(LHSWorkspace=wksp1+"reb",RHSWorkspace="overlapave",OutputWorkspace='temp1')
+    Plus(LHSWorkspace='temp1',RHSWorkspace=wksp2+"reb",OutputWorkspace=outputwksp)    
     
-    mtd.deleteWorkspace("temp1")
-    mtd.deleteWorkspace(wksp1+"reb")
-    mtd.deleteWorkspace(wksp2+"reb")
-    mtd.deleteWorkspace("i1temp")
-    mtd.deleteWorkspace("i2temp")
-    mtd.deleteWorkspace("overlap1")
-    mtd.deleteWorkspace("overlap2")
-    mtd.deleteWorkspace("overlapave")
+    DeleteWorkspace("temp1")
+    DeleteWorkspace(wksp1+"reb")
+    DeleteWorkspace(wksp2+"reb")
+    DeleteWorkspace("i1temp")
+    DeleteWorkspace("i2temp")
+    DeleteWorkspace("overlap1")
+    DeleteWorkspace("overlap2")
+    DeleteWorkspace("overlapave")
     return outputwksp, scalefactor
 
 		
 def getWorkspace(wksp):
-    if mtd[wksp].isGroup():
-        wout = mantid.getMatrixWorkspace(wksp+'_1')
+    if isinstance(mtd[wksp], WorkspaceGroup):
+        wout = mtd[wksp+'_1']
     else:
-        wout = mantid.getMatrixWorkspace(wksp)
+        wout = mtd[wksp]
         
     return wout
 
@@ -144,13 +145,13 @@ def groupGet(wksp,whattoget,field=''):
 	also if the workspace is a group (info from first group element)
 	'''
 	if (whattoget == 'inst'):
-		if mtd[wksp].isGroup():
+		if isinstance(mtd[wksp], WorkspaceGroup):
 			return mtd[wksp+'_1'].getInstrument()
 		else:
 			return mtd[wksp].getInstrument()
 			
 	elif (whattoget == 'samp' and field != ''):
-		if mtd[wksp].isGroup():
+		if isinstance(mtd[wksp], WorkspaceGroup):
 			try:
 				res = mtd[wksp + '_1'].getSampleDetails().getLogData(field).value				
 			except RuntimeError:
@@ -164,7 +165,7 @@ def groupGet(wksp,whattoget,field=''):
 				print "Block "+field+" not found."
 		return res
 	elif (whattoget == 'wksp'):
-		if mtd[wksp].isGroup():
+		if isinstance(mtd[wksp], WorkspaceGroup):
 			return mtd[wksp+'_1'].getNumberHistograms()
 		else:
 			return mtd[wksp].getNumberHistograms()
