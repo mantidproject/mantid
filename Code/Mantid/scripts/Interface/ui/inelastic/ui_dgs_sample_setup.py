@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'ui/inelastic/dgs_sample_setup.ui'
+# Form implementation generated from reading ui file 'Code/Mantid/scripts/Interface/ui/inelastic/dgs_sample_setup.ui'
 #
-# Created: Tue Oct 16 09:29:18 2012
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Wed Jul 17 16:58:27 2013
+#      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_Frame(object):
     def setupUi(self, Frame):
         Frame.setObjectName(_fromUtf8("Frame"))
-        Frame.resize(1020, 706)
+        Frame.resize(1020, 793)
         Frame.setFrameShape(QtGui.QFrame.StyledPanel)
         Frame.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout_3 = QtGui.QVBoxLayout(Frame)
@@ -262,8 +262,25 @@ class Ui_Frame(object):
         spacerItem11 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_11.addItem(spacerItem11)
         self.verticalLayout_3.addLayout(self.horizontalLayout_11)
-        spacerItem12 = QtGui.QSpacerItem(20, 242, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem12)
+        self.horizontalLayout_13 = QtGui.QHBoxLayout()
+        self.horizontalLayout_13.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
+        self.horizontalLayout_13.setContentsMargins(-1, -1, -1, 0)
+        self.horizontalLayout_13.setObjectName(_fromUtf8("horizontalLayout_13"))
+        self.savedir_label = QtGui.QLabel(Frame)
+        self.savedir_label.setMinimumSize(QtCore.QSize(170, 0))
+        self.savedir_label.setObjectName(_fromUtf8("savedir_label"))
+        self.horizontalLayout_13.addWidget(self.savedir_label)
+        self.savedir_edit = QtGui.QLineEdit(Frame)
+        self.savedir_edit.setObjectName(_fromUtf8("savedir_edit"))
+        self.horizontalLayout_13.addWidget(self.savedir_edit)
+        self.savedir_browse = QtGui.QPushButton(Frame)
+        self.savedir_browse.setObjectName(_fromUtf8("savedir_browse"))
+        self.horizontalLayout_13.addWidget(self.savedir_browse)
+        spacerItem12 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_13.addItem(spacerItem12)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_13)
+        spacerItem13 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacerItem13)
 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
@@ -295,4 +312,6 @@ class Ui_Frame(object):
         self.grouping_label.setText(QtGui.QApplication.translate("Frame", "Grouping", None, QtGui.QApplication.UnicodeUTF8))
         self.grouping_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.show_workspaces_cb.setText(QtGui.QApplication.translate("Frame", "Show Intermediate Workspaces", None, QtGui.QApplication.UnicodeUTF8))
+        self.savedir_label.setText(QtGui.QApplication.translate("Frame", "Save to folder", None, QtGui.QApplication.UnicodeUTF8))
+        self.savedir_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
 
