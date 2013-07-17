@@ -118,7 +118,8 @@ public:
 void setLabelText(const QString&);
 void setLabelMinWidth(const int);
 void doMultiEntry(const bool);
-void allowMultipleFiles(const bool)
+void allowMultipleFiles(const bool);
+void setAlgorithmProperty(const QString &);
 QString getText() /PyName=text/;
 bool isValid();
 void setUserInput(const QVariant &);
