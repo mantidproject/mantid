@@ -656,7 +656,6 @@ namespace Mantid
     /// @param progEnd :: ending progress fraction
     void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd )
     {
-
       //search for the log file to load, and save their names in a set.
       std::set<std::string> logFiles = searchForLogFiles(fileName);
 
@@ -669,17 +668,21 @@ namespace Mantid
 
       IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
 
-      std::set<std::string>::const_iterator location;
-
       //Iterate over the set, and load each log file into the localWorkspace.
+      std::set<std::string>::const_iterator location;
       for (location = logFiles.begin(); location != logFiles.end(); ++location)
       {
-        std::cout << *location << "\n";
+        std::cout << "Location: " << *location << std::endl;
         // Pass through the same input filename
         loadLog->setPropertyValue("Filename", *location);
-
         // Set the workspace property to be the same one filled above
         loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+
+        // Find the name of the file
+        std::string logName = extractLogName(*location);
+
+        // Pass the name of the log file explicitly to LoadLog.
+//        loadLog->setPropertyValue("Names", extractLogName(*location));
 
         // Enable progress reporting by Child Algorithm - if progress range has duration
         if ( progStart < progEnd )
@@ -708,6 +711,20 @@ namespace Mantid
       // Make log creator object and add the run status log if we have the appropriate ICP log
       m_logCreator.reset(new ISISRunLogs(localWorkspace->run(), m_numberOfPeriods));
       m_logCreator->addStatusLog(localWorkspace->mutableRun());
+    }
+
+    /**
+     * Extract the log name from the path to the log file.
+     * @param path :: Path to the log file
+     * @return logName :: The name of the log file.
+     */
+    std::string LoadRawHelper::extractLogName(std::string path)
+    {
+      std::string loc(path);
+      size_t pos = loc.find('_');
+      std::string logName = loc.substr(pos + 1);
+      logName.erase(logName.find_last_of('.'));
+      return (logName);
     }
 
     /**
@@ -1082,10 +1099,9 @@ namespace Mantid
     }
 
     /**
-     * Searches for the log files to load using LoadLog algorithm.
-     * @param descriptor TODO
-     * @param descriptor TODO
-     * @returns A set containing paths to RAW related log files.
+     * Searches for log files related to RAW file loaded using LoadLog algorithm.
+     * @param m_filename The raw file filename
+     * @returns A set containing paths to log files related to RAW file used.
      */
     std::set<std::string> LoadRawHelper::searchForLogFiles(const std::string& m_filename)
     {
@@ -1104,7 +1120,6 @@ namespace Mantid
 
       // start the process or populating potential log files into the container: potentialLogFiles
       std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
-      bool rawFile = false;// Will be true if Filename property is a name of a RAW file
 
       if ( isAscii(m_filename) && l_filenamePart.find("_") != std::string::npos )
       {
@@ -1115,7 +1130,7 @@ namespace Mantid
       {
         // then we will assume that m_filename is an ISIS raw file. The file validator
         // will have warned the user if the extension is not one of the suggested ones.
-        rawFile = true;
+
         // strip out the raw data file identifier
         std::string l_rawID("");
         size_t idx = l_filenamePart.rfind('.');
@@ -1147,7 +1162,6 @@ namespace Mantid
           }
           catch(std::exception &)
           {
-
           }
         }
       }

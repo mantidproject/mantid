@@ -202,6 +202,7 @@ void LoadLog::exec()
 {
   // Retrieve the filename from the properties and perform some initial checks on the filename
   m_filename = getPropertyValue("Filename");
+  std::string logFileName = getPropertyValue("Names");
 
   // File property checks whether the given path exists, just check that is actually a file 
   Poco::File l_path( m_filename );
@@ -231,12 +232,6 @@ void LoadLog::exec()
   {
     createthreecolumnFileLogProperty( threecolumnLogfile,localWorkspace->mutableRun() );
   }
-
-  // Extract the common part of log file names (the workspace name)
-  std::string ws_name = Poco::Path(m_filename).getFileName();
-  ws_name.erase(ws_name.find_last_of('.'));
-  ws_name += '_';
-  size_t n_common_chars = ws_name.size();
 
   std::ifstream inLogFile(m_filename.c_str());
 
@@ -272,15 +267,12 @@ void LoadLog::exec()
 
     try
     {
-      // Make the property name by removing the workspce name and file extension from the log filename
-      std::string log_name = Poco::Path(Poco::Path(m_filename).getFileName()).getBaseName();
-      log_name.erase(0, n_common_chars);
-//      if (rawFile)
-//      {
-//        log_name.erase(0, n_common_chars);
-//      }
-      
-      Property* log = LogParser::createLogProperty(m_filename,stringToLower(log_name));
+      std::cout << "FILENAME: " << m_filename << std::endl;
+      std::cout << "LOGNAME:  " << logFileName << std::endl;
+      std::cout << "LN FROM FUNCTION: " << (createLogFileName(logFileName)) << std::endl;
+      std::cout << std::endl;
+
+      Property* log = LogParser::createLogProperty(m_filename,stringToLower(createLogFileName(logFileName)));
       if (log)
       {
         localWorkspace->mutableRun().addLogData(log);
@@ -291,9 +283,24 @@ void LoadLog::exec()
       inLogFile.close();
     }
   }
-
+  inLogFile.close();
   // operation was a success and ended normally
   return;
+}
+
+
+std::string LoadLog::createLogFileName(std::string fileName)
+{
+  if(fileName.empty())
+  {
+    std::string path = Poco::Path(Poco::Path(m_filename).getFileName()).getBaseName();
+    return (path.substr(path.find_first_of('_') + 1));
+//    return (path);
+  }
+  else
+  {
+    return (fileName);
+  }
 }
 
 /** Return the name of the three column log file if we have one.
