@@ -15,6 +15,8 @@ from mantidsimple import *
 
 # Define a SANS specific logger 
 from mantid.kernel import Logger
+import mantid.simpleapi as api
+from mantid.api import AnalysisDataService
 sanslog = Logger.get("SANS")
 
 class HFIRSetup(ReductionStep):
@@ -850,7 +852,7 @@ class Mask(ReductionStep):
                     mantid.sendLogMessage("Badly defined mask from configuration file: %s" % str(rec))
         
         for shape in self._xml:
-            MaskDetectorsInShape(workspace, shape)
+            api.MaskDetectorsInShape(Workspace=workspace, ShapeXML=shape)
         
         instrument = reducer.instrument
         # Get a list of detector pixels to mask
@@ -871,10 +873,10 @@ class Mask(ReductionStep):
             # Mask the pixels by passing the list of IDs
             MaskDetectors(workspace, DetectorList = masked_detectors)
             
-        masked_detectors = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
-        mantid.sendLogMessage("Mask check %s: %g masked pixels" % (workspace, len(masked_detectors.getPropertyValue("DetectorList"))))  
+        masked_detectors = api.ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
+        sanslog.notice("Mask check %s: %g masked pixels" % (workspace, len(masked_detectors)))  
         
-        return "Mask applied %s: %g masked pixels" % (workspace, len(masked_detectors.getPropertyValue("DetectorList")))
+        return "Mask applied %s: %g masked pixels" % (workspace, len(masked_detectors))
 
 class CorrectToFileStep(ReductionStep):
     """
@@ -975,14 +977,14 @@ class CalculateNorm(object):
         wave_adj = None
         for wksp in wave_wksps:
             #before the workspaces can be combined they all need to match 
-            RebinToWorkspace(wksp, reducer.output_wksp, self.TMP_WORKSPACE_NAME)
+            api.RebinToWorkspace(WorkspaceToRebin=wksp, WorkspaceToMatch=reducer.output_wksp, OutputWorkspace=self.TMP_WORKSPACE_NAME)
 
             if not wave_adj:
                 #first time around this loop
                 wave_adj = self.WAVE_CORR_NAME
-                RenameWorkspace(self.TMP_WORKSPACE_NAME, wave_adj)
+                api.RenameWorkspace(InputWorkspace=self.TMP_WORKSPACE_NAME, OutputWorkspace=wave_adj)
             else:
-                Multiply(self.TMP_WORKSPACE_NAME, wave_adj, wave_adj)
+                api.Multiply(LHSWorkspace=self.TMP_WORKSPACE_NAME, RHSWorkspace=wave_adj, OutputWorkspace=wave_adj)
 
         # read pixel correction file
         # note the python code below is an attempt to emulate function overloading
@@ -997,8 +999,8 @@ class CalculateNorm(object):
             load_com += ')'
             eval(load_com)
         
-        if mtd.workspaceExists(self.TMP_WORKSPACE_NAME):
-            DeleteWorkspace(self.TMP_WORKSPACE_NAME)
+        if AnalysisDataService.doesExist(self.TMP_WORKSPACE_NAME):
+            AnalysisDataService.remove(self.TMP_WORKSPACE_NAME)
         
         return wave_adj, pixel_adj
 
@@ -1123,8 +1125,8 @@ class ConvertToQ(ReductionStep):
         """
         for wk in workspaces:
             try:
-                if wk and mantid.workspaceExists(wk):
-                    DeleteWorkspace(wk)
+                if AnalysisDataService.doesExist(wk):
+                    AnalysisDataService.remove(wk)
             except:
                 #if the workspace can't be deleted this function does nothing
                 pass
@@ -1530,4 +1532,4 @@ class StripEndNans(ReductionStep):
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001*x_vals[stop + 1]
-        CropWorkspace(workspace,workspace,startX,endX)
+        api.CropWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace, XMin=startX, XMax=endX)
