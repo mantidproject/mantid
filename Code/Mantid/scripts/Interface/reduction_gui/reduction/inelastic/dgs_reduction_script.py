@@ -86,7 +86,6 @@ class DgsReductionScripter(BaseReductionScripter):
                 except:
                     pass
         
-        #data_files = data_list.split(',')
         data_files = self.filenameParser(data_list)                    
         scripts = []
         output_dir=mantid.config['defaultsave.directory']
@@ -117,9 +116,7 @@ class DgsReductionScripter(BaseReductionScripter):
             script +="\n"
             script +="OutputFilename=os.path.join('"+output_dir+ "',processed[0].getInstrument().getName()+str(processed[0].getRunNumber())+'.nxs')\n"
             script +="SaveNexus(processed[0],OutputFilename)\n"
-            
-
-       
+   
             scripts.append(script)
             
         return scripts
