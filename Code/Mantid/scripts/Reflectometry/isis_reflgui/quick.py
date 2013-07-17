@@ -14,7 +14,9 @@ from combineMulti import *
 from mantid.simpleapi import *  # New API
 from mantidplot import *
 from PyQt4 import QtCore, uic
+from mantid.api import WorkspaceGroup
 import math
+import re
 
 
 def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', debug=0):
@@ -113,15 +115,15 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
 			Divide(LHSWorkspace="_DM",RHSWorkspace="_I0M",OutputWorkspace="IvsLam")
 			if (roi != [0,0]) :
 				SumSpectra(InputWorkspace="IvsLam",OutputWorkspace="DMR",StartWorkspaceIndex=roi[0], EndWorkspaceIndex=roi[1])
-				ReflectedBeam=mantid['DMR']
+				ReflectedBeam=mtd['DMR']
 			if (db != [0,0]) :
 				SumSpectra(InputWorkspace="_DM",OutputWorkspace="_DMD",StartWorkspaceIndex=db[0], EndWorkspaceIndex=db[1])
-				DirectBeam=mantid['_DMD']
+				DirectBeam=mtd['_DMD']
 		except SystemExit:
 			print "Point-Detector only run."
 		RunNumber = groupGet('IvsLam','samp','run_number')
 		if (theta):
-			IvsQ = l2q(mantid['DMR'], 'linear-detector', theta)
+			IvsQ = l2q(mtd['DMR'], 'linear-detector', theta)
 		else:
 			ConvertUnits(InputWorkspace='DMR',OutputWorkspace="IvsQ",Target="MomentumTransfer")
 				
@@ -174,7 +176,7 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
 			#scaling=1/mantid.getMatrixWorkspace('_monInt').dataY(0)[0]
 			Divide(LHSWorkspace="_DP",RHSWorkspace="_monInt",OutputWorkspace="IvsLam")
 			##Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
-			names = mantid.getWorkspaceNames()
+			names = mtd.getObjectNames()
 			if trans in names:
 				##Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
 				RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch="IvsLam",OutputWorkspace=trans)
@@ -212,13 +214,13 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
 				# Get detector angle theta from NeXuS
 				theta = groupGet(runno,'samp','theta')
 				print 'Nexus file theta =', theta
-				IvsQ = l2q(mantid['IvsLam'], 'point-detector', theta)
+				IvsQ = l2q(mtd['IvsLam'], 'point-detector', theta)
 			else:
 				ConvertUnits(InputWorkspace='IvsLam',OutputWorkspace="IvsQ",Target="MomentumTransfer")
 			
 		else:
 			theta = float(theta)
-			IvsQ = l2q(mantid['IvsLam'], 'point-detector', theta)		
+			IvsQ = l2q(mtd['IvsLam'], 'point-detector', theta)		
 	
 	RenameWorkspace(InputWorkspace='IvsLam',OutputWorkspace=RunNumber+'_IvsLam')
 	RenameWorkspace(InputWorkspace='IvsQ',OutputWorkspace=RunNumber+'_IvsQ')
@@ -227,7 +229,7 @@ def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, use
     
 	if debug == 0:
 		cleanup()
-	return  mantid[RunNumber+'_IvsLam'], mantid[RunNumber+'_IvsQ'], theta
+	return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
 
@@ -291,25 +293,20 @@ def transCorr(transrun):
 		
 	#got sometimes very slight binning diferences, so do this again:
 	RebinToWorkspace(WorkspaceToRebin='_DP_TRANS',WorkspaceToMatch="IvsLam",OutputWorkspace=str(transrun)+'_IvsLam_TRANS')
-	if mantid["_DP_TRANS"].isGroup():
+	if isinstance(mtd["_DP_TRANS"], WorkspaceGroup):
 		Divide(LHSWorkspace="IvsLam",RHSWorkspace=str(transrun)+"_IvsLam_TRANS_1",OutputWorkspace="IvsLam")
 	else:
 		Divide(LHSWorkspace="IvsLam",RHSWorkspace=str(transrun)+"_IvsLam_TRANS",OutputWorkspace="IvsLam")
 
 
 def cleanup():
-	names = mantid.getWorkspaceGroupNames()
-	for ws in names:
-		if ws.find('_',0,1) == 0:
-			DeleteWorkspace(ws)
-		
-	names = mantid.getWorkspaceNames()
-	for ws in names:
-		if ws.find('_',0,1) == 0:
-			DeleteWorkspace(ws)
+	names = mtd.getObjectNames()
+	for name in names:
+		if re.search("^_", name):
+			DeleteWorkspace(name)
 		
 def coAdd(run,name):
-	names = mantid.getWorkspaceNames()
+	names = mtd.getObjectNames()
 	wTof = "_W" + name   		# main workspace in time-of-flight	
 	if run in names:
 		RenameWorkspace(InputWorkspace=run,OutputWorkspace=wTof)
@@ -406,15 +403,15 @@ def groupGet(wksp,whattoget,field=''):
 	also if the workspace is a group (info from first group element)
 	'''
 	if (whattoget == 'inst'):
-		if mantid[wksp].isGroup():
+		if isinstance(mtd[wksp], WorkspaceGroup):
 			return mtd[wksp+'_1'].getInstrument()
 		else:
 			return mtd[wksp].getInstrument()
 			
 	elif (whattoget == 'samp' and field != ''):
-		if mantid[wksp].isGroup():
+		if isinstance(mtd[wksp], WorkspaceGroup):
 			try:
-				log = mantid[wksp + '_1'].getSampleDetails().getLogData(field).value
+				log = mtd[wksp + '_1'].getSampleDetails().getLogData(field).value
 				if (type(log) is int or type(log) is str):
 					res=log
 				else:
@@ -424,7 +421,7 @@ def groupGet(wksp,whattoget,field=''):
 				print "Block "+field+" not found."			
 		else:
 			try:
-				log = mantid[wksp].getSampleDetails().getLogData(field).value
+				log = mtd[wksp].getSampleDetails().getLogData(field).value
 				if (type(log) is int or type(log) is str):
 					res=log
 				else:
@@ -434,10 +431,10 @@ def groupGet(wksp,whattoget,field=''):
 				print "Block "+field+" not found."
 		return res
 	elif (whattoget == 'wksp'):
-		if mantid[wksp].isGroup():
-			return mantid[wksp+'_1'].getNumberHistograms()
+		if isinstance(mtd[wksp], WorkspaceGroup):
+			return mtd[wksp+'_1'].getNumberHistograms()
 		else:
-			return mantid[wksp].getNumberHistograms()
+			return mtd[wksp].getNumberHistograms()
 
 
 """ =====================  Testing stuff =====================
@@ -454,7 +451,7 @@ def groupGet(wksp,whattoget,field=''):
 """
 	
 def _testQuick():
-	mantid.settings['default.instrument'] = "SURF"
+	config['default.instrument'] = "SURF"
 	[w1lam,w1q,th] = quick(94511,theta=0.25,trans='94504')
 	[w2lam,w2q,th] = quick(94512,theta=0.65,trans='94504')
 	[w3lam,w3q,th] = quick(94513,theta=1.5,trans='94504')
