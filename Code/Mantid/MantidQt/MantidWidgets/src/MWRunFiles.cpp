@@ -223,6 +223,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   doButtonOpt(m_buttonOpt);
 
   liveButtonState(m_liveButtonState);
+  connect(m_uiForm.liveButton, SIGNAL(clicked(bool)), this, SIGNAL(liveButtonPressed(bool)));
 
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(m_uiForm.fileEditor);

@@ -193,6 +193,8 @@ namespace MantidQt
       void filesFound();
       /// Emitted when file finding is finished (files may or may not have been found).
       void fileFindingFinished();
+      /// Emitted when the live button is toggled
+      void liveButtonPressed(bool);
 
     public slots:
       /// Set the file text and try and find it

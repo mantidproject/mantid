@@ -52,10 +52,7 @@ void StepScan::initLayout()
   m_uiForm.xmin->setValidator(new QDoubleValidator(m_uiForm.xmin));
   m_uiForm.xmax->setValidator(new QDoubleValidator(m_uiForm.xmax));
 
-  // Try to connect to live listener for default instrument to see if live button should be enabled
-  // Enable the button if the connection is successful. Will be disabled otherwise.
-  m_uiForm.liveButton->setEnabled(LiveListenerFactory::Instance().checkConnection(m_instrument));
-  connect( m_uiForm.liveButton, SIGNAL(clicked(bool)), SLOT(triggerLiveListener(bool)), Qt::QueuedConnection );
+  connect( m_uiForm.mWRunFiles, SIGNAL(liveButtonPressed(bool)), SLOT(triggerLiveListener(bool)), Qt::QueuedConnection );
 
   connect( m_uiForm.launchInstView, SIGNAL(clicked()), SLOT(launchInstrumentWindow()) );
 
@@ -211,7 +208,7 @@ void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
   // First check that the provided workspace has the scan_index - complain if it doesn't
   try {
     auto scan_index_prop = ws->run().getTimeSeriesProperty<int>(scan_index);
-    if ( !m_uiForm.liveButton->isChecked() && scan_index_prop->realSize() < 2 )
+    if ( !m_uiForm.mWRunFiles->liveButtonIsChecked() && scan_index_prop->realSize() < 2 )
     {
       QMessageBox::warning(this,"scan_index log empty","This data does not appear to be an alignment scan");
       return;
@@ -322,7 +319,7 @@ void StepScan::runStepScanAlg()
 
   QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
 
-  if ( m_uiForm.liveButton->isChecked() )  // Live data
+  if ( m_uiForm.mWRunFiles->liveButtonIsChecked() )  // Live data
   {
     runStepScanAlgLive(stepScan->toString());
   }
