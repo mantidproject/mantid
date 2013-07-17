@@ -44,18 +44,18 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Order", 2));
 
     //create a binned workspaces
-    MatrixWorkspace_sptr matchWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 1);
-    MatrixWorkspace_sptr interpolateWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 15, 0.5, 0.1);
+    MatrixWorkspace_sptr iws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 1);
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 15, 0.5, 0.1);
 
-    size_t mwSize =  matchWorkspace->readY(0).size();
+    size_t mwSize =  iws->readY(0).size();
     for (size_t i = 0; i < mwSize; ++i)
     {
       double val = static_cast<double>(i);
-      matchWorkspace->dataY(0)[i] = val *2;
+      iws->dataY(0)[i] = val *2;
     }
 
-    alg.setProperty("WorkspaceToMatch", matchWorkspace);
-    alg.setProperty("WorkspaceToInterpolate", interpolateWorkspace);
+    alg.setProperty("WorkspaceToMatch", mws);
+    alg.setProperty("WorkspaceToInterpolate", iws);
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
 

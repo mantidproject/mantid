@@ -43,10 +43,10 @@ public:
     alg.setPropertyValue("OutputWorkspace", "Anon");
 
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("SplineSize", 10));
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Order", order));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DerivOrder", order));
 
     //create a binned workspace
-    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 20, 0, 1);
+    MatrixWorkspace_sptr inputWorkspace = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 20, 0, 1);
 
     size_t iwSize = inputWorkspace->readY(0).size();
     for (size_t i = 0; i < iwSize; ++i)
@@ -62,15 +62,18 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_const_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
+    MatrixWorkspace_const_sptr derivs1 = alg.getProperty("OutputWorkspace_1");
+    MatrixWorkspace_const_sptr derivs2 = alg.getProperty("OutputWorkspace_2");
+
     const auto & yVals = outputWorkspace->readY(0);
-    const auto & yDeriv = outputWorkspace->readY(1);
-    const auto & yDeriv2 = outputWorkspace->readY(2);
+    const auto & d1 = derivs1->readY(0);
+    const auto & d2 = derivs2->readY(0);
 
     for(size_t i = 0; i < yVals.size(); ++i)
     {
       TS_ASSERT_DELTA(yVals[i], i*2, 1e-15);
-      TS_ASSERT_EQUALS(yDeriv[i], 2);
-      TS_ASSERT_EQUALS(yDeriv2[i], 0);
+      TS_ASSERT_EQUALS(d1[i], 2);
+      TS_ASSERT_EQUALS(d2[i], 0);
     }
   }
   

@@ -84,13 +84,13 @@ namespace Mantid
       //read in algorithm parameters
       int order = static_cast<int>(getProperty("Order"));
 
-      MatrixWorkspace_sptr interpolateWorkspace = getProperty("WorkspaceToInterpolate");
-      MatrixWorkspace_sptr matchWorkspace = getProperty("WorkspaceToMatch");
+      MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");
+      MatrixWorkspace_sptr iws = getProperty("WorkspaceToInterpolate");
 
-      interpolateWorkspace = convertBinnedData(interpolateWorkspace);
-      matchWorkspace = convertBinnedData(matchWorkspace);
+      MatrixWorkspace_const_sptr mwspt = convertBinnedData(mws);
+      MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
 
-      MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(interpolateWorkspace,
+      MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(mws,
           order + 1);
 
       //set axis labels for output workspace
@@ -104,10 +104,10 @@ namespace Mantid
       auto cspline = boost::make_shared<CubicSpline>();
 
       //set the interpolation points
-      setInterpolationPoints(cspline, matchWorkspace);
+      setInterpolationPoints(cspline, iwspt);
 
       //compare the data set against our spline
-      calculateSpline(cspline, interpolateWorkspace, outputWorkspace, order);
+      calculateSpline(cspline, mwspt, outputWorkspace, order);
 
       //store the output workspace
       setProperty("OutputWorkspace", outputWorkspace);

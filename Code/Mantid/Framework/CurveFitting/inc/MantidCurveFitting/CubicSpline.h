@@ -101,6 +101,9 @@ namespace Mantid
 
       /// Check if an error occurred and throw appropriate message
       void checkGSLError(const int status, const int errorType) const;
+
+      /// Check if an x value falls within the range of the spline
+      bool checkXInRange(double x) const;
     };
 
 

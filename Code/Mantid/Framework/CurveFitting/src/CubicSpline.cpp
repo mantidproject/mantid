@@ -61,12 +61,12 @@ namespace Mantid
       {
         int n = getAttribute("n").asInt();
 
-
         boost::scoped_array<double> x(new double[n]);
         boost::scoped_array<double> y(new double[n]);
 
         //setup the reference points and calculate
         setupInput(x, y, n);
+
         calculateSpline(out, xValues, nData);
 
         m_recalculateSpline = false;
@@ -121,52 +121,85 @@ namespace Mantid
         calculateDerivative(x,y,out,xValues,nData, order);
     }
 
+    bool CubicSpline::checkXInRange(double x) const
+    {
+      return (x >= m_spline->interp->xmin
+          || x <= m_spline->interp->xmax);
+    }
+
     void CubicSpline::calculateSpline(double* out, const double* xValues, const size_t nData) const
     {
       //calculate spline for given input set
-      double y = 0;
+      double y(0);
+      bool outOfRange(false);
       for (size_t i = 0; i < nData; ++i)
       {
-        y = gsl_spline_eval(m_spline, xValues[i], m_acc);
-        int errorCode = gsl_spline_eval_e(m_spline, xValues[i], m_acc, &y);
+        if(checkXInRange(xValues[i]))
+        {
+          y = gsl_spline_eval(m_spline, xValues[i], m_acc);
+          int errorCode = gsl_spline_eval_e(m_spline, xValues[i], m_acc, &y);
 
-        //check if GSL function returned an error
-        checkGSLError(errorCode, GSL_EDOM);
+          //check if GSL function returned an error
+          checkGSLError(errorCode, GSL_EDOM);
 
-        out[i] = y;
+          out[i] = y;
+        }
+        else
+        {
+          outOfRange = true;
+          y = 0;
+        }
+      }
+
+      if(outOfRange)
+      {
+        g_log.warning() << "Some x values where out of range and will not be calculated." << std::endl;
       }
     }
 
     void CubicSpline::calculateDerivative(const boost::scoped_array<double>& x, const boost::scoped_array<double>& y,
         double* out, const double* xValues, const size_t nData, const size_t order) const
     {
-      double x_deriv = 0;
+      double xDeriv = 0;
       int errorCode = 0;
+      bool outOfRange(false);
+
+      //throw error if the order is not the 1st or 2nd derivative
+      if(order > 2 || order < 1) throw std::invalid_argument(
+          "CubicSpline: order of derivative must be either 1 or 2");
 
       for(size_t i = 0; i < nData; ++i)
       {
-        //choose the order of the derivative
-        if(order == 1)
+        if(checkXInRange(xValues[i]))
         {
-          x_deriv = gsl_interp_eval_deriv(m_interp,x.get(),y.get(),xValues[i],m_acc);
-          errorCode = gsl_interp_eval_deriv_e (m_interp,x.get(),y.get(),xValues[i],m_acc,&x_deriv);
-        }
-        else if (order == 2)
-        {
-          x_deriv = gsl_interp_eval_deriv2(m_interp,x.get(),y.get(),xValues[i],m_acc);
-          errorCode = gsl_interp_eval_deriv2_e (m_interp,x.get(),y.get(),xValues[i],m_acc,&x_deriv);
+          //choose the order of the derivative
+          if(order == 1)
+          {
+            xDeriv = gsl_interp_eval_deriv(m_interp,x.get(),y.get(),xValues[i],m_acc);
+            errorCode = gsl_interp_eval_deriv_e (m_interp,x.get(),y.get(),xValues[i],m_acc,&xDeriv);
+          }
+          else if (order == 2)
+          {
+            xDeriv = gsl_interp_eval_deriv2(m_interp,x.get(),y.get(),xValues[i],m_acc);
+            errorCode = gsl_interp_eval_deriv2_e (m_interp,x.get(),y.get(),xValues[i],m_acc,&xDeriv);
+          }
         }
         else
         {
-          //throw error if the order is not the 1st or 2nd derivative
-          throw std::invalid_argument("CubicSpline: order of derivative must be either 1 or 2");
+          outOfRange = true;
+          xDeriv = 0;
         }
 
         //check GSL functions didn't return an error
         checkGSLError(errorCode, GSL_EDOM);
 
         //record the value
-        out[i] = x_deriv;
+        out[i] = xDeriv;
+      }
+
+      if(outOfRange)
+      {
+        g_log.warning() << "Some x values where out of range and will not be calculated." << std::endl;
       }
     }
 

@@ -65,7 +65,7 @@ namespace CurveFitting
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The workspace containing the calculated points and derivatives");
 
     auto validator = boost::make_shared<BoundedValidator<int> >(0,2);
-    declareProperty("Order", 2, validator, "Order to derivatives to calculate.");
+    declareProperty("DerivOrder", 2, validator, "Order to derivatives to calculate.");
 
     auto splineSizeValidator = boost::make_shared<BoundedValidator<int> >();
     splineSizeValidator->setLower(3);
@@ -77,54 +77,105 @@ namespace CurveFitting
    */
   void SplineSmoothing::exec()
   {
+    MatrixWorkspace_sptr inputWorkspaceBinned = getProperty("InputWorkspace");
+
     //read in algorithm parameters
-    int order = static_cast<int>(getProperty("Order"));
+    int order = static_cast<int>(getProperty("DerivOrder"));
+    //number of input histograms.
+    size_t histNo = inputWorkspaceBinned->getNumberHistograms();
 
-    MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+    //convert binned data to point data is necessary
+    MatrixWorkspace_sptr inputWorkspacePt = convertBinnedData(inputWorkspaceBinned);
 
-    inputWorkspace = convertBinnedData(inputWorkspace);
+    //output workspaces for points and derivs
+    MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(inputWorkspaceBinned);
+    std::vector<MatrixWorkspace_sptr> derivs (order);
 
-    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,
-        order + 1);
+    //set up workspaces for output derivatives
+    for(int i=1; i<=order; ++i)
+    {
+      derivs[i-1] = setupOutputWorkspace(inputWorkspaceBinned);
+    }
+
+    for(size_t i = 0; i < histNo; ++i)
+    {
+      //Create and instance of the cubic spline function
+      auto cspline = boost::make_shared<CubicSpline>();
+
+      //choose some smoothing points from input workspace
+      setSmoothingPoints(cspline, inputWorkspacePt, i);
+
+      //compare the data set against our spline
+      outputWorkspace->setX(i, inputWorkspaceBinned->readX(i));
+      calculateSmoothing(cspline, inputWorkspacePt, outputWorkspace, i);
+
+      for(int j = 1; j <= order; ++j)
+      {
+        derivs[j-1]->setX(i, inputWorkspaceBinned->readX(i));
+        calculateDerivatives(cspline, inputWorkspacePt, derivs[j-1], j, i);
+      }
+    }
+
+    //store the output workspaces
+    setProperty("OutputWorkspace", outputWorkspace);
+    //prefix to name of deriv output workspaces
+    std::string owsPrefix = getPropertyValue("OutputWorkspace") + "_";
+    for(int i = 0; i < order; ++i)
+    {
+      std::string index = boost::lexical_cast<std::string>(i+1);
+      std::string ows = "OutputWorkspace_" + index;
+
+      //declare new output workspace for derivatives
+      declareProperty(new WorkspaceProperty<>(ows,owsPrefix+index,Direction::Output),
+          "Workspace containing the order " + index + " derivatives");
+
+      setProperty(ows, derivs[i]);
+    }
+  }
+
+  API::MatrixWorkspace_sptr SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_sptr inws) const
+  {
+    size_t histNo = inws->getNumberHistograms();
+    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inws,histNo);
 
     //create labels for output workspace
-    API::TextAxis* tAxis = new API::TextAxis(order+1);
-    tAxis->setLabel(0, "Y");
-    tAxis->setLabel(1, "Deriv 1");
-    tAxis->setLabel(2, "Deriv 2");
+    API::TextAxis* tAxis = new API::TextAxis(histNo);
+    for(size_t i=0; i < histNo; ++i)
+    {
+      std::string index = boost::lexical_cast<std::string>(i);
+      tAxis->setLabel(i, "Y"+index);
+    }
     outputWorkspace->replaceAxis(1, tAxis);
 
-    //Create and instance of the cubic spline function
-    auto cspline = boost::make_shared<CubicSpline>();
+    return outputWorkspace;
 
-    //choose somre smoothing points from input workspace
-    setSmoothingPoints(cspline, inputWorkspace);
-
-    //compare the data set against our spline
-    calculateSpline(cspline, inputWorkspace, outputWorkspace, order);
-
-    //store the output workspace
-    setProperty("OutputWorkspace", outputWorkspace);
   }
 
   MatrixWorkspace_sptr SplineSmoothing::convertBinnedData(MatrixWorkspace_sptr workspace) const
   {
     if(workspace->isHistogramData())
     {
-      const auto & xValues = workspace->readX(0);
-      const auto & yValues = workspace->readY(0);
-      size_t size = xValues.size()-1;
+      size_t histNo = workspace->getNumberHistograms();
+      size_t size = workspace->readY(0).size();
 
       //make a new workspace for the point data
-      MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,1,size,size);
-      auto & newXValues = pointWorkspace->dataX(0);
-      auto & newYValues = pointWorkspace->dataY(0);
+      MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,histNo,size,size);
 
-      //
-      for(size_t i = 0; i < size; ++i)
+      //loop over each histogram
+      for(size_t i=0; i < histNo; ++i)
       {
-        newXValues[i] = (xValues[i] + xValues[i+1])/2;
-        newYValues[i] = yValues[i];
+        const auto & xValues = workspace->readX(i);
+        const auto & yValues = workspace->readY(i);
+
+        auto & newXValues = pointWorkspace->dataX(i);
+        auto & newYValues = pointWorkspace->dataY(i);
+
+        //set x values to be average of bin bounds
+        for(size_t j = 0; j < size; ++j)
+        {
+          newXValues[j] = (xValues[j] + xValues[j+1])/2;
+          newYValues[j] = yValues[j];
+        }
       }
 
       return pointWorkspace;
@@ -133,37 +184,38 @@ namespace CurveFitting
     return workspace;
   }
 
-  void SplineSmoothing::calculateSpline(const boost::shared_ptr<CubicSpline> cspline,
+  void SplineSmoothing::calculateSmoothing(const boost::shared_ptr<CubicSpline> cspline,
       MatrixWorkspace_const_sptr inputWorkspace,
-      MatrixWorkspace_sptr outputWorkspace, int order) const
+      MatrixWorkspace_sptr outputWorkspace, size_t row) const
   {
     //define the spline's parameters
-    const auto & xIn = inputWorkspace->readX(0);
-
-    //setup input parameters
+    const auto & xIn = inputWorkspace->readX(row);
     size_t nData = xIn.size();
     const double* xValues = xIn.data();
-    double* yValues = outputWorkspace->dataY(0).data();
-    outputWorkspace->setX(0, inputWorkspace->readX(0));
+    double* yValues = outputWorkspace->dataY(row).data();
 
-    //calculate the interpolation
+    //calculate the smoothing
     cspline->function1D(yValues, xValues, nData);
+  }
 
-    //calculate the derivatives
-    for(int i = 1; i <= order; ++i)
-    {
-      outputWorkspace->setX(i, inputWorkspace->readX(0));
-      yValues = outputWorkspace->dataY(i).data();
-      cspline->derivative1D(yValues, xValues, nData, i);
-    }
+  void SplineSmoothing::calculateDerivatives(const boost::shared_ptr<CubicSpline> cspline,
+      API::MatrixWorkspace_const_sptr inputWorkspace,
+      API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const
+  {
+      const auto & xIn = inputWorkspace->readX(row);
+      const double* xValues = xIn.data();
+      double* yValues = outputWorkspace->dataY(row).data();
+      size_t nData = xIn.size();
+
+      cspline->derivative1D(yValues, xValues, nData, order);
   }
 
   void SplineSmoothing::setSmoothingPoints(const boost::shared_ptr<CubicSpline> cspline,
-      MatrixWorkspace_const_sptr inputWorkspace) const
+      MatrixWorkspace_const_sptr inputWorkspace, size_t row) const
   {
       //define the spline's parameters
-      const auto & xIn = inputWorkspace->readX(0);
-      const auto & yIn = inputWorkspace->readY(0);
+      const auto & xIn = inputWorkspace->readX(row);
+      const auto & yIn = inputWorkspace->readY(row);
 
       int xSize = static_cast<int>(xIn.size());
       int numPoints = getProperty("SplineSize");
@@ -204,6 +256,7 @@ namespace CurveFitting
 
             cspline->setXAttribute(attrCount, xIn[index]);
             cspline->setParameter(attrCount, yIn[index]);
+
             attrCount++;
         }
       }
