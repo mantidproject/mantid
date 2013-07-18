@@ -1,7 +1,5 @@
 import unittest
 import numpy
-from MantidFramework import mtd
-mtd.initialise()
 from mantid.simpleapi import *
 from isis_reflgui import quick
 
