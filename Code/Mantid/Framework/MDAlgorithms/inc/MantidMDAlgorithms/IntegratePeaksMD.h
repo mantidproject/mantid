@@ -6,6 +6,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidAPI/CompositeFunction.h"
 
 namespace Mantid
 {
@@ -37,6 +38,8 @@ namespace MDAlgorithms
     void init();
     /// Run the algorithm
     void exec();
+
+    double f_eval (double x, boost::shared_ptr<const API::CompositeFunction> fun);
 
     template<typename MDE, size_t nd>
     void integrate(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);

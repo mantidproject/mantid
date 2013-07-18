@@ -80,10 +80,10 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Column.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <gsl/gsl_integration.h>
 #include <fstream>
 
 namespace Mantid
@@ -542,24 +542,18 @@ namespace MDAlgorithms
 				out << std::setw( 6 ) << i;
 				for (size_t j = 0; j < numrows; ++j)out << std::setw( 20 ) << std::fixed << std::setprecision( 10 ) << paramsValue[j] << " " ;
 				out << "\n";
+
 				//Evaluate fit at points
-				/*const Mantid::MantidVec& x = fitWS->readX(1);
-				const Mantid::MantidVec& y = fitWS->readY(1);
-				const Mantid::MantidVec& e = fitWS->readY(2);
-				wsFit2D->dataX(i) = x;
-				wsDiff2D->dataX(i) = x;
-				wsFit2D->dataY(i) = y;
-				wsDiff2D->dataY(i) = e;*/
 				IFunction_sptr ifun = fit_alg->getProperty("Function");
 				boost::shared_ptr<const CompositeFunction> fun = boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
 				const Mantid::MantidVec& x = wsProfile2D->readX(i);
-				FunctionDomain1DVector domain(x);
-				FunctionValues yy(domain);
-			    fun->function(domain, yy);
+				std::vector<double> yy;
 				wsFit2D->dataX(i) = x;
 				wsDiff2D->dataX(i) = x;
 				for (size_t j = 0; j < numSteps; j++)
 				{
+					double yyval = f_eval (x[j], fun);
+				    yy.push_back(yyval);
 					wsFit2D->dataY(i)[j] = yy[j];
 					wsDiff2D->dataY(i)[j] = yValues[j] - yy[j];
 				}
@@ -657,7 +651,13 @@ namespace MDAlgorithms
     CALL_MDEVENT_FUNCTION(this->integrate, inWS);
   }
 
-
+  double IntegratePeaksMD::f_eval (double x, boost::shared_ptr<const CompositeFunction> fun)
+  {
+	FunctionDomain1DVector domain(x);
+	FunctionValues yval(domain);
+	fun->function(domain, yval);
+	return yval[0];
+  }
 
 } // namespace Mantid
 } // namespace MDEvents
