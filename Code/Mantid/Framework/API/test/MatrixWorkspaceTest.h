@@ -560,10 +560,9 @@ public:
   void test_hasGroupedDetectors()
   {
     auto ws = makeWorkspaceWithDetectors(5, 1);
-    bool result =ws->hasGroupedDetectors();
     TS_ASSERT_EQUALS( ws->hasGroupedDetectors(), false);
 
-	ws->getSpectrum(0)->addDetectorID(3);
+	  ws->getSpectrum(0)->addDetectorID(3);
     TS_ASSERT_EQUALS( ws->hasGroupedDetectors(), true);
  
   }
