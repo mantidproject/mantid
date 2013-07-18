@@ -677,13 +677,15 @@ void ConfigDialog::initMantidPage()
 
   // Populate boxes
   Mantid::Kernel::ConfigServiceImpl & mantid_config = Mantid::Kernel::ConfigService::Instance();
-  QString property = QString::fromStdString(mantid_config.getString("supported.facilities"));
 
-  QStringList prop_list = property.split(";", QString::SkipEmptyParts);
-  facility->addItems(prop_list);
+  auto faclist = mantid_config.getFacilityNames();
+  for ( auto it = faclist.begin(); it != faclist.end(); ++it )
+  {
+    facility->addItem(QString::fromStdString(*it));
+  }
 
   // Set default property
-  property = QString::fromStdString(mantid_config.getFacility().name());
+  QString property = QString::fromStdString(mantid_config.getFacility().name());
   int index = facility->findText(property);
   if( index < 0 )
   {
