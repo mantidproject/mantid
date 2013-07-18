@@ -122,6 +122,17 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         
         DeleteWorkspace(mtd[wsName])
         
+    def test_groupGet_unknown_log_error_code(self):
+        wsName = "TestWorkspace"
+        LoadISISNexus(Filename='POLREF00004699', OutputWorkspace=wsName)
+        
+        errorCode = 0
+        # Test with group workspace as input
+        self.assertEquals(errorCode, quick.groupGet(wsName, 'samp','MADE-UP-LOG-NAME'))
+        
+        # Test with group workspace as input
+        self.assertEquals(errorCode, quick.groupGet(mtd[wsName][0].name(), 'samp','MADE-UP-LOG-NAME'))
+        
 
 if __name__ == '__main__':
     unittest.main()
