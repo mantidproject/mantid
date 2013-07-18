@@ -71,35 +71,13 @@ MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 	endCol->setRange(1, 1000000);
 	gl1->addWidget(endCol, 1, 3);
 
-	functions = new QComboBox();
-	btnAddFunction = new QPushButton(tr( "Add &Function" ));
-	btnAddCell = new QPushButton(tr( "Add Ce&ll" ));
-
-	QHBoxLayout *hbox1 = new QHBoxLayout();
-	hbox1->addWidget(functions);
-	hbox1->addWidget(btnAddFunction);
-	hbox1->addWidget(btnAddCell);
-
 	QVBoxLayout *vbox1 = new QVBoxLayout();
     vbox1->addLayout(gl1);
-	vbox1->addLayout(hbox1);
 	QGroupBox *gb = new QGroupBox();
     gb->setLayout(vbox1);
-    gb->setSizePolicy(QSizePolicy (QSizePolicy::Preferred, QSizePolicy::Preferred));
-
-	explain = new QTextEdit();
-	explain->setReadOnly(true);
-	explain->setSizePolicy(QSizePolicy (QSizePolicy::Preferred, QSizePolicy::Preferred));
-    QPalette palette = explain->palette();
-    palette.setColor(QPalette::Active, QPalette::Base, Qt::lightGray);
-    explain->setPalette(palette);
-
-	QHBoxLayout *hbox2 = new QHBoxLayout();
-	hbox2->addWidget(explain);
-	hbox2->addWidget(gb);
+    gb->setSizePolicy(QSizePolicy (QSizePolicy::Maximum, QSizePolicy::Preferred));
 
 	QHBoxLayout *hbox3 = new QHBoxLayout();
-
 	commands = new ScriptEditor(this, scriptingEnv()->createCodeLexer());
 	commands->setFocus();
 	hbox3->addWidget(commands);
@@ -111,29 +89,17 @@ MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
     vbox2->addWidget(btnCancel);
     vbox2->addStretch();
 
-	hbox3->addLayout(vbox2);
+	QHBoxLayout *hbox2 = new QHBoxLayout();
+	hbox2->addWidget(gb);
+	hbox2->addLayout(vbox2);
 
 	QVBoxLayout* vbox3 = new QVBoxLayout(this);
 	vbox3->addLayout(hbox2);
-#ifdef SCRIPTING_PYTHON	
-	boxMuParser = NULL;
-	if (scriptingEnv()->name() != QString("muParser")){
-		boxMuParser = new QCheckBox(tr("Use built-in muParser (much faster)"));
-		boxMuParser->setChecked(true);
-		vbox3->addWidget(boxMuParser);
-	}
-#endif
 	vbox3->addWidget(new QLabel(tr( "Cell(i,j)=" )));
 	vbox3->addLayout(hbox3);
 
-	functions->insertStringList(scriptingEnv()->mathFunctions(), -1);
-	insertExplain(0);
-
-	connect(btnAddCell, SIGNAL(clicked()), this, SLOT(addCell()));
-	connect(btnAddFunction, SIGNAL(clicked()), this, SLOT(insertFunction()));
 	connect(btnApply, SIGNAL(clicked()), this, SLOT(apply()));
 	connect(btnCancel, SIGNAL(clicked()), this, SLOT(close()));
-	connect(functions, SIGNAL(activated(int)), this, SLOT(insertExplain(int)));
 }
 
 QSize MatrixValuesDialog::sizeHint() const
@@ -155,10 +121,6 @@ bool MatrixValuesDialog::apply()
 	matrix->setFormula(formula);
 	
 	bool useMuParser = true;
-#ifdef SCRIPTING_PYTHON
-	if (boxMuParser)
-		useMuParser = boxMuParser->isChecked();
-#endif
 	
 	if (matrix->canCalculate(useMuParser)){
 		matrix->undoStack()->push(new MatrixSetFormulaCommand(matrix, oldFormula, formula,
@@ -197,17 +159,5 @@ void MatrixValuesDialog::setMatrix(Matrix* m)
     }
 }
 
-void MatrixValuesDialog::insertExplain(int index)
-{
-	explain->setText(scriptingEnv()->mathFunctionDoc(functions->text(index)));
-}
 
-void MatrixValuesDialog::insertFunction()
-{
-  QMessageBox::warning(this, "MantidPlot", "Deprecated functionality");
-}
 
-void MatrixValuesDialog::addCell()
-{
-	commands->insert("cell(i, j)");
-}

@@ -16,7 +16,7 @@ Workflow algorithm to load all of the preNeXus files.
 #include <Poco/SAX/InputSource.h>
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidKernel/System.h"
@@ -38,9 +38,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LoadPreNexus)
-  DECLARE_LOADALGORITHM(LoadPreNexus)
+  DECLARE_FILELOADER_ALGORITHM(LoadPreNexus);
 
   static const string RUNINFO_PARAM("Filename");
   static const string MAP_PARAM("MappingFilename");
@@ -86,26 +84,15 @@ namespace DataHandling
     this->setOptionalMessage("Load a collection of PreNexus files.");
   }
 
-  //----------------------------------------------------------------------------------------------
-  /// @copydoc Mantid::API::IDataFileChecker::filePropertyName()
-  const char * LoadPreNexus::filePropertyName() const
+  /**
+   * Return the confidence with with this algorithm can load the file
+   * @param descriptor A descriptor for the file
+   * @returns An integer specifying the confidence level. 0 indicates it will not be used
+   */
+  int LoadPreNexus::confidence(Kernel::FileDescriptor & descriptor) const
   {
-    return RUNINFO_PARAM.c_str();
-  }
-
-  /// @copydoc Mantid::API::IDataFileChecker::quickFileCheck
-  bool LoadPreNexus::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-  {
-    UNUSED_ARG(nread);
-    UNUSED_ARG(header);
-
-    return (filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0);
-  }
-
-  /// @copydoc Mantid::API::IDataFileChecker::fileCheck
-  int LoadPreNexus::fileCheck(const std::string& filePath)
-  {
-    if( filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0)
+    const std::string & filename = descriptor.filename();
+    if(filename.compare(filename.size()-12,12,"_runinfo.xml") == 0)
       return 80;
     else
       return 0;

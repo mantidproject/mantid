@@ -241,6 +241,8 @@ namespace MDEvents
     setPropertySettings("IncidentTheta", new Kernel::EnabledWhenProperty("OverrideIncidentTheta", IS_EQUAL_TO, "1") );
 
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
+
+    this->initBoxControllerProps("2,2", 50, 10);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -288,19 +290,22 @@ namespace MDEvents
     
     typedef boost::shared_ptr<ReflectometryMDTransform> ReflectometryMDTransform_sptr;
 
+    BoxController_sptr bc = boost::make_shared<BoxController>(2);
+    this->setBoxController(bc);
+
     //Select the transform strategy.
     ReflectometryMDTransform_sptr transform;
     if(outputDimensions == qSpaceTransform())
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformQxQz(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformQxQz(dim0min, dim0max, dim1min, dim1max, incidentTheta, bc));
     }
     else if(outputDimensions == pSpaceTransform())
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformP(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformP(dim0min, dim0max, dim1min, dim1max, incidentTheta, bc));
     }
     else
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta, bc));
     }
 
     auto outputWS = transform->execute(inputWs);

@@ -1553,7 +1553,6 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
         QMessageBox::information(this, "Mantid - Muon Analysis", "This kind of workspace is not compatible with applying dead times");
         return;
       }
-      deadTimeTables->deepRemoveAll();
       Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
     }
   }
@@ -2035,7 +2034,7 @@ QStringList MuonAnalysis::getPeriodLabels() const
  * @param wsName workspace name
  * @param wsIndex workspace index
  */
-void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex)
+void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale)
 {
     // create first part of plotting Python string
     QString gNum = QString::number(wsIndex);
@@ -2073,10 +2072,12 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex)
       else
       {
         max = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
-      }
-
+      }     
       pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
     }
+
+    if ( ylogscale )
+      pyS += "l.logYlinX()\n";
 
     // plot the spectrum
     runPythonCode( pyS );
@@ -2148,6 +2149,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
                    cropWS_2.toStdString());
     }
 
+    // set to true if plot y axis on log scale
+    bool plotOnLogScale = false;
+
     if (plotType.compare("Counts") == 0)
     {
       // nothing to do
@@ -2177,26 +2181,8 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     }
     else if (plotType.compare("Logorithm") == 0)
     {
-      Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Logarithm");
-      alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString());
-      alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString());
-      alg->execute();
-      alg = Mantid::API::AlgorithmManager::Instance().create("Logarithm");
-      alg->setPropertyValue("InputWorkspace", cropWS_1.toStdString() + "_Raw");
-      alg->setPropertyValue("OutputWorkspace", cropWS_1.toStdString() + "_Raw");
-      alg->execute();
-
-      if (periodLabel.size() == 2)  
-      {    
-        alg = Mantid::API::AlgorithmManager::Instance().create("Logarithm");
-        alg->setPropertyValue("InputWorkspace", cropWS_2.toStdString());
-        alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString());
-        alg->execute();
-        alg = Mantid::API::AlgorithmManager::Instance().create("Logarithm");
-        alg->setPropertyValue("InputWorkspace", cropWS_2.toStdString() + "_Raw");
-        alg->setPropertyValue("OutputWorkspace", cropWS_2.toStdString() + "_Raw");
-        alg->execute();  
-      }
+      // nothing to do since plot as count but with the y-axis set to logarithm scale
+      plotOnLogScale = true;
     }
     else
     {
@@ -2218,7 +2204,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     matrix_workspace->setYUnitLabel(plotType);
 
     // plot the spectrum
-    plotSpectrum(cropWS, groupNum);
+    plotSpectrum(cropWS, groupNum, plotOnLogScale);
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab.

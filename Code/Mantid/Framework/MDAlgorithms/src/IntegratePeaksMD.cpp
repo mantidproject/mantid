@@ -72,6 +72,12 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidKernel/Utils.h"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid
 {
@@ -138,6 +144,7 @@ namespace MDAlgorithms
         "The signal density around the peak (BackgroundInnerRadius < r < BackgroundOuterRadius) is used to estimate the background under the peak.\n"
         "If smaller than PeakRadius, no background measurement is done." );
 
+
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::Input),
         "A PeaksWorkspace containing the peaks to integrate.");
 
@@ -150,6 +157,22 @@ namespace MDAlgorithms
 
     declareProperty("IntegrateIfOnEdge", true, "Only warning if all of peak outer radius is not on detector (default).\n"
         "If false, do not integrate if the outer radius is not on a detector.");
+
+    declareProperty("Cylinder", false, "Default is sphere.  Use next three parameters for cylinder.");
+
+    declareProperty(new PropertyWithValue<double>("CylinderLength",0.0,Direction::Input),
+        "Length of cylinder in which to integrate (in the same units as the workspace).");
+
+    declareProperty(new PropertyWithValue<double>("PercentBackground",0.0,Direction::Input),
+        "Percent of CylinderLength that is background (20 is 20%)");
+    std::vector<std::string> fitFunction(4);
+    fitFunction[0] = "Gaussian";
+    fitFunction[1] = "ConvolutionExpGaussian";
+    fitFunction[2] = "ConvolutionBackToBackGaussian";
+    fitFunction[3] = "NoFit";
+    auto fitvalidator = boost::make_shared<StringListValidator>(fitFunction);
+    declareProperty("ProfileFunction", "Gaussian", fitvalidator, "Fitting function for profile "
+                    "used only with Cylinder integration.");
 
   }
 
@@ -182,6 +205,49 @@ namespace MDAlgorithms
     double BackgroundOuterRadius = getProperty("BackgroundOuterRadius");
     /// Start radius of the background
     double BackgroundInnerRadius = getProperty("BackgroundInnerRadius");
+    /// Cylinder Length to use around peaks for cylinder
+    double cylinderLength = getProperty("CylinderLength");
+    Workspace2D_sptr wsProfile2D,wsFit2D,wsDiff2D;
+    size_t numSteps = 0;
+    double deltaQ = 0.0;
+    bool cylinderBool = getProperty("Cylinder");
+    if (cylinderBool)
+    {
+        numSteps = 100;
+        deltaQ = cylinderLength/static_cast<double>(numSteps-1);
+        size_t histogramNumber = peakWS->getNumberPeaks();
+        Workspace_sptr wsProfile= WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,numSteps,numSteps);
+        wsProfile2D = boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+        AnalysisDataService::Instance().addOrReplace("ProfilesData", wsProfile2D);
+        Workspace_sptr wsFit= WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,numSteps,numSteps);
+        wsFit2D = boost::dynamic_pointer_cast<Workspace2D>(wsFit);
+        AnalysisDataService::Instance().addOrReplace("ProfilesFit", wsFit2D);
+        Workspace_sptr wsDiff= WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,numSteps,numSteps);
+        wsDiff2D = boost::dynamic_pointer_cast<Workspace2D>(wsDiff);
+        AnalysisDataService::Instance().addOrReplace("ProfilesFitDiff", wsDiff2D);
+	    TextAxis* const newAxis1 = new TextAxis(peakWS->getNumberPeaks());
+	    TextAxis* const newAxis2 = new TextAxis(peakWS->getNumberPeaks());
+	    TextAxis* const newAxis3 = new TextAxis(peakWS->getNumberPeaks());
+        wsProfile2D->replaceAxis(1, newAxis1);
+        wsFit2D->replaceAxis(1, newAxis2);
+        wsDiff2D->replaceAxis(1, newAxis3);
+        for (int i=0; i < peakWS->getNumberPeaks(); ++i)
+        {
+			// Get a direct ref to that peak.
+			IPeak & p = peakWS->getPeak(i);
+			std::ostringstream label;
+			label << Utils::round(p.getH())
+			<< "_" << Utils::round(p.getK())
+			<<  "_" << Utils::round(p.getL())
+			<<  "_" << p.getRunNumber();
+			newAxis1->setLabel(i, label.str());
+			newAxis2->setLabel(i, label.str());
+			newAxis3->setLabel(i, label.str());
+        }
+    }
+    double backgroundCylinder = cylinderLength;
+    double percentBackground = getProperty("PercentBackground");
+    cylinderLength *= 1.0 - (percentBackground/100.);
     /// Replace intensity with 0
     bool replaceIntensity = getProperty("ReplaceIntensity");
     bool integrateEdge = getProperty("IntegrateIfOnEdge");
@@ -240,74 +306,224 @@ namespace MDAlgorithms
         dimensionsUsed[d] = true; // Use all dimensions
         center[d] = static_cast<coord_t>(pos[d]);
       }
-      CoordTransformDistance sphere(nd, center, dimensionsUsed);
+	  signal_t signal = 0;
+	  signal_t errorSquared = 0;
+	  signal_t bgSignal = 0;
+	  signal_t bgErrorSquared = 0;
+      if (!cylinderBool)
+	  {
+			CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
-      // Perform the integration into whatever box is contained within.
-      signal_t signal = 0;
-      signal_t errorSquared = 0;
-      ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), signal, errorSquared);
+			// Perform the integration into whatever box is contained within.
+			ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), signal, errorSquared);
 
-      // Integrate around the background radius
-      signal_t bgSignal = 0;
-      signal_t bgErrorSquared = 0;
-      if (BackgroundOuterRadius > PeakRadius)
+			// Integrate around the background radius
+
+			if (BackgroundOuterRadius > PeakRadius )
+			{
+				// Get the total signal inside "BackgroundOuterRadius"
+				ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundOuterRadius*BackgroundOuterRadius), bgSignal, bgErrorSquared);
+
+				// Evaluate the signal inside "BackgroundInnerRadius"
+				signal_t interiorSignal = 0;
+				signal_t interiorErrorSquared = 0;
+
+				// Integrate this 3rd radius, if needed
+				if (BackgroundInnerRadius != PeakRadius)
+				{
+					ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundInnerRadius*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
+				}
+				else
+				{
+					// PeakRadius == BackgroundInnerRadius, so use the previous value
+					interiorSignal = signal;
+					interiorErrorSquared = errorSquared;
+				}
+		        // Subtract the peak part to get the intensity in the shell (BackgroundInnerRadius < r < BackgroundOuterRadius)
+		        bgSignal -= interiorSignal;
+		        // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
+		        bgErrorSquared -= interiorErrorSquared;
+
+		        // Relative volume of peak vs the BackgroundOuterRadius sphere
+		        double ratio = (PeakRadius / BackgroundOuterRadius);
+		        double peakVolume = ratio * ratio * ratio;
+
+		        // Relative volume of the interior of the shell vs overall backgroundratio * ratio
+		        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+		        // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
+		        double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+
+		        // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
+		        double scaleFactor = peakVolume / bgVolume;
+		        bgSignal *= scaleFactor;
+		        bgErrorSquared *= scaleFactor;
+		        // Adjust the integrated values.
+		        signal -= bgSignal;
+		        // But we add the errors together
+		        errorSquared += bgErrorSquared;
+			}
+	  }
+      else
       {
-        // Get the total signal inside "BackgroundOuterRadius"
-        ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundOuterRadius*BackgroundOuterRadius), bgSignal, bgErrorSquared);
+			CoordTransformDistance cylinder(nd, center, dimensionsUsed, 2);
 
-        // Evaluate the signal inside "BackgroundInnerRadius"
-        signal_t interiorSignal = 0;
-        signal_t interiorErrorSquared = 0;
+			// Perform the integration into whatever box is contained within.
+			std::vector<signal_t> signal_fit;
 
-        // Integrate this 3rd radius, if needed
-        if (BackgroundInnerRadius != PeakRadius)
-          ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundInnerRadius*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
-        else
-        {
-          // PeakRadius == BackgroundInnerRadius, so use the previous value
-          interiorSignal = signal;
-          interiorErrorSquared = errorSquared;
-        }
+			signal_fit.clear();
+			for (size_t j=0; j<numSteps; j++)signal_fit.push_back(0.0);
+			ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(cylinderLength), signal, errorSquared, signal_fit);
+			for (size_t j = 0; j < numSteps; j++)
+			{
+				 wsProfile2D->dataX(i)[j] = static_cast<double>(j) * deltaQ; //-0.5*backgroundCylinder
+				 wsProfile2D->dataY(i)[j] = signal_fit[j];
+				 wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
+			}
 
-        // Subtract the peak part to get the intensity in the shell (BackgroundInnerRadius < r < BackgroundOuterRadius)
-        bgSignal -= interiorSignal;
-        // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
-        bgErrorSquared -= interiorErrorSquared;
+			// Integrate around the background radius
+			if (BackgroundOuterRadius > PeakRadius || percentBackground > 0.0)
+			{
+				// Get the total signal inside "BackgroundOuterRadius"
 
-        // Relative volume of peak vs the BackgroundOuterRadius sphere
-        double ratio = (PeakRadius / BackgroundOuterRadius);
-        double peakVolume = ratio * ratio * ratio;
+				if (BackgroundOuterRadius < PeakRadius ) BackgroundOuterRadius = PeakRadius;
+				signal_fit.clear();
+				for (size_t j=0; j<numSteps; j++)signal_fit.push_back(0.0);
+				ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared, signal_fit);
+				for (size_t j = 0; j < numSteps; j++)
+				{
+					 wsProfile2D->dataX(i)[j] = static_cast<double>(j) * deltaQ; //-0.5*backgroundCylinder
+					 wsProfile2D->dataY(i)[j] = signal_fit[j];
+					 wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
+				}
 
-        // Relative volume of the interior of the shell vs overall background
-        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
-        // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
-        double bgVolume = 1.0 - interiorRatio * interiorRatio * interiorRatio;
+				// Evaluate the signal inside "BackgroundInnerRadius"
+				signal_t interiorSignal = 0;
+				signal_t interiorErrorSquared = 0;
 
-        // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
-        double scaleFactor = peakVolume / bgVolume;
-        bgSignal *= scaleFactor;
-        bgErrorSquared *= scaleFactor;
+				// Integrate this 3rd radius, if needed
+				if (BackgroundInnerRadius != PeakRadius)
+				{
+					ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundInnerRadius), static_cast<coord_t>(cylinderLength), interiorSignal, interiorErrorSquared, signal_fit);
+				}
+				else
+				{
+					// PeakRadius == BackgroundInnerRadius, so use the previous value
+					interiorSignal = signal;
+					interiorErrorSquared = errorSquared;
+				}
+		        // Subtract the peak part to get the intensity in the shell (BackgroundInnerRadius < r < BackgroundOuterRadius)
+		        bgSignal -= interiorSignal;
+		        // We can subtract the error (instead of adding) because the two values are 100% dependent; this is the same as integrating a shell.
+		        bgErrorSquared -= interiorErrorSquared;
+		        // Relative volume of peak vs the BackgroundOuterRadius sphere
+		        double ratio = (PeakRadius / BackgroundOuterRadius);
+		        double peakVolume = ratio * ratio * (1-percentBackground/100.);
 
-        // Adjust the integrated values.
-        signal -= bgSignal;
-        // But we add the errors together
-        errorSquared += bgErrorSquared;
-      }
+		        // Relative volume of the interior of the shell vs overall backgroundratio * ratio
+		        double interiorRatio = (BackgroundInnerRadius / BackgroundOuterRadius);
+		        // Volume of the bg shell, relative to the volume of the BackgroundOuterRadius sphere
+		        double bgVolume = 1.0 - interiorRatio * interiorRatio * (percentBackground/100.);
 
+		        // Finally, you will multiply the bg intensity by this to get the estimated background under the peak volume
+		        double scaleFactor = peakVolume / bgVolume;
+		        bgSignal *= scaleFactor;
+		        bgErrorSquared *= scaleFactor;
+		        // Adjust the integrated values.
+		        signal -= bgSignal;
+		        // But we add the errors together
+		        errorSquared += bgErrorSquared;
+			}
+			else
+			{
+				for (size_t j = 0; j < numSteps; j++)
+				{
+					 wsProfile2D->dataX(i)[j] = static_cast<double>(j) * deltaQ;  //-0.5*cylinderLength
+					 wsProfile2D->dataY(i)[j] = signal_fit[j];
+					 wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
+				}
+			}
 
-      // Save it back in the peak object.
-      if (signal != 0. || replaceIntensity)
-      {
-        p.setIntensity(signal);
-        p.setSigmaIntensity( sqrt(errorSquared) );
-      }
+			IAlgorithm_sptr fit_alg;
+			try
+			{
+			fit_alg = createChildAlgorithm("Fit", -1, -1, false);
+			} catch (Exception::NotFoundError&)
+			{
+			g_log.error("Can't locate Fit algorithm");
+			throw ;
+			}
 
-      g_log.information() << "Peak " << i << " at " << pos << ": signal "
-          << signal << " (sig^2 " << errorSquared << "), with background "
-          << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
-          << std::endl;
+			size_t half = numSteps/2;
+			double Centre = wsProfile2D->dataX(i)[half];
+			const Mantid::MantidVec& Y = wsProfile2D->readY(i);
+			double peakHeight = Y[half];
+			size_t iStep;
+			for (iStep=0; iStep <= half; iStep++)
+			{
+				if(((Y[iStep]-peakHeight*0.75)*(Y[iStep+1]-peakHeight*0.75))<0.)break;
+			}
+			double Sigma = fabs(Centre-wsProfile2D->dataX(i)[iStep]);
+			std::string profileFunction = getProperty("ProfileFunction");
+			std::ostringstream fun_str, plot_str;
+			plot_str << "FitPeak" << i;
+			if (profileFunction.compare("Gaussian") == 0)
+			{
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=Gaussian,Height="<<peakHeight<<",Sigma="<<Sigma<<",PeakCentre="<<Centre;
+			}
+			else if (profileFunction.compare("ConvolutionExpGaussian") == 0)
+			{
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=250.0,B=0.0,X0="<<Centre<<",S="<<Sigma;
+				fit_alg->setProperty("Ties", "f1.B=0.0");
+			}
+			else if (profileFunction.compare("ConvolutionBackToBackGaussian") == 0)
+			{
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=250.0,B=250.0,X0="<<Centre<<",S="<<Sigma;
+			}
+			if (profileFunction.compare("NoFit") != 0)
+			{
+				fit_alg->setPropertyValue("Function", fun_str.str());
+				fit_alg->setProperty("InputWorkspace", wsProfile2D);
+				fit_alg->setProperty("WorkspaceIndex", i);
+				if (profileFunction.compare("ConvolutionExpGaussian") == 0)
+				{
+			        fit_alg->setProperty("StartX", Centre - 4.0 * Sigma);
+			        fit_alg->setProperty("EndX", Centre + 4.0 * Sigma);
+				}
+				fit_alg->setProperty("CreateOutput", true);
+				fit_alg->setProperty("Output", plot_str.str());
+				fit_alg->executeAsChildAlg();
+				MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
+				std::string fun = fit_alg->getProperty("Function");
+				double chisq = fit_alg->getProperty("OutputChi2overDoF");
+				g_log.notice() << "Peak " << i <<": Chisq = " << chisq << " " << fun<<"\n";
+				//Evaluate fit at points
+				const Mantid::MantidVec& x = fitWS->readX(1);
+				const Mantid::MantidVec& y = fitWS->readY(1);
+				const Mantid::MantidVec& e = fitWS->readY(2);
+				wsFit2D->dataX(i) = x;
+				wsDiff2D->dataX(i) = x;
+				wsFit2D->dataY(i) = y;
+				wsDiff2D->dataY(i) = e;
+
+				//Calculate intensity
+				signal = 0.0;
+				for (size_t j = 0; j < numSteps; j++) if ( !boost::math::isnan(y[j]) && !boost::math::isinf(y[j]))signal+= y[j];
+				errorSquared = std::fabs(signal);
+			}
+      	  }
+		  // Save it back in the peak object.
+		  if (signal != 0. || replaceIntensity)
+		  {
+			p.setIntensity(signal);
+			p.setSigmaIntensity( sqrt(errorSquared) );
+		  }
+
+		  g_log.information() << "Peak " << i << " at " << pos << ": signal "
+			  << signal << " (sig^2 " << errorSquared << "), with background "
+			  << bgSignal << " (sig^2 " << bgErrorSquared << ") subtracted."
+			  << std::endl;
+
     }
-
     // This flag is used by the PeaksWorkspace to evaluate whether it has been integrated.
     peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true); 
     // These flags are specific to the algorithm.

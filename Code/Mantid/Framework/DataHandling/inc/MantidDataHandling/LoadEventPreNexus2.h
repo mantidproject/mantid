@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
@@ -96,7 +96,7 @@ struct Pulse
 #pragma pack(pop)
 
 
-class DLLExport LoadEventPreNexus2 : public API::IDataFileChecker
+class DLLExport LoadEventPreNexus2 : public API::IFileLoader
 {
 public:
   /// Constructor
@@ -112,12 +112,8 @@ public:
   /// Algorithm's aliases
   virtual const std::string alias() const { return "LoadEventPreNeXus2"; }
 
-  /// Returns the name of the property to be considered as the Filename for Load
-  virtual const char * filePropertyName() const;
-  /// do a quick check that this file can be loaded 
-  bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-  /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-  int fileCheck(const std::string& filePath);
+  /// Returns a confidence value that this algorithm can load a file
+  virtual int confidence(Kernel::FileDescriptor & descriptor) const;
   
 private:
   /// Sets documentation strings for this algorithm

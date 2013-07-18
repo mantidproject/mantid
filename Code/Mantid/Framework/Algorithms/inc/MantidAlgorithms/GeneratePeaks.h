@@ -59,7 +59,7 @@ namespace Algorithms
     // Implement abstract Algorithm methods
     void exec();
 
-    API::MatrixWorkspace_sptr createOutputWorkspace(std::set<specid_t> spectra, std::vector<double> mBinParameters);
+    API::MatrixWorkspace_sptr createDataWorkspace(std::set<specid_t> spectra, std::vector<double> binparameters);
 
     API::IFunction_sptr createFunction(const std::string &peakFuncType, const std::vector<std::string> &colNames,
                                        const bool isRaw, const bool withBackground,
@@ -73,6 +73,9 @@ namespace Algorithms
        std::string peakfunction, bool newWSFromParent);
 
     double getTableValue(DataObjects::TableWorkspace_const_sptr tableWS, std::string colname, size_t index);
+
+    /// Get the IPeakFunction part in the input function
+    API::IPeakFunction_sptr getPeakFunction(API::IFunction_sptr infunction);
 
     std::map<specid_t, specid_t> mSpectrumMap;
   };

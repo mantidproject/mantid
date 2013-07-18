@@ -31,7 +31,7 @@ namespace Poco {
 }
 
 
-class RemoteJobManager
+class MANTID_REMOTE_DLL RemoteJobManager
 {
 public:
   RemoteJobManager( const Poco::XML::Element* elem);

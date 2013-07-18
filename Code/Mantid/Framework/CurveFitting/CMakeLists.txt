@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/BoundaryConstraint.cpp
 	src/Chebyshev.cpp
 	src/ComptonProfile.cpp
+	src/ComptonScatteringCountRate.cpp
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
@@ -98,6 +99,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/ComptonProfile.h
+	inc/MantidCurveFitting/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
@@ -188,6 +190,7 @@ set ( TEST_FILES
 	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonProfileTest.h
+	ComptonScatteringCountRateTest.h
 	ConvolutionTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h

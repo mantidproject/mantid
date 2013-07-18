@@ -20,12 +20,14 @@ set ( SRC_FILES
 	src/EnvironmentHistory.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
+	src/FileDescriptor.cpp
 	src/FileValidator.cpp
 	src/FilterChannel.cpp
 	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
 	src/Glob.cpp
+	src/HDFDescriptor.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
@@ -40,10 +42,11 @@ set ( SRC_FILES
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
-	src/Material.cpp
 	src/MaskedProperty.cpp
+	src/Material.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
+	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
 	src/Memory.cpp
@@ -135,6 +138,7 @@ set ( INC_FILES
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
 	inc/MantidKernel/Fast_Exponential.h
+	inc/MantidKernel/FileDescriptor.h
 	inc/MantidKernel/FileValidator.h
 	inc/MantidKernel/FilterChannel.h
 	inc/MantidKernel/FilteredTimeSeriesProperty.h
@@ -142,6 +146,7 @@ set ( INC_FILES
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
 	inc/MantidKernel/Glob.h
+	inc/MantidKernel/HDFDescriptor.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
 	inc/MantidKernel/ISaveable.h
@@ -161,10 +166,11 @@ set ( INC_FILES
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
-	inc/MantidKernel/Material.h
 	inc/MantidKernel/MaskedProperty.h
+	inc/MantidKernel/Material.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
+	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
 	inc/MantidKernel/Memory.h
@@ -251,6 +257,7 @@ set ( TEST_FILES
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
 	FacilitiesTest.h
+	FileDescriptorTest.h
 	FileValidatorTest.h
 	FilterChannelTest.h
 	FilteredTimeSeriesPropertyTest.h
@@ -259,6 +266,7 @@ set ( TEST_FILES
 	FunctionTaskTest.h
 	GlobTest.h
 	HermitePolynomialsTest.h
+	HDFDescriptorTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
@@ -272,8 +280,8 @@ set ( TEST_FILES
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
 	MandatoryValidatorTest.h
-	MaterialTest.h
 	MaskedPropertyTest.h
+	MaterialTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
 	MemoryTest.h
@@ -296,6 +304,7 @@ set ( TEST_FILES
 	RebinHistogramTest.h
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
+	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h

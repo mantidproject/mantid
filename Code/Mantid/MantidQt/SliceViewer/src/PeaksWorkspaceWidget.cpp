@@ -45,6 +45,30 @@ namespace MantidQt
       populate();
     }
 
+    std::set<QString> PeaksWorkspaceWidget::getShownColumns()
+    {
+
+      std::set<QString> result;
+      auto numCols = ui.tblPeaks->model()->columnCount();
+      for (auto i = 0; i < numCols; ++i)
+      {
+        if (!ui.tblPeaks->isColumnHidden(i))
+          result.insert(ui.tblPeaks->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString());
+      }
+      return result;
+    }
+
+    void PeaksWorkspaceWidget::setShownColumns(std::set<QString> & cols)
+    {
+      auto numCols = ui.tblPeaks->model()->columnCount();
+      for (auto i = 0; i < numCols; ++i)
+      {
+        const QString name = ui.tblPeaks->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
+        bool hide(cols.find(name) == cols.end());
+        ui.tblPeaks->setColumnHidden(i, hide);
+      }
+    }
+
     /**
     Populate controls with data ready for rendering.
     */
@@ -54,13 +78,13 @@ namespace MantidQt
       ui.lblWorkspaceName->setText(nameText);
       ui.lblWorkspaceName->setToolTip(nameText);
 
-      const QString integratedText = m_ws->hasIntegratedPeaks() ? "Yes" : "No";
+      const QString integratedText = "Integrated: " + QString(m_ws->hasIntegratedPeaks() ? "Yes" : "No");
 
       ui.lblWorkspaceState->setText(integratedText);
       ui.lblWorkspaceState->setToolTip(integratedText);
 
       const QString coordinateText = QString(m_coordinateSystem.c_str());
-      ui.lblWorkspaceCoordinates->setText(coordinateText);
+      ui.lblWorkspaceCoordinates->setText("Coords: " + coordinateText);
       ui.lblWorkspaceCoordinates->setToolTip(coordinateText);
 
       ui.btnBackgroundColor->setBackgroundColor(m_backgroundColour);
@@ -69,16 +93,22 @@ namespace MantidQt
       auto model = new QPeaksTableModel(this->m_ws);
       connect(model, SIGNAL(peaksSorted(const std::string&, const bool)), this, SLOT(onPeaksSorted(const std::string&, const bool)));
       ui.tblPeaks->setModel(model);
+      const std::vector<int> hideCols = model->defaultHideCols();
+      for (auto it = hideCols.begin(); it != hideCols.end(); ++it)
+        ui.tblPeaks->setColumnHidden(*it,true);
       ui.tblPeaks->verticalHeader()->setResizeMode(QHeaderView::Interactive);
       ui.tblPeaks->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
       m_originalTableWidth = ui.tblPeaks->horizontalHeader()->length();
 
+      // calculate the average width (in pixels) of numbers
+      QString allNums("0123456789");
+      double char_width = static_cast<double>(ui.tblPeaks->fontMetrics().boundingRect(allNums).width())
+          / static_cast<double>(allNums.size());
       // set the starting width of each column
-      int char_width = (ui.tblPeaks->fontMetrics().maxWidth()+ui.tblPeaks->fontMetrics().averageCharWidth());
-      char_width = static_cast<int>(.4*static_cast<double>(char_width)); // randomly determined "correct"
       for (int i = 0; i < m_originalTableWidth; ++i)
       {
-        ui.tblPeaks->horizontalHeader()->resizeSection(i, model->numCharacters(i) * char_width);
+        double width = static_cast<double>(model->numCharacters(i) + 3) * char_width;
+        ui.tblPeaks->horizontalHeader()->resizeSection(i, static_cast<int>(width));
       }
 
     }

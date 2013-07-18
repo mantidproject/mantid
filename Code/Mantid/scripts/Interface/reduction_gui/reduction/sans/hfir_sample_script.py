@@ -153,11 +153,22 @@ class SampleData(BaseScriptElement):
     
     # Data file
     data_files = []
+    separate_jobs = False
 
      # Option list
     option_list = [DirectBeam, BeamSpreader]
-           
-    def to_script(self):
+    
+    def get_data_file_list(self):
+        """
+            Get the list of data files.
+            Includes expanding run ranges. 
+        """
+        data_list = []
+        for f in self.data_files:
+            data_list.extend(SampleData.parse_runs(f))
+        return data_list
+
+    def to_script(self, data_file=None):
         """
             Generate reduction script
             @param execute: if true, the script will be executed
@@ -165,7 +176,8 @@ class SampleData(BaseScriptElement):
         script = ""
 
         # Sample thickness
-        script += "DivideByThickness(%g)\n" % self.sample_thickness
+        if not self.sample_thickness == 1.0:
+            script += "DivideByThickness(%g)\n" % self.sample_thickness
         
         if not self.calculate_transmission:
             script += "SetTransmission(%g, %g)\n" % (self.transmission, self.transmission_spread)
@@ -177,15 +189,29 @@ class SampleData(BaseScriptElement):
             script += "TransmissionDarkCurrent(\"%s\")\n" % str(self.dark_current)
         
         # Data files
-        if len(self.data_files)>0:
-            parts = os.path.split(str(self.data_files[0]).strip())
+        if len(self.data_files)==0:
+            raise RuntimeError, "Trying to generate reduction script without a data file."
+
+        if data_file is None:
+            data_file_list = self.get_data_file_list()
+            parts = os.path.split(str(data_file_list[0]).strip())
             if len(parts[0])>0:
                 script += "DataPath(\"%s\")\n" % parts[0]
             else:
                 script += "#Note: Data path was not found at script generation, will try at run time.\n"
-            script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(self.data_files)
+
+            if self.separate_jobs is False:
+                script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(data_file_list)
+            else:
+                for f in data_file_list:
+                    script += "AppendDataFile([\"%s\"])\n" % f
         else:
-            raise RuntimeError, "Trying to generate reduction script without a data file."
+            parts = os.path.split(str(data_file).strip())
+            if len(parts[0])>0:
+                script += "DataPath(\"%s\")\n" % parts[0]
+            else:
+                script += "#Note: Data path was not found at script generation, will try at run time.\n"
+            script += "AppendDataFile([\"%s\"])\n" % str(data_file)
 
         return script
 
@@ -225,6 +251,7 @@ class SampleData(BaseScriptElement):
         xml += self.calculation_method.to_xml()
         xml += "</Transmission>\n"
         xml += "<SampleData>\n"
+        xml += "  <separate_jobs>%s</separate_jobs>\n" % str(self.separate_jobs)
         xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
         for item in self.data_files:
             xml += "  <data_file>%s</data_file>\n" % item.strip()        
@@ -270,6 +297,9 @@ class SampleData(BaseScriptElement):
             self.data_files = BaseScriptElement.getStringList(sample_data_dom, "data_file")
             self.sample_thickness = BaseScriptElement.getFloatElement(sample_data_dom, "sample_thickness",
                                                                       default=SampleData.sample_thickness)      
+            self.separate_jobs = BaseScriptElement.getBoolElement(sample_data_dom, "separate_jobs",
+                                                                  default = SampleData.separate_jobs) 
+
     
     def reset(self):
         """
@@ -283,6 +313,7 @@ class SampleData(BaseScriptElement):
         self.dark_current = SampleData.dark_current
         self.sample_thickness = SampleData.sample_thickness
         self.data_files = []
+        self.separate_jobs = SampleData.separate_jobs
     
 
     

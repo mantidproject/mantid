@@ -41,7 +41,6 @@ IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDi
     retVal->getEventList(pix).addDetectorID(pix);
     retVal->getEventList(pix).setSpectrumNo(pix);
   }
-  retVal->doneAddingEventLists();
 
   // Add the required start time.
   PropertyWithValue<std::string>* testProperty = new PropertyWithValue<std::string>("start_time", runStart.toSimpleString(), Direction::Input);

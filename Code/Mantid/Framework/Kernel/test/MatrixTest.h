@@ -260,7 +260,7 @@ public:
     {
       for( size_t j = 0; j < 4; ++j )
       {
-        if( i < 1 ) 
+        if( i < 1 )
         {
           TS_ASSERT_EQUALS(rot[i][j], static_cast<double>(i+j));
         }
@@ -272,7 +272,35 @@ public:
     }
   }
 
-   void test_Construction_From_Output_Stream()
+   void test_fillMatrix_With_Good_Input_Gives_Expected_Matrix()
+   {
+     DblMatrix rot;
+     std::istringstream is;
+     is.str("Matrix(3|3)1|2|3|4|5|6|7|8|9");
+     TS_ASSERT_THROWS_NOTHING(Mantid::Kernel::fillFromStream(is, rot, '|'));
+
+     checkMatrixHasExpectedValuesForSquareMatrixTest(rot);
+   }
+
+   void test_fillMatrix_Accepts_Any_Delimiter_Between_Number_Rows_And_Columns()
+   {
+     DblMatrix rot;
+     std::istringstream is;
+     is.str("Matrix(3@3)1|2|3|4|5|6|7|8|9");
+     TS_ASSERT_THROWS_NOTHING(Mantid::Kernel::fillFromStream(is, rot, '|'));
+
+     checkMatrixHasExpectedValuesForSquareMatrixTest(rot);
+   }
+
+   void test_fillMatrix_With_Mixed_Delimiters_In_Input_Values_Throws()
+   {
+     DblMatrix rot;
+     std::istringstream is;
+     is.str("Matrix(3|3)1|2,3|4|5|6|7|8|9");
+     TS_ASSERT_THROWS(Mantid::Kernel::fillFromStream(is, rot, '|'), std::invalid_argument);
+   }
+
+   void test_Construction_Non_Square_Matrix_From_Output_Stream()
    {
      DblMatrix ref(2,3);
      ref[0][0] = 5;
@@ -285,36 +313,32 @@ public:
      std::ostringstream os;
      os << ref;
      TS_ASSERT_EQUALS(os.str(), "Matrix(2,3)5,10,15,105,110,115");
+   }
 
-     DblMatrix copy;
-     std::istringstream is;
-     is.str(os.str());
-     is >> copy;
-     TS_ASSERT_EQUALS(copy[0][0], 5.0);
-     TS_ASSERT_EQUALS(copy[0][1], 10.0);
-     TS_ASSERT_EQUALS(copy[0][2], 15.0);
-     TS_ASSERT_EQUALS(copy[1][0], 105.0);
-     TS_ASSERT_EQUALS(copy[1][1], 110.0);
-     TS_ASSERT_EQUALS(copy[1][2], 115.0);
-
+   void test_Construction_Square_Matrix_From_Output_Stream()
+   {
      DblMatrix square(2,2);
      square[0][0] = 2;
      square[0][1] = 4;
      square[1][0] = 6;
      square[1][1] = 8;
 
-     os.clear(); //Clear any eof flags that may have been set
-     os.str("");
+     std::ostringstream os;
      os << square;
      TS_ASSERT_EQUALS(os.str(), "Matrix(2,2)2,4,6,8");
-     
-     is.clear();
-     is.str(os.str());
-     is >> copy;
-     TS_ASSERT_EQUALS(copy[0][0], 2.0);
-     TS_ASSERT_EQUALS(copy[0][1], 4.0);
-     TS_ASSERT_EQUALS(copy[1][0], 6.0);
-     TS_ASSERT_EQUALS(copy[1][1], 8.0);
+   }
+
+   void test_Dump_Matrix_To_Output_Stream_With_Custom_Delimiter()
+   {
+     DblMatrix square(2,2);
+     square[0][0] = 2;
+     square[0][1] = 4;
+     square[1][0] = 6;
+     square[1][1] = 8;
+
+     std::ostringstream os;
+     Mantid::Kernel::dumpToStream(os, square, '|');
+     TS_ASSERT_EQUALS(os.str(), "Matrix(2|2)2|4|6|8");
    }
 
    void test_lexical_cast()
@@ -333,7 +357,21 @@ public:
       {
         TS_FAIL(e.what());
       }
+   }
 
+private:
+
+   void checkMatrixHasExpectedValuesForSquareMatrixTest(const DblMatrix & mat)
+   {
+     TS_ASSERT_EQUALS(mat.numRows(), 3);
+     TS_ASSERT_EQUALS(mat.numCols(), 3);
+     for( size_t i = 0; i < 3; ++i )
+     {
+       for( size_t j = 0; j < 3; ++j )
+       {
+         TS_ASSERT_EQUALS(mat[i][j], static_cast<double>(i*mat.numRows() + j + 1));
+       }
+     }
    }
 };
 

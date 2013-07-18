@@ -110,7 +110,7 @@ def Load(*args, **kwargs):
         
     # If a WorkspaceGroup was loaded then there will be a set of properties that have an underscore in the name
     # and users will simply expect the groups to be returned NOT the groups + workspaces.
-    return _gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','.*_.*'])
+    return _gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','LoaderVersion','.*_.*'])
 
 # Have a better load signature for autocomplete
 _signature = "\bFilename"

@@ -117,7 +117,10 @@ class SANSCatalogWidget(BaseWidget):
         headers = ["Run", "Title", "Start", "Time[s]", "SDD[mm]", "Comment"]
         self._content.data_set_table.setColumnCount(len(headers))
         self._content.data_set_table.setHorizontalHeaderLabels(headers)
-
+        # Stretch the columns evenly
+        h = self._content.data_set_table.horizontalHeader()
+        h.setResizeMode(1)
+        
         if self._catalog_cls is not None:
             dc = self._catalog_cls()
             def _add_item(data):

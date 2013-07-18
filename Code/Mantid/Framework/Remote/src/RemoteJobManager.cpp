@@ -1071,6 +1071,32 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
           // Unfortunately, the string that MWS returns is not quite in ISO 8601 format
           convertToISO8601( submitTimeString);
 
+          // Get start time
+          std::string startTimeString;
+          (*oneJob.find( "startDate")).second.getValue( startTimeString);
+          Mantid::Kernel::DateAndTime startTime;
+          if (convertToISO8601( startTimeString))
+          {
+            startTime = Mantid::Kernel::DateAndTime( startTimeString);
+          }
+          else
+          {
+            startTime = Mantid::Kernel::DateAndTime().minimum();
+          }
+
+          // Get completion time
+          std::string completionTimeString;
+          (*oneJob.find( "completionDate")).second.getValue( completionTimeString);
+          Mantid::Kernel::DateAndTime completionTime;
+          if (convertToISO8601( completionTimeString))
+          {
+            completionTime = Mantid::Kernel::DateAndTime( completionTimeString);
+          }
+          else
+          {
+            completionTime = Mantid::Kernel::DateAndTime().minimum();
+          }
+
           std::string statusString;
           (*oneJob.find( "expectedState")).second.getValue( statusString);
 
@@ -1108,7 +1134,10 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
             retVal = false;
           }
 
-          jobList.push_back(RemoteJob(jobId, this, status, algName, Mantid::Kernel::DateAndTime( submitTimeString)));
+          RemoteJob job = RemoteJob( jobId, this, status, algName, Mantid::Kernel::DateAndTime( submitTimeString));
+          job.setStartTime( startTime);
+          job.setCompletionTime( completionTime);
+          jobList.push_back( job);
         }
 
       }

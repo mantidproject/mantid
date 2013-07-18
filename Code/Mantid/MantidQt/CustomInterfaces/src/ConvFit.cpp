@@ -145,14 +145,14 @@ namespace IDA
     QString ftype = fitTypeString();
     QString bg = backgroundString();
 
-    QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + QString::fromStdString(m_cfInputWSName) + QString("')\n")).trimmed();
+    QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
     outputNm += QString("conv_") + ftype + bg + uiForm().confit_leSpecNo->text();  
     std::string output = outputNm.toStdString();
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setPropertyValue("Function", function->asString());
-    alg->setPropertyValue("InputWorkspace", m_cfInputWSName);
+    alg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
     alg->setProperty<int>("WorkspaceIndex", uiForm().confit_leSpecNo->text().toInt());
     alg->setProperty<double>("StartX", m_cfDblMng->value(m_cfProp["StartX"]));
     alg->setProperty<double>("EndX", m_cfDblMng->value(m_cfProp["EndX"]));
@@ -166,7 +166,7 @@ namespace IDA
     }
 
     // Plot the line on the mini plot
-    m_cfCalcCurve = plotMiniplot(m_cfPlot, m_cfCalcCurve, output+"_Workspace", 1);
+    m_cfCalcCurve = plotMiniplot(m_cfPlot, m_cfCalcCurve, outputNm+"_Workspace", 1);
     QPen fitPen(Qt::red, Qt::SolidLine);
     m_cfCalcCurve->setPen(fitPen);
     m_cfPlot->replot();
@@ -598,7 +598,10 @@ namespace IDA
 
   void ConvFit::plotInput()
   {
-    std::string wsname;
+    using Mantid::API::MatrixWorkspace;
+    using Mantid::API::AnalysisDataService;
+    using Mantid::Kernel::Exception::NotFoundError;
+
     const bool plotGuess = uiForm().confit_ckPlotGuess->isChecked();
     uiForm().confit_ckPlotGuess->setChecked(false);
 
@@ -609,20 +612,15 @@ namespace IDA
       {
         if ( uiForm().confit_inputFile->isValid() )
         {
-          QFileInfo fi(uiForm().confit_inputFile->getFirstFilename());
-          wsname = fi.baseName().toStdString();
+          QString filename = uiForm().confit_inputFile->getFirstFilename();
+          QFileInfo fi(filename);
+          QString wsname = fi.baseName();
 
           // Load the file if it has not already been loaded.
-          if ( (m_cfInputWS == NULL) || ( wsname != m_cfInputWSName )
-            )
+          if ( (m_cfInputWS == NULL) || ( wsname != m_cfInputWSName ))
           {
-            std::string filename = uiForm().confit_inputFile->getFirstFilename().toStdString();
-            Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
-            alg->initialize();
-            alg->setPropertyValue("Filename", filename);
-            alg->setPropertyValue("OutputWorkspace",wsname);
-            alg->execute();
-            m_cfInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+            m_cfInputWSName = wsname;
+            m_cfInputWS = runLoadNexus(filename, wsname);
           }
         }
         else
@@ -633,14 +631,14 @@ namespace IDA
       break;
     case 1: // Workspace
       {
-        wsname = uiForm().confit_wsSample->currentText().toStdString();
+        m_cfInputWSName = uiForm().confit_wsSample->currentText();
         try
         {
-          m_cfInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+          m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());
         }
-        catch ( Mantid::Kernel::Exception::NotFoundError & )
+        catch ( NotFoundError & )
         {
-          QString msg = "Workspace: '" + QString::fromStdString(wsname) + "' could not be "
+          QString msg = "Workspace: '" + m_cfInputWSName + "' could not be "
             "found in the Analysis Data Service.";
           showInformationBox(msg);
           return;
@@ -648,7 +646,6 @@ namespace IDA
       }
       break;
     }
-    m_cfInputWSName = wsname;
 
     int specNo = uiForm().confit_leSpecNo->text().toInt();
     // Set spectra max value
@@ -665,10 +662,10 @@ namespace IDA
       uiForm().confit_leSpecMax->setText(QString::number(specMax));
     }
 
-    m_cfDataCurve = plotMiniplot(m_cfPlot, m_cfDataCurve, wsname, specNo);
+    m_cfDataCurve = plotMiniplot(m_cfPlot, m_cfDataCurve, m_cfInputWS, specNo);
     try
     {
-      const std::pair<double, double> range = getCurveRange(m_cfDataCurve);    
+      const std::pair<double, double> range = getCurveRange(m_cfDataCurve);
       m_cfRangeS->setRange(range.first, range.second);
       uiForm().confit_ckPlotGuess->setChecked(plotGuess);
     }
@@ -768,7 +765,7 @@ namespace IDA
 
     QString pyInput =
       "from IndirectDataAnalysis import confitSeq\n"
-      "input = '" + QString::fromStdString(m_cfInputWSName) + "'\n"
+      "input = '" + m_cfInputWSName + "'\n"
       "func = r'" + QString::fromStdString(function) + "'\n"
       "startx = " + stX + "\n"
       "endx = " + enX + "\n"

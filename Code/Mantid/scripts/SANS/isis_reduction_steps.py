@@ -12,7 +12,7 @@ import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 sanslog = sans_reduction_steps.sanslog
 
 from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, Workspace
 import SANSUtility
 import isis_instrument
 import os
@@ -118,18 +118,22 @@ class LoadRun(object):
                 RenameWorkspace(InputWorkspace=workspace,OutputWorkspace= period_definitely_inc)
                 workspace = period_definitely_inc 
         
+        log = self._extract_log_info(SANS2D_log_file, inst)
+        
+        self.wksp_name = workspace 
+        return numPeriods, log        
+
+    def _extract_log_info(self,wksp_pointer, inst):
         log = None
         if (not inst is None) and inst.name() == 'SANS2D':
             #this instrument has logs to be loaded 
             try:
-                log = inst.get_detector_log(SANS2D_log_file)
+                log = inst.get_detector_log(wksp_pointer)
             except:
                 #transmission workspaces, don't have logs 
                 if not self._is_trans:
                     raise
-
-        self.wksp_name = workspace 
-        return numPeriods, log        
+        return log
 
     def _get_workspace_name(self, entry_num=None):
         """
@@ -149,10 +153,56 @@ class LoadRun(object):
         else:
             return run + '_sans_' + self.ext.lower()
 
+
+    def _loadFromWorkspace(self, reducer):
+        """ It substitute the work of _assignHelper for workspaces, or, at least, 
+        prepare the internal attributes, to be processed by the _assignHelper. 
+        
+        It is executed when the input for the constructor (run_spec) is given a workspace
+        
+        If reload is False, it will try to get all information necessary to use the given 
+        workspace as the one for the post-processing. 
+        If reload is True, it will try to get all the information necessary to reload this 
+        workspace from the data file.
+        """
+        assert(isinstance(self._data_file, Workspace))
+        ws_pointer = self._data_file
+
+        try:
+            _file_path = ws_pointer.getHistory().getAlgorithm(0).getPropertyValue("Filename")
+        except:
+            raise RuntimeError("Failed to retrieve information to reloade this workspace " + str(self._data_file))
+        self._data_file = _file_path
+        if self._reload:
+            # give to _assignHelper the responsibility of loading this data.
+            return False, None
+
+        #test if the sample details are already loaded:
+        if not ws_pointer.sample().getGeometryFlag():
+            LoadSampleDetailsFromRaw(ws_pointer, self._data_file)
+
+        # so, it will try, not to reload the workspace.
+        self.wksp_name = ws_pointer.name()
+        self.periods_in_file = 1
+        self.shortrun_no = ws_pointer.getRunNumber()
+
+        #check that the current workspace has never been moved
+        hist_str = self._getHistory(ws_pointer)
+        if 'Algorithm: Move' in hist_str or 'Algorithm: Rotate' in hist_str:
+            raise RuntimeError('Moving components needs to be made compatible with not reloading the sample')
+        
+        return True, self._extract_log_info(ws_pointer, reducer.instrument)
+        
+
     # Helper function
     def _assignHelper(self, reducer):
+        if isinstance(self._data_file, Workspace):
+            loaded_flag, logs = self._loadFromWorkspace(reducer)
+            if loaded_flag:
+                return logs
+
         if self._data_file == '' or self._data_file.startswith('.'):
-            return ''
+            raise RuntimeError('Sample needs to be assigned as run_number.file_type')
         
         try:
             data_file = self._extract_run_details(
@@ -251,6 +301,11 @@ class LoadRun(object):
             @param run_number_width: ISIS instruments often produce files with a fixed number of digits padded with zeros
         """
         pieces = run_string.split('.')
+        if len(pieces) > 2: 
+            # this means that the foldername has '.',  so costruct the pieces to ignore foldername with '.' 
+            extension = pieces[-1]
+            body = '.'.join(pieces[:-1])
+            pieces = [body, extension]
         if len(pieces) != 2:
              raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
         
@@ -312,6 +367,18 @@ class LoadRun(object):
             pass
         
         return numPeriods
+
+    def _getHistory(self, wk_name):
+
+        if isinstance(wk_name, Workspace):
+            ws_h = wk_name.getHistory()
+        else:
+            if wk_name not in mtd:
+                return ""
+            ws_h = mtd[wk_name].getHistory()
+        hist_str = str(ws_h)
+
+        return hist_str
     
     def getCorrospondingPeriod(self, sample_period, reducer):
         """
@@ -369,6 +436,8 @@ class LoadTransmissions(ReductionStep):
         if self._trans_name not in [None, '']:
             self.trans = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
             self.trans._assignHelper(reducer)
+            if isinstance(self._trans_name, Workspace):
+                self._trans_name = self._trans_name.name()
             if not self.trans.wksp_name:
                 # do nothing if no workspace was specified
                 return '', ''
@@ -376,6 +445,8 @@ class LoadTransmissions(ReductionStep):
         if self._direct_name not in [None, '']:
             self.direct = LoadRun(self._direct_name, trans=True, reload=self._reload, entry=self._period_d)
             self.direct._assignHelper(reducer)
+            if isinstance(self._direct_name, Workspace):
+                self._direct_name = self._direct_name.name()
             if not self.direct.wksp_name:
                 raise RuntimeError('Transmission run set without direct run error')
  
@@ -429,8 +500,6 @@ class CanSubtraction(ReductionStep):
                 _issueWarning("Can logs could not be loaded, using sample values.")
                 return "()"    
         
-        if not self.workspace._reload:
-            raise NotImplementedError('Moving components needs to be made compatible with not reloading the sample')
         beamcoords = reducer.get_beam_center()
         reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
 
@@ -984,11 +1053,6 @@ class LoadSample(LoadRun, ReductionStep):
         # Code from AssignSample
         self._clearPrevious(self._scatter_sample)
         
-        if ( not self._data_file ) or self._data_file.startswith('.'):
-            self._SAMPLE_RUN = ''
-            self._scatter_sample = None
-            raise RuntimeError('Sample needs to be assigned as run_number.file_type')
-
         logs = self._assignHelper(reducer)
         if self._period != self.UNSET_PERIOD:
             self.entries  = [self._period]
@@ -1021,8 +1085,6 @@ class LoadSample(LoadRun, ReductionStep):
                 raise RuntimeError('Sample logs cannot be loaded, cannot continue')
             reducer.instrument.apply_detector_logs(logs)           
 
-        if not self._reload:
-            raise NotImplementedError('Moving components needs to be made compatible with not reloading the sample')
         beamcoords = reducer.get_beam_center()
         reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
 

@@ -65,6 +65,7 @@ public:
   boost::shared_ptr<Algorithm> createUnmanaged(const std::string& algName, const int& version = -1) const;
 
   std::size_t size() const;
+  void setMaxAlgorithms(int n);
 
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
   IAlgorithm_sptr newestInstanceOf(const std::string& algorithmName) const;

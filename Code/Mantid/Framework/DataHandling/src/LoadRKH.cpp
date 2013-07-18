@@ -10,10 +10,10 @@ Loads the given file in the RKH text format, which can be a file with three colu
 #include "MantidDataHandling/LoadRKH.h"
 #include "MantidDataHandling/SaveRKH.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -32,10 +32,60 @@ namespace DataHandling
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadRKH)
-//register the algorithm into loadalgorithm factory
-DECLARE_LOADALGORITHM(LoadRKH)
+DECLARE_FILELOADER_ALGORITHM(LoadRKH);
+
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadRKH::confidence(Kernel::FileDescriptor & descriptor) const
+{
+  if(!descriptor.isAscii()) return 0;
+
+  auto &file = descriptor.data();
+  std::string fileline("");
+
+  // Header looks something like this where the text inside [] could be anything
+  //  LOQ Thu 28-OCT-2004 12:23 [W 26  INST_DIRECT_BEAM]
+
+  // -- First line --
+  std::getline(file, fileline);
+  // LOQ or SANS2D (case insensitive)
+  if(boost::ifind_first(fileline, "loq").empty() && boost::ifind_first(fileline, "sans2d").empty()) return 0;
+
+  // Next should be date time string
+  static const char* MONTHS[12] = {"-JAN-", "-FEB-", "-MAR-", "-APR-", "-MAY-", "-JUN-", "-JUL-", "-AUG-", "-SEP-", "-OCT-", "-NOV-", "-DEC-"};
+
+  bool foundMonth(false);
+  for(size_t i = 0 ; i < 12; ++i)
+  {
+    if(!boost::ifind_first(fileline, MONTHS[i]).empty())
+    {
+      foundMonth = true;
+      break;
+    }
+  }
+  if(!foundMonth) return 0;
+
+ // there are no constraints on the second line
+  std::getline(file, fileline);
+
+  // read 3rd line - should contain sequence "0    0    0    1"
+  std::getline(file, fileline);
+  if(fileline.find("0    0    0    1") == std::string::npos) return 0;
+
+  // read 4th line - should contain sequence ""0         0         0         0"
+  std::getline(file, fileline);
+  if(fileline.find("0         0         0         0") == std::string::npos) return 0;
+
+  // read 5th line - should contain sequence "3 (F12.5,2E16.6)"
+  std::getline(file, fileline);
+  if(fileline.find("3 (F12.5,2E16.6)") == std::string::npos) return 0;
+
+  return 20; // Better than LoadAscii
+}
+
 
 /// Sets documentation strings for this algorithm
 void LoadRKH::initDocs()
@@ -449,138 +499,7 @@ void LoadRKH::binCenter(const MantidVec oldBoundaries, MantidVec & toCenter) con
 {
   VectorHelper::convertToBinCentre(oldBoundaries, toCenter);
 }
-/**This method does a quick file check by checking the no.of bytes read nread params and header buffer
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
- */
-bool LoadRKH::quickFileCheck(const std::string &,size_t nread,const file_header& header)
-{
-  for(size_t i=0; i<nread; i++)
-  {
-    if (!isascii(header.full_hdr[i]))
-      return false;
-  }
-  // RKH files are always ASCII, they can have extension
-  return true;
-}
 
-/**checks the file by opening it and reading few lines 
- *  @param filePath :: name of the file inluding its path
- *  @return an integer value how much this algorithm can load the file 
- */
-int LoadRKH::fileCheck(const std::string& filePath)
-{ 
-  int bret=0;
-  std::ifstream file(filePath.c_str());
-  if (!file)
-  {
-    g_log.error("Unable to open file: " + filePath);
-    throw Exception::FileError("Unable to open file: " , filePath);
-  }
-
-  typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-   boost::char_separator<char> sep(" ");
-
-  std::string fileline("");
-
-  //get first line
-  getline(file, fileline);
-  if ( fileline.find("Workspace:") == std::string::npos )
-  {//seeing Workspace: is enough to carry on
-    if ( fileline.find(":") == std::string::npos )
-    {//there must be a : in the line
-      return 0;
-    }
-    if ( fileline.find("LOQ") == std::string::npos )
-    {
-      if ( fileline.find("SANS2D") == std::string::npos )
-      {
-        static const std::string MONTHS[12] = {"-JAN-", "-FEB-", "-MAR-", "-APR-", "-MAY-", "-JUN-", "-JUL-", "-AUG-", "-SEP-", "-OCT-", "-NOV-", "-DEC-"};
-        size_t i = 0;
-        for ( ; i < 12; ++i )
-        {
-          if ( fileline.find(MONTHS[i]) != std::string::npos )
-          {
-            //the line is acceptable
-            break;
-          }
-        }
-        if ( i == 12 )
-        {
-          //the line contains none of the strings we were looking for except one : which is not enough, reject the file
-          return 0;
-        }
-      }
-    }
-  }
-  
-  //there are no constraints on the second line
-  getline(file, fileline);
-
-  //read 3rd line
-  getline(file, fileline);
-  int ncols=0;
-  if(fileline.find("(")!=std::string::npos && fileline.find(")")!=std::string::npos)
-  {
-    bret+=10;
-    if(fileline.find("    0    0    0    1")!=std::string::npos)
-    {
-      bret+=10;
-    }
-  }
-  else
-  { 
-    tokenizer tok(fileline,sep);
-    for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
-    {		 
-      ++ncols;
-    }
-    if(ncols==7)
-    {
-      bret+=10;
-    }
-  }
-  //4th line
-  getline(file, fileline);
-  if(fileline.find("         0         0         0         0")!=std::string::npos)
-  {
-    bret+=10;
-  }
-  else if(fileline.find("  0 ")!=std::string::npos)
-  {
-      bret+=10;
-  }
-  //5th line
-  getline(file, fileline);
-  if(fileline.find("3 (F12.5,2E16.6)")!=std::string::npos)
-  {
-    bret+=10;
-  }
-  else if (fileline.find("  1\n")!=std::string::npos)
-  { 
-      bret+=10;
-  }
-  ncols=0;  
-  //6th line data line
-  getline(file, fileline);
-  tokenizer tok1(fileline, sep); 
-  for (tokenizer::iterator beg=tok1.begin(); beg!=tok1.end(); ++beg)
-  {		 
-    ++ncols;
-  }
-  if(ncols==3)
-  {
-    bret+=20;
-  }
-  
-  if( bret == 10 )
-  {
-    // Assume we are better than LoadAscii
-    bret += 10;
-  }
-  return bret;
-}
 
 }
 }

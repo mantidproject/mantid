@@ -540,22 +540,25 @@ namespace Mantid
         {
           const ComponentID id = comp->getComponentID();
           pmap_cit it_found = m_map.find(id);
-          if( it_found->first && it_found != m_map.end() )
+          if(it_found != m_map.end() )
           {
-            pmap_cit itr = m_map.lower_bound(id);
-            pmap_cit itr_end = m_map.upper_bound(id);
-            for( ; itr != itr_end; ++itr )
-            {
-              Parameter_sptr param = itr->second;
-              if( boost::iequals(param->type(), type) )
-              {
-                result = param;
-                break;
-              }
-            }
-          }
-        }
-      }
+             if (it_found->first)
+             {
+                pmap_cit itr = m_map.lower_bound(id);
+                pmap_cit itr_end = m_map.upper_bound(id);
+                for( ; itr != itr_end; ++itr )
+                {
+                    Parameter_sptr param = itr->second;
+                    if( boost::iequals(param->type(), type) )
+                    {
+                        result = param;
+                        break;
+                    }
+                }
+             } // found->firdst
+          } // it_found != m_map.end()
+        } //!m_map.empty()
+      } // PARALLEL_CRITICAL(ParameterMap_get)
       return result;
     }
 

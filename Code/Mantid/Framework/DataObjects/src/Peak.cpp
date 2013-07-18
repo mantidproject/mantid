@@ -807,8 +807,22 @@ namespace DataObjects
   /**
   Forwarding function. Exposes the detector position directly.
   */
+  Mantid::Kernel::V3D Peak::getDetectorPositionNoCheck() const
+  {
+    return getDetector()->getPos();
+  }
+
+  /**
+  Forwarding function. Exposes the detector position directly, but checks that the detector is not null before
+  accessing its position. Throws if null.
+  */
   Mantid::Kernel::V3D Peak::getDetectorPosition() const
   {
+    auto det = getDetector();
+    if(det == NULL)
+    {
+      throw Mantid::Kernel::Exception::NullPointerException("Peak", "Detector");
+    }
     return getDetector()->getPos();
   }
 

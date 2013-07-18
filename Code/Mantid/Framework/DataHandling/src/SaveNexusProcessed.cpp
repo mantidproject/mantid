@@ -36,6 +36,8 @@ off by default.
 // @author Ronald Fowler, based on SaveNexus
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -217,8 +219,19 @@ namespace DataHandling
     if(peaksWorkspace) g_log.debug("We have a peaks workspace");
     // check if inputWorkspace is something we know how to save
     if (!matrixWorkspace && !tableWorkspace) {
-      g_log.debug() << "Workspace "  << m_title << " not saved because it is not of a type we can presently save.\n";
-      return;
+      // get the workspace name for the error message
+      std::string name = getProperty("InputWorkspace");
+
+      // md workspaces should be saved using SaveMD
+      if (bool(boost::dynamic_pointer_cast<const IMDEventWorkspace>(inputWorkspace))
+          || bool(boost::dynamic_pointer_cast<const IMDHistoWorkspace>(inputWorkspace)))
+        g_log.warning() << name << " can be saved using SaveMD\n";
+
+      // standard error message
+      std::stringstream msg;
+      msg << "Workspace \""  << name << "\" not saved because it is not of a type we can presently save.";
+
+      throw std::runtime_error(msg.str());
     }
     m_eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
     const std::string workspaceID = inputWorkspace->id();

@@ -965,8 +965,8 @@ public:
       int outputWorkspaceWillBe = 0
       )
   {
-    lhs->setName("MinusTest_lhs");
-    rhs->setName("MinusTest_rhs");
+    //lhs->setName("MinusTest_lhs");
+    //rhs->setName("MinusTest_rhs");
     switch (outputWorkspaceWillBe)
     {
     case 0:

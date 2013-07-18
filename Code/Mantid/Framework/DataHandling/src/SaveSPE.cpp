@@ -16,8 +16,10 @@ The input workspace must contain histogram data with common binning on all spect
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "Poco/File.h"
 #include <cstdio>
 #include <cmath>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -26,7 +28,19 @@ namespace Mantid
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(SaveSPE)
+
     
+    /** A Macro wrapping std::fprintf in order to throw an exception when there is a fault writing to disk
+    *  @param stream :: the file object to write to
+    *  @param format :: C string that contains the text to be written to the stream.
+    *  @param ... :: Additional arguments to fill format specifiers
+    *  @throws std::runtime_error :: throws when there is a problem writing to disk, ususally disk space or permissions based
+    */
+    #define FPRINTF_WITH_EXCEPTION(stream, format, ... ) if (fprintf(stream, format, ##__VA_ARGS__) <= 0)\
+    {\
+      throw std::runtime_error("Error writing to file. Check folder permissions and disk space.");\
+    }
+
     /// Sets documentation strings for this algorithm
     void SaveSPE::initDocs()
     {
@@ -83,57 +97,72 @@ namespace Mantid
       // Do the full check for common binning
       if ( ! WorkspaceHelpers::commonBoundaries(inputWS) )
       {
-        g_log.error("The input workspace must have common binning");
         throw std::invalid_argument("The input workspace must have common binning");
       }
-
-      const size_t nHist = inputWS->getNumberHistograms();
-      m_nBins = inputWS->blocksize();
 
       // Retrieve the filename from the properties
       const std::string filename = getProperty("Filename");
 
-      FILE * outSPE_File;
-      outSPE_File = fopen(filename.c_str(),"w");
-      if (!outSPE_File)
+      FILE * outSPEFile = fopen(filename.c_str(),"w");
+      if (!outSPEFile)
       {
-        g_log.error("Failed to open file:" + filename);
         throw Kernel::Exception::FileError("Failed to open file:" , filename);
       }
-
+      try
+      {
+        //write to the file being ready to catch it if something happens during writing
+        writeSPEFile(outSPEFile, inputWS);
+        fclose(outSPEFile);
+      }
+      catch (std::exception &)
+      {
+        fclose(outSPEFile);
+        Poco::File(filename).remove();
+        //throw the exception again so the base class can deal with it too in it's own way
+        throw;
+      }
+    }
+    
+    /** Write the data to the SPE file
+    *  @param outFile :: the file object to write to
+    *  @param inputWS :: the workspace to be saved
+    */
+    void SaveSPE::writeSPEFile(FILE * outSPEFile, const API::MatrixWorkspace_const_sptr &inputWS)
+    {
+      const size_t nHist = inputWS->getNumberHistograms();
+      m_nBins = inputWS->blocksize();
       // Number of Workspaces and Number of Energy Bins
-      fprintf(outSPE_File,"%8u%8u\n",static_cast<int>(nHist), static_cast<int>(m_nBins));
-
+      FPRINTF_WITH_EXCEPTION(outSPEFile,"%8u%8u\n",static_cast<int>(nHist), static_cast<int>(m_nBins));
       // Write the angle grid (dummy if no 'vertical' axis)
       size_t phiPoints(0);
       if ( inputWS->axes() > 1 && inputWS->getAxis(1)->isNumeric() )
       {
         const Axis& axis = *inputWS->getAxis(1);
         const std::string commentLine = "### " + axis.unit()->caption() + " Grid\n";
-        fprintf(outSPE_File,"%s",commentLine.c_str());
+        FPRINTF_WITH_EXCEPTION(outSPEFile,"%s",commentLine.c_str());
         const size_t axisLength = axis.length();
         phiPoints = (axisLength==nHist) ? axisLength+1 : axisLength;
         for (size_t i = 0; i < phiPoints; i++)
         {
           const double value = (i < axisLength) ? axis(i) : axis(axisLength-1)+1;
-          fprintf(outSPE_File,NUM_FORM,value);
+          FPRINTF_WITH_EXCEPTION(outSPEFile,NUM_FORM,value);
           if ( (i + 1) % 8 == 0 )
           {
-            fprintf(outSPE_File,"\n");
+            FPRINTF_WITH_EXCEPTION(outSPEFile,"\n");
           }
         }
       }
       else
       {
-        fprintf(outSPE_File,"### Phi Grid\n");
+        FPRINTF_WITH_EXCEPTION(outSPEFile,"### Phi Grid\n");
         phiPoints = nHist + 1; // Pretend this is binned
         for (size_t i = 0; i < phiPoints; i++)
         {
           const double value = static_cast<int>(i) + 0.5;
-          fprintf(outSPE_File,NUM_FORM,value);
+          FPRINTF_WITH_EXCEPTION(outSPEFile,NUM_FORM,value);
           if ( (i + 1) % 8 == 0 )
           {
-            fprintf(outSPE_File,"\n");
+            FPRINTF_WITH_EXCEPTION(outSPEFile,"\n");
           }
         }
       }
@@ -141,19 +170,19 @@ namespace Mantid
       // If the number of points written isn't a factor of 8 then we need to add an extra newline
       if (phiPoints % 8 != 0)
       {
-        fprintf(outSPE_File,"\n");
+        FPRINTF_WITH_EXCEPTION(outSPEFile,"\n");
       }
 
       // Get the Energy Axis (X) of the first spectra (they are all the same - checked above)
       const MantidVec& X = inputWS->readX(0);
 
       // Write the energy grid
-      fprintf(outSPE_File,"### Energy Grid\n");
+      FPRINTF_WITH_EXCEPTION(outSPEFile,"### Energy Grid\n");
       const size_t energyPoints = m_nBins + 1; // Validator enforces binned data
       size_t i = NUM_PER_LINE-1;
       for (  ; i < energyPoints; i += NUM_PER_LINE)
       {// output a whole line of numbers at once
-        fprintf(outSPE_File,NUMS_FORM,
+        FPRINTF_WITH_EXCEPTION(outSPEFile,NUMS_FORM,
           X[i-7],X[i-6],X[i-5],X[i-4],X[i-3],X[i-2],X[i-1],X[i]);
       }
       // if the last line is not a full line enter them individually
@@ -161,16 +190,14 @@ namespace Mantid
       {// the condition above means that the last line has less than the maximum number of digits
         for (i-=7; i < energyPoints; ++i)
         {
-          fprintf(outSPE_File,NUM_FORM,X[i]);
+          FPRINTF_WITH_EXCEPTION(outSPEFile,NUM_FORM,X[i]);
         }
-        fprintf(outSPE_File,"\n");
+        FPRINTF_WITH_EXCEPTION(outSPEFile,"\n");
       }
 
-      writeHists(inputWS, outSPE_File);
-
-      // Close the file
-      fclose(outSPE_File);
+      writeHists(inputWS, outSPEFile);
     }
+
     /** Write the bin values and errors for all histograms to the file
     *  @param WS :: the workspace to be saved
     *  @param outFile :: the file object to write to
@@ -225,10 +252,10 @@ namespace Mantid
     */
     void SaveSPE::writeHist(const API::MatrixWorkspace_const_sptr WS, FILE * const outFile, const int specIn) const
     {
-      fprintf(outFile,"%s", Y_HEADER);
+      FPRINTF_WITH_EXCEPTION(outFile,"%s", Y_HEADER);
       writeBins(WS->readY(specIn), outFile);
 
-      fprintf(outFile,"%s", E_HEADER);
+      FPRINTF_WITH_EXCEPTION(outFile,"%s", E_HEADER);
       writeBins(WS->readE(specIn), outFile);
     }
     /** Write the mask flags for in a histogram entry
@@ -236,10 +263,10 @@ namespace Mantid
     */
     void SaveSPE::writeMaskFlags(FILE * const outFile) const
     {
-      fprintf(outFile,"%s", Y_HEADER);
+      FPRINTF_WITH_EXCEPTION(outFile,"%s", Y_HEADER);
       writeValue(MASK_FLAG, outFile);
 
-      fprintf(outFile,"%s", E_HEADER);
+      FPRINTF_WITH_EXCEPTION(outFile,"%s", E_HEADER);
       writeValue(MASK_ERROR, outFile);
     }
     /** Write the the values in the array to the file in the correct format
@@ -250,16 +277,16 @@ namespace Mantid
     {
       for(size_t j = NUM_PER_LINE-1; j < m_nBins; j+=NUM_PER_LINE)
       {// output a whole line of numbers at once
-        fprintf(outFile,NUMS_FORM,
+        FPRINTF_WITH_EXCEPTION(outFile,NUMS_FORM,
           Vs[j-7],Vs[j-6],Vs[j-5],Vs[j-4],Vs[j-3],Vs[j-2],Vs[j-1],Vs[j]);
       }
       if (m_remainder)
       {
         for ( size_t l = m_nBins - m_remainder; l < m_nBins; ++l)
         {
-          fprintf(outFile,NUM_FORM,Vs[l]);
+          FPRINTF_WITH_EXCEPTION(outFile,NUM_FORM,Vs[l]);
         }
-        fprintf(outFile,"\n");
+        FPRINTF_WITH_EXCEPTION(outFile,"\n");
       }
     }
     /** Write the the value the file a number of times given by m_nbins
@@ -270,16 +297,16 @@ namespace Mantid
     {
       for(size_t j = NUM_PER_LINE-1; j < m_nBins; j+=NUM_PER_LINE)
       {// output a whole line of numbers at once
-        fprintf(outFile,NUMS_FORM,
+        FPRINTF_WITH_EXCEPTION(outFile,NUMS_FORM,
           value,value,value,value,value,value,value,value);
       }
       if (m_remainder)
       {
         for ( size_t l = m_nBins - m_remainder; l < m_nBins; ++l)
         {
-          fprintf(outFile,NUM_FORM,value);
+          FPRINTF_WITH_EXCEPTION(outFile,NUM_FORM,value);
         }
-        fprintf(outFile,"\n");
+        FPRINTF_WITH_EXCEPTION(outFile,"\n");
       }
     }
     /**Write a summary information about what the algorithm had managed to save to the

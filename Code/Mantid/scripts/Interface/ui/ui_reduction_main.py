@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/reduction_main.ui'
 #
-# Created: Tue Apr 10 13:22:25 2012
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Thu Jun 20 11:11:32 2013
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -55,20 +55,27 @@ class Ui_SANSReduction(object):
         self.horizontalLayout.addItem(spacerItem1)
         self.reduce_button = QtGui.QPushButton(self.centralwidget)
         self.reduce_button.setEnabled(True)
+        self.reduce_button.setMinimumSize(QtCore.QSize(95, 0))
         self.reduce_button.setObjectName("reduce_button")
         self.horizontalLayout.addWidget(self.reduce_button)
+        self.cluster_button = QtGui.QPushButton(self.centralwidget)
+        self.cluster_button.setMinimumSize(QtCore.QSize(95, 0))
+        self.cluster_button.setObjectName("cluster_button")
+        self.horizontalLayout.addWidget(self.cluster_button)
         self.save_button = QtGui.QPushButton(self.centralwidget)
         self.save_button.setEnabled(True)
+        self.save_button.setMinimumSize(QtCore.QSize(95, 0))
         self.save_button.setObjectName("save_button")
         self.horizontalLayout.addWidget(self.save_button)
         self.export_button = QtGui.QPushButton(self.centralwidget)
         self.export_button.setEnabled(True)
+        self.export_button.setMinimumSize(QtCore.QSize(95, 0))
         self.export_button.setObjectName("export_button")
         self.horizontalLayout.addWidget(self.export_button)
         self.verticalLayout.addLayout(self.horizontalLayout)
         SANSReduction.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(SANSReduction)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1062, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1062, 23))
         self.menubar.setObjectName("menubar")
         self.file_menu = QtGui.QMenu(self.menubar)
         self.file_menu.setObjectName("file_menu")
@@ -105,6 +112,8 @@ class Ui_SANSReduction(object):
         self.interface_chk.setText(QtGui.QApplication.translate("SANSReduction", "Advanced interface", None, QtGui.QApplication.UnicodeUTF8))
         self.reduce_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to execute reduction.", None, QtGui.QApplication.UnicodeUTF8))
         self.reduce_button.setText(QtGui.QApplication.translate("SANSReduction", "Reduce", None, QtGui.QApplication.UnicodeUTF8))
+        self.cluster_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to send the reduction job to a remote compute resource", None, QtGui.QApplication.UnicodeUTF8))
+        self.cluster_button.setText(QtGui.QApplication.translate("SANSReduction", "Send cluster", None, QtGui.QApplication.UnicodeUTF8))
         self.save_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to save your reduction parameters.", None, QtGui.QApplication.UnicodeUTF8))
         self.save_button.setText(QtGui.QApplication.translate("SANSReduction", "Save", None, QtGui.QApplication.UnicodeUTF8))
         self.export_button.setToolTip(QtGui.QApplication.translate("SANSReduction", "Click to export the reduction parameters to a python script that can be run in MantidPlot.", None, QtGui.QApplication.UnicodeUTF8))

@@ -4,6 +4,8 @@
 #include "InstrumentWindowTab.h"
 #include "MantidGLWidget.h"
 
+#include "MantidGeometry/Instrument.h"
+
 #include <QFrame>
 #include <QMap>
 
@@ -78,6 +80,7 @@ protected slots:
   void saveMaskToWorkspace();
   void saveMaskToFile();
   void saveMaskToCalFile();
+  void saveMaskToTable();
   void saveInvertedMaskToCalFile();
   void extractDetsToWorkspace();
   void sumDetsToWorkspace();
@@ -96,6 +99,7 @@ protected:
   void saveMaskingToWorkspace(bool invertMask = false);
   void saveMaskingToFile(bool invertMask = false);
   void saveMaskingToCalFile(bool invertMask = false);
+  void saveMaskingToTableWorkspace(bool invertMask = false);
   std::string generateMaskWorkspaceName(bool temp = false) const;
   void enableApplyButtons();
   void setSelectActivity();
@@ -128,7 +132,6 @@ protected:
   QPushButton* m_apply_to_view;
   QPushButton* m_clear_all;
   QPushButton* m_saveButton;
-  QCheckBox* m_savegroupdet;
 
 
   QMenu* m_saveMask;
@@ -138,6 +141,7 @@ protected:
   QAction* m_save_as_file_exclude;
   QAction* m_save_as_cal_file_include;
   QAction* m_save_as_cal_file_exclude;
+  QAction *m_save_as_table_xrange_exclude;
 
   QMenu* m_saveGroup;
   QAction* m_extract_to_workspace;

@@ -61,6 +61,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpetraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );
 
@@ -68,7 +69,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
     if (!output) return;
 
-    TS_ASSERT_DELTA( output->dataY(0)[0], -0.00196, 0.0002);
+    TS_ASSERT_DELTA( output->dataY(0)[0], 0.0506, 0.0002);
 
     AnalysisDataService::Instance().remove(outputWS);
 
@@ -102,6 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
     TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("MaskWorkspace",maskWS) );
     TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","9.98040"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("SpetraFitInfoTableWorkspace", "FitInfoTable"));
     TS_ASSERT_THROWS_NOTHING( offsets.execute() );
     TS_ASSERT( offsets.isExecuted() );
 

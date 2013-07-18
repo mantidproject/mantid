@@ -43,6 +43,7 @@ set ( SRC_FILES
 	src/LoadEventPreNexus2.cpp
 	src/LoadFullprofResolution.cpp
 	src/LoadGSS.cpp
+	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
@@ -60,6 +61,7 @@ set ( SRC_FILES
 	src/LoadMask.cpp
 	src/LoadMaskingFile.cpp
 	src/LoadMcStasNexus.cpp
+	src/LoadMcStasEventNexus.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
 	src/LoadMuonNexus1.cpp
@@ -117,7 +119,6 @@ set ( SRC_FILES
 	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
 	src/SaveCanSAS1D2.cpp
-	src/SaveDASC.cpp
 	src/SaveDaveGrp.cpp
 	src/SaveDetectorMasks.cpp
 	src/SaveDetectorsGrouping.cpp
@@ -189,6 +190,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
 	inc/MantidDataHandling/LoadGSS.h
+	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
@@ -206,6 +208,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMaskingFile.h
 	inc/MantidDataHandling/LoadMcStasNexus.h
+	inc/MantidDataHandling/LoadMcStasEventNexus.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
 	inc/MantidDataHandling/LoadMuonNexus1.h
@@ -258,7 +261,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
 	inc/MantidDataHandling/SaveCanSAS1D2.h
-	inc/MantidDataHandling/SaveDASC.h
 	inc/MantidDataHandling/SaveDaveGrp.h
 	inc/MantidDataHandling/SaveDetectorMasks.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
@@ -341,6 +343,7 @@ set ( TEST_FILES
 	LoadMappingTableTest.h
 	LoadMaskTest.h
 	LoadMcStasNexusTest.h
+	LoadMcStasEventNexusTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
@@ -389,7 +392,6 @@ set ( TEST_FILES
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
 	SaveCanSAS1dTest2.h
-	SaveDASCTest.h
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
 	SaveDspacemapTest.h

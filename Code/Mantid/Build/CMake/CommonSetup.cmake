@@ -233,6 +233,7 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/ICat/src/GSoap.cpp
         Framework/Kernel/src/ANN/
         Framework/Kernel/src/ANN_complete.cpp
+        Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp
         Framework/PythonAPI/src/
         MantidPlot/src/nrutil.cpp
         MantidPlot/src/origin/OPJFile.cpp

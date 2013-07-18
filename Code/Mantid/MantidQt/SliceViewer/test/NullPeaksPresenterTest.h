@@ -34,7 +34,8 @@ public:
   void test_updateWithSlicePoint_does_nothing()
   {
     NullPeaksPresenter presenter;
-    TS_ASSERT_THROWS_NOTHING(presenter.updateWithSlicePoint(0));
+    PeakBoundingBox region;
+    TS_ASSERT_THROWS_NOTHING(presenter.updateWithSlicePoint(region));
   }
 
   void test_changeShownDim_does_nothing()

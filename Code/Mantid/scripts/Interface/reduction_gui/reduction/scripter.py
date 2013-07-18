@@ -21,6 +21,7 @@ import time
 import platform
 import re
 import os
+import stat
 import traceback
 
 class BaseScriptElement(object):
@@ -77,6 +78,30 @@ class BaseScriptElement(object):
         """
         return NotImplemented
     
+    @classmethod
+    def parse_runs(cls, range_str):
+        """
+            Return a list of runs. Parses for run ranges indicated
+            by dashes.
+            @param range_str: string representing a range of runs
+        """
+        range_str = range_str.strip()
+        # Parse for dash
+        toks = range_str.split('-')
+        # If we have two sub-strings separated by a dash, treat
+        # it as a range if the two sub-strings can be converted
+        # to integers
+        if len(toks)==2:
+            try:
+                r_min = int(toks[0])
+                r_max = int(toks[1])
+                if r_max>r_min:
+                    return [str(i) for i in range(r_min, r_max+1)]
+            except:
+                # Can't convert to run numbers, just skip
+                pass
+        return [range_str]
+        
     @classmethod
     def getText(cls, nodelist):
         """
@@ -404,6 +429,12 @@ class BaseReductionScripter(object):
 
         return script
     
+    def to_batch(self):
+        """
+             @param script_dir: directory where to write the job scripts
+        """
+        return [self.to_script()]
+    
     def apply(self):
         """
             Apply the reduction process to a Mantid SANSReducer
@@ -429,6 +460,59 @@ class BaseReductionScripter(object):
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 
+    def cluster_submit(self, output_dir, user, pwd, resource=None,
+                       nodes=4, cores_per_node=4, job_name=None):
+        """
+            Submit the reduction job to a cluster
+            @param output_dir: directory where the output data will be written
+            @param user: name of the user on the cluster
+            @param pwd: password of the user on the cluster
+        """
+        Logger.get("scripter").notice("Preparing remote reduction job submission")
+
+        if HAS_MANTID:
+            # Generate reduction script and write it to file
+            scripts = self.to_batch()
+            for i in range(len(scripts)):
+                script = scripts[i]
+                script_name = "job_submission_%s.py" % i
+                script_path = os.path.join(os.path.expanduser('~'), script_name)
+                fd = open(script_path, 'w')
+                fd.write(script)
+                fd.close()
+                Logger.get("scripter").notice("Reduction script: %s" % script_path)
+                
+                # Generate job submission script
+                script_path = os.path.join(os.path.expanduser('~'), "job_submission_%s.sh" % i)
+                self._write_submission_script(script_path, script_name)
+                st = os.stat(script_path)
+                os.chmod(script_path, st.st_mode | stat.S_IEXEC)
+                Logger.get("scripter").notice("Execution script: %s" % script_path)
+                
+                lower_case_instr = self.instrument_name.lower()
+                job_name_lower = job_name.lower()
+                _job_name = job_name
+                if job_name is None or len(job_name)==0:
+                    _job_name = lower_case_instr
+                elif job_name_lower.find(lower_case_instr)>=0:
+                    _job_name = job_name.strip()
+                else:
+                    _job_name = "%s_%s" % (lower_case_instr, job_name.strip())
+
+                # Make sure we have unique job names
+                if len(scripts)>1:
+                    _job_name += "_%s" % i
+                # Submit the job
+                submit_cmd = "SubmitRemoteJob(ComputeResource='%s', " % resource
+                submit_cmd += "TaskName='%s'," % _job_name
+                submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
+                submit_cmd += "UserName='%s', GroupName='users', Password='%s', " % (user, pwd)
+                submit_cmd += "TransactionID='mantid_remote', "
+                submit_cmd += "ScriptName='%s')" % script_path
+                mantidplot.runPythonScript(submit_cmd, True)
+        else:
+            Logger.get("scripter").error("Mantid is unavailable to submit a reduction job")
+
     def execute_script(self, script):
         """
             Executes the given script code.
@@ -452,3 +536,47 @@ class BaseReductionScripter(object):
         for item in self._observers:
             item.reset()
             
+    def _write_submission_script(self, file_path, script_name):
+        """
+            Write the mpirun script to be executed on a cluster
+            @param file_path: local location of the script
+            
+            #TODO: This should be a template, and it should be hidden on the cluster side
+        """
+        content =  "# Script suitable for calling remotely from MantidPlot\n"
+        content += "# Set up the environment for mantid\n"
+        content += "#module load mantid-mpi\n"
+        content += "#module load mantid-mpi/nightly\n"
+
+        content += "PATH=/usr/lib64/compat-openmpi/bin:$PATH\n"
+        content += "LD_LIBRARY_PATH=/usr/lib64/compat-openmpi/lib:$LD_LIBRARY_PATH\n"
+        content += "PYTHONPATH=/usr/lib64/python2.6/site-packages/compat-openmpi:$PYTHONPATH\n"
+        content += "MPI_BIN=/usr/lib64/compat-openmpi/bin\n"
+        content += "MPI_SYSCONFIG=/etc/compat-openmpi-x86_64\n"
+        content += "MPI_FORTRAN_MOD_DIR=/usr/lib64/gfortran/modules/compat-openmpi-x86_64\n"
+        content += "MPI_INCLUDE=/usr/include/compat-openmpi-x86_64\n"
+        content += "MPI_LIB=/usr/lib64/compat-openmpi/lib\n"
+        content += "MPI_MAN=/usr/share/man/compat-openmpi-x86_64\n"
+        content += "MPI_PYTHON_SITEARCH=/usr/lib64/python2.6/site-packages/compat-openmpi\n"
+        content += "MPI_COMPILER=compat-openmpi-x86_64\n"
+        content += "MPI_SUFFIX=_compat_openmpi\n"
+        content += "MPI_HOME=/usr/lib64/compat-openmpi\n"
+        
+        #content += "PREFIX=/sw/fermi/mantid-mpi/mantid-mpi-2.4.0-1.el6.x86_64\n"
+        content += "PREFIX=/sw/fermi/mantid-mpi/mantid-mpi-2.5.502-1.el6.x86_64\n"
+        content += "PATH=$PATH:$PREFIX/bin\n"
+        # Second one is to pick up boostmpi (not openmpi itself which comes from the compat package above)
+        content += "LD_LIBRARY_PATH=$PREFIX/lib:/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH\n"
+        content += "PYTHONPATH=$PREFIX/bin:$PYTHONPATH\n"
+
+        content += "# Compute the total processes from node count and cores_per_node\n"
+        content += "TOTAL_PROCESSES=$((MANTIDPLOT_NUM_NODES * MANTIDPLOT_CORES_PER_NODE))\n"
+
+        content += "# Kick off python on the computes...\n"
+        content += "# Note: any MANTIDPLOT_* environment variables are set by MantidPlot when it submits the job\n"
+        #content += "/usr/lib64/openmpi/bin/mpirun -n $TOTAL_PROCESSES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE python job_submission.py\n"
+        content += "$MPI_BIN/mpirun -n $MANTIDPLOT_NUM_NODES -npernode $MANTIDPLOT_CORES_PER_NODE -hostfile $PBS_NODEFILE -x PATH=$PATH -x LD_LIBRARY_PATH=$LD_LIBRARY_PATH -x PYTHONPATH=$PYTHONPATH python %s\n" % script_name
+        fd = open(file_path, 'w')
+        fd.write(content)
+        fd.close()
+        

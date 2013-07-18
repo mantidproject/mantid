@@ -59,7 +59,7 @@ class Sample(object):
             @param reload: if this sample should be reloaded before the first reduction  
             @param period: the period within the sample to be analysed
         """
-        self.run_option = run
+        self.run_option = str(run) #to self-guard against keeping reference to workspace
         self.reload_option = reload
         self.period_option = period
 
@@ -182,6 +182,14 @@ class ISISReducer(SANSReducer):
         self._resolution_calculator = None
         #option to indicate if wide_angle_correction will be applied.
         self.wide_angle_correction = False
+        # Due to the way that ISISReducer is used to the reduction of the Can
+        # creating a new copy of ISISReducer through the SingleTon interface, we have
+        # to add this two attributes __transmission_sample and __transmission_can
+        # to keep the values of the __transmission workspaces generated on the reduction.
+        # register the value of transmission of sample
+        self.__transmission_sample = ""
+        # register the value of transmission can
+        self.__transmission_can = ""
 
     def set_sample(self, run, reload, period):
         """
@@ -299,6 +307,10 @@ class ISISReducer(SANSReducer):
 
         #the reducer is completely setup, run it
         new_reducer._reduce(init=False, post=False, steps=can_steps)
+        ## after the reduction of can, the new_reducer will be discarded
+        ## so, we will keep the information of the transmission and save it 
+        ## inside the __transmission_can attribute.
+        self.__transmission_can = new_reducer.transmission_calculator.output_wksp
 
     def run_from_raw(self):
         """
@@ -323,7 +335,19 @@ class ISISReducer(SANSReducer):
             user_file = 'None'
         else:
             user_file = self.user_settings.filename
-        AddSampleLog(Workspace=self.output_wksp,LogName= "UserFile", LogText=user_file)
+        AddSampleLog(Workspace=self.output_wksp,LogName="UserFile", LogText=user_file)
+
+        # get the value of __transmission_sample from the transmission_calculator if it has 
+        if self.transmission_calculator and self.transmission_calculator.output_wksp:
+            self.__transmission_sample = self.transmission_calculator.output_wksp
+        # The reducer itself sometimes will be reset, and the users of the singleton
+        # not always will have access to its settings. So, we will add the transmission workspaces
+        # to the SampleLog, to be connected to the workspace, and be available outside. These values
+        # are current being used for saving CanSAS (ticket #6929)
+        if self.__transmission_sample:
+            AddSampleLog(Workspace=self.output_wksp,LogName= "Transmission", LogText=self.__transmission_sample + str('_unfitted'))
+        if self.__transmission_can:
+            AddSampleLog(Workspace=self.output_wksp,LogName= "TransmissionCan", LogText=self.__transmission_can + str('_unfitted'))
 	
         for role in self._temporys.keys():
             try:

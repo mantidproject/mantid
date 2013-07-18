@@ -70,7 +70,7 @@ namespace IDA
     MantidQt::MantidWidgets::RangeSelector* m_ffBackRangeS;
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffInputWS;
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffOutputWS;
-    std::string m_ffInputWSName;
+    QString m_ffInputWSName;
     QString m_ties;
   };
 } // namespace IDA

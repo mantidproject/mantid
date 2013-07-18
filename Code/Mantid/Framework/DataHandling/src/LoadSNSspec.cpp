@@ -64,7 +64,7 @@ This text file will create a Workspace2D with 3 spectra.
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include <fstream>
 #include <cstring>
 #include <boost/tokenizer.hpp>
@@ -73,11 +73,73 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadSNSspec)
-      //register the algorithm into loadalgorithm factory
-    DECLARE_LOADALGORITHM(LoadSNSspec)
+    DECLARE_FILELOADER_ALGORITHM(LoadSNSspec);
     
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadSNSspec::confidence(Kernel::FileDescriptor & descriptor) const
+    {
+      if(!descriptor.isAscii()) return 0;
+
+      auto & file = descriptor.data();
+
+      int confidence(0), axiscols(0), datacols(0);
+      std::string str;
+      typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+      boost::char_separator<char> sep(" ");
+      bool snsspec(false);
+
+      while(std::getline(file,str))
+      {
+        // File is opened in binary mode so getline will leave a \r at the end of an empty line if it exists
+        if(str.empty() || str == "\r") continue;
+ 
+        try
+        {
+          //if it's comment line
+          if (str.at(0)=='#' )
+          {
+            if(str.at(1) =='L')
+            {
+              tokenizer tok(str, sep);
+              for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
+              {
+                ++axiscols;
+              }
+              //if the file contains a comment line starting with "#L" followed
+              //by three columns this could be loadsnsspec file
+              if(axiscols > 2)
+              {
+                snsspec=true;
+              }
+            }
+          }
+          else
+          {
+            //check first data line is a 3 column line
+            tokenizer tok(str, sep);
+            for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
+            {
+              ++datacols;
+            }
+            break;
+          }
+        }
+        catch(std::out_of_range& )
+        {
+        }
+      }
+      if(snsspec && datacols == 3)//three column data
+      {
+        confidence = 80;
+      }
+      return confidence;
+    }
+
+
     /// Sets documentation strings for this algorithm
     void LoadSNSspec::initDocs()
     {
@@ -236,96 +298,6 @@ namespace Mantid
           // Asked for dimensionless workspace (obviously not in unit factory)
       }
 
-    }
-    /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
- *  @param filePath- path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
- */
-    bool LoadSNSspec::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-    {
-      std::string extn=extension(filePath);
-      bool bascii(false);
-      (!extn.compare("txt"))?bascii=true:bascii=false;
-
-      bool is_ascii (true);
-      for(size_t i=0; i<nread; i++)
-        {
-          if (!isascii(header.full_hdr[i]))
-            is_ascii =false;
-        }
-      return(is_ascii|| bascii?true:false);
-    }
-
-/**checks the file by opening it and reading few lines 
- *  @param filePath :: name of the file including its path
- *  @return an integer value how much this algorithm can load the file 
- */
-    int LoadSNSspec::fileCheck(const std::string& filePath)
-    {  
-      std::ifstream file(filePath.c_str());
-      if (!file)
-      {
-        g_log.error("Unable to open file: " + filePath);
-        throw Exception::FileError("Unable to open file: " , filePath);
-      }
-
-      int bret=0;
-      int axiscols=0;
-      int datacols=0;
-      std::string str;
-      typedef boost::tokenizer<boost::char_separator<char> > tokenizer; 
-      boost::char_separator<char> sep(" ");   
-      bool bsnsspec(false);
-      while(!file.eof())
-      {
-        //read line
-        std::getline(file,str);
-        if(str.empty())
-        {
-          continue;
-        }
-        try
-        {
-          //if it's comment line
-          if (str.at(0)=='#' ) 
-          {  
-            if(str.at(1) =='L')  
-            {
-              tokenizer tok(str, sep); 
-              for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
-              {		 
-                ++axiscols;
-              }
-              //if the file contains a comment line starting with "#L" followed
-              //by three columns this could be loadsnsspec file
-              if(axiscols>2)
-              {                
-                bsnsspec=true;
-              }
-            }
-          }
-          else 
-          {  
-            //check first data line is a 3 column line
-            tokenizer tok(str, sep); 
-            for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
-            {		 
-              ++datacols;
-            } 
-            break;
-          }
-        }
-        catch(std::out_of_range& )
-        {
-        } 
-      }
-      if(bsnsspec && datacols==3 )//three column data
-      {
-        bret=80;
-      }
-      return bret;
     }
   } // namespace DataHandling
 } // namespace Mantid

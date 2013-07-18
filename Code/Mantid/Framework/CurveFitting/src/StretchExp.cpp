@@ -41,7 +41,13 @@ void StretchExp::function1D(double* out, const double* xValues, const size_t nDa
 
     for (size_t i = 0; i < nData; i++) 
     {
-        out[i] = h*exp( -pow(xValues[i]/t,b) );
+        double x = xValues[i];
+        if ( x < 0.0 )
+        {
+            // although it is defined for integer b's we don't allow negative x in fitting
+            throw std::runtime_error("StretchExp is undefined for negative argument.");
+        }
+        out[i] = h*exp( -pow(x/t,b) );
     }
 }
 
@@ -63,7 +69,15 @@ void StretchExp::functionDeriv1D(API::Jacobian* out, const double* xValues, cons
         double e = exp(-a);
         out->set(i,0, e);              //derivative with respect to h
         out->set(i,1, h*a*b*e/t);      //derivative with respect to t
-        out->set(i,2,-h*a*e*log(x/t)); //derivative with respect to b
+        if ( x == 0.0 )
+        {
+            //derivative with respect to b at x = 0 is undefined, set to 0
+            out->set(i,2,0.0);
+        }
+        else
+        {
+            out->set(i,2,-h*a*e*log(x/t)); //derivative with respect to b
+        }
     }
 
 }

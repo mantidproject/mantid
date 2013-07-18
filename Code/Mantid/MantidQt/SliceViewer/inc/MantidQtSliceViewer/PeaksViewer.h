@@ -34,6 +34,7 @@ public slots:
       void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool);
       void onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, int peakIndex);
       void onPeaksSorted(const std::string& columnToSortBy, const bool sortedAscending, Mantid::API::IPeaksWorkspace_const_sptr peaksWS);
+      void showPeaksTableColumnOptions();
 private:
   boost::shared_ptr<ProxyCompositePeaksPresenter> m_presenter;
 };

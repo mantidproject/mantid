@@ -11,7 +11,7 @@
 
   <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
   </soapEndPoint>
-
+  
   <instrument name="ALF">  
     <technique>Single Crystal Diffraction</technique>
     <livedata address="NDXALF:6789" />
@@ -109,10 +109,11 @@
     <technique>Neutron Diffraction with isotopic substitution</technique>
     <livedata address="NDXSANDALS:6789" />
   </instrument>
-
+  
   <instrument name="SURF" shortname="SRF">
     <zeropadding size="5" startRunNumber="1" prefix="SRF"/> 
     <zeropadding size="6" startRunNumber="100000" prefix="SRF"/>
+    <zeropadding size="8" startRunNumber="104604" prefix="SURF"/>
     <technique>Reflectometry</technique>
     <livedata address="NDXSURF:6789" />
   </instrument>
@@ -477,6 +478,15 @@
 
   <instrument name="ECHO">
     <technique>UNKOWN</technique>
+  </instrument>
+
+</facility>
+
+<facility name="SmuS" FileExtensions=".nxs,.xml">
+
+  <instrument name="GPD">
+    <zeropadding size="3"/>
+    <technique>Muon spectroscopy</technique>
   </instrument>
 
 </facility>

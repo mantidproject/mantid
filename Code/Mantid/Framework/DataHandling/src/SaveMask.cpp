@@ -1,7 +1,7 @@
 /*WIKI*
 
-This algorithm is used to save a mask workspace to an XML file. 
-This algorithm is renamed from [[SaveDetectorMasks]].
+This algorithm is used to save the masking from a workspace to an XML file. 
+This algorithm has previously been renamed from [[SaveDetectorMasks]].
 
 == 2 Types of Mask Workspace ==
 There are two types of mask workspace that can serve as input. 
@@ -44,6 +44,7 @@ Example 1:
 #include "sstream"
 #include "algorithm"
 
+#include <boost/shared_ptr.hpp>
 #include "Poco/DOM/Document.h"
 #include "Poco/DOM/Element.h"
 #include "Poco/DOM/Text.h"
@@ -100,12 +101,10 @@ namespace DataHandling
   void SaveMask::init()
   {
 
-    declareProperty(new API::WorkspaceProperty<DataObjects::SpecialWorkspace2D>("InputWorkspace", "", Direction::Input),
-        "MaskingWorkspace to output to XML file (SpecialWorkspace2D)");
+    declareProperty(new API::WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
+        "Workspace to output masking to XML file");
     declareProperty(new FileProperty("OutputFile", "", FileProperty::Save, ".xml"),
         "File to save the detectors mask in XML format");
-    declareProperty("GroupedDetectors", false,
-        "True if there can be more than one detector contained in any spectrum. ");
 
   }
 
@@ -113,9 +112,26 @@ namespace DataHandling
   void SaveMask::exec()
   {
     // 1. Get input
-    DataObjects::SpecialWorkspace2D_const_sptr inpWS = this->getProperty("InputWorkspace");
+    API::MatrixWorkspace_sptr userInputWS = this->getProperty("InputWorkspace");
+
+
+    DataObjects::SpecialWorkspace2D_sptr inpWS = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(userInputWS);
+    if (!inpWS)
+    {
+       //extract the masking and use that
+      Algorithm_sptr emAlg = this->createChildAlgorithm("ExtractMasking",0.0,0.5,false);
+      emAlg->setProperty("InputWorkspace",userInputWS);
+      emAlg->setPropertyValue("OutputWorkspace","tmp");
+      emAlg->execute();
+      API::MatrixWorkspace_sptr ws = emAlg->getProperty("OutputWorkspace");
+      inpWS = boost::dynamic_pointer_cast<DataObjects::SpecialWorkspace2D>(ws);
+      if (!inpWS)
+      {
+        throw std::runtime_error("Unable to extract masking data using ExtractMask");
+      }
+    }
+
     std::string outxmlfilename = this->getPropertyValue("OutputFile");
-    bool groupeddetectors = this->getProperty("GroupedDetectors");
 
     // 2. Convert Workspace to ...
     std::vector<detid_t> detid0s;
@@ -132,11 +148,6 @@ namespace DataHandling
         }
 
         const std::set<detid_t> detids = spec->getDetectorIDs();
-        if (!groupeddetectors && detids.size() != 1)
-        {
-          g_log.error() << "Impossible Situation! Workspace " << i << " corresponds to #(Det) = " << detids.size() << std::endl;
-          throw std::invalid_argument("Impossible number of detectors");
-        }
 
         // b) get detector id & Store
         detid_t detid;;

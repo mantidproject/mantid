@@ -136,6 +136,7 @@ namespace API
        * @returns special Q3D coordinate system to use being used by this PeaksWorkspace object. Probably the one the workspace was generated with.
        */
       virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
+      virtual int PeakInfoNumber(Kernel::V3D QLabFrame , bool lab_coords) const =0;
     };
 
 

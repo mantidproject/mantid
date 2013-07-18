@@ -53,6 +53,12 @@
       <iconset resource="../../icons/QtWidgetsIcons.qrc">
        <normaloff>:/VatesSimpleGuiQtWidgets/icons/standard_view.png</normaloff>:/VatesSimpleGuiQtWidgets/icons/standard_view.png</iconset>
      </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
      <property name="checkable">
       <bool>false</bool>
      </property>
@@ -69,6 +75,12 @@
      <property name="icon">
       <iconset resource="../../icons/QtWidgetsIcons.qrc">
        <normaloff>:/VatesSimpleGuiQtWidgets/icons/multislice_view.png</normaloff>:/VatesSimpleGuiQtWidgets/icons/multislice_view.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
      </property>
     </widget>
    </item>
@@ -87,6 +99,12 @@
       <iconset resource="../../icons/QtWidgetsIcons.qrc">
        <normaloff>:/VatesSimpleGuiQtWidgets/icons/threeslice_view.png</normaloff>:/VatesSimpleGuiQtWidgets/icons/threeslice_view.png</iconset>
      </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
     </widget>
    </item>
    <item>
@@ -101,14 +119,20 @@
       <iconset resource="../../../../ParaviewPlugins/ParaViewFilters/SplatterPlot/SplatterPlot.qrc">
        <normaloff>:/Splatter.png</normaloff>:/Splatter.png</iconset>
      </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
     </widget>
    </item>
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../../../../ParaviewPlugins/ParaViewFilters/SplatterPlot/SplatterPlot.qrc"/>
   <include location="../../icons/QtWidgetsIcons.qrc"/>
+  <include location="../../../../ParaviewPlugins/ParaViewFilters/SplatterPlot/SplatterPlot.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -15,12 +15,23 @@
 	#include "MantidDataObjects/Workspace2D.h"
 	#include "MantidKernel/Exception.h"
 	#include "MantidAPI/FunctionFactory.h"
+    #include "MantidAPI/FunctionDomain1D.h"
+    #include "MantidAPI/FunctionValues.h"
 
 	using namespace Mantid::Kernel;
 	using namespace Mantid::API;
 	using namespace Mantid::CurveFitting;
 	using namespace Mantid::DataObjects;
 
+
+class StretchExpTest_Jacobian: public Mantid::API::Jacobian
+{
+    std::vector<double> m_values;
+public:
+  StretchExpTest_Jacobian(){m_values.resize(3);}
+  virtual void set(size_t, size_t iP, double value) {m_values[iP] = value;}
+  virtual double get(size_t, size_t iP) {return m_values[iP];}
+};
 
 	class StretchExpTest : public CxxTest::TestSuite
 	{
@@ -125,6 +136,43 @@
 		AnalysisDataService::Instance().remove(wsName);
 
 	  }
+
+      void test_derivative_at_0()
+      {
+          Mantid::API::FunctionDomain1DVector x(0);
+          StretchExpTest_Jacobian jac;
+          StretchExp fn;
+          fn.initialize();
+          fn.setParameter("Height",1.5);
+          fn.setParameter("Lifetime",5.0);
+          fn.setParameter("Stretching",0.4);
+          fn.functionDeriv(x, jac);
+          TS_ASSERT_EQUALS( jac.get(0,2), 0.0 );
+
+          fn.setParameter("Stretching",0.0);
+          fn.functionDeriv(x, jac);
+          TS_ASSERT_EQUALS( jac.get(0,2), 0.0 );
+
+          Mantid::API::FunctionDomain1DVector x1(0.001);
+          fn.functionDeriv(x1, jac);
+          TS_ASSERT_DIFFERS( jac.get(0,2), 0.0 );
+          fn.setParameter("Stretching",0.4);
+          fn.functionDeriv(x1, jac);
+          TS_ASSERT_DIFFERS( jac.get(0,2), 0.0 );
+      }
+
+      void test_negative_x()
+      {
+          Mantid::API::FunctionDomain1DVector x(-0.001);
+          Mantid::API::FunctionValues y(x);
+
+          StretchExp fn;
+          fn.initialize();
+          fn.setParameter("Height",1.5);
+          fn.setParameter("Lifetime",5.0);
+          fn.setParameter("Stretching",0.4);
+          TS_ASSERT_THROWS( fn.function(x,y), std::runtime_error );
+      }
 
 
 	};

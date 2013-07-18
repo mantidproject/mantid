@@ -4,25 +4,12 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidMDEvents/ReflectometryMDTransform.h"
+#include "MantidMDEvents/CalculateReflectometryQBase.h"
 
 namespace Mantid
 {
   namespace MDEvents
   {
-    /**
-    Base class for reflectometry Q transformations
-    */
-    class CalculateReflectometryQBase
-    {
-    protected: 
-      const double to_radians_factor;
-      const double two_pi;
-      CalculateReflectometryQBase() : to_radians_factor(3.14159265/180), two_pi(6.28318531)
-      {
-      }
-    protected:
-      ~CalculateReflectometryQBase(){};
-    };
 
     /**
     Converts from inputs of wavelength, incident theta and final theta to Qx for reflectometry experiments
@@ -55,7 +42,7 @@ namespace Mantid
       */
       double execute(const double& wavelength) const
       {
-        double wavenumber = two_pi/wavelength;
+        double wavenumber = 2*M_PI/wavelength;
         return wavenumber * m_dirQx;
       }
     };
@@ -91,7 +78,7 @@ namespace Mantid
       */
       double execute(const double& wavelength) const
       {
-        double wavenumber = two_pi/wavelength;
+        double wavenumber = 2*M_PI/wavelength;
         return wavenumber * m_dirQz;
       }
     };
@@ -128,16 +115,16 @@ namespace Mantid
     const double m_qxMax;
     const double m_qzMin;
     const double m_qzMax;
-    /// Object performing raw caclcation to determine Qx
+    /// Object performing raw calculation to determine Qx
     mutable CalculateReflectometryQx m_QxCalculation;
     /// Object performing raw calculation to determine Qx
     mutable CalculateReflectometryQz m_QzCalculation;
   public:
 
     /// Constructor
-    ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta);
+    ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta, Mantid::API::BoxController_sptr boxController);
     /// Destructor
-    ~ReflectometryTransformQxQz();
+    virtual ~ReflectometryTransformQxQz();
     /// Execute transformation
     virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
 

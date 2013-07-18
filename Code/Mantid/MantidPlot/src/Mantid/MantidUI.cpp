@@ -807,20 +807,6 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
   return t;
 }
 
-void MantidUI::removeWindowFromLists(MdiSubWindow* m)
-{
-  if (!m)
-    return;
-
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-
-  if (m->isA("MantidMatrix"))
-  {static_cast<MantidMatrix*>(m)->removeWindow();
-  }
-
-  QApplication::restoreOverrideCursor();
-}
-
 void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
   if (w->isA("MantidMatrix"))
@@ -1510,7 +1496,7 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 * Renames selected workspace
 * @param wsName :: selected workspace name
 */
-void MantidUI::renameWorkspace(QString wsName)
+void MantidUI::renameWorkspace(QStringList wsName)
 { 
   // If the wsname is blank look for an active window and assume this workspace is
   // the one to rename
@@ -1519,7 +1505,7 @@ void MantidUI::renameWorkspace(QString wsName)
     MantidMatrix *matrix = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
     if( matrix )
     {
-      wsName = matrix->workspaceName();
+      wsName.append(matrix->workspaceName());
     }
     else
     {
@@ -1527,14 +1513,19 @@ void MantidUI::renameWorkspace(QString wsName)
     }
   }
 
-  //execute the algorithm
-  std::string algName("RenameWorkspace");
+  //determine the algorithm
+  std::string algName("RenameWorkspace"); 
+  if(wsName.size() > 1)
+  {
+     algName = std::string("RenameWorkspaces");
+  }
   int version=-1;
+
+  // execute the algorithm
   Mantid::API::IAlgorithm_sptr alg;
   try
   {
     alg = Mantid::API::AlgorithmManager::Instance().create(algName,version);
-
   }
   catch(...)
   {
@@ -1546,26 +1537,20 @@ void MantidUI::renameWorkspace(QString wsName)
     return;
   }
   MantidQt::API::InterfaceManager interfaceManager;
-  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_appWindow);
-  if( !dlg ) return;
-  //getting the combo box which has input workspaces and removing the workspaces except the selected one
-  QComboBox *combo = dlg->findChild<QComboBox*>();
-  if(combo)
-  {
-    int count=combo->count();
-    int index=count-1;
-    while(count>1)
-    {
-      int selectedIndex=combo->findText(wsName,Qt::MatchExactly );
-      if(selectedIndex!=index)
-      {
-        combo->removeItem(index);
-        count=combo->count();
-      }
-      index=index-1;
+  QHash<QString,QString> presets;
 
-    }
-  }//end of if loop for combo
+  if(wsName.size() == 1)
+  {
+    presets["InputWorkspace"] = wsName[0];
+  }
+  else
+  {
+    presets["InputWorkspaces"] = wsName.join(",");
+  }
+
+  MantidQt::API::AlgorithmDialog *dlg = interfaceManager.createDialog(alg.get(), m_appWindow,false,presets);
+  if( !dlg ) return;
+  
   if ( dlg->exec() == QDialog::Accepted)
   {
     delete dlg;
@@ -1833,19 +1818,19 @@ void MantidUI::showAlgMonitor()
   m_algMonitor->showDialog();
 }
 
-void MantidUI::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr pNf)
+void MantidUI::handleAddWorkspace(Mantid::API::WorkspaceAddNotification_ptr)
 {
-  emit workspace_added(QString::fromStdString(pNf->object_name()),(pNf->object()));
+    emit ADS_updated();
 }
 
-void MantidUI::handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf)
+void MantidUI::handleReplaceWorkspace(Mantid::API::WorkspaceAfterReplaceNotification_ptr)
 {
-  emit workspace_replaced(QString::fromStdString(pNf->object_name()),(pNf->object()));
+  emit ADS_updated();
 }
 
-void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr pNf)
+void MantidUI::handleDeleteWorkspace(Mantid::API::WorkspacePostDeleteNotification_ptr )
 {
-  emit workspace_removed(QString::fromStdString(pNf->object_name()));
+    emit ADS_updated();
 }
 
 void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
@@ -1853,30 +1838,22 @@ void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
   emit workspaces_cleared();
 }
 
-void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf)
+void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr )
 {
-  emit workspace_renamed(QString::fromStdString(pNf->object_name()), QString::fromStdString(pNf->new_objectname()));
+    emit ADS_updated();
 }
-void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr pNf)
+void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_ptr)
 {
-  const std::vector<std::string> wsvec=pNf->inputworkspacenames();
-  QStringList wsList;
-  std::vector<std::string>::const_iterator citr;
-  for(citr=wsvec.begin();citr!=wsvec.end();++citr)
-  {
-    wsList.append(QString::fromStdString(*citr));
-  }
-  emit workspaces_grouped(wsList);
+    emit ADS_updated();
 }
-void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf)
+void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr)
 {
-  emit workspace_ungrouped(QString::fromStdString(pNf->object_name()), pNf->object());
+    emit ADS_updated();
 }
 
-void MantidUI::handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf)
+void MantidUI::handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr)
 {
-  QString name = QString::fromStdString(pNf->object_name());
-  emit workspace_group_updated( name );
+    emit ADS_updated();
 }
 
 void MantidUI::handleConfigServiceUpdate(Mantid::Kernel::ConfigValChangeNotification_ptr pNf){
@@ -2299,7 +2276,23 @@ bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString
 */
 void MantidUI::importString(const QString &logName, const QString &data)
 {
-  Table* t = new Table(appWindow()->scriptingEnv(), 1, 1, "", appWindow(), 0);
+	importString(logName,data,QString(""));
+}
+
+/** Displays a string in a Qtiplot table
+*  @param logName :: the title of the table is based on this
+*  @param data :: the string to display
+*  @param sep :: the seperator character
+*/
+void MantidUI::importString(const QString &logName, const QString &data, const QString &sep)
+{
+  QStringList loglines =  QStringList(data);
+  if (sep.length() > 0)
+  {
+    loglines = data.split(sep, QString::SkipEmptyParts);
+  }
+
+  Table* t = new Table(appWindow()->scriptingEnv(), loglines.size(), 1, "", appWindow(), 0);
   if( !t ) return;
   //Have to replace "_" since the legend widget uses them to separate things
   QString label = logName;
@@ -2310,7 +2303,10 @@ void MantidUI::importString(const QString &logName, const QString &data)
   t->setColName(0, "Log entry");
   t->setReadOnlyColumn(0, true); //Read-only
 
-  t->setText(0, 0, data);
+  for (int i=0; i<loglines.size(); ++i)
+  {
+    t->setText(i, 0, loglines[i]);
+  }
 
   //Show table
   t->resize(2*t->table()->horizontalHeader()->sectionSize(0) + 55,
@@ -2560,11 +2556,10 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   double lastValue = 0;
 
   //Iterate through the time-value map.
-  int i = 0;
   std::map<DateAndTime, double>::iterator it = time_value_map.begin();
   if (it!=time_value_map.end())
   {
-    for (; it!=time_value_map.end(); ++it)
+    for (int i = 0; it!=time_value_map.end(); ++i,++it)
     {
       lastTime = it->first;
       lastValue = it->second;
@@ -2573,7 +2568,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
       t->setText(i,0,QString::fromStdString(time_string));
       t->setCell(i,1,lastValue);
-      i++;
     }
   }
 
@@ -2752,47 +2746,35 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QStr
   appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
   // t->askOnCloseEvent(false);
 
-  int kX(0),kY(0),kErr(0);
   for(int i=0;i < no_cols; i++)
   {
     const Mantid::MantidVec& dataX = workspace->readX(indexList[i]);
     const Mantid::MantidVec& dataY = workspace->readY(indexList[i]);
     const Mantid::MantidVec& dataE = workspace->readE(indexList[i]);
 
-    kY =(c+1)*i+1;
-    kX=(c+1)*i;
+    const int kY =(c+1)*i+1;
+    const int kX=(c+1)*i;
+    int kErr = 0;
     t->setColName(kY,"YS"+QString::number(indexList[i]));
     t->setColName(kX,"XS"+QString::number(indexList[i]));
     t->setColPlotDesignation(kX,Table::X);
     if (errs)
     {
-      // kErr = 2*i + 2;
       kErr=(c+1)*i+2;
       t->setColPlotDesignation(kErr,Table::yErr);
       t->setColName(kErr,"ES"+QString::number(indexList[i]));
     }
     for(int j=0;j<numRows;j++)
     {
-
-      //if (i == 0)
-      //{
-      // in histograms the point is to be drawn in the centre of the bin.
       if (isHistogram && binCentres)
       {
-        // logObject.error()<<"inside isHistogram true= "<<j<< std::endl;
         t->setCell(j,kX,( dataX[j] + dataX[j+1] )/2);
       }
       else
-      {//logObject.error()<<"inside isHistogram false= "<< std::endl;
+      {
         t->setCell(j,kX,dataX[j]);
       }
-      //         }
-      //else
-      //{
-      // t->setCell(j,kX,dataX[j]);
-      //}
       t->setCell(j,kY,dataY[j]);
-
 
       if (errs) t->setCell(j,kErr,dataE[j]);
     }
@@ -2805,7 +2787,7 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QStr
       if (errs) t->setCell(iRow,kErr,0);
     }
   }
-  // t->askOnCloseEvent(false);
+
   return t;
 }
 
@@ -2854,13 +2836,12 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
       lst.removeAt(index);
     }
   }
-  //MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+
   MultiLayer* ml = appWindow()->multilayerPlot(t,lst,Graph::Line);
   Graph *g = ml->activeGraph();
   appWindow()->polishGraph(g,type);
   for(int i=0;i<g->curves();i++)
     g->setCurveStyle(i,type);
-  //ml->askOnCloseEvent(false);
 
   return ml;
 }
@@ -3231,11 +3212,11 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
 
   Table* t = new Table(appWindow()->scriptingEnv(), numRows, c*bins.size() + 1, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-"));
-  // t->askOnCloseEvent(false);
-  int kY,kErr = 0;
+
   for(int i = 0; i < bins.size(); i++)
   {
-    kY = c*i+1;
+    const int kY = c*i+1;
+    int kErr = 0;
     t->setColName(kY,"YB"+QString::number(bins[i]));
     if (errs)
     {

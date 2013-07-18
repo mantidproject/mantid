@@ -19,9 +19,10 @@ namespace MDEvents
     @param kfMin: min kf value (extent)
     @param kfMax; max kf value (extent)
     @param incidentTheta: Predetermined incident theta value
+    @param boxController: box controller to apply on output workspace.
   */
-  ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta) 
-    : m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
+  ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, BoxController_sptr boxController)
+    : ReflectometryMDTransform(boxController),  m_kiMin(kiMin), m_kiMax(kiMax), m_kfMin(kfMin), m_kfMax(kfMax), m_KiCalculation(incidentTheta)
   {
       if(kiMin >= kiMax)
       {
@@ -51,26 +52,10 @@ namespace MDEvents
   */
   Mantid::API::IMDEventWorkspace_sptr ReflectometryTransformKiKf::execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const
   {
-      const size_t nbinsx = 10;
-      const size_t nbinsz = 10;
+      MDHistoDimension_sptr kiDim = MDHistoDimension_sptr(new MDHistoDimension("Ki","ki","(Ang^-1)", static_cast<Mantid::coord_t>(m_kiMin), static_cast<Mantid::coord_t>(m_kiMax), m_nbinsx));
+      MDHistoDimension_sptr kfDim = MDHistoDimension_sptr(new MDHistoDimension("Kf","kf","(Ang^-1)", static_cast<Mantid::coord_t>(m_kfMin), static_cast<Mantid::coord_t>(m_kfMax), m_nbinsz));
 
-      auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<2>,2> >();
-      MDHistoDimension_sptr kiDim = MDHistoDimension_sptr(new MDHistoDimension("Ki","ki","(Ang^-1)", static_cast<Mantid::coord_t>(m_kiMin), static_cast<Mantid::coord_t>(m_kiMax), nbinsx)); 
-      MDHistoDimension_sptr kfDim = MDHistoDimension_sptr(new MDHistoDimension("Kf","kf","(Ang^-1)", static_cast<Mantid::coord_t>(m_kfMin), static_cast<Mantid::coord_t>(m_kfMax), nbinsz)); 
-
-      ws->addDimension(kiDim);
-      ws->addDimension(kfDim);
-
-      // Set some reasonable values for the box controller
-      BoxController_sptr bc = ws->getBoxController();
-      bc->setSplitInto(2);
-      bc->setSplitThreshold(10);
-
-      // Initialize the workspace.
-      ws->initialize();
-
-      // Start with a MDGridBox.
-      ws->splitBox();
+      auto ws = createWorkspace(kiDim, kfDim);
 
       auto spectraAxis = inputWs->getAxis(1);
       for(size_t index = 0; index < inputWs->getNumberHistograms(); ++index)
@@ -91,8 +76,9 @@ namespace MDEvents
 
           ws->addEvent(MDLeanEvent<2>(float(counts[binIndex]), float(errors[binIndex]*errors[binIndex]), centers));
         }
-        ws->splitAllIfNeeded(NULL);
       }
+      ws->splitAllIfNeeded(NULL);
+      ws->refreshCache();
       return ws;
   }
 

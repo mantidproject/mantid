@@ -23,7 +23,7 @@ namespace Mantid
 
     /**
      * Construct the "wrapper" and stores the reference to the PyObject
-     * * @param self A reference to the calling Python object
+     * @param self A reference to the calling Python object
      */
     IPeakFunctionAdapter::IPeakFunctionAdapter(PyObject* self)
       : API::IPeakFunction(), IFunctionAdapter(self), IFunction1DAdapter(self)
@@ -121,7 +121,6 @@ namespace Mantid
      * Python-type signature version of above so that users can call functionLocal directly from Python on a factory
      * created object
      * @param xvals The input X values in read-only numpy array
-     * @param out A read/write numpy array of doubles to store the results
      */
     object IPeakFunctionAdapter::functionLocal(const boost::python::object & xvals) const
     {

@@ -281,13 +281,13 @@ void SurfaceDialog::setFunction(Graph3D *g)
 		return;
 
 	d_graph = g;
-	UserFunction *f = d_graph->userFunction();
+    UserFunction2D *f = dynamic_cast<UserFunction2D*>( d_graph->userFunction() );
 	if (!f)
 		return;
 
-	boxFunction->setCurrentText(f->function());
-	boxFuncColumns->setValue(f->columns());
-	boxFuncRows->setValue(f->rows());
+    boxFunction->setCurrentText(f->formula());
+    boxFuncColumns->setValue(static_cast<int>(f->columns()));
+    boxFuncRows->setValue(static_cast<int>(f->rows()));
 
 	boxXFrom->setText(QString::number(g->xStart()));
 	boxXTo->setText(QString::number(g->xStop()));

@@ -183,7 +183,7 @@ namespace Mantid
 
       /// Set the date from which the instrument definition begins to be valid.
       /// @param val :: date
-      void setValidFromDate(const Kernel::DateAndTime val) { m_ValidFrom = val; }
+      void setValidFromDate(const Kernel::DateAndTime val);
 
       /// Set the date at which the instrument definition is no longer valid.
       /// @param val :: date
@@ -222,7 +222,17 @@ namespace Mantid
       /// Get refernce Frame
       boost::shared_ptr<const ReferenceFrame> getReferenceFrame() const;
 
+      /// To determine whether the instrument contains elements of some type
+      enum ContainsState {Full, Partial, None};
+
+      /// Check whether instrument contains rectangular detectors.
+      /// @return Full if all detectors are rect., Partial if some, None if none 
+      ContainsState containsRectDetectors() const;
+
     private:
+      /// Save information about a set of detectors to Nexus
+      void saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const;
+
       /// Private copy assignment operator
       Instrument& operator=(const Instrument&);
 

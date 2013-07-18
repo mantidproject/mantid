@@ -1,6 +1,7 @@
 #include "MantidQtSliceViewer/PeaksViewer.h"
 #include "MantidQtSliceViewer/PeaksWorkspaceWidget.h"
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
+#include "MantidQtSliceViewer/PeaksTableColumnsDialog.h"
 #include <QBoxLayout>
 #include <QLayoutItem>
 
@@ -168,5 +169,51 @@ namespace MantidQt
       m_presenter->sortPeaksWorkspace(peaksWS, columnToSortBy, sortedAscending);
     }
 
+    /**
+     * Slot called when the user wants to see the dialog for selecting
+     * what columns are visible in the tables of peaks.
+     */
+    void PeaksViewer::showPeaksTableColumnOptions()
+    {
+      std::set<QString> areShown;
+
+      // get the list of all the columns that are already shown
+      QLayout* layout = this->layout();
+      const int size = layout->count();
+      for(int i = 0; i < size; ++i)
+      {
+        auto item = layout->itemAt(i);
+        if(auto widget = item->widget())
+        {
+          if (auto table = dynamic_cast<PeaksWorkspaceWidget *>(widget))
+          {
+            auto shown = table->getShownColumns();
+            areShown.insert(shown.begin(), shown.end());
+          }
+        }
+      }
+
+      // show the dialog box
+      PeaksTableColumnsDialog dialog(this);
+      dialog.setVisibleColumns(areShown);
+      dialog.exec();
+      auto result = static_cast<QDialog::DialogCode>(dialog.result());
+      if (result != QDialog::DialogCode::Accepted)
+        return;
+
+      // set what columns to show
+      auto toShow = dialog.getVisibleColumns();
+      for(int i = 0; i < size; ++i)
+      {
+        auto item = layout->itemAt(i);
+        if(auto widget = item->widget())
+        {
+          if (auto table = dynamic_cast<PeaksWorkspaceWidget *>(widget))
+          {
+            table->setShownColumns(toShow);
+          }
+        }
+      }
+    }
   } // namespace
 }

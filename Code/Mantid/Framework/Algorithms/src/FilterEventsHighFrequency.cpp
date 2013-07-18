@@ -455,7 +455,7 @@ namespace Algorithms
 
     // 1. Initialize:use dummy numbers for arguments, for event workspace it doesn't matter
     outputWS = DataObjects::EventWorkspace_sptr(new DataObjects::EventWorkspace());
-    outputWS->setName("FilteredWorkspace");
+    //outputWS->setName("FilteredWorkspace");
     outputWS->initialize(1,1,1);
 
     // 2. Set the units
@@ -514,7 +514,6 @@ namespace Algorithms
         workspaceIndex += 1;
       }
     }
-    outputWS->doneAddingEventLists();
 
     // Clear
     pixel_to_wkspindex.clear();

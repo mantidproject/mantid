@@ -4,8 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IFileLoader.h"
 
 namespace Mantid
 {
@@ -45,7 +44,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadAscii :public API::IDataFileChecker 
+    class DLLExport LoadAscii :public API::IFileLoader
     {
     public:
       /// Default constructor
@@ -56,11 +55,8 @@ namespace Mantid
       virtual int version() const { return 1; }
       /// The category
       virtual const std::string category() const { return "DataHandling\\Text"; }
-      /// Do a quick check that this file can be loaded 
-      virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and  return a value between 
-      /// 0 and 100 of how much this file can be loaded
-      virtual int fileCheck(const std::string& filePath);
+      /// Returns a confidence value that this algorithm can load a file
+      virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
       static bool isAscii(FILE *file);
 

@@ -160,6 +160,7 @@ namespace Mantid { namespace PythonInterface {
        * @param self :: The object containing the method definition
        * @param funcName :: The method name
        * @param defaultValue :: A default value if the method does not exist
+       * @param arg1 :: The value of the first argument
        * @return The value of the function or the default value if it does not exist
        */
       static ResultType dispatchWithDefaultReturn(PyObject *self, const char * funcName, const ResultType & defaultValue,

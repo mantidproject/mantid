@@ -189,6 +189,10 @@ namespace Mantid
 
       /// Load facility information from instrumentDir/Facilities.xml file 
       void updateFacilities(const std::string& facilityName = "");
+      /// Get the list of facilities
+      const std::vector<FacilityInfo*> getFacilities()const;
+      /// Get the list of facility names
+      const std::vector<std::string> getFacilityNames()const;
       /// Get the default facility
       const FacilityInfo& getFacility()const;
       /// Get a facility

@@ -1590,6 +1590,7 @@ void MultiLayer::reverseWaterfallOrder()
 
   active_graph->reverseCurveOrder();
   active_graph->updateDataCurves();
+  active_graph->replot();
   emit modifiedWindow(this);
 }
 

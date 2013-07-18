@@ -16,6 +16,7 @@
 using namespace WorkspaceCreationHelper;
 using namespace Mantid::MDEvents::MDEventsTestHelper;
 
+BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithFullInstrument_overloads, create2DWorkspaceWithFullInstrument, 2, 4);
 BOOST_PYTHON_FUNCTION_OVERLOADS(makeFakeMDHistoWorkspace_overloads, makeFakeMDHistoWorkspace, 2, 7);
 
 
@@ -31,7 +32,8 @@ BOOST_PYTHON_MODULE(WorkspaceCreationHelper)
   register_ptr_to_python<boost::shared_ptr<Workspace2D> >();
   class_<Workspace2D, bases<Mantid::API::MatrixWorkspace>,boost::noncopyable>("Workspace2D", no_init);
 
-  def("create2DWorkspaceWithFullInstrument", &create2DWorkspaceWithFullInstrument);
+  def("create2DWorkspaceWithFullInstrument", create2DWorkspaceWithFullInstrument, 
+      create2DWorkspaceWithFullInstrument_overloads());
 
   //=================================== Event Workspaces ===================================
   register_ptr_to_python<boost::shared_ptr<EventWorkspace> >();

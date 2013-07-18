@@ -63,7 +63,7 @@ public:
    * @throw runtime_error if the file size is not an even multiple of the type size
    * @throw invalid_argument if the file does not exist
    * */
-  void open(std::string filename)
+  void open(const std::string & filename)
   {
     this->handle = NULL;
     if (!Poco::File(filename).exists())

@@ -17,6 +17,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EmptyValues.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
 #include <algorithm>
 
 namespace Mantid
@@ -244,14 +245,30 @@ namespace
     for(size_t i = m_startIndex; i < ito; ++i)
     {
       size_t j = i - m_startIndex + i0;
-      values->setFitData( j, Y[i] );
+      double y = Y[i];
       double error = E[i];
-      if (error <= 0)
+      double weight = 0.0;
+
+      if ( ! boost::math::isfinite(y) ) // nan or inf data
       {
-        error = 1.0;
-        //foundZeroOrNegativeError = true;
+          if ( !m_ignoreInvalidData ) throw std::runtime_error("Infinte number or NaN found in input data.");
+          y = 0.0; // leaving inf or nan would break the fit
       }
-      values->setFitWeight( j, 1.0 / error );
+      else if ( ! boost::math::isfinite( error ) ) // nan or inf error
+      {
+          if ( !m_ignoreInvalidData ) throw std::runtime_error("Infinte number or NaN found in input data.");
+      }
+      else if ( error <= 0 )
+      {
+          if ( !m_ignoreInvalidData ) weight = 1.0;
+      }
+      else
+      {
+          weight = 1.0 / error;
+      }
+
+      values->setFitData( j, y );
+      values->setFitWeight( j, weight );
     }
 
   }

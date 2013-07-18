@@ -126,7 +126,6 @@ private slots:
   //spectrograms
   void showDefaultContourLinesBox(bool show);
   void showColorMapEditor(bool show);
-  void showSelectColorMapButton(bool show);
 
   //layer geometry
   void adjustLayerHeight(int width);

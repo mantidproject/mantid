@@ -456,8 +456,6 @@ namespace Algorithms
       int wsindex = wsiter->first;
       DataObjects::EventWorkspace_sptr opws = wsiter->second;
 
-      // 2a Done adding event
-      opws->doneAddingEventLists();
 
       // 2b To split/filter the selected run of the workspace output
       Kernel::TimeSplitterType splitters;

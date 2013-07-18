@@ -48,39 +48,17 @@ namespace MantidQt
       /// Draw
       SphericalPeakPrimitives draw(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const;
 
-      /**
-      Determine whether the physical peak is viewable. This means that the intesecting plane penetrates the sphere somehow. If the absolute
-      distance between the plane and the origin is greater than the peak radius, then the peak is not visible.
-      @return True if the peak is visible in the current configuration.
-      */
-      inline bool isViewablePeak() const
-      {
-        if(m_peakRadiusAtDistance.is_initialized())
-        {
-          return (m_peakRadiusAtDistance.get() <= this->m_peakRadius);
-        }
-        return false;
-      }
-
-      /**
-      Determine whether the physical peak background is viewable. This means that the intesecting plane penetrates the sphere somehow. If the absolute
-      distance between the plane and the origin is greater than the peak radius, then the peak is not visible.
-      @return True if the peak is visible in the current configuration.
-      */
-      inline bool isViewableBackground() const
-      {
-        if(m_showBackgroundRadius && m_backgroundOuterRadiusAtDistance.is_initialized())
-        {
-          return (m_backgroundOuterRadiusAtDistance.get() <= this->m_backgroundOuterRadius);
-        }
-        return false;
-      }
-
       /// Setter to command whether the background radius should also be shown.
       void showBackgroundRadius(const bool show);
 
       /// Get the bounding box in natural coordinates.
       PeakBoundingBox getBoundingBox() const;
+
+      /// Get the background outer radius.
+      double getRadius() const;
+
+      /// Show the background radius.
+      bool getShowBackgroundRadius() const;
 
     private:
       /// Original origin x=h, y=k, z=l
@@ -118,6 +96,9 @@ namespace MantidQt
 
       DISABLE_COPY_AND_ASSIGN(PhysicalSphericalPeak)
     };
+
+    typedef boost::shared_ptr<PhysicalSphericalPeak> PhysicalSphericalPeak_sptr;
+    typedef std::vector<PhysicalSphericalPeak_sptr> VecPhysicalSphericalPeak;
 
   }
 }

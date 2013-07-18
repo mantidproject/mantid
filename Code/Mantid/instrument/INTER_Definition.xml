@@ -22,13 +22,20 @@
 	MultiDetectorStart=[1]
 	I0MonitorIndex=1
  -->
+   <parameter name="MonitorIntegralMin">
+    <value val="4.0"/> 
+  </parameter>
+  
+  <parameter name="MonitorIntegralMax">
+    <value val="10.0"/> 
+  </parameter>
  
   <parameter name="MonitorBackgroundMin">
-	<value val="15.0"/> 
+    <value val="15.0"/> 
   </parameter>
   
   <parameter name="MonitorBackgroundMax">
-	<value val="17.0"/> 
+    <value val="17.0"/> 
   </parameter>
    
 <!-- here we need to add the other monitors -->
@@ -41,7 +48,7 @@
   </parameter>
 
   <parameter name="PointDetectorStop">
-    <value val="3"/>
+    <value val="4"/>
   </parameter>
   
   <parameter name="MultiDetectorStart">
@@ -59,7 +66,17 @@
   <parameter name="LambdaMax">
     <value val="17.0"/>
   </parameter>
+
+   <!-- parameters for efficiency correction -->
+   <parameter name="correction" type="string">
+    <value val="polynomial"/>
+   </parameter>
+   <parameter name="polystring" type="string">
+    <value val="35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-6"/>
+    <!--<value val="28.0051,-19.396,7.5629,-1.624,0.1986,-0.013783,0.00050478,-7.56647e-6"/>-->
+   </parameter>
   
+
   
   
   <!-- BRIEF DESCRIPTION OF Inter INSTRUMENT: 
@@ -182,7 +199,8 @@
     We may actually want to draw in the table for clarity.
     -->
     <parameter name="y">
-      <logfile id="theta" eq="2.6*sin(value*0.0174533)" extract-single-value-as="last_value"/>
+      <logfile id="PD1H" eq="(value+201.0)/1000." extract-single-value-as="last_value"/>
+      <!--<logfile id="theta" eq="2.6*sin(value*0.0174533)" extract-single-value-as="last_value"/>-->
     </parameter>
     
   </component>   
@@ -220,7 +238,8 @@
     We may actually want to draw in the table for clarity.
     -->
     <parameter name="y">
-      <logfile id="Theta" eq="2.7*sin((value+1)*0.0174533)" extract-single-value-as="last_value"/>
+      <logfile id="PD1H" eq="(value+301.0)/1000" extract-single-value-as="last_value"/>
+      <!--<logfile id="Theta" eq="2.7*sin((value+1)*0.0174533)" extract-single-value-as="last_value"/> -->
     </parameter>
     
   </component>   
@@ -293,47 +312,91 @@
   <!-- other components -->  
 
   <!--  Must change the distances below to match polref -->
-
-  <component type="slit1">
-    <location z="15.200"/> <!-- x= 23.0 - 4.710 -->
-     <!-- This log file stores the vertical opening of slit -->
-    <parameter name="opening height"> 
-      <logfile id="s1" extract-single-value-as="position 1" />
+  
+  <component type="test" name="test1">
+    <location z="13.200"/>
+    <parameter name="y">
+      <value val="-0.1"/>
+    </parameter>
+    <location z="13.00" />
+    <parameter name="y">
+      <value val="0.1"/>
     </parameter>
   </component>
   
-  <component type="slit2">  
+  <type name="test">
+      <percent-transparency val="50" />
+    <cuboid id="bottom">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
+    </cuboid>
+  </type>
+
+  <component type="slit" name="slit1">
+    <location z="15.200"/> <!-- x= 23.0 - 4.710 -->
+     <!-- This log file stores the vertical opening of slit -->
+    <parameter name="vertical gap"> 
+      <logfile id="S1_VG" extract-single-value-as="last_value" />
+    </parameter>
+    <parameter name="y"> 
+      <logfile id="S1_VG" eq="-value*0.001/2.0" extract-single-value-as="last_value" />
+    </parameter>
+
+    <parameter name="y2"> 
+      <logfile id="S1_VG" eq="0.3+value*0.001/2.0" extract-single-value-as="last_value" />
+    </parameter>
+    <location z="15.250" y="0.3"/>
+    </component>
+  
+  <component type="slit" name="slit2">  
     <location z="16.700"/>  <!-- x=23.0 - 0.590   -->
     <!-- This log file stores the vertical opening of this. Note this
      slit can also be translated in the z. However this info not stored
      in log file since it is not used in the data analysis process. -->
-    <parameter name="opening height">
-      <logfile id="s2" extract-single-value-as="position 1" />         
+    <parameter name="vertical gap">
+      <logfile id="S2_VG" extract-single-value-as="last_value" />         
     </parameter>  
   </component>    
   
-  <component type="slit3">   
+  <component type="slit" name="slit3">   
     <location z="18.200"/> <!-- x=23.0+0.960   -->
     <!-- This log file stores the vertical opening of slit -->  
-    <parameter name="opening height">
-      <logfile id="s3" extract-single-value-as="position 1" />        
+    <parameter name="vertical gap">
+      <logfile id="S3_VG" extract-single-value-as="last_value" />        
     </parameter>
   </component>    
   
-  <component type="slit4">    
+  <component type="slit" name="slit4">    
     <location z="19.700"/>     <!-- x=23.0+2.445   -->
     <!-- This log file stores the vertical opening of slit. Note this slit
      is fixed to the point detector. -->
-    <parameter name="opening height">
-      <logfile id="s4" extract-single-value-as="position 1" />    
+    <parameter name="vertical gap">
+      <logfile id="S4_VG" extract-single-value-as="last_value" />    
     </parameter>
   </component>
   
-  <type name="slit1"></type>
-  <type name="slit2"></type>
+  <type name="slit">
+    <percent-transparency val="50" />
+    <cuboid id="bottom">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="-0.03"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.0"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="-0.03"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="-0.03"  />
+    </cuboid>
+  </type>
+ <!--    <cuboid id="top">
+      <left-front-bottom-point z="0.0005" x="-0.025" y="0.01"  />
+      <left-front-top-point  z="0.0005" x="-0.025" y="0.04"  />
+      <left-back-bottom-point  z="-0.0005" x="-0.025" y="0.01"  />
+      <right-front-bottom-point  z="0.0005" x="0.025" y="0.01"  />
+    </cuboid>
+    <algebra val="top : bottom" />
+ <type name="slit2"></type>
   <type name="slit3"></type>
   <type name="slit4"></type>  
-  
+ -->
   
   
   <component type="supermirror">

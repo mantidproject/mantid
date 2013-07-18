@@ -4,11 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/IDataFileChecker.h"
 #include <climits>
 
 //----------------------------------------------------------------------
@@ -54,7 +53,7 @@ namespace Mantid
 	File change history is stored at: <https://github.com/mantidproject/mantid>.
 	Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport LoadRawHelper: public API::IDataFileChecker 
+    class DLLExport LoadRawHelper: public API::IFileLoader
     {
     public:
       /// Default constructor
@@ -70,10 +69,8 @@ namespace Mantid
       /// Read in run parameters Public so that LoadRaw2 can use it
       void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const = NULL) const;
 
-      /// do a quick check that this file can be loaded 
-      virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and if this file can be loaded return a value between 1 and 100
-      virtual int fileCheck(const std::string& filePath);
+      /// Returns a confidence value that this algorithm can load a file
+      virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
     protected:
       /// Overwrites Algorithm method.
@@ -186,8 +183,6 @@ namespace Mantid
 
       /// Overwrites Algorithm method
       void exec();
-      /// Check if the buffer looks like a RAW file header
-      bool isRawFileHeader(const int nread, const unsigned char* buffer) const;
       /// convert month label to int string
       std::string convertMonthLabelToIntStr(std::string month) const;
 

@@ -180,7 +180,6 @@ void FilterByTime::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  outputWS->doneAddingEventLists();
 
   //Now filter out the run, using the DateAndTime type.
   outputWS->mutableRun().filterByTime(start, stop);

@@ -214,6 +214,7 @@ namespace WorkspaceCreationHelper
   WorkspaceGroup_sptr CreateWorkspaceGroup(int nEntries, int nHist, int nBins, const std::string & stem)
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup);
+    AnalysisDataService::Instance().add(stem, group);
     for(int i = 0; i < nEntries; ++i)
     {
       Workspace2D_sptr ws = Create2DWorkspace(nHist,nBins);
@@ -222,7 +223,6 @@ namespace WorkspaceCreationHelper
       AnalysisDataService::Instance().add(os.str(), ws);
       group->add(os.str());
     }
-    AnalysisDataService::Instance().add(stem, group);
     return group;
   }
 
@@ -304,7 +304,7 @@ namespace WorkspaceCreationHelper
    * pervious. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
-  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors)
+  Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, bool includeMonitors, bool startYNegative)
   {
     if( includeMonitors && nhist < 2 )
     {
@@ -332,7 +332,9 @@ namespace WorkspaceCreationHelper
       std::ostringstream lexer;
       lexer << "pixel-" << i << ")";
       Detector * physicalPixel = new Detector(lexer.str(), space->getAxis(1)->spectraNo(i), pixelShape, testInst.get());
-      const double ypos = i*2.0*pixelRadius;
+      int ycount(i);
+      if(startYNegative) ycount -= 1;
+      const double ypos = ycount*2.0*pixelRadius;
       physicalPixel->setPos(detXPos, ypos,0.0);
       testInst->add(physicalPixel);
       testInst->markAsDetector(physicalPixel);
@@ -432,7 +434,6 @@ namespace WorkspaceCreationHelper
       ws->getEventList(wi).setDetectorID(detID);
       detID++;
     }
-    ws->doneAddingEventLists();
     return ws;
   }
 
@@ -524,7 +525,6 @@ namespace WorkspaceCreationHelper
         workspaceIndex++;
       }
     }
-    retVal->doneAddingEventLists();
 
     //Create the x-axis for histogramming.
     MantidVecPtr x1;
@@ -564,7 +564,6 @@ namespace WorkspaceCreationHelper
       }
     }
 
-    retVal->doneAddingEventLists();
 
     //Create the x-axis for histogramming.
     MantidVecPtr x1;
@@ -627,7 +626,6 @@ namespace WorkspaceCreationHelper
       }
       events.addDetectorID( detid_t(i) );
     }
-    retVal->doneAddingEventLists();
     retVal->setAllX(axis);
     retVal->replaceAxis(0,pAxis0); 
 
@@ -881,9 +879,10 @@ namespace WorkspaceCreationHelper
     */
    Mantid::DataObjects::EventWorkspace_sptr createEventWorkspace3(Mantid::DataObjects::EventWorkspace_const_sptr sourceWS, std::string wsname, API::Algorithm* alg)
    {
+       UNUSED_ARG(wsname);
      // 1. Initialize:use dummy numbers for arguments, for event workspace it doesn't matter
       Mantid::DataObjects::EventWorkspace_sptr outputWS = Mantid::DataObjects::EventWorkspace_sptr(new DataObjects::EventWorkspace());
-      outputWS->setName(wsname);
+      //outputWS->setName(wsname);
       outputWS->initialize(1,1,1);
 
       // 2. Set the units
@@ -937,7 +936,6 @@ namespace WorkspaceCreationHelper
           workspaceIndex += 1;
         }
       }
-      outputWS->doneAddingEventLists();
 
       // Clear
       pixel_to_wkspindex.clear();
@@ -948,7 +946,8 @@ namespace WorkspaceCreationHelper
    RebinnedOutput_sptr CreateRebinnedOutputWorkspace()
    {
      RebinnedOutput_sptr outputWS = Mantid::DataObjects::RebinnedOutput_sptr(new RebinnedOutput());
-     outputWS->setName("rebinTest");
+     //outputWS->setName("rebinTest");
+     Mantid::API::AnalysisDataService::Instance().add("rebinTest",outputWS);
 
      // Set Q ('y') axis binning
      MantidVec qbins;

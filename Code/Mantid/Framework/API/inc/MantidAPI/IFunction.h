@@ -296,6 +296,12 @@ public:
   /// Derivatives of function with respect to active parameters.
   virtual void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
+  /* @name Callbacks to perform work at various points other than in the function */
+  /// Called at the start of each iteration
+  virtual void iterationStarting() {}
+  /// Called at the end of an iteration
+  virtual void iterationFinished() {}
+
   /** @name Function parameters */
   //@{
   /// Set i-th parameter

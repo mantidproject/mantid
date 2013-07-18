@@ -32,8 +32,8 @@ The Child Algorithms used by LoadMuonNexus are:
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
@@ -60,8 +60,7 @@ namespace DataHandling
 {
 
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(LoadNexusProcessed)
-DECLARE_LOADALGORITHM(LoadNexusProcessed)
+DECLARE_HDF_FILELOADER_ALGORITHM(LoadNexusProcessed);
 
 /// Sets documentation strings for this algorithm
 void LoadNexusProcessed::initDocs()
@@ -87,6 +86,17 @@ LoadNexusProcessed::LoadNexusProcessed() : m_shared_bins(false), m_xbins(),
 LoadNexusProcessed::~LoadNexusProcessed()
 {
   delete m_cppFile;
+}
+
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadNexusProcessed::confidence(Kernel::HDFDescriptor & descriptor) const
+{
+  if(descriptor.pathExists("/mantid_workspace_1")) return 80;
+  else return 0;
 }
 
 /** Initialisation method.
@@ -312,8 +322,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  // Clean up some stuff
-  ws->doneAddingEventLists();
 
   return ws;
 }
@@ -1593,58 +1601,6 @@ size_t LoadNexusProcessed::calculateWorkspacesize(const std::size_t numberofspec
   }
   return total_specs;
 }
-
-  /**This method does a quick file type check by looking at the first 100 bytes of the file 
-    *  @param filePath- path of the file including name.
-    *  @param nread :: no.of bytes read
-    *  @param header :: The first 100 bytes of the file as a union
-    *  @return true if the given file is of type which can be loaded by this algorithm
-    */
-    bool LoadNexusProcessed::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-    {
-      std::string extn=extension(filePath);
-       bool bnexs(false);
-      (!extn.compare("nxs")||!extn.compare("nx5"))?bnexs=true:bnexs=false;
-      /*
-      * HDF files have magic cookie in the first 4 bytes
-      */
-      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes)) == g_hdf_cookie)||bnexs )
-      {
-        //hdf
-        return true;
-      }
-      else if ( (nread >= sizeof(g_hdf5_signature)) && 
-                (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
-      {    
-        //hdf5
-        return true;
-      }
-      return false;
-          
-    }
-   /**checks the file by opening it and reading few lines 
-    *  @param filePath :: name of the file inluding its path
-    *  @return an integer value how much this algorithm can load the file 
-    */
-    int LoadNexusProcessed::fileCheck(const std::string& filePath)
-    {
-     std::vector<std::string> entryName,definition;
-      int count= getNexusEntryTypes(filePath,entryName,definition);
-      if(count<=-1)
-      {
-        throw Exception::FileError("Unable to read data in File:" , filePath);
-      }
-      else if(count==0)
-      {
-        throw Exception::FileError("Error no entries found in " , filePath);
-      }
-      int ret=0;
-      if( entryName[0]=="mantid_workspace_1" )
-      {
-        ret=80;
-      }
-      return ret;
-    }
 
 } // namespace DataHandling
 } // namespace Mantid

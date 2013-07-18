@@ -16,6 +16,7 @@ void export_DateAndTime()
     .def(init<int64_t>("Construct a total number of nanoseconds"))
     .def("total_nanoseconds", &DateAndTime::totalNanoseconds)
     .def("totalNanoseconds", &DateAndTime::totalNanoseconds)
+    .def("setToMinimum", &DateAndTime::setToMinimum)
     .def("__str__", &Mantid::Kernel::DateAndTime::toISO8601String)
     // cppcheck-suppress duplicateExpression
     .def(self == self)

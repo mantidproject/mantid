@@ -114,33 +114,43 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 {
   g_log.debug("Calling FindPeaks as a Child Algorithm");
 
-  bool showlog = true;
-  API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks",0.0, 0.2, showlog);
-  findpeaks->setProperty("InputWorkspace", WS);
-  findpeaks->setProperty<int>("FWHM",getProperty("FWHM"));
-  findpeaks->setProperty<int>("Tolerance",getProperty("Tolerance"));
-  // FindPeaks will do the checking on the validity of WorkspaceIndex
-  findpeaks->setProperty<int>("WorkspaceIndex",getProperty("WorkspaceIndex"));
-
-  //Get the specified peak positions, which is optional
-  findpeaks->setProperty<std::vector<double> >("PeakPositions", getProperty("PeakPositions"));
-  findpeaks->setProperty<std::string>("BackgroundType", getProperty("BackgroundType"));
-  findpeaks->setProperty<bool>("HighBackground", getProperty("HighBackground"));
-  findpeaks->setProperty<double>("PeakPositionTolerance", getProperty("PeakPositionTolerance"));
-  findpeaks->setProperty<bool>("RawPeakParameters", true);
-
+  // Read from properties
   int fwhm = getProperty("FWHM");
   int tolerance = getProperty("Tolerance");
+  int wsindex = getProperty("WorkspaceIndex");
   std::string backgroundtype = getProperty("BackgroundType");
   bool highbackground = getProperty("HighBackground");
   std::vector<double> peakpositions = getProperty("PeakPositions");
-  g_log.debug() << "StripPeaks() calls FindPeaks(): FWHM            = " << fwhm << std::endl;
-  g_log.debug() << "StripPeaks() calls FindPeaks(): Tolerance       = " << tolerance << std::endl;
-  g_log.debug() << "StripPeaks() calls FindPeaks(): HighBackground  = " << highbackground<< std::endl;
-  g_log.debug() << "StripPeaks() calls FindPeaks(): BackgroundType  = " << backgroundtype << std::endl;
-  g_log.debug() << "StripPeaks() calls FindPeaks(): Peak positions: " << std::endl;
+  double peakpostol = getProperty("PeakPositionTolerance");
+
+  // Set up and execute algorithm
+  bool showlog = true;
+  API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks",0.0, 0.2, showlog);
+  findpeaks->setProperty("InputWorkspace", WS);
+  findpeaks->setProperty<int>("FWHM", fwhm);
+  findpeaks->setProperty<int>("Tolerance", tolerance);
+  findpeaks->setProperty<int>("WorkspaceIndex", wsindex);
+  //Get the specified peak positions, which is optional
+  findpeaks->setProperty<std::vector<double> >("PeakPositions", peakpositions);
+  findpeaks->setProperty<std::string>("BackgroundType", backgroundtype);
+  findpeaks->setProperty<bool>("HighBackground", highbackground);
+  findpeaks->setProperty<double>("PeakPositionTolerance", peakpostol);
+  findpeaks->setProperty<bool>("RawPeakParameters", true);
+
+  std::stringstream infoss;
+  infoss << "Call FindPeaks() with parameters: \n";
+  infoss << "\t FWHM            = " << fwhm << ";\n";
+  infoss << "\t Tolerance       = " << tolerance << ";\n";
+  infoss << "\t HighBackground  = " << highbackground << ";\n";
+  infoss << "\t BackgroundType  = " << backgroundtype << ";\n";
+  infoss << "\t Peak positions  = ";
   for (size_t i = 0; i < peakpositions.size(); ++i)
-      g_log.debug() << peakpositions[i] << std::endl;
+  {
+      infoss << peakpositions[i];
+      if (i < peakpositions.size() - 1)
+        infoss << ", ";
+  }
+  g_log.information(infoss.str());
 
   findpeaks->executeAsChildAlg();
   return findpeaks->getProperty("PeaksList");
@@ -193,10 +203,16 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     }
     if ( chisq > m_maxChiSq)
     {
-      if (chisq != 1.e10)
-        g_log.error() << "StripPeaks():  Peak Index = " << i << " @ " << centre 
-           << "  Error: Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
+      if (chisq != DBL_MAX)
+        g_log.error() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
+                      << "  Error: Peak fit with too high of chisq " << chisq << " > " << m_maxChiSq << "\n";
       continue;
+    }
+    else if (chisq <= 0.)
+    {
+      g_log.warning() << "StripPeaks():  Peak Index = " << i << " @ X = " << centre
+                      << ". Error: Peak fit with too wide peak width" << width
+                      << " denoted by chi^2 = " << chisq << " <= 0. \n";
     }
 
     g_log.debug() << "Subtracting peak " << i << " from spectrum " << peakslist->getRef<int>("spectrum",i)

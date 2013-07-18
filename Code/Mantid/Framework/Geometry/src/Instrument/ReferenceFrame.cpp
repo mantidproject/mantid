@@ -136,7 +136,7 @@ namespace Geometry
   Getter for the up instrument direction
   @return up direction.
   */
-  const V3D& ReferenceFrame::vecPointingUp() const
+  const V3D ReferenceFrame::vecPointingUp() const
   {
     return m_vecPointingUp;
   }
@@ -145,7 +145,7 @@ namespace Geometry
   Getter for the along beam vector.
   @return along beam direction.
   */
-  const V3D& ReferenceFrame::vecPointingAlongBeam() const
+  const V3D ReferenceFrame::vecPointingAlongBeam() const
   {
     return m_vecPointingAlongBeam;
   }

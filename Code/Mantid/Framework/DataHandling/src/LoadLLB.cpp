@@ -5,8 +5,8 @@
 #include "MantidDataHandling/LoadLLB.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <limits>
@@ -22,10 +22,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadLLB)
-//register the algorithm into loadalgorithm factory
-DECLARE_LOADALGORITHM(LoadLLB)
+DECLARE_HDF_FILELOADER_ALGORITHM(LoadLLB);
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -59,52 +56,23 @@ const std::string LoadLLB::category() const {
 	return "DataHandling";
 }
 
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadLLB::confidence(Kernel::HDFDescriptor & descriptor) const
+{
+  const auto & firstEntry = descriptor.firstEntryNameType();
+  if(descriptor.pathExists("/" + firstEntry.first + "/nxinstrument/name")) return 80;
+  return 0;
+}
+
 //----------------------------------------------------------------------------------------------
 /// Sets documentation strings for this algorithm
 void LoadLLB::initDocs() {
 	this->setWikiSummary("Loads LLB nexus file.");
 	this->setOptionalMessage("Loads LLB nexus file.");
-}
-
-
-bool LoadLLB::quickFileCheck(const std::string& filePath, size_t nread,
-		const file_header& header) {
-	std::string extn = extension(filePath);
-	bool bnexs(false);
-	(!extn.compare("nxs") || !extn.compare("nx5")) ? bnexs = true : bnexs =
-																false;
-	/*
-	 * HDF files have magic cookie in the first 4 bytes
-	 */
-	if (((nread >= sizeof(unsigned))
-			&& (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs) {
-		//hdf
-		return true;
-	} else if ((nread >= sizeof(g_hdf5_signature))
-			&& (!memcmp(header.full_hdr, g_hdf5_signature,
-					sizeof(g_hdf5_signature)))) {
-		//hdf5
-		return true;
-	}
-	return false;
-}
-
-/**
- * Checks the file by opening it and reading few lines
- * @param filePath :: name of the file inluding its path
- * @return an integer value how much this algorithm can load the file
- */
-int LoadLLB::fileCheck(const std::string& filePath) {
-	// Create the root Nexus class
-	NXRoot root(filePath);
-	NXEntry entry = root.openFirstEntry();
-	std::string instrumentName = getInstrumentName(entry);
-	if (std::find(supportedInstruments.begin(), supportedInstruments.end(),
-			instrumentName) != supportedInstruments.end()) {
-		// FOUND
-		return 80;
-	}
-	return 0;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -156,17 +124,16 @@ void LoadLLB::setInstrumentName(NeXus::NXEntry& entry) {
 
 }
 
-std::string LoadLLB::getInstrumentName(NeXus::NXEntry& entry) {
+std::string LoadLLB::getInstrumentName(NeXus::NXEntry& entry) const {
 
 	// format: /entry0/?????/name
 
 	std::string instrumentName = "";
 
-	std::vector<NXClassInfo> v = entry.groups();
+	std::vector<NXClassInfo> & v = entry.groups();
 	for (auto it = v.begin(); it < v.end(); it++) {
 		if (it->nxclass == "NXinstrument" || it->nxname == "nxinstrument") {
-			m_nexusInstrumentEntryName = it->nxname;
-			std::string insNamePath = m_nexusInstrumentEntryName + "/name";
+			std::string insNamePath = it->nxname + "/name";
 			if ( !entry.isValid(insNamePath) )
 				throw std::runtime_error("Error reading the instrument name: " + insNamePath + " is not a valid path!");
 			instrumentName = entry.getString(insNamePath);

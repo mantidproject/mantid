@@ -22,14 +22,14 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakOverlaySphereFactory.h"
-#include "MantidQtSliceViewer/PeakOverlayCrossFactory.h"
+#include "MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h"
+#include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
 #include "MantidQtSliceViewer/PeakTransformHKL.h"
 #include "MantidQtSliceViewer/PeakTransformQSample.h"
 #include "MantidQtSliceViewer/PeakTransformQLab.h"
 #include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
-#include "MantidQtSliceViewer/PeaksViewerOptionsDialog.h"
+#include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
@@ -413,8 +413,11 @@ void SliceViewer::initMenus()
 
   // --------------- Peaks Menu ----------------------------------------
   m_menuPeaks = new QMenu("&Peak", this);
-  action = new QAction(QPixmap(), "&PeaksViewer Options", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(onPeaksViewerOptions()));
+  action = new QAction(QPixmap(), "&Overlay Options", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(onPeaksViewerOverlayOptions()));
+  m_menuPeaks->addAction(action);
+  action = new QAction(QPixmap(), "&Visable Columns", this);
+  connect(action, SIGNAL(triggered()), this, SIGNAL(peaksTableColumnOptions())); // just re-emit
   m_menuPeaks->addAction(action);
   m_menuPeaks->setEnabled(false);// Until a PeaksWorkspace is selected.
 
@@ -1020,7 +1023,7 @@ void SliceViewer::resetZoom()
   // Make sure the view updates
   m_plot->replot();
   autoRebinIfRequired();
-  m_peaksPresenter->update();
+  updatePeaksOverlay();
 }
 
 //------------------------------------------------------------------------------------
@@ -1157,6 +1160,9 @@ void SliceViewer::zoomBy(double factor)
   // Perform the move
   this->setXYLimits(x_min, x_max, y_min, y_max);
   autoRebinIfRequired();
+
+  // Peaks in region will change.
+  this->updatePeaksOverlay();
 }
 
 //------------------------------------------------------------------------------------
@@ -1480,11 +1486,8 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->itemChanged();
   m_plot->replot();
 
-  /// Update the peak positions if peak relevant slider has changed.
-  if(m_peaksSliderWidget != NULL)
-  {
-    m_peaksPresenter->updateWithSlicePoint(m_peaksSliderWidget->getSlicePoint()); 
-  }
+  // Peaks overlays may need redrawing
+  updatePeaksOverlay();
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
@@ -1825,7 +1828,7 @@ void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, doubl
   m_plot->setAxisScale( m_spect->yAxis(), ybottom, ytop);
   // Make sure the view updates
   m_plot->replot();
-  m_peaksPresenter->update();
+  updatePeaksOverlay();
 }
 
 //------------------------------------------------------------------------------------
@@ -2135,6 +2138,8 @@ Event handler for plot panning.
 void SliceViewer::panned(int, int)
 {
   autoRebinIfRequired();
+
+  this->updatePeaksOverlay();
 }
 
 /**
@@ -2143,6 +2148,8 @@ Event handler for changing magnification.
 void SliceViewer::magnifierRescaled(double)
 {
   autoRebinIfRequired();
+
+  this->updatePeaksOverlay();
 }
 
 /**
@@ -2221,8 +2228,8 @@ void SliceViewer::peakOverlay_toggled(bool checked)
           const size_t numberOfChildPresenters = m_peaksPresenter->size();
 
           PeakOverlayViewFactorySelector_sptr viewFactorySelector = boost::make_shared<PeakOverlayViewFactorySelector>();
-          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlaySphereFactory>(peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
-          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlayCrossFactory>(m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
+          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlayMultiSphereFactory>(peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters)); 
+          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlayMultiCrossFactory>(m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
           try
           {
             m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(viewFactorySelector->makeSelection(), peaksWS, m_ws, transformFactory));
@@ -2270,11 +2277,30 @@ void SliceViewer::updatePeakOverlaySliderWidget()
       if(m_peaksPresenter->isLabelOfFreeAxis(widget->getDimName()))
       {
         m_peaksSliderWidget = widget; // Cache the widget being used for this.
-        m_peaksPresenter->updateWithSlicePoint(m_peaksSliderWidget->getSlicePoint()); // Ensure that the presenter is up-to-date with the change
+        auto xInterval = getXLimits();
+        auto yInterval = getYLimits();
+        PeakBoundingBox viewableRegion(Left(xInterval.minValue()), Right(xInterval.maxValue()), Top(yInterval.maxValue()), Bottom(yInterval.minValue()), SlicePoint(m_peaksSliderWidget->getSlicePoint()));
+
+        updatePeaksOverlay(); // Ensure that the presenter is up-to-date with the change
       }
     }
   }
 }
+
+/**
+ * Update the peaks presenter. Use the slice position as well as the plot region to update the collection of peaks presetners.
+ */
+void SliceViewer::updatePeaksOverlay()
+{
+  if(m_peaksSliderWidget != NULL)
+  {
+    auto xInterval = getXLimits();
+    auto yInterval = getYLimits();
+    PeakBoundingBox viewableRegion(Left(xInterval.minValue()), Right(xInterval.maxValue()), Top(yInterval.maxValue()), Bottom(yInterval.minValue()), SlicePoint(m_peaksSliderWidget->getSlicePoint()));
+    m_peaksPresenter->updateWithSlicePoint(viewableRegion);
+  }
+}
+
 
 /**
 Decide whether to enable peak overlays, then reflect the ui controls to indicate this.
@@ -2333,9 +2359,9 @@ void SliceViewer::resetView()
   this->resetZoom();
 }
 
-void SliceViewer::onPeaksViewerOptions()
+void SliceViewer::onPeaksViewerOverlayOptions()
 {
-  PeaksViewerOptionsDialog dlg(this->m_peaksPresenter);
+  PeaksViewerOverlayDialog dlg(this->m_peaksPresenter);
   dlg.exec();
 }
 

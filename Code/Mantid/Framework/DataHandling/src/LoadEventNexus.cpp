@@ -41,7 +41,7 @@ Veto pulses can be filtered out in a separate step using [[FilterByLogValue]]:
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 using std::endl;
@@ -56,8 +56,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-DECLARE_ALGORITHM(LoadEventNexus)
-DECLARE_LOADALGORITHM(LoadEventNexus)
+DECLARE_HDF_FILELOADER_ALGORITHM(LoadEventNexus);
 
 using namespace Kernel;
 using namespace Geometry;
@@ -563,8 +562,11 @@ public:
 
     if (start_event > static_cast<size_t>(dim0))
     {
-      // For bad file around SEQ_7872, Jul 15, 2011, Janik Zikovsky
-      alg->getLogger().information() << this->entry_name << "'s field 'event_index' seem to be invalid (> than the number of events in the bank). Filtering by time ignored.\n";
+      // If the frame indexes are bad then we can't construct the times of the events properly and filtering by time
+      // will not work on this data
+      alg->getLogger().warning() 
+        << this->entry_name << "'s field 'event_index' seems to be invalid (start_index > than the number of events in the bank)."
+        << "All events will appear in the same frame and filtering by time will not be possible on this data.\n";
       start_event = 0;
       stop_event =  static_cast<size_t>(dim0);
     }
@@ -896,7 +898,7 @@ private:
 //===============================================================================================
 
 /// Empty default constructor
-LoadEventNexus::LoadEventNexus() : IDataFileChecker(),
+LoadEventNexus::LoadEventNexus() : IHDFFileLoader(),
     event_id_is_spec(false), m_allBanksPulseTimes(NULL)
 {
 }
@@ -910,60 +912,19 @@ LoadEventNexus::~LoadEventNexus()
 }
 
 /**
- * Do a quick file type check by looking at the first 100 bytes of the file 
- *  @param filePath :: path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-bool LoadEventNexus::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
-{
-  std::string ext = this->extension(filePath);
-  g_log.debug() << "LoadEventNexus::quickFileCheck() - File extension is: " << ext << std::endl;
-
-  // If the extension is nxs then give it a go
-  if( ext.compare("nxs") == 0 ) return true;
-  // If the extension is h5 then give it a go
-  if( ext.compare("h5") == 0 ) return true;
-
-
-  // If not then let's see if it is a HDF file by checking for the magic cookie
-  if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
-  return false;
-}
-
-/**
- * Checks the file by opening it and reading few lines 
- *  @param filePath :: name of the file inluding its path
- *  @return an integer value how much this algorithm can load the file 
- */
-int LoadEventNexus::fileCheck(const std::string& filePath)
+int LoadEventNexus::confidence(Kernel::HDFDescriptor & descriptor) const
 {
   int confidence(0);
-  typedef std::map<std::string,std::string> string_map_t; 
-  try
+  if(descriptor.classTypeExists("NXevent_data"))
   {
-    ::NeXus::File file = ::NeXus::File(filePath);
-    string_map_t entries = file.getEntries();
-    for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
+    if(descriptor.pathOfTypeExists("/entry", "NXentry") || descriptor.pathOfTypeExists("/raw_data_1", "NXentry"))
     {
-      if ( ((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry") ) 
-      {
-        file.openGroup(it->first, it->second);
-        string_map_t entries2 = file.getEntries();
-        for(string_map_t::const_iterator it2 = entries2.begin(); it2 != entries2.end(); ++it2)
-        {
-          if (it2->second == "NXevent_data")
-          {
-            confidence = 80;
-          }
-        }
-        file.closeGroup();
-      }
+      confidence = 80;
     }
-  }
-  catch(::NeXus::Exception&)
-  {
   }
   return confidence;
 }
@@ -1326,7 +1287,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   //Load the instrument
   prog->report("Loading instrument");
-  instrument_loaded_correctly = runLoadInstrument(m_filename, WS, m_top_entry_name, this);
+  instrument_loaded_correctly = loadInstrument(m_filename, WS, m_top_entry_name, this);
 
   if (!this->instrument_loaded_correctly)
       throw std::runtime_error("Instrument was not initialized correctly! Loading cannot continue.");
@@ -1733,15 +1694,71 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
   file.close();
 }
 
+//-----------------------------------------------------------------------------
+/** Load the instrument from the nexus file or if not found from the IDF file
+ *  specified by the info in the Nexus file
+ *
+ *  @param nexusfilename :: The Nexus file name
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+ *  @param top_entry_name :: entry name at the top of the Nexus file
+ *  @param alg :: Handle of the algorithm 
+ *  @return true if successful
+ */
+bool LoadEventNexus::loadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,
+    const std::string & top_entry_name, Algorithm * alg) 
+{
 
+   // Get the instrument group in the Nexus file
+   ::NeXus::File nxfile(nexusfilename);
+
+   bool foundInstrument = runLoadIDFFromNexus( nexusfilename, localWorkspace, alg);
+
+   if(!foundInstrument) foundInstrument = runLoadInstrument( nexusfilename, localWorkspace, top_entry_name, alg );
+
+   return foundInstrument;
+}
 
 //-----------------------------------------------------------------------------
-/** Load the instrument geometry file using info in the NXS file.
+/** Load the instrument from the nexus file
+ *
+ *  @param nxfile :: C++ interface to Nexus file with instrumentr group opened
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+ *  @return true if successful
+ */
+bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
+{
+  // Code to be added here. In meantime, fail to find instrument
+
+  IAlgorithm_sptr loadInst= alg->createChildAlgorithm("LoadIDFFromNexus",-1,-1,false);
+
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+  try
+  {
+    loadInst->setPropertyValue("Filename", nexusfilename);
+    loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+    loadInst->setPropertyValue("InstrumentParentPath","/raw_data_1");
+    loadInst->execute();
+  }
+  catch( std::invalid_argument&)
+  {
+    alg->getLogger().error("Invalid argument to LoadIDFFromNexus Child Algorithm ");
+  }
+  catch (std::runtime_error&)
+  {
+    alg->getLogger().information("No IDF found in "+nexusfilename+" at raw_data_1/Instrument");
+  }
+
+  if ( !loadInst->isExecuted() ) alg->getLogger().information("No IDF loaded from Nexus file.");   
+  return loadInst->isExecuted();
+}
+
+//-----------------------------------------------------------------------------
+/** Load the instrument defination file specified by info in the NXS file.
  *
  *  @param nexusfilename :: Used to pick the instrument.
  *  @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
  *  @param top_entry_name :: entry name at the top of the NXS file
- *  @param alg :: Handle of an algorithm for logging access
+ *  @param alg :: Handle of the algorithm 
  *  @return true if successful
  */
 bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace,

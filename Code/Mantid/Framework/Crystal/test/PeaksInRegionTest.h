@@ -9,7 +9,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/assign/list_of.hpp>
 
-using Mantid::Crystal::PeaksInRegion;
+using namespace Mantid::Crystal;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
@@ -69,6 +69,13 @@ public:
   static PeaksInRegionTest *createSuite() { return new PeaksInRegionTest(); }
   static void destroySuite( PeaksInRegionTest *suite ) { delete suite; }
 
+  void test_numberOfFaces()
+  {
+    PeaksInRegion alg;
+    PeaksIntersection& baseAlg = alg;
+    TS_ASSERT_EQUALS(6, baseAlg.numberOfFaces());
+  }
+
   void test_setProperties()
   {
     PeaksInRegion alg;
@@ -107,11 +114,11 @@ public:
 
   void test_bad_extent_pairs()
   {
-    do_test_extents_throws("Invalid x extents", "-1,-1,-1,1,-1,1");
+    do_test_extents_throws("Invalid x extents", "-1,-1.1,-1,1,-1,1");
 
-    do_test_extents_throws("Invalid y extents", "-1,1,-1,-1,-1,1");
+    do_test_extents_throws("Invalid y extents", "-1,1,-1,-1.1,-1,1");
 
-    do_test_extents_throws("Invalid z extents", "-1,1,-1,1,-1,-1");
+    do_test_extents_throws("Invalid z extents", "-1,1,-1,1,-1,-1.1");
 
   }
 
@@ -138,9 +145,10 @@ public:
     
     ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
-    TS_ASSERT_EQUALS(2, outWS->columnCount());
+    TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS("PeakIndex", outWS->getColumn(0)->name());
     TS_ASSERT_EQUALS("Intersecting", outWS->getColumn(1)->name());
+    TS_ASSERT_EQUALS("Distance", outWS->getColumn(2)->name());
 
     TS_ASSERT_EQUALS(1, outWS->rowCount());
 
@@ -165,9 +173,10 @@ public:
     
     ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
-    TS_ASSERT_EQUALS(2, outWS->columnCount());
+    TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS("PeakIndex", outWS->getColumn(0)->name());
     TS_ASSERT_EQUALS("Intersecting", outWS->getColumn(1)->name());
+    TS_ASSERT_EQUALS("Distance", outWS->getColumn(2)->name());
     TS_ASSERT_EQUALS(1, outWS->rowCount());
 
     TSM_ASSERT_EQUALS("Peak index should be zero", 0, outWS->cell<int>(0,  0)); 
@@ -411,7 +420,7 @@ public:
 
     Mantid::API::ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
-    TS_ASSERT_EQUALS(2, outWS->columnCount());
+    TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());
   }
 
@@ -433,7 +442,7 @@ public:
 
     Mantid::API::ITableWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outName);
 
-    TS_ASSERT_EQUALS(2, outWS->columnCount());
+    TS_ASSERT_EQUALS(3, outWS->columnCount());
     TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());
   }
 

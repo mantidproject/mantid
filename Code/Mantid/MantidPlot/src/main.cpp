@@ -141,7 +141,7 @@ public:
 int main( int argc, char ** argv )
 {
   // First, look for command-line arguments that we want to deal with before launching anything
-  if ( argc == 2 )
+   if ( argc == 2 )
   {
     QString str(argv[1]);
     if ( str == "-v" || str == "--version" )

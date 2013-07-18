@@ -4,7 +4,7 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidMDEvents/MDGridBox.h"
-
+#include <cmath>
 
 using namespace Mantid::API;
 
@@ -600,6 +600,53 @@ namespace MDEvents
     if(m_Saveable)
     {
         m_Saveable->setBusy(false);  
+    }
+  }
+
+  /** Integrate the signal within a sphere; for example, to perform single-crystal
+   * peak integration.
+   * The CoordTransform object could be used for more complex shapes, e.g. "lentil" integration, as long
+   * as it reduces the dimensions to a single value.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radius :: radius below which to integrate
+   * @param length :: length below which to integrate
+   * @param[out] signal :: set to the integrated signal
+   * @param[out] errorSquared :: set to the integrated squared error.
+   */
+  TMDE(
+  void MDBox)::integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const
+  {
+    // If the box is cached to disk, you need to retrieve it
+    const std::vector<MDE> & events = this->getConstEvents();
+    typename std::vector<MDE>::const_iterator it = events.begin();
+    typename std::vector<MDE>::const_iterator it_end = events.end();
+    size_t numSteps = signal_fit.size();
+    double deltaQ = length/static_cast<double>(numSteps-1);
+
+    // For each MDLeanEvent
+    for (; it != it_end; ++it)
+    {
+      coord_t out[2];  // radius and length of cylinder
+      radiusTransform.apply(it->getCenter(), out);
+      if (out[0] < radius && std::fabs(out[1]) < 0.5*length)
+      {
+        // add event to appropriate y channel
+		size_t xchannel;
+		if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2);
+		else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2);
+        if (xchannel < numSteps ) signal_fit[xchannel] += static_cast<signal_t>(it->getSignal());
+
+        signal += static_cast<signal_t>(it->getSignal());
+        errorSquared += static_cast<signal_t>(it->getErrorSquared());
+      }
+    }
+    // it is constant access, so no saving or fiddling with the buffer is needed. Events just can be dropped if necessary
+   //m_Saveable->releaseEvents();
+    if(m_Saveable)
+    {
+        m_Saveable->setBusy(false);
     }
   }
 

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IHDFFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <hdf5.h>
@@ -53,11 +53,11 @@ namespace Mantid
   };
   */
 
-  class DLLExport LoadSassena : public API::IDataFileChecker
+  class DLLExport LoadSassena : public API::IHDFFileLoader
   {
   public:
     /// Constructor
-    LoadSassena(): IDataFileChecker(), m_filename("") {};
+    LoadSassena(): API::IHDFFileLoader(), m_filename("") {};
     /// Virtual Destructor
     virtual ~LoadSassena() {}
     /// Algorithm's name
@@ -66,23 +66,9 @@ namespace Mantid
     virtual int version() const { return 1; }
     /// Algorithm's category for identification
     virtual const std::string category() const { return "DataHandling\\Sassena"; }
-    /**
-     * Do a quick check that this file can be loaded
-     *
-     * @param filePath the location of and the file to check
-     * @param nread number of bytes to read
-     * @param header the first 100 bytes of the file as a union
-     * @return true if the file can be loaded, otherwise false
-     */
-    virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-    /**
-     * Check the structure of the file and return a value between 0 and 100 of
-     * how much this file can be loaded
-     *
-     * @param filePath the location of and the file to check
-     * @return a confidence level indicator between 0 and 100
-     */
-    int fileCheck(const std::string& filePath);
+
+    /// Returns a confidence value that this algorithm can load a file
+    virtual int confidence(Kernel::HDFDescriptor & descriptor) const;
 
   protected:
     /// Add a workspace to the group and register in the analysis data service

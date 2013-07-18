@@ -400,7 +400,7 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
     		if (std::abs(WS->readX(0)[i] - WS->readX(j)[i]) > 1.0E-7 ) return false;
     	}
     }
-    else if ( std::abs(commonSum-sum)/std::max<double>(commonSum,sum) > 1.0E-7 ) return false;
+    else if ( std::abs(commonSum-sum)/std::max<double>(std::abs(commonSum),std::abs(sum)) > 1.0E-7 ) return false;
   }
   return true;
 }
@@ -423,12 +423,12 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
   const double secondWS = std::accumulate(ws2->readX(0).begin(),ws2->readX(0).end(),0.);
   if ( std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7 ) 
   {
-  	for (size_t i = 0; i < ws1->readX(0).size(); i++)
-  	{
-  		if (std::abs(ws1->readX(0)[i] - ws2->readX(0)[i]) > 1.0E-7 ) return false;
-  	}
+    for (size_t i = 0; i < ws1->readX(0).size(); i++)
+    {
+      if (std::abs(ws1->readX(0)[i] - ws2->readX(0)[i]) > 1.0E-7 ) return false;
+    }
   }
-  else if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
+  else if ( std::abs(firstWS-secondWS)/std::max<double>(std::abs(firstWS),std::abs(secondWS)) > 1.0E-7 ) return false;
 
   // If we were only asked to check the first spectrum, return now
   if (firstOnly) return true;
@@ -451,12 +451,12 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
     const double secondWS = std::accumulate(ws2->readX(i).begin(),ws2->readX(i).end(),0.);
     if ( std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7 ) 
     {
-    	for (size_t j = 0; j < ws1->readX(i).size(); j++)
-    	{
-    		if (std::abs(ws1->readX(i)[j] - ws2->readX(i)[j]) > 1.0E-7 ) return false;
-    	}
+      for (size_t j = 0; j < ws1->readX(i).size(); j++)
+      {
+        if (std::abs(ws1->readX(i)[j] - ws2->readX(i)[j]) > 1.0E-7 ) return false;
+      }
     }
-    else if ( std::abs(firstWS-secondWS)/std::max<double>(firstWS,secondWS) > 1.0E-7 ) return false;
+    else if ( std::abs(firstWS-secondWS)/std::max<double>(std::abs(firstWS),std::abs(secondWS)) > 1.0E-7 ) return false;
   }
 
   return true;
@@ -491,26 +491,26 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
 
   for (size_t i = 0; i < numberOfSpectra; ++i)
   {
-	  const MantidVec& X=workspace->readX(i);
-	  MantidVec& Y=workspace->dataY(i);
-	  MantidVec& E=workspace->dataE(i);
-	  std::adjacent_difference(X.begin(),X.end(),widths.begin()); // Calculate bin widths
+    const MantidVec& X=workspace->readX(i);
+    MantidVec& Y=workspace->dataY(i);
+    MantidVec& E=workspace->dataE(i);
+    std::adjacent_difference(X.begin(),X.end(),widths.begin()); // Calculate bin widths
 
     // RJT: I'll leave this in, but X should never be out of order. 
     // If it is there'll be problems elsewhere...
-	  if (X.front()>X.back()) // If not ascending order
-		  std::transform(widths.begin(),widths.end(),widths.begin(),std::negate<double>());
+    if (X.front()>X.back()) // If not ascending order
+      std::transform(widths.begin(),widths.end(),widths.begin(),std::negate<double>());
 
-	  if (forwards)
-	  {
-		  std::transform(Y.begin(),Y.end(),widths.begin()+1,Y.begin(),std::divides<double>());
-		  std::transform(E.begin(),E.end(),widths.begin()+1,E.begin(),std::divides<double>());
-	  }
-	  else
-	  {
-		  std::transform(Y.begin(),Y.end(),widths.begin()+1,Y.begin(),std::multiplies<double>());
-		  std::transform(E.begin(),E.end(),widths.begin()+1,E.begin(),std::multiplies<double>());
-	  }
+    if (forwards)
+    {
+      std::transform(Y.begin(),Y.end(),widths.begin()+1,Y.begin(),std::divides<double>());
+      std::transform(E.begin(),E.end(),widths.begin()+1,E.begin(),std::divides<double>());
+    }
+    else
+    {
+      std::transform(Y.begin(),Y.end(),widths.begin()+1,Y.begin(),std::multiplies<double>());
+      std::transform(E.begin(),E.end(),widths.begin()+1,E.begin(),std::multiplies<double>());
+    }
   }
   workspace->isDistribution(forwards);
 }

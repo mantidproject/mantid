@@ -77,7 +77,6 @@ namespace Crystal
 
     std::string filename = getPropertyValue("Filename");
     PeaksWorkspace_sptr ws(new PeaksWorkspace());
-    ws->setName(getProperty("OutputWorkspace"));
 
     std::fstream in;
     in.open( filename.c_str(), std::ios::in);

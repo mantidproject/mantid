@@ -4,6 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
 #include "MantidKernel/Logger.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+
 
 namespace Mantid
 {
@@ -57,6 +59,11 @@ namespace Crystal
     virtual const std::string category() const 
             { return "Crystal";}
     
+
+    static  Kernel::Matrix<double>  DetermineErrors( std::vector<double> &sigabc, const Kernel::Matrix<double> &UB,
+                                               const DataObjects::PeaksWorkspace_sptr &ws, double tolerance);
+
+
   private:
 
     /// Sets documentation strings for this algorithm

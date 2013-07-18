@@ -33,7 +33,7 @@ namespace MDEvents
   class DLLExport CoordTransformDistance : public Mantid::API::CoordTransform
   {
   public:
-    CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed);
+    CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed, const size_t outD = 1);
     virtual CoordTransform * clone() const;
     virtual ~CoordTransformDistance();
     virtual std::string toXMLString() const;

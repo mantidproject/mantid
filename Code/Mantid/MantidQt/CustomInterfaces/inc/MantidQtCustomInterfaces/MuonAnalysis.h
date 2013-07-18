@@ -267,7 +267,7 @@ private:
   void plotPair(const std::string& plotType);
 
   /// plots specific WS spectrum (used by plotPair and plotGroup)
-  void plotSpectrum(const QString& wsName, const int wsIndex);
+  void plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale = false);
 
   /// get period labels
   QStringList getPeriodLabels() const;

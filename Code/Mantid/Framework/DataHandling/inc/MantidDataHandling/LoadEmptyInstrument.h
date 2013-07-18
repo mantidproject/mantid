@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 
@@ -54,7 +54,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadEmptyInstrument : public API::Algorithm
+    class DLLExport LoadEmptyInstrument : public API::IFileLoader
     {
     public:
       /// Default constructor
@@ -65,6 +65,8 @@ namespace Mantid
       virtual int version() const { return 1; }
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Instrument"; }
+      /// Returns a confidence value that this algorithm can load a file
+      virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
     private:
       /// Sets documentation strings for this algorithm

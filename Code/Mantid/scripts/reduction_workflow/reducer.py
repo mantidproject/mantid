@@ -161,7 +161,10 @@ class Reducer(object):
             Logger.get("Reducer").error("A reduction algorithm wasn't set: stopping")
             return
         
+        _first_ws_name = None
         for ws in self._data_files.keys():
+            if _first_ws_name is None:
+                _first_ws_name = ws
             alg = AlgorithmManager.create(self.reduction_algorithm)
             alg.initialize()
             props = [p.name for p in alg.getProperties()]
@@ -206,7 +209,10 @@ class Reducer(object):
                 output_dir = os.path.expanduser('~')
 
         self.log_text += "Reduction completed in %g sec\n" % (time.time()-t_0)
-        log_path = os.path.join(output_dir,"%s_reduction.log" % self.instrument_name)
+        if _first_ws_name is not None:
+            log_path = os.path.join(output_dir, "%s_reduction.log" % _first_ws_name)
+        else:
+            log_path = os.path.join(output_dir,"%s_reduction.log" % self.instrument_name)
         self.log_text += "Log saved to %s" % log_path
         
         # Write the log to file

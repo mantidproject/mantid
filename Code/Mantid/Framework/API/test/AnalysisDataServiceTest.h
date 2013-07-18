@@ -331,6 +331,99 @@ public:
     ConfigService::Instance().setString("MantidOptions.InvisibleWorkspaces","0");
   }
 
+  void test_deepRemoveGroup()
+  {
+      addToADS("some_workspace");
+      auto group = addGroupToADS("group");
+      TS_ASSERT_EQUALS( ads.size(), 4);
+
+      // name doesn't exist
+      TS_ASSERT_THROWS( ads.deepRemoveGroup("abc"), std::runtime_error );
+      // workspace isn't a group
+      TS_ASSERT_THROWS( ads.deepRemoveGroup("group_1"), std::runtime_error );
+      TS_ASSERT_THROWS_NOTHING( ads.deepRemoveGroup("group") );
+      TS_ASSERT_EQUALS( ads.size(), 1);
+
+      // check a group containing another group
+      group = addGroupWithGroupToADS("group");
+      TS_ASSERT_EQUALS( ads.size(), 6);
+      TS_ASSERT_THROWS_NOTHING( ads.deepRemoveGroup("group") );
+      TS_ASSERT_EQUALS( ads.size(), 1);
+      ads.clear();
+  }
+
+  void test_removeFromGroup()
+  {
+      auto group = addGroupToADS("group");
+      TS_ASSERT_EQUALS( ads.size(), 3);
+      TS_ASSERT_EQUALS( group->size(), 2);
+      ads.removeFromGroup("group","group_2");
+      TS_ASSERT_EQUALS( ads.size(), 3);
+      TS_ASSERT_EQUALS( group->size(), 1);
+
+      TS_ASSERT_THROWS( ads.removeFromGroup("group","noworkspace"), std::runtime_error );
+      TS_ASSERT_THROWS( ads.removeFromGroup("nogroup","noworkspace"), std::runtime_error );
+      TS_ASSERT_THROWS( ads.removeFromGroup("nogroup","group_1"), std::runtime_error );
+      ads.clear();
+  }
+
+  void test_removeFromGroup_group()
+  {
+      auto group = addGroupWithGroupToADS("group");
+      TS_ASSERT_EQUALS( ads.size(), 5);
+      TS_ASSERT_EQUALS( group->size(), 2);
+      // remove group from group
+      ads.removeFromGroup("group","group_2");
+      TS_ASSERT_EQUALS( ads.size(), 5);
+      TS_ASSERT_EQUALS( group->size(), 1);
+      ads.clear();
+  }
+
+  void test_addToGroup()
+  {
+      auto group = addGroupToADS("group");
+      addToADS("workspace");
+      TS_ASSERT( !group->contains("workspace") );
+      ads.addToGroup("group","workspace");
+      TS_ASSERT( group->contains("workspace") );
+      ads.clear();
+  }
+
+  void test_addToGroup_group()
+  {
+      auto group = addGroupWithGroupToADS("group");
+      addToADS("workspace");
+
+      WorkspaceGroup_sptr grp = ads.retrieveWS<WorkspaceGroup>("group_2");
+      TS_ASSERT( grp );
+      TS_ASSERT( !group->contains("workspace") );
+      TS_ASSERT( !grp->contains("workspace") );
+      ads.addToGroup("group_2","workspace");
+      TS_ASSERT( !group->contains("workspace") );
+      TS_ASSERT( grp->contains("workspace") );
+      ads.clear();
+  }
+
+  void test_createInfoTree()
+  {
+      // this adds 1 group to the ADS (5 ws's altogether)
+      auto group = addGroupWithGroupToADS("group");
+      // plus 1 more ws
+      addToADS("workspace");
+      // ADS must have 6 ws's now
+      TS_ASSERT_EQUALS( ads.size(), 6 );
+
+      auto root = ads.createInfoTree();
+      TS_ASSERT( root );
+      // there are 2 ws's at top level
+      TS_ASSERT_EQUALS( root->nodes().size(), 2 );
+      TS_ASSERT_EQUALS( root->nodes()[0]->nodes().size(), 2 );
+      TS_ASSERT_EQUALS( root->nodes()[1]->nodes().size(), 0 );
+
+      delete root;
+      ads.clear();
+  }
+
 private:
 
   /// If replace=true then usea addOrReplace
@@ -371,6 +464,29 @@ private:
     MockWorkspace_sptr space = MockWorkspace_sptr(new MockWorkspace);
     ads.add(name, space);
     return space;
+  }
+
+  /// Add a group with 2 simple workspaces to the ADS
+  WorkspaceGroup_sptr addGroupToADS(const std::string & name)
+  {
+      WorkspaceGroup_sptr group( new WorkspaceGroup );
+      group->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      group->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      ads.add(name, group);
+      return group;
+  }
+
+  /// Add a group with 1 simple workspace and 1 group with 2 simple ws to the ADS
+  WorkspaceGroup_sptr addGroupWithGroupToADS(const std::string & name)
+  {
+      WorkspaceGroup_sptr group( new WorkspaceGroup );
+      group->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      WorkspaceGroup_sptr group1( new WorkspaceGroup );
+      group1->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      group1->addWorkspace( MockWorkspace_sptr(new MockWorkspace) );
+      group->addWorkspace( group1 );
+      ads.add(name, group);
+      return group;
   }
 
   /// Add or replace the given name

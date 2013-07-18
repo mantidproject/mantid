@@ -237,6 +237,7 @@ private:
   void  createGroupWorkspace( const double * params, const std::string& gwsName)
   {
     API::WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
+    API::AnalysisDataService::Instance().add( gwsName, gws);
 
     const size_t nspectra(4); // assume four Q-values
     std::string wsName = gwsName +"_fqt.Re";
@@ -259,7 +260,6 @@ private:
     this->createWorkspace2D( wsName, Heigth, sigma, 1);
     gws->add(wsName);
 
-    API::AnalysisDataService::Instance().add( gwsName, gws);
   } // void  createGroupWorkspace
 
   Algorithms::SassenaFFT m_alg;

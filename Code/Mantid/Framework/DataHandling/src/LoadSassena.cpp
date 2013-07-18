@@ -25,15 +25,15 @@ Dataset '''fqt''' is split into two workspaces, one for the real part and the ot
 *WIKI*/
 
 #include "MantidDataHandling/LoadSassena.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
-#include "MantidAPI/FileProperty.h"
-#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-
 
 #include <hdf5_hl.h>
 
@@ -42,10 +42,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadSassena)
-//register the algorithm into LoadAlgorithmFactory
-DECLARE_LOADALGORITHM(LoadSassena)
+DECLARE_HDF_FILELOADER_ALGORITHM(LoadSassena);
 
 /// Sets documentation strings for this algorithm
 void LoadSassena::initDocs()
@@ -55,46 +52,14 @@ void LoadSassena::initDocs()
 }
 
 /**
- * Do a quick file type check by looking at the first 100 bytes of the file
- *  @param filePath :: path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-bool LoadSassena::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
+int LoadSassena::confidence(Kernel::HDFDescriptor & descriptor) const
 {
-  std::string ext = this->extension(filePath);
-  // If the extension is h5 then give it a go
-  if( ext.compare("h5") == 0 ) return true;
-
-  // If not then let's see if it is a HDF file by checking for the magic cookie
-  if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
-
-  return false;
-}
-
-/**
- * Checks the file by opening it and reading few lines
- *  @param filePath :: name of the file inluding its path
- *  @return an integer value how much this algorithm can load the file
- */
-int LoadSassena::fileCheck(const std::string &filePath)
-{
-  int confidence(0);
-  hid_t h5file = H5Fopen(filePath.c_str(),H5F_ACC_RDONLY,H5P_DEFAULT);
-  if (H5LTfind_attribute(h5file,"sassena_version")==1)
-  {
-    confidence = 99;
-  }
-  else
-  {
-    // use g_log.debug instead of g_log.error to prevent seing the error message
-    // every time a non-sassena *.h5 file is loaded by the Load algorithm
-    this->g_log.debug("LoadSassena::fileCheck - no version attribute found");
-  }
-  // Be sure to close the file before returning
-  H5Fclose(h5file);
-  return confidence;
+  if(descriptor.hasRootAttr("sassena_version")) return 99;
+  return 0;
 }
 
 /**
@@ -108,7 +73,7 @@ void LoadSassena::registerWorkspace( API::WorkspaceGroup_sptr gws, const std::st
 {
   UNUSED_ARG(description);
   API::AnalysisDataService::Instance().add( wsName, ws );
-  gws->add(wsName);
+  gws->addWorkspace(ws);
 }
 
 /**
@@ -338,17 +303,18 @@ void LoadSassena::exec()
   //auto gws=boost::dynamic_pointer_cast<API::WorkspaceGroup>(getProperty("OutputWorkspace"));
   //API::WorkspaceGroup_sptr gws=getProperty("OutputWorkspace");
   API::Workspace_sptr ows=getProperty("OutputWorkspace");
+
   API::WorkspaceGroup_sptr gws=boost::dynamic_pointer_cast<API::WorkspaceGroup>(ows);
-  if(gws)
+  if(gws && API::AnalysisDataService::Instance().doesExist( gws->name() ) )
   {
-    gws->deepRemoveAll(); // remove workspace members
+    //gws->deepRemoveAll(); // remove workspace members
+    API::AnalysisDataService::Instance().deepRemoveGroup( gws->name() );
   }
   else
   {
     gws = boost::make_shared<API::WorkspaceGroup>();
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<API::Workspace>(gws));
   }
-  gws->observeADSNotifications( false ); // Prevent sending unnecessary notifications
 
   //populate m_validSets
   int nvalidSets = 4;
@@ -390,7 +356,6 @@ void LoadSassena::exec()
       this->g_log.information("Dataset "+setName+" not present in file");
   }// end of iterate over the valid sets
 
-  gws->observeADSNotifications( true ); // Restore notification sending
   H5Fclose(h5file);
 } // end of LoadSassena::exec()
 

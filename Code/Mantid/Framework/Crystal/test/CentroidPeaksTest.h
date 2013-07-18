@@ -97,7 +97,6 @@ public:
         el += TofEvent(5844.+10.*(((*gens[0])()+(*gens[0])()+(*gens[0])())*2.-3.), run_start+double(i));
       }
     }
-    retVal->doneAddingEventLists();
 
     /// Clean up the generators
     for (size_t d=0; d<nd; ++d)
@@ -159,7 +158,7 @@ public:
 
     // Create the peaks workspace
     PeaksWorkspace_sptr pkws(new PeaksWorkspace());
-    pkws->setName("TOPAZ");
+    //pkws->setName("TOPAZ");
 
     // Create a single peak on that particular detector
     Peak PeakObj(in_ws->getInstrument(),5050,2.,V3D(1,1,1));

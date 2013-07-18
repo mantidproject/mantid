@@ -84,6 +84,17 @@ namespace Mantid
     try
     {
       Kernel::DynamicFactory<Algorithm>::unsubscribe(key);
+      // Update version map accordingly
+      VersionMap::iterator it = m_vmap.find(algorithmName);
+      if(it != m_vmap.end())
+      {
+        int highest_version = it->second;
+        if(highest_version > 1 && version == highest_version) // Decrement the highest version
+        {
+          it->second -= 1;
+        }
+        else m_vmap.erase(algorithmName);
+      }
     }
     catch(Kernel::Exception::NotFoundError&)
     {
