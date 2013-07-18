@@ -1700,11 +1700,11 @@ void Indirect::sOfQwClicked()
     {
       pyInput += "importMatrixWorkspace(sqwOutput).plotGraph2D()\n";
     }
-    else if ( m_uiForm.sqw_cbPlotType->currentText() == "Specta" )
+    else if ( m_uiForm.sqw_cbPlotType->currentText() == "Spectra" )
     {
       pyInput +=
-        "nspec = mtd[sqwOuput].getNumberHistograms()\n"
-        "plotSpectra(sqwOutput, range(0, nspec)\n";
+        "nspec = mtd[sqwOutput].getNumberHistograms()\n"
+        "plotSpectrum(sqwOutput, range(0, nspec))\n";
     }
         
     QString pyOutput = runPythonCode(pyInput).trimmed();
