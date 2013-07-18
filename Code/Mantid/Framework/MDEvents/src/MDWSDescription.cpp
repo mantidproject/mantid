@@ -166,7 +166,9 @@ void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &So
 {
   m_InWS  = SourceMatrWS.m_InWS;
   m_Emode = SourceMatrWS.m_Emode;
+  m_LorentzCorr = SourceMatrWS.m_LorentzCorr;
   this->AlgID = SourceMatrWS.AlgID;
+  
 
   m_AddCoord.assign(SourceMatrWS.m_AddCoord.begin(),SourceMatrWS.m_AddCoord.end());
 
@@ -197,8 +199,9 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
   if(m_Emode==Kernel::DeltaEMode::Undefined)
     throw(std::invalid_argument("Workspace description has not been correctly defined, as emode has not been defined")); 
 
-
-  for(size_t i=0;i<m_NDims;i++)
+  //TODO: !!! Dim Unit currently have decorative name and is not used in real conversion.  It is just a name. This is why this check does not work 
+  // properly
+ /* for(size_t i=0;i<m_NDims;i++)
   {
       if(m_DimUnits[i] != NewMDWorkspaceD.m_DimUnits[i])
       {
@@ -206,7 +209,7 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
                                  " different from the requested: "+NewMDWorkspaceD.m_DimUnits[i]+
                                  "\n Either give a different worspace as the output, or change the OutputDimensions parameter.");
       }
-  }
+  }*/
 
 
   //TODO: More thorough checks may be nesessary to prevent adding different kind of workspaces e.g 4D |Q|-dE-T-P workspace to Q3d+dE ws
