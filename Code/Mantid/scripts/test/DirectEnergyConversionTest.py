@@ -235,7 +235,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         param = tReducer.get_default_parameter('ei-mon1-spec')
         self.assertTrue(isinstance(param,int))
 
-        param = tReducer.get_default_parameter('background')
+        param = tReducer.get_default_parameter('check_background')
         self.assertTrue(isinstance(param,bool))
 
         print "Instr_type :",type(tReducer.instrument)
