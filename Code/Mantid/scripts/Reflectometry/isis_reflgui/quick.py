@@ -12,8 +12,6 @@ from l2q import *
 from combineMulti import *
 #from mantidsimple import *  # Old API
 from mantid.simpleapi import *  # New API
-from mantidplot import *
-from PyQt4 import QtCore, uic
 from mantid.api import WorkspaceGroup
 import math
 import re
