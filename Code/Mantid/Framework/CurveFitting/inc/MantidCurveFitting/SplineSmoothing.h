@@ -52,14 +52,14 @@ namespace CurveFitting
 
     API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
 
-    void setSmoothingPoints(const boost::shared_ptr<CubicSpline> cspline,
+    void setSmoothingPoints(CubicSpline_const_sptr cspline,
         API::MatrixWorkspace_const_sptr inputWorkspace, size_t row) const;
 
-    void calculateSmoothing(const boost::shared_ptr<CubicSpline> cspline,
+    void calculateSmoothing(CubicSpline_const_sptr cspline,
       API::MatrixWorkspace_const_sptr inputWorkspace,
       API::MatrixWorkspace_sptr outputWorkspace, size_t row) const;
 
-    void calculateDerivatives(const boost::shared_ptr<CubicSpline> cspline,
+    void calculateDerivatives(CubicSpline_const_sptr cspline,
         API::MatrixWorkspace_const_sptr inputWorkspace,
         API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const;
   };

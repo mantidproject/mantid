@@ -139,7 +139,7 @@ namespace Mantid
       return workspace;
     }
 
-    void SplineInterpolation::setInterpolationPoints(const boost::shared_ptr<CubicSpline> cspline,
+    void SplineInterpolation::setInterpolationPoints(CubicSpline_const_sptr cspline,
         MatrixWorkspace_const_sptr inputWorkspace) const
     {
       const auto & xIn = inputWorkspace->readX(0);
@@ -156,7 +156,7 @@ namespace Mantid
       }
     }
 
-    void SplineInterpolation::calculateSpline(const boost::shared_ptr<CubicSpline> cspline,
+    void SplineInterpolation::calculateSpline(CubicSpline_const_sptr cspline,
         MatrixWorkspace_const_sptr inputWorkspace, MatrixWorkspace_sptr outputWorkspace, int order) const
     {
       //setup input parameters

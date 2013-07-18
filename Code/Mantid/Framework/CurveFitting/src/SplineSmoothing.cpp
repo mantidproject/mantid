@@ -184,7 +184,7 @@ namespace CurveFitting
     return workspace;
   }
 
-  void SplineSmoothing::calculateSmoothing(const boost::shared_ptr<CubicSpline> cspline,
+  void SplineSmoothing::calculateSmoothing(CubicSpline_const_sptr cspline,
       MatrixWorkspace_const_sptr inputWorkspace,
       MatrixWorkspace_sptr outputWorkspace, size_t row) const
   {
@@ -198,7 +198,7 @@ namespace CurveFitting
     cspline->function1D(yValues, xValues, nData);
   }
 
-  void SplineSmoothing::calculateDerivatives(const boost::shared_ptr<CubicSpline> cspline,
+  void SplineSmoothing::calculateDerivatives(CubicSpline_const_sptr cspline,
       API::MatrixWorkspace_const_sptr inputWorkspace,
       API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const
   {
@@ -210,7 +210,7 @@ namespace CurveFitting
       cspline->derivative1D(yValues, xValues, nData, order);
   }
 
-  void SplineSmoothing::setSmoothingPoints(const boost::shared_ptr<CubicSpline> cspline,
+  void SplineSmoothing::setSmoothingPoints(CubicSpline_const_sptr cspline,
       MatrixWorkspace_const_sptr inputWorkspace, size_t row) const
   {
       //define the spline's parameters

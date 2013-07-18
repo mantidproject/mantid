@@ -49,10 +49,10 @@ namespace CurveFitting
 
     API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
 
-    void setInterpolationPoints(const boost::shared_ptr<CubicSpline> cspline,
+    void setInterpolationPoints(CubicSpline_const_sptr cspline,
         API::MatrixWorkspace_const_sptr inputWorkspace) const;
 
-    void calculateSpline(const boost::shared_ptr<CubicSpline> cspline,
+    void calculateSpline(CubicSpline_const_sptr cspline,
         API::MatrixWorkspace_const_sptr inputWorkspace,
         API::MatrixWorkspace_sptr outputWorkspace, int order) const;
   };

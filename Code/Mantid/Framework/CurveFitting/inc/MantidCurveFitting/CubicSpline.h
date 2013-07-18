@@ -114,6 +114,7 @@ namespace Mantid
 
 
     typedef boost::shared_ptr<CubicSpline> CubicSpline_sptr;
+    typedef const boost::shared_ptr<CubicSpline> CubicSpline_const_sptr;
 
   } // namespace CurveFitting
 } // namespace Mantid
