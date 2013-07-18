@@ -307,14 +307,12 @@ namespace MantidQt
         size_t numToCheck(ids.size());
         if (numToCheck > 20) // arbitrary cutoff
           numToCheck = 20;
-        bool hasRectDet(false);
         const std::string RECT_DET("RectangularDetector");
         for (size_t i = 0; i < numToCheck; ++i)
         {
           boost::shared_ptr<const Mantid::Geometry::IComponent> component = instr->getDetector(ids[i]);
           if (component->type().compare(RECT_DET) == 0)
           {
-            hasRectDet = true;
             break;
           }
           else
@@ -322,7 +320,6 @@ namespace MantidQt
             component = component->getParent();
             if (component->type().compare(RECT_DET) == 0)
             {
-              hasRectDet = true;
               break;
             }
           }
