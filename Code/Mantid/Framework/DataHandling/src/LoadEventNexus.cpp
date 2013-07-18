@@ -375,7 +375,9 @@ public:
     // but don't call if more than 15% of memory is still available, since that slows down the loading.
     MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
 
+#ifndef _WIN32
     alg->getLogger().debug() << "Time to process " << entry_name << " " << m_timer << "\n";
+#endif
   }
 
 
