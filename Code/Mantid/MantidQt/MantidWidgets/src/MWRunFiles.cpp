@@ -640,6 +640,16 @@ void MWRunFiles::setNumberOfEntries(const int number)
   }
 }
 
+/** Inform the widget of a running instance of MonitorLiveData to be used in stopLiveListener().
+ *  Note that the type passed in is IAlgorithm and that no check is made that it actually refers
+ *  to an instance of MonitorLiveData.
+ *  @param monitorLiveData The running algorithm
+ */
+void MWRunFiles::setLiveAlgorithm(const IAlgorithm_sptr& monitorLiveData)
+{
+  m_monitorLiveData = monitorLiveData;
+}
+
 /** 
 * Set the file text.  This is different to setText in that it emits findFiles, as well
 * changing the state of the text box widget to "modified = true" which is a prerequisite
@@ -689,6 +699,21 @@ void MWRunFiles::findFiles()
     // Make sure errors are correctly set if we didn't run
     inspectThreadResult();
   }
+}
+
+/** Calls cancel on a running instance of MonitorLiveData.
+ *  Requires that a handle to the MonitorLiveData instance has been set via setLiveListener()
+ *  @return A handle to the cancelled algorithm (usable if the method is called directly)
+ */
+IAlgorithm_const_sptr MWRunFiles::stopLiveAlgorithm()
+{
+  IAlgorithm_const_sptr theAlgorithmBeingCancelled = m_monitorLiveData;
+  if ( m_monitorLiveData && m_monitorLiveData->isRunning() )
+  {
+    m_monitorLiveData->cancel();
+    m_monitorLiveData.reset();
+  }
+  return theAlgorithmBeingCancelled;
 }
 
 /**

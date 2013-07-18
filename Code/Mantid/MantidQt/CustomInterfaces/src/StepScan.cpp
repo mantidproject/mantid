@@ -35,7 +35,7 @@ StepScan::StepScan(QWidget *parent)
 StepScan::~StepScan()
 {
   // Stop live data collection, if running
-  stopLiveListener();
+  m_uiForm.mWRunFiles->stopLiveAlgorithm();
   // Disconnect the observers for the mask workspace combobox
   AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
   AnalysisDataService::Instance().notificationCenter.removeObserver(m_replObserver);
@@ -99,7 +99,7 @@ void StepScan::triggerLiveListener(bool checked)
   }
   else
   {
-    stopLiveListener();
+    m_uiForm.mWRunFiles->stopLiveAlgorithm();
     cleanupWorkspaces();
   }
 }
@@ -120,23 +120,11 @@ void StepScan::startLiveListener()
   startLiveData->execute();
 
   // Keep track of the algorithm that's pulling in the live data
-  m_monitorLiveData = startLiveData->getProperty("MonitorLiveData");
+  m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
   setupOptionControls();
 
   QApplication::restoreOverrideCursor();
-}
-
-IAlgorithm_sptr StepScan::stopLiveListener()
-{
-  // TODO: Make return type IAlgorithm_const_sptr (requires ticket #6811)
-  IAlgorithm_sptr theAlgorithmBeingCancelled = m_monitorLiveData;
-  if (m_monitorLiveData)
-  {
-    m_monitorLiveData->cancel();
-    m_monitorLiveData.reset();
-  }
-  return theAlgorithmBeingCancelled;
 }
 
 void StepScan::loadFile()
@@ -345,7 +333,7 @@ void StepScan::runStepScanAlg()
 void StepScan::runStepScanAlgLive(std::string stepScanProperties)
 {
   // First stop the currently running live algorithm
-  IAlgorithm_sptr oldMonitorLiveData = stopLiveListener();
+  IAlgorithm_const_sptr oldMonitorLiveData = m_uiForm.mWRunFiles->stopLiveAlgorithm();
 
   stepScanProperties.erase(0,stepScanProperties.find_first_of('(')+1);
   stepScanProperties.erase(stepScanProperties.find_last_of(')'));
@@ -362,13 +350,13 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
   startLiveData->setProperty("AccumulationWorkspace",m_inputWSName);
   startLiveData->setProperty("OutputWorkspace",m_tableWSName);
   // The previous listener needs to finish before this one can start
-  while ( oldMonitorLiveData->isRunning() ) // TODO: Can we get a signal for this?
+  while ( oldMonitorLiveData->isRunning() )
   {
     Poco::Thread::sleep(200);
   }
   startLiveData->execute();
   // Keep track of the algorithm that's pulling in the live data
-  m_monitorLiveData = startLiveData->getProperty("MonitorLiveData");
+  m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
   AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
   connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),

@@ -10,6 +10,9 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QThread>
+#include <boost/shared_ptr.hpp>
+
+namespace Mantid { namespace API { class IAlgorithm; } }
 
 namespace MantidQt
 {
@@ -155,11 +158,11 @@ namespace MantidQt
       LiveButtonOpts liveButtonState() const;
       void liveButtonState(const LiveButtonOpts);
 
+      // Standard setters/getters
       bool liveButtonIsChecked() const;
       bool isEmpty() const;
       QString getText() const;
 
-      // Standard setters/getters
       bool isValid() const;
       QStringList getFilenames() const;
       QString getFirstFilename() const;
@@ -181,6 +184,8 @@ namespace MantidQt
       void saveSettings(const QString & group);
       /// Alters the text label that contains the number of entries, normally run when the file is loaded
       void setNumberOfEntries(const int number);
+      /// Inform the widget of a running instance of MonitorLiveData to be used in stopLiveListener()
+      void setLiveAlgorithm(const boost::shared_ptr<Mantid::API::IAlgorithm>& monitorLiveData);
 
     signals:
       /// Emitted when the file text changes
@@ -203,6 +208,7 @@ namespace MantidQt
       void setFileTextWithoutSearch(const QString & text);
       /// Find the files within the text edit field and cache their full paths
       void findFiles();
+      boost::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();
 
     private:
       /// Create a file filter from a list of extensions
@@ -249,6 +255,8 @@ namespace MantidQt
       bool m_extsAsSingleOption;
       /// If or when live button will be shown
       LiveButtonOpts m_liveButtonState;
+      /// Handle on a running instance of MonitorLiveData
+      boost::shared_ptr<Mantid::API::IAlgorithm> m_monitorLiveData;
 
       /// The Ui form
       Ui::MWRunFiles m_uiForm;
