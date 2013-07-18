@@ -39,8 +39,13 @@ class DgsReductionScripter(BaseReductionScripter):
                     pass
                     
                     
-        
-        script = "from mantid.simpleapi import *\n"
+        out_dir_line=""
+        script = "# DGS reduction script\n"
+        script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
+            
+        script += "import mantid\n"
+        script += "import os\n"
+        script += "from mantid.simpleapi import *\n"        
         script += "config['default.facility']=\"%s\"\n" % self.facility_name
         script += "\n"
         script += 'DGS_input_data=Load("'+data_list+'")\n'
@@ -49,19 +54,26 @@ class DgsReductionScripter(BaseReductionScripter):
         for item in self._observers:
             if item.state() is not None:
                 for subitem in str(item.state()).split('\n'):
-                    if len(subitem) and subitem.find("SampleInputFile")==-1:
+                    if len(subitem) and subitem.find("SampleInputFile")==-1 and subitem.find("OutputDirectory")==-1:
                         script += DgsReductionScripter.WIDTH + subitem + "\n"
+                    elif len(subitem) and subitem.find("OutputDirectory")!=-1:
+                        out_dir_line=subitem.strip(',')+"\n"
         script += DgsReductionScripter.WIDTH_END + ")\n"
         script += "\n"
+        
+        if len(out_dir_line)==0:
+            output_dir=mantid.config['defaultsave.directory']
+            out_dir_line='OutputDirectory="%s"\n'%output_dir
+        
+        script += out_dir_line
 
-        output_dir=mantid.config['defaultsave.directory']
         filenames=self.filenameParser(data_list)
         if len(filenames)==1:
-            script += "OutputFilename=os.path.join('"+output_dir+ "',DGS_output_data[0].getInstrument().getName()+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
+            script += "OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrument().getName()+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
             script += 'SaveNexus(DGS_output_data[0],OutputFilename)\n'
         else:
             script += "for i in range("+str(len(filenames))+"):\n"
-            script += DgsReductionScripter.WIDTH+"OutputFilename=os.path.join('"+output_dir+ "',DGS_output_data[0][i].getInstrument().getName()+str(DGS_output_data[0][i].getRunNumber())+'.nxs')\n"
+            script += DgsReductionScripter.WIDTH+"OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0][i].getInstrument().getName()+str(DGS_output_data[0][i].getRunNumber())+'.nxs')\n"
             script += DgsReductionScripter.WIDTH+'SaveNexus(DGS_output_data[0][i],OutputFilename)\n'
 
 
@@ -88,11 +100,8 @@ class DgsReductionScripter(BaseReductionScripter):
         
         data_files = self.filenameParser(data_list)                    
         scripts = []
-        output_dir=mantid.config['defaultsave.directory']
-        
-        if  not os.path.isdir(output_dir):
-            raise RuntimeError("Default save path is not set")
-        
+
+        out_dir_line=""
         for data_file in data_files:
             script = "# DGS reduction script\n"
             script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
@@ -104,18 +113,27 @@ class DgsReductionScripter(BaseReductionScripter):
 
             
             script += "\n"
-            script +=  "processed=%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
-            script+=DgsReductionScripter.WIDTH + 'SampleInputFile="'+data_file+'",\n'
+
+            script += 'DGS_input_data=Load("'+data_file+'")\n'
+            script +=  "DGS_output_data=%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
+            script += DgsReductionScripter.WIDTH + 'SampleInputWorkspace=DGS_input_data,\n'
             for item in self._observers:
                 if item.state() is not None:
                     for subitem in str(item.state()).split('\n'):
-                        if len(subitem) and subitem.find("SampleInputFile")==-1:
+                        if len(subitem) and subitem.find("SampleInputFile")==-1 and subitem.find("OutputDirectory")==-1:
                             script += DgsReductionScripter.WIDTH + subitem + "\n"
+                        elif len(subitem) and subitem.find("OutputDirectory")!=-1:
+                            out_dir_line=subitem.strip(',')+"\n"
             script += DgsReductionScripter.WIDTH_END + ")\n"
-            
-            script +="\n"
-            script +="OutputFilename=os.path.join('"+output_dir+ "',processed[0].getInstrument().getName()+str(processed[0].getRunNumber())+'.nxs')\n"
-            script +="SaveNexus(processed[0],OutputFilename)\n"
+             
+            script +="\n"        
+            if len(out_dir_line)==0:
+                output_dir=mantid.config['defaultsave.directory']
+                out_dir_line='OutputDirectory="%s"\n'%output_dir        
+            script += out_dir_line
+
+            script +="OutputFilename=os.path.join(OutputDirectory,DGS_output_data[0].getInstrument().getName()+str(DGS_output_data[0].getRunNumber())+'.nxs')\n"
+            script +="SaveNexus(DGS_output_data[0],OutputFilename)\n"
    
             scripts.append(script)
             

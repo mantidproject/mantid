@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'Code/Mantid/scripts/Interface/ui/inelastic/dgs_sample_setup.ui'
+# Form implementation generated from reading ui file './dgs_sample_setup.ui'
 #
-# Created: Wed Jul 17 16:58:27 2013
+# Created: Thu Jul 18 11:48:15 2013
 #      by: PyQt4 UI code generator 4.9.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -288,6 +288,8 @@ class Ui_Frame(object):
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_label.setText(QtGui.QApplication.translate("Frame", "Sample Data", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_edit.setToolTip(QtGui.QApplication.translate("Frame", "Data runs to be processed", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Dtata runs to be processed", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.output_ws_label.setText(QtGui.QApplication.translate("Frame", "Output Workspace Name", None, QtGui.QApplication.UnicodeUTF8))
         self.detcal_label.setText(QtGui.QApplication.translate("Frame", "DetCal File", None, QtGui.QApplication.UnicodeUTF8))
@@ -304,14 +306,24 @@ class Ui_Frame(object):
         self.label_2.setText(QtGui.QApplication.translate("Frame", "and", None, QtGui.QApplication.UnicodeUTF8))
         self.et_range_box.setTitle(QtGui.QApplication.translate("Frame", "Energy Transfer Range (meV)", None, QtGui.QApplication.UnicodeUTF8))
         self.etr_low_label.setText(QtGui.QApplication.translate("Frame", "Low", None, QtGui.QApplication.UnicodeUTF8))
+        self.etr_low_edit.setToolTip(QtGui.QApplication.translate("Frame", "Minimum energy transfer in the output file", None, QtGui.QApplication.UnicodeUTF8))
+        self.etr_low_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Minimum energy transfer in the output file", None, QtGui.QApplication.UnicodeUTF8))
         self.etr_width_label.setText(QtGui.QApplication.translate("Frame", "Width", None, QtGui.QApplication.UnicodeUTF8))
         self.etr_high_label.setText(QtGui.QApplication.translate("Frame", "High", None, QtGui.QApplication.UnicodeUTF8))
+        self.etr_high_edit.setToolTip(QtGui.QApplication.translate("Frame", "Maximum energy transfer in the output file", None, QtGui.QApplication.UnicodeUTF8))
+        self.etr_high_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Maximum energy transfer in the output file", None, QtGui.QApplication.UnicodeUTF8))
         self.et_is_distribution_cb.setText(QtGui.QApplication.translate("Frame", "S(Phi, E) is distribution", None, QtGui.QApplication.UnicodeUTF8))
         self.hardmask_label.setText(QtGui.QApplication.translate("Frame", "Hard Mask", None, QtGui.QApplication.UnicodeUTF8))
+        self.hardmask_edit.setToolTip(QtGui.QApplication.translate("Frame", "Name of the hard mask file", None, QtGui.QApplication.UnicodeUTF8))
+        self.hardmask_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Name of the hard mask file", None, QtGui.QApplication.UnicodeUTF8))
         self.hardmask_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.grouping_label.setText(QtGui.QApplication.translate("Frame", "Grouping", None, QtGui.QApplication.UnicodeUTF8))
+        self.grouping_edit.setToolTip(QtGui.QApplication.translate("Frame", "Name of the grouping file", None, QtGui.QApplication.UnicodeUTF8))
+        self.grouping_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Name of the grouping file", None, QtGui.QApplication.UnicodeUTF8))
         self.grouping_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.show_workspaces_cb.setText(QtGui.QApplication.translate("Frame", "Show Intermediate Workspaces", None, QtGui.QApplication.UnicodeUTF8))
         self.savedir_label.setText(QtGui.QApplication.translate("Frame", "Save to folder", None, QtGui.QApplication.UnicodeUTF8))
+        self.savedir_edit.setToolTip(QtGui.QApplication.translate("Frame", "Folder where output data is going to be saved", None, QtGui.QApplication.UnicodeUTF8))
+        self.savedir_edit.setStatusTip(QtGui.QApplication.translate("Frame", "Folder where output data is going to be saved", None, QtGui.QApplication.UnicodeUTF8))
         self.savedir_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
 

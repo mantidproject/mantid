@@ -28,6 +28,7 @@ class SampleSetupScript(BaseScriptElement):
     hardmask_file = ""
     grouping_file = ""
     show_workspaces = False
+    savedir = ""
     
     def __init__(self, inst_name):
         super(SampleSetupScript, self).__init__()
@@ -78,6 +79,8 @@ class SampleSetupScript(BaseScriptElement):
             script += "GroupingFile=\"%s\",\n" % self.grouping_file
         if self.show_workspaces:
             script += "ShowIntermediateWorkspaces=%s,\n" % self.show_workspaces
+        if self.savedir != SampleSetupScript.savedir:
+            script += "OutputDirectory=\"%s\",\n" % self.savedir       
         return script
         
     def to_xml(self):
@@ -103,6 +106,7 @@ class SampleSetupScript(BaseScriptElement):
         xml += "  <hardmask_file>%s</hardmask_file>\n" % self.hardmask_file
         xml += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
         xml += "  <show_workspaces>%s</show_workspaces>\n" % self.show_workspaces
+        xml += "  <savedir>%s</savedir>\n" % self.savedir
         xml += "</SampleSetup>\n"
         return xml
     
@@ -163,6 +167,9 @@ class SampleSetupScript(BaseScriptElement):
             self.show_workspaces = BaseScriptElement.getBoolElement(instrument_dom,
                                                                     "show_workspaces",
                                                                     default=SampleSetupScript.show_workspaces)
+            self.savedir = BaseScriptElement.getStringElement(instrument_dom,
+                                                                    "savedir",
+                                                                    default=SampleSetupScript.savedir)
 
     def reset(self):
         """
@@ -185,4 +192,5 @@ class SampleSetupScript(BaseScriptElement):
         self.hardmask_file = SampleSetupScript.hardmask_file
         self.grouping_file = SampleSetupScript.grouping_file
         self.show_workspaces = SampleSetupScript.show_workspaces
-        
+        self.savedir = SampleSetupScript.savedir
+

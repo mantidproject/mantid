@@ -36,7 +36,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="sample_edit"/>
+      <widget class="QLineEdit" name="sample_edit">
+       <property name="toolTip">
+        <string>Data runs to be processed</string>
+       </property>
+       <property name="statusTip">
+        <string>Dtata runs to be processed</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="sample_browse">
@@ -410,6 +417,12 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>Minimum energy transfer in the output file</string>
+          </property>
+          <property name="statusTip">
+           <string>Minimum energy transfer in the output file</string>
+          </property>
          </widget>
         </item>
         <item>
@@ -443,6 +456,12 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Maximum energy transfer in the output file</string>
+          </property>
+          <property name="statusTip">
+           <string>Maximum energy transfer in the output file</string>
           </property>
          </widget>
         </item>
@@ -520,7 +539,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="hardmask_edit"/>
+      <widget class="QLineEdit" name="hardmask_edit">
+       <property name="toolTip">
+        <string>Name of the hard mask file</string>
+       </property>
+       <property name="statusTip">
+        <string>Name of the hard mask file</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="hardmask_browse">
@@ -563,7 +589,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="grouping_edit"/>
+      <widget class="QLineEdit" name="grouping_edit">
+       <property name="toolTip">
+        <string>Name of the grouping file</string>
+       </property>
+       <property name="statusTip">
+        <string>Name of the grouping file</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="grouping_browse">
@@ -636,7 +669,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="savedir_edit"/>
+      <widget class="QLineEdit" name="savedir_edit">
+       <property name="toolTip">
+        <string>Folder where output data is going to be saved</string>
+       </property>
+       <property name="statusTip">
+        <string>Folder where output data is going to be saved</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="savedir_browse">
