@@ -81,7 +81,7 @@ namespace Mantid
       wsValidator->add<API::HistogramValidator>();
       declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Direction::Input,wsValidator),
         "The input workspace, which must be in Energy Transfer");
-      declareProperty(new FileProperty("Filename","", FileProperty::Save),
+      declareProperty(new FileProperty("Filename","", FileProperty::Save,".spe"),
         "The filename to use for the saved data");
     }
 
