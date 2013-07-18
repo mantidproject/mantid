@@ -47,7 +47,6 @@ namespace Mantid
     int LoadEmptyInstrument::confidence(Kernel::FileDescriptor & descriptor) const
     {
       const std::string & filePath = descriptor.filename();
-      const size_t filenameLength = filePath.size();
 
       int confidence(0);
       if(descriptor.isAscii()) // Only consider an Ascii file
