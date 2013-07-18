@@ -101,7 +101,7 @@ namespace Mantid
       /// Takes as input a string and try to determine what type it is
       kind classify(const std::string& s) const;
 
-      /// convert string to lower case
+      /// Convert string to lower case
       std::string stringToLower(std::string strToConvert);
 
       /// Checks if the file is an ASCII file
@@ -119,12 +119,13 @@ namespace Mantid
       /// Check for SNS-style text file
       bool SNSTextFormatColumns(const std::string& str, std::vector<double> & out) const;
 
-      /// create timeseries property from .log file and adds taht to sample object
+      /// Create timeseries property from .log file and adds that to sample object
       std::set<std::string> createthreecolumnFileLogProperty(const std::string& logfile, API::Run& run);
 
-      /// if a file with the second column(block column) name in .log file exists in the raw file directory
+      /// If a file with the second column(block column) name in .log file exists in the raw file directory
       bool blockcolumnFileExists(const std::string& fileName);
 
+      /// Loads two column log file data into local workspace
       void loadTwoColumnLogFile(std::string names);
 
       /// TimeSeriesProperty<int> containing data periods. Created by LogParser
