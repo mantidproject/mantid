@@ -39,8 +39,6 @@ namespace MDAlgorithms
     /// Run the algorithm
     void exec();
 
-    double f_eval (double x, boost::shared_ptr<const API::CompositeFunction> fun);
-
     template<typename MDE, size_t nd>
     void integrate(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 

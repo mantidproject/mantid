@@ -125,26 +125,26 @@ public:
     AnalysisDataService::Instance().add("IntegratePeaksMDTest_peaks",peakWS0);
 
     // ------------- Integrating with cylinder ------------------------
-    doRun(1.0,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true);
+    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true);
 
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
     std::string fnct = "Gaussian";
-    doRun(1.0,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
-
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 1000.0, 1e-2);
+    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+    // More accurate integration changed values
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 0.5738, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(0.5738), 1e-2);
     fnct = "ConvolutionBackToBackGaussian";
-    doRun(1.0,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
+    doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
 
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 1000.0, 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 1.2017, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(1000.0), 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(1.2017), 1e-2);
     /*fnct = "ConvolutionExpGaussian";
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
 

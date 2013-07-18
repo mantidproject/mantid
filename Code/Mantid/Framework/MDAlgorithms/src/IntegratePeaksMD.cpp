@@ -66,6 +66,7 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 
 *WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidMDAlgorithms/GSLFunctions.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -219,12 +220,10 @@ namespace MDAlgorithms
     double cylinderLength = getProperty("CylinderLength");
     Workspace2D_sptr wsProfile2D,wsFit2D,wsDiff2D;
     size_t numSteps = 0;
-    double deltaQ = 0.0;
     bool cylinderBool = getProperty("Cylinder");
     if (cylinderBool)
     {
         numSteps = 100;
-        deltaQ = cylinderLength/static_cast<double>(numSteps-1);
         size_t histogramNumber = peakWS->getNumberPeaks();
         Workspace_sptr wsProfile= WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,numSteps,numSteps);
         wsProfile2D = boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
@@ -393,7 +392,7 @@ namespace MDAlgorithms
 			ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(PeakRadius), static_cast<coord_t>(cylinderLength), signal, errorSquared, signal_fit);
 			for (size_t j = 0; j < numSteps; j++)
 			{
-				 wsProfile2D->dataX(i)[j] = static_cast<double>(j) * deltaQ; //-0.5*backgroundCylinder
+				 wsProfile2D->dataX(i)[j] = static_cast<double>(j);
 				 wsProfile2D->dataY(i)[j] = signal_fit[j];
 				 wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
 			}
@@ -409,7 +408,7 @@ namespace MDAlgorithms
 				ws->getBox()->integrateCylinder(cylinder, static_cast<coord_t>(BackgroundOuterRadius), static_cast<coord_t>(backgroundCylinder), bgSignal, bgErrorSquared, signal_fit);
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					 wsProfile2D->dataX(i)[j] = static_cast<double>(j) * deltaQ; //-0.5*backgroundCylinder
+					 wsProfile2D->dataX(i)[j] = static_cast<double>(j);
 					 wsProfile2D->dataY(i)[j] = signal_fit[j];
 					 wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
 				}
@@ -455,7 +454,7 @@ namespace MDAlgorithms
 			{
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					 wsProfile2D->dataX(i)[j] = static_cast<double>(j) * deltaQ;  //-0.5*cylinderLength
+					 wsProfile2D->dataX(i)[j] = static_cast<double>(j);
 					 wsProfile2D->dataY(i)[j] = signal_fit[j];
 					 wsProfile2D->dataE(i)[j] = std::sqrt(signal_fit[j]);
 				}
@@ -490,23 +489,18 @@ namespace MDAlgorithms
 			}
 			else if (profileFunction.compare("ConvolutionExpGaussian") == 0)
 			{
-				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=250.0,B=0.0,X0="<<Centre<<",S="<<Sigma;
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=1.0,B=0.0,X0="<<Centre<<",S="<<Sigma;
 				fit_alg->setProperty("Ties", "f1.B=0.0");
 			}
 			else if (profileFunction.compare("ConvolutionBackToBackGaussian") == 0)
 			{
-				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=250.0,B=250.0,X0="<<Centre<<",S="<<Sigma;
+				fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=BackToBackExponential,I="<<peakHeight<<",A=1.0,B=1.0,X0="<<Centre<<",S="<<Sigma;
 			}
 			if (profileFunction.compare("NoFit") != 0)
 			{
 				fit_alg->setPropertyValue("Function", fun_str.str());
 				fit_alg->setProperty("InputWorkspace", wsProfile2D);
 				fit_alg->setProperty("WorkspaceIndex", i);
-				if (profileFunction.compare("ConvolutionExpGaussian") == 0)
-				{
-			        fit_alg->setProperty("StartX", Centre - 5.0 * Sigma);
-			        fit_alg->setProperty("EndX", Centre + 5.0 * Sigma);
-				}
 				fit_alg->setProperty("CreateOutput", true);
 				fit_alg->setProperty("Output", plot_str.str());
 
@@ -547,20 +541,31 @@ namespace MDAlgorithms
 				IFunction_sptr ifun = fit_alg->getProperty("Function");
 				boost::shared_ptr<const CompositeFunction> fun = boost::dynamic_pointer_cast<const CompositeFunction>(ifun);
 				const Mantid::MantidVec& x = wsProfile2D->readX(i);
-				std::vector<double> yy;
 				wsFit2D->dataX(i) = x;
 				wsDiff2D->dataX(i) = x;
+				FunctionDomain1DVector domain(x);
+				FunctionValues yy(domain);
+				fun->function(domain, yy);
 				for (size_t j = 0; j < numSteps; j++)
 				{
-					double yyval = f_eval (x[j], fun);
-				    yy.push_back(yyval);
 					wsFit2D->dataY(i)[j] = yy[j];
 					wsDiff2D->dataY(i)[j] = yValues[j] - yy[j];
 				}
 
 				//Calculate intensity
-				signal = 0.0;
-				for (size_t j = 0; j < numSteps; j++) if ( !boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))signal+= yy[j];
+				gsl_integration_workspace * w
+				 = gsl_integration_workspace_alloc (1000);
+
+				double error;
+
+				gsl_function F;
+				F.function = &Mantid::MDAlgorithms::f_eval;
+				F.params = &fun;
+
+				gsl_integration_qags (&F, x[0], x[numSteps-1], 0, 1e-7, 1000,
+									 w, &signal, &error);
+
+				gsl_integration_workspace_free (w);
 				errorSquared = std::fabs(signal);
 			}
       	  }
@@ -651,8 +656,9 @@ namespace MDAlgorithms
     CALL_MDEVENT_FUNCTION(this->integrate, inWS);
   }
 
-  double IntegratePeaksMD::f_eval (double x, boost::shared_ptr<const CompositeFunction> fun)
+  double f_eval (double x, void * params)
   {
+	boost::shared_ptr<const API::CompositeFunction> fun = *(boost::shared_ptr<const API::CompositeFunction> *) params;
 	FunctionDomain1DVector domain(x);
 	FunctionValues yval(domain);
 	fun->function(domain, yval);
