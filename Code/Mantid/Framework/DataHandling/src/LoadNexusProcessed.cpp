@@ -986,7 +986,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   //Read necessary arrays from the file
   // Detector list contains a list of all of the detector numbers. If it not present then we can't update the spectra
   // map
-  int ndets(-1);
+  int ndets;
   boost::shared_array<int> det_list(new int);
   try
   {
