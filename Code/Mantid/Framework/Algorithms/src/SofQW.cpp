@@ -94,7 +94,6 @@ void SofQW::createInputProperties(API::Algorithm & alg)
 void SofQW::exec()
 {
   using namespace Geometry;
-  double efixed(-1000.);
 
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   // Do the full check for common binning
@@ -113,8 +112,7 @@ void SofQW::exec()
 
   // Get a pointer to the instrument contained in the workspace
   Instrument_const_sptr instrument = inputWorkspace->getInstrument();
-  // Get the parameter map
-  const ParameterMap& pmap = inputWorkspace->constInstrumentParameters();
+
   // Get the distance between the source and the sample (assume in metres)
   IObjComponent_const_sptr source = instrument->getSource();
   IObjComponent_const_sptr sample = instrument->getSample();
