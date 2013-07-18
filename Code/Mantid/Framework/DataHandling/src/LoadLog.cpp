@@ -125,7 +125,6 @@ void LoadLog::exec()
   Poco::File l_path( m_filename );
   if ( l_path.isDirectory() )
   {
-    g_log.error("In LoadLog: " + m_filename + " must be a filename not a directory.");
     throw Exception::FileError("Filename is a directory:" , m_filename);
   }
 
@@ -142,7 +141,7 @@ void LoadLog::exec()
     } // Otherwise we continue.
   }
 
-  //.if a .log file exists in the raw file directory
+  // Check if a three column log file exists. (Calculated using m_filename)
   std::string threecolumnLogfile = getThreeColumnName();
   if ( !threecolumnLogfile.empty() )
   {
@@ -150,15 +149,34 @@ void LoadLog::exec()
     return;
   }
 
+  // Get the log file names if provided.
+  std::vector<std::string> names = getProperty("Names");
+  //If there's more than one log name provided, then it's an invalid ISIS file.
+  if (names.size() > 1)
+  {
+    throw std::invalid_argument("More than one log name provided. Invalid ISIS log file.");
+    return;
+  }
+  // Otherwise, we load the ISIS log file.
+  loadTwoColumnLogFile(extractLogName(names));
+}
+
+/**
+ * Load an ISIS log file into the local workspace.
+ * @param logFileName :: The name of the log file to load.
+ */
+void LoadLog::loadTwoColumnLogFile(std::string logFileName)
+{
+  // Get the input workspace and retrieve run from workspace.
+  // the log file(s) will be loaded into the run object of the workspace
+  const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
+
   std::ifstream inLogFile(m_filename.c_str());
 
   if (!inLogFile)
   {
     g_log.warning("Unable to open file " + m_filename);
   }
-
-  // Now working with two column log files (ISIS)
-  std::string logFileName = getProperty("Names");
 
   // figure out if second column is a number or a string
   std::string aLine;
@@ -187,7 +205,7 @@ void LoadLog::exec()
 
     try
     {
-      Property* log = LogParser::createLogProperty(m_filename,stringToLower(extractLogName(logFileName)));
+      Property* log = LogParser::createLogProperty(m_filename,stringToLower(logFileName));
       if (log)
       {
         localWorkspace->mutableRun().addLogData(log);
@@ -199,25 +217,23 @@ void LoadLog::exec()
     }
   }
   inLogFile.close();
-  // operation was a success and ended normally
-  return;
 }
 
 /**
- * Check if log file property name has been set. If it has, then return it.
- * Otherwise we return the workspace name and log file name (e.g. HRP37129_ICPevent).
- * @param logName :: The name of the log file.
+ * Check if log file property name has been set. If not set, return the
+ * workspace + log file name (e.g. HRP37129_ICPevent). Otherwise return first log name.
+ * @param logName :: The vector containing log file names.
  * @return The name of the log file.
  */
-std::string LoadLog::extractLogName(std::string logName)
+std::string LoadLog::extractLogName(std::vector<std::string> logName)
 {
-  if(!logName.empty())
+  if(logName.empty())
   {
-    return (logName);
+    return (Poco::Path(Poco::Path(m_filename).getFileName()).getBaseName());
   }
   else
   {
-    return (Poco::Path(Poco::Path(m_filename).getFileName()).getBaseName());
+    return (logName.front());
   }
 }
 
