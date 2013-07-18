@@ -7,7 +7,6 @@
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Crystal::FilterPeaks;
 using namespace Mantid::API;
