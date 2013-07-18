@@ -7,11 +7,23 @@ from isis_reflgui import quick
 
 class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
     
+    __wsName = None
+    
+    
+    def __init__(self, methodName='runTest'):
+        super(ReflectometryQuickAuxiliaryTest, self).__init__(methodName)
+        self.__wsName = "TestWorkspace"
+        LoadISISNexus(Filename='POLREF00004699', OutputWorkspace=self.__wsName)
+    
+    def __del__(self):
+        DeleteWorkspace(mtd[self.__wsName])
+        
     
     def test_cleanup(self):
+        numObjectsOriginal = len(mtd.getObjectNames())
         todump =CreateSingleValuedWorkspace(OutputWorkspace='_toremove', DataValue=1, ErrorValue=1)
         tokeep =CreateSingleValuedWorkspace(OutputWorkspace='tokeep', DataValue=1, ErrorValue=1)
-        self.assertEqual(2, len(mtd.getObjectNames()))  
+        self.assertEqual(numObjectsOriginal+2, len(mtd.getObjectNames()))  
         # Should remove workspaces starting with _
         quick.cleanup()
         cleaned_object_names = mtd.getObjectNames()
@@ -59,39 +71,32 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
             DeleteWorkspace(outWS)
         
     def test_groupGet_instrument(self):
-        wsName = "TestWorkspace"
-        LoadISISNexus(Filename='POLREF00004699', OutputWorkspace=wsName)
         
         expectedInstrument = "POLREF"
         
         # Test with group workspace as input
-        instrument = quick.groupGet(wsName, 'inst')
+        instrument = quick.groupGet(self.__wsName, 'inst')
         self.assertEquals(expectedInstrument, instrument.getName(), "Did not fetch the instrument from ws group")
         
         # Test with single workspace as input
-        instrument = quick.groupGet(mtd[wsName][0].name(), 'inst')
+        instrument = quick.groupGet(mtd[self.__wsName][0].name(), 'inst')
         self.assertEquals(expectedInstrument, instrument.getName(), "Did not fetch the instrument from ws")
         
         DeleteWorkspace(mtd[wsName])
     
     def test_groupGet_histogram_count(self):
-        wsName = "TestWorkspace"
-        LoadISISNexus(Filename='POLREF00004699', OutputWorkspace=wsName)
-        expectedNHistograms = mtd[wsName][0].getNumberHistograms()
+        expectedNHistograms = mtd[self.__wsName][0].getNumberHistograms()
         
         # Test with group workspace as input
-        nHistograms = quick.groupGet(wsName, 'wksp')
+        nHistograms = quick.groupGet(self.__wsName, 'wksp')
         self.assertEquals(expectedNHistograms, nHistograms, "Did not fetch the n histograms from ws group")
         
         # Test with single workspace as input
-        nHistograms = quick.groupGet(mtd[wsName][0].name(), 'wksp')
+        nHistograms = quick.groupGet(mtd[self.__wsName][0].name(), 'wksp')
         self.assertEquals(expectedNHistograms, nHistograms, "Did not fetch the n histograms from ws")
         
-        DeleteWorkspace(mtd[wsName])
     
     def test_groupGet_log_single_value(self):
-        wsName = "TestWorkspace"
-        LoadISISNexus(Filename='POLREF00004699', OutputWorkspace=wsName)
         
         expectedNPeriods = 2
         
@@ -103,35 +108,28 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         nPeriods = quick.groupGet(mtd[wsName][0].name(), 'samp', 'nperiods')
         self.assertEquals(expectedNPeriods, nPeriods, "Did not fetch the number of periods from ws")
         
-        DeleteWorkspace(mtd[wsName])
+        DeleteWorkspace(mtd[self.__wsName])
         
     def test_groupGet_multi_value_log(self):
-        wsName = "TestWorkspace"
-        LoadISISNexus(Filename='POLREF00004699', OutputWorkspace=wsName)
-        
+
         # Expected start theta, taken from the last value of the time series log.
         expectedStartTheta = 0.4903 
         
         # Test with group workspace as input
-        stheta = quick.groupGet(wsName, 'samp', 'stheta')
+        stheta = quick.groupGet(self.__wsName, 'samp', 'stheta')
         self.assertEquals(expectedStartTheta, round(float(stheta), 4))
         
         # Test with single workspace as input
-        stheta = quick.groupGet(mtd[wsName][0].name(), 'samp', 'stheta')
+        stheta = quick.groupGet(mtd[self.__wsName][0].name(), 'samp', 'stheta')
         self.assertEquals(expectedStartTheta, round(float(stheta), 4))
         
-        DeleteWorkspace(mtd[wsName])
-        
     def test_groupGet_unknown_log_error_code(self):
-        wsName = "TestWorkspace"
-        LoadISISNexus(Filename='POLREF00004699', OutputWorkspace=wsName)
-        
         errorCode = 0
         # Test with group workspace as input
-        self.assertEquals(errorCode, quick.groupGet(wsName, 'samp','MADE-UP-LOG-NAME'))
+        self.assertEquals(errorCode, quick.groupGet(self.__wsName, 'samp','MADE-UP-LOG-NAME'))
         
         # Test with group workspace as input
-        self.assertEquals(errorCode, quick.groupGet(mtd[wsName][0].name(), 'samp','MADE-UP-LOG-NAME'))
+        self.assertEquals(errorCode, quick.groupGet(mtd[self.__wsName][0].name(), 'samp','MADE-UP-LOG-NAME'))
         
 
 if __name__ == '__main__':
