@@ -114,7 +114,7 @@ namespace IDA
   {
     using Mantid::Kernel::Exception::NotFoundError;
 
-    QString pyInput = "LoadNexus(r'" + filename + "', '" + wsname + "')";
+    QString pyInput = "LoadNexus(Filename=r'" + filename + "', OutputWorkspace='" + wsname + "')";
     runPythonCode(pyInput);
 
     MatrixWorkspace_const_sptr ws;
