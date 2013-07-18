@@ -203,8 +203,6 @@ namespace MantidQt
       void setFileTextWithoutSearch(const QString & text);
       /// Find the files within the text edit field and cache their full paths
       void findFiles();
-      /// Slot called when file finding thread has finished.
-      void inspectThreadResult();
 
     private:
       /// Create a file filter from a list of extensions
@@ -225,6 +223,8 @@ namespace MantidQt
       void browseClicked();
       /// currently checks only if the entry number is any integer > 0
       void checkEntry();
+      /// Slot called when file finding thread has finished.
+      void inspectThreadResult();
 
     private:
       /// Is the widget for run files or standard files
