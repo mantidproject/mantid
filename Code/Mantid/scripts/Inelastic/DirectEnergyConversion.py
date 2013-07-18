@@ -809,13 +809,11 @@ class DirectEnergyConversion(object):
         short_name = config.getFacility().instrument(new_name).shortName()
        except:
            # it is possible to have wrong facility:
-           facilities = config.getString('supported.facilities')
-           facilities = facilities.split(';')
-           for fac_name in facilities:
-               #config.setFacility(fac_name);
-               config.setString('default.facility',fac_name)
+           facilities = config.getFacilities()
+           for facility in facilities:
+               config.setString('default.facility',facility.name())
                try :
-                   short_name = config.getFacility().instrument(new_name).shortName()
+                   short_name = facility.instrument(new_name).shortName()
                    if len(short_name)>0 :
                        break
                except:
