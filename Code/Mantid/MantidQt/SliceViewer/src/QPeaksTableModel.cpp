@@ -336,8 +336,6 @@ namespace MantidQt
       // hide some columns based on the techniques
       { // shrink variable scope
         std::set<std::string> techniques = instrInfo.techniques();
-        // required for ???
-        const std::string SCD("Single Crystal Diffraction");
         // required for showing final and delta energy
         const std::string IGS("TOF Indirect Geometry Spectroscopy");
         // required for showing initial and delta energy
