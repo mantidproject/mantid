@@ -27,7 +27,7 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         # Should remove workspaces starting with _
         quick.cleanup()
         cleaned_object_names = mtd.getObjectNames()
-        self.assertEqual(1, len(cleaned_object_names))
+        self.assertEqual(numObjectsOriginal+1, len(cleaned_object_names))
         self.assertEqual(True, ('tokeep' in cleaned_object_names))
         
         DeleteWorkspace(tokeep)
@@ -82,7 +82,6 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         instrument = quick.groupGet(mtd[self.__wsName][0].name(), 'inst')
         self.assertEquals(expectedInstrument, instrument.getName(), "Did not fetch the instrument from ws")
         
-        DeleteWorkspace(mtd[wsName])
     
     def test_groupGet_histogram_count(self):
         expectedNHistograms = mtd[self.__wsName][0].getNumberHistograms()
@@ -101,14 +100,12 @@ class ReflectometryQuickAuxiliaryTest(unittest.TestCase):
         expectedNPeriods = 2
         
         # Test with group workspace as input
-        nPeriods = quick.groupGet(wsName, 'samp', 'nperiods')
+        nPeriods = quick.groupGet(self.__wsName, 'samp', 'nperiods')
         self.assertEquals(expectedNPeriods, nPeriods, "Did not fetch the number of periods from ws group")
         
         # Test with single workspace as input
-        nPeriods = quick.groupGet(mtd[wsName][0].name(), 'samp', 'nperiods')
+        nPeriods = quick.groupGet(mtd[self.__wsName][0].name(), 'samp', 'nperiods')
         self.assertEquals(expectedNPeriods, nPeriods, "Did not fetch the number of periods from ws")
-        
-        DeleteWorkspace(mtd[self.__wsName])
         
     def test_groupGet_multi_value_log(self):
 
