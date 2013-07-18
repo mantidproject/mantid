@@ -90,14 +90,9 @@
 </parameter>
 
 <!-- Remove the count rate seen in the regions of the histograms defined as the background regions -->
-<parameter name="background"  type="bool">
+<parameter name="check_background"  type="bool">
    <value val="False"/>
 </parameter>
-<!-- True if background is to be checked UNUSED PROPERTY !!! 
-<parameter name="check_background"  type="bool">
-  <value val="True"/>
-</parameter>
--->
 
 <!--  detector_van_range- integratin in E(mev) for detector(white beam) vanadium data [20,100] -->
 <parameter name="wb-integr-min">
@@ -350,6 +345,7 @@
        sum_runs=sum;
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass;
+       check_background = background;       
        mon1_norm_spec=norm-mon1-spec;
        scale_factor=scale-factor;
        wb_scale_factor=wb-scale-factor;

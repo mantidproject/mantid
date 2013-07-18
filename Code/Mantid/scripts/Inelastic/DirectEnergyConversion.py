@@ -368,7 +368,7 @@ class DirectEnergyConversion(object):
         
         # For event mode, we are going to histogram in energy first, then go back to TOF
         if (self.__facility == "SNS"):
-            if self.background == True:
+            if self.check_background== True:
                 # Extract the time range for the background determination before we throw it away
                 background_bins = "%s,%s,%s" % (self.bkgd_range[0] + bin_offset, (self.bkgd_range[1]-self.bkgd_range[0]), self.bkgd_range[1] + bin_offset)
                 Rebin(InputWorkspace=result_name,OutputWorkspace= "background_origin_ws",Params=background_bins)
@@ -416,7 +416,7 @@ class DirectEnergyConversion(object):
                         CopyInstrumentParameters(InputWorkspace=self.__det_cal_file_ws,OutputWorkspace=result_name)
                         self.log('_do_mono: Copying detectors positions complete','debug')
 
-        if self.background == True:
+        if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
             ConvertToDistribution(Workspace=result_name)    
             if (self.__facility == "SNS"):
