@@ -1584,8 +1584,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*5);
-
   // Make the thread pool
   ThreadScheduler * scheduler = new ThreadSchedulerMutexes();
   ThreadPool pool(scheduler);
@@ -1648,6 +1646,11 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
   // split banks up if the number of cores is more than twice the number of banks
   splitProcessing = bool(bankNames.size() * 2 < ThreadPool::getNumPhysicalCores());
+
+  // set up progress bar for the rest of the (multi-threaded) process
+  size_t numProg = bankNames.size() * (1 + 3); // 1 = disktask, 3 = proc task
+  if (splitProcessing) numProg += bankNames.size() * 3; // 3 = second proc task
+  Progress * prog2 = new Progress(this,0.3,1.0, numProg);
 
   for (size_t i=bank0; i < bankn; i++)
   {
