@@ -190,19 +190,16 @@ public:
     CubicSpline cspline;
 
     int nData = 10;
-    int testDataSize = 30;
+    int testDataSize = 10;
 
-    boost::scoped_array<double> x(new double[testDataSize]);
+    boost::scoped_array<double> x(new double[nData]);
     boost::scoped_array<double> refSet(new double[testDataSize]);
+    boost::scoped_array<double> testDataValues(new double[testDataSize]);
 
     setupCubicSpline(cspline, nData, 1);
-    generateDerviTestData(testDataSize, refSet, x, 0.3, 1);
+    generateDerviTestData(testDataSize, refSet, x, 1, 1);
 
-    FunctionDomain1DView* view = new FunctionDomain1DView(x.get(), testDataSize);
-    FunctionValues testDataValues(*view);
-    FunctionDomain* domain = dynamic_cast<FunctionDomain*>(view);
-
-    cspline.derivative(*domain, testDataValues, 1);
+    cspline.derivative1D(testDataValues.get(),x.get(),nData,1);
 
     //compare reference data with output data
     for (int i = 0; i < testDataSize; ++i)
@@ -234,7 +231,7 @@ private:
   //function which we wish to use to generate our corresponding y data
   double splineYFunction(double x)
   {
-    return sin((2 * M_PI / 18) * x) + 1;
+    return x*2;
   }
 
   //setup a CubicSpline class for testing

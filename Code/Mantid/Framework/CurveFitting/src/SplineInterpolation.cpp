@@ -117,20 +117,27 @@ namespace Mantid
     {
       if(workspace->isHistogramData())
       {
-        const auto & xValues = workspace->readX(0);
-        const auto & yValues = workspace->readY(0);
-        size_t size = xValues.size()-1;
+        size_t histNo = workspace->getNumberHistograms();
+        size_t size = workspace->readY(0).size();
 
         //make a new workspace for the point data
-        MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,1,size,size);
-        auto & newXValues = pointWorkspace->dataX(0);
-        auto & newYValues = pointWorkspace->dataY(0);
+        MatrixWorkspace_sptr pointWorkspace = WorkspaceFactory::Instance().create(workspace,histNo,size,size);
 
-        //take middle point of bin boundaries
-        for(size_t i = 0; i < size; ++i)
+        //loop over each histogram
+        for(size_t i=0; i < histNo; ++i)
         {
-          newXValues[i] = (xValues[i] + xValues[i+1])/2;
-          newYValues[i] = yValues[i];
+          const auto & xValues = workspace->readX(i);
+          const auto & yValues = workspace->readY(i);
+
+          auto & newXValues = pointWorkspace->dataX(i);
+          auto & newYValues = pointWorkspace->dataY(i);
+
+          //set x values to be average of bin bounds
+          for(size_t j = 0; j < size; ++j)
+          {
+            newXValues[j] = (xValues[j] + xValues[j+1])/2;
+            newYValues[j] = yValues[j];
+          }
         }
 
         return pointWorkspace;

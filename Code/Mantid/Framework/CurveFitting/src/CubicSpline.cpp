@@ -2,12 +2,13 @@
 
 This function interpolates between a set of data points.
 
-First and second derivatives can be calculated by using the derivative function.
+First and second derivatives can be calculated by using the derivative1D function.
 
-CubicSpline function has three attributes (non-fitting parameters). First is 'n' which has
+CubicSpline function has two sets of attributes. First is 'n' which has
 integer type and sets the number of interpolation points.
-The parameter names have the form 'yi' where 'A' is letter 'A' and 'i' is the
-parameter's index starting from 0.
+The parameter names have the form 'yi' where 'y' is letter 'y' and 'i' is the
+parameter's index starting from 0 and have the type double.
+Likewise, the attribute names have the form 'xi'.
 
  *WIKI*/
 

@@ -16,11 +16,9 @@ namespace Mantid
   namespace CurveFitting
   {
     /**
-    Implements cubic spline Interpolation.
 
-    Attributes: int n - number of interpolation points
-    Parameters: n
-
+    A wrapper around GSL functions implementing cubic spline interpolation.
+    This function can also calculate derivatives as a by product of the spline.
 
     @author Samuel Jackson, STFC
     @date 05/07/2013
