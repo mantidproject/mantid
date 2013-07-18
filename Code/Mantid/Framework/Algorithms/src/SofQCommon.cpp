@@ -5,10 +5,8 @@ namespace Mantid
   namespace Algorithms
   {
     /** The procedure analyses emode and efixed properties provided to the algorithm and identify the energy analysis mode and the way the properties are defined
-    @param workspace :: input workspace which may or may not have incident energy property (Ei) attached to it as the run log
-    @param hostAlgorithm :: the pointer to SofQ algorithm hosting the base class. This algorithm expects to have EMode and EFixed properties attached to it. 
-
-
+     *@param workspace     :: input workspace which may or may not have incident energy property (Ei) attached to it as the run log
+     *@param hostAlgorithm :: the pointer to SofQ algorithm hosting the base class. This algorithm expects to have EMode and EFixed properties attached to it.  
     */
     void SofQCommon::initCachedValues(API::MatrixWorkspace_const_sptr workspace, API::Algorithm *const hostAlgorithm)
     {
@@ -52,10 +50,6 @@ namespace Mantid
       }
     }
 
-
-  
-
-
     /**
      * Return the efixed for this detector. In Direct mode this has to be property set up earlier and in Indirect mode it may be the property of a component 
                                             if not specified globally for the instrument. 
@@ -83,6 +77,6 @@ namespace Mantid
       return efixed;
     }
 
-  
+ 
   }
 }
