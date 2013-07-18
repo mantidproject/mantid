@@ -166,14 +166,16 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    */
   void Run::setProtonCharge(const double charge)
   {
+    const std::string PROTON_CHARGE_UNITS("uA.hour");
     if( !hasProperty(PROTON_CHARGE_LOG_NAME) )
     {
-      addProperty(PROTON_CHARGE_LOG_NAME, charge, "uA.hour");
+      addProperty(PROTON_CHARGE_LOG_NAME, charge, PROTON_CHARGE_UNITS);
     }
     else
     {
       Kernel::Property *charge_prop = getProperty(PROTON_CHARGE_LOG_NAME);
       charge_prop->setValue(boost::lexical_cast<std::string>(charge));
+      charge_prop->setUnits(PROTON_CHARGE_UNITS);
     }
   }
 
