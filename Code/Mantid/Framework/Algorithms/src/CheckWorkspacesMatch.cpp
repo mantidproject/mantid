@@ -150,7 +150,6 @@ void CheckWorkspacesMatch::init()
   declareProperty(new WorkspaceProperty<Workspace>("Workspace2","",Direction::Input), "The name of the second input workspace.");
 
   declareProperty("Tolerance",0.0, "The maximum amount by which values may differ between the workspaces.");
-  declareProperty("ToleranceRelerr",false, "Treat tolerance as relative error rather then the absolute error");   
   
   declareProperty("CheckType",true, "Whether to check that the data types (Workspace2D vs EventWorkspace) match.");
   declareProperty("CheckAxes",true, "Whether to check that the axes match.");
@@ -158,10 +157,15 @@ void CheckWorkspacesMatch::init()
   declareProperty("CheckInstrument",true, "Whether to check that the instruments match. ");
   declareProperty("CheckMasking",true, "Whether to check that the bin masking matches. ");
   declareProperty("CheckSample",false, "Whether to check that the sample (e.g. logs).");    // Have this one false by default - the logs are brittle
-  declareProperty("CheckAllData",false, "Usually checking data ends wnen first mismatch occurs. This will force algorithm to check all data and print mismatch to debug log");    // Have this one false by default - it can be a lot of printing. 
-
   
   declareProperty("Result","",Direction::Output);
+
+  declareProperty("ToleranceRelErr",false, "Treat tolerance as relative error rather then the absolute error");   
+  declareProperty("CheckAllData",false, "Usually checking data ends when first mismatch occurs. This forces algorithm to check all data and print mismatch to the debug log.\n"\
+                                        "Very often such logs are huge so making it true should be the last option.");    // Have this one false by default - it can be a lot of printing. 
+
+  
+
 }
 
 void CheckWorkspacesMatch::exec()
