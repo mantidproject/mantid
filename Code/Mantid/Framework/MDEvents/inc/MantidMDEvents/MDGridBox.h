@@ -17,7 +17,9 @@ namespace Mantid
 namespace MDEvents
 {
 
+#ifndef __INTEL_COMPILER // As of July 13, the packing has no effect for the Intel compiler and produces a warning
 #pragma pack(push, 4) //Ensure the structure is no larger than it needs to
+#endif
 
   //===============================================================================================
   /** Templated class for a GRIDDED multi-dimensional event "box".
@@ -58,13 +60,13 @@ namespace MDEvents
     virtual void setFileBacked();
     virtual void clearFileBacked(bool loadDiskBackedData);
     void clear();
-    void clearDataFromMemory(){/*it seems works on boxes only though recursive clearing makes sence, not yet implemented*/};
+    void clearDataFromMemory(){/*it seems works on boxes only though recursive clearing makes sence, not yet implemented*/}
     /**Save the box at specific disk position using the class, respoinsible for the file IO. */
-    virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/)const
-    {/*Not saveable */};    
+    virtual void saveAt(API::IBoxControllerIO *const /* */,  uint64_t /*position*/) const
+    {/*Not saveable */}
     /**Load the box data of specified size from the disk location provided using the class, respoinsible for the file IO. */
     virtual void loadAndAddFrom(API::IBoxControllerIO *const /* */, uint64_t /*position*/, size_t /* Size */)
-    {/*Not directly loadable */};
+    {/*Not directly loadable */}
     //-------------------------------------------------------------------------------------------------------
     
     /** Uses the cached value of points stored in the grid box  
@@ -112,7 +114,7 @@ namespace MDEvents
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
-    void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {};
+    void generalBin(MDBin<MDE,nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const {}
 
     void integrateSphere(Mantid::API::CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 
@@ -121,19 +123,11 @@ namespace MDEvents
     void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const;
 
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
-    //void splitContentsById(size_t childId); // No definition causes a myriad of warnings on MSVC
 
     void splitAllIfNeeded(Kernel::ThreadScheduler * ts = NULL);
 
-    //void cacheChildrenToDisk(); // No definition causes a myriad of warnings on MSVC
-
     void refreshCache(Kernel::ThreadScheduler * ts = NULL);
 
-    //void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
-
-    // Set the box controller overrriden.
-    //virtual void setBoxController(Mantid::API::BoxController *controller);
- 
     virtual bool getIsMasked() const;
     ///Setter for masking the box
     virtual void mask();
@@ -146,18 +140,18 @@ namespace MDEvents
 
 
 //------------------------------------------------------------------------- 
-  /** The function used to satisfy IMDNode interface but the physical meaning is unclear */
-  void calculateCentroid(coord_t *  /*centroid*/) const
-  {
+    /** The function used to satisfy IMDNode interface but the physical meaning is unclear */
+    void calculateCentroid(coord_t *  /*centroid*/) const
+    {
       throw(std::runtime_error("This function should not be called on MDGridBox (as its meaning for MDbox is dubious too)"));
-  }
+    }
+
   public:
     /// Typedef for a shared pointer to a MDGridBox
     typedef boost::shared_ptr< MDGridBox<MDE, nd> > sptr;
 
     /// Typedef for a vector of MDBoxBase pointers
     typedef std::vector<MDBoxBase<MDE, nd>*> boxVector_t;
-
 
   private:
     /// Each dimension is split into this many equally-sized boxes
@@ -174,7 +168,7 @@ namespace MDEvents
      * to the nd-array.     */
     std::vector<MDBoxBase<MDE,nd> *> m_Children;
 
-   /** Length (squared) of the diagonal through every dimension = sum( boxSize[i]^2 )
+    /** Length (squared) of the diagonal through every dimension = sum( boxSize[i]^2 )
      * Used in some calculations like peak integration */
     coord_t diagonalSquared;
 
@@ -190,69 +184,16 @@ namespace MDEvents
     /**private default copy constructor as the only correct constructor is the one with box controller */
     MDGridBox(const MDGridBox<MDE, nd> & box);
     /**Private constructor as it does not work without box controller */
-    MDGridBox(){};
+    MDGridBox() {}
     /// common part of MDGridBox contstructor;
     void initGridBox();
-  public:
-
-    ////===============================================================================================
-    ////===============================================================================================
-    ///** Task for adding events to a MDGridBox. */
-    //class AddEventsTask : public Mantid::Kernel::Task
-    //{
-    //public:
-    //  /// Pointer to MDGridBox.
-    //  MDBoxBase<MDE, nd> * box;
-    //  /// Reference to the MD events that will be added
-    //  const std::vector<MDE> & events;
-    //  /// Where to start in vector
-    //  size_t start_at;
-    //  /// Where to stop in vector
-    //  size_t stop_at;
-    //  /// Progress report
-    //  Mantid::Kernel::ProgressBase * prog;
-
-    //  /** Ctor
-    //   *
-    //   * @param box :: Pointer to MDGridBox
-    //   * @param events :: Reference to the MD events that will be added
-    //   * @param start_at :: Where to start in vector
-    //   * @param stop_at :: Where to stop in vector
-    //   * @param prog :: ProgressReporting
-    //   * @return
-    //   */
-    //  AddEventsTask(MDBoxBase<MDE, nd> * box, const std::vector<MDE> & events,
-    //                const size_t start_at, const size_t stop_at, Mantid::Kernel::ProgressBase * prog)
-    //  : Mantid::Kernel::Task(),
-    //    box(box), events(events), start_at(start_at), stop_at(stop_at), prog(prog)
-    //  {
-    //  }
-
-    //  /// Add the events in the MDGridBox.
-    //  void run()
-    //  {
-    //    box->addEvents(events);
-    //    if (prog)
-    //    {
-    //      std::ostringstream out;
-    //      out << "Adding events " << start_at;
-    //      prog->report(out.str());
-    //    }
-    //  }
-    //};
-
-
-
   };
 
-
+#ifndef __INTEL_COMPILER
 #pragma pack(pop) //Return to default packing size
-
-
-
+#endif
 
 }//namespace MDEvents
-
 }//namespace Mantid
 
 #endif /* MDGRIDBOX_H_ */

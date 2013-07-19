@@ -361,21 +361,14 @@ public:
 
   }
 
-#ifdef _WIN32
-#pragma warning( push )
-// Disable division by 0 warning
-#pragma warning( disable: 4723 )
-#endif
-
   void test_ignore_invalid_data()
   {
       auto ws = createTestWorkspace(false);
-      const double zero = 0.0;
       const double one = 1.0;
-      ws->dataY(0)[3] = 1.0 / zero;
+      ws->dataY(0)[3] = std::numeric_limits<double>::infinity();
       ws->dataY(0)[5] = log(-one);
       ws->dataE(0)[7] = 0;
-      ws->dataE(0)[9] = 1.0 / zero;
+      ws->dataE(0)[9] = std::numeric_limits<double>::infinity();
       ws->dataE(0)[11] = log(-one);
 
       FunctionDomain_sptr domain;
@@ -444,10 +437,6 @@ public:
       TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
 
   }
-
-#ifdef _WIN32
-#pragma warning ( pop ) // Re-enable the warning
-#endif
 
 private:
 
