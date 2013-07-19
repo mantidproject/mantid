@@ -117,6 +117,23 @@ public:
 
   }
 
+  void testFacilityList()
+  {
+    std::vector<FacilityInfo*> facilities = ConfigService::Instance().getFacilities();
+    std::vector<std::string> names = ConfigService::Instance().getFacilityNames();
+
+    TS_ASSERT_LESS_THAN(0,names.size());
+    TS_ASSERT_EQUALS(facilities.size(),names.size());
+    auto itFacilities = facilities.begin();
+    auto itNames = names.begin();
+    for (; itFacilities != facilities.end(); ++itFacilities,++itNames)
+    {
+      TS_ASSERT_EQUALS(*itNames, (**itFacilities).name());
+    }
+
+
+  }
+
   void testInstrumentSearch()
   {
     // Set a default facility

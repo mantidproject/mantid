@@ -21,10 +21,10 @@ void FirstTimeSetup::initLayout()
 
   // Populate list of facilities
   m_uiForm.cbFacility->clear();
-  QStringList faclist = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("supported.facilities")).split(";");
-  for ( QStringList::iterator it = faclist.begin(); it != faclist.end(); ++it )
+  auto faclist = Mantid::Kernel::ConfigService::Instance().getFacilityNames();
+  for ( auto it = faclist.begin(); it != faclist.end(); ++it )
   {
-    m_uiForm.cbFacility->addItem(*it);
+    m_uiForm.cbFacility->addItem(QString::fromStdString(*it));
   }
 }
 

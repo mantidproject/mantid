@@ -22,6 +22,9 @@ try:
 except ImportError:
     HAVE_NUMPY = False
 
+# A list of filenames to suppress warnings about API removal
+SUPPRESS_API_WARN = set()
+
 ###############################################################################
 # Define the api version
 ###############################################################################
@@ -1977,3 +1980,48 @@ Mtd = mtd
 MantidPyFramework._addToPySearchPath(mtd.settings['requiredpythonscript.directories'])
 # Now additional user specified directories
 MantidPyFramework._addToPySearchPath(mtd.settings['pythonscripts.directories'])
+
+#---------------------------------------------------------------------------------------
+def suppressV1Warnings(filename, suppress=True):
+    """
+        Enable/disable the warnings about the removal of this API coming from the
+        given filename. The match will be based on an exact path match. The simplest
+        way to use the function is using __file__: suppressV1Warnings(__file__)
+        @param filename A filename
+        @param suppress If true the warnings are enabled, otherwise they are not (default=True)
+    """
+    global SUPPRESS_API_WARN
+    if suppress:
+        SUPPRESS_API_WARN.add(filename)
+    else:
+        try:
+            SUPPRESS_API_WARN.remove(filename)
+        except KeyError, exc:
+            pass
+
+def warnOnV1MethodCall(frame=None):
+    """
+        Issue a Mantid log warning about the removal of v1 of the API when a method has
+        been called
+        If a valid frame is given then the source & line of that frame are printed.
+        Use inspect.currentframe() for the current frame and inspect.currentframe().f_back
+        for the caller's frame
+    """
+    if frame:
+        src_file = inspect.getsourcefile(frame)
+        if src_file in SUPPRESS_API_WARN:
+            return
+    else:
+        src_file = None
+    
+    src = ""
+    if src_file:
+        src = " at line %d in '%s'" % (frame.f_lineno,src_file)
+    msg = "Warning: Python API v1 call has been made%s.\n" % (src)
+    print msg
+
+#---------------------------------------------------------------------------------------
+
+# -- Issue a general startup warning about the old API --
+_msg = "Notice: Version 1 of the Python API ('from mantidsimple import *') will be removed in the next major release\n"
+mtd.sendWarningMessage(_msg)

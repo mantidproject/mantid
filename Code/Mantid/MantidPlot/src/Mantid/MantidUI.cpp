@@ -1505,7 +1505,7 @@ void MantidUI::renameWorkspace(QStringList wsName)
     MantidMatrix *matrix = dynamic_cast<MantidMatrix*>(appWindow()->activeWindow());
     if( matrix )
     {
-      wsName[0] = matrix->workspaceName();
+      wsName.append(matrix->workspaceName());
     }
     else
     {
@@ -2556,11 +2556,10 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   double lastValue = 0;
 
   //Iterate through the time-value map.
-  int i = 0;
   std::map<DateAndTime, double>::iterator it = time_value_map.begin();
   if (it!=time_value_map.end())
   {
-    for (; it!=time_value_map.end(); ++it)
+    for (int i = 0; it!=time_value_map.end(); ++i,++it)
     {
       lastTime = it->first;
       lastValue = it->second;
@@ -2569,7 +2568,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
 
       t->setText(i,0,QString::fromStdString(time_string));
       t->setCell(i,1,lastValue);
-      i++;
     }
   }
 
@@ -2748,47 +2746,35 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QStr
   appWindow()->initTable(t, appWindow()->generateUniqueName(tableName+"-"));
   // t->askOnCloseEvent(false);
 
-  int kX(0),kY(0),kErr(0);
   for(int i=0;i < no_cols; i++)
   {
     const Mantid::MantidVec& dataX = workspace->readX(indexList[i]);
     const Mantid::MantidVec& dataY = workspace->readY(indexList[i]);
     const Mantid::MantidVec& dataE = workspace->readE(indexList[i]);
 
-    kY =(c+1)*i+1;
-    kX=(c+1)*i;
+    const int kY =(c+1)*i+1;
+    const int kX=(c+1)*i;
+    int kErr = 0;
     t->setColName(kY,"YS"+QString::number(indexList[i]));
     t->setColName(kX,"XS"+QString::number(indexList[i]));
     t->setColPlotDesignation(kX,Table::X);
     if (errs)
     {
-      // kErr = 2*i + 2;
       kErr=(c+1)*i+2;
       t->setColPlotDesignation(kErr,Table::yErr);
       t->setColName(kErr,"ES"+QString::number(indexList[i]));
     }
     for(int j=0;j<numRows;j++)
     {
-
-      //if (i == 0)
-      //{
-      // in histograms the point is to be drawn in the centre of the bin.
       if (isHistogram && binCentres)
       {
-        // logObject.error()<<"inside isHistogram true= "<<j<< std::endl;
         t->setCell(j,kX,( dataX[j] + dataX[j+1] )/2);
       }
       else
-      {//logObject.error()<<"inside isHistogram false= "<< std::endl;
+      {
         t->setCell(j,kX,dataX[j]);
       }
-      //         }
-      //else
-      //{
-      // t->setCell(j,kX,dataX[j]);
-      //}
       t->setCell(j,kY,dataY[j]);
-
 
       if (errs) t->setCell(j,kErr,dataE[j]);
     }
@@ -2801,7 +2787,7 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, const QStr
       if (errs) t->setCell(iRow,kErr,0);
     }
   }
-  // t->askOnCloseEvent(false);
+
   return t;
 }
 
@@ -2850,13 +2836,12 @@ MultiLayer* MantidUI::createGraphFromTable(Table* t, int type)
       lst.removeAt(index);
     }
   }
-  //MultiLayer* ml = appWindow()->multilayerPlot(t,t->colNames(),Graph::Line);
+
   MultiLayer* ml = appWindow()->multilayerPlot(t,lst,Graph::Line);
   Graph *g = ml->activeGraph();
   appWindow()->polishGraph(g,type);
   for(int i=0;i<g->curves();i++)
     g->setCurveStyle(i,type);
-  //ml->askOnCloseEvent(false);
 
   return ml;
 }
@@ -3227,11 +3212,11 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
 
   Table* t = new Table(appWindow()->scriptingEnv(), numRows, c*bins.size() + 1, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-"));
-  // t->askOnCloseEvent(false);
-  int kY,kErr = 0;
+
   for(int i = 0; i < bins.size(); i++)
   {
-    kY = c*i+1;
+    const int kY = c*i+1;
+    int kErr = 0;
     t->setColName(kY,"YB"+QString::number(bins[i]));
     if (errs)
     {

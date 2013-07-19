@@ -21,12 +21,12 @@ class DataSets(BaseSampleData):
         super(DataSets, self).reset()
         self.background.reset()
     
-    def to_script(self):
+    def to_script(self, data_file=None):
         """
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        script_sample = super(DataSets, self).to_script()
+        script_sample = super(DataSets, self).to_script(data_file)
         script_bck = self.background.to_script()
         return "%s\n%s" % (script_sample, script_bck)
             

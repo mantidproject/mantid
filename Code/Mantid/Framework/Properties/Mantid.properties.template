@@ -9,9 +9,6 @@
 #          This File will be overwritten with each new version of Mantid, however
 #          we will never alter your user.properties file so settings there are safe.
 
-# A semi-colon separated list of supported facilities
-supported.facilities = ISIS;SNS;HFIR;NCNR;LENS;ILL;SINQ;LLB
-
 # Set a default facility
 default.facility = ISIS
 

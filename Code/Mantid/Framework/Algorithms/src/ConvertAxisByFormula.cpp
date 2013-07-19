@@ -222,6 +222,13 @@ namespace Mantid
         throw std::invalid_argument(ss.str());
       }
 
+      IncreasingAxisValidator incAxis;
+      std::string incAxisResult = incAxis.isValid(outputWs);
+
+      if(incAxisResult != "")
+        g_log.warning(incAxisResult + ".\n"
+                      "Some of the Mantid algorithms might not use the workspace correctly.");
+
       if ((axisUnits!="") || (axisTitle!=""))
       {
         if (axisTitle=="")

@@ -28,6 +28,7 @@ void export_IPeaksWorkspace()
     .def("hasIntegratedPeaks", &IPeaksWorkspace::hasIntegratedPeaks, "Determine if the peaks have been integrated")
     .def("getRun", &IPeaksWorkspace::mutableRun, return_internal_reference<>(),
              "Return the Run object for this workspace")
+    .def("PeakInfoNumber", &IPeaksWorkspace::PeakInfoNumber, "Peak info number at Q vector for this workspace")
       ;
 
   REGISTER_SINGLEVALUE_HANDLER(IPeaksWorkspace_sptr);

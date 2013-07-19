@@ -108,12 +108,12 @@ void RepoModel::RepoItem::appendChild(RepoItem *child)
 }
 
 /** Gives access to the row_th children of RepoItem. Note that 
-    the row can not be greater than ::childCount(). 
+    the row can not be greater than RepoModel::childCount(). 
 
     But we do not test it, because this method will be called
     indirectly from the QView, and will never go beyond that value. 
     
-    @param row: Number between 0 and ::childCount().
+    @param row: Number between 0 and RepoModel::childCount().
 
     @return The pointer to the row_th children.
     
@@ -741,7 +741,7 @@ QString RepoModel::filePath(const QModelIndex & index){
    that is a parent. If it does not exists, it should be created.
    
    @param folder: relative path inside the repository for the folder. 
-   @param Reference to the list of parents
+   @param parents Reference to the list of parents
    @return Pointer to the RepoItem related to the given folder. 
    
 **/

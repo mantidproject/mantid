@@ -206,7 +206,7 @@ class SampleData(BaseScriptElement):
                 for f in data_file_list:
                     script += "AppendDataFile([\"%s\"])\n" % f
         else:
-            parts = os.path.split(str(self.data_files[str(data_file)]).strip())
+            parts = os.path.split(str(data_file).strip())
             if len(parts[0])>0:
                 script += "DataPath(\"%s\")\n" % parts[0]
             else:
@@ -251,6 +251,7 @@ class SampleData(BaseScriptElement):
         xml += self.calculation_method.to_xml()
         xml += "</Transmission>\n"
         xml += "<SampleData>\n"
+        xml += "  <separate_jobs>%s</separate_jobs>\n" % str(self.separate_jobs)
         xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
         for item in self.data_files:
             xml += "  <data_file>%s</data_file>\n" % item.strip()        
@@ -296,6 +297,9 @@ class SampleData(BaseScriptElement):
             self.data_files = BaseScriptElement.getStringList(sample_data_dom, "data_file")
             self.sample_thickness = BaseScriptElement.getFloatElement(sample_data_dom, "sample_thickness",
                                                                       default=SampleData.sample_thickness)      
+            self.separate_jobs = BaseScriptElement.getBoolElement(sample_data_dom, "separate_jobs",
+                                                                  default = SampleData.separate_jobs) 
+
     
     def reset(self):
         """

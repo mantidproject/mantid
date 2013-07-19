@@ -157,13 +157,14 @@ namespace IDA
       QString filename = uiForm().elwin_inputFile->getFirstFilename();
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
+      auto ws = runLoadNexus(filename, wsname);
+      if(!ws)
+      {
+        showInformationBox(QString("Unable to load file: ") + filename);
+        return;
+      }
 
-      QString pyInput = "LoadNexus(r'" + filename + "', '" + wsname + "')\n";
-      QString pyOutput = runPythonCode(pyInput);
-
-      std::string workspace = wsname.toStdString();
-
-      m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, workspace, 0);
+      m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, ws, 0);
       try
       {
         const std::pair<double, double> range = getCurveRange(m_elwDataCurve);

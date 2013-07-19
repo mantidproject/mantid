@@ -204,7 +204,7 @@ class RemoteJobsWidget(BaseWidget):
             self._content.job_table.setItem(i, 4, item)
           
         self._content.job_table.setSortingEnabled(True)
-        self._content.job_table.sortItems(0, 1)
+        self._content.job_table.sortItems(3, 1)
     
     def get_state(self):
         return RemoteJobs()

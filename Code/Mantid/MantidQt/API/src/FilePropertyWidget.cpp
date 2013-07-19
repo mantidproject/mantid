@@ -169,15 +169,22 @@ namespace API
       {
         // Hack off the first star that the filter returns
         QString ext = selectedFilter;
-        if( selectedFilter.startsWith("*") )
+
+        if( selectedFilter.startsWith("*.") )
         {
           // 1 character from the start
           ext = ext.remove(0,1);
         }
+        else
+        {
+          ext = "";
+        }
+
         if( filename.endsWith(".") && ext.startsWith(".") )
         {
           ext = ext.remove(0,1);
         }
+
         // Construct the full file name
         filename += ext;
       }

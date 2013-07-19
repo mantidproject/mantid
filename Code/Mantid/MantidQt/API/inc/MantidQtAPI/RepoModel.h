@@ -49,22 +49,22 @@ const QString DELETABLEENTRY = "deletable";
       with the ScriptRepository through the Qt ModelView Framework. 
 
       The requirements for a class to fit this framework is to reimplement the following methods: 
-        - ::data - giving access to the data
-        - ::flags - indication of the allowed interaction 
-        - ::headerData 
-        - ::index
-        - ::parent
-        - ::rowCount
-        - ::columnCount
-        - ::setData
+        - RepoModel::data - giving access to the data
+        - RepoModel::flags - indication of the allowed interaction 
+        - RepoModel::headerData 
+        - RepoModel::index
+        - RepoModel::parent
+        - RepoModel::rowCount
+        - RepoModel::columnCount
+        - RepoModel::setData
 
      Through these methods, the RepoModel will be able to provide access to the ScriptRepository 
      service. Allowing the users to upload and download files and folders.
 
      Some extra services are provided, to allow the classes to show the description of the files 
      as well as open the files to be inspected by the users: 
-      - ::entrySelected
-      - ::fileSelected
+      - entrySelected
+      - fileSelected
 
      This class should be constructed just once, and as so, the copy constructor and the assignment 
      will be make private to ensure this. 
@@ -97,8 +97,8 @@ const QString DELETABLEENTRY = "deletable";
       This class in indended to keep track of the path inside the Repository
       of the entries, in such a way the repomodel will be able to get from the 
       index the path.
-      The ::appendChild allows the RepoModel to reconstruct the tree of the directories,
-      while the ::child and ::parent methods allow to iterate over the tree.      
+      The RepoModel::appendChild allows the RepoModel to reconstruct the tree of the directories,
+      while the RepoModel::child and RepoModel::parent methods allow to iterate over the tree.      
   */
   class RepoItem
   {

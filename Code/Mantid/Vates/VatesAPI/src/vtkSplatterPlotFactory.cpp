@@ -280,11 +280,14 @@ namespace Mantid
     UNUSED_ARG(progressUpdating);
     validate();
 
-    size_t nd = m_workspace->getNumDims();
+    size_t nd = m_workspace->getNonIntegratedDimensions().size();
      
     Mantid::Kernel::ReadLock lock(*m_workspace);
     if (nd > 3)
     {
+      throw std::runtime_error("SplatterPlot cannot handle 4D data, please integrate to 3D!");
+      // Hold the old code for now
+      /*
       // Slice from >3D down to 3D
       this->slice = true;
       this->sliceMask = new bool[nd];
@@ -309,6 +312,7 @@ namespace Mantid
       // This creates a 0-thickness region to slice in.
       sliceImplicitFunction->addPlane( MDPlane(normal1, point) );
       sliceImplicitFunction->addPlane( MDPlane(normal2, point) );
+      */
     }
     else
     {

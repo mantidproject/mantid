@@ -491,16 +491,20 @@ class BaseReductionScripter(object):
                 
                 lower_case_instr = self.instrument_name.lower()
                 job_name_lower = job_name.lower()
+                _job_name = job_name
                 if job_name is None or len(job_name)==0:
-                    job_name = lower_case_instr
+                    _job_name = lower_case_instr
                 elif job_name_lower.find(lower_case_instr)>=0:
-                    job_name = job_name.strip()
+                    _job_name = job_name.strip()
                 else:
-                    job_name = "%s_%s" % (lower_case_instr, job_name.strip())
+                    _job_name = "%s_%s" % (lower_case_instr, job_name.strip())
 
+                # Make sure we have unique job names
+                if len(scripts)>1:
+                    _job_name += "_%s" % i
                 # Submit the job
                 submit_cmd = "SubmitRemoteJob(ComputeResource='%s', " % resource
-                submit_cmd += "TaskName='%s'," % job_name
+                submit_cmd += "TaskName='%s'," % _job_name
                 submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
                 submit_cmd += "UserName='%s', GroupName='users', Password='%s', " % (user, pwd)
                 submit_cmd += "TransactionID='mantid_remote', "

@@ -61,6 +61,7 @@ set ( SRC_FILES
 	src/LoadMask.cpp
 	src/LoadMaskingFile.cpp
 	src/LoadMcStasNexus.cpp
+	src/LoadMcStasEventNexus.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
 	src/LoadMuonNexus1.cpp
@@ -207,6 +208,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMaskingFile.h
 	inc/MantidDataHandling/LoadMcStasNexus.h
+	inc/MantidDataHandling/LoadMcStasEventNexus.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
 	inc/MantidDataHandling/LoadMuonNexus1.h
@@ -341,6 +343,7 @@ set ( TEST_FILES
 	LoadMappingTableTest.h
 	LoadMaskTest.h
 	LoadMcStasNexusTest.h
+	LoadMcStasEventNexusTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h

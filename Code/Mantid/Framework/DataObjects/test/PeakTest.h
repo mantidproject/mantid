@@ -349,7 +349,7 @@ public:
     Peak p(inst, detectorId, wavelength);
     TSM_ASSERT_THROWS_NOTHING("Nothing wrong here, detector is valid", p.getDetectorPosition());
     p.setQLabFrame(V3D(1,1,1), 1); // This sets the detector pointer to null and detector id to -1;
-    TSM_ASSERT_THROWS("Detector is not valid", p.getDetectorPosition(), Mantid::Kernel::Exception::NotFoundError&);
+    TSM_ASSERT_THROWS("Detector is not valid", p.getDetectorPosition(), Mantid::Kernel::Exception::NullPointerException&);
   }
 
 private:

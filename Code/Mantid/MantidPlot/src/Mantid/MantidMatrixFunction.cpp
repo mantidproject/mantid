@@ -171,13 +171,12 @@ size_t MantidMatrixFunction::indexX(size_t row,double s)const
   size_t n = m_workspace->blocksize();
 
   const Mantid::MantidVec& X = m_workspace->readX(row);
-  if (n == 0 || s < X[0] || s > X[n-1]) return -1;
+  if (n == 0 || s < X[0] || s > X[n-1]) return std::numeric_limits<size_t>::max();
 
   size_t i = 0, j = n-1, k = n/2;
-  double ss;
   for(size_t it = 0; it < n; it++)
   {
-    ss = X[k];
+    const double ss = X[k];
     if (ss == s ) return k;
     if (abs(static_cast<int>(i) - static_cast<int>(j)) <2)
     {
@@ -202,26 +201,25 @@ size_t MantidMatrixFunction::indexY(double s)const
 
   bool isNumeric = yAxis.isNumeric();
 
-  if (n == 0) return -1;
+  if (n == 0) return std::numeric_limits<size_t>::max();
 
   size_t i0 = 0;
 
   if (s < yAxis(i0))
   {
-    if (isNumeric || yAxis(i0) - s > 0.5) return -1;
+    if (isNumeric || yAxis(i0) - s > 0.5) return std::numeric_limits<size_t>::max();
     return 0;
   }
   else if (s > yAxis(n-1))
   {
-    if (isNumeric || s - yAxis(n-1) > 0.5) return -1;
+    if (isNumeric || s - yAxis(n-1) > 0.5) return std::numeric_limits<size_t>::max();
     return n-1;
   }
 
   size_t i = i0, j = n-1, k = n/2;
-  double ss;
   for(size_t it = 0; it < n; it++)
   {
-    ss = yAxis(k);
+    const double ss = yAxis(k);
     if (ss == s ) return k;
     if (abs(static_cast<int>(i) - static_cast<int>(j)) <2)
     {
@@ -230,10 +228,10 @@ size_t MantidMatrixFunction::indexY(double s)const
       if (ds1 < ds)
       {
         if (isNumeric || ds1 < 0.5) return j;
-        return -1;
+        return std::numeric_limits<size_t>::max();
       }
       if (isNumeric || ds < 0.5) return i;
-      return -1;
+      return std::numeric_limits<size_t>::max();
     }
     if (s > ss) i = k;
     else

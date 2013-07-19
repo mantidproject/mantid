@@ -60,6 +60,9 @@ namespace MDEvents
     void centroidSphere(Mantid::API::CoordTransform & , const coord_t , coord_t * , signal_t & ) const
     { throw std::runtime_error("Not implemented."); }
 
+    void integrateCylinder(Mantid::API::CoordTransform & radiusTransform, const coord_t radius, const coord_t length, signal_t & signal, signal_t & errorSquared, std::vector<signal_t> & signal_fit) const
+    { throw std::runtime_error("Not implemented."); }
+
     // --------------------------------------------------------------------------------------------
 
     /// Return which dimension (index) was split

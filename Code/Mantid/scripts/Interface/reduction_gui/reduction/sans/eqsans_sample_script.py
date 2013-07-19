@@ -27,12 +27,12 @@ class SampleData(BaseSampleData):
         self.combine_transmission_frames = SampleData.combine_transmission_frames
         self.calculate_transmission = SampleData.calculate_transmission
     
-    def to_script(self):
+    def to_script(self, data_file=None):
         """
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        script = super(SampleData, self).to_script()
+        script = super(SampleData, self).to_script(data_file)
         if self.calculate_transmission:
             script += "CombineTransmissionFits(%s)\n" % self.combine_transmission_frames
         return script

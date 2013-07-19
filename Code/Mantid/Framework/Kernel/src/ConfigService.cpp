@@ -1566,6 +1566,29 @@ const InstrumentInfo & ConfigServiceImpl::getInstrument(const std::string& instr
   throw Exception::NotFoundError("Instrument", instrumentName);
 }
 
+/** Gets a vector of the facility Information objects
+ * @return A vector of FacilityInfo objects
+ */
+const std::vector<FacilityInfo*> ConfigServiceImpl::getFacilities() const
+{
+  return m_facilities;
+}
+
+/** Gets a vector of the facility names
+ * @return A vector of the facility Names
+ */
+const std::vector<std::string> ConfigServiceImpl::getFacilityNames()const
+{
+  auto names = std::vector<std::string>(m_facilities.size());
+  auto itFacilities = m_facilities.begin();
+  auto itNames = names.begin();
+  for (; itFacilities != m_facilities.end(); ++itFacilities,++itNames)
+  {
+    *itNames = (**itFacilities).name();
+  }
+  return names;
+}
+
 /** Get the default facility
  * @return the facility information object
  */
@@ -1576,7 +1599,7 @@ const FacilityInfo& ConfigServiceImpl::getFacility() const
   {
     defFacility = "ISIS";
   }
-  return getFacility(defFacility);
+  return this->getFacility(defFacility);
 }
 
 /**
