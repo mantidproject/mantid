@@ -137,26 +137,26 @@ namespace MantidQt
 
       // property accessors/modifiers
       bool isForRunFiles() const;
-      void isForRunFiles(const bool);
+      void isForRunFiles(bool);
       QString getLabelText() const;
       void setLabelText(const QString & text);
-      void setLabelMinWidth(const int width);
+      void setLabelMinWidth(int);
       bool allowMultipleFiles() const;
-      void allowMultipleFiles(const bool);
+      void allowMultipleFiles(bool);
       bool isOptional() const;
-      void isOptional(const bool);
+      void isOptional(bool);
       ButtonOpts doButtonOpt() const;
-      void doButtonOpt(const ButtonOpts buttonOpt);
+      void doButtonOpt(ButtonOpts buttonOpt);
       bool doMultiEntry() const;
-      void doMultiEntry(const bool);
+      void doMultiEntry(bool);
       QString getAlgorithmProperty() const;
       void setAlgorithmProperty(const QString & name);
       QStringList getFileExtensions() const;
       void setFileExtensions(const QStringList & extensions);
       bool extsAsSingleOption() const;
-      void extsAsSingleOption(const bool value);
+      void extsAsSingleOption(bool value);
       LiveButtonOpts liveButtonState() const;
-      void liveButtonState(const LiveButtonOpts);
+      void liveButtonState(LiveButtonOpts);
 
       // Standard setters/getters
       void liveButtonSetEnabled(bool);
@@ -185,7 +185,7 @@ namespace MantidQt
       /// Save settings in the given group
       void saveSettings(const QString & group);
       /// Alters the text label that contains the number of entries, normally run when the file is loaded
-      void setNumberOfEntries(const int number);
+      void setNumberOfEntries(int number);
       /// Inform the widget of a running instance of MonitorLiveData to be used in stopLiveListener()
       void setLiveAlgorithm(const boost::shared_ptr<Mantid::API::IAlgorithm>& monitorLiveData);
 
