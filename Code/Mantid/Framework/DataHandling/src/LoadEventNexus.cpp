@@ -252,7 +252,8 @@ public:
       {
         bool breakOut = false;
         //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
-        while ( i+startAt < event_index->operator[](pulse_i))
+        while ( !((i+startAt >= event_index->operator[](pulse_i))
+                  && (i+startAt < event_index->operator[](pulse_i+1))))
         {
           pulse_i++;
           // Check once every new pulse if you need to cancel (checking on every event might slow things down more)
