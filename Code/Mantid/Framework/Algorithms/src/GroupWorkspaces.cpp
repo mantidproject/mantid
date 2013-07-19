@@ -33,10 +33,6 @@ namespace Mantid
     void GroupWorkspaces::exec()
     {
       const std::vector<std::string> inputworkspaces = getProperty("InputWorkspaces");
-      if (inputworkspaces.size() < 2)
-      {
-        throw std::runtime_error("Select atleast two workspaces to group ");
-      }
       //creates workspace group pointer
       WorkspaceGroup_sptr outgrp_sptr = WorkspaceGroup_sptr(new WorkspaceGroup);
 

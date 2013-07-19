@@ -62,10 +62,23 @@ public:
     input.push_back("LOQ48097");
     TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("InputWorkspaces",input));
     TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("OutputWorkspace","NewGroup"));
-    //only one workspace selected.,so it would throw
     TS_ASSERT_THROWS_NOTHING( grpwsalg.execute());
-    TS_ASSERT( !grpwsalg.isExecuted() );//fail
+    TS_ASSERT( grpwsalg.isExecuted() );
+
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+    WorkspaceGroup_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = ads.retrieveWS<WorkspaceGroup>("NewGroup") );
+    std::vector<std::string> grpVec = result->getNames();
+    TS_ASSERT_EQUALS(grpVec.size(),1);
+    if(grpVec.size() == 1)
+    {
+      TS_ASSERT_EQUALS("LOQ48097",grpVec[0])
+    }
+    ads.remove("LOQ48097");
+    ads.remove("NewGroup");
+
   }
+
   void testExecGroupTwoNormalWorkspaces()
   {
     LoadRaw3 alg;
