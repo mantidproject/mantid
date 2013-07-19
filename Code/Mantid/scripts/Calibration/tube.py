@@ -278,25 +278,24 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
       Optionals parameters to tune the calibration: 
 
-      :param fitPar: Define the parameters to be used in the fit. If not provided, the dynamic mode is used.
+      :param fitPar: Define the parameters to be used in the fit. If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
 
-      :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 10
+      :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 10. See: :py:mod:`~Examples.TubeCalibDemoMerlin`
 
        >>> fit_start, fit_end = centre - margin, centre + margin
 
-      :param rangeList: list of tubes indexes that will be calibrated. As in the following code:
+      :param rangeList: list of tubes indexes that will be calibrated. As in the following code (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`):
 
        >>> for index in rangelist:
        >>>  do_calibrate(tubeSet.getTube(index))
       
-      :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it.
+      :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it. (see: :py:mod:`~Examples.TubeCalibDemoMerlin`)
 
-      :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks. (It can receive a list of indexes to plot)
+      :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks, it can receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.extendMarginAndExpectedValue`)
 
-      :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value.
+      :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value. (see at: Examples/TubeCalibDemoMerlin_Adjustable.py)
 
-
-      :param overridePeaks: dictionary that defines an array of peaks positions (in pixels) to be used for the specific tube(key).
+      :param overridePeaks: dictionary that defines an array of peaks positions (in pixels) to be used for the specific tube(key). (see: :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube`)
 
         >>> 
         >>> for index in rangelist:
@@ -305,10 +304,10 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         >>>    # skip finding peaks
         >>>    fit_peaks_to_position()
 
-      :param fitPolin: Define the order of the polinomial to fit the pixels positions agains the known positions. The acceptable values are 2 or 3. Default = 2.
+      :param fitPolin: Define the order of the polinomial to fit the pixels positions agains the known positions. The acceptable values are 2 or 3. Default = 2. (not implemented yet)
 
 
-      :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes. 
+      :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes. (see :py:mod:`~Examples.TubeCalibDemoMerlin` that shows a nice inspection on this table).
 
        >>> calibTable, peakTable = calibrate(ws, (omitted), rangeList=[1], 
        >>>          outputPeak=True)
