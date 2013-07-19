@@ -5,7 +5,7 @@
 #include "MantidKernel/ClassMacros.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/ReflectometryMDTransform.h"
+#include "MantidMDEvents/ReflectometryTransform.h"
 
 namespace Mantid
 {
@@ -54,7 +54,7 @@ namespace MDEvents
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ReflectometryTransformKiKf : public ReflectometryMDTransform
+  class DLLExport ReflectometryTransformKiKf : public ReflectometryTransform
   {
   private:
     const double m_kiMin;
@@ -65,11 +65,14 @@ namespace MDEvents
     mutable CalculateReflectometryK m_KiCalculation;
 
   public:
-    ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, Mantid::API::BoxController_sptr boxController);
+    ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, int numberOfBinsQx=100, int numberOfBinsQz=100);
     virtual ~ReflectometryTransformKiKf();
 
     /// Execute transformation
-    virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+    virtual Mantid::API::MatrixWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
+
+    /// Execute transformation
+    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const;
 
   private:
 

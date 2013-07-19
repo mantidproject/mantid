@@ -2,7 +2,7 @@
 #define MANTID_MDEVENTS_REFLECTOMETRYTRANSFORMP_H_
 
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/ReflectometryMDTransform.h"
+#include "MantidMDEvents/ReflectometryTransform.h"
 
 namespace Mantid
 {
@@ -68,7 +68,7 @@ namespace MDEvents
 
 
 
-  /** ReflectometryTransformP : TODO: DESCRIPTION
+  /** ReflectometryTransformP : Calculates workspace(s) of Pi and Pf based on the input workspace and incident theta angle.
     
     @date 2012-06-06
 
@@ -92,7 +92,7 @@ namespace MDEvents
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ReflectometryTransformP : public ReflectometryMDTransform
+  class DLLExport ReflectometryTransformP : public ReflectometryTransform
   {
   private:
     const double m_pSumMin;
@@ -105,10 +105,11 @@ namespace MDEvents
     mutable CalculateReflectometryDiffP m_pDiffCalculation;
 
   public:
-    ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta, Mantid::API::BoxController_sptr boxController);
+    ReflectometryTransformP(double pSumMin, double pSumMax, double pDiffMin, double pDiffMax, double incidentTheta, int numberOfBinsQx=100, int numberOfBinsQz=100);
     virtual ~ReflectometryTransformP();
-    virtual Mantid::API::IMDEventWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
-    
+    virtual Mantid::API::IMDEventWorkspace_sptr executeMD(Mantid::API::MatrixWorkspace_const_sptr inputWs, Mantid::API::BoxController_sptr boxController) const;
+    /// Execute transformation
+    virtual Mantid::API::MatrixWorkspace_sptr execute(Mantid::API::MatrixWorkspace_const_sptr inputWs) const;
   };
 
 
