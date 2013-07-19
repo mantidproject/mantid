@@ -117,7 +117,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             wsOut.setY(i,wsInMonitor.dataY(i))
             wsOut.setE(i,wsInMonitor.dataE(i))               
                 
-        for i in range(wsOut.getNumberHistograms()):
+        for i in range(wsOut.getNumberHistograms() - mon_n):
             wsOut.setY(i+mon_n, wsInDetector.dataY(i))
             wsOut.setE(i+mon_n, wsInDetector.dataE(i))
                        
