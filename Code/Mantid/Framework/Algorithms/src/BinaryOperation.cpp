@@ -329,16 +329,10 @@ namespace Mantid
       }
 
       // Check the size compatibility
-      if (!checkSizeCompatibility(lhs,rhs))
+      std::string checkSizeCompatibilityResult = checkSizeCompatibility(lhs,rhs); 
+      if (!checkSizeCompatibilityResult.empty())
       {
-        std::ostringstream ostr;
-        ostr<<"The sizes of the two workspaces " <<
-            "(" << lhs->getName() << ": " << lhs->getNumberHistograms() << " spectra, blocksize " << lhs->blocksize() << ")"
-            << " and " <<
-            "(" << rhs->getName() << ": " << rhs->getNumberHistograms() << " spectra, blocksize " << rhs->blocksize() << ")"
-            << " are not compatible for algorithm "<<this->name();
-        g_log.error() << ostr.str() << std::endl;
-        throw std::invalid_argument( ostr.str() );
+        throw std::invalid_argument(checkSizeCompatibilityResult);
       }
 
       return true;
@@ -366,31 +360,67 @@ namespace Mantid
      *  must divide be the size of the smaller workspace leaving no remainder
      *  @param lhs :: the first workspace to compare
      *  @param rhs :: the second workspace to compare
-     *  @retval true The two workspaces are size compatible
-     *  @retval false The two workspaces are NOT size compatible
+     *  @retval "" The two workspaces are size compatible
+     *  @retval "<reason why not compatible>" The two workspaces are NOT size compatible
      */
-    bool BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    std::string BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       const size_t lhsSize = lhs->size();
       const size_t rhsSize = rhs->size();
       // A SingleValueWorkspace on the right matches anything
-      if ( rhsSize == 1 ) return true;
-      // The rhs must not be smaller than the lhs
-      if ( lhsSize < rhsSize ) return false;
+      if ( rhsSize == 1 ) return "";
+      // The lhs must not be smaller than the rhs
+      if ( lhsSize < rhsSize ) return "Left hand side smaller than right hand side.";
 
       //Did checkRequirements() tell us that the X histogram size did not matter?
       if (!m_matchXSize)
+      {
         //If so, only the vertical # needs to match
-        return (lhs->getNumberHistograms() == rhs->getNumberHistograms());
-
+        
+        if ( lhs->getNumberHistograms() == rhs->getNumberHistograms() )
+        {
+          return "";
+        }
+        else
+        {
+          return "Number of histograms not identical.";
+        }
+      }
       // Otherwise they must match both ways, or horizontally or vertically with the other rhs dimension=1
-      if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
+      if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return "";
       // Past this point, we require the X arrays to match. Note this only checks the first spectrum
-      if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) ) return false;
+      if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) )
+        {
+            return "X arrays must match when performing this operation on a 2D workspaces.";
+        }
       
       const size_t rhsSpec = rhs->getNumberHistograms();
 
-      return ( lhs->blocksize() == rhs->blocksize() && ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec ) );
+      if ( lhs->blocksize() == rhs->blocksize())
+      {
+        if ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec )
+        {
+          return "";
+        }
+        else
+        {
+          //can't be more specific as if this is reached both failed and only one or both are needed
+          return "Left and right sides should contain the same amount of spectra or the right side should contian only one spectra.";
+        }
+      }
+      else
+      {
+        //blocksize check failed, but still check the number of spectra to see if that was wrong too
+        if ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec )
+        {
+          return "Number of y values not equal on left and right sides.";
+        }
+        else
+        {
+          //can't be more specific as if this is reached both failed and only one or both are needed
+          return "Number of y values not equal on left and right sides and the right side contained neither only one spectra or the same amount of spectra as the left.";
+        }
+      }
     }
 
 

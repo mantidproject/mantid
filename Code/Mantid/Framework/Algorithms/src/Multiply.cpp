@@ -187,7 +187,7 @@ namespace Mantid
      *  @retval true The two workspaces are size compatible
      *  @retval false The two workspaces are NOT size compatible
      */
-    bool Multiply::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    std::string Multiply::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       if (!m_keepEventWorkspace && !m_AllowDifferentNumberSpectra)
       {
@@ -198,68 +198,46 @@ namespace Mantid
       {
 
         // A SingleValueWorkspace on the right, or matches anything
-        if (rhs->size()==1) return true;
+        if (rhs->size()==1) return "";
 
         // A SingleValueWorkspace on the left only matches if rhs was single value too. Why are you using mantid to do simple math?!?
-        if (lhs->size()==1) return false;
+        if (lhs->size()==1) return "The left side cannot contain a single value if the right side isn't also a single value.";
 
         // RHS only has one value (1D vertical), so the number of histograms needs to match.
         // Each lhs spectrum will be divided by that scalar
-        if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
+        if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return "";
 
         if (m_matchXSize)
         {
           // Past this point, for a 2D WS operation, we require the X arrays to match. Note this only checks the first spectrum
-          if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) ) return false;
+          if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) )
+          {
+            return "X arrays must match when multiplying 2D workspaces.";
+          }
         }
 
         // We don't need to check for matching bins for events. Yay events!
         const size_t rhsSpec = rhs->getNumberHistograms();
 
         // If the rhs has a single spectrum, then we can divide. The block size does NOT need to match,
-        if (rhsSpec == 1) return true;
+        if (rhsSpec == 1) return "";
 
         // Are we allowing the division by different # of spectra, using detector IDs to match up?
         if (m_AllowDifferentNumberSpectra)
         {
-          return true;
+          return "";
         }
 
         // Otherwise, the number of histograms needs to match, but the block size of each does NOT need to match.
-        return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
-
-//
-//
-//        // --- Check for event workspaces - different than workspaces 2D! ---
-//
-//        // A SingleValueWorkspace on the right matches anything
-//        WorkspaceSingleValue_const_sptr rhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(rhs);
-//        if (rhs_single) return true;
-//
-//        // A SingleValueWorkspace on the left only matches if rhs was single value too. Why are you using mantid to do simple math?!?
-//        WorkspaceSingleValue_const_sptr lhs_single = boost::dynamic_pointer_cast<const WorkspaceSingleValue>(lhs);
-//        if (lhs_single) return false;
-//
-//        // RHS only has one value (1D vertical), so the number of histograms needs to match.
-//        // Each lhs spectrum will be divided by that scalar
-//        if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
-//
-//        // We don't need to check for matching bins. Yay events!
-//
-//        const size_t rhsSpec = rhs->getNumberHistograms();
-//
-//        // If the rhs has a single spectrum, then we can divide. The block size does NOT need to match,
-//        if (rhsSpec == 1) return true;
-//
-//
-//        // Are we allowing the division by different # of spectra, using detector IDs to match up?
-//        if (m_AllowDifferentNumberSpectra)
-//        {
-//          return true;
-//        }
-//
-//        // Otherwise, the number of histograms needs to match, but the block size of each does NOT need to match.
-//        return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
+        
+        if ( lhs->getNumberHistograms() == rhs->getNumberHistograms() )
+        {
+          return "";
+        }
+        else
+        {
+          return "Number of histograms not identical.";
+        }
       }
     }
 
