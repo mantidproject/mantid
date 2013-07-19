@@ -1,1952 +1,697 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- For help on the notation used to specify an Instrument Definition File 
-	see http://www.mantidproject.org/IDF -->
-<instrument name="IN5" valid-from="1900-01-31 23:59:59"
-	valid-to="2100-01-31 23:59:59" last-modified="2013-03-01 00:00:01">
-
-	<!-- Author: ricardo.leal@ill.fr -->
-	<defaults>
-		<length unit="meter" />
-		<angle unit="degree" />
-		<reference-frame>
-			<!-- The z-axis is set parallel to and in the direction of the beam. the 
-				y-axis points up and the coordinate system is right handed. -->
-			<along-beam axis="z" />
-			<pointing-up axis="y" />
-			<handedness val="right" />
-		</reference-frame>
-	</defaults>
-
-	<!-- Majority copy from MERLIN; IDF IN5 has 12 panels/doors; Each panel 
-		has 32 tubes; Detector is 4m from the sample position -->
-
-
-	<!-- Moderator: In the ILL this is the distance from the PU chopper to sample -->
-	<component type="moderator">
-		<location z="-2" />
-	</component>
-	<type name="moderator" is="Source"></type>
-
-	<!-- Chopper position Apparently it does nothing... -->
-	<component type="chopper-position">
-		<location z="-1.22950" />
-	</component>
-	<type name="chopper-position" is="ChopperPos"></type>
-
-	<!-- Sample position -->
-	<component type="sample-position">
-		<location y="0.0" x="0.0" z="0.0" />
-	</component>
-	<type name="sample-position" is="SamplePos" />
-
-	<!-- **** DETECTORS **** -->
-	<!-- Detector IDs -->
-	<idlist idname="detectors">
-		<id start="1" end="98304" />
-	</idlist>
-
-	<component type="detectors" idlist="detectors">
-		<location />
-	</component>
-
-	<!-- Detector Doors/Banks/Panels -->
-	<type name="detectors">
-		<component type="door1" idlist="door1">
-			<location />
-		</component>
-		<component type="door2" idlist="door2">
-			<location />
-		</component>
-		<component type="door3" idlist="door3">
-			<location />
-		</component>
-		<component type="door4" idlist="door4">
-			<location />
-		</component>
-		<component type="door5" idlist="door5">
-			<location />
-		</component>
-		<component type="door6" idlist="door6">
-			<location />
-		</component>
-		<component type="door7" idlist="door7">
-			<location />
-		</component>
-		<component type="door8" idlist="door8">
-			<location />
-		</component>
-		<component type="door9" idlist="door9">
-			<location />
-		</component>
-		<component type="door10" idlist="door10">
-			<location />
-		</component>
-		<component type="door11" idlist="door11">
-			<location />
-		</component>
-		<component type="door12" idlist="door12">
-			<location />
-		</component>
-	</type>
-	<!-- Position of tubes around 2 theta, 4m from the sample -->
-	<type name="door1">
-		<component type="standard-tube">
-			<location r="4.0" t="134.817000" name="tube_1">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="134.445000" name="tube_2">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="134.072000" name="tube_3">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="133.700000" name="tube_4">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="133.328000" name="tube_5">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="132.955000" name="tube_6">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="132.583000" name="tube_7">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="132.210000" name="tube_8">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="131.838000" name="tube_9">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="131.465000" name="tube_10">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="131.093000" name="tube_11">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="130.721000" name="tube_12">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="130.348000" name="tube_13">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="129.976000" name="tube_14">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="129.603000" name="tube_15">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="129.231000" name="tube_16">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="128.858000" name="tube_17">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="128.486000" name="tube_18">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="128.114000" name="tube_19">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="127.741000" name="tube_20">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="127.369000" name="tube_21">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="126.996000" name="tube_22">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="126.624000" name="tube_23">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="126.251000" name="tube_24">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="125.879000" name="tube_25">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="125.507000" name="tube_26">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="125.134000" name="tube_27">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="124.762000" name="tube_28">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="124.389000" name="tube_29">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="124.017000" name="tube_30">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="123.645000" name="tube_31">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="123.272000" name="tube_32">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door2">
-		<component type="standard-tube">
-			<location r="4.0" t="122.527000" name="tube_33">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="122.155000" name="tube_34">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="121.782000" name="tube_35">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="121.410000" name="tube_36">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="121.038000" name="tube_37">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="120.665000" name="tube_38">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="120.293000" name="tube_39">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="119.920000" name="tube_40">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="119.548000" name="tube_41">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="119.175000" name="tube_42">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="118.803000" name="tube_43">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="118.431000" name="tube_44">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="118.058000" name="tube_45">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="117.686000" name="tube_46">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="117.313000" name="tube_47">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="116.941000" name="tube_48">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="116.568000" name="tube_49">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="116.196000" name="tube_50">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="115.824000" name="tube_51">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="115.451000" name="tube_52">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="115.079000" name="tube_53">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="114.706000" name="tube_54">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="114.334000" name="tube_55">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="113.962000" name="tube_56">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="113.589000" name="tube_57">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="113.217000" name="tube_58">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="112.844000" name="tube_59">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="112.472000" name="tube_60">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="112.099000" name="tube_61">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="111.727000" name="tube_62">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="111.355000" name="tube_63">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="110.982000" name="tube_64">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door3">
-		<component type="standard-tube">
-			<location r="4.0" t="110.237000" name="tube_65">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="109.865000" name="tube_66">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="109.492000" name="tube_67">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="109.120000" name="tube_68">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="108.748000" name="tube_69">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="108.375000" name="tube_70">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="108.003000" name="tube_71">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="107.630000" name="tube_72">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="107.258000" name="tube_73">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="106.885000" name="tube_74">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="106.513000" name="tube_75">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="106.141000" name="tube_76">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="105.768000" name="tube_77">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="105.396000" name="tube_78">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="105.023000" name="tube_79">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="104.651000" name="tube_80">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="104.279000" name="tube_81">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="103.906000" name="tube_82">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="103.534000" name="tube_83">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="103.161000" name="tube_84">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="102.789000" name="tube_85">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="102.416000" name="tube_86">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="102.044000" name="tube_87">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="101.672000" name="tube_88">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="101.299000" name="tube_89">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="100.927000" name="tube_90">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="100.554000" name="tube_91">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="100.182000" name="tube_92">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="99.809400" name="tube_93">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="99.437000" name="tube_94">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="99.064600" name="tube_95">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="98.692200" name="tube_96">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door4">
-		<component type="standard-tube">
-			<location r="4.0" t="97.947300" name="tube_97">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="97.574900" name="tube_98">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="97.202500" name="tube_99">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="96.830000" name="tube_100">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="96.457600" name="tube_101">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="96.085200" name="tube_102">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="95.712800" name="tube_103">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="95.340400" name="tube_104">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="94.967900" name="tube_105">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="94.595500" name="tube_106">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="94.223100" name="tube_107">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="93.850700" name="tube_108">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="93.478200" name="tube_109">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="93.105800" name="tube_110">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="92.733400" name="tube_111">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="92.361000" name="tube_112">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="91.988500" name="tube_113">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="91.616100" name="tube_114">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="91.243700" name="tube_115">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="90.871300" name="tube_116">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="90.498900" name="tube_117">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="90.126400" name="tube_118">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="89.754000" name="tube_119">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="89.381600" name="tube_120">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="89.009200" name="tube_121">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="88.636700" name="tube_122">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="88.264300" name="tube_123">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="87.891900" name="tube_124">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="87.519500" name="tube_125">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="87.147000" name="tube_126">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="86.774600" name="tube_127">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="86.402200" name="tube_128">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door5">
-		<component type="standard-tube">
-			<location r="4.0" t="85.657300" name="tube_129">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="85.284900" name="tube_130">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="84.912500" name="tube_131">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="84.540100" name="tube_132">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="84.167700" name="tube_133">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="83.795200" name="tube_134">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="83.422800" name="tube_135">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="83.050400" name="tube_136">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="82.678000" name="tube_137">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="82.305500" name="tube_138">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="81.933100" name="tube_139">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="81.560700" name="tube_140">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="81.188300" name="tube_141">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="80.815800" name="tube_142">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="80.443400" name="tube_143">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="80.071000" name="tube_144">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="79.698600" name="tube_145">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="79.326200" name="tube_146">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="78.953700" name="tube_147">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="78.581300" name="tube_148">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="78.208900" name="tube_149">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="77.836500" name="tube_150">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="77.464000" name="tube_151">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="77.091600" name="tube_152">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="76.719200" name="tube_153">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="76.346800" name="tube_154">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="75.974300" name="tube_155">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="75.601900" name="tube_156">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="75.229500" name="tube_157">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="74.857100" name="tube_158">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="74.484600" name="tube_159">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="74.112200" name="tube_160">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door6">
-		<component type="standard-tube">
-			<location r="4.0" t="73.367400" name="tube_161">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="72.995000" name="tube_162">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="72.622500" name="tube_163">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="72.250100" name="tube_164">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="71.877700" name="tube_165">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="71.505300" name="tube_166">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="71.132800" name="tube_167">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="70.760400" name="tube_168">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="70.388000" name="tube_169">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="70.015600" name="tube_170">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="69.643200" name="tube_171">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="69.270700" name="tube_172">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="68.898300" name="tube_173">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="68.525900" name="tube_174">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="68.153500" name="tube_175">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="67.781000" name="tube_176">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="67.408600" name="tube_177">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="67.036200" name="tube_178">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="66.663800" name="tube_179">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="66.291300" name="tube_180">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="65.918900" name="tube_181">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="65.546500" name="tube_182">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="65.174100" name="tube_183">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="64.801700" name="tube_184">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="64.429200" name="tube_185">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="64.056800" name="tube_186">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="63.684400" name="tube_187">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="63.312000" name="tube_188">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="62.939500" name="tube_189">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="62.567100" name="tube_190">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="62.194700" name="tube_191">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="61.822300" name="tube_192">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door7">
-		<component type="standard-tube">
-			<location r="4.0" t="61.077400" name="tube_193">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="60.705000" name="tube_194">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="60.332600" name="tube_195">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="59.960100" name="tube_196">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="59.587700" name="tube_197">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="59.215300" name="tube_198">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="58.842900" name="tube_199">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="58.470400" name="tube_200">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="58.098000" name="tube_201">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="57.725600" name="tube_202">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="57.353200" name="tube_203">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="56.980800" name="tube_204">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="56.608300" name="tube_205">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="56.235900" name="tube_206">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="55.863500" name="tube_207">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="55.491100" name="tube_208">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="55.118600" name="tube_209">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="54.746200" name="tube_210">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="54.373800" name="tube_211">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="54.001400" name="tube_212">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="53.628900" name="tube_213">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="53.256500" name="tube_214">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="52.884100" name="tube_215">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="52.511700" name="tube_216">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="52.139300" name="tube_217">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="51.766800" name="tube_218">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="51.394400" name="tube_219">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="51.022000" name="tube_220">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="50.649600" name="tube_221">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="50.277100" name="tube_222">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="49.904700" name="tube_223">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="49.532300" name="tube_224">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door8">
-		<component type="standard-tube">
-			<location r="4.0" t="48.787400" name="tube_225">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="48.415000" name="tube_226">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="48.042600" name="tube_227">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="47.670200" name="tube_228">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="47.297800" name="tube_229">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="46.925300" name="tube_230">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="46.552900" name="tube_231">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="46.180500" name="tube_232">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="45.808100" name="tube_233">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="45.435600" name="tube_234">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="45.063200" name="tube_235">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="44.690800" name="tube_236">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="44.318400" name="tube_237">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="43.945900" name="tube_238">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="43.573500" name="tube_239">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="43.201100" name="tube_240">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="42.828700" name="tube_241">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="42.456200" name="tube_242">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="42.083800" name="tube_243">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="41.711400" name="tube_244">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="41.339000" name="tube_245">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="40.966600" name="tube_246">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="40.594100" name="tube_247">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="40.221700" name="tube_248">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="39.849300" name="tube_249">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="39.476900" name="tube_250">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="39.104400" name="tube_251">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="38.732000" name="tube_252">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="38.359600" name="tube_253">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="37.987200" name="tube_254">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="37.614700" name="tube_255">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="37.242300" name="tube_256">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door9">
-		<component type="standard-tube">
-			<location r="4.0" t="36.497500" name="tube_257">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="36.125100" name="tube_258">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="35.752600" name="tube_259">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="35.380200" name="tube_260">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="35.007800" name="tube_261">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="34.635400" name="tube_262">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="34.262900" name="tube_263">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="33.890500" name="tube_264">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="33.518100" name="tube_265">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="33.145700" name="tube_266">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="32.773200" name="tube_267">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="32.400800" name="tube_268">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="32.028400" name="tube_269">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="31.656000" name="tube_270">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="31.283600" name="tube_271">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="30.911100" name="tube_272">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="30.538700" name="tube_273">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="30.166300" name="tube_274">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="29.793900" name="tube_275">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="29.421400" name="tube_276">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="29.049000" name="tube_277">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="28.676600" name="tube_278">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="28.304200" name="tube_279">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="27.931700" name="tube_280">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="27.559300" name="tube_281">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="27.186900" name="tube_282">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="26.814500" name="tube_283">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="26.442000" name="tube_284">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="26.069600" name="tube_285">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="25.697200" name="tube_286">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="25.324800" name="tube_287">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="24.952400" name="tube_288">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door10">
-		<component type="standard-tube">
-			<location r="4.0" t="24.207500" name="tube_289">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="23.835100" name="tube_290">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="23.462700" name="tube_291">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="23.090200" name="tube_292">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="22.717800" name="tube_293">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="22.345400" name="tube_294">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="21.973000" name="tube_295">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="21.600500" name="tube_296">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="21.228100" name="tube_297">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="20.855700" name="tube_298">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="20.483300" name="tube_299">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="20.110900" name="tube_300">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="19.738400" name="tube_301">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="19.366000" name="tube_302">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="18.993600" name="tube_303">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="18.621200" name="tube_304">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="18.248700" name="tube_305">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="17.876300" name="tube_306">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="17.503900" name="tube_307">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="17.131500" name="tube_308">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="16.759000" name="tube_309">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="16.386600" name="tube_310">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="16.014200" name="tube_311">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="15.641800" name="tube_312">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="15.269400" name="tube_313">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="14.896900" name="tube_314">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="14.524500" name="tube_315">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="14.152100" name="tube_316">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="13.779700" name="tube_317">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="13.407200" name="tube_318">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="13.034800" name="tube_319">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="12.662400" name="tube_320">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door11">
-		<component type="standard-tube">
-			<location r="4.0" t="11.917500" name="tube_321">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="11.545100" name="tube_322">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="11.172700" name="tube_323">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="10.800300" name="tube_324">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="10.427900" name="tube_325">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="10.055400" name="tube_326">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="9.683000" name="tube_327">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="9.310580" name="tube_328">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="8.938160" name="tube_329">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="8.565730" name="tube_330">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="8.193310" name="tube_331">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="7.820890" name="tube_332">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="7.448460" name="tube_333">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="7.076040" name="tube_334">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="6.703620" name="tube_335">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="6.331190" name="tube_336">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="5.958770" name="tube_337">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="5.586350" name="tube_338">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="5.213930" name="tube_339">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="4.841500" name="tube_340">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="4.469080" name="tube_341">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="4.096660" name="tube_342">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="3.724230" name="tube_343">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="3.351810" name="tube_344">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="2.979390" name="tube_345">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="2.606960" name="tube_346">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="2.234540" name="tube_347">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="1.862120" name="tube_348">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="1.489690" name="tube_349">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="1.117270" name="tube_350">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="0.744847" name="tube_351">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="0.372423" name="tube_352">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-	<type name="door12">
-		<component type="standard-tube">
-			<location r="4.0" t="-0.372423" name="tube_353">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-0.744846" name="tube_354">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-1.117270" name="tube_355">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-1.489690" name="tube_356">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-1.862120" name="tube_357">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-2.234540" name="tube_358">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-2.606960" name="tube_359">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-2.979390" name="tube_360">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-3.351810" name="tube_361">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-3.724230" name="tube_362">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-4.096660" name="tube_363">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-4.469080" name="tube_364">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-4.841500" name="tube_365">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-5.213930" name="tube_366">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-5.586350" name="tube_367">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-5.958770" name="tube_368">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-6.331190" name="tube_369">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-6.703620" name="tube_370">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-7.076040" name="tube_371">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-7.448460" name="tube_372">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-7.820890" name="tube_373">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-8.193310" name="tube_374">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-8.565730" name="tube_375">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-8.938160" name="tube_376">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-9.310580" name="tube_377">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-9.683000" name="tube_378">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-10.055400" name="tube_379">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-10.427900" name="tube_380">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-10.800300" name="tube_381">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-11.172700" name="tube_382">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-11.545100" name="tube_383">
-				<facing x="0" y="0" z="0" />
-			</location>
-			<location r="4.0" t="-11.917500" name="tube_384">
-				<facing x="0" y="0" z="0" />
-			</location>
-		</component>
-	</type>
-
-	<!--Definition of standard-tube. TODO: This instrument may have different 
-		configurations: either 1025, 512 or 256 pixels per tube. We may have to create 
-		different IDFs according to the data collection dates / instrument configuration. 
-		This configuration has only 256 pixels -->
-	<!-- In 5: 2.95m / 241 positions = 256 - 7 pixel top - 8 pixels bottom -->
-	<type name="standard-tube" outline="yes">
-		<component type="standard-pixel">
-			<location y="-1.566805" />
-			<location y="-1.554516" />
-			<location y="-1.542228" />
-			<location y="-1.529939" />
-			<location y="-1.517650" />
-			<location y="-1.505362" />
-			<location y="-1.493073" />
-			<location y="-1.480784" />
-			<location y="-1.468496" />
-			<location y="-1.456207" />
-			<location y="-1.443918" />
-			<location y="-1.431630" />
-			<location y="-1.419341" />
-			<location y="-1.407052" />
-			<location y="-1.394764" />
-			<location y="-1.382475" />
-			<location y="-1.370186" />
-			<location y="-1.357898" />
-			<location y="-1.345609" />
-			<location y="-1.333320" />
-			<location y="-1.321032" />
-			<location y="-1.308743" />
-			<location y="-1.296454" />
-			<location y="-1.284166" />
-			<location y="-1.271877" />
-			<location y="-1.259588" />
-			<location y="-1.247300" />
-			<location y="-1.235011" />
-			<location y="-1.222722" />
-			<location y="-1.210434" />
-			<location y="-1.198145" />
-			<location y="-1.185856" />
-			<location y="-1.173568" />
-			<location y="-1.161279" />
-			<location y="-1.148990" />
-			<location y="-1.136702" />
-			<location y="-1.124413" />
-			<location y="-1.112124" />
-			<location y="-1.099836" />
-			<location y="-1.087547" />
-			<location y="-1.075258" />
-			<location y="-1.062970" />
-			<location y="-1.050681" />
-			<location y="-1.038392" />
-			<location y="-1.026104" />
-			<location y="-1.013815" />
-			<location y="-1.001526" />
-			<location y="-0.989238" />
-			<location y="-0.976949" />
-			<location y="-0.964660" />
-			<location y="-0.952372" />
-			<location y="-0.940083" />
-			<location y="-0.927794" />
-			<location y="-0.915506" />
-			<location y="-0.903217" />
-			<location y="-0.890928" />
-			<location y="-0.878640" />
-			<location y="-0.866351" />
-			<location y="-0.854062" />
-			<location y="-0.841774" />
-			<location y="-0.829485" />
-			<location y="-0.817196" />
-			<location y="-0.804908" />
-			<location y="-0.792619" />
-			<location y="-0.780330" />
-			<location y="-0.768042" />
-			<location y="-0.755753" />
-			<location y="-0.743464" />
-			<location y="-0.731176" />
-			<location y="-0.718887" />
-			<location y="-0.706598" />
-			<location y="-0.694310" />
-			<location y="-0.682021" />
-			<location y="-0.669732" />
-			<location y="-0.657444" />
-			<location y="-0.645155" />
-			<location y="-0.632866" />
-			<location y="-0.620578" />
-			<location y="-0.608289" />
-			<location y="-0.596000" />
-			<location y="-0.583712" />
-			<location y="-0.571423" />
-			<location y="-0.559134" />
-			<location y="-0.546846" />
-			<location y="-0.534557" />
-			<location y="-0.522268" />
-			<location y="-0.509980" />
-			<location y="-0.497691" />
-			<location y="-0.485402" />
-			<location y="-0.473114" />
-			<location y="-0.460825" />
-			<location y="-0.448536" />
-			<location y="-0.436248" />
-			<location y="-0.423959" />
-			<location y="-0.411670" />
-			<location y="-0.399382" />
-			<location y="-0.387093" />
-			<location y="-0.374804" />
-			<location y="-0.362516" />
-			<location y="-0.350227" />
-			<location y="-0.337938" />
-			<location y="-0.325650" />
-			<location y="-0.313361" />
-			<location y="-0.301072" />
-			<location y="-0.288784" />
-			<location y="-0.276495" />
-			<location y="-0.264206" />
-			<location y="-0.251918" />
-			<location y="-0.239629" />
-			<location y="-0.227340" />
-			<location y="-0.215052" />
-			<location y="-0.202763" />
-			<location y="-0.190474" />
-			<location y="-0.178186" />
-			<location y="-0.165897" />
-			<location y="-0.153608" />
-			<location y="-0.141320" />
-			<location y="-0.129031" />
-			<location y="-0.116742" />
-			<location y="-0.104454" />
-			<location y="-0.092165" />
-			<location y="-0.079876" />
-			<location y="-0.067588" />
-			<location y="-0.055299" />
-			<location y="-0.043010" />
-			<location y="-0.030722" />
-			<location y="-0.018433" />
-			<location y="-0.006144" />
-			<location y="0.006144" />
-			<location y="0.018433" />
-			<location y="0.030722" />
-			<location y="0.043010" />
-			<location y="0.055299" />
-			<location y="0.067588" />
-			<location y="0.079876" />
-			<location y="0.092165" />
-			<location y="0.104454" />
-			<location y="0.116742" />
-			<location y="0.129031" />
-			<location y="0.141320" />
-			<location y="0.153608" />
-			<location y="0.165897" />
-			<location y="0.178186" />
-			<location y="0.190474" />
-			<location y="0.202763" />
-			<location y="0.215052" />
-			<location y="0.227340" />
-			<location y="0.239629" />
-			<location y="0.251918" />
-			<location y="0.264206" />
-			<location y="0.276495" />
-			<location y="0.288784" />
-			<location y="0.301072" />
-			<location y="0.313361" />
-			<location y="0.325650" />
-			<location y="0.337938" />
-			<location y="0.350227" />
-			<location y="0.362516" />
-			<location y="0.374804" />
-			<location y="0.387093" />
-			<location y="0.399382" />
-			<location y="0.411670" />
-			<location y="0.423959" />
-			<location y="0.436248" />
-			<location y="0.448536" />
-			<location y="0.460825" />
-			<location y="0.473114" />
-			<location y="0.485402" />
-			<location y="0.497691" />
-			<location y="0.509980" />
-			<location y="0.522268" />
-			<location y="0.534557" />
-			<location y="0.546846" />
-			<location y="0.559134" />
-			<location y="0.571423" />
-			<location y="0.583712" />
-			<location y="0.596000" />
-			<location y="0.608289" />
-			<location y="0.620578" />
-			<location y="0.632866" />
-			<location y="0.645155" />
-			<location y="0.657444" />
-			<location y="0.669732" />
-			<location y="0.682021" />
-			<location y="0.694310" />
-			<location y="0.706598" />
-			<location y="0.718887" />
-			<location y="0.731176" />
-			<location y="0.743464" />
-			<location y="0.755753" />
-			<location y="0.768042" />
-			<location y="0.780330" />
-			<location y="0.792619" />
-			<location y="0.804908" />
-			<location y="0.817196" />
-			<location y="0.829485" />
-			<location y="0.841774" />
-			<location y="0.854062" />
-			<location y="0.866351" />
-			<location y="0.878640" />
-			<location y="0.890928" />
-			<location y="0.903217" />
-			<location y="0.915506" />
-			<location y="0.927794" />
-			<location y="0.940083" />
-			<location y="0.952372" />
-			<location y="0.964660" />
-			<location y="0.976949" />
-			<location y="0.989238" />
-			<location y="1.001526" />
-			<location y="1.013815" />
-			<location y="1.026104" />
-			<location y="1.038392" />
-			<location y="1.050681" />
-			<location y="1.062970" />
-			<location y="1.075258" />
-			<location y="1.087547" />
-			<location y="1.099836" />
-			<location y="1.112124" />
-			<location y="1.124413" />
-			<location y="1.136702" />
-			<location y="1.148990" />
-			<location y="1.161279" />
-			<location y="1.173568" />
-			<location y="1.185856" />
-			<location y="1.198145" />
-			<location y="1.210434" />
-			<location y="1.222722" />
-			<location y="1.235011" />
-			<location y="1.247300" />
-			<location y="1.259588" />
-			<location y="1.271877" />
-			<location y="1.284166" />
-			<location y="1.296454" />
-			<location y="1.308743" />
-			<location y="1.321032" />
-			<location y="1.333320" />
-			<location y="1.345609" />
-			<location y="1.357898" />
-			<location y="1.370186" />
-			<location y="1.382475" />
-			<location y="1.394764" />
-			<location y="1.407052" />
-			<location y="1.419341" />
-			<location y="1.431630" />
-			<location y="1.443918" />
-			<location y="1.456207" />
-			<location y="1.468496" />
-			<location y="1.480784" />
-			<location y="1.493073" />
-			<location y="1.505362" />
-			<location y="1.517650" />
-			<location y="1.529939" />
-			<location y="1.542228" />
-			<location y="1.554516" />
-			<location y="1.566805" />
-		</component>
-	</type>
-
-	<!-- Definition of standard-pixel -->
-	<type name="standard-pixel" is="detector">
-		<cylinder id="shape">
-			<centre-of-bottom-base x="0.0" y="-0.006144" z="0.0" />
-			<axis x="0.0" y="1.0" z="0.0" />
-			<radius val="0.0127" />
-			<height val=".0114341328125" />
-		</cylinder>
-		<algebra val="shape" />
-	</type>
-
-	<!-- DETECTOR ID LISTS -->
-
-	<!-- Auto generated Merlin has 1024 positions, IN5 only 256 -->
-	<idlist idname="door1">
-		<id start="1" end="8192" />
-	</idlist>
-	<idlist idname="door2">
-		<id start="8193" end="8448" />
-		<id start="8449" end="8704" />
-		<id start="8705" end="8960" />
-		<id start="8961" end="9216" />
-		<id start="9217" end="9472" />
-		<id start="9473" end="9728" />
-		<id start="9729" end="9984" />
-		<id start="9985" end="10240" />
-		<id start="10241" end="10496" />
-		<id start="10497" end="10752" />
-		<id start="10753" end="11008" />
-		<id start="11009" end="11264" />
-		<id start="11265" end="11520" />
-		<id start="11521" end="11776" />
-		<id start="11777" end="12032" />
-		<id start="12033" end="12288" />
-		<id start="12289" end="12544" />
-		<id start="12545" end="12800" />
-		<id start="12801" end="13056" />
-		<id start="13057" end="13312" />
-		<id start="13313" end="13568" />
-		<id start="13569" end="13824" />
-		<id start="13825" end="14080" />
-		<id start="14081" end="14336" />
-		<id start="14337" end="14592" />
-		<id start="14593" end="14848" />
-		<id start="14849" end="15104" />
-		<id start="15105" end="15360" />
-		<id start="15361" end="15616" />
-		<id start="15617" end="15872" />
-		<id start="15873" end="16128" />
-		<id start="16129" end="16384" />
-	</idlist>
-	<idlist idname="door3">
-		<id start="16385" end="16640" />
-		<id start="16641" end="16896" />
-		<id start="16897" end="17152" />
-		<id start="17153" end="17408" />
-		<id start="17409" end="17664" />
-		<id start="17665" end="17920" />
-		<id start="17921" end="18176" />
-		<id start="18177" end="18432" />
-		<id start="18433" end="18688" />
-		<id start="18689" end="18944" />
-		<id start="18945" end="19200" />
-		<id start="19201" end="19456" />
-		<id start="19457" end="19712" />
-		<id start="19713" end="19968" />
-		<id start="19969" end="20224" />
-		<id start="20225" end="20480" />
-		<id start="20481" end="20736" />
-		<id start="20737" end="20992" />
-		<id start="20993" end="21248" />
-		<id start="21249" end="21504" />
-		<id start="21505" end="21760" />
-		<id start="21761" end="22016" />
-		<id start="22017" end="22272" />
-		<id start="22273" end="22528" />
-		<id start="22529" end="22784" />
-		<id start="22785" end="23040" />
-		<id start="23041" end="23296" />
-		<id start="23297" end="23552" />
-		<id start="23553" end="23808" />
-		<id start="23809" end="24064" />
-		<id start="24065" end="24320" />
-		<id start="24321" end="24576" />
-	</idlist>
-	<idlist idname="door4">
-		<id start="24577" end="24832" />
-		<id start="24833" end="25088" />
-		<id start="25089" end="25344" />
-		<id start="25345" end="25600" />
-		<id start="25601" end="25856" />
-		<id start="25857" end="26112" />
-		<id start="26113" end="26368" />
-		<id start="26369" end="26624" />
-		<id start="26625" end="26880" />
-		<id start="26881" end="27136" />
-		<id start="27137" end="27392" />
-		<id start="27393" end="27648" />
-		<id start="27649" end="27904" />
-		<id start="27905" end="28160" />
-		<id start="28161" end="28416" />
-		<id start="28417" end="28672" />
-		<id start="28673" end="28928" />
-		<id start="28929" end="29184" />
-		<id start="29185" end="29440" />
-		<id start="29441" end="29696" />
-		<id start="29697" end="29952" />
-		<id start="29953" end="30208" />
-		<id start="30209" end="30464" />
-		<id start="30465" end="30720" />
-		<id start="30721" end="30976" />
-		<id start="30977" end="31232" />
-		<id start="31233" end="31488" />
-		<id start="31489" end="31744" />
-		<id start="31745" end="32000" />
-		<id start="32001" end="32256" />
-		<id start="32257" end="32512" />
-		<id start="32513" end="32768" />
-	</idlist>
-	<idlist idname="door5">
-		<id start="32769" end="33024" />
-		<id start="33025" end="33280" />
-		<id start="33281" end="33536" />
-		<id start="33537" end="33792" />
-		<id start="33793" end="34048" />
-		<id start="34049" end="34304" />
-		<id start="34305" end="34560" />
-		<id start="34561" end="34816" />
-		<id start="34817" end="35072" />
-		<id start="35073" end="35328" />
-		<id start="35329" end="35584" />
-		<id start="35585" end="35840" />
-		<id start="35841" end="36096" />
-		<id start="36097" end="36352" />
-		<id start="36353" end="36608" />
-		<id start="36609" end="36864" />
-		<id start="36865" end="37120" />
-		<id start="37121" end="37376" />
-		<id start="37377" end="37632" />
-		<id start="37633" end="37888" />
-		<id start="37889" end="38144" />
-		<id start="38145" end="38400" />
-		<id start="38401" end="38656" />
-		<id start="38657" end="38912" />
-		<id start="38913" end="39168" />
-		<id start="39169" end="39424" />
-		<id start="39425" end="39680" />
-		<id start="39681" end="39936" />
-		<id start="39937" end="40192" />
-		<id start="40193" end="40448" />
-		<id start="40449" end="40704" />
-		<id start="40705" end="40960" />
-	</idlist>
-	<idlist idname="door6">
-		<id start="40961" end="41216" />
-		<id start="41217" end="41472" />
-		<id start="41473" end="41728" />
-		<id start="41729" end="41984" />
-		<id start="41985" end="42240" />
-		<id start="42241" end="42496" />
-		<id start="42497" end="42752" />
-		<id start="42753" end="43008" />
-		<id start="43009" end="43264" />
-		<id start="43265" end="43520" />
-		<id start="43521" end="43776" />
-		<id start="43777" end="44032" />
-		<id start="44033" end="44288" />
-		<id start="44289" end="44544" />
-		<id start="44545" end="44800" />
-		<id start="44801" end="45056" />
-		<id start="45057" end="45312" />
-		<id start="45313" end="45568" />
-		<id start="45569" end="45824" />
-		<id start="45825" end="46080" />
-		<id start="46081" end="46336" />
-		<id start="46337" end="46592" />
-		<id start="46593" end="46848" />
-		<id start="46849" end="47104" />
-		<id start="47105" end="47360" />
-		<id start="47361" end="47616" />
-		<id start="47617" end="47872" />
-		<id start="47873" end="48128" />
-		<id start="48129" end="48384" />
-		<id start="48385" end="48640" />
-		<id start="48641" end="48896" />
-		<id start="48897" end="49152" />
-	</idlist>
-	<idlist idname="door7">
-		<id start="49153" end="49408" />
-		<id start="49409" end="49664" />
-		<id start="49665" end="49920" />
-		<id start="49921" end="50176" />
-		<id start="50177" end="50432" />
-		<id start="50433" end="50688" />
-		<id start="50689" end="50944" />
-		<id start="50945" end="51200" />
-		<id start="51201" end="51456" />
-		<id start="51457" end="51712" />
-		<id start="51713" end="51968" />
-		<id start="51969" end="52224" />
-		<id start="52225" end="52480" />
-		<id start="52481" end="52736" />
-		<id start="52737" end="52992" />
-		<id start="52993" end="53248" />
-		<id start="53249" end="53504" />
-		<id start="53505" end="53760" />
-		<id start="53761" end="54016" />
-		<id start="54017" end="54272" />
-		<id start="54273" end="54528" />
-		<id start="54529" end="54784" />
-		<id start="54785" end="55040" />
-		<id start="55041" end="55296" />
-		<id start="55297" end="55552" />
-		<id start="55553" end="55808" />
-		<id start="55809" end="56064" />
-		<id start="56065" end="56320" />
-		<id start="56321" end="56576" />
-		<id start="56577" end="56832" />
-		<id start="56833" end="57088" />
-		<id start="57089" end="57344" />
-	</idlist>
-	<idlist idname="door8">
-		<id start="57345" end="57600" />
-		<id start="57601" end="57856" />
-		<id start="57857" end="58112" />
-		<id start="58113" end="58368" />
-		<id start="58369" end="58624" />
-		<id start="58625" end="58880" />
-		<id start="58881" end="59136" />
-		<id start="59137" end="59392" />
-		<id start="59393" end="59648" />
-		<id start="59649" end="59904" />
-		<id start="59905" end="60160" />
-		<id start="60161" end="60416" />
-		<id start="60417" end="60672" />
-		<id start="60673" end="60928" />
-		<id start="60929" end="61184" />
-		<id start="61185" end="61440" />
-		<id start="61441" end="61696" />
-		<id start="61697" end="61952" />
-		<id start="61953" end="62208" />
-		<id start="62209" end="62464" />
-		<id start="62465" end="62720" />
-		<id start="62721" end="62976" />
-		<id start="62977" end="63232" />
-		<id start="63233" end="63488" />
-		<id start="63489" end="63744" />
-		<id start="63745" end="64000" />
-		<id start="64001" end="64256" />
-		<id start="64257" end="64512" />
-		<id start="64513" end="64768" />
-		<id start="64769" end="65024" />
-		<id start="65025" end="65280" />
-		<id start="65281" end="65536" />
-	</idlist>
-	<idlist idname="door9">
-		<id start="65537" end="65792" />
-		<id start="65793" end="66048" />
-		<id start="66049" end="66304" />
-		<id start="66305" end="66560" />
-		<id start="66561" end="66816" />
-		<id start="66817" end="67072" />
-		<id start="67073" end="67328" />
-		<id start="67329" end="67584" />
-		<id start="67585" end="67840" />
-		<id start="67841" end="68096" />
-		<id start="68097" end="68352" />
-		<id start="68353" end="68608" />
-		<id start="68609" end="68864" />
-		<id start="68865" end="69120" />
-		<id start="69121" end="69376" />
-		<id start="69377" end="69632" />
-		<id start="69633" end="69888" />
-		<id start="69889" end="70144" />
-		<id start="70145" end="70400" />
-		<id start="70401" end="70656" />
-		<id start="70657" end="70912" />
-		<id start="70913" end="71168" />
-		<id start="71169" end="71424" />
-		<id start="71425" end="71680" />
-		<id start="71681" end="71936" />
-		<id start="71937" end="72192" />
-		<id start="72193" end="72448" />
-		<id start="72449" end="72704" />
-		<id start="72705" end="72960" />
-		<id start="72961" end="73216" />
-		<id start="73217" end="73472" />
-		<id start="73473" end="73728" />
-	</idlist>
-	<idlist idname="door10">
-		<id start="73729" end="73984" />
-		<id start="73985" end="74240" />
-		<id start="74241" end="74496" />
-		<id start="74497" end="74752" />
-		<id start="74753" end="75008" />
-		<id start="75009" end="75264" />
-		<id start="75265" end="75520" />
-		<id start="75521" end="75776" />
-		<id start="75777" end="76032" />
-		<id start="76033" end="76288" />
-		<id start="76289" end="76544" />
-		<id start="76545" end="76800" />
-		<id start="76801" end="77056" />
-		<id start="77057" end="77312" />
-		<id start="77313" end="77568" />
-		<id start="77569" end="77824" />
-		<id start="77825" end="78080" />
-		<id start="78081" end="78336" />
-		<id start="78337" end="78592" />
-		<id start="78593" end="78848" />
-		<id start="78849" end="79104" />
-		<id start="79105" end="79360" />
-		<id start="79361" end="79616" />
-		<id start="79617" end="79872" />
-		<id start="79873" end="80128" />
-		<id start="80129" end="80384" />
-		<id start="80385" end="80640" />
-		<id start="80641" end="80896" />
-		<id start="80897" end="81152" />
-		<id start="81153" end="81408" />
-		<id start="81409" end="81664" />
-		<id start="81665" end="81920" />
-	</idlist>
-	<idlist idname="door11">
-		<id start="81921" end="82176" />
-		<id start="82177" end="82432" />
-		<id start="82433" end="82688" />
-		<id start="82689" end="82944" />
-		<id start="82945" end="83200" />
-		<id start="83201" end="83456" />
-		<id start="83457" end="83712" />
-		<id start="83713" end="83968" />
-		<id start="83969" end="84224" />
-		<id start="84225" end="84480" />
-		<id start="84481" end="84736" />
-		<id start="84737" end="84992" />
-		<id start="84993" end="85248" />
-		<id start="85249" end="85504" />
-		<id start="85505" end="85760" />
-		<id start="85761" end="86016" />
-		<id start="86017" end="86272" />
-		<id start="86273" end="86528" />
-		<id start="86529" end="86784" />
-		<id start="86785" end="87040" />
-		<id start="87041" end="87296" />
-		<id start="87297" end="87552" />
-		<id start="87553" end="87808" />
-		<id start="87809" end="88064" />
-		<id start="88065" end="88320" />
-		<id start="88321" end="88576" />
-		<id start="88577" end="88832" />
-		<id start="88833" end="89088" />
-		<id start="89089" end="89344" />
-		<id start="89345" end="89600" />
-		<id start="89601" end="89856" />
-		<id start="89857" end="90112" />
-	</idlist>
-	<idlist idname="door12">
-		<id start="90113" end="90368" />
-		<id start="90369" end="90624" />
-		<id start="90625" end="90880" />
-		<id start="90881" end="91136" />
-		<id start="91137" end="91392" />
-		<id start="91393" end="91648" />
-		<id start="91649" end="91904" />
-		<id start="91905" end="92160" />
-		<id start="92161" end="92416" />
-		<id start="92417" end="92672" />
-		<id start="92673" end="92928" />
-		<id start="92929" end="93184" />
-		<id start="93185" end="93440" />
-		<id start="93441" end="93696" />
-		<id start="93697" end="93952" />
-		<id start="93953" end="94208" />
-		<id start="94209" end="94464" />
-		<id start="94465" end="94720" />
-		<id start="94721" end="94976" />
-		<id start="94977" end="95232" />
-		<id start="95233" end="95488" />
-		<id start="95489" end="95744" />
-		<id start="95745" end="96000" />
-		<id start="96001" end="96256" />
-		<id start="96257" end="96512" />
-		<id start="96513" end="96768" />
-		<id start="96769" end="97024" />
-		<id start="97025" end="97280" />
-		<id start="97281" end="97536" />
-		<id start="97537" end="97792" />
-		<id start="97793" end="98048" />
-		<id start="98049" end="98304" />
-	</idlist>
-
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
+<instrument name="IN5" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2013-06-25 12:56:06">
+  <!-- Author: ricardo.leal@ill.fr -->
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+             y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+  <component type="moderator">
+    <location z="-2" />
+  </component>
+  <type name="moderator" is="Source"></type>
+  <!-- Sample position -->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0" />
+  </component>
+  <type name="sample-position" is="SamplePos" />
+  <idlist idname="detectors">
+    <id start="1" end="98304" />
+  </idlist>
+  <!-- Detector list def -->
+  <component type="detectors" idlist="detectors">
+    <location />
+  </component>
+  <!-- Detector Banks -->
+  <type name="detectors">
+    <component type="bank_uniq">
+      <location />
+    </component>
+  </type>
+  <!-- Definition of the unique existent bank (made of tubes) -->
+  <type name="bank_uniq">
+    <component type="standard_tube">
+      <location r="4.000000" t="134.817000" name="tube_1" />
+      <location r="4.000000" t="134.445000" name="tube_2" />
+      <location r="4.000000" t="134.072000" name="tube_3" />
+      <location r="4.000000" t="133.700000" name="tube_4" />
+      <location r="4.000000" t="133.328000" name="tube_5" />
+      <location r="4.000000" t="132.955000" name="tube_6" />
+      <location r="4.000000" t="132.583000" name="tube_7" />
+      <location r="4.000000" t="132.210000" name="tube_8" />
+      <location r="4.000000" t="131.838000" name="tube_9" />
+      <location r="4.000000" t="131.465000" name="tube_10" />
+      <location r="4.000000" t="131.093000" name="tube_11" />
+      <location r="4.000000" t="130.721000" name="tube_12" />
+      <location r="4.000000" t="130.348000" name="tube_13" />
+      <location r="4.000000" t="129.976000" name="tube_14" />
+      <location r="4.000000" t="129.603000" name="tube_15" />
+      <location r="4.000000" t="129.231000" name="tube_16" />
+      <location r="4.000000" t="128.858000" name="tube_17" />
+      <location r="4.000000" t="128.486000" name="tube_18" />
+      <location r="4.000000" t="128.114000" name="tube_19" />
+      <location r="4.000000" t="127.741000" name="tube_20" />
+      <location r="4.000000" t="127.369000" name="tube_21" />
+      <location r="4.000000" t="126.996000" name="tube_22" />
+      <location r="4.000000" t="126.624000" name="tube_23" />
+      <location r="4.000000" t="126.251000" name="tube_24" />
+      <location r="4.000000" t="125.879000" name="tube_25" />
+      <location r="4.000000" t="125.507000" name="tube_26" />
+      <location r="4.000000" t="125.134000" name="tube_27" />
+      <location r="4.000000" t="124.762000" name="tube_28" />
+      <location r="4.000000" t="124.389000" name="tube_29" />
+      <location r="4.000000" t="124.017000" name="tube_30" />
+      <location r="4.000000" t="123.645000" name="tube_31" />
+      <location r="4.000000" t="123.272000" name="tube_32" />
+      <location r="4.000000" t="122.527000" name="tube_33" />
+      <location r="4.000000" t="122.155000" name="tube_34" />
+      <location r="4.000000" t="121.782000" name="tube_35" />
+      <location r="4.000000" t="121.410000" name="tube_36" />
+      <location r="4.000000" t="121.038000" name="tube_37" />
+      <location r="4.000000" t="120.665000" name="tube_38" />
+      <location r="4.000000" t="120.293000" name="tube_39" />
+      <location r="4.000000" t="119.920000" name="tube_40" />
+      <location r="4.000000" t="119.548000" name="tube_41" />
+      <location r="4.000000" t="119.175000" name="tube_42" />
+      <location r="4.000000" t="118.803000" name="tube_43" />
+      <location r="4.000000" t="118.431000" name="tube_44" />
+      <location r="4.000000" t="118.058000" name="tube_45" />
+      <location r="4.000000" t="117.686000" name="tube_46" />
+      <location r="4.000000" t="117.313000" name="tube_47" />
+      <location r="4.000000" t="116.941000" name="tube_48" />
+      <location r="4.000000" t="116.568000" name="tube_49" />
+      <location r="4.000000" t="116.196000" name="tube_50" />
+      <location r="4.000000" t="115.824000" name="tube_51" />
+      <location r="4.000000" t="115.451000" name="tube_52" />
+      <location r="4.000000" t="115.079000" name="tube_53" />
+      <location r="4.000000" t="114.706000" name="tube_54" />
+      <location r="4.000000" t="114.334000" name="tube_55" />
+      <location r="4.000000" t="113.962000" name="tube_56" />
+      <location r="4.000000" t="113.589000" name="tube_57" />
+      <location r="4.000000" t="113.217000" name="tube_58" />
+      <location r="4.000000" t="112.844000" name="tube_59" />
+      <location r="4.000000" t="112.472000" name="tube_60" />
+      <location r="4.000000" t="112.099000" name="tube_61" />
+      <location r="4.000000" t="111.727000" name="tube_62" />
+      <location r="4.000000" t="111.355000" name="tube_63" />
+      <location r="4.000000" t="110.982000" name="tube_64" />
+      <location r="4.000000" t="110.237000" name="tube_65" />
+      <location r="4.000000" t="109.865000" name="tube_66" />
+      <location r="4.000000" t="109.492000" name="tube_67" />
+      <location r="4.000000" t="109.120000" name="tube_68" />
+      <location r="4.000000" t="108.748000" name="tube_69" />
+      <location r="4.000000" t="108.375000" name="tube_70" />
+      <location r="4.000000" t="108.003000" name="tube_71" />
+      <location r="4.000000" t="107.630000" name="tube_72" />
+      <location r="4.000000" t="107.258000" name="tube_73" />
+      <location r="4.000000" t="106.885000" name="tube_74" />
+      <location r="4.000000" t="106.513000" name="tube_75" />
+      <location r="4.000000" t="106.141000" name="tube_76" />
+      <location r="4.000000" t="105.768000" name="tube_77" />
+      <location r="4.000000" t="105.396000" name="tube_78" />
+      <location r="4.000000" t="105.023000" name="tube_79" />
+      <location r="4.000000" t="104.651000" name="tube_80" />
+      <location r="4.000000" t="104.279000" name="tube_81" />
+      <location r="4.000000" t="103.906000" name="tube_82" />
+      <location r="4.000000" t="103.534000" name="tube_83" />
+      <location r="4.000000" t="103.161000" name="tube_84" />
+      <location r="4.000000" t="102.789000" name="tube_85" />
+      <location r="4.000000" t="102.416000" name="tube_86" />
+      <location r="4.000000" t="102.044000" name="tube_87" />
+      <location r="4.000000" t="101.672000" name="tube_88" />
+      <location r="4.000000" t="101.299000" name="tube_89" />
+      <location r="4.000000" t="100.927000" name="tube_90" />
+      <location r="4.000000" t="100.554000" name="tube_91" />
+      <location r="4.000000" t="100.182000" name="tube_92" />
+      <location r="4.000000" t="99.809400" name="tube_93" />
+      <location r="4.000000" t="99.437000" name="tube_94" />
+      <location r="4.000000" t="99.064600" name="tube_95" />
+      <location r="4.000000" t="98.692200" name="tube_96" />
+      <location r="4.000000" t="97.947300" name="tube_97" />
+      <location r="4.000000" t="97.574900" name="tube_98" />
+      <location r="4.000000" t="97.202500" name="tube_99" />
+      <location r="4.000000" t="96.830000" name="tube_100" />
+      <location r="4.000000" t="96.457600" name="tube_101" />
+      <location r="4.000000" t="96.085200" name="tube_102" />
+      <location r="4.000000" t="95.712800" name="tube_103" />
+      <location r="4.000000" t="95.340400" name="tube_104" />
+      <location r="4.000000" t="94.967900" name="tube_105" />
+      <location r="4.000000" t="94.595500" name="tube_106" />
+      <location r="4.000000" t="94.223100" name="tube_107" />
+      <location r="4.000000" t="93.850700" name="tube_108" />
+      <location r="4.000000" t="93.478200" name="tube_109" />
+      <location r="4.000000" t="93.105800" name="tube_110" />
+      <location r="4.000000" t="92.733400" name="tube_111" />
+      <location r="4.000000" t="92.361000" name="tube_112" />
+      <location r="4.000000" t="91.988500" name="tube_113" />
+      <location r="4.000000" t="91.616100" name="tube_114" />
+      <location r="4.000000" t="91.243700" name="tube_115" />
+      <location r="4.000000" t="90.871300" name="tube_116" />
+      <location r="4.000000" t="90.498900" name="tube_117" />
+      <location r="4.000000" t="90.126400" name="tube_118" />
+      <location r="4.000000" t="89.754000" name="tube_119" />
+      <location r="4.000000" t="89.381600" name="tube_120" />
+      <location r="4.000000" t="89.009200" name="tube_121" />
+      <location r="4.000000" t="88.636700" name="tube_122" />
+      <location r="4.000000" t="88.264300" name="tube_123" />
+      <location r="4.000000" t="87.891900" name="tube_124" />
+      <location r="4.000000" t="87.519500" name="tube_125" />
+      <location r="4.000000" t="87.147000" name="tube_126" />
+      <location r="4.000000" t="86.774600" name="tube_127" />
+      <location r="4.000000" t="86.402200" name="tube_128" />
+      <location r="4.000000" t="85.657300" name="tube_129" />
+      <location r="4.000000" t="85.284900" name="tube_130" />
+      <location r="4.000000" t="84.912500" name="tube_131" />
+      <location r="4.000000" t="84.540100" name="tube_132" />
+      <location r="4.000000" t="84.167700" name="tube_133" />
+      <location r="4.000000" t="83.795200" name="tube_134" />
+      <location r="4.000000" t="83.422800" name="tube_135" />
+      <location r="4.000000" t="83.050400" name="tube_136" />
+      <location r="4.000000" t="82.678000" name="tube_137" />
+      <location r="4.000000" t="82.305500" name="tube_138" />
+      <location r="4.000000" t="81.933100" name="tube_139" />
+      <location r="4.000000" t="81.560700" name="tube_140" />
+      <location r="4.000000" t="81.188300" name="tube_141" />
+      <location r="4.000000" t="80.815800" name="tube_142" />
+      <location r="4.000000" t="80.443400" name="tube_143" />
+      <location r="4.000000" t="80.071000" name="tube_144" />
+      <location r="4.000000" t="79.698600" name="tube_145" />
+      <location r="4.000000" t="79.326200" name="tube_146" />
+      <location r="4.000000" t="78.953700" name="tube_147" />
+      <location r="4.000000" t="78.581300" name="tube_148" />
+      <location r="4.000000" t="78.208900" name="tube_149" />
+      <location r="4.000000" t="77.836500" name="tube_150" />
+      <location r="4.000000" t="77.464000" name="tube_151" />
+      <location r="4.000000" t="77.091600" name="tube_152" />
+      <location r="4.000000" t="76.719200" name="tube_153" />
+      <location r="4.000000" t="76.346800" name="tube_154" />
+      <location r="4.000000" t="75.974300" name="tube_155" />
+      <location r="4.000000" t="75.601900" name="tube_156" />
+      <location r="4.000000" t="75.229500" name="tube_157" />
+      <location r="4.000000" t="74.857100" name="tube_158" />
+      <location r="4.000000" t="74.484600" name="tube_159" />
+      <location r="4.000000" t="74.112200" name="tube_160" />
+      <location r="4.000000" t="73.367400" name="tube_161" />
+      <location r="4.000000" t="72.995000" name="tube_162" />
+      <location r="4.000000" t="72.622500" name="tube_163" />
+      <location r="4.000000" t="72.250100" name="tube_164" />
+      <location r="4.000000" t="71.877700" name="tube_165" />
+      <location r="4.000000" t="71.505300" name="tube_166" />
+      <location r="4.000000" t="71.132800" name="tube_167" />
+      <location r="4.000000" t="70.760400" name="tube_168" />
+      <location r="4.000000" t="70.388000" name="tube_169" />
+      <location r="4.000000" t="70.015600" name="tube_170" />
+      <location r="4.000000" t="69.643200" name="tube_171" />
+      <location r="4.000000" t="69.270700" name="tube_172" />
+      <location r="4.000000" t="68.898300" name="tube_173" />
+      <location r="4.000000" t="68.525900" name="tube_174" />
+      <location r="4.000000" t="68.153500" name="tube_175" />
+      <location r="4.000000" t="67.781000" name="tube_176" />
+      <location r="4.000000" t="67.408600" name="tube_177" />
+      <location r="4.000000" t="67.036200" name="tube_178" />
+      <location r="4.000000" t="66.663800" name="tube_179" />
+      <location r="4.000000" t="66.291300" name="tube_180" />
+      <location r="4.000000" t="65.918900" name="tube_181" />
+      <location r="4.000000" t="65.546500" name="tube_182" />
+      <location r="4.000000" t="65.174100" name="tube_183" />
+      <location r="4.000000" t="64.801700" name="tube_184" />
+      <location r="4.000000" t="64.429200" name="tube_185" />
+      <location r="4.000000" t="64.056800" name="tube_186" />
+      <location r="4.000000" t="63.684400" name="tube_187" />
+      <location r="4.000000" t="63.312000" name="tube_188" />
+      <location r="4.000000" t="62.939500" name="tube_189" />
+      <location r="4.000000" t="62.567100" name="tube_190" />
+      <location r="4.000000" t="62.194700" name="tube_191" />
+      <location r="4.000000" t="61.822300" name="tube_192" />
+      <location r="4.000000" t="61.077400" name="tube_193" />
+      <location r="4.000000" t="60.705000" name="tube_194" />
+      <location r="4.000000" t="60.332600" name="tube_195" />
+      <location r="4.000000" t="59.960100" name="tube_196" />
+      <location r="4.000000" t="59.587700" name="tube_197" />
+      <location r="4.000000" t="59.215300" name="tube_198" />
+      <location r="4.000000" t="58.842900" name="tube_199" />
+      <location r="4.000000" t="58.470400" name="tube_200" />
+      <location r="4.000000" t="58.098000" name="tube_201" />
+      <location r="4.000000" t="57.725600" name="tube_202" />
+      <location r="4.000000" t="57.353200" name="tube_203" />
+      <location r="4.000000" t="56.980800" name="tube_204" />
+      <location r="4.000000" t="56.608300" name="tube_205" />
+      <location r="4.000000" t="56.235900" name="tube_206" />
+      <location r="4.000000" t="55.863500" name="tube_207" />
+      <location r="4.000000" t="55.491100" name="tube_208" />
+      <location r="4.000000" t="55.118600" name="tube_209" />
+      <location r="4.000000" t="54.746200" name="tube_210" />
+      <location r="4.000000" t="54.373800" name="tube_211" />
+      <location r="4.000000" t="54.001400" name="tube_212" />
+      <location r="4.000000" t="53.628900" name="tube_213" />
+      <location r="4.000000" t="53.256500" name="tube_214" />
+      <location r="4.000000" t="52.884100" name="tube_215" />
+      <location r="4.000000" t="52.511700" name="tube_216" />
+      <location r="4.000000" t="52.139300" name="tube_217" />
+      <location r="4.000000" t="51.766800" name="tube_218" />
+      <location r="4.000000" t="51.394400" name="tube_219" />
+      <location r="4.000000" t="51.022000" name="tube_220" />
+      <location r="4.000000" t="50.649600" name="tube_221" />
+      <location r="4.000000" t="50.277100" name="tube_222" />
+      <location r="4.000000" t="49.904700" name="tube_223" />
+      <location r="4.000000" t="49.532300" name="tube_224" />
+      <location r="4.000000" t="48.787400" name="tube_225" />
+      <location r="4.000000" t="48.415000" name="tube_226" />
+      <location r="4.000000" t="48.042600" name="tube_227" />
+      <location r="4.000000" t="47.670200" name="tube_228" />
+      <location r="4.000000" t="47.297800" name="tube_229" />
+      <location r="4.000000" t="46.925300" name="tube_230" />
+      <location r="4.000000" t="46.552900" name="tube_231" />
+      <location r="4.000000" t="46.180500" name="tube_232" />
+      <location r="4.000000" t="45.808100" name="tube_233" />
+      <location r="4.000000" t="45.435600" name="tube_234" />
+      <location r="4.000000" t="45.063200" name="tube_235" />
+      <location r="4.000000" t="44.690800" name="tube_236" />
+      <location r="4.000000" t="44.318400" name="tube_237" />
+      <location r="4.000000" t="43.945900" name="tube_238" />
+      <location r="4.000000" t="43.573500" name="tube_239" />
+      <location r="4.000000" t="43.201100" name="tube_240" />
+      <location r="4.000000" t="42.828700" name="tube_241" />
+      <location r="4.000000" t="42.456200" name="tube_242" />
+      <location r="4.000000" t="42.083800" name="tube_243" />
+      <location r="4.000000" t="41.711400" name="tube_244" />
+      <location r="4.000000" t="41.339000" name="tube_245" />
+      <location r="4.000000" t="40.966600" name="tube_246" />
+      <location r="4.000000" t="40.594100" name="tube_247" />
+      <location r="4.000000" t="40.221700" name="tube_248" />
+      <location r="4.000000" t="39.849300" name="tube_249" />
+      <location r="4.000000" t="39.476900" name="tube_250" />
+      <location r="4.000000" t="39.104400" name="tube_251" />
+      <location r="4.000000" t="38.732000" name="tube_252" />
+      <location r="4.000000" t="38.359600" name="tube_253" />
+      <location r="4.000000" t="37.987200" name="tube_254" />
+      <location r="4.000000" t="37.614700" name="tube_255" />
+      <location r="4.000000" t="37.242300" name="tube_256" />
+      <location r="4.000000" t="36.497500" name="tube_257" />
+      <location r="4.000000" t="36.125100" name="tube_258" />
+      <location r="4.000000" t="35.752600" name="tube_259" />
+      <location r="4.000000" t="35.380200" name="tube_260" />
+      <location r="4.000000" t="35.007800" name="tube_261" />
+      <location r="4.000000" t="34.635400" name="tube_262" />
+      <location r="4.000000" t="34.262900" name="tube_263" />
+      <location r="4.000000" t="33.890500" name="tube_264" />
+      <location r="4.000000" t="33.518100" name="tube_265" />
+      <location r="4.000000" t="33.145700" name="tube_266" />
+      <location r="4.000000" t="32.773200" name="tube_267" />
+      <location r="4.000000" t="32.400800" name="tube_268" />
+      <location r="4.000000" t="32.028400" name="tube_269" />
+      <location r="4.000000" t="31.656000" name="tube_270" />
+      <location r="4.000000" t="31.283600" name="tube_271" />
+      <location r="4.000000" t="30.911100" name="tube_272" />
+      <location r="4.000000" t="30.538700" name="tube_273" />
+      <location r="4.000000" t="30.166300" name="tube_274" />
+      <location r="4.000000" t="29.793900" name="tube_275" />
+      <location r="4.000000" t="29.421400" name="tube_276" />
+      <location r="4.000000" t="29.049000" name="tube_277" />
+      <location r="4.000000" t="28.676600" name="tube_278" />
+      <location r="4.000000" t="28.304200" name="tube_279" />
+      <location r="4.000000" t="27.931700" name="tube_280" />
+      <location r="4.000000" t="27.559300" name="tube_281" />
+      <location r="4.000000" t="27.186900" name="tube_282" />
+      <location r="4.000000" t="26.814500" name="tube_283" />
+      <location r="4.000000" t="26.442000" name="tube_284" />
+      <location r="4.000000" t="26.069600" name="tube_285" />
+      <location r="4.000000" t="25.697200" name="tube_286" />
+      <location r="4.000000" t="25.324800" name="tube_287" />
+      <location r="4.000000" t="24.952400" name="tube_288" />
+      <location r="4.000000" t="24.207500" name="tube_289" />
+      <location r="4.000000" t="23.835100" name="tube_290" />
+      <location r="4.000000" t="23.462700" name="tube_291" />
+      <location r="4.000000" t="23.090200" name="tube_292" />
+      <location r="4.000000" t="22.717800" name="tube_293" />
+      <location r="4.000000" t="22.345400" name="tube_294" />
+      <location r="4.000000" t="21.973000" name="tube_295" />
+      <location r="4.000000" t="21.600500" name="tube_296" />
+      <location r="4.000000" t="21.228100" name="tube_297" />
+      <location r="4.000000" t="20.855700" name="tube_298" />
+      <location r="4.000000" t="20.483300" name="tube_299" />
+      <location r="4.000000" t="20.110900" name="tube_300" />
+      <location r="4.000000" t="19.738400" name="tube_301" />
+      <location r="4.000000" t="19.366000" name="tube_302" />
+      <location r="4.000000" t="18.993600" name="tube_303" />
+      <location r="4.000000" t="18.621200" name="tube_304" />
+      <location r="4.000000" t="18.248700" name="tube_305" />
+      <location r="4.000000" t="17.876300" name="tube_306" />
+      <location r="4.000000" t="17.503900" name="tube_307" />
+      <location r="4.000000" t="17.131500" name="tube_308" />
+      <location r="4.000000" t="16.759000" name="tube_309" />
+      <location r="4.000000" t="16.386600" name="tube_310" />
+      <location r="4.000000" t="16.014200" name="tube_311" />
+      <location r="4.000000" t="15.641800" name="tube_312" />
+      <location r="4.000000" t="15.269400" name="tube_313" />
+      <location r="4.000000" t="14.896900" name="tube_314" />
+      <location r="4.000000" t="14.524500" name="tube_315" />
+      <location r="4.000000" t="14.152100" name="tube_316" />
+      <location r="4.000000" t="13.779700" name="tube_317" />
+      <location r="4.000000" t="13.407200" name="tube_318" />
+      <location r="4.000000" t="13.034800" name="tube_319" />
+      <location r="4.000000" t="12.662400" name="tube_320" />
+      <location r="4.000000" t="11.917500" name="tube_321" />
+      <location r="4.000000" t="11.545100" name="tube_322" />
+      <location r="4.000000" t="11.172700" name="tube_323" />
+      <location r="4.000000" t="10.800300" name="tube_324" />
+      <location r="4.000000" t="10.427900" name="tube_325" />
+      <location r="4.000000" t="10.055400" name="tube_326" />
+      <location r="4.000000" t="9.683000" name="tube_327" />
+      <location r="4.000000" t="9.310580" name="tube_328" />
+      <location r="4.000000" t="8.938160" name="tube_329" />
+      <location r="4.000000" t="8.565730" name="tube_330" />
+      <location r="4.000000" t="8.193310" name="tube_331" />
+      <location r="4.000000" t="7.820890" name="tube_332" />
+      <location r="4.000000" t="7.448460" name="tube_333" />
+      <location r="4.000000" t="7.076040" name="tube_334" />
+      <location r="4.000000" t="6.703620" name="tube_335" />
+      <location r="4.000000" t="6.331190" name="tube_336" />
+      <location r="4.000000" t="5.958770" name="tube_337" />
+      <location r="4.000000" t="5.586350" name="tube_338" />
+      <location r="4.000000" t="5.213930" name="tube_339" />
+      <location r="4.000000" t="4.841500" name="tube_340" />
+      <location r="4.000000" t="4.469080" name="tube_341" />
+      <location r="4.000000" t="4.096660" name="tube_342" />
+      <location r="4.000000" t="3.724230" name="tube_343" />
+      <location r="4.000000" t="3.351810" name="tube_344" />
+      <location r="4.000000" t="2.979390" name="tube_345" />
+      <location r="4.000000" t="2.606960" name="tube_346" />
+      <location r="4.000000" t="2.234540" name="tube_347" />
+      <location r="4.000000" t="1.862120" name="tube_348" />
+      <location r="4.000000" t="1.489690" name="tube_349" />
+      <location r="4.000000" t="1.117270" name="tube_350" />
+      <location r="4.000000" t="0.744847" name="tube_351" />
+      <location r="4.000000" t="0.372423" name="tube_352" />
+      <location r="4.000000" t="-0.372423" name="tube_353" />
+      <location r="4.000000" t="-0.744846" name="tube_354" />
+      <location r="4.000000" t="-1.117270" name="tube_355" />
+      <location r="4.000000" t="-1.489690" name="tube_356" />
+      <location r="4.000000" t="-1.862120" name="tube_357" />
+      <location r="4.000000" t="-2.234540" name="tube_358" />
+      <location r="4.000000" t="-2.606960" name="tube_359" />
+      <location r="4.000000" t="-2.979390" name="tube_360" />
+      <location r="4.000000" t="-3.351810" name="tube_361" />
+      <location r="4.000000" t="-3.724230" name="tube_362" />
+      <location r="4.000000" t="-4.096660" name="tube_363" />
+      <location r="4.000000" t="-4.469080" name="tube_364" />
+      <location r="4.000000" t="-4.841500" name="tube_365" />
+      <location r="4.000000" t="-5.213930" name="tube_366" />
+      <location r="4.000000" t="-5.586350" name="tube_367" />
+      <location r="4.000000" t="-5.958770" name="tube_368" />
+      <location r="4.000000" t="-6.331190" name="tube_369" />
+      <location r="4.000000" t="-6.703620" name="tube_370" />
+      <location r="4.000000" t="-7.076040" name="tube_371" />
+      <location r="4.000000" t="-7.448460" name="tube_372" />
+      <location r="4.000000" t="-7.820890" name="tube_373" />
+      <location r="4.000000" t="-8.193310" name="tube_374" />
+      <location r="4.000000" t="-8.565730" name="tube_375" />
+      <location r="4.000000" t="-8.938160" name="tube_376" />
+      <location r="4.000000" t="-9.310580" name="tube_377" />
+      <location r="4.000000" t="-9.683000" name="tube_378" />
+      <location r="4.000000" t="-10.055400" name="tube_379" />
+      <location r="4.000000" t="-10.427900" name="tube_380" />
+      <location r="4.000000" t="-10.800300" name="tube_381" />
+      <location r="4.000000" t="-11.172700" name="tube_382" />
+      <location r="4.000000" t="-11.545100" name="tube_383" />
+      <location r="4.000000" t="-11.917500" name="tube_384" />
+    </component>
+  </type>
+  <!-- Definition of standard_tube -->
+  <type name="standard_tube" outline="yes">
+    <component type="standard_pixel">
+      <location y="-1.566805" />
+      <location y="-1.554516" />
+      <location y="-1.542228" />
+      <location y="-1.529939" />
+      <location y="-1.517650" />
+      <location y="-1.505362" />
+      <location y="-1.493073" />
+      <location y="-1.480784" />
+      <location y="-1.468496" />
+      <location y="-1.456207" />
+      <location y="-1.443918" />
+      <location y="-1.431630" />
+      <location y="-1.419341" />
+      <location y="-1.407052" />
+      <location y="-1.394764" />
+      <location y="-1.382475" />
+      <location y="-1.370186" />
+      <location y="-1.357898" />
+      <location y="-1.345609" />
+      <location y="-1.333320" />
+      <location y="-1.321032" />
+      <location y="-1.308743" />
+      <location y="-1.296454" />
+      <location y="-1.284166" />
+      <location y="-1.271877" />
+      <location y="-1.259588" />
+      <location y="-1.247300" />
+      <location y="-1.235011" />
+      <location y="-1.222722" />
+      <location y="-1.210434" />
+      <location y="-1.198145" />
+      <location y="-1.185856" />
+      <location y="-1.173568" />
+      <location y="-1.161279" />
+      <location y="-1.148990" />
+      <location y="-1.136702" />
+      <location y="-1.124413" />
+      <location y="-1.112124" />
+      <location y="-1.099836" />
+      <location y="-1.087547" />
+      <location y="-1.075258" />
+      <location y="-1.062970" />
+      <location y="-1.050681" />
+      <location y="-1.038392" />
+      <location y="-1.026104" />
+      <location y="-1.013815" />
+      <location y="-1.001526" />
+      <location y="-0.989238" />
+      <location y="-0.976949" />
+      <location y="-0.964660" />
+      <location y="-0.952372" />
+      <location y="-0.940083" />
+      <location y="-0.927794" />
+      <location y="-0.915506" />
+      <location y="-0.903217" />
+      <location y="-0.890928" />
+      <location y="-0.878640" />
+      <location y="-0.866351" />
+      <location y="-0.854062" />
+      <location y="-0.841774" />
+      <location y="-0.829485" />
+      <location y="-0.817196" />
+      <location y="-0.804908" />
+      <location y="-0.792619" />
+      <location y="-0.780330" />
+      <location y="-0.768042" />
+      <location y="-0.755753" />
+      <location y="-0.743464" />
+      <location y="-0.731176" />
+      <location y="-0.718887" />
+      <location y="-0.706598" />
+      <location y="-0.694310" />
+      <location y="-0.682021" />
+      <location y="-0.669732" />
+      <location y="-0.657444" />
+      <location y="-0.645155" />
+      <location y="-0.632866" />
+      <location y="-0.620578" />
+      <location y="-0.608289" />
+      <location y="-0.596000" />
+      <location y="-0.583712" />
+      <location y="-0.571423" />
+      <location y="-0.559134" />
+      <location y="-0.546846" />
+      <location y="-0.534557" />
+      <location y="-0.522268" />
+      <location y="-0.509980" />
+      <location y="-0.497691" />
+      <location y="-0.485402" />
+      <location y="-0.473114" />
+      <location y="-0.460825" />
+      <location y="-0.448536" />
+      <location y="-0.436248" />
+      <location y="-0.423959" />
+      <location y="-0.411670" />
+      <location y="-0.399382" />
+      <location y="-0.387093" />
+      <location y="-0.374804" />
+      <location y="-0.362516" />
+      <location y="-0.350227" />
+      <location y="-0.337938" />
+      <location y="-0.325650" />
+      <location y="-0.313361" />
+      <location y="-0.301072" />
+      <location y="-0.288784" />
+      <location y="-0.276495" />
+      <location y="-0.264206" />
+      <location y="-0.251918" />
+      <location y="-0.239629" />
+      <location y="-0.227340" />
+      <location y="-0.215052" />
+      <location y="-0.202763" />
+      <location y="-0.190474" />
+      <location y="-0.178186" />
+      <location y="-0.165897" />
+      <location y="-0.153608" />
+      <location y="-0.141320" />
+      <location y="-0.129031" />
+      <location y="-0.116742" />
+      <location y="-0.104454" />
+      <location y="-0.092165" />
+      <location y="-0.079876" />
+      <location y="-0.067588" />
+      <location y="-0.055299" />
+      <location y="-0.043010" />
+      <location y="-0.030722" />
+      <location y="-0.018433" />
+      <location y="-0.006144" />
+      <location y="0.006144" />
+      <location y="0.018433" />
+      <location y="0.030722" />
+      <location y="0.043010" />
+      <location y="0.055299" />
+      <location y="0.067588" />
+      <location y="0.079876" />
+      <location y="0.092165" />
+      <location y="0.104454" />
+      <location y="0.116742" />
+      <location y="0.129031" />
+      <location y="0.141320" />
+      <location y="0.153608" />
+      <location y="0.165897" />
+      <location y="0.178186" />
+      <location y="0.190474" />
+      <location y="0.202763" />
+      <location y="0.215052" />
+      <location y="0.227340" />
+      <location y="0.239629" />
+      <location y="0.251918" />
+      <location y="0.264206" />
+      <location y="0.276495" />
+      <location y="0.288784" />
+      <location y="0.301072" />
+      <location y="0.313361" />
+      <location y="0.325650" />
+      <location y="0.337938" />
+      <location y="0.350227" />
+      <location y="0.362516" />
+      <location y="0.374804" />
+      <location y="0.387093" />
+      <location y="0.399382" />
+      <location y="0.411670" />
+      <location y="0.423959" />
+      <location y="0.436248" />
+      <location y="0.448536" />
+      <location y="0.460825" />
+      <location y="0.473114" />
+      <location y="0.485402" />
+      <location y="0.497691" />
+      <location y="0.509980" />
+      <location y="0.522268" />
+      <location y="0.534557" />
+      <location y="0.546846" />
+      <location y="0.559134" />
+      <location y="0.571423" />
+      <location y="0.583712" />
+      <location y="0.596000" />
+      <location y="0.608289" />
+      <location y="0.620578" />
+      <location y="0.632866" />
+      <location y="0.645155" />
+      <location y="0.657444" />
+      <location y="0.669732" />
+      <location y="0.682021" />
+      <location y="0.694310" />
+      <location y="0.706598" />
+      <location y="0.718887" />
+      <location y="0.731176" />
+      <location y="0.743464" />
+      <location y="0.755753" />
+      <location y="0.768042" />
+      <location y="0.780330" />
+      <location y="0.792619" />
+      <location y="0.804908" />
+      <location y="0.817196" />
+      <location y="0.829485" />
+      <location y="0.841774" />
+      <location y="0.854062" />
+      <location y="0.866351" />
+      <location y="0.878640" />
+      <location y="0.890928" />
+      <location y="0.903217" />
+      <location y="0.915506" />
+      <location y="0.927794" />
+      <location y="0.940083" />
+      <location y="0.952372" />
+      <location y="0.964660" />
+      <location y="0.976949" />
+      <location y="0.989238" />
+      <location y="1.001526" />
+      <location y="1.013815" />
+      <location y="1.026104" />
+      <location y="1.038392" />
+      <location y="1.050681" />
+      <location y="1.062970" />
+      <location y="1.075258" />
+      <location y="1.087547" />
+      <location y="1.099836" />
+      <location y="1.112124" />
+      <location y="1.124413" />
+      <location y="1.136702" />
+      <location y="1.148990" />
+      <location y="1.161279" />
+      <location y="1.173568" />
+      <location y="1.185856" />
+      <location y="1.198145" />
+      <location y="1.210434" />
+      <location y="1.222722" />
+      <location y="1.235011" />
+      <location y="1.247300" />
+      <location y="1.259588" />
+      <location y="1.271877" />
+      <location y="1.284166" />
+      <location y="1.296454" />
+      <location y="1.308743" />
+      <location y="1.321032" />
+      <location y="1.333320" />
+      <location y="1.345609" />
+      <location y="1.357898" />
+      <location y="1.370186" />
+      <location y="1.382475" />
+      <location y="1.394764" />
+      <location y="1.407052" />
+      <location y="1.419341" />
+      <location y="1.431630" />
+      <location y="1.443918" />
+      <location y="1.456207" />
+      <location y="1.468496" />
+      <location y="1.480784" />
+      <location y="1.493073" />
+      <location y="1.505362" />
+      <location y="1.517650" />
+      <location y="1.529939" />
+      <location y="1.542228" />
+      <location y="1.554516" />
+      <location y="1.566805" />
+    </component>
+  </type>
+  <type name="standard_pixel" is="detector">
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.006144" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" />
+      <radius val="0.0127" />
+      <height val=".0114341328125" />
+    </cylinder>
+    <algebra val="shape" />
+  </type>
 </instrument>
-
