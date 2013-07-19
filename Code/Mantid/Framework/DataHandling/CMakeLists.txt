@@ -377,6 +377,7 @@ set ( TEST_FILES
 	MaskDetectorsInShapeTest.h
 	MaskDetectorsTest.h
 	MergeLogsTest.h
+	ModifyDetectorDotDatFileTest.h
 	MonitorLiveDataTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
