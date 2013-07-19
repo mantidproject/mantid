@@ -139,10 +139,21 @@ namespace Mantid
         } // Otherwise we continue.
       }
 
+      //open file, have method to extract number of columns...
+      //if 2, use 2 column method, if 3 use 3...
+      //findNumberColumns();
+      //REMEMBER - reset stream. (pass it around, in correct position).
+      //seekg
+      //pass fstreamed object to the method, as to re-use it
+      // make sure to pass the stream of the file to all methods using m_filename
+      // make & take stream rather than filename.
+
       // Check if a three column log file exists. (Calculated using m_filename)
       std::string threecolumnLogfile = getThreeColumnName();
       if ( !threecolumnLogfile.empty() )
       {
+        //restructure this method to take ifstream, and better name (see below)
+        // pass the rub object to load two column log file. Both should have same signature.
         createthreecolumnFileLogProperty( threecolumnLogfile,localWorkspace->mutableRun() );
         return;
       }

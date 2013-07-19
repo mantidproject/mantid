@@ -668,16 +668,15 @@ namespace Mantid
       IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
 
       //Iterate over the set, and load each log file into the localWorkspace.
-      std::set<std::string>::const_iterator logFileName;
-      for (logFileName = logFiles.begin(); logFileName != logFiles.end(); ++logFileName)
+      std::set<std::string>::const_iterator logPath;
+      for (logPath = logFiles.begin(); logPath != logFiles.end(); ++logPath)
       {
         // Pass through the same input filename
-        loadLog->setPropertyValue("Filename", *logFileName);
+        loadLog->setPropertyValue("Filename", *logPath);
         // Set the workspace property to be the same one filled above
         loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
         // Pass the name of the log file explicitly to LoadLog.
-        loadLog->setPropertyValue("Names", extractLogName(*logFileName));
-
+        loadLog->setPropertyValue("Names", extractLogName(*logPath));
         // Enable progress reporting by Child Algorithm - if progress range has duration
         if ( progStart < progEnd )
         {
@@ -1092,10 +1091,10 @@ namespace Mantid
 
     /**
      * Searches for log files related to RAW file loaded using LoadLog algorithm.
-     * @param m_filename The raw file filename
+     * @param pathToRawFile The path and name of the raw file.
      * @returns A set containing paths to log files related to RAW file used.
      */
-    std::set<std::string> LoadRawHelper::searchForLogFiles(const std::string& m_filename)
+    std::set<std::string> LoadRawHelper::searchForLogFiles(const std::string& pathToRawFile)
     {
       // If m_filename is the filename of a raw datafile then search for potential log files
       // in the directory of this raw datafile. Otherwise check if m_filename is a potential
@@ -1103,20 +1102,20 @@ namespace Mantid
       std::set<std::string> potentialLogFiles;
 
       // File property checks whether the given path exists, just check that is actually a file
-      Poco::File l_path( m_filename );
+      Poco::File l_path( pathToRawFile );
       if ( l_path.isDirectory() )
       {
-        g_log.error("In LoadLog: " + m_filename + " must be a filename not a directory.");
-        throw Exception::FileError("Filename is a directory:" , m_filename);
+        g_log.error("In LoadLog: " + pathToRawFile + " must be a filename not a directory.");
+        throw Exception::FileError("Filename is a directory:" , pathToRawFile);
       }
 
       // start the process or populating potential log files into the container: potentialLogFiles
       std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
 
-      if ( isAscii(m_filename) && l_filenamePart.find("_") != std::string::npos )
+      if ( isAscii(pathToRawFile) && l_filenamePart.find("_") != std::string::npos )
       {
         // then we will assume that m_filename is an ISIS/SNS log file
-        potentialLogFiles.insert(m_filename);
+        potentialLogFiles.insert(pathToRawFile);
       }
       else
       {
@@ -1145,7 +1144,7 @@ namespace Mantid
         {
           // look for log files in the directory of the raw datafile
           std::string pattern(l_rawID + "_*.txt");
-          Poco::Path dir(m_filename);
+          Poco::Path dir(pathToRawFile);
           dir.makeParent();
 
           try
@@ -1155,6 +1154,14 @@ namespace Mantid
           catch(std::exception &)
           {
           }
+        }
+        // Remove extension from path, and append .log to path.
+        std::string logName = pathToRawFile.substr(0, pathToRawFile.find('.')) + ".log";
+        // Check if log file exists in current directory.
+        std::ifstream fileExists(logName);
+        if(fileExists)
+        {
+          potentialLogFiles.insert(logName);
         }
       }
       return (potentialLogFiles);
