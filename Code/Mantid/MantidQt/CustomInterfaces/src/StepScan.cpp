@@ -106,6 +106,14 @@ void StepScan::triggerLiveListener(bool checked)
 
 void StepScan::startLiveListener()
 {
+  if ( ! LiveListenerFactory::Instance().create(m_instrument,false)->buffersEvents() )
+  {
+    QMessageBox::critical(this,"Invalid live stream","This interface requires event data.\nThe live data for " + QString::fromStdString(m_instrument) + " is in histogram form");
+    m_uiForm.mWRunFiles->liveButtonSetChecked(false);
+    m_uiForm.mWRunFiles->liveButtonSetEnabled(false);
+    return;
+  }
+
   QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
 
   // Remove any previously-loaded workspaces
@@ -117,7 +125,16 @@ void StepScan::startLiveListener()
   startLiveData->setProperty("Instrument",m_instrument);
   m_inputWSName = "__live";
   startLiveData->setProperty("OutputWorkspace",m_inputWSName);
-  startLiveData->execute();
+  try {
+    const bool executed = startLiveData->execute();
+    if ( ! executed ) throw std::runtime_error("Unable to run StartLiveData");
+  } catch (std::runtime_error&)
+  {
+    QApplication::restoreOverrideCursor();
+    QMessageBox::critical(this,"StartLiveData failed","Unable to start live data collection");
+    m_uiForm.mWRunFiles->liveButtonSetChecked(false);
+    return;
+  }
 
   // Keep track of the algorithm that's pulling in the live data
   m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
