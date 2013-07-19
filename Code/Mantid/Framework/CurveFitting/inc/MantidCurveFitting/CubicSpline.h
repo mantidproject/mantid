@@ -68,6 +68,9 @@ namespace Mantid
 
     private:
 
+      /// Minimum number of data points in spline
+      const int m_min_points;
+
       /// Functor to free a GSL objects in a shared pointer
       struct GSLFree
       {
@@ -83,9 +86,6 @@ namespace Mantid
 
       /// Flag for checking if the spline needs recalculating
       mutable bool m_recalculateSpline;
-
-      /// Minimum number of data points in spline
-      static const int M_MIN_POINTS;
 
       /// Reallocate the spline object to use n data points
       void reallocGSLObjects(const int n);

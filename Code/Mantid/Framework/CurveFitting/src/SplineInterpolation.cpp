@@ -110,6 +110,10 @@ namespace Mantid
       calculateSpline(cspline, mwspt, outputWorkspace, order);
 
       //store the output workspace
+      for(int i=0; i < order; ++i)
+      {
+        outputWorkspace->setX(i, mws->readX(0));
+      }
       setProperty("OutputWorkspace", outputWorkspace);
     }
 
@@ -170,7 +174,6 @@ namespace Mantid
       size_t nData = inputWorkspace->readY(0).size();
       const double* xValues = inputWorkspace->readX(0).data();
       double* yValues = outputWorkspace->dataY(0).data();
-      outputWorkspace->setX(0, inputWorkspace->readX(0));
 
       //calculate the interpolation
       cspline->function1D(yValues, xValues, nData);
@@ -178,7 +181,6 @@ namespace Mantid
       //calculate the derivatives
       for (int i = 1; i <= order; ++i)
       {
-        outputWorkspace->setX(i, inputWorkspace->readX(0));
         yValues = outputWorkspace->dataY(i).data();
         cspline->derivative1D(yValues, xValues, nData, i);
       }

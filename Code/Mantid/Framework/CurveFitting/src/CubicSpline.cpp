@@ -33,15 +33,14 @@ namespace Mantid
 
     DECLARE_FUNCTION(CubicSpline)
 
-    const int CubicSpline::M_MIN_POINTS = gsl_interp_type_min_size (gsl_interp_cspline);
-
     CubicSpline::CubicSpline() :
+        m_min_points(gsl_interp_type_min_size (gsl_interp_cspline)),
         m_acc(gsl_interp_accel_alloc(), m_gslFree),
-        m_spline(gsl_spline_alloc(gsl_interp_cspline, M_MIN_POINTS), m_gslFree),
+        m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree),
         m_recalculateSpline(true)
     {
       //setup class with a default set of attributes
-      declareAttribute("n", Attribute(M_MIN_POINTS));
+      declareAttribute("n", Attribute(m_min_points));
 
       declareAttribute("x0", Attribute(0.0));
       declareAttribute("x1", Attribute(1.0));
