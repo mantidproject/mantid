@@ -32,7 +32,7 @@ public:
     std::string outWSName("SplineTest_OutputWS");
 
     //number of derivatives
-    int order = 2;
+    int order = 5;
 
     SplineSmoothing alg;
 

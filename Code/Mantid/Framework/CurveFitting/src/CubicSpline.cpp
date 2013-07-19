@@ -159,15 +159,15 @@ namespace Mantid
       bool outOfRange(false);
 
       //throw error if the order is not the 1st or 2nd derivative
-      if(order > 2 || order < 1) throw std::invalid_argument(
-          "CubicSpline: order of derivative must be either 1 or 2");
+      if(order < 1) throw std::invalid_argument(
+          "CubicSpline: order of derivative must be 1 or greater");
 
       for(size_t i = 0; i < nData; ++i)
       {
         if(checkXInRange(xValues[i]))
         {
           //choose the order of the derivative
-          if(order == 1)
+          if(order == 1 || order > 2)
           {
             xDeriv = gsl_spline_eval_deriv(m_spline.get(),xValues[i],m_acc.get());
             errorCode = gsl_spline_eval_deriv_e (m_spline.get(),xValues[i],m_acc.get(),&xDeriv);

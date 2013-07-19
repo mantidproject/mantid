@@ -64,7 +64,8 @@ namespace CurveFitting
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "The workspace on which to perform the smoothing algorithm.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The workspace containing the calculated points and derivatives");
 
-    auto validator = boost::make_shared<BoundedValidator<int> >(0,2);
+    auto validator = boost::make_shared<BoundedValidator<int> >();
+    validator->setLower(0);
     declareProperty("DerivOrder", 2, validator, "Order to derivatives to calculate.");
 
     auto splineSizeValidator = boost::make_shared<BoundedValidator<int> >();
@@ -109,10 +110,17 @@ namespace CurveFitting
       outputWorkspace->setX(i, inputWorkspaceBinned->readX(i));
       calculateSmoothing(cspline, inputWorkspacePt, outputWorkspace, i);
 
-      for(int j = 1; j <= order; ++j)
+      for(int j = 0; j < order; ++j)
       {
-        derivs[j-1]->setX(i, inputWorkspaceBinned->readX(i));
-        calculateDerivatives(cspline, inputWorkspacePt, derivs[j-1], j, i);
+
+        derivs[j]->setX(i, inputWorkspaceBinned->readX(i));
+
+        if(j >= 2)
+        {
+          setSmoothingPoints(cspline, derivs[j-1], i);
+        }
+
+        calculateDerivatives(cspline, inputWorkspacePt, derivs[j], j+1, i);
       }
     }
 
@@ -256,7 +264,7 @@ namespace CurveFitting
 
             cspline->setXAttribute(attrCount, xIn[index]);
             cspline->setParameter(attrCount, yIn[index]);
-
+            std::cout << yIn[index] << std::endl;
             attrCount++;
         }
       }

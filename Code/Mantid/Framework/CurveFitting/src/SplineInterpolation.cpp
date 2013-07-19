@@ -181,6 +181,16 @@ namespace Mantid
       //calculate the derivatives
       for (int i = 1; i <= order; ++i)
       {
+        if(i > 2)
+        {
+          size_t n = cspline->getAttribute("n").asInt();
+          for(size_t j=0; j < n; ++j)
+          {
+            std::string index = boost::lexical_cast<std::string>(j);
+            cspline->setParameter(j, cspline->getAttribute("x"+index).asDouble());
+          }
+        }
+
         yValues = outputWorkspace->dataY(i).data();
         cspline->derivative1D(yValues, xValues, nData, i);
       }
