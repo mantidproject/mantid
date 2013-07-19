@@ -28,7 +28,20 @@ class ConfigServiceTest(unittest.TestCase):
         facility = config.getFacility("ISIS")
         self.assertTrue(isinstance(facility, FacilityInfo))
         self.assertRaises(RuntimeError, config.getFacility, "MadeUpFacility")
-
+        
+    def test_getFacilities_Returns_A_FacilityInfo_List(self):
+        facilities = config.getFacilities()
+        self.assertTrue(isinstance(facilities[0], FacilityInfo))
+        
+    def test_getFacilities_and_Facility_Names_are_in_sync_and_non_empty(self):
+        facilities = config.getFacilities()
+        names = config.getFacilityNames()
+        
+        self.assertTrue(len(names)>0)
+        self.assertEquals(len(names),len(facilities))
+        for i in range(len(names)):
+            self.assertEquals(names[i],facilities[i].name())
+        
     def test_getInstrumentReturns_A_InstrumentInfo_Object(self):
         self.assertTrue(isinstance(config.getInstrument("WISH"), InstrumentInfo))
         self.assertRaises(RuntimeError, config.getInstrument, "MadeUpInstrument")

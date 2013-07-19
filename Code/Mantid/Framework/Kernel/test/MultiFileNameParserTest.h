@@ -363,7 +363,6 @@ public:
 
   void test_instrument_with_multiple_padding()
   {
-    Mantid::Kernel::ConfigService::Instance().setString("supported.facilities", "TEST");
 
     Parser parser;
     parser.parse("TESTHISTOLISTENER123,299-301");

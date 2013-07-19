@@ -39,6 +39,7 @@ support rebinning in-situ as part of the visualisation process.
 #include "MantidVatesAPI/LoadVTK.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -65,8 +66,36 @@ namespace Mantid
 {
   namespace VATES
   {
-    DECLARE_ALGORITHM( LoadVTK)
+    DECLARE_FILELOADER_ALGORITHM( LoadVTK)
 
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadVTK::confidence(Kernel::FileDescriptor & descriptor) const
+    {
+      const std::string & fileExt = descriptor.extension();
+      const bool isntAscii = !descriptor.isAscii();
+      int confidence(0);
+      if (isntAscii && fileExt == ".vtk")
+      {
+        confidence = 80;
+      }
+      else if (fileExt == ".vtk")
+      {
+        confidence = 60;
+      }
+      else if (isntAscii)
+      {
+        confidence = 15;
+      }
+      else
+      {
+        confidence = 0;
+      }
+      return confidence;
+    }
     const std::string LoadVTK::name() const
     {
       return "LoadVTK";

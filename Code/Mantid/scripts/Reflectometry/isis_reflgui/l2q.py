@@ -1,5 +1,14 @@
+''' SVN Info:  	The variables below will only get subsituted at svn checkout if
+		the repository is configured for variable subsitution. 
+
+	$Id$
+	$HeadURL$
+|=============================================================================|=======|	
+1                                                                            80   <tab>
+'''
+
 import math
-from mantid.simpleapi import *  
+from mantid.simpleapi import *  # New API
 
 def l2q(ws,whichDet,theta):
 	'''	
@@ -24,9 +33,9 @@ def l2q(ws,whichDet,theta):
 	'''
 	#ws = mantid.getMatrixWorkspace(ws)
 	
-	# pick up the sample to detector distance 
-	from mantid.api import WorkspaceGroup # (only required as while the old API still exists.)
-	if isinstance(ws, WorkspaceGroup):	
+	# pick up the sample to detector distance
+	from mantid.api import WorkspaceGroup
+	if isinstance(ws, WorkspaceGroup):
 		wsg = ws.getName() + '_1'
 		inst = mtd[wsg].getInstrument()
 	else:
@@ -46,10 +55,10 @@ def l2q(ws,whichDet,theta):
 	print x, y, z
 	print whichDet
 	# Move the detector ianto the correct spot
-	MoveInstrumentComponent(Workspace=mtd[ws.name()],ComponentName=whichDet,X=x,Y=y,Z=z,RelativePosition=False)
+	MoveInstrumentComponent(ws,ComponentName=whichDet,X=x,Y=y,Z=z,RelativePosition=False)
 			
 	# Now convert to momentum transfer
-	ConvertUnits(InputWorkspace=mtd[ws.name()],OutputWorkspace="IvsQ",Target="MomentumTransfer",AlignBins="1")
+	ConvertUnits(InputWorkspace=ws,OutputWorkspace="IvsQ",Target="MomentumTransfer")
 	return mtd["IvsQ"]
 
 

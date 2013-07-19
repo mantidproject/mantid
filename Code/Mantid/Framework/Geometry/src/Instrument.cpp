@@ -7,10 +7,12 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <Poco/Path.h>
+#include <queue>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Exception::NotFoundError;
@@ -1228,6 +1230,70 @@ namespace Mantid
       }
       m_ValidFrom = val; 
     }
+
+    Instrument::ContainsState Instrument::containsRectDetectors() const
+    {
+      std::queue<IComponent_const_sptr> compQueue; // Search queue
+
+      // Add all the direct children of the intrument
+      for(int i = 0; i < nelements(); i++)
+        compQueue.push(getChild(i));
+
+      bool foundRect = false;
+      bool foundNonRect = false;
+      IComponent_const_sptr comp;
+
+      while(!compQueue.empty() && !(foundRect && foundNonRect))
+      {
+        comp = compQueue.front();
+        compQueue.pop();
+
+        // Skip source and sample components
+        if(getSource()->getComponentID() == comp->getComponentID() 
+           || getSample()->getComponentID() == comp->getComponentID())
+          continue;
+
+        // Skip monitors
+        IDetector_const_sptr detector
+          = boost::dynamic_pointer_cast<const IDetector>(comp);
+        if(detector && detector->isMonitor())
+          continue;
+
+        if(dynamic_cast<const RectangularDetector*>(comp.get()))
+        {
+          if(!foundRect)
+            foundRect = true;
+        }
+        else
+        {
+          ICompAssembly_const_sptr assembly 
+            = boost::dynamic_pointer_cast<const ICompAssembly>(comp);
+
+          if(assembly)
+          {
+            for(int i = 0; i < assembly->nelements(); i++)
+              compQueue.push(assembly->getChild(i));
+          }
+          else // Is a non-rectangular component
+          {
+            if(!foundNonRect)
+              foundNonRect = true;
+          }
+        }
+
+      } // while
+
+      // Found both
+      if(foundRect && foundNonRect) 
+        return Instrument::ContainsState::Partial;
+      // Found only rectangular
+      else if(foundRect) 
+        return Instrument::ContainsState::Full;  
+      // Found only non-rectangular
+      else 
+        return Instrument::ContainsState::None;
+
+    } // containsRectDetectors
 
   } // namespace Geometry
 } // Namespace Mantid
