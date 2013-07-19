@@ -35,7 +35,98 @@ def trimData(nSpec, vals, min, max):
 # ConvFit
 ##############################################################################
 
-def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
+def getConvFitOption(ftype, bgd, Verbose):
+    if ftype[:5] == 'Delta':
+        delta = True
+        lor = ftype[5:6]
+    else:
+        delta = False
+        lor = ftype[:1]
+    options = [bgd, delta, int(lor)]
+    if Verbose:
+        logger.notice('Fit type : Delta = ' + str(options[1]) + ' ; Lorentzians = ' + str(options[2]))
+        logger.notice('Background type : ' + options[0])
+    return options
+
+##############################################################################
+
+def createConvFitFun(options, par, file):
+    bgd_fun = 'name=LinearBackground,A0='
+    if options[0] == 'FixF':
+        bgd_fun = bgd_fun +str(par[0])+',A1=0,ties=(A0='+str(par[0])+',A1=0.0)'
+    if options[0] == 'FitF':
+        bgd_fun = bgd_fun +str(par[0])+',A1=0,ties=(A1=0.0)'
+    if options[0] == 'FitL':
+        bgd_fun = bgd_fun +str(par[0])+',A1='+str(par[1])
+    if options[1]:
+        ip = 3
+    else:
+        ip = 2
+    pk_1 = '(composite=Convolution;name=Resolution, FileName='+file
+    if  options[2] >= 1:
+        lor_fun = 'name=Lorentzian,Height='+str(par[ip])+',PeakCentre='+str(par[ip+1])+',HWHM='+str(par[ip+2])
+    if options[2] == 2:
+        lor_2 = 'name=Lorentzian,Height='+str(par[ip+3])+',PeakCentre='+str(par[ip+4])+',HWHM='+str(par[ip+5])
+        lor_fun = lor_fun +';'+ lor_2 +';ties=(f0.PeakCentre=f1.PeakCentre)'
+    if options[1]:
+        delta_fun = 'name=DeltaFunction,Height='+str(par[2])
+        lor_fun = delta_fun +';' + lor_fun
+    func = bgd_fun +';'+ pk_1 +';('+ lor_fun +'))'
+    return func
+
+##############################################################################
+
+def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
+    options = getConvFitOption(ftype, bgd[:-2], Verbose)   
+    params = mtd[outNm+'_Parameters']
+    A0 = params.column(1)     #bgd A0 value
+    A1 = params.column(3)     #bgd A1 value
+    if options[1]:
+        ip = 7
+        D1 = params.column(5)      #delta value
+    else:
+        ip = 5
+    if options[2] >= 1:
+        H1 = params.column(ip)        #height1 value
+        C1 = params.column(ip+2)      #centre1 value
+        W1 = params.column(ip+4)      #width1 value
+    if options[2] == 2:
+        H2 = params.column(ip+6)        #height2 value
+        C2 = params.column(ip+8)      #centre2 value
+        W2 = params.column(ip+10)      #width2 value
+    nHist = mtd[inputWS].getNumberHistograms()
+    for i in range(nHist):
+        paras = [A0[i], A1[i]]
+        if options[1]:
+            paras.append(D1[i])
+        if options[2] >= 1:
+            paras.append(H1[i])
+            paras.append(C1[i])
+            paras.append(W1[i])
+        if options[2] == 2:
+            paras.append(H2[i])
+            paras.append(C2[i])
+            paras.append(W2[i])
+        func = createConvFitFun(options, paras, resFile)
+        if Verbose:
+            logger.notice('Fit func : '+func)      
+        fitWS = outNm + '_Result_'
+        fout = fitWS + str(i)
+        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
+        unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
+        unitx.setLabel('Time' , 'ns')
+        RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
+        DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
+        DeleteWorkspace(fitWS+str(i)+'_Parameters')
+        if i == 0:
+            group = fout
+        else:
+            group += ',' + fout
+    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
+
+##############################################################################
+
+def confitParsToWS(Table, Data, specMin=0, specMax=-1):
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
     dataX = createQaxis(Data)
@@ -69,6 +160,8 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
         VerticalAxisValues=names)
     return outNm
 
+##############################################################################
+
 def confitPlotSeq(inputWS, Plot):
     nhist = mtd[inputWS].getNumberHistograms()
     if ( Plot == 'All' ):
@@ -85,9 +178,13 @@ def confitPlotSeq(inputWS, Plot):
             plotSpecs.append(i)
     mp.plotSpectrum(inputWS, plotSpecs, True)
 
-def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bg, specMin, specMax, Verbose):
+##############################################################################
+
+def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, specMax, Verbose):
     StartTime('ConvFit')
     workdir = config['defaultsave.directory']
+    elements = func.split('"')
+    resFile = elements[1]  
     if Verbose:
         logger.notice('Input files : '+str(inputWS))  
     input = inputWS+',i' + str(specMin)
@@ -97,15 +194,16 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bg, specMin, specM
         input += ';'+inputWS+',i'+str(i)
     (instr, run) = getInstrRun(inputWS)
     run_name = instr + run
-    outNm = getWSprefix(inputWS) + 'conv_' + ftype + bg + str(specMin) + "_to_" + str(specMax)
+    outNm = getWSprefix(inputWS) + 'conv_' + ftype + bgd + str(specMin) + "_to_" + str(specMax)
     if Verbose:
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startX, EndX=endX, FitType='Sequential')
-    wsname = confitParsToWS(outNm, inputWS, bg, specMin, specMax)
+    wsname = confitParsToWS(outNm, inputWS, specMin, specMax)
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
+    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose)
     if Save:
-        o_path = os.path.join(workdir, wsname+'.nxs')                   # path name for nxs file
+        o_path = os.path.join(workdir, wsname+'.nxs')                    # path name for nxs file
         if Verbose:
             logger.notice('Creating file : '+o_path)
         SaveNexusProcessed(InputWorkspace=wsname, Filename=o_path)
