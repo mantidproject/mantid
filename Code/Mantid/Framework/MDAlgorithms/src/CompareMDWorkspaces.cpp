@@ -105,6 +105,9 @@ namespace MDAlgorithms
         "Boolean set to true if the workspaces match.");
     declareProperty(new PropertyWithValue<std::string>("Result","",Direction::Output),
         "String describing the difference found between the workspaces");
+    declareProperty("IgnoreBoxID",false,
+        "To ignore box ID-s when comparing MD boxes as Multithreaded splitting assigns box id-s randomly");
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -217,8 +220,11 @@ namespace MDAlgorithms
       this->compare( box1->getID(), box2->getID(), "Boxes have different ID" );
       this->compare(size_t(box1->getDepth()), size_t(box2->getDepth()), "Boxes are at a different depth" );
       this->compare( box1->getNumChildren(), box2->getNumChildren(), "Boxes do not have the same number of children");
-      for (size_t i=0; i<box1->getNumChildren(); i++)
-        this->compare( box1->getChild(i)->getID(), box2->getChild(i)->getID(), "Child of boxes do not match IDs" );
+      if (m_CompareBoxID)
+      {
+        for (size_t i=0; i<box1->getNumChildren(); i++)
+          this->compare( box1->getChild(i)->getID(), box2->getChild(i)->getID(), "Child of boxes do not match IDs" );
+      }
 
       for (size_t d=0; d<nd; d++)
       {
@@ -336,6 +342,8 @@ namespace MDAlgorithms
   void CompareMDWorkspaces::exec()
   {
     m_result.clear();
+    m_CompareBoxID = !getProperty("IgnoreBoxID");
+
     this->doComparison();
 
     if ( m_result != "")
