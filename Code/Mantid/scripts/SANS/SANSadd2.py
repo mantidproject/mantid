@@ -194,15 +194,9 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
 
   if period != _NO_INDIVIDUAL_PERIODS:
       #load just a single period
-      if ext == ".nxs" or ext == ".NXS":
-        outWs = LoadNexus( Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
-      else:   
-        outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)     
+      outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
   else:
-      if ext == ".nxs" or ext == ".NXS":
-        outWs = LoadNexus(Filename=filename,OutputWorkspace=wsName)
-      else:
-        outWs = Load(Filename=filename,OutputWorkspace=wsName)
+      outWs = Load(Filename=filename,OutputWorkspace=wsName)
 
   props = outWs.getHistory().lastAlgorithm()
 
