@@ -34,7 +34,7 @@ namespace Mantid
     DECLARE_FUNCTION(CubicSpline)
 
     CubicSpline::CubicSpline() :
-        m_min_points(gsl_interp_type_min_size (gsl_interp_cspline)),
+        m_min_points(3),
         m_acc(gsl_interp_accel_alloc(), m_gslFree),
         m_spline(gsl_spline_alloc(gsl_interp_cspline, m_min_points), m_gslFree),
         m_recalculateSpline(true)
@@ -63,8 +63,6 @@ namespace Mantid
       if(m_recalculateSpline) setupInput(x,y,n);
 
       calculateSpline(out, xValues, nData);
-
-      m_recalculateSpline = false;
     }
 
     void CubicSpline::setupInput(boost::scoped_array<double>& x,
@@ -101,6 +99,7 @@ namespace Mantid
 
       //pass values to GSL objects
       initGSLObjects(x,y,n);
+      m_recalculateSpline = false;
     }
 
     void CubicSpline::derivative1D(double* out, const double* xValues, size_t nData, const size_t order) const
@@ -114,7 +113,6 @@ namespace Mantid
       if(m_recalculateSpline) setupInput(x,y,n);
       calculateDerivative(out,xValues,nData,order);
 
-      m_recalculateSpline = false;
     }
 
     bool CubicSpline::checkXInRange(double x) const
