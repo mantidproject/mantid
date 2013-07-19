@@ -47,9 +47,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      GroupWorkspaces() : API::Algorithm() {};
-      /// Destructor
-      virtual ~GroupWorkspaces() {};
+      GroupWorkspaces();
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "GroupWorkspaces";}
       /// Algorithm's version for identification overriding a virtual method
@@ -62,10 +60,17 @@ namespace Mantid
       void init();
       /// overridden execute method
       void exec();
-      /// method to check the input workspaces are of same types
-      bool isCompatibleWorkspaces(Mantid::API::Workspace_sptr ws, std::string& firstWs);
-      /// add member workspace to the groupworkspace
-      void addworkspacetoGroup(Mantid::API::WorkspaceGroup_sptr  outgrp_sptr, API::Workspace_sptr ws, std::string& firstWs);
+      /// Add a list of names to the new group
+      void addToGroup(const std::vector<std::string> & names);
+      /// Add a workspace to the new group, checking for a WorkspaceGroup and unrolling it
+      void addToGroup(const API::Workspace_sptr & workspace);
+      /// Append the workspace to the new group, checking if it is compatible with the others
+      void appendWSToGroup(const API::Workspace_sptr & workspace);
+
+      /// A pointer to the new group
+      API::WorkspaceGroup_sptr m_group;
+      /// Cache the value of  the ID of the first workspace added
+      std::string m_firstID;
     };
 
   } // namespace Algorithm
