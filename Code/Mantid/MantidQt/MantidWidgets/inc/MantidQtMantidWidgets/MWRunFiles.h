@@ -159,6 +159,8 @@ namespace MantidQt
       void liveButtonState(const LiveButtonOpts);
 
       // Standard setters/getters
+      void liveButtonSetEnabled(bool);
+      void liveButtonSetChecked(bool);
       bool liveButtonIsChecked() const;
       bool isEmpty() const;
       QString getText() const;

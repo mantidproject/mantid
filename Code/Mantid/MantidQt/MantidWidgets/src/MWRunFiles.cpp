@@ -463,6 +463,16 @@ void MWRunFiles::liveButtonState(const LiveButtonOpts option)
   }
 }
 
+void MWRunFiles::liveButtonSetEnabled(const bool enabled)
+{
+  m_uiForm.liveButton->setEnabled(enabled);
+}
+
+void MWRunFiles::liveButtonSetChecked(const bool checked)
+{
+  m_uiForm.liveButton->setChecked(checked);
+}
+
 bool MWRunFiles::liveButtonIsChecked() const
 {
   return m_uiForm.liveButton->isChecked();
