@@ -74,6 +74,8 @@ namespace Mantid
       if(localGroup)
       {
         addToGroup(localGroup->getNames());
+        // Remove the group from the ADS
+        AnalysisDataService::Instance().remove(workspace->name());
       }
       else
       {
