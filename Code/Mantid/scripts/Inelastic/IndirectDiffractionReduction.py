@@ -30,6 +30,8 @@ class MSGDiffractionReducer(MSGReducer):
             step = mtd.createAlgorithm("Rebin")
             step.setPropertyValue("Params", self._rebin_string)
             self.append_step(step)
+        else:
+            self.append_step(steps.RebinToFirstSpectrum())
         
         step = steps.Grouping()
         step.set_mask_list(self._masking_detectors)
