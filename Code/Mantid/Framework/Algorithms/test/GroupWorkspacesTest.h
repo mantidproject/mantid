@@ -127,6 +127,22 @@ public:
     removeFromADS(groupName, inputs);    
   }
 
+  void test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Succeeds()
+  {
+    std::string matrixWS = "test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Succeeds_Matrix";
+    addTestMatrixWorkspaceToADS(matrixWS);
+    std::string eventWS = "test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Succeeds_Event";
+    addTestEventWorkspaceToADS(eventWS);
+
+    std::vector<std::string> inputs(2, matrixWS);
+    inputs[1] = eventWS;
+    const std::string groupName = "test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Throws_Error_Group";
+    TS_ASSERT_THROWS_NOTHING(runAlgorithm(inputs, groupName));
+
+    checkGroupExistsWithMembers(groupName, inputs);
+    removeFromADS(groupName, inputs);
+  }
+
   //========================= Failure Cases ===========================================
   
   void test_Exec_With_Input_That_Is_Not_In_ADS_Fails()
@@ -146,21 +162,6 @@ public:
     removeFromADS("", inputs);
   }
 
-  void test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Throws_Error()
-  {
-    std::string matrixWS = "test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Throws_Error_Matrix";
-    addTestMatrixWorkspaceToADS(matrixWS);
-    std::string eventWS = "test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Throws_Error_Event";
-    addTestEventWorkspaceToADS(eventWS);
-
-    std::vector<std::string> inputs(2, matrixWS);
-    inputs[1] = eventWS;
-    const std::string groupName = "test_Exec_With_Mixture_Of_WorkspaceTypes_Not_Including_TableWorkspace_Throws_Error_Group";
-    TS_ASSERT_THROWS(runAlgorithm(inputs, groupName), std::runtime_error);
-
-    TS_ASSERT_EQUALS(false, Mantid::API::AnalysisDataService::Instance().doesExist(groupName));
-    removeFromADS(groupName, inputs);    
-  }
 
 private:
 

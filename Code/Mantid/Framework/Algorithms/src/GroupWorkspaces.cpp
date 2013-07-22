@@ -18,7 +18,7 @@ namespace Mantid
     using namespace API;
 
     /// Default constructor
-    GroupWorkspaces::GroupWorkspaces() : API::Algorithm(), m_group(), m_firstID() 
+    GroupWorkspaces::GroupWorkspaces() : API::Algorithm(), m_group()
     {
     }
 
@@ -79,26 +79,9 @@ namespace Mantid
       }
       else
       {
-        appendWSToGroup(workspace);
+        m_group->addWorkspace(workspace);
       }
     }
 
-    /**
-     * Append the workspace to the new group
-     * @param A pointer to a single workspace. Its ID must match the others in the group
-     * unless it is a TableWorkspace
-     */
-    void GroupWorkspaces::appendWSToGroup(const API::Workspace_sptr & workspace)
-    {
-      if(m_group->size() == 0) m_firstID = workspace->id();
-      else if(m_firstID != workspace->id() && workspace->id() != "TableWorkspace" )
-      {
-        throw std::runtime_error("Selected workspaces are not all of same type. Found " + workspace->id() +
-                                 " which does not match the first entry of type " + m_firstID);
-      }
-
-      /// Append
-      m_group->addWorkspace(workspace);
-    }
   }
 }

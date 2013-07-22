@@ -20,9 +20,6 @@ namespace Mantid
     <LI> OutputWorkspace - The name of the new group workspace created </LI>
     </UL>
 
-    @author Sofia Antony
-    @date 21/07/2008
-
     Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -64,13 +61,9 @@ namespace Mantid
       void addToGroup(const std::vector<std::string> & names);
       /// Add a workspace to the new group, checking for a WorkspaceGroup and unrolling it
       void addToGroup(const API::Workspace_sptr & workspace);
-      /// Append the workspace to the new group, checking if it is compatible with the others
-      void appendWSToGroup(const API::Workspace_sptr & workspace);
 
       /// A pointer to the new group
       API::WorkspaceGroup_sptr m_group;
-      /// Cache the value of  the ID of the first workspace added
-      std::string m_firstID;
     };
 
   } // namespace Algorithm
