@@ -356,6 +356,10 @@ void CommandLineInterpreter::displayOutput(const QString & messages)
 void CommandLineInterpreter::displayError(const QString & messages)
 {
   append(messages);
+
+  //disconnect front pasting if we encounter an error
+  disconnect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(processNextPastedLine()));
+  disconnect(this, SIGNAL(moreInputRequired()), this, SLOT(processNextPastedLine()));
 }
 
 /**
@@ -396,6 +400,8 @@ void CommandLineInterpreter::setStatusToWaiting()
 void CommandLineInterpreter::processNextPastedLine()
 {
   QString nextLine = m_pasteQueue.readLine();
+
+
   if(m_pasteQueue.atEnd())
   {
     disconnect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(processNextPastedLine()));
@@ -561,6 +567,7 @@ void CommandLineInterpreter::processPastedCodeWithNewlines(const int offset)
 {
   m_pasteQueue.setString(&m_pastedText, QIODevice::ReadOnly);
   QString firstLine = m_pasteQueue.readLine();
+
   // Execute the first line and connect the finished signal to a function to process the next line.
   // This chains the processing together while avoiding blocking the GUI
   connect(m_runner.data(), SIGNAL(finished(const QString &)), this, SLOT(processNextPastedLine()));
