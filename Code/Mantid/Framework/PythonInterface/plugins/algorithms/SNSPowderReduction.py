@@ -166,7 +166,6 @@ class SNSPowderReduction(PythonAlgorithm):
             raise RuntimeError("Failed to find wavelength: %fAngstrom" % request)
     
         def getInfo(self, frequency, wavelength):
-            #print "getInfo(%f, %f)" % (frequency, wavelength)
             if self.filename is not None:
                 if frequency is None:
                     raise RuntimeError("Unable to determine frequency from data")
@@ -253,6 +252,8 @@ class SNSPowderReduction(PythonAlgorithm):
         infotableprop = ITableWorkspaceProperty("SplitInformationWorkspace", "", Direction.Input, PropertyMode.Optional)
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
+        self.declareProperty("LowResolutionSpectraOffset", -1,  "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
+
         return
 
 
@@ -310,6 +311,29 @@ class SNSPowderReduction(PythonAlgorithm):
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
         samwksplist = []
+
+        self._lowResTOFoffset = self.getProperty("LowResolutionSpectraOffset").value
+        focuspos = self._config.getFocusPos()
+        if self._lowResTOFoffset >= 0:
+            # Dealing with the parameters for editing instrument parameters
+            if focuspos.has_key("PrimaryFlightPath") is True:
+                l1 = focuspos["PrimaryFlightPath"]
+                if l1 > 0:
+                    specids = focuspos['SpectrumIDs'][:]
+                    l2s = focuspos['L2'][:]
+                    polars = focuspos['Polar'][:]
+                    phis = focuspos['Azimuthal'][:]
+
+                    specids.extend(specids) 
+                    l2s.extend(l2s) 
+                    polars.extend(polars)
+                    phis.extend(phis)
+
+                    focuspos['SpectrumIDs'] = specids
+                    focuspos['L2'] = l2s
+                    focuspos['Polar'] = polars
+                    focuspos['Azimuthal'] = phis
+        # ENDIF
 
         if self.getProperty("Sum").value:
             # Sum input sample runs and then do reduction
@@ -428,10 +452,10 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # process the vanadium run
             vanRun = self.getProperty("VanadiumNumber").value
-            self.log().information("F313A:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
+            self.log().debug("F313A:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
             if vanRun == 0: # use the version in the info
                 vanRun = self._info.van
-                self.log().information("F313B: Van Correction SamRun = %s, VanRun = %s" % (str(samRun), str(vanRun)))
+                self.log().debug("F313B: Van Correction SamRun = %s, VanRun = %s" % (str(samRun), str(vanRun)))
             elif vanRun < 0: # turn off the correction
                 vanRun = 0
             self.log().information("F313C:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
@@ -522,9 +546,13 @@ class SNSPowderReduction(PythonAlgorithm):
                             return
                     if self.getProperty("StripVanadiumPeaks").value:
                         vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
+                        # api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_Raw")
                         vanRun = api.StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, FWHM=self._vanPeakFWHM,
                                            PeakPositionTolerance=self.getProperty("VanadiumPeakTol").value,
                                            BackgroundType="Quadratic", HighBackground=True)
+                        # api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_PostStrip")
+                    else:
+                        self.log().information("Not strip vanadium peaks")
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                     vanRun = api.FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
                               Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
@@ -576,8 +604,10 @@ class SNSPowderReduction(PythonAlgorithm):
                     samRun = str(samRun)
             else:
                 self._save(samRun, self._info, normalized, False)
+                samRunws = samRun
                 samRun = str(samRun)
             #mtd.releaseFreeMemory()
+
         # ENDFOR
 
         # convert everything into d-spacing
@@ -783,20 +813,21 @@ class SNSPowderReduction(PythonAlgorithm):
                 temp = tempwslist[itemp]
                 # Align and focus
                 self.log().information("[F1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk))
-                # print "[DB1141] Align and focus workspace %s; Number of events = %d of chunk %d " % (str(temp), temp.getNumberEvents(), ichunk)
+
+                focuspos = self._config.getFocusPos()
+
                 temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                     DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
                     PreserveEvents=preserveEvents,
                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
-                    UnwrapRef=self._LRef, LowResRef=self._DIFCref,
-                    CropWavelengthMin=self._wavelengthMin, **(self._config.getFocusPos()))
-                # try: 
-                #     if temp.__class__.__name__.count("IEvent") > 0: 
-                #         print "[DB1050-3] Number of events = %d of chunk %d" % (temp.getNumberEvents(), ichunk)
-                # except RuntimeError:
-                #     print "[DB1050-3] Not an event workspace."
-                
+                    UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset, 
+                    CropWavelengthMin=self._wavelengthMin, **(focuspos))
+
+                for iws in xrange(temp.getNumberHistograms()):
+                    spec = temp.getSpectrum(iws)
+                    self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
+
                 # Rename and/or add to workspace of same splitter but different chunk
                 wkspname = wksp
                 if numwksp > 1:
@@ -862,7 +893,7 @@ class SNSPowderReduction(PythonAlgorithm):
             #    except Exception as e:
             #        print e
 
-        self.log().information("[F1207] Number of workspace in workspace list after clean = %d. " %(len(wksplist)))
+        self.log().information("[E1207] Number of workspace in workspace list after clean = %d. " %(len(wksplist)))
 
         # About return
         if splitwksp is None:
