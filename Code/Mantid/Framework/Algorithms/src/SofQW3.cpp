@@ -52,7 +52,7 @@ namespace Algorithms
 
   /// Default constructor
   SofQW3::SofQW3()
-    : Rebin2D(), m_emode(0), m_efixedGiven(false), m_efixed(0.0),
+    : Rebin2D(),
       m_Qout(), m_thetaWidth(0.0), m_detNeighbourOffset(-1)
   {
   }
@@ -124,7 +124,7 @@ namespace Algorithms
                                                                     nreports));
 
     // Compute input caches
-    this->initCachedValues(inputWS);
+    m_EmodeProperties.initCachedValues(inputWS,this);
 
     std::vector<double> par = inputWS->getInstrument()->getNumberParameter("detector-neighbour-offset");
     if (par.empty())
@@ -141,6 +141,7 @@ namespace Algorithms
 
     const MantidVec & X = inputWS->readX(0);
 
+    int emode = m_EmodeProperties.m_emode;
     PARALLEL_FOR2(inputWS, outputWS)
     for (int64_t i = 0; i < static_cast<int64_t>(nHistos); ++i) // signed for openmp
     {
@@ -178,7 +179,7 @@ namespace Algorithms
       const double phiLower = phi - phiHalfWidth;
       const double phiUpper = phi + phiHalfWidth;
 
-      const double efixed = this->getEFixed(detector);
+      const double efixed = m_EmodeProperties.getEFixed(detector);
 
       for(size_t j = 0; j < nEnergyBins; ++j)
       {
@@ -188,10 +189,10 @@ namespace Algorithms
         const double dE_j = X[j];
         const double dE_jp1 = X[j+1];
 
-        const V2D ll(dE_j, this->calculateQ(efixed, dE_j, thetaLower, phiLower));
-        const V2D lr(dE_jp1, this->calculateQ(efixed, dE_jp1, thetaLower, phiLower));
-        const V2D ur(dE_jp1, this->calculateQ(efixed, dE_jp1, thetaUpper, phiUpper));
-        const V2D ul(dE_j, this->calculateQ(efixed, dE_j, thetaUpper, phiUpper));
+        const V2D ll(dE_j, this->calculateQ(efixed, emode,dE_j, thetaLower, phiLower));
+        const V2D lr(dE_jp1, this->calculateQ(efixed,emode, dE_jp1, thetaLower, phiLower));
+        const V2D ur(dE_jp1, this->calculateQ(efixed,emode, dE_jp1, thetaUpper, phiUpper));
+        const V2D ul(dE_j, this->calculateQ(efixed,emode, dE_j, thetaUpper, phiUpper));
         Quadrilateral inputQ = Quadrilateral(ll, lr, ur, ul);
 
         this->rebinToFractionalOutput(inputQ, inputWS, i, j, outputWS, m_Qout);
@@ -205,52 +206,28 @@ namespace Algorithms
     this->normaliseOutput(outputWS, inputWS);
   }
 
-  /**
-   * Return the efixed for this detector
-   * @param det :: A pointer to a detector object
-   * @return The value of efixed
-   */
-  double SofQW3::getEFixed(Geometry::IDetector_const_sptr det) const
-  {
-    double efixed(0.0);
-    if( m_emode == 1 ) //Direct
-    {
-      efixed = m_efixed;
-    }
-    else // Indirect
-    {
-      if( m_efixedGiven ) efixed = m_efixed; // user provided a value
-      else
-      {
-        std::vector<double> param = det->getNumberParameter("EFixed");
-        if( param.empty() ) throw std::runtime_error("Cannot find EFixed parameter for component \"" + det->getName()
-                                                     + "\". This is required in indirect mode. Please check the IDF contains these values.");
-        efixed = param[0];
-      }
-    }
-    return efixed;
-  }
 
   /**
    * Calculate the Q value for a given set of energy transfer, scattering
    * and azimuthal angle.
    * @param efixed :: An fixed energy value
+   * @param emode  :: the energy evaluation mode
    * @param deltaE :: The energy change
    * @param twoTheta :: The value of the scattering angle
    * @param azimuthal :: The value of the azimuthual angle
    * @return The value of Q
    */
-  double SofQW3::calculateQ(const double efixed, const double deltaE,
+  double SofQW3::calculateQ(const double efixed,int emode, const double deltaE,
                             const double twoTheta, const double azimuthal) const
   {
     double ki = 0.0;
     double kf = 0.0;
-    if (m_emode == 1)
+    if (emode == 1)
       {
         ki = std::sqrt(efixed * SofQW::energyToK());
         kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
       }
-    else if(m_emode == 2)
+    else if(emode == 2)
       {
         ki = std::sqrt((deltaE + efixed) * SofQW::energyToK());
         kf = std::sqrt(efixed * SofQW::energyToK());
@@ -260,62 +237,6 @@ namespace Algorithms
     const double Qz = -kf * std::sin(twoTheta) * std::sin(azimuthal);
     return std::sqrt(Qx * Qx + Qy * Qy + Qz * Qz);
   }
-
-  /**
-   * Init variables caches
-   * @param workspace :: Workspace pointer
-   */
-  void SofQW3::initCachedValues(API::MatrixWorkspace_const_sptr workspace)
-  {
-    // Retrieve the emode & efixed properties
-    const std::string emode = getProperty("EMode");
-    // Convert back to an integer representation
-    m_emode = 0;
-    if (emode == "Direct")
-    {
-      m_emode = 1;
-    }
-    else if (emode == "Indirect")
-    {
-      m_emode = 2;
-    }
-    m_efixed = getProperty("EFixed");
-
-    // Check whether they should have supplied an EFixed value
-    if( m_emode == 1 ) // Direct
-    {
-      // If GetEi was run then it will have been stored in the workspace, if not the user will need to enter one
-      if( m_efixed == 0.0 )
-      {
-        if ( workspace->run().hasProperty("Ei") )
-        {
-          Kernel::Property *p = workspace->run().getProperty("Ei");
-          Kernel::PropertyWithValue<double> *eiProp = dynamic_cast<Kernel::PropertyWithValue<double>*>(p);
-          if( !eiProp )
-          {
-            throw std::runtime_error("Input workspace contains Ei but its property type is not a double.");
-          }
-          m_efixed = (*eiProp)();
-        }
-        else
-        {
-          throw std::invalid_argument("Input workspace does not contain an EFixed value. Please provide one or run GetEi.");
-        }
-      }
-      else
-      {
-        m_efixedGiven = true;
-      }
-    }
-    else
-    {
-      if( m_efixed != 0.0 )
-      {
-        m_efixedGiven = true;
-      }
-    }
-  }
-
   /**
    * A map detector ID and Q ranges
    * This method looks unnecessary as it could be calculated on the fly but
@@ -342,7 +263,7 @@ namespace Algorithms
         // Check to see if there is an EFixed, if not skip it
         try
         {
-          getEFixed(det);
+            m_EmodeProperties.getEFixed(det);
         }
         catch(std::runtime_error&)
         {

@@ -189,6 +189,7 @@ set ( SRC_FILES
 	src/SignalOverError.cpp
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
+	src/SofQCommon.cpp    
 	src/SofQW.cpp
 	src/SofQW2.cpp
 	src/SofQW3.cpp
@@ -410,6 +411,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SignalOverError.h
 	inc/MantidAlgorithms/SmoothData.h
 	inc/MantidAlgorithms/SmoothNeighbours.h
+	inc/MantidAlgorithms/SofQCommon.h    
 	inc/MantidAlgorithms/SofQW.h
 	inc/MantidAlgorithms/SofQW2.h
 	inc/MantidAlgorithms/SofQW3.h

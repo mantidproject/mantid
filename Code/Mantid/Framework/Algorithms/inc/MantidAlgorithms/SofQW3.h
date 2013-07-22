@@ -8,6 +8,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include <list>
+#include "MantidAlgorithms/SofQCommon.h"
 
 namespace Mantid
 {
@@ -73,10 +74,8 @@ namespace Mantid
       void exec();
 
       /// Calculate the Q value for given conditions.
-      double calculateQ(const double efixed, const double deltaE,
+      double calculateQ(const double efixed,const int emode, const double deltaE,
                         const double twoTheta, const double azimuthal) const;
-      /// Get the efixed value for the given detector
-      double getEFixed(Geometry::IDetector_const_sptr det) const;
       /// Init variables cache base on the given workspace
       void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
       /// Init the theta index
@@ -88,14 +87,8 @@ namespace Mantid
       DataObjects::RebinnedOutput_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
                                                      const std::vector<double> & binParams, std::vector<double>& newAxis);
 
-
-      /// E Mode
-      int m_emode;
-      /// EFixed has been provided
-      bool m_efixedGiven;
-      /// EFixed
-      double m_efixed;
-      /// Output Q axis
+      SofQCommon  m_EmodeProperties;
+  /// Output Q axis
       std::vector<double> m_Qout;
       /// Single value theta width
       double m_thetaWidth;
