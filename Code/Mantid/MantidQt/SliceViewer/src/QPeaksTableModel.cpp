@@ -307,14 +307,12 @@ namespace MantidQt
         size_t numToCheck(ids.size());
         if (numToCheck > 20) // arbitrary cutoff
           numToCheck = 20;
-        bool hasRectDet(false);
         const std::string RECT_DET("RectangularDetector");
         for (size_t i = 0; i < numToCheck; ++i)
         {
           boost::shared_ptr<const Mantid::Geometry::IComponent> component = instr->getDetector(ids[i]);
           if (component->type().compare(RECT_DET) == 0)
           {
-            hasRectDet = true;
             break;
           }
           else
@@ -322,7 +320,6 @@ namespace MantidQt
             component = component->getParent();
             if (component->type().compare(RECT_DET) == 0)
             {
-              hasRectDet = true;
               break;
             }
           }
@@ -339,8 +336,6 @@ namespace MantidQt
       // hide some columns based on the techniques
       { // shrink variable scope
         std::set<std::string> techniques = instrInfo.techniques();
-        // required for ???
-        const std::string SCD("Single Crystal Diffraction");
         // required for showing final and delta energy
         const std::string IGS("TOF Indirect Geometry Spectroscopy");
         // required for showing initial and delta energy

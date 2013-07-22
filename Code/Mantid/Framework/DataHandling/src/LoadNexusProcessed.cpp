@@ -986,12 +986,10 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   //Read necessary arrays from the file
   // Detector list contains a list of all of the detector numbers. If it not present then we can't update the spectra
   // map
-  int ndets(-1);
   boost::shared_array<int> det_list(new int);
   try
   {
     NXInt detlist_group = detgroup.openNXInt("detector_list");
-    ndets = detlist_group.dim0();
     detlist_group.load();
     det_list.swap(detlist_group.sharedBuffer());
   }
@@ -1050,7 +1048,6 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
 
         int start = det_index[i-1];
         int end = start + det_count[i-1];
-        assert( end <= ndets );
         spec->setDetectorIDs(std::set<detid_t>(det_list.get()+start,det_list.get()+end));
       }
   }
