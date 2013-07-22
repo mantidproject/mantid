@@ -41,7 +41,8 @@ The previous calibrated instrument view:
 
 .. sectionauthor:: Gesner Passos - ISIS
 """
-
+import numpy
+from mantid.simpleapi import *
 import tube
 
 
