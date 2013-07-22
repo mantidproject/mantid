@@ -68,8 +68,21 @@ public:
     // Check output file
     std::string fullFilename = alg.getPropertyValue("OutputFilename"); //Get absolute path
     // has the algorithm written the output file to disk?
-    TS_ASSERT( Poco::File(fullFilename).exists() );
-    
+    bool OutputFileExists = Poco::File(fullFilename).exists();
+    TS_ASSERT( OutputFileExists );
+    // If output file exists do some tests on its contents
+    if( OutputFileExists) {
+      std::ifstream in(fullFilename.c_str());
+      std::string header;
+
+      // Check header has name of algorithm in it
+      getline( in, header);
+      bool headerHasNameOfAlgorithmInIt = header.find("ModifyDetectorDotDatFile") != std::string::npos;
+      TS_ASSERT( headerHasNameOfAlgorithmInIt );
+      in.close();
+
+    }
+
     // Remove output file
     Poco::File(fullFilename).remove();
   }
