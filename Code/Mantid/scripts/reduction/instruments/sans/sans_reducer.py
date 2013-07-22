@@ -10,6 +10,7 @@ import sans_reduction_steps
 import hfir_load
 import absolute_scale
 import mantid.simpleapi as api
+from mantid import simpleapi
 import warnings
 import inspect
 

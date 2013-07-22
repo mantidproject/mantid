@@ -11,7 +11,8 @@ from reduction import validate_step
 import warnings
 
 # Mantid imports
-from mantidsimple import *
+import mantid
+from mantid.simpleapi import *
 
 # Define a SANS specific logger 
 from mantid.kernel import Logger
@@ -175,8 +176,8 @@ class BaseTransmission(ReductionStep):
                                         TransmissionError=self._error, 
                                         OutputWorkspace=workspace) 
         else:
-            CreateSingleValuedWorkspace("transmission", self._trans, self._error)
-            Divide(workspace, "transmission", workspace)
+            CreateSingleValuedWorkspace(OutputWorkspace="transmission", DataValue=self._trans, ErrorValue=self._error)
+            Divide(LHSWorkspace=workspace, RHSWorkspace="transmission", OutputWorkspace=workspace)
         
         return "Transmission correction applied for T = %g +- %g" % (self._trans, self._error)
   
@@ -262,9 +263,9 @@ class BeamSpreaderTransmission(BaseTransmission):
         if self._theta_dependent:
             ApplyTransmissionCorrection(InputWorkspace=workspace, 
                                         TransmissionWorkspace=self._transmission_ws, 
-                                        OutputWorkspace=workspace)          
+                                        OutputWorkspace=workspace)
         else:
-            Divide(workspace, self._transmission_ws, workspace)  
+            Divide(LHSWorkspace=workspace, RHSWorkspace=self._transmission_ws, OutputWorkspace=workspace)
         
         trans_ws = mtd[self._transmission_ws]
         self._trans = trans_ws.dataY(0)[0]
@@ -290,7 +291,7 @@ class DirectBeamTransmission(BaseTransmission):
         self._transmission_ws = None
         ## Flag to tell us whether we should normalise to the monitor channel
         self._monitor_det_ID = None
-        self._use_sample_dc = use_sample_dc        
+        self._use_sample_dc = use_sample_dc
         
     def _load_monitors(self, reducer, workspace):
         """
@@ -386,12 +387,12 @@ class DirectBeamTransmission(BaseTransmission):
         
         # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
         # as the monitor channel.
-        RebinToWorkspace(empty_mon_ws, sample_mon_ws, OutputWorkspace=empty_mon_ws)
+        RebinToWorkspace(WorkspaceToRebin=empty_mon_ws, WorkspaceToMatch=sample_mon_ws, OutputWorkspace=empty_mon_ws)
 
         # Clean up
         for ws in [empty_ws, sample_ws]:
-            if mtd.workspaceExists(ws):
-                mtd.deleteWorkspace(ws)          
+            if mtd.doesExist(ws):
+                DeleteWorkspace(Workspace=ws)
             
         return sample_mon_ws, empty_mon_ws, first_det, output_str
         
@@ -415,8 +416,8 @@ class DirectBeamTransmission(BaseTransmission):
             raise RuntimeError, "Couldn't compute transmission. Is the beam center in the right place?\n\n%s" % sys.exc_value
         
         for ws in [empty_mon_ws, sample_mon_ws]:
-            if mtd.workspaceExists(ws):
-                mtd.deleteWorkspace(ws)          
+            if mtd.doesExist(ws):
+                DeleteWorkspace(Workspace=ws)
                 
     def _apply_transmission(self, workspace):
         """
@@ -429,12 +430,12 @@ class DirectBeamTransmission(BaseTransmission):
         if self._theta_dependent:
             ApplyTransmissionCorrection(InputWorkspace=workspace, 
                                         TransmissionWorkspace=self._transmission_ws+'_rebin', 
-                                        OutputWorkspace=workspace)          
+                                        OutputWorkspace=workspace)
         else:
-            Divide(workspace, self._transmission_ws+'_rebin', workspace)  
+            Divide(LHSWorkspace=workspace, RHSWorkspace=self._transmission_ws+'_rebin', OutputWorkspace=workspace)
 
-        if mtd.workspaceExists(self._transmission_ws+'_rebin'):
-            mtd.deleteWorkspace(self._transmission_ws+'_rebin')          
+        if mtd.doesExist(self._transmission_ws+'_rebin'):
+            DeleteWorkspace(Workspace=self._transmission_ws+'_rebin')
        
         
     def execute(self,reducer, workspace=None):
@@ -494,11 +495,11 @@ class Normalize(ReductionStep):
                   Factor=1.0/norm_count, Operation='Multiply')
             return "Normalization by time: %6.2g sec" % norm_count
         else:
-            mantid.sendLogMessage("Normalization step did not get a valid normalization option: skipping")
+            logger.notice("Normalization step did not get a valid normalization option: skipping")
             return "Normalization step did not get a valid normalization option: skipping"
                         
     def clean(self):
-        mtd.deleteWorkspace(norm_ws)
+        DeleteWorkspace(Workspace=norm_ws)
             
 class WeightedAzimuthalAverage(ReductionStep):
     """
@@ -523,8 +524,9 @@ class WeightedAzimuthalAverage(ReductionStep):
         pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
 
         # Q min is one pixel from the center, unless we have the beam trap size
-        if mtd[workspace].getRun().hasProperty("beam-trap-diameter"):
-            mindist = mtd[workspace].getRun().getProperty("beam-trap-diameter").value/2.0
+        run = mtd[workspace].run()
+        if run.hasProperty("beam-trap-diameter"):
+            mindist = run.getProperty("beam-trap-diameter").value/2.0
         else:
             mindist = min(pixel_size_x, pixel_size_y)
         qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
@@ -582,11 +584,11 @@ class WeightedAzimuthalAverage(ReductionStep):
         # If we kept the events this far, we need to convert the input workspace
         # to a histogram here
         input_workspace = workspace
-        if not isinstance(mtd[workspace]._getHeldObject(), MatrixWorkspace):
+        if isinstance(mtd[workspace], mantid.api.IEventWorkspace):
             input_workspace = '__'+workspace
-            ConvertToMatrixWorkspace(workspace, input_workspace)
+            ConvertToMatrixWorkspace(InputWorkspace=workspace, OutputWorkspace=input_workspace)
             
-        Q1DWeighted(InputWorkspace=input_workspace, 
+        Q1DWeighted(InputWorkspace=input_workspace,
                     OutputWorkspace=output_ws, 
                     OutputBinning=self._binning,
                     NPixelDivision=self._nsubpix,
@@ -663,7 +665,7 @@ class SensitivityCorrection(ReductionStep):
     
     @validate_step
     def set_dark_current_subtracter(self, subtracter):
-        warnings.warn("Call to deprecated method SensitivityCorrection.set_dark_current_subtracter", category=DeprecationWarning)        
+        warnings.warn("Call to deprecated method SensitivityCorrection.set_dark_current_subtracter", category=DeprecationWarning)
         self._dark_current_subtracter = subtracter
         
     def execute(self, reducer, workspace):
@@ -680,7 +682,7 @@ class SensitivityCorrection(ReductionStep):
         if self._dark_current_data is not None:
             dark_current = find_data(self._dark_current_data, instrument=reducer.instrument.name())
         
-        l=SANSSensitivityCorrection(InputWorkspace=workspace,
+        outputs=SANSSensitivityCorrection(InputWorkspace=workspace,
                                   Filename=filepath,
                                   UseSampleDC=self._use_sample_dc,
                                   DarkCurrentFile=dark_current,
@@ -692,7 +694,7 @@ class SensitivityCorrection(ReductionStep):
                                   ReductionProperties=reducer.get_reduction_table_name(),
                                   OutputSensitivityWorkspace=self._efficiency_ws
                                   )
-        return l.getPropertyValue("OutputMessage")
+        return outputs[2] # message
         
 class Mask(ReductionStep):
     """
@@ -833,8 +835,9 @@ class Mask(ReductionStep):
     def execute(self, reducer, workspace):
         
         # Check whether the workspace has mask information
-        if not self._ignore_run_properties and mtd[workspace].getRun().hasProperty("rectangular_masks"):
-            mask_str = mtd[workspace].getRun().getProperty("rectangular_masks").value
+        run = mtd[workspace].run()
+        if not self._ignore_run_properties and run.hasProperty("rectangular_masks"):
+            mask_str = run.getProperty("rectangular_masks").value
             try:
                 rectangular_masks = pickle.loads(mask_str)
             except:
@@ -849,7 +852,7 @@ class Mask(ReductionStep):
                 try:
                     self.add_pixel_rectangle(rec[0], rec[1], rec[2], rec[3])
                 except:
-                    mantid.sendLogMessage("Badly defined mask from configuration file: %s" % str(rec))
+                    mantid.logger.notice("Badly defined mask from configuration file: %s" % str(rec))
         
         for shape in self._xml:
             api.MaskDetectorsInShape(Workspace=workspace, ShapeXML=shape)
@@ -864,19 +867,19 @@ class Mask(ReductionStep):
                                                                    workspace))
 
         if len(self.detect_list)>0:
-            MaskDetectors(workspace, DetectorList = self.detect_list)
+            MaskDetectors(Workspace=workspace, DetectorList = self.detect_list)
             
         # Mask out internal list of pixels
         if len(self.masked_pixels)>0:
             # Transform the list of pixels into a list of Mantid detector IDs
             masked_detectors = instrument.get_detector_from_pixel(self.masked_pixels, workspace)
             # Mask the pixels by passing the list of IDs
-            MaskDetectors(workspace, DetectorList = masked_detectors)
+            MaskDetectors(Workspace=workspace, DetectorList = masked_detectors)
             
-        masked_detectors = api.ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
-        sanslog.notice("Mask check %s: %g masked pixels" % (workspace, len(masked_detectors)))  
+        output_ws, detector_list = ExtractMask(InputWorkspace=workspace, OutputWorkspace="__mask")
+        mantid.logger.notice("Mask check %s: %g masked pixels" % (workspace, len(detector_list)))
         
-        return "Mask applied %s: %g masked pixels" % (workspace, len(masked_detectors))
+        return "Mask applied %s: %g masked pixels" % (workspace, len(detector_list))
 
 class CorrectToFileStep(ReductionStep):
     """
@@ -906,8 +909,8 @@ class CorrectToFileStep(ReductionStep):
 
     def execute(self, reducer, workspace):
         if self._filename:
-            CorrectToFile(workspace, self._filename, workspace,
-                          self._corr_type, self._operation)
+            CorrectToFile(WorkspaceToCorrect=workspace, Filename=self._filename, OutputWorkspace=workspace,
+                          FirstColumnValue=self._corr_type, WorkspaceOperation=self._operation)
 
 class CalculateNorm(object):
     """
@@ -993,7 +996,7 @@ class CalculateNorm(object):
         pixel_adj = ''
         if self._pixel_file:
             pixel_adj = self.PIXEL_CORR_NAME
-            load_com = self._load+'("'+self._pixel_file+'","'+pixel_adj+'"'
+            load_com = self._load+'(Filename="'+self._pixel_file+'",OutputWorkspace="'+pixel_adj+'"'
             if self._load_params:
                 load_com  += ','+self._load_params
             load_com += ')'
@@ -1104,11 +1107,11 @@ class ConvertToQ(ReductionStep):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
+                Q1D(DetBankWorkspace=workspace, OutputWorkspace=workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
     
             elif self._Q_alg == 'Qxy':
-                Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
-                ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
+                Qxy(InputWorkspace=workspace, OutputWorkspace=workspace, MaxQxy=reducer.QXY2, DeltaQ=reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
+                ReplaceSpecialValues(InputWorkspace=workspace, OutputWorkspace=workspace, NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
         except:
@@ -1154,7 +1157,7 @@ class SaveIqAscii(ReductionStep):
             if type(output_list) is not list:
                 output_list = [output_list]
             for output_ws in output_list:
-                if mtd.workspaceExists(output_ws):
+                if mtd.doesExist(output_ws):
                     proc_xml = ""
                     if self._process is not None and os.path.isfile(self._process):
                         proc = open(self._process, 'r')
@@ -1248,11 +1251,10 @@ class SubtractBackground(ReductionStep):
                     log_text = "%s\n   %s" % (log_text, output)
         
         # Make sure that we have the same binning
-        RebinToWorkspace(self._background_ws, workspace, OutputWorkspace="__tmp_bck")
-        Minus(LHSWorkspace=workspace, RHSWorkspace="__tmp_bck",
-              OutputWorkspace=workspace)
-        if mtd.workspaceExists("__tmp_bck"):
-            mtd.deleteWorkspace("__tmp_bck")        
+        RebinToWorkspace(WorkspaceToRebin=self._background_ws, WorkspaceToMatch=workspace, OutputWorkspace="__tmp_bck")
+        Minus(LHSWorkspace=workspace, RHSWorkspace="__tmp_bck", OutputWorkspace=workspace)
+        if mtd.doesExist("__tmp_bck"):
+            DeleteWorkspace(Workspace="__tmp_bck")
         
         log_text = log_text.replace('\n','\n   |')
         return "Background subtracted [%s]%s\n" % (self._background_ws, log_text)
@@ -1383,9 +1385,9 @@ class GetSampleGeom(ReductionStep):
             but doesn't replace values that have been previously set
         """
         wksp = mtd[workspace] 
-        if wksp.isGroup():
+        if isinstance(wksp, mantid.api.WorkspaceGroup):
             wksp = wksp[0]
-        sample_details = wksp.getSampleInfo()
+        sample_details = wksp.sample()
 
         if self._use_wksp_shape:
             self.shape = sample_details.getGeometryFlag()
@@ -1459,7 +1461,7 @@ class StripEndZeros(ReductionStep):
         self._flag_value = flag_value
         
     def execute(self, reducer, workspace):
-        result_ws = mantid.getMatrixWorkspace(workspace)
+        result_ws = mtd[workspace]
         if result_ws.getNumberHistograms() != 1:
             #Strip zeros is only possible on 1D workspaces
             return
@@ -1484,7 +1486,7 @@ class StripEndZeros(ReductionStep):
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001*x_vals[stop + 1]
-        CropWorkspace(workspace,workspace,startX,endX)
+        CropWorkspace(InputWorkspace=workspace,OutputWorkspace=workspace,XMin=startX,XMax=endX)
 
 class StripEndNans(ReductionStep):
     # ISIS only
@@ -1507,7 +1509,7 @@ class StripEndNans(ReductionStep):
             @param reducer: unused
             @param workspace: the workspace to convert
         """
-        result_ws = mantid.getMatrixWorkspace(workspace)
+        result_ws = mtd[workspace]
         if result_ws.getNumberHistograms() != 1:
             #Strip zeros is only possible on 1D workspaces
             return

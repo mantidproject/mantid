@@ -23,8 +23,8 @@ import time
 import types
 import inspect
 from instrument import Instrument
-import MantidFramework
-import mantidsimple
+import mantid
+from mantid import simpleapi
 import warnings
 import inspect
 import random
@@ -47,10 +47,6 @@ def validate_loader(f):
             # If we get a function, assume its name is an algorithm name
             algorithm = algorithm.func_name
 
-        if isinstance(algorithm, MantidFramework.IAlgorithmProxy):
-            # If we have an algorithm proxy, get the actual algorithm
-            algorithm = algorithm._getHeldObject()
-            
         if isinstance(algorithm, types.StringType):
             # If we have a string, assume it's an algorithm name
             class _AlgorithmStep(ReductionStep):
@@ -60,7 +56,7 @@ def validate_loader(f):
                 def get_algorithm(self):
                     return self.algorithm
                 def setProperty(self, key, value):
-                    kwargs[key]=value                    
+                    kwargs[key]=value
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
                     """
                         Create a new instance of the requested algorithm object, 
@@ -83,11 +79,11 @@ def validate_loader(f):
                     else:
                         data_file = self._data_file
 
-                    proxy = MantidFramework.mtd._createAlgProxy(algorithm)
-                    if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
-                        raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
+                    alg = mantid.api.FrameworkManager.createAlgorithm(algorithm)
+                    if not isinstance(alg, mantid.api.AlgorithmProxy):
+                        raise RuntimeError, "Reducer expects a ReductionStep or a function returning an AlgorithmProxy object"
                     
-                    propertyOrder = MantidFramework.mtd._getPropertyOrder(proxy._getHeldObject())
+                    propertyOrder = proxy.orderedProperties()
             
                     # add the args to the kw list so everything can be set in a single way
                     for (key, arg) in zip(propertyOrder[:len(args)], args):
@@ -105,19 +101,15 @@ def validate_loader(f):
                         kwargs["AlternateName"] in propertyOrder:
                         kwargs[kwargs["AlternateName"]] = data_file
 
-                    # set the properties of the algorithm                    
-                    ialg = proxy._getHeldObject()
-                    self.algorithm = ialg
-                    for key in kwargs.keys():
-                        ialg.setPropertyValue(key, MantidFramework._makeString(kwargs[key]).lstrip('? '))
-                        
-                    proxy.execute()
+                    self.algorithm = alg
+                    simpleapi._set_properties(alg, [], **kwargs)
+                    alg.execute()
                     if "OutputMessage" in propertyOrder:
                         return proxy.getPropertyValue("OutputMessage")
-                    return "%s applied" % proxy.name()
+                    return "%s applied" % alg.name()
             return f(reducer, _AlgorithmStep())
         
-        elif isinstance(algorithm, MantidFramework.IAlgorithm) \
+        elif isinstance(algorithm, mantid.api.IAlgorithm) \
             or type(algorithm).__name__=="IAlgorithm":
             class _AlgorithmStep(ReductionStep):
                 def __init__(self):
@@ -149,13 +141,13 @@ def validate_loader(f):
                     else:
                         data_file = self._data_file
                                 
-                    propertyOrder = MantidFramework.mtd._getPropertyOrder(algorithm)
+                    propertyOrder = algorithm.orderedProperties()
             
                     # Override input and output workspaces
                     if "Workspace" in propertyOrder:
-                        algorithm.setPropertyValue("Workspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                        algorithm.setPropertyValue("Workspace", inputworkspace)
                     if "OutputWorkspace" in propertyOrder:
-                        algorithm.setPropertyValue("OutputWorkspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                        algorithm.setPropertyValue("OutputWorkspace", inputworkspace)
                     if "Filename" in propertyOrder:
                         algorithm.setPropertyValue("Filename", data_file)
 
@@ -206,10 +198,6 @@ def validate_step(f):
             # If we get a function, assume its name is an algorithm name
             algorithm = algorithm.func_name
 
-        if isinstance(algorithm, MantidFramework.IAlgorithmProxy):
-            # If we have an algorithm proxy, get the actual algorithm
-            algorithm = algorithm._getHeldObject()
-            
         if isinstance(algorithm, types.StringType):
             # If we have a string, assume it's an algorithm name
             class _AlgorithmStep(ReductionStep):
@@ -218,7 +206,7 @@ def validate_step(f):
                 def get_algorithm(self):
                     return self.algorithm
                 def setProperty(self, key, value):
-                    kwargs[key]=value                    
+                    kwargs[key]=value
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
                     """
                         Create a new instance of the requested algorithm object, 
@@ -232,11 +220,11 @@ def validate_step(f):
                     """
                     if outputworkspace is None:
                         outputworkspace = inputworkspace 
-                    proxy = MantidFramework.mtd._createAlgProxy(algorithm)
-                    if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
+                    alg = mantid.FrameworkManager.createAlgorithm(algorithm)
+                    if not isinstance(proxy, mantid.api.AlgorithmProxy):
                         raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
                     
-                    propertyOrder = MantidFramework.mtd._getPropertyOrder(proxy._getHeldObject())
+                    propertyOrder = alg.orderedProperties()
             
                     # add the args to the kw list so everything can be set in a single way
                     for (key, arg) in zip(propertyOrder[:len(args)], args):
@@ -250,19 +238,15 @@ def validate_step(f):
                     if "OutputWorkspace" in kwargs:
                         kwargs["OutputWorkspace"] = outputworkspace
 
-                    # set the properties of the algorithm                    
-                    ialg = proxy._getHeldObject()
-                    self.algorithm = ialg
-                    for key in kwargs.keys():
-                        ialg.setPropertyValue(key, MantidFramework._makeString(kwargs[key]).lstrip('? '))
-                        
-                    proxy.execute()
+                    self.algorithm = alg
+                    simpleapi._set_properties(alg,[],**kwargs)
+                    alg.execute()
                     if "OutputMessage" in propertyOrder:
-                        return proxy.getPropertyValue("OutputMessage")
-                    return "%s applied" % proxy.name()
+                        return alg.getPropertyValue("OutputMessage")
+                    return "%s applied" % alg.name()
             return f(reducer, _AlgorithmStep())
                     
-        elif isinstance(algorithm, MantidFramework.IAlgorithm) \
+        elif isinstance(algorithm, mantid.api.IAlgorithm) \
             or type(algorithm).__name__=="IAlgorithm":
             class _AlgorithmStep(ReductionStep):
                 def __init__(self):
@@ -284,15 +268,15 @@ def validate_step(f):
                     """
                     if outputworkspace is None:
                         outputworkspace = inputworkspace 
-                    propertyOrder = MantidFramework.mtd._getPropertyOrder(algorithm)
+                    propertyOrder = algorithm.orderedProperties()
             
                     # Override input and output workspaces
                     if "Workspace" in propertyOrder:
-                        algorithm.setPropertyValue("Workspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                        algorithm.setPropertyValue("Workspace", inputworkspace)
                     if "InputWorkspace" in propertyOrder:
-                        algorithm.setPropertyValue("InputWorkspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                        algorithm.setPropertyValue("InputWorkspace", inputworkspace)
                     if "OutputWorkspace" in propertyOrder:
-                        algorithm.setPropertyValue("OutputWorkspace", MantidFramework._makeString(outputworkspace).lstrip('? '))
+                        algorithm.setPropertyValue("OutputWorkspace", outputworkspace)
 
                     algorithm.execute()
                     if "OutputMessage" in propertyOrder:
@@ -311,7 +295,7 @@ class Reducer(object):
     """
     
     ## Instrument configuration object
-    instrument = None    
+    instrument = None
     ## Path for data files
     _data_path = '.'
     ## Path for output files
@@ -357,10 +341,10 @@ class Reducer(object):
             Removes all workspace flagged as dirty, use when a reduction aborts with errors
         """
         for bad_data in self._dirty:
-            if MantidFramework.mtd.workspaceExists(bad_data):
-                mantidsimple.DeleteWorkspace(bad_data)
+            if bad_data in mtd:
+                simpleapi.DeleteWorkspace(Workspace=bad_data)
             else:
-                MantidFramework.mtd.sendLogMessage('reducer: Could not access tainted workspace '+bad_data)
+                mantid.logger.notice('reducer: Could not access tainted workspace '+bad_data)
             
     def clean(self, workspace):
         """
@@ -385,7 +369,7 @@ class Reducer(object):
         path = os.path.normcase(path)
         if os.path.isdir(path):
             self._data_path = path
-            MantidFramework.ConfigService().appendDataSearchDir(path)
+            mantid.config.appendDataSearchDir(path)
         else:
             raise RuntimeError, "Reducer.set_data_path: provided path is not a directory (%s)" % path
         
@@ -443,7 +427,7 @@ class Reducer(object):
             TODO: this needs to be an ordered list
         """
         if data_file is None:
-            if MantidFramework.mtd.workspaceExists(workspace):
+            if workspace in mtd:
                 self._data_files[workspace] = None
                 return
             else:
