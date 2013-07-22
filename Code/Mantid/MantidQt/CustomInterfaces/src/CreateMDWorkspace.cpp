@@ -152,8 +152,7 @@ void CreateMDWorkspace::findUBMatrixClicked()
     memento->fetchIt(Everything); 
 
     // Find the peaks workspace in detector space
-    command = "from mantidsimple import *\n"
-      "import sys\n"
+    command = "from mantid.simpleapi import *\n"
       "try:\n"
       "    FindSXPeaksDialog(InputWorkspace='%1', OutputWorkspace='%1_peaks')\n"
       "    print 'SUCCESS'\n"
@@ -228,8 +227,7 @@ void CreateMDWorkspace::setLogValueClicked()
     QString id = QString(memento->getId().c_str());
 
     QString pyInput =
-      "from mantidsimple import *\n"
-      "import sys\n"
+      "from mantid.simpleapi import *\n"
       "try:\n"
       "    wsName='%1'\n"
       "    alg = AddSampleLogDialog(Workspace=wsName)\n"
@@ -303,14 +301,13 @@ void CreateMDWorkspace::setUBMatrixClicked()
     QString id = QString(memento->getId().c_str());
 
     QString pyInput =
-      "from mantidsimple import *\n"
-      "import sys\n"
+      "from mantid.simpleapi import *\n"
       "wsName='%1'\n"
       "SetUBDialog(Workspace=wsName)\n"
       "msg = 'ws is: ' + wsName\n"
-      "mtd.sendLogMessage(msg)\n"
+      "logger.notice(msg)\n"
       "ws = mtd[wsName]\n"
-      "lattice = ws.getSample().getOrientedLattice()\n"
+      "lattice = ws.sample().getOrientedLattice()\n"
       "ub = lattice.getUB()\n"
       "print '%(u00)d, %(u01)d, %(u02)d, %(u10)d, %(u11)d, %(u12)d, %(u20)d, %(u21)d, %(u22)d' "
       "% {'u00': ub[0][0], 'u01' : ub[0][1], 'u02' : ub[0][2], 'u10': ub[1][0], 'u11' : ub[1][1], 'u12' : ub[1][2], 'u20' : ub[2][0], 'u21' : ub[2][1], 'u22' : ub[2][2]}\n";
@@ -453,7 +450,7 @@ void CreateMDWorkspace::setGoniometerClicked()
     QString id = QString(memento->getId().c_str());
 
     QString pyInput =
-      "from mantidsimple import *\n"
+      "from mantid.simpleapi import *\n"
       "import sys\n"
       "try:\n"
       "    wsName='%1'\n"
