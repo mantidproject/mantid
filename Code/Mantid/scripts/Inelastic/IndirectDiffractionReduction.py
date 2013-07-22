@@ -1,4 +1,4 @@
-from mantidsimple import *
+import mantid
 from msg_reducer import MSGReducer
 import inelastic_indirect_reduction_steps as steps
 
@@ -21,13 +21,13 @@ class MSGDiffractionReducer(MSGReducer):
             else:
                 return
         
-        step = mtd.createAlgorithm("ConvertUnits")
+        step = mantid.FrameworkManager.createAlgorithm("ConvertUnits")
         step.setPropertyValue("Target", "dSpacing")
         step.setPropertyValue("EMode", "Elastic")
         self.append_step(step)
         
         if self._rebin_string is not None:
-            step = mtd.createAlgorithm("Rebin")
+            step = mantid.FrameworkManager.createAlgorithm("Rebin")
             step.setPropertyValue("Params", self._rebin_string)
             self.append_step(step)
         
