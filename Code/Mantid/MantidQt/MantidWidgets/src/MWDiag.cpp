@@ -368,7 +368,7 @@ QString MWDiag::createDiagnosticScript() const
 
   QString diagCall =
     "from DirectEnergyConversion import setup_reducer\n"
-    "from mantidsimple import mtd\n"
+    "from mantidimport mtd\n"
     "reducer = setup_reducer(mtd.settings['default.instrument'])\n"
     "diag_total_mask = reducer.diagnose(";
   
