@@ -5062,13 +5062,28 @@ void ApplicationWindow::readSettings()
   settings.endGroup(); // UserFunctions
 
   settings.beginGroup("/Confirmations");
-  confirmCloseFolder = settings.value("/Folder", true).toBool();
-  confirmCloseTable = settings.value("/Table", true).toBool();
-  confirmCloseMatrix = settings.value("/Matrix", true).toBool();
-  confirmClosePlot2D = settings.value("/Plot2D", true).toBool();
-  confirmClosePlot3D = settings.value("/Plot3D", true).toBool();
-  confirmCloseNotes = settings.value("/Note", true).toBool();
-  d_inform_rename_table = settings.value("/RenameTable", true).toBool();
+  //Once only for each Qsettings instance set all of the confirmations to false - they are annoying
+  //however if people consciously turn them back on then leave them alone.
+  //leaving renameTable out of this as it is bit different
+  bool setConfirmationDefaultsToFalseOnce= settings.value("/DefaultsSetToFalseOnce", false).toBool();
+  if (!setConfirmationDefaultsToFalseOnce)
+  {
+    settings.setValue("/Folder", false);
+    settings.setValue("/Table", false);
+    settings.setValue("/Matrix", false);
+    settings.setValue("/Plot2D", false);
+    settings.setValue("/Plot3D", false);
+    settings.setValue("/Note", false);
+    settings.setValue("/InstrumentWindow", false);
+    settings.setValue("/DefaultsSetToFalseOnce", true);
+  }
+  confirmCloseFolder = settings.value("/Folder", false).toBool();
+  confirmCloseTable = settings.value("/Table", false).toBool();
+  confirmCloseMatrix = settings.value("/Matrix", false).toBool();
+  confirmClosePlot2D = settings.value("/Plot2D", false).toBool();
+  confirmClosePlot3D = settings.value("/Plot3D", false).toBool();
+  confirmCloseNotes = settings.value("/Note", false).toBool();
+  d_inform_rename_table = settings.value("/RenameTable", false).toBool();
   confirmCloseInstrWindow=settings.value("/InstrumentWindow", false).toBool();
   settings.endGroup(); // Confirmations
 
