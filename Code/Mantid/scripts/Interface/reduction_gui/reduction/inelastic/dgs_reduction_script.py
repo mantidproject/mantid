@@ -114,6 +114,8 @@ class DgsReductionScripter(BaseReductionScripter):
             
             script += "\n"
 
+            if isinstance(data_file,list):
+                data_file='+'.join(data_file)
             script += 'DGS_input_data=Load("'+data_file+'")\n'
             script +=  "DGS_output_data=%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
             script += DgsReductionScripter.WIDTH + 'SampleInputWorkspace=DGS_input_data,\n'
