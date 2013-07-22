@@ -1,0 +1,10 @@
+data=/inelastic/inelastic_bank/data
+x-axis=/inelastic/inelastic_bank/time_binning
+x-axis-name=time_of_flight
+title=/inelastic/title
+sample=/inelastic/sample/name
+detector_distance=/inelastic/MARS/inelastic_bank/distance
+scattering_angle=/inelastic/MARS/inelastic_bank/scattering_angle
+chopper_distance=/inelastic/MARS/pulse_producing_chopper/distance
+monitor1=/inelastic/pre_sample_monitor/integral
+monitortof=/inelastic/pre_sample_monitor/data
