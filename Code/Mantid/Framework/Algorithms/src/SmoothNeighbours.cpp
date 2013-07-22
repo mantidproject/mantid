@@ -648,8 +648,6 @@ bool areAllDefault(ConstVecProperties &properties)
 void SmoothNeighbours::exec()
 {
   inWS = getProperty("InputWorkspace");
-  
-  // TODO: OutputWorkspace, IgnoreMaskedDetectors?
 
   PreserveEvents = getProperty("PreserveEvents");
 
@@ -658,24 +656,20 @@ void SmoothNeighbours::exec()
 
   setWeightingStrategy(getProperty("WeightedSum"), Radius);
 
+  AdjX = getProperty("AdjX");
+  AdjY = getProperty("AdjY");
+  Edge = getProperty("ZeroEdgePixels");
+
+  nNeighbours = getProperty("NumberOfNeighbours");
+
   // Progress reporting, first for the sorting
   m_prog = new Progress(this, 0.0, 0.2, inWS->getNumberHistograms());
 
-  // Check the type of the instrument
+  // Run the appropriate method depending on the type of the instrument
   if(inWS->getInstrument()->containsRectDetectors() == Instrument::ContainsState::Full)
-  {
-    AdjX = getProperty("AdjX");
-    AdjY = getProperty("AdjY");
-    Edge = getProperty("ZeroEdgePixels");
-    // TODO: SumPixelsX, SumPixelsY?
     findNeighboursRectangular();
-  }
   else
-  {
-    nNeighbours = getProperty("NumberOfNeighbours");
-    // TODO: SumNumberOfNeighbours?
     findNeighboursUbiqutious();
-  }
 
   EventWorkspace_sptr wsEvent = boost::dynamic_pointer_cast<EventWorkspace>(inWS);
   if (wsEvent)
