@@ -102,7 +102,7 @@ m_sampleActor(NULL)
   blockSignals(false);
 
   /// Keep the pointer to the detid2index map
-  m_detid2index_map = shared_workspace->getDetectorIDToWorkspaceIndexMap(false);
+  m_detid2index_map = shared_workspace->getDetectorIDToWorkspaceIndexMap();
 
   Instrument_const_sptr instrument = getInstrument();
 

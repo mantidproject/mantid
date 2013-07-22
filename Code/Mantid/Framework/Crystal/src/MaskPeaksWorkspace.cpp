@@ -80,7 +80,7 @@ namespace Mantid
       peaksW = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(getProperty("InPeaksWorkspace"));
 
       //To get the workspace index from the detector ID
-      detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(false);
+      detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap();
       //Get some stuff from the input workspace
       Geometry::Instrument_const_sptr inst = inputW->getInstrument();
       if (!inst)

@@ -1013,7 +1013,7 @@ namespace Mantid
       table->resize(lhs_nhist, -1);
 
       detid2index_map * rhs_det_to_wi;
-      rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap(false);
+      rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap();
 
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)

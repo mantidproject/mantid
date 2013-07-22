@@ -694,7 +694,7 @@ namespace DataHandling
     inputWorkspace = getProperty("InputWorkspace");
 
     // We'll need to get workspace indices
-    map = inputWorkspace->getDetectorIDToWorkspaceIndexMap( false );
+    map = inputWorkspace->getDetectorIDToWorkspaceIndexMap();
 
     // Start the progress bar. 3 reports per histogram.
     prog = new Progress(this, 0, 1.0, inputWorkspace->getNumberHistograms()*3);

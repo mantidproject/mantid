@@ -571,7 +571,7 @@ void LoadTOFRawNexus::exec()
   WS->rebuildSpectraMapping(false);
   // And map ID to WI
   g_log.debug() << "Mapping ID to WI" << std::endl;
-  id_to_wi = WS->getDetectorIDToWorkspaceIndexMap(false);
+  id_to_wi = WS->getDetectorIDToWorkspaceIndexMap();
 
   // Load each bank sequentially
   //PARALLEL_FOR1(WS)

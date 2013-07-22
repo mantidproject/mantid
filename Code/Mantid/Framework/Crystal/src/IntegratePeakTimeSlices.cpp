@@ -322,7 +322,7 @@ namespace Mantid
       string spec_idList="";
 
       // For quickly looking up workspace index from det id
-      wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap( false );
+      wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap();
 
       TableWorkspace_sptr TabWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(0));
 
