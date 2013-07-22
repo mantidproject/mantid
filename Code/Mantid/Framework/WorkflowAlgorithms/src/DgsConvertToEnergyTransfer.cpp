@@ -416,7 +416,7 @@ namespace Mantid
               bkgWsName = "background_ws";
             }
             // Calculate the background
-            IAlgorithm_sptr flatBg = this->createChildAlgorithm("FlatBackground");
+            IAlgorithm_sptr flatBg = this->createChildAlgorithm("CalculateFlatBackground");
             flatBg->setProperty("InputWorkspace", origBkgWS);
             flatBg->setProperty("OutputWorkspace", bkgWsName);
             flatBg->setProperty("StartX", tibTofStart);

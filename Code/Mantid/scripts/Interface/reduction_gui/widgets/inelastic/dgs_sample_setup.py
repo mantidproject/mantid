@@ -4,6 +4,7 @@ from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.inelastic.dgs_sample_data_setup_script import SampleSetupScript
 import reduction_gui.widgets.util as util
 import ui.inelastic.ui_dgs_sample_setup
+import os
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -68,10 +69,13 @@ class SampleSetupWidget(BaseWidget):
                      self._grouping_browse)
         self.connect(self._content.use_ei_guess_chkbox, QtCore.SIGNAL("stateChanged(int)"),
                      self._handle_tzero_guess)
+        self.connect(self._content.savedir_browse, QtCore.SIGNAL("clicked()"), 
+                     self._savedir_browse)
         
         # Validated widgets
         self._connect_validated_lineedit(self._content.sample_edit)
         self._connect_validated_lineedit(self._content.ei_guess_edit)
+        self._connect_validated_lineedit(self._content.savedir_edit)
 
     def _swap_in_mwrunfiles_widget(self):
         labeltext = self._content.sample_label.text()
@@ -83,6 +87,8 @@ class SampleSetupWidget(BaseWidget):
         self._content.horizontalLayout.removeWidget(self._content.sample_browse)
         spacer = self._content.horizontalLayout.takeAt(0)
         self._content.sample_edit = mantidqtpython.MantidQt.MantidWidgets.MWRunFiles()
+        self._content.sample_edit.allowMultipleFiles(True)
+        self._content.sample_edit.setAlgorithmProperty("Load|Filename")
         self._content.sample_edit.setLabelText(labeltext)
         self._content.sample_edit.setLabelMinWidth(self._content.sample_label.minimumWidth())
         self._content.horizontalLayout.addWidget(self._content.sample_edit)
@@ -134,6 +140,14 @@ class SampleSetupWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.grouping_edit.setText(fname)   
+
+    def _savedir_browse(self):
+        save_dir = QtGui.QFileDialog.getExistingDirectory(self, "Output Directory - Choose a directory",
+                                                            os.path.expanduser('~'), 
+                                                            QtGui.QFileDialog.ShowDirsOnly
+                                                            | QtGui.QFileDialog.DontResolveSymlinks)
+        if save_dir:
+            self._content.savedir_edit.setText(save_dir) 
             
     def set_state(self, state):
         """
@@ -162,6 +176,7 @@ class SampleSetupWidget(BaseWidget):
         self._content.hardmask_edit.setText(state.hardmask_file)
         self._content.grouping_edit.setText(state.grouping_file)
         self._content.show_workspaces_cb.setChecked(state.show_workspaces)
+        self._content.savedir_edit.setText(state.savedir)
     
     def get_state(self):
         """
@@ -184,4 +199,5 @@ class SampleSetupWidget(BaseWidget):
         s.hardmask_file = self._content.hardmask_edit.text()
         s.grouping_file = self._content.grouping_edit.text()   
         s.show_workspaces = self._content.show_workspaces_cb.isChecked() 
+        s.savedir = self._content.savedir_edit.text()   
         return s
