@@ -446,6 +446,14 @@ namespace CurveFitting
       g_log.warning() << "Input parameters are unable to generate peaks that are physical." << ".\n";
       return;
     }
+
+    // Set up output workspaces
+    size_t numpts = vecY.size();
+    for (size_t i = 0; i < numpts; ++i)
+    {
+      m_outputWS->dataY(DATADIFFINDEX)[i] = m_outputWS->readY(OBSDATAINDEX)[i] - m_outputWS->readY(CALDATAINDEX)[i];
+    }
+
 #if 0
     // Old... Delete after code is tested.
     calculateDiffractionPattern(m_dataWS, m_wsIndex, vecX, vecY, m_funcParameters, !useinputpeakheights);

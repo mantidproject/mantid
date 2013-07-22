@@ -582,10 +582,10 @@ namespace CurveFitting
       else if (intensity < 0.0)
       {
         // No negative intensity
+        g_log.information() << "[Wx134] Set peak @ " << peak->centre() << "'s intensity to 0.0 instead of "
+                            << intensity << ".\n";
         intensity = 0.0;
-        g_log.warning("Set intensity to 0.0 because it was negative.");
       }
-
       g_log.debug() << "[Fx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
       peak->setHeight(intensity);
 
