@@ -3,7 +3,10 @@
 #
 # Here we run the calibration of WISH panel03 using a simple CalibrateWish function.
 #
+import numpy
 import tube
+from mantid.simpleapi import *
+
 from tube_calib_fit_params import TubeCalibFitParams
 
 def CalibrateWish( RunNumber, PanelNumber):
@@ -63,8 +66,8 @@ def CalibrateWish( RunNumber, PanelNumber):
     config['default.instrument'] = previousDefaultInstrument
 
     # ==== End of CalibrateWish() ====
-# this file is found on cycle_11_1
-RunNumber = 17701
-PanelNumber = '03'
-
-CalibrateWish(RunNumber, PanelNumber)   
+if __name__ == "__main__":
+  # this file is found on cycle_11_1
+  RunNumber = 17701
+  PanelNumber = '03'
+  CalibrateWish(RunNumber, PanelNumber)   
