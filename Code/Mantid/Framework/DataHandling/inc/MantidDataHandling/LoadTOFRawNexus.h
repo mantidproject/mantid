@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -39,7 +39,7 @@ namespace DataHandling
 
  File change history is stored at: <https://github.com/mantidproject/mantid>
  */
-class DLLExport LoadTOFRawNexus : public API::IHDFFileLoader
+class DLLExport LoadTOFRawNexus : public API::IFileLoader<Kernel::NexusDescriptor>
 {
 public:
   /// Default Constructor

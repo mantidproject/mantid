@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_LOADNXSPE_H_
     
 #include "MantidKernel/System.h"
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 
 namespace Mantid
 {
@@ -38,7 +38,7 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadNXSPE  : public API::IHDFFileLoader
+  class DLLExport LoadNXSPE  : public API::IFileLoader<Kernel::NexusDescriptor>
   {
   public:
     LoadNXSPE();

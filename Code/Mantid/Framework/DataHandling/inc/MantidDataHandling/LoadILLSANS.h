@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_LOADILLSANS_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 
@@ -54,7 +54,7 @@ std::ostream& operator<<(std::ostream &strm, const DetectorPosition &p) {
 			<< p.shiftDown << std::endl;
 }
 
-class DLLExport LoadILLSANS: public API::IHDFFileLoader {
+class DLLExport LoadILLSANS: public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
 	LoadILLSANS();
 	virtual ~LoadILLSANS();
@@ -63,7 +63,7 @@ public:
 	virtual int version() const;
 	virtual const std::string category() const;
         /// Returns a confidence value that this algorithm can load a file
-        int confidence(Kernel::HDFDescriptor & descriptor) const;
+        int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
 	virtual void initDocs();

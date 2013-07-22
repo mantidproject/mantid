@@ -1,7 +1,5 @@
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/IHDFFileLoader.h"
-#include "MantidKernel/FileDescriptor.h"
 
 #include <Poco/File.h>
 
@@ -95,12 +93,12 @@ namespace Mantid
       if(NexusDescriptor::isHDF(filename))
       {
         m_log.debug() << filename << " looks like a Nexus file. Checking registered Nexus loaders\n";
-        bestLoader = searchForLoader<NexusDescriptor,IHDFFileLoader>(filename, m_names[Nexus], m_log);
+        bestLoader = searchForLoader<NexusDescriptor,IFileLoader<NexusDescriptor>>(filename, m_names[Nexus], m_log);
       }
       else
       {
         m_log.debug() << "Checking registered non-HDF loaders\n";
-        bestLoader = searchForLoader<FileDescriptor,IFileLoader>(filename, m_names[Generic], m_log);
+        bestLoader = searchForLoader<FileDescriptor,IFileLoader<FileDescriptor>>(filename, m_names[Generic], m_log);
       }
 
       if(!bestLoader)
@@ -135,11 +133,11 @@ namespace Mantid
       IAlgorithm_sptr loader;
       if(nexus && NexusDescriptor::isHDF(filename))
       {
-        loader = searchForLoader<NexusDescriptor,IHDFFileLoader>(filename, names, m_log);
+        loader = searchForLoader<NexusDescriptor,IFileLoader<NexusDescriptor> >(filename, names, m_log);
       }
       else
       {
-        loader = searchForLoader<FileDescriptor,IFileLoader>(filename, names, m_log);
+        loader = searchForLoader<FileDescriptor,IFileLoader<FileDescriptor>>(filename, names, m_log);
       }
       if(loader) return true;
       else return false;

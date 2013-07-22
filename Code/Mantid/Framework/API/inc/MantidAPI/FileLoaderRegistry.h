@@ -3,7 +3,6 @@
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/IHDFFileLoader.h"
 #include "MantidKernel/SingletonHolder.h"
 
 #include <boost/type_traits/is_base_of.hpp>
@@ -104,17 +103,17 @@ namespace Mantid
           switch(format)
           {
           case Nexus:
-            if(!boost::is_base_of<IHDFFileLoader,T>::value)
+            if(!boost::is_base_of<IFileLoader<Kernel::NexusDescriptor>,T>::value)
             {
               throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                                       "' registered as Nexus loader but it does not inherit from Mantid::API::IHDFFileLoader");
+                                       "' registered as Nexus loader but it does not inherit from API::IFileLoader<Kernel::NexusDescriptor>");
             }
             break;
           case Generic:
-            if(!boost::is_base_of<IFileLoader,T>::value)
+            if(!boost::is_base_of<IFileLoader<Kernel::FileDescriptor>,T>::value)
             {
               throw std::runtime_error(std::string("FileLoaderRegistryImpl::subscribe - Class '") + typeid(T).name() +
-                "' registered as Generic loader but it does not inherit from Mantid::API::IFileLoader");
+                "' registered as Generic loader but it does not inherit from API::IFileLoader<Kernel::FileDescriptor>");
             }
           break;
             default: throw std::runtime_error("Invalid LoaderFormat given");

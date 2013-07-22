@@ -898,7 +898,7 @@ private:
 //===============================================================================================
 
 /// Empty default constructor
-LoadEventNexus::LoadEventNexus() : IHDFFileLoader(),
+LoadEventNexus::LoadEventNexus() : IFileLoader<Kernel::NexusDescriptor>(),
     event_id_is_spec(false), m_allBanksPulseTimes(NULL)
 {
 }

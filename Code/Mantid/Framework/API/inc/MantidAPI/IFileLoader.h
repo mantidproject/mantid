@@ -3,6 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/FileDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 
 namespace Mantid
 {
@@ -33,13 +34,14 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
+    template<typename DescriptorType>
     class MANTID_API_DLL IFileLoader : public Algorithm
     {
     public:
       /// Virtual destructor (required by linker on some versions of OS X/Intel compiler)
       virtual ~IFileLoader() {}
       /// Returns a confidence value that this algorithm can load a file
-      virtual int confidence(Kernel::FileDescriptor & descriptor) const = 0;
+      virtual int confidence(DescriptorType & descriptor) const = 0;
     };
 
   } // namespace API

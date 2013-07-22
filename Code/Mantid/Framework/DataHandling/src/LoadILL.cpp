@@ -80,7 +80,7 @@ void LoadILL::initDocs() {
 //---------------------------------------------------
 
 LoadILL::LoadILL() :
-		API::IHDFFileLoader() {
+		API::IFileLoader<Kernel::NexusDescriptor>() {
 
 	m_instrumentName = "";
 	m_wavelength = 0;

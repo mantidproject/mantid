@@ -96,7 +96,7 @@ struct Pulse
 #pragma pack(pop)
 
 
-class DLLExport LoadEventPreNexus2 : public API::IFileLoader
+class DLLExport LoadEventPreNexus2 : public API::IFileLoader<Kernel::FileDescriptor>
 {
 public:
   /// Constructor

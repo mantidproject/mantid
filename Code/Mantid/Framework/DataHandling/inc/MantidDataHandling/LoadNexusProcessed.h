@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
@@ -47,7 +47,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadNexusProcessed : public API::IHDFFileLoader
+    class DLLExport LoadNexusProcessed : public API::IFileLoader<Kernel::NexusDescriptor>
     {
 
     public:

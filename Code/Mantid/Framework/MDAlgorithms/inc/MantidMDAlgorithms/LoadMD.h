@@ -1,7 +1,7 @@
 #ifndef MANTID_MDEVENTS_LOADMD_H_
 #define MANTID_MDEVENTS_LOADMD_H_
 
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -36,7 +36,7 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMD : public API::IHDFFileLoader
+  class DLLExport LoadMD : public API::IFileLoader<Kernel::NexusDescriptor>
   {
   public:
     LoadMD();

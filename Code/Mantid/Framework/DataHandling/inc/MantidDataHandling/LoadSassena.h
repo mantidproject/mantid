@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <hdf5.h>
@@ -53,11 +53,11 @@ namespace Mantid
   };
   */
 
-  class DLLExport LoadSassena : public API::IHDFFileLoader
+  class DLLExport LoadSassena : public API::IFileLoader<Kernel::NexusDescriptor>
   {
   public:
     /// Constructor
-    LoadSassena(): API::IHDFFileLoader(), m_filename("") {};
+    LoadSassena(): API::IFileLoader<Kernel::NexusDescriptor>(), m_filename("") {};
     /// Virtual Destructor
     virtual ~LoadSassena() {}
     /// Algorithm's name

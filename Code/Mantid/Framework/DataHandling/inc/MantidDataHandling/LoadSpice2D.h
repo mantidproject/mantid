@@ -49,7 +49,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class DLLExport LoadSpice2D : public API::IFileLoader
+    class DLLExport LoadSpice2D : public API::IFileLoader<Kernel::FileDescriptor>
     {
     public:
       ///default constructor

@@ -4,7 +4,7 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 
 namespace Mantid
 {
@@ -37,7 +37,7 @@ namespace DataHandling
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadQKK : public  API::IHDFFileLoader
+class DLLExport LoadQKK : public  API::IFileLoader<Kernel::NexusDescriptor>
 {
 public:
   /// (Empty) Constructor
