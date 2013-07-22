@@ -4759,11 +4759,6 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
     newEnv = ScriptingLangManager::newEnv(lang, this);
     connect(newEnv, SIGNAL(print(const QString&)), resultsLog, SLOT(appendNotice(const QString&)));
 
-    // The following is already part of executeScript
-    // This call could be uncommented if mantidsimple is folded into Mantid such that the
-    // algorithm call signature could also be updated.
-    //connect(mantidUI, SIGNAL(algorithmAboutToBeCreated()), newEnv, SLOT(refreshAlgorithms()));
-
     if( newEnv->initialize() )
     {   
       m_script_envs.insert(lang, newEnv);
