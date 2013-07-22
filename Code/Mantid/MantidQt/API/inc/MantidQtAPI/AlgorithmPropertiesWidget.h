@@ -74,6 +74,9 @@ namespace API
     /// Each dynamically created PropertyWidget
     QHash<QString, PropertyWidget*> m_propWidgets;
 
+    /// Mapping between group and it's dynamically created widget
+    QHash<QString, QGroupBox*> m_groupWidgets;
+
     /// Viewport containing the grid of property widgets
     QWidget * m_viewport;
 
