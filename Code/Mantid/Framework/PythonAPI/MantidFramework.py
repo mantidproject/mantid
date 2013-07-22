@@ -1999,7 +1999,7 @@ def suppressV1Warnings(filename, suppress=True):
         except KeyError, exc:
             pass
 
-def warnOnV1MethodCall(frame=None):
+def warnOnV1MethodCall(frame=None, identifier=None):
     """
         Issue a Mantid log warning about the removal of v1 of the API when a method has
         been called
@@ -2017,7 +2017,10 @@ def warnOnV1MethodCall(frame=None):
     src = ""
     if src_file:
         src = " at line %d in '%s'" % (frame.f_lineno,src_file)
-    msg = "Warning: Python API v1 call has been made%s.\n" % (src)
+    msg = "Warning: Python API v1 call has been made %s" % (src)
+    if identifier is not None:
+        msg += "[%s]" % str(identifier)
+    msg += "\n"
     print msg
 
 #---------------------------------------------------------------------------------------
