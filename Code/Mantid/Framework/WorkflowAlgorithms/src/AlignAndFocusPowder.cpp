@@ -117,7 +117,9 @@ namespace WorkflowAlgorithms
 
     declareProperty("LowResSpectrumOffset", -1, "Offset on spectrum ID of low resolution spectra from high resolution one. "
                     "If negative, then all the low resolution TOF will not be processed.  Otherwise, low resolution TOF "
-                    "will be stored in an additional set of spectra. ");
+                    "will be stored in an additional set of spectra. "
+                    "If offset is equal to 0, then the low resolution will have same spectrum IDs as the normal ones.  "
+                    "Otherwise, the low resolution spectra will have spectrum IDs offset from normal ones. ");
 
   }
 
@@ -746,11 +748,12 @@ namespace WorkflowAlgorithms
     }
 
     // Rename spectrum number
-    if (offset > 0)
+    if (offset >= 1)
     {
       for (size_t i = 0; i < nspec2; ++i)
       {
-         outws->getSpectrum(nspec1+i)->setSpectrumNo(maxspecid1+static_cast<specid_t>((i+1)+offset));
+        specid_t newspecid = maxspecid1+static_cast<specid_t>((i)+offset);
+        outws->getSpectrum(nspec1+i)->setSpectrumNo(newspecid);
         // ISpectrum* spec = outws->getSpectrum(nspec1+i);
         // if (spec)
         // spec->setSpectrumNo(3);
