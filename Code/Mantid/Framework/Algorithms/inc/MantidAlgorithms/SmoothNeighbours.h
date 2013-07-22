@@ -4,12 +4,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/BoundedValidator.h"
-
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid
@@ -98,15 +96,7 @@ public:
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Transforms\\Smoothing";}
-
-  /// Override, as we need to update the set of properties when input workspace
-  /// is getting changed
-  virtual void setPropertyValue(const std::string &name, const std::string &value);
-
 private:
-  /// Group which all the dynamically created properties are assigned to
-  static const std::string G_DYNAMIC_GROUP;
-
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods
@@ -127,12 +117,12 @@ private:
   /// Build the instrument/detector setup in workspace
   void setupNewInstrument(API::MatrixWorkspace_sptr outws);
 
-  /// Declare all the properties needed for rect. instruments
-  void declareRectProperties();
-  /// Declare all the properties needed for non-uniform instruments
-  void declareNonUniformProperties();
-  /// Removes any properties declared on-the-fly
-  void removeDynamicProperties();
+  /// Non rectangular detector group name
+  static const std::string NON_UNIFORM_GROUP;
+  /// Rectangular detector group name
+  static const std::string RECTANGULAR_GROUP;
+  /// Input workspace name
+  static const std::string INPUT_WORKSPACE;
 
   /// Pixels in the detector
   int XPixels;
@@ -168,10 +158,6 @@ private:
   /// Progress reporter
   Mantid::API::Progress * m_prog;
 
-  /// Validator for unsigned doubles
-  const boost::shared_ptr< Kernel::BoundedValidator<double> > m_mustBePositiveDouble;
-  /// Validator for unsigned number
-  const boost::shared_ptr< Kernel::BoundedValidator<int> > m_mustBePositive;
 };
 
 } // namespace Algorithm
