@@ -35,7 +35,7 @@ StepScan::StepScan(QWidget *parent)
 StepScan::~StepScan()
 {
   // Stop live data collection, if running
-  stopLiveListener();
+  m_uiForm.mWRunFiles->stopLiveAlgorithm();
   // Disconnect the observers for the mask workspace combobox
   AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
   AnalysisDataService::Instance().notificationCenter.removeObserver(m_replObserver);
@@ -52,10 +52,7 @@ void StepScan::initLayout()
   m_uiForm.xmin->setValidator(new QDoubleValidator(m_uiForm.xmin));
   m_uiForm.xmax->setValidator(new QDoubleValidator(m_uiForm.xmax));
 
-  // Try to connect to live listener for default instrument to see if live button should be enabled
-  // Enable the button if the connection is successful. Will be disabled otherwise.
-  m_uiForm.liveButton->setEnabled(LiveListenerFactory::Instance().checkConnection(m_instrument));
-  connect( m_uiForm.liveButton, SIGNAL(clicked(bool)), SLOT(triggerLiveListener(bool)), Qt::QueuedConnection );
+  connect( m_uiForm.mWRunFiles, SIGNAL(liveButtonPressed(bool)), SLOT(triggerLiveListener(bool)), Qt::QueuedConnection );
 
   connect( m_uiForm.launchInstView, SIGNAL(clicked()), SLOT(launchInstrumentWindow()) );
 
@@ -102,13 +99,21 @@ void StepScan::triggerLiveListener(bool checked)
   }
   else
   {
-    stopLiveListener();
+    m_uiForm.mWRunFiles->stopLiveAlgorithm();
     cleanupWorkspaces();
   }
 }
 
 void StepScan::startLiveListener()
 {
+  if ( ! LiveListenerFactory::Instance().create(m_instrument,false)->buffersEvents() )
+  {
+    QMessageBox::critical(this,"Invalid live stream","This interface requires event data.\nThe live data for " + QString::fromStdString(m_instrument) + " is in histogram form");
+    m_uiForm.mWRunFiles->liveButtonSetChecked(false);
+    m_uiForm.mWRunFiles->liveButtonSetEnabled(false);
+    return;
+  }
+
   QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
 
   // Remove any previously-loaded workspaces
@@ -120,26 +125,23 @@ void StepScan::startLiveListener()
   startLiveData->setProperty("Instrument",m_instrument);
   m_inputWSName = "__live";
   startLiveData->setProperty("OutputWorkspace",m_inputWSName);
-  startLiveData->execute();
+  try {
+    const bool executed = startLiveData->execute();
+    if ( ! executed ) throw std::runtime_error("Unable to run StartLiveData");
+  } catch (std::runtime_error&)
+  {
+    QApplication::restoreOverrideCursor();
+    QMessageBox::critical(this,"StartLiveData failed","Unable to start live data collection");
+    m_uiForm.mWRunFiles->liveButtonSetChecked(false);
+    return;
+  }
 
   // Keep track of the algorithm that's pulling in the live data
-  m_monitorLiveData = startLiveData->getProperty("MonitorLiveData");
+  m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
   setupOptionControls();
 
   QApplication::restoreOverrideCursor();
-}
-
-IAlgorithm_sptr StepScan::stopLiveListener()
-{
-  // TODO: Make return type IAlgorithm_const_sptr (requires ticket #6811)
-  IAlgorithm_sptr theAlgorithmBeingCancelled = m_monitorLiveData;
-  if (m_monitorLiveData)
-  {
-    m_monitorLiveData->cancel();
-    m_monitorLiveData.reset();
-  }
-  return theAlgorithmBeingCancelled;
 }
 
 void StepScan::loadFile()
@@ -211,7 +213,7 @@ void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
   // First check that the provided workspace has the scan_index - complain if it doesn't
   try {
     auto scan_index_prop = ws->run().getTimeSeriesProperty<int>(scan_index);
-    if ( !m_uiForm.liveButton->isChecked() && scan_index_prop->realSize() < 2 )
+    if ( !m_uiForm.mWRunFiles->liveButtonIsChecked() && scan_index_prop->realSize() < 2 )
     {
       QMessageBox::warning(this,"scan_index log empty","This data does not appear to be an alignment scan");
       return;
@@ -322,7 +324,7 @@ void StepScan::runStepScanAlg()
 
   QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
 
-  if ( m_uiForm.liveButton->isChecked() )  // Live data
+  if ( m_uiForm.mWRunFiles->liveButtonIsChecked() )  // Live data
   {
     runStepScanAlgLive(stepScan->toString());
   }
@@ -348,7 +350,7 @@ void StepScan::runStepScanAlg()
 void StepScan::runStepScanAlgLive(std::string stepScanProperties)
 {
   // First stop the currently running live algorithm
-  IAlgorithm_sptr oldMonitorLiveData = stopLiveListener();
+  IAlgorithm_const_sptr oldMonitorLiveData = m_uiForm.mWRunFiles->stopLiveAlgorithm();
 
   stepScanProperties.erase(0,stepScanProperties.find_first_of('(')+1);
   stepScanProperties.erase(stepScanProperties.find_last_of(')'));
@@ -365,13 +367,13 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
   startLiveData->setProperty("AccumulationWorkspace",m_inputWSName);
   startLiveData->setProperty("OutputWorkspace",m_tableWSName);
   // The previous listener needs to finish before this one can start
-  while ( oldMonitorLiveData->isRunning() ) // TODO: Can we get a signal for this?
+  while ( oldMonitorLiveData->isRunning() )
   {
     Poco::Thread::sleep(200);
   }
   startLiveData->execute();
   // Keep track of the algorithm that's pulling in the live data
-  m_monitorLiveData = startLiveData->getProperty("MonitorLiveData");
+  m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
   AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
   connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
