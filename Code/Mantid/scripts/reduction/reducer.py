@@ -83,7 +83,7 @@ def validate_loader(f):
                     if not isinstance(alg, mantid.api.AlgorithmProxy):
                         raise RuntimeError, "Reducer expects a ReductionStep or a function returning an AlgorithmProxy object"
                     
-                    propertyOrder = proxy.orderedProperties()
+                    propertyOrder = alg.orderedProperties()
             
                     # add the args to the kw list so everything can be set in a single way
                     for (key, arg) in zip(propertyOrder[:len(args)], args):
@@ -105,7 +105,7 @@ def validate_loader(f):
                     simpleapi._set_properties(alg, [], **kwargs)
                     alg.execute()
                     if "OutputMessage" in propertyOrder:
-                        return proxy.getPropertyValue("OutputMessage")
+                        return alg.getPropertyValue("OutputMessage")
                     return "%s applied" % alg.name()
             return f(reducer, _AlgorithmStep())
         
@@ -221,7 +221,7 @@ def validate_step(f):
                     if outputworkspace is None:
                         outputworkspace = inputworkspace 
                     alg = mantid.FrameworkManager.createAlgorithm(algorithm)
-                    if not isinstance(proxy, mantid.api.AlgorithmProxy):
+                    if not isinstance(alg, mantid.api.AlgorithmProxy):
                         raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
                     
                     propertyOrder = alg.orderedProperties()
