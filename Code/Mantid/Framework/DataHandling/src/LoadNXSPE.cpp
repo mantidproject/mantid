@@ -29,7 +29,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  DECLARE_HDF_FILELOADER_ALGORITHM(LoadNXSPE);
+  DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE);
 
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
@@ -64,7 +64,7 @@ namespace DataHandling
    * @param descriptor A descriptor for the file
    * @returns An integer specifying the confidence level. 0 indicates it will not be used
    */
-  int LoadNXSPE::confidence(Kernel::HDFDescriptor & descriptor) const
+  int LoadNXSPE::confidence(Kernel::NexusDescriptor & descriptor) const
   {
     int confidence(0);
     typedef std::map<std::string,std::string> string_map_t;

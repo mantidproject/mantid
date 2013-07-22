@@ -42,7 +42,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-DECLARE_HDF_FILELOADER_ALGORITHM(LoadSassena);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSassena);
 
 /// Sets documentation strings for this algorithm
 void LoadSassena::initDocs()
@@ -56,7 +56,7 @@ void LoadSassena::initDocs()
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadSassena::confidence(Kernel::HDFDescriptor & descriptor) const
+int LoadSassena::confidence(Kernel::NexusDescriptor & descriptor) const
 {
   if(descriptor.hasRootAttr("sassena_version")) return 99;
   return 0;

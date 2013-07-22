@@ -1,5 +1,5 @@
-#ifndef MANTID_KERNEL_HIERARCHICALFILEDESCRIPTOR_H_
-#define MANTID_KERNEL_HIERARCHICALFILEDESCRIPTOR_H_
+#ifndef MANTID_KERNEL_NEXUSDESCRIPTOR_H_
+#define MANTID_KERNEL_NEXUSDESCRIPTOR_H_
 
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/DllConfig.h"
@@ -20,7 +20,7 @@ namespace Mantid
   {
 
     /** 
-        Defines a wrapper around a file whose internal structure is stored in a hierarchy, e.g NeXus.
+        Defines a wrapper around a file whose internal structure can be accessed using the NeXus API
 
         On construction the simple details about the layout of the file are cached for faster querying later.
 
@@ -44,7 +44,7 @@ namespace Mantid
         File change history is stored at: <https://github.com/mantidproject/mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class MANTID_KERNEL_DLL HDFDescriptor
+    class MANTID_KERNEL_DLL NexusDescriptor
     {
     public:
       /// Enumerate HDF possible versions
@@ -63,9 +63,9 @@ namespace Mantid
 
     public:
       /// Constructor accepting a filename
-      HDFDescriptor(const std::string & filename);
+      NexusDescriptor(const std::string & filename);
       /// Destructor
-      ~HDFDescriptor();
+      ~NexusDescriptor();
 
       /**
        * Access the filename
@@ -97,8 +97,8 @@ namespace Mantid
       bool classTypeExists(const std::string & classType) const;
 
     private:
-      DISABLE_DEFAULT_CONSTRUCT(HDFDescriptor);
-      DISABLE_COPY_AND_ASSIGN(HDFDescriptor);
+      DISABLE_DEFAULT_CONSTRUCT(NexusDescriptor);
+      DISABLE_COPY_AND_ASSIGN(NexusDescriptor);
 
       /// Initialize object with filename
       void initialize(const std::string& filename);

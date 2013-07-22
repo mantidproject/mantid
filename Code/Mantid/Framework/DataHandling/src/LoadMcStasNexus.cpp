@@ -25,7 +25,7 @@ namespace DataHandling
   using namespace Kernel;
   using namespace API;
 
-  DECLARE_HDF_FILELOADER_ALGORITHM(LoadMcStasNexus);
+  DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStasNexus);
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -57,7 +57,7 @@ namespace DataHandling
    * @param descriptor A descriptor for the file
    * @returns An integer specifying the confidence level. 0 indicates it will not be used
    */
-  int LoadMcStasNexus::confidence(Kernel::HDFDescriptor & descriptor) const
+  int LoadMcStasNexus::confidence(Kernel::NexusDescriptor & descriptor) const
   {
     using namespace ::NeXus;
 	  // We will look at the first entry and check for a

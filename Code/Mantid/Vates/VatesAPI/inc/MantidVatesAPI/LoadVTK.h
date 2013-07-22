@@ -17,7 +17,7 @@ namespace Mantid
   }
   namespace VATES
   {
-    class DLLExport LoadVTK : public Mantid::API::IFileLoader
+    class DLLExport LoadVTK : public API::IFileLoader<Kernel::FileDescriptor>
     {
     public:
       virtual const std::string name() const;

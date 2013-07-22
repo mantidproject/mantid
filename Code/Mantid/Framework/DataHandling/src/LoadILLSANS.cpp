@@ -18,7 +18,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_HDF_FILELOADER_ALGORITHM(LoadILLSANS)
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLSANS)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -67,7 +67,7 @@ void LoadILLSANS::initDocs() {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadILLSANS::confidence(Kernel::HDFDescriptor & descriptor) const
+int LoadILLSANS::confidence(Kernel::NexusDescriptor & descriptor) const
 {
 	const std::string path = descriptor.pathOfType("NXinstrument");
 	g_log.debug() << "Path of type NXinstrument: " << path << std::endl;

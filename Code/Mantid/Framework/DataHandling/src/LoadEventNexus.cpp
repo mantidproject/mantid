@@ -58,7 +58,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-DECLARE_HDF_FILELOADER_ALGORITHM(LoadEventNexus);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEventNexus);
 
 using namespace Kernel;
 using namespace Geometry;
@@ -942,7 +942,7 @@ private:
 //===============================================================================================
 
 /// Empty default constructor
-LoadEventNexus::LoadEventNexus() : IHDFFileLoader(),
+LoadEventNexus::LoadEventNexus() : IFileLoader<Kernel::NexusDescriptor>(),
     event_id_is_spec(false), m_allBanksPulseTimes(NULL)
 {
 }
@@ -960,7 +960,7 @@ LoadEventNexus::~LoadEventNexus()
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadEventNexus::confidence(Kernel::HDFDescriptor & descriptor) const
+int LoadEventNexus::confidence(Kernel::NexusDescriptor & descriptor) const
 {
   int confidence(0);
   if(descriptor.classTypeExists("NXevent_data"))

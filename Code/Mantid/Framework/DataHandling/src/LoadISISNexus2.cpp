@@ -43,7 +43,7 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    DECLARE_HDF_FILELOADER_ALGORITHM(LoadISISNexus2);
+    DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2);
     
     using namespace Kernel;
     using namespace API;
@@ -64,7 +64,7 @@ namespace Mantid
      * @param descriptor A descriptor for the file
      * @returns An integer specifying the confidence level. 0 indicates it will not be used
      */
-    int LoadISISNexus2::confidence(Kernel::HDFDescriptor & descriptor) const
+    int LoadISISNexus2::confidence(Kernel::NexusDescriptor & descriptor) const
     {
       if(descriptor.pathOfTypeExists("/raw_data_1","NXentry")) return 80;
       return 0;

@@ -1,7 +1,7 @@
 #ifndef MANTID_MDEVENTS_LOADMD_H_
 #define MANTID_MDEVENTS_LOADMD_H_
 
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -36,7 +36,7 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMD : public API::IHDFFileLoader
+  class DLLExport LoadMD : public API::IFileLoader<Kernel::NexusDescriptor>
   {
   public:
     LoadMD();
@@ -50,7 +50,7 @@ namespace MDAlgorithms
     virtual const std::string category() const { return "MDAlgorithms";}
 
     /// Returns a confidence value that this algorithm can load a file
-    int confidence(Kernel::HDFDescriptor & descriptor) const;
+    int confidence(Kernel::NexusDescriptor & descriptor) const;
 
   private:
     /// Sets documentation strings for this algorithm

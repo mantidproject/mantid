@@ -34,7 +34,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-DECLARE_HDF_FILELOADER_ALGORITHM(LoadTOFRawNexus);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus);
 
 using namespace Kernel;
 using namespace API;
@@ -83,7 +83,7 @@ void LoadTOFRawNexus::init()
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadTOFRawNexus::confidence(Kernel::HDFDescriptor & descriptor) const
+int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor & descriptor) const
 {
   int confidence(0);
   if( descriptor.pathOfTypeExists("/entry", "NXentry") ||

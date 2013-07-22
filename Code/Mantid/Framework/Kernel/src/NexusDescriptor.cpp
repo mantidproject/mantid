@@ -1,4 +1,4 @@
-#include "MantidKernel/HDFDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/Exception.h"
 
 #include <nexus/NeXusFile.hpp>
@@ -14,17 +14,17 @@ namespace Mantid
   namespace Kernel
   {
     //---------------------------------------------------------------------------------------------------------------------------
-    // static HDFDescriptor constants
+    // static NexusDescriptor constants
     //---------------------------------------------------------------------------------------------------------------------------
     /// Size of HDF magic number
-    const size_t HDFDescriptor::HDFMagicSize = 4;
+    const size_t NexusDescriptor::HDFMagicSize = 4;
     /// HDF cookie that is stored in the first 4 bytes of the file.
-    const unsigned char HDFDescriptor::HDFMagic[4] = {'\016','\003','\023','\001'}; // From HDF4::hfile.h
+    const unsigned char NexusDescriptor::HDFMagic[4] = {'\016','\003','\023','\001'}; // From HDF4::hfile.h
 
     /// Size of HDF5 signature
-    size_t HDFDescriptor::HDF5SignatureSize = 8;
+    size_t NexusDescriptor::HDF5SignatureSize = 8;
     /// signature identifying a HDF5 file.
-    const unsigned char HDFDescriptor::HDF5Signature[8] = { 137, 'H', 'D', 'F', '\r', '\n', '\032', '\n' };
+    const unsigned char NexusDescriptor::HDF5Signature[8] = { 137, 'H', 'D', 'F', '\r', '\n', '\032', '\n' };
 
     namespace
     {
@@ -36,10 +36,10 @@ namespace Mantid
        * Currently simply checks for the HDF signatures and returns true if one of them is found
        * @param fileHandle A file handled opened and pointing at the start of the file. On return the
        * fileHandle is left at the start of the file
-       * @param version One of the HDFDescriptor::Version enumerations specifying the required version
+       * @param version One of the NexusDescriptor::Version enumerations specifying the required version
        * @return True if the file is considered hierarchical, false otherwise
        */
-      bool isHDFHandle(FILE *fileHandle, HDFDescriptor::Version version)
+      bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version)
       {
         if(!fileHandle) throw std::invalid_argument("HierarchicalFileDescriptor::isHierarchical - Invalid file handle");
 
@@ -48,16 +48,16 @@ namespace Mantid
         // HDF4 check requires 4 bytes,  HDF5 check requires 8 bytes
         // Use same buffer and waste a few bytes if only checking HDF4
         unsigned char buffer[8] = {'0','0','0','0','0','0','0','0'};
-        std::fread(static_cast<void*>(&buffer), sizeof(unsigned char), HDFDescriptor::HDF5SignatureSize, fileHandle);
+        std::fread(static_cast<void*>(&buffer), sizeof(unsigned char), NexusDescriptor::HDF5SignatureSize, fileHandle);
         // Number of bytes read doesn't matter as if it is not enough then the memory simply won't match
         // as the buffer has been "zeroed"
-        if(version == HDFDescriptor::Version5 || version == HDFDescriptor::AnyVersion )
+        if(version == NexusDescriptor::Version5 || version == NexusDescriptor::AnyVersion )
         {
-          result = (std::memcmp(&buffer, &HDFDescriptor::HDF5Signature, HDFDescriptor::HDF5SignatureSize) == 0);
+          result = (std::memcmp(&buffer, &NexusDescriptor::HDF5Signature, NexusDescriptor::HDF5SignatureSize) == 0);
         }
-        if(!result && (version == HDFDescriptor::Version4 || version == HDFDescriptor::AnyVersion) )
+        if(!result && (version == NexusDescriptor::Version4 || version == NexusDescriptor::AnyVersion) )
         {
-          result = (std::memcmp(&buffer, &HDFDescriptor::HDFMagic, HDFDescriptor::HDFMagicSize) == 0);
+          result = (std::memcmp(&buffer, &NexusDescriptor::HDFMagic, NexusDescriptor::HDFMagicSize) == 0);
         }
 
         // Return file stream to start of file
@@ -67,16 +67,16 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------------------------------------------
-    // static HDFDescriptor methods
+    // static NexusDescriptor methods
     //---------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Checks for the HDF signatures and returns true if one of them is found
      * @param filename A string filename to check
-     * @param version One of the HDFDescriptor::Version enumerations specifying the required version
+     * @param version One of the NexusDescriptor::Version enumerations specifying the required version
      * @return True if the file is considered hierarchical, false otherwise
      */
-    bool HDFDescriptor::isHDF(const std::string & filename, const Version version)
+    bool NexusDescriptor::isHDF(const std::string & filename, const Version version)
     {
       FILE *fd = fopen(filename.c_str(), "rb");
       if(!fd)
@@ -89,7 +89,7 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------------------------------------------
-    // HDFDescriptor public methods
+    // NexusDescriptor public methods
     //---------------------------------------------------------------------------------------------------------------------------
     /**
      * Constructs the wrapper
@@ -97,17 +97,17 @@ namespace Mantid
      * @throws std::invalid_argument if the file is not identified to be hierarchical. This currently
      * involves simply checking for the signature if a HDF file at the start of the file
      */
-    HDFDescriptor::HDFDescriptor(const std::string & filename)
+    NexusDescriptor::NexusDescriptor(const std::string & filename)
       : m_filename(), m_extension(), m_firstEntryNameType(),
         m_rootAttrs(), m_pathsToTypes(), m_file(NULL)
     {
       if(filename.empty())
       {
-        throw std::invalid_argument("HDFDescriptor() - Empty filename '" + filename + "'");
+        throw std::invalid_argument("NexusDescriptor() - Empty filename '" + filename + "'");
       }
       if(!Poco::File(filename).exists())
       {
-        throw std::invalid_argument("HDFDescriptor() - File '" + filename + "' does not exist");
+        throw std::invalid_argument("NexusDescriptor() - File '" + filename + "' does not exist");
       }
       try
       {
@@ -115,19 +115,19 @@ namespace Mantid
       }
       catch(::NeXus::Exception &)
       {
-        throw std::invalid_argument("HDFDescriptor::initialize - File '" + filename + "' does not look like a HDF file.");
+        throw std::invalid_argument("NexusDescriptor::initialize - File '" + filename + "' does not look like a HDF file.");
       }
     }
 
     /**
      */
-    HDFDescriptor::~HDFDescriptor()
+    NexusDescriptor::~NexusDescriptor()
     {
       delete m_file;
     }
 
     /// Returns the name & type of the first entry in the file
-    const std::pair<std::string,std::string> & HDFDescriptor::firstEntryNameType() const
+    const std::pair<std::string,std::string> & NexusDescriptor::firstEntryNameType() const
     {
       return m_firstEntryNameType;
     }
@@ -136,7 +136,7 @@ namespace Mantid
      * @param name The name of an attribute
      * @return True if the attribute exists, false otherwise
      */
-    bool HDFDescriptor::hasRootAttr(const std::string &name) const
+    bool NexusDescriptor::hasRootAttr(const std::string &name) const
     {
       return (m_rootAttrs.count(name) == 1); 
     }
@@ -145,7 +145,7 @@ namespace Mantid
      * @param path A string giving a path using UNIX-style path separators (/), e.g. /raw_data_1, /entry/bank1
      * @return True if the path exists in the file, false otherwise
      */
-    bool HDFDescriptor::pathExists(const std::string& path) const
+    bool NexusDescriptor::pathExists(const std::string& path) const
     {
       return (m_pathsToTypes.find(path) != m_pathsToTypes.end());
     }
@@ -155,7 +155,7 @@ namespace Mantid
      * @param type A string specifying the required type
      * @return True if the path exists in the file, false otherwise
      */
-    bool HDFDescriptor::pathOfTypeExists(const std::string& path, const std::string & type) const
+    bool NexusDescriptor::pathOfTypeExists(const std::string& path, const std::string & type) const
     {
       auto it = m_pathsToTypes.find(path);
       if(it != m_pathsToTypes.end())
@@ -169,21 +169,23 @@ namespace Mantid
      * @param type A string specifying the required type
      * @return path A string giving a path using UNIX-style path separators (/), e.g. /raw_data_1, /entry/bank1
      */
-	std::string HDFDescriptor::pathOfType(const std::string & type) const {
-		auto iend = m_pathsToTypes.end();
-		for (auto it = m_pathsToTypes.begin(); it != iend; ++it) {
-			if (type == it->second)
-				return  it->first;
-		}
-		return  "";
-	}
+    std::string NexusDescriptor::pathOfType(const std::string & type) const
+    {
+      auto iend = m_pathsToTypes.end();
+      for (auto it = m_pathsToTypes.begin(); it != iend; ++it)
+      {
+        if (type == it->second)
+          return it->first;
+      }
+      return  "";
+    }
 
 
     /**
      * @param classType A string name giving a class type
      * @return True if the type exists in the file, false otherwise
      */
-    bool HDFDescriptor::classTypeExists(const std::string & classType) const
+    bool NexusDescriptor::classTypeExists(const std::string & classType) const
     {
       auto iend = m_pathsToTypes.end();
       for(auto it = m_pathsToTypes.begin(); it != iend; ++it)
@@ -194,13 +196,13 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------------------------------------------
-    // HDFDescriptor private methods
+    // NexusDescriptor private methods
     //---------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Creates the internal cached structure of the file as a tree of nodes
      */
-    void HDFDescriptor::initialize(const std::string& filename)
+    void NexusDescriptor::initialize(const std::string& filename)
     {
       m_filename = filename;
       m_extension = "." + Poco::Path(filename).getExtension();
@@ -222,7 +224,7 @@ namespace Mantid
      * @param pmap [Out] An output map filled with mappings of path->type
      * @param level An integer defining the current level in the file
      */
-    void HDFDescriptor::walkFile(::NeXus::File & file,const std::string & rootPath, const std::string & className,
+    void NexusDescriptor::walkFile(::NeXus::File & file,const std::string & rootPath, const std::string & className,
                                  std::map<std::string, std::string> & pmap, int level)
     {
       if (!rootPath.empty())

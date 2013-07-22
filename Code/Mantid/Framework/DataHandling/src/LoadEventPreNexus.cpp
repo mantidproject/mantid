@@ -102,7 +102,7 @@ static const double TOF_CONVERSION = .1;
 /// Conversion factor between picoColumbs and microAmp*hours
 static const double CURRENT_CONVERSION = 1.e-6 / 3600.;
 
-LoadEventPreNexus::LoadEventPreNexus() : Mantid::API::IFileLoader(), eventfile(NULL), max_events(0)
+LoadEventPreNexus::LoadEventPreNexus() : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), eventfile(NULL), max_events(0)
 {
 }
 

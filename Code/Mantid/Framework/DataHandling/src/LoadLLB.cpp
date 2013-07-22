@@ -22,8 +22,8 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_HDF_FILELOADER_ALGORITHM(LoadLLB)
-;
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB);
+
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -62,7 +62,8 @@ const std::string LoadLLB::category() const {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadLLB::confidence(Kernel::HDFDescriptor & descriptor) const {
+int LoadLLB::confidence(Kernel::NexusDescriptor & descriptor) const
+{	
 	const auto & firstEntry = descriptor.firstEntryNameType();
 
 	const std::string path = "/" + firstEntry.first + "/nxinstrument/name";

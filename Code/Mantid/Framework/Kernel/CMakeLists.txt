@@ -27,7 +27,6 @@ set ( SRC_FILES
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
 	src/Glob.cpp
-	src/HDFDescriptor.cpp
 	src/IPropertyManager.cpp
 	src/ISaveable.cpp
 	src/InstrumentInfo.cpp
@@ -55,6 +54,7 @@ set ( SRC_FILES
 	src/MultiFileValidator.cpp
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
+	src/NexusDescriptor.cpp
 	src/NexusTestHelper.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
@@ -146,7 +146,6 @@ set ( INC_FILES
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
 	inc/MantidKernel/Glob.h
-	inc/MantidKernel/HDFDescriptor.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
 	inc/MantidKernel/ISaveable.h
@@ -181,6 +180,7 @@ set ( INC_FILES
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
 	inc/MantidKernel/NeutronAtom.h
+	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -266,7 +266,6 @@ set ( TEST_FILES
 	FunctionTaskTest.h
 	GlobTest.h
 	HermitePolynomialsTest.h
-	HDFDescriptorTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
@@ -292,6 +291,7 @@ set ( TEST_FILES
 	NDPseudoRandomNumberGeneratorTest.h
 	NDRandomNumberGeneratorTest.h
 	NeutronAtomTest.h
+	NexusDescriptorTest.h
 	NullValidatorTest.h
 	ProgressBaseTest.h
 	ProgressTextTest.h

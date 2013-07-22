@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_LOADLLB_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidDataHandling/LoadHelper.h"
 
@@ -33,7 +33,7 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadLLB: public API::IHDFFileLoader  {
+class DLLExport LoadLLB: public API::IFileLoader<Kernel::NexusDescriptor>  {
 public:
 	LoadLLB();
 	virtual ~LoadLLB();
@@ -43,7 +43,7 @@ public:
 	virtual const std::string category() const;
 
     /// Returns a confidence value that this algorithm can load a file
-    virtual int confidence(Kernel::HDFDescriptor & descriptor) const;
+    virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
 	virtual void initDocs();

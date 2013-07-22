@@ -3,7 +3,7 @@
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/HDFDescriptor.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/Matrix.h"
 #include <iostream>
 #include <fstream>

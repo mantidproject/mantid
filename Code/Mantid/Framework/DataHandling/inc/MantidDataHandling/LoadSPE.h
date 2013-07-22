@@ -42,11 +42,11 @@ namespace DataHandling
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>    
  */
-class DLLExport LoadSPE : public API::IFileLoader
+class DLLExport LoadSPE : public API::IFileLoader<Kernel::FileDescriptor>
 {
 public:
   /// Constructor
-  LoadSPE() : API::IFileLoader() {}
+  LoadSPE() : API::IFileLoader<Kernel::FileDescriptor>() {}
   /// Virtual destructor
   virtual ~LoadSPE() {}
   /// Algorithm's name
