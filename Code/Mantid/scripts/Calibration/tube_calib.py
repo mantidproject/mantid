@@ -390,10 +390,12 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     if( len(pixels) != nDets):
        print "Tube correction failed."
        return detIDs, detPositions 
-    
+    baseInstrument = ws.getInstrument().getBaseInstrument()
     # Get tube unit vector 
-    det0 = ws.getDetector( whichTube[0])
-    detN = ws.getDetector (whichTube[-1])
+    # get the detector from the baseInstrument, in order to get the positions
+    # before any calibration being loaded.
+    det0 = baseInstrument.getDetector(ws.getDetector( whichTube[0]).getID())
+    detN = baseInstrument.getDetector(ws.getDetector (whichTube[-1]).getID())
     d0pos,dNpos = det0.getPos(),detN.getPos()
     ## identical to norm of vector: |dNpos - d0pos|
     tubeLength = det0.getDistance(detN)
