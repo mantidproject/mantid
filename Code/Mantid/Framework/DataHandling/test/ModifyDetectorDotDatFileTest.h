@@ -74,11 +74,21 @@ public:
     if( OutputFileExists) {
       std::ifstream in(fullFilename.c_str());
       std::string header;
+      std::string ignore;
+      std::string columnNames;
 
       // Check header has name of algorithm in it
       getline( in, header);
       bool headerHasNameOfAlgorithmInIt = header.find("ModifyDetectorDotDatFile") != std::string::npos;
       TS_ASSERT( headerHasNameOfAlgorithmInIt );
+
+      // Ignore 2nd line
+      TS_ASSERT_THROWS_NOTHING(getline (in, ignore));
+
+      // Now at 3rd line
+      TS_ASSERT_THROWS_NOTHING(getline (in, columnNames));
+      TS_ASSERT_EQUALS( columnNames.substr(0,9), "  det no.");
+
       in.close();
 
     }
