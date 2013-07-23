@@ -2,7 +2,7 @@
     Instrument class for EQSANS reduction
 """
 from reduction import Instrument
-import MantidFramework
+import mantid
 
 class EQSANS(Instrument):
     """
@@ -94,12 +94,12 @@ class EQSANS(Instrument):
             @param workspace: workspace to extract the pixel information from
         """
         ## Number of detector pixels in X
-        nx_pixels = int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        nx_pixels = int(mantid.mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
         ## Number of detector pixels in Y
-        ny_pixels = int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        ny_pixels = int(mantid.mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
         ## Pixel size in mm
-        pixel_size_x = MantidFramework.mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = MantidFramework.mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
+        pixel_size_x = mantid.mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = mantid.mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
 
         return nx_pixels, ny_pixels, pixel_size_x, pixel_size_y
                 

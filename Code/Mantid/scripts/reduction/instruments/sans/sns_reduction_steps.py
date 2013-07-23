@@ -15,8 +15,7 @@ from reduction import extract_workspace_name, find_file, find_data
 from eqsans_load import LoadRun
 
 # Mantid imports
-from MantidFramework import *
-from mantidsimple import *
+from mantid.simpleapi import *
     
 class EQSANSSetup(ReductionStep):
     def __init__(self):
@@ -84,9 +83,9 @@ class SubtractDarkCurrent(ReductionStep):
             @param reducer: Reducer object for which this step is executed
             @param workspace: input workspace
         """
-        alg = EQSANSDarkCurrentSubtraction(InputWorkspace=workspace, Filename=self._dark_current_file, OutputWorkspace=workspace,
-                                     ReductionProperties=reducer.get_reduction_table_name())        
-        return alg.getPropertyValue("OutputMessage")
+        outputs = EQSANSDarkCurrentSubtraction(InputWorkspace=workspace, Filename=self._dark_current_file, OutputWorkspace=workspace,
+                                           ReductionProperties=reducer.get_reduction_table_name())
+        return outputs[-1] #message
     
 class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
     """
@@ -126,11 +125,11 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         
         # Get the source aperture radius
         source_aperture_radius = 10.0
-        if mtd[workspace].getRun().hasProperty("source-aperture-diameter"):
-            source_aperture_radius = mtd[workspace].getRun().getProperty("source-aperture-diameter").value/2.0
+        if mtd[workspace].run().hasProperty("source-aperture-diameter"):
+            source_aperture_radius = mtd[workspace].run().getProperty("source-aperture-diameter").value/2.0
 
-        if mtd[workspace].getRun().hasProperty("is_frame_skipping") \
-            and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0:
+        if mtd[workspace].run().hasProperty("is_frame_skipping") \
+            and mtd[workspace].run().getProperty("is_frame_skipping").value==0:
             self._is_frame_skipping = False
             output_str = super(AzimuthalAverageByFrame, self).execute(reducer, workspace)
             if self._compute_resolution:
@@ -147,20 +146,20 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         # First frame
         wl_min_f1 = None
         wl_max_f1 = None
-        if mtd[workspace].getRun().hasProperty("wavelength_min"):
-            wl_min_f1 = mtd[workspace].getRun().getProperty("wavelength_min").value
-        if mtd[workspace].getRun().hasProperty("wavelength_max"):
-            wl_max_f1 = mtd[workspace].getRun().getProperty("wavelength_max").value
+        if mtd[workspace].run().hasProperty("wavelength_min"):
+            wl_min_f1 = mtd[workspace].run().getProperty("wavelength_min").value
+        if mtd[workspace].run().hasProperty("wavelength_max"):
+            wl_max_f1 = mtd[workspace].run().getProperty("wavelength_max").value
         if wl_min_f1 is None and wl_max_f1 is None:
             raise RuntimeError, "Could not get the wavelength band for frame 1"
         
         # Second frame
         wl_min_f2 = None
         wl_max_f2 = None
-        if mtd[workspace].getRun().hasProperty("wavelength_min_frame2"):
-            wl_min_f2 = mtd[workspace].getRun().getProperty("wavelength_min_frame2").value
-        if mtd[workspace].getRun().hasProperty("wavelength_max_frame2"):
-            wl_max_f2 = mtd[workspace].getRun().getProperty("wavelength_max_frame2").value
+        if mtd[workspace].run().hasProperty("wavelength_min_frame2"):
+            wl_min_f2 = mtd[workspace].run().getProperty("wavelength_min_frame2").value
+        if mtd[workspace].run().hasProperty("wavelength_max_frame2"):
+            wl_max_f2 = mtd[workspace].run().getProperty("wavelength_max_frame2").value
         if wl_min_f2 is None and wl_max_f2 is None:
             raise RuntimeError, "Could not get the wavelength band for frame 2"
         
@@ -174,7 +173,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         Rebin(InputWorkspace=workspace, OutputWorkspace=workspace+'_frame2', 
               Params="%4.2f,%4.2f,%4.2f" % (wl_min_f2, 0.1, wl_max_f2), 
               PreserveEvents=False)
-        ReplaceSpecialValues(workspace+'_frame2', workspace+'_frame2', NaNValue=0.0,NaNError=0.0)
+        ReplaceSpecialValues(InputWorkspace=workspace+'_frame2', OutputWorkspace=workspace+'_frame2', NaNValue=0.0,NaNError=0.0)
         
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame2')
         if self._compute_resolution:
@@ -191,7 +190,7 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         Rebin(InputWorkspace=workspace, OutputWorkspace=workspace+'_frame1',
               Params="%4.2f,%4.2f,%4.2f" % (wl_min_f1, 0.1, wl_max_f1),
               PreserveEvents=False)
-        ReplaceSpecialValues(workspace+'_frame1', workspace+'_frame1', NaNValue=0.0,NaNError=0.0)
+        ReplaceSpecialValues(InputWorkspace=workspace+'_frame1', OutputWorkspace=workspace+'_frame1', NaNValue=0.0,NaNError=0.0)
         
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame1')
         
@@ -259,8 +258,8 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
 
         # Clean up 
         for ws in [workspace+'_frame1', workspace+'_frame2']:
-            if mtd.workspaceExists(ws):
-                mtd.deleteWorkspace(ws)
+            if mtd.doesExist(ws):
+                DeleteWorkspace(ws)
         
         return "Performed radial averaging for two frames"
         
@@ -299,8 +298,8 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
         
     def execute(self, reducer, workspace):
         if self._combine_frames or \
-            (mtd[workspace].getRun().hasProperty("is_frame_skipping") \
-             and mtd[workspace].getRun().getProperty("is_frame_skipping").value==0):
+            (mtd[workspace].run().hasProperty("is_frame_skipping") \
+             and mtd[workspace].run().getProperty("is_frame_skipping").value==0):
             return super(DirectBeamTransmission, self).execute(reducer, workspace)
     
         output_str = ""
@@ -311,13 +310,13 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
             
             def _crop_and_compute(wl_min_prop, wl_max_prop, suffix):
                 # Get the wavelength band from the run properties
-                if mtd[workspace].getRun().hasProperty(wl_min_prop):
-                    wl_min = mtd[workspace].getRun().getProperty(wl_min_prop).value
+                if mtd[workspace].run().hasProperty(wl_min_prop):
+                    wl_min = mtd[workspace].run().getProperty(wl_min_prop).value
                 else:
                     raise RuntimeError, "DirectBeamTransmission could not retrieve the %s property" % wl_min_prop
                 
-                if mtd[workspace].getRun().hasProperty(wl_max_prop):
-                    wl_max = mtd[workspace].getRun().getProperty(wl_max_prop).value
+                if mtd[workspace].run().hasProperty(wl_max_prop):
+                    wl_max = mtd[workspace].run().getProperty(wl_max_prop).value
                 else:
                     raise RuntimeError, "DirectBeamTransmission could not retrieve the %s property" % wl_max_prop
                 
@@ -331,8 +330,8 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
                       Params="%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max),
                       PreserveEvents=False)
                 self._calculate_transmission(sample_mon_ws+suffix, empty_mon_ws+suffix, first_det, self._transmission_ws+suffix)
-                RebinToWorkspace(self._transmission_ws+suffix, workspace, OutputWorkspace=self._transmission_ws+suffix)
-                RebinToWorkspace(self._transmission_ws+suffix+'_unfitted', workspace, OutputWorkspace=self._transmission_ws+suffix+'_unfitted')
+                RebinToWorkspace(WorkspaceToRebin=self._transmission_ws+suffix, WorkspaceToMatch=workspace, OutputWorkspace=self._transmission_ws+suffix)
+                RebinToWorkspace(WorkspaceToRebin=self._transmission_ws+suffix+'_unfitted', WorkspaceToMatch=workspace, OutputWorkspace=self._transmission_ws+suffix+'_unfitted')
                 return self._transmission_ws+suffix
                 
             # First frame
@@ -341,15 +340,15 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
             # Second frame
             trans_frame_2 = _crop_and_compute("wavelength_min_frame2", "wavelength_max_frame2", "_frame2")
             
-            Plus(trans_frame_1, trans_frame_2, self._transmission_ws)
-            Plus(trans_frame_1+'_unfitted', trans_frame_2+'_unfitted', self._transmission_ws+'_unfitted')
+            Plus(LHSWorkspace=trans_frame_1, RHSWorkspace=trans_frame_2, OutputWorkspace=self._transmission_ws)
+            Plus(LHSWorkspace=trans_frame_1+'_unfitted', RHSWorkspace=trans_frame_2+'_unfitted', OutputWorkspace=self._transmission_ws+'_unfitted')
 
             # Clean up            
             for ws in [trans_frame_1, trans_frame_2, 
                        trans_frame_1+'_unfitted', trans_frame_2+'_unfitted',
                        sample_mon_ws, empty_mon_ws]:
-                if mtd.workspaceExists(ws):
-                    mtd.deleteWorkspace(ws)
+                if mtd.doesExist(ws):
+                    DeleteWorkspace(ws)
             
         # Add output workspace to the list of important output workspaces
         #reducer.output_workspaces.append([self._transmission_ws, self._transmission_ws+'_unfitted'])
@@ -382,7 +381,7 @@ class SaveIqAscii(BaseSaveIqAscii):
             if not hasattr(reducer._two_dim_calculator, "get_output_workspace"):
                 
                 for output_ws in [workspace+'_Iqxy', workspace+'_frame1_Iqxy', workspace+'_frame2_Iqxy']:
-                    if mtd.workspaceExists(output_ws):
+                    if mtd.doesExist(output_ws):
                         filename = os.path.join(output_dir, output_ws+'.dat')
                         SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
                         filename = os.path.join(output_dir, output_ws+'.nxs')                        
