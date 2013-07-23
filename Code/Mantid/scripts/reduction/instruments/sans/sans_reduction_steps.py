@@ -40,7 +40,7 @@ class HFIRSetup(ReductionStep):
                            WavelengthSpread=reducer._data_loader._wavelength_spread,
                            BeamCenterMethod=find_beam,
                            BeamCenterX=beam_ctr_x,
-                           BeamCenterY=beam_ctr_y,                           
+                           BeamCenterY=beam_ctr_y,
                            ReductionProperties=reducer.get_reduction_table_name())
         
 class BaseBeamFinder(ReductionStep):
@@ -79,15 +79,15 @@ class BaseBeamFinder(ReductionStep):
         if self._beam_center_x is not None and self._beam_center_y is not None:
             return "Using Beam Center at: %g %g" % (self._beam_center_x, self._beam_center_y)
         
-        c=SANSBeamFinder(Filename=self._datafile,
-                         UseDirectBeamMethod=direct_beam,
-                         BeamRadius=self._beam_radius,
-                         PersistentCorrection=self._persistent,
-                         ReductionProperties=reducer.get_reduction_table_name())
+        beam_x,beam_y,msg = SANSBeamFinder(Filename=self._datafile,
+                                         UseDirectBeamMethod=direct_beam,
+                                         BeamRadius=self._beam_radius,
+                                         PersistentCorrection=self._persistent,
+                                         ReductionProperties=reducer.get_reduction_table_name())
         
-        self._beam_center_x = c.getProperty("FoundBeamCenterX").value
-        self._beam_center_y = c.getProperty("FoundBeamCenterY").value
-        return c.getPropertyValue("OutputMessage")
+        self._beam_center_x = beam_x
+        self._beam_center_y = beam_y
+        return msg
         
 class ScatteringBeamCenter(BaseBeamFinder):
     """
@@ -355,13 +355,11 @@ class DirectBeamTransmission(BaseTransmission):
                  
         # Use the transmission workspaces to find the list of monitor pixels
         # since the beam center may be at a different location
-        det_finder = FindDetectorsInShape(Workspace=sample_ws, ShapeXML=cylXML)
-        det_list = det_finder.getPropertyValue("DetectorList")
-        
-        first_det_str = det_list.split(',')[0]
-        if len(first_det_str.strip())==0:
+        det_list = FindDetectorsInShape(Workspace=sample_ws, ShapeXML=cylXML)
+
+        if len(det_list) == 0:
             raise RuntimeError, "Could not find detector pixels near the beam center: check that the beam center is placed at (0,0)."
-        first_det = int(first_det_str)
+        first_det = det_list[0]
         
         #TODO: check that both workspaces have the same masked spectra
         
@@ -497,7 +495,7 @@ class Normalize(ReductionStep):
         else:
             logger.notice("Normalization step did not get a valid normalization option: skipping")
             return "Normalization step did not get a valid normalization option: skipping"
-                        
+
     def clean(self):
         DeleteWorkspace(Workspace=norm_ws)
             
@@ -694,7 +692,7 @@ class SensitivityCorrection(ReductionStep):
                                   ReductionProperties=reducer.get_reduction_table_name(),
                                   OutputSensitivityWorkspace=self._efficiency_ws
                                   )
-        return outputs[2] # message
+        return outputs[-1] # message is last output
         
 class Mask(ReductionStep):
     """
