@@ -63,6 +63,12 @@ class PropertyWithValueTest(unittest.TestCase):
         for i in range(6):
             self.assertEquals(det_list[i], i+2)
             
+    def test_set_array_property_with_single_item_correct_type_suceeds(self):
+        self._mask_dets.setProperty("WorkspaceIndexList", 10)
+        
+        val =  self._mask_dets.getProperty("WorkspaceIndexList").value
+        self.assertEquals(10, val)
+
     def test_set_property_succeeds_with_python_float_lists(self):
         rebin = AlgorithmManager.createUnmanaged("Rebin")
         rebin.initialize()
@@ -82,6 +88,13 @@ class PropertyWithValueTest(unittest.TestCase):
 
     def test_set_property_of_vector_double_succeeds_with_numpy_array_of_int_type(self):
         self._do_vector_double_numpy_test(True)
+        
+    def test_set_property_using_list_extracted_from_other_property_succeeds(self):
+        det_list_prop = self._mask_dets.getProperty("DetectorList")
+        det_list_prop.valueAsStr = "1,2,3,4,5"
+        
+        det_list = det_list_prop.value
+        self._mask_dets.setProperty("DetectorList", det_list)
 
     def _do_vector_double_numpy_test(self, int_type=False):
         create_ws = AlgorithmManager.createUnmanaged('CreateWorkspace')
