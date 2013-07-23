@@ -773,18 +773,6 @@ void ConfigDialog::initSendToProgramTab()
   widgetLayout ->addWidget(frame);
   QGridLayout *grid = new QGridLayout(frame);
 
-  //create tree diagram for all known programs that can be saved to
-  treePrograms = new QTreeWidget(frame);
-  treePrograms->setSelectionMode( QAbstractItemView::ExtendedSelection );
-  treePrograms->setColumnCount(1);
-  treePrograms->setSortingEnabled(false);
-  treePrograms->setHeaderLabel(tr("List of Current Programs"));
-
-  grid->addWidget(treePrograms, 0,0);
-
-  connect(treePrograms,SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(treeClicked(QTreeWidgetItem*)));
-  connect(treePrograms,SIGNAL(itemSelectionChanged()), this, SLOT(enableButtons()));
-  populateProgramTree();
 
   //Add buttons to the bottom of the widget
   deleteButton = new QPushButton(tr("Delete"));
@@ -803,11 +791,24 @@ void ConfigDialog::initSendToProgramTab()
   buttons->addWidget(addButton);
 
   widgetLayout->addLayout(buttons);
+
+  //create tree diagram for all known programs that can be saved to
+  treePrograms = new QTreeWidget(frame);
+  treePrograms->setSelectionMode( QAbstractItemView::ExtendedSelection );
+  treePrograms->setColumnCount(1);
+  treePrograms->setSortingEnabled(false);
+  treePrograms->setHeaderLabel(tr("List of Current Programs"));
+
+  grid->addWidget(treePrograms, 0,0);
+
+  populateProgramTree();
+  connect(treePrograms,SIGNAL(itemChanged(QTreeWidgetItem*, int)), this, SLOT(itemCheckedChanged(QTreeWidgetItem*)));
+  connect(treePrograms,SIGNAL(itemSelectionChanged()), this, SLOT(enableButtons()));
+
 }
 
 void ConfigDialog::enableButtons()
 {
- // QStringList selectedItems = treeSelecting();
   QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
   //Set the buttons on whether the conditions are met. Reducing the amount of user errors
   if (selectedItems.size() == 0)
@@ -827,22 +828,24 @@ void ConfigDialog::enableButtons()
   }
 }
 
-void ConfigDialog::treeClicked(QTreeWidgetItem* item)
+void ConfigDialog::itemCheckedChanged(QTreeWidgetItem* item)
 {
-  treePrograms->setCurrentItem(item);
-  enableButtons();
+  if (item->childCount() > 0)
+  {
+    treePrograms->setCurrentItem(item);
+  }
+  //enableButtons();
   std::string visibility = "Yes";
   if (item->checkState(0) != Qt::Checked)
   {
     visibility = "No";
   }
-
   auto it = m_sendToSettings.find(item->text(0).toStdString());
   if (it != m_sendToSettings.end())
   {
     it->second["visible"] = visibility;
+    updateChildren(it->second, item);
   }
-  updateChildren(it->second, item);
 }
 
 
@@ -867,11 +870,11 @@ void ConfigDialog::addDialog()
 //Edit a program
 void ConfigDialog::editDialog()
 {
-  QStringList checkedItems = treeSelecting();
+  QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
 
-  std::map<std::string,std::string> programKeysAndDetails = m_sendToSettings.find(checkedItems[0].toStdString())->second;
+  std::map<std::string,std::string> programKeysAndDetails = m_sendToSettings.find(selectedItems[0]->text(0).toStdString())->second;
 
-  SendToProgramDialog* editProgram = new SendToProgramDialog(this, checkedItems[0], programKeysAndDetails);
+  SendToProgramDialog* editProgram = new SendToProgramDialog(this, selectedItems[0]->text(0), programKeysAndDetails);
 
   editProgram->setWindowTitle(tr("Edit a Program"));
   editProgram->setModal(true);
@@ -892,11 +895,11 @@ void ConfigDialog::editDialog()
 //Deleting send to options. Deletes them off the mantid.user.properties
 void ConfigDialog::deleteDialog()
 {
-  QStringList checkedItems = treeSelecting();
-  if(checkedItems.size() > 0)
+  QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
+  if(selectedItems.size() > 0)
   {
     //Question box asking to continue to avoid accidental deletion of program options
-    int status = QMessageBox::question(this, tr("Delete save options?"), tr("Are you sure you want to delete \nthe (%1) selected save option(s)?").arg(checkedItems.size()),
+    int status = QMessageBox::question(this, tr("Delete save options?"), tr("Are you sure you want to delete \nthe (%1) selected save option(s)?").arg(selectedItems.size()),
       QMessageBox::Yes|QMessageBox::Default,
       QMessageBox::No|QMessageBox::Escape,
       QMessageBox::NoButton);
@@ -904,9 +907,9 @@ void ConfigDialog::deleteDialog()
     if(status == QMessageBox::Yes)
     {
       //For each program selected, remove all details from the user.properties file;
-      for (int i = 0; i<checkedItems.size(); ++i)
+      for (int i = 0; i<selectedItems.size(); ++i)
       {      
-        m_sendToSettings.erase(checkedItems[i].toStdString());
+        m_sendToSettings.erase(selectedItems[i]->text(0).toStdString());
       }
       //clear the tree and repopulate it without the programs that have just been deleted
       treePrograms->clear();
@@ -2294,27 +2297,6 @@ void ConfigDialog::updateMantidOptionsTab()
   int apiVersion(1);
   if( m_defaultToNewPython->isChecked() ) apiVersion = 2;
   settings.setValue("Mantid/Python/APIVersion", apiVersion);
-}
-
-QStringList ConfigDialog::treeSelecting(QTreeWidgetItem *parent)
-{
-  QStringList results;
-  //how many children at this level
-  int count = parent ? parent->childCount() : treePrograms->topLevelItemCount();
-
-  for (int i = 0; i<count; ++i)
-  {
-    //get the child
-    QTreeWidgetItem *item = parent ? parent->child(i) : treePrograms->topLevelItem(i);
-
-    if (item->isSelected())
-    {
-      results.append(item->text(0));
-    }
-  }
-
-  return results;
-
 }
 
 QStringList ConfigDialog::buildHiddenCategoryString(QTreeWidgetItem *parent)

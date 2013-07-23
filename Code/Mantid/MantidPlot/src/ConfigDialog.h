@@ -121,7 +121,7 @@ public:
     void addInstrumentDir();
     void addParameterDir();
     void enableButtons();
-    void treeClicked(QTreeWidgetItem* item);
+    void itemCheckedChanged(QTreeWidgetItem* item);
     void updateChildren(std::map<std::string, std::string> &programKeysAndDetails, QTreeWidgetItem* program);
     void addDialog();
     void editDialog();
@@ -158,7 +158,6 @@ private:
 
   QTreeWidgetItem* createCheckedTreeItem(QString name,bool checkBoxState);
   QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = 0);
-  QStringList treeSelecting(QTreeWidgetItem *parent = 0); 
 
   std::map<std::string,std::map<std::string,std::string> > m_sendToSettings;
 
