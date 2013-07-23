@@ -119,6 +119,12 @@ namespace DataHandling
   void DetermineChunking::exec()
   {
     double maxChunk = this->getProperty("MaxChunkSize");
+    if (maxChunk == 0)
+    {
+      g_log.debug() << "Converting maxChunk=0 to maxChunk=EMPTY_DBL\n";
+      maxChunk = EMPTY_DBL();
+    }
+
     double filesize = 0;
     int m_numberOfSpectra = 0;
     string runinfo = this->getPropertyValue("Filename");
@@ -137,7 +143,7 @@ namespace DataHandling
     this->setProperty("OutputWorkspace", strategy);
 #ifndef MPI_BUILD
     // mpi needs work for every core, so don't do this
-    if (maxChunk == 0 || maxChunk == EMPTY_DBL())
+    if (maxChunk == 0 || isEmpty(maxChunk))
     {
       return;
     }
@@ -172,7 +178,6 @@ namespace DataHandling
       map<string,string>::const_iterator it = entries.begin();
       std::string classType = "NXevent_data";
       size_t total_events = 0;
-      double maxChunk = this->getProperty("MaxChunkSize");
       for (; it != entries.end(); ++it)
       {
         std::string entry_name(it->first);
@@ -254,7 +259,15 @@ namespace DataHandling
 
     int numChunks = static_cast<int>(filesize/maxChunk);
     numChunks ++; //So maxChunkSize is not exceeded 
-    if (numChunks < 0) numChunks = 1;
+    if (numChunks <= 1 || isEmpty(maxChunk))
+    {
+#ifdef MPI_BUILD
+      numChunks = 1;
+#else
+      g_log.information() << "Everything can be done in a single chunk returning empty table\n";
+      return;
+#endif
+    }
 
 #ifdef MPI_BUILD
       // use all cores so number of chunks should be a multiple of cores
@@ -264,7 +277,8 @@ namespace DataHandling
       numChunks = imult * mpi::communicator().size();
     }
 #endif
-    for (int i = 1; i <= numChunks; i++) 
+
+    for (int i = 1; i <= numChunks; i++)
     {
 #ifdef MPI_BUILD
 	if (mpi::communicator().size() > 1)
