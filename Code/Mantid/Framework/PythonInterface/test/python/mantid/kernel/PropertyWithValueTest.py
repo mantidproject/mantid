@@ -18,6 +18,12 @@ class PropertyWithValueTest(unittest.TestCase):
             self.__class__._mask_dets = AlgorithmManager.createUnmanaged("MaskDetectors")
             self.__class__._mask_dets.initialize()
   
+    def test_value_setting_as_string_gives_expected_value_for_correct_type(self):
+        prop = self.__class__._integration.getProperty("RangeLower")
+        prop.valueAsStr = "15.5"
+        
+        self.assertAlmostEqual(15.5, prop.value)
+  
     def test_type_str_is_not_empty(self):
         rangeLower=self.__class__._integration.getProperty("RangeLower")
         self.assertTrue(len(rangeLower.type) > 0)
