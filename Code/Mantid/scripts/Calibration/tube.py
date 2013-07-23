@@ -35,12 +35,6 @@ Other Usefull Methods
 
 .. autofunction:: tube.readPeakFile
 
-=========================
-Details on Implementation
-=========================
-
-.. automodule:: tube_calib
-
 """
 
 import numpy
@@ -268,7 +262,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        >>> self.tube_spec = TubeSpec(ws)
        >>> self.tube_spec.setTubeSpecByStringArray(tubeSet)
 
-       If a TubeSet object is passed, it will be used as it is.
+       If a :class:`~tube_spec.TubeSpec` object is passed, it will be used as it is.
 
        
       :param knownPositions: The defined position for the peaks/edges, taking the center as the origin and having the same units as the tube length in the 3D space.
@@ -278,7 +272,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
       Optionals parameters to tune the calibration: 
 
-      :param fitPar: Define the parameters to be used in the fit. If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
+      :param fitPar: Define the parameters to be used in the fit as a :class:`~tube_calib_fit_params.TubeCalibFitParams`. If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
 
       :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 10. See: :py:mod:`~Examples.TubeCalibDemoMerlin`
 

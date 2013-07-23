@@ -1,15 +1,15 @@
 """
 This file is concerned with calibrating a specified set of tubes
 
-The main function is getCaibration(....) which is at the end of this file. 
+The main function is :func:`getCalibration` which is at the end of this file. 
 It populates an empty Calibration Table Workspace with the new positions of the pixel detectors after calibration.
 This Calibration Table Workspace can be used later to move the pixel detectors to the calibrated positions.
 
-Users should not need to directly call any other function other than getCaibration(....) from this file.
-
-Author: Karl palmen ISIS and for readPeakFile Gesner Passos ISIS
+Users should not need to directly call any other function other than :func:`getCalibration` from this file.
 
 """
+## Author: Karl palmen ISIS and for readPeakFile Gesner Passos ISIS
+
 
 import numpy
 from mantid.simpleapi import *
@@ -465,27 +465,29 @@ def readPeakFile(file_name):
     
     
     
-""" THESE FUNCTIONS NEXT SHOULD BE THE ONLY FUNCTIONS THE USER CALLS FROM THIS FILE
-"""
+### THESE FUNCTIONS NEXT SHOULD BE THE ONLY FUNCTIONS THE USER CALLS FROM THIS FILE
+
 def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable, 
                     overridePeaks=dict(), excludeShortTubes=0.0, plotTube=[], 
                     rangeList = None, polinFit=2, peaksTestMode=False):
     """     
-       Get the results the calibration and put them in the calibration table provided.
+    Get the results the calibration and put them in the calibration table provided.
              
-       :param ws: Integrated Workspace with tubes to be calibrated 
-       :param tubeSet: Specification of Set of tubes to be calibrated
-       :param calibTable: Empty calibration table into which the calibration results are placed
-       :param fitPar: A TubeCalibFitParam object for fitting the peaks
-       :param iTube: The ideal tube
-       :param peaksTable: Peaks table into wich the peaks positions will be put
-       :param overridePeak: dictionary with tube indexes keys and an array of peaks in pixels to override those that would be fitted for one tube
-       :param exludeShortTubes: Exlude tubes shorter than specified length from calibration
-       :param plotTube: List of tube indexes that will be ploted
-       :param rangelist: list of the tube indexes that will be calibrated. Default None, means all the tubes in tubeSet
-       :param polinFit: Order of the polinomial to fit against the known positions. Acceptable: 2, 3
-       :param peakTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
-       
+    :param ws: Integrated Workspace with tubes to be calibrated 
+    :param tubeSet: Specification of Set of tubes to be calibrated ( :class:`~tube_spec.TubeSpec` object)
+    :param calibTable: Empty calibration table into which the calibration results are placed. It is composed by 'Detector ID' and a V3D column 'Detector Position'. It will be filled with the IDs and calibrated positions of the detectors. 
+    :param fitPar: A :class:`~tube_calib_fit_params.TubeCalibFitParams` object for fitting the peaks
+    :param iTube: The :class:`~ideal_tube.IdealTube` which contains the positions in metres of the shadows of the slits, bars or edges used for calibration.
+    :param peaksTable: Peaks table into wich the peaks positions will be put
+    :param overridePeak: dictionary with tube indexes keys and an array of peaks in pixels to override those that would be fitted for one tube
+    :param exludeShortTubes: Exlude tubes shorter than specified length from calibration
+    :param plotTube: List of tube indexes that will be ploted
+    :param rangelist: list of the tube indexes that will be calibrated. Default None, means all the tubes in tubeSet
+    :param polinFit: Order of the polinomial to fit against the known positions. Acceptable: 2, 3
+    :param peakTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
+
+    
+    This is the main method called from :func:`~tube.calibrate` to perform the calibration.
     """
     nTubes = tubeSet.getNumTubes()
     print "Number of tubes =",nTubes
@@ -606,13 +608,13 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
 ## implement this function
 def constructIdealTubeFromRealTube( ws, tube, fitPar, funcForm ):
    """     
-      Construct an ideal tube from an actual tube (assumed ideal) 
+   Construct an ideal tube from an actual tube (assumed ideal) 
 
-      :param ws: integrated workspace          
-      :param tube: specification of one tube (if several tubes, only first tube is used)
-      :param fitPar: initial fit parameters for peak of the tube
-      :param funcForm: listing the type of known positions 1=Gaussian; 2=edge
-      :rtype: IdealTube
+   :param ws: integrated workspace          
+   :param tube: specification of one tube (if several tubes, only first tube is used)
+   :param fitPar: initial fit parameters for peak of the tube
+   :param funcForm: listing the type of known positions 1=Gaussian; 2=edge
+   :rtype: IdealTube
       
    """   
    # Get workspace indices
