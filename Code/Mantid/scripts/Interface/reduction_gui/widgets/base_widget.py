@@ -90,6 +90,12 @@ class BaseWidget(QtGui.QWidget):
         """
         return NotImplemented 
     
+    def live_button_widget(self):
+        """
+            Returns a reference to a widget that is or contains a live data button
+        """
+        return None
+    
     def dir_browse_dialog(self):
         """
             Pop up a directory dialog box.

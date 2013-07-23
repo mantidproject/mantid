@@ -116,6 +116,8 @@ class MWRunFiles : QWidget
 %End
 public:
 void setLabelMinWidth(const int);
+void liveButtonSetChecked(bool);
+bool liveButtonIsChecked();
 QString getText() /PyName=text/;
 bool isValid();
 void setUserInput(const QVariant &);

@@ -84,7 +84,33 @@ class DgsReductionScripter(BaseReductionScripter):
         
         return script
         
+    def to_live_script(self):
+        """
+            Generate the script for live data reduction
+        """
+        script = """StartLiveData(UpdateEvery='5',Instrument='"""
+        script += self.instrument_name    #'FileEventDataListener'
+        script += """',ProcessingScript='"""
         
+        # Need to construct Dgs call slightly differently: no line breaks & extract output workspace
+        script +=  DgsReductionScripter.TOPLEVEL_WORKFLOWALG + '('
+        for item in self._observers:
+            if item.state() is not None:
+                for subitem in str(item.state()).split('\n'):
+                    if len(subitem):
+                        if 'OutputWorkspace' in subitem:
+                            output_workspace = subitem
+                            script += "OutputWorkspace=output,"
+                        else:
+                            script += subitem
+        script += ")"
+        
+        script += """',PreserveEvents=True,EndRunBehavior='Stop',"""
+        script += output_workspace
+        script += ")\n" 
+        
+        return script
+
     def to_batch(self):
         """
         """
