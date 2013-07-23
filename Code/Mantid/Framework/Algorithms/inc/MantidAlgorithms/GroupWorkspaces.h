@@ -10,18 +10,15 @@
 #include "MantidAPI/WorkspaceGroup.h"
 namespace Mantid
 {
-namespace Algorithms
-{
-/** Takes   workspaces as input and groups the workspaces.
+  namespace Algorithms
+  {
+    /** Takes   workspaces as input and groups the workspaces.
 
     Required Properties:
     <UL>
     <LI> InputWorkspaces - The name of the workspaces to group  </LI>
     <LI> OutputWorkspace - The name of the new group workspace created </LI>
     </UL>
-
-    @author Sofia Antony
-    @date 21/07/2008
 
     Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -42,33 +39,34 @@ namespace Algorithms
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
-class DLLExport GroupWorkspaces : public API::Algorithm
-{
-public:
-  /// Default constructor
-  GroupWorkspaces() : API::Algorithm() {};
-  /// Destructor
-  virtual ~GroupWorkspaces() {};
-  /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "GroupWorkspaces";}
-  /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;}
-  /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Transforms\\Grouping;Utility\\Workspaces";}
+     */
+    class DLLExport GroupWorkspaces : public API::Algorithm
+    {
+    public:
+      /// Default constructor
+      GroupWorkspaces();
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "GroupWorkspaces";}
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1;}
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "Transforms\\Grouping;Utility\\Workspaces";}
 
-private:
- /// Overridden Init method
-  void init();
-  /// overridden execute method
-  void exec();
-  /// method to check the input workspaces are of same types
-  bool isCompatibleWorkspaces(Mantid::API::Workspace_sptr ws, std::string& firstWs);
-  /// add member workspace to the groupworkspace
-  void addworkspacetoGroup(Mantid::API::WorkspaceGroup_sptr  outgrp_sptr, API::Workspace_sptr ws, std::string& firstWs);
-};
+    private:
+      /// Overridden Init method
+      void init();
+      /// overridden execute method
+      void exec();
+      /// Add a list of names to the new group
+      void addToGroup(const std::vector<std::string> & names);
+      /// Add a workspace to the new group, checking for a WorkspaceGroup and unrolling it
+      void addToGroup(const API::Workspace_sptr & workspace);
 
-} // namespace Algorithm
+      /// A pointer to the new group
+      API::WorkspaceGroup_sptr m_group;
+    };
+
+  } // namespace Algorithm
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_REGROUP_H_*/
