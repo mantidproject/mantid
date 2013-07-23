@@ -49,7 +49,7 @@ SendToProgramDialog::SendToProgramDialog(QWidget* parent, Qt::WFlags fl)
 /**
 * Constructor when editing a program settings
 */
-SendToProgramDialog::SendToProgramDialog(QWidget* parent, QString& programName, std::map<std::string, std::string> programKeysAndDetails, Qt::WFlags fl)
+SendToProgramDialog::SendToProgramDialog(QWidget* parent, QString programName, std::map<std::string, std::string> programKeysAndDetails, Qt::WFlags fl)
     : QDialog(parent, fl), validName(true), validTarget(true), validSaveUsing(true)
 {
   m_uiform.setupUi(this);
