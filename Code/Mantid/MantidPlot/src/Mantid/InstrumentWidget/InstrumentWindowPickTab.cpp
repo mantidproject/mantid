@@ -1254,6 +1254,15 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
 {
   m_plot->clearAll();
   m_plot->replot();
+  auto surface = m_instrWindow->getSurface();
+  if ( surface )
+  {
+    auto interactionMode = surface->getInteractionMode();
+    if ( interactionMode == ProjectionSurface::DrawMode || interactionMode == ProjectionSurface::MoveMode )
+    {
+        updatePlotMultipleDetectors();
+    }
+  }
 }
 
 /**
