@@ -1,7 +1,6 @@
 import unittest
-from MantidFramework import mtd
-mtd.initialise()
-from mantidsimple import LoadAscii, ConvertToHistogram
+import mantid
+from mantid.simpleapi import LoadAscii, ConvertToHistogram, DeleteWorkspace, mtd
 from reduction import Reducer, ReductionStep, validate_step
 
 # Make sure we can import the UI
@@ -28,8 +27,8 @@ class ReducerTest(unittest.TestCase):
             result = item.execute(r, "test2")
             
         # Check that the workspace was created
-        self.assertNotEqual(mtd["test2"], None)
-        mtd.deleteWorkspace("test2")
+        self.assertTrue("test2" in mtd)
+        DeleteWorkspace("test2")
 
     def test_pars_variation(self):
         """
@@ -44,8 +43,8 @@ class ReducerTest(unittest.TestCase):
             result = item.execute(r, "test2")
             
         # Check that the workspace was created
-        self.assertNotEqual(mtd["test2"], None)
-        mtd.deleteWorkspace("test2")
+        self.assertTrue("test2" in mtd)
+        DeleteWorkspace("test2")
                 
     def test_output_wksp(self):
         """
@@ -62,10 +61,10 @@ class ReducerTest(unittest.TestCase):
         r._reduction_steps[1].execute(r, "test2", "test3")
             
         # Check that the workspace was created
-        self.assertNotEqual(mtd["test2"], None)
-        self.assertNotEqual(mtd["test3"], None)
-        mtd.deleteWorkspace("test2")
-        mtd.deleteWorkspace("test3")
+        self.assertTrue("test2" in mtd)
+        self.assertTrue("test3" in mtd)
+        DeleteWorkspace("test2")
+        DeleteWorkspace("test3")
         
     def test_parameter_variation(self):
         """
@@ -77,8 +76,8 @@ class ReducerTest(unittest.TestCase):
             result = item.execute(r, "test2")
             
         # Check that the workspace was created
-        self.assertNotEqual(mtd["test2"], None)
-        mtd.deleteWorkspace("test2")
+        self.assertTrue("test2" in mtd)
+        DeleteWorkspace("test2")
             
     def test_reduction_step(self):
         """
