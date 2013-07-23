@@ -27,6 +27,7 @@ namespace CurveFitting
   /** Constructor
    */
   SplineSmoothing::SplineSmoothing()
+    : M_START_SMOOTH_POINTS(10)
   {
   }
     
@@ -68,9 +69,9 @@ namespace CurveFitting
     validator->setLower(0);
     declareProperty("DerivOrder", 2, validator, "Order to derivatives to calculate.");
 
-    auto splineSizeValidator = boost::make_shared<BoundedValidator<int> >();
-    splineSizeValidator->setLower(3);
-    declareProperty("SplineSize", 3, splineSizeValidator, "Number of points defining the spline.");
+    auto errorSizeValidator = boost::make_shared<BoundedValidator<double> >();
+    errorSizeValidator->setLower(0.0);
+    declareProperty("Error", 0.0, errorSizeValidator, "The amount of error we wish to tolerate in smoothing");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -104,7 +105,8 @@ namespace CurveFitting
       auto cspline = boost::make_shared<CubicSpline>();
 
       //choose some smoothing points from input workspace
-      setSmoothingPoints(cspline, inputWorkspacePt, i);
+      std::set<int> xPoints;
+      selectSmoothingPoints(xPoints, cspline, inputWorkspacePt, i);
 
       //compare the data set against our spline
       outputWorkspace->setX(i, inputWorkspaceBinned->readX(i));
@@ -117,7 +119,7 @@ namespace CurveFitting
 
         if(j >= 2)
         {
-          setSmoothingPoints(cspline, derivs[j-1], i);
+          addSmoothingPoints(cspline,xPoints,inputWorkspacePt->readX(i).data(), derivs[j-1]->readY(i).data());
         }
 
         calculateDerivatives(cspline, inputWorkspacePt, derivs[j], j+1, i);
@@ -126,6 +128,7 @@ namespace CurveFitting
 
     //store the output workspaces
     setProperty("OutputWorkspace", outputWorkspace);
+
     //prefix to name of deriv output workspaces
     std::string owsPrefix = getPropertyValue("OutputWorkspace") + "_";
     for(int i = 0; i < order; ++i)
@@ -218,54 +221,107 @@ namespace CurveFitting
       cspline->derivative1D(yValues, xValues, nData, order);
   }
 
-  void SplineSmoothing::setSmoothingPoints(CubicSpline_const_sptr cspline,
+  void SplineSmoothing::setSmoothingPoint(CubicSpline_const_sptr cspline, const int index, const double xpoint, const double ypoint) const
+  {
+    //set the x and y values defining a point on the spline
+     cspline->setXAttribute(index, xpoint);
+     cspline->setParameter(index, ypoint);
+  }
+
+  bool SplineSmoothing::checkSmoothingAccuracy(const int start, const int end,
+      const double* ys, const double* ysmooth) const
+  {
+    double error = getProperty("Error");
+
+    //for all values between the selected indices
+    for(int i = start; i < end; ++i)
+    {
+      //check if the difference between points is greater than our error tolerance
+      double ydiff = fabs(ys[i] - ysmooth[i]);
+      if(ydiff > error)
+      {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  void SplineSmoothing::addSmoothingPoints(CubicSpline_const_sptr cspline, const std::set<int>& points,
+      const double* xs, const double* ys) const
+  {
+    //resize the number of attributes
+    int size = static_cast<int>(points.size());
+    cspline->setAttributeValue("n", size);
+
+    //set each of the x and y points to redefine the spline
+    std::set<int>::const_iterator iter;
+    int i(0);
+    for(iter = points.begin(); iter != points.end(); ++iter)
+    {
+      setSmoothingPoint(cspline, i, xs[*iter], ys[*iter]);
+      ++i;
+    }
+  }
+
+  void SplineSmoothing::selectSmoothingPoints(std::set<int>& smoothPts, CubicSpline_const_sptr cspline,
       MatrixWorkspace_const_sptr inputWorkspace, size_t row) const
   {
-      //define the spline's parameters
-      const auto & xIn = inputWorkspace->readX(row);
-      const auto & yIn = inputWorkspace->readY(row);
+      const auto & xs = inputWorkspace->readX(row);
+      const auto & ys = inputWorkspace->readY(row);
 
-      int xSize = static_cast<int>(xIn.size());
-      int numPoints = getProperty("SplineSize");
+      int xSize = static_cast<int>(xs.size());
 
-      //check number of spline points is within a valid range
-      if(numPoints > xSize)
+      //number of points to start with
+      int numSmoothPts(M_START_SMOOTH_POINTS);
+
+      //evenly space initial points over data set
+      int delta = xSize / numSmoothPts;
+      for (int i = 0; i < xSize; i+=delta)
       {
-        throw std::range_error("SplineSmoothing: Spline size cannot be larger than the number of data points.");
+        smoothPts.insert(i);
       }
+      smoothPts.insert(xSize-1); //add largest element to end of spline.
 
-      //choose number of smoothing points
-      double deltaX = (xIn.back() - xIn.front()) / (numPoints-1);
-      double targetX = 0;
-      int lastIndex = 0;
-      int attrCount = 0;
+      addSmoothingPoints(cspline, smoothPts, xs.data(), ys.data());
 
-      for (int i = 0; i < numPoints; ++i)
+      bool resmooth(true);
+      while(resmooth)
       {
-        //increment x position
-        targetX = xIn[0] + (i * deltaX);
+        resmooth = false;
 
-        //find closest x point
-        while(lastIndex < xSize-1 && xIn[lastIndex] <= targetX)
+        //calculate the spline and retrieve smoothed points
+        boost::shared_array<double> ysmooth(new double[xSize]);
+        cspline->function1D(ysmooth.get(),xs.data(),xSize);
+
+        //iterate over smoothing points
+        std::set<int>::const_iterator iter = smoothPts.begin();
+        int start = *iter;
+        int end(0);
+        bool accurate(true);
+
+        for(++iter; iter != smoothPts.end(); ++iter)
         {
-          ++lastIndex;
+          end = *iter;
+
+          //check each point falls within our range of error.
+          accurate = checkSmoothingAccuracy(start,end,ys.data(),ysmooth.get());
+
+          //if not, flag for resmoothing and add another point between these two data points
+          if(!accurate)
+          {
+            resmooth = true;
+            smoothPts.insert((start+end)/2);
+          }
+
+          start = end;
+          accurate = true;
         }
 
-        //get x value with minimum difference.
-        int index = (xIn[lastIndex] - targetX < targetX - xIn[lastIndex-1]) ? lastIndex : lastIndex-1;
-
-        std::string attrName = "x" + boost::lexical_cast<std::string>(attrCount-1);
-        if(i == 0 || cspline->getAttribute(attrName).asDouble() != xIn[index])
+        //add new smoothing points if necessary
+        if(resmooth)
         {
-            if(attrCount >= 3)
-            {
-              cspline->setAttributeValue("n", attrCount+1);
-            }
-
-            cspline->setXAttribute(attrCount, xIn[index]);
-            cspline->setParameter(attrCount, yIn[index]);
-            std::cout << yIn[index] << std::endl;
-            attrCount++;
+          addSmoothingPoints(cspline, smoothPts, xs.data(), ys.data());
         }
       }
   }

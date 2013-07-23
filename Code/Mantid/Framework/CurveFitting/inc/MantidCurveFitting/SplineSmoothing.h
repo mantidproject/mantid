@@ -44,6 +44,10 @@ namespace CurveFitting
     virtual const std::string category() const;
 
   private:
+
+    /// number of smoothing points to start with
+    const int M_START_SMOOTH_POINTS;
+
     virtual void initDocs();
     void init();
     void exec();
@@ -52,7 +56,9 @@ namespace CurveFitting
 
     API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
 
-    void setSmoothingPoints(CubicSpline_const_sptr cspline,
+    void setSmoothingPoint(CubicSpline_const_sptr cspline, const int index, const double xpoint, const double ypoint) const;
+
+    void selectSmoothingPoints(std::set<int>& xPoints, CubicSpline_const_sptr cspline,
         API::MatrixWorkspace_const_sptr inputWorkspace, size_t row) const;
 
     void calculateSmoothing(CubicSpline_const_sptr cspline,
@@ -62,6 +68,12 @@ namespace CurveFitting
     void calculateDerivatives(CubicSpline_const_sptr cspline,
         API::MatrixWorkspace_const_sptr inputWorkspace,
         API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const;
+
+    void addSmoothingPoints(CubicSpline_const_sptr cspline, const std::set<int>& points,
+        const double* xs, const double* ys) const;
+
+    bool checkSmoothingAccuracy(const int start, const int end,
+        const double* ys, const double* ysmooth) const;
   };
 
 

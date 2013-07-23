@@ -42,7 +42,7 @@ public:
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("SplineSize", 10));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Error", 0.02));
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("DerivOrder", order));
 
     //create a binned workspace
