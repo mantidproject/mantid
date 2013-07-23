@@ -8,13 +8,13 @@ class ReflectometryQuickToLamTest(unittest.TestCase):
     
     __wsName = None
     
-    def __init__(self, methodName='runTest'):
-        super(ReflectometryQuickToLamTest, self).__init__(methodName)
+    def setUp(self):
         self.__wsName = "TestWorkspace"
         LoadISISNexus(Filename='INTER00013460', OutputWorkspace=self.__wsName)
     
-    def __del__(self):
-        DeleteWorkspace(mtd[self.__wsName])
+    def tearDown(self):
+        if self.__wsName in mtd.getObjectNames():
+            DeleteWorkspace(mtd[self.__wsName])
         
     def test_basic_type_checks(self):
         firstWSName = mtd[self.__wsName].name()
@@ -39,7 +39,26 @@ class ReflectometryQuickToLamTest(unittest.TestCase):
         self.assertEquals("Wavelength", detectorWSInLam.getAxis(0).getUnit().caption())
         
         
-
+    def test_check_lambda_range(self):
+        
+        # Expected Min and Max x wavelength values on output.
+        inst = mtd[self.__wsName].getInstrument()
+        expectedLambdaMin = inst.getNumberParameter('LambdaMin')[0]
+        expectedLambdaMax = inst.getNumberParameter('LambdaMax')[0]
+        
+        firstWSName = mtd[self.__wsName].name()
+        
+        # Run Quick
+        quick.toLam(firstWSName, firstWSName)
+        
+        # Get output workspace
+        detectorWSInLam = mtd['_D' + self.__wsName] 
+        
+        # Check that output workspace has been cropped.
+        x = detectorWSInLam.readX(0)
+        self.assertAlmostEquals(expectedLambdaMin, x[0], 0)
+        self.assertAlmostEquals(expectedLambdaMax, x[-1], 0)
+        
     
 if __name__ == '__main__':
     unittest.main()
