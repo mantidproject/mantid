@@ -223,6 +223,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         for dRange in self._samMap.getMap().iterkeys():
             samWs = self._samMap.getMap()[dRange]
             vanWs = self._vanMap.getMap()[dRange]
+            samWs, vanWs = self.rebinToSmallest(samWs, vanWs)
             Divide(LHSWorkspace=samWs, RHSWorkspace=vanWs, OutputWorkspace=samWs)
             ReplaceSpecialValues(InputWorkspace=samWs, OutputWorkspace=samWs, NaNValue=0.0, InfinityValue=0.0)
             
@@ -277,5 +278,29 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
             except IndexError:
                 raise RuntimeError("Could not locate sample file: " + run)
         return run_files
+
+    def rebinToSmallest(self, samWS, vanWS):
+        """
+            At some point a change to the control program
+            meant that the raw data got an extra bin. This 
+            prevents runs past this point being normalised
+            with a vanadium from an earlier point. 
+            Here we simply rebin to the smallest workspace if
+            the sizes don't match
+            @param samWS A workspace object containing the sample run
+            @param vanWS A workspace object containing the vanadium run
+            @returns samWS, vanWS rebinned  to the smallest if necessary
+        """
+        sample_size, van_size = mtd[samWS].blocksize(), mtd[vanWS].blocksize()
+        if sample_size == van_size:
+            return samWS, vanWS
+        
+        if sample_size < van_size:
+            RebinToWorkspace(WorkspaceToRebin=vanWS, WorkspaceToMatch=samWS,OutputWorkspace=vanWS)
+        else:
+            RebinToWorkspace(WorkspaceToRebin=samWS, WorkspaceToMatch=vanWS,OutputWorkspace=samWS)
+        
+        return samWS, vanWS
+        
 
 AlgorithmFactory.subscribe(OSIRISDiffractionReduction)
