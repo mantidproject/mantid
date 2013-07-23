@@ -783,6 +783,7 @@ void ConfigDialog::initSendToProgramTab()
   grid->addWidget(treePrograms, 0,0);
 
   connect(treePrograms,SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(treeClicked(QTreeWidgetItem*)));
+  connect(treePrograms,SIGNAL(itemSelectionChanged()), this, SLOT(enableButtons()));
   populateProgramTree();
 
   //Add buttons to the bottom of the widget
@@ -806,7 +807,8 @@ void ConfigDialog::initSendToProgramTab()
 
 void ConfigDialog::enableButtons()
 {
-  QStringList selectedItems = treeSelecting();
+ // QStringList selectedItems = treeSelecting();
+  QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
   //Set the buttons on whether the conditions are met. Reducing the amount of user errors
   if (selectedItems.size() == 0)
   {  
@@ -827,6 +829,7 @@ void ConfigDialog::enableButtons()
 
 void ConfigDialog::treeClicked(QTreeWidgetItem* item)
 {
+  treePrograms->setCurrentItem(item);
   enableButtons();
   std::string visibility = "Yes";
   if (item->checkState(0) != Qt::Checked)
