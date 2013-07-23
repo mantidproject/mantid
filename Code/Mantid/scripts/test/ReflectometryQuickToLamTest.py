@@ -59,6 +59,31 @@ class ReflectometryQuickToLamTest(unittest.TestCase):
         self.assertAlmostEquals(expectedLambdaMin, x[0], 0)
         self.assertAlmostEquals(expectedLambdaMax, x[-1], 0)
         
-    
+    def test_workspace_splitting_monitor_detector(self):
+        # Expected Min and Max x wavelength values on output.
+        inst = mtd[self.__wsName].getInstrument()
+        originalNHisto = mtd[self.__wsName].getNumberHistograms()
+        
+        pointDetectorStartIndex = inst.getNumberParameter('PointDetectorStart')[0]
+        pointDetectorStopIndex = inst.getNumberParameter('PointDetectorStop')[0]
+        multiDetectorStartIndex = inst.getNumberParameter('MultiDetectorStart')[0]
+        
+        histoRangeMonitor = pointDetectorStartIndex # zero to pointDetectorStartIndex
+        histoRangePointDetector = originalNHisto - pointDetectorStartIndex
+        histoRangeMultiDetector = originalNHisto - multiDetectorStartIndex
+        
+        firstWSName = mtd[self.__wsName].name()
+        
+        # Run Quick
+        quick.toLam(firstWSName, firstWSName)
+        
+        # Get output workspace
+        pointDetectorWSInLam = mtd['_D' + self.__wsName] 
+        monitorWSInLam = mtd['_M' + self.__wsName] 
+        
+        # Check histogram ranges
+        self.assertEquals(histoRangeMonitor, monitorWSInLam.getNumberHistograms())
+        self.assertEquals(histoRangePointDetector, pointDetectorWSInLam.getNumberHistograms())
+        
 if __name__ == '__main__':
     unittest.main()
