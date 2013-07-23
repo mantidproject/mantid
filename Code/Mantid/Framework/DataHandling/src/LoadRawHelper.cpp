@@ -657,7 +657,7 @@ namespace Mantid
     void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd )
     {
       //search for the log file to load, and save their names in a set.
-      std::set<std::string> logFiles = searchForLogFiles(fileName);
+      std::list<std::string> logFiles = searchForLogFiles(fileName);
 
       g_log.debug("Loading the log files...");
       if( progStart < progEnd ) {
@@ -667,8 +667,8 @@ namespace Mantid
       progress(m_prog, "Reading log files...");
       IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
 
-      //Iterate over the set, and load each log file into the localWorkspace.
-      std::set<std::string>::const_iterator logPath;
+      //Iterate over and load each log file into the localWorkspace.
+      std::list<std::string>::const_iterator logPath;
       for (logPath = logFiles.begin(); logPath != logFiles.end(); ++logPath)
       {
         // Pass through the same input filename
@@ -1094,12 +1094,16 @@ namespace Mantid
      * @param pathToRawFile The path and name of the raw file.
      * @returns A set containing paths to log files related to RAW file used.
      */
-    std::set<std::string> LoadRawHelper::searchForLogFiles(const std::string& pathToRawFile)
+    std::list<std::string> LoadRawHelper::searchForLogFiles(const std::string& pathToRawFile)
     {
       // If m_filename is the filename of a raw datafile then search for potential log files
       // in the directory of this raw datafile. Otherwise check if m_filename is a potential
       // log file. Add the filename of these potential log files to: potentialLogFiles.
       std::set<std::string> potentialLogFiles;
+      // Using a list instead of a set to preserve order. The three column names will
+      // be added to the end of the list. This means if a column exists in the two
+      // and three column file then it will be overridden correctly.
+      std::list<std::string> potentialLogFilesList;
 
       // File property checks whether the given path exists, just check that is actually a file
       Poco::File l_path( pathToRawFile );
@@ -1150,6 +1154,8 @@ namespace Mantid
           try
           {
             Kernel::Glob::glob(Poco::Path(dir).resolve(pattern),potentialLogFiles);
+            //push potential log files from set to list.
+            potentialLogFilesList.insert(potentialLogFilesList.begin(), potentialLogFiles.begin(), potentialLogFiles.end());
           }
           catch(std::exception &)
           {
@@ -1161,10 +1167,11 @@ namespace Mantid
         std::ifstream fileExists(logName);
         if(fileExists)
         {
-          potentialLogFiles.insert(logName);
+          // Push three column filename to end of list.
+          potentialLogFilesList.insert(potentialLogFilesList.end(), logName);
         }
       }
-      return (potentialLogFiles);
+      return (potentialLogFilesList);
     }
 
     /**

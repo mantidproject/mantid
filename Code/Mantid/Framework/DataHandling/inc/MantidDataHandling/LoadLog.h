@@ -111,22 +111,19 @@ namespace Mantid
       bool isDateTimeString(const std::string& str) const;
 
       /// Checks if a log file name was provided (e.g. through setPropertyValue). If not it creates one based on provided path.
-      std::string extractLogName(std::vector<std::string> fileName);
-
-      /// Return the name of the three column log file for associated with the specified file. Empty string if one doesn't exist
-      std::string getThreeColumnName() const;
+      std::string extractLogName(std::vector<std::string> logFileName);
 
       /// Check for SNS-style text file
       bool SNSTextFormatColumns(const std::string& str, std::vector<double> & out) const;
 
       /// Create timeseries property from .log file and adds that to sample object
-      std::set<std::string> createthreecolumnFileLogProperty(const std::string& logfile, API::Run& run);
-
-      /// If a file with the second column(block column) name in .log file exists in the raw file directory
-      bool blockcolumnFileExists(const std::string& fileName);
+      void loadThreeColumnLogFile(std::ifstream& logFileStream, std::string logFileName, API::Run& run);
 
       /// Loads two column log file data into local workspace
-      void loadTwoColumnLogFile(std::string names);
+      void loadTwoColumnLogFile(std::ifstream& logFileStream, std::string logFileName, API::Run& run);
+
+      /// Returns the number of columns in the log file.
+      int countNumberColumns(std::ifstream& logFileStream);
 
       /// TimeSeriesProperty<int> containing data periods. Created by LogParser
       boost::shared_ptr<Kernel::Property> m_periods;

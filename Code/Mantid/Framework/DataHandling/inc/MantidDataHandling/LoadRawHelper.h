@@ -209,7 +209,7 @@ namespace Mantid
       /// The name and path of an input file. This may be the filename of a raw datafile or the name of a specific log file.
       std::string m_filename;
       /// Search for the log files in the workspace, and output their names as a set.
-      std::set<std::string> searchForLogFiles(const std::string& fileName);
+      std::list<std::string> searchForLogFiles(const std::string& fileName);
       /// Extract the log name from the path to the specific log file.
       std::string extractLogName(std::string path);
       /// Checks if the file is an ASCII file
