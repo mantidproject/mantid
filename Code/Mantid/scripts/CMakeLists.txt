@@ -1,4 +1,7 @@
-set ( TEST_PY_FILES test/ReducerTest.py test/ReflectometryQuickAuxiliaryTest.py )
+set ( TEST_PY_FILES test/ReducerTest.py 
+ test/ReflectometryQuickAuxiliaryTest.py 
+ test/ReflectometryQuickToLamTest.py
+)
 
 # python unit tests
 if (PYUNITTEST_FOUND)
