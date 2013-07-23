@@ -45,7 +45,7 @@ class MSGDiffractionReducer(MSGReducer):
 def getStringProperty(workspace, property):
     """This function is used in the interface.
     """
-    inst = mtd[workspace].getInstrument()
+    inst = mantid.AnalysisDataService[workspace].getInstrument()
     try:
         prop = inst.getStringParameter(property)[0]
     except IndexError: return ""
