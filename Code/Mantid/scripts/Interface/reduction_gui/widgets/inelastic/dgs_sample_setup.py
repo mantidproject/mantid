@@ -95,8 +95,7 @@ class SampleSetupWidget(BaseWidget):
         self._content.sample_edit.setLabelMinWidth(self._content.sample_label.minimumWidth())
         self._content.horizontalLayout.addWidget(self._content.sample_edit)
         self._content.horizontalLayout.addItem(spacer)
-        self.connect(self._content.sample_edit, QtCore.SIGNAL("fileFindingFinished()"),
-                     partial(self._validate_edit,self._content.sample_edit))
+        self._content.sample_edit.fileFindingFinished.connect(lambda: self._validate_edit(self._content.sample_edit))
         self._livebuttonwidget = self._content.sample_edit
 
     def _handle_tzero_guess(self, is_enabled):
