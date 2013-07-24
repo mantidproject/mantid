@@ -1161,7 +1161,7 @@ namespace Mantid
           }
         }
         // Remove extension from path, and append .log to path.
-        std::string logName = pathToRawFile.substr(0, pathToRawFile.find('.')) + ".log";
+        std::string logName = pathToRawFile.substr(0, pathToRawFile.rfind('.')) + ".log";
         // Check if log file exists in current directory.
         std::ifstream fileExists(logName.c_str());
         if(fileExists)
