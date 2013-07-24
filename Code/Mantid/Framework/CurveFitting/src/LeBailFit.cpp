@@ -290,7 +290,6 @@ namespace CurveFitting
       case FIT:
         // LeBail Fit
         g_log.notice() << "Function: Do LeBail Fit ==> Monte Carlo.\n";
-        // execLeBailFit();
 
       case MONTECARLO:
         // Monte carlo Le Bail refinement
@@ -378,6 +377,8 @@ namespace CurveFitting
     // Calculate diffraction pattern
     Rfactor rfactor(-DBL_MAX, -DBL_MAX);
     bool useinputpeakheights = this->getProperty("UseInputPeakHeights");
+    if (useinputpeakheights)
+      g_log.warning("UseInputPeakHeights is temporarily turned off now. ");
 
     // Set the parameters to LeBailFunction
     map<string, double> profilemap = convertToDoubleMap(m_funcParameters);
@@ -1472,15 +1473,6 @@ namespace CurveFitting
     g_log.notice() << "[DBx255] Random-walk Starting Rwp = " << currR.Rwp
                    << ", Rp = " << currR.Rp << "\n";
 
-    // c) Set to output
-    /* WHY THIS?
-    MantidVec& initcalVec = m_outputWS->dataY(INPUTCALDATAINDEX);
-    for (size_t i = 0; i < numpts; ++i)
-    {
-      initcalVec[i] = purepeakvalues[i] + vecBkgd[i];
-    }
-    */
-
     // Random walk loops
     // generate some MC trace structure
     vector<double> vecIndex(maxcycles+1);
@@ -1653,8 +1645,9 @@ namespace CurveFitting
     writeRfactorsToFile(vecIndex, vecR, filenamess.str());
 
     // c) Calculate again
+    map<string, double> bestparams = convertToDoubleMap(m_bestParameters);
+    m_lebailFunction->setProfileParameterValues(bestparams);
     calculateDiffractionPatternMC(vecX, vecPurePeak, false, false, vecBkgd, purepeakvalues, currR);
-    // m_outputWS, INPUTPUREPEAKINDEX, m_bestParameters, background, purepeakvalues, currR
 
     MantidVec& vecCalY = m_outputWS->dataY(CALDATAINDEX);
     MantidVec& vecDiff = m_outputWS->dataY(DATADIFFINDEX);
@@ -2482,6 +2475,9 @@ namespace CurveFitting
   void LeBailFit::smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVector domain,
                                              FunctionValues peakdata, vector<double>& background)
   {
+    UNUSED_ARG(domain);
+    UNUSED_ARG(background);
+
     // 1. Make data ready
     MantidVec& vecData = m_dataWS->dataY(wsindex);
     MantidVec& vecFitBkgd = m_outputWS->dataY(CALBKGDINDEX);
