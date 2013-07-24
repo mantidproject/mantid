@@ -333,7 +333,10 @@ namespace CurveFitting
 
     // Divide peaks into groups from peak's parameters
     vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > > peakgroupvec;
-    groupPeaks(peakgroupvec);
+    vector<IPowderDiffPeakFunction_sptr> outboundpeakvec;
+    double xmin = vecX.front();
+    double xmax = vecX.back();
+    groupPeaks(peakgroupvec, outboundpeakvec, xmin, xmax);
 
     // Calculate each peak's intensity and set
     bool allpeakheightsphysical = true;
@@ -347,6 +350,13 @@ namespace CurveFitting
 
       if (!peakheightsphysical)
         allpeakheightsphysical = false;
+    }
+
+    // Set zero to all peaks out of boundary
+    for (size_t i = 0; i < outboundpeakvec.size(); ++i)
+    {
+      IPowderDiffPeakFunction_sptr peak = outboundpeakvec[i];
+      peak->setHeight(0.);
     }
 
     return allpeakheightsphysical;
@@ -389,25 +399,38 @@ namespace CurveFitting
     // Check boundary
     IPowderDiffPeakFunction_sptr leftpeak = peakgroup[0].second;
     double leftbound = leftpeak->centre() - PEAKRANGECONSTANT * leftpeak->fwhm();
-    if (leftbound < vecX[0])
+    if (leftbound < vecX.front())
     {
+      stringstream msg;
       int h, k, l;
       leftpeak->getMillerIndex(h, k, l);
-      g_log.warning() << "Peak group's left boundary " << leftbound << " is out side of "
-                      << "input data workspace's left bound (" << vecX[0]
-                      << ")! Accuracy of its peak intensity might be affected."
-                      << "Peaks group has " << peakgroup.size() << " peaks, where the left most peak "
-                      << "is at " << leftpeak->centre() << " (HKL) = " << h << ", " << k << ", " << l << ".\n"
-                      << "[DBx] " << leftpeak->asString() << ".\n";
+      msg << "Peak group's left boundary " << leftbound << " is out side of "
+          << "input data workspace's left bound (" << vecX[0]
+          << ")! Accuracy of its peak intensity might be affected."
+          << "Peaks group has " << peakgroup.size() << " peaks, where the left most peak "
+          << "is at " << leftpeak->centre() << " (HKL) = " << h << ", " << k << ", " << l << ".\n"
+          << "[DBx] " << leftpeak->asString() << ".";
+      if (leftpeak->centre() - leftpeak->fwhm() < vecX.front())
+        g_log.warning(msg.str());
+      else
+        g_log.information(msg.str());
+
       leftbound = vecX[0] + 0.1;
     }
     IPowderDiffPeakFunction_sptr rightpeak = peakgroup.back().second;
     double rightbound = rightpeak->centre() + PEAKRANGECONSTANT * rightpeak->fwhm();
     if (rightbound > vecX.back())
     {
-      g_log.warning() << "Peak group's right boundary " << rightbound << " is out side of "
-                      << "input data workspace's right bound (" << vecX.back()
-                      << ")! Accuracy of its peak intensity might be affected.\n";
+      stringstream msg;
+      msg << "Peak group's right boundary " << rightbound << " is out side of "
+          << "input data workspace's right bound (" << vecX.back()
+          << ")! Accuracy of its peak intensity might be affected. ";
+
+      if (rightpeak->centre() + rightpeak->fwhm() > vecX.back())
+        g_log.warning(msg.str());
+      else
+        g_log.information(msg.str());
+
       rightbound = vecX.back() - 0.1;
     }
 
@@ -503,11 +526,11 @@ namespace CurveFitting
       else
       {
         // Report the problem
-
         int h, k, l;
         peak->getMillerIndex(h, k, l);
         stringstream warnss;
-        warnss << "Peak (" << h << ", " << k << ", " << l <<") has " << numbadpts << " data points whose "
+        warnss << "Peak (" << h << ", " << k << ", " << l <<") @ TOF = " << peak->centre() \
+               << " has " << numbadpts << " data points, whose "
                << "values exceed limit (i.e., not physical).\n";
         g_log.warning(warnss.str());
       }
@@ -722,9 +745,12 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Group peaks together
     * @param peakgroupvec:  output vector containing peaks grouped together.
+    * @param xmin : minimim x value of the data
+    * @param xmax : maximum x value of the data
     * Disabled argument: MatrixWorkspace_sptr dataws, size_t workspaceindex,
    */
-  void LeBailFunction::groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec)
+  void LeBailFunction::groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec,
+                                  vector<IPowderDiffPeakFunction_sptr>& outboundpeakvec, double xmin, double xmax)
   {
     // Sort peaks
     if (m_numPeaks > 1)
@@ -739,52 +765,95 @@ namespace CurveFitting
       throw std::runtime_error(errmsg.str());
     }
 
-    // Group peaks
-    //   Set up starting value
+    // Set up starting value
     peakgroupvec.clear();
+    outboundpeakvec.clear();
     vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup; // one group of peaks
     size_t ipk = 0;
 
-    while (ipk < m_numPeaks)
+    // Group peaks from low-d to high-d
+    bool outbound = true;
+    while (outbound && ipk < m_numPeaks)
     {
-      // add peak to CURRENT peak group
-      peakgroup.push_back(m_dspPeakVec[ipk]);
-
-      if (ipk < m_numPeaks-1)
+      // Group peaks out of lower boundary to a separate vector of peaks
+      IPowderDiffPeakFunction_sptr peak = m_dspPeakVec[ipk].second;
+      if (peak->centre() <= xmin)
       {
-        // Any peak but not the last (rightmost) peak
-
-        // test whether next peak will be in a different group
-        IPowderDiffPeakFunction_sptr thispeak = m_dspPeakVec[ipk].second;
-        IPowderDiffPeakFunction_sptr rightpeak = m_dspPeakVec[ipk+1].second;
-
-        double thispeak_rightbound = thispeak->centre() + PEAKRANGECONSTANT * thispeak->fwhm();
-        double rightpeak_leftbound = rightpeak->centre() - PEAKRANGECONSTANT * rightpeak->fwhm();
-
-        if (thispeak_rightbound < rightpeak_leftbound)
-        {
-          // this peak and its right peak are well separated.
-          // finish this group by a copy
-          vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroupcopy = peakgroup;
-          peakgroupvec.push_back(peakgroupcopy);
-          //  clear for the next group
-          peakgroup.clear();
-        }
-        else
-        {
-          // this peak and its right peak are close enough to be in same group. do nothing
-          ;
-        }
+        // Add peak
+        outboundpeakvec.push_back(peak);
+        ipk += 1;
       }
       else
       {
-        // Rightmost peak.  Finish the current peak
+        // Get out of while loop if peak is in bound
+        outbound = false;
+      }
+    }
+
+    bool inbound = true;
+    while (inbound && ipk < m_numPeaks)
+    {
+      // Group peaks in the boundary
+      IPowderDiffPeakFunction_sptr thispeak = m_dspPeakVec[ipk].second;
+
+      if (thispeak->centre() < xmax)
+      {
+        // Peak is in the boundary still
+
+        // add peak to CURRENT peak group
+        peakgroup.push_back(m_dspPeakVec[ipk]);
+
+        if (ipk < m_numPeaks-1)
+        {
+          // Any peak but not the last (rightmost) peak
+
+          // test whether next peak will be in a different group
+          IPowderDiffPeakFunction_sptr rightpeak = m_dspPeakVec[ipk+1].second;
+
+          double thispeak_rightbound = thispeak->centre() + PEAKRANGECONSTANT * thispeak->fwhm();
+          double rightpeak_leftbound = rightpeak->centre() - PEAKRANGECONSTANT * rightpeak->fwhm();
+
+          if (thispeak_rightbound < rightpeak_leftbound)
+          {
+            // this peak and its right peak are well separated.
+            // finish this group by a copy
+            vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroupcopy = peakgroup;
+            peakgroupvec.push_back(peakgroupcopy);
+            //  clear for the next group
+            peakgroup.clear();
+          }
+          else
+          {
+            // this peak and its right peak are close enough to be in same group. do nothing
+            ;
+          }
+        }
+        else
+        {
+          // Rightmost peak.  Finish the current peak
+          vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroupcopy = peakgroup;
+          peakgroupvec.push_back(peakgroupcopy);
+        }
+
+        ++ ipk;
+      }
+      else
+      {
+        // Peak is get out of boundary
+
+        // Right most peak in the boundary.  Add current peak group vector to
         vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroupcopy = peakgroup;
         peakgroupvec.push_back(peakgroupcopy);
       }
-
-      ++ ipk;
     } // ENDWHILE
+
+    while (ipk < m_numPeaks)
+    {
+      // Group peaks out of uppper boundary to a separate vector of peaks
+      IPowderDiffPeakFunction_sptr thispeak = m_dspPeakVec[ipk].second;
+      outboundpeakvec.push_back(thispeak);
+      ipk += 1;
+    }
 
     g_log.debug() << "[Calculate Peak Intensity]:  Number of Peak Groups = " << peakgroupvec.size()
                   << "\n";

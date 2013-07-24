@@ -142,7 +142,8 @@ namespace CurveFitting
                                        const vector<double> &vecX, const vector<double> &vecY, vector<double> &vec_summedpeaks);
 
     /// Group close peaks together
-    void groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec);
+    void groupPeaks(vector<vector<pair<double, IPowderDiffPeakFunction_sptr> > >& peakgroupvec,
+                    vector<IPowderDiffPeakFunction_sptr> &outboundpeakvec, double xmin, double xmax);
 
     /// Peak type
     std::string m_peakType;
