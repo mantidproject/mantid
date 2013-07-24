@@ -47,14 +47,22 @@ namespace CurveFitting
     void init();
     void exec();
 
+    /// CubicSpline member used to perform interpolation
+    boost::shared_ptr<CubicSpline> m_cspline;
+
+    API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const;
+
     API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
 
-    void setInterpolationPoints(CubicSpline_const_sptr cspline,
-        API::MatrixWorkspace_const_sptr inputWorkspace) const;
+    void setInterpolationPoints(API::MatrixWorkspace_const_sptr inputWorkspace, const int row) const;
 
-    void calculateSpline(CubicSpline_const_sptr cspline,
-        API::MatrixWorkspace_const_sptr inputWorkspace,
-        API::MatrixWorkspace_sptr outputWorkspace, int order) const;
+    void setYPoints(const double* ys) const;
+
+    void calculateSpline(API::MatrixWorkspace_const_sptr inputWorkspace,
+        API::MatrixWorkspace_sptr outputWorkspace, int row) const;
+
+    void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
+        API::MatrixWorkspace_sptr outputWorkspace, int order, int row) const;
   };
 
 

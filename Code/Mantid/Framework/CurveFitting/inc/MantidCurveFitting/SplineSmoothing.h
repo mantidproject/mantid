@@ -48,28 +48,28 @@ namespace CurveFitting
     /// number of smoothing points to start with
     const int M_START_SMOOTH_POINTS;
 
+    boost::shared_ptr<CubicSpline> m_cspline;
+
     virtual void initDocs();
     void init();
     void exec();
 
-    API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_sptr inws) const;
+    API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const;
 
     API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
 
-    void setSmoothingPoint(CubicSpline_const_sptr cspline, const int index, const double xpoint, const double ypoint) const;
+    void setSmoothingPoint(const int index, const double xpoint, const double ypoint) const;
 
-    void selectSmoothingPoints(std::set<int>& xPoints, CubicSpline_const_sptr cspline,
+    void selectSmoothingPoints(std::set<int>& xPoints,
         API::MatrixWorkspace_const_sptr inputWorkspace, size_t row) const;
 
-    void calculateSmoothing(CubicSpline_const_sptr cspline,
-      API::MatrixWorkspace_const_sptr inputWorkspace,
+    void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
       API::MatrixWorkspace_sptr outputWorkspace, size_t row) const;
 
-    void calculateDerivatives(CubicSpline_const_sptr cspline,
-        API::MatrixWorkspace_const_sptr inputWorkspace,
+    void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
         API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const;
 
-    void addSmoothingPoints(CubicSpline_const_sptr cspline, const std::set<int>& points,
+    void addSmoothingPoints(const std::set<int>& points,
         const double* xs, const double* ys) const;
 
     bool checkSmoothingAccuracy(const int start, const int end,

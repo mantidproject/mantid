@@ -35,23 +35,20 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
 
-    //number of derivatives
-    int order = 2;
-
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");
 
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("DerivOrder", 2));
 
     //create a binned workspaces
-    MatrixWorkspace_sptr iws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 1);
-    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::Create2DWorkspaceBinned(order+1, 15, 0.5, 0.1);
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 1);
+    MatrixWorkspace_sptr iws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 15, 0.5, 0.1);
 
-    size_t mwSize =  iws->readY(0).size();
+    size_t mwSize =  mws->readY(0).size();
     for (size_t i = 0; i < mwSize; ++i)
     {
       double val = static_cast<double>(i);
-      iws->dataY(0)[i] = val *2;
+      mws->dataY(0)[i] = val *2;
     }
 
     alg.setProperty("WorkspaceToMatch", mws);
@@ -62,9 +59,12 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_const_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
+    WorkspaceGroup_const_sptr derivs = alg.getProperty("OutputWorkspaceDeriv");
+    MatrixWorkspace_const_sptr derivs1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(0));
+
     const auto & yVals = outputWorkspace->readY(0);
-    const auto & yDeriv = outputWorkspace->readY(1);
-    const auto & yDeriv2 = outputWorkspace->readY(2);
+    const auto & yDeriv = derivs1->readY(0);
+    const auto & yDeriv2 = derivs1->readY(1);
 
     double count =1;
     for(size_t i = 0; i < yVals.size(); ++i)

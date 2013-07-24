@@ -27,7 +27,8 @@ namespace CurveFitting
   /** Constructor
    */
   SplineSmoothing::SplineSmoothing()
-    : M_START_SMOOTH_POINTS(10)
+    : M_START_SMOOTH_POINTS(10),
+      m_cspline(boost::make_shared<CubicSpline>())
   {
   }
     
@@ -62,8 +63,15 @@ namespace CurveFitting
    */
   void SplineSmoothing::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "The workspace on which to perform the smoothing algorithm.");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The workspace containing the calculated points and derivatives");
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
+        "The workspace on which to perform the smoothing algorithm.");
+
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+        "The workspace containing the calculated points");
+
+    declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaceDeriv","",
+        Direction::Output, PropertyMode::Optional),
+        "The workspace containing the calculated derivatives");
 
     auto validator = boost::make_shared<BoundedValidator<int> >();
     validator->setLower(0);
@@ -83,75 +91,70 @@ namespace CurveFitting
 
     //read in algorithm parameters
     int order = static_cast<int>(getProperty("DerivOrder"));
+
     //number of input histograms.
-    size_t histNo = inputWorkspaceBinned->getNumberHistograms();
+    int histNo = static_cast<int>(inputWorkspaceBinned->getNumberHistograms());
 
     //convert binned data to point data is necessary
     MatrixWorkspace_sptr inputWorkspacePt = convertBinnedData(inputWorkspaceBinned);
 
     //output workspaces for points and derivs
-    MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(inputWorkspaceBinned);
-    std::vector<MatrixWorkspace_sptr> derivs (order);
+    MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(inputWorkspaceBinned, histNo);
+    std::vector<MatrixWorkspace_sptr> derivs (histNo);
 
-    //set up workspaces for output derivatives
-    for(int i=1; i<=order; ++i)
+    for(int i = 0; i < histNo; ++i)
     {
-      derivs[i-1] = setupOutputWorkspace(inputWorkspaceBinned);
-    }
-
-    for(size_t i = 0; i < histNo; ++i)
-    {
-      //Create and instance of the cubic spline function
-      auto cspline = boost::make_shared<CubicSpline>();
+      m_cspline = boost::make_shared<CubicSpline>();
 
       //choose some smoothing points from input workspace
       std::set<int> xPoints;
-      selectSmoothingPoints(xPoints, cspline, inputWorkspacePt, i);
+      selectSmoothingPoints(xPoints,inputWorkspacePt, i);
 
       //compare the data set against our spline
       outputWorkspace->setX(i, inputWorkspaceBinned->readX(i));
-      calculateSmoothing(cspline, inputWorkspacePt, outputWorkspace, i);
+      calculateSmoothing(inputWorkspacePt, outputWorkspace, i);
 
-      for(int j = 0; j < order; ++j)
+      if(order > 0)
       {
-
-        derivs[j]->setX(i, inputWorkspaceBinned->readX(i));
-
-        if(j >= 2)
+        derivs[i] = setupOutputWorkspace(inputWorkspaceBinned, order);
+        for(int j = 0; j < order; ++j)
         {
-          addSmoothingPoints(cspline,xPoints,inputWorkspacePt->readX(i).data(), derivs[j-1]->readY(i).data());
-        }
 
-        calculateDerivatives(cspline, inputWorkspacePt, derivs[j], j+1, i);
+          derivs[i]->setX(j, inputWorkspaceBinned->readX(i));
+
+          if(j >= 2)
+          {
+            addSmoothingPoints(xPoints,inputWorkspacePt->readX(i).data(), derivs[i]->readY(j-1).data());
+          }
+
+          calculateDerivatives(inputWorkspacePt, derivs[i], j+1, i);
+        }
       }
     }
 
-    //store the output workspaces
-    setProperty("OutputWorkspace", outputWorkspace);
-
     //prefix to name of deriv output workspaces
-    std::string owsPrefix = getPropertyValue("OutputWorkspace") + "_";
-    for(int i = 0; i < order; ++i)
+    if(order > 0)
     {
-      std::string index = boost::lexical_cast<std::string>(i+1);
-      std::string ows = "OutputWorkspace_" + index;
+      WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
 
-      //declare new output workspace for derivatives
-      declareProperty(new WorkspaceProperty<>(ows,owsPrefix+index,Direction::Output),
-          "Workspace containing the order " + index + " derivatives");
+      for(int i = 0; i < histNo; ++i)
+      {
+        wsg->addWorkspace(derivs[i]);
+      }
 
-      setProperty(ows, derivs[i]);
+      setProperty("OutputWorkspaceDeriv", wsg);
     }
+
+    setProperty("OutputWorkspace", outputWorkspace);
   }
 
-  API::MatrixWorkspace_sptr SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_sptr inws) const
+  API::MatrixWorkspace_sptr SplineSmoothing::setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const
   {
-    size_t histNo = inws->getNumberHistograms();
-    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inws,histNo);
+    MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inws,size);
 
     //create labels for output workspace
-    API::TextAxis* tAxis = new API::TextAxis(histNo);
-    for(size_t i=0; i < histNo; ++i)
+    API::TextAxis* tAxis = new API::TextAxis(size);
+    for(int i=0; i < size; ++i)
     {
       std::string index = boost::lexical_cast<std::string>(i);
       tAxis->setLabel(i, "Y"+index);
@@ -195,7 +198,7 @@ namespace CurveFitting
     return workspace;
   }
 
-  void SplineSmoothing::calculateSmoothing(CubicSpline_const_sptr cspline,
+  void SplineSmoothing::calculateSmoothing(
       MatrixWorkspace_const_sptr inputWorkspace,
       MatrixWorkspace_sptr outputWorkspace, size_t row) const
   {
@@ -206,26 +209,26 @@ namespace CurveFitting
     double* yValues = outputWorkspace->dataY(row).data();
 
     //calculate the smoothing
-    cspline->function1D(yValues, xValues, nData);
+    m_cspline->function1D(yValues, xValues, nData);
   }
 
-  void SplineSmoothing::calculateDerivatives(CubicSpline_const_sptr cspline,
+  void SplineSmoothing::calculateDerivatives(
       API::MatrixWorkspace_const_sptr inputWorkspace,
       API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const
   {
       const auto & xIn = inputWorkspace->readX(row);
       const double* xValues = xIn.data();
-      double* yValues = outputWorkspace->dataY(row).data();
+      double* yValues = outputWorkspace->dataY(order-1).data();
       size_t nData = xIn.size();
 
-      cspline->derivative1D(yValues, xValues, nData, order);
+      m_cspline->derivative1D(yValues, xValues, nData, order);
   }
 
-  void SplineSmoothing::setSmoothingPoint(CubicSpline_const_sptr cspline, const int index, const double xpoint, const double ypoint) const
+  void SplineSmoothing::setSmoothingPoint(const int index, const double xpoint, const double ypoint) const
   {
     //set the x and y values defining a point on the spline
-     cspline->setXAttribute(index, xpoint);
-     cspline->setParameter(index, ypoint);
+     m_cspline->setXAttribute(index, xpoint);
+     m_cspline->setParameter(index, ypoint);
   }
 
   bool SplineSmoothing::checkSmoothingAccuracy(const int start, const int end,
@@ -247,24 +250,24 @@ namespace CurveFitting
     return true;
   }
 
-  void SplineSmoothing::addSmoothingPoints(CubicSpline_const_sptr cspline, const std::set<int>& points,
+  void SplineSmoothing::addSmoothingPoints(const std::set<int>& points,
       const double* xs, const double* ys) const
   {
     //resize the number of attributes
     int size = static_cast<int>(points.size());
-    cspline->setAttributeValue("n", size);
+    m_cspline->setAttributeValue("n", size);
 
     //set each of the x and y points to redefine the spline
     std::set<int>::const_iterator iter;
     int i(0);
     for(iter = points.begin(); iter != points.end(); ++iter)
     {
-      setSmoothingPoint(cspline, i, xs[*iter], ys[*iter]);
+      setSmoothingPoint(i, xs[*iter], ys[*iter]);
       ++i;
     }
   }
 
-  void SplineSmoothing::selectSmoothingPoints(std::set<int>& smoothPts, CubicSpline_const_sptr cspline,
+  void SplineSmoothing::selectSmoothingPoints(std::set<int>& smoothPts,
       MatrixWorkspace_const_sptr inputWorkspace, size_t row) const
   {
       const auto & xs = inputWorkspace->readX(row);
@@ -283,7 +286,7 @@ namespace CurveFitting
       }
       smoothPts.insert(xSize-1); //add largest element to end of spline.
 
-      addSmoothingPoints(cspline, smoothPts, xs.data(), ys.data());
+      addSmoothingPoints(smoothPts, xs.data(), ys.data());
 
       bool resmooth(true);
       while(resmooth)
@@ -292,7 +295,7 @@ namespace CurveFitting
 
         //calculate the spline and retrieve smoothed points
         boost::shared_array<double> ysmooth(new double[xSize]);
-        cspline->function1D(ysmooth.get(),xs.data(),xSize);
+        m_cspline->function1D(ysmooth.get(),xs.data(),xSize);
 
         //iterate over smoothing points
         std::set<int>::const_iterator iter = smoothPts.begin();
@@ -321,7 +324,7 @@ namespace CurveFitting
         //add new smoothing points if necessary
         if(resmooth)
         {
-          addSmoothingPoints(cspline, smoothPts, xs.data(), ys.data());
+          addSmoothingPoints(smoothPts, xs.data(), ys.data());
         }
       }
   }

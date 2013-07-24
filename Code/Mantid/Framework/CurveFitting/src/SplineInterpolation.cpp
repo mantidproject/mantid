@@ -21,6 +21,7 @@ namespace Mantid
     /** Constructor
      */
     SplineInterpolation::SplineInterpolation()
+      : m_cspline(boost::make_shared<CubicSpline>())
     {
     }
 
@@ -65,14 +66,21 @@ namespace Mantid
      */
     void SplineInterpolation::init()
     {
-      declareProperty(new WorkspaceProperty<>("WorkspaceToInterpolate", "", Direction::Input),
-          "The workspace on which to perform interpolation the algorithm.");
       declareProperty(new WorkspaceProperty<>("WorkspaceToMatch", "", Direction::Input),
           "The workspace which defines the points of the spline.");
+
+      declareProperty(new WorkspaceProperty<>("WorkspaceToInterpolate", "", Direction::Input),
+          "The workspace on which to perform the interpolation algorithm.");
+
       declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
           "The workspace containing the calculated points and derivatives");
 
-      auto validator = boost::make_shared<BoundedValidator<int> >(0, 2);
+      declareProperty(new WorkspaceProperty<WorkspaceGroup>("OutputWorkspaceDeriv","",
+          Direction::Output, PropertyMode::Optional),
+          "The workspace containing the calculated derivatives");
+
+      auto validator = boost::make_shared<BoundedValidator<int> >();
+      validator->setLower(0);
       declareProperty("DerivOrder", 2, validator, "Order to derivatives to calculate.");
     }
 
@@ -87,35 +95,82 @@ namespace Mantid
       MatrixWorkspace_sptr mws = getProperty("WorkspaceToMatch");
       MatrixWorkspace_sptr iws = getProperty("WorkspaceToInterpolate");
 
+      int histNo = static_cast<int>(iws->getNumberHistograms());
+
+      std::vector<MatrixWorkspace_sptr> derivs(histNo);
+
+      if(mws->getNumberHistograms() > 1)
+      {
+        g_log.warning() << "Algorithm can only interpolate against a single data set. "
+            "Only the first data set will be used." << std::endl;
+      }
+
       MatrixWorkspace_const_sptr mwspt = convertBinnedData(mws);
       MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
 
-      MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(mws,
-          order + 1);
+      MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(iws, histNo);
 
-      //set axis labels for output workspace
-      API::TextAxis* tAxis = new API::TextAxis(order+1);
-      tAxis->setLabel(0, "Y");
-      tAxis->setLabel(1, "Deriv 1");
-      tAxis->setLabel(2, "Deriv 2");
-      outputWorkspace->replaceAxis(1, tAxis);
 
-      //Create and instance of the cubic spline function
-      auto cspline = boost::make_shared<CubicSpline>();
-
-      //set the interpolation points
-      setInterpolationPoints(cspline, iwspt);
-
-      //compare the data set against our spline
-      calculateSpline(cspline, mwspt, outputWorkspace, order);
-
-      //store the output workspace
-      for(int i=0; i < order; ++i)
+      for (int i = 0; i < histNo; ++i)
       {
-        outputWorkspace->setX(i, mws->readX(0));
+        //Create and instance of the cubic spline function
+        m_cspline = boost::make_shared<CubicSpline>();
+        //set the interpolation points
+        setInterpolationPoints(mwspt, i);
+
+        //compare the data set against our spline
+        calculateSpline(iwspt, outputWorkspace, i);
+        outputWorkspace->setX(i, iws->readX(i));
+
+        if(order > 0)
+        {
+          derivs[i] = setupOutputWorkspace(iws, order);
+          for(int j = 0; j < order; ++j)
+          {
+
+            derivs[i]->setX(j, iws->readX(i));
+
+            if(j >= 2)
+            {
+              setYPoints(derivs[i]->readY(j-1).data());
+            }
+
+            calculateDerivatives(iwspt, derivs[i], j+1, i);
+          }
+        }
       }
+
+      if(order > 0)
+      {
+        WorkspaceGroup_sptr wsg = WorkspaceGroup_sptr(new WorkspaceGroup);
+
+        for(int i = 0; i < histNo; ++i)
+        {
+          wsg->addWorkspace(derivs[i]);
+        }
+
+        setProperty("OutputWorkspaceDeriv", wsg);
+      }
+
       setProperty("OutputWorkspace", outputWorkspace);
     }
+
+    API::MatrixWorkspace_sptr SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const
+    {
+      MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inws,size);
+
+      //create labels for output workspace
+      API::TextAxis* tAxis = new API::TextAxis(size);
+      for(int i=0; i < size; ++i)
+      {
+        std::string index = boost::lexical_cast<std::string>(i);
+        tAxis->setLabel(i, "Y"+index);
+      }
+      outputWorkspace->replaceAxis(1, tAxis);
+
+      return outputWorkspace;
+    }
+
 
     MatrixWorkspace_sptr SplineInterpolation::convertBinnedData(MatrixWorkspace_sptr workspace) const
     {
@@ -150,50 +205,52 @@ namespace Mantid
       return workspace;
     }
 
-    void SplineInterpolation::setInterpolationPoints(CubicSpline_const_sptr cspline,
-        MatrixWorkspace_const_sptr inputWorkspace) const
+    void SplineInterpolation::setYPoints(const double* ys) const
     {
-      const auto & xIn = inputWorkspace->readX(0);
-      const auto & yIn = inputWorkspace->readY(0);
-      int size = static_cast<int>(xIn.size());
-
-      //pass x attributes and y parameters to CubicSpline
-      cspline->setAttributeValue("n", size);
-
-      for (int i = 0; i < size; ++i)
+      int n = m_cspline->getAttribute("n").asInt();
+      for (int i =0; i < n; ++i)
       {
-        cspline->setXAttribute(i, xIn[i]);
-        cspline->setParameter(i, yIn[i]);
+        m_cspline->setParameter(i, ys[i]);
       }
     }
 
-    void SplineInterpolation::calculateSpline(CubicSpline_const_sptr cspline,
-        MatrixWorkspace_const_sptr inputWorkspace, MatrixWorkspace_sptr outputWorkspace, int order) const
+    void SplineInterpolation::setInterpolationPoints(MatrixWorkspace_const_sptr inputWorkspace, const int row) const
+    {
+      const auto & xIn = inputWorkspace->readX(row);
+      const auto & yIn = inputWorkspace->readY(row);
+      int size = static_cast<int>(xIn.size());
+
+      //pass x attributes and y parameters to CubicSpline
+      m_cspline->setAttributeValue("n", size);
+
+      for (int i = 0; i < size; ++i)
+      {
+        m_cspline->setXAttribute(i, xIn[i]);
+        m_cspline->setParameter(i, yIn[i]);
+      }
+    }
+
+    void SplineInterpolation::calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
+        API::MatrixWorkspace_sptr outputWorkspace, int order, int row) const
+    {
+      size_t nData = inputWorkspace->readY(row).size();
+      const double* xValues = inputWorkspace->readX(row).data();
+      double* yValues = outputWorkspace->dataY(order-1).data();
+
+      m_cspline->derivative1D(yValues, xValues, nData, order);
+    }
+
+    void SplineInterpolation::calculateSpline(MatrixWorkspace_const_sptr inputWorkspace,
+        MatrixWorkspace_sptr outputWorkspace, int row) const
     {
       //setup input parameters
-      size_t nData = inputWorkspace->readY(0).size();
-      const double* xValues = inputWorkspace->readX(0).data();
-      double* yValues = outputWorkspace->dataY(0).data();
+
+      size_t nData = inputWorkspace->readY(row).size();
+      const double* xValues = inputWorkspace->readX(row).data();
+      double* yValues = outputWorkspace->dataY(row).data();
 
       //calculate the interpolation
-      cspline->function1D(yValues, xValues, nData);
-
-      //calculate the derivatives
-      for (int i = 1; i <= order; ++i)
-      {
-        if(i > 2)
-        {
-          size_t n = cspline->getAttribute("n").asInt();
-          for(size_t j=0; j < n; ++j)
-          {
-            std::string index = boost::lexical_cast<std::string>(j);
-            cspline->setParameter(j, cspline->getAttribute("x"+index).asDouble());
-          }
-        }
-
-        yValues = outputWorkspace->dataY(i).data();
-        cspline->derivative1D(yValues, xValues, nData, i);
-      }
+      m_cspline->function1D(yValues, xValues, nData);
     }
 
   } // namespace CurveFitting

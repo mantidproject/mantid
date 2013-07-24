@@ -62,12 +62,12 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     MatrixWorkspace_const_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-    MatrixWorkspace_const_sptr derivs1 = alg.getProperty("OutputWorkspace_1");
-    MatrixWorkspace_const_sptr derivs2 = alg.getProperty("OutputWorkspace_2");
+    WorkspaceGroup_const_sptr derivs = alg.getProperty("OutputWorkspaceDeriv");
+    MatrixWorkspace_const_sptr derivs1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(0));
 
     const auto & yVals = outputWorkspace->readY(0);
     const auto & d1 = derivs1->readY(0);
-    const auto & d2 = derivs2->readY(0);
+    const auto & d2 = derivs1->readY(1);
 
     for(size_t i = 0; i < yVals.size(); ++i)
     {
