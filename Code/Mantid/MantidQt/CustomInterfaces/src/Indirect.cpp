@@ -1333,20 +1333,20 @@ void Indirect::plotRaw()
     }
 
     QString pyInput =
-      "from mantidsimple import *\n"
-      "from mantidplot import *\n"
+      "from mantid.simpleapi import FlatBackground,GroupDetectors,Load\n"
+      "from mantidplot import plotSpectrum\n"
       "import os.path as op\n"
       "file = r'" + rawFile + "'\n"
       "name = op.splitext( op.split(file)[1] )[0]\n"
       "bgrange = " + bgrange + "\n"
-      "Load(file, name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
+      "Load(Filename=file, OutputWorkspace=name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
       "if ( bgrange != [-1, -1] ):\n"
       "    #Remove background\n"
-      "    FlatBackground(name, name+'_bg', bgrange[0], bgrange[1], Mode='Mean')\n"
-      "    GroupDetectors(name+'_bg', name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-      "    GroupDetectors(name, name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
+      "    FlatBackground(InputWorkspace=name, OutputWorkspace=name+'_bg', StartX=bgrange[0], EndX=bgrange[1], Mode='Mean')\n"
+      "    GroupDetectors(InputWorkspace=name+'_bg', OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
+      "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
       "else: # Just group detectors as they are\n"
-      "    GroupDetectors(name, name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
+      "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
       "graph = plotSpectrum(name+'_grp', 0)\n";
 
     QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -1439,7 +1439,7 @@ void Indirect::calibCreate()
   {
     QString filenames = "[r'"+m_uiForm.cal_leRunNo->getFilenames().join("', r'")+"']";
 
-    QString reducer = "from mantidsimple import *\n"
+    QString reducer = "from mantid.simpleapi import SaveNexus\n"
       "from inelastic_indirect_reduction_steps import CreateCalibrationWorkspace\n"
       "calib = CreateCalibrationWorkspace()\n"
       "calib.set_files(" + filenames + ")\n"
@@ -1453,11 +1453,11 @@ void Indirect::calibCreate()
       "calib.execute(None, None)\n"
       "result = calib.result_workspace()\n"
       "print result\n"
-      "SaveNexus(result, result+'.nxs')\n";
+      "SaveNexus(InputWorkspace=result, Filename=result+'.nxs')\n";
 
     if ( m_uiForm.cal_ckPlotResult->isChecked() )
     {
-      reducer += "from mantidplot import *\n"
+      reducer += "from mantidplot import plotTimeBin\n"
         "plotTimeBin(result, 0)\n";
     }
 
@@ -1506,11 +1506,9 @@ void Indirect::calPlotRaw()
     
   QFileInfo fi(filename);
   QString wsname = fi.baseName();
-  QString pyInput = "Load(r'" + filename + "', '" + wsname + "', SpectrumMin="
+  QString pyInput = "Load(Filename=r'" + filename + "', OutputWorkspace='" + wsname + "', SpectrumMin="
     + m_uiForm.leSpectraMin->text() + ", SpectrumMax="
     + m_uiForm.leSpectraMax->text() + ")\n";
-
-  std::cout << "Indirect::calPlotRaw() calling: " << pyInput.toStdString() << std::endl;
 
   pyInput = "try:\n  " +
                pyInput +
@@ -1648,7 +1646,7 @@ void Indirect::sOfQwClicked()
   if ( validateSofQw() )
   {
     QString rebinString = m_uiForm.sqw_leQLow->text()+","+m_uiForm.sqw_leQWidth->text()+","+m_uiForm.sqw_leQHigh->text();
-    QString pyInput = "from mantidsimple import *\n";
+    QString pyInput = "from mantid.simpleapi import *\n";
 
     if ( m_uiForm.sqw_cbInput->currentText() == "File" )
     {
@@ -1656,7 +1654,7 @@ void Indirect::sOfQwClicked()
         "filename = r'" +m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
         "(dir, file) = os.path.split(filename)\n"
         "(sqwInput, ext) = os.path.splitext(file)\n"
-        "LoadNexus(filename, sqwInput)\n"
+        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n"
         "cleanup = True\n"; 
     }
     else
@@ -1672,9 +1670,9 @@ void Indirect::sOfQwClicked()
     if ( m_uiForm.sqw_ckRebinE->isChecked() )
     {
       QString eRebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
-      pyInput += "Rebin(sqwInput, sqwInput+'_r', '" + eRebinString + "')\n"
+      pyInput += "Rebin(InputWorkspace=sqwInput, OutputWorkspace=sqwInput+'_r', Params='" + eRebinString + "')\n"
         "if cleanup:\n"
-        "    mantid.deleteWorkspace(sqwInput)\n"
+        "    DeleteWorkspace(sqwInput)\n"
         "sqwInput += '_r'\n"
         "cleanup = True\n";
     }
@@ -1683,30 +1681,30 @@ void Indirect::sOfQwClicked()
       "rebin = '" + rebinString + "'\n";
 
     if(m_uiForm.sqw_cbRebinType->currentText() == "Centre (SofQW)")
-      pyInput += "SofQW(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n";
+      pyInput += "SofQW(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
     else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped (SofQW2)")
-      pyInput += "SofQW2(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n";
+      pyInput += "SofQW2(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
     else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped/Fractional Area (SofQW3)")
-      pyInput += "SofQW3(sqwInput, sqwOutput, rebin, 'Indirect', EFixed=efixed)\n";
+      pyInput += "SofQW3(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
     
     pyInput +=
       "if cleanup:\n"
-      "    mantid.deleteWorkspace(sqwInput)\n";
+      "    DeleteWorkspace(sqwInput)\n";
 
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {
-      pyInput += "SaveNexus(sqwOutput, sqwOutput+'.nxs')\n";
+      pyInput += "SaveNexus(InputWorkspace=sqwOutput, Filename=sqwOutput+'.nxs')\n";
     }
 
     if ( m_uiForm.sqw_cbPlotType->currentText() == "Contour" )
     {
       pyInput += "importMatrixWorkspace(sqwOutput).plotGraph2D()\n";
     }
-    else if ( m_uiForm.sqw_cbPlotType->currentText() == "Specta" )
+    else if ( m_uiForm.sqw_cbPlotType->currentText() == "Spectra" )
     {
       pyInput +=
-        "nspec = mtd[sqwOuput].getNumberHistograms()\n"
-        "plotSpectra(sqwOutput, range(0, nspec)\n";
+        "nspec = mtd[sqwOutput].getNumberHistograms()\n"
+        "plotSpectrum(sqwOutput, range(0, nspec))\n";
     }
         
     QString pyOutput = runPythonCode(pyInput).trimmed();
@@ -1751,7 +1749,7 @@ void Indirect::sOfQwInputType(const QString& input)
 
 void Indirect::sOfQwPlotInput()
 {
-  QString pyInput = "from mantidsimple import *\n"
+  QString pyInput = "from mantid.simpleapi import *\n"
     "from mantidplot import *\n";
 
   //...
@@ -1764,7 +1762,7 @@ void Indirect::sOfQwPlotInput()
         "filename = r'" + m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
         "(dir, file) = os.path.split(filename)\n"
         "(input, ext) = os.path.splitext(file)\n"
-        "LoadNexus(filename, input)\n";
+        "LoadNexus(Filename=filename, OutputWorkspace=input)\n";
     }
     else
     {
@@ -1777,7 +1775,7 @@ void Indirect::sOfQwPlotInput()
     pyInput += "input = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
   }
 
-  pyInput += "ConvertSpectrumAxis(input, input+'_q', 'MomentumTransfer', 'Indirect')\n"
+  pyInput += "ConvertSpectrumAxis(InputWorkspace=input, OutputWorkspace=input+'_q', Target='ElasticQ', EMode='Indirect')\n"
     "ws = importMatrixWorkspace(input+'_q')\n"
     "ws.plotGraph2D()\n";
 
@@ -1849,7 +1847,7 @@ void Indirect::slicePlotRaw()
     QFileInfo fi(filename);
     QString wsname = fi.baseName();
 
-    QString pyInput = "Load(r'" + filename + "', '" + wsname + "', SpectrumMin="
+    QString pyInput = "Load(Filename=r'" + filename + "', OutputWorkspace='" + wsname + "', SpectrumMin="
       + m_uiForm.leSpectraMin->text() + ", SpectrumMax="
       + m_uiForm.leSpectraMax->text() + ")\n";
     

@@ -125,8 +125,7 @@ void IndirectDiffractionReduction::demonRun()
     }
 
     QString pyInput = 
-      "from MantidFramework import *\n"
-      "from mantidsimple import *\n"
+      "from mantid.simpleapi import *\n"
       "OSIRISDiffractionReduction("
       "Sample=r'" + m_uiForm.dem_rawFiles->getFilenames().join(", ") + "', "
       "Vanadium=r'" + m_uiForm.dem_vanadiumFile->getFilenames().join(", ") + "', "
@@ -137,14 +136,14 @@ void IndirectDiffractionReduction::demonRun()
     
     if ( m_uiForm.ckGSS->isChecked() )
     {
-      pyInput += "SaveGSS(" + tofWsName + ", " + tofWsName + " + '.gss')\n";
+      pyInput += "SaveGSS(InputWorkspace=" + tofWsName + ", Filename=" + tofWsName + " + '.gss')\n";
     }
 
     if ( m_uiForm.ckNexus->isChecked() ) 
-      pyInput += "SaveNexusProcessed(" + drangeWsName + ", " + drangeWsName + "+'.nxs')\n";
+      pyInput += "SaveNexusProcessed(InputWorkspace=" + drangeWsName + ", Filename=" + drangeWsName + "+'.nxs')\n";
 
     if ( m_uiForm.ckAscii->isChecked() ) 
-      pyInput += "SaveAscii(" + drangeWsName + ", " + drangeWsName + " +'.dat')\n";
+      pyInput += "SaveAscii(InputWorkspace=" + drangeWsName + ", Filename=" + drangeWsName + " +'.dat')\n";
 
     if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
     {

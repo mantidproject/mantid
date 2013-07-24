@@ -204,7 +204,7 @@ namespace IDA
       "file = r'" + input + "'\n"
       "( dir, filename ) = op.split(file)\n"
       "( name, ext ) = op.splitext(filename)\n"
-      "LoadNexusProcessed(file, name)\n"
+      "LoadNexusProcessed(Filename=file, OutputWorkspace=name)\n"
       "inputws = name\n";
     }
     else

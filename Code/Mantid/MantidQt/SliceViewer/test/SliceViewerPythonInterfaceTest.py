@@ -4,12 +4,10 @@ import os
 import unittest
 import time
 from PyQt4 import QtCore, QtGui
-#from PyQt4.QtTest import QTest
+
         
 # Import the Mantid framework
-import MantidFramework
-from MantidFramework import mtd
-from mantidsimple import *
+from mantid.simpleapi import *
 import mantidqtpython
 
 from mantidqtpython import StdRuntimeError, StdInvalidArgument
