@@ -248,7 +248,7 @@ class Ui_AbsUnitsFrame(object):
 
     def retranslateUi(self, AbsUnitsFrame):
         AbsUnitsFrame.setWindowTitle(QtGui.QApplication.translate("AbsUnitsFrame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
-        self.absunits_gb.setTitle(QtGui.QApplication.translate("AbsUnitsFrame", "Perform Absolute Normalsation", None, QtGui.QApplication.UnicodeUTF8))
+        self.absunits_gb.setTitle(QtGui.QApplication.translate("AbsUnitsFrame", "Perform Absolute Normalisation", None, QtGui.QApplication.UnicodeUTF8))
         self.run_files_gb.setTitle(QtGui.QApplication.translate("AbsUnitsFrame", "Run Files", None, QtGui.QApplication.UnicodeUTF8))
         self.absunits_van_label.setText(QtGui.QApplication.translate("AbsUnitsFrame", "AbsUnits Vanadium", None, QtGui.QApplication.UnicodeUTF8))
         self.absunits_van_browse.setText(QtGui.QApplication.translate("AbsUnitsFrame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
