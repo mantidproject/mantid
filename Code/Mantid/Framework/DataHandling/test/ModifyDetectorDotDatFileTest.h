@@ -5,6 +5,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 #include "MantidDataHandling/ModifyDetectorDotDatFile.h"
@@ -76,6 +77,13 @@ public:
       std::string header;
       std::string ignore;
       std::string columnNames;
+      std::string detectorData;
+      int detNo;
+      double offset;
+      double l2;
+      int code;
+      double theta;
+      double phi;
 
       // Check header has name of algorithm in it
       getline( in, header);
@@ -88,6 +96,31 @@ public:
       // Now at 3rd line
       TS_ASSERT_THROWS_NOTHING(getline (in, columnNames));
       TS_ASSERT_EQUALS( columnNames.substr(0,9), "  det no.");
+
+      // Look for detector 11208002 and verify there are at least 7 detectors
+      bool detector11208002found = false;
+      for (int i=1; i<8; ++i)
+      {
+        TS_ASSERT_THROWS_NOTHING(getline (in, detectorData));
+        if(detectorData.substr(0,9) == " 11208002")
+        {
+          detector11208002found = true;
+          std::istringstream is(detectorData);
+          TS_ASSERT_THROWS_NOTHING( is >> detNo >> offset >> l2 >> code >> theta >> phi );
+        }
+      }
+      
+      TS_ASSERT(detector11208002found);
+
+      // If the detector has been found, test some of its data
+      if(detector11208002found)
+      {
+        TS_ASSERT_EQUALS(code,3);  // Not changed by algorithm
+        TS_ASSERT_DELTA(offset,5.3,0.001); // Not changed by algorithm
+        TS_ASSERT_DELTA(l2,6.02008,0.00001); // Changed from 3.02008 by algorithm
+        TS_ASSERT_DELTA(theta,8.36362,0.00001); // Changed from 4.36362 by algorithm
+        TS_ASSERT_DELTA(phi,34.12505,0.00001); // Changed from 17.12505 by algorithm
+      }
 
       in.close();
 
