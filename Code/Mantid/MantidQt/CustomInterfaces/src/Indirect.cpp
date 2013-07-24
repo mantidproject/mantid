@@ -1333,7 +1333,7 @@ void Indirect::plotRaw()
     }
 
     QString pyInput =
-      "from mantid.simpleapi import FlatBackground,GroupDetectors,Load\n"
+      "from mantid.simpleapi import CalculateFlatBackground,GroupDetectors,Load\n"
       "from mantidplot import plotSpectrum\n"
       "import os.path as op\n"
       "file = r'" + rawFile + "'\n"
@@ -1342,7 +1342,7 @@ void Indirect::plotRaw()
       "Load(Filename=file, OutputWorkspace=name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
       "if ( bgrange != [-1, -1] ):\n"
       "    #Remove background\n"
-      "    FlatBackground(InputWorkspace=name, OutputWorkspace=name+'_bg', StartX=bgrange[0], EndX=bgrange[1], Mode='Mean')\n"
+      "    CalculateFlatBackground(InputWorkspace=name, OutputWorkspace=name+'_bg', StartX=bgrange[0], EndX=bgrange[1], Mode='Mean')\n"
       "    GroupDetectors(InputWorkspace=name+'_bg', OutputWorkspace=name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
       "    GroupDetectors(InputWorkspace=name, OutputWorkspace=name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
       "else: # Just group detectors as they are\n"

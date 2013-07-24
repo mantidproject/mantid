@@ -72,8 +72,8 @@ void ElasticWindow::exec()
   {
     stepProgress = 1.0/6.0;
     
-    // ... FlatBackground, Minus, Integration...
-    IAlgorithm_sptr flatBG = createChildAlgorithm("FlatBackground",startProgress, endProgress,childAlgLogging);
+    // ... CalculateFlatBackground, Minus, Integration...
+    IAlgorithm_sptr flatBG = createChildAlgorithm("CalculateFlatBackground",startProgress, endProgress,childAlgLogging);
     flatBG->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
     flatBG->setProperty<double>("StartX", enR2S);
     flatBG->setProperty<double>("EndX", enR2E);
