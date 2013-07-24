@@ -418,6 +418,11 @@ def completeCalibration(filename):
 	This example shows how to use some properties of calibrate method to 
 	join together the calibration done in :func:`extendMarginAndExpectedValue`, 
 	and improved in :func:`calibrateB2Window`, and :func:`improvingCalibrationOfListOfTubes`.
+
+        It also improves the result of the calibration because it deals with the E door. The
+        aquired data cannot be used to calibrate the E door, and trying to do so, produces a bad 
+        result. In this example, the tubes inside the E door are excluded to the calibration.
+        Using the '''rangeList''' option.
         """
 	
 	# first step, load the workspace
@@ -465,9 +470,14 @@ def completeCalibration(filename):
 		345: [4.6084, 87.0351, 128.125, 169.923, 245.3]} 	
 	
 	b2_window = range(196,212) + range(222,233)
+
 	complete_range = range(648)
-	
-	range_3_strips = numpy.setdiff1d(complete_range, b2_window)
+
+        # this data can not be used to calibrate the E1 window, so, let's remove it.
+	e1_window = range(560,577)
+	aux = numpy.setdiff1d(complete_range, b2_window)
+        # the group that have 3 stripts are all the tubes except the b2 window and e window.
+	range_3_strips = numpy.setdiff1d(aux, e1_window)
 	
 	calibrationTable, peak3Table= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
 		fitPar=fitPar, outputPeak=True, overridePeaks=define_peaks, rangeList=range_3_strips)
@@ -513,6 +523,6 @@ if __name__ == "__main__":
     #improvingCalibrationSingleTube(filename)
     #improvingCalibrationOfListOfTubes(filename)
     #calibrateB2Window(filename)
-    #completeCalibration(filename)
+    completeCalibration(filename)
     #findThoseTubesThatNeedSpecialCareForCalibration(filename)
 
