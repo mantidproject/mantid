@@ -54,13 +54,6 @@ namespace CurveFitting
 
   const Rfactor badR(DBL_MAX, DBL_MAX);
 
-#if 0
-  bool compDescending2(int a, int b)
-  {
-    return (a >= b);
-  }
-#endif
-
   DECLARE_ALGORITHM(LeBailFit)
 
   //----------------------------------------------------------------------------------------------
@@ -364,54 +357,8 @@ namespace CurveFitting
       parseBackgroundTableWorkspace(bkgdparamws, m_backgroundParameters);
     }
 
-#if 0
-    // 3. Create background function
-    auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
-    m_backgroundFunction = boost::dynamic_pointer_cast<BackgroundFunction>(background);
-
-    size_t order = bkgdorderparams.size();
-
-    m_backgroundFunction->setAttributeValue("n", int(order));
-    m_backgroundFunction->initialize();
-
-    for (size_t i = 0; i < order; ++i)
-    {
-      std::stringstream ss;
-      ss << "A" << i;
-      std::string parname = ss.str();
-      m_backgroundFunction->setParameter(parname, bkgdorderparams[i]);
-    }
-
-    g_log.information() << "Generated background function: " << m_backgroundFunction->asString() << "\n";
-
-    // 4. Calculate background function and set to output workspace
-    if (!m_outputWS)
-    {
-      throw runtime_error("Output workspace hasn't been created!");
-    }
-
-    FunctionDomain1DVector domainBkgd(m_dataWS->readX(m_wsIndex));
-    FunctionValues valuesBkgd(domainBkgd);
-    m_backgroundFunction->function(domainBkgd, valuesBkgd);
-
-    MantidVec& inpvec = m_outputWS->dataY(INPUTBKGDINDEX);
-    MantidVec& calvec = m_outputWS->dataY(CALBKGDINDEX);
-    MantidVec& purevec = m_outputWS->dataY(INPUTPUREPEAKINDEX);
-    const MantidVec& obsYvec = m_dataWS->readY(m_wsIndex);
-    size_t numpts = inpvec.size();
-    for (size_t i = 0; i < numpts; ++i)
-    {
-      inpvec[i] = valuesBkgd[i];
-      calvec[i] = valuesBkgd[i];
-      purevec[i] = obsYvec[i] - valuesBkgd[i];
-    }
-#endif
-
     return;
   }
-
-
-
 
   //===================================  Pattern Calculation & Minimizing  =======================
 
@@ -453,10 +400,6 @@ namespace CurveFitting
     {
       m_outputWS->dataY(DATADIFFINDEX)[i] = m_outputWS->readY(OBSDATAINDEX)[i] - m_outputWS->readY(CALDATAINDEX)[i];
     }
-
-#if 0
-    transform(vecY.begin(), vecY.end(), vecBkgd.begin(), vecPurePeaks.begin(), ::minus<double>());
-#endif
 
     // Calcualte individual peaks
     bool ploteachpeak = this->getProperty("PlotIndividualPeaks");
@@ -514,14 +457,6 @@ namespace CurveFitting
 
     // 2. Calculate diffraction pattern
     Rfactor currR(DBL_MAX, DBL_MAX);
-#if 0
-    calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, true);
-    for (size_t i = 0; i < numpts; ++i)
-    {
-      valueVec[i] = values[i];
-    }
-    Rfactor currR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
-#else
     m_backgroundFunction->function(domain, values);
     vector<double> backgroundvalues(numpts);
     for (size_t i = 0; i < numpts; ++i)
@@ -534,8 +469,6 @@ namespace CurveFitting
     m_lebailFunction->setProfileParameterValues(parammap);
     calculateDiffractionPatternMC(m_outputWS->readX(INPUTPUREPEAKINDEX), m_outputWS->readY(INPUTPUREPEAKINDEX),
                                   false, true, backgroundvalues, valueVec, currR);
-    // calculateDiffractionPatternMC(m_outputWS, INPUTPUREPEAKINDEX, m_funcParameters, backgroundvalues, valueVec, currR);
-#endif
     Rfactor bestR = currR;
     storeBackgroundParameters(m_bkgdParameterBest);
     stringstream bufss;
@@ -553,14 +486,6 @@ namespace CurveFitting
       // b) Propose new values and evalulate
       proposeNewBackgroundValues();
       Rfactor newR(DBL_MAX, DBL_MAX);
-#if 0
-      calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, true);
-      for (size_t i = 0; i < numpts; ++i)
-      {
-        valueVec[i] = values[i];
-      }
-       newR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
-#else
       m_backgroundFunction->function(domain, values);
       for (size_t i = 0; i < numpts; ++i)
       {
@@ -571,7 +496,6 @@ namespace CurveFitting
       m_lebailFunction->setProfileParameterValues(parammap);
       calculateDiffractionPatternMC(m_outputWS->readX(INPUTPUREPEAKINDEX), m_outputWS->readY(INPUTPUREPEAKINDEX),
                                     false, true, backgroundvalues, valueVec, newR);
-#endif
 
       g_log.information() << "[DBx800] New Rwp = " << newR.Rwp << ", Rp = " << newR.Rp << ".\n";
 
@@ -615,15 +539,6 @@ namespace CurveFitting
     g_log.notice(bufss1.str());
 
     Rfactor outputR(-DBL_MAX, -DBL_MAX);
-#if 0
-    calculateDiffractionPattern(m_dataWS, m_wsIndex, domain, values, m_funcParameters, true);
-
-    for (size_t i = 0; i < numpts; ++i)
-    {
-      valueVec[i] = values[i];
-    }
-    Rfactor outputR = getRFactor(m_dataWS->readY(m_wsIndex), valueVec, m_dataWS->readE(m_wsIndex));
-#else
     m_backgroundFunction->function(domain, values);
     for (size_t i = 0; i < numpts; ++i)
     {
@@ -634,7 +549,6 @@ namespace CurveFitting
     m_lebailFunction->setProfileParameterValues(parammap);
     calculateDiffractionPatternMC(m_outputWS->readX(INPUTPUREPEAKINDEX), m_outputWS->readY(INPUTPUREPEAKINDEX),
                                   false, true, backgroundvalues, valueVec, outputR);
-#endif
 
     g_log.notice() << "[DBx604] Best Rwp = " << bestR.Rwp << ",  vs. recovered best Rwp = " << outputR.Rwp << ".\n";
 
@@ -2508,7 +2422,7 @@ namespace CurveFitting
     for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
     {
       throw runtime_error("Need to figure out how to deal with this part!");
-#if 0
+      /* Below are original code for modifying from
       ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       double height = thispeak->height();
       if (height > m_minimumPeakHeight)
@@ -2534,7 +2448,7 @@ namespace CurveFitting
           peakdensity[i] += 1.0;
         }
       }
-#endif
+      */
     }
 
     // FIXME : What is bk_prm2???
@@ -2583,7 +2497,8 @@ namespace CurveFitting
     }
 
     // 2. Fit
-#if 0
+    throw runtime_error("Need to re-consider this method.");
+    /* Below is the original code to modifying from
     Chebyshev_sptr bkgdfunc(new Chebyshev);
     bkgdfunc->setAttributeValue("n", 6);
 
@@ -2619,9 +2534,7 @@ namespace CurveFitting
 
     for (size_t i = 0; i < numpts; ++i)
       background[i] = values[i];
-#else
-    throw runtime_error("Need to re-consider this method.");
-#endif
+    */
 
     return;
   }
