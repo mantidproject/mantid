@@ -96,6 +96,15 @@ class BaseWidget(QtGui.QWidget):
         """
         return None
     
+    def live_button_toggled_actions(self,checked):
+        """
+            Actions to take on the widget (e.g. setting or disabling certain items) if the
+            live button has been turned on or off.
+            Default is to do nothing - override this method if you need something to happen.
+            @param checked: True if the button has been checked, false if unchecked
+        """
+        pass
+    
     def dir_browse_dialog(self):
         """
             Pop up a directory dialog box.

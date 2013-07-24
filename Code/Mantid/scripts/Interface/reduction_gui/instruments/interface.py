@@ -41,7 +41,6 @@ class InstrumentInterface(object):
         self.ERROR_REPORT_NAME = InstrumentInterface.ERROR_REPORT_DIR
         self.LAST_REDUCTION_NAME = InstrumentInterface.LAST_REDUCTION_NAME
 
-        
     def attach(self, widget):
         """
             Attach a widget to the interface and hook it up to its observer/scripter.
@@ -50,6 +49,7 @@ class InstrumentInterface(object):
         self.widgets.append(widget)
         if widget.live_button_widget() is not None:
             self._livebuttonwidget = widget.live_button_widget()
+            self._livebuttonwidget.liveButtonPressed.connect(self.live_button_toggled)
         self.scripter.attach(widget)
 
     def destroy(self):
@@ -266,7 +266,19 @@ class InstrumentInterface(object):
         return self._livebuttonwidget is not None
     
     def live_button_is_checked(self):
+        """
+            Returns true if there is a live button and it is selected
+        """
         return self.is_live_enabled() and self._livebuttonwidget.liveButtonIsChecked()
+    
+    def live_button_toggled(self,checked):
+        """
+            Called as a slot when the live button is pressed to make any necessary settings
+            to other widgets.
+            @param checked: True if the button has been checked, false if unchecked
+        """
+        for item in self.widgets:
+            item.live_button_toggled_actions(checked)
     
     def reset(self):
         """
