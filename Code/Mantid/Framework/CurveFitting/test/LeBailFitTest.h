@@ -887,6 +887,7 @@ public:
     else if (option == 4)
     {
       // Load from column file
+      throw runtime_error("Using .dat file is not allowed for committing. ");
       string datafilename("PG3_4862_Bank7.dat");
       string wsname("Data");
       importDataFromColumnFile(datafilename, wsname);
