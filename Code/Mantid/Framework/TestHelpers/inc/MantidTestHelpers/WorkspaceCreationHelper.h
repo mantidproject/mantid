@@ -168,6 +168,18 @@ namespace WorkspaceCreationHelper
   /** Create an Eventworkspace with an instrument that contains RectangularDetector's */
   Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithFullInstrument(int numBanks, int numPixels, bool clearEvents=true);
 
+  /**
+   * Creates an event workspace with instrument which consists of cylindrical detectors.
+   *
+   * X data: 100 histogrammed bins, starting from 0.0 in steps of 1.0.
+   * Y data: 2 ToF events for every bin
+   *
+   * @param numBanks :: How many detector groups there should be
+   * @param clearEvents :: Whether workspace should not contain any events
+   * @return Workspace with described type of events (empty if clearEvents) and instrument set
+   */
+  Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents);
+
   Mantid::DataObjects::WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value);
   Mantid::DataObjects::WorkspaceSingleValue_sptr CreateWorkspaceSingleValueWithError(double value, double error);
   /** Perform some finalization on event workspace stuff */
