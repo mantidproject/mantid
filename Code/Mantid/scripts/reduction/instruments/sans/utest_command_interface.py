@@ -8,11 +8,11 @@ import os
 import unittest
 from sans_reducer import SANSReducer
 from hfir_command_interface import *
-from mantidsimple import *
+from mantid.simpleapi import *
 
 # Set directory containing the test data, relative to the Mantid release directory.
 TEST_DIR = ""
-data_search_dirs = ConfigService()["datasearch.directories"].split(';')
+data_search_dirs = config["datasearch.directories"].split(';')
 for item in data_search_dirs:
     if item.endswith("SANS2D/"):
         TEST_DIR = item
@@ -160,7 +160,7 @@ class TestCommands(unittest.TestCase):
     def test_data_path(self):
         self.assertEqual(ReductionSingleton()._data_path, '.')
         #any path that definitely exists on a computer with Mantid installed
-        test_path = mtd.getConfigProperty('instrumentDefinition.directory')
+        test_path = config['instrumentDefinition.directory']
         DataPath(test_path)
         self.assertEqual(ReductionSingleton()._data_path, test_path)
         
@@ -171,7 +171,7 @@ class TestCommands(unittest.TestCase):
         SetSampleDetectorDistance(2500.0)
         Reduce1D()
         
-        sdd = mtd["BioSANS_test_data"].getRun().getProperty("sample_detector_distance").value
+        sdd = mtd["BioSANS_test_data"].run().getProperty("sample_detector_distance").value
         self.assertEqual(sdd, 2500.0)
         
     def test_set_detector_offset(self):
@@ -181,7 +181,7 @@ class TestCommands(unittest.TestCase):
         SetSampleDetectorOffset(500.0)
         Reduce1D()
         
-        sdd = mtd["BioSANS_test_data"].getRun().getProperty("sample_detector_distance").value
+        sdd = mtd["BioSANS_test_data"].run().getProperty("sample_detector_distance").value
         self.assertEqual(sdd, 6500.0)
         
     def test_set_distandce_and_detector_offset(self):
@@ -195,7 +195,7 @@ class TestCommands(unittest.TestCase):
         SetSampleDetectorOffset(500.0)
         Reduce1D()
         
-        sdd = mtd["BioSANS_test_data"].getRun().getProperty("sample_detector_distance").value
+        sdd = mtd["BioSANS_test_data"].run().getProperty("sample_detector_distance").value
         self.assertEqual(sdd, 2500.0)
         
     def test_set_wavelength(self):
@@ -251,7 +251,7 @@ class TestCommands(unittest.TestCase):
         Reduce1D()
         
         self.assertEqual(ReductionSingleton()._normalizer._normalization_spectrum, 1)
-        sdd = mtd["BioSANS_test_data"].getRun().getProperty("sample_detector_distance").value
+        sdd = mtd["BioSANS_test_data"].run().getProperty("sample_detector_distance").value
         self.assertEqual(sdd, 6000.0)    
         
         self.assertTrue(_check_result(mtd["BioSANS_test_data_Iq"], TEST_DIR+"reduced_center_calculated.txt", tolerance=1e-4))

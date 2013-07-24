@@ -5,6 +5,7 @@ set ( TEST_PY_FILES
   AlgorithmTest.py
   AlgorithmFactoryTest.py
   AlgorithmManagerTest.py
+  AlgorithmPropertyTest.py
   AnalysisDataServiceTest.py
   AxisTest.py
   DeprecatedAlgorithmCheckerTest.py
