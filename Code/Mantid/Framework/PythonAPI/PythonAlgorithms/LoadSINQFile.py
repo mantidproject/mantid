@@ -67,8 +67,6 @@ class LoadSINQFile(PythonAlgorithm):
         fname =self.getProperty('Filename').value 
         wname =self.getProperty('OutputWorkspace').value
         ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-#        exec(wname + '= mantid.simpleapi.Transpose3D(\'tmp\',\'AMOR\')')
-#        mantid.simpleapi.DeleteWorkspace('tmp')
     def doBoa(self):
         dicname = dictsearch +"/mantidboa.dic"
         fname =self.getProperty('Filename').value 

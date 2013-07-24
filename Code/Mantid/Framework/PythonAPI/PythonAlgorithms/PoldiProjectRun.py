@@ -4,7 +4,7 @@
 *WIKI*"""
 from mantid.api import PythonAlgorithm, registerAlgorithm, MatrixWorkspaceProperty, ITableWorkspaceProperty
 from mantid.api import FileProperty, FileAction
-from mantid.kernel import Direction
+from mantid.kernel import Direction, ConfigServiceImpl
 from mantid.simpleapi import *
 from pylab import *
 import math
@@ -84,7 +84,7 @@ class PoldiProjectRun(PythonAlgorithm):
         self.log().error('      -  bad_wires_threshold   : %s' %(bad_wires_threshold))
         self.log().error('      -  peak_detect_threshold : %s' %(peak_detect_threshold))
         
-        dictsearch='/home/christophe/poldi/dev/mantid-2.3.2-Source/PSIScripts'+"/mantidpoldi.dic"
+        dictsearch = ConfigServiceImpl.Instance().getInstrumentDirectory() + '/mantidpoldi.dic'
 
         
         firstOne=""               
