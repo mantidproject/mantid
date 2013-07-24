@@ -327,9 +327,9 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False )
         return xResult
                 
     # Fit quadratic to ideal tube points 
-    CreateWorkspace(dataX=usedTubePoints,dataY=usedIdealTubePoints, OutputWorkspace="QuadraticFittingWorkspace")
+    CreateWorkspace(dataX=usedTubePoints,dataY=usedIdealTubePoints, OutputWorkspace="PolyFittingWorkspace")
     try:
-       Fit(InputWorkspace="QuadraticFittingWorkspace",Function='name=Quadratic',StartX=str(0.0),EndX=str(nDets),Output="QF")
+       Fit(InputWorkspace="PolyFittingWorkspace",Function='name=Polynomial,n=2',StartX=str(0.0),EndX=str(nDets),Output="QF")
     except:
        print "Fit failed"
        return xResult
@@ -541,7 +541,7 @@ def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
     # Delete temporary workspaces used in the calibration
     for ws_name in ('TubePlot','CalibPoint_NormalisedCovarianceMatrix', 
                     'CalibPoint_NormalisedCovarianceMatrix','CalibPoint_NormalisedCovarianceMatrix',
-                    'CalibPoint_Parameters', 'CalibPoint_Workspace', 'QuadraticFittingWorkspace', 
+                    'CalibPoint_Parameters', 'CalibPoint_Workspace', 'PolyFittingWorkspace', 
                     'QF_NormalisedCovarianceMatrix', 'QF_Parameters', 'QF_Workspace', 
                     'Z1_Workspace', 'Z1_Parameters', 'Z1_NormalisedCovarianceMatrix'):
         try:
@@ -596,7 +596,7 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
        return                
     
     # Delete temporary workspaces for getting new detector positions
-    DeleteWorkspace('QuadraticFittingWorkspace')
+    DeleteWorkspace('PolyFittingWorkspace')
     DeleteWorkspace('QF_NormalisedCovarianceMatrix')
     DeleteWorkspace('QF_Parameters')
     DeleteWorkspace('QF_Workspace')
