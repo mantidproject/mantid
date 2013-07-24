@@ -1342,7 +1342,7 @@ void Indirect::plotRaw()
       "Load(file, name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
       "if ( bgrange != [-1, -1] ):\n"
       "    #Remove background\n"
-      "    FlatBackground(name, name+'_bg', bgrange[0], bgrange[1], Mode='Mean')\n"
+      "    CalculateFlatBackground(name, name+'_bg', bgrange[0], bgrange[1], Mode='Mean')\n"
       "    GroupDetectors(name+'_bg', name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
       "    GroupDetectors(name, name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
       "else: # Just group detectors as they are\n"
