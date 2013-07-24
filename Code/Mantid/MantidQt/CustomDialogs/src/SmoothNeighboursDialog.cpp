@@ -1,7 +1,8 @@
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtCustomDialogs/SmoothNeighboursDialog.h"
 
-using Mantid::Geometry::Instrument;
-using Mantid::API::MatrixWorkspace_sptr;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 //Register the class with the factory
 DECLARE_DIALOG(SmoothNeighboursDialog)
@@ -60,23 +61,32 @@ void SmoothNeighboursDialog::inputWorkspaceChanged(const QString& pName)
   m_propertiesWidget->m_groupWidgets[RECTANGULAR_GROUP]->setVisible(false);
   m_propertiesWidget->m_groupWidgets[NON_UNIFORM_GROUP]->setVisible(false);
 
+  std::string inWsName = INPUT_WORKSPACE.toStdString();
+
   // Workspace should have been set by PropertyWidget before emitting valueChanged
-  MatrixWorkspace_sptr workspace = this->getAlgorithm()->getProperty(INPUT_WORKSPACE.toStdString());
+  MatrixWorkspace_sptr inWs = this->getAlgorithm()->getProperty(inWsName);
 
-  // If invalid workspace, do nothing
-  if(!workspace)
-    return;
+  if(!inWs)
+  {
+    // Workspace groups are NOT returned by IWP->getWorkspace(), as they are not MatrixWorkspace,
+    // so check the ADS for the GroupWorkspace with the same name
+    std::string inWsValue = this->getAlgorithm()->getPointerToProperty(inWsName)->value();
+    WorkspaceGroup_sptr inGroupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inWsValue);
 
-  Instrument::ContainsState containsRectDetectors = workspace->getInstrument()->containsRectDetectors();
-
-  QString groupToShow;
+    if(inGroupWs)
+      // If is a group workspace, use the first workspace to determine the instrument type,
+      // as most of the times it will be the same for all the workspaces
+      inWs = boost::dynamic_pointer_cast<MatrixWorkspace>(inGroupWs->getItem(0));
+    else
+      // If is not a GroupWorkspace as well, do nothing
+      return;
+  }
+  Instrument::ContainsState containsRectDetectors = inWs->getInstrument()->containsRectDetectors();
 
   if(containsRectDetectors == Instrument::ContainsState::Full)
-    groupToShow = RECTANGULAR_GROUP;
+    m_propertiesWidget->m_groupWidgets[RECTANGULAR_GROUP]->setVisible(true);
   else
-    groupToShow = NON_UNIFORM_GROUP;
-
-  m_propertiesWidget->m_groupWidgets[groupToShow]->setVisible(true);
+    m_propertiesWidget->m_groupWidgets[NON_UNIFORM_GROUP]->setVisible(true);
 }
 
 void SmoothNeighboursDialog::accept()
