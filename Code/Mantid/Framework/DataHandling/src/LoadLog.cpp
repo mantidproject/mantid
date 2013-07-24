@@ -146,7 +146,7 @@ namespace Mantid
       // If there's more than one log name provided, then it's an invalid ISIS file.
       if (names.size() > 1)
       {
-        throw Exception::FileError("More than one log name provided. Invalid ISIS log file.");
+        throw std::invalid_argument("More than one log name provided. Invalid ISIS log file.");
       }
 
       try
@@ -166,7 +166,7 @@ namespace Mantid
       }
       catch(std::string &error)
       {
-        throw Exception::FileError("The log file provided is invalid as it has more than three columns.");
+        throw std::invalid_argument("The log file provided is invalid as it has more than three columns.");
       }
     }
 
@@ -180,7 +180,7 @@ namespace Mantid
     {
       if (!logFileStream)
       {
-        throw Exception::FileError("Unable to open file " + m_filename);
+        throw std::invalid_argument("Unable to open file " + m_filename);
       }
 
       // figure out if second column is a number or a string
@@ -189,7 +189,7 @@ namespace Mantid
       {
         if ( !isDateTimeString(aLine) )
         {
-          throw Exception::FileError("File" + m_filename + " is not a standard ISIS log file. Expected to be a two column file.");
+          throw std::invalid_argument("File" + m_filename + " is not a standard ISIS log file. Expected to be a two column file.");
         }
 
         std::string DateAndTime;
@@ -203,7 +203,7 @@ namespace Mantid
 
         if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
         {
-          throw Exception::FileError("ISIS log file contains unrecognised second column entries: " + m_filename);
+          throw std::invalid_argument("ISIS log file contains unrecognised second column entries: " + m_filename);
         }
 
         try
@@ -241,14 +241,14 @@ namespace Mantid
 
       if (!logFileStream)
       {
-        throw Exception::FileError("Unable to open file " + m_filename);
+        throw std::invalid_argument("Unable to open file " + m_filename);
       }
 
       while(Mantid::Kernel::extractToEOL(logFileStream,str))
       {
         if ( !isDateTimeString(str) )
         {
-          throw Exception::FileError("File" + logFileName + " is not a standard ISIS log file. Expected to be a file starting with DateTime String format.");
+          throw std::invalid_argument("File" + logFileName + " is not a standard ISIS log file. Expected to be a file starting with DateTime String format.");
         }
 
         if (!Kernel::TimeSeriesProperty<double>::isTimeString(str) || (str[0]=='#'))
@@ -266,7 +266,7 @@ namespace Mantid
 
         if ( LoadLog::string != l_kind )
         {
-          throw Exception::FileError("ISIS log file contains unrecognised second column entries:" + logFileName);
+          throw std::invalid_argument("ISIS log file contains unrecognised second column entries:" + logFileName);
         }
 
         std::string valuecolumn;
@@ -275,7 +275,7 @@ namespace Mantid
 
         if ( LoadLog::string != l_kind && LoadLog::number != l_kind)
         {
-          throw Exception::FileError("ISIS log file contains unrecognised third column entries: " + logFileName);
+          throw std::invalid_argument("ISIS log file contains unrecognised third column entries: " + logFileName);
         }
 
         // column two in .log file is called block column
