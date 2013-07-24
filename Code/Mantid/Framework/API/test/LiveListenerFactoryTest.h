@@ -5,6 +5,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "ILiveListenerTest.h"
+#include <Poco/Path.h>
+
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -21,6 +23,20 @@ public:
   {
     // Subscribe the mock implementation created in ILiveListenerTest.h
     factory.subscribe<MockILiveListener>("MockILiveListener");
+  }
+
+  void setUp()
+  {
+    auto & config = Kernel::ConfigService::Instance();
+    Poco::Path testFile = Poco::Path(config.getInstrumentDirectory()).resolve("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml");
+    // Load the test facilities file
+    config.updateFacilities(testFile.toString());
+  }
+
+  void tearDown()
+  {
+    // Restore the main facilities file
+    Kernel::ConfigService::Instance().updateFacilities(); // no file loads the default
   }
 
   void test_create()
