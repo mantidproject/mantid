@@ -654,7 +654,7 @@ namespace Mantid
     /// @param localWorkspace :: The workspace to load the logs for
     /// @param progStart :: starting progress fraction
     /// @param progEnd :: ending progress fraction
-    void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd )
+    void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd)
     {
       //search for the log file to load, and save their names in a set.
       std::list<std::string> logFiles = searchForLogFiles(fileName);
@@ -665,12 +665,13 @@ namespace Mantid
       }
 
       progress(m_prog, "Reading log files...");
-      IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
 
       //Iterate over and load each log file into the localWorkspace.
       std::list<std::string>::const_iterator logPath;
       for (logPath = logFiles.begin(); logPath != logFiles.end(); ++logPath)
       {
+        // Create a new object for each log file.
+        IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
         // Pass through the same input filename
         loadLog->setPropertyValue("Filename", *logPath);
         // Set the workspace property to be the same one filled above
@@ -684,7 +685,6 @@ namespace Mantid
           setChildStartProgress(progStart);
           setChildEndProgress(progEnd);
         }
-
         // Now execute the Child Algorithm. Catch and log any error, but don't stop.
         try
         {
@@ -712,10 +712,10 @@ namespace Mantid
      */
     std::string LoadRawHelper::extractLogName(std::string path)
     {
-      size_t pos = path.find('_');
-      std::string logName = path.substr(pos + 1);
-      logName.erase(logName.find_last_of('.'));
-      return (logName);
+      // The log file's name, including workspace (e.g. CSP78173_ICPevent)
+      std::string fileName = Poco::Path(Poco::Path(path).getFileName()).getBaseName();
+      // Return only the log name (excluding workspace, e.g. ICPevent)
+      return (fileName.substr(fileName.find('_') + 1));
     }
 
     /**
@@ -1115,8 +1115,7 @@ namespace Mantid
 
       // start the process or populating potential log files into the container: potentialLogFiles
       std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
-
-      if ( isAscii(pathToRawFile) && l_filenamePart.find("_") != std::string::npos )
+      if ( isAscii(pathToRawFile) && l_filenamePart.rfind("_") != std::string::npos )
       {
         // then we will assume that m_filename is an ISIS/SNS log file
         potentialLogFiles.insert(pathToRawFile);
@@ -1164,7 +1163,7 @@ namespace Mantid
         // Remove extension from path, and append .log to path.
         std::string logName = pathToRawFile.substr(0, pathToRawFile.find('.')) + ".log";
         // Check if log file exists in current directory.
-        std::ifstream fileExists(logName);
+        std::ifstream fileExists(logName.c_str());
         if(fileExists)
         {
           // Push three column filename to end of list.
