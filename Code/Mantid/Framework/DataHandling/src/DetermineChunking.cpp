@@ -91,8 +91,6 @@ namespace DataHandling
     this->setOptionalMessage("Workflow algorithm to determine chunking strategy for event nexus, runinfo.xml, raw, or histo nexus files.");
   }
 
-
-
   //----------------------------------------------------------------------------------------------
   /// @copydoc Mantid::API::Algorithm::init()
   void DetermineChunking::init()
@@ -102,6 +100,7 @@ namespace DataHandling
     exts.push_back("_runinfo.xml");
     exts.push_back("_event.nxs");
     exts.push_back(".nxs");
+    exts.push_back(".nxs.h5");
     exts.push_back(".raw");
     this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the event nexus, runinfo.xml, raw, or histo nexus file to read, including its full or relative path. The Event NeXus file name is typically of the form INST_####_event.nxs (N.B. case sensitive if running on Linux)." );
@@ -130,7 +129,7 @@ namespace DataHandling
     string runinfo = this->getPropertyValue("Filename");
     std::string ext = extension(runinfo);
     Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    if( ext.compare("xml") == 0 || runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0)
+    if( ext.compare("xml") == 0 || runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0 || runinfo.compare(runinfo.size()-7,7,".nxs.h5") == 0)
     {
 		strategy->addColumn("int","ChunkNumber");
 		strategy->addColumn("int","TotalChunks");
@@ -162,7 +161,7 @@ namespace DataHandling
       }
     }
     //Event Nexus
-    else if( runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0)
+    else if( runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0 || runinfo.compare(runinfo.size()-7,7,".nxs.h5") == 0)
     {
 
       // top level file information
@@ -288,7 +287,7 @@ namespace DataHandling
 	}
 #endif
       Mantid::API::TableRow row = strategy->appendRow();
-      if( ext.compare("xml") == 0 || runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0)
+      if( ext.compare("xml") == 0 || runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0 || runinfo.compare(runinfo.size()-7,7,".nxs.h5") == 0)
       {
     	  row << i << numChunks;
       }
