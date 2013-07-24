@@ -12,7 +12,7 @@ def quick(run):
 	# Load a data set. single period
 	LoadRaw(Filename=run,OutputWorkspace="W",SpectrumMax="4",LoadMonitors="Separate")
 	ConvertUnits(InputWorkspace="W_Monitors",OutputWorkspace="M",Target="Wavelength",AlignBins="1")
-	FlatBackground(InputWorkspace="M",OutputWorkspace="M",WorkspaceIndexList=MonitorsToCorrect,StartX=MonitorBackground[0],EndX=MonitorBackground[1])
+	CalculateFlatBackground(InputWorkspace="M",OutputWorkspace="M",WorkspaceIndexList=MonitorsToCorrect,StartX=MonitorBackground[0],EndX=MonitorBackground[1])
 	ConvertUnits(InputWorkspace="W",OutputWorkspace="D",Target="Wavelength",AlignBins="1")
 
 	heliumDetectorEff('D')

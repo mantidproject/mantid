@@ -321,7 +321,7 @@ class DirectEnergyConversion(object):
             # Both are these should be run properties really
             ei_value, mon1_peak = self.get_ei(monitor_ws, result_name, ei_guess)
 
-        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in FlatBackground and normalisation
+        # As we've shifted the TOF so that mon1 is at t=0.0 we need to account for this in CalculateFlatBackground and normalisation
         bin_offset = -mon1_peak
         
         # For event mode, we are going to histogram in energy first, then go back to TOF
@@ -368,7 +368,7 @@ class DirectEnergyConversion(object):
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
             ConvertToDistribution(Workspace=result_name)    
             if (self.facility == "SNS"):
-                FlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
+                CalculateFlatBackground(InputWorkspace="background_origin_ws",OutputWorkspace= "background_ws",
                                StartX= self.background_range[0] + bin_offset,EndX= self.background_range[1] + bin_offset,
                                WorkspaceIndexList= '',Mode= 'Mean',OutputMode= 'Return Background')
                 # Delete the raw data background region workspace
@@ -380,7 +380,7 @@ class DirectEnergyConversion(object):
                 # Delete the determined background 
                 DeleteWorkspace("background_ws")
             else:
-                FlatBackground(InputWorkspace=result_name,OutputWorkspace=result_name,
+                CalculateFlatBackground(InputWorkspace=result_name,OutputWorkspace=result_name,
                                StartX= self.background_range[0] + bin_offset,EndX= self.background_range[1] + bin_offset,
                                WorkspaceIndexList= '',Mode= 'Mean')
             ConvertFromDistribution(Workspace=result_name)  
