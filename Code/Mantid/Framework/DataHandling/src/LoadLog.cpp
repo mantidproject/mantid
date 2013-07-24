@@ -201,7 +201,7 @@ namespace Mantid
         ins >> whatType;
         kind l_kind = classify(whatType);
 
-        if ( LoadLog::string != l_kind && LoadLog::number != l_kind )
+        if (LoadLog::string != l_kind && LoadLog::number != l_kind)
         {
           throw std::invalid_argument("ISIS log file contains unrecognised second column entries: " + m_filename);
         }
