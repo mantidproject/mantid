@@ -146,3 +146,17 @@ class DataCorrectionsWidget(BaseWidget):
         d.use_proc_detvan = self._content.use_procdetvan_cb.isChecked()
         return d
     
+    def live_button_toggled_actions(self,checked):
+        if checked:
+            self._old_norm_button = self.incident_beam_norm_grp.checkedId()
+            self._old_backgnd_sub = self._content.background_sub_gb.isChecked()
+            self._content.none_rb.setChecked(True)
+            self._content.background_sub_gb.setChecked(False)
+        else:
+            try:
+                self.incident_beam_norm_grp.button(self._old_norm_button).setChecked(True)
+                self._content.background_sub_gb.setChecked(self._old_backgnd_sub)
+            except:  # This is for if the live button started out checked
+                pass
+        self._content.incident_beam_norm_gb.setEnabled(not checked)
+        self._content.background_sub_gb.setEnabled(not checked)

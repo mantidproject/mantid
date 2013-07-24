@@ -213,3 +213,16 @@ class SampleSetupWidget(BaseWidget):
             (if using interface inside MantidPlot)
         """
         return self._livebuttonwidget
+    
+    def live_button_toggled_actions(self,checked):
+        if checked:
+            self._old_ei_guess_state = self._content.use_ei_guess_chkbox.isChecked()
+            self._content.use_ei_guess_chkbox.setChecked(True)
+        else:
+            try:
+                self._content.use_ei_guess_chkbox.setChecked(self._old_ei_guess_state)
+            except:  # This is for if the live button started out checked
+                pass
+        self._content.use_ei_guess_chkbox.setEnabled(not checked)
+        self._content.savedir_edit.setEnabled(not checked)
+        self._content.savedir_browse.setEnabled(not checked)
