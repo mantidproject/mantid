@@ -36,7 +36,7 @@ using namespace API;
 void RenameWorkspace::init()
 {
   declareProperty(new WorkspaceProperty<Workspace> ("InputWorkspace", "", Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "", Direction::Output));
+  declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "", Direction::Output, UniqueMode::Unique));
 }
 
 /** Executes the algorithm
