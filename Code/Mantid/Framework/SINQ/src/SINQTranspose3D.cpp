@@ -1,10 +1,10 @@
-#include "MantidSINQ/Transpose3D.h"
+#include "MantidSINQ/SINQTranspose3D.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(Transpose3D)
+DECLARE_ALGORITHM(SINQTranspose3D)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -14,7 +14,7 @@ using namespace Mantid::MDEvents;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
-void Transpose3D::init()
+void SINQTranspose3D::init()
 {
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace","",Direction::Input));
     std::vector<std::string> transposeOptions;
@@ -28,7 +28,7 @@ void Transpose3D::init()
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 }
 
-void Transpose3D::exec()
+void SINQTranspose3D::exec()
 {
 	IMDHistoWorkspace_sptr inWS = IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
 
@@ -52,7 +52,7 @@ void Transpose3D::exec()
 
 }
 
-void Transpose3D::doYXZ(IMDHistoWorkspace_sptr inWS)
+void SINQTranspose3D::doYXZ(IMDHistoWorkspace_sptr inWS)
 {
 	double *inVal, *inErr, *outVal, *outErr;
 	size_t idxIn, idxOut;
@@ -91,7 +91,7 @@ void Transpose3D::doYXZ(IMDHistoWorkspace_sptr inWS)
 
 }
 
-void Transpose3D::doXZY(IMDHistoWorkspace_sptr inWS)
+void SINQTranspose3D::doXZY(IMDHistoWorkspace_sptr inWS)
 {
 	double *inVal, *inErr, *outVal, *outErr;
 	size_t idxIn, idxOut;
@@ -132,7 +132,7 @@ void Transpose3D::doXZY(IMDHistoWorkspace_sptr inWS)
 	setProperty("OutputWorkspace",outWS);
 
 }
-void Transpose3D::doTRICS(IMDHistoWorkspace_sptr inWS)
+void SINQTranspose3D::doTRICS(IMDHistoWorkspace_sptr inWS)
 {
 	double *inVal, *inErr, *outVal, *outErr;
 	size_t idxIn, idxOut;
@@ -174,7 +174,7 @@ void Transpose3D::doTRICS(IMDHistoWorkspace_sptr inWS)
 	setProperty("OutputWorkspace",outWS);
 
 }
-void Transpose3D::doAMOR(IMDHistoWorkspace_sptr inWS)
+void SINQTranspose3D::doAMOR(IMDHistoWorkspace_sptr inWS)
 {
 	double val, *inVal;
 	unsigned int xdim, ydim, zdim, idx;
@@ -215,7 +215,7 @@ void Transpose3D::doAMOR(IMDHistoWorkspace_sptr inWS)
 
 }
 
-void Transpose3D::copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws)
+void SINQTranspose3D::copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws)
 {
 	outws->setTitle(inws->getTitle());
 	ExperimentInfo_sptr info;

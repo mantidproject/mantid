@@ -17,13 +17,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
-class Transpose3D : public Mantid::API::Algorithm
+class SINQTranspose3D : public Mantid::API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  Transpose3D() : Mantid::API::Algorithm() {}
+  SINQTranspose3D() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~Transpose3D() {}
+  virtual ~SINQTranspose3D() {}
   /// Algorithm's name
   virtual const std::string name() const { return "Transpose3D"; }
   /// Algorithm's version

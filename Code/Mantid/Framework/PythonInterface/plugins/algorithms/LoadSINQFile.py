@@ -27,7 +27,7 @@ class LoadSINQFile(PythonAlgorithm):
         self.declareProperty(FileProperty(name="Filename",defaultValue="",
                                           action=FileAction.Load, extensions=["h5","hdf"]))
         self.declareProperty("OutputWorkspace","nexus")
-        dictsearch = ConfigServiceImpl.Instance().getInstrumentDirectory()
+        dictsearch = ConfigServiceImpl.Instance().getInstrumentDirectory() + '/nexusdictionaries'
 
     def PyExec(self):
         inst=self.getProperty('Instrument').value
@@ -73,7 +73,6 @@ class LoadSINQFile(PythonAlgorithm):
         wname =self.getProperty('OutputWorkspace').value
         ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
     def doDMC(self):
-        self.log().debug('dictsearch in doDMC: ' + dictsearch)
         dicname = dictsearch +"/mantiddmc.dic"
         fname =self.getProperty('Filename').value 
         wname =self.getProperty('OutputWorkspace').value
@@ -118,7 +117,7 @@ class LoadSINQFile(PythonAlgorithm):
         fname =self.getProperty('Filename').value 
         wname =self.getProperty('OutputWorkspace').value
         ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,'tmp')
-        exec(wname + '= mantid.simpleapi.Transpose3D(\'tmp\',\'TRICS\')')
+        exec(wname + '= mantid.simpleapi.SINQTranspose3D(\'tmp\',\'TRICS\')')
         mantid.simpleapi.DeleteWorkspace('tmp')
     def doRITA(self):
         dicname = dictsearch +"/mantidrita.dic"

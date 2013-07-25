@@ -14,7 +14,7 @@ set ( SRC_FILES
 	src/ProjectMD.cpp
 	src/SINQHMListener.cpp
 	src/SliceMDHisto.cpp
-	src/Transpose3D.cpp
+	src/SINQTranspose3D.cpp
 )
 
 set ( INC_FILES
@@ -33,7 +33,7 @@ set ( INC_FILES
 	inc/MantidSINQ/ProjectMD.h
 	inc/MantidSINQ/SINQHMListener.h
 	inc/MantidSINQ/SliceMDHisto.h
-	inc/MantidSINQ/Transpose3D.h
+	inc/MantidSINQ/SINQTranspose3D.h
 )
 
 set ( TEST_FILES

@@ -84,7 +84,7 @@ class PoldiProjectRun(PythonAlgorithm):
         self.log().error('      -  bad_wires_threshold   : %s' %(bad_wires_threshold))
         self.log().error('      -  peak_detect_threshold : %s' %(peak_detect_threshold))
         
-        dictsearch = ConfigServiceImpl.Instance().getInstrumentDirectory() + '/mantidpoldi.dic'
+        dictsearch = ConfigServiceImpl.Instance().getInstrumentDirectory() + '/nexusdictionaries/mantidpoldi.dic'
 
         
         firstOne=""               
