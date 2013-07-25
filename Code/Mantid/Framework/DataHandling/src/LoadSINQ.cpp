@@ -72,27 +72,14 @@ void LoadSINQ::initDocs() {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadSINQ::confidence(Kernel::NexusDescriptor & descriptor) const
-{
-	const std::string path = descriptor.pathOfType("NXinstrument");
-	g_log.debug() << "Path of type NXinstrument: " << path << std::endl;
+int LoadSINQ::confidence(Kernel::NexusDescriptor & descriptor) const {
 
-	::NeXus::File &file = descriptor.data();
-	file.openPath(path + "/name");
-	std::string instrumentName = file.getStrData();
-
-	// Instrument name at SINQ is : <intrument name> at SINQ
-	long unsigned int pos = instrumentName.find(" ");
-	instrumentName = instrumentName.substr(0, pos);
-
-	for (auto it = m_supportedInstruments.begin();
-			it != m_supportedInstruments.end(); ++it) {
-		g_log.debug() << "\t: " << *it << std::endl;
-		if (instrumentName == *it)
-			return 80;
+	// fields existent only at the SINQ (to date Loader only valid for focus)
+	if (descriptor.pathExists("/entry1/FOCUS/SINQ") ){
+		return 80;
+	} else {
+		return 0;
 	}
-
-	return 0;
 }
 
 //-----------------------------------------1-----------------------------------------------------
