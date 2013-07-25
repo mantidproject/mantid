@@ -184,9 +184,9 @@ namespace Algorithms
         const V2D lr(dE_jp1, this->calculateQ(efixed,emode, dE_jp1, thetaLower, phiLower));
         const V2D ur(dE_jp1, this->calculateQ(efixed,emode, dE_jp1, thetaUpper, phiUpper));
         const V2D ul(dE_j, this->calculateQ(efixed,emode, dE_j, thetaUpper, phiUpper));
-        if(g_log.is(Logger::Priority::PRIO_INFORMATION))
+        if(g_log.is(Logger::Priority::PRIO_DEBUG))
         {
-          g_log.information() << "Spectrum=" << specNo << ", theta=" << theta << ",thetaWidth=" << thetaWidth
+          g_log.debug() << "Spectrum=" << specNo << ", theta=" << theta << ",thetaWidth=" << thetaWidth
                               << ", phi=" << phi << ", phiWidth=" << phiWidth
                               << ". QE polygon: ll=" << ll << ", lr=" << lr << ", ur=" << ur << ", ul=" << ul << "\n";
         }
@@ -313,9 +313,9 @@ namespace Algorithms
       double boxWidth = maxPoint[upDir];
 
       m_thetaWidths[i] = std::fabs(2.0*std::atan(boxWidth/l2));
-      if(g_log.is(Logger::Priority::PRIO_INFORMATION))
+      if(g_log.is(Logger::Priority::PRIO_DEBUG))
       {
-        g_log.information() << "Detector at spectrum =" << workspace->getSpectrum(i)->getSpectrumNo() << ", width=" << m_thetaWidths[i]*180.0/M_PI << " degrees\n";
+        g_log.debug() << "Detector at spectrum =" << workspace->getSpectrum(i)->getSpectrumNo() << ", width=" << m_thetaWidths[i]*180.0/M_PI << " degrees\n";
       }
     }
 
