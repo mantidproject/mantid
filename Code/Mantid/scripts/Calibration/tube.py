@@ -400,9 +400,10 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         # centre_pixel = known_pos * ndets/tube_length + ndets / 2
         # 
         wsp_index_for_tube0 = tubeSet.getTube(0)
+        baseInstrument = ws.getInstrument().getBaseInstrument()
         # get the first and last detectors
-        det0 = ws.getDetector(wsp_index_for_tube0[0])
-        detN = ws.getDetector(wsp_index_for_tube0[-1])
+        det0 = baseInstrument.getDetector(ws.getDetector(wsp_index_for_tube0[0]).getID())
+        detN = baseInstrument.getDetector(ws.getDetector(wsp_index_for_tube0[-1]).getID())
         tube_length = det0.getDistance(detN)
         ndets = len(wsp_index_for_tube0)
         

@@ -204,7 +204,7 @@ def calibrateMerlin(filename):
 
   # calibrating others inside door3
   # 5_8, 5_7, 5_6, 5_5, 5_4, 5_3, 5_2, 5_1, 4_8, 4_7, 4_6, 4_5, 4_4, 4_3, 4_2, 4_1, 3_8, 3_7, 3_6, 3_5, 3_4
-  part_3 = ['MERLIN/door3/tube_3_%d'%(i) for i in [4,5,6]]
+  part_3 = ['MERLIN/door3/tube_3_%d'%(i) for i in [4,5,6,7,8]]
   part_4 = ['MERLIN/door3/tube_4_%d'%(i) for i in range(1,9)]
   part_5 = ['MERLIN/door3/tube_5_%d'%(i) for i in range(1,9)]
   CalibratedComponent = part_3 + part_4 + part_5
