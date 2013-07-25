@@ -92,7 +92,7 @@ namespace Mantid
       declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output),
                       "Workspace name to load into.");
 
-      declareProperty("UseBankIDasSpectrumNumber", false, "If true, spectrum number corresponding to one bank should be its bank ID. ");
+      declareProperty("UseBankIDasSpectrumNumber", false, "If true, spectrum number corresponding to each bank is to be its bank ID. ");
     }
 
     /**
@@ -482,7 +482,7 @@ namespace Mantid
       // 0. Check Input
       g_log.information() << "L1 = " << primaryflightpath << std::endl;
       if (detectorids.size() != totalflightpaths.size() || totalflightpaths.size() != twothetas.size()){
-        g_log.warning() << "Cannot create geometry due to number of L2, Polar are not same." << std::endl;
+        g_log.warning() << "Cannot create geometry, because the numbers of L2 and Polar are not equal." << std::endl;
         return;
       }
       for (size_t i = 0; i < detectorids.size(); i ++){

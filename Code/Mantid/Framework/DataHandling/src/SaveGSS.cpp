@@ -78,7 +78,7 @@ namespace Mantid
       declareProperty("ExtendedHeader", false, "Add information to the header about iparm file and normalization");
 
       declareProperty("UseSpectrumNumberAsBankID", false, "If true, then each bank's bank ID is equal to the spectrum number; "
-                      "otherwise, the continous bank IDs is applied. ");
+                      "otherwise, the continous bank IDs are applied. ");
     }
 
     /**
