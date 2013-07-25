@@ -125,7 +125,7 @@ namespace
 {
   Poco::Mutex g_eventVectorMutex;
 }
-  
+
 //===============================================================================================
 //===============================================================================================
 /** This task does the disk IO from loading the NXS file,
@@ -1250,46 +1250,19 @@ void LoadEventNexus::makeMapToEventLists(std::vector<T> & vectors)
     eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size()) + pixelID_to_wi_offset;
     
     // Make an array where index = pixel ID
-    // Set the value to the 0th workspace index by default
-    resizeFrom(vectors, eventid_max+1, WS->getEventList(0));
+    // Set the value to NULL by default
+    vectors.resize(eventid_max+1, NULL);
 
     for (size_t j=size_t(pixelID_to_wi_offset); j<pixelID_to_wi_vector.size(); j++)
     {
       size_t wi = pixelID_to_wi_vector[j];
       // Save a POINTER to the vector
-      getEventsFrom(WS->getEventList(wi), vectors[j-pixelID_to_wi_offset]);
+      if ( wi < WS->getNumberHistograms() )
+      {
+        getEventsFrom(WS->getEventList(wi), vectors[j-pixelID_to_wi_offset]);
+      }
     }
   }
-}
-
-//-----------------------------------------------------------------------------
-/**
- * This function takes the given vector of pointers for the TofEvents and
- * resizes it according to the specified length using the events in the
- * EventList to provide overfill information.
- * @param vec :: The vector to resize
- * @param size :: The length to resize the incoming vector to
- * @param el :: The event list to use as fill values
- */
-void LoadEventNexus::resizeFrom(std::vector<EventVector_pt> &vec,
-    const int32_t &size, EventList &el)
-{
-  vec.resize(size, &el.getEvents());
-}
-
-//-----------------------------------------------------------------------------
-/**
- * This function takes the given vector of pointers for the WeightedEvents and
- * resizes it according to the specified length using the events in the
- * EventList to provide overfill information.
- * @param vec :: The vector to resize
- * @param size :: The length to resize the incoming vector to
- * @param el :: The event list to use as fill values
- */
-void LoadEventNexus::resizeFrom(std::vector<WeightedEventVector_pt> &vec,
-    const int32_t &size, EventList &el)
-{
-  vec.resize(size, &el.getWeightedEvents());
 }
 
 /**

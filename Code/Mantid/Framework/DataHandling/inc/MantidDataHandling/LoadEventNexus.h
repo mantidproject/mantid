@@ -217,14 +217,6 @@ namespace Mantid
       static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
         const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
-      /// Resize from TofEvents
-      void resizeFrom(std::vector<EventVector_pt> &vec,
-          const int32_t &size, DataObjects::EventList &el);
-
-      /// Resize from WeightedEvents
-      void resizeFrom(std::vector<WeightedEventVector_pt> &vec,
-          const int32_t &size, DataObjects::EventList &el);
-
     public:
       /// name of top level NXentry to use
       std::string m_top_entry_name;
