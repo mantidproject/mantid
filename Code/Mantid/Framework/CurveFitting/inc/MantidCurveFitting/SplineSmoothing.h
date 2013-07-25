@@ -90,7 +90,7 @@ namespace CurveFitting
         const double* ys, const double* ysmooth) const;
 
     /// Use an existing fit function to tidy smoothing
-    void performAdditionalFitting(const API::MatrixWorkspace_const_sptr& ws, const int row);
+    void performAdditionalFitting(const API::MatrixWorkspace_sptr& ws, const int row);
   };
 
 

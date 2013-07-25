@@ -153,12 +153,12 @@ namespace CurveFitting
    * @param ws :: The input workspace
    * @param row :: The row of spectra to use
    */
-  void SplineSmoothing::performAdditionalFitting(const MatrixWorkspace_const_sptr& ws, const int row)
+  void SplineSmoothing::performAdditionalFitting(const MatrixWorkspace_sptr& ws, const int row)
   {
     //perform additional fitting of the points
     auto fit = createChildAlgorithm("Fit");
     fit->setProperty("Function", boost::dynamic_pointer_cast<IFunction>(m_cspline));
-    fit->setProperty("InputWorkspace",boost::static_pointer_cast<const Workspace>(ws));
+    fit->setProperty("InputWorkspace",boost::static_pointer_cast<Workspace>(ws));
     fit->setProperty("WorkspaceIndex",row);
     fit->execute();
   }
