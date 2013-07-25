@@ -27,7 +27,7 @@ namespace MantidQt
     const QString QPeaksTableModel::DSPACING = "DSpacing";
     const QString QPeaksTableModel::INT = "Intens";
     const QString QPeaksTableModel::SIGMINT = "SigInt";
-    const QString QPeaksTableModel::INT_SIGINT("I/sigmaI");
+    const QString QPeaksTableModel::INT_SIGINT("Int/SigInt");
     const QString QPeaksTableModel::BINCOUNT("BinCount");
     const QString QPeaksTableModel::BANKNAME("BankName");
     const QString QPeaksTableModel::ROW("Row");
