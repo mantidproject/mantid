@@ -153,7 +153,7 @@ namespace Crystal
 
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
         "An output workspace2D containing intensity vs radius.");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace2","",Direction::Output),
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace2","NumberPeaksIntegrated",Direction::Output),
         "An output workspace2D containing number of peaks at levels of I/sigI vs radius.");
   }
 
