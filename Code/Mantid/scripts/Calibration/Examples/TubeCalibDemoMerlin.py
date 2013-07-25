@@ -3,10 +3,9 @@ Tube Calibration Demonstration program for MERLIN.
 
 .. attention::
 
-  MERLIN instruments are loaded with already calibrated values. In order to effectivelly test
-  the calibration methods, it is necessary to switch off the loading calibration values.   
-
-  To to this, comment the section **det-pos-source** from **MERLIN_Parameters.xml**. 
+  MERLIN instruments are loaded with already calibrated values. The calibration works nicelly with these files, 
+  but if you want to see the uncalibrated file you can do it.
+  Look at `How to reset detectors calibration <http://www.mantidproject.org/How_to_reset_detectors_calibration>`_.
 
 In this example, the calibration of the whole MERLIN instrument is shown. It demonstrate how to 
 use :py:func:`tube.calibrate` to calibrate MERLIN tubes.
