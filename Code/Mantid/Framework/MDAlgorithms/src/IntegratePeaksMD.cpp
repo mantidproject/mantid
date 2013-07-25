@@ -166,7 +166,7 @@ namespace MDAlgorithms
     declareProperty("IntegrateIfOnEdge", true, "Only warning if all of peak outer radius is not on detector (default).\n"
         "If false, do not integrate if the outer radius is not on a detector.");
 
-    declareProperty("Cylinder", false, "Default is sphere.  Use next three parameters for cylinder.");
+    declareProperty("Cylinder", false, "Default is sphere.  Use next five parameters for cylinder.");
 
     declareProperty(new PropertyWithValue<double>("CylinderLength",0.0,Direction::Input),
         "Length of cylinder in which to integrate (in the same units as the workspace).");
@@ -175,11 +175,17 @@ namespace MDAlgorithms
         "Percent of CylinderLength that is background (20 is 20%)");
     std::vector<std::string> fitFunction(4);
     fitFunction[0] = "Gaussian";
-    fitFunction[1] = "ConvolutionExpGaussian";
-    fitFunction[2] = "ConvolutionBackToBackGaussian";
-    fitFunction[3] = "NoFit";
+    fitFunction[1] = "ConvolutionBackToBackGaussian";
+    fitFunction[2] = "NoFit";
+    //fitFunction[1] = "ConvolutionExpGaussian";
     auto fitvalidator = boost::make_shared<StringListValidator>(fitFunction);
     declareProperty("ProfileFunction", "Gaussian", fitvalidator, "Fitting function for profile "
+                    "used only with Cylinder integration.");
+    std::vector<std::string> integrationOptions(2);
+    integrationOptions[0] = "Sum";
+    integrationOptions[1] = "GaussianQuadrature";
+    auto integrationvalidator = boost::make_shared<StringListValidator>(integrationOptions);
+    declareProperty("IntegrationOption", "GaussianQuadrature", integrationvalidator, "Integration method for calculating intensity "
                     "used only with Cylinder integration.");
 
     declareProperty(new FileProperty("ProfilesFile","", FileProperty::OptionalSave,
@@ -263,6 +269,7 @@ namespace MDAlgorithms
     if (BackgroundInnerRadius < PeakRadius)
       BackgroundInnerRadius = PeakRadius;
 	std::string profileFunction = getProperty("ProfileFunction");
+	std::string integrationOption = getProperty("IntegrationOption");
     std::ofstream out;
     if (cylinderBool && profileFunction.compare("NoFit") != 0)
     {
@@ -302,7 +309,7 @@ namespace MDAlgorithms
       {
         if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius))
           {
-             g_log.warning() << "Warning: sphere for integration is off edge of detector for peak " << i << std::endl;
+             g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
              if (!integrateEdge)continue;
           }
       }
@@ -310,7 +317,7 @@ namespace MDAlgorithms
       {
         if (!detectorQ(p.getQLabFrame(), PeakRadius))
           {
-             g_log.warning() << "Warning: sphere for integration is off edge of detector for peak " << i << std::endl;
+             g_log.warning() << "Warning: sphere/cylinder for integration is off edge of detector for peak " << i << std::endl;
              if (!integrateEdge)continue;
           }
       }
@@ -327,6 +334,7 @@ namespace MDAlgorithms
 	  signal_t errorSquared = 0;
 	  signal_t bgSignal = 0;
 	  signal_t bgErrorSquared = 0;
+	  double background_total = 0.0;
       if (!cylinderBool)
 	  {
 			CoordTransformDistance sphere(nd, center, dimensionsUsed);
@@ -553,27 +561,42 @@ namespace MDAlgorithms
 				}
 
 				//Calculate intensity
-				gsl_integration_workspace * w
-				 = gsl_integration_workspace_alloc (1000);
+				signal = 0.0;
+				if (integrationOption.compare("Sum") == 0)
+				{
+					for (size_t j = 0; j < numSteps; j++) if ( !boost::math::isnan(yy[j]) && !boost::math::isinf(yy[j]))signal+= yy[j];
+				}
+				else
+				{
+					gsl_integration_workspace * w
+					 = gsl_integration_workspace_alloc (1000);
 
-				double error;
+					double error;
 
-				gsl_function F;
-				F.function = &Mantid::MDAlgorithms::f_eval;
-				F.params = &fun;
+					gsl_function F;
+					F.function = &Mantid::MDAlgorithms::f_eval;
+					F.params = &fun;
 
-				gsl_integration_qags (&F, x[0], x[numSteps-1], 0, 1e-7, 1000,
-									 w, &signal, &error);
+					gsl_integration_qags (&F, x[0], x[numSteps-1], 0, 1e-7, 1000,
+										 w, &signal, &error);
 
-				gsl_integration_workspace_free (w);
+					gsl_integration_workspace_free (w);
+				}
 				errorSquared = std::fabs(signal);
+				// Get background counts
+				for (size_t j = 0; j < numSteps; j++)
+				{
+					double background = paramsValue[1] * x[j] + paramsValue[0];
+					if (yy[j] > background)
+						background_total = background_total + background;
+				}
 			}
       	  }
 		  // Save it back in the peak object.
 		  if (signal != 0. || replaceIntensity)
 		  {
 			p.setIntensity(signal);
-			p.setSigmaIntensity( sqrt(errorSquared) );
+			p.setSigmaIntensity( sqrt(errorSquared + std::fabs(background_total)) );
 		  }
 
 		  g_log.information() << "Peak " << i << " at " << pos << ": signal "

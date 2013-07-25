@@ -20,6 +20,7 @@
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <cxxtest/TestSuite.h>
+#include <Poco/File.h>
 #include <iomanip>
 #include <iostream>
 
@@ -66,6 +67,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("CylinderLength", 4.0 ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PercentBackground", 20.0 ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("ProfileFunction", fnct ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("IntegrationOption", "Sum" ) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
   }
@@ -134,17 +136,19 @@ public:
     std::string fnct = "Gaussian";
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
     // More accurate integration changed values
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 0.5738, 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 1e-2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(0.5738), 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);
+    Poco::File("IntegratePeaksMDTest_MDEWSGaussian.dat").remove();
     fnct = "ConvolutionBackToBackGaussian";
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
 
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 1.2017, 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getIntensity(), 2.0, 0.2);
 
     // Error is also calculated
-    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(1.2017), 1e-2);
+    TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 0.2);
+    Poco::File("IntegratePeaksMDTest_MDEWSConvolutionBackToBackGaussian.dat").remove();
     /*fnct = "ConvolutionExpGaussian";
     doRun(0.1,0.0,"IntegratePeaksMDTest_peaks",0.0,true,true,fnct);
 
