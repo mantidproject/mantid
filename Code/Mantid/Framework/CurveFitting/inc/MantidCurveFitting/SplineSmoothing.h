@@ -11,8 +11,12 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** SplineSmoothing : TODO: DESCRIPTION
+  /** Takes a 2D workspace and produces an output workspace containing a smoothed version of the data by selecting
+    a number of points to define a spline for each histogram in the workspace.
     
+    @author Samuel Jackson, STFC
+    @date 24/07/2013
+
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -48,32 +52,45 @@ namespace CurveFitting
     /// number of smoothing points to start with
     const int M_START_SMOOTH_POINTS;
 
+    /// CubicSpline member used to perform smoothing
     boost::shared_ptr<CubicSpline> m_cspline;
 
+    //Overriden methods
     virtual void initDocs();
     void init();
     void exec();
 
+    /// setup an output workspace using meta data from inws and taking a number of spectra
     API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const;
 
+    /// convert a binned workspace to point data. Uses mean of the bins as point
     API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
 
+    /// set the points used in the spline for smoothing
     void setSmoothingPoint(const int index, const double xpoint, const double ypoint) const;
 
+    /// choose points to define a spline and smooth the data
     void selectSmoothingPoints(std::set<int>& xPoints,
         API::MatrixWorkspace_const_sptr inputWorkspace, size_t row) const;
 
+    /// calculate the spline based on the smoothing points chosen
     void calculateSmoothing(API::MatrixWorkspace_const_sptr inputWorkspace,
       API::MatrixWorkspace_sptr outputWorkspace, size_t row) const;
 
+    /// calculate the derivatives for a set of points on the spline
     void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
         API::MatrixWorkspace_sptr outputWorkspace, int order, size_t row) const;
 
+    /// add a set of smoothing points to the spline
     void addSmoothingPoints(const std::set<int>& points,
         const double* xs, const double* ys) const;
 
+    /// check if the difference between smoothing points and data points is within a certain error bound
     bool checkSmoothingAccuracy(const int start, const int end,
         const double* ys, const double* ysmooth) const;
+
+    /// Use an existing fit function to tidy smoothing
+    void performAdditionalFitting(const API::MatrixWorkspace_const_sptr& ws, const int row);
   };
 
 

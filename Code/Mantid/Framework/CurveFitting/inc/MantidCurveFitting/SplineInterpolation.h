@@ -10,7 +10,16 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** SplineInterpolation : TODO: DESCRIPTION
+  /** Takes two workspaces as input. One contain a set of points which define a spline,
+    and one which contains a number of spectra to be interpolated against spline.
+
+    Produces an output workspace containing the interpolated points
+
+    Optionally the algorithm will also produce a grouped workspace of derivatives of up to order 2
+    for each of the interpolated points.
+
+    @author Samuel Jackson, STFC
+    @date 25/07/2013
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -50,17 +59,20 @@ namespace CurveFitting
     /// CubicSpline member used to perform interpolation
     boost::shared_ptr<CubicSpline> m_cspline;
 
+    /// setup an output workspace using meta data from inws and taking a number of spectra
     API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_sptr inws, int size) const;
 
+    /// convert a binned workspace to point data. Uses mean of the bins as point
     API::MatrixWorkspace_sptr convertBinnedData(API::MatrixWorkspace_sptr workspace) const;
 
+    /// set the points that define the spline used for interpolation of a workspace
     void setInterpolationPoints(API::MatrixWorkspace_const_sptr inputWorkspace, const int row) const;
 
-    void setYPoints(const double* ys) const;
-
+    /// Calculate the interpolation of the input workspace against the spline and store it in outputWorkspace
     void calculateSpline(API::MatrixWorkspace_const_sptr inputWorkspace,
         API::MatrixWorkspace_sptr outputWorkspace, int row) const;
 
+    /// Calculate the derivatives of the input workspace from the spline.
     void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
         API::MatrixWorkspace_sptr outputWorkspace, int order, int row) const;
   };

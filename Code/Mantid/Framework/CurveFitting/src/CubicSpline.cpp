@@ -1,14 +1,11 @@
 /*WIKI*
 
-This function interpolates between a set of data points.
+This function creates spline using the set of points and interpolates the input between them.
 
-First and second derivatives can be calculated by using the derivative1D function.
+First and second derivatives from the spline can be calculated by using the derivative1D function.
 
-CubicSpline function has two sets of attributes. First is 'n' which has
-integer type and sets the number of interpolation points.
-The parameter names have the form 'yi' where 'y' is letter 'y' and 'i' is the
-parameter's index starting from 0 and have the type double.
-Likewise, the attribute names have the form 'xi'.
+CubicSpline function takes a set of attributes and a set of parameters. The first attrbiute is 'n' which has integer type and sets the number of interpolation points.
+The parameter names have the form 'yi' where 'y' is letter 'y' and 'i' is the parameter's index starting from 0 and have the type double. Likewise, the attribute names have the form 'xi'.
 
  *WIKI*/
 
@@ -33,6 +30,9 @@ namespace Mantid
 
     DECLARE_FUNCTION(CubicSpline)
 
+    /**Constructor
+     *
+     */
     CubicSpline::CubicSpline() :
         m_min_points(3),
         m_acc(gsl_interp_accel_alloc(), m_gslFree),
@@ -42,6 +42,7 @@ namespace Mantid
       //setup class with a default set of attributes
       declareAttribute("n", Attribute(m_min_points));
 
+      //declare corresponding attributes and parameters
       declareAttribute("x0", Attribute(0.0));
       declareAttribute("x1", Attribute(1.0));
       declareAttribute("x2", Attribute(2.0));
@@ -51,6 +52,12 @@ namespace Mantid
       declareParameter("y2", 0);
     };
 
+    /** Execute the function
+     *
+     * @param out :: The array to store the calculated y values
+     * @param xValues :: The array of x values to interpolate
+     * @param nData :: The size of the arrays
+     */
     void CubicSpline::function1D(double* out, const double* xValues, const size_t nData) const
     {
       //check if spline needs recalculating
@@ -65,6 +72,13 @@ namespace Mantid
       calculateSpline(out, xValues, nData);
     }
 
+
+    /** Sets up the spline object by with the parameters and attributes
+     *
+     * @param x :: The array of x values defining the spline
+     * @param y :: The array of y values defining the spline
+     * @param n :: The size of the arrays
+     */
     void CubicSpline::setupInput(boost::scoped_array<double>& x,
         boost::scoped_array<double>& y, int n) const
     {
@@ -102,6 +116,13 @@ namespace Mantid
       m_recalculateSpline = false;
     }
 
+    /** Calculate the derivatives for a set of points on the spline
+     *
+     * @param out :: The array to store the derivatives in
+     * @param xValues :: The array of x values we wish to know the derivatives of
+     * @param nData :: The size of the arrays
+     * @param order :: The order of the derivatives o calculate
+     */
     void CubicSpline::derivative1D(double* out, const double* xValues, size_t nData, const size_t order) const
     {
       int n = getAttribute("n").asInt();
@@ -115,12 +136,23 @@ namespace Mantid
 
     }
 
+    /** Check if the supplied x value falls within the range of the spline
+     *
+     * @param x :: The x value to check
+     * @return Whether the value falls within the range of the spline
+     */
     bool CubicSpline::checkXInRange(double x) const
     {
       return (x >= m_spline->interp->xmin
           || x <= m_spline->interp->xmax);
     }
 
+    /** Calculate the values on the spline at each point supplied
+     *
+     * @param out :: The array to store the calculated values
+     * @param xValues :: The array of x values we wish to interpolate
+     * @param nData :: The size of the arrays
+     */
     void CubicSpline::calculateSpline(double* out, const double* xValues, const size_t nData) const
     {
       //calculate spline for given input set
@@ -130,6 +162,7 @@ namespace Mantid
       {
         if(checkXInRange(xValues[i]))
         {
+          //calculate the y value
           y = gsl_spline_eval(m_spline.get(), xValues[i], m_acc.get());
           int errorCode = gsl_spline_eval_e(m_spline.get(), xValues[i], m_acc.get(), &y);
 
@@ -140,17 +173,26 @@ namespace Mantid
         }
         else
         {
+          //if out of range, just set it to zero
           outOfRange = true;
           y = 0;
         }
       }
 
+      //warn user than some values wern't calculated
       if(outOfRange)
       {
         g_log.warning() << "Some x values where out of range and will not be calculated." << std::endl;
       }
     }
 
+    /** Calculate the derivatives of each of the supplied points
+     *
+     * @param out :: The array to store the calculated derivatives
+     * @param xValues :: The array of x values we wish to calculate derivatives at
+     * @param nData :: The size of the arrays
+     * @param order :: The order of derivatives to calculate too
+     */
     void CubicSpline::calculateDerivative(double* out, const double* xValues,
         const size_t nData, const size_t order) const
     {
@@ -167,7 +209,7 @@ namespace Mantid
         if(checkXInRange(xValues[i]))
         {
           //choose the order of the derivative
-          if(order == 1 || order > 2)
+          if(order == 1)
           {
             xDeriv = gsl_spline_eval_deriv(m_spline.get(),xValues[i],m_acc.get());
             errorCode = gsl_spline_eval_deriv_e (m_spline.get(),xValues[i],m_acc.get(),&xDeriv);
@@ -180,6 +222,7 @@ namespace Mantid
         }
         else
         {
+          //if out of range, just set it to zero
           outOfRange = true;
           xDeriv = 0;
         }
@@ -191,12 +234,19 @@ namespace Mantid
         out[i] = xDeriv;
       }
 
+      //warn user that some values weren't calculated
       if(outOfRange)
       {
-        g_log.warning() << "Some x values where out of range and will not be calculated." << std::endl;
+        g_log.warning() << "Cannot calculate derivatives with a order higher than 2" << std::endl;
       }
     }
 
+    /** Set a parameter for the function and flags the spline for re-calculation
+     *
+     * @param i :: index of parameter
+     * @param value :: value of parameter
+     * @param explicitlySet :: whether it's value was explicitly set or not
+     */
     void CubicSpline::setParameter(size_t i, const double& value, bool explicitlySet)
     {
       //Call parent setParameter implementation
@@ -206,6 +256,11 @@ namespace Mantid
       m_recalculateSpline = true;
     }
 
+    /** Set an attribute for the function
+     *
+     * @param attName :: The name of the attribute to set
+     * @param att :: The attribute to set
+     */
     void CubicSpline::setAttribute(const std::string& attName, const API::IFunction::Attribute& att)
     {
 
@@ -249,6 +304,11 @@ namespace Mantid
       storeAttributeValue(attName, att);
     }
 
+    /** Set an x attribute for the spline
+     *
+     * @param index :: index of x attribute to set
+     * @param x :: The value of the x attribute
+     */
     void CubicSpline::setXAttribute(const size_t index, double x)
     {
       size_t n = static_cast<size_t>(getAttribute("n").asInt());
@@ -268,6 +328,12 @@ namespace Mantid
       }
     }
 
+    /** Checks if a call to a GSL function produced a given error or not
+     * and throw an appropriate message
+     *
+     * @param status :: The status returned for the GSL function call
+     * @param errorType :: The type of GSL error to check for
+     */
     void CubicSpline::checkGSLError(const int status, const int errorType) const
     {
       //check GSL functions didn't return an error
@@ -282,18 +348,31 @@ namespace Mantid
       }
     }
 
+    /** Initilize the GSL spline with the given points
+     *
+     * @param x :: The x points defining the spline
+     * @param y :: The y points defining the spline
+     * @param n :: The size of the arrays
+     */
     void CubicSpline::initGSLObjects(boost::scoped_array<double>& x, boost::scoped_array<double>& y, int n) const
     {
       int status = gsl_spline_init(m_spline.get(), x.get(), y.get(), n);
       checkGSLError(status, GSL_EINVAL);
     }
 
+    /** Reallocate the size of the GSL objects
+     *
+     * @param n :: The new size of the spline object
+     */
     void CubicSpline::reallocGSLObjects(const int n)
     {
       m_spline.reset(gsl_spline_alloc(gsl_interp_cspline, n),m_gslFree);
       gsl_interp_accel_reset (m_acc.get());
     }
 
+    /** Destructor
+     *
+     */
     CubicSpline::~CubicSpline()
     {
 
