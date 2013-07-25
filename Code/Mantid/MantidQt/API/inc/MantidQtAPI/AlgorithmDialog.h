@@ -220,6 +220,10 @@ protected:
   void parse();
   /// Test if the given name's widget has been explicity asked to be enabled
   bool requestedToKeepEnabled(const QString& propName) const;
+  /// Get the property value from either the previous input store or from Python argument
+  /// @param propName :: Name of the property
+  /// @return Previous value. If there is no value, empty string is returned
+  QString getPreviousValue(const QString& propName);
   /// Set a value based on any old input that we have
   void setPreviousValue(QWidget *widget, const QString & property);
 

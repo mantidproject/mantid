@@ -117,6 +117,13 @@ private:
   /// Build the instrument/detector setup in workspace
   void setupNewInstrument(API::MatrixWorkspace_sptr outws);
 
+  /// Non rectangular detector group name
+  static const std::string NON_UNIFORM_GROUP;
+  /// Rectangular detector group name
+  static const std::string RECTANGULAR_GROUP;
+  /// Input workspace name
+  static const std::string INPUT_WORKSPACE;
+
   /// Pixels in the detector
   int XPixels;
   /// Pixels in the detector
@@ -150,12 +157,6 @@ private:
 
   /// Progress reporter
   Mantid::API::Progress * m_prog;
-
-  /// Non rectangular detector group
-  const std::string m_NonUniformDetectorGroupProperty; 
-  
-  /// Rectuangular detector group
-  const std::string m_RectangularDetectorGroupProperty;
 
 };
 
