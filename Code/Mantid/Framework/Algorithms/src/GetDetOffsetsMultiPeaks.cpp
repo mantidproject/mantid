@@ -260,17 +260,16 @@ namespace Algorithms
     m_maxChiSq = this->getProperty("MaxChiSq");
 
     // Create output information tableworkspace
-    TableWorkspace_sptr tempws(new TableWorkspace());
-    m_infoTableWS = tempws;
+    auto m_infoTableWS = boost::make_shared<TableWorkspace>();
     m_infoTableWS->addColumn("int", "SpectrumIndex");
     m_infoTableWS->addColumn("int", "NumberPeaksFitted");
     m_infoTableWS->addColumn("int", "NumberPeaksToFit");
     m_infoTableWS->addColumn("str", "OffsetFitStatus");
     m_infoTableWS->addColumn("double", "ChiSquare");
+    setProperty("SpetraFitInfoTableWorkspace", m_infoTableWS);
 
     // Create output peak offset workspace
-    TableWorkspace_sptr tempws2(new TableWorkspace());
-    m_peakOffsetTableWS = tempws2;
+    auto m_peakOffsetTableWS = boost::make_shared<TableWorkspace>();
     m_peakOffsetTableWS->addColumn("int", "SpectrumIndex");
     for (size_t i = 0; i < peakPositions.size(); ++i)
     {
@@ -279,8 +278,6 @@ namespace Algorithms
       m_peakOffsetTableWS->addColumn("str", namess.str());
     }
     m_peakOffsetTableWS->addColumn("double", "OffsetDeviation");
-
-    setProperty("SpetraFitInfoTableWorkspace", m_infoTableWS);
     setProperty("PeaksOffsetTableWorkspace", m_peakOffsetTableWS);
 
     // Fit all the spectra with a gaussian
@@ -296,8 +293,9 @@ namespace Algorithms
       double chisqSum = 0.0;
       double peakPosFittedSize = 0.0;
 
-      int numpeaksfitted, numpeakstofit;
-      std::string fitoffsetstatus;
+      int numpeaksfitted(0);
+      int numpeakstofit(0);
+      std::string fitoffsetstatus("N/A");
       double chi2 = -1;
       std::vector<double> fittedpeakpositions, tofitpeakpositions;
 

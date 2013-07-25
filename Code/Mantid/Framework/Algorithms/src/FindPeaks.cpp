@@ -364,12 +364,12 @@ namespace Algorithms
 
     m_peakPositionTolerance = getProperty("PeakPositionTolerance");
     m_usePeakPositionTolerance = true;
-    if (m_peakPositionTolerance == EMPTY_DBL())
+    if (isEmpty(m_peakPositionTolerance))
       m_usePeakPositionTolerance = false;
 
     m_peakHeightTolerance = getProperty("PeakHeightTolerance");
     m_usePeakHeightTolerance = true;
-    if (m_peakHeightTolerance == EMPTY_DBL())
+    if (isEmpty(m_peakHeightTolerance))
       m_usePeakHeightTolerance = false;
 
     // Specified peak positions, which is optional
@@ -1104,7 +1104,7 @@ namespace Algorithms
       fit->setProperty("MaxIterations", 50);
       fit->setProperty("StartX", vecX[i_min]); //(X[i0] - 5 * (X[i0] - X[i2])));
       fit->setProperty("EndX", vecX[i_max]); //(X[i0] + 5 * (X[i0] - X[i2])));
-      fit->setProperty("Minimizer", "Levenberg-Marquardt");
+      fit->setProperty("Minimizer", m_minimizer);
       fit->setProperty("CostFunction", "Least squares");
 
       // e) Fit and get result
@@ -1207,24 +1207,22 @@ namespace Algorithms
 
     //    set up x-axis first
     MantidVec& dataX = peakws->dataX(0);
-    MantidVec& dataY = peakws->dataY(0);
-    MantidVec& dataE = peakws->dataE(0);
-    for (int i = 0; i < numpts; ++i)
-    {
-      dataX[i] = rawX[i_min+i];
-    }
+    dataX.assign(rawX.begin()+i_min, rawX.begin()+i_min+numpts);
+
     //    set up Y/E as pure peak
     FunctionDomain1DVector domain(dataX);
     FunctionValues backgroundvalues(domain);
     m_backgroundFunction->function(domain, backgroundvalues);
 
+    MantidVec& dataY = peakws->dataY(0);
     for (int i = 0; i < numpts; ++i)
     {
       dataY[i] = rawY[i_min+i] - backgroundvalues[i];
       if (dataY[i] < 0)
         dataY[i] = 0.;
-      dataE[i] = 1.0;
     }
+    MantidVec& dataE = peakws->dataE(0);
+    dataE.assign(numpts, 1.);
 
     // Estimate/observe peak parameters
     const MantidVec& peakX = peakws->readX(0);
@@ -1254,12 +1252,12 @@ namespace Algorithms
       else
       {
         // Peak is on the edge.  It is not possible to fit!
-        std::stringstream errmsg;
-        errmsg << "Unable to estimate peak parameter for ";
-        errmsg << "Spectrum " << spectrum << ": Atttemp to find peak between " << rawX[i_min] << "(i = " << i_min
-               << ") and " << rawX[i_max] << "(i = " << i_max << ").";
-        errmsg << "Assumed peak is at " << user_centre << ".";
-        errmsg << "\nError reason: " << errormessage;
+        g_log.warning() << "Unable to estimate peak parameter for "
+                        << "Spectrum " << spectrum << ": Atttemp to find peak between "
+                        << rawX[i_min] << "(i = " << i_min
+                        << ") and " << rawX[i_max] << "(i = " << i_max << ")."
+                        << "Assumed peak is at " << user_centre << "."
+                        << "\nError reason: " << errormessage;
         /*
         errmsg << "Background: " << m_backgroundFunction->asString() << "; Background points are as follow.\n";
         for (size_t i = 0; i < static_cast<size_t>(numpts); ++i)
@@ -1268,16 +1266,10 @@ namespace Algorithms
         }
         */
 
-        g_log.warning(errmsg.str());
-
         addNonFitRecord(spectrum);
         return;
       }
     }
-
-    // Create peak function
-    IPeakFunction_sptr peakfunc = boost::dynamic_pointer_cast<IPeakFunction>(
-          FunctionFactory::Instance().createFunction(m_peakFuncType));
 
     // Fit with loop upon specified FWHM range
     g_log.information("\nFitting peak by trying different peak width.");
@@ -1299,12 +1291,12 @@ namespace Algorithms
       double in_fwhm = peakX[irightside] - peakX[ileftside];
       if (in_fwhm < 1.0E-20)
       {
-        std::stringstream errss;
-        errss << "It is impossible to have zero peak width as iCentre = " << i_centre << ", iMin = "
-              << i_min << ", iWidth = " << iwidth << "\n";
-        errss << "More information: Spectrum = " << spectrum << "; Range of X is " << rawX[0] << ", " << rawX.back()
-              << "; Peak centre = " << rawX[i_centre];
-        g_log.warning(errss.str());
+        g_log.warning() << "It is impossible to have zero peak width as iCentre = "
+                        << i_centre << ", iMin = "
+                        << i_min << ", iWidth = " << iwidth << "\n"
+                        << "More information: Spectrum = " << spectrum << "; Range of X is "
+                        << rawX[0] << ", " << rawX.back()
+                        << "; Peak centre = " << rawX[i_centre];
       }
       else
       {
@@ -1314,6 +1306,10 @@ namespace Algorithms
 
       vec_FWHM.push_back(in_fwhm);
     }
+
+    // Create peak function
+    IPeakFunction_sptr peakfunc = boost::dynamic_pointer_cast<IPeakFunction>(
+          FunctionFactory::Instance().createFunction(m_peakFuncType));
 
     double in_centre = peakX[i_centre - i_min];
     double peakleftbound = peakX.front();
@@ -1814,12 +1810,11 @@ namespace Algorithms
     // If maximum point is on the edge 2 points, return false.  One side of peak must have at least 3 points
     if (icentre <= i_min+1 || icentre >= i_max-1)
     {
-      std::stringstream errmsg;
-      errmsg << "Maximum value between " << vecX[i_min] << " and " << vecX[i_max] << " is located on "
+      g_log.debug() << "Maximum value between " << vecX[i_min] << " and " << vecX[i_max] << " is located on "
              << "X = " << vecX[icentre] << "(" << icentre << ")." << "\n";
       for (size_t i = i_min; i <= i_max; ++i)
-        errmsg << vecX[i] << "\t\t" << vecY[i] << ".\n";
-      g_log.debug(errmsg.str());
+        g_log.debug() << vecX[i] << "\t\t" << vecY[i] << ".\n";
+
       error = "Maximum value on edge";
       return false;
     }
@@ -1894,7 +1889,7 @@ namespace Algorithms
     if (i_min >= i_max)
       throw std::runtime_error("i_min cannot larger or equal to i_max");
 
-    // FIXME - THIS IS A MAGI NUMBER
+    // FIXME - THIS IS A MAGIC NUMBER
     const size_t MAGICNUMBER = 12;
     size_t numavg;
     if (i_max - i_min > MAGICNUMBER)
@@ -2050,12 +2045,11 @@ namespace Algorithms
 
     if (isbadfit)    // Bad fit
     {
-      std::stringstream badss;
-      badss << "No Good Fit Obtained! Chi2 = " << mincost << ". ";
-      badss << "Possible reason: (1) Fit error = " << error << ", (2) params.size = " << params.size()
+      g_log.warning() << "No Good Fit Obtained! Chi2 = " << mincost << ". ";
+      g_log.warning() << "Possible reason: (1) Fit error = " << error << ", (2) params.size = " << params.size()
             << ", (3) rawParams.size():" << rawParams.size() << ". (Output with raw parameter = "
             << m_rawPeaksTable << ").";
-      g_log.warning(badss.str());
+
       for (std::size_t i = 0; i < m_numTableParams; i++)
         t << 0.;
       t << 1.e10; // bad chisq value
@@ -2380,13 +2374,18 @@ namespace Algorithms
     double sumrpdenom = 0;
 
     size_t numpts = domain.size();
+    double cal_i;
+    double obs_i;
+    double sigma;
+    double weight;
+    double diff;
     for (size_t i = 0; i < numpts; ++i)
     {
-      double cal_i = values[i];
-      double obs_i = partY[i];
-      double sigma = 1.0;
-      double weight = 1.0/(sigma*sigma);
-      double diff = obs_i - cal_i;
+      cal_i = values[i];
+      obs_i = partY[i];
+      sigma = 1.0;
+      weight = 1.0/(sigma*sigma);
+      diff = obs_i - cal_i;
 
       sumrpnom += fabs(diff);
       sumrpdenom += fabs(obs_i);
@@ -2413,8 +2412,7 @@ namespace Algorithms
     std::vector<std::string> funparnames = fitfunction->getParameterNames();
     for (size_t i = 0; i < funparnames.size(); ++i)
     {
-      std::string parname = funparnames[i];
-      copyfunc->setParameter(parname, fitfunction->getParameter(parname));
+      copyfunc->setParameter(funparnames[i], fitfunction->getParameter(funparnames[i]));
     }
     m_fitFunctions.push_back(copyfunc);
 
@@ -2465,12 +2463,10 @@ namespace Algorithms
 
     if (numpts < 3)
     {
-      std::stringstream errss;
-      errss << "Size of workspace to fit for background = " << newX.size()
-            << ". It is too small to proceed. ";
-      errss << "Input i_min = " << imin << ",i_max = " << imax << ", i_left = " << ileft
-            << ", i_right = " << iright;
-      g_log.warning(errss.str());
+      g_log.warning() << "Size of workspace to fit for background = " << newX.size()
+                      << ". It is too small to proceed. ";
+      g_log.warning() << "Input i_min = " << imin << ",i_max = " << imax << ", i_left = " << ileft
+                      << ", i_right = " << iright;
 
       return false;
     }
@@ -2517,7 +2513,7 @@ namespace Algorithms
     fit->setProperty("MaxIterations", 50);
     fit->setProperty("StartX", startx);
     fit->setProperty("EndX", endx);
-    fit->setProperty("Minimizer", "Levenberg-Marquardt");
+    fit->setProperty("Minimizer", m_minimizer);
     fit->setProperty("CostFunction", "Least squares");
 
     // Execute fit and get result of fitting background
