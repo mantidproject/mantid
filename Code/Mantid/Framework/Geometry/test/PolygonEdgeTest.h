@@ -69,8 +69,8 @@ public:
   {
     const PolygonEdge edge(V2D(0.1,0.1), V2D(2.0,2.0));
 
-    TS_ASSERT_EQUALS(classify(V2D(0.05,0.1), edge), Mantid::Geometry::Left);
-    TS_ASSERT_EQUALS(classify(V2D(0.3,0.1), edge), Mantid::Geometry::Right);
+    TS_ASSERT_EQUALS(classify(V2D(0.05,0.1), edge), Mantid::Geometry::OnLeft);
+    TS_ASSERT_EQUALS(classify(V2D(0.3,0.1), edge), Mantid::Geometry::OnRight);
     TS_ASSERT_EQUALS(classify(V2D(-0.05,-0.05), edge), Mantid::Geometry::Behind);
     TS_ASSERT_EQUALS(classify(V2D(2.5,2.5), edge), Mantid::Geometry::Beyond);
     TS_ASSERT_EQUALS(classify(V2D(1.4,1.4), edge), Mantid::Geometry::Between);
