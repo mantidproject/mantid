@@ -3,7 +3,7 @@
 Definition of Calibration
 =========================
 
-.. autofunction:: calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolin, outputPeak ] )
+.. autofunction:: calibrate(ws, tubeSet, knownPositions, funcForm, [fitPar, margin, rangeList, calibTable, plotTube, excludeShorTubes, overridePeaks, fitPolyn, outputPeak ] )
 
 =========
 Use Cases
@@ -229,7 +229,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
        positions with a quadratic function in order to define an operation to 
        move all the pixels to their real positions. If necessary, the user may 
        select to fit using a polinomial of 3rd order, through the parameter 
-       **fitPolin**.
+       **fitPolyn**.
 
        .. note::
          
@@ -304,7 +304,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
         >>>    # skip finding peaks
         >>>    fit_peaks_to_position()
 
-      :param fitPolin: Define the order of the polinomial to fit the pixels positions agains the known positions. The acceptable values are 2 or 3. Default = 2. (not implemented yet)
+      :param fitPolyn: Define the order of the polinomial to fit the pixels positions agains the known positions. The acceptable values are 1, 2 or 3. Default = 2.
 
 
       :param outputPeak: Enable the calibrate to output the peak table, relating the tubes with the pixels positions. It may be passed as a boolean value (outputPeak=True) or as a peakTable value. The later case is to inform calibrate to append the new values to the given peakTable. This is usefull when you have to operate in subsets of tubes. (see :py:mod:`~Examples.TubeCalibDemoMerlin` that shows a nice inspection on this table).
@@ -326,7 +326,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     PLOTTUBE = 'plotTube'
     EXCLUDESHORT = 'excludeShortTubes'
     OVERRIDEPEAKS = 'overridePeaks'
-    FITPOLIN = 'fitPolin'
+    FITPOLIN = 'fitPolyn'
     OUTPUTPEAK = 'outputPeak'
 
     #check that only valid arguments were passed through kwargs    
