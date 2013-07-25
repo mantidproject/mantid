@@ -427,18 +427,12 @@ namespace Mantid
       detid_t maxId = 0;
       this->getInstrument()->getMinMaxDetectorIDs(minId, maxId);
       offset = -minId;
+      const int outSize = maxId - minId + 1;
       // Allocate at once
-      out.resize(maxId - minId + 1, 0);
-      int outSize = int(out.size());
+      out.resize(outSize, std::numeric_limits<size_t>::max());
 
-      // Run in parallel if thread-safe.
-      // We should expect that there is only one workspace index per detector ID.
-      int numHistos = int(this->getNumberHistograms());
-
-      for (int i=0; i < numHistos; i++)
+      for (size_t workspaceIndex=0; workspaceIndex < getNumberHistograms(); ++workspaceIndex)
       {
-        size_t workspaceIndex = size_t(i);
-
         //Get the list of detectors from the WS index
         const std::set<detid_t> & detList = this->getSpectrum(workspaceIndex)->getDetectorIDs();
 
@@ -452,7 +446,6 @@ namespace Mantid
           int index = *it + offset;
           if (index < 0 || index >= outSize)
           {
-            //throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" + Mantid::Kernel::Strings::toString(*it) + ") is not within the min/max limits found. This indicates a logical error in Instrument->getMinMaxDetectorIDs(). Contact the development team.");
             g_log.debug() << "MatrixWorkspace::getDetectorIDToWorkspaceIndexVector(): detector ID found (" << *it << " at workspace index " << workspaceIndex << ") is invalid." << std::endl;
           }
           else
