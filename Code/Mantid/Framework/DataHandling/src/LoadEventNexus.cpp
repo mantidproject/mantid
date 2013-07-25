@@ -288,7 +288,7 @@ public:
             // NULL eventVector indicates a bad spectrum lookup
             if(eventVector)
             {
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
+#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
               // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
               eventVector->emplace_back( tof, pulsetime, weight, errorSq );
 #else
@@ -303,7 +303,7 @@ public:
             // NULL eventVector indicates a bad spectrum lookup
             if(eventVector)
             {
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
+#if !(defined(__INTEL_COMPILER)) && !(defined(__clang__))
               // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
               eventVector->emplace_back( tof, pulsetime );
 #else
