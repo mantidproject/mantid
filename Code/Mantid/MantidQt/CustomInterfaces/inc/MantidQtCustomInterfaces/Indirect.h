@@ -84,6 +84,7 @@ namespace MantidQt
       bool validateInput(); ///< validate input of "Energy Transfer" tab
       QString validateCalib(); ///< validate input of "Calibration" tab
       bool validateSofQw(); ///< validate input of "S(Q, w)" tab
+      bool validateSofQ(int);
       QString validateSlice(); ///< validate input of "Slice" tab
       void loadSettings();
       void saveSettings();

@@ -101,7 +101,7 @@ void Indirect::initLayout()
   // "SofQW" tab
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
   connect(m_uiForm.sqw_cbInput, SIGNAL(currentIndexChanged(int)), m_uiForm.sqw_swInput, SLOT(setCurrentIndex(int)));
-  connect(m_uiForm.sqw_cbWorkspace, SIGNAL(currentIndexChanged(int)), this, SLOT(validateSofQw()));
+  connect(m_uiForm.sqw_cbWorkspace, SIGNAL(currentIndexChanged(int)), this, SLOT(validateSofQw(int)));
 
   connect(m_uiForm.sqw_pbPlotInput, SIGNAL(clicked()), this, SLOT(sOfQwPlotInput()));
 
@@ -756,6 +756,11 @@ QString Indirect::validateCalib()
   }
 
   return uiv.generateErrorMessage();
+}
+
+bool Indirect::validateSofQ(int)
+{
+  return validateSofQw();
 }
 
 bool Indirect::validateSofQw()
