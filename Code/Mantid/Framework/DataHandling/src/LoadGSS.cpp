@@ -27,6 +27,7 @@ Two types of GSAS files are supported
 #include <Poco/File.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 
 using namespace Mantid::DataHandling;
@@ -414,7 +415,9 @@ namespace Mantid
       // 2.2 Put data from MatidVec's into outputWorkspace
       if (detectorIDs.size() != static_cast<size_t>(nHist))
       {
-        throw std::runtime_error("It seems not possible to have mismatch spectrum numbers and nHist.");
+        std::ostringstream mess("");
+        mess << "Number of spectra " << detectorIDs.size() << " is not equal to number of histograms " << nHist << ".";
+        throw std::runtime_error(mess.str());
       }
       for (int i = 0; i < nHist; ++i)
       {
