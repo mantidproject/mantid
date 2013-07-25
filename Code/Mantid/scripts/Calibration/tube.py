@@ -512,8 +512,8 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     # deal with FITPOLIN parameter
     if kwargs.has_key(FITPOLIN):
         polinFit = kwargs[FITPOLIN]
-        if polinFit not in [2,3]:
-            raise RuntimeError("Wrong argument %s. It expects a number 2 for quadratic, or 3 for 3rd polinomial order when fitting the pixels positions agains the known positions" % FITPOLIN)
+        if polinFit not in [1, 2,3]:
+            raise RuntimeError("Wrong argument %s. It expects a number 1 for linear, 2 for quadratic, or 3 for 3rd polinomial order when fitting the pixels positions agains the known positions" % FITPOLIN)
     else:
         polinFit = 2
 
