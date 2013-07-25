@@ -7,10 +7,25 @@ import numpy
 # Author: Karl Palmen ISIS
 class IdealTube:
    """
-   The IdealTube specifies where the peaks formed by slits or edges should occur. 
+   The IdealTube specifies where the peaks formed by slits or edges should occur.
+
    They can be considered as the known positions as well.
    It does also keep informatin about the shape of the known_positions, if they are 
    peaks or edges.
+
+   First you create an ideal tube by calling the empty constructor idealTube(). 
+   Then call another function to populate it. 
+
+   You may fill it up with the following methods:
+   
+    * :meth:`~ideal_tube.IdealTube.setArray`
+    * :meth:`~ideal_tube.IdealTube.setPositionsAndForm`
+
+   You may than query the known positions and functional forms through : 
+
+    * :meth:`~ideal_tube.IdealTube.getArray`
+    * :meth:`~ideal_tube.IdealTube.getFunctionalForms`
+   
    """
    def __init__( self ):
         """

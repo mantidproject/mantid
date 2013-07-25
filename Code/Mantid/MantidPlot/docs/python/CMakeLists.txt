@@ -26,6 +26,7 @@ if ( SPHINX_FOUND )
     source/changes.rst
     source/contents.rst
     source/techiniques/calibration.rst
+    source/techiniques/calibration_implementation.rst
     source/api/mantid.rst
     source/api/mantidplot.rst
     source/_templates/indexcontent.html
