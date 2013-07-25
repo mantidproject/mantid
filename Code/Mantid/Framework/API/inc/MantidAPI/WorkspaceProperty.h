@@ -34,7 +34,8 @@ namespace Mantid
     {
       enum Type { Lock, NoLock };
     };
-    /// Enumeration for uniqueness of property
+    /// Enumeration for uniqueness of property. If is Output workspace and is Unique,
+    /// will make property invalid if there is a workspace with the same name in the ADS
     struct UniqueMode
     {
       enum Type { Unique, NonUnique};
