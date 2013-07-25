@@ -144,7 +144,7 @@ namespace Mantid
     bool CubicSpline::checkXInRange(double x) const
     {
       return (x >= m_spline->interp->xmin
-          || x <= m_spline->interp->xmax);
+          && x <= m_spline->interp->xmax);
     }
 
     /** Calculate the values on the spline at each point supplied
@@ -160,6 +160,7 @@ namespace Mantid
       bool outOfRange(false);
       for (size_t i = 0; i < nData; ++i)
       {
+
         if(checkXInRange(xValues[i]))
         {
           //calculate the y value
@@ -175,7 +176,7 @@ namespace Mantid
         {
           //if out of range, just set it to zero
           outOfRange = true;
-          y = 0;
+          out[i] = 0;
         }
       }
 
@@ -237,7 +238,7 @@ namespace Mantid
       //warn user that some values weren't calculated
       if(outOfRange)
       {
-        g_log.warning() << "Cannot calculate derivatives with a order higher than 2" << std::endl;
+        g_log.warning() << "Some x values where out of range and will not be calculated." << std::endl;
       }
     }
 
