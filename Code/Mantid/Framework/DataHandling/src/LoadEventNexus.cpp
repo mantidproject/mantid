@@ -121,11 +121,6 @@ bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime)
   return ((this->startTime == otherStartTime) && (this->numPulses == otherNumPulse));
 }
 
-namespace
-{
-  Poco::Mutex g_eventVectorMutex;
-}
-
 //===============================================================================================
 //===============================================================================================
 /** This task does the disk IO from loading the NXS file,
