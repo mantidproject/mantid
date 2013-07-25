@@ -477,7 +477,7 @@ namespace Mantid
           {
             // Check if is unique
             if(AnalysisDataService::Instance().doesExist(value))
-              error = "Workspace with such name already exists";
+              error = "Workspace with name \"" + value + "\" already exists";
           }
         }
         else
