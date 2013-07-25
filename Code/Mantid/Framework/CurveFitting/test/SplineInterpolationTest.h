@@ -16,6 +16,14 @@ public:
   static SplineInterpolationTest *createSuite() { return new SplineInterpolationTest(); }
   static void destroySuite( SplineInterpolationTest *suite ) { delete suite; }
 
+  //Functor to generate spline values
+  struct SplineFunc
+  {
+    double operator()(double x, int)
+    {
+      return x*2;
+    }
+  };
 
   void test_Init()
   {
@@ -23,57 +31,92 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
-  
-  void test_exec()
+
+  void testExec()
   {
     using namespace Mantid::API;
 
-    // Name of the output workspace.
-    std::string outWSName("SplineInterpolationTest_OutputWS");
-  
-    SplineInterpolation alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT( alg.isInitialized() );
+    int order(2), spectra(1);
 
+    //create binned workspaces
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1, 0, 20, 1, false);
+    MatrixWorkspace_sptr iws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 0.1, false);
+
+    SplineInterpolation alg;
+    runAlgorithm(alg, order, iws, mws);
+    checkOutput(alg);
+  }
+
+  void testExecHistogramData()
+  {
+    using namespace Mantid::API;
+
+    int order(2), spectra(1);
+
+    //create binned workspaces
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1, 0, 20, 1, true);
+    MatrixWorkspace_sptr iws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 1, true);
+
+    SplineInterpolation alg;
+    runAlgorithm(alg, order, iws, mws);
+    checkOutput(alg);
+  }
+
+  void testExecMultipleSpectra()
+  {
+    using namespace Mantid::API;
+
+    int order(2), spectra(3);
+
+    //create binned workspaces
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1, 0, 20, 1, true);
+    MatrixWorkspace_sptr iws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 1, true);
+
+    SplineInterpolation alg;
+    runAlgorithm(alg, order, iws, mws);
+    checkOutput(alg);
+  }
+
+  void checkOutput(const SplineInterpolation& alg) const
+  {
+    using namespace Mantid::API;
+
+    MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
+    WorkspaceGroup_const_sptr derivs = alg.getProperty("OutputWorkspaceDeriv");
+
+    for (size_t i = 0; i < ows->getNumberHistograms(); ++i)
+    {
+      MatrixWorkspace_const_sptr derivsWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
+      const auto & xs = ows->readX(i);
+      const auto & ys = ows->readY(i);
+      const auto & d1 = derivsWs->readY(0);
+      const auto & d2 = derivsWs->readY(1);
+
+      //check output for consistency
+      for(size_t j = 0; j < ys.size(); ++j)
+      {
+        TS_ASSERT_DELTA(ys[j], xs[j]*2, 1e-15);
+        TS_ASSERT_DELTA(d1[j], 2, 1e-15);
+        TS_ASSERT_DELTA(d2[j], 0, 1e-15);
+      }
+    }
+  }
+
+  void runAlgorithm(SplineInterpolation& alg, int order, const Mantid::API::MatrixWorkspace_sptr& iws,
+      const Mantid::API::MatrixWorkspace_sptr& mws) const
+  {
+    alg.initialize();
+    alg.isInitialized();
     alg.setChild(true);
     alg.setPropertyValue("OutputWorkspace", "Anon");
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DerivOrder", 2));
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DerivOrder", order));
 
-    //create a binned workspaces
-    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 10, 0, 1);
-    MatrixWorkspace_sptr iws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1, 15, 0.5, 0.1);
-
-    size_t mwSize =  mws->readY(0).size();
-    for (size_t i = 0; i < mwSize; ++i)
-    {
-      double val = static_cast<double>(i);
-      mws->dataY(0)[i] = val *2;
-    }
-
-    alg.setProperty("WorkspaceToMatch", mws);
     alg.setProperty("WorkspaceToInterpolate", iws);
+    alg.setProperty("WorkspaceToMatch", mws);
 
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
-
     TS_ASSERT( alg.isExecuted() );
-
-    MatrixWorkspace_const_sptr outputWorkspace = alg.getProperty("OutputWorkspace");
-    WorkspaceGroup_const_sptr derivs = alg.getProperty("OutputWorkspaceDeriv");
-    MatrixWorkspace_const_sptr derivs1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(0));
-
-    const auto & yVals = outputWorkspace->readY(0);
-    const auto & yDeriv = derivs1->readY(0);
-    const auto & yDeriv2 = derivs1->readY(1);
-
-    double count =1;
-    for(size_t i = 0; i < yVals.size(); ++i)
-    {
-      TS_ASSERT_DELTA(yVals[i], count*0.1, 1e-15);
-      TS_ASSERT_EQUALS(yDeriv[i], 2);
-      TS_ASSERT_EQUALS(yDeriv2[i], 0);
-      count+=2;
-    }
   }
 
 };

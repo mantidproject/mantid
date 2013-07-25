@@ -75,6 +75,7 @@ namespace CurveFitting
     /// Calculate the derivatives of the input workspace from the spline.
     void calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
         API::MatrixWorkspace_sptr outputWorkspace, int order, int row) const;
+
   };
 
 

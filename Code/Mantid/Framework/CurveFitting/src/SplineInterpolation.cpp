@@ -10,6 +10,10 @@ Optionally, this algorithm can also calculate the first and second derivatives o
 
 If the input workspace contains histograms, rather than data points, then SplineInterpolation will automatically convert the input to point data. The output returned with be in the same format as the input.
 
+=== Known Issues ===
+
+Histogram workspaces being interpolated will throw an error when the range of the data is equal to the size of the workspace to match, but has finer bin boundaries.
+
  *WIKI*/
 
 #include "MantidAPI/TextAxis.h"
@@ -107,10 +111,11 @@ namespace Mantid
       }
 
       //convert data to binned data as required
-      MatrixWorkspace_const_sptr mwspt = convertBinnedData(mws);
+      MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
       MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
 
       MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(iws, histNo);
+
 
       //for each histogram in workspace, calculate interpolation and derivatives
       for (int i = 0; i < histNo; ++i)
@@ -118,7 +123,7 @@ namespace Mantid
         //Create and instance of the cubic spline function
         m_cspline = boost::make_shared<CubicSpline>();
         //set the interpolation points
-        setInterpolationPoints(mwspt, i);
+        setInterpolationPoints(mwspt, 0);
 
         //compare the data set against our spline
         calculateSpline(iwspt, outputWorkspace, i);
@@ -134,6 +139,7 @@ namespace Mantid
 
             derivs[i]->setX(j, iws->readX(i));
             calculateDerivatives(iwspt, derivs[i], j+1, i);
+
           }
         }
       }
@@ -175,7 +181,6 @@ namespace Mantid
 
       return outputWorkspace;
     }
-
 
     /**Convert a binned workspace to point data
      *
