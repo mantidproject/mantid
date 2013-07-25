@@ -11,6 +11,7 @@ import os
 import unittest
 import mantidplottests
 from mantidplottests import *
+from mantid.kernel import *
 import time
 
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='mdw')
@@ -19,6 +20,7 @@ FakeMDEventData(InputWorkspace="mdw",  PeakParams="1e4, 2,4,6, 1.5")
 BinMD(InputWorkspace="mdw", OutputWorkspace="uniform",  AxisAligned=True, AlignedDim0="x,0,10,30", AlignedDim1="y,0,10,30", AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
 CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='empty')
 CreateMDWorkspace(Dimensions='4',Extents='0,10,0,10,0,10,0,10',Names='x,y,z,e',Units='m,m,m,meV',SplitInto='5',MaxRecursionDepth='20',OutputWorkspace='md4')
+
 
 class MantidPlotSliceViewerTest(unittest.TestCase):
     
@@ -135,6 +137,26 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         # Now turn it off
         svw.toggleLineMode(False)
         self.assertFalse( liner.isVisible(), "LineViewer was hidden")
+        
+    def test_showPeakOverlays(self):
+        
+        qLab = CreateMDWorkspace(Dimensions='3',EventType='MDEvent',Extents='-10,10,-10,10,-10,10',Names='Q_lab_x,Q_lab_y,Q_lab_z',Units='A,B,C')
+        FakeMDEventData(InputWorkspace=qLab, PeakParams=[1000, 1, 1, 1, 1])
+        qLab = BinMD(InputWorkspace=qLab, AxisAligned=True, AlignedDim0="Q_lab_x,-10,10,100", AlignedDim1="Q_lab_y,-10,10,100", AlignedDim2="Q_lab_z,-10,10,100", IterateEvents="1", Parallel="0")
+
+        pathToInstrument = os.path.join(config["instrumentDefinition.directory"], 'CRISP_Definition.xml') # Note that the instrument doesn't matter. Choose a small one.
+        instWS = LoadEmptyInstrument(Filename=pathToInstrument) # Only do this so that we can provide the parameter to CreatePeaksWorkspace
+        pw = CreatePeaksWorkspace(InstrumentWorkspace=instWS, NumberOfPeaks=1)
+        
+        peak = pw.getPeak(0)
+        peak.setQLabFrame(V3D(1, 1, 1), 1)
+        svw = plotSlice(qLab.name(), slicepoint=[1, 1, 1], colormin=1, colormax=5000, colorscalelog=True)
+        sv = svw.getSlicer()
+        # Show the PeaksOverlays
+        sv.setPeaksWorkspaces([pw.name()])
+        
+        # Now clear the PeaksOverlays
+        sv.clearPeaksWorkspaces()
         
         
         
