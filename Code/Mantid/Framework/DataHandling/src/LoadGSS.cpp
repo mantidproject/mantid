@@ -416,7 +416,7 @@ namespace Mantid
       if (detectorIDs.size() != static_cast<size_t>(nHist))
       {
         std::ostringstream mess("");
-        mess << "Number of spectra " << detectorIDs.size() << " is not equal to number of histograms " << nHist << ".";
+        mess << "Number of spectra (" << detectorIDs.size() << ") is not equal to number of histograms (" << nHist << ").";
         throw std::runtime_error(mess.str());
       }
       for (int i = 0; i < nHist; ++i)

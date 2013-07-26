@@ -64,7 +64,7 @@ namespace Mantid
       Split[1] = "False";
       declareProperty("SplitFiles", "True", boost::make_shared<Kernel::StringListValidator>(Split),
           "Whether to save each spectrum into a separate file ('true') or not ('false'). Note that this is a string, not a boolean property.");
-      declareProperty("Append", true, "If true and Filename already exists, append, else overwrite");
+      declareProperty("Append", true, "If true and Filename already exists, append, else overwrite ");
       declareProperty(
           "Bank",
           1,
@@ -124,8 +124,8 @@ namespace Mantid
       // Check the number of histogram/spectra < 99
       if (nHist > 99)
       {
-        g_log.error() << "Spectra number cannot be larger than 99 for GSAS file" << std::endl;
-        throw new std::invalid_argument("Workspace has more than 99 spectra, and not allowed by GSAS");
+        g_log.error() << "Number of Spectra ("<< nHist<<") cannot be larger than 99 for GSAS file" << std::endl;
+        throw new std::invalid_argument("Workspace has more than the 99 spectra, allowed by GSAS");
       }
 
       std::string filename = getProperty("Filename");
@@ -238,7 +238,7 @@ namespace Mantid
           }
           else
           {
-            throw std::runtime_error("Do not know how to write output format " + outputFormat);
+            throw std::runtime_error("Cannot write to the unknown " +  outputFormat + "output format"); 
           }
 
         } // End separate scope
