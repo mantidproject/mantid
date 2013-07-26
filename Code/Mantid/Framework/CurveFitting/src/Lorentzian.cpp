@@ -1,17 +1,16 @@
 /*WIKI*
-A Lorentzian function is defined as:
+A Lorentzian function is defined as: 
 
-:<math> \mbox{Height}* \left( \frac{\mbox{HWHM}^2}{(x-\mbox{PeakCentre})^2+\mbox{HWHM}^2} \right) </math>
+<center><math> \frac{A}{\pi} \left( \frac{\frac{\Gamma}{2}}{(x-x_0)^2 + (\frac{\Gamma}{2})^2}\right)</math></center>
 
-where
-
+where:
     <UL>
-    <LI> Height - height of peak (at maximum) </LI>
-    <LI> PeakCentre - centre of peak </LI>
-    <LI> HWHM - half-width at half-maximum </LI>
+    <LI> A (Amplitude) - Maximum peak height at peak centre </LI>
+    <LI><math>x_0</math> (PeakCentre) - centre of peak </LI>
+    <LI><math>\Gamma</math> (HWHM) - half-width at half-maximum </LI>
     </UL>
 
-Note that the FWHM (Full Width Half Maximum) equals two times HWHM, and the integral over the Lorentzian equals <math>\mbox{Height} * \pi * \mbox{HWHM}</math> (ignoring the linear background). In the literature you may also often see the notation <math>\gamma</math> = HWHM.
+Note that the FWHM (Full Width Half Maximum) equals two times HWHM, and the integral over the Lorentzian equals 1.
 
 The figure below illustrate this symmetric peakshape function fitted to a TOF peak:
 
@@ -32,40 +31,51 @@ namespace CurveFitting
 using namespace Kernel;
 using namespace API;
 
-DECLARE_FUNCTION(Lorentzian)
+DECLARE_FUNCTION(Lorentzian);
 
 void Lorentzian::init()
 {
-  declareParameter("Height", 0.0, "height of peak (not the height may be refined to a negative value to fit a dipped curve)");
+  declareParameter("Amplitude", 1.0, "Maximum height of peak when x=x0");
   declareParameter("PeakCentre", 0.0, "Centre of peak");
-  declareParameter("HWHM", 0.0, "half-width at half-maximum");
+  declareParameter("HWHM", 0.0, "Half-width at half-maximum");
 }
 
 
 void Lorentzian::functionLocal(double* out, const double* xValues, const size_t nData)const
 {
-    const double height = getParameter("Height");
+    const double amplitude = getParameter("Amplitude");
     const double peakCentre = getParameter("PeakCentre");
-    const double hwhm = getParameter("HWHM");
+    const double halfGamma = 0.5*getParameter("HWHM");
 
-    for (size_t i = 0; i < nData; i++) {
-        double diff=xValues[i]-peakCentre;
-        out[i] = height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) );
+    const double invPI = 1.0/M_PI;
+    for (size_t i = 0; i < nData; i++)
+    {
+        double diff=(xValues[i]-peakCentre);
+        out[i] = amplitude*invPI*halfGamma/(diff*diff + (halfGamma*halfGamma));
     }
 }
 
 void Lorentzian::functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
 {
-    const double height = getParameter("Height");
+    const double amplitude = getParameter("Amplitude");
     const double peakCentre = getParameter("PeakCentre");
-    const double hwhm = getParameter("HWHM");
+    const double gamma = getParameter("HWHM");
+    const double halfGamma = 0.5*gamma;
 
-    for (size_t i = 0; i < nData; i++) {
+    const double invPI = 1.0/M_PI;
+    for (size_t i = 0; i < nData; i++)
+    {
         double diff = xValues[i]-peakCentre;
-        double invDenominator =  1/((diff*diff+hwhm*hwhm));
-        out->set(i,0, hwhm*hwhm*invDenominator);
-        out->set(i,1, 2.0*height*diff*hwhm*hwhm*invDenominator*invDenominator);
-        out->set(i,2, height*(-hwhm*hwhm*invDenominator+1)*2.0*hwhm*invDenominator);
+        const double invDen1 = 1.0/(gamma*gamma + 4.0*diff*diff);
+        const double dfda = 2.0*invPI*gamma*invDen1;
+        out->set(i,0, dfda);
+
+        double invDen2 =  1/(diff*diff + halfGamma*halfGamma);
+        const double dfdxo = amplitude*invPI*gamma*diff*invDen2*invDen2;
+        out->set(i,1, dfdxo);
+
+        const double dfdg = -2.0*amplitude*invPI*(gamma*gamma - 4.0*diff*diff)*invDen1*invDen1;
+        out->set(i,2, dfdg);
     }
 
 }
