@@ -9,6 +9,7 @@ import os
 IS_IN_MANTIDPLOT = False
 try:
     import mantidqtpython
+    from mantid.kernel import config
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -29,12 +30,12 @@ class SampleSetupWidget(BaseWidget):
                 self.setupUi(self)
                 
         self._content = SamSetFrame(self)
+        self._instrument_name = settings.instrument_name
+        self._facility_name = settings.facility_name
         self._livebuttonwidget = None
         if IS_IN_MANTIDPLOT:
             self._swap_in_mwrunfiles_widget()
         self._layout.addWidget(self._content)
-        self._instrument_name = settings.instrument_name
-        self._facility_name = settings.facility_name
         self.initialize_content()
         
         if state is not None:
@@ -88,7 +89,9 @@ class SampleSetupWidget(BaseWidget):
         self._content.horizontalLayout.removeWidget(self._content.sample_browse)
         spacer = self._content.horizontalLayout.takeAt(0)
         self._content.sample_edit = mantidqtpython.MantidQt.MantidWidgets.MWRunFiles()
-        self._content.sample_edit.setProperty("liveButton","ShowIfCanConnect")
+        # Unfortunately, can only use live if default instrument = gui-set instrument
+        if self._instrument_name == config.getInstrument().name():
+            self._content.sample_edit.setProperty("liveButton","ShowIfCanConnect")
         self._content.sample_edit.setProperty("multipleFiles",True)
         self._content.sample_edit.setProperty("algorithmAndProperty","Load|Filename")
         self._content.sample_edit.setProperty("label",labeltext)
