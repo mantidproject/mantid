@@ -283,22 +283,22 @@ def correctTube( AP, BP, CP, nDets ):
     # print xBinNew	 
     return xBinNew
     
-def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False ): 
+def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False, polinFit=2 ): 
     """     
        Corrects position errors in a tube given an array of points and their ideal positions.
        
-       @param tubePoints: Array of Slit Points along tube to be fitted (in pixels) 
-       @param idealTubePoints: The corresponding points in an ideal tube (Y-coords advised)
-       @param nDets: Number of pixel detectors in tube
-       @parame Testmode: If true, detectors at the position of a slit will be moved out of the way
+       :param tubePoints: Array of Slit Points along tube to be fitted (in pixels) 
+       :param idealTubePoints: The corresponding points in an ideal tube (Y-coords advised)
+       :param nDets: Number of pixel detectors in tube
+       :param Testmode: If true, detectors at the position of a slit will be moved out of the way
                          to show the reckoned slit positions when the instrument is displayed.
+       :param polinFit: Order of the polinomial to fit for the ideal positions
 
        Return Value: Array of corrected Xs  (in same units as ideal tube points)
        
        Note that any element of tubePoints not between 0.0 and nDets is considered a rogue point and so is ignored. 
     """           
     
-    xResult = []
     #print "correctTubeToIdealTube"
 
     # Check the arguments
@@ -324,29 +324,24 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False )
     # Check number of usable points
     if( len(usedTubePoints) < 3):
         print "Too few usable points in tube",len(usedTubePoints)
-        return xResult
+        return []
                 
     # Fit quadratic to ideal tube points 
-    CreateWorkspace(dataX=usedTubePoints,dataY=usedIdealTubePoints, OutputWorkspace="QuadraticFittingWorkspace")
+    CreateWorkspace(dataX=usedTubePoints,dataY=usedIdealTubePoints, OutputWorkspace="PolyFittingWorkspace")
     try:
-       Fit(InputWorkspace="QuadraticFittingWorkspace",Function='name=Quadratic',StartX=str(0.0),EndX=str(nDets),Output="QF")
+       Fit(InputWorkspace="PolyFittingWorkspace",Function='name=Polynomial,n=%d'%(polinFit),StartX=str(0.0),EndX=str(nDets),Output="QF")
     except:
        print "Fit failed"
-       return xResult
+       return []
     
     paramQF = mtd['QF_Parameters']
-    rowP0 = paramQF.row(0).items()
-    rowP1 = paramQF.row(1).items()
-    rowP2 = paramQF.row(2).items()
-    rowErr = paramQF.row(3).items() # may use to check accuracy of fit
     
-    p0 = rowP0[1][1]
-    p1 = rowP1[1][1]
-    p2 = rowP2[1][1]
+    # get the coeficients, get the Value from every row, and exclude the last one because it is the error
+    # rowErr is the last one, it could be used to check accuracy of fit
+    c = [r['Value'] for r in paramQF][:-1]
     
     # Modify the output array by the fitted quadratic
-    for i in range(nDets):
-        xResult.append( p0 + p1*i + p2*i*i)
+    xResult = numpy.polynomial.polynomial.polyval(range(nDets),c)
         
     # In test mode, shove the pixels that are closest to the reckoned peaks 
     # to the position of the first detector so that the resulting gaps can be seen.
@@ -385,7 +380,7 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
         return  detIDs, detPositions 
 
     # Correct positions of detectors in tube by quadratic fit
-    pixels = correctTubeToIdealTube ( tubePts, idealTubePts, nDets, TestMode=peakTestMode )
+    pixels = correctTubeToIdealTube ( tubePts, idealTubePts, nDets, TestMode=peakTestMode, polinFit=polinFit )
     #print pixels
     if( len(pixels) != nDets):
        print "Tube correction failed."
@@ -545,7 +540,7 @@ def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
     # Delete temporary workspaces used in the calibration
     for ws_name in ('TubePlot','CalibPoint_NormalisedCovarianceMatrix', 
                     'CalibPoint_NormalisedCovarianceMatrix','CalibPoint_NormalisedCovarianceMatrix',
-                    'CalibPoint_Parameters', 'CalibPoint_Workspace', 'QuadraticFittingWorkspace', 
+                    'CalibPoint_Parameters', 'CalibPoint_Workspace', 'PolyFittingWorkspace', 
                     'QF_NormalisedCovarianceMatrix', 'QF_Parameters', 'QF_Workspace', 
                     'Z1_Workspace', 'Z1_Parameters', 'Z1_NormalisedCovarianceMatrix'):
         try:
@@ -600,7 +595,7 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
        return                
     
     # Delete temporary workspaces for getting new detector positions
-    DeleteWorkspace('QuadraticFittingWorkspace')
+    DeleteWorkspace('PolyFittingWorkspace')
     DeleteWorkspace('QF_NormalisedCovarianceMatrix')
     DeleteWorkspace('QF_Parameters')
     DeleteWorkspace('QF_Workspace')
