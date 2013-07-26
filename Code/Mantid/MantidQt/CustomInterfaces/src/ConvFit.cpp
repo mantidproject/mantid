@@ -23,7 +23,7 @@ namespace IDA
     IDATab(parent), m_intVal(NULL), m_stringManager(NULL), m_cfTree(NULL), 
       m_cfPlot(NULL), m_cfProp(), m_fixedProps(), m_cfRangeS(NULL), m_cfBackgS(NULL), 
       m_cfHwhmRange(NULL), m_cfGrpMng(NULL), m_cfDblMng(NULL), m_cfBlnMng(NULL), m_cfDataCurve(NULL), 
-      m_cfCalcCurve(NULL), m_cfInputWS(), m_cfInputWSName()
+      m_cfCalcCurve(NULL), m_cfInputWS(), m_cfInputWSName(), m_confitResFileType()
   {}
   
   void ConvFit::setup()
@@ -112,8 +112,8 @@ namespace IDA
     // Replot input automatically when file / spec no changes
     connect(uiForm().confit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().confit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
-  
     connect(uiForm().confit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().confit_swInput, SLOT(setCurrentIndex(int)));
+    connect(uiForm().confit_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resType(const QString&)));
     connect(uiForm().confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
     connect(uiForm().confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
@@ -270,6 +270,23 @@ namespace IDA
     uiForm().confit_inputFile->readSettings(settings.group());
     uiForm().confit_resInput->readSettings(settings.group());
   }
+
+  void ConvFit::resType(const QString& type)
+  {
+    QStringList exts;
+    if ( type == "RES File" )
+    {
+      exts.append("_res.nxs");
+      m_confitResFileType = true;
+    }
+    else
+    {
+      exts.append("_red.nxs");
+      m_confitResFileType = false;
+    }
+    uiForm().confit_resInput->setFileExtensions(exts);
+  }
+
 
   namespace
   {
