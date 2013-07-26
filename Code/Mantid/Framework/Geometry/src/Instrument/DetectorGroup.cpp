@@ -372,6 +372,11 @@ namespace Mantid
       (void) name; //Avoid compiler warning
       return false;
     }
+    /** Detectors group assumed to be non-parameterized */
+    std::string DetectorGroup::getParameterType(const std::string & /*name*/, bool /*recursive = true*/) const
+    {
+        return std::string("");
+    }
 
     /// Default implementation
     std::vector<double> DetectorGroup::getNumberParameter(const std::string&, bool) const

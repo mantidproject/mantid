@@ -815,13 +815,13 @@ namespace DataHandling
         continue;
 
       // c. parse
-      g_log.notice() << "Input: " << isisline << std::endl;
+      g_log.debug() << "Input: " << isisline << std::endl;
       parseISISStringToVector(isisline, mask_specid_pair_low, mask_specid_pair_up);
     }
 
     for (size_t i = 0; i < mask_specid_pair_low.size(); i ++)
     {
-      g_log.notice() << i << ": " << mask_specid_pair_low[i] << ", " <<
+      g_log.debug() << i << ": " << mask_specid_pair_low[i] << ", " <<
           mask_specid_pair_up[i] << std::endl;
     }
 

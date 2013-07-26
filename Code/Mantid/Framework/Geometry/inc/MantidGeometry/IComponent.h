@@ -131,6 +131,8 @@ namespace Mantid
       virtual std::set<std::string> getParameterNames(bool recursive = true) const = 0;
       /// Returns a boolean indicating if the component has the named parameter
       virtual bool hasParameter(const std::string & name, bool recursive = true) const = 0;
+      //Hack untill proper python export functions are defined
+      virtual std::string getParameterType(const std::string& pname, bool recursive = true)const=0;
       // 06/05/2010 MG: Templated virtual functions cannot be defined so we have to resort to
       // one for each type, luckily there won't be too many
       /// Get a parameter defined as a double

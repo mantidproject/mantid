@@ -30,7 +30,7 @@ def diagnose(white_int, **kwargs):
                           If a run/file is given it simply loaded and integrated across the whole range
           sample_counts - A workspace containing the total integrated counts from a sample run
           second_white - If provided an additional set of tests is performed on this.
-          hard_mask  - A file specifying those spectra that should be masked without testing 
+          hard_mask_file  - A file specifying those spectra that should be masked without testing 
           tiny        - Minimum threshold for acceptance 
           huge       - Maximum threshold for acceptance
           van_out_lo  - Lower bound defining outliers as fraction of median value 
@@ -65,71 +65,88 @@ def diagnose(white_int, **kwargs):
     test_results = [ [None, None], [None, None], [None, None], [None, None], [None, None]]
 
     # Hard mask
-    hardmask_file = kwargs.get('hard_mask', None)
+    hardmask_file = kwargs.get('hard_mask_file', None)
     if hardmask_file is not None:
-        LoadMask(Instrument=kwargs.get('instrument_name',''),InputFile=parser.hard_mask,
+        LoadMask(Instrument=kwargs.get('instrument_name',''),InputFile=parser.hard_mask_file,
                  OutputWorkspace='hard_mask_ws')
         MaskDetectors(Workspace=white_int, MaskedWorkspace='hard_mask_ws')
         # Find out how many detectors we hard masked
         _dummy_ws,masked_list = ExtractMask(InputWorkspace='hard_mask_ws')
         DeleteWorkspace('_dummy_ws')
-        test_results[0][0] = os.path.basename(parser.hard_mask)
+        test_results[0][0] = os.path.basename(parser.hard_mask_file)
         test_results[0][1] = len(masked_list)
 
-    # White beam Test
-    __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge, 
-                                              parser.van_out_lo, parser.van_out_hi,
-                                              parser.van_lo, parser.van_hi, 
-                                              parser.van_sig, start_index, end_index)
-    test_results[1] = [str(__white_masks), num_failed]
-    add_masking(white_int, __white_masks, start_index, end_index)
-    DeleteWorkspace(__white_masks)
+    if not parser.use_hard_mask_only :
+        # White beam Test
+        __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge, 
+                                                  parser.van_out_lo, parser.van_out_hi,
+                                                  parser.van_lo, parser.van_hi, 
+                                                  parser.van_sig, start_index, end_index)
+        test_results[1] = [str(__white_masks), num_failed]
+        add_masking(white_int, __white_masks, start_index, end_index)
+        DeleteWorkspace(__white_masks)
 
-    # Second white beam test
-    if 'second_white' in kwargs:
-        __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge, 
-                                                   parser.van_out_lo, parser.van_out_hi,
-                                                   parser.van_lo, parser.van_hi, parser.variation,
-                                                   parser.van_sig, start_index, end_index)
-        test_results[2] = [str(__second_white_masks), num_failed]
-        add_masking(white_int, __second_white_masks, start_index, end_index)
+        # Second white beam test
+        if 'second_white' in kwargs:
+            __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge, 
+                                                       parser.van_out_lo, parser.van_out_hi,
+                                                       parser.van_lo, parser.van_hi, parser.variation,
+                                                       parser.van_sig, start_index, end_index)
+            test_results[2] = [str(__second_white_masks), num_failed]
+            add_masking(white_int, __second_white_masks, start_index, end_index)
 
-    #
-    # Zero total count check for sample counts
-    #
-    zero_count_failures = 0
-    if kwargs.get('sample_counts',None) is not None and kwargs.get('samp_zero',False):
-        add_masking(parser.sample_counts, white_int)
-        maskZero, zero_count_failures = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts,
-                                                                   StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
+        #
+        # Zero total count check for sample counts
+        #
+        zero_count_failures = 0
+        if kwargs.get('sample_counts',None) is not None and kwargs.get('samp_zero',False):
+            add_masking(parser.sample_counts, white_int)
+            maskZero, zero_count_failures = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts,
+                                                                    StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,
                                                                    LowThreshold=1e-10, HighThreshold=1e100)
-        add_masking(white_int, maskZero, start_index, end_index)
-        DeleteWorkspace(maskZero)
+            add_masking(white_int, maskZero, start_index, end_index)
+            DeleteWorkspace(maskZero)
 
-    #
-    # Background check
-    #
-    if hasattr(parser, 'background_int'):
-        add_masking(parser.background_int, white_int)
-        __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo, 
-                                                   parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
-        test_results[3] = [str(__bkgd_mask), zero_count_failures + failures]
-        add_masking(white_int, __bkgd_mask, start_index, end_index)
-        DeleteWorkspace(__bkgd_mask)
+        #
+        # Background check
+        #
+        if hasattr(parser, 'background_int'):
+            add_masking(parser.background_int, white_int)
+            __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo, 
+                                                           parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
+            test_results[3] = [str(__bkgd_mask), zero_count_failures + failures]
+            add_masking(white_int, __bkgd_mask, start_index, end_index)
+            DeleteWorkspace(__bkgd_mask)
     
-    #
-    # Bleed test
-    #
-    if hasattr(parser, 'bleed_test') and parser.bleed_test:
-        if not hasattr(parser, 'sample_run'):
-            raise RuntimeError("Bleed test requested but the sample_run keyword has not been provided")
-        __bleed_masks, failures = do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
-        test_results[4] = [str(__bleed_masks), failures]
-        add_masking(white_int, __bleed_masks)
-        DeleteWorkspace(__bleed_masks)
-    
+        #
+        # Bleed test
+        #
+        if hasattr(parser, 'bleed_test') and parser.bleed_test:
+            if not hasattr(parser, 'sample_run'):
+                raise RuntimeError("Bleed test requested but the sample_run keyword has not been provided")
+            __bleed_masks, failures = do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
+            test_results[4] = [str(__bleed_masks), failures]
+            add_masking(white_int, __bleed_masks)
+            DeleteWorkspace(__bleed_masks)
+    # endif not hard_mask_only
+    start_index_name = "from: start"    
+    end_index_name=" to: end"
+    default = True
     if hasattr(parser, 'print_results') and parser.print_results:
-        print_test_summary(test_results)
+            default=True
+    if 'start_index' in kwargs:
+            default = False
+            start_index_name = "from: "+str(kwargs['start_index'])
+    if 'end_index' in kwargs : 
+            default = False
+            end_index_name = " to: "+str(kwargs['end_index'])
+
+
+    testName=start_index_name+end_index_name
+    if not default :
+       testName = " For bank: "+start_index_name+end_index_name
+
+    print_test_summary(test_results,testName)
 
 #-------------------------------------------------------------------------------
 
@@ -284,8 +301,8 @@ def do_background_test(background_int, median_lo, median_hi, sigma, mask_zero,
                                                  SignificanceTest=sigma, 
                                                  LowThreshold=median_lo, HighThreshold=median_hi, 
                                                  LowOutlier=0.0, HighOutlier=1e100, ExcludeZeroesFromMedian=True)
-
-    return mask_bkgd, num_failures
+    #TODO: Looks like hack! why it returns negative value
+    return mask_bkgd, abs(num_failures)
 
 #-------------------------------------------------------------------------------
 
@@ -323,7 +340,7 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
 
 #-------------------------------------------------------------------------------
 
-def print_test_summary(test_results):
+def print_test_summary(test_results,test_name=None):
     """Print a summary of the failures per test run.
 
     Input:
@@ -350,8 +367,10 @@ def print_test_summary(test_results):
         ['Background test:',test_results[3]], \
         ['PSD Bleed test :',test_results[4]] \
         )
-
-    print '==== Diagnostic Test Summary ===='
+    if test_name == None:
+        print '==== Diagnostic Test Summary ===='
+    else:
+        print '==== Diagnostic Test Summary {0} ===='.format(test_name)
 
     max_name_length = -1
     max_ws_length = -1
