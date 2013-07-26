@@ -127,6 +127,8 @@ namespace Mantid
       double shortest_tof;
       /// Count of all the "bad" tofs found. These are events with TOF > 2e8 microsec
       size_t bad_tofs;
+      /// A count of events discarded because they came from a pixel that's not in the IDF
+      size_t discarded_events;
 
       /// Do we pre-count the # of events in each pixel ID?
       bool precount;
@@ -216,14 +218,6 @@ namespace Mantid
 
       static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
         const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
-
-      /// Resize from TofEvents
-      void resizeFrom(std::vector<EventVector_pt> &vec,
-          const int32_t &size, DataObjects::EventList &el);
-
-      /// Resize from WeightedEvents
-      void resizeFrom(std::vector<WeightedEventVector_pt> &vec,
-          const int32_t &size, DataObjects::EventList &el);
 
     public:
       /// name of top level NXentry to use
