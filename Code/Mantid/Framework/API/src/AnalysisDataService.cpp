@@ -152,9 +152,20 @@ namespace Mantid
      */
     void AnalysisDataServiceImpl::remove( const std::string& name )
     {
-      auto ws = retrieve( name );
-      ws->setName( "" );
+      Workspace_sptr ws;
+      try
+      {
+        ws = retrieve( name );
+      }
+      catch(Kernel::Exception::NotFoundError)
+      {
+        // do nothing - remove will do what's needed
+      }
       Kernel::DataService<API::Workspace>::remove( name );
+      if ( ws )
+      {
+        ws->setName( "" );
+      }
     }
 
     /**
