@@ -65,9 +65,9 @@ public:
   /// Get chi-square
   double getChiSquare() { return m_goodness; }
   /// Get peak parameters
-  std::map<std::string, double> getPeakParameters() { return m_peakParameterMap;}
+  std::map<std::string, double>& getPeakParameters() { return m_peakParameterMap;}
   /// Get background parameters
-  std::map<std::string, double> getBackgroundParameters() { return m_bkgdParameterMap; }
+  std::map<std::string, double>& getBackgroundParameters() { return m_bkgdParameterMap; }
 
 private:
   /// chi-square
@@ -117,7 +117,7 @@ private:
   void fitPeakInWindow(const API::MatrixWorkspace_sptr &input, const int spectrum, const double centre, const double xmin, const double xmax);
 
   /// Fit peak by given/guessed FWHM
-  void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
+  void fitPeakGuessFWHM(const API::MatrixWorkspace_sptr &input, const int spectrum, const double center_guess, const int FWHM_guess);
 
   /// Fit peak
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max, const int i_centre);
@@ -161,7 +161,7 @@ private:
   /// Fit peak with multiple iterations
   PeakFittingRecord multiFitPeakBackground(API::MatrixWorkspace_sptr purepeakws, size_t purepeakindex,
                                            API::MatrixWorkspace_sptr dataws, size_t datawsindex,
-                                           API::IPeakFunction_sptr peak,
+                                           size_t iendx, API::IPeakFunction_sptr peak,
                                            double in_centre, double in_height, std::vector<double> in_fwhms,
                                            double peakleftboundary, double peakrightboundary, double user_centre);
 
@@ -229,6 +229,9 @@ private:
   API::IFunction_sptr m_backgroundFunction;
   API::IFunction_sptr m_peakAndBackgroundFunction;
 
+  // Temporary workspace for fitting
+  API::MatrixWorkspace_sptr m_tempWS;
+
   int m_minGuessedPeakWidth;
   int m_maxGuessedPeakWidth;
   int m_stepGuessedPeakWidth;
@@ -247,6 +250,9 @@ private:
 
   /// Minimum peak height
   double m_minHeight;
+
+  /// Peak function
+  API::IPeakFunction_sptr m_peakFunction;
 
 };
 

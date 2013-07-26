@@ -69,7 +69,8 @@ namespace Algorithms
     */
   PeakFittingRecord::~PeakFittingRecord()
   {
-
+    m_peakParameterMap.clear();
+    m_bkgdParameterMap.clear();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -393,8 +394,11 @@ namespace Algorithms
     size_t sizex = m_dataWS->readX(0).size();
     size_t sizey = m_dataWS->readY(0).size();
 
-    API::MatrixWorkspace_sptr m_tempWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    m_tempWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
           WorkspaceFactory::Instance().create("Workspace2D", 1, sizex, sizey));
+
+    m_peakFunction = boost::dynamic_pointer_cast<IPeakFunction>(
+              FunctionFactory::Instance().createFunction(m_peakFuncType));;
 
     return;
   }
@@ -440,7 +444,7 @@ namespace Algorithms
           if (useWindows)
             fitPeakInWindow(m_dataWS, spec, x_center, fitwindows[2 * i], fitwindows[2 * i + 1]);
           else
-            fitPeak(m_dataWS, spec, x_center, m_inputPeakFWHM);
+            fitPeakGuessFWHM(m_dataWS, spec, x_center, m_inputPeakFWHM);
         }
 
       } // loop through the peaks specified
@@ -854,9 +858,23 @@ namespace Algorithms
     */
   int getMaxHeightIndex(const MantidVec &Y, const int leftIndex, const int rightIndex)
   {
+    if (leftIndex < 0 || leftIndex >= static_cast<int>(Y.size()))
+      throw std::runtime_error("Left index out of boundary");
+    if (rightIndex < 0 || rightIndex > static_cast<int>(Y.size()))
+    {
+      std::stringstream errss;
+      errss << "In getMaxHeightIndex, Size(Y) = " << Y.size() << ", Left Index = " << leftIndex
+            << ", Right Index = " << rightIndex;
+      throw std::runtime_error(errss.str());
+    }
+
+    int rightindex = rightIndex;
+    if (rightindex == static_cast<int>(Y.size()))
+      rightindex -= 1;
+
     double maxY = Y[leftIndex];
     int indexMax = leftIndex;
-    for (int i = leftIndex + 1; i < rightIndex; i++)
+    for (int i = leftIndex + 1; i < rightindex; i++)
     {
       if (Y[i] > maxY)
       {
@@ -877,8 +895,8 @@ namespace Algorithms
     *  @param center_guess :: A guess of the X-value of the center of the peak, in whatever units of the X-axis of the workspace.
     *  @param FWHM_guess :: A guess of the full-width-half-max of the peak, in # of bins.
     */
-  void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum,
-                          const double center_guess, const int FWHM_guess)
+  void FindPeaks::fitPeakGuessFWHM(const API::MatrixWorkspace_sptr &input, const int spectrum,
+                                   const double center_guess, const int FWHM_guess)
   {
     g_log.information() << "Fit peak with guessed FWHM:  starting center = " << center_guess
                         << ", FWHM = " << FWHM_guess << ".\n";
@@ -932,7 +950,7 @@ namespace Algorithms
                                   const double centre_guess, const double xmin, const double xmax)
   {
     // Check
-    g_log.information() << "Fit Peak with given window:  Guessed center = " << centre_guess
+    g_log.notice() << "Fit Peak with given window:  Guessed center = " << centre_guess
                         << "  x-min = " << xmin
                         << ", x-max = " << xmax << "\n";
     if (xmin >= centre_guess || xmax <= centre_guess)
@@ -1184,7 +1202,7 @@ namespace Algorithms
                                         const int& i_centre, const int& i_min, const int& i_max,
                                         double& in_bg0, double& in_bg1, double& in_bg2)
   {
-    g_log.information() << "Fitting a peak assumed at " << input->dataX(spectrum)[i_centre]
+    g_log.notice() << "Fitting a peak assumed at " << input->dataX(spectrum)[i_centre]
                         << " (index = " << i_centre << ") by high-background approach. \n";
 
     // Check
@@ -1218,14 +1236,20 @@ namespace Algorithms
     if (numpts <= 0)
       throw std::runtime_error("FitPeakHighBackground.  Pure peak workspace size <= 0.");
 
+#if 0
     size_t sizex = static_cast<size_t>(numpts);
     size_t sizey = sizex;
     API::MatrixWorkspace_sptr peakws =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1,  sizex, sizey);
+#else
+    MatrixWorkspace_sptr peakws = m_tempWS;
+#endif
 
     //    set up x-axis first
     MantidVec& dataX = peakws->dataX(0);
     dataX.assign(rawX.begin()+i_min, rawX.begin()+i_min+numpts);
+    for (size_t i = numpts; i < dataX.size(); ++i)
+      dataX[i] = dataX[i-1] + 1.0;
 
     //    set up Y/E as pure peak
     FunctionDomain1DVector domain(dataX);
@@ -1247,8 +1271,9 @@ namespace Algorithms
     const MantidVec& peakY = peakws->readY(0);
 
     double g_centre, g_height, g_fwhm;
-    std::string errormessage;
+    std::string errormessage("");
     bool goodestimate = estimatePeakParameters(peakX, peakY, 0, numpts-1, g_centre, g_height, g_fwhm, errormessage);
+    // Check whether peak is well observed in the given region
     if (!goodestimate)
     {
       if (errormessage.compare("Flat spectrum") == 0)
@@ -1295,9 +1320,9 @@ namespace Algorithms
     for (int iwidth = m_minGuessedPeakWidth; iwidth <= m_maxGuessedPeakWidth; iwidth +=
          m_stepGuessedPeakWidth)
     {
-      int peakwssize = static_cast<int>(peakX.size());
+      int peakwssize = static_cast<int>(numpts);
       // There are 3 possible situation: peak at left edge, peak in proper range, peak at righ edge
-      // There should no guessed
+      // There shouldn't be any guess value
       int ileftside = (i_centre - i_min) - iwidth/2;
       if (ileftside < 0)
         ileftside = 0;
@@ -1326,13 +1351,17 @@ namespace Algorithms
     }
 
     // Create peak function
+#if 0
     IPeakFunction_sptr peakfunc = boost::dynamic_pointer_cast<IPeakFunction>(
           FunctionFactory::Instance().createFunction(m_peakFuncType));
+#else
+    IPeakFunction_sptr peakfunc = m_peakFunction;
+#endif
 
     double in_centre = peakX[i_centre - i_min];
     double peakleftbound = peakX.front();
-    double peakrightbound = peakX.back();
-    PeakFittingRecord fitresult1 = multiFitPeakBackground(peakws, 0, input, spectrum, peakfunc, in_centre, g_height,vec_FWHM,
+    double peakrightbound = peakX[numpts-1];
+    PeakFittingRecord fitresult1 = multiFitPeakBackground(peakws, 0, input, spectrum, numpts-1, peakfunc, in_centre, g_height,vec_FWHM,
                                                           peakleftbound, peakrightbound, user_centre);
 
     // Fit upon observation
@@ -1348,7 +1377,7 @@ namespace Algorithms
     peakrightbound = g_centre + 3*g_fwhm;
     vec_FWHM.clear();
     vec_FWHM.push_back(g_fwhm);
-    PeakFittingRecord fitresult2 = multiFitPeakBackground(peakws, 0, input, spectrum, peakfunc, in_centre, g_height,vec_FWHM,
+    PeakFittingRecord fitresult2 = multiFitPeakBackground(peakws, 0, input, spectrum, numpts-1, peakfunc, in_centre, g_height,vec_FWHM,
                                                           peakleftbound, peakrightbound, user_centre);
 
     // Compare results and add result to row
@@ -1364,6 +1393,7 @@ namespace Algorithms
     * @param purepeakindex :: workspace index for purepeakws
     * @param dataws :: raw data workspace
     * @param datawsindex :: workspace index of the spectrum in raw data workspace
+    * @param iendx :: index of the last (rightmost) defined x value
     * @param peak :: peak function to fit
     * @param in_centre :: starting value of peak centre
     * @param in_height :: starting value of peak height
@@ -1374,7 +1404,7 @@ namespace Algorithms
     */
   PeakFittingRecord FindPeaks::multiFitPeakBackground(MatrixWorkspace_sptr purepeakws, size_t purepeakindex,
                                                       MatrixWorkspace_sptr dataws, size_t datawsindex,
-                                                      IPeakFunction_sptr peak,
+                                                      size_t iendx, IPeakFunction_sptr peak,
                                                       double in_centre, double in_height, std::vector<double> in_fwhms,
                                                       double peakleftboundary, double peakrightboundary, double user_centre)
   {
@@ -1398,8 +1428,8 @@ namespace Algorithms
 
     // Fit PEAK function without background
     std::string peakcentreconstraint = makePeakCentreConstraint(peak, peakleftboundary, peakrightboundary, false);
-    double startx = purepeakws->readX(purepeakindex)[0];
-    double endx = purepeakws->readX(purepeakindex).back();
+    double startx = purepeakws->readX(purepeakindex).front();
+    double endx = purepeakws->readX(purepeakindex)[iendx];
 
     for (size_t i = 0; i < in_fwhms.size(); ++i)
     {
@@ -1798,6 +1828,8 @@ namespace Algorithms
     centre = vecX[i_min];
     double highest = vecY[i_min];
     double lowest = vecY[i_min];
+    if (i_max == vecY.size())
+      -- i_max;
     for (size_t i = i_min+1; i <= i_max; ++i)
     {
       double y = vecY[i];
@@ -1922,13 +1954,17 @@ namespace Algorithms
     y0 = 0.0;
     xf = 0.0;
     yf = 0.0;
+    size_t imax = i_max;
+    if (i_max == Y.size())
+      imax -= 1;
+
     for (size_t i = 0; i < numavg; ++i)
     {
       x0 += X[i_min+i];
       y0 += Y[i_min+i];
 
-      xf += X[i_max-i];
-      yf += Y[i_max-i];
+      xf += X[imax-i];
+      yf += Y[imax-i];
     }
     x0 = x0 / static_cast<double>(numavg);
     y0 = y0 / static_cast<double>(numavg);
@@ -1952,7 +1988,7 @@ namespace Algorithms
     }
 
     g_log.debug() << "Estimated background: A0 = " << out_bg0 << ", A1 = "
-                        << out_bg1 << ".\n";
+                  << out_bg1 << ".\n";
 
     return;
   }
@@ -1973,7 +2009,7 @@ namespace Algorithms
     if (i_min >= i_max)
       throw std::runtime_error("i_min cannot larger or equal to i_max");
 
-    // FIXME - THIS IS A MAGI NUMBER
+    // FIXME - THIS IS A MAGIC NUMBER
     const size_t MAGICNUMBER = 12;
     size_t numavg;
     if (i_max - i_min > MAGICNUMBER)
@@ -2329,11 +2365,15 @@ namespace Algorithms
     peakFunc->setFwhm(sigma);
 
     // put the two together and return
-    CompositeFunction* fitFunc = new CompositeFunction();
+    // CompositeFunction* fitFunc = new CompositeFunction();
+
+    CompositeFunction_sptr fitFunc = boost::make_shared<CompositeFunction>();
     fitFunc->addFunction(peakFunc);
     fitFunc->addFunction(background);
 
-    return boost::shared_ptr<IFunction>(fitFunc);
+    IFunction_sptr ifunc = boost::dynamic_pointer_cast<IFunction>(fitFunc);
+
+    return ifunc;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -2485,21 +2525,31 @@ namespace Algorithms
     }
 
     // Construct a background data workspace for fit
+#if 0
     MatrixWorkspace_sptr bkgdWS =
         API::WorkspaceFactory::Instance().create("Workspace2D", 1, newX.size(), newY.size());
+#else
+    MatrixWorkspace_sptr bkgdWS = m_tempWS;
+#endif
 
     MantidVec& wsX = bkgdWS->dataX(0);
     MantidVec& wsY = bkgdWS->dataY(0);
     MantidVec& wsE = bkgdWS->dataE(0);
+    for (size_t i = 0; i < newX.size(); ++i)
+      wsX[i] = newX[i];
+
     for (size_t i = 0; i < newY.size(); i++)
     {
-      wsX[i] = newX[i];
       wsY[i] = newY[i];
       wsE[i] = newE[i];
     }
+    for (size_t i = newX.size(); i < wsX.size(); ++i)
+    {
+      wsX[i] = wsX[i-1] + 1.0;
+    }
 
     // Fit range
-    double startx = newX[0];
+    double startx = newX.front();
     double endx = newX.back();
 
     g_log.debug() << "Background Type = " << m_backgroundType << "  Function: "
