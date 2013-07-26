@@ -62,24 +62,15 @@ const std::string LoadLLB::category() const {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadLLB::confidence(Kernel::NexusDescriptor & descriptor) const
-{	
-	const auto & firstEntry = descriptor.firstEntryNameType();
-
-	const std::string path = "/" + firstEntry.first + "/nxinstrument/name";
-	if (descriptor.pathExists(path)) {
-		::NeXus::File &file = descriptor.data();
-		file.openPath(path);
-		std::string instrumentName = file.getStrData();
-
-		for (auto it = m_supportedInstruments.begin();
-				it != m_supportedInstruments.end(); ++it) {
-			g_log.debug() << "\t: " << *it << std::endl;
-			if (instrumentName == *it)
-				return 80;
-		}
+int LoadLLB::confidence(Kernel::NexusDescriptor & descriptor) const {
+	// fields existent only at the LLB
+	if (descriptor.pathExists("/nxentry/program_name")
+			&& descriptor.pathExists("/nxentry/subrun_number")
+			&& descriptor.pathExists("/nxentry/total_subruns")) {
+		return 80;
+	} else {
+		return 0;
 	}
-	return 0;
 }
 
 //----------------------------------------------------------------------------------------------
