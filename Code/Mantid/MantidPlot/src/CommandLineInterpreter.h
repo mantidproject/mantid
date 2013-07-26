@@ -157,6 +157,8 @@ private:
   void handleDownKeyPress();
   /// Handle a return key press
   void handleReturnKeyPress();
+  /// Handle a backspace key press
+  bool handleBackspace();
   /// Try to execute the code in the current buffer.
   void tryExecute();
   /// Execute the given code

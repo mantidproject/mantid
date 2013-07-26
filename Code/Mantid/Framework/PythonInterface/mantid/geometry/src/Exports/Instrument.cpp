@@ -24,6 +24,7 @@ void export_Instrument()
     .def("getReferenceFrame", (boost::shared_ptr<const ReferenceFrame> (Instrument::*)())&Instrument::getReferenceFrame )
     .def("getValidFromDate", &Instrument::getValidFromDate, "Return the valid from date of the instrument")
     .def("getValidToDate", &Instrument::getValidToDate, "Return the valid to date of the instrument")
+    .def("getBaseInstrument", &Instrument::baseInstrument,"Return reference to the base instrument")
       ;
     ;
     

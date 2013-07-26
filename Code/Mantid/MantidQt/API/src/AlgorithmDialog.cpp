@@ -877,6 +877,24 @@ QString AlgorithmDialog::getValue(QWidget *widget)
   }
 }
 
+QString AlgorithmDialog::getPreviousValue(const QString& propName)
+{
+  QString value;
+
+  if (!isForScript())
+  {
+    value = m_propertyValueMap.value(propName);
+    if (value.isEmpty())
+      value = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
+  }
+  else if(getAlgorithmProperty(propName) != NULL)
+  {
+    value = m_propertyValueMap.value(propName);
+  }
+
+  return value;
+}
+
 //------------------------------------------------------------------------------------------------
 /** Set a value for a widget.
  *
@@ -885,25 +903,14 @@ QString AlgorithmDialog::getValue(QWidget *widget)
  * @param widget :: A pointer to the widget
  * @param propName :: The property name
  */
-void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString & propName)
+void AlgorithmDialog::setPreviousValue(QWidget* widget, const QString& propName)
 {
-  // Get the value from either the previous input store or from Python argument
-  QString value("");
-  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+  QString value = getPreviousValue(propName);
 
-  if( !isForScript() )
-  {
-    value = m_propertyValueMap.value(propName);
-    if( value.isEmpty() )
-    {
-      value = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
-    }
-  }
-  else
-  {
-    if( !property ) return;
-    value = m_propertyValueMap.value(propName);
-  }
+  if(value.isEmpty())
+    return;
+
+  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
 
   // Do the right thing for the widget type
   if( QComboBox *opts = qobject_cast<QComboBox*>(widget) )

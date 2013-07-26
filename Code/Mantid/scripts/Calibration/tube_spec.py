@@ -1,18 +1,43 @@
 from mantid.simpleapi import *
 from mantid.kernel import *
 
-class TubeSpec:
-
 # This class is to take a specification of a set of tubes for an instrument provided by a user
 # and then provide a list of workspace index ranges corresponding to each of the specified tubes
 # to be used the the tube calibration code
 
 # Author: Karl Palmen ISIS
 
+class TubeSpec:
+    """
+    The python class :class:`~tube_spec.TubeSpec` provides a way of specifying a set of tubes for 
+    calibration, so that the necessary information about detectors etc. is forethcoming. This class 
+    is provide by the python file tube_spec.py. The function :func:`~tube_calib.getCalibration` of 
+    :mod:`tube_calib` needs such an object.
+    
+    Configuration methods: 
+
+     * :meth:`~tube_spec.TubeSpec.setTubeSpecByString`
+     * :meth:`~tube_spec.TubeSpec.setTubeSpecByStringArray`
+
+    There are some functions useful for getting information about a tube specification. 
+    It is not necessary to call them in a calibration script, but they may be useful for checking 
+    the specification. These methods are:
+
+     * :meth:`~tube_spec.TubeSpec.getNumTubes`
+     * :meth:`~tube_spec.TubeSpec.getDetectorInfoFromTube`
+     * :meth:`~tube_spec.TubeSpec.getTubeLength`
+     * :meth:`~tube_spec.TubeSpec.getTubeName`
+     * :meth:`~tube_spec.TubeSpec.getTubeByString`
+    
+    .. note::
+     
+        Tubes are currently ordered in the specification in the same order as they appear in the IDF. 
+        This may differ from the order they appear in the workspace indices. 
+    
+    """
     def __init__(self,ws):
         """     
-        Creates empty tube specification for specified instrument.
-        
+        The constructor creates empty tube specification for specified instrument.   
         :param ws: workspace containing the specified instrument with one pixel detector per spectrum.
         """	
 	self.ws = ws
@@ -26,7 +51,9 @@ class TubeSpec:
         
         
     def setTubeSpecByString(self, tubeSpecString ):
-        """     
+        """
+        Define the sets of tube from the workspace.
+
         Sets tube specification by string. The string specifies a component of the intrument
         as in the instrument tree of its IDF file. This component may contain one or more tubes
         and possibly all the tunes in the instrument.
@@ -35,12 +62,12 @@ class TubeSpec:
         
         :param tubeSpecString: string specifying tubes of a component of the instrument
         
-        The 'tubeSpecString' may be the full path name for the component or 
+        The **tubeSpecString** may be the full path name for the component or 
         steps may be missed out provided it remains unique.
-        For example panel03 of WISH can be specified by just 'panel03', 
+        For example panel03 of WISH can be specified by just **panel03**, 
         because panel03 is unique within the instrument. Also tube012 of this panel, 
         which is unique within the panel but not within the instrument 
-        can be specified by 'panel03/tube012' but not 'tube012'.
+        can be specified by **panel03/tube012** but not **tube012**.
         If the specification is not unique, the first found will be used and there will
         be no error message. So if in doubt don't skip a step.
         """	
@@ -50,8 +77,18 @@ class TubeSpec:
         
     def setTubeSpecByStringArray( self, tubeSpecArray ):
         """
+        Define the sets of tube from the workspace with an array of strings.
+
         Set tube specification like setTubeSpecByString, but with an array of string
-        to enable multiple components to be calibrated
+        to enable multiple components to be calibrated. 
+
+        This function allows you to calibrate a set of tubes that is not defined by a single component. 
+        For example a set of windows. It takes an array of strings as its argument. 
+        Each string specifies a component such as a window or a single tube in the same manner as for 
+        :meth:`~tube_spec.TubeSpec.setTubeSpecByString`. The components must be disjoint. 
+
+        :param tubeSpecArray: array of strings (ex. ['door1', 'door2'])
+
         """
         for i in range(len(tubeSpecArray)):
            self.setTubeSpecByString(tubeSpecArray[i])
@@ -158,11 +195,17 @@ class TubeSpec:
 	     
 	return self.componentArray
  
-
-	
     def getDetectorInfoFromTube( self, tubeIx ):
         """     
         Returns detector info for one tube (currently ID of first detector and number of detectors in tube)
+
+        Returns information about detectors in the ( **tubeIx** +1)st tube in the specification, 
+        where **tubeIx** is the argument. Three integers are returned:
+
+          the ID for the first detector,
+          the number of detectors in the tube and
+          the increment step of detector IDs in the tube (usually 1, but may be -1). 
+
         It assumes that all the pixels along the tube have consecutive detector IDs.
         
         :param tubeIx:  index of Tube in specified set 
@@ -204,12 +247,13 @@ class TubeSpec:
         return firstDet, numDet, step
         
     def getTubeLength( self, tubeIx ):
-        """     
-        Returns length of tube.
+        """
+        Returns length of the ( **tubeIx** +1)st tube.
         
         :param tubeIx:  index of Tube in specified set 
 	
 	:rtype: Length of tube (first pixel to last pixel) in metres. 0.0 if tube not found.
+        
         """	
 	nTubes = self.getNumTubes()
 	if(nTubes < 0):
@@ -231,7 +275,8 @@ class TubeSpec:
             
     def getTubeName ( self, tubeIx ):
         """     
-        Returns name of tube. 
+        Returns name of tube.
+ 
         This function is not used in tube calibration, but may be useful as a diagnostic.
         It is used in creating the peakfile, which lists the peaks found for each tube.
         
