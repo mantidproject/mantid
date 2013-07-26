@@ -170,11 +170,11 @@ public:
   void run()
   {
     //Local tof limits
-    double my_shortest_tof, my_longest_tof;
-    my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
-    my_longest_tof = 0.;
+    double my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
+    double my_longest_tof = 0.;
     // A count of "bad" TOFs that were too high
     size_t badTofs = 0;
+    size_t my_discarded_events(0);
 
     prog->report(entry_name + ": precount");
 
@@ -295,6 +295,10 @@ public:
               eventVector->push_back( WeightedEvent(tof, pulsetime, weight, errorSq) );
 #endif
             }
+            else
+            {
+              ++my_discarded_events;
+            }
           }
           else
           {
@@ -309,6 +313,10 @@ public:
 #else
               eventVector->push_back( TofEvent(tof, pulsetime) );
 #endif
+            }
+            else
+            {
+              ++my_discarded_events;
             }
           }
 
@@ -364,6 +372,7 @@ public:
       if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
       if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
       alg->bad_tofs += badTofs;
+      alg->discarded_events += my_discarded_events;
     }
 
 
@@ -938,7 +947,7 @@ private:
 
 /// Empty default constructor
 LoadEventNexus::LoadEventNexus() : IFileLoader<Kernel::NexusDescriptor>(),
-    event_id_is_spec(false), m_allBanksPulseTimes(NULL)
+    discarded_events(0), event_id_is_spec(false), m_allBanksPulseTimes(NULL)
 {
 }
 
@@ -1170,6 +1179,14 @@ void LoadEventNexus::exec()
   // Load the detector events
   WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
   loadEvents(&prog, false); // Do not load monitor blocks
+
+  if ( discarded_events > 0 )
+  {
+    g_log.information() << discarded_events
+                        << " events were encountered coming from pixels which are not in the Instrument Definition File."
+                           "These events were discarded.\n";
+  }
+
   //add filename
   WS->mutableRun().addProperty("Filename",m_filename);
   //Save output

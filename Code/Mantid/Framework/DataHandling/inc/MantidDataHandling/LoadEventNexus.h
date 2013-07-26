@@ -127,6 +127,8 @@ namespace Mantid
       double shortest_tof;
       /// Count of all the "bad" tofs found. These are events with TOF > 2e8 microsec
       size_t bad_tofs;
+      /// A count of events discarded because they came from a pixel that's not in the IDF
+      size_t discarded_events;
 
       /// Do we pre-count the # of events in each pixel ID?
       bool precount;
