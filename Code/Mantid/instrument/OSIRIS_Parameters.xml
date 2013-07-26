@@ -16,7 +16,7 @@
 </parameter>
 
 <parameter name="refl-diffraction" type="string">
-  <value val="diffraction" />
+  <value val="diffonly,diffspec" />
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->
@@ -34,10 +34,6 @@
 </parameter>
 <parameter name="Workflow.NamingConvention" type="string">
     <value val="AnalyserReflection" />
-</parameter>
-
-<parameter name="Workflow.Diffraction.Correction" type="string">
-    <value val="Vanadium" />
 </parameter>
 
 </component-link>

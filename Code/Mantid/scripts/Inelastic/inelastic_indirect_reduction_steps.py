@@ -721,6 +721,17 @@ class ConvertToEnergy(ReductionStep):
             else:
                 Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= rstwo)
 
+class RebinToFirstSpectrum(ReductionStep):
+    """
+        A simple step to rebin the input workspace to match
+        the first spectrum of itself
+    """
+
+    def execute(self, reducer, inputworkspace):
+        RebinToWorkspace(WorkspaceToRebin=inputworkspace,WorkspaceToMatch=inputworkspace,
+                         OutputWorkspace=inputworkspace)
+        
+
 class DetailedBalance(ReductionStep):
     """
     """
