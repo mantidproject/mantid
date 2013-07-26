@@ -40,6 +40,9 @@ private:
 		  std::vector<int> start, std::vector<int> end, int dim);
 
   void copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws);
+
+  virtual void initDocs();
+
 };
 
 #endif /*SLICEMDHISTO_H_*/

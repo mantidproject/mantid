@@ -80,6 +80,8 @@ private:
   int calculateCAddress(int *pos, int* dim, int rank);
   int calculateF77Address(int *pos, int rank);
   size_t *indexMaker;
+
+  virtual void initDocs();
 };
 
 #endif /*FLEXINEXUSLOADER_H_*/

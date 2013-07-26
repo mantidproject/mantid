@@ -42,6 +42,8 @@ private:
   void doTRICS( Mantid::API::IMDHistoWorkspace_sptr inws);
   void doAMOR( Mantid::API::IMDHistoWorkspace_sptr inws);
 
+  virtual void initDocs();
+
   void copyMetaData( Mantid::API::IMDHistoWorkspace_sptr inws,  Mantid::API::IMDHistoWorkspace_sptr outws);
 };
 

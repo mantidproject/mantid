@@ -40,6 +40,7 @@ private:
   unsigned int calcIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
   unsigned int calcInvertedIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
 
+  virtual void initDocs();
 
 };
 

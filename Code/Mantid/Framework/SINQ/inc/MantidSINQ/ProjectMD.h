@@ -40,6 +40,7 @@ private:
   void putValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim, double val);
   unsigned int calcIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
 
+  virtual void initDocs();
 };
 
 #endif /*PROJECTMD_H_*/

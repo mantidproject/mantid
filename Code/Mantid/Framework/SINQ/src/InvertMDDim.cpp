@@ -1,3 +1,12 @@
+/*WIKI*
+== Description ==
+
+InvertMDDim inverts the dimensions of a MDHistoWorkspace. It copies the data around to 
+match the new dimensions. This algorithm is useful when dealing with storage order 
+issues.
+
+ *WIKI*/
+
 /**
  * This Algorithms inverts the dimensions of a MD data set. The
  * application area is when fixing up MD workspaces which had to have the
@@ -126,4 +135,8 @@ unsigned int InvertMDDim::calcInvertedIndex(IMDHistoWorkspace_sptr ws, int dim[]
 		throw std::runtime_error("Unsupported dimension depth");
 	}
 	return idx;
+}
+void InvertMDDim::initDocs()
+{
+    this->setWikiSummary("Inverts dimensions of a MDHistoWorkspace");
 }

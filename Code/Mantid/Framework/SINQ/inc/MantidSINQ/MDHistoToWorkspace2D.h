@@ -34,6 +34,8 @@ private:
   ///Execution code
   void exec();
 
+  virtual void initDocs();
+
   int rank;
   int currentSpectra;
   int calculateNSpectra( Mantid::API::IMDHistoWorkspace_sptr inws);
