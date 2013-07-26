@@ -30,7 +30,7 @@ namespace
   /// Boost macro for "looping" over builtin types
   #define BUILTIN_TYPES \
     BOOST_PP_TUPLE_TO_LIST( \
-        5, (double, std::string, int, int64_t, float) \
+      6, (double, std::string, int, int64_t, float, size_t)    \
     )
   #define USER_TYPES \
     BOOST_PP_TUPLE_TO_LIST( \

@@ -77,11 +77,11 @@ namespace Mantid
       double calculateQ(const double efixed,const int emode, const double deltaE,
                         const double twoTheta, const double azimuthal) const;
       /// Init variables cache base on the given workspace
-      void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
+      void initCachedValues(const API::MatrixWorkspace_const_sptr & workspace);
       /// Init the theta index
-      void initThetaCache(API::MatrixWorkspace_const_sptr workspace);
+      void initAngularCachesNonPSD(const API::MatrixWorkspace_const_sptr & workspace);
       /// Get angles and calculate angular widths.
-      void getValuesAndWidths(API::MatrixWorkspace_const_sptr workspace);
+      void initAngularCachesPSD(const API::MatrixWorkspace_const_sptr &workspace);
 
       /// Create the output workspace
       DataObjects::RebinnedOutput_sptr setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
