@@ -160,7 +160,6 @@ namespace Mantid
       bool outOfRange(false);
       for (size_t i = 0; i < nData; ++i)
       {
-
         if(checkXInRange(xValues[i]))
         {
           //calculate the y value

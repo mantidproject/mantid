@@ -10,9 +10,8 @@ Optionally, this algorithm can also calculate the first and second derivatives o
 
 If the input workspace contains histograms, rather than data points, then SplineInterpolation will automatically convert the input to point data. The output returned with be in the same format as the input.
 
-=== Known Issues ===
-
-Histogram workspaces being interpolated will throw an error when the range of the data is equal to the size of the workspace to match, but has finer bin boundaries.
+Histogram workspaces being interpolated will show a warning when the range of the data is equal to the size of the workspace to match, but has finer bin boundaries. This is because histogram data is converted to point data using the average
+of the bin boundaries. This will cause some values to fall outside of the range of the spline when fine bin boundaries are used.
 
  *WIKI*/
 
@@ -114,8 +113,7 @@ namespace Mantid
       MatrixWorkspace_sptr mwspt = convertBinnedData(mws);
       MatrixWorkspace_const_sptr iwspt = convertBinnedData(iws);
 
-      MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(iws, histNo);
-
+      MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, histNo);
 
       //for each histogram in workspace, calculate interpolation and derivatives
       for (int i = 0; i < histNo; ++i)
@@ -123,23 +121,21 @@ namespace Mantid
         //Create and instance of the cubic spline function
         m_cspline = boost::make_shared<CubicSpline>();
         //set the interpolation points
-        setInterpolationPoints(mwspt, 0);
+        setInterpolationPoints(iwspt, i);
 
         //compare the data set against our spline
-        calculateSpline(iwspt, outputWorkspace, i);
-        outputWorkspace->setX(i, iws->readX(i));
+        calculateSpline(mwspt, outputWorkspace, i);
+        outputWorkspace->setX(i, mws->readX(0));
 
         //check if we want derivatives
         if(order > 0)
         {
           //calculate the derivatives for each order chosen
-          derivs[i] = setupOutputWorkspace(iws, order);
+          derivs[i] = setupOutputWorkspace(mws, order);
           for(int j = 0; j < order; ++j)
           {
-
-            derivs[i]->setX(j, iws->readX(i));
-            calculateDerivatives(iwspt, derivs[i], j+1, i);
-
+            derivs[i]->setX(j, mws->readX(0));
+            calculateDerivatives(mwspt, derivs[i], j+1);
           }
         }
       }
@@ -250,11 +246,11 @@ namespace Mantid
      * @param row :: The row of spectra to use
      */
     void SplineInterpolation::calculateDerivatives(API::MatrixWorkspace_const_sptr inputWorkspace,
-        API::MatrixWorkspace_sptr outputWorkspace, int order, int row) const
+        API::MatrixWorkspace_sptr outputWorkspace, int order) const
     {
       //get x and y parameters from workspaces
-      size_t nData = inputWorkspace->readY(row).size();
-      const double* xValues = inputWorkspace->readX(row).data();
+      size_t nData = inputWorkspace->readY(0).size();
+      const double* xValues = inputWorkspace->readX(0).data();
       double* yValues = outputWorkspace->dataY(order-1).data();
 
       //calculate the derivatives
@@ -271,9 +267,8 @@ namespace Mantid
         MatrixWorkspace_sptr outputWorkspace, int row) const
     {
       //setup input parameters
-
-      size_t nData = inputWorkspace->readY(row).size();
-      const double* xValues = inputWorkspace->readX(row).data();
+      size_t nData = inputWorkspace->readY(0).size();
+      const double* xValues = inputWorkspace->readX(0).data();
       double* yValues = outputWorkspace->dataY(row).data();
 
       //calculate the interpolation
