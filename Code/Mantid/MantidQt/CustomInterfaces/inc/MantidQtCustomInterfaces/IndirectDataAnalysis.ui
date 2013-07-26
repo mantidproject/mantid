@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>752</width>
-    <height>575</height>
+    <width>776</width>
+    <height>577</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -841,97 +841,154 @@
       </attribute>
       <layout class="QVBoxLayout" name="layoutConFit">
        <item>
-        <layout class="QHBoxLayout" name="confit_layoutInput">
-         <item>
-          <widget class="QComboBox" name="confit_cbInputType">
+        <layout class="QGridLayout" name="confit_layoutFiles">
+         <item row="1" column="0">
+          <layout class="QHBoxLayout" name="confit_ResType">
            <item>
-            <property name="text">
-             <string>File</string>
-            </property>
+            <widget class="QLabel" name="lbl_resFile">
+             <property name="text">
+              <string>Resolution File Type:</string>
+             </property>
+            </widget>
            </item>
            <item>
-            <property name="text">
-             <string>Workspace</string>
-            </property>
+            <widget class="QComboBox" name="confit_cbResType">
+             <item>
+              <property name="text">
+               <string>RES File</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Data File</string>
+              </property>
+             </item>
+            </widget>
            </item>
-          </widget>
+          </layout>
          </item>
-         <item>
-          <widget class="QStackedWidget" name="confit_swInput">
+         <item row="2" column="0">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_resInput">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
              <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
+             <verstretch>41</verstretch>
             </sizepolicy>
            </property>
-           <property name="currentIndex">
-            <number>0</number>
+           <property name="findRunFiles" stdset="0">
+            <bool>false</bool>
            </property>
-           <widget class="QWidget" name="confit_page_inputFile">
-            <layout class="QHBoxLayout" name="confit_layout_page_inputFile">
-             <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_inputFile">
-               <property name="findRunFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="label" stdset="0">
-                <string/>
-               </property>
-               <property name="multipleFiles" stdset="0">
-                <bool>false</bool>
-               </property>
-               <property name="fileExtensions">
-                <stringlist>
-                 <string>_red.nxs</string>
-                 <string>_sqw.nxs</string>
-                </stringlist>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="confit_page_inputWorkspace">
-            <layout class="QHBoxLayout" name="horizontalLayout_29">
-             <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample"/>
-             </item>
-            </layout>
-           </widget>
+           <property name="label" stdset="0">
+            <string>Resolution File:</string>
+           </property>
+           <property name="multipleFiles" stdset="0">
+            <bool>false</bool>
+           </property>
+           <property name="fileExtensions">
+            <stringlist>
+             <string>_res.nxs</string>
+             <string>.res</string>
+            </stringlist>
+           </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="1">
           <widget class="QPushButton" name="confit_pbPlotInput">
            <property name="text">
             <string>Plot Input</string>
            </property>
           </widget>
          </item>
+         <item row="0" column="0">
+          <layout class="QHBoxLayout" name="confit_layout_input">
+           <property name="spacing">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QComboBox" name="confit_cbInputType">
+             <item>
+              <property name="text">
+               <string>File</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Workspace</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QStackedWidget" name="confit_swInput">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>527</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="currentIndex">
+              <number>0</number>
+             </property>
+             <widget class="QWidget" name="confit_page_inputFile">
+              <layout class="QHBoxLayout" name="confit_layout_page_inputFile">
+               <item>
+                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_inputFile">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>41</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="findRunFiles" stdset="0">
+                  <bool>false</bool>
+                 </property>
+                 <property name="label" stdset="0">
+                  <string/>
+                 </property>
+                 <property name="multipleFiles" stdset="0">
+                  <bool>false</bool>
+                 </property>
+                 <property name="fileExtensions">
+                  <stringlist>
+                   <string>_red.nxs</string>
+                   <string>_sqw.nxs</string>
+                  </stringlist>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="confit_page_inputWorkspace">
+              <layout class="QHBoxLayout" name="horizontalLayout_29">
+               <item>
+                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample"/>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+           </item>
+          </layout>
+         </item>
         </layout>
        </item>
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_resInput">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-           <horstretch>0</horstretch>
-           <verstretch>41</verstretch>
-          </sizepolicy>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <property name="findRunFiles" stdset="0">
-          <bool>false</bool>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
          </property>
-         <property name="label" stdset="0">
-          <string>Resolution File</string>
-         </property>
-         <property name="multipleFiles" stdset="0">
-          <bool>false</bool>
-         </property>
-         <property name="fileExtensions">
-          <stringlist>
-           <string>_res.nxs</string>
-           <string>.res</string>
-          </stringlist>
-         </property>
-        </widget>
+        </spacer>
        </item>
        <item>
         <layout class="QHBoxLayout" name="confit_layoutPlotArea">
@@ -2363,8 +2420,6 @@
   <tabstop>furyfit_ckConstrainIntensities</tabstop>
   <tabstop>furyfit_ckPlotGuess</tabstop>
   <tabstop>furyfit_leSpecNo</tabstop>
-  <tabstop>confit_cbInputType</tabstop>
-  <tabstop>confit_pbPlotInput</tabstop>
   <tabstop>confit_cbFitType</tabstop>
   <tabstop>confit_cbBackground</tabstop>
   <tabstop>confit_ckPlotGuess</tabstop>
