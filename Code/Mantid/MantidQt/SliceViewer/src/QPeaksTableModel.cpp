@@ -81,8 +81,8 @@ namespace MantidQt
       double sigma = peak.getSigmaIntensity();
       m_dataCache.push_back(QString::number(intensity, 'f', 1));
       m_dataCache.push_back(QString::number(sigma, 'f', 1));
-      m_dataCache.push_back(QString::number(intensity/sigma, 'f', 1));
-      m_dataCache.push_back(QString::number(peak.getBinCount()));
+      m_dataCache.push_back(QString::number(intensity/sigma, 'f', 2));
+      m_dataCache.push_back(QString::number(peak.getBinCount(), 'g', 2));
       m_dataCache.push_back(QString(peak.getBankName().c_str()));
       m_dataCache.push_back(QString::number(peak.getRow()));
       m_dataCache.push_back(QString::number(peak.getCol()));
@@ -134,7 +134,7 @@ namespace MantidQt
       else if (column == COL_INT_SIGINT)
         return 5;
       else if (column == COL_BINCOUNT)
-        return 5;
+        return 6;
       else if (column == COL_BANKNAME)
         return 6;
       else if (column == COL_ROW)
