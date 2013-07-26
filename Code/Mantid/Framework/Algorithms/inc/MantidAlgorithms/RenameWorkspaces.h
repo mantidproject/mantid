@@ -15,15 +15,11 @@ namespace Algorithms
     The renaming is implemented as a removal of the original workspace from the data service
     and re-addition under the new name.
 
-    The algorithm will fail with an error if any of the OutputWorkspace names specified
-    (or constructed using Prefix of Suffix) do already exist in ADS.
-
     Required Properties:
     <UL>
     <LI> InputWorkspace - Comma sepatated list of names of the Workspace to take as input </LI>
-    <LI> OutputWorkspace - Comma separated list of new names </LI>
-    <LI> Prefix - String which will be added to the front of every InputWorkspace name </LI>
-    <LI> Suffix - String which will be added to the end of every InputWorkspace name </LI>
+    <LI> OutputWorkspace - string to append or prefix of the names of the workspaces </LI>
+    <LI> Prefix - true if prefixing the Output Workspace name
     </UL>
 
     Copyright &copy; 2007-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

@@ -36,7 +36,7 @@ using namespace API;
 void RenameWorkspace::init()
 {
   declareProperty(new WorkspaceProperty<Workspace> ("InputWorkspace", "", Direction::Input));
-  declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "", Direction::Output, UniqueMode::Unique));
+  declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "", Direction::Output));
 }
 
 /** Executes the algorithm
@@ -84,8 +84,6 @@ bool RenameWorkspace::processGroups()
   // Basically we rename if the members ALL follow the pattern GroupName_1, _2, _3 etc.
   const bool renameMembers = inputGroup->areNamesSimilar();
 
-  setProperty("OutputWorkspace", inputWS);
-
   AnalysisDataService::Instance().rename(inputwsName, outputwsName);
 
   // If necessary, go through group members calling the algorithm on each one
@@ -115,6 +113,7 @@ bool RenameWorkspace::processGroups()
       }
     }
   }
+  setProperty("OutputWorkspace", inputWS);
 
   // We finished successfully.
   setExecuted(true);
