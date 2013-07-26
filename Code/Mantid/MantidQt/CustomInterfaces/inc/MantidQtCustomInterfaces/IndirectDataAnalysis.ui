@@ -2109,7 +2109,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainerInput"/>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer"/>
              </item>
             </layout>
            </widget>
