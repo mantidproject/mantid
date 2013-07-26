@@ -164,19 +164,21 @@ namespace Mantid
         if(checkXInRange(xValues[i]))
         {
           //calculate the y value
-          y = gsl_spline_eval(m_spline.get(), xValues[i], m_acc.get());
-          int errorCode = gsl_spline_eval_e(m_spline.get(), xValues[i], m_acc.get(), &y);
-
-          //check if GSL function returned an error
-          checkGSLError(errorCode, GSL_EDOM);
-
+          y = splineEval(xValues[i]);
           out[i] = y;
         }
         else
         {
-          //if out of range, just set it to zero
+          //if out of range, set it to constant of fringe values
           outOfRange = true;
-          out[i] = 0;
+          if(xValues[i] < m_spline->interp->xmin)
+          {
+            out[i] = splineEval(m_spline->interp->xmin);
+          }
+          else
+          {
+            out[i] = splineEval(m_spline->interp->xmax);
+          }
         }
       }
 
@@ -185,6 +187,24 @@ namespace Mantid
       {
         g_log.warning() << "Some x values where out of range and will not be calculated." << std::endl;
       }
+    }
+
+    /**Evaluate a point on the spline. Includes basic error handling
+     *
+     * @param out :: The array to store the calculated values
+     * @param xValues :: The array of x values we wish to interpolate
+     * @param nData :: The size of the arrays
+     */
+    double CubicSpline::splineEval(const double x) const
+    {
+      //calculate the y value
+      double y = gsl_spline_eval(m_spline.get(), x, m_acc.get());
+      int errorCode = gsl_spline_eval_e(m_spline.get(), x, m_acc.get(), &y);
+
+      //check if GSL function returned an error
+      checkGSLError(errorCode, GSL_EDOM);
+
+      return y;
     }
 
     /** Calculate the derivatives of each of the supplied points

@@ -108,6 +108,9 @@ namespace Mantid
 
       /// Check if an x value falls within the range of the spline
       bool checkXInRange(double x) const;
+
+      /// Evaluate a point on the spline, with basic error handling
+      double splineEval(const double x) const;
     };
 
 
