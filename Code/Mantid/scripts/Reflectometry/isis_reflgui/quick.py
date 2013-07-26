@@ -304,9 +304,13 @@ def cleanup():
 			DeleteWorkspace(name)
 		
 def coAdd(run,name):
-	names = mtd.getObjectNames()
 	wTof = "_W" + name   		# main workspace in time-of-flight	
-	if run in names:
+	if mtd.doesExist(run):
+		# If ws with such name already exists, delete it, so
+		# RenameWorkspace will not complain
+		if mtd.doesExist(wTof):
+			mtd.remove(wTof)
+
 		RenameWorkspace(InputWorkspace=run,OutputWorkspace=wTof)
 	else:
 

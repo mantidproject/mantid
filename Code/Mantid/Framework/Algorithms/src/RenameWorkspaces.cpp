@@ -92,7 +92,6 @@ void RenameWorkspaces::exec()
      }
   }
 
-
   size_t nWs = inputWsName.size();
   if( newWsName.size() > 0) {
     // We are using a list of new names
@@ -109,6 +108,13 @@ void RenameWorkspaces::exec()
     {
       newWsName.push_back(prefix+inputWsName[i]+suffix);
     }
+  }
+
+  // Check that all of the new names are unique
+  for(auto it = newWsName.begin(); it != newWsName.end(); it++)
+  {
+    if(AnalysisDataService::Instance().doesExist((*it)))
+      throw std::invalid_argument("Workspace with the name \"" + (*it) + "\" already exists");
   }
 
   // loop over array and rename each workspace

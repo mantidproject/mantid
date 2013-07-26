@@ -46,6 +46,7 @@ public:
     wsp4 = new WorkspaceProperty<Workspace>("workspace4","",Direction::Input, PropertyMode::Optional);
     wsp5 = new WorkspaceProperty<WorkspaceTester2>("workspace5","",Direction::Input, PropertyMode::Optional);
     wsp6 = new WorkspaceProperty<Workspace>("InvalidNameTest","",Direction::Output);
+    wsp7 = new WorkspaceProperty<Workspace>("UniqueProperty", "", Direction::Output, UniqueMode::Unique);
   }
 
   ~WorkspacePropertyTest()
@@ -56,11 +57,33 @@ public:
     delete wsp4;
     delete wsp5;
     delete wsp6;
+    delete wsp7;
   }
 
   void testConstructor()
   {
     TS_ASSERT_THROWS( WorkspaceProperty<Workspace>("test","",3), std::out_of_range )
+  }
+
+  void testDefaultValues()
+  {
+    TS_ASSERT(wsp1->isLocking());
+    TS_ASSERT(!wsp1->isOptional());
+    TS_ASSERT(!wsp1->isUnique());
+  }
+
+  void testCopyConstructor()
+  {
+    WorkspaceProperty<Workspace>* newWsp = new WorkspaceProperty<Workspace>(*wsp1);
+
+    TS_ASSERT_EQUALS(wsp1->name(), newWsp->name());
+    TS_ASSERT_EQUALS(wsp1->value(), newWsp->value());
+    TS_ASSERT(wsp1->direction() == newWsp->direction());
+    TS_ASSERT(wsp1->isLocking() == newWsp->isLocking());
+    TS_ASSERT(wsp1->isOptional() == newWsp->isOptional());
+    TS_ASSERT(wsp1->isUnique() == newWsp->isUnique());
+
+    delete newWsp;
   }
 
   void testValue()
@@ -256,6 +279,19 @@ public:
 
   }
 
+  void test_unique()
+  {
+    Workspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = WorkspaceFactory::Instance().create("WorkspacePropertyTest", 1, 1, 1));
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().addOrReplace("ws1", ws));
+
+    // Check that returns an error message if is unique
+    TS_ASSERT_EQUALS(wsp7->setValue("ws1"), "Workspace with name \"ws1\" already exists");
+
+    // Check that passes if is not unique
+    TS_ASSERT_EQUALS(wsp2->setValue("ws1"), "");
+  }
+
 private:
   WorkspaceProperty<Workspace> *wsp1;
   WorkspaceProperty<Workspace> *wsp2;
@@ -263,6 +299,7 @@ private:
   WorkspaceProperty<Workspace> *wsp4;
   WorkspaceProperty<WorkspaceTester2> *wsp5;
   WorkspaceProperty<Workspace> *wsp6;
+  WorkspaceProperty<Workspace> *wsp7;
 };
 
 #endif /*WORKSPACEPROPERTYTEST_H_*/
