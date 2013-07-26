@@ -136,7 +136,8 @@ private:
   /// Add the fit record (failure) to output workspace
   void addNonFitRecord(const size_t spectrum);
 
-  void updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double> &bestEffparams, std::vector<double> &bestRawparams, double &mincost, const double expPeakPos, const double expPeakHeight);
+  void updateFitResults(API::IFunction_sptr fitfunc, std::string fitstatus, double chi2, std::vector<double> &bestEffparams,
+                        std::vector<double> &bestRawparams, double &mincost, const double expPeakPos, const double expPeakHeight);
 
   API::IFunction_sptr createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak = true);
   int getBackgroundOrder();
@@ -187,6 +188,11 @@ private:
   void processFitResult(PeakFittingRecord& r1, PeakFittingRecord& r2, API::IPeakFunction_sptr peak, API::IFunction_sptr bkgdfunc, size_t spectrum,
                         size_t imin, size_t imax, double windowsize);
 
+  bool fitFunction(const API::MatrixWorkspace_sptr ws, size_t wsindex, API::IFunction_sptr func,
+                                   int maxiteration, double startx, double endx, std::string minimizer,
+                                   std::string& fitstatus, double& chi2);
+
+
   /// Get best result from a set of fitting result
   int getBestResult(std::vector<double> vecRwp);
 
@@ -206,7 +212,7 @@ private:
   //Properties saved in the algo.
   API::MatrixWorkspace_sptr m_dataWS; ///<workspace to check for peaks
   int m_inputPeakFWHM; ///<holder for the requested peak FWHM
-  int index; ///<list of workspace indicies to check
+  int m_wsIndex; ///<list of workspace indicies to check
   bool singleSpectrum; ///<flag for if only a single spectrum is present
   bool m_highBackground; ///<flag for find relatively weak peak in high background
   bool m_rawPeaksTable; ///<flag for whether the output is the raw peak parameters or effective (centre, width, height)
