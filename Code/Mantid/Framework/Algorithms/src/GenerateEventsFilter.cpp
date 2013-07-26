@@ -523,6 +523,8 @@ namespace Algorithms
       }
     }
 
+    g_log.debug() << "[GenearteEventFilter DB1248] minimum value = " << minvalue <<  ", "
+                  << "maximum value = " << maxvalue << ".\n";
 
     return;
   }
@@ -921,8 +923,9 @@ namespace Algorithms
         {
           size_t index = searchValue(logvalueranges, currValue);
           g_log.debug() << "DBx257 Examine Log Index " << i << ", Value = " << currValue
-                        << ", Data Range Index = " << index
-                        << "/Group Index = " << indexwsindexmap[index/2] << std::endl;
+                        << ", Data Range Index = " << index << "; "
+                        << "Group Index = " << indexwsindexmap[index/2]
+                        << " (log value range vector size = " << logvalueranges.size() << ").\n";
 
           bool valuewithin2boundaries = true;
           if (index > logvalueranges.size())
@@ -933,7 +936,7 @@ namespace Algorithms
 
           if (index%2 == 0 && valuewithin2boundaries)
           {
-            // c1) Falls in the interval
+            // [Situation] Falls in the interval
             currindex = indexwsindexmap[index/2];
 
             if (currindex != lastindex && start.totalNanoseconds() == 0)
@@ -994,11 +997,17 @@ namespace Algorithms
 
             // c2) Fall out of interval
             g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c value range... " << std::endl;
+            throw runtime_error("Is it ever reached? ");
           }
           else
           {
-            // log value falls out of min/max: do nothing
-            ;
+            // log value falls out of min/max: If start is defined, then define stop
+            if (start.totalNanoseconds() > 0)
+            {
+              stop = currTime;
+              completehalf = true;
+              g_log.debug() << "DBOP Log Index [2] " << i << "  falls Out b/c value range... " << ".\n";
+            }
           }
         } // ENDIF NO breakloop AND Correction Direction
         else
@@ -1232,7 +1241,8 @@ namespace Algorithms
   {
     size_t outrange = sorteddata.size()+1;
 
-    // std::cout << "DB450  Search Value " << value << std::endl;
+    g_log.debug() << "[G-E-F: DBx450] Search Value " << value << " (sorted data range = "
+                  << sorteddata[0] << ", " << sorteddata.back() << ").\n";
 
     // 1. Extreme case
     if (value < sorteddata[0] || value > sorteddata.back())
