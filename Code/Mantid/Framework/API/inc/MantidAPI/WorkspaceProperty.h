@@ -34,12 +34,6 @@ namespace Mantid
     {
       enum Type { Lock, NoLock };
     };
-    /// Enumeration for uniqueness of property. If is Output workspace and is Unique,
-    /// will make property invalid if there is a workspace with the same name in the ADS
-    struct UniqueMode
-    {
-      enum Type { Unique, NonUnique};
-    };
 
     /** A property class for workspaces. Inherits from PropertyWithValue, with the value being
     a pointer to the workspace type given to the WorkspaceProperty constructor. This kind
@@ -91,8 +85,7 @@ namespace Mantid
       explicit WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
                                   Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator)) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
-        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock),
-        m_unique(UniqueMode::NonUnique)
+        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(PropertyMode::Mandatory), m_locking(LockMode::Lock)
       {
       }
 
@@ -105,12 +98,11 @@ namespace Mantid
       *  @param validator :: The (optional) validator to use for this property
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
-      explicit WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
+      explicit WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction, 
                                   const PropertyMode::Type optional,
                                   Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator) ) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
-        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(LockMode::Lock),
-        m_unique(UniqueMode::NonUnique)
+        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(LockMode::Lock)
       {
       }
 
@@ -126,43 +118,18 @@ namespace Mantid
       *  @param validator :: The (optional) validator to use for this property
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
-      explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction,
+      explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction, 
                                  const PropertyMode::Type optional, const LockMode::Type locking,
                                  Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator)) :
         Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
-        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(locking),
-        m_unique(UniqueMode::NonUnique)
+        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(locking)
       {
-      }
-
-      /** Constructor. Mostly useful for output workspaces.
-      *  Sets the property and workspace names but initialises the workspace pointer to null.
-      *  @param name :: The name to assign to the property
-      *  @param wsName :: The name of the workspace
-      *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
-      *  @param unique :: Whether an output workspace name should be unique within ADS
-      *  @param optional :: A boolean indicating whether the property is mandatory or not. Only matters
-      *                     for input properties
-      *  @param locking :: A boolean indicating whether the workspace should read or
-      *                    write-locked when an algorithm begins. Default=true.
-      *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
-      */
-      explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction,
-                                 const UniqueMode::Type unique,
-                                 const PropertyMode::Type optional = PropertyMode::Mandatory,
-                                 const LockMode::Type locking = LockMode::Lock,
-                                 Kernel::IValidator_sptr validator = Kernel::IValidator_sptr(new Kernel::NullValidator)) :
-        Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
-        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional), m_locking(locking), m_unique(unique)
-      {
-
       }
 
       /// Copy constructor, the default name stored in the new object is the same as the default name from the original object
       WorkspaceProperty( const WorkspaceProperty& right ) :
       Kernel::PropertyWithValue< boost::shared_ptr<TYPE> >( right ),
-      m_workspaceName( right.m_workspaceName ), m_initialWSName( right.m_initialWSName ), m_optional(right.m_optional),
-      m_locking(right.m_locking), m_unique(right.m_unique)
+      m_workspaceName( right.m_workspaceName ), m_initialWSName( right.m_initialWSName ), m_optional(right.m_optional), m_locking(right.m_locking)
       {    
       }
 
@@ -323,19 +290,11 @@ namespace Mantid
       {
         return (m_optional == PropertyMode::Optional);
       }
-
       /** Does the workspace need to be locked before starting an algorithm?
        * @return true (default) if the workspace will be locked */
       bool isLocking() const
       {
         return (m_locking == LockMode::Lock);
-      }
-
-      /// Should a workspace name be unique within ADS?
-      /// @return true is should, false (default) is shouldn't
-      bool isUnique() const
-      {
-        return (m_unique == UniqueMode::Unique);
       }
 
       /** Returns the current contents of the AnalysisDataService for input workspaces.
@@ -471,15 +430,8 @@ namespace Mantid
         const std::string value = this->value();
         if( !value.empty() )
         {
-          // Check if the name is correct
+          // Will the ADS accept it
           error = AnalysisDataService::Instance().isValid(value);
-
-          if(error.empty() && this->isUnique())
-          {
-            // Check if is unique
-            if(AnalysisDataService::Instance().doesExist(value))
-              error = "Workspace with name \"" + value + "\" already exists";
-          }
         }
         else
         {
@@ -541,20 +493,13 @@ namespace Mantid
 
       /// The name of the workspace (as used by the AnalysisDataService)
       std::string m_workspaceName;
-
       /// The name of the workspace that the this this object was created for
       std::string m_initialWSName;
-
-      /// A flag indicating whether the property should be considered optional.
+      /// A flag indicating whether the property should be considered optional. Only matters for input workspaces
       PropertyMode::Type m_optional;
-
-      /// A flag indicating whether the workspace should be read or write-locked
-      /// when an algorithm begins. Default=true.
+      /** A flag indicating whether the workspace should be read or write-locked
+       * when an algorithm begins. Default=true. */
       LockMode::Type m_locking;
-
-      /// A flag indicating whether the property value should be unique within ADS.
-      /// Only matters for output workspaces. Default: NonUnique.
-      UniqueMode::Type m_unique;
 
       /// for access to logging streams
       static Kernel::Logger& g_log;

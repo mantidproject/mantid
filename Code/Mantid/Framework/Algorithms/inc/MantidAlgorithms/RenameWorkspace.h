@@ -15,9 +15,6 @@ namespace Algorithms
     The renaming is implemented as a removal of the original workspace from the data service
     and re-addition under the new name.
 
-    The algorithm will fail with an error if the name of OutputWorkspace already exists
-    in the ADS.
-
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace to take as input </LI>

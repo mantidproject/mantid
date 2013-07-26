@@ -66,7 +66,7 @@ public:
     AnalysisDataService::Instance().remove("WSRenamed");
   }
 
-  void testSameNames()
+  void testExecSameNames()
   {
     MatrixWorkspace_sptr inputWS = createWorkspace();
     AnalysisDataService::Instance().add("InputWS", inputWS);
@@ -74,35 +74,22 @@ public:
     Mantid::Algorithms::RenameWorkspace alg3;
     alg3.initialize();
     TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("InputWorkspace","InputWS"));
+    TS_ASSERT_THROWS_NOTHING( alg3.setPropertyValue("OutputWorkspace","InputWS"));
 
-    TS_ASSERT_THROWS( alg3.setPropertyValue("OutputWorkspace","InputWS"), std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING( alg3.execute());
+    TS_ASSERT( !alg3.isExecuted());
+
+    Workspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING(
+        result = AnalysisDataService::Instance().retrieveWS<Workspace>("InputWS"));
+    TS_ASSERT( result);
 
     AnalysisDataService::Instance().remove("InputWS");
-  }
-
-  void testExists()
-  {
-    MatrixWorkspace_sptr ws1 = createWorkspace();
-    AnalysisDataService::Instance().add("ws1", ws1);
-
-    MatrixWorkspace_sptr ws2 = createWorkspace();
-    AnalysisDataService::Instance().add("ws2", ws2);
-
-    Mantid::Algorithms::RenameWorkspace algInstance;
-    algInstance.initialize();
-
-    TS_ASSERT_THROWS_NOTHING(algInstance.setPropertyValue("InputWorkspace","ws1"));
-
-    TS_ASSERT_THROWS(algInstance.setPropertyValue("OutputWorkspace","ws2"), std::invalid_argument);
-
-    AnalysisDataService::Instance().remove("ws1");
-    AnalysisDataService::Instance().remove("ws2");
   }
 
   void testGroup()
   {
     AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
-
     WorkspaceGroup_sptr group(new WorkspaceGroup);
     ads.add("oldName",group);
     MatrixWorkspace_sptr member1 = createWorkspace();

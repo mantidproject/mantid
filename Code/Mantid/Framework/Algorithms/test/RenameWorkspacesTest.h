@@ -228,35 +228,6 @@ public:
     TS_ASSERT( algG.isExecuted());
   }
 
-  /// Test that the method is not doing any renaming if one of the new workspace names
-  /// already exists in the ADS
-  void testDuplicates()
-  {
-    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
-    MatrixWorkspace_sptr ws1 = createWorkspace();
-    ads.add("ws1", ws1);
-    MatrixWorkspace_sptr ws2 = createWorkspace();
-    ads.add("ws2", ws2);
-    MatrixWorkspace_sptr new_ws1 = createWorkspace();
-    ads.add("new_ws1", new_ws1);
-
-    Mantid::Algorithms::RenameWorkspaces algInstance;
-    algInstance.initialize();
-    algInstance.setRethrows(true);
-    TS_ASSERT_THROWS_NOTHING(algInstance.setPropertyValue("InputWorkspaces", "ws1, ws2"));
-    TS_ASSERT_THROWS_NOTHING(algInstance.setPropertyValue("Prefix", "new_"));
-
-    TS_ASSERT_THROWS(algInstance.execute(), std::invalid_argument);
-
-    // Check that old were not deleted
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieveWS<Workspace>("ws1"));
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieveWS<Workspace>("ws2"));
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().retrieveWS<Workspace>("new_ws1"));
-
-    // Check that the new was not created
-    TS_ASSERT_THROWS(AnalysisDataService::Instance().retrieveWS<Workspace>("new_ws2"), Mantid::Kernel::Exception::NotFoundError);
-  }
-
 
   MatrixWorkspace_sptr createWorkspace()
   {
