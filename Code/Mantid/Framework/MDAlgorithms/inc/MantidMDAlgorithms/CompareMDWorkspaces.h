@@ -74,6 +74,8 @@ namespace MDAlgorithms
     /// Is CheckEvents true
     bool m_CheckEvents;
 
+    bool m_CompareBoxID;
+
   };
 
 
