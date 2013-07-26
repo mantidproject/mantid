@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>587</width>
-    <height>488</height>
+    <width>752</width>
+    <height>575</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_16">
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" native="true">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -49,7 +49,7 @@
            <property name="multipleFiles" stdset="0">
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" stdset="0">
+           <property name="fileExtensions">
             <stringlist>
              <string>_red.nxs</string>
             </stringlist>
@@ -193,7 +193,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18">
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile" native="true">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -209,7 +209,7 @@
            <property name="multipleFiles" stdset="0">
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" stdset="0">
+           <property name="fileExtensions">
             <stringlist>
              <string>_eq2.nxs</string>
             </stringlist>
@@ -305,7 +305,7 @@
        <item>
         <layout class="QGridLayout" name="fury_layoutFiles">
          <item row="2" column="1">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_resFile" native="true">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_resFile">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -321,7 +321,7 @@
            <property name="multipleFiles" stdset="0">
             <bool>false</bool>
            </property>
-           <property name="fileExtensions" stdset="0">
+           <property name="fileExtensions">
             <stringlist>
              <string>_res.nxs</string>
             </stringlist>
@@ -387,7 +387,7 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile" native="true">
+                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
@@ -403,7 +403,7 @@
                  <property name="multipleFiles" stdset="0">
                   <bool>true</bool>
                  </property>
-                 <property name="fileExtensions" stdset="0">
+                 <property name="fileExtensions">
                   <stringlist>
                    <string>_red.nxs</string>
                    <string>_sqw.nxs</string>
@@ -419,11 +419,7 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample">
-                 <property name="Suffix" stdset="0">
-                  <string>_red</string>
-                 </property>
-                </widget>
+                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample"/>
                </item>
               </layout>
              </widget>
@@ -550,7 +546,7 @@
            <widget class="QWidget" name="furyfit_page_inputFile">
             <layout class="QHBoxLayout" name="horizontalLayout_19">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" native="true">
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -566,7 +562,7 @@
                <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" stdset="0">
+               <property name="fileExtensions">
                 <stringlist>
                  <string>_iqt.nxs</string>
                 </stringlist>
@@ -578,11 +574,7 @@
            <widget class="QWidget" name="furyfit_page_inputWorkspace">
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt">
-               <property name="Suffix" stdset="0">
-                <string>_iqt</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt"/>
              </item>
             </layout>
            </widget>
@@ -878,7 +870,7 @@
            <widget class="QWidget" name="confit_page_inputFile">
             <layout class="QHBoxLayout" name="confit_layout_page_inputFile">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_inputFile" native="true">
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_inputFile">
                <property name="findRunFiles" stdset="0">
                 <bool>false</bool>
                </property>
@@ -888,7 +880,7 @@
                <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" stdset="0">
+               <property name="fileExtensions">
                 <stringlist>
                  <string>_red.nxs</string>
                  <string>_sqw.nxs</string>
@@ -901,11 +893,7 @@
            <widget class="QWidget" name="confit_page_inputWorkspace">
             <layout class="QHBoxLayout" name="horizontalLayout_29">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample">
-               <property name="Suffix" stdset="0">
-                <string>_red</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample"/>
              </item>
             </layout>
            </widget>
@@ -921,7 +909,7 @@
         </layout>
        </item>
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_resInput" native="true">
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_resInput">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
            <horstretch>0</horstretch>
@@ -937,7 +925,7 @@
          <property name="multipleFiles" stdset="0">
           <bool>false</bool>
          </property>
-         <property name="fileExtensions" stdset="0">
+         <property name="fileExtensions">
           <stringlist>
            <string>_res.nxs</string>
            <string>.res</string>
@@ -1266,7 +1254,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absp_inputFile" native="true">
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absp_inputFile">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                  <horstretch>0</horstretch>
@@ -1282,7 +1270,7 @@
                <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" stdset="0">
+               <property name="fileExtensions">
                 <stringlist>
                  <string>_red.nxs</string>
                 </stringlist>
@@ -1300,11 +1288,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput">
-               <property name="Suffix" stdset="0">
-                <string>_red</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput"/>
              </item>
             </layout>
            </widget>
@@ -1897,7 +1881,7 @@
            <widget class="QWidget" name="abscor_samFile">
             <layout class="QVBoxLayout" name="verticalLayout_17">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_sample" native="true">
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_sample">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                  <horstretch>0</horstretch>
@@ -1910,7 +1894,7 @@
                <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" stdset="0">
+               <property name="fileExtensions">
                 <stringlist>
                  <string>_red.nxs</string>
                 </stringlist>
@@ -1922,11 +1906,7 @@
            <widget class="QWidget" name="abscor_samWS">
             <layout class="QHBoxLayout" name="horizontalLayout_31">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample">
-               <property name="Suffix" stdset="0">
-                <string>_red</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample"/>
              </item>
             </layout>
            </widget>
@@ -2095,7 +2075,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_can" native="true">
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_can">
                <property name="enabled">
                 <bool>true</bool>
                </property>
@@ -2114,7 +2094,7 @@
                <property name="optional" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" stdset="0">
+               <property name="fileExtensions">
                 <stringlist>
                  <string>_red.nxs</string>
                 </stringlist>
@@ -2129,11 +2109,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer">
-               <property name="Suffix" stdset="0">
-                <string>_red</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainerInput"/>
              </item>
             </layout>
            </widget>
@@ -2378,19 +2354,16 @@
   <tabstop>fury_pbPlotInput</tabstop>
   <tabstop>fury_cbResType</tabstop>
   <tabstop>fury_cbInputType</tabstop>
-  <tabstop>fury_wsSample</tabstop>
   <tabstop>fury_ckVerbose</tabstop>
   <tabstop>fury_ckPlot</tabstop>
   <tabstop>fury_ckSave</tabstop>
   <tabstop>furyfit_cbInputType</tabstop>
-  <tabstop>furyfit_wsIqt</tabstop>
   <tabstop>furyfit_pbPlotInput</tabstop>
   <tabstop>furyfit_cbFitType</tabstop>
   <tabstop>furyfit_ckConstrainIntensities</tabstop>
   <tabstop>furyfit_ckPlotGuess</tabstop>
   <tabstop>furyfit_leSpecNo</tabstop>
   <tabstop>confit_cbInputType</tabstop>
-  <tabstop>confit_wsSample</tabstop>
   <tabstop>confit_pbPlotInput</tabstop>
   <tabstop>confit_cbFitType</tabstop>
   <tabstop>confit_cbBackground</tabstop>
@@ -2399,7 +2372,6 @@
   <tabstop>confit_leSpecMax</tabstop>
   <tabstop>confit_cbPlotOutput</tabstop>
   <tabstop>absp_cbInputType</tabstop>
-  <tabstop>absp_wsInput</tabstop>
   <tabstop>absp_ckUseCan</tabstop>
   <tabstop>absp_cbShape</tabstop>
   <tabstop>absp_lets</tabstop>
@@ -2418,12 +2390,10 @@
   <tabstop>absp_lecansiga</tabstop>
   <tabstop>absp_cbPlotOutput</tabstop>
   <tabstop>abscor_cbSampleInputType</tabstop>
-  <tabstop>abscor_wsSample</tabstop>
   <tabstop>abscor_cbGeometry</tabstop>
   <tabstop>abscor_ckUseCorrections</tabstop>
   <tabstop>abscor_ckUseCan</tabstop>
   <tabstop>abscor_cbContainerInputType</tabstop>
-  <tabstop>abscor_wsContainer</tabstop>
   <tabstop>abscor_cbPlotOutput</tabstop>
   <tabstop>pbHelp</tabstop>
   <tabstop>pbRun</tabstop>
