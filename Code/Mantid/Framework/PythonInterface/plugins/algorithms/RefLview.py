@@ -85,12 +85,9 @@ Input examples:
 
 *WIKI*"""
 
-#from MantidFramework import *
-#from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-#import mantid
 from numpy import zeros, shape, arange
 import math
 import sfCalculator
@@ -125,7 +122,6 @@ for a given run or set of runs.""")
         import math
         from reduction.instruments.reflectometer import wks_utility
         
-        from mantid import mtd
         #remove all previous workspaces
         list_mt = mtd.getObjectNames()
         for _mt in list_mt:
@@ -133,7 +129,6 @@ for a given run or set of runs.""")
                 mtd.remove(_mt)
             if _mt.find('_reflectivity') != -1:
                 mtd.remove(_mt)
-#        from mantidsimple import mtd    
 
         bDebug = True
         if bDebug:
