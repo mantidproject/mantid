@@ -83,6 +83,7 @@ private slots:
 
 private:
   void createWorkspaceMenuActions();
+  void createSortMenuActions();
   QString findParentName(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Workspace::InfoNode::IconType iconType);
 
@@ -106,7 +107,7 @@ private:
   QSet<QString> m_known_groups;
 
   QPushButton *m_loadButton;
-  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu, *m_choiceMenu;
+  QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu;
   QPushButton *m_deleteButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
