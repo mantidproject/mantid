@@ -69,7 +69,7 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
   QFrame *f = new QFrame(this);
   setWidget(f);
 
-  m_tree = new MantidTreeWidget(f,m_mantidUI);
+  m_tree = new MantidTreeWidget(this,m_mantidUI);
   m_tree->setHeaderLabel("Workspaces");
 
   FlowLayout * buttonLayout = new FlowLayout();
@@ -462,6 +462,7 @@ void MantidDockWidget::updateTree()
           entry->setExpanded( true );
         }
     }
+    m_tree->sort();
 }
 
 /**
@@ -1075,7 +1076,7 @@ void MantidDockWidget::convertMDHistoToMatrixWorkspace()
 
 //------------ MantidTreeWidget -----------------------//
 
-MantidTreeWidget::MantidTreeWidget(QWidget *w, MantidUI *mui):QTreeWidget(w),m_mantidUI(mui),m_sortScheme()
+MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui):QTreeWidget(w),m_dockWidget(w),m_mantidUI(mui),m_sortScheme()
 {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -1150,14 +1151,14 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
     /// This relies on the item descriptions being up-to-date
     /// so ensure that they are or if something was
     /// replaced then it might not be correct.
-    static_cast<MantidDockWidget*>(parentWidget())->populateChildData(*it);
+    m_dockWidget->populateChildData(*it);
 
     // Look for children (workspace groups)
     QTreeWidgetItem *child = (*it)->child(0);
     if ( child && child->text(0) == "WorkspaceGroup" )
     {
       // Have to populate the group's children if it hasn't been expanded
-      if (!(*it)->isExpanded()) static_cast<MantidDockWidget*>(parentWidget())->populateChildData(*it);
+      if (!(*it)->isExpanded()) m_dockWidget->populateChildData(*it);
       const int count = (*it)->childCount();
       for ( int i=1; i < count; ++i )
       {
@@ -1247,6 +1248,22 @@ MantidItemSortScheme MantidTreeWidget::getSortScheme() const
   return m_sortScheme;
 }
 
+/**
+ * Sort the items according to the current sort scheme and order.
+ */
+void MantidTreeWidget::sort()
+{
+  sortItems(sortColumn(), m_sortOrder);
+}
+
+/**
+ * Log a warning message.
+ * @param msg :: A message to log.
+ */
+void MantidTreeWidget::logWarningMessage(const std::string& msg)
+{
+  logObject.warning( msg );
+}
 
 //-------------------- MantidTreeWidgetItem ----------------------//
 /**Constructor.
@@ -1326,7 +1343,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
         }
         catch(std::out_of_range &e)
         {
-          QMessageBox::warning(m_parent, "Error", e.what());
+          m_parent->logWarningMessage( e.what() );
           return false;
         }
       }

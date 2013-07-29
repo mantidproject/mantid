@@ -136,7 +136,7 @@ class MantidTreeWidget:public QTreeWidget
   Q_OBJECT
 
 public:
-  MantidTreeWidget(QWidget *w, MantidUI *mui);
+  MantidTreeWidget(MantidDockWidget *w, MantidUI *mui);
   void mousePressEvent (QMouseEvent *e);
   void mouseMoveEvent(QMouseEvent *e);
   void mouseDoubleClickEvent(QMouseEvent *e);
@@ -149,9 +149,11 @@ public:
   Qt::SortOrder getSortOrder() const;
   void logWarningMessage(const std::string&);
   void disableNodes(bool);
+  void sort();
 
 private:
   QPoint m_dragStartPosition;
+  MantidDockWidget *m_dockWidget;
   MantidUI *m_mantidUI;
   static Mantid::Kernel::Logger& logObject;
   MantidItemSortScheme m_sortScheme;
