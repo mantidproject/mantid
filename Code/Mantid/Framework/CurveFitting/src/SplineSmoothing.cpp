@@ -85,7 +85,7 @@ namespace CurveFitting
 
     auto errorSizeValidator = boost::make_shared<BoundedValidator<double> >();
     errorSizeValidator->setLower(0.0);
-    declareProperty("Error", 0.0, errorSizeValidator, "The amount of error we wish to tolerate in smoothing");
+    declareProperty("Error", 0.05, errorSizeValidator, "The amount of error we wish to tolerate in smoothing");
   }
 
   //----------------------------------------------------------------------------------------------
