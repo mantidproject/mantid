@@ -2845,7 +2845,6 @@ void ApplicationWindow::initMultilayerPlot(MultiLayer* g, const QString& name)
 
   g->setWindowTitle(label);
   g->setName(label);
-  g->setIcon(getQPixmap("graph_xpm"));
   g->setScaleLayersOnPrint(d_scale_plots_on_print);
   g->printCropmarks(d_print_cropmarks);
 
@@ -3066,8 +3065,11 @@ void ApplicationWindow::initTable(Table* w, const QString& caption)
   customTable(w);
 
   w->setName(name);
-  w->setIcon( getQPixmap("worksheet_xpm") );
   w->setSpecifications(w->saveToString(windowGeometryInfo(w)));
+  if ( !w->isA("MantidTable"))
+  {
+    w->setIcon( getQPixmap("worksheet_xpm") );
+  }
 
   addMdiSubWindow(w);
 }
@@ -3098,7 +3100,6 @@ Note* ApplicationWindow::newNote(const QString& caption)
     name = generateUniqueName(tr("Notes"));
 
   m->setName(name);
-  m->setIcon(getQPixmap("note_xpm"));
   m->confirmClose(confirmCloseNotes);
 
   addMdiSubWindow(m);
@@ -3369,7 +3370,6 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
 
   m->setWindowTitle(name);
   m->setName(name);
-  m->setIcon( m->matrixIcon() );//Mantid
   m->confirmClose(confirmCloseMatrix);
   m->setNumericPrecision(d_decimal_digits);
 
@@ -8179,7 +8179,6 @@ void ApplicationWindow::showImageDialog()
     id->setAttribute(Qt::WA_DeleteOnClose);
     connect (id, SIGNAL(setGeometry(int, int, int, int)),
         g, SLOT(updateImageMarker(int, int, int, int)));
-    //		id->setIcon(getQPixmap("logo_xpm"));
     id->setOrigin(im->origin());
     id->setSize(im->size());
     id->exec();
@@ -17855,6 +17854,7 @@ QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoin
 {
   QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
   sw->resize(w->size());
+  sw->setWindowIcon(w->windowIcon());
   if ( pos != QPoint(-1,-1) )
   {
     sw->move(pos);

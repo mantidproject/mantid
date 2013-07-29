@@ -67,7 +67,6 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, Applicati
   setup(ws,start,end);
   setWindowTitle(name);
   setName(name);
-  setIcon( matrixIcon() );
 
   m_modelY = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
   m_table_viewY = new QTableView();
