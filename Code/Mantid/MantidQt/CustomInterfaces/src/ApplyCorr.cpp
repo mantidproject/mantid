@@ -31,6 +31,10 @@ namespace IDA
 
     // Apply the validator to the input box for the Scale option.
     uiForm().abscor_leScaleMultiplier->setValidator(m_valPosDbl);
+
+    //refresh workspace combo boxes
+    uiForm().abscor_wsSample->refresh();
+    uiForm().abscor_wsContainer->refresh();
   }
 
   /**
