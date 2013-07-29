@@ -847,9 +847,24 @@ namespace Algorithms
     */
   int getMaxHeightIndex(const MantidVec &Y, const int leftIndex, const int rightIndex)
   {
+    if (leftIndex < 0 || leftIndex >= static_cast<int>(Y.size()))
+      throw std::runtime_error("Left index out of boundary");
+
+    if (rightIndex < 0 || rightIndex > static_cast<int>(Y.size()))
+    {
+      std::stringstream errss;
+      errss << "In getMaxHeightIndex, Size(Y) = " << Y.size() << ", Left Index = " << leftIndex
+            << ", Right Index = " << rightIndex;
+      throw std::runtime_error(errss.str());
+    }
+
+    int right_index = rightIndex;
+    if (right_index == static_cast<int>(Y.size()))
+      right_index -= 1;
+
     double maxY = Y[leftIndex];
     int indexMax = leftIndex;
-    for (int i = leftIndex + 1; i < rightIndex; i++)
+    for (int i = leftIndex + 1; i < right_index; i++)
     {
       if (Y[i] > maxY)
       {
