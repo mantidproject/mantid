@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>776</width>
-    <height>575</height>
+    <height>577</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -316,7 +316,7 @@
             <bool>false</bool>
            </property>
            <property name="label" stdset="0">
-            <string>Resolution File:</string>
+            <string>Resolution:</string>
            </property>
            <property name="multipleFiles" stdset="0">
             <bool>false</bool>
@@ -398,7 +398,7 @@
                   <bool>false</bool>
                  </property>
                  <property name="label" stdset="0">
-                  <string/>
+                  <string>Sample:     </string>
                  </property>
                  <property name="multipleFiles" stdset="0">
                   <bool>true</bool>
@@ -419,11 +419,7 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample">
-                 <property name="Suffix">
-                  <string>_red</string>
-                 </property>
-                </widget>
+                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample"/>
                </item>
               </layout>
              </widget>
@@ -578,11 +574,7 @@
            <widget class="QWidget" name="furyfit_page_inputWorkspace">
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt">
-               <property name="Suffix">
-                <string>_iqt</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt"/>
              </item>
             </layout>
            </widget>
@@ -975,11 +967,7 @@
              <widget class="QWidget" name="confit_page_inputWorkspace">
               <layout class="QHBoxLayout" name="horizontalLayout_29">
                <item>
-                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample">
-                 <property name="Suffix">
-                  <string>_red</string>
-                 </property>
-                </widget>
+                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample"/>
                </item>
               </layout>
              </widget>
@@ -1357,11 +1345,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput">
-               <property name="Suffix">
-                <string>_red</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput"/>
              </item>
             </layout>
            </widget>
@@ -1979,11 +1963,7 @@
            <widget class="QWidget" name="abscor_samWS">
             <layout class="QHBoxLayout" name="horizontalLayout_31">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample">
-               <property name="Suffix">
-                <string>_red</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample"/>
              </item>
             </layout>
            </widget>
@@ -2186,11 +2166,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer">
-               <property name="Suffix">
-                <string>_red</string>
-               </property>
-              </widget>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer"/>
              </item>
             </layout>
            </widget>
@@ -2435,18 +2411,15 @@
   <tabstop>fury_pbPlotInput</tabstop>
   <tabstop>fury_cbResType</tabstop>
   <tabstop>fury_cbInputType</tabstop>
-  <tabstop>fury_wsSample</tabstop>
   <tabstop>fury_ckVerbose</tabstop>
   <tabstop>fury_ckPlot</tabstop>
   <tabstop>fury_ckSave</tabstop>
   <tabstop>furyfit_cbInputType</tabstop>
-  <tabstop>furyfit_wsIqt</tabstop>
   <tabstop>furyfit_pbPlotInput</tabstop>
   <tabstop>furyfit_cbFitType</tabstop>
   <tabstop>furyfit_ckConstrainIntensities</tabstop>
   <tabstop>furyfit_ckPlotGuess</tabstop>
   <tabstop>furyfit_leSpecNo</tabstop>
-  <tabstop>confit_wsSample</tabstop>
   <tabstop>confit_cbFitType</tabstop>
   <tabstop>confit_cbBackground</tabstop>
   <tabstop>confit_ckPlotGuess</tabstop>
@@ -2454,7 +2427,6 @@
   <tabstop>confit_leSpecMax</tabstop>
   <tabstop>confit_cbPlotOutput</tabstop>
   <tabstop>absp_cbInputType</tabstop>
-  <tabstop>absp_wsInput</tabstop>
   <tabstop>absp_ckUseCan</tabstop>
   <tabstop>absp_cbShape</tabstop>
   <tabstop>absp_lets</tabstop>
@@ -2473,12 +2445,10 @@
   <tabstop>absp_lecansiga</tabstop>
   <tabstop>absp_cbPlotOutput</tabstop>
   <tabstop>abscor_cbSampleInputType</tabstop>
-  <tabstop>abscor_wsSample</tabstop>
   <tabstop>abscor_cbGeometry</tabstop>
   <tabstop>abscor_ckUseCorrections</tabstop>
   <tabstop>abscor_ckUseCan</tabstop>
   <tabstop>abscor_cbContainerInputType</tabstop>
-  <tabstop>abscor_wsContainer</tabstop>
   <tabstop>abscor_cbPlotOutput</tabstop>
   <tabstop>pbHelp</tabstop>
   <tabstop>pbRun</tabstop>

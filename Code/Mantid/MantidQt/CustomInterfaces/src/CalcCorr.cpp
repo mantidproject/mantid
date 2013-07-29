@@ -140,6 +140,8 @@ namespace IDA
     QDoubleMultiRangeValidator * angleValidator = new QDoubleMultiRangeValidator(angleRanges, this);
     uiForm().absp_leavar->setValidator(angleValidator); // Can Angle to Beam
 
+    uiForm().absp_wsInput->refresh();
+
     allFields = positiveDoubleFields;
     allFields += uiForm().absp_leavar;
 
