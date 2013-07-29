@@ -490,20 +490,22 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
 
   // instanciate class, responsible for defining Mslice-type projection
     MDEvents::MDWSTransform MsliceProj;
+   //identify if u,v are present among input parameters and use defaults if not
+    std::vector<double> ut = getProperty("UProj");
+    std::vector<double> vt = getProperty("VProj");
+    std::vector<double> wt = getProperty("WProj");
+    try
+    {  
+      // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
+      MsliceProj.setUVvectors(ut,vt,wt);   
+    }
+    catch(std::invalid_argument &)
+    {     g_log.error() << "The projections are coplanar. Will use defaults [1,0,0],[0,1,0] and [0,0,1]" << std::endl;     }
+
     if(createNewTargetWs)
     {
-        //identify if u,v are present among input parameters and use defaults if not
-        std::vector<double> ut = getProperty("UProj");
-        std::vector<double> vt = getProperty("VProj");
-        std::vector<double> wt = getProperty("WProj");
-        try
-        {     MsliceProj.setUVvectors(ut,vt,wt);   }
-        catch(std::invalid_argument &)
-        {     g_log.error() << "The projections are coplanar. Will use defaults [1,0,0],[0,1,0] and [0,0,1]" << std::endl;     }
-
-       // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
-
-        // check if we are working in powder mode
+ 
+         // check if we are working in powder mode
         // set up target coordinate system and identify/set the (multi) dimension's names to use
          targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);           
     }
@@ -517,7 +519,7 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
         // and derived from input parameters. 
         oldWSDescr.setUpMissingParameters(targWSDescr);      
        // set up target coordinate system and the dimension names/units
-        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,QFrame,convertTo_);   
+        oldWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(oldWSDescr,QFrame,convertTo_);   
 
         // check inconsistencies, if the existing workspace can be used as target workspace. 
         oldWSDescr.checkWSCorresponsMDWorkspace(targWSDescr);

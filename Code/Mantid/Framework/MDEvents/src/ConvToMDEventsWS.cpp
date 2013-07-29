@@ -12,11 +12,14 @@ namespace Mantid
     {
 
       const Mantid::DataObjects::EventList & el = m_EventWS->getEventList(workspaceIndex);
+      size_t numEvents     = el.getNumberEvents();  
+      if (numEvents == 0) return 0;
+
 
       // create local unit conversion class
       UnitsConversionHelper localUnitConv(m_UnitConversion);
 
-      size_t numEvents     = el.getNumberEvents();      
+
       uint32_t detID       = m_detID[workspaceIndex];
       uint16_t runIndexLoc = m_RunIndex;
 
