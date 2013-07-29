@@ -23,7 +23,7 @@
    <item>
     <widget class="QGroupBox" name="absunits_gb">
      <property name="title">
-      <string>Perform Absolute Normalsation</string>
+      <string>Perform Absolute Normalisation</string>
      </property>
      <property name="checkable">
       <bool>true</bool>

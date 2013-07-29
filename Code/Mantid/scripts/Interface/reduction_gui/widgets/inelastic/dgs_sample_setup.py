@@ -9,6 +9,7 @@ import os
 IS_IN_MANTIDPLOT = False
 try:
     import mantidqtpython
+    from mantid.kernel import config
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -29,11 +30,12 @@ class SampleSetupWidget(BaseWidget):
                 self.setupUi(self)
                 
         self._content = SamSetFrame(self)
+        self._instrument_name = settings.instrument_name
+        self._facility_name = settings.facility_name
+        self._livebuttonwidget = None
         if IS_IN_MANTIDPLOT:
             self._swap_in_mwrunfiles_widget()
         self._layout.addWidget(self._content)
-        self._instrument_name = settings.instrument_name
-        self._facility_name = settings.facility_name
         self.initialize_content()
         
         if state is not None:
@@ -87,14 +89,17 @@ class SampleSetupWidget(BaseWidget):
         self._content.horizontalLayout.removeWidget(self._content.sample_browse)
         spacer = self._content.horizontalLayout.takeAt(0)
         self._content.sample_edit = mantidqtpython.MantidQt.MantidWidgets.MWRunFiles()
-        self._content.sample_edit.allowMultipleFiles(True)
-        self._content.sample_edit.setAlgorithmProperty("Load|Filename")
-        self._content.sample_edit.setLabelText(labeltext)
+        # Unfortunately, can only use live if default instrument = gui-set instrument
+        if self._instrument_name == config.getInstrument().name():
+            self._content.sample_edit.setProperty("liveButton","ShowIfCanConnect")
+        self._content.sample_edit.setProperty("multipleFiles",True)
+        self._content.sample_edit.setProperty("algorithmAndProperty","Load|Filename")
+        self._content.sample_edit.setProperty("label",labeltext)
         self._content.sample_edit.setLabelMinWidth(self._content.sample_label.minimumWidth())
         self._content.horizontalLayout.addWidget(self._content.sample_edit)
         self._content.horizontalLayout.addItem(spacer)
-        self.connect(self._content.sample_edit, QtCore.SIGNAL("fileFindingFinished()"),
-                     partial(self._validate_edit,self._content.sample_edit))
+        self._content.sample_edit.fileFindingFinished.connect(lambda: self._validate_edit(self._content.sample_edit))
+        self._livebuttonwidget = self._content.sample_edit
 
     def _handle_tzero_guess(self, is_enabled):
         self._content.tzero_guess_label.setEnabled(is_enabled)
@@ -156,6 +161,7 @@ class SampleSetupWidget(BaseWidget):
         """
         if IS_IN_MANTIDPLOT:
             self._content.sample_edit.setUserInput(state.sample_file)
+            self._content.sample_edit.liveButtonSetChecked(state.live_button)
         else:
             self._check_and_set_lineedit_content(self._content.sample_edit,
                                                  state.sample_file)
@@ -184,6 +190,8 @@ class SampleSetupWidget(BaseWidget):
         """
         s = SampleSetupScript(self._instrument_name)
         s.sample_file = self._content.sample_edit.text()
+        if IS_IN_MANTIDPLOT:
+            s.live_button = self._content.sample_edit.liveButtonIsChecked()
         s.output_wsname = self._content.output_ws_edit.text()
         s.detcal_file = self._content.detcal_edit.text()
         s.incident_energy_guess = self._content.ei_guess_edit.text()
@@ -201,3 +209,23 @@ class SampleSetupWidget(BaseWidget):
         s.show_workspaces = self._content.show_workspaces_cb.isChecked() 
         s.savedir = self._content.savedir_edit.text()   
         return s
+    
+    def live_button_widget(self):
+        """
+            Returns a reference to the MWRunFiles widget that contains the live button
+            (if using interface inside MantidPlot)
+        """
+        return self._livebuttonwidget
+    
+    def live_button_toggled_actions(self,checked):
+        if checked:
+            self._old_ei_guess_state = self._content.use_ei_guess_chkbox.isChecked()
+            self._content.use_ei_guess_chkbox.setChecked(True)
+        else:
+            try:
+                self._content.use_ei_guess_chkbox.setChecked(self._old_ei_guess_state)
+            except:  # This is for if the live button started out checked
+                pass
+        self._content.use_ei_guess_chkbox.setEnabled(not checked)
+        self._content.savedir_edit.setEnabled(not checked)
+        self._content.savedir_browse.setEnabled(not checked)
