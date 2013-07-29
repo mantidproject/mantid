@@ -258,4 +258,4 @@ for a given run or set of runs.""")
         print 
         
 #Register Algorithm with Mantid
-registerAlgorithm(RefLview())
+AlgorithmFactory.subscribe(RefLview)
