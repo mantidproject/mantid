@@ -15,9 +15,10 @@ import ui.reflectometer.ui_refl_sf_calculator
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
+#    from MantidFramework import *
+#    mtd.initialise(False)
+#    from mantidsimple import *
+    from mantid.simpleapi import *    
     from reduction.instruments.reflectometer import data_manipulation
 
     IS_IN_MANTIDPLOT = True
