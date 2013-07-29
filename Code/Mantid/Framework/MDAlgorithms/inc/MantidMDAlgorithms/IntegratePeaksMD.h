@@ -6,6 +6,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidAPI/CompositeFunction.h"
 
 namespace Mantid
 {

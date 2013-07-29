@@ -634,8 +634,8 @@ namespace MDEvents
       {
         // add event to appropriate y channel
 		size_t xchannel;
-		if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2);
-		else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2);
+		if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2)-1;
+		else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2)-1;
         if (xchannel < numSteps ) signal_fit[xchannel] += static_cast<signal_t>(it->getSignal());
 
         signal += static_cast<signal_t>(it->getSignal());
