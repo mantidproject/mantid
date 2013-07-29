@@ -90,7 +90,6 @@ from mantid.api import *
 from mantid.kernel import *
 from numpy import zeros, shape, arange
 import math
-import sfCalculator
 
 class RefLview(PythonAlgorithm):
 
