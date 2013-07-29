@@ -112,6 +112,8 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
    virtual void addOrReplace( const std::string& name, const boost::shared_ptr<API::Workspace>& workspace);
    /// Overridden rename member to attach the new name to the workspace when a workspace object is renamed
    virtual void rename( const std::string& oldName, const std::string& newName);
+   /// Overridden remove member to delete its name held by the workspace itself
+   virtual void remove( const std::string& name);
 
    /** Retrieve a workspace and cast it to the given WSTYPE
     *

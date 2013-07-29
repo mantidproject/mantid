@@ -146,6 +146,18 @@ namespace Mantid
     }
 
     /**
+     * Overridden remove member to delete its name held by the workspace itself. 
+     * It is important to do if the workspace isn't deleted after removal.
+     * @param name The name of a workspace to remove.
+     */
+    void AnalysisDataServiceImpl::remove( const std::string& name )
+    {
+      auto ws = retrieve( name );
+      ws->setName( "" );
+      Kernel::DataService<API::Workspace>::remove( name );
+    }
+
+    /**
      * Add a workspace to a group. The group and the workspace must be in the ADS.
      * @param groupName :: A group name.
      * @param wsName :: Name of a workspace to add to the group.
