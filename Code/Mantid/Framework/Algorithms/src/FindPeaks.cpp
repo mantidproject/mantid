@@ -1166,7 +1166,7 @@ namespace Algorithms
                                         const int& i_centre, const int& i_min, const int& i_max,
                                         double& in_bg0, double& in_bg1, double& in_bg2)
   {
-    g_log.information() << "Fitting a peak assumed at " << input->dataX(spectrum)[i_centre]
+    g_log.information() << "Fitting a peak assumed at " << input->readX(spectrum)[i_centre]
                         << " (index = " << i_centre << ") by high-background approach. \n";
 
     // Check
