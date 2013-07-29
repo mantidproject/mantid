@@ -39,19 +39,7 @@ public:
 
   void testExec()
   {
-    // ---- Create the simple workspace -------
-    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,200);
-    AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
-    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    const Mantid::MantidVec &X = WS->readX(0);
-    Mantid::MantidVec &Y = WS->dataY(0);
-    Mantid::MantidVec &E = WS->dataE(0);
-    for (size_t i = 0; i < Y.size(); ++i)
-    {
-      const double x = (X[i]+X[i+1])/2;
-      Y[i] = 5.1*exp(-0.5*pow((x-10)/1.0,2));
-      E[i] = 0.001;
-    }
+    setupTestWorkspace();
 
     // ---- Run algo -----
     if ( !offsets.isInitialized() ) offsets.initialize();
@@ -69,7 +57,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
     if (!output) return;
 
-    TS_ASSERT_DELTA( output->dataY(0)[0], 0.0506, 0.0002);
+    TS_ASSERT_DELTA( output->dataY(0)[0], -0.002, 0.0002);
 
     AnalysisDataService::Instance().remove(outputWS);
 
@@ -82,6 +70,8 @@ public:
 
   void testExecWithGroup()
   {
+    setupTestWorkspace();
+
     // --------- Workspace with summed spectra -------
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
@@ -121,6 +111,23 @@ public:
     if (!mask) return;
     TS_ASSERT( !mask->getInstrument()->getDetector(1)->isMasked() );
 
+  }
+
+  void setupTestWorkspace()
+  {
+    // ---- Create the simple workspace -------
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,200);
+    AnalysisDataService::Instance().addOrReplace("temp_event_ws", WS);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    const Mantid::MantidVec &X = WS->readX(0);
+    Mantid::MantidVec &Y = WS->dataY(0);
+    Mantid::MantidVec &E = WS->dataE(0);
+    for (size_t i = 0; i < Y.size(); ++i)
+    {
+      const double x = (X[i]+X[i+1])/2;
+      Y[i] = 5.1*exp(-0.5*pow((x-10)/1.0,2));
+      E[i] = 0.001;
+    }
   }
 
 
