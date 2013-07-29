@@ -212,7 +212,7 @@ namespace IDA
     {
       // One Lorentz
       QString pref = prefBase + QString::number(funcIndex) + ".";
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.Height"], parameters[pref+"Height"]);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 1.Amplitude"], parameters[pref+"Amplitude"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 1.HWHM"], parameters[pref+"HWHM"]);
       funcIndex++;
@@ -222,7 +222,7 @@ namespace IDA
     {
       // Two Lorentz
       QString pref = prefBase + QString::number(funcIndex) + ".";
-      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.Height"], parameters[pref+"Height"]);
+      m_cfDblMng->setValue(m_cfProp["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_cfDblMng->setValue(m_cfProp["Lorentzian 2.HWHM"], parameters[pref+"HWHM"]);
     }
@@ -484,15 +484,15 @@ namespace IDA
   QtProperty* ConvFit::createLorentzian(const QString & name)
   {
     QtProperty* lorentzGroup = m_cfGrpMng->addProperty(name);
-    m_cfProp[name+".Height"] = m_cfDblMng->addProperty("Height");
-    // m_cfDblMng->setRange(m_cfProp[name+".Height"], 0.0, 1.0); // 0 < Height < 1
+    m_cfProp[name+".Amplitude"] = m_cfDblMng->addProperty("Amplitude");
+    // m_cfDblMng->setRange(m_cfProp[name+".Amplitude"], 0.0, 1.0); // 0 < Amplitude < 1
     m_cfProp[name+".PeakCentre"] = m_cfDblMng->addProperty("PeakCentre");
     m_cfProp[name+".HWHM"] = m_cfDblMng->addProperty("HWHM");
-    m_cfDblMng->setDecimals(m_cfProp[name+".Height"], NUM_DECIMALS);
+    m_cfDblMng->setDecimals(m_cfProp[name+".Amplitude"], NUM_DECIMALS);
     m_cfDblMng->setDecimals(m_cfProp[name+".PeakCentre"], NUM_DECIMALS);
     m_cfDblMng->setDecimals(m_cfProp[name+".HWHM"], NUM_DECIMALS);
     m_cfDblMng->setValue(m_cfProp[name+".HWHM"], 0.02);
-    lorentzGroup->addSubProperty(m_cfProp[name+".Height"]);
+    lorentzGroup->addSubProperty(m_cfProp[name+".Amplitude"]);
     lorentzGroup->addSubProperty(m_cfProp[name+".PeakCentre"]);
     lorentzGroup->addSubProperty(m_cfProp[name+".HWHM"]);
     return lorentzGroup;
