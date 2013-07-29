@@ -3,6 +3,7 @@ set ( TEST_PY_FILES test/ReducerTest.py
  test/ReflectometryQuickToLamTest.py
  test/DgreduceTest.py
  test/DirectEnergyConversionTest.py 
+ test/ExtendedUnitCellTest.py
 )
 
 
