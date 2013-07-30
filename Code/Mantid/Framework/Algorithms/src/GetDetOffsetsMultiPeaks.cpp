@@ -156,7 +156,7 @@ namespace Algorithms
     //Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
 
-    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("SpetraFitInfoTableWorkspace", "FitInfoTable", Direction::Output);
+    auto tablewsprop = new WorkspaceProperty<TableWorkspace>("SpectraFitInfoTableWorkspace", "FitInfoTable", Direction::Output);
     declareProperty(tablewsprop, "Name of the output table workspace containing spectra peak fit information.");
 
     auto offsetwsprop = new WorkspaceProperty<TableWorkspace>("PeaksOffsetTableWorkspace", "PeakOffsetTable", Direction::Output);
@@ -266,7 +266,7 @@ namespace Algorithms
     m_infoTableWS->addColumn("int", "NumberPeaksToFit");
     m_infoTableWS->addColumn("str", "OffsetFitStatus");
     m_infoTableWS->addColumn("double", "ChiSquare");
-    setProperty("SpetraFitInfoTableWorkspace", m_infoTableWS);
+    setProperty("SpectraFitInfoTableWorkspace", m_infoTableWS);
 
     // Create output peak offset workspace
     auto m_peakOffsetTableWS = boost::make_shared<TableWorkspace>();
