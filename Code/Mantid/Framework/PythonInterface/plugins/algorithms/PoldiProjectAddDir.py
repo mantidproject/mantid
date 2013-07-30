@@ -6,7 +6,7 @@ from mantid.api import PythonAlgorithm, registerAlgorithm, MatrixWorkspaceProper
 from mantid.api import FileProperty, FileAction
 from mantid.kernel import Direction
 from mantid.simpleapi import *
-from pylab import *
+#from pylab import *
 import math
 import numpy as np
 import os.path
@@ -90,6 +90,7 @@ class PoldiProjectAddDir(PythonAlgorithm):
             sample_info_ws.addColumn("str","data file")
             sample_info_ws.addColumn("str","spl log")
             sample_info_ws.addColumn("str","spl corr")
+            sample_info_ws.addColumn("str","spl dead wires")
             sample_info_ws.addColumn("str","spl peak")
             load_data_at_the_end = True
 #             self.setProperty("PoldiAnalysis", sample_info_ws)
@@ -119,12 +120,14 @@ class PoldiProjectAddDir(PythonAlgorithm):
                 file_path = join(directory,dataFile)
                 sample_name_log = "%sLog" %sample_name
                 sample_name_corr = "%sCorr" %sample_name
+                sample_name_deadw = "%sDeadWires" %sample_name
                 (sample_year, sample_numero) = self.interpreteName(sample_name)
                 sample_name_peak = "%sPeak" %sample_name
                   
                 sample_info_ws.addRow([sample_name, sample_year, sample_numero, file_path, 
                                        sample_name_log, 
                                        sample_name_corr,
+                                       sample_name_deadw,
                                        sample_name_peak])  
         nb_of_sample = sample_info_ws.rowCount()
         self.log().error('Poldi -  %d samples added' %(nb_of_sample))
@@ -141,5 +144,4 @@ class PoldiProjectAddDir(PythonAlgorithm):
         
 
 
-
-registerAlgorithm(PoldiProjectAddDir())
+AlgorithmFactory.subscribe(PoldiProjectAddDir)

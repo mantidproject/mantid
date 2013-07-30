@@ -286,5 +286,6 @@ void SINQHMListener::readHMData(IMDHistoWorkspace_sptr ws)
 
 	free(data);
 	free(idx);
-	httpcon.reset();
+//	httpcon.reset();
+//	httpcon.abort();
 }

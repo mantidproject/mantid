@@ -46,7 +46,7 @@ Please note that the dimensions on the MDHistoWorkspace are inverted when compar
 #include <boost/algorithm/string.hpp>
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadFlexiNexus)
+DECLARE_ALGORITHM(LoadFlexiNexus);
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

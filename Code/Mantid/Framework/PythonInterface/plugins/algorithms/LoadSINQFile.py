@@ -12,13 +12,17 @@ LoadSINQFile is a wrapper algorithm around LoadFlexiNexus. It locates a suitable
 #
 # Mark Koennecke, November 2012
 #--------------------------------------------------------------
+from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm, registerAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty, FrameworkManager
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
 import mantid.simpleapi
 import MantidFramework 
+from mantid import config
+
 
 #--------- place to look for dictionary files
-dictsearch='/home/christophe/poldi/dev/mantid-2.3.2-Source/PSIScripts'
+#dictsearch='/home/christophe/poldi/dev/mantid-2.3.2-Source/PSIScripts'
+dictsearch=config['instrumentDefinition.directory']+"/nexusdictionaries/"
 
 class LoadSINQFile(PythonAlgorithm):
     def category(self):
@@ -109,12 +113,12 @@ class LoadSINQFile(PythonAlgorithm):
         dicname = dictsearch +"/mantidpoldi.dic"
         fname =self.getProperty('Filename').value 
         wname =self.getProperty('OutputWorkspace').value
-#        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
-        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,'tmp')
-        mapname= dictsearch +'/poldigroup.xml'
-        exec(wname + '= mantid.simpleapi.GroupDetectors(\'tmp\',mapname,[],[],[],False,\'Sum\',True)')
-        mantid.simpleapi.DeleteWorkspace('tmp')
-        
+        ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,wname)
+        config.appendDataSearchDir(config['groupingFiles.directory'])
+        grp_file = "POLDI_Grouping_800to400.xml"
+        mantid.simpleapi.GroupDetectors(InputWorkspace=ws, 
+                           OutputWorkspace=ws,
+                           MapFile=grp_file, Behaviour="Sum")        
     def doSANS(self):
         dicname = dictsearch +"/mantidsans.dic"
         fname =self.getProperty('Filename').value 
@@ -135,4 +139,4 @@ class LoadSINQFile(PythonAlgorithm):
          
 
 #---------- register with Mantid
-registerAlgorithm(LoadSINQFile())
+AlgorithmFactory.subscribe(LoadSINQFile)

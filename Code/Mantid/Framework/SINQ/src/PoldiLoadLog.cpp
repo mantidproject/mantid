@@ -14,12 +14,10 @@ toto
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FileProperty.h"
 #include <boost/shared_ptr.hpp>
-#include "MantidNexus/NexusClasses.h"
 
+#include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
-//#include "MantidNexusCPP/NeXusFile.hpp"
-//#include "MantidNexusCPP/NeXusException.hpp"
 
 #include <fstream>
 #include <string>
@@ -46,6 +44,7 @@ using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
 using namespace::NeXus;
+using namespace Mantid::NeXus;
 
 
 /// Initialisation method.
@@ -58,8 +57,12 @@ void PoldiLoadLog::init()
 	exts.push_back("");
 
 
+    // Input workspace containing the data raw to treat.
+    declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace", "", Direction::InOut),
+      "Input workspace of the raw data.");
+
 	declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-			"A NeXus file");
+			"The raw data NeXus file");
 
 	std::vector<std::string> exts2;
 	exts2.push_back(".txt");
@@ -73,10 +76,6 @@ void PoldiLoadLog::init()
 	declareProperty(new WorkspaceProperty<ITableWorkspace>("PoldiLog","",Direction::Output),
 			"The output Tableworkspace"
 			"with columns containing key summary information about the Poldi spectra.");
-
-//	int zero = 0;
-//	declareProperty(new PropertyWithValue<int>("DictionaryNbOfEntries",zero,Direction::Output),"", "" );
-
 
 }
 
@@ -98,6 +97,8 @@ void PoldiLoadLog::exec()
 	////////////////////////////////////////////////////////////////////////
 	// About the workspace
 	////////////////////////////////////////////////////////////////////////
+
+	DataObjects::Workspace2D_sptr localWorkspace = this->getProperty("InputWorkspace");
 
 	std::string filename = getProperty("Filename");
 	std::string dictname = getProperty("Dictionary");
@@ -159,6 +160,23 @@ void PoldiLoadLog::exec()
 		}
 
 	}
+
+
+
+	//Open the hdf file
+	try
+	{
+		(&fin)->openPath(dictionary["StartTime"]);
+//		localWorkspace->mutableRun().addProperty("run_start", root.getString(dictionary["StartTime"]), true );
+
+//		NeXus::NXRoot theroot(filename);
+//	    Kernel::DateAndTime run_start(root.getString(dictionary["StartTime"]));
+	    Kernel::DateAndTime run_start((&fin)->getStrData());
+//		localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
+		localWorkspace->mutableRun().addProperty("run_start", (&fin)->getStrData(), true );
+	}catch (::NeXus::Exception&){}
+
+	(&fin)->close();
 
 	setProperty("PoldiLog",outputws);
 
