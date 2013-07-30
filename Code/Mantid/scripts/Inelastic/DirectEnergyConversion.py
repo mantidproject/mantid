@@ -508,7 +508,7 @@ class DirectEnergyConversion(object):
             # TODO: Need a better check than this...
             if (abs_white_run is None):
                 self.log("Performing Normalisation to Mono Vanadium.")
-                norm_factor = self.calc_average(monovan_wkspace)
+                norm_factor = self.calc_average(monovan_wkspace,ei)
             else:
                 self.log("Performing Absolute Units Normalisation.")
                 # Perform Abs Units...
@@ -670,6 +670,7 @@ class DirectEnergyConversion(object):
         args['van_lo'] = self.monovan_lo_frac
         args['van_hi'] = self.monovan_hi_frac
         args['van_sig'] = self.samp_sig
+        args['use_hard_mask_only']=self.use_hard_mask_only;
 
         diagnostics.diagnose(data_ws, **args)
         monovan_masks,det_ids = ExtractMask(InputWorkspace=data_ws,OutputWorkspace='monovan_masks')
@@ -680,6 +681,7 @@ class DirectEnergyConversion(object):
         nhist = data_ws.getNumberHistograms()
         average_value = 0.0
         weight_sum = 0.0
+        ic =0
         for i in range(nhist):
             try:
                 det = data_ws.getDetector(i)
@@ -690,9 +692,13 @@ class DirectEnergyConversion(object):
             y_value = data_ws.readY(i)[0]
             if y_value != y_value:
                 continue
+            ic = ic+1;
             weight = 1.0/data_ws.readE(i)[0]
             average_value += y_value * weight
             weight_sum += weight
+
+        if weight_sum == 0:
+            raise RuntimeError(str.format(" Vanadium weighth calculated from {0} spectra out of {1} histohrams is equal to 0 and sum: {2} Check vanadium intergation ranges or diagnostic settings ",str(ic),str(nhist),str(average_value)))
         return average_value / weight_sum
 
     def monovan_abs(self, ei_workspace):
