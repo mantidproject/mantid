@@ -805,8 +805,11 @@ class DirectEnergyConversion(object):
 
        # Instrument name might be a prefix, query Mantid for the full name
        short_name=''
+       full_name=''
        try :
-        short_name = config.getFacility().instrument(new_name).shortName()
+        instrument = config.getFacility().instrument(new_name)
+        short_name = instrument.shortName()
+        full_name = instrument.name()
        except:
            # it is possible to have wrong facility:
            facilities = config.getFacilities()
@@ -814,7 +817,9 @@ class DirectEnergyConversion(object):
            for facility in facilities:
                config.setString('default.facility',facility.name())
                try :
-                   short_name = facility.instrument(new_name).shortName()
+                   instrument = facility.instrument(new_name)
+                   short_name = instrument.shortName()
+                   full_name = instrument.name()
                    if len(short_name)>0 :
                        break
                except:
@@ -828,10 +833,8 @@ class DirectEnergyConversion(object):
        if new_name == self.instr_name:
            return
 
- 
        self._instr_name = new_name
-
-       config['default.instrument'] = new_name
+       config['default.instrument'] = full_name
 
 
 
