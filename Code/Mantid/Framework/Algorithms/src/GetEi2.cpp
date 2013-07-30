@@ -236,9 +236,9 @@ double GetEi2::calculateEi(const double initial_guess)
     }
     catch(std::invalid_argument &)
     {
-      if(!m_fixedei) throw;
       peak_times[i] = 0.0;
-      g_log.information() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
+      g_log.error() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
+      if(!m_fixedei) throw;
     }
     if(i == 0) 
     {
