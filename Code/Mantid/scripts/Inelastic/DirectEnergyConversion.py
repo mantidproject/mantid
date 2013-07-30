@@ -785,7 +785,7 @@ class DirectEnergyConversion(object):
         self._idf_values_read = False
         self._keep_wb_workspace=False #  when input data for reducer is wb workspace rather then run number, we want to keep this workspace. But usually not
 
-        if not (instr_name is None or len(instr_name)==0) : # first time run or empty run
+        if not (instr_name is None or len(instr_name)==0 or instr_name == '__empty_') : # first time run or empty run
             self.initialise(instr_name)
 
 #----------------------------------------------------------------------------------
@@ -810,6 +810,7 @@ class DirectEnergyConversion(object):
        except:
            # it is possible to have wrong facility:
            facilities = config.getFacilities()
+           old_facility = str(config.getFacility())
            for facility in facilities:
                config.setString('default.facility',facility.name())
                try :
@@ -819,6 +820,7 @@ class DirectEnergyConversion(object):
                except:
                    pass
            if len(short_name)==0 :
+            config.setString('default.facility',old_facility)
             raise KeyError(" Can not find/set-up the instrument: "+new_name+' in any supported facility')
 
        new_name = short_name
@@ -870,7 +872,7 @@ class DirectEnergyConversion(object):
     # integration range for monochromatic vanadium,
     @property
     def monovan_integr_range(self):
-        if self._monovan_integr_range is None:
+        if not hasattr(self,'_monovan_integr_range') or self._monovan_integr_range is None:
             ei = self.incident_energy
             range = [self.monovan_lo_frac*ei,self.monovan_hi_frac*ei]
             return range

@@ -397,15 +397,15 @@ QString MWDiag::createDiagnosticScript() const
 
   QString diagCall =
     "from DirectEnergyConversion import setup_reducer\n"
-    "from mantidimport mtd\n"
-    "reducer = setup_reducer(mtd.settings['default.instrument'])\n"
+    "from mantid import config\n"
+    "reducer = setup_reducer(config['default.instrument'])\n"
     "diag_total_mask = reducer.diagnose(";
   
   if( m_designWidg.ckDoBack->isChecked() )
   {
     // Do the background check so we need all fields
     diagCall += 
-      "white=" + whiteBeam + ","
+      whiteBeam + ","
       "sample=" + sampleRun + ","
       "samp_zero=" + removeZeroes + ","
       "tiny=" + lowCounts + ","
@@ -422,7 +422,7 @@ QString MWDiag::createDiagnosticScript() const
   {
     // No background check so don't need all of the fields
     diagCall += 
-      "white=" + whiteBeam + ","
+      whiteBeam + ","
       "tiny=" + lowCounts + ","
       "huge=" + highCounts + ","
       "van_lo=" + lowMedian + ","
