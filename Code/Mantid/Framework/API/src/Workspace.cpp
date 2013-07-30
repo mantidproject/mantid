@@ -112,6 +112,7 @@ bool Workspace::isDirty(const int n) const
  */
 void Workspace::addInfoNodeTo(Workspace::InfoNode &parentNode) const
 {
+    Poco::ScopedWriteRWLock rwLock(*(this->getLock()));
     InfoNode *node = createInfoNode();
     parentNode.addNode( node );
 }
