@@ -1356,8 +1356,8 @@ void SliceViewer::findRangeSlice()
 
   // Iterate through the slice
   std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS, function);
-  delete function;
   m_colorRangeSlice = getRange(iterators);
+  delete function;
   // In case of failure, use the full range instead
   if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0))
     m_colorRangeSlice = m_colorRangeFull;
