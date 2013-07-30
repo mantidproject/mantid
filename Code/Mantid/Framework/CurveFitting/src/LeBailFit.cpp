@@ -267,7 +267,7 @@ namespace CurveFitting
       // Some peaks within range have unphysical parameters.  Just calcualtion for reference
       m_inputParameterPhysical = false;
       g_log.warning() << "Input instrument parameters values cause some peaks to have "
-                         "unphysical profile arameters.\n";
+                         "unphysical profile parameters.\n";
       if (m_fitMode == FIT || m_fitMode == MONTECARLO)
       {
         g_log.warning() << "Function mode FIT is disabled.  Convert to Calculation mode.\n";
@@ -883,6 +883,9 @@ namespace CurveFitting
           // string data
           g_log.debug() << "Col-name = " << colname << ", ";
           trow >> strvalue;
+          strvalue.erase(std::find_if(strvalue.rbegin(), strvalue.rend(),
+                                      std::not1(std::ptr_fun<int, int>(std::isspace))).base(), strvalue.end());
+
           g_log.debug() << "Value = " << strvalue << ".\n";
           tempstrmap.insert(std::make_pair(colname, strvalue));
         }
