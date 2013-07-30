@@ -1034,6 +1034,12 @@ namespace API
                       HTTPMessage::HTTP_1_0); 
       g_log.debug() << "Receive request to delete file " << file_path << " using " << url << std::endl; 
 
+      // configure proxy
+      std::string proxy_config; 
+      unsigned short proxy_port; 
+      if (getProxyConfig(proxy_config, proxy_port))
+        session.setProxy(proxy_config, proxy_port);
+      // proxy end
 
       // fill up the form required from the server to delete one file, with the fields 
       // path, author, comment, email
