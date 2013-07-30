@@ -1770,25 +1770,37 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
     if (proxy_var == 0)
       proxy_var = getenv("HTTP_PROXY"); 
     
-    if (proxy_var != 0){
-      std::string proxy_option = proxy_var;
-      size_t pos = proxy_option.rfind(':');
-      if (pos != std::string::npos){
-        if (pos == 4 || pos == 5) // means it found http(s):
-          {
-            PROXYSERVER = proxy_option;
-            PROXYPORT = 8080; // default port for proxy
-          }else{
-          PROXYSERVER = std::string(proxy_option.begin(),proxy_option.begin()+pos);
-          std::stringstream port_str;
-          port_str << std::string(proxy_option.begin()+pos+1,proxy_option.end());
-          port_str >> PROXYPORT;
-        }
-      }else{
-        PROXYSERVER = proxy_option;
-        PROXYPORT = 8080;
+    if (proxy_var != 0){      
+      Poco::URI uri_p(proxy_var);
+      PROXYSERVER = uri_p.getHost(); 
+      PROXYPORT = uri_p.getPort();
+      try{
+        // test if the proxy is valid for connecting to remote repository
+        Poco::URI uri(remote_url); 
+        Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort()); 
+        // setup a request to read the remote url
+        Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, "/",
+                                       Poco::Net::HTTPMessage::HTTP_1_1);
+        // through the proxy
+        session.setProxy(PROXYSERVER, PROXYPORT);        
+        session.sendRequest(request);  // if it fails, it will throw exception here.
+        
+        // clear the answer.
+        Poco::Net::HTTPResponse response; 
+        std::istream & rs = session.receiveResponse(response); 
+        Poco::NullOutputStream null; 
+        Poco::StreamCopier::copyStream(rs, null);
+        // report that the proxy was configured
+        g_log.information() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
       }
-      g_log.notice() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
+      catch(Poco::Net::HostNotFoundException & ex){
+        g_log.information() << "ScriptRepository found that proxy can not be used for this connection.\n"
+                            << ex.displayText() << std::endl; 
+        PROXYSERVER = "";        
+      }catch(...){
+        g_log.warning() << "Unexpected error while looking for the proxy for ScriptRepository." << std::endl; 
+        PROXYSERVER = ""; 
+      }
     }
 #endif    
   }
