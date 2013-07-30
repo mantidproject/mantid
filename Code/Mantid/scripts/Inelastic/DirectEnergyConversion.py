@@ -790,6 +790,7 @@ class DirectEnergyConversion(object):
         self._log_to_mantid = False
         self._idf_values_read = False
         self._keep_wb_workspace=False #  when input data for reducer is wb workspace rather then run number, we want to keep this workspace. But usually not
+        self.spectra_masks = None;
 
         if not (instr_name is None or len(instr_name)==0 or instr_name == '__empty_') : # first time run or empty run
             self.initialise(instr_name)
