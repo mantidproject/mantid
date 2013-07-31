@@ -19,10 +19,6 @@ Provide Expected Value
 
 .. autofunction:: provideTheExpectedValue
 
-Extend Margin and Expected Value
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. autofunction:: extendMarginAndExpectedValue
-
 Improving Calibration Single Tube
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: improvingCalibrationSingleTube
@@ -122,13 +118,13 @@ def provideTheExpectedValue(filename):
 	# == Apply the Calibation ==
 	ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 
-def extendMarginAndExpectedValue(filename):
+def changeMarginAndExpectedValue(filename):
 	"""
         To fit correcly, it is important to have a good window around the peak. This windown is defined
         by the **margin** parameter. 
 
-        This examples shows how increasing the margin from its default value (**10**) to (**15**) improves
-        the result of the calibration. 
+        This examples shows how the results worsen if we change the margin from its default value **15** 
+        to **10**. 
 
         It shows how to see the fitted values using the **plotTube** parameter. 
         
@@ -139,7 +135,7 @@ def extendMarginAndExpectedValue(filename):
 
 	.. image:: /images/calibratePlotFittedData.png
         
-        The result improved, but there are still place for improvement:
+        The result deteriorate, as you can see: 
 
         .. image:: /images/calibrateExtendMarginAndExpectedValue.png
 
@@ -156,7 +152,8 @@ def extendMarginAndExpectedValue(filename):
 	expectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
 	fitPar = TubeCalibFitParams(expectedPositions)
 	fitPar.setAutomatic(True)
-	fitPar.setMargin(15)
+        # it is not necessary, because 15 is the default value, but it is done here for illustration
+	fitPar.setMargin(10) 
 	
 	# == Get the calibration and put results into calibration table ==
 	calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
@@ -169,14 +166,14 @@ def extendMarginAndExpectedValue(filename):
 
 def improvingCalibrationSingleTube(filename):
 	"""
-	The :func:`~Examples.extendMarginAndExpectedValue` provided a good solution, but there are few 
+	The :func:`~Examples.provideTheExpectedValue` provided a good solution, but there are few 
         tubes whose calibration was not so good. 
 	
 	This method explores how to deal with these tubes. 	
 	
 	First of all, it is important to identify the tubes that did not work well. 
 	
-	From the outputs of extendMarginAndExpectedValue, looking inside the instrument tree, 
+	From the outputs of provideTheExpectedValue, looking inside the instrument tree, 
 	it is possible to list all the tubes that are not so good. 
 	
 	Unfortunatelly, they do not have a single name identifier.  
@@ -207,7 +204,6 @@ def improvingCalibrationSingleTube(filename):
 	expectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
 	fitPar = TubeCalibFitParams(expectedPositions)
 	fitPar.setAutomatic(True)
-	fitPar.setMargin(15)
 
 	# == Get the calibration and put results into calibration table ==
 	calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
@@ -236,7 +232,7 @@ def improvingCalibrationSingleTube(filename):
 
 def improvingCalibrationOfListOfTubes(filename):
 	"""
-	Analysing the result of extendMarginAndExpectedValue it was seen that the calibration 
+	Analysing the result of provideTheExpectedValue it was seen that the calibration 
         of some tubes was not good. 
 	
 	.. note:: 
@@ -262,7 +258,6 @@ def improvingCalibrationOfListOfTubes(filename):
 	expectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
 	fitPar = TubeCalibFitParams(expectedPositions)
 	fitPar.setAutomatic(True)
-	fitPar.setMargin(15)
 
 	# == Get the calibration and put results into calibration table ==
 	#calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
@@ -319,7 +314,6 @@ def calibrateB2Window(filename):
 	expectedPositions = [4.0, 85.0, 161.0, 252.0]
 	fitPar = TubeCalibFitParams(expectedPositions)
 	fitPar.setAutomatic(True)
-	fitPar.setMargin(15)
 
 	# == Get the calibration and put results into calibration table ==
 	calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
@@ -331,14 +325,14 @@ def calibrateB2Window(filename):
 
 def findThoseTubesThatNeedSpecialCareForCalibration(filename):
 	"""
-	The example :func:`extendMarginAndExpectedValue` has shown its capability to calibrate almost 
+	The example :func:`provideTheExpectedValue` has shown its capability to calibrate almost 
         all tubes, but,	as explored in the :func:`improvingCalibrationOfListOfTubes` and 
         :func:`improvingCalibrationSingleTube` there are 
 	some tubes that could not be calibrated using that method. 
 	
 	The goal of this method is to show one way to find the tubes that will require special care. 
 
-        It will first perform the same calibration seen in :func:`extendMarginAndExpectedValue`, 
+        It will first perform the same calibration seen in :func:`provideTheExpectedValue`, 
         them, it will process the **peakTable** output of the calibrate method when enabling the 
         parameter **outputPeak**. 
 
@@ -363,7 +357,6 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
 	expectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
 	fitPar = TubeCalibFitParams(expectedPositions)
 	fitPar.setAutomatic(True)
-	fitPar.setMargin(15)
 
 	# == Get the calibration and put results into calibration table ==
 	calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
@@ -416,7 +409,7 @@ def findThoseTubesThatNeedSpecialCareForCalibration(filename):
 def completeCalibration(filename):
 	"""
 	This example shows how to use some properties of calibrate method to 
-	join together the calibration done in :func:`extendMarginAndExpectedValue`, 
+	join together the calibration done in :func:`provideTheExpectedValue`, 
 	and improved in :func:`calibrateB2Window`, and :func:`improvingCalibrationOfListOfTubes`.
 
         It also improves the result of the calibration because it deals with the E door. The
@@ -441,7 +434,6 @@ def completeCalibration(filename):
 	expectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
 	fitPar = TubeCalibFitParams(expectedPositions)
 	fitPar.setAutomatic(True)
-	fitPar.setMargin(15)
 	
 	
 	#execute the improvingCalibrationOfListOfTubes excluding the range of b2 window
@@ -490,7 +482,6 @@ def completeCalibration(filename):
 	expectedPositions = [4.0, 85.0, 161.0, 252.0]
 	fitPar = TubeCalibFitParams(expectedPositions)
 	fitPar.setAutomatic(True)
-	fitPar.setMargin(15)
 
 	# apply the calibration for the b2_window 2 strips values
 	calibrationTable, peak2Table = tube.calibrate(CalibInstWS, CalibratedComponent, 
@@ -519,7 +510,7 @@ if __name__ == "__main__":
     filename = 'MAP14919.raw'	
     #minimalInput(filename)
     #provideTheExpectedValue(filename)
-    #extendMarginAndExpectedValue(filename)
+    #changeMarginAndExpectedValue(filename)
     #improvingCalibrationSingleTube(filename)
     #improvingCalibrationOfListOfTubes(filename)
     #calibrateB2Window(filename)

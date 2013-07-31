@@ -35,7 +35,7 @@ print "Created objects needed for calibration."
 # == Get the calibration and put results into calibration table ==
 
 calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponents, knownPos, funcForm, 
-	outputPeak=True, margin=15)
+	outputPeak=True)
 print "Got calibration (new positions of detectors) "
 
 # == Apply the Calibation ==
