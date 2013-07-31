@@ -551,6 +551,11 @@ class DirectEnergyConversion(object):
                 self.log("Could not find such sample environment log. Will use psi=offset")
         self.psi = self.motor+self.motor_offset
         # Save then finish
+
+        print "************************************************** in convert_to_energy *************************"
+        for form in self.save_format:
+            print " Default save format reaquested: ",form;
+        print "          SAVING RESULTS                                              y *************************"
         self.save_results(sample_wkspace, save_path)
         # Clear loaded raw data to free up memory
         common.clear_loaded_data()
