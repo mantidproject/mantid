@@ -724,16 +724,16 @@ class DirectEnergyConversion(object):
         absnorm_factor /= xsection
         return absnorm_factor * (float(self.sample_mass)/float(self.sample_rmm))
 
-    def save_results(self, workspace, save_path, formats = None):
+    def save_results(self, workspace, save_file=None, formats = None):
         """
         Save the result workspace to the specfied filename using the list of formats specified in 
         formats. If formats is None then the default list is used
         """
-        if save_path is None:
-            save_path = workspace.getName()
-        elif os.path.isdir(save_path):
-            save_path = os.path.join(save_path, workspace.getName())
-        elif save_path == '':
+        if save_file is None:
+            save_file = workspace.getName()
+        elif os.path.isdir(save_file):
+            save_file = os.path.join(save_file, workspace.getName())
+        elif save_file == '':
             raise ValueError('Empty filename is not allowed for saving')
         else:
             pass
@@ -753,14 +753,17 @@ class DirectEnergyConversion(object):
         if len(ext) == 1 and ext[0] == None :
             return
 
-        save_path = os.path.splitext(save_path)[0]
+        save_file = os.path.splitext(save_file)[0]
+        # this is mainly for debugging purposes as real save do not return anything
+        rez =''
         for ext in formats:
             if ext in self.__save_formats :
-                filename = save_path + ext
-                self.__save_formats[ext](workspace,filename)            
+                filename = save_file + ext
+                rez+=self.__save_formats[ext](workspace,filename)            
             else:
                 self.log("Unknown file format {0} requested while saving results.".format(ext))
-    
+        # this is mainly for debugging purposes as real save do not return anything    
+        return rez;
 
     #-------------------------------------------------------------------------------
     def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):
