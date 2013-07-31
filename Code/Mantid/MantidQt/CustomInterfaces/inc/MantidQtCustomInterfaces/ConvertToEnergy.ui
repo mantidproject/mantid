@@ -2159,7 +2159,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
                     <property name="WorkspaceTypes">
                      <stringlist/>
                     </property>
-                    <property name="Suffix">
+                    <property name="Suffix" stdset="0">
                      <stringlist>
                       <string>_red</string>
                      </stringlist>
