@@ -73,8 +73,8 @@ namespace MantidQt
       QString openFileDialog(const bool save, const QStringList &exts);
       boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument(const QString & name);
       QString getSetting(const QString & settingName, 
-			 boost::shared_ptr<const Mantid::Geometry::Instrument> inst = boost::shared_ptr<const Mantid::Geometry::Instrument>(),
-			 const QString & idfName = "") const;
+       boost::shared_ptr<const Mantid::Geometry::Instrument> inst = boost::shared_ptr<const Mantid::Geometry::Instrument>(),
+       const QString & idfName = "") const;
       void saveDefaults();
       void setupToolTips();
       void connectSignals(const QWidget * const parentInterface);

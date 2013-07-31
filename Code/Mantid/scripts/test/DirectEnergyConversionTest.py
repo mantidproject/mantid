@@ -199,7 +199,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertTrue(tReducer.save_format is None)
 
         tReducer.save_format = '.spe'
-        self.assertEqual('.spe',tReducer.save_format)
+        self.assertEqual(['.spe'],tReducer.save_format)
 
     def test_set_format(self):
         tReducer = self.reducer
@@ -242,6 +242,75 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 
+    def test_save_formats(self):
+        tReducer = self.reducer;
+
+        ws_name = '__empty_'+tReducer._instr_name
+
+        pws = mtd[ws_name]
+        self.assertEqual(pws.name(),ws_name);
+        self.assertTrue(tReducer.save_format is None)
+        # do nothing
+        tReducer.save_results(pws,'test_path')
+        tReducer.test_name='';
+        def f_spe(workspace, filename):
+                tReducer.test_name += (workspace.name()+'_file_spe_' + filename)
+        def f_nxspe(workspace, filename):
+                tReducer.test_name += (workspace.name()+'_file_nxspe_' + filename)
+        def f_nxs(workspace, filename):
+                tReducer.test_name += (workspace.name()+'_file_nxs_' + filename)
+
+ 
+        # redefine test save methors to produce test ouptut
+        tReducer._DirectEnergyConversion__save_formats['.spe']=lambda workspace,filename: f_spe(workspace,filename);
+        tReducer._DirectEnergyConversion__save_formats['.nxspe']=lambda workspace,filename : f_nxspe(workspace,filename);
+        tReducer._DirectEnergyConversion__save_formats['.nxs']=lambda workspace,filename : f_nxs(workspace,filename);
+
+
+
+        # set non-exisiting format
+        tReducer.save_format = 'non-existing-format'
+        self.assertTrue(tReducer.save_format is None)
+
+        tReducer.save_format = 'spe'
+        self.assertTrue(tReducer.save_format is None)
+
+        tReducer.save_format = '.spe'
+        self.assertEqual(tReducer.save_format,['.spe'])
+
+        tReducer.test_name='';
+        tReducer.save_results(pws)
+        self.assertEquals(ws_name+'_file_spe_'+ws_name+'.spe',tReducer.test_name)
+        file_long_name = ws_name+'_file_spe_other_file_name.spe'
+
+        tReducer.test_name='';
+        tReducer.save_results(pws,'other_file_name')
+        self.assertEquals(file_long_name,tReducer.test_name)
+
+        file_long_name=ws_name+'_file_nxspe_ofn.nxspe'+ws_name+'_file_nxs_ofn.nxs'
+        tReducer.test_name='';
+        tReducer.save_results(pws,'ofn',['.nxspe','.nxs'])
+        self.assertEquals(file_long_name,tReducer.test_name)
+
+        #clear all previous default formats
+        tReducer.save_format=[];
+        self.assertTrue(tReducer.save_format is None)
+
+        format_list = ['.nxspe','.nxs','.spe']
+        file_long_name = '';
+        tReducer.save_format = format_list;
+        for i in xrange(len(format_list)):
+            self.assertEqual(tReducer.save_format[i],format_list[i]);
+            end = len(format_list[i]);
+            file_long_name+=ws_name+'_file_'+format_list[i][1:end]+'_ofn'+format_list[i]
+
+        tReducer.test_name='';
+        tReducer.save_results(pws,'ofn')
+        self.assertEquals(file_long_name,tReducer.test_name)
+
+
+        #self.assertEqual(tReducer.save_results(pws,'my_path'),ws_name+
+
 
     #def test_diag_call(self):
     #    tReducer = self.reducer
@@ -250,5 +319,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     #    tReducet.di
 
-if __name__=="__main__":   
-    unittest.main()
+
+if __name__=="__main__":
+        unittest.main()

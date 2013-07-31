@@ -120,12 +120,41 @@ QString MWDiag::getSetting(const QString & settingName, boost::shared_ptr<const 
   }
   else if( instrument && !idfName.isEmpty() )
   {
-    std::vector<double> params = instrument->getNumberParameter(idfName.toStdString());
-    if( params.size() == 1 )
+    std::string parName = idfName.toStdString();
+    std::string parType = instrument->getParameterType(parName);
+    switch(parType[0])
     {
-      value = QString::number(params.front());
+    case('b'):
+      {
+        std::vector<bool> vl = instrument->getBoolParameter(parName);
+        if (vl[0])
+            value = "1";
+        else
+            value = "0";
+        break;
+      }
+    case('i'):
+      {
+        std::vector<int> params = instrument->getIntParameter(parName);
+        if( params.size() == 1 )
+        {
+          value = QString::number(params.front());
+        }
+        else value = QString();
+        break;
+      }
+    default:
+      {
+        std::vector<double> params = instrument->getNumberParameter(parName);
+        if( params.size() == 1 )
+        {
+          value = QString::number(params.front());
+        }
+        else value = QString();
+      }
+
+
     }
-    else value = QString();
   }
   else
   {
@@ -249,12 +278,12 @@ void MWDiag::connectSignals(const QWidget * const parentInterface)
     connect(parentInterface, SIGNAL(MWDiag_updateWBV(const QString&)),
       m_designWidg.white_file, SLOT(setFileTextWithSearch(const QString&)));
     connect(parentInterface, SIGNAL(MWDiag_updateTOFs(const double &, const double &)),
-	        this, SLOT(updateTOFs(const double &, const double &)));
+          this, SLOT(updateTOFs(const double &, const double &)));
     connect(m_designWidg.leStartTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
     connect(m_designWidg.leEndTime, SIGNAL(editingFinished()), this, SLOT(TOFUpd()));
 
     connect(parentInterface, SIGNAL(MWDiag_sendRuns(const QStringList&)),
-	  this, SLOT(specifyRuns(const QStringList &)));
+    this, SLOT(specifyRuns(const QStringList &)));
   }
 }
 void MWDiag::setUpValidators()
@@ -301,7 +330,7 @@ void MWDiag::browseClicked(const QString &buttonDis)
     extensions << "msk";
     toSave = true;
   }
-	
+  
   QString filepath = openFileDialog(toSave, extensions);
   if( filepath.isEmpty() ) return;
   QWidget *focus = QApplication::focusWidget();
@@ -368,15 +397,16 @@ QString MWDiag::createDiagnosticScript() const
 
   QString diagCall =
     "from DirectEnergyConversion import setup_reducer\n"
-    "from mantidimport mtd\n"
-    "reducer = setup_reducer(mtd.settings['default.instrument'])\n"
+    "from mantid import config\n"
+    "reducer = setup_reducer(config['default.instrument'])\n"
+    "reducer._to_stdout = False\n"
     "diag_total_mask = reducer.diagnose(";
   
   if( m_designWidg.ckDoBack->isChecked() )
   {
     // Do the background check so we need all fields
     diagCall += 
-      "white=" + whiteBeam + ","
+      whiteBeam + ","
       "sample=" + sampleRun + ","
       "samp_zero=" + removeZeroes + ","
       "tiny=" + lowCounts + ","
@@ -393,7 +423,7 @@ QString MWDiag::createDiagnosticScript() const
   {
     // No background check so don't need all of the fields
     diagCall += 
-      "white=" + whiteBeam + ","
+      whiteBeam + ","
       "tiny=" + lowCounts + ","
       "huge=" + highCounts + ","
       "van_lo=" + lowMedian + ","
@@ -430,7 +460,7 @@ void MWDiag::showTestResults(const QString & testSummary) const
   {
     m_dispDialog = new DiagResults(this->parentWidget());
     connect(m_dispDialog, SIGNAL(runAsPythonScript(const QString&, bool)), this,
-	    SIGNAL(runAsPythonScript(const QString&, bool)));
+      SIGNAL(runAsPythonScript(const QString&, bool)));
   }
   
   m_dispDialog->updateResults(testSummary);
@@ -530,7 +560,7 @@ void MWDiag::updateTOFs(const double &start, const double &end)
   if ( ! m_TOFChanged ) 
   {
     m_designWidg.leStartTime->setText(QString::number(start));
-	m_designWidg.leEndTime->setText(QString::number(end));
+  m_designWidg.leEndTime->setText(QString::number(end));
   }
 }
 /** This slot sets m_monoFiles based on the array that is

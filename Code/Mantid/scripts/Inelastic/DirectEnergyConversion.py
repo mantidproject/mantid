@@ -176,7 +176,7 @@ class DirectEnergyConversion(object):
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
             background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
-            self.log("Diagnose: finisthed convertUnits ")
+            self.log("Diagnose: finished convertUnits ")
             background_int *= self.scale_factor
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
@@ -235,7 +235,7 @@ class DirectEnergyConversion(object):
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
-        self.log("do_white: finisthed convertUnits ")
+        self.log("do_white: finished convertUnits ")
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
         low = self.wb_integr_range[0]
         upp = self.wb_integr_range[1]
@@ -508,7 +508,7 @@ class DirectEnergyConversion(object):
             # TODO: Need a better check than this...
             if (abs_white_run is None):
                 self.log("Performing Normalisation to Mono Vanadium.")
-                norm_factor = self.calc_average(monovan_wkspace)
+                norm_factor = self.calc_average(monovan_wkspace,ei)
             else:
                 self.log("Performing Absolute Units Normalisation.")
                 # Perform Abs Units...
@@ -550,6 +550,7 @@ class DirectEnergyConversion(object):
             else:
                 self.log("Could not find such sample environment log. Will use psi=offset")
         self.psi = self.motor+self.motor_offset
+
         # Save then finish
         self.save_results(sample_wkspace, save_path)
         # Clear loaded raw data to free up memory
@@ -670,6 +671,8 @@ class DirectEnergyConversion(object):
         args['van_lo'] = self.monovan_lo_frac
         args['van_hi'] = self.monovan_hi_frac
         args['van_sig'] = self.samp_sig
+        args['use_hard_mask_only']=self.use_hard_mask_only;
+        args['print_results'] = False
 
         diagnostics.diagnose(data_ws, **args)
         monovan_masks,det_ids = ExtractMask(InputWorkspace=data_ws,OutputWorkspace='monovan_masks')
@@ -680,6 +683,7 @@ class DirectEnergyConversion(object):
         nhist = data_ws.getNumberHistograms()
         average_value = 0.0
         weight_sum = 0.0
+        ic =0
         for i in range(nhist):
             try:
                 det = data_ws.getDetector(i)
@@ -690,9 +694,13 @@ class DirectEnergyConversion(object):
             y_value = data_ws.readY(i)[0]
             if y_value != y_value:
                 continue
+            ic = ic+1;
             weight = 1.0/data_ws.readE(i)[0]
             average_value += y_value * weight
             weight_sum += weight
+
+        if weight_sum == 0:
+            raise RuntimeError(str.format(" Vanadium weighth calculated from {0} spectra out of {1} histohrams is equal to 0 and sum: {2} Check vanadium intergation ranges or diagnostic settings ",str(ic),str(nhist),str(average_value)))
         return average_value / weight_sum
 
     def monovan_abs(self, ei_workspace):
@@ -718,43 +726,41 @@ class DirectEnergyConversion(object):
         absnorm_factor /= xsection
         return absnorm_factor * (float(self.sample_mass)/float(self.sample_rmm))
 
-    def save_results(self, workspace, save_path, formats = None):
+    def save_results(self, workspace, save_file=None, formats = None):
         """
         Save the result workspace to the specfied filename using the list of formats specified in 
         formats. If formats is None then the default list is used
         """
-        if save_path is None:
-            save_path = workspace.getName()
-        elif os.path.isdir(save_path):
-            save_path = os.path.join(save_path, workspace.getName())
-        elif save_path == '':
+        if save_file is None:
+            save_file = workspace.getName()
+        elif os.path.isdir(save_file):
+            save_file = os.path.join(save_file, workspace.getName())
+        elif save_file == '':
             raise ValueError('Empty filename is not allowed for saving')
         else:
             pass
 
         if formats is None:
-            formats = [self.save_format]
+            formats = self.save_format
         if type(formats) == str:
             formats = [formats]
-        #Make sure we just have a file stem
-        ext = formats
 
 
-        if len(ext) == 0:
-            ext = '.spe'
 
         # if ext is none, no need to write anything
-        if len(ext) == 1 and ext[0] == None :
+        if formats is None:
             return
 
-        save_path = os.path.splitext(save_path)[0]
+        save_file = os.path.splitext(save_file)[0]
+        # this is mainly for debugging purposes as real save do not return anything
+ 
         for ext in formats:
             if ext in self.__save_formats :
-                filename = save_path + ext
+                filename = save_file + ext
                 self.__save_formats[ext](workspace,filename)            
             else:
                 self.log("Unknown file format {0} requested while saving results.".format(ext))
-    
+   
 
     #-------------------------------------------------------------------------------
     def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):
@@ -784,8 +790,9 @@ class DirectEnergyConversion(object):
         self._log_to_mantid = False
         self._idf_values_read = False
         self._keep_wb_workspace=False #  when input data for reducer is wb workspace rather then run number, we want to keep this workspace. But usually not
+        self.spectra_masks = None;
 
-        if not (instr_name is None or len(instr_name)==0) : # first time run or empty run
+        if not (instr_name is None or len(instr_name)==0 or instr_name == '__empty_') : # first time run or empty run
             self.initialise(instr_name)
 
 #----------------------------------------------------------------------------------
@@ -805,20 +812,27 @@ class DirectEnergyConversion(object):
 
        # Instrument name might be a prefix, query Mantid for the full name
        short_name=''
+       full_name=''
        try :
-        short_name = config.getFacility().instrument(new_name).shortName()
+        instrument = config.getFacility().instrument(new_name)
+        short_name = instrument.shortName()
+        full_name = instrument.name()
        except:
            # it is possible to have wrong facility:
            facilities = config.getFacilities()
+           old_facility = str(config.getFacility())
            for facility in facilities:
                config.setString('default.facility',facility.name())
                try :
-                   short_name = facility.instrument(new_name).shortName()
+                   instrument = facility.instrument(new_name)
+                   short_name = instrument.shortName()
+                   full_name = instrument.name()
                    if len(short_name)>0 :
                        break
                except:
                    pass
            if len(short_name)==0 :
+            config.setString('default.facility',old_facility)
             raise KeyError(" Can not find/set-up the instrument: "+new_name+' in any supported facility')
 
        new_name = short_name
@@ -826,10 +840,8 @@ class DirectEnergyConversion(object):
        if new_name == self.instr_name:
            return
 
- 
        self._instr_name = new_name
-
-       config['default.instrument'] = new_name
+       config['default.instrument'] = full_name
 
 
 
@@ -870,7 +882,7 @@ class DirectEnergyConversion(object):
     # integration range for monochromatic vanadium,
     @property
     def monovan_integr_range(self):
-        if self._monovan_integr_range is None:
+        if not hasattr(self,'_monovan_integr_range') or self._monovan_integr_range is None:
             ei = self.incident_energy
             range = [self.monovan_lo_frac*ei,self.monovan_hi_frac*ei]
             return range
@@ -887,24 +899,36 @@ class DirectEnergyConversion(object):
         return self._save_format
     @save_format.setter
     def save_format(self, value):
+    # user can clear save formats by setting save_format=None or save_format = [] or save_format=''
+    # if empty string or empty list is provided as part of the list, all save_format-s set up earlier are cleared
+
+    # clear format by using None
         if value is None:
             self._save_format = None
-
+            return
+    # check string, if it is emtpy, clear save format, if not contiunue
         if isinstance(value,str):
             if value not in self.__save_formats :
-                self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur")
-                value = None
+                self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")    
+                if len(value) == 0: # user wants to clear internal save formats
+                   self._save_format = None
+                return
         elif isinstance(value,list):
             if len(value) > 0 :
-                value = value[0]
-                if len(value)>1 :
-                    self.log("Only one default save format is currenctly allowed. Will try to use: \""+str(value)+"\" format ")
-            else:
-                value = None
-            # set single default save format recursively
-            self.save_format = value
-            
-        self._save_format = value
+                # set single default save format recursively
+                for val in value:
+                    self.save_format = val
+                return;
+      # clear all previous formats by providing empty list
+            else: 
+                self._save_format = None;
+                return
+
+        # here we came to setting list of save formats
+        if self._save_format is None:
+            self._save_format = [];
+
+        self._save_format.append(value);
 
     # bin ranges
     @property 
