@@ -129,10 +129,6 @@ set( TEST_FILES
 
 include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
-# the directory with the information about ConvertToMD interface definitions
-# TODO: Remove these illegal dependencies (ticket #5151)
-include_directories (../../Framework/MDEvents/inc)
-include_directories (../../Framework/DataObjects/inc)
 
 # Ugly hack to get around issue in Boost version 1.48.0 
 # in conjunction with Qt 4.7.4 or greater
@@ -164,7 +160,7 @@ set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomIn
 
 find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser MDEvents ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser ${CMAKE_THREAD_LIBS_INIT})
 
 ###########################################################################
 # Testing
