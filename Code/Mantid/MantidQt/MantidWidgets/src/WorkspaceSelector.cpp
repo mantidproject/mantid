@@ -20,6 +20,8 @@ using namespace MantidQt::MantidWidgets;
 WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(parent),
   m_addObserver(*this, &WorkspaceSelector::handleAddEvent), 
   m_remObserver(*this, &WorkspaceSelector::handleRemEvent),
+  m_clearObserver(*this, &WorkspaceSelector::handleClearEvent),
+  m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
   m_init(init), m_workspaceTypes(), m_showHidden(false), m_optional(false),
   m_suffix(), m_algName(), m_algPropName(), m_algorithm()
 {
@@ -29,6 +31,10 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(par
     Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
     ads.notificationCenter.addObserver(m_addObserver);
     ads.notificationCenter.addObserver(m_remObserver);
+    ads.notificationCenter.addObserver(m_renameObserver);
+    ads.notificationCenter.addObserver(m_clearObserver);
+
+    refresh();
   }
 }
 
@@ -42,6 +48,8 @@ WorkspaceSelector::~WorkspaceSelector()
   {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_remObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
   }
 }
 
@@ -166,6 +174,22 @@ void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNotificat
   if ( index != -1 )
   {
     removeItem(index);
+  }
+}
+
+void WorkspaceSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
+{
+  this->clear();
+}
+
+void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf)
+{
+  QString name = QString::fromStdString(pNf->object_name());
+  QString newName = QString::fromStdString(pNf->new_objectname());
+  int index = findText(name);
+  if ( index != -1 )
+  {
+    this->setItemText(index, newName);
   }
 }
 

@@ -97,8 +97,6 @@ namespace IDA
     // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
     m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_ffTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(fitContextMenu(const QPoint &)));
-
-    uiForm().furyfit_wsIqt->refresh();
   }
 
   void FuryFit::run()
