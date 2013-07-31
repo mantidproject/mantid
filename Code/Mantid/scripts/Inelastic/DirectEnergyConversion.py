@@ -176,7 +176,7 @@ class DirectEnergyConversion(object):
                                          IncludePartialBins=True)
             total_counts = Integration(result_ws, IncludePartialBins=True)
             background_int = ConvertUnits(background_int, "Energy", AlignBins=0)
-            self.log("Diagnose: finisthed convertUnits ")
+            self.log("Diagnose: finished convertUnits ")
             background_int *= self.scale_factor
             diagnostics.normalise_background(background_int, whiteintegrals, kwargs.get('second_white',None))
             kwargs['background_int'] = background_int
@@ -235,7 +235,7 @@ class DirectEnergyConversion(object):
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method,0.0,mon_number)
         # Units conversion
         white_ws = ConvertUnits(InputWorkspace=white_ws,OutputWorkspace=whitews_name, Target= "Energy", AlignBins=0)
-        self.log("do_white: finisthed convertUnits ")
+        self.log("do_white: finished convertUnits ")
         # This both integrates the workspace into one bin spectra and sets up common bin boundaries for all spectra
         low = self.wb_integr_range[0]
         upp = self.wb_integr_range[1]
@@ -672,6 +672,7 @@ class DirectEnergyConversion(object):
         args['van_hi'] = self.monovan_hi_frac
         args['van_sig'] = self.samp_sig
         args['use_hard_mask_only']=self.use_hard_mask_only;
+        args['print_results'] = False
 
         diagnostics.diagnose(data_ws, **args)
         monovan_masks,det_ids = ExtractMask(InputWorkspace=data_ws,OutputWorkspace='monovan_masks')

@@ -399,6 +399,7 @@ QString MWDiag::createDiagnosticScript() const
     "from DirectEnergyConversion import setup_reducer\n"
     "from mantid import config\n"
     "reducer = setup_reducer(config['default.instrument'])\n"
+    "reducer._to_stdout = False\n"
     "diag_total_mask = reducer.diagnose(";
   
   if( m_designWidg.ckDoBack->isChecked() )

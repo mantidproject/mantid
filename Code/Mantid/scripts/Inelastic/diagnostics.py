@@ -146,7 +146,8 @@ def diagnose(white_int, **kwargs):
     if not default :
        testName = " For bank: "+start_index_name+end_index_name
 
-    print_test_summary(test_results,testName)
+    if hasattr(parser, 'print_results') and parser.print_results:
+        print_test_summary(test_results,testName)
 
 #-------------------------------------------------------------------------------
 
