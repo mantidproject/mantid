@@ -133,6 +133,9 @@ unsigned int ProjectMD::calcIndex(IMDHistoWorkspace_sptr ws, int dim[])
 {
 	unsigned int idx = 0;
 	switch(ws->getNumDims()){
+	case 1:
+	                idx = dim[0];
+			break;
 	case 2:
 		    idx = ws->getLinearIndex(dim[0],dim[1]);
 			break;

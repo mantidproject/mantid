@@ -104,8 +104,8 @@ private:
 	double dblSqrt(double in);
 
 
-	static constexpr double hbar = 1.0545717253362894e-34;   // J.s
-	static constexpr double m_n = 1.674927351e-27;           // kg
+	static const double hbar = 1.0545717253362894e-34;   // J.s
+	static const double m_n = 1.674927351e-27;           // kg
 
 //	***     convkv=hquer/(Masse Neutron)
         double CONVKV;

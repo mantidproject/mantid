@@ -46,7 +46,7 @@ Please note that the dimensions on the MDHistoWorkspace are inverted when compar
 #include <boost/algorithm/string.hpp>
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadFlexiNexus);
+DECLARE_ALGORITHM(LoadFlexiNexus)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -416,7 +416,7 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
 		/**
 		 * load all the extras into the Run information
 		 */
-		Run r = info->mutableRun();
+		Run& r = info->mutableRun();
 		std::set<std::string> specialMap = populateSpecialMap();
 		for(it = dictionary.begin(); it != dictionary.end(); it++){
 			if(specialMap.find(it->first) == specialMap.end()){
@@ -442,6 +442,13 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
 				}
 			}
 		}
+
+		// const std::vector<Kernel::Property *> props = r.getProperties();
+		// for(int i = 0; i < props.size(); i++){
+		//   Property *prop = props[i];
+		//   getLogger().error("Found property: " + prop->name() + " with value: " + prop->value());
+                // }
+
 	}
 std::set<std::string> LoadFlexiNexus::populateSpecialMap()
 {
