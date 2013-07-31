@@ -739,18 +739,14 @@ class DirectEnergyConversion(object):
             pass
 
         if formats is None:
-            formats = [self.save_format]
+            formats = self.save_format
         if type(formats) == str:
             formats = [formats]
-        #Make sure we just have a file stem
-        ext = formats
 
 
-        if len(ext) == 0:
-            ext = '.spe'
 
         # if ext is none, no need to write anything
-        if len(ext) == 1 and ext[0] == None :
+        if formats is None:
             return
 
         save_file = os.path.splitext(save_file)[0]
@@ -902,24 +898,36 @@ class DirectEnergyConversion(object):
         return self._save_format
     @save_format.setter
     def save_format(self, value):
+    # user can clear save formats by setting save_format=None or save_format = [] or save_format=''
+    # if empty string or empty list is provided as part of the list, all save_format-s set up earlier are cleared
+
+    # clear format by using None
         if value is None:
             self._save_format = None
-
+            return
+    # check string, if it is emtpy, clear save format, if not contiunue
         if isinstance(value,str):
             if value not in self.__save_formats :
-                self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur")
-                value = None
+                self.log("Trying to set saving in unknown format: \""+str(value)+"\" No saving will occur for this format")    
+                if len(value) == 0: # user wants to clear internal save formats
+                   self._save_format = None
+                return
         elif isinstance(value,list):
             if len(value) > 0 :
-                value = value[0]
-                if len(value)>1 :
-                    self.log("Only one default save format is currenctly allowed. Will try to use: \""+str(value)+"\" format ")
-            else:
-                value = None
-            # set single default save format recursively
-            self.save_format = value
-            
-        self._save_format = value
+                # set single default save format recursively
+                for val in value:
+                    self.save_format = val
+                return;
+      # clear all previous formats by providing empty list
+            else: 
+                self._save_format = None;
+                return
+
+        # here we came to setting list of save formats
+        if self._save_format is None:
+            self._save_format = [];
+
+        self._save_format.append(value);
 
     # bin ranges
     @property 

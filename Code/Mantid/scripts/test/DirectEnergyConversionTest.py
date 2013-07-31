@@ -199,7 +199,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertTrue(tReducer.save_format is None)
 
         tReducer.save_format = '.spe'
-        self.assertEqual('.spe',tReducer.save_format)
+        self.assertEqual(['.spe'],tReducer.save_format)
 
     def test_set_format(self):
         tReducer = self.reducer
@@ -268,7 +268,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertTrue(tReducer.save_format is None)
 
         tReducer.save_format = '.spe'
-        self.assertEqual(tReducer.save_format,'.spe')
+        self.assertEqual(tReducer.save_format,['.spe'])
 
         self.assertEquals(ws_name+'_file_spe_'+ws_name+'.spe',tReducer.save_results(pws))
         file_long_name = ws_name+'_file_spe_other_file_name.spe'
@@ -276,6 +276,21 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         file_long_name=ws_name+'_file_nxspe_ofn.nxspe'+ws_name+'_file_nxs_ofn.nxs'
         self.assertEquals(file_long_name,tReducer.save_results(pws,'ofn',['.nxspe','.nxs']))
+
+        #clear all previous default formats
+        tReducer.save_format=[];
+        self.assertTrue(tReducer.save_format is None)
+
+        format_list = ['.nxspe','.nxs','.spe']
+        file_long_name = '';
+        tReducer.save_format = format_list;
+        for i in xrange(len(format_list)):
+            self.assertEqual(tReducer.save_format[i],format_list[i]);
+            end = len(format_list[i]);
+            file_long_name+=ws_name+'_file_'+format_list[i][1:end]+'_ofn'+format_list[i]
+
+        self.assertEquals(file_long_name,tReducer.save_results(pws,'ofn'))
+
 
         #self.assertEqual(tReducer.save_results(pws,'my_path'),ws_name+
 
