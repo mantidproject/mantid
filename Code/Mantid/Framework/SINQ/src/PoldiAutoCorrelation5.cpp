@@ -37,13 +37,14 @@ void PoldiAutoCorrelation5::initDocs()
 
 using namespace Kernel;
 using namespace API;
+using namespace PhysicalConstants;
 
 /// Initialisation method.
 void PoldiAutoCorrelation5::init()
 {
 
-  CONVKV = hbar/m_n;
-  CONVLAMV = CONVKV*TWOPI;
+  CONVKV = h_bar/NeutronMass;
+  CONVLAMV = CONVKV*2.*M_PI;
 
 //	std::vector<std::string> exts;
 //	exts.push_back(".hdf");
@@ -213,10 +214,10 @@ void PoldiAutoCorrelation5::exec()
 
 
 	double ang_alpha1 = atan2(pos_y0_det, pos_x0_det);
-	if(ang_alpha1<0){ang_alpha1 += PI;}
+	if(ang_alpha1<0){ang_alpha1 += M_PI;}
 	g_log.debug() << "_Poldi -        ang_alpha1                         " <<  ang_alpha1*rad2deg          << " deg" << std::endl;
 
-	double ang_alpha_sample = ang_alpha1 + (PI - ang_twotheta_det);
+	double ang_alpha_sample = ang_alpha1 + (M_PI - ang_twotheta_det);
 	g_log.debug() << "_Poldi -        ang_alpha_sample                   " <<  ang_alpha_sample*rad2deg    << " deg" << std::endl;
 
 	double dist_sms = sqrt(pos_x0_det*pos_x0_det + pos_y0_det*pos_y0_det);
@@ -225,7 +226,7 @@ void PoldiAutoCorrelation5::exec()
 	double ang_phi_det_mittel = asin(dist_sms / dist_detector_radius * sin(ang_alpha_sample));
 	g_log.debug() << "_Poldi -        ang_phi_det_mittel                 " <<  ang_phi_det_mittel*rad2deg  << " deg" << std::endl;
 
-	double ang_phi_det_mittel_comp = PI - ang_phi_det_mittel - ang_alpha_sample;
+	double ang_phi_det_mittel_comp = M_PI - ang_phi_det_mittel - ang_alpha_sample;
 	g_log.debug() << "_Poldi -        ang_phi_det_mittel_comp            " <<  ang_phi_det_mittel_comp*rad2deg  << " deg" << std::endl;
 
 	double ang_beta_det_mittel = ang_phi_det_mittel_comp + ang_alpha1;
@@ -317,8 +318,8 @@ void PoldiAutoCorrelation5::exec()
 	g_log.information() << "____________________________________________________ "  << std::endl;
 	g_log.information() << "_Poldi  diffraction calibration -------------------  "  << std::endl;
 
-	double qmin=2.*(TWOPI/wlen_max) * sin(ang_pw_for_sample[0]/2.);
-	double qmax=2.*(TWOPI/wlen_min) * sin(ang_pw_for_sample[nb_det_channel-1]/2.);
+	double qmin=2.*(2.*M_PI/wlen_max) * sin(ang_pw_for_sample[0]/2.);
+	double qmax=2.*(2.*M_PI/wlen_min) * sin(ang_pw_for_sample[nb_det_channel-1]/2.);
 
 	g_log.information() << "_Poldi -        wlen_min                           " <<  wlen_min << " A" << std::endl;
 	g_log.information() << "_Poldi -        wlen_max                           " <<  wlen_max << " A"  << std::endl;
@@ -331,10 +332,10 @@ void PoldiAutoCorrelation5::exec()
 	g_log.debug() << "_Poldi -        dist_chop_mid_detector             " <<  dist_chop_mid_detector << " mm" << std::endl;
 
 	double dspace2 = CONVKV / (2.*dist_chop_mid_detector*sin(ang_pw_for_sample[indice_mid_detector]/2.));
-	dspace2 *= time_delta_t *1e7 *TWOPI;       // unit [A]
-	int n0_dspace = int(TWOPI/qmax/dspace2);
+	dspace2 *= time_delta_t *1e7 *2.*M_PI;       // unit [A]
+	int n0_dspace = int(2.*M_PI/qmax/dspace2);
 	double dspace1 = n0_dspace*dspace2;
-	int n1_dspace = int(TWOPI/qmin/dspace2);
+	int n1_dspace = int(2.*M_PI/qmin/dspace2);
 
 	size_t n_d_space = n1_dspace-n0_dspace;
 	g_log.debug() << "_Poldi -        dspace2                            " <<  dspace2  << std::endl;
@@ -532,8 +533,8 @@ void PoldiAutoCorrelation5::exec()
 	vector<double> qi; qi.resize(n_d_space);
 	vector<double> qj; qj.resize(n_d_space);
 	for(size_t i=0; i<n_d_space; i++){
-		qi[i] = TWOPI/(dspace1+float(i)*dspace2);
-		qj[n_d_space-1-i] = TWOPI/(dspace1+float(i)*dspace2);
+		qi[i] = 2.*M_PI/(dspace1+float(i)*dspace2);
+		qj[n_d_space-1-i] = 2.*M_PI/(dspace1+float(i)*dspace2);
 	}
 
 	try

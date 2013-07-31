@@ -10,6 +10,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
+#include "MantidKernel/PhysicalConstants.h"
+
 
 
 namespace Mantid
@@ -23,10 +25,11 @@ namespace Poldi
 
 
 
-const double PI    = 3.1415926535897932384626433832795;
-const double TWOPI = 2*3.1415926535897932384626433832795;
-const double rad2deg = 180/PI;
-const double deg2rad = PI/180;
+//const double PI    = 3.1415926535897932384626433832795;
+//const double TWOPI = 2*3.1415926535897932384626433832795;
+//const double TWOPI = 2*M_PI;
+const double rad2deg = 180./M_PI;
+const double deg2rad = M_PI/180.;
 
 
 
@@ -104,11 +107,11 @@ private:
 	double dblSqrt(double in);
 
 
-	static const double hbar = 1.0545717253362894e-34;   // J.s
-	static const double m_n = 1.674927351e-27;           // kg
+//	static const double hbar = 1.0545717253362894e-34;   // J.s
+//	static const double m_n = 1.674927351e-27;           // kg
 
 //	***     convkv=hquer/(Masse Neutron)
-        double CONVKV;
+    double CONVKV;
 	double CONVLAMV; 
 
 };

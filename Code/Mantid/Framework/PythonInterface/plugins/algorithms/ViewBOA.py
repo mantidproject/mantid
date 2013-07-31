@@ -5,6 +5,7 @@
 # Mark Koennecke, July 2013
 #---------------------------------------------------------------------
 
+from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm, registerAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty
 from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
 import mantid.simpleapi
@@ -46,4 +47,4 @@ class ViewBOA(PythonAlgorithm):
         mantid.simpleapi.DeleteWorkspace('tmp2')
         mantid.simpleapi.DeleteWorkspace('tmp3')
 
-registerAlgorithm(ViewBOA())
+AlgorithmFactory.subscribe(ViewBOA)
