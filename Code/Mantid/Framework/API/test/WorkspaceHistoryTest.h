@@ -135,6 +135,27 @@ public:
     TS_ASSERT_THROWS(emptyHistory.lastAlgorithm(), std::out_of_range);
     TS_ASSERT_THROWS(emptyHistory.getAlgorithm(1), std::out_of_range);
   }
+
+  void test_SaveNexus()
+  {
+    //add some history
+    WorkspaceHistory testHistory;
+    testHistory.addHistory(AlgorithmHistory("History1", 1,DateAndTime::defaultTime(),-1.0,0));
+    testHistory.addHistory(AlgorithmHistory("History2", 1,DateAndTime::defaultTime(),-1.0,1));
+    testHistory.addHistory(AlgorithmHistory("History3", 1,DateAndTime::defaultTime(),-1.0,2));
+    testHistory.addHistory(AlgorithmHistory("History4", 1,DateAndTime::defaultTime(),-1.0,3));
+
+    auto savehandle = boost::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
+    savehandle->close();
+
+  }
+
+  void test_LoadNexus()
+  {
+      ::NeXus::File *filehandle;
+
+  }
   
 };
 
