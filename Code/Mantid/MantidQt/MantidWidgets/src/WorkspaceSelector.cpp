@@ -101,12 +101,12 @@ void WorkspaceSelector::setOptional(bool optional)
   }
 }
 
-QString WorkspaceSelector::getSuffix() const
+QStringList WorkspaceSelector::getSuffixes() const
 {
   return m_suffix;
 }
 
-void WorkspaceSelector::setSuffix(const QString & suffix)
+void WorkspaceSelector::setSuffixes(const QStringList & suffix)
 {
   if ( suffix != m_suffix )
   {
@@ -186,10 +186,16 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
 {
   QString name = QString::fromStdString(pNf->object_name());
   QString newName = QString::fromStdString(pNf->new_objectname());
+  auto& ads = Mantid::API::AnalysisDataService::Instance();
+
   int index = findText(name);
   if ( index != -1 )
   {
     this->setItemText(index, newName);
+  }
+  else if( checkEligibility(newName, ads.retrieve(pNf->new_objectname())))
+  {
+    addItem(newName);
   }
 }
 
@@ -210,12 +216,32 @@ bool WorkspaceSelector::checkEligibility(const QString & name, Mantid::API::Work
   {
     return false;
   }
-  else if ( ( ! m_suffix.isEmpty() ) && ( ! name.endsWith(m_suffix) ) )
+  else if ( ! hasValidSuffix(name) )
   {
     return false;
   }
 
   return true;
+}
+
+bool WorkspaceSelector::hasValidSuffix(const QString& name) const
+{
+  if(m_suffix.isEmpty())
+  {
+    return true;
+  }
+  else
+  {
+    for (int i =0; i < m_suffix.size(); ++i)
+    {
+      if(name.endsWith(m_suffix[i]))
+      {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 void WorkspaceSelector::refresh()

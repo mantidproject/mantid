@@ -2156,6 +2156,14 @@ Later steps in the process (saving, renaming) will not be done.</string>
                       <verstretch>0</verstretch>
                      </sizepolicy>
                     </property>
+                    <property name="WorkspaceTypes">
+                     <stringlist/>
+                    </property>
+                    <property name="Suffix">
+                     <stringlist>
+                      <string>_red</string>
+                     </stringlist>
+                    </property>
                    </widget>
                   </item>
                   <item>
