@@ -427,12 +427,7 @@ class SNSPowderReduction(PythonAlgorithm):
             elif canRun < 0: # turn off the correction
                 canRun = 0
             if canRun > 0:
-                canFile = "%s_%d" % (self._instrument, canRun)+".nxs"
-                if HAVE_MPI and os.path.exists(canFile):
-                    if rank == 0:                     
-                        canRun = "%s_%d" % (self._instrument, canRun)
-                        canRun = api.Load(Filename=canFile, OutputWorkspace=canRun)
-                elif ("%s_%d" % (self._instrument, canRun)) in mtd:
+                if ("%s_%d" % (self._instrument, canRun)) in mtd:
                     canRun = mtd["%s_%d" % (self._instrument, canRun)]
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 else:
@@ -443,9 +438,6 @@ class SNSPowderReduction(PythonAlgorithm):
                         canRun = self._focusChunks(canRun, SUFFIX, (0., 0.), calib,
                                preserveEvents=preserveEvents)
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
-                    if HAVE_MPI:
-                        if rank == 0:
-                            api.SaveNexus(InputWorkspace=canRun, Filename=canFile)
                 workspacelist.append(str(canRun))
             else:
                 canRun = None
@@ -460,12 +452,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 vanRun = 0
             self.log().information("F313C:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
             if vanRun > 0:
-                vanFile = "%s_%d" % (self._instrument, vanRun)+".nxs"
-                if HAVE_MPI and os.path.exists(vanFile):
-                    if rank == 0:                     
-                        vanRun = "%s_%d" % (self._instrument, vanRun)
-                        vanRun = api.Load(Filename=vanFile, OutputWorkspace=vanRun)
-                elif ("%s_%d" % (self._instrument, vanRun)) in mtd:
+                if ("%s_%d" % (self._instrument, vanRun)) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 else:
@@ -561,9 +548,6 @@ class SNSPowderReduction(PythonAlgorithm):
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
                     vanRun = api.SetUncertainties(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
-                    if HAVE_MPI:
-                        if rank == 0:
-                            api.SaveNexus(InputWorkspace=vanRun, Filename=vanFile)
                 workspacelist.append(str(vanRun))
             else:
                 vanRun = None
