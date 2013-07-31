@@ -550,12 +550,8 @@ class DirectEnergyConversion(object):
             else:
                 self.log("Could not find such sample environment log. Will use psi=offset")
         self.psi = self.motor+self.motor_offset
-        # Save then finish
 
-        print "************************************************** in convert_to_energy *************************"
-        for form in self.save_format:
-            print " Default save format reaquested: ",form;
-        print "          SAVING RESULTS                                              y *************************"
+        # Save then finish
         self.save_results(sample_wkspace, save_path)
         # Clear loaded raw data to free up memory
         common.clear_loaded_data()
@@ -756,15 +752,14 @@ class DirectEnergyConversion(object):
 
         save_file = os.path.splitext(save_file)[0]
         # this is mainly for debugging purposes as real save do not return anything
-        rez =''
+ 
         for ext in formats:
             if ext in self.__save_formats :
                 filename = save_file + ext
-                rez+=self.__save_formats[ext](workspace,filename)            
+                self.__save_formats[ext](workspace,filename)            
             else:
                 self.log("Unknown file format {0} requested while saving results.".format(ext))
-        # this is mainly for debugging purposes as real save do not return anything    
-        return rez;
+   
 
     #-------------------------------------------------------------------------------
     def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):

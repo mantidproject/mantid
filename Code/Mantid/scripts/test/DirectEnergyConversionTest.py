@@ -252,11 +252,19 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertTrue(tReducer.save_format is None)
         # do nothing
         tReducer.save_results(pws,'test_path')
+        tReducer.test_name='';
+        def f_spe(workspace, filename):
+                tReducer.test_name += (workspace.name()+'_file_spe_' + filename)
+        def f_nxspe(workspace, filename):
+                tReducer.test_name += (workspace.name()+'_file_nxspe_' + filename)
+        def f_nxs(workspace, filename):
+                tReducer.test_name += (workspace.name()+'_file_nxs_' + filename)
 
+ 
         # redefine test save methors to produce test ouptut
-        tReducer._DirectEnergyConversion__save_formats['.spe']=lambda workspace,filename : (workspace.name()+'_file_spe_' + filename);
-        tReducer._DirectEnergyConversion__save_formats['.nxspe']=lambda workspace,filename : (workspace.name()+'_file_nxspe_' + filename);
-        tReducer._DirectEnergyConversion__save_formats['.nxs']=lambda workspace,filename : (workspace.name()+'_file_nxs_' + filename);
+        tReducer._DirectEnergyConversion__save_formats['.spe']=lambda workspace,filename: f_spe(workspace,filename);
+        tReducer._DirectEnergyConversion__save_formats['.nxspe']=lambda workspace,filename : f_nxspe(workspace,filename);
+        tReducer._DirectEnergyConversion__save_formats['.nxs']=lambda workspace,filename : f_nxs(workspace,filename);
 
 
 
@@ -270,12 +278,19 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.save_format = '.spe'
         self.assertEqual(tReducer.save_format,['.spe'])
 
-        self.assertEquals(ws_name+'_file_spe_'+ws_name+'.spe',tReducer.save_results(pws))
+        tReducer.test_name='';
+        tReducer.save_results(pws)
+        self.assertEquals(ws_name+'_file_spe_'+ws_name+'.spe',tReducer.test_name)
         file_long_name = ws_name+'_file_spe_other_file_name.spe'
-        self.assertEquals(file_long_name,tReducer.save_results(pws,'other_file_name'))
+
+        tReducer.test_name='';
+        tReducer.save_results(pws,'other_file_name')
+        self.assertEquals(file_long_name,tReducer.test_name)
 
         file_long_name=ws_name+'_file_nxspe_ofn.nxspe'+ws_name+'_file_nxs_ofn.nxs'
-        self.assertEquals(file_long_name,tReducer.save_results(pws,'ofn',['.nxspe','.nxs']))
+        tReducer.test_name='';
+        tReducer.save_results(pws,'ofn',['.nxspe','.nxs'])
+        self.assertEquals(file_long_name,tReducer.test_name)
 
         #clear all previous default formats
         tReducer.save_format=[];
@@ -289,7 +304,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
             end = len(format_list[i]);
             file_long_name+=ws_name+'_file_'+format_list[i][1:end]+'_ofn'+format_list[i]
 
-        self.assertEquals(file_long_name,tReducer.save_results(pws,'ofn'))
+        tReducer.test_name='';
+        tReducer.save_results(pws,'ofn')
+        self.assertEquals(file_long_name,tReducer.test_name)
 
 
         #self.assertEqual(tReducer.save_results(pws,'my_path'),ws_name+
