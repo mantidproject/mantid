@@ -37,12 +37,8 @@ namespace Mantid
      *
      * @return the RWLock object.
      */
-    Poco::RWLock * DataItem::getLock()
+    Poco::RWLock * DataItem::getLock() const
     {
-      if (m_lock == NULL)
-      {
-        m_lock = new Poco::RWLock();
-      }
       return m_lock;
     }
 

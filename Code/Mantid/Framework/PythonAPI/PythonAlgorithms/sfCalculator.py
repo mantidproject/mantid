@@ -1,22 +1,28 @@
-from MantidFramework import *
-from mantidsimple import *
-from numpy import zeros, unique, arange, sqrt
+#from MantidFramework import *
+#from mantidsimple import *
+from mantid.simpleapi import *
+from numpy import zeros, unique, arange, sqrt, size
 import os.path
+import sys
+import math
 
 PRECISION = 0.020
 
 class sfCalculator():      
-    
+
+    INDEX = 0
+
     tof_min = None  #microS
     tof_max = None  #microS
 
     #range of x pixel to use in the X integration (we found out that there 
     #is a frame effect that introduces noise)
-    x_pixel_min = 90
-    x_pixel_max = 190
+    x_pixel_min = 0   #default is 90 
+    x_pixel_max = 255 #default is 190  (must be below 256)
 
     #from,width,to in microS
-    rebin_parameters = '0,200,200000'  
+    #rebin_parameters = '0,50,200000'
+    rebin_parameters = '0,50,100000'  
 
     #turn on or off the plots
     bPlot = False
@@ -110,20 +116,90 @@ class sfCalculator():
         
         #perform calculation for numerator
         self._calculateFinalYAxis(bNumerator=True)
+
+#         #DEBUGGING
+#           
+#         #output the data to fit to DEBUG
+#         x_axis = self.x_axis_ratio
+#         y_axis = self.y_axis_numerator
+#         y_error_axis = self.y_axis_error_numerator
+#            
+#         print 'create sfOutputTest#'
+#         filename = "/SNS/users/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+# #        filename = "/home/j35/Desktop/sfOutputTest#%d.txt" % sfCalculator.INDEX
+#         print filename
+#         sfCalculator.INDEX += 1
+#            
+#         f=open(filename,'w')
+#    
+#         for i in range(len(x_axis)):
+#             f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+#            
+#         f.close
+        #END of DEBUGGING
         
         #perform calculation for denominator
         self._calculateFinalYAxis(bNumerator=False)
+
+#         #DEBUGGING
+#           
+#         #output the data to fit to DEBUG
+#         x_axis = self.x_axis_ratio
+#         y_axis = self.y_axis_denominator
+#         y_error_axis = self.y_axis_error_denominator
+#            
+#         print 'create sfOutputTest#'
+#         filename = "/SNS/users/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+# #         filename = "/home/j35/Desktop/sfOutputTest#%d.txt" % sfCalculator.INDEX
+#         print filename
+#         sfCalculator.INDEX += 1
+#            
+#         f=open(filename,'w')
+#    
+#         for i in range(len(x_axis)):
+#             f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+#            
+#         f.close
+#         #END of DEBUGGING
         
         #calculate y_axis of numerator/denominator
 #        self._x_axis_ratio = self._x_axis
-        self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
         
-        self.y_axis_error_ratio = ((self.y_axis_error_numerator / 
-                                    self.y_axis_numerator) ** 2 + 
-                                    (self.y_axis_error_denominator / 
-                                     self.y_axis_denominator) ** 2)
-        self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
-        self.y_axis_error_ratio *= self.y_axis_ratio
+        ## code to replace this
+        #self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
+
+        sz = size(self.y_axis_numerator)
+        new_y_axis_ratio = zeros(sz)
+        for i in range(sz):
+            
+            if self.y_axis_denominator[i] == 0:
+                self.y_axis_denominator[i] = 1
+            
+#             print i
+#             print self.y_axis_numerator[i]
+#             print self.y_axis_denominator[i]
+#             print
+            
+            new_y_axis_ratio[i] = float(self.y_axis_numerator[i]) / float(self.y_axis_denominator[i])
+        self.y_axis_ratio = new_y_axis_ratio
+        
+        ## code to replace this
+#         self.y_axis_error_ratio = ((self.y_axis_error_numerator / 
+#                                     self.y_axis_numerator) ** 2 + 
+#                                     (self.y_axis_error_denominator / 
+#                                      self.y_axis_denominator) ** 2)
+#         self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
+#         self.y_axis_error_ratio *= self.y_axis_ratio
+        new_y_axis_error_ratio = zeros(sz)
+        for i in range(sz):
+            
+            if self.y_axis_numerator[i] == 0:
+                self.y_axis_numerator[i] = 1
+            
+            tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + (float(self.y_axis_error_denominator[i]) / float(self.y_axis_denominator[i])) **2
+            tmp_value = math.sqrt(tmp_value)
+            new_y_axis_error_ratio[i] = self.y_axis_ratio[i]* tmp_value
+        self.y_axis_error_ratio = new_y_axis_error_ratio        
         
     def _calculateFinalYAxis(self, bNumerator=True):
         """
@@ -146,103 +222,104 @@ class sfCalculator():
         
         nexus_file_numerator = file
         print '----> loading nexus file: ' + nexus_file_numerator
-        LoadEventNexus(Filename=nexus_file_numerator,
-                       OutputWorkspace='EventDataWks')
-        mt1 = mtd['EventDataWks']
+        EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
+#                       OutputWorkspace='EventDataWks')
+#        mt1 = mtd['EventDataWks']
         
-        proton_charge = self._getProtonCharge(mt1)
+        proton_charge = self._getProtonCharge(EventDataWks)
         print '----> rebinning '
-        rebin(InputWorkspace='EventDataWks',
-              OutputWorkspace='HistoDataWks',
+        HistoDataWks = Rebin(InputWorkspace=EventDataWks,
               Params=self.rebin_parameters)
-        
-        mt2 = mtd['HistoDataWks']
-        x_axis = mt2.readX(0)[:]
+
+#        mt2 = mtd['HistoDataWks']
+#        x_axis = mt2.readX(0)[:]
+
+        x_axis = HistoDataWks.readX(0)[:]
         self.x_axis = x_axis
 
-        self._createIntegratedWorkspace(InputWorkspace=mt2,
-                                        OutputWorkspace='IntegratedDataWks',
+        OutputWorkspace = self._createIntegratedWorkspace(InputWorkspace=HistoDataWks,
                                         proton_charge=proton_charge,
-                                        from_pixel=self.x_pixel_min,
-                                        to_pixel=self.x_pixel_max)
-        
-        print '----> Convert to histogram'
-        ConvertToHistogram(InputWorkspace='IntegratedDataWks',
-                           OutputWorkspace='IntegratedDataWks')
+                                        from_pixel=self.peak_pixel_min,
+                                        to_pixel=self.peak_pixel_max)
 
-        print '----> Transpose'
-        Transpose(InputWorkspace='IntegratedDataWks',
-                  OutputWorkspace='TransposeIntegratedDataWks')
+        DataWks = self._removeBackground(InputWorkspace=OutputWorkspace,
+                                         from_peak=self.peak_pixel_min,
+                                         to_peak=self.peak_pixel_max,
+                                         from_back=self.back_pixel_min,
+                                         to_back=self.back_pixel_max,
+                                         tof_min = self.tof_min, 
+                                         tof_max = self.tof_max)
+                                         
+#         print '----> Convert to histogram'
+#         IntegratedDataWks = ConvertToHistogram(InputWorkspace=OutputWorkspace)
+# 
+#         print '----> Transpose'
+#         TransposeIntegratedDataWks = Transpose(InputWorkspace=IntegratedDataWks)
+#         
+#         print '----> convert to histogram'
+#         TransposeIntegratedDataWks_t = ConvertToHistogram(InputWorkspace=TransposeIntegratedDataWks)
+#         
+#         print '----> flat background1'
+#         TransposeHistoFlatDataWks_1 = FlatBackground(InputWorkspace=TransposeIntegratedDataWks_t,
+#                        StartX=self.back_pixel_min,
+#                        EndX=self.peak_pixel_min,
+#                        Mode='Mean',
+#                        OutputMode="Return Background")
+#         
+#         print '----> flat background2'
+#         TransposeHistoFlatDataWks_2 = FlatBackground(InputWorkspace=TransposeIntegratedDataWks_t,
+#                        StartX=self.peak_pixel_max,
+#                        EndX=self.back_pixel_max,
+#                        Mode='Mean',
+#                        OutputMode="Return Background")
+#         
+#         print '----> transpose flat background 1 -> data1'
+#         DataWks_1 = Transpose(InputWorkspace=TransposeHistoFlatDataWks_1);
+#         
+#         print '----> transpose flat background 2 -> data2'
+#         DataWks_2 = Transpose(InputWorkspace=TransposeHistoFlatDataWks_2);
+#         
+#         print '----> convert to histogram data2'
+#         DataWks_1 = ConvertToHistogram(InputWorkspace=DataWks_1);
+#         
+#         print '----> convert to histogram data1'
+#         DataWks_2 = ConvertToHistogram(InputWorkspace=DataWks_2)
+#         
+#         print '----> rebin workspace data1'
+#         DataWks_1 = RebinToWorkspace(WorkspaceToRebin=DataWks_1,
+#                          WorkspacetoMatch=IntegratedDataWks)
+#         
+#         print '----> rebin workspace data2'
+#         DataWks_2 = RebinToWorkspace(WorkspaceToRebin=DataWks_2,
+#                          WorkspacetoMatch=IntegratedDataWks)
+#         
+#         print '----> weighted mean'
+#         DataWksWeightedMean = WeightedMean(InputWorkspace1=DataWks_1,
+#                      InputWorkspace2=DataWks_2)
+# 
+#         print '----> minus'
+#         DataWks = Minus(LHSWorkspace=IntegratedDataWks, 
+#               RHSWorkspace=DataWksWeightedMean)
         
-        print '----> convert to histogram'
-        ConvertToHistogram(InputWorkspace='TransposeIntegratedDataWks',
-                           OutputWorkspace='TransposeIntegratedDataWks_t')
-        
-        print '----> flat background1'
-        FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
-                       OutputWorkspace='TransposeHistoFlatDataWks_1',
-                       StartX=self.back_pixel_min,
-                       EndX=self.peak_pixel_min,
-                       Mode='Mean',
-                       OutputMode="Return Background")
-        
-        print '----> flat background2'
-        FlatBackground(InputWorkspace='TransposeIntegratedDataWks_t',
-                       OutputWorkspace='TransposeHistoFlatDataWks_2',
-                       StartX=self.peak_pixel_max,
-                       EndX=self.back_pixel_max,
-                       Mode='Mean',
-                       OutputMode="Return Background")
-        
-        print '----> transpose flat background 1 -> data1'
-        Transpose(InputWorkspace='TransposeHistoFlatDataWks_1',
-                  OutputWorkspace='DataWks_1')
-        
-        print '----> transpose flat background 2 -> data2'
-        Transpose(InputWorkspace='TransposeHistoFlatDataWks_2',
-                  OutputWorkspace='DataWks_2')
-        
-        print '----> convert to histogram data2'
-        ConvertToHistogram(InputWorkspace='DataWks_1', 
-                           OutputWorkspace='DataWks_1')
-        
-        print '----> convert to histogram data1'
-        ConvertToHistogram(InputWorkspace='DataWks_2', 
-                           OutputWorkspace='DataWks_2')
-        
-        print '----> rebin workspace data1'
-        RebinToWorkspace(WorkspaceToRebin='DataWks_1',
-                         WorkspacetoMatch='IntegratedDataWks',
-                         OutputWorkspace='DataWks_1')
-        
-        print '----> rebin workspace data2'
-        RebinToWorkspace(WorkspaceToRebin='DataWks_2',
-                         WorkspacetoMatch='IntegratedDataWks',
-                         OutputWorkspace='DataWks_2')
-        
-        print '----> weighted mean'
-        WeightedMean(InputWorkspace1='DataWks_1',
-                     InputWorkspace2='DataWks_2',
-                     OutputWorkspace='DataWks')
-
-        print '----> minus'
-        Minus(LHSWorkspace='IntegratedDataWks', 
-              RHSWorkspace='DataWks',
-              OutputWorkspace='DataWks')
-        
-        mt3 = mtd['DataWks']
-        self._calculateFinalAxis(Workspace=mt3,
+#        if not bNumerator:
+#            import sys
+#            sys.exit("now we are working with denominator")
+            
+                
+#        mt3 = mtd['DataWks']
+        self._calculateFinalAxis(Workspace=DataWks,
                            bNumerator=bNumerator)
-        print 'done with _calculateFinalAxis and back in calculatefinalaxis in line 236' #REMOVEME
+        print 'done with _calculateFinalAxis and back in calculatefinalaxis' #REMOVEME
 
         #cleanup workspaces
-        mtd.deleteWorkspace('EventDataWks')
-        mtd.deleteWorkspace('HistoDataWks')
-        mtd.deleteWorkspace('IntegratedDataWks')
-        mtd.deleteWorkspace('TransposeIntegratedDataWks')
-        mtd.deleteWorkspace('TransposeIntegratedDataWks_t')
-        mtd.deleteWorkspace('TransposeHistoFlatDataWks')
-        mtd.deleteWorkspace('DataWks')
+        DeleteWorkspace(EventDataWks)
+        DeleteWorkspace(HistoDataWks)
+#         DeleteWorkspace(IntegratedDataWks)
+#         DeleteWorkspace(TransposeIntegratedDataWks)
+#         DeleteWorkspace(TransposeIntegratedDataWks_t)
+#         DeleteWorkspace(TransposeHistoFlatDataWks_1)
+#         DeleteWorkspace(TransposeHistoFlatDataWks_2)
+        DeleteWorkspace(DataWks)
         
         print 'done with cleaning workspaces in line 247'
         
@@ -256,39 +333,47 @@ class sfCalculator():
         mt = Workspace
         x_axis = mt.readX(0)[:]
         self.x_axis = x_axis
+        
+        counts_vs_tof = mt.readY(0)[:]
+        counts_vs_tof_error = mt.readE(0)[:]
 
-        counts_vs_tof = zeros(len(x_axis)-1)
-        counts_vs_tof_error = zeros(len(x_axis)-1)
-        
-        for x in range(self.alpha_pixel_nbr):
-            counts_vs_tof += mt.readY(x)[:]
-            counts_vs_tof_error += mt.readE(x)[:] ** 2
-        counts_vs_tof_error = sqrt(counts_vs_tof_error)
-        
-#        print 'x_axis'
-#        print x_axis
-#        print 'self.tof_min:'
-#        print self.tof_min
-#        print 'self.tof_max:'
-#        print self.tof_max
+## this is not use anymore as the integration is done in the previous step
+#         counts_vs_tof = zeros(len(x_axis)-1)
+#         counts_vs_tof_error = zeros(len(x_axis)-1)
+#         
+#         for x in range(self.alpha_pixel_nbr):
+#             counts_vs_tof += mt.readY(x)[:]
+#             counts_vs_tof_error += mt.readE(x)[:] ** 2
+#         counts_vs_tof_error = sqrt(counts_vs_tof_error)
+
+#         
+#        #for DEBUGGING
+#        #output data into ascii file
+#        f=open('/home/j35/Desktop/myASCII.txt','w')
+#        if (not bNumerator):
+#            f.write(self.denominator + "\n")
+#        
+#            for i in range(len(counts_vs_tof)):
+#                f.write(str(x_axis[i]) + "," + str(counts_vs_tof[i]) + "\n")
+#            f.close
+#            import sys
+#            sys.exit("Stop in _calculateFinalAxis")
+##        end of for DEBUGGING #so far, so good !
         
         index_tof_min = self._getIndex(self.tof_min, x_axis)
         index_tof_max = self._getIndex(self.tof_max, x_axis)
 
-#        print 'index_tof_min'
-#        print index_tof_min
-#        print 'index_tof_max'
-#        print index_tof_max
-
         if (bNumerator is True):
-            self.y_axis_numerator = counts_vs_tof[index_tof_min:index_tof_max]
-            self.y_axis_error_numerator = counts_vs_tof_error[index_tof_min:index_tof_max]
-            self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max]
+            self.y_axis_numerator = counts_vs_tof[index_tof_min:index_tof_max].copy()
+            self.y_axis_error_numerator = counts_vs_tof_error[index_tof_min:index_tof_max].copy()
+            self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max].copy()
         else:
-            self.y_axis_denominator = counts_vs_tof[index_tof_min:index_tof_max]
-            self.y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max]
-            self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max]
+            self.y_axis_denominator = counts_vs_tof[index_tof_min:index_tof_max].copy()
+            self.y_axis_error_denominator = counts_vs_tof_error[index_tof_min:index_tof_max].copy()
+            self.x_axis_ratio = self.x_axis[index_tof_min:index_tof_max].copy()
+
         print 'done with _calculateFinalAxis'
+        
         
         
     def _createIntegratedWorkspace(self,
@@ -296,13 +381,13 @@ class sfCalculator():
                                    OutputWorkspace=None,
                                    proton_charge=None,
                                    from_pixel=0,
-                                   to_pixel=303):
+                                   to_pixel=255):
         """
         This creates the integrated workspace over the second pixel range 
         (beta_pixel_nbr here) and
         returns the new workspace handle
         """
-        
+
         print '-----> Create Integrated workspace '
         x_axis = InputWorkspace.readX(0)[:]
         x_size = to_pixel - from_pixel + 1 
@@ -310,29 +395,226 @@ class sfCalculator():
         y_error_axis = zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
         y_range = arange(x_size) + from_pixel
         
-        for x in range(self.beta_pixel_nbr):
+#        for x in range(self.beta_pixel_nbr):
+#            for y in y_range:
+#                index = int(self.alpha_pixel_nbr * x + y)
+##                y_axis[y, :] += InputWorkspace.readY(index)[:]
+#                y_axis[y, :] += InputWorkspace.readY(index)[:]
+#                y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) * 
+#                                        (InputWorkspace.readE(index)[:]))
+        
+        #case 1
+        print 'using case 1'
+        for x in range(304):
             for y in y_range:
-                index = int(self.alpha_pixel_nbr * x + y)
+                index = int(y+x*256)
+#                y_axis[y, :] += InputWorkspace.readY(index)[:]
                 y_axis[y, :] += InputWorkspace.readY(index)[:]
                 y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) * 
                                         (InputWorkspace.readE(index)[:]))
+
+##        case 2
+#        for x in range(304):
+#            for y in range(256):
+#                index = int(x+y*304)
+##                y_axis[y, :] += InputWorkspace.readY(index)[:]
+#                y_axis[y, :] += InputWorkspace.readY(index)[:]
+#                y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) * 
+#                                        (InputWorkspace.readE(index)[:]))
+
+
+#        for x in range(self.alpha_pixel_nbr):
+#            for y in range(256):
+#                index = int(self.beta_pixel_nbr * x + y)
+##                y_axis[y, :] += InputWorkspace.readY(index)[:]
+#                y_axis[y, :] += InputWorkspace.readY(index)[:]
+#                y_error_axis[y, :] += ((InputWorkspace.readE(index)[:]) * 
+#                                        (InputWorkspace.readE(index)[:]))
         
+#        #DEBUG
+#        f=open('/home/j35/myASCIIfromCode.txt','w')
+#        new_y_axis = zeros((len(x_axis)-1))
+#
+#        for y in range(256):
+#            new_y_axis += y_axis[y,:]
+#            
+#        for i in range(len(x_axis)-1):
+#            f.write(str(x_axis[i]) + "," + str(new_y_axis[i]) + "\n");
+#        f.close
+#
+#        print sum(new_y_axis)
+#        
+#        #END OF DEBUG
+        ## so far, worsk perfectly (tested with portal vs Mantid vs Matlab
+
         y_axis = y_axis.flatten()
         y_error_axis = sqrt(y_error_axis)
         #plot_y_error_axis = _y_error_axis #for output testing only    
-        #-> plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
+        #plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
         y_error_axis = y_error_axis.flatten()
 
-        #normalization by proton charge
+        #normalization by proton beam
         y_axis /= (proton_charge * 1e-12)
-
-        CreateWorkspace(OutputWorkspace=OutputWorkspace,
-                        DataX=x_axis,
+        y_error_axis /= (proton_charge * 1e-12)
+        
+        OutputWorkspace = CreateWorkspace(DataX=x_axis,
                         DataY=y_axis,
                         DataE=y_error_axis,
                         Nspec=self.alpha_pixel_nbr)
-#        mt3 = mtd[OutputWorkspace]
-#        return mt3 
+
+        return OutputWorkspace 
+
+    def weighted_mean(self, data, error):
+        
+        sz = len(data)
+        
+        #calculate numerator
+        dataNum = 0
+        for i in range(sz):
+            if (data[i] != 0):
+                tmpFactor = float(data[i]) / (error[i]**2)
+                dataNum += tmpFactor
+        
+        #calculate denominator
+        dataDen = 0
+        for i in range(sz):
+            if (error[i] != 0):
+                tmpFactor = float(1) / (error[i]**2)
+                dataDen += tmpFactor
+        
+        if dataDen == 0:
+            dataDen = 1
+
+        mean = dataNum / dataDen
+        mean_error = math.sqrt(dataDen)
+        
+        return (mean, mean_error)
+
+    def removeValueFromArray(self, data, background):
+        # Will remove the background value from each of the data 
+        # element (data is an array)
+        
+        sz = len(data)
+        new_data = zeros(sz)
+        for i in range(sz):
+            new_data[i] = data[i] - background
+        
+        return new_data
+
+    def removeValueFromArrayError(self, data_error, background_error):
+        # will calculate the new array of error when removing
+        # a single value from an array
+        
+        sz = len(data_error)
+        new_data_error = zeros(sz)
+        for i in range(sz):
+            new_data_error[i] = math.sqrt(data_error[i]**2 + background_error**2)
+
+        return new_data_error
+
+    def sumWithError(self, peak, peak_error):
+        # add the array element using their weight and return new error as well
+        
+        sz = len(peak)
+        sum_peak = 0
+        sum_peak_error = 0
+        for i in range(sz):
+            sum_peak += peak[i]
+            sum_peak_error += peak_error[i]**2
+            
+        sum_peak_error = math.sqrt(sum_peak_error)
+        return [sum_peak, sum_peak_error]
+
+    def  _removeBackground(self, 
+                           InputWorkspace=None,
+                           from_peak= 0,
+                           to_peak=256,
+                           from_back=0,
+                           to_back=256,
+                           tof_min = 0,
+                           tof_max = 200000):
+    
+        # retrieve various axis
+        tof_axis = InputWorkspace.readX(0)[:]
+        nbr_tof = len(tof_axis)-1
+
+        # make big array of data
+        data = zeros((256,nbr_tof))
+        error = zeros((256,nbr_tof))
+        for x in range(256):
+            data[x,:] = InputWorkspace.readY(x)[:]
+            error[x,:] = InputWorkspace.readE(x)[:]
+            
+        peak_array = zeros(nbr_tof)
+        peak_array_error = zeros(nbr_tof)
+        
+        bMinBack = False;
+        bMaxBack = False;
+                
+        min_back = 0;
+        min_back_error = 0;
+        max_back = 0;
+        max_back_error = 0;
+                
+        for t in (range(nbr_tof-1)):
+            
+            _y_slice = data[:,t]
+            _y_error_slice = error[:,t]
+            
+            _y_slice = _y_slice.flatten()
+            _y_error_slice = _y_error_slice.flatten()
+            
+            if from_back < (from_peak-1):
+                range_back_min = _y_slice[from_back : from_peak]
+                range_back_error_min = _y_error_slice[from_back : from_peak]
+                [min_back, min_back_error] = self.weighted_mean(range_back_min, range_back_error_min)
+                bMinBack = True
+              
+            if (to_peak+1) < to_back:
+                range_back_max = _y_slice[to_peak+1: to_back+1]
+                range_back_error_max = _y_error_slice[to_peak+1: to_back+1]
+                [max_back, max_back_error] = self.weighted_mean(range_back_max, range_back_error_max)
+                bMaxBack = True
+                 
+            # if we have a min and max background
+            if bMinBack & bMaxBack:
+                [background, background_error] = self.weighted_mean([min_back,max_back],[min_back_error,max_back_error])
+#              
+            # if we don't have a max background, we use min background
+            if not bMaxBack:
+                background = min_back
+                background_error = min_back_error
+#                  
+            # if we don't have a min background, we use max background
+            if not bMinBack:
+                background = max_back
+                background_error = max_back_error
+                  
+            tmp_peak = _y_slice[from_peak:to_peak+1]
+            tmp_peak_error = _y_error_slice[from_peak:to_peak+1]
+
+            new_tmp_peak = self.removeValueFromArray(tmp_peak, background)
+            new_tmp_peak_error = self.removeValueFromArrayError(tmp_peak_error, background_error)
+            
+            [final_value, final_error] = self.sumWithError(new_tmp_peak, new_tmp_peak_error)
+
+            peak_array[t] = final_value;
+            peak_array_error[t] = final_error;
+
+
+        # make new workspace
+        y_axis = peak_array.flatten()
+        y_error_axis = peak_array_error.flatten()
+
+        DataWks = CreateWorkspace(DataX=tof_axis[0:-1],
+                        DataY=y_axis,
+                        DataE=y_error_axis,
+                        Nspec=1)
+            
+#         import sys
+#         sys.exit("in _removeBackground... so far, so good!")
+        
+        return DataWks
             
     def _getIndex(self, value, array):
         """
@@ -362,9 +644,31 @@ class sfCalculator():
         product.denominator = self.denominator + '*' + other.denominator
         
         product.x_axis_ratio = self.x_axis_ratio
-        product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
-        product.y_axis_error_ratio = sqrt((other.y_axis_ratio * self.y_axis_error_ratio) ** 2 + 
-                                          (other.y_axis_error_ratio * self.y_axis_ratio) ** 2)
+
+        ## replace code by
+        #product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
+        sz = len(self.y_axis_ratio)
+        new_y_axis_ratio = zeros(sz)
+        for i in range(sz):
+            new_y_axis_ratio[i] = self.y_axis_ratio[i] * other.y_axis_ratio[i]
+        product.y_axis_ratio = new_y_axis_ratio
+        
+        ## replace code by
+        #product.y_axis_error_ratio = product.y_axis_ratio * sqrt((other.y_axis_error_ratio / other.y_axis_ratio)**2 + (self.y_axis_error_ratio / self.y_axis_ratio)**2)
+        new_y_axis_error_ratio = zeros(sz)
+        for i in range(sz):
+            
+            # make sure we don't divide b 0
+            if other.y_axis_ratio[i] == 0:
+                other.y_axis_ratio[i] = 1
+            if self.y_axis_ratio[i] == 0:
+                self.y_axis_ratio[i] = 1
+                
+            tmp_product = (other.y_axis_error_ratio[i] / other.y_axis_ratio[i]) ** 2 + (self.y_axis_error_ratio[i] / self.y_axis_ratio[i]) ** 2
+            tmp_product = math.sqrt(tmp_product)
+            new_y_axis_error_ratio[i] = tmp_product * product.y_axis_ratio[i]
+        product.y_axis_error_ratio = new_y_axis_error_ratio
+            
         return product
     
     def fit(self):
@@ -372,31 +676,47 @@ class sfCalculator():
         This is going to fit the counts_vs_tof with a linear expression and return the a and
         b coefficients (y=a+bx)
         """
-        CreateWorkspace(OutputWorkspace='DataToFit',
-                        DataX=self.x_axis_ratio,
+        
+        DataToFit = CreateWorkspace(DataX=self.x_axis_ratio,
                         DataY=self.y_axis_ratio,
                         DataE=self.y_axis_error_ratio,
                         Nspec=1)
-        print 'entering fit in line 380'
-
         
         print 'replaceSpecialValues'
-        ReplaceSpecialValues(InputWorkspace='DataToFit', 
+        DataToFit = ReplaceSpecialValues(InputWorkspace=DataToFit, 
                              NaNValue=0, 
                              NaNError=0, 
                              InfinityValue=0, 
-                             InfinityError=0, 
-                             OutputWorkspace='DataToFit')
+                             InfinityError=0)
 
 #        ResetNegatives(InputWorkspace='DataToFit',
 #                       OutputWorkspace='DataToFit',
 #                       AddMinimum=0)        
         
+#         #DEBUG
+#         #output the data to fit to DEBUG
+#         x_axis = DataToFit.readX(0)[:]
+#         y_axis = DataToFit.readY(0)[:]
+#         y_error_axis = DataToFit.readE(0)[:]
+#         
+#         print 'create sfOutputTest#'
+#         filename = "/home/j35/sfOutputTest#%d.txt" % sfCalculator.INDEX
+#         print filename
+#         sfCalculator.INDEX += 1
+#         
+#         f=open(filename,'w')
+# 
+#         for i in range(len(x_axis)):
+#             f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+#         
+#         f.close
+#         #END OF DEBUG
+        
         try:
         
-            Fit(InputWorkspace='DataToFit',
+            Fit(InputWorkspace=DataToFit,
                 Function="name=UserFunction, Formula=a+b*x, a=1, b=2",
-                Output='Res')
+                Output='res')
         
         except:
             
@@ -405,21 +725,25 @@ class sfCalculator():
             xmin = xaxis[0]
             xmax = xaxis[sz/2]
             
-            CropWorkspace(InputWorkspace='DataToFit',
-                         OutputWorkspace='DataToFit',
+            DataToFit = CropWorkspace(InputWorkspace=DataToFit,
                          XMin=xmin,
                          XMax=xmax)
             
-            Fit(InputWorkspace='DataToFit',
+            Fit(InputWorkspace=DataToFit,
                 Function='name=UserFunction, Formula=a+b*x, a=1, b=2',
-                Output='Res')
+                Output='res')
         
-        res = mtd['Res_Parameters']
+        res = mtd['res_Parameters']
         
-        self.a = res.getDouble("Value", 0)
-        self.b = res.getDouble("Value", 1)        
-        self.error_a = res.getDouble("Error", 0)
-        self.error_b = res.getDouble("Error", 1)            
+        self.a = res.cell(0,1)
+        self.b = res.cell(1,1)
+        self.error_a = res.cell(0,2)
+        self.error_b = res.cell(1,2)
+        
+#        self.a = res.getDouble("Value", 0)
+#        self.b = res.getDouble("Value", 1)        
+#        self.error_a = res.getDouble("Error", 0)
+#        self.error_b = res.getDouble("Error", 1)            
 
 def plotObject(instance):
     
@@ -777,21 +1101,20 @@ def getSlitsValueAndLambda(full_list_runs,
     for i in range(_nbr_files):
         _full_file_name = full_list_runs[i]
         print '-> ' + _full_file_name
-        LoadEventNexus(Filename=_full_file_name,
-                       OutputWorkspace='tmpWks',
+        tmpWks = LoadEventNexus(Filename=_full_file_name,
                        MetaDataOnly='1')
-        mt1 = mtd['tmpWks']
-        _s1h_value = getS1h(mt1)
-        _s2h_value = getS2h(mt1)
+#        mt1 = mtd['tmpWks']
+        _s1h_value = getS1h(tmpWks)
+        _s2h_value = getS2h(tmpWks)
         S1H[i] = _s1h_value
         S2H[i] = _s2h_value
         
-        _s1w_value = getS1w(mt1)
-        _s2w_value = getS2w(mt1)
+        _s1w_value = getS1w(tmpWks)
+        _s2w_value = getS2w(tmpWks)
         S1W[i] = _s1w_value
         S2W[i] = _s2w_value
         
-        _lambda_value = getLambdaValue(mt1)
+        _lambda_value = getLambdaValue(tmpWks)
         lambdaRequest[i] = _lambda_value
 
 def isRunsSorted(list_runs, S1H, S2H):
@@ -840,7 +1163,7 @@ def calculateAndFit(numerator='',
                         maxBack=list_peak_back_denominator[3])                
 
     cal1.run()
-    print 'Done with cal1.run() line 806' #REMOVEME
+    print 'Done with cal1.run()'
     
     if (list_objects != [] and list_objects[-1] is not None):
         new_cal1 = cal1 * list_objects[-1]
@@ -958,6 +1281,7 @@ def calculate(string_runs=None,
     #Make sure all the lambdaRequested are identical within a given range
     lambdaRequestPrecision = 0.01 #1%
     _lr = lambdaRequest[0]
+        
     for i in lambdaRequest:
         _localValue = float(lambdaRequest[i][0])
         _localValueRate = lambdaRequestPrecision * _localValue
