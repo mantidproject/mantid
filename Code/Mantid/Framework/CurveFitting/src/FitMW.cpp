@@ -441,15 +441,8 @@ namespace
     {
       throw std::runtime_error("Cannot initialize empty function.");
     }
-    API::IFunctionMW* funMW = dynamic_cast<API::IFunctionMW*>(function.get());
-    if (funMW)
-    {
-      funMW->setMatrixWorkspace( m_matrixWorkspace, m_workspaceIndex, m_startX, m_endX);
-    }
-    else
-    {
-      function->setWorkspace(m_matrixWorkspace);
-    }
+    function->setWorkspace(m_matrixWorkspace);
+    function->setMatrixWorkspace( m_matrixWorkspace, m_workspaceIndex, m_startX, m_endX);
   }
 
   //--------------------------------------------------------------------------------------------------------------
