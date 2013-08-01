@@ -188,14 +188,26 @@ void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotificati
   QString newName = QString::fromStdString(pNf->new_objectname());
   auto& ads = Mantid::API::AnalysisDataService::Instance();
 
+  bool eligible = checkEligibility(newName, ads.retrieve(pNf->new_objectname()));
   int index = findText(name);
-  if ( index != -1 )
+
+  if(eligible)
   {
-    this->setItemText(index, newName);
+    if ( index != -1 )
+    {
+      this->setItemText(index, newName);
+    }
+    else
+    {
+      addItem(newName);
+    }
   }
-  else if( checkEligibility(newName, ads.retrieve(pNf->new_objectname())))
+  else
   {
-    addItem(newName);
+    if ( index != -1 )
+    {
+      removeItem(index);
+    }
   }
 }
 
