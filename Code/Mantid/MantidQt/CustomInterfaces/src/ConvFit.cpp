@@ -122,8 +122,6 @@ namespace IDA
     uiForm().confit_leSpecNo->setValidator(m_intVal);
     uiForm().confit_leSpecMax->setValidator(m_intVal);
 
-    uiForm().confit_wsSample->refresh();
-
     // Context menu
     m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_cfTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(fitContextMenu(const QPoint &)));

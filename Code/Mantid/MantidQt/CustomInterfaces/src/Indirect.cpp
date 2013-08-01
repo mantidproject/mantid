@@ -135,7 +135,6 @@ void Indirect::initLayout()
   m_uiForm.sqw_leQWidth->setValidator(m_valDbl);
   m_uiForm.sqw_leQHigh->setValidator(m_valDbl);
 
-  m_uiForm.sqw_cbWorkspace->refresh();
 
   // set default values for save formats
   m_uiForm.save_ckSPE->setChecked(false);

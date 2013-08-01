@@ -419,7 +419,17 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample"/>
+                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample">
+                 <property name="WorkspaceTypes">
+                  <stringlist/>
+                 </property>
+                 <property name="Suffix" stdset="0">
+                  <stringlist>
+                   <string>_res</string>
+                   <string>_sqw</string>
+                  </stringlist>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>
@@ -574,7 +584,16 @@
            <widget class="QWidget" name="furyfit_page_inputWorkspace">
             <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt"/>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt">
+               <property name="WorkspaceTypes">
+                <stringlist/>
+               </property>
+               <property name="Suffix" stdset="0">
+                <stringlist>
+                 <string>_iqt</string>
+                </stringlist>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -967,7 +986,17 @@
              <widget class="QWidget" name="confit_page_inputWorkspace">
               <layout class="QHBoxLayout" name="horizontalLayout_29">
                <item>
-                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample"/>
+                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample">
+                 <property name="WorkspaceTypes">
+                  <stringlist/>
+                 </property>
+                 <property name="Suffix" stdset="0">
+                  <stringlist>
+                   <string>_res</string>
+                   <string>_sqw</string>
+                  </stringlist>
+                 </property>
+                </widget>
                </item>
               </layout>
              </widget>
@@ -1345,7 +1374,16 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput"/>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput">
+               <property name="WorkspaceTypes">
+                <stringlist/>
+               </property>
+               <property name="Suffix" stdset="0">
+                <stringlist>
+                 <string>_res</string>
+                </stringlist>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -1963,7 +2001,16 @@
            <widget class="QWidget" name="abscor_samWS">
             <layout class="QHBoxLayout" name="horizontalLayout_31">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample"/>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample">
+               <property name="WorkspaceTypes">
+                <stringlist/>
+               </property>
+               <property name="Suffix" stdset="0">
+                <stringlist>
+                 <string>_res</string>
+                </stringlist>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -2166,7 +2213,13 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer"/>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer">
+               <property name="Suffix" stdset="0">
+                <stringlist>
+                 <string>_res</string>
+                </stringlist>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>

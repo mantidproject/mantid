@@ -58,8 +58,6 @@ namespace IDA
     connect(uiForm().fury_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().fury_swInput, SLOT(setCurrentIndex(int)));  
     connect(uiForm().fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resType(const QString&)));
     connect(uiForm().fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
-
-    uiForm().fury_wsSample->refresh();
   }
 
   void Fury::run()
