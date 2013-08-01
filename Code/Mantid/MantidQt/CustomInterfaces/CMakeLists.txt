@@ -120,11 +120,11 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 )
 
-set( TEST_FILES
-               EventNexusFileMementoTest.h
-               WorkspaceMementoTest.h
-               WorkspaceInADSTest.h
-               RawFileMementoTest.h
+set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
+                EventNexusFileMementoTest.h
+                WorkspaceMementoTest.h
+                WorkspaceInADSTest.h
+                RawFileMementoTest.h
 )
 
 include_directories ( inc )

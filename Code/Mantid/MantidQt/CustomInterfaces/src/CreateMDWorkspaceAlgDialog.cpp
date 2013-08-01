@@ -5,6 +5,11 @@
 #include <QCheckBox>
 #include <QFileDialog>
 
+namespace MantidQt
+{
+namespace CustomInterfaces
+{
+
 /**
 Constructor
 */
@@ -71,4 +76,7 @@ QString CreateMDWorkspaceAlgDialog::getPreprocessedDetectors() const
 
 CreateMDWorkspaceAlgDialog::~CreateMDWorkspaceAlgDialog()
 {
+}
+
+}
 }
