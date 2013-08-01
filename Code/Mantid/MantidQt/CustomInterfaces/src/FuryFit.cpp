@@ -319,6 +319,8 @@ namespace IDA
     m_ffProp[name+".Intensity"] = m_ffDblMng->addProperty("Intensity");
     m_ffProp[name+".Tau"] = m_ffDblMng->addProperty("Tau");
     m_ffProp[name+".Beta"] = m_ffDblMng->addProperty("Beta");
+    m_ffDblMng->setMinimum(m_ffProp[name+".Beta"], 0);
+    m_ffDblMng->setMaximum(m_ffProp[name+".Beta"], 1);
     m_ffDblMng->setDecimals(m_ffProp[name+".Intensity"], NUM_DECIMALS);
     m_ffDblMng->setDecimals(m_ffProp[name+".Tau"], NUM_DECIMALS);
     m_ffDblMng->setDecimals(m_ffProp[name+".Beta"], NUM_DECIMALS);
