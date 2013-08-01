@@ -18,6 +18,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidKernel/PropertyManager.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <sstream>
 
@@ -436,6 +437,51 @@ public:
       TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-3);
       TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
 
+  }
+
+  void test_setting_instrument_fitting_parameters()
+  {
+      boost::shared_ptr<Mantid::Geometry::Instrument> instrument;
+      instrument.reset(new Mantid::Geometry::Instrument);
+      Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent("source");
+      source->setPos(0.0,0.0,-10.0);
+      instrument->markAsSource(source);
+      Mantid::Geometry::ObjComponent *sample = new Mantid::Geometry::ObjComponent("sample");
+      instrument->markAsSamplePos(sample);
+      boost::shared_ptr<Mantid::Geometry::Detector> det = boost::shared_ptr<Mantid::Geometry::Detector>(new Mantid::Geometry::Detector("det",1,0));
+      instrument->markAsDetector(det.get());
+
+      API::MatrixWorkspace_sptr ws = createTestWorkspace(false);
+      ws->setInstrument( instrument );
+      ws->getSpectrum(0)->setDetectorID(det->getID());
+
+      auto &pmap = ws->instrumentParameters();
+
+      std::string value = "20.0 , ExpDecay , Lifetime , , , , , , , TOF ,";
+      pmap.add("fitting",det.get(), "Lifetime", value);
+      boost::shared_ptr<const Mantid::Geometry::IDetector> pdet = instrument->getDetector(det->getID());
+      TS_ASSERT( pdet );
+
+      Geometry::Parameter_sptr param = pmap.getRecursive(pdet.get(), "Lifetime", "fitting");
+      TS_ASSERT( param );
+
+      API::IFunction_sptr expDecay(new ExpDecay);
+      FunctionDomain_sptr domain;
+      IFunctionValues_sptr values;
+
+      // Requires a property manager to make a workspce
+      auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+      const std::string wsPropName = "TestWorkspaceInput";
+      propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
+      propManager->setProperty<Workspace_sptr>(wsPropName, ws);
+
+      FitMW fitmw( propManager.get(), wsPropName);
+      fitmw.declareDatasetProperties("", true);
+      fitmw.createDomain(domain, values);
+      fitmw.initFunction(expDecay);
+
+      // test that the Lifetime parameter value was picked up from the instrument parameter map
+      TS_ASSERT_EQUALS( expDecay->getParameter("Lifetime"), 20.0 );
   }
 
 private:
