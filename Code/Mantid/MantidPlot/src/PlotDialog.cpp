@@ -2339,22 +2339,6 @@ bool PlotDialog::acceptParams()
     }
     else
     {
-      QList<Graph *> layers = d_ml->layersList();
-      foreach(Graph *g, layers)
-      {
-        g->setFrame(boxBorderWidth->value(), boxBorderColor->color());
-        g->setMargin(boxMargin->value());
-
-        QColor c = boxBackgroundColor->color();
-        c.setAlpha(boxBackgroundTransparency->value());
-        g->setBackgroundColor(c);
-
-        c = boxCanvasColor->color();
-        c.setAlpha(boxCanvasTransparency->value());
-        g->setCanvasBackground(c);
-
-        g->setAntialiasing(boxAntialiasing->isChecked());
-      }
       LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
       if (!item)
       {
