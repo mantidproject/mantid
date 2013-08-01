@@ -136,14 +136,6 @@ private slots:
 protected slots:
   void setActiveLayer(LayerItem *item);
   void updateTreeWidgetItem(QTreeWidgetItem *item);
-  void updateBackgroundTransparency(int alpha);
-  void updateCanvasTransparency(int alpha);
-  void updateAntialiasing(bool on);
-  void updateBorder(int width);
-  void pickBackgroundColor();
-  void pickCanvasColor();
-  void pickBorderColor();
-  void changeMargin(int);
   void setTitlesFont();
   void setAxesLabelsFont();
   void setAxesNumbersFont();
