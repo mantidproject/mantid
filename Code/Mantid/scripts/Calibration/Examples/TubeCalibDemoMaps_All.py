@@ -19,6 +19,10 @@ Provide Expected Value
 
 .. autofunction:: provideTheExpectedValue
 
+Change Margin and Expected Value
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autofunction:: changeMarginAndExpectedValue
+
 Improving Calibration Single Tube
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. autofunction:: improvingCalibrationSingleTube
@@ -137,7 +141,7 @@ def changeMarginAndExpectedValue(filename):
         
         The result deteriorate, as you can see: 
 
-        .. image:: /images/calibrateExtendMarginAndExpectedValue.png
+        .. image:: /images/calibrateChangeMarginAndExpectedValue.png
 
 	"""
 	from tube_calib_fit_params import TubeCalibFitParams
@@ -152,12 +156,10 @@ def changeMarginAndExpectedValue(filename):
 	expectedPositions = [4.0, 85.0, 128.0, 161.0, 252.0]
 	fitPar = TubeCalibFitParams(expectedPositions)
 	fitPar.setAutomatic(True)
-        # it is not necessary, because 15 is the default value, but it is done here for illustration
-	fitPar.setMargin(10) 
 	
 	# == Get the calibration and put results into calibration table ==
 	calibrationTable, peakTable= tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcFactor,
-		fitPar=fitPar, plotTube=[1,10,100], outputPeak=True)
+		fitPar=fitPar, plotTube=[1,10,100], outputPeak=True, margin=10)
 	# == Apply the Calibation ==
 	ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
 	
