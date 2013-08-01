@@ -1,6 +1,6 @@
-from numpy import zeros, arctan2, arange, shape
-from mantidsimple import *
-from MantidFramework import *
+from numpy import zeros, arctan2, arange, shape, sqrt
+from mantid.simpleapi import *
+# from MantidFramework import *
 import math
 import os.path
 
@@ -255,7 +255,7 @@ def cleanup_data(InputWorkspace=None,
                     UnitX="TOF",
                     ParentWorkspace=mti)
 
-def createIntegratedWorkspace(mt1, outputWorkspace,
+def createIntegratedWorkspace(mt1, 
                               fromXpixel, toXpixel,
                               fromYpixel, toYpixel,
                               maxX=304, maxY=256,
@@ -295,19 +295,19 @@ def createIntegratedWorkspace(mt1, outputWorkspace,
             _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
 
     _y_axis = _y_axis.flatten()
-    _y_error_axis = numpy.sqrt(_y_error_axis)
+    _y_error_axis = sqrt(_y_error_axis)
     _y_error_axis = _y_error_axis.flatten()
 
-    CreateWorkspace(OutputWorkspace=outputWorkspace,
-                    DataX=_tof_axis,
-                    DataY=_y_axis,
-                    DataE=_y_error_axis,
-                    Nspec=maxY,
-                    UnitX="TOF",
-                    ParentWorkspace=mt1)
+    outputWorkspace = CreateWorkspace(DataX=_tof_axis,
+                                      DataY=_y_axis,
+                                      DataE=_y_error_axis,
+                                      Nspec=maxY,
+                                      UnitX="TOF",
+                                      ParentWorkspace=mt1.name())
+    
+    return outputWorkspace
     
 def convertWorkspaceToQ(ws_data,
-                        outputWorkspace,
                         fromYpixel, toYpixel,
                         maxX=304, maxY=256,
                         cpix=None,
@@ -321,7 +321,7 @@ def convertWorkspaceToQ(ws_data,
         returns the new workspace handle
     """
 
-    mt1 = mtd[ws_data]
+    mt1 = ws_data
     _tof_axis = mt1.readX(0)[:]    
     _fromYpixel = min([fromYpixel, toYpixel])
     _toYpixel = max([fromYpixel, toYpixel])
@@ -381,18 +381,16 @@ def convertWorkspaceToQ(ws_data,
         y_axis = _y_axis.flatten()
         y_error_axis = _y_error_axis.flatten()
             
-        CreateWorkspace(OutputWorkspace=outputWorkspace,
-                        DataX=x_axis,
-                        DataY=y_axis,
-                        DataE=y_error_axis,
-                        Nspec=y_size,
-                        UnitX="MomentumTransfer",
-                        ParentWorkspace=mt1)
+        outputWorkspace = CreateWorkspace(DataX=x_axis,
+                                          DataY=y_axis,
+                                          DataE=y_error_axis,
+                                          Nspec=int(y_size),
+                                          UnitX="MomentumTransfer",
+                                          ParentWorkspace=mt1.name()) 
         
-        mtd[outputWorkspace].setDistribution(True)
+        outputWorkspace.setDistribution(True)
         
-        Rebin(InputWorkspace=outputWorkspace,
-              OutputWorkspace=outputWorkspace,
+        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,
               Params=q_binning)
 
     else:
@@ -420,19 +418,19 @@ def convertWorkspaceToQ(ws_data,
         _y_axis = _y_axis[::-1]
         _y_error_axis = _y_error_axis[::-1]
 
-        CreateWorkspace(OutputWorkspace=outputWorkspace,
-                        DataX=_q_axis,
-                        DataY=_y_axis,
-                        DataE=_y_error_axis,
-                        Nspec=maxY,
-                        UnitX="MomentumTransfer",
-                        ParentWorkspace=mt1)
+        outputWorkspace = CreateWorkspace(DataX=_q_axis,
+                                          DataY=_y_axis,    
+                                          DataE=_y_error_axis,
+                                          Nspec=maxY,
+                                          UnitX="MomentumTransfer",
+                                          ParentWorkspace=mt1.name())
 
         mtd[outputWorkspace].setDistribution(True)
 
-        Rebin(InputWorkspace=outputWorkspace,
-              OutputWorkspace=outputWorkspace,
+        outputWorkspace = Rebin(InputWorkspace=outputWorkspace,
               Params=q_binning)        
+            
+    return outputWorkspace
             
 def create_grouping(workspace=None, xmin=0, xmax=None, filename=".refl_grouping.xml"):
     # This should be read from the 
