@@ -992,7 +992,7 @@
                  </property>
                  <property name="Suffix" stdset="0">
                   <stringlist>
-                   <string>_res</string>
+                   <string>_red</string>
                    <string>_sqw</string>
                   </stringlist>
                  </property>
@@ -1380,7 +1380,7 @@
                </property>
                <property name="Suffix" stdset="0">
                 <stringlist>
-                 <string>_res</string>
+                 <string>_red</string>
                 </stringlist>
                </property>
               </widget>
@@ -2007,7 +2007,7 @@
                </property>
                <property name="Suffix" stdset="0">
                 <stringlist>
-                 <string>_res</string>
+                 <string>_red</string>
                 </stringlist>
                </property>
               </widget>
