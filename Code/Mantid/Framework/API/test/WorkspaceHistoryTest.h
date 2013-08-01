@@ -7,6 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/Property.h"
+#include "MantidAPI/FileFinder.h"
+#include "Poco/File.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -138,22 +140,50 @@ public:
 
   void test_SaveNexus()
   {
-    //add some history
     WorkspaceHistory testHistory;
-    testHistory.addHistory(AlgorithmHistory("History1", 1,DateAndTime::defaultTime(),-1.0,0));
-    testHistory.addHistory(AlgorithmHistory("History2", 1,DateAndTime::defaultTime(),-1.0,1));
-    testHistory.addHistory(AlgorithmHistory("History3", 1,DateAndTime::defaultTime(),-1.0,2));
-    testHistory.addHistory(AlgorithmHistory("History4", 1,DateAndTime::defaultTime(),-1.0,3));
+    for (int i = 1; i < 5; i++)
+    {
+      testHistory.addHistory(AlgorithmHistory("History" + boost::lexical_cast<std::string>(i), 1,DateAndTime::defaultTime(),-1.0,i));
+    }
 
     auto savehandle = boost::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
+    auto loadhandle = boost::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    std::string rootstring = "/process/";
+    for (int i = 1; i < 5; i++)
+    {
+      TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_" + boost::lexical_cast<std::string>(i)));
+    }
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidEnvironment"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/author"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/data"));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/description"));
+
+    loadhandle->close();
+    Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
   }
 
   void test_LoadNexus()
   {
-      ::NeXus::File *filehandle;
+    std::string filename = FileFinder::Instance().getFullPath("GEM38370_Focussed_Legacy.nxs");
+    auto loadhandle = boost::make_shared<::NeXus::File>(filename);
+    loadhandle->openPath("/mantid_workspace_1");
+
+    WorkspaceHistory emptyHistory;
+    TS_ASSERT_THROWS_NOTHING(emptyHistory.loadNexus(loadhandle.get()));
+
+    const auto & histories = emptyHistory.getAlgorithmHistories();
+    TS_ASSERT_EQUALS(3,histories.size());
+    
+    const auto & history = emptyHistory.getAlgorithmHistory(0);
+
+    TS_ASSERT_EQUALS("LoadRaw", history.name());
+    TS_ASSERT_EQUALS(3, history.version());
+    TS_ASSERT_EQUALS(DateAndTime("2009-10-09T16:56:54"), history.executionDate());
+    TS_ASSERT_EQUALS(2.3, history.executionDuration());
+    loadhandle->close();
 
   }
   
