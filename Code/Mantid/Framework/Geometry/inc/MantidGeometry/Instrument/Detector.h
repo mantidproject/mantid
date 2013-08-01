@@ -79,7 +79,7 @@ public:
  
 private:
   /// The detector id
-  mutable detid_t m_id;
+  const detid_t m_id;
   /// Flags if this is a monitor
   bool m_isMonitor;
 
