@@ -591,7 +591,7 @@ namespace Algorithms
                                                          bool filterincrease,
                                                          bool filterdecrease)
   {
-    // 1. Read more input
+    // Read more input
     double valueinterval = this->getProperty("LogValueInterval");
     if (valueinterval <= 0)
       throw std::invalid_argument("Multiple values filter must have LogValueInterval larger than ZERO.");
@@ -602,7 +602,7 @@ namespace Algorithms
     else if (valuetolerance < 0.0)
       throw std::runtime_error("LogValueTolerance cannot be less than zero.");
 
-    // 2. Create log value interval (low/up boundary) list and split information workspace
+    // Create log value interval (low/up boundary) list and split information workspace
     std::map<size_t, int> indexwsindexmap;
     std::vector<double> logvalueranges;
     int wsindex = 0;
@@ -641,6 +641,18 @@ namespace Algorithms
       wsindex ++;
       ++index;
     } // ENDWHILE
+
+    // Debug print
+    stringstream splitss;
+    splitss << "Index map size = " << indexwsindexmap.size() << "\n";
+    for (map<size_t, int>::iterator mit = indexwsindexmap.begin();
+         mit != indexwsindexmap.end(); ++mit)
+    {
+      splitss << "Index " << mit->first << ":  WS-group = " << mit->second
+              << ". Log value range: " << logvalueranges[mit->first*2] << ", "
+              << logvalueranges[mit->first*2+1] << ".\n";
+    }
+    g_log.information(splitss.str());
 
     if (logvalueranges.size() < 2)
     {
@@ -971,18 +983,32 @@ namespace Algorithms
             {
               // iv.  It is impossible
               std::stringstream errmsg;
+              double lastvalue =  m_dblLog->nthValue(i-1);
               errmsg << "Impossible to have currindex == lastindex == " << currindex
                      << ", while start is not init.  Log Index = " << i << "\t value = "
                      << currValue << "\t, Index = " << index
-                     << " in range " << logvalueranges[index] << ", " << logvalueranges[index+1];
+                     << " in range " << logvalueranges[index] << ", " << logvalueranges[index+1]
+                     << "; Last value = " << lastvalue;
 
               g_log.error(errmsg.str());
               throw std::runtime_error(errmsg.str());
             }
-          }
+          } // [In-bound: Inside interval]
           else if (valuewithin2boundaries)
           {
+            // [Situation] Fall between interval (which is not likley happen)
+            currindex = -1;
+            if (start.totalNanoseconds() > 0)
+            {
+              // Close the interval pair if it has been started.
+              stop = currTime;
+              completehalf = true;
+            }
+          } // [In-bound: Between interval]
+          else if (!valuewithin2boundaries)
+          {
             // Out of a range.
+            currindex = -1;
             if (start.totalNanoseconds() > 0)
             {
               // End situation
@@ -994,13 +1020,14 @@ namespace Algorithms
               // No operation required
               ;
             }
-
+          } // [Out-bound]
+          else
+          {
+            // IMPOSSIBLE SITUATION
             // c2) Fall out of interval
             g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c value range... " << std::endl;
             throw runtime_error("Is it ever reached? ");
-          }
-          else
-          {
+
             // log value falls out of min/max: If start is defined, then define stop
             if (start.totalNanoseconds() > 0)
             {
@@ -1009,15 +1036,17 @@ namespace Algorithms
               g_log.debug() << "DBOP Log Index [2] " << i << "  falls Out b/c value range... " << ".\n";
             }
           }
-        } // ENDIF NO breakloop AND Correction Direction
+        } // [CORRECT DIRECTION]
         else
         {
+          currindex = -1;
           g_log.debug() << "DBOP Log Index " << i << " Falls out b/c out of wrong direction" << std::endl;
         }
       }
       else
       {
-        // Wrong direction
+        // Out of time range
+        currindex = -1;
         g_log.debug() << "DBOP Log Index " << i << "  Falls Out b/c out of time range... " << std::endl;
       }
 
