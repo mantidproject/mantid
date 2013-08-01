@@ -110,8 +110,12 @@ namespace Geometry
     void clearParametersByName(const std::string & name);
 
     /// Method for adding a parameter providing its value as a string
-    void add(const std::string& type,const IComponent* comp,const std::string& name, 
+    void add(const std::string& type,const IComponent* comp,const std::string& name,
              const std::string& value);
+
+//    /// Method for adding a parameter providing its value as a char string
+//    void add(const std::string& type,const IComponent* comp,const std::string& name,
+//             const char* value) {add( type, comp, name, std::string(value));}
 
     /**
      * Method for adding a parameter providing its value of a particular type
