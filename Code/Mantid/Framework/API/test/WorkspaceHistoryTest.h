@@ -146,11 +146,11 @@ public:
       testHistory.addHistory(AlgorithmHistory("History" + boost::lexical_cast<std::string>(i), 1,DateAndTime::defaultTime(),-1.0,i));
     }
 
-    auto savehandle = boost::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
-    auto loadhandle = boost::make_shared<::NeXus::File>("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    auto loadhandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
     std::string rootstring = "/process/";
     for (int i = 1; i < 5; i++)
     {
@@ -168,7 +168,7 @@ public:
   void test_LoadNexus()
   {
     std::string filename = FileFinder::Instance().getFullPath("GEM38370_Focussed_Legacy.nxs");
-    auto loadhandle = boost::make_shared<::NeXus::File>(filename);
+    auto loadhandle = boost::make_shared< ::NeXus::File >(filename);
     loadhandle->openPath("/mantid_workspace_1");
 
     WorkspaceHistory emptyHistory;
