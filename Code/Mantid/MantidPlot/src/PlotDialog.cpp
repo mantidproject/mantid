@@ -563,16 +563,6 @@ void PlotDialog::initLayerPage()
   hl->addWidget(box4);
 
   privateTabWidget->addTab(layerPage, tr("Layer"));
-
-  connect(boxBackgroundTransparency, SIGNAL(valueChanged(int)), this,
-  SLOT(updateBackgroundTransparency(int)));
-  connect(boxCanvasTransparency, SIGNAL(valueChanged(int)), this, SLOT(updateCanvasTransparency(int)));
-  connect(boxAntialiasing, SIGNAL(toggled(bool)), this, SLOT(updateAntialiasing(bool)));
-  connect(boxMargin, SIGNAL(valueChanged (int)), this, SLOT(changeMargin(int)));
-  connect(boxBorderColor, SIGNAL(colorChanged()), this, SLOT(pickBorderColor()));
-  connect(boxBackgroundColor, SIGNAL(colorChanged()), this, SLOT(pickBackgroundColor()));
-  connect(boxCanvasColor, SIGNAL(colorChanged()), this, SLOT(pickCanvasColor()));
-  connect(boxBorderWidth, SIGNAL(valueChanged (int)), this, SLOT(updateBorder(int)));
 }
 
 void PlotDialog::initLayerGeometryPage()
@@ -856,17 +846,6 @@ void PlotDialog::initLabelsPage()
   QHBoxLayout* hlayout = new QHBoxLayout(labelsPage);
   hlayout->addWidget(labelsGroupBox);
   privateTabWidget->addTab(labelsPage, tr("Labels"));
-  //privateTabWidget->setTabEnabled(3,true);
-
-  connect(labelsGroupBox, SIGNAL(toggled(bool)), this, SLOT(acceptParams()));
-  connect(boxLabelsColumn, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxLabelsAlign, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxLabelsWhiteOut, SIGNAL(toggled(bool)), this, SLOT(acceptParams()));
-  connect(boxLabelsColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxLabelsXOffset, SIGNAL(valueChanged(int)), this, SLOT(acceptParams()));
-  connect(boxLabelsYOffset, SIGNAL(valueChanged(int)), this, SLOT(acceptParams()));
-  connect(boxLabelsAngle, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
-  //connect(btnLabelsFont, SIGNAL(clicked()), this, SLOT(chooseLabelsFont()));
 }
 
 void PlotDialog::initAxesPage()
@@ -950,12 +929,6 @@ void PlotDialog::initLinePage()
   hlayout->addWidget(fillGroupBox);
   privateTabWidget->addTab(linePage, tr("Line"));
 
-  connect(boxLineWidth, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
-  connect(boxLineColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxConnect, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxLineStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxAreaColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxPattern, SIGNAL(activated(int)), this, SLOT(acceptParams()));
   connect(fillGroupBox, SIGNAL(toggled(bool)), this, SLOT(showAreaColor(bool)));
   connect(fillGroupBox, SIGNAL(clicked()), this, SLOT(acceptParams()));
 }
@@ -993,9 +966,6 @@ void PlotDialog::initSymbolsPage()
 
   privateTabWidget->insertTab(symbolPage, tr("Symbol"));
 
-  connect(boxSymbolColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxSymbolStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxFillColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
   connect(boxFillSymbol, SIGNAL(clicked()), this, SLOT(fillSymbols()));
 }
 
@@ -2348,24 +2318,68 @@ bool PlotDialog::acceptParams()
   }
   else if (privateTabWidget->currentWidget() == layerPage)
   {
-    if (!boxAll->isChecked())
-      return true;
+    if (boxAll->isChecked())
+    {
+      QList<Graph *> layers = d_ml->layersList();
+      foreach(Graph *g, layers)
+      {
+        g->setFrame(boxBorderWidth->value(), boxBorderColor->color());
+        g->setMargin(boxMargin->value());
 
-    QList<Graph *> layers = d_ml->layersList();
-    foreach(Graph *g, layers){
-    g->setFrame(boxBorderWidth->value(), boxBorderColor->color());
-    g->setMargin(boxMargin->value());
+        QColor c = boxBackgroundColor->color();
+        c.setAlpha(boxBackgroundTransparency->value());
+        g->setBackgroundColor(c);
 
-    QColor c = boxBackgroundColor->color();
-    c.setAlpha(boxBackgroundTransparency->value());
-    g->setBackgroundColor(c);
+        c = boxCanvasColor->color();
+        c.setAlpha(boxCanvasTransparency->value());
+        g->setCanvasBackground(c);
 
-    c = boxCanvasColor->color();
-    c.setAlpha(boxCanvasTransparency->value());
-    g->setCanvasBackground(c);
+        g->setAntialiasing(boxAntialiasing->isChecked());
+      }
+    }
+    else
+    {
+      QList<Graph *> layers = d_ml->layersList();
+      foreach(Graph *g, layers)
+      {
+        g->setFrame(boxBorderWidth->value(), boxBorderColor->color());
+        g->setMargin(boxMargin->value());
 
-    g->setAntialiasing(boxAntialiasing->isChecked());
-  }
+        QColor c = boxBackgroundColor->color();
+        c.setAlpha(boxBackgroundTransparency->value());
+        g->setBackgroundColor(c);
+
+        c = boxCanvasColor->color();
+        c.setAlpha(boxCanvasTransparency->value());
+        g->setCanvasBackground(c);
+
+        g->setAntialiasing(boxAntialiasing->isChecked());
+      }
+      LayerItem *item = dynamic_cast<LayerItem*>(listBox->currentItem());
+      if (!item)
+      {
+        return (true);
+      }
+      else
+      {
+        Graph *g = item->graph();
+        QColor c = boxBackgroundColor->color();
+
+        //background opacity & color
+        c.setAlpha(boxBackgroundTransparency->value());
+        g->setBackgroundColor(c);
+        //Canvas color & opacity
+        c = boxCanvasColor->color();
+        c.setAlpha(boxCanvasTransparency->value());
+        g->setCanvasBackground(c);
+        //Border color & width
+        g->setFrame(boxBorderWidth->value(), boxBorderColor->color());
+        //Anti-aliasing
+        g->setAntialiasing(boxAntialiasing->isChecked());
+        //Margin
+        g->setMargin(boxMargin->value());
+      }
+    }
     return true;
   }
   else if (privateTabWidget->currentWidget() == layerGeometryPage)
