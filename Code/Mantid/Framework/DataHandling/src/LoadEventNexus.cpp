@@ -1737,6 +1737,12 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
   string run("");
   if (file.getInfo().type == ::NeXus::CHAR) {
     run = file.getStrData();
+  }else if (file.isDataInt()){
+    // inside ISIS the run_number type is int32
+    vector<int> value; 
+    file.getData(value);
+    if (value.size()  > 0)
+      run = boost::lexical_cast<std::string>(value[0]);
   }
   if (!run.empty()) {
     WS->mutableRun().addProperty("run_number", run);
