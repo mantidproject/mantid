@@ -2125,7 +2125,12 @@ Later steps in the process (saving, renaming) will not be done.</string>
                    <bool>false</bool>
                   </property>
                   <property name="algorithmAndProperty" stdset="0">
-                   <string>LoadNexusProcessed|FileName</string>
+                   <string/>
+                  </property>
+                  <property name="fileExtensions">
+                   <stringlist>
+                    <string>_red.nxs</string>
+                   </stringlist>
                   </property>
                  </widget>
                 </item>
