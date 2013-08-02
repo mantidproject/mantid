@@ -527,13 +527,14 @@ class HandleMonitor(ReductionStep):
         try:
             area = inst.getNumberParameter('Workflow.MonitorArea')[0]
             thickness = inst.getNumberParameter('Workflow.MonitorThickness')[0]
+            attenuation= inst.getNumberParameter('Workflow.Monitor1-Attenuation')[0]
         except IndexError:
-            raise ValueError('Unable to retrieve monitor thickness and '
-                'area from Instrument Parameter file.')
+            raise ValueError('Unable to retrieve monitor thickness, area and '
+                'attenuation from Instrument Parameter file.')
         else:
-            if ( area == -1 or thickness == -1 ):
+            if ( area == -1 or thickness == -1 or attenuation == -1):
                 return
-            OneMinusExponentialCor(InputWorkspace=monitor,OutputWorkspace= monitor,C= (8.3 * thickness),C1= area)
+            OneMinusExponentialCor(InputWorkspace=monitor,OutputWorkspace= monitor,C= (attenuation * thickness),C1= area)
 
     def _scale_monitor(self, monitor):
         """Some instruments wish to scale their data. Doing this at the
