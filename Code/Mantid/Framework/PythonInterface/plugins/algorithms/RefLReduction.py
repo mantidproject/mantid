@@ -377,7 +377,7 @@ class RefLReduction(PythonAlgorithm):
         # Distance source->center of detector        
         dMD = dSD + dSM
 
-        ws_data = '_' + ws_name + '_DataWks'
+#         ws_data = '_' + ws_name + '_DataWks'
 
         #Even if user select Background subtraction
         #make sure there is a background selection (peak != back selection)        
@@ -396,7 +396,7 @@ class RefLReduction(PythonAlgorithm):
             ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
                                      OutputWorkspace=ws_histo_data)
             
-            ws_data_bck = '_' + ws_name + '_DataBckWks'
+#             ws_data_bck = '_' + ws_name + '_DataBckWks'
             
             bBackLeft = False
             if (data_back[0] < (data_peak[0]-1)):
@@ -637,12 +637,8 @@ class RefLReduction(PythonAlgorithm):
             ws_norm_event_data = ws_name+"_evt"  
             ws_norm_histo_data = ws_name+"_histo"  
 
-            print '#1'
-
             if not mtd.doesExist(ws_norm_event_data):
                 ws_norm_event_data = LoadEventNexus(Filename=norm_file)
- 
-            print '#2'
  
             # Rebin data
             print '-> rebin normalization'
@@ -651,15 +647,11 @@ class RefLReduction(PythonAlgorithm):
                                                TOFsteps, 
                                                TOFrange[1]])
  
-            print '#3'
- 
             # Keep only range of TOF of interest
             print '-> Crop TOF range'
             ws_norm_histo_data = CropWorkspace(InputWorkspace=ws_norm_histo_data,
                                                XMin=TOFrange[0], 
                                                XMax=TOFrange[1])    
-
-            print '#4'
             
             # Normalized by Current (proton charge)
             print '-> normalized by current direct beam'
@@ -802,8 +794,6 @@ class RefLReduction(PythonAlgorithm):
                                                       bCleaning=True)
 
             if (subtract_norm_bck and (backSubMethod == 2)):
-                     
-                print '-> Entering case 2'
                      
                 #integrate over the x axis in the low axis range specified
                 ws_norm_histo_data_1D = wks_utility.createIntegratedWorkspace(ws_norm_histo_data, 
@@ -1035,11 +1025,19 @@ class RefLReduction(PythonAlgorithm):
         import time
         _time = int(time.time())
 #         output_ws = output_ws + '_#' + str(_time) + 'ts'        
-#         if mtd.doesExist(output_ws):
+        name_output_ws = self.getPropertyValue("OutputWorkspace")
+         
+        import time
+        _time = int(time.time())
+        name_output_ws = name_output_ws + '_#' + str(_time) + 'ts'
+         
+#         if mtd.doesExist(output_ws.name()):
 #             DeleteWorkspace(output_ws)
 #             
         print '-> sum spectra'    
-        output_ws = SumSpectra(InputWorkspace=ws_data_Q)
+        output_ws = SumSpectra(InputWorkspace=ws_data_Q, 
+                               OutputWorkspace=name_output_ws)
+        
 #         DeleteWorkspace(ws_data_Q)
 
         #keep only none zero values
@@ -1057,32 +1055,42 @@ class RefLReduction(PythonAlgorithm):
                     data_x.append(output_ws.readX(0)[i])
                     data_y.append(_y)
                     data_y_error.append(output_ws.readE(0)[i])
-         
+          
             #if at least one non zero value found
             if data_x != []:
                 print '-> cleanup data (remove zeros)'
 #                 DeleteWorkspace(output_ws)
- 
-                output_ws = CreateWorkspace(DataX=data_x,
+  
+                output_ws = CreateWorkspace(OutputWorkspace=name_output_ws,
+                                            DataX=data_x,
                                             DataY=data_y,
                                             DataE=data_y_error,
                                             Nspec=1,
                                             UnitX="MomentumTransfer")
+ 
+#                 factory = WorkspaceFactoryImpl.Instance()
+#                 output_ws = factory.create("Workspace2D",1,len(data_x), len(data_y))
+#                 output_ws.setX(0,data_x)
+#                 output_ws.setY(0,data_y)
+#                 output_ws.setE(0,data_y_error)
+#                 output_ws.getAxis(0).setUnit("MomentumTransfer")
+         
         except:
             print 'in except of keep only non-zeros values'
- 
+  
         #removing first and last Q points (edge effect) 
         x_axis = output_ws.readX(0)[:]
         if (len(x_axis) > 2):
             print '-> remove first and last point (edge effet)'
             qmin = x_axis[1]
             qmax = x_axis[-2]
-            output_ws = CropWorkspace(InputWorkspace=output_ws,
+            output_ws = CropWorkspace(InputWorkspace = output_ws,
+                                      OutputWorkspace = name_output_ws,
                                       XMin=qmin, XMax=qmax)
-
-         #space
-        self.setProperty("OutputWorkspace", output_ws)
+                
+        self.setProperty('OutputWorkspace', mtd[name_output_ws])
         
+
         #cleanup all workspace used
 #         print '-> Cleaning useless workspaces'
 #         if mtd.doesExist(ws_event_data.name()):
@@ -1097,8 +1105,6 @@ class RefLReduction(PythonAlgorithm):
 # #             if mtd.doesExist(ws_norm_event_data.name()):
 #             print 'd'
 #             DeleteWorkspace(ws_norm_event_data)
-        
-        print 'done !'
         
 AlgorithmFactory.subscribe(RefLReduction)
 # registerAlgorithm(RefLReduction())
