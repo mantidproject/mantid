@@ -239,8 +239,8 @@ double GetEi2::calculateEi(const double initial_guess)
 
       if(!m_fixedei) 
       {
-        g_log.error() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
-        throw std::invalid_argument("No peak found the monitor specified. See error log for the details of the error ");
+        throw std::invalid_argument("No peak found for the monitor"+boost::lexical_cast<std::string>(i+1)+ " (at "+
+                   boost::lexical_cast<std::string>(det_distances[i])+"  metres).\n");
       }
       else
       {
