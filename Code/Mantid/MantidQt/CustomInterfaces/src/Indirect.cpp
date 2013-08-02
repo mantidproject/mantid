@@ -97,6 +97,8 @@ void Indirect::initLayout()
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(calPlotEnergy()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
+  connect(m_uiForm.cal_ckIntensityScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(intensityScaleMultiplierCheck(bool)));
+  connect(m_uiForm.cal_leIntensityScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(calibValidateIntensity(const QString &)));
 
   // "SofQW" tab
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
@@ -113,6 +115,8 @@ void Indirect::initLayout()
   m_valInt = new QIntValidator(this);
   m_valDbl = new QDoubleValidator(this);
   m_valPosDbl = new QDoubleValidator(this);
+
+
   // Tolerance chosen arbitrarily. Avoids dividing by zero elsewhere.
   const double tolerance = 0.00001;
   m_valPosDbl->setBottom(tolerance);
@@ -127,6 +131,7 @@ void Indirect::initLayout()
   m_uiForm.rebin_leEHigh->setValidator(m_valDbl);
 
   m_uiForm.leScaleMultiplier->setValidator(m_valPosDbl);
+  m_uiForm.cal_leIntensityScaleMultiplier->setValidator(m_valDbl);
   
   m_uiForm.sqw_leELow->setValidator(m_valDbl);
   m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
@@ -139,6 +144,8 @@ void Indirect::initLayout()
   // set default values for save formats
   m_uiForm.save_ckSPE->setChecked(false);
   m_uiForm.save_ckNexus->setChecked(true);
+
+  m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
 
   // nudge "Background Removal" button to display whether it is
   // set to "OFF" or "ON".
@@ -1408,6 +1415,22 @@ void Indirect::scaleMultiplierCheck(bool state)
   m_uiForm.leScaleMultiplier->setEnabled(state);
 }
 
+void Indirect::intensityScaleMultiplierCheck(bool state)
+{
+  m_uiForm.cal_leIntensityScaleMultiplier->setEnabled(state);
+}
+
+void Indirect::calibValidateIntensity(const QString & text)
+{
+  if(!text.isEmpty())
+  {
+    m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
+  }
+  else
+  {
+    m_uiForm.cal_valIntensityScaleMultiplier->setText("*");
+  }
+}
 
 
 void Indirect::useCalib(bool state)

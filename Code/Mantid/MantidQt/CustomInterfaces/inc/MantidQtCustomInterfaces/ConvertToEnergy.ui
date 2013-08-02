@@ -1758,14 +1758,14 @@ Later steps in the process (saving, renaming) will not be done.</string>
            <item row="1" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout_18">
              <item>
-              <widget class="QCheckBox" name="ckIntensityScaleMultiplier">
+              <widget class="QCheckBox" name="cal_ckIntensityScaleMultiplier">
                <property name="text">
                 <string>Intensity Scale Factor</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="leIntensityScaleMultiplier_4">
+              <widget class="QLineEdit" name="cal_leIntensityScaleMultiplier">
                <property name="enabled">
                 <bool>false</bool>
                </property>
@@ -1787,7 +1787,7 @@ Later steps in the process (saving, renaming) will not be done.</string>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="valIntensityScaleMultiplier">
+              <widget class="QLabel" name="cal_valIntensityScaleMultiplier">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                  <horstretch>10</horstretch>
