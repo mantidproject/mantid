@@ -69,9 +69,9 @@ class Script : public QObject
   /// Returns the envirnoment this script is tied to
   inline ScriptingEnv *environment() { return m_env; }
   /// Returns the identifier for the script.
-  inline const std::string & name() const { return m_name; }
+  inline const std::string & identifier() const { return m_name; }
   /// Update the identifier for the object.
-  void setName(const QString &name);
+  virtual void setIdentifier(const QString &name);
   /// Return the current context
   const QObject * context() const { return m_context; }
   /// Set the context in which the code is to be executed.

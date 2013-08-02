@@ -147,14 +147,14 @@ bool ScriptFileInterpreter::isExecuting() const
 void ScriptFileInterpreter::saveToCurrentFile()
 {
   m_editor->saveToCurrentFile();
-  m_runner->setName(m_editor->fileName());
+  m_runner->setIdentifier(m_editor->fileName());
 }
 
 /// Save to a different name
 void ScriptFileInterpreter::saveAs()
 {
   m_editor->saveAs();
-  m_runner->setName(m_editor->fileName());
+  m_runner->setIdentifier(m_editor->fileName());
 }
 
 /**
@@ -164,7 +164,7 @@ void ScriptFileInterpreter::saveAs()
 void ScriptFileInterpreter::saveScript(const QString & filename)
 {
   m_editor->saveScript(filename);
-  m_runner->setName(m_editor->fileName());
+  m_runner->setIdentifier(m_editor->fileName());
 }
 
 /**
