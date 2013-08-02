@@ -333,21 +333,17 @@ class CreateCalibrationWorkspace(ReductionStep):
         else:
             cwsn = runs[0]
         CalculateFlatBackground(InputWorkspace=cwsn,OutputWorkspace= cwsn,StartX= backMin,EndX= backMax, Mode='Mean')
-        Integration(InputWorkspace=cwsn,OutputWorkspace= cwsn,RangeLower= peakMin,RangeUpper= peakMax)
+        
         cal_ws = mtd[cwsn]
-        sum = 0
-        for i in range(0, cal_ws.getNumberHistograms()):
-            sum += cal_ws.readY(i)[0]
-
         runNo = cal_ws.getRun().getLogData("run_number").value
         outWS_n = runs[0][:3] + runNo + '_' + self._analyser + self._reflection + '_calib'
-
-        value = 1.0 / ( sum / cal_ws.getNumberHistograms() )
-        Scale(InputWorkspace=cwsn,OutputWorkspace= cwsn,Factor= value,Operation= 'Multiply')
         
-        if (self._intensity_scale is not None):
-            Scale(InputWorkspace=cwsn, OutputWorkspace=cwsn, Factor=self._intensity_scale)
-            
+        ntu = NormaliseToUnity()
+        ntu.set_factor(self._intensity_scale)
+        ntu.set__peak_range(peakMin, peakMax)
+        ntu.set_number_of_histograms(cal_ws.getNumberHistograms())
+        ntu.execute(reducer, cwsn)
+        
         RenameWorkspace(InputWorkspace=cwsn,OutputWorkspace= outWS_n)
         self._calib_workspace = outWS_n # Set result workspace value
         if ( len(runs) > 1 ):
@@ -738,6 +734,35 @@ class RebinToFirstSpectrum(ReductionStep):
         RebinToWorkspace(WorkspaceToRebin=inputworkspace,WorkspaceToMatch=inputworkspace,
                          OutputWorkspace=inputworkspace)
         
+class NormaliseToUnity(ReductionStep):
+    """
+        A simple step to normalise a workspace to a given factor
+    """
+    _factor = 1.0
+    _peak_min = None
+    _peak_max = None
+    _no_hist = 1.0
+    
+    def execute(self, reducer, ws):
+        Integration(InputWorkspace=ws,OutputWorkspace=ws,RangeLower=self._peak_min, RangeUpper= self._peak_max)
+        
+        tempSum = SumSpectra(InputWorkspace=ws, OutputWorkspace='__tempSum')
+        sum = tempSum.readY(0)[0]
+        DeleteWorkspace(tempSum)
+        
+        value = self._factor / ( sum / self._no_hist )
+        Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=value,Operation= 'Multiply')
+        
+        
+    def set_factor(self, factor):
+        self._factor = factor
+        
+    def set__peak_range(self, pmin, pmax):
+        self._peak_min = pmin
+        self._peank_max = pmax
+        
+    def set_number_of_histograms(self, num):
+        self._no_hist = num
 
 class DetailedBalance(ReductionStep):
     """

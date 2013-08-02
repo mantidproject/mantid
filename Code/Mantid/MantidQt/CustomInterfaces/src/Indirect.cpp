@@ -1587,7 +1587,7 @@ void Indirect::calPlotEnergy()
     "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
     "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
     "files = " + files + "\n"
-    "outWS = resolution(files, iconOpt, '', '', instrument, analyser, reflection, Res=False)\n"
+    "outWS = resolution(files, iconOpt, '', '', instrument, analyser, reflection, Res=False, factor="+m_uiForm.cal_leIntensityScaleMultiplier->text()+")\n"
     "print outWS\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
   

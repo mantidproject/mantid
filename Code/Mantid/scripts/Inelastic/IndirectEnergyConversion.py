@@ -4,6 +4,7 @@ from IndirectImport import import_mantidplot
 mp = import_mantidplot()
 from mantid import config, logger
 import inelastic_indirect_reducer
+import inelastic_indirect_reduction_steps
 import sys, os.path, numpy as np
 
 def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
@@ -52,7 +53,7 @@ def createMappingFile(groupFile, ngroup, nspec, first):
 
 def resolution(files, iconOpt, rebinParam, bground, 
         instrument, analyser, reflection,
-        plotOpt=False, Res=True):
+        plotOpt=False, Res=True, factor=None):
     reducer = inelastic_indirect_reducer.IndirectReducer()
     reducer.set_instrument_name(instrument)
     reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
@@ -71,7 +72,14 @@ def resolution(files, iconOpt, rebinParam, bground,
             Mode='Mean', OutputMode='Subtract Background')
         Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
         DeleteWorkspace(iconWS)
+        
+        ntu = NormaliseToUnity()
+        ntu.set_factor(factor)
+        ntu.set_number_of_histograms(name.getNumberHistograms())
+        ntu.execute(reducer, name)
+            
         SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
+            
         if plotOpt:
             graph = mp.plotSpectrum(name, 0)
         return name
