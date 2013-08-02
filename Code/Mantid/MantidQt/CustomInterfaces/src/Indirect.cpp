@@ -1464,8 +1464,15 @@ void Indirect::calibCreate()
         + m_calCalProp["PeakMin"]->valueText() + ","
         + m_calCalProp["PeakMax"]->valueText() + ")\n"
       "calib.set_analyser('" + m_uiForm.cbAnalyser->currentText() + "')\n"
-      "calib.set_reflection('" + m_uiForm.cbReflection->currentText() + "')\n"
-      "calib.execute(None, None)\n"
+      "calib.set_reflection('" + m_uiForm.cbReflection->currentText() + "')\n";
+
+    //scale values by arbitrary scalar if requested
+    if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
+    {
+      reducer += "calib.set_intensity_scale("+m_uiForm.cal_leIntensityScaleMultiplier->text()+")\n";
+    }
+
+    reducer += "calib.execute(None, None)\n"
       "result = calib.result_workspace()\n"
       "print result\n"
       "SaveNexus(InputWorkspace=result, Filename=result+'.nxs')\n";

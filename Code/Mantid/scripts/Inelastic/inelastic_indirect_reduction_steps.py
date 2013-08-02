@@ -298,6 +298,7 @@ class CreateCalibrationWorkspace(ReductionStep):
         self._calib_workspace = None
         self._analyser = None
         self._reflection = None
+        self._intensity_scale = None
 
     def execute(self, reducer, file_ws):
         """The information we use here is not from the main reducer object
@@ -320,7 +321,7 @@ class CreateCalibrationWorkspace(ReductionStep):
             (root, ext) = os.path.splitext(filename)
             try:
                 Load(Filename=file,OutputWorkspace= root, SpectrumMin=specMin, SpectrumMax=specMax,
-                    LoadLogFiles=False)
+                    LoadLogFiles=False)                
                 runs.append(root)
             except:
                 sys.exit('Indirect: Could not load raw file: ' + file)
@@ -343,7 +344,10 @@ class CreateCalibrationWorkspace(ReductionStep):
 
         value = 1.0 / ( sum / cal_ws.getNumberHistograms() )
         Scale(InputWorkspace=cwsn,OutputWorkspace= cwsn,Factor= value,Operation= 'Multiply')
-
+        
+        if (self._intensity_scale is not None):
+            Scale(InputWorkspace=cwsn, OutputWorkspace=cwsn, Factor=self._intensity_scale)
+            
         RenameWorkspace(InputWorkspace=cwsn,OutputWorkspace= outWS_n)
         self._calib_workspace = outWS_n # Set result workspace value
         if ( len(runs) > 1 ):
@@ -355,7 +359,10 @@ class CreateCalibrationWorkspace(ReductionStep):
         self._back_max = back_max
         self._peak_min = peak_min
         self._peak_max = peak_max
-        
+    
+    def set_intensity_scale(self, factor):
+        self._intensity_scale = float(factor)
+    
     def set_detector_range(self, start, end):
         self._detector_range_start = start
         self._detector_range_end = end
