@@ -164,8 +164,20 @@ private slots:
   /// Update the pair plot based on changes on the group page.
   void settingsTabUpdatePlot();
 
+  /**
+   * Checks whether plots should be auto-updated when some settings change
+   * @return true if enabled, false if not
+   */
+  bool isAutoUpdateEnabled();
+
   /// Assigns a peak picker tool to the workspace.
   void assignPeakPickerTool(const QString &);
+
+  /**
+   * Show a plot for a given workspace. Hides previous plot if exists.
+   * @param wsName The name of workspace to be plotted. Should exist in ADS.
+   */
+  void showPlot(const QString& wsName);
 
   /// Called when the plot function has been changed on the home page.
   void changeHomeFunction();
