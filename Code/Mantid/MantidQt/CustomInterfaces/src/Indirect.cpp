@@ -554,6 +554,12 @@ QString Indirect::savePyCode()
 */
 void Indirect::createRESfile(const QString& file)
 {
+  QString scaleFactor("None");
+  if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
+  {
+    scaleFactor = m_uiForm.cal_leIntensityScaleMultiplier->text();
+  }
+
   QString pyInput =
     "from IndirectEnergyConversion import resolution\n"
     "iconOpt = { 'first': " +QString::number(m_calDblMng->value(m_calResProp["SpecMin"]))+
@@ -576,7 +582,7 @@ void Indirect::createRESfile(const QString& file)
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
     "file = " + file + "\n"
-    "resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot)\n";
+    "resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -1578,6 +1584,7 @@ void Indirect::calPlotEnergy()
     showInformationBox("Run number not valid.");
     return;
   }
+
   QString files = "[r'" + m_uiForm.cal_leRunNo->getFilenames().join("', r'") + "']";
   QString pyInput =
     "from IndirectEnergyConversion import resolution\n"
@@ -1587,7 +1594,7 @@ void Indirect::calPlotEnergy()
     "analyser = '" + m_uiForm.cbAnalyser->currentText() + "'\n"
     "reflection = '" + m_uiForm.cbReflection->currentText() + "'\n"
     "files = " + files + "\n"
-    "outWS = resolution(files, iconOpt, '', '', instrument, analyser, reflection, Res=False, factor="+m_uiForm.cal_leIntensityScaleMultiplier->text()+")\n"
+    "outWS = resolution(files, iconOpt, '', '', instrument, analyser, reflection, Res=False)\n"
     "print outWS\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
   

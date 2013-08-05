@@ -338,9 +338,9 @@ class CreateCalibrationWorkspace(ReductionStep):
         runNo = cal_ws.getRun().getLogData("run_number").value
         outWS_n = runs[0][:3] + runNo + '_' + self._analyser + self._reflection + '_calib'
         
-        ntu = NormaliseToUnity()
+        ntu = NormaliseToUnityStep()
         ntu.set_factor(self._intensity_scale)
-        ntu.set__peak_range(peakMin, peakMax)
+        ntu.set_peak_range(peakMin, peakMax)
         ntu.set_number_of_histograms(cal_ws.getNumberHistograms())
         ntu.execute(reducer, cwsn)
         
@@ -349,6 +349,8 @@ class CreateCalibrationWorkspace(ReductionStep):
         if ( len(runs) > 1 ):
             for run in runs:
                 DeleteWorkspace(Workspace=run)
+                
+        print peakMin, peakMax
 
     def set_parameters(self, back_min, back_max, peak_min, peak_max):
         self._back_min = back_min
@@ -733,8 +735,8 @@ class RebinToFirstSpectrum(ReductionStep):
     def execute(self, reducer, inputworkspace):
         RebinToWorkspace(WorkspaceToRebin=inputworkspace,WorkspaceToMatch=inputworkspace,
                          OutputWorkspace=inputworkspace)
-        
-class NormaliseToUnity(ReductionStep):
+    
+class NormaliseToUnityStep(ReductionStep):
     """
         A simple step to normalise a workspace to a given factor
     """
@@ -743,23 +745,23 @@ class NormaliseToUnity(ReductionStep):
     _peak_max = None
     _no_hist = 1.0
     
-    def execute(self, reducer, ws):
+    def execute(self, reducer, ws):   
         Integration(InputWorkspace=ws,OutputWorkspace=ws,RangeLower=self._peak_min, RangeUpper= self._peak_max)
-        
+          
         tempSum = SumSpectra(InputWorkspace=ws, OutputWorkspace='__tempSum')
         sum = tempSum.readY(0)[0]
         DeleteWorkspace(tempSum)
-        
+   
         value = self._factor / ( sum / self._no_hist )
-        Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=value,Operation= 'Multiply')
-        
+        Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=value,Operation= 'Multiply') 
         
     def set_factor(self, factor):
-        self._factor = factor
+        if factor is not None:
+            self._factor = factor
         
-    def set__peak_range(self, pmin, pmax):
+    def set_peak_range(self, pmin, pmax):
         self._peak_min = pmin
-        self._peank_max = pmax
+        self._peak_max = pmax
         
     def set_number_of_histograms(self, num):
         self._no_hist = num

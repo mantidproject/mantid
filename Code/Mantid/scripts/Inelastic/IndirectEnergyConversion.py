@@ -4,7 +4,6 @@ from IndirectImport import import_mantidplot
 mp = import_mantidplot()
 from mantid import config, logger
 import inelastic_indirect_reducer
-import inelastic_indirect_reduction_steps
 import sys, os.path, numpy as np
 
 def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
@@ -66,17 +65,16 @@ def resolution(files, iconOpt, rebinParam, bground,
     reducer.set_sum_files(True)
     reducer.reduce()
     iconWS = reducer.get_result_workspaces()[0]
+    
+    if factor != None:
+        Scale(InputWorkspace=iconWS, OutputWorkspace=iconWS, Factor = factor)
+            
     if Res:
         name = getWSprefix(iconWS) + 'res'
         CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
             Mode='Mean', OutputMode='Subtract Background')
         Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
         DeleteWorkspace(iconWS)
-        
-        ntu = NormaliseToUnity()
-        ntu.set_factor(factor)
-        ntu.set_number_of_histograms(name.getNumberHistograms())
-        ntu.execute(reducer, name)
             
         SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
             
