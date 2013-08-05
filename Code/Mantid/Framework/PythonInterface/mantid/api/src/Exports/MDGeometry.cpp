@@ -1,13 +1,16 @@
 #include "MantidAPI/MDGeometry.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/return_value_policy.hpp>
 
 using Mantid::API::MDGeometry;
 using Mantid::Geometry::IMDDimension_const_sptr;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
+using Mantid::PythonInterface::Policies::downcast_returned_value;
 using namespace boost::python;
 
 namespace
@@ -68,6 +71,26 @@ void export_MDGeometry()
 
     .def("getTDimension", &MDGeometry::getTDimension,
          "Returns the dimension description mapped to time")
+
+    .def("getGeometryXML", &MDGeometry::getGeometryXML,
+         "Returns an XML representation, as a string, of the geometry of the workspace")
+
+    .def("getBasisVector", (const Mantid::Kernel::VMD & (MDGeometry::*)(size_t) const)&MDGeometry::getBasisVector,
+         (args("index")), return_value_policy<copy_const_reference>(),
+         "Returns a VMD object defining the basis vector for the specified dimension")
+
+    .def("hasOriginalWorkspace", &MDGeometry::hasOriginalWorkspace, (args("index")),
+         "Returns True if there is a source workspace at the given index")
+
+    .def("numOriginalWorkspaces", &MDGeometry::numOriginalWorkspaces,
+         "Returns the number of source workspaces attached" )
+
+    .def("getOriginalWorkspace", &MDGeometry::getOriginalWorkspace, (args("index")), return_value_policy<downcast_returned_value>(),
+         "Returns the source workspace attached at the given index")
+
+    .def("getOrigin", (const Mantid::Kernel::VMD & (MDGeometry::*)() const)&MDGeometry::getOrigin,
+         return_value_policy<copy_const_reference>(),
+         "Returns the vector of the origin (in the original workspace) that corresponds to 0,0,0... in this workspace")
     ;
 }
 

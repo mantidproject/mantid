@@ -1,4 +1,5 @@
 import mantid
+from mantid.kernel import VMD
 from mantid.geometry import IMDDimension
 from mantid.api import MDGeometry
 import numpy
@@ -63,6 +64,23 @@ class MDGeometryTest(unittest.TestCase):
         dimension = self._test_mdws.getTDimension()
         self._check_is_dimension_with_id(dimension, "t")
 
+    def test_getGeometryXML_returns_non_empty_string(self):
+        xml = self._test_mdws.getGeometryXML()
+        self.assertTrue(len(xml) > 0)
+
+    def test_getBasisVector_returns_VMD(self):
+        basis = self._test_mdws.getBasisVector(0)
+        self.assertTrue(isinstance(basis, VMD))
+
+    def test_getOrigin_returns_VMD(self):
+        origin = self._test_mdws.getOrigin()
+        self.assertTrue(isinstance(origin, VMD))
+
+    def test_original_workspace_access(self):
+        self.assertFalse(self._test_mdws.hasOriginalWorkspace(0))
+        self.assertEqual(0,self._test_mdws.numOriginalWorkspaces())
+        self.assertRaises(RuntimeError,self._test_mdws.getOriginalWorkspace, 0)
+
 #====================== Failure cases ==================================================
 
     def test_getDimension_by_index_raises_RuntimeError_for_invalid_index(self):
@@ -76,6 +94,9 @@ class MDGeometryTest(unittest.TestCase):
 
     def test_getDimensionIndexById_raises_ValueError_for_invalid_name(self):
         self.assertRaises(RuntimeError, self._test_mdws.getDimensionIndexById, id="NOTANID")
+
+    def test_getBasisVector_raises_ValueError_for_invalid_index(self):
+        self.assertRaises(ValueError, self._test_mdws.getBasisVector, index=self._test_ndims+1)
 
 #========================================================================================
 
