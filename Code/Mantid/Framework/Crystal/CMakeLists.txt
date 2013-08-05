@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/CalculatePeaksHKL.cpp
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
+	src/ClearUB.cpp
 	src/CombinePeaksWorkspaces.cpp
 	src/DiffPeaksWorkspaces.cpp
 	src/FilterPeaks.cpp
@@ -56,6 +57,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CalculatePeaksHKL.h
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
+	inc/MantidCrystal/ClearUB.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/FilterPeaks.h
@@ -108,6 +110,7 @@ set ( TEST_FILES
 	CalculatePeaksHKLTest.h
 	CalculateUMatrixTest.h
 	CentroidPeaksTest.h
+	ClearUBTest.h
 	CombinePeaksWorkspacesTest.h
 	DiffPeaksWorkspacesTest.h
 	FilterPeaksTest.h
