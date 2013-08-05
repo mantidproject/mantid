@@ -290,7 +290,8 @@ class SNSPowderReduction(PythonAlgorithm):
         self._outTypes = self.getProperty("SaveAs").value
         samRuns = self.getProperty("RunNumber").value
         preserveEvents = self.getProperty("PreserveEvents").value
-        if HAVE_MPI:
+        if HAVE_MPI and preserveEvents == True:
+            self.log().warning("preserveEvents set to False for MPI tasks.")
             preserveEvents = False
         normbycurrent = self.getProperty("NormalizeByCurrent").value
         self._info = None
