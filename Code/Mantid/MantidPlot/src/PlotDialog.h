@@ -87,7 +87,6 @@ private slots:
   void updateEndPointColumns(const QString& text);
 
   void showBoxSymbols(bool show);
-  void fillSymbols();
   bool acceptParams();
   void showWorksheet();
   void quit();

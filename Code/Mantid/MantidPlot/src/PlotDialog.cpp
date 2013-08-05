@@ -1097,6 +1097,7 @@ void PlotDialog::initPercentilePage()
   gl2->addWidget(boxPercSize, 0, 1);
 
   boxFillSymbols = new QCheckBox(tr("Fill Color"));
+  boxFillSymbols->setCheckable(true);
   gl2->addWidget(boxFillSymbols, 1, 0);
   boxPercFillColor = new ColorBox();
   gl2->addWidget(boxPercFillColor, 1, 1);
@@ -1119,15 +1120,7 @@ void PlotDialog::initPercentilePage()
   hl->addWidget(gb2);
   privateTabWidget->insertTab(percentilePage, tr("Percentile"));
 
-  connect(boxMeanStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxMinStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxMaxStyle, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(box99Style, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(box1Style, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(box1Style, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxEdgeColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxPercFillColor, SIGNAL(activated(int)), this, SLOT(acceptParams()));
-  connect(boxFillSymbols, SIGNAL(clicked()), this, SLOT(fillBoxSymbols()));
+  connect(boxFillSymbols, SIGNAL(toggled(bool)), this, SLOT(showBoxSymbols(bool)));
 }
 
 /*
@@ -1202,12 +1195,6 @@ void PlotDialog::showBoxSymbols(bool show)
 {
   boxPercFillColor->setEnabled(show);
   boxFillColor->setEnabled(show);
-}
-
-void PlotDialog::fillSymbols()
-{
-  boxFillColor->setEnabled(boxFillSymbol->isChecked());
-  acceptParams();
 }
 
 void PlotDialog::initErrorsPage()
