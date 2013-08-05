@@ -86,7 +86,7 @@ private slots:
   void customVectorsPage(bool angleMag);
   void updateEndPointColumns(const QString& text);
 
-  void fillBoxSymbols();
+  void showBoxSymbols(bool show);
   void fillSymbols();
   bool acceptParams();
   void showWorksheet();

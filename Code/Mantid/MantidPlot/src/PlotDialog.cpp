@@ -437,8 +437,8 @@ void PlotDialog::changePlotType(int plotType)
     if (plotType)
     {
       boxSymbolStyle->setCurrentIndex(1);
-      boxFillSymbol->setChecked(true);
-      boxFillColor->setEnabled(true);
+      boxFillSymbol->setChecked(false);
+      boxFillColor->setEnabled(false);
     }
   }
   acceptParams();
@@ -930,7 +930,6 @@ void PlotDialog::initLinePage()
   privateTabWidget->addTab(linePage, tr("Line"));
 
   connect(fillGroupBox, SIGNAL(toggled(bool)), this, SLOT(showAreaColor(bool)));
-  connect(fillGroupBox, SIGNAL(clicked()), this, SLOT(acceptParams()));
 }
 
 void PlotDialog::initSymbolsPage()
@@ -946,6 +945,7 @@ void PlotDialog::initSymbolsPage()
   boxSymbolSize->setValue(5);
   gl->addWidget(boxSymbolSize, 1, 1);
   boxFillSymbol = new QCheckBox(tr("Fill Color"));
+  boxFillSymbol->setCheckable(true);
   gl->addWidget(boxFillSymbol, 2, 0);
   boxFillColor = new ColorBox();
   gl->addWidget(boxFillColor, 2, 1);
@@ -966,7 +966,7 @@ void PlotDialog::initSymbolsPage()
 
   privateTabWidget->insertTab(symbolPage, tr("Symbol"));
 
-  connect(boxFillSymbol, SIGNAL(clicked()), this, SLOT(fillSymbols()));
+  connect(boxFillSymbol, SIGNAL(toggled(bool)), this, SLOT(showBoxSymbols(bool)));
 }
 
 void PlotDialog::initBoxPage()
@@ -1207,10 +1207,10 @@ void PlotDialog::initSpectrogramPage()
   privateTabWidget->insertTab(spectrogramPage, tr("Contour") + " / " + tr("Image"));
 }
 
-void PlotDialog::fillBoxSymbols()
+void PlotDialog::showBoxSymbols(bool show)
 {
-  boxPercFillColor->setEnabled(boxFillSymbols->isChecked());
-  acceptParams();
+  boxPercFillColor->setEnabled(show);
+  boxFillColor->setEnabled(show);
 }
 
 void PlotDialog::fillSymbols()
