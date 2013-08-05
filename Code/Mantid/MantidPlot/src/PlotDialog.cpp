@@ -732,13 +732,6 @@ void PlotDialog::initPieGeometryPage()
   vl->addWidget(gb2);
 
   privateTabWidget->addTab(pieGeometryPage, tr("Pie Geometry"));
-
-  connect(boxPieConterClockwise, SIGNAL(toggled(bool)), this, SLOT(acceptParams()));
-  connect(boxPieViewAngle, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
-  connect(boxPieThickness, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
-  connect(boxPieStartAzimuth, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
-  connect(boxRadius, SIGNAL(valueChanged(int)), this, SLOT(acceptParams()));
-  connect(boxPieOffset, SIGNAL(valueChanged(int)), this, SLOT(acceptParams()));
 }
 
 void PlotDialog::initPieLabelsPage()
@@ -776,8 +769,6 @@ void PlotDialog::initPieLabelsPage()
   vl->addWidget(boxPieWedge);
 
   privateTabWidget->addTab(pieLabelsPage, tr("Labels"));
-
-  connect(boxPieEdgeDist, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
 }
 
 void PlotDialog::initPrintPage()
