@@ -162,7 +162,7 @@ namespace Mantid
         logFileStream.seekg(0);
         loadTwoColumnLogFile(logFileStream, extractLogName(names), localWorkspace->mutableRun());
       }
-      catch(std::string &error)
+      catch(std::exception&)
       {
         throw std::invalid_argument("The log file provided is invalid as it has more than three columns.");
       }
