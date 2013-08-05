@@ -1266,13 +1266,6 @@ void PlotDialog::initErrorsPage()
   hl->addWidget(gb1);
   hl->addWidget(gb2);
   privateTabWidget->insertTab(errorsPage, tr("Error Bars"));
-
-  connect(widthBox, SIGNAL(valueChanged(double)), this, SLOT(acceptParams()));
-  connect(colorBox, SIGNAL(colorChanged()), this, SLOT(pickErrorBarsColor()));
-  connect(xBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsType()));
-  connect(plusBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsPlus()));
-  connect(minusBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsMinus()));
-  connect(throughBox, SIGNAL(clicked()), this, SLOT(changeErrorBarsThrough()));
 }
 
 void PlotDialog::initHistogramPage()
@@ -1547,91 +1540,6 @@ void PlotDialog::removeSelectedCurve()
     if (it)
       delete it;
   }
-}
-
-void PlotDialog::changeErrorBarsPlus()
-{
-  CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(listBox->currentItem());
-  if (!item)
-    return;
-  if (item->type() != CurveTreeItem::PlotCurveTreeItem)
-    return;
-
-  Graph *graph = item->graph();
-  if (!graph)
-    return;
-
-  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),
-      widthBox->value(), capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(),
-      minusBox->isChecked(), throughBox->isChecked());
-}
-
-void PlotDialog::changeErrorBarsMinus()
-{
-  CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(listBox->currentItem());
-  if (!item)
-    return;
-  if (item->type() != CurveTreeItem::PlotCurveTreeItem)
-    return;
-
-  Graph *graph = item->graph();
-  if (!graph)
-    return;
-
-  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),
-      widthBox->value(), capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(),
-      minusBox->isChecked(), throughBox->isChecked());
-}
-
-void PlotDialog::changeErrorBarsThrough()
-{
-  CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(listBox->currentItem());
-  if (!item)
-    return;
-  if (item->type() != CurveTreeItem::PlotCurveTreeItem)
-    return;
-
-  Graph *graph = item->graph();
-  if (!graph)
-    return;
-
-  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),
-      widthBox->value(), capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(),
-      minusBox->isChecked(), throughBox->isChecked());
-}
-
-void PlotDialog::changeErrorBarsType()
-{
-  CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(listBox->currentItem());
-  if (!item)
-    return;
-  if (item->type() != CurveTreeItem::PlotCurveTreeItem)
-    return;
-
-  Graph *graph = item->graph();
-  if (!graph)
-    return;
-
-  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),
-      widthBox->value(), capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(),
-      minusBox->isChecked(), throughBox->isChecked());
-}
-
-void PlotDialog::pickErrorBarsColor()
-{
-  CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(listBox->currentItem());
-  if (!item)
-    return;
-  if (item->type() != CurveTreeItem::PlotCurveTreeItem)
-    return;
-
-  Graph *graph = item->graph();
-  if (!graph)
-    return;
-
-  graph->updateErrorBars(dynamic_cast<QwtErrorPlotCurve*>(item->plotItem()), xBox->isChecked(),
-      widthBox->value(), capBox->currentText().toInt(), colorBox->color(), plusBox->isChecked(),
-      minusBox->isChecked(), throughBox->isChecked());
 }
 
 void PlotDialog::showAreaColor(bool show)

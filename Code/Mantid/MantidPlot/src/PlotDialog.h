@@ -104,13 +104,6 @@ private slots:
 
   void removeSelectedCurve();
 
-  /******* error bars options **************/
-  void pickErrorBarsColor();
-  void changeErrorBarsType();
-  void changeErrorBarsPlus();
-  void changeErrorBarsMinus();
-  void changeErrorBarsThrough();
-
   void setAutomaticBinning();
   bool validInput();
   void showPlotAssociations(QTreeWidgetItem *item, int);
