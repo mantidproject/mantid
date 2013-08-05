@@ -46,6 +46,7 @@ set ( INC_FILES
     inc/MantidQtCustomInterfaces/ConvFit.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
     inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+    inc/MantidQtCustomInterfaces/DllConfig.h
     inc/MantidQtCustomInterfaces/Elwin.h
 	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h	
     inc/MantidQtCustomInterfaces/Fury.h
@@ -120,7 +121,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 )
 
-set( TEST_FILES #CreateMDWorkspaceAlgDialogTest.h
+set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
                 EventNexusFileMementoTest.h
                 WorkspaceMementoTest.h
                 WorkspaceInADSTest.h
@@ -156,7 +157,8 @@ enable_precompiled_headers( inc/MantidQtCustomInterfaces/PrecompiledHeader.h  AL
 add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # Set the name of the generated library
-set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
+set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces
+                                                    COMPILE_DEFINITIONS IN_MANTIDQT_CUSTOMINTERFACES )
 
 find_Package(Threads)
 
