@@ -16,6 +16,7 @@ of the bin boundaries. This will cause some values to fall outside of the range 
  *WIKI*/
 
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidCurveFitting/SplineInterpolation.h"
 
@@ -115,6 +116,8 @@ namespace Mantid
 
       MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(mws, histNo);
 
+      Progress pgress(this, 0.0, 1.0, histNo);
+
       //for each histogram in workspace, calculate interpolation and derivatives
       for (int i = 0; i < histNo; ++i)
       {
@@ -138,6 +141,8 @@ namespace Mantid
             calculateDerivatives(mwspt, derivs[i], j+1);
           }
         }
+
+        pgress.report();
       }
 
       //Store the output workspaces

@@ -11,6 +11,7 @@ If the input workspace contains histograms, rather than data points, then Spline
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -108,6 +109,7 @@ namespace CurveFitting
     MatrixWorkspace_sptr outputWorkspace = setupOutputWorkspace(inputWorkspaceBinned, histNo);
     std::vector<MatrixWorkspace_sptr> derivs (histNo);
 
+    Progress pgress(this, 0.0, 1.0, histNo);
     for(int i = 0; i < histNo; ++i)
     {
       m_cspline = boost::make_shared<CubicSpline>();
@@ -132,6 +134,8 @@ namespace CurveFitting
           calculateDerivatives(inputWorkspacePt, derivs[i], j+1, i);
         }
       }
+
+      pgress.report();
     }
 
     //prefix to name of deriv output workspaces
