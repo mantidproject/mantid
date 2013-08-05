@@ -43,7 +43,9 @@ class VMDTest(unittest.TestCase):
         self.assertEquals(pre_norm, a.normalize())
 
         b = VMD(3./8,4./8, math.sqrt(39.0)/8.) # normalized version
-        self.assertAlmostEquals(b, a, places=6)
+        self.assertAlmostEquals(b[0], a[0], places=6)
+        self.assertAlmostEquals(b[1], a[1], places=6)
+        self.assertAlmostEquals(b[2], a[2], places=6)
 
     def test_angle(self):
         a = VMD(1,0,0);
