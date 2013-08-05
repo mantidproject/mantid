@@ -111,7 +111,7 @@ namespace Mantid
       bool isDateTimeString(const std::string& str) const;
 
       /// Checks if a log file name was provided (e.g. through setPropertyValue). If not it creates one based on provided path.
-      std::string extractLogName(std::vector<std::string> logFileName);
+      std::string extractLogName(const std::vector<std::string> & logFileName);
 
       /// Check for SNS-style text file
       bool SNSTextFormatColumns(const std::string& str, std::vector<double> & out) const;

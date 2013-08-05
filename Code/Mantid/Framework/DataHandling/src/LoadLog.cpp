@@ -86,11 +86,9 @@ namespace Mantid
         new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
                           "The name of the workspace to which the log data will be added.");
 
-      std::vector<std::string> exts(4, "");
+      std::vector<std::string> exts(2, "");
       exts[0] = ".txt";
-      exts[1] = ".raw";
-      exts[2] = ".s*";
-      exts[3] = ".add";
+      exts[1] = ".add";
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The filename (including its full or relative path) of a SNS text log file (not cvinfo), "
         "an ISIS log file, or an ISIS raw file. "
@@ -346,7 +344,7 @@ namespace Mantid
      * @param logName :: The vector containing log file names.
      * @return The name of the log file.
      */
-    std::string LoadLog::extractLogName(std::vector<std::string> logName)
+    std::string LoadLog::extractLogName(const std::vector<std::string> & logName)
     {
       if(logName.empty())
       {

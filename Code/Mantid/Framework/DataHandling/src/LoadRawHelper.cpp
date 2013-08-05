@@ -710,7 +710,7 @@ namespace Mantid
      * @param path :: Path to the log file
      * @return logName :: The name of the log file.
      */
-    std::string LoadRawHelper::extractLogName(std::string path)
+    std::string LoadRawHelper::extractLogName(const std::string &path)
     {
       // The log file's name, including workspace (e.g. CSP78173_ICPevent)
       std::string fileName = Poco::Path(Poco::Path(path).getFileName()).getBaseName();
@@ -1096,8 +1096,8 @@ namespace Mantid
      */
     std::list<std::string> LoadRawHelper::searchForLogFiles(const std::string& pathToRawFile)
     {
-      // If m_filename is the filename of a raw datafile then search for potential log files
-      // in the directory of this raw datafile. Otherwise check if m_filename is a potential
+      // If pathToRawFile is the filename of a raw datafile then search for potential log files
+      // in the directory of this raw datafile. Otherwise check if it is a potential
       // log file. Add the filename of these potential log files to: potentialLogFiles.
       std::set<std::string> potentialLogFiles;
       // Using a list instead of a set to preserve order. The three column names will
@@ -1117,12 +1117,12 @@ namespace Mantid
       std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
       if ( isAscii(pathToRawFile) && l_filenamePart.rfind("_") != std::string::npos )
       {
-        // then we will assume that m_filename is an ISIS/SNS log file
+        // then we will assume that the file is an ISIS log file
         potentialLogFiles.insert(pathToRawFile);
       }
       else
       {
-        // then we will assume that m_filename is an ISIS raw file. The file validator
+        // then we will assume that the file is an ISIS raw file. The file validator
         // will have warned the user if the extension is not one of the suggested ones.
 
         // strip out the raw data file identifier
@@ -1139,9 +1139,9 @@ namespace Mantid
         }
         /// check for alternate data stream exists for raw file
         /// if exists open the stream and read  log files name  from ADS
-        if(adsExists())
+        if(adsExists(pathToRawFile))
         {
-          potentialLogFiles = getLogfilenamesfromADS();
+          potentialLogFiles = getLogFilenamesfromADS(pathToRawFile);
         }
         else
         {
@@ -1175,12 +1175,13 @@ namespace Mantid
 
     /**
      * This method looks for ADS with name checksum exists
+     * @param pathToFile The path and name of the file.
      * @return True if ADS stream checksum exists
      */
-    bool LoadRawHelper::adsExists()
+    bool LoadRawHelper::adsExists(const std::string &pathToFile)
     {
       #ifdef _WIN32
-        std::string adsname(m_filename+":checksum");
+        std::string adsname(pathToFile+":checksum");
         std::ifstream adstream(adsname.c_str());
         if (!adstream)
         {
@@ -1194,32 +1195,32 @@ namespace Mantid
     }
 
     /**
-     * This method reads  the checksum ADS associated with the
-     * raw file and returns the filensmes of the log files
+     * This method reads the checksum ADS associated with the raw file and returns the filenames of the log files
+     * @param pathToRawFile The path and name of the raw file.
      * @return list of logfile names.
      */
-    std::set<std::string> LoadRawHelper::getLogfilenamesfromADS()
+    std::set<std::string> LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile)
     {
-      std::string adsname(m_filename + ":checksum");
+      std::string adsname(pathToRawFile + ":checksum");
       std::ifstream adstream(adsname.c_str());
       if(!adstream)
       {
-        return std::set<std::string>();
+        return (std::set<std::string>());
       }
 
       std::string str;
       std::string path;
       std::string logFile;
       std::set<std::string>logfilesList;
-      Poco::Path logpath(m_filename);
-      size_t pos =m_filename.find_last_of("/");
+      Poco::Path logpath(pathToRawFile);
+      size_t pos = pathToRawFile.find_last_of("/");
       if (pos == std::string::npos)
       {
-        pos =m_filename.find_last_of("\\");
+        pos = pathToRawFile.find_last_of("\\");
       }
       if (pos!=std::string::npos)
       {
-        path=m_filename.substr(0,pos);
+        path = pathToRawFile.substr(0,pos);
       }
       while (Mantid::Kernel::extractToEOL(adstream,str))
       {
@@ -1231,12 +1232,12 @@ namespace Mantid
         pos = fileName.find("txt");
         if ( pos == std::string::npos )
           continue;
-        logFile=path+"/"+fileName;
+        logFile = path + "/" + fileName;
         if ( logFile.empty() )
           continue;
         logfilesList.insert(logFile);
       }
-      return logfilesList;
+      return (logfilesList);
     }
 
     /**
