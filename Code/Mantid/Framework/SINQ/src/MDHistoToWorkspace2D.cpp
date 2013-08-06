@@ -16,6 +16,8 @@ conversion with MDHistoToWorkspace2D such algorithms can also be applied to MD d
  * copyright: do not bother me, see Mantid copyright
  *
  * Mark Koennecke, November 2012
+ *
+ * Added copying of meta data. Mark Koennecke, July 2013
  */
 #include "MantidSINQ/MDHistoToWorkspace2D.h"
 #include <iostream>
@@ -59,6 +61,7 @@ void MDHistoToWorkspace2D::exec()
 	memset(pos,0,rank*sizeof(coord_t));
 	currentSpectra = 0;
 	recurseData(inWS,outWS,0,pos);
+	copyMetaData(inWS,outWS);
 
 	//checkW2D(outWS);
 
@@ -135,4 +138,10 @@ void MDHistoToWorkspace2D::checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS)
 void MDHistoToWorkspace2D::initDocs()
 {
   this->setWikiSummary("Flattens a n dimensional MDHistoWorkspace into a Workspace2D with many spectra");
+}
+
+void MDHistoToWorkspace2D::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS)
+{
+  ExperimentInfo_sptr info = inWS->getExperimentInfo(0);
+  outWS->copyExperimentInfoFrom(info.get());
 }

@@ -21,10 +21,12 @@ class ViewBOA(PythonAlgorithm):
         now = datetime.datetime.now()
         self.declareProperty("Year",now.year,"Choose year",direction=Direction.Input)
         self.declareProperty('Numor',0,'Choose file number',direction=Direction.Input)
+        self.declareProperty('CD-Distance',6.000,'Chopper Detector distance in meter',direction=Direction.Input)
 
     def PyExec(self):
         year=self.getProperty('Year').value
         num=self.getProperty('Numor').value
+        CD = self.getProperty('CD-Distance').value
         self.log().error('Running LoadBOA for file number ' + str(num))
         rawfile = 'tmp' + str(num)
         mantid.simpleapi.LoadSINQ('BOA',year,num,rawfile)
@@ -42,8 +44,16 @@ class ViewBOA(PythonAlgorithm):
         exec('tmp3' + ' = mantid.simpleapi.MDHistoToWorkspace2D(\'tmp2\')')
         exec(hist + ' = mantid.simpleapi.GroupDetectors(\'tmp3\',\'\',\'\',\'0-' + str(ny) +
              '\',\'\',False,\'Sum\',False)')
+        self.TOFToLambda(hist,CD)
         mantid.simpleapi.DeleteWorkspace(rawfile)
         mantid.simpleapi.DeleteWorkspace('tmp2')
         mantid.simpleapi.DeleteWorkspace('tmp3')
+
+    def TOFToLambda(self, wsname, CD):
+        ws2d = mtd[wsname]
+        tofdata = ws2d.dataX(0)
+        for i in range(len(tofdata)):
+            tofdata[i] = (3.9560346E-7*(tofdata[i]*1.E-7/CD))*1.E10
+        
 
 registerAlgorithm(ViewBOA())

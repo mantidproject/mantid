@@ -43,6 +43,7 @@ private:
 
   void checkW2D(Mantid::DataObjects::Workspace2D_sptr outWS);
 
+  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS);
 };
 
 #endif /*MDHISTOTOWORKSPACE2D_H_*/
