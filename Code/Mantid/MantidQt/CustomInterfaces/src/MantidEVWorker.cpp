@@ -1068,7 +1068,7 @@ std::vector< std::pair<std::string,std::string> > MantidEVWorker::PointInfo( con
                                                                              Mantid::Kernel::V3D Q)
 {
   IPeaksWorkspace_sptr peaks_ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(peaks_ws_name);
-  return peaks_ws->PeakInfo( Q , lab_coords); 
+  return peaks_ws->peakInfo( Q , lab_coords);
 }
 
 } // namespace CustomInterfaces
