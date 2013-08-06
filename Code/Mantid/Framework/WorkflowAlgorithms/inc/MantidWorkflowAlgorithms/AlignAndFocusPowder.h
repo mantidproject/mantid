@@ -75,7 +75,7 @@ namespace Mantid
       void init();
       void exec();
       void loadCalFile(const std::string &calFileName);
-      void rebin(API::MatrixWorkspace_sptr matrixws);
+      API::MatrixWorkspace_sptr rebin(API::MatrixWorkspace_sptr matrixws);
 
       API::MatrixWorkspace_sptr conjoinWorkspaces(API::MatrixWorkspace_sptr ws1, API::MatrixWorkspace_sptr ws2,
                                                   size_t offset);

@@ -348,7 +348,7 @@ namespace WorkflowAlgorithms
     m_outputW = maskAlg->getProperty("Workspace");
 
     if(!dspace)
-      this->rebin(m_outputW);
+      m_outputW = rebin(m_outputW);
 
     g_log.information() << "running AlignDetectors\n";
     API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
@@ -450,9 +450,9 @@ namespace WorkflowAlgorithms
 
     if(dspace)
     {
-      this->rebin(m_outputW);
+      m_outputW = rebin(m_outputW);
       if (m_processLowResTOF)
-        rebin(m_lowResW);
+    	  m_lowResW = rebin(m_lowResW);
     }
 
     doSortEvents(m_outputW);
@@ -472,9 +472,9 @@ namespace WorkflowAlgorithms
     // but it changes the system tests
     if (dspace && m_resampleX != 0)
     {
-      this->rebin(m_outputW);
+      m_outputW = rebin(m_outputW);
       if (m_processLowResTOF)
-        rebin(m_lowResW);
+        m_lowResW = rebin(m_lowResW);
     }
 
     if (l1 > 0)
@@ -584,7 +584,7 @@ namespace WorkflowAlgorithms
     if (!m_dmaxs.empty())
       m_dmaxs.clear();
 
-    this->rebin(m_outputW);
+    m_outputW = rebin(m_outputW);
 
     // return the output workspace
     setProperty("OutputWorkspace",m_outputW);
@@ -655,7 +655,7 @@ namespace WorkflowAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Rebin
   */
-  void AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws)
+  API::MatrixWorkspace_sptr AlignAndFocusPowder::rebin(API::MatrixWorkspace_sptr matrixws)
   {
     if (m_resampleX != 0)
     {
@@ -684,6 +684,7 @@ namespace WorkflowAlgorithms
       alg->setProperty("LogBinning", (m_resampleX < 0));
       alg->executeAsChildAlg();
       matrixws = alg->getProperty("OutputWorkspace");
+      return matrixws;
     }
     else
     {
@@ -697,6 +698,7 @@ namespace WorkflowAlgorithms
       rebin3Alg->setProperty("Params",m_params);
       rebin3Alg->executeAsChildAlg();
       matrixws = rebin3Alg->getProperty("OutputWorkspace");
+      return matrixws;
     }
   }
 
