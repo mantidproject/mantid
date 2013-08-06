@@ -1166,7 +1166,7 @@ namespace Mantid
         std::ifstream fileExists(logName.c_str());
         if(fileExists)
         {
-          // Push three columngit gui filename to end of list.
+          // Push three column filename to end of list.
           potentialLogFilesList.insert(potentialLogFilesList.end(), logName);
         }
       }
