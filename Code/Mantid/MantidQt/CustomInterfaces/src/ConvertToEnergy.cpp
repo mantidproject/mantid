@@ -245,11 +245,10 @@ void ConvertToEnergy::instrumentSelectChanged(const QString& name)
 ConvertToEnergy::DeltaEMode ConvertToEnergy::instrumentDeltaEMode(const QString& defFile)
 {
   QString pyInput =
-    "from mantidsimple import *\n"
-    "import sys\n"
+    "from mantid.simpleapi import LoadEmptyInstrument,mtd\n"
     "ws_name = '__empty_%2'\n"
-    "if not mtd.workspaceExists(ws_name):\n"
-    "  LoadEmptyInstrument(r'%1', ws_name)\n"
+    "if not mtd.doesExist(ws_name):\n"
+    "  LoadEmptyInstrument(Filename=r'%1', OutputWorkspace=ws_name)\n"
     "instrument = mtd[ws_name].getInstrument()\n"
     "try:\n"
     "    print instrument.getStringParameter('deltaE-mode')[0]\n"

@@ -291,7 +291,7 @@ namespace Algorithms
       }
 
       // 3. Set to map
-      mOutputWorkspaces.insert(std::make_pair(wsgroup, optws));
+      m_outputWS.insert(std::make_pair(wsgroup, optws));
 
       // 4. Set to output workspace
       this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>(
@@ -411,67 +411,76 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Main filtering method
+    * Structure: per spectrum --> per workspace
    */
   void FilterEvents::filterEventsBySplitters()
   {
     size_t numberOfSpectra = m_eventWS->getNumberHistograms();
     std::map<int, DataObjects::EventWorkspace_sptr>::iterator wsiter;
 
-    // 1. Loop over the histograms (detector spectra)
+    // Loop over the histograms (detector spectra) to do split from 1 event list to N event list
+    g_log.information() << "[FilterEvents F1206] Number of spectra = " << numberOfSpectra << ".\n";
+
     // FIXME Make it parallel
     // PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t iws = 0; iws < int64_t(numberOfSpectra); ++iws)
     {
+      // FIXME Make it parallel
       // PARALLEL_START_INTERUPT_REGION
 
-      // a) Get the output event lists (should be empty) to be a map
+      // Get the output event lists (should be empty) to be a map
       std::map<int, DataObjects::EventList* > outputs;
-      for (wsiter = mOutputWorkspaces.begin(); wsiter != mOutputWorkspaces.end(); ++ wsiter)
+      for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++ wsiter)
       {
         int index = wsiter->first;
         DataObjects::EventList* output_el = wsiter->second->getEventListPtr(iws);
         outputs.insert(std::make_pair(index, output_el));
       }
 
-      // b) and this is the input event list
+      // Get a holder on input workspace's event list of this spectrum
       const DataObjects::EventList& input_el = m_eventWS->getEventList(iws);
 
-      // c) Perform the filtering (using the splitting function and just one output)
+      // Perform the filtering (using the splitting function and just one output)
       input_el.splitByFullTime(m_splitters, outputs, m_detTofOffsets[iws]);
 
       mProgress = 0.2+0.8*double(iws)/double(numberOfSpectra);
       progress(mProgress);
 
+      // FIXME - Turn on parallel
       // PARALLEL_END_INTERUPT_REGION
     } // END FOR i = 0
+    // FIXME - Turn on parallel
     // PARALLEL_CHECK_INTERUPT_REGION
 
-    // 2. Finish adding events and To split/filter the runs for each workspace
+    // Finish (1) adding events and splitting the sample logs in each target workspace.
     std::vector<std::string> lognames;
     this->getTimeSeriesLogNames(lognames);
-    g_log.debug() << "FilterEvents:  Number of TimeSeries Logs = " << lognames.size() << std::endl;
+    g_log.debug() << "[FilterEvents D1214]:  Number of TimeSeries Logs = " << lognames.size()
+                  << " to " << m_outputWS.size() << " outptu workspaces. \n";
 
-    for (wsiter = mOutputWorkspaces.begin(); wsiter != mOutputWorkspaces.end(); ++wsiter)
+    for (wsiter = m_outputWS.begin(); wsiter != m_outputWS.end(); ++wsiter)
     {
       int wsindex = wsiter->first;
       DataObjects::EventWorkspace_sptr opws = wsiter->second;
 
-
-      // 2b To split/filter the selected run of the workspace output
+      // Generate a list of splitters for current output workspace
       Kernel::TimeSplitterType splitters;
       generateSplitters(wsindex, splitters);
 
-      g_log.debug() << "FilterEvents: Workspace Index " << wsindex
-          << "  Number of Splitters = " << splitters.size() << std::endl;
+      g_log.debug() << "[FilterEvents D1215]: Output orkspace Index " << wsindex
+                    << ": Name = " << opws->name() << "; Number of splitters = " << splitters.size() << ".\n";
 
+      // Skip output workspace has ZERO splitters
       if (splitters.size() == 0)
       {
-        g_log.warning() << "Workspace " << opws->name() << " Indexed @ " << wsindex <<
-            " won't have logs splitted due to zero splitter size. " << std::endl;
+        g_log.warning() << "[FilterEvents] Workspace " << opws->name() << " Indexed @ " << wsindex <<
+                           " won't have logs splitted due to zero splitter size. " << ".\n";
         continue;
       }
 
-      for (size_t ilog = 0; ilog < lognames.size(); ++ilog)
+      // Split log
+      size_t numlogs = lognames.size();
+      for (size_t ilog = 0; ilog < numlogs; ++ilog)
       {
         this->splitLog(opws, lognames[ilog], splitters);
       }
@@ -501,8 +510,8 @@ namespace Algorithms
     return;
   }
 
-  /*
-   * Split a log by splitters
+  //----------------------------------------------------------------------------------------------
+  /** Split a log by splitters
    */
   void FilterEvents::splitLog(DataObjects::EventWorkspace_sptr eventws, std::string logname, Kernel::TimeSplitterType& splitters)
   {
@@ -513,15 +522,24 @@ namespace Algorithms
       g_log.warning() << "Log " << logname << " is not TimeSeriesProperty.  Unable to split." << std::endl;
       return;
     }
+    else
+    {
+      for (size_t i = 0; i < splitters.size(); ++i)
+      {
+        SplittingInterval split = splitters[i];
+        g_log.debug() << "[FilterEvents DB1226] Going to filter workspace " << eventws->name() << ": "
+                      << "log name = " << logname << ", duration = " << split.duration()
+                      << " from " << split.start() << " to " << split.stop() << ".\n";
+      }
+    }
 
     prop->filterByTimes(splitters);
 
     return;
   }
 
-
-  /*
-   * Get all filterable logs' names
+  //----------------------------------------------------------------------------------------------
+  /** Get all filterable logs' names
    */
   void FilterEvents::getTimeSeriesLogNames(std::vector<std::string>& lognames)
   {

@@ -1356,8 +1356,8 @@ void SliceViewer::findRangeSlice()
 
   // Iterate through the slice
   std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS, function);
-  delete function;
   m_colorRangeSlice = getRange(iterators);
+  delete function;
   // In case of failure, use the full range instead
   if (m_colorRangeSlice == QwtDoubleInterval(0.0, 1.0))
     m_colorRangeSlice = m_colorRangeFull;
@@ -2184,6 +2184,14 @@ void SliceViewer::autoRebinIfRequired()
   }
 }
 
+/**
+ * Convenience function for removing all displayed peaks workspaces.
+ */
+void SliceViewer::clearPeaksWorkspaces()
+{
+  this->disablePeakOverlays();
+}
+
   /**
    * Helper function to rest the SliceViewer into a no-peak overlay mode.
    */
@@ -2194,6 +2202,64 @@ void SliceViewer::autoRebinIfRequired()
     m_peaksPresenter->clear();
     emit showPeaksViewer(false);
     m_menuPeaks->setEnabled(false);
+  }
+
+  /**
+   * Show a collection of peaks workspaces as overplots
+   * @param list : List of peak workspace names to show.
+   */
+  void SliceViewer::setPeaksWorkspaces(const QStringList& list)
+  {
+
+    if (m_ws->getNumDims() < 2)
+    {
+      throw std::invalid_argument(
+          "Cannot overplot a peaks workspace unless the base workspace has two or more dimensions");
+    }
+
+    // Fetch the correct Peak Overlay Transform Factory;
+    const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
+    const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
+
+    PeakTransformFactory_sptr transformFactory = m_peakTransformSelector.makeChoice(xDim, yDim);
+    // Loop through each of those peaks workspaces and display them.
+    for (int i = 0; i < list.size(); ++i)
+    {
+      const std::string workspaceName = list[i].toStdString();
+      if (!AnalysisDataService::Instance().doesExist(workspaceName))
+      {
+        throw std::invalid_argument(workspaceName + " Does not exist");
+      }
+      IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(
+          workspaceName);
+      const size_t numberOfChildPresenters = m_peaksPresenter->size();
+
+      PeakOverlayViewFactorySelector_sptr viewFactorySelector = boost::make_shared<
+          PeakOverlayViewFactorySelector>();
+      // Candidate for overplotting as spherical peaks
+      viewFactorySelector->registerCandidate(
+          boost::make_shared<PeakOverlayMultiSphereFactory>(peaksWS, m_plot, m_plot->canvas(),
+              numberOfChildPresenters));
+      // Candiate for plotting as a markers of peak positions
+      viewFactorySelector->registerCandidate(
+          boost::make_shared<PeakOverlayMultiCrossFactory>(m_ws,
+              transformFactory->createDefaultTransform(), peaksWS, m_plot, m_plot->canvas(),
+              numberOfChildPresenters));
+      try
+      {
+        m_peaksPresenter->addPeaksPresenter(
+            boost::make_shared<ConcretePeaksPresenter>(viewFactorySelector->makeSelection(), peaksWS,
+                m_ws, transformFactory));
+      } catch (std::invalid_argument& e)
+      {
+        // Incompatible PeaksWorkspace.
+        disablePeakOverlays();
+        throw e;
+      }
+    }
+    updatePeakOverlaySliderWidget();
+    emit showPeaksViewer(true);
+    m_menuPeaks->setEnabled(true);
   }
 
 /**
@@ -2218,32 +2284,7 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       if(!list.isEmpty())
       {
         // Fetch the correct Peak Overlay Transform Factory;
-        const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
-        const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
-        PeakTransformFactory_sptr transformFactory = m_peakTransformSelector.makeChoice(xDim, yDim);
-        // Loop through each of those peaks workspaces and display them.
-        for(int i = 0; i < list.size(); ++i)
-        {
-          IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list[i].toStdString());
-          const size_t numberOfChildPresenters = m_peaksPresenter->size();
-
-          PeakOverlayViewFactorySelector_sptr viewFactorySelector = boost::make_shared<PeakOverlayViewFactorySelector>();
-          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlayMultiSphereFactory>(peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters)); 
-          viewFactorySelector->registerCandidate(boost::make_shared<PeakOverlayMultiCrossFactory>(m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
-          try
-          {
-            m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(viewFactorySelector->makeSelection(), peaksWS, m_ws, transformFactory));
-          }
-          catch(std::invalid_argument& e)
-          {
-            // Incompatible PeaksWorkspace.
-            disablePeakOverlays();
-            throw e;
-          }
-        }
-        updatePeakOverlaySliderWidget();
-        emit showPeaksViewer(true);
-        m_menuPeaks->setEnabled(true);
+          setPeaksWorkspaces(list);
       }
       else
       {

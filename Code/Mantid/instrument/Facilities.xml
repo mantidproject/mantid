@@ -335,7 +335,7 @@
   <instrument name="HYSPEC" shortname="HYS" beamline="14B"> 
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
-    <!--livedata address="hyspec-sms1.sns.gov:31415" /-->
+    <livedata address="hyspec-sms1.sns.gov:31415" />
   </instrument> 
   
   <!-- This is a virtual temp instrument for testing ADARA -->
@@ -404,6 +404,10 @@
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
+  </instrument>
+  
+  <instrument name="D33">
+    <technique>SANS</technique> 
   </instrument>
 
 </facility>
@@ -497,25 +501,6 @@
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Direct Geometry Spectroscopy</technique>
   </instrument>
-</facility>
-
-
-<facility name="TEST" FileExtensions=".nxs,.dat,.xml">
-
-   <livedata listener="MockILiveListener"/>
-
-   <instrument name="MINITOPAZ"> 
-      <technique>Test Neutron Diffraction</technique>
-      <livedata address="127.0.0.1:0" />
-   </instrument>
-
-  <instrument name="TESTHISTOLISTENER"> 
-    <zeropadding size="8"/>
-    <zeropadding size="11" startRunNumber="300" prefix="TST"/>
-    <technique>Test ISISHistoDataListener</technique>
-    <livedata listener="ISISHistoDataListener" address="127.0.0.1:6789" />
-  </instrument>
-
 </facility>
 
 </facilities>

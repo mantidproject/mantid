@@ -28,7 +28,7 @@ public:
   {
     if( !m_alg.isInitialized() ) m_alg.initialize();
     m_alg.setPropertyValue( "Filename", m_inputFile );
-    Mantid::Kernel::HDFDescriptor descr(m_alg.getPropertyValue("Filename"));
+    Mantid::Kernel::NexusDescriptor descr(m_alg.getPropertyValue("Filename"));
     TS_ASSERT_EQUALS(m_alg.confidence(descr), 99);
   }
 

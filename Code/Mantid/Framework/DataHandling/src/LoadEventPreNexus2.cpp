@@ -215,7 +215,7 @@ int LoadEventPreNexus2::confidence(Kernel::FileDescriptor & descriptor) const
 /*
  * Constructor
  */
-LoadEventPreNexus2::LoadEventPreNexus2() : Mantid::API::IFileLoader(), eventfile(NULL), max_events(0)
+LoadEventPreNexus2::LoadEventPreNexus2() : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), eventfile(NULL), max_events(0)
 {
 }
 

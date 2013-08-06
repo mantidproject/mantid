@@ -239,19 +239,11 @@ namespace ComponentCreationHelper
 
 
   //----------------------------------------------------------------------------------------------
-  /**
-   * Create an test instrument with n panels of 9 cylindrical detectors, a source and spherical sample shape.
-   * Detector ID's start at 1.
-   *
-   * @param num_banks: number of 9-cylinder banks to create
-   * @param verbose: prints out the instrument after creation.
-   */
-  Instrument_sptr createTestInstrumentCylindrical(int num_banks, bool verbose)
+
+  Instrument_sptr createTestInstrumentCylindrical(int num_banks, bool verbose, const double cylRadius, const double cylHeight)
   {
     boost::shared_ptr<Instrument> testInst(new Instrument("basic"));
 
-    const double cylRadius(0.004);
-    const double cylHeight(0.0002);
     // One object
     Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape");
 
@@ -265,7 +257,7 @@ namespace ComponentCreationHelper
       bankname << "bank" << banknum;
       CompAssembly *bank = new CompAssembly(bankname.str());
 
-      // Four object components
+      // Nine object components
       for( int i = -1; i < 2; ++i )
       {
         for( int j = -1; j < 2; ++j )
@@ -273,7 +265,7 @@ namespace ComponentCreationHelper
           std::ostringstream lexer;
           lexer << "pixel-(" << j << "," << i << ")";
           Detector * physicalPixel = new Detector(lexer.str(), pixelID, pixelShape, bank);
-          const double xpos = j*cylRadius*2.0;
+          const double xpos = j*(cylRadius*2.0);
           const double ypos = i*cylHeight;
           physicalPixel->setPos(xpos, ypos,0.0);
           pixelID++;

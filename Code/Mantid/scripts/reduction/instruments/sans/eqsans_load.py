@@ -11,7 +11,7 @@ from eqsans_config import EQSANSConfig
 from sans_reduction_steps import BaseBeamFinder
 
 # Mantid imports
-from mantidsimple import *
+from mantid.simpleapi import *
 
 class LoadRun(ReductionStep):
     """
@@ -152,10 +152,10 @@ class LoadRun(ReductionStep):
         # Delete the beam hole transmission workspace if it exists
         if mtd[workspace].getRun().hasProperty("transmission_ws"):
             trans_ws = mtd[workspace].getRun().getProperty("transmission_ws").value
-            if mtd.workspaceExists(trans_ws):
-                mtd.deleteWorkspace(trans_ws)
-        if mtd.workspaceExists(workspace):
-            mtd.deleteWorkspace(workspace)
+            if mtd.doesExist(trans_ws):
+                DeleteWorkspace(trans_ws)
+        if mtd.doesExist(workspace):
+            DeleteWorkspace(workspace)
         
     def execute(self, reducer, workspace):
         output_str = ""      
@@ -182,7 +182,7 @@ class LoadRun(ReductionStep):
         def _load_data_file(file_name, wks_name):
             # Check whether we are processing an event workspace or whether
             # we need to load a file
-            if mtd.workspaceExists(file_name) \
+            if mtd.doesExist(file_name) \
                 and mtd[file_name].getAxis(0).getUnit().name()=="TOF":
                 input_ws = file_name
                 filepath = None
@@ -190,7 +190,7 @@ class LoadRun(ReductionStep):
                 filepath = find_data(file_name, instrument=reducer.instrument.name())
                 input_ws = None
                 
-            l = EQSANSLoad(Filename=filepath,
+            results = EQSANSLoad(Filename=filepath,
                            InputWorkspace=input_ws,
                            OutputWorkspace=wks_name,
                            UseConfigBeam=use_config_beam,
@@ -210,7 +210,7 @@ class LoadRun(ReductionStep):
                            LoadMonitors=self._load_monitors,
                            ReductionProperties=reducer.get_reduction_table_name()
                            )            
-            return l.getPropertyValue("OutputMessage")
+            return results[-1] # return output message
         
         # Check whether we have a list of files that need merging
         #   Make sure we process a list of files written as a string
@@ -226,13 +226,13 @@ class LoadRun(ReductionStep):
                     Plus(LHSWorkspace=workspace,
                          RHSWorkspace='__tmp_wksp',
                          OutputWorkspace=workspace)
-            if mtd.workspaceExists('__tmp_wksp'):
-                mtd.deleteWorkspace('__tmp_wksp')
+            if mtd.doesExist('__tmp_wksp'):
+                DeleteWorkspace('__tmp_wksp')
         else:
             output_str += "Loaded %s\n" % data_file
             output_str += _load_data_file(data_file, workspace)
         
-        mantid[workspace].getRun().addProperty_str("event_ws", workspace, True)
+        mtd[workspace].getRun().addProperty("event_ws", workspace, True)
         
         if mtd[workspace].getRun().hasProperty("beam_center_x") and \
             mtd[workspace].getRun().hasProperty("beam_center_y"):
@@ -240,10 +240,10 @@ class LoadRun(ReductionStep):
             beam_center_y = mtd[workspace].getRun().getProperty("beam_center_y").value
             if type(reducer._beam_finder) is BaseBeamFinder:
                 reducer.set_beam_finder(BaseBeamFinder(beam_center_x, beam_center_y))
-                mantid.sendLogMessage("Setting beam center to [%-6.1f, %-6.1f]" % (beam_center_x, beam_center_y))
+                logger.notice("Setting beam center to [%-6.1f, %-6.1f]" % (beam_center_x, beam_center_y))
         
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
-        mtd[workspace].getRun().addProperty_int("loaded_by_eqsans_reduction", 1, True)
+        mtd[workspace].getRun().addProperty("loaded_by_eqsans_reduction", 1, True)
         
         return output_str

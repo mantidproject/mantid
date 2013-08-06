@@ -9,7 +9,7 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** FilterPeaks : TODO: DESCRIPTION
+  /** FilterPeaks : Filter a peaks workspace based on a set number of queries to provide a new, filtered peaks workspace.
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

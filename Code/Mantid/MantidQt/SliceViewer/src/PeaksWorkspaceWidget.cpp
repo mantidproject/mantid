@@ -124,10 +124,13 @@ namespace MantidQt
     void PeaksWorkspaceWidget::onForegroundColourClicked()
     {
       QColorDialog colourDlg;
+      colourDlg.result();
       QColor selectedColour = colourDlg.getColor();
-
-      ui.btnPeakColor->setBackgroundColor(selectedColour);
-      emit peakColourChanged(this->m_ws, selectedColour);
+      if(selectedColour.isValid() )
+      {
+        ui.btnPeakColor->setBackgroundColor(selectedColour);
+        emit peakColourChanged(this->m_ws, selectedColour);
+      }
     }
 
     /**
@@ -137,8 +140,11 @@ namespace MantidQt
     {
       QColorDialog colourDlg;
       QColor selectedColour = colourDlg.getColor();
-      ui.btnBackgroundColor->setBackgroundColor(selectedColour);
-      emit backgroundColourChanged(this->m_ws, selectedColour);
+      if(selectedColour.isValid() )
+      {
+        ui.btnBackgroundColor->setBackgroundColor(selectedColour);
+        emit backgroundColourChanged(this->m_ws, selectedColour);
+      }
     }
 
     /**

@@ -24,7 +24,7 @@
         <file>upload.png</file>
         <file>system-software-update.png</file>
         <file>dialog-ok.png</file>
-	<file>running_process.png</file>
+        <file>running_process.png</file>
         <file>file_pdf.png</file>
         <file>selection-circle-ring.png</file>
 	<file>emptytrash.png</file>
@@ -41,13 +41,16 @@
         <file>selection-text.png</file>
         <file>selection-peak.png</file>
         <file>selection-peaks.png</file>
+        <file>selection-edit.png</file>
         <file>eraser.png</file>
+        <file>selection-box-ring.png</file>
+        <file>selection-circle-ring.png</file>
     </qresource>
     <qresource prefix="/MaskTools">
-        <file>selection-pointer.png</file>
         <file>selection-circle.png</file>
         <file>selection-box.png</file>
         <file>selection-box-ring.png</file>
         <file>selection-circle-ring.png</file>
+        <file>selection-edit.png</file>
     </qresource>
 </RCC>

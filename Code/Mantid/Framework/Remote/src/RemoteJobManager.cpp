@@ -94,8 +94,6 @@ HttpRemoteJobManager::HttpRemoteJobManager( const Poco::XML::Element* elem)
 // serverErr string.
 RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::startTransaction( std::string &transId, std::string &directory, std::string &serverErr)
 {
-  JobManagerErrorCode reqErr = JM_OK;
-
   // Create an HTTPS session
   // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
   // sends to us.  That's BAD!!
@@ -103,7 +101,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::startTransaction( st
   Poco::Net::HTTPSClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
   // We need to send a GET request to the server with a query string of "action=start"
   Poco::Net::HTTPRequest req;
-  reqErr = initGetRequest( req, "/transaction", "action=start");
+  JobManagerErrorCode reqErr = initGetRequest( req, "/transaction", "action=start");
   if ( reqErr != JM_OK)
   {
     return reqErr;
@@ -172,8 +170,6 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::startTransaction( st
 // serverErr string.
 RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::stopTransaction( std::string &transId, std::string &serverErr)
 {
-  JobManagerErrorCode reqErr = JM_OK;
-
   // Create an HTTPS session
   // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
   // sends to us.  That's BAD!!
@@ -182,7 +178,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::stopTransaction( std
   // We need to send a GET request to the server with a query string of "action=start"
   Poco::Net::HTTPRequest req;
   std::string queryString = "action=stop&transid=" + transId;
-  reqErr = initGetRequest( req, "/transaction", queryString);
+  JobManagerErrorCode reqErr = initGetRequest( req, "/transaction", queryString);
   if ( reqErr != JM_OK)
   {
     return reqErr;
@@ -243,8 +239,6 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::listFiles( const std
                                                                        std::vector<std::string> &listing,
                                                                        std::string &serverErr)
 {
-  JobManagerErrorCode reqErr = JM_OK;
-
   // Create an HTTPS session
   // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
   // sends to us.  That's BAD!!
@@ -254,7 +248,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::listFiles( const std
   // We need to send a GET request to the server with a query string of "TransID=xxxxx&Action=query"
   Poco::Net::HTTPRequest req;
   std::string queryString = "Action=query&TransID=" + transId;
-  reqErr = initGetRequest( req, "/file_transfer", queryString);
+  JobManagerErrorCode reqErr = initGetRequest( req, "/file_transfer", queryString);
   if ( reqErr != JM_OK)
   {
     return reqErr;
@@ -310,7 +304,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::listFiles( const std
       std::string oneName;
       (*itNames).getValue( oneName);
       listing.push_back( oneName);
-      itNames++;
+      ++itNames;
     }
 
     reqErr = JM_OK;  // This should already be set, but just in case....
@@ -392,7 +386,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::uploadFile( const st
   postData << httpLineEnd;
 
   infile.seekg (0, std::ios_base::end);
-  long fileLen = infile.tellg();
+  auto fileLen = infile.tellg();
   infile.seekg (0, std::ios_base::beg);
 
   req.setContentLength( postData.str().size() + fileLen + strlen(httpLineEnd) + finalBoundaryLine.size());
@@ -455,8 +449,6 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::downloadFile( const 
                                                                           const std::string &localFileName,
                                                                           std::string &serverErr)
 {
-  JobManagerErrorCode reqErr = JM_OK;
-
   // Create an HTTPS session
   // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
   // sends to us.  That's BAD!!
@@ -467,7 +459,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::downloadFile( const 
   Poco::Net::HTTPRequest req;
   std::string queryString = "Action=download&TransID=" + transId + "&File=" + remoteFileName;
   queryString += "&XDEBUG_SESSION_START=MWS";  // enable debugging of the remote PHP
-  reqErr = initGetRequest( req, "/file_transfer", queryString);
+  JobManagerErrorCode reqErr = initGetRequest( req, "/file_transfer", queryString);
   if ( reqErr != JM_OK)
   {
     return reqErr;
@@ -581,7 +573,7 @@ Poco::Net::NameValueCollection HttpRemoteJobManager::getCookies()
   while (it != m_cookies.end())
   {
     nvc.add( (*it).getName(), (*it).getValue());
-    it++;
+    ++it;
   }
   return nvc;
 }
@@ -1141,7 +1133,7 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
         }
 
       }
-      it++;
+      ++it;
     }
   }
 

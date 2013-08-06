@@ -1,5 +1,5 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+Filters a [[PeaksWorkspace]] using a set number of queries. Outputs a filtered PeaksWorkspace.
 *WIKI*/
 
 #include "MantidCrystal/FilterPeaks.h"
@@ -34,7 +34,7 @@ namespace Mantid
 namespace Crystal
 {
   // Register the algorithm into the AlgorithmFactory
-  //DECLARE_ALGORITHM(FilterPeaks)
+  DECLARE_ALGORITHM(FilterPeaks)
 
   using namespace Kernel;
   using namespace API;
@@ -104,8 +104,6 @@ namespace Crystal
     IPeaksWorkspace_sptr filteredWS = WorkspaceFactory::Instance().createPeaks();
     // Copy over ExperimentInfo from input workspace
     filteredWS->copyExperimentInfoFrom(inputWS.get());
-
-    // TODO: Refactor to avoid all the else-ifs and multiple edits required on adding new variables
 
     const std::string FilterVariable = getProperty("FilterVariable");
     double (*filterFunction)(const Mantid::API::IPeak &) = 0;

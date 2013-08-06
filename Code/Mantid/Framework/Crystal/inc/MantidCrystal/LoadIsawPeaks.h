@@ -16,7 +16,7 @@ namespace Crystal
    * @author Janik Zikovsky, SNS
    * @date 2011-03-07 15:22:11.897153
    */
-  class DLLExport LoadIsawPeaks  : public API::IFileLoader
+  class DLLExport LoadIsawPeaks  : public API::IFileLoader<Kernel::FileDescriptor>
   {
   public:
     LoadIsawPeaks();

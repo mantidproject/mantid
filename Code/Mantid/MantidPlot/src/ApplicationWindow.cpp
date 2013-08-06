@@ -2845,7 +2845,6 @@ void ApplicationWindow::initMultilayerPlot(MultiLayer* g, const QString& name)
 
   g->setWindowTitle(label);
   g->setName(label);
-  g->setIcon(getQPixmap("graph_xpm"));
   g->setScaleLayersOnPrint(d_scale_plots_on_print);
   g->printCropmarks(d_print_cropmarks);
 
@@ -3066,8 +3065,11 @@ void ApplicationWindow::initTable(Table* w, const QString& caption)
   customTable(w);
 
   w->setName(name);
-  w->setIcon( getQPixmap("worksheet_xpm") );
   w->setSpecifications(w->saveToString(windowGeometryInfo(w)));
+  if ( !w->isA("MantidTable"))
+  {
+    w->setIcon( getQPixmap("worksheet_xpm") );
+  }
 
   addMdiSubWindow(w);
 }
@@ -3098,7 +3100,6 @@ Note* ApplicationWindow::newNote(const QString& caption)
     name = generateUniqueName(tr("Notes"));
 
   m->setName(name);
-  m->setIcon(getQPixmap("note_xpm"));
   m->confirmClose(confirmCloseNotes);
 
   addMdiSubWindow(m);
@@ -3369,7 +3370,6 @@ void ApplicationWindow::initMatrix(Matrix* m, const QString& caption)
 
   m->setWindowTitle(name);
   m->setName(name);
-  m->setIcon( m->matrixIcon() );//Mantid
   m->confirmClose(confirmCloseMatrix);
   m->setNumericPrecision(d_decimal_digits);
 
@@ -4759,11 +4759,6 @@ bool ApplicationWindow::setScriptingLanguage(const QString &lang)
     newEnv = ScriptingLangManager::newEnv(lang, this);
     connect(newEnv, SIGNAL(print(const QString&)), resultsLog, SLOT(appendNotice(const QString&)));
 
-    // The following is already part of executeScript
-    // This call could be uncommented if mantidsimple is folded into Mantid such that the
-    // algorithm call signature could also be updated.
-    //connect(mantidUI, SIGNAL(algorithmAboutToBeCreated()), newEnv, SLOT(refreshAlgorithms()));
-
     if( newEnv->initialize() )
     {   
       m_script_envs.insert(lang, newEnv);
@@ -5062,13 +5057,28 @@ void ApplicationWindow::readSettings()
   settings.endGroup(); // UserFunctions
 
   settings.beginGroup("/Confirmations");
-  confirmCloseFolder = settings.value("/Folder", true).toBool();
-  confirmCloseTable = settings.value("/Table", true).toBool();
-  confirmCloseMatrix = settings.value("/Matrix", true).toBool();
-  confirmClosePlot2D = settings.value("/Plot2D", true).toBool();
-  confirmClosePlot3D = settings.value("/Plot3D", true).toBool();
-  confirmCloseNotes = settings.value("/Note", true).toBool();
-  d_inform_rename_table = settings.value("/RenameTable", true).toBool();
+  //Once only for each Qsettings instance set all of the confirmations to false - they are annoying
+  //however if people consciously turn them back on then leave them alone.
+  //leaving renameTable out of this as it is bit different
+  bool setConfirmationDefaultsToFalseOnce= settings.value("/DefaultsSetToFalseOnce", false).toBool();
+  if (!setConfirmationDefaultsToFalseOnce)
+  {
+    settings.setValue("/Folder", false);
+    settings.setValue("/Table", false);
+    settings.setValue("/Matrix", false);
+    settings.setValue("/Plot2D", false);
+    settings.setValue("/Plot3D", false);
+    settings.setValue("/Note", false);
+    settings.setValue("/InstrumentWindow", false);
+    settings.setValue("/DefaultsSetToFalseOnce", true);
+  }
+  confirmCloseFolder = settings.value("/Folder", false).toBool();
+  confirmCloseTable = settings.value("/Table", false).toBool();
+  confirmCloseMatrix = settings.value("/Matrix", false).toBool();
+  confirmClosePlot2D = settings.value("/Plot2D", false).toBool();
+  confirmClosePlot3D = settings.value("/Plot3D", false).toBool();
+  confirmCloseNotes = settings.value("/Note", false).toBool();
+  d_inform_rename_table = settings.value("/RenameTable", false).toBool();
   confirmCloseInstrWindow=settings.value("/InstrumentWindow", false).toBool();
   settings.endGroup(); // Confirmations
 
@@ -8169,7 +8179,6 @@ void ApplicationWindow::showImageDialog()
     id->setAttribute(Qt::WA_DeleteOnClose);
     connect (id, SIGNAL(setGeometry(int, int, int, int)),
         g, SLOT(updateImageMarker(int, int, int, int)));
-    //		id->setIcon(getQPixmap("logo_xpm"));
     id->setOrigin(im->origin());
     id->setSize(im->size());
     id->exec();
@@ -17845,6 +17854,7 @@ QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoin
 {
   QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
   sw->resize(w->size());
+  sw->setWindowIcon(w->windowIcon());
   if ( pos != QPoint(-1,-1) )
   {
     sw->move(pos);

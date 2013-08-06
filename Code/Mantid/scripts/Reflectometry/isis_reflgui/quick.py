@@ -381,7 +381,7 @@ def toLam(run, name, pointdet=1):
 	CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=monInLam,StartWorkspaceIndex='0',EndWorkspaceIndex=PointDetectorStart-1)
 	CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=detInLam,XMin=LambdaMin,XMax=LambdaMax,StartWorkspaceIndex=PointDetectorStart)
 	# Subtract flat background from fit in range given from Instrument Def/Par File
-	FlatBackground(InputWorkspace=monInLam,OutputWorkspace=monInLam,WorkspaceIndexList=MonitorsToCorrect,StartX=MonitorBackground[0],EndX=MonitorBackground[1])
+	CalculateFlatBackground(InputWorkspace=monInLam,OutputWorkspace=monInLam,WorkspaceIndexList=MonitorsToCorrect,StartX=MonitorBackground[0],EndX=MonitorBackground[1])
 	
 	# Is it a multidetector run?
 	nHist = groupGet(wTof+"_lam",'wksp','')

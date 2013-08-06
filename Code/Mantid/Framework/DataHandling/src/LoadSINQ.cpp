@@ -26,14 +26,14 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_HDF_FILELOADER_ALGORITHM(LoadSINQ);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQ);
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
 LoadSINQ::LoadSINQ() {
 	m_instrumentName = "";
-	supportedInstruments.push_back("FOCUS");
+	m_supportedInstruments.push_back("FOCUS");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -72,18 +72,17 @@ void LoadSINQ::initDocs() {
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadSINQ::confidence(Kernel::HDFDescriptor & descriptor) const
-{
-  const std::string root =  "/" + descriptor.firstEntryNameType().first + "/";
-  for(auto it = supportedInstruments.begin(); it != supportedInstruments.end() ; ++it)
-  {
-    if(descriptor.pathExists(root + *it)) return 80;
-  }
+int LoadSINQ::confidence(Kernel::NexusDescriptor & descriptor) const {
 
-  return 0;
+	// fields existent only at the SINQ (to date Loader only valid for focus)
+	if (descriptor.pathExists("/entry1/FOCUS/SINQ") ){
+		return 80;
+	} else {
+		return 0;
+	}
 }
 
-//----------------------------------------------------------------------------------------------
+//-----------------------------------------1-----------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void LoadSINQ::init() {
@@ -119,42 +118,23 @@ void LoadSINQ::exec() {
 	setProperty("OutputWorkspace", m_localWorkspace);
 }
 
+/*
+ * Set global variables:
+ * m_instrumentPath
+ * m_instrumentName
+ * Note that the instrument in the nexus file is of the form "FOCUS at SINQ"
+ *
+ */
 void LoadSINQ::setInstrumentName(NeXus::NXEntry& entry) {
 
-	m_instrumentName = getInstrumentName(entry,m_nexusInstrumentEntryName);
-	if (m_instrumentName == "") {
-		std::string message(
-				"Cannot read the instrument name from the Nexus file!");
-		g_log.error(message);
-		throw std::runtime_error(message);
+	m_instrumentPath = m_loader.findInstrumentNexusPath(entry);
+
+	if (m_instrumentPath == "") {
+		throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
 	}
-
-}
-
-std::string LoadSINQ::getInstrumentName(NeXus::NXEntry& entry, std::string &nexusInstrumentName) const {
-
-	// format: /entry0/?????/name
-
-	std::string instrumentName = "";
-
-	std::vector<NXClassInfo> v = entry.groups();
-	for (auto it = v.begin(); it < v.end(); it++) {
-		if (it->nxclass == "NXinstrument") {
-		  nexusInstrumentName = it->nxname;
-		  std::string insNamePath = nexusInstrumentName + "/name";
-			if ( !entry.isValid(insNamePath) )
-				throw std::runtime_error("Error reading the instrument name: " + insNamePath + " is not a valid path!");
-			instrumentName = entry.getString(insNamePath);
-			g_log.debug() << "Instrument Name: " << instrumentName
-					<< " in NxPath: " << insNamePath << std::endl;
-			break;
-		}
-	}
-	//std::replace( instrumentName.begin(), instrumentName.end(), ' ', '_'); // replace all ' ' to '_'
-	long unsigned int pos = instrumentName.find(" ");
-	instrumentName = instrumentName.substr(0, pos);
-	return instrumentName;
-
+	m_instrumentName = m_loader.getStringFromNexusPath(entry, m_instrumentPath + "/name");
+	long unsigned int pos = m_instrumentName.find(" ");
+	m_instrumentName = m_instrumentName.substr(0, pos);
 }
 
 void LoadSINQ::initWorkSpace(NeXus::NXEntry& entry) {
@@ -197,20 +177,8 @@ void LoadSINQ::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	NXInt data = dataGroup.openIntData();
 	data.load();
 
-	NXFloat timeBinning = entry.openNXFloat("merged/time_binning");
-	timeBinning.load();
-
-	size_t numberOfBins = static_cast<size_t>(timeBinning.dim0()) + 1; // boundaries
-	g_log.debug() << "Number of bins: " << numberOfBins << std::endl;
-
-	// Assign time bin to first X entry
-	float* timeBinning_p = &timeBinning[0];
-	std::vector<double> timeBinningTmp(numberOfBins);
-	timeBinningTmp.assign(timeBinning_p, timeBinning_p + numberOfBins);
-	timeBinningTmp[numberOfBins - 1] = timeBinningTmp[numberOfBins - 2]
-			+ timeBinningTmp[1] - timeBinningTmp[0];
-	m_localWorkspace->dataX(0).assign(timeBinningTmp.begin(),
-			timeBinningTmp.end());
+	std::vector<double> timeBinning = m_loader.getTimeBinningFromNexusPath(entry, "merged/time_binning");
+	m_localWorkspace->dataX(0).assign(timeBinning.begin(),timeBinning.end());
 
 	Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 	size_t spec = 0;
@@ -224,18 +192,15 @@ void LoadSINQ::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 			int* data_p = &data(static_cast<int>(i), static_cast<int>(j));
 			m_localWorkspace->dataY(spec).assign(data_p,
 					data_p + m_numberOfChannels);
-
 			// Assign Error
 			MantidVec& E = m_localWorkspace->dataE(spec);
 			std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
 					LoadSINQ::calculateError);
-
 			++spec;
 			progress.report();
 		}
 	}
-
-	g_log.debug() << "Data loading inti WS done...." << std::endl;
+	g_log.debug() << "Data loading into WS done...." << std::endl;
 }
 
 void LoadSINQ::loadRunDetails(NXEntry & entry) {
@@ -254,12 +219,10 @@ void LoadSINQ::loadRunDetails(NXEntry & entry) {
 	//end_time = getDateTimeInIsoFormat(end_time);
 	runDetails.addProperty("run_end", end_time);
 
-	double wavelength = entry.getFloat(
-			m_nexusInstrumentEntryName + "/monochromator/lambda");
+	double wavelength = entry.getFloat(m_instrumentPath + "/monochromator/lambda");
 	runDetails.addProperty<double>("wavelength", wavelength);
 
-	double energy = entry.getFloat(
-			m_nexusInstrumentEntryName + "/monochromator/energy");
+	double energy = entry.getFloat(m_instrumentPath + "/monochromator/energy");
 	runDetails.addProperty<double>("Ei", energy, true); //overwrite
 
 	std::string title = entry.getString("title");

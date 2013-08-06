@@ -39,7 +39,7 @@ def create_algorithm(algorithm, version, _algm_object):
             del kwargs["Version"]
 
         # Warn about old API
-        warnOnV1MethodCall(inspect.currentframe().f_back)
+        warnOnV1MethodCall(inspect.currentframe().f_back, identifier=algorithm)
         algm = mtd.createAlgorithm(algorithm, _version)
         algm.setPropertyValues(*args, **kwargs)
         algm.execute()
@@ -107,7 +107,7 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
             if item not in kwargs:
                 kwargs[item] = ""
         # Warn about old API
-        warnOnV1MethodCall(inspect.currentframe().f_back)
+        warnOnV1MethodCall(inspect.currentframe().f_back, identifier=algorithm)
         algm = mtd.createAlgorithm(algorithm, _version)
         algm.setPropertiesDialog(*args, **kwargs)
         algm.execute()
@@ -187,7 +187,7 @@ def Load(*args, **kwargs):
     
     # Create and execute
     # Warn about old API
-    warnOnV1MethodCall(inspect.currentframe().f_back)
+    warnOnV1MethodCall(inspect.currentframe().f_back, identifier="Load")
     algm = mtd.createAlgorithm('Load')
     algm.setPropertyValue('Filename', filename) # Must be set first
     algm.setPropertyValue('OutputWorkspace', wkspace)
@@ -246,7 +246,7 @@ def LoadDialog(*args, **kwargs):
     if 'Message' not in arguments: arguments['Message']=''
 
     # Warn about old API
-    warnOnV1MethodCall(inspect.currentframe().f_back)
+    warnOnV1MethodCall(inspect.currentframe().f_back, identifier="LoadDialog")
     algm = mtd.createAlgorithm('Load')
     algm.setPropertiesDialog(**arguments)
     algm.execute()
@@ -273,7 +273,7 @@ def Fit(*args, **kwargs):
     
     # Create and execute
     # Warn about old API
-    warnOnV1MethodCall(inspect.currentframe().f_back)
+    warnOnV1MethodCall(inspect.currentframe().f_back, identifier="Fit")
     algm = mtd.createAlgorithm('Fit')
     algm.setPropertyValue('Function', str(Function)) # Must be set first
     algm.setPropertyValue('InputWorkspace', str(InputWorkspace))
@@ -323,7 +323,7 @@ def FitDialog(*args, **kwargs):
     if 'Message' not in arguments: arguments['Message']=''
 
     # Warn about old API
-    warnOnV1MethodCall(inspect.currentframe().f_back)
+    warnOnV1MethodCall(inspect.currentframe().f_back, identifier="FitDialog")
     algm = mtd.createAlgorithm('Fit')
     algm.setPropertiesDialog(**arguments)
     algm.execute()

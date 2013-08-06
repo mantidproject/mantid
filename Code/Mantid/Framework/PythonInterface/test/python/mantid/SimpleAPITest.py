@@ -121,9 +121,8 @@ PreserveEvents(Input) *boolean*       Keep the output workspace as an EventWorks
     def test_function_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
         ws1 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
         ws2 = simpleapi.CreateWorkspace([1.5],[1.5],NSpec=1,UnitX='Wavelength')
-        # GroupWorkspaces defines extra properties for each workspace added at runtime
-        wsgroup,ws1a,ws2a = simpleapi.GroupWorkspaces(InputWorkspaces="ws1,ws2")
-        self.assertTrue(isinstance(wsgroup, WorkspaceGroup))
+        # RenameWorkspaces defines extra properties for each workspace renamed at runtime
+        ws1a,ws2a = simpleapi.RenameWorkspaces(InputWorkspaces="ws1,ws2",WorkspaceNames="ws1a,ws2a")
         self.assertTrue(isinstance(ws1a, MatrixWorkspace))
         self.assertTrue(isinstance(ws2a, MatrixWorkspace))
         

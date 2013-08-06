@@ -224,30 +224,6 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QCheckBox" name="visibleCheck">
-      <property name="geometry">
-       <rect>
-        <x>350</x>
-        <y>250</y>
-        <width>70</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>10</pointsize>
-       </font>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::RightToLeft</enum>
-      </property>
-      <property name="text">
-       <string>Visible</string>
-      </property>
-      <property name="checked">
-       <bool>true</bool>
-      </property>
-     </widget>
      <widget class="QLabel" name="label_7">
       <property name="geometry">
        <rect>
@@ -2134,7 +2110,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>argumentsText</tabstop>
   <tabstop>saveUsingText</tabstop>
   <tabstop>saveParametersText</tabstop>
-  <tabstop>visibleCheck</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
  <resources/>

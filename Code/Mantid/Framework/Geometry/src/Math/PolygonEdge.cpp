@@ -49,11 +49,11 @@ namespace Mantid
       double sa = a.X() * b.Y() - b.X() * a.Y();
       if(sa > 0.0)
       {
-        return Left;
+        return OnLeft;
       }
       if(sa < 0.0)
       {
-        return Right;
+        return OnRight;
       }
       if((a.X() * b.X() < 0.0) || (a.Y() * b.Y() < 0.0))
       {
@@ -90,7 +90,7 @@ namespace Mantid
       if( Kernel::equals(denom, 0.0) )
       {
         PointClassification edgeClass = classify(focusEdge.start(), refEdge);
-        if( edgeClass == Left || edgeClass == Right )
+        if( edgeClass == OnLeft || edgeClass == OnRight )
         {
           return PolygonEdge::Parallel;
         }
@@ -178,11 +178,11 @@ namespace Mantid
         double cb = vb.X() * va.Y();
         if( Kernel::gtEquals(ca, cb) )
         {
-          return (aclass != Right);
+          return (aclass != OnRight);
         }
         else
         {
-          return (aclass != Left);
+          return (aclass != OnLeft);
         }
       }
       else

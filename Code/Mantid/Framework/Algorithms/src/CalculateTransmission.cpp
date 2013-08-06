@@ -28,6 +28,9 @@ Uses the algorithm [[linear]] to fit to the calculated transmission fraction.
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
+
 #include <cmath>
 
 namespace Mantid
@@ -308,11 +311,16 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
 {
   g_log.information("Fitting the experimental transmission curve");
   double start = m_done;
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Linear", start, m_done=0.9);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done=0.9);
+  auto linearBack = API::FunctionFactory::Instance().createFunction("LinearBackground");
+  childAlg->setProperty("Function",linearBack);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
+  childAlg->setProperty("Minimizer","Levenberg-MarquardtMD");
+  childAlg->setProperty("CreateOutput",true);
+childAlg->setProperty("IgnoreInvalidData",true);
   childAlg->executeAsChildAlg();
 
-  std::string fitStatus = childAlg->getProperty("FitStatus");
+  std::string fitStatus = childAlg->getProperty("OutputStatus");
   if ( fitStatus != "success" )
   {
     g_log.error("Unable to successfully fit the data: " + fitStatus);
@@ -320,10 +328,9 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
   }
  
   // Only get to here if successful
-  offset = childAlg->getProperty("FitIntercept");
-  grad = childAlg->getProperty("FitSlope");
-  
-  return childAlg->getProperty("OutputWorkspace");
+  offset = linearBack->getParameter(0);
+  grad = linearBack->getParameter(1);
+  return this->extractSpectrum(childAlg->getProperty("OutputWorkspace"),1);
 }
 /** Calls rebin as Child Algorithm
 *  @param binParams this string is passed to rebin as the "Params" property

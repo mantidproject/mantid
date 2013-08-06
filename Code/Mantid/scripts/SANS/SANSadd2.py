@@ -117,7 +117,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             wsOut.setY(i,wsInMonitor.dataY(i))
             wsOut.setE(i,wsInMonitor.dataE(i))               
                 
-        for i in range(wsOut.getNumberHistograms()):
+        for i in range(wsOut.getNumberHistograms() - mon_n):
             wsOut.setY(i+mon_n, wsInDetector.dataY(i))
             wsOut.setE(i+mon_n, wsInDetector.dataE(i))
                        
@@ -194,15 +194,9 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
 
   if period != _NO_INDIVIDUAL_PERIODS:
       #load just a single period
-      if ext == ".nxs" or ext == ".NXS":
-        outWs = LoadNexus( Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
-      else:   
-        outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)     
+      outWs = Load(Filename=filename, OutputWorkspace=wsName, EntryNumber=period)
   else:
-      if ext == ".nxs" or ext == ".NXS":
-        outWs = LoadNexus(Filename=filename,OutputWorkspace=wsName)
-      else:
-        outWs = Load(Filename=filename,OutputWorkspace=wsName)
+      outWs = Load(Filename=filename,OutputWorkspace=wsName)
 
   props = outWs.getHistory().lastAlgorithm()
 

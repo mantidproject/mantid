@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/SofQCommon.h"
 
 namespace Mantid
 {
@@ -75,6 +75,8 @@ private:
   void init();
   /// Execution code
   void exec();
+
+  SofQCommon  m_EmodeProperties;
 
 };
 

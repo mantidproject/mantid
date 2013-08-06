@@ -13,6 +13,7 @@
 
 
 using namespace Mantid::MDEvents;
+using namespace Mantid::API;
 
 class ReflectometryTransformKiKfTest : public CxxTest::TestSuite
 {

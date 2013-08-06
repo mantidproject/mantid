@@ -67,7 +67,7 @@ def resolution(files, iconOpt, rebinParam, bground,
     iconWS = reducer.get_result_workspaces()[0]
     if Res:
         name = getWSprefix(iconWS) + 'res'
-        FlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
+        CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
             Mode='Mean', OutputMode='Subtract Background')
         Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
         DeleteWorkspace(iconWS)
@@ -111,7 +111,7 @@ def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=True,
             Integration(InputWorkspace=root, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
                 StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
         else:
-            FlatBackground(InputWorkspace=root, OutputWorkspace=sfile, StartX=xrange[2], EndX=xrange[3], 
+            CalculateFlatBackground(InputWorkspace=root, OutputWorkspace=sfile, StartX=xrange[2], EndX=xrange[3], 
                     Mode='Mean')
             Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
                 StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)

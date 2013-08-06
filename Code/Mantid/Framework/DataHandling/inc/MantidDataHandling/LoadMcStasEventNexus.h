@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 
 namespace Mantid
 {
@@ -32,7 +32,7 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMcStasEventNexus  : public API::IHDFFileLoader
+  class DLLExport LoadMcStasEventNexus  : public API::IFileLoader<Kernel::NexusDescriptor>
   {
   public:
     LoadMcStasEventNexus();
@@ -43,7 +43,7 @@ namespace DataHandling
     virtual const std::string category() const;
 
     /// Returns a confidence value that this algorithm can load a file
-    virtual int confidence(Kernel::HDFDescriptor & descriptor) const;
+    virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
   private:
     virtual void initDocs();

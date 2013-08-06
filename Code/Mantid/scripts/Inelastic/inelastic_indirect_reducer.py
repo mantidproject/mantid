@@ -52,7 +52,7 @@ class IndirectReducer(MSGReducer):
         step = steps.HandleMonitor(MultipleFrames=self._multiple_frames)
         self.append_step(step)
         
-        # "BackgroundOperations" just does a FlatBackground at the moment,
+        # "BackgroundOperations" just does a CalculateFlatBackground at the moment,
         # will be extended for SNS stuff
         if (self._background_start is not None and
                 self._background_end is not None):

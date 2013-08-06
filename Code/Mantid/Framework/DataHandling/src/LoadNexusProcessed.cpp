@@ -60,7 +60,7 @@ namespace DataHandling
 {
 
 // Register the algorithm into the algorithm factory
-DECLARE_HDF_FILELOADER_ALGORITHM(LoadNexusProcessed);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed);
 
 /// Sets documentation strings for this algorithm
 void LoadNexusProcessed::initDocs()
@@ -93,7 +93,7 @@ LoadNexusProcessed::~LoadNexusProcessed()
  * @param descriptor A descriptor for the file
  * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-int LoadNexusProcessed::confidence(Kernel::HDFDescriptor & descriptor) const
+int LoadNexusProcessed::confidence(Kernel::NexusDescriptor & descriptor) const
 {
   if(descriptor.pathExists("/mantid_workspace_1")) return 80;
   else return 0;
@@ -986,12 +986,10 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   //Read necessary arrays from the file
   // Detector list contains a list of all of the detector numbers. If it not present then we can't update the spectra
   // map
-  int ndets(-1);
   boost::shared_array<int> det_list(new int);
   try
   {
     NXInt detlist_group = detgroup.openNXInt("detector_list");
-    ndets = detlist_group.dim0();
     detlist_group.load();
     det_list.swap(detlist_group.sharedBuffer());
   }
@@ -1050,7 +1048,6 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
 
         int start = det_index[i-1];
         int end = start + det_count[i-1];
-        assert( end <= ndets );
         spec->setDetectorIDs(std::set<detid_t>(det_list.get()+start,det_list.get()+end));
       }
   }

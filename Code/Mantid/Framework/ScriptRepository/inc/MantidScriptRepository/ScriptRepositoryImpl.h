@@ -179,6 +179,7 @@ namespace API{
 
     std::string ignoreregex;    
 
+    bool getProxyConfig(std::string&, unsigned short&); 
   };
   
 }; // namespace API

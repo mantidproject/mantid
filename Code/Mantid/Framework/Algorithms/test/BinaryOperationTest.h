@@ -34,7 +34,7 @@ public:
   /// function to return a category of the algorithm. A default implementation is provided
   virtual const std::string category() const {return "Helper";}
 
-  bool checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
+  std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
   {
     m_lhs = ws1;
     m_rhs = ws2;
@@ -68,11 +68,11 @@ public:
     Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     BinaryOpHelper helper;
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6).empty());
   }
 
   void testcheckSizeCompatibility2D1D()
@@ -88,13 +88,13 @@ public:
     //will not pass x array does not match
     MatrixWorkspace_sptr work_inEvent2 = WorkspaceCreationHelper::CreateEventWorkspace(1,10);
     BinaryOpHelper helper;
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent1));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent2));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent1).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent2).empty());
   }
 
   void testcheckSizeCompatibility2D2D()
@@ -110,13 +110,13 @@ public:
     MatrixWorkspace_sptr work_inEvent1 = WorkspaceCreationHelper::CreateEventWorkspace(5,5);
     MatrixWorkspace_sptr work_inEvent2 = WorkspaceCreationHelper::CreateEventWorkspace(10,10);
     BinaryOpHelper helper;
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent1));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent2));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_inEvent1).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_inEvent2).empty());
   }
 
   void testMaskedSpectraPropagation()

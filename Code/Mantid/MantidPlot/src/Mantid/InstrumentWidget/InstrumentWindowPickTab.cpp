@@ -5,6 +5,7 @@
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
 #include "UnwrappedSurface.h"
+#include "Projection3D.h"
 #include "PeakMarker2D.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -39,6 +40,7 @@
 #include <QSignalMapper>
 #include <QPixmap>
 #include <QSettings>
+#include <QApplication>
 
 #include <numeric>
 #include <cfloat>
@@ -160,6 +162,36 @@ m_freezePlot(false)
   m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
   m_tube->setToolTip("Select whole tube");
 
+  m_rectangle = new QPushButton();
+  m_rectangle->setCheckable(true);
+  m_rectangle->setAutoExclusive(true);
+  m_rectangle->setIcon(QIcon(":/PickTools/selection-box.png"));
+  m_rectangle->setToolTip("Draw a rectangle");
+
+  m_ellipse = new QPushButton();
+  m_ellipse->setCheckable(true);
+  m_ellipse->setAutoExclusive(true);
+  m_ellipse->setIcon(QIcon(":/PickTools/selection-circle.png"));
+  m_ellipse->setToolTip("Draw a ellipse");
+
+  m_ring_ellipse = new QPushButton();
+  m_ring_ellipse->setCheckable(true);
+  m_ring_ellipse->setAutoExclusive(true);
+  m_ring_ellipse->setIcon(QIcon(":/PickTools/selection-circle-ring.png"));
+  m_ring_ellipse->setToolTip("Draw an elliptical ring");
+
+  m_ring_rectangle = new QPushButton();
+  m_ring_rectangle->setCheckable(true);
+  m_ring_rectangle->setAutoExclusive(true);
+  m_ring_rectangle->setIcon(QIcon(":/PickTools/selection-box-ring.png"));
+  m_ring_rectangle->setToolTip("Draw a rectangular ring");
+
+  m_edit = new QPushButton();
+  m_edit->setCheckable(true);
+  m_edit->setAutoExclusive(true);
+  m_edit->setIcon(QIcon(":/PickTools/selection-edit.png"));
+  m_edit->setToolTip("Edit a shape");
+
   m_peak = new QPushButton();
   m_peak->setCheckable(true);
   m_peak->setAutoExclusive(true);
@@ -172,19 +204,29 @@ m_freezePlot(false)
   m_peakSelect->setIcon(QIcon(":/PickTools/eraser.png"));
   m_peakSelect->setToolTip("Erase single crystal peak(s)");
 
-  QHBoxLayout* toolBox = new QHBoxLayout();
-  toolBox->addWidget(m_zoom);
-  toolBox->addWidget(m_one);
-  toolBox->addWidget(m_tube);
-  toolBox->addWidget(m_peak);
-  toolBox->addWidget(m_peakSelect);
-  toolBox->addStretch();
+  QGridLayout* toolBox = new QGridLayout();
+  toolBox->addWidget(m_zoom,0,0);
+  toolBox->addWidget(m_edit,0,1);
+  toolBox->addWidget(m_ellipse,0,2);
+  toolBox->addWidget(m_rectangle,0,3);
+  toolBox->addWidget(m_ring_ellipse,0,4);
+  toolBox->addWidget(m_ring_rectangle,0,5);
+  toolBox->addWidget(m_one,1,0);
+  toolBox->addWidget(m_tube,1,1);
+  toolBox->addWidget(m_peak,1,2);
+  toolBox->addWidget(m_peakSelect,1,3);
+  toolBox->setColStretch(6,1);
   toolBox->setSpacing(2);
   connect(m_zoom,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_one,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_tube,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_peak,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_peakSelect,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_rectangle,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_ellipse,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_ring_ellipse,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_ring_rectangle,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_edit,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   setSelectionType();
 
   // lay out the widgets
@@ -347,7 +389,16 @@ void InstrumentWindowPickTab::plotContextMenu()
   if (m_selectionType > SingleDetectorSelection)
   {// only for multiple detector selectors
     context.addActions(m_summationType->actions());
-    m_sumDetectors->setChecked(m_plotSum);
+    if ( m_selectionType == Draw )
+    {
+        m_sumDetectors->setChecked(true);
+        m_integrateTimeBins->setEnabled(false);
+    }
+    else
+    {
+        m_sumDetectors->setChecked(m_plotSum);
+        m_integrateTimeBins->setEnabled(true);
+    }
     context.addSeparator();
   }
 
@@ -460,55 +511,6 @@ void InstrumentWindowPickTab::updatePick(int detid)
 {
   updateSelectionInfo(detid); // Also calls updatePlot
   m_currentDetID = detid;
-}
-
-/**
- * Find the offsets in the spectrum's x vector of the bounds of integration.
- * @param wi :: The works[ace index of the spectrum.
- * @param imin :: Index of the lower bound: x_min == readX(wi)[imin]
- * @param imax :: Index of the upper bound: x_max == readX(wi)[imax]
- */
-void InstrumentWindowPickTab::getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax)
-{
-  InstrumentActor* instrActor = m_instrWindow->getInstrumentActor();
-  Mantid::API::MatrixWorkspace_const_sptr ws = instrActor->getWorkspace();
-  const Mantid::MantidVec& x = ws->readX(wi);
-  Mantid::MantidVec::const_iterator x_begin = x.begin();
-  Mantid::MantidVec::const_iterator x_end = x.end();
-  if (x_begin == x_end)
-  {
-    throw std::runtime_error("No bins found to plot");
-  }
-  if (ws->isHistogramData())
-  {
-    --x_end;
-  }
-  if (instrActor->wholeRange())
-  {
-    imin = 0;
-    imax = static_cast<size_t>(x_end - x_begin);
-  }
-  else
-  {
-    Mantid::MantidVec::const_iterator x_from = std::lower_bound(x_begin,x_end,instrActor->minBinValue());
-    Mantid::MantidVec::const_iterator x_to = std::upper_bound(x_begin,x_end,instrActor->maxBinValue());
-    imin = static_cast<size_t>(x_from - x_begin);
-    imax = static_cast<size_t>(x_to - x_begin);
-    if (imax <= imin)
-    {
-      if (x_from == x_end)
-      {
-        --x_from;
-        x_to = x_end;
-      }
-      else
-      {
-        x_to = x_from + 1;
-      }
-      imin = static_cast<size_t>(x_from - x_begin);
-      imax = static_cast<size_t>(x_to - x_begin);
-    }
-  }
 }
 
 /**
@@ -652,14 +654,56 @@ void InstrumentWindowPickTab::setSelectionType()
     m_activeTool->setText("Tool: Erase crystal peak(s)");
     surfaceMode = ProjectionSurface::EraseMode;
   }
+  else if (m_rectangle->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Rectangle");
+    surfaceMode = ProjectionSurface::DrawMode;
+    m_instrWindow->getSurface()->startCreatingShape2D("rectangle",Qt::green,QColor(255,255,255,80));
+  }
+  else if (m_ellipse->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Ellipse");
+    surfaceMode = ProjectionSurface::DrawMode;
+    m_instrWindow->getSurface()->startCreatingShape2D("ellipse",Qt::green,QColor(255,255,255,80));
+  }
+  else if (m_ring_ellipse->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Elliptical ring");
+    surfaceMode = ProjectionSurface::DrawMode;
+    m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",Qt::green,QColor(255,255,255,80));
+  }
+  else if (m_ring_rectangle->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Rectangular ring");
+    surfaceMode = ProjectionSurface::DrawMode;
+    m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",Qt::green,QColor(255,255,255,80));
+  }
+  else if (m_edit->isChecked())
+  {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Shape editing");
+    surfaceMode = ProjectionSurface::DrawMode;
+  }
   auto surface = m_instrWindow->getSurface();
   if ( surface ) 
   {
     surface->setInteractionMode( surfaceMode );
+    auto interactionMode = surface->getInteractionMode();
+    if ( interactionMode == ProjectionSurface::DrawMode || interactionMode == ProjectionSurface::MoveMode )
+    {
+        updatePlotMultipleDetectors();
+    }
+    else
+    {
+        m_plot->clearAll();
+        m_plot->replot();
+        setPlotCaption();
+    }
   }
-  m_plot->clearAll();
-  m_plot->replot();
-  setPlotCaption();
   m_instrWindow->updateInfoText();
 }
 
@@ -757,6 +801,7 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
   setSelectionType();
   // make sure picking updated
   m_instrWindow->updateInstrumentView(true);
+  m_instrWindow->getSurface()->changeBorderColor( getShapeBorderColor() );
 }
 
 /**
@@ -817,7 +862,7 @@ void InstrumentWindowPickTab::prepareDataForSinglePlot(
 
   // find min and max for x
   size_t imin,imax;
-  getBinMinMaxIndex(wi,imin,imax);
+  instrActor->getBinMinMaxIndex(wi,imin,imax);
 
   x.assign(X.begin() + imin,X.begin() + imax);
   y.assign(Y.begin() + imin,Y.begin() + imax);
@@ -860,7 +905,7 @@ void InstrumentWindowPickTab::prepareDataForSumsPlot(
     return; // Detector doesn't have a workspace index relating to it
   }
   size_t imin,imax;
-  getBinMinMaxIndex(wi,imin,imax);
+  instrActor->getBinMinMaxIndex(wi,imin,imax);
 
   const Mantid::MantidVec& X = ws->readX(wi);
   x.assign(X.begin() + imin, X.begin() + imax);
@@ -943,7 +988,7 @@ void InstrumentWindowPickTab::prepareDataForIntegralsPlot(
   }
   // imin and imax give the bin integration range
   size_t imin,imax;
-  getBinMinMaxIndex(wi,imin,imax);
+  instrActor->getBinMinMaxIndex(wi,imin,imax);
 
   const int n = ass->nelements();
   if (n == 0)
@@ -1069,6 +1114,15 @@ QString InstrumentWindowPickTab::getNonDetectorInfo()
     return text;
 }
 
+/**
+ * Get the color of the overlay shapes in this tab.
+ * @return
+ */
+QColor InstrumentWindowPickTab::getShapeBorderColor() const
+{
+    return QColor( Qt::green );
+}
+
 
 /**
  * Save data plotted on the miniplot into a MatrixWorkspace.
@@ -1099,7 +1153,14 @@ void InstrumentWindowPickTab::savePlotToWorkspace()
     std::vector<double> x,y,e;
     // split the label to get the detector id and selection type 
     QStringList parts = label.split(QRegExp("[()]"));
-    if (parts.size() == 3)
+    if ( label == "multiple" )
+    {
+        QList<int> dets;
+        getSurface()->getMaskedDetectors( dets );
+        m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y );
+        unitX = parentWorkspace->getAxis(0)->unit()->unitID();
+    }
+    else if (parts.size() == 3)
     {
       int detid = parts[1].toInt();
       QString SumOrIntegral = parts[2].trimmed();
@@ -1193,6 +1254,15 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
 {
   m_plot->clearAll();
   m_plot->replot();
+  auto surface = m_instrWindow->getSurface();
+  if ( surface )
+  {
+    auto interactionMode = surface->getInteractionMode();
+    if ( interactionMode == ProjectionSurface::DrawMode || interactionMode == ProjectionSurface::MoveMode )
+    {
+        updatePlotMultipleDetectors();
+    }
+  }
 }
 
 /**
@@ -1213,6 +1283,15 @@ void InstrumentWindowPickTab::initSurface()
     connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
     connect(surface,SIGNAL(peaksWorkspaceAdded()),this,SLOT(updateSelectionInfoDisplay()));
     connect(surface,SIGNAL(peaksWorkspaceDeleted()),this,SLOT(updateSelectionInfoDisplay()));
+    connect(surface,SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
+    connect(surface,SIGNAL(shapeChangeFinished()),this,SLOT(updatePlotMultipleDetectors()));
+    connect(surface,SIGNAL(shapesCleared()),this,SLOT(updatePlotMultipleDetectors()));
+    connect(surface,SIGNAL(shapesRemoved()),this,SLOT(updatePlotMultipleDetectors()));
+    Projection3D *p3d = dynamic_cast<Projection3D*>( surface );
+    if ( p3d )
+    {
+        connect(p3d,SIGNAL(finishedMove()),this,SLOT(updatePlotMultipleDetectors()));
+    }
 }
 
 /**
@@ -1271,6 +1350,12 @@ void InstrumentWindowPickTab::selectTool(const ToolType tool)
     break;
   case PeakErase: m_peakSelect->setChecked(true);
     break;
+  case DrawRectangle: m_rectangle->setChecked(true);
+    break;
+  case DrawEllipse: m_ellipse->setChecked(true);
+    break;
+  case EditShape: m_edit->setChecked(true);
+    break;
   default: throw std::invalid_argument("Invalid tool type.");
   }
   setSelectionType();
@@ -1281,7 +1366,6 @@ void InstrumentWindowPickTab::singleDetectorTouched(int detid)
 {
   if (canUpdateTouchedDetector())
   {
-    //mInteractionInfo->setText(cursorPos.display());
     updatePick(detid);
   }
 }
@@ -1298,5 +1382,41 @@ void InstrumentWindowPickTab::singleDetectorPicked(int detid)
 void InstrumentWindowPickTab::updateSelectionInfoDisplay()
 {
     updateSelectionInfo(m_currentDetID);
+}
+
+/**
+ * Respond to the shapeCreated signal from the surface.
+ */
+void InstrumentWindowPickTab::shapeCreated()
+{
+    selectTool( EditShape );
+}
+
+/**
+ * Update the mini-plot with information from multiple detector
+ * selected with drawn shapes.
+ */
+void InstrumentWindowPickTab::updatePlotMultipleDetectors()
+{
+    if ( !isVisible() ) return;
+    ProjectionSurface &surface = *getSurface();
+    m_plot->clearAll();
+    if ( !surface.hasMasks() )
+    {
+        m_plot->replot();
+        return;
+    }
+    QList<int> dets;
+    surface.getMaskedDetectors( dets );
+    std::vector<double> x,y;
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    m_instrWindow->getInstrumentActor()->sumDetectors( dets, x, y );
+    QApplication::restoreOverrideCursor();
+    if ( !x.empty() )
+    {
+        m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()), m_instrWindow->getInstrumentActor()->getWorkspace()->getAxis(0)->unit()->unitID());
+    }
+    m_plot->setLabel("multiple");
+    m_plot->replot();
 }
 

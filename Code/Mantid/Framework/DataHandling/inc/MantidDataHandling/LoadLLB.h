@@ -2,8 +2,9 @@
 #define MANTID_DATAHANDLING_LOADLLB_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidDataHandling/LoadHelper.h"
 
 namespace Mantid
 {
@@ -32,7 +33,7 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadLLB: public API::IHDFFileLoader  {
+class DLLExport LoadLLB: public API::IFileLoader<Kernel::NexusDescriptor>  {
 public:
 	LoadLLB();
 	virtual ~LoadLLB();
@@ -42,33 +43,30 @@ public:
 	virtual const std::string category() const;
 
     /// Returns a confidence value that this algorithm can load a file
-    virtual int confidence(Kernel::HDFDescriptor & descriptor) const;
+    virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
 	virtual void initDocs();
 	void init();
 	void exec();
 	void setInstrumentName(NeXus::NXEntry& entry);
-	std::string getInstrumentName(NeXus::NXEntry& entry) const;
 	void initWorkSpace(NeXus::NXEntry&);
 	void loadTimeDetails(NeXus::NXEntry& entry);
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry&);
 	int getDetectorElasticPeakPosition(const NeXus::NXFloat&);
 	std::vector<double> getTimeBinning(int, double);
-	double getL1();
-	double getL2(int detId = 1);
-	double calculateTOF(double);
 	/// Calculate error for y
 	static double calculateError(double in) {
 		return sqrt(in);
 	}
 	void loadExperimentDetails(NeXus::NXEntry&);
 	void loadRunDetails(NeXus::NXEntry &);
-	double calculateEnergy(double);
 	void runLoadInstrument();
 
-	std::vector<std::string> supportedInstruments;
+	std::vector<std::string> m_supportedInstruments;
 	std::string m_instrumentName;
+	std::string m_instrumentPath;///< Name of the instrument path
+
 	API::MatrixWorkspace_sptr m_localWorkspace;
 	size_t m_numberOfTubes; // number of tubes - X
 	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
@@ -76,6 +74,8 @@ private:
 	size_t m_numberOfHistograms;
 	double m_wavelength;
 	double m_channelWidth;
+
+	LoadHelper m_loader;
 
 };
 

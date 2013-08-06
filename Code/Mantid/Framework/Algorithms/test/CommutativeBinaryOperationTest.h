@@ -22,7 +22,7 @@ public:
   virtual const std::string name() const { return "CommutativeBinaryOperationHelper"; }
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return 1; }
-  bool checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
+  std::string checkSizeCompatibility(const MatrixWorkspace_const_sptr ws1,const MatrixWorkspace_const_sptr ws2)
   {
     m_lhs = ws1;
     m_rhs = ws2;
@@ -55,7 +55,7 @@ private:
     UNUSED_ARG(rhsE);
     UNUSED_ARG(YOut);
     UNUSED_ARG(EOut);
-  }
+  } 
 };
 
 class CommutativeBinaryOperationTest : public CxxTest::TestSuite
@@ -72,11 +72,11 @@ public:
     MatrixWorkspace_sptr work_in5 = WorkspaceCreationHelper::Create1DWorkspaceFib(3);
     MatrixWorkspace_sptr work_in6 = WorkspaceCreationHelper::Create1DWorkspaceFib(1);
     CommutativeBinaryOpHelper helper;
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6).empty());
   }
 
   void testcheckSizeCompatibility2D1D()
@@ -91,14 +91,14 @@ public:
     MatrixWorkspace_sptr work_event1 = WorkspaceCreationHelper::CreateEventWorkspace(10,1);
     MatrixWorkspace_sptr work_event2 = WorkspaceCreationHelper::CreateEventWorkspace(1,10);
     CommutativeBinaryOpHelper helper;
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event1));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in6).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event1).empty());
     //bin boundaries will not match
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_event2));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_event2).empty());
   }
 
 
@@ -115,15 +115,15 @@ public:
     MatrixWorkspace_sptr work_event1 = WorkspaceCreationHelper::CreateEventWorkspace(10,1);
     MatrixWorkspace_sptr work_event2 = WorkspaceCreationHelper::CreateEventWorkspace(10,10);
     CommutativeBinaryOpHelper helper;
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5));
-    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in7));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in7,work_in1));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event1));
-    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event2));
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in2).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in3).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in4).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in5).empty());
+    TS_ASSERT(!helper.checkSizeCompatibility(work_in1,work_in6).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_in7).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in7,work_in1).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event1).empty());
+    TS_ASSERT(helper.checkSizeCompatibility(work_in1,work_event2).empty());
   }
 
   void checkOutputWorkspace(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsIn1,MatrixWorkspace_sptr wsIn2 ) const

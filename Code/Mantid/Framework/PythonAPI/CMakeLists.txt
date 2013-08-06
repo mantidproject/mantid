@@ -50,7 +50,6 @@ set ( TEST_PY_FILES
   MDHistoWorkspaceTest.py
   NumpyTest.py
   PythonAlgorithmTest.py
-  RunOldPythonScriptTest.py
   SANSMaskCommandsTest.py
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py

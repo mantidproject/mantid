@@ -21,7 +21,7 @@ import sans_reduction_steps
 import sns_reduction_steps
 from reduction.find_data import find_data
 
-import mantidsimple
+import mantid.simpleapi as api
 
 def EQSANS(keep_events=False, property_manager=None):
     Clear(EqSansReducer)
@@ -39,13 +39,13 @@ def FrameSkipping(value=False):
     
 def DarkCurrent(datafile):
     datafile = find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_dark_current_subtracter(mantidsimple.EQSANSDarkCurrentSubtraction, 
+    ReductionSingleton().set_dark_current_subtracter(api.EQSANSDarkCurrentSubtraction, 
                                                      InputWorkspace=None, Filename=datafile,
                                                      OutputWorkspace=None,
                                                      ReductionProperties=ReductionSingleton().get_reduction_table_name())
 
 def TotalChargeNormalization(normalize_to_beam=True, beam_file=''):
-    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, InputWorkspace=None, 
+    ReductionSingleton().set_normalizer(api.EQSANSNormalise, InputWorkspace=None, 
                                         NormaliseToBeam=normalize_to_beam, 
                                         BeamSpectrumFile=beam_file,
                                         OutputWorkspace=None,
@@ -59,7 +59,7 @@ def MonitorNormalization(normalize_to_beam=True, beam_file=''):
 def BeamMonitorNormalization(reference_flux_file):
     find_data(reference_flux_file, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_data_loader().load_monitors(True)
-    ReductionSingleton().set_normalizer(mantidsimple.EQSANSNormalise, 
+    ReductionSingleton().set_normalizer(api.EQSANSNormalise, 
                                         InputWorkspace=None,
                                         BeamSpectrumFile=reference_flux_file,
                                         NormaliseToMonitor=True,
@@ -134,7 +134,7 @@ def BckCombineTransmissionFits(combine_frames):
     ReductionSingleton().get_background().get_transmission_calculator().set_combine_frames(combine_frames)
     
 def IQxQy(nbins=100):
-    ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, None, NumberOfBins=nbins)
+    ReductionSingleton().set_IQxQy(api.EQSANSQ2D, None, NumberOfBins=nbins)
     
 def SaveIqAscii(process=None):
     ReductionSingleton().set_save_Iq(sns_reduction_steps.SaveIqAscii(process=process))

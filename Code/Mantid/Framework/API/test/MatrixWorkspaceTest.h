@@ -557,6 +557,16 @@ public:
     TSM_ASSERT("If any detector is not masked, return false", !inst->isDetectorMasked(dets) );
   }
 
+  void test_hasGroupedDetectors()
+  {
+    auto ws = makeWorkspaceWithDetectors(5, 1);
+    TS_ASSERT_EQUALS( ws->hasGroupedDetectors(), false);
+
+	  ws->getSpectrum(0)->addDetectorID(3);
+    TS_ASSERT_EQUALS( ws->hasGroupedDetectors(), true);
+ 
+  }
+
   void test_getDetectorIDToWorkspaceIndexMap()
   {
     auto ws = makeWorkspaceWithDetectors(5, 1);
@@ -571,7 +581,7 @@ public:
 
     ws->getSpectrum(2)->addDetectorID(99); // Set a second ID on one spectrum
     TS_ASSERT_THROWS( ws->getDetectorIDToWorkspaceIndexMap(true), std::runtime_error );
-    boost::scoped_ptr<detid2index_map> idmap2(ws->getDetectorIDToWorkspaceIndexMap(false));
+    boost::scoped_ptr<detid2index_map> idmap2(ws->getDetectorIDToWorkspaceIndexMap());
     TS_ASSERT_EQUALS( idmap2->size(), 6 );
   }
 
@@ -580,12 +590,39 @@ public:
     auto ws = makeWorkspaceWithDetectors(100, 10);
     std::vector<size_t> out;
     detid_t offset = -1234;
-    TS_ASSERT_THROWS_NOTHING( ws->getDetectorIDToWorkspaceIndexVector(out, offset, false) );
+    TS_ASSERT_THROWS_NOTHING( ws->getDetectorIDToWorkspaceIndexVector(out, offset) );
     TS_ASSERT_EQUALS( offset, 0);
     TS_ASSERT_EQUALS( out.size(), 100);
     TS_ASSERT_EQUALS( out[0], 0);
     TS_ASSERT_EQUALS( out[1], 1);
     TS_ASSERT_EQUALS( out[99], 99);
+
+    // Create some discontinuities and check that the default value is there
+    // Have to create a whole new instrument to keep things consistent, since the detector ID
+    // is stored in at least 3 places
+    auto inst = boost::make_shared<Instrument>("TestInstrument");
+    ws->setInstrument(inst);
+    // We get a 1:1 map by default so the detector ID should match the spectrum number
+    for( size_t i = 0; i < ws->getNumberHistograms(); ++i )
+    {
+      detid_t detid = static_cast<detid_t>(i);
+      // Create a detector for each spectra
+      if ( i == 0 ) detid = -1;
+      if ( i == 99 ) detid = 110;
+      Detector * det = new Detector("pixel", detid, inst.get());
+      inst->add(det);
+      inst->markAsDetector(det);
+      ws->getSpectrum(i)->addDetectorID(detid);
+    }
+    ws->getSpectrum(66)->clearDetectorIDs();
+
+    TS_ASSERT_THROWS_NOTHING( ws->getDetectorIDToWorkspaceIndexVector(out, offset) );
+    TS_ASSERT_EQUALS( offset, 1 );
+    TS_ASSERT_EQUALS( out.size(), 112 );
+    TS_ASSERT_EQUALS( out[66+offset], std::numeric_limits<size_t>::max() );
+    TS_ASSERT_EQUALS( out[99+offset], 99 );
+    TS_ASSERT_EQUALS( out[105+offset], std::numeric_limits<size_t>::max() );
+    TS_ASSERT_EQUALS( out[110+offset], 99 );
   }
 
   void test_getSpectrumToWorkspaceIndexVector()

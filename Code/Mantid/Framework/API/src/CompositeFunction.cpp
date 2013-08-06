@@ -162,6 +162,20 @@ void CompositeFunction::setWorkspace(boost::shared_ptr<const Workspace> ws)
   }
 }
 
+/**
+ * @param workspace :: A workspace to fit to.
+ * @param wi :: An index of a spectrum to fit to.
+ * @param startX :: A start of the fitting region.
+ * @param endX :: An end of the fitting region.
+ */
+void CompositeFunction::setMatrixWorkspace(boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX, double endX)
+{
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+        m_functions[ iFun ]->setMatrixWorkspace( workspace, wi, startX, endX );
+    }
+}
+
 /** Function you want to fit to. 
  *  @param domain :: An instance of FunctionDomain with the function arguments.
  *  @param values :: A FunctionValues instance for storing the calculated values.

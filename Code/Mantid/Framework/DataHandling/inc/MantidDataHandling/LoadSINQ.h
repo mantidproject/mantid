@@ -4,8 +4,9 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/IHDFFileLoader.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidDataHandling/LoadHelper.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -40,7 +41,7 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadSINQ: public API::IHDFFileLoader
+class DLLExport LoadSINQ: public API::IFileLoader<Kernel::NexusDescriptor>
 {
 public:
 	LoadSINQ();
@@ -51,14 +52,13 @@ public:
 	virtual const std::string category() const;
 
 	/// Returns a confidence value that this algorithm can load a file
-  virtual int confidence(Kernel::HDFDescriptor & descriptor) const;
+  virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
 private:
 	virtual void initDocs();
 	void init();
 	void exec();
 	void setInstrumentName(NeXus::NXEntry& entry);
-	std::string getInstrumentName(NeXus::NXEntry& entry, std::string &nexusInstrumentName) const;
 	void initWorkSpace(NeXus::NXEntry&);
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry&);
 	/// Calculate error for y
@@ -69,14 +69,17 @@ private:
 	void loadRunDetails(NeXus::NXEntry &);
 	void runLoadInstrument();
 
-	std::vector<std::string> supportedInstruments;
+	std::vector<std::string> m_supportedInstruments;
 	std::string m_instrumentName;
-	std::string m_nexusInstrumentEntryName;
+	std::string m_instrumentPath;
+;
 	API::MatrixWorkspace_sptr m_localWorkspace;
 	size_t m_numberOfTubes; // number of tubes - X
 	size_t m_numberOfPixelsPerTube; //number of pixels per tube - Y
 	size_t m_numberOfChannels; // time channels - Z
 	size_t m_numberOfHistograms;
+
+	LoadHelper m_loader;
 
 };
 

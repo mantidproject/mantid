@@ -46,60 +46,20 @@
       </widget>
      </item>
      <item>
-      <widget class="QStackedWidget" name="swReflections">
+      <widget class="QLabel" name="set_lbReflection">
+       <property name="text">
+        <string>Reflection</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cbReflection">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="currentIndex">
-        <number>1</number>
-       </property>
-       <widget class="QWidget" name="page_3">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QLabel" name="set_lbReflection">
-           <property name="text">
-            <string>Reflection</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="cbReflection">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="page_4">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
       </widget>
      </item>
      <item>
@@ -177,7 +137,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page">
       <property name="sizePolicy">
@@ -246,7 +206,7 @@
        <item>
         <widget class="QGroupBox" name="gbRebin">
          <property name="title">
-          <string>Rebin in D-Spacing (Leave Blank to Not Rebin)</string>
+          <string>Rebin in D-Spacing (optional)</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_7">
           <item>
@@ -262,7 +222,7 @@
           <item>
            <widget class="QLabel" name="valRebinStart">
             <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
+             <string notr="true">color: rgb(170, 0, 0);</string>
             </property>
             <property name="text">
              <string>*</string>
@@ -282,7 +242,7 @@
           <item>
            <widget class="QLabel" name="valRebinWidth">
             <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
+             <string notr="true">color: rgb(170, 0, 0);</string>
             </property>
             <property name="text">
              <string>*</string>
@@ -302,7 +262,7 @@
           <item>
            <widget class="QLabel" name="valRebinEnd">
             <property name="styleSheet">
-             <string notr="true">color: rgb(255, 0, 0);</string>
+             <string notr="true">color: rgb(170, 0, 0);</string>
             </property>
             <property name="text">
              <string>*</string>

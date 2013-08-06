@@ -53,7 +53,7 @@ namespace Mantid
 	File change history is stored at: <https://github.com/mantidproject/mantid>.
 	Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class DLLExport LoadRawHelper: public API::IFileLoader
+    class DLLExport LoadRawHelper: public API::IFileLoader<Kernel::FileDescriptor>
     {
     public:
       /// Default constructor

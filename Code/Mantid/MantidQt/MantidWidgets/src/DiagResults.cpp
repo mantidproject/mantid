@@ -72,6 +72,8 @@ void DiagResults::updateResults(const QString & testSummary)
   for(int i = 1; i <= NUMTESTS; ++i)
   {
     QString testName = results[i].section(":", 0, 1);
+    std::string tn = testName.toStdString();
+    if (tn[0] == '=')continue;
     QString fieldValues = results[i].section(":", 1);
     QStringList columns = fieldValues.split(QRegExp("\\s+"), QString::SkipEmptyParts);
     Q_ASSERT(columns.size() == 2);

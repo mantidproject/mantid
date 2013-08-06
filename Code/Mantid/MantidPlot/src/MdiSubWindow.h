@@ -129,43 +129,43 @@ public:
 
 public slots:
     //! Returns a pointer to the parent application
-    ApplicationWindow *applicationWindow(){return d_app;};
+    ApplicationWindow *applicationWindow(){return d_app;}
 
 	//! Return the window label
-	QString windowLabel(){return QString(d_label);};
+    QString windowLabel(){return QString(d_label);}
 	//! Set the window label
-	void setWindowLabel(const QString& s) { d_label = s; updateCaption();};
+    void setWindowLabel(const QString& s) { d_label = s; updateCaption();}
 
 	//! Return the window name
-	QString name(){return objectName();};
+    QString name(){return objectName();}
 	//! Set the window name
-	void setName(const QString& s){setObjectName(s); updateCaption();};
+    void setName(const QString& s){setObjectName(s); updateCaption();}
 
 	//! Return the caption policy
-	CaptionPolicy captionPolicy(){return d_caption_policy;};
+    CaptionPolicy captionPolicy(){return d_caption_policy;}
 	//! Set the caption policy
-	void setCaptionPolicy(CaptionPolicy policy) { d_caption_policy = policy; updateCaption(); }
+    void setCaptionPolicy(CaptionPolicy policy) { d_caption_policy = policy; updateCaption(); }
 
 	//! Return the creation date
-	QString birthDate(){return d_birthdate;};
+    QString birthDate(){return d_birthdate;}
 	//! Set the creation date
-	void setBirthDate(const QString& s){d_birthdate = s;};
+    void setBirthDate(const QString& s){d_birthdate = s;}
 
 	//! Return the window status as a string
 	QString aspect();
 	//! Return the window status flag (hidden, normal, minimized or maximized)
-	Status status(){return d_status;};
+    Status status(){return d_status;}
 	//! Set the window status flag (hidden, normal, minimized or maximized)
 	void setStatus(Status s);
 
-	virtual QString saveAsTemplate(const QString& ){return QString();};
+    virtual QString saveAsTemplate(const QString& ){return QString();}
 	// TODO:
 	//! Not implemented yet
-	virtual void restore(const QStringList& ){};
+    virtual void restore(const QStringList& ){}
 
-	virtual void exportPDF(const QString&){};
+    virtual void exportPDF(const QString&){}
 
-	virtual QString saveToString(const QString &, bool = false){return QString();};
+    virtual QString saveToString(const QString &, bool = false){return QString();}
 
 	// TODO: make this return something useful
 	//! Size of the widget as a string
@@ -189,21 +189,21 @@ public slots:
 	//! Filters other object's events (customizes title bar's context menu)
 	bool eventFilter(QObject *object, QEvent *e);
 	//! Returns the pointer to the parent folder of the window
-	Folder* folder(){return d_folder;};
+    Folder* folder(){return d_folder;}
 
 	//! Initializes the pointer to the parent folder of the window
-	void setFolder(Folder* f){d_folder = f;};
+    void setFolder(Folder* f){d_folder = f;}
 
 	FloatingWindow* getFloatingWindow() const;
-  QMdiSubWindow* getDockedWindow() const;
-  QWidget* getWrapperWindow() const;
+    QMdiSubWindow* getDockedWindow() const;
+    QWidget* getWrapperWindow() const;
 
 	void setNormal();
 	void setMinimized();
 	void setMaximized();
 
     //! Returns the size the window had before a change state event to minimized.
-    QSize minRestoreSize(){return d_min_restore_size;};
+    QSize minRestoreSize(){return d_min_restore_size;}
 
 	//! Static function used as a workaround for ASCII files having end line char != '\n'.
 	/*
@@ -217,8 +217,8 @@ public slots:
 	void setconfirmcloseFlag(bool closeflag){d_confirm_close=closeflag;}
 
 	//! Notifies the main application that the window has been modified
-	void notifyChanges(){emit modifiedWindow(this);};
-	virtual void print(){};
+    void notifyChanges(){emit modifiedWindow(this);}
+    virtual void print(){}
 
   bool close();
   void hide();

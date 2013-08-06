@@ -182,7 +182,6 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionValues.h
 	inc/MantidAPI/IFunctionWithLocation.h
-	inc/MantidAPI/IHDFFileLoader.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/ILocatedData.h
 	inc/MantidAPI/IMDEventWorkspace.h

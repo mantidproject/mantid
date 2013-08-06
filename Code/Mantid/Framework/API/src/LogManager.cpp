@@ -455,7 +455,9 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
 
   INSTANTIATE(double);
   INSTANTIATE(int);
+  INSTANTIATE(long);
   INSTANTIATE(uint32_t);
+  INSTANTIATE(uint64_t);
   INSTANTIATE(std::string);
   INSTANTIATE(bool);
 

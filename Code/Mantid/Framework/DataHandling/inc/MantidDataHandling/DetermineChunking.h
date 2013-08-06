@@ -51,8 +51,16 @@ struct DasEvent
     PixelType pid;
 };
 #pragma pack(pop)
+/// Allowed file types
 
-  class DLLExport DetermineChunking : public API::Algorithm
+enum FileType {
+  PRENEXUS_FILE,    ///< PreNeXus files
+  EVENT_NEXUS_FILE, ///< Event NeXus files
+  HISTO_NEXUS_FILE, ///< Histogram NeXus files
+  RAW_FILE          ///< ISIS raw files
+};
+
+class DLLExport DetermineChunking : public API::Algorithm
   {
   public:
     DetermineChunking();
@@ -65,9 +73,8 @@ struct DasEvent
     virtual void initDocs();
     void init();
     void exec();
-    std::string setTopEntryName(std::string m_filename);
-    std::string extension(const std::string& fileName);
-
+    std::string setTopEntryName(std::string filename);
+    FileType getFileType(const std::string& filename);
   };
 
 

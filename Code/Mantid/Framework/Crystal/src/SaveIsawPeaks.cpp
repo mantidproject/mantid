@@ -17,6 +17,7 @@ Save a PeaksWorkspace to a ISAW-style ASCII .peaks file.
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/V3D.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include <fstream>
 #include <Poco/File.h>
 
@@ -75,6 +76,10 @@ namespace Crystal
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
         "Path to an ISAW-style peaks or integrate file to save.");
+
+    declareProperty(new WorkspaceProperty<Workspace2D>("ProfileWorkspace","",Direction::Input, PropertyMode::Optional),
+                    "An optional Workspace2D of profiles from integrating cylinder.");
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -330,6 +335,21 @@ namespace Crystal
 
             out << std::endl;
 
+            Workspace2D_sptr wsProfile2D = getProperty("ProfileWorkspace");
+            if (wsProfile2D)
+            {
+				out <<  "8";
+				const Mantid::MantidVec& yValues = wsProfile2D->readY(wi);
+				for (size_t j=0; j < yValues.size(); j++)
+				{
+					out << std::setw( 8 ) << static_cast<int>(yValues[j]);
+					if ((j+1)%10 == 0)
+					{
+						out << std::endl;
+						if (j+1 != yValues.size())out <<  "8";
+					}
+				}
+            }
             // Count the sequence
             seqNum++;
           }

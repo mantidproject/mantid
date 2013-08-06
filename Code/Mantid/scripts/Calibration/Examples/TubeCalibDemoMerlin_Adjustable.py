@@ -11,11 +11,8 @@
 # which takes a string consisting of the run number of a calibration run number as argument.
 # The workspace with calibrated instrument is saved to a Nexus file
 #
-from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
+import tube
 from tube_calib_fit_params import * # To handle fit parameters
-from ideal_tube import * # For ideal tube
-from tube_calib import *  # For tube calibration functions
-from tube_spec import * # For tube specification class
 import os
 
 def CalibrateMerlin( RunNumber, UsePeakFile=False ):
@@ -40,10 +37,10 @@ def CalibrateMerlin( RunNumber, UsePeakFile=False ):
    ExpectedPositions = [35.0, 512.0, 989.0] # Expected positions of the edges and peak (initial values of fit parameters)
 
    # Set what we want to calibrate (e.g whole intrument or one door )
-   CalibratedComponent = 'MERLIN'  # Calibrate whole instrument 
+   CalibratedComponent = 'MERLIN/door8'  # Calibrate whole instrument 
     
    # Get calibration raw file and integrate it    
-   rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
+   rawCalibInstWS = LoadRaw(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
    print "Integrating Workspace"
    CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
    DeleteWorkspace(rawCalibInstWS)
@@ -51,21 +48,11 @@ def CalibrateMerlin( RunNumber, UsePeakFile=False ):
 
    # == Create Objects needed for calibration ==
 
-   #Create Calibration Table
-   calibrationTable = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
-   calibrationTable.addColumn(type="int",name="Detector ID")  # "Detector ID" column required by ApplyCalbration
-   calibrationTable.addColumn(type="V3D",name="Detector Position")  # "Detector Position" column required by ApplyCalbration
-
-   if(not UsePeakFile):
-      # Specify component to calibrate
-      thisTubeSet = TubeSpec(CalibInstWS)
-      thisTubeSet.setTubeSpecByString(CalibratedComponent)
-      # Get fitting parameters
-      fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth, ThreePointMethod=True )
-
    # Get ideal tube
-   iTube = IdealTube()
-   iTube.constructTubeFor3PointsMethod ( Left, Right, Centre, ActiveLength )
+   # the known positions are given in pixels inside the tubes and transformed to provide the positions
+   # with the center of the tube as the origin
+   knownPositions = ActiveLength*(numpy.array([ Left, Right, Centre])/1024 - 0.5)
+   funcForm = [1,1,1]
 
    print "Created objects needed for calibration."
 
@@ -73,11 +60,25 @@ def CalibrateMerlin( RunNumber, UsePeakFile=False ):
    # also put peaks into PeakFile
    saveDirectory = config['defaultsave.directory']
    peakFileName = "TubeCalibDemoMerlin_Peaks.txt"
+
+   # pass more parameters to tube.calibrate by name
+   extra_options = dict()
+   extra_options['excludeShortTubes']=ActiveLength
+   extra_options['outputPeak']=True
    if(not UsePeakFile):
-      getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength, PeakFile=peakFileName )
+      # Get fitting parameters
+      fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth )
+      fitPar.setAutomatic(True)
+      extra_options['fitPar'] = fitPar
+
+
+   calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPositions, funcForm,
+                                        **extra_options)   
+
+   peakFileName = "TubeCalibDemoMerlin_Peaks.txt"
+   if UsePeakFile:
+      tube.savePeak(peakTable, peakFileName)
       print " Put slit peaks into file",peakFileName, "in save directory",saveDirectory,"." 
-   else:
-      getCalibrationFromPeakFile( CalibInstWS, calibrationTable, iTube, peakFileName )
      
    print "Got calibration (new positions of detectors)"
 

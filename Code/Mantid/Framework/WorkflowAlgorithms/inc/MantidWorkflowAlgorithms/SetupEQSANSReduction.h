@@ -60,7 +60,6 @@ private:
   /// Execution code
   void exec();
   std::string _findFile(std::string dataRun);
-  void initializeReduction(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
   void setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
   void setupTransmission(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
   void setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);

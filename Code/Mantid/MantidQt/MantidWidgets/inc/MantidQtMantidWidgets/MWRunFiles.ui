@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>308</width>
+    <width>444</width>
     <height>34</height>
    </rect>
   </property>
@@ -149,6 +149,22 @@
      </property>
     </widget>
    </item>
+   <item>
+    <widget class="QPushButton" name="liveButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="toolTip">
+      <string>Enabled if a connection can be made to your default instrument</string>
+     </property>
+     <property name="text">
+      <string>Use live stream</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
   </layout>
   <action name="actionDialog">
    <property name="icon">
@@ -163,5 +179,102 @@
  <resources>
   <include location="../../../../Images/images.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>liveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>fileEditor</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>380</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>93</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>liveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>entryNum</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>380</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>134</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>liveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>numEntries</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>380</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>161</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>liveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>valid</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>380</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>178</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>liveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>browseIco</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>380</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>204</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>liveButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>browseBtn</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>380</x>
+     <y>16</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>268</x>
+     <y>16</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
