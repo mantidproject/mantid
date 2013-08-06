@@ -131,6 +131,8 @@ namespace Mantid
       /// Returns the width
       double getWidth() const;  
       //@}
+      /// Delete the oriented lattice
+      void clearOrientedLattice();
 
     private: 
       /// The sample name
