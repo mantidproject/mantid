@@ -245,7 +245,7 @@ namespace MDEventsTestHelper
           MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, max, numBins)),
           MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, max, numBins)),
           MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, max, numBins)),
-          MDHistoDimension_sptr(new MDHistoDimension("t","z","m", 0.0, max, numBins))
+          MDHistoDimension_sptr(new MDHistoDimension("t","t","m", 0.0, max, numBins))
           );
     }
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);

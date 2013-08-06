@@ -28,6 +28,7 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceProperty.cpp
   src/Exports/ITableWorkspace.cpp
   src/Exports/ITableWorkspaceProperty.cpp
+  src/Exports/MDGeometry.cpp
   src/Exports/IMDWorkspace.cpp
   src/Exports/IMDHistoWorkspace.cpp
   src/Exports/IMDHistoWorkspaceProperty.cpp  
