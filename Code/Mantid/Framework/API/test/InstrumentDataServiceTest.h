@@ -21,6 +21,7 @@ public:
 
   InstrumentDataServiceTest() : inst1(new Instrument), inst2(new Instrument)
   {
+    InstrumentDataService::Instance().clear();
   }
 
   void testAdd()
