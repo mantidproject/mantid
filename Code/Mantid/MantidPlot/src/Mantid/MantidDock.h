@@ -80,6 +80,7 @@ private slots:
   void convertMDHistoToMatrixWorkspace();
   void updateTree();
   void incrementUpdateCount();
+  void clearUB();
 
 private:
   void setTreeUpdating(const bool state);
@@ -96,6 +97,7 @@ private:
   void addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr & WS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
+  void addClearMenuItems(QMenu* menu);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
   
@@ -126,7 +128,8 @@ private:
   *m_program, * m_ascendingSortAction,
   *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
   *m_convertToMatrixWorkspace,
-  *m_convertMDHistoToMatrixWorkspace;
+  *m_convertMDHistoToMatrixWorkspace,
+  *m_clearUB;
 
   QAtomicInt m_updateCount;
   bool m_treeUpdating;

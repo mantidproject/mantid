@@ -1493,6 +1493,32 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 }
 
 /**
+* Clears the UB from the selected workspace
+* @param wsName :: selected workspace name
+*/
+void MantidUI::clearUB(const QStringList& wsName)
+{
+  const std::string algName("ClearUB");
+  const int version = -1;
+  for(int i = 0; i < wsName.size(); ++i)
+  {
+    Mantid::API::IAlgorithm_sptr alg;
+    try
+    {
+      alg = Mantid::API::AlgorithmManager::Instance().create(algName, version);
+    }
+    catch(...)
+    {
+      QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+QString::fromStdString(algName)+" version "+QString::number(version));
+      return;
+    }
+    alg->initialize();
+    alg->setPropertyValue("Workspace", wsName[i].toStdString());
+    alg->execute();
+  }
+}
+
+/**
 * Renames selected workspace
 * @param wsName :: selected workspace name
 */
