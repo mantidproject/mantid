@@ -328,14 +328,19 @@ namespace API
             if (prop->direction() == Direction::Input)
             {
               // Input workspace property. Get the text typed in.
+              const std::string propName = otherWidget->getProperty()->name();
+              const std::string WSNAME = otherWidget->getValue().toStdString();
               wsName = otherWidget->getValue();
-              break;
+              if (!wsName.isEmpty())
+              {
+                propWidget->setValue(wsName);
+                break;
+              }
             }
           }
         }
 
-        if (!wsName.isEmpty())
-          propWidget->setValue(wsName);
+
       }
     }
 
