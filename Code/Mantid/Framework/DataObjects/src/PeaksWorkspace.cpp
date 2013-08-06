@@ -264,10 +264,10 @@ namespace Mantid
       int seqNum = -1;
       bool hasOneRunNumber = true;
       int runNum = -1;
-      double minDist = 10000000;
       int NPeaks = getNumberPeaks();
       try
       {
+        double minDist = 10000000;
         for (int i = 0; i < NPeaks; i++)
         {
           Peak pk = getPeak(i);
