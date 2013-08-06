@@ -39,6 +39,7 @@
 
 <component-link name="graphite">
 <parameter name="Efixed"> <value val="7.3812" /> </parameter>
+<parameter name="resolution"> <value val="0.0545" /> </parameter>
 </component-link>
 
 <parameter name="analyser" type="string">

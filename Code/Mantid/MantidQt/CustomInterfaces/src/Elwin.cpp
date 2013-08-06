@@ -150,6 +150,27 @@ namespace IDA
     uiForm().elwin_inputFile->readSettings(settings.group());
   }
 
+  void Elwin::setDefaultResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+  {
+    auto inst = ws->getInstrument();
+    auto analyser = inst->getStringParameter("analyser");
+
+    if(analyser.size() > 0)
+    {
+      auto comp = inst->getComponentByName(analyser[0]);
+      auto params = comp->getNumberParameter("resolution", true);
+
+      //set the default instrument resolution
+      if(params.size() > 0)
+      {
+        double res = params[0];
+        m_elwDblMng->setValue(m_elwProp["R1S"], -res);
+        m_elwDblMng->setValue(m_elwProp["R1E"], res);
+      }
+
+    }
+  }
+
   void Elwin::plotInput()
   {
     if ( uiForm().elwin_inputFile->isValid() )
@@ -157,12 +178,16 @@ namespace IDA
       QString filename = uiForm().elwin_inputFile->getFirstFilename();
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
+
       auto ws = runLoadNexus(filename, wsname);
+
       if(!ws)
       {
         showInformationBox(QString("Unable to load file: ") + filename);
         return;
       }
+
+      setDefaultResolution(ws);
 
       m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, ws, 0);
       try
