@@ -170,9 +170,6 @@ private slots:
    */
   bool isAutoUpdateEnabled();
 
-  /// Assigns a peak picker tool to the workspace.
-  void assignPeakPickerTool(const QString &);
-
   /**
    * Show a plot for a given workspace. Hides previous plot if exists.
    * @param wsName The name of workspace to be plotted. Should exist in ADS.
@@ -304,9 +301,6 @@ private:
 
   /// name of the loaded data
   QString m_currentDataName;
-
-  /// boolean to tell whether the fit property browser has been assigned
-  bool m_assigned;
 
   /// which group table row has the user last clicked on
   int m_groupTableRowInFocus;

@@ -77,10 +77,10 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName("N/A"), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
-  m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), 
-  m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay(""),
-  m_nexusTimeZero(0.0)
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName("N/A"), 
+  m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
+  m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
+  m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
 {
   try
   {
@@ -2096,9 +2096,19 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
 
 void MuonAnalysis::showPlot(const QString& wsName)
 {
-  emit closeGraph(wsName + "-1");
-  plotSpectrum(wsName, 0, false);
-  assignPeakPickerTool(wsName);
+  m_currentDataName = wsName;
+
+  emit closeGraph(m_currentDataName + "-1");
+  plotSpectrum(m_currentDataName, 0, false);
+
+  // Change the plot style of the graph so that it matches what is selected on
+  // the plot options tab.
+  QStringList plotDetails = m_fitDataTab->getAllPlotDetails(m_currentDataName);
+  changePlotType(plotDetails);
+
+  setConnectedDataText();
+
+  emit fittingRequested(m_uiForm.fitBrowser, m_currentDataName + "-1");
 }
 
 /**
@@ -3419,56 +3429,32 @@ void MuonAnalysis::getFullCode(int originalSize, QString & run)
 
 
 /**
-* Everytime the tab is changed this is called to decide whether the peakpicker
-* tool needs to be associated with a plot or deleted from a plot
-*
-* @param tabNumber :: The index value of the current tab (3 = data analysis)
-*/
-void MuonAnalysis::changeTab(int tabNumber)
+ * Is called every time when tab gets changed
+ *
+ * @param tabNumber The index value of the current tab
+ */
+void MuonAnalysis::changeTab(int newTabNumber)
 {
+  int oldTabNumber = m_tabNumber;
+
+  m_tabNumber = newTabNumber;
+
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
   if (m_uiForm.hideToolbars->isChecked())
     emit hideToolbars();
 
-  m_tabNumber = tabNumber;
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
-  // If data analysis tab is chosen by user, assign peak picker tool to the current data if not done so already.
-  if (tabNumber == 3)
-  {
-    m_assigned = false;
-    this->assignPeakPickerTool(m_currentDataName);
-  }
-  else
-  {
-    if (tabNumber == 4)
-    {
-      m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
-    }
-    // delete the peak picker tool because it is no longer needed.
+  // If we are leaving the DA tab, unassign the PP tool
+  if(oldTabNumber == 3)
     emit fittingRequested(m_uiForm.fitBrowser, "");
-  }
+
+  if (newTabNumber == 3)
+    emit fittingRequested(m_uiForm.fitBrowser, m_currentDataName + "-1");
+  else if(newTabNumber == 4)
+    m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
 }
-
-
-/**
-*   Emits a signal containing the fitBrowser and the name of the
-*   workspace we want to attach a peak picker tool to
-*
-*   @param workspaceName :: The QString name of the workspace the user wishes
-*   to attach a plot picker tool to.
-*/
-void MuonAnalysis::assignPeakPickerTool(const QString & wsName)
-{
-  if (m_tabNumber == 3 && (!m_assigned || m_currentDataName != wsName))
-  {
-    m_assigned = true;
-    m_currentDataName = wsName;
-    emit fittingRequested(m_uiForm.fitBrowser, wsName + "-1");
-  }
-}
-
 
 /**
 * Set up the signals and slots for auto updating the plots
@@ -3623,7 +3609,7 @@ void MuonAnalysis::showHideToolbars(bool state)
 void MuonAnalysis::changeDeadTimeType(int choice)
 {
   m_deadTimesChanged = true;
-  if (choice == 0 || choice == 1) // if choice == none ||choice == from file
+  if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
     homeTabUpdatePlot();
