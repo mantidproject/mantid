@@ -196,8 +196,8 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
 
-    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 0);
-    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 0);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 983040);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 15);
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 65536 * 15);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     // Check one entry in each group
