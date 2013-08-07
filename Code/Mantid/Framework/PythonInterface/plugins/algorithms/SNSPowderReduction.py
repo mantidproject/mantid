@@ -366,7 +366,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
                                            % (tempinfo.wl, info.wl))
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
-                    if not "histo" in SUFFIX:
+                    if not "histo" in SUFFIX and preserveEvents:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                        Tolerance=COMPRESS_TOL_TOF) # 10ns
                     api.DeleteWorkspace(str(temp))
