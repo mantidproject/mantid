@@ -97,6 +97,19 @@ namespace Algorithms
 
     declareProperty(new WorkspaceProperty<GroupingWorkspace>("OutputWorkspace","",Direction::Output),
         "An output GroupingWorkspace.");
+
+    std::string inputs("Specify Instrument");
+    setPropertyGroup("InputWorkspace", inputs);
+    setPropertyGroup("InstrumentName", inputs);
+    setPropertyGroup("InstrumentFilename", inputs);
+
+    std::string groupby("Specify Grouping");
+    setPropertyGroup("GroupNames", groupby);
+    setPropertyGroup("GroupDetectorsBy", groupby);
+
+    // output properties
+    declareProperty("NumberGroupedSpectraResult", EMPTY_INT(), "The number of spectra in groups", Direction::Output);
+    declareProperty("NumberGroupsResult", EMPTY_INT(), "The number of groups", Direction::Output);
   }
 
 
@@ -344,20 +357,26 @@ namespace Algorithms
       readGroupingFile(OldCalFilename, detIDtoGroup, prog);
 
     g_log.information() << detIDtoGroup.size() << " entries in the detectorID-to-group map.\n";
+    setProperty("NumberGroupedSpectraResult", static_cast<int>(detIDtoGroup.size()));
 
-
-
-    if (!detIDtoGroup.empty())
+    if (detIDtoGroup.empty())
+    {
+      g_log.warning() << "Creating empty group workspace\n";
+      setProperty("NumberGroupsResult", static_cast<int>(0));
+    }
+    else
     {
       size_t numNotFound = 0;
 
       // Make the groups, if any
       std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
       std::map<detid_t, int>::const_iterator it;
+      std::set<int> groupCount;
       for (it = detIDtoGroup.begin(); it != it_end; ++it)
       {
         int detID = it->first;
         int group = it->second;
+        groupCount.insert(group);
         try
         {
           outWS->setValue(detID, double(group));
@@ -367,6 +386,7 @@ namespace Algorithms
           numNotFound++;
         }
       }
+      setProperty("NumberGroupsResult", static_cast<int>(groupCount.size()));
 
       if (numNotFound > 0)
         g_log.warning() << numNotFound << " detector IDs (out of " << detIDtoGroup.size() << ") were not found in the instrument\n.";
