@@ -1,3 +1,10 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This header MAY NOT be included in any test from a package below the level of
+ *  DataHandling (e.g. Kernel, Geometry, API, DataObjects).
+ *  I.e. It can only be used by plugin/algorithm-level packages (e.g. DataHandling)
+ *********************************************************************************/
 #ifndef SANSINSTRUMENTCREATIONHELPER_H_
 #define SANSINSTRUMENTCREATIONHELPER_H_
 
