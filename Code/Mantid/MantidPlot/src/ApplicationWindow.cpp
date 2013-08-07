@@ -17017,10 +17017,9 @@ else
   {
     connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
     connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
-    setGeometry(usr_win,user_interface);
-    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
-        SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
-    if(user_interface->objectName() == "Muon Analysis")
+    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), 
+                      this, SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
+    if(user_interface->interfaceName() == "Muon Analysis")
     {
       // Re-emits the signal caught from the muon analysis
       connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
@@ -17037,7 +17036,9 @@ else
       connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
                     mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
     }
+    user_interface->initializeLayout(); 
     user_interface->initializeLocalPython();
+    setGeometry(usr_win, user_interface);
   }
   else
   {

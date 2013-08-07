@@ -110,6 +110,12 @@ void MuonAnalysis::initLayout()
 
   m_uiForm.fitBrowser->init();
 
+  // Make the Muon Analysis fit browser the currently used one
+  emit setFitPropertyBrowser(m_uiForm.fitBrowser);
+
+  // Delete current PP tool (if any), as we start not on the DA tab
+  emit activatePPTool("");
+
   // alow appending files
   m_uiForm.mwRunFiles->allowMultipleFiles(true);
 
@@ -3560,8 +3566,13 @@ void MuonAnalysis::closeEvent(QCloseEvent *e)
   // Show the toolbar
   if (m_uiForm.hideToolbars->isChecked())
     emit showToolbars();
-  // delete the peak picker tool because it is no longer needed.
+
+  // Reset currently used fit property browser to the default one
+  emit setFitPropertyBrowser(NULL);
+
+  // Delete the peak picker tool because it is no longer needed.
   emit activatePPTool("");
+
   e->accept();
 }
 
