@@ -10,7 +10,15 @@ from mantid.api import *
 from mantid.simpleapi import *
 from numpy import zeros, shape, arange
 import math
+
+# import sfCalculator
+import sys
+import os
+sys.path.insert(0,os.path.dirname(__file__))
 import sfCalculator
+sys.path.pop(0)
+
+
 from mantid.kernel import *
 
 class RefLReduction(PythonAlgorithm):
