@@ -2108,7 +2108,7 @@ void MuonAnalysis::showPlot(const QString& wsName)
 
   setConnectedDataText();
 
-  emit fittingRequested(m_uiForm.fitBrowser, m_currentDataName + "-1");
+  emit activatePPTool(m_currentDataName + "-1");
 }
 
 /**
