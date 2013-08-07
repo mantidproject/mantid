@@ -215,7 +215,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         numrows = tablews.rowCount()
         for irow in xrange(numrows):
             parname = tablews.cell(irow, 0)
-            parname = parname.lower()
+            parname = parname.lower().strip()
             parnamedict[parname] = irow
             self.parameternames.append(parname)
 
