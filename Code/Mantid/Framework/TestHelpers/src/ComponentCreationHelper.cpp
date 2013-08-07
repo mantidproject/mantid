@@ -1,3 +1,11 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This collection of functions MAY NOT be used in any test from a package below
+ *  Geometry (e.g. Kernel).
+ *  Conversely, this file MAY NOT be modified to use anything from a package
+ *  higher than Geometry (e.g. API, DataObjects, ...)
+ *********************************************************************************/
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------

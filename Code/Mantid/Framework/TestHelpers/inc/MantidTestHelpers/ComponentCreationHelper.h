@@ -1,3 +1,11 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This header MAY NOT be included in any test from a package below Geometry
+ *    (e.g. Kernel).
+ *  Conversely, this file (and its cpp) MAY NOT be modified to use anything from a
+ *  package higher than Geometry (e.g. API, DataObjects, ...)
+ *********************************************************************************/
 #ifndef COMPONENTCREATIONHELPER_H_
 #define COMPONENTCREATIONHELPER_H_
 

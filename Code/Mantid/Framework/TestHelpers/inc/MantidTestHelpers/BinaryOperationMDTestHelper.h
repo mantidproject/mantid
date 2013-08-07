@@ -1,3 +1,8 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This header MAY ONLY be included from a test in the MDAlgorithms package.
+ *********************************************************************************/
 #ifndef MANTID_MDALGORITHMS_BINARYOPERATIONMDTESTHELPER_H_
 #define MANTID_MDALGORITHMS_BINARYOPERATIONMDTESTHELPER_H_
 
