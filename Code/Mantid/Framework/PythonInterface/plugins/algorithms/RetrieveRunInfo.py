@@ -12,8 +12,9 @@ Currently, only ISIS instruments with runs that have the ''full'' list of log pr
 
 *WIKI*"""
 
-from MantidFramework import *
+from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.simpleapi import *
+from mantid.kernel import StringMandatoryValidator, Direction
 from mantid import logger, config
 import os
 from itertools import ifilterfalse
@@ -197,14 +198,10 @@ class RetrieveRunInfo(PythonAlgorithm):
         self.declareProperty(
             'Runs',
             '',
-            MandatoryValidator(),
-            Description='The range of runs to retrieve the run info for. E.g. "100-105".')
-        self.declareWorkspaceProperty(
-            'OutputWorkspace',
-            '',
-            Direction.Output,
-            Type=ITableWorkspace,
-            Description= """The name of the TableWorkspace that will be created. '''You must specify a name that does not already exist.''' """)
+            StringMandatoryValidator(),
+            doc='The range of runs to retrieve the run info for. E.g. "100-105".')
+        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+            doc= """The name of the TableWorkspace that will be created. '''You must specify a name that does not already exist.''' """)
         
     def PyExec(self):
         PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title", 
@@ -254,4 +251,4 @@ class RetrieveRunInfo(PythonAlgorithm):
         self.setPropertyValue('OutputWorkspace', output_ws_name)
 
 # Register algorthm with Mantid.
-mantid.registerPyAlgorithm(RetrieveRunInfo())
+AlgorithmFactory.subscribe(RetrieveRunInfo)
