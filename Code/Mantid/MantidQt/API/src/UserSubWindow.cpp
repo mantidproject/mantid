@@ -1,9 +1,9 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/FileDialogHandler.h"
+#include "MantidQtAPI/UserSubWindow.h"
 
 #include <QIcon>
 #include <QMessageBox>
@@ -75,6 +75,11 @@ bool UserSubWindow::isInitialized() const
 bool UserSubWindow::isPyInitialized() const
 { 
   return m_isPyInitialized; 
+}
+
+QString UserSubWindow::interfaceName() const
+{
+  return m_ifacename;
 }
 
 /**
