@@ -1,7 +1,17 @@
 #ifndef _vtkSplatterPlot_h
 #define _vtkSplatterPlot_h
+
 #include "vtkUnstructuredGridAlgorithm.h"
 #include <string>
+
+namespace Mantid
+{
+  namespace VATES
+  {
+    class vtkSplatterPlotFactory;
+  }
+}
+
 class VTK_EXPORT vtkSplatterPlot : public vtkUnstructuredGridAlgorithm
 {
 public:
@@ -19,9 +29,17 @@ protected:
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
 private:
+  /// Number of total points to plot
+  size_t m_numberPoints;
+  /// Percent of densest boxes to keep
+  double m_topPercentile;
+  /// MVP presenter
+  Mantid::VATES::vtkSplatterPlotFactory *m_presenter;
+  /// Holder for the workspace name
+  std::string m_wsName;
+
   vtkSplatterPlot(const vtkSplatterPlot&);
   void operator = (const vtkSplatterPlot&);
-  size_t m_numberPoints;
-  double m_topPercentile;
+
 };
 #endif
