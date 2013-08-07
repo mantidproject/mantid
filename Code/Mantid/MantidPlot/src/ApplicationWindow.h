@@ -1192,8 +1192,13 @@ private:
   /// Open up the SetupParaview dialog
   void showSetupParaview();
 
-  /// Run the peakPickerTool for the new plot and delete it for the old plot if there was one.
-  void runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot);
+  /**
+  * This searches for the plot with a selected name and then attaches Peak Picker tool to it. It
+  * also disables the tool from all the other plots.
+  * 
+  * @param plotName The name of the plot we want to attach the tool to.
+  */
+  void activatePPTool(const QString& plotName);
 
   /// Delete a plot with a given workspace name
   void closeGraph(const QString & wsName);

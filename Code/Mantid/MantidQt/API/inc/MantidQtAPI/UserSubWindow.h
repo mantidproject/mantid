@@ -110,8 +110,8 @@ signals:
   /// Change the plot style/color
   void setAsPlotType(const QStringList & plotDetails);
 
-  ///Connects MantidPlot up with the muon analysis custom interface and in turn the fitPropertyBrowser. (Emitted when a new graph is created).
-  void fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&);
+  /// Thrown to attach PP tool to the plot with given name
+  void activatePPTool(const QString& plotName);
 
   void closeGraph(const QString & wsName);
   void hideGraphs(const QString & exception = ""); // wsName

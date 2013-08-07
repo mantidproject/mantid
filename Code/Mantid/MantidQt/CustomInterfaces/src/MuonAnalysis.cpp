@@ -3431,7 +3431,7 @@ void MuonAnalysis::changeTab(int tabNumber)
       m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
     }
     // delete the peak picker tool because it is no longer needed.
-    emit fittingRequested(m_uiForm.fitBrowser, "");
+    emit activatePPTool("");
   }
 }
 
@@ -3449,7 +3449,7 @@ void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
   {
     m_assigned = true;
     m_currentDataName = workspaceName;
-    emit fittingRequested(m_uiForm.fitBrowser, workspaceName + "-1");
+    emit activatePPTool(workspaceName + "-1");
   }
 }
 
@@ -3572,7 +3572,7 @@ void MuonAnalysis::closeEvent(QCloseEvent *e)
   if (m_uiForm.hideToolbars->isChecked())
     emit showToolbars();
   // delete the peak picker tool because it is no longer needed.
-  emit fittingRequested(m_uiForm.fitBrowser, "");
+  emit activatePPTool("");
   e->accept();
 }
 
@@ -3596,9 +3596,9 @@ void MuonAnalysis::showEvent(QShowEvent *e)
   // Hide the toolbar
   if (m_uiForm.hideToolbars->isChecked() )
     emit hideToolbars();
+
   e->accept();
 }
-
 
 /**
 * Show/Hide Toolbar

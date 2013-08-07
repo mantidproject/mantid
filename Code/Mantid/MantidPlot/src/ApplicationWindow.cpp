@@ -17030,9 +17030,9 @@ else
       connect(user_interface, SIGNAL(hideGraphs(const QString &)), this, SLOT(hideGraphs(const QString &)));
       // Shows the graph
       connect(user_interface, SIGNAL(showGraphs()), this, SLOT(showGraphs()));
-      //If the fitting is requested then run the peak picker tool in runConnectFitting
-      connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
-          SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
+      // Activate Peak Picker tool on the requested plot
+      connect(user_interface, SIGNAL(activatePPTool(const QString&)), 
+                        this, SLOT(activatePPTool(const QString&)));
     }
     user_interface->initializeLocalPython();
   }
@@ -17046,14 +17046,8 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
     tr("MantidPlot was not built with Python scripting support included!"));
 #endif
 }
-/**This searches for the graph with a selected name and then attaches the fitFunctionBrowser to it
-*  This also disables the fitFunctionBrowser from all the other graphs.
-* 
-* @param fpb The fit property browser from the custom interface
-* @param nameOfPlot A string variable containing the name of the graph we want to fit.
-*
-*/
-void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot)
+
+void ApplicationWindow::activatePPTool(const QString& nameOfPlot)
 {
   // Loop through all multilayer (i.e. plots) windows displayed in Mantidplot 
   // and apply pickpickertool to relevant plot
@@ -17099,7 +17093,8 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
           foreach(Graph *g, layers)
           {
             // Go through and set up the PeakPickerTool for the new graph
-            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true, true);
+            PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, 
+                                                         true, true);
             g->setActiveTool(ppicker);
           }
         }     
