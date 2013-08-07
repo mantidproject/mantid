@@ -175,10 +175,7 @@ void testMeanFirstWithReturnBackground()
       backError = std::sqrt(backError)/15.0;
       for (int i = 0; i < NUMBINS; ++i)
       {
-        double correct = ( YIn[i] - background ) > 0 ? YIn[i]-background : 0;
-
         TS_ASSERT_DELTA(YOut[i], background, 1e-6 )
-
         TS_ASSERT_DELTA(EOut[i], std::sqrt((EIn[i]*EIn[i])+(backError*backError)), 1e-6 )
       }
     }
