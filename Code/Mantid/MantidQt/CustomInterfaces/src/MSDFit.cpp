@@ -50,6 +50,7 @@ namespace IDA
     connect(m_msdDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
 
     connect(uiForm().msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
+    connect(uiForm().msd_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
   }
 
   void MSDFit::run()
