@@ -113,6 +113,9 @@ signals:
   /// Thrown to attach PP tool to the plot with given name
   void activatePPTool(const QString& plotName);
 
+  /// Thrown when used fit property browser should be changed to given one
+  void setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* browser);
+
   void closeGraph(const QString & wsName);
   void hideGraphs(const QString & exception = ""); // wsName
   void showGraphs();

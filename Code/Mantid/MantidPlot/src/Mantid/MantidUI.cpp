@@ -185,19 +185,22 @@ void MantidUI::init()
   Mantid::Kernel::ConfigService::Instance().addObserver(m_configServiceObserver);
 
   m_exploreAlgorithms->update();
+
   try
   {
-    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
-    m_fitFunction->init();
+    m_defaultFitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
+    m_defaultFitFunction->init();
         // this make the progress bar work with Fit algorithm running form the fit browser
-    connect(m_fitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
-      this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
-    m_fitFunction->hide();
-    m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_fitFunction );
+    connect(m_defaultFitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
+            this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
+    m_defaultFitFunction->hide();
+    m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_defaultFitFunction );
 
+    m_fitFunction = m_defaultFitFunction;
   }
   catch(...)
   {
+    m_defaultFitFunction = NULL;
     m_fitFunction = NULL;
     showCritical("The curve fitting plugin is missing");
   }
@@ -1562,6 +1565,15 @@ void MantidUI::renameWorkspace(QStringList wsName)
   }
 
 }
+
+void MantidUI::setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* newBrowser)
+{
+  if(newBrowser == NULL)
+    m_fitFunction = m_defaultFitFunction;
+  else
+    m_fitFunction = newBrowser;
+}
+
 void MantidUI::groupWorkspaces()
 {
   try

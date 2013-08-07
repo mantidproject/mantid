@@ -247,6 +247,13 @@ public slots:
   //  *****                            *****  //
   void renameWorkspace(QStringList = QStringList());
 
+  /**
+   * Set the currently used fit property browser. Is needed because e.g. Muon Analysis is using its 
+   * own fit browser.
+   * @param newBrowser The browser to be used. If is null, is set to default one.
+   */
+  void setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* newBrowser);
+
 public:
 
   // Return pointer to the fit function property browser
@@ -496,7 +503,10 @@ private:
   MantidDockWidget *m_exploreMantid;          // Dock window for manipulating workspaces
   AlgorithmDockWidget *m_exploreAlgorithms;   // Dock window for using algorithms
   RemoteClusterDockWidget *m_exploreRemoteTasks;   // Dock window for using remote tasks
-  MantidQt::MantidWidgets::FitPropertyBrowser *m_fitFunction;        // Dock window to set fit function properties
+  /// Current fit property browser being used
+  MantidQt::MantidWidgets::FitPropertyBrowser* m_fitFunction; 
+  /// Default fit property browser (the one docked on the left)
+  MantidQt::MantidWidgets::FitPropertyBrowser* m_defaultFitFunction;
 
   QAction *actionCopyRowToTable;
   QAction *actionCopyRowToGraph;

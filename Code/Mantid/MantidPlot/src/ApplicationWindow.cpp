@@ -17033,6 +17033,9 @@ else
       // Activate Peak Picker tool on the requested plot
       connect(user_interface, SIGNAL(activatePPTool(const QString&)), 
                         this, SLOT(activatePPTool(const QString&)));
+      // Update the used fit property browser
+      connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
+                    mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
     }
     user_interface->initializeLocalPython();
   }
