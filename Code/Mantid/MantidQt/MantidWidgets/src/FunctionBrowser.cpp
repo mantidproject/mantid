@@ -145,9 +145,9 @@ void FunctionBrowser::createBrowser()
   m_tieManager = new QtStringPropertyManager(this);
   m_constraintManager = new QtStringPropertyManager(this);
   m_formulaManager = new QtStringPropertyManager(this);
-
-  //m_filenameManager = new QtStringPropertyManager(this);
-  //m_formulaManager = new QtStringPropertyManager(this);
+  m_attributeVectorManager = new QtGroupPropertyManager(this);
+  m_attributeSizeManager = new QtIntPropertyManager(this);
+  m_attributeVectorDoubleManager = new QtDoublePropertyManager(this);
 
   // create editor factories
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
@@ -168,6 +168,8 @@ void FunctionBrowser::createBrowser()
   m_browser->setFactoryForManager(m_tieManager, lineEditFactory);
   m_browser->setFactoryForManager(m_constraintManager, lineEditFactory);
   m_browser->setFactoryForManager(m_formulaManager, formulaDialogEditFactory);
+  m_browser->setFactoryForManager(m_attributeSizeManager, spinBoxFactory);
+  m_browser->setFactoryForManager(m_attributeVectorDoubleManager, doubleEditorFactory);
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
@@ -178,6 +180,7 @@ void FunctionBrowser::createBrowser()
   connect(m_attributeIntManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeBoolManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
+  connect(m_attributeVectorDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeVectorDoubleChanged(QtProperty*)));
 }
 
 /**
@@ -424,7 +427,6 @@ void FunctionBrowser::setFunction(QtProperty* prop, Mantid::API::IFunction_sptr 
  */
 void FunctionBrowser::addFunction(QtProperty* prop, Mantid::API::IFunction_sptr fun)
 {
-  //Mantid::API::IFunction_sptr fun = Mantid::API::FunctionFactory::Instance().createInitialized(funStr.toStdString());
   if ( !prop )
   {
     AProperty ap = addFunctionProperty(NULL,QString::fromStdString(fun->name()));
@@ -498,6 +500,30 @@ protected:
     m_browser->m_attributeBoolManager->setValue(prop, b);
     return m_browser->addProperty(m_parent,prop);
   }
+  /// Create vector property
+  FunctionBrowser::AProperty apply(const std::vector<double>& v)const
+  {
+    QtProperty* prop = m_browser->m_attributeVectorManager->addProperty(m_attName);
+    FunctionBrowser::AProperty aprop = m_browser->addProperty(m_parent,prop);
+
+    QtProperty* sizeProp = m_browser->m_attributeSizeManager->addProperty("Size");
+    m_browser->m_attributeSizeManager->setValue( sizeProp, static_cast<int>(v.size()) );
+    m_browser->addProperty( prop, sizeProp );
+    sizeProp->setEnabled(false);
+
+    m_browser->m_attributeVectorDoubleManager->blockSignals(true);
+    QString parName = "value[%1]";
+    for(size_t i = 0; i < v.size(); ++i)
+    {
+        QtProperty *dprop = m_browser->m_attributeVectorDoubleManager->addProperty( parName.arg(i) );
+        m_browser->m_attributeVectorDoubleManager->setValue( dprop, v[i] );
+        m_browser->addProperty( prop, dprop );
+    }
+    m_browser->m_attributeVectorDoubleManager->blockSignals(false);
+
+    m_browser->m_browser->setExpanded( aprop.item, false );
+    return aprop;
+  }
 private:
   FunctionBrowser* m_browser;
   QtProperty* m_parent;
@@ -543,6 +569,24 @@ protected:
   void apply(bool& b)const
   {
     b = m_browser->m_attributeBoolManager->value(m_prop);
+  }
+  /// Set vector attribute
+  void apply(std::vector<double>& v)const
+  {
+      //throw std::runtime_error("Vector setter not implemented.");
+      QList<QtProperty*> members = m_prop->subProperties();
+      if ( members.empty() ) throw std::runtime_error("FunctionBrowser: empty vector attribute group.");
+      int n = members.size() - 1;
+      if ( n == 0 )
+      {
+          v.clear();
+          return;
+      }
+      v.resize( n );
+      for(int i = 0; i < n; ++i)
+      {
+          v[i] = m_browser->m_attributeVectorDoubleManager->value( members[i+1] );
+      }
   }
 private:
   FunctionBrowser* m_browser;
@@ -722,7 +766,25 @@ bool FunctionBrowser::isDoubleAttribute(QtProperty* prop) const
  */
 bool FunctionBrowser::isIntAttribute(QtProperty* prop) const
 {
-  return prop && dynamic_cast<QtAbstractPropertyManager*>(m_attributeIntManager) == prop->propertyManager();
+    return prop && dynamic_cast<QtAbstractPropertyManager*>(m_attributeIntManager) == prop->propertyManager();
+}
+
+/**
+ * Check if property is a function bool attribute
+ * @param prop :: Property to check
+ */
+bool FunctionBrowser::isBoolAttribute(QtProperty *prop) const
+{
+    return prop && dynamic_cast<QtAbstractPropertyManager*>(m_attributeBoolManager) == prop->propertyManager();
+}
+
+/**
+ * Check if property is a function vector attribute
+ * @param prop :: Property to check
+ */
+bool FunctionBrowser::isVectorAttribute(QtProperty *prop) const
+{
+    return prop && dynamic_cast<QtAbstractPropertyManager*>(m_attributeVectorManager) == prop->propertyManager();
 }
 
 /**
@@ -731,7 +793,8 @@ bool FunctionBrowser::isIntAttribute(QtProperty* prop) const
  */
 bool FunctionBrowser::isAttribute(QtProperty* prop) const
 {
-  return isStringAttribute(prop) || isDoubleAttribute(prop) || isIntAttribute(prop);
+  return isStringAttribute(prop) || isDoubleAttribute(prop) || isIntAttribute(prop) ||
+          isBoolAttribute(prop) || isVectorAttribute(prop);
 }
 
 /**
@@ -1202,7 +1265,7 @@ void FunctionBrowser::addFunction()
  * Return the function 
  * @param prop :: Function property 
  */
-Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop)
+Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool attributesOnly)
 {
   if (prop == NULL)
   {// get overall function
@@ -1235,6 +1298,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop)
   {
     // loop over the children properties and set parameters and attributes
     auto children = prop->subProperties();
+    std::map<std::string, Mantid::API::IFunction::Attribute> attributes;
+    bool doneAttributes = false;
     foreach(QtProperty* child, children)
     {
       if (isAttribute(child))
@@ -1243,30 +1308,46 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop)
         SetAttributeFromProperty setter(this,child);
         Mantid::API::IFunction::Attribute attr = fun->getAttribute(attName);
         attr.apply(setter);
+        attributes[attName] = attr;
+      }
+      else if (!attributesOnly && isParameter(child))
+      {
+          if ( !doneAttributes )
+          {
+              try
+              {
+                fun->setAttributes(attributes);
+              }
+              catch(std::exception& e)
+              {
+                  QMessageBox::warning(this,"Mantid - Warning","Attributes  cannot be set for function "
+                                       + prop->propertyName() + ":\n" + e.what() );
+                  return Mantid::API::IFunction_sptr();
+              }
+          }
+          doneAttributes = true;
+          fun->setParameter(child->propertyName().toStdString(), getParameter(child));
+      }
+    }
+
+    if ( !doneAttributes && !attributes.empty() )
+    {
         try
         {
-          fun->setAttribute(attName,attr);
+          fun->setAttributes(attributes);
         }
         catch(std::exception& e)
         {
-          if ( attName == "Formula" && attr.asString().empty() && children.size() == 1 )
-          {
-            fun->setAttributeValue("Formula","x");
-          }
-          else
-          {
-            QMessageBox::warning(this,"Mantid - Warning","Attribute " + child->propertyName() + 
-              " cannot be set for function " + prop->propertyName() + ":\n" + e.what() );
+            QMessageBox::warning(this,"Mantid - Warning","Attributes  cannot be set for function "
+                                 + prop->propertyName() + ":\n" + e.what() );
             return Mantid::API::IFunction_sptr();
-          }
         }
-      }
-      else if (isParameter(child))
-      {
-        fun->setParameter(child->propertyName().toStdString(), getParameter(child));
-      }
     }
   }
+
+  // if this flag is set the function requires attributes only
+  // attempts to set other properties may result in exceptions
+  if ( attributesOnly ) return fun;
 
   // add ties
   {
@@ -1514,16 +1595,25 @@ void FunctionBrowser::attributeChanged(QtProperty* prop)
 {
   auto funProp = m_properties[prop].parent;
   if ( !funProp ) return;
-  auto fun = Mantid::API::FunctionFactory::Instance().createFunction(funProp->propertyName().toStdString());
+  // get function with the changed attribute (it is set from prop's value)
+  auto fun = getFunction( funProp, true );
 
-  std::string attName = prop->propertyName().toStdString();
-  SetAttributeFromProperty setter(this,prop);
-  Mantid::API::IFunction::Attribute attr = fun->getAttribute(attName);
-  attr.apply(setter);
-  fun->setAttribute(attName,attr);
-
+  // delete and recreate all function's properties (attributes, parameters, etc)
   setFunction(funProp, fun);
   updateFunctionIndices();
+}
+
+/**
+ * Slot connected to a property displaying the value of a member of a vector attribute.
+ * @param prop :: A property that was changed.
+ */
+void FunctionBrowser::attributeVectorDoubleChanged(QtProperty *prop)
+{
+    QtProperty *vectorProp = m_properties[prop].parent;
+    if ( !vectorProp ) throw std::runtime_error("FunctionBrowser: inconsistency in vector properties.");
+
+    std::cerr << "Value of " << vectorProp->propertyName().toStdString() << ' ' << prop->propertyName().toStdString() << std::endl;
+    attributeChanged( vectorProp );
 }
 
 

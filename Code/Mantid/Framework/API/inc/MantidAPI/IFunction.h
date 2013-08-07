@@ -152,6 +152,8 @@ public:
     T operator()(int& i)const{return apply(i);}
     /// implements static_visitor's operator() for bool
     T operator()(bool& b)const{return apply(b);}
+    /// implements static_visitor's operator() for vector
+    T operator()(std::vector<double>& v)const{return apply(v);}
   protected:
     /// Implement this mathod to access attribute as string
     virtual T apply(std::string&)const = 0;
@@ -161,6 +163,8 @@ public:
     virtual T apply(int&)const = 0;
     /// Implement this mathod to access attribute as bool
     virtual T apply(bool&)const = 0;
+    /// Implement this mathod to access attribute as vector
+    virtual T apply(std::vector<double>&)const = 0;
   };
 
   /**
@@ -180,6 +184,8 @@ public:
     T operator()(int& i)const{return apply(i);}
     /// implements static_visitor's operator() for bool
     T operator()(bool& b)const{return apply(b);}
+    /// implements static_visitor's operator() for vector
+    T operator()(std::vector<double>& v)const{return apply(v);}
   protected:
     /// Implement this mathod to access attribute as string
     virtual T apply(const std::string& str)const = 0;
@@ -189,6 +195,8 @@ public:
     virtual T apply(const int& i)const = 0;
     /// Implement this mathod to access attribute as bool
     virtual T apply(const bool& i)const = 0;
+    /// Implement this mathod to access attribute as vector
+    virtual T apply(const std::vector<double>&)const = 0;
   };
 
   /// Attribute is a non-fitting parameter.
@@ -207,14 +215,18 @@ public:
     explicit Attribute(const double& d):m_data(d){}
     /// Create bool attribute
     explicit Attribute(const bool& b):m_data(b){}
-    /// Create bool attribute
+    /// Create string attribute
     explicit Attribute(const char* c):m_data(std::string(c)), m_quoteValue(false){}
-    /// Apply an attribute visitor
+    /// Create vector attribute
+    explicit Attribute(const std::vector<double>& v):m_data(v){}
+
+      /// Apply an attribute visitor
     template<typename T>
     T apply(AttributeVisitor<T>& v){return boost::apply_visitor(v,m_data);}
     /// Apply a const attribute visitor
     template<typename T>
     T apply(ConstAttributeVisitor<T>& v)const{return boost::apply_visitor(v,m_data);}
+
     /// Returns type of the attribute
     std::string type()const;
     /// Returns the attribute value as a string
@@ -231,6 +243,9 @@ public:
     double asDouble()const;
     /// Returns bool value if attribute is a bool, throws exception otherwise
     bool asBool()const;
+    /// Returns bool value if attribute is a vector, throws exception otherwise
+    std::vector<double> asVector()const;
+
     /// Sets new value if attribute is a string
     void setString(const std::string& str);
     /// Sets new value if attribute is a double
@@ -239,11 +254,13 @@ public:
     void setInt(const int&);
     /// Sets new value if attribute is a bool
     void setBool(const bool&);
+    /// Sets new value if attribute is a vector
+    void setVector(const std::vector<double>&);
     /// Set value from a string.
     void fromString(const std::string& str);
   private:
     /// The data holder as boost variant
-    mutable boost::variant<std::string,int,double,bool> m_data;
+    mutable boost::variant< std::string,int,double,bool,std::vector<double> > m_data;
     /// Flag indicating if the string value should be returned quoted
     bool m_quoteValue;
   };
@@ -402,6 +419,8 @@ public:
   virtual void setAttribute(const std::string& attName,const Attribute& );
   /// Check if attribute attName exists
   virtual bool hasAttribute(const std::string& attName)const;
+  /// Set multiple attributes in one call
+  virtual void setAttributes(const std::map<std::string, API::IFunction::Attribute>& attributes);
   /// Set an attribute value
   template<typename T>
   void setAttributeValue(const std::string& attName,const T& value){setAttribute(attName,Attribute(value));}

@@ -8,8 +8,9 @@ set ( SRC_FILES
 	src/BackgroundFunction.cpp
 	src/BivariateNormal.cpp
 	src/Bk2BkExpConvPV.cpp
-	src/BoundaryConstraint.cpp
-	src/Chebyshev.cpp
+  src/BoundaryConstraint.cpp
+  src/BSpline.cpp
+  src/Chebyshev.cpp
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
 	src/Convolution.cpp
@@ -98,8 +99,9 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BackgroundFunction.h
 	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
-	inc/MantidCurveFitting/BoundaryConstraint.h
-	inc/MantidCurveFitting/Chebyshev.h
+  inc/MantidCurveFitting/BoundaryConstraint.h
+  inc/MantidCurveFitting/BSpline.h
+  inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
@@ -192,8 +194,9 @@ set ( TEST_FILES
 	BackToBackExponentialTest.h
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
-	BoundaryConstraintTest.h
-	ChebyshevTest.h
+  BoundaryConstraintTest.h
+  BSplineTest.h
+  ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonProfileTest.h
 	ComptonScatteringCountRateTest.h

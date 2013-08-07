@@ -315,6 +315,8 @@ namespace
     std::string apply(const double&)const{return "double";}
     /// Apply if bool
     std::string apply(const bool&)const{return "bool";}
+    /// Apply if vector
+    std::string apply(const std::vector<double>&)const{return "std::vector<double>";}
   };
 }
 
@@ -327,7 +329,7 @@ std::string IFunction::Attribute::type()const
 namespace
 {
   /**
-   * Const attribute visitor returning the type of the attribute
+   * Const attribute visitor returning the value of the attribute as a string
    */
   class AttValue: public IFunction::ConstAttributeVisitor<std::string>
   {
@@ -350,6 +352,21 @@ namespace
     std::string apply(const double& d)const{return boost::lexical_cast<std::string>(d);}
     /// Apply if bool
     std::string apply(const bool& b)const{return b ? "true" : "false";}
+    /// Apply if vector
+    std::string apply(const std::vector<double>& v)const
+    {
+        std::string res = "(";
+        if ( v.size() > 0 )
+        {
+            for(size_t i = 0; i < v.size()-1; ++i)
+            {
+                res += boost::lexical_cast<std::string>( v[i] ) + ",";
+            }
+            res += boost::lexical_cast<std::string>( v.back() );
+        }
+        res += ")";
+        return res;
+    }
 
   private:
     /// Flag to quote a string value returned
@@ -473,7 +490,23 @@ bool IFunction::Attribute::asBool()const
   {
     throw std::runtime_error("Trying to access a "+type()+" attribute "
       "as bool");
-  }
+    }
+}
+
+/**
+ * Return the attribute as a bool if it is a vector.
+ */
+std::vector<double> IFunction::Attribute::asVector() const
+{
+    try
+    {
+      return boost::get<std::vector<double>>(m_data);
+    }
+    catch(...)
+    {
+      throw std::runtime_error("Trying to access a "+type()+" attribute "
+        "as vector");
+      }
 }
 
 /** Sets new value if attribute is a string. If the type is wrong 
@@ -541,7 +574,26 @@ void IFunction::Attribute::setBool(const bool& b)
   {
     throw std::runtime_error("Trying to access a "+type()+" attribute "
       "as bool");
-  }
+    }
+}
+
+/**
+ * Sets new value if attribute is a vector. If the type is wrong
+ * throws an exception
+ * @param v :: The new value
+ */
+void IFunction::Attribute::setVector(const std::vector<double> &v)
+{
+    try
+    {
+      auto &value = boost::get<std::vector<double>>(m_data);
+      value.assign( v.begin(), v.end() );
+    }
+    catch(...)
+    {
+      throw std::runtime_error("Trying to access a "+type()+" attribute "
+        "as vector");
+    }
 }
 
 namespace
@@ -581,8 +633,33 @@ namespace
     {
       b = ( m_value == "true" || m_value == "TRUE" || m_value == "1" );
     }
+    /// Apply if vector
+    void apply(std::vector<double>& v)const
+    {
+        if ( m_value.empty() )
+        {
+            v.clear();
+            return;
+        }
+        if ( m_value.size() > 2 )
+        {
+            // check if the value is in barckets (...)
+            if (m_value.front() == '(' && m_value.back() == ')')
+            {
+                m_value.erase(0,1);
+                m_value.erase( m_value.size()-1 );
+            }
+        }
+        Poco::StringTokenizer tokenizer( m_value, ",", Poco::StringTokenizer::TOK_TRIM );
+        v.resize( tokenizer.count() );
+        for (size_t i = 0; i < v.size(); ++i)
+        {
+            v[i] = boost::lexical_cast<double>( tokenizer[i] );
+        }
+
+    }
   private:
-    std::string m_value; ///<the value as a string
+    mutable std::string m_value; ///<the value as a string
   };
 }
 
@@ -1011,7 +1088,20 @@ size_t IFunction::nAttributes() const
 /// Check if attribute named exists
 bool IFunction::hasAttribute(const std::string& name)const
 {
-  return m_attrs.find(name) != m_attrs.end();
+    return m_attrs.find(name) != m_attrs.end();
+}
+
+/**
+ * By default it calls setAttribue for each attribute in the list.
+ * Implementations can override this method to make setting more eficient.
+ * @param attributes :: A list of attributes to set.
+ */
+void IFunction::setAttributes(const std::map<std::string, API::IFunction::Attribute> &attributes)
+{
+    for(auto it = attributes.begin(); it != attributes.end(); ++it)
+    {
+        this->setAttribute( it->first, it->second );
+    }
 }
 
 /// Returns a list of attribute names
