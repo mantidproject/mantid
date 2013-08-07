@@ -94,6 +94,7 @@ void Indirect::initLayout()
   connect(m_uiForm.ind_runFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
 
   // "Calibration" tab
+  connect(m_uiForm.cal_leRunNo, SIGNAL(filesFound()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(calPlotEnergy()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
@@ -106,6 +107,7 @@ void Indirect::initLayout()
   connect(m_uiForm.sqw_pbPlotInput, SIGNAL(clicked()), this, SLOT(sOfQwPlotInput()));
 
   // "Slice" tab
+  connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
@@ -1490,9 +1492,8 @@ void Indirect::calPlotRaw()
 {
   QString filename = m_uiForm.cal_leRunNo->getFirstFilename();
   
-  if ( filename == "" )
+  if ( filename.isEmpty() )
   {
-    showInformationBox("Please enter a run number.");
     return;
   }
     
