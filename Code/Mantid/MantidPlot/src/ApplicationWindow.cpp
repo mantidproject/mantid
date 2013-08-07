@@ -17047,60 +17047,32 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
 #endif
 }
 
-void ApplicationWindow::activatePPTool(const QString& nameOfPlot)
+void ApplicationWindow::activatePPTool(const QString& plotName)
 {
-  // Loop through all multilayer (i.e. plots) windows displayed in Mantidplot 
-  // and apply pickpickertool to relevant plot
-  // Search and delete any current peak picker tools first
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) 
   {
     if (w->isA("MultiLayer"))
     {
       MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
+
+      QList<Graph *> layers = plot->layersList();
+
+      if (w->objectName() == plotName)
       {
-        // Check to see if graph is the new one by comparing the names
-        if (w->objectName() != nameOfPlot)
+        foreach(Graph *g, layers)
         {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Delete the PeakPickerTool
-            g->disableTools();
-          }
+          PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, true, true);
+          g->setActiveTool(ppicker);
         }
+      }
+      else
+      {
+        foreach(Graph *g, layers)
+          g->disableTools();
       }
     }
   }
-  // now check for graphs to add the peak picker tool to.
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-      {
-        if (w->objectName() == nameOfPlot)
-        {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Go through and set up the PeakPickerTool for the new graph
-            PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, 
-                                                         true, true);
-            g->setActiveTool(ppicker);
-          }
-        }     
-      }
-    }
-  } 
 }
 
 
