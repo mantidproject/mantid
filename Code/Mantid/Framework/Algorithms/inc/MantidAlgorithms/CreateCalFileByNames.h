@@ -54,7 +54,7 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CreateCalFileByNames : public API::Algorithm, public API::DeprecatedAlgorithm
+class DLLExport CreateCalFileByNames : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
@@ -66,7 +66,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Deprecated"; }
+  virtual const std::string category() const { return "Diffraction"; }
 
 private:
   /// Sets documentation strings for this algorithm
