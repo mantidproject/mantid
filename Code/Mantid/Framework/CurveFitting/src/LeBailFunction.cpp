@@ -386,7 +386,7 @@ namespace CurveFitting
     }
     else
     {
-      g_log.debug() << "[Fx155] Peaks group size = " << peakgroup.size() << "\n";
+      g_log.information() << "[Fx155] Peaks group size = " << peakgroup.size() << "\n";
     }
     if (peakgroup.size() > 1)
       sort(peakgroup.begin(), peakgroup.end());
@@ -486,8 +486,8 @@ namespace CurveFitting
       g_log.error(errmsg.str());
       throw runtime_error(errmsg.str());
     }
-    g_log.debug() << "[DBx356] Number of data points = " << ndata << " index from " << ileft
-                  << " to " << iright << ";  Size(datax, datay) = " << datax.size() << "\n";
+    g_log.information() << "[DBx356] Number of data points = " << ndata << " index from " << ileft
+                        << " to " << iright << ";  Size(datax, datay) = " << datax.size() << "\n";
 
     // Prepare to integrate dataY to calculate peak intensity
     vector<double> sumYs(ndata, 0.0);
@@ -846,15 +846,20 @@ namespace CurveFitting
         }
 
         ++ ipk;
-      }
+      } // still in bound
       else
       {
         // Peak is get out of boundary
+        inbound = false;
+        g_log.information() << "[Fx301] Group peak: peak @ " << thispeak->centre() << " causes grouping "
+                            << "peak over at maximum TOF = " << xmax << ".\n";
 
-        // Right most peak in the boundary.  Add current peak group vector to
-        vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroupcopy = peakgroup;
-        peakgroupvec.push_back(peakgroupcopy);
-      }
+        if (peakgroup.size() > 0)
+        {
+          vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroupcopy = peakgroup;
+          peakgroupvec.push_back(peakgroupcopy);
+        }
+      } // FIRST out of boundary
     } // ENDWHILE
 
     while (ipk < m_numPeaks)
@@ -865,8 +870,8 @@ namespace CurveFitting
       ipk += 1;
     }
 
-    g_log.debug() << "[Calculate Peak Intensity]:  Number of Peak Groups = " << peakgroupvec.size()
-                  << "\n";
+    g_log.information() << "[Calculate Peak Intensity]:  Number of Peak Groups = " << peakgroupvec.size()
+                        << "\n";
 
     return;
   }
