@@ -131,7 +131,6 @@ std::vector<std::string> WorkspaceGroup::getNames() const
  */
 Workspace::InfoNode *WorkspaceGroup::createInfoNode() const
 {
-    Poco::Mutex::ScopedLock _lock(m_mutex);
     InfoNode *node = new InfoNode(*this);
     for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
     {
