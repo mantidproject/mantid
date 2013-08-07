@@ -1359,7 +1359,16 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   }
   else
   {
-    g_log.information() << "Skipping the loading of sample logs!" << endl;
+    g_log.information() << "Skipping the loading of sample logs!\n"
+                        << "Reading the start time directly from /" << m_top_entry_name
+                        << "/start_time\n";
+    // start_time is read and set
+    ::NeXus::File nxfile(m_filename);
+    nxfile.openGroup(m_top_entry_name, "NXentry");
+    std::string tmp;
+    nxfile.readData("start_time", tmp);
+    run_start = DateAndTime(tmp);
+    WS->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
   }
 
   // Make sure you have a non-NULL m_allBanksPulseTimes
