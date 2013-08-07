@@ -164,8 +164,17 @@ private slots:
   /// Update the pair plot based on changes on the group page.
   void settingsTabUpdatePlot();
 
-  /// Assigns a peak picker tool to the workspace.
-  void assignPeakPickerTool(const QString &);
+  /**
+   * Checks whether plots should be auto-updated when some settings change
+   * @return true if enabled, false if not
+   */
+  bool isAutoUpdateEnabled();
+
+  /**
+   * Show a plot for a given workspace. Hides previous plot if exists.
+   * @param wsName The name of workspace to be plotted. Should exist in ADS.
+   */
+  void showPlot(const QString& wsName);
 
   /// Called when the plot function has been changed on the home page.
   void changeHomeFunction();
@@ -292,9 +301,6 @@ private:
 
   /// name of the loaded data
   QString m_currentDataName;
-
-  /// boolean to tell whether the fit property browser has been assigned
-  bool m_assigned;
 
   /// which group table row has the user last clicked on
   int m_groupTableRowInFocus;

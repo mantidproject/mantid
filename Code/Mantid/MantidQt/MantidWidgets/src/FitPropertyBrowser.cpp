@@ -2668,7 +2668,6 @@ void FitPropertyBrowser::setTextPlotGuess(const QString text)
 */
 void FitPropertyBrowser::workspaceChange(const QString& wsName)
 {
-  UNUSED_ARG(wsName);
   if (m_guessOutputName)
   {
     if (isWorkspaceAGroup())
@@ -2686,20 +2685,9 @@ void FitPropertyBrowser::workspaceChange(const QString& wsName)
   }
   else
   {
-    //m_groupMember = workspaceName();
     removeLogValue();
   }
-}
 
-/**
-* Shows the correct workspace in the fit property browser and
-* then updates the PeakPickerTool to another workspace.
-*
-* @param wsName :: The name of the workspace the PeakPickerTool is
-*                   to be assigned to.
-*/
-void FitPropertyBrowser::updatePPTool(const QString & wsName)
-{
   emit workspaceNameChanged(wsName);
   emit wsChangePPAssign(wsName);
 }
