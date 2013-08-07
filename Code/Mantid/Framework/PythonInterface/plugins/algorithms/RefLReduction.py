@@ -181,7 +181,7 @@ class RefLReduction(PythonAlgorithm):
 
         run_numbers = self.getProperty("RunNumbers").value
 
-        backSubMethod = 2   #1 uses RefRoi, 2 used own method
+        backSubMethod = 1   #1 uses RefRoi, 2 used own method
 
 #        mtd.sendLogMessage("RefLReduction: processing %s" % run_numbers)
 
@@ -334,7 +334,7 @@ class RefLReduction(PythonAlgorithm):
 
         # Normalized by Current (proton charge)
         print '-> Normalize by proton charge'
-        ws_histo_data = NormaliseByCurrent(InputWorkspace=ws_histo_data) 
+        ws_histo_data = NormaliseByCurrent(InputWorkspace=ws_histo_data)
     
         # Calculation of the central pixel (using weighted average)
         pixelXtof_data = wks_utility.getPixelXTOF(ws_histo_data, 
@@ -393,8 +393,7 @@ class RefLReduction(PythonAlgorithm):
         if (subtract_data_bck and (backSubMethod == 1)):
 
             print '-> substract background'
-            ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data,
-                                     OutputWorkspace=ws_histo_data)
+            ws_histo_data = ConvertToMatrixWorkspace(InputWorkspace=ws_histo_data)
             
 #             ws_data_bck = '_' + ws_name + '_DataBckWks'
             
@@ -402,114 +401,102 @@ class RefLReduction(PythonAlgorithm):
             if (data_back[0] < (data_peak[0]-1)):
 
                 bBackLeft = True
-                ws_data_bck_1 = ws_data_bck + "_1"
-                RefRoi(InputWorkspace=ws_histo_data,
-                       OutputWorkspace=ws_data_bck_1,
+                                
+                ws_data_bck_1 = RefRoi(InputWorkspace=ws_histo_data,
                        NXPixel=maxX,
                        NYPixel=maxY,
                        ConvertToQ=False,
                        IntegrateY=False,
                        SumPixels=True,
-                       XPixelMin=data_low_res[0],
-                       XPixelMax=data_low_res[1],
-                       YPixelMin=data_back[0],
-                       YPixelMax=data_peak[0]-1,
+                       XPixelMin=int(data_low_res[0]),
+                       XPixelMax=int(data_low_res[1]),
+                       YPixelMin=int(data_back[0]),
+                       YPixelMax=int(data_peak[0]-1),
                        NormalizeSum=True)
 
-                ws_data_bck_1_rebin = ws_data_bck_1 + '_rebin'
-                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
-                                 WorkspaceToMatch=ws_histo_data, 
-                                 OutputWorkspace=ws_data_bck_1_rebin)
+                ws_data_bck_1_rebin = RebinToWorkspace(WorkspaceToRebin=ws_data_bck_1, 
+                                 WorkspaceToMatch=ws_histo_data)
 
             bBackRight = False
             if ((data_peak[1]+1) < data_back[1]):
 
                 bBackRight = True
-                ws_data_bck_2 = ws_data_bck + "_2"
-                RefRoi(InputWorkspace=ws_histo_data,
-                       OutputWorkspace=ws_data_bck_2,
+                ws_data_bck_2 = RefRoi(InputWorkspace=ws_histo_data,
                        NXPixel=maxX,
                        NYPixel=maxY,
                        ConvertToQ=False,
                        IntegrateY=False,
                        SumPixels=True,
-                       XPixelMin=data_low_res[0],
-                       XPixelMax=data_low_res[1],
-                       YPixelMin=data_peak[1]+1,
-                       YPixelMax=data_back[1],
+                       XPixelMin=int(data_low_res[0]),
+                       XPixelMax=int(data_low_res[1]),
+                       YPixelMin=int(data_peak[1]+1),
+                       YPixelMax=int(data_back[1]),
                        NormalizeSum=True)
             
-                ws_data_bck_2_rebin = ws_data_bck_2 + '_rebin'
-                RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
-                                 WorkspaceToMatch=ws_histo_data, 
-                                 OutputWorkspace=ws_data_bck_2_rebin)
-
+                ws_data_bck_2_rebin = RebinToWorkspace(WorkspaceToRebin=ws_data_bck_2, 
+                                 WorkspaceToMatch=ws_histo_data)
+                
             if (bBackLeft and bBackRight):
             
-                Plus(RHSWorkspace=ws_data_bck_1_rebin,
-                     LHSWorkspace=ws_data_bck_2_rebin,
-                     OutputWorkspace=ws_data_bck)
-                Scale(InputWorkspace=ws_data_bck,
-                      OutputWorkspace=ws_data_bck+'_scale',
+                ws_data_bck = Plus(RHSWorkspace=ws_data_bck_1_rebin,
+                     LHSWorkspace=ws_data_bck_2_rebin)
+                
+                ws_data_bck_scale = Scale(InputWorkspace=ws_data_bck,
                       Factor=0.5,
                       Operation="Multiply")
                 
-                Minus(LHSWorkspace=ws_histo_data, 
-                      RHSWorkspace=ws_data_bck+'_scale', 
-                      OutputWorkspace=ws_data)
+                ws_data = Minus(LHSWorkspace=ws_histo_data, 
+                      RHSWorkspace=ws_data_bck_scale) 
 
-                if mtd.workspaceExists(ws_data_bck+'_scale'):
-                    mtd.deleteWorkspace(ws_data_bck+'_scale')
-                
-                if mtd.workspaceExists(ws_data_bck):
-                    mtd.deleteWorkspace(ws_data_bck)
-                
-                if mtd.workspaceExists(ws_data_bck_1_rebin):
-                    mtd.deleteWorkspace(ws_data_bck_1_rebin)
-                
-                if mtd.workspaceExists(ws_data_bck_2_rebin):
-                    mtd.deleteWorkspace(ws_data_bck_2_rebin)
-                
-                if mtd.workspaceExists(ws_data_bck_1):
-                    mtd.deleteWorkspace(ws_data_bck_1)
-                
-                if mtd.workspaceExists(ws_data_bck_2):
-                    mtd.deleteWorkspace(ws_data_bck_2)
-                
-                if mtd.workspaceExists(ws_histo_data):
-                    mtd.deleteWorkspace(ws_histo_data)
+#                 if mtd.workspaceExists(ws_data_bck+'_scale'):
+#                     mtd.deleteWorkspace(ws_data_bck+'_scale')
+#                 
+#                 if mtd.workspaceExists(ws_data_bck):
+#                     mtd.deleteWorkspace(ws_data_bck)
+#                 
+#                 if mtd.workspaceExists(ws_data_bck_1_rebin):
+#                     mtd.deleteWorkspace(ws_data_bck_1_rebin)
+#                 
+#                 if mtd.workspaceExists(ws_data_bck_2_rebin):
+#                     mtd.deleteWorkspace(ws_data_bck_2_rebin)
+#                 
+#                 if mtd.workspaceExists(ws_data_bck_1):
+#                     mtd.deleteWorkspace(ws_data_bck_1)
+#                 
+#                 if mtd.workspaceExists(ws_data_bck_2):
+#                     mtd.deleteWorkspace(ws_data_bck_2)
+#                 
+#                 if mtd.workspaceExists(ws_histo_data):
+#                     mtd.deleteWorkspace(ws_histo_data)
 
             elif (bBackLeft):
                 
-                Minus(LHSWorkspace=ws_histo_data,
-                      RHSWorkspace=ws_data_bck_1_rebin,
-                      OutputWorkspace=ws_data)
+                ws_data = Minus(LHSWorkspace=ws_histo_data,
+                      RHSWorkspace=ws_data_bck_1_rebin)
                 
-                if mtd.workspaceExists(ws_data_bck_1_rebin):
-                    mtd.deleteWorkspace(ws_data_bck_1_rebin)
-                
-                if mtd.workspaceExists(ws_data_bck_1):
-                    mtd.deleteWorkspace(ws_data_bck_1)
+#                 if mtd.workspaceExists(ws_data_bck_1_rebin):
+#                     mtd.deleteWorkspace(ws_data_bck_1_rebin)
+#                 
+#                 if mtd.workspaceExists(ws_data_bck_1):
+#                     mtd.deleteWorkspace(ws_data_bck_1)
                 
             elif (bBackRight):
                 
-                Minus(LHSWorkspace=ws_histo_data,
-                      RHSWorkspace=ws_data_bck_2_rebin,
-                      OutputWorkspace=ws_data)
+                ws_data = Minus(LHSWorkspace=ws_histo_data,
+                      RHSWorkspace=ws_data_bck_2_rebin)
 
-                if mtd.workspaceExists(ws_data_bck_2_rebin):
-                    mtd.deleteWorkspace(ws_data_bck_2_rebin)
-                
-                if mtd.workspaceExists(ws_data_bck_2):
-                    mtd.deleteWorkspace(ws_data_bck_2)
+#                 if mtd.workspaceExists(ws_data_bck_2_rebin):
+#                     mtd.deleteWorkspace(ws_data_bck_2_rebin)
+#                 
+#                 if mtd.workspaceExists(ws_data_bck_2):
+#                     mtd.deleteWorkspace(ws_data_bck_2)
 
             #cleanup (remove all negatives values
-            ResetNegatives(InputWorkspace=ws_data,
-                           OutputWorkspace=ws_data,
+            ws_data = ResetNegatives(InputWorkspace=ws_data,
                            AddMinimum=0)
             
-            if mtd.workspaceExists(ws_histo_data):
-                mtd.deleteWorkspace(ws_histo_data)
+#             if mtd.workspaceExists(ws_histo_data):
+#                 mtd.deleteWorkspace(ws_histo_data)
 
         if (subtract_data_bck and (backSubMethod == 2)):
                             
@@ -655,7 +642,7 @@ class RefLReduction(PythonAlgorithm):
             
             # Normalized by Current (proton charge)
             print '-> normalized by current direct beam'
-            ws_norm_histo_data = NormaliseByCurrent(InputWorkspace=ws_norm_histo_data)
+            ws_norm_histo_data = NormaliseByCurrent(InputWorkspace=ws_norm_histo_data) 
 
 #            ws_data_bck = '_' + ws_name + '_NormBckWks'
 #            ws_norm_rebinned = '_' + ws_name + '_NormRebinnedWks'
@@ -663,128 +650,110 @@ class RefLReduction(PythonAlgorithm):
             if (subtract_norm_bck and (backSubMethod == 1)):
                 
                 print '-> substract background to direct beam'
-                ConvertToMatrixWorkspace(InputWorkspace=ws_norm_histo_data,
-                                         OutputWorkspace=ws_norm_histo_data)
-                            
-                ws_norm_bck = '_' + ws_name + '_NormBckWks'
+                ws_norm_histo_data = ConvertToMatrixWorkspace(InputWorkspace=ws_norm_histo_data)
                 
                 bBackLeft = False
                 if (norm_back[0] < (norm_peak[0]-1)):
             
                     bBackLeft = True
-                    ws_norm_bck_1 = ws_norm_bck + "_1"
-                    RefRoi(InputWorkspace=ws_norm_histo_data,
-                           OutputWorkspace=ws_norm_bck_1,
+                    ws_norm_bck_1 = RefRoi(InputWorkspace=ws_norm_histo_data,
                            NXPixel=maxX,
                            NYPixel=maxY,
                            ConvertToQ=False,
                            IntegrateY=False,
                            SumPixels=True,
-                           XPixelMin=norm_low_res[0],
-                           XPixelMax=norm_low_res[1],
-                           YPixelMin=norm_back[0],
-                           YPixelMax=norm_peak[0]-1,
+                           XPixelMin=int(norm_low_res[0]),
+                           XPixelMax=int(norm_low_res[1]),
+                           YPixelMin=int(norm_back[0]),
+                           YPixelMax=int(norm_peak[0]-1),
                            NormalizeSum=True)
                            
-                    ws_norm_bck_1_rebin = ws_norm_bck_1 + '_rebin'
-                    RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_1, 
-                                     WorkspaceToMatch=ws_norm_histo_data, 
-                                     OutputWorkspace=ws_norm_bck_1_rebin)
+                    ws_norm_bck_1_rebin = RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_1, 
+                                     WorkspaceToMatch=ws_norm_histo_data)
 
 
                 bBackRight = False
                 if ((norm_peak[1]+1) < norm_back[1]):
 
                     bBackRight = True
-                    ws_norm_bck_2 = ws_norm_bck + "_2"
-                    RefRoi(InputWorkspace=ws_norm_histo_data,
-                           OutputWorkspace=ws_norm_bck_2,
+                    ws_norm_bck_2 = RefRoi(InputWorkspace=ws_norm_histo_data,
                            NXPixel=maxX,
                            NYPixel=maxY,
                            ConvertToQ=False,
                            IntegrateY=False,
                            SumPixels=True,
-                           XPixelMin=norm_low_res[0],
-                           XPixelMax=norm_low_res[1],
-                           YPixelMin=norm_peak[1]+1,
-                           YPixelMax=norm_back[1],
+                           XPixelMin=int(norm_low_res[0]),
+                           XPixelMax=int(norm_low_res[1]),
+                           YPixelMin=int(norm_peak[1]+1),
+                           YPixelMax=int(norm_back[1]),
                            NormalizeSum=True)
             
-                    ws_norm_bck_2_rebin = ws_norm_bck_2 + '_rebin'
-                    RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_2, 
-                                     WorkspaceToMatch=ws_norm_histo_data, 
-                                     OutputWorkspace=ws_norm_bck_2_rebin)
+                    ws_norm_bck_2_rebin = RebinToWorkspace(WorkspaceToRebin=ws_norm_bck_2, 
+                                     WorkspaceToMatch=ws_norm_histo_data)
 
                 if (bBackLeft and bBackRight):
 
-                    Plus(RHSWorkspace=ws_norm_bck_1_rebin,
-                         LHSWorkspace=ws_norm_bck_2_rebin,
-                         OutputWorkspace=ws_norm_bck)
-                    Scale(InputWorkspace=ws_norm_bck,
-                          OutputWorkspace=ws_norm_bck+'_scale',
+                    ws_norm_bck = Plus(RHSWorkspace=ws_norm_bck_1_rebin,
+                         LHSWorkspace=ws_norm_bck_2_rebin)
+                    ws_norm_bck_scale = Scale(InputWorkspace=ws_norm_bck,
                           Factor=0.5,
                           Operation="Multiply")
 
-                    Minus(LHSWorkspace=ws_norm_histo_data, 
-                          RHSWorkspace=ws_norm_bck+'_scale', 
-                          OutputWorkspace=ws_norm_rebinned)
+                    ws_norm_rebinned = Minus(LHSWorkspace=ws_norm_histo_data, 
+                          RHSWorkspace=ws_norm_bck_scale)
                     
-                    if mtd.workspaceExists(ws_norm_bck_1_rebin):
-                        mtd.deleteWorkspace(ws_norm_bck_1_rebin)
-                    
-                    if mtd.workspaceExists(ws_norm_bck_2_rebin):
-                        mtd.deleteWorkspace(ws_norm_bck_2_rebin)
-                    
-                    if mtd.workspaceExists(ws_norm_bck_1):
-                        mtd.deleteWorkspace(ws_norm_bck_1)
-                    
-                    if mtd.workspaceExists(ws_norm_bck_2):
-                        mtd.deleteWorkspace(ws_norm_bck_2)
-                    
-                    if mtd.workspaceExists(ws_norm_histo_data):
-                        mtd.deleteWorkspace(ws_norm_histo_data)
-                    
-                    if mtd.workspaceExists(ws_norm_bck+'_scale'):
-                        mtd.deleteWorkspace(ws_norm_bck+'_scale')
+#                     if mtd.workspaceExists(ws_norm_bck_1_rebin):
+#                         mtd.deleteWorkspace(ws_norm_bck_1_rebin)
+#                     
+#                     if mtd.workspaceExists(ws_norm_bck_2_rebin):
+#                         mtd.deleteWorkspace(ws_norm_bck_2_rebin)
+#                     
+#                     if mtd.workspaceExists(ws_norm_bck_1):
+#                         mtd.deleteWorkspace(ws_norm_bck_1)
+#                     
+#                     if mtd.workspaceExists(ws_norm_bck_2):
+#                         mtd.deleteWorkspace(ws_norm_bck_2)
+#                     
+#                     if mtd.workspaceExists(ws_norm_histo_data):
+#                         mtd.deleteWorkspace(ws_norm_histo_data)
+#                     
+#                     if mtd.workspaceExists(ws_norm_bck+'_scale'):
+#                         mtd.deleteWorkspace(ws_norm_bck+'_scale')
 
                 elif (bBackLeft):
                     
-                    Minus(LHSWorkspace=ws_norm_histo_data,
-                          RHSWorkspace=ws_norm_bck_1_rebin,
-                          OutputWorkspace=ws_norm_rebinned)
+                    ws_norm_rebinned = Minus(LHSWorkspace=ws_norm_histo_data,
+                          RHSWorkspace=ws_norm_bck_1_rebin)
                     
-                    if mtd.workspaceExists(ws_norm_bck_1_rebin):
-                        mtd.deleteWorkspace(ws_norm_bck_1_rebin)
-                    
-                    if mtd.workspaceExists(ws_norm_bck_1):
-                        mtd.deleteWorkspace(ws_norm_bck_1)
-                        
-                    if mtd.workspaceExists(ws_norm_histo_data):
-                        mtd.deleteWorkspace(ws_norm_histo_data)
+#                     if mtd.workspaceExists(ws_norm_bck_1_rebin):
+#                         mtd.deleteWorkspace(ws_norm_bck_1_rebin)
+#                     
+#                     if mtd.workspaceExists(ws_norm_bck_1):
+#                         mtd.deleteWorkspace(ws_norm_bck_1)
+#                         
+#                     if mtd.workspaceExists(ws_norm_histo_data):
+#                         mtd.deleteWorkspace(ws_norm_histo_data)
 
                 elif (bBackRight):
                     
-                    Minus(LHSWorkspace=ws_norm_histo_data,
-                          RHSWorkspace=ws_norm_bck_2_rebin,
-                          OutputWorkspace=ws_norm_rebinned)
+                    ws_norm_rebinned = Minus(LHSWorkspace=ws_norm_histo_data,
+                          RHSWorkspace=ws_norm_bck_2_rebin)
                     
-                    if mtd.workspaceExists(ws_norm_bck_2_rebin):
-                        mtd.deleteWorkspace(ws_norm_bck_2_rebin)
-                        
-                    if mtd.workspaceExists(ws_norm_bck_2):
-                        mtd.deleteWorkspace(ws_norm_bck_2)
-                    
-                    if mtd.workspaceExists(ws_norm_histo_data):
-                        mtd.deleteWorkspace(ws_norm_histo_data)
+#                     if mtd.workspaceExists(ws_norm_bck_2_rebin):
+#                         mtd.deleteWorkspace(ws_norm_bck_2_rebin)
+#                         
+#                     if mtd.workspaceExists(ws_norm_bck_2):
+#                         mtd.deleteWorkspace(ws_norm_bck_2)
+#                     
+#                     if mtd.workspaceExists(ws_norm_histo_data):
+#                         mtd.deleteWorkspace(ws_norm_histo_data)
 
                 
                 #Here I need to set to zeros all the negative entries
-                ResetNegatives(InputWorkspace=ws_norm_rebinned,
-                               OutputWorkspace=ws_norm_rebinned,
+                ws_norm_rebinned = ResetNegatives(InputWorkspace=ws_norm_rebinned,
                                AddMinimum=0)
 
-                wks_utility.createIntegratedWorkspace(mtd[ws_norm_rebinned], 
-                                                      ws_norm_rebinned,
+                ws_norm_rebinned = wks_utility.createIntegratedWorkspace(ws_norm_rebinned, 
                                                       fromXpixel=norm_low_res[0],
                                                       toXpixel=norm_low_res[1],
                                                       fromYpixel=norm_peak[0],
@@ -993,11 +962,15 @@ class RefLReduction(PythonAlgorithm):
                                             q_binning=[q_min,q_step,q_max])
 
 #             if mtd.doesExist(ws_integrated_data):
-            DeleteWorkspace(ws_integrated_data)
+#             DeleteWorkspace(ws_integrated_data)
 
         else:
-            print '-> convert to Q here'
             
+            withCorrection = True               #REMOVEME should be True
+            if withCorrection:
+                print 'Convert to Q with geo-correction'
+            else:
+                print 'Convert to Q without geo-correction'
             ws_data_Q = wks_utility.convertWorkspaceToQ(ws_data_scaled,
                                                         fromYpixel=data_peak[0],
                                                         toYpixel=data_peak[1],
@@ -1005,7 +978,7 @@ class RefLReduction(PythonAlgorithm):
                                                         source_to_detector=dMD,
                                                         sample_to_detector=dSD,
                                                         theta=theta,
-                                                        geo_correction=True,
+                                                        geo_correction=withCorrection, 
                                                         q_binning=[q_min,q_step,q_max])
 
             DeleteWorkspace(ws_data_scaled)

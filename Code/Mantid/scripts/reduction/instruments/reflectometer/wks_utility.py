@@ -380,7 +380,7 @@ def convertWorkspaceToQ(ws_data,
         x_axis = q_axis.flatten()        
         y_axis = _y_axis.flatten()
         y_error_axis = _y_error_axis.flatten()
-            
+           
         outputWorkspace = CreateWorkspace(DataX=x_axis,
                                           DataY=y_axis,
                                           DataE=y_error_axis,
@@ -400,32 +400,40 @@ def convertWorkspaceToQ(ws_data,
             _q_axis = 1e-10 * _const * math.sin(theta) / (_tof_axis * 1e-6)
         else:
             _q_axis = _tof_axis
-
-        _y_axis = zeros((maxY, len(_q_axis) - 1))
-        _y_error_axis = zeros((maxY, len(_q_axis) - 1))
-    
+            print 'should not reach this condition !'
+            
         y_size = toYpixel - fromYpixel + 1
         y_range = arange(y_size) + fromYpixel
     
-        for y in y_range:
-            _y_axis[int(y), :] = mt1.readY(int(y))[:]
-            _y_error_axis[int(y), :] = mt1.readE(int(y))[:]
+        _y_axis = zeros((y_size, len(_q_axis) -1 ))
+        _y_error_axis = zeros((y_size, len(_q_axis) - 1))
 
+        for y in range(y_size):
+            
+            a = y_range[y]
+            
+            _tmp_y_axis = mt1.readY(int(a))[:]
+            _y_axis[int(y), :] = _tmp_y_axis;
+            _tmp_y_error_axis = mt1.readE(int(a))[:]
+            _y_error_axis[int(y),:] = _tmp_y_error_axis
+
+        _x_axis = _q_axis.flatten()
         _y_axis = _y_axis.flatten()
         _y_error_axis = _y_error_axis.flatten()
 
-        _q_axis = _q_axis[::-1]
+        # reverse order
+        _x_axis = _x_axis[::-1]
         _y_axis = _y_axis[::-1]
         _y_error_axis = _y_error_axis[::-1]
 
-        outputWorkspace = CreateWorkspace(DataX=_q_axis,
+        outputWorkspace = CreateWorkspace(DataX=_x_axis,
                                           DataY=_y_axis,    
                                           DataE=_y_error_axis,
-                                          Nspec=maxY,
+                                          Nspec=int(y_size),
                                           UnitX="MomentumTransfer",
                                           ParentWorkspace=mt1.name())
 
-        mtd[outputWorkspace].setDistribution(True)
+        outputWorkspace.setDistribution(True)
 
         outputWorkspace = Rebin(InputWorkspace=outputWorkspace,
               Params=q_binning)        
