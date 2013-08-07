@@ -22,6 +22,7 @@ set ( TEST_PY_FILES
   ITableWorkspaceTest.py
   JacobianTest.py
   MatrixWorkspaceTest.py
+  MDGeometryTest.py
   MDHistoWorkspaceTest.py
   MultipleExperimentInfos.py
   MultipleFilePropertyTest.py

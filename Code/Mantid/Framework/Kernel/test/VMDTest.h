@@ -159,6 +159,7 @@ public:
     VMD a(3,4,sqrt(39.0));
     TS_ASSERT_EQUALS( a.length(), 8.0);
     TS_ASSERT_EQUALS( a.norm(), 8.0);
+    TS_ASSERT_EQUALS( a.norm2(), 64.0);
   }
 
   void test_normalize()

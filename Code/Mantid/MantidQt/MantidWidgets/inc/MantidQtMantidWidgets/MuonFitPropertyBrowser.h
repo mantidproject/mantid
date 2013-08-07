@@ -62,8 +62,6 @@ private:
   virtual void populateFunctionNames();
   /// Enable/disable the Fit button;
   virtual void setFitEnabled(bool yes);
-  /// Sets the new workspace to the current one
-  virtual void workspaceChange(const QString& wsName);
   /// Check if the workspace can be used in the fit
   virtual bool isWorkspaceValid(Mantid::API::Workspace_sptr)const;
 

@@ -77,10 +77,10 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName("N/A"), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
-  m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), 
-  m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay(""),
-  m_nexusTimeZero(0.0)
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName("N/A"), 
+  m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
+  m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
+  m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
 {
   try
   {
@@ -200,8 +200,10 @@ void MuonAnalysis::initLayout()
   // connect the fit function widget buttons to their respective slots.
   loadFittings();
 
-  // Detected a workspace change and therefore the peak picker tool needs to be reassigned.
-  connect(m_uiForm.fitBrowser, SIGNAL(wsChangePPAssign(const QString &)), this, SLOT(assignPeakPickerTool(const QString &)));
+  // When workspace gets changed, show its plot
+  connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
+                         this, SLOT(showPlot(const QString&)),
+          Qt::QueuedConnection);
 
   // Detect when the tab is changed
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
@@ -214,7 +216,6 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
   connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileEditingFinished()), this, SLOT(deadTimeFileSelected() ) );
 }
-
 
 /**
 * Muon Analysis help (slot)
@@ -284,6 +285,9 @@ void MuonAnalysis::runFirstGoodBinFront()
 */
 void MuonAnalysis::runFrontPlotButton()
 {
+  if(m_updating)
+    return;
+
   if (m_deadTimesChanged)
   {
     inputFileChanged(m_previousFilenames);
@@ -450,6 +454,9 @@ void MuonAnalysis::runClearGroupingButton()
  */
 void MuonAnalysis::runGroupTablePlotButton()
 {
+  if(m_updating)
+    return;
+
   if (m_deadTimesChanged)
   {
     inputFileChanged(m_previousFilenames);
@@ -654,6 +661,9 @@ void MuonAnalysis::runLoadCurrent()
  */
 void MuonAnalysis::runPairTablePlotButton()
 {
+  if(m_updating)
+    return;
+
   if (m_deadTimesChanged)
   {
     inputFileChanged(m_previousFilenames);
@@ -988,6 +998,7 @@ void MuonAnalysis::inputFileChanged_MWRunFiles()
  */
 void MuonAnalysis::handleInputFileChanges()
 { 
+
   if ( m_uiForm.mwRunFiles->getText().isEmpty() )
     return;
 
@@ -1333,13 +1344,13 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   m_uiForm.optionLabelBinWidth->setText(QString("Data collected with histogram bins of ") + QString::number(binWidth) + QString(" %1s").arg(MU_SYM));
 
   m_deadTimesChanged = false;
+  m_updating = false;
 
   // finally the preferred default by users are to by default
   // straight away plot the data
   if (m_uiForm.frontPlotButton->isEnabled() )
     runFrontPlotButton();
   
-  m_updating = false;
   m_uiForm.tabWidget->setTabEnabled(3, true);
 }
 
@@ -2083,6 +2094,22 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
     runPythonCode( pyS );
 }
 
+void MuonAnalysis::showPlot(const QString& wsName)
+{
+  m_currentDataName = wsName;
+
+  emit closeGraph(m_currentDataName + "-1");
+  plotSpectrum(m_currentDataName, 0, false);
+
+  // Change the plot style of the graph so that it matches what is selected on
+  // the plot options tab.
+  QStringList plotDetails = m_fitDataTab->getAllPlotDetails(m_currentDataName);
+  changePlotType(plotDetails);
+
+  setConnectedDataText();
+
+  emit fittingRequested(m_uiForm.fitBrowser, m_currentDataName + "-1");
+}
 
 /**
  * Plot group
@@ -3402,57 +3429,32 @@ void MuonAnalysis::getFullCode(int originalSize, QString & run)
 
 
 /**
-* Everytime the tab is changed this is called to decide whether the peakpicker
-* tool needs to be associated with a plot or deleted from a plot
-*
-* @param tabNumber :: The index value of the current tab (3 = data analysis)
-*/
-void MuonAnalysis::changeTab(int tabNumber)
+ * Is called every time when tab gets changed
+ *
+ * @param tabNumber The index value of the current tab
+ */
+void MuonAnalysis::changeTab(int newTabNumber)
 {
+  int oldTabNumber = m_tabNumber;
+
+  m_tabNumber = newTabNumber;
+
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
   if (m_uiForm.hideToolbars->isChecked())
     emit hideToolbars();
 
-  m_tabNumber = tabNumber;
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
-  // If data analysis tab is chosen by user, assign peak picker tool to the current data if not done so already.
-  if (tabNumber == 3)
-  {
-    m_assigned = false;
-    // Update the peak picker tool with the current workspace.
-    m_uiForm.fitBrowser->updatePPTool(m_currentDataName);
-  }
-  else
-  {
-    if (tabNumber == 4)
-    {
-      m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
-    }
-    // delete the peak picker tool because it is no longer needed.
+  // If we are leaving the DA tab, unassign the PP tool
+  if(oldTabNumber == 3)
     emit activatePPTool("");
-  }
+
+  if (newTabNumber == 3)
+    emit activatePPTool(m_currentDataName + "-1");
+  else if(newTabNumber == 4)
+    m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
 }
-
-
-/**
-*   Emits a signal containing the fitBrowser and the name of the
-*   workspace we want to attach a peak picker tool to
-*
-*   @param workspaceName :: The QString name of the workspace the user wishes
-*   to attach a plot picker tool to.
-*/
-void MuonAnalysis::assignPeakPickerTool(const QString & workspaceName)
-{
-  if ((m_tabNumber == 3 && !m_assigned) || (m_tabNumber == 3 && m_currentDataName != workspaceName))
-  {
-    m_assigned = true;
-    m_currentDataName = workspaceName;
-    emit activatePPTool(workspaceName + "-1");
-  }
-}
-
 
 /**
 * Set up the signals and slots for auto updating the plots
@@ -3512,12 +3514,8 @@ void MuonAnalysis::secondPeriodSelectionChanged()
 
 void MuonAnalysis::homeTabUpdatePlot()
 {
-  int choice(m_uiForm.plotCreation->currentIndex());
-  if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 0) )
-  {
-    if (m_loaded == true)
+  if (isAutoUpdateEnabled() && m_tabNumber == 0 && m_loaded)
       runFrontPlotButton();
-  }
 }
 
 void MuonAnalysis::groupTabUpdateGroup()
@@ -3530,38 +3528,29 @@ void MuonAnalysis::groupTabUpdateGroup()
       updateFront();
     }
     m_uiForm.frontPlotFuncs->setCurrentIndex(m_uiForm.groupTablePlotChoice->currentIndex());
-    int choice(m_uiForm.plotCreation->currentIndex()); 
-    if ((choice == 0 || choice == 1) && (!m_updating) )
-    {
-      if (m_loaded == true)
-        runGroupTablePlotButton();
-    }
+
+    if (isAutoUpdateEnabled() && m_loaded == true)
+      runGroupTablePlotButton();
   }
 }
 
 void MuonAnalysis::groupTabUpdatePair()
 {
-  if (m_tabNumber == 1)
-  {
-    int choice(m_uiForm.plotCreation->currentIndex());
-    if ((choice == 0 || choice == 1) && (!m_updating) )
-    {
-      if (m_loaded == true)
-        runPairTablePlotButton();
-    }
-  }
+  if (isAutoUpdateEnabled() && m_tabNumber == 1 && m_loaded == true)
+    runPairTablePlotButton();
 }
 
 void MuonAnalysis::settingsTabUpdatePlot()
 {
-  int choice(m_uiForm.plotCreation->currentIndex());
-  if ((choice == 0 || choice == 1) && (!m_updating) && (m_tabNumber == 2) )
-  {
-    if (m_loaded == true)
-      runFrontPlotButton();
-  }
+  if (isAutoUpdateEnabled() && m_tabNumber == 2 && m_loaded == true)
+    runFrontPlotButton();
 }
 
+bool MuonAnalysis::isAutoUpdateEnabled()
+{
+  int choice(m_uiForm.plotCreation->currentIndex());
+  return (choice == 0 || choice == 1);
+}
 
 /**
 * Re-open the toolbars after closing MuonAnalysis
@@ -3620,7 +3609,7 @@ void MuonAnalysis::showHideToolbars(bool state)
 void MuonAnalysis::changeDeadTimeType(int choice)
 {
   m_deadTimesChanged = true;
-  if (choice == 0 || choice == 1) // if choice == none ||choice == from file
+  if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
     homeTabUpdatePlot();
