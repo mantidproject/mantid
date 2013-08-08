@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -13,6 +14,30 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+
+class RemovePeaks
+{
+public:
+  RemovePeaks();
+  ~RemovePeaks();
+
+  void setup(DataObjects::TableWorkspace_sptr peaktablews);
+
+  DataObjects::Workspace2D_sptr removePeaks(API::MatrixWorkspace_const_sptr dataws, int wsindex, double numfwhm);
+
+private:
+  /// Parse peak centre and FWHM from a table workspace
+  void parsePeakTableWorkspace(DataObjects::TableWorkspace_sptr peaktablews, std::vector<double>& vec_peakcentre,
+                               std::vector<double>& vec_peakfwhm);
+
+  /// Exclude peak regions
+  size_t excludePeaks(std::vector<double> v_inX, std::vector<bool>& v_useX, std::vector<double> v_centre,
+                      std::vector<double> v_fwhm,  double num_fwhm);
+
+  std::vector<double> m_vecPeakCentre;
+  std::vector<double> m_vecPeakFWHM;
+
+};
 
   /** ProcessBackground : Process background obtained from LeBailFit
     
@@ -60,16 +85,29 @@ private:
     /// Select background points (main)
     void execSelectBkgdPoints();
 
+    /// Parse peak centre and FWHM from a table workspace
+    void parsePeakTableWorkspace(DataObjects::TableWorkspace_sptr peaktablews, std::vector<double>& vec_peakcentre,
+                                 std::vector<double>& vec_peakfwhm);
+
+    /// Exclude peak regions
+    size_t excludePeaks(std::vector<double> v_inX, std::vector<bool>& v_useX, std::vector<double> v_centre,
+                        std::vector<double> v_fwhm);
+
     /// Select background points automatically
     DataObjects::Workspace2D_sptr autoBackgroundSelection(size_t wsindex, DataObjects::Workspace2D_sptr bkgdWS);
 
-    DataObjects::Workspace2D_const_sptr inpWS;
-    DataObjects::Workspace2D_sptr outWS;
+    DataObjects::Workspace2D_const_sptr m_dataWS;
+    DataObjects::Workspace2D_sptr m_outputWS;
+
+    int m_wsIndex;
 
     double mLowerBound;
     double mUpperBound;
 
     double mTolerance;
+
+    /// Number of FWHM of range of peak to be removed.
+    double m_numFWHM;
 
     /// Remove peaks in a certain region
     void removePeaks();
