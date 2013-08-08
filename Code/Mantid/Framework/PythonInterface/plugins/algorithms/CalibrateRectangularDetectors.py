@@ -313,8 +313,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             for ws in [str(wksp)+"cc3", str(wksp)+"offset3", str(wksp)+"mask3"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, 
+        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, 
                                 OutputWorkspace=str(wksp)+"group")
+        if (numGroupedSpectra==0) or (numGroups==0):
+            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
         lcinst = str(self._instrument)
         
         if "dspacemap" in self._outTypes:
@@ -366,8 +368,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if not "histo" in self.getProperty("Extension").value:
             wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                          Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, 
+        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, 
                                 OutputWorkspace=str(wksp)+"group")
+        if (numGroupedSpectra==0) or (numGroups==0):
+            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
         if len(self._smoothGroups) > 0:
             wksp = SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
                               NPoints=self._smoothGroups, GroupingWorkspace=str(wksp)+"group")
