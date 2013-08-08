@@ -210,7 +210,6 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Set Miller Indices for this peak
-   */
   void ThermalNeutronBk2BkExpConvPVoigt::setMillerIndex(int h, int k, int l)
   {
     // Check validity and set flag
@@ -244,10 +243,10 @@ namespace CurveFitting
 
     return;
   }
+     */
 
   //----------------------------------------------------------------------------------------------
   /** Get Miller Index from this peak
-   */
   void ThermalNeutronBk2BkExpConvPVoigt::getMillerIndex(int& h, int &k, int &l)
   {
     h = static_cast<int>(mH);
@@ -256,8 +255,9 @@ namespace CurveFitting
 
     return;
   }
+  */
 
-    //----------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Get peak parameters stored locally
    * Get some internal parameters values including
    * (a) Alpha, (b) Beta, (c) Gamma, (d) Sigma2
@@ -644,8 +644,8 @@ namespace CurveFitting
       const double SQRT_H_5 = sqrt(H)*.5;
       std::complex<double> p(alpha*x, alpha*SQRT_H_5);
       std::complex<double> q(-beta*x, beta*SQRT_H_5);
-      double omega2a = imag(exp(p)*E1(p));
-      double omega2b = imag(exp(q)*E1(q));
+      double omega2a = imag(exp(p)*E1X(p));
+      double omega2b = imag(exp(q)*E1X(q));
       omega2 = -1.0*N*eta*(omega2a + omega2b)*TWO_OVER_PI;
     }
     const double omega = omega1+omega2;
@@ -737,7 +737,7 @@ namespace CurveFitting
   //-------------------------  External Functions ---------------------------------------------------
   /** Implementation of complex integral E_1
    */
-  std::complex<double> E1(std::complex<double> z)
+  std::complex<double> E1X(std::complex<double> z)
   {
     const double el = 0.5772156649015328;
 

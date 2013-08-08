@@ -143,6 +143,54 @@ namespace API
     return max;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Set Miller Indices for this peak
+   */
+  void IPowderDiffPeakFunction::setMillerIndex(int h, int k, int l)
+  {
+    // Check validity and set flag
+    if (mHKLSet)
+    {
+      // Throw exception if tried to reset the miller index
+      stringstream errss;
+      errss << "ThermalNeutronBk2BkExpConvPVoigt Peak cannot have (HKL) reset.";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+    else
+    {
+      // Set flag
+      mHKLSet = true;
+    }
+
+    // Set value
+    mH = static_cast<int>(h);
+    mK = static_cast<int>(k);
+    mL = static_cast<int>(l);
+
+    // Check value valid or not
+    if (mH*mH + mK*mK + mL*mL < 1.0E-8)
+    {
+      stringstream errmsg;
+      errmsg << "H = K = L = 0 is not allowed";
+      g_log.error(errmsg.str());
+      throw std::invalid_argument(errmsg.str());
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get Miller Index from this peak
+   */
+  void IPowderDiffPeakFunction::getMillerIndex(int& h, int &k, int &l)
+  {
+    h = static_cast<int>(mH);
+    k = static_cast<int>(mK);
+    l = static_cast<int>(mL);
+
+    return;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** General implementation of the method for all peaks. Limits the peak evaluation to

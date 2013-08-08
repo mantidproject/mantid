@@ -60,18 +60,16 @@ namespace CurveFitting
 
     //--------------- ThermalNeutron peak function special ---------------------------------------
     /// Set Miller Indicies
-    virtual void setMillerIndex(int h, int k, int l);
+    // virtual void setMillerIndex(int h, int k, int l);
 
     /// Get Miller Index from this peak
-    virtual void getMillerIndex(int& h, int &k, int &l);
+    // virtual void getMillerIndex(int& h, int &k, int &l);
 
     /// Get peak parameters
     virtual double getPeakParameter(std::string);
 
     /// Calculate peak parameters (alpha, beta, sigma2..)
-    void calculateParameters(bool explicitoutput) const;
-    //  double& dh, double& tof_h, double& eta, double& alpha, double& beta, double &H, double& sigma2,
-    // double &gamma, double &N,
+    virtual void calculateParameters(bool explicitoutput) const;
 
     /// Core function to calcualte peak values for whole region
     // void functionLocal(vector<double>& out, const vector<double> &xValues) const;
@@ -85,10 +83,10 @@ namespace CurveFitting
     */
 
     /// Override setting a new value to the i-th parameter
-    void setParameter(size_t i, const double& value, bool explicitlySet=true);
+    virtual void setParameter(size_t i, const double& value, bool explicitlySet=true);
 
     /// Override setting a new value to a parameter by name
-    void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
+    virtual void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
 
     /// Set peak's height
     virtual void setHeight(const double h);
@@ -187,7 +185,7 @@ inline double calCubicDSpace(double a, int h, int k, int l)
 */
 
 /// Integral for Gamma
-std::complex<double> E1(std::complex<double> z);
+std::complex<double> E1X(std::complex<double> z);
 
 } // namespace CurveFitting
 } // namespace Mantid

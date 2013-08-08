@@ -67,10 +67,10 @@ public:
 
   //--------------- ThermalNeutron peak function special ---------------------------------------
   /// Set Miller Indicies
-  virtual void setMillerIndex(int h, int k, int l) = 0;
+  virtual void setMillerIndex(int h, int k, int l);
 
   /// Get Miller Index from this peak
-  virtual void getMillerIndex(int& h, int &k, int &l) = 0;
+  virtual void getMillerIndex(int& h, int &k, int &l);
 
   /// Get peak parameters
   virtual double getPeakParameter(std::string) = 0;
@@ -100,7 +100,6 @@ public:
 
   /// Calculate function in a range
   using IFunction1D::function;
-
   virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const = 0;
 
   /// Get maximum value on a given set of data points
