@@ -8,3 +8,11 @@ The following command will generate classes and headers based on the source file
 
     soapcpp2 -i -C -I</path/to/gsoap/import> NameOfFile.h
 
+### Possible issues
+
+When running your code on OSX, or the test servers you may *will* come across problems with OSX trying to include windows.h files. To solve this issue, locate `windows.h` in `stdsoap2.h` and add the following code to the `WITH_OPENSSL` macro:
+
+    # ifdef __APPLE__
+      # undef OPENSSL_SYS_WINDOWS
+      # undef OPENSSL_SYS_WIN32
+    # endif
