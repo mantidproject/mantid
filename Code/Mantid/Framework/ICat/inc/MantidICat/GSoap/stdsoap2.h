@@ -1123,8 +1123,8 @@ extern "C" {
 #ifdef __APPLE__
 # ifdef __cplusplus
 #  ifndef isnan
-extern "C" int isnan(double);
-extern "C" int isinf(double);
+// JAWRAINEY (08/08/2013) extern "C" int isnan(double);
+// JAWRAINEY (08/08/2013) extern "C" int isinf(double);
 #  endif
 # endif
 # ifndef HAVE_ISNAN
