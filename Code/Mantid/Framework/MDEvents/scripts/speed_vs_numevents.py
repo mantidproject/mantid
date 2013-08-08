@@ -14,9 +14,7 @@ from pylab import *
 import os
 import sys
 sys.path.append("/home/8oz/Code/Mantid/Code/Mantid/bin")
-from MantidFramework import mtd
-mtd.initialise()
-from mantidsimple import *
+from mantid.simpleapi import * 
 import time
 import numpy as np
 import pickle
