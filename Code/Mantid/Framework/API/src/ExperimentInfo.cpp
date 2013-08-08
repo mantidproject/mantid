@@ -21,12 +21,14 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
+#include <Poco/ScopedLock.h>
 
 #include <fstream>
 #include <map>
@@ -49,8 +51,8 @@ namespace API
   :
     m_moderatorModel(),
     m_choppers(),
-    m_sample(),
-    m_run(),
+    m_sample(new Sample()),
+    m_run(new Run()),
     m_parmap(new ParameterMap()),
     sptr_instrument(new Instrument())
   {
@@ -63,6 +65,16 @@ namespace API
   {
   }
 
+  //---------------------------------------------------------------------------------------
+  /**
+   * Constructs the object from a copy if the input. This leaves the new mutex
+   * unlocked.
+   * @param source The source object from which to initialize
+   */
+  ExperimentInfo::ExperimentInfo(const ExperimentInfo & source)
+  {
+    this->copyExperimentInfoFrom(&source);
+  }
 
   //---------------------------------------------------------------------------------------
   /** Copy the experiment info data from another ExperimentInfo instance,
@@ -130,24 +142,20 @@ namespace API
     //TODO: Here duplicates cow_ptr. Figure out if there's a better way
 
     // Use a double-check for sharing so that we only
+
     // enter the critical region if absolutely necessary
     if (!m_parmap.unique())
     {
-      PARALLEL_CRITICAL(cow_ptr_access)
+      Poco::Mutex::ScopedLock lock(m_mutex);
+      // Check again because another thread may have taken copy
+      // and dropped reference count since previous check
+      if (!m_parmap.unique())
       {
-        // Check again because another thread may have taken copy
-        // and dropped reference count since previous check
-        if (!m_parmap.unique())
-        {
-          ParameterMap_sptr oldData=m_parmap;
-          m_parmap.reset();
-          m_parmap = ParameterMap_sptr(new ParameterMap(*oldData));
-        }
+        ParameterMap_sptr oldData = m_parmap;
+        m_parmap = boost::make_shared<ParameterMap>(*oldData);
       }
     }
-
     return *m_parmap;
-    //return m_parmap.access(); //old cow_ptr thing
   }
 
 
@@ -505,6 +513,7 @@ namespace API
   */
   const  Sample& ExperimentInfo::sample() const
   {
+    Poco::Mutex::ScopedLock lock(m_mutex);
     return *m_sample;
   }
 
@@ -516,7 +525,20 @@ namespace API
   */
   Sample& ExperimentInfo::mutableSample()
   {
-    return m_sample.access();
+    // Use a double-check for sharing so that we only
+    // enter the critical region if absolutely necessary
+    if (!m_sample.unique())
+    {
+      Poco::Mutex::ScopedLock lock(m_mutex);
+      // Check again because another thread may have taken copy
+      // and dropped reference count since previous check
+      if (!m_sample.unique())
+      {
+        boost::shared_ptr<Sample> oldData = m_sample;
+        m_sample = boost::make_shared<Sample>(*oldData);
+      }
+    }
+    return *m_sample;
   }
 
 
@@ -526,6 +548,7 @@ namespace API
   */
   const Run& ExperimentInfo::run() const
   {
+    Poco::Mutex::ScopedLock lock(m_mutex);
     return *m_run;
   }
 
@@ -537,7 +560,20 @@ namespace API
   */
   Run& ExperimentInfo::mutableRun()
   {
-    return m_run.access();
+    // Use a double-check for sharing so that we only
+    // enter the critical region if absolutely necessary
+    if (!m_run.unique())
+    {
+      Poco::Mutex::ScopedLock lock(m_mutex);
+      // Check again because another thread may have taken copy
+      // and dropped reference count since previous check
+      if (!m_run.unique())
+      {
+        boost::shared_ptr<Run> oldData = m_run;
+        m_run = boost::make_shared<Run>(*oldData);
+      }
+    }
+    return *m_run;
   }
 
   /**
@@ -604,7 +640,8 @@ namespace API
    */
   int ExperimentInfo::getRunNumber() const
   {
-    if (!m_run->hasProperty("run_number"))
+    const Run& thisRun = run();
+    if (!thisRun.hasProperty("run_number"))
     {
       // No run_number property, default to 0
       return 0;
@@ -776,7 +813,7 @@ namespace API
     std::string date;
     try
     {
-      date = m_run->startTime().toISO8601String();
+      date = run().startTime().toISO8601String();
     }
     catch (std::runtime_error &)
     {
@@ -872,8 +909,8 @@ namespace API
   {
     Instrument_const_sptr instrument = getInstrument();
     instrument->saveNexus( file, "instrument");
-    m_sample->saveNexus(file, "sample");
-    m_run->saveNexus(file, "logs");
+    sample().saveNexus(file, "sample");
+    run().saveNexus(file, "logs");
   }
 
   //--------------------------------------------------------------------------------------------
@@ -889,7 +926,7 @@ namespace API
     std::string instrumentFilename;
 
     // First, the sample and then the logs
-    int sampleVersion = m_sample.access().loadNexus(file, "sample");
+    int sampleVersion = mutableSample().loadNexus(file, "sample");
     if (sampleVersion == 0)
     {
       // Old-style (before Sep-9-2011) NXS processed
