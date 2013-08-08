@@ -242,13 +242,28 @@ public:
     int nHist = 10,nBins=20;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
-    MatrixWorkspace_sptr work_out1;
+    const double value(8.0);
+    MatrixWorkspace_sptr work_out1, work_out2;
     if (DO_PLUS)
+    {
       work_out1 = work_in1+work_in2;
+      work_out2 = work_in1+value;
+    }
     else
+    {
       work_out1 = work_in1-work_in2;
+      work_out2 = work_in1-value;
+
+      MatrixWorkspace_sptr work_out3 = value-work_in2;
+      // checkData won't work on this one, do a few checks here
+      TS_ASSERT_EQUALS( work_out3->size(), work_in2->size() );
+      TS_ASSERT_EQUALS( work_out3->readX(1), work_in2->readX(1) );
+      TS_ASSERT_EQUALS( work_out3->readY(2)[6], 3.0 );
+      TS_ASSERT_EQUALS( work_out3->readE(3)[4], 4.0 );
+    }
 
     checkData(work_in1, work_in2, work_out1);
+    checkData(work_in1, boost::make_shared<WorkspaceSingleValue>(value), work_out2);
   }
 
   void test_1D_SingleValue()
