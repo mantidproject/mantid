@@ -110,9 +110,6 @@ void MuonAnalysis::initLayout()
 
   m_uiForm.fitBrowser->init();
 
-  // Make the Muon Analysis fit browser the currently used one
-  emit setFitPropertyBrowser(m_uiForm.fitBrowser);
-
   // Delete current PP tool (if any), as we start not on the DA tab
   emit activatePPTool("");
 
@@ -3452,13 +3449,18 @@ void MuonAnalysis::changeTab(int newTabNumber)
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
-  // If we are leaving the DA tab, unassign the PP tool
-  if(oldTabNumber == 3)
+  if(oldTabNumber == 3) // DA tab
+  {
+    emit setFitPropertyBrowser(NULL);
     emit activatePPTool("");
+  }
 
-  if (newTabNumber == 3)
+  if (newTabNumber == 3) // DA tab
+  {
+    emit setFitPropertyBrowser(m_uiForm.fitBrowser);
     emit activatePPTool(m_currentDataName + "-1");
-  else if(newTabNumber == 4)
+  }
+  else if(newTabNumber == 4) // Results table tab
     m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
 }
 
@@ -3567,8 +3569,9 @@ void MuonAnalysis::closeEvent(QCloseEvent *e)
   if (m_uiForm.hideToolbars->isChecked())
     emit showToolbars();
 
-  // Reset currently used fit property browser to the default one
-  emit setFitPropertyBrowser(NULL);
+  // If closed while on DA tab, reassign fit property browser to default one
+  if(m_tabNumber == 3)
+    emit setFitPropertyBrowser(NULL);
 
   // Delete the peak picker tool because it is no longer needed.
   emit activatePPTool("");
