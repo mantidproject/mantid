@@ -17066,7 +17066,7 @@ void ApplicationWindow::activatePPTool(const QString& plotName)
       {
         foreach(Graph *g, layers)
         {
-          PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, true, true);
+          PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, true);
           g->setActiveTool(ppicker);
         }
       }

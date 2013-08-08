@@ -26,7 +26,7 @@
 
 Mantid::Kernel::Logger & PeakPickerTool::g_log = Mantid::Kernel::Logger::get("PeakPickerTool");
 
-PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser, bool customInterface) :
+PeakPickerTool::PeakPickerTool(Graph *graph, MantidQt::MantidWidgets::FitPropertyBrowser *fitPropertyBrowser, MantidUI *mantidUI, bool showFitPropertyBrowser) :
 QwtPlotPicker(graph->plotWidget()->canvas()),
 PlotToolInterface(graph),
 m_fitPropertyBrowser(fitPropertyBrowser),
