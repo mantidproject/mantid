@@ -4,10 +4,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/FakeObjects.h"
 #include "MantidAPI/NumericAxis.h"
 
 #include <boost/shared_ptr.hpp>
+
+using namespace Mantid;
 
 class IncreasingAxisValidatorTest : public CxxTest::TestSuite
 {
@@ -19,18 +21,20 @@ public:
 
   IncreasingAxisValidatorTest()
   {
-    m_right_ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,2);
+    m_right_ws = boost::make_shared<WorkspaceTester>();
+    m_right_ws->initialize(1,3,3);
 
-    boost::shared_ptr<Mantid::MantidVec> right_x(new Mantid::MantidVec);
+    auto right_x = boost::make_shared<MantidVec>();
     right_x->push_back(0);
     right_x->push_back(1);
     right_x->push_back(2);
 
     m_right_ws->setX(0, *right_x.get());
 
-    m_wrong_ws = WorkspaceCreationHelper::Create2DWorkspaceBinned(1,2);
+    m_wrong_ws = boost::make_shared<WorkspaceTester>();
+    m_wrong_ws->initialize(1,3,3);
 
-    boost::shared_ptr<Mantid::MantidVec> wrong_x(new Mantid::MantidVec);
+    auto wrong_x = boost::make_shared<MantidVec>();
     wrong_x->push_back(2);
     wrong_x->push_back(1);
     wrong_x->push_back(0);
