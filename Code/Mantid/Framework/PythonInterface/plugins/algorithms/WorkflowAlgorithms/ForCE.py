@@ -1,7 +1,6 @@
 # Algorithm to start Force
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator, logger
-from IndirectForce import IbackStart, InxStart
 
 class ForCE(PythonAlgorithm):
  
@@ -34,6 +33,7 @@ class ForCE(PythonAlgorithm):
 		saveOp = self.getProperty('Save')
 		plotOp = self.getPropertyValue('Plot')
 
+                from IndirectForce import IbackStart, InxStart
 		if mode == 'ASCII':
 			IbackStart(instr,run,ana,refl,rejectZ,useM,verbOp,plotOp,saveOp)
 		if mode == 'INX':

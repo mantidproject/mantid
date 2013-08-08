@@ -1,7 +1,6 @@
 # Algorithm to start Symmetrise
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
-import IndirectSymm as Main
 
 class Symmetrise(PythonAlgorithm):
  
@@ -32,6 +31,7 @@ class Symmetrise(PythonAlgorithm):
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getProperty('Plot')
 		saveOp = self.getProperty('Save')
+                import IndirectSymm as Main
 		Main.SymmStart(inType,sam,cut,verbOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(Symmetrise)         # Register algorithm with Mantid
