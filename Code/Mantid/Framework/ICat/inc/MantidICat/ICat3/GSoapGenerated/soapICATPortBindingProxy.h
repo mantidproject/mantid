@@ -7,7 +7,7 @@
 
 #ifndef soapICATPortBindingProxy_H
 #define soapICATPortBindingProxy_H
-#include "MantidICat/GSoapGenerated/soapH.h"
+#include "soapH.h"
 
 class SOAP_CMAC ICATPortBindingProxy : public soap
 {

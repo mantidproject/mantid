@@ -1,4 +1,4 @@
-#include "MantidICat/ICat3Catalog.h"
+#include "MantidICat/ICat3/ICat3Catalog.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidICat/Session.h"
 #include "MantidAPI/Progress.h"
