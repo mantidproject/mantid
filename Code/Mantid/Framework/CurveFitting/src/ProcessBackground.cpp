@@ -191,60 +191,9 @@ DECLARE_ALGORITHM(ProcessBackground)
     if (m_numFWHM <= 0.)
       throw runtime_error("NumberOfFWHM must be larger than 0. ");
 
-#if 0
-    // Generate peaks
-    vector<double> vec_peakcentre, vec_peakfwhm;
-    parsePeakTableWorkspace(peaktablews, vec_peakcentre, vec_peakfwhm);
-
-    // Remove peaks
-    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
-    const MantidVec& vecY = m_dataWS->readY(m_wsIndex);
-    const MantidVec& vecE = m_dataWS->readE(m_wsIndex);
-
-    size_t sizex = vecX.size();
-    vector<bool> vec_useX(sizex, true);
-
-    // Exclude regions
-    size_t numbkgdpoints = excludePeaks(vecX, vec_useX, vec_peakcentre, vec_peakfwhm);
-    size_t numbkgdpointsy = numbkgdpoints;
-    size_t sizey =  vecY.size();
-    if (sizex > sizey)
-      -- numbkgdpointsy;
-
-    // Construct output workspace
-    m_outputWS = boost::dynamic_pointer_cast<Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 1, numbkgdpoints, numbkgdpointsy));
-    MantidVec& outX = m_outputWS->dataX(0);
-    MantidVec& outY = m_outputWS->dataY(0);
-    MantidVec& outE = m_outputWS->dataE(0);
-    size_t index = 0;
-    for (size_t i = 0; i < sizex; ++i)
-    {
-      if (vec_useX[i])
-      {
-        if (index >= numbkgdpoints)
-          throw runtime_error("Programming logic error (1)");
-        outX[index] = vecX[i];
-        ++ index;
-      }
-    }
-    index = 0;
-    for (size_t i = 0; i < sizey; ++i)
-    {
-      if (vec_useX[i])
-      {
-        if (index >= numbkgdpointsy)
-          throw runtime_error("Programming logic error (2)");
-        outY[index] = vecY[i];
-        outE[index] = vecE[i];
-        ++ index;
-      }
-    }
-#else
     RemovePeaks remove;
     remove.setup(peaktablews);
     m_outputWS = remove.removePeaks(m_dataWS, m_wsIndex, m_numFWHM);
-#endif
 
     return;
   }
