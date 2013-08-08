@@ -1,8 +1,5 @@
 import unittest
-
-from MantidFramework import *
-mtd.initialise()
-from mantidsimple import *
+from mantid.simpleapi import *
 
 class NormaliseToUnityTest(unittest.TestCase):
     """
@@ -19,8 +16,8 @@ class NormaliseToUnityTest(unittest.TestCase):
         output_ws = "output_1"
         NormaliseToUnity("normalise_to_unity_test", output_ws)
         self.assertEqual(mtd[output_ws].readY(0)[0],0.1)
-        if mtd.workspaceExists(output_ws):
-            mtd.deleteWorkspace(output_ws)
+        if mtd.doesExist(output_ws):
+            DeleteWorkspace(output_ws)
 
     def test_x_range(self):
         """
@@ -29,8 +26,8 @@ class NormaliseToUnityTest(unittest.TestCase):
         output_ws = "output_2"
         NormaliseToUnity("normalise_to_unity_test", output_ws, RangeLower=2, RangeUpper=4)
         self.assertEqual(mtd[output_ws].readY(0)[0],0.25)
-        if mtd.workspaceExists(output_ws):
-            mtd.deleteWorkspace(output_ws)
+        if mtd.doesExist(output_ws):
+            DeleteWorkspace(output_ws)
 
     def test_x_range_and_spectra(self):
         """
@@ -40,8 +37,8 @@ class NormaliseToUnityTest(unittest.TestCase):
         NormaliseToUnity("normalise_to_unity_test", output_ws, RangeLower=2, RangeUpper=4,
                          StartWorkspaceIndex=0, EndWorkspaceIndex=0)
         self.assertEqual(mtd[output_ws].readY(0)[0],0.5)
-        if mtd.workspaceExists(output_ws):
-            mtd.deleteWorkspace(output_ws)
+        if mtd.doesExist(output_ws):
+            DeleteWorkspace(output_ws)
             
 if __name__ == '__main__':
     unittest.main()
