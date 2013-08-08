@@ -139,6 +139,7 @@ namespace CurveFitting
 
       FunctionDomain1DVector domain(xvalues);
       FunctionValues values(domain);
+      g_log.notice() << "[REMOVESOON] Background function: " << m_background->asString() << ".\n";
       m_background->function(domain, values);
       size_t numpts = out.size();
       for (size_t i = 0; i < numpts; ++i)
@@ -876,8 +877,11 @@ namespace CurveFitting
     * The supported background types are Polynomial/Linear/Flat and Chebyshev
     * @param backgroundtype :: string, type of background, such as Polynomial, Chebyshev
     * @param vecparvalues :: vector of parameter values from order 0.
+    * @param startx :: background's StartX.  Used by Chebyshev
+    * @param endx :: background's EndX.  Used by Chebyshev
     */
-  void LeBailFunction::addBackgroundFunction(string backgroundtype, std::vector<double>& vecparvalues)
+  void LeBailFunction::addBackgroundFunction(string backgroundtype, std::vector<double>& vecparvalues,
+                                             double startx, double endx)
   {
     // Check
     if (backgroundtype.compare("Polynomial") && backgroundtype.compare("Chebyshev"))
@@ -894,17 +898,23 @@ namespace CurveFitting
     auto background = FunctionFactory::Instance().createFunction(backgroundtype);
     m_background = boost::dynamic_pointer_cast<BackgroundFunction>(background);
 
-    // Set order and init
-    m_background->setAttributeValue("n", int(order));
+    // Set order and init: remember that for background function polynomial and chebyshev,
+    // n is always equal to number of order parameter plus 1.
+    m_background->setAttributeValue("n", int(order)-1);
     m_background->initialize();
 
     // Set parameters
     for (size_t i = 0; i < order; ++i)
     {
       m_background->setParameter(i, vecparvalues[i]);
-      g_log.information() << "Background function: set " << m_background->parameterName(i)
-                          << " = " << vecparvalues[i] << ".\n";
+      g_log.debug() << "Background function: set " << m_background->parameterName(i)
+                    << " = " << vecparvalues[i] << ".\n";
     }
+
+    if (startx > 0.)
+      m_background->setAttributeValue("StartX", startx);
+    if (endx > 0.)
+      m_background->setAttributeValue("EndX", endx);
 
     return;
   }
