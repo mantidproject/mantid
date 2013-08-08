@@ -13,7 +13,6 @@
 #endif
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
 
 
 namespace Mantid

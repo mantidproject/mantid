@@ -8,7 +8,6 @@
 // To be compatible with MSVC++ Express Edition that does not have TR1 headers
 #include <map>
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
