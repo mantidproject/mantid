@@ -8,7 +8,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DeltaEMode.h"
 
 #include <list>
@@ -48,7 +47,8 @@ namespace API
     ExperimentInfo();
     /// Virtual destructor
     virtual ~ExperimentInfo();
-    
+    /// Copy constructor
+    ExperimentInfo(const ExperimentInfo &);
     /// Copy everything from the given experiment object
     void copyExperimentInfoFrom(const ExperimentInfo * other);
     /// Clone us
@@ -139,9 +139,9 @@ namespace API
     /// Description of the choppers for this experiment.
     std::list<boost::shared_ptr<ChopperModel> > m_choppers;
     /// The information on the sample environment
-    Kernel::cow_ptr<Sample> m_sample;
+    boost::shared_ptr<Sample> m_sample;
     /// The run information
-    Kernel::cow_ptr<Run> m_run;
+    boost::shared_ptr<Run> m_run;
     /// Parameters modifying the base instrument
     boost::shared_ptr<Geometry::ParameterMap> m_parmap;
     /// The base (unparametrized) instrument
@@ -150,7 +150,8 @@ namespace API
   private:
     /// Detector grouping information
     det2group_map m_detgroups;
-
+    /// Mutex to protect against cow_ptr copying
+    mutable Poco::Mutex m_mutex;
   };
 
   /// Shared pointer to ExperimentInfo
