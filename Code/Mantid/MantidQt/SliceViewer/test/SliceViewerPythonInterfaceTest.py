@@ -444,7 +444,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv.refreshRebin()
         sv.setRebinMode(True, True)
         time.sleep(1)
-        self.assertTrue(mtd.workspaceExists('uniform_rebinned'), 'Dynamically rebinned workspace was created.')
+        self.assertTrue(mtd.doesExist('uniform_rebinned'), 'Dynamically rebinned workspace was created.')
         ws = mtd['uniform_rebinned']
         self.assertEqual(ws.getNumDims(), 3)
         self.assertEqual(ws.getNPoints(), 50*200*1)
