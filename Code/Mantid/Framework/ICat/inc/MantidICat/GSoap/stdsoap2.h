@@ -773,6 +773,12 @@ A commercial use license is available from Genivia, Inc., contact@genivia.com
 # define OPENSSL_NO_KRB5
 # include <openssl/bio.h>
 # include <openssl/err.h>
+// RJT, 14/7/10: For some bizarre reason these symbols end up being defined in our Mac build,
+// which leads to it trying to include windows.h - obviously bad news on a Mac
+# ifdef __APPLE__
+  # undef OPENSSL_SYS_WINDOWS
+  # undef OPENSSL_SYS_WIN32
+# endif
 # include <openssl/rand.h>
 # include <openssl/ssl.h>
 # include <openssl/x509v3.h>
