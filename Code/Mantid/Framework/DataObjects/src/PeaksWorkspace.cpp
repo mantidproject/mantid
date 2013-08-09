@@ -237,25 +237,25 @@ namespace Mantid
    /**
     * Returns selected information for a "peak" at QLabFrame.
     *
-    * @param QFrame      An arbitrary position in Q-space.  This does not have to be the 
+    * @param qFrame      An arbitrary position in Q-space.  This does not have to be the
     *                    position of a peak.
-    * @param lab_coords  Set true if the position is in the lab coordinate system, false if 
+    * @param labCoords   Set true if the position is in the lab coordinate system, false if
     *                    it is in the sample coordinate system.
     * @return a vector whose elements contain different information about the "peak" at that position.
     *         each element is a pair of description of information and the string form for the corresponding
     *         value.
     */
-    std::vector<std::pair<std::string, std::string> > PeaksWorkspace::PeakInfo(Kernel::V3D QFrame,
-        bool lab_coords) const
+    std::vector<std::pair<std::string, std::string> > PeaksWorkspace::peakInfo(Kernel::V3D qFrame,
+        bool labCoords) const
     {
       std::vector<std::pair<std::string, std::string> > Result;
       std::ostringstream oss;
-      oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(QFrame.norm());
+      oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(qFrame.norm());
       std::pair<std::string, std::string> QMag("|Q|",oss.str());
       Result.push_back(QMag);
 
       oss.str(""); oss.clear();
-      oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(2.0 * M_PI / QFrame.norm());
+      oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(2.0 * M_PI / qFrame.norm());
 
       std::pair<std::string, std::string> dspc("d-spacing",oss.str());
       oss.str(""); oss.clear();
@@ -264,17 +264,17 @@ namespace Mantid
       int seqNum = -1;
       bool hasOneRunNumber = true;
       int runNum = -1;
-      double minDist = 10000000;
       int NPeaks = getNumberPeaks();
       try
       {
+        double minDist = 10000000;
         for (int i = 0; i < NPeaks; i++)
         {
           Peak pk = getPeak(i);
           V3D Q = pk.getQLabFrame();
-          if (!lab_coords)
+          if (!labCoords)
             Q = pk.getQSampleFrame();
-          double D = QFrame.distance(Q);
+          double D = qFrame.distance(Q);
           if (D < minDist)
           {
             minDist = D;
@@ -291,13 +291,13 @@ namespace Mantid
       {
         seqNum = -1;//peak could have been removed
       }
-      V3D Qlab = QFrame;
+      V3D Qlab = qFrame;
       V3D Qsamp;
       Kernel::Matrix<double> Gon(3, 3, true);
 
       if (seqNum >= 0 && NPeaks == getNumberPeaks())
         Gon = getPeak(seqNum).getGoniometerMatrix();
-      if (lab_coords)
+      if (labCoords)
       {
 
         Kernel::Matrix<double> InvGon(Gon);
@@ -307,18 +307,18 @@ namespace Mantid
       }
       else
       {
-        Qsamp = QFrame;
+        Qsamp = qFrame;
         Qlab = Gon * Qsamp;
       }
 
-      if (lab_coords || seqNum >= 0)
+      if (labCoords || seqNum >= 0)
 
       {
         std::pair<std::string, std::string> QlabStr("Qlab", boost::lexical_cast<std::string>(Qlab));
         Result.push_back(QlabStr);
       }
 
-      if (!lab_coords || seqNum >= 0)
+      if (!labCoords || seqNum >= 0)
       {
 
         std::pair<std::string, std::string> QsampStr("QSample", boost::lexical_cast<std::string>(Qsamp));
@@ -415,25 +415,25 @@ namespace Mantid
     /**
      * Returns selected information for a "peak" at QLabFrame.
      *
-     * @param QFrame      An arbitrary position in Q-space.  This does not have to be the
+     * @param qFrame      An arbitrary position in Q-space.  This does not have to be the
      *                    position of a peak.
-     * @param lab_coords  Set true if the position is in the lab coordinate system, false if
+     * @param labCoords  Set true if the position is in the lab coordinate system, false if
      *                    it is in the sample coordinate system.
      * @return a vector whose elements contain different information about the "peak" at that position.
      *         each element is a pair of description of information and the string form for the corresponding
      *         value.
      */
-     int PeaksWorkspace::PeakInfoNumber(Kernel::V3D QFrame,
-         bool lab_coords) const
+     int PeaksWorkspace::peakInfoNumber(Kernel::V3D qFrame,
+         bool labCoords) const
      {
        std::vector<std::pair<std::string, std::string> > Result;
        std::ostringstream oss;
-       oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(QFrame.norm());
+       oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(qFrame.norm());
        std::pair<std::string, std::string> QMag("|Q|",oss.str());
        Result.push_back(QMag);
 
        oss.str(""); oss.clear();
-       oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(2.0 * M_PI / QFrame.norm());
+       oss<<std::setw(12)<<std::fixed<<std::setprecision(3)<<(2.0 * M_PI / qFrame.norm());
 
        std::pair<std::string, std::string> dspc("d-spacing",oss.str());
        oss.str(""); oss.clear();
@@ -446,9 +446,9 @@ namespace Mantid
        {
          Peak pk = getPeak(i);
          V3D Q = pk.getQLabFrame();
-         if (!lab_coords)
+         if (!labCoords)
            Q = pk.getQSampleFrame();
-         double D = QFrame.distance(Q);
+         double D = qFrame.distance(Q);
          if (D < minDist)
          {
            minDist = D;

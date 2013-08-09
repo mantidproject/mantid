@@ -5,12 +5,6 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
-
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/TableRow.h"
-
 #include <QTableWidget>
 
 namespace Ui

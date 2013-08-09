@@ -3,9 +3,15 @@
 
 #include <QDialog>
 #include "ui_CreateMDWorkspaceAlgDialog.h"
+#include "MantidQtCustomInterfaces/DllConfig.h"
+
+namespace MantidQt
+{
+namespace CustomInterfaces
+{
 
 /// Code-behind for CreateMDWorkspaceAlgDialog.
-class CreateMDWorkspaceAlgDialog : public QDialog
+class MANTIDQT_CUSTOMINTERFACES_DLL CreateMDWorkspaceAlgDialog : public QDialog
 {
   Q_OBJECT
 
@@ -29,5 +35,7 @@ private:
 
 };
 
+}
+}
 
 #endif
