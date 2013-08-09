@@ -10,7 +10,7 @@ class SettingsTest(unittest.TestCase):
     __init_dir_list = ''
 
     def test_welcome(self):
-        self.assertEquals(mtd.settings.welcomeMessage(), 
+        self.assertEquals(mtd.settings.welcomeMessage().split('\n')[0].strip(), 
                           'Welcome to Mantid - Manipulation and Analysis Toolkit for Instrument Data')
 
     def test_getting_search_paths(self):
