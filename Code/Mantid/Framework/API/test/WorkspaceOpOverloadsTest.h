@@ -142,6 +142,63 @@ public:
     TS_ASSERT( WorkspaceHelpers::sharedXData(ws) );
   }
 
+  void test_makeDistribution()
+  {
+    // N.B. This is also tested in the tests for the Convert[To/From]Distribution algorithms.
+    // Test only on tiny data here.
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2,2,1);
+    ws->dataX(0)[1] = 3.0;
+    ws->dataX(1)[1] = 0.5;
+    TS_ASSERT( ! ws->isDistribution() );
+
+    TS_ASSERT_THROWS_NOTHING( WorkspaceHelpers::makeDistribution(ws) );
+    TS_ASSERT( ws->isDistribution() );
+    TS_ASSERT_EQUALS( ws->readX(0)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readX(0)[1], 3.0 )
+    TS_ASSERT_EQUALS( ws->readX(1)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readX(1)[1], 0.5 )
+    TS_ASSERT_EQUALS( ws->readY(0)[0], 0.5 )
+    TS_ASSERT_EQUALS( ws->readY(1)[0], 2.0 )
+    TS_ASSERT_EQUALS( ws->readE(0)[0], 0.5 )
+    TS_ASSERT_EQUALS( ws->readE(1)[0], 2.0 )
+
+    // Try and do it again - will do nothing
+    TS_ASSERT_THROWS_NOTHING( WorkspaceHelpers::makeDistribution(ws) );
+    TS_ASSERT( ws->isDistribution() );
+    TS_ASSERT_EQUALS( ws->readX(0)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readX(0)[1], 3.0 )
+    TS_ASSERT_EQUALS( ws->readX(1)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readX(1)[1], 0.5 )
+    TS_ASSERT_EQUALS( ws->readY(0)[0], 0.5 )
+    TS_ASSERT_EQUALS( ws->readY(1)[0], 2.0 )
+    TS_ASSERT_EQUALS( ws->readE(0)[0], 0.5 )
+    TS_ASSERT_EQUALS( ws->readE(1)[0], 2.0 )
+
+    // Now reverse the operation
+    TS_ASSERT_THROWS_NOTHING( WorkspaceHelpers::makeDistribution(ws,false) );
+    TS_ASSERT( ! ws->isDistribution() );
+    TS_ASSERT_EQUALS( ws->readX(0)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readX(0)[1], 3.0 )
+    TS_ASSERT_EQUALS( ws->readX(1)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readX(1)[1], 0.5 )
+    TS_ASSERT_EQUALS( ws->readY(0)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readY(1)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readE(0)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readE(1)[0], 1.0 )
+
+    // Try and do it again - will do nothing
+    TS_ASSERT_THROWS_NOTHING( WorkspaceHelpers::makeDistribution(ws,false) );
+    TS_ASSERT( ! ws->isDistribution() );
+    TS_ASSERT_EQUALS( ws->readX(0)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readX(0)[1], 3.0 )
+    TS_ASSERT_EQUALS( ws->readX(1)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readX(1)[1], 0.5 )
+    TS_ASSERT_EQUALS( ws->readY(0)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readY(1)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readE(0)[0], 1.0 )
+    TS_ASSERT_EQUALS( ws->readE(1)[0], 1.0 )
+  }
 };
 
 #endif
