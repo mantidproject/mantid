@@ -16,27 +16,37 @@ public:
   ChopperConfiguration(double freq, std::string bankidstr, std::string cwlstr, std::string mndspstr,
                        std::string mxdspstr, std::string maxtofstr);
 
+  /// Get bank IDs in configuration
+  std::vector<unsigned int> getBankIDs();
   /// Check wehther a bank is defined
   bool hasBank(unsigned int bankid);
-  /// Get a parameter for bank
+  /// Get a parameter from a bank
   double getParameter(unsigned int bankid, std::string paramname);
+  /// Set a parameter to a bank
+  void setParameter(unsigned int bankid, std::string paramname, double value);
 
 private:
   std::string parseString();
-
-  double m_frequency;
-  std::vector<double> m_vecCWL;
-  std::vector<double> m_mindsps;
-  std::vector<double> m_maxdsps;
-  std::vector<double> m_maxtofs;
-  std::vector<unsigned int> m_bankIDs;
-  std::vector<double> m_splitds;
-  std::vector<int> m_vruns;
-
   /// Parse string to a double vector
   std::vector<double> parseStringDbl(std::string instring);
   /// Parse string to an integer vector
   std::vector<unsigned int> parseStringUnsignedInt(std::string instring);
+
+  double m_frequency;
+  std::vector<unsigned int> m_bankIDs;
+  std::map<unsigned int, size_t> m_bankIDIndexMap;
+
+  std::vector<double> m_vec2Theta;
+  std::vector<double> m_vecL1;
+  std::vector<double> m_vecL2;
+
+  std::vector<double> m_vecCWL;
+  std::vector<double> m_mindsps;
+  std::vector<double> m_maxdsps;
+  std::vector<double> m_maxtofs;
+
+  std::vector<double> m_splitds;
+  std::vector<int> m_vruns;
 
 };
 
@@ -90,10 +100,13 @@ private:
   /// Set up some constant by default
   void initConstants(double chopperfrequency);
 
-  ///
+  /// Set up for PG3 chopper constants
   ChopperConfiguration_sptr setupPG3Constants(int intfrequency);
-  ///
+  /// Set up for NOM chopper constants
   ChopperConfiguration_sptr setupNOMConstants(int intfrequency);
+
+  /// Parse profile table workspace to a map
+  std::map<std::string, double> parseProfileTableWorkspace(DataObjects::TableWorkspace_sptr ws);
 
   /// Convert to GSAS instrument file
   void convertToGSAS(std::vector<unsigned int> banks, std::string gsasinstrfilename);
@@ -115,6 +128,9 @@ private:
 
   /// Calculate a value related to (alph0, alph1, alph0t, alph1t) or (beta0, beta1, beta0t, beta1t)
   double aaba(double n, double ea1, double ea2, double ta1, double ta2, double dsp);
+
+  /// Get parameter value from a map
+  double getParameterValue(std::map<std::string, double> profilemap, std::string parname);
 
   /// Input workspace
   DataObjects::TableWorkspace_sptr m_inpWS;

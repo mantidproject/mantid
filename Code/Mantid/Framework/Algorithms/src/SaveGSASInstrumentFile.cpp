@@ -53,21 +53,59 @@ namespace Algorithms
   ChopperConfiguration::ChopperConfiguration(double freq, string bankidstr, string cwlstr, string mndspstr, string mxdspstr,
                                              string maxtofstr)
   {
+    // Import and set up from default constants
     m_frequency = freq;
+
     m_bankIDs = parseStringUnsignedInt(bankidstr);
+    size_t numbanks = m_bankIDs.size();
+
     m_vecCWL = parseStringDbl(cwlstr);
     m_mindsps = parseStringDbl(mndspstr);
     m_maxdsps = parseStringDbl(mxdspstr);
     m_maxtofs = parseStringDbl(maxtofstr);
-    // m_splitds = parseStringDbl(splitdstr);
-    // m_vruns = parseStringInt(vrunstr);
+
+#if 0
+    m_splitds = parseStringDbl(splitdstr);
+    m_vruns = parseStringInt(vrunstr);
+#endif
 
     // Check size
-    if (m_bankIDs.size() != m_vecCWL.size() || m_vecCWL.size() != m_mindsps.size() || m_vecCWL.size() != m_maxdsps.size())
-      throw "Input string has different length.  ";
+    if (m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks)
+    {
+      stringstream errss;
+      errss << "Default chopper constants have different number of elements. ";
+      throw runtime_error(errss.str());
+    }
 
-    // Build
+    // Set up index map
+    m_vec2Theta.resize(numbanks, 0.);
+    m_vecL1.resize(numbanks, 0.);
+    m_vecL2.resize(numbanks, 0.);
 
+
+    // Set up bank ID / looking up index map
+    m_bankIDIndexMap.clear();
+    for (size_t ib = 0; ib < numbanks; ++ib)
+    {
+      m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get bank IDs in the chopper configuration
+    */
+  vector<unsigned int> ChopperConfiguration::getBankIDs()
+  {
+    vector<unsigned int> bids;
+    // FIXME : use sorphisticated vector methods to replace the below!
+    for (size_t i = 0; i < m_bankIDs.size(); ++i)
+    {
+      bids.push_back(m_bankIDs[i]);
+    }
+
+    return bids;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -87,9 +125,123 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   double ChopperConfiguration::getParameter(unsigned int bankid, string paramname)
   {
-    throw std::runtime_error("Implement soon!");
+    // Check bank IDs
+    if (!hasBank(bankid))
+    {
+      stringstream errss;
+      errss << "ChopperConfiguration does not have bank " << bankid;
+      throw runtime_error(errss.str());
+    }
 
-    return EMPTY_DBL();
+    // Obtain index for the bank
+    map<unsigned int, size_t>::iterator biter = m_bankIDIndexMap.find(bankid);
+    if (biter == m_bankIDIndexMap.end())
+    {
+      stringstream errss;
+      errss << "Bank ID and index map does not have entry for bank " << bankid;
+      throw runtime_error(errss.str());
+    }
+    size_t bindex = biter->second;
+
+    double value(EMPTY_DBL());
+    if (paramname.compare("TwoTheta") == 0)
+      value = m_vec2Theta[bindex];
+    else
+    {
+      // FIXME : Remove Fake Return ASAP!
+      stringstream errss;
+      errss << "Bank ID : " << bankid << ", Parameter : " << paramname;
+      cout << "Error: " << errss.str() << "\n[Fake Return] " << ".\n";
+      return 100.;
+      // throw runtime_error(errss.str());
+    }
+
+    return value;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set a parameter to a bank
+    */
+  void ChopperConfiguration::setParameter(unsigned int bankid, string paramname, double value)
+  {
+    map<unsigned, size_t>::iterator biter = m_bankIDIndexMap.find(bankid);
+
+    if (biter == m_bankIDIndexMap.end())
+    {
+      stringstream errss;
+      errss << "Chopper configuration does not have bank " << bankid;
+      throw runtime_error(errss.str());
+    }
+    else
+    {
+      size_t ibank = biter->second;
+      if (paramname.compare("2Theta") == 0)
+        m_vec2Theta[ibank] = value;
+      else if (paramname.compare("L1") == 0)
+        m_vecL1[ibank] = value;
+      else if (paramname.compare("L2") == 0)
+        m_vecL2[ibank] = value;
+      else
+      {
+        stringstream errss;
+        errss << "In Chopper configuration's bank " << bankid << ", there is no parameter named "
+              << paramname;
+        throw runtime_error(errss.str());
+      }
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Parse string to double vector
+    */
+  vector<double> ChopperConfiguration::parseStringDbl(string instring)
+  {
+    vector<string> strs;
+    boost::split(strs, instring, boost::is_any_of(", "));
+
+    vector<double> vecdouble;
+    for (size_t i = 0; i < strs.size(); i++)
+    {
+      if (strs[i].size() > 0)
+      {
+        double item = atof(strs[i].c_str());
+        vecdouble.push_back(item);
+        // cout << "[C] |" << strs[i] << "|" << item << "\n";
+      }
+    }
+
+    cout << "[C]* Input: " << instring << ": size of double vector: " << vecdouble.size() << endl;
+
+    return vecdouble;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Parse string to double vector
+    */
+  vector<unsigned int> ChopperConfiguration::parseStringUnsignedInt(string instring)
+  {
+    vector<string> strs;
+    boost::split(strs, instring, boost::is_any_of(", "));
+
+    vector<unsigned int> vecinteger;
+    for (size_t i = 0; i < strs.size(); i++)
+    {
+      if (strs[i].size() > 0)
+      {
+        int item = atoi(strs[i].c_str());
+        if (item < 0)
+        {
+          throw runtime_error("Found negative number in a string for unsigned integers.");
+        }
+        vecinteger.push_back(static_cast<unsigned int>(item));
+      }
+    }
+
+    cout << "[C]* Input : " << instring << ": size of string vector: " << vecinteger.size() << endl;
+
+    return vecinteger;
   }
 
 
@@ -170,9 +322,10 @@ namespace Algorithms
     m_bankIDsOutput = getProperty("BankIDs");
 
     m_L1 = getProperty("L1");
-    m_2theta = getProperty("2Theta");
+    m_2theta = getProperty("TwoTheta");
     m_L2 = getProperty("L2");
-    m_frequency = getProperty("Frequency");
+    string freqtempstr = getProperty("ChopperFrequency");
+    m_frequency = atoi(freqtempstr.c_str());
 
 #if 0
     // Process input
@@ -263,6 +416,8 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Set up some constant by default
+    * Output--> m_configuration
+    * @param chopperfrequency :: chopper frequency of the profile for.
     */
   void SaveGSASInstrumentFile::initConstants(double chopperfrequency)
   {
@@ -282,16 +437,67 @@ namespace Algorithms
     return;
   }
 
-  //
-  /**
+  //----------------------------------------------------------------------------------------------
+  /** Some parameter can come from 3 sources (1) default in code; (2) input table workspace and
+    * (3) user-specified property.  Set up this kind of parameter from all possible source
+    * with proper prioirty
     */
   void SaveGSASInstrumentFile::makeParameterConsistent()
   {
+    // Parse input profile table workspace
+    map<string, double> profileparammap = parseProfileTableWorkspace(m_inpWS);
+
+    // 2-theta
+    // FIXME - Figure out what (bank ID) to set up!
+    unsigned int fake4(4);
+    if (m_2theta != EMPTY_DBL())
+    {
+      m_configuration->setParameter(fake4, "2Theta", m_2theta);
+    }
+    else
+    {
+      double tth = getParameterValue(profileparammap, "twotheta");
+      if (tth != EMPTY_DBL())
+        m_configuration->setParameter(fake4,"2Theta", tth);
+    }
+
+    // L1
+    if (m_L1 != EMPTY_DBL())
+    {
+      m_configuration->setParameter(fake4, "L1", m_L1);
+    }
+
+    // L2
+    if (m_L2 != EMPTY_DBL())
+    {
+      m_configuration->setParameter(fake4, "L2", m_L2);
+    }
+
     // TODO :: Implement ASAP
-    throw runtime_error("ASAP");
+    // throw runtime_error("ASAP");
+    g_log.error("How to make parameter consistent? Which parameters should be consistent? ");
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Parse profile table workspace to a map
+    */
+  map<string, double> SaveGSASInstrumentFile::parseProfileTableWorkspace(TableWorkspace_sptr ws)
+  {
+    // TODO - Implement ASAP
+    // throw runtime_error("Haven't implemented yet.");
+    g_log.error("Faking now [1]!");
+
+    map<string, double> profilemap;
+
+
+    return profilemap;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up the chopper/instrument constant parameters for PG3
+    */
   ChopperConfiguration_sptr SaveGSASInstrumentFile::setupPG3Constants(int intfrequency)
   {
     string bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr;
@@ -348,6 +554,7 @@ namespace Algorithms
     // Set up string
     string bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr;
 
+    // FIXME : Requiring more banks
     switch (intfrequency)
     {
       case 60:
@@ -368,49 +575,6 @@ namespace Algorithms
     ChopperConfiguration_sptr confsptr = boost::make_shared<ChopperConfiguration>(conf);
 
     return confsptr;
-  }
-
-
-  //----------------------------------------------------------------------------------------------
-  /** Parse string to double vector
-    */
-  vector<double> ChopperConfiguration::parseStringDbl(string instring)
-  {
-    vector<string> strs;
-    boost::split(strs, instring, boost::is_any_of(", "));
-    cout << "* size of the vector: " << strs.size() << endl;
-
-    vector<double> vecdouble;
-    for (size_t i = 0; i < strs.size(); i++)
-    {
-      double item = atof(strs[i].c_str());
-      vecdouble.push_back(item);
-    }
-
-    return vecdouble;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Parse string to double vector
-    */
-  vector<unsigned int> ChopperConfiguration::parseStringUnsignedInt(string instring)
-  {
-    vector<string> strs;
-    boost::split(strs, instring, boost::is_any_of(", "));
-    cout << "* size of the vector: " << strs.size() << endl;
-
-    vector<unsigned int> vecinteger;
-    for (size_t i = 0; i < strs.size(); i++)
-    {
-      int item = atoi(strs[i].c_str());
-      if (item < 0)
-      {
-        throw runtime_error("Found negative number in a string for unsigned integers.");
-      }
-      vecinteger.push_back(static_cast<unsigned int>(item));
-    }
-
-    return vecinteger;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -438,7 +602,18 @@ namespace Algorithms
       }
       else
       {
-        g_log.warning() << "Bank " << bankid << " does not exist in source resolution file";
+        vector<unsigned int> bankids = m_configuration->getBankIDs();
+        stringstream errss;
+        errss << "Bank " << bankid << " does not exist in source resolution file. "
+              << "There are " << bankids.size() << " banks given, including " << ".\n";
+        for (size_t i = 0; i < bankids.size(); ++i)
+        {
+          errss << bankids[i];
+          if (i < bankids.size()-1)
+            errss << ", ";
+        }
+        g_log.error(errss.str());
+        throw runtime_error(errss.str());
       }
     }
 
@@ -582,9 +757,6 @@ namespace Algorithms
     double twotheta = m_configuration->getParameter(bankid, "TwoTheta");
     double cwl = m_configuration->getParameter(bankid, "CWL");
 
-    // FIXME ::
-    throw runtime_error("Test (compile and run) to use fprintf() in Mantid");
-
     // Calculate
     double instC = dtt1 - (4*(alph0+alph1));
     if (m_L2 <= 0. || m_L2 == EMPTY_DBL())
@@ -609,8 +781,15 @@ namespace Algorithms
               << "INS HTYPE PNTR \n";
     }
 
-    printf("INS %2d ICONS%10.3f%10.3f%10.3f %10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
+    printf("INS %2d ICONS%10.3f%10.3f%10.3f%10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
     printf("INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
+
+
+    // FIXME ::
+    throw runtime_error("Test (compile and run) to use fprintf() in Mantid");
+
+    return;
+
     // printf('INS %2dBAKGD 1 4 Y 0 Y\n', bankid);
     // printf('INS %2dI HEAD %s\n', bankid, titleline);
 
@@ -736,7 +915,14 @@ namespace Algorithms
     return a;
   }
 
-
+  //----------------------------------------------------------------------------------------------
+  /** Get parameter value from a map
+    */
+  double SaveGSASInstrumentFile::getParameterValue(std::map<std::string, double> profilemap, string parname)
+  {
+    // FIXME - Implement ASAP
+    throw runtime_error("Implement ASAP.");
+  }
 
 } // namespace Algorithms
 } // namespace Mantid
