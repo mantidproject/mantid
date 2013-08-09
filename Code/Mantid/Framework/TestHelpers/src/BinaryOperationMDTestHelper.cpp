@@ -1,4 +1,8 @@
-
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  These functions MAY ONLY be used in a test in the MDAlgorithms package.
+ *********************************************************************************/
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/System.h"

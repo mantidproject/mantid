@@ -1,3 +1,10 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This collection of functions MAY NOT be used in any test from a package below
+ *  the level of MDEvents (e.g. Kernel, Geometry, API, DataObjects).
+ *********************************************************************************/
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"

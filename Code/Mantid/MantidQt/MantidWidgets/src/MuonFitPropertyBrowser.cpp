@@ -333,37 +333,6 @@ void MuonFitPropertyBrowser::setFitEnabled(bool yes)
 }
 
 
-/**
-* Sets a new workspace
-*/
-void MuonFitPropertyBrowser::workspaceChange(const QString& wsName)
-{
-  if (m_guessOutputName)
-  {
-    if (isWorkspaceAGroup())
-    {
-      m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()+"_params"));
-    }
-    else
-    {
-      m_stringManager->setValue(m_output,QString::fromStdString(workspaceName()));
-    }
-  }
-  if (isWorkspaceAGroup())
-  {
-    setLogValue();
-  }
-  else
-  {
-    //m_groupMember = workspaceName();
-    removeLogValue();
-  }
-  
-  // Sets up the peak picker tool for that workspace. Might not work if not on correct tab. i.e loading data on the first tab wouldn't work.
-  updatePPTool(wsName);
-}
-
-
 /** Check if the workspace can be used in the fit. The accepted types are
   * MatrixWorkspaces same size and that it isn't the generated raw file.
   * @param ws :: The workspace

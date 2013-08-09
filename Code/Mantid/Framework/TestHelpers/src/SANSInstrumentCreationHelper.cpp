@@ -1,3 +1,10 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This collection of functions MAY NOT be used in any test from a package below
+ *  the level of DataHandling (e.g. Kernel, Geometry, API, DataObjects).
+ *  I.e. It can only be used by plugin/algorithm-level packages (e.g. DataHandling)
+ *********************************************************************************/
 #include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"

@@ -202,9 +202,6 @@ public:
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
 
-  /// Update the PeakPickerTool with the current workspace to be displayed and which to associate itself with
-  void updatePPTool(const QString& name);
-
   /// Returns the list of workspaces that are currently been worked on by the fit property browser.
   QStringList getWorkspaceNames();
   /// Create a MatrixWorkspace from a TableWorkspace

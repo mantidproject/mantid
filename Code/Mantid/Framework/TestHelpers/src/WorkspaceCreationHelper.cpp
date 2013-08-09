@@ -1,3 +1,11 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This collection of functions MAY NOT be used in any test from a package below
+ *  DataObjects (e.g. Kernel, Geometry, API).
+ *  Conversely, this file MAY NOT be modified to use anything from a package higher
+ *  than DataObjects (e.g. any algorithm), even if going via the factory.
+ *********************************************************************************/
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------

@@ -5,37 +5,39 @@
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
 
-#include "MantidVatesAPI/vtkSplatterPlotFactory.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
-#include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/NoThresholdRange.h"
+#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
-#include "MantidAPI/FrameworkManager.h"
-
+#include "MantidVatesAPI/vtkDataSetToWsName.h"
+#include "MantidVatesAPI/vtkSplatterPlotFactory.h"
 
 using namespace Mantid::API;
 using namespace Mantid::VATES;
 
 vtkStandardNewMacro(vtkSplatterPlot);
 
-vtkSplatterPlot::vtkSplatterPlot()
+/// Constructor
+vtkSplatterPlot::vtkSplatterPlot() : m_numberPoints(0), m_topPercentile(0.0),
+  m_presenter(NULL), m_wsName("")
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
-  Mantid::API::FrameworkManager::Instance();
 }
 
+/// Destructor
 vtkSplatterPlot::~vtkSplatterPlot()
 {
+  delete m_presenter;
 }
 
 /**
-Sets number of points.
-@param nPoints : number of points.
-*/
+ * Sets number of points.
+ * @param nPoints : number of points.
+ */
 void vtkSplatterPlot::SetNumberOfPoints(int nPoints)
 {
   if(nPoints >= 0)
@@ -44,6 +46,10 @@ void vtkSplatterPlot::SetNumberOfPoints(int nPoints)
     if(m_numberPoints != temp)
     {
       m_numberPoints = temp;
+      if (NULL != m_presenter)
+      {
+        m_presenter->SetNumberOfPoints(m_numberPoints);
+      }
       this->Modified();
     }
   }
@@ -60,53 +66,75 @@ void vtkSplatterPlot::SetTopPercentile(double topPercentile)
     if (m_topPercentile != topPercentile)
     {
       m_topPercentile = topPercentile;
+      if (NULL != m_presenter)
+      {
+        m_presenter->SetPercentToUse(m_topPercentile);
+      }
       this->Modified();
     }
   }
 }
 
 
-int vtkSplatterPlot::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
+int vtkSplatterPlot::RequestData(vtkInformation *,
+                                 vtkInformationVector **inputVector,
+                                 vtkInformationVector *outputVector)
 {
-  //get the info objects
-  vtkInformation *outInfo = outputVector->GetInformationObject(0);
-
-  vtkDataSet *output = vtkDataSet::SafeDownCast(
-    outInfo->Get(vtkDataObject::DATA_OBJECT()));
-
-  vtkDataSet *input = vtkDataSet::SafeDownCast(this->GetInput(0));
-  
-  std::string wsName = Mantid::VATES::vtkDataSetToWsName::exec(input);
-
-  Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsName);
-
-  std::string scalarName = "signal";
-  vtkSplatterPlotFactory vtkGridFactory(ThresholdRange_scptr(new NoThresholdRange), scalarName, m_numberPoints,
-                                        m_topPercentile);
-  vtkGridFactory.initialize(result);
-  
-  FilterUpdateProgressAction<vtkSplatterPlot> drawUpdateProgress(this, "Drawing...");
-  vtkDataSet* product = vtkGridFactory.create(drawUpdateProgress);
-  product->SetFieldData(input->GetFieldData());
-  output->ShallowCopy(product);
-
-  try
+  if (NULL != m_presenter)
   {
-    vtkDataSetToNonOrthogonalDataSet converter(output, wsName);
-    converter.execute();
-  }
-  catch (std::invalid_argument &e)
-  {
-    std::string error = e.what();
-    vtkDebugMacro(<< "Workspace does not have correct information to "
-                  << "plot non-orthogonal axes. " << error);
+    // Get the info objects
+    vtkInformation *outInfo = outputVector->GetInformationObject(0);
+    vtkDataSet *output = vtkDataSet::SafeDownCast(
+          outInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+    vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
+    vtkDataSet *input = vtkDataSet::SafeDownCast(
+          inInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+    FilterUpdateProgressAction<vtkSplatterPlot> drawUpdateProgress(this,
+                                                                   "Drawing...");
+    vtkDataSet* product = m_presenter->create(drawUpdateProgress);
+    product->SetFieldData(input->GetFieldData());
+    output->ShallowCopy(product);
+
+    try
+    {
+      vtkDataSetToNonOrthogonalDataSet converter(output, m_wsName);
+      converter.execute();
+    }
+    catch (std::invalid_argument &e)
+    {
+      std::string error = e.what();
+      vtkDebugMacro(<< "Workspace does not have correct information to "
+                    << "plot non-orthogonal axes. " << error);
+    }
   }
   return 1;
 }
 
-int vtkSplatterPlot::RequestInformation(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
+int vtkSplatterPlot::RequestInformation(vtkInformation *,
+                                        vtkInformationVector **inputVector,
+                                        vtkInformationVector *)
 {
-  return Superclass::RequestInformation(request, inputVector, outputVector);
+  if (NULL == m_presenter)
+  {
+    std::string scalarName = "signal";
+    m_presenter = new vtkSplatterPlotFactory(ThresholdRange_scptr(new NoThresholdRange),
+                                             scalarName, m_numberPoints,
+                                             m_topPercentile);
+
+    // Get the info objects
+    vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
+    vtkDataSet *input = vtkDataSet::SafeDownCast(
+      inInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+    m_wsName = Mantid::VATES::vtkDataSetToWsName::exec(input);
+    // Get the workspace from the ADS
+    ADSWorkspaceProvider<IMDWorkspace> workspaceProvider;
+    Workspace_sptr result = workspaceProvider.fetchWorkspace(m_wsName);
+    m_presenter->initialize(result);
+  }
+  return 1;
 }
 
 void vtkSplatterPlot::PrintSelf(ostream& os, vtkIndent indent)
@@ -115,10 +143,10 @@ void vtkSplatterPlot::PrintSelf(ostream& os, vtkIndent indent)
 }
 
 /**
-Output the progress information and progress text.
-@param : progress
-@param : message
-*/
+ * Output the progress information and progress text.
+ * @param : progress
+ *@param : message
+ */
 void vtkSplatterPlot::updateAlgorithmProgress(double progress, const std::string& message)
 {
   this->SetProgress(progress);

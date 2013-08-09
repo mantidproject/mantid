@@ -77,7 +77,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
       Let's consider the simplest way of calling calibrate:
 
-       >>> from tube_calib import calibrate
+       >>> from tube import calibrate
        >>> ws = Load('WISH17701')
        >>> ws = Integration(ws)
        >>> known_pos = [-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ]
