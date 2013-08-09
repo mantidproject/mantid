@@ -113,6 +113,8 @@ namespace MantidQt
       void useCalib(bool state); ///< whether to use calib file
       void calibCreate(); ///< create calibration file
       void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
+      void intensityScaleMultiplierCheck(bool state); /// Toggle the intensity scale multiplier box
+      void calibValidateIntensity(const QString & text); /// Check that the scale multiplier is valid
 
       void calPlotRaw();
       void calPlotEnergy();
