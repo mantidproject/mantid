@@ -54,6 +54,9 @@ namespace API
     /// Clone us
     ExperimentInfo * cloneExperimentInfo()const;
 
+    /// Returns a string description of the object
+    const std::string toString() const;
+
     /// Instrument accessors
     void setInstrument(const Geometry::Instrument_const_sptr& instr);
     /// Returns the parameterized instrument

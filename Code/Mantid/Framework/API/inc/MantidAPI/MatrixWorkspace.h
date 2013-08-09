@@ -59,6 +59,10 @@ namespace Mantid
     */
     class MANTID_API_DLL MatrixWorkspace : public IMDWorkspace, public ExperimentInfo
     {
+
+    private:
+      using ExperimentInfo::toString;
+
     public:
 
       // The Workspace Factory create-from-parent method needs direct access to the axes.
@@ -72,7 +76,11 @@ namespace Mantid
       void initialize(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
       /// Delete
       virtual ~MatrixWorkspace();
-      
+
+      using IMDWorkspace::toString;
+      /// String description of state
+      const std::string toString() const;
+
       /**@name Instrument queries */
       //@{
       Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;

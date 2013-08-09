@@ -58,7 +58,7 @@ private:
     MOCK_CONST_METHOD0(id, const std::string());
     MOCK_CONST_METHOD0(name, const std::string());
     MOCK_CONST_METHOD0(threadSafe, bool());
-    MOCK_CONST_METHOD0(toString, std::string());
+    MOCK_CONST_METHOD0(toString, const std::string());
     MOCK_CONST_METHOD0(getMemorySize, size_t());
   };
 
@@ -79,6 +79,18 @@ public:
     group->add("ws1");
     group->add("ws2");
     return group;
+  }
+
+  void test_toString_Produces_Expected_String()
+  {
+    WorkspaceGroup_sptr group = makeGroup();
+
+    const std::string expected = \
+        "WorkspaceGroup\n"
+        " -- ws0\n"
+        " -- ws1\n"
+        " -- ws2\n";
+    TS_ASSERT_EQUALS(expected, group->toString());
   }
 
   void test_add()

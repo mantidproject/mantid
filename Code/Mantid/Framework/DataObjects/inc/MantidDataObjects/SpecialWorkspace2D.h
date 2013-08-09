@@ -67,6 +67,8 @@ namespace DataObjects
 
     virtual void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength);
 
+    /// Return human-readable string
+    virtual const std::string toString() const;
     /// Create and return a new InfoNode describing this workspace.
     virtual InfoNode *createInfoNode() const;
 

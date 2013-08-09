@@ -101,6 +101,17 @@ namespace DataObjects
   }
 
   /**
+   * @return A string containing the workspace description
+   */
+  const std::string SpecialWorkspace2D::toString() const
+  {
+    std::ostringstream os;
+    os << "Title: " << getTitle() << "\n";
+    os << "Histograms: " << getNumberHistograms() << "\n";
+    return os.str();
+  }
+
+  /**
    * @return :: A pointer to the created info node.
    */
   API::Workspace::InfoNode *SpecialWorkspace2D::createInfoNode() const

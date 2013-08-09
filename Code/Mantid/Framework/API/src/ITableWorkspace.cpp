@@ -11,6 +11,17 @@ namespace API
 // Get a reference to the logger
 Kernel::Logger& ITableWorkspace::g_log = Kernel::Logger::get("ITableWorkspace");
 
+/**
+ */
+const std::string ITableWorkspace::toString() const
+{
+  std::ostringstream os;
+  os << id() << "\n";
+  os << "Columns: " << boost::lexical_cast<std::string>(columnCount()) << "\n";
+  os << "Rows: " << boost::lexical_cast<std::string>(rowCount()) << "\n";
+  os << getMemorySizeAsStr();
+  return os.str();
+}
 
 /** Creates n new columns of the same type
  * @param type :: The datatype of the column

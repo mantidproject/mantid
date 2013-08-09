@@ -49,6 +49,36 @@ namespace Mantid
       }
     }
 
+    /// @returns A human-readable string of the current state
+    const std::string MatrixWorkspace::toString() const
+    {
+      std::ostringstream os;
+      os << id() << "\n"
+         << "Title: " << getTitle() << "\n"
+         << "Histograms: " << getNumberHistograms() << "\n"
+         << "Bins: " << blocksize() << "\n";
+
+      if ( isHistogramData() ) os << "Histogram\n";
+      else os << "Data points\n";
+
+      os << "X axis: ";
+      if (axes() > 0 )
+      {
+        Axis *ax = getAxis(0);
+        if ( ax && ax->unit() ) os << ax->unit()->caption() << " / " << ax->unit()->label();
+        else os << "Not set";
+      }
+      else
+      {
+        os << "N/A";
+      }
+      os << "\n"
+         << "Y axis: " << YUnitLabel() << "\n";
+
+      os << ExperimentInfo::toString();
+      return os.str();
+    }
+
     /** Initialize the workspace. Calls the protected init() method, which is implemented in each type of
     *  workspace. Returns immediately if the workspace is already initialized.
     *  @param NVectors :: The number of spectra in the workspace (only relevant for a 2D workspace

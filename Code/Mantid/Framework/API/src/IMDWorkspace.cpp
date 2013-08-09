@@ -63,6 +63,32 @@ namespace Mantid
       }
 
       //-----------------------------------------------------------------------------------------------
+
+      /**
+       */
+      const std::string IMDWorkspace::toString() const
+      {
+        std::ostringstream os;
+        os << "Title: " + getTitle() << "\n";
+        for (size_t i=0; i < getNumDims(); i++)
+        {
+          Geometry::IMDDimension_const_sptr dim = getDimension(i);
+          os << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
+          // Also show the dimension ID string, if different than name
+          if (dim->getDimensionId() != dim->getName())
+            os << ". Id=" << dim->getDimensionId();
+          os << "\n";
+        }
+        if( hasOriginalWorkspace() )
+        {
+          os << "Binned from '" << getOriginalWorkspace()->getName();
+        }
+        os << "\n";
+        return os.str();
+      }
+
+      //-----------------------------------------------------------------------------------------------
+
       /**
        * @return :: A pointer to the created info node.
        */

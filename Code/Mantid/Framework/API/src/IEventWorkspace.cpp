@@ -17,6 +17,29 @@ namespace API
 {
 
 /**
+ */
+const std::string IEventWorkspace::toString() const
+{
+  std::ostringstream os;
+  os << MatrixWorkspace::toString() << "\n";
+
+  os << "Events: " + boost::lexical_cast<std::string>(getNumberEvents());
+  switch ( getEventType() )
+  {
+  case WEIGHTED:
+    os << " (weighted)\n";
+    break;
+  case WEIGHTED_NOTIME:
+    os << " (weighted, no times)\n";
+    break;
+  case TOF:
+    os << "\n";
+    break;
+  }
+  return os.str();
+}
+
+/**
  * @return :: A pointer to the created info node.
  */
 API::Workspace::InfoNode *IEventWorkspace::createInfoNode() const

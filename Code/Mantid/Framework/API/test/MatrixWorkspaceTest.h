@@ -14,6 +14,7 @@
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <cxxtest/TestSuite.h>
+#include <boost/make_shared.hpp>
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -23,7 +24,7 @@ using namespace testing;
 
 
 // Declare into the factory.
-DECLARE_WORKSPACE(WorkspaceTester)
+DECLARE_WORKSPACE(WorkspaceTester);
 
 /** Create a workspace with numSpectra, with
  * each spectrum having one detector, at id = workspace index.
@@ -64,6 +65,28 @@ public:
     ws->initialize(1,1,1);
   }
   
+  void test_toString_Produces_Expected_Contents()
+  {
+    auto testWS = boost::make_shared<WorkspaceTester>();
+    testWS->initialize(1,2,1);
+    testWS->setTitle("A test run");
+    testWS->getAxis(0)->setUnit("TOF");
+    testWS->setYUnitLabel("Counts");
+
+    std::string expected = \
+        "WorkspaceTester\n"
+        "Title: A test run\n"
+        "Histograms: 1\n"
+        "Bins: 1\n"
+        "Histogram\n"
+        "X axis: Time-of-flight / microsecond\n"
+        "Y axis: Counts\n"
+        "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n";
+    expected += "Memory used: 0 kB";
+
+    TS_ASSERT_EQUALS(expected, testWS->toString());
+  }
+
   void testGetSetTitle()
   {
     TS_ASSERT_EQUALS( ws->getTitle(), "" );

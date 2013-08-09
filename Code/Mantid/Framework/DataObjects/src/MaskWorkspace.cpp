@@ -261,6 +261,17 @@ namespace DataObjects
     }
 
     /**
+     * @return A string containing the workspace description
+     */
+    const std::string MaskWorkspace::toString() const
+    {
+      std::ostringstream os;
+      os << SpecialWorkspace2D::toString();
+      os << "Masked: " << getNumberMasked() << "\n";
+      return os.str();
+    }
+
+    /**
      * @return :: A pointer to the created info node.
      */
     API::Workspace::InfoNode *MaskWorkspace::createInfoNode() const

@@ -112,8 +112,6 @@ public:
      * @return true if the workspace is suitable for multithreaded operations, otherwise false.
      */
     virtual bool threadSafe() const { return true; }
-    /** Returns the name of the workspace **/
-    virtual std::string toString() const { return name(); }
 
     void virtual setTitle(const std::string&);
     void setComment(const std::string&);
@@ -123,7 +121,8 @@ public:
     bool isDirty(const int n=1) const;
     /// Get the footprint in memory in bytes.
     virtual size_t getMemorySize() const = 0;
-
+    /// Returns the memory footprint in sensible units
+    std::string getMemorySizeAsStr() const;
 
     /// Returns a reference to the WorkspaceHistory
     WorkspaceHistory& history() { return m_history; }

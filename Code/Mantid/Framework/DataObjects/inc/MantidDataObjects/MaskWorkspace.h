@@ -34,6 +34,8 @@ namespace DataObjects
         virtual const std::string id() const;
 
     protected:
+        /// Return human-readable string
+        virtual const std::string toString() const;
         /// Create and return a new InfoNode describing this workspace.
         virtual InfoNode *createInfoNode() const;
 

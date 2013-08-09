@@ -31,6 +31,25 @@ WorkspaceGroup::~WorkspaceGroup()
 }
 
 /**
+ * The format is:
+ *   ID
+ *   -- Name1
+ *   -- Name2
+ * @returns A formatted human-readable string specifying the contents of the group
+ */
+const std::string WorkspaceGroup::toString() const
+{
+  std::string descr = this->id() + "\n";
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
+  {
+    descr += " -- " + (*it)->name() + "\n";
+  }
+  return descr;
+}
+
+
+/**
  * Turn on/off observing delete and rename notifications to update the group accordingly
  * It can be useful to turn them off when constructing the group.
  * @param observeADS :: If true observe the ADS notifications, otherwise disable them

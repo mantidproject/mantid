@@ -14,6 +14,7 @@ namespace
   class MockWorkspace : public Workspace
   {
     virtual const std::string id() const { return "MockWorkspace"; }
+    virtual const std::string toString() const { return ""; }
     virtual size_t getMemorySize() const { return 1; }
   };
   typedef boost::shared_ptr<MockWorkspace> MockWorkspace_sptr;

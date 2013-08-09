@@ -55,6 +55,7 @@ namespace API
     virtual void clearMRU() const = 0;
 
   protected:
+      virtual const std::string toString() const;
       /// Create and return a new InfoNode describing this workspace.
       virtual InfoNode *createInfoNode() const;
   };

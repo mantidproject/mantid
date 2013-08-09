@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
@@ -104,6 +105,15 @@ const std::string& Workspace::getName() const
 bool Workspace::isDirty(const int n) const
 {
     return static_cast<int>(m_history.size()) > n;
+}
+
+/**
+ * Returns the memory footprint in sensible units
+ * @return A string with the
+ */
+std::string Workspace::getMemorySizeAsStr() const
+{
+  return Mantid::Kernel::memToString<size_t>(getMemorySize()/1024);
 }
 
 /**

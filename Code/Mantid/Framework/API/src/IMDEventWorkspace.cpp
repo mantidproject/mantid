@@ -57,6 +57,26 @@ namespace API
   }
 
   //-----------------------------------------------------------------------------------------------
+
+  /**
+   */
+  const std::string IMDEventWorkspace::toString() const
+  {
+    std::ostringstream os;
+    os << IMDWorkspace::toString();
+
+    // Now box controller details
+    std::vector<std::string> stats = getBoxControllerStats();
+    for (size_t i=0; i < stats.size(); i++)
+    {
+      os << stats[i] << "\n";
+    }
+
+    os << "Events: " << getNPoints() << "\n";
+    return os.str();
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /**
    * @return :: A pointer to the created info node.
    */

@@ -151,7 +151,7 @@ public:
       virtual const std::string name() const { return "MyName1"; };
       virtual const std::string id() const { return "DataObjectOne"; }
       virtual bool threadSafe() const { return true; }
-      virtual std::string toString() const { return name(); }
+      virtual const std::string toString() const { return name(); }
     };
 
     class DataObjectTwo : public DataItem
@@ -159,7 +159,7 @@ public:
       virtual const std::string name() const { return "MyName2"; };
       virtual const std::string id() const { return "DataObjectTwo"; }
       virtual bool threadSafe() const { return true; }
-      virtual std::string toString() const { return name(); }
+      virtual const std::string toString() const { return name(); }
     };
 
 

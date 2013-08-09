@@ -65,6 +65,9 @@ public:
   ~WorkspaceGroup();
   /// Return a string ID of the class
   virtual const std::string id() const { return "WorkspaceGroup"; }
+  /// Returns a formatted string detailing the contents of the group
+  virtual const std::string toString() const;
+
   /// The collection itself is considered to take up no space
   virtual size_t getMemorySize() const { return 0; }
   /// Adds a workspace to the group.
