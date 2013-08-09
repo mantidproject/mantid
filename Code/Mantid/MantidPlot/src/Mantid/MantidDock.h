@@ -82,6 +82,8 @@ private slots:
   void incrementUpdateCount();
 
 private:
+  void populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems);
+  void addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent = NULL);
   void createWorkspaceMenuActions();
   void createSortMenuActions();
   QString findParentName(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
@@ -127,6 +129,7 @@ private:
   *m_convertMDHistoToMatrixWorkspace;
 
   QAtomicInt m_updateCount;
+  Mantid::API::AnalysisDataServiceImpl & m_ads;
   Mantid::API::Workspace::InfoNode *m_rootInfoNode;
 
   static Mantid::Kernel::Logger& logObject;
@@ -156,6 +159,7 @@ private:
   QPoint m_dragStartPosition;
   MantidDockWidget *m_dockWidget;
   MantidUI *m_mantidUI;
+  Mantid::API::AnalysisDataServiceImpl & m_ads;
   static Mantid::Kernel::Logger& logObject;
   MantidItemSortScheme m_sortScheme;
   Qt::SortOrder m_sortOrder;
