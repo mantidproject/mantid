@@ -349,8 +349,6 @@ class CreateCalibrationWorkspace(ReductionStep):
         if ( len(runs) > 1 ):
             for run in runs:
                 DeleteWorkspace(Workspace=run)
-                
-        print peakMin, peakMax
 
     def set_parameters(self, back_min, back_max, peak_min, peak_max):
         self._back_min = back_min
