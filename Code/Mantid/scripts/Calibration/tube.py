@@ -14,7 +14,7 @@ Among the examples, inside the :py:mod:`Examples` folder, the user is encouraged
 
 * :py:func:`~Examples.TubeCalibDemoMaps_All.minimalInput` shows the easiest way to use calibrate.
 * :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue` shows the usage of **fitPar** parameter to provide the expected values for the peaks in pixels.
-* :py:func:`~Examples.TubeCalibDemoMaps_All.extendMarginAndExpectedValue` demonstrate how to use **fitPar**, **plotTube**, and **outputPeak**
+* :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue` demonstrate how to use **margin**, **fitPar**, **plotTube**, and **outputPeak**
 * :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationSingleTube` explores the usage of **rangeList** and **overridePeaks** to improve the calibration of specific tubes.
 * :py:func:`~Examples.TubeCalibDemoMaps_All.improvingCalibrationOfListOfTubes` extends the improvingCalibrationSingleTube to provide a good calibration to almost all instrument. 
 * :py:func:`~Examples.TubeCalibDemoMaps_All.calibrateB2Window` explore a singularity of the MAP14919 example, where the second peak does not appear clear on some tubes inside one door. So, this example, shows how to use **rangeList** to carry a calibration to the group of tubes.
@@ -274,7 +274,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
       :param fitPar: Define the parameters to be used in the fit as a :class:`~tube_calib_fit_params.TubeCalibFitParams`. If not provided, the dynamic mode is used. See :py:func:`~Examples.TubeCalibDemoMaps_All.provideTheExpectedValue`
 
-      :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 10. See: :py:mod:`~Examples.TubeCalibDemoMerlin`
+      :param margin: value in pixesl that will be used around the peaks/edges to fit them. Default = 15. See the code of :py:mod:`~Examples.TubeCalibDemoMerlin` where **margin** is used to calibrate small tubes.
 
        >>> fit_start, fit_end = centre - margin, centre + margin
 
@@ -285,7 +285,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
       
       :param calibTable: Pass the calibration table, it will them append the values to the provided one and return it. (see: :py:mod:`~Examples.TubeCalibDemoMerlin`)
 
-      :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks, it can receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.extendMarginAndExpectedValue`)
+      :param plotTube: If given, the tube whose index is in plotTube will be ploted as well as its fitted peaks, it can receive a list of indexes to plot.(see: :py:func:`~Examples.TubeCalibDemoMaps_All.changeMarginAndExpectedValue`)
 
       :param excludeShortTubes: Do not calibrate tubes whose length is smaller than given value. (see at: Examples/TubeCalibDemoMerlin_Adjustable.py)
 

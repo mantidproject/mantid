@@ -34,18 +34,17 @@ def CalibrateWish( RunNumber, PanelNumber):
     lower_tube = numpy.array([-0.41,-0.31,-0.21,-0.11,-0.02, 0.09, 0.18, 0.28, 0.39 ])
     upper_tube = numpy.array(lower_tube+0.003)
     funcForm = 9*[1] # 9 gaussian peaks
-    margin = 15
     print "Created objects needed for calibration."
 
     # Get the calibration and put it into the calibration table
 
     #calibrate the lower tubes 
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, lower_tube, funcForm, 
-                                                  rangeList = range(0,76), outputPeak=True, margin=margin)
+                                                  rangeList = range(0,76), outputPeak=True)
     
     #calibrate the upper tubes
     calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, upper_tube, funcForm,
-                                    rangeList = range(76,152), margin = margin,
+                                    rangeList = range(76,152),
                                     calibTable=calibrationTable, #give the calibration table to append data
                                     outputPeak = peakTable #give peak table to append data
                                                  )
