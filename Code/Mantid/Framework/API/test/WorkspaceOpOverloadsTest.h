@@ -130,6 +130,18 @@ public:
 
     TS_ASSERT( ! WorkspaceHelpers::matchingBins(ws1,ws2,true) );
   }
+
+  void test_sharedXData()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2,2,1);
+    // By default the X vectors are different ones
+    TS_ASSERT( ! WorkspaceHelpers::sharedXData(ws) );
+    // Force both X spectra to point to the same underlying vector
+    ws->getSpectrum(1)->setX(ws->getSpectrum(0)->ptrX());
+    TS_ASSERT( WorkspaceHelpers::sharedXData(ws) );
+  }
+
 };
 
 #endif
