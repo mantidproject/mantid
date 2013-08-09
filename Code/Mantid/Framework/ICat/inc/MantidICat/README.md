@@ -10,7 +10,7 @@ The following command will generate classes and headers based on the source file
 
 ### Possible issues
 
-When running your code on OSX, or the test servers you may *will* come across problems with OSX trying to include windows.h files. To solve this issue, locate `windows.h` in `stdsoap2.h` and add the following code to the `WITH_OPENSSL` macro:
+When running your code on OSX locally or on test servers you *will* come across problems with OSX trying to include windows.h files. To solve this issue, locate `windows.h` in `stdsoap2.h` and add the following code to the `WITH_OPENSSL` macro:
 
     # ifdef __APPLE__
       # undef OPENSSL_SYS_WINDOWS
@@ -18,7 +18,7 @@ When running your code on OSX, or the test servers you may *will* come across pr
     # endif
     
    
-In order to prevent OSX errors when trying to compile (due to already included files) comment out the following two lines of code inside the second `#ifdef __APPLE__` macro: 
+To prevent OSX errors when trying to compile (due to already included files) comment out the following two lines of code inside the second `#ifdef __APPLE__` macro: 
 
     extern "C" int isnan(double);
     extern "C" int isinf(double);
