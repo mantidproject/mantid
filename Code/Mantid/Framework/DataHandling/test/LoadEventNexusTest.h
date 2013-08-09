@@ -69,18 +69,6 @@ public:
     doTestSingleBank(true, false);
   }
 
-
-//  void xtest_fileCheck()
-//  {
-//    LoadEventNexus ld;
-//    ld.initialize();
-//    ld.setPropertyValue("Filename","CNCS_7860_event.nxs"); // Only doing this to resolve the path to the file
-//    TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 80);
-//    //Try an ISIS nexus file
-//    ld.setPropertyValue("Filename","LOQ49886.nxs");
-//    TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 0);
-//  }
-
   void test_Normal_vs_Precount()
   {
     Mantid::API::FrameworkManager::Instance();
@@ -528,20 +516,6 @@ public:
     TS_ASSERT_DELTA(WS->getEventList(26798).getWeightedEvents()[0].weight(),
         1.8124e-11, 1.0e-4);
     TS_ASSERT_EQUALS(WS->getEventList(26798).getWeightedEvents()[0].tof(), 1476.0);
-  }
-
-  // There was an error where all the events from detectors that aren't in the IDF ended
-  // up in the first spectrum (ticket #7524). This makes sure there's no regression with the fix.
-  void test_BASIS_first_spectrum()
-  {
-    LoadEventNexus ld;
-    ld.initialize();
-    ld.setPropertyValue("Filename","BSS_11841_event.nxs");
-    ld.setPropertyValue("OutputWorkspace","Basis");
-    TS_ASSERT( ld.execute() );
-
-    EventWorkspace_const_sptr ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("Basis");
-    TS_ASSERT_EQUALS( ws->getEventList(0).getNumberEvents(), 1 );
   }
 
 };
