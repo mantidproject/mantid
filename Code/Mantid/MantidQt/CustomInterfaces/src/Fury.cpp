@@ -90,6 +90,7 @@ namespace IDA
   QString Fury::validate()
   {
     UserInputValidator uiv;
+    uiv.checkMWRunFilesIsValid("Resolution", uiForm().fury_resFile);
 
     double eLow   = m_furDblMng->value(m_furProp["ELow"]);
     double eWidth = m_furDblMng->value(m_furProp["EWidth"]);
