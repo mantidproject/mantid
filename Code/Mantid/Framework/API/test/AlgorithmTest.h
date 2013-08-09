@@ -198,7 +198,7 @@ public:
   ~AlgorithmTest()
   {
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",1);
-    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm2", 1);
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithmTwo", 1);
   }
   
   void testAlgorithm()
