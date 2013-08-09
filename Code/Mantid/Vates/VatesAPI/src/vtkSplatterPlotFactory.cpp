@@ -304,6 +304,12 @@ namespace VATES
   {
     UNUSED_ARG(progressUpdating);
 
+    // If initialize() wasn't run, we don't have a workspace.
+    if(!m_workspace)
+    {
+      throw std::runtime_error("Invalid vtkSplatterPlotFactory. Workspace is null");
+    }
+
     size_t nd = m_workspace->getNumDims();
      
     Mantid::Kernel::ReadLock lock(*m_workspace);
@@ -375,10 +381,6 @@ namespace VATES
     if(!m_workspace)
     {
       throw std::invalid_argument("Workspace is null or not IMDEventWorkspace");
-    }
-    if(!m_workspace)
-    {
-      throw std::runtime_error("Invalid vtkSplatterPlotFactory. Workspace is null");
     }
     if (m_workspace->getNumDims() < 3)
     {
