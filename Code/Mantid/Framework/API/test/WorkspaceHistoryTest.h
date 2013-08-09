@@ -6,12 +6,15 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
-#include "MantidKernel/Property.h"
 #include "MantidAPI/FileFinder.h"
+#include "MantidKernel/Property.h"
+#include "MantidKernel/NexusTestHelper.h"
 #include "Poco/File.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using Mantid::Kernel::NexusTestHelper;
+
 class WorkspaceHistoryTest : public CxxTest::TestSuite
 {
 private:
@@ -160,7 +163,26 @@ public:
     TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/author"));
     TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/data"));
     TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_4/description"));
+    TS_ASSERT_THROWS_ANYTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_5"));
 
+    loadhandle->close();
+    Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
+  }
+
+  void test_SaveNexus_Empty()
+  {
+    WorkspaceHistory testHistory;
+
+    auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
+    savehandle->close();
+
+    auto loadhandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    std::string rootstring = "/process/";
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring));
+    TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidEnvironment"));
+    TS_ASSERT_THROWS_ANYTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1"));
+    
     loadhandle->close();
     Poco::File("WorkspaceHistoryTest_test_SaveNexus.nxs").remove();
   }
@@ -186,7 +208,22 @@ public:
     loadhandle->close();
 
   }
-  
+
+  void test_LoadNexus_Failiure()
+  {
+    NexusTestHelper th(false);
+    th.createFile("LoadNexusTest2.nxs");
+
+    WorkspaceHistory emptyHistory;
+    TS_ASSERT_THROWS_NOTHING(emptyHistory.loadNexus(th.file));
+    const auto & histories = emptyHistory.getAlgorithmHistories();
+    
+    TS_ASSERT_EQUALS(0,histories.size());
+    std::string rootstring = "/process/";
+    TS_ASSERT_THROWS_NOTHING(th.file->openPath(rootstring));
+    TS_ASSERT_THROWS_NOTHING(th.file->openPath(rootstring + "MantidEnvironment"));
+    TS_ASSERT_THROWS_ANYTHING(th.file->openPath(rootstring + "MantidAlgorithm_1")); 
+  }
 };
 
 
