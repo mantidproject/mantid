@@ -24,7 +24,7 @@ print "Created objects needed for calibration."
 
 # Get the calibration and put it into the calibration table
 calibrationTable = tube.calibrate(CalibInstWS, CalibratedComponent, 
-                                  knownPos, funcForm, margin=15)
+                                  knownPos, funcForm)
 print "Got calibration (new positions of detectors)"
     
 #Apply the calibration

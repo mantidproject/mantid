@@ -2,8 +2,6 @@ import time as time
 import math
 import numpy
 from mantid.simpleapi import *
-import MantidFramework 
-MantidFramework.mtd.initialise()
 try:
   from mantidplot import *
 except ImportError:

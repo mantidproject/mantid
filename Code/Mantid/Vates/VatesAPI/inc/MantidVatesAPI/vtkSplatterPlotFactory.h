@@ -16,41 +16,40 @@ namespace VATES
 {
 
 /**
- * Factory that creates a simple "splatter plot" data set
- * composed of points of a selection of the events in a MDEventWorkspace.
+ * Factory that creates a simple "splatter plot" data set composed of points
+ * of a selection of the events in a MDEventWorkspace.
  *
-
- @author Janik Zikovsky
- @date August 16, 2011
-
- Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
- This file is part of Mantid.
-
- Mantid is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or
- (at your option) any later version.
-
- Mantid is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
- File change history is stored at: <https://github.com/mantidproject/mantid>
- Code Documentation is available at: <http://doxygen.mantidproject.org>
+ * @date August 16, 2011
+ *
+ * Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+ *
+ * This file is part of Mantid.
+ *
+ * Mantid is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Mantid is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * File change history is stored at: <https://github.com/mantidproject/mantid>
+ * Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-
 class DLLExport vtkSplatterPlotFactory : public vtkDataSetFactory
 {
-
 public:
 
   /// Constructor
-  vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t numPoints = 150000, const double percentToUse = 5.0);
+  vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange,
+                         const std::string& scalarName,
+                         const size_t numPoints = 150000,
+                         const double percentToUse = 5.0);
 
   /// Destructor
   virtual ~vtkSplatterPlotFactory();
@@ -71,7 +70,7 @@ public:
   virtual void SetNumberOfPoints(size_t points);
 
   /// Set percentage of boxes from which points will be plotted
-  virtual void SetPercentToUse( double percentToUse );
+  virtual void SetPercentToUse(double percentToUse);
 
 private:
 
@@ -97,19 +96,17 @@ private:
   double m_percentToUse;
 
   /// Data set that will be generated
-  mutable vtkDataSet * dataSet;
+  mutable vtkDataSet *dataSet;
 
   /// We are slicing down from > 3 dimensions
   mutable bool slice;
 
   /// Mask for choosing along which dimensions to slice
-  mutable bool * sliceMask;
+  mutable bool *sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable Mantid::Geometry::MDImplicitFunction * sliceImplicitFunction;
-
+  mutable Mantid::Geometry::MDImplicitFunction *sliceImplicitFunction;
 };
-
 
 }
 }
