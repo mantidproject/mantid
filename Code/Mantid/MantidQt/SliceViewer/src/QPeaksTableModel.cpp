@@ -25,7 +25,7 @@ namespace MantidQt
     const QString QPeaksTableModel::FINAL_ENERGY("E_f");
     const QString QPeaksTableModel::TOF("TOF");
     const QString QPeaksTableModel::DSPACING = "DSpacing";
-    const QString QPeaksTableModel::INT = "Intens";
+    const QString QPeaksTableModel::INT = "Int";
     const QString QPeaksTableModel::SIGMINT = "SigInt";
     const QString QPeaksTableModel::INT_SIGINT("Int/SigInt");
     const QString QPeaksTableModel::BINCOUNT("BinCount");

@@ -61,6 +61,9 @@ namespace Mantid
       double Rwp;
       /// Rp
       double Rp;
+      ///  Foos(int a, int b) : a(a), b(b) {}
+      Rfactor (double rwp, double rp) : Rwp(rwp), Rp(rp) {}
+      Rfactor () {Rwp = -1.0; Rp = -1.0;}
     };
   
     /// Return a statistics object for the given data set

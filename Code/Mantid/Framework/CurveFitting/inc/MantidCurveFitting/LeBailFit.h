@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/LeBailFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -118,7 +119,7 @@ namespace CurveFitting
 
     /// Calculate diffraction pattern
     bool calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
-                                     FunctionDomain1DVector domain, FunctionValues &values,
+                                     const MantidVec &vecX, MantidVec& vecY,
                                      map<string, Parameter> parammap, bool recalpeakintesity);
 
     /// LeBailFit
@@ -127,16 +128,11 @@ namespace CurveFitting
     /// Do 1 iteration in Le Bail fit
     bool do1StepLeBailFit(std::map<std::string, Parameter>& parammap);
 
-    /// Set up Lebail
+    /// Set up fit/tie/parameter values to all peaks functions (calling GSL library)
     void setLeBailFitParameters();
 
     /// Do 1 fit on LeBailFunction
     bool fitLeBailFunction(std::map<std::string, Parameter> &parammap);
-
-    /// Minimize a give function
-    bool minimizeFunction(MatrixWorkspace_sptr dataws, size_t wsindex, IFunction_sptr function,
-                          double tofmin, double tofmax, string minimizer, double dampfactor,
-                          int numiteration, string &status, double &chi2, bool outputcovarmatrix);
 
     /// Calcualte background by fitting peak heights
     void execRefineBackground();
@@ -160,13 +156,16 @@ namespace CurveFitting
                                         double &d_h, double &tof_h, string &errmsg);
 
     /// Set parameters to each peak
-    void setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<string, Parameter> parammap,
-                           double peakheight, bool setpeakheight);
+    // void setPeakParameters(ThermalNeutronBk2BkExpConvPVoigt_sptr peak, map<string, Parameter> parammap,
+    // double peakheight, bool setpeakheight);
 
     /// From table/map to set parameters to all peaks.
-    void setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
-                            map<std::string, Parameter> parammap,
-                            double peakheight, bool setpeakheight);
+    // void setPeaksParameters(vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > peaks,
+    // map<std::string, Parameter> parammap,
+    // double peakheight, bool setpeakheight);
+
+    /// Check whether a parameter is a profile parameter
+    bool hasProfileParameter(std::string paramname);
 
     //--------------  Le Bail Formular: Calculate Peak Intensities ------------
     /// Calcualte peak heights from model to data
@@ -223,10 +222,9 @@ namespace CurveFitting
     void addParameterToMCMinimize(vector<string>& parnamesforMC, string parname);
 
     /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
-    bool calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws,
-                                       size_t wsindex,
-                                       map<string, Parameter> funparammap,
-                                       MantidVec &background, MantidVec &values,
+    bool calculateDiffractionPatternMC(const MantidVec &vecX, const MantidVec &vecY,
+                                       bool inputraw, bool outputwithbkgd,
+                                       MantidVec& vecBkgd,  MantidVec& values,
                                        Rfactor& rfactor);
 
     /// Calculate powder diffraction statistic Rwp
@@ -273,7 +271,19 @@ namespace CurveFitting
     /// Propose new background parameters
     void proposeNewBackgroundValues();
 
-    //--------------------------------------------------------------------------
+
+    /// Minimize a give function
+    bool minimizeFunction(API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                          double tofmin, double tofmax, string minimizer, double dampfactor,
+                          int numiteration, string &status, double &chi2, bool outputcovarmatrix);
+
+    //--------------------------------------------------------------------------------------------
+
+    /// Map to contain function variables
+    // map<string, Parameter> m_functionParameters;
+
+    /// Le Bail Function (Composite) (old: API::CompositeFunction_sptr m_lebailFunction)
+    LeBailFunction_sptr m_lebailFunction;
 
     /// Instance data
     API::MatrixWorkspace_sptr m_dataWS;
@@ -293,7 +303,7 @@ namespace CurveFitting
     vector<pair<vector<int>, double> > m_inputPeakInfoVec;
 
     /// Vector of pairs of d-spacing and peak reference for all Bragg peaks
-    std::vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > m_dspPeaks;
+    // std::vector<pair<double, ThermalNeutronBk2BkExpConvPVoigt_sptr> > m_dspPeaks;
 
     /* Phase out (HKL)^2 may not be in order of peak position if lattice is not cubic
     std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPVoigt_sptr> m_peaks;
@@ -303,8 +313,7 @@ namespace CurveFitting
 
     /// Background function
     CurveFitting::BackgroundFunction_sptr m_backgroundFunction;
-    /// Le Bail Function (Composite)
-    API::CompositeFunction_sptr m_lebailFunction;
+
 
     /// Function parameters updated by fit
     std::map<std::string, Parameter> m_funcParameters; // char = f: fit... = t: tie to value
@@ -319,7 +328,22 @@ namespace CurveFitting
     /// Calculate some statistics for fitting/calculating result
     // void calChiSquare();
 
+    /// Convert a map of Parameter to a map of double
+    std::map<std::string, double> convertToDoubleMap(std::map<std::string, Parameter>& inmap);
+
     /// =============================    =========================== ///
+
+    std::string m_peakType;
+
+    /// Vector for miller indexes
+    // std::vector<std::vector<int> > m_vecHKL;
+
+    /// Background type
+    std::string m_backgroundType;
+
+    /// Background polynomials
+    std::vector<double> m_backgroundParameters;
+
     // size_t mWSIndexToWrite;
 
     /// Map to store peak group information: key (int) = (hkl)^2; value = group ID
@@ -387,7 +411,6 @@ namespace CurveFitting
     vector<double> m_bkgdParameterBest;
     int m_roundBkgd;
     vector<double> m_bkgdParameterStepVec;
-
 
   };
 
