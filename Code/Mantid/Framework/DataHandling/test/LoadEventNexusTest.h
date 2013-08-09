@@ -496,8 +496,10 @@ public:
     ld.initialize();
     ld.setPropertyValue("Filename", "ARCS_sim_event.nxs");
     ld.setPropertyValue("OutputWorkspace", wsname);
-    ld.execute();
-    TS_ASSERT( ld.isExecuted() );
+    ld.setProperty("BankName","bank27");
+    ld.setProperty("SingleBankPixelsOnly",false);
+    ld.setProperty("LoadLogs",false);
+    TS_ASSERT( ld.execute() );
 
     EventWorkspace_sptr WS;
     TS_ASSERT_THROWS_NOTHING(
@@ -505,9 +507,10 @@ public:
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     if (!WS) return;
-    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 117760);
-    TS_ASSERT_EQUALS( WS->getNumberEvents(), 128);
-    for (size_t wi = 0; wi <  WS->getNumberHistograms(); wi++)
+    const auto numHist = WS->getNumberHistograms();
+    TS_ASSERT_EQUALS( numHist, 117760);
+    TS_ASSERT_EQUALS( WS->getNumberEvents(), 2);
+    for (size_t wi = 0; wi <  numHist; wi+=5000)
     {
       // All events should be weighted events for simulated data
       TS_ASSERT_EQUALS( WS->getEventList(wi).getEventType(), WEIGHTED);
