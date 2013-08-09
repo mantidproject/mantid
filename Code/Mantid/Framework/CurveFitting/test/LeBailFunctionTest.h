@@ -161,7 +161,7 @@ public:
     vector<double> bkgdvec(2);
     bkgdvec[0] = 0.01;
     bkgdvec[1] = 0.;
-    lebailfunction.addBackgroundFunction("Polynomial", bkgdvec);
+    lebailfunction.addBackgroundFunction("Polynomial", bkgdvec, vecX.front(), vecX.back());
 
     lebailfunction.function(out, vecX, true, true);
 
