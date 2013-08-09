@@ -75,7 +75,7 @@ namespace Mantid
             }
             else
             {
-                int ret = gsl_bspline_eval(x, B.gsl(), m_bsplineWorkspace);
+                gsl_bspline_eval(x, B.gsl(), m_bsplineWorkspace);
                 double val = 0.0;
                 for(size_t j = 0; j < np; ++j)
                 {
@@ -96,7 +96,10 @@ namespace Mantid
      */
     void BSpline::derivative1D(double* out, const double* xValues, size_t nData, const size_t order) const
     {
-
+        UNUSED_ARG(out);
+        UNUSED_ARG(xValues);
+        UNUSED_ARG(nData);
+        UNUSED_ARG(order);
     }
 
     /** Set an attribute for the function

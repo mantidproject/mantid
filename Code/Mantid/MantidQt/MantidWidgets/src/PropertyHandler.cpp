@@ -789,8 +789,11 @@ protected:
     m_browser->m_changeSlotsEnabled = true;
   }
   /// Set vector property
-  void apply(const std::vector<double>& b)const
+  void apply(const std::vector<double>&)const
   {
+      // this method is supposed to be called when corresponding
+      // property value changes but it doesn't have a value because
+      // it's a group property
       throw std::runtime_error("Vector attribute not implemented.");
   }
 private:
