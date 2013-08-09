@@ -328,13 +328,6 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="2">
-          <widget class="QPushButton" name="fury_pbPlotInput">
-           <property name="text">
-            <string>Plot Input</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_17">
            <item>
@@ -363,76 +356,22 @@
          <item row="0" column="1">
           <layout class="QHBoxLayout" name="fury_layout_input">
            <item>
-            <widget class="QComboBox" name="fury_cbInputType">
-             <item>
-              <property name="text">
-               <string>File</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Workspace</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item>
-            <widget class="QStackedWidget" name="fury_swInput">
-             <property name="currentIndex">
-              <number>0</number>
+            <widget class="MantidQt::MantidWidgets::DataSelector" name="fury_dsInput">
+             <property name="loadLabelText" stdset="0">
+              <string>Plot Input</string>
              </property>
-             <widget class="QWidget" name="fury_page_inputFile">
-              <layout class="QVBoxLayout" name="fury_page_inputFile_layout">
-               <property name="margin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>41</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="findRunFiles" stdset="0">
-                  <bool>false</bool>
-                 </property>
-                 <property name="label" stdset="0">
-                  <string>Sample:     </string>
-                 </property>
-                 <property name="multipleFiles" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                 <property name="fileExtensions">
-                  <stringlist>
-                   <string>_red.nxs</string>
-                   <string>_sqw.nxs</string>
-                  </stringlist>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-             <widget class="QWidget" name="fury_page_inputWorkspace">
-              <layout class="QHBoxLayout" name="fury_layout_page_inputWorkspace">
-               <property name="margin">
-                <number>0</number>
-               </property>
-               <item>
-                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample">
-                 <property name="WorkspaceTypes">
-                  <stringlist/>
-                 </property>
-                 <property name="Suffix" stdset="0">
-                  <stringlist>
-                   <string>_res</string>
-                   <string>_sqw</string>
-                  </stringlist>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
+             <property name="workspaceSuffixes" stdset="0">
+              <stringlist>
+               <string>_red</string>
+               <string>_sqw</string>
+              </stringlist>
+             </property>
+             <property name="fileBrowserSuffixes" stdset="0">
+              <stringlist>
+               <string>_red.nxs</string>
+               <string>_sqw.nxs</string>
+              </stringlist>
+             </property>
             </widget>
            </item>
           </layout>
@@ -2450,6 +2389,11 @@
    <extends>QComboBox</extends>
    <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
   </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::DataSelector</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/DataSelector.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>tabWidget</tabstop>
@@ -2461,9 +2405,7 @@
   <tabstop>msd_ckVerbose</tabstop>
   <tabstop>msd_ckPlot</tabstop>
   <tabstop>msd_ckSave</tabstop>
-  <tabstop>fury_pbPlotInput</tabstop>
   <tabstop>fury_cbResType</tabstop>
-  <tabstop>fury_cbInputType</tabstop>
   <tabstop>fury_ckVerbose</tabstop>
   <tabstop>fury_ckPlot</tabstop>
   <tabstop>fury_ckSave</tabstop>
