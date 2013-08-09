@@ -92,6 +92,7 @@ void LoadDaveGrp::init()
   exts.push_back(".grp");
   exts.push_back(".sqe");
   exts.push_back(".txt");
+  exts.push_back(".dat");
 
   this->declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
                         "A DAVE grouped ASCII file");
