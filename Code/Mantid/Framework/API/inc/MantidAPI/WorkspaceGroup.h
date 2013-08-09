@@ -100,6 +100,10 @@ public:
   void remove(const std::string& wsName) { AnalysisDataService::Instance().removeFromGroup( this->name(), wsName); }
   /// Does a workspace exist within the group
   bool contains(const std::string & wsName) const;
+  /// Does a workspace exist within the group
+  bool contains(const Workspace_sptr & wsName) const;
+  /// Add the members of the group to the given list
+  void reportMembers(std::set<Workspace_sptr> & memberList) const;
   /// Returns the names of workspaces that make up this group. Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
   std::vector<std::string> getNames() const;
 

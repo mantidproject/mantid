@@ -111,6 +111,28 @@ bool WorkspaceGroup::contains(const std::string & wsName) const
 }
 
 /**
+ * @param workspace A pointer to a workspace
+ * @returns True if the workspace exists in the group, false otherwise
+ */
+bool WorkspaceGroup::contains(const Workspace_sptr & workspace) const
+{
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  auto iend = m_workspaces.end();
+  auto it = std::find(m_workspaces.begin(),iend, workspace);
+  return (it != iend);
+}
+
+/**
+ * Adds the current workspace members to the given list
+ * @param memberList
+ */
+void WorkspaceGroup::reportMembers(std::set<Workspace_sptr> & memberList) const
+{
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  memberList.insert(m_workspaces.begin(), m_workspaces.end());
+}
+
+/**
  * Returns the names of workspaces that make up this group. 
  * Note that this returns a copy as the internal vector can mutate while the vector is being iterated over.
  */

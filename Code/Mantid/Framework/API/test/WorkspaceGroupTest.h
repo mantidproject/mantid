@@ -138,6 +138,25 @@ public:
     TS_ASSERT_EQUALS(names[1], "Workspace2");
   }
 
+  void test_reportMembers_Does_Not_Clear_List_Already_Passed_In()
+  {
+    Workspace_sptr leaf1(new WorkspaceTester());
+    std::set<Workspace_sptr> topLevel;
+    topLevel.insert(leaf1);
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    Workspace_sptr ws1(new WorkspaceTester());
+    group->addWorkspace( ws1 );
+    Workspace_sptr ws2(new WorkspaceTester());
+    group->addWorkspace( ws2 );
+
+    group->reportMembers(topLevel);
+    TS_ASSERT_EQUALS(3, topLevel.size());
+    TS_ASSERT_EQUALS(1, topLevel.count(leaf1));
+    TS_ASSERT_EQUALS(1, topLevel.count(ws1));
+    TS_ASSERT_EQUALS(1, topLevel.count(ws2));
+
+  }
+
   void test_getItem()
   {
     WorkspaceGroup_sptr group = makeGroup();

@@ -1,6 +1,5 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/Strings.h"
 
 namespace Mantid
 {
@@ -263,6 +262,51 @@ namespace Mantid
             }
         }
         return root;
+    }
+
+    /**
+     * Produces a map of names to Workspaces that doesn't include
+     * items that are part of a WorkspaceGroup already in the list
+     * @return A lookup of name to Workspace pointer
+     */
+    std::map<std::string,Workspace_sptr> AnalysisDataServiceImpl::topLevelItems() const
+    {
+      std::map<std::string,Workspace_sptr> topLevel;
+      auto topLevelNames = this->getObjectNames();
+      std::set<Workspace_sptr> groupMembers;
+
+      for(auto it = topLevelNames.begin(); it != topLevelNames.end(); ++it)
+      {
+        try
+        {
+          const std::string & name = *it;
+          auto ws = this->retrieve(*it);
+          topLevel.insert(std::make_pair(name, ws));
+          if(auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws))
+          {
+            group->reportMembers(groupMembers);
+          }
+        }
+        catch(std::exception&)
+        {
+        }
+      }
+
+      // Prune members
+      for(auto it = topLevel.begin(); it != topLevel.end();)
+      {
+        const Workspace_sptr & item = it->second;
+        if(groupMembers.count(item) == 1)
+        {
+          topLevel.erase(it++);
+        }
+        else
+        {
+          ++it;
+        }
+      }
+
+      return topLevel;
     }
 
     //-------------------------------------------------------------------------
