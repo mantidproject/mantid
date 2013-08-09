@@ -636,7 +636,11 @@ namespace IDA
         {
           return;
         }
-        if ( uiForm().confit_inputFile->isValid() )
+        if ( ! uiForm().confit_inputFile->isValid() )
+        {
+          return;
+        }
+        else
         {
           QString filename = uiForm().confit_inputFile->getFirstFilename();
           QFileInfo fi(filename);
@@ -648,11 +652,6 @@ namespace IDA
             m_cfInputWSName = wsname;
             m_cfInputWS = runLoadNexus(filename, wsname);
           }
-        }
-        else
-        {
-          showInformationBox("Selected input files are invalid.");
-          return;
         }
       }
       break;
