@@ -887,7 +887,7 @@ QString AlgorithmDialog::getPreviousValue(const QString& propName)
     if (value.isEmpty())
       value = AlgorithmInputHistory::Instance().previousInput(m_algName, propName);
   }
-  else if(getAlgorithmProperty(propName) != NULL)
+  else if(getAlgorithmProperty(propName))
   {
     value = m_propertyValueMap.value(propName);
   }
@@ -905,10 +905,11 @@ QString AlgorithmDialog::getPreviousValue(const QString& propName)
  */
 void AlgorithmDialog::setPreviousValue(QWidget* widget, const QString& propName)
 {
-  QString value = getPreviousValue(propName);
-
-  if(value.isEmpty())
+  // If is called from a script, check if we have such property
+  if(isForScript() && !getAlgorithmProperty(propName))
     return;
+
+  QString value = getPreviousValue(propName);
 
   Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
 
