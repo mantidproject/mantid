@@ -117,11 +117,6 @@ namespace CurveFitting
     /// Calculate LeBail pattern from from input peak parameters
     void execPatternCalculation();
 
-    /// Calculate diffraction pattern
-    bool calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
-                                     const MantidVec &vecX, MantidVec& vecY,
-                                     map<string, Parameter> parammap, bool recalpeakintesity);
-
     /// LeBailFit
     void execLeBailFit();
 

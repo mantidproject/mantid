@@ -1981,7 +1981,7 @@ namespace CurveFitting
    */
   bool LeBailFit::calculateDiffractionPattern(const MantidVec& vecX, const MantidVec &vecY,
                                               bool inputraw, bool outputwithbkgd,
-                                              MantidVec& vecBkgd,  MantidVec& values,
+                                              const MantidVec& vecBkgd,  MantidVec& values,
                                               Rfactor& rfactor)
   {
     vector<double> veccalbkgd;
