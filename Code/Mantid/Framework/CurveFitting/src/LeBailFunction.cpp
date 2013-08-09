@@ -885,7 +885,7 @@ namespace CurveFitting
     * @param startx :: background's StartX.  Used by Chebyshev
     * @param endx :: background's EndX.  Used by Chebyshev
     */
-  void LeBailFunction::addBackgroundFunction(string backgroundtype, std::vector<double>& vecparvalues,
+  void LeBailFunction::addBackgroundFunction(string backgroundtype, const std::vector<double>& vecparvalues,
                                              double startx, double endx)
   {
     // Check
@@ -897,7 +897,7 @@ namespace CurveFitting
     }
 
     // Determine order from number of input parameters
-    size_t order = vecparvalues.size();
+    size_t numbkgdvec = vecparvalues.size();
 
     // Create background function from factory
     auto background = FunctionFactory::Instance().createFunction(backgroundtype);
@@ -905,15 +905,26 @@ namespace CurveFitting
 
     // Set order and init: remember that for background function polynomial and chebyshev,
     // n is always equal to number of order parameter plus 1.
-    m_background->setAttributeValue("n", int(order)-1);
+    int order = static_cast<int>(numbkgdvec)-1;
+    if (order < 0)
+      order = 0;
+    m_background->setAttributeValue("n", order);
     m_background->initialize();
 
     // Set parameters
-    for (size_t i = 0; i < order; ++i)
+    if (numbkgdvec > 0)
     {
-      m_background->setParameter(i, vecparvalues[i]);
-      g_log.debug() << "Background function: set " << m_background->parameterName(i)
-                    << " = " << vecparvalues[i] << ".\n";
+      for (size_t i = 0; i < numbkgdvec; ++i)
+      {
+        m_background->setParameter(i, vecparvalues[i]);
+        g_log.debug() << "Background function: set " << m_background->parameterName(i)
+                      << " = " << vecparvalues[i] << ".\n";
+      }
+    }
+    else
+    {
+      // Set a flat zero background as default
+      m_background->setParameter(0, 0.);
     }
 
     if (startx > 0.)
