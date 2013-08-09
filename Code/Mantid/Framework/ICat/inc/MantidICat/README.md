@@ -16,3 +16,9 @@ When running your code on OSX, or the test servers you may *will* come across pr
       # undef OPENSSL_SYS_WINDOWS
       # undef OPENSSL_SYS_WIN32
     # endif
+    
+   
+In order to prevent OSX errors when trying to compile (due to already included files) comment out the following two lines of code inside the second `#ifdef __APPLE__` macro: 
+
+    extern "C" int isnan(double);
+    extern "C" int isinf(double);
