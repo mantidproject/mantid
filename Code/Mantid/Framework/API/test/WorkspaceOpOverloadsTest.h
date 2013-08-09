@@ -63,6 +63,51 @@ public:
     TS_ASSERT( ! WorkspaceHelpers::commonBoundaries(ws) );
   }
 
+  void test_matchingBins()
+  {
+    auto ws = boost::make_shared<WorkspaceTester>();
+    ws->init(2,2,1);
+    TSM_ASSERT("Passing it the same workspace twice had better work!", WorkspaceHelpers::matchingBins(ws,ws) );
+
+    // Different size workspaces fail of course
+    auto ws2 = boost::make_shared<WorkspaceTester>();
+    ws2->init(3,2,1);
+    auto ws3 = boost::make_shared<WorkspaceTester>();
+    ws3->init(2,3,2);
+    TSM_ASSERT("Different size workspaces should always fail", ! WorkspaceHelpers::matchingBins(ws,ws2) );
+    TSM_ASSERT("Different size workspaces should always fail", ! WorkspaceHelpers::matchingBins(ws,ws3) );
+
+    ws2->dataX(1)[0] = 99.0;
+    TSM_ASSERT("First-spectrum-only check should pass even when things differ in later spectra",
+               WorkspaceHelpers::matchingBins(ws,ws2,true) );
+
+    // Check it fails if the sum is zero but the boundaries differ, both for 1st & later spectra.
+    auto ws4 = boost::make_shared<WorkspaceTester>();
+    ws4->init(2,3,2);
+    ws4->dataX(0)[0] = -1;
+    ws4->dataX(0)[1] = 0;
+    auto ws5 = boost::make_shared<WorkspaceTester>();
+    ws5->init(2,3,2);
+    ws5->dataX(0)[0] = -1;
+    ws5->dataX(0)[2] = 0;
+    TS_ASSERT( ! WorkspaceHelpers::matchingBins(ws4,ws5,true) )
+    auto ws6 = boost::make_shared<WorkspaceTester>();
+    ws6->init(2,3,2);
+    ws6->dataX(1)[0] = -1;
+    ws6->dataX(1)[1] = 0;
+    auto ws7 = boost::make_shared<WorkspaceTester>();
+    ws7->init(2,3,2);
+    ws7->dataX(1)[0] = -1;
+    ws7->dataX(1)[2] = 0;
+    TS_ASSERT( ! WorkspaceHelpers::matchingBins(ws6,ws7) )
+
+    // N.B. There are known ways to fool this method, but they are considered acceptable because
+    // we're making a trade-off between absolute accuracy and speed.
+    //  - it is possible for bins boundaries to sum to the same and be different, but this is considered
+    //    unlikely and boundaries are only checked individually if the sum is zero.
+    //  - for large workspaces, only 1 in 10 of the spectra are checked.
+  }
+
   void test_matchingBins_negative_sum() // Added in response to bug #7391
   {
     auto ws1 = boost::make_shared<WorkspaceTester>();
