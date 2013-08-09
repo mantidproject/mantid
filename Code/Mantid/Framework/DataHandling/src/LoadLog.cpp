@@ -88,7 +88,7 @@ namespace Mantid
 
       std::vector<std::string> exts(2, "");
       exts[0] = ".txt";
-      exts[1] = ".add";
+      exts[1] = ".log";
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The filename (including its full or relative path) of a SNS text log file (not cvinfo), "
         "an ISIS log file, or an ISIS raw file. "
