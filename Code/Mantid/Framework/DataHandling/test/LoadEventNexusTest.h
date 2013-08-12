@@ -37,16 +37,15 @@ private:
     const double filterStart = 1;
     const double filterEnd = 1000;
 
-    LoadEventNexus * ld = new LoadEventNexus;
-    ld->initialize();
-    ld->setPropertyValue("OutputWorkspace", wsName);
-    ld->setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld->setProperty("FilterByTimeStart", filterStart);
-    ld->setProperty("FilterByTimeStop", filterEnd);
-    ld->setProperty("MetaDataOnly", metadataonly);
+    LoadEventNexus ld;
+    ld.initialize();
+    ld.setPropertyValue("OutputWorkspace", wsName);
+    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ld.setProperty("FilterByTimeStart", filterStart);
+    ld.setProperty("FilterByTimeStop", filterEnd);
+    ld.setProperty("MetaDataOnly", metadataonly);
 
-    ld->execute();
-    TS_ASSERT( ld->isExecuted() );
+    TS_ASSERT( ld.execute() );
 
     auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
 
@@ -78,6 +77,7 @@ public:
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace",outws_name);
     ld.setPropertyValue("Precount", "0");
+    ld.setProperty<bool>("LoadLogs", false); // Time-saver
     ld.execute();
     TS_ASSERT( ld.isExecuted() );
 
@@ -103,6 +103,11 @@ public:
 
     //Check filename
     TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),WS->run().getProperty("Filename")->value());
+
+    // Test that asking not to load the logs did what it should
+    // Make sure that we throw if we try to read a log (that shouldn't be there)
+    TS_ASSERT_THROWS( WS->getLog("proton_charge"),  std::invalid_argument);
+
     //----- Now we re-load with precounting and compare memory use ----
     LoadEventNexus ld2;
     std::string outws_name2 = "cncs_precount";
@@ -110,6 +115,7 @@ public:
     ld2.setPropertyValue("Filename","CNCS_7860_event.nxs");
     ld2.setPropertyValue("OutputWorkspace",outws_name2);
     ld2.setPropertyValue("Precount", "1");
+    ld.setProperty<bool>("LoadLogs", false); // Time-saver
     ld2.execute();
     TS_ASSERT( ld2.isExecuted() );
 
@@ -187,15 +193,15 @@ public:
     const double filterStart = 45000;
     const double filterEnd = 59000;
 
-    LoadEventNexus * ld = new LoadEventNexus;
-    ld->initialize();
-    ld->setPropertyValue("OutputWorkspace", wsName);
-    ld->setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld->setProperty("FilterByTofMin", filterStart);
-    ld->setProperty("FilterByTofMax", filterEnd);
+    LoadEventNexus ld;
+    ld.initialize();
+    ld.setPropertyValue("OutputWorkspace", wsName);
+    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ld.setProperty("FilterByTofMin", filterStart);
+    ld.setProperty("FilterByTofMax", filterEnd);
+    ld.setProperty<bool>("LoadLogs", false); // Time-saver
 
-    ld->execute();
-    TS_ASSERT( ld->isExecuted() );
+    TS_ASSERT( ld.execute() );
 
     auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
 
@@ -223,6 +229,8 @@ public:
     ld.setPropertyValue("OutputWorkspace",outws_name);
     ld.setPropertyValue("Precount", "0");
     ld.setPropertyValue("CompressTolerance", "0.05");
+    ld.setProperty<bool>("LoadMonitors", true); // For the next test, saving a load
+    ld.setProperty<bool>("LoadLogs", false); // Time-saver
     ld.execute();
     TS_ASSERT( ld.isExecuted() );
 
@@ -246,18 +254,8 @@ public:
 
   void test_Monitors()
   {
-    Mantid::API::FrameworkManager::Instance();
-    LoadEventNexus ld;
-    std::string outws_name = "cncs";
-    ld.initialize();
-    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld.setPropertyValue("OutputWorkspace",outws_name);
-    ld.setProperty<bool>("LoadMonitors", true);
-
-    ld.execute();
-    TS_ASSERT( ld.isExecuted() );
-
-    std::string mon_outws_name = outws_name + "_monitors";
+    // Uses the workspace loaded in the last test to save a load execution
+    std::string mon_outws_name = "cncs_compressed_monitors";
     MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(mon_outws_name);
     //Valid WS and it is an MatrixWorkspace
     TS_ASSERT( WS );
@@ -281,30 +279,6 @@ public:
     TS_ASSERT_DELTA( mon->getDistance(*sample), 1.426, 1e-6 );
   }
 
-
-  // Test that not loading logs works ok.
-  void test_LoadLogs()
-  {
-      Mantid::API::FrameworkManager::Instance();
-      LoadEventNexus ld;
-      std::string outws_name = "_loadeventnexus_test_loadlogs";
-      ld.initialize();
-      ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
-      ld.setPropertyValue("OutputWorkspace", outws_name);
-      ld.setProperty<bool>("LoadLogs", false);
-
-      ld.execute();
-      TS_ASSERT( ld.isExecuted() );
-
-      MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
-
-      // Make sure that we throw if we try to read a log (that shouldn't be there)
-      TS_ASSERT_THROWS( WS->getLog("proton_charge"),  std::invalid_argument);
-
-
-  }
-
-
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount, std::string BankName = "bank36", bool willFail=false)
   {
     Mantid::API::FrameworkManager::Instance();
@@ -317,6 +291,7 @@ public:
     ld.setPropertyValue("BankName", BankName);
     ld.setProperty<bool>("SingleBankPixelsOnly", SingleBankPixelsOnly);
     ld.setProperty<bool>("Precount", Precount);
+    ld.setProperty<bool>("LoadLogs", false); // Time-saver
     ld.execute();
 
     EventWorkspace_sptr WS;
@@ -360,8 +335,9 @@ public:
 
   /** Test with a particular ARCS file that has 2 preprocessors,
    * meaning different-sized pulse ID files.
+   * DISABLED AS THE FILE ISN'T IN THE REPOSITORY
    */
-  void test_MultiplePreprocessors()
+  void xtest_MultiplePreprocessors()
   {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
