@@ -71,6 +71,11 @@ void SmoothNeighboursDialog::inputWorkspaceChanged(const QString& pName)
     // Workspace groups are NOT returned by IWP->getWorkspace(), as they are not MatrixWorkspace,
     // so check the ADS for the GroupWorkspace with the same name
     std::string inWsValue = this->getAlgorithm()->getPointerToProperty(inWsName)->value();
+
+    // If it really doesn't exist, don't do anything
+    if(!AnalysisDataService::Instance().doesExist(inWsValue))
+      return;
+
     WorkspaceGroup_sptr inGroupWs = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(inWsValue);
 
     if(inGroupWs)
