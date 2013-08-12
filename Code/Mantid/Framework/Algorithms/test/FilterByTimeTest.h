@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/FilterByTime.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -201,6 +202,42 @@ private:
   std::string inWS;
 };
 
+//------------------------------------------------------------------------------
+// Performance test
+//------------------------------------------------------------------------------
+
+class FilterByTimeTestPerformance : public CxxTest::TestSuite
+{
+public:
+  FilterByTimeTestPerformance()
+  {
+    LoadEventNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    const std::string outWS("FilterByTimeTestPerformance");
+    loader.setPropertyValue("OutputWorkspace", outWS);
+    loader.execute();
+
+    alg.initialize();
+    alg.setProperty("InputWorkspace",outWS);
+    alg.setProperty("OutputWorkspace","anon");
+    alg.setProperty("StartTime", 60.0 );
+    alg.setProperty("StopTime", 120.0 );
+  }
+
+  ~FilterByTimeTestPerformance()
+  {
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_filtering()
+  {
+    alg.execute();
+  }
+
+private:
+  FilterByTime alg;
+};
 
 #endif /* FILTERBYTIMETEST_H_ */
 
