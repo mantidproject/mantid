@@ -131,7 +131,6 @@ private:
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
   Mantid::API::AnalysisDataServiceImpl & m_ads;
-  Mantid::API::Workspace::InfoNode *m_rootInfoNode;
 
   static Mantid::Kernel::Logger& logObject;
 };

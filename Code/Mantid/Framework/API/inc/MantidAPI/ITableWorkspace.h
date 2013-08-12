@@ -291,8 +291,6 @@ public:
 
 protected:
 
-  virtual InfoNode *createInfoNode() const;
-
   /**  Resize a column.
          @param c :: Pointer to the column
          @param size :: New column size

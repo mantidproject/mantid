@@ -20,9 +20,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-// Allow Mantid::API::Workspace::InfoNode* type to be used with QVariant
-Q_DECLARE_METATYPE(Mantid::API::Workspace::InfoNode*)
-
 Mantid::Kernel::Logger& MantidDockWidget::logObject = Mantid::Kernel::Logger::get("MantidDockWidget");
 Mantid::Kernel::Logger& MantidTreeWidget::logObject = Mantid::Kernel::Logger::get("MantidTreeWidget");
 
@@ -33,7 +30,7 @@ namespace
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
     QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_updateCount( 0 ),
-    m_treeUpdating(false), m_ads(Mantid::API::AnalysisDataService::Instance()), m_rootInfoNode(NULL)
+    m_treeUpdating(false), m_ads(Mantid::API::AnalysisDataService::Instance())
 {
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -102,7 +99,6 @@ MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
 
 MantidDockWidget::~MantidDockWidget()
 {
-    if ( m_rootInfoNode ) delete m_rootInfoNode;
 }
 
 /** Returns the name of the selected workspace

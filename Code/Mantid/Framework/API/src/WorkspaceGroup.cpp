@@ -167,20 +167,6 @@ std::vector<std::string> WorkspaceGroup::getNames() const
 }
 
 /**
- * Create InfoNode for this workspace group and add nodes for all its members.
- * @return
- */
-Workspace::InfoNode *WorkspaceGroup::createInfoNode() const
-{
-    InfoNode *node = new InfoNode(*this);
-    for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
-    {
-        (**it).addInfoNodeTo( *node );
-    }
-    return node;
-}
-
-/**
  * Return the ith workspace
  * @param index The index within the group
  * @throws an out_of_range error if the index is invalid

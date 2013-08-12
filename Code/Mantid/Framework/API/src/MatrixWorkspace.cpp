@@ -1626,40 +1626,6 @@ namespace Mantid
       return Mantid::API::None;
     }
 
-    /**
-     * @return :: A pointer to the created node.
-     */
-    Workspace::InfoNode *MatrixWorkspace::createInfoNode() const
-    {
-        auto node = new InfoNode(*this);
-        node->addLine( "Title: " + getTitle() );
-        node->addLine( "Histograms: " + boost::lexical_cast<std::string>(getNumberHistograms()) );
-        node->addLine( "Bins: " + boost::lexical_cast<std::string>(blocksize()) );
-        if ( isHistogramData() )
-        {
-            node->addLine( "Histogram" );
-        }
-        else
-        {
-            node->addLine( "Data points" );
-        }
-        std::string s = "X axis: ";
-        if (axes() > 0 )
-        {
-          Axis *ax = getAxis(0);
-          if ( ax && ax->unit() ) s += ax->unit()->caption() + " / " + ax->unit()->label();
-          else s += "Not set";
-        }
-        else
-        {
-          s += "N/A";
-        }
-        node->addLine( s );
-        node->addLine( "Y axis: " + YUnitLabel() );
-        node->addExperimentInfo(*this);
-        return node;
-    }
-
   } // namespace API
 } // Namespace Mantid
 

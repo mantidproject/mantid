@@ -405,26 +405,6 @@ public:
       ads.clear();
   }
 
-  void test_createInfoTree()
-  {
-      // this adds 1 group to the ADS (5 ws's altogether)
-      auto group = addGroupWithGroupToADS("group");
-      // plus 1 more ws
-      addToADS("workspace");
-      // ADS must have 6 ws's now
-      TS_ASSERT_EQUALS( ads.size(), 6 );
-
-      auto root = ads.createInfoTree();
-      TS_ASSERT( root );
-      // there are 2 ws's at top level
-      TS_ASSERT_EQUALS( root->nodes().size(), 2 );
-      TS_ASSERT_EQUALS( root->nodes()[0]->nodes().size(), 2 );
-      TS_ASSERT_EQUALS( root->nodes()[1]->nodes().size(), 0 );
-
-      delete root;
-      ads.clear();
-  }
-
   void test_topLevelItems_Does_Not_Contain_Workspaces_That_Are_In_A_Group_In_The_List()
   {
     // this adds 1 group to the ADS (5 ws's altogether)

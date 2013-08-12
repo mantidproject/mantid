@@ -112,10 +112,6 @@ public:
 
   //@}
 
-protected:
-  /// Create and return a new InfoNode describing this workspace.
-  virtual InfoNode *createInfoNode() const;
-
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);

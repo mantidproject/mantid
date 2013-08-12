@@ -69,8 +69,6 @@ namespace DataObjects
 
     /// Return human-readable string
     virtual const std::string toString() const;
-    /// Create and return a new InfoNode describing this workspace.
-    virtual InfoNode *createInfoNode() const;
 
     void binaryAND(boost::shared_ptr<const SpecialWorkspace2D> ws);
     void binaryOR(boost::shared_ptr<const SpecialWorkspace2D> ws);

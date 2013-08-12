@@ -315,18 +315,6 @@ public:
     TS_ASSERT(group->isMultiperiod());
   }
 
-  void test_InfoNode()
-  {
-      WorkspaceGroup_sptr group = makeGroup();
-      Mantid::API::Workspace::InfoNode rootNode( *group );
-      group->addInfoNodeTo( rootNode );
-      Mantid::API::Workspace::InfoNode &node = *rootNode.nodes()[0];
-      TS_ASSERT_EQUALS( node.nodes().size(), 3 );
-
-      TS_ASSERT_EQUALS( node.workspaceName(), "group" );     // workspace name
-      TS_ASSERT_EQUALS( node.lines()[0], "WorkspaceGroup" ); // workspace id
-  }
-
   void test_isInGroup()
   {
       WorkspaceGroup_sptr group = makeGroup();

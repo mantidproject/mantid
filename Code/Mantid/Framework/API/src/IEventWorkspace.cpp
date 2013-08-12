@@ -39,29 +39,6 @@ const std::string IEventWorkspace::toString() const
   return os.str();
 }
 
-/**
- * @return :: A pointer to the created info node.
- */
-API::Workspace::InfoNode *IEventWorkspace::createInfoNode() const
-{
-    auto node = MatrixWorkspace::createInfoNode();
-    std::string extra("");
-    switch ( getEventType() )
-    {
-    case WEIGHTED:
-      extra = " (weighted)";
-      break;
-    case WEIGHTED_NOTIME:
-      extra = " (weighted, no times)";
-      break;
-    case TOF:
-      extra = "";
-      break;
-    }
-    node->addLine( "Events: " + boost::lexical_cast<std::string>(getNumberEvents()) + extra );
-    return node;
-}
-
 }
 
 /*

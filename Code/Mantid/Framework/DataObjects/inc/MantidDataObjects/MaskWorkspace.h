@@ -36,8 +36,6 @@ namespace DataObjects
     protected:
         /// Return human-readable string
         virtual const std::string toString() const;
-        /// Create and return a new InfoNode describing this workspace.
-        virtual InfoNode *createInfoNode() const;
 
     private:
         /// Private copy constructor. NO COPY ALLOWED

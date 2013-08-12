@@ -82,8 +82,6 @@ namespace API
 
   protected:
     virtual const std::string toString() const;
-    /// Create and return a new InfoNode describing this workspace.
-    virtual InfoNode *createInfoNode() const;
     /// Marker set to true when a file-backed workspace needs its back-end file updated (by calling SaveMD(UpdateFileBackEnd=1) )
     bool m_fileNeedsUpdating;
 

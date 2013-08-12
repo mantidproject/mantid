@@ -88,32 +88,6 @@ namespace Mantid
       }
 
       //-----------------------------------------------------------------------------------------------
-
-      /**
-       * @return :: A pointer to the created info node.
-       */
-      Workspace::InfoNode *IMDWorkspace::createInfoNode() const
-      {
-          auto node = new InfoNode(*this);
-          node->addLine( "Title: " + getTitle() );
-          for (size_t i=0; i < getNumDims(); i++)
-          {
-              std::ostringstream mess;
-              Geometry::IMDDimension_const_sptr dim = getDimension(i);
-              mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
-              // Also show the dimension ID string, if different than name
-              if (dim->getDimensionId() != dim->getName())
-                mess << ". Id=" << dim->getDimensionId();
-              node->addLine( mess.str() );
-          }
-          if ( hasOriginalWorkspace() )
-          {
-              node->addLine("Binned from '" + getOriginalWorkspace()->getName() + "'");
-          }
-          return node;
-      }
-
-      //-----------------------------------------------------------------------------------------------
       /** Obtain coordinates for a line plot through a IMDWorkspace.
        * Cross the workspace from start to end points, recording the signal along the line.
        * Sets the x,y vectors to the histogram bin boundaries and counts
