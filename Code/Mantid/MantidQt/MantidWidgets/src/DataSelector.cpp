@@ -106,15 +106,18 @@ namespace MantidQt
      */
     void DataSelector::handleWorkspaceInput()
     {
-      //Get text of name of workspace to use
-      QString filename = m_uiForm.wsWorkspaceInput->currentText();
-      if(filename.isEmpty())
+      if(m_uiForm.stackedDataSelect->currentIndex() > 0)
       {
-        return;
-      }
+        //Get text of name of workspace to use
+        QString filename = m_uiForm.wsWorkspaceInput->currentText();
+        if(filename.isEmpty())
+        {
+          return;
+        }
 
-      //emit that we got a valid workspace/file to work with
-      emit dataReady(filename);
+        //emit that we got a valid workspace/file to work with
+        emit dataReady(filename);
+      }
     }
 
     /**
