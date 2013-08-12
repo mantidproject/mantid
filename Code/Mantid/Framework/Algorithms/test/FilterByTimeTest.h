@@ -75,32 +75,34 @@ public:
     AnalysisDataService::Instance().addOrReplace("eventWS", ws);
 
     //Do the filtering now.
-    FilterByTime * alg = new FilterByTime();
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", "eventWS");
-    alg->setPropertyValue("OutputWorkspace", "out");
-    alg->setPropertyValue("StopTime", "120");
-    alg->setPropertyValue("AbsoluteStartTime", "2010");
-    alg->execute();
-    TS_ASSERT( !alg->isExecuted() );
+    FilterByTime alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "eventWS");
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setPropertyValue("StopTime", "120");
+    alg.setPropertyValue("AbsoluteStartTime", "2010");
+    alg.execute();
+    TS_ASSERT( !alg.isExecuted() );
 
-    alg = new FilterByTime(); alg->initialize();
-    alg->setPropertyValue("InputWorkspace", "eventWS");
-    alg->setPropertyValue("OutputWorkspace", "out");
-    alg->setPropertyValue("StartTime", "60");
-    alg->setPropertyValue("StopTime", "120");
-    alg->setPropertyValue("AbsoluteStartTime", "2010");
-    alg->execute();
-    TS_ASSERT( !alg->isExecuted() );
+    FilterByTime alg2;
+    alg2.initialize();
+    alg2.setPropertyValue("InputWorkspace", "eventWS");
+    alg2.setPropertyValue("OutputWorkspace", "out");
+    alg2.setPropertyValue("StartTime", "60");
+    alg2.setPropertyValue("StopTime", "120");
+    alg2.setPropertyValue("AbsoluteStartTime", "2010");
+    alg2.execute();
+    TS_ASSERT( !alg2.isExecuted() );
 
-    alg = new FilterByTime(); alg->initialize();
-    alg->setPropertyValue("InputWorkspace", "eventWS");
-    alg->setPropertyValue("OutputWorkspace", "out");
-    alg->setPropertyValue("StopTime", "120");
-    alg->setPropertyValue("AbsoluteStartTime", "2010");
-    alg->setPropertyValue("AbsoluteStopTime", "2010-03");
-    alg->execute();
-    TS_ASSERT( !alg->isExecuted() );
+    FilterByTime alg3;
+    alg3.initialize();
+    alg3.setPropertyValue("InputWorkspace", "eventWS");
+    alg3.setPropertyValue("OutputWorkspace", "out");
+    alg3.setPropertyValue("StopTime", "120");
+    alg3.setPropertyValue("AbsoluteStartTime", "2010");
+    alg3.setPropertyValue("AbsoluteStopTime", "2010-03");
+    alg3.execute();
+    TS_ASSERT( !alg3.isExecuted() );
   }
 
   void testExecEventWorkspace_relativeTime_and_absolute_time()
