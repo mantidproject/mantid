@@ -143,6 +143,11 @@ namespace DataHandling
       return mGroupSpectraMap;
     }
 
+    std::map<int, std::string> getGroupNamesMap()
+    {
+      return mGroupNamesMap;
+    }
+
   private:
     /// Instrument name
     std::string mInstrumentName;
@@ -163,6 +168,9 @@ namespace DataHandling
     std::map<int, std::vector<detid_t> > mGroupDetectorsMap;
     std::map<int, std::vector<int> > mGroupSpectraMap;
     int mStartGroupID;
+
+    /// Map of group names
+    std::map<int, std::string> mGroupNamesMap;
 
     /// Initialize XML parser
     void initializeXMLParser(const std::string & filename);

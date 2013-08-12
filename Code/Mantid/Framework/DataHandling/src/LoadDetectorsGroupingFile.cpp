@@ -121,10 +121,6 @@ namespace DataHandling
 
     // 1. Parse XML File
     std::string xmlfilename = getProperty("InputFile");
-    /*
-    this->initializeXMLParser(xmlfilename);
-    this->parseXML();
-     */
 
     LoadGroupXMLFile loader;
     loader.loadXMLFile(xmlfilename);
@@ -163,6 +159,15 @@ namespace DataHandling
       mGroupWS->mutableRun().addProperty("Description", description);
     }
 
+    // 6. Add group names, if user has specified any
+    std::map<int, std::string> groupNamesMap = loader.getGroupNamesMap();
+    
+    for(auto it = groupNamesMap.begin(); it != groupNamesMap.end(); it++)
+    {
+      std::string groupIdStr = boost::lexical_cast<std::string>(it->first);
+      mGroupWS->mutableRun().addProperty("GroupName_" + groupIdStr, it->second);
+    }
+    
     return;
   }
 
@@ -539,6 +544,12 @@ namespace DataHandling
         }
         else
         {
+          // When group ID is sorted, check if user has specified a group name
+          bool foundName;
+          std::string name = getAttributeValueByName(pNode, "name", foundName);
+          if(foundName)
+            mGroupNamesMap[curgroupid] = name;
+
           // Set map
           std::vector<std::string> tempcomponents;
           std::vector<detid_t> tempdetids;
