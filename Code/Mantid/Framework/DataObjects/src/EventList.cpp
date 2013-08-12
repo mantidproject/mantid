@@ -446,7 +446,7 @@ namespace DataObjects
     this->order = UNSORTED;
     //Do a union between the detector IDs of both lists
     std::set<detid_t>::const_iterator it;
-    for (it = more_events.detectorIDs.begin(); it != more_events.detectorIDs.end(); it++ )
+    for (it = more_events.detectorIDs.begin(); it != more_events.detectorIDs.end(); ++it )
       this->detectorIDs.insert( *it );
 
     return *this;
@@ -3508,7 +3508,6 @@ namespace DataObjects
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
     Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
     DateAndTime start, stop;
-    int index;
 
     // Iterate for the input
     typename std::vector<T>::iterator itev = events.begin();
@@ -3523,7 +3522,7 @@ namespace DataObjects
       //Get the splitting interval times and destination
       start = itspl->start();
       stop = itspl->stop();
-      index = itspl->index();
+      const int index = itspl->index();
 
       //Skip the events before the start of the time
       while ((itev != itev_end) && (itev->m_pulsetime < start))
@@ -3619,7 +3618,6 @@ namespace DataObjects
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
     Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
     DateAndTime start, stop;
-    size_t index;
 
     //Iterate through all events (sorted by tof)
     typename std::vector<T>::iterator itev = events.begin();
@@ -3631,7 +3629,7 @@ namespace DataObjects
       //Get the splitting interval times and destination
       start = itspl->start();
       stop = itspl->stop();
-      index = itspl->index();
+      const size_t index = itspl->index();
 
       //Skip the events before the start of the time
       while ((itev != itev_end) && (itev->m_pulsetime < start))
@@ -3728,7 +3726,6 @@ namespace DataObjects
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
     Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
     int64_t start, stop;
-    int index;
 
     // 2. Prepare to Iterate through all events (sorted by tof)
     typename std::vector<T>::iterator itev = events.begin();
@@ -3740,7 +3737,7 @@ namespace DataObjects
       //Get the splitting interval times and destination
       start = itspl->start().totalNanoseconds();
       stop = itspl->stop().totalNanoseconds();
-      index = itspl->index();
+      const int index = itspl->index();
 
       // a) Skip the events before the start of the time
       // TODO This step can be
