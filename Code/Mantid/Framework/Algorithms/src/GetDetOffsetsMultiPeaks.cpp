@@ -258,6 +258,7 @@ namespace Algorithms
     m_backType = this->getPropertyValue("BackgroundType");
     // the maximum allowable chisq value for an individual peak fit
     m_maxChiSq = this->getProperty("MaxChiSq");
+    m_minPeakHeight = this->getProperty("MinimumPeakHeight");
 
     // Create output information tableworkspace
     auto m_infoTableWS = boost::make_shared<TableWorkspace>();
@@ -274,7 +275,7 @@ namespace Algorithms
     for (size_t i = 0; i < peakPositions.size(); ++i)
     {
       std::stringstream namess;
-      namess << "@ " << std::setprecision(5) << peakPositions[i];
+      namess << "@" << std::setprecision(5) << peakPositions[i];
       m_peakOffsetTableWS->addColumn("str", namess.str());
     }
     m_peakOffsetTableWS->addColumn("double", "OffsetDeviation");
@@ -500,7 +501,7 @@ namespace Algorithms
             }
             else
             {
-              newrow2 << "-";
+              newrow2 << "";
             }
           }
 
@@ -598,9 +599,37 @@ namespace Algorithms
                                            std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted,
                                            std::vector<double> &chisq)
   {
+    // default overall fit range is the whole spectrum
     const MantidVec & X = inputW->readX(s);
     minD = X.front();
     maxD = X.back();
+
+    // trim in the edges based on where the data turns off of zero
+    const MantidVec & Y = inputW->readY(s);
+    size_t i_min = 0;
+    const double MIN_SIGNAL(0.);
+    for (; i_min < Y.size(); ++i_min)
+    {
+      if (Y[i_min] > MIN_SIGNAL)
+      {
+        minD = X[i_min];
+        break;
+      }
+    }
+    if (minD >= maxD)
+      std::cout << "Stuff went wrong with wkspIndex=" << s
+                << " specIndex=" <<inputW->getSpectrum(s)->getSpectrumNo() << std::endl;
+    for (size_t i = Y.size()-1; i > i_min; --i)
+    {
+      if (Y[i] > MIN_SIGNAL)
+      {
+        maxD = X[i];
+        break;
+      }
+    }
+//    std::cout << "D-RANGE[" << inputW->getSpectrum(s)->getSpectrumNo() << "]: " << minD << " -> " << maxD << std::endl;
+
+    // setup the fit windows
     bool useFitWindows = (!fitWindows.empty());
     std::vector<double> fitWindowsToUse;
     for (int i = 0; i < static_cast<int>(peakPositions.size()); ++i)
@@ -615,8 +644,6 @@ namespace Algorithms
         }
       }
     }
-
-    double minpeakheight = getProperty("MinimumPeakHeight");
 
     API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
     findpeaks->setProperty("InputWorkspace", inputW);
@@ -634,7 +661,7 @@ namespace Algorithms
     findpeaks->setProperty<bool>("HighBackground", this->getProperty("HighBackground"));
     findpeaks->setProperty<int>("MinGuessedPeakWidth",4);
     findpeaks->setProperty<int>("MaxGuessedPeakWidth",4);
-    findpeaks->setProperty<double>("MinimumPeakHeight", minpeakheight);
+    findpeaks->setProperty<double>("MinimumPeakHeight", m_minPeakHeight);
     findpeaks->executeAsChildAlg();
     ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
     std::vector<size_t> banned;
@@ -685,9 +712,15 @@ namespace Algorithms
           continue;
         }
       }
-      if (chisq[i] > m_maxChiSq)
+      if (chisq[i] > m_maxChiSq || chisq[i] < 0.)
       {
-        // ban peaks from HUGE chi-square
+        // ban peaks from HUGE (or negative) chi-square
+        banned.push_back(i);
+        continue;
+      }
+      if (peakHighFitted[i] < m_minPeakHeight)
+      {
+        // ban peaks that don't meet the minimum height requirement
         banned.push_back(i);
         continue;
       }

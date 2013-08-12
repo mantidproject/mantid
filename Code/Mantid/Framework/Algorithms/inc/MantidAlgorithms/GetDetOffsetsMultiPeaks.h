@@ -68,6 +68,7 @@ private:
   std::string m_backType;
   std::string m_peakType;
   double m_maxChiSq;
+  double m_minPeakHeight;
 };
 
 } // namespace Algorithm
