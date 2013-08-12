@@ -1445,6 +1445,10 @@ public:
     }
   }
 
+  void test_filterByPulseTime_output_same_as_input_throws()
+  {
+    TS_ASSERT_THROWS( el.filterByPulseTime(100,200,el), std::invalid_argument );
+  }
 
   //-----------------------------------------------------------------------------------------------
   void test_splitByTime()

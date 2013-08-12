@@ -15,6 +15,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;
@@ -25,6 +26,31 @@ using namespace Mantid::API;
 class FilterByTimeTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FilterByTimeTest *createSuite() { return new FilterByTimeTest(); }
+  static void destroySuite( FilterByTimeTest *suite ) { delete suite; }
+
+  FilterByTimeTest()
+  {
+    inWS = "filterbytime_input";
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace2(4,1);
+    // Add proton charge
+    TimeSeriesProperty<double> * pc = new TimeSeriesProperty<double>("proton_charge");
+    pc->setUnits("picoCoulomb");
+    DateAndTime run_start("2010-01-01T00:00:00"); //NOTE This run_start is hard-coded in WorkspaceCreationHelper.
+    for (double i=0; i<100; i++)
+      pc->addValue( run_start+i, 1.0);
+    ws->mutableRun().addProperty( pc );
+
+    AnalysisDataService::Instance().add(inWS,ws);
+  }
+
+  ~FilterByTimeTest()
+  {
+    AnalysisDataService::Instance().clear();
+  }
+
   /** Setup for loading raw data */
   void setUp_Event()
   {
@@ -154,13 +180,25 @@ public:
 
   }
 
+  void test_same_output_and_input_workspaces()
+  {
+    FilterByTime alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",inWS);
+    alg.setProperty("OutputWorkspace",inWS);
+    alg.setProperty("StartTime", 20.5 );
+    alg.setProperty("StopTime", 70.5 );
+    TS_ASSERT( alg.execute() );
 
+    EventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inWS);
+    TS_ASSERT_LESS_THAN( 0, outWS->getNumberEvents() );
+
+  }
 
 private:
   std::string inputWS;
   EventWorkspace_sptr WS;
-
-
+  std::string inWS;
 };
 
 
