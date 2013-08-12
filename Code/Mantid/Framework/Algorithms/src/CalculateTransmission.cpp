@@ -307,15 +307,18 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
       }
     }
     else 
-      { // the polynomial fit
-        double aux=0;
-        double x_v =0; 
-        for (size_t i=0; i<Y.size(); ++i){
-          aux = 0;
-          x_v = 0.5*(X[i]+X[i+1]);
-          for (size_t j=0; j<coeficients.size(); j++)
-            aux += coeficients[j]*std::pow(x_v,j);
-          Y[i] = aux;
+    { // the polynomial fit
+      double aux=0;
+      double x_v =0;
+      for (size_t i=0; i<Y.size(); ++i)
+      {
+        aux = 0;
+        x_v = 0.5*(X[i]+X[i+1]);
+        for (int j=0; j<static_cast<int>(coeficients.size()); ++j)
+        {
+          aux += coeficients[j]*std::pow(x_v,j);
+        }
+        Y[i] = aux;
       }
     }
   }
