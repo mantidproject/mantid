@@ -139,7 +139,7 @@ namespace CurveFitting
 
       FunctionDomain1DVector domain(xvalues);
       FunctionValues values(domain);
-      g_log.notice() << "[REMOVESOON] Background function: " << m_background->asString() << ".\n";
+      g_log.information() << "Background function (in LeBailFunction): " << m_background->asString() << ".\n";
       m_background->function(domain, values);
       size_t numpts = out.size();
       for (size_t i = 0; i < numpts; ++i)

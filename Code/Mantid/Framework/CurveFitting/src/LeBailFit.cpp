@@ -433,7 +433,7 @@ namespace CurveFitting
 
     // Calcualte individual peaks
     bool ploteachpeak = this->getProperty("PlotIndividualPeaks");
-    g_log.notice() << "Output individual peaks  = " << ploteachpeak << ".\n";
+    g_log.information() << "Output individual peaks  = " << ploteachpeak << ".\n";
     if (ploteachpeak)
     {
       for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
@@ -580,7 +580,8 @@ namespace CurveFitting
     calculateDiffractionPattern(m_outputWS->readX(INPUTPUREPEAKINDEX), m_outputWS->readY(INPUTPUREPEAKINDEX),
                                   false, true, backgroundvalues, valueVec, outputR);
 
-    g_log.notice() << "[DBx604] Best Rwp = " << bestR.Rwp << ",  vs. recovered best Rwp = " << outputR.Rwp << ".\n";
+    g_log.notice() << "[RefineBackground] Best Rwp = " << bestR.Rwp << ",  vs. recovered best Rwp = "
+                   << outputR.Rwp << ".\n";
 
     // 4. Add data (0: experimental, 1: calcualted, 2: difference)
     for (size_t i = 0; i < numpts; ++i)
@@ -1256,8 +1257,6 @@ namespace CurveFitting
     // 4. Set
     this->setProperty("OutputPeaksWorkspace", peakWS);
 
-    g_log.notice("[DBx403] Set property to OutputPeaksWorkspace.");
-
     return;
   }
 
@@ -1509,7 +1508,7 @@ namespace CurveFitting
     m_bestRp = currR.Rp + 0.001;
     bookKeepBestMCResult(parammap, vecBkgd, currR, 0);
 
-    g_log.notice() << "[DBx255] Random-walk Starting Rwp = " << currR.Rwp
+    g_log.notice() << "[MC-Start] Random-walk Starting Rwp = " << currR.Rwp
                    << ", Rp = " << currR.Rp << "\n";
 
     // Random walk loops
@@ -2320,7 +2319,7 @@ namespace CurveFitting
       g_log.debug() << "[TestRandom] dice " << dice << "\n";
       double bar = exp(-(new_goodness-cur_goodness)/(cur_goodness*m_Temperature));
       // double bar = exp(-(newrwp-currwp)/m_bestRwp);
-      // g_log.notice() << "[DBx329] Bar = " << bar << ", Dice = " << dice << "\n";
+      // g_log.debug() << "[DBx329] Bar = " << bar << ", Dice = " << dice << "\n";
       if (dice < bar)
       {
         // random number (dice, 0 and 1) is smaller than bar (between -infty and 0)
