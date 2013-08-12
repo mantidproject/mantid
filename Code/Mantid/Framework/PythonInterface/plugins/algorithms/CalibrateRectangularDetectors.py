@@ -83,6 +83,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              "Maximum window around a peak to search for it. Optional.")
+        self.declareProperty("MinimumPeakHeight", 2., "Minimum value allowed for peak height")
         self.declareProperty("PeakFunction", "Gaussian", StringListValidator(["BackToBackExponential", "Gaussian", "Lorentzian"]),
                              "Type of peak to fit. Used only with CrossCorrelation=False")
         self.declareProperty("BackgroundType", "Flat", StringListValidator(['Flat', 'Linear', 'Quadratic']),
@@ -382,6 +383,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
                                 DReference=self._peakpos, 
                                 FitWindowMaxWidth=self.getProperty("PeakWindowMax").value, 
+                                MinimumPeakHeight=self.getProperty("MinimumPeakHeight").value,
                                 BackgroundType=self.getProperty("BackgroundType").value,
                                 MaxOffset=self._maxoffset, NumberPeaksWorkspace=str(wksp)+"peaks", 
                                 MaskWorkspace=str(wksp)+"mask")
