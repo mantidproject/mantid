@@ -12,7 +12,6 @@
 
 #include "MantidAlgorithms/FilterByTime.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -35,7 +34,7 @@ public:
   FilterByTimeTest()
   {
     inWS = "filterbytime_input";
-    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace2(4,1);
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace(4,1);
     // Add proton charge
     TimeSeriesProperty<double> * pc = new TimeSeriesProperty<double>("proton_charge");
     pc->setUnits("picoCoulomb");
@@ -43,6 +42,7 @@ public:
     for (double i=0; i<100; i++)
       pc->addValue( run_start+i, 1.0);
     ws->mutableRun().addProperty( pc );
+    ws->mutableRun().integrateProtonCharge();
 
     AnalysisDataService::Instance().add(inWS,ws);
   }
@@ -51,23 +51,6 @@ public:
   {
     AnalysisDataService::Instance().clear();
   }
-
-  /** Setup for loading raw data */
-  void setUp_Event()
-  {
-    inputWS = "eventWS";
-    LoadEventPreNexus loader;
-    loader.initialize();
-    std::string eventfile( "CNCS_7860_neutron_event.dat" );
-    std::string pulsefile( "CNCS_7860_pulseid.dat" );
-    loader.setPropertyValue("EventFilename", eventfile);
-    loader.setPropertyValue("PulseidFilename", pulsefile);
-    loader.setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
-    loader.setPropertyValue("OutputWorkspace", inputWS);
-    loader.execute();
-    TS_ASSERT (loader.isExecuted() );
-  }
-
 
   void testTooManyParams()
   {
@@ -105,82 +88,78 @@ public:
     TS_ASSERT( !alg3.isExecuted() );
   }
 
-  void testExecEventWorkspace_relativeTime_and_absolute_time()
+  void test_relative_time()
   {
-    std::string outputWS;
-    this->setUp_Event();
+    FilterByTime alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",inWS);
+    const std::string outWS("relative");
+    alg.setProperty("OutputWorkspace",outWS);
+    alg.setProperty("StartTime", 40.5);
+    alg.setProperty("StopTime", 75.0);
+    TS_ASSERT( alg.execute() );
 
-    //Retrieve Workspace
-    WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
-    TS_ASSERT( WS ); //workspace is loaded
+    EventWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inWS);
+    EventWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWS);
+    // Things that haven't changed
+    TS_ASSERT_EQUALS( output->blocksize(), input->blocksize());
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), input->getNumberHistograms());
+    // Things that changed
+    TS_ASSERT_LESS_THAN( output->getNumberEvents(), input->getNumberEvents() );
+    TS_ASSERT_EQUALS( output->getNumberEvents(), 136 );
+    // Proton charge is lower
+    TS_ASSERT_LESS_THAN( output->run().getProtonCharge(), input->run().getProtonCharge() );
+    // Event distribution is uniform so the following should hold true
+    TS_ASSERT_DELTA( output->run().getProtonCharge()/input->run().getProtonCharge(), 136.0/400.0, 0.01 );
 
-    //Do the filtering now.
-    FilterByTime * alg = new FilterByTime();
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inputWS);
-    outputWS = "eventWS_relative";
-    alg->setPropertyValue("OutputWorkspace", outputWS);
-    //Get 1 minute worth
-    alg->setPropertyValue("StartTime", "60");
-    alg->setPropertyValue("StopTime", "120");
+    // Test 'null' filter
+    FilterByTime alg2;
+    alg2.initialize();
+    alg2.setProperty("InputWorkspace",inWS);
+    alg2.setProperty("OutputWorkspace",outWS);
+    alg2.setProperty("StartTime", 0.0);
+    alg2.setProperty("StopTime", 101.0);
+    TS_ASSERT( alg2.execute() );
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWS);
+    TS_ASSERT_EQUALS( output->getNumberEvents(), input->getNumberEvents() );
+    TS_ASSERT_EQUALS( output->run().getProtonCharge(), input->run().getProtonCharge() );
+  }
 
-    alg->execute();
-    TS_ASSERT( alg->isExecuted() );
+  void test_absolute_time()
+  {
+    FilterByTime alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",inWS);
+    const std::string outWS("absolute");
+    alg.setProperty("OutputWorkspace",outWS);
+    alg.setPropertyValue("AbsoluteStartTime", "2010-01-01T00:00:50");
+    alg.setPropertyValue("AbsoluteStopTime", "2010-01-01T00:01:10");
+    TS_ASSERT( alg.execute() );
 
-    //Retrieve Workspace changed
-    EventWorkspace_sptr outWS;
-    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
-    TS_ASSERT( outWS ); //workspace is loaded
+    EventWorkspace_sptr input = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inWS);
+    EventWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWS);
+    // Things that haven't changed
+    TS_ASSERT_EQUALS( output->blocksize(), input->blocksize());
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), input->getNumberHistograms());
+    // Things that changed
+    TS_ASSERT_LESS_THAN( output->getNumberEvents(), input->getNumberEvents() );
+    TS_ASSERT_EQUALS( output->getNumberEvents(), 80 );
+    // Proton charge is lower
+    TS_ASSERT_LESS_THAN( output->run().getProtonCharge(), input->run().getProtonCharge() );
+    // Event distribution is uniform so the following should hold true
+    TS_ASSERT_DELTA( output->run().getProtonCharge()/input->run().getProtonCharge(), 80.0/400.0, 0.01 );
 
-    //Things that haven't changed
-    TS_ASSERT_EQUALS( outWS->blocksize(), WS->blocksize());
-    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), WS->getNumberHistograms());
-    //Things that changed
-    TS_ASSERT_LESS_THAN( outWS->getNumberEvents(), WS->getNumberEvents() );
-
-    //Proton charge is lower
-    TS_ASSERT_LESS_THAN( outWS->run().getProtonCharge(), WS->run().getProtonCharge() );
-
-    //-------------- Absolute time filtering --------------------
-    alg = new FilterByTime();
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inputWS);
-    outputWS = "eventWS_absolute";
-    alg->setPropertyValue("OutputWorkspace", outputWS);
-    //Get 1 minutes worth, starting at minute 1
-    alg->setPropertyValue("AbsoluteStartTime", "2010-03-25T16:09:37.46");
-    alg->setPropertyValue("AbsoluteStopTime", "2010-03-25T16:10:37.46");
-    alg->execute();
-    TS_ASSERT( alg->isExecuted() );
-
-    EventWorkspace_sptr outWS2;
-    outWS2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
-    TS_ASSERT( outWS2 ); //workspace is loaded
-
-    //Things that haven't changed
-    TS_ASSERT_EQUALS( outWS2->blocksize(), WS->blocksize());
-    TS_ASSERT_EQUALS( outWS2->getNumberHistograms(), WS->getNumberHistograms());
-    //Things that changed
-    TS_ASSERT_LESS_THAN( outWS2->getNumberEvents(), WS->getNumberEvents() );
-    TS_ASSERT_LESS_THAN( outWS2->run().getProtonCharge(), WS->run().getProtonCharge() );
-
-    //------------------ Comparing both -----------------------
-    //Similar total number of events
-    TS_ASSERT_DELTA( outWS->getNumberEvents(), outWS2->getNumberEvents(), 10 );
-    int count = 0;
-    for (size_t i=0; i<outWS->getNumberHistograms(); i++)
-    {
-      double diff = fabs(double(outWS->getEventList(i).getNumberEvents() - outWS2->getEventList(i).getNumberEvents()));
-      //No more than 2 events difference because of rounding to 0.01 second
-      TS_ASSERT_LESS_THAN( diff, 3);
-      if (diff > 3) count++;
-      if (count > 50) break;
-    }
-
-    //Almost same proton charge
-    TS_ASSERT_DELTA( outWS->run().getProtonCharge(), outWS2->run().getProtonCharge(), 0.01 );
-
-
+    // Test 'null' filter
+    FilterByTime alg2;
+    alg2.initialize();
+    alg2.setProperty("InputWorkspace",inWS);
+    alg2.setProperty("OutputWorkspace",outWS);
+    alg2.setPropertyValue("AbsoluteStartTime", "2009-12-31T00:00:00");
+    alg2.setPropertyValue("AbsoluteStopTime", "2010-01-02T00:01:10");
+    TS_ASSERT( alg2.execute() );
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWS);
+    TS_ASSERT_EQUALS( output->getNumberEvents(), input->getNumberEvents() );
+    TS_ASSERT_EQUALS( output->run().getProtonCharge(), input->run().getProtonCharge() );
   }
 
   void test_same_output_and_input_workspaces()
