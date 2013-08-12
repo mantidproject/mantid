@@ -86,98 +86,33 @@ class CreateLeBailFitInput(PythonAlgorithm):
         reflectionfilename = self.getPropertyValue("ReflectionsFile")
 
         # 3. Import reflections list
-        hkldict = self.importFullProfHKLFile(reflectionfilename)
-
-        hkllist = sorted(hkldict.keys())
-        if _OUTPUTLEVEL == "INFORMATION":
-            for hkl in hkllist:
-                print "Import Peak (%d, %d, %d): FWHM = %f" % (hkl[0], hkl[1], hkl[2], hkldict[hkl]["FWHM"])
-
-        # 5. Set up the table workspaces 
-
-        self.createReflectionWorkspace(hkldict, hklWS)
+        hklws = self.importFullProfHKLFile(reflectionfilename)
+        self.setProperty("BraggPeakParameterWorkspace", hklws)
 
         return
-
 
     def importFullProfHKLFile(self, hklfilename):
         """ Import Fullprof's .hkl file
         """
         import math
+        import random
 
-        # 1. Import file
-        try:
-            hklfile = open(hklfilename, "r")
-            lines = hklfile.readlines()
-            hklfile.close()
-        except IOError:
-            print "Error to open/read Fullprof .hkl file %s" % (hklfilename)
-            raise IOError()
+        rand = random.randint(1, 100000)
+        dummywsname = "Foo%d" % (rand)
+        hklwsname = self.getPropertyValue("BraggPeakParameterWorkspace")
+        print hklwsname
+        tempX = api.LoadFullprofFile(
+                Filename=hklfilename, 
+                # PeakParameterWorkspace = hklwsname,
+                PeakParameterWorkspace = "TempXXX",
+                OutputWorkspace = dummywsname)
+    
+        hklws = tempX[0]
+        dummyws = tempX[1]
 
-        # 2. Parse
-        hkldict = {}
-        for line in lines:
-            # a) Clean & split
-            line = line.strip()
-            if len(line) == 0:
-                continue
-            terms = line.split()
+        api.DeleteWorkspace(Workspace=dummyws)
 
-            # b) parse
-            if not terms[0].isdigit():
-                # Comment line
-                continue
-
-            h = int(terms[0])
-            k = int(terms[1])
-            l = int(terms[2])
-            if len(terms) >= 9:
-                dsp = float(terms[3])
-                tof = float(terms[4])
-                alpha = float(terms[5])
-                beta = float(terms[6])
-                sigma2 = float(terms[7])
-                gamma2 = float(terms[8])
-            else:
-                dsp = 0.0
-                tof = 0.0
-                alpha = 0.0
-                beta = 0.0
-                sigma2 = 0.0
-                gamma2 = 0.0
-                fwhm = 1.0
-
-            if len(terms) >= 13:
-                fwhm = float(terms[12])
-            elif len(terms) >= 9:
-                fwhm = math.sqrt(sigma2)*2.0
-
-            dkey = (h, k, l)
-
-            if hkldict.has_key(dkey):
-                if _OUTPUTLEVEL == "INFORMATION": 
-                    print "Warning! Duplicate HKL %d, %d, %d" (h, k, l)
-                continue
-
-            if fwhm < 1.0E-5:
-                # Peak width is too small/annihilated peak
-                if _OUTPUTLEVEL == "INFORMATION": 
-                    print "Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l)
-                continue
-
-            hkldict[dkey] = {}
-            hkldict[dkey]["dsp"] = dsp
-            hkldict[dkey]["tof"] = tof
-            hkldict[dkey]["alpha"] = alpha
-            hkldict[dkey]["beta"] = beta
-            hkldict[dkey]["sigma2"] = sigma2
-            hkldict[dkey]["gamma2"] = gamma2
-            hkldict[dkey]["FWHM"] = fwhm
-        # ENDFOR: line
-
-        print "[CreateLeBailFit] Import Fullprof reflection file %s successfully. " % (hklfilename)
-
-        return hkldict
+        return hklws
 
 
     def createPeakParameterWorkspace(self, irffilename):
@@ -224,25 +159,6 @@ class CreateLeBailFitInput(PythonAlgorithm):
         api.DeleteWorkspace(Workspace=irfwsname)
         
         return tablews
-
-
-    def createReflectionWorkspace(self, hkldict, tablews):
-        """ Create TableWorkspace containing reflections and etc. 
-        """
-        # 1. Set up columns
-        tablews.addColumn("int", "H");
-        tablews.addColumn("int", "K");
-        tablews.addColumn("int", "L"); 
-        tablews.addColumn("double", "PeakHeight"); 
-        tablews.addColumn("str", "Include/Exclude")
-
-        # 2. Add rows
-        for hkl in sorted(hkldict.keys()):
-            tablews.addRow([hkl[0], hkl[1], hkl[2], 1.0, "i"])
-        # ENDFOR
-
-        return tablews
-
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateLeBailFitInput)
