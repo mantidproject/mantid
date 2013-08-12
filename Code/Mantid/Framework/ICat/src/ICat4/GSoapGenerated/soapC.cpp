@@ -13,7 +13,7 @@ compiling, linking, and/or using OpenSSL is allowed.
 #pragma option push -w-8004
 #endif
 
-#include "soapH.h"
+#include "MantidICat/ICat4/GSoapGenerated/soapH.h"
 
 SOAP_SOURCE_STAMP("@(#) soapC.cpp ver 2.8.15 2013-08-12 08:53:53 GMT")
 

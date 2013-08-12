@@ -13,7 +13,7 @@ compiling, linking, and/or using OpenSSL is allowed.
 #include <vector>
 #define SOAP_NAMESPACE_OF_ns2	""
 #define SOAP_NAMESPACE_OF_ns1	"http://icatproject.org"
-#include "stdsoap2.h"
+#include "MantidICat/GSoap/stdsoap2.h"
 #if GSOAP_VERSION != 20815
 # error "GSOAP VERSION MISMATCH IN GENERATED CODE: PLEASE REINSTALL PACKAGE"
 #endif

@@ -8,7 +8,7 @@ This program is released under the GPL with the additional exemption that
 compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#include "soapICATPortBindingProxy.h"
+#include "MantidICat/ICat4/GSoapGenerated/soapICATPortBindingProxy.h"
 
 ICATPortBindingProxy::ICATPortBindingProxy()
 {	ICATPortBindingProxy_init(SOAP_IO_DEFAULT, SOAP_IO_DEFAULT);
