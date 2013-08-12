@@ -5,48 +5,16 @@
 #include "../pixmaps.h"
 #include "MantidWSIndexDialog.h"
 #include "FlowLayout.h"
+#include "WorkspaceIcons.h"
 
 #include <MantidAPI/AlgorithmFactory.h>
-#include <MantidAPI/MemoryManager.h>
-#include <MantidAPI/IEventWorkspace.h>
-#include <MantidAPI/IMaskWorkspace.h>
-#include <MantidAPI/IMDEventWorkspace.h>
-#include <MantidAPI/IMDWorkspace.h>
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include <MantidAPI/FileProperty.h>
-#include "MantidAPI/ExperimentInfo.h"
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidQtAPI/InterfaceManager.h>
 #include <MantidQtAPI/Message.h>
 
 #include <Poco/Path.h>
-#include <boost/algorithm/string.hpp>
-
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QTextEdit>
-#include <QListWidget>
-#include <QApplication>
-#include <QMap>
-#include <QMenu>
-#include <QAction>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QMutexLocker>
-#include <QProgressBar>
-#include <QSignalMapper>
-#include <QtGui>
-#include <QThread>
-
-#include <map>
-#include <vector>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <cstdio>
-#include <algorithm>
-#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -55,8 +23,13 @@ using namespace Mantid::Geometry;
 // Allow Mantid::API::Workspace::InfoNode* type to be used with QVariant
 Q_DECLARE_METATYPE(Mantid::API::Workspace::InfoNode*)
 
-Mantid::Kernel::Logger& MantidDockWidget::logObject=Mantid::Kernel::Logger::get("mantidDockWidget");
-Mantid::Kernel::Logger& MantidTreeWidget::logObject=Mantid::Kernel::Logger::get("MantidTreeWidget");
+Mantid::Kernel::Logger& MantidDockWidget::logObject = Mantid::Kernel::Logger::get("MantidDockWidget");
+Mantid::Kernel::Logger& MantidTreeWidget::logObject = Mantid::Kernel::Logger::get("MantidTreeWidget");
+
+namespace
+{
+  WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
+}
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
     QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups(), m_updateCount( 0 ),
@@ -180,7 +153,7 @@ QTreeWidgetItem *MantidDockWidget::addWorkspaceTreeEntry( Workspace::InfoNode &n
     wsid_item->setFlags(Qt::NoItemFlags);
     wsItem->addChild(wsid_item);
 
-    setItemIcon( wsItem, node.getIconType() );
+    //setItemIcon( wsItem, node.getIconType() );
 
     if ( parentItem )
     {
@@ -374,54 +347,48 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
 
   Workspace_sptr workspace = userData.value<Workspace_sptr>();
 
+  if(auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace))
+  {
+    const size_t nmembers = group->getNumberOfEntries();
+    for(size_t i = 0; i < nmembers; ++i)
+    {
+      auto ws = group->getItem(i);
+      auto * node = addTreeEntry(std::make_pair(ws->name(), ws), item);
+      excludeItemFromSort(node);
+    }
+  }
+  else
+  {
+    QString details = workspace->toString().c_str();
+    QStringList rows = details.split(QLatin1Char('\n'), QString::SkipEmptyParts);
+    rows.append(QString("Memory used: ") + workspace->getMemorySizeAsStr().c_str());
 
-  QStringList details(workspace->toString().c_str());
-  QString memoryUsage("Memory used: ");
-  memoryUsage += workspace->getMemorySizeAsStr().c_str();
-  details.back() += memoryUsage; // Needs to be set as single item
-
-  MantidTreeWidgetItem *data = new MantidTreeWidgetItem(details, m_tree);
-  data->setFlags(Qt::NoItemFlags);
-  excludeItemFromSort(data);
-  item->addChild(data);
-
-//
-//  // add nodes of the workspace groups
-//  auto &nodes = node->nodes();
-//  for( auto nd = nodes.begin(); nd != nodes.end(); ++nd )
-//  {
-//      addWorkspaceTreeEntry( **nd, item );
-//  }
+    auto iend = rows.constEnd();
+    for(auto itr = rows.constBegin(); itr != iend; ++itr)
+    {
+      MantidTreeWidgetItem *data = new MantidTreeWidgetItem(QStringList(*itr), m_tree);
+      data->setFlags(Qt::NoItemFlags);
+      excludeItemFromSort(data);
+      item->addChild(data);
+    }
+  }
 }
 
 /**
- * Set tree item's icon based on the type of the workspace.
- *
- * @param ws_item :: A workspace tree item.
- * @param iconType :: An icon type code.
+ * Set tree item's icon based on the ID of the workspace.
+ * @param item :: A workspace tree item.
+ * @param wsID :: An icon type code.
  */
-void MantidDockWidget::setItemIcon(QTreeWidgetItem *ws_item, Workspace::InfoNode::IconType iconType)
+void MantidDockWidget::setItemIcon(QTreeWidgetItem *item, const std::string & wsID)
 {
-    if( iconType == Workspace::InfoNode::Matrix )
-    {
-      ws_item->setIcon(0,QIcon(getQPixmap("mantid_matrix_xpm")));
-    }
-    else if( iconType == Workspace::InfoNode::Group )
-    {
-      ws_item->setIcon(0,QIcon(getQPixmap("mantid_wsgroup_xpm")));
-    }
-    else if( iconType == Workspace::InfoNode::MD )
-    {
-      ws_item->setIcon(0,QIcon(getQPixmap("mantid_mdws_xpm")));
-    }
-    // Assume it is a table workspace
-    else if( iconType == Workspace::InfoNode::Table )
-    {
-      ws_item->setIcon(0,QIcon(getQPixmap("worksheet_xpm")));
-    }
-    else
-    {
-    }
+  try
+  {
+    item->setIcon(0, QIcon(WORKSPACE_ICONS.getIcon(wsID)));
+  }
+  catch(std::runtime_error&)
+  {
+    logObject.warning() << "Cannot find icon for workspace ID '" << wsID << "'\n";
+  }
 }
 
 /**
@@ -432,6 +399,7 @@ void MantidDockWidget::updateTree()
 {
     // do not update until the counter is zero
     if ( m_updateCount.deref() ) return;
+
 
     // find all expanded top-level entries
     QStringList expanded;
@@ -447,28 +415,9 @@ void MantidDockWidget::updateTree()
 
     // create a new tree
     m_tree->clear();
-    populateTopLevel(m_ads.topLevelItems());
+    populateTopLevel(m_ads.topLevelItems(), expanded);
 
-//    auto topLevelItems = ;
-//    for(auto it = topLevelItems.begin(); it != iend; ++it)
-//    {
-//
-
-    //    }
-//
-//    MantidTreeWidgetItem *wsid_item = new MantidTreeWidgetItem(QStringList(topLevelItems.begin()->first.c_str()), m_tree);
-//    m_tree->insertTopLevelItem(0, wsid_item);
-//    if ( m_rootInfoNode ) delete m_rootInfoNode;
-//    m_rootInfoNode = Mantid::API::AnalysisDataService::Instance().createInfoTree();
-//    auto &nodes = m_rootInfoNode->nodes();
-//    for( size_t i = 0; i < nodes.size(); ++i )
-//    {
-//        auto entry = addWorkspaceTreeEntry( *nodes[i] );
-//        if ( expanded.contains( entry->text(0) ) )
-//        {
-//          entry->setExpanded( true );
-//        }
-//    }
+    // Re-sort
     m_tree->sort();
 }
 
@@ -480,16 +429,20 @@ void MantidDockWidget::incrementUpdateCount()
     m_updateCount.ref();
 }
 
+
 /**
  * Populates the top level items
  * @param topLevelItems The map of names to workspaces
+ * @param expandedItems Names of items who should expanded after being populated
  */
-void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems)
+void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems,
+                                        const QStringList & expanded)
 {
   auto iend = topLevelItems.end();
   for(auto it = topLevelItems.begin(); it != iend; ++it)
   {
-    addTreeEntry(*it);
+    auto *node = addTreeEntry(*it);
+    if(expanded.contains(node->text(0))) node->setExpanded(true);
   }
 }
 
@@ -499,17 +452,17 @@ void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::
  * @param item A name/workspace pair to add.
  * @param parent If not null then add the new items as a child of the given item
  */
-void MantidDockWidget::addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent)
+MantidTreeWidgetItem * MantidDockWidget::addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent)
 {
   MantidTreeWidgetItem *node = new MantidTreeWidgetItem(QStringList(item.first.c_str()), m_tree);
   node->setData(0,Qt::UserRole, QVariant::fromValue(item.second));
 
   // A a child ID item so that it becomes expandable. Using the correct ID is needed when plotting from non-expanded groups.
-  MantidTreeWidgetItem *idNode = new MantidTreeWidgetItem(QStringList(item.second->id().c_str()), m_tree);
+  const std::string wsID = item.second->id();
+  MantidTreeWidgetItem *idNode = new MantidTreeWidgetItem(QStringList(wsID.c_str()), m_tree);
   idNode->setFlags(Qt::NoItemFlags);
   node->addChild(idNode);
-  //ICON!!!!
-  //setItemIcon( wsItem, node.getIconType() );
+  setItemIcon(node,wsID);
 
   if(parent)
   {
@@ -519,7 +472,7 @@ void MantidDockWidget::addTreeEntry(const std::pair<std::string,Mantid::API::Wor
   {
     m_tree->addTopLevelItem(node);
   }
-
+  return node;
 }
 
 /**
@@ -1411,24 +1364,18 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
 /**Finds the date and time of the last modification made to the workspace who's details
  * are found in the given QTreeWidgetItem.
  */
-DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* workspaceWidget)
+DateAndTime MantidTreeWidgetItem::getLastModified(const QTreeWidgetItem* item)
 {
-  const QString wsName = workspaceWidget->text(0);
-  Mantid::API::Workspace_sptr ws = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
-  
-  const Mantid::API::WorkspaceHistory wsHist = ws->getHistory();
+  QVariant userData = item->data(0, Qt::UserRole);
+  if ( userData.isNull() ) return DateAndTime(); //now
 
-  if(wsHist.empty())
-  {
-    throw std::out_of_range("The workspace \"" + wsName.toStdString() +
-      "\" has no history and so cannot be sorted by date last modified.");
-  }
+  Workspace_sptr workspace = userData.value<Workspace_sptr>();
+  const Mantid::API::WorkspaceHistory & wsHist = workspace->getHistory();
+  if(wsHist.empty()) return DateAndTime(); // now
 
   const size_t indexOfLast = wsHist.size() - 1;
-  AlgorithmHistory lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
-  DateAndTime output = lastAlgHist.executionDate();
-
-  return output;
+  const AlgorithmHistory & lastAlgHist = wsHist.getAlgorithmHistory(indexOfLast);
+  return lastAlgHist.executionDate();
 }
 
 //-------------------- AlgorithmDockWidget ----------------------//
