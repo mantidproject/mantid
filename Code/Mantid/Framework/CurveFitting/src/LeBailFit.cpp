@@ -45,18 +45,6 @@ See [[Le Bail Fit]].
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/TextAxis.h"
 
-/*
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidKernel/Statistics.h"
-
-#include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/Chebyshev.h"
-#include "MantidAPI/FuncMinimizerFactory.h"
-*/
-
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <iomanip>
@@ -412,6 +400,7 @@ namespace CurveFitting
 
     // Calculate diffraction pattern
     Rfactor rfactor(-DBL_MAX, -DBL_MAX);
+    // FIXME - It should be a new ticket to turn on this option (use user-specified peak height)
     bool useinputpeakheights = this->getProperty("UseInputPeakHeights");
     if (useinputpeakheights)
       g_log.warning("UseInputPeakHeights is temporarily turned off now. ");
@@ -674,8 +663,6 @@ namespace CurveFitting
 
     return;
   }
-
-
 
   //===================================  Set up the Le Bail Fit   ================================
   //----------------------------------------------------------------------------------------------
@@ -1087,7 +1074,7 @@ namespace CurveFitting
       hasPeakHeight = true;
     }
 
-    /* FIXME This section is disabled presently
+    /* FIXME This section is disabled.  It should be a new ticket to turn on this option.
     bool userexcludepeaks = false;
     if (colnames.size() >= 5 && colnames[4].compare("Include/Exclude") == 0)
     {
@@ -1198,12 +1185,13 @@ namespace CurveFitting
 
     // Debug output
     std::stringstream msg;
-    msg << "Background Order = " << bkgdorderparams.size() << ": ";
+    msg << "Finished importing background TableWorkspace. " << "Background Order = "
+        << bkgdorderparams.size() << ": ";
     for (size_t iod = 0; iod < bkgdorderparams.size(); ++iod)
     {
       msg << "A" << iod << " = " << bkgdorderparams[iod] << "; ";
     }
-    g_log.notice() << "[DB1105] Importing background TableWorkspace is finished. " << msg.str() << "\n";
+    g_log.information(msg.str());
 
     return;
   }
@@ -2109,14 +2097,11 @@ namespace CurveFitting
     {
       // Find out the i-th parameter to be refined or not
       string paramname = mcgroup[i];
-#if 0
-      Parameter& param = curparammap[paramname];
-#else
       map<string, Parameter>::iterator mapiter = curparammap.find(paramname);
       if (mapiter == curparammap.end())
         throw runtime_error("Parameter to update is not in the pool of parameters to get updated.");
       Parameter& param = mapiter->second;
-#endif
+
       if (param.fit)
         anyparamtorefine = true;
       else
@@ -2193,23 +2178,15 @@ namespace CurveFitting
       }
 
       // Apply to new parameter map
-#if 0
-      newparammap[paramname].curvalue = newvalue;
-#else
       map<string, Parameter>::iterator newmiter = newparammap.find(paramname);
       if (newmiter == newparammap.end())
         throw runtime_error("New parameter map does not contain parameter that is updated.");
       newmiter->second.curvalue = newvalue;
-#endif
       g_log.information() << "[ProposeNewValue] " << paramname << " --> " << newvalue
                           << "; random number = " << randomnumber << "\n";
 
       // g) record some trace
-#if 0
-      Parameter& p = curparammap[paramname];
-#else
       Parameter& p = param;
-#endif
       if (stepsize > 0)
       {
         p.movedirection = 1;
@@ -2536,17 +2513,27 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Smooth background by fitting the background to specified background function
-   * @param wsindex  :  raw data's workspace index
-   * @param domain      domain of X's
-   * @param peakdata:   pattern of pure peaks
-   * @param background: output of smoothed background
+    * Algorithm: 1. calculate background by removing calculated peaks from raw data
+    *            2. fit background by a specified background function.
+    * @param wsindex  :  raw data's workspace index
+    * @param domain      domain of X's
+    * @param peakdata:   pattern of pure peaks
+    * @param background: output of smoothed background
     */
   void LeBailFit::smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVector domain,
                                              FunctionValues peakdata, vector<double>& background)
   {
+    // FIXME - This method may not be a good solution.
+    // TODO  - Create a new ticket to use the algorithm in ProcessBackground here.
+
+    UNUSED_ARG(wsindex);
+    UNUSED_ARG(peakdata);
     UNUSED_ARG(domain);
     UNUSED_ARG(background);
 
+    throw runtime_error("Need to re-consider this method.");
+
+    /* Below is the original code to modifying from
     // 1. Make data ready
     MantidVec& vecData = m_dataWS->dataY(wsindex);
     MantidVec& vecFitBkgd = m_outputWS->dataY(CALBKGDINDEX);
@@ -2562,8 +2549,6 @@ namespace CurveFitting
     }
 
     // 2. Fit
-    throw runtime_error("Need to re-consider this method.");
-    /* Below is the original code to modifying from
     Chebyshev_sptr bkgdfunc(new Chebyshev);
     bkgdfunc->setAttributeValue("n", 6);
 

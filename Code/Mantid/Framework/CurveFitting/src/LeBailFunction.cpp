@@ -503,10 +503,6 @@ namespace CurveFitting
       peak->setHeight(1.0);
       vector<double> localpeakvalue(ndata, 0.0);
       peak->function(localpeakvalue, datax);
-#if 0
-      for (size_t i = 0; i < localpeakvalue.size(); ++i)
-        g_log.notice() << "Point " << i << " : " << localpeakvalue[i] << ".\n";
-#endif
 
       // check data
       size_t numbadpts(0);
@@ -550,14 +546,6 @@ namespace CurveFitting
       IPowderDiffPeakFunction_sptr peak = peakgroup[ipk].second;
       double intensity = 0.0;
 
-#if 0
-      g_log.notice() << "nData = " << ndata << ".\n";
-      g_log.notice() << "Data X from " << datax.front() << " to " << datax.back()
-                     << " for X and Sum[Y] " << ".\n";
-      for (size_t i = 0; i < ndata; ++i)
-        g_log.notice() << datax[i] << "\t\t" << sumYs[i] << ".\n";
-#endif
-
       for (size_t i = 0; i < ndata; ++i)
       {
         double temp;
@@ -566,9 +554,6 @@ namespace CurveFitting
           // Reasonable non-zero value
           double peaktogroupratio = peakvalues[ipk][i]/sumYs[i];
           temp = datay[i] * peaktogroupratio;
-#if 0
-          g_log.debug() << "Data " << i << " is " << datay[i] << ", Peak Ratio = " << peaktogroupratio << ".\n";
-#endif
         }
         else
         {
@@ -581,9 +566,6 @@ namespace CurveFitting
         else
           deltax = datax[i] - datax[i-1];
 
-#if 0
-        g_log.notice() << "Intensity = " << intensity << " by increment = " << temp << " x " << deltax << ".\n";
-#endif
         intensity += temp * deltax;
       } // for data points
 
@@ -975,7 +957,6 @@ namespace CurveFitting
   {
     for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
     {
-#if 1
       stringstream ss1, ss2;
       ss1 << "f" << ipk << "." << paramname;
       ss2 << paramvalue;
@@ -985,14 +966,12 @@ namespace CurveFitting
 
       g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | \n";
 
-#else
-      // FIXME - // TODO: Make a map between peak parameter name and index. And use fix() to replace tie
+      // FIXME & TODO: Make a map between peak parameter name and index. And use fix() to replace tie
       /*--  Code prepared to replace the existing block
       ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       size_t iparam = findIndex(thispeak, funcparam.name);
       thispeak->fix(iparam);
       --*/
-#endif
 
     } // For each peak
 
@@ -1008,26 +987,6 @@ namespace CurveFitting
 
     for (size_t iparam = 0; iparam < numbkgdparams; ++iparam)
       m_background->fix(iparam);
-
-#if 0
-    original code just for backup
-
-    std::vector<std::string> bkgdparnames = m_background->getParameterNames();
-    for (size_t ib = 0; ib < bkgdparnames.size(); ++ib)
-    {
-      std::string parname = bkgdparnames[ib];
-      double parvalue = m_background->getParameter(parname);
-      std::stringstream ss1, ss2;
-      ss1 << "f" << funcindex << "." << parname;
-      ss2 << parvalue;
-      std::string tiepart1 = ss1.str();
-      std::string tievalue = ss2.str();
-
-      g_log.debug() << "Step 2: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /\n";
-
-      m_compsiteFunction->tie(tiepart1, tievalue);
-    }
-#endif
 
     return;
   }
@@ -1196,18 +1155,5 @@ namespace CurveFitting
     return maxvalue;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Calculate d-space value of a Bragg peak of a cubic unit cell.
-    * d = a/sqrt(h**2+k**2+l**2)
-
-  double calCubicDSpace(double a, int h, int k, int l)
-  {
-    double hklfactor = sqrt(double(h*h)+double(k*k)+double(l*l));
-    double d = a/hklfactor;
-    // cout << "DB143 a = " << a << " (HKL) = " << h << ", " << k << ", " << l << ": d = " << d << std::endl;
-
-    return d;
-  }
-  */
 } // namespace Mantid
 } // namespace CurveFitting
