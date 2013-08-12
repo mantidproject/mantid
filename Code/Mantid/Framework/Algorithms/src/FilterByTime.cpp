@@ -140,21 +140,14 @@ void FilterByTime::exec()
   if (stop <= start)
     throw std::invalid_argument("The stop time should be larger than the start time.");
 
-
-
-  // generate the output workspace pointer
-  EventWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
-  if (inputWS != outputWS)
-  {
-    //Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+  // Make a brand new EventWorkspace
+  EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    //Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    //But we don't copy the data.
+  // Copy geometry over.
+  API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+  // But we don't copy the data.
 
-    this->setProperty("OutputWorkspace", outputWS);
-  }
+  setProperty("OutputWorkspace", outputWS);
 
   size_t numberOfSpectra = inputWS->getNumberHistograms();
 
