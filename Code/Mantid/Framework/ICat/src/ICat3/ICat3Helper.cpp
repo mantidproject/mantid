@@ -1,11 +1,12 @@
 // WorkspaceFactory include must be first otherwise you get a bizarre Poco-related compilation error on Windows
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidICat/ICatHelper.h"
+#include "MantidICat/ICat3/ICat3Helper.h"
 #include "MantidICat/Session.h"
 #include "MantidICat/ErrorHandling.h" 
 #include <iomanip>
 #include <time.h>
 #include <boost/lexical_cast.hpp>
+
 namespace Mantid
 {
   namespace ICat

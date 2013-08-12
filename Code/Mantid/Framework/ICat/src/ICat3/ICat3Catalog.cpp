@@ -2,7 +2,7 @@
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidICat/Session.h"
 #include "MantidAPI/Progress.h"
-#include "MantidICat/ICatHelper.h"
+#include "MantidICat/ICat3/ICat3Helper.h"
 
 namespace Mantid
 {
