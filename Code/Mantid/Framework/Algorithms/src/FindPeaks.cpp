@@ -962,7 +962,9 @@ namespace Algorithms
       errss << "Input peak centre @ " << centre_guess << " is out side of minimum x = "
             << xmin << ".  Input X ragne = " << vecX.front() << ", " << vecX.back();
       g_log.error(errss.str());
-      throw std::runtime_error(errss.str());
+      addNonFitRecord(spectrum);
+      return;
+//      throw std::runtime_error(errss.str());
     }
 
     //The right index
@@ -973,7 +975,9 @@ namespace Algorithms
       errss << "Input peak centre @ " << centre_guess << " is out side of maximum x = "
             << xmax;
       g_log.error(errss.str());
-      throw std::runtime_error(errss.str());
+      addNonFitRecord(spectrum);
+      return;
+//      throw std::runtime_error(errss.str());
     }
 
     // look for the heigh point
@@ -1121,6 +1125,7 @@ namespace Algorithms
       fit->setProperty("EndX", vecX[i_max]); //(X[i0] + 5 * (X[i0] - X[i2])));
       fit->setProperty("Minimizer", m_minimizer);
       fit->setProperty("CostFunction", "Least squares");
+      fit->setProperty("IgnoreInvalidData", true);
 
       // e) Fit and get result
       fit->executeAsChildAlg();
@@ -1632,9 +1637,7 @@ namespace Algorithms
 
     // Is it a failed fit?
     double finalrwp = bestR.getChiSquare();
-    bool fitfail = false;
-    if (finalrwp > DBL_MAX-1.0)
-      fitfail = true;
+    bool fitfail(finalrwp > DBL_MAX-1.0);
 
     // Set up parameters
     std::vector<double> params, rawparams;
@@ -2044,9 +2047,6 @@ namespace Algorithms
   void FindPeaks::addInfoRow(const size_t spectrum, const std::vector<double> &params,
                              const std::vector<double> &rawParams, const double mincost, bool error)
   {
-    API::TableRow t = m_outPeakTableWS->appendRow();
-    t << static_cast<int>(spectrum);
-
     // Is bad fit?
     bool isbadfit;
     if (error)
@@ -2065,12 +2065,13 @@ namespace Algorithms
             << ", (3) rawParams.size():" << rawParams.size() << ". (Output with raw parameter = "
             << m_rawPeaksTable << ").";
 
-      for (std::size_t i = 0; i < m_numTableParams; i++)
-        t << 0.;
-      t << 1.e10; // bad chisq value
+      this->addNonFitRecord(spectrum);
     }
     else    // Good fit
     {
+      API::TableRow t = m_outPeakTableWS->appendRow();
+      t << static_cast<int>(spectrum);
+
       if (m_rawPeaksTable)
       {
         for (std::vector<double>::const_iterator it = rawParams.begin(); it != rawParams.end(); ++it)
