@@ -3458,9 +3458,15 @@ namespace DataObjects
    * @param start :: start time (absolute)
    * @param stop :: end time (absolute)
    * @param output :: reference to an event list that will be output.
+   * @throws std::invalid_argument If output is a reference to this EventList
    */
   void EventList::filterByPulseTime(DateAndTime start, DateAndTime stop, EventList & output) const
   {
+    if ( this == &output )
+    {
+      throw std::invalid_argument("In-place filtering is not allowed");
+    }
+
     //Start by sorting the event list by pulse time.
     this->sortPulseTime();
     //Clear the output
