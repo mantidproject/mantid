@@ -651,6 +651,10 @@ namespace IDA
           {
             m_cfInputWSName = wsname;
             m_cfInputWS = runLoadNexus(filename, wsname);
+            if(!m_cfInputWS)
+            {
+              return;
+            }
           }
         }
       }

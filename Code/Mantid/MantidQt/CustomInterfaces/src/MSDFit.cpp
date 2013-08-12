@@ -103,7 +103,6 @@ namespace IDA
       auto ws = runLoadNexus(filename, wsname);
       if(!ws)
       {
-        showInformationBox(QString("Unable to load file: ") + filename);
         return;
       }
 

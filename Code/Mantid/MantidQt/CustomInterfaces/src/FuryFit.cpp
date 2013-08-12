@@ -391,15 +391,19 @@ namespace IDA
         }
         else
         {
-        QFileInfo fi(uiForm().furyfit_inputFile->getFirstFilename());
-        QString wsname = fi.baseName();
-        if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
-        {
-          m_ffInputWSName = wsname;
-          QString filename = uiForm().furyfit_inputFile->getFirstFilename();
-          // get the output workspace
-          m_ffInputWS = runLoadNexus(filename, m_ffInputWSName);
-        }
+          QFileInfo fi(uiForm().furyfit_inputFile->getFirstFilename());
+          QString wsname = fi.baseName();
+          if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
+          {
+            m_ffInputWSName = wsname;
+            QString filename = uiForm().furyfit_inputFile->getFirstFilename();
+            // get the output workspace
+            m_ffInputWS = runLoadNexus(filename, m_ffInputWSName);
+            if(!m_ffInputWS)
+            {
+              return;
+            }
+          }
         }
       }
       break;

@@ -168,7 +168,6 @@ namespace IDA
         workspace = runLoadNexus(filename, wsname);
         if(!workspace)
         {
-          showInformationBox(QString("Unable to load file: ") + filename);
           return;
         }
       }

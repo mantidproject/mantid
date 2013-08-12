@@ -124,6 +124,7 @@ namespace IDA
     }
     catch(NotFoundError&)
     {
+      showInformationBox("Failed to load "+filename+".\n Check the log for more details.");
     }
     return ws;
   }
