@@ -32,7 +32,7 @@ namespace
 }
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
-    QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups(), m_updateCount( 0 ),
+    QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_updateCount( 0 ),
     m_treeUpdating(false), m_ads(Mantid::API::AnalysisDataService::Instance()), m_rootInfoNode(NULL)
 {
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
@@ -132,38 +132,6 @@ Mantid::API::Workspace_sptr MantidDockWidget::getSelectedWorkspace() const
   {
     return Mantid::API::Workspace_sptr();
   }
-}
-
-/**
- * Add an item to the tree displaying the workspace name and having a child item with workspace's id.
- * The item is added in the collapsed state.
- *
- * @param node :: An InfoNode of the workspace to display.
- * @param parentItem :: A pointer to the parent item to add to. If NULL the item is added at top level.
- */
-QTreeWidgetItem *MantidDockWidget::addWorkspaceTreeEntry( Workspace::InfoNode &node, QTreeWidgetItem *parentItem )
-{
-    // name of a top-level item == workspace name
-    QString wsName = QString::fromStdString(node.workspaceName());
-    MantidTreeWidgetItem *wsItem = new MantidTreeWidgetItem(QStringList(wsName), m_tree);
-    wsItem->setData(0,Qt::UserRole, QVariant::fromValue(&node));
-
-    // Need to add a child so that it becomes expandable. Using the correct ID is needed when plotting from non-expanded groups.
-    MantidTreeWidgetItem *wsid_item = new MantidTreeWidgetItem(QStringList(node.lines()[0].c_str()), m_tree);
-    wsid_item->setFlags(Qt::NoItemFlags);
-    wsItem->addChild(wsid_item);
-
-    //setItemIcon( wsItem, node.getIconType() );
-
-    if ( parentItem )
-    {
-        parentItem->addChild( wsItem );
-    }
-    else
-    {
-        m_tree->addTopLevelItem( wsItem );
-    }
-    return wsItem;
 }
 
 /**
@@ -294,43 +262,6 @@ void MantidDockWidget::createSortMenuActions()
 }
 
 /**
-* Check if the given workspace is part of a known group
-*/
-QString MantidDockWidget::findParentName(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
-{
-  QString name("");
-  if(Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace) )
-  {
-    m_known_groups.insert(QString::fromStdString(workspace->getName()));
-  }
-  else
-  {
-    QSet<QString>::const_iterator iend = m_known_groups.constEnd();
-    for( QSet<QString>::const_iterator itr = m_known_groups.constBegin(); itr != iend; ++itr )
-    {
-      Mantid::API::Workspace *worksp = NULL;
-      try
-      {
-        worksp = m_ads.retrieve((*itr).toStdString()).get();
-      }
-      catch(Mantid::Kernel::Exception::NotFoundError&)
-      {
-        continue;
-      }
-      if( Mantid::API::WorkspaceGroup *grouped = dynamic_cast<Mantid::API::WorkspaceGroup *>(worksp) )
-      {
-        if( grouped->contains(ws_name.toStdString()) )
-        {
-          name = *itr;
-          break;
-        }
-      }
-    }
-  }
-  return name;
-}
-
-/**
 * When an item is expanded, populate the child data for this item
 * @param item :: The item being expanded
 */
@@ -399,7 +330,6 @@ void MantidDockWidget::updateTree()
 {
     // do not update until the counter is zero
     if ( m_updateCount.deref() ) return;
-
 
     // find all expanded top-level entries
     QStringList expanded;
@@ -491,7 +421,7 @@ MantidTreeWidgetItem * MantidDockWidget::addTreeEntry(const std::pair<std::strin
  * @param menu :: The menu to store the items
  * @param matrixWS :: The workspace related to the menu
  */
-void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const
+void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::API::MatrixWorkspace_const_sptr & matrixWS) const
 {
   // Add all options except plot of we only have 1 value
   menu->addAction(m_showData);
@@ -501,16 +431,13 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::Mat
   menu->addSeparator();
   menu->addAction(m_plotSpec);
   menu->addAction(m_plotSpecErr);
-  //menu->addAction(m_plotSpecDistr);
+
   // Don't plot a spectrum if only one X value
   m_plotSpec->setEnabled ( matrixWS->blocksize() > 1 );
   m_plotSpecErr->setEnabled ( matrixWS->blocksize() > 1 );
-/*
-  if( boost::dynamic_pointer_cast<const IEventWorkspace>(matrixWS) )
-  {
-*/
-    menu->addAction(m_showImageViewer); // The 2D image viewer
-//  }
+
+  menu->addAction(m_showImageViewer); // The 2D image viewer
+
   menu->addAction(m_colorFill);
   // Show the color fill plot if you have more than one histogram
   m_colorFill->setEnabled( ( matrixWS->axes() > 1 && matrixWS->getNumberHistograms() > 1) );
@@ -527,9 +454,9 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::Mat
  * @param menu :: The menu to store the items
  * @param WS :: The workspace related to the menu
  */
-void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr WS) const
+void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDEventWorkspace_const_sptr & WS) const
 {
-  (void) WS;
+  Q_UNUSED(WS);
 
   //menu->addAction(m_showBoxData); // Show MD Box data (for debugging only)
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
@@ -548,9 +475,9 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
   menu->addAction(m_showLogs);
 }
 
-void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDWorkspace_const_sptr WS) const
+void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const
 {
-  (void) WS;
+  Q_UNUSED(WS);
   menu->addAction(m_showHist); // Algorithm history
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries())
@@ -574,9 +501,9 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
  * @param menu :: The menu to store the items
  * @param WS :: The workspace related to the menu
  */
-void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const
+void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr &WS) const
 {
-  (void) WS;
+  Q_UNUSED(WS);
   menu->addAction(m_showData);
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::hasVatesLibraries())
@@ -619,7 +546,7 @@ void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
 
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
 {
-  (void) item; //Avoid unused warning
+  Q_UNUSED(item);
 }
 
 void MantidDockWidget::workspaceSelected()
