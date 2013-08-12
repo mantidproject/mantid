@@ -116,8 +116,13 @@ namespace IDA
     connect(uiForm().confit_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resType(const QString&)));
     connect(uiForm().confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
     connect(uiForm().confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(bgTypeSelection(int)));
-    connect(uiForm().confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().confit_pbSequential, SIGNAL(clicked()), this, SLOT(sequential()));
+
+    //signals for plotting input
+    connect(uiForm().confit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
+    connect(uiForm().confit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
+    connect(uiForm().confit_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(uiForm().confit_wsSample, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
 
     uiForm().confit_leSpecNo->setValidator(m_intVal);
     uiForm().confit_leSpecMax->setValidator(m_intVal);
@@ -627,7 +632,15 @@ namespace IDA
     {
     case 0: // "File"
       {
-        if ( uiForm().confit_inputFile->isValid() )
+        if(uiForm().confit_inputFile->isEmpty())
+        {
+          return;
+        }
+        if ( ! uiForm().confit_inputFile->isValid() )
+        {
+          return;
+        }
+        else
         {
           QString filename = uiForm().confit_inputFile->getFirstFilename();
           QFileInfo fi(filename);
@@ -638,17 +651,21 @@ namespace IDA
           {
             m_cfInputWSName = wsname;
             m_cfInputWS = runLoadNexus(filename, wsname);
+            if(!m_cfInputWS)
+            {
+              return;
+            }
           }
-        }
-        else
-        {
-          return;
         }
       }
       break;
     case 1: // Workspace
       {
         m_cfInputWSName = uiForm().confit_wsSample->currentText();
+        if(m_cfInputWSName.isEmpty())
+        {
+         return;
+        }
         try
         {
           m_cfInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_cfInputWSName.toStdString());

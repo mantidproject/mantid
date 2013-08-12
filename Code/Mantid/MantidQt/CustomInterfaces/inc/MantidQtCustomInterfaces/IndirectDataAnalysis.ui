@@ -518,6 +518,13 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="furyfit_pbPlotInput">
+               <property name="text">
+                <string>Plot Input</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="furyfit_page_inputWorkspace">
@@ -536,13 +543,6 @@
              </item>
             </layout>
            </widget>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="furyfit_pbPlotInput">
-           <property name="text">
-            <string>Plot Input</string>
-           </property>
           </widget>
          </item>
         </layout>
@@ -850,13 +850,6 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="confit_pbPlotInput">
-           <property name="text">
-            <string>Plot Input</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <layout class="QHBoxLayout" name="confit_layout_input">
            <property name="spacing">
@@ -917,6 +910,13 @@
                    <string>_red.nxs</string>
                    <string>_sqw.nxs</string>
                   </stringlist>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="confit_pbPlotInput">
+                 <property name="text">
+                  <string>Plot Input</string>
                  </property>
                 </widget>
                </item>
@@ -2410,7 +2410,6 @@
   <tabstop>fury_ckPlot</tabstop>
   <tabstop>fury_ckSave</tabstop>
   <tabstop>furyfit_cbInputType</tabstop>
-  <tabstop>furyfit_pbPlotInput</tabstop>
   <tabstop>furyfit_cbFitType</tabstop>
   <tabstop>furyfit_ckConstrainIntensities</tabstop>
   <tabstop>furyfit_ckPlotGuess</tabstop>

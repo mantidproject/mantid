@@ -395,10 +395,10 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
 
     if ( std::abs(commonSum) < 1.0E-7 && std::abs(sum) < 1.0E-7 ) 
     {
-    	for (size_t i = 0; i < WS->blocksize(); i++)
-    	{
-    		if (std::abs(WS->readX(0)[i] - WS->readX(j)[i]) > 1.0E-7 ) return false;
-    	}
+      for (size_t i = 0; i < WS->blocksize(); i++)
+      {
+        if (std::abs(WS->readX(0)[i] - WS->readX(j)[i]) > 1.0E-7 ) return false;
+      }
     }
     else if ( std::abs(commonSum-sum)/std::max<double>(std::abs(commonSum),std::abs(sum)) > 1.0E-7 ) return false;
   }
@@ -413,7 +413,7 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
  *  @return True if the test passes
  */
 bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
-                                          const MatrixWorkspace_const_sptr ws2, const bool firstOnly)
+                                    const MatrixWorkspace_const_sptr ws2, const bool firstOnly)
 {
   // First of all, the first vector must be the same size
   if ( ws1->readX(0).size() != ws2->readX(0).size() ) return false;

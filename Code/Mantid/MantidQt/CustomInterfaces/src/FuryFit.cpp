@@ -87,10 +87,16 @@ namespace IDA
     // Signal/slot ui connections
     connect(uiForm().furyfit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeSelection(int)));
-    connect(uiForm().furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(plotInput()));
     connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().furyfit_swInput, SLOT(setCurrentIndex(int)));  
     connect(uiForm().furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(sequential()));
+
+    //plot input connections
+    connect(uiForm().furyfit_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_wsIqt, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
+    connect(uiForm().furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
+
     // apply validators - furyfit
     uiForm().furyfit_leSpecNo->setValidator(m_intVal);
 
@@ -385,21 +391,29 @@ namespace IDA
         }
         else
         {
-        QFileInfo fi(uiForm().furyfit_inputFile->getFirstFilename());
-        QString wsname = fi.baseName();
-        if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
-        {
-          m_ffInputWSName = wsname;
-          QString filename = uiForm().furyfit_inputFile->getFirstFilename();
-          // get the output workspace
-          m_ffInputWS = runLoadNexus(filename, m_ffInputWSName);
-        }
+          QFileInfo fi(uiForm().furyfit_inputFile->getFirstFilename());
+          QString wsname = fi.baseName();
+          if ( (m_ffInputWS == NULL) || ( wsname != m_ffInputWSName ) )
+          {
+            m_ffInputWSName = wsname;
+            QString filename = uiForm().furyfit_inputFile->getFirstFilename();
+            // get the output workspace
+            m_ffInputWS = runLoadNexus(filename, m_ffInputWSName);
+            if(!m_ffInputWS)
+            {
+              return;
+            }
+          }
         }
       }
       break;
     case 1: // Workspace
       {
         m_ffInputWSName = uiForm().furyfit_wsIqt->currentText();
+        if(m_ffInputWSName.isEmpty())
+        {
+          return;
+        }
         try
         {
           m_ffInputWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(m_ffInputWSName.toStdString());

@@ -81,8 +81,8 @@ namespace IDA
     connect(m_elwBlnMng, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(twoRanges(QtProperty*, bool)));
     twoRanges(0, false);
 
-    // m_uiForm element signals and slots
     connect(uiForm().elwin_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
+    connect(uiForm().elwin_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
 
     // Set any default values
     m_elwDblMng->setValue(m_elwProp["R1S"], -0.02);
@@ -160,7 +160,6 @@ namespace IDA
       auto ws = runLoadNexus(filename, wsname);
       if(!ws)
       {
-        showInformationBox(QString("Unable to load file: ") + filename);
         return;
       }
 

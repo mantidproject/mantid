@@ -21,8 +21,9 @@ public:
 
   FileDescriptorTest()
   {
-    using Mantid::Kernel::ConfigService;
-    auto dataPaths = ConfigService::Instance().getDataSearchDirs();
+    auto& cfg = Mantid::Kernel::ConfigService::Instance();
+    cfg.reset();
+    const auto& dataPaths = cfg.getDataSearchDirs();
     for(auto it = dataPaths.begin(); it != dataPaths.end(); ++it)
     {
       Poco::Path nxsPath(*it, "CNCS_7860_event.nxs");
