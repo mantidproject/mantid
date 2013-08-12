@@ -115,7 +115,7 @@ public:
     ld2.setPropertyValue("Filename","CNCS_7860_event.nxs");
     ld2.setPropertyValue("OutputWorkspace",outws_name2);
     ld2.setPropertyValue("Precount", "1");
-    ld.setProperty<bool>("LoadLogs", false); // Time-saver
+    ld2.setProperty<bool>("LoadLogs", false); // Time-saver
     ld2.execute();
     TS_ASSERT( ld2.isExecuted() );
 
