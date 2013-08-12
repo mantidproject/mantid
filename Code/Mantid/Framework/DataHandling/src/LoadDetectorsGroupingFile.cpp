@@ -151,10 +151,17 @@ namespace DataHandling
     mGroupWS->mutableRun().addProperty("Filename",xmlfilename);
     setProperty("OutputWorkspace", mGroupWS);
 
-    // 3. Translate and set geometry
+    // 4. Translate and set geometry
     this->setByComponents();
     this->setByDetectors();
     this->setBySpectrumIDs();
+
+    // 5. Add grouping description, if specified
+    if(loader.isGivenDescription())
+    {
+      std::string description = loader.getDescription();
+      mGroupWS->mutableRun().addProperty("Description", description);
+    }
 
     return;
   }
@@ -472,11 +479,6 @@ namespace DataHandling
       throw std::runtime_error("Call LoadDetectorsGroupingFile::initialize() before parseXML.");
 
     // 1. Parse and create a structure
-    /*
-    NodeList* pNL_type = pRootElem->getElementsByTagName("type");
-    g_log.information() << "Node Size = " << pNL_type->length() << std::endl;
-    */
-
     Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
     Poco::XML::Node* pNode = it.nextNode();
 
@@ -493,19 +495,15 @@ namespace DataHandling
 
       if (pNode->nodeName().compare("detector-grouping") == 0)
       {
+        // Node "detector-grouping" (first level)
 
-        // Node "detector-grouping" (first level). Instrument Name
-        bool foundname;
-        mInstrumentName = getAttributeValueByName(pNode, "instrument", foundname);
-        if (!foundname){
-          mUserGiveInstrument = false;
-        }
-        else
-        {
-          mUserGiveInstrument = true;
-        }
+        // Optional instrument name
+        mInstrumentName = getAttributeValueByName(pNode, "instrument", mUserGiveInstrument);
+       
+        // Optional grouping description
+        mDescription = getAttributeValueByName(pNode, "description", mUserGiveDescription);
 
-      } // "detector-masking"
+      } // "detector-grouping"
       else if (pNode->nodeName().compare("group") == 0)
       {
         // Group Node:  get ID, set map

@@ -214,6 +214,13 @@ namespace DataHandling
     pDoc->appendChild(pRoot);
     pRoot->setAttribute("instrument", name);
 
+    // Set description if was specified by user
+    if(mGroupWS->run().hasProperty("Description"))
+    {
+      std::string description = mGroupWS->run().getProperty("Description")->value();
+      pRoot->setAttribute("description", description);
+    }
+
     // 3. Append Groups
     for (std::map<int, std::vector<detid_t> >::iterator it = groupdetidrangemap.begin();
         it != groupdetidrangemap.end(); ++it){

@@ -119,6 +119,16 @@ namespace DataHandling
       return mUserGiveInstrument;
     }
 
+    std::string getDescription()
+    {
+        return mDescription;
+    }
+
+    bool isGivenDescription()
+    {
+        return mUserGiveDescription;
+    }
+
     /// Data structures to store XML to Group/Detector conversion map
     std::map<int, std::vector<std::string> > getGroupComponentsMap()
     {
@@ -138,6 +148,12 @@ namespace DataHandling
     std::string mInstrumentName;
     /// User-define instrument name
     bool mUserGiveInstrument;
+
+    /// Grouping description. Empty if not specified.
+    std::string mDescription;
+    /// Whether description is given by user
+    bool mUserGiveDescription;
+
     /// XML document loaded
     Poco::XML::Document* pDoc;
     /// Root element of the parsed XML
