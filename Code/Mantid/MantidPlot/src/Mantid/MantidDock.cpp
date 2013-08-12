@@ -33,7 +33,7 @@ namespace
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
     QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups(), m_updateCount( 0 ),
-    m_ads(Mantid::API::AnalysisDataService::Instance()), m_rootInfoNode(NULL)
+    m_treeUpdating(false), m_ads(Mantid::API::AnalysisDataService::Instance()), m_rootInfoNode(NULL)
 {
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -414,8 +414,9 @@ void MantidDockWidget::updateTree()
     }
 
     // create a new tree
-    m_tree->clear();
+    setTreeUpdating(true);
     populateTopLevel(m_ads.topLevelItems(), expanded);
+    setTreeUpdating(false);
 
     // Re-sort
     m_tree->sort();
@@ -429,15 +430,25 @@ void MantidDockWidget::incrementUpdateCount()
     m_updateCount.ref();
 }
 
+/**
+ * Flips the flag indicating whether a tree update is in progress. Actions such as sorting
+ * are disabled while an update is in progress.
+ * @param state The required state for the flag
+ */
+void MantidDockWidget::setTreeUpdating(const bool state)
+{
+  m_treeUpdating = state;
+}
 
 /**
- * Populates the top level items
+ * Clears the tree and re-populates it with the given top level items
  * @param topLevelItems The map of names to workspaces
  * @param expandedItems Names of items who should expanded after being populated
  */
 void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems,
                                         const QStringList & expanded)
 {
+  m_tree->clear();
   auto iend = topLevelItems.end();
   for(auto it = topLevelItems.begin(); it != iend; ++it)
   {
@@ -650,24 +661,28 @@ void MantidDockWidget::deleteWorkspaces()
 
 void MantidDockWidget::sortAscending()
 {
+  if(isTreeUpdating()) return;
   m_tree->setSortOrder(Qt::Ascending);
   m_tree->sort();
 }
 
 void MantidDockWidget::sortDescending()
 {
-   m_tree->setSortOrder(Qt::Descending);
-   m_tree->sort();
+  if(isTreeUpdating()) return;
+  m_tree->setSortOrder(Qt::Descending);
+  m_tree->sort();
 }
 
 void MantidDockWidget::chooseByName()
 {
+  if(isTreeUpdating()) return;
   m_tree->setSortScheme(ByName);
   m_tree->sort();
 }
 
 void MantidDockWidget::chooseByLastModified()
 {
+  if(isTreeUpdating()) return;
   m_tree->setSortScheme(ByLastModified);
   m_tree->sort();
 }

@@ -83,6 +83,8 @@ private slots:
   void incrementUpdateCount();
 
 private:
+  void setTreeUpdating(const bool state);
+  inline bool isTreeUpdating() const { return m_treeUpdating; }
   void populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems, const QStringList & expanded);
   MantidTreeWidgetItem * addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent = NULL);
   void createWorkspaceMenuActions();
@@ -130,6 +132,7 @@ private:
   *m_convertMDHistoToMatrixWorkspace;
 
   QAtomicInt m_updateCount;
+  bool m_treeUpdating;
   Mantid::API::AnalysisDataServiceImpl & m_ads;
   Mantid::API::Workspace::InfoNode *m_rootInfoNode;
 
