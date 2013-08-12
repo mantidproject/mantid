@@ -119,17 +119,17 @@ void FilterByTime::exec()
   {
     // Use the relative times in seconds.
     DateAndTime first = inputWS->getFirstPulseTime();
-	DateAndTime last = inputWS->getLastPulseTime();
+    DateAndTime last = inputWS->getLastPulseTime();
     start = first + start_dbl;
-	if (stop_dbl > 0.0)
-	{
-		stop = first + stop_dbl;
-	}
-	else
-	{
-		this->getLogger().debug() << "No end filter time specified - assuming last pulse" << std::endl;
-		stop = last + 10000.0;   // so we get all events - needs to be past last pulse
-	}
+    if (stop_dbl > 0.0)
+    {
+      stop = first + stop_dbl;
+    }
+    else
+    {
+      this->getLogger().debug() << "No end filter time specified - assuming last pulse" << std::endl;
+      stop = last + 10000.0;   // so we get all events - needs to be past last pulse
+    }
   }
   else
   {
