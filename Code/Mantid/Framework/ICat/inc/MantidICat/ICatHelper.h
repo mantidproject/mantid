@@ -2,7 +2,7 @@
 #define MANTID_ICAT_SEARCHHELPER_H_
 
 
-#include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
+#include "MantidICat/ICat3/GSoapGenerated/soapICATPortBindingProxy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Logger.h"

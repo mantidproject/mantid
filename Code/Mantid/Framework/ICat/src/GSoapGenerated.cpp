@@ -14,5 +14,5 @@
   #pragma warning( disable: 4100 )
 #endif
 
-#include "GSoapGenerated/soapC.cpp"
-#include "GSoapGenerated/soapICATPortBindingProxy.cpp"
+#include "ICat3/GSoapGenerated/soapC.cpp"
+#include "ICat3/GSoapGenerated/soapICATPortBindingProxy.cpp"
