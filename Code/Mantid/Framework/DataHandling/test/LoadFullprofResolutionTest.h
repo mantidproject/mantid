@@ -26,6 +26,7 @@ public:
   static LoadFullprofResolutionTest *createSuite() { return new LoadFullprofResolutionTest(); }
   static void destroySuite( LoadFullprofResolutionTest *suite ) { delete suite; }
 
+  //----------------------------------------------------------------------------------------------
   /** Test import from a 1-bank irf file
     */
   void test_1BankCase()
@@ -50,7 +51,7 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 26);
+    TS_ASSERT_EQUALS(outws->rowCount(), 27);
 
     // 3. Verify value
     map<string, double> parammap;
@@ -67,6 +68,7 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Test import from a 1-bank irf file
     */
   void test_2BankCase()
@@ -91,7 +93,7 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 26);
+    TS_ASSERT_EQUALS(outws->rowCount(), 27);
 
     // 3. Verify value
     map<string, double> parammap;
@@ -108,6 +110,59 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test import all banks from a 2-bank irf file
+    */
+  void test_LoadAllBankCase()
+  {
+    // Generate file
+    string filename("Test2Bank.irf");
+    generate2BankIrfFile(filename);
+
+    // Init LoadFullprofResolution
+    LoadFullprofResolution alg;
+    alg.initialize();
+
+    // Set up
+    alg.setProperty("Filename", filename);
+    alg.setProperty("OutputWorkspace", "TestBank4Table");
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Check output workspace
+    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+          AnalysisDataService::Instance().retrieve("TestBank4Table"));
+    TS_ASSERT(outws);
+
+    // Check table workspace size
+    TS_ASSERT_EQUALS(outws->columnCount(), 3);
+    TS_ASSERT_EQUALS(outws->rowCount(), 27);
+
+    // Verify value
+    map<string, double> parammap1;
+    parseTableWorkspace(outws, parammap1);
+    TS_ASSERT_DELTA(parammap1["Dtt1"], 22580.59157, 0.0001);
+    TS_ASSERT_DELTA(parammap1["Sig1"], sqrt(0.00044), 0.0001);
+    TS_ASSERT_DELTA(parammap1["Alph0t"], 0.010156, 0.00001);
+
+    map<string, double> parammap2;
+    parseTableWorkspace2(outws, parammap2);
+    TS_ASSERT_DELTA(parammap2["Dtt1"], 22586.10156, 0.0001);
+    TS_ASSERT_DELTA(parammap2["Sig1"], sqrt(10.00), 0.0001);
+    TS_ASSERT_DELTA(parammap2["Alph0t"], 86.059, 0.00001);
+
+
+
+    // Clean
+    AnalysisDataService::Instance().remove("TestBank4Table");
+    Poco::File("Test2Bank.irf").remove();
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Test Exception
     */
   void test_WrongInputBankCase()
@@ -136,6 +191,7 @@ public:
   }
 
 
+  //----------------------------------------------------------------------------------------------
   /** Parse a TableWorkspace to a map
     */
   void parseTableWorkspace(TableWorkspace_sptr tablews, map<string, double>& parammap)
@@ -155,6 +211,28 @@ public:
     return;
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Parse a TableWorkspace's 2nd bank to a map
+    */
+  void parseTableWorkspace2(TableWorkspace_sptr tablews, map<string, double>& parammap)
+  {
+    parammap.clear();
+
+    size_t numrows = tablews->rowCount();
+    for (size_t i = 0; i < numrows; ++i)
+    {
+      TableRow row = tablews->getRow(i);
+      double value1, value2;
+      string name;
+      row >> name >> value1 >> value2;
+      parammap.insert(make_pair(name, value2));
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Generate a 1 bank .irf file
     */
   void generate1BankIrfFile(string filename)
@@ -197,6 +275,7 @@ public:
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Generate a 2 bank .irf file
     */
   void generate2BankIrfFile(string filename)
