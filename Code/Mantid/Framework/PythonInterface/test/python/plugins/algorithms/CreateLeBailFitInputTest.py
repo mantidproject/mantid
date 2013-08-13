@@ -29,10 +29,19 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         # Verify some values
         # Profile parameter workspace
         paramws = AnalysisDataService.retrieve("PG3_Bank2_Foo")
-        self.assertEqual(27, paramws.rowCount())
+
+        paramname0 = paramws.cell(0, 0)
+        
+        if paramname0.lower() == "bank":
+            numrowgood = 28
+        else:
+            numrowgood = 27
+        print "Parameter name of first line = ", paramname0
+
+        self.assertEqual(numrowgood, paramws.rowCount())
 
         paramnames = []
-        for i in xrange(27):
+        for i in xrange(numrowgood):
             paramname = paramws.cell(i, 0)
             paramnames.append(paramname)
         self.assertEqual(paramnames.count("LatticeConstant"), 1)
