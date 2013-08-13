@@ -260,5 +260,23 @@ namespace MantidQt
       m_uiForm.rfFileInput->setFileExtensions(suffixes);
     }
 
+    /**
+    * Read settings from the given group
+    * @param group :: The name of the group key to retrieve data from
+    */
+    void DataSelector::readSettings(const QString & group)
+    {
+      m_uiForm.rfFileInput->readSettings(group);
+    }
+
+    /**
+    * Save settings to the given group
+    * @param group :: The name of the group key to save to
+    */
+    void DataSelector::saveSettings(const QString & group)
+    {
+      m_uiForm.rfFileInput->saveSettings(group);
+    }
+
   } /* namespace MantidWidgets */
 } /* namespace MantidQt */

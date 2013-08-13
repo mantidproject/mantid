@@ -103,6 +103,7 @@ namespace IDA
 
   void Fury::loadSettings(const QSettings & settings)
   {
+    uiForm().fury_dsInput->readSettings(settings.group());
     uiForm().fury_resFile->readSettings(settings.group());
   }
 

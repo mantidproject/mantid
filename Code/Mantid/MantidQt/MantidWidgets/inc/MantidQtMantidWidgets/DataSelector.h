@@ -75,6 +75,10 @@ namespace MantidQt
       QStringList getFBSuffixes();
       /// Set file suffixes to filter for in the file browser
       void setFBSuffixes(const QStringList & suffixes);
+      /// Read settings from the given group
+      void readSettings(const QString & group);
+      /// Save settings in the given group
+      void saveSettings(const QString & group);
 
     signals:
       /// Signal emitted when files were found but widget isn't autoloading
