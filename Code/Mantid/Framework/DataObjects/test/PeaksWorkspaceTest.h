@@ -157,7 +157,6 @@ public:
 
      // Check detector IDs
      TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_1") );
-
      std::vector<int> detIDs;
      TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getData(detIDs));
      nexusHelper.file->closeData();
@@ -170,21 +169,20 @@ public:
        TS_ASSERT_EQUALS( detIDs[3], 1400);
      }
 
-    //if(lpw) {
-    //  TS_ASSERT_EQUALS(17, lpw->columnCount());
-      // Check that the peaks are what we saved
-   //   TS_ASSERT_EQUALS( lpw->getPeak(0).getDetectorID(), 1300);
-    //  TS_ASSERT_DELTA( lpw->getPeak(0).getWavelength(), 4.0, 1e-5);
-    //  TS_ASSERT_EQUALS( lpw->getPeak(0).getQSampleFrame(), sampleFrameQ);
-    //  TS_ASSERT_EQUALS( lpw->getPeak(0).getQLabFrame(), labFrameQ);
+     // Check wavelengths
+     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_10") );
+     std::vector<double> waveLengths;
+     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getData(waveLengths));
+     nexusHelper.file->closeData();
+     TS_ASSERT_EQUALS( waveLengths.size(), 4);  // We have 4 wave lengths
+     if( waveLengths.size() == 4)
+     {
+        TS_ASSERT_DELTA( waveLengths[0], 4.0, 1e-5);
+        TS_ASSERT_DELTA( waveLengths[1], 5.0, 1e-5);
+        TS_ASSERT_DELTA( waveLengths[2], 3.0, 1e-5);
+        TS_ASSERT_DELTA( waveLengths[3], 3.0, 1e-5);
+     }
 
-    //  TS_ASSERT_EQUALS( lpw->getPeak(1).getDetectorID(), 1300);
-   //   TS_ASSERT_DELTA(  lpw->getPeak(1).getWavelength(), 5.0, 1e-5);
-  //    TS_ASSERT_EQUALS( lpw->getPeak(2).getDetectorID(), 1350);
-   //   TS_ASSERT_DELTA(  lpw->getPeak(2).getWavelength(), 3.0, 1e-5);
-   //   TS_ASSERT_EQUALS( lpw->getPeak(3).getDetectorID(), 1400);
-  //    TS_ASSERT_DELTA( lpw->getPeak(3).getWavelength(), 3.0, 1e-5);
-   // }
   }
 
   void test_getSetLogAccess()
