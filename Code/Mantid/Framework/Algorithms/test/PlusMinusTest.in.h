@@ -1166,9 +1166,12 @@ public:
 
 class @PLUSMINUSTEST_CLASS@Performance : public CxxTest::TestSuite
 {
-public:
   bool DO_PLUS;
   Workspace2D_sptr ws2D_1, ws2D_2;
+
+public:
+  static @PLUSMINUSTEST_CLASS@Performance *createSuite() { return new @PLUSMINUSTEST_CLASS@Performance(); }
+  static void destroySuite( @PLUSMINUSTEST_CLASS@Performance *suite ) { delete suite; }
 
   @PLUSMINUSTEST_CLASS@Performance()
   {
@@ -1185,8 +1188,7 @@ public:
   {
   	MatrixWorkspace_sptr out = ws2D_1 * ws2D_2;
   }
-  
-  
+
 }; // end of class @PLUSMINUSTEST_CLASS@Performance
 
 #endif
