@@ -54,10 +54,7 @@ namespace Mantid
  */
 std::string welcomeMessage()
 {
-    std::stringstream s;
-    s<<"Welcome to Mantid "<<Mantid::Kernel::MantidVersion::version()<<" Manipulation and Analysis Toolkit for Instrument Data "<<std::endl;
-
-    return s.str();
+    return "Welcome to Mantid " + std::string(Mantid::Kernel::MantidVersion::version()) + " - Manipulation and Analysis Toolkit for Instrument Data";
 }
 
 namespace Kernel
