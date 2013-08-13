@@ -106,7 +106,7 @@ private:
   ChopperConfiguration_sptr setupNOMConstants(int intfrequency);
 
   /// Parse profile table workspace to a map
-  std::map<std::string, double> parseProfileTableWorkspace(DataObjects::TableWorkspace_sptr ws);
+  void parseProfileTableWorkspace(DataObjects::TableWorkspace_sptr ws, std::map<unsigned int, std::map<std::string, double> > profilemap)
 
   /// Convert to GSAS instrument file
   void convertToGSAS(std::vector<unsigned int> banks, std::string gsasinstrfilename);
@@ -130,7 +130,10 @@ private:
   double aaba(double n, double ea1, double ea2, double ta1, double ta2, double dsp);
 
   /// Get parameter value from a map
-  double getParameterValue(std::map<std::string, double> profilemap, std::string parname);
+  double getValueFromMap(std::map<std::string, double> profilemap, std::string parname);
+
+  /// Get parameter value from class storage
+  double getProfileParameterValue(unsigned int bankid, std::string paramname);
 
   /// Input workspace
   DataObjects::TableWorkspace_sptr m_inpWS;
@@ -158,6 +161,9 @@ private:
 
   /// Chopper configuration
   ChopperConfiguration_sptr m_configuration;
+
+  /// Profile parameter map
+  std::map<unsigned int, std::map<std::string, double> > m_profileMap;
 
   //
   std::vector<double> m_gdsp;

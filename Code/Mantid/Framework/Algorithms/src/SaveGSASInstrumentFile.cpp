@@ -25,7 +25,9 @@ There can be several types of Fullprof files as the input file
 *WIKI*
 */
 
-#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
+//#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
+#include "SaveGSASInstrumentFile.h"
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -123,6 +125,8 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Get chopper configuration parameters value
+    */
   double ChopperConfiguration::getParameter(unsigned int bankid, string paramname)
   {
     // Check bank IDs
@@ -143,17 +147,15 @@ namespace Algorithms
     }
     size_t bindex = biter->second;
 
+    // TODO - Expand the list of parameters on needed-base.
     double value(EMPTY_DBL());
     if (paramname.compare("TwoTheta") == 0)
       value = m_vec2Theta[bindex];
     else
     {
-      // FIXME : Remove Fake Return ASAP!
       stringstream errss;
       errss << "Bank ID : " << bankid << ", Parameter : " << paramname;
-      cout << "Error: " << errss.str() << "\n[Fake Return] " << ".\n";
-      return 100.;
-      // throw runtime_error(errss.str());
+      throw runtime_error(errss.str());
     }
 
     return value;
@@ -447,50 +449,88 @@ namespace Algorithms
     // Parse input profile table workspace
     map<string, double> profileparammap = parseProfileTableWorkspace(m_inpWS);
 
-    // 2-theta
-    // FIXME - Figure out what (bank ID) to set up!
-    unsigned int fake4(4);
-    if (m_2theta != EMPTY_DBL())
+    // Make input parameters consistent
+    for (size_t i = 0; i < m_bankIDsOutput.size(); ++i)
     {
-      m_configuration->setParameter(fake4, "2Theta", m_2theta);
-    }
-    else
-    {
-      double tth = getParameterValue(profileparammap, "twotheta");
-      if (tth != EMPTY_DBL())
-        m_configuration->setParameter(fake4,"2Theta", tth);
+      unsigned int bankid = m_bankIDsOutput[i];
+      if (m_2theta != EMPTY_DBL())
+      {
+        m_configuration->setParameter(bankid, "2Theta", m_2theta);
+      }
+      else
+      {
+        double tth = getValueFromMap(profileparammap, "twotheta");
+        if (tth != EMPTY_DBL())
+          m_configuration->setParameter(bankid,"2Theta", tth);
+      }
+
+      // L1
+      if (m_L1 != EMPTY_DBL())
+      {
+        m_configuration->setParameter(bankid, "L1", m_L1);
+      }
+
+      // L2
+      if (m_L2 != EMPTY_DBL())
+      {
+        m_configuration->setParameter(bankid, "L2", m_L2);
+      }
     }
 
-    // L1
-    if (m_L1 != EMPTY_DBL())
-    {
-      m_configuration->setParameter(fake4, "L1", m_L1);
-    }
-
-    // L2
-    if (m_L2 != EMPTY_DBL())
-    {
-      m_configuration->setParameter(fake4, "L2", m_L2);
-    }
-
-    // TODO :: Implement ASAP
-    // throw runtime_error("ASAP");
-    g_log.error("How to make parameter consistent? Which parameters should be consistent? ");
+    // FIXME - the data structure to store the instrument/profile parameters is still NOT clear.
 
     return;
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Parse profile table workspace to a map
+  /** Parse profile table workspace to a map (the new ...
     */
-  map<string, double> SaveGSASInstrumentFile::parseProfileTableWorkspace(TableWorkspace_sptr ws)
+  void SaveGSASInstrumentFile::parseProfileTableWorkspace(TableWorkspace_sptr ws, map<unsigned int, map<string, double> > profilemap)
   {
-    // TODO - Implement ASAP
-    // throw runtime_error("Haven't implemented yet.");
-    g_log.error("Faking now [1]!");
+    size_t numbanks = ws->columnCount();
+    size_t numparams = ws->rowCount()-1;
+    vector<map<string, double> > vec_maptemp(numbanks);
+    vector<unsigned int> vecbankindex;
 
-    map<string, double> profilemap;
+    // Check
+    vector<string> colnames = ws->getColumnNames();
+    if (colnames[0].compare("Name"))
+      throw runtime_error("The first column must be 'Name'");
 
+    // Parse
+    for (size_t irow = 0; irow < numparams; ++irow)
+    {
+      TableRow tmprow = ws->getRow(irow);
+      string parname;
+      tmprow >> parname;
+      if (parname.compare("Bank"))
+      {
+        for (size_t icol = 0; icol < numbanks; ++icol)
+        {
+          double tmpdbl;
+          tmprow >> tmpdbl;
+          vec_maptemp.insert(make_pair(parname, tmpdbl));
+        }
+      }
+      else
+      {
+        for (size_t icol = 0; icol < numbanks; ++icol)
+        {
+          unsigned int tmpint;
+          tmprow >> tmpint;
+          vecbankindex[icol] = tmpint;
+        }
+      }
+    }
+
+    // Construct output
+    profilemap.clear();
+
+    for (size_t i = 0; i < vecbankindex.size(); ++i)
+    {
+      unsigned int bankid = vecbankindex[i];
+      profilemap.insert(make_pair(bankid), vec_maptemp[i]);
+    }
 
     return profilemap;
   }
@@ -584,9 +624,9 @@ namespace Algorithms
     */
   void SaveGSASInstrumentFile::convertToGSAS(vector<unsigned int> banks, string gsasinstrfilename)
   {
+    // Check
     if (!m_configuration)
       throw runtime_error("Not set up yet!");
-
 
     //  Convert and write
     sort(banks.begin(), banks.end());
@@ -781,101 +821,94 @@ namespace Algorithms
               << "INS HTYPE PNTR \n";
     }
 
+    // FIXME - Use fprintf() after test is done
+
+    int randint = randint(10001,99999);
+    double sig0 = getProfileParameterValue(bankid, "Sig0");
+    double sig1 = getProfileParameterValue(bankid, "Sig0");
+    double sig2 = getProfileParameterValue(bankid, "Sig2");
+    double gam0 = getProfileParameterValue(bankid, "Gam0");
+    double gam1 = getProfileParameterValue(bankid, "Gam1");
+    double gam2 = getProfileParameterValue(bankid, "Gam2");
+
     printf("INS %2d ICONS%10.3f%10.3f%10.3f%10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
     printf("INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
+    printf('INS %2dBAKGD 1 4 Y 0 Y\n', bankid);
+    printf('INS %2dI HEAD %s\n', bankid, titleline);
+    printf('INS %2dI ITYP%5d%10.4f%10.4f%10i\n', bankid, 0, m_mndsp[bankid]*0.001*instC, m_mxtofs[bankid], randint);
+    printf('INS %2dINAME powgen \n', bankid);
+    printf('INS %2dPRCF1 %5d%5d%10.5f\n', bankid, -3, 21, 0.002);
+    printf('INS %2dPRCF11%15.6f%15.6f%15.6f%15.6f\n', bankid, 0.0, 0.0, 0.0, sig0);
+    printf('INS %2dPRCF12%15.6f%15.6f%15.6f%15.6f\n', bankid, sig1, sig2, gam0, gam1);
+    printf('INS %2dPRCF13%15.6f%15.6f%15.6f%15.6f\n', bankid, gam2, 0.0, 0.0, 0.0);
+    printf('INS %2dPRCF14%15.6f%15.6f%15.6f%15.6f\n', bankid, 0.0, 0.0, 0.0, 0.0);
+    printf('INS %2dPRCF15%15.6f%15.6f%15.6f%15.6f\n', bankid, 0.0, 0.0, 0.0, 0.0);
+    printf('INS %2dPRCF16%15.6f\n', bankid, 0.0);
+    printf('INS %2dPAB3 %3d\n', bankid, 90);
 
+    for (size_t k = 0; k < 90; ++k)
+    {
+      printf("INS %2dPAB3%2i%10.5f%10.5f%10.5f%10.5f\n", bankid, k+1, m_gdsp[k],
+              m_gdt[k], m_galpha[k], m_gbeta[k]);
+    }
+    printf("INS %2dPRCF2 %5i%5i%10.5f\n", bankid, -4, 27, 0.002);
+    printf("INS %2dPRCF21%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig1);
+    printf("INS %2dPRCF22%15.6f%15.6f%15.6f%15.6f\n", bankid, sig2, gam2, 0.0, 0.0);
+    printf("INS %2dPRCF23%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF24%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF25%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF26%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF27%15.6f%15.6f%15.6f \n", bankid, 0.0, 0.0, 0.0);
 
-    // FIXME ::
-    throw runtime_error("Test (compile and run) to use fprintf() in Mantid");
+    printf("INS %2dPAB4 %3i\n", bankid, 90);
+    for (size_t k = 0; k < 90; ++k)
+    {
+      printf("INS %2dPAB4%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, k+1, m_gdsp[k],
+             m_gdt[k], m_galpha[k], m_gbeta[k]);
+    }
 
-    return;
+    printf("INS %2dPRCF3 %5i%5i%10.5f\n", bankid, -5, 21, 0.002);
+    printf("INS %2dPRCF31%15.6f%15.6f%15.6f%15.6f", bankid, 0.0, 0.0, 0.0, sig0);
+    printf("INS %2dPRCF32%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2, gam0, gam1);
+    printf("INS %2dPRCF33%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF34%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF35%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF36%15.6f\n", bankid, 0.0);
 
-    // printf('INS %2dBAKGD 1 4 Y 0 Y\n', bankid);
-    // printf('INS %2dI HEAD %s\n', bankid, titleline);
+    printf("INS %2dPAB5 %3i\n", bankid, 90); // 90 means there will be 90 lines of table
+    for (size_t k = 0; k < 90; k ++)
+    {
+      printf("INS %2iPAB5%2i%10.5f%10.5f%10.5f%10.5f\n", bankid, k+1, m_gdsp[k], m_gdt[k],
+             m_galpha[k], m_gbeta[k]);
+    }
 
-
-
-    /** To translate
-
-
-  # print "Debug: L2 = %f, 2Theta (irf) = %f, 2Theta (input) = %f" % (self.iL2, pardict["twotheta"], self.i2theta)
-
-  prmfile += ('INS %2i ICONS%10.3f%10.3f%10.3f %10.3f%5i%10.3f\n' %
-  (bank, instC*1.00009, 0.0, pardict["Zero"],0.0,0,0.0))
-  prmfile += ('INS %2iBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5i%5i\n' %
-  (bank, self.iL2, pardict["twotheta"], 0, 0, 0.2, 1, 1))
-  prmfile += ('INS %2iBAKGD 1 4 Y 0 Y\n' % (bank))
-  prmfile += ('INS %2iI HEAD %s\n' %
-  (bank, titleline))
-
-  prmfile += ('INS %2iI ITYP%5i%10.4f%10.4f%10i\n' %
-  (bank, 0, self.mndsp[bank-1]*0.001*instC, self.mxtofs[bank-1], randint(10001,99999)))
-  prmfile += ('INS %2iINAME powgen \n' %(bank))
-  prmfile += ('INS %2iPRCF1 %5i%5i%10.5f\n' % (bank, -3, 21, 0.002))
-  prmfile += ('INS %2iPRCF11%15.6f%15.6f%15.6f%15.6f\n' %
-  (bank, 0.0, 0.0, 0.0, pardict["Sig0"])) # sigma20
-  prmfile += ('INS %2iPRCF12%15.6f%15.6f%15.6f%15.6f\n' %
-  (bank, pardict["Sig1"], pardict["Sig2"], pardict["Gam0"], pardict["Gam1"]))
-  prmfile += ('INS %2iPRCF13%15.6f%15.6f%15.6f%15.6f\n' %
-  (bank, pardict["Gam2"], 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF14%15.6f%15.6f%15.6f%15.6f\n' %
-  (bank, 0.0, 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF15%15.6f%15.6f%15.6f%15.6f\n' %
-  (bank, 0.0, 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF16%15.6f\n' % (bank, 0.0))
-  prmfile += ('INS %2iPAB3 %3i\n' % (bank, 90))
-  for k in xrange(90):
-  prmfile += ('INS %2iPAB3%2i%10.5f%10.5f%10.5f%10.5f\n' %(bank, k+1,
-  self.gdsp[k], self.gdt[k], self.galpha[k], self.gbeta[k]))
-  prmfile += ('INS %2iPRCF2 %5i%5i%10.5f\n' % (bank, -4, 27, 0.002))
-  prmfile += ('INS %2iPRCF21%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, pardict["Sig1"]))
-  prmfile += ('INS %2iPRCF22%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["Sig2"], pardict["Gam2"], 0.0, 0.0))
-  prmfile += ('INS %2iPRCF23%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF24%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF25%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF26%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF27%15.6f%15.6f%15.6f \n' % (bank, 0.0, 0.0, 0.0 ))
-  prmfile += ('INS %2iPAB4 %3i\n' % (bank, 90))
-  for k in xrange(90):
-  prmfile += ('INS %2iPAB4%2i%10.5f%10.5f%10.5f%10.5f\n' %(bank, k+1,
-  self.gdsp[k], self.gdt[k], self.galpha[k], self.gbeta[k]))
-  prmfile += ('INS %2iPRCF3 %5i%5i%10.5f\n' % (bank, -5, 21, 0.002))
-  prmfile += ('INS %2iPRCF31%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, pardict["Sig0"]))
-  prmfile += ('INS %2iPRCF32%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["Sig1"], pardict["Sig2"],
-  pardict["Gam0"], pardict["Gam1"]))
-  prmfile += ('INS %2iPRCF33%15.6f%15.6f%15.6f%15.6f\n' % (bank, pardict["Gam2"], 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF34%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF35%15.6f%15.6f%15.6f%15.6f\n' % (bank, 0.0, 0.0, 0.0, 0.0))
-  prmfile += ('INS %2iPRCF36%15.6f\n' % (bank, 0.0))
-  prmfile += ('INS %2iPAB5 %3i\n' % (bank, 90))
-  for k in xrange(90):
-  prmfile += ('INS %2iPAB5%2i%10.5f%10.5f%10.5f%10.5f\n' %(bank, k+1, self.gdsp[k], self.gdt[k], self.galpha[k], self.gbeta[k]))
-  prmfile += ('')
-
-  # 3. Write to file
-  if isfirstbank:
-  wprmfile = open(prmfilename, 'w')
-  else:
-  wprmfile = open(prmfilename, 'a')
-  wprmfile.write(prmfile)
-  wprmfile.close()
-  */
+    /*
+    if isfirstbank:
+    wprmfile = open(prmfilename, 'w')
+    else:
+    wprmfile = open(prmfilename, 'a')
+    wprmfile.write(prmfile)
+    wprmfile.close()
+    */
 
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Caclualte L2 from DIFFC and L1
     * DIFC = 252.816*2sin(theta)sqrt(L1+L2)
     */
   double SaveGSASInstrumentFile::calL2FromDtt1(double difc, double L1, double twotheta)
   {
     double l2 = difc/(252.816*2.0*sin(0.5*twotheta*PI/180.0)) - L1;
-    // cout <<  "DIFC = %f,  L1 = %f,  2theta = %f, L2 = %f" % (difc, L1, twotheta, l2)
+    g_log.debug() <<  "DIFC = " << difc << ", L1 = " << L1 << ", 2Theta = " << twotheta
+                   << " ==> L2 = " << l2 << ".\n";
 
     return l2;
   }
 
 
+  //----------------------------------------------------------------------------------------------
   /** Calculate TOF difference
    * @param ep :: zero
    * @param eq :: dtt1
@@ -918,26 +951,56 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Get parameter value from a map
     */
-  double SaveGSASInstrumentFile::getParameterValue(std::map<std::string, double> profilemap, string parname)
+  double SaveGSASInstrumentFile::getValueFromMap(std::map<std::string, double> profilemap, string parname)
   {
-    // FIXME - Implement ASAP
-    throw runtime_error("Implement ASAP.");
+    std::map<std::string, double>::iterator piter;
+    piter = profilemap.find(parname);
+    if (piter == profilemap.end())
+    {
+      stringstream errss;
+      errss << "Profile parameter map does not contain parameter"
+            << paramname << ". ";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    double value = piter->second;
+
+    return value;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get parameter value from m_configuration/m_profile
+    */
+  double SaveGSASInstrumentFile::getProfileParameterValue(unsigned int bankid, std::string paramname)
+  {
+    map<unsigned int, map<string, double> >::iterator biter;
+    biter = m_profileMap.find(bankid);
+    if (biter == m_profileMap.end())
+    {
+      stringstream errss;
+      errss << "Profile parameter map does not have bank " << bankid << ". ";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    map<string, double>::iterator piter = biter->second.find(paramname);
+    if (piter == biter->second.end())
+    {
+      stringstream errss;
+      errss << "Bank " << banikd << "'s profile parameter does not contain parameter"
+            << paramname << ". ";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    double value = piter->second;
+
+    return value;
   }
 
 } // namespace Algorithms
 } // namespace Mantid
-
-
-
-// from MantidFramework import *
-// from mantidsimple import *
-// import mantid.simpleapi as api
-// import os
-// from random import *
-// import numpy as np
-
-
-
 
 /** Complementary error function
 */
