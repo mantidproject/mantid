@@ -446,19 +446,29 @@ namespace Algorithms
   void SaveGSASInstrumentFile::makeParameterConsistent()
   {
     // Parse input profile table workspace
-    map<string, double> profileparammap = parseProfileTableWorkspace(m_inpWS);
+    map<unsigned int, map<string, double> > bankprofileparammap;
+    parseProfileTableWorkspace(m_inpWS, bankprofileparammap);
 
     // Make input parameters consistent
     for (size_t i = 0; i < m_bankIDsOutput.size(); ++i)
     {
       unsigned int bankid = m_bankIDsOutput[i];
+      map<unsigned int, map<string, double> >::iterator biter = bankprofileparammap.find(bankid);
+      if (biter == bankprofileparammap.end())
+      {
+        stringstream errss;
+        errss << "Bank " << bankid << " does not exist in input workspace. ";
+        g_log.error(errss.str());
+        throw runtime_error(errss.str());
+      }
+
       if (m_2theta != EMPTY_DBL())
       {
         m_configuration->setParameter(bankid, "2Theta", m_2theta);
       }
       else
       {
-        double tth = getValueFromMap(profileparammap, "twotheta");
+        double tth = getValueFromMap(biter->second, "twotheta");
         if (tth != EMPTY_DBL())
           m_configuration->setParameter(bankid,"2Theta", tth);
       }
@@ -508,7 +518,7 @@ namespace Algorithms
         {
           double tmpdbl;
           tmprow >> tmpdbl;
-          vec_maptemp[icl].insert(make_pair(parname, tmpdbl));
+          vec_maptemp[icol].insert(make_pair(parname, tmpdbl));
         }
       }
       else
@@ -528,10 +538,10 @@ namespace Algorithms
     for (size_t i = 0; i < vecbankindex.size(); ++i)
     {
       unsigned int bankid = vecbankindex[i];
-      profilemap.insert(make_pair(bankid), vec_maptemp[i]);
+      profilemap.insert(make_pair(bankid, vec_maptemp[i]));
     }
 
-    return profilemap;
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -679,7 +689,7 @@ namespace Algorithms
     vector<double> gdt(90);
     vector<double> gpkX(90, 0.);   // ratio (n) b/w thermal and epithermal neutron
 
-    double twotheta = m_configuration->getParameter(bankid, "TwoTheta");
+    // double twotheta = m_configuration->getParameter(bankid, "TwoTheta");
     double mx = m_configuration->getParameter(bankid, "Tcross");
     double mxb = m_configuration->getParameter(bankid, "Width");
 
@@ -789,6 +799,10 @@ namespace Algorithms
     */
   void SaveGSASInstrumentFile::writePRM(unsigned int bankid, size_t numbanks, std::string prmfilename, bool isfirstbank)
   {
+    // FIXME - Figure out how to set up m_mndsp and m_mxtofs
+    if (m_mndsp.size() == 0 || m_mxtofs.size() == 0)
+      throw runtime_error("Implement the setup on m_mndsp and m_mxtof ASAP.");
+
     double zero = m_configuration->getParameter(bankid, "Zero");
     double dtt1 = m_configuration->getParameter(bankid, "Dtt1");
     double alph0 = m_configuration->getParameter(bankid, "Alph0");
@@ -822,7 +836,8 @@ namespace Algorithms
 
     // FIXME - Use fprintf() after test is done
 
-    int randint = randint(10001,99999);
+    // int randint = randint(10001,99999);
+    int randint = 10001 + (rand() % (int)(99999 - 10001 + 1));
     double sig0 = getProfileParameterValue(bankid, "Sig0");
     double sig1 = getProfileParameterValue(bankid, "Sig0");
     double sig2 = getProfileParameterValue(bankid, "Sig2");
@@ -833,7 +848,7 @@ namespace Algorithms
     printf("INS %2d ICONS%10.3f%10.3f%10.3f%10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
     printf("INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
     printf("INS %2dBAKGD 1 4 Y 0 Y\n", bankid);
-    printf("INS %2dI HEAD %s\n", bankid, titleline);
+    printf("INS %2dI HEAD %s\n", bankid, titleline.c_str());
     printf("INS %2dI ITYP%5d%10.4f%10.4f%10i\n", bankid, 0, m_mndsp[bankid]*0.001*instC, m_mxtofs[bankid], randint);
     printf("INS %2dINAME powgen \n", bankid);
     printf("INS %2dPRCF1 %5d%5d%10.5f\n", bankid, -3, 21, 0.002);
@@ -847,7 +862,7 @@ namespace Algorithms
 
     for (size_t k = 0; k < 90; ++k)
     {
-      printf("INS %2dPAB3%2i%10.5f%10.5f%10.5f%10.5f\n", bankid, k+1, m_gdsp[k],
+      printf("INS %2dPAB3%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k)+1, m_gdsp[k],
               m_gdt[k], m_galpha[k], m_gbeta[k]);
     }
     printf("INS %2dPRCF2 %5i%5i%10.5f\n", bankid, -4, 27, 0.002);
@@ -862,7 +877,7 @@ namespace Algorithms
     printf("INS %2dPAB4 %3i\n", bankid, 90);
     for (size_t k = 0; k < 90; ++k)
     {
-      printf("INS %2dPAB4%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, k+1, m_gdsp[k],
+      printf("INS %2dPAB4%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k)+1, m_gdsp[k],
              m_gdt[k], m_galpha[k], m_gbeta[k]);
     }
 
@@ -877,7 +892,7 @@ namespace Algorithms
     printf("INS %2dPAB5 %3i\n", bankid, 90); // 90 means there will be 90 lines of table
     for (size_t k = 0; k < 90; k ++)
     {
-      printf("INS %2iPAB5%2i%10.5f%10.5f%10.5f%10.5f\n", bankid, k+1, m_gdsp[k], m_gdt[k],
+      printf("INS %2dPAB5%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k)+1, m_gdsp[k], m_gdt[k],
              m_galpha[k], m_gbeta[k]);
     }
 
@@ -958,7 +973,7 @@ namespace Algorithms
     {
       stringstream errss;
       errss << "Profile parameter map does not contain parameter"
-            << paramname << ". ";
+            << parname << ". ";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }
@@ -987,7 +1002,7 @@ namespace Algorithms
     if (piter == biter->second.end())
     {
       stringstream errss;
-      errss << "Bank " << banikd << "'s profile parameter does not contain parameter"
+      errss << "Bank " << bankid << "'s profile parameter does not contain parameter"
             << paramname << ". ";
       g_log.error(errss.str());
       throw runtime_error(errss.str());

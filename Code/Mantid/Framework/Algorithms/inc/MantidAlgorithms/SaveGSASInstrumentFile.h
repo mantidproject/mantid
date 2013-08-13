@@ -106,7 +106,7 @@ private:
   ChopperConfiguration_sptr setupNOMConstants(int intfrequency);
 
   /// Parse profile table workspace to a map
-  void parseProfileTableWorkspace(DataObjects::TableWorkspace_sptr ws, std::map<unsigned int, std::map<std::string, double> > profilemap)
+  void parseProfileTableWorkspace(DataObjects::TableWorkspace_sptr ws, std::map<unsigned int, std::map<std::string, double> > profilemap);
 
   /// Convert to GSAS instrument file
   void convertToGSAS(std::vector<unsigned int> banks, std::string gsasinstrfilename);
@@ -170,6 +170,9 @@ private:
   std::vector<double> m_gdt;
   std::vector<double> m_galpha;
   std::vector<double> m_gbeta;
+
+  std::vector<double> m_mndsp;
+  std::vector<double> m_mxtofs;
 
 };
 
