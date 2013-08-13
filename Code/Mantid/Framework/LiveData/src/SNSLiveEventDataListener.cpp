@@ -1,7 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidLiveData/ADARAParser.h"
 #include "MantidLiveData/SNSLiveEventDataListener.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/DateAndTime.h"

@@ -1,7 +1,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "MantidLiveData/ADARAParser.h"
+#include "MantidLiveData/ADARA/ADARAParser.h"
 
 using namespace ADARA;
 

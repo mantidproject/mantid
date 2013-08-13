@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidLiveData/ADARAParser.h"
+#include "MantidLiveData/ADARA/ADARAParser.h"
 #include "boost/shared_ptr.hpp"
 #include "Poco/DOM/DOMParser.h"  // for parsing the XML device descriptions
 

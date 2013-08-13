@@ -1,6 +1,6 @@
 set ( SRC_FILES
-	src/ADARAPackets.cpp
-	src/ADARAParser.cpp
+	src/ADARA/ADARAPackets.cpp
+	src/ADARA/ADARAParser.cpp
 	src/FakeEventDataListener.cpp
 	src/FakeISISHistoDAE.cpp
 	src/FileEventDataListener.cpp
@@ -21,9 +21,9 @@ set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
         src/LoadDAE/isisds_command.cpp)
 
 set ( INC_FILES
-	inc/MantidLiveData/ADARA.h
-	inc/MantidLiveData/ADARAPackets.h
-	inc/MantidLiveData/ADARAParser.h
+	inc/MantidLiveData/ADARA/ADARA.h
+	inc/MantidLiveData/ADARA/ADARAPackets.h
+	inc/MantidLiveData/ADARA/ADARAParser.h
 	inc/MantidLiveData/FakeEventDataListener.h
 	inc/MantidLiveData/FakeISISHistoDAE.h
 	inc/MantidLiveData/FileEventDataListener.h

@@ -1,4 +1,4 @@
-#include "MantidLiveData/ADARAPackets.h"
+#include "MantidLiveData/ADARA/ADARAPackets.h"
 
 #include <boost/lexical_cast.hpp>
 #include <string.h>
