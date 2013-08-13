@@ -237,7 +237,8 @@ public:
     trans.setPropertyValue("DirectRunWorkspace", m_dirWS);
     trans.setProperty("IncidentBeamMonitor",1);
     trans.setProperty("TransmissionMonitor",2);
-    trans.setProperty("FitMethod","Poly3");
+    trans.setProperty("FitMethod","Polynomial");
+    trans.setProperty("PolynomialOrder",3); 
     std::string outputWS("CalculateTransmissionTest_poly"); 
     trans.setPropertyValue("OutputWorkspace", outputWS);
     TS_ASSERT_THROWS_NOTHING( trans.setProperty("OutputUnfittedData", true) )
@@ -273,7 +274,8 @@ public:
     trans.setPropertyValue("DirectRunWorkspace", m_dirWS);
     trans.setProperty("IncidentBeamMonitor",1);
     trans.setProperty("TransmissionMonitor",2);
-    trans.setProperty("FitMethod","Poly3");
+    trans.setProperty("FitMethod","Polynomial");
+    trans.setProperty("PolynomialOrder",3); 
     trans.setProperty("RebinParams","7.5, 0.1, 9");
     std::string outputWS("CalculateTransmissionTest_poly2"); 
     trans.setPropertyValue("OutputWorkspace", outputWS);

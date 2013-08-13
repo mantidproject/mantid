@@ -82,14 +82,13 @@ void CalculateTransmission::init()
   std::vector<std::string> options(7);
   options[0] = "Linear";
   options[1] = "Log";
-  options[2] = "Poly2"; 
-  options[3] = "Poly3"; 
-  options[4] = "Poly4"; 
-  options[5] = "Poly5"; 
-  options[6] = "Poly6";
+  options[2] = "Polynomial"; 
    
   declareProperty("FitMethod","Log",boost::make_shared<StringListValidator>(options),
-    "Whether to fit directly to the transmission curve using Linear, Log or Polynomial function of 2nd, 3rd, 4th, 5th or 6th order.");
+    "Whether to fit directly to the transmission curve using Linear, Log or Polynomial.");
+  auto twoOrMore = boost::make_shared<BoundedValidator<int> >();
+  twoOrMore->setLower(2); 
+  declareProperty("PolynomialOrder", 2, twoOrMore, "Order of the polynomial to fit. It is considered only for FitMethod=Polynomial"); 
 
   declareProperty("OutputUnfittedData",false, "If True, will output an additional workspace called [OutputWorkspace]_unfitted containing the unfitted transmission correction.");
 }
@@ -263,9 +262,11 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
   { // Linear fit
     g_log.debug("Fitting directly to the data (i.e. linearly)");
     output = fitData(output, grad, offset);
-  }else{ // fitMethod PolyX for X in [2, 3, 4, 5, 6]
-    g_log.debug("Fitting the transmission to polynomial");
-    int order = atoi(fitMethod.c_str() + 4);
+  }else{ // fitMethod Polynomial
+    int order = getProperty("PolynomialOrder");
+    std::stringstream info; 
+    info << "Fitting the transmission to polynomial order=" << order ; 
+    g_log.information(info.str());
     output = fitPolynomial(output, order, coeficients);
   }
 
