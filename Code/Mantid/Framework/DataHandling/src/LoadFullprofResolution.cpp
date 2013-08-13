@@ -155,7 +155,7 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Load file
+  /** Load file to a vector of strings.  Each string is a non-empty line.
     * @param filename :: string for name of the .irf file
     * @param lines :: vector of strings for each non-empty line in .irf file
     */
@@ -197,11 +197,12 @@ namespace DataHandling
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Scan lines for bank IDs
     * @param lines :: vector of string of all non-empty lines in input file;
-    * @param banks :: output vector of integers for existing banks in .irf file;
-    * @param bankstartindexmap :: map to indicate the first line of each bank in vector lines.
-    * @param bankendindexmap :: map to indicate the last lie of each bank in vector lines
+    * @param banks :: [output] vector of integers for existing banks in .irf file;
+    * @param bankstartindexmap :: [output] map to indicate the first line of each bank in vector lines.
+    * @param bankendindexmap :: [output] map to indicate the last lie of each bank in vector lines
     */
   void LoadFullprofResolution::scanBanks(const vector<string>& lines, vector<int>& banks,
                                          map<int, int>& bankstartindexmap, map<int, int>& bankendindexmap)
@@ -255,7 +256,13 @@ namespace DataHandling
     return;
   }
 
-  /** Parse .irf file to a map
+  //----------------------------------------------------------------------------------------------
+  /** Parse one bank in a .irf file to a map of parameter name and value
+    * @param parammap :: [output] parameter name and value map
+    * @param lines :: [input] vector of lines from .irf file;
+    * @param bankid :: [input] ID of the bank to get parsed
+    * @param startlineindex :: [input] index of the first line of the bank in vector of lines
+    * @param endlineindex :: [input] index of the last line of the bank in vector of lines
     */
   void LoadFullprofResolution::parseResolutionStrings(map<string, double>& parammap, const vector<string>& lines,
                                                       int bankid, int startlineindex, int endlineindex)
@@ -517,7 +524,9 @@ namespace DataHandling
     return;
   }
 
-
+  //----------------------------------------------------------------------------------------------
+  /** Parse a line containig bank information
+    */
   void LoadFullprofResolution::parseBankLine(string line, double& cwl, int& bankid)
   {
     // 1. Split along 'Bank'
@@ -560,47 +569,82 @@ namespace DataHandling
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Generate output workspace
     */
-  TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(map<string, double> parammap)
+  TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(map<int, map<string, double> > bankparammap)
   {
-    TableWorkspace_sptr tablews(new TableWorkspace());
+    // Retrieve some information
+    size_t numbanks = bankparammap.size();
+    if (numbanks == 0)
+      throw runtime_error("Unable to generate a table from an empty map!");
 
-    // 1. Set column
-    tablews->addColumn("str", "Name");
-    tablews->addColumn("double", "Value");
+    map<string, double>::iterator mapiter = bankparammap.begin();
+    size_t numparams = mapiter->second.size();
 
-    // 2. Add rows
-    size_t numparams = parammap.size();
+    // vector of all parameter name
+    vector<string> vec_parname;
+    vector<int> vec_bankids;
+    for (size_t i = 0; i < numparams; ++i)
+    {
+      string parname = mapiter->second.first;
+      vec_parname.push_back(parname);
+      int bankid = mapiter->first;
+      vec_bankids.push_back(bankid);
+    }
+
     g_log.debug() << "[DBx240] Number of imported parameters is " << numparams << "\n";
 
-    map<string, double>::iterator mapiter;
-    for (mapiter = parammap.begin(); mapiter != parammap.end(); ++mapiter)
-    {
-      string parname = mapiter->first;
-      double parvalue = mapiter->second;
-
-      TableRow newrow = tablews->appendRow();
-      newrow << parname << parvalue;
-    }
-
-    return tablews;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Generate bank information workspace
-    */
-  TableWorkspace_sptr LoadFullprofResolution::genInfoTableWorkspace(vector<int> banks)
-  {
+    // Create TableWorkspace
     TableWorkspace_sptr tablews(new TableWorkspace());
 
-    tablews->addColumn("int", "Bank");
+    // set columns :
+    // FIXME - It is unknown whether any 2 columns can have same name!!!
+    tablews->addColumn("str", "Name");
+    for (size_t i = 0; i < numbanks; ++i)
+      tablews->addColumn("double", "Value");
 
-    for (size_t i = 0; i < banks.size(); ++i)
+    // add BANK ID row
+    TableRow newrow = tablews->appendRow();
+    newrow << "BANK";
+    for (size_t i = 0; i < numbanks.size(); ++i)
+      newrow << static_cast<double>(vec_bankids[i]);
+
+    // add profile parameter rows
+    for (size_t i = 0; i < numparams; ++i)
     {
       TableRow newrow = tablews->appendRow();
-      newrow << banks[i];
-    }
+
+      string parname = vec_parname[i];
+      newrow << parname;
+
+      for (size_t j = 0; j < numbanks; ++j)
+      {
+        int bankid = numbanks[j];
+
+        // Locate map of bank 'bankid'
+        map<int, <string, double> >::iterator bpmapiter;
+        bpmapiter = bankparammap.find(bankid);
+        if (bpmapiter == bankparammap.end())
+        {
+          throw runtime_error("Bank cannot be found in map.");
+        }
+
+        // Locate parameter
+        map<string, double>::iterator parmapiter;
+        parmapiter = bpmapiter->second.find(parname);
+        if (parmapiter == bpmapiter->second.end())
+        {
+          throw runtime_error("Parameter cannot be found in a bank's map.");
+        }
+        else
+        {
+          double pvalue = parmapiter->second;
+          newrow << pvalue;
+        }
+
+      } // END(j)
+    } // END(i)
 
     return tablews;
   }
