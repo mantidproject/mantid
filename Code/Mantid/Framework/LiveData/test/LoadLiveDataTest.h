@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAHANDLING_LOADLIVEDATATEST_H_
 #define MANTID_DATAHANDLING_LOADLIVEDATATEST_H_
 
-#include "MantidDataHandling/LoadLiveData.h"
+#include "MantidLiveData/LoadLiveData.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/System.h"

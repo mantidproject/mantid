@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/ADARAParser.h"
+#include "MantidLiveData/ADARAParser.h"
 #include "MantidAPI/ILiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
 //#include "MantidKernel/RandomNumberGenerator.h"

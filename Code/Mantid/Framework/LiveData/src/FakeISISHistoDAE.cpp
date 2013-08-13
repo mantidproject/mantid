@@ -6,7 +6,7 @@ Simulates ISIS histogram DAE. It runs continuously until canceled and listens to
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/FakeISISHistoDAE.h"
+#include "MantidLiveData/FakeISISHistoDAE.h"
 #include <numeric>
 
 #include <Poco/Net/TCPServer.h>

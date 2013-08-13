@@ -16,8 +16,6 @@
     GNU General Public License
 */
 
-#include "MantidDataHandling/DllConfig.h"
-
 ///@cond nodoc
 /** 
 * holds information about the DAE connection - defined fully in idc.c
@@ -35,10 +33,10 @@ extern "C" {
 #endif
 
 /** Open a DAE connection on host*/
-int DLLExport IDCopen(const char* host, int mode, int options, idc_handle_t* fh);
+int IDCopen(const char* host, int mode, int options, idc_handle_t* fh);
 
 /** Close a DAE connection */
-int DLLExport IDCclose(idc_handle_t* fh);
+int IDCclose(idc_handle_t* fh);
 
 /* The A versions of the functions allocate memory, the other need to be passed a pre-allocated array */
 
@@ -72,7 +70,7 @@ int IDCgetparc(idc_handle_t fh, const char* name, char* value, int dims_array[],
 
 /** Read \a nos spectra from the DAE starting at \a ifsn into pre-allocated array \a value.
     The size of value is held in the parameters \a dims_array and \a ndims  */
-int DLLExport IDCgetdat(idc_handle_t fh, int ifsn, int nos, int* value, int dims_array[], int* ndims);
+int IDCgetdat(idc_handle_t fh, int ifsn, int nos, int* value, int dims_array[], int* ndims);
 
 /** Read \a nos spectra from the DAE starting at \a ifsn and allocate array \a value to return the results.
     The size of the returned array is written to the parameters \a dims_array and \a ndims  */

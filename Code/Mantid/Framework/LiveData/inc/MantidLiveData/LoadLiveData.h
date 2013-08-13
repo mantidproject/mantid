@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataHandling/LiveDataAlgorithm.h"
+#include "MantidLiveData/LiveDataAlgorithm.h"
 #include "MantidAPI/Workspace.h"
 
 namespace Mantid

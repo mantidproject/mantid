@@ -21,19 +21,19 @@ set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
         src/LoadDAE/isisds_command.cpp)
 
 set ( INC_FILES
-	inc/MantidDataHandling/ADARA.h
-	inc/MantidDataHandling/ADARAPackets.h
-	inc/MantidDataHandling/ADARAParser.h
-	inc/MantidDataHandling/FakeEventDataListener.h
-	inc/MantidDataHandling/FakeISISHistoDAE.h
-	inc/MantidDataHandling/FileEventDataListener.h
-	inc/MantidDataHandling/ISISHistoDataListener.h
-	inc/MantidDataHandling/LiveDataAlgorithm.h
-	inc/MantidDataHandling/LoadDAE.h
-	inc/MantidDataHandling/LoadLiveData.h
-	inc/MantidDataHandling/MonitorLiveData.h
-	inc/MantidDataHandling/SNSLiveEventDataListener.h
-	inc/MantidDataHandling/StartLiveData.h
+	inc/MantidLiveData/ADARA.h
+	inc/MantidLiveData/ADARAPackets.h
+	inc/MantidLiveData/ADARAParser.h
+	inc/MantidLiveData/FakeEventDataListener.h
+	inc/MantidLiveData/FakeISISHistoDAE.h
+	inc/MantidLiveData/FileEventDataListener.h
+	inc/MantidLiveData/ISISHistoDataListener.h
+	inc/MantidLiveData/LiveDataAlgorithm.h
+	inc/MantidLiveData/LoadDAE.h
+	inc/MantidLiveData/LoadLiveData.h
+	inc/MantidLiveData/MonitorLiveData.h
+	inc/MantidLiveData/SNSLiveEventDataListener.h
+	inc/MantidLiveData/StartLiveData.h
 )
 
 set ( TEST_FILES

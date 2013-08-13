@@ -1,4 +1,4 @@
-#include "MantidDataHandling/FakeEventDataListener.h"
+#include "MantidLiveData/FakeEventDataListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MersenneTwister.h"

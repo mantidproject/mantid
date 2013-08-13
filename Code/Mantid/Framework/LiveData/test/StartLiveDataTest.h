@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAHANDLING_STARTLIVEDATATEST_H_
 #define MANTID_DATAHANDLING_STARTLIVEDATATEST_H_
 
-#include "MantidDataHandling/StartLiveData.h"
+#include "MantidLiveData/StartLiveData.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"

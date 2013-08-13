@@ -11,9 +11,9 @@ For details on the way to specify the data processing steps, see: [[LoadLiveData
 
 *WIKI*/
 
-#include "MantidDataHandling/MonitorLiveData.h"
+#include "MantidLiveData/MonitorLiveData.h"
 #include "MantidKernel/System.h"
-#include "MantidDataHandling/LoadLiveData.h"
+#include "MantidLiveData/LoadLiveData.h"
 #include <Poco/Thread.h>
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MemoryManager.h"

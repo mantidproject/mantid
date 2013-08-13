@@ -1,4 +1,4 @@
-#include "MantidDataHandling/FileEventDataListener.h"
+#include "MantidLiveData/FileEventDataListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/ConfigService.h"

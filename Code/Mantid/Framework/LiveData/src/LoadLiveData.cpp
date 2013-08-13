@@ -55,7 +55,7 @@ This could cause Mantid to run very slowly or to crash due to lack of memory.
 
 *WIKI*/
 
-#include "MantidDataHandling/LoadLiveData.h"
+#include "MantidLiveData/LoadLiveData.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidKernel/ReadLock.h"

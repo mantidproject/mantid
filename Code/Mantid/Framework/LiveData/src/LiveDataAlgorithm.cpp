@@ -1,4 +1,4 @@
-#include "MantidDataHandling/LiveDataAlgorithm.h"
+#include "MantidLiveData/LiveDataAlgorithm.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ListValidator.h"

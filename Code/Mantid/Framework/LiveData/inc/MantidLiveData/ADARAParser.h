@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stdexcept>
 
-#include "MantidDataHandling/ADARA.h"
-#include "MantidDataHandling/ADARAPackets.h"
+#include "MantidLiveData/ADARA.h"
+#include "MantidLiveData/ADARAPackets.h"
 
 namespace ADARA {
 

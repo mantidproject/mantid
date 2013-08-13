@@ -6,7 +6,7 @@
 #include "MantidKernel/System.h"
 #include <iostream>
 #include <iomanip>
-#include "MantidDataHandling/LiveDataAlgorithm.h"
+#include "MantidLiveData/LiveDataAlgorithm.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AlgorithmManager.h"

@@ -94,10 +94,10 @@ StartLiveData(UpdateEvery='1.0',Instrument='OFFSPEC',
 plotSpectrum('live', [0,1])
 </source>
 *WIKI_USAGE_NO_SIGNATURE*/
-#include "MantidDataHandling/StartLiveData.h"
+#include "MantidLiveData/StartLiveData.h"
 #include "MantidKernel/System.h"
-#include "MantidDataHandling/LoadLiveData.h"
-#include "MantidDataHandling/MonitorLiveData.h"
+#include "MantidLiveData/LoadLiveData.h"
+#include "MantidLiveData/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AlgorithmProperty.h"

@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_ADARAPACKETS_H_
 
 #ifndef MANTID_DATAHANDLING_ADARAPACKETTEST_H_
-  #error "This file should only be included by MantidDataHandling/test/AdaraPacketTest.h"
+  #error "This file should only be included by MantidLiveData/test/AdaraPacketTest.h"
 #endif
 
 // This file includes sample packets for the AdaraPacketTest unit test. It's

@@ -117,6 +117,7 @@ add_subdirectory (WorkflowAlgorithms)
 add_subdirectory (CurveFitting)
 add_subdirectory (Crystal)
 add_subdirectory (ICat)
+add_subdirectory (LiveData)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if ( MPI_BUILD )
@@ -150,6 +151,7 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI PythonKernelModule
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms
+                     LiveData
 #                     ISISLiveData
 )
 

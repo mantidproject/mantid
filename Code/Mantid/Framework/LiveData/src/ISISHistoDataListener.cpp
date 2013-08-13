@@ -1,4 +1,4 @@
-#include "MantidDataHandling/ISISHistoDataListener.h"
+#include "MantidLiveData/ISISHistoDataListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"

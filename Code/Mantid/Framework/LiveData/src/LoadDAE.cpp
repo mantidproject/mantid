@@ -17,7 +17,7 @@ If the optional 'spectrum' properties are set for a multiperiod dataset, then th
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadDAE.h"
+#include "MantidLiveData/LoadDAE.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
