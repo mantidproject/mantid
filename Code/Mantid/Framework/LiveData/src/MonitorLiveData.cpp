@@ -24,7 +24,7 @@ using namespace Mantid::API;
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
 
   // Register the algorithm into the AlgorithmFactory
@@ -232,5 +232,5 @@ namespace DataHandling
 
 
 
+} // namespace LiveData
 } // namespace Mantid
-} // namespace DataHandling

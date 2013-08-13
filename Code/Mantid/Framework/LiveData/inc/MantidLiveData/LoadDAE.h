@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADDAE_H_
-#define MANTID_DATAHANDLING_LOADDAE_H_
+#ifndef MANTID_LIVEDATA_LOADDAE_H_
+#define MANTID_LIVEDATA_LOADDAE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -19,9 +19,9 @@ typedef struct idc_info* idc_handle_t;
 
 namespace Mantid
 {
-  namespace DataHandling
+  namespace LiveData
   {
-    /** @class LoadDAE LoadDAE.h DataHandling/LoadDAE.h
+    /**
 
     Loads data from the ISIS DATA acquisition system and stores it in a 2D workspace 
     (Workspace2D class).
@@ -138,7 +138,7 @@ namespace Mantid
 
     };
 
-  } // namespace DataHandling
+  } // namespace LiveData
 } // namespace Mantid
 
 #endif

@@ -14,7 +14,7 @@ using Mantid::Kernel::ConfigService;
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
   DECLARE_LISTENER(TestDataListener)
 
@@ -121,5 +121,5 @@ namespace DataHandling
     return extracted;
   }
 
+} // namespace LiveData
 } // namespace Mantid
-} // namespace DataHandling

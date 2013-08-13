@@ -11,7 +11,7 @@ using namespace Mantid::API;
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
   DECLARE_LISTENER(FakeEventDataListener)
 
@@ -130,5 +130,5 @@ namespace DataHandling
 
     return;
   }
+} // namespace LiveData
 } // namespace Mantid
-} // namespace DataHandling

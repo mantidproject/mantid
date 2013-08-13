@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_SNSLIVEEVENTDATALISTENER_H_
-#define MANTID_DATAHANDLING_SNSLIVEEVENTDATALISTENER_H_
+#ifndef MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENER_H_
+#define MANTID_LIVEDATA_SNSLIVEEVENTDATALISTENER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -16,7 +16,7 @@
 
 namespace Mantid
 {
-  namespace DataHandling
+  namespace LiveData
   {
 
     /** An implementation of ILiveListener for use at SNS.  Connects to the Stream Management
@@ -202,7 +202,7 @@ namespace Mantid
      
     };
 
-  } // namespace DataHandling
+  } // namespace LiveData
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_FAKEEVENTDATALISTENER_H_ */
+#endif  /* MANTID_LIVEDATA_FAKEEVENTDATALISTENER_H_ */

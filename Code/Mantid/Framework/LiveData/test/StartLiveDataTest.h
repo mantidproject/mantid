@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_STARTLIVEDATATEST_H_
-#define MANTID_DATAHANDLING_STARTLIVEDATATEST_H_
+#ifndef MANTID_LIVEDATA_STARTLIVEDATATEST_H_
+#define MANTID_LIVEDATA_STARTLIVEDATATEST_H_
 
 #include "MantidLiveData/StartLiveData.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -14,7 +14,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
-using namespace Mantid::DataHandling;
+using namespace Mantid::LiveData;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -148,4 +148,4 @@ private:
 };
 
 
-#endif /* MANTID_DATAHANDLING_STARTLIVEDATATEST_H_ */
+#endif /* MANTID_LIVEDATA_STARTLIVEDATATEST_H_ */

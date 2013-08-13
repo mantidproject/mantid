@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_TESTDATALISTENER_H_
-#define MANTID_DATAHANDLING_TESTDATALISTENER_H_
+#ifndef MANTID_LIVEDATA_TESTDATALISTENER_H_
+#define MANTID_LIVEDATA_TESTDATALISTENER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -10,7 +10,7 @@
 
 namespace Mantid
 {
-  namespace DataHandling
+  namespace LiveData
   {
     /** An implementation of ILiveListener for testing purposes that gives back a buffer
         with an identical number of events every time extractData is called.
@@ -52,7 +52,7 @@ namespace Mantid
 
     };
 
-  } // namespace DataHandling
+  } // namespace LiveData
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_TESTDATALISTENER_H_ */
+#endif  /* MANTID_LIVEDATA_TESTDATALISTENER_H_ */

@@ -8,7 +8,7 @@ using namespace Mantid::API;
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
   DECLARE_LISTENER(FileEventDataListener)
 
@@ -138,5 +138,5 @@ namespace DataHandling
     m_chunkload = new Poco::ActiveResult<bool>(m_loader->executeAsync());
   }
 
+} // namespace LiveData
 } // namespace Mantid
-} // namespace DataHandling

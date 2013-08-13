@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_ISISHISTODATALISTENERTEST_H_
-#define MANTID_DATAHANDLING_ISISHISTODATALISTENERTEST_H_
+#ifndef MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
+#define MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_
 
 #include "MantidLiveData/ISISHistoDataListener.h"
 #include "MantidLiveData/FakeISISHistoDAE.h"
@@ -18,7 +18,7 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::DataHandling;
+using namespace Mantid::LiveData;
 
 class ISISHistoDataListenerTest : public CxxTest::TestSuite
 {
@@ -239,4 +239,4 @@ public:
 };
 
 
-#endif /* MANTID_DATAHANDLING_ISISHISTODATALISTENERTEST_H_ */
+#endif /* MANTID_LIVEDATA_ISISHISTODATALISTENERTEST_H_ */

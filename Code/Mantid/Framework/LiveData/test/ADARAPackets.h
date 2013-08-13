@@ -1,7 +1,7 @@
-#ifndef MANTID_DATAHANDLING_ADARAPACKETS_H_
-#define MANTID_DATAHANDLING_ADARAPACKETS_H_
+#ifndef MANTID_LIVEDATA_ADARAPACKETS_H_
+#define MANTID_LIVEDATA_ADARAPACKETS_H_
 
-#ifndef MANTID_DATAHANDLING_ADARAPACKETTEST_H_
+#ifndef MANTID_LIVEDATA_ADARAPACKETTEST_H_
   #error "This file should only be included by MantidLiveData/test/AdaraPacketTest.h"
 #endif
 
@@ -241,4 +241,4 @@ const unsigned char devDesPacket[2600] = {
   0x5f, 0x76, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x73, 0x3e, 0x0a, 0x3c, 0x2f, 0x64, 0x65, 
   0x76, 0x69, 0x63, 0x65, 0x3e, 0x0a, 0x00, 0x00 };  
   
-#endif /* MANTID_DATAHANDLING_ADARAPACKETS_H_ */
+#endif /* MANTID_LIVEDATA_ADARAPACKETS_H_ */

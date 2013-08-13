@@ -15,7 +15,7 @@ Simulates ISIS histogram DAE. It runs continuously until canceled and listens to
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FakeISISHistoDAE)
@@ -405,6 +405,6 @@ void FakeISISHistoDAE::exec()
   socket.close();
 }
 
-} // namespace DataHandling
+} // namespace LiveData
 } // namespace Mantid
 

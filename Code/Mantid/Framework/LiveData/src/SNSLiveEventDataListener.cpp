@@ -57,7 +57,7 @@ Mantid::Kernel::DateAndTime timeFromPacket( const ADARA::PacketHeader &hdr)
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
   DECLARE_LISTENER(SNSLiveEventDataListener)
   ;
@@ -1368,5 +1368,5 @@ namespace DataHandling
     m_variableMap.clear();  // empty the map to save a little ram
   }
 
+} // namespace LiveData
 } // namespace Mantid
-} // namespace DataHandling

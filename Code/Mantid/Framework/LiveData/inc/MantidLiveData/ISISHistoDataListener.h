@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_ISISHISTODATALISTENER_H_
-#define MANTID_DATAHANDLING_ISISHISTODATALISTENER_H_
+#ifndef MANTID_LIVEDATA_ISISHISTODATALISTENER_H_
+#define MANTID_LIVEDATA_ISISHISTODATALISTENER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -25,7 +25,7 @@ namespace Mantid
     class MatrixWorkspace;
   }
 
-  namespace DataHandling
+  namespace LiveData
   {
     /** ILiveListener is the interface implemented by classes which connect directly to
         instrument data acquisition systems (DAS) for retrieval of 'live' data into Mantid.
@@ -109,7 +109,7 @@ namespace Mantid
       static void IDCReporter(int status, int code, const char* message);
     };
 
-  } // namespace DataHandling
+  } // namespace LiveData
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_ISISHISTODATALISTENER_H_ */
+#endif  /* MANTID_LIVEDATA_ISISHISTODATALISTENER_H_ */

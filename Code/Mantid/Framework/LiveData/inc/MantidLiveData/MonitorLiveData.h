@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_MONITORLIVEDATA_H_
-#define MANTID_DATAHANDLING_MONITORLIVEDATA_H_
+#ifndef MANTID_LIVEDATA_MONITORLIVEDATA_H_
+#define MANTID_LIVEDATA_MONITORLIVEDATA_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -7,7 +7,7 @@
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
 
   /** Algorithm that repeatedly calls LoadLiveData, at a given
@@ -59,7 +59,7 @@ namespace DataHandling
   };
 
 
-} // namespace DataHandling
+} // namespace LiveData
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_MONITORLIVEDATA_H_ */
+#endif  /* MANTID_LIVEDATA_MONITORLIVEDATA_H_ */

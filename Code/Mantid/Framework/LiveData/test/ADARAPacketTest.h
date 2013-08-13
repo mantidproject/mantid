@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_ADARAPACKETTEST_H_
-#define MANTID_DATAHANDLING_ADARAPACKETTEST_H_
+#ifndef MANTID_LIVEDATA_ADARAPACKETTEST_H_
+#define MANTID_LIVEDATA_ADARAPACKETTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -203,7 +203,6 @@ protected:
 
 private:
 
-  //boost::shared_ptr<Mantid::DataHandling::SNSLiveEventDataListener> sns_l;
   unsigned char *m_initialBufferAddr;
   boost::shared_ptr <ADARA::Packet> m_pkt;
 
@@ -274,4 +273,4 @@ private:
 
 };
 
-#endif /* MANTID_DATAHANDLING_ADARAPACKETTEST_H_ */
+#endif /* MANTID_LIVEDATA_ADARAPACKETTEST_H_ */

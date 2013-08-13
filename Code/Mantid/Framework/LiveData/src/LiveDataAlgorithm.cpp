@@ -14,7 +14,7 @@ using boost::tokenizer;
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
 
   //----------------------------------------------------------------------------------------------
@@ -345,5 +345,5 @@ namespace DataHandling
   }
 
 
+} // namespace LiveData
 } // namespace Mantid
-} // namespace DataHandling

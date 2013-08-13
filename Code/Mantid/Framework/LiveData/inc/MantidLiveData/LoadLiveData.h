@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LOADLIVEDATA_H_
-#define MANTID_DATAHANDLING_LOADLIVEDATA_H_
+#ifndef MANTID_LIVEDATA_LOADLIVEDATA_H_
+#define MANTID_LIVEDATA_LOADLIVEDATA_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -8,7 +8,7 @@
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
 
   /** Algorithm to load a chunk of live data.
@@ -70,7 +70,7 @@ namespace DataHandling
   };
 
 
-} // namespace DataHandling
+} // namespace LiveData
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LOADLIVEDATA_H_ */
+#endif  /* MANTID_LIVEDATA_LOADLIVEDATA_H_ */

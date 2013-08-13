@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_FAKEEVENTDATALISTENER_H_
-#define MANTID_DATAHANDLING_FAKEEVENTDATALISTENER_H_
+#ifndef MANTID_LIVEDATA_FAKEEVENTDATALISTENER_H_
+#define MANTID_LIVEDATA_FAKEEVENTDATALISTENER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,7 +13,7 @@
 
 namespace Mantid
 {
-  namespace DataHandling
+  namespace LiveData
   {
     /** An implementation of ILiveListener for testing purposes that fills its event
         workspace buffer with randomly generated events.
@@ -72,7 +72,7 @@ namespace Mantid
       Kernel::Mutex m_mutex;
     };
 
-  } // namespace DataHandling
+  } // namespace LiveData
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_FAKEEVENTDATALISTENER_H_ */
+#endif  /* MANTID_LIVEDATA_FAKEEVENTDATALISTENER_H_ */

@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_MONITORLIVEDATATEST_H_
-#define MANTID_DATAHANDLING_MONITORLIVEDATATEST_H_
+#ifndef MANTID_LIVEDATA_MONITORLIVEDATATEST_H_
+#define MANTID_LIVEDATA_MONITORLIVEDATATEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -15,7 +15,7 @@
 #include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
-using namespace Mantid::DataHandling;
+using namespace Mantid::LiveData;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
@@ -212,4 +212,4 @@ public:
 };
 
 
-#endif /* MANTID_DATAHANDLING_MONITORLIVEDATATEST_H_ */
+#endif /* MANTID_LIVEDATA_MONITORLIVEDATATEST_H_ */

@@ -23,7 +23,7 @@ using Mantid::Kernel::ConfigService;
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
   DECLARE_LISTENER(ISISHistoDataListener)
 
@@ -429,5 +429,5 @@ namespace DataHandling
       return sqrt( in );
     }
 
+} // namespace LiveData
 } // namespace Mantid
-} // namespace DataHandling

@@ -37,7 +37,7 @@ If the optional 'spectrum' properties are set for a multiperiod dataset, then th
 
 namespace Mantid
 {
-  namespace DataHandling
+  namespace LiveData
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadDAE)
@@ -568,5 +568,5 @@ namespace Mantid
       return sqrt(in);
     }
 
-  } // namespace DataHandling
+  } // namespace LiveData
 } // namespace Mantid

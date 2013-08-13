@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_FILEEVENTDATALISTENER_H_
-#define MANTID_DATAHANDLING_FILEEVENTDATALISTENER_H_
+#ifndef MANTID_LIVEDATA_FILEEVENTDATALISTENER_H_
+#define MANTID_LIVEDATA_FILEEVENTDATALISTENER_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -12,7 +12,7 @@
 
 namespace Mantid
 {
-  namespace DataHandling
+  namespace LiveData
   {
     /** An implementation of ILiveListener for testing purposes that reads from a
         file and serves up 'chunks' when extractBuffer() is called.
@@ -74,7 +74,7 @@ namespace Mantid
       static Kernel::Logger& g_log;   ///< reference to the logger class
     };
 
-  } // namespace DataHandling
+  } // namespace LiveData
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_FILEEVENTDATALISTENER_H_ */
+#endif  /* MANTID_LIVEDATA_FILEEVENTDATALISTENER_H_ */

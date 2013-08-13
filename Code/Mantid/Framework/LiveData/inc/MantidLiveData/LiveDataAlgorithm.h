@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_LIVEDATAALGORITHM_H_
-#define MANTID_DATAHANDLING_LIVEDATAALGORITHM_H_
+#ifndef MANTID_LIVEDATA_LIVEDATAALGORITHM_H_
+#define MANTID_LIVEDATA_LIVEDATAALGORITHM_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -8,7 +8,7 @@
 
 namespace Mantid
 {
-namespace DataHandling
+namespace LiveData
 {
 
   /** Abstract base class with common properties
@@ -68,7 +68,7 @@ namespace DataHandling
   };
 
 
-} // namespace DataHandling
+} // namespace LiveData
 } // namespace Mantid
 
-#endif  /* MANTID_DATAHANDLING_LIVEDATAALGORITHM_H_ */
+#endif  /* MANTID_LIVEDATA_LIVEDATAALGORITHM_H_ */
