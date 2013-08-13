@@ -9,13 +9,13 @@ mtdHelp()
 mtdHelp(LoadRaw)
 
 # Perform some algorithms
-LoadRaw("HET15869.raw","test")
-ConvertUnits("test","converted","dSpacing")
-Rebin("converted","rebinned","0.1,0.001,5")
+LoadRaw("HET15869.raw", OutputWorkspace="test")
+ConvertUnits("test","dSpacing", OutputWorkspace="converted")
+Rebin("converted","0.1,0.001,5", OutputWorkspace="rebinned")
 
 # clear up intermediate workspaces
-mtd.deleteWorkspace("test")
-mtd.deleteWorkspace("converted")
+DeleteWorkspace("test")
+DeleteWorkspace("converted")
 
 # extract the one we want
 wksp = mtd['rebinned']
