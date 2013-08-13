@@ -424,7 +424,7 @@ set ( TEST_FILES
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(CurveFitting SRC_FILES SRC_UNITY_IGNORE_FILES 10)
+  enable_unity_build(DataHandling SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
