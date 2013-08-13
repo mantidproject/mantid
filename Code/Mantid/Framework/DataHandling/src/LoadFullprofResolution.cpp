@@ -101,6 +101,9 @@ namespace DataHandling
     scanBanks(lines, vec_bankinirf, bankstartindexmap, bankendindexmap);
     sort(vec_bankinirf.begin(), vec_bankinirf.end());
 
+    for (size_t i = 0; i < vec_bankinirf.size(); ++i)
+      g_log.debug() << "Irf containing bank " << vec_bankinirf[i] << ".\n";
+
     vector<int> vec_bankids; // bank IDs to output to table workspace
 
     if (vec_bankinirf.empty())
@@ -140,8 +143,9 @@ namespace DataHandling
     for (size_t i = 0; i < vec_bankids.size(); ++i)
     {
       int bankid = vec_bankids[i];
+      g_log.debug() << "Parse bank " << bankid << " of total " << vec_bankids.size() << ".\n";
       map<string, double> parammap;
-      parseResolutionStrings(parammap, lines, outputbankid, bankstartindexmap[bankid], bankendindexmap[bankid]);
+      parseResolutionStrings(parammap, lines, bankid, bankstartindexmap[bankid], bankendindexmap[bankid]);
       bankparammap.insert(make_pair(bankid, parammap));
     }
 
@@ -274,7 +278,10 @@ namespace DataHandling
     g_log.debug() << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid << "\n";
     if (bankid != tmpbankid)
     {
-      throw runtime_error("Scanned bank is not same as bank found in the specified region.");
+      stringstream errss;
+      errss << "Input bank ID (" << bankid << ") is not same as the bank ID (" << tmpbankid
+            << ") found in the specified region from input. ";
+      throw runtime_error(errss.str());
     }
 
     double tempdb;
@@ -574,41 +581,59 @@ namespace DataHandling
     */
   TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(map<int, map<string, double> > bankparammap)
   {
+    g_log.notice() << "Start to generate table workspace ...." << ".\n";
+
     // Retrieve some information
     size_t numbanks = bankparammap.size();
     if (numbanks == 0)
       throw runtime_error("Unable to generate a table from an empty map!");
 
-    map<string, double>::iterator mapiter = bankparammap.begin();
-    size_t numparams = mapiter->second.size();
+    map<int, map<string, double> >::iterator bankmapiter = bankparammap.begin();
+    size_t numparams = bankmapiter->second.size();
 
     // vector of all parameter name
     vector<string> vec_parname;
     vector<int> vec_bankids;
-    for (size_t i = 0; i < numparams; ++i)
+
+    map<string, double>::iterator parmapiter;
+    for (parmapiter = bankmapiter->second.begin(); parmapiter != bankmapiter->second.end(); ++parmapiter)
     {
-      string parname = mapiter->second.first;
+      string parname = parmapiter->first;
       vec_parname.push_back(parname);
-      int bankid = mapiter->first;
+    }
+
+    for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end(); ++bankmapiter)
+    {
+      int bankid = bankmapiter->first;
       vec_bankids.push_back(bankid);
     }
 
-    g_log.debug() << "[DBx240] Number of imported parameters is " << numparams << "\n";
+    g_log.debug() << "[DBx240] Number of imported parameters is " << numparams
+                  << ", Number of banks = " << vec_bankids.size() << "." << "\n";
 
     // Create TableWorkspace
     TableWorkspace_sptr tablews(new TableWorkspace());
 
     // set columns :
-    // FIXME - It is unknown whether any 2 columns can have same name!!!
+    // Any 2 columns cannot have the same name.
     tablews->addColumn("str", "Name");
     for (size_t i = 0; i < numbanks; ++i)
-      tablews->addColumn("double", "Value");
+    {
+      stringstream colnamess;
+      int bankid = vec_bankids[i];
+      colnamess << "Value_" << bankid;
+      tablews->addColumn("double", colnamess.str());
+    }
+
+    g_log.debug() << "Number of column = " << tablews->columnCount() << ".\n";
 
     // add BANK ID row
     TableRow newrow = tablews->appendRow();
     newrow << "BANK";
-    for (size_t i = 0; i < numbanks.size(); ++i)
+    for (size_t i = 0; i < numbanks; ++i)
       newrow << static_cast<double>(vec_bankids[i]);
+
+    g_log.debug() << "Number of row now = " << tablews->rowCount() << ".\n";
 
     // add profile parameter rows
     for (size_t i = 0; i < numparams; ++i)
@@ -620,10 +645,10 @@ namespace DataHandling
 
       for (size_t j = 0; j < numbanks; ++j)
       {
-        int bankid = numbanks[j];
+        int bankid = vec_bankids[j];
 
         // Locate map of bank 'bankid'
-        map<int, <string, double> >::iterator bpmapiter;
+        map<int, map<string, double> >::iterator bpmapiter;
         bpmapiter = bankparammap.find(bankid);
         if (bpmapiter == bankparammap.end())
         {
