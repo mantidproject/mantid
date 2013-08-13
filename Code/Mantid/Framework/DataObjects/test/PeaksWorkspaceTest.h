@@ -155,6 +155,21 @@ public:
      // Verify that this test_entry has a peaks_workspace entry
      TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openGroup("peaks_workspace","NXentry") );
 
+     // Check detector IDs
+     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->openData("column_1") );
+
+     std::vector<int> detIDs;
+     TS_ASSERT_THROWS_NOTHING(nexusHelper.file->getData(detIDs));
+     nexusHelper.file->closeData();
+     TS_ASSERT_EQUALS( detIDs.size(), 4);  // We have 4 detectors
+     if( detIDs.size() == 4) 
+     {
+       TS_ASSERT_EQUALS( detIDs[0], 1300);
+       TS_ASSERT_EQUALS( detIDs[1], 1300);
+       TS_ASSERT_EQUALS( detIDs[2], 1350);
+       TS_ASSERT_EQUALS( detIDs[3], 1400);
+     }
+
     //if(lpw) {
     //  TS_ASSERT_EQUALS(17, lpw->columnCount());
       // Check that the peaks are what we saved
