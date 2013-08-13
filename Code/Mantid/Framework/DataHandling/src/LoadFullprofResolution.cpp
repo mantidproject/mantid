@@ -321,7 +321,7 @@ namespace DataHandling
       {
         vector<string> terms;
         boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
-        if (terms.size() != 2 || terms.size() != 4)
+        if (terms.size() != 2 && terms.size() != 4)
         {
           stringstream errmsg;
           errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 2/4 terms in definition.";
