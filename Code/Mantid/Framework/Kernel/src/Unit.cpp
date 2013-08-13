@@ -206,6 +206,11 @@ Label::Label()
 {
 }
 
+Label::Label(std::string caption, std::string label) : Empty(),
+  m_caption(caption), m_label(label)
+{
+}
+
 /**
   * Set a caption and a label
   */
@@ -999,48 +1004,6 @@ double Time::singleFromTOF(const double tof) const
 Unit * Time::clone() const
 {
     return new Time(*this);
-}
-
-// ================================================================================
-/* CustomUnit
- * ================================================================================
- *
- * CustomUnit can have the caption and label defined at creation time.
- */
-DECLARE_UNIT(CustomUnit)
-
-CustomUnit::CustomUnit() : Unit(),
-	m_Caption(""),m_Label("")
-{
-}
-
-CustomUnit::CustomUnit(std::string caption, std::string label) : Unit(),
-	m_Caption(caption),m_Label(label)
-{
-}
-
-void CustomUnit::init()
-{
-}
-
-
-double CustomUnit::singleToTOF(const double x) const
-{
-    UNUSED_ARG(x);
-    throw std::runtime_error("CustomUnit is not allowed to be convert to TOF. ");
-    return 0.0;
-}
-
-double CustomUnit::singleFromTOF(const double tof) const
-{
-    UNUSED_ARG(tof);
-    throw std::runtime_error("CustomUnit is not allowed to be converted from TOF. ");
-    return 0.0;
-}
-
-Unit * CustomUnit::clone() const
-{
-    return new CustomUnit(*this);
 }
 
 } // namespace Units
