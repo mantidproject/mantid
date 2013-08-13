@@ -1,6 +1,6 @@
 /** *WIKI*
 
-Convert Fullprof's instrument resolution file (.irf) to  GSAS's instrument file (.iparm/.prm).
+Convert Fullprof"s instrument resolution file (.irf) to  GSAS"s instrument file (.iparm/.prm).
 
 ==== Supported peak profiles ====
 * Time-of-flight back-to-back exponential convoluted with pseudo-voigt (planned)
@@ -25,12 +25,11 @@ There can be several types of Fullprof files as the input file
 *WIKI*
 */
 
-//#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
-#include "SaveGSASInstrumentFile.h"
-
+#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/TableRow.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -495,7 +494,7 @@ namespace Algorithms
     // Check
     vector<string> colnames = ws->getColumnNames();
     if (colnames[0].compare("Name"))
-      throw runtime_error("The first column must be 'Name'");
+      throw runtime_error("The first column must be Name");
 
     // Parse
     for (size_t irow = 0; irow < numparams; ++irow)
@@ -509,7 +508,7 @@ namespace Algorithms
         {
           double tmpdbl;
           tmprow >> tmpdbl;
-          vec_maptemp.insert(make_pair(parname, tmpdbl));
+          vec_maptemp[icl].insert(make_pair(parname, tmpdbl));
         }
       }
       else
@@ -661,8 +660,8 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Build a data structure for GSAS's tabulated peak profile
-     * from Fullprof's TOF peak profile
+  /** Build a data structure for GSAS"s tabulated peak profile
+     * from Fullprof"s TOF peak profile
 
   Note:
   - gdsp[k] : d_k as the tabulated d-spacing value
@@ -833,18 +832,18 @@ namespace Algorithms
 
     printf("INS %2d ICONS%10.3f%10.3f%10.3f%10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
     printf("INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
-    printf('INS %2dBAKGD 1 4 Y 0 Y\n', bankid);
-    printf('INS %2dI HEAD %s\n', bankid, titleline);
-    printf('INS %2dI ITYP%5d%10.4f%10.4f%10i\n', bankid, 0, m_mndsp[bankid]*0.001*instC, m_mxtofs[bankid], randint);
-    printf('INS %2dINAME powgen \n', bankid);
-    printf('INS %2dPRCF1 %5d%5d%10.5f\n', bankid, -3, 21, 0.002);
-    printf('INS %2dPRCF11%15.6f%15.6f%15.6f%15.6f\n', bankid, 0.0, 0.0, 0.0, sig0);
-    printf('INS %2dPRCF12%15.6f%15.6f%15.6f%15.6f\n', bankid, sig1, sig2, gam0, gam1);
-    printf('INS %2dPRCF13%15.6f%15.6f%15.6f%15.6f\n', bankid, gam2, 0.0, 0.0, 0.0);
-    printf('INS %2dPRCF14%15.6f%15.6f%15.6f%15.6f\n', bankid, 0.0, 0.0, 0.0, 0.0);
-    printf('INS %2dPRCF15%15.6f%15.6f%15.6f%15.6f\n', bankid, 0.0, 0.0, 0.0, 0.0);
-    printf('INS %2dPRCF16%15.6f\n', bankid, 0.0);
-    printf('INS %2dPAB3 %3d\n', bankid, 90);
+    printf("INS %2dBAKGD 1 4 Y 0 Y\n", bankid);
+    printf("INS %2dI HEAD %s\n", bankid, titleline);
+    printf("INS %2dI ITYP%5d%10.4f%10.4f%10i\n", bankid, 0, m_mndsp[bankid]*0.001*instC, m_mxtofs[bankid], randint);
+    printf("INS %2dINAME powgen \n", bankid);
+    printf("INS %2dPRCF1 %5d%5d%10.5f\n", bankid, -3, 21, 0.002);
+    printf("INS %2dPRCF11%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig0);
+    printf("INS %2dPRCF12%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2, gam0, gam1);
+    printf("INS %2dPRCF13%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF14%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF15%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    printf("INS %2dPRCF16%15.6f\n", bankid, 0.0);
+    printf("INS %2dPAB3 %3d\n", bankid, 90);
 
     for (size_t k = 0; k < 90; ++k)
     {
@@ -884,9 +883,9 @@ namespace Algorithms
 
     /*
     if isfirstbank:
-    wprmfile = open(prmfilename, 'w')
+    wprmfile = open(prmfilename, "w")
     else:
-    wprmfile = open(prmfilename, 'a')
+    wprmfile = open(prmfilename, "a")
     wprmfile.write(prmfile)
     wprmfile.close()
     */
