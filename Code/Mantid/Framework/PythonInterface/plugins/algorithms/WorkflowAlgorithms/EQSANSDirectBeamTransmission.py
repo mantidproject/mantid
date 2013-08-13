@@ -137,7 +137,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
 
         output_str = ""
         if trans_ws is None:
-            trans_ws_name = "transmission_fit_"+input_ws_name
+            trans_ws_name = "__transmission_fit_"+input_ws_name
             # Load data files
             sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID = TransmissionUtils.load_monitors(self, property_manager)
             
