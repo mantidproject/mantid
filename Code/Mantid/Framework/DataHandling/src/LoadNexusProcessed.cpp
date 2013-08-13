@@ -874,6 +874,13 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   try
   {
     local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create(unit1);
+    if(unit1 == "Label")
+    {
+      auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(local_workspace->getAxis(0)->unit());
+      auto ax = wksp_cls.openNXDouble("axis1");
+      label->setLabel(ax.attributes("caption"), ax.attributes("label"));
+    }
+
     //If this doesn't throw then it is a numeric access so grab the data so we can set it later
     axis2.load();
     m_axis1vals = MantidVec(axis2(), axis2() + axis2.dim0());
@@ -896,6 +903,12 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
       Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(nspectra);
       local_workspace->replaceAxis(1, newAxis);
       newAxis->unit() = UnitFactory::Instance().create(unit2);
+      if(unit2 == "Label")
+      {
+        auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(newAxis->unit());
+        auto ax = wksp_cls.openNXDouble("axis2");
+        label->setLabel(ax.attributes("caption"), ax.attributes("label"));
+      }
     }
     catch( std::runtime_error & )
     {
