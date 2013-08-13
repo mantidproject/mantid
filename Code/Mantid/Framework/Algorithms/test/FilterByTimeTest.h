@@ -178,8 +178,6 @@ public:
   }
 
 private:
-  std::string inputWS;
-  EventWorkspace_sptr WS;
   std::string inWS;
 };
 
