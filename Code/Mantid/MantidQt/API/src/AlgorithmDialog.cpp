@@ -971,17 +971,10 @@ void AlgorithmDialog::setPreviousValue(QWidget* widget, const QString& propName)
   PropertyWidget * propWidget = qobject_cast<PropertyWidget*>(widget);
   if (propWidget)
   {
-    if( !isForScript() )
-      propWidget->setValue(value);
-    else
-    {
-      //Need to check if this is the default value as we don't fill them in if they are
-      if( m_python_arguments.contains(propName) || !property->isDefault() )
-        propWidget->setValue(value);
-    }
+    propWidget->setValue(value);
+    
     return;
   }
-
 
   // Reaching here means we have a widget type we don't understand. Tell the developer
   QMessageBox::warning(this, windowTitle(), 
