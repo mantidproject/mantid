@@ -374,6 +374,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitPolynomial(API::MatrixWorksp
   polyfit->initialize();
   childAlg->setProperty("Function",polyfit); 
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",WS);
+  childAlg->setProperty("Minimizer","Levenberg-MarquardtMD");
   childAlg->setProperty("CreateOutput",true); 
   childAlg->setProperty("IgnoreInvalidData",true);
   childAlg->executeAsChildAlg();
