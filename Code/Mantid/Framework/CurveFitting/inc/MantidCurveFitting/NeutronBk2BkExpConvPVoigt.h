@@ -124,9 +124,6 @@ namespace CurveFitting
 
   };
 
-  /// Integral for Gamma
-  std::complex<double> E1(std::complex<double> z);
-
 
 } // namespace CurveFitting
 } // namespace Mantid
