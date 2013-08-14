@@ -1002,27 +1002,11 @@ namespace Algorithms
                         << vecX[i_min] << ", " << vecX[i_max] << "  i_min = " << i_min << ", i_max = "
                         << i_max << ", i_centre = " << i_centre << ".\n";
 
-    // Estimate height, boundary, and etc for fitting
-    // FIXME - Does this make sense?
-    double bg_lowerSum;
-    if (i_min > 0)
-      bg_lowerSum = vecY[i_min - 1] + vecY[i_min] + vecY[i_min + 1];
-    else
-      bg_lowerSum = vecY[i_min + 2] + vecY[i_min] + vecY[i_min + 1];
-
-    double bg_upperSum;
-    if (i_max < static_cast<int>(vecY.size())-1)
-    {
-      bg_upperSum = vecY[i_max - 1] + vecY[i_max] + vecY[i_max + 1];
-    }
-    else
-    {
-      bg_upperSum = vecY[i_max - 1] + vecY[i_max] + vecY[i_max -2];
-    }
-
-    double in_bg0 = (bg_lowerSum + bg_upperSum) / 6.0;
-    double in_bg1 = (bg_upperSum - bg_lowerSum) / (3.0 * static_cast<double>(i_max - i_min + 1));
-    double in_bg2 = 0.0;
+    // Estimate background: output-> m_backgroundFunction
+    double in_bg0;
+    double in_bg1;
+    double in_bg2;
+    estimateBackground(vecX, vecY, i_min, i_max, in_bg0, in_bg1, in_bg2);
 
     if (!m_highBackground)
     {
@@ -1198,17 +1182,6 @@ namespace Algorithms
     g_log.information() << "Fitting a peak assumed at " << user_centre
                         << " (index = " << i_centre << ") by high-background approach. \n";
 
-    // Estimate linear background: output-> m_backgroundFunction
-    if (m_backgroundFunction->nParams() == 1)
-    {
-      // Flat background
-      estimateFlatBackground(rawY, i_min, i_max, in_bg0, in_bg1, in_bg2);
-    }
-    else
-    {
-      estimateLinearBackground(rawX, rawY, i_min, i_max, in_bg0, in_bg1, in_bg2);
-    }
-
     // Create a pure peak workspace (Workspace2D)
     size_t sizex = static_cast<size_t>(numpts);
     size_t sizey = sizex;
@@ -1297,10 +1270,15 @@ namespace Algorithms
     // Fit upon observation
     g_log.information("\nFitting peak with starting value from observation. ");
 
-    g_log.debug() << "[DB_Bkgd] Reset A0/A1 to: A0 = " << in_bg0 << ", A1 = " << in_bg1 << ".\n";
+    g_log.debug() << "[DB_Bkgd] Reset A0/A1 to: A0 = " << in_bg0 << ", A1 = " << in_bg1
+                  << ", A2 = " << in_bg2 << "\n";
     m_backgroundFunction->setParameter("A0", in_bg0);
     if (m_backgroundFunction->nParams() > 1)
+    {
       m_backgroundFunction->setParameter("A1", in_bg1);
+      if (m_backgroundFunction->nParams() > 2)
+        m_backgroundFunction->setParameter("A2", in_bg2);
+    }
 
     in_centre = g_centre;
     peakleftbound = g_centre - 3*g_fwhm;
@@ -1852,7 +1830,7 @@ namespace Algorithms
 
 
   //----------------------------------------------------------------------------------------------
-  /** Estimate linear background
+  /** Estimate background
     * @param X :: vec for X
     * @param Y :: vec for Y
     * @param i_min :: index of minimum in X to estimate background
@@ -1861,7 +1839,7 @@ namespace Algorithms
     * @param out_bg1 :: slope
     * @param out_bg2 :: a2 = 0
     */
-  void FindPeaks::estimateLinearBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
+  void FindPeaks::estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
                                            double& out_bg0, double& out_bg1, double& out_bg2)
   {
     // Validate input
@@ -1901,78 +1879,30 @@ namespace Algorithms
 
     // Esitmate
     out_bg2 = 0.;
-    out_bg1 = (y0-yf)/(x0-xf);
-    out_bg0 = (xf*y0-x0*yf)/(xf-x0);
+    if (m_backgroundFunction->nParams() > 1) // linear background
+    {
+      out_bg1 = (y0-yf)/(x0-xf);
+      out_bg0 = (xf*y0-x0*yf)/(xf-x0);
+    }
+    else // flat background
+    {
+      out_bg1 = 0.;
+      out_bg0 = 0.5*(y0 + yf);
+    }
 
     m_backgroundFunction->setParameter("A0", out_bg0);
     if (m_backgroundFunction->nParams() > 1)
     {
       m_backgroundFunction->setParameter("A1", out_bg1);
       if (m_backgroundFunction->nParams() > 2)
-        m_backgroundFunction->setParameter("A2", 0.0);
+        m_backgroundFunction->setParameter("A2", out_bg2);
     }
 
     g_log.debug() << "Estimated background: A0 = " << out_bg0 << ", A1 = "
-                        << out_bg1 << ".\n";
+                        << out_bg1 << ", A2 = " << out_bg2 << "\n";
 
     return;
   }
-
-  //----------------------------------------------------------------------------------------------
-  /** Estimate flat background
-    * @param Y :: vec for Y
-    * @param i_min :: index of minimum in X to estimate background
-    * @param i_max :: index of maximum in X to estimate background
-    * @param out_bg0 :: interception
-    * @param out_bg1 :: a1 = 0
-    * @param out_bg2 :: a2 = 0
-    */
-  void FindPeaks::estimateFlatBackground(const MantidVec& Y, const size_t i_min, const size_t i_max,
-                                         double& out_bg0, double& out_bg1, double& out_bg2)
-  {
-    // Validate input
-    if (i_min >= i_max)
-      throw std::runtime_error("i_min cannot larger or equal to i_max");
-
-    // FIXME - THIS IS A MAGIC NUMBER
-    const size_t MAGICNUMBER = 12;
-    size_t numavg;
-    if (i_max - i_min > MAGICNUMBER)
-      numavg = 3;
-    else
-      numavg = 1;
-
-    // Get (x0, y0) and (xf, yf)
-    double y0, yf;
-
-    y0 = 0.0;
-    yf = 0.0;
-    for (size_t i = 0; i < numavg; ++i)
-    {
-      y0 += Y[i_min+i];
-      yf += Y[i_max-i];
-    }
-    y0 = y0 / static_cast<double>(numavg);
-    yf = yf / static_cast<double>(numavg);
-
-    // Esitmate
-    out_bg2 = 0.;
-    out_bg1 = 0.;
-    out_bg0 = 0.5*(y0 + yf);
-
-    m_backgroundFunction->setParameter("A0", out_bg0);
-    if (m_backgroundFunction->nParams() > 1)
-    {
-      m_backgroundFunction->setParameter("A1", 0.0);
-      if (m_backgroundFunction->nParams() > 2)
-        m_backgroundFunction->setParameter("A2", 0.0);
-    }
-
-    g_log.debug() << "Estimated flat background: A0 = " << out_bg0 << ".\n";
-
-    return;
-  }
-
 
   //----------------------------------------------------------------------------------------------
   /** Add the fit record (failure) to output workspace
