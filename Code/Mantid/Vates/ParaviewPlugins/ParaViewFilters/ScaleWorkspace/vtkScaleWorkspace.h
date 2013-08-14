@@ -1,6 +1,7 @@
 #ifndef _vtkScaleWorkspace_h
 #define _vtkScaleWorkspace_h
 #include "vtkUnstructuredGridAlgorithm.h"
+// cppcheck-suppress class_X_Y
 class VTK_EXPORT vtkScaleWorkspace : public vtkUnstructuredGridAlgorithm
 {
 public:
