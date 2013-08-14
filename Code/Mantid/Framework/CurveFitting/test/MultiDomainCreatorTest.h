@@ -24,6 +24,11 @@ using namespace Mantid::CurveFitting;
 class MultiDomainCreatorTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MultiDomainCreatorTest *createSuite() { return new MultiDomainCreatorTest(); }
+  static void destroySuite( MultiDomainCreatorTest *suite ) { delete suite; }
+  
   MultiDomainCreatorTest()
   {
     //FrameworkManager::Instance();

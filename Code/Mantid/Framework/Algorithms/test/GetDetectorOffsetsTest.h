@@ -18,6 +18,10 @@ using Mantid::DataObjects::OffsetsWorkspace_sptr;
 class GetDetectorOffsetsTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GetDetectorOffsetsTest *createSuite() { return new GetDetectorOffsetsTest(); }
+  static void destroySuite( GetDetectorOffsetsTest *suite ) { delete suite; }
 
   GetDetectorOffsetsTest()
   {
@@ -126,17 +130,18 @@ public:
 
   }
 
-
-
 private:
   GetDetectorOffsets offsets;
 };
 
 class GetDetectorOffsetsTestPerformance : public CxxTest::TestSuite
 {
-public:
   MatrixWorkspace_sptr WS;
   int numpixels;
+
+public:
+  static GetDetectorOffsetsTestPerformance *createSuite() { return new GetDetectorOffsetsTestPerformance(); }
+  static void destroySuite( GetDetectorOffsetsTestPerformance *suite ) { delete suite; }
 
   void setUp()
   {

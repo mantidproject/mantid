@@ -12,7 +12,11 @@ using namespace Mantid::MDEvents;
 class MDWSDescriptionTest : public CxxTest::TestSuite
 {
     Mantid::API::MatrixWorkspace_sptr ws2D;
+
 public:
+  static MDWSDescriptionTest *createSuite() { return new MDWSDescriptionTest(); }
+  static void destroySuite(MDWSDescriptionTest * suite) { delete suite; }
+
   void testBuildFromMatrixWS2D()
   {
     MDWSDescription WSD;

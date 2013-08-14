@@ -15,6 +15,11 @@ class GlobTest : public CxxTest::TestSuite
 {
   Poco::Path base;
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static GlobTest *createSuite() { return new GlobTest(); }
+  static void destroySuite( GlobTest *suite ) { delete suite; }
+
   GlobTest()
   {
     base.assign( ConfigService::Instance().getInstrumentDirectory());
