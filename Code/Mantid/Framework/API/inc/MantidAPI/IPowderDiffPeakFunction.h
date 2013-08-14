@@ -57,7 +57,7 @@ public:
   /// Get peak's centre
   virtual double centre() const;
   /// Get peak's intensity
-  virtual double height() const = 0;
+  virtual double height() const;
   /// Get peakl's FWHM
   virtual double fwhm()const;
   /// Set peak's height
@@ -150,6 +150,9 @@ protected:
   int mK;
   int mL;
   bool mHKLSet;
+
+  size_t LATTICEINDEX;
+  size_t HEIGHTINDEX;
 
 private:
   /// Peak intensity

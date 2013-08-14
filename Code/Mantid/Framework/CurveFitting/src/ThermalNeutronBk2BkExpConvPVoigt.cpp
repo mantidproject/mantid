@@ -106,7 +106,6 @@ where
  *WIKI*/
 
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
-// #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/EmptyValues.h"
@@ -192,6 +191,9 @@ namespace CurveFitting
 
     // Lattice parameter (23)
     declareParameter("LatticeConstant", 10.0, "lattice constant for the sample");
+
+    LATTICEINDEX = 23;
+    HEIGHTINDEX = 0;
 
     // Unit cell
     m_unitCellSize = 10.0;
@@ -335,7 +337,7 @@ namespace CurveFitting
     double gam1 = getParameter(21);
     double gam2 = getParameter(22);
 
-    double latticeconstant = getParameter(23);
+    double latticeconstant = getParameter(LATTICEINDEX);
 
     double dh, tof_h, eta, alpha, beta, H, sigma2, gamma, N;
 
@@ -554,23 +556,23 @@ namespace CurveFitting
    */
 
   /** Set peak height
-   */
+
   void ThermalNeutronBk2BkExpConvPVoigt::setHeight(const double h)
   {
-    setParameter(0, h);
+    setParameter(HEIGHTINDEX, h);
 
     return;
   }
+     */
 
 
   /** Get peak's height
-    */
   double ThermalNeutronBk2BkExpConvPVoigt::height() const
   {
-    double height = this->getParameter(0);
+    double height = this->getParameter(HEIGHTINDEX);
     return height;
   }
-
+    */
 
   /** Get peak's FWHM
 
@@ -673,7 +675,7 @@ namespace CurveFitting
     */
   void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i, const double& value, bool explicitlySet)
   {
-    if (i == 23)
+    if (i == LATTICEINDEX)
     {
       // Lattice parameter
       if (fabs(m_unitCellSize-value) > 1.0E-8)
@@ -707,7 +709,7 @@ namespace CurveFitting
       {
         // If change in value is non-trivial
         m_cellParamValueChanged = true;
-        ParamFunction::setParameter(23, value, explicitlySet);
+        ParamFunction::setParameter(LATTICEINDEX, value, explicitlySet);
         m_hasNewParameterValue = true;
         m_unitCellSize = value;
       }

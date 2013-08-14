@@ -89,9 +89,9 @@ namespace CurveFitting
     virtual void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
 
     /// Set peak's height
-    virtual void setHeight(const double h);
+    // virtual void setHeight(const double h);
     /// Get peak's height
-    virtual double height()const;
+    // virtual double height()const;
 
     using IFunction1D::function;
     virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const;

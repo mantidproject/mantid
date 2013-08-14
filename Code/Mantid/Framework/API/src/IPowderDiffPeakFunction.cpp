@@ -21,7 +21,7 @@ namespace API
   //----------------------------------------------------------------------------------------------
   /** Constructor. Sets peak radius to the value of curvefitting.peakRadius property
     */
-  IPowderDiffPeakFunction::IPowderDiffPeakFunction()
+  IPowderDiffPeakFunction::IPowderDiffPeakFunction() : LATTICEINDEX(9999), HEIGHTINDEX(9999)
   {
     // Set peak's radius from configuration
     int peakRadius;
@@ -100,12 +100,32 @@ namespace API
 
   //----------------------------------------------------------------------------------------------
   /**  Set peak height (intensity indeed)
-    */
+
   void IPowderDiffPeakFunction::setHeight(const double h)
   {
     m_intensity = h;
 
     return;
+  }
+      */
+
+  //----------------------------------------------------------------------------------------------
+  /** Set peak height
+   */
+  void IPowderDiffPeakFunction::setHeight(const double h)
+  {
+    setParameter(HEIGHTINDEX, h);
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get peak's height
+    */
+  double IPowderDiffPeakFunction::height() const
+  {
+    double height = this->getParameter(HEIGHTINDEX);
+    return height;
   }
 
   //----------------------------------------------------------------------------------------------
