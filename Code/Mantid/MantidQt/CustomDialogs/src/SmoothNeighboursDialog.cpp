@@ -34,6 +34,9 @@ void SmoothNeighboursDialog::initLayout()
 
   m_propertiesWidget->setAlgorithm(this->getAlgorithm());
 
+  // Mark the properties that will be forced enabled or disabled
+  m_propertiesWidget->addEnabledAndDisableLists(m_enabled, m_disabled + m_python_arguments);
+
   // Tie all the widgets to properties
   for (auto it = m_propertiesWidget->m_propWidgets.begin(); it != m_propertiesWidget->m_propWidgets.end(); it++)
     this->tie(it.value(), it.key());
