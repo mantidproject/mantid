@@ -82,7 +82,6 @@ public:
         "X axis: Time-of-flight / microsecond\n"
         "Y axis: Counts\n"
         "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n";
-    expected += "Memory used: 0 kB";
 
     TS_ASSERT_EQUALS(expected, testWS->toString());
   }
