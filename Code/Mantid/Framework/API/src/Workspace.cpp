@@ -107,7 +107,7 @@ bool Workspace::isDirty(const int n) const
  */
 std::string Workspace::getMemorySizeAsStr() const
 {
-  return Mantid::Kernel::memToString<size_t>(getMemorySize()/1024);
+  return Mantid::Kernel::memToString<uint64_t>(static_cast<uint64_t>(getMemorySize())/1024);
 }
 
 } // namespace API
