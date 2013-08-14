@@ -339,18 +339,20 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         ename = first[:-1]
     else:
         ename = first+'to_'+last
+    
     elfWS = ename+'_elf'    # interchange Q & T
     CreateWorkspace(OutputWorkspace=elfWS, DataX=datTx, DataY=datTy, DataE=datTe,
         Nspec=nQ, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=q1)
     unitx = mtd[elfWS].getAxis(0).setUnit("Label")
     unitx.setLabel(unit[0], unit[1])
     DeleteWorkspace('__elf')
+    label = unit[0]+' / '+unit[1]
+    AddSampleLog(Workspace=elfWS, LogName="Vaxis", LogType="String", LogText=label)
     e1WS = ename+'_eq1'
     CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
         Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
     unity = mtd[e1WS].getAxis(1).setUnit("Label")
     unity.setLabel(unit[0], unit[1])
-    label = unit[0]+' / '+unit[1]
     AddSampleLog(Workspace=e1WS, LogName="Vaxis", LogType="String", LogText=label)
     e2WS = ename+'_eq2'
     CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
