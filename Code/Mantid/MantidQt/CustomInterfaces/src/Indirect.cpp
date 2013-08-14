@@ -1,5 +1,5 @@
 #include "MantidQtCustomInterfaces/Indirect.h"
-
+#include "MantidQtCustomInterfaces/Transmission.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtCustomInterfaces/Background.h"
 
@@ -54,8 +54,8 @@ Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) :
   m_calCalR1(NULL), m_calCalR2(NULL), m_calResR1(NULL),
   m_calCalCurve(NULL), m_calResCurve(NULL),
   // Null pointers - Diagnostics Tab
-  m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL)
-
+  m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL),
+  m_tab_trans(new Transmission(m_uiForm,this))
 {
   // Constructor
 }
@@ -182,6 +182,8 @@ void Indirect::helpClicked()
     url += "Diagnostics";
   else if ( tabName == "S(Q, w)" )
     url += "SofQW";
+  else if (tabName == "Transmission")
+    url += "Transmission";
   QDesktopServices::openUrl(QUrl(url));
 }
 /**
@@ -207,6 +209,10 @@ void Indirect::runClicked()
   else if ( tabName == "S(Q, w)" )
   {
     sOfQwClicked();
+  }
+  else if (tabName == "Transmission")
+  {
+    m_tab_trans->runTab();
   }
 }
 
