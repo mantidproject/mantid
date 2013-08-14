@@ -156,14 +156,16 @@ namespace CurveFitting
    */
   double NeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname)
   {
-    // 1. Calculate peak parameters if required
+    // Calculate peak parameters if required
     if (m_hasNewParameterValue)
     {
       calculateParameters(false);
     }
 
-    // 2. Get value
+    // Get value
     double paramvalue;
+
+    // FIXME - Whether 'Eta' a parameter?
 
     if (paramname.compare("Alpha") == 0)
       paramvalue = m_Alpha;
@@ -198,6 +200,7 @@ namespace CurveFitting
   */
   void NeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const
   {
+    // FIXME - Clean the order! dtt2 should be parameter 2 and etc!
     // Obtain parameters (class) with pre-set order
     double dtt1   = getParameter(1);
     double dtt2   = getParameter(4);
@@ -234,6 +237,14 @@ namespace CurveFitting
     }
 
     // Calculate all the parameters
+    // FIXME : Implement this!
+    /*
+      alpha(d) = alpha0 + alpha1/d_h
+      beta(d)  = beta0 + beta1/d_h^4
+      tof(d)   = zero + Dtt1*d_h + Dtt2*d_h^2
+      */
+
+
     // - Start to calculate alpha, beta, sigma2, gamma,
 #if 0
     double n = 0.5*gsl_sf_erfc(wcross*(Tcross-1/dh));
@@ -416,6 +427,7 @@ namespace CurveFitting
     */
   void NeutronBk2BkExpConvPVoigt::function1D(double* out, const double* xValues, const size_t nData)const
   {
+    // FIXME - Implement soon.
     throw runtime_error("Implement ASAP.");
   }
 
@@ -425,6 +437,7 @@ namespace CurveFitting
    */
   void NeutronBk2BkExpConvPVoigt::init()
   {
+    // FIXME -
     // Peak height (0)
     declareParameter("Height", 1.0, "Intensity of peak");
 
@@ -546,6 +559,7 @@ namespace CurveFitting
   }
 
   //-------------------------  External Functions ---------------------------------------------------
+  // FIXME : This is the same function used for ThermalNeutron... ...
   /** Implementation of complex integral E_1
    */
   std::complex<double> E1(std::complex<double> z)
