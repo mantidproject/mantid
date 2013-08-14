@@ -136,10 +136,6 @@ public:
 
   void test_Save_Unmodified_PeaksWorkspace_Nexus()
   {
-    auto pw = createSaveTestPeaksWorkspace();
-
-    const V3D sampleFrameQ = pw->getPeak(0).getQSampleFrame();
-    const V3D labFrameQ = pw->getPeak(0).getQLabFrame();
 
     const std::string filename = "test_Save_Unmodified_PeaksWorkspace_Nexus.nxs";
      /// auto lpw = saveAndReloadPeaksWorkspace(pw, filename);
