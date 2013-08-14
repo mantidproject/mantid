@@ -136,7 +136,7 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  NeutronBk2BkExpConvPVoigt::NeutronBk2BkExpConvPVoigt() : LATTICEINDEX(1000), HEIGHTINDEX(0)
+  NeutronBk2BkExpConvPVoigt::NeutronBk2BkExpConvPVoigt()
   {
   }
     
@@ -146,6 +146,9 @@ namespace CurveFitting
   NeutronBk2BkExpConvPVoigt::~NeutronBk2BkExpConvPVoigt()
   {
   }
+
+  /// Default value for the peak radius
+  int NeutronBk2BkExpConvPVoigt::s_peakRadius = 5;
 
   //----------------------------------------------------------------------------------------------
   /** Get peak parameters stored locally
@@ -163,9 +166,7 @@ namespace CurveFitting
     }
 
     // Get value
-    double paramvalue;
-
-    // FIXME - Whether 'Eta' a parameter?
+    double paramvalue(EMPTY_DBL());
 
     if (paramname.compare("Alpha") == 0)
       paramvalue = m_Alpha;
@@ -177,6 +178,8 @@ namespace CurveFitting
       paramvalue = m_Gamma;
     else if (paramname.compare("d_h") == 0)
       paramvalue = m_dcentre;
+    else if (paramname.compare("Eta") == 0)
+      paramvalue = m_eta;
     else if (paramname.compare("TOF_h") == 0)
       paramvalue = m_centre;
     else if (paramname.compare("FWHM") == 0)
@@ -200,32 +203,31 @@ namespace CurveFitting
   */
   void NeutronBk2BkExpConvPVoigt::calculateParameters(bool explicitoutput) const
   {
-    // FIXME - Clean the order! dtt2 should be parameter 2 and etc!
     // Obtain parameters (class) with pre-set order
     double dtt1   = getParameter(1);
-    double dtt2   = getParameter(4);
-    double zero   = getParameter(5);
+    double dtt2   = getParameter(2);
+    double zero   = getParameter(3);
 
-    double alph0 = getParameter(9);
-    double alph1 = getParameter(10);
-    double beta0 = getParameter(11);
-    double beta1 = getParameter(12);
+    double alph0 = getParameter(4);
+    double alph1 = getParameter(5);
+    double beta0 = getParameter(6);
+    double beta1 = getParameter(7);
 
-    double sig0 = getParameter(17);
-    double sig1 = getParameter(18);
-    double sig2 = getParameter(19);
-    double gam0 = getParameter(20);
-    double gam1 = getParameter(21);
-    double gam2 = getParameter(22);
+    double sig0 = getParameter(8);
+    double sig1 = getParameter(9);
+    double sig2 = getParameter(10);
+    double gam0 = getParameter(11);
+    double gam1 = getParameter(12);
+    double gam2 = getParameter(13);
 
-    double latticeconstant = getParameter(23);
+    double latticeconstant = getParameter(14);
 
-    double dh, tof_h, alpha, beta, H, sigma2, gamma, N;
+    double dh, tof_h, eta, alpha, beta, H, sigma2, gamma, N;
 
-    // Calcualte Peak Position d-spacing and TOF
+    // Calcualte Peak Position d-spacing if necessary
     if (m_cellParamValueChanged)
     {
-      // FIXME : only works for cubic
+      // TODO : make it more general to all type of lattice structure
       m_unitCell.set(latticeconstant, latticeconstant, latticeconstant, 90.0, 90.0, 90.0);
       dh = m_unitCell.d(mH, mK, mL);
       m_dcentre = dh;
@@ -237,13 +239,15 @@ namespace CurveFitting
     }
 
     // Calculate all the parameters
-    // FIXME : Implement this!
     /*
       alpha(d) = alpha0 + alpha1/d_h
       beta(d)  = beta0 + beta1/d_h^4
       tof(d)   = zero + Dtt1*d_h + Dtt2*d_h^2
       */
 
+    alpha = alph0 + alph1/dh;
+    beta = beta0 + beta1/pow(dh, 4.);
+    tof_h = zero + dtt1*dh + dtt2*dh*dh;
 
     // - Start to calculate alpha, beta, sigma2, gamma,
 #if 0
@@ -260,6 +264,7 @@ namespace CurveFitting
     double Th_e = zero + dtt1*dh;
     double Th_t = zerot + dtt1t*dh - dtt2t/dh;
     tof_h = n*Th_e + (1-n)*Th_t;
+#endif
 
     sigma2 = sig0*sig0 + sig1*sig1*std::pow(dh, 2) + sig2*sig2*std::pow(dh, 4);
     gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
@@ -289,22 +294,14 @@ namespace CurveFitting
       m_parameterValid = true;
     }
 
-    // 5.Debug output
+    // Debug output
     if (explicitoutput)
     {
-      stringstream errss;
-      errss << "alpha = " << alpha << ", beta = " << beta
-            << ", N = " << N << "\n";
-      errss << "  n = " << n << ", alpha_e = " << alpha_e << ", alpha_t = " << alpha_t << "\n";
-      errss << " dh = " << dh << ", alph0t = " << alph0t << ", alph1t = " << alph1t
-            << ", alph0 = " << alph0 << ", alph1 = " << alph1 << "\n";
-      errss << "  n = " << n << ", beta_e = " << beta_e << ", beta_t = " << beta_t << "\n";
-      errss << " dh = " << dh << ", beta0t = " << beta0t << ", beta1t = " << beta1t << "\n";
-      g_log.information(errss.str());
+      stringstream msgss;
+      msgss << " dh = " << dh << "; TOF = " << tof_h << ", "
+            << "alpha = " << alpha << ", beta = " << beta;
+      g_log.information(msgss.str());
     }
-#else
-    throw runtime_error("Implement this method ASAP! ");
-#endif
 
     // Reset the flag
     m_hasNewParameterValue = false;
@@ -366,27 +363,6 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  // FIXME : THINK OF REFACORING IT TO INTERFACE
-  /** Set peak height
-   */
-  void NeutronBk2BkExpConvPVoigt::setHeight(const double h)
-  {
-    setParameter(HEIGHTINDEX, h);
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  // FIXME : THINK OF REFACORING IT TO INTERFACE
-  /** Get peak's height
-    */
-  double NeutronBk2BkExpConvPVoigt::height() const
-  {
-    double height = this->getParameter(HEIGHTINDEX);
-    return height;
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Function (local) of the vector version
     * @param out: The calculated peak intensities. This is assume to been initialized to the correct length
     * with a value of zero everywhere.
@@ -423,12 +399,32 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  /**
+  /** virtual function from IFunction
     */
   void NeutronBk2BkExpConvPVoigt::function1D(double* out, const double* xValues, const size_t nData)const
   {
-    // FIXME - Implement soon.
-    throw runtime_error("Implement ASAP.");
+    // calculate some parameter for the (peak-like) function
+    const double height = getParameter(HEIGHTINDEX);
+    const double invert_sigma2 = 1.0/sqrt(2.0*m_Sigma2);
+    double dx = fabs(s_peakRadius*this->fwhm());
+
+    // On each data point
+    for(size_t i = 0; i < nData; ++i)
+    {
+      if (fabs(xValues[i] - m_centre) < dx)
+      {
+        // In peak range
+        out[i] = height
+            * calOmega(xValues[i] - m_centre, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, invert_sigma2);
+      }
+      else
+      {
+        // Out of peak range
+        out[i] = 0.0;
+      }
+    }
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -437,22 +433,21 @@ namespace CurveFitting
    */
   void NeutronBk2BkExpConvPVoigt::init()
   {
-    // FIXME -
     // Peak height (0)
     declareParameter("Height", 1.0, "Intensity of peak");
 
-    // Instrument geometry related (1 ~ 8)
+    // Instrument geometry related (1 ~ 3)
     declareParameter("Dtt1", 1.0, "coefficient 1 for d-spacing calculation for epithermal neutron part");
     declareParameter("Dtt2", 1.0, "coefficient 2 for d-spacing calculation for epithermal neutron part");
     declareParameter("Zero", 0.0, "Zero shift for epithermal neutron");
 
-    // Peak profile related (9 ~ 16) Back to back Expoential
+    // Peak profile related (4 ~ 7) Back to back Expoential
     declareParameter("Alph0",1.6, "exponential constant for rising part of epithermal neutron pulse");
     declareParameter("Alph1",1.5, "exponential constant for rising part of expithermal neutron pulse");
     declareParameter("Beta0",1.6, "exponential constant of decaying part of epithermal neutron pulse");
     declareParameter("Beta1",1.5, "exponential constant of decaying part of epithermal neutron pulse");
 
-    // Pseudo-Voigt (17 ~ 22)
+    // Pseudo-Voigt (8 ~ 13)
     declareParameter("Sig0", 1.0, "variance parameter 1 of the Gaussian component of the psuedovoigt function");
     declareParameter("Sig1", 1.0, "variance parameter 2 of the Gaussian component of the psuedovoigt function");
     declareParameter("Sig2", 1.0, "variance parameter 3 of the Gaussian component of the psuedovoigt function");
@@ -461,11 +456,15 @@ namespace CurveFitting
     declareParameter("Gam1", 0.0, "FWHM parameter 2 of the Lorentzian component of the psuedovoigt function");
     declareParameter("Gam2", 0.0, "FWHM parameter 3 of the Lorentzian component of the psuedovoigt function");
 
-    // Lattice parameter (23)
+    // Lattice parameter (14)
     declareParameter("LatticeConstant", 10.0, "lattice constant for the sample");
 
+    // Some build-in constant
+    LATTICEINDEX = 14;
+    HEIGHTINDEX = 0;
+
     // Unit cell
-    m_unitCellSize = 10.0;
+    m_unitCellSize = -DBL_MAX;
 
     // Set flag
     m_cellParamValueChanged = true;
