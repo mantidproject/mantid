@@ -100,7 +100,6 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(keys = AlgorithmFactory::Instance().getKeys());
     int noOfAlgs = keys.size();
-    TS_ASSERT(noOfAlgs > 1);
 
     AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",1);
 
@@ -133,20 +132,70 @@ public:
     AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",2);
   }
 
+  void testGetDescriptors()
+  {
+    AlgorithmFactory::Instance().subscribe<ToyAlgorithm>();
+    std::vector<Algorithm_descriptor> descriptors;
+    TS_ASSERT_THROWS_NOTHING(descriptors = AlgorithmFactory::Instance().getDescriptors(true));
+
+    int noOfAlgs = descriptors.size();
+    std::vector<Algorithm_descriptor>::const_iterator descItr = descriptors.begin();
+    bool foundAlg = false;
+    while (descItr != descriptors.end() && !foundAlg)
+    {
+      foundAlg = ("Cat" == descItr->category)&&("ToyAlgorithm" == descItr->name)&&(1 == descItr->version);
+      descItr++;
+    }
+    TS_ASSERT(foundAlg);
+
+    AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",1);
+
+    TS_ASSERT_THROWS_NOTHING(descriptors = AlgorithmFactory::Instance().getDescriptors(true));
+
+    TS_ASSERT_EQUALS(noOfAlgs - 1, descriptors.size());
+  }
+
   void testGetCategories()
   {
+    AlgorithmFactory::Instance().subscribe<CategoryAlgorithm>();
+    std::set<std::string> validCategories;
+    TS_ASSERT_THROWS_NOTHING(validCategories = AlgorithmFactory::Instance().getCategories(true));
+    
+    int noOfCats = validCategories.size();
+    TS_ASSERT_DIFFERS(validCategories.find("Fake"), validCategories.end());
+
+    AlgorithmFactory::Instance().unsubscribe("CategoryAlgorithm",1);
+    TS_ASSERT_THROWS_NOTHING(validCategories = AlgorithmFactory::Instance().getCategories(true));
+    TS_ASSERT_EQUALS(noOfCats - 1, validCategories.size());
   }
   
   void testGetCategoriesWithState()
   {
-  }
-  
-  void testGetDescriptors()
-  {
+    AlgorithmFactory::Instance().subscribe<CategoryAlgorithm>();
+
+    std::map<std::string, bool> validCategories;
+    TS_ASSERT_THROWS_NOTHING(validCategories = AlgorithmFactory::Instance().getCategoriesWithState());
+    int noOfCats = validCategories.size();
+    TS_ASSERT_DIFFERS(validCategories.find("Fake"), validCategories.end());
+    
+    AlgorithmFactory::Instance().unsubscribe("CategoryAlgorithm",1);
+    TS_ASSERT_THROWS_NOTHING(validCategories = AlgorithmFactory::Instance().getCategoriesWithState());
+    TS_ASSERT_EQUALS(noOfCats - 1, validCategories.size());
   }
   
   void testDecodeName()
   {
+    std::pair<std::string,int> basePair;
+    basePair.first = "Cat";
+    basePair.second = 1;
+    std::string mangledName = "Cat|1";
+    std::pair<std::string,int> outPair;
+    TS_ASSERT_THROWS_NOTHING(outPair = AlgorithmFactory::Instance().decodeName(mangledName));
+    TS_ASSERT_EQUALS(basePair.first,outPair.first);
+    TS_ASSERT_EQUALS(basePair.second,outPair.second);
+
+    mangledName = "Cat 1";
+    TS_ASSERT_THROWS_ANYTHING(outPair = AlgorithmFactory::Instance().decodeName(mangledName));
   }
 
 

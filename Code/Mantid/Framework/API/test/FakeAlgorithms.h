@@ -79,4 +79,23 @@ public:
   }
   void exec() {}
 };
+
+class CategoryAlgorithm : public Algorithm
+{
+public:
+  CategoryAlgorithm() : Algorithm() {}
+  virtual ~CategoryAlgorithm() {}
+
+  const std::string name() const { return "CategoryAlgorithm";} ///< Algorithm's name for identification
+  int version() const  { return 1;} ///< Algorithm's version for identification
+  const std::string category() const { return "Fake";} 
+  const std::string alias() const { return "CategoryTester";}
+  void init()
+  { 
+    declareProperty("prop1","value");
+    declareProperty("prop2",1);   
+    declareProperty("prop3",10.5);   
+  }
+  void exec() {}
+};
 #endif
