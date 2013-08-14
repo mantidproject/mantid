@@ -54,7 +54,6 @@ set ( TEST_PY_FILES
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py
   MantidSimpleTest.py
-  SettingsTest.py
   WorkspaceGroupTest.py
   WorkspaceHistoryTest.py
 )
