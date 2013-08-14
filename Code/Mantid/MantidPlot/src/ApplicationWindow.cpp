@@ -17037,8 +17037,8 @@ else
                     mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
     }
     user_interface->initializeLayout(); 
-    user_interface->initializeLocalPython();
     setGeometry(usr_win, user_interface);
+    user_interface->initializeLocalPython();
   }
   else
   {
