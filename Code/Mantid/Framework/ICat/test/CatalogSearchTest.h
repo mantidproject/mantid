@@ -20,11 +20,6 @@ public:
     return ICatTestHelper::skipTests();
   }
 
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static CatalogSearchTest *createSuite() { return new CatalogSearchTest(); }
-  static void destroySuite( CatalogSearchTest *suite ) { delete suite; }
-  
   CatalogSearchTest()
   {
     Mantid::API::FrameworkManager::Instance();
