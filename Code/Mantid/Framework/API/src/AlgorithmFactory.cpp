@@ -141,6 +141,10 @@ namespace Mantid
   std::pair<std::string,int> AlgorithmFactoryImpl::decodeName(const std::string& mangledName)const
   {
     std::string::size_type seperatorPosition = mangledName.find("|");
+    if (seperatorPosition == std::string::npos)
+    {
+      throw std::invalid_argument("Cannot decode a Name string without a \"|\" (bar) character ");
+    }
     std::string name = mangledName.substr(0,seperatorPosition);
     int version;
     std::istringstream ss(mangledName.substr(seperatorPosition+1));
@@ -277,7 +281,7 @@ namespace Mantid
     std::map<std::string,bool> categoryMap = getCategoriesWithState();
 
     //iterate around the map
-    std::map<std::string,bool>::const_iterator it_end = categoryMap.begin();
+    std::map<std::string,bool>::const_iterator it_end = categoryMap.end();
     for (std::map<std::string,bool>::const_iterator it = categoryMap.begin(); it!= it_end; ++it)
     {
       bool isHidden = (*it).second;
@@ -309,7 +313,7 @@ namespace Mantid
     {
       fillHiddenCategories(&hiddenCategories);
     }
-
+    
     //results vector
     std::vector<Algorithm_descriptor> res;
 
