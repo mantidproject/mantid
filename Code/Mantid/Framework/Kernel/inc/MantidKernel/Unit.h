@@ -233,7 +233,7 @@ public:
   const std::string label() const {return m_label; }
 
   Label();
-  Label(std::string caption, std::string label);
+  Label(const std::string& caption, const std::string& label);
   void setLabel(const std::string& cpt, const std::string& lbl = "");
   virtual Unit * clone() const;
 

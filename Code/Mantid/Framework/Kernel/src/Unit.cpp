@@ -206,7 +206,7 @@ Label::Label()
 {
 }
 
-Label::Label(std::string caption, std::string label) : Empty(),
+Label::Label(const std::string& caption, const std::string& label) : Empty(),
   m_caption(caption), m_label(label)
 {
 }
