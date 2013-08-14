@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
-//#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
-#include "SaveGSASInstrumentFile.h"
+#include "MantidAlgorithms/SaveGSASInstrumentFile.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidAPI/TableRow.h"
+
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 
 using namespace std;
 
@@ -62,7 +62,7 @@ public:
 
   }
 
-  void test_SaveGSSInstrumentFile_MultiBank()
+  void Xtest_SaveGSSInstrumentFile_MultiBank()
   {
     // Load a (local) table workspace
     loadProfileTable("PG3ProfileTable");
@@ -102,15 +102,48 @@ public:
   // Load table workspace containing instrument parameters
   void loadProfileTable(string wsname)
   {
-    string tablewsname("pg3_bank1_params.nxs");
+    TableWorkspace_sptr tablews(new TableWorkspace);
+    tablews->addColumn("str", "Name");
+    tablews->addColumn("double", "Value_4");
 
-    LoadNexusProcessed loader;
-    loader.initialize();
+    vector<string> parnames;
+    vector<double> parvalues;
 
-    loader.setProperty("Filename", tablewsname);
-    loader.setProperty("OutputWorkspace", wsname);
+    parnames.push_back("BANK");     parvalues.push_back(4.);
+    parnames.push_back("Alph0"); 	parvalues.push_back(0.5    );
+    parnames.push_back("Alph0t"); 	parvalues.push_back(65.14  );
+    parnames.push_back("Alph1"); 	parvalues.push_back(8.15   );
+    parnames.push_back("Alph1t"); 	parvalues.push_back(0      );
+    parnames.push_back("Beta0"); 	parvalues.push_back(3.201  );
+    parnames.push_back("Beta0t"); 	parvalues.push_back(78.412 );
+    parnames.push_back("Beta1"); 	parvalues.push_back(7.674  );
+    parnames.push_back("Beta1t"); 	parvalues.push_back(0      );
+    parnames.push_back("Dtt1"); 	parvalues.push_back(22780.6);
+    parnames.push_back("Dtt1t"); 	parvalues.push_back(22790.1);
+    parnames.push_back("Dtt2"); 	parvalues.push_back(0      );
+    parnames.push_back("Dtt2t"); 	parvalues.push_back(0.3    );
+    parnames.push_back("Gam0"); 	parvalues.push_back(0      );
+    parnames.push_back("Gam1"); 	parvalues.push_back(0      );
+    parnames.push_back("Gam2"); 	parvalues.push_back(0      );
+    parnames.push_back("Sig0"); 	parvalues.push_back(0      );
+    parnames.push_back("Sig1"); 	parvalues.push_back(3.16228);
+    parnames.push_back("Sig2"); 	parvalues.push_back(20.0823);
+    parnames.push_back("Tcross"); 	parvalues.push_back(0.356  );
+    parnames.push_back("Width"); 	parvalues.push_back(1.2141 );
+    parnames.push_back("Zero"); 	parvalues.push_back(0      );
+    parnames.push_back("Zerot"); 	parvalues.push_back(-70.6  );
+    parnames.push_back("step"); 	parvalues.push_back(5      );
+    parnames.push_back("tof-max"); 	parvalues.push_back(46760  );
+    parnames.push_back("tof-min"); 	parvalues.push_back(2278.06);
+    parnames.push_back("twotheta"); parvalues.push_back(90.807 );
 
-    loader.execute();
+    for (size_t i = 0; i < parnames.size(); ++i)
+    {
+      TableRow row = tablews->appendRow();
+      row << parnames[i] << parvalues[i];
+    }
+
+    AnalysisDataService::Instance().addOrReplace(wsname, tablews);
 
     return;
   }
@@ -118,10 +151,12 @@ public:
   // Compare 2 files
   bool compare2Files(std::string filename1, std::string filename2)
   {
-    ifstream file1, file2;
+    ifstream file1(filename1.c_str(), std::ifstream::in);
+    ifstream file2(filename2.c_str(), std::ifstream::in);
 
-    file1.open( filename1.c_str(), ios::binary ); //c_str() returns C-style string pointer
-    file2.open( filename2.c_str(), ios::binary );
+
+    // file1.open( filename1.c_str(), ios::binary ); //c_str() returns C-style string pointer
+    // file2.open( filename2.c_str(), ios::binary );
 
     if (!file1)
     {
