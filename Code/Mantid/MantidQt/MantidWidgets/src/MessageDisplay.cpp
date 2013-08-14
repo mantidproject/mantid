@@ -9,9 +9,10 @@
 #include <QActionGroup>
 #include <QHBoxLayout>
 #include <QMenu>
+#include <QPlainTextEdit>
 #include <QPoint>
+#include <QScrollBar>
 #include <QSignalMapper>
-#include <QTextEdit>
 
 #include <Poco/Logger.h>
 #include <Poco/Message.h>
@@ -33,12 +34,13 @@ namespace MantidQt
      */
     MessageDisplay::MessageDisplay(QWidget *parent)
     : QWidget(parent), m_logLevelControl(DisableLogLevelControl), m_logChannel(new API::QtSignalChannel),
-      m_textDisplay(new QTextEdit(this)), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
+      m_textDisplay(new QPlainTextEdit(this)), m_formats(), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
       m_error(new QAction(tr("&Error"), this)), m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)), m_information(new QAction(tr("&Information"), this)),
       m_debug(new QAction(tr("&Debug"), this))
     {
       initActions();
+      initFormats();
       setupTextArea();
     }
 
@@ -49,12 +51,13 @@ namespace MantidQt
      */
     MessageDisplay::MessageDisplay(LogLevelControl logLevelControl, QWidget *parent)
     : QWidget(parent), m_logLevelControl(logLevelControl), m_logChannel(new API::QtSignalChannel),
-      m_textDisplay(new QTextEdit(this)), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
+      m_textDisplay(new QPlainTextEdit(this)), m_loglevels(new QActionGroup(this)), m_logLevelMapping(new QSignalMapper(this)),
       m_error(new QAction(tr("&Error"), this)), m_warning(new QAction(tr("&Warning"), this)),
       m_notice(new QAction(tr("&Notice"), this)), m_information(new QAction(tr("&Information"), this)),
       m_debug(new QAction(tr("&Debug"), this))
     {
       initActions();
+      initFormats();
       setupTextArea();
     }
 
@@ -157,11 +160,9 @@ namespace MantidQt
      */
     void MessageDisplay::append(const Message & msg)
     {
-      setTextColor(msg.priority());
-      appendText(msg.text());
-      //set the colour back to the default (black) for historical reasons
-      setTextColor(Message::Priority::PRIO_INFORMATION);
-      scrollToBottom();
+      QTextCursor cursor = moveCursorToEnd();
+      cursor.insertText(msg.text(), format(msg.priority()));
+      moveCursorToEnd();
 
       if(msg.priority() <= Message::Priority::PRIO_ERROR ) emit errorReceived(msg.text());
       if(msg.priority() <= Message::Priority::PRIO_WARNING ) emit warningReceived(msg.text());
@@ -185,29 +186,53 @@ namespace MantidQt
     }
 
     /**
+     * @returns The cursor at the end of the text
+     */
+    QTextCursor MessageDisplay::moveCursorToEnd()
+    {
+      QTextCursor cursor( m_textDisplay->textCursor());
+      cursor.movePosition(QTextCursor::End);
+      m_textDisplay->setTextCursor(cursor);
+      return cursor;
+    }
+
+    /**
+     * @return True if scroll bar is at bottom, false otherwise
+     */
+    bool MessageDisplay::isScrollbarAtBottom() const
+    {
+      return m_textDisplay->verticalScrollBar()->value() == m_textDisplay->verticalScrollBar()->maximum();
+    }
+
+    /**
+     * Moves the cursor to the top of the document
+     */
+    void MessageDisplay::scrollToTop()
+    {
+      // Code taken from QtCreator source
+      m_textDisplay->verticalScrollBar()->setValue(m_textDisplay->verticalScrollBar()->minimum());
+      // QPlainTextEdit destroys the first calls value in case of multiline
+      // text, so make sure that the scroll bar actually gets the value set.
+      // Is a noop if the first call succeeded.
+      m_textDisplay->verticalScrollBar()->setValue(m_textDisplay->verticalScrollBar()->minimum());
+    }
+
+    /**
      * Moves the cursor to the bottom of the document
      */
     void MessageDisplay::scrollToBottom()
     {
-      QTextCursor cur = m_textDisplay->textCursor();
-      cur.movePosition(QTextCursor::End);
-      m_textDisplay->setTextCursor(cur);
+      // Code taken from QtCreator source
+      m_textDisplay->verticalScrollBar()->setValue(m_textDisplay->verticalScrollBar()->maximum());
+      // QPlainTextEdit destroys the first calls value in case of multiline
+      // text, so make sure that the scroll bar actually gets the value set.
+      // Is a noop if the first call succeeded.
+      m_textDisplay->verticalScrollBar()->setValue(m_textDisplay->verticalScrollBar()->maximum());
     }
 
     //----------------------------------------------------------------------------------------
     // Protected members
     //----------------------------------------------------------------------------------------
-    /**
-     * @param event A QShowEvent object a parameterizing the event
-     */
-    void MessageDisplay::showEvent(QShowEvent * event)
-    {
-      Q_UNUSED(event);
-      scrollToBottom();
-
-      // Don't accept the event on purpose to allow parent to
-      // do something if required.
-    }
 
     //-----------------------------------------------------------------------------
     // Private slot member functions
@@ -216,7 +241,7 @@ namespace MantidQt
     void MessageDisplay::showContextMenu(const QPoint & mousePos)
     {
       QMenu * menu = m_textDisplay->createStandardContextMenu();
-      if(!m_textDisplay->text().isEmpty()) menu->addAction("Clear",m_textDisplay, SLOT(clear()));
+      if(!m_textDisplay->document()->isEmpty()) menu->addAction("Clear",m_textDisplay, SLOT(clear()));
 
       if(m_logLevelControl == MessageDisplay::EnableLogLevelControl)
       {
@@ -290,6 +315,27 @@ namespace MantidQt
     }
 
     /**
+     * Sets up the internal map of text formatters for each log level
+     */
+    void MessageDisplay::initFormats()
+    {
+      m_formats.clear();
+      QTextCharFormat format;
+
+      format.setForeground(Qt::red);
+      m_formats[Message::Priority::PRIO_ERROR] = format;
+
+      format.setForeground(QColor::fromRgb(255, 100, 0));
+      m_formats[Message::Priority::PRIO_WARNING] = format;
+
+      format.setForeground(Qt::gray);
+      m_formats[Message::Priority::PRIO_INFORMATION] = format;
+
+      format.setForeground(Qt::darkBlue);
+      m_formats[Message::Priority::PRIO_NOTICE] = format;
+    }
+
+    /**
      * Set the properties of the text display, i.e read-only
      * and make it occupy the whole widget
      */
@@ -297,6 +343,9 @@ namespace MantidQt
     {
       m_textDisplay->setReadOnly(true);
       m_textDisplay->ensureCursorVisible();
+      m_textDisplay->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+      m_textDisplay->setMouseTracking(true);
+      m_textDisplay->setUndoRedoEnabled(false);
 
       this->setLayout(new QHBoxLayout(this));
       QLayout *layout = this->layout();
@@ -310,41 +359,13 @@ namespace MantidQt
     }
 
     /**
-     *  @param priority A priority enumeration
+     * @param priority An enumeration for the log level
+     * @return format for given log level
      */
-    void MessageDisplay::setTextColor(const Message::Priority priority)
+    QTextCharFormat MessageDisplay::format(const API::Message::Priority priority) const
     {
-      m_textDisplay->setTextColor(this->textColor(priority));
+      return m_formats.value(priority,QTextCharFormat());
     }
 
-    /**
-     * @param priority A priority enumeration
-     */
-    QColor MessageDisplay::textColor(const Message::Priority priority) const
-    {
-      switch(priority)
-      {
-      case Message::Priority::PRIO_ERROR: return Qt::red;
-        break;
-      case Message::Priority::PRIO_WARNING: return QColor::fromRgb(255, 100, 0); //orange
-        break;
-      case Message::Priority::PRIO_INFORMATION: return Qt::gray;
-        break;
-      case Message::Priority::PRIO_NOTICE: return Qt::darkBlue;
-        break;
-      default: return Qt::black;
-      }
-    }
-
-    /**
-     * @param text Text to append
-     */
-    void MessageDisplay::appendText(const QString & text)
-    {
-      m_textDisplay->insertPlainText(text);
-      QTextCursor cur = m_textDisplay->textCursor();
-      cur.movePosition(QTextCursor::End);
-      m_textDisplay->setTextCursor(cur);
-    }
   }
 }
