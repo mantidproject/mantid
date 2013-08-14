@@ -123,16 +123,6 @@ public:
         DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, true /*in place*/);
   }
 
-  /// This test is more likely to cause the odd bug found
-  void test_2D_2D_inPlace_bigger()
-  {
-    int nHist = 500,nBins=500;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
-    performTest(work_in1,work_in2, false /*not event*/,
-        DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, true /*in place*/);
-  }
-
   void test_2D_1DColumn()
   {
     for (int inplace=0; inplace<2; inplace++)
