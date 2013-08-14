@@ -264,7 +264,7 @@ namespace Algorithms
     auto m_infoTableWS = boost::make_shared<TableWorkspace>();
     m_infoTableWS->addColumn("int", "WorkspaceIndex");
     m_infoTableWS->addColumn("int", "NumberPeaksFitted");
-    m_infoTableWS->addColumn("int", "NumberPeaksToFit");
+    m_infoTableWS->addColumn("int", "NumberPeaksInRange");
     m_infoTableWS->addColumn("str", "OffsetFitStatus");
     m_infoTableWS->addColumn("double", "ChiSquare");
     setProperty("SpectraFitInfoTableWorkspace", m_infoTableWS);
@@ -296,6 +296,7 @@ namespace Algorithms
 
       int numpeaksfitted(0);
       int numpeakstofit(0);
+      int numpeaksindrange(0);
       std::string fitoffsetstatus("N/A");
       double chi2 = -1;
       std::vector<double> fittedpeakpositions, tofitpeakpositions;
@@ -306,9 +307,7 @@ namespace Algorithms
       {
         // dead detector will be masked
         offset = BAD_OFFSET;
-        numpeakstofit = 0;
-        numpeaksfitted = 0;
-        fitoffsetstatus = "N/A";
+        fitoffsetstatus = "empty det";
       }
       else
       {
@@ -320,9 +319,7 @@ namespace Algorithms
         {
           // Dead detector will be masked
           offset=BAD_OFFSET;
-          numpeakstofit = -1;
-          numpeaksfitted = -1;
-          fitoffsetstatus = "N/A";
+          fitoffsetstatus = "dead det";
         }
       }
       if (offset < 10.)
@@ -331,7 +328,9 @@ namespace Algorithms
         std::vector<double> peakPosToFit, peakPosFitted, chisq;
         size_t nparams;
         double minD, maxD;
-        fitSpectra(wi, inputW, peakPositions, fitWindows, nparams, minD, maxD, peakPosToFit, peakPosFitted, chisq);
+        numpeaksindrange =
+            fitSpectra(wi, inputW, peakPositions, fitWindows, nparams, minD, maxD,
+                       peakPosToFit, peakPosFitted, chisq);
         numpeakstofit = static_cast<int>(peakPositions.size());
         numpeaksfitted = static_cast<int>(peakPosFitted.size());
         fittedpeakpositions = peakPosFitted;
@@ -424,7 +423,7 @@ namespace Algorithms
           // Output warning
           g_log.debug() << "Spectra " << wi << " has 0 parameter for it.  Set to bad_offset." << ".\n";
           offset = BAD_OFFSET;
-          fitoffsetstatus = "N/A";
+          fitoffsetstatus = "no peaks";
         }
       }
       double mask=0.0;
@@ -461,7 +460,7 @@ namespace Algorithms
 
         // Add report to TableWorkspace
         TableRow newrow = m_infoTableWS->appendRow();
-        newrow << wi << numpeaksfitted << numpeakstofit << fitoffsetstatus << chi2;
+        newrow << wi << numpeaksfitted << numpeaksindrange << fitoffsetstatus << chi2;
 
         // Add report to offset info table
         TableRow newrow2 = m_peakOffsetTableWS->appendRow();
@@ -592,9 +591,9 @@ namespace Algorithms
     * @param peakPosToFit :: Peak positions to fit.
     * @param peakPosFitted :: Peak positions fitted.
     * @param chisq :: chisq.
-    * @return The calculated offset value
+    * @return The number of peaks in range
     */
-  void GetDetOffsetsMultiPeaks::fitSpectra(const int64_t wi, MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions,
+  int GetDetOffsetsMultiPeaks::fitSpectra(const int64_t wi, MatrixWorkspace_sptr inputW, const std::vector<double> &peakPositions,
                                            const std::vector<double> &fitWindows, size_t &nparams, double &minD, double &maxD,
                                            std::vector<double>&peakPosToFit, std::vector<double>&peakPosFitted,
                                            std::vector<double> &chisq)
@@ -644,7 +643,7 @@ namespace Algorithms
         peakPosToFit.push_back(peakPositions[i]);
       }
     }
-
+    int numPeaksInRange = static_cast<int>(peakPosToFit.size());
 
     API::IAlgorithm_sptr findpeaks = createChildAlgorithm("FindPeaks", -1, -1, false);
     findpeaks->setProperty("InputWorkspace", inputW);
@@ -803,7 +802,7 @@ namespace Algorithms
                   chisq);
 
       nparams = peakPosFitted.size();
-      return;
+      return numPeaksInRange;
     }
 
   } // namespace Algorithm
