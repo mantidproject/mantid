@@ -185,7 +185,7 @@ inline double calCubicDSpace(double a, int h, int k, int l)
 */
 
 /// Integral for Gamma
-std::complex<double> E1X(std::complex<double> z);
+// std::complex<double> E1X(std::complex<double> z);
 
 } // namespace CurveFitting
 } // namespace Mantid

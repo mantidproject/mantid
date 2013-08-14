@@ -646,8 +646,8 @@ namespace CurveFitting
       const double SQRT_H_5 = sqrt(H)*.5;
       std::complex<double> p(alpha*x, alpha*SQRT_H_5);
       std::complex<double> q(-beta*x, beta*SQRT_H_5);
-      double omega2a = imag(exp(p)*E1X(p));
-      double omega2b = imag(exp(q)*E1X(q));
+      double omega2a = imag(exp(p)*Mantid::API::E1(p));
+      double omega2b = imag(exp(q)*Mantid::API::E1(q));
       omega2 = -1.0*N*eta*(omega2a + omega2b)*TWO_OVER_PI;
     }
     const double omega = omega1+omega2;
@@ -738,7 +738,6 @@ namespace CurveFitting
 
   //-------------------------  External Functions ---------------------------------------------------
   /** Implementation of complex integral E_1
-   */
   std::complex<double> E1X(std::complex<double> z)
   {
     const double el = 0.5772156649015328;
@@ -802,6 +801,7 @@ namespace CurveFitting
 
     return exp_e1;
   }
+     */
 
   //----------------------------------------------------------------------------------------------
   /** (Migrated from IPeakFunction)

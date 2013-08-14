@@ -162,6 +162,9 @@ private:
 
 typedef boost::shared_ptr<IPowderDiffPeakFunction> IPowderDiffPeakFunction_sptr;
 
+/// Integral for Gamma
+std::complex<double> E1(std::complex<double> z);
+
 } // namespace API
 } // namespace Mantid
 
