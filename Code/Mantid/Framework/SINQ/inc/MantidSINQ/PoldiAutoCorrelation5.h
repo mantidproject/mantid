@@ -25,9 +25,6 @@ namespace Poldi
 
 
 
-//const double PI    = 3.1415926535897932384626433832795;
-//const double TWOPI = 2*3.1415926535897932384626433832795;
-//const double TWOPI = 2*M_PI;
 const double rad2deg = 180./M_PI;
 const double deg2rad = M_PI/180.;
 

@@ -19,14 +19,6 @@ namespace Mantid
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
-//namespace DataObjects
-//{
-//	  class Workspace2D_sptr;
-//}
-//namespace API
-//{
-//	  class ITableWorkspace_sptr;
-//}
 
 
   namespace Poldi

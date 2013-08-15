@@ -1,6 +1,11 @@
 /*WIKI*
 
-toto
+
+== How to use algorithm with other algorithms ==
+This algorithm is designed to work with other algorithms to
+proceed POLDI data. The introductions can be found in the
+wiki page of [[PoldiProjectRun]].
+
 
  *WIKI*/
 //----------------------------------------------------------------------
@@ -26,11 +31,11 @@ namespace Poldi
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiLoadChopperSlits)
 
-    				/// Sets documentation strings for this algorithm
-    				void PoldiLoadChopperSlits::initDocs()
+// Sets documentation strings for this algorithm
+void PoldiLoadChopperSlits::initDocs()
 {
-	this->setWikiSummary("Load Poldi data file. ");
-	this->setOptionalMessage("Load Poldi data file.");
+	this->setWikiSummary("Load Poldi chopper slits data file. ");
+	this->setOptionalMessage("Load Poldi chopper slits data file.");
 }
 
 
