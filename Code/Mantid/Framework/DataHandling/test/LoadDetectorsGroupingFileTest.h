@@ -190,6 +190,49 @@ public:
     return ScopedFile(os.str(), xmlfilename);
   }
 
+  void test_DescriptionAndNameLoading()
+  {
+    ScopedFile f = generateNamedAndDescribedFile("description_loading.xml");
+
+    // Initialize an algorithm
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+
+    TS_ASSERT(load.setProperty("InputFile", f.getFileName()));
+    TS_ASSERT(load.setProperty("OutputWorkspace", "Grouping"));
+
+    // Run the algorithm
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+
+    Workspace_sptr ws = API::AnalysisDataService::Instance().retrieve("Grouping");
+    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(ws);
+
+    // Check that description was loaded
+    TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(), "Some description");
+
+    // Check that group names were loaded
+    TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_1")->value(), "name1");
+    TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_2")->value(), "name2");
+
+    // Check that no empty group name properties are created
+    TS_ASSERT(!gws->run().hasProperty("GroupName_3"));
+  }
+
+  ScopedFile generateNamedAndDescribedFile(std::string xmlfilename)
+  {
+    std::ostringstream os;
+
+    os << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
+    os << "<detector-grouping description=\"Some description\">" << std::endl;
+    os << "  <group name=\"name1\"> <ids>1-32</ids> </group>" << std::endl;
+    os << "  <group name=\"name2\"> <ids>33-64</ids> </group>" << std::endl;
+    os << "  <group> <ids>65-96</ids> </group>" << std::endl;
+    os << "</detector-grouping>" << std::endl;
+
+    return ScopedFile(os.str(), xmlfilename);
+  }
+
 };
 
 
