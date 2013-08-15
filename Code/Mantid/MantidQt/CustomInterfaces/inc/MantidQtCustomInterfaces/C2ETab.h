@@ -46,13 +46,17 @@ namespace CustomInterfaces
     void setupTab();
     void validateTab();
 
+
+  signals:
+   void runAsPythonScript(const QString & code, bool no_output);
+
   private:
     /// Overidden by child class.
     virtual void setup() = 0;
     /// Overidden by child class.
     virtual void run() = 0;
     /// Overidden by child class.
-    virtual QString validate() = 0;
+    virtual bool validate() = 0;
 
   protected:
     Ui::ConvertToEnergy m_uiForm;

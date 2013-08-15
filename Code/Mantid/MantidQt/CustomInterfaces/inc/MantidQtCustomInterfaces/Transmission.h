@@ -38,13 +38,14 @@ namespace CustomInterfaces
   class DLLExport Transmission : public C2ETab
   {
     Q_OBJECT
+
   public:
     Transmission(Ui::ConvertToEnergy& uiForm, QWidget * parent = 0);
     virtual ~Transmission();
 
     virtual void setup();
     virtual void run();
-    virtual QString validate();
+    virtual bool validate();
   };
 
 } // namespace CustomInterfaces

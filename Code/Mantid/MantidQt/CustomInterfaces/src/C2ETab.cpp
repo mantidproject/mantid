@@ -22,7 +22,10 @@ namespace CustomInterfaces
   
   void C2ETab::runTab()
   {
-    run();
+    if(validate())
+    {
+      run();
+    }
   }
 
   void C2ETab::setupTab()

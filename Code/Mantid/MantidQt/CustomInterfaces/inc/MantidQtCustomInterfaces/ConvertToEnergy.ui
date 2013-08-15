@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>626</width>
-    <height>830</height>
+    <width>621</width>
+    <height>746</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -2752,26 +2752,50 @@ p, li { white-space: pre-wrap; }
       <layout class="QVBoxLayout" name="verticalLayout_17">
        <item>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
+         <item row="0" column="1">
           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transInputFile">
            <property name="label" stdset="0">
-            <string>Sample File:</string>
+            <string/>
+           </property>
+           <property name="fileExtensions">
+            <stringlist>
+             <string>.raw</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile">
+           <property name="label" stdset="0">
+            <string/>
+           </property>
+           <property name="fileExtensions">
+            <stringlist>
+             <string>.raw</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Sample File: </string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="transCanFile">
-           <property name="label" stdset="0">
+          <widget class="QLabel" name="label_8">
+           <property name="text">
             <string>Can/bgd File:</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="2" column="0" colspan="2">
           <layout class="QHBoxLayout" name="horizontalLayout_44">
            <item>
             <widget class="QCheckBox" name="trans_ckVerbose">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="text">
               <string>Verbose</string>

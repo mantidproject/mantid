@@ -1,6 +1,5 @@
 # Algorithm to start Bayes programs
 from MantidFramework import *
-
 class IDAtransmission(PythonAlgorithm):
  
 	def category(self):
@@ -10,8 +9,8 @@ class IDAtransmission(PythonAlgorithm):
 		self.declareProperty(Name='Instrument',DefaultValue='iris',Validator=ListValidator(['irs','iris','osi','osiris']),Description = 'Instrument')
 		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
 		self.declareProperty(Name='CanNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Resolution run number')
-		self.declareProperty('Verbose',DefaultValue='Yes',Validator=ListValidator(['Yes','No']))
-		self.declareProperty('Plot',DefaultValue='Yes',Validator=ListValidator(['Yes','No']))
+		self.declareProperty('Verbose',DefaultValue=False, Description = 'Switch to show verbose output of algorithm')
+		self.declareProperty('Plot',DefaultValue=False, Description = 'Switch to plot output of algorithm')
 		self.declareProperty('Save',DefaultValue=False,Description = 'Switch Save result to nxs file Off/On')
  
 	def PyExec(self):
@@ -21,13 +20,10 @@ class IDAtransmission(PythonAlgorithm):
 		sn = self.getPropertyValue('SamNumber')
 		cn = self.getPropertyValue('CanNumber')
 
-		sam = prefix+sn
-		can = prefix+cn
-
-		verbOp = self.getPropertyValue('Verbose')
-		plotOp = self.getPropertyValue('Plot')
+		verbOp = self.getProperty('Verbose')
+		plotOp = self.getProperty('Plot')
 		saveOp = self.getProperty('Save')
 		from IndirectEnergyConversion import IndirectTrans
-		IndirectTrans(sam,can,verbOp,plotOp,saveOp)
+		IndirectTrans(prefix,sn,cn,Verbose=verbOp,Plot=plotOp,Save=saveOp)
 
 mantid.registerPyAlgorithm(IDAtransmission())         # Register algorithm with Mantid

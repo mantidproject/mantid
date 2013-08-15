@@ -113,6 +113,9 @@ void Indirect::initLayout()
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
 
+  // "Transmission" tab
+  connect(m_tab_trans, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+
   // create validators
   m_valInt = new QIntValidator(this);
   m_valDbl = new QDoubleValidator(this);
