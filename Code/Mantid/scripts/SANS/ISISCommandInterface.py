@@ -177,7 +177,7 @@ def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False
         scale, shift, fitScale, fitShift, qMin, qMax)
     _printMessage('#Set front detector rescale/shift values')
     
-def TransFit(mode,lambdamin=None,lambdamax=None):
+def TransFit(mode,lambdamin=None,lambdamax=None, selector='BOTH'):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range
         over which to do the fit. These arguments are passed to the algorithm
@@ -186,14 +186,16 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
         @param mode: can be 'Logarithmic' ('YLOG', 'LOG') 'OFF' ('CLEAR') or 'LINEAR' (STRAIGHT', LIN')
         @param lambdamin: the lowest wavelength to use in any fit
         @param lambdamax: the end of the fit range
+        @param selector: define for which transmission this fit specification is valid (BOTH, SAMPLE, CAN) 
     """
     mode = str(mode).strip().upper()
     message = mode
     if lambdamin: message += ', ' + str(lambdamin)
     if lambdamax: message += ', ' + str(lambdamax)
+    message += ', selector=' + selector 
     _printMessage("TransFit(\"" + message + "\")")
 
-    ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode)
+    ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode, selector)
     
 def TransWorkspace(sample, can = None):
     """
