@@ -221,9 +221,7 @@ public:
     LoadDetectorsGroupingFile load;
     load.initialize();
 
-    ScopedFile f = generateNamedAndDescribedFile("descr_and_name_test.xml");
-
-    TS_ASSERT(load.setProperty("InputFile", f.getFileName()));
+    TS_ASSERT(load.setProperty("InputFile", "MUSRGrouping.xml"));
     TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
     // Run the algorithm
@@ -233,31 +231,14 @@ public:
     auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     // Check that description was loaded
-    TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(), "Some description");
+    TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(), "musr longitudinal (64 detectors)");
 
     // Check that group names were loaded
-    TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_1")->value(), "name1");
-    TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_2")->value(), "name2");
-
-    // Check that no empty group name properties are created
-    TS_ASSERT(!gws->run().hasProperty("GroupName_3"));
+    TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_1")->value(), "fwd");
+    TS_ASSERT_EQUALS(gws->run().getProperty("GroupName_2")->value(), "bwd");
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(ws);
-  }
-
-  ScopedFile generateNamedAndDescribedFile(std::string xmlfilename)
-  {
-    std::ostringstream os;
-
-    os << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << std::endl;
-    os << "<detector-grouping description=\"Some description\">" << std::endl;
-    os << "  <group name=\"name1\"> <ids>1-32</ids> </group>" << std::endl;
-    os << "  <group name=\"name2\"> <ids>33-64</ids> </group>" << std::endl;
-    os << "  <group> <ids>65-96</ids> </group>" << std::endl;
-    os << "</detector-grouping>" << std::endl;
-
-    return ScopedFile(os.str(), xmlfilename);
   }
 
 };
