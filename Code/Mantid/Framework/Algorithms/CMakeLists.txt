@@ -184,6 +184,7 @@ set ( SRC_FILES
 	src/SassenaFFT.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
+	src/SeparateBackgroundFromSignal.cpp
 	src/SetUncertainties.cpp
 	src/ShiftLogTime.cpp
 	src/SignalOverError.cpp
@@ -406,6 +407,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SassenaFFT.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
+	inc/MantidAlgorithms/SeparateBackgroundFromSignal.h
 	inc/MantidAlgorithms/SetUncertainties.h
 	inc/MantidAlgorithms/ShiftLogTime.h
 	inc/MantidAlgorithms/SignalOverError.h
