@@ -1188,26 +1188,18 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         as a function of wavelength. The results are stored as a workspace
     """
     
-    # The different ways of doing a fit, convert the possible ways of specifying this into the stand way it's shown on the GUI 
+    # The different ways of doing a fit, convert the possible ways of specifying this (also the way it is specified in the GUI to the way it can be send to CalculateTransmission 
     TRANS_FIT_OPTIONS = {
-        'YLOG' : 'Logarithmic',
+        'YLOG' : 'Log',
         'STRAIGHT' : 'Linear',
-        'CLEAR' : 'Off',
+        'CLEAR' : 'Linear',
         # Add Mantid ones as well
-        'LOGARITHMIC' : 'Logarithmic',
-        'LOG' : 'Logarithmic',
+        'LOGARITHMIC' : 'Log',
+        'LOG' : 'Log',
         'LINEAR' : 'Linear',
         'LIN' : 'Linear',
-        'OFF' : 'Off'}
-    
-    
-    # Relate the different GUI names for doing a fit to the arguments that can be sent to CalculateTransmission 
-    CALC_TRANS_FIT_PARAMS = {
-        'Logarithmic' : 'Log',
-        'Linear' : 'Linear',
-        'Off' : 'Linear'
-    }
-
+        'OFF' : 'Linear'}
+     
     #map to restrict the possible values of _trans_type
     CAN_SAMPLE_SUFFIXES = {
         False : 'sample',
@@ -1296,9 +1288,9 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         sel_settings[FITMETHOD] = fit_method
         
         if min_: 
-            sel_settings[LAMBDAMIN] = float(min_) if fit_method != 'OFF' else None
+            sel_settings[LAMBDAMIN] = float(min_) if fit_method not in ['OFF', 'CLEAR'] else None
         if max_: 
-            sel_settings[LAMBDAMAX] = float(max_) if fit_method != 'OFF' else None
+            sel_settings[LAMBDAMAX] = float(max_) if fit_method not in ['OFF', 'CLEAR'] else None
 
         # apply the propertis to self.fit_settings
         for prop in self.fit_props:
@@ -1450,7 +1442,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                               OutputWorkspace=fittedtransws, IncidentBeamMonitor=pre_sample,
                               TransmissionMonitor=post_sample, 
                               RebinParams=reducer.to_wavelen.get_rebin(), 
-                              FitMethod=self.CALC_TRANS_FIT_PARAMS[self.TRANS_FIT_OPTIONS[sel_settings[FITMETHOD]]],
+                              FitMethod=self.TRANS_FIT_OPTIONS[sel_settings[FITMETHOD]],
                               OutputUnfittedData=True)
 
         # Remove temporaries
@@ -1458,7 +1450,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         if direct_tmp_out != trans_tmp_out:
             DeleteWorkspace(Workspace=direct_tmp_out)
             
-        if sel_settings[FITMETHOD] == 'OFF':
+        if sel_settings[FITMETHOD] in ['OFF', 'CLEAR']:
             result = unfittedtransws
             DeleteWorkspace(fittedtransws)
         else:
