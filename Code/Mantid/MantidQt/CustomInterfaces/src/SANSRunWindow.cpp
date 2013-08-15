@@ -3499,7 +3499,7 @@ void SANSRunWindow::transSelectorChanged(int currindex){
   }
   QString text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fitMethod('SAMPLE')").trimmed();
-  int index = m_uiForm.trans_opt->findText(text, Qt::MatchCaseSensitive);
+  int index = m_uiForm.trans_opt->findText(text, Qt::MatchFixedString);
   if( index >= 0 )
   {
     m_uiForm.trans_opt->setCurrentIndex(index);

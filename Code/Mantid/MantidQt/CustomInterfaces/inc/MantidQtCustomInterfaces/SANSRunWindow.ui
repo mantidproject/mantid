@@ -1366,6 +1366,31 @@ intermediate ranges are there for comparison</string>
                 <string>Linear</string>
                </property>
               </item>
+              <item>
+               <property name="text">
+                <string>Polynomial2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Polynomial3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Polynomial4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Polynomial5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Polynomial6</string>
+               </property>
+              </item>
              </widget>
             </item>
             <item row="6" column="5">
@@ -1378,6 +1403,31 @@ intermediate ranges are there for comparison</string>
               <item>
                <property name="text">
                 <string>Linear</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Polynomial2</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Polynomial3</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Polynomial4</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Polynomial5</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Polynomial6</string>
                </property>
               </item>
              </widget>
