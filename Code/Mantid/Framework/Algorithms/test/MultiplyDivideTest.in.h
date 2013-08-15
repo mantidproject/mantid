@@ -554,7 +554,7 @@ public:
     mess << "; RHS: grouping=" << rhs_grouping << ", 2D=" << rhs2D;
     message = mess.str();
 
-    int numpix = 20;
+    int numpix = 12;
     std::vector< std::vector<int> > lhs(numpix/lhs_grouping), rhs(numpix/rhs_grouping);
     for (int i=0; i<numpix; i++)
     {
@@ -564,13 +564,13 @@ public:
       rhs[i/rhs_grouping].push_back(i);
     }
     // Grouped workspace will have lhs_grouping events in each bin (also).
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 100, 1.0);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 10, 1.0);
     if (lhs2D)
       work_in1 = EventWorkspaceHelpers::convertEventTo2D(work_in1);
     TS_ASSERT_DELTA( work_in1->readE(0)[0], sqrt( double(lhs_grouping*1.0) ), 1e-5);
 
     // Grouped workspace will have rhs_grouping events in each bin (also).
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 100, 1.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 10, 1.0);
     if (rhs2D)
       work_in2 = EventWorkspaceHelpers::convertEventTo2D(work_in2);
     TS_ASSERT_DELTA( work_in2->readE(0)[0], sqrt( double(rhs_grouping*1.0) ), 1e-5);
