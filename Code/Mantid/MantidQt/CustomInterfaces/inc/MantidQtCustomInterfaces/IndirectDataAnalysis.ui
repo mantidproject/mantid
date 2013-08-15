@@ -372,6 +372,9 @@
                <string>_sqw.nxs</string>
               </stringlist>
              </property>
+             <property name="showLoad">
+              <bool>false</bool>
+             </property>
             </widget>
            </item>
           </layout>

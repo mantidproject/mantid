@@ -50,6 +50,7 @@ namespace MantidQt
       Q_PROPERTY(QString loadLabelText READ getLoadBtnText WRITE setLoadBtnText)
       Q_PROPERTY(QStringList workspaceSuffixes READ getWSSuffixes WRITE setWSSuffixes)
       Q_PROPERTY(QStringList fileBrowserSuffixes READ getFBSuffixes WRITE setFBSuffixes)
+      Q_PROPERTY(bool showLoad READ willShowLoad WRITE setShowLoad)
 
     public:
       DataSelector(QWidget *parent = 0);
@@ -79,6 +80,10 @@ namespace MantidQt
       void readSettings(const QString & group);
       /// Save settings in the given group
       void saveSettings(const QString & group);
+      /// Check if the widget will show the load button
+      bool willShowLoad();
+      /// Set if the load button should be shown
+      void setShowLoad(bool load);
 
     signals:
       /// Signal emitted when files were found but widget isn't autoloading
@@ -109,8 +114,10 @@ namespace MantidQt
       Ui::DataSelector m_uiForm;
       /// Algorithm Runner used to run the load algorithm
       MantidQt::API::AlgorithmRunner m_algRunner;
-      /// Flag to enable auto loading. By Default this is set to true.
+      /// Flag to enable auto loading. By default this is set to true.
       bool m_autoLoad;
+      /// Flag to show or hide the load button. By default this is set to true.
+      bool m_showLoad;
     };
 
   } /* namespace MantidWidgets */

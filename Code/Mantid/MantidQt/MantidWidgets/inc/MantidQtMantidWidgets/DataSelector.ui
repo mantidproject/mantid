@@ -56,8 +56,14 @@
        </item>
        <item>
         <widget class="QPushButton" name="pbLoadFile">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="text">
           <string>Load</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -92,7 +98,6 @@
     </widget>
    </item>
   </layout>
-  <zorder>wsWorkspaceInput</zorder>
   <zorder>stackedDataSelect</zorder>
   <zorder>cbInputType</zorder>
  </widget>

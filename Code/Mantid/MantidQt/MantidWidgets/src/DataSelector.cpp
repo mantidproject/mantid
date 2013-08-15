@@ -12,7 +12,7 @@ namespace MantidQt
   {
 
     DataSelector::DataSelector(QWidget *parent)
-    : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true)
+    : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true), m_showLoad(true)
     {
       m_uiForm.setupUi(this);
       connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
@@ -276,6 +276,30 @@ namespace MantidQt
     void DataSelector::saveSettings(const QString & group)
     {
       m_uiForm.rfFileInput->saveSettings(group);
+    }
+
+
+    /**
+     * Check if the load button will be shown on the interface
+     *
+     * @return If the load button will be shown or not
+     */
+    bool DataSelector::willShowLoad()
+    {
+      return m_showLoad;
+    }
+
+    /**
+     * Set if the load button will be shown or not
+     * This will change if the button widget is visible and enabled.
+     *
+     * @param load :: Whether the load button will be shown
+     */
+    void DataSelector::setShowLoad(bool load)
+    {
+      m_uiForm.pbLoadFile->setEnabled(load);
+      m_uiForm.pbLoadFile->setVisible(load);
+      m_showLoad = load;
     }
 
   } /* namespace MantidWidgets */
