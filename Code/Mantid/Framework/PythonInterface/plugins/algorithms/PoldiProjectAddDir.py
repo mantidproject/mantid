@@ -1,26 +1,26 @@
 """*WIKI* 
 
 
+== How to use algorithm with other algorithms ==
+This algorithm is designed to work with other algorithms to 
+proceed POLDI data. The introductions can be found in the 
+wiki page of [[PoldiProjectRun]].
+
 *WIKI*"""
-from mantid.api import PythonAlgorithm, registerAlgorithm, MatrixWorkspaceProperty, ITableWorkspaceProperty
-from mantid.api import FileProperty, FileAction
+from mantid.api import (PythonAlgorithm, 
+                        AlgorithmFactory)
+from mantid.api import (FileProperty, 
+                        FileAction)
+from mantid.api import (ITableWorkspaceProperty, 
+                        WorkspaceFactory)
 from mantid.kernel import Direction
-from mantid.simpleapi import *
-#from pylab import *
-import math
-import numpy as np
-import os.path
+
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, splitext
+
 import re
 
 
-
-PI=math.pi
-TWOPI = 2*PI
-
-CONVLAMV = 3956.034*1000.
-CONVKV = CONVLAMV / TWOPI
 
 
 class PoldiProjectAddDir(PythonAlgorithm):
@@ -38,12 +38,12 @@ class PoldiProjectAddDir(PythonAlgorithm):
     def PyInit(self):
         """ Mantid required
         """
+        
+        self.setWikiSummary("""Add all the .hdf files from the given directory to the queue for automatic processing.""")
+
         self.declareProperty(FileProperty(name="Directory",defaultValue="",action=FileAction.Directory))
 
         self.declareProperty(ITableWorkspaceProperty("PoldiAnalysis", "PoldiAnalysis", direction=Direction.Output), "Poldi analysis main worksheet")
-
-#         self.declareProperty("RunTheAnalysis", False, direction=Direction.Input,
-#                              Description="If True, the PoldiProjectRun algo is called. Default: False")
 
     
     
@@ -107,7 +107,7 @@ class PoldiProjectAddDir(PythonAlgorithm):
                 
         self.log().debug('Poldi - load data')
         for dataFile in onlyfiles:
-            (sample_name, sampleExt) = os.path.splitext(dataFile)
+            (sample_name, sampleExt) = splitext(dataFile)
             file_path = join(directory,dataFile)
             
 #             PoldiProjectAddFile(File=file_path)

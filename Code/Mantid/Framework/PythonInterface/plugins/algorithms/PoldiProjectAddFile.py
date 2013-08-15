@@ -1,35 +1,25 @@
 """*WIKI* 
 
 
+== How to use algorithm with other algorithms ==
+This algorithm is designed to work with other algorithms to 
+proceed POLDI data. The introductions can be found in the 
+wiki page of [[PoldiProjectRun]].
+
 *WIKI*"""
-from mantid.api import PythonAlgorithm, AlgorithmFactory
-from mantid.api import registerAlgorithm, MatrixWorkspaceProperty
-from mantid.api import ITableWorkspaceProperty
-from mantid.api import FileProperty, FileAction
-
-
-# from MantidFramework import *
-# from mantidsimple import *
-
+from mantid.api import (PythonAlgorithm, 
+                        AlgorithmFactory)
+from mantid.api import (FileProperty, 
+                        FileAction)
+from mantid.api import (ITableWorkspaceProperty, 
+                        WorkspaceFactory)
 from mantid.kernel import Direction
-from mantid.simpleapi import *
 
-
-#from pylab import *
-import math
-import numpy as np
-import os.path
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, split, splitext
+
 import re
 
-
-
-PI=math.pi
-TWOPI = 2*PI
-
-CONVLAMV = 3956.034*1000.
-CONVKV = CONVLAMV / TWOPI
 
 
 class PoldiProjectAddFile(PythonAlgorithm):
@@ -47,14 +37,13 @@ class PoldiProjectAddFile(PythonAlgorithm):
     def PyInit(self):
         """ Mantid required
         """
+
+        self.setWikiSummary("""Add all the .hdf files from the given directory to the queue for automatic processing.""")
+
         self.declareProperty(FileProperty(name="File",defaultValue="",action=FileAction.Load))
 
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "PoldiAnalysis", direction=Direction.Output),
                               "Poldi analysis main worksheet")
-    
-#         self.declareProperty(self, "RunTheAnalysis", False, 
-#                              doc="If True, the PoldiProjectRun algo is called. Default: False")
-    
     
     
     
@@ -108,8 +97,8 @@ class PoldiProjectAddFile(PythonAlgorithm):
         dataFile = self.getProperty("File").value
         
         self.log().debug('Poldi - load data - %s'%(dataFile))
-        (sample_root, sample_name) = os.path.split(dataFile)
-        (sample_name, sampleExt) = os.path.splitext(sample_name)
+        (sample_root, sample_name) = split(dataFile)
+        (sample_name, sampleExt) = splitext(sample_name)
         self.log().error('Poldi -  samples : %s' %(sample_root))
         self.log().error('Poldi -          : %s' %(sample_name))
         self.log().error('Poldi -          : %s' %(sampleExt))
@@ -137,9 +126,6 @@ class PoldiProjectAddFile(PythonAlgorithm):
             self.setProperty("OutputWorkspace", sample_info_ws)
         
         
-#         if(self.getProperty("RunTheAnalysis").value):
-#             PoldiProjectRun(InputWorkspace=sample_info_ws)
-
 
 
 AlgorithmFactory.subscribe(PoldiProjectAddFile)

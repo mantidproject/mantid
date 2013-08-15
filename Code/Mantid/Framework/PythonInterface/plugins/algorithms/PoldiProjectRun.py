@@ -204,7 +204,7 @@ on row (1) the detected peak, on row (2) the fitted peak.
 
 == How to use algorithm with other algorithms ==
 This algorithm is designed to work with other algorithms to 
-proceed POLDI data. The introduction can be found in the 
+proceed POLDI data. The introductions can be found in the 
 wiki page of [[PoldiProjectRun]].
 
 
