@@ -1,6 +1,7 @@
 # Algorithm to start Bayes programs
-from MantidFramework import *
 from mantid.simpleapi import *
+from mantid.api import PythonAlgorithm, AlgorithmFactory
+from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid import config, logger, mtd
 
 class iFudge(PythonAlgorithm):
@@ -9,12 +10,12 @@ class iFudge(PythonAlgorithm):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
 	def PyInit(self):
-		self.declareProperty(Name='InputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of data input - File (_red.nxs) or Workspace')
-		self.declareProperty(Name='Instrument',DefaultValue='iris',Validator=ListValidator(['irs','iris','osi','osiris']),Description = 'Instrument')
-		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
-		self.declareProperty(Name='InNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
-		self.declareProperty(Name='MultiplyBy',DefaultValue='',Validator=MandatoryValidator(),Description = 'Multiplicative scale factor')
-		self.declareProperty(Name='OutNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
+		self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (_red.nxs) or Workspace')
+		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
+		self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')
+		self.declareProperty(name='InNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample run number')
+		self.declareProperty(name='MultiplyBy',defaultValue='',validator=StringMandatoryValidator(), doc='Multiplicative scale factor')
+		self.declareProperty(name='OutNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample run number')
  
 	def PyExec(self):
 
@@ -36,4 +37,4 @@ class iFudge(PythonAlgorithm):
 		outWS = prefix+OutNumb+'_'+ana+'_red'
 		Scale(InputWorkspace=inWS, OutputWorkspace=outWS, Factor=float(factor), Operation='Multiply')
 
-mantid.registerPyAlgorithm(iFudge())         # Register algorithm with Mantid
+AlgorithmFactory.subscribe(iFudge)         # Register algorithm with Mantid
