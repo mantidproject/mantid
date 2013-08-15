@@ -27,7 +27,7 @@ public:
     
     //get the nubmer of algorithms it already has
     std::vector<std::string> keys = AlgorithmFactory::Instance().getKeys();
-    int noOfAlgs = keys.size();
+    size_t noOfAlgs = keys.size();
 
     TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe<ToyAlgorithm>());
     TS_ASSERT_THROWS_NOTHING(AlgorithmFactory::Instance().subscribe(newTwo));
@@ -36,7 +36,7 @@ public:
    
     //get the nubmer of algorithms it has now
     keys = AlgorithmFactory::Instance().getKeys();
-    int noOfAlgsAfter = keys.size();
+    size_t noOfAlgsAfter = keys.size();
     TS_ASSERT_EQUALS(noOfAlgsAfter, noOfAlgs + 2);
 
     AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",1);
@@ -49,7 +49,7 @@ public:
 
     //get the nubmer of algorithms it already has
     std::vector<std::string> keys = AlgorithmFactory::Instance().getKeys();
-    int noOfAlgs = keys.size();
+    size_t noOfAlgs = keys.size();
 
     AlgorithmFactory::Instance().subscribe<ToyAlgorithm>();
     AlgorithmFactory::Instance().subscribe(newTwo);
@@ -59,7 +59,7 @@ public:
     
     //get the nubmer of algorithms it has now
     keys = AlgorithmFactory::Instance().getKeys();
-    int noOfAlgsAfter = keys.size();
+    size_t noOfAlgsAfter = keys.size();
 
     TS_ASSERT_EQUALS(noOfAlgsAfter, noOfAlgs)
 
@@ -69,7 +69,7 @@ public:
     
     //make sure the number hasn't changed
     keys = AlgorithmFactory::Instance().getKeys();
-    int noOfAlgsAgain = keys.size();
+    size_t noOfAlgsAgain = keys.size();
 
     TS_ASSERT_EQUALS(noOfAlgsAfter, noOfAlgsAgain);
   }
@@ -99,7 +99,7 @@ public:
     AlgorithmFactory::Instance().subscribe<ToyAlgorithm>();
 
     TS_ASSERT_THROWS_NOTHING(keys = AlgorithmFactory::Instance().getKeys());
-    int noOfAlgs = keys.size();
+    size_t noOfAlgs = keys.size();
 
     AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm",1);
 
@@ -138,7 +138,7 @@ public:
     std::vector<Algorithm_descriptor> descriptors;
     TS_ASSERT_THROWS_NOTHING(descriptors = AlgorithmFactory::Instance().getDescriptors(true));
 
-    int noOfAlgs = descriptors.size();
+    size_t noOfAlgs = descriptors.size();
     std::vector<Algorithm_descriptor>::const_iterator descItr = descriptors.begin();
     bool foundAlg = false;
     while (descItr != descriptors.end() && !foundAlg)
@@ -161,7 +161,7 @@ public:
     std::set<std::string> validCategories;
     TS_ASSERT_THROWS_NOTHING(validCategories = AlgorithmFactory::Instance().getCategories(true));
     
-    int noOfCats = validCategories.size();
+    size_t noOfCats = validCategories.size();
     TS_ASSERT_DIFFERS(validCategories.find("Fake"), validCategories.end());
 
     AlgorithmFactory::Instance().unsubscribe("CategoryAlgorithm",1);
@@ -175,7 +175,7 @@ public:
 
     std::map<std::string, bool> validCategories;
     TS_ASSERT_THROWS_NOTHING(validCategories = AlgorithmFactory::Instance().getCategoriesWithState());
-    int noOfCats = validCategories.size();
+    size_t noOfCats = validCategories.size();
     TS_ASSERT_DIFFERS(validCategories.find("Fake"), validCategories.end());
     
     AlgorithmFactory::Instance().unsubscribe("CategoryAlgorithm",1);
