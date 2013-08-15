@@ -44,16 +44,18 @@ public:
      * 3696-(-1): 2.0
      */
 
+    const std::string ws = "Vulcan_Group";
+
     LoadDetectorsGroupingFile load;
     load.initialize();
 
     TS_ASSERT(load.setProperty("InputFile", "vulcangroup.xml"));
-    TS_ASSERT(load.setProperty("OutputWorkspace", "Vulcan_Group"));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve("Vulcan_Group"));
+    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0],    1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(3695)[0], 1.0, 1.0E-5);
@@ -62,6 +64,8 @@ public:
     //Check if filename is saved
     TS_ASSERT_EQUALS(load.getPropertyValue("InputFile"),gws->run().getProperty("Filename")->value());
 
+    // Clean-up
+    API::AnalysisDataService::Instance().remove(ws);
   }
 
   /*
@@ -69,23 +73,29 @@ public:
    */
   void test_AutoGroupIndex()
   {
+
+    const std::string ws = "Vulcan_Group2";
+
     LoadDetectorsGroupingFile load;
     load.initialize();
 
     ScopedFile f = generateAutoGroupIDGroupXMLFile("testautoidgroup.xml");
 
     TS_ASSERT(load.setProperty("InputFile", f.getFileName()));
-    TS_ASSERT(load.setProperty("OutputWorkspace", "Vulcan_Group2"));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve("Vulcan_Group"));
+    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0],    1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(3695)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(3696)[0], 2.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(7000)[0], 2.0, 1.0E-5);
+
+    // Clean-up
+    API::AnalysisDataService::Instance().remove(ws);
   }
 
   ScopedFile generateAutoGroupIDGroupXMLFile(std::string xmlfilename)
@@ -113,23 +123,29 @@ public:
    */
   void test_SpectrumIDs()
   {
+
+    const std::string ws = "Vulcan_Group3";
+
     LoadDetectorsGroupingFile load;
     load.initialize();
 
     ScopedFile f = generateSpectrumIDXMLFile("testnoinstrumentgroup.xml");
 
     TS_ASSERT(load.setProperty("InputFile", f.getFileName()));
-    TS_ASSERT(load.setProperty("OutputWorkspace", "Vulcan_Group3"));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve("Vulcan_Group3"));
+    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(5)[0], 2.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(16)[0], 2.0, 1.0E-5);
+
+    // Clean-up
+    API::AnalysisDataService::Instance().remove(ws);
   }
 
   ScopedFile generateSpectrumIDXMLFile(std::string xmlfilename)
@@ -157,24 +173,30 @@ public:
    */
   void test_OldFormat()
   {
+
+    const std::string ws = "Random_Group_Old";
+
     LoadDetectorsGroupingFile load;
     load.initialize();
 
     ScopedFile f = generateOldSpectrumIDXMLFile("testoldformat.xml");
 
     TS_ASSERT(load.setProperty("InputFile", f.getFileName()));
-    TS_ASSERT(load.setProperty("OutputWorkspace", "Random_Group_Old"));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
     load.execute();
     TS_ASSERT(load.isExecuted());
 
     DataObjects::GroupingWorkspace_sptr gws =
-        boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve("Random_Group_Old"));
+        boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(31)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(32)[0], 2.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(39)[0], 2.0, 1.0E-5);
+
+    // Clean-up
+    API::AnalysisDataService::Instance().remove(ws);
   }
 
   ScopedFile generateOldSpectrumIDXMLFile(std::string xmlfilename)
@@ -192,21 +214,23 @@ public:
 
   void test_DescriptionAndNameLoading()
   {
-    ScopedFile f = generateNamedAndDescribedFile("description_loading.xml");
+
+    const std::string ws = "Grouping";
 
     // Initialize an algorithm
     LoadDetectorsGroupingFile load;
     load.initialize();
 
+    ScopedFile f = generateNamedAndDescribedFile("descr_and_name_test.xml");
+
     TS_ASSERT(load.setProperty("InputFile", f.getFileName()));
-    TS_ASSERT(load.setProperty("OutputWorkspace", "Grouping"));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
 
     // Run the algorithm
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    Workspace_sptr ws = API::AnalysisDataService::Instance().retrieve("Grouping");
-    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(ws);
+    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     // Check that description was loaded
     TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(), "Some description");
@@ -217,6 +241,9 @@ public:
 
     // Check that no empty group name properties are created
     TS_ASSERT(!gws->run().hasProperty("GroupName_3"));
+
+    // Clean-up
+    API::AnalysisDataService::Instance().remove(ws);
   }
 
   ScopedFile generateNamedAndDescribedFile(std::string xmlfilename)
