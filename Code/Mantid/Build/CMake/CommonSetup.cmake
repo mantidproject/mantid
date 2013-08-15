@@ -81,6 +81,7 @@ endif()
 
 set ( MtdVersion_WC_LAST_CHANGED_REV 0 )
 set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
+set ( MtdVersion_WC_LAST_CHANGED_DATETIME 0 )
 set ( NOT_GIT_REPO "Not" )
 
 find_package ( Git )
@@ -105,6 +106,49 @@ if ( GIT_FOUND )
                       WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
     string ( SUBSTRING ${MtdVersion_WC_LAST_CHANGED_DATE} 0 16 MtdVersion_WC_LAST_CHANGED_DATE )
+
+    execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%H
+                      OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_SHA_LONG
+                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+
+    # getting the datetime (as iso8601 string) to turn into the patch string
+    execute_process ( COMMAND ${GIT_EXECUTABLE} log -1 --format=format:%ci
+                      OUTPUT_VARIABLE MtdVersion_WC_LAST_CHANGED_DATETIME
+                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    )
+    if ( MtdVersion_WC_LAST_CHANGED_DATETIME )
+      # split into "date time timezone"
+      string (REPLACE " " ";" LISTVERS ${MtdVersion_WC_LAST_CHANGED_DATETIME})
+      list (GET LISTVERS 0 ISODATE)
+      list (GET LISTVERS 1 ISOTIME)
+      list (GET LISTVERS 2 ISOTIMEZONE)
+
+      # turn the date into a number
+      string (REPLACE "-" "" ISODATE ${ISODATE})
+
+      # prepare the time
+      string (REGEX REPLACE "^([0-9]+:[0-9]+).*" "\\1" ISOTIME ${ISOTIME})
+      string (REPLACE ":" "" ISOTIME ${ISOTIME})
+
+      # convert the timezone into something that can be evaluated for math
+      string (REPLACE "-" "+" ISOTIMEZONE ${ISOTIMEZONE})
+      string (REGEX REPLACE "^([0-9]+)" "-\\1" ISOTIMEZONE ${ISOTIMEZONE})
+
+      # revert the timezone from the time
+      math (EXPR ISOTIME "${ISOTIME}${ISOTIMEZONE}" )
+
+      # deal with times crossing midnight
+      # this does not get the number of days in a month right or jan 1st/dec 31st
+      if ( ISOTIME GREATER 2400 )
+          math (EXPR ISOTIME "${ISOTIME}-2400" )
+	  math (EXPR ISODATE "${ISODATE}+1")
+      elseif (ISOTIME LESS 0)
+          math (EXPR ISOTIME "2400${ISOTIME}" )
+	  math (EXPR ISODATE "${ISODATE}-1")
+      endif ()
+
+      set (MtdVersion_WC_LAST_CHANGED_DATETIME "${ISODATE}.${ISOTIME}")
+    endif ()
 
     ###########################################################################
     # This part puts our hooks (in .githooks) into .git/hooks
@@ -137,7 +181,8 @@ else()
   message ( STATUS "Git not found - using dummy revision number and date" )
 endif()
 
-mark_as_advanced( MtdVersion_WC_LAST_CHANGED_REV MtdVersion_WC_LAST_CHANGED_DATE )
+mark_as_advanced( MtdVersion_WC_LAST_CHANGED_REV MtdVersion_WC_LAST_CHANGED_DATE
+                  MtdVersion_WC_LAST_CHANGED_DATETIME )
 
 ###########################################################################
 # Include the file that contains the version number
