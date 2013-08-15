@@ -1262,14 +1262,14 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             @param max: highest wavelength to use
             @param fit_method: the fit type to pass to CalculateTransmission ('Logarithmic' or 'Linear')or 'Off'
             @param override: if set to False this call won't override the settings set by a previous call (default True)
-            @param selector: define if the given settings is valid for DIRECT, CAN or BOTH transmissions.
+            @param selector: define if the given settings is valid for SAMPLE, CAN or BOTH transmissions.
         """
         FITMETHOD = 'fit_method'
         LAMBDAMIN = 'lambda_min'
         LAMBDAMAX = 'lambda_max'
         # processing the selector input
         select = selector.lower()
-        if select not in ['both', 'can', 'direct']:
+        if select not in ['both', 'can', 'sample']:
             _issueWarning('Invalid selector option ('+selector+'). Fit to transmission skipped')
             return
         select += "::"
@@ -1486,6 +1486,20 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         unfitted = fitted_name + "_unfitted"
         
         return fitted_name, unfitted
+
+    def _get_fit_property(self,selector, property_name):
+        if self.fit_settings.has_key(selector+'::' + property_name):
+            return self.fit_settings[selector+'::' + property_name]
+        else:
+            return self.fit_settings['both::'+property_name]
+        
+
+    def lambdaMin(self, selector):
+        return self._get_fit_property(selector.lower(), 'lambda_min')
+    def lambdaMax(self, selector):
+        return self._get_fit_property(selector.lower(), 'lambda_max')
+    def fitMethod(self, selector):
+        return self._get_fit_property(selector.lower(), 'fit_method')
 
 class AbsoluteUnitsISIS(ReductionStep):
     DEFAULT_SCALING = 100.0
@@ -1881,18 +1895,31 @@ class UserFile(ReductionStep):
                 reducer.to_Q.set_gravity(False, override=False)
         
         elif upper_line.startswith('FIT/TRANS/'):
-            params = upper_line[10:].split()
-            nparams = len(params)
-            if nparams == 3 or nparams == 1:
+            #check if the selector is passed:
+            selector = 'BOTH'
+            if 'SAMPLE' in upper_line:
+                selector = 'SAMPLE'
+                params = upper_line[17:].split() # remove FIT/TRANS/SAMPLE/
+            elif 'CAN' in upper_line:
+                selector = 'CAN'
+                params = upper_line[14:].split() # remove FIT/TRANS/CAN/
+            else:
+                params = upper_line[10:].split() # remove FIT/TRANS/            
+
+            try:
+                nparams = len(params)
                 if nparams == 1:
                     fit_type = params[0]
                     lambdamin = lambdamax = None
-                else:
+                elif nparams == 3:
                     fit_type, lambdamin, lambdamax = params
-
-                reducer.transmission_calculator.set_trans_fit(min_=lambdamin, 
-                    max_=lambdamax, fit_method=fit_type, override=False)
-            else:
+                else:
+                    raise 1
+                
+                reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
+                                                              fit_method=fit_type, override=False, 
+                                                              selector=selector)
+            except:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
 
         elif upper_line.startswith('FIT/MONITOR'):
