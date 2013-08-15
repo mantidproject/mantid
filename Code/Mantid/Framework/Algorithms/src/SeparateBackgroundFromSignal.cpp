@@ -179,6 +179,7 @@ namespace Algorithms
 			  cont_stop.push_back(l-1);
 		  }
 	  }
+	  if(cont_start.size() > cont_stop.size()) cont_stop.push_back(n-1);
 	  vector<size_t> cont_len;
 	  for (size_t l = 0; l < cont_start.size(); ++l)
 	  {

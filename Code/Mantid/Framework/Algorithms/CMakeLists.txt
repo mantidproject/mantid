@@ -622,6 +622,7 @@ set ( TEST_FILES
 	SassenaFFTTest.h
 	ScaleTest.h
 	ScaleXTest.h
+	SeparateBackgroundFromSignalTest.h
 	ShiftLogTimeTest.h
 	SignalOverErrorTest.h
 	SmoothDataTest.h
