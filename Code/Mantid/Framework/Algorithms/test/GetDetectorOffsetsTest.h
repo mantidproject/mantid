@@ -143,6 +143,11 @@ public:
   static GetDetectorOffsetsTestPerformance *createSuite() { return new GetDetectorOffsetsTestPerformance(); }
   static void destroySuite( GetDetectorOffsetsTestPerformance *suite ) { delete suite; }
 
+  GetDetectorOffsetsTestPerformance()
+  {
+    FrameworkManager::Instance();
+  }
+
   void setUp()
   {
     numpixels = 10000;

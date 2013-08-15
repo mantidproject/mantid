@@ -142,6 +142,11 @@ public:
   static GetDetOffsetsMultiPeaksTestPerformance *createSuite() { return new GetDetOffsetsMultiPeaksTestPerformance(); }
   static void destroySuite( GetDetOffsetsMultiPeaksTestPerformance *suite ) { delete suite; }
 
+  GetDetOffsetsMultiPeaksTestPerformance()
+  {
+    FrameworkManager::Instance();
+  }
+
   void setUp()
   {
     numpixels = 10000;

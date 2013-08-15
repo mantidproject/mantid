@@ -13,6 +13,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
@@ -31,6 +32,10 @@ public:
   static GeneratePeaksTest *createSuite() { return new GeneratePeaksTest(); }
   static void destroySuite( GeneratePeaksTest *suite ) { delete suite; }
 
+  GeneratePeaksTest()
+  {
+    FrameworkManager::Instance();
+  }
 
   void test_Init()
   {
