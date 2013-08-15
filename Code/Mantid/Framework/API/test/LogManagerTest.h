@@ -61,9 +61,6 @@ namespace
 class LogManagerTest : public CxxTest::TestSuite
 {
 public:
-  LogManagerTest()
-  {}
-
   void testAddGetData()
   {
     LogManager runInfo;
@@ -324,8 +321,6 @@ public:
  
   }
 
-private:
-  
 };
 
 //---------------------------------------------------------------------------------------

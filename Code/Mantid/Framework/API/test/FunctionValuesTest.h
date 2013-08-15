@@ -13,7 +13,11 @@ using namespace Mantid::API;
 class FunctionValuesTest : public CxxTest::TestSuite
 {
 public:
-  
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FunctionValuesTest *createSuite() { return new FunctionValuesTest(); }
+  static void destroySuite( FunctionValuesTest *suite ) { delete suite; }
+
   FunctionValuesTest()
   {
     x.resize(10);
