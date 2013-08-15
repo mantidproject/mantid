@@ -278,11 +278,13 @@ class LoadFullprofFile(PythonAlgorithm):
         if firstline < 0:
             raise NotImplementedError("File format is incorrect. Unable to locate data title line")
 
+        # FIXME - Need to parse header line: T.O.F. Yobs    Ycal    Yobs-Ycal       Backg   Bragg ...
+        #         to determine how the data line look alike (==5 or >= 5)
 
         count = 0
         for i in xrange(firstline, len(lines)):
             terms = lines[i].split()
-            if len(terms) == 5 and lines[i].count(")") == 0:
+            if (len(terms) == 5 and lines[i].count(")") == 0) or (len(terms) > 5 and terms[2].count("(")  == 0):
                 # it is a data line
                 x    = float(terms[0])
                 yobs = float(terms[1])
