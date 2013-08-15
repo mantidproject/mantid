@@ -53,7 +53,7 @@ namespace Algorithms
     void init();
     /// Implement abstract Algorithm methods
     void exec();
-    double moment(MantidVec& X, size_t n, double mean, size_t k);
+    double moment(MantidVec& X, size_t n, double mean, int k);
     
   };
 

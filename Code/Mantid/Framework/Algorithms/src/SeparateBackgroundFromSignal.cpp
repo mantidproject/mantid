@@ -205,7 +205,7 @@ namespace Algorithms
 
     return;
   }
-  double SeparateBackgroundFromSignal::moment(MantidVec& X, size_t n, double mean, size_t k)
+  double SeparateBackgroundFromSignal::moment(MantidVec& X, size_t n, double mean, int k)
   {
 	  double sum=0.0;
 	  for (size_t i = 0; i < n; ++i)
