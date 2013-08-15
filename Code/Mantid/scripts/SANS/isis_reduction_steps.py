@@ -1198,7 +1198,8 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         'LOG' : 'Log',
         'LINEAR' : 'Linear',
         'LIN' : 'Linear',
-        'OFF' : 'Linear'}
+        'OFF' : 'Linear',
+        'POLYNOMIAL':'Polynomial'}
      
     #map to restrict the possible values of _trans_type
     CAN_SAMPLE_SUFFIXES = {
@@ -1214,7 +1215,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         self.fit_settings = dict()
         for prop in self.fit_props:
             self.fit_settings['both::'+prop] = None
-        self.fit_settings['both::fit_method'] = self.DEFAULT_FIT
         # An optional LoadTransmissions object that contains the names of the transmission and direct workspaces for the sample
         self.samp_loader = None
         # An optional LoadTransmissions objects for the can's transmission and direct workspaces
@@ -1445,14 +1445,18 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
         options = dict()
-        if sel_settings[FITMETHOD] == "POLYNOMIAL":
-            options['PolynomialOrder'] = sel_settings[ORDER]
+        if sel_settings[FITMETHOD]:
+            options['FitMethod'] = self.TRANS_FIT_OPTIONS[sel_settings[FITMETHOD]]
+            if sel_settings[FITMETHOD] == "POLYNOMIAL":
+                options['PolynomialOrder'] = sel_settings[ORDER]
+        else:
+            options['FitMethod'] = self.TRANS_FIT_OPTIONS[self.DEFAULT_FIT]
+
         CalculateTransmission(SampleRunWorkspace=trans_tmp_out, DirectRunWorkspace=direct_tmp_out,
                               OutputWorkspace=fittedtransws, IncidentBeamMonitor=pre_sample,
                               TransmissionMonitor=post_sample, 
                               RebinParams=reducer.to_wavelen.get_rebin(), 
-                              FitMethod=self.TRANS_FIT_OPTIONS[sel_settings[FITMETHOD]],
-                              OutputUnfittedData=True, **options)
+                              OutputUnfittedData=True, **options) # options FitMethod, PolynomialOrder if present
 
         # Remove temporaries
         DeleteWorkspace(Workspace=trans_tmp_out)
@@ -1500,7 +1504,10 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     def lambdaMax(self, selector):
         return self._get_fit_property(selector.lower(), 'lambda_max')
     def fitMethod(self, selector):
-        return self._get_fit_property(selector.lower(), 'fit_method')
+        resp = self._get_fit_property(selector.lower(), 'fit_method')
+        if 'POLYNOMIAL' == resp:
+            resp += str(self._get_fit_property(selector.lower(), 'order'))
+        return resp
 
 class AbsoluteUnitsISIS(ReductionStep):
     DEFAULT_SCALING = 100.0
@@ -1916,7 +1923,6 @@ class UserFile(ReductionStep):
                     fit_type, lambdamin, lambdamax = params
                 else:
                     raise 1
-                
                 reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
                                                               fit_method=fit_type, override=False, 
                                                               selector=selector)
