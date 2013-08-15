@@ -95,7 +95,8 @@ namespace Mantid
       
       // A MatrixWorkspace contains uniquely one Run object, hence for this workspace
       // keep the Run object run_title property the same as the workspace title
-      m_run.access().addProperty("run_title",t, true);        
+      Run& run = mutableRun();
+      run.addProperty("run_title",t, true);        
     }
 
 
@@ -106,9 +107,9 @@ namespace Mantid
      */
     const std::string MatrixWorkspace::getTitle() const
     {
-      if ( m_run->hasProperty("run_title") )
+      if ( run().hasProperty("run_title") )
       {
-        std::string title = m_run->getProperty("run_title")->value();
+        std::string title = run().getProperty("run_title")->value();
         return title;
       }
       else      
@@ -1035,19 +1036,7 @@ namespace Mantid
     size_t MatrixWorkspace::getMemorySize() const
     {
       //3 doubles per histogram bin.
-      if (m_run.operator ->())
-      {
-        return 3*size()*sizeof(double) + m_run->getMemorySize();
-      }
-      else
-      {
-        std::stringstream errss;
-        errss << "m_run is empty! for workspace " << this->name();
-        g_log.error(errss.str());
-        throw std::runtime_error(errss.str());
-      }
-
-      return 0;
+      return 3*size()*sizeof(double) + run().getMemorySize();
     }
 
     /** Returns the memory used (in bytes) by the X axes, handling ragged bins.

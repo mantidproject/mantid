@@ -226,8 +226,8 @@ if ( CPPCHECK_EXECUTABLE )
   set ( CPPCHECK_EXCLUDES
         Framework/DataHandling/src/LoadDAE/
         Framework/DataHandling/src/LoadRaw/
-        Framework/ICat/inc/MantidICat/GSoapGenerated/
-        Framework/ICat/src/GSoapGenerated/
+        Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/
+        Framework/ICat/src/ICat3/GSoapGenerated/
         Framework/ICat/src/GSoapGenerated.cpp
         Framework/ICat/src/GSoap/
         Framework/ICat/src/GSoap.cpp

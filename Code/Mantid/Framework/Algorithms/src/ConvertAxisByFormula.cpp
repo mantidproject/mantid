@@ -239,7 +239,7 @@ namespace Mantid
         {
           axisUnits = axisPtr->unit()->label();
         }
-        axisPtr->unit() = boost::shared_ptr<Unit>(new Units::CustomUnit(axisTitle,axisUnits));
+        axisPtr->unit() = boost::shared_ptr<Unit>(new Units::Label(axisTitle,axisUnits));
       }
 
     }
