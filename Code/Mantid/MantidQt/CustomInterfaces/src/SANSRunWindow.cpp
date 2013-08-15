@@ -728,9 +728,8 @@ bool SANSRunWindow::loadUserFile()
       "print i.ReductionSingleton().DQXY"), m_uiForm.qy_dqy,
       m_uiForm.qy_dqy_opt);
 
-  // The tramission line of the Limits section
-  transSelectorChanged(m_uiForm.trans_selector_opt->currentIndex());
-  
+  // The tramission line of the Limits section (read settings for sample and can)
+    transSelectorChanged(1); transSelectorChanged(0);
 
 
   // The front rescale/shift section
@@ -3504,7 +3503,7 @@ void SANSRunWindow::transSelectorChanged(int currindex){
   {
     m_uiForm.trans_opt->setCurrentIndex(index);
   }
-  if ( text == "Off" )
+  if ( text == "Off" || text == "None" )
     m_uiForm.transFitOnOff->setChecked(false);
   else 
     m_uiForm.transFitOnOff->setChecked(true);
@@ -3530,7 +3529,7 @@ void SANSRunWindow::transSelectorChanged(int currindex){
   {
     m_uiForm.trans_opt_can->setCurrentIndex(index);
   }
-  if ( text == "Off" )
+  if ( text == "Off" || text == "None" )
     m_uiForm.transFitOnOff_can->setChecked(false);
   else 
     m_uiForm.transFitOnOff_can->setChecked(true);
