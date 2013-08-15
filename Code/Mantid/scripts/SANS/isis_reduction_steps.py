@@ -1210,7 +1210,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()
         #set these variables to None, which means they haven't been set and defaults will be set further down
-        self.fit_props = ['lambda_min', 'lambda_max', 'fit_method']
+        self.fit_props = ['lambda_min', 'lambda_max', 'fit_method', 'order']
         self.fit_settings = dict()
         for prop in self.fit_props:
             self.fit_settings['both::'+prop] = None
@@ -1259,6 +1259,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         FITMETHOD = 'fit_method'
         LAMBDAMIN = 'lambda_min'
         LAMBDAMAX = 'lambda_max'
+        ORDER = 'order'
         # processing the selector input
         select = selector.lower()
         if select not in ['both', 'can', 'sample']:
@@ -1275,6 +1276,10 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             return
         
         fit_method = fit_method.upper()
+        if 'POLYNOMIAL' in fit_method:
+            order_str = fit_method[10:]
+            fit_method = 'POLYNOMIAL'
+            self.fit_settings[select+ORDER] = int(order_str)
         if fit_method not in self.TRANS_FIT_OPTIONS.keys():
             _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
             fit_method = self.DEFAULT_FIT             
@@ -1285,7 +1290,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             sel_settings[prop] = self.fit_settings[select+prop] if self.fit_settings.has_key(select+prop) else self.fit_settings['both::'+prop]        
 
         # copy fit_method
-        sel_settings[FITMETHOD] = fit_method
+        sel_settings[FITMETHOD] = fit_method        
         
         if min_: 
             sel_settings[LAMBDAMIN] = float(min_) if fit_method not in ['OFF', 'CLEAR'] else None
@@ -1386,6 +1391,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         LAMBDAMIN = 'lambda_min'
         LAMBDAMAX = 'lambda_max'
         FITMETHOD = 'fit_method'
+        ORDER = 'order'
         #get the settings required to do the calculation
         trans_raw, direct_raw = self._get_run_wksps(reducer)
         
@@ -1438,12 +1444,15 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                     trans_raw, translambda_min, translambda_max, reducer)
         
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
+        options = dict()
+        if sel_settings[FITMETHOD] == "POLYNOMIAL":
+            options['PolynomialOrder'] = sel_settings[ORDER]
         CalculateTransmission(SampleRunWorkspace=trans_tmp_out, DirectRunWorkspace=direct_tmp_out,
                               OutputWorkspace=fittedtransws, IncidentBeamMonitor=pre_sample,
                               TransmissionMonitor=post_sample, 
                               RebinParams=reducer.to_wavelen.get_rebin(), 
                               FitMethod=self.TRANS_FIT_OPTIONS[sel_settings[FITMETHOD]],
-                              OutputUnfittedData=True)
+                              OutputUnfittedData=True, **options)
 
         # Remove temporaries
         DeleteWorkspace(Workspace=trans_tmp_out)
