@@ -56,10 +56,8 @@ namespace CustomInterfaces
     }
 
     QString pyInput =
-        "IDAtransmission("
-        "Instrument='"+inst+"',"
-        "SamNumber='"+sampleNo+"',"
-        "CanNumber='"+canNo+"',"
+        "from IndirectEnergyConversion import IndirectTrans \n"
+        "IndirectTrans('"+inst+"','"+sampleNo+"','"+canNo+"',"
         "Verbose="+verbose+","
         "Plot="+plot+","
         "Save="+save+""
