@@ -60,7 +60,7 @@ for SplitInto in SplitInto_list:
         par.SplitThreshold = SplitThreshold
 
         
-        if not mtd["mdew"] is None:
+        if mtd.doesExist["mdew"]:
             DeleteWorkspace("mdew")
         
         CreateMDWorkspace(Dimensions="3",Extents="-6,6,-6,6,-6,6",Names="Qx,Qy,Qz",Units="Ang-1,Ang-1,Ang-1", 
@@ -73,8 +73,7 @@ for SplitInto in SplitInto_list:
         par.MakeTime = time.time()-start
 
         aa = mtd["mdew"]
-        a = aa._getHeldObject()
-        par.MemoryUsed = a.getMemorySize()
+        par.MemoryUsed = aa.getMemorySize()
 
         start = time.time()
         bin_str = "-6.0, 6.0, 100"

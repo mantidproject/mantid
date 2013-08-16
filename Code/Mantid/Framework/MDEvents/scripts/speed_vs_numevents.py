@@ -38,7 +38,7 @@ results = []
 print "Loading the source event nexus file..."
 LoadEventNexus(Filename="/home/8oz/data/TOPAZ_2511_event.nxs",OutputWorkspace="topaz",SingleBankPixelsOnly="0",Precount="1")
 
-if not mtd["mdew"] is None:
+if mtd.doesExist("mdew"):
     DeleteWorkspace("mdew")
 
 # Create the MDEW once
@@ -61,9 +61,8 @@ for numTimes in xrange(1,11):
         par.MakeTime = time.time()-start
 
         aa = mtd["mdew"]
-        a = aa._getHeldObject()
-        par.MemoryUsed = a.getMemorySize()
-        par.NumberEvents = a.getNPoints()
+        par.MemoryUsed = aa.getMemorySize()
+        par.NumberEvents = aa.getNEvents()
 
         start = time.time()
         bin_str = "-6.0, 6.0, 100"
