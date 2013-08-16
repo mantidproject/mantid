@@ -50,7 +50,6 @@ class ViewBOA(PythonAlgorithm):
         mantid.simpleapi.DeleteWorkspace('tmp2')
         mantid.simpleapi.DeleteWorkspace('tmp3')
 
-<<<<<<< HEAD
     def TOFToLambda(self, wsname, CD):
         ws2d = mtd[wsname]
         tofdata = ws2d.dataX(0)
@@ -59,6 +58,3 @@ class ViewBOA(PythonAlgorithm):
         
 
 registerAlgorithm(ViewBOA())
-=======
-AlgorithmFactory.subscribe(ViewBOA)
->>>>>>> 6f17f525fc43272450abf62d3e7dff8914c4dff2
