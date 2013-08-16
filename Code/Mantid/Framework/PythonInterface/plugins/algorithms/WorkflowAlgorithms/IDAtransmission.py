@@ -8,7 +8,7 @@ class IDAtransmission(PythonAlgorithm):
 		return "Workflow\\MIDAS;PythonAlgorithms"
 
 	def PyInit(self):
-		self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
+		self.declareProperty(name='Instrument',defaultValue='', doc='Instrument')
 		self.declareProperty(name='SamNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample run number')
 		self.declareProperty(name='CanNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
 		self.declareProperty('Verbose',defaultValue=False, doc="Switch to show verbose output of algorithm")

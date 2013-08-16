@@ -1,5 +1,7 @@
 #include "MantidQtCustomInterfaces/Transmission.h"
 
+#include <QFileInfo>
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -27,9 +29,11 @@ namespace CustomInterfaces
 
   void Transmission::run()
   {
-    QString inst = m_uiForm.cbInst->currentText().lower();
     QString sampleNo = m_uiForm.transInputFile->getFirstFilename();
     QString canNo = m_uiForm.transCanFile->getFirstFilename();
+
+    QFileInfo finfo(sampleNo);
+    QString inst = finfo.baseName();
 
     //flags for various algorithm options
     QString verbose("False");
