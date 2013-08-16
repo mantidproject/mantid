@@ -65,7 +65,7 @@ namespace CustomInterfaces
         "Save="+save+""
         ")\n";
 
-    emit runAsPythonScript(pyInput, false);
+    emit runAsPythonScript(pyInput, true);
   }
 
   bool Transmission::validate()
