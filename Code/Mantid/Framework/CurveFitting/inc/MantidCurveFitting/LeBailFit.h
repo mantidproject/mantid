@@ -117,11 +117,6 @@ namespace CurveFitting
     /// Calculate LeBail pattern from from input peak parameters
     void execPatternCalculation();
 
-    /// Calculate diffraction pattern
-    bool calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
-                                     const MantidVec &vecX, MantidVec& vecY,
-                                     map<string, Parameter> parammap, bool recalpeakintesity);
-
     /// LeBailFit
     void execLeBailFit();
 
@@ -224,7 +219,7 @@ namespace CurveFitting
     /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
     bool calculateDiffractionPattern(const MantidVec &vecX, const MantidVec &vecY,
                                        bool inputraw, bool outputwithbkgd,
-                                       MantidVec& vecBkgd,  MantidVec& values,
+                                       const MantidVec& vecBkgd,  MantidVec& values,
                                        Rfactor& rfactor);
 
     /// Calculate powder diffraction statistic Rwp
@@ -292,6 +287,8 @@ namespace CurveFitting
     DataObjects::TableWorkspace_sptr reflectionWS;
 
     size_t m_wsIndex;
+
+    double m_startX, m_endX;
 
     /// Peaks about input and etc.
     //  These two are used for sorting peaks.
