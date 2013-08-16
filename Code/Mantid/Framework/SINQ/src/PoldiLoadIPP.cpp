@@ -1,6 +1,10 @@
 /*WIKI*
 
-toto
+== How to use algorithm with other algorithms ==
+This algorithm is designed to work with other algorithms to
+proceed POLDI data. The introductions can be found in the
+wiki page of [[PoldiProjectRun]].
+
 
  *WIKI*/
 //----------------------------------------------------------------------
@@ -29,8 +33,8 @@ DECLARE_ALGORITHM(PoldiLoadIPP)
 /// Sets documentation strings for this algorithm
 void PoldiLoadIPP::initDocs()
 {
-	this->setWikiSummary("Load Poldi data file. ");
-	this->setOptionalMessage("Load Poldi data file.");
+	this->setWikiSummary("Load Poldi IPP data. ");
+	this->setOptionalMessage("Load Poldi IPP data.");
 }
 
 

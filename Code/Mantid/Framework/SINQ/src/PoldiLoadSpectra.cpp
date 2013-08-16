@@ -1,6 +1,11 @@
 /*WIKI*
 
-toto
+
+== How to use algorithm with other algorithms ==
+This algorithm is designed to work with other algorithms to
+proceed POLDI data. The introductions can be found in the
+wiki page of [[PoldiProjectRun]].
+
 
  *WIKI*/
 //----------------------------------------------------------------------
@@ -12,13 +17,14 @@ toto
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+
 #include <limits>
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 
 
 #include <iostream>
-//#include "./xylib/xylib.h"
+
 using namespace std;
 
 
@@ -29,8 +35,8 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiLoadSpectra)
 
-    				/// Sets documentation strings for this algorithm
-    				void PoldiLoadSpectra::initDocs()
+// Sets documentation strings for this algorithm
+void PoldiLoadSpectra::initDocs()
 {
 	this->setWikiSummary("Load Poldi data file. ");
 	this->setOptionalMessage("Load Poldi data file.");

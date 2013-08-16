@@ -1,6 +1,11 @@
 /*WIKI*
 
-toto
+
+== How to use algorithm with other algorithms ==
+This algorithm is designed to work with other algorithms to
+proceed POLDI data. The introductions can be found in the
+wiki page of [[PoldiProjectRun]].
+
 
  *WIKI*/
 //----------------------------------------------------------------------
@@ -12,7 +17,6 @@ toto
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-//#include "MantidAPI/FileProperty.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -30,8 +34,8 @@ DECLARE_ALGORITHM(PoldiAutoCorrelation5)
 /// Sets documentation strings for this algorithm
 void PoldiAutoCorrelation5::initDocs()
 {
-	this->setWikiSummary("Load Poldi data file. ");
-	this->setOptionalMessage("Load Poldi data file.");
+	this->setWikiSummary("Proceed to autocorrelation on Poldi data.");
+	this->setOptionalMessage("Proceed to autocorrelation on Poldi data.");
 }
 
 
@@ -46,13 +50,6 @@ void PoldiAutoCorrelation5::init()
   CONVKV = h_bar/NeutronMass;
   CONVLAMV = CONVKV*2.*M_PI;
 
-//	std::vector<std::string> exts;
-//	exts.push_back(".hdf");
-//	exts.push_back(".h5");
-//	exts.push_back("");
-//	// the nexus data file containing the raw data and some log from Poldi
-//	declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-//			"A NeXus file containing the raw data and some log from Poldi.");
 
 	// Input workspace containing the raw data.
 	declareProperty(new WorkspaceProperty<DataObjects::Workspace2D>("InputWorkspace", "", Direction::InOut),
