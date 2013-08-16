@@ -101,7 +101,7 @@ class Detector(BaseScriptElement):
                 script += "  BeamCenterMethod='DirectBeam',\n"
             else:
                 script += "  BeamCenterMethod='Scattering',\n"
-            script += "  BeamCenterFile=%s,\n" % self.beam_file
+            script += "  BeamCenterFile='%s',\n" % self.beam_file
             script += "  BeamRadius=%g,\n" % self.beam_radius
         else:
             script += "  BeamCenterMethod='Value',\n"
@@ -116,7 +116,7 @@ class Detector(BaseScriptElement):
                 script += "  UseDefaultDC=1,\n"
             else:
                 script += "  UseDefaultDC=0,\n"
-                script += "  SensitivityDarkCurrentFile=%s,\n" % self.sensitivity_dark
+                script += "  SensitivityDarkCurrentFile='%s',\n" % self.sensitivity_dark
             script += "  MinEfficiency=%g,\n" % self.min_sensitivity
             script += "  MaxEfficiency=%g,\n" % self.max_sensitivity
             
