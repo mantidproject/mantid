@@ -22,10 +22,11 @@ class IDAtransmission(PythonAlgorithm):
 		sam = self.getPropertyValue('SamNumber')
 		can = self.getPropertyValue('CanNumber')
 
-		verbOp = self.getProperty('Verbose')
-		plotOp = self.getProperty('Plot')
-		saveOp = self.getProperty('Save')
+		verbOp = self.getProperty('Verbose').value
+		plotOp = self.getProperty('Plot').value
+		saveOp = self.getProperty('Save').value
+		
 		from IndirectEnergyConversion import IndirectTrans
-		IndirectTrans(inst,sam,can,verbOp,plotOp,saveOp)
+		IndirectTrans(inst,sam,can,Verbose=verbOp,Plot=plotOp,Save=saveOp)
 
 AlgorithmFactory.subscribe(IDAtransmission)         # Register algorithm with Mantid

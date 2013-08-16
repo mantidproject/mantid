@@ -85,6 +85,15 @@ namespace CustomInterfaces
       return false;
     }
 
+    //Check if we have a file problem
+    QString errorInputFile = m_uiForm.transInputFile->getFileProblem();
+    QString errorCanFile = m_uiForm.transCanFile->getFileProblem();
+
+    if(!errorInputFile.isEmpty() || !errorCanFile.isEmpty())
+    {
+      return false;
+    }
+
     return true;
   }
 

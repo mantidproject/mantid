@@ -270,13 +270,14 @@ def IndirectTrans(inst, sfile,cfile,Verbose=False,Plot=False,Save=False):
     if Verbose:
         logger.notice('Transmission : '+str(trans))
     path = os.path.join(workdir,transWS+'.nxs')
+    
     if Save:
         SaveNexusProcessed(InputWorkspace=transWS, Filename=path)
         if Verbose:
             logger.notice('Output file created : '+path)
-
+            
     if Plot:
-		TransPlot(transWS)
+        TransPlot(transWS)
     EndTime('Transmission')
 
 ##############################################################################
