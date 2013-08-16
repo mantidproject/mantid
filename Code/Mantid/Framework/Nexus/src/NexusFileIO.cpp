@@ -13,6 +13,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/ConfigService.h"
@@ -384,6 +385,14 @@ using namespace DataObjects;
     std::string dist=(localworkspace->isDistribution()) ? "1" : "0";
     NXputattr(fileID, "distribution",  reinterpret_cast<void*>(const_cast<char*>(dist.c_str())), 2, NX_CHAR);
     NXputattr (fileID, "units",  reinterpret_cast<void*>(const_cast<char*>(xLabel.c_str())), static_cast<int>(xLabel.size()), NX_CHAR);
+
+    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
+    if(label)
+    {
+      NXputattr (fileID, "caption",  reinterpret_cast<void*>(const_cast<char*>(label->caption().c_str())), static_cast<int>(label->caption().size()), NX_CHAR);
+      NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(label->label().c_str())), static_cast<int>(label->label().size()), NX_CHAR);
+    }
+
     NXclosedata(fileID);
 
     if ( ! sAxis->isText() )
@@ -394,6 +403,14 @@ using namespace DataObjects;
       NXopendata(fileID, "axis2");
       NXputdata(fileID, (void*)&(axis2[0]));
       NXputattr (fileID, "units",  reinterpret_cast<void*>(const_cast<char*>(sLabel.c_str())), static_cast<int>(sLabel.size()), NX_CHAR);
+
+      auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
+      if(label)
+      {
+        NXputattr (fileID, "caption",  reinterpret_cast<void*>(const_cast<char*>(label->caption().c_str())), static_cast<int>(label->caption().size()), NX_CHAR);
+        NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(label->label().c_str())), static_cast<int>(label->label().size()), NX_CHAR);
+      }
+
       NXclosedata(fileID);
     }
     else
@@ -409,6 +426,14 @@ using namespace DataObjects;
       NXopendata(fileID, "axis2");
       NXputdata(fileID,  reinterpret_cast<void*>(const_cast<char*>(textAxis.c_str())));
       NXputattr (fileID, "units",  reinterpret_cast<void*>(const_cast<char*>("TextAxis")), 8, NX_CHAR);
+
+      auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
+      if(label)
+      {
+        NXputattr (fileID, "caption",  reinterpret_cast<void*>(const_cast<char*>(label->caption().c_str())), static_cast<int>(label->caption().size()), NX_CHAR);
+        NXputattr (fileID, "label",  reinterpret_cast<void*>(const_cast<char*>(label->label().c_str())), static_cast<int>(label->label().size()), NX_CHAR);
+      }
+
       NXclosedata(fileID);
     }
 
