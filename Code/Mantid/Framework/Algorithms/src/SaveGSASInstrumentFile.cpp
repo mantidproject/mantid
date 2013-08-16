@@ -32,6 +32,7 @@ There can be several types of Fullprof files as the input file
 #include "MantidAPI/TableRow.h"
 
 #include <stdio.h>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -93,6 +94,15 @@ namespace Algorithms
       m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
     }
 
+    // Debug output
+    stringstream dbss;
+    for (map<unsigned int, size_t>::iterator diter = m_bankIDIndexMap.begin(); diter != m_bankIDIndexMap.end();
+         ++diter)
+    {
+      dbss << "Bank " << diter->first << " has vector index " << diter->second << ".\n";
+    }
+    cout << dbss.str();
+
     return;
   }
 
@@ -148,10 +158,31 @@ namespace Algorithms
     }
     size_t bindex = biter->second;
 
-    // TODO - Expand the list of parameters on needed-base.
     double value(EMPTY_DBL());
+
     if (paramname.compare("TwoTheta") == 0)
+    {
       value = m_vec2Theta[bindex];
+    }
+    else if (paramname.compare("MinDsp") == 0)
+    {
+      // cout << "size of min-dsp = " << m_mindsps.size() << ". --> bindex = " << bindex << ".\n";
+      value = m_mindsps[bindex];
+    }
+    else if (paramname.compare("MaxDsp") == 0)
+    {
+      // cout << "size of max-dsp = " << m_maxdsps.size() << ". --> bindex = " << bindex << ".\n";
+      value = m_maxdsps[bindex];
+    }
+    else if (paramname.compare("MaxTOF") == 0)
+    {
+      // cout << "size of max-tof = " << m_maxtofs.size() << ". --> bindex = " << bindex << ".\n";
+      value = m_maxtofs[bindex];
+    }
+    else if (paramname.compare("CWL") == 0)
+    {
+      value = m_vecCWL[bindex];
+    }
     else
     {
       stringstream errss;
@@ -406,24 +437,17 @@ namespace Algorithms
     // Process user specified properties
     processProperties();
 
-    // Execute
+    // Initialize some conversion constants related to the chopper
     initConstants(m_frequency);
 
-#if 0
-    This might be a legacy
-    if (useirf)
-    {
-      parseFullprofResolutionFile(irffilename);
-    }
-    else
-    {
-      throw runtime_error("Parsing .pcr file has not been implemented yet.");
-    }
-#endif
+    // Parse profile table workspace
+    map<unsigned int, map<string, double> > bankprofileparammap;
+    parseProfileTableWorkspace(m_inpWS, bankprofileparammap);
 
+    //
     makeParameterConsistent();
 
-    convertToGSAS(m_vecBankID2File, m_gsasFileName);
+    convertToGSAS(m_vecBankID2File, m_gsasFileName, bankprofileparammap);
 
     return;
   }
@@ -435,11 +459,11 @@ namespace Algorithms
     */
   void SaveGSASInstrumentFile::initConstants(double chopperfrequency)
   {
-    if (m_instrument.compare("PG3"))
+    if (m_instrument.compare("PG3") == 0)
     {
       m_configuration = setupPG3Constants(static_cast<int>(chopperfrequency));
     }
-    else if (m_instrument.compare("NOM"))
+    else if (m_instrument.compare("NOM") == 0)
     {
       m_configuration = setupNOMConstants(static_cast<int>(chopperfrequency));
     }
@@ -458,10 +482,10 @@ namespace Algorithms
     */
   void SaveGSASInstrumentFile::makeParameterConsistent()
   {
-    // Parse input profile table workspace
-    map<unsigned int, map<string, double> > bankprofileparammap;
-    parseProfileTableWorkspace(m_inpWS, bankprofileparammap);
+    g_log.warning("This one may not be useful at all. ");
+    return;
 
+#if 0
     // Make input parameters consistent
     for (size_t i = 0; i < m_vecBankID2File.size(); ++i)
     {
@@ -501,6 +525,7 @@ namespace Algorithms
     }
 
     // FIXME - the data structure to store the instrument/profile parameters is still NOT clear.
+#endif
 
     return;
   }
@@ -655,23 +680,39 @@ namespace Algorithms
     * @param banks : list of banks (sorted) to .iparm or prm file
     * @param gsasinstrfilename: string
     */
-  void SaveGSASInstrumentFile::convertToGSAS(vector<unsigned int> banks, string gsasinstrfilename)
+  void SaveGSASInstrumentFile::convertToGSAS(vector<unsigned int> banks, string gsasinstrfilename,
+                                             map<unsigned int, map<string, double> > bankprofilemap)
   {
     // Check
     if (!m_configuration)
       throw runtime_error("Not set up yet!");
 
+    // Set up min-dsp, max-tof
+    for (size_t i = 0; i < banks.size(); ++i)
+    {
+      unsigned int bankid = banks[i];
+      if (!m_configuration->hasBank(bankid))
+        throw runtime_error("Chopper configuration does not have some certain bank.");
+
+      double mndsp = m_configuration->getParameter(bankid, "MinDsp");
+      m_bank_mndsp.insert(make_pair(bankid, mndsp));
+      double mxtof = m_configuration->getParameter(bankid, "MaxTOF");
+      m_bank_mxtof.insert(make_pair(bankid, mxtof));
+    }
+
+    // Write bank header
+    g_log.notice() << "Export header of GSAS instrument file " << gsasinstrfilename << ".\n";
+    writePRMHeader(banks, gsasinstrfilename);
+
     //  Convert and write
     sort(banks.begin(), banks.end());
-    bool isfirstbank = true;
     for (size_t ib = 0; ib < banks.size(); ++ib)
     {
-      int bankid = banks[ib];
+      unsigned int bankid = banks[ib];
       if (m_configuration->hasBank(bankid))
       {
-        buildGSASTabulatedProfile(bankid);
-        writePRM(bankid, banks.size(), gsasinstrfilename, isfirstbank);
-        isfirstbank = false;
+        buildGSASTabulatedProfile(bankprofilemap, bankid);
+        writePRMSingleBank(bankprofilemap, bankid, gsasinstrfilename);
       }
       else
       {
@@ -703,11 +744,17 @@ namespace Algorithms
 
     @param pardict ::
   */
-  void SaveGSASInstrumentFile::buildGSASTabulatedProfile(unsigned int bankid)
+  void SaveGSASInstrumentFile::buildGSASTabulatedProfile(map<unsigned int, map<string, double> > bankprofilemap, unsigned int bankid)
   {
     // FIXME - The profile parameter values should not get from m_configuration.
     //         but from the profile map!
     //         THIS IS VERY WRONG!
+
+    // Locate the profile map
+    map<unsigned int, map<string, double> >::iterator biter = bankprofilemap.find(bankid);
+    if (biter == bankprofilemap.end())
+      throw runtime_error("Bank ID cannot be found in bank-profile-map-map. 001");
+    map<string, double>& profilemap = biter->second;
 
     // Init data structure
     vector<double> gdsp(90, 0.);   // TOF_thermal(d_k)
@@ -718,24 +765,24 @@ namespace Algorithms
     vector<double> gpkX(90, 0.);   // ratio (n) b/w thermal and epithermal neutron
 
     // double twotheta = m_configuration->getParameter(bankid, "TwoTheta");
-    double mx = m_configuration->getParameter(bankid, "Tcross");
-    double mxb = m_configuration->getParameter(bankid, "Width");
+    double mx = getProfileParameterValue(profilemap, "Tcross");
+    double mxb = getProfileParameterValue(profilemap, "Width");
 
-    double zero = m_configuration->getParameter(bankid, "Zero");
-    double zerot = m_configuration->getParameter(bankid, "Zerot");
-    double dtt1 = m_configuration->getParameter(bankid, "Dtt1");
-    double dtt1t = m_configuration->getParameter(bankid, "Dtt1t");
-    double dtt2 = m_configuration->getParameter(bankid, "Dtt2");
+    double zero = getProfileParameterValue(profilemap, "Zero");
+    double zerot = getProfileParameterValue(profilemap, "Zerot");
+    double dtt1 = getProfileParameterValue(profilemap, "Dtt1");
+    double dtt1t = getProfileParameterValue(profilemap, "Dtt1t");
+    double dtt2 = getProfileParameterValue(profilemap, "Dtt2");
 
-    double alph0 = m_configuration->getParameter(bankid, "Alph0");
-    double alph1 = m_configuration->getParameter(bankid, "Alph1");
-    double alph0t = m_configuration->getParameter(bankid, "Alph0t");
-    double alph1t = m_configuration->getParameter(bankid, "Alph1t");
+    double alph0 = getProfileParameterValue(profilemap, "Alph0");
+    double alph1 = getProfileParameterValue(profilemap, "Alph1");
+    double alph0t = getProfileParameterValue(profilemap, "Alph0t");
+    double alph1t = getProfileParameterValue(profilemap, "Alph1t");
 
-    double beta0 = m_configuration->getParameter(bankid, "Beta0");
-    double beta1 = m_configuration->getParameter(bankid, "Beat1");
-    double beta0t = m_configuration->getParameter(bankid, "Beta0t");
-    double beta1t = m_configuration->getParameter(bankid, "Beta1t");
+    double beta0 = getProfileParameterValue(profilemap, "Beta0");
+    double beta1 = getProfileParameterValue(profilemap, "Beta1");
+    double beta0t = getProfileParameterValue(profilemap, "Beta0t");
+    double beta1t = getProfileParameterValue(profilemap, "Beta1t");
 
     double instC = dtt1 - 4*(alph0+alph1);
 
@@ -753,6 +800,17 @@ namespace Algorithms
       gpkX[k] = 0.5*erfc(mxb*dmX); //  # this is n in the formula
       gtof[k] = calTOF(gpkX[k], zero, dtt1 ,dtt2, zerot, dtt1t, -dtt2, gdsp[k]);
       gdt[k] = gtof[k] - (instC*gdsp[k]);
+#if 0
+      g_log.notice() << setprecision(10)
+                     << "gtof[" << k << "] = " << gtof[k] << "; gdsp[" << k << "] = " << gdsp[k]
+                     << "; instC = " << instC << "; gdt[" << k << "] = " << gdt[k] << ".\n";
+#else
+      g_log.notice() << k << "\t"
+                     << setw(20) << setprecision(10) << gtof[k] << "\t  "
+                     << setw(20) << setprecision(10) << gdsp[k] << "\t  "
+                     << setw(20) << setprecision(10) << instC << "\t "
+                     << setw(20) << setprecision(10) << gdt[k] << ".\n";
+#endif
       galpha[k] = aaba(gpkX[k], alph0, alph1, alph0t, alph1t, gdsp[k]);
       gbeta[k] = aaba(gpkX[k], beta0, beta1, beta0t, beta1t, gdsp[k]);
     }
@@ -817,8 +875,26 @@ namespace Algorithms
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Write the header of the file
+    */
+  void SaveGSASInstrumentFile::writePRMHeader(vector<unsigned int> banks, std::string prmfilename)
+  {
+    int numbanks = static_cast<int>(banks.size());
 
-  // FIXME - Split writePRM to 2 parts.  It might be better to split to 2 methods
+    // FIXME - Need to read the original .py file to understand it!
+    FILE * pFile;
+    pFile = fopen (prmfilename.c_str(), "w");
+    fprintf(pFile, "            12345678901234567890123456789012345678901234567890123456789012345678\n");
+    fprintf(pFile, "ID    %s\n", m_id_line.c_str());
+    fprintf(pFile, "INS   BANK  %5d\n", numbanks);
+    fprintf(pFile, "INS   FPATH1     %f \n", m_L1);
+    fprintf(pFile, "INS   HTYPE   PNTR \n");
+    fclose(pFile);
+
+    return;
+  }
+
   // (1) Header: write the first 2 lines
   // (2) Loop on each bank: write the parameters for each bank
 
@@ -829,131 +905,112 @@ namespace Algorithms
     * @prmfilename: output file name
     * @isfirstbank: bool
     */
-  void SaveGSASInstrumentFile::writePRM(unsigned int bankid, size_t numbanks, std::string prmfilename, bool isfirstbank)
+  void SaveGSASInstrumentFile::writePRMSingleBank(map<unsigned int, map<string, double> > bankprofilemap, unsigned int bankid, std::string prmfilename)
   {
-    // FIXME - Figure out how to set up m_mndsp and m_mxtofs
-    if (m_mndsp.size() == 0 || m_mxtofs.size() == 0)
-      throw runtime_error("Implement the setup on m_mndsp and m_mxtof ASAP.");
+    // Get access to the profile map
+    map<unsigned int, map<string, double> >::iterator biter = bankprofilemap.find(bankid);
+    if (biter == bankprofilemap.end())
+      throw runtime_error("Bank does not exist in bank-profile-map. 002");
 
-    // FIXME - These parameter should be obtained from profile parameter map from input table workspace
-    double zero = m_configuration->getParameter(bankid, "Zero");
-    double dtt1 = m_configuration->getParameter(bankid, "Dtt1");
-    double alph0 = m_configuration->getParameter(bankid, "Alph0");
-    double alph1 = m_configuration->getParameter(bankid, "Alph1");
-    double twotheta = m_configuration->getParameter(bankid, "TwoTheta");
+    map<string, double>& profilemap = biter->second;
+
+    // Collect parameters used for output
+    double zero = getProfileParameterValue(profilemap, "Zero");
+    double dtt1 = getProfileParameterValue(profilemap, "Dtt1");
+    double alph0 = getProfileParameterValue(profilemap, "Alph0");
+    double alph1 = getProfileParameterValue(profilemap, "Alph1");
+    double twotheta = getProfileParameterValue(profilemap, "twotheta");
+
+    double sig0 = getProfileParameterValue(profilemap, "Sig0");
+    sig0 = sig0*sig0;
+    double sig1 = getProfileParameterValue(profilemap, "Sig1");
+    sig1 = sig1*sig1;
+    double sig2 = getProfileParameterValue(profilemap, "Sig2");
+    sig2 = sig2*sig2;
+    double gam0 = getProfileParameterValue(profilemap, "Gam0");
+    double gam1 = getProfileParameterValue(profilemap, "Gam1");
+    double gam2 = getProfileParameterValue(profilemap, "Gam2");
+
+    int randint = 10001 + (rand() % (int)(99999 - 10001 + 1));
+
+    double mindsp = m_configuration->getParameter(bankid, "MinDsp");
+    double maxtof = m_configuration->getParameter(bankid, "MaxTOF");
+
     double cwl = m_configuration->getParameter(bankid, "CWL");
 
-    // Calculate
+    // Calculate L2
     double instC = dtt1 - (4*(alph0+alph1));
+    g_log.notice() << "Dtt1 = " << dtt1 << ", Alph0 = " << alph0 << ", Alph1 = " << alph1 << ".\n"
+                   << "MinDsp = " << mindsp << ".\n";
+
     if (m_L2 <= 0. || m_L2 == EMPTY_DBL())
     {
       m_L2 = calL2FromDtt1(dtt1, m_L1, m_2theta);
     }
 
+    // Title line
     stringstream titless;
     titless << m_sample << " " << static_cast<int>(m_frequency) << "Hz CW=" << cwl;
     string titleline(titless.str());
 
-    // Build the output
-    stringstream bufss;
-
-    // Header
-    bufss << " 12345678901234567890123456789012345678901234567890123456789012345678\n";
-    if (isfirstbank)
-    {
-      bufss << "ID " << m_id_line << "\n"
-             <<  "INS BANK " << numbanks << "\n"
-              << "INS FPATH1 " << m_L1 << "\n"
-              << "INS HTYPE PNTR \n";
-    }
-
-    // FIXME - Use fprintf() after test is done
-
-    // int randint = randint(10001,99999);
-    int randint = 10001 + (rand() % (int)(99999 - 10001 + 1));
-    double sig0 = getProfileParameterValue(bankid, "Sig0");
-    double sig1 = getProfileParameterValue(bankid, "Sig0");
-    double sig2 = getProfileParameterValue(bankid, "Sig2");
-    double gam0 = getProfileParameterValue(bankid, "Gam0");
-    double gam1 = getProfileParameterValue(bankid, "Gam1");
-    double gam2 = getProfileParameterValue(bankid, "Gam2");
-
-    // Just for test!
-    // Start (Header)
+    // Write to file
     FILE * pFile;
-    pFile = fopen (prmfilename.c_str(),"w");
+    pFile = fopen (prmfilename.c_str(),"a");
+
     fprintf(pFile, "INS %2d ICONS%10.3f%10.3f%10.3f%10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
     fprintf(pFile, "INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
-    fclose (pFile);
-    // Append
-    pFile = fopen(prmfilename.c_str(), "a");
-    fprintf(pFile, "INS %2dBAKGD 1 4 Y 0 Y\n", bankid);
+
+    fprintf(pFile, "INS %2dBAKGD     1    4    Y    0    Y\n", bankid);
     fprintf(pFile, "INS %2dI HEAD %s\n", bankid, titleline.c_str());
-    fclose(pFile);
-
-    // Print the value
-
-    printf("INS %2d ICONS%10.3f%10.3f%10.3f%10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
-    printf("INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
-
-    // Bank 1...
-    printf("INS %2dBAKGD 1 4 Y 0 Y\n", bankid);
-    printf("INS %2dI HEAD %s\n", bankid, titleline.c_str());
-    printf("INS %2dI ITYP%5d%10.4f%10.4f%10i\n", bankid, 0, m_mndsp[bankid]*0.001*instC, m_mxtofs[bankid], randint);
-    printf("INS %2dINAME powgen \n", bankid);
-    printf("INS %2dPRCF1 %5d%5d%10.5f\n", bankid, -3, 21, 0.002);
-    printf("INS %2dPRCF11%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig0);
-    printf("INS %2dPRCF12%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2, gam0, gam1);
-    printf("INS %2dPRCF13%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF14%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF15%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF16%15.6f\n", bankid, 0.0);
-    printf("INS %2dPAB3 %3d\n", bankid, 90);
+    fprintf(pFile, "INS %2dI ITYP%5d%10.4f%10.4f%10i\n", bankid, 0, mindsp*0.001*instC, maxtof, randint);
+    // FIXME - "powgen" should be m_instrumentName
+    fprintf(pFile, "INS %2dINAME   %s \n", bankid, "powgen");
+    fprintf(pFile, "INS %2dPRCF1 %5d%5d%10.5f\n", bankid, -3, 21, 0.002);
+    fprintf(pFile, "INS %2dPRCF11%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig0);
+    fprintf(pFile, "INS %2dPRCF12%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2, gam0, gam1);
+    fprintf(pFile, "INS %2dPRCF13%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF14%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF15%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF16%15.6f\n", bankid, 0.0);
+    fprintf(pFile, "INS %2dPAB3    %3d\n", bankid, 90);
 
     for (size_t k = 0; k < 90; ++k)
     {
-      printf("INS %2dPAB3%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k)+1, m_gdsp[k],
+      fprintf(pFile, "INS %2dPAB3%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k)+1, m_gdsp[k],
               m_gdt[k], m_galpha[k], m_gbeta[k]);
     }
-    printf("INS %2dPRCF2 %5i%5i%10.5f\n", bankid, -4, 27, 0.002);
-    printf("INS %2dPRCF21%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig1);
-    printf("INS %2dPRCF22%15.6f%15.6f%15.6f%15.6f\n", bankid, sig2, gam2, 0.0, 0.0);
-    printf("INS %2dPRCF23%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF24%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF25%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF26%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF27%15.6f%15.6f%15.6f \n", bankid, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF2 %5i%5i%10.5f\n", bankid, -4, 27, 0.002);
+    fprintf(pFile, "INS %2dPRCF21%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig1);
+    fprintf(pFile, "INS %2dPRCF22%15.6f%15.6f%15.6f%15.6f\n", bankid, sig2, gam2, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF23%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF24%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF25%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF26%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF27%15.6f%15.6f%15.6f \n", bankid, 0.0, 0.0, 0.0);
 
-    printf("INS %2dPAB4 %3i\n", bankid, 90);
+    fprintf(pFile, "INS %2dPAB4    %3i\n", bankid, 90);
     for (size_t k = 0; k < 90; ++k)
     {
-      printf("INS %2dPAB4%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k)+1, m_gdsp[k],
+      fprintf(pFile, "INS %2dPAB4%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k)+1, m_gdsp[k],
              m_gdt[k], m_galpha[k], m_gbeta[k]);
     }
 
-    printf("INS %2dPRCF3 %5i%5i%10.5f\n", bankid, -5, 21, 0.002);
-    printf("INS %2dPRCF31%15.6f%15.6f%15.6f%15.6f", bankid, 0.0, 0.0, 0.0, sig0);
-    printf("INS %2dPRCF32%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2, gam0, gam1);
-    printf("INS %2dPRCF33%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF34%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF35%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
-    printf("INS %2dPRCF36%15.6f\n", bankid, 0.0);
+    fprintf(pFile, "INS %2dPRCF3 %5i%5i%10.5f\n", bankid, -5, 21, 0.002);
+    fprintf(pFile, "INS %2dPRCF31%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, sig0);
+    fprintf(pFile, "INS %2dPRCF32%15.6f%15.6f%15.6f%15.6f\n", bankid, sig1, sig2, gam0, gam1);
+    fprintf(pFile, "INS %2dPRCF33%15.6f%15.6f%15.6f%15.6f\n", bankid, gam2, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF34%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF35%15.6f%15.6f%15.6f%15.6f\n", bankid, 0.0, 0.0, 0.0, 0.0);
+    fprintf(pFile, "INS %2dPRCF36%15.6f\n", bankid, 0.0);
 
-    printf("INS %2dPAB5 %3i\n", bankid, 90); // 90 means there will be 90 lines of table
+    fprintf(pFile, "INS %2dPAB5    %3i\n", bankid, 90); // 90 means there will be 90 lines of table
     for (size_t k = 0; k < 90; k ++)
     {
-      printf("INS %2dPAB5%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k)+1, m_gdsp[k], m_gdt[k],
+      fprintf(pFile, "INS %2dPAB5%2d%10.5f%10.5f%10.5f%10.5f\n", bankid, static_cast<int>(k)+1, m_gdsp[k], m_gdt[k],
              m_galpha[k], m_gbeta[k]);
     }
 
-    /*
-    if isfirstbank:
-    wprmfile = open(prmfilename, "w")
-    else:
-    wprmfile = open(prmfilename, "a")
-    wprmfile.write(prmfile)
-    wprmfile.close()
-    */
+    fclose(pFile);
 
     return;
   }
@@ -965,8 +1022,8 @@ namespace Algorithms
   double SaveGSASInstrumentFile::calL2FromDtt1(double difc, double L1, double twotheta)
   {
     double l2 = difc/(252.816*2.0*sin(0.5*twotheta*PI/180.0)) - L1;
-    g_log.debug() <<  "DIFC = " << difc << ", L1 = " << L1 << ", 2Theta = " << twotheta
-                   << " ==> L2 = " << l2 << ".\n";
+    g_log.notice() <<  "DIFC = " << difc << ", L1 = " << L1 << ", 2Theta = " << twotheta
+                    << " ==> L2 = " << l2 << ".\n";
 
     return l2;
   }
@@ -1035,7 +1092,6 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Get parameter value from m_configuration/m_profile
-    */
   double SaveGSASInstrumentFile::getProfileParameterValue(unsigned int bankid, std::string paramname)
   {
     map<unsigned int, map<string, double> >::iterator biter;
@@ -1062,6 +1118,31 @@ namespace Algorithms
 
     return value;
   }
+      */
+
+  //----------------------------------------------------------------------------------------------
+  /** Get parameter value from m_configuration/m_profile
+    */
+  double SaveGSASInstrumentFile::getProfileParameterValue(map<string, double> profilemap , std::string paramname)
+  {
+    map<string, double>::iterator piter = profilemap.find(paramname);
+    if (piter == profilemap.end())
+    {
+      stringstream errss;
+      errss << "Profile map does not contain parameter "
+            << paramname << ". Available parameters are ";
+      for (map<string, double>::iterator piter = profilemap.begin(); piter != profilemap.end(); ++piter)
+      {
+        errss << piter->first << ", ";
+      }
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    double value = piter->second;
+
+    return value;
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Load fullprof resolution file.
@@ -1069,10 +1150,32 @@ namespace Algorithms
     * - set output table workspace to m_inpWS
     * @param irffilename
     */
-  double SaveGSASInstrumentFile::loadFullprofResolutionFile(std::string irffilename)
+  void SaveGSASInstrumentFile::loadFullprofResolutionFile(std::string irffilename)
   {
-    // FIXME - Implement ASAP
-    throw runtime_error("ASAP");
+    IAlgorithm_sptr loadfpirf;
+    try
+    {
+      loadfpirf = createChildAlgorithm("LoadFullprofResolution");
+    }
+    catch(Exception::NotFoundError &)
+    {
+      g_log.error("SaveGSASInstrumentFile requires DataHandling library for LoadFullprofResolution.");
+      throw runtime_error("SaveGSASInstrumentFile requires DataHandling library for LoadFullprofResolution.");
+    }
+
+    loadfpirf->setProperty("Filename", irffilename);
+    loadfpirf->setPropertyValue("OutputWorkspace", "temp");
+
+    loadfpirf->execute();
+    if (!loadfpirf->isExecuted())
+      throw runtime_error("LoadFullprof cannot be executed. ");
+
+    // m_inpWS = boost::dynamic_pointer_cast<TableWorkspace>(loadfpirf->getProperty("OutputWorkspace"));
+    m_inpWS = loadfpirf->getProperty("OutputWorkspace");
+    if (!m_inpWS)
+      throw runtime_error("Failed to obtain a table workspace from LoadFullprofResolution's output.");
+
+    return;
   }
 
 

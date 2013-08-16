@@ -25,7 +25,6 @@ public:
   static SaveGSASInstrumentFileTest *createSuite() { return new SaveGSASInstrumentFileTest(); }
   static void destroySuite( SaveGSASInstrumentFileTest *suite ) { delete suite; }
 
-
   void test_SaveGSSInstrumentFile_1Bank()
   {
     // Load a (local) table workspace
@@ -41,14 +40,13 @@ public:
 
     saver.setProperty("InputWorkspace", "PG3ProfileTable");
     saver.setProperty("OutputFilename", "test.iparm");
-    saver.setPropertyValue("BankIDs", "4");
+    saver.setPropertyValue("BankIDs", "1");
     saver.setProperty("Instrument", "PG3");
     saver.setPropertyValue("ChopperFrequency", "60");
-    saver.setProperty("IDLine", "Blablabla Blablabla");
-    saver.setProperty("Sample", "whatever");
+    saver.setProperty("IDLine", "PG60_2011B");
+    saver.setProperty("Sample", "LaB6");
     saver.setProperty("L1", 60.0);
-    saver.setProperty("L2", 0.321);
-    saver.setProperty("TwoTheta", 90.1);
+    saver.setProperty("TwoTheta", 90.0);
 
     // Execute the algorithm
     saver.execute();
@@ -77,7 +75,7 @@ public:
 
     saver.setProperty("InputFullprofResolutonFile", "pg3_60hz.irf");
     saver.setProperty("OutputFilename", "test.iparm");
-    saver.setPropertyValue("BankIDs", "4");
+    saver.setPropertyValue("BankIDs", "1");
     saver.setProperty("Instrument", "PG3");
     saver.setPropertyValue("ChopperFrequency", "60");
     saver.setProperty("IDLine", "Blablabla Blablabla");
@@ -95,21 +93,21 @@ public:
 
     AnalysisDataService::Instance().remove("PG3ProfileTable");
     TS_ASSERT_EQUALS(1, 9876);
-
   }
-
 
   // Load table workspace containing instrument parameters
   void loadProfileTable(string wsname)
   {
+    // The data befow is from Bank1 in pg60_2011B.irf
+
     TableWorkspace_sptr tablews(new TableWorkspace);
     tablews->addColumn("str", "Name");
-    tablews->addColumn("double", "Value_4");
+    tablews->addColumn("double", "Value_1");
 
     vector<string> parnames;
     vector<double> parvalues;
 
-    parnames.push_back("BANK");     parvalues.push_back(4.);
+    parnames.push_back("BANK");     parvalues.push_back(1.);
     parnames.push_back("Alph0"); 	parvalues.push_back(0.5    );
     parnames.push_back("Alph0t"); 	parvalues.push_back(65.14  );
     parnames.push_back("Alph1"); 	parvalues.push_back(8.15   );
@@ -118,20 +116,20 @@ public:
     parnames.push_back("Beta0t"); 	parvalues.push_back(78.412 );
     parnames.push_back("Beta1"); 	parvalues.push_back(7.674  );
     parnames.push_back("Beta1t"); 	parvalues.push_back(0      );
-    parnames.push_back("Dtt1"); 	parvalues.push_back(22780.6);
-    parnames.push_back("Dtt1t"); 	parvalues.push_back(22790.1);
+    parnames.push_back("Dtt1"); 	parvalues.push_back(22780.57);
+    parnames.push_back("Dtt1t"); 	parvalues.push_back(22790.129);
     parnames.push_back("Dtt2"); 	parvalues.push_back(0      );
     parnames.push_back("Dtt2t"); 	parvalues.push_back(0.3    );
     parnames.push_back("Gam0"); 	parvalues.push_back(0      );
     parnames.push_back("Gam1"); 	parvalues.push_back(0      );
     parnames.push_back("Gam2"); 	parvalues.push_back(0      );
     parnames.push_back("Sig0"); 	parvalues.push_back(0      );
-    parnames.push_back("Sig1"); 	parvalues.push_back(3.16228);
-    parnames.push_back("Sig2"); 	parvalues.push_back(20.0823);
-    parnames.push_back("Tcross"); 	parvalues.push_back(0.356  );
+    parnames.push_back("Sig1"); 	parvalues.push_back(sqrt(10.0));
+    parnames.push_back("Sig2"); 	parvalues.push_back(sqrt(403.30));
+    parnames.push_back("Tcross"); 	parvalues.push_back(0.3560 );
     parnames.push_back("Width"); 	parvalues.push_back(1.2141 );
     parnames.push_back("Zero"); 	parvalues.push_back(0      );
-    parnames.push_back("Zerot"); 	parvalues.push_back(-70.6  );
+    parnames.push_back("Zerot"); 	parvalues.push_back(-70.60  );
     parnames.push_back("step"); 	parvalues.push_back(5      );
     parnames.push_back("tof-max"); 	parvalues.push_back(46760  );
     parnames.push_back("tof-min"); 	parvalues.push_back(2278.06);

@@ -110,13 +110,18 @@ private:
                                   std::map<unsigned int, std::map<std::string, double> >& profilemap);
 
   /// Convert to GSAS instrument file
-  void convertToGSAS(std::vector<unsigned int> banks, std::string gsasinstrfilename);
+  void convertToGSAS(std::vector<unsigned int> banks, std::string gsasinstrfilename,
+                     std::map<unsigned int, std::map<std::string, double> > bankprofilemap);
 
   /// Build a data structure for GSAS's tabulated peak profile
-  void buildGSASTabulatedProfile(unsigned int bankid);
+  void buildGSASTabulatedProfile(std::map<unsigned int, std::map<std::string, double> > bankprofilemap, unsigned int bankid);
+
+  /// Write the header of the file
+  void writePRMHeader(std::vector<unsigned int> banks, std::string prmfilename);
 
   /// Write out .prm/.iparm file
-  void writePRM(unsigned int bankid, size_t numbanks, std::string prmfilename, bool isfirstbank);
+  void writePRMSingleBank(std::map<unsigned int, std::map<std::string, double> > bankprofilemap,
+                          unsigned int bankid, std::string prmfilename);
 
   ///
   void makeParameterConsistent();
@@ -134,10 +139,11 @@ private:
   double getValueFromMap(std::map<std::string, double> profilemap, std::string parname);
 
   /// Get parameter value from class storage
-  double getProfileParameterValue(unsigned int bankid, std::string paramname);
+  // double getProfileParameterValue(unsigned int bankid, std::string paramname);
+  double getProfileParameterValue(std::map<std::string, double> profilemap , std::string paramname);
 
   /// Load fullprof resolution file.
-  double loadFullprofResolutionFile(std::string irffilename);
+  void loadFullprofResolutionFile(std::string irffilename);
 
   /// Input workspace
   DataObjects::TableWorkspace_sptr m_inpWS;
@@ -175,8 +181,8 @@ private:
   std::vector<double> m_galpha;
   std::vector<double> m_gbeta;
 
-  std::vector<double> m_mndsp;
-  std::vector<double> m_mxtofs;
+  std::map<unsigned int, double> m_bank_mndsp;
+  std::map<unsigned int, double> m_bank_mxtof;
 
 };
 
