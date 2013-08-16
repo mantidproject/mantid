@@ -1,4 +1,4 @@
-#include "MantidICat/ErrorHandling.h"
+#include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include "MantidICat/ICat3/GSoapGenerated/soapICATPortBindingProxy.h"
 
 namespace Mantid

@@ -2,7 +2,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidICat/ICat3/ICat3Helper.h"
 #include "MantidICat/Session.h"
-#include "MantidICat/ErrorHandling.h" 
+#include "MantidICat/ICat3/ICat3ErrorHandling.h"
 #include <iomanip>
 #include <time.h>
 #include <boost/lexical_cast.hpp>

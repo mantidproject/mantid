@@ -11,7 +11,6 @@ if the data archive is not accessible, it downloads the files from the data serv
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidICat/ErrorHandling.h" 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/ICatalog.h"
