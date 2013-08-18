@@ -250,50 +250,43 @@ namespace API
       const auto & paramInfo = cacheItr->second;
       const std::string & paramN = nameComp.first;
 
-      // Special case for r,t,p. We need to know all three first to calculate X,Y,Z
-      if(paramN.compare(1,9,"-position") == 0)
+      try
       {
-        auto & rtpValues  = rtpParams[paramInfo->m_component]; //If not found, constructs default
-        double value = ParameterValue(*paramInfo, runData);
-        if(paramN.compare(0,1,"r") == 0) 
+        // Special case for r,t,p. We need to know all three first to calculate X,Y,Z
+        if(paramN.compare(1,9,"-position") == 0)
         {
-          rtpValues.radius = value;
-          rtpValues.haveRadius = true;
+          auto & rtpValues  = rtpParams[paramInfo->m_component]; //If not found, constructs default
+          double value = ParameterValue(*paramInfo, runData);
+          if(paramN.compare(0,1,"r") == 0) 
+          {
+            rtpValues.radius = value;
+            rtpValues.haveRadius = true;
+          }
+          else if(paramN.compare(0,1,"t") == 0) rtpValues.theta = deg2rad*value;
+          else if(paramN.compare(0,1,"p") == 0) rtpValues.phi = deg2rad*value;
+          else {}
+          if(rtpValues.haveRadius) // Just overwrite x,y,z
+          {
+            // convert spherical coordinates to cartesian coordinate values
+            double x = rtpValues.radius*std::sin(rtpValues.theta)*std::cos(rtpValues.phi);
+            paramMap.addPositionCoordinate(paramInfo->m_component, "x", x);
+            double y = rtpValues.radius*std::sin(rtpValues.theta)*std::sin(rtpValues.phi);
+            paramMap.addPositionCoordinate(paramInfo->m_component, "y", y);
+            double z = rtpValues.radius*std::cos(rtpValues.theta);
+            paramMap.addPositionCoordinate(paramInfo->m_component, "z", z);
+          }
         }
-        else if(paramN.compare(0,1,"t") == 0) 
-        {
-          rtpValues.theta = deg2rad*value;
-        }
-        else if(paramN.compare(0,1,"p") == 0) 
-        {
-          rtpValues.phi = deg2rad*value;
-        }
-        else {}
-        if(rtpValues.haveRadius) // Just overwrite x,y,z
-        {
-          // convert spherical coordinates to cartesian coordinate values
-          double x = rtpValues.radius*std::sin(rtpValues.theta)*std::cos(rtpValues.phi);
-          paramMap.addPositionCoordinate(paramInfo->m_component, "x", x);
-          double y = rtpValues.radius*std::sin(rtpValues.theta)*std::sin(rtpValues.phi);
-          paramMap.addPositionCoordinate(paramInfo->m_component, "y", y);
-          double z = rtpValues.radius*std::cos(rtpValues.theta);
-          paramMap.addPositionCoordinate(paramInfo->m_component, "z", z);
-        }
-      }
-      else
-      {
-        try
+        else
         {
           populateWithParameter(paramMap, paramN, *paramInfo, runData);
         }
-        catch(std::exception& exc)
-        {
-          g_log.information() << "Unable to add component parameter '" << nameComp.first << "'. Error: " << exc.what();
-          continue;
-        }
+      }
+      catch(std::exception& exc)
+      {
+        g_log.information() << "Unable to add component parameter '" << nameComp.first << "'. Error: " << exc.what();
+        continue;
       }
     }
-
   }
   
   //---------------------------------------------------------------------------------------
