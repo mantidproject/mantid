@@ -17,6 +17,74 @@ static const int NUMSPECS = 4;
 
 class CalculateFlatBackgroundTest : public CxxTest::TestSuite
 {
+  ///Tests each method in CalculateFlatBackground using different parameter sets to make sure the returns are as expected
+private:
+  ///Run CalculateFlatBackground with options specific to the function calling it. Each function has a preset relating to that specific test's needs.
+  ///@param functindex - an integer identifying the function running the algorithm in order to set the properties
+  void runCalculateFlatBackground(int functindex)
+  {
+    // functindex key
+    // 1 = exec
+    // 2 = execwithreturnbg
+    // 3 = testMeanFirst
+    // 4 = testMeanFirstWithReturnBackground
+    // 5 = testMeanSecond
+
+    //common beginning
+    Mantid::Algorithms::CalculateFlatBackground flatBG;
+    TS_ASSERT_THROWS_NOTHING( flatBG.initialize() )
+    TS_ASSERT( flatBG.isInitialized() )
+
+    if (functindex == 1 || functindex == 2)
+    {
+      //exec or execWithReturnBackground
+      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("InputWorkspace","calcFlatBG") )
+      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("OutputWorkspace","Removed") )
+      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("WorkspaceIndexList","0") )
+      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("StartX","9.5") )
+      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("EndX","20.5") )
+      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("Mode","Linear Fit") )
+
+      if(functindex == 2)
+      {
+        //execWithReturnBackground
+        TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("OutputMode","Return Background") )
+      }
+    }
+    else if (functindex == 3 || functindex == 4 || functindex == 5)
+    {
+      flatBG.setPropertyValue("InputWorkspace","calculateflatbackgroundtest_ramp");
+      flatBG.setPropertyValue("WorkspaceIndexList","");
+      flatBG.setPropertyValue("Mode","Mean");
+
+      if (functindex == 3 || functindex == 4)
+      {
+        //testMeanFirst or testMeanFirstWithReturnBackground
+        flatBG.setPropertyValue("OutputWorkspace","calculateflatbackgroundtest_first");
+        // remove the first half of the spectrum
+        flatBG.setPropertyValue("StartX","0");
+        flatBG.setPropertyValue("EndX","15");
+        if (functindex == 4)
+        {
+          //testMeanFirstWithReturnBackground
+          flatBG.setPropertyValue("OutputMode","Return Background"); 
+        }
+      }
+      else if (functindex == 5)
+      {
+        //testMeanSecond
+        flatBG.setPropertyValue("OutputWorkspace","calculateflatbackgroundtest_second");
+        // remove the last half of the spectrum
+        flatBG.setProperty("StartX", 2*double(NUMBINS)/3);
+        flatBG.setProperty("EndX", double(NUMBINS));
+      }
+    }
+
+    // common ending
+    TS_ASSERT_THROWS_NOTHING( flatBG.execute() )
+    TS_ASSERT( flatBG.isExecuted() )
+  }
+
 public:
   static CalculateFlatBackgroundTest *createSuite() { return new CalculateFlatBackgroundTest(); }
   static void destroySuite(CalculateFlatBackgroundTest *suite) { delete suite; }
@@ -71,8 +139,6 @@ public:
     TS_ASSERT_EQUALS( flatBG.version(), 1 )
   }
 
-
-
   void testExec()
   {
     runCalculateFlatBackground(1);
@@ -104,7 +170,6 @@ public:
       TS_ASSERT( 100.3431 > Y[i]);
     }
   }
-
 
   void testMeanFirst()
   {
@@ -148,7 +213,7 @@ public:
     }
   }
 
-void testMeanFirstWithReturnBackground()
+  void testMeanFirstWithReturnBackground()
   {
     runCalculateFlatBackground(4);
 
@@ -268,79 +333,12 @@ void testMeanFirstWithReturnBackground()
     TS_ASSERT_DELTA( EOut[20], 37.2677, 0.001 )
   }
   
-
 private:
   double bg;
 
   double round( double value )
   {
     return floor( value*100000 + 0.5 )/100000;
-  }
-
-  ///Run CalculateFlatBackground wiht options specific to the function calling it. Each function has a preset
-  ///@param functindex - an integer identifying the function running the algorithm in order to set the properties
-  void runCalculateFlatBackground(int functindex)
-  {
-    // functindex key
-    // 1 = exec
-    // 2 = execwithreturnbg
-    // 3 = testMeanFirst
-    // 4 = testMeanFirstWithReturnBackground
-    // 5 = testMeanSecond
-
-    //common beginning
-    Mantid::Algorithms::CalculateFlatBackground flatBG;
-    TS_ASSERT_THROWS_NOTHING( flatBG.initialize() )
-    TS_ASSERT( flatBG.isInitialized() )
-
-    if (functindex == 1 || functindex == 2)
-    {
-      //exec or execWithReturnBackground
-      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("InputWorkspace","calcFlatBG") )
-      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("OutputWorkspace","Removed") )
-      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("WorkspaceIndexList","0") )
-      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("StartX","9.5") )
-      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("EndX","20.5") )
-      TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("Mode","Linear Fit") )
-
-      if(functindex == 2)
-      {
-        //execWithReturnBackground
-        TS_ASSERT_THROWS_NOTHING( flatBG.setPropertyValue("OutputMode","Return Background") )
-      }
-    }
-    else if (functindex == 3 || functindex == 4 || functindex == 5)
-    {
-      flatBG.setPropertyValue("InputWorkspace","calculateflatbackgroundtest_ramp");
-      flatBG.setPropertyValue("WorkspaceIndexList","");
-      flatBG.setPropertyValue("Mode","Mean");
-
-      if (functindex == 3 || functindex == 4)
-      {
-        //testMeanFirst or testMeanFirstWithReturnBackground
-        flatBG.setPropertyValue("OutputWorkspace","calculateflatbackgroundtest_first");
-        // remove the first half of the spectrum
-        flatBG.setPropertyValue("StartX","0");
-        flatBG.setPropertyValue("EndX","15");
-        if (functindex == 4)
-        {
-          //testMeanFirstWithReturnBackground
-          flatBG.setPropertyValue("OutputMode","Return Background"); 
-        }
-      }
-      else if (functindex == 5)
-      {
-        //testMeanSecond
-        flatBG.setPropertyValue("OutputWorkspace","calculateflatbackgroundtest_second");
-        // remove the last half of the spectrum
-        flatBG.setProperty("StartX", 2*double(NUMBINS)/3);
-        flatBG.setProperty("EndX", double(NUMBINS));
-      }
-    }
-
-    // common ending
-    TS_ASSERT_THROWS_NOTHING( flatBG.execute() )
-    TS_ASSERT( flatBG.isExecuted() )
   }
 };
 
