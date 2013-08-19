@@ -95,6 +95,7 @@ namespace Algorithms
     }
 
     // Debug output
+    /*
     stringstream dbss;
     for (map<unsigned int, size_t>::iterator diter = m_bankIDIndexMap.begin(); diter != m_bankIDIndexMap.end();
          ++diter)
@@ -102,6 +103,7 @@ namespace Algorithms
       dbss << "Bank " << diter->first << " has vector index " << diter->second << ".\n";
     }
     cout << dbss.str();
+    */
 
     return;
   }
@@ -246,7 +248,7 @@ namespace Algorithms
       }
     }
 
-    cout << "[C]* Input: " << instring << ": size of double vector: " << vecdouble.size() << endl;
+    // cout << "[C]* Input: " << instring << ": size of double vector: " << vecdouble.size() << endl;
 
     return vecdouble;
   }
@@ -273,7 +275,7 @@ namespace Algorithms
       }
     }
 
-    cout << "[C]* Input : " << instring << ": size of string vector: " << vecinteger.size() << endl;
+    // cout << "[C]* Input : " << instring << ": size of string vector: " << vecinteger.size() << endl;
 
     return vecinteger;
   }
@@ -701,7 +703,7 @@ namespace Algorithms
     }
 
     // Write bank header
-    g_log.notice() << "Export header of GSAS instrument file " << gsasinstrfilename << ".\n";
+    g_log.information() << "Export header of GSAS instrument file " << gsasinstrfilename << ".\n";
     writePRMHeader(banks, gsasinstrfilename);
 
     //  Convert and write
@@ -773,6 +775,7 @@ namespace Algorithms
     double dtt1 = getProfileParameterValue(profilemap, "Dtt1");
     double dtt1t = getProfileParameterValue(profilemap, "Dtt1t");
     double dtt2 = getProfileParameterValue(profilemap, "Dtt2");
+    double dtt2t = getProfileParameterValue(profilemap, "Dtt2t");
 
     double alph0 = getProfileParameterValue(profilemap, "Alph0");
     double alph1 = getProfileParameterValue(profilemap, "Alph1");
@@ -798,21 +801,16 @@ namespace Algorithms
       double rd = 1.0/gdsp[k];
       double dmX = mx-rd;
       gpkX[k] = 0.5*erfc(mxb*dmX); //  # this is n in the formula
-      gtof[k] = calTOF(gpkX[k], zero, dtt1 ,dtt2, zerot, dtt1t, -dtt2, gdsp[k]);
+      gtof[k] = calTOF(gpkX[k], zero, dtt1 ,dtt2, zerot, dtt1t, -dtt2t, gdsp[k]);
       gdt[k] = gtof[k] - (instC*gdsp[k]);
-#if 0
-      g_log.notice() << setprecision(10)
-                     << "gtof[" << k << "] = " << gtof[k] << "; gdsp[" << k << "] = " << gdsp[k]
-                     << "; instC = " << instC << "; gdt[" << k << "] = " << gdt[k] << ".\n";
-#else
-      g_log.notice() << k << "\t"
-                     << setw(20) << setprecision(10) << gtof[k] << "\t  "
-                     << setw(20) << setprecision(10) << gdsp[k] << "\t  "
-                     << setw(20) << setprecision(10) << instC << "\t "
-                     << setw(20) << setprecision(10) << gdt[k] << ".\n";
-#endif
       galpha[k] = aaba(gpkX[k], alph0, alph1, alph0t, alph1t, gdsp[k]);
       gbeta[k] = aaba(gpkX[k], beta0, beta1, beta0t, beta1t, gdsp[k]);
+
+      g_log.debug() << k << "\t"
+                    << setw(20) << setprecision(10) << gtof[k] << "\t  "
+                    << setw(20) << setprecision(10) << gdsp[k] << "\t  "
+                    << setw(20) << setprecision(10) << instC << "\t "
+                    << setw(20) << setprecision(10) << gdt[k] << ".\n";
     }
 
     // 3. Set to class variables 
@@ -940,8 +938,8 @@ namespace Algorithms
 
     // Calculate L2
     double instC = dtt1 - (4*(alph0+alph1));
-    g_log.notice() << "Dtt1 = " << dtt1 << ", Alph0 = " << alph0 << ", Alph1 = " << alph1 << ".\n"
-                   << "MinDsp = " << mindsp << ".\n";
+    g_log.debug() << "Dtt1 = " << dtt1 << ", Alph0 = " << alph0 << ", Alph1 = " << alph1 << ".\n"
+                  << "MinDsp = " << mindsp << ".\n";
 
     if (m_L2 <= 0. || m_L2 == EMPTY_DBL())
     {
@@ -1022,8 +1020,8 @@ namespace Algorithms
   double SaveGSASInstrumentFile::calL2FromDtt1(double difc, double L1, double twotheta)
   {
     double l2 = difc/(252.816*2.0*sin(0.5*twotheta*PI/180.0)) - L1;
-    g_log.notice() <<  "DIFC = " << difc << ", L1 = " << L1 << ", 2Theta = " << twotheta
-                    << " ==> L2 = " << l2 << ".\n";
+    g_log.debug() <<  "DIFC = " << difc << ", L1 = " << L1 << ", 2Theta = " << twotheta
+                   << " ==> L2 = " << l2 << ".\n";
 
     return l2;
   }
@@ -1031,28 +1029,24 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Calculate TOF difference
-   * @param ep :: zero
-   * @param eq :: dtt1
-   * @param er :: dtt2
-   * @param tp :: zerot
-   * @param tq :: dtt1t
-   * @param er :: dtt2t
+    * Epithermal: te = zero  + d*dtt1  + 0.5*dtt2*erfc( (1/d-1.05)*10 );
+    * Thermal:    tt = zerot + d*dtt1t + dtt2t/d;
+    * Total TOF:  t  = n*te + (1-n) tt
+    * @param ep :: zero
+    * @param eq :: dtt1
+    * @param er :: dtt2
+    * @param tp :: zerot
+    * @param tq :: dtt1t
+    * @param er :: dtt2t
   */
   double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er, double tp, double tq, double tr, double dsp)
   {
-      // Epithermal
-      // double te = zero  + d*dtt1  + 0.5*dtt2*erfc( (1/d-1.05)*10 );
-      // Thermal
-      // double tt = zerot + d*dtt1t + dtt2t/d;
-      // Total TOF
-      // double t  = n*te + (1-n) tt
+    // FIXME Is this equation for TOF^e correct?
+    double te = ep + (eq*dsp) + er*0.5*erfc(((1.0/dsp)-1.05)*10.0);
+    double tt = tp + (tq*dsp) + (tr/dsp);
+    double t = (n*te) + tt - (n*tt);
 
-      // FIXME Is this equation for TOF^e correct?
-      double te = ep + (eq*dsp) + er*0.5*erfc(((1.0/dsp)-1.05)*10.0);
-      double tt = tp + (tq*dsp) + (tr/dsp);
-      double t = (n*te) + tt - (n*tt);
-
-      return t;
+    return t;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1178,33 +1172,24 @@ namespace Algorithms
     return;
   }
 
+  /** Complementary error function
+  */
+  double SaveGSASInstrumentFile::erfc(double xx)
+  {
+    double x = fabs(xx);
+    double t = 1.0 / (1.0 + (0.5 * x));
+    double ty = (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))));
+    double tx = (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * ty))));
+    double y = t * exp(-x * x - 1.26551223 + t * tx);
+    if (xx < 0)
+      y = 2.0 - y;
+
+    return y;
+  }
+
+
 
 } // namespace Algorithms
 } // namespace Mantid
-
-/** Complementary error function
-*/
-double erfc(double xx)
-{
-  double x = fabs(xx);
-  double t = 1.0 / (1.0 + (0.5 * x));
-  double ty = (0.27886807 + t * (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * 0.17087277))));
-  double tx = (1.00002368 + t * (0.37409196 + t * (0.09678418 + t * (-0.18628806 + t * ty))));
-  double y = t * exp(-x * x - 1.26551223 + t * tx);
-  if (xx < 0)
-    y = 2.0 - y;
-
-  return y;
-}
-
-
-
-
-/** Initialize constant library
-  */
-void initConstantLib()
-{
-
-}
 
 

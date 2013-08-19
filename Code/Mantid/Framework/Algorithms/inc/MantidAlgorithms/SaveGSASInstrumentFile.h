@@ -145,6 +145,8 @@ private:
   /// Load fullprof resolution file.
   void loadFullprofResolutionFile(std::string irffilename);
 
+  double erfc(double xx);
+
   /// Input workspace
   DataObjects::TableWorkspace_sptr m_inpWS;
 
@@ -185,10 +187,6 @@ private:
   std::map<unsigned int, double> m_bank_mxtof;
 
 };
-
-/// Examine whether str1's last few characters are same as str2
-bool endswith(std::string str1, std::string str2) { throw std::runtime_error("Implement soon!");}
-
 
 } // namespace Algorithms
 } // namespace Mantid

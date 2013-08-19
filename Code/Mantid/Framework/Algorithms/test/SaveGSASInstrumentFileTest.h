@@ -8,6 +8,7 @@
 #include "MantidAPI/TableRow.h"
 
 #include <fstream>
+#include <Poco/File.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -52,12 +53,13 @@ public:
     saver.execute();
     TS_ASSERT(saver.isExecuted());
 
-    // Check the output file against ... ....
-    // Load generated file
+    // Check the output file's existence and size;
+    TS_ASSERT(Poco::File("test.iparm").exists());
+    Poco::File::FileSize size = Poco::File("test.iparm").getSize();
+    TS_ASSERT(size >= 16191 && size <= 16209);
 
     AnalysisDataService::Instance().remove("PG3ProfileTable");
-    TS_ASSERT_EQUALS(1, 9876);
-
+    Poco::File("test.iparm").remove();
   }
 
   void Xtest_SaveGSSInstrumentFile_MultiBank()
@@ -92,7 +94,6 @@ public:
     // Load generated file
 
     AnalysisDataService::Instance().remove("PG3ProfileTable");
-    TS_ASSERT_EQUALS(1, 9876);
   }
 
   // Load table workspace containing instrument parameters
