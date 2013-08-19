@@ -122,6 +122,7 @@ namespace Algorithms
           throw runtime_error("Programming logic error.");
         maskbins->setProperty("InputWorkspace", outputws);
       }
+      maskbins->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       maskbins->setPropertyValue("SpectraList", m_spectraVec[ib]);
       maskbins->setProperty("XMin", m_xminVec[ib]);
       maskbins->setProperty("XMax", m_xmaxVec[ib]);
