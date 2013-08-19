@@ -9,19 +9,20 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
+
+#include <QActionGroup>
+#include <QAtomicInt>
 #include <QComboBox>
 #include <QDockWidget>
+#include <QList>
 #include <QPoint>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QList>
-#include <QActionGroup>
 #include <QSortFilterProxyModel>
 #include <QStringList>
-#include <QAtomicInt>
 
 #include <set>
-#include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 
 class MantidUI;
 class ApplicationWindow;
@@ -67,7 +68,6 @@ protected slots:
   void workspaceSelected();
 
 private slots:
-  QTreeWidgetItem *addWorkspaceTreeEntry(Mantid::API::Workspace::InfoNode &node, QTreeWidgetItem* parentItem = NULL);
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();
@@ -82,15 +82,18 @@ private slots:
   void incrementUpdateCount();
 
 private:
+  void setTreeUpdating(const bool state);
+  inline bool isTreeUpdating() const { return m_treeUpdating; }
+  void populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems, const QStringList & expanded);
+  MantidTreeWidgetItem * addTreeEntry(const std::pair<std::string,Mantid::API::Workspace_sptr> & item, QTreeWidgetItem* parent = NULL);
   void createWorkspaceMenuActions();
   void createSortMenuActions();
-  QString findParentName(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
-  void setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Workspace::InfoNode::IconType iconType);
+  void setItemIcon(QTreeWidgetItem *item,  const std::string & wsID);
 
-  void addMatrixWorkspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const;
-  void addMDEventWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr mdeventWS) const;
-  void addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IMDWorkspace_const_sptr WS) const;
-  void addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const;
+  void addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::API::MatrixWorkspace_const_sptr & matrixWS) const;
+  void addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDEventWorkspace_const_sptr & mdeventWS) const;
+  void addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr & WS) const;
+  void addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr & WS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
 
@@ -104,7 +107,6 @@ private:
   QString selectedWsName;
   
   MantidUI * const m_mantidUI;
-  QSet<QString> m_known_groups;
 
   QPushButton *m_loadButton;
   QMenu *m_loadMenu, *m_saveToProgram, *m_sortMenu;
@@ -127,7 +129,8 @@ private:
   *m_convertMDHistoToMatrixWorkspace;
 
   QAtomicInt m_updateCount;
-  Mantid::API::Workspace::InfoNode *m_rootInfoNode;
+  bool m_treeUpdating;
+  Mantid::API::AnalysisDataServiceImpl & m_ads;
 
   static Mantid::Kernel::Logger& logObject;
 };
@@ -156,6 +159,7 @@ private:
   QPoint m_dragStartPosition;
   MantidDockWidget *m_dockWidget;
   MantidUI *m_mantidUI;
+  Mantid::API::AnalysisDataServiceImpl & m_ads;
   static Mantid::Kernel::Logger& logObject;
   MantidItemSortScheme m_sortScheme;
   Qt::SortOrder m_sortOrder;

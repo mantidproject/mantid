@@ -123,6 +123,7 @@ public:
  
   /// Return the workspace typeID
   virtual const std::string id() const{return "ITableWorkspace";}
+  virtual const std::string toString() const;
   /** Creates a new column
    * @param type :: The datatype of the column
    * @param name :: The name to assign to the column
@@ -289,8 +290,6 @@ public:
   void modified();
 
 protected:
-
-  virtual InfoNode *createInfoNode() const;
 
   /**  Resize a column.
          @param c :: Pointer to the column

@@ -184,20 +184,6 @@ public:
     TS_ASSERT_EQUALS("SpecialWorkspace2D", Mantid::Kernel::getUnmangledTypeName(*property.type_info()));
   }
 
-  void test_InfoNode()
-  {
-    SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D());
-    ws->initialize(100, 1, 1);
-
-    Mantid::API::Workspace::InfoNode rootNode( *ws );
-    ws->addInfoNodeTo( rootNode );
-    auto &node = *rootNode.nodes()[0];
-    TS_ASSERT_EQUALS( node.nodes().size(), 0 );
-    TS_ASSERT_EQUALS( node.lines().size(), 3 );
-    TS_ASSERT_EQUALS( node.lines()[0], "SpecialWorkspace2D" );
-    TS_ASSERT_EQUALS( node.lines()[1], "Title: " );
-    TS_ASSERT_EQUALS( node.lines()[2], "Histograms: 100" );
-  }
 };
 
 

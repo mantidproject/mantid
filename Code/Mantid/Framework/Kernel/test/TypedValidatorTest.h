@@ -32,7 +32,7 @@ namespace
     virtual const std::string id() const { return "FakeDataItem"; }
     virtual const std::string name() const { return "Empty"; }
     virtual bool threadSafe() const { return true; }
-    virtual std::string toString() const { return "FakeDataItem{}"; }
+    virtual const std::string toString() const { return "FakeDataItem{}"; }
   };
   DECLARE_TEST_VALIDATOR(DataItemSptrTypedValidator, boost::shared_ptr<FakeDataItem>);
 }

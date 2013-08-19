@@ -2,12 +2,10 @@
 
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/InstrumentDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ModeratorModel.h"
 
-#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
-
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
@@ -16,9 +14,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/make_shared.hpp>
@@ -29,9 +25,6 @@
 #include <Poco/SAX/ContentHandler.h>
 #include <Poco/SAX/SAXParser.h>
 #include <Poco/ScopedLock.h>
-
-#include <fstream>
-#include <map>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -104,6 +97,27 @@ namespace API
     return out;
   }
 
+  //---------------------------------------------------------------------------------------
+
+  /// @returns A human-readable description of the object
+  const std::string ExperimentInfo::toString() const
+  {
+    std::ostringstream out;
+
+    Geometry::Instrument_const_sptr inst = this->getInstrument();
+    out << "Instrument: " << inst->getName() << " ("
+        << inst->getValidFromDate().toFormattedString("%Y-%b-%d")
+        << " to " << inst->getValidToDate().toFormattedString("%Y-%b-%d") << ")";
+    out << "\n";
+    if (this->sample().hasOrientedLattice())
+    {
+      const Geometry::OrientedLattice & latt = this->sample().getOrientedLattice();
+      out << "Sample: a " << std::fixed << std::setprecision(1) << latt.a() <<", b " << latt.b() << ", c " << latt.c();
+      out << "; alpha " << std::fixed << std::setprecision(0) << latt.alpha() <<", beta " << latt.beta() << ", gamma " << latt.gamma();
+      out << "\n";
+    }
+    return out.str();
+  }
 
   //---------------------------------------------------------------------------------------
   /** Set the instrument
