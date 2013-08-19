@@ -42,6 +42,7 @@ void WorkspaceIcons::initInternalLookup()
   m_idToPixmapName["EventWorkspace"] = "mantid_matrix_xpm";
   m_idToPixmapName["GroupingWorkspace"] = "mantid_matrix_xpm";
   m_idToPixmapName["ManagedWorkspace2D"] = "mantid_matrix_xpm";
+  m_idToPixmapName["ManagedRawFileWorkspace2D"] = "mantid_matrix_xpm";
   m_idToPixmapName["MaskWorkspace"] = "mantid_matrix_xpm";
   m_idToPixmapName["OffsetsWorkspace"] = "mantid_matrix_xpm";
   m_idToPixmapName["RebinnedOutput"] = "mantid_matrix_xpm";
