@@ -199,12 +199,6 @@ namespace Mantid
       MatrixWorkspace_sptr bkgWS = this->getProperty("SampleBackgroundWorkspace");
       MatrixWorkspace_sptr sampleWS = this->getProperty("SampleWorkspace");
 
-      std::string maskName = this->getPropertyValue("OutputWorkspace");
-      if (maskName.empty())
-      {
-        maskName = "diagnostic_mask";
-      }
-
       // calculate the number of tests for progress bar
       m_progStepWidth = 0;
       {
