@@ -97,7 +97,6 @@ namespace Algorithms
   {
     bool firstloop = true;
     API::MatrixWorkspace_sptr outputws;
-    string outputwsname = this->getPropertyValue("OutputWorkspace");
 
     size_t numcalls = m_xminVec.size();
 
@@ -120,10 +119,9 @@ namespace Algorithms
       else
       {
         if (!outputws)
-          throw runtime_error("Programming lotic error.");
-        maskbins->setPropertyValue("InputWorkspace", outputwsname);
+          throw runtime_error("Programming logic error.");
+        maskbins->setProperty("InputWorkspace", outputws);
       }
-      maskbins->setPropertyValue("OutputWorkspace", outputwsname);
       maskbins->setPropertyValue("SpectraList", m_spectraVec[ib]);
       maskbins->setProperty("XMin", m_xminVec[ib]);
       maskbins->setProperty("XMax", m_xmaxVec[ib]);
