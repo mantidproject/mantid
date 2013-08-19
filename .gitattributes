@@ -10,4 +10,4 @@
 # Allowing gSoap generated files to be committed.
 /Code/Mantid/Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/ICat3H.h              hooks.MaxObjectKiB130819=2048 
 /Code/Mantid/Framework/ICat/src/ICat3/GSoapGenerated/ICat3C.cpp                       hooks.MaxObjectKiB130819=5120
-/Code/Mantid/Framework/ICat/src/ICat4/GSoapGenerated/ICat3C.cpp                       hooks.MaxObjectKiB130819=2048
+/Code/Mantid/Framework/ICat/src/ICat4/GSoapGenerated/ICat4C.cpp                       hooks.MaxObjectKiB130819=2048
