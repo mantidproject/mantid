@@ -64,9 +64,9 @@ namespace CurveFitting
     // 2. Calculate
     double lambda,theta0,dthet,dthetr,dt,bgd,scalefac,pthet;
     double tl,tlc,con;
-    double dn[m_nlayer+2];
-    double rnbn[m_nlayer+2];
-    double zbb[m_nlayer+2];
+    std::vector<double> dn(m_nlayer+2);
+    std::vector<double> rnbn(m_nlayer+2);
+    std::vector<double> zbb(m_nlayer+2);
     int nit=21;
     int i;
     double cy[nData];
@@ -74,9 +74,9 @@ namespace CurveFitting
     std::complex<double> c0(0.0, 0.0);
     std::complex<double> ci(0.0, 1.0);
     std::complex<double> cr(1.0, 0.0);
-    std::complex<double> rnfn[m_nlayer+2];
-    std::complex<double> pfn[m_nlayer+2];
-    std::complex<double> betan[m_nlayer+2];
+    std::vector<std::complex<double>> rnfn(m_nlayer+2);
+    std::vector<std::complex<double>> pfn(m_nlayer+2);
+    std::vector<std::complex<double>> betan(m_nlayer+2);
     std::complex<double> rnf(0.0,0.0);
     std::complex<double> rnf1(0.0,0.0);
     std::complex<double> ac1(0.0,0.0);
