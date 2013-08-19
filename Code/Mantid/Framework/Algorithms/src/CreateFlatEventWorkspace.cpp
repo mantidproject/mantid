@@ -77,8 +77,6 @@ namespace Algorithms
       EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
       MatrixWorkspace_sptr outputWS;
 
-     // std::string outputWsName = this->getPropertyValue("OutputWorkspace");
-
       // Get the background region start/end
       double start = getProperty("RangeStart");
       double end = getProperty("RangeEnd");

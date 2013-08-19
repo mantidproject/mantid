@@ -116,8 +116,6 @@ namespace Algorithms
           throw std::runtime_error( "\"" + wsName + "\" does not have a run property of \"" + *propName + "\"." );
     }
 
-    const std::string outputTableName = this->getPropertyValue("OutputWorkspace");
-
     // Set up output table.
     boost::shared_ptr<ITableWorkspace> outputTable = WorkspaceFactory::Instance().createTable();
     // One column for each property.
@@ -145,8 +143,6 @@ namespace Algorithms
       }
     }
 
-    // Add to ADS and set as output.
-    AnalysisDataService::Instance().addOrReplace(outputTableName, outputTable);
     this->setProperty("OutputWorkspace", outputTable);
   }
 
