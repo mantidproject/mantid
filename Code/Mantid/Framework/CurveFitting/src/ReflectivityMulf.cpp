@@ -69,7 +69,7 @@ namespace CurveFitting
     std::vector<double> zbb(m_nlayer+2);
     int nit=21;
     int i;
-    double cy[nData];
+    std::vector<double> cy(nData);
 
     std::complex<double> c0(0.0, 0.0);
     std::complex<double> ci(0.0, 1.0);
@@ -135,7 +135,7 @@ namespace CurveFitting
  
     double tmax,tmin,x,st0,ct0,ans,gauss,f;
     int nit1=nit+1;
-    double xnit[nit1];
+    std::vector<double> xnit(nit1);
     int ii,k;
 
     dthet=theta0*pthet/100.0;
