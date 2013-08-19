@@ -392,8 +392,7 @@ void StepScan::generateCurve( const QString& var )
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
   alg->setLogging(false); // Don't log this algorithm
   alg->setPropertyValue("InputWorkspace", m_tableWSName);
-  // TODO: Make workspace hidden once ticket #6803 is fixed
-  m_plotWSName = "plot_" + m_tableWSName;
+  m_plotWSName = m_tableWSName + "_plot";
   alg->setPropertyValue("OutputWorkspace", m_plotWSName);
   alg->setPropertyValue("ColumnX", var.toStdString() );
   alg->setPropertyValue("ColumnY", "Counts" );
