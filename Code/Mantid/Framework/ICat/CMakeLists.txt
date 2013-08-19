@@ -31,10 +31,12 @@ set ( INC_FILES
 	inc/MantidICat/CatalogSearchParam.h
 	inc/MantidICat/ICatExport.h
 	inc/MantidICat/Session.h
+	inc/MantidICat/GSoap/soapserializersH.h
+	inc/MantidICat/GSoap/soapserializersStub.h
 	inc/MantidICat/GSoap/stdsoap2.h
-	inc/MantidICat/ICat3/GSoapGenerated/soapH.h
-	inc/MantidICat/ICat3/GSoapGenerated/soapICATPortBindingProxy.h
-	inc/MantidICat/ICat3/GSoapGenerated/soapStub.h
+	inc/MantidICat/ICat3/GSoapGenerated/ICat3H.h
+	inc/MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h
+	inc/MantidICat/ICat3/GSoapGenerated/ICat3Stub.h
 	inc/MantidICat/ICat3/ICat3ErrorHandling.h
 	inc/MantidICat/ICat3/ICat3Catalog.h
 	inc/MantidICat/ICat3/ICat3Helper.h

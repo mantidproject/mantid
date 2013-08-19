@@ -1,5 +1,5 @@
 #include "MantidICat/ICat3/ICat3ErrorHandling.h"
-#include "MantidICat/ICat3/GSoapGenerated/soapICATPortBindingProxy.h"
+#include "MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h"
 
 namespace Mantid
 {
@@ -16,7 +16,7 @@ CErrorHandling::~CErrorHandling()
 /**This method throws the error string returned by gsoap to mantid upper layer
  *@param icat :: -ICat proxy object
  */
-void CErrorHandling::throwErrorMessages(ICATPortBindingProxy& icat)
+void CErrorHandling::throwErrorMessages(ICat3::ICATPortBindingProxy& icat)
 {
   char buf[600];
   const int len=600;

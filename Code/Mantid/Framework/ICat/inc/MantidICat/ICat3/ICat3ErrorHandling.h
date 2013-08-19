@@ -9,7 +9,10 @@
 //----------------------------------------------------------------------
 // Forward Declaration
 //----------------------------------------------------------------------
-class ICATPortBindingProxy;
+namespace ICat3
+{
+  class ICATPortBindingProxy;
+}
 
 namespace Mantid
 {
@@ -52,7 +55,7 @@ public:
   /** This method throws the error string returned by gsoap to mantid upper layer
    *  @param icat ICat proxy object
    */
-  static void throwErrorMessages(ICATPortBindingProxy& icat);
+  static void throwErrorMessages(ICat3::ICATPortBindingProxy& icat);
 };
 
 /** a class for Throwing Session exception in Catalog module

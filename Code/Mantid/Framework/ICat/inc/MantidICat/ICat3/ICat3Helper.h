@@ -2,7 +2,7 @@
 #define MANTID_ICAT_SEARCHHELPER_H_
 
 
-#include "MantidICat/ICat3/GSoapGenerated/soapICATPortBindingProxy.h"
+#include "MantidICat/ICat3/GSoapGenerated/ICat3ICATPortBindingProxy.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Logger.h"
@@ -50,13 +50,13 @@ namespace Mantid
       ~CICatHelper(){}
 
       /// search method
-      int doSearch(ICATPortBindingProxy& icat,boost::shared_ptr<ns1__searchByAdvanced>& request,ns1__searchByAdvancedResponse& response);
+      int doSearch(ICat3::ICATPortBindingProxy& icat,boost::shared_ptr<ICat3::ns1__searchByAdvanced>& request,ICat3::ns1__searchByAdvancedResponse& response);
 
       /// calls getInvestigationIncludes api's
-      int getDataFiles(long long invId,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
+      int getDataFiles(long long invId,ICat3::ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
 
       /// this method calls Icat api getInvestigationIncludes and returns datasets for the given investigation id.
-      int doDataSetsSearch(long long invId,ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
+      int doDataSetsSearch(long long invId,ICat3::ns1__investigationInclude inclide,API::ITableWorkspace_sptr& responsews_sptr);
 
       /// This method lists the isntruments
       void  listInstruments(std::vector<std::string>& instruments);
@@ -89,25 +89,25 @@ namespace Mantid
     private:
 
       /// This method sets the request parameters for investigation includes.
-      void setReqParamforInvestigationIncludes(long long invstId,ns1__investigationInclude include,
-          ns1__getInvestigationIncludes& request);
+      void setReqParamforInvestigationIncludes(long long invstId,ICat3::ns1__investigationInclude include,
+          ICat3::ns1__getInvestigationIncludes& request);
 
       ///This method saves the file search response to table workspace
-      API::ITableWorkspace_sptr saveFileSearchResponse(const ns1__searchByAdvancedResponse& response);
+      API::ITableWorkspace_sptr saveFileSearchResponse(const ICat3::ns1__searchByAdvancedResponse& response);
 
       /// This method saves the response data of search by run number to table workspace
-      void saveSearchRessults(const ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws);
+      void saveSearchRessults(const ICat3::ns1__searchByAdvancedResponse& response,API::ITableWorkspace_sptr& outputws);
 
       /// this method saves investigation include response to a table workspace
       void  saveInvestigationIncludesResponse(
-          const ns1__getInvestigationIncludesResponse& response,
+          const ICat3::ns1__getInvestigationIncludesResponse& response,
           API::ITableWorkspace_sptr& outputws);
 
       /// This method saves Datasets to a table workspace
-      void  saveDataSets(const ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws);
+      void  saveDataSets(const ICat3::ns1__getInvestigationIncludesResponse& response,API::ITableWorkspace_sptr& outputws);
 
       /// This method sets the request parameters
-      void setReqparamforlistInstruments(ns1__listInstruments& request);
+      void setReqparamforlistInstruments(ICat3::ns1__listInstruments& request);
 
 
       /// This method creates table workspace
@@ -117,13 +117,13 @@ namespace Mantid
       bool isDataFile(const std::string* fileName);
 
       /// This method saves the myinvestigations data to a table workspace
-      void saveMyInvestigations(const ns1__getMyInvestigationsIncludesResponse& response,API::ITableWorkspace_sptr& outputws);
+      void saveMyInvestigations(const ICat3::ns1__getMyInvestigationsIncludesResponse& response,API::ITableWorkspace_sptr& outputws);
 
       ///save investigations
-      void saveInvestigations(const std::vector<ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws);
+      void saveInvestigations(const std::vector<ICat3::ns1__investigation*>& investigations,API::ITableWorkspace_sptr& outputws);
 
       ///saves
-      void saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t);
+      void saveInvestigatorsNameandSample(ICat3::ns1__investigation* investigation,API::TableRow& t);
 
 
       /** This is a template method to save data to table workspace
