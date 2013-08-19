@@ -20,21 +20,15 @@ namespace CurveFitting
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  ReflectivityMulf::ReflectivityMulf():m_nlayer(0)
+  ReflectivityMulf::ReflectivityMulf():m_nlayer(0),m_nlayer_old(0)
   {
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  ReflectivityMulf::~ReflectivityMulf()
-  {
-  }
-  
   //Initialize Basic Parameters
   void ReflectivityMulf::init()
   {
     m_nlayer_old=0;
+    declareAttribute("nlayer", Attribute(0));
     declareParameter("Theta",2.3);
     declareParameter("ScaleFactor",1.0);
     declareParameter("AirSLD",0.0);
@@ -44,6 +38,7 @@ namespace CurveFitting
     declareParameter("Resolution",5.0);
     return;
   }
+
   //----------------------------------------------------------------------------------------------
   /** Function to calcualte reflectivity
    */
@@ -157,7 +152,6 @@ namespace CurveFitting
     // Could be parallelized at this point
 
     for (size_t j = 0; j < nData; ++j)
-//    for (size_t j = 0; j < 10; ++j)
     {
       lambda=4*PI*sin(theta0)/xValues[j];
       cy[j]=0.0;
@@ -257,46 +251,6 @@ namespace CurveFitting
   }
 
   //----------------------------------------------------------------------------------------------
-  // Derivative
-  //void ReflectivityMulf::functionDeriv1D(API::Jacobian* , const double* , const size_t )
-  //{
-  //  throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for ReflectivityMulf.");
-  //}
-
-  // Numerical Derivative
-  //void ReflectivityMulf::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
-  //{
-  //  calNumericalDeriv(domain, jacobian);
-  //}
-
-  //----------------------------------------------------------------------------------------------
-  /** Get Attribute names
-   * @return A list of attribute names (identical to ReflectivityMulf)
-  */
-  std::vector<std::string> ReflectivityMulf::getAttributeNames()const
-  {
-    std::vector<std::string> res;
-    res.push_back("nlayer");
-    return res;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Get Attribute
-   * @param attName :: Attribute name. If it is not "nlayer" exception is thrown.
-   * @return a value of attribute attName
-   * (identical to ReflectivityMulf)
-   */
-  API::IFunction::Attribute ReflectivityMulf::getAttribute(const std::string& attName)const
-  {
-    if (attName == "nlayer")
-    {
-      return Attribute(m_nlayer);
-    }
-
-    throw std::invalid_argument("ReflectivityMulf: Unknown attribute " + attName);
-  }
-
-  //----------------------------------------------------------------------------------------------
   /** Set Attribute
    * @param attName :: The attribute name. If it is not "nlayer" exception is thrown.
    * @param att :: An int attribute containing the new value. The value cannot be negative.
@@ -304,6 +258,7 @@ namespace CurveFitting
    */
   void ReflectivityMulf::setAttribute(const std::string& attName,const API::IFunction::Attribute& att)
   {
+    storeAttributeValue(attName,att);
     if (attName == "nlayer")
     {
       m_nlayer = att.asInt();
@@ -374,14 +329,6 @@ namespace CurveFitting
         declareParameter(parName,coeff[9+i*3]);
       }
     }
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Check if attribute attName exists
-    */
-  bool ReflectivityMulf::hasAttribute(const std::string& attName)const
-  {
-    return attName == "nlayer";
   }
 
 } // namespace CurveFitting

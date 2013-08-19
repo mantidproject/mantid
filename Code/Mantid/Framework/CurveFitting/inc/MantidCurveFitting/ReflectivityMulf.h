@@ -36,11 +36,10 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ReflectivityMulf : virtual public API::IFunction1D, public API::ParamFunction
+  class DLLExport ReflectivityMulf : public API::IFunction1D, public API::ParamFunction
   {
   public:
     ReflectivityMulf();
-    virtual ~ReflectivityMulf();
 
     virtual void init();
 
@@ -51,34 +50,14 @@ namespace CurveFitting
 
     virtual void function1D(double* out, const double* xValues, const size_t nData)const;
 
-    //virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
-    //virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
-
-    /// Returns the number of Layers in the model nlayer)
-    size_t nAttributes()const{return 1;}
-
-    /// Returns a list of attribute names
-    std::vector<std::string> getAttributeNames()const;
-
-    /// Return a value of attribute attName
-    Attribute getAttribute(const std::string& attName)const;
-
     /// Set a value to attribute attName
     void setAttribute(const std::string& attName,const Attribute& );
-
-    /// Check if attribute attName exists
-    bool hasAttribute(const std::string& attName)const;
 
   private:
 
     /// ReflectivityMulf layers
     int m_nlayer,m_nlayer_old;
 
-    /// Lower x boundary.
-    double m_StartX;
-
-    /// Upper x boundary
-    double m_EndX;
   };
 
   typedef boost::shared_ptr<ReflectivityMulf> ReflectivityMulf_sptr;
