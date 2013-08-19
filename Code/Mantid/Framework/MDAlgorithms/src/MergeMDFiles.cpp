@@ -366,7 +366,6 @@ namespace MDAlgorithms
     loader->setProperty("MetadataOnly", false);
     loader->setProperty("BoxStructureOnly", true);
     loader->setProperty("FileBackEnd", false);
-    loader->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace") );
     loader->executeAsChildAlg();
     IMDWorkspace_sptr firstWS = loader->getProperty("OutputWorkspace");
 
