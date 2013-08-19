@@ -193,9 +193,9 @@ public:
     std::vector<int> index;
     std::vector<double> dbl1, dbl2;
     DateAndTime startTime("2010-01-01T00:00:00");
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 100; ++i)
     {
-      times.push_back(startTime + i*100.0);
+      times.push_back(startTime + i*10.0);
       index.push_back(i);
       dbl1.push_back(i*0.1);
       dbl2.push_back(6.0);
