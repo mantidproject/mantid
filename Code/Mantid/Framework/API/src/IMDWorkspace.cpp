@@ -69,7 +69,8 @@ namespace Mantid
       const std::string IMDWorkspace::toString() const
       {
         std::ostringstream os;
-        os << "Title: " + getTitle() << "\n";
+        os << id() << "\n"
+           << "Title: " + getTitle() << "\n";
         for (size_t i=0; i < getNumDims(); i++)
         {
           Geometry::IMDDimension_const_sptr dim = getDimension(i);
