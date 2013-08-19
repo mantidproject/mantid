@@ -115,14 +115,13 @@ namespace Mantid
       const double referenceValue = getProperty("ReferenceValue");
       const bool doOverwriteWithZero = getProperty("OverwriteWithZero");
       double customOverwriteValue = getProperty("CustomOverwriteValue");
-      const std::string outWSName = getPropertyValue("OutputWorkspace");
       if(doOverwriteWithZero)
       {
         customOverwriteValue = 0;
       }
 
-      IMDHistoWorkspace_sptr outWS = inputWS; // Shallow copy
-      if (outWSName != inputWS->getName())
+      IMDHistoWorkspace_sptr outWS = getProperty("OutputWorkspace");
+      if ( outWS != inputWS )
       {
         g_log.debug("Deep copy input workspace as output workspace.");
         IAlgorithm_sptr alg = createChildAlgorithm("CloneMDWorkspace");
