@@ -5,6 +5,7 @@ Load Fullprof resolution (.irf) file to TableWorkspace(s)
 *WIKI*/
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 
@@ -77,7 +78,10 @@ namespace DataHandling
     declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
 
     // Bank to import
-    declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is all banks in .irf file.");
+    declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load. "
+                    "Default is all banks contained in input .irf file.");
+
+    // declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is all banks in .irf file.");
 
     return;
   }
@@ -89,7 +93,7 @@ namespace DataHandling
   {
     // Get input
     string datafile = getProperty("Filename");
-    int outputbankid = getProperty("Bank");
+    vector<int> outputbankids = getProperty("Banks");
 
     // Import data
     vector<string> lines;
@@ -110,31 +114,48 @@ namespace DataHandling
     {
       throw runtime_error("No Bank is found in input file.");
     }
-    else if (outputbankid == EMPTY_INT())
+    else if (outputbankids.size() == 0)
     {
       vec_bankids = vec_bankinirf;
     }
     else
     {
-      vector<int>::iterator fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(), outputbankid);
-      if (fiter == vec_bankinirf.end() || *fiter != outputbankid)
+      sort(outputbankids.begin(), outputbankids.end());
+      for (size_t i = 0; i < outputbankids.size(); ++i)
       {
-        // Specified bank ID does not exist.
-        stringstream errmsg;
-        errmsg << "Specified output bank (ID = " << outputbankid << ") cannot be found in input "
-               << datafile << ", which includes bank : ";
-        for (size_t i = 0; i < vec_bankinirf.size(); ++i)
+        int outputbankid = outputbankids[i];
+        if (outputbankid < 0)
         {
-          errmsg << vec_bankinirf[i];
-          if (i != vec_bankinirf.size()-1)
-            errmsg << ",";
+          g_log.warning() << "Input bank ID (" << outputbankid << ") is negative.  It is not allowed and ignored. " << ".\n";
         }
-        g_log.error(errmsg.str());
-        throw runtime_error(errmsg.str());
+        else
+        {
+          vector<int>::iterator fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(), outputbankid);
+          if (fiter == vec_bankinirf.end() || *fiter != outputbankid)
+          {
+            // Specified bank ID does not exist.
+            stringstream errmsg;
+            errmsg << "Specified output bank (ID = " << outputbankid << ") cannot be found in input "
+                   << datafile << ", which includes bank : ";
+            for (size_t i = 0; i < vec_bankinirf.size(); ++i)
+            {
+              errmsg << vec_bankinirf[i];
+              if (i != vec_bankinirf.size()-1)
+                errmsg << ",";
+            }
+            g_log.error(errmsg.str());
+            throw runtime_error(errmsg.str());
+          }
+          else
+          {
+            vec_bankids.push_back(outputbankid);
+          }
+        }
       }
-      else
+      if (vec_bankids.size() == 0)
       {
-        vec_bankids.push_back(outputbankid);
+        g_log.error("There is no valid specified bank IDs for output.");
+        throw runtime_error("There is no valid specified bank IDs for output.");
       }
     }
 
