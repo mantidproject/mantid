@@ -60,7 +60,7 @@ for SplitInto in SplitInto_list:
         par.SplitThreshold = SplitThreshold
 
         
-        if mtd.doesExist["mdew"]:
+        if mtd.doesExist("mdew"):
             DeleteWorkspace("mdew")
         
         CreateMDWorkspace(Dimensions="3",Extents="-6,6,-6,6,-6,6",Names="Qx,Qy,Qz",Units="Ang-1,Ang-1,Ang-1", 
