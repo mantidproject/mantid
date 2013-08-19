@@ -147,54 +147,58 @@ namespace Algorithms
       }
       while (std::abs(Ymean-Yvariance) > k * Ysigma);
 
-      // remove single outliers
+      if(n > 5)
+      {
+    	  // remove single outliers
+		  if (mask[1] == mask[2] && mask[2] == mask[3])
+			  mask[0] = mask[1];
+		  if (mask[0] == mask[2] && mask[2] == mask[3])
+			  mask[1] = mask[2];
+		  for (size_t l = 2; l < n-3; ++l)
+		  {
+			  if (mask[l-1] == mask[l+1] && (mask[l-1] == mask[l-2] || mask[l+1] == mask[l+2]))
+			  {
+				  mask[l] = mask[l+1];
+			  }
+		  }
+		  if (mask[n-2] == mask[n-3] && mask[n-3] == mask[n-4])
+			  mask[n-1] = mask[n-2];
+		  if (mask[n-1] == mask[n-3] && mask[n-3] == mask[n-4])
+			  mask[n-2] = mask[n-1];
 
-      if (mask[1] == mask[2] && mask[2] == mask[3])
-    	  mask[0] = mask[1];
-      if (mask[0] == mask[2] && mask[2] == mask[3])
-          mask[1] = mask[2];
-	  for (size_t l = 2; l < n-2; ++l)
-	  {
-		  if (mask[l-1] == mask[l+1] && (mask[l-1] == mask[l-2] || mask[l+1] == mask[l+2]))
+		  // mask regions not connected to largest region
+		  // for loop can start > 1 for multiple peaks
+		  vector<cont_peak> peaks;
+		  for (size_t l = 1; l < n; ++l)
 		  {
-			  mask[l] = mask[l+1];
+			  if (mask[l] != mask[l-1] && mask[l] == 1)
+			  {
+				  peaks.push_back(cont_peak());
+				  peaks[peaks.size()-1].start = l;
+			  }
+			  if (peaks.size() > 0)
+			  {
+				  size_t ipeak = peaks.size()-1;
+				  if (mask[l] != mask[l-1] && mask[l] == 0)
+				  {
+					  peaks[ipeak].stop = l-1;
+				  }
+				  if (inpY[l] > peaks[ipeak].maxY) peaks[ipeak].maxY = inpY[l];
+			  }
 		  }
-	  }
-	  if (mask[n-2] == mask[n-3] && mask[n-3] == mask[n-4])
-		  mask[n-1] = mask[n-2];
-	  if (mask[n-1] == mask[n-3] && mask[n-3] == mask[n-4])
-		  mask[n-2] = mask[n-1];
-
-	  // mask regions not connected to largest region
-	  vector<size_t> cont_start;
-	  vector<size_t> cont_stop;
-	  for (size_t l = 1; l < n-1; ++l)
-	  {
-		  if (mask[l] != mask[l-1] && mask[l] == 1)
+		  if(peaks.size()> 0)
 		  {
-			  cont_start.push_back(l);
+			  if(peaks[peaks.size()-1].stop == 0) peaks[peaks.size()-1].stop = n-1;
+			  std::sort(peaks.begin(), peaks.end(), by_len());
+			  for (size_t l = 1; l < peaks.size(); ++l)
+			  {
+				  for (size_t j = peaks[l].start; j <= peaks[l].stop; ++j)
+				  {
+					  mask[j] = 0;
+				  }
+			  }
 		  }
-		  if (mask[l] != mask[l-1] && mask[l] == 0)
-		  {
-			  cont_stop.push_back(l-1);
-		  }
-	  }
-	  if(cont_start.size() > cont_stop.size()) cont_stop.push_back(n-1);
-	  vector<size_t> cont_len;
-	  for (size_t l = 0; l < cont_start.size(); ++l)
-	  {
-		  cont_len.push_back(cont_stop[l] - cont_start[l] + 1);
-	  }
-	  std::vector<size_t>::iterator ic = std::max_element(cont_len.begin(), cont_len.end());
-      const size_t c = ic - cont_len.begin();
-	  for (size_t l = 0; l < cont_len.size(); ++l)
-	  {
-		  if (l != c) for (size_t j = cont_start[l]; j <= cont_stop[l]; ++j)
-		  {
-			  mask[j] = 0;
-		  }
-	  }
-
+      }
 	  // save output of mask * Y
       vecX = inpX;
       std::transform(mask.begin(), mask.end(), inpY.begin(), vecY.begin(), std::multiplies<double>());

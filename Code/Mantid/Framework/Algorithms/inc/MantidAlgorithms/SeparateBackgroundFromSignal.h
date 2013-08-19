@@ -54,6 +54,19 @@ namespace Algorithms
     /// Implement abstract Algorithm methods
     void exec();
     double moment(MantidVec& X, size_t n, double mean, int k);
+	struct cont_peak
+	{
+		size_t start;
+		size_t stop;
+		double maxY;
+	};
+	struct by_len
+	{
+		bool operator()(cont_peak const &a, cont_peak const &b)
+		{
+		  return a.maxY > b.maxY;
+		}
+	};
     
   };
 
