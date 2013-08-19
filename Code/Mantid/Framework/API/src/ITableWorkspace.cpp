@@ -116,7 +116,23 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type (ITableWorkspace)";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected ITableWorkspace";
+        throw std::runtime_error(message);
+      }
+    }
+
+    template<> MANTID_API_DLL
+    API::ITableWorkspace_const_sptr IPropertyManager::getValue<API::ITableWorkspace_const_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<API::ITableWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<API::ITableWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return prop->operator()();
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const ITableWorkspace";
         throw std::runtime_error(message);
       }
     }
