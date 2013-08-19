@@ -29,18 +29,26 @@ public:
   static CreateLogTimeCorrectionTest *createSuite() { return new CreateLogTimeCorrectionTest(); }
   static void destroySuite( CreateLogTimeCorrectionTest *suite ) { delete suite; }
 
+  CreateLogTimeCorrectionTest()
+  {
+    m_inpws = createEmptyWorkspace("VULCAN");
+    AnalysisDataService::Instance().add("Vulcan", m_inpws);
+  }
+
+  ~CreateLogTimeCorrectionTest()
+  {
+    AnalysisDataService::Instance().clear();
+  }
+
   /** Test against a Vulcan run
     */
   void test_VulcanNoFileOutput()
   {
-    MatrixWorkspace_sptr inpws = createEmptyWorkspace("VULCAN");
-    AnalysisDataService::Instance().addOrReplace("Vulcan_Fake", inpws);
-
     CreateLogTimeCorrection alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
 
-    alg.setProperty("InputWorkspace", inpws);
+    alg.setProperty("InputWorkspace", m_inpws);
     alg.setProperty("OutputWorkspace", "CorrectionTable");
     alg.setProperty("OutputFilename", "dummpy.dat");
 
@@ -75,7 +83,6 @@ public:
     }
 
     // clean workspaces and file written
-    AnalysisDataService::Instance().remove("Vulcan_Fake");
     AnalysisDataService::Instance().remove("CorrectionTable");
 
     return;
@@ -85,14 +92,11 @@ public:
     */
   void WindowsFailed_test_VulcanFileOutput()
   {
-    MatrixWorkspace_sptr inpws = createEmptyWorkspace("VULCAN");
-    AnalysisDataService::Instance().addOrReplace("Vulcan_Fake", inpws);
-
     CreateLogTimeCorrection alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
 
-    alg.setProperty("InputWorkspace", inpws);
+    alg.setProperty("InputWorkspace", m_inpws);
     alg.setProperty("OutputWorkspace", "CorrectionTable");
     alg.setProperty("OutputFilename", "VucanCorrection.dat");
 
@@ -142,7 +146,6 @@ public:
     TS_ASSERT_EQUALS(numrowsinfile, 7392);
 
     // clean workspaces and file written
-    AnalysisDataService::Instance().remove("Vulcan_Fake");
     AnalysisDataService::Instance().remove("CorrectionTable");
 
     Poco::File file("VucanCorrection.dat");
@@ -156,30 +159,33 @@ public:
   void test_NoInstrument()
   {
     MatrixWorkspace_sptr inpws = createEmptyWorkspace("");
-    AnalysisDataService::Instance().addOrReplace("Vulcan_Fake", inpws);
 
     CreateLogTimeCorrection alg;
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
 
-    alg.setProperty("InputWorkspace", inpws);
-    alg.setProperty("OutputWorkspace", "CorrectionTable");
-    alg.setProperty("OutputFilename", "VucanCorrection.dat");
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(!alg.isExecuted());
-
-    return;
+    TS_ASSERT_THROWS( alg.setProperty("InputWorkspace", inpws), std::invalid_argument) ;
   }
 
+  void test_not_allowed_output_workspace_same_as_input()
+  {
+    CreateLogTimeCorrection alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", m_inpws) )
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("OutputWorkspace", "Vulcan") )
+    TS_ASSERT( ! alg.execute() )
+  }
+
+private:
   /** Generate an empty Vulcan workspace
     */
-  API::MatrixWorkspace_sptr createEmptyWorkspace(string instrument)
+  API::MatrixWorkspace_sptr createEmptyWorkspace(const string& instrument)
   {
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
 
-    if (instrument.size() > 0)
+    if (! instrument.empty() )
     {
       DataHandling::LoadInstrument load;
       load.initialize();
@@ -191,7 +197,7 @@ public:
     return ws;
   }
 
-
+  MatrixWorkspace_sptr m_inpws;
 };
 
 
