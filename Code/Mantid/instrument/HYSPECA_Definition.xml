@@ -43,7 +43,7 @@
     </component>
   </type>
   <component type="Tank" idlist="Tank">
-    <location t-position="70.148" roty="70.148">
+    <location>
       <parameter name="r-position">
         <value val="0"/>
       </parameter>
