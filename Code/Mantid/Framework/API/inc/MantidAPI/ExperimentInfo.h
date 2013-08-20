@@ -129,9 +129,6 @@ namespace API
     /// Get the IDF using the instrument name and date
     static std::string getInstrumentFilename(const std::string& instrumentName, const std::string& date="");
 
-    /// Set the default Nexus File Instrument section Version Number
-    void setdefaultNexusInstrumentVersionNumber( int vn );
-
   protected:
 
     /// Static reference to the logger class
@@ -151,6 +148,11 @@ namespace API
     Geometry::Instrument_const_sptr sptr_instrument;
 
   private:
+    /// Fill with given instrument parameter
+    void populateWithParameter(Geometry::ParameterMap & paramMap,
+                               const std::string & name, const Geometry::XMLlogfile & paramInfo,
+                               const Run & runData);
+
     /// Detector grouping information
     det2group_map m_detgroups;
     /// Mutex to protect against cow_ptr copying
