@@ -38,6 +38,11 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	CalMuonDeadTimeTest.h
+	LoadFlexiNexusTest.h
+	ProjectMDTest.h
+	InvertMDDimTest.h
+	MDHistoToWorkspace2DTest.h
+	SliceMDHistoTest.h
 )
 
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
@@ -69,7 +74,7 @@ include_directories ( inc )
 target_link_libraries ( SINQ ${MANTIDLIBS} ${GSL_LIBRARIES} MDEvents CurveFitting)
 
 # Add the unit tests directory
-#add_subdirectory ( test )
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

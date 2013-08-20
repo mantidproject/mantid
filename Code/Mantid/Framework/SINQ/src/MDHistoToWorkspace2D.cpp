@@ -142,6 +142,9 @@ void MDHistoToWorkspace2D::initDocs()
 
 void MDHistoToWorkspace2D::copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inWS, Mantid::DataObjects::Workspace2D_sptr outWS)
 {
-  ExperimentInfo_sptr info = inWS->getExperimentInfo(0);
-  outWS->copyExperimentInfoFrom(info.get());
+  if(inWS->getNumExperimentInfo() > 0) {
+    ExperimentInfo_sptr info = inWS->getExperimentInfo(0);
+    outWS->copyExperimentInfoFrom(info.get());
+  }
+  outWS->setTitle(inWS->getTitle());
 }
