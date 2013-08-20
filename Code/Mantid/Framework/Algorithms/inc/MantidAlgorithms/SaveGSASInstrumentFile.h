@@ -123,8 +123,6 @@ private:
   void writePRMSingleBank(std::map<unsigned int, std::map<std::string, double> > bankprofilemap,
                           unsigned int bankid, std::string prmfilename);
 
-  ///
-  void makeParameterConsistent();
 
   /// Caclualte L2 from DIFFC and L1
   double calL2FromDtt1(double difc, double L1, double twotheta);

@@ -446,9 +446,22 @@ namespace Algorithms
     map<unsigned int, map<string, double> > bankprofileparammap;
     parseProfileTableWorkspace(m_inpWS, bankprofileparammap);
 
-    //
-    makeParameterConsistent();
+    // Deal with a default
+    if (m_vecBankID2File.size() == 0)
+    {
+      // Default is to export all banks
+      for (map<unsigned int, map<string, double> >::iterator miter = bankprofileparammap.begin();
+           miter != bankprofileparammap.end(); ++miter)
+      {
+        unsigned int bankid = miter->first;
+        m_vecBankID2File.push_back(bankid);
+      }
+      sort(m_vecBankID2File.begin(), m_vecBankID2File.end());
+    }
+    g_log.debug() << "Number of banks to output = " << m_vecBankID2File.size() << ".\n";
 
+
+    // Convert to GSAS
     convertToGSAS(m_vecBankID2File, m_gsasFileName, bankprofileparammap);
 
     return;
@@ -473,61 +486,6 @@ namespace Algorithms
     {
       throw runtime_error("Instrument is not supported");
     }
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Some parameter can come from 3 sources (1) default in code; (2) input table workspace and
-    * (3) user-specified property.  Set up this kind of parameter from all possible source
-    * with proper prioirty
-    */
-  void SaveGSASInstrumentFile::makeParameterConsistent()
-  {
-    g_log.warning("This one may not be useful at all. ");
-    return;
-
-#if 0
-    // Make input parameters consistent
-    for (size_t i = 0; i < m_vecBankID2File.size(); ++i)
-    {
-      unsigned int bankid = m_vecBankID2File[i];
-      map<unsigned int, map<string, double> >::iterator biter = bankprofileparammap.find(bankid);
-      if (biter == bankprofileparammap.end())
-      {
-        stringstream errss;
-        errss << "Bank " << bankid << " does not exist in input workspace. "
-              << "Input file/tableworkspace constains " << bankprofileparammap.size() << " banks. ";
-        g_log.error(errss.str());
-        throw runtime_error(errss.str());
-      }
-
-      if (m_2theta != EMPTY_DBL())
-      {
-        m_configuration->setParameter(bankid, "2Theta", m_2theta);
-      }
-      else
-      {
-        double tth = getValueFromMap(biter->second, "twotheta");
-        if (tth != EMPTY_DBL())
-          m_configuration->setParameter(bankid,"2Theta", tth);
-      }
-
-      // L1
-      if (m_L1 != EMPTY_DBL())
-      {
-        m_configuration->setParameter(bankid, "L1", m_L1);
-      }
-
-      // L2
-      if (m_L2 != EMPTY_DBL())
-      {
-        m_configuration->setParameter(bankid, "L2", m_L2);
-      }
-    }
-
-    // FIXME - the data structure to store the instrument/profile parameters is still NOT clear.
-#endif
 
     return;
   }
