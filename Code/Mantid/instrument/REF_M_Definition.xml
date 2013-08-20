@@ -4565,8 +4565,8 @@
     <cylinder id="cyl-approx">
       <centre-of-bottom-base x="0.0" y="0.0" z="0.0"/>
       <axis x="0.0" y="0.0" z="1.0"/>
-      <radius radius="0.01"/>
-      <height height="0.03"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
     </cylinder>
     <algebra val="cyl-approx"/>
   </type>
