@@ -53,6 +53,7 @@ enum Clipping{ ApplyClipping, IgnoreClipping};
 enum OrignalExtents{ ApplyOriginal, IgnoreOriginal};
 
 class vtkImplicitFunction;
+// cppcheck-suppress class_X_Y
 class VTK_EXPORT vtkMDEWRebinningCutter : public vtkUnstructuredGridAlgorithm//, public Mantid::VATES::MDRebinningView
 {
 public:
