@@ -58,6 +58,7 @@ public:
     // Poco::File::FileSize size = Poco::File("test.iparm").getSize();
     // TS_ASSERT(size >= 16191 && size <= 16209); Removed due to windows
 
+    // Clean
     AnalysisDataService::Instance().remove("PG3ProfileTable");
     Poco::File("test.iparm").remove();
   }
@@ -65,7 +66,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Test on import FP .irf file and import multiple banks
     */
-  void Xtest_SaveGSSInstrumentFile_MultiBank()
+  void test_SaveGSSInstrumentFile_MultiBank()
   {
     // Generate a 3-bank .irf file
     string irffilename("pg3_60hz_3b.irf");
@@ -79,7 +80,7 @@ public:
     saver.initialize();
     TS_ASSERT(saver.isInitialized());
 
-    saver.setProperty("InputFullprofResolutonFile", irffilename);
+    saver.setProperty("InputFileName", irffilename);
     saver.setProperty("OutputFilename", prmfilename);
     saver.setPropertyValue("BankIDs", "1, 3-4");
     saver.setProperty("Instrument", "PG3");
@@ -93,10 +94,12 @@ public:
     saver.execute();
     TS_ASSERT(saver.isExecuted());
 
-    // Check the output file against ... ....
-    // Load generated file
+    // Check existence of file
+    TS_ASSERT(Poco::File(prmfilename).exists());
 
-    AnalysisDataService::Instance().remove("PG3ProfileTable");
+    // Clean
+    Poco::File(prmfilename).remove();
+    Poco::File(irffilename).remove();
   }
 
   //----------------------------------------------------------------------------------------------
