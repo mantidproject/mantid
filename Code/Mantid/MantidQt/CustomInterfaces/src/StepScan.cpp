@@ -358,7 +358,8 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
 
   IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("Instrument", m_instrument);
-  // TODO: startLive->setProperty("FromStartOfRun",true);
+  startLiveData->setProperty("FromNow",false);
+  startLiveData->setProperty("FromStartOfRun",true);
   startLiveData->setProperty("UpdateEvery",10.0);
   startLiveData->setProperty("PreserveEvents",true);
   startLiveData->setProperty("PostProcessingAlgorithm","StepScan");
