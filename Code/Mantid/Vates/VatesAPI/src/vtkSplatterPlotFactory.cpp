@@ -145,8 +145,8 @@ namespace VATES
       }
     }
 
-    size_t num_boxes_to_use = static_cast<size_t>(percent_to_use * static_cast<double>(sorted_boxes.size()) / 100.0);
-    if (num_boxes_to_use >= sorted_boxes.size())
+    size_t num_boxes_to_use = static_cast<size_t>(percent_to_use * static_cast<double>(m_sortedBoxes.size()) / 100.0);
+    if (num_boxes_to_use >= m_sortedBoxes.size())
     {
       num_boxes_to_use = m_sortedBoxes.size()-1;
     }
