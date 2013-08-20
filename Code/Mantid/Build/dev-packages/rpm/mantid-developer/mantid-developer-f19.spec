@@ -11,7 +11,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: cmake-gui >= 2.8.5
 Requires: boost-devel
-Requires: epel-release 
 Requires: gperftools-devel
 Requires: gperftools-libs
 Requires: gcc-c++
@@ -38,8 +37,8 @@ Requires: git
 Requires: openssl-devel
 Requires: texlive-latex
 Requires: dvipng
-Requires: mantidlibs-qt-devel
-Requires: mantidlibs-qt-assistant
+Requires: qt-devel
+Requires: qt-assistant
 Requires: scl-utils
 
 BuildArch: noarch
@@ -63,6 +62,9 @@ required for Mantid development.
 %files
 
 %changelog
+* Tue Aug 20 2013 Peter Peterson <petersonpf@ornl.gov>
+- Removed things not necessary for fedora 19.
+
 * Tue May 07 2013 Stuart Campbell <campbellsi@ornl.gov>
 - Added dvipng and latex for qt-assistant stuff
 - Added software collection dependencies
