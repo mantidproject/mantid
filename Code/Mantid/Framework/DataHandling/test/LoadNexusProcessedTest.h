@@ -412,6 +412,35 @@ public:
 
    }
 
+   void test_load_workspace_group_unique_names()
+   {
+     LoadNexusProcessed alg;
+     TS_ASSERT_THROWS_NOTHING(alg.initialize());
+     TS_ASSERT( alg.isInitialized() );
+
+     //Group two uses unique names for each workspace
+     alg.setPropertyValue("Filename", "WorkspaceGroup2.nxs");
+     alg.setPropertyValue("OutputWorkspace", "group");
+
+     const char* suffix[] = {"eq2", "eq1", "elf"};
+     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+     Workspace_sptr workspace;
+     TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve("group") );
+     WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
+     TS_ASSERT( group );
+     int groupSize = group->getNumberOfEntries();
+     TS_ASSERT_EQUALS( groupSize, 3);
+     for(int i = 0; i < groupSize; ++i)
+     {
+       MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(i) );
+       TS_ASSERT( ws );
+       TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
+       TS_ASSERT_EQUALS( ws->blocksize(), 2 );
+       TS_ASSERT_EQUALS( ws->name(),  "irs55125_graphite002_to_55131_" + std::string(suffix[i]));
+     }
+   }
+
    void test_load_fit_parameters()
    {
      LoadNexusProcessed alg;

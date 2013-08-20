@@ -73,6 +73,13 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
+
+      /// Check if group workspace share a common name stem
+      bool checkForCommonNameStem(Mantid::NeXus::NXRoot & root, std::vector<std::string>& names);
+
+      /// Load the workspace name attribute if it exists
+      std::string loadWorkspaceName(Mantid::NeXus::NXRoot & root, const std::string& entry_name);
+
       /// Load a single entry
       API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot & root, const std::string & entry_name,
                                               const double& progressStart, const double& progressRange);
