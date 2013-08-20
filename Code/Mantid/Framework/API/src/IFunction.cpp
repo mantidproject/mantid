@@ -1091,19 +1091,6 @@ bool IFunction::hasAttribute(const std::string& name)const
     return m_attrs.find(name) != m_attrs.end();
 }
 
-/**
- * By default it calls setAttribue for each attribute in the list.
- * Implementations can override this method to make setting more eficient.
- * @param attributes :: A list of attributes to set.
- */
-void IFunction::setAttributes(const std::map<std::string, API::IFunction::Attribute> &attributes)
-{
-    for(auto it = attributes.begin(); it != attributes.end(); ++it)
-    {
-        this->setAttribute( it->first, it->second );
-    }
-}
-
 /// Returns a list of attribute names
 std::vector<std::string> IFunction::getAttributeNames() const
 {

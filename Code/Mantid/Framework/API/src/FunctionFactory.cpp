@@ -100,10 +100,6 @@ namespace Mantid
       }
       std::string fnName = term->terms()[1].name();
 
-      // collect all attributes into a map
-      std::map<std::string, IFunction::Attribute> attributes;
-      bool doneAttributes = false;
-
       IFunction_sptr fun = createFunction(fnName);
       for(++term;term!=terms.end();++term)
       {// loop over function's parameters/attributes
@@ -113,10 +109,6 @@ namespace Mantid
         if (fun->hasAttribute(parName))
         {
           // set attribute
-          if ( doneAttributes )
-          {
-              throw std::invalid_argument("FunctionFactory: attributes must be set before any other property.");
-          }
           if (parValue.size() > 1 && parValue[0] == '"')
           {
             // remove the double quotes
@@ -124,17 +116,15 @@ namespace Mantid
           }
           IFunction::Attribute att = fun->getAttribute( parName );
           att.fromString( parValue );
-          attributes[parName] = att;
+          fun->setAttribute(parName,att);
         }
         else if (parName.size() >= 10 && parName.substr(0,10) == "constraint")
         {
-          doneAttributes = true;
           // or it can be a list of constraints
           addConstraints(fun,(*term)[1]);
         }
         else if (parName == "ties")
         {
-          doneAttributes = true;
           addTies(fun,(*term)[1]);
         }
         else if (!parName.empty() && parName[0] == '$')
@@ -144,20 +134,10 @@ namespace Mantid
         }
         else
         {
-          if ( !doneAttributes )
-          {
-              fun->setAttributes( attributes );
-          }
-          doneAttributes = true;
           // set initial parameter value
           fun->setParameter(parName,atof(parValue.c_str()));
         }
       }// for term
-
-      if ( !doneAttributes && !attributes.empty() )
-      {
-          fun->setAttributes( attributes );
-      }
 
       fun->applyTies();
       return fun;

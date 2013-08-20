@@ -419,8 +419,6 @@ public:
   virtual void setAttribute(const std::string& attName,const Attribute& );
   /// Check if attribute attName exists
   virtual bool hasAttribute(const std::string& attName)const;
-  /// Set multiple attributes in one call
-  virtual void setAttributes(const std::map<std::string, API::IFunction::Attribute>& attributes);
   /// Set an attribute value
   template<typename T>
   void setAttributeValue(const std::string& attName,const T& value){setAttribute(attName,Attribute(value));}

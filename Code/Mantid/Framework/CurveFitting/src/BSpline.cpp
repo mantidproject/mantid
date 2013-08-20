@@ -33,14 +33,14 @@ namespace Mantid
      */
     BSpline::BSpline():m_bsplineWorkspace(NULL)
     {
-
-      declareAttribute( "Order", Attribute( 3 ));
-      declareAttribute( "NBreak", Attribute( 10 ));
+      const size_t nbreak = 10;
       declareAttribute( "Uniform", Attribute( true ));
+      declareAttribute( "Order", Attribute( 3 ));
+      declareAttribute( "NBreak", Attribute( static_cast<int>(nbreak) ));
 
       declareAttribute( "StartX", Attribute(0.0) );
       declareAttribute( "EndX", Attribute(1.0) );
-      declareAttribute( "BreakPoints", Attribute( std::vector<double>(10) ));
+      declareAttribute( "BreakPoints", Attribute( std::vector<double>(nbreak) ));
 
       resetGSLObjects();
       resetParameters();
@@ -131,53 +131,18 @@ namespace Mantid
     }
 
     /**
-     * Process all attributes at the same time re-setting the internal objects only once.
-     * @param attributes :: The attributes to set.
+     * @return Names of all declared attributes in correct order.
      */
-    void BSpline::setAttributes(const std::map<std::string, IFunction::Attribute> &attributes)
+    std::vector<std::string> BSpline::getAttributeNames() const
     {
-        // will b-spline be uniform or not
-        bool isUniform = false;
-        auto att = attributes.find("Uniform");
-        if ( att != attributes.end() )
-        {
-            isUniform = att->second.asBool();
-            storeAttributeValue("Uniform",att->second);
-        }
-        else
-        {
-            isUniform = getAttribute("Uniform").asBool();
-        }
-
-        // Order is set in any case
-        att = attributes.find("Order");
-        if ( att != attributes.end() )
-        {
-            storeAttributeValue("Order",att->second);
-        }
-
-        // if b-spline is uniform it is defined by NBreak, StartX, EndX
-        if ( isUniform )
-        {
-            if ( attributes.find("BreakPoints") != attributes.end() )
-            {
-                g_log.warning() << "BSpline: BreakPoints attribute is ignored because Uniform is set to true.";
-            }
-            att = attributes.find("NBreak");
-            if ( att != attributes.end() ) storeAttributeValue("NBreak",att->second);
-            att = attributes.find("StartX");
-            if ( att != attributes.end() ) storeAttributeValue("StartX",att->second);
-            att = attributes.find("EndX");
-            if ( att != attributes.end() ) storeAttributeValue("EndX",att->second);
-        }
-        else
-        {
-            att = attributes.find("BreakPoints");
-            if ( att != attributes.end() ) storeAttributeValue("BreakPoints",att->second);
-        }
-
-        resetGSLObjects();
-        resetParameters();
+        std::vector<std::string> names;
+        names.push_back("Uniform");
+        names.push_back("Order");
+        names.push_back("NBreak");
+        names.push_back("StartX");
+        names.push_back("EndX");
+        names.push_back("BreakPoints");
+        return names;
     }
 
     /**

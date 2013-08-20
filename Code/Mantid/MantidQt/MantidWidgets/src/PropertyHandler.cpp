@@ -857,9 +857,10 @@ void PropertyHandler::setAttribute(const QString& attName, const double& attValu
       {
         if (prop->propertyName() == attName)
         {
-          m_browser->m_changeSlotsEnabled = false;
-          m_browser->m_doubleManager->setValue(prop,attValue);
-          m_browser->m_changeSlotsEnabled = true;
+            // re-insert the attribute and parameter properties as they may
+            // depend on the value of the attribute being set
+            initAttributes();
+            initParameters();
         }
       }
     }
@@ -894,6 +895,9 @@ void PropertyHandler::setAttribute(const QString& attName, const QString& attVal
         att.apply(tmp);
       }
     }
+    // re-insert the attribute and parameter properties as they may
+    // depend on the value of the attribute being set
+    initAttributes();
     initParameters();
   }
 }

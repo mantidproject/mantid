@@ -1298,8 +1298,6 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool 
   {
     // loop over the children properties and set parameters and attributes
     auto children = prop->subProperties();
-    std::map<std::string, Mantid::API::IFunction::Attribute> attributes;
-    bool doneAttributes = false;
     foreach(QtProperty* child, children)
     {
       if (isAttribute(child))
@@ -1308,41 +1306,14 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunction(QtProperty* prop, bool 
         SetAttributeFromProperty setter(this,child);
         Mantid::API::IFunction::Attribute attr = fun->getAttribute(attName);
         attr.apply(setter);
-        attributes[attName] = attr;
+        fun->setAttribute(attName,attr);
       }
       else if (!attributesOnly && isParameter(child))
       {
-          if ( !doneAttributes )
-          {
-              try
-              {
-                fun->setAttributes(attributes);
-              }
-              catch(std::exception& e)
-              {
-                  QMessageBox::warning(this,"Mantid - Warning","Attributes  cannot be set for function "
-                                       + prop->propertyName() + ":\n" + e.what() );
-                  return Mantid::API::IFunction_sptr();
-              }
-          }
-          doneAttributes = true;
           fun->setParameter(child->propertyName().toStdString(), getParameter(child));
       }
     }
 
-    if ( !doneAttributes && !attributes.empty() )
-    {
-        try
-        {
-          fun->setAttributes(attributes);
-        }
-        catch(std::exception& e)
-        {
-            QMessageBox::warning(this,"Mantid - Warning","Attributes  cannot be set for function "
-                                 + prop->propertyName() + ":\n" + e.what() );
-            return Mantid::API::IFunction_sptr();
-        }
-    }
   }
 
   // if this flag is set the function requires attributes only
@@ -1611,8 +1582,6 @@ void FunctionBrowser::attributeVectorDoubleChanged(QtProperty *prop)
 {
     QtProperty *vectorProp = m_properties[prop].parent;
     if ( !vectorProp ) throw std::runtime_error("FunctionBrowser: inconsistency in vector properties.");
-
-    std::cerr << "Value of " << vectorProp->propertyName().toStdString() << ' ' << prop->propertyName().toStdString() << std::endl;
     attributeChanged( vectorProp );
 }
 

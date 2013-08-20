@@ -57,8 +57,8 @@ namespace Mantid
 
       /// Set a value to attribute attName
       void setAttribute(const std::string& attName,const Attribute& );
-      /// Set multiple attributes in one call
-      void setAttributes(const std::map<std::string, API::IFunction::Attribute>& attributes);
+      /// Returns a list of attribute names
+      std::vector<std::string> getAttributeNames()const;
 
     private:
 
