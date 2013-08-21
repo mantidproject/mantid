@@ -3,7 +3,6 @@ project( MantidParaViewMDHWNexusReader )
 add_paraview_plugin( MantidParaViewMDHWNexusReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML MDHWNexusReader.xml
 	SERVER_MANAGER_SOURCES vtkMDHWNexusReader.cxx
-	GUI_RESOURCE_FILES MDHWNexusReaderGUI.xml
 )
 
 # Add to the 'VatesParaViewPlugins' group in VS

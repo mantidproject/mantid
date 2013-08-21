@@ -3,7 +3,6 @@ project( MantidParaViewPeaksReader )
 add_paraview_plugin( MantidParaViewPeaksReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML PeaksReader.xml
 	SERVER_MANAGER_SOURCES vtkPeaksReader.cxx
-	GUI_RESOURCE_FILES PeaksReaderGUI.xml
 )
 
 # Add to the 'VatesParaViewPlugins' group in VS

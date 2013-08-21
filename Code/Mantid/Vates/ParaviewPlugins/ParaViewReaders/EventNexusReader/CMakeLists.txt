@@ -3,7 +3,6 @@ project( MantidParaViewEventNexusReader )
 add_paraview_plugin( MantidParaViewEventNexusReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML EventNexusReader.xml
 	SERVER_MANAGER_SOURCES vtkEventNexusReader.cxx
-	GUI_RESOURCE_FILES EventNexusReaderGUI.xml
 )
 
 # Add to the 'VatesParaViewPlugins' group in VS

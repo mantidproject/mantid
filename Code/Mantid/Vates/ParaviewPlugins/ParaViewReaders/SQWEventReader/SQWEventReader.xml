@@ -48,6 +48,11 @@
         information_only="1"
         si_class="vtkSITimeLabelProperty">
       </StringVectorProperty>
+      <Hints>
+        <ReaderFactory
+          extensions="sqw"
+          file_description="MD *.sqw format" />
+      </Hints>
     </SourceProxy>
   </ProxyGroup>
   <!-- End SQWEventReader -->
