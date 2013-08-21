@@ -91,6 +91,8 @@ namespace Mantid
           "Move detectors to position specified in cal file.");
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
+      auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
+      mustBePosInt->setLower(0);
       this->declareProperty("IncidentEnergyGuess", EMPTY_DBL(), mustBePositive,
           "Set the value of the incident energy guess in meV.");
       this->declareProperty("UseIncidentEnergyGuess", false,
@@ -247,10 +249,14 @@ namespace Mantid
           "Mask detectors below this threshold.");
       this->setPropertySettings("MedianTestLow",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
+      this->declareProperty("MedianTestLevelsUp", 0, mustBePositiveInt,
+          "Mask detectors below this threshold.");
+      this->setPropertySettings("MedianTestLevelsUp",
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("ErrorBarCriterion", EMPTY_DBL(), mustBePositive,
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("ErrorBarCriterion",
-          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));      
       this->declareProperty(new FileProperty("DetectorVanadium2InputFile", "",
           FileProperty::OptionalLoad, "_event.nxs"),
           "File containing detector vanadium data to compare against");
@@ -305,6 +311,7 @@ namespace Mantid
       this->setPropertyGroup("HighOutlier", findBadDets);
       this->setPropertyGroup("MedianTestHigh", findBadDets);
       this->setPropertyGroup("MedianTestLow", findBadDets);
+      this->setPropertyGroup("MediantestLevelsUp", findBadDets);
       this->setPropertyGroup("ErrorBarCriterion", findBadDets);
       this->setPropertyGroup("DetectorVanadium2InputFile", findBadDets);
       this->setPropertyGroup("DetectorVanadium2InputWorkspace", findBadDets);

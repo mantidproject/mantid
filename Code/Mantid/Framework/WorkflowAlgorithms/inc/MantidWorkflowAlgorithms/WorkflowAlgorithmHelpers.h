@@ -16,6 +16,12 @@ namespace WorkflowAlgorithmHelpers
       API::MatrixWorkspace_sptr &ws,
       const double overrideValue = Mantid::EMPTY_DBL());
 
+  /// Function to get int property or instrument parameter value
+  int getIntPropOrParam(const std::string &algProp,
+      Kernel::PropertyManager_sptr &pm, const std::string &instParam,
+      API::MatrixWorkspace_sptr &ws,
+      const double overrideValue = Mantid::EMPTY_INT());
+
   /// Function to get boolean property or instrument parameter value
   bool getBoolPropOrParam(const std::string &algProp,
       Kernel::PropertyManager_sptr &pm, const std::string &instParam,

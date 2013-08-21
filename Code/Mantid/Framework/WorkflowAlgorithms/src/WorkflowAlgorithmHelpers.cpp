@@ -54,6 +54,54 @@ namespace WorkflowAlgorithmHelpers
   }
 
   /**
+   * This function tries to get an int value from a particular algorithm
+   * property. If that property is the default (EMPTY_INT()), then the function
+   * tries to look up the parameter on the instrument in the given workspace
+   * for a given parameter name. If found, that value is returned. If not found,
+   * the default value (EMPTY_INT()) is returned.
+   *
+   * @param pmProp : The name of the algorithm property to retrieve
+   * @param pm : The property manager pointer to retrieve a property value from
+   * @param instParam : The name of the instrument parameter to fetch from the workspace
+   * @param ws : A workspace that should house the alternate parameter
+   * @param overrideValue : A provided override value to hand back if nothing is found
+   * @return : Either the algorithm property or an instrument parameter.
+   */
+  int getIntPropOrParam(const std::string &pmProp, Kernel::PropertyManager_sptr &pm,
+      const std::string &instParam, API::MatrixWorkspace_sptr &ws,
+      const double overrideValue)
+  {
+    int defaultValue = EMPTY_INT();
+    int param = defaultValue;
+    if (pm->existsProperty(pmProp))
+    {
+      param = pm->getProperty(pmProp);
+      if (defaultValue == param)
+      {
+        std::vector<int> params = ws->getInstrument()->getIntParameter(instParam);
+        if (!params.empty())
+        {
+          param = params[0];
+        }
+      }
+    }
+    else
+    {
+      std::vector<int> params = ws->getInstrument()->getIntParameter(instParam);
+      if (!params.empty())
+      {
+        param = params[0];
+      }
+    }
+    if(defaultValue != overrideValue)
+    {
+      param = overrideValue;
+    }
+    return param;
+  }
+
+
+  /**
    * This function tries to get a boolean value from a particular algorithm
    * property. If that property does not exist, then the function tries to look
    * up the parameter on the instrument in the given workspace for a given
