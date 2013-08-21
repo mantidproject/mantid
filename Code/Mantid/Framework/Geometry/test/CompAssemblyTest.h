@@ -139,6 +139,40 @@ public:
     TS_ASSERT_EQUALS(kids[8]->getName(), "ChildDet1Name");
   }
 
+  void testGetComponentByName()
+  {
+    // put together a bare "deep" instrument
+    Instrument_sptr instr(new Instrument("deep_instrument"));
+    CompAssembly * group1 = new CompAssembly("group1");
+    for (int colnum = 1; colnum <= 5; ++colnum)
+    {
+      std::ostringstream colname;
+      colname << "column" << colnum;
+      CompAssembly * column = new CompAssembly(colname.str());
+      for ( int banknum = 5*(colnum-1)+1; banknum <= 5*(colnum); ++banknum)
+      {
+        std::ostringstream bankname;
+        bankname << "bank" << banknum;
+        CompAssembly * bank = new CompAssembly(bankname.str());
+        column->add(bank);
+      }
+      group1->add(column);
+    }
+    instr->add(group1);
+
+    // look for each bank
+    for (int i = 1; i < 26; ++i)
+    {
+      std::ostringstream temp_oss;
+      temp_oss << "bank" << i;
+      std::string bankname(temp_oss.str());
+      std::cout << "testing getComponentByName(" << bankname << ")" << std::endl;
+      auto temp = instr->getComponentByName(bankname,3);
+//      TS_ASSERT(bool(temp));
+      TS_ASSERT_EQUALS(temp->getName(), bankname);
+    }
+
+  }
 
   //-----------------------------------------------------------------------------
   void testAddCopy()
