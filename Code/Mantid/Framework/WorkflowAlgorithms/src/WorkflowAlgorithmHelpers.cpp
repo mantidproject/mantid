@@ -69,7 +69,7 @@ namespace WorkflowAlgorithmHelpers
    */
   int getIntPropOrParam(const std::string &pmProp, Kernel::PropertyManager_sptr &pm,
       const std::string &instParam, API::MatrixWorkspace_sptr &ws,
-      const double overrideValue)
+      const int overrideValue)
   {
     int defaultValue = EMPTY_INT();
     int param = defaultValue;
