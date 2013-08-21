@@ -40,7 +40,7 @@ namespace Mantid
       _ns1__login_credentials_entry entry;
 
       // Name of the authentication plugin in use.
-      std::string plugin("ldap");
+      std::string plugin("uows");
       login.plugin = &plugin;
 
       // Making string as cannot convert from const.
@@ -91,8 +91,8 @@ namespace Mantid
       ns1__logoutResponse response;
 
       //Get the session ID to log the user out.
-      std::string sessionID  = Session::Instance().getSessionId();
-      request.sessionId = &sessionID;
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
 
       int logoutResponse = icat.logout(&request,&response);
 
@@ -147,6 +147,35 @@ namespace Mantid
      */
     void ICat4Catalog::listInstruments(std::vector<std::string>& instruments)
     {
+      ICATPortBindingProxy icat;
+
+      ns1__search request;
+      ns1__searchResponse response;
+
+      //Get the session ID to log the user out.
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+
+      std::string query = "Instrument.name ORDER BY name";
+      request.query     = &query;
+
+      int errorCode = icat.search(&request, &response);
+
+      // Was the search successful?
+      if (errorCode == 0)
+      {
+        for(unsigned i = 0; i < response.return_.size(); ++i)
+        {
+          // Cast from xsd__anyType to subclass (xsd__string).
+          xsd__string * inst = dynamic_cast<xsd__string*>(response.return_[i]);
+          // Then add it to the instruments vector.
+          instruments.push_back(inst->__item);
+        }
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
     }
 
     /**
