@@ -174,7 +174,7 @@ namespace API
     {
       // Throw exception if tried to reset the miller index
       stringstream errss;
-      errss << "ThermalNeutronBk2BkExpConvPVoigt Peak cannot have (HKL) reset.";
+      errss << "Profile function " << name() << "cannot have (HKL) reset.";
       g_log.error(errss.str());
       throw runtime_error(errss.str());
     }

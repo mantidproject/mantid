@@ -138,6 +138,7 @@ namespace CurveFitting
    */
   NeutronBk2BkExpConvPVoigt::NeutronBk2BkExpConvPVoigt()
   {
+    mHKLSet = false;
   }
     
   //----------------------------------------------------------------------------------------------
@@ -249,27 +250,13 @@ namespace CurveFitting
     beta = beta0 + beta1/pow(dh, 4.);
     tof_h = zero + dtt1*dh + dtt2*dh*dh;
 
-    // - Start to calculate alpha, beta, sigma2, gamma,
-#if 0
-    double n = 0.5*gsl_sf_erfc(wcross*(Tcross-1/dh));
-
-    double alpha_e = alph0 + alph1*dh;
-    double alpha_t = alph0t - alph1t/dh;
-    alpha = 1/(n*alpha_e + (1-n)*alpha_t);
-
-    double beta_e = beta0 + beta1*dh;
-    double beta_t = beta0t - beta1t/dh;
-    beta = 1/(n*beta_e + (1-n)*beta_t);
-
-    double Th_e = zero + dtt1*dh;
-    double Th_t = zerot + dtt1t*dh - dtt2t/dh;
-    tof_h = n*Th_e + (1-n)*Th_t;
-#endif
-
     sigma2 = sig0*sig0 + sig1*sig1*std::pow(dh, 2) + sig2*sig2*std::pow(dh, 4);
     gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
 
-    // - Calcualte H for the peak
+    g_log.notice() << "[DBx123] Gam-0 = " << gam0 << ", Gam-1 = " << gam1 << ", Gam-2 = " << gam2
+                   << ", Gamma = " << gamma << ".\n";
+
+    // Calcualte H for the peak
     calHandEta(sigma2, gamma, H, eta);
 
     N = alpha*beta*0.5/(alpha+beta);
@@ -494,6 +481,10 @@ namespace CurveFitting
     {
       g_log.warning() << "Calculated eta = " << eta << " is out of range [0, 1].\n";
     }
+    else
+    {
+      g_log.notice() << "[DBx121] Eta = " << eta << "; Gamma = " << gamma << ".\n";
+    }
 
     return;
   }
@@ -508,14 +499,14 @@ namespace CurveFitting
                                                     const double sigma2, const double invert_sqrt2sigma,
                                                     const bool explicitoutput) const
   {
+    // Transform to variable u, v, y, z
     const double u = 0.5*alpha*(alpha*sigma2+2.*x);
     const double y = (alpha*sigma2 + x)*invert_sqrt2sigma;
 
     const double v = 0.5*beta*(beta*sigma2 - 2.*x);
     const double z = (beta*sigma2 - x)*invert_sqrt2sigma;
 
-    // 2. Calculate
-
+    // Calculate Gaussian part
     const double erfcy = gsl_sf_erfc(y);
     double part1(0.);
     if (fabs(erfcy) > DBL_MIN)
@@ -527,6 +518,8 @@ namespace CurveFitting
       part2 = exp(v)*erfcz;
 
     const double omega1 = (1.-eta)*N*(part1 + part2);
+
+    // Calculate Lorenzian part
     double omega2(0.);
     if (eta >= 1.0E-8)
     {
