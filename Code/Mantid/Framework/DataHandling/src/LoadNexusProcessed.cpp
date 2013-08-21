@@ -31,6 +31,7 @@ The Child Algorithms used by LoadMuonNexus are:
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -49,6 +50,7 @@ The Child Algorithms used by LoadMuonNexus are:
 #include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
@@ -182,6 +184,17 @@ void LoadNexusProcessed::exec()
     std::vector<std::string> names(nperiods+1);
     bool commonStem = checkForCommonNameStem(root, names);
 
+    //remove existing workspace and replace with the one being loaded
+    bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
+    if(wsExists)
+    {
+      Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
+      alg->initialize();
+      alg->setChild(true);
+      alg->setProperty("Workspace", base_name);
+      alg->execute();
+    }
+
     base_name += "_";
     const std::string prop_name = "OutputWorkspace_";
     double nperiods_d = static_cast<double>(nperiods);
@@ -190,38 +203,8 @@ void LoadNexusProcessed::exec()
       std::ostringstream os;
       os << p;
 
-      std::string wsName;
-
-      //if we don't have a common stem then use name tag
-      if(!commonStem)
-      {
-        if(!names[p].empty())
-        {
-          //use name loaded from file there's no common stem
-          wsName = names[p];
-        }
-        else
-        {
-          //if the name property wasn't defined just use <OutputWorkspaceName>_n
-          wsName = base_name + os.str();
-        }
-      }
-      else
-      {
-        //we have a common stem so rename accordingly
-        boost::smatch results;
-        const boost::regex exp(".*_(\\d+$)");
-        //if we have a common name stem then name is <OutputWorkspaceName>_n
-        if(boost::regex_search(names[p], results, exp))
-        {
-          wsName = base_name + std::string(results[1].first, results[1].second);
-        }
-        else
-        {
-          //use default name if we couldn't match for some reason
-          wsName = base_name + os.str();
-        }
-      }
+      //decide what the workspace should be called
+      std::string wsName = buildWorkspaceName(names[p], base_name, p, commonStem);
 
       Workspace_sptr local_workspace = loadEntry(root, basename + os.str(), static_cast<double>(p-1)/nperiods_d, 1./nperiods_d);
       declareProperty(new WorkspaceProperty<API::Workspace>(prop_name + os.str(), wsName,
@@ -240,6 +223,93 @@ void LoadNexusProcessed::exec()
 }
 
 
+/**
+ * Decides what to call a child of a group workspace.
+ *
+ * This function uses information about if the child workspace has a common stem
+ * and checks if the file contained a workspace name to decide what it should be called
+ *
+ * @param name :: The name loaded from the file (possibly the empty string if none was loaded)
+ * @param baseName :: The name group workspace
+ * @param wsIndex :: The current index of this workspace
+ * @param commonStem :: Whether the workspaces share a common name stem
+ *
+ * @return The name of the workspace
+ */
+std::string LoadNexusProcessed::buildWorkspaceName(const std::string& name, const std::string& baseName, int64_t wsIndex, bool commonStem)
+{
+  std::string wsName;
+  std::string index = boost::lexical_cast<std::string>(wsIndex);
+
+  //if we don't have a common stem then use name tag
+  if(!commonStem)
+  {
+    if(!name.empty())
+    {
+      //use name loaded from file there's no common stem
+      wsName = name;
+    }
+    else
+    {
+      //if the name property wasn't defined just use <OutputWorkspaceName>_n
+      wsName = baseName + index;
+    }
+  }
+  else
+  {
+    //we have a common stem so rename accordingly
+    boost::smatch results;
+    const boost::regex exp(".*_(\\d+$)");
+    //if we have a common name stem then name is <OutputWorkspaceName>_n
+    if(boost::regex_search(name, results, exp))
+    {
+      wsName = baseName + std::string(results[1].first, results[1].second);
+    }
+    else
+    {
+      //use default name if we couldn't match for some reason
+      wsName = baseName + index;
+    }
+  }
+
+  correctForWorkspaceNameClash(wsName);
+
+  return wsName;
+}
+
+/**
+ * Append an index to the name if it already exists in the AnalysisDataService
+ *
+ * @param wsName :: Name to call the workspace
+ */
+void LoadNexusProcessed::correctForWorkspaceNameClash(std::string& wsName)
+{
+  bool noClash(false);
+
+  for (int i =0; !noClash; ++i )
+  {
+    std::string wsIndex = ""; //dont use an index if there is no other workspace
+    if(i > 0)
+    {
+      wsIndex = "_" + boost::lexical_cast<std::string>(i);
+    }
+
+    bool wsExists = AnalysisDataService::Instance().doesExist(wsName+wsIndex);
+    if(!wsExists)
+    {
+      wsName += wsIndex;
+      noClash = true;
+    }
+  }
+}
+
+/**
+ * Check if the workspace name contains a common stem and load the workspace names
+ *
+ * @param root :: the root for the NeXus document
+ * @param names :: vector to store the names to be loaded.
+ * @return Whether there was a common stem.
+ */
 bool LoadNexusProcessed::checkForCommonNameStem(NXRoot & root, std::vector<std::string>& names)
 {
   bool success(true);
