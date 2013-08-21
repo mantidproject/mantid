@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SeparateBackgroundFromSignal_H_
-#define MANTID_ALGORITHMS_SeparateBackgroundFromSignal_H_
+#ifndef MANTID_ALGORITHMS_FindPeakBackground_H_
+#define MANTID_ALGORITHMS_FindPeakBackground_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -9,7 +9,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** SeparateBackgroundFromSignal : Calculate Zscore for a Matrix Workspace
+  /** FindPeakBackground : Calculate Zscore for a Matrix Workspace
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,14 +31,14 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SeparateBackgroundFromSignal : public API::Algorithm
+  class DLLExport FindPeakBackground : public API::Algorithm
   {
   public:
-    SeparateBackgroundFromSignal();
-    virtual ~SeparateBackgroundFromSignal();
+    FindPeakBackground();
+    virtual ~FindPeakBackground();
 
     /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "SeparateBackgroundFromSignal";}
+    virtual const std::string name() const { return "FindPeakBackground";}
 
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;}
@@ -53,7 +53,7 @@ namespace Algorithms
     void init();
     /// Implement abstract Algorithm methods
     void exec();
-    double moment(MantidVec& X, size_t n, double mean, int k);
+    double moment4(MantidVec& X, size_t n, double mean);
 	struct cont_peak
 	{
 		size_t start;
@@ -74,4 +74,4 @@ namespace Algorithms
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_SeparateBackgroundFromSignal_H_ */
+#endif  /* MANTID_ALGORITHMS_FindPeakBackground_H_ */
