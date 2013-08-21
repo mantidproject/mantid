@@ -130,6 +130,8 @@ namespace Mantid
           reductionManager, "diag_samp_zero", detVanWS);
       const bool createPsdBleed = getBoolPropOrParam("PsdBleed",
           reductionManager, "diag_bleed_test", detVanWS);
+      const bool vanSA = getBoolPropOrParam("MediantestCorectForSolidAngle",
+          reductionManager, "diag_correct_solid_angle", detVanWS);
 
       // Numeric properties
       const double huge = getDblPropOrParam("HighCounts",
@@ -306,6 +308,7 @@ namespace Mantid
       diag->setProperty("LowThresholdFraction", vanLo);
       diag->setProperty("HighThresholdFraction", vanHi);
       diag->setProperty("LevelsUp",vanLevelsUp);
+      diag->setProperty("CorrectForSolidAngle",vanSA);
       diag->setProperty("SignificanceTest", vanSigma);
       diag->setProperty("DetVanRatioVariation", variation);
       diag->setProperty("SampleBkgLowAcceptanceFactor", samLo);

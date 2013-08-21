@@ -178,7 +178,7 @@ namespace Mantid
       this->declareProperty("SaveProcessedDetVan", false,
           "Save the processed detector vanadium workspace");
       this->setPropertySettings("SaveProcessedDetVan",
-          new VisibleWhenProperty("SaveProcessedDetVan", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty(new FileProperty("SaveProcDetVanFilename", "",
           FileProperty::OptionalSave, ".nxs"),
           "Provide a filename for saving the processed detector vanadium.");
@@ -253,6 +253,10 @@ namespace Mantid
           "Mask detectors below this threshold.");
       this->setPropertySettings("MedianTestLevelsUp",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
+      this->declareProperty("MedianTestCorrectForSolidAngle", false,
+          "Flag to correct for solid angle efficiency.");
+      this->setPropertySettings("MedianTestCorrectForSolidAngle",
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("ErrorBarCriterion", EMPTY_DBL(), mustBePositive,
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("ErrorBarCriterion",
@@ -311,7 +315,8 @@ namespace Mantid
       this->setPropertyGroup("HighOutlier", findBadDets);
       this->setPropertyGroup("MedianTestHigh", findBadDets);
       this->setPropertyGroup("MedianTestLow", findBadDets);
-      this->setPropertyGroup("MediantestLevelsUp", findBadDets);
+      this->setPropertyGroup("MedianTestLevelsUp", findBadDets);
+      this->setPropertyGroup("MedianTestCorrectForSolidAngle", findBadDets);
       this->setPropertyGroup("ErrorBarCriterion", findBadDets);
       this->setPropertyGroup("DetectorVanadium2InputFile", findBadDets);
       this->setPropertyGroup("DetectorVanadium2InputWorkspace", findBadDets);
