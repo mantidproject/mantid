@@ -14,6 +14,7 @@
 #include "MantidTestHelpers/FakeGmockObjects.h"
 #include "MantidTestHelpers/FakeObjects.h"
 #include <cxxtest/TestSuite.h>
+#include <boost/make_shared.hpp>
 
 using std::size_t;
 using namespace Mantid::Kernel;
@@ -23,7 +24,7 @@ using namespace testing;
 
 
 // Declare into the factory.
-DECLARE_WORKSPACE(WorkspaceTester)
+DECLARE_WORKSPACE(WorkspaceTester);
 
 /** Create a workspace with numSpectra, with
  * each spectrum having one detector, at id = workspace index.
@@ -64,6 +65,27 @@ public:
     ws->initialize(1,1,1);
   }
   
+  void test_toString_Produces_Expected_Contents()
+  {
+    auto testWS = boost::make_shared<WorkspaceTester>();
+    testWS->initialize(1,2,1);
+    testWS->setTitle("A test run");
+    testWS->getAxis(0)->setUnit("TOF");
+    testWS->setYUnitLabel("Counts");
+
+    std::string expected = \
+        "WorkspaceTester\n"
+        "Title: A test run\n"
+        "Histograms: 1\n"
+        "Bins: 1\n"
+        "Histogram\n"
+        "X axis: Time-of-flight / microsecond\n"
+        "Y axis: Counts\n"
+        "Instrument:  (1990-Jan-01 to 1990-Jan-01)\n";
+
+    TS_ASSERT_EQUALS(expected, testWS->toString());
+  }
+
   void testGetSetTitle()
   {
     TS_ASSERT_EQUALS( ws->getTitle(), "" );
@@ -744,25 +766,6 @@ public:
     TS_ASSERT_EQUALS(xmax, 1.0);
     TS_ASSERT_EQUALS(ws->getXMin(), 1.0);
     TS_ASSERT_EQUALS(ws->getXMax(), 1.0);
-  }
-
-  void test_InfoNode()
-  {
-    Mantid::API::Workspace::InfoNode rootNode( *ws );
-    ws->addInfoNodeTo( rootNode );
-    auto &node = *rootNode.nodes()[0];
-    TS_ASSERT_EQUALS( node.nodes().size(), 0 );
-    TS_ASSERT_EQUALS( node.lines().size(), 8 );
-    TS_ASSERT_EQUALS( node.lines()[0], "WorkspaceTester" );
-    TS_ASSERT_EQUALS( node.lines()[1], "Title: " );
-    TS_ASSERT_EQUALS( node.lines()[2], "Histograms: 1" );
-    TS_ASSERT_EQUALS( node.lines()[3], "Bins: 1" );
-    TS_ASSERT_EQUALS( node.lines()[4], "Data points" );
-    TS_ASSERT_EQUALS( node.lines()[5], "X axis:  / " );
-    TS_ASSERT_EQUALS( node.lines()[6], "Y axis: something per " );
-    TS_ASSERT_EQUALS( node.lines()[7].substr(0,11), "Instrument:" );
-    TS_ASSERT_EQUALS( node.workspaceName(), "" );
-    TS_ASSERT_DIFFERS( node.getMemorySize(), 0 );
   }
 
 private:

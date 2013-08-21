@@ -1,17 +1,9 @@
-/*
- * FilterByLogValueTest.h
- *
- *  Created on: Sep 15, 2010
- *      Author: janik
- */
-
 #ifndef FILTERBYLOGVALUETEST_H_
 #define FILTERBYLOGVALUETEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/FilterByLogValue.h"
-#include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -19,7 +11,6 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
-using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -32,84 +23,8 @@ public:
   static FilterByLogValueTest *createSuite() { return new FilterByLogValueTest(); }
   static void destroySuite( FilterByLogValueTest *suite ) { delete suite; }
 
-  FilterByLogValueTest() : inputWS("eventWS")
+  FilterByLogValueTest()
   {
-  }
-
-
-  /** Setup for loading raw data */
-  void setUp_Event()
-  {
-    IAlgorithm_sptr loader = AlgorithmManager::Instance().create("LoadEventNexus");
-    loader->initialize();
-    loader->setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    loader->setPropertyValue("OutputWorkspace", inputWS);
-    loader->execute();
-    TS_ASSERT (loader->isExecuted() );
-  }
-
-
-
-  void doTest(std::string outputWS)
-  {
-    //Retrieve Workspace
-    this->setUp_Event();
-    WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWS);
-    TS_ASSERT( WS ); //workspace is loaded
-
-    size_t num_events = WS->getNumberEvents();
-    double start_proton_charge = WS->run().getProtonCharge();
-    size_t num_sample_logs = WS->run().getProperties().size();
-    TS_ASSERT_EQUALS( num_events, 112266 );
-    //Do the filtering now.
-    FilterByLogValue alg;
-    alg.initialize();
-    alg.setPropertyValue("InputWorkspace", inputWS);
-    alg.setPropertyValue("OutputWorkspace", outputWS);
-    alg.setPropertyValue("LogName", "proton_charge");
-    //We set the minimum high enough to cut out some real charge too, not just zeros.
-    alg.setPropertyValue("MinimumValue", "1.e7");
-    alg.setPropertyValue("MaximumValue", "1e20");
-    alg.setPropertyValue("TimeTolerance", "4e-12");
-
-    alg.execute();
-    TS_ASSERT( alg.isExecuted() );
-
-    //Retrieve Workspace changed
-    EventWorkspace_sptr outWS;
-    outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputWS);
-    TS_ASSERT( outWS ); //workspace is loaded
-
-    //Things that haven't changed
-    TS_ASSERT_EQUALS( outWS->blocksize(), WS->blocksize());
-    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), WS->getNumberHistograms());
-
-    //There should be some events
-    TS_ASSERT_LESS_THAN( 0, outWS->getNumberEvents());
-
-    TS_ASSERT_LESS_THAN( outWS->getNumberEvents(), num_events);
-    TS_ASSERT_DELTA(  outWS->getNumberEvents() , 83434, 100);
-
-    //Proton charge is lower
-    TS_ASSERT_EQUALS( outWS->run().getProperties().size(), num_sample_logs);
-    TS_ASSERT_LESS_THAN( outWS->run().getProtonCharge(), start_proton_charge );
-    // But not 0
-    TS_ASSERT_LESS_THAN( 0, outWS->run().getProtonCharge());
-
-
-  }
-
-  void test_exec_renamed()
-  {
-    doTest(inputWS + "_filtered");
-    AnalysisDataService::Instance().remove(inputWS);
-    AnalysisDataService::Instance().remove(inputWS + "_filtered");
-  }
-
-  void test_exec_inplace()
-  {
-    doTest(inputWS);
-    AnalysisDataService::Instance().remove(inputWS);
   }
 
   void test_validators()
@@ -427,27 +342,9 @@ public:
     TS_ASSERT_EQUALS( min_max_helper(false,true,0.0,70.0), 8000 );
   }
 
-//  // Very slow
-//  void xtest_HYSPEC()
-//  {
-//    FrameworkManager::Instance().exec("LoadEventNexus", 4,
-//       "OutputWorkspace", "hys_4333",
-//       "Filename", "HYS_4333_event.nxs");
-//    FrameworkManager::Instance().exec("FilterByLogValue", 8,
-//        "InputWorkspace", "hys_4333",
-//        "OutputWorkspace", "hys_4333_veto",
-//        "LogName", "veto_pulse_time",
-//        "PulseFilter", "1");
-//  }
-
-
 private:
-  std::string inputWS;
   EventWorkspace_sptr WS;
-
-
 };
-
 
 #endif
 

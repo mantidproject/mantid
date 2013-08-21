@@ -34,6 +34,46 @@ public:
 public:
 
   //----------------------------------------------------------------------
+  // Label tests
+  //----------------------------------------------------------------------
+
+  void testLabel_constructor()
+  {
+    Label lbl("Temperature", "K");
+    TS_ASSERT_EQUALS(lbl.caption(), "Temperature");
+    TS_ASSERT_EQUALS(lbl.label(), "K");
+  }
+
+  void testLabel_unitID()
+  {
+    TS_ASSERT_EQUALS( label.unitID(), "Label" );
+  }
+
+  void testLabel_caption()
+  {
+    TS_ASSERT_EQUALS( label.caption(), "Quantity" );
+  }
+
+  void testLabel_label()
+  {
+    TS_ASSERT_EQUALS( label.label(), "" );
+  }
+
+  void testLabel_cast()
+  {
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&label) );
+    TS_ASSERT_EQUALS(u->unitID(), "Label");
+  }
+
+  void testLabel_setLabel()
+  {
+    label.setLabel("Temperature", "K");
+    TS_ASSERT_EQUALS(label.caption(), "Temperature");
+    TS_ASSERT_EQUALS(label.label(), "K");
+  }
+
+  //----------------------------------------------------------------------
   // Base Unit class tests
   //----------------------------------------------------------------------
 
@@ -840,6 +880,7 @@ public:
   }
 
 private:
+  Units::Label label;
   Units::TOF tof;
   Units::Wavelength lambda;
   Units::Energy energy;

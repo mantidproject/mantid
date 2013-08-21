@@ -121,8 +121,7 @@ namespace Mantid
       {throw Kernel::Exception::NotImplementedError("This method is not generally implemented ");}
 
     protected:
-      /// Create and return a new InfoNode describing this workspace.
-      virtual InfoNode *createInfoNode() const;
+      virtual const std::string toString() const;
     };
     
     /// Shared pointer to the IMDWorkspace base class

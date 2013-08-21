@@ -266,6 +266,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	IkedaCarpenterModeratorTest.h
+	AlgorithmFactoryTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
 	AlgorithmManagerTest.h

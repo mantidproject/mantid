@@ -54,7 +54,7 @@ namespace Mantid
  */
 std::string welcomeMessage()
 {
-  return "Welcome to Mantid - Manipulation and Analysis Toolkit for Instrument Data";
+    return "Welcome to Mantid version " + std::string(Mantid::Kernel::MantidVersion::version()) + " - Manipulation and Analysis Toolkit for Instrument Data";
 }
 
 namespace Kernel
@@ -264,8 +264,8 @@ ConfigServiceImpl::ConfigServiceImpl() :
   g_log.debug() << "ConfigService created." << std::endl;
   g_log.debug() << "Configured Mantid.properties directory of application as " << getPropertiesDir()
       << std::endl;
-  g_log.information() << "This is Mantid Version "
-                      << MantidVersion::version() << "-" << MantidVersion::revision() << std::endl;
+  g_log.information() << "This is Mantid version "
+                      << MantidVersion::version() << " revision " << MantidVersion::revision() << std::endl;
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList << std::endl;
 #ifndef MPI_BUILD  // There is no logging to file by default in MPI build
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;

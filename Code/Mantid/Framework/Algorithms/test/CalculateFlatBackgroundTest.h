@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidCurveFitting/Linear.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/MersenneTwister.h"
 #include <boost/lexical_cast.hpp>
 #include <cmath>
@@ -23,6 +24,8 @@ public:
 
   CalculateFlatBackgroundTest()
   {
+    FrameworkManager::Instance();
+
     bg = 100.0;
     Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(1,NUMBINS+1,NUMBINS);

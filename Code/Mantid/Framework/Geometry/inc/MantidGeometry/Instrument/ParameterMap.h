@@ -100,6 +100,11 @@ namespace Geometry
     static const std::string & pV3D();
     static const std::string & pQuat();
 
+    /// Inquality comparison operator
+    bool operator!=(const ParameterMap & rhs) const;
+    /// Equality comparison operator
+    bool operator==(const ParameterMap & rhs) const;
+
     /// Clears the map
     inline void clear()
     {
@@ -177,6 +182,8 @@ namespace Geometry
     bool contains(const IComponent* comp, const char*  name) const;
     /// Does the named parameter exist for the given component and type
     bool contains(const IComponent* comp, const std::string & name, const std::string & type = "") const;
+    /// Does the given parameter & component combination exist
+    bool contains(const IComponent* comp, const Parameter & parameter) const;
     /// Get a parameter with a given name
     boost::shared_ptr<Parameter> get(const IComponent* comp, const char * name) const;
     /// Get a parameter with a given name and optional type

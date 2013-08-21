@@ -5,7 +5,9 @@ if ( CXXTEST_FOUND )
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../../TestHelpers/src/ComponentCreationHelper.cpp ) # Used by cxx_test_add_test
+                        ../../TestHelpers/src/ComponentCreationHelper.cpp
+                        ../../TestHelpers/src/StartFrameworkManager.cpp
+  )
   cxxtest_add_test ( CurveFittingTest ${TEST_FILES}  )
   target_link_libraries( CurveFittingTest CurveFitting DataHandling DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   add_dependencies ( FrameworkTests CurveFittingTest )

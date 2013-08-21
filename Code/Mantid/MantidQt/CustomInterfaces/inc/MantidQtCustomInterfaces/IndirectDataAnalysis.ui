@@ -328,13 +328,6 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="2">
-          <widget class="QPushButton" name="fury_pbPlotInput">
-           <property name="text">
-            <string>Plot Input</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_17">
            <item>
@@ -382,7 +375,7 @@
               <number>0</number>
              </property>
              <widget class="QWidget" name="fury_page_inputFile">
-              <layout class="QVBoxLayout" name="fury_page_inputFile_layout">
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
                <property name="margin">
                 <number>0</number>
                </property>
@@ -408,6 +401,13 @@
                    <string>_red.nxs</string>
                    <string>_sqw.nxs</string>
                   </stringlist>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="fury_pbPlotInput">
+                 <property name="text">
+                  <string>Plot Input</string>
                  </property>
                 </widget>
                </item>
@@ -579,6 +579,13 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="furyfit_pbPlotInput">
+               <property name="text">
+                <string>Plot Input</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="furyfit_page_inputWorkspace">
@@ -597,13 +604,6 @@
              </item>
             </layout>
            </widget>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="furyfit_pbPlotInput">
-           <property name="text">
-            <string>Plot Input</string>
-           </property>
           </widget>
          </item>
         </layout>
@@ -911,13 +911,6 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QPushButton" name="confit_pbPlotInput">
-           <property name="text">
-            <string>Plot Input</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0">
           <layout class="QHBoxLayout" name="confit_layout_input">
            <property name="spacing">
@@ -978,6 +971,13 @@
                    <string>_red.nxs</string>
                    <string>_sqw.nxs</string>
                   </stringlist>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="confit_pbPlotInput">
+                 <property name="text">
+                  <string>Plot Input</string>
                  </property>
                 </widget>
                </item>
@@ -2461,14 +2461,12 @@
   <tabstop>msd_ckVerbose</tabstop>
   <tabstop>msd_ckPlot</tabstop>
   <tabstop>msd_ckSave</tabstop>
-  <tabstop>fury_pbPlotInput</tabstop>
   <tabstop>fury_cbResType</tabstop>
   <tabstop>fury_cbInputType</tabstop>
   <tabstop>fury_ckVerbose</tabstop>
   <tabstop>fury_ckPlot</tabstop>
   <tabstop>fury_ckSave</tabstop>
   <tabstop>furyfit_cbInputType</tabstop>
-  <tabstop>furyfit_pbPlotInput</tabstop>
   <tabstop>furyfit_cbFitType</tabstop>
   <tabstop>furyfit_ckConstrainIntensities</tabstop>
   <tabstop>furyfit_ckPlotGuess</tabstop>

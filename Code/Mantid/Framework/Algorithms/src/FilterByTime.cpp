@@ -119,17 +119,17 @@ void FilterByTime::exec()
   {
     // Use the relative times in seconds.
     DateAndTime first = inputWS->getFirstPulseTime();
-	DateAndTime last = inputWS->getLastPulseTime();
+    DateAndTime last = inputWS->getLastPulseTime();
     start = first + start_dbl;
-	if (stop_dbl > 0.0)
-	{
-		stop = first + stop_dbl;
-	}
-	else
-	{
-		this->getLogger().debug() << "No end filter time specified - assuming last pulse" << std::endl;
-		stop = last + 10000.0;   // so we get all events - needs to be past last pulse
-	}
+    if (stop_dbl > 0.0)
+    {
+      stop = first + stop_dbl;
+    }
+    else
+    {
+      this->getLogger().debug() << "No end filter time specified - assuming last pulse" << std::endl;
+      stop = last + 10000.0;   // so we get all events - needs to be past last pulse
+    }
   }
   else
   {
@@ -140,21 +140,14 @@ void FilterByTime::exec()
   if (stop <= start)
     throw std::invalid_argument("The stop time should be larger than the start time.");
 
-
-
-  // generate the output workspace pointer
-  EventWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
-  if (inputWS != outputWS)
-  {
-    //Make a brand new EventWorkspace
-    outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
+  // Make a brand new EventWorkspace
+  EventWorkspace_sptr outputWS = boost::dynamic_pointer_cast<EventWorkspace>(
         API::WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1));
-    //Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-    //But we don't copy the data.
+  // Copy geometry over.
+  API::WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+  // But we don't copy the data.
 
-    this->setProperty("OutputWorkspace", outputWS);
-  }
+  setProperty("OutputWorkspace", outputWS);
 
   size_t numberOfSpectra = inputWS->getNumberHistograms();
 

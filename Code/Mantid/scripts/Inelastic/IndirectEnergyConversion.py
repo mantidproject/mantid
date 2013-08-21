@@ -52,7 +52,7 @@ def createMappingFile(groupFile, ngroup, nspec, first):
 
 def resolution(files, iconOpt, rebinParam, bground, 
         instrument, analyser, reflection,
-        plotOpt=False, Res=True):
+        plotOpt=False, Res=True, factor=None):
     reducer = inelastic_indirect_reducer.IndirectReducer()
     reducer.set_instrument_name(instrument)
     reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
@@ -65,13 +65,19 @@ def resolution(files, iconOpt, rebinParam, bground,
     reducer.set_sum_files(True)
     reducer.reduce()
     iconWS = reducer.get_result_workspaces()[0]
+    
+    if factor != None:
+        Scale(InputWorkspace=iconWS, OutputWorkspace=iconWS, Factor = factor)
+            
     if Res:
         name = getWSprefix(iconWS) + 'res'
         CalculateFlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
             Mode='Mean', OutputMode='Subtract Background')
         Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
         DeleteWorkspace(iconWS)
+            
         SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
+            
         if plotOpt:
             graph = mp.plotSpectrum(name, 0)
         return name

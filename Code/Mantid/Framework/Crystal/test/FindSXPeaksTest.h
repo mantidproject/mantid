@@ -269,7 +269,10 @@ class FindSXPeaksTestPerformance : public CxxTest::TestSuite
 private:
   int m_nHistograms;
   Workspace2D_sptr m_workspace2D;
+
 public:
+  static FindSXPeaksTestPerformance *createSuite() { return new FindSXPeaksTestPerformance(); }
+  static void destroySuite( FindSXPeaksTestPerformance *suite ) { delete suite; }
 
   FindSXPeaksTestPerformance() : m_nHistograms(5000)
   {

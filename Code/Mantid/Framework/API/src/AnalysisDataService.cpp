@@ -1,6 +1,5 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/Strings.h"
 
 namespace Mantid
 {
@@ -236,33 +235,48 @@ namespace Mantid
     }
 
     /**
-     * @return A pointer to the root node of the info tree.
+     * Produces a map of names to Workspaces that doesn't include
+     * items that are part of a WorkspaceGroup already in the list
+     * @return A lookup of name to Workspace pointer
      */
-    Workspace::InfoNode *AnalysisDataServiceImpl::createInfoTree() const
+    std::map<std::string,Workspace_sptr> AnalysisDataServiceImpl::topLevelItems() const
     {
-        auto workspaces = getObjects();
+      std::map<std::string,Workspace_sptr> topLevel;
+      auto topLevelNames = this->getObjectNames();
+      std::set<Workspace_sptr> groupMembers;
 
-        // collect all groups and put them into temporary rootGroup
-        WorkspaceGroup rootGroup;
-        for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+      for(auto it = topLevelNames.begin(); it != topLevelNames.end(); ++it)
+      {
+        try
         {
-            WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>( *ws );
-            if ( group )
-            {
-                rootGroup.addWorkspace( group );
-            }
+          const std::string & name = *it;
+          auto ws = this->retrieve(*it);
+          topLevel.insert(std::make_pair(name, ws));
+          if(auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws))
+          {
+            group->reportMembers(groupMembers);
+          }
         }
+        catch(std::exception&)
+        {
+        }
+      }
 
-        // build the tree
-        Workspace::InfoNode *root = new Workspace::InfoNode(this);
-        for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+      // Prune members
+      for(auto it = topLevel.begin(); it != topLevel.end();)
+      {
+        const Workspace_sptr & item = it->second;
+        if(groupMembers.count(item) == 1)
         {
-            if ( !rootGroup.isInChildGroup(**ws) )
-            {
-                (**ws).addInfoNodeTo( *root );
-            }
+          topLevel.erase(it++);
         }
-        return root;
+        else
+        {
+          ++it;
+        }
+      }
+
+      return topLevel;
     }
 
     //-------------------------------------------------------------------------

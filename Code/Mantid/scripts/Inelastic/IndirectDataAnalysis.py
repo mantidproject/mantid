@@ -282,24 +282,10 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         q1 = np.array(mtd['__eq1'].readX(0))
         i1 = np.array(mtd['__eq1'].readY(0))
         e1 = np.array(mtd['__eq1'].readE(0))
+        Logarithm(InputWorkspace='__eq2', OutputWorkspace='__eq2')
         q2 = np.array(mtd['__eq2'].readX(0))
-        inY = mtd['__eq2'].readY(0)
-        inE = mtd['__eq2'].readE(0)
-        logy = []
-        loge = []
-        for i in range(0, len(inY)):
-            if(inY[i] == 0):
-                ly = math.log(0.000000000001)
-            else:
-                ly = math.log(inY[i])
-            logy.append(ly)
-            if( inY[i]+inE[i] == 0 ):
-                le = math.log(0.000000000001)-ly
-            else:
-                le = math.log(inY[i]+inE[i])-ly
-            loge.append(le)
-        i2 = np.array(logy)
-        e2 = np.array(loge)
+        i2 = np.array(mtd['__eq2'].readY(0))
+        e2 = np.array(mtd['__eq2'].readE(0))
         if (nr == 0):
             CloneWorkspace(InputWorkspace='__eq1', OutputWorkspace='__elf')
             first = getWSprefix(tempWS,root)

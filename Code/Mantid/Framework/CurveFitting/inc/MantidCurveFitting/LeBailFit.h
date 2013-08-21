@@ -117,11 +117,6 @@ namespace CurveFitting
     /// Calculate LeBail pattern from from input peak parameters
     void execPatternCalculation();
 
-    /// Calculate diffraction pattern
-    bool calculateDiffractionPattern(MatrixWorkspace_sptr dataws, size_t workspaceindex,
-                                     const MantidVec &vecX, MantidVec& vecY,
-                                     map<string, Parameter> parammap, bool recalpeakintesity);
-
     /// LeBailFit
     void execLeBailFit();
 
@@ -222,9 +217,9 @@ namespace CurveFitting
     void addParameterToMCMinimize(vector<string>& parnamesforMC, string parname);
 
     /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
-    bool calculateDiffractionPatternMC(const MantidVec &vecX, const MantidVec &vecY,
+    bool calculateDiffractionPattern(const MantidVec &vecX, const MantidVec &vecY,
                                        bool inputraw, bool outputwithbkgd,
-                                       MantidVec& vecBkgd,  MantidVec& values,
+                                       const MantidVec& vecBkgd,  MantidVec& values,
                                        Rfactor& rfactor);
 
     /// Calculate powder diffraction statistic Rwp
@@ -266,7 +261,7 @@ namespace CurveFitting
     void storeBackgroundParameters(vector<double> &bkgdparamvec);
 
     /// Restore/recover the buffered background parameters to m_background function
-    void recoverBackgroundParameters(vector<double> bkgdparamvec);
+    void recoverBackgroundParameters(const vector<double> &bkgdparamvec);
 
     /// Propose new background parameters
     void proposeNewBackgroundValues();
@@ -292,6 +287,8 @@ namespace CurveFitting
     DataObjects::TableWorkspace_sptr reflectionWS;
 
     size_t m_wsIndex;
+
+    double m_startX, m_endX;
 
     /// Peaks about input and etc.
     //  These two are used for sorting peaks.
@@ -408,7 +405,7 @@ namespace CurveFitting
     vector<string> m_bkgdParameterNames;
     size_t m_numberBkgdParameters;
     vector<double> m_bkgdParameterBuffer;
-    vector<double> m_bkgdParameterBest;
+    vector<double> m_bestBkgdParams;
     int m_roundBkgd;
     vector<double> m_bkgdParameterStepVec;
 
