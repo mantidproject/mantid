@@ -229,6 +229,7 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.qx_lb->setText(QString("Qx (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.qxy_lb->setText(QString("Qxy (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.transFitOnOff->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
+  m_uiForm.transFitOnOff_can->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
   m_uiForm.q_rebin->setToolTip("Any string allowed by the Rebin algorithm may be used");
   
  
@@ -379,7 +380,9 @@ void SANSRunWindow::connectAnalysDetSignals()
     SLOT(handleInstrumentChange()));
 
   connect(m_uiForm.transFit_ck, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
+  connect(m_uiForm.transFit_ck_can, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));  
   updateTransInfo(m_uiForm.transFit_ck->state());
+  m_uiForm.transFit_ck_can->toggle();
 
   connect(m_uiForm.frontDetQrangeOnOff, SIGNAL(stateChanged(int)), this, SLOT(updateFrontDetQrange(int)));
   updateFrontDetQrange(m_uiForm.frontDetQrangeOnOff->state());
@@ -387,6 +390,8 @@ void SANSRunWindow::connectAnalysDetSignals()
   connect(m_uiForm.enableRearFlood_ck, SIGNAL(stateChanged(int)), this, SLOT(prepareFlood(int)));
   connect(m_uiForm.enableFrontFlood_ck, SIGNAL(stateChanged(int)), this, SLOT(prepareFlood(int)));
   
+  connect(m_uiForm.trans_selector_opt, SIGNAL(currentIndexChanged(int)), this, SLOT(transSelectorChanged(int)));
+  transSelectorChanged(0);
 
   connect(m_uiForm.wavRanges, SIGNAL(editingFinished()),
                                     this, SLOT(checkList()));
@@ -723,31 +728,9 @@ bool SANSRunWindow::loadUserFile()
       "print i.ReductionSingleton().DQXY"), m_uiForm.qy_dqy,
       m_uiForm.qy_dqy_opt);
 
-  // The tramission line of the Limits section 
-  QString transMin = runReduceScriptFunction(
-      "print i.ReductionSingleton().transmission_calculator.lambda_min").trimmed();
-  if (transMin == "None")
-  {
-    m_uiForm.transFit_ck->setChecked(false);
-  }
-  else
-  {
-    m_uiForm.transFit_ck->setChecked(true);
-    m_uiForm.trans_min->setText(transMin);
-    m_uiForm.trans_max->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().transmission_calculator.lambda_max").trimmed());
-  }
-  text = runReduceScriptFunction(
-      "print i.ReductionSingleton().transmission_calculator.fit_method").trimmed();
-  int index = m_uiForm.trans_opt->findText(text, Qt::MatchCaseSensitive);
-  if( index >= 0 )
-  {
-    m_uiForm.trans_opt->setCurrentIndex(index);
-  }
-  if ( text == "Off" )
-    m_uiForm.transFitOnOff->setChecked(false);
-  else 
-    m_uiForm.transFitOnOff->setChecked(true);  
+  // The tramission line of the Limits section (read settings for sample and can)
+    transSelectorChanged(1); transSelectorChanged(0);
+
 
   // The front rescale/shift section
   m_uiForm.frontDetRescale->setText(runReduceScriptFunction(
@@ -1061,13 +1044,20 @@ void SANSRunWindow::updateMaskTable()
       "print i.ReductionSingleton().mask.arm_width");
     QString arm_angle = runReduceScriptFunction(
       "print i.ReductionSingleton().mask.arm_angle");
+    QString arm_x = runReduceScriptFunction(
+      "print i.ReductionSingleton().mask.arm_x");
+    QString arm_y = runReduceScriptFunction(
+      "print i.ReductionSingleton().mask.arm_y");
     if ( arm_width != "None" && arm_angle != "None" )
     {
       int row = m_uiForm.mask_table->rowCount();
       m_uiForm.mask_table->insertRow(row);
       m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem("Arm"));
       m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(reardet_name));
-      m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle));      
+      if (arm_x != "None" && arm_y != "None")
+        m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle + " " + arm_x +" " + arm_y));      
+      else
+        m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("LINE " + arm_width + " " + arm_angle));      
     }
   }
 
@@ -2022,23 +2012,51 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
 
   // Set the wavelength ranges, equal to those for the sample unless this box is checked
   // Also check if the Trans Fit on/off tick is on or off. If Off then set the trans_opt to off
-  if (m_uiForm.transFit_ck->isChecked())
   {
-    if ( m_uiForm.transFitOnOff->isChecked() )
-      exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "','" +
-        m_uiForm.trans_min->text().trimmed()+"','"+m_uiForm.trans_max->text().trimmed()+"')\n";
-    else
-      exec_reduce += "i.TransFit('Off','" +
-        m_uiForm.trans_min->text().trimmed()+"','"+m_uiForm.trans_max->text().trimmed()+"')\n";
-  }
-  else
-  {
-    if ( m_uiForm.transFitOnOff->isChecked() )
-      exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "')\n";
-    else
-      exec_reduce += "i.TransFit('Off')\n";
-  }
+    QCheckBox * fit_ck; 
+    QCheckBox * use_ck;
+    QComboBox * method_opt;
+    QLineEdit * _min;
+    QLineEdit * _max;
+    QString selector = "BOTH";
+    // if trans_selector_opt == BOTH (index 0) it executes only once. 
+    // if trans_selector_opt == SAMPLE (index 1) it executes twice.
+    for (int i = 0; i< m_uiForm.trans_selector_opt->currentIndex()+1; i++){
+      if (i == 0){
+        fit_ck = m_uiForm.transFitOnOff;
+        use_ck = m_uiForm.transFit_ck;
+        method_opt = m_uiForm.trans_opt;
+        _min = m_uiForm.trans_min;
+        _max = m_uiForm.trans_max;
+        if (m_uiForm.trans_selector_opt->currentIndex() == 1)
+          selector = "SAMPLE";
+      }else{
+        fit_ck = m_uiForm.transFitOnOff_can;
+        use_ck = m_uiForm.transFit_ck_can;
+        method_opt = m_uiForm.trans_opt_can;
+        _min = m_uiForm.trans_min_can;
+        _max = m_uiForm.trans_max_can;
+        selector = "CAN";
+      }
+      
+      QString lambda_min_option = "lambdamin=None";
+      QString lambda_max_option = "lambdamax=None"; 
+      QString mode_option; // = "mode='OFF'";
+      QString selector_option = "selector='"+selector+"'";
 
+      if (!fit_ck->isChecked())
+        mode_option = "mode='Off'";
+      else{
+        mode_option = "mode='"+ method_opt->currentText() + "'";
+        if (use_ck->isChecked()){
+          lambda_min_option = "lambdamin='"+ _min->text().trimmed() + "'";
+          lambda_max_option = "lambdamax='"+ _max->text().trimmed() + "'";
+        }
+      }
+      exec_reduce += "i.TransFit(" + mode_option + ", " + lambda_min_option + ", " + lambda_max_option + ", " + selector_option + ")\n";
+      
+    }
+  }
   // Set the Front detector Rescale and Shift
   QString fdArguments = "scale=" + m_uiForm.frontDetRescale->text().trimmed() + ","
                       + "shift=" + m_uiForm.frontDetShift->text().trimmed();
@@ -2919,24 +2937,32 @@ void SANSRunWindow::updateFrontDetQrange(int state)
  */
 void SANSRunWindow::updateTransInfo(int state)
 {
+  QLineEdit * _min = m_uiForm.trans_min, 
+    * _max = m_uiForm.trans_max;
+  
+  if (sender() == m_uiForm.transFit_ck_can){
+    _min = m_uiForm.trans_min_can;
+    _max = m_uiForm.trans_max_can;
+  }
+
   if( state == Qt::Checked )
   {
-    m_uiForm.trans_min->setEnabled(true);
-    m_uiForm.trans_min->setText(
+    _min->setEnabled(true);
+    _min->setText(
       runReduceScriptFunction("print i.ReductionSingleton().instrument.WAV_RANGE_MIN").trimmed());
 
-    m_uiForm.trans_max->setEnabled(true);
-    m_uiForm.trans_max->setText(
+    _max->setEnabled(true);
+    _max->setText(
        runReduceScriptFunction("print i.ReductionSingleton().instrument.WAV_RANGE_MAX").trimmed());
 
   }
   else
   {
-    m_uiForm.trans_min->setEnabled(false);
-    m_uiForm.trans_min->setText("");
+    _min->setEnabled(false);
+    _min->setText("");
 
-    m_uiForm.trans_max->setEnabled(false);
-    m_uiForm.trans_max->setText("");
+    _max->setEnabled(false);
+    _max->setText("");
   }
 }
 
@@ -3446,6 +3472,71 @@ void SANSRunWindow::phiMaskingChanged(int i)
   Q_UNUSED(i);
   updateMaskTable(); 
 }  
+
+void SANSRunWindow::transSelectorChanged(int currindex){
+  bool visible = false;
+  if (currindex != 0)
+    visible = true;
+
+  QWidget * wid [] = {m_uiForm.trans_can_label, m_uiForm.transFitOnOff_can,
+                      m_uiForm.transFit_ck_can, m_uiForm.trans_min_can, 
+                      m_uiForm.trans_max_can, m_uiForm.trans_opt_can};
+  for (size_t i = 0; i< 6; i++) wid[i]->setVisible(visible);
+
+  QString transMin = runReduceScriptFunction(
+                  "print i.ReductionSingleton().transmission_calculator.lambdaMin('SAMPLE')").trimmed();
+  if (transMin == "None")
+  {
+    m_uiForm.transFit_ck->setChecked(false);
+  }
+  else
+  {
+    m_uiForm.transFit_ck->setChecked(true);
+    m_uiForm.trans_min->setText(transMin);
+    m_uiForm.trans_max->setText(runReduceScriptFunction(
+      "print i.ReductionSingleton().transmission_calculator.lambdaMax('SAMPLE')").trimmed());
+  }
+  QString text = runReduceScriptFunction(
+      "print i.ReductionSingleton().transmission_calculator.fitMethod('SAMPLE')").trimmed();
+  int index = m_uiForm.trans_opt->findText(text, Qt::MatchFixedString);
+  if( index >= 0 )
+  {
+    m_uiForm.trans_opt->setCurrentIndex(index);
+  }
+  if ( text == "Off" || text == "None" )
+    m_uiForm.transFitOnOff->setChecked(false);
+  else 
+    m_uiForm.transFitOnOff->setChecked(true);
+
+  if (visible){
+    transMin = runReduceScriptFunction(
+                  "print i.ReductionSingleton().transmission_calculator.lambdaMin('CAN')").trimmed();
+  if (transMin == "None")
+  {
+    m_uiForm.transFit_ck_can->setChecked(false);
+  }
+  else
+  {
+    m_uiForm.transFit_ck_can->setChecked(true);
+    m_uiForm.trans_min_can->setText(transMin);
+    m_uiForm.trans_max_can->setText(runReduceScriptFunction(
+      "print i.ReductionSingleton().transmission_calculator.lambdaMax('CAN')").trimmed());
+  }
+  text = runReduceScriptFunction(
+      "print i.ReductionSingleton().transmission_calculator.fitMethod('CAN')").trimmed();
+  index = m_uiForm.trans_opt_can->findText(text, Qt::MatchCaseSensitive);
+  if( index >= 0 )
+  {
+    m_uiForm.trans_opt_can->setCurrentIndex(index);
+  }
+  if ( text == "Off" || text == "None" )
+    m_uiForm.transFitOnOff_can->setChecked(false);
+  else 
+    m_uiForm.transFitOnOff_can->setChecked(true);
+  }
+
+
+}
 
 } //namespace CustomInterfaces
 

@@ -9,6 +9,7 @@
 //#include <fstream>
 
 using namespace Mantid;
+using Mantid::DataHandling::LoadGSS;
 
 class LoadGSSTest : public CxxTest::TestSuite
 {
@@ -39,6 +40,38 @@ public:
     TS_ASSERT( loader->execute() )
     // Check a few things in the workspace
 	checkWorkspace( loader->getProperty("OutputWorkspace"), 1, 6);
+  }
+
+  /** Test LoadGSS with setting spectrum ID as bank ID
+    */
+  void test_load_gss_use_spec()
+  {
+    // Set property and execute
+    LoadGSS loader;
+    loader.initialize();
+
+    loader.setPropertyValue("Filename","gss1.txt");
+    loader.setProperty("OutputWorkspace", "TestWS");
+    loader.setProperty("UseBankIDasSpectrumNumber", true);
+
+    TS_ASSERT( loader.execute() );
+
+    // Check result
+    API::MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+          API::AnalysisDataService::Instance().retrieve("TestWS"));
+    TS_ASSERT(outws);
+    if (!outws)
+      return;
+
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 3);
+    if (outws->getNumberHistograms() != 3)
+      return;
+
+    TS_ASSERT_EQUALS(outws->getSpectrum(0)->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(outws->getSpectrum(1)->getSpectrumNo(), 3);
+    TS_ASSERT_EQUALS(outws->getSpectrum(2)->getSpectrumNo(), 5);
+
+    API::AnalysisDataService::Instance().remove("TestWS");
   }
 
   void test_fails_gracefully_if_passed_wrong_filetype()

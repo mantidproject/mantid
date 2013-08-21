@@ -39,6 +39,7 @@ support rebinning in-situ as part of the visualisation process.
 #include "MantidVatesAPI/LoadVTK.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -65,8 +66,36 @@ namespace Mantid
 {
   namespace VATES
   {
-    DECLARE_ALGORITHM( LoadVTK)
+    DECLARE_FILELOADER_ALGORITHM(LoadVTK);
 
+    /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadVTK::confidence(Kernel::FileDescriptor & descriptor) const
+    {
+      const std::string & fileExt = descriptor.extension();
+      const bool isntAscii = !descriptor.isAscii();
+      int confidence(0);
+      if (isntAscii && fileExt == ".vtk")
+      {
+        confidence = 80;
+      }
+      else if (fileExt == ".vtk")
+      {
+        confidence = 60;
+      }
+      else if (isntAscii)
+      {
+        confidence = 15;
+      }
+      else
+      {
+        confidence = 0;
+      }
+      return confidence;
+    }
     const std::string LoadVTK::name() const
     {
       return "LoadVTK";
@@ -108,7 +137,7 @@ namespace Mantid
       this->declareProperty("KeepTopPercent", 25.0, rangeValidator, "Only keep the top percentage of SignalArray values in the range min to max. Allow sparse regions to be ignored. Defaults to 25%.");
 
       setPropertySettings("KeepTopPercent",
-                new EnabledWhenProperty("AdaptiveBinned", IS_NOT_DEFAULT));
+                new EnabledWhenProperty("AdaptiveBinned", IS_DEFAULT));
 
       declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace", "", Direction::Output),
           "MDWorkspace equivalent of vtkStructuredPoints input.");
@@ -136,6 +165,7 @@ namespace Mantid
       prog.report("Converting to MD Histogram Workspace");
       MDHistoWorkspace_sptr outputWS = boost::make_shared<MDHistoWorkspace>(dimX, dimY, dimZ);
 
+      // cppcheck-suppress unreadVariable
       double* destinationSignals = outputWS->getSignalArray();
       double* destinationErrorsSQ = outputWS->getErrorSquaredArray();
 
@@ -145,6 +175,7 @@ namespace Mantid
         for (int64_t i = 0; i < nPoints; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
+          // cppcheck-suppress unreadVariable
           destinationSignals[i] = signals->GetValue(i);
           if(i%frequency == 0)
             prog.report();
@@ -158,6 +189,7 @@ namespace Mantid
        for (int64_t i = 0; i < nPoints; ++i)
        {
          PARALLEL_START_INTERUPT_REGION
+         // cppcheck-suppress unreadVariable
          destinationSignals[i] = signals->GetValue(i);
          destinationErrorsSQ[i] = errorsSQ->GetValue(i);
          if(i%frequency == 0)

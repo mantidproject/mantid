@@ -609,6 +609,7 @@ public:
     ws->setCoordinateSystem(Mantid::API::QLab);
     TS_ASSERT_EQUALS(Mantid::API::QLab, ws->getSpecialCoordinateSystem());
   }
+
 };
 
 

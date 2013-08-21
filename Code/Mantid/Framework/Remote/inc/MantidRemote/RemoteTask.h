@@ -1,6 +1,8 @@
 #ifndef REMOTETASK_H
 #define REMOTETASK_H
 
+#include "MantidRemote/DllConfig.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -12,7 +14,7 @@
  * This class is mainly a convenince so that we can pass this one object to submitJob instead of multiple strings.
  */
 
-class RemoteTask
+class MANTID_REMOTE_DLL RemoteTask
 {
 public:
 

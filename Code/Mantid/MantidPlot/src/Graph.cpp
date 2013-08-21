@@ -57,7 +57,7 @@
 #include "PlotCurve.h"
 #include "ApplicationWindow.h"
 #include "plot2D/ScaleEngine.h"
-#include "UserFunction.h"
+
 #include "Mantid/MantidMatrixCurve.h"
 #include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
 #include "Mantid/ErrorBarSettings.h"
@@ -5030,7 +5030,7 @@ Spectrogram* Graph::plotSpectrogram(Matrix *m, CurveType type)
   Spectrogram *d_spectrogram = new Spectrogram(m);
   return plotSpectrogram(d_spectrogram,type);
 }
-Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz, CurveType type)
+Spectrogram* Graph::plotSpectrogram(Function2D *f,int nrows, int ncols,double left, double top, double width, double height,double minz,double maxz, CurveType type)
 {
   if (type != GrayScale && type != ColorMap && type != Contour)
     return 0;
@@ -5078,7 +5078,7 @@ Spectrogram* Graph::spectrogram()
 
 }
 
-Spectrogram* Graph::plotSpectrogram(UserHelperFunction *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
+Spectrogram* Graph::plotSpectrogram(Function2D *f,int nrows, int ncols,QwtDoubleRect bRect,double minz,double maxz,CurveType type)
 {
   if (type != GrayScale && type != ColorMap && type != Contour && type != ColorMapContour)
     return 0;
@@ -5905,6 +5905,7 @@ void Graph::setWaterfallXOffset(int offset)
 
   if ( offset >= 0 ) d_waterfall_offset_x = offset;
   updateDataCurves();
+  replot();
   emit modifiedGraph();
 }
 
@@ -5915,6 +5916,7 @@ void Graph::setWaterfallYOffset(int offset)
 
   if ( offset >= 0 ) d_waterfall_offset_y = offset;
   updateDataCurves();
+  replot();
   emit modifiedGraph();
 }
 
@@ -5925,6 +5927,7 @@ void Graph::setWaterfallOffset(int x, int y, bool update)
 
   if (update){
     updateDataCurves();
+    replot();
     emit modifiedGraph();
   }
 }
@@ -6005,7 +6008,6 @@ void Graph::updateDataCurves()
     else if (MantidMatrixCurve *mc = dynamic_cast<MantidMatrixCurve*>(pc))
       mc->loadData();
   }
-  replot();
   QApplication::restoreOverrideCursor();
 }
 

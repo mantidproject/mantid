@@ -120,6 +120,8 @@ protected:
   QRadioButton* m_masking_on;
   QRadioButton* m_grouping_on;
 
+  QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
+
   // buttons
   QPushButton* m_move;
   QPushButton* m_pointer;
@@ -132,7 +134,6 @@ protected:
   QPushButton* m_apply_to_view;
   QPushButton* m_clear_all;
   QPushButton* m_saveButton;
-  QCheckBox* m_savegroupdet;
 
 
   QMenu* m_saveMask;

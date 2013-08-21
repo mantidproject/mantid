@@ -10,6 +10,9 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QThread>
+#include <boost/shared_ptr.hpp>
+
+namespace Mantid { namespace API { class IAlgorithm; } }
 
 namespace MantidQt
 {
@@ -100,7 +103,9 @@ namespace MantidQt
       Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE setAlgorithmProperty)
       Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
       Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
+      Q_PROPERTY(LiveButtonOpts liveButton READ liveButtonState WRITE liveButtonState)
       Q_ENUMS(ButtonOpts)
+      Q_ENUMS(LiveButtonOpts)
 
     public:
       /// options for bringing up the load file dialog
@@ -116,6 +121,13 @@ namespace MantidQt
         NO_ENTRY_NUM = -1,          ///< error in the entry number setting
         ALL_ENTRIES = -2            ///< use all entries (i.e. entry number was left blank)
       };
+      /// Options for the live button
+      enum LiveButtonOpts
+      {
+        Hide,            ///< Don't use the live button
+        AlwaysShow,      ///< Show whether a connection is possible or not (will be disabled)
+        ShowIfCanConnect ///< Only show if able to connect to the live data server
+      };
 
       ///Default constructor
       MWRunFiles(QWidget *parent=NULL);
@@ -125,27 +137,34 @@ namespace MantidQt
 
       // property accessors/modifiers
       bool isForRunFiles() const;
-      void isForRunFiles(const bool);
+      void isForRunFiles(bool);
       QString getLabelText() const;
       void setLabelText(const QString & text);
+      void setLabelMinWidth(int);
       bool allowMultipleFiles() const;
-      void allowMultipleFiles(const bool);
+      void allowMultipleFiles(bool);
       bool isOptional() const;
-      void isOptional(const bool);
+      void isOptional(bool);
       ButtonOpts doButtonOpt() const;
-      void doButtonOpt(const ButtonOpts buttonOpt);
+      void doButtonOpt(ButtonOpts buttonOpt);
       bool doMultiEntry() const;
-      void doMultiEntry(const bool);
+      void doMultiEntry(bool);
       QString getAlgorithmProperty() const;
       void setAlgorithmProperty(const QString & name);
       QStringList getFileExtensions() const;
       void setFileExtensions(const QStringList & extensions);
       bool extsAsSingleOption() const;
-      void extsAsSingleOption(const bool value);
+      void extsAsSingleOption(bool value);
+      LiveButtonOpts liveButtonState() const;
+      void liveButtonState(LiveButtonOpts);
+
+      // Standard setters/getters
+      void liveButtonSetEnabled(bool);
+      void liveButtonSetChecked(bool);
+      bool liveButtonIsChecked() const;
       bool isEmpty() const;
       QString getText() const;
 
-      // Standard setters/getters
       bool isValid() const;
       QStringList getFilenames() const;
       QString getFirstFilename() const;
@@ -166,7 +185,9 @@ namespace MantidQt
       /// Save settings in the given group
       void saveSettings(const QString & group);
       /// Alters the text label that contains the number of entries, normally run when the file is loaded
-      void setNumberOfEntries(const int number);
+      void setNumberOfEntries(int number);
+      /// Inform the widget of a running instance of MonitorLiveData to be used in stopLiveListener()
+      void setLiveAlgorithm(const boost::shared_ptr<Mantid::API::IAlgorithm>& monitorLiveData);
 
     signals:
       /// Emitted when the file text changes
@@ -179,6 +200,8 @@ namespace MantidQt
       void filesFound();
       /// Emitted when file finding is finished (files may or may not have been found).
       void fileFindingFinished();
+      /// Emitted when the live button is toggled
+      void liveButtonPressed(bool);
 
     public slots:
       /// Set the file text and try and find it
@@ -187,8 +210,7 @@ namespace MantidQt
       void setFileTextWithoutSearch(const QString & text);
       /// Find the files within the text edit field and cache their full paths
       void findFiles();
-      /// Slot called when file finding thread has finished.
-      void inspectThreadResult();
+      boost::shared_ptr<const Mantid::API::IAlgorithm> stopLiveAlgorithm();
 
     private:
       /// Create a file filter from a list of extensions
@@ -209,6 +231,8 @@ namespace MantidQt
       void browseClicked();
       /// currently checks only if the entry number is any integer > 0
       void checkEntry();
+      /// Slot called when file finding thread has finished.
+      void inspectThreadResult();
 
     private:
       /// Is the widget for run files or standard files
@@ -231,6 +255,10 @@ namespace MantidQt
       QStringList m_fileExtensions;
       /// If true the exts are displayed as one option in the dialog
       bool m_extsAsSingleOption;
+      /// If or when live button will be shown
+      LiveButtonOpts m_liveButtonState;
+      /// Handle on a running instance of MonitorLiveData
+      boost::shared_ptr<Mantid::API::IAlgorithm> m_monitorLiveData;
 
       /// The Ui form
       Ui::MWRunFiles m_uiForm;

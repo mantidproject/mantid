@@ -7,9 +7,12 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+#include <Poco/Path.h>
+#include <queue>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Exception::NotFoundError;
@@ -1057,14 +1060,111 @@ namespace Mantid
     {
       file->makeGroup(group, "NXinstrument", 1);
       file->putAttr("version", 1);
+
+      file->writeData("name", getName() );
+
+      // XML contents of instrument, as a NX note
+      file->makeGroup("instrument_xml", "NXnote", true);
+      file->writeData("data", getXmlText() );
+      file->writeData("type", "text/xml"); // mimetype
+      file->writeData("description", "XML contents of the instrument IDF file.");
+      file->closeGroup();
+
+      file->writeData("instrument_source", Poco::Path(getFilename()).getFileName());
+
+      // Now the parameter map, as a NXnote via its saveNexus method
+      if(isParametrized()){
+        const Geometry::ParameterMap& params = *getParameterMap();
+        params.saveNexus( file, "instrument_parameter_map" );
+      }
+
+      // Add physical detector and monitor data
+      std::vector<detid_t> detectorIDs;
+      std::vector<detid_t> detmonIDs;
+      detectorIDs = getDetectorIDs( true );
+      detmonIDs = getDetectorIDs( false );
+      if( !detmonIDs.empty() )
+      {
+        // Add detectors group
+        file->makeGroup("physical_detectors","NXdetector", true);
+        file->writeData("number_of_detectors", uint64_t(detectorIDs.size()) );
+        saveDetectorSetInfoToNexus ( file, detectorIDs );
+        file->closeGroup(); // detectors
+
+        // Create Monitor IDs vector
+        std::vector<IDetector_const_sptr> detmons;
+        detmons = getDetectors( detmonIDs );
+        std::vector<detid_t> monitorIDs;
+        for (size_t i=0; i < detmonIDs.size(); i++) 
+        {
+          if( detmons[i]->isMonitor()) monitorIDs.push_back( detmonIDs[i] );
+        }
+
+        // Add Monitors group
+        file->makeGroup("physical_monitors","NXmonitor", true);
+        file->writeData("number_of_monitors", uint64_t(monitorIDs.size()) );
+        saveDetectorSetInfoToNexus ( file, monitorIDs );
+        file->closeGroup(); // monitors
+      }
+
       file->closeGroup();
     }
 
+  /* A private helper function so save information about a set of detectors to Nexus
+  *  @param file :: open Nexus file ready to recieve the info about the set of detectors
+  *                 a group must be open that has only one call of this function.
+  *  @param detIDs :: the dectector IDs of the detectors belonging to the set
+  */
+  void Instrument::saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const
+  { 
+
+    size_t nDets = detIDs.size();
+    if( nDets == 0) return;
+    std::vector<IDetector_const_sptr> detectors;
+    detectors = getDetectors( detIDs );
+
+    Geometry::IObjComponent_const_sptr sample = getSample();
+    Kernel::V3D sample_pos;
+    if(sample) sample_pos = sample->getPos();
+
+    std::vector<double> a_angles( nDets );
+    std::vector<double> p_angles( nDets );
+    std::vector<double> distances( nDets );
+
+    for (size_t i=0; i < nDets; i++)
+    {
+      if( sample) 
+      {
+        Kernel::V3D pos = detectors[i]->getPos() - sample_pos;
+        pos.getSpherical( distances[i], p_angles[i], a_angles[i]);
+      } else {
+        a_angles[i] = detectors[i]->getPhi()*180.0/M_PI;
+      }
+    }
+    file->writeData("detector_number", detIDs);
+    file->writeData("azimuthal_angle", a_angles);
+    file->openData("azimuthal_angle");
+    file->putAttr("units","degree");
+    file->closeData();
+    if(sample) 
+    {
+      file->writeData("polar_angle", p_angles);
+      file->openData("polar_angle");
+      file->putAttr("units","degree");
+      file->closeData();
+      file->writeData("distance", distances);
+      file->openData("distance");
+      file->putAttr("units","metre");
+      file->closeData();
+    }
+
+  }
+
     //--------------------------------------------------------------------------------------------
     /** Load the object from an open NeXus file.
-     * @param file :: open NeXus file
-     * @param group :: name of the group to open
-     */
+    * @param file :: open NeXus file
+    * @param group :: name of the group to open
+    */
     void Instrument::loadNexus(::NeXus::File * file, const std::string & group)
     {
       file->openGroup(group, "NXinstrument");
@@ -1117,6 +1217,87 @@ namespace Mantid
         g_log.warning() << type << " is not allowed as an instrument view type. Default to \"3D\"" << std::endl;
       }
     }
+
+    /// Set the date from which the instrument definition begins to be valid.
+    /// @param val :: date and time
+    /// @throw InstrumentDefinitionError Thrown if date is earlier than 1900-01-31 23:59:01
+    void Instrument::setValidFromDate(const Kernel::DateAndTime val)
+    { 
+      Kernel::DateAndTime earliestAllowedDate("1900-01-31 23:59:01");
+      if ( val < earliestAllowedDate )
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("The valid-from <instrument> tag date must be from 1900-01-31 23:59:01 or later", m_filename);          
+      }
+      m_ValidFrom = val; 
+    }
+
+    Instrument::ContainsState Instrument::containsRectDetectors() const
+    {
+      std::queue<IComponent_const_sptr> compQueue; // Search queue
+
+      // Add all the direct children of the intrument
+      for(int i = 0; i < nelements(); i++)
+        compQueue.push(getChild(i));
+
+      bool foundRect = false;
+      bool foundNonRect = false;
+
+      IComponent_const_sptr comp;
+
+      while(!compQueue.empty() && !(foundRect && foundNonRect))
+      {
+        comp = compQueue.front();
+        compQueue.pop();
+
+        // Skip source, is has one
+        if(m_sourceCache && m_sourceCache->getComponentID() == comp->getComponentID())
+          continue;
+
+        // Skip sample, if has one
+        if(m_sampleCache && m_sampleCache->getComponentID() == comp->getComponentID())
+          continue;
+
+        // Skip monitors
+        IDetector_const_sptr detector
+          = boost::dynamic_pointer_cast<const IDetector>(comp);
+        if(detector && detector->isMonitor())
+          continue;
+
+        if(dynamic_cast<const RectangularDetector*>(comp.get()))
+        {
+          if(!foundRect)
+            foundRect = true;
+        }
+        else
+        {
+          ICompAssembly_const_sptr assembly 
+            = boost::dynamic_pointer_cast<const ICompAssembly>(comp);
+
+          if(assembly)
+          {
+            for(int i = 0; i < assembly->nelements(); i++)
+              compQueue.push(assembly->getChild(i));
+          }
+          else // Is a non-rectangular component
+          {
+            if(!foundNonRect)
+              foundNonRect = true;
+          }
+        }
+
+      } // while
+
+      // Found both
+      if(foundRect && foundNonRect) 
+        return Instrument::ContainsState::Partial;
+      // Found only rectangular
+      else if(foundRect) 
+        return Instrument::ContainsState::Full;  
+      // Found only non-rectangular
+      else 
+        return Instrument::ContainsState::None;
+
+    } // containsRectDetectors
 
   } // namespace Geometry
 } // Namespace Mantid

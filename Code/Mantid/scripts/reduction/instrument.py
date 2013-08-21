@@ -1,6 +1,6 @@
-import MantidFramework
-import mantidsimple
-MantidFramework.mtd.initialise()
+import mantid.simpleapi as api
+from mantid.kernel import *
+from mantid.api import *
 
 def instrument_factory(name):
     """
@@ -21,16 +21,16 @@ class Instrument(object):
         """
         if instr_filen is None:
             instr_filen = self._NAME+'_Definition.xml'
-
-        self._definition_file = MantidFramework.mtd.getConfigProperty(
-            'instrumentDefinition.directory')+'/'+instr_filen
+            
+        config = ConfigService.Instance()
+        self._definition_file = config["instrumentDefinition.directory"]+'/'+instr_filen
                 
         self.definition = self.load_instrument() 
 
     def get_default_instrument(self):
         instr_filen = self._NAME+'_Definition.xml'
-        self._definition_file = MantidFramework.mtd.getConfigProperty(
-            'instrumentDefinition.directory')+'/'+instr_filen
+        config = ConfigService.Instance()
+        self._definition_file =config["instrumentDefinition.directory"]+'/'+instr_filen
         return self.load_instrument() 
 
     def load_instrument(self):
@@ -39,12 +39,12 @@ class Instrument(object):
             @return the instrument parameter data
         """
         wrksp = '__'+self._NAME+'instrument_definition'
-        if not MantidFramework.mtd.workspaceExists(wrksp):
-          mantidsimple.CreateWorkspace(wrksp,"1","1","1")
+        if not AnalysisDataService.doesExist(wrksp):
+          api.CreateWorkspace(OutputWorkspace=wrksp,DataX="1",DataY="1",DataE="1")
           #read the information about the instrument that stored in its xml
-          mantidsimple.LoadInstrument(wrksp, InstrumentName=self._NAME)
+          api.LoadInstrument(Workspace=wrksp, InstrumentName=self._NAME)
 
-        return MantidFramework.mtd[wrksp].getInstrument()  
+        return AnalysisDataService.retrieve(wrksp).getInstrument()  
 
     def name(self):
         """
@@ -70,7 +70,7 @@ class Instrument(object):
         if workspace_name is None:
             workspace_name = self._NAME+'_instrument_view'
             self.load_empty(workspace_name)
-        elif not MantidFramework.mtd.workspaceExists(workspace_name):
+        elif not AnalysisDataService.doesExist(workspace_name):
             self.load_empty(workspace_name)
 
         import mantidplot
@@ -89,7 +89,7 @@ class Instrument(object):
         if workspace_name is None:
             workspace_name = '__'+self._NAME+'_empty'
 
-        mantidsimple.LoadEmptyInstrument(self._definition_file, workspace_name)
+        api.LoadEmptyInstrument(Filename=self._definition_file, OutputWorkspace=workspace_name)
 
         return workspace_name
    

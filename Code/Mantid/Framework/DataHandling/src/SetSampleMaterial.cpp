@@ -14,8 +14,8 @@ Neutron scattering lengths and cross sections of the elements and their isotopes
 =====Setting the sample by a more complex formula=====
  SetSampleMaterial(InputWorkspace='IRS26173',ChemicalFormula='Al2-O3', UnitCellVolume='253.54', ZParameter='6')
 
-=====Setting the sample by specific values (all three must be specified)=====
- SetSampleMaterial(InputWorkspace='IRS26173',AttenuationXSection=2.56,ScatteringXSection=11.62,SampleNumberDensity=0.0849106)
+=====Setting the sample by specific values=====
+ SetSampleMaterial(InputWorkspace='IRS26173',AtomicNumber=26,AttenuationXSection=2.56,ScatteringXSection=11.62,SampleNumberDensity=0.0849106)
 
 =====Extracting the set values out by python=====
  sam = ws.sample()
@@ -153,6 +153,14 @@ namespace DataHandling
     setPropertySettings("UnitCellVolume", new Kernel::EnabledWhenProperty("SampleNumberDensity", Kernel::IS_DEFAULT));
     setPropertySettings("ZParameter", new Kernel::EnabledWhenProperty("SampleNumberDensity", Kernel::IS_DEFAULT));
 
+    //output properties
+    declareProperty("SampleNumberDensityResult", EMPTY_DBL(), "The provided or calculated sample number density in atoms/Angstrom^3", Direction::Output); 
+    declareProperty("ReferenceWavelength", EMPTY_DBL(), "The reference wavelength in Angstroms", Direction::Output);
+    declareProperty("TotalXSectionResult", EMPTY_DBL(), "The provided or calculated total cross-section for the sample material in barns.", Direction::Output);
+    declareProperty("IncoherentXSectionResult", EMPTY_DBL(), "The provided or calculated incoherent cross-section for the sample material in barns.", Direction::Output);
+    declareProperty("CoherentXSectionResult", EMPTY_DBL(), "The provided or calculated coherent cross-section for the sample material in barns.", Direction::Output);
+    declareProperty("AbsorptionXSectionResult", EMPTY_DBL(),"The provided or calculated Absorption cross-section for the sample material in barns.", Direction::Output);
+    
   }
 
   std::map<std::string, std::string> SetSampleMaterial::validateInputs()
@@ -291,14 +299,24 @@ namespace DataHandling
       expInfo->mutableSample().setMaterial(*mat);
       g_log.notice() << "Sample number density ";
       if (isEmpty(mat->numberDensity()))
+      {
         g_log.notice() << "was not specified\n";
+      }
       else
+      {
         g_log.notice() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
+        setProperty("SampleNumberDensityResult", mat->numberDensity()); // in atoms/Angstrom^3
+      }
       g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << "Angstroms\n"
                      << "    Coherent "   << mat->cohScatterXSection() << " barns\n"
                      << "    Incoherent " << mat->incohScatterXSection() << " barns\n"
                      << "    Total "      << mat->totalScatterXSection() << " barns\n"
                      << "    Absorption " << mat->absorbXSection() << " barns\n";
+      setProperty("CoherentXSectionResult", mat->cohScatterXSection()); // in barns
+      setProperty("IncoherentXSectionResult", mat->incohScatterXSection()); // in barns
+      setProperty("TotalXSectionResult",mat->totalScatterXSection()); // in barns
+      setProperty("AbsorptionXSectionResult",mat->absorbXSection()); // in barns
+      setProperty("ReferenceWavelength",NeutronAtom::ReferenceLambda); // in Angstroms
     }
     else
     {

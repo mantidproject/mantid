@@ -45,6 +45,7 @@ would tell the algorithm to interpret the columns as:
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 #include "LoadRaw/isisraw2.h"
@@ -132,27 +133,37 @@ namespace Mantid
       const bool moveMonitors = getProperty("MoveMonitors");
       m_ignoreMonitors = (!moveMonitors);
 
-      // Check the file type
-      LoadRawHelper isisRAW;
-      LoadAscii ascii;
-      LoadISISNexus2 isisNexus;
-      if( isisRAW.fileCheck(filename) > 0 )
+      // Check file type
+      if(NexusDescriptor::isHDF(filename))
       {
-        updateFromRaw(filename);
+        LoadISISNexus2 isisNexus;
+        auto *descriptor = new Kernel::NexusDescriptor(filename);
+        if(isisNexus.confidence(*descriptor) > 0)
+        {
+          delete descriptor;
+          updateFromNeXus(filename);
+          return;
+        }
       }
-      else if(ascii.fileCheck(filename) > 0)
+
+      if(FileDescriptor::isAscii(filename))
       {
         updateFromAscii(filename);
+        return;
       }
-      else if(isisNexus.fileCheck(filename) > 0)
+
+      LoadRawHelper isisRAW;
+      auto *descriptor = new Kernel::FileDescriptor(filename);
+      if( isisRAW.confidence(*descriptor) > 0 )
       {
-        updateFromNeXus(filename);
+        delete descriptor;
+        updateFromRaw(filename);
       }
       else
       {
+        delete descriptor;
         throw std::invalid_argument("File \"" + filename + "\" is not a valid input file.");
       }
-
     }
 
     /**

@@ -13,6 +13,10 @@ using namespace Mantid::Kernel;
 class VectorHelperTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static VectorHelperTest *createSuite() { return new VectorHelperTest(); }
+  static void destroySuite( VectorHelperTest *suite ) { delete suite; }
 
   VectorHelperTest() : m_test_bins(5,0.0)
   {

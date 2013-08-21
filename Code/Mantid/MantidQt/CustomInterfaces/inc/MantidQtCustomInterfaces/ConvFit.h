@@ -28,6 +28,7 @@ namespace IDA
     virtual QString helpURL() {return "ConvFit";}
 
   private slots:
+    void resType(const QString& type);
     void typeSelection(int index);
     void bgTypeSelection(int index);
     void plotInput();
@@ -66,7 +67,8 @@ namespace IDA
     QwtPlotCurve* m_cfDataCurve;
     QwtPlotCurve* m_cfCalcCurve;
     boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_cfInputWS;
-    std::string m_cfInputWSName;
+    QString m_cfInputWSName;
+    bool m_confitResFileType;
   };
 } // namespace IDA
 } // namespace CustomInterfaces

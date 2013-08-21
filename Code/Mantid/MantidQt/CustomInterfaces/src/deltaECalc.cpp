@@ -35,8 +35,8 @@ deltaECalc::deltaECalc(QWidget * const interface, const Ui::ConvertToEnergy &use
 * @param saveName :: filename for output saving
 */
 void deltaECalc::createProcessingScript(const QStringList &runFiles, const QString &whiteBeam,
-					const QStringList &absRunFiles, const QString &absWhiteBeam,
-					const QString & saveName)
+          const QStringList &absRunFiles, const QString &absWhiteBeam,
+          const QString & saveName)
 { 
   QString pyCode = "import DirectEnergyConversion as direct\n";
   pyCode += QString("mono_sample = direct.DirectEnergyConversion('%1')\n").arg(m_sets.cbInst->currentText());
@@ -59,7 +59,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   {
     fileExts.append("'.nxspe'");
   }
-  pyCode += "mono_sample.save_formats = [" + fileExts.join(",") + "]\n\n";
+  pyCode += "mono_sample.save_format = [" + fileExts.join(",") + "]\n\n";
 
   // Create the python variables. The strings are wrapped with r'' for slash safety
   QString pyRunFiles = createPyListAsString(runFiles);
@@ -228,7 +228,7 @@ std::string deltaECalc::insertNumber(const std::string &filename, const int numb
   if ( f.depth() > 0 )
   {// get the directory name, the full path of the file minus its name and add it back to the result so that we don't lose the path
     return f.directory(f.depth()-1)+"/"+f.getBaseName()+"_"+
-	  boost::lexical_cast<std::string>(number)+"."+f.getExtension();
+    boost::lexical_cast<std::string>(number)+"."+f.getExtension();
   }
   return f.getBaseName()+"_"+boost::lexical_cast<std::string>(number)+
     "."+f.getExtension();

@@ -78,7 +78,7 @@ namespace Mantid
 
       void checkRequirements();
 
-      bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+      std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
 
     };
 

@@ -32,9 +32,6 @@ class PredictFractionalPeaksTest: public CxxTest::TestSuite
 {
 
 public:
- PredictFractionalPeaksTest()
- {
- }
  void test_Init()
     {
       PredictFractionalPeaks alg;

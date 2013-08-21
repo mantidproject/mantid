@@ -9,6 +9,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include <boost/shared_ptr.hpp>
 #include "MockObjects.h"
 
@@ -47,8 +48,8 @@ void testNoWorkspaceThrows()
 void testNoLocationDoesNotThrow()
 {
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
-  pWorkspace->setName("someName");
   Mantid::API::IMDWorkspace_sptr workspace(pWorkspace);
+  Mantid::API::AnalysisDataService::Instance().addOrReplace("someName",workspace);
 
   MockImplicitFunction* pImpFunction = new MockImplicitFunction;
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
@@ -59,6 +60,7 @@ void testNoLocationDoesNotThrow()
   generator.setWorkspace(workspace);
 
   TSM_ASSERT_THROWS_NOTHING("The location is not mandatory, should not throw", generator.createXMLString());
+  Mantid::API::AnalysisDataService::Instance().clear();
 }
 
 void testNoNameThrows()
@@ -74,26 +76,6 @@ void testNoNameThrows()
       std::runtime_error);
 }
 
-void testCreateXMLWithWorkspace() //Uses the workspace setter.
-{
-  MockImplicitFunction* pImpFunction = new MockImplicitFunction;
-  EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
-
-  MockIMDWorkspace* pWorkspace = new MockIMDWorkspace("name");
-
-  boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
-  Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
-  RebinningKnowledgeSerializer generator;
-
-  //Apply setters.
-  generator.setImplicitFunction(impFunction);
-  generator.setWorkspace(workspace);
-
-  std::string xml = generator.createXMLString();
-
-  TSM_ASSERT_EQUALS("The xml has been created, but is incorrect.", "<MDInstruction><MDWorkspaceName>name</MDWorkspaceName><MDWorkspaceLocation></MDWorkspaceLocation>"
-      + workspace->getGeometryXML() + "<ImplicitFunction/></MDInstruction>" ,xml)
-}
 
 void testCreateXMLWithComponents() //Uses individual setters for geometry, location and name.
 {

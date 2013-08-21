@@ -1,6 +1,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Kernel::FacilityInfo;
 using Mantid::Kernel::InstrumentInfo;
@@ -8,6 +9,8 @@ using namespace boost::python;
 
 void export_FacilityInfo()
 {
+
+  register_ptr_to_python<FacilityInfo*>();
 
   class_<FacilityInfo>("FacilityInfo", no_init)
 

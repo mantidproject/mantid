@@ -4,8 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IFileLoader.h"
 
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
@@ -48,7 +47,7 @@ namespace Mantid
     File change history is stored at: <https://github.com/mantidproject/mantid>. 
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport LoadNexusProcessed : public API::IDataFileChecker 
+    class DLLExport LoadNexusProcessed : public API::IFileLoader<Kernel::NexusDescriptor>
     {
 
     public:
@@ -63,10 +62,8 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
-      /// do a quick check that this file can be loaded 
-      virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-      virtual int fileCheck(const std::string& filePath);
+      /// Returns a confidence value that this algorithm can load a file
+      virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
     private:
       /// Sets documentation strings for this algorithm

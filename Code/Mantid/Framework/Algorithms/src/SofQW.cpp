@@ -94,7 +94,7 @@ void SofQW::createInputProperties(API::Algorithm & alg)
 void SofQW::exec()
 {
   using namespace Geometry;
-  
+
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   // Do the full check for common binning
   if ( ! WorkspaceHelpers::commonBoundaries(inputWorkspace) )
@@ -107,17 +107,12 @@ void SofQW::exec()
   MatrixWorkspace_sptr outputWorkspace = setUpOutputWorkspace(inputWorkspace, getProperty("QAxisBinning"), verticalAxis);
   setProperty("OutputWorkspace",outputWorkspace);
 
-  // Retrieve the emode & efixed properties
-  const std::string emodeStr = getProperty("EMode");
-  // Convert back to an integer representation
-  int emode = 0;
-  if (emodeStr == "Direct") emode=1;
-  else if (emodeStr == "Indirect") emode=2;
-  
+  m_EmodeProperties.initCachedValues(inputWorkspace,this);
+  int emode = m_EmodeProperties.m_emode;
+
   // Get a pointer to the instrument contained in the workspace
   Instrument_const_sptr instrument = inputWorkspace->getInstrument();
-  // Get the parameter map
-  const ParameterMap& pmap = inputWorkspace->constInstrumentParameters();
+
   // Get the distance between the source and the sample (assume in metres)
   IObjComponent_const_sptr source = instrument->getSource();
   IObjComponent_const_sptr sample = instrument->getSample();
@@ -146,26 +141,13 @@ void SofQW::exec()
   Progress prog(this,0.0,1.0,numHists);
   for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
-    try {
+    try 
+    {
       // Now get the detector object for this histogram
       IDetector_const_sptr spectrumDet = inputWorkspace->getDetector(i);
       if( spectrumDet->isMonitor() ) continue;
-      // If an indirect instrument, try getting Efixed from the geometry
-      double efixed = getProperty("EFixed");
-      if (emode==2)
-      {
-        try {
-          Parameter_sptr par = pmap.get(spectrumDet.get(),"EFixed");
-          if (par) 
-          {
-            efixed = par->value<double>();
-          }
-          else if( efixed == 0.0 )
-          {
-            continue;
-          }
-        } catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
-      }
+
+       const double efixed = m_EmodeProperties.getEFixed(spectrumDet);
 
       // For inelastic scattering the simple relationship q=4*pi*sinTheta/lambda does not hold. In order to
       // be completely general we must calculate the momentum transfer by calculating the incident and final
@@ -202,11 +184,26 @@ void SofQW::exec()
           {
             ei = efixed;
             ef = efixed - deltaE;
+            if (ef<0)
+            {
+                std::string mess = "Energy transfer requested in Direct mode exceeds incident energy.\n Found for det ID: "+boost::lexical_cast<std::string>(idet)+
+                    " bin No "+boost::lexical_cast<std::string>(j)+" with Ei="+boost::lexical_cast<std::string>(efixed)+" and energy transfer: "+
+                    boost::lexical_cast<std::string>(deltaE);
+                throw std::runtime_error(mess);
+            }
           }
           else
           {
             ei = efixed + deltaE;
             ef = efixed;
+            if (ef<0)
+            {
+                std::string mess = "Incident energy of a neutron is negative. Are you trying to process Direct data in Indirect mode?\n Found for det ID: "+boost::lexical_cast<std::string>(idet)+
+                    " bin No "+boost::lexical_cast<std::string>(j)+" with efied="+boost::lexical_cast<std::string>(efixed)+" and energy transfer: "+
+                    boost::lexical_cast<std::string>(deltaE);
+                throw std::runtime_error(mess);
+            }
+
           }
           const V3D ki = beamDir*sqrt(energyToK*ei);
           const V3D kf = scatterDir*(sqrt(energyToK*(ef)));

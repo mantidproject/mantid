@@ -4,9 +4,9 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidDataHandling/LoadHelper.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -39,20 +39,11 @@ namespace DataHandling {
  File change history is stored at: <https://github.com/mantidproject/mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport LoadILL: public API::IDataFileChecker {
-public:
-	/// Constructor
-	LoadILL() :
-			API::IDataFileChecker(), m_instrumentName(""),
-			//m_nexusInstrumentEntryName(""),
-			m_wavelength(0), m_channelWidth(0) {
-
-		supportedInstruments.push_back("IN4");
-		supportedInstruments.push_back("IN5");
-		supportedInstruments.push_back("IN6");
-
-	}
-	/// Virtual destructor
+  class DLLExport LoadILL: public API::IFileLoader<Kernel::NexusDescriptor> 
+  {
+  public:
+    /// Constructor
+	LoadILL();	/// Virtual destructor
 	virtual ~LoadILL() {
 	}
 	/// Algorithm's name
@@ -67,11 +58,10 @@ public:
 	virtual const std::string category() const {
 		return "DataHandling";
 	}
-	///checks the file can be loaded by reading 1st 100 bytes and looking at the file extension.
-	bool quickFileCheck(const std::string& filePath, size_t nread,
-			const file_header& header);
-	/// check the structure of the file and if this file can be loaded return a value between 1 and 100
-	int fileCheck(const std::string& filePath);
+
+	/// Returns a confidence value that this algorithm can load a file
+        int confidence(Kernel::NexusDescriptor & descriptor) const;
+
 private:
 	/// Sets documentation strings for this algorithm
 	virtual void initDocs();
@@ -80,8 +70,7 @@ private:
 	// Execution code
 	void exec();
 
-	void setInstrumentName(NeXus::NXEntry& entry);
-	std::string getInstrumentName(NeXus::NXEntry& entry);
+	void loadInstrumentDetails(NeXus::NXEntry&);
 	void initWorkSpace(NeXus::NXEntry& entry);
 	void initInstrumentSpecific();
 	void loadRunDetails(NeXus::NXEntry & entry);
@@ -91,20 +80,18 @@ private:
 	NeXus::NXData loadNexusFileData(NeXus::NXEntry& entry);
 	void loadDataIntoTheWorkSpace(NeXus::NXEntry& entry);
 
-	double calculateEnergy(double);
-	double calculateTOF(double);
 	void runLoadInstrument();
 
-	std::string getDateTimeInIsoFormat(std::string dateToParse);
-	// Load all the nexus file information
-
 	/// Calculate error for y
-	static double calculateError(double in) { return sqrt(in);}
+	static double calculateError(double in) {
+		return sqrt(in);
+	}
 
 	API::MatrixWorkspace_sptr m_localWorkspace;
 
 	std::string m_filename; ///< The file to load
 	std::string m_instrumentName; ///< Name of the instrument
+	std::string m_instrumentPath; ///< Name of the instrument path
 
 	// Variables describing the data in the detector
 	size_t m_numberOfTubes; // number of tubes - X
@@ -120,11 +107,8 @@ private:
 	double m_l1; //=2.0;
 	double m_l2; //=4.0;
 
-	std::vector<std::string> supportedInstruments;
-
-	// Nexus instrument entry is of the format /entry0/<XXX>/
-	// XXX changes from version to version
-	std::string m_nexusInstrumentEntryName;
+	std::vector<std::string> m_supportedInstruments;
+	LoadHelper m_loader;
 
 };
 

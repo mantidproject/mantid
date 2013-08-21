@@ -45,6 +45,9 @@ namespace Mantid
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getPositionParameter,Geometry::Component::getPositionParameter,1,2);
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotationParameter,Geometry::Component::getRotationParameter,1,2);
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getStringParameter,Geometry::Component::getStringParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getBoolParameter,Geometry::Component::getBoolParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getIntParameter,Geometry::Component::getIntParameter,1,2);
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterType,Geometry::Component::getParameterType,1,2);
     
     void export_components()
     {
@@ -124,6 +127,11 @@ namespace Mantid
         .def("getPositionParameter", &Geometry::Component::getPositionParameter, Component_getPositionParameter())
         .def("getRotationParameter", &Geometry::Component::getRotationParameter, Component_getRotationParameter())
         .def("getStringParameter", &Geometry::Component::getStringParameter, Component_getStringParameter())
+    
+        .def("getBoolParameter", &Geometry::Component::getBoolParameter, Component_getBoolParameter())
+        .def("getIntParameter", &Geometry::Component::getIntParameter, Component_getIntParameter())
+        .def("getParameterType", &Geometry::Component::getParameterType, Component_getParameterType())
+
 
         ;
 

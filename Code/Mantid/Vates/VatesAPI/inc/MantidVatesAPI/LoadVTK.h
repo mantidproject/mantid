@@ -2,9 +2,9 @@
 #define LOADVTK_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidAPI/IFileLoader.h"
 
 class vtkUnsignedShortArray;
 class vtkDataSet;
@@ -17,7 +17,7 @@ namespace Mantid
   }
   namespace VATES
   {
-    class DLLExport LoadVTK : public Mantid::API::Algorithm
+    class DLLExport LoadVTK : public API::IFileLoader<Kernel::FileDescriptor>
     {
     public:
       virtual const std::string name() const;
@@ -25,6 +25,9 @@ namespace Mantid
       virtual int version() const;
 
       virtual const std::string category() const;
+
+      /// Returns a confidence value that this algorithm can load a file
+      virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
     protected:
 

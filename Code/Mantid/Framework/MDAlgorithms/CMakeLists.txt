@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToDiffractionMDWorkspace2.cpp
 	src/ConvertToMD.cpp
+	src/ConvertToMDHelper.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
 	src/DivideMD.cpp
@@ -85,6 +86,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
+	inc/MantidMDAlgorithms/ConvertToMDHelper.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
 	inc/MantidMDAlgorithms/DivideMD.h
@@ -94,6 +96,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/FakeMDEventData.h
 	inc/MantidMDAlgorithms/FindPeaksMD.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
+        inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
@@ -157,6 +160,7 @@ set ( TEST_FILES
 	ConvertToDiffractionMDWorkspace2Test.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToMDComponentsTest.h
+	ConvertToMDHelperTest.h
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h

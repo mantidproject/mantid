@@ -110,7 +110,7 @@ def Load(*args, **kwargs):
         
     # If a WorkspaceGroup was loaded then there will be a set of properties that have an underscore in the name
     # and users will simply expect the groups to be returned NOT the groups + workspaces.
-    return _gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','.*_.*'])
+    return _gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','LoaderVersion','.*_.*'])
 
 # Have a better load signature for autocomplete
 _signature = "\bFilename"
@@ -501,17 +501,17 @@ def _set_properties(alg_object, *args, **kwargs):
         :param *args: Positional arguments
         :param **kwargs: Keyword arguments  
     """
-    prop_order = alg_object.mandatoryProperties()
-    # add the args to the kw list so everything can be set in a single way
-    for (key, arg) in zip(prop_order[:len(args)], args):
-        kwargs[key] = arg
+    if len(args) > 0:
+        prop_order = alg_object.mandatoryProperties()
+        # add the args to the kw list so everything can be set in a single way
+        for (key, arg) in zip(prop_order[:len(args)], args):
+            kwargs[key] = arg
 
     # Set the properties of the algorithm.
     for key in kwargs.keys():
         value = kwargs[key]
         if value is None:
             continue
-
         # The correct parent/child relationship is not quite set up yet: #5157
         # ChildAlgorithms in Python are marked as children but their output is in the
         # ADS meaning we cannot just set DataItem properties by value. At the moment

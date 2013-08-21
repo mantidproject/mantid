@@ -8,7 +8,7 @@ from reduction import validate_step
 from sans_reduction_steps import BaseBeamFinder
 
 # Mantid imports
-from mantidsimple import *
+from mantid.simpleapi import *
 
 class LoadRun(ReductionStep):
     """
@@ -130,7 +130,7 @@ class LoadRun(ReductionStep):
             else:
                 [beam_x, beam_y] = reducer.get_beam_center()
                 
-            l = HFIRLoad(filepath, wks_name,
+            wksp, msg = HFIRLoad(Filename=filepath, OutputWorkspace=wks_name,
                          BeamCenterX = beam_x,
                          BeamCenterY = beam_y,
                          SampleDetectorDistance = self._sample_det_dist,
@@ -138,7 +138,7 @@ class LoadRun(ReductionStep):
                          Wavelength = self._wavelength,
                          WavelengthSpread = self._wavelength_spread,
                          ReductionProperties=reducer.get_reduction_table_name())
-            return l.getPropertyValue("OutputMessage")
+            return msg
 
         # Check whether we have a list of files that need merging
         #   Make sure we process a list of files written as a string
@@ -166,11 +166,11 @@ class LoadRun(ReductionStep):
             timer += mtd[workspace].getRun().getProperty("timer").value
                     
             # Update the timer and monitor
-            mantid[workspace].getRun().addProperty_dbl("monitor", monitor, True)
-            mantid[workspace].getRun().addProperty_dbl("timer", timer, True)
+            mtd[workspace].mutableRun().addProperty("monitor", monitor, True)
+            mtd[workspace].mutableRun().addProperty("timer", timer, True)
             
-            if mtd.workspaceExists('__tmp_wksp'):
-                mtd.deleteWorkspace('__tmp_wksp')
+            if mtd.doesExist('__tmp_wksp'):
+                DeleteWorkspace('__tmp_wksp')
         else:
             output_str += "Loaded %s\n" % data_file
             output_str += _load_data_file(data_file, workspace)
@@ -181,7 +181,7 @@ class LoadRun(ReductionStep):
             beam_center_y = mtd[workspace].getRun().getProperty("beam_center_y").value
             if type(reducer._beam_finder) is BaseBeamFinder:
                 reducer.set_beam_finder(BaseBeamFinder(beam_center_x, beam_center_y))
-                mantid.sendLogMessage("No beam finding method: setting to default [%-6.1f, %-6.1f]" % (beam_center_x, beam_center_y))
+                logger.notice("No beam finding method: setting to default [%-6.1f, %-6.1f]" % (beam_center_x, beam_center_y))
         
         n_files = 1
         if type(data_file)==list:

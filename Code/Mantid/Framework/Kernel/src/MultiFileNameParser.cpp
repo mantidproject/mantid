@@ -199,18 +199,10 @@ namespace Kernel
     {
       ConfigServiceImpl & config = ConfigService::Instance();
 
-      std::string supportedFacilities = config.getString("supported.facilities");
-
-      std::vector<std::string> allFacilityNames;
-      boost::split(
-        allFacilityNames,
-        supportedFacilities,
-        boost::is_any_of(";"));
-
-      for( auto facilityName = allFacilityNames.begin(); facilityName != allFacilityNames.end(); ++facilityName )
+      auto facilities = config.getFacilities();
+      for( auto itFacility = facilities.begin(); itFacility != facilities.end(); ++itFacility )
       {
-        const FacilityInfo & facility = config.getFacility(*facilityName);
-        const std::vector<InstrumentInfo> instruments = facility.instruments();
+        const std::vector<InstrumentInfo> instruments = (**itFacility).instruments();
 
         for( auto instrument = instruments.begin(); instrument != instruments.end(); ++instrument )
         {

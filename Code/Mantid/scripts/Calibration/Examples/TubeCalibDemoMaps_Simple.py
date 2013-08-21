@@ -5,12 +5,8 @@
 # It uses the CalibrateMaps function 
 
 #
-from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
-from mantid.kernel import config  # To set default instrument to MAPS
-from tube_calib_fit_params import * # To handle fit parameters
-from ideal_tube import * # For ideal tube
-from tube_calib import *  # For tube calibration functions
-from tube_spec import * # For tube specification class
+import tube
+from tube_calib_fit_params import TubeCalibFitParams
 
 def CalibrateMaps( RunNumber ):
    '''
@@ -24,8 +20,7 @@ def CalibrateMaps( RunNumber ):
    print "Filename",filename
    rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper 
    rangeUpper = 10000 #
-
-
+   
    # Set initial parameters for peak finding
    ExpectedHeight = -1000.0 # Expected Height of Gaussian Peaks  (initial value of fit parameter)
    ExpectedWidth = 8.0 # Expected width of Gaussian peaks in pixels (initial value of fit parameter)
@@ -44,31 +39,20 @@ def CalibrateMaps( RunNumber ):
 
    # == Create Objects needed for calibration ==
 
-   #Create Calibration Table
-   calibrationTable = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
-   calibrationTable.addColumn(type="int",name="Detector ID")  # "Detector ID" column required by ApplyCalbration
-   calibrationTable.addColumn(type="V3D",name="Detector Position")  # "Detector Position" column required by ApplyCalbration
-
-   # Specify component to calibrate
-   thisTubeSet = TubeSpec(CalibInstWS)
-   thisTubeSet.setTubeSpecByString(CalibratedComponent)
-
-   # Get ideal tube
-   iTube = IdealTube()
-   # Set positions of where the shadows and ends should be. 
    # First array gives positions in Metres and second array gives type 1=Gaussian peak 2=edge.
-   # See http://www.mantidproject.org/IdealTube for details
    # An intelligent guess is used here that is not correct for all tubes.
-   iTube.setPositionsAndForm([-0.50,-0.16,-0.00, 0.16, 0.50 ],[2,1,1,1,2]) 
+   knownPos, funcForm = [-0.50,-0.16,-0.00, 0.16, 0.50 ],[2,1,1,1,2] 
 
    # Get fitting parameters
-   fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth )
+   fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth)
+   fitPar.setAutomatic(True)
 
    print "Created objects needed for calibration."
 
    # == Get the calibration and put results into calibration table ==
-   # also put peaks into PeakFile
-   getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube )
+   calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, 
+                                                knownPos, funcForm, fitPar = fitPar, 
+                                                outputPeak=True)
    print "Got calibration (new positions of detectors) "
 
    # == Apply the Calibation ==
@@ -85,4 +69,4 @@ def CalibrateMaps( RunNumber ):
 
    # ==== End of CalibrateMaps() ====
 
-CalibrateMaps( 14919 )
+CalibrateMaps( 14919 ) #found at \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5

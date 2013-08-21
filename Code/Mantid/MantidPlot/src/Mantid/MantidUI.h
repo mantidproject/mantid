@@ -155,9 +155,6 @@ public:
   // Adjusts QtiPlot's main menu if a MantidMatrix becomes active (receives focus)
   bool menuAboutToShow(MdiSubWindow *w);
 
-  // Removes references to MantidMatrix w in QtiPlot (called when matrix closes)
-  void removeWindowFromLists(MdiSubWindow* w);
-
   // Prepares the contex menu for MantidMatrix
   void showContextMenu(QMenu& cm, MdiSubWindow* w);
 
@@ -248,7 +245,7 @@ public slots:
 
 
   //  *****                            *****  //
-  void renameWorkspace(QStringList);
+  void renameWorkspace(QStringList = QStringList());
 
 public:
 
@@ -301,15 +298,8 @@ signals:
   // These signals are to be fired from methods run in threads other than the main one
   // (e.g. handlers of algorithm notifications)
 
-  // Signals that the UI needs to be updated.
-  void workspace_added(const QString &, Mantid::API::Workspace_sptr);
-  void workspace_replaced(const QString &, Mantid::API::Workspace_sptr);
-  void workspace_removed(const QString &);
   void workspaces_cleared();
-  void workspace_renamed(const QString &, const QString &);
-  void workspaces_grouped(const QStringList&);
-  void workspace_ungrouped(const QString&, Mantid::API::Workspace_sptr);
-  void workspace_group_updated(const QString&);
+  void ADS_updated();
 
   void needToCreateLoadDAEMantidMatrix(const QString&);
 

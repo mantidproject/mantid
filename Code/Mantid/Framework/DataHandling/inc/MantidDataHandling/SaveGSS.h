@@ -87,6 +87,9 @@ private:
                      const MantidVec& X, const MantidVec& Y, const MantidVec& E) const;
   /// sets non workspace properties for the algorithm
   void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int periodNum);
+
+  bool m_useSpecAsBank;
+
 };
 
 }

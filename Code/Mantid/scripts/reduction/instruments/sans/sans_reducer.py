@@ -9,7 +9,8 @@ from reduction import validate_step
 import sans_reduction_steps
 import hfir_load
 import absolute_scale
-import mantidsimple
+import mantid.simpleapi as api
+from mantid import simpleapi
 import warnings
 import inspect
 
@@ -91,10 +92,10 @@ class SANSReducer(Reducer):
         self._mask = sans_reduction_steps.Mask()
         
         # Default dark current subtracter class
-        self._dark_current_subtracter_class = mantidsimple.HFIRDarkCurrentSubtraction
+        self._dark_current_subtracter_class = api.HFIRDarkCurrentSubtraction
         
         # Resolution calculator
-        self._resolution_calculator = mantidsimple.ReactorSANSResolution
+        self._resolution_calculator = api.ReactorSANSResolution
         
         # Sample geometry correction
         self.geometry_correcter = None

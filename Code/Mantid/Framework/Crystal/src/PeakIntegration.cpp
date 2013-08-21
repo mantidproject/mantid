@@ -110,7 +110,7 @@ namespace Mantid
 
 
       //To get the workspace index from the detector ID
-      pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(false);//true);
+      pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap();
 
       //Sort events if EventWorkspace so it will run in parallel
       EventWorkspace_const_sptr inWS = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );

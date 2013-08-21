@@ -132,16 +132,16 @@ namespace Mantid
         for(invstrItr=investigators.begin();invstrItr!=investigators.end();++invstrItr)
         {
           std::string firstname;std::string lastname;std::string name;
-          if((*invstrItr)->facilityUser)
+          if((*invstrItr)->ns1__facilityUser_)
           {
 
-            if((*invstrItr)->facilityUser->firstName)
+            if((*invstrItr)->ns1__facilityUser_->firstName)
             {
-              firstname = *(*invstrItr)->facilityUser->firstName;
+              firstname = *(*invstrItr)->ns1__facilityUser_->firstName;
             }
-            if((*invstrItr)->facilityUser->lastName)
+            if((*invstrItr)->ns1__facilityUser_->lastName)
             {
-              lastname = *(*invstrItr)->facilityUser->lastName;
+              lastname = *(*invstrItr)->ns1__facilityUser_->lastName;
             }
             name = firstname+" "+ lastname;
           }

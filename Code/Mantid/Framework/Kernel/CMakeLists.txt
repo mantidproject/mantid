@@ -20,6 +20,7 @@ set ( SRC_FILES
 	src/EnvironmentHistory.cpp
 	src/Exception.cpp
 	src/FacilityInfo.cpp
+	src/FileDescriptor.cpp
 	src/FileValidator.cpp
 	src/FilterChannel.cpp
 	src/FilteredTimeSeriesProperty.cpp
@@ -40,10 +41,11 @@ set ( SRC_FILES
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
-	src/Material.cpp
 	src/MaskedProperty.cpp
+	src/Material.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Math/Distributions/HermitePolynomials.cpp
+	src/Math/Optimization/SLSQPMinimizer.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
 	src/Memory.cpp
@@ -52,6 +54,7 @@ set ( SRC_FILES
 	src/MultiFileValidator.cpp
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
+	src/NexusDescriptor.cpp
 	src/NexusTestHelper.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
@@ -135,6 +138,7 @@ set ( INC_FILES
 	inc/MantidKernel/Exception.h
 	inc/MantidKernel/FacilityInfo.h
 	inc/MantidKernel/Fast_Exponential.h
+	inc/MantidKernel/FileDescriptor.h
 	inc/MantidKernel/FileValidator.h
 	inc/MantidKernel/FilterChannel.h
 	inc/MantidKernel/FilteredTimeSeriesProperty.h
@@ -161,10 +165,11 @@ set ( INC_FILES
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
-	inc/MantidKernel/Material.h
 	inc/MantidKernel/MaskedProperty.h
+	inc/MantidKernel/Material.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
+	inc/MantidKernel/Math/Optimization/SLSQPMinimizer.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
 	inc/MantidKernel/Memory.h
@@ -175,6 +180,7 @@ set ( INC_FILES
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
 	inc/MantidKernel/NDRandomNumberGenerator.h
 	inc/MantidKernel/NeutronAtom.h
+	inc/MantidKernel/NexusDescriptor.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/ParaViewVersion.h
@@ -251,6 +257,7 @@ set ( TEST_FILES
 	EnabledWhenPropertyTest.h
 	EnvironmentHistoryTest.h
 	FacilitiesTest.h
+	FileDescriptorTest.h
 	FileValidatorTest.h
 	FilterChannelTest.h
 	FilteredTimeSeriesPropertyTest.h
@@ -272,8 +279,8 @@ set ( TEST_FILES
 	MagneticFormFactorTableTest.h
 	MagneticIonTest.h
 	MandatoryValidatorTest.h
-	MaterialTest.h
 	MaskedPropertyTest.h
+	MaterialTest.h
 	MatrixPropertyTest.h
 	MatrixTest.h
 	MemoryTest.h
@@ -284,6 +291,7 @@ set ( TEST_FILES
 	NDPseudoRandomNumberGeneratorTest.h
 	NDRandomNumberGeneratorTest.h
 	NeutronAtomTest.h
+	NexusDescriptorTest.h
 	NullValidatorTest.h
 	ProgressBaseTest.h
 	ProgressTextTest.h
@@ -296,6 +304,7 @@ set ( TEST_FILES
 	RebinHistogramTest.h
 	RebinParamsValidatorTest.h
 	RegexStringsTest.h
+	SLSQPMinimizerTest.h
 	SobolSequenceTest.h
 	StartsWithValidatorTest.h
 	StatisticsTest.h
@@ -357,6 +366,7 @@ add_subdirectory ( test )
 # determine it from git and the file already exists. This makes sure the 
 # version number is correct when building off the source tarball
 
+include (PatchVersionNumber)
 if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in
                    ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp

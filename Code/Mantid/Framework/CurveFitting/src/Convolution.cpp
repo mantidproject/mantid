@@ -50,7 +50,8 @@ DECLARE_FUNCTION(Convolution)
 Convolution::Convolution()
 :m_resolution(NULL),m_resolutionSize(0)
 {
-  this->setAttributeValue("NumDeriv", true );
+  declareAttribute("FixResolution", Attribute(true));
+  setAttributeValue("NumDeriv", true );
 }
 
 /// Destructor
@@ -65,9 +66,30 @@ void Convolution::init()
 
 void Convolution::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
-  calNumericalDeriv(domain,jacobian);
+    calNumericalDeriv(domain,jacobian);
 }
 
+void Convolution::setAttribute(const std::string &attName, const IFunction::Attribute &att)
+{
+    // if the resolution is there fix/unfix its parameters according to the attribute value
+    if ( attName == "FixResolution" && nFunctions() > 0 )
+    {
+        bool fixRes = att.asBool();
+        auto &f = *getFunction(0);
+        for(size_t i = 0; i < f.nParams(); i++)
+        {
+            if ( fixRes )
+            {
+                f.fix(i);
+            }
+            else
+            {
+                f.unfix(i);
+            }
+        }
+    }
+    CompositeFunction::setAttribute( attName, att );
+}
 
 /**
  * Calculates convolution of the two member functions. 
@@ -92,10 +114,7 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
   const double *xValues = d1d->getPointerAt(0);
   double *out = values.getPointerToCalculated(0);
 
-  if (m_resolutionSize != nData)
-  {
-    refreshResolution();
-  }
+  refreshResolution();
 
   gsl_fft_real_workspace * workspace = gsl_fft_real_workspace_alloc(nData);
   gsl_fft_real_wavetable * wavetable = gsl_fft_real_wavetable_alloc(nData);
@@ -211,9 +230,6 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
   HalfComplex res(m_resolution,nData);
   HalfComplex fun(out,nData);
 
-  //double df = nData > 1? 1./(xValues[nData-1] - xValues[0]): 1.;
-  //std::cerr<<"df="<<df<<'\n';
-  //std::ofstream ftrans("trans.txt");
   for(size_t i = 0; i <= res.size(); i++)
   {
     // complex multiplication
@@ -222,7 +238,6 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
     double fun_r = fun.real(i);
     double fun_i = fun.imag(i);
     fun.set(i,res_r*fun_r - res_i*fun_i,res_r*fun_i + res_i*fun_r);
-    //ftrans<<df*i<<' '<<fun.real(i)<<' '<<fun.imag(i)<<'\n';
   }
 
   gsl_fft_halfcomplex_wavetable * wavetable_r = gsl_fft_halfcomplex_wavetable_alloc(nData);
@@ -255,7 +270,7 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
  */
 size_t Convolution::addFunction(IFunction_sptr f)
 {
-  if (nFunctions() == 0)
+  if (nFunctions() == 0 && getAttribute("FixResolution").asBool() )
   {
     for(size_t i=0;i<f->nParams();i++)
     {
@@ -292,42 +307,29 @@ size_t Convolution::addFunction(IFunction_sptr f)
 /// Deletes and zeroes pointer m_resolution forsing function(...) to recalculate the resolution function
 void Convolution::refreshResolution()const
 {
+  // refresh when calculation for the first time
+  bool needRefreshing = m_resolutionSize == 0;
+  if ( !needRefreshing )
+  {
+      // if resolution has active parameters always refresh
+      IFunction &res = *getFunction(0);
+      for(size_t i = 0; i < res.nParams(); ++i)
+      {
+          if ( res.isActive(i) )
+          {
+              needRefreshing = true;
+              break;
+          }
+      }
+  }
+  if ( !needRefreshing ) return;
+  // delete fourier transform of the resolution to force its recalculation
   if (m_resolution) delete[] m_resolution;
   m_resolution = NULL;
   m_resolutionSize = 0;
 }
 
-/// Writes itself into a string
-std::string Convolution::asString()const
-{
-  if (nFunctions() != 2)
-  {
-    //throw std::runtime_error("Convolution function is incomplete");
-    return CompositeFunction::asString();
-  }
-  std::ostringstream ostr;
-  ostr<<"composite=Convolution;";
-  IFunction_sptr res = getFunction(0);
-  IFunction_sptr fun = getFunction(1);
-  if (!res || !fun)
-  {
-    throw std::runtime_error("IFunction expected but function of another type found");
-  }
-  bool isCompRes = boost::dynamic_pointer_cast<CompositeFunction>(res) != 0;
-  bool isCompFun = boost::dynamic_pointer_cast<CompositeFunction>(fun) != 0;
-
-  if (isCompRes) ostr << '(';
-  ostr << res->asString() ;
-  if (isCompRes) ostr << ')';
-  ostr << ';';
-
-  if (isCompFun) ostr << '(';
-  ostr << fun->asString() ;
-  if (isCompFun) ostr << ')';
-
-  return ostr.str();
-}
-
 
 } // namespace CurveFitting
 } // namespace Mantid
+

@@ -34,6 +34,7 @@
 
 */
 
+// cppcheck-suppress class_X_Y
 class VTK_EXPORT vtkPeaksSource : public vtkPolyDataAlgorithm
 {
 public:

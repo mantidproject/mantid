@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="EMU" valid-from   ="1900-01-01 23:59:59"
+<instrument name="EMU" valid-from   ="1900-01-31 23:59:01"
                        valid-to     ="2009-12-31 23:59:59"
 		       last-modified="2011-01-07 00:00:00">
   <defaults>

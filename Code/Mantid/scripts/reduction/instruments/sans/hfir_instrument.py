@@ -1,5 +1,5 @@
 from reduction import Instrument
-import MantidFramework
+import mantid
 
 class HFIRSANS(Instrument):
     """
@@ -16,9 +16,9 @@ class HFIRSANS(Instrument):
 
     def get_incident_mon(self, workspace, option):
         if option == HFIRSANS.NORMALIZATION_TIME:
-            return int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("default-incident-timer-spectrum")[0])
+            return int(mantid.mtd[workspace].getInstrument().getNumberParameter("default-incident-timer-spectrum")[0])
         elif option == HFIRSANS.NORMALIZATION_MONITOR:
-            return int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("default-incident-monitor-spectrum")[0])
+            return int(mantid.mtd[workspace].getInstrument().getNumberParameter("default-incident-monitor-spectrum")[0])
         return -1
     
     def get_default_beam_center(self, workspace=None):
@@ -97,12 +97,12 @@ class HFIRSANS(Instrument):
             @param workspace: workspace to extract the pixel information from
         """
         ## Number of detector pixels in X
-        nx_pixels = int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        nx_pixels = int(mantid.mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
         ## Number of detector pixels in Y
-        ny_pixels = int(MantidFramework.mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        ny_pixels = int(mantid.mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
         ## Pixel size in mm
-        pixel_size_x = MantidFramework.mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
-        pixel_size_y = MantidFramework.mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
+        pixel_size_x = mantid.mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = mantid.mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
 
         return nx_pixels, ny_pixels, pixel_size_x, pixel_size_y
         
@@ -120,8 +120,8 @@ class HFIRSANS(Instrument):
             @param workspace: workspace to get the aperture distance from
         """
         try:
-            nguides = MantidFramework.mtd[workspace].getRun().getProperty("number-of-guides").value
-            apertures_lst = MantidFramework.mtd[workspace].getInstrument().getStringParameter("aperture-distances")[0]
+            nguides = mantid.mtd[workspace].run().getProperty("number-of-guides").value
+            apertures_lst = mantid.mtd[workspace].getInstrument().getStringParameter("aperture-distances")[0]
             apertures = apertures_lst.split(',')
             # Note that they are in reverse order, the first item is for 8 guides
             # and the last item is for 0 guide.

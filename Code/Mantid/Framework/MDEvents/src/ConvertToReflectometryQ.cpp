@@ -36,6 +36,7 @@ You will usually want to rebin using [[BinMD]] or [[SliceMD]] after transformati
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -44,6 +45,7 @@ You will usually want to rebin using [[BinMD]] or [[SliceMD]] after transformati
 #include "MantidMDEvents/ReflectometryTransformKiKf.h"
 #include "MantidMDEvents/ReflectometryTransformP.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -240,7 +242,23 @@ namespace MDEvents
 
     setPropertySettings("IncidentTheta", new Kernel::EnabledWhenProperty("OverrideIncidentTheta", IS_EQUAL_TO, "1") );
 
-    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
+    declareProperty(new Kernel::PropertyWithValue<bool>("OutputAsMDWorkspace", true), "Generate the output as a MDWorkspace, otherwise a Workspace2D is returned.");
+
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("OutputWorkspace","",Direction::Output), "Output 2D Workspace.");
+
+
+    declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQx", 100), "The number of bins along the qx axis. Optional and only applies to 2D workspaces. Defaults to 100.");
+    declareProperty(new Kernel::PropertyWithValue<int>("NumberBinsQz", 100), "The number of bins along the qx axis. Optional and only applies to 2D workspaces. Defaults to 100.");
+    setPropertySettings("NumberBinsQx", new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT) );
+    setPropertySettings("NumberBinsQz", new EnabledWhenProperty("OutputAsMDWorkspace", IS_NOT_DEFAULT) );
+
+    // Create box controller properties.
+    this->initBoxControllerProps("2,2", 50, 10);
+
+    // Only show box controller properties when a md workspace is returned.
+    setPropertySettings("SplitInto", new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT) );
+    setPropertySettings("SplitThreshold", new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT) );
+    setPropertySettings("MaxRecursionDepth", new EnabledWhenProperty("OutputAsMDWorkspace", IS_DEFAULT) );
   }
 
   //----------------------------------------------------------------------------------------------
@@ -249,10 +267,13 @@ namespace MDEvents
   void ConvertToReflectometryQ::exec()
   {
     Mantid::API::MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
-    bool bUseOwnIncidentTheta = getProperty("OverrideIncidentTheta"); 
-    std::vector<double> extents = getProperty("Extents");
+    const bool bUseOwnIncidentTheta = getProperty("OverrideIncidentTheta");
+    const std::vector<double> extents = getProperty("Extents");
     double incidentTheta = getProperty("IncidentTheta");
-    std::string outputDimensions = getPropertyValue("OutputDimensions");
+    const std::string outputDimensions = getPropertyValue("OutputDimensions");
+    const bool outputAsMDWorkspace = getProperty("OutputAsMDWorkspace");
+    const int numberOfBinsQx = getProperty("NumberBinsQx");
+    const int numberOfBinsQz = getProperty("NumberBinsQz");
 
     //Validation of input parameters
     checkInputWorkspace(inputWs);
@@ -286,29 +307,42 @@ namespace MDEvents
     const double dim1min = extents[2];
     const double dim1max = extents[3];
     
-    typedef boost::shared_ptr<ReflectometryMDTransform> ReflectometryMDTransform_sptr;
+    BoxController_sptr bc = boost::make_shared<BoxController>(2);
+    this->setBoxController(bc);
 
     //Select the transform strategy.
-    ReflectometryMDTransform_sptr transform;
+    ReflectometryTransform_sptr transform;
+
     if(outputDimensions == qSpaceTransform())
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformQxQz(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = boost::make_shared<ReflectometryTransformQxQz>(dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx, numberOfBinsQz);
     }
     else if(outputDimensions == pSpaceTransform())
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformP(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = boost::make_shared<ReflectometryTransformP>(dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx, numberOfBinsQz);
     }
     else
     {
-      transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta));
+      transform = boost::make_shared<ReflectometryTransformKiKf>(dim0min, dim0max, dim1min, dim1max, incidentTheta, numberOfBinsQx, numberOfBinsQz);
     }
 
-    auto outputWS = transform->execute(inputWs);
+    IMDWorkspace_sptr outputWS;
 
-    // Copy ExperimentInfo (instrument, run, sample) to the output WS
-    ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
-    uint16_t runIndex = outputWS->addExperimentInfo(ei);
-    UNUSED_ARG(runIndex);
+    if(outputAsMDWorkspace)
+    {
+      auto outputMDWS = transform->executeMD(inputWs, bc);
+
+      // Copy ExperimentInfo (instrument, run, sample) to the output WS
+      ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
+      outputMDWS->addExperimentInfo(ei);
+      outputWS = outputMDWS;
+    }
+    else
+    {
+      auto outputWS2D = transform->execute(inputWs);
+      outputWS2D->copyExperimentInfoFrom(inputWs.get());
+      outputWS = outputWS2D;
+    }
 
     //Execute the transform and bind to the output.
     setProperty("OutputWorkspace", outputWS);

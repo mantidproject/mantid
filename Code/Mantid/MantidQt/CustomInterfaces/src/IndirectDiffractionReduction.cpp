@@ -49,15 +49,16 @@ void IndirectDiffractionReduction::demonRun()
 {
   if ( !validateDemon() )
   {
-    showInformationBox("Input invalid.");
+    showInformationBox("Invalid invalid. Incorrect entries marked with red star.");
     return;
   }
 
   QString instName=m_uiForm.cbInst->currentText();
-  if ( instName != "OSIRIS" )
+  QString mode = m_uiForm.cbReflection->currentText();
+  if ( mode == "diffspec" )
   {
     // MSGDiffractionReduction
-    QString pfile = instName + "_diffraction_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml";
+    QString pfile = instName + "_diffraction_" + mode + "_Parameters.xml";
     QString pyInput =
       "from IndirectDiffractionReduction import MSGDiffractionReducer\n"
       "reducer = MSGDiffractionReducer()\n"
@@ -125,8 +126,7 @@ void IndirectDiffractionReduction::demonRun()
     }
 
     QString pyInput = 
-      "from MantidFramework import *\n"
-      "from mantidsimple import *\n"
+      "from mantid.simpleapi import *\n"
       "OSIRISDiffractionReduction("
       "Sample=r'" + m_uiForm.dem_rawFiles->getFilenames().join(", ") + "', "
       "Vanadium=r'" + m_uiForm.dem_vanadiumFile->getFilenames().join(", ") + "', "
@@ -137,14 +137,14 @@ void IndirectDiffractionReduction::demonRun()
     
     if ( m_uiForm.ckGSS->isChecked() )
     {
-      pyInput += "SaveGSS(" + tofWsName + ", " + tofWsName + " + '.gss')\n";
+      pyInput += "SaveGSS(InputWorkspace=" + tofWsName + ", Filename=" + tofWsName + " + '.gss')\n";
     }
 
     if ( m_uiForm.ckNexus->isChecked() ) 
-      pyInput += "SaveNexusProcessed(" + drangeWsName + ", " + drangeWsName + "+'.nxs')\n";
+      pyInput += "SaveNexusProcessed(InputWorkspace=" + drangeWsName + ", Filename=" + drangeWsName + "+'.nxs')\n";
 
     if ( m_uiForm.ckAscii->isChecked() ) 
-      pyInput += "SaveAscii(" + drangeWsName + ", " + drangeWsName + " +'.dat')\n";
+      pyInput += "SaveAscii(InputWorkspace=" + drangeWsName + ", Filename=" + drangeWsName + " +'.dat')\n";
 
     if ( m_uiForm.cbPlotType->currentText() == "Spectra" )
     {
@@ -190,43 +190,19 @@ void IndirectDiffractionReduction::instrumentSelected(int)
         }
       }
     }
-
-    if ( m_uiForm.cbReflection->count() > 1 )
-    {
-      m_uiForm.swReflections->setCurrentIndex(0);
-    }
-    else
-    {
-      m_uiForm.swReflections->setCurrentIndex(1);
-    }
-  }
-  else
-  {
-    m_uiForm.swReflections->setCurrentIndex(1);
   }
 
   reflectionSelected(m_uiForm.cbReflection->currentIndex());
   m_uiForm.cbReflection->blockSignals(false);
 
-  pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
-      "print getStringProperty('__empty_" + m_uiForm.cbInst->currentText() + "', 'Workflow.Diffraction.Correction')\n";
-
-  pyOutput = runPythonCode(pyInput).trimmed();
-
-  if ( pyOutput == "Vanadium" )
-  {
-    m_uiForm.swVanadium->setCurrentIndex(0);
-  }
-  else
-  {
-    m_uiForm.swVanadium->setCurrentIndex(1);
-  }
-
-  // Turn off summing files options for OSIRIS.
+  // Disable summing file options for OSIRIS.
   if ( m_uiForm.cbInst->currentText() != "OSIRIS" )
     m_uiForm.dem_ckSumFiles->setEnabled(true);
   else
+  {
+    m_uiForm.dem_ckSumFiles->setChecked(true);
     m_uiForm.dem_ckSumFiles->setEnabled(false);
+  }
 
 }
 
@@ -252,6 +228,23 @@ void IndirectDiffractionReduction::reflectionSelected(int)
     m_uiForm.set_leSpecMin->setText(values[1]);
     m_uiForm.set_leSpecMax->setText(values[2]);
   }
+
+  // Determine whether we need vanadium input
+  pyInput = "from IndirectDiffractionReduction import getStringProperty\n"
+      "print getStringProperty('__empty_" + m_uiForm.cbInst->currentText() + "', 'Workflow.Diffraction.Correction')\n";
+
+  pyOutput = runPythonCode(pyInput).trimmed();
+
+  if ( pyOutput == "Vanadium" )
+  {
+    m_uiForm.swVanadium->setCurrentIndex(0);
+  }
+  else
+  {
+    m_uiForm.swVanadium->setCurrentIndex(1);
+  }
+
+
 }
 
 void IndirectDiffractionReduction::openDirectoryDialog()
@@ -289,6 +282,8 @@ void IndirectDiffractionReduction::initLayout()
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
 
   loadSettings();
+
+  validateDemon();
 }
 
 void IndirectDiffractionReduction::initLocalPython()
@@ -323,42 +318,49 @@ void IndirectDiffractionReduction::saveSettings()
 
 bool IndirectDiffractionReduction::validateDemon()
 {
-  bool valid = true;
+  bool rawValid = true;
+  if ( ! m_uiForm.dem_rawFiles->isValid() ) { rawValid = false; }
 
-  if ( ! m_uiForm.dem_rawFiles->isValid() ) { valid = false; }
+  QString rebStartTxt = m_uiForm.leRebinStart->text();
+  QString rebStepTxt = m_uiForm.leRebinWidth->text();
+  QString rebEndTxt = m_uiForm.leRebinEnd->text();
 
-  QString rebin = m_uiForm.leRebinStart->text() + "," + m_uiForm.leRebinEnd->text() +
-    "," + m_uiForm.leRebinEnd->text();
-  if ( rebin != ",," )
+  bool rebinValid = true;
+  // Need all or none
+  if(rebStartTxt.isEmpty() && rebStepTxt.isEmpty() && rebEndTxt.isEmpty() )
   {
-    // validate rebin parameters
-    if ( m_uiForm.leRebinStart->text() == "" )
-    {
-      valid = false;
-      m_uiForm.valRebinStart->setText("*");
-    } else { m_uiForm.valRebinStart->setText(""); }
+    rebinValid = true;
+    m_uiForm.valRebinStart->setText("");
+    m_uiForm.valRebinWidth->setText("");
+    m_uiForm.valRebinEnd->setText("");
+  }
+  else
+  {
+#define CHECK_VALID(text,validator)\
+    if(text.isEmpty())\
+    {\
+      rebinValid = false;\
+      validator->setText("*");\
+    }\
+    else\
+    {\
+      rebinValid = true;\
+      validator->setText("");\
+    }
 
-    if ( m_uiForm.leRebinWidth->text() == "" )
-    {
-      valid = false;
-      m_uiForm.valRebinWidth->setText("*");
-    } else { m_uiForm.valRebinWidth->setText(""); }
+    CHECK_VALID(rebStartTxt,m_uiForm.valRebinStart);
+    CHECK_VALID(rebStepTxt,m_uiForm.valRebinWidth);
+    CHECK_VALID(rebEndTxt,m_uiForm.valRebinEnd);
 
-    if ( m_uiForm.leRebinEnd->text() == "" )
+    if(rebinValid && rebStartTxt.toDouble() > rebEndTxt.toDouble())
     {
-      valid = false;
-      m_uiForm.valRebinEnd->setText("*");
-    } else { m_uiForm.valRebinEnd->setText(""); }
-
-    if ( m_uiForm.leRebinStart->text().toDouble() > m_uiForm.leRebinEnd->text().toDouble() )
-    {
-      valid = false;
+      rebinValid = false;
       m_uiForm.valRebinStart->setText("*");
       m_uiForm.valRebinEnd->setText("*");
     }
   }
 
-  return valid;
+  return rawValid && rebinValid;
 }
 
 }

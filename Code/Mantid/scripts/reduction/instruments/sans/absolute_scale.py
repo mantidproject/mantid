@@ -13,7 +13,7 @@ from reduction import validate_step
 from reduction import find_data
 
 # Mantid imports
-from mantidsimple import *
+from mantid.simpleapi import *
 
 class BaseAbsoluteScale(ReductionStep):
     """
@@ -71,7 +71,7 @@ class AbsoluteScale(BaseAbsoluteScale):
             self._compute_scaling_factor(reducer)
                             
         if workspace is not None:
-            Scale(workspace, workspace, self._scaling_factor, 'Multiply')
+            Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=self._scaling_factor, Operation='Multiply')
         
         return "Absolute scale computed using direct beam: %6.4g" % self._scaling_factor
 
@@ -105,16 +105,16 @@ class AbsoluteScale(BaseAbsoluteScale):
         if monitor_id == reducer.NORMALIZATION_MONITOR:         
             monitor /= 1.0e8
         
-        if mtd[data_file_ws].getRun().hasProperty("sample_detector_distance"):
-            sdd = mtd[data_file_ws].getRun().getProperty("sample_detector_distance").value
+        if mtd[data_file_ws].run().hasProperty("sample_detector_distance"):
+            sdd = mtd[data_file_ws].run().getProperty("sample_detector_distance").value
         else:
             raise RuntimeError, "AbsoluteScale could not read the sample-detector-distance"
         
         if self._beamstop_diameter is not None:
             beam_diameter = self._beamstop_diameter
         else:
-            if mtd[data_file_ws].getRun().hasProperty("beam-diameter"):
-                beam_diameter = mtd[data_file_ws].getRun().getProperty("beam-diameter").value
+            if mtd[data_file_ws].run().hasProperty("beam-diameter"):
+                beam_diameter = mtd[data_file_ws].run().getProperty("beam-diameter").value
             else:
                 raise RuntimeError, "AbsoluteScale could not read the beam radius and none was provided"        
         
@@ -129,8 +129,7 @@ class AbsoluteScale(BaseAbsoluteScale):
                    '<radius val="%12.10f" />' % (beam_diameter/2000.0) + \
                  '</infinite-cylinder>\n'
                  
-        det_finder = FindDetectorsInShape(Workspace=data_file_ws, ShapeXML=cylXML)
-        det_list = det_finder.getPropertyValue("DetectorList")
+        det_list = FindDetectorsInShape(Workspace=data_file_ws, ShapeXML=cylXML)
         det_count_ws = "__absolute_scale"
         GroupDetectors(InputWorkspace=data_file_ws,  OutputWorkspace=det_count_ws,  DetectorList=det_list, KeepUngroupedSpectra="0")
         det_count = mtd[det_count_ws].readY(0)[0]
@@ -145,8 +144,8 @@ class AbsoluteScale(BaseAbsoluteScale):
         # (detector count rate)/(attenuator transmission)/(monitor rate)*(pixel size/SDD)**2
         self._scaling_factor = 1.0/(det_count/self._attenuator_trans/(monitor)*(pixel_size/sdd)*(pixel_size/sdd))
 
-        mtd.deleteWorkspace(data_file_ws)
-        mtd.deleteWorkspace(det_count_ws)
+        DeleteWorkspace(data_file_ws)
+        DeleteWorkspace(det_count_ws)
         
         
 

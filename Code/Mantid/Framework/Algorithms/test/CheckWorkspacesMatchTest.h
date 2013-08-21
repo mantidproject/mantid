@@ -602,7 +602,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Instrument ParameterMap mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Instrument ParameterMap mismatch (differences in ordering ignored)" );
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
@@ -741,6 +741,7 @@ public:
 
   void test_Input_With_Two_Groups_When_Single_Item_Checking_Is_Disabled()
   {
+    Mantid::API::AnalysisDataService::Instance().clear();
     // Create a group
     const std::string groupOneName("TestGroupOne");
     WorkspaceGroup_sptr groupOne = WorkspaceCreationHelper::CreateWorkspaceGroup(2, 2, 2, groupOneName);
@@ -804,9 +805,9 @@ private:
 
   void cleanupGroup(const WorkspaceGroup_sptr group)
   {
-    group->deepRemoveAll();
+    //group->deepRemoveAll();
     const std::string name = group->getName();
-    Mantid::API::AnalysisDataService::Instance().remove(name);
+    Mantid::API::AnalysisDataService::Instance().deepRemoveGroup(name);
   }
 
 private:

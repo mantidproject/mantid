@@ -370,6 +370,7 @@ public:
 
   void testList()
   {
+    AnalysisDataService::Instance().clear();
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "MUSR15189,15190,15191.nxs");
@@ -485,13 +486,13 @@ public:
     TS_ASSERT_EQUALS(output->getNumberOfEntries(),2);
     MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_MUSR00015191_MUSR00015192_1");
     TS_ASSERT(ws1);
-    TS_ASSERT_DELTA(ws1->readY(0)[0], 28.0, 1e-12);
-    TS_ASSERT_DELTA(ws1->readY(6)[4], 2.0, 1e-12);
+    TS_ASSERT_DELTA(ws1->readY(0)[0], 16.0, 1e-12);
+    TS_ASSERT_DELTA(ws1->readY(6)[4], 1.0, 1e-12);
 
     MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_MUSR00015191_MUSR00015192_2");
     TS_ASSERT(ws2);
-    TS_ASSERT_DELTA(ws2->readY(0)[5], 1.0, 1e-12);
-    TS_ASSERT_DELTA(ws2->readY(8)[0], 3.0, 1e-12);
+    TS_ASSERT_DELTA(ws2->readY(0)[5], 2.0, 1e-12);
+    TS_ASSERT_DELTA(ws2->readY(8)[0], 6.0, 1e-12);
 
     removeGroupFromADS(output);
   }
@@ -573,5 +574,35 @@ public:
     AnalysisDataService::Instance().remove("LOQ48127");
   }
 };
+
+
+//-------------------------------------------------------------------------------------------------
+// Performance test
+//
+// This simple checks how long it takes to run the search for a Loader, which is done when
+// the file property is set
+//-------------------------------------------------------------------------------------------------
+
+class LoadTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static LoadTestPerformance *createSuite() { return new LoadTestPerformance(); }
+  static void destroySuite( LoadTestPerformance *suite ) { delete suite; }
+
+  void test_find_loader_performance()
+  {
+    const size_t ntimes(5);
+
+    for(size_t i = 0; i < ntimes; ++i)
+    {
+      Mantid::DataHandling::Load loader;
+      loader.initialize();
+      loader.setPropertyValue("Filename", "CNCS_7860_event.nxs");
+    }
+  }
+};
+
 
 #endif /*LOADTEST_H_*/

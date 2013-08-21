@@ -33,6 +33,10 @@ namespace DataObjects
         std::set<std::size_t> getMaskedWkspIndices() const;
         virtual const std::string id() const;
 
+    protected:
+        /// Return human-readable string
+        virtual const std::string toString() const;
+
     private:
         /// Private copy constructor. NO COPY ALLOWED
         MaskWorkspace(const MaskWorkspace&);

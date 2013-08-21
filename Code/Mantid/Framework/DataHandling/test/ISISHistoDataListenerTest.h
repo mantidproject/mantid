@@ -9,6 +9,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidTestHelpers/FacilityHelper.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/Thread.h>
@@ -36,6 +38,8 @@ public:
 // cannot make it work for linux
 #ifdef _WIN32
     //system("pause");
+    FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+
     FakeISISHistoDAE dae;
     dae.initialize();
     dae.setProperty("NPeriods",1);
@@ -122,6 +126,8 @@ public:
   {
 
 #ifdef _WIN32
+    FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+
     FakeISISHistoDAE dae;
     dae.initialize();
     dae.setProperty("NPeriods",2);

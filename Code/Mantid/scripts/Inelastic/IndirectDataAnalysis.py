@@ -35,7 +35,98 @@ def trimData(nSpec, vals, min, max):
 # ConvFit
 ##############################################################################
 
-def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
+def getConvFitOption(ftype, bgd, Verbose):
+    if ftype[:5] == 'Delta':
+        delta = True
+        lor = ftype[5:6]
+    else:
+        delta = False
+        lor = ftype[:1]
+    options = [bgd, delta, int(lor)]
+    if Verbose:
+        logger.notice('Fit type : Delta = ' + str(options[1]) + ' ; Lorentzians = ' + str(options[2]))
+        logger.notice('Background type : ' + options[0])
+    return options
+
+##############################################################################
+
+def createConvFitFun(options, par, file):
+    bgd_fun = 'name=LinearBackground,A0='
+    if options[0] == 'FixF':
+        bgd_fun = bgd_fun +str(par[0])+',A1=0,ties=(A0='+str(par[0])+',A1=0.0)'
+    if options[0] == 'FitF':
+        bgd_fun = bgd_fun +str(par[0])+',A1=0,ties=(A1=0.0)'
+    if options[0] == 'FitL':
+        bgd_fun = bgd_fun +str(par[0])+',A1='+str(par[1])
+    if options[1]:
+        ip = 3
+    else:
+        ip = 2
+    pk_1 = '(composite=Convolution;name=Resolution, FileName="'+file+'"'
+    if  options[2] >= 1:
+        lor_fun = 'name=Lorentzian,Amplitude='+str(par[ip])+',PeakCentre='+str(par[ip+1])+',HWHM='+str(par[ip+2])
+    if options[2] == 2:
+        lor_2 = 'name=Lorentzian,Amplitude='+str(par[ip+3])+',PeakCentre='+str(par[ip+4])+',HWHM='+str(par[ip+5])
+        lor_fun = lor_fun +';'+ lor_2 +';ties=(f0.PeakCentre=f1.PeakCentre)'
+    if options[1]:
+        delta_fun = 'name=DeltaFunction,Amplitude='+str(par[2])
+        lor_fun = delta_fun +';' + lor_fun
+    func = bgd_fun +';'+ pk_1 +';('+ lor_fun +'))'
+    return func
+
+##############################################################################
+
+def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
+    options = getConvFitOption(ftype, bgd[:-2], Verbose)   
+    params = mtd[outNm+'_Parameters']
+    A0 = params.column(1)     #bgd A0 value
+    A1 = params.column(3)     #bgd A1 value
+    if options[1]:
+        ip = 7
+        D1 = params.column(5)      #delta value
+    else:
+        ip = 5
+    if options[2] >= 1:
+        H1 = params.column(ip)        #height1 value
+        C1 = params.column(ip+2)      #centre1 value
+        W1 = params.column(ip+4)      #width1 value
+    if options[2] == 2:
+        H2 = params.column(ip+6)        #height2 value
+        C2 = params.column(ip+8)      #centre2 value
+        W2 = params.column(ip+10)      #width2 value
+    nHist = mtd[inputWS].getNumberHistograms()
+    for i in range(nHist):
+        paras = [A0[i], A1[i]]
+        if options[1]:
+            paras.append(D1[i])
+        if options[2] >= 1:
+            paras.append(H1[i])
+            paras.append(C1[i])
+            paras.append(W1[i])
+        if options[2] == 2:
+            paras.append(H2[i])
+            paras.append(C2[i])
+            paras.append(W2[i])
+        func = createConvFitFun(options, paras, resFile)
+        if Verbose:
+            logger.notice('Fit func : '+func)      
+        fitWS = outNm + '_Result_'
+        fout = fitWS + str(i)
+        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
+        unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
+        unitx.setLabel('Time' , 'ns')
+        RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
+        DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
+        DeleteWorkspace(fitWS+str(i)+'_Parameters')
+        if i == 0:
+            group = fout
+        else:
+            group += ',' + fout
+    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
+
+##############################################################################
+
+def confitParsToWS(Table, Data, specMin=0, specMax=-1):
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
     dataX = createQaxis(Data)
@@ -50,7 +141,7 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
     for spec in range(0,nSpec):
         yCol = (spec*2)+1
         yAxis = cName[(spec*2)+1]
-        if re.search('HWHM$', yAxis) or re.search('Height$', yAxis):
+        if re.search('HWHM$', yAxis) or re.search('Amplitude$', yAxis):
             xAxisVals += dataX
             if (len(names) > 0):
                 names += ","
@@ -69,6 +160,8 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
         VerticalAxisValues=names)
     return outNm
 
+##############################################################################
+
 def confitPlotSeq(inputWS, Plot):
     nhist = mtd[inputWS].getNumberHistograms()
     if ( Plot == 'All' ):
@@ -76,7 +169,7 @@ def confitPlotSeq(inputWS, Plot):
         return    
     plotSpecs = []
     if ( Plot == 'Intensity' ):
-        res = 'Height$'
+        res = 'Amplitude$'
     elif ( Plot == 'HWHM' ):
         res = 'HWHM$'
     for i in range(0,nhist):
@@ -85,9 +178,13 @@ def confitPlotSeq(inputWS, Plot):
             plotSpecs.append(i)
     mp.plotSpectrum(inputWS, plotSpecs, True)
 
-def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bg, specMin, specMax, Verbose):
+##############################################################################
+
+def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, specMax, Verbose):
     StartTime('ConvFit')
     workdir = config['defaultsave.directory']
+    elements = func.split('"')
+    resFile = elements[1]  
     if Verbose:
         logger.notice('Input files : '+str(inputWS))  
     input = inputWS+',i' + str(specMin)
@@ -97,15 +194,16 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bg, specMin, specM
         input += ';'+inputWS+',i'+str(i)
     (instr, run) = getInstrRun(inputWS)
     run_name = instr + run
-    outNm = getWSprefix(inputWS) + 'conv_' + ftype + bg + str(specMin) + "_to_" + str(specMax)
+    outNm = getWSprefix(inputWS) + 'conv_' + ftype + bgd + str(specMin) + "_to_" + str(specMax)
     if Verbose:
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startX, EndX=endX, FitType='Sequential')
-    wsname = confitParsToWS(outNm, inputWS, bg, specMin, specMax)
+    wsname = confitParsToWS(outNm, inputWS, specMin, specMax)
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
+    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose)
     if Save:
-        o_path = os.path.join(workdir, wsname+'.nxs')                   # path name for nxs file
+        o_path = os.path.join(workdir, wsname+'.nxs')                    # path name for nxs file
         if Verbose:
             logger.notice('Creating file : '+o_path)
         SaveNexusProcessed(InputWorkspace=wsname, Filename=o_path)
@@ -184,24 +282,10 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         q1 = np.array(mtd['__eq1'].readX(0))
         i1 = np.array(mtd['__eq1'].readY(0))
         e1 = np.array(mtd['__eq1'].readE(0))
+        Logarithm(InputWorkspace='__eq2', OutputWorkspace='__eq2')
         q2 = np.array(mtd['__eq2'].readX(0))
-        inY = mtd['__eq2'].readY(0)
-        inE = mtd['__eq2'].readE(0)
-        logy = []
-        loge = []
-        for i in range(0, len(inY)):
-            if(inY[i] == 0):
-                ly = math.log(0.000000000001)
-            else:
-                ly = math.log(inY[i])
-            logy.append(ly)
-            if( inY[i]+inE[i] == 0 ):
-                le = math.log(0.000000000001)-ly
-            else:
-                le = math.log(inY[i]+inE[i])-ly
-            loge.append(le)
-        i2 = np.array(logy)
-        e2 = np.array(loge)
+        i2 = np.array(mtd['__eq2'].readY(0))
+        e2 = np.array(mtd['__eq2'].readE(0))
         if (nr == 0):
             CloneWorkspace(InputWorkspace='__eq1', OutputWorkspace='__elf')
             first = getWSprefix(tempWS,root)
@@ -416,7 +500,7 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
 # FuryFit
 ##############################################################################
 
-def furyfitParsToWS(Table, Data, option):
+def getFuryFitOption(option):
     nopt = len(option)
     if nopt == 2:
         npeak = option[0]
@@ -425,7 +509,13 @@ def furyfitParsToWS(Table, Data, option):
         npeak = '2'
         type = 'SE'
     else:
-        logger.notice('Bad option : ' +option)	    
+        error = 'Bad option : ' +option
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    return npeak, type
+
+def furyfitParsToWS(Table, Data, option):
+    npeak, type = getFuryFitOption(option)   
     Q = createQaxis(Data)
     nQ = len(Q)
     ws = mtd[Table]
@@ -481,6 +571,54 @@ def furyfitParsToWS(Table, Data, option):
         VerticalAxisValues=names)
     return wsname
 
+def createFurySeqResFun(ties, par, option):
+    npeak, type = getFuryFitOption(option)   
+    fun = 'name=LinearBackground,A0='+str(par[0])+',A1=0,ties=(A1=0);'
+    if npeak == '1' and type == 'E':
+        fun += 'name=UserFunction,Formula=Intensity*exp(-(x/Tau)),Intensity='+str(par[1])+',Tau='+str(par[2])
+    if npeak == '1' and type == 'S':
+        fun += 'name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity='+str(par[1])+',Tau='+str(par[2])+',Beta='+str(par[3])
+    if ties:
+        fun += ';ties=(f1.Intensity=1-f0.A0)'
+    return fun
+
+def getFurySeqResult(inputWS, outNm, option, Verbose):
+    logger.notice('Option : ' +option)
+    npeak, type = getFuryFitOption(option)   
+    params = mtd[outNm+'_Parameters']
+    A0 = params.column(1)     #bgd value
+    I1 = params.column(5)      #intensity1 value
+    T1 = params.column(7)      #tau1 value
+    if npeak == '1' and type == 'S':
+        B1 = params.column(9)  #beta1 value
+    if npeak == '2':
+        I2 = params.column(9)  #intensity2 value
+        T2 = params.column(11)  #tau2 value
+    nHist = mtd[inputWS].getNumberHistograms()
+    for i in range(nHist):
+        paras = [A0[i], I1[i], T1[i]]
+        if npeak == '1' and type == 'S':
+            paras.append(B1[i])
+        if npeak == '2':
+            paras.append(I2[i])
+            paras.append(T2[i])
+        func = createFurySeqResFun(True, paras, option)
+        if Verbose:
+            logger.notice('Fit func : '+func)  	
+        fitWS = outNm + '_Result_'
+        fout = fitWS + str(i)
+        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
+        unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
+        unitx.setLabel('Time' , 'ns')
+        RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
+        DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
+        DeleteWorkspace(fitWS+str(i)+'_Parameters')
+        if i == 0:
+            group = fout
+        else:
+            group += ',' + fout
+    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
+
 def furyfitPlotSeq(inputWS, Plot):
     nHist = mtd[inputWS].getNumberHistograms()
     if ( Plot == 'All' ):
@@ -513,64 +651,70 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose=False):
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startx, EndX=endx, FitType='Sequential')
-    wsname = furyfitParsToWS(outNm, inputWS, option)
+    fitWS = furyfitParsToWS(outNm, inputWS, option)
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm+"_Parameters")
+    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=inputWS, XMin=startx, XMax=endx)
+    getFurySeqResult(inputWS, outNm, option, Verbose)
     if Save:
-        opath = os.path.join(workdir, wsname+'.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=wsname, Filename=opath)
+        opath = os.path.join(workdir, fitWS+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=fitWS, Filename=opath)
         if Verbose:
             logger.notice('Output file : '+opath)  
     if ( Plot != 'None' ):
-        furyfitPlotSeq(wsname, Plot)
+        furyfitPlotSeq(fitWS, Plot)
     EndTime('FuryFit')
-    return mtd[wsname]
+    return mtd[fitWS]
 
 def furyfitMultParsToWS(Table, Data):
-    dataX = []
-    dataA0v = []
-    dataA0e = []
-    dataY1 = []
-    dataE1 = []
-    dataY2 = []
-    dataE2 = []
-    dataY3 = []
-    dataE3 = []
+#   Q = createQaxis(Data)
+    theta,Q = GetThetaQ(Data)
     ws = mtd[Table+'_Parameters']
     rCount = ws.rowCount()
     cCount = ws.columnCount()
-    logger.notice(' Cols : '+str(cCount))
     nSpec = ( rCount - 1 ) / 5
+    val = ws.column(1)     #value
+    err = ws.column(2)     #error
+    dataX = []
+    A0val = []
+    A0err = []
+    Ival = []
+    Ierr = []
+    Tval = []
+    Terr = []
+    Bval = []
+    Berr = []
     for spec in range(0,nSpec):
-        A0val = 1
-        A0err = 2
-        ival = 5                   #intensity value
-        ierr = 6                   #intensity error
-        tval = 7                   #tau value
-        terr = 8                   #tau error
-        bval = 9                   #beta value
-        bval = 10                   #beta error
-        dataX.append(spec)
-        dataA0v.append(ws.cell(spec,A0val))
-        dataA0e.append(ws.cell(spec,A0err))
-        dataY1.append(ws.cell(spec,ival))
-        dataE1.append(ws.cell(spec,A0err))
-        dataY2.append(ws.cell(spec,tval))
-        dataE2.append(ws.cell(spec,terr))
-        dataY3.append(ws.cell(spec,bval))
-        dataE3.append(ws.cell(spec,berr))
-    suffix = 'S'
+        n1 = spec*5
+        A0 = n1
+        A1 = n1+1
+        int = n1+2                   #intensity value
+        tau = n1+3                   #tau value
+        beta = n1+4                   #beta value
+        dataX.append(Q[spec])
+        A0val.append(val[A0])
+        A0err.append(err[A0])
+        Ival.append(val[int])
+        Ierr.append(err[int])
+        Tval.append(val[tau])
+        Terr.append(err[tau])
+        Bval.append(val[beta])
+        Berr.append(err[beta])
+    nQ = len(dataX)
+    Qa = np.array(dataX)
+    dataY = np.array(A0val)
+    dataE = np.array(A0err)
+    dataY = np.append(dataY,np.array(Ival))
+    dataE = np.append(dataE,np.array(Ierr))
+    dataY = np.append(dataY,np.array(Tval))
+    dataE = np.append(dataE,np.array(Terr))
+    dataY = np.append(dataY,np.array(Bval))
+    dataE = np.append(dataE,np.array(Berr))
+    names = 'A0,Intensity,Tau,Beta'
+    suffix = 'Workspace'
     wsname = Table + '_' + suffix
-    CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY1, DataE=dataE1, 
-        Nspec=1, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
-        VerticalAxisValues='Intensity')
-    CreateWorkspace(OutputWorkspace='__multmp', DataX=dataX, DataY=dataY2, DataE=dataE2, 
-        Nspec=1, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
-        VerticalAxisValues='Tau')
-    ConjoinWorkspaces(InputWorkspace1=wsname, InputWorkspace2='__multmp', CheckOverlapping=False)
-    CreateWorkspace(OutputWorkspace='__multmp', DataX=dataX, DataY=dataY3, DataE=dataE3, 
-        Nspec=1, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
-        VerticalAxisValues='Beta')
-    ConjoinWorkspaces(InputWorkspace1=wsname, InputWorkspace2='__multmp', CheckOverlapping=False)
+    CreateWorkspace(OutputWorkspace=wsname, DataX=Qa, DataY=dataY, DataE=dataE, 
+        Nspec=4, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
+        VerticalAxisValues=names)
     return wsname
 
 def furyfitPlotMult(inputWS, Plot):
@@ -580,47 +724,95 @@ def furyfitPlotMult(inputWS, Plot):
         return
     plotSpecs = []
     if ( Plot == 'Intensity' ):
-        mp.plotSpectrum(inputWS, 0, True)
-    if ( Plot == 'Tau' ):
         mp.plotSpectrum(inputWS, 1, True)
+    if ( Plot == 'Tau' ):
+        mp.plotSpectrum(inputWS, 2, True)
     elif ( Plot == 'Beta' ):
-        mp.plotSpectrum(inputWS, 2, True)   
+        mp.plotSpectrum(inputWS, 3, True)   
 
-def furyfitMult(inputWS, func, startx, endx, Save, Plot):
-    StartTime('FuryFit Mult')
-    Verbose = True
-    workdir = config['defaultsave.directory']
-    input = inputWS+',i0'
+
+def createFuryMultFun(ties = True, function = ''):
+    fun =  '(composite=CompositeFunction,$domains=i;'
+    fun += function
+    if ties:
+        fun += ';ties=(f1.Intensity=1-f0.A0)'
+    fun += ');'
+    return fun
+
+def createFuryMultResFun(ties = True, A0 = 0.02, Intensity = 0.98 ,Tau = 0.025, Beta = 0.8):
+    fun =  '(composite=CompositeFunction,$domains=i;'
+    fun += 'name=LinearBackground,A0='+str(A0)+',A1=0,ties=(A1=0);'
+    fun += 'name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity='+str(Intensity)+',Tau='+str(Tau)+',Beta='+str(Beta)
+    if ties:
+        fun += ';ties=(f1.Intensity=1-f0.A0)'
+    fun += ');'
+    return fun
+
+def getFuryMultResult(inputWS, outNm, function, Verbose):
+    params = mtd[outNm+'_Parameters']
     nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(1,nHist):
-        input += ';'+inputWS+',i'+str(i)
-    outNm = getWSprefix(inputWS) + 'fury'
-    f1 = """(
-        composite=CompositeFunctionMW,Workspace=$WORKSPACE$,WSParam=(WorkspaceIndex=$INDEX$);
-        name=LinearBackground,A0=0,A1=0,ties=(A1=0);
-        name=UserFunction,Formula=Intensity*exp(-(x/Tau)^Beta),Intensity=1.0,Tau=0.1,Beta=1;ties=(f1.Intensity=1-f0.A0)
-    );
-    """.replace('$WORKSPACE$',inputWS)
-    func= 'composite=MultiBG;'
+    for i in range(nHist):
+        j = 5 * i
+#        assert( params.row(j)['Name'][3:] == 'f0.A0' )
+        A0 = params.row(j)['Value']
+        A1 = params.row(j + 1)['Value']
+        Intensity = params.row(j + 2)['Value']
+        Tau = params.row(j + 3)['Value']
+        Beta = params.row(j + 4)['Value']
+        func = createFuryMultResFun(True,  A0, Intensity ,Tau, Beta)
+        if Verbose:
+            logger.notice('Fit func : '+func)  	
+        fitWS = outNm + '_Result_'
+        fout = fitWS + str(i)
+        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
+        unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
+        unitx.setLabel('Time' , 'ns')
+        RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
+        DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
+        DeleteWorkspace(fitWS+str(i)+'_Parameters')
+        if i == 0:
+            group = fout
+        else:
+            group += ',' + fout
+    GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS[:-1])
+
+def furyfitMult(inputWS, function, ftype, startx, endx, Save, Plot, Verbose=False):
+    StartTime('FuryFit Mult')
+    workdir = config['defaultsave.directory']
+    option = ftype[:-2]
+    if Verbose:
+        logger.notice('Option: '+option)  
+        logger.notice('Function: '+function)  
+    nHist = mtd[inputWS].getNumberHistograms()
+    outNm = inputWS[:-3] + 'fury_mult'
+    f1 = createFuryMultFun(True, function)
+    func= 'composite=MultiDomainFunction,NumDeriv=1;'
     ties='ties=('
+    kwargs = {}
     for i in range(0,nHist):
-        func+=f1.replace('$INDEX$',str(i))
+        func+=f1
         if i > 0:
             ties += 'f' + str(i) + '.f1.Beta=f0.f1.Beta'
             if i < nHist-1:
                 ties += ','
+            kwargs['InputWorkspace_' + str(i)] = inputWS
+        kwargs['WorkspaceIndex_' + str(i)] = i
     ties+=')'
     func += ties
-    logger.notice(func)
-    Fit(InputWorkspace=inputWS,Function=func,Output=outNm)
-    wsname = furyfitMultParsToWS(outNm, inputWS)
+    CropWorkspace(InputWorkspace=inputWS, OutputWorkspace=inputWS, XMin=startx, XMax=endx)
+    Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=0,Output=outNm,**kwargs)
+    outWS = furyfitMultParsToWS(outNm, inputWS)
+    getFuryMultResult(inputWS, outNm, function, Verbose)
     if Save:
-        opath = os.path.join(workdir, wsname+'.nxs')					# path name for nxs file
-        SaveNexusProcessed(InputWorkspace=wsname, Filename=opath)
+        opath = os.path.join(workdir, outWS+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
+        rpath = os.path.join(workdir, outNm+'_result.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=outNm+'_result', Filename=rpath)
         if Verbose:
             logger.notice('Output file : '+opath)  
+            logger.notice('Output file : '+rpath)  
     if ( Plot != 'None' ):
-        furyfitPlotMult(wsname, Plot)
+        furyfitPlotMult(outWS, Plot)
     EndTime('FuryFit')
 
 ##############################################################################
@@ -651,11 +843,10 @@ def msdfitPlotSeq(inputWS, xlabel):
     msd_layer.setAxisTitle(mp.Layer.Bottom,xlabel)
     msd_layer.setAxisTitle(mp.Layer.Left,'<u2>')
 
-def msdfitPlotFits(lniWS, fitWS, n):
-    mfit_plot = mp.plotSpectrum(lniWS,n,True)
+def msdfitPlotFits(calcWS, n):
+    mfit_plot = mp.plotSpectrum(calcWS+'_0',[0,1],True)
     mfit_layer = mfit_plot.activeLayer()
     mfit_layer.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
-    mp.mergePlots(mfit_plot,mp.plotSpectrum(fitWS+'_line',n,False))
 
 def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True): 
     StartTime('msdFit')
@@ -698,37 +889,42 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=True):
     msdfitParsToWS(msdWS, x_list)
     nr = 0
     fitWS = mname+'_Fit'
+    calcWS = mname+'_msd_Result'
     a0 = mtd[msdWS+'_a0'].readY(0)
     a1 = mtd[msdWS+'_a1'].readY(0)
     for nr in range(0, nHist):
         inWS = file_list[nr]
         CropWorkspace(InputWorkspace=inWS,OutputWorkspace='__data',XMin=0.95*startX,XMax=1.05*endX)
-        xin = mtd['__data'].readX(0)
-        nxd = len(xin)-1
+        dataX = mtd['__data'].readX(0)
+        nxd = len(dataX)
+        dataX = np.append(dataX,2*dataX[nxd-1]-dataX[nxd-2])
+        dataY = np.array(mtd['__data'].readY(0))
+        dataE = np.array(mtd['__data'].readE(0))
         xd = []
         yd = []
         ed = []
         for n in range(0,nxd):
-            line = a0[nr] - a1[nr]*xin[n]
-            xd.append(xin[n])
+            line = a0[nr] - a1[nr]*dataX[n]
+            xd.append(dataX[n])
             yd.append(line)
             ed.append(0.0)
-        xd.append(xin[nxd])
-        CreateWorkspace(OutputWorkspace='__line', DataX=xd, DataY=yd, DataE=ed,
-		    Nspec=1)
-        if (nr == 0):
-            RenameWorkspace(InputWorkspace='__data',OutputWorkspace=fitWS+'_data')
-            RenameWorkspace(InputWorkspace='__line',OutputWorkspace=fitWS+'_line')
+        xd.append(dataX[nxd])
+        dataX = np.append(dataX,np.array(xd))
+        dataY = np.append(dataY,np.array(yd))
+        dataE = np.append(dataE,np.array(ed))
+        fout = calcWS +'_'+ str(nr)
+        CreateWorkspace(OutputWorkspace=fout, DataX=dataX, DataY=dataY, DataE=dataE,
+            Nspec=2, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues='Data,Calc')
+        if nr == 0:
+            gro = fout
         else:
-            ConjoinWorkspaces(InputWorkspace1=fitWS+'_data', InputWorkspace2='__data', CheckOverlapping=False)
-            ConjoinWorkspaces(InputWorkspace1=fitWS+'_line', InputWorkspace2='__line', CheckOverlapping=False)
-        nr += 1
-        group = fitWS+'_data,'+ fitWS+'_line'
-        GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
+            gro += ',' + fout
         DeleteWorkspace(inWS)
+        DeleteWorkspace('__data')
+    GroupWorkspaces(InputWorkspaces=gro,OutputWorkspace=calcWS)
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
-        msdfitPlotFits(root, fitWS, 0)
+        msdfitPlotFits(calcWS, 0)
     if Save:
         msd_path = os.path.join(workdir, msdWS+'.nxs')					# path name for nxs file
         SaveNexusProcessed(InputWorkspace=msdWS, Filename=msd_path, Title=msdWS)
@@ -833,7 +1029,7 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
     ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
         EMode='Indirect', EFixed=efixed)
     CloneWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw')
-    replace_workspace_axis(CorrectedWS+'_rqw', Q)
+    replace_workspace_axis(CorrectedWS+'_rqw', Q, 'MomentumTransfer')
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
     if canWS != '':
         DeleteWorkspace(CorrectedCanWS)
@@ -873,18 +1069,15 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
             logger.notice('Correction file :'+abs_path)
         LoadNexus(Filename=abs_path, OutputWorkspace='corrections')
         cor_result = applyCorrections(sample, container, 'corrections', Verbose)
+        rws = mtd[cor_result+'_red']
+        outNm= cor_result + '_Result_'
         if Save:
             cred_path = os.path.join(workdir,cor_result+'_red.nxs')
             SaveNexusProcessed(InputWorkspace=cor_result+'_red',Filename=cred_path)
             if Verbose:
                 logger.notice('Output file created : '+cred_path)
-        plot_list = [cor_result+'_red',sample]
-        if ( container != '' ):
-            plot_list.append(container)
-        if (PlotResult != 'None'):
-            plotCorrResult(cor_result+'_rqw',PlotResult)
-        if PlotContrib:
-            plotCorrContrib(plot_list,0)
+        calc_plot = [cor_result+'_red',sample]
+        res_plot = cor_result+'_rqw'
     else:
         if ( container == '' ):
             sys.exit('ERROR *** Invalid options - nothing to do!')
@@ -895,19 +1088,56 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
             Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
             CloneWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw')
             theta,Q = GetThetaQ(sample)
-            replace_workspace_axis(sub_result+'_rqw', Q)
+            replace_workspace_axis(sub_result+'_rqw', Q, 'MomentumTransfer')
             RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
+            rws = mtd[sub_result+'_red']
+            outNm= sub_result + '_Result_'
             if Save:
                 sred_path = os.path.join(workdir,sub_result+'_red.nxs')
                 SaveNexusProcessed(InputWorkspace=sub_result+'_red',Filename=sred_path)
                 if Verbose:
                     logger.notice('Output file created : '+sred_path)
-            plot_list = [sub_result+'_red',sample]
-            if (PlotResult != 'None'):
-                plotCorrResult(sub_result+'_rqw',PlotResult)
-            if PlotContrib:
-                plotCorrContrib(plot_list,0)
+            res_plot = sub_result+'_rqw'
+    if (PlotResult != 'None'):
+        plotCorrResult(res_plot,PlotResult)
+    if ( container != '' ):
+        sws = mtd[sample]
+        cws = mtd[container]
+        names = 'Sample,Can,Calc'
+        for i in range(0, s_hist): # Loop through each spectra in the inputWS
+            dataX = np.array(sws.readX(i))
+            dataY = np.array(sws.readY(i))
+            dataE = np.array(sws.readE(i))
+            dataX = np.append(dataX,np.array(cws.readX(i)))
+            dataY = np.append(dataY,np.array(cws.readY(i)))
+            dataE = np.append(dataE,np.array(cws.readE(i)))
+            dataX = np.append(dataX,np.array(rws.readX(i)))
+            dataY = np.append(dataY,np.array(rws.readY(i)))
+            dataE = np.append(dataE,np.array(rws.readE(i)))
+            fout = outNm + str(i)
+            CreateWorkspace(OutputWorkspace=fout, DataX=dataX, DataY=dataY, DataE=dataE,
+                Nspec=3, UnitX='DeltaE', VerticalAxisUnit='Text', VerticalAxisValues=names)
+            if i == 0:
+                group = fout
+            else:
+                group += ',' + fout
+        GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=outNm[:-1])
+        if PlotContrib:
+            plotCorrContrib(outNm+'0',[0,1,2])
+        if Save:
+            res_path = os.path.join(workdir,outNm[:-1]+'.nxs')
+            SaveNexusProcessed(InputWorkspace=outNm[:-1],Filename=res_path)
+            if Verbose:
+                logger.notice('Output file created : '+res_path)
     EndTime('ApplyCorrections')
+
+from mantid.api import NumericAxis      
+def replace_workspace_axis(wsName, new_values, new_unit):
+    ax1 = NumericAxis.create(len(new_values))
+    for i in range(len(new_values)):
+        ax1.setValue(i, new_values[i])
+    ax1.setUnit(new_unit)
+    mtd[wsName].replaceAxis(1, ax1)      #axis=1 is vertical
 
 def plotCorrResult(inWS,PlotResult):
     nHist = mtd[inWS].getNumberHistograms()
@@ -924,11 +1154,3 @@ def plotCorrResult(inWS,PlotResult):
 
 def plotCorrContrib(plot_list,n):
         con_plot=mp.plotSpectrum(plot_list,n)
-
-def replace_workspace_axis(wsName, new_values):
-    from mantidsimple import createNumericAxis, mtd        #temporary use of old API
-    ax1 = createNumericAxis(len(new_values))
-    for i in range(len(new_values)):
-        ax1.setValue(i, new_values[i])
-    ax1.setUnit('MomentumTransfer')
-    mtd[wsName].replaceAxis(1, ax1)      #axis=1 is vertical

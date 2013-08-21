@@ -8,7 +8,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 
-#include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DeltaEMode.h"
 
 #include <list>
@@ -48,11 +47,15 @@ namespace API
     ExperimentInfo();
     /// Virtual destructor
     virtual ~ExperimentInfo();
-    
+    /// Copy constructor
+    ExperimentInfo(const ExperimentInfo &);
     /// Copy everything from the given experiment object
     void copyExperimentInfoFrom(const ExperimentInfo * other);
     /// Clone us
     ExperimentInfo * cloneExperimentInfo()const;
+
+    /// Returns a string description of the object
+    const std::string toString() const;
 
     /// Instrument accessors
     void setInstrument(const Geometry::Instrument_const_sptr& instr);
@@ -126,9 +129,6 @@ namespace API
     /// Get the IDF using the instrument name and date
     static std::string getInstrumentFilename(const std::string& instrumentName, const std::string& date="");
 
-    /// Set the default Nexus File Instrument section Version Number
-    void setdefaultNexusInstrumentVersionNumber( int vn );
-
   protected:
 
     /// Static reference to the logger class
@@ -139,21 +139,24 @@ namespace API
     /// Description of the choppers for this experiment.
     std::list<boost::shared_ptr<ChopperModel> > m_choppers;
     /// The information on the sample environment
-    Kernel::cow_ptr<Sample> m_sample;
+    boost::shared_ptr<Sample> m_sample;
     /// The run information
-    Kernel::cow_ptr<Run> m_run;
+    boost::shared_ptr<Run> m_run;
     /// Parameters modifying the base instrument
     boost::shared_ptr<Geometry::ParameterMap> m_parmap;
     /// The base (unparametrized) instrument
     Geometry::Instrument_const_sptr sptr_instrument;
 
   private:
-    /// Save information about a set of detectors to Nexus
-    void saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const;
+    /// Fill with given instrument parameter
+    void populateWithParameter(Geometry::ParameterMap & paramMap,
+                               const std::string & name, const Geometry::XMLlogfile & paramInfo,
+                               const Run & runData);
 
     /// Detector grouping information
     det2group_map m_detgroups;
-
+    /// Mutex to protect against cow_ptr copying
+    mutable Poco::Mutex m_mutex;
   };
 
   /// Shared pointer to ExperimentInfo

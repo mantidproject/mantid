@@ -114,3 +114,13 @@ class AbsoluteUnitsWidget(BaseWidget):
         a.absunits_errorbar_criterion = util._check_and_get_float_line_edit(self._content.errorbar_crit_edit)
         return a
         
+    def live_button_toggled_actions(self,checked):
+        if checked:
+            self._old_absunits = self._content.absunits_gb.isChecked()
+            self._content.absunits_gb.setChecked(False)
+        else:
+            try:
+                self._content.absunits_gb.setChecked(self._old_absunits)
+            except:  # This is for if the live button started out checked
+                pass
+        self._content.absunits_gb.setEnabled(not checked)

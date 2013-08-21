@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="GPD" valid-from   ="1900-01-31 23:59:01"
+		       last-modified="2013-06-27 00:00:00">
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <parameter eq="" type="double" extract-single-value-as="mean" />       
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+
+  
+  <!-- BRIEF DESCRIPTION OF THE PSI GPD INSTRUMENT: 
+  
+      Data provided by Stephen Cottrell - dimensions of pixels are incorrect!
+  -->
+  
+  <parameter name="Default grouping file" type="string">
+    <value val="Grouping/GPD_Detector_Grouping_LF_2.xml"/>
+  </parameter>     
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- dummy components added for visualisation purposes. 
+       To easy spot what geometry the instrument is in -->
+       
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location z="-10.0" />
+  </component>
+  
+  <type name="source" is="Source" />
+  
+  <component type="some-sample-holder">
+    <location />
+  </component>
+  
+  <type name="some-sample-holder" is="SamplePos" />
+ 
+  <!-- detector components --> 
+  
+  <component type="FBdetector"  idlist="all">
+       <location />  
+  </component>  
+
+  <type name="FBdetector" >
+     <component type="front" >
+       <location />
+     </component>
+     <component type="back" >
+       <location />     
+     </component>    
+  </type>
+
+  <type name="front" >
+     <component type="pixel">
+        <location z="-0.1" name="front" />
+     </component>
+  </type>
+  
+  <type name="back" >
+     <component type="pixel">
+        <location z="0.1" name="back" />
+     </component>
+  </type>
+     
+  <type name="pixel" is="detector">  
+    <!-- It is implicitely assumed here that the front y-z plane (looking down
+         the x-axis) is the surface that see the neutron beam.
+         This surface is 36mm along y and 30mm along z and the dept along x is 5mm.  -->
+    <cuboid id="inner-shape">
+      <left-front-bottom-point x="0.0" y="-0.04" z="-0.04"  />
+      <left-front-top-point  x="0.0" y="0.04" z="-0.02"  />
+      <left-back-bottom-point  x="0.010" y="-0.04" z="-0.02"  />
+      <right-front-bottom-point  x="0.0" y="-0.04" z="0.02"  />
+    </cuboid>
+    <algebra val="inner-shape" />     
+  </type>
+      
+  <!-- DETECTOR ID LISTS -->
+  
+  <idlist idname="all">
+    <id start="1" end="2"/>            
+  </idlist>
+
+
+  
+</instrument>

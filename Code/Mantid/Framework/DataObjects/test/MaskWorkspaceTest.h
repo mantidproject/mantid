@@ -80,6 +80,7 @@ public:
         detIds.insert(2);
         TS_ASSERT_EQUALS(maskWS->isMasked(detIds), true);
     }
+
 };
 
 #endif // MANTID_DATAOBJECTS_MASKWORKSPACETEST_H

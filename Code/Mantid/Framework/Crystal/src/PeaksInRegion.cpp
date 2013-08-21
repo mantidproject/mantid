@@ -1,21 +1,14 @@
 /*WIKI*
-Determines which peaks intersect a defined region in either QLab, QSample or HKL space.
+Determines which peaks intersect a defined box region in either QLab, QSample or HKL space. Similar to [[PeaksOnSurface]].
 *WIKI*/
 
-#include <boost/make_shared.hpp>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <vector>
+
 #include "MantidCrystal/PeaksInRegion.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/Progress.h"
+#include <boost/assign.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -24,26 +17,6 @@ namespace Mantid
 {
 namespace Crystal
 {
-
-  std::string PeaksInRegion::detectorSpaceFrame()
-  {
-    return "Detector space";
-  }
-
-  std::string PeaksInRegion::qLabFrame()
-  {
-    return "Q (lab frame)";
-  }
-
-  std::string PeaksInRegion::qSampleFrame()
-  {
-    return "Q (sample frame)";
-  }
-
-  std::string PeaksInRegion::hklFrame()
-  {
-    return "HKL";
-  }
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(PeaksInRegion)
@@ -71,13 +44,13 @@ namespace Crystal
   int PeaksInRegion::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string PeaksInRegion::category() const { return "crystal";}
+  const std::string PeaksInRegion::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void PeaksInRegion::initDocs()
   {
-    this->setWikiSummary("Find peaks intersecting a region.");
+    this->setWikiSummary("Find peaks intersecting a box region.");
     this->setOptionalMessage(this->getWikiSummary());
   }
 
@@ -86,25 +59,9 @@ namespace Crystal
    */
   void PeaksInRegion::init()
   {
-    declareProperty(new WorkspaceProperty<IPeaksWorkspace>("InputWorkspace","",Direction::Input), "An input peaks workspace.");
-
-    std::vector<std::string> propOptions;
-    propOptions.push_back(detectorSpaceFrame());
-    propOptions.push_back(qLabFrame());
-    propOptions.push_back(qSampleFrame());
-    propOptions.push_back(hklFrame());
-
-    declareProperty("CoordinateFrame", "DetectorSpace" ,boost::make_shared<StringListValidator>(propOptions),
-      "What coordinate system to use for intersection criteria?\n"
-      "  DetectorSpace: Real-space coordinates.\n"
-      "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
-      "  Q (sample frame): Momentum in the sample frame.\n"
-      "  HKL"
-       );
-
     declareProperty(new PropertyWithValue<bool>("CheckPeakExtents", false), "Include any peak in the region that has a shape extent extending into that region.");
 
-    declareProperty("PeakRadius", 0.0, "Effective peak radius in CoordinateFrame");
+    this->initBaseProperties();
 
     auto manditoryExtents = boost::make_shared<Mantid::Kernel::MandatoryValidator<std::vector<double> > >();
 
@@ -115,50 +72,49 @@ namespace Crystal
       "A comma separated list of min, max for each dimension,\n"
       "specifying the extents of each dimension. Optional, default +-50 in each dimension.");
 
-    declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace","",Direction::Output), "An output table workspace. Two columns. Peak index into input workspace, and boolean, where true is for positive intersection.");
-  
     setPropertySettings("PeakRadius", new EnabledWhenProperty("CheckPeakExtents", IS_NOT_DEFAULT) );
   }
 
-  void validateExtentsInput(const std::vector<double>& extents)
+  void PeaksInRegion::validateExtentsInput() const
   {
+    const size_t numberOfFaces = this->numberOfFaces();
     std::stringstream outbuff;
-    if(extents.size() != 6)
+    if(m_extents.size() != numberOfFaces)
     {
       throw std::invalid_argument("Six commma separated entries for the extents expected");
     }
-    if(extents[0] > extents[1])
+    if(m_extents[0] > m_extents[1])
     {
-      outbuff << "xmin > xmax " << extents[0] << " > " << extents[1];
+      outbuff << "xmin > xmax " << m_extents[0] << " > " << m_extents[1];
       throw std::invalid_argument(outbuff.str());
     }
-    if(extents[2] > extents[3])
+    if(m_extents[2] > m_extents[3])
     {
-      outbuff << "ymin > ymax " << extents[2] << " > " << extents[3];
+      outbuff << "ymin > ymax " << m_extents[2] << " > " << m_extents[3];
       throw std::invalid_argument(outbuff.str());
     }
-    if(extents[4] > extents[5])
+    if(m_extents[4] > m_extents[5])
     {
-      outbuff << "zmin > zmax " << extents[2] << " > " << extents[3];
+      outbuff << "zmin > zmax " << m_extents[2] << " > " << m_extents[3];
       throw std::invalid_argument(outbuff.str());
     }
   }
 
-  bool pointOutsideAnyExtents(const V3D& testPoint, const std::vector<double>& extents)
+  bool PeaksInRegion::pointOutsideAnyExtents(const V3D& testPoint) const
   {
-    return testPoint[0] < extents[0] || testPoint[0] > extents[1]
-      || testPoint[1] < extents[2] || testPoint[1] > extents[3] 
-      || testPoint[2] < extents[4] || testPoint[2] > extents[5];
+    return testPoint[0] < m_extents[0] || testPoint[0] > m_extents[1]
+      || testPoint[1] < m_extents[2] || testPoint[1] > m_extents[3] 
+      || testPoint[2] < m_extents[4] || testPoint[2] > m_extents[5];
   }
 
-  bool pointInsideAllExtents(const V3D& testPoint, const std::vector<double>& extents)
+  bool PeaksInRegion::pointInsideAllExtents(const V3D& testPoint, const Mantid::Kernel::V3D&) const
   {
-    return testPoint[0] >= extents[0] && testPoint[0] <= extents[1]
-      && testPoint[1] >= extents[2] && testPoint[1] <= extents[3] 
-      && testPoint[2]>= extents[4] && testPoint[2] <= extents[5];
+    return testPoint[0] >= m_extents[0] && testPoint[0] <= m_extents[1]
+      && testPoint[1] >= m_extents[2] && testPoint[1] <= m_extents[3] 
+      && testPoint[2]>= m_extents[4] && testPoint[2] <= m_extents[5];
   }
 
-  void checkTouchPoint(const V3D& touchPoint,const  V3D& normal,const  V3D& faceVertex)
+  void PeaksInRegion::checkTouchPoint(const V3D& touchPoint,const  V3D& normal,const  V3D& faceVertex) const
   {
      if( normal.scalar_prod(touchPoint - faceVertex) != 0)
      {
@@ -166,43 +122,21 @@ namespace Crystal
      }
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
-  void PeaksInRegion::exec()
+  /**
+  Implementation of pure virtual method on PeaksIntersection.
+  @return Number of faces that the box has (6 - always)
+  */
+  int PeaksInRegion::numberOfFaces() const
   {
-    std::vector<double> extents = this->getProperty("Extents");
-    validateExtentsInput(extents);
+    return 6;
+  }
 
-    const std::string coordinateFrame = this->getPropertyValue("CoordinateFrame");
-    IPeaksWorkspace_sptr ws = this->getProperty("InputWorkspace");
-    const bool checkPeakExtents = this->getProperty("CheckPeakExtents");
-    const double peakRadius = this->getProperty("PeakRadius");
-
-    boost::function<V3D(IPeak*)> coordFrameFunc = &IPeak::getHKL;
-    if(coordinateFrame == detectorSpaceFrame())
-    {
-      coordFrameFunc = &IPeak::getDetectorPosition;
-    }
-    else if(coordinateFrame == qLabFrame())
-    {
-      coordFrameFunc = &IPeak::getQLabFrame;
-    }
-    else if(coordinateFrame == qSampleFrame())
-    {
-      coordFrameFunc = &IPeak::getQSampleFrame;
-    }
-
-    std::stringstream buff;
-    buff << extents[0] << "\t" << extents[1] << "\t" << extents[2] <<"\t"<< extents[3] <<"\t"<<  extents[4] <<"\t"<<  extents[5];
-    g_log.debug(buff.str());
-
-    const int nPeaks = ws->getNumberPeaks();
-
-    Mantid::DataObjects::TableWorkspace_sptr outputWorkspace = boost::make_shared<Mantid::DataObjects::TableWorkspace>(ws->rowCount());
-    outputWorkspace->addColumn("int", "PeakIndex");
-    outputWorkspace->addColumn("bool", "Intersecting");
-
+  /**
+  Create the faces associated with this shape.
+  @return newly created faces
+  */
+  VecVecV3D PeaksInRegion::createFaces() const
+  {
     const int minXIndex = 0;
     const int maxXIndex = 1;
     const int minYIndex = 2;
@@ -219,89 +153,39 @@ namespace Crystal
       |   |
     p1|---|p4
     */
-    V3D point1(extents[minXIndex], extents[minYIndex], extents[minZIndex]);
-    V3D point2(extents[minXIndex], extents[maxYIndex], extents[minZIndex]);
-    V3D point3(extents[maxXIndex], extents[maxYIndex], extents[minZIndex]);
-    V3D point4(extents[maxXIndex], extents[minYIndex], extents[minZIndex]);
-    V3D point5(extents[minXIndex], extents[minYIndex], extents[maxZIndex]);
-    V3D point6(extents[minXIndex], extents[maxYIndex], extents[maxZIndex]);
-    V3D point7(extents[maxXIndex], extents[maxYIndex], extents[maxZIndex]);
-    V3D point8(extents[maxXIndex], extents[minYIndex], extents[maxZIndex]);
+    V3D point1(m_extents[minXIndex], m_extents[minYIndex], m_extents[minZIndex]);
+    V3D point2(m_extents[minXIndex], m_extents[maxYIndex], m_extents[minZIndex]);
+    V3D point3(m_extents[maxXIndex], m_extents[maxYIndex], m_extents[minZIndex]);
+    V3D point4(m_extents[maxXIndex], m_extents[minYIndex], m_extents[minZIndex]);
+    V3D point5(m_extents[minXIndex], m_extents[minYIndex], m_extents[maxZIndex]);
+    V3D point6(m_extents[minXIndex], m_extents[maxYIndex], m_extents[maxZIndex]);
+    V3D point7(m_extents[maxXIndex], m_extents[maxYIndex], m_extents[maxZIndex]);
+    V3D point8(m_extents[maxXIndex], m_extents[minYIndex], m_extents[maxZIndex]);
 
-    V3D faces[6][3] =
-    { 
-      {point1, point5, point6} // These define a face normal to x at xmin.
-      ,{point4, point7, point8} // These define a face normal to x at xmax.
-      ,{point1, point4, point8} // These define a face normal to y at ymin.
-      ,{point2, point3, point7} // These define a face normal to y at ymax.
-      ,{point1, point2, point3} // These define a face normal to z at zmin.
-      ,{point5, point6, point7}
-    }; // These define a face normal to z at zmax.
+    using boost::assign::list_of;
+    const int numberOfFaces = this->numberOfFaces();
+    VecVecV3D faces(numberOfFaces);
+    int faceIndex = 0;
+    faces[faceIndex++] = list_of(point1)(point5)(point6).convert_to_container<VecV3D>(); // These define a face normal to x at xmin.
+    faces[faceIndex++] = list_of(point4)(point7)(point8).convert_to_container<VecV3D>(); // These define a face normal to x at xmax.
+    faces[faceIndex++] = list_of(point1)(point4)(point8).convert_to_container<VecV3D>(); // These define a face normal to y at ymin.
+    faces[faceIndex++] = list_of(point2)(point3)(point7).convert_to_container<VecV3D>(); // These define a face normal to y at ymax.
+    faces[faceIndex++] = list_of(point1)(point2)(point3).convert_to_container<VecV3D>(); // These define a face normal to z at zmin.
+    faces[faceIndex++] = list_of(point5)(point6)(point7).convert_to_container<VecV3D>(); // These define a face normal to z at zmax.
+    return faces;
+  }
 
-    // Calculate the normals for each face.
-    V3D normals[6];
-    for(int i = 0; i < 6; ++i)
-    {
-      V3D* face = faces[i];
-      normals[i] = (face[1] - face[0]).cross_prod((face[2] - face[0]));
-      normals[i].normalize();
-    }
+  //----------------------------------------------------------------------------------------------
+  /** Execute the algorithm.
+   */
+  void PeaksInRegion::exec()
+  {
+    m_extents = this->getProperty("Extents");
+    const bool checkPeakExtents = this->getProperty("CheckPeakExtents");
 
+    validateExtentsInput();
 
-    size_t frequency = ws->rowCount();
-    if(frequency > 100)
-    {
-      frequency = ws->rowCount()/100;
-    }
-    Progress prog(this, 0, 1, 100);
-
-     PARALLEL_FOR2(ws, outputWorkspace)
-      for(int i = 0; i < nPeaks; ++i)
-      {
-      PARALLEL_START_INTERUPT_REGION
-      IPeak* peak =  ws->getPeakPtr(i);
-      V3D peakCenter = coordFrameFunc(peak);
-
-      if(i%frequency == 0)
-        prog.report();
-
-      bool doesIntersect = true;
-      if (pointOutsideAnyExtents(peakCenter, extents))
-      {
-        // Out of bounds.
-        doesIntersect = false;
-        
-        if(checkPeakExtents)
-        {
-          // Take account of radius spherical extents.
-          for(int i = 0; i < 6; ++i)
-          {
-            double distance = normals[i].scalar_prod(faces[i][0] - peakCenter); // Distance between plane and peak center.
-            if(peakRadius >= std::abs(distance)) // Sphere passes through one of the PLANES defined by the box faces.
-            {
-              // Check that it is actually within the face boundaries.
-              V3D touchPoint = (normals[i] * distance) + peakCenter; // Vector equation of line give touch point on plane.
-              
-              //checkTouchPoint(touchPoint, normals[i], faces[i][0]); // Debugging line.
-              
-              if(pointInsideAllExtents(touchPoint, extents))
-              {
-                doesIntersect = true;
-                break;
-              }
-            }
-          }
-        }
-      }
-
-      TableRow row = outputWorkspace->getRow(i);
-      row << i << doesIntersect;
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-
-
-    setProperty("OutputWorkspace", outputWorkspace);
+    executePeaksIntersection(checkPeakExtents);
   }
 
 

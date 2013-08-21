@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/Expression.cpp
 	src/FermiChopperModel.cpp
 	src/FileFinder.cpp
+	src/FileLoaderRegistry.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
 	src/FuncMinimizerFactory.cpp
@@ -38,7 +39,6 @@ set ( SRC_FILES
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
 	src/GridDomain1D.cpp
-	src/IDataFileChecker.cpp
 	src/IDomainCreator.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
@@ -55,6 +55,7 @@ set ( SRC_FILES
 	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
+	src/IPowderDiffPeakFunction.cpp
 	src/ISpectrum.cpp
 	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
@@ -68,7 +69,6 @@ set ( SRC_FILES
 	src/JointDomain.cpp
 	src/LinearScale.cpp
 	src/LiveListenerFactory.cpp
-	src/LoadAlgorithmFactory.cpp
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
 	src/LogManager.cpp
@@ -116,6 +116,7 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
         src/IEventWorkspace.cpp
         src/IFunctionMD.cpp
         src/IPeakFunction.cpp
+	src/IPowderDiffPeakFunction.cpp
         )
 
 set ( INC_FILES
@@ -152,6 +153,7 @@ set ( INC_FILES
 	inc/MantidAPI/Expression.h
 	inc/MantidAPI/FermiChopperModel.h
 	inc/MantidAPI/FileFinder.h
+	inc/MantidAPI/FileLoaderRegistry.h
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
 	inc/MantidAPI/FuncMinimizerFactory.h
@@ -170,11 +172,11 @@ set ( INC_FILES
 	inc/MantidAPI/ICatalog.h
 	inc/MantidAPI/IConstraint.h
 	inc/MantidAPI/ICostFunction.h
-	inc/MantidAPI/IDataFileChecker.h
 	inc/MantidAPI/IDataItem.h
 	inc/MantidAPI/IDomainCreator.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
+	inc/MantidAPI/IFileLoader.h
 	inc/MantidAPI/IFuncMinimizer.h
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunction1D.h
@@ -193,6 +195,7 @@ set ( INC_FILES
 	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
+	inc/MantidAPI/IPowderDiffPeakFunction.h
 	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ISplittersWorkspace.h
 	inc/MantidAPI/ITableWorkspace.h
@@ -212,7 +215,6 @@ set ( INC_FILES
 	inc/MantidAPI/JointDomain.h
 	inc/MantidAPI/LinearScale.h
 	inc/MantidAPI/LiveListenerFactory.h
-	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
 	inc/MantidAPI/LogManager.h
@@ -264,6 +266,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	IkedaCarpenterModeratorTest.h
+	AlgorithmFactoryTest.h
 	AlgorithmHasPropertyTest.h
 	AlgorithmHistoryTest.h
 	AlgorithmManagerTest.h
@@ -298,6 +301,7 @@ set ( TEST_FILES
 	ISpectrumTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
+	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
 	LiveListenerFactoryTest.h
 	MDGeometryTest.h
@@ -325,6 +329,7 @@ set ( TEST_FILES
 	WorkspaceFactoryTest.h
 	WorkspaceGroupTest.h
 	WorkspaceHistoryTest.h
+	WorkspaceOpOverloadsTest.h
 	WorkspacePropertyTest.h
 )
 

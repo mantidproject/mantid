@@ -1,13 +1,23 @@
+''' SVN Info:  	The variables below will only get subsituted at svn checkout if
+		the repository is configured for variable subsitution. 
+
+	$Id$
+	$HeadURL$
+|=============================================================================|=======|	
+1                                                                            80   <tab>
+'''
 #these need to be moved into one NR folder or so
 #from ReflectometerCors import *
 from l2q import *
-from mantidsimple import *  # Old API
-#from mantid.simpleapi import *  # New API
-#from mantidplot import *
+from combineMulti import *
+#from mantidsimple import *  # Old API
+from mantid.simpleapi import *  # New API
+from mantid.api import WorkspaceGroup
 import math
+import re
 
 
-def quick(run, theta=0, roi=[0,0], db=[0,0], trans='', outputType='pd', debug=0):
+def quick(run, theta=0, pointdet=1,roi=[0,0], db=[0,0], trans='', polcorr=0, usemon=-1,outputType='pd', debug=0):
 	'''
 	call signature(s)::
 
@@ -38,6 +48,8 @@ def quick(run, theta=0, roi=[0,0], db=[0,0], trans='', outputType='pd', debug=0)
 	trans		transmission run number or saved workspace. The default is 0 (No 
 			transmission run).  trans=-1 will supress the division of the 
 			detector by the monitor.
+	polcorr		polarisation correction, 0=no correction (unpolarised run)
+	usemon		monitor to be used for normalisation (-1 is default from IDF)
 	outputType	'pd' = point detector (Default), 'md'=  Multidetector   Will use
 			this to build the equivalent of gd in the old matlab code but 
 			keep all of the simple detector processing in one well organized
@@ -82,10 +94,14 @@ def quick(run, theta=0, roi=[0,0], db=[0,0], trans='', outputType='pd', debug=0)
 	'''
 	
 	
-	[I0MonitorIndex, MultiDetectorStart, nHist] = toLam(run,'')
+	[I0MonitorIndex, MultiDetectorStart, nHist] = toLam(run,'',pointdet=1) #creates wTof = "_W" + name
+	inst = groupGet("_W",'inst')
+	# Some beamline constants from IDF
+	intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
+	intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
 	print I0MonitorIndex
 	print nHist
-	if (nHist > 5):
+	if (nHist > 5 and not(pointdet)):
 		# Proccess Multi-Detector; assume MD goes to the end:
 		# if roi or db are given in the function then sum over the apropriate channels
 		print "This is a multidetector run."
@@ -93,6 +109,7 @@ def quick(run, theta=0, roi=[0,0], db=[0,0], trans='', outputType='pd', debug=0)
 			CropWorkspace(InputWorkspace="_D",OutputWorkspace="_DM",StartWorkspaceIndex=MultiDetectorStart)
 			RebinToWorkspace(WorkspaceToRebin="_M",WorkspaceToMatch="_DM",OutputWorkspace="_M_M")
 			CropWorkspace(InputWorkspace="_M_M",OutputWorkspace="_I0M",StartWorkspaceIndex=I0MonitorIndex)
+			RebinToWorkspace(WorkspaceToRebin="_I0M",WorkspaceToMatch="_DM",OutputWorkspace="_I0M")
 			Divide(LHSWorkspace="_DM",RHSWorkspace="_I0M",OutputWorkspace="IvsLam")
 			if (roi != [0,0]) :
 				SumSpectra(InputWorkspace="IvsLam",OutputWorkspace="DMR",StartWorkspaceIndex=roi[0], EndWorkspaceIndex=roi[1])
@@ -115,7 +132,7 @@ def quick(run, theta=0, roi=[0,0], db=[0,0], trans='', outputType='pd', debug=0)
 		# process the point detector reflectivity  
 		RebinToWorkspace(WorkspaceToRebin="_M",WorkspaceToMatch="_DP",OutputWorkspace="_M_P")
 		CropWorkspace(InputWorkspace="_M_P",OutputWorkspace="_I0P",StartWorkspaceIndex=I0MonitorIndex,EndWorkspaceIndex=I0MonitorIndex)
-		Scale("_DP","IvsLam",1)
+		Scale(InputWorkspace="_DP",OutputWorkspace="IvsLam",Factor=1)
 		#Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
 		#  Normalise by good frames
 		GoodFrames = groupGet('IvsLam','samp','goodfrm')
@@ -124,53 +141,47 @@ def quick(run, theta=0, roi=[0,0], db=[0,0], trans='', outputType='pd', debug=0)
 			RunNumber = '0'
 		else:
 			RunNumber = groupGet('IvsLam','samp','run_number') 
-		#mtd['IvsLam'].getSampleDetails().getLogData("goodfrm").value
+		#mantid['IvsLam'].getSampleDetails().getLogData("goodfrm").value
 		#Scale('IvsLam','IvsLam',GoodFrames**-1,'Multiply')
-		#IvsLam = mtd['IvsLam']*GoodFrames**-1
+		#IvsLam = mantid['IvsLam']*GoodFrames**-1
 		if (trans==''):
 			#monitor2Eff('M')  # This doesn't seem to work.
 			#heliumDetectorEff('DP')  # point detector  #Nor does this.
 			# Multidetector   (Flood)   TODO		
-			print "No transmission file. Using monitor spectrum"
-			# normalise by monitor spectrum
-			# RebinToWorkspace(WorkspaceToRebin="_M",WorkspaceToMatch="_DP",OutputWorkspace="_M_M")
-			# CropWorkspace(InputWorkspace="M_M",OutputWorkspace="I0M",StartWorkspaceIndex=I0MonitorIndex)
-			# Divide(LHSWorkspace="DM",RHSWorkspace="I0M",OutputWorkspace="RM")	
-			Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
+			print "No transmission file. Trying default exponential/polynomial correction..."
+			inst=groupGet('_DP','inst')
+			corrType=inst.getStringParameter('correction')[0]
+			if (corrType=='polynomial'):
+				pString=inst.getStringParameter('polystring')
+				print pString
+				if len(pString):
+					PolynomialCorrection(InputWorkspace='_DP',OutputWorkspace='IvsLam',Coefficients=pString[0],Operation='Divide')
+				else:
+					print "No polynomial coefficients in IDF. Using monitor spectrum with no corrections."
+			elif (corrType=='exponential'):
+				c0=inst.getNumberParameter('C0')
+				c1=inst.getNumberParameter('C1')
+				print "Exponential parameters: ", c0[0], c1[0]
+				if len(c0):
+					ExponentialCorrection(InputWorkspace='_DP',OutputWorkspace='IvsLam',C0=c0[0],C1=c1[0],Operation='Divide')
+				# normalise by monitor spectrum
+				# RebinToWorkspace(WorkspaceToRebin="_M",WorkspaceToMatch="_DP",OutputWorkspace="_M_M")
+				# CropWorkspace(InputWorkspace="M_M",OutputWorkspace="I0M",StartWorkspaceIndex=I0MonitorIndex)
+				# Divide(LHSWorkspace="DM",RHSWorkspace="I0M",OutputWorkspace="RM")
+			Divide(LHSWorkspace="IvsLam",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
 		else: # we have a transmission run
-			names = mtd.getWorkspaceNames()
+			Integration(InputWorkspace="_I0P",OutputWorkspace="_monInt",RangeLower=str(intmin),RangeUpper=str(intmax))
+			#scaling=1/mantid.getMatrixWorkspace('_monInt').dataY(0)[0]
+			Divide(LHSWorkspace="_DP",RHSWorkspace="_monInt",OutputWorkspace="IvsLam")
+			##Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
+			names = mtd.getObjectNames()
 			if trans in names:
-				Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
-				RebinToWorkspace(trans,"IvsLam",trans)
-				#IvsLam = mtd['IvsLam']*GoodFrames**-1
+				##Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
+				RebinToWorkspace(WorkspaceToRebin=trans,WorkspaceToMatch="IvsLam",OutputWorkspace=trans)
+				##IvsLam = mantid['IvsLam']*GoodFrames**-1
 				Divide(LHSWorkspace="IvsLam",RHSWorkspace=trans,OutputWorkspace="IvsLam")
 			else:
-				Divide(LHSWorkspace="_DP",RHSWorkspace="_I0P",OutputWorkspace="IvsLam")
-				#IvsLam = mtd['IvsLam']*GoodFrames**-1
-				[I0MonitorIndex, MultiDetectorStart, nHist] = toLam(trans,'_TRANS')
-				RebinToWorkspace(WorkspaceToRebin="_M_TRANS",WorkspaceToMatch="_DP_TRANS",OutputWorkspace="_M_P_TRANS")
-				CropWorkspace(InputWorkspace="_M_P_TRANS",OutputWorkspace="_I0P_TRANS",StartWorkspaceIndex=I0MonitorIndex)
-				Divide(LHSWorkspace="_DP_TRANS",RHSWorkspace="_I0P_TRANS",OutputWorkspace=str(trans)+"_IvsLam_TRANS")
-				# Normalise TRANS run by good frames
-				print str(trans)+'_IvsLam_TRANS'
-				GoodFramesTr = groupGet(str(trans)+'_IvsLam_TRANS','samp','goodfrm')
-				print "trans frames: ", GoodFramesTr
-				#mtd['IvsLam_TRANS'].getSampleDetails().getLogData("goodfrm").value
-				
-				#Scale(str(trans)+'_IvsLam_TRANS',Factor=GoodFramesTr**-1,OutputWorkspace=str(trans)+'_IvsLam_TRANS')
-				#got sometimes very slight binning diferences, so do this again:
-				RebinToWorkspace(WorkspaceToRebin=str(trans)+'_IvsLam_TRANS',WorkspaceToMatch="IvsLam",OutputWorkspace=str(trans)+'_IvsLam_TRANS')
-				Divide(LHSWorkspace="IvsLam",RHSWorkspace=str(trans)+"_IvsLam_TRANS",OutputWorkspace="IvsLam")
-				# try:
-					# Divide(LHSWorkspace=str(trans)+"_IvsLam",RHSWorkspace=str(trans)+"_IvsLam_TRANS",OutputWorkspace="IvsLam")
-				# except:
-					# try:
-						# Divide(LHSWorkspace="IvsLam_1",RHSWorkspace=str(trans)+"_IvsLam_TRANS_1",OutputWorkspace="IvsLam_1")
-						# print 'Handling run-time error: possibly empty periods...'
-					# except:
-						# print 'Handling run-time error: possibly empty periods...'
-			   
-
+				transCorr(trans)
 		# Need to process the optional args to see what needs to be output and what division needs to be made
 		
 		# Convert to I vs Q
@@ -183,11 +194,11 @@ def quick(run, theta=0, roi=[0,0], db=[0,0], trans='', outputType='pd', debug=0)
 			detLocation=inst.getComponentByName('point-detector').getPos()
 			sampleLocation=inst.getComponentByName('some-surface-holder').getPos()
 			detLocation=inst.getComponentByName('point-detector').getPos()
-			sample2detector=detLocation-sampleLocation    # meters
+			sample2detector=detLocation-sampleLocation    # metres
 			source=inst.getSource()
 			beamPos = sampleLocation - source.getPos()
 			PI = 3.1415926535
-			theta = inst.getComponentByName('point-detector').getTwoTheta(sampleLocation, beamPos)*180.0/PI
+			theta = inst.getComponentByName('point-detector').getTwoTheta(sampleLocation, beamPos)*180.0/PI/2.0
 			print "Det location: ", detLocation, "Calculated theta = ",theta
 			if detLocation.getY() == 0:  # detector is not in correct place
 				print "det at 0"
@@ -201,16 +212,16 @@ def quick(run, theta=0, roi=[0,0], db=[0,0], trans='', outputType='pd', debug=0)
 				# Get detector angle theta from NeXuS
 				theta = groupGet(runno,'samp','theta')
 				print 'Nexus file theta =', theta
-				IvsQ = l2q(IvsLam, 'point-detector', theta)
+				IvsQ = l2q(mtd['IvsLam'], 'point-detector', theta)
 			else:
-				ConvertUnits(InputWorkspace='IvsLam',OutputWorkspace="IvsQ",Target="MomentumTransfer",AlignBins="1")
+				ConvertUnits(InputWorkspace='IvsLam',OutputWorkspace="IvsQ",Target="MomentumTransfer")
 			
 		else:
 			theta = float(theta)
 			IvsQ = l2q(mtd['IvsLam'], 'point-detector', theta)		
 	
-	RenameWorkspace('IvsLam',RunNumber+'_IvsLam')
-	RenameWorkspace('IvsQ',RunNumber+'_IvsQ')
+	RenameWorkspace(InputWorkspace='IvsLam',OutputWorkspace=RunNumber+'_IvsLam')
+	RenameWorkspace(InputWorkspace='IvsQ',OutputWorkspace=RunNumber+'_IvsQ')
 		
 	# delete all temporary workspaces unless in debug mode (debug=1)
     
@@ -219,41 +230,117 @@ def quick(run, theta=0, roi=[0,0], db=[0,0], trans='', outputType='pd', debug=0)
 	return  mtd[RunNumber+'_IvsLam'], mtd[RunNumber+'_IvsQ'], theta
 
 
+
+def transCorr(transrun):
+	inst = groupGet("_W",'inst')
+	# Some beamline constants from IDF
+	intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
+	intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
+	if ',' in transrun:
+		slam = transrun.split(',')[0]
+		llam = transrun.split(',')[1]
+		print "Transmission runs: ", transrun
+		[I0MonitorIndex, MultiDetectorStart, nHist] = toLam(slam,'_'+slam)
+		CropWorkspace(InputWorkspace="_D_"+slam,OutputWorkspace="_D_"+slam,StartWorkspaceIndex=0,EndWorkspaceIndex=0)
+		[I0MonitorIndex, MultiDetectorStart, nHist] = toLam(llam,'_'+llam)
+		CropWorkspace(InputWorkspace="_D_"+llam,OutputWorkspace="_D_"+llam,StartWorkspaceIndex=0,EndWorkspaceIndex=0)
+		
+		RebinToWorkspace(WorkspaceToRebin="_M_"+llam,WorkspaceToMatch="_DP_"+llam,OutputWorkspace="_M_P_"+llam)
+		CropWorkspace(InputWorkspace="_M_P_"+llam,OutputWorkspace="_I0P_"+llam,StartWorkspaceIndex=I0MonitorIndex)
+		
+		#Normalise by monitor integral
+		inst = groupGet('_D_'+slam,'inst')
+		# Some beamline constants from IDF
+		intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
+		intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
+		Integration(InputWorkspace="_I0P_"+llam,OutputWorkspace="_monInt_TRANS",RangeLower=str(intmin),RangeUpper=str(intmax))
+		Divide(LHSWorkspace="_DP_"+llam,RHSWorkspace="_monInt_TRANS",OutputWorkspace="_D_"+llam)
+		#scaling=1/mantid.getMatrixWorkspace('_monInt_TRANS').dataY(0)[0]
+		#Scale(InputWorkspace="_DP_"+llam,OutputWorkspace="_D_"+llam,Factor=scaling,Operation="Multiply")
+		
+		# same for short wavelength run slam:
+		RebinToWorkspace(WorkspaceToRebin="_M_"+slam,WorkspaceToMatch="_DP_"+slam,OutputWorkspace="_M_P_"+slam)
+		CropWorkspace(InputWorkspace="_M_P_"+slam,OutputWorkspace="_I0P_"+slam,StartWorkspaceIndex=I0MonitorIndex)
+
+		#Normalise by monitor integral
+		inst = groupGet('_D_'+llam,'inst')
+		# Some beamline constants from IDF
+		intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
+		intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
+		Integration(InputWorkspace="_I0P_"+slam,OutputWorkspace="_monInt_TRANS",RangeLower=str(intmin),RangeUpper=str(intmax))
+		#scaling=1/mantid.getMatrixWorkspace('_monInt_TRANS').dataY(0)[0]
+		Divide(LHSWorkspace="_DP_"+slam,RHSWorkspace="_monInt_TRANS",OutputWorkspace="_D_"+slam)
+		#Scale(InputWorkspace="_DP_"+slam,OutputWorkspace="_D_"+slam,Factor=scaling,Operation="Multiply")
+		
+		#Divide(LHSWorkspace="_DP_"+slam,RHSWorkspace="_I0P_"+slam,OutputWorkspace="_D_"+slam)
+
+		[transr, sf] = combine2("_D_"+slam,"_D_"+llam,"_DP_TRANS",10.0,12.0,1.5,17.0,0.02,scalehigh=1)
+		#[wlam, wq, th] = quick(runno,angle,trans='_transcomb')
+	else:
+		[I0MonitorIndex, MultiDetectorStart, nHist] = toLam(transrun,'_TRANS')
+		RebinToWorkspace(WorkspaceToRebin="_M_TRANS",WorkspaceToMatch="_DP_TRANS",OutputWorkspace="_M_P_TRANS")
+		CropWorkspace(InputWorkspace="_M_P_TRANS",OutputWorkspace="_I0P_TRANS",StartWorkspaceIndex=I0MonitorIndex)
+
+		#Normalise by monitor integral
+		Integration(InputWorkspace="_I0P_TRANS",OutputWorkspace="_monInt_TRANS",RangeLower=str(intmin),RangeUpper=str(intmax))
+		Divide(LHSWorkspace="_DP_TRANS",RHSWorkspace="_monInt_TRANS",OutputWorkspace="_DP_TRANS")
+		#scaling=1/mantid.getMatrixWorkspace('_monInt_TRANS').dataY(0)[0]
+		#print "SCALING:",scaling
+		#Scale(InputWorkspace="_I0P_TRANS",OutputWorkspace=str(transrun)+"_IvsLam_TRANS",Factor=scaling,Operation="Multiply")
+		#Scale(InputWorkspace="_DP_TRANS",OutputWorkspace="_DP_TRANS",Factor=scaling,Operation="Multiply")
+		
+	#got sometimes very slight binning diferences, so do this again:
+	RebinToWorkspace(WorkspaceToRebin='_DP_TRANS',WorkspaceToMatch="IvsLam",OutputWorkspace=str(transrun)+'_IvsLam_TRANS')
+	if isinstance(mtd["_DP_TRANS"], WorkspaceGroup):
+		Divide(LHSWorkspace="IvsLam",RHSWorkspace=str(transrun)+"_IvsLam_TRANS_1",OutputWorkspace="IvsLam")
+	else:
+		Divide(LHSWorkspace="IvsLam",RHSWorkspace=str(transrun)+"_IvsLam_TRANS",OutputWorkspace="IvsLam")
+
+
 def cleanup():
-	names = mtd.getWorkspaceNames()
-	for ws in names:
-		if ws.find('_',0,1) == 0:
-			mantid.deleteWorkspace(ws)
+	names = mtd.getObjectNames()
+	for name in names:
+		if re.search("^_", name):
+			DeleteWorkspace(name)
 		
 def coAdd(run,name):
-	wTof = "_W" + name   		# main workspace in time-of-flight
-	
-	runlist = []
-	l1 = run.split(',')
-	for subs in l1:
-		l2 = subs.split(':')
-		for l3 in l2:
-			runlist.append(l3)
-	print "Adding: ", runlist
-	
-	if (runlist[0]=='0'): #DAE/current run
-		LoadDAE(DAEname='ndx'+mtd.settings['default.instrument'],OutputWorkspace='_sum')
+	names = mtd.getObjectNames()
+	wTof = "_W" + name   		# main workspace in time-of-flight	
+	if run in names:
+		RenameWorkspace(InputWorkspace=run,OutputWorkspace=wTof)
 	else:
-		Load(Filename=runlist[0],OutputWorkspace='_sum',LoadLogFiles="1")
-		
-	for i in range(len(runlist)-1):
-		if (runlist[i+1]=='0'): #DAE/current run
-			LoadDAE(DAEname='ndx'+mtd.settings['default.instrument'],OutputWorkspace='_w2')
-		else:
-			LoadRaw(Filename=runlist[i+1],OutputWorkspace='_w2',LoadLogFiles="1")
-			
-		Plus('_sum','_w2','_sum')
 
-	RenameWorkspace('_sum',wTof)
+		currentInstrument=config['default.instrument']
+		runlist = []
+		l1 = run.split(',')
+		for subs in l1:
+			l2 = subs.split(':')
+			for l3 in l2:
+				runlist.append(l3)
+		print "Adding: ", runlist
+		currentInstrument=currentInstrument.upper()
+		if (runlist[0]=='0'): #DAE/current run
+			StartLiveData(Instrument=currentInstrument,UpdateEvery='0',Outputworkspace='_sum')
+			#LoadLiveData(currentInstrument,OutputWorkspace='_sum')
+			#LoadDAE(DAEname='ndx'+mantid.settings['default.instrument'],OutputWorkspace='_sum')
+		else:
+			Load(Filename=runlist[0],OutputWorkspace='_sum')#,LoadLogFiles="1")
+			
+		for i in range(len(runlist)-1):
+			if (runlist[i+1]=='0'): #DAE/current run
+				StartLiveData(Instrument=currentInstrument,UpdateEvery='0',Outputworkspace='_w2')
+				#LoadLiveData(currentInstrument,OutputWorkspace='_w2')
+				#LoadDAE(DAEname='ndx'+mantid.settings['default.instrument'],OutputWorkspace='_w2')
+			else:
+				Load(Filename=runlist[i+1],OutputWorkspace='_w2')#,LoadLogFiles="1")
+				
+			Plus(LHSWorkspace='_sum',RHSWorkspace='_w2',OutputWorkspace='_sum')
+
+		RenameWorkspace(InputWorkspace='_sum',OutputWorkspace=wTof)
 
 	
 
-def toLam(run, name):
+def toLam(run, name, pointdet=1):
 	'''
 	toLam splits a given run into monitor and detector spectra and
 	converts these to wavelength
@@ -263,7 +350,7 @@ def toLam(run, name):
 	monInLam = "_M" + name		# monitor spectra vs. wavelength
 	detInLam = "_D" + name		# detector spectra vs. wavelength
 	pDet = "_DP" + name			# point-detector only vs. wavelength
-	mDet = "_DM" + name			# point-detector only vs. wavelength
+	mDet = "_DM" + name			# multi-detector only vs. wavelength
 	
 
 	# add multiple workspaces, if given
@@ -275,6 +362,8 @@ def toLam(run, name):
 	bgmin = inst.getNumberParameter('MonitorBackgroundMin')[0]
 	bgmax = inst.getNumberParameter('MonitorBackgroundMax')[0]
 	MonitorBackground = [bgmin,bgmax]
+	intmin = inst.getNumberParameter('MonitorIntegralMin')[0]
+	intmax = inst.getNumberParameter('MonitorIntegralMax')[0]
 	MonitorsToCorrect = [int(inst.getNumberParameter('MonitorsToCorrect')[0])]
 	# Note: Since we are removing the monitors in the load raw command they are not counted here.
 	PointDetectorStart = int(inst.getNumberParameter('PointDetectorStart')[0])
@@ -287,16 +376,16 @@ def toLam(run, name):
 	LambdaMax = float(inst.getNumberParameter('LambdaMax')[0])
 			
 	# Convert spectra from TOF to wavelength
-	ConvertUnits(InputWorkspace=wTof,OutputWorkspace=wTof+"_lam",Target="Wavelength")
+	ConvertUnits(InputWorkspace=wTof,OutputWorkspace=wTof+"_lam",Target="Wavelength", AlignBins='1')
 	# Separate detector an monitor spectra manually
-	CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=monInLam,XMin=LambdaMin,XMax=LambdaMax,StartWorkspaceIndex='0',EndWorkspaceIndex=PointDetectorStart-1)
+	CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=monInLam,StartWorkspaceIndex='0',EndWorkspaceIndex=PointDetectorStart-1)
 	CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=detInLam,XMin=LambdaMin,XMax=LambdaMax,StartWorkspaceIndex=PointDetectorStart)
 	# Subtract flat background from fit in range given from Instrument Def/Par File
-	FlatBackground(InputWorkspace=monInLam,OutputWorkspace=monInLam,WorkspaceIndexList=MonitorsToCorrect,StartX=MonitorBackground[0],EndX=MonitorBackground[1])
+	CalculateFlatBackground(InputWorkspace=monInLam,OutputWorkspace=monInLam,WorkspaceIndexList=MonitorsToCorrect,StartX=MonitorBackground[0],EndX=MonitorBackground[1])
 	
 	# Is it a multidetector run?
 	nHist = groupGet(wTof+"_lam",'wksp','')
-	if nHist<6:
+	if (nHist<6 or (nHist>5 and pointdet)):
 		CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=pDet,XMin=LambdaMin,XMax=LambdaMax,StartWorkspaceIndex=PointDetectorStart,EndWorkspaceIndex=PointDetectorStop)
 	else:
 		CropWorkspace(InputWorkspace=wTof+"_lam",OutputWorkspace=mDet,XMin=LambdaMin,XMax=LambdaMax,StartWorkspaceIndex=MultiDetectorStart)
@@ -312,28 +401,35 @@ def groupGet(wksp,whattoget,field=''):
 	also if the workspace is a group (info from first group element)
 	'''
 	if (whattoget == 'inst'):
-		if mtd[wksp].isGroup():
+		if isinstance(mtd[wksp], WorkspaceGroup):
 			return mtd[wksp+'_1'].getInstrument()
 		else:
 			return mtd[wksp].getInstrument()
 			
 	elif (whattoget == 'samp' and field != ''):
-		if mtd[wksp].isGroup():
+		if isinstance(mtd[wksp], WorkspaceGroup):
 			try:
-				res = mtd[wksp + '_1'].getSampleDetails().getLogData(field).value				
+				log = mtd[wksp + '_1'].getSampleDetails().getLogData(field).value
+				if (type(log) is int or type(log) is str):
+					res=log
+				else:
+					res = log[len(log)-1]
 			except RuntimeError:
 				res = 0
 				print "Block "+field+" not found."			
 		else:
 			try:
-				log = [mtd[wksp].getSampleDetails().getLogData(field).value]
-				res = log[len(log)-1]
+				log = mtd[wksp].getSampleDetails().getLogData(field).value
+				if (type(log) is int or type(log) is str):
+					res=log
+				else:
+					res = log[len(log)-1]
 			except RuntimeError:		
 				res = 0
 				print "Block "+field+" not found."
 		return res
 	elif (whattoget == 'wksp'):
-		if mtd[wksp].isGroup():
+		if isinstance(mtd[wksp], WorkspaceGroup):
 			return mtd[wksp+'_1'].getNumberHistograms()
 		else:
 			return mtd[wksp].getNumberHistograms()
@@ -353,7 +449,7 @@ def groupGet(wksp,whattoget,field=''):
 """
 	
 def _testQuick():
-	mtd.settings['default.instrument'] = "SURF"
+	config['default.instrument'] = "SURF"
 	[w1lam,w1q,th] = quick(94511,theta=0.25,trans='94504')
 	[w2lam,w2q,th] = quick(94512,theta=0.65,trans='94504')
 	[w3lam,w3q,th] = quick(94513,theta=1.5,trans='94504')

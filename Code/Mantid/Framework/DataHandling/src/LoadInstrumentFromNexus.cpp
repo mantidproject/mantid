@@ -1,6 +1,12 @@
 /*WIKI* 
+Attempts to load information about the instrument from a ISIS NeXus file. In particular attempt to
+read L2 and 2-theta detector position values and add detectors which are positioned relative
+to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source
+and samplepos components to instrument.
 
-
+LoadInstrumentFromNexus is intended to be used as a child algorithm of
+other Loadxxx algorithms, rather than being used directly.
+It is used by LoadMuonNexus version 1.
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
@@ -27,10 +33,8 @@ DECLARE_ALGORITHM(LoadInstrumentFromNexus)
 /// Sets documentation strings for this algorithm
 void LoadInstrumentFromNexus::initDocs()
 {
-  this->setWikiSummary("<p>Attempts to load information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.</p>"
-"<p>Later this will be extended to use any further available details about the instrument in the Nexus file.</p>"
-"<p>If the L1 source - sample distance is not available in the file then it may be read from the [[Properties File|mantid properties]] file using the key instrument.L1, as a final fallback a default distance of 10m will be used.</p>");
-  this->setOptionalMessage("Attempts to load information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.  Later this will be extended to use any further available details about the instrument in the Nexus file.  If the L1 source - sample distance is not available in the file then it may be read from the mantid properties file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
+  this->setWikiSummary("Attempts to load some information about the instrument from a Nexus file.");
+  this->setOptionalMessage("Attempts to load some information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.  Later this will be extended to use any further available details about the instrument in the Nexus file.  If the L1 source - sample distance is not available in the file then it may be read from the mantid properties file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
 }
 
 

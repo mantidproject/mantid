@@ -80,11 +80,24 @@ namespace WorkflowAlgorithmHelpers
     }
     else
     {
-      std::vector<double> params = ws->getInstrument()->getNumberParameter(instParam);
-      if (!params.empty())
-      {
-        param = (params[0] != 0.0);
-      }
+        try
+        {
+           std::vector<bool> params = ws->getInstrument()->getBoolParameter(instParam);
+           if (!params.empty())
+                param = params[0];
+           else
+               param = false;
+        }
+        catch(std::runtime_error &) // Old style bool parameter expressed as double
+        {
+           std::vector<double> params = ws->getInstrument()->getNumberParameter(instParam);
+           if (!params.empty())
+           {
+                param = (params[0] != 0.0);
+           }
+        }
+
+
     }
     if(defaultValue != overrideValue)
     {

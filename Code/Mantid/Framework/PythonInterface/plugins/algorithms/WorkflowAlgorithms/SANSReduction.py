@@ -37,7 +37,11 @@ class SANSReduction(PythonAlgorithm):
             property_manager.existsProperty('LoadAlgorithm')
         p = property_manager.getProperty('LoadAlgorithm')
         alg = Algorithm.fromString(p.valueAsStr)
-        alg.setProperty('Filename', filename)
+        
+        if AnalysisDataService.doesExist(filename):
+            alg.setProperty("InputWorkspace", filename)
+        else:
+            alg.setProperty('Filename', filename)
         alg.setProperty('OutputWorkspace', output_ws)
         if alg.existsProperty('ReductionProperties'):
             alg.setProperty('ReductionProperties', property_manager_name)
@@ -56,10 +60,12 @@ class SANSReduction(PythonAlgorithm):
             property_manager.existsProperty('InstrumentName')
         output_str = ''
         if type(data_file) == str:
-            data_file = find_data(data_file, instrument=instrument, allow_multiple=True)
+            if AnalysisDataService.doesExist(data_file):
+                data_file = [data_file]
+            else:
+                data_file = find_data(data_file, instrument=instrument, allow_multiple=True)
         if type(data_file) == list:
             for i in range(len(data_file)):
-                output_str += 'Loaded %s\n' % data_file[i]
                 if i == 0:
                     output_str += self._load_data(data_file[i], workspace, property_manager, property_manager_name)
                     continue
@@ -75,7 +81,6 @@ class SANSReduction(PythonAlgorithm):
     def _py_exec(self):
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
-        #output_ws = '__'+output_ws+'_reduced'
         property_manager_name = self.getProperty("ReductionProperties").value
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
         

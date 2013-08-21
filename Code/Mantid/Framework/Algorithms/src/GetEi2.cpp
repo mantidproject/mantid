@@ -9,7 +9,7 @@ Not all neutrons arrive at the monitors at the same time because their kinetic e
 # the half height is half the above number
 # examine bins to the left of the bin with the highest number of counts looking for a bin with less than half that number above background
 # interpolate between this point bin and the one immediately previous to find the first half height location
-# repeat the steps 3 and 4 looking to the left of the highest point to get the second half height point
+# repeat the steps 3 and 4 looking to the right of the highest point to get the second half height point
 # the mean of the X-values of the two half height points is the TOF arrival time of the neutrons
 
 The above process is illustrated on a peak is shown below in the image below
@@ -236,9 +236,17 @@ double GetEi2::calculateEi(const double initial_guess)
     }
     catch(std::invalid_argument &)
     {
-      if(!m_fixedei) throw;
-      peak_times[i] = 0.0;
-      g_log.information() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
+
+      if(!m_fixedei) 
+      {
+        throw std::invalid_argument("No peak found for the monitor"+boost::lexical_cast<std::string>(i+1)+ " (at "+
+                   boost::lexical_cast<std::string>(det_distances[i])+"  metres).\n");
+      }
+      else
+      {
+        peak_times[i] = 0.0;
+        g_log.information() << "No peak found for monitor " << (i+1) << " (at " << det_distances[i] << " metres). Setting peak time to zero\n";
+      }
     }
     if(i == 0) 
     {

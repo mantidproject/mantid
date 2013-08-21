@@ -4,8 +4,7 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IFileLoader.h"
 #include <fstream>
 
 namespace Mantid
@@ -45,7 +44,7 @@ namespace DataHandling
      File change history is stored at: <https://github.com/mantidproject/mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>    
   */
-class DLLExport LoadRKH : public API::IDataFileChecker
+class DLLExport LoadRKH : public API::IFileLoader<Kernel::FileDescriptor>
 {
 public:
   /// Constructor
@@ -58,10 +57,10 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling\\Text;SANS"; }
-  /// do a quick check that this file can be loaded 
-  virtual bool quickFileCheck(const std::string& ,size_t nread,const file_header& header);
-      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-      virtual int fileCheck(const std::string& filePath);
+
+  /// Returns a confidence value that this algorithm can load a file
+  virtual int confidence(Kernel::FileDescriptor & descriptor) const;
+
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();

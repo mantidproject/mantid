@@ -12,7 +12,7 @@ set ( SRC_FILES
 	src/ErrorHandling.cpp
 	src/GSoap.cpp
 	src/GSoapGenerated.cpp
-	src/ICat3Catalog.cpp
+	src/ICat3/ICat3Catalog.cpp
 	src/ICatHelper.cpp
 )
 
@@ -31,10 +31,10 @@ set ( INC_FILES
 	inc/MantidICat/CatalogSearchParam.h
 	inc/MantidICat/ErrorHandling.h
 	inc/MantidICat/GSoap/stdsoap2.h
-	inc/MantidICat/GSoapGenerated/soapH.h
-	inc/MantidICat/GSoapGenerated/soapICATPortBindingProxy.h
-	inc/MantidICat/GSoapGenerated/soapStub.h
-	inc/MantidICat/ICat3Catalog.h
+	inc/MantidICat/ICat3/GSoapGenerated/soapH.h
+	inc/MantidICat/ICat3/GSoapGenerated/soapICATPortBindingProxy.h
+	inc/MantidICat/ICat3/GSoapGenerated/soapStub.h
+	inc/MantidICat/ICat3/ICat3Catalog.h
 	inc/MantidICat/ICatExport.h
 	inc/MantidICat/ICatHelper.h
 	inc/MantidICat/Session.h

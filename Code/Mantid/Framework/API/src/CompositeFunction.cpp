@@ -55,8 +55,7 @@ DECLARE_FUNCTION(CompositeFunction)
 
 /// Default constructor
 CompositeFunction::CompositeFunction(): 
-m_nParams(0),
-m_useNumericDerivatives(false)
+m_nParams(0)
 {
   declareAttribute("NumDeriv", Attribute(false));
 }
@@ -163,6 +162,20 @@ void CompositeFunction::setWorkspace(boost::shared_ptr<const Workspace> ws)
   }
 }
 
+/**
+ * @param workspace :: A workspace to fit to.
+ * @param wi :: An index of a spectrum to fit to.
+ * @param startX :: A start of the fitting region.
+ * @param endX :: An end of the fitting region.
+ */
+void CompositeFunction::setMatrixWorkspace(boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX, double endX)
+{
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+        m_functions[ iFun ]->setMatrixWorkspace( workspace, wi, startX, endX );
+    }
+}
+
 /** Function you want to fit to. 
  *  @param domain :: An instance of FunctionDomain with the function arguments.
  *  @param values :: A FunctionValues instance for storing the calculated values.
@@ -185,7 +198,7 @@ void CompositeFunction::function(const FunctionDomain& domain, FunctionValues& v
  */
 void CompositeFunction::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
-  if ( m_useNumericDerivatives )
+  if ( getAttribute("NumDeriv").asBool() )
   {
     calNumericalDeriv(domain, jacobian);
   }
@@ -741,7 +754,7 @@ void CompositeFunction::setUpForFit()
 
   // instead of automatically switching to numeric derivatives
   // log a warning about a danger of not using it
-  if ( !m_useNumericDerivatives ) 
+  if ( !getAttribute("NumDeriv").asBool() )
   {
     for(size_t i = 0; i < nParams(); ++i)
     {
@@ -823,26 +836,6 @@ IFunction_sptr CompositeFunction::getContainingFunction(const ParameterReference
     }
   }
   return IFunction_sptr();
-}
-
-/**
- * Enable/disable numeric derivative calculation.
- * @param yes :: Set to true to use numeric derivative calculation.
- */
-void CompositeFunction::useNumericDerivatives( bool yes ) const
-{
-  m_useNumericDerivatives = yes;
-}
-
-/// Set a value to attribute attName
-void CompositeFunction::setAttribute(const std::string& attName,const Attribute& att)
-{
-  storeAttributeValue( attName, att );
-
-  if ( attName == "NumDeriv" )
-  {
-    useNumericDerivatives( att.asBool() );
-  }
 }
 
 } // namespace API

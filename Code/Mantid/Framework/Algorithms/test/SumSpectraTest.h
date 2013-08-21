@@ -216,6 +216,7 @@ public:
 
   void testRebinnedOutputSum()
   {
+      AnalysisDataService::Instance().clear();
     RebinnedOutput_sptr ws = WorkspaceCreationHelper::CreateRebinnedOutputWorkspace();
     std::string inName = "rebinTest";
     std::string outName = "rebin_sum";

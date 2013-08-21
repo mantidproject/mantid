@@ -130,13 +130,15 @@ namespace API
      */
     virtual void setCoordinateSystem(const Mantid::API::SpecialCoordinateSystem coordinateSystem) = 0;
 
-      //---------------------------------------------------------------------------------------------
-      /**
-       * Get the special coordinate system.
-       * @returns special Q3D coordinate system to use being used by this PeaksWorkspace object. Probably the one the workspace was generated with.
-       */
-      virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
-    };
+    //---------------------------------------------------------------------------------------------
+    /**
+     * Get the special coordinate system.
+     * @returns special Q3D coordinate system to use being used by this PeaksWorkspace object. Probably the one the workspace was generated with.
+     */
+    virtual Mantid::API::SpecialCoordinateSystem getSpecialCoordinateSystem() const = 0;
+    virtual std::vector<std::pair<std::string,std::string> > peakInfo(Kernel::V3D QFrame , bool labCoords) const = 0;
+    virtual int peakInfoNumber(Kernel::V3D qLabFrame , bool labCoords) const =0;
+  };
 
 
   /// Typedef for a shared pointer to a peaks workspace.

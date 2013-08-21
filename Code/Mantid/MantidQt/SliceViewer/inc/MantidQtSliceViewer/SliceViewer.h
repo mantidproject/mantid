@@ -99,6 +99,8 @@ public:
 
   /// Methods relating to peaks overlays.
   boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
+  void setPeaksWorkspaces(const QStringList& list); // For python binding
+  void clearPeaksWorkspaces(); // For python binding
 
   /* -- Methods from implementation of ZoomablePeaksView. --*/
   virtual void zoomToRectangle(const PeakBoundingBox& box);
@@ -115,6 +117,8 @@ signals:
   void showPeaksViewer(bool);
   /// Signal emitted when someone uses setWorkspace() on SliceViewer
   void workspaceChanged();
+  /// Signal emitted when someone wants to see the options dialog
+  void peaksTableColumnOptions();
 
 public slots:
   void helpSliceViewer();
@@ -149,7 +153,7 @@ public slots:
   QPixmap getImage();
   void saveImage(const QString & filename = QString());
   void copyImageToClipboard();
-  void onPeaksViewerOptions();
+  void onPeaksViewerOverlayOptions();
 
   // Synced checkboxes
   void LineMode_toggled(bool);
@@ -189,6 +193,7 @@ private:
   // Autorebin methods.
   bool isAutoRebinSet() const;
   void autoRebinIfRequired();
+
 
 private:
 

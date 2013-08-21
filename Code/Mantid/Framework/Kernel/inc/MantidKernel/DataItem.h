@@ -66,15 +66,16 @@ namespace Mantid
       /// Can this object be accessed from multiple threads safely
       virtual bool threadSafe() const = 0;
       /// Serializes the object to a string
-      virtual std::string toString() const = 0;
+      virtual const std::string toString() const = 0;
       //@}
+
+    protected:
+      Poco::RWLock * getLock() const;
 
     private:
       /// Multiple-reader/single-writer lock to restrict multithreaded
       /// access to the data item.
       Poco::RWLock * m_lock;
-
-      Poco::RWLock * getLock();
 
       /// Allow the ReadLock class direct access to the m_lock object.
       friend class ReadLock;

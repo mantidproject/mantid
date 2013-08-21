@@ -96,6 +96,8 @@ void IQTransform::init()
   // (which the result of a SANS reduction in Mantid will be)
   wsValidator->add<WorkspaceUnitValidator>("MomentumTransfer");
   wsValidator->add<RawCountValidator>(false);
+  // Require X data to be increasing from left to right
+  wsValidator->add<IncreasingAxisValidator>();
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
                   "The input workspace must be a distribution with units of Q");

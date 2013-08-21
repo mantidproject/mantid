@@ -449,19 +449,17 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Create an object capable of using the information in the
             interface and turn it into a reduction process.
         """
-        self.reduce_button.setEnabled(False)   
+        self.reduce_button.setEnabled(False)
         self.export_button.setEnabled(False)
         self.save_button.setEnabled(False)
         self.interface_chk.setEnabled(False)
         self.file_menu.setEnabled(False)
         self.tools_menu.setEnabled(False)
-        if IS_IN_MANTIDPLOT:
-            mantidplot.app.mantidUI.setIsRunning(True)
+        
         if self._interface is not None:
             self._interface.reduce()
-        if IS_IN_MANTIDPLOT:
-            mantidplot.app.mantidUI.setIsRunning(False)
-        self.reduce_button.setEnabled(True)   
+            
+        self.reduce_button.setEnabled(True)
         self.export_button.setEnabled(True)
         self.save_button.setEnabled(True)
         self.interface_chk.setEnabled(True)
@@ -478,11 +476,19 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if self._interface is not None \
         and self.general_settings.cluster_user is not None \
         and self.general_settings.cluster_pass is not None:
+            # Chose a name for the job
+            if self._filename is not None:
+                job_name = os.path.basename(self._filename).strip()
+                toks = os.path.splitext(job_name)
+                job_name = toks[0]
+            else:
+                job_name = ''
             self._interface.cluster_submit(self.general_settings.cluster_user, 
                                            self.general_settings.cluster_pass,
                                            resource=self.general_settings.compute_resource,
                                            nodes=self._number_of_nodes,
-                                           cores_per_node=self._cores_per_node)
+                                           cores_per_node=self._cores_per_node,
+                                           job_name=job_name)
         
     def open_file(self, file_path=None):
         """
@@ -501,6 +507,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             msg = "The file you attempted to load doesn't have a recognized format.\n\n"
             msg += "Please make sure it has been produced by this application."
             QtGui.QMessageBox.warning(self, "Error loading reduction parameter file", msg)
+            print sys.exc_value
             return
          
         if not found_instrument == self._instrument:

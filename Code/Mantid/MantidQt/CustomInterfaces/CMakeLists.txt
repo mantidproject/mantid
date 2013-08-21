@@ -46,6 +46,7 @@ set ( INC_FILES
     inc/MantidQtCustomInterfaces/ConvFit.h
 	inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
     inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
+    inc/MantidQtCustomInterfaces/DllConfig.h
     inc/MantidQtCustomInterfaces/Elwin.h
 	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h	
     inc/MantidQtCustomInterfaces/Fury.h
@@ -120,19 +121,15 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 )
 
-set( TEST_FILES
-               EventNexusFileMementoTest.h
-               WorkspaceMementoTest.h
-               WorkspaceInADSTest.h
-               RawFileMementoTest.h
+set( TEST_FILES CreateMDWorkspaceAlgDialogTest.h
+                EventNexusFileMementoTest.h
+                WorkspaceMementoTest.h
+                WorkspaceInADSTest.h
+                RawFileMementoTest.h
 )
 
 include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
-# the directory with the information about ConvertToMD interface definitions
-# TODO: Remove these illegal dependencies (ticket #5151)
-include_directories (../../Framework/MDEvents/inc)
-include_directories (../../Framework/DataObjects/inc)
 
 # Ugly hack to get around issue in Boost version 1.48.0 
 # in conjunction with Qt 4.7.4 or greater
@@ -160,11 +157,12 @@ enable_precompiled_headers( inc/MantidQtCustomInterfaces/PrecompiledHeader.h  AL
 add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # Set the name of the generated library
-set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
+set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces
+                                                    COMPILE_DEFINITIONS IN_MANTIDQT_CUSTOMINTERFACES )
 
 find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser MDEvents ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser ${CMAKE_THREAD_LIBS_INIT})
 
 ###########################################################################
 # Testing

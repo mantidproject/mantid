@@ -59,7 +59,7 @@ class Sample(object):
             @param reload: if this sample should be reloaded before the first reduction  
             @param period: the period within the sample to be analysed
         """
-        self.run_option = run
+        self.run_option = str(run) #to self-guard against keeping reference to workspace
         self.reload_option = reload
         self.period_option = period
 
@@ -371,8 +371,8 @@ class ISISReducer(SANSReducer):
     
     user_file_path = property(get_user_path, set_user_path, None, None)
 
-    def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
-        self.transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method, override=True)
+    def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log", selector='BOTH'):
+        self.transmission_calculator.set_trans_fit(fit_method, lambda_min, lambda_max, override=True, selector=selector)
         
     def set_trans_sample(self, sample, direct, reload=True, period_t = -1, period_d = -1):
         if not issubclass(self.samp_trans_load.__class__, sans_reduction_steps.BaseTransmission):

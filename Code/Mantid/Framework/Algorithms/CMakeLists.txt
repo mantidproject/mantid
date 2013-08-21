@@ -38,6 +38,7 @@ set ( SRC_FILES
 	src/ConvertFromDistribution.cpp
 	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpectrumAxis.cpp
+	src/ConvertSpectrumAxis2.cpp
 	src/ConvertTableToMatrixWorkspace.cpp
 	src/ConvertToDistribution.cpp
 	src/ConvertToEventWorkspace.cpp
@@ -174,7 +175,7 @@ set ( SRC_FILES
 	src/RemoveLowResTOF.cpp
 	src/RemovePromptPulse.cpp
 	src/RenameWorkspace.cpp
-        src/RenameWorkspaces.cpp
+	src/RenameWorkspaces.cpp
 	src/ReplaceSpecialValues.cpp
 	src/ResampleX.cpp
 	src/ResetNegatives.cpp
@@ -188,6 +189,7 @@ set ( SRC_FILES
 	src/SignalOverError.cpp
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
+	src/SofQCommon.cpp    
 	src/SofQW.cpp
 	src/SofQW2.cpp
 	src/SofQW3.cpp
@@ -257,6 +259,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
+	inc/MantidAlgorithms/ConvertSpectrumAxis2.h
 	inc/MantidAlgorithms/ConvertTableToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToDistribution.h
 	inc/MantidAlgorithms/ConvertToEventWorkspace.h
@@ -394,7 +397,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RenameWorkspace.h
-        inc/MantidAlgorithms/RenameWorkspaces.h
+	inc/MantidAlgorithms/RenameWorkspaces.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
 	inc/MantidAlgorithms/ResampleX.h
 	inc/MantidAlgorithms/ResetNegatives.h
@@ -408,6 +411,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SignalOverError.h
 	inc/MantidAlgorithms/SmoothData.h
 	inc/MantidAlgorithms/SmoothNeighbours.h
+	inc/MantidAlgorithms/SofQCommon.h    
 	inc/MantidAlgorithms/SofQW.h
 	inc/MantidAlgorithms/SofQW2.h
 	inc/MantidAlgorithms/SofQW3.h
@@ -487,6 +491,7 @@ set ( TEST_FILES
 	ConvertAxisByFormulaTest.h
 	ConvertFromDistributionTest.h
 	ConvertSpectrumAxisTest.h
+	ConvertSpectrumAxis2Test.h
 	ConvertTableToMatrixWorkspaceTest.h
 	ConvertToDistributionTest.h
 	ConvertToEventWorkspaceTest.h
@@ -570,8 +575,8 @@ set ( TEST_FILES
 	MedianDetectorTestTest.h
 	MergeRunsTest.h
 	MinusTest.h
-	ModeratorTzeroTest.h
 	ModeratorTzeroLinearTest.h
+	ModeratorTzeroTest.h
 	MonteCarloAbsorptionTest.h
 	MultipleScatteringCylinderAbsorptionTest.h
 	MultiplyRangeTest.h
@@ -606,8 +611,8 @@ set ( TEST_FILES
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
 	RemovePromptPulseTest.h
-	RenameWorkspacesTest.h
 	RenameWorkspaceTest.h
+	RenameWorkspacesTest.h
 	ReplaceSpecialValuesTest.h
 	ResampleXTest.h
 	ResetNegativesTest.h

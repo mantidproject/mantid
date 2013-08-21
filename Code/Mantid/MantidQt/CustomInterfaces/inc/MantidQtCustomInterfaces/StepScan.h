@@ -48,7 +48,6 @@ private slots:
 private:
   void initLayout();
   void startLiveListener();
-  Mantid::API::IAlgorithm_sptr stopLiveListener();
   void setupOptionControls();
   void clearNormalizationCombobox();
   Mantid::API::IAlgorithm_sptr setupStepScanAlg();
@@ -66,7 +65,6 @@ private:
   QString m_inputFilename;
   bool m_dataReloadNeeded;
   const std::string m_instrument; ///< The default instrument (for live data)
-  Mantid::API::IAlgorithm_sptr m_monitorLiveData; ///< A handle to the running MonitorLiveData (null if none running)
 
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAddNotification> m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification> m_replObserver;

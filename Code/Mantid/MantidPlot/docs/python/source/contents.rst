@@ -7,3 +7,4 @@ Mantid Python References Contents
   changes
   api/mantid
   api/mantidplot
+  techiniques/calibration

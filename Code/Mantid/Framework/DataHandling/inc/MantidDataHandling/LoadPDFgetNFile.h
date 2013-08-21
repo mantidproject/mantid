@@ -2,8 +2,7 @@
 #define MANTID_DATAHANDLING_LOADPDFGETNFILE_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
@@ -33,7 +32,7 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadPDFgetNFile : public API::IDataFileChecker
+  class DLLExport LoadPDFgetNFile : public API::IFileLoader<Kernel::FileDescriptor>
   {
   public:
     LoadPDFgetNFile();
@@ -55,16 +54,14 @@ namespace DataHandling
     void init();
     /// Implement abstract Algorithm methods
     void exec();
-    /// do a quick check that this file can be loaded
-    virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-    /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-    virtual int fileCheck(const std::string& filePath);
+    /// Returns a confidence value that this algorithm can load a file
+    virtual int confidence(Kernel::FileDescriptor & descriptor) const;
 
     /// Parse PDFgetN data file
     void parseDataFile(std::string filename);
 
     /// Check whether a string starts from a specified sub-string
-    bool startsWith(std::string s, std::string header);
+    bool startsWith(const std::string &s, const std::string & header) const;
 
     /// Parse column name line staring with \#L
     void parseColumnNameLine(std::string line);

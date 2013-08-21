@@ -1,5 +1,5 @@
 #include "MantidICat/ErrorHandling.h"
-#include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
+#include "MantidICat/ICat3/GSoapGenerated/soapICATPortBindingProxy.h"
 
 namespace Mantid
 {

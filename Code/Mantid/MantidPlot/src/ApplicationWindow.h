@@ -41,6 +41,7 @@ Description          : QtiPlot's main window
 #include <QLocale>
 #include <QSet>
 #include <QSettings>
+#include <QPointer>
 
 #include "MantidQtAPI/HelpWindow.h"
 #include "Table.h"
@@ -326,7 +327,7 @@ public slots:
   //! \name Surface Plots
   //@{
   Graph3D* plotSurface(const QString& formula, double xl, double xr,
-    double yl, double yr, double zl, double zr, int columns = 40, int rows = 30);
+    double yl, double yr, double zl, double zr, size_t columns = 40, size_t rows = 30);
   Graph3D* plotParametricSurface(const QString& xFormula, const QString& yFormula,
     const QString& zFormula, double ul, double ur, double vl, double vr,
     int columns, int rows, bool uPeriodic, bool vPeriodic);
@@ -1455,7 +1456,7 @@ private:
   QAction *actionSetXCol, *actionSetYCol, *actionSetZCol, *actionSetLabelCol, *actionDisregardCol, *actionSetXErrCol, *actionSetYErrCol;
   QAction *actionBoxPlot, *actionMultiPeakGauss, *actionMultiPeakLorentz, *actionCheckUpdates;
   QAction *actionDonate, *actionHomePage, *actionDownloadManual, *actionTechnicalSupport, *actionTranslations;
-  QAction *actionHelpForums, *actionHelpBugReports;
+  QAction *actionHelpForums, *actionHelpBugReports, *actionAskHelp;
   QAction *actionShowPlotDialog, *actionShowScaleDialog, *actionOpenTemplate, *actionSaveTemplate;
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;

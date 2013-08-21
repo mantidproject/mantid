@@ -260,6 +260,17 @@ namespace DataObjects
         return "MaskWorkspace";
     }
 
+    /**
+     * @return A string containing the workspace description
+     */
+    const std::string MaskWorkspace::toString() const
+    {
+      std::ostringstream os;
+      os << SpecialWorkspace2D::toString();
+      os << "Masked: " << getNumberMasked() << "\n";
+      return os.str();
+    }
+
 } //namespace DataObjects
 } //namespace Mantid
 

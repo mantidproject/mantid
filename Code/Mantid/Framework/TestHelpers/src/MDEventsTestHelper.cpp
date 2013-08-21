@@ -1,3 +1,10 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This collection of functions MAY NOT be used in any test from a package below
+ *  the level of MDEvents (e.g. Kernel, Geometry, API, DataObjects).
+ *********************************************************************************/
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -8,6 +15,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -49,7 +57,8 @@ namespace MDEventsTestHelper
    */
   EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents)
   {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "TEST");
+    FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+
     int numPixels = 10000;
     int numBins = 1600;
     double binDelta = 10.0;
@@ -243,7 +252,7 @@ namespace MDEventsTestHelper
           MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, max, numBins)),
           MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, max, numBins)),
           MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, max, numBins)),
-          MDHistoDimension_sptr(new MDHistoDimension("t","z","m", 0.0, max, numBins))
+          MDHistoDimension_sptr(new MDHistoDimension("t","t","m", 0.0, max, numBins))
           );
     }
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);

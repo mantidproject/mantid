@@ -177,23 +177,25 @@ def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False
         scale, shift, fitScale, fitShift, qMin, qMax)
     _printMessage('#Set front detector rescale/shift values')
     
-def TransFit(mode,lambdamin=None,lambdamax=None):
+def TransFit(mode,lambdamin=None,lambdamax=None, selector='BOTH'):
     """
         Sets the fit method to calculate the transmission fit and the wavelength range
         over which to do the fit. These arguments are passed to the algorithm
         CalculateTransmission. If mode is set to 'Off' then the unfitted workspace is
         used and lambdamin and max have no effect
-        @param mode: can be 'Logarithmic' ('YLOG', 'LOG') 'OFF' ('CLEAR') or 'LINEAR' (STRAIGHT', LIN')
+        @param mode: can be 'Logarithmic' ('YLOG', 'LOG') 'OFF' ('CLEAR') or 'LINEAR' (STRAIGHT', LIN'), 'POLYNOMIAL2', 'POLYNOMIAL3', ... 
         @param lambdamin: the lowest wavelength to use in any fit
         @param lambdamax: the end of the fit range
+        @param selector: define for which transmission this fit specification is valid (BOTH, SAMPLE, CAN) 
     """
     mode = str(mode).strip().upper()
     message = mode
     if lambdamin: message += ', ' + str(lambdamin)
     if lambdamax: message += ', ' + str(lambdamax)
+    message += ', selector=' + selector 
     _printMessage("TransFit(\"" + message + "\")")
 
-    ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode)
+    ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode, selector)
     
 def TransWorkspace(sample, can = None):
     """
@@ -216,13 +218,13 @@ def AssignCan(can_run, reload = True, period = isis_reduction_steps.LoadRun.UNSE
         @param reload: must be set to True
         @param period: the period (entry) number to load, default is the first period
     """    
-    mes = 'AssignCan("' + can_run + '"'
+    mes = 'AssignCan("' + str(can_run) + '"'
     if period != isis_reduction_steps.LoadRun.UNSET_PERIOD:
         mes += ', ' + str(period)
     mes += ')'
     _printMessage(mes)
 
-    if (not can_run) or can_run.startswith('.'):
+    if (not can_run) or (isinstance(can_run,str) and can_run.startswith('.')):
         ReductionSingleton().background_subtracter = None
         return '', None
 
@@ -243,8 +245,8 @@ def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = 
         @param period_t: the entry number of the transmission run (default single entry file)  
         @param period_d: the entry number of the direct run (default single entry file)
     """  
-    _printMessage('TransmissionSample("' + sample + '","' + direct + '")')
-    ReductionSingleton().set_trans_sample(sample, direct, True, period_t, period_d)
+    _printMessage('TransmissionSample("' + str(sample) + '","' + str(direct) + '")')
+    ReductionSingleton().set_trans_sample(sample, direct, reload, period_t, period_d)
     return ReductionSingleton().samp_trans_load.execute(
                                         ReductionSingleton(), None)
 
@@ -257,8 +259,8 @@ def TransmissionCan(can, direct, reload = True, period_t = -1, period_d = -1):
         @param period_t: the entry number of the transmission run (default single entry file)  
         @param period_d: the entry number of the direct run (default single entry file)
     """
-    _printMessage('TransmissionCan("' + can + '","' + direct + '")')
-    ReductionSingleton().set_trans_can(can, direct, True, period_t, period_d)
+    _printMessage('TransmissionCan("' + str(can) + '","' + str(direct) + '")')
+    ReductionSingleton().set_trans_can(can, direct, reload, period_t, period_d)
     return ReductionSingleton().can_trans_load.execute(
                                             ReductionSingleton(), None) 
     
@@ -271,7 +273,7 @@ def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRu
         @param reload: must be set to True
         @param period: the period (entry) number to load, default is the first period
     """
-    mes = 'AssignSample("' + sample_run + '"'
+    mes = 'AssignSample("' + str(sample_run) + '"'
     if period != isis_reduction_steps.LoadRun.UNSET_PERIOD:
         mes += ', ' + str(period)
     mes += ')'

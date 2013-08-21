@@ -57,7 +57,12 @@ namespace IDA
   
     connect(uiForm().fury_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().fury_swInput, SLOT(setCurrentIndex(int)));  
     connect(uiForm().fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resType(const QString&)));
+
+    //signals to plot input files
     connect(uiForm().fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
+    connect(uiForm().fury_iconFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(uiForm().fury_wsSample, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
+    connect(uiForm().fury_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
   }
 
   void Fury::run()
@@ -144,19 +149,27 @@ namespace IDA
 
   void Fury::plotInput()
   {
-    std::string workspace;
+    using Mantid::API::MatrixWorkspace;
+    using Mantid::API::MatrixWorkspace_const_sptr;
+
+    MatrixWorkspace_const_sptr workspace;
     if ( uiForm().fury_cbInputType->currentIndex() == 0 )
     {
+      if(uiForm().fury_iconFile->isEmpty())
+      {
+        return;
+      }
+
       if ( uiForm().fury_iconFile->isValid() )
       {
         QString filename = uiForm().fury_iconFile->getFirstFilename();
         QFileInfo fi(filename);
         QString wsname = fi.baseName();
-
-        QString pyInput = "LoadNexus(r'" + filename + "', '" + wsname + "')\n";
-        QString pyOutput = runPythonCode(pyInput);
-
-        workspace = wsname.toStdString();
+        workspace = runLoadNexus(filename, wsname);
+        if(!workspace)
+        {
+          return;
+        }
       }
       else
       {
@@ -166,10 +179,18 @@ namespace IDA
     }
     else if ( uiForm().fury_cbInputType->currentIndex() == 1 )
     {
-      workspace = uiForm().fury_wsSample->currentText().toStdString();
-      if ( workspace.empty() )
+      QString wsname = uiForm().fury_wsSample->currentText();
+      if(wsname.isEmpty())
       {
-        showInformationBox("No workspace selected.");
+        return;
+      }
+      try
+      {
+        workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
+      }
+      catch(Mantid::Kernel::Exception::NotFoundError&)
+      {
+        showInformationBox(QString("Unable to retrieve workspace: " + wsname));
         return;
       }
     }

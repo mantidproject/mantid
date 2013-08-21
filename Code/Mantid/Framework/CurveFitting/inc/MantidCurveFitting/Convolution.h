@@ -121,18 +121,16 @@ namespace Mantid
       /// overwrite IFunction base class methods
       std::string name()const{return "Convolution";}
       virtual const std::string category() const { return "General";}
-      /// Writes itself into a string
-      std::string asString()const;
       /// Function you want to fit to. 
       /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
       virtual void function(const API::FunctionDomain& domain, API::FunctionValues& values)const;
       /// Derivatives of function with respect to active parameters
       virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
 
-      //void function1D(double* out, const double* xValues, const size_t nData)const;
-      //void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
+      /// Set a value to attribute attName
+      virtual void setAttribute(const std::string& attName,const Attribute& );
 
-      /// Add a function. 
+      /// Add a function.
       size_t addFunction(API::IFunction_sptr f);
 
       /// Deletes and zeroes pointer m_resolution forsing function(...) to recalculate the resolution function

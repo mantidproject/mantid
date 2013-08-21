@@ -11,7 +11,7 @@
 
   <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
   </soapEndPoint>
-
+  
   <instrument name="ALF">  
     <technique>Single Crystal Diffraction</technique>
     <livedata address="NDXALF:6789" />
@@ -109,10 +109,11 @@
     <technique>Neutron Diffraction with isotopic substitution</technique>
     <livedata address="NDXSANDALS:6789" />
   </instrument>
-
+  
   <instrument name="SURF" shortname="SRF">
     <zeropadding size="5" startRunNumber="1" prefix="SRF"/> 
     <zeropadding size="6" startRunNumber="100000" prefix="SRF"/>
+    <zeropadding size="8" startRunNumber="104604" prefix="SURF"/>
     <technique>Reflectometry</technique>
     <livedata address="NDXSURF:6789" />
   </instrument>
@@ -334,7 +335,7 @@
   <instrument name="HYSPEC" shortname="HYS" beamline="14B"> 
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
-    <!--livedata address="hyspec-sms1.sns.gov:31415" /-->
+    <livedata address="hyspec-sms1.sns.gov:31415" />
   </instrument> 
   
   <!-- This is a virtual temp instrument for testing ADARA -->
@@ -403,6 +404,10 @@
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
+  </instrument>
+  
+  <instrument name="D33">
+    <technique>SANS</technique> 
   </instrument>
 
 </facility>
@@ -481,31 +486,21 @@
 
 </facility>
 
+<facility name="SmuS" FileExtensions=".nxs,.xml">
+
+  <instrument name="GPD">
+    <zeropadding size="3"/>
+    <technique>Muon spectroscopy</technique>
+  </instrument>
+
+</facility>
+
 <!--  Reactor Orphee (France) -->
 <facility name="LLB" FileExtensions=".nxs,.hdf">
   <instrument name="MIBEMOL">
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Direct Geometry Spectroscopy</technique>
   </instrument>
-</facility>
-
-
-<facility name="TEST" FileExtensions=".nxs,.dat,.xml">
-
-   <livedata listener="MockILiveListener"/>
-
-   <instrument name="MINITOPAZ"> 
-      <technique>Test Neutron Diffraction</technique>
-      <livedata address="127.0.0.1:0" />
-   </instrument>
-
-  <instrument name="TESTHISTOLISTENER"> 
-    <zeropadding size="8"/>
-    <zeropadding size="11" startRunNumber="300" prefix="TST"/>
-    <technique>Test ISISHistoDataListener</technique>
-    <livedata listener="ISISHistoDataListener" address="127.0.0.1:6789" />
-  </instrument>
-
 </facility>
 
 </facilities>

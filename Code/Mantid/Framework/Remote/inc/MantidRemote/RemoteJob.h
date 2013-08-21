@@ -8,13 +8,14 @@
  * managers (MWS vs. Condor, for example) but I don't think so.
  */
 
+#include "MantidRemote/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 
 #include <string>
 #include <map>
 class RemoteJobManager;
 
-class RemoteJob
+class MANTID_REMOTE_DLL RemoteJob
 {
 public:
 

@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/LiveDataAlgorithm.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
+	src/LoadHelper.cpp
 	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadCanSAS1D2.cpp
@@ -43,7 +44,9 @@ set ( SRC_FILES
 	src/LoadEventPreNexus2.cpp
 	src/LoadFullprofResolution.cpp
 	src/LoadGSS.cpp
+	src/LoadIDFFromNexus.cpp
 	src/LoadILL.cpp
+	src/LoadILLSANS.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
 	src/LoadInstrument.cpp
@@ -60,6 +63,7 @@ set ( SRC_FILES
 	src/LoadMask.cpp
 	src/LoadMaskingFile.cpp
 	src/LoadMcStasNexus.cpp
+	src/LoadMcStasEventNexus.cpp
 	src/LoadMuonLog.cpp
 	src/LoadMuonNexus.cpp
 	src/LoadMuonNexus1.cpp
@@ -174,6 +178,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LiveDataAlgorithm.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
+	inc/MantidDataHandling/LoadHelper.h
 	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadCanSAS1D2.h
@@ -188,7 +193,9 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadEventPreNexus2.h
 	inc/MantidDataHandling/LoadFullprofResolution.h
 	inc/MantidDataHandling/LoadGSS.h
+	inc/MantidDataHandling/LoadIDFFromNexus.h
 	inc/MantidDataHandling/LoadILL.h
+	inc/MantidDataHandling/LoadILLSANS.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
 	inc/MantidDataHandling/LoadInstrument.h
@@ -205,6 +212,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadMask.h
 	inc/MantidDataHandling/LoadMaskingFile.h
 	inc/MantidDataHandling/LoadMcStasNexus.h
+	inc/MantidDataHandling/LoadMcStasEventNexus.h
 	inc/MantidDataHandling/LoadMuonLog.h
 	inc/MantidDataHandling/LoadMuonNexus.h
 	inc/MantidDataHandling/LoadMuonNexus1.h
@@ -327,6 +335,7 @@ set ( TEST_FILES
 	LoadEventPreNexusTest.h
 	LoadFullprofResolutionTest.h
 	LoadGSSTest.h
+	LoadILLSANSTest.h
 	LoadILLTest.h
 	LoadISISNexusTest.h
 	LoadInstrumentFromRawTest.h
@@ -339,6 +348,7 @@ set ( TEST_FILES
 	LoadMappingTableTest.h
 	LoadMaskTest.h
 	LoadMcStasNexusTest.h
+	LoadMcStasEventNexusTest.h
 	LoadMuonLogTest.h
 	LoadMuonNexus1Test.h
 	LoadMuonNexus2Test.h
@@ -372,6 +382,7 @@ set ( TEST_FILES
 	MaskDetectorsInShapeTest.h
 	MaskDetectorsTest.h
 	MergeLogsTest.h
+	ModifyDetectorDotDatFileTest.h
 	MonitorLiveDataTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h

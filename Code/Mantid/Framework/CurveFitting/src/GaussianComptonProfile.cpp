@@ -34,38 +34,79 @@ namespace Mantid
      */
     void GaussianComptonProfile::declareParameters()
     {
-      // DO NOT REORDER WITHOUT CHANGING THE GETPARAMETER calls
+      // DO NOT REORDER WITHOUT CHANGING THE getParameter AND 
+      // intensityParameterIndices methods
       //
       declareParameter(WIDTH_PARAM, 1.0, "Gaussian width parameter");
       declareParameter(AMP_PARAM, 1.0, "Gaussian intensity parameter");
+    }
+
+   
+    /*
+     */
+    std::vector<size_t> GaussianComptonProfile::intensityParameterIndices() const
+    {
+      return std::vector<size_t>(1, this->parameterIndex(AMP_PARAM));
+    }
+
+    /**
+     * Fills in a column of the matrix with this mass profile, starting at the given index
+     * @param cmatrix InOut matrix whose column should be set to the mass profile for each active hermite polynomial
+     * @param start Index of the column to start on
+     * @param errors The data errors
+     * @returns The number of columns filled
+     */
+    size_t GaussianComptonProfile::fillConstraintMatrix(Kernel::DblMatrix & cmatrix, const size_t start,
+                                                        const std::vector<double>& errors) const
+    {
+      std::vector<double> result(ySpace().size());
+      const double amplitude = 1.0;
+      this->massProfile(result.data(), ySpace().size(), amplitude);
+      std::transform(result.begin(), result.end(), errors.begin(), result.begin(), std::divides<double>());
+      cmatrix.setColumn(start, result);
+      return 1;
+    }
+
+    /**
+     * Uses a Gaussian approximation for the mass and convolutes it with the Voigt
+     * instrument resolution function
+     * @param result An pre-sized output array that should be filled with the results
+     * @param nData The size of the array
+     */
+    void GaussianComptonProfile::massProfile(double * result, const size_t nData) const
+    {
+      const double amplitude(getParameter(1));
+      this->massProfile(result, nData, amplitude);
     }
 
     /**
      * Uses a Gaussian approximation for the mass and convolutes it with the Voigt
      * instrument resolution function
      * @param result An pre-sized output vector that should be filled with the results
-     * @param lorentzFWHM The lorentz width for the resolution
-     * @param resolutionFWHM The sum-squared value of the resolution errors
+     * @param nData The size of the array
+     * @param amplitude A fixed value for the amplitude
      */
-    void GaussianComptonProfile::massProfile(std::vector<double> & result,const double lorentzFWHM, const double resolutionFWHM) const
+    void GaussianComptonProfile::massProfile(double * result, const size_t nData, const double amplitude) const
     {
-      double lorentzPos(0.0), gaussWidth(getParameter(0)), amplitude(getParameter(1));
-      double gaussFWHM = std::sqrt(std::pow(resolutionFWHM,2) + std::pow(2.0*STDDEV_TO_HWHM*gaussWidth,2));
+      double lorentzPos(0.0), gaussWidth(getParameter(0));
+      double gaussFWHM = std::sqrt(std::pow(resolutionFWHM(),2) + std::pow(2.0*STDDEV_TO_HWHM*gaussWidth,2));
 
       const auto & yspace = ySpace();
-
       // Gaussian already folded into Voigt
-      voigtApprox(result, yspace, lorentzPos, amplitude, lorentzFWHM, gaussFWHM);
-      std::vector<double> voigtDiffResult(yspace.size());
-      voigtApproxDiff(voigtDiffResult, yspace, lorentzPos, amplitude, lorentzFWHM, gaussFWHM);
+      std::vector<double> voigt(yspace.size()), voigtDiffResult(yspace.size());
+      voigtApprox(voigt, yspace, lorentzPos, amplitude, lorentzFWHM(), gaussFWHM);
+      voigtApproxDiff(voigtDiffResult, yspace, lorentzPos, amplitude, lorentzFWHM(), gaussFWHM);
 
       const auto & modq = modQ();
-      const size_t nData(result.size());
+      const auto & ei = e0();
+      // Include e_i^0.1*mass/q pre-factor
       for(size_t j = 0; j < nData; ++j)
       {
-        const double factor = std::pow(gaussWidth,4.0)/(3.0*modq[j]);
-        result[j] -= factor*voigtDiffResult[j];
+        const double q = modq[j];
+        const double prefactor = mass()*std::pow(ei[j],0.1)/q;
+        result[j] = prefactor*(voigt[j] - std::pow(gaussWidth,4.0)*voigtDiffResult[j]/(3.0*q));
       }
+
     }
 
 

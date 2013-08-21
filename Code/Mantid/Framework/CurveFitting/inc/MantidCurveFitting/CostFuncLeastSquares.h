@@ -10,6 +10,10 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
+  class Logger;
+}
 namespace CurveFitting
 {
   class SeqDomain;
@@ -44,7 +48,7 @@ class DLLExport CostFuncLeastSquares : public CostFuncFitting
 {
 public:
   /// Constructor
-  CostFuncLeastSquares():CostFuncFitting(),m_value(0),m_pushed(false){}
+  CostFuncLeastSquares();
   /// Virtual destructor
   virtual ~CostFuncLeastSquares() {}
 
@@ -103,6 +107,7 @@ private:
   friend class SeqDomain;
   friend class ParDomain;
 
+  Kernel::Logger & m_log;
 };
 
 } // namespace CurveFitting

@@ -35,14 +35,11 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
 
-    if (outWSName.compare("Grouping_2012-11-27") != 0)
-    {
-      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 24794);
-    }
-    else
-    {
-      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 25872);
-    }
+    // We expect the same number of histograms as detectors in the instrument (excluding monitors)
+    const bool skipMonitors(true);
+    const size_t ndets = ws->getInstrument()->getNumberDetectors(skipMonitors);
+    TS_ASSERT_EQUALS(ndets, ws->getNumberHistograms());
+
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     // All zero.
     TS_ASSERT_EQUALS( ws->dataY(0)[0], 0.0);
@@ -66,6 +63,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     doTest(outWSName);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 0);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 0);
   }
 
 
@@ -81,6 +80,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     doTest(outWSName);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 0);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 0);
   }
   
 
@@ -105,6 +106,8 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
 
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 4096);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 4);
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 51200);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     for (int i = 1; i <= 4; ++i)
@@ -139,6 +142,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
+
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 18750);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 4);
 
     AnalysisDataService::Instance().remove(outWSName);
   }
@@ -190,6 +196,8 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
 
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupedSpectraResult")), 983040);
+    TS_ASSERT_EQUALS(static_cast<int>(alg.getProperty("NumberGroupsResult")), 15);
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 65536 * 15);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     // Check one entry in each group

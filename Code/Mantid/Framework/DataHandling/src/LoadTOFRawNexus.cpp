@@ -18,8 +18,8 @@ The typical meanings of Signal are as follows (note that these may change!):
 *WIKI*/
 
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -33,9 +33,8 @@ namespace Mantid
 {
 namespace DataHandling
 {
-// Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM( LoadTOFRawNexus )
-DECLARE_LOADALGORITHM(LoadTOFRawNexus)
+
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus);
 
 using namespace Kernel;
 using namespace API;
@@ -80,65 +79,19 @@ void LoadTOFRawNexus::init()
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Do a quick file type check by looking at the first 100 bytes of the file
- *  @param filePath :: path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
  */
-bool LoadTOFRawNexus::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
-{
-  std::string ext = this->extension(filePath);
-  // If the extension is nxs then give it a go
-  if( ext.compare("nxs") == 0 ) return true;
-
-  // If not then let's see if it is a HDF file by checking for the magic cookie
-  if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
-  return false;
-}
-
-//-------------------------------------------------------------------------------------------------
-/**
- * Checks the file by opening it and reading few lines
- *  @param filePath :: name of the file inluding its path
- *  @return an integer value how much this algorithm can load the file
- */
-int LoadTOFRawNexus::fileCheck(const std::string& filePath)
+int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor & descriptor) const
 {
   int confidence(0);
-  typedef std::map<std::string,std::string> string_map_t;
-  bool hasEventData = false;
-  bool hasEntry = false;
-  bool hasData = false;
-  try
+  if( descriptor.pathOfTypeExists("/entry", "NXentry") ||
+      descriptor.pathOfTypeExists("/entry-state0", "NXentry") ||
+      descriptor.pathOfTypeExists("/raw_data_1", "NXentry") )
   {
-    ::NeXus::File file = ::NeXus::File(filePath);
-    string_map_t entries = file.getEntries();
-    for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)
-    {
-      if ( ((it->first == "entry") || (it->first == "entry-state0") || (it->first == "raw_data_1")) && (it->second == "NXentry") )
-      {
-        // Has an entry - is ok sign
-        hasEntry = true;
-        file.openGroup(it->first, it->second);
-        string_map_t entries2 = file.getEntries();
-        for(string_map_t::const_iterator it2 = entries2.begin(); it2 != entries2.end(); ++it2)
-        {
-          if (it2->second == "NXevent_data")
-            hasEventData = true;
-          if (it2->second == "NXdata")
-            hasData = true;
-        }
-        file.closeGroup();
-      }
-    }
-  }
-  catch(::NeXus::Exception&)
-  {
-  }
-
-  if (hasEntry)
-  {
+    const bool hasEventData = descriptor.classTypeExists("NXevent_data");
+    const bool hasData = descriptor.classTypeExists("NXdata");
     if (hasData && hasEventData)
       // Event data = this is event NXS
       confidence = 20;
@@ -149,13 +102,8 @@ int LoadTOFRawNexus::fileCheck(const std::string& filePath)
       // No data ?
       confidence = 10;
   }
-  else
-    confidence = 0;
-
   return confidence;
 }
-
-
 
 //-------------------------------------------------------------------------------------------------
 /** Goes thoguh a histogram NXS file and counts the number of pixels.
@@ -623,7 +571,7 @@ void LoadTOFRawNexus::exec()
   WS->rebuildSpectraMapping(false);
   // And map ID to WI
   g_log.debug() << "Mapping ID to WI" << std::endl;
-  id_to_wi = WS->getDetectorIDToWorkspaceIndexMap(false);
+  id_to_wi = WS->getDetectorIDToWorkspaceIndexMap();
 
   // Load each bank sequentially
   //PARALLEL_FOR1(WS)

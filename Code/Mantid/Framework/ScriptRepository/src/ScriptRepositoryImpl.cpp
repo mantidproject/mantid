@@ -29,10 +29,12 @@ using Mantid::Kernel::ConfigServiceImpl;
 #pragma warning( disable : 4250 )
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
+#include <Winhttp.h>
 #pragma warning( pop )
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
+#include <stdlib.h>
 #endif
 #include <Poco/StreamCopier.h>
 #include <Poco/Net/NetException.h>
@@ -268,7 +270,7 @@ namespace API
     }
       
     // install the two files inside the given folder
-    
+    g_log.debug() << "ScriptRepository attempt to doDownload file " << path << std::endl;
     // download the repository json
     doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
@@ -422,7 +424,9 @@ namespace API
 
       // for the directories, update the status of this directory
       if (entry.directory){
-        entry.status = acc_status; 
+        entry.status = acc_status;
+        if (!entry.remote)
+          entry.status = Mantid::API::LOCAL_ONLY;
         last_directory = entry_path;        
       }else{
         // for the files, it evaluates the status of this file
@@ -741,6 +745,14 @@ namespace API
       Poco::URI uri(remote_upload); 
       std::string path(uri.getPathAndQuery());
       HTTPClientSession session(uri.getHost(), uri.getPort()); 
+
+      // configure proxy
+      std::string proxy_config; 
+      unsigned short proxy_port; 
+      if (getProxyConfig(proxy_config, proxy_port))
+        session.setProxy(proxy_config, proxy_port);
+      // proxy end
+
       HTTPRequest req(HTTPRequest::HTTP_POST, path, 
                       HTTPMessage::HTTP_1_0); 
       HTMLForm form(HTMLForm::ENCODING_MULTIPART); 
@@ -845,6 +857,231 @@ namespace API
       throw ScriptRepoException(ex.displayText(), ex.className()); 
     }
   }
+
+ /**
+   * Delete one file from the local and the central ScriptRepository 
+   * It will send in a POST method, with the file path to find the path : 
+   *  - author : Will identify the author of the change
+   *  - email:  Will identify the email of the author
+   *  - comment: Description of the nature of the file or of the update
+   * 
+   * It will them send the request to the URL pointed to UploaderWebServer, changing the word
+   * publish to remove. For example: 
+   * 
+   * http://upload.mantidproject.org/scriptrepository/payload/remove
+   * 
+   * The server will them create a git commit deleting the file. And will reply with a json string
+   * with some usefull information about the success or failure of the attempt to delete. 
+   * In failure, it will be converted to an appropriated ScriptRepoException.
+   * 
+   * Requirements: in order to be allowed to delete files from the central repository, 
+   * it is required that the state of the file must be BOTH_UNCHANGED or LOCAL_CHANGED.
+   * 
+   * @param file_path: The path (relative to the repository) or absolute to identify the file to remove
+   * @param comment: justification to remove this file (will be used as git commit message)
+   * @param author: identification of the requester for deleting wich must be the author of the file as well
+   * @param email: email of the requester   
+   * 
+   * @exception ScriptRepoException justifying the reason to failure.
+   *
+   * @note only local files can be removed.
+  */
+  void ScriptRepositoryImpl::remove(const std::string & file_path, 
+                                              const std::string & comment,
+                                              const std::string & author, 
+                                    const std::string & email){
+    std::string relative_path = convertPath(file_path);
+   
+    // get the status, because only local files can be removed
+    SCRIPTSTATUS status = fileStatus(relative_path);
+    std::stringstream ss;
+    bool raise_exc = false; 
+    switch(status){
+    case REMOTE_ONLY:
+      ss << "You are not allowed to remove files from the repository that you have not installed and you are not the owner";
+      raise_exc = true;
+      break;
+    case REMOTE_CHANGED: 
+    case BOTH_CHANGED:
+      ss << "There is a new version of this file, so you can not remove it from the repository before checking it out. Please download the new version, and if you still wants to remove, do it afterwards"; 
+      raise_exc = true;
+      break; 
+    case LOCAL_ONLY:
+      ss << "This operation is to remove files from the central repository. "
+         << "\nTo delete files or folders from your local folder, please, do it through your operative system,"
+         << "using your local installation folder at " << local_repository ; 
+      raise_exc = true; 
+    default: 
+      break;
+    }
+    if (raise_exc)
+      throw ScriptRepoException(ss.str()); 
+
+    g_log.information() << "ScriptRepository deleting " << file_path << " ..." << std::endl; 
+    
+    {
+      // request to remove the file from the central repository
+
+      RepositoryEntry & entry = repo.at(relative_path);
+
+      if (entry.directory)
+        throw ScriptRepoException("You can not remove folders recursively from the central repository.");
+      
+      
+      // prepare the request, and call doDeleteRemoteFile to request the server to remove the file
+      std::string remote_delete = remote_upload; 
+      boost::replace_all(remote_delete, "publish", "remove");
+      std::stringstream answer; 
+      answer << doDeleteRemoteFile(remote_delete, file_path, author, email, comment);
+      g_log.debug() << "Answer from doDelete: " << answer.str() << std::endl; 
+
+      // analyze the answer from the server, to see if the file was removed or not. 
+      std::string info; 
+      std::string detail;
+      std::string published_date;        
+      ptree pt; 
+      try{
+        read_json(answer, pt); 
+        info = pt.get<std::string>("message",""); 
+        detail = pt.get<std::string>("detail","");
+        std::string cmd = pt.get<std::string>("shell",""); 
+        if (!cmd.empty())
+          detail.append("\nFrom Command: ").append(cmd);
+        
+      }catch (boost::property_tree::json_parser_error & ex){
+        // this should not occurr in production. The answer from the 
+        // server should always be a valid json file
+        g_log.debug() << "Bad answer: " << ex.what() << std::endl; 
+        throw ScriptRepoException("Bad answer from the Server",
+                                  ex.what()); 
+      }
+
+      g_log.debug() << "Checking if success info=" << info << std::endl; 
+      // check if the server removed the file from the central repository
+      if (info!= "success")
+        throw ScriptRepoException(info, detail); // no
+
+      
+      g_log.notice() << "ScriptRepository " << file_path <<  " removed from central repository"<< std::endl; 
+
+      // delete the entry from the repository.json. In reality, the repository.json should change at the 
+      // remote repository, and we could only download the new one, but, practically, at the server, it will 
+      // take sometime to be really removed, so, for practical reasons, this is dealt with locally. 
+      // 
+      {
+        ptree pt; 
+        std::string filename = std::string(local_repository).append(".repository.json"); 
+        try{
+          read_json(filename,pt);
+          pt.erase(relative_path);// remove the entry
+#if defined(_WIN32) ||  defined(_WIN64)
+          //set the .repository.json and .local.json not hidden (to be able to edit it)
+          SetFileAttributes( filename.c_str(), FILE_ATTRIBUTE_NORMAL);     
+#endif
+          write_json(filename,pt);
+#if defined(_WIN32) ||  defined(_WIN64)
+          //set the .repository.json and .local.json hidden
+          SetFileAttributes( filename.c_str(), FILE_ATTRIBUTE_HIDDEN);     
+#endif
+        }catch (boost::property_tree::json_parser_error & ex){
+          std::stringstream ss;
+          ss << "corrupted central copy of database : " << filename; 
+          
+          g_log.error() << "ScriptRepository: " << ss.str() 
+                        << "\nDetails: deleting entries - json_parser_error: " << ex.what() << std::endl; 
+          throw ScriptRepoException(ss.str(), ex.what()); 
+        }
+      }
+
+      // update the repository list variable
+      // now, it is local_only and it is not inside remote. 
+      // this is necessary for the strange case, where removing locally may fail.
+
+      entry.status = LOCAL_ONLY; 
+      entry.remote = false; 
+      
+    }// file removed on central repository
+
+  }
+
+  /** Implements the request to the server to delete one file. It is created as a virtual protected member
+   * to allow creating unittest mocking the dependency on the internet connection. This method requires 
+   * internet connection. 
+   * 
+   * @param url: url from the server that serves the request of removing entries
+   * @param file_path: relative path to the file inside the repository
+   * @param author: requester
+   * @param email: email from author
+   * @param comment: to be converted in git commit
+   * @return The answer from the server (json string)
+   *
+   * The server requires that the path, author, email and comment be given in order to create the commit
+   * for the git repository. Besides, it will ensure that the author and email are the same to the author
+   * and email for the last commit, in order not to allow deleting files that others are owner. 
+   * 
+   */
+  std::string ScriptRepositoryImpl::doDeleteRemoteFile(const std::string & url, const std::string & file_path, 
+                          const std::string & author, const std::string & email, 
+                          const std::string & comment){
+    using namespace Poco::Net;
+    std::stringstream answer;
+    try{
+      // create the poco httprequest object
+      Poco::URI uri(url); 
+      std::string path(uri.getPathAndQuery());
+      HTTPClientSession session(uri.getHost(), uri.getPort()); 
+      HTTPRequest req(HTTPRequest::HTTP_POST, path, 
+                      HTTPMessage::HTTP_1_0); 
+      g_log.debug() << "Receive request to delete file " << file_path << " using " << url << std::endl; 
+
+      // configure proxy
+      std::string proxy_config; 
+      unsigned short proxy_port; 
+      if (getProxyConfig(proxy_config, proxy_port))
+        session.setProxy(proxy_config, proxy_port);
+      // proxy end
+
+      // fill up the form required from the server to delete one file, with the fields 
+      // path, author, comment, email
+      HTMLForm form; 
+      form.add("author",author); 
+      form.add("mail", email); 
+      form.add("comment",comment);
+      form.add("file_n",file_path);       
+
+      // send the request to the server
+      form.prepareSubmit(req);
+      std::ostream& ostr = session.sendRequest(req);
+      form.write(ostr);
+      
+      // get the answer from the server
+      HTTPResponse response;
+      std::istream & rs = session.receiveResponse(response);
+      
+      g_log.debug() << "ScriptRepository delete status: " 
+                          << response.getStatus() << " " << response.getReason() << std::endl;
+
+      { 
+        // get the answer from the server
+        std::stringstream server_reply; 
+        std::string server_reply_str; 
+        Poco::StreamCopier::copyStream(rs, server_reply);
+        server_reply_str= server_reply.str(); 
+        // remove the status message from the end of the reply, 
+        // in order not to get exception from the read_json parser
+        size_t pos = server_reply_str.rfind("}");
+        if (pos != std::string::npos)
+          answer << std::string(server_reply_str.begin() , server_reply_str.begin() + pos + 1); 
+        else
+          answer << server_reply_str; 
+      }
+      g_log.debug() << "Form Output: " << answer.str() << std::endl; 
+    }catch(Poco::Exception & ex){
+      throw ScriptRepoException(ex.displayText(), ex.className()); 
+    }
+    return answer.str(); 
+}
+                          
 
   /** The ScriptRepositoryImpl is set to be valid when the local repository path
       points to a valid folder that has also the .repository.json and .local.json files. 
@@ -976,7 +1213,7 @@ namespace API
       the Mantid Web Service. This is the only method for the downloading and update
       that performs a real connection to the Mantid Web Service. 
       
-      This method was presente at the Script Repository Design, as an strategy to perform 
+      This method was present at the Script Repository Design, as an strategy to perform 
       unit tests, but also, helps the definition of a clear separation of the logic and 
       organization of the ScriptRepository, from the conneciton to the Mantid Web service, 
       making it more decoupled. 
@@ -988,7 +1225,7 @@ namespace API
       
       url_file = "http://mantidweb/repository/README.md"
       
-      The result it to connect to the http server, and request the path given.
+      The result is to connect to the http server, and request the path given.
       
       The answer, will be inserted at the local_file_path. 
       
@@ -1001,15 +1238,28 @@ namespace API
   void ScriptRepositoryImpl::doDownloadFile(const std::string & url_file, 
                                             const std::string & local_file_path)
   {
+    g_log.debug() << "DoDownloadFile : " << url_file << " to file: " << local_file_path << std::endl; 
     // get the information from url_file
     Poco::URI uri(url_file);
     std::string path(uri.getPathAndQuery());
     if (path.empty()) path = "/";
-    std::string given_path = std::string(path.begin()+18, path.end());// remove the "/scriptrepository/" from the path
+    std::string given_path; 
+    if (path.find("/scriptrepository") != std::string::npos)
+      given_path = std::string(path.begin()+18, path.end());// remove the "/scriptrepository/" from the path
+    else
+      given_path = path; 
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-      session.setTimeout(Poco::Timespan(2,0));// 2 secconds
+      session.setTimeout(Poco::Timespan(2,0));// 2 secconds	
+
+      // configure proxy
+      std::string proxy_config; 
+      unsigned short proxy_port; 
+      if (getProxyConfig(proxy_config, proxy_port))
+        session.setProxy(proxy_config, proxy_port);
+      // proxy end
+
       Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path,
                                      Poco::Net::HTTPMessage::HTTP_1_1);
       Poco::Net::HTTPResponse response;
@@ -1371,6 +1621,204 @@ namespace API
     return path; 
   }
 
+#if defined(_WIN32) || defined(_WIN64)
+bool get_proxy_configuration_win(const std::string & target_url, std::string &proxy_str, std::string & err_msg){
+HINTERNET  hSession = NULL;
+  std::wstring proxy;
+  std::wstring wtarget_url;
+  if (target_url.find("http://") == std::string::npos){
+    wtarget_url = L"http://";    
+  }
+  wtarget_url += std::wstring(target_url.begin(),target_url.end());  
+  bool fail = false; 
+  std::stringstream info;
+  WINHTTP_CURRENT_USER_IE_PROXY_CONFIG ie_proxy;
+  WINHTTP_AUTOPROXY_OPTIONS proxy_options;
+  WINHTTP_PROXY_INFO proxy_info;
+  ZeroMemory( &proxy_options, sizeof(proxy_options)); 
+  ZeroMemory( &ie_proxy, sizeof(ie_proxy)); 
+  ZeroMemory( &proxy_info, sizeof(proxy_info));
+
+  // the loop is just to allow us to go out of this session whenever we want
+  while(true){
+    // Use WinHttpOpen to obtain a session handle.
+    hSession = WinHttpOpen( L"ScriptRepository FindingProxy/1.0",  
+                          WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+                          WINHTTP_NO_PROXY_NAME, 
+                          WINHTTP_NO_PROXY_BYPASS, 0 );
+    if (!hSession)
+    {
+      fail = true;
+      info << "Failed to create the session (Error Code: " << GetLastError() << ").";
+      break;
+    }
+  // get the configuration of the web browser
+  if (!WinHttpGetIEProxyConfigForCurrentUser(&ie_proxy)){
+    fail = true;
+    info << "Could not find the proxy settings (Error code :" << GetLastError();    
+    break;
+  }
+
+  if (ie_proxy.lpszProxy){
+    // the proxy was already given, 
+    // it is not necessary to query the system for the auto proxy
+    proxy = ie_proxy.lpszProxy; 
+    break;
+  }
+  
+  if (ie_proxy.fAutoDetect){
+    // if auto detect, than setup the proxy to auto detect
+    proxy_options.dwFlags |= WINHTTP_AUTOPROXY_AUTO_DETECT; 
+    proxy_options.dwAutoDetectFlags = WINHTTP_AUTO_DETECT_TYPE_DNS_A;
+  }
+  
+  if (ie_proxy.lpszAutoConfigUrl){
+    // configure to auto proxy
+    proxy_options.dwFlags |= WINHTTP_AUTOPROXY_CONFIG_URL; 
+    proxy_options.lpszAutoConfigUrl = ie_proxy.lpszAutoConfigUrl;   
+  }
+  
+  
+  if (!WinHttpGetProxyForUrl(hSession, wtarget_url.c_str(), &proxy_options, &proxy_info)){
+    info << "Could not find the proxy for this url (Error code :" << GetLastError() <<").";
+    fail = true;
+     break;
+  }
+
+  //std::cout << "get proxy for url passed" << std::endl;
+  if (proxy_info.dwAccessType == WINHTTP_ACCESS_TYPE_NO_PROXY){
+    // no proxy (return an empty proxy)
+    break;
+  }
+
+  if (proxy_info.lpszProxy){
+    //proxy found. Get it.
+      proxy = proxy_info.lpszProxy;
+      break;
+    }
+  break; // loop finished
+  }
+
+  // free memory of all possibly allocated objects
+  // ie_proxy
+  if (ie_proxy.lpszAutoConfigUrl)
+    GlobalFree(ie_proxy.lpszAutoConfigUrl); 
+  if (ie_proxy.lpszProxy)
+    GlobalFree(ie_proxy.lpszProxy); 
+  if (ie_proxy.lpszProxyBypass)
+    GlobalFree(ie_proxy.lpszProxyBypass);
+  // proxy_info
+  if (proxy_info.lpszProxyBypass)
+      GlobalFree(proxy_info.lpszProxyBypass);
+  if (proxy_info.lpszProxy)
+    GlobalFree(proxy_info.lpszProxy); 
+
+  // hSession
+  if( hSession ) WinHttpCloseHandle( hSession );
+  
+  if (fail){
+    err_msg = info.str();    
+  }
+  proxy_str = std::string(proxy.begin(),proxy.end());  
+  return !fail;
+}
+#endif
+
+bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned short& proxy_port){
+  // these variables are made static, so, to not query the system for the proxy configuration 
+  // everytime this information is needed
+  static std::string PROXYSERVER=""; 
+  static unsigned short PROXYPORT=0;   
+  static bool firstTime = true;
+  
+  // the first time this function is called, PROXYXERVER will be empty.
+  if (firstTime){
+    // attempt to get the proxy configuration
+    // setup the proxy. The setup of the proxy will be dealt differently 
+    // from windows and linux and macs. 
+#if defined(_WIN32) || defined(_WIN64)
+    std::string errmsg, proxy_option;
+    g_log.notice() << "Attempt to get the proxy configuration for this connection" << std::endl; 
+    if(get_proxy_configuration_win(remote_url, proxy_option,errmsg))
+    {
+      if (!proxy_option.empty()){
+        size_t pos = proxy_option.rfind(':');
+        if (pos != std::string::npos){
+          if (pos == 4 || pos == 5) // means it found http(s):
+          {
+            PROXYSERVER = proxy_option;
+            PROXYPORT = 8080; // default port for proxy
+          }else{
+          PROXYSERVER = std::string(proxy_option.begin(),proxy_option.begin()+pos);
+          std::stringstream port_str;
+          port_str << std::string(proxy_option.begin()+pos+1,proxy_option.end());
+          port_str >> PROXYPORT;
+          }
+        }else{
+          PROXYSERVER = proxy_option;
+          PROXYPORT = 8080;
+        }
+        g_log.notice() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
+        } 
+    }
+    else{
+    g_log.warning() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. " 
+              << errmsg << std::endl; 
+    }
+#else  // linux and mac
+    char * proxy_var = getenv("http_proxy"); 
+    if (proxy_var == 0)
+      proxy_var = getenv("HTTP_PROXY"); 
+    
+    if (proxy_var != 0){      
+      Poco::URI uri_p(proxy_var);
+      PROXYSERVER = uri_p.getHost(); 
+      PROXYPORT = uri_p.getPort();
+      try{
+        // test if the proxy is valid for connecting to remote repository
+        Poco::URI uri(remote_url); 
+        Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort()); 
+        // setup a request to read the remote url
+        Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, "/",
+                                       Poco::Net::HTTPMessage::HTTP_1_1);
+        // through the proxy
+        session.setProxy(PROXYSERVER, PROXYPORT);        
+        session.sendRequest(request);  // if it fails, it will throw exception here.
+        
+        // clear the answer.
+        Poco::Net::HTTPResponse response; 
+        std::istream & rs = session.receiveResponse(response); 
+        Poco::NullOutputStream null; 
+        Poco::StreamCopier::copyStream(rs, null);
+        // report that the proxy was configured
+        g_log.information() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
+      }
+      catch(Poco::Net::HostNotFoundException & ex){
+        g_log.information() << "ScriptRepository found that proxy can not be used for this connection.\n"
+                            << ex.displayText() << std::endl; 
+        PROXYSERVER = "";        
+      }catch(...){
+        g_log.warning() << "Unexpected error while looking for the proxy for ScriptRepository." << std::endl; 
+        PROXYSERVER = ""; 
+      }
+    }
+#endif    
+  }
+  firstTime = false;
+  
+  bool ret_value; 
+  
+  // it means no proxy configured.
+  if (PROXYSERVER.empty())
+    ret_value =  false;
+  
+  else{
+    proxy_server = PROXYSERVER; 
+    proxy_port = PROXYPORT;
+    ret_value = true;
+  }
+  return ret_value;
+}
 
 }// END API
 }// END MANTID

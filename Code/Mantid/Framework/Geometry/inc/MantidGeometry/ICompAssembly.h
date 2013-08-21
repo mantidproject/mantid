@@ -50,36 +50,36 @@ namespace Mantid
     public:
       ///String description of the type of component
       virtual std::string type() const { return "ICompAssembly";}
-      //ICompAssembly();
 
       virtual ~ICompAssembly(){}
-      //! Make a clone of the present component
+      /// Make a clone of the present component
       virtual IComponent* clone() const = 0;
-      //! Return the number of elements in the assembly
+      /// Return the number of elements in the assembly
       virtual int nelements() const = 0;
-      //! Add a component to the assembly
+      /// Add a component to the assembly
       virtual int add(IComponent*) = 0;
-      //! Add a copy (clone) of a component 
+      /// Add a copy (clone) of a component 
       virtual int addCopy(IComponent*) = 0;
-      //! Add a copy (clone) of a component and rename it
+      /// Add a copy (clone) of a component and rename it
       virtual int addCopy(IComponent*, const std::string&) = 0;
-      //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
+      /// Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
       virtual boost::shared_ptr<IComponent> getChild(const int i) const = 0;
       /// Returns a pointer to the first component of assembly encountered with the given name
       virtual boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname, int nlevels = 0) const = 0; 
-      //! Get all children
+      /// Get all children
       virtual void getChildren(std::vector<IComponent_const_sptr> & outVector, bool recursive) const = 0;
-      //! Overloaded index operator. Get a pointer to the ith component in the assembly
+      /// Overloaded index operator. Get a pointer to the ith component in the assembly
       virtual boost::shared_ptr<IComponent> operator[](int i) const = 0;
-      //! Print information about all children
+      /// Print information about all children
       virtual void printChildren(std::ostream&) const = 0;
       /** Print information about all the elements in the tree to a stream
-      *  Loops through all components in the tree 
-      *  and call printSelf(os). 
-      */
+       *  Loops through all components in the tree 
+       *  and call printSelf(os). 
+       */
       virtual void printTree(std::ostream&) const = 0;
 
-      /** Test the intersection of the ray with the children of the component assembly  */
+
+      /// Test the intersection of the ray with the children of the component assembly
       virtual void testIntersectionWithChildren(Track & testRay, std::deque<IComponent_const_sptr> & searchQueue) const = 0;
 
     private:

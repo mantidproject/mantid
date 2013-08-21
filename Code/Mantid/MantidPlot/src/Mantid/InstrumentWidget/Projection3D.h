@@ -36,6 +36,9 @@ public:
   virtual void resize(int, int);
   virtual QString getInfoText()const;
 
+signals:
+  void finishedMove();
+
 protected slots:
   void initTranslation(int x, int y);
   void translate(int x, int y);

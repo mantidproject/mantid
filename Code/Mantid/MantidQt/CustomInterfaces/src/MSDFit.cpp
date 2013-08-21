@@ -50,6 +50,7 @@ namespace IDA
     connect(m_msdDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
 
     connect(uiForm().msd_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
+    connect(uiForm().msd_inputFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
   }
 
   void MSDFit::run()
@@ -99,16 +100,16 @@ namespace IDA
       QString filename = uiForm().msd_inputFile->getFirstFilename();
       QFileInfo fi(filename);
       QString wsname = fi.baseName();
+      auto ws = runLoadNexus(filename, wsname);
+      if(!ws)
+      {
+        return;
+      }
 
-      QString pyInput = "LoadNexus(r'" + filename + "', '" + wsname + "')\n";
-      QString pyOutput = runPythonCode(pyInput);
-
-      std::string workspace = wsname.toStdString();
-
-      m_msdDataCurve = plotMiniplot(m_msdPlot, m_msdDataCurve, workspace, 0);
+      m_msdDataCurve = plotMiniplot(m_msdPlot, m_msdDataCurve, ws, 0);
       try
       {
-        const std::pair<double, double> range = getCurveRange(m_msdDataCurve);    
+        const std::pair<double, double> range = getCurveRange(m_msdDataCurve);
         m_msdRange->setRange(range.first, range.second);
         // Replot
         m_msdPlot->replot();

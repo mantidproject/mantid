@@ -1,5 +1,5 @@
 if ( CXXTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} ../../TestHelpers/inc )
 
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
   target_link_libraries( KernelTest Kernel ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )

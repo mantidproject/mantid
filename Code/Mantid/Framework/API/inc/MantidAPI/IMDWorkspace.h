@@ -119,6 +119,9 @@ namespace Mantid
       /// this is the method to build table workspace from any workspace. It does not have much sence and may be placed here erroneously
       virtual ITableWorkspace_sptr makeBoxTable(size_t /*start*/, size_t /* num*/)
       {throw Kernel::Exception::NotImplementedError("This method is not generally implemented ");}
+
+    protected:
+      virtual const std::string toString() const;
     };
     
     /// Shared pointer to the IMDWorkspace base class

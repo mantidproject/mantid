@@ -1,6 +1,6 @@
 import os
-from MantidFramework import *
-from mantidsimple import *
+import mantid.api as api
+from mantid.simpleapi import *
 
 def find_file(filename=None, startswith=None, data_dir=None):
     """
@@ -23,7 +23,7 @@ def find_file(filename=None, startswith=None, data_dir=None):
         search_dirs.append(data_dir)
     # The standard place would be the location of the configuration files on the SNS mount
     search_dirs.append("/SNS/EQSANS/shared/instrument_configuration/")
-    search_dirs.extend(ConfigService().getDataSearchDirs())
+    search_dirs.extend(config.getDataSearchDirs())
     
     # Look for specific file
     if filename is not None:
@@ -79,7 +79,7 @@ def find_data(file, instrument='', allow_multiple=False):
     try:
         # FileFinder doesn't like dashes...
         instrument=instrument.replace('-','')        
-        f = FileFinder.findRuns(instrument+file)
+        f = api.FileFinder.findRuns(instrument+file)
         if os.path.isfile(f[0]): 
             if allow_multiple:
                 # Mantid returns its own list object type, so make a real list out if it
@@ -92,7 +92,7 @@ def find_data(file, instrument='', allow_multiple=False):
 
     # Third, assume a run number, without instrument name to take care of list of full paths
     try:
-        f = FileFinder.findRuns(file)
+        f = api.FileFinder.findRuns(file)
         if os.path.isfile(f[0]): 
             if allow_multiple:
                 # Mantid returns its own list object type, so make a real list out if it   
@@ -104,5 +104,5 @@ def find_data(file, instrument='', allow_multiple=False):
         pass
 
     # If we didn't find anything, raise an exception
-    mtd.sendErrorMessage("\n\nCould not find a file for %s: check your reduction parameters\n\n" % str(file))
+    logger.error("\n\nCould not find a file for %s: check your reduction parameters\n\n" % str(file))
     raise RuntimeError, "Could not find a file for %s" % str(file)

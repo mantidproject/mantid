@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "IRIS" date = "2010-07-15T00:00:00">
+<component-link name = "OSIRIS">
+
+<parameter name="analysis-type" type="string">
+  <value val="diffraction" />
+</parameter>
+
+<parameter name="spectra-min">
+	<value val="3" />
+</parameter>
+
+<parameter name="spectra-max">
+	<value val="962" />
+</parameter>
+
+<parameter name="Workflow.Diffraction.Correction" type="string">
+    <value val="None" />
+</parameter>
+
+
+</component-link>
+</parameter-file>

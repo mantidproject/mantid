@@ -8,7 +8,7 @@ import hfir_load
 import absolute_scale
 import hfir_instrument
 from reduction.find_data import find_data
-import mantidsimple
+import mantid.simpleapi as api
 
 ## List of user commands ######################################################
 def DirectBeamCenter(datafile):
@@ -56,7 +56,7 @@ def NoSensitivityCorrection():
     
 def DarkCurrent(datafile):
     datafile = find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_dark_current_subtracter(mantidsimple.HFIRDarkCurrentSubtraction, 
+    ReductionSingleton().set_dark_current_subtracter(api.HFIRDarkCurrentSubtraction, 
                                                      InputWorkspace=None, Filename=datafile,
                                                      OutputWorkspace=None,
                                                      ReductionProperties=ReductionSingleton().get_reduction_table_name())
@@ -65,7 +65,7 @@ def NoDarkCurrent():
     ReductionSingleton().set_dark_current_subtracter(None)
     
 def SolidAngle(detector_tubes=False):
-    ReductionSingleton().set_solid_angle_correcter(mantidsimple.SANSSolidAngleCorrection, InputWorkspace=None, OutputWorkspace=None,
+    ReductionSingleton().set_solid_angle_correcter(api.SANSSolidAngleCorrection, InputWorkspace=None, OutputWorkspace=None,
                                                    DetectorTubes=detector_tubes,
                                                    ReductionProperties=ReductionSingleton().get_reduction_table_name())
     
@@ -309,7 +309,7 @@ def ResetWavelength():
     ReductionSingleton().get_data_loader().set_wavelength()
     
 def IQxQy(nbins=100):
-    ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, InputWorkspace=None, 
+    ReductionSingleton().set_IQxQy(api.EQSANSQ2D, InputWorkspace=None, 
                                    NumberOfBins=nbins)
     
 def NoIQxQy(nbins=100):
@@ -331,7 +331,7 @@ def DivideByThickness(thickness=1.0):
     if thickness is None or thickness == 1.0:
         ReductionSingleton().set_geometry_correcter(None)
     else:
-        ReductionSingleton().set_geometry_correcter(mantidsimple.NormaliseByThickness, InputWorkspace=None, OutputWorkspace=None, SampleThickness=thickness)
+        ReductionSingleton().set_geometry_correcter(api.NormaliseByThickness, InputWorkspace=None, OutputWorkspace=None, SampleThickness=thickness)
         
 def BckDivideByThickness(thickness=1.0):
     print "Background thickness can no longer be set: only the final sample-minus-data workspace can be divided by the sample thickness."

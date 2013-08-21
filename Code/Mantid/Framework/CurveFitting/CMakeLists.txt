@@ -11,9 +11,11 @@ set ( SRC_FILES
 	src/BoundaryConstraint.cpp
 	src/Chebyshev.cpp
 	src/ComptonProfile.cpp
+	src/ComptonScatteringCountRate.cpp
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
+	src/CubicSpline.cpp
 	src/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
 	src/DerivMinimizer.cpp
@@ -35,8 +37,8 @@ set ( SRC_FILES
 	src/GausOsc.cpp
 	src/Gaussian.cpp
 	src/Gaussian1D.cpp
-	src/GaussianComptonProfile.cpp
 	src/Gaussian1D2.cpp
+	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
 	src/InelasticDiffSphere.cpp
@@ -67,6 +69,8 @@ set ( SRC_FILES
 	src/SimplexMinimizer.cpp
 	src/SpecialFunctionHelper.cpp
 	src/SplineBackground.cpp
+	src/SplineInterpolation.cpp
+	src/SplineSmoothing.cpp
 	src/StaticKuboToyabe.cpp
 	src/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
@@ -98,9 +102,11 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/ComptonProfile.h
+	inc/MantidCurveFitting/ComptonScatteringCountRate.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
+	inc/MantidCurveFitting/CubicSpline.h
 	inc/MantidCurveFitting/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DerivMinimizer.h
@@ -126,8 +132,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GausOsc.h
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/Gaussian1D.h
-	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/Gaussian1D2.h
+	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/InelasticDiffSphere.h
@@ -159,6 +165,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SimplexMinimizer.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
+	inc/MantidCurveFitting/SplineInterpolation.h
+	inc/MantidCurveFitting/SplineSmoothing.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
@@ -188,7 +196,9 @@ set ( TEST_FILES
 	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonProfileTest.h
+	ComptonScatteringCountRateTest.h
 	ConvolutionTest.h
+	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
 	EndErfcTest.h
@@ -234,6 +244,8 @@ set ( TEST_FILES
 	SimplexTest.h
 	SpecialFunctionSupportTest.h
 	SplineBackgroundTest.h
+	SplineInterpolationTest.h
+	SplineSmoothingTest.h
 	StaticKuboToyabeTest.h
 	StretchExpMuonTest.h
 	StretchExpTest.h

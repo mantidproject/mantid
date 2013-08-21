@@ -4,20 +4,13 @@
 # Here we run the calibration of a selected part of MAPS 
 
 #
-from mantid.api import WorkspaceFactory  # For table worskspace of calibrations
-from tube_calib_fit_params import * # To handle fit parameters
-from ideal_tube import * # For ideal tube
-from tube_calib import *  # For tube calibration functions
-from tube_spec import * # For tube specification class
-
-
+import tube
+from tube_calib_fit_params import TubeCalibFitParams
 # == Set parameters for calibration ==
 
-path = r"C:/Temp/" # Path name of folder containing input and output files
-filename = 'MAPS14919.raw' # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
+filename = 'MAP14919.raw' # Calibration run ( found in \\isis\inst$\NDXMAPS\Instrument\data\cycle_09_5 )
 rangeLower = 2000 # Integrate counts in each spectra from rangeLower to rangeUpper 
 rangeUpper = 10000 #
-
 
 # Set initial parameters for peak finding
 ExpectedHeight = -1000.0 # Expected Height of Gaussian Peaks (initial value of fit parameter)
@@ -29,38 +22,29 @@ CalibratedComponent = 'B1_window'  # Calibrate B1 window
  
     
 # Get calibration raw file and integrate it    
-rawCalibInstWS = Load(path+filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
+rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
 print "Integrating Workspace"
 CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
 DeleteWorkspace(rawCalibInstWS)
 print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate" 
 
 # == Create Objects needed for calibration ==
-
-#Create Calibration Table
-calibrationTable = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")
-calibrationTable.addColumn(type="int",name="Detector ID")  # "Detector ID" column required by ApplyCalbration
-calibrationTable.addColumn(type="V3D",name="Detector Position")  # "Detector Position" column required by ApplyCalbration
-
-# Specify component to calibrate
-thisTubeSet = TubeSpec(CalibInstWS)
-thisTubeSet.setTubeSpecByString(CalibratedComponent)
-
-# Get ideal tube
-iTube = IdealTube()
 # The positions of the shadows and ends here are an intelligent guess.
 # First array gives positions in Metres and second array gives type 1=Gaussian peak 2=edge.
 # See http://www.mantidproject.org/IdealTube for details.
-iTube.setPositionsAndForm([-0.50,-0.165,-0.00, 0.165, 0.50 ],[2,1,1,1,2])
+knownPos = [-0.50,-0.165,-0.00, 0.165, 0.50 ]
+funcForm = [2,1,1,1,2]
 
 # Get fitting parameters
 fitPar = TubeCalibFitParams( ExpectedPositions, ExpectedHeight, ExpectedWidth )
+fitPar.setAutomatic(True)
 
 print "Created objects needed for calibration."
 
 # == Get the calibration and put results into calibration table ==
 # also put peaks into PeakFile
-getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, PeakFile=path+'TubeDemoMaps01.txt' )
+calibrationTable, peakTable = tube.calibrate(CalibInstWS, CalibratedComponent, knownPos, funcForm, 
+	fitPar=fitPar, outputPeak=True)
 print "Got calibration (new positions of detectors) "
 
 # == Apply the Calibation ==
@@ -69,6 +53,8 @@ print "Applied calibration"
 
 
 # == Save workspace ==
-SaveNexusProcessed( CalibInstWS, path+'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps_B1.py")
+SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMapsResult.nxs',"Result of Running TCDemoMaps_B1.py")
 print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMapsResult.nxs"
 
+# == Save Peak File == 
+tube.savePeak(peakTable, 'TubeDemoMaps01.txt')

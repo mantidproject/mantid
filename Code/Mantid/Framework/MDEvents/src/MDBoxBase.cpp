@@ -19,8 +19,8 @@ namespace MDEvents
   TMDE(
   MDBoxBase)::MDBoxBase(Mantid::API::BoxController * const boxController,const uint32_t depth,const size_t boxID):
       m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
-      m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()),
       m_BoxController(boxController),
+      m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()),
       m_depth(depth),
       m_parent(NULL),
       m_fileID(boxID)
@@ -40,8 +40,8 @@ namespace MDEvents
   TMDE(
   MDBoxBase)::MDBoxBase(Mantid::API::BoxController *const boxController,const uint32_t depth,const size_t boxID,const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
-      m_inverseVolume(UNDEF_COORDT),
       m_BoxController(boxController),
+      m_inverseVolume(UNDEF_COORDT),
       m_depth(depth),
       m_parent(NULL),
       m_fileID(boxID)
@@ -71,8 +71,8 @@ namespace MDEvents
   TMDE(
   MDBoxBase)::MDBoxBase(const MDBoxBase<MDE,nd> & box,Mantid::API::BoxController * const otherBC):
     m_signal(box.m_signal), m_errorSquared(box.m_errorSquared), m_totalWeight(box.m_totalWeight),
-    m_inverseVolume(box.m_inverseVolume),
     m_BoxController(otherBC),
+    m_inverseVolume(box.m_inverseVolume),
     m_depth(box.m_depth),
     m_parent(box.m_parent),
     m_fileID(box.m_fileID)

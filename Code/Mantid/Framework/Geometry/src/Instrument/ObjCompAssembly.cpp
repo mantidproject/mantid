@@ -410,6 +410,11 @@ boost::shared_ptr<Object> ObjCompAssembly::createOutline()
   {
     type = "cylinder";
   }
+  else
+  {
+      throw std::runtime_error("IDF \"outline\" option is only allowed for assemblies containing "
+                               "components of types \"box\" or \"cylinder\".");
+  }
 
   // Calculate the dimensions of the outline object
 

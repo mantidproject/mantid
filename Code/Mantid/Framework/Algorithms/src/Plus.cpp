@@ -199,14 +199,21 @@ namespace Mantid
      *  must divide be the size of the smaller workspace leaving no remainder
      *  @param lhs :: the first workspace to compare
      *  @param rhs :: the second workspace to compare
-     *  @retval true The two workspaces are size compatible
-     *  @retval false The two workspaces are NOT size compatible
+     *  @retval "" The two workspaces are size compatible
+     *  @retval "<reason why not compatible>" The two workspaces are NOT size compatible
      */
-    bool Plus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    std::string Plus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
       if (m_erhs && m_elhs)
       {
-        return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
+        if ( lhs->getNumberHistograms() == rhs->getNumberHistograms() )
+        {
+          return "";
+        }
+        else
+        {
+          return "Number of histograms not identical.";
+        }
       }
       else
       {

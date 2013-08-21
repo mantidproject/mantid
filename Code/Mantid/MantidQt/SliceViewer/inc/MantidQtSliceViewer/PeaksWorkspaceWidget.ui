@@ -25,110 +25,19 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1,0">
    <item>
-    <widget class="QFrame" name="infoFrame">
-     <layout class="QHBoxLayout" name="infoLayout">
-      <item>
-       <widget class="QLabel" name="lblWSName">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Workspace:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="lblWorkspaceName">
-        <property name="text">
-         <string>[Workspace]</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="lblPeaksIntegrated">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Peaks Integrated:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="lblWorkspaceState">
-        <property name="text">
-         <string>[Integrated/UnIntegrated]</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_5">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="lblCoordinates">
-        <property name="font">
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text">
-         <string>Coordinates:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="lblWorkspaceCoordinates">
-        <property name="text">
-         <string>[Viewing Coordinate System]</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="lblWorkspaceName">
+     <property name="text">
+      <string>[Workspace]</string>
+     </property>
     </widget>
    </item>
    <item>
@@ -161,7 +70,37 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="controlsLayout">
+    <layout class="QHBoxLayout" name="controlsLayout" stretch="0,0,0,0,0,0">
+     <item>
+      <widget class="QFrame" name="infoFrame">
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <property name="margin">
+         <number>1</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="lblWorkspaceCoordinates">
+          <property name="text">
+           <string>[Viewing Coordinate System]</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblWorkspaceState">
+          <property name="text">
+           <string>[Integrated/UnIntegrated]</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
@@ -174,7 +113,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>90</width>
            <height>0</height>
           </size>
          </property>
@@ -188,7 +127,7 @@
           <string>Remove entire peaks list from display</string>
          </property>
          <property name="text">
-          <string>Remove Peaks List</string>
+          <string>Remove</string>
          </property>
         </widget>
        </item>
@@ -202,7 +141,7 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>150</width>
+           <width>90</width>
            <height>0</height>
           </size>
          </property>
@@ -216,7 +155,7 @@
           <string>Hide/show all peaks from this list in the plot</string>
          </property>
          <property name="text">
-          <string>Hide Peaks List</string>
+          <string>Hide</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -226,17 +165,11 @@
       </layout>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
+      <widget class="Line" name="line_3">
        <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+        <enum>Qt::Vertical</enum>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>30</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+      </widget>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -252,12 +185,15 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>150</width>
+             <width>70</width>
              <height>0</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Peak boundary/marker color</string>
+           </property>
            <property name="text">
-            <string>Peak Color</string>
+            <string>Peak Marker</string>
            </property>
            <property name="buddy">
             <cstring>infoFrame</cstring>
@@ -303,12 +239,15 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>150</width>
+             <width>70</width>
              <height>0</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Peak background color</string>
+           </property>
            <property name="text">
-            <string>Peak Background Color</string>
+            <string>Peak Background</string>
            </property>
           </widget>
          </item>
@@ -341,6 +280,22 @@
         </widget>
        </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::MinimumExpanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

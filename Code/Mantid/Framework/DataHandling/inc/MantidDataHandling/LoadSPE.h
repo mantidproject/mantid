@@ -4,8 +4,8 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IFileLoader.h"
+
 namespace Mantid
 {
 namespace DataHandling
@@ -42,11 +42,11 @@ namespace DataHandling
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>    
  */
-class DLLExport LoadSPE : public API::IDataFileChecker 
+class DLLExport LoadSPE : public API::IFileLoader<Kernel::FileDescriptor>
 {
 public:
   /// Constructor
-  LoadSPE() : API::IDataFileChecker() {}
+  LoadSPE() : API::IFileLoader<Kernel::FileDescriptor>() {}
   /// Virtual destructor
   virtual ~LoadSPE() {}
   /// Algorithm's name
@@ -55,10 +55,9 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling\\SPE;Inelastic"; }
-  ///checks the file can be loaded by reading 1st 100 bytes and looking at the file extension.
-  bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-  /// check the structure of the file and if this file can be loaded return a value between 1 and 100
-  int fileCheck(const std::string& filePath);
+  /// Returns a confidence value that this algorithm can load a file
+  virtual int confidence(Kernel::FileDescriptor & descriptor) const;
+
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();

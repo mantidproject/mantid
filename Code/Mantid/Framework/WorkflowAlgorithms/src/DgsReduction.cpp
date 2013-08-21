@@ -111,8 +111,10 @@ namespace Mantid
           "Negative width value indicates logarithmic binning.");
       this->declareProperty("SofPhiEIsDistribution", true,
           "The final S(Phi, E) data is made to be a distribution.");
-      this->declareProperty("HardMaskFile", "", "A file or workspace containing a hard mask.");
-      this->declareProperty("GroupingFile", "", "A file containing grouping (mapping) information.");
+      this->declareProperty(new FileProperty("HardMaskFile","",
+           FileProperty::OptionalLoad, ".xml"), "A file or workspace containing a hard mask.");
+      this->declareProperty(new FileProperty("GroupingFile", "",FileProperty::OptionalLoad, ".xml"),
+           "A file containing grouping (mapping) information.");
       this->declareProperty("ShowIntermediateWorkspaces", false,
           "Flag to show the intermediate workspaces (diagnostic mask, integrated detector vanadium, "
           "integrated absolute units) from the reduction.");

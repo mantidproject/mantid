@@ -17,6 +17,11 @@ using namespace Mantid::API;
 class AlignDetectorsTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AlignDetectorsTest *createSuite() { return new AlignDetectorsTest(); }
+  static void destroySuite( AlignDetectorsTest *suite ) { delete suite; }
+
   /** Setup for loading Nexus data */
   void setUp_HRP38692()
   {

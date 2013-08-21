@@ -133,11 +133,11 @@ namespace Mantid
               }
             }
           }
-          if (pclass == Right)
+          if (pclass == OnRight)
           {
             inflag = PIsInside;
           }
-          else if (qclass == Right)
+          else if (qclass == OnRight)
           {
             inflag = QIsInside;
           }
@@ -164,7 +164,7 @@ namespace Mantid
 #endif
         if (pAIMSq && qAIMSp)
         {
-          if( (inflag == QIsInside) || ((inflag == Unknown) && (pclass == Left)) )
+          if( (inflag == QIsInside) || ((inflag == Unknown) && (pclass == OnLeft)) )
           {
 #ifdef VERBOSE
             std::cout << "Move edge on P" << std::endl;
@@ -195,7 +195,7 @@ namespace Mantid
         }
         else 
         {
-          if ((inflag == QIsInside) || ((inflag == Unknown) && (pclass == Left)))
+          if ((inflag == QIsInside) || ((inflag == Unknown) && (pclass == OnLeft)))
           {
 #ifdef VERBOSE
             std::cout << "Move edge on P" << std::endl;

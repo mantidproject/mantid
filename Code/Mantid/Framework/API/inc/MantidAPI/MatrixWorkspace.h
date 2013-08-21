@@ -59,6 +59,10 @@ namespace Mantid
     */
     class MANTID_API_DLL MatrixWorkspace : public IMDWorkspace, public ExperimentInfo
     {
+
+    private:
+      using ExperimentInfo::toString;
+
     public:
 
       // The Workspace Factory create-from-parent method needs direct access to the axes.
@@ -72,7 +76,11 @@ namespace Mantid
       void initialize(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
       /// Delete
       virtual ~MatrixWorkspace();
-      
+
+      using IMDWorkspace::toString;
+      /// String description of state
+      const std::string toString() const;
+
       /**@name Instrument queries */
       //@{
       Geometry::IDetector_const_sptr getDetector(const size_t workspaceIndex) const;
@@ -102,13 +110,15 @@ namespace Mantid
 
       // More mapping
       spec2index_map * getSpectrumToWorkspaceIndexMap() const;
-      detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
-      void getDetectorIDToWorkspaceIndexVector( std::vector<size_t> & out, detid_t & offset, bool throwIfMultipleDets) const;
+      detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets=false ) const;
+      void getDetectorIDToWorkspaceIndexVector( std::vector<size_t> & out, detid_t & offset, bool throwIfMultipleDets=false) const;
       void getSpectrumToWorkspaceIndexVector(std::vector<size_t> & out, specid_t & offset) const;
       void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
       size_t getIndexFromSpectrumNumber(const specid_t specNo) const;
       void getIndicesFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<size_t>& indexList) const;
       void getSpectraFromDetectorIDs(const std::vector<detid_t>& detIdList, std::vector<specid_t>& spectraList) const;
+
+	  bool hasGroupedDetectors() const;
 
       /// Get the footprint in memory in bytes.
       virtual size_t getMemorySize() const;

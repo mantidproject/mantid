@@ -4,13 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidAPI/IDataFileChecker.h"
 #include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid
@@ -40,7 +39,7 @@ namespace DataHandling
 
  File change history is stored at: <https://github.com/mantidproject/mantid>
  */
-class DLLExport LoadTOFRawNexus : public API::IDataFileChecker
+class DLLExport LoadTOFRawNexus : public API::IFileLoader<Kernel::NexusDescriptor>
 {
 public:
   /// Default Constructor
@@ -64,10 +63,8 @@ public:
 
   static std::string getEntryName(const std::string & filename);
 
-  /// do a quick check that this file can be loaded
-  bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-  /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-  int fileCheck(const std::string& filePath);
+  /// Returns a confidence value that this algorithm can load a file
+  virtual int confidence(Kernel::NexusDescriptor & descriptor) const;
 
   void countPixels(const std::string &nexusfilename, const std::string & entry_name,
        std::vector<std::string> & bankNames);

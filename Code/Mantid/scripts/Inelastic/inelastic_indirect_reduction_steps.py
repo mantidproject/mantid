@@ -239,7 +239,7 @@ class LoadData(ReductionStep):
 
 class BackgroundOperations(ReductionStep):
     """Removes, if requested, a background from the detectors data in TOF
-    units. Currently only uses the FlatBackground algorithm, more options
+    units. Currently only uses the CalculateFlatBackground algorithm, more options
     to cover SNS use to be added at a later point.
     """
     _multiple_frames = False
@@ -263,7 +263,7 @@ class BackgroundOperations(ReductionStep):
 
         for ws in workspaces:
             ConvertToDistribution(Workspace=ws)
-            FlatBackground(InputWorkspace=ws,OutputWorkspace= ws,StartX= self._background_start,
+            CalculateFlatBackground(InputWorkspace=ws,OutputWorkspace= ws,StartX= self._background_start,
                            EndX=self._background_end, Mode='Mean')
             ConvertFromDistribution(Workspace=ws)
 
@@ -298,6 +298,7 @@ class CreateCalibrationWorkspace(ReductionStep):
         self._calib_workspace = None
         self._analyser = None
         self._reflection = None
+        self._intensity_scale = None
 
     def execute(self, reducer, file_ws):
         """The information we use here is not from the main reducer object
@@ -320,7 +321,7 @@ class CreateCalibrationWorkspace(ReductionStep):
             (root, ext) = os.path.splitext(filename)
             try:
                 Load(Filename=file,OutputWorkspace= root, SpectrumMin=specMin, SpectrumMax=specMax,
-                    LoadLogFiles=False)
+                    LoadLogFiles=False)                
                 runs.append(root)
             except:
                 sys.exit('Indirect: Could not load raw file: ' + file)
@@ -331,19 +332,18 @@ class CreateCalibrationWorkspace(ReductionStep):
             Scale(InputWorkspace=cwsn,OutputWorkspace= cwsn,Factor= factor)
         else:
             cwsn = runs[0]
-        FlatBackground(InputWorkspace=cwsn,OutputWorkspace= cwsn,StartX= backMin,EndX= backMax, Mode='Mean')
-        Integration(InputWorkspace=cwsn,OutputWorkspace= cwsn,RangeLower= peakMin,RangeUpper= peakMax)
+        CalculateFlatBackground(InputWorkspace=cwsn,OutputWorkspace= cwsn,StartX= backMin,EndX= backMax, Mode='Mean')
+        
         cal_ws = mtd[cwsn]
-        sum = 0
-        for i in range(0, cal_ws.getNumberHistograms()):
-            sum += cal_ws.readY(i)[0]
-
         runNo = cal_ws.getRun().getLogData("run_number").value
         outWS_n = runs[0][:3] + runNo + '_' + self._analyser + self._reflection + '_calib'
-
-        value = 1.0 / ( sum / cal_ws.getNumberHistograms() )
-        Scale(InputWorkspace=cwsn,OutputWorkspace= cwsn,Factor= value,Operation= 'Multiply')
-
+        
+        ntu = NormaliseToUnityStep()
+        ntu.set_factor(self._intensity_scale)
+        ntu.set_peak_range(peakMin, peakMax)
+        ntu.set_number_of_histograms(cal_ws.getNumberHistograms())
+        ntu.execute(reducer, cwsn)
+        
         RenameWorkspace(InputWorkspace=cwsn,OutputWorkspace= outWS_n)
         self._calib_workspace = outWS_n # Set result workspace value
         if ( len(runs) > 1 ):
@@ -355,7 +355,10 @@ class CreateCalibrationWorkspace(ReductionStep):
         self._back_max = back_max
         self._peak_min = peak_min
         self._peak_max = peak_max
-        
+    
+    def set_intensity_scale(self, factor):
+        self._intensity_scale = float(factor)
+    
     def set_detector_range(self, start, end):
         self._detector_range_start = start
         self._detector_range_end = end
@@ -720,6 +723,46 @@ class ConvertToEnergy(ReductionStep):
                 Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= self._rebin_string)
             else:
                 Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= rstwo)
+
+class RebinToFirstSpectrum(ReductionStep):
+    """
+        A simple step to rebin the input workspace to match
+        the first spectrum of itself
+    """
+
+    def execute(self, reducer, inputworkspace):
+        RebinToWorkspace(WorkspaceToRebin=inputworkspace,WorkspaceToMatch=inputworkspace,
+                         OutputWorkspace=inputworkspace)
+    
+class NormaliseToUnityStep(ReductionStep):
+    """
+        A simple step to normalise a workspace to a given factor
+    """
+    _factor = 1.0
+    _peak_min = None
+    _peak_max = None
+    _no_hist = 1.0
+    
+    def execute(self, reducer, ws):   
+        Integration(InputWorkspace=ws,OutputWorkspace=ws,RangeLower=self._peak_min, RangeUpper= self._peak_max)
+          
+        tempSum = SumSpectra(InputWorkspace=ws, OutputWorkspace='__tempSum')
+        sum = tempSum.readY(0)[0]
+        DeleteWorkspace(tempSum)
+   
+        value = self._factor / ( sum / self._no_hist )
+        Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=value,Operation= 'Multiply') 
+        
+    def set_factor(self, factor):
+        if factor is not None:
+            self._factor = factor
+        
+    def set_peak_range(self, pmin, pmax):
+        self._peak_min = pmin
+        self._peak_max = pmax
+        
+    def set_number_of_histograms(self, num):
+        self._no_hist = num
 
 class DetailedBalance(ReductionStep):
     """

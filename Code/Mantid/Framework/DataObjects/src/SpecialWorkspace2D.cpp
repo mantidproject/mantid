@@ -100,6 +100,17 @@ namespace DataObjects
     Workspace2D::init(NVectors, XLength, YLength);
   }
 
+  /**
+   * @return A string containing the workspace description
+   */
+  const std::string SpecialWorkspace2D::toString() const
+  {
+    std::ostringstream os;
+    os << "Title: " << getTitle() << "\n";
+    os << "Histograms: " << getNumberHistograms() << "\n";
+    return os.str();
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Return the special value (Y) in the workspace at the given detector ID
    *

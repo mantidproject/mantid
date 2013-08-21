@@ -1,4 +1,5 @@
 #include "MantidMatrix.h"
+#include "MantidMatrixFunction.h"
 #include "MantidKernel/Timer.h"
 #include "MantidUI.h"
 #include "../Graph3D.h"
@@ -49,7 +50,6 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace MantidQt::API;
 
-//Mantid::Kernel::Logger & MantidMatrix::g_log=Mantid::Kernel::Logger::get("MantidMatrix");
 MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, ApplicationWindow* parent, const QString& label, const QString& name, int start, int end)
   : MdiSubWindow(parent, label, name, 0),
     WorkspaceObserver(),
@@ -60,7 +60,6 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, Applicati
     m_min(0),m_max(0),
     m_are_min_max_set(false),
     m_boundingRect(),
-    m_funct(this),
     m_strName(name.toStdString()),
     m_selectedRows(),
     m_selectedCols()
@@ -68,7 +67,6 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, Applicati
   setup(ws,start,end);
   setWindowTitle(name);
   setName(name);
-  setIcon( matrixIcon() );
 
   m_modelY = new MantidMatrixModel(this,ws.get(),m_rows,m_cols,m_startRow,MantidMatrixModel::Y);
   m_table_viewY = new QTableView();
@@ -124,13 +122,6 @@ MantidMatrix::MantidMatrix(Mantid::API::MatrixWorkspace_const_sptr ws, Applicati
   connect(this, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(selfClosed(MdiSubWindow*)));
 
   confirmClose(false);
-}
-
-MantidMatrix::~MantidMatrix()
-{
-  delete m_modelY;
-  delete m_modelX;
-  delete m_modelE;
 }
 
 bool MantidMatrix::eventFilter(QObject *object, QEvent *e)
@@ -389,75 +380,8 @@ void MantidMatrix::range(double *min, double *max)
 {
   if (!m_are_min_max_set)
   {
-    //this is here to fill m_min and m_max with numbers that aren't nan
-    m_min = std::numeric_limits<double>::max();
-    m_max = -std::numeric_limits<double>::max();
-
-    if (this->m_workspace)
-    {
-
-      PARALLEL_FOR1(m_workspace)
-      for (int wi=0; wi < static_cast<int>(m_workspace->getNumberHistograms()); wi++)
-      {
-        double local_min, local_max;
-        const MantidVec & Y = m_workspace->readY(wi);
-
-        local_min = std::numeric_limits<double>::max();
-        local_max = -std::numeric_limits<double>::max();
-
-        for (size_t i=0; i < Y.size(); i++)
-        {
-          double aux = Y[i];
-          if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
-            continue;
-          if (aux < local_min)
-            local_min = aux;
-          if (aux > local_max)
-            local_max = aux;
-        }
-
-        // Now merge back the local min max
-        PARALLEL_CRITICAL(MantidMatrix_range_max)
-        {
-          if (local_max > m_max)
-            m_max = local_max;
-        }
-        PARALLEL_CRITICAL(MantidMatrix_range_min)
-        {
-          if (local_min < m_min)
-            m_min = local_min;
-        }
-      }
-      m_are_min_max_set = true;
-    }
-
-    // Make up some reasonable values if nothing was found
-    if (m_min == std::numeric_limits<double>::max())
-      m_min = 0;
-    if (m_max == -std::numeric_limits<double>::max())
-      m_max = m_min + 1e6;
-
-//    // ---- VERY SLOW OLD ALGORITHM -----
-//    int rows = numRows();
-//    int cols = numCols();
-//    for(int i=0; i<rows; i++){
-//      for(int j=0; j<cols; j++){
-//        double aux = cell(i, j);
-//        if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
-//        {
-//          continue;
-//        }
-//        if (aux <= m_min)
-//          m_min = aux;
-//
-//        if (aux >= m_max)
-//          m_max = aux;
-//      }
-//
-//      m_are_min_max_set = true;
-//    }
-
-
+    findYRange(m_workspace, m_min, m_max);
+    m_are_min_max_set = true;
   }
   *min = m_min;
   *max = m_max;
@@ -564,59 +488,6 @@ double MantidMatrix::dataE(int row, int col) const
 
 }
 
-/////////////////////////////////////////
-
-int MantidMatrix::indexY(double s)const
-{
-  int n = m_rows;
-
-  const Mantid::API::Axis& yAxis = *m_workspace->getAxis(1);
-
-  bool isNumeric = yAxis.isNumeric();
-  
-  if (n == 0) return -1;
-
-  int i0 = m_startRow;
-
-  if (s < yAxis(i0))
-  {
-    if (isNumeric || yAxis(i0) - s > 0.5) return -1;
-    return 0;
-  }
-  else if (s > yAxis(n-1))
-  {
-    if (isNumeric || s - yAxis(n-1) > 0.5) return -1;
-    return n-1;
-  }
-
-  int i = i0, j = n-1, k = n/2;
-  double ss;
-  int it;
-  for(it=0;it<n;it++)
-  {
-    ss = yAxis(k);
-    if (ss == s ) return k;
-    if (abs(i - j) <2)
-    {
-      double ds = fabs(ss-s);
-      double ds1 = fabs(yAxis(j)-s);
-      if (ds1 < ds)
-      {
-        if (isNumeric || ds1 < 0.5) return j;
-        return -1;
-      }
-      if (isNumeric || ds < 0.5) return i;
-      return -1;
-    }
-    if (s > ss) i = k;
-    else
-      j = k;
-    k = i + (j - i)/2;
-  }
-
-  return i;
-}
-
 QString MantidMatrix::workspaceName() const
 {
   return QString::fromStdString(m_strName);
@@ -721,149 +592,6 @@ QwtDoubleRect MantidMatrix::boundingRect()
 }
 
 //----------------------------------------------------------------------------
-MantidMatrixFunction::MantidMatrixFunction(MantidMatrix* wsm):m_matrix(wsm),m_dx(0),m_dy(0),m_outside(0){}
-
-void MantidMatrixFunction::init()
-{
- if (!m_matrix->workspace()->getAxis(1))
- {
-   throw std::runtime_error("The y-axis is not set");
- }
-
-  double tmp;
-  m_matrix->range(&tmp,&m_outside);
-  m_outside *= 1.1;
-}
-
-double MantidMatrixFunction::operator()(double x, double y)
-{
-  int i = m_matrix->indexY(y);
-  if (i < 0 || i >= m_matrix->numRows())
-  {
-    return m_outside;
-  }
-
-  int j = m_matrix->indexX(i,x);
-
-  if (j >=0 && j < m_matrix->numCols())
-    return m_matrix->dataY(i,j);
-  else
-    return m_outside;
-}
-
-double MantidMatrixFunction::getMinPositiveValue()const
-{
-  double zmin = DBL_MAX;
-  for(int i=0;i<numRows();++i)
-  {
-    for(int j=0;j<numCols();++j)
-    {
-      double tmp = value(i,j);
-      if (tmp > 0 && tmp < zmin)
-      {
-        zmin = tmp;
-      }
-    }
-  }
-  return zmin;
-}
-
-int MantidMatrixFunction::numRows()const
-{
-  return m_matrix->m_rows;
-}
-
-int MantidMatrixFunction::numCols()const
-{
-  return m_matrix->m_cols;
-}
-
-double MantidMatrixFunction::value(int row,int col)const
-{
-  return m_matrix->m_workspace->readY(row + m_matrix->m_startRow)[col];
-}
-
-void MantidMatrixFunction::getRowYRange(int row,double& ymin, double& ymax)const
-{
-  const Mantid::API::Axis& yAxis = *(m_matrix->m_workspace->getAxis(1));
-
-
-  int i = row + m_matrix->m_startRow;
-  double y = yAxis(i);
-
-  int imax = static_cast<int>(m_matrix->m_workspace->getNumberHistograms())-1;
-  if (yAxis.isNumeric())
-  {
-    if (i < imax)
-    {
-      ymax = (yAxis(i+1) + y)/2;
-      if (i > 0)
-      {
-        ymin = (yAxis(i-1) + y)/2;
-      }
-      else
-      {
-        ymin = 2*y - ymax;
-      }
-    }
-    else
-    {
-      ymin = (yAxis(i-1) + y)/2;
-      ymax = 2*y - ymin;
-    }
-  }
-  else // if spectra
-  {
-    ymin = y - 0.5;
-    ymax = y + 0.5;
-  }
-  
-}
-
-void MantidMatrixFunction::getRowXRange(int row,double& xmin, double& xmax)const
-{
-  const Mantid::MantidVec& X = m_matrix->m_workspace->readX(row + m_matrix->m_startRow);
-  xmin = X[0];
-  xmax = X[X.size()-1];
-}
-
-const Mantid::MantidVec& MantidMatrixFunction::getMantidVec(int row)const
-{
-  return m_matrix->m_workspace->readX(row + m_matrix->m_startRow);
-}
-
-int MantidMatrix::indexX(int row,double s)const
-{
-  int n = static_cast<int>(m_workspace->blocksize());
-
-  //bool isHistogram = m_workspace->isHistogramData();
-
-  const Mantid::MantidVec& X = m_workspace->readX(row + m_startRow);
-  if (n == 0 || s < X[0] || s > X[n-1]) return -1;
-
-  int i = 0, j = n-1, k = n/2;
-  double ss;
-  int it;
-  for(it=0;it<n;it++)
-  {
-    ss = X[k];
-    if (ss == s ) return k;
-    if (abs(i - j) <2)
-    {
-      double ds = fabs(ss-s);
-      if (fabs(X[j]-s) < ds) return j;
-      return i;
-    }
-    if (s > ss) i = k;
-    else
-      j = k;
-    k = i + (j - i)/2;
-  }
-
-  return i;
-}
-
-//----------------------------------------------------------------------------
 
 Graph3D * MantidMatrix::plotGraph3D(int style)
 {
@@ -895,8 +623,8 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
   // Calculate xStart(), xEnd(), yStart(), yEnd()
   boundingRect();
   
-  m_funct.init();
-  plot->addFunction("", xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows(), static_cast<UserHelperFunction*>(&m_funct));
+  MantidMatrixFunction *fun = new MantidMatrixFunction(*this);
+  plot->addFunction(fun, xStart(), xEnd(), yStart(), yEnd(), zMin, zMax, numCols(), numRows() );
 
   const Mantid::API::Axis* ax = m_workspace->getAxis(0);
   std::string s;
@@ -990,9 +718,9 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Gr
 
   // Set the range on the third, colour axis
   double minz, maxz;
-  m_funct.init();
+  auto fun = new MantidMatrixFunction(*this);
   range(&minz,&maxz);
-  Spectrogram *spgrm = plot->plotSpectrogram(&m_funct, m_spectrogramRows, m_spectrogramCols, boundingRect(), minz, maxz, type);
+  Spectrogram *spgrm = plot->plotSpectrogram(fun, m_spectrogramRows, m_spectrogramCols, boundingRect(), minz, maxz, type);
   if( spgrm )
   {
     if(project)
@@ -1045,35 +773,6 @@ void MantidMatrix::setBinGraph(MultiLayer *ml, Table* t)
   }
   else
     m_plots2D<<ml;
-}
-
-// Remove all references to the MantidMatrix
-void MantidMatrix::removeWindow()
-{
-  QList<MdiSubWindow *> windows = applicationWindow()->windowsList();
-  foreach(MdiSubWindow *w, windows){
-    //if (w->isA("Graph3D") && ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
-    if (w->isA("Graph3D") )//&& ((Graph3D*)w)->userFunction()->hlpFun() == &m_funct)
-    { 	UserFunction* fn=(dynamic_cast<Graph3D*>(w))->userFunction();
-      if(fn)
-      {	if(fn->hlpFun() == &m_funct)(dynamic_cast<Graph3D*>(w))->clearData();
-      }
-
-    }else if (w->isA("Table")){
-    }
-    else if (w->isA("MultiLayer")){
-      QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
-      foreach(Graph *g, layers){
-        for (int i=0; i<g->curves(); i++){
-          Spectrogram *sp = dynamic_cast<Spectrogram *>(g->plotItem(i));
-          if (sp && sp->rtti() == QwtPlotItem::Rtti_PlotSpectrogram && sp->funct() == &m_funct)
-            g->removeCurve(i);
-        }
-      }
-    }
-
-  }
-  //this->closeDependants();
 }
 
 /// Returns a list of the selected rows
@@ -1223,7 +922,19 @@ void MantidMatrix::repaintAll()
 
 void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  if( wsName != m_strName || !ws ) return;
+  if ( !ws ) return;
+  if( wsName != m_strName )
+  {
+    if ( ws == m_workspace ) // i.e. this is a rename
+    {
+      m_strName = wsName;
+      QString qwsName = QString::fromStdString(wsName);
+      setWindowTitle(qwsName);
+      setName(qwsName);
+      setObjectName(qwsName);
+    }
+    return;
+  }
 
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
   emit needWorkspaceChange( new_workspace ); 
@@ -1525,3 +1236,53 @@ QVariant MantidMatrixModel::data(const QModelIndex &index, int role) const
   return QVariant(m_locale.toString(val,m_format,m_prec));
 }
 
+
+void findYRange(MatrixWorkspace_const_sptr ws, double &miny, double &maxy)
+{
+    //this is here to fill m_min and m_max with numbers that aren't nan
+    miny = std::numeric_limits<double>::max();
+    maxy = -std::numeric_limits<double>::max();
+
+    if ( ws )
+    {
+
+      PARALLEL_FOR1( ws )
+      for (int wi=0; wi < static_cast<int>(ws->getNumberHistograms()); wi++)
+      {
+        double local_min, local_max;
+        const MantidVec & Y = ws->readY(wi);
+
+        local_min = std::numeric_limits<double>::max();
+        local_max = -std::numeric_limits<double>::max();
+
+        for (size_t i=0; i < Y.size(); i++)
+        {
+          double aux = Y[i];
+          if (fabs(aux) == std::numeric_limits<double>::infinity() || aux != aux)
+            continue;
+          if (aux < local_min)
+            local_min = aux;
+          if (aux > local_max)
+            local_max = aux;
+        }
+
+        // Now merge back the local min max
+        PARALLEL_CRITICAL(MantidMatrix_range_max)
+        {
+          if (local_max > maxy)
+            maxy = local_max;
+        }
+        PARALLEL_CRITICAL(MantidMatrix_range_min)
+        {
+          if (local_min < miny)
+            miny = local_min;
+        }
+      }
+    }
+
+    // Make up some reasonable values if nothing was found
+    if (miny == std::numeric_limits<double>::max())
+      miny = 0;
+    if (maxy == -std::numeric_limits<double>::max())
+      maxy = miny + 1e6;
+}

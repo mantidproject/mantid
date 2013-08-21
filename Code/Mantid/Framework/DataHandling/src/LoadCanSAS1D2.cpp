@@ -12,13 +12,13 @@ If the file contains mulitple SASentry elements a workspace group will be create
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadCanSAS1D2.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/AlgorithmFactory.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+
 #include <Poco/Path.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -44,11 +44,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadCanSAS1D2)
-
-//register the algorithm into loadalgorithm factory
-DECLARE_LOADALGORITHM(LoadCanSAS1D2)
+DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2);
 
 /// constructor
 LoadCanSAS1D2::LoadCanSAS1D2() : LoadCanSAS1D()

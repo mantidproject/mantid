@@ -28,6 +28,9 @@ Uses the algorithm [[linear]] to fit to the calculated transmission fraction.
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
+
 #include <cmath>
 
 namespace Mantid
@@ -76,11 +79,16 @@ void CalculateTransmission::init()
     "this can be followed by a comma and more widths and last boundary pairs.\n"
     "Negative width values indicate logarithmic binning.");
 
-  std::vector<std::string> options(2);
+  std::vector<std::string> options(7);
   options[0] = "Linear";
   options[1] = "Log";
+  options[2] = "Polynomial"; 
+   
   declareProperty("FitMethod","Log",boost::make_shared<StringListValidator>(options),
-    "Whether to fit directly to the transmission curve (Linear) or to the log of it (Log)");
+    "Whether to fit directly to the transmission curve using Linear, Log or Polynomial.");
+  auto twoOrMore = boost::make_shared<BoundedValidator<int> >();
+  twoOrMore->setLower(2); 
+  declareProperty("PolynomialOrder", 2, twoOrMore, "Order of the polynomial to fit. It is considered only for FitMethod=Polynomial"); 
 
   declareProperty("OutputUnfittedData",false, "If True, will output an additional workspace called [OutputWorkspace]_unfitted containing the unfitted transmission correction.");
 }
@@ -216,7 +224,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWork
 /** Calculate a workspace that contains the result of the fit to the transmission fraction that was calculated
 *  @param raw [in] the workspace with the unfitted transmission ratio data
 *  @param rebinParams [in] the parameters for rebinning
-*  @param fitMethod [in] string can either be Log or Linear
+*  @param fitMethod [in] string can be Log, Linear, Poly2, Poly3, Poly4, Poly5, Poly6
 *  @return a workspace that contains the evaluation of the fit
 *  @throw runtime_error if the Linear or ExtractSpectrum algorithm fails during execution
 */
@@ -229,7 +237,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
 
   //these are calculated by the call to fit below
   double grad(0.0), offset(0.0);
-
+  std::vector<double> coeficients;
   const bool logFit = ( fitMethod == "Log" );
   if (logFit)
   {
@@ -250,10 +258,16 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
     // Now fit this to a straight line
     output = fitData(output, grad, offset);
   } // logFit true
-  else
+  else if (fitMethod == "Linear")
   { // Linear fit
     g_log.debug("Fitting directly to the data (i.e. linearly)");
     output = fitData(output, grad, offset);
+  }else{ // fitMethod Polynomial
+    int order = getProperty("PolynomialOrder");
+    std::stringstream info; 
+    info << "Fitting the transmission to polynomial order=" << order ; 
+    g_log.information(info.str());
+    output = fitPolynomial(output, order, coeficients);
   }
 
   progress.report("CalculateTransmission: Performing fit");
@@ -264,8 +278,9 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
     output = rebin(rebinParams, output);
   }
   progress.report("CalculateTransmission: Performing fit");
+
   // if there was rebinnning or log fitting we need to recalculate the Ys, otherwise we can just use the workspace kicked out by the fitData()'s call to Linear
-  if ( ( ! rebinParams.empty() ) || logFit)
+  if ( (! rebinParams.empty()) || logFit)
   {
     const MantidVec & X = output->readX(0);
     MantidVec & Y = output->dataY(0);
@@ -284,12 +299,27 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(API::MatrixWorkspace_sptr r
         progress.report();
       }
     }// end logFit
-    else
+    else if (fitMethod == "Linear")
     {
       //the simplar linear situation
       for (size_t i = 0; i < Y.size(); ++i)
       {
         Y[i] = (grad*0.5*(X[i]+X[i+1]))+offset;
+      }
+    }
+    else 
+    { // the polynomial fit
+      double aux=0;
+      double x_v =0;
+      for (size_t i=0; i<Y.size(); ++i)
+      {
+        aux = 0;
+        x_v = 0.5*(X[i]+X[i+1]);
+        for (int j=0; j<static_cast<int>(coeficients.size()); ++j)
+        {
+          aux += coeficients[j]*std::pow(x_v,j);
+        }
+        Y[i] = aux;
       }
     }
   }
@@ -308,11 +338,16 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
 {
   g_log.information("Fitting the experimental transmission curve");
   double start = m_done;
-  IAlgorithm_sptr childAlg = createChildAlgorithm("Linear", start, m_done=0.9);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done=0.9);
+  auto linearBack = API::FunctionFactory::Instance().createFunction("LinearBackground");
+  childAlg->setProperty("Function",linearBack);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
+  childAlg->setProperty("Minimizer","Levenberg-MarquardtMD");
+  childAlg->setProperty("CreateOutput",true);
+  childAlg->setProperty("IgnoreInvalidData",true);
   childAlg->executeAsChildAlg();
 
-  std::string fitStatus = childAlg->getProperty("FitStatus");
+  std::string fitStatus = childAlg->getProperty("OutputStatus");
   if ( fitStatus != "success" )
   {
     g_log.error("Unable to successfully fit the data: " + fitStatus);
@@ -320,11 +355,44 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitData(API::MatrixWorkspace_sp
   }
  
   // Only get to here if successful
-  offset = childAlg->getProperty("FitIntercept");
-  grad = childAlg->getProperty("FitSlope");
-  
-  return childAlg->getProperty("OutputWorkspace");
+  offset = linearBack->getParameter(0);
+  grad = linearBack->getParameter(1);
+  return this->extractSpectrum(childAlg->getProperty("OutputWorkspace"),1);
 }
+/** Uses Polynomial as a ChildAlgorithm to fit the log of the exponential curve expected for the transmission.
+ * @param[in] WS The single-spectrum workspace to fit
+ * @param[in] order The order of the polynomial from 2 to 6
+ * @param[out] the coeficients of the polynomial. c[0] + c[1]x + c[2]x^2 + ... 
+ */
+API::MatrixWorkspace_sptr CalculateTransmission::fitPolynomial(API::MatrixWorkspace_sptr WS, int order, std::vector<double> & coeficients)
+{
+  g_log.notice("Fitting the experimental transmission curve fitpolyno");
+  double start = m_done; 
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Fit", start, m_done=0.9); 
+  auto polyfit = API::FunctionFactory::Instance().createFunction("Polynomial"); 
+  polyfit->setAttributeValue("n",order); 
+  polyfit->initialize();
+  childAlg->setProperty("Function",polyfit); 
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",WS);
+  childAlg->setProperty("Minimizer","Levenberg-MarquardtMD");
+  childAlg->setProperty("CreateOutput",true); 
+  childAlg->setProperty("IgnoreInvalidData",true);
+  childAlg->executeAsChildAlg();
+  std::string fitStatus = childAlg->getProperty("OutputStatus");
+  if ( fitStatus != "success" )
+  {
+    g_log.error("Unable to successfully fit the data: " + fitStatus);
+    throw std::runtime_error("Unable to successfully fit the data");
+  }
+ 
+  // Only get to here if successful
+  coeficients.resize(order+1);
+  for (int i = 0; i<=order; i++){
+    coeficients[i] = polyfit->getParameter(i); 
+  }
+  return this->extractSpectrum(childAlg->getProperty("OutputWorkspace"),1);
+} 
+
 /** Calls rebin as Child Algorithm
 *  @param binParams this string is passed to rebin as the "Params" property
 *  @param ws the workspace to rebin

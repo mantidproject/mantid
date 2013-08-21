@@ -84,10 +84,15 @@ namespace MDEvents
     std::vector<std::string> exts;
     exts.push_back(".bin");
 
-    declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-        "Path to an hkl file to save.");
+    declareProperty(new FileProperty("Filename", "", FileProperty::OptionalSave, exts),
+        "Optional path to an hkl file to save.  Vectors returned if no file requested.");
     declareProperty("RightHanded", true, "Save the Q-vector as k_f - k_i");
     declareProperty("ISAWcoords", true, "Save the Q-vector with y gravitationally up and x pointing downstream");
+    std::vector<double>Qx_save,Qy_save,Qz_save;
+    declareProperty("Qx_vector", Qx_save, "The name of the vector in which to store the list of Qx", Direction::Output);
+    declareProperty("Qy_vector", Qy_save, "The name of the vector in which to store the list of Qy", Direction::Output);
+    declareProperty("Qz_vector", Qz_save, "The name of the vector in which to store the list of Qz", Direction::Output);
+
   }
 
   //----------------------------------------------------------------------------------------------
@@ -111,9 +116,13 @@ namespace MDEvents
 
     // open the output file
     std::string filename = getPropertyValue("Filename");
-    std::ofstream handle(filename.c_str(), std::ios::out | std::ios::binary);
-    if (!handle.is_open())
-      throw std::runtime_error("Failed to open file for writing");
+    std::ofstream handle;
+    if (!filename.empty())
+    {
+      handle.open(filename.c_str(), std::ios::out | std::ios::binary);
+      if (!handle.is_open())
+        throw std::runtime_error("Failed to open file for writing");
+    }
     // set up a descripter of where we are going
     this->initTargetWSDescr(wksp);
 
@@ -150,6 +159,7 @@ namespace MDEvents
 
     // loop through the eventlists
     float buffer[DIMS];
+    std::vector<double>Qx_save,Qy_save,Qz_save;
     for (std::size_t i = 0; i < numSpectra; ++i)
     {
       // get a reference to the event list
@@ -179,14 +189,25 @@ namespace MDEvents
         {
           buffer[dim] = static_cast<float>(coord_signs[dim] * locCoord[coord_map[dim]]);
         }
-        handle.write(reinterpret_cast<char*>(buffer), BUFF_SIZE);
+        if (filename.empty())
+        {
+			Qx_save.push_back(static_cast<double>(buffer[0]));
+			Qy_save.push_back(static_cast<double>(buffer[1]));
+			Qz_save.push_back(static_cast<double>(buffer[2]));
+        }
+        else handle.write(reinterpret_cast<char*>(buffer), BUFF_SIZE);
       } // end of loop over events in list
 
       prog.report();
     } // end of loop over spectra
+    if (filename.empty())
+    {
+		setProperty("Qx_vector", Qx_save);
+		setProperty("Qy_vector", Qy_save);
+		setProperty("Qz_vector", Qz_save);
+    }
+    else handle.close(); // cleanup
 
-    // cleanup
-    handle.close();
   }
 
   /**

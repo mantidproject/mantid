@@ -1,3 +1,11 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This header MAY NOT be included in any test from a package below DataObjects
+ *    (e.g. Kernel, Geometry, API).
+ *  Conversely, this file (and its cpp) MAY NOT be modified to use anything from a
+ *  package higher than DataObjects (e.g. any algorithm), even if via the factory.
+ *********************************************************************************/
 #ifndef WORKSPACECREATIONHELPER_H_
 #define WORKSPACECREATIONHELPER_H_
 //------------------------------------------------------------------------------
@@ -154,7 +162,7 @@ namespace WorkspaceCreationHelper
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
   Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nHist, int nBins,
-                    bool includeMonitors = false);
+                    bool includeMonitors = false, bool startYNegative = false);
   
   /**
    * Create a test workspace with a Theta numeric axis instead of a spectrum axis
@@ -167,6 +175,18 @@ namespace WorkspaceCreationHelper
 
   /** Create an Eventworkspace with an instrument that contains RectangularDetector's */
   Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithFullInstrument(int numBanks, int numPixels, bool clearEvents=true);
+
+  /**
+   * Creates an event workspace with instrument which consists of cylindrical detectors.
+   *
+   * X data: 100 histogrammed bins, starting from 0.0 in steps of 1.0.
+   * Y data: 2 ToF events for every bin
+   *
+   * @param numBanks :: How many detector groups there should be
+   * @param clearEvents :: Whether workspace should not contain any events
+   * @return Workspace with described type of events (empty if clearEvents) and instrument set
+   */
+  Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents);
 
   Mantid::DataObjects::WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value);
   Mantid::DataObjects::WorkspaceSingleValue_sptr CreateWorkspaceSingleValueWithError(double value, double error);

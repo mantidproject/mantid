@@ -50,10 +50,16 @@ using namespace std;
 class IntegratePeakTimeSlicesTest: public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IntegratePeakTimeSlicesTest *createSuite() { return new IntegratePeakTimeSlicesTest(); }
+  static void destroySuite( IntegratePeakTimeSlicesTest *suite ) { delete suite; }
+  
   IntegratePeakTimeSlicesTest()
   {
     Mantid::API::FrameworkManager::Instance();
   }
+
   void test_abc()
   {
     int NRC =60;// 30;
@@ -166,8 +172,8 @@ public:
     pks->addPeak(peak);
 
     IntegratePeakTimeSlices algP;
-    wsPtr->setName("InputWorkspace");
-    pks->setName("PeaksWorkspace");
+    //wsPtr->setName("InputWorkspace");
+    //pks->setName("PeaksWorkspace");
     try
     {
       algP.initialize();
@@ -232,9 +238,6 @@ public:
     }
 
   }
-
-
-
 
 
 

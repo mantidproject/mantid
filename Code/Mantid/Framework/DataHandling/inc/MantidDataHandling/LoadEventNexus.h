@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
@@ -68,7 +68,7 @@ namespace Mantid
 
     File change history is stored at: <https://github.com/mantidproject/mantid>
     */
-    class DLLExport LoadEventNexus : public API::IDataFileChecker
+    class DLLExport LoadEventNexus : public API::IFileLoader<Kernel::NexusDescriptor>
     {
     public:
       /// Sets documentation strings for this algorithm
@@ -80,10 +80,8 @@ namespace Mantid
       virtual int version() const { return 1;};
       virtual const std::string category() const { return "DataHandling\\Nexus";}
 
-      /// do a quick check that this file can be loaded 
-      bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-      int fileCheck(const std::string& filePath);
+      /// Returns a confidence value that this algorithm can load a file
+      int confidence(Kernel::NexusDescriptor & descriptor) const;
 
       /** Sets whether the pixel counts will be pre-counted.
        * @param value :: true if you want to precount. */
@@ -129,6 +127,8 @@ namespace Mantid
       double shortest_tof;
       /// Count of all the "bad" tofs found. These are events with TOF > 2e8 microsec
       size_t bad_tofs;
+      /// A count of events discarded because they came from a pixel that's not in the IDF
+      size_t discarded_events;
 
       /// Do we pre-count the # of events in each pixel ID?
       bool precount;
@@ -193,6 +193,14 @@ namespace Mantid
       static void loadEntryMetadata(const std::string &nexusfilename, Mantid::API::MatrixWorkspace_sptr WS,
           const std::string &entry_name);
 
+      /// Load instrument from Nexus file if possible, else from IDF spacified by Nexus file 
+      static bool loadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
+          const std::string & top_entry_name, Algorithm * alg);
+
+      /// Load instrument for Nexus file
+      static bool runLoadIDFFromNexus(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg);
+
+      /// Load instrument from IDF file specified by Nexus file
       static bool runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace,
           const std::string & top_entry_name, Algorithm * alg);
 
@@ -211,20 +219,13 @@ namespace Mantid
       static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
         const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
-      /// Resize from TofEvents
-      void resizeFrom(std::vector<EventVector_pt> &vec,
-          const int32_t &size, DataObjects::EventList &el);
-
-      /// Resize from WeightedEvents
-      void resizeFrom(std::vector<WeightedEventVector_pt> &vec,
-          const int32_t &size, DataObjects::EventList &el);
-
     public:
       /// name of top level NXentry to use
       std::string m_top_entry_name;
       /// Set the top entry field name
       void setTopEntryName();
-
+      /// whether or not to launch multiple ProcessBankData jobs per bank
+      bool splitProcessing;
     };
 
   } // namespace DataHandling

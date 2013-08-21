@@ -199,18 +199,17 @@ class ConvertInstrumentFile(PythonAlgorithm):
         """
         mdict = {}
 
-        infows = api.LoadFullprofResolution(Filename=irffilename, OutputWorkspace="BankInfoTable", BankInformation=True)
+        profilews = api.LoadFullprofResolution(Filename=irffilename, OutputWorkspace="BankInfoTable")
 
-        numbanks = infows.rowCount()
+        numbanks = profilews.columnCount() - 1
+        self.log().notice("Total %d banks in %s. " % (numbanks, irffilename))
+
         for i in xrange(numbanks):
-            bankid = infows.cell(i, 0)
-            print "Found bank %d" %(bankid)
+            bankid = int(profilews.cell(0, i+1))
+            self.log().information("Found bank %d" %(bankid))
             
-            bankwsname = irffilename.split("/")[-1].split(".")[0] + "_Bank" + str(bankid)
-            print "Export to Tableworkspace %s" % (bankwsname)
-            bankws = api.LoadFullprofResolution(Filename=irffilename, OutputWorkspace=bankwsname, Bank=bankid, BankInformation=False)
-
-            mdict = self.parseTableWorkspaceToDict(bankws, mdict, bankid)
+            colindex = 1 + i
+            mdict = self.parseTableWorkspaceToDict(profilews, mdict, bankid, colindex)
 
             # .irf file may not have term Dtt2
             if mdict[bankid].has_key("Dtt2") is False:
@@ -230,7 +229,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         return mdict
 
 
-    def parseTableWorkspaceToDict(self, tablews, pardict, bankid):
+    def parseTableWorkspaceToDict(self, tablews, pardict, bankid, colindex):
         """ Parse parameter table workspace to a dictionary
         """
         pardict[bankid] = {}
@@ -239,7 +238,7 @@ class ConvertInstrumentFile(PythonAlgorithm):
         
         for irow in xrange(numrows):
             parname = tablews.cell(irow, 0)
-            parvalue = tablews.cell(irow, 1)
+            parvalue = tablews.cell(irow, colindex)
             pardict[bankid][parname] = parvalue
 
         return pardict

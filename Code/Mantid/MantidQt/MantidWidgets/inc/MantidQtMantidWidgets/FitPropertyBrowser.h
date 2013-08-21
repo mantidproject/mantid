@@ -127,6 +127,10 @@ public:
   void setOutputName(const std::string&);
   /// Get the minimizer
   std::string minimizer(bool withProperties = false)const;
+  /// Get the ignore invalid data option
+  bool ignoreInvalidData() const;
+  /// Set the ignore invalid data option
+  void setIgnoreInvalidData(bool on);
   /// Get the cost function
   std::string costFunction()const;
 
@@ -197,9 +201,6 @@ public:
 
   void postDeleteHandle(const std::string& wsName);
   void addHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
-
-  /// Update the PeakPickerTool with the current workspace to be displayed and which to associate itself with
-  void updatePPTool(const QString& name);
 
   /// Returns the list of workspaces that are currently been worked on by the fit property browser.
   QStringList getWorkspaceNames();
@@ -351,6 +352,7 @@ protected:
   QtProperty *m_endX;
   QtProperty *m_output;
   QtProperty *m_minimizer;
+  QtProperty *m_ignoreInvalidData;
   QtProperty *m_costFunction;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;

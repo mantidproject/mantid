@@ -24,13 +24,6 @@ namespace Mantid
       eNumber = 2
     };
 
-//    struct OpRequirements
-//    {
-//      bool matchXSize;
-//      bool keepEventWorkspace;
-//    };
-
-
     /** 
     BinaryOperation supports the implementation of a binary operation on two input workspaces.
     It inherits from the Algorithm class, and overrides the init() & exec() methods.
@@ -111,7 +104,7 @@ namespace Mantid
       virtual bool checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs);
 
       /// Checks the overall size compatibility of two workspaces
-      virtual bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
+      virtual std::string checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       
       /// Checks if the spectra at the given index of either input workspace is masked. If so then the output spectra has zeroed data
       /// and is also masked. The function returns true if further processing is not required on the spectra.

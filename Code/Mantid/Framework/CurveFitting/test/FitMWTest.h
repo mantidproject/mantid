@@ -18,6 +18,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 
 #include "MantidKernel/PropertyManager.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <sstream>
 
@@ -106,7 +107,7 @@ public:
     TS_ASSERT_EQUALS(covar->Double(1,2), 100.0);
     TS_ASSERT(fabs(covar->Double(0,2)) < 100.0);
     TS_ASSERT(fabs(covar->Double(0,2)) > 0.0);
-    TS_ASSERT_EQUALS(covar->Double(0,2), covar->Double(1,1));
+    TS_ASSERT_DELTA(covar->Double(0,2), covar->Double(1,1), 0.000001);
 
     TS_ASSERT_DIFFERS( fun->getError(0), 0.0 );
     TS_ASSERT_DIFFERS( fun->getError(1), 0.0 );
@@ -361,13 +362,134 @@ public:
 
   }
 
+  void test_ignore_invalid_data()
+  {
+      auto ws = createTestWorkspace(false);
+      const double one = 1.0;
+      ws->dataY(0)[3] = std::numeric_limits<double>::infinity();
+      ws->dataY(0)[5] = log(-one);
+      ws->dataE(0)[7] = 0;
+      ws->dataE(0)[9] = std::numeric_limits<double>::infinity();
+      ws->dataE(0)[11] = log(-one);
+
+      FunctionDomain_sptr domain;
+      IFunctionValues_sptr values;
+
+      // Requires a property manager to make a workspce
+      auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+      const std::string wsPropName = "TestWorkspaceInput";
+      propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
+      propManager->setProperty<Workspace_sptr>(wsPropName, ws);
+
+      FitMW fitmw(propManager.get(), wsPropName);
+      fitmw.declareDatasetProperties("", true);
+      fitmw.ignoreInvalidData(true);
+      fitmw.createDomain(domain, values);
+
+      FunctionValues *val = dynamic_cast<FunctionValues*>(values.get());
+      for(size_t i = 0; i < val->size(); ++i)
+      {
+          if ( i == 3 || i == 5 || i == 7 || i == 9 || i == 11 )
+          {
+              TS_ASSERT_EQUALS( val->getFitWeight(i), 0.0 );
+          }
+          else
+          {
+              TS_ASSERT_DIFFERS( val->getFitWeight(i), 0.0 );
+          }
+      }
+
+      API::IFunction_sptr fun(new ExpDecay);
+      fun->setParameter("Height",1.);
+      fun->setParameter("Lifetime",1.0);
+
+      Fit fit;
+      fit.initialize();
+
+      fit.setProperty("Function",fun);
+      fit.setProperty("InputWorkspace",ws);
+      fit.setProperty("WorkspaceIndex",0);
+
+      fit.execute();
+      TS_ASSERT(! fit.isExecuted());
+
+      fit.setProperty("IgnoreInvalidData",true);
+      fit.setProperty("Minimizer","Levenberg-Marquardt");
+      fit.execute();
+      TS_ASSERT(fit.isExecuted());
+
+      TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-3);
+      TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
+
+      // check Levenberg-MarquardtMD minimizer
+      fun->setParameter("Height",1.);
+      fun->setParameter("Lifetime",1.0);
+      Fit fit1;
+      fit1.initialize();
+      fit1.setProperty("Function",fun);
+      fit1.setProperty("InputWorkspace",ws);
+      fit1.setProperty("WorkspaceIndex",0);
+      fit1.setProperty("IgnoreInvalidData",true);
+      fit1.setProperty("Minimizer","Levenberg-MarquardtMD");
+      fit1.execute();
+      TS_ASSERT(fit1.isExecuted());
+
+      TS_ASSERT_DELTA( fun->getParameter("Height"), 10.0, 1e-3);
+      TS_ASSERT_DELTA( fun->getParameter("Lifetime"), 0.5, 1e-4);
+
+  }
+
+  void test_setting_instrument_fitting_parameters()
+  {
+      boost::shared_ptr<Mantid::Geometry::Instrument> instrument;
+      instrument.reset(new Mantid::Geometry::Instrument);
+      Mantid::Geometry::ObjComponent *source = new Mantid::Geometry::ObjComponent("source");
+      source->setPos(0.0,0.0,-10.0);
+      instrument->markAsSource(source);
+      Mantid::Geometry::ObjComponent *sample = new Mantid::Geometry::ObjComponent("sample");
+      instrument->markAsSamplePos(sample);
+      boost::shared_ptr<Mantid::Geometry::Detector> det = boost::shared_ptr<Mantid::Geometry::Detector>(new Mantid::Geometry::Detector("det",1,0));
+      instrument->markAsDetector(det.get());
+
+      API::MatrixWorkspace_sptr ws = createTestWorkspace(false);
+      ws->setInstrument( instrument );
+      ws->getSpectrum(0)->setDetectorID(det->getID());
+
+      auto &pmap = ws->instrumentParameters();
+
+      std::string value = "20.0 , ExpDecay , Lifetime , , , , , , , TOF ,";
+      pmap.add("fitting",det.get(), "Lifetime", value);
+      boost::shared_ptr<const Mantid::Geometry::IDetector> pdet = instrument->getDetector(det->getID());
+      TS_ASSERT( pdet );
+
+      Geometry::Parameter_sptr param = pmap.getRecursive(pdet.get(), "Lifetime", "fitting");
+      TS_ASSERT( param );
+
+      API::IFunction_sptr expDecay(new ExpDecay);
+      FunctionDomain_sptr domain;
+      IFunctionValues_sptr values;
+
+      // Requires a property manager to make a workspce
+      auto propManager = boost::make_shared<Mantid::Kernel::PropertyManager>();
+      const std::string wsPropName = "TestWorkspaceInput";
+      propManager->declareProperty(new WorkspaceProperty<Workspace>(wsPropName, "", Mantid::Kernel::Direction::Input));
+      propManager->setProperty<Workspace_sptr>(wsPropName, ws);
+
+      FitMW fitmw( propManager.get(), wsPropName);
+      fitmw.declareDatasetProperties("", true);
+      fitmw.createDomain(domain, values);
+      fitmw.initFunction(expDecay);
+
+      // test that the Lifetime parameter value was picked up from the instrument parameter map
+      TS_ASSERT_EQUALS( expDecay->getParameter("Lifetime"), 20.0 );
+  }
 
 private:
 
   API::MatrixWorkspace_sptr createTestWorkspace(const bool histogram)
   {
     MatrixWorkspace_sptr ws2(new WorkspaceTester);
-    ws2->initialize(2,10,10);
+    ws2->initialize(2,20,20);
 
     for(size_t is = 0; is < ws2->getNumberHistograms(); ++is)
     {

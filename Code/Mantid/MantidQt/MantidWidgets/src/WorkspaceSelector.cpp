@@ -20,6 +20,8 @@ using namespace MantidQt::MantidWidgets;
 WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(parent),
   m_addObserver(*this, &WorkspaceSelector::handleAddEvent), 
   m_remObserver(*this, &WorkspaceSelector::handleRemEvent),
+  m_clearObserver(*this, &WorkspaceSelector::handleClearEvent),
+  m_renameObserver(*this, &WorkspaceSelector::handleRenameEvent),
   m_init(init), m_workspaceTypes(), m_showHidden(false), m_optional(false),
   m_suffix(), m_algName(), m_algPropName(), m_algorithm()
 {
@@ -29,6 +31,10 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init) : QComboBox(par
     Mantid::API::AnalysisDataServiceImpl& ads = Mantid::API::AnalysisDataService::Instance();
     ads.notificationCenter.addObserver(m_addObserver);
     ads.notificationCenter.addObserver(m_remObserver);
+    ads.notificationCenter.addObserver(m_renameObserver);
+    ads.notificationCenter.addObserver(m_clearObserver);
+
+    refresh();
   }
 }
 
@@ -42,6 +48,8 @@ WorkspaceSelector::~WorkspaceSelector()
   {
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
     Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_remObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearObserver);
+    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
   }
 }
 
@@ -93,12 +101,12 @@ void WorkspaceSelector::setOptional(bool optional)
   }
 }
 
-QString WorkspaceSelector::getSuffix() const
+QStringList WorkspaceSelector::getSuffixes() const
 {
   return m_suffix;
 }
 
-void WorkspaceSelector::setSuffix(const QString & suffix)
+void WorkspaceSelector::setSuffixes(const QStringList & suffix)
 {
   if ( suffix != m_suffix )
   {
@@ -169,6 +177,41 @@ void WorkspaceSelector::handleRemEvent(Mantid::API::WorkspacePostDeleteNotificat
   }
 }
 
+void WorkspaceSelector::handleClearEvent(Mantid::API::ClearADSNotification_ptr)
+{
+  this->clear();
+}
+
+void WorkspaceSelector::handleRenameEvent(Mantid::API::WorkspaceRenameNotification_ptr pNf)
+{
+  QString name = QString::fromStdString(pNf->object_name());
+  QString newName = QString::fromStdString(pNf->new_objectname());
+  auto& ads = Mantid::API::AnalysisDataService::Instance();
+
+  bool eligible = checkEligibility(newName, ads.retrieve(pNf->new_objectname()));
+  int index = findText(name);
+  int newIndex = findText(newName); 
+  if(eligible)
+  {
+    if ( index != -1  && newIndex == -1)
+    {
+      this->setItemText(index, newName);
+    }
+    else if (index == -1 && newIndex == -1)
+    {
+      addItem(newName);
+    }else 
+      removeItem(index);
+  }
+  else
+  {
+    if ( index != -1 )
+    {
+      removeItem(index);
+    }
+  }
+}
+
 bool WorkspaceSelector::checkEligibility(const QString & name, Mantid::API::Workspace_sptr object) const
 {
   if ( m_algorithm && ! m_algPropName.isEmpty() )
@@ -186,12 +229,32 @@ bool WorkspaceSelector::checkEligibility(const QString & name, Mantid::API::Work
   {
     return false;
   }
-  else if ( ( ! m_suffix.isEmpty() ) && ( ! name.endsWith(m_suffix) ) )
+  else if ( ! hasValidSuffix(name) )
   {
     return false;
   }
 
   return true;
+}
+
+bool WorkspaceSelector::hasValidSuffix(const QString& name) const
+{
+  if(m_suffix.isEmpty())
+  {
+    return true;
+  }
+  else
+  {
+    for (int i =0; i < m_suffix.size(); ++i)
+    {
+      if(name.endsWith(m_suffix[i]))
+      {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 void WorkspaceSelector::refresh()

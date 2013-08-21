@@ -68,32 +68,22 @@ m_userEditing(true)
   // main layout
   QVBoxLayout* layout=new QVBoxLayout(this);
 
-  m_masking_on = new QRadioButton("Mask");
-  m_grouping_on = new QRadioButton("Group");
-  m_masking_on->setChecked(true);
-  connect(m_masking_on,SIGNAL(toggled(bool)),this,SLOT(toggleMaskGroup(bool)));
-  QHBoxLayout* radioLayout = new QHBoxLayout();
-  radioLayout->addWidget(m_masking_on);
-  radioLayout->addWidget(m_grouping_on);
-  radioLayout->setMargin(0);
-  QWidget* radioGroup = new QWidget();
-  radioGroup->setLayout(radioLayout);
-
-  layout->addWidget(radioGroup);
+  m_activeTool = new QLabel(this);
+  layout->addWidget(m_activeTool);
 
   // Create the tool buttons
 
   m_move = new QPushButton();
   m_move->setCheckable(true);
   m_move->setAutoExclusive(true);
-  m_move->setIcon(QIcon(":/PickTools/selection-tube.png"));
+  m_move->setIcon(QIcon(":/PickTools/zoom.png"));
   m_move->setToolTip("Move the instrument (Ctrl+Alt+M)");
   m_move->setShortcut(QKeySequence("Ctrl+Alt+M"));
 
   m_pointer = new QPushButton();
   m_pointer->setCheckable(true);
   m_pointer->setAutoExclusive(true);
-  m_pointer->setIcon(QIcon(":/MaskTools/selection-pointer.png"));
+  m_pointer->setIcon(QIcon(":/MaskTools/selection-edit.png"));
   m_pointer->setToolTip("Select and edit shapes (Ctrl+Alt+P)");
   m_pointer->setShortcut(QKeySequence("Ctrl+Alt+P"));
 
@@ -148,6 +138,20 @@ m_userEditing(true)
 
   layout->addWidget(toolGroup);
 
+  // create mask/group switch
+  m_masking_on = new QRadioButton("Mask");
+  m_grouping_on = new QRadioButton("Group");
+  m_masking_on->setChecked(true);
+  connect(m_masking_on,SIGNAL(toggled(bool)),this,SLOT(toggleMaskGroup(bool)));
+  QHBoxLayout* radioLayout = new QHBoxLayout();
+  radioLayout->addWidget(m_masking_on);
+  radioLayout->addWidget(m_grouping_on);
+  radioLayout->setMargin(0);
+  QWidget* radioGroup = new QWidget();
+  radioGroup->setLayout(radioLayout);
+
+  layout->addWidget(radioGroup);
+
   // Create property browser
 
   /* Create property managers: they create, own properties, get and set values  */
@@ -179,9 +183,6 @@ m_userEditing(true)
   m_clear_all->setToolTip("Clear all masking that have not been applied to the data.");
   connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
 
-  m_savegroupdet = new QCheckBox("Grouped Detectors");
-  m_savegroupdet->setToolTip("If checked, then save masked with grouped detectors. ");
-  m_savegroupdet->setChecked(false);
 
   m_save_as_workspace_exclude = new QAction("As Mask to workspace",this);
   m_save_as_workspace_exclude->setToolTip("Save current mask to mask workspace.");
@@ -263,7 +264,6 @@ m_userEditing(true)
   buttons->addWidget(m_apply_to_view,0,0,1,2);
   buttons->addWidget(m_saveButton,1,0);
   buttons->addWidget(m_clear_all,1,1);
-  buttons->addWidget(m_savegroupdet, 2, 0, 1, 2);
 
   box->setLayout(buttons);
   layout->addWidget(box);
@@ -340,35 +340,41 @@ void InstrumentWindowMaskTab::setActivity()
   {
     m_activity = Move;
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+    m_activeTool->setText("Tool: Navigation");
   }
   else if (m_pointer->isChecked())
   {
     m_activity = Select;
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Shape editing");
   }
   else if (m_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
     m_instrWindow->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Ellipse");
   }
   else if (m_rectangle->isChecked())
   {
     m_activity = DrawRectangle;
     m_instrWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Rectangle");
   }
   else if (m_ring_ellipse->isChecked())
   {
     m_activity = DrawEllipticalRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Elliptical ring");
   }
   else if (m_ring_rectangle->isChecked())
   {
     m_activity = DrawRectangularRing;
     m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_activeTool->setText("Tool: Rectangular ring");
   }
   m_instrWindow->updateInfoText();
 }
@@ -448,6 +454,7 @@ void InstrumentWindowMaskTab::showEvent (QShowEvent *)
   m_instrWindow->setMouseTracking(true);
   enableApplyButtons();
   m_instrWindow->updateInstrumentView(true);
+  m_instrWindow->getSurface()->changeBorderColor( getShapeBorderColor() );
 }
 
 void InstrumentWindowMaskTab::clearProperties()
@@ -787,14 +794,11 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
 
     if (!fileName.isEmpty())
     {
-      // Check option "GroupedDetectors"
-      bool groupeddetectors = m_savegroupdet->isChecked();
 
       // Call "SaveMask()"
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveMask",-1);
       alg->setProperty("InputWorkspace",boost::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
       alg->setPropertyValue("OutputFile",fileName.toStdString());
-      alg->setProperty("GroupedDetectors", groupeddetectors);
       alg->execute();
     }
     Mantid::API::AnalysisDataService::Instance().remove( outputWS->name() );

@@ -499,7 +499,7 @@ namespace Kernel
     /** @return the length of this vector */
     TYPE length() const
     {
-      return TYPE(sqrt(this->scalar_prod(*this)));
+      return TYPE(std::sqrt(this->norm2()));
     }
 
     /** @return the length of this vector */
@@ -508,6 +508,11 @@ namespace Kernel
       return this->length();
     }
 
+    /** @return the length of this vector */
+    TYPE norm2() const
+    {
+      return this->scalar_prod(*this);
+    }
 
     //-------------------------------------------------------------------------------------------
     /** Normalize this vector to unity length

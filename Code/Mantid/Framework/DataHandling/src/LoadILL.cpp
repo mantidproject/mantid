@@ -11,13 +11,12 @@
 //---------------------------------------------------
 #include "MantidDataHandling/LoadILL.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/UnitFactory.h"
-//#include "MantidAPI/NumericAxis.h"
-//#include "MantidDataObjects/Histogram1D.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidGeometry/Instrument.h"
-
+#include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 
 #include <limits>
 #include <algorithm>
@@ -32,11 +31,8 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-// Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(LoadILL)
-
-//register the algorithm into loadalgorithm factory
-DECLARE_LOADALGORITHM(LoadILL)
+    DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILL);
+;
 
 /**
  * tostring operator to print the contents of NXClassInfo
@@ -54,9 +50,40 @@ void LoadILL::initDocs() {
 	this->setOptionalMessage("Loads a ILL nexus file.");
 }
 
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not be used
+ */
+int LoadILL::confidence(Kernel::NexusDescriptor & descriptor) const {
+
+	// fields existent only at the ILL
+	if (descriptor.pathExists("/entry0/wavelength")
+			&& descriptor.pathExists("/entry0/experiment_identifier")
+			&& descriptor.pathExists("/entry0/mode")) {
+		return 80;
+	} else {
+		return 0;
+	}
+}
+
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
+
+LoadILL::LoadILL() :
+		API::IFileLoader<Kernel::NexusDescriptor>() {
+
+	m_instrumentName = "";
+	m_wavelength = 0;
+	m_channelWidth = 0;
+	m_numberOfChannels = 0;
+	m_numberOfHistograms = 0;
+	m_supportedInstruments.push_back("IN4");
+	m_supportedInstruments.push_back("IN5");
+	m_supportedInstruments.push_back("IN6");
+
+}
 
 /**
  * Initialise the algorithm
@@ -82,12 +109,12 @@ void LoadILL::exec() {
 	// find the first entry
 	NXEntry entry = root.openFirstEntry();
 
-	setInstrumentName(entry);
-
-	initInstrumentSpecific();
-
+	loadInstrumentDetails(entry);
 	loadTimeDetails(entry);
 	initWorkSpace(entry);
+
+	runLoadInstrument(); // just to get IDF contents
+	initInstrumentSpecific();
 
 	loadDataIntoTheWorkSpace(entry);
 
@@ -102,51 +129,18 @@ void LoadILL::exec() {
 }
 
 /**
- * Finds the instrument name in the nexus file
- *
- * @param entry :: The Nexus entry
- * @return instrument name
- */
-std::string LoadILL::getInstrumentName(NeXus::NXEntry& entry) {
-
-	// Old format: /entry0/IN5/name
-	// New format: /entry0/instrument/name
-
-	// Ugly way of getting Instrument Name
-	// Instrument name is in: entry0/<NXinstrument>/name
-
-	std::string instrumentName = "";
-
-	std::vector<NXClassInfo> v = entry.groups();
-	for (auto it = v.begin(); it < v.end(); it++) {
-		if (it->nxclass == "NXinstrument") {
-			m_nexusInstrumentEntryName = it->nxname;
-			std::string insNamePath = m_nexusInstrumentEntryName + "/name";
-			instrumentName = entry.getString(insNamePath);
-			g_log.debug() << "Instrument Name: " << instrumentName
-					<< " in NxPath: " << insNamePath << std::endl;
-			break;
-		}
-	}
-
-	return instrumentName;
-
-}
-
-/**
- * Sets the member variable to instrument name
- *
- * @param entry :: The Nexus entry
  *
  */
-void LoadILL::setInstrumentName(NeXus::NXEntry& entry) {
+void LoadILL::loadInstrumentDetails(NeXus::NXEntry& firstEntry) {
 
-	m_instrumentName = getInstrumentName(entry);
-	if (m_instrumentName == "") {
-		std::string message("Cannot read the instrument name from the Nexus file!");
-		g_log.error(message);
-		throw std::runtime_error(message);
+	m_instrumentPath = m_loader.findInstrumentNexusPath(firstEntry);
+
+	if (m_instrumentPath == "") {
+		throw std::runtime_error("Cannot set the instrument name from the Nexus file!");
 	}
+	m_instrumentName = m_loader.getStringFromNexusPath(firstEntry,
+			m_instrumentPath + "/name");
+	g_log.debug() << "Instrument name set to: " + m_instrumentName << std::endl;
 
 }
 
@@ -171,7 +165,8 @@ void LoadILL::initWorkSpace(NeXus::NXEntry& entry) {
 	m_numberOfHistograms = m_numberOfTubes * m_numberOfPixelsPerTube;
 
 	g_log.debug() << "NumberOfTubes: " << m_numberOfTubes << std::endl;
-	g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube << std::endl;
+	g_log.debug() << "NumberOfPixelsPerTube: " << m_numberOfPixelsPerTube
+			<< std::endl;
 	g_log.debug() << "NumberOfChannels: " << m_numberOfChannels << std::endl;
 
 	// Now create the output workspace
@@ -191,27 +186,16 @@ void LoadILL::initWorkSpace(NeXus::NXEntry& entry) {
 
 /**
  * Function to do specific instrument stuff
- * This is very ugly. We have to find a place where to put this
- * I can't get this from the instrument parameters because it wasn't
- * initilialised yet!
+ *
  */
 void LoadILL::initInstrumentSpecific() {
-	if (std::string::npos != m_instrumentName.find("IN5")) {
-		m_l1 = 2.0;
-		m_l2 = 4.0;
+	m_l1 = m_loader.getL1(m_localWorkspace);
+	// this will be mainly for IN5 (flat PSD detector)
+	m_l2 = m_loader.getInstrumentProperty(m_localWorkspace,"l2");
+	if (m_l2 == EMPTY_DBL()) {
+		g_log.debug("Calculating L2 from the IDF.");
+		m_l2 = m_loader.getL2(m_localWorkspace);
 	}
-	else if (std::string::npos != m_instrumentName.find("IN6")) {
-		m_l1 = 2.0;
-		m_l2 = 2.48;
-	}
-	else if (std::string::npos != m_instrumentName.find("IN4")) {
-		m_l1 = 2.0;
-		m_l2 = 2.0;
-	}
-	else{
-		g_log.warning("initInstrumentSpecific : Couldn't find instrument: " +  m_instrumentName);
-	}
-
 }
 
 /**
@@ -219,7 +203,6 @@ void LoadILL::initInstrumentSpecific() {
  * @param entry :: The Nexus entry
  */
 void LoadILL::loadTimeDetails(NeXus::NXEntry& entry) {
-
 
 	m_wavelength = entry.getFloat("wavelength");
 
@@ -237,7 +220,8 @@ void LoadILL::loadTimeDetails(NeXus::NXEntry& entry) {
 
 	m_monitorElasticPeakPosition = entry.getInt(monitorName + "/elasticpeak");
 
-	NXFloat time_of_flight_data = entry.openNXFloat(monitorName + "/time_of_flight");
+	NXFloat time_of_flight_data = entry.openNXFloat(
+			monitorName + "/time_of_flight");
 	time_of_flight_data.load();
 
 	// The entry "monitor/time_of_flight", has 3 fields:
@@ -253,34 +237,7 @@ void LoadILL::loadTimeDetails(NeXus::NXEntry& entry) {
 
 }
 
-/**
- * Parses the date as formatted at the ILL:
- * 29-Jun-12 11:27:26
- * and converts it to the ISO format used in Mantid:
- * ISO8601 format string: "yyyy-mm-ddThh:mm:ss[Z+-]tz:tz"
- *
- *  @param dateToParse :: date as string
- *  @return date as required in Mantid
- */
-std::string LoadILL::getDateTimeInIsoFormat(std::string dateToParse) {
-	namespace bt = boost::posix_time;
-	// parsing format
-	const std::locale format = std::locale(std::locale::classic(),
-			new bt::time_input_facet("%d-%b-%y %H:%M:%S"));
 
-	bt::ptime pt;
-	std::istringstream is(dateToParse);
-	is.imbue(format);
-	is >> pt;
-
-	if (pt != bt::ptime()) {
-		// Converts to ISO
-		std::string s = bt::to_iso_extended_string(pt);
-		return s;
-	} else {
-		return "";
-	}
-}
 
 /**
  * Load information about the run.
@@ -298,19 +255,19 @@ void LoadILL::loadRunDetails(NXEntry & entry) {
 	runDetails.addProperty("run_number", run_num);
 
 	std::string start_time = entry.getString("start_time");
-	start_time = getDateTimeInIsoFormat(start_time);
+	start_time = m_loader.dateTimeInIsoFormat(start_time);
 	runDetails.addProperty("run_start", start_time);
 
 	std::string end_time = entry.getString("end_time");
-	end_time = getDateTimeInIsoFormat(end_time);
+	end_time = m_loader.dateTimeInIsoFormat(end_time);
 	runDetails.addProperty("run_end", end_time);
 
 	//m_wavelength = entry.getFloat("wavelength");
 	std::string wavelength = boost::lexical_cast<std::string>(m_wavelength);
 	//runDetails.addProperty<double>("wavelength", m_wavelength);
 	runDetails.addProperty("wavelength", wavelength);
-	double ei = calculateEnergy(m_wavelength);
-	runDetails.addProperty<double>("Ei", ei,true); //overwrite
+	double ei = m_loader.calculateEnergy(m_wavelength);
+	runDetails.addProperty<double>("Ei", ei, true); //overwrite
 	//std::string ei_str = boost::lexical_cast<std::string>(ei);
 	//runDetails.addProperty("Ei", ei_str);
 
@@ -363,65 +320,6 @@ void LoadILL::loadExperimentDetails(NXEntry & entry) {
 
 }
 
-
-///**
-// * Gets the experimental Elastic Peak Position in the dectector
-// * as the value parsed from the nexus file might be wrong.
-// *
-// * It gets a few spectra in the equatorial line of the detector,
-// * calculates the peak position and puts all in a vector.
-// *
-// * In case there are several peaks in a spectrum, it considers
-// * the highest one.
-// *
-// * @param :: spectra data
-// * @return detector Elastic Peak Position
-// */
-//int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
-//
-//	SpectraAux s;
-//	std::vector<int> listOfFoundEPP;
-//	// j = index in the equatorial line (256/2=128)
-//	// both index 127 and 128 are in the equatorial line
-//	size_t j = m_numberOfPixelsPerTube / 2;
-//
-//	// ignore the first tubes and the last ones to avoid the beamstop
-//	//get limits in the m_numberOfTubes
-//	size_t tubesToRemove = m_numberOfTubes / 7;
-//
-//	for (size_t i = tubesToRemove ; i < m_numberOfTubes - tubesToRemove; i++) {
-//		int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-//		std::vector<int> thisSpectrum(data_p, data_p + m_numberOfChannels);
-//
-//		int peakPosition = s.peakSearchMaxiumPosition<int>(thisSpectrum, 5);
-//		if (peakPosition != std::numeric_limits<int>::min()) {
-//			listOfFoundEPP.push_back(peakPosition);
-//		}
-////		g_log.debug() << "Tube (" << i << ") : Spectra (" << 256 * i - 128 << ") : ";
-////		for (auto v : peakPositions)
-////			g_log.debug() << v << " ";
-////		g_log.debug() << "\n";
-//
-//	}
-//
-//	int calculatedDetectorElasticPeakPosition;
-//	if (listOfFoundEPP.size() <= 0 || s.mode<int>(listOfFoundEPP).size() <= 0) {
-//		g_log.warning()
-//				<< "No Elastic peak position found! Assuming the EPP in the Nexus file: "
-//				<< m_monitorElasticPeakPosition << std::endl;
-//		calculatedDetectorElasticPeakPosition = m_monitorElasticPeakPosition;
-//	} else {
-//		calculatedDetectorElasticPeakPosition = s.mode<int>(listOfFoundEPP)[0]; // in case of various, pick the first [0]
-//		g_log.debug() << "Calculated Detector EPP: "
-//				<< calculatedDetectorElasticPeakPosition;
-//		g_log.debug() << " :: Read EPP from the nexus file: "
-//				<< m_monitorElasticPeakPosition << std::endl;
-//	}
-//
-//	return calculatedDetectorElasticPeakPosition;
-//
-//}
-
 /**
  * Gets the experimental Elastic Peak Position in the dectector
  * as the value parsed from the nexus file might be wrong.
@@ -444,7 +342,6 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
 	//get limits in the m_numberOfTubes
 	size_t tubesToRemove = m_numberOfTubes / 7;
 
-
 	std::vector<int> cumulatedSumOfSpectras(m_numberOfChannels, 0);
 	for (size_t i = tubesToRemove; i < m_numberOfTubes - tubesToRemove; i++) {
 		int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
@@ -454,7 +351,8 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
 				cumulatedSumOfSpectras.begin(), cumulatedSumOfSpectras.begin(),
 				std::plus<int>());
 	}
-	auto it = std::max_element(cumulatedSumOfSpectras.begin(),cumulatedSumOfSpectras.end());
+	auto it = std::max_element(cumulatedSumOfSpectras.begin(),
+			cumulatedSumOfSpectras.end());
 
 	int calculatedDetectorElasticPeakPosition;
 	if (it == cumulatedSumOfSpectras.end()) {
@@ -465,13 +363,15 @@ int LoadILL::getDetectorElasticPeakPosition(const NeXus::NXInt &data) {
 
 	} else {
 		//calculatedDetectorElasticPeakPosition = *it;
-		calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(cumulatedSumOfSpectras.begin(), it));
+		calculatedDetectorElasticPeakPosition = static_cast<int>(std::distance(
+				cumulatedSumOfSpectras.begin(), it));
 
 		if (calculatedDetectorElasticPeakPosition == 0) {
 			g_log.warning()
-							<< "Elastic peak position is ZERO Assuming the EPP in the Nexus file: "
-							<< m_monitorElasticPeakPosition << std::endl;
-			calculatedDetectorElasticPeakPosition = m_monitorElasticPeakPosition;
+					<< "Elastic peak position is ZERO Assuming the EPP in the Nexus file: "
+					<< m_monitorElasticPeakPosition << std::endl;
+			calculatedDetectorElasticPeakPosition =
+					m_monitorElasticPeakPosition;
 
 		} else {
 			g_log.debug() << "Calculated Detector EPP: "
@@ -502,7 +402,8 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 	int calculatedDetectorElasticPeakPosition = getDetectorElasticPeakPosition(
 			data);
 
-	double theoreticalElasticTOF = (calculateTOF(m_l1) + calculateTOF(m_l2)) * 1e6; //microsecs
+	double theoreticalElasticTOF = (m_loader.calculateTOF(m_l1,m_wavelength) + m_loader.calculateTOF(m_l2,m_wavelength))
+			* 1e6; //microsecs
 
 	// Calculate the real tof (t1+t2) put it in tof array
 	std::vector<double> detectorTofBins(m_numberOfChannels + 1);
@@ -511,7 +412,7 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 				+ m_channelWidth
 						* static_cast<double>(static_cast<int>(i)
 								- calculatedDetectorElasticPeakPosition)
-								- m_channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
+				- m_channelWidth / 2; // to make sure the bin is in the middle of the elastic peak
 
 	}
 	//g_log.debug() << "Detector TOF bins: ";
@@ -525,7 +426,8 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 			<< std::endl;
 
 	// Assign calculated bins to first X axis
-	m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),detectorTofBins.end());
+	m_localWorkspace->dataX(0).assign(detectorTofBins.begin(),
+			detectorTofBins.end());
 
 	Progress progress(this, 0, 1, m_numberOfTubes * m_numberOfPixelsPerTube);
 	size_t spec = 0;
@@ -542,58 +444,13 @@ void LoadILL::loadDataIntoTheWorkSpace(NeXus::NXEntry& entry) {
 
 			// Assign Error
 			MantidVec& E = m_localWorkspace->dataE(spec);
-			std::transform(data_p, data_p + m_numberOfChannels, E.begin(), LoadILL::calculateError);
+			std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
+					LoadILL::calculateError);
 
 			++spec;
 			progress.report();
 		}
 	}
-}
-
-/**
- * This method does a quick file check by checking the no.of bytes read nread params and header buffer
- *  @param filePath- path of the file including name.
- *  @param nread :: no.of bytes read
- *  @param header :: The first 100 bytes of the file as a union
- *  @return true if the given file is of type which can be loaded by this algorithm
- */
-bool LoadILL::quickFileCheck(const std::string& filePath, size_t nread,
-		const file_header& header) {
-	std::string extn = extension(filePath);
-	bool bnexs(false);
-	(!extn.compare("nxs") || !extn.compare("nx5")) ? bnexs = true : bnexs =
-																false;
-	/*
-	 * HDF files have magic cookie in the first 4 bytes
-	 */
-	if (((nread >= sizeof(unsigned))
-			&& (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs) {
-		//hdf
-		return true;
-	} else if ((nread >= sizeof(g_hdf5_signature))
-			&& (!memcmp(header.full_hdr, g_hdf5_signature,
-					sizeof(g_hdf5_signature)))) {
-		//hdf5
-		return true;
-	}
-	return false;
-}
-
-/**
- * Checks the file by opening it and reading few lines
- * @param filePath :: name of the file inluding its path
- * @return an integer value how much this algorithm can load the file 
- */
-int LoadILL::fileCheck(const std::string& filePath) {
-	// Create the root Nexus class
-	NXRoot root(filePath);
-	NXEntry entry = root.openFirstEntry();
-	if (std::find(supportedInstruments.begin(), supportedInstruments.end(),
-			getInstrumentName(entry)) != supportedInstruments.end()) {
-		// FOUND
-		return 80;
-	}
-	return 0;
 }
 
 /**
@@ -617,34 +474,9 @@ void LoadILL::runLoadInstrument() {
 	}
 }
 
-/**
- * Calculate TOF from distance
- *  @param distance :: distance in meters
- *  @return tof in seconds
- */
-double LoadILL::calculateTOF(double distance) {
-	if (m_wavelength <= 0) {
-		g_log.error("Wavelenght is <= 0");
-		throw std::runtime_error("Wavelenght is <= 0");
-	}
 
-	double velocity = PhysicalConstants::h
-			/ (PhysicalConstants::NeutronMass * m_wavelength * 1e-10); //m/s
 
-	return distance / velocity;
-}
 
-/**
- * Calculate Neutron Energy from wavelength: \f$ E = h^2 / 2m\lambda ^2 \f$
- *  @param wavelength :: wavelength in \f$ \AA \f$
- *  @return tof in seconds
- */
-double LoadILL::calculateEnergy(double wavelength) {
-	double e = (PhysicalConstants::h * PhysicalConstants::h) /
-			(2 * PhysicalConstants::NeutronMass * wavelength*wavelength * 1e-20)/
-			PhysicalConstants::meV;
-	return e;
-}
 
 
 } // namespace DataHandling

@@ -1,5 +1,8 @@
 #include "MantidAPI/Workspace.h"
-#include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/Memory.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -95,7 +98,16 @@ const std::string& Workspace::getName() const
  */
 bool Workspace::isDirty(const int n) const
 {
-  return static_cast<int>(m_history.size()) > n;
+    return static_cast<int>(m_history.size()) > n;
+}
+
+/**
+ * Returns the memory footprint in sensible units
+ * @return A string with the
+ */
+std::string Workspace::getMemorySizeAsStr() const
+{
+  return Mantid::Kernel::memToString<uint64_t>(static_cast<uint64_t>(getMemorySize())/1024);
 }
 
 } // namespace API

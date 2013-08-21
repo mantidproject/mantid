@@ -58,7 +58,7 @@ private:
     MOCK_CONST_METHOD0(id, const std::string());
     MOCK_CONST_METHOD0(name, const std::string());
     MOCK_CONST_METHOD0(threadSafe, bool());
-    MOCK_CONST_METHOD0(toString, std::string());
+    MOCK_CONST_METHOD0(toString, const std::string());
     MOCK_CONST_METHOD0(getMemorySize, size_t());
   };
 
@@ -74,11 +74,23 @@ public:
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i), ws);
     }
     WorkspaceGroup_sptr group(new WorkspaceGroup());
+    AnalysisDataService::Instance().addOrReplace("group", group);
     group->add("ws0");
     group->add("ws1");
     group->add("ws2");
-    AnalysisDataService::Instance().addOrReplace("group", group);
     return group;
+  }
+
+  void test_toString_Produces_Expected_String()
+  {
+    WorkspaceGroup_sptr group = makeGroup();
+
+    const std::string expected = \
+        "WorkspaceGroup\n"
+        " -- ws0\n"
+        " -- ws1\n"
+        " -- ws2\n";
+    TS_ASSERT_EQUALS(expected, group->toString());
   }
 
   void test_add()
@@ -138,6 +150,25 @@ public:
     TS_ASSERT_EQUALS(names[1], "Workspace2");
   }
 
+  void test_reportMembers_Does_Not_Clear_List_Already_Passed_In()
+  {
+    Workspace_sptr leaf1(new WorkspaceTester());
+    std::set<Workspace_sptr> topLevel;
+    topLevel.insert(leaf1);
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    Workspace_sptr ws1(new WorkspaceTester());
+    group->addWorkspace( ws1 );
+    Workspace_sptr ws2(new WorkspaceTester());
+    group->addWorkspace( ws2 );
+
+    group->reportMembers(topLevel);
+    TS_ASSERT_EQUALS(3, topLevel.size());
+    TS_ASSERT_EQUALS(1, topLevel.count(leaf1));
+    TS_ASSERT_EQUALS(1, topLevel.count(ws1));
+    TS_ASSERT_EQUALS(1, topLevel.count(ws2));
+
+  }
+
   void test_getItem()
   {
     WorkspaceGroup_sptr group = makeGroup();
@@ -160,6 +191,25 @@ public:
     TSM_ASSERT( "remove() does not take out of ADS ", AnalysisDataService::Instance().doesExist("ws0") );
     AnalysisDataService::Instance().clear();
 }
+
+  void test_removeItem()
+  {
+    WorkspaceGroup_sptr group1 = makeGroup();
+    TS_ASSERT_THROWS( group1->removeItem(1), std::runtime_error );
+
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    Workspace_sptr ws1(new WorkspaceTester());
+    group->addWorkspace( ws1 );
+    Workspace_sptr ws2(new WorkspaceTester());
+    group->addWorkspace( ws2 );
+
+    TS_ASSERT_EQUALS( group->size(), 2 );
+    TS_ASSERT_THROWS_NOTHING( group->removeItem(1) );
+    TS_ASSERT_EQUALS( group->size(), 1 );
+    TS_ASSERT_EQUALS( group->getItem(0), ws1 );
+
+    AnalysisDataService::Instance().clear();
+  }
 
   void test_removeAll()
   {
@@ -193,7 +243,8 @@ public:
   void test_areNamesSimilar()
   {
     WorkspaceGroup_sptr group(new WorkspaceGroup());
-    group->setName("name");
+    //group->setName("name");
+    AnalysisDataService::Instance().add("name",group);
     TSM_ASSERT( "Empty group is not similar", !group->areNamesSimilar() );
 
     boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
@@ -221,46 +272,6 @@ public:
     group->add("different_name");
     TS_ASSERT( !group->areNamesSimilar() );
     
-    AnalysisDataService::Instance().clear();
-  }
-
-  void testUpdated()
-  {
-    WorkspaceGroupTest_WorkspaceGroupObserver observer;
-    WorkspaceGroup_sptr group(new WorkspaceGroup());
-    AnalysisDataService::Instance().add( "group", group );
-    TS_ASSERT( !observer.received );
-
-    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
-    ws->initialize(2,3,4);
-    AnalysisDataService::Instance().addOrReplace("name_0", ws);
-
-    ws.reset(new WorkspaceTester());
-    ws->initialize(2,3,4);
-    AnalysisDataService::Instance().addOrReplace("name_12", ws);
-
-    group->add( "name_0" );
-    TS_ASSERT( observer.received );
-    observer.received = false;
-
-    group->observeADSNotifications( false );
-
-    group->add( "name_12" );
-    TS_ASSERT( !observer.received );
-    observer.received = false;
-
-    group->observeADSNotifications( true );
-
-    group->remove( "name_12" );
-    TS_ASSERT( observer.received );
-    observer.received = false;
-
-    group->observeADSNotifications( false );
-
-    group->remove( "name_0" );
-    TS_ASSERT( !observer.received );
-    observer.received = false;
-
     AnalysisDataService::Instance().clear();
   }
 
@@ -302,6 +313,25 @@ public:
     group->addWorkspace(a);
     add_periods_logs(group, 1); 
     TS_ASSERT(group->isMultiperiod());
+  }
+
+  void test_isInGroup()
+  {
+      WorkspaceGroup_sptr group = makeGroup();
+      auto ws1 = group->getItem(1);
+      TS_ASSERT( group->isInGroup( *ws1 ) );
+      Workspace_sptr a = boost::make_shared<WorkspaceTester>();
+      TS_ASSERT( !group->isInGroup( *a ) );
+
+      WorkspaceGroup_sptr group1 = boost::make_shared<WorkspaceGroup>();
+      group1->addWorkspace( a );
+      group->addWorkspace( group1 );
+      TS_ASSERT( group->isInGroup( *a ) );
+
+      // catch a cycle
+      group1->addWorkspace( group );
+      Workspace_sptr b = boost::make_shared<WorkspaceTester>();
+      TS_ASSERT_THROWS( group->isInGroup( *b ), std::runtime_error );
   }
 
 };

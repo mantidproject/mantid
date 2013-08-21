@@ -514,6 +514,7 @@ namespace CurveFitting
     mustBePositive->setLower(0);
     declareProperty("MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
+    declareProperty("IgnoreInvalidData",false,"Flag to ignore infinities, NaNs and data with zero errors.");
     declareProperty("OutputStatus","", Kernel::Direction::Output);
     getPointerToProperty("OutputStatus")->setDocumentation( "Whether the fit was successful" );
     declareProperty("OutputChi2overDoF",0.0, "Returns the goodness of the fit", Kernel::Direction::Output);
@@ -583,6 +584,7 @@ namespace CurveFitting
 
     API::FunctionDomain_sptr domain;
     API::IFunctionValues_sptr values;
+    m_domainCreator->ignoreInvalidData(getProperty("IgnoreInvalidData"));
     m_domainCreator->createDomain(domain,values);
 
     // do something with the function which may depend on workspace
@@ -611,13 +613,12 @@ namespace CurveFitting
     size_t iter = 0;
     bool success = false;
     std::string errorString;
-    //double costFuncVal = 0;
-    //do
     g_log.debug("Starting minimizer iteration\n");
     while (static_cast<int>(iter) < maxIterations)
     {
       iter++;
       g_log.debug() << "Starting iteration " << iter << "\n";
+      m_function->iterationStarting();
       if ( !minimizer->iterate() )
       {
         errorString = minimizer->getError();
@@ -631,6 +632,11 @@ namespace CurveFitting
         break;
       }
       prog.report();
+      m_function->iterationFinished();
+      if(g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
+      {
+        g_log.information() << "Iteration " << iter << ", cost function = " << minimizer->costFunctionVal() << "\n";
+      }
     }
     g_log.information() << "Number of minimizer iterations=" << iter << "\n";
 

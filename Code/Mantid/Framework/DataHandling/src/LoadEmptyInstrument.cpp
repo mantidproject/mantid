@@ -11,6 +11,7 @@ The instrument is referred to as being empty because there is no data associated
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include <cmath>
 #include <Poco/Path.h>
 
@@ -18,8 +19,8 @@ namespace Mantid
 {
   namespace DataHandling
   {
-    // Register the algorithm into the algorithm factory
-    DECLARE_ALGORITHM(LoadEmptyInstrument)
+    // Register the algorithm into the algorithm factory as a file loading algorithm
+     DECLARE_FILELOADER_ALGORITHM(LoadEmptyInstrument)
     
     /// Sets documentation strings for this algorithm
     void LoadEmptyInstrument::initDocs()
@@ -35,8 +36,38 @@ namespace Mantid
     using namespace DataObjects;
 
     /// Empty default constructor
-    LoadEmptyInstrument::LoadEmptyInstrument() : Algorithm()
+    LoadEmptyInstrument::LoadEmptyInstrument() 
     {}
+
+     /**
+     * Return the confidence with with this algorithm can load the file
+     * @param descriptor A descriptor for the file
+     * @returns An integer specifying the confidence level. 0 indicates it will not be used
+     */
+    int LoadEmptyInstrument::confidence(Kernel::FileDescriptor & descriptor) const
+    {
+      const std::string & filePath = descriptor.filename();
+
+      int confidence(0);
+      if(descriptor.isAscii()) // Only consider an Ascii file
+      {
+        // Filename must contain "Definition" 
+        std::string::size_type stripPath = filePath.find_last_of("\\/");
+        if(stripPath == std::string::npos) stripPath = 0;
+        if(filePath.find("Definition",stripPath) != std::string::npos ){
+          // We have some confidence and it depends on the filetype.
+          if(descriptor.extension() == "xml")
+          { 
+            confidence = 80;
+          }
+          else
+          {
+            confidence = 20;
+          }
+        } // Has "Definition"
+      }  // Ascii file
+      return confidence;
+    }
 
     /// Initialisation method.
     void LoadEmptyInstrument::init()
@@ -166,10 +197,11 @@ namespace Mantid
       {
         loadInst->execute();
       }
-      catch (std::runtime_error& )
+      catch (std::runtime_error& exc)
       {
-        g_log.error("Unable to successfully run LoadInstrument Child Algorithm");
-        throw std::runtime_error("Unable to obtain valid instrument.");
+        std::ostringstream os;
+        os << "Unable to run LoadInstrument: '" << exc.what() << "'\n";
+        throw std::runtime_error(os.str());
       }
       
       return ws;

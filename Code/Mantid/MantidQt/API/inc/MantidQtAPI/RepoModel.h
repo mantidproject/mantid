@@ -11,6 +11,7 @@
 #include "MantidAPI/ScriptRepository.h"
 #include <QtConcurrentRun>
 #include <QFutureWatcher>
+#include <QMessageBox>
 
 class QLineEdit; 
 class QCheckBox; 
@@ -34,6 +35,9 @@ const QString BOTHUNCHANGED = "UPDATED";
 const QString BOTHCHANGED = "CHANGED"; 
 const QString UPLOADST = "UPLOADING";
 const QString DOWNLOADST = "DOWNLOADING";
+const QString PROTECTEDENTRY = "protected";
+const QString DELETABLEENTRY = "deletable"; 
+
 
   /** RepoModel : Wrapper for ScriptRepository to fit the Model View Qt Framework. 
       
@@ -45,22 +49,22 @@ const QString DOWNLOADST = "DOWNLOADING";
       with the ScriptRepository through the Qt ModelView Framework. 
 
       The requirements for a class to fit this framework is to reimplement the following methods: 
-        - ::data - giving access to the data
-        - ::flags - indication of the allowed interaction 
-        - ::headerData 
-        - ::index
-        - ::parent
-        - ::rowCount
-        - ::columnCount
-        - ::setData
+        - RepoModel::data - giving access to the data
+        - RepoModel::flags - indication of the allowed interaction 
+        - RepoModel::headerData 
+        - RepoModel::index
+        - RepoModel::parent
+        - RepoModel::rowCount
+        - RepoModel::columnCount
+        - RepoModel::setData
 
      Through these methods, the RepoModel will be able to provide access to the ScriptRepository 
      service. Allowing the users to upload and download files and folders.
 
      Some extra services are provided, to allow the classes to show the description of the files 
      as well as open the files to be inspected by the users: 
-      - ::entrySelected
-      - ::fileSelected
+      - entrySelected
+      - fileSelected
 
      This class should be constructed just once, and as so, the copy constructor and the assignment 
      will be make private to ensure this. 
@@ -93,8 +97,8 @@ const QString DOWNLOADST = "DOWNLOADING";
       This class in indended to keep track of the path inside the Repository
       of the entries, in such a way the repomodel will be able to get from the 
       index the path.
-      The ::appendChild allows the RepoModel to reconstruct the tree of the directories,
-      while the ::child and ::parent methods allow to iterate over the tree.      
+      The RepoModel::appendChild allows the RepoModel to reconstruct the tree of the directories,
+      while the RepoModel::child and RepoModel::parent methods allow to iterate over the tree.      
   */
   class RepoItem
   {
@@ -122,7 +126,8 @@ public:
     /// access to the parent of this entry
     /// @return : this entry parent's
     RepoItem * parent() const{return parentItem;};
-    
+    /// allow to remove a child, which allows erasing rows from the view.
+    bool removeChild(int row);
 private:
     /// track the list of children for this entry
     QList<RepoItem * >childItems;
@@ -156,6 +161,18 @@ private:
       QTextEdit * comment_te;
     };
 
+    /** Auxiliary Dialog to get the option from the user about removing the entries 
+     *  from the local folder or the central repository. When removing from central 
+     *  repository, it will allow also to provide the justification.
+     */
+    class DeleteQueryBox : public QMessageBox{
+    public: 
+      DeleteQueryBox(const QString & path, QWidget* parent = 0);
+      virtual ~DeleteQueryBox(); 
+      QString comment();
+    private: 
+      QTextEdit * comment_te; 
+    };
 
 public:
     /// constructor
@@ -193,24 +210,29 @@ public:
 
     QString fileDescription(const QModelIndex & index); 
     QString filePath(const QModelIndex & index);
-    QString author(const QModelIndex& index); 
-    
+    QString author(const QModelIndex& index);
+
+ signals:
+    void executingThread(bool);
 private:
     /// auxiliary method to populate the model
     void setupModelData(RepoItem *parent);
     /// auxiliary method to match the ScriptStatus to string
     const QString & fromStatus(Mantid::API::SCRIPTSTATUS status)const; 
-
+    /// pointer to the RepoItem root
     RepoItem *rootItem;
+    /// pointer to the ScriptRepository
     Mantid::API::ScriptRepository_sptr repo_ptr;
-    QString last_selected;
+    /// ScriptLocalRepository path, to be able to retrieve the absolute path
     QString repo_path;
     /// auxiliary method to help populating the model
     RepoItem * getParent(const QString & folder, QList<RepoItem*>&parents);
-private:
-    RepoModel( const RepoModel& );
-    const RepoModel& operator=( const RepoModel& );
+
+    Q_DISABLE_COPY(RepoModel);
+    /// logger
     static Mantid::Kernel::Logger & g_log;
+    
+    /// auxiliary method to deal with exceptions
     void handleExceptions(const Mantid::API::ScriptRepoException & ex, 
                           const QString & title, 
                           bool showWarning=true)const;
@@ -223,19 +245,23 @@ private:
     bool isDownloading(const QModelIndex & index)const ; 
     private slots:
     void downloadFinished();
-
  private:
-    //handle upload in thread
+    //handle connection to the uploader server in thread
+    // this connection are used to upload or deleting files.
+    
+    // QFuture variable, used to check if the thread is running, alive, etc... 
     QFuture<QString> upload_threads;
+    // The mechanism to have a call back function executed after finishing the thread
     QFutureWatcher<QString> upload_watcher;
-    QModelIndex upload_index;
+    // keep track of the file being used to the connection with uploader
     QString uploading_path;
+    QModelIndex upload_index;
+    // check if the file pointed by the index is inside a connection with uploader
     bool isUploading(const QModelIndex & index)const ; 
     private slots:
+    // call back method executed after finishing the thread
     void uploadFinished();
-
   };
-
 
 }; // namespace API
 };// namespace Mantid

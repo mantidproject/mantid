@@ -14,10 +14,14 @@ from cmakelists_utils import *
 def move_one(subproject, classname, newproject, newclassname, oldfilename, newfilename, args):
     """Move one file """
     
-    # Do an SVN move
-    cmd = "git mv " + oldfilename + " " + newfilename
+    # Move the file
+    cmd = "mv " + oldfilename + " " + newfilename
+    if not args.no_vcs:
+        cmd = "git " + cmd
     print "Running:", cmd
-    os.system(cmd)
+    retval = os.system(cmd)
+    if retval != 0:
+        raise RuntimeError("Error executing cmd '%s'" % cmd)
     
     f = open(newfilename, 'r')
     text = f.read()
@@ -102,6 +106,9 @@ if __name__ == "__main__":
     parser.add_argument('--force', dest='force', action='store_const',
                         const=True, default=False,
                         help='Force overwriting existing files. Use with caution!')
+    parser.add_argument('--no-vcs', dest='no_vcs', action='store_const',const=True,
+                        default=False,
+                        help='Can be used to move a class that is not yet under version control. Default: False')
     parser.add_argument('--no-header', dest='header', action='store_const',
                         const=False, default=True,
                         help="Don't move the header file")
@@ -120,6 +127,7 @@ if __name__ == "__main__":
     parser.add_argument('--project', dest='project', 
                         default="Framework",
                         help='The project in which this goes. Default: Framework. Can be MantidQt, Vates')
+
      
     args = parser.parse_args()
     subproject = args.subproject
@@ -127,7 +135,7 @@ if __name__ == "__main__":
     classname = args.classname
     newclassname = args.newclassname
     overwrite = args.force
-    
+
     # Make sure the subfolders end with a /
     if args.source_subfolder != "":
         if args.source_subfolder[-1:] != "/":

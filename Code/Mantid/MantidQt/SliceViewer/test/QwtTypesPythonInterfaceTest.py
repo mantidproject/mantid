@@ -3,11 +3,7 @@ import sys
 import os
 import unittest
 import time
-        
-# Import the Mantid framework
-import MantidFramework
-from MantidFramework import mtd
-from mantidsimple import *
+
 import mantidqtpython
 
 from mantidqtpython import StdRuntimeError, StdInvalidArgument
