@@ -220,7 +220,7 @@ namespace CurveFitting
     double gam1 = getParameter(12);
     double gam2 = getParameter(13);
 
-    double latticeconstant = getParameter(14);
+    double latticeconstant = getParameter(LATTICEINDEX);
 
     double dh, tof_h, eta, alpha, beta, H, sigma2, gamma, N;
 
