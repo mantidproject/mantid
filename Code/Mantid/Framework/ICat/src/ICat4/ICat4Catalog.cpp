@@ -184,6 +184,34 @@ namespace Mantid
      */
     void ICat4Catalog::listInvestigationTypes(std::vector<std::string>& invstTypes)
     {
+      ICATPortBindingProxy icat;
+
+      ns1__search request;
+      ns1__searchResponse response;
+
+      //Get the session ID to log the user out.
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+
+      std::string query = "InvestigationType.name ORDER BY name";
+      request.query     = &query;
+
+      int errorCode = icat.search(&request, &response);
+
+      // Was the search successful?
+      if (errorCode == 0)
+      {
+        for(unsigned i = 0; i < response.return_.size(); ++i)
+        {
+          // Cast from xsd__anyType to subclass (xsd__string).
+          xsd__string * inst = dynamic_cast<xsd__string*>(response.return_[i]);
+          invstTypes.push_back(inst->__item);
+        }
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
     }
 
     /**
