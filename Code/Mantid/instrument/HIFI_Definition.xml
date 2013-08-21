@@ -8,7 +8,6 @@
   <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
-    <parameter eq="" type="double" extract-single-value-as="mean" />       
     <reference-frame>
       <!-- The z-axis is set parallel to and in the direction of the beam. the 
            y-axis points up and the coordinate system is right handed. -->
