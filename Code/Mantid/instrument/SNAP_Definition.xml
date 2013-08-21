@@ -31,7 +31,7 @@
   <component type="monitors" idlist="monitors">
     <location/>
   </component>
-  <type name="monitors">
+  <type is="monitor" name="monitors">
     <component type="monitor">
       <location z="-3.0" name="monitor1"/>
     </component>
@@ -44,9 +44,9 @@
     <location  />
   </component>
   
-  <type name="Downstream_monitor">
-   <component type="pixel">
-    <location x="0.0" y="0.0" z="0.3" name="bank19" />
+  <type is="monitor" name="Downstream_monitor">
+   <component type="monitor">
+    <location x="0.0" y="0.0" z="0.3" name="monitor2" />
    </component>
   </type>
   
