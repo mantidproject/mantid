@@ -65,9 +65,9 @@ namespace Mantid
       entries.push_back(entry);
 
       // Is the login successful? (0 if yes, 12 if no).
-      int query_id = icat.login(&login, &loginResponse);
+      int result = icat.login(&login, &loginResponse);
 
-      if (query_id == 0)
+      if (result == 0)
       {
         std::string session_id = *(loginResponse.return_);
         ICat::Session::Instance().setSessionId(session_id);
@@ -90,20 +90,20 @@ namespace Mantid
       ns1__logout request;
       ns1__logoutResponse response;
 
-      //Get the session ID to log the user out.
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
-      int logoutResponse = icat.logout(&request,&response);
+      int result = icat.logout(&request,&response);
 
-      //If session is not valid (expired, or not logged in)
-      if(logoutResponse != 0)
+      // If session is set and valid.
+      if(result == 0)
       {
-        //then throw an error.
-        throwErrorMessage(icat);
+        Session::Instance().setSessionId("");
       }
-      //otherwise we clear the session.
-      Session::Instance().setSessionId("");
+      else
+      {
+        throw std::runtime_error("You are not currently logged into the system.");
+      }
     }
 
     /**
@@ -159,10 +159,10 @@ namespace Mantid
       std::string query = "Instrument.name ORDER BY name";
       request.query     = &query;
 
-      int errorCode = icat.search(&request, &response);
+      int result = icat.search(&request, &response);
 
       // Was the search successful?
-      if (errorCode == 0)
+      if (result == 0)
       {
         for(unsigned i = 0; i < response.return_.size(); ++i)
         {
@@ -196,10 +196,10 @@ namespace Mantid
       std::string query = "InvestigationType.name ORDER BY name";
       request.query     = &query;
 
-      int errorCode = icat.search(&request, &response);
+      int result = icat.search(&request, &response);
 
       // Was the search successful?
-      if (errorCode == 0)
+      if (result == 0)
       {
         for(unsigned i = 0; i < response.return_.size(); ++i)
         {
