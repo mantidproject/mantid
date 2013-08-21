@@ -183,7 +183,7 @@ def TransFit(mode,lambdamin=None,lambdamax=None, selector='BOTH'):
         over which to do the fit. These arguments are passed to the algorithm
         CalculateTransmission. If mode is set to 'Off' then the unfitted workspace is
         used and lambdamin and max have no effect
-        @param mode: can be 'Logarithmic' ('YLOG', 'LOG') 'OFF' ('CLEAR') or 'LINEAR' (STRAIGHT', LIN')
+        @param mode: can be 'Logarithmic' ('YLOG', 'LOG') 'OFF' ('CLEAR') or 'LINEAR' (STRAIGHT', LIN'), 'POLYNOMIAL2', 'POLYNOMIAL3', ... 
         @param lambdamin: the lowest wavelength to use in any fit
         @param lambdamax: the end of the fit range
         @param selector: define for which transmission this fit specification is valid (BOTH, SAMPLE, CAN) 
