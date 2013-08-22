@@ -334,8 +334,13 @@ boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::
       }
       else
       {
+        // only add things if max-recursion depth hasn't been reached
         if ((!limitSearch) || (depth+1 < nlevels))
-          nodeQueue.push_back(comp);
+        {
+          // don't bother adding things to the queue that aren't assemblies
+          if (bool(boost::dynamic_pointer_cast<const ICompAssembly>(comp)))
+            nodeQueue.push_back(comp);
+        }
       }
     }
   }// while-end
