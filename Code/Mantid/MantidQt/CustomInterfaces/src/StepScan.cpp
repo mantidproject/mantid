@@ -28,7 +28,8 @@ StepScan::StepScan(QWidget *parent)
   : UserSubWindow(parent), m_dataReloadNeeded(false),
     m_instrument(ConfigService::Instance().getInstrument().name()),
     m_addObserver(*this, &StepScan::handleAddEvent),
-    m_replObserver(*this, &StepScan::handleReplEvent)
+    m_replObserver(*this, &StepScan::handleReplEvent),
+    m_replaceObserverAdded(false)
 {
 }
 
@@ -78,6 +79,7 @@ void StepScan::cleanupWorkspaces()
     m_inputWSName.clear();
     if ( ADS.doesExist( m_plotWSName ) ) ADS.remove( m_plotWSName );
     m_plotWSName.clear();
+    disconnect( SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)) );
   }
 
   m_uiForm.startButton->setEnabled(false);
@@ -143,6 +145,10 @@ void StepScan::startLiveListener()
 
   setupOptionControls();
 
+  addReplaceObserverOnce();
+  connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
+           SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
+
   QApplication::restoreOverrideCursor();
 }
 
@@ -201,7 +207,7 @@ void StepScan::launchInstrumentWindow()
   // Attach the observers so that if a mask workspace is generated over in the instrument view,
   // it is automatically selected by the combobox over here
   AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
+  addReplaceObserverOnce();
 }
 
 void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
@@ -378,9 +384,6 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
   // Keep track of the algorithm that's pulling in the live data
   m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
-  connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
-           SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
   connect( this, SIGNAL(updatePlot(const QString&)), SLOT(generateCurve(const QString&)) );
 }
 
@@ -465,6 +468,15 @@ void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_pt
   checkForMaskWorkspace(pNf->object_name());
   checkForResultTableUpdate(pNf->object_name());
   checkForVaryingLogs(pNf->object_name());
+}
+
+void StepScan::addReplaceObserverOnce()
+{
+  if ( ! m_replaceObserverAdded )
+  {
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
+    m_replaceObserverAdded = true;
+  }
 }
 
 void StepScan::checkForMaskWorkspace(const std::string & wsName)
