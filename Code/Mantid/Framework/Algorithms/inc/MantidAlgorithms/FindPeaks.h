@@ -91,6 +91,8 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Optimization\\PeakFinding"; }
+  /// needed by FindPeaksBackground
+  int getVectorIndex(const MantidVec &vecX, double x);
 
 private:
   /// Sets documentation strings for this algorithm
@@ -121,9 +123,6 @@ private:
 
   /// Fit peak
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max, const int i_centre);
-
-
-  int getVectorIndex(const MantidVec &vecX, double x);
 
   void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum, const int &i_centre, const int &i_min, const int &i_max,
                              double &in_bg0, double &in_bg1, double &in_bg2);
