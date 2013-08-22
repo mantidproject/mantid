@@ -42,7 +42,7 @@ namespace Crystal
     virtual const std::string category() const;
 
   private:
-    void clearSingleExperimentInfo(Mantid::API::ExperimentInfo * const experimentInfo) const;
+    bool clearSingleExperimentInfo(Mantid::API::ExperimentInfo * const experimentInfo, const bool dryRun) const;
     virtual void initDocs();
     void init();
     void exec();
