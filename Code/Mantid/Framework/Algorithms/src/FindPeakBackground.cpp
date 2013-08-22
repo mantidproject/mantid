@@ -1,14 +1,19 @@
 /*WIKI*
 
 
-
+Algorithm written using this paper:
 J. Appl. Cryst. (2013). 46, 663-671
 
 Objective algorithm to separate signal from noise in a Poisson-distributed pixel data set
 
 T. Straaso/, D. Mueter, H. O. So/rensen and J. Als-Nielsen
 
-Synopsis: A method is described for the estimation of background level and separation of background pixels from signal pixels in a Poisson-distributed data set by statistical analysis.
+Synopsis: A method is described for the estimation of background level and separation
+of background pixels from signal pixels in a Poisson-distributed data set by statistical analysis.
+For each iteration, the pixel with the highest intensity value is eliminated from the
+data set and the sample mean and the unbiased variance estimator are calculated. Convergence is reached when the
+absolute difference between the sample mean and the sample variance of the data set is within k standard deviations of the
+variance, the default value of k being 1.  The k value is called SigmaConstant in the algorithm input.
 
 
 *WIKI*/
@@ -71,13 +76,16 @@ namespace Algorithms
     auto inwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::Input);
     declareProperty(inwsprop, "Name of input MatrixWorkspace that contains peaks.");
 
-    declareProperty("WorkspaceIndex", EMPTY_INT(), "Index of the spectrum to have peak and background separated. "
+    declareProperty(new ArrayProperty<int>("WorkspaceIndices"), "Optional: enter a comma-separated list of the "
+    		        "workspace indices to have peak and background separated. "
                     "Default is to calculate for all spectra.");
 
-    declareProperty("SigmaConstant", 1.0, "Multiplier of sigma for removing peak.  Default is 1.0. ");
+    declareProperty("SigmaConstant", 1.0, "Multiplier of standard deviations of the variance for convergence of "
+    		        "peak elimination.  Default is 1.0. ");
 
     declareProperty(new ArrayProperty<double>("FitWindow"),
-                    "Optional: enter a comma-separated list of the expected X-position of window to fit. The number of values must be exactly two.");
+                    "Optional: enter a comma-separated list of the minimum and maximum X-positions of window to fit.  "
+    		        "The window is the same for all indices in workspace. The length must be exactly two.");
 
     std::vector<std::string> bkgdtypes;
     bkgdtypes.push_back("Flat");
@@ -88,7 +96,9 @@ namespace Algorithms
 
     // The found peak in a table
     declareProperty(new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace", "", Direction::Output),
-                    "The name of the TableWorkspace in which to store the list of peaks found");
+                    "The name of the TableWorkspace in which to store the background found for each index.  "
+    		        "Table contains the indices of the beginning and ending of peak "
+    		        "and the estimated background coefficients for the constant, linear, and quadratic terms.");
 
   }
   
@@ -99,13 +109,13 @@ namespace Algorithms
   {
     // 1. Get input and validate
     MatrixWorkspace_const_sptr inpWS = getProperty("InputWorkspace");
-    int inpwsindex = getProperty("WorkspaceIndex");
+    std::vector<int> inpwsindex = getProperty("WorkspaceIndices");
     std::vector<double> m_vecFitWindows = getProperty("FitWindow");
     m_backgroundType = getPropertyValue("BackgroundType");
     double k = getProperty("SigmaConstant");
 
     bool separateall = false;
-    if (inpwsindex == EMPTY_INT())
+    if (inpwsindex.size() == 0)
     {
       separateall = true;
     }
@@ -118,7 +128,7 @@ namespace Algorithms
     }
     else
     {
-      numspec = 1;
+      numspec = inpwsindex.size();
     }
     size_t sizex = inpWS->readX(0).size();
     size_t sizey = inpWS->readY(0).size();
@@ -136,9 +146,9 @@ namespace Algorithms
 
     // Set up output table workspace
     API::ITableWorkspace_sptr m_outPeakTableWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
-    m_outPeakTableWS->addColumn("int", "wkspindex");
-    m_outPeakTableWS->addColumn("int", "peak_min");
-    m_outPeakTableWS->addColumn("int", "peak_max");
+    m_outPeakTableWS->addColumn("int", "wksp_index");
+    m_outPeakTableWS->addColumn("int", "peak_min_index");
+    m_outPeakTableWS->addColumn("int", "peak_max_index");
     m_outPeakTableWS->addColumn("double", "bkg0");
     m_outPeakTableWS->addColumn("double", "bkg1");
     m_outPeakTableWS->addColumn("double", "bkg2");
@@ -161,11 +171,11 @@ namespace Algorithms
       else
       {
         // Use the wsindex as the input
-        wsindex = static_cast<size_t>(inpwsindex);
+        wsindex = static_cast<size_t>(inpwsindex[i]);
         if (wsindex >= inpWS->getNumberHistograms())
         {
           stringstream errmsg;
-          errmsg << "Input workspace index " << inpwsindex << " is out of input workspace range = "
+          errmsg << "Input workspace index " << inpwsindex[i] << " is out of input workspace range = "
                  << inpWS->getNumberHistograms() << endl;
         }
       }

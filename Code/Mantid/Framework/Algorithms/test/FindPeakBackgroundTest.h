@@ -43,7 +43,7 @@ public:
 
 		alg.setProperty("InputWorkspace", inWS);
 		alg.setProperty("OutputWorkspace", "Signal");
-		alg.setProperty("WorkspaceIndex", 0);
+		alg.setProperty("WorkspaceIndices", "0");
 
 		alg.execute();
 		TS_ASSERT(alg.isExecuted());
