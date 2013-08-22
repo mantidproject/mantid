@@ -185,6 +185,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
                    src/Mantid/SetUpParaview.cpp				   
                    src/Mantid/UserFitFunctionDialog.cpp
+                   src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
                    src/Mantid/InstrumentWidget/CompAssemblyActor.cpp
                    src/Mantid/InstrumentWidget/ComponentActor.cpp
@@ -413,6 +414,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/RemoveErrorsDialog.h
                    src/Mantid/SetUpParaview.h				   
                    src/Mantid/UserFitFunctionDialog.h
+                   src/Mantid/WorkspaceIcons.h
                    src/Mantid/InstrumentWidget/BinDialog.h
                    src/Mantid/InstrumentWidget/CompAssemblyActor.h
                    src/Mantid/InstrumentWidget/ComponentActor.h

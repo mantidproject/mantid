@@ -101,14 +101,14 @@ namespace DataObjects
   }
 
   /**
-   * @return :: A pointer to the created info node.
+   * @return A string containing the workspace description
    */
-  API::Workspace::InfoNode *SpecialWorkspace2D::createInfoNode() const
+  const std::string SpecialWorkspace2D::toString() const
   {
-      auto node = new InfoNode(*this);
-      node->addLine( "Title: " + getTitle() );
-      node->addLine( "Histograms: " + boost::lexical_cast<std::string>(getNumberHistograms()) );
-      return node;
+    std::ostringstream os;
+    os << "Title: " << getTitle() << "\n";
+    os << "Histograms: " << getNumberHistograms() << "\n";
+    return os.str();
   }
 
   //----------------------------------------------------------------------------------------------

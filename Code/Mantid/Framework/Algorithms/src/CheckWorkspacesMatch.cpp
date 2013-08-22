@@ -687,12 +687,12 @@ bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, 
   const Geometry::ParameterMap& ws1_parmap = ws1->instrumentParameters();
   const Geometry::ParameterMap& ws2_parmap = ws2->instrumentParameters();
 
-  if ( ws1_parmap.asString() != ws2_parmap.asString() )
+  if ( ws1_parmap != ws2_parmap )
   {
     g_log.debug() << "Parameter maps...\n";
     g_log.debug() << "WS1: " << ws1_parmap.asString() << "\n";
     g_log.debug() << "WS2: " << ws2_parmap.asString() << "\n";
-    result = "Instrument ParameterMap mismatch";
+    result = "Instrument ParameterMap mismatch (differences in ordering ignored)";
     return false;
   }
   

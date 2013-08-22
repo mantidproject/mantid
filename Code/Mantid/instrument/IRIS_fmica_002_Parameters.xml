@@ -37,6 +37,7 @@
 
 <component-link name="mica">
 <parameter name="Efixed"> <value val="0.2067" /> </parameter>
+<parameter name="resolution"> <value val="0.0012" /> </parameter>
 </component-link>
 
 <parameter name="analyser" type="string">

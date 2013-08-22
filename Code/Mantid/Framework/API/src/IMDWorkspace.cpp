@@ -63,28 +63,29 @@ namespace Mantid
       }
 
       //-----------------------------------------------------------------------------------------------
+
       /**
-       * @return :: A pointer to the created info node.
        */
-      Workspace::InfoNode *IMDWorkspace::createInfoNode() const
+      const std::string IMDWorkspace::toString() const
       {
-          auto node = new InfoNode(*this);
-          node->addLine( "Title: " + getTitle() );
-          for (size_t i=0; i < getNumDims(); i++)
-          {
-              std::ostringstream mess;
-              Geometry::IMDDimension_const_sptr dim = getDimension(i);
-              mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
-              // Also show the dimension ID string, if different than name
-              if (dim->getDimensionId() != dim->getName())
-                mess << ". Id=" << dim->getDimensionId();
-              node->addLine( mess.str() );
-          }
-          if ( hasOriginalWorkspace() )
-          {
-              node->addLine("Binned from '" + getOriginalWorkspace()->getName() + "'");
-          }
-          return node;
+        std::ostringstream os;
+        os << id() << "\n"
+           << "Title: " + getTitle() << "\n";
+        for (size_t i=0; i < getNumDims(); i++)
+        {
+          Geometry::IMDDimension_const_sptr dim = getDimension(i);
+          os << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
+          // Also show the dimension ID string, if different than name
+          if (dim->getDimensionId() != dim->getName())
+            os << ". Id=" << dim->getDimensionId();
+          os << "\n";
+        }
+        if( hasOriginalWorkspace() )
+        {
+          os << "Binned from '" << getOriginalWorkspace()->getName();
+        }
+        os << "\n";
+        return os.str();
       }
 
       //-----------------------------------------------------------------------------------------------
