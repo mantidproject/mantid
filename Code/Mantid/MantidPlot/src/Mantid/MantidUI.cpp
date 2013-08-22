@@ -1517,6 +1517,7 @@ bool MantidUI::hasUB(const QString& wsName)
     return false;
   }
 
+  alg->setLogging(false);
   alg->setPropertyValue("Workspace", wsName.toStdString());
   executeAlgorithmAsync(alg, true);
 
