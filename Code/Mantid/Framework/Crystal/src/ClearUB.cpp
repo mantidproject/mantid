@@ -101,23 +101,24 @@ namespace Mantid
       return doesClear;
     }
 
-    //----------------------------------------------------------------------------------------------
-    /** Execute the algorithm.
+    /**
+     * Perform the working for the algorithm.
+     * @param ws : Input or input/output workspace
+     * @param dryRun : Flag to indicate that this is a dry run.
+     * @return : True if the algorithm does result in the clearing of at least one UB.
      */
-    void ClearUB::exec()
+    bool ClearUB::doExecute(Workspace * const ws, bool dryRun)
     {
-      Workspace_sptr ws = getProperty("Workspace");
-      const bool dryRun = getProperty("DryRun");
       bool doesClear = false;
-      ExperimentInfo_sptr experimentInfo = boost::dynamic_pointer_cast<ExperimentInfo>(ws);
+      ExperimentInfo* experimentInfo = dynamic_cast<ExperimentInfo*>(ws);
       if (experimentInfo)
       {
-        doesClear = clearSingleExperimentInfo(experimentInfo.get(), dryRun);
+        doesClear = clearSingleExperimentInfo(experimentInfo, dryRun);
       }
       else
       {
-        MultipleExperimentInfos_sptr experimentInfos = boost::dynamic_pointer_cast<
-            MultipleExperimentInfos>(ws);
+        MultipleExperimentInfos* experimentInfos = dynamic_cast<
+            MultipleExperimentInfos*>(ws);
         if (!experimentInfos)
         {
           if (!dryRun)
@@ -136,6 +137,17 @@ namespace Mantid
           }
         }
       }
+      return doesClear;
+    }
+
+    //----------------------------------------------------------------------------------------------
+    /** Execute the algorithm.
+     */
+    void ClearUB::exec()
+    {
+      Workspace_sptr ws = getProperty("Workspace");
+      const bool dryRun = getProperty("DryRun");
+      bool doesClear = doExecute(ws.get(), dryRun);
       this->setProperty("DoesClear", doesClear);
     }
 

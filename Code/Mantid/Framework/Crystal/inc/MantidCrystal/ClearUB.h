@@ -41,6 +41,10 @@ namespace Crystal
     virtual int version() const;
     virtual const std::string category() const;
 
+  protected:
+
+    bool doExecute(Mantid::API::Workspace * const ws, bool dryRun);
+
   private:
     bool clearSingleExperimentInfo(Mantid::API::ExperimentInfo * const experimentInfo, const bool dryRun) const;
     virtual void initDocs();
