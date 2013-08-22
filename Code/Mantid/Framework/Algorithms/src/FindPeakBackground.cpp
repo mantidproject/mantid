@@ -1,6 +1,15 @@
 /*WIKI*
 
-Separates background from signal for spectra of a workspace.
+
+
+J. Appl. Cryst. (2013). 46, 663-671
+
+Objective algorithm to separate signal from noise in a Poisson-distributed pixel data set
+
+T. Straaso/, D. Mueter, H. O. So/rensen and J. Als-Nielsen
+
+Synopsis: A method is described for the estimation of background level and separation of background pixels from signal pixels in a Poisson-distributed data set by statistical analysis.
+
 
 *WIKI*/
 
@@ -12,6 +21,9 @@ Separates background from signal for spectra of a workspace.
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Statistics.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
 
 #include <sstream>
 
@@ -57,16 +69,26 @@ namespace Algorithms
   void FindPeakBackground::init()
   {
     auto inwsprop = new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::Input);
-    declareProperty(inwsprop, "Name of input MatrixWorkspace to have signal and background separated.");
+    declareProperty(inwsprop, "Name of input MatrixWorkspace that contains peaks.");
 
     declareProperty("WorkspaceIndex", EMPTY_INT(), "Index of the spectrum to have peak and background separated. "
                     "Default is to calculate for all spectra.");
 
+    declareProperty("SigmaConstant", 1.0, "Multiplier of sigma for removing peak.  Default is 1.0. ");
+
     declareProperty(new ArrayProperty<double>("FitWindow"),
                     "Optional: enter a comma-separated list of the expected X-position of window to fit. The number of values must be exactly two.");
 
-    auto outwsprop = new WorkspaceProperty<Workspace2D>("OutputWorkspace", "", Direction::Output);
-    declareProperty(outwsprop, "Name of the output Workspace2D containing the peak.");
+    std::vector<std::string> bkgdtypes;
+    bkgdtypes.push_back("Flat");
+    bkgdtypes.push_back("Linear");
+    //bkgdtypes.push_back("Quadratic");
+    declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
+                    "Type of Background.");
+
+    // The found peak in a table
+    declareProperty(new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace", "", Direction::Output),
+                    "The name of the TableWorkspace in which to store the list of peaks found");
 
   }
   
@@ -79,6 +101,8 @@ namespace Algorithms
     MatrixWorkspace_const_sptr inpWS = getProperty("InputWorkspace");
     int inpwsindex = getProperty("WorkspaceIndex");
     std::vector<double> m_vecFitWindows = getProperty("FitWindow");
+    m_backgroundType = getPropertyValue("BackgroundType");
+    double k = getProperty("SigmaConstant");
 
     bool separateall = false;
     if (inpwsindex == EMPTY_INT())
@@ -110,15 +134,23 @@ namespace Algorithms
       if (n < sizey) n++;
     }
 
-    Workspace2D_sptr outWS = boost::dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(
-          "Workspace2D", numspec, 2, 2));
+    // Set up output table workspace
+    API::ITableWorkspace_sptr m_outPeakTableWS = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    m_outPeakTableWS->addColumn("int", "wkspindex");
+    m_outPeakTableWS->addColumn("int", "peak_min");
+    m_outPeakTableWS->addColumn("int", "peak_max");
+    m_outPeakTableWS->addColumn("double", "bkg0");
+    m_outPeakTableWS->addColumn("double", "bkg1");
+    m_outPeakTableWS->addColumn("double", "bkg2");
+    for( size_t i = 0; i < numspec; ++i )
+      m_outPeakTableWS->appendRow();
 
     // 3. Get Y values
     Progress prog(this, 0, 1.0, numspec);
-    //PARALLEL_FOR2(inpWS, outWS)
+    PARALLEL_FOR2(inpWS, m_outPeakTableWS)
     for (size_t i = 0; i < numspec; ++i)
     {
-      //PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERUPT_REGION
       // a) figure out wsindex
       size_t wsindex;
       if (separateall)
@@ -141,26 +173,12 @@ namespace Algorithms
       // Find background
       const MantidVec& inpX = inpWS->readX(wsindex);
       const MantidVec& inpY = inpWS->readY(wsindex);
-      const MantidVec& inpE = inpWS->readE(wsindex);
-
-      MantidVec& vecX = outWS->dataX(i);
-      MantidVec& vecY = outWS->dataY(i);
-      MantidVec& vecE = outWS->dataE(i);
-
-	  // save output of mask * Y
-	  vecX[0] = inpX[l0];
-	  vecX[1] = inpX[n-1];
-	  vecY[0] = inpY[l0];
-	  vecY[1] = inpY[n-1];
-	  vecE[0] = inpE[l0];
-	  vecE[1] = inpE[n-1];
 
       double Ymean, Yvariance, Ysigma;
       MantidVec maskedY;
       for (size_t l = l0; l < n; ++l)maskedY.push_back(inpY[l]);
       MantidVec mask(n-l0,0.0);
       double xn = static_cast<double>(n-l0);
-      double k = 1.0;
       do
       {
     	  Statistics stats = getStatistics(maskedY);
@@ -218,32 +236,104 @@ namespace Algorithms
 				  if (inpY[l+l0] > peaks[ipeak].maxY) peaks[ipeak].maxY = inpY[l+l0];
 			  }
 		  }
+		  size_t min_peak, max_peak;
 		  if(peaks.size()> 0)
 		  {
 			  if(peaks[peaks.size()-1].stop == 0) peaks[peaks.size()-1].stop = n-1;
 			  std::sort(peaks.begin(), peaks.end(), by_len());
 
 			  // save endpoints
-			  vecX[0] = inpX[peaks[0].start];
+			  min_peak = peaks[0].start;
 			  // extra point for histogram input
-			  vecX[1] = inpX[peaks[0].stop + sizex - sizey];
-			  vecY[0] = inpY[peaks[0].start];
-			  vecY[1] = inpY[peaks[0].stop];
-			  vecE[0] = inpE[peaks[0].start];
-			  vecE[1] = inpE[peaks[0].stop];
+			  max_peak = peaks[0].stop + sizex - sizey;
 		  }
+		  else
+		  {
+			  min_peak = l0;
+			  max_peak = n-1;
+		  }
+		  double a0,a1,a2;
+		  estimateBackground(inpX, inpY, l0, n,
+		      peaks[0].start, peaks[0].stop, a0, a1, a2);
+		  // Add a new row
+		  API::TableRow t = m_outPeakTableWS->getRow(i);
+		  t << static_cast<int>(wsindex) << static_cast<int>(min_peak) << static_cast<int>(max_peak) << a0 << a1 <<a2;
       }
 
 	  prog.report();
-	  //PARALLEL_END_INTERUPT_REGION
+	  PARALLEL_END_INTERUPT_REGION
     } // ENDFOR
-    //PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERUPT_REGION
 
     // 4. Set the output
-    setProperty("OutputWorkspace", outWS);
+    setProperty("OutputWorkspace", m_outPeakTableWS);
 
     return;
   }
+  //----------------------------------------------------------------------------------------------
+  /** Estimate background
+* @param X :: vec for X
+* @param Y :: vec for Y
+* @param i_min :: index of minimum in X to estimate background
+* @param i_max :: index of maximum in X to estimate background
+* @param p_min :: index of peak min in X to estimate background
+* @param p_max :: index of peak max in X to estimate background
+* @param out_bg0 :: interception
+* @param out_bg1 :: slope
+* @param out_bg2 :: a2 = 0
+*/
+  void FindPeakBackground::estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
+		  const size_t p_min, const size_t p_max,double& out_bg0, double& out_bg1, double& out_bg2)
+  {
+    // Validate input
+    if (i_min >= i_max)
+      throw std::runtime_error("i_min cannot larger or equal to i_max");
+    if (p_min >= p_max)
+      throw std::runtime_error("p_min cannot larger or equal to p_max");
+    double sum = 0.0;
+    double sumX = 0.0;
+    double sumY = 0.0;
+    double sumX2 = 0.0;
+    double sumXY = 0.0;
+    for (size_t i = i_min; i < i_max; ++i)
+    {
+		  if(i >= p_min && i < p_max) continue;
+		  sum += 1.0;
+		  sumX += X[i];
+		  sumX2 += X[i]*X[i];
+		  sumY += Y[i];
+		  sumXY += X[i]*Y[i];
+    }
+
+    // Estimate
+    out_bg0 = 0.;
+    out_bg1 = 0.;
+    out_bg2 = 0.;
+    if (m_backgroundType.compare("Linear") == 0) // linear background
+    {
+      // Cramer's rule for 2 x 2 matrix
+      double devisor = sum*sumX2-sumX*sumX;
+      if (devisor != 0)
+      {
+		  out_bg0 = (sumY*sumX2-sumX*sumXY)/devisor;
+		  out_bg1 = (sum*sumXY-sumY*sumX)/devisor;
+      }
+    }
+    else // flat background
+    {     if(sum != 0) out_bg0 = sumY/sum;
+    }
+
+    g_log.debug() << "Estimated background: A0 = " << out_bg0 << ", A1 = "
+                        << out_bg1 << ", A2 = " << out_bg2 << "\n";
+
+    return;
+  }
+  //----------------------------------------------------------------------------------------------
+  /** Calculate 4th moment
+* @param X :: vec for X
+* @param n :: length of vector
+* @param mean :: mean of X
+*/
   double FindPeakBackground::moment4(MantidVec& X, size_t n, double mean)
   {
 	  double sum=0.0;

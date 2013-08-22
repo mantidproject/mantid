@@ -48,16 +48,16 @@ public:
 		alg.execute();
 		TS_ASSERT(alg.isExecuted());
 
-		Workspace2D_sptr outWS = boost::dynamic_pointer_cast<Workspace2D>(
-				AnalysisDataService::Instance().retrieve("Signal"));
+	    Mantid::API::ITableWorkspace_sptr peaklist = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>
+	                  (Mantid::API::AnalysisDataService::Instance().retrieve("Signal"));
 
-		const MantidVec& Signal = outWS->readY(0);
-		TS_ASSERT_DELTA(Signal[0], 9.0000, 0.0001);
-		TS_ASSERT_DELTA(Signal[1], 2.000, 0.0001);
-
-		const MantidVec& vecX = outWS->readX(0);
-		TS_ASSERT_DELTA(vecX[0], 4.0, 0.000001);
-		TS_ASSERT_DELTA(vecX[1], 19.0, 0.000001);
+	    TS_ASSERT( peaklist );
+	    TS_ASSERT_EQUALS( peaklist->rowCount() , 1 );
+	    TS_ASSERT_DELTA( peaklist->Int(0,1), 4, 0.01 );
+	    TS_ASSERT_DELTA( peaklist->Int(0,2), 19, 0.01 );
+	    TS_ASSERT_DELTA( peaklist->Double(0,3), 1.2, 0.01 );
+	    TS_ASSERT_DELTA( peaklist->Double(0,4), 0.04, 0.01 );
+	    TS_ASSERT_DELTA( peaklist->Double(0,5), 0.0, 0.01 );
 
 		return;
 	}
