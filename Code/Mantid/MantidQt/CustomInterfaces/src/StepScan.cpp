@@ -122,6 +122,8 @@ void StepScan::startLiveListener()
   // TODO: Run entirely asynchronously (see AlgorithmRunner)
   IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("UpdateEvery",5.0);
+  startLiveData->setProperty("FromNow",false);
+  startLiveData->setProperty("FromStartOfRun",true);
   startLiveData->setProperty("Instrument",m_instrument);
   m_inputWSName = "__live";
   startLiveData->setProperty("OutputWorkspace",m_inputWSName);
