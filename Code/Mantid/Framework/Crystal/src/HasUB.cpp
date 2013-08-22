@@ -67,9 +67,9 @@ namespace Crystal
    */
   void HasUB::exec()
   {
-    Workspace_sptr ws =  getProperty("Workspace");
+    Workspace_sptr ws =  this->getProperty("Workspace");
     bool hasUB = ClearUB::doExecute(ws.get(), true /*DryRun*/);
-    setProperty("HasUB", hasUB);
+    this->setProperty("HasUB", hasUB);
   }
 
 

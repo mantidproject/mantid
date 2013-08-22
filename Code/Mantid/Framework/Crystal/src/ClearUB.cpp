@@ -85,10 +85,11 @@ namespace Mantid
       Sample& sampleObject = experimentInfo->mutableSample();
       if (!sampleObject.hasOrientedLattice())
       {
-        this->g_log.notice("Workspace has no oriented lattice to clear.");
+        this->g_log.notice("Experiment Info has no oriented lattice.");
       }
       else
       {
+        this->g_log.notice("Experiment Info has an oriented lattice.");
         // Only actually clear the orientedlattice if this is NOT a dry run.
         if (!dryRun)
         {
