@@ -119,6 +119,16 @@ namespace DataHandling
       return mUserGiveInstrument;
     }
 
+    std::string getDescription()
+    {
+        return mDescription;
+    }
+
+    bool isGivenDescription()
+    {
+        return mUserGiveDescription;
+    }
+
     /// Data structures to store XML to Group/Detector conversion map
     std::map<int, std::vector<std::string> > getGroupComponentsMap()
     {
@@ -133,11 +143,22 @@ namespace DataHandling
       return mGroupSpectraMap;
     }
 
+    std::map<int, std::string> getGroupNamesMap()
+    {
+      return mGroupNamesMap;
+    }
+
   private:
     /// Instrument name
     std::string mInstrumentName;
     /// User-define instrument name
     bool mUserGiveInstrument;
+
+    /// Grouping description. Empty if not specified.
+    std::string mDescription;
+    /// Whether description is given by user
+    bool mUserGiveDescription;
+
     /// XML document loaded
     Poco::XML::Document* pDoc;
     /// Root element of the parsed XML
@@ -147,6 +168,9 @@ namespace DataHandling
     std::map<int, std::vector<detid_t> > mGroupDetectorsMap;
     std::map<int, std::vector<int> > mGroupSpectraMap;
     int mStartGroupID;
+
+    /// Map of group names
+    std::map<int, std::string> mGroupNamesMap;
 
     /// Initialize XML parser
     void initializeXMLParser(const std::string & filename);
