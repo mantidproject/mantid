@@ -145,7 +145,7 @@ namespace Mantid
       } catch (std::invalid_argument& ex)
       {
         this->g_log.error("Specified ColumnToSortBy does not exist");
-        throw ex;
+        throw;
       }
 
     }

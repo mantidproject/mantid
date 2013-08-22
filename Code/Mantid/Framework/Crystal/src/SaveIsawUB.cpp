@@ -112,7 +112,7 @@ namespace Crystal
       dV+= U*U;
     }
 
-    Volume = Volume/2.0/(1-xA*xA-xB*xB-xC*xC+2*xA*xB*xC);
+
     double U=(lattice_errors[3])*(sin(2*latticeParams[3]/180.*M_PI)-
               sin(latticeParams[3]/180.*M_PI)*cos(latticeParams[4]/180*M_PI)*
               cos(latticeParams[5]/180*M_PI));

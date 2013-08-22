@@ -113,8 +113,8 @@ namespace Mantid
         Geometry::IComponent_const_sptr comp = inst->getComponentByName(bankName);
         if (!comp)
         {
-        	continue;
         	g_log.debug() << "Component "+bankName+" does not exist in instrument\n";
+          continue;
         }
 
         // determine the range in time-of-flight

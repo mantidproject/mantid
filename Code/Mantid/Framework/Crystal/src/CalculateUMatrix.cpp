@@ -182,8 +182,6 @@ namespace Crystal
     OrientedLattice o(a,b,c,alpha,beta,gamma);
     Matrix<double> B=o.getB();
 
-    double H,K,L;
-
     PeaksWorkspace_sptr ws;
     ws = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(this->getProperty("PeaksWorkspace") );
     if (!ws) throw std::runtime_error("Problems reading the peaks workspace");
@@ -195,9 +193,9 @@ namespace Crystal
     for (int i=0;i<ws->getNumberPeaks();i++)
     {
       Peak p=ws->getPeaks()[i];
-      H=p.getH();
-      K=p.getK();
-      L=p.getL();
+      double H=p.getH();
+      double K=p.getK();
+      double L=p.getL();
       if(H*H+K*K+L*L>0)
       {
         nIndexedpeaks++;
