@@ -530,8 +530,7 @@ namespace Mantid
       boost::shared_array<int> udet(new int[ndet]);
       dims_array[0] = ndet;
       sv_ndims = 1;
-      int res = 0;
-      if ((res = IDCgetpari(dae_handle, "UDET", udet.get(), dims_array, &sv_ndims)) != 0)
+      if (IDCgetpari(dae_handle, "UDET", udet.get(), dims_array, &sv_ndims) != 0)
       {
         g_log.error("Unable to read detector information (UDET) from DAE " + m_daename);
       }

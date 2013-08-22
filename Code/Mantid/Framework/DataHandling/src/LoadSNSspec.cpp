@@ -186,8 +186,7 @@ namespace Mantid
       std::string str;
 
       std::vector<DataObjects::Histogram1D> spectra;
-      //size_t iLine=0;    // line number
-      int nSpectra = 0;
+
       int nBins = 0; //number of rows
 
       //bool numeric = true;
@@ -276,7 +275,7 @@ namespace Mantid
 
       try
       {
-          nSpectra = spectra_nbr;
+          int nSpectra = spectra_nbr;
           MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
           (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins+1,nBins));
 

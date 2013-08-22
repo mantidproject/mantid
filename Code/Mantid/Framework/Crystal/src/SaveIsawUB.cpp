@@ -100,11 +100,6 @@ namespace Crystal
       else
        Volume = lattice.volume();
 
-
-    double xA=cos(latticeParams[3]/180.*M_PI);
-    double xB=cos(latticeParams[4]/180.*M_PI);
-    double xC=cos(latticeParams[5]/180.*M_PI);
-
     double dV =0;
     for( int i=0;i<3;i++)
     {

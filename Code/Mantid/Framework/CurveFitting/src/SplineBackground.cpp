@@ -151,7 +151,7 @@ void SplineBackground::exec()
     {
       double Bj = gsl_vector_get(B, j);
       gsl_matrix_set(Z, i, j, Bj);
-    }
+    }S
   }
 
   /* do the fit */
@@ -161,10 +161,10 @@ void SplineBackground::exec()
   API::MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(inWS,1,X.size(),Y.size());
   {
     outWS->getSpectrum(0)->setSpectrumNo(inWS->getSpectrum(spec)->getSpectrumNo());
-    double xi, yi, yerr;
+    double yi, yerr;
     for (MantidVec::size_type i=0;i<Y.size();i++)
     {
-      xi = X[i];
+      double xi = X[i];
       gsl_bspline_eval(xi, B, bw);
       gsl_multifit_linear_est(B, c, cov, &yi, &yerr);
       outWS->dataY(0)[i] = yi;

@@ -739,7 +739,7 @@ namespace CurveFitting
    */
   std::complex<double> E1(std::complex<double> z)
   {
-    const double el = 0.5772156649015328;
+
 
     std::complex<double> exp_e1;
 
@@ -755,7 +755,6 @@ namespace CurveFitting
     else if (az <= 10.0 || (rz < 0.0 && az < 20.0))
     {
       // Some interesting region, equal to integrate to infinity, converged
-      // cout << "[DB] Type 1" << endl;
 
       complex<double> r(1.0, 0.0);
       exp_e1 = r;
@@ -773,8 +772,7 @@ namespace CurveFitting
         }
       } // ENDFOR k
 
-      // cout << "[DB] el = " << el << ", exp_e1 = " << exp_e1 << endl;
-
+      const double el = 0.5772156649015328;
       exp_e1 = -el - log(z) + (z*exp_e1);
     }
     else
@@ -796,7 +794,6 @@ namespace CurveFitting
       }
     }
 
-    // cout << "[DB] Final exp_e1 = " << exp_e1 << "\n";
 
     return exp_e1;
   }
