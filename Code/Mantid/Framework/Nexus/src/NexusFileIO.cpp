@@ -151,14 +151,21 @@ using namespace DataObjects;
        Nexus specs.
        @param title :: title field.
   */
-  int NexusFileIO::writeNexusProcessedHeader( const std::string& title) const
+  int NexusFileIO::writeNexusProcessedHeader( const std::string& title, const std::string& wsName) const
   {
 
     std::string className="Mantid Processed Workspace";
     std::vector<std::string> attributes,avalues;
     if( ! writeNxValue<std::string>("title", title, NX_CHAR, attributes, avalues) )
       return(3);
-    //
+
+    //name for workspace if this is a multi workspace nexus file
+    if(!wsName.empty())
+    {
+      if( ! writeNxValue<std::string>("workspace_name", wsName, NX_CHAR, attributes, avalues) )
+        return(3);
+    }
+
     attributes.push_back("URL");
     avalues.push_back("http://www.nexusformat.org/instruments/xml/NXprocessed.xml");
     attributes.push_back("Version");
