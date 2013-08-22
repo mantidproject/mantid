@@ -1,3 +1,5 @@
+#include "PythonThreading.h"
+
 #include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
@@ -212,6 +214,7 @@ void MdViewerWidget::setupMainView()
  */
 void MdViewerWidget::setupPluginMode()
 {
+  GlobalInterpreterLock gil;
   this->createAppCoreForPlugin();
   this->checkEnvSetup();
   this->setupUiAndConnections();
@@ -454,6 +457,7 @@ void MdViewerWidget::renderingDone()
  */
 void MdViewerWidget::renderWorkspace(QString wsname, int wstype)
 {
+  GlobalInterpreterLock gil;
   QString sourcePlugin = "";
   if (VatesViewerInterface::PEAKS == wstype)
   {

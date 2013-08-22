@@ -68,6 +68,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/MantidQt/Factory/inc
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
+  ${CMAKE_SOURCE_DIR}/MantidPlot/src
   ${QWT_INCLUDE_DIR}
 )
 
