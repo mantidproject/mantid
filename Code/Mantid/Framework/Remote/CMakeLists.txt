@@ -1,12 +1,10 @@
 set ( SRC_FILES
-	src/RemoteJobManager.cpp
 	src/RemoteTask.cpp
 	src/SimpleJSON.cpp
 )
 
 set ( INC_FILES
 	inc/MantidRemote/RemoteJob.h
-	inc/MantidRemote/RemoteJobManager.h
 	inc/MantidRemote/RemoteTask.h
 	inc/MantidRemote/SimpleJSON.h
 )
