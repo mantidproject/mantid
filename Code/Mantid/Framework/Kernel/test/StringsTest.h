@@ -292,7 +292,13 @@ public:
   {
     std::vector<int> result;
     TS_ASSERT_THROWS_NOTHING(result = parseRange("3,1,4,0,2,5"));
-    std::vector<int> expected = {3,1,4,0,2,5};
+    std::vector<int> expected(6);
+    expected[0] = 3;
+    expected[1] = 1;
+    expected[2] = 4;
+    expected[3] = 0;
+    expected[4] = 2;
+    expected[5] = 5;
     TS_ASSERT_EQUALS(result, expected);
   }
 
@@ -300,13 +306,21 @@ public:
   {
     std::vector<int> result;
     TS_ASSERT_THROWS_NOTHING(result = parseRange("  1, 2 - 5,   6   ,7,8,    9,10-12"));
-    std::vector<int> expected = {1,2,3,4,5,6,7,8,9,10,11,12};
+
+    std::vector<int> expected;
+    expected.reserve(12);
+    for(int i = 1; i <= 12; i++)
+      expected.push_back(i);
+
     TS_ASSERT_EQUALS(result, expected);
   }
 
   void test_parseRange_emptyElements()
   {
-    std::vector<int> expected = {1,2,3};
+    std::vector<int> expected(3);
+    expected[0] = 1;
+    expected[1] = 2;
+    expected[2] = 3;
 
     std::vector<int> result1;
     TS_ASSERT_THROWS_NOTHING(result1 = parseRange(",1,2,3"));
@@ -325,7 +339,13 @@ public:
   {
     std::vector<int> result;
     TS_ASSERT_THROWS_NOTHING(result = parseRange("   52   53   54   55   56   57   58   192", " "));
-    std::vector<int> expected = {52,53,54,55,56,57,58,192};
+
+    std::vector<int> expected;
+    expected.reserve(8);
+    for(int i = 52; i <= 58; i++)
+      expected.push_back(i);
+    expected.push_back(192);
+
     TS_ASSERT_EQUALS(result, expected);
   }
 
@@ -333,7 +353,12 @@ public:
   {
     std::vector<int> result;
     TS_ASSERT_THROWS_NOTHING(result = parseRange("  1- 3 4    5 - 7  8 -10  ", " "));
-    std::vector<int> expected = {1,2,3,4,5,6,7,8,9,10};
+
+    std::vector<int> expected;
+    expected.reserve(10);
+    for(int i = 1; i <= 10; i++)
+      expected.push_back(i);
+
     TS_ASSERT_EQUALS(result, expected);
   }
 
@@ -341,7 +366,12 @@ public:
   {
     std::vector<int> result;
     TS_ASSERT_THROWS_NOTHING(result = parseRange("1-2,3:5,6-7,8:10", ",","-:"));
-    std::vector<int> expected = {1,2,3,4,5,6,7,8,9,10};
+
+    std::vector<int> expected;
+    expected.reserve(10);
+    for(int i = 1; i <= 10; i++)
+      expected.push_back(i);
+
     TS_ASSERT_EQUALS(result, expected);
   }
 

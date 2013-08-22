@@ -157,7 +157,10 @@ namespace DataHandling
   {
     /// Initialise the properties
 
-    std::vector<std::string> fileExts = {".xml", ".map"};
+    std::vector<std::string> fileExts(2);
+    fileExts[0] = ".xml";
+    fileExts[1] = ".map";
+
     declareProperty(new FileProperty("InputFile", "", FileProperty::Load, fileExts),
         "The XML or Map file with full path.");
 
@@ -871,7 +874,7 @@ namespace DataHandling
   LoadGroupMapFile::LoadGroupMapFile(const std::string& fileName, Kernel::Logger& log)
     : m_fileName(fileName), m_log(log), m_lastLineRead(0) 
   {
-    m_file.open(m_fileName, std::ifstream::in);
+    m_file.open(m_fileName.c_str(), std::ifstream::in);
 
     if(!m_file)
       throw Exception::FileError("Couldn't open file for reading", fileName);
