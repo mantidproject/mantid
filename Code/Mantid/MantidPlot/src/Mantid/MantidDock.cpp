@@ -546,10 +546,14 @@ void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
 /**
  * Add menu for clearing workspace items.
  * @param menu : Parent menu.
+ * @param wsName : Name of the selected workspace.
  */
-void MantidDockWidget::addClearMenuItems(QMenu* menu)
+void MantidDockWidget::addClearMenuItems(QMenu* menu, const QString& wsName)
 {
   QMenu* clearMenu = new QMenu(tr("Clear Options"), this);
+
+  m_clearUB->setEnabled( m_mantidUI->hasUB(wsName) );
+
   clearMenu->addAction(m_clearUB);
   menu->addMenu(clearMenu);
 }
@@ -842,7 +846,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     {
       addTableWorkspaceMenuItems(menu);
     }
-    addClearMenuItems(menu);
+    addClearMenuItems(menu, selectedWsName);
     
     //Get the names of the programs for the send to option
     std::vector<std::string> programNames = (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name"));

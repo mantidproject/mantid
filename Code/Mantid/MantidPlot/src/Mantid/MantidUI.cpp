@@ -1493,28 +1493,66 @@ void  MantidUI::copyWorkspacestoVector(const QList<QTreeWidgetItem*> &selectedIt
 }
 
 /**
-* Clears the UB from the selected workspace
-* @param wsName :: selected workspace name
-*/
+ * Determine if the workspace has one or more UB matrixes on one of it's samples.
+ * @param wsName
+ * @return True if present
+ */
+bool MantidUI::hasUB(const QString& wsName)
+{
+  const std::string algName("HasUB");
+  const int version = -1;
+  Mantid::API::IAlgorithm_sptr alg;
+  try
+  {
+    alg = Mantid::API::AlgorithmManager::Instance().create(algName);
+  } catch (...)
+  {
+    QMessageBox::critical(appWindow(), "MantidPlot - Algorithm error",
+        "Cannot create algorithm " + QString::fromStdString(algName) + " version "
+            + QString::number(version));
+    return false;
+  }
+  if (!alg)
+  {
+    return false;
+  }
+
+  alg->setPropertyValue("Workspace", wsName.toStdString());
+  executeAlgorithmAsync(alg, true);
+
+  bool hasUB = alg->getProperty("HasUB");
+  return hasUB;
+}
+
+/**
+ * Clears the UB from the selected workspace
+ * @param wsName :: selected workspace name
+ */
 void MantidUI::clearUB(const QStringList& wsName)
 {
   const std::string algName("ClearUB");
   const int version = -1;
-  for(int i = 0; i < wsName.size(); ++i)
+  for (int i = 0; i < wsName.size(); ++i)
   {
     Mantid::API::IAlgorithm_sptr alg;
     try
     {
       alg = Mantid::API::AlgorithmManager::Instance().create(algName, version);
     }
-    catch(...)
+    catch (...)
     {
-      QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Cannot create algorithm "+QString::fromStdString(algName)+" version "+QString::number(version));
+      QMessageBox::critical(appWindow(), "MantidPlot - Algorithm error",
+          "Cannot create algorithm " + QString::fromStdString(algName) + " version "
+              + QString::number(version));
       return;
     }
-    alg->initialize();
+    if (!alg)
+    {
+      return;
+    }
+
     alg->setPropertyValue("Workspace", wsName[i].toStdString());
-    alg->execute();
+    executeAlgorithmAsync(alg);
   }
 }
 

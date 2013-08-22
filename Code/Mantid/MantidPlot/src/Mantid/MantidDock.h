@@ -97,7 +97,7 @@ private:
   void addPeaksWorkspaceMenuItems(QMenu *menu, const Mantid::API::IPeaksWorkspace_const_sptr & WS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
-  void addClearMenuItems(QMenu* menu);
+  void addClearMenuItems(QMenu* menu, const QString& wsName);
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
   

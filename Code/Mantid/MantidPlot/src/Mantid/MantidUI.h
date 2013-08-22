@@ -244,6 +244,8 @@ public slots:
   Table* createDetectorTable(const QString & wsName, const Mantid::API::IPeaksWorkspace_sptr & ws);
 
 
+  // Determine whether the workspace has a UB matrix
+  bool hasUB(const QString& wsName);
   // Clear the UB via the ClearUB algorithm
   void clearUB(const QStringList& workspaces);
   //  *****                            *****  //
