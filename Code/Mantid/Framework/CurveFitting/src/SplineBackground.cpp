@@ -151,7 +151,7 @@ void SplineBackground::exec()
     {
       double Bj = gsl_vector_get(B, j);
       gsl_matrix_set(Z, i, j, Bj);
-    }S
+    }
   }
 
   /* do the fit */
