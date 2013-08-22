@@ -17,6 +17,7 @@
 #include "../ScriptingWindow.h"
 
 #include "MantidKernel/Property.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/DateAndTime.h"
@@ -34,7 +35,6 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -54,16 +54,22 @@
 #include <windows.h>
 #endif
 
+#include <algorithm>
+#include <locale>
 #include <set>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+#include <boost/tokenizer.hpp>
+
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
 #include "MantidQtImageViewer/MatrixWSImageView.h"
+#include <typeinfo>
 
 using namespace std;
 
@@ -1004,15 +1010,78 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
                                      const std::vector<int>& indices, bool include_data)
 {
   using namespace Mantid::Geometry;
+
+  //get list of techniques for this instrument
+  std::string instName  = ws->getInstrument()->getName();
+  auto inst = Mantid::Kernel::ConfigService::Instance().getInstrument(instName);
+  auto techniques = inst.techniques();
+
+  //check if the instrument is and indirect instrument
+  std::set<std::string>::const_iterator iter = techniques.begin();
+  bool calcQ(false);
+  for(; iter != techniques.end() && !calcQ; ++iter)
+  {
+    //convert to lowercase
+    std::string str = boost::algorithm::to_lower_copy(*iter);
+
+    //check each token for our applicable technique
+    boost::tokenizer<> tokens(str);
+    boost::tokenizer<>::iterator tok = tokens.begin();
+    for(; tok != tokens.end(); ++tok)
+    {
+      if(*tok == "indirect")
+      {
+        calcQ = true;
+        break;
+      }
+    }
+  }
+
+  Axis* qAxis = NULL;
+  MatrixWorkspace_const_sptr out;
+  if(calcQ)
+  {
+    //create instance of convert spectrum axis
+    Mantid::API::Algorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
+    alg->setChild(true);
+    alg->initialize();
+
+    //set algorithm parameters
+    alg->setProperty("InputWorkspace", ws);
+    alg->setProperty("OutputWorkspace", "__convertSpectrum");
+    alg->setProperty("Target", "ElasticQ");
+    alg->setProperty("EMode", "Indirect");
+
+    alg->execute();
+
+    if(alg->isExecuted())
+    {
+      out = alg->getProperty("OutputWorkspace");
+      if(out)
+      {
+        qAxis = out->getAxis(1);
+      }
+    }
+
+  }
+
   // Prepare column names. Types will be determined from QVariant
   QStringList colNames;
   colNames << "Index" << "Spectrum No" << "Detector ID(s)";
   if( include_data )
   {
-    colNames << "Data Value" << "Data Error";  
+    colNames << "Data Value" << "Data Error";
   }
-  colNames << "R" << "Theta" << "Phi" << "Monitor";
-  
+
+  colNames << "R" << "Theta";
+  if(calcQ)
+  {
+    colNames << "Q";
+  }
+  colNames << "Phi" << "Monitor";
+
+
+
   const int ncols = static_cast<int>(colNames.size());
   const int nrows = indices.empty()? static_cast<int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
   Table* t = new Table(appWindow()->scriptingEnv(), nrows, ncols, "", appWindow(), 0);
@@ -1090,7 +1159,15 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
-      colValues << QVariant(R) << QVariant(theta) << QVariant(phi) // rtp
+      colValues << QVariant(R) << QVariant(theta);
+
+      if(calcQ)
+      {
+        double qValue = qAxis->getValue(row);
+        colValues << QVariant(qValue);
+      }
+
+      colValues << QVariant(phi) // rtp
                 << QVariant(isMonitor);         // monitor
     }
     catch(...)
