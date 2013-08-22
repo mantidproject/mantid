@@ -119,10 +119,9 @@ void SofQW::exec()
   V3D beamDir = sample->getPos() - source->getPos();
   beamDir.normalize();
 
-  double l1;
   try
   {
-    l1 = source->getDistance(*sample);
+    double l1 = source->getDistance(*sample);
     g_log.debug() << "Source-sample distance: " << l1 << std::endl;
   }
   catch (Exception::NotFoundError &)
