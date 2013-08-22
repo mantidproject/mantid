@@ -146,8 +146,8 @@ namespace Mantid
           reductionManager, "diag_van_hi", detVanWS);
       const double vanLo = getDblPropOrParam("MedianTestLow",
           reductionManager, "diag_van_lo", detVanWS);
-      const int vanLevelsUp=getIntPropOrParam("MedianTestLevelsUp",
-              reductionManager, "diag_van_levels", detVanWS);
+      const double vanLevelsUp=getDblPropOrParam("MedianTestLevelsUp",
+              reductionManager, "diag_van_levels", detVanWS,0);
       const double vanSigma = getDblPropOrParam("ErrorBarCriterion",
           reductionManager, "diag_van_sig", detVanWS);
       const double variation = getDblPropOrParam("DetVanRatioVariation",
@@ -307,7 +307,7 @@ namespace Mantid
       diag->setProperty("HighOutlier", vanOutHi);
       diag->setProperty("LowThresholdFraction", vanLo);
       diag->setProperty("HighThresholdFraction", vanHi);
-      diag->setProperty("LevelsUp",vanLevelsUp);
+      diag->setProperty("LevelsUp",static_cast<int>(vanLevelsUp));
       diag->setProperty("CorrectForSolidAngle",vanSA);
       diag->setProperty("SignificanceTest", vanSigma);
       diag->setProperty("DetVanRatioVariation", variation);
