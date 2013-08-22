@@ -19,8 +19,6 @@ class ClearUBTest : public CxxTest::TestSuite
 
 private:
 
-  const static bool DRY_RUN = true;
-
   // Single return type
   struct SingleReturnType
   {
@@ -69,7 +67,7 @@ private:
   }
 
   // Execute the algorithm
-  SingleReturnType doExecute(const std::string& wsName, bool dryRun = !DRY_RUN)
+  SingleReturnType doExecute(const std::string& wsName)
   {
     // Create and run the algorithm
     ClearUB alg;
@@ -77,7 +75,6 @@ private:
     TS_ASSERT_THROWS_NOTHING( alg.initialize())
     TS_ASSERT( alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DryRun", dryRun));
     alg.execute();
     TS_ASSERT( alg.isExecuted());
 
@@ -90,7 +87,7 @@ private:
   }
 
   // Execute the algorithm
-  MultipleReturnType doExecuteMultiInfo(const std::string& wsName, bool dryRun = !DRY_RUN)
+  MultipleReturnType doExecuteMultiInfo(const std::string& wsName)
   {
     // Create and run the algorithm
     ClearUB alg;
@@ -98,7 +95,6 @@ private:
     TS_ASSERT_THROWS_NOTHING( alg.initialize())
     TS_ASSERT( alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace", wsName));
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DryRun", dryRun));
     alg.execute();
     TS_ASSERT( alg.isExecuted());
 
@@ -191,64 +187,6 @@ public:
     TSM_ASSERT_THROWS("Input workspace type is not derived from ExperimentInfo or MultipleExperimentInfo, so should throw.", doExecute(wsName), std::invalid_argument&);
     AnalysisDataService::Instance().remove(wsName);
   }
-
-  void test_dry_run_with_intput_workspace_not_expeirmentinfo()
-  {
-    using Mantid::DataObjects::TableWorkspace;
-    Workspace_sptr inws = boost::make_shared<TableWorkspace>();
-    const std::string wsName = "tablews";
-    AnalysisDataService::Instance().addOrReplace(wsName, inws);
-
-    const bool dryRun = true;
-
-    SingleReturnType output;
-    TSM_ASSERT_THROWS_NOTHING("Input workspace type is not derived from ExperimentInfo or MultipleExperimentInfo, so should throw.", output = doExecute(wsName, dryRun));
-    TSM_ASSERT("Should indicate that it could not clear a workspace, this is because it is a table workspace (no experiment info)", !output.DidClear);
-
-    AnalysisDataService::Instance().remove(wsName);
-  }
-
-  void test_removeOrientedLattice_dry_run()
-  {
-    // Name of the output workspace.
-    const std::string wsName = createMatrixWorkspace();
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    TSM_ASSERT("OrientedLattice should be present to begin with", ws->sample().hasOrientedLattice());
-
-    const bool dryRun = true;
-    auto output = doExecute(wsName, DRY_RUN);
-    auto expInfo = output.ExperimentInfo;
-
-    TS_ASSERT( expInfo)
-    TSM_ASSERT("OrientedLattice should NOT be gone as is dry run", expInfo->sample().hasOrientedLattice());
-    TSM_ASSERT("OutputFlag should indicate possible removal", output.DidClear);
-
-    // Clean up.
-    AnalysisDataService::Instance().remove(wsName);
-  }
-
-  void test_removeOrientedLatticeMDHW_dry_run()
-  {
-    // Name of the output workspace.
-    const std::string wsName = createMDHistoWorkspace();
-
-    auto output = doExecuteMultiInfo(wsName, DRY_RUN);
-    auto expInfo = output.ExperimentInfos;
-
-    TS_ASSERT( expInfo)
-
-    // Check that every experiment info has been cleared.
-    const uint16_t nInfos = expInfo->getNumExperimentInfo();
-    for (uint16_t i = 0; i < nInfos; ++i)
-    {
-      TSM_ASSERT("OrientedLattice should NOT be gone as this is a dry run", expInfo->getExperimentInfo(i)->sample().hasOrientedLattice() )
-    }
-    TSM_ASSERT("OutputFlag should indicate potential removal", output.DidClear);
-    // Clean up.
-    AnalysisDataService::Instance().remove(wsName);
-  }
-
-
 
 };
 

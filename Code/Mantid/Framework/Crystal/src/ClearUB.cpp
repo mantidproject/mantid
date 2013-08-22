@@ -68,10 +68,8 @@ namespace Mantid
     {
       declareProperty(new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
           "Workspace to clear the UB from.");
-      declareProperty(new PropertyWithValue<bool>("DryRun", false, Direction::Input),
-          "Dry run mode, will complete processing without error, and without removing any UB. Use in conjunction with DoesClear output property.");
       declareProperty(new PropertyWithValue<bool>("DoesClear", "", Direction::Output),
-          "Indicates action performed, or predicted to perform if DryRun.");
+          "Indicates action performed. DoesClear returns true only if one or more OrientedLattices have been removed.");
     }
 
     /**
@@ -146,8 +144,7 @@ namespace Mantid
     void ClearUB::exec()
     {
       Workspace_sptr ws = getProperty("Workspace");
-      const bool dryRun = getProperty("DryRun");
-      bool doesClear = doExecute(ws.get(), dryRun);
+      bool doesClear = doExecute(ws.get(), false /* Not a dry run*/);
       this->setProperty("DoesClear", doesClear);
     }
 
