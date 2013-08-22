@@ -160,18 +160,29 @@ public:
     }
     instr->add(group1);
 
-    // look for each bank
+    // variable to hold the name of the bank
+    std::string bankname;
+
+    // look for each bank - recursing down three levels
     for (int i = 1; i < 26; ++i)
     {
       std::ostringstream temp_oss;
       temp_oss << "bank" << i;
-      std::string bankname(temp_oss.str());
-      std::cout << "testing getComponentByName(" << bankname << ")" << std::endl;
+      bankname = temp_oss.str();
       auto temp = instr->getComponentByName(bankname,3);
-//      TS_ASSERT(bool(temp));
+      TS_ASSERT(bool(temp));
       TS_ASSERT_EQUALS(temp->getName(), bankname);
     }
 
+    // look for bank13 - recursing all the way down the instrument tree
+    bankname = std::string("bank13");
+    auto temp = instr->getComponentByName(bankname);
+    TS_ASSERT(bool(temp));
+    TS_ASSERT_EQUALS(temp->getName(), bankname);
+
+    // look for bank13 again - recursing just one level (should fail)
+    temp = instr->getComponentByName(bankname,1);
+    TS_ASSERT(!bool(temp));
   }
 
   //-----------------------------------------------------------------------------
