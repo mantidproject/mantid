@@ -168,9 +168,6 @@ void MdViewerWidget::setupUiAndConnections()
   this->ui.splitter_2->setStretchFactor(1, 1);
   this->ui.statusBar->setSizeGripEnabled(false);
 
-  // Unset the connections since the views aren't up yet.
-  this->removeProxyTabWidgetConnections();
-
   QObject::connect(this->ui.modeControlWidget,
                    SIGNAL(executeSwitchViews(ModeControlWidget::Views)),
                    this, SLOT(switchViews(ModeControlWidget::Views)));
