@@ -55,7 +55,7 @@ namespace Mantid
     void MaskPeaksWorkspace::init()
     {
 
-      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, boost::make_shared<InstrumentValidator>()),
                       "A workspace containing one or more rectangular area detectors. Each spectrum needs to correspond to only one pixelID (e.g. no grouping or previous calls to SumNeighbours).");
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input),
                       "The name of the workspace that will be created. Can replace the input workspace.");
@@ -76,15 +76,12 @@ namespace Mantid
       retrieveProperties();
   
       MantidVecPtr XValues;
-      PeaksWorkspace_sptr peaksW;
-      peaksW = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>(getProperty("InPeaksWorkspace"));
+      PeaksWorkspace_const_sptr peaksW = getProperty("InPeaksWorkspace");
 
       //To get the workspace index from the detector ID
       detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap();
       //Get some stuff from the input workspace
       Geometry::Instrument_const_sptr inst = inputW->getInstrument();
-      if (!inst)
-        throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 
       // Init a table workspace
       DataObjects::TableWorkspace_sptr tablews =
@@ -171,8 +168,7 @@ namespace Mantid
 
       // Mask bins
       API::IAlgorithm_sptr maskbinstb = this->createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
-      maskbinstb->initialize();
-      maskbinstb->setPropertyValue("InputWorkspace", inputW->getName());
+      maskbinstb->setProperty("InputWorkspace", inputW);
       maskbinstb->setPropertyValue("OutputWorkspace", inputW->getName());
       maskbinstb->setProperty("MaskingInformation", tablews);
       maskbinstb->execute();

@@ -95,13 +95,9 @@ namespace Crystal
                                           
     double degrees_per_step =  1.5;
 
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
+    PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
 
-    if (!ws) throw std::runtime_error("Could not read the peaks workspace");
-
-    std::vector<Peak> &peaks = ws->getPeaks();
+    const std::vector<Peak> &peaks = ws->getPeaks();
     size_t n_peaks = ws->getNumberPeaks();
 
     std::vector<V3D>  q_vectors;

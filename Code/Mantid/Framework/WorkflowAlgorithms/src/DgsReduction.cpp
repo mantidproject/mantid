@@ -764,7 +764,6 @@ namespace Mantid
         etConv->setProperty("GroupingWorkspace", groupingWS);
       }
       etConv->setProperty("ReductionProperties", reductionManagerName);
-      etConv->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       std::string tibWsName = this->getPropertyValue("OutputWorkspace") + "_tib";
       etConv->setProperty("OutputTibWorkspace", tibWsName);
       etConv->executeAsChildAlg();

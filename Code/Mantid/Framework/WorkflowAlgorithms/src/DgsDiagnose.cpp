@@ -108,12 +108,6 @@ namespace Mantid
         throw std::runtime_error("DgsDiagnose cannot run without a reduction PropertyManager.");
       }
 
-      std::string maskName = this->getPropertyValue("OutputWorkspace");
-      if (maskName.empty())
-      {
-        maskName = "det_van_mask";
-      }
-
       // Gather all the necessary properties
       MatrixWorkspace_sptr detVanWS = this->getProperty("DetVanWorkspace");
       MatrixWorkspace_sptr detVanMonWS = this->getProperty("DetVanMonitorWorkspace");
@@ -310,7 +304,6 @@ namespace Mantid
       diag->setProperty("SampleBkgSignificanceTest", samSigma);
       diag->setProperty("MaxTubeFramerate", bleedRate);
       diag->setProperty("NIgnoredCentralPixels", static_cast<int>(bleedPixels));
-      diag->setProperty("OutputWorkspace", maskName);
 
       MatrixWorkspace_sptr maskWS;
       std::vector<std::string> diag_spectra = dvWS->getInstrument()->getStringParameter("diag_spectra");

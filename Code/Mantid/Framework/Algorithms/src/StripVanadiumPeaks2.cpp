@@ -89,7 +89,6 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
 
     // 1. Process input/output
     API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-    std::string outputWSName = getPropertyValue("OutputWorkspace");
     int singleIndex = getProperty("WorkspaceIndex");
     int param_fwhm = getProperty("FWHM");
     int param_tolerance = getProperty("Tolerance");
@@ -121,7 +120,6 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     bool sublog = true;
     IAlgorithm_sptr stripPeaks = createChildAlgorithm("StripPeaks", pro0, prof, sublog);
     stripPeaks->setProperty("InputWorkspace", inputWS);
-    stripPeaks->setPropertyValue("OutputWorkspace", outputWSName);
     stripPeaks->setProperty("FWHM", param_fwhm);
     stripPeaks->setProperty("Tolerance", param_tolerance);
     stripPeaks->setPropertyValue("PeakPositions", peakpositions);
@@ -135,8 +133,6 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     stripPeaks->executeAsChildAlg();
 
     // 3. Get and set output workspace
-    // API::MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<API::MatrixWorkspace_sptr>(outputWSName);
-    // boost::shared_ptr<API::Workspace> outputWS = AnalysisDataService::Instance().retrieve(outputWSName);
     API::MatrixWorkspace_sptr outputWS = stripPeaks->getProperty("OutputWorkspace");
 
     this->setProperty("OutputWorkspace", outputWS);

@@ -464,7 +464,6 @@ namespace Mantid
         Workspace2D_sptr ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(wsM);
         ws->setInstrument(newInstr);
         ws->populateInstrumentParameters();
-        //ws->setName("rrrr");
 
         boost::shared_ptr<Algorithm> loadParFile = createChildAlgorithm("LoadParameterFile");
         loadParFile->initialize();
@@ -1145,11 +1144,6 @@ namespace Mantid
 
       }
 
-
-      string ResultWorkspaceName= getPropertyValue( "ResultWorkspace");
-      AnalysisDataService::Instance().addOrReplace(ResultWorkspaceName, Result);
-
-      setPropertyValue( "ResultWorkspace", ResultWorkspaceName);
       setProperty( "ResultWorkspace", Result);
 
       Result->setComment(string("t0(microseconds),l0 & offsets(meters),rot(degrees"));
@@ -1282,10 +1276,8 @@ namespace Mantid
       }
 
 
-      string QErrorWorkspaceName = getPropertyValue("QErrorWorkspace");
       QErrTable->setComment(string("Errors in Q for each Peak"));
-      AnalysisDataService::Instance().addOrReplace(QErrorWorkspaceName, QErrTable);
-      setPropertyValue("QErrorWorkspace", QErrorWorkspaceName);
+      setProperty("QErrorWorkspace", QErrTable);
 
     }
 

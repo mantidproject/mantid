@@ -252,11 +252,9 @@ namespace MDAlgorithms
    
     Convert->setRethrows(true);
     Convert->initialize();
-    std::string inWSName = this->getPropertyValue("InputWorkspace");
-    std::string outWSName = this->getPropertyValue("OutputWorkspace");
 
-    Convert->setProperty("InputWorkspace",inWSName);
-    Convert->setProperty("OutputWorkspace",outWSName);
+    Convert->setProperty<MatrixWorkspace_sptr>("InputWorkspace",this->getProperty("InputWorkspace"));
+    Convert->setProperty("OutputWorkspace",this->getPropertyValue("OutputWorkspace"));
     Convert->setProperty("OverwriteExisting",!this->getProperty("Append"));
 
 
