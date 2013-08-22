@@ -132,7 +132,6 @@ void StripVanadiumPeaks::exec()
       //Middle of each X bin
       MantidVec midX;
       convertToBinCentre(X, midX);
-      double totY;
 
       //This'll be the output
       MantidVec outY = Y;
@@ -150,7 +149,7 @@ void StripVanadiumPeaks::exec()
         int L1 = getBinIndex(X, center - width * 0.75);
         int L2 = getBinIndex(X, center - width * 0.25);
         double leftX = (midX[L1] + midX[L2])/2;
-        totY = 0;
+        double totY = 0;
         for (int i=L1; i<=L2; i++)
           totY += Y[i];
         double leftY = totY / (L2-L1+1);

@@ -2959,6 +2959,8 @@ namespace CurveFitting
         //    Calcualte d-spacing
         d_h = m_unitCell.d(hkl[0], hkl[1], hkl[2]);
         //                  d_h = calCubicDSpace(latticesize, hkl[0], hkl[1], hkl[2]);
+        // cppcheck complains about the NaN check
+        // cppcheck-suppress duplicateExpression
         if ( (d_h != d_h) || (d_h < -DBL_MAX) || (d_h > DBL_MAX) )
         {
           stringstream warnss;

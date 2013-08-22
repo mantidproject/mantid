@@ -2281,27 +2281,17 @@ namespace Algorithms
     double sumrpdenom = 0;
 
     size_t numpts = domain.size();
-    double cal_i;
-    double obs_i;
-    double sigma;
-    double weight;
-    double diff;
     for (size_t i = 0; i < numpts; ++i)
     {
-      cal_i = values[i];
-      obs_i = partY[i];
-      sigma = 1.0;
-      weight = 1.0/(sigma*sigma);
-      diff = obs_i - cal_i;
-
-      sumrpnom += fabs(diff);
-      sumrpdenom += fabs(obs_i);
+      double cal_i = values[i];
+      double obs_i = partY[i];
+      double sigma = 1.0;
+      double weight = 1.0/(sigma*sigma);
+      double diff = obs_i - cal_i;
 
       sumnom += weight*diff*diff;
       sumdenom += weight*obs_i*obs_i;
     }
-
-    // double rp = (sumrpnom/sumrpdenom);
     double rwp = std::sqrt(sumnom/sumdenom);
 
     return rwp;
