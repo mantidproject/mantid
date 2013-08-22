@@ -1006,39 +1006,16 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
  * @param indices :: Limit the table to these workspace indices
  * @param include_data :: If true then first value from the each spectrum is displayed
  */
-Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws, 
+Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws,
                                      const std::vector<int>& indices, bool include_data)
 {
   using namespace Mantid::Geometry;
 
-  //get list of techniques for this instrument
-  std::string instName  = ws->getInstrument()->getName();
-  auto inst = Mantid::Kernel::ConfigService::Instance().getInstrument(instName);
-  auto techniques = inst.techniques();
+  //check if indirect instrument
+  bool calcQ = checkTechnique(ws, "indirect");
 
-  //check if the instrument is and indirect instrument
-  std::set<std::string>::const_iterator iter = techniques.begin();
-  bool calcQ(false);
-  for(; iter != techniques.end() && !calcQ; ++iter)
-  {
-    //convert to lowercase
-    std::string str = boost::algorithm::to_lower_copy(*iter);
-
-    //check each token for our applicable technique
-    boost::tokenizer<> tokens(str);
-    boost::tokenizer<>::iterator tok = tokens.begin();
-    for(; tok != tokens.end(); ++tok)
-    {
-      if(*tok == "indirect")
-      {
-        calcQ = true;
-        break;
-      }
-    }
-  }
-
-  Axis* qAxis = NULL;
   MatrixWorkspace_const_sptr out;
+  Axis* qAxis = NULL;
   if(calcQ)
   {
     //create instance of convert spectrum axis
@@ -1054,6 +1031,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
     alg->execute();
 
+    //run algorithm and get axis
     if(alg->isExecuted())
     {
       out = alg->getProperty("OutputWorkspace");
@@ -1062,7 +1040,6 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
         qAxis = out->getAxis(1);
       }
     }
-
   }
 
   // Prepare column names. Types will be determined from QVariant
@@ -1083,7 +1060,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
 
   const int ncols = static_cast<int>(colNames.size());
-  const int nrows = indices.empty()? static_cast<int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
+  const int nrows = indices.empty()? static_cast <int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
   Table* t = new Table(appWindow()->scriptingEnv(), nrows, ncols, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
   // Set the column names
@@ -1197,6 +1174,12 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
     }
   }
 
+  //remove extra workspace after we're finished
+  if(calcQ)
+  {
+    AnalysisDataService::Instance().remove(out->name());
+  }
+
   t->showNormal();
   return t;
 }
@@ -1233,6 +1216,44 @@ bool MantidUI::drop(QDropEvent* e)
 
   return false;
 }
+
+/**
+ * Check if the given technique is applicable to this instrument
+ *
+ * @param ws :: The workspace with accompanying instrument
+ * @param technique :: String defining the technique to look for
+ * @return Whether the technique is applicable
+ */
+bool MantidUI::checkTechnique(Mantid::API::MatrixWorkspace_const_sptr ws, const std::string& technique)
+{
+  //get list of techniques for this instrument
+  std::string instName  = ws->getInstrument()->getName();
+  auto inst = Mantid::Kernel::ConfigService::Instance().getInstrument(instName);
+  auto techniques = inst.techniques();
+
+  //check if the instrument is and indirect instrument
+  std::set<std::string>::const_iterator iter = techniques.begin();
+  bool calcQ(false);
+  for(; iter != techniques.end(); ++iter)
+  {
+    //convert to lowercase
+    std::string str = boost::algorithm::to_lower_copy(*iter);
+
+    //check each token for our applicable technique
+    boost::tokenizer<> tokens(str);
+    boost::tokenizer<>::iterator tok = tokens.begin();
+    for(; tok != tokens.end(); ++tok)
+    {
+      if(*tok == technique)
+      {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 
 /**
 executes Save Nexus
