@@ -126,7 +126,7 @@ namespace Algorithms
     size_t l0 = 0;
     const MantidVec& inpX = inpWS->readX(0);
 
-    if (m_vecFitWindows.size() > 0)
+    if (m_vecFitWindows.size() > 1)
     {
   	  Mantid::Algorithms::FindPeaks fp;
   	  l0 = fp.getVectorIndex(inpX, m_vecFitWindows[0]);
@@ -148,7 +148,7 @@ namespace Algorithms
     // 3. Get Y values
     Progress prog(this, 0, 1.0, numspec);
     PARALLEL_FOR2(inpWS, m_outPeakTableWS)
-    for (size_t i = 0; i < numspec; ++i)
+    for (int i = 0; i < static_cast<int>(numspec); ++i)
     {
       PARALLEL_START_INTERUPT_REGION
       // a) figure out wsindex
@@ -156,7 +156,7 @@ namespace Algorithms
       if (separateall)
       {
         // Update wsindex to index in input workspace
-        wsindex = i;
+        wsindex = static_cast<size_t>(i);
       }
       else
       {
@@ -237,6 +237,7 @@ namespace Algorithms
 			  }
 		  }
 		  size_t min_peak, max_peak;
+		  double a0,a1,a2;
 		  if(peaks.size()> 0)
 		  {
 			  if(peaks[peaks.size()-1].stop == 0) peaks[peaks.size()-1].stop = n-1;
@@ -246,15 +247,19 @@ namespace Algorithms
 			  min_peak = peaks[0].start;
 			  // extra point for histogram input
 			  max_peak = peaks[0].stop + sizex - sizey;
+			  estimateBackground(inpX, inpY, l0, n,
+			      peaks[0].start, peaks[0].stop, a0, a1, a2);
 		  }
 		  else
 		  {
+			  // assume peak is larger than window so no background
 			  min_peak = l0;
 			  max_peak = n-1;
+			  a0 = 0.0;
+			  a1 = 0.0;
+			  a2 = 0.0;
 		  }
-		  double a0,a1,a2;
-		  estimateBackground(inpX, inpY, l0, n,
-		      peaks[0].start, peaks[0].stop, a0, a1, a2);
+
 		  // Add a new row
 		  API::TableRow t = m_outPeakTableWS->getRow(i);
 		  t << static_cast<int>(wsindex) << static_cast<int>(min_peak) << static_cast<int>(max_peak) << a0 << a1 <<a2;
