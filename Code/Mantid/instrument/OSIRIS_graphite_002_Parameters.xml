@@ -35,6 +35,11 @@
 	<value val="70000" />
 </parameter>
 
+<<<<<<< Updated upstream
+=======
+
+
+>>>>>>> Stashed changes
 <parameter name="analyser" type="string">
   <value val="graphite" />
 </parameter>
@@ -47,5 +52,13 @@
 <parameter name="Efixed"> <value val="1.845" /> </parameter>
 <parameter name="resolution"> <value val="0.0245" /> </parameter>
 </component-link>
-
+  <component-link name="graphite">
+    <parameter name="Efixed">
+      <value val="1.845" />
+    </parameter>
+    <parameter name="resolution">
+      <value val="0.0245" />
+    </parameter>
+  </component-link>
 </parameter-file>
+
