@@ -70,6 +70,7 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_SOURCE_DIR}/MantidPlot/src
   ${QWT_INCLUDE_DIR}
+  ${PYTHON_INCLUDE_PATH}
 )
 
 set( ALL_FILES
@@ -104,6 +105,7 @@ VatesAPI
 ${MANTID_SUBPROJECT_LIBS}
 MantidQtSliceViewer
 MantidQtFactory
+${PYTHON_LIBRARIES}
 )
 
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h.in
