@@ -215,6 +215,7 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSphere.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
+                   src/Mantid/InstrumentWidget/RotationSurface.cpp
                    src/Mantid/InstrumentWidget/ProjectionSurface.cpp
                    src/Mantid/InstrumentWidget/Projection3D.cpp
                    src/Mantid/InstrumentWidget/PeakMarker2D.cpp
@@ -444,6 +445,7 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.h
                    src/Mantid/InstrumentWidget/UnwrappedSphere.h
                    src/Mantid/InstrumentWidget/UnwrappedSurface.h
+                   src/Mantid/InstrumentWidget/RotationSurface.h
                    src/Mantid/InstrumentWidget/PeakMarker2D.h
                    src/Mantid/InstrumentWidget/PeakOverlay.h
                    src/Mantid/InstrumentWidget/ProjectionSurface.h

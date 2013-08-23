@@ -148,6 +148,7 @@ public:
                   bool out = false
                   );
 
+  static void rotateToLookAt(const Mantid::Kernel::V3D& eye, const Mantid::Kernel::V3D& up, Mantid::Kernel::Quat &R);
 
   /* Masking */
 
