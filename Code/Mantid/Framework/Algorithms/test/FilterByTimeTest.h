@@ -188,6 +188,9 @@ private:
 class FilterByTimeTestPerformance : public CxxTest::TestSuite
 {
 public:
+  static FilterByTimeTestPerformance *createSuite() { return new FilterByTimeTestPerformance(); }
+  static void destroySuite( FilterByTimeTestPerformance *suite ) { delete suite; }
+
   FilterByTimeTestPerformance()
   {
     LoadEventNexus loader;

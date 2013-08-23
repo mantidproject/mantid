@@ -392,11 +392,11 @@ void StepScan::generateCurve( const QString& var )
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
   alg->setLogging(false); // Don't log this algorithm
   alg->setPropertyValue("InputWorkspace", m_tableWSName);
-  // TODO: Make workspace hidden once ticket #6803 is fixed
-  m_plotWSName = "plot_" + m_tableWSName;
+  m_plotWSName = m_tableWSName + "_plot";
   alg->setPropertyValue("OutputWorkspace", m_plotWSName);
   alg->setPropertyValue("ColumnX", var.toStdString() );
   alg->setPropertyValue("ColumnY", "Counts" );
+  alg->setPropertyValue("ColumnE", "Error" );
   if ( ! alg->execute() ) return;
 
   // Now create one for the normalisation, if required
@@ -439,7 +439,7 @@ void StepScan::plotCurve()
   // Has to be done via python
   std::string pyCode = "g = graph('" + title + "')\n"
                        "if g is None:\n"
-                       "    g = plotSpectrum('" + m_plotWSName + "',0,type=Layer.Scatter)\n"
+                       "    g = plotSpectrum('" + m_plotWSName + "',0,True,type=Layer.Scatter)\n"
                        "    l = g.activeLayer()\n"
                        "    l.legend().hide()\n"
                        "    l.removeTitle()\n"

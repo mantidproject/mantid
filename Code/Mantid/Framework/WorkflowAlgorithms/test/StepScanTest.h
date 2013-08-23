@@ -96,22 +96,24 @@ public:
     if (!table) return;
     
     TS_ASSERT_EQUALS( table->rowCount(), 1 )
-    TS_ASSERT_EQUALS( table->columnCount(), 5 )
+    TS_ASSERT_EQUALS( table->columnCount(), 6 )
     TS_ASSERT_EQUALS( table->getColumnNames()[0], "scan_index" );
     TS_ASSERT_EQUALS( table->Int(0,0), 1 )
     TS_ASSERT_EQUALS( table->getColumnNames()[1], "Counts" );
+    TS_ASSERT_EQUALS( table->getColumnNames()[2], "Error" );
     // The original workspace has 600 events.
     // The scan_index=1 period covers 70 out of 100s -> so 420 events remain
     // The masking removes 1 of 3 spectra -> leaving 280
     // The XMin/XMax range covers 50s out of the remaining 70s TOF range
     //   (note that there's a correlation between pulse time & TOF) -> so 200 are left at the end
     TS_ASSERT_EQUALS( table->Int(0,1), 200 )
-    TS_ASSERT_EQUALS( table->getColumnNames()[2], "time" );
-    TS_ASSERT_EQUALS( table->Double(0,2), 70.0);
-    TS_ASSERT_EQUALS( table->getColumnNames()[3], "proton_charge" );
+    TS_ASSERT_EQUALS( table->Double(0,2), std::sqrt(200.0) )
+    TS_ASSERT_EQUALS( table->getColumnNames()[3], "time" );
+    TS_ASSERT_EQUALS( table->Double(0,3), 70.0);
+    TS_ASSERT_EQUALS( table->getColumnNames()[4], "proton_charge" );
     // The cell in the proton_charge column will be empty
-    TS_ASSERT_EQUALS( table->getColumnNames()[4], "sample_property" );
-    TS_ASSERT_EQUALS( table->Double(0,4), 3.0 );
+    TS_ASSERT_EQUALS( table->getColumnNames()[5], "sample_property" );
+    TS_ASSERT_EQUALS( table->Double(0,5), 3.0 );
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
