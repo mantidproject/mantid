@@ -117,10 +117,88 @@ namespace Mantid
 
     /**
      * Returns the logged in user's investigations data.
-     * @param mydataws_sptr :: pointer to table workspace which stores the data
+     * @param outputws :: Pointer to table workspace that stores the data.
      */
-    void ICat4Catalog::myData(Mantid::API::ITableWorkspace_sptr& mydataws_sptr)
+    void ICat4Catalog::myData(Mantid::API::ITableWorkspace_sptr& outputws)
     {
+      ICATPortBindingProxy icat;
+
+      ns1__search request;
+      ns1__searchResponse response;
+
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+
+      std::string query = "Investigation INCLUDE Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]";
+      request.query     = &query;
+
+      int result = icat.search(&request, &response);
+
+      if (result == 0)
+      {
+        // Verify data exists in the response.
+        if(response.return_.empty())
+        {
+          throw std::runtime_error("ICat My data search is complete. There are no results to display");
+        }
+        else
+        {
+          // Try to save query result data to workspace.
+          saveInvestigations(response.return_, outputws);
+        }
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
+    }
+
+    /**
+     * Saves investigations to a table workspace.
+     * @param response :: A vector containing the results of the search query.
+     * @param outputws :: Shared pointer to output workspace.
+     */
+    void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
+    {
+      // Add rows headers to the output workspace.
+      addMyDataColumnHeader(outputws);
+
+      // Add data to each row in the output workspace.
+      std::vector<xsd__anyType*>::const_iterator iter;
+      for(iter = response.begin(); iter != response.end(); ++iter)
+      {
+        // Cast from xsd__anyType to subclass (xsd__string).
+        ns1__investigation * investigation = dynamic_cast<ns1__investigation*>(*iter);
+        // Now attempt to add the relevant data to the output workspace.
+        try
+        {
+          API::TableRow table = outputws->appendRow();
+          // Now add the relevant investigation data to the table.
+          savetoTableWorkspace(investigation->name, table);    // Investigation ID
+          savetoTableWorkspace(investigation->summary, table); // Investigation proposal
+          savetoTableWorkspace(investigation->title, table);   // Investigation title
+          savetoTableWorkspace(investigation->instrument->name, table); // Instrument name
+          savetoTableWorkspace(investigation->parameters[0]->stringValue, table); // Run parameters
+        }
+        catch(std::runtime_error&)
+        {
+          throw std::runtime_error("An error occurred when saving the ICat search results data to Workspace");
+        }
+      }
+    }
+
+    /**
+     * Adds relevant investigation headers from my data to the output workspace.
+     * @param outputws :: shared pointer to table workspace which stores the investigations search result.
+     */
+    void ICat4Catalog::addMyDataColumnHeader(Mantid::API::ITableWorkspace_sptr& outputws)
+    {
+      // Add rows to the output workspace...
+      outputws->addColumn("str","InvestigationId");
+      outputws->addColumn("str","Proposal");
+      outputws->addColumn("str","Title");
+      outputws->addColumn("str","Instrument");
+      outputws->addColumn("str","Run Range");
     }
 
     /**
@@ -152,7 +230,6 @@ namespace Mantid
       ns1__search request;
       ns1__searchResponse response;
 
-      //Get the session ID to log the user out.
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 
@@ -189,7 +266,6 @@ namespace Mantid
       ns1__search request;
       ns1__searchResponse response;
 
-      //Get the session ID to log the user out.
       std::string sessionID = Session::Instance().getSessionId();
       request.sessionId     = &sessionID;
 

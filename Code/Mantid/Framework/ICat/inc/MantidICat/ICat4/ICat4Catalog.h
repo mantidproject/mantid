@@ -2,6 +2,7 @@
 #define MANTID_ICAT_ICAT4CATALOG_H_
 
 #include "MantidAPI/ICatalog.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidICat/CatalogSearchParam.h"
 
 namespace Mantid
@@ -69,6 +70,28 @@ namespace Mantid
         void throwErrorMessage(ICat4::ICATPortBindingProxy& icat);
         // Defines the SSL authentication scheme.
         void setSSLContext(ICat4::ICATPortBindingProxy& icat);
+        // Adds "MyData" column headers to the output workspace.
+        void addMyDataColumnHeader(Mantid::API::ITableWorkspace_sptr& outputws);
+        // Saves "MyData" query result to output workspace.
+        void saveInvestigations(std::vector<ICat4::xsd__anyType *>return_, API::ITableWorkspace_sptr& outputws);
+
+        /**
+         * Template method to save data to table workspace
+         * @param input :: Pointer to input value.
+         * @param table :: Table row reference.
+         */
+        template<class T>
+        void savetoTableWorkspace(T* input,Mantid::API::TableRow &table)
+        {
+          if(input != 0)
+          {
+            table << *input;
+          }
+          else
+          {
+            table << "";
+          }
+        }
     };
   }
 }
