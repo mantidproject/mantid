@@ -504,6 +504,9 @@ namespace DataHandling
 
         // Optional instrument name
         mInstrumentName = getAttributeValueByName(pNode, "instrument", mUserGiveInstrument);
+
+        // Optional date for which is relevant
+        mDate = getAttributeValueByName(pNode, "date", mUserGiveDate);
        
         // Optional grouping description
         mDescription = getAttributeValueByName(pNode, "description", mUserGiveDescription);
