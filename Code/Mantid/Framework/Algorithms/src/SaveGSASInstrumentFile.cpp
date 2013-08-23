@@ -16,6 +16,11 @@ There can be several types of Fullprof files as the input file
 * resolution file .irf (implemented)
 * configuration file .pcr (planned)
 
+==== Supported instruments ====
+Here is the list of instruments (powder diffractomers) supported by this algorithm:
+* NOMAD
+* POWGEN
+
 ==== Calculation of L2 ====
 * If 2Theta (<math>2\theta</math>) is given, L2 will be calculated from given 2Theta and L1 by <math>DIFC = 252.816\cdot2sin(\theta)\sqrt{L1+L2}</math>. Notice that <math>2\theta</math> given in input .irf file may have subtle difference to "2Theta", which is input by user in order to calculate L2.
 
@@ -325,7 +330,9 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     vector<string> instruments;
     instruments.push_back("PG3");
     instruments.push_back("NOM");
-    declareProperty("Instrument", "PG3", boost::make_shared<StringListValidator>(instruments), "Name of the instrument that parameters are belonged to. ");
+    declareProperty("Instrument", "PG3", boost::make_shared<StringListValidator>(instruments),
+                    "Name of the instrument that parameters are belonged to. "
+                    "So far, only PG3 and NOM are supported.");
 
     vector<string> vecfreq;
     vecfreq.push_back("10");
@@ -403,7 +410,8 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
       else
       {
         stringstream errss;
-        errss << "L1 is not given. There is no default value for instrument " << m_instrument << ".\n";
+        errss << "L1 is not given. There is no default value for instrument " << m_instrument
+              << "Only NOMAD and POWGEN are supported now.\n";
         g_log.error(errss.str());
         throw runtime_error(errss.str());
       }
@@ -484,7 +492,9 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     }
     else
     {
-      throw runtime_error("Instrument is not supported");
+      stringstream errss;
+      errss << "Instrument " << m_instrument << " is not supported. ";
+      throw runtime_error(errss.str());
     }
 
     return;
@@ -630,8 +640,9 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
 
   //----------------------------------------------------------------------------------------------
   /** Convert to GSAS instrument file
-    * @param banks : list of banks (sorted) to .iparm or prm file
+    * @param outputbankids : list of banks (sorted) to .iparm or prm file
     * @param gsasinstrfilename: string
+    * @param bankprofilemap :: map containing each bank's profile parameter stored in map.
     */
   void SaveGSASInstrumentFile::convertToGSAS(const std::vector<unsigned int>& outputbankids, const std::string& gsasinstrfilename,
                                              const std::map<unsigned int, std::map<std::string, double> >& bankprofilemap)
@@ -690,14 +701,10 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
 
   //----------------------------------------------------------------------------------------------
   /** Build a data structure for GSAS"s tabulated peak profile
-     * from Fullprof"s TOF peak profile
-
-  Note:
-  - gdsp[k] : d_k as the tabulated d-spacing value
-  -
-
-    @param pardict ::
-  */
+    * from Fullprof"s TOF peak profile
+    * @param bankprofilemap :: map of all banks' peak profile that is stored in map;
+    * @param bankid :: the ID of the bank to be converted
+    */
   void SaveGSASInstrumentFile::buildGSASTabulatedProfile(const std::map<unsigned int, std::map<std::string, double> >& bankprofilemap,
                                                          unsigned int bankid)
   {
@@ -796,15 +803,11 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     return;
   }
 
-  // (1) Header: write the first 2 lines
-  // (2) Loop on each bank: write the parameters for each bank
-
   //----------------------------------------------------------------------------------------------
   /** Write out .prm/.iparm file
-    * @bankid : integer, bank ID
-    * @numbanks: integer, total number of banks written in file
-    * @prmfilename: output file name
-    * @isfirstbank: bool
+    * @param bankid : integer as the ID of the bank to be written to file
+    * @param bankprofilemap: map of all banks' profile parameters stored in map
+    * @param prmfilename: output file name
     */
   void SaveGSASInstrumentFile::writePRMSingleBank(const std::map<unsigned int, std::map<std::string, double> >& bankprofilemap,
                                                   unsigned int bankid, const std::string& prmfilename)
@@ -938,16 +941,18 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
 
 
   //----------------------------------------------------------------------------------------------
-  /** Calculate TOF difference
+  /** Calculate TOF from d-space value of thermal neutron back-to-back exponential conv. pseudo-voigt
     * Epithermal: te = zero  + d*dtt1  + 0.5*dtt2*erfc( (1/d-1.05)*10 );
     * Thermal:    tt = zerot + d*dtt1t + dtt2t/d;
     * Total TOF:  t  = n*te + (1-n) tt
+    * @param n :: ratio between thermal neutron and epithermal neutron
     * @param ep :: zero
     * @param eq :: dtt1
     * @param er :: dtt2
     * @param tp :: zerot
     * @param tq :: dtt1t
     * @param er :: dtt2t
+    * @param dsp :: d-space value
   */
   double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er, double tp, double tq, double tr, double dsp)
   {
