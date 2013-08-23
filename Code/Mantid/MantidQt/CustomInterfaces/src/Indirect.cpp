@@ -1684,14 +1684,12 @@ void Indirect::sOfQwClicked()
         "filename = r'" +m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
         "(dir, file) = os.path.split(filename)\n"
         "(sqwInput, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n"
-        "cleanup = True\n"; 
+        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
     }
     else
     {
       pyInput +=
-        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n"
-        "cleanup = False\n";
+        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
     }
 
     // Create output name before rebinning
@@ -1701,10 +1699,7 @@ void Indirect::sOfQwClicked()
     {
       QString eRebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
       pyInput += "Rebin(InputWorkspace=sqwInput, OutputWorkspace=sqwInput+'_r', Params='" + eRebinString + "')\n"
-        "if cleanup:\n"
-        "    DeleteWorkspace(sqwInput)\n"
-        "sqwInput += '_r'\n"
-        "cleanup = True\n";
+        "sqwInput += '_r'\n";
     }
     pyInput +=
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
@@ -1716,10 +1711,6 @@ void Indirect::sOfQwClicked()
       pyInput += "SofQW2(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
     else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped/Fractional Area (SofQW3)")
       pyInput += "SofQW3(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
-    
-    pyInput +=
-      "if cleanup:\n"
-      "    DeleteWorkspace(sqwInput)\n";
 
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {
