@@ -1,8 +1,10 @@
 /*WIKI*
 
-This algorithm is used to generate a GroupingWorkspace from an XML file containing the definition of detectors' grouping information.
+This algorithm is used to generate a GroupingWorkspace from an XML or Map file containing detectors' grouping information.
 
 == XML File Format ==
+
+Extension: .xml
 
 === Parameters ===
 * "instrument": optional attribute of node 'detector-grouping'.  It must be valid instrument name. If "instrument" is not defined, only tag "ids" can be used in this XML file.  
@@ -47,6 +49,53 @@ Example 3:
    </group>
   </detector-grouping>
 
+== Map File Format ==
+
+Extension: .map
+
+The file must have the following format* (extra space and comments starting with # are allowed) :
+
+  "unused number1"             
+  "unused number2"
+  "number_of_input_spectra1"
+  "input spec1" "input spec2" "input spec3" "input spec4"
+  "input spec5 input spec6"
+  **    
+  "unused number2" 
+  "number_of_input_spectra2"
+  "input spec1" "input spec2" "input spec3" "input spec4"
+
+<nowiki>*</nowiki> each phrase in "" is replaced by a single integer
+
+<nowiki>**</nowiki> the section of the file that follows is repeated once for each group
+
+Some programs require that "unused number1" is the number of groups specified in the file but Mantid ignores that number and all groups contained in the file are read regardless. "unused number2" is in other implementations the group's spectrum number but in this algorithm it is is ignored and can be any integer (not necessarily the same integer)
+
+An example of an input file follows:
+
+  3  
+  1  
+  64  
+  1 2 3 4 5 6 7 8 9 10  
+  11 12 13 14 15 16 17 18 19 20  
+  21 22 23 24 25 26 27 28 29 30  
+  31 32 33 34 35 36 37 38 39 40  
+  41 42 43 44 45 46 47 48 49 50  
+  51 52 53 54 55 56 57 58 59 60  
+  61 62 63 64  
+  2  
+  60
+  65 66 67 68 69 70 71 72 73 74  
+  75 76 77 78 79 80 81 82 83 84  
+  85 86 87 88 89 90 91 92 93 94  
+  95 96 97 98 99 100 101 102 103 104  
+  105 106 107 108 109 110 111 112 113 114  
+  115 116 117 118 119 120 121 122 123 124
+  3
+  60
+  125 126 127 - 180 181 182 183 184
+
+== 
 
 *WIKI*/
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
@@ -70,8 +119,7 @@ Example 3:
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-
-#include <boost/algorithm/string.hpp>
+#include <Poco/String.h>
 
 #include <sstream>
 
@@ -101,74 +149,109 @@ namespace DataHandling
   
   /// Sets documentation strings for this algorithm
   void LoadDetectorsGroupingFile::initDocs(){
-    this->setWikiSummary("Load an XML file, which contains definition of detectors grouping, to a [[GroupingWorkspace]]).");
-    this->setOptionalMessage("Load an XML file, which contains definition of detectors grouping, to a GroupingWorkspace).");
+    this->setWikiSummary("Load an XML or Map file, which contains definition of detectors grouping, to a [[GroupingWorkspace]]).");
+    this->setOptionalMessage("Load an XML or Map file, which contains definition of detectors grouping, to a GroupingWorkspace).");
   }
 
-  /// Initialise the properties
-  void LoadDetectorsGroupingFile::init(){
-    declareProperty(new FileProperty("InputFile", "", FileProperty::Load, ".xml"),
-        "The XML file with full path.");
+  void LoadDetectorsGroupingFile::init()
+  {
+    /// Initialise the properties
+
+    std::vector<std::string> fileExts(2);
+    fileExts[0] = ".xml";
+    fileExts[1] = ".map";
+
+    declareProperty(new FileProperty("InputFile", "", FileProperty::Load, fileExts),
+        "The XML or Map file with full path.");
+
     declareProperty(new WorkspaceProperty<DataObjects::GroupingWorkspace>("OutputWorkspace", "", Direction::Output),
         "The name of the output workspace.");
-
-    return;
   }
 
 
   /// Run the algorithm
-  void LoadDetectorsGroupingFile::exec(){
+  void LoadDetectorsGroupingFile::exec()
+  {
+    Poco::Path inputFile(static_cast<std::string>(getProperty("InputFile")));
 
-    // 1. Parse XML File
-    std::string xmlfilename = getProperty("InputFile");
+    std::string ext = Poco::toLower(inputFile.getExtension());
 
-    LoadGroupXMLFile loader;
-    loader.loadXMLFile(xmlfilename);
-    mUserGiveInstrument = loader.isGivenInstrumentName();
-    mInstrumentName = loader.getInstrumentName();
-
-    mGroupComponentsMap = loader.getGroupComponentsMap();
-    mGroupDetectorsMap = loader.getGroupDetectorsMap();
-    mGroupSpectraMap = loader.getGroupSpectraMap();
-
-    // 2. Check if detector IDs are given
-    if (!mUserGiveInstrument)
+    if(ext == "xml")
     {
-      std::map<int, std::vector<detid_t> >::iterator dit;
-      for (dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end(); ++dit)
+      // Deal with file as xml
+
+      // 1. Parse XML File
+      LoadGroupXMLFile loader;
+      loader.loadXMLFile(inputFile.toString());
+
+      mUserGiveInstrument = loader.isGivenInstrumentName();
+      mInstrumentName = loader.getInstrumentName();
+
+      mGroupComponentsMap = loader.getGroupComponentsMap();
+      mGroupDetectorsMap = loader.getGroupDetectorsMap();
+      mGroupSpectraMap = loader.getGroupSpectraMap();
+  
+      // 2. Check if detector IDs are given
+      if (!mUserGiveInstrument)
       {
-        if (dit->second.size() > 0)
-          throw std::invalid_argument("Grouping file specifies detector ID without instrument name");
+        std::map<int, std::vector<detid_t> >::iterator dit;
+        for (dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end(); ++dit)
+        {
+          if (dit->second.size() > 0)
+            throw std::invalid_argument("Grouping file specifies detector ID without instrument name");
+        }
+      }
+
+      // 3. Create output workspace
+      this->intializeGroupingWorkspace();
+      mGroupWS->mutableRun().addProperty("Filename",inputFile.toString());
+      setProperty("OutputWorkspace", mGroupWS);
+  
+      // 4. Translate and set geometry
+      this->setByComponents();
+      this->setByDetectors();
+      this->setBySpectrumIDs();
+
+      // 5. Add grouping description, if specified
+      if(loader.isGivenDescription())
+      {
+        std::string description = loader.getDescription();
+        mGroupWS->mutableRun().addProperty("Description", description);
+      }
+
+      // 6. Add group names, if user has specified any
+      std::map<int, std::string> groupNamesMap = loader.getGroupNamesMap();
+      
+      for(auto it = groupNamesMap.begin(); it != groupNamesMap.end(); it++)
+      {
+        std::string groupIdStr = boost::lexical_cast<std::string>(it->first);
+        mGroupWS->mutableRun().addProperty("GroupName_" + groupIdStr, it->second);
       }
     }
-
-    // 3. Load Instrument and create output Mask workspace
-    this->intializeGroupingWorkspace();
-    mGroupWS->mutableRun().addProperty("Filename",xmlfilename);
-    setProperty("OutputWorkspace", mGroupWS);
-
-    // 4. Translate and set geometry
-    this->setByComponents();
-    this->setByDetectors();
-    this->setBySpectrumIDs();
-
-    // 5. Add grouping description, if specified
-    if(loader.isGivenDescription())
+    else if(ext == "map")
     {
-      std::string description = loader.getDescription();
-      mGroupWS->mutableRun().addProperty("Description", description);
-    }
+      // Deal with file as map
 
-    // 6. Add group names, if user has specified any
-    std::map<int, std::string> groupNamesMap = loader.getGroupNamesMap();
-    
-    for(auto it = groupNamesMap.begin(); it != groupNamesMap.end(); it++)
-    {
-      std::string groupIdStr = boost::lexical_cast<std::string>(it->first);
-      mGroupWS->mutableRun().addProperty("GroupName_" + groupIdStr, it->second);
+      // Load data from file
+      LoadGroupMapFile loader(inputFile.toString(), g_log);
+      loader.parseFile();
+
+      // In .map files we are dealing with spectra numbers only.
+      mGroupSpectraMap = loader.getGroupSpectraMap();
+
+      // There is no way to specify instrument name in .map file
+      generateNoInstrumentGroupWorkspace();
+
+      mGroupWS->mutableRun().addProperty("Filename",inputFile.toString());
+      setProperty("OutputWorkspace", mGroupWS);
+
+      this->setBySpectrumIDs();
     }
-    
-    return;
+    else
+    {
+      // Unknown file type
+      throw std::invalid_argument("File type is not supported: " + ext);
+    }
   }
 
   /*
@@ -781,6 +864,128 @@ namespace DataHandling
     return;
   }
 
+  // -----------------------------------------------------------------------------------------------
+
+  /**
+   * Constructor. Opens a file.
+   * @param fileName Full path to the .map file
+   * @param log Logger to use
+   */
+  LoadGroupMapFile::LoadGroupMapFile(const std::string& fileName, Kernel::Logger& log)
+    : m_fileName(fileName), m_log(log), m_lastLineRead(0) 
+  {
+    m_file.open(m_fileName.c_str(), std::ifstream::in);
+
+    if(!m_file)
+      throw Exception::FileError("Couldn't open file for reading", fileName);
+  }
+
+  /**
+   * Destructor. Closes the file.
+   */
+  LoadGroupMapFile::~LoadGroupMapFile()
+  {
+    // Close the file, if terminate was not called
+    if(m_file.is_open())
+      m_file.close();
+  }
+
+  /**
+   * Creates a group -> [spectra list] map by parsing the input file.
+   */
+  void LoadGroupMapFile::parseFile()
+  {
+    std::string line;
+
+    int currentGroupNo = 1;
+
+    try
+    {
+      // We don't use the total number of groups report at the top of the file but we'll tell them 
+      // later if there is a problem with it for their diagnostic purposes
+      size_t givenNoOfGroups;
+
+      if(!nextDataLine(line))
+        throw std::invalid_argument("The input file doesn't appear to contain any data");
+
+      if(Kernel::Strings::convert(line, givenNoOfGroups) != 1)
+        throw std::invalid_argument("Expected a single int for the number of groups");
+
+      // Parse groups
+      while(true)
+      {
+        // Read next line ("group spectrum no.") -> ignore the number itself
+        if(!nextDataLine(line))
+          // If file ended -> no more groups to read, so exit the loop silently
+          break;
+
+        // Try to read number of spectra
+        size_t noOfGroupSpectra;
+
+        if(!nextDataLine(line))
+          throw std::invalid_argument("Premature end of file, expecting the number of group spectra");
+
+        if(Kernel::Strings::convert(line, noOfGroupSpectra) != 1)
+          throw std::invalid_argument("Expected a single int for the number of group spectra");
+
+        std::vector<int>& groupSpectra = m_groupSpectraMap[currentGroupNo];
+
+        groupSpectra.reserve(noOfGroupSpectra);
+
+        // While have not read all the group spectra
+        while(groupSpectra.size() < noOfGroupSpectra)
+        {
+          if(!nextDataLine(line))
+            throw std::invalid_argument("Premature end of file, expecting spectra list");
+
+          // Parse line with range. Exceptions will be catched as all others.
+          std::vector<int> readSpectra = Kernel::Strings::parseRange(line, " ");
+
+          groupSpectra.insert(groupSpectra.end(), readSpectra.begin(), readSpectra.end());
+        }
+
+        if(groupSpectra.size() != noOfGroupSpectra)
+          throw std::invalid_argument("Bad number of spectra list");
+
+        currentGroupNo++;
+      }
+
+      if(m_groupSpectraMap.size() != givenNoOfGroups)
+      {
+        m_log.warning() << "The input file header states there are " << givenNoOfGroups
+                        << ", but the file contains "  << m_groupSpectraMap.size()
+                        << " groups" << std::endl;
+      }
+    }
+    catch (std::invalid_argument &e)
+    {
+      throw Exception::ParseError(e.what(), m_fileName, m_lastLineRead);
+    }
+  }
+
+  /**
+   * Returns a next data line. By "data line" I mean not empty and not a comment line.
+   * @param line Where a line string will be stored
+   * @return true if line is read, false if eof or file error
+   */
+  bool LoadGroupMapFile::nextDataLine(std::string& line)
+  {
+    while(m_file)
+    {
+      std::getline(m_file, line);
+      m_lastLineRead++;
+
+      if(!m_file)
+        return false;
+
+      line = Poco::trim(line);
+
+      if(!line.empty() && line[0] != '#')
+        return true;
+    }
+
+    return false;
+  }
 
 } // namespace Mantid
 } // namespace DataHandling

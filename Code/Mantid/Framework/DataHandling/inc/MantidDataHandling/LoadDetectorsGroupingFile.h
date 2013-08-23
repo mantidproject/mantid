@@ -5,12 +5,18 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 
+#include <fstream>
+
 namespace Mantid
 {
 namespace DataHandling
 {
 
-  /** LoadDetectorsGroupingFile : TODO: DESCRIPTION
+  /**
+    LoadDetectorsGroupingFile
+
+    Algorithm used to generate a GroupingWorkspace from an .xml or .map file containing the
+    detectors' grouping information.
     
     @date 2011-11-17
 
@@ -185,6 +191,50 @@ namespace DataHandling
     /// Split and convert string
     void parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs);
 
+  };
+
+  /**
+   * Class used to load a grouping information from .map file.
+   *
+   * @author Arturs Bekasovs
+   * @date 21/08/2013
+   */
+  class DLLExport LoadGroupMapFile
+  {
+  public:
+    /// Constructor. Opens a file.
+    LoadGroupMapFile(const std::string& fileName, Kernel::Logger& log);
+
+    /// Desctructor. Closes a file.
+    ~LoadGroupMapFile();
+
+    /// Parses grouping information from .map file
+    void parseFile();
+
+    /// Return the map parsed from file. Should only be called after the file is parsed,
+    /// otherwise a map will always be empty.
+    /// TODO: make return const pointer.
+    std::map<int, std::vector<int> > getGroupSpectraMap() { return m_groupSpectraMap; }
+
+  private:
+
+    /// Skips all the empty lines and comment lines, and returns next line with real data
+    bool nextDataLine(std::string& line);
+
+    /// The name of the file being parsed
+    const std::string m_fileName;
+
+    /// Logger used
+    Kernel::Logger& m_log;
+
+    /// group_id -> [list of spectra]
+    std::map<int, std::vector<int> > m_groupSpectraMap;
+
+    /// The file being parsed
+    std::ifstream m_file;
+
+    /// Number of the last line parsed
+    int m_lastLineRead;
   };
 
 } // namespace DataHandling
