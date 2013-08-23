@@ -79,10 +79,10 @@ namespace DataHandling
 
      /// Grouping Workspace
      DataObjects::GroupingWorkspace_sptr mGroupWS;
-     /// Instrument name
-     std::string mInstrumentName;
-     /// User-define instrument name
-     bool mUserGiveInstrument;
+
+     /// Instrument to use if given by user
+     Geometry::Instrument_const_sptr mInstrument;
+
      /// XML document loaded
      Poco::XML::Document* pDoc;
      /// Root element of the parsed XML
