@@ -951,7 +951,7 @@ typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
     * @param er :: dtt2
     * @param tp :: zerot
     * @param tq :: dtt1t
-    * @param er :: dtt2t
+    * @param tr :: dtt2t
     * @param dsp :: d-space value
   */
   double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er, double tp, double tq, double tr, double dsp)
