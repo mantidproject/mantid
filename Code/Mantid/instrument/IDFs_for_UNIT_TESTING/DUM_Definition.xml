@@ -9,7 +9,7 @@
     <reference-frame>
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
-      <handedness axis="right"/>
+      <handedness val="right"/>
     </reference-frame>
   </defaults>
   <!--SOURCE AND SAMPLE POSITION-->
@@ -64,8 +64,8 @@
     <cylinder id="cyl-approx">
       <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>
-      <radius radius="0.01"/>
-      <height height="0.03"/>
+      <radius val="0.01"/>
+      <height val="0.03"/>
     </cylinder>
     <algebra val="cyl-approx"/>
   </type>
