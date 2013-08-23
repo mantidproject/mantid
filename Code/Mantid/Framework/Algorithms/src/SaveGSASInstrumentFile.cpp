@@ -29,6 +29,7 @@ There can be several types of Fullprof files as the input file
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidAPI/TableRow.h"
 
 #include <stdio.h>
@@ -39,9 +40,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
-using namespace std;
-
-const double PI = 3.14159265;
+using namespace std; 
 
 namespace Mantid
 {
@@ -50,28 +49,60 @@ namespace Algorithms
 
   DECLARE_ALGORITHM(SaveGSASInstrumentFile)
 
+class ChopperConfiguration
+{
+public:
+  ChopperConfiguration(const int freq, const std::string& bankidstr, const std::string& cwlstr,
+          const std::string& mndspstr, const std::string& mxdspstr, const std::string& maxtofstr);
+
+  /// Get bank IDs in configuration
+  std::vector<unsigned int> getBankIDs() const;
+  /// Check wehther a bank is defined
+  bool hasBank(unsigned int bankid) const;
+  /// Get a parameter from a bank
+  double getParameter(unsigned int bankid, const std::string& paramname) const;
+  /// Set a parameter to a bank
+  void setParameter(unsigned int bankid, const std::string& paramname, double value);
+
+private:
+  std::string parseString() const;
+  /// Parse string to a double vector
+  std::vector<double> parseStringDbl(const std::string& instring) const;
+  /// Parse string to an integer vector
+  std::vector<unsigned int> parseStringUnsignedInt(const std::string& instring) const;
+
+  const double m_frequency;
+  std::vector<unsigned int> m_bankIDs;
+  std::map<unsigned int, size_t> m_bankIDIndexMap;
+
+  std::vector<double> m_vec2Theta;
+  std::vector<double> m_vecL1;
+  std::vector<double> m_vecL2;
+
+  std::vector<double> m_vecCWL;
+  std::vector<double> m_mindsps;
+  std::vector<double> m_maxdsps;
+  std::vector<double> m_maxtofs;
+
+  std::vector<double> m_splitds;
+  std::vector<int> m_vruns;
+
+};
+
+typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
+
   //----------------------------------------------------------------------------------------------
   /** Constructor of chopper configuration
     * Removed arguments: std::string splitdstr, std::string vrunstr
     */
-  ChopperConfiguration::ChopperConfiguration(double freq, string bankidstr, string cwlstr, string mndspstr, string mxdspstr,
-                                             string maxtofstr)
+  ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& bankidstr, const std::string& cwlstr,
+                                             const std::string& mndspstr, const std::string& mxdspstr,
+                                             const std::string& maxtofstr) : m_frequency(freq),
+    m_bankIDs(parseStringUnsignedInt(bankidstr)), m_vecCWL(parseStringDbl(cwlstr)), m_mindsps(parseStringDbl(mndspstr)),
+    m_maxdsps(parseStringDbl(mxdspstr)), m_maxtofs(parseStringDbl(maxtofstr))
+
   {
-    // Import and set up from default constants
-    m_frequency = freq;
-
-    m_bankIDs = parseStringUnsignedInt(bankidstr);
     size_t numbanks = m_bankIDs.size();
-
-    m_vecCWL = parseStringDbl(cwlstr);
-    m_mindsps = parseStringDbl(mndspstr);
-    m_maxdsps = parseStringDbl(mxdspstr);
-    m_maxtofs = parseStringDbl(maxtofstr);
-
-#if 0
-    m_splitds = parseStringDbl(splitdstr);
-    m_vruns = parseStringInt(vrunstr);
-#endif
 
     // Check size
     if (m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks || m_vecCWL.size() != numbanks)
@@ -93,65 +124,31 @@ namespace Algorithms
     {
       m_bankIDIndexMap.insert(make_pair(m_bankIDs[ib], ib));
     }
-
-    // Debug output
-    /*
-    stringstream dbss;
-    for (map<unsigned int, size_t>::iterator diter = m_bankIDIndexMap.begin(); diter != m_bankIDIndexMap.end();
-         ++diter)
-    {
-      dbss << "Bank " << diter->first << " has vector index " << diter->second << ".\n";
-    }
-    cout << dbss.str();
-    */
-
-    return;
   }
 
   //----------------------------------------------------------------------------------------------
   /** Get bank IDs in the chopper configuration
     */
-  vector<unsigned int> ChopperConfiguration::getBankIDs()
+  vector<unsigned int> ChopperConfiguration::getBankIDs() const
   {
-    vector<unsigned int> bids;
-    // FIXME : use sorphisticated vector methods to replace the below!
-    for (size_t i = 0; i < m_bankIDs.size(); ++i)
-    {
-      bids.push_back(m_bankIDs[i]);
-    }
-
-    return bids;
+    return m_bankIDs;
   }
 
   //----------------------------------------------------------------------------------------------
-  bool ChopperConfiguration::hasBank(unsigned int bankid)
+  /**
+   */
+  bool ChopperConfiguration::hasBank(unsigned int bankid) const
   {
-    bool hasbank = false;
-    for (size_t i = 0; i < m_bankIDs.size(); ++i)
-      if (bankid == m_bankIDs[i])
-      {
-        hasbank = true;
-        break;
-      }
-
-    return hasbank;
+    return std::find(m_bankIDs.begin(), m_bankIDs.end(), bankid) != m_bankIDs.end();
   }
 
   //----------------------------------------------------------------------------------------------
   /** Get chopper configuration parameters value
     */
-  double ChopperConfiguration::getParameter(unsigned int bankid, string paramname)
+  double ChopperConfiguration::getParameter(unsigned int bankid, const string& paramname) const
   {
-    // Check bank IDs
-    if (!hasBank(bankid))
-    {
-      stringstream errss;
-      errss << "ChopperConfiguration does not have bank " << bankid;
-      throw runtime_error(errss.str());
-    }
-
     // Obtain index for the bank
-    map<unsigned int, size_t>::iterator biter = m_bankIDIndexMap.find(bankid);
+    map<unsigned int, size_t>::const_iterator biter = m_bankIDIndexMap.find(bankid);
     if (biter == m_bankIDIndexMap.end())
     {
       stringstream errss;
@@ -162,26 +159,26 @@ namespace Algorithms
 
     double value(EMPTY_DBL());
 
-    if (paramname.compare("TwoTheta") == 0)
+    if (paramname == "TwoTheta")
     {
       value = m_vec2Theta[bindex];
     }
-    else if (paramname.compare("MinDsp") == 0)
+    else if (paramname == "MinDsp")
     {
       // cout << "size of min-dsp = " << m_mindsps.size() << ". --> bindex = " << bindex << ".\n";
       value = m_mindsps[bindex];
     }
-    else if (paramname.compare("MaxDsp") == 0)
+    else if (paramname == "MaxDsp")
     {
       // cout << "size of max-dsp = " << m_maxdsps.size() << ". --> bindex = " << bindex << ".\n";
       value = m_maxdsps[bindex];
     }
-    else if (paramname.compare("MaxTOF") == 0)
+    else if (paramname == "MaxTOF")
     {
       // cout << "size of max-tof = " << m_maxtofs.size() << ". --> bindex = " << bindex << ".\n";
       value = m_maxtofs[bindex];
     }
-    else if (paramname.compare("CWL") == 0)
+    else if (paramname == "CWL")
     {
       value = m_vecCWL[bindex];
     }
@@ -198,7 +195,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Set a parameter to a bank
     */
-  void ChopperConfiguration::setParameter(unsigned int bankid, string paramname, double value)
+  void ChopperConfiguration::setParameter(unsigned int bankid, const string& paramname, double value)
   {
     map<unsigned, size_t>::iterator biter = m_bankIDIndexMap.find(bankid);
 
@@ -211,11 +208,11 @@ namespace Algorithms
     else
     {
       size_t ibank = biter->second;
-      if (paramname.compare("2Theta") == 0)
+      if (paramname == "2Theta")
         m_vec2Theta[ibank] = value;
-      else if (paramname.compare("L1") == 0)
+      else if (paramname == "L1")
         m_vecL1[ibank] = value;
-      else if (paramname.compare("L2") == 0)
+      else if (paramname == "L2")
         m_vecL2[ibank] = value;
       else
       {
@@ -232,7 +229,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Parse string to double vector
     */
-  vector<double> ChopperConfiguration::parseStringDbl(string instring)
+  vector<double> ChopperConfiguration::parseStringDbl(const string& instring) const
   {
     vector<string> strs;
     boost::split(strs, instring, boost::is_any_of(", "));
@@ -256,7 +253,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Parse string to double vector
     */
-  vector<unsigned int> ChopperConfiguration::parseStringUnsignedInt(string instring)
+  vector<unsigned int> ChopperConfiguration::parseStringUnsignedInt(const string& instring) const
   {
     vector<string> strs;
     boost::split(strs, instring, boost::is_any_of(", "));
@@ -328,8 +325,6 @@ namespace Algorithms
     vector<string> instruments;
     instruments.push_back("PG3");
     instruments.push_back("NOM");
-    instruments.push_back("VULCAN");
-    // auto instrumentval = new ListValidator<string>(instruments);
     declareProperty("Instrument", "PG3", boost::make_shared<StringListValidator>(instruments), "Name of the instrument that parameters are belonged to. ");
 
     vector<string> vecfreq;
@@ -341,9 +336,14 @@ namespace Algorithms
     declareProperty("IDLine", "", "ID line to be written in GSAS instrumetn file.");
     declareProperty("Sample", "", "Name of the sample used to calibrate the instrument parameters. ");
 
-    declareProperty("L1", EMPTY_DBL(), "L1 (primary flight path) of the instrument. ");
-    declareProperty("L2", EMPTY_DBL(), "L2 (secondary flight path) of the insturment. ");
-    declareProperty("TwoTheta", EMPTY_DBL(), "Angle of the detector bank. ");
+    boost::shared_ptr<BoundedValidator<double> > mustBePositive(new BoundedValidator<double>());
+    mustBePositive->setLower(0.0);
+
+    declareProperty("L1", EMPTY_DBL(), mustBePositive, "L1 (primary flight path) of the instrument. ");
+    declareProperty("L2", EMPTY_DBL(), "L2 (secondary flight path) of the instrument. "
+            "It must be given if 2Theta is not given. ");
+    declareProperty("TwoTheta", EMPTY_DBL(), mustBePositive, "Angle of the detector bank. "
+            "It must be given if L2 is not given. ");
 
     return;
   }
@@ -392,11 +392,11 @@ namespace Algorithms
     // Set default value for L1
     if (m_L1 == EMPTY_DBL())
     {
-      if (m_instrument.compare("PG3") == 0)
+      if (m_instrument == "PG3")
       {
         m_L1 = 60.0;
       }
-      else if (m_instrument.compare("NOM") == 0)
+      else if (m_instrument == "NOM")
       {
         m_L1 = 19.5;
       }
@@ -447,7 +447,7 @@ namespace Algorithms
     parseProfileTableWorkspace(m_inpWS, bankprofileparammap);
 
     // Deal with a default
-    if (m_vecBankID2File.size() == 0)
+    if (m_vecBankID2File.empty())
     {
       // Default is to export all banks
       for (map<unsigned int, map<string, double> >::iterator miter = bankprofileparammap.begin();
@@ -472,15 +472,15 @@ namespace Algorithms
     * Output--> m_configuration
     * @param chopperfrequency :: chopper frequency of the profile for.
     */
-  void SaveGSASInstrumentFile::initConstants(double chopperfrequency)
+  void SaveGSASInstrumentFile::initConstants(int chopperfrequency)
   {
     if (m_instrument.compare("PG3") == 0)
     {
-      m_configuration = setupPG3Constants(static_cast<int>(chopperfrequency));
+      m_configuration = setupPG3Constants(chopperfrequency);
     }
     else if (m_instrument.compare("NOM") == 0)
     {
-      m_configuration = setupNOMConstants(static_cast<int>(chopperfrequency));
+      m_configuration = setupNOMConstants(chopperfrequency);
     }
     else
     {
@@ -496,8 +496,6 @@ namespace Algorithms
   void SaveGSASInstrumentFile::parseProfileTableWorkspace(TableWorkspace_sptr ws,
                                                           map<unsigned int, map<string, double> >& profilemap)
   {
-    g_log.information("[DBx908] Start to parse TableWorkspace.");
-
     size_t numbanks = ws->columnCount()-1;
     size_t numparams = ws->rowCount();
     vector<map<string, double> > vec_maptemp(numbanks);
@@ -595,12 +593,8 @@ namespace Algorithms
         break;
     }
 
-    // Create configuration
-    ChopperConfiguration conf(static_cast<double>(intfrequency), bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
-
-    ChopperConfiguration_sptr confsptr = boost::make_shared<ChopperConfiguration>(conf);
-
-    return confsptr;
+    // Return
+    return boost::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -624,15 +618,14 @@ namespace Algorithms
         break;
 
       default:
-        throw runtime_error("Not supported");
+        stringstream errss;
+        errss << "NOMAD Frequency = " << intfrequency << " is not supported. ";
+        throw runtime_error(errss.str());
         break;
     }
 
     // Create configuration
-    ChopperConfiguration conf(static_cast<float>(intfrequency), bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
-    ChopperConfiguration_sptr confsptr = boost::make_shared<ChopperConfiguration>(conf);
-
-    return confsptr;
+    return boost::make_shared<ChopperConfiguration>(intfrequency, bankidstr, cwlstr, mndspstr, mxdspstr, maxtofstr);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -640,17 +633,17 @@ namespace Algorithms
     * @param banks : list of banks (sorted) to .iparm or prm file
     * @param gsasinstrfilename: string
     */
-  void SaveGSASInstrumentFile::convertToGSAS(vector<unsigned int> banks, string gsasinstrfilename,
-                                             map<unsigned int, map<string, double> > bankprofilemap)
+  void SaveGSASInstrumentFile::convertToGSAS(const std::vector<unsigned int>& outputbankids, const std::string& gsasinstrfilename,
+                                             const std::map<unsigned int, std::map<std::string, double> >& bankprofilemap)
   {
     // Check
     if (!m_configuration)
       throw runtime_error("Not set up yet!");
 
     // Set up min-dsp, max-tof
-    for (size_t i = 0; i < banks.size(); ++i)
+    for (size_t i = 0; i < outputbankids.size(); ++i)
     {
-      unsigned int bankid = banks[i];
+      unsigned int bankid = outputbankids[i];
       if (!m_configuration->hasBank(bankid))
         throw runtime_error("Chopper configuration does not have some certain bank.");
 
@@ -662,9 +655,10 @@ namespace Algorithms
 
     // Write bank header
     g_log.information() << "Export header of GSAS instrument file " << gsasinstrfilename << ".\n";
-    writePRMHeader(banks, gsasinstrfilename);
+    writePRMHeader(outputbankids, gsasinstrfilename);
 
     //  Convert and write
+    vector<unsigned int> banks = outputbankids;
     sort(banks.begin(), banks.end());
     for (size_t ib = 0; ib < banks.size(); ++ib)
     {
@@ -704,24 +698,27 @@ namespace Algorithms
 
     @param pardict ::
   */
-  void SaveGSASInstrumentFile::buildGSASTabulatedProfile(map<unsigned int, map<string, double> > bankprofilemap, unsigned int bankid)
+  void SaveGSASInstrumentFile::buildGSASTabulatedProfile(const std::map<unsigned int, std::map<std::string, double> >& bankprofilemap,
+                                                         unsigned int bankid)
   {
-    // FIXME - The profile parameter values should not get from m_configuration.
-    //         but from the profile map!
-    //         THIS IS VERY WRONG!
-
     // Locate the profile map
-    map<unsigned int, map<string, double> >::iterator biter = bankprofilemap.find(bankid);
+    map<unsigned int, map<string, double> >::const_iterator biter = bankprofilemap.find(bankid);
     if (biter == bankprofilemap.end())
       throw runtime_error("Bank ID cannot be found in bank-profile-map-map. 001");
-    map<string, double>& profilemap = biter->second;
+    const map<string, double>& profilemap = biter->second;
 
     // Init data structure
-    vector<double> gdsp(90, 0.);   // TOF_thermal(d_k)
+    // m_gdsp = gdsp;
+    // m_gdt = gdt;
+    // m_galpha = galpha;
+    // m_gbeta = gbeta;
+
+    m_gdsp.assign(90, 0.);   // TOF_thermal(d_k)
+    m_galpha.assign(90, 0.); // delta(alpha)
+    m_gbeta.assign(90, 0.);  // delta(beta)
+    m_gdt.assign(90, 0.);
+
     vector<double> gtof(90, 0.);   // TOF_thermal(d_k) - TOF(d_k)
-    vector<double> galpha(90, 0.); // delta(alpha)
-    vector<double> gbeta(90, 0.);  // delta(beta)
-    vector<double> gdt(90);
     vector<double> gpkX(90, 0.);   // ratio (n) b/w thermal and epithermal neutron
 
     // double twotheta = m_configuration->getParameter(bankid, "TwoTheta");
@@ -755,78 +752,21 @@ namespace Algorithms
 
     for (size_t k = 0; k < 90; ++k)
     {
-      gdsp[k] = (0.9*mndsp)+(static_cast<double>(k)*ddstep);
-      double rd = 1.0/gdsp[k];
+      m_gdsp[k] = (0.9*mndsp)+(static_cast<double>(k)*ddstep);
+      double rd = 1.0/m_gdsp[k];
       double dmX = mx-rd;
       gpkX[k] = 0.5*erfc(mxb*dmX); //  # this is n in the formula
-      gtof[k] = calTOF(gpkX[k], zero, dtt1 ,dtt2, zerot, dtt1t, -dtt2t, gdsp[k]);
-      gdt[k] = gtof[k] - (instC*gdsp[k]);
-      galpha[k] = aaba(gpkX[k], alph0, alph1, alph0t, alph1t, gdsp[k]);
-      gbeta[k] = aaba(gpkX[k], beta0, beta1, beta0t, beta1t, gdsp[k]);
+      gtof[k] = calTOF(gpkX[k], zero, dtt1 ,dtt2, zerot, dtt1t, -dtt2t, m_gdsp[k]);
+      m_gdt[k] = gtof[k] - (instC*m_gdsp[k]);
+      m_galpha[k] = aaba(gpkX[k], alph0, alph1, alph0t, alph1t, m_gdsp[k]);
+      m_gbeta[k] = aaba(gpkX[k], beta0, beta1, beta0t, beta1t, m_gdsp[k]);
 
       g_log.debug() << k << "\t"
                     << setw(20) << setprecision(10) << gtof[k] << "\t  "
-                    << setw(20) << setprecision(10) << gdsp[k] << "\t  "
+                    << setw(20) << setprecision(10) << m_gdsp[k] << "\t  "
                     << setw(20) << setprecision(10) << instC << "\t "
-                    << setw(20) << setprecision(10) << gdt[k] << ".\n";
+                    << setw(20) << setprecision(10) << m_gdt[k] << ".\n";
     }
-
-    // 3. Set to class variables 
-    m_gdsp = gdsp;
-    m_gdt = gdt;
-    m_galpha = galpha;
-    m_gbeta = gbeta;
-
-    /** To translate
-    gdsp = np.zeros(90) # d_k
-          gtof = np.zeros(90) # TOF_thermal(d_k)
-          gdt = np.zeros(90) # TOF_thermal(d_k) - TOF(d_k)
-          galpha = np.zeros(90) # delta(alpha)
-          gbeta = np.zeros(90) # delta(beta)
-          gpkX = np.zeros(90) # n ratio b/w thermal and epithermal neutron
-          try:
-              twosintheta = pardict["twotheta"]
-              mX = pardict["Tcross"]
-              mXb = pardict["Width"]
-              instC = pardict["Dtt1"] - (4*(pardict["Alph0"]+pardict["Alph1"]))
-          except KeyError:
-              print "Cannot Find Key twotheta/x-cross/width/dtt1/alph0/alph1!"
-              print "Keys are: "
-              print pardict.keys()
-              raise NotImplementedError("Key works cannot be found!")
-
-          if 1:
-              # latest version from Jason
-              ddstep = ((1.05*self.mxdsp[bank-1])-(0.9*self.mndsp[bank-1]))/90
-          else:
-              # used in the older prm file
-              ddstep = ((1.00*self.mxdsp[bank-1])-(0.9*self.mndsp[bank-1]))/90
-
-          # 2. Calcualte alph, beta table
-          for k in xrange(90):
-              #try:
-              gdsp[k] = (0.9*self.mndsp[bank-1])+(k*ddstep)
-              rd = 1.0/gdsp[k]
-              dmX = mX-rd
-              gpkX[k] = 0.5*erfc(mXb*dmX) # this is n in the formula
-              gtof[k] = tofh(gpkX[k], pardict["Zero"], pardict["Dtt1"] ,pardict["Dtt2"],
-                      pardict["Zerot"], pardict["Dtt1t"], -pardict["Dtt2t"], gdsp[k])
-              gdt[k] = gtof[k] - (instC*gdsp[k])
-              galpha[k] = aaba(gpkX[k], pardict["Alph0"], pardict["Alph1"],
-                      pardict["Alph0t"], pardict["Alph1t"], gdsp[k])
-              gbeta[k] = aaba(gpkX[k], pardict["Beta0"], pardict["Beta1"],
-                      pardict["Beta0t"], pardict["Beta1t"], gdsp[k])
-              #except KeyError err:
-              # print err
-              # raise NotImplementedError("Unable to find some parameter name as key")
-          # ENDFOR: k
-
-          # 3. Set to class variables
-          self.gdsp = gdsp
-          self.gdt = gdt
-          self.galpha = galpha
-          self.gbeta = gbeta
-        */
 
     return;
   }
@@ -834,13 +774,18 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Write the header of the file
     */
-  void SaveGSASInstrumentFile::writePRMHeader(vector<unsigned int> banks, std::string prmfilename)
+  void SaveGSASInstrumentFile::writePRMHeader(const vector<unsigned int>& banks, const string& prmfilename)
   {
     int numbanks = static_cast<int>(banks.size());
 
-    // FIXME - Need to read the original .py file to understand it!
     FILE * pFile;
     pFile = fopen (prmfilename.c_str(), "w");
+    if (!pFile)
+    {
+      stringstream errss;
+      errss << "Unable to open file " << prmfilename << " in write-mode";
+      throw runtime_error(errss.str());
+    }
     fprintf(pFile, "            12345678901234567890123456789012345678901234567890123456789012345678\n");
     fprintf(pFile, "ID    %s\n", m_id_line.c_str());
     fprintf(pFile, "INS   BANK  %5d\n", numbanks);
@@ -861,14 +806,15 @@ namespace Algorithms
     * @prmfilename: output file name
     * @isfirstbank: bool
     */
-  void SaveGSASInstrumentFile::writePRMSingleBank(map<unsigned int, map<string, double> > bankprofilemap, unsigned int bankid, std::string prmfilename)
+  void SaveGSASInstrumentFile::writePRMSingleBank(const std::map<unsigned int, std::map<std::string, double> >& bankprofilemap,
+                                                  unsigned int bankid, const std::string& prmfilename)
   {
     // Get access to the profile map
-    map<unsigned int, map<string, double> >::iterator biter = bankprofilemap.find(bankid);
+    map<unsigned int, map<string, double> >::const_iterator biter = bankprofilemap.find(bankid);
     if (biter == bankprofilemap.end())
       throw runtime_error("Bank does not exist in bank-profile-map. 002");
 
-    map<string, double>& profilemap = biter->second;
+    const map<string, double>& profilemap = biter->second;
 
     // Collect parameters used for output
     double zero = getProfileParameterValue(profilemap, "Zero");
@@ -912,6 +858,12 @@ namespace Algorithms
     // Write to file
     FILE * pFile;
     pFile = fopen (prmfilename.c_str(),"a");
+    if (!pFile)
+    {
+      stringstream errss;
+      errss << "Unable to open file " << prmfilename << " in append-mode";
+      throw runtime_error(errss.str());
+    }
 
     fprintf(pFile, "INS %2d ICONS%10.3f%10.3f%10.3f%10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
     fprintf(pFile, "INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
@@ -972,12 +924,12 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Caclualte L2 from DIFFC and L1
+  /** Calculate L2 from DIFFC and L1
     * DIFC = 252.816*2sin(theta)sqrt(L1+L2)
     */
   double SaveGSASInstrumentFile::calL2FromDtt1(double difc, double L1, double twotheta)
   {
-    double l2 = difc/(252.816*2.0*sin(0.5*twotheta*PI/180.0)) - L1;
+    double l2 = difc/(252.816*2.0*sin(0.5*twotheta*M_PI/180.0)) - L1;
     g_log.debug() <<  "DIFC = " << difc << ", L1 = " << L1 << ", 2Theta = " << twotheta
                    << " ==> L2 = " << l2 << ".\n";
 
@@ -999,7 +951,6 @@ namespace Algorithms
   */
   double SaveGSASInstrumentFile::calTOF(double n, double ep, double eq, double er, double tp, double tq, double tr, double dsp)
   {
-    // FIXME Is this equation for TOF^e correct?
     double te = ep + (eq*dsp) + er*0.5*erfc(((1.0/dsp)-1.05)*10.0);
     double tt = tp + (tq*dsp) + (tr/dsp);
     double t = (n*te) + tt - (n*tt);
@@ -1024,9 +975,9 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Get parameter value from a map
     */
-  double SaveGSASInstrumentFile::getValueFromMap(std::map<std::string, double> profilemap, string parname)
+  double SaveGSASInstrumentFile::getValueFromMap(const map<string, double>& profilemap, const string& parname)
   {
-    std::map<std::string, double>::iterator piter;
+    std::map<std::string, double>::const_iterator piter;
     piter = profilemap.find(parname);
     if (piter == profilemap.end())
     {
@@ -1042,48 +993,19 @@ namespace Algorithms
     return value;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Get parameter value from m_configuration/m_profile
-  double SaveGSASInstrumentFile::getProfileParameterValue(unsigned int bankid, std::string paramname)
-  {
-    map<unsigned int, map<string, double> >::iterator biter;
-    biter = m_profileMap.find(bankid);
-    if (biter == m_profileMap.end())
-    {
-      stringstream errss;
-      errss << "Profile parameter map does not have bank " << bankid << ". ";
-      g_log.error(errss.str());
-      throw runtime_error(errss.str());
-    }
-
-    map<string, double>::iterator piter = biter->second.find(paramname);
-    if (piter == biter->second.end())
-    {
-      stringstream errss;
-      errss << "Bank " << bankid << "'s profile parameter does not contain parameter"
-            << paramname << ". ";
-      g_log.error(errss.str());
-      throw runtime_error(errss.str());
-    }
-
-    double value = piter->second;
-
-    return value;
-  }
-      */
 
   //----------------------------------------------------------------------------------------------
   /** Get parameter value from m_configuration/m_profile
     */
-  double SaveGSASInstrumentFile::getProfileParameterValue(map<string, double> profilemap , std::string paramname)
+  double SaveGSASInstrumentFile::getProfileParameterValue(const map<string, double>& profilemap , const string& paramname)
   {
-    map<string, double>::iterator piter = profilemap.find(paramname);
+    map<string, double>::const_iterator piter = profilemap.find(paramname);
     if (piter == profilemap.end())
     {
       stringstream errss;
       errss << "Profile map does not contain parameter "
             << paramname << ". Available parameters are ";
-      for (map<string, double>::iterator piter = profilemap.begin(); piter != profilemap.end(); ++piter)
+      for (map<string, double>::const_iterator piter = profilemap.begin(); piter != profilemap.end(); ++piter)
       {
         errss << piter->first << ", ";
       }
@@ -1116,13 +1038,11 @@ namespace Algorithms
     }
 
     loadfpirf->setProperty("Filename", irffilename);
-    loadfpirf->setPropertyValue("OutputWorkspace", "temp");
 
     loadfpirf->execute();
     if (!loadfpirf->isExecuted())
       throw runtime_error("LoadFullprof cannot be executed. ");
 
-    // m_inpWS = boost::dynamic_pointer_cast<TableWorkspace>(loadfpirf->getProperty("OutputWorkspace"));
     m_inpWS = loadfpirf->getProperty("OutputWorkspace");
     if (!m_inpWS)
       throw runtime_error("Failed to obtain a table workspace from LoadFullprofResolution's output.");
@@ -1130,6 +1050,7 @@ namespace Algorithms
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Complementary error function
   */
   double SaveGSASInstrumentFile::erfc(double xx)
@@ -1144,8 +1065,6 @@ namespace Algorithms
 
     return y;
   }
-
-
 
 } // namespace Algorithms
 } // namespace Mantid

@@ -55,12 +55,23 @@ public:
 
     // Check the output file's existence and size;
     TS_ASSERT(Poco::File("test.iparm").exists());
-    // Poco::File::FileSize size = Poco::File("test.iparm").getSize();
-    // TS_ASSERT(size >= 16191 && size <= 16209); Removed due to windows
+ 
+    string filename("test.iparm");
+    vector<size_t> veclineindextoread;
+    veclineindextoread.push_back(5);
+    veclineindextoread.push_back(20);
+    veclineindextoread.push_back(304);
+    
+    vector<string> veclines;
+    readLines(filename, veclineindextoread, veclines);
+
+    TS_ASSERT_EQUALS(veclines[0], "INS  1 ICONS 22748.017     0.000     0.000     0.000    0     0.000");
+    TS_ASSERT_EQUALS(veclines[1], "INS  1PAB3 2   0.11303   3.91095   0.70362   0.24580");
+    TS_ASSERT_EQUALS(veclines[2], "INS  1PAB589   2.11693  51.99258   0.02653   0.02259");
 
     // Clean
     AnalysisDataService::Instance().remove("PG3ProfileTable");
-    Poco::File("test.iparm").remove();
+    // Poco::File("test.iparm").remove();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -97,6 +108,19 @@ public:
     // Check existence of file
     TS_ASSERT(Poco::File(prmfilename).exists());
 
+    string filename("test3bank.iparm");
+    vector<size_t> veclineindextoread;
+    veclineindextoread.push_back(52);
+    veclineindextoread.push_back(499);
+    veclineindextoread.push_back(906);
+    
+    vector<string> veclines;
+    readLines(filename, veclineindextoread, veclines);
+
+    TS_ASSERT_EQUALS(veclines[0], "INS  1PAB334   0.85010  -0.99997125000.00000   0.15997");
+    TS_ASSERT_EQUALS(veclines[1], "INS  3PAB481   3.40607  -2.820365483.32128   0.13123");
+    TS_ASSERT_EQUALS(veclines[2], "INS  4PAB589   4.24091 193.05366   0.01585   0.01282");
+
     // Clean
     Poco::File(prmfilename).remove();
     Poco::File(irffilename).remove();
@@ -104,7 +128,8 @@ public:
 
   //----------------------------------------------------------------------------------------------
   /** Load table workspace containing instrument parameters
-    */  void loadProfileTable(string wsname)
+    */
+  void loadProfileTable(string wsname)
   {
     // The data befow is from Bank1 in pg60_2011B.irf
 
@@ -233,6 +258,68 @@ public:
       throw runtime_error("Unable to open file to write.");
     }
   }
+
+
+  //------------------------------------------------------------------------------------
+  /** Read several specified lines from a file
+    */
+  void readLines(const std::string& filename, const std::vector<size_t>& veclineindex,
+                 std::vector<std::string>& veclines)
+  {
+    // Validate
+    if (veclineindex.empty())
+      throw std::runtime_error("Vector of line indexes cannot be empty.");
+
+    // Sort line indexes
+    std::vector<size_t> vecindex = veclineindex;
+    std::sort(vecindex.begin(), vecindex.end());
+
+    // Open file 
+    ifstream file(filename.c_str(), std::ifstream::in);
+    if (!file)
+    {
+      std::stringstream errss;
+      errss << "Couldn't open the file  " << filename << ".\n";
+      throw runtime_error(errss.str());
+    }
+
+    // Read
+    veclines.assign(veclineindex.size(), "");
+
+    size_t itemindex = 0;
+    size_t lineindextoread = veclineindex[0];
+    bool islast = itemindex == veclineindex.size()-1;
+    bool lastIsRead = false;
+
+    char linestring[256];
+    size_t linenumber = 0;
+    while(!file.eof() && !lastIsRead)
+    {
+      file.getline(linestring, 256);
+      if (linenumber == lineindextoread)
+      {
+        // This is the line to read out to output
+        veclines[itemindex] = linestring;
+        // Update the information
+        if (islast)
+          lastIsRead = true;
+        else
+        {
+          ++ itemindex;
+          islast = itemindex == veclineindex.size()-1;
+          lineindextoread = veclineindex[itemindex];
+        }
+      }
+      ++ linenumber;
+    }
+
+    // Check
+    if (!lastIsRead)
+      throw runtime_error("Not all lines are found!");
+
+    return; 
+  }
+
 
   // Compare 2 files
   bool compare2Files(std::string filename1, std::string filename2)

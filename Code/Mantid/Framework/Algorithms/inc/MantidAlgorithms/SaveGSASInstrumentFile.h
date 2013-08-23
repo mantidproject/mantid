@@ -10,49 +10,10 @@ namespace Mantid
 namespace Algorithms
 {
 
-class ChopperConfiguration
-{
-public:
-  ChopperConfiguration(double freq, std::string bankidstr, std::string cwlstr, std::string mndspstr,
-                       std::string mxdspstr, std::string maxtofstr);
+class ChopperConfiguration;
 
-  /// Get bank IDs in configuration
-  std::vector<unsigned int> getBankIDs();
-  /// Check wehther a bank is defined
-  bool hasBank(unsigned int bankid);
-  /// Get a parameter from a bank
-  double getParameter(unsigned int bankid, std::string paramname);
-  /// Set a parameter to a bank
-  void setParameter(unsigned int bankid, std::string paramname, double value);
-
-private:
-  std::string parseString();
-  /// Parse string to a double vector
-  std::vector<double> parseStringDbl(std::string instring);
-  /// Parse string to an integer vector
-  std::vector<unsigned int> parseStringUnsignedInt(std::string instring);
-
-  double m_frequency;
-  std::vector<unsigned int> m_bankIDs;
-  std::map<unsigned int, size_t> m_bankIDIndexMap;
-
-  std::vector<double> m_vec2Theta;
-  std::vector<double> m_vecL1;
-  std::vector<double> m_vecL2;
-
-  std::vector<double> m_vecCWL;
-  std::vector<double> m_mindsps;
-  std::vector<double> m_maxdsps;
-  std::vector<double> m_maxtofs;
-
-  std::vector<double> m_splitds;
-  std::vector<int> m_vruns;
-
-};
-
-typedef boost::shared_ptr<ChopperConfiguration> ChopperConfiguration_sptr;
-
-/** SaveGSASInstrumentFile : TODO: DESCRIPTION
+/** SaveGSASInstrumentFile :  Convert Fullprof"s instrument resolution file (.irf) to  GSAS"s instrument 
+    file (.iparm/.prm).
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -84,7 +45,7 @@ public:
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
-  virtual const std::string category() const { return "Diffraction;Algorithm\\Text"; }
+  virtual const std::string category() const { return "Diffraction"; }
 
 private:
   /// Sets documentation strings for this algorithm
@@ -98,30 +59,30 @@ private:
   void processProperties();
 
   /// Set up some constant by default
-  void initConstants(double chopperfrequency);
+  void initConstants(int chopperfrequency);
 
   /// Set up for PG3 chopper constants
-  ChopperConfiguration_sptr setupPG3Constants(int intfrequency);
+  boost::shared_ptr<ChopperConfiguration> setupPG3Constants(int intfrequency);
   /// Set up for NOM chopper constants
-  ChopperConfiguration_sptr setupNOMConstants(int intfrequency);
+  boost::shared_ptr<ChopperConfiguration> setupNOMConstants(int intfrequency);
 
   /// Parse profile table workspace to a map
   void parseProfileTableWorkspace(DataObjects::TableWorkspace_sptr ws,
                                   std::map<unsigned int, std::map<std::string, double> >& profilemap);
 
   /// Convert to GSAS instrument file
-  void convertToGSAS(std::vector<unsigned int> banks, std::string gsasinstrfilename,
-                     std::map<unsigned int, std::map<std::string, double> > bankprofilemap);
+  void convertToGSAS(const std::vector<unsigned int>& outputbankids, const std::string& gsasinstrfilename,
+                     const std::map<unsigned int, std::map<std::string, double> >& bankprofilemap);
 
   /// Build a data structure for GSAS's tabulated peak profile
-  void buildGSASTabulatedProfile(std::map<unsigned int, std::map<std::string, double> > bankprofilemap, unsigned int bankid);
+  void buildGSASTabulatedProfile(const std::map<unsigned int, std::map<std::string, double> >& bankprofilemap, unsigned int bankid);
 
   /// Write the header of the file
-  void writePRMHeader(std::vector<unsigned int> banks, std::string prmfilename);
+  void writePRMHeader(const std::vector<unsigned int>& banks, const std::string& prmfilename);
 
   /// Write out .prm/.iparm file
-  void writePRMSingleBank(std::map<unsigned int, std::map<std::string, double> > bankprofilemap,
-                          unsigned int bankid, std::string prmfilename);
+  void writePRMSingleBank(const std::map<unsigned int, std::map<std::string, double> >& bankprofilemap,
+                          unsigned int bankid, const std::string& prmfilename);
 
 
   /// Caclualte L2 from DIFFC and L1
@@ -134,15 +95,15 @@ private:
   double aaba(double n, double ea1, double ea2, double ta1, double ta2, double dsp);
 
   /// Get parameter value from a map
-  double getValueFromMap(std::map<std::string, double> profilemap, std::string parname);
+  double getValueFromMap(const std::map<std::string, double>& profilemap, const std::string& parname);
 
   /// Get parameter value from class storage
-  // double getProfileParameterValue(unsigned int bankid, std::string paramname);
-  double getProfileParameterValue(std::map<std::string, double> profilemap , std::string paramname);
+  double getProfileParameterValue(const std::map<std::string, double>& profilemap , const std::string& paramname);
 
   /// Load fullprof resolution file.
   void loadFullprofResolutionFile(std::string irffilename);
 
+  // TODO Replace it with gsl's erfc()
   double erfc(double xx);
 
   /// Input workspace
@@ -170,7 +131,7 @@ private:
   std::string m_gsasFileName;
 
   /// Chopper configuration
-  ChopperConfiguration_sptr m_configuration;
+  boost::shared_ptr<ChopperConfiguration> m_configuration;
 
   /// Profile parameter map
   std::map<unsigned int, std::map<std::string, double> > m_profileMap;
