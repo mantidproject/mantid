@@ -79,9 +79,8 @@ def calL2FromDtt1(difc, L1, twotheta):
     DIFC = 252.816*2sin(theta)sqrt(L1+L2)
     """
     import math
-    # print "DIFC = %f,  L1 = %f,  2theta = %f" % (difc, L1, twotheta)
     l2 = difc/(252.816*2.0*math.sin(0.5*twotheta*math.pi/180.0)) - L1
-    # print "L2 = %f" % (l2)
+    print "DIFC = %f,  L1 = %f,  2theta = %f, L2 = %f" % (difc, L1, twotheta, l2)
 
     return l2
     
@@ -168,9 +167,9 @@ class ConvertInstrumentFile(PythonAlgorithm):
             if (hz60_f):
                 # 60 Hz
                 self.rep='60'
-                self.CWL    = [0.00,  1.11,  2.22,  3.33,  1.5000]
-                self.mndsp  = [0,     1,     2,     3,     0.0450]   #for gsas parameter file extrapolation
-                self.mxdsp  = [0,     1,     2,     3,     2.6000]
+                self.CWL    = ["?",  "?",  "?",  1.500,  1.5000]
+                self.mndsp  = ["?",  "?",  "?",  0.052,  0.0450]   #for gsas parameter file extrapolation
+                self.mxdsp  = ["?",  "?",  "?",  2.630,  2.6000]
                 #self.mndsp  = [0,     1,     2,     3,     0.2335]   #for gsas parameter file extrapolation
                 #self.mxdsp  = [0,     1,     2,     3,     1.3270]
                 self.mxtofs = [46.76, 70.14, 81.83, 93.52, 156.00]
@@ -388,7 +387,10 @@ class ConvertInstrumentFile(PythonAlgorithm):
          # ENDIF
   
         if self.iL2 < 0:
+            print "Calculate L2 from input DIFC (Dtt1), L2 and 2theta"
             self.iL2 = calL2FromDtt1(difc=self.mdict[bank]["Dtt1"], L1=self.iL1, twotheta=self.i2theta)
+        else:
+            print "Use input L2 = %.f. " % (self.iL2)
 
         # print "Debug: L2 = %f,  2Theta (irf) = %f,  2Theta (input) = %f" % (self.iL2, pardict["twotheta"], self.i2theta)
 
