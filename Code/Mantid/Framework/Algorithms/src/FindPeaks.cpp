@@ -41,6 +41,7 @@
 #include <numeric>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidAPI/TableRow.h"
 
 #include <fstream>
 
@@ -995,18 +996,31 @@ namespace Algorithms
   void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min,
                           const int i_max, const int i_centre)
   {
+
+    // Estimate background:
+
+    IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
+    estimate->setProperty("InputWorkspace", input);
+    // The workspace index
+    std::vector<int> wivec;
+    wivec.push_back(spectrum);
+    estimate->setProperty("WorkspaceIndices", wivec);
+    //estimate->setProperty("SigmaConstant", 1.0);
+    // The workspace index
+    std::vector<double> fwvec;
     const MantidVec &vecX = input->readX(spectrum);
-    const MantidVec &vecY = input->readY(spectrum);
+    fwvec.push_back(vecX[i_min]);
+    fwvec.push_back(vecX[i_max]);
+    estimate->setProperty("FitWindow", fwvec);
+    estimate->executeAsChildAlg();
+    // Get back the result
+    Mantid::API::ITableWorkspace_sptr peaklist = estimate->getProperty("OutputWorkspace");
 
-    g_log.information() << "Fit Peak @ " << vecX[i_centre] << "  of Spectrum " << spectrum << ". Fit peak In Range "
-                        << vecX[i_min] << ", " << vecX[i_max] << "  i_min = " << i_min << ", i_max = "
-                        << i_max << ", i_centre = " << i_centre << ".\n";
-
-    // Estimate background: output-> m_backgroundFunction
-    double in_bg0;
-    double in_bg1;
-    double in_bg2;
-    estimateBackground(vecX, vecY, i_min, i_max, in_bg0, in_bg1, in_bg2);
+    int i_peakmin = peaklist->Int(0,1);
+    int i_peakmax = peaklist->Int(0,2);
+    double in_bg0 = peaklist->Double(0,3);
+    double in_bg1 = peaklist->Double(0,4);
+    double in_bg2 = peaklist->Double(0,5);
 
     if (!m_highBackground)
     {
@@ -1017,7 +1031,7 @@ namespace Algorithms
     else
     {
       // High background
-      fitPeakHighBackground(input, spectrum, i_centre, i_min, i_max, in_bg0, in_bg1, in_bg2);
+      fitPeakHighBackground(input, spectrum, i_centre, i_min, i_max, in_bg0, in_bg1, in_bg2, i_peakmin, i_peakmax);
 
     } // if high background
 
@@ -1154,7 +1168,8 @@ namespace Algorithms
     */
   void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum,
                                         const int& i_centre, const int& i_min, const int& i_max,
-                                        double& in_bg0, double& in_bg1, double& in_bg2)
+                                        double& in_bg0, double& in_bg1, double& in_bg2,
+                                        const int& i_peakmin, const int& i_peakmax)
   {
     // Check that the indices provided are sensible
     if (i_min >= i_centre || i_max <= i_centre || i_min < 0)
@@ -1281,8 +1296,8 @@ namespace Algorithms
     }
 
     in_centre = g_centre;
-    peakleftbound = g_centre - 3*g_fwhm;
-    peakrightbound = g_centre + 3*g_fwhm;
+    peakleftbound = peakX[i_peakmin]; //g_centre - 3*g_fwhm;
+    peakrightbound = peakX[i_peakmax]; //g_centre + 3*g_fwhm;
     vec_FWHM.clear();
     vec_FWHM.push_back(g_fwhm);
     PeakFittingRecord fitresult2 = multiFitPeakBackground(peakws, 0, input, spectrum, peakfunc, in_centre, g_height,vec_FWHM,
@@ -2277,8 +2292,6 @@ namespace Algorithms
     // Calculate Rwp
     double sumnom = 0;
     double sumdenom = 0;
-    double sumrpnom = 0;
-    double sumrpdenom = 0;
 
     size_t numpts = domain.size();
     for (size_t i = 0; i < numpts; ++i)

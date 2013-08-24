@@ -186,7 +186,12 @@ namespace Algorithms
 
       double Ymean, Yvariance, Ysigma;
       MantidVec maskedY;
-      for (size_t l = l0; l < n; ++l)maskedY.push_back(inpY[l]);
+      MantidVec::const_iterator in = std::min_element(inpY.begin(), inpY.end());
+      double bkg0 = inpY[in - inpY.begin()];
+      for (size_t l = l0; l < n; ++l)
+      {
+          maskedY.push_back(inpY[l]-bkg0);
+      }
       MantidVec mask(n-l0,0.0);
       double xn = static_cast<double>(n-l0);
       do
@@ -241,7 +246,7 @@ namespace Algorithms
 				  size_t ipeak = peaks.size()-1;
 				  if (mask[l] != mask[l-1] && mask[l] == 0)
 				  {
-					  peaks[ipeak].stop = l+l0-1;
+					  peaks[ipeak].stop = l+l0;
 				  }
 				  if (inpY[l+l0] > peaks[ipeak].maxY) peaks[ipeak].maxY = inpY[l+l0];
 			  }
@@ -327,11 +332,11 @@ namespace Algorithms
     if (m_backgroundType.compare("Linear") == 0) // linear background
     {
       // Cramer's rule for 2 x 2 matrix
-      double devisor = sum*sumX2-sumX*sumX;
-      if (devisor != 0)
+      double divisor = sum*sumX2-sumX*sumX;
+      if (divisor != 0)
       {
-		  out_bg0 = (sumY*sumX2-sumX*sumXY)/devisor;
-		  out_bg1 = (sum*sumXY-sumY*sumX)/devisor;
+		  out_bg0 = (sumY*sumX2-sumX*sumXY)/divisor;
+		  out_bg1 = (sum*sumXY-sumY*sumX)/divisor;
       }
     }
     else // flat background
