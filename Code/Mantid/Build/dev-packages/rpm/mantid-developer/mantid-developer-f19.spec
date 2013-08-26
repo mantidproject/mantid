@@ -28,7 +28,7 @@ Requires: PyQt4-devel
 Requires: python-devel
 Requires: qscintilla-devel
 Requires: qt-devel >= 4.6
-Requires: qwt-devel
+Requires: qwt5-qt4-devel
 Requires: qwtplot3d-qt4-devel
 Requires: redhat-lsb
 Requires: rpmdevtools
