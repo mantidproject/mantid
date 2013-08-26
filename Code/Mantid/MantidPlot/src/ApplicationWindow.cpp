@@ -83,7 +83,6 @@
 #include "plot2D/ScaleEngine.h"
 #include "ScriptingLangDialog.h"
 #include "ScriptingWindow.h"
-#include "CommandLineInterpreter.h"
 #include "ScriptFileInterpreter.h"
 #include "TableStatistics.h"
 #include "Fit.h"
@@ -500,9 +499,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  m_scriptInterpreter = new CommandLineInterpreter(*scriptingEnv(), m_interpreterDock);
-  delete m_interpreterDock->widget();
-  m_interpreterDock->setWidget(m_scriptInterpreter);
+  //delete m_interpreterDock->widget();
   m_iface_script = NULL;
   loadCustomActions();
 
@@ -5628,8 +5625,6 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/KeepAspect", d_keep_plot_aspect);
   settings.endGroup(); // ExportImage
 
-
-  if(m_scriptInterpreter ) m_scriptInterpreter->saveSettings();
   settings.beginGroup("/ScriptWindow");
   // Geometry is applied by the app window
   settings.setValue("/size", d_script_win_size);
@@ -8275,11 +8270,6 @@ void ApplicationWindow::copySelection()
     info->copy();
     return;
   }
-  else if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->copy();
-    return;
-  }
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -8379,12 +8369,6 @@ void ApplicationWindow::copyMarker()
 
 void ApplicationWindow::pasteSelection()
 {  
-  if (m_interpreterDock->hasFocus())
-  {
-    m_scriptInterpreter->paste();
-    return;
-  }
-
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -9507,7 +9491,6 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   //Save the settings and exit
   saveSettings();
-  m_scriptInterpreter->shutdown();
   scriptingEnv()->finalize();
 
   // Help window
@@ -16132,10 +16115,9 @@ void ApplicationWindow::showScriptInterpreter()
   { 
     m_interpreterDock->show();
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
-    m_interpreterDock->setFocusProxy(m_scriptInterpreter);
-    m_scriptInterpreter->setFocus();
+    m_interpreterDock->setFocusProxy(m_interpreterDock->widget());
+    m_interpreterDock->setFocus();
     m_interpreterDock->activateWindow();
-     
   }
 
 }
