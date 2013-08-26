@@ -513,8 +513,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
     g_log.warning("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
   }
 
-  actionIPythonConsole->setVisible(testForIPython());
-
   // Need to show first time setup dialog?
   using Mantid::Kernel::ConfigServiceImpl;
   ConfigServiceImpl& config = ConfigService::Instance();
@@ -1108,7 +1106,6 @@ void ApplicationWindow::initMainMenu()
   view->insertSeparator();
   view->addAction(actionShowScriptWindow);//Mantid
   view->addAction(actionShowScriptInterpreter);
-  view->addAction(actionIPythonConsole);
   view->insertSeparator();
 
   mantidUI->addMenuItems(view);
@@ -13221,14 +13218,6 @@ void ApplicationWindow::createActions()
 #endif
   actionShowScriptInterpreter->setToggleAction(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
-
-  actionIPythonConsole = new QAction(getQPixmap("python_xpm"), tr("Launch IPython Console"), this);
-#ifdef __APPLE__
-  actionIPythonConsole->setShortcut(tr("Ctrl+5")); // F4 is used by the window manager on Mac
-#else
-  actionIPythonConsole->setShortcut(tr("F5"));
-#endif
-  connect(actionIPythonConsole, SIGNAL(activated()), this, SLOT(launchIPythonConsole()));
 #endif
 
   actionShowCurvePlotDialog = new QAction(tr("&Plot details..."), this);
@@ -16149,25 +16138,6 @@ void ApplicationWindow::showScriptInterpreter()
      
   }
 
-}
-
-bool ApplicationWindow::testForIPython()
-{
-#ifdef _WIN32
-  // We have an issue with clashing MSVCR90 libraries on 32-bit windows. When this method
-  // is run at startup it raises a dialog box warning about an invalid load of the C runtime library.
-  // It seems to have picked up MSCRV90 from the CMake bin directory. Clicking OK allows
-  // Mantid to load and then running IPython seesm fine, also without CMake in the PATH it is okay.
-  // We will have to assume that this is always here on Windows.
-  return true;
-#else
-  return runPythonScript("from ipython_plugin import MantidPlot_IPython",false, true,false);
-#endif
-}
-
-void ApplicationWindow::launchIPythonConsole()
-{
-  runPythonScript("from ipython_plugin import MantidPlot_IPython\nMantidPlot_IPython().launch_console()",false, true,false);
 }
 
 /**

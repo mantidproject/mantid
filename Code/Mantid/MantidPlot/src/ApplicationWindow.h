@@ -748,8 +748,6 @@ public slots:
   void showScriptWindow(bool forceVisible = false, bool quitting = false);
   void saveScriptWindowGeometry();
   void showScriptInterpreter();
-  bool testForIPython();
-  void launchIPythonConsole();
   void showMoreWindows();
   void showMarkerPopupMenu();
   void showHelp();
@@ -1449,7 +1447,7 @@ private:
   QAction *actionNextWindow, *actionPrevWindow;
   QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
   QAction *actionSaveNote;
-  QAction *actionShowScriptWindow, *actionShowScriptInterpreter, *actionIPythonConsole;
+  QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
   QAction *btnCursor, /* *btnSelect,*/ *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
