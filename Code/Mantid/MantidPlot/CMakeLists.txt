@@ -13,7 +13,6 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Bar.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
-                   src/CommandLineInterpreter.cpp
                    src/ColorMapDialog.cpp
                    src/Cone3D.cpp
                    src/ConfigDialog.cpp
@@ -242,7 +241,6 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Bar.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
-                   src/CommandLineInterpreter.h
                    src/ColorMapDialog.h
                    src/Cone3D.h
                    src/ConfigDialog.h
@@ -544,7 +542,6 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AxesDialog.h
                         src/CanvasPicker.h
                         src/ColorMapDialog.h
-                        src/CommandLineInterpreter.h
                         src/ConfigDialog.h
                         src/ContourLinesEditor.h
                         src/Convolution.h
