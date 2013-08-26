@@ -103,7 +103,7 @@ public:
 
 	const Event *events(void) const { return (const Event *) &m_fields[6]; }
 	uint32_t num_events(void) const {
-		return (m_payload_len - 24) / (2 * sizeof (uint32_t));
+    return (m_payload_len - 24) / static_cast<uint32_t>(2 * sizeof (uint32_t));
 	}
 
 private:
@@ -151,7 +151,7 @@ public:
 
 	const uint32_t *ids(void) const { return (const uint32_t *) payload(); }
 	uint32_t num_ids(void) const {
-		return payload_length() / sizeof (uint32_t);
+    return payload_length() / static_cast<uint32_t>(sizeof (uint32_t));
 	}
 
 private:

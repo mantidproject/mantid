@@ -1,5 +1,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/AlgorithmWrapper.h"
 
@@ -47,6 +48,7 @@ namespace
     /// Python algorithm registration mutex in anonymous namespace (aka static)
     Poco::Mutex FUNCTION_REGISTER_MUTEX;
 
+GCC_DIAG_ON(cast-qual)
     /**
      * A free function to register a fit function from Python
      * @param obj :: A Python object that should either be a class type derived from IFunction
@@ -55,8 +57,8 @@ namespace
     void subscribe(FunctionFactoryImpl & self, const boost::python::object & obj )
     {
       Poco::ScopedLock<Poco::Mutex> lock(FUNCTION_REGISTER_MUTEX);
-
       static PyObject * const baseClass = (PyObject*)converter::registered<IFunction>::converters.to_python_target_type();
+
       // obj could be or instance/class, check instance first
       PyObject *classObject(NULL);
       if( PyObject_IsInstance(obj.ptr(), baseClass) )
@@ -83,6 +85,7 @@ namespace
     }
   ///@endcond
 }
+GCC_DIAG_OFF(cast-qual)
 
 void export_FunctionFactory()
 {

@@ -120,7 +120,7 @@ public:
   {
     isisds_command_header_t comm;
     memset( &comm, 0, sizeof(comm) );
-    comm.len = (int)sizeof(comm) + sizeof(int);
+    comm.len = static_cast<int>(sizeof(comm) + sizeof(int));
     comm.type = ISISDSInt32;
 		comm.ndims = 1;
     comm.dims_array[0] = 1;

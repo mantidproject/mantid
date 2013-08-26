@@ -1,18 +1,32 @@
+#include "MantidKernel/WarningSuppressions.h"
 //------------------------------------------------------------------------------
 // This is a global 'include' file for the GSoap generated files in order to 
 // disable some warnings that we understand but do not want to touch as 
 // it is automatically generated code
 //------------------------------------------------------------------------------
-
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-  #pragma GCC diagnostic ignored "-Wcast-qual"
-  #pragma GCC diagnostic ignored "-Wconversion"
-  #pragma GCC diagnostic ignored "-Wunused-parameter"
-  #pragma GCC diagnostic ignored "-Wstrict-aliasing"
-  #pragma GCC diagnostic ignored "-Wformat"
-#elif defined(_WIN32)
+GCC_DIAG_OFF(cast-qual)
+GCC_DIAG_OFF(conversion)
+GCC_DIAG_OFF(unused-parameter)
+GCC_DIAG_OFF(strict-aliasing)
+GCC_DIAG_OFF(format)
+GCC_DIAG_OFF(vla)
+#if GCC_VERSION >= 40800 // 4.8.0
+    GCC_DIAG_OFF(literal-suffix)
+#ifdef _WIN32
   #pragma warning( disable: 4100 )
 #endif
 
 #include "ICat3/GSoapGenerated/soapC.cpp"
 #include "ICat3/GSoapGenerated/soapICATPortBindingProxy.cpp"
+
+GCC_DIAG_ON(cast-qual)
+GCC_DIAG_ON(conversion)
+GCC_DIAG_ON(unused-parameter)
+GCC_DIAG_ON(strict-aliasing)
+GCC_DIAG_ON(format)
+GCC_DIAG_ON(vla)
+#if GCC_VERSION > 40700 // 4.8.0
+  GCC_DIAG_ON(literal-suffix)
+#endif // GCC_VERSION
+
+#endif
