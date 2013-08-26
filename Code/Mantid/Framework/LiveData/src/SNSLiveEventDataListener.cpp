@@ -286,7 +286,7 @@ namespace LiveData
     // will cause the algorithm to exit).
     // NOTE: For the default exception handler, we actually create a new runtime_error
     // object and throw that, since there's no exception object passed in to the handler.
-    } catch ( ADARA::invalid_packet e) {  // exception handler for invalid packets
+    } catch ( ADARA::invalid_packet &e) {  // exception handler for invalid packets
       // For now, log it and let the thread exit.  In the future, we might
       // try to recover from this.  (A bad event packet could probably just
       // be ignored, for example)
@@ -299,7 +299,7 @@ namespace LiveData
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new ADARA::invalid_packet(e));
 
-    } catch (std::runtime_error e) {  // exception handler for generic runtime exceptions
+    } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
       g_log.fatal() << "Caught a runtime exception." << std::endl
                     << "Exception message: " << e.what() << std::endl
                     << "Thread will exit." << std::endl;
@@ -307,7 +307,7 @@ namespace LiveData
 
       m_backgroundException = boost::shared_ptr<std::runtime_error>( new std::runtime_error( e));
 
-    } catch (std::invalid_argument e) { // TimeSeriesProperty (and possibly some other things) can
+    } catch (std::invalid_argument &e) { // TimeSeriesProperty (and possibly some other things) can
                                         // can throw these errors
       g_log.fatal() << "Caught an invalid argument exception." << std::endl
                     << "Exception message: "  << e.what() << std::endl
@@ -378,8 +378,7 @@ namespace LiveData
 
     }
 
-    // A few counters that we use for logging purposes
-    unsigned eventsPerBank = 0;
+    // A counter that we use for logging purposes
     unsigned totalEvents = 0;
 
     // First, check to see if the run has been paused.  We don't process
@@ -406,6 +405,8 @@ namespace LiveData
       // Iterate through each event
       const ADARA::Event *event = pkt.firstEvent();
       unsigned lastBankID = pkt.curBankId();
+      // A counter that we use for logging purposes
+      unsigned eventsPerBank = 0;
       while (event != NULL)
       {
         eventsPerBank++;
