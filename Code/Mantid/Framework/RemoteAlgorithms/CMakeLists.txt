@@ -1,23 +1,23 @@
 set( SRC_FILES
 	src/Authenticate.cpp
+	src/StartRemoteTransaction.cpp
+	src/StopRemoteTransaction.cpp
 #	src/DownloadRemoteFile.cpp
 #	src/QueryAllRemoteJobs.cpp
 #	src/QueryRemoteFile.cpp
 #	src/QueryRemoteJob.cpp
-#	src/StartRemoteTransaction.cpp
-#	src/StopRemoteTransaction.cpp
 #	src/SubmitRemoteJob.cpp
 #	src/UploadRemoteFile.cpp
 )
 
 set( INC_FILES
 	inc/MantidRemoteAlgorithms/Authenticate.h
+	inc/MantidRemoteAlgorithms/StartRemoteTransaction.h
+	inc/MantidRemoteAlgorithms/StopRemoteTransaction.h
 #	inc/MantidRemoteAlgorithms/DownloadRemoteFile.h
 #	inc/MantidRemoteAlgorithms/QueryAllRemoteJobs.h
 #	inc/MantidRemoteAlgorithms/QueryRemoteFile.h
 #	inc/MantidRemoteAlgorithms/QueryRemoteJob.h
-#	inc/MantidRemoteAlgorithms/StartRemoteTransaction.h
-#	inc/MantidRemoteAlgorithms/StopRemoteTransaction.h
 #	inc/MantidRemoteAlgorithms/SubmitRemoteJob.h
 #	inc/MantidRemoteAlgorithms/UploadRemoteFile.h
 )

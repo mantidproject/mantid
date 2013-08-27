@@ -79,7 +79,18 @@ std::istream & RemoteJobManager::httpGet( const std::string &path, const std::st
   m_session->sendRequest( req);
 
   std::istream &respStream = m_session->receiveResponse( m_response);
-  m_response.getCookies( m_cookies);
+
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server. In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  // Note: This won't work properly if we ever use cookies other than a
+  // session cookie.
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  m_response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
 
   return respStream;
 }
@@ -136,7 +147,19 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
   postStream << postBody.rdbuf() << std::flush;
 
   std::istream &respStream = m_session->receiveResponse( m_response);
-  m_response.getCookies( m_cookies);
+
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server. In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  // Note: This won't work properly if we ever use cookies other than a
+  // session cookie.
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  m_response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
+
   return respStream;
 }
 
