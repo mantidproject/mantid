@@ -1,15 +1,17 @@
-#ifndef MANTID_CRYSTAL_CLEARUB_H_
-#define MANTID_CRYSTAL_CLEARUB_H_
+#ifndef MANTID_CRYSTAL_HASUB_H_
+#define MANTID_CRYSTAL_HASUB_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/ClearUB.h"
 
 namespace Mantid
 {
 namespace Crystal
 {
 
-  /** ClearUB : Clear the UB matrix from a workspace by removing the oriented lattice.
+  /** HasUB : Determine if a workspace has a UB matrix on any of it's samples. Returns True if one is found. Returns false if none can be found, or if the
+   * workspace type is incompatible.
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,22 +33,17 @@ namespace Crystal
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ClearUB  : public API::Algorithm
+  class DLLExport HasUB  : public ClearUB
   {
   public:
-    ClearUB();
-    virtual ~ClearUB();
+    HasUB();
+    virtual ~HasUB();
     
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
 
-  protected:
-
-    bool doExecute(Mantid::API::Workspace * const ws, bool dryRun);
-
   private:
-    bool clearSingleExperimentInfo(Mantid::API::ExperimentInfo * const experimentInfo, const bool dryRun) const;
     virtual void initDocs();
     void init();
     void exec();
@@ -58,4 +55,4 @@ namespace Crystal
 } // namespace Crystal
 } // namespace Mantid
 
-#endif  /* MANTID_CRYSTAL_CLEARUB_H_ */
+#endif  /* MANTID_CRYSTAL_HASUB_H_ */
