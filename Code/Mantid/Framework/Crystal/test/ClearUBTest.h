@@ -49,13 +49,13 @@ private:
   }
 
   // Helper method to create a MDHW
-  std::string createMDHistoWorkspace(const int nExperimentInfosToAdd = 2)
+  std::string createMDHistoWorkspace(const uint16_t nExperimentInfosToAdd = 2)
   {
     const std::string wsName = "TestWorkspace";
     auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
     ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(new OrientedLattice(1.0,2.0,3.0, 90, 90,90));
 
-    for(int i = 1; i < nExperimentInfosToAdd; ++i)
+    for(uint16_t i = 1; i < nExperimentInfosToAdd; ++i)
     {
       ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
       ws->addExperimentInfo(experimentInfo);
