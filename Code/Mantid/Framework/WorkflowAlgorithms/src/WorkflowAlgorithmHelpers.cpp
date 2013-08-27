@@ -46,7 +46,7 @@ namespace WorkflowAlgorithmHelpers
         param = params[0];
       }
     }
-    if(defaultValue != overrideValue)
+    if((defaultValue == param)&&(defaultValue!=overrideValue))
     {
       param = overrideValue;
     }
@@ -93,7 +93,7 @@ namespace WorkflowAlgorithmHelpers
         param = params[0];
       }
     }
-    if(defaultValue != overrideValue)
+    if((defaultValue == param)&&(defaultValue!=overrideValue))
     {
       param = overrideValue;
     }
@@ -147,7 +147,7 @@ namespace WorkflowAlgorithmHelpers
 
 
     }
-    if(defaultValue != overrideValue)
+    if((defaultValue == param)&&(defaultValue!=overrideValue))
     {
       param = overrideValue;
     }
