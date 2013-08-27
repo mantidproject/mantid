@@ -167,18 +167,19 @@ public:
     ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "4");
     ConfigService::Instance().setString("testdatalistener.m_newStatus", "4" /* ILiveListener::EndRun */);
 
-    boost::shared_ptr<MonitorLiveData> alg1 = makeAlgo("fake1", "", "Add", "Restart", "0.15");
+    boost::shared_ptr<MonitorLiveData> alg1 = makeAlgo("fake1", "", "Add", "Restart", "0.05");
     // Run this algorithm until that chunk #
-    if (!runAlgoUntilChunk(alg1, 7)) return;
+    if (!runAlgoUntilChunk(alg1, 5)) return;
 
     // Cancel the algo before exiting test (avoids segfault)
     alg1->cancel();
 
     // The workspace was reset after 4 additions, and then got 3 more
     EventWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake1");
-    TS_ASSERT_EQUALS( ws->getNumberEvents(), 3*200);
+    TS_ASSERT_EQUALS( ws->getNumberEvents(), 200);
 
-    Poco::Thread::sleep(500);
+    Kernel::Timer timer;
+    while ( alg1->isRunning() && timer.elapsed_no_reset() < 0.5 ) {}
   }
 
 
@@ -190,9 +191,9 @@ public:
     ConfigService::Instance().setString("testdatalistener.m_changeStatusAfter", "4");
     ConfigService::Instance().setString("testdatalistener.m_newStatus", "4" /* ILiveListener::EndRun */);
 
-    boost::shared_ptr<MonitorLiveData> alg1 = makeAlgo("fake2", "", "Add", "Rename", "0.15");
+    boost::shared_ptr<MonitorLiveData> alg1 = makeAlgo("fake2", "", "Add", "Rename", "0.05");
     // Run this algorithm until that chunk #
-    if (!runAlgoUntilChunk(alg1, 7)) return;
+    if (!runAlgoUntilChunk(alg1, 5)) return;
 
     // Cancel the algo before exiting test (avoids segfault)
     alg1->cancel();
@@ -203,9 +204,10 @@ public:
 
     // And this is the current run
     EventWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake2");
-    TS_ASSERT_EQUALS( ws2->getNumberEvents(), 3*200);
+    TS_ASSERT_EQUALS( ws2->getNumberEvents(), 200);
 
-    Poco::Thread::sleep(500);
+    Kernel::Timer timer;
+    while ( alg1->isRunning() && timer.elapsed_no_reset() < 0.5 ) {}
   }
 
 
