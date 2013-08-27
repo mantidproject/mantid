@@ -73,14 +73,3 @@ GCC_DIAG_OFF(uninitialized)
 #include "boostpython/str.cpp"
 #include "boostpython/tuple.cpp"
 #include "boostpython/wrapper.cpp"
-
-GCC_DIAG_ON(conversion)
-GCC_DIAG_ON(missing-field-initializers)
-GCC_DIAG_ON(unused-parameter)
-GCC_DIAG_ON(type-limits)
-GCC_DIAG_ON(unused-value)
-GCC_DIAG_ON(strict-aliasing)
-GCC_DIAG_ON(uninitialized)
-#if GCC_VERSION >= 40800 // 4.8.0
-  GCC_DIAG_ON(unused-local-typedefs)
-#endif

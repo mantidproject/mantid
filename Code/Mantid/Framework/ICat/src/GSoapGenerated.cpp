@@ -19,13 +19,3 @@ GCC_DIAG_OFF(vla)
 
 #include "ICat3/GSoapGenerated/soapC.cpp"
 #include "ICat3/GSoapGenerated/soapICATPortBindingProxy.cpp"
-
-GCC_DIAG_ON(cast-qual)
-GCC_DIAG_ON(conversion)
-GCC_DIAG_ON(unused-parameter)
-GCC_DIAG_ON(strict-aliasing)
-GCC_DIAG_ON(format)
-GCC_DIAG_ON(vla)
-#if GCC_VERSION > 40700 // 4.8.0
-  GCC_DIAG_ON(literal-suffix)
-#endif // GCC_VERSION

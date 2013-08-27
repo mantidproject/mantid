@@ -49,7 +49,7 @@
   // define macros for turning the warning suppression on/off
   #if GCC_VERSION >= 40600 // 4.6.0
     #define GCC_DIAG_OFF(x) GCC_DIAG_PRAGMA(push) \
-	GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W,x))
+                         GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W,x))
     #define GCC_DIAG_ON(x) GCC_DIAG_PRAGMA(pop)
   #else
     #define GCC_DIAG_OFF(x) GCC_DIAG_PRAGMA(ignored GCC_DIAG_JOINSTR(-W,x))
