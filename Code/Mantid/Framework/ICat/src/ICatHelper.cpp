@@ -4,9 +4,6 @@
     GCC_DIAG_OFF(literal-suffix)
 #endif
 #include "MantidICat/ICatHelper.h"
-#if GCC_VERSION >= 40800 // 4.8.0
-    GCC_DIAG_ON(literal-suffix)
-#endif
 #include "MantidICat/Session.h"
 #include "MantidICat/ErrorHandling.h" 
 #include <iomanip>
