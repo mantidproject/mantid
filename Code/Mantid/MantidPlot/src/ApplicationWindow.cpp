@@ -9492,6 +9492,8 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
   }
 
   mantidUI->shutdown();
+  delete mantidUI;
+  mantidUI = NULL;
 
   if( scriptingWindow )
   {
@@ -16221,12 +16223,16 @@ ApplicationWindow::~ApplicationWindow()
   if (d_text_editor)
     delete d_text_editor;
 
+  while(!d_user_menus.isEmpty())
+  {
+    QMenu *menu = d_user_menus.takeLast();
+    delete menu;
+  }
+  delete current_folder;
+
   QApplication::clipboard()->clear(QClipboard::Clipboard);
 
   btnPointer->setChecked(true);
-
-  //Mantid
-  if (mantidUI) delete mantidUI;
 }
 
 QString ApplicationWindow::versionString()
