@@ -103,7 +103,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void test_calculatePeakShape()
+  void TODO_test_calculatePeakShape()
   {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
@@ -155,6 +155,131 @@ public:
     TS_ASSERT_EQUALS(1, 432);
     */
   }
+
+  //----------------------------------------------------------------------------------------------
+  /** Calculate peak positions: data is from Fullprof's sample: arg_si
+    */
+  void TODO_test_calculateVulcanPeakPositions()
+  {
+    // (2, 2, 0)
+    NeutronBk2BkExpConvPVoigt func;
+    func.initialize();
+
+    func.setParameter("Dtt1", 16370.650);
+    func.setParameter("Dtt2", 0.100);
+    func.setParameter("Zero", 0.000);
+    func.setParameter("LatticeConstant", 5.431363); // Silicon
+
+    func.setMillerIndex(3, 3, 1);
+    func.calculateParameters(false);
+    double dh1 = func.getPeakParameter("d_h");
+    double tofh1 = func.centre();
+
+    cout << "Peak [111]: d_h = " << dh1 << ", TOF_h = " << tofh1 << ".\n";
+
+    TS_ASSERT_DELTA(tofh1, 23421.7207, 0.01);
+
+    /*
+    // (2, 2, 0)
+    NeutronBk2BkExpConvPVoigt func220;
+    func220.initialize();
+
+    func220.setParameter("Dtt1", 16370.650);
+    func220.setParameter("Dtt2", -1.540);
+    func220.setParameter("Zero", -9.227);
+    func220.setParameter("LatticeConstant", 5.431363); // Silicon
+    func220.setMillerIndex(2, 2, 0);
+    func220.calculateParameters(false);
+    double tofh2 = func220.centre();
+    TS_ASSERT_DELTA(tofh2, 14342.8350, 0.01);
+
+    // (3,1,1)
+    NeutronBk2BkExpConvPVoigt func311;
+    func311.initialize();
+
+    func311.setParameter("Dtt1", 7476.910);
+    func311.setParameter("Dtt2", -1.540);
+    func311.setParameter("Zero", -9.227);
+    func311.setParameter("LatticeConstant", 5.431363); // Silicon
+
+    func311.setMillerIndex(3, 1, 1);
+    func311.calculateParameters(false);
+    double tofh3 = func311.centre();
+    TS_ASSERT_DELTA(tofh3, 12230.9648, 0.01);
+
+    // (2, 2, 2)
+    NeutronBk2BkExpConvPVoigt func222;
+    func222.initialize();
+
+    func222.setParameter("Dtt1", 7476.910);
+    func222.setParameter("Dtt2", -1.540);
+    func222.setParameter("Zero", -9.227);
+    func222.setParameter("LatticeConstant", 5.431363); // Silicon
+    func222.setMillerIndex(2, 2, 2);
+
+    func222.calculateParameters(false);
+    double tofh4 = func222.centre();
+    TS_ASSERT_DELTA(tofh4, 11710.0332, 0.01);
+    */
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Calculate peak positions: data is from Fullprof's sample: arg_si
+    */
+  void test_calculateVulcanProfile()
+  {
+    NeutronBk2BkExpConvPVoigt func;
+    func.initialize();
+
+    func.setParameter("Dtt1", 16370.650);
+    func.setParameter("Dtt2", 0.100);
+    func.setParameter("Zero", 0.000);
+    func.setParameter("LatticeConstant", 5.431363); // Silicon
+
+    func.setParameter("Alph0", 1.000000);
+    func.setParameter("Alph1", 0.000000);
+    func.setParameter("Beta0", 0.109036);
+    func.setParameter("Beta1", 0.009834);
+    func.setParameter("Sig0", sqrt(0.000));
+    func.setParameter("Sig1", sqrt(1119.230));
+    func.setParameter("Sig2", sqrt(91.127));
+    func.setParameter("Gam0", 0.000);
+    func.setParameter("Gam1", 2.604);
+    func.setParameter("Gam2", 0.000);
+
+    // Peak 220
+    func.setMillerIndex(2, 2, 0);
+    func.calculateParameters(false);
+
+    // Peak centre
+    double tofh1 = func.centre();
+    TS_ASSERT_DELTA(tofh1, 23421.7207, 0.01);
+
+    // Peak shape
+    func.setParameter("Height", 1.0);
+
+    double fwhm = func.fwhm();
+    TS_ASSERT_DELTA(fwhm, 47.049, 0.001);
+
+    cout << "Peak 220: TOF_h = " << tofh1 << ", FWHM = " << fwhm << ".\n";
+
+    vector<double> vecX;
+    double tof = tofh1 - 10*fwhm;
+    while (tof < tofh1 + 10*fwhm)
+    {
+      vecX.push_back(tof);
+      tof += fwhm*0.1;
+    }
+    vector<double> vecY(vecX.size(), 0.0);
+    func.function(vecY, vecX);
+    for (size_t i = 0; i < vecX.size(); ++i)
+      cout << vecX[i] << "\t\t" << vecY[i] << "\n";
+
+    return;
+  }
+
 
 };
 
