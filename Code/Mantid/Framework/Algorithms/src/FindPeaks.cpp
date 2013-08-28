@@ -996,8 +996,20 @@ namespace Algorithms
   void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min,
                           const int i_max, const int i_centre)
   {
+	int i_peakmin = i_min;
+	int i_peakmax = i_max;
+    const MantidVec &vecX = input->readX(spectrum);
+    const MantidVec &vecY = input->readY(spectrum);
 
-    // Estimate background:
+    g_log.information() << "Fit Peak @ " << vecX[i_centre] << "  of Spectrum " << spectrum << ". Fit peak In Range "
+                        << vecX[i_min] << ", " << vecX[i_max] << "  i_min = " << i_min << ", i_max = "
+                        << i_max << ", i_centre = " << i_centre << ".\n";
+
+    // Estimate background: output-> m_backgroundFunction
+    double in_bg0;
+    double in_bg1;
+    double in_bg2;
+    estimateBackground(vecX, vecY, i_min, i_max, in_bg0, in_bg1, in_bg2);
 
     IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
     estimate->setProperty("InputWorkspace", input);
@@ -1008,19 +1020,20 @@ namespace Algorithms
     //estimate->setProperty("SigmaConstant", 1.0);
     // The workspace index
     std::vector<double> fwvec;
-    const MantidVec &vecX = input->readX(spectrum);
     fwvec.push_back(vecX[i_min]);
     fwvec.push_back(vecX[i_max]);
     estimate->setProperty("FitWindow", fwvec);
     estimate->executeAsChildAlg();
     // Get back the result
     Mantid::API::ITableWorkspace_sptr peaklist = estimate->getProperty("OutputWorkspace");
-
-    int i_peakmin = peaklist->Int(0,1);
-    int i_peakmax = peaklist->Int(0,2);
-    double in_bg0 = peaklist->Double(0,3);
-    double in_bg1 = peaklist->Double(0,4);
-    double in_bg2 = peaklist->Double(0,5);
+    if (peaklist->rowCount() > 0)
+    {
+    	if(peaklist->Int(0,1) >= i_min)i_peakmin = peaklist->Int(0,1) - i_min;
+    	if(peaklist->Int(0,2) >= i_min)i_peakmax = peaklist->Int(0,2) - i_min;
+    	in_bg0 = peaklist->Double(0,3);
+    	in_bg1 = peaklist->Double(0,4);
+    	in_bg2 = peaklist->Double(0,5);
+    }
 
     if (!m_highBackground)
     {

@@ -241,7 +241,7 @@ namespace Algorithms
 				  peaks.push_back(cont_peak());
 				  peaks[peaks.size()-1].start = l+l0;
 			  }
-			  if (peaks.size() > 0)
+			  else if (peaks.size() > 0)
 			  {
 				  size_t ipeak = peaks.size()-1;
 				  if (mask[l] != mask[l-1] && mask[l] == 0)
