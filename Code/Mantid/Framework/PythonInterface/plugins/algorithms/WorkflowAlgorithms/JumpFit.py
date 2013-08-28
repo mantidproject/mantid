@@ -3,6 +3,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
+import os
 
 class JumpFit(PythonAlgorithm):
  
