@@ -1,8 +1,10 @@
+#include "MantidAPI/CatalogFactory.h"
+#include "MantidAPI/Progress.h"
 #include "MantidICat/ICat4/GSoapGenerated/ICat4ICATPortBindingProxy.h"
 #include "MantidICat/ICat4/ICat4Catalog.h"
-#include "MantidAPI/CatalogFactory.h"
 #include "MantidICat/Session.h"
-#include "MantidAPI/Progress.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/DateAndTime.h"
 
 namespace Mantid
 {
@@ -104,6 +106,109 @@ namespace Mantid
       {
         throw std::runtime_error("You are not currently logged into the system.");
       }
+    }
+
+    /**
+     * Creates a search query string based on inputs provided by the user.
+     * @param inputs :: reference to a class contains search inputs.
+     * @return a query string constructed from user input.
+     */
+    std::string ICat4Catalog::getSearchQuery(const CatalogSearchParam& inputs)
+    {
+      // This will hold strings for each table of the query. Each segment will be joined together (<->).
+      std::vector<std::string> querySegments;
+
+      // The investigation segment will be stored here as it makes up for several inputs.
+      // It will be converted to a string, joined and then added to the querySegments.
+      std::vector<std::string> investigationWhere;
+
+      // In ICat4.2 `Dataset` and `Sample` cannot be in the same query (due to restriction with join).
+      // As such, we will query for sample only when dataset inputs are not used.
+      bool queryDataset = false;
+
+      // Investigation Start and end date
+      if(inputs.getStartDate() != 0 && inputs.getEndDate() != 0)
+      {
+        // Convert the time_t variables to boost ptime as DateAndTime constructor takes ptime.
+        boost::posix_time::ptime startTimeStamp = boost::posix_time::from_time_t(inputs.getStartDate());
+        boost::posix_time::ptime endTimeStamp   = boost::posix_time::from_time_t(inputs.getEndDate());
+        Mantid::Kernel::DateAndTime sDate       = Mantid::Kernel::DateAndTime(startTimeStamp);
+        Mantid::Kernel::DateAndTime eDate       = Mantid::Kernel::DateAndTime(endTimeStamp);
+
+        // Format the timestamps in order to compare them.
+        std::string startDate = sDate.toFormattedString("%F %T");
+        std::string endDate   = eDate.toFormattedString("%F %T");
+
+        // Make it so...
+        investigationWhere.push_back("startDate >= '" + startDate + "' AND startDate <= '" + endDate + "' OR endDate >= '" + startDate + "' AND endDate <= '" + endDate + "'");
+      }
+
+      // Investigation name (title)
+      if(!inputs.getInvestigationName().empty())
+      {
+        investigationWhere.push_back("name LIKE '%" + inputs.getInvestigationName() + "%' ");
+      }
+
+      // Investigation abstract
+      if(!inputs.getInvestigationAbstract().empty())
+      {
+        investigationWhere.push_back("summary = '" + inputs.getInvestigationAbstract() + "' ");
+      }
+
+      // Iterate over query vector and append AND between inputs.
+      std::string investigationResult = Mantid::Kernel::Strings::join(investigationWhere.begin(), investigationWhere.end(), " AND ");
+
+      // Add the investigation result to the query if it exists.
+      if (!investigationResult.empty())
+      {
+        querySegments.push_back("DISTINCT Investigation[" + investigationResult + "]");
+      }
+
+      // Investigator's surname
+      if(!inputs.getInvestigatorSurName().empty())
+      {
+        querySegments.push_back("InvestigationUser <-> User[name LIKE '%" + inputs.getInvestigatorSurName() + "%']");
+      }
+
+      // Datafile name
+      if(!inputs.getDatafileName().empty())
+      {
+        querySegments.push_back("Dataset <-> Datafile[name = '" + inputs.getDatafileName() + "']");
+        queryDataset = true;
+      }
+
+      // Run start and end
+      if(inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)
+      {
+        // Convert the start and end runs to string.
+        std::string runStart = Mantid::Kernel::Strings::toString(inputs.getRunStart());
+        std::string runEnd   = Mantid::Kernel::Strings::toString(inputs.getRunEnd());
+        querySegments.push_back("DatafileParameter[type.name ='run_number' AND numericValue BETWEEN " + runStart + " AND " + runEnd + "]");
+        queryDataset = true;
+      }
+
+      // Instrument name
+      if(!inputs.getInstrument().empty())
+      {
+        querySegments.push_back("Instrument[name = '" + inputs.getInstrument() + "']");
+      }
+
+      // Keywords
+      if(!inputs.getKeywords().empty())
+      {
+        querySegments.push_back("Keyword[name IN ('" + inputs.getKeywords() + "')]");
+      }
+
+      // Sample name
+      if(!inputs.getSampleName().empty() && !queryDataset)
+      {
+        querySegments.push_back("Sample[name = '" + inputs.getSampleName() + "']");
+      }
+
+      // Now we build the query from the segments. For each segment, we append a join ("<->").
+      std::string query = Mantid::Kernel::Strings::join(querySegments.begin(), querySegments.end(), " <-> ");
+
+      return (query);
     }
 
     /**

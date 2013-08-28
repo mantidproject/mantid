@@ -74,6 +74,8 @@ namespace Mantid
         void addMyDataColumnHeader(Mantid::API::ITableWorkspace_sptr& outputws);
         // Saves "MyData" query result to output workspace.
         void saveInvestigations(std::vector<ICat4::xsd__anyType *>return_, API::ITableWorkspace_sptr& outputws);
+        // Creates a search query string based on inputs provided by the user.
+        std::string getSearchQuery(const CatalogSearchParam& inputs);
 
         /**
          * Template method to save data to table workspace
