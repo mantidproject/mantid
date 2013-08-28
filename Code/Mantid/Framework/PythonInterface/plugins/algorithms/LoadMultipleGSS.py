@@ -3,8 +3,9 @@
 
 *WIKI*"""
 
-from MantidFramework import *
-from mantidsimple import *
+from mantid.api import *
+from mantid.simpleapi import *
+from mantid.kernel import *
 import os
 
 class LoadMultipleGSS(PythonAlgorithm):
@@ -14,41 +15,43 @@ class LoadMultipleGSS(PythonAlgorithm):
     def name(self):
         return "LoadMultipleGSS"
 
-    def __load(self, directory, instr, run, loader, exts, wksp):
-        for ext in exts:
-            filename = "%s_%s%s" % (instr, str(run), ext)
+    def __load(self, directory, prefix):
+        for ext in self.__exts:
+            filename = "%s%s" % (prefix, ext)
             if len(directory) > 0:
                 filename = os.path.join(directory, filename)
                 if not os.path.exists(filename):
                     continue
             try:
                 self.log().information("Trying to load '%s'" % filename)
-                loader(filename, wksp)
+                self.__loader(Filename=filename, OutputWorkspace=prefix, UseBankIDasSpectrumNumber=True)
                 return
             except Exception, e:
                 pass
         raise RuntimeError("Failed to load run %s" % str(run))              
 
     def PyInit(self):
-        self.declareListProperty("RunNumbers",[0], Validator=ArrayBoundedValidator(Lower=0))
-        self.declareFileProperty("Directory", "", FileAction.OptionalDirectory)
+        self.declareProperty("FilePrefix","")
+        intArrayValidator = IntArrayBoundedValidator()
+        intArrayValidator.setLower(0)
+        self.declareProperty(IntArrayProperty("RunNumbers",[0], validator=intArrayValidator))
+        self.declareProperty(FileProperty("Directory", "", action=FileAction.OptionalDirectory))
 
     def PyExec(self):
         # generic stuff for running
-        #wksp = self.getPropertyValue("OutputWorkspace")
-        runs = self.getProperty("RunNumbers")
-        instr = mtd.getSettings().facility().instrument().shortName()
-        directory = self.getPropertyValue("Directory").strip()
+        prefix = self.getProperty("FilePrefix").value
+        runs = self.getProperty("RunNumbers").value
+        directory = self.getProperty("Directory").value.strip()
 
         # change here if you want something other than gsas files
-        exts = ['.txt', '.gsa']
-        loader = LoadGSS
+        self.__exts = ['.txt', '.gsa']
+        self.__loader = LoadGSS
 
         # load things and conjoin them
         first = True
         for run in runs:
-            run = str(run)
-            self.__load(directory, instr, run, loader, exts, run)
-	    ConvertUnits(InputWorkspace=run, OutputWorkspace=run, Target="dSpacing")
+            wksp = "%s_%d" % (prefix,run)
+            self.__load(directory, wksp)
+	    ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
 
-mtd.registerPyAlgorithm(LoadMultipleGSS())
+AlgorithmFactory.subscribe(LoadMultipleGSS)
