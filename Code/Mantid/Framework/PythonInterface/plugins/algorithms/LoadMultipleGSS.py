@@ -1,6 +1,6 @@
 """*WIKI* 
-
-
+This algorithm loads multiple gsas files from a single directory 
+into mantid.
 *WIKI*"""
 
 from mantid.api import *
