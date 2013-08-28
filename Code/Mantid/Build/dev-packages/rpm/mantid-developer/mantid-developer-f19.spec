@@ -14,6 +14,7 @@ Requires: boost-devel
 Requires: gperftools-devel
 Requires: gperftools-libs
 Requires: gcc-c++
+Requires: git-all
 Requires: gsl-devel
 Requires: hdf-devel
 Requires: hdf5-devel
@@ -39,7 +40,6 @@ Requires: texlive-latex
 Requires: dvipng
 Requires: qt-devel
 Requires: qt-assistant
-Requires: scl-utils
 
 BuildArch: noarch
 
