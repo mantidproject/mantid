@@ -1233,7 +1233,6 @@ bool MantidUI::checkTechnique(Mantid::API::MatrixWorkspace_const_sptr ws, const 
 
   //check if the instrument is and indirect instrument
   std::set<std::string>::const_iterator iter = techniques.begin();
-  bool calcQ(false);
   for(; iter != techniques.end(); ++iter)
   {
     //convert to lowercase
