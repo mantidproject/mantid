@@ -16,7 +16,7 @@ namespace MantidQt
     {
       m_uiForm.setupUi(this);
       connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
-      connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SLOT(loadClicked()));
+      connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SIGNAL(loadClicked()));
 
       //data selected changes
       connect(m_uiForm.rfFileInput, SIGNAL(filesFound()), this, SLOT(handleFileInput()));
