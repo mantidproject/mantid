@@ -47,6 +47,9 @@ namespace Algorithms
     virtual int version() const { return 1; };
     virtual const std::string category() const {return "Transforms";};
 
+  protected:
+    boost::shared_ptr<API::Progress> m_progress; 
+
   private:
     virtual void initDocs();
     void init();

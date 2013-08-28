@@ -171,6 +171,8 @@ namespace Algorithms
       checkInputsForNumericWorkspace(inputWS); 
     }
 
+    m_progress = boost::shared_ptr<API::Progress>(new API::Progress(this, 0.0, 1.0, inputWS->getNumberHistograms()+1)); 
+    
     // prepare the vector to hold the output
     std::vector<double> output_bins(num_bins, 0);
 
@@ -187,7 +189,7 @@ namespace Algorithms
     // create the output
     API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS, 1, 
                                                                                   output_bins.size()+1, output_bins.size());
-  
+    m_progress->report("Preparing the output"); 
     // populate Y data getting the values from the output_bins
     MantidVec & refY = outputWS->dataY(0);
     if (clockwise){
@@ -368,6 +370,7 @@ void RingProfile::processInstrumentRingProfile(const API::MatrixWorkspace_sptr i
                                                std::vector<double> & output_bins){
 
   for (int i= 0; i< (int) inputWS->getNumberHistograms(); i++){
+    m_progress->report("Computing ring bins positions for detectors"); 
     // for the detector based, the positions will be taken from the detector itself.
     try{
       Mantid::Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
@@ -455,7 +458,7 @@ void RingProfile::processNumericImageRingProfile(const API::MatrixWorkspace_sptr
 
   // consider that each spectrum is a row in the image 
   for (int i= 0; i< (int) inputWS->getNumberHistograms(); i++){
-    
+    m_progress->report("Computing ring bins positions for pixels"); 
     // get bin for the pixels inside this spectrum
     // for each column of the image
     getBinForPixel(inputWS, i, bin_n);
