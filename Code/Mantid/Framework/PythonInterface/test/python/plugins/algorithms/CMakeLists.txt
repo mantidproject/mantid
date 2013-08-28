@@ -12,6 +12,7 @@ set ( TEST_PY_FILES
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
+  LoadMultipleGSSTest.py
   MaskWorkspaceToCalFileTest.py
   MergeCalFilesTest.py
   RetrieveRunInfoTest.py
