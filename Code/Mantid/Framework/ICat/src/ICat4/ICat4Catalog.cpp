@@ -107,11 +107,11 @@ namespace Mantid
     }
 
     /**
-     * Searches for the investigation for the user.
+     * Searches for the relevant data based on user input.
      * @param inputs  :: reference to a class contains search inputs
      * @param ws_sptr :: shared pointer to search results workspace
      */
-    void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr)
+    void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws)
     {
     }
 
@@ -139,7 +139,7 @@ namespace Mantid
         // Verify data exists in the response.
         if(response.return_.empty())
         {
-          throw std::runtime_error("ICat My data search is complete. There are no results to display");
+          throw std::runtime_error("ICat My data search is complete. There are no results to display.");
         }
         else
         {
@@ -244,9 +244,9 @@ namespace Mantid
         for(unsigned i = 0; i < response.return_.size(); ++i)
         {
           // Cast from xsd__anyType to subclass (xsd__string).
-          xsd__string * inst = dynamic_cast<xsd__string*>(response.return_[i]);
+          xsd__string * instrument = dynamic_cast<xsd__string*>(response.return_[i]);
           // Then add it to the instruments vector.
-          instruments.push_back(inst->__item);
+          instruments.push_back(instrument->__item);
         }
       }
       else
@@ -280,8 +280,8 @@ namespace Mantid
         for(unsigned i = 0; i < response.return_.size(); ++i)
         {
           // Cast from xsd__anyType to subclass (xsd__string).
-          xsd__string * inst = dynamic_cast<xsd__string*>(response.return_[i]);
-          invstTypes.push_back(inst->__item);
+          xsd__string * investigation = dynamic_cast<xsd__string*>(response.return_[i]);
+          invstTypes.push_back(investigation->__item);
         }
       }
       else
