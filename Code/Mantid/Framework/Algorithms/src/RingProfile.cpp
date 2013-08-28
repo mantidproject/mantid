@@ -13,18 +13,26 @@ The image below shows a visual interpretation for the inputs of the algorithm
 The algorithm goes through each pixel and find its distance from the center. If it relies inside the defined ring, it checks the angle 
 between the pixel position and the center and uses this information to define the bin where to put the count for that pixel. 
 
-
 The RingProfile is also defined for Workspace2D which has the positions based on the detectors, as you can see in the picture below.
 
 [[File:RingProfileInstrument.png | 800px ]]
-
 
 In this case, the inputs of the algorithm is like the image below
 
 [[File:Ringprofileinstrument.png]]
 
-
 The algorithm does to each spectrum, get the associated detector from which it get the positions. From the positions it work out if it belongs or not to the ring and in which bin it must be placed. It finally accumulate all the spectrum values inside the target bin.
+
+It is possible to setup the ''StartAngle'' from where to starting the Ring as well as the Sense, if in clockwise direction or anti-clockwise direction. But, 
+the resulting workspace will always place the bins in a relative angle position from the start. Which means that for anti-clockwise sense, the real 3D angle 
+is: 
+
+RealAngle = StartAngle + Angle
+
+While for clockwise sense, the real 3D angle is: 
+
+RealAngle = StartAngle - Angle
+
 *WIKI*/
 
 #include "MantidAlgorithms/RingProfile.h"
@@ -205,13 +213,10 @@ namespace Algorithms
     MantidVec & refX = outputWS->dataX(0);
     
     std::vector<double> angles(output_bins.size()+1); 
-    if (clockwise){
-      for (int j=0; j<(int)angles.size(); j++)
-        refX[j] = start_angle - bin_size * j; 
-    }else{
-      for (int j=0; j<(int)angles.size(); j++)
-        refX[j] = start_angle + bin_size * j;     
-    }
+    // we always keep the angle in relative from where it starts and growing in its sense.
+    for (int j=0; j<(int)angles.size(); j++)
+      refX[j] = bin_size * j;     
+    
     
     // configure the axis
     

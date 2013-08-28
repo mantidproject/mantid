@@ -210,7 +210,7 @@ public:
 
     // check angles: 
     for(int i = 0; i<5; i++)
-      TS_ASSERT_DELTA(outputWS->readX(0)[i], -45 + 90 * i, 0.1);
+      TS_ASSERT_DELTA(outputWS->readX(0)[i],  90 * i, 0.1);
     
     // check that Y = [1, 4, 3, 2]
     TS_ASSERT_DELTA(outputWS->readY(0)[0], 1, 0.1);
@@ -242,7 +242,7 @@ public:
 
     // check angles: 
     for(int i = 0; i<5; i++)
-      TS_ASSERT_DELTA(outputWS->readX(0)[i], 45 + 90 * i, 0.1);
+      TS_ASSERT_DELTA(outputWS->readX(0)[i],90 * i, 0.1);
     
     // check that Y = [4, 3, 2, 1]
     for (int i = 0; i< 4; i++)
