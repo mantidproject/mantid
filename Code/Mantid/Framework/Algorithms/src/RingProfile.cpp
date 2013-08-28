@@ -222,7 +222,8 @@ namespace Algorithms
     
     // the horizontal axis is configured as degrees and copy the values of X
     API::Axis * const horizontal = new API::NumericAxis(refX.size()); 
-    horizontal->unit() = boost::shared_ptr<Kernel::Unit>(new Kernel::Units::Degrees);
+    horizontal->unit() = boost::shared_ptr<Kernel::Unit>(new Kernel::Units::Phi);
+    horizontal->title() = "Ring Angle";
     for (size_t j=0; j< refX.size() ; j++)
       horizontal->setValue(j, refX[j]);  
     outputWS->replaceAxis(0, horizontal); 
