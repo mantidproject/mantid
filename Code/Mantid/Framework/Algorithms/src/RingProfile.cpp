@@ -247,22 +247,61 @@ namespace Algorithms
 */
 void RingProfile::checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr inputWS){
   try{
-    auto det = inputWS->readX(inputWS->getNumberHistograms()/2); 
-    auto instrument = inputWS->getInstrument(); 
-    Geometry::BoundingBox box; 
-    instrument->getBoundingBox(box); 
+    // finding the limits of the instrument
+    double first_x, first_y, first_z;
+    size_t i = 0; 
+    while(true){
+      i++; 
+      if (i >= inputWS->getNumberHistograms())
+        throw std::invalid_argument("Did not find any non monitor detector position"); 
+
+      auto det = inputWS->getDetector(i);
+      if (det->isMonitor())
+        continue;
+      first_x = det->getPos().X();
+      first_y = det->getPos().Y();
+      first_z = det->getPos().Z(); 
+      break;
+    }
+
+    double last_x, last_y, last_z;
+    i = inputWS->getNumberHistograms() -1; 
+    while (true){
+      i--; 
+      if (i <= 0 )
+        throw std::invalid_argument("There is no region defined for the instrument of this workspace");
+
+      auto det = inputWS->getDetector(i); 
+      if (det->isMonitor())
+        continue; 
+      last_x = det->getPos().X();
+      last_y = det->getPos().Y();
+      last_z = det->getPos().Z();
+      break;
+    }
+
+    double xMax, yMax, zMax; 
+    double xMin, yMin, zMin; 
+    xMax = std::max(first_x, last_x); 
+    yMax = std::max(first_y, last_y); 
+    zMax = std::max(first_z, last_z); 
+    xMin = std::min(first_x, last_x); 
+    yMin = std::min(first_y, last_y); 
+    zMin = std::min(first_z, last_z); 
+    
+
     std::stringstream limits_s; 
     limits_s << "(["
-             << box.xMin() << ", " << box.xMax() << "], ["
-             << box.yMin() << ", " << box.yMax() << "], ["
-             << box.zMin() << ", " << box.zMax() << "])"; 
-    g_log.notice() << "The limits for the instrument is : " << limits_s.str() << std::endl;  
+             << xMin << ", " << xMax << "], ["
+             << yMin << ", " << yMax << "], ["
+             << zMin << ", " << zMax << "])"; 
+    g_log.debug() << "The limits for the instrument is : " << limits_s.str() << std::endl;  
     int xOutside=0, yOutside=0, zOutside=0;
-    if (centre_x < box.xMin() || centre_x > box.xMax() )
+    if (centre_x < xMin || centre_x > xMax )
       xOutside = 1; 
-    if (centre_y < box.yMin() || centre_y > box.yMax() )
+    if (centre_y < yMin || centre_y > yMax )
       yOutside = 1; 
-    if (centre_z < box.zMin() || centre_z > box.zMax() )
+    if (centre_z < zMin || centre_z > zMax )
       zOutside = 1;
     int summed = xOutside + yOutside + zOutside;     
     // if at least 2 are outside, the centre is considered outside the box. 
@@ -274,11 +313,11 @@ void RingProfile::checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr
     }
     
     xOutside = yOutside = zOutside = 0; 
-    if (centre_x - min_radius > box.xMax() || centre_x + min_radius < box.xMin())
+    if (centre_x - min_radius > xMax || centre_x + min_radius < xMin)
       xOutside = 1; 
-    if (centre_y - min_radius > box.yMax() || centre_y + min_radius < box.yMin())
+    if (centre_y - min_radius > yMax || centre_y + min_radius < yMin)
       yOutside = 1; 
-    if (centre_z - min_radius > box.zMax() || centre_z + min_radius < box.zMin())
+    if (centre_z - min_radius > zMax || centre_z + min_radius < zMin)
       zOutside = 1;
 
     if (summed >= 2){
