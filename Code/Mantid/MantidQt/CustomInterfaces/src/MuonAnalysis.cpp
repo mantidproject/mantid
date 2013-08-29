@@ -1734,6 +1734,8 @@ void MuonAnalysis::updateFront()
       m_uiForm.frontAlphaNumber->setVisible(true);
 
       m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(m_pairToRow[index-numG],3)->text());
+
+      m_uiForm.frontAlphaNumber->setCursorPosition(0);
     }
     else
     {
