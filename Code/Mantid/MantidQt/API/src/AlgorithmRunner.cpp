@@ -26,6 +26,7 @@ namespace API
    */
   AlgorithmRunner::~AlgorithmRunner()
   {
+    delete m_asyncResult;
   }
   
 
