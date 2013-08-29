@@ -63,6 +63,9 @@ namespace Mantid
       /// Virtual destructor for a base class
       virtual ~MDResolutionConvolution() {}
 
+      /// Function category
+      virtual const std::string category() const { return "Quantification"; }
+
       /**
        * Called once before any fit/simulation is started to allow caching of
        * frequently used parameters
