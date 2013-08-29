@@ -69,6 +69,7 @@ void RebinningCutterObjectPanel::constructGeometry(QGridLayout* gLayout)
     //Empty geometry widget added to layout.
     if(m_geometryWidget != NULL)
     {
+      m_geomBinDisplayMode = m_geometryWidget->getBinDisplayMode();
       this->layout()->removeWidget(m_geometryWidget);
       delete m_geometryWidget;
     }
