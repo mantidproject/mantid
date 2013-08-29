@@ -45,13 +45,13 @@ namespace Mantid
         /// Log the user out of the catalog system.
         virtual void logout();
         /// Search the catalog for data.
-        virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& ws_sptr);
+        virtual void search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws);
         /// Show the logged in user's investigations search results.
-        virtual void myData(Mantid::API::ITableWorkspace_sptr& mydataws_sptr);
+        virtual void myData(Mantid::API::ITableWorkspace_sptr& outputws);
         /// Get datasets.
-        virtual void getDataSets(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& datasetsws_sptr);
+        virtual void getDataSets(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& outputws);
         /// Get datafiles
-        virtual void getDataFiles(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& datafilesws_sptr);
+        virtual void getDataFiles(const long long&investigationId,Mantid::API::ITableWorkspace_sptr& outputws);
         /// Get instruments list
         virtual void listInstruments(std::vector<std::string>& instruments);
         /// Get investigationtypes list
@@ -70,12 +70,15 @@ namespace Mantid
         void throwErrorMessage(ICat4::ICATPortBindingProxy& icat);
         // Defines the SSL authentication scheme.
         void setSSLContext(ICat4::ICATPortBindingProxy& icat);
-        // Adds "MyData" column headers to the output workspace.
-        void addMyDataColumnHeader(Mantid::API::ITableWorkspace_sptr& outputws);
         // Saves "MyData" query result to output workspace.
         void saveInvestigations(std::vector<ICat4::xsd__anyType *>return_, API::ITableWorkspace_sptr& outputws);
         // Creates a search query string based on inputs provided by the user.
         std::string getSearchQuery(const CatalogSearchParam& inputs);
+        // Saves "DataFiles" result to output workspace.
+        void saveDataFiles(std::vector<ICat4::xsd__anyType *>return_, API::ITableWorkspace_sptr& outputws);
+        // Helper method that formats a given timestamp.
+        std::string formatDateTime(time_t timestamp);
+
 
         /**
          * Template method to save data to table workspace

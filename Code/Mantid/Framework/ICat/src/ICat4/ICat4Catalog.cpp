@@ -11,6 +11,7 @@ namespace Mantid
   namespace ICat
   {
     using namespace ICat4;
+    using namespace Kernel;
 
     DECLARE_CATALOG(ICat4Catalog)
 
@@ -129,15 +130,9 @@ namespace Mantid
       // Investigation Start and end date
       if(inputs.getStartDate() != 0 && inputs.getEndDate() != 0)
       {
-        // Convert the time_t variables to boost ptime as DateAndTime constructor takes ptime.
-        boost::posix_time::ptime startTimeStamp = boost::posix_time::from_time_t(inputs.getStartDate());
-        boost::posix_time::ptime endTimeStamp   = boost::posix_time::from_time_t(inputs.getEndDate());
-        Mantid::Kernel::DateAndTime sDate       = Mantid::Kernel::DateAndTime(startTimeStamp);
-        Mantid::Kernel::DateAndTime eDate       = Mantid::Kernel::DateAndTime(endTimeStamp);
-
         // Format the timestamps in order to compare them.
-        std::string startDate = sDate.toFormattedString("%F %T");
-        std::string endDate   = eDate.toFormattedString("%F %T");
+        std::string startDate = formatDateTime(inputs.getStartDate());
+        std::string endDate   = formatDateTime(inputs.getEndDate());
 
         // Make it so...
         investigationWhere.push_back("startDate >= '" + startDate + "' AND startDate <= '" + endDate + "' OR endDate >= '" + startDate + "' AND endDate <= '" + endDate + "'");
@@ -156,12 +151,18 @@ namespace Mantid
       }
 
       // Iterate over query vector and append AND between inputs.
-      std::string investigationResult = Mantid::Kernel::Strings::join(investigationWhere.begin(), investigationWhere.end(), " AND ");
+      std::string investigationResult = Strings::join(investigationWhere.begin(), investigationWhere.end(), " AND ");
 
       // Add the investigation result to the query if it exists.
       if (!investigationResult.empty())
       {
         querySegments.push_back("DISTINCT Investigation[" + investigationResult + "]");
+      }
+
+      // Investigation type
+      if(!inputs.getInvestigationType().empty())
+      {
+        querySegments.push_back("InvestigationUserType[name IN ('" + inputs.getInvestigationType() + "')]");
       }
 
       // Investigator's surname
@@ -181,8 +182,8 @@ namespace Mantid
       if(inputs.getRunStart() > 0 && inputs.getRunEnd() > 0)
       {
         // Convert the start and end runs to string.
-        std::string runStart = Mantid::Kernel::Strings::toString(inputs.getRunStart());
-        std::string runEnd   = Mantid::Kernel::Strings::toString(inputs.getRunEnd());
+        std::string runStart = Strings::toString(inputs.getRunStart());
+        std::string runEnd   = Strings::toString(inputs.getRunEnd());
         querySegments.push_back("DatafileParameter[type.name ='run_number' AND numericValue BETWEEN " + runStart + " AND " + runEnd + "]");
         queryDataset = true;
       }
@@ -206,7 +207,7 @@ namespace Mantid
       }
 
       // Now we build the query from the segments. For each segment, we append a join ("<->").
-      std::string query = Mantid::Kernel::Strings::join(querySegments.begin(), querySegments.end(), " <-> ");
+      std::string query = Strings::join(querySegments.begin(), querySegments.end(), " <-> ");
 
       return (query);
     }
@@ -241,16 +242,7 @@ namespace Mantid
 
       if (result == 0)
       {
-        // Verify data exists in the response.
-        if(response.return_.empty())
-        {
-          throw std::runtime_error("ICat My data search is complete. There are no results to display.");
-        }
-        else
-        {
-          // Try to save query result data to workspace.
-          saveInvestigations(response.return_, outputws);
-        }
+        saveInvestigations(response.return_, outputws);
       }
       else
       {
@@ -266,7 +258,11 @@ namespace Mantid
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
       // Add rows headers to the output workspace.
-      addMyDataColumnHeader(outputws);
+      outputws->addColumn("str","InvestigationId");
+      outputws->addColumn("str","Proposal");
+      outputws->addColumn("str","Title");
+      outputws->addColumn("str","Instrument");
+      outputws->addColumn("str","Run Range");
 
       // Add data to each row in the output workspace.
       std::vector<xsd__anyType*>::const_iterator iter;
@@ -293,20 +289,6 @@ namespace Mantid
     }
 
     /**
-     * Adds relevant investigation headers from my data to the output workspace.
-     * @param outputws :: shared pointer to table workspace which stores the investigations search result.
-     */
-    void ICat4Catalog::addMyDataColumnHeader(Mantid::API::ITableWorkspace_sptr& outputws)
-    {
-      // Add rows to the output workspace...
-      outputws->addColumn("str","InvestigationId");
-      outputws->addColumn("str","Proposal");
-      outputws->addColumn("str","Title");
-      outputws->addColumn("str","Instrument");
-      outputws->addColumn("str","Run Range");
-    }
-
-    /**
      * Returns the datasets associated to the given investigation id.
      * @param investigationId :: unique identifier of the investigation
      * @param datasetsws_sptr :: shared pointer to datasets
@@ -320,8 +302,76 @@ namespace Mantid
      * @param investigationId  :: unique identifier of the investigation
      * @param datafilesws_sptr :: shared pointer to datasets
      */
-    void ICat4Catalog::getDataFiles(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& datafilesws_sptr)
+    void ICat4Catalog::getDataFiles(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
+      ICATPortBindingProxy icat;
+
+      ns1__search request;
+      ns1__searchResponse response;
+
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+
+      std::ostringstream temp;
+      temp << investigationId;
+      std::string name = temp.str();
+
+      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + name + "']";
+      request.query     = &query;
+
+      // If the investigation name is not valid.
+      if(name == "0" || name.empty())
+      {
+        throw std::runtime_error("Invalid investigation ID supplied.");
+      }
+
+      int result = icat.search(&request, &response);
+
+      if (result == 0)
+      {
+        saveDataFiles(response.return_, outputws);
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
+    }
+
+    /**
+     * Saves result from "getDataFiles" to workspace.
+     * @param investigationId :: unique identifier of the investigation
+     * @param datasetsws_sptr :: shared pointer to datasets
+     */
+    void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
+    {
+      // Add rows headers to the output workspace.
+      outputws->addColumn("str","Name");
+      outputws->addColumn("str","Location");
+      outputws->addColumn("long64","Id");
+      outputws->addColumn("str","Create Time");
+
+      // Add data to each row in the output workspace.
+      std::vector<xsd__anyType*>::const_iterator iter;
+      for(iter = response.begin(); iter != response.end(); ++iter)
+      {
+        ns1__datafile * datafile = dynamic_cast<ns1__datafile*>(*iter);
+        try
+        {
+          API::TableRow table = outputws->appendRow();
+          // Now add the relevant investigation data to the table.
+          savetoTableWorkspace(datafile->name, table);
+          savetoTableWorkspace(datafile->location, table);
+          savetoTableWorkspace(datafile->id, table);
+
+          // Make human readable createTime.
+          std::string createDate = formatDateTime(*(datafile->createTime));
+          savetoTableWorkspace(&createDate, table);
+        }
+        catch(std::runtime_error&)
+        {
+          throw std::runtime_error("An error occurred when saving file data to workspace.");
+        }
+      }
     }
 
     /**
@@ -472,6 +522,17 @@ namespace Mantid
       }
 
       throw std::runtime_error(exception);
+    }
+
+    /**
+     * Formats a given timestamp to human readable datetime.
+     * @param timestamp :: Unix timestamp.
+     * @return string   :: Formatted Unix timestamp in the format "%Y-%b-%d %H:%M:%S"
+     */
+    std::string ICat4Catalog::formatDateTime(time_t timestamp)
+    {
+      auto dateTime = DateAndTime(boost::posix_time::from_time_t(timestamp));
+      return (dateTime.toFormattedString());
     }
 
   }
