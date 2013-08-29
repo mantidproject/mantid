@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<detector-grouping instrument="EMU" valid-on="2010-01-02 00:00:00" description="emu longitudinal (96 detectors)"> 
+<detector-grouping instrument="EMU" idf-date="2010-01-02 00:00:00" description="emu longitudinal (96 detectors)"> 
 
 <group name="fwd"> <ids val="1-48"/> </group> 
 <group name="bwd"> <ids val="49-96"/> </group> 
