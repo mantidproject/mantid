@@ -405,7 +405,7 @@ void RingProfile::checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr
  * The main method to calculate the ring profile for workspaces based on instruments. 
  * 
  * It will iterate over all the spectrum inside the workspace. 
- * For each spectrum, it will use the ::getBinForPixel method to identify 
+ * For each spectrum, it will use the RingProfile::getBinForPixel method to identify 
  * where, in the output_bins, the sum of all the spectrum values should be placed in. 
  * 
  * @param inputWS: pointer to the input workspace
@@ -490,7 +490,7 @@ int RingProfile::getBinForPixel(Mantid::Geometry::IDetector_const_sptr det ){
  * The main method to calculate the ring profile for 2d image based workspace. 
  * 
  * It will iterate over all the spectrum inside the workspace. 
- * For each spectrum, it will use the ::getBinForPixel method to identify 
+ * For each spectrum, it will use the RingProfile::getBinForPixel method to identify 
  * where, in the output_bins, the elements of the spectrum should be placed in. 
  * 
  * @param inputWS: pointer to the input workspace
@@ -543,7 +543,7 @@ void RingProfile::processNumericImageRingProfile(const API::MatrixWorkspace_sptr
  * position. 
  * @param ws: pointer to the workspace
  * @param spectrum_index: index of the spectrum
- * @param vector<int> bin positions (for each column inside the spectrum, the correspondent bin_pos)
+ * @param bins_pos: bin positions (for each column inside the spectrum, the correspondent bin_pos)
  */
 void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws, 
                                  int spectrum_index, std::vector<int> & bins_pos ){
