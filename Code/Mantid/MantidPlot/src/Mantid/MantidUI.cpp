@@ -1116,9 +1116,9 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
         double wavelengthFactor(0.0), wavelengthPower(0.0);
         energyUnit.quickConversion("Wavelength", wavelengthFactor,wavelengthPower);
 
-        //get efixed value
+        // Get efixed value
         double efixed(0.0), usignTheta(0.0);
-
+        bool noEfixed(true);
         if ( ! det->isMonitor() )
         {
           usignTheta = ws->detectorTwoTheta(det)/2.0;
@@ -1132,22 +1132,26 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
           if (! efixedVec.empty() ) 
           {
             efixed = efixedVec.at(0);
+            noEfixed = false;
           }
+        }
+
+        if(!noEfixed)
+        {
+          const double stheta = std::sin(usignTheta);
+
+          //Calculate the wavelength to allow it to be used to convert to elasticQ. 
+          double wavelength = wavelengthFactor*std::pow(efixed, wavelengthPower);
+          // The MomentumTransfer value.
+          double q = 4.0*M_PI*stheta/wavelength;
+
+          colValues << QVariant(q);
         }
         else
         {
-          usignTheta = 0.0;
-          efixed = DBL_MIN;
+          colValues << QVariant("No Efixed");
         }
 
-        const double stheta = std::sin(usignTheta);
-
-        //Calculate the wavelength to allow it to be used to convert to elasticQ. 
-        double wavelength = wavelengthFactor*std::pow(efixed, wavelengthPower);
-        // The MomentumTransfer value.
-        double q = 4.0*M_PI*stheta/wavelength;
-
-        colValues << QVariant(q); 
       }
 
       colValues << QVariant(phi) // rtp
