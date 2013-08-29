@@ -3735,7 +3735,7 @@ void Graph::contextMenuEvent(QContextMenuEvent *e)
   QPoint pos = d_plot->canvas()->mapFrom(d_plot, e->pos());
   int dist, point;
   const int curve = d_plot->closestCurve(pos.x(), pos.y(), dist, point);
-  const QwtPlotCurve *c = dynamic_cast<QwtPlotCurve *>(d_plot->curve(curve));
+  const DataCurve *c = dynamic_cast<DataCurve *>(d_plot->curve(curve));
 
   if (c && dist < 10)//10 pixels tolerance
     emit showCurveContextMenu(curve);
