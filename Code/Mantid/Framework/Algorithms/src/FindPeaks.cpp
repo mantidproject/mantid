@@ -996,8 +996,8 @@ namespace Algorithms
   void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min,
                           const int i_max, const int i_centre)
   {
-	int i_peakmin = i_min;
-	int i_peakmax = i_max;
+	int i_peakmin = 0;
+	int i_peakmax = i_max - i_min + 1;
     const MantidVec &vecX = input->readX(spectrum);
     const MantidVec &vecY = input->readY(spectrum);
 
