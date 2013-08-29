@@ -53,7 +53,7 @@ namespace API
     Q_OBJECT
 
   public:
-    AlgorithmRunner();
+    explicit AlgorithmRunner(QObject * parent = 0);
     virtual ~AlgorithmRunner();
     
     void cancelRunningAlgorithm();

@@ -13,7 +13,7 @@ namespace API
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  AlgorithmRunner::AlgorithmRunner() :
+  AlgorithmRunner::AlgorithmRunner(QObject * parent) : QObject(parent),
     m_finishedObserver(*this, &AlgorithmRunner::handleAlgorithmFinishedNotification),
     m_progressObserver(*this, &AlgorithmRunner::handleAlgorithmProgressNotification),
     m_errorObserver(*this, &AlgorithmRunner::handleAlgorithmErrorNotification),
