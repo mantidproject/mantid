@@ -2,6 +2,9 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/System.h"
 #include <stdexcept>
+#include <iomanip>
+#include <ios>
+#include <iostream>
 #include <cfloat>
 
 namespace Mantid
@@ -690,6 +693,44 @@ namespace Geometry
     calculateB();
     return;
   }  
+
+  std::ostream& operator<<(std::ostream &out, const UnitCell& unitCell)
+  {
+    // always show the lattice constants
+    out << "Lattice Parameters:"
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.a()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.b()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.c()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.alpha()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.beta()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.gamma();
+
+    // determine whether there is a non-zero uncertainty
+    bool showUncertainties(false);
+    if (unitCell.errora() > 0)
+      showUncertainties = true;
+    if (!showUncertainties && (unitCell.errorb() > 0))
+      showUncertainties = true;
+    if (!showUncertainties && (unitCell.errorc() > 0))
+      showUncertainties = true;
+    if (!showUncertainties && (unitCell.erroralpha() > 0))
+      showUncertainties = true;
+    if (!showUncertainties && (unitCell.errorbeta() > 0))
+      showUncertainties = true;
+    if (!showUncertainties && (unitCell.errorgamma() > 0))
+      showUncertainties = true;
+
+    if (showUncertainties)
+      out << "\nParameter Errors  :"
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errora()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorb()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorc()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.erroralpha()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorbeta()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorgamma();
+
+    return out;
+  }
 
 
 } // namespace Mantid
