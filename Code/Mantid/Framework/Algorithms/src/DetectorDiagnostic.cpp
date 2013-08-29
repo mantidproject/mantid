@@ -125,6 +125,8 @@ namespace Mantid
       this->setPropertyGroup("LowOutlier", medianDetTestGrp);
       this->declareProperty("HighOutlier", 100., "Upper bound defining outliers as fraction of median value");
       this->setPropertyGroup("HighOutlier", medianDetTestGrp);
+      this->declareProperty("CorrectForSolidAngle", false, "Flag to correct for solid angle efficiency. False by default.");
+      this->setPropertyGroup("CorrectForSolidAngle", medianDetTestGrp);
       this->declareProperty("ExcludeZeroesFromMedian", false, "If false (default) zeroes will be included in "
           "the median calculation, otherwise they will not be included but they will be left unmasked");
       this->setPropertyGroup("ExcludeZeroesFromMedian", medianDetTestGrp);
@@ -163,6 +165,9 @@ namespace Mantid
           "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
           "difference with respect to the median value must also exceed this number of error bars");
       this->setPropertyGroup("SampleBkgSignificanceTest", backgroundCheck);
+      this->declareProperty("SampleCorrectForSolidAngle", false,
+          "Flag to correct for solid angle efficiency for background check MedianDetectorTest. False by default.");
+      this->setPropertyGroup("SampleCorrectForSolidAngle",backgroundCheck);
 
       string psdBleedMaskGrp("Create PSD Bleed Mask");
       this->declareProperty(new WorkspaceProperty<>("SampleWorkspace", "",
@@ -292,6 +297,7 @@ namespace Mantid
         double significanceTest = this->getProperty("SampleBkgSignificanceTest");
         double lowThreshold = this->getProperty("SampleBkgLowAcceptanceFactor");
         double highThreshold = this->getProperty("SampleBkgHighAcceptanceFactor");
+        bool correctSA=this->getProperty("SampleCorrectForSolidAngle");
 
         // run the ChildAlgorithm
         IAlgorithm_sptr alg = this->createChildAlgorithm("MedianDetectorTest",
@@ -306,6 +312,7 @@ namespace Mantid
         alg->setProperty("LowOutlier", 0.0);
         alg->setProperty("HighOutlier", 1.0e100);
         alg->setProperty("ExcludeZeroesFromMedian", true);
+        alg->setProperty("CorrectForSolidAngle",correctSA);
         alg->executeAsChildAlg();
         MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
         applyMask(inputWS, localMaskWS);
@@ -405,6 +412,7 @@ namespace Mantid
       double lowOutlier = this->getProperty("LowOutlier");
       double highOutlier = this->getProperty("HighOutlier");
       bool excludeZeroes = this->getProperty("ExcludeZeroesFromMedian");
+      bool correctforSA = this->getProperty("CorrectForSolidAngle");
 
       // MedianDetectorTest
       // apply mask to what we are going to input
@@ -426,6 +434,7 @@ namespace Mantid
       mdt->setProperty("LowOutlier", lowOutlier);
       mdt->setProperty("HighOutlier", highOutlier);
       mdt->setProperty("ExcludeZeroesFromMedian", excludeZeroes);
+      mdt->setProperty("CorrectForSolidAngle",correctforSA);
       mdt->executeAsChildAlg();
       localMask = mdt->getProperty("OutputWorkspace");
       localFails = mdt->getProperty("NumberOfFailures");
