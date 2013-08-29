@@ -274,7 +274,7 @@ void RingProfile::checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr
     i = inputWS->getNumberHistograms() -1; 
     while (true){
       i--; 
-      if (i <= 0 )
+      if (i == 0 )
         throw std::invalid_argument("There is no region defined for the instrument of this workspace");
 
       auto det = inputWS->getDetector(i); 
@@ -325,6 +325,8 @@ void RingProfile::checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr
       yOutside = 1; 
     if (centre_z - min_radius > zMax || centre_z + min_radius < zMin)
       zOutside = 1;
+    
+    summed = xOutside + yOutside + zOutside;
 
     if (summed >= 2){
       std::stringstream s; 
@@ -561,13 +563,12 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws,
 
   // the reference to X bins (the limits for each pixel in the horizontal direction)
   auto xvec = ws->dataX(spectrum_index);
+
   double xpos; 
   double diffx;
   double distance;
   double angle; 
-  // g_log.debug() << "minR=" << min_radius << ", maxR=" << max_radius << ", start_angle = " << start_angle
-  //               << ", num_bins" << num_bins << std::endl; 
-  
+
   // for each pixel inside this row
   for (size_t i = 0; i< xvec.size()-1; i++){
 
@@ -575,9 +576,6 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws,
     diffx = xpos - centre_x; 
     // calculate the distance => norm of pixel position - centre
     distance = sqrt(pow(diffx, 2.0) + diffy_quad);
-    
-    //    g_log.debug() << "Distance found for v[" << i << "] = " << distance << "|("<< xpos << ", " 
-    //               <<ypos << ")|" << std::endl; 
     
     // check if the distance is inside the ring
     if (distance < min_radius || distance > max_radius || distance == 0){
