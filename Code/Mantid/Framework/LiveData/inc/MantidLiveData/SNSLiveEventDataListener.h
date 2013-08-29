@@ -7,7 +7,6 @@
 #include "MantidLiveData/ADARA/ADARAParser.h"
 #include "MantidAPI/ILiveListener.h"
 #include "MantidDataObjects/EventWorkspace.h"
-//#include "MantidKernel/RandomNumberGenerator.h"
 #include "MantidKernel/MultiThreaded.h"
 
 #include <Poco/Timer.h>
