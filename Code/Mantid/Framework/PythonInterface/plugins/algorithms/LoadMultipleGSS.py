@@ -28,7 +28,7 @@ class LoadMultipleGSS(PythonAlgorithm):
                 return
             except Exception, e:
                 pass
-        raise RuntimeError("Failed to load run %s" % str(run))              
+        raise RuntimeError("Failed to load run %s" % prefix)              
 
     def PyInit(self):
         self.declareProperty("FilePrefix","")
