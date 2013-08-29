@@ -80,10 +80,10 @@ namespace API
     Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
     /// For the asynchronous call in dynamic rebinning. Holds the result of asyncExecute() algorithm call
-    Poco::ActiveResult<bool> * m_asyncRebinResult;
+    Poco::ActiveResult<bool> * m_asyncResult;
 
     /// Reference to the algorithm executing asynchronously.
-    Mantid::API::IAlgorithm_sptr m_asyncRebinAlg;
+    Mantid::API::IAlgorithm_sptr m_asyncAlg;
 
   };
 

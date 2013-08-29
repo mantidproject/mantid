@@ -17,7 +17,7 @@ namespace API
     m_finishedObserver(*this, &AlgorithmRunner::handleAlgorithmFinishedNotification),
     m_progressObserver(*this, &AlgorithmRunner::handleAlgorithmProgressNotification),
     m_errorObserver(*this, &AlgorithmRunner::handleAlgorithmErrorNotification),
-    m_asyncRebinResult(NULL)
+    m_asyncResult(NULL)
   {
   }
     
@@ -37,17 +37,17 @@ namespace API
   void AlgorithmRunner::cancelRunningAlgorithm()
   {
     // Cancel any currently running rebinning algorithms
-    if (m_asyncRebinAlg)
+    if (m_asyncAlg)
     {
-      if (m_asyncRebinAlg->isRunning())
-        m_asyncRebinAlg->cancel();
-      if (m_asyncRebinResult)
+      if (m_asyncAlg->isRunning())
+        m_asyncAlg->cancel();
+      if (m_asyncResult)
       {
-        m_asyncRebinResult->tryWait(1000);
-        delete m_asyncRebinResult;
-        m_asyncRebinResult = NULL;
+        m_asyncResult->tryWait(1000);
+        delete m_asyncResult;
+        m_asyncResult = NULL;
       }
-      m_asyncRebinAlg.reset();
+      m_asyncAlg.reset();
     }
   }
 
@@ -64,8 +64,8 @@ namespace API
       throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given an uninitialized Algorithm");
 
     // Start asynchronous execution
-    m_asyncRebinAlg = alg;
-    m_asyncRebinResult = new Poco::ActiveResult<bool>(m_asyncRebinAlg->executeAsync());
+    m_asyncAlg = alg;
+    m_asyncResult = new Poco::ActiveResult<bool>(m_asyncAlg->executeAsync());
 
     // Observe the algorithm
     alg->addObserver(m_finishedObserver);
