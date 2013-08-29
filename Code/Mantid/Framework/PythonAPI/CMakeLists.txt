@@ -260,6 +260,6 @@ endif ()
 # Pure Python files 
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 # Algorithms
-install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/python/algorithms
-          PATTERN "*.pyc" EXCLUDE
-          PATTERN ".svn" EXCLUDE )
+#install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/python/algorithms
+#          PATTERN "*.pyc" EXCLUDE
+#          PATTERN ".svn" EXCLUDE )
