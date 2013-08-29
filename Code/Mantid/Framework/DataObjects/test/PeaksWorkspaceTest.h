@@ -38,7 +38,7 @@ public:
      AlgorithmManager::Instance();
   }
 
-  /** Build a test PeaksWorkspace
+  /** Build a test PeaksWorkspace with one peak (others peaks can be added)
    *
    * @return PeaksWorkspace
    */
