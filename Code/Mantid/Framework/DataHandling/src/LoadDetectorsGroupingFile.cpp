@@ -518,7 +518,7 @@ namespace DataHandling
         mInstrumentName = getAttributeValueByName(pNode, "instrument", mUserGiveInstrument);
 
         // Optional date for which is relevant
-        mDate = getAttributeValueByName(pNode, "date", mUserGiveDate);
+        mDate = getAttributeValueByName(pNode, "valid-on", mUserGiveDate);
        
         // Optional grouping description
         mDescription = getAttributeValueByName(pNode, "description", mUserGiveDescription);
