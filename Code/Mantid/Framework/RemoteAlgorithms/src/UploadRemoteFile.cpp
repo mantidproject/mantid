@@ -9,10 +9,14 @@ or input data necessary to run a Mantid algorithm on the remote compute resource
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/MaskedProperty.h"
-#include "MantidRemote/RemoteJobManager.h"
+#include "MantidKernel/RemoteJobManager.h"
 #include "MantidKernel/ListValidator.h"
 
+#include "MantidRemote/SimpleJSON.h"
+
 #include "boost/make_shared.hpp"
+
+#include <fstream>
 
 namespace Mantid
 {
@@ -39,12 +43,6 @@ void UploadRemoteFile::init()
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
   declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
 
-  // TODO: Can we figure out the user name/group name automatically?
-  declareProperty( "UserName", "", requireValue, "", Direction::Input);
-
-  // Password doesn't get echoed to the screen...
-  declareProperty( new MaskedProperty<std::string>( "Password", "", requireValue, Direction::Input), "");
-
   // The transaction ID comes from the StartRemoteTransaction algortithm
   declareProperty( "TransactionID", "", requireValue, "", Direction::Input);
   declareProperty( "RemoteFileName", "", requireValue, "", Direction::Input);
@@ -65,18 +63,38 @@ void UploadRemoteFile::exec()
     throw( std::runtime_error( std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  // Set the username and password from the properties
-  jobManager->setUserName( getPropertyValue ("UserName"));
-  jobManager->setPassword( getPropertyValue( "Password"));
+  RemoteJobManager::PostDataMap postData;
+  postData["TransID"] = getPropertyValue("TransactionID");
 
-  std::string errMsg;
-  if (jobManager->uploadFile( getPropertyValue("TransactionID"), getPropertyValue("RemoteFileName"),
-                              getPropertyValue("LocalFileName"), errMsg) != RemoteJobManager::JM_OK)
+  std::ifstream infile( getPropertyValue("LocalFileName"));
+  if (infile.good())
   {
-    throw( std::runtime_error( "Error uploading file: " + errMsg));
+    // Yes, we're reading the entire file into memory.  Obviously, this is only
+    // feasible for fairly small files...
+    RemoteJobManager::PostDataMap fileData;
+    fileData[getPropertyValue("RemoteFileName")] = std::string( std::istreambuf_iterator<char>( infile),
+                                                                std::istreambuf_iterator<char>());
+    infile.close();
+
+    std::istream &respStream = jobManager->httpPost("/upload", postData, fileData);
+    if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_CREATED)  // Upload returns a "201 - Created" code on success
+    {
+      g_log.information() << "Uploaded '" << getPropertyValue("RemoteFileName") << "' to '"
+                          << getPropertyValue("LocalFileName") << "'" << std::endl;
+    }
+    else
+    {
+      JSONObject resp;
+      initFromStream( resp, respStream);
+      std::string errMsg;
+      resp["Err_Msg"].getValue( errMsg);
+      throw( std::runtime_error( errMsg));
+    }
   }
-
-
+  else
+  {
+    throw( std::runtime_error( std::string("Failed to open " + getPropertyValue("LocalFileName"))));
+  }
 }
 
 } // end namespace RemoteAlgorithms

@@ -2,10 +2,13 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/MaskedProperty.h"
-#include "MantidRemote/RemoteJobManager.h"
+#include "MantidKernel/RemoteJobManager.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidRemote/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"
+
+#include <fstream>
 
 namespace Mantid
 {
@@ -32,12 +35,6 @@ void DownloadRemoteFile::init()
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
   declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
 
-  // TODO: Can we figure out the user name/group name automatically?
-  declareProperty( "UserName", "", requireValue, "", Direction::Input);
-
-  // Password doesn't get echoed to the screen...
-  declareProperty( new MaskedProperty<std::string>( "Password", "", requireValue, Direction::Input), "");
-
   // The transaction ID comes from the StartRemoteTransaction algortithm
   declareProperty( "TransactionID", "", requireValue, "", Direction::Input);
   declareProperty( "RemoteFileName", "", requireValue, "", Direction::Input);
@@ -59,17 +56,33 @@ void DownloadRemoteFile::exec()
     throw( std::runtime_error( std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  // Set the username and password from the properties
-  jobManager->setUserName( getPropertyValue ("UserName"));
-  jobManager->setPassword( getPropertyValue( "Password"));
+  std::istream &respStream = jobManager->httpGet("/download", std::string("TransID=") + getPropertyValue("TransactionID") +
+                                                 "&File=" + getPropertyValue("RemoteFileName"));
 
-  std::string errMsg;
-  if (jobManager->downloadFile( getPropertyValue("TransactionID"), getPropertyValue("RemoteFileName"),
-                                getPropertyValue("LocalFileName"), errMsg) != RemoteJobManager::JM_OK)
+  if ( jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
-    throw( std::runtime_error( "Error downloading remote file: " + errMsg));
-  }
 
+    std::ofstream outfile( getPropertyValue("LocalFileName"));
+    if (outfile.good())
+    {
+      outfile << respStream.rdbuf();
+      outfile.close();
+      g_log.information() << "Downloaded '" << getPropertyValue("RemoteFileName") << "' to '"
+                          << getPropertyValue("LocalFileName") << "'" << std::endl;
+    }
+    else
+    {
+      throw( std::runtime_error( std::string("Failed to open " + getPropertyValue("LocalFileName"))));
+    }
+  }
+  else
+  {
+    JSONObject resp;
+    initFromStream( resp, respStream);
+    std::string errMsg;
+    resp["Err_Msg"].getValue( errMsg);
+    throw( std::runtime_error( errMsg));
+  }
 }
 
 } // end namespace RemoteAlgorithms
