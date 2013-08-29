@@ -188,15 +188,14 @@ namespace DataHandling
       if(loader.isGivenInstrumentName())
       {
         const std::string instrumentName = loader.getInstrumentName();
-  
-        std::string date;
+    
+        std::string date("");
+
         if(loader.isGivenDate())
           date = loader.getDate();
-        else
-          // If not specified - use current date
-          date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
   
-        // Get a relevant IDF for a given instrument name and date
+        // Get a relevant IDF for a given instrument name and date. If date is empty -
+        // the most recent will be used.
         const std::string instrumentFilename = ExperimentInfo::getInstrumentFilename(instrumentName,date);
   
         // Load an instrument
