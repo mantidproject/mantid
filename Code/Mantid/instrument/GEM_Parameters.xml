@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="GEM" date = "2003-11-30 23:59:59">
+<parameter-file instrument="GEM" valid-from = "2003-11-30 23:59:59">
   
   <component-link name="GEM" >
     <parameter name="IkedaCarpenterPV:Alpha0" type="fitting">
@@ -51,8 +51,8 @@
     <parameter name="IkedaCarpenterPV:SigmaSquared" type="fitting">
       <formula eq="176.833*centre^2" unit="dSpacing" result-unit="TOF^2"/>
     </parameter>    
-    <parameter name="IkedaCarpenterPV:Gamma" type="fitting" result-unit="TOF">
-      <formula eq="4.416*centre" unit="dSpacing"/>
+    <parameter name="IkedaCarpenterPV:Gamma" type="fitting" >
+      <formula eq="4.416*centre" unit="dSpacing" result-unit="TOF"/>
     </parameter>    
   </component-link>
  

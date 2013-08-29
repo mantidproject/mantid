@@ -8,6 +8,8 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
+#include "Poco/File.h"
+
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <iomanip>
@@ -17,6 +19,9 @@ using namespace Mantid;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
+using ScopedFileHelper::ScopedFile;
 
 using ScopedFileHelper::ScopedFile;
 
@@ -35,6 +40,21 @@ public:
     load.initialize();
     TS_ASSERT(load.isInitialized());
 
+  }
+
+  void test_InvalidFileFormat()
+  {
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+    load.setRethrows(true);
+
+    TS_ASSERT(load.setProperty("InputFile", "VULCAN_furnace4208.txt"));
+    TS_ASSERT(load.setProperty("OutputWorkspace", "ws"));
+
+    TS_ASSERT_THROWS_EQUALS(load.execute(), const std::invalid_argument& e,
+                            e.what(), std::string("File type is not supported: txt"));
+
+    TS_ASSERT(!load.isExecuted());
   }
 
   void test_DetectorsGroupingXMLFile()
@@ -239,6 +259,170 @@ public:
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(ws);
+  }
+
+  void test_MapFile_General()
+  {
+    std::stringstream ss;
+
+    using std::endl;
+
+    ss << "3" << endl
+       << "# Group 1" << endl << "111" << endl << "2" << endl
+       << " 1 " << endl << " 2" << endl
+       << "  # Group 2" << endl << "222" << endl << endl << " 1  " << endl
+       << " 3  " << endl
+       << "# Group 3" << endl << "333" << endl << "3" << endl
+       << " 4   5   6" << endl
+       << endl;
+
+    ScopedFile file(ss.str(), "test_mapfile_general.map");
+
+    std::string ws = "Grouping";
+
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+
+    TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
+
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+
+    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(2)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(3)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(4)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(5)[0], 3.0, 1.0E-5);
+
+    API::AnalysisDataService::Instance().remove(ws);
+  }
+
+  void test_MapFile_Ranges()
+  {
+    std::stringstream ss;
+
+    using std::endl;
+
+    ss << "3" << endl
+       << "  # Group 1" << endl << "111" << endl << "3" << endl
+       << " 1-   2 3  " << endl
+       << "# Group 2" << endl << "222" << endl << " 2  " << endl
+       << " 4 - 5 " << endl
+       << "# Group 3" << endl << "333" << endl << "2" << endl
+       << " 6   -7" << endl
+       << endl;
+
+    ScopedFile file(ss.str(), "test_mapfile_ranges.map");
+
+    std::string ws = "Grouping";
+
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+
+    TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
+
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+
+    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(2)[0], 1.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(3)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(4)[0], 2.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(5)[0], 3.0, 1.0E-5);
+    TS_ASSERT_DELTA(gws->dataY(6)[0], 3.0, 1.0E-5);
+
+    API::AnalysisDataService::Instance().remove(ws);
+  }
+
+  void test_MapFile_BadSpectraNumber()
+  {
+    std::stringstream ss;
+
+    using std::endl;
+
+    ss << "1" << endl
+       << "111" << endl 
+       << "3" << endl
+       << "1-6" << endl;
+
+    ScopedFile file(ss.str(), "test_mapfile_badspectranumber.map");
+
+    std::string ws = "Grouping";
+
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+    load.setRethrows(true);
+
+    TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
+
+    std::string errorMsg = "Bad number of spectra list in " + file.getFileName() + " on line 4"; 
+
+    TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError& e, e.what(), errorMsg);
+    TS_ASSERT(!load.isExecuted());
+  }
+
+  void test_MapFile_PrematureEndOfFile()
+  {
+    std::stringstream ss;
+
+    using std::endl;
+
+    ss << "1" << endl
+       << "111" << endl 
+       << "3" << endl;
+
+    ScopedFile file(ss.str(), "test_mapfile_prematureendoffile.map");
+
+    std::string ws = "Grouping";
+
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+    load.setRethrows(true);
+
+    TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
+
+    std::string errorMsg = "Premature end of file, expecting spectra list in " + file.getFileName() + " on line 4"; 
+
+    TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError& e, e.what(), errorMsg);
+    TS_ASSERT(!load.isExecuted());
+  }
+
+  void test_MapFile_NotANumber()
+  {
+    std::stringstream ss;
+
+    using std::endl;
+
+    ss << "1" << endl
+       << "111" << endl 
+       << "a" << endl
+       << "1-3" << endl;
+
+    ScopedFile file(ss.str(), "test_mapfile_notanumber.map");
+
+    std::string ws = "Grouping";
+
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+    load.setRethrows(true);
+
+    TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
+    TS_ASSERT(load.setProperty("OutputWorkspace", ws));
+
+    std::string errorMsg = "Expected a single int for the number of group spectra in " + file.getFileName() + " on line 3"; 
+
+    TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError& e, e.what(), errorMsg);
+    TS_ASSERT(!load.isExecuted());
   }
 
 };

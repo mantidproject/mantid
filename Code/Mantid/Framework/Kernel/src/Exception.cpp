@@ -37,6 +37,26 @@ const char* FileError::what() const throw()
 }
 
 //-------------------------
+// ParseError
+//-------------------------
+ParseError::ParseError(const std::string& desc, const std::string& fileName, const int& lineNumber)
+  : FileError(desc, fileName), m_lineNumber(lineNumber)
+{
+  std::stringstream ss;
+  ss << FileError::what() << " on line " << m_lineNumber;
+  m_outMessage = ss.str();
+}
+
+ParseError::ParseError(const ParseError& A) 
+  : FileError(A), m_lineNumber(A.m_lineNumber)
+{}
+
+const char* ParseError::what() const throw()
+{
+  return m_outMessage.c_str();
+}
+
+//-------------------------
 // NotImplementedError
 //-------------------------
 /** Constructor

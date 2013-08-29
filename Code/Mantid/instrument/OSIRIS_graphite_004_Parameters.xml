@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "OSIRIS" date = "2010-07-15T00:00:00">
+<parameter-file instrument = "OSIRIS" valid-from = "2010-07-15T00:00:00">
 
 <component-link name = "OSIRIS">
 
@@ -35,12 +35,6 @@
 	<value val="26000" />
 </parameter>
 
-<component-link name="graphite">
-<parameter name="Efixed"> <value val="7.3812" /> </parameter>
-
-<parameter name="resolution"> <value val="0.100" /> </parameter>
-</component-link>
-
 <parameter name="analyser" type="string">
   <value val="graphite" />
 </parameter>
@@ -51,4 +45,9 @@
 
 </component-link>
 
+<component-link name="graphite">
+<parameter name="Efixed"> <value val="7.3812" /> </parameter>
+
+<parameter name="resolution"> <value val="0.100" /> </parameter>
+</component-link>
 </parameter-file>

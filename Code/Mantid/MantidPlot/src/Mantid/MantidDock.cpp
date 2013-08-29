@@ -203,6 +203,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_convertMDHistoToMatrixWorkspace = new QAction(tr("Convert to MatrixWorkpace"),this);
   m_convertMDHistoToMatrixWorkspace->setIcon(QIcon(getQPixmap("mantid_matrix_xpm")));
   connect(m_convertMDHistoToMatrixWorkspace,SIGNAL(triggered()),this,SLOT(convertMDHistoToMatrixWorkspace()));
+
+  m_clearUB = new QAction(tr("Clear UB Matrix"), this);
+  connect(m_clearUB, SIGNAL(activated()), this, SLOT(clearUB()));
 }
 
 /**
@@ -540,6 +543,21 @@ void MantidDockWidget::addTableWorkspaceMenuItems(QMenu * menu) const
   menu->addAction(m_convertToMatrixWorkspace);
 }
 
+/**
+ * Add menu for clearing workspace items.
+ * @param menu : Parent menu.
+ * @param wsName : Name of the selected workspace.
+ */
+void MantidDockWidget::addClearMenuItems(QMenu* menu, const QString& wsName)
+{
+  QMenu* clearMenu = new QMenu(tr("Clear Options"), this);
+
+  m_clearUB->setEnabled( m_mantidUI->hasUB(wsName) );
+
+  clearMenu->addAction(m_clearUB);
+  menu->addMenu(clearMenu);
+}
+
 void MantidDockWidget::clickedWorkspace(QTreeWidgetItem* item, int)
 {
   Q_UNUSED(item);
@@ -828,6 +846,7 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     {
       addTableWorkspaceMenuItems(menu);
     }
+    addClearMenuItems(menu, selectedWsName);
     
     //Get the names of the programs for the send to option
     std::vector<std::string> programNames = (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name"));
@@ -1014,6 +1033,23 @@ void MantidDockWidget::convertToMatrixWorkspace()
 void MantidDockWidget::convertMDHistoToMatrixWorkspace()
 {
   m_mantidUI->executeAlgorithm("ConvertMDHistoToMatrixWorkspace",-1);
+}
+
+/**
+ * Handler for the clear the UB matrix event.
+ */
+void MantidDockWidget::clearUB()
+{
+  QList<QTreeWidgetItem*> selectedItems = m_tree->selectedItems();
+  QStringList selctedWSNames;
+  if (!selectedItems.empty())
+  {
+    for (int i = 0; i < selectedItems.size(); ++i)
+    {
+    selctedWSNames.append(selectedItems[i]->text(0));
+    }
+  }
+  m_mantidUI->clearUB(selctedWSNames);
 }
 
 //------------ MantidTreeWidget -----------------------//

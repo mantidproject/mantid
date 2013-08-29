@@ -56,6 +56,7 @@ private:
 
   void handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf);
   void handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_ptr pNf);
+  void addReplaceObserverOnce();
   void checkForMaskWorkspace(const std::string& wsName);
   void checkForResultTableUpdate(const std::string& wsName);
   void checkForVaryingLogs(const std::string& wsName);
@@ -68,6 +69,7 @@ private:
 
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAddNotification> m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification> m_replObserver;
+  bool m_replaceObserverAdded;
 };
 
 } // namespace CustomInterfaces
