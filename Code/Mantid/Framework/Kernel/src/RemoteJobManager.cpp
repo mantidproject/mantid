@@ -96,7 +96,8 @@ std::istream & RemoteJobManager::httpGet( const std::string &path, const std::st
 }
 
 std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDataMap &postData,
-                                          const std::string &username, const std::string &password)
+                                          const PostDataMap &fileData, const std::string &username,
+                                          const std::string &password)
 {
   Poco::Net::HTTPRequest req;
   initPostRequest( req, path);
@@ -132,9 +133,25 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
   {
     postBody << boundaryLine;
     postBody <<"Content-Disposition: form-data; name=\"" << (*it).first << "\"";
-    postBody << httpLineEnd;
+    postBody << httpLineEnd << httpLineEnd;
     postBody << (*it).second;
     postBody << httpLineEnd;
+    it++;
+  }
+
+  // file data is treated the same as post data, except that we set the filename field
+  // in the Content-Disposition header and add the Content-Type header
+  it = fileData.begin();
+  while (it != fileData.end())
+  {
+    postBody << boundaryLine;
+    postBody <<"Content-Disposition: form-data; name=\"" << (*it).first << "\"; filename=\"" << (*it).first << "\"";
+    postBody << httpLineEnd;
+    postBody << "Content-Type: application/octet-stream";
+    postBody << httpLineEnd << httpLineEnd;
+    postBody << (*it).second;
+    postBody << httpLineEnd;
+    it++;
   }
 
   postBody << finalBoundaryLine;
@@ -144,7 +161,7 @@ std::istream & RemoteJobManager::httpPost(const std::string &path, const PostDat
   std::ostream &postStream = m_session->sendRequest( req);
 
   // upload the actual HTTP body
-  postStream << postBody.rdbuf() << std::flush;
+  postStream << postBody.str() << std::flush;
 
   std::istream &respStream = m_session->receiveResponse( m_response);
 

@@ -43,6 +43,7 @@ public:
 
   // Perform an HTTP POST request
   std::istream & httpPost(const std::string &path, const PostDataMap &postData,
+                          const PostDataMap &fileData = PostDataMap(),
                           const std::string &username = "",
                           const std::string &password = "");
 
