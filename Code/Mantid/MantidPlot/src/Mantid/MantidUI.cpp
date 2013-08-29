@@ -1014,34 +1014,6 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
   //check if indirect instrument
   bool calcQ = checkTechnique(ws, "indirect");
 
-  MatrixWorkspace_const_sptr out;
-  Axis* qAxis = NULL;
-  if(calcQ)
-  {
-    //create instance of convert spectrum axis
-    Mantid::API::Algorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("ConvertSpectrumAxis");
-    alg->setChild(true);
-    alg->initialize();
-
-    //set algorithm parameters
-    alg->setProperty("InputWorkspace", ws);
-    alg->setProperty("OutputWorkspace", "__convertSpectrum");
-    alg->setProperty("Target", "ElasticQ");
-    alg->setProperty("EMode", "Indirect");
-
-    alg->execute();
-
-    //run algorithm and get axis
-    if(alg->isExecuted())
-    {
-      out = alg->getProperty("OutputWorkspace");
-      if(out)
-      {
-        qAxis = out->getAxis(1);
-      }
-    }
-  }
-
   // Prepare column names. Types will be determined from QVariant
   QStringList colNames;
   colNames << "Index" << "Spectrum No" << "Detector ID(s)";
@@ -1056,8 +1028,6 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
     colNames << "Q";
   }
   colNames << "Phi" << "Monitor";
-
-
 
   const int ncols = static_cast<int>(colNames.size());
   const int nrows = indices.empty()? static_cast <int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
@@ -1140,8 +1110,44 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
       if(calcQ)
       {
-        double qValue = qAxis->getValue(row);
-        colValues << QVariant(qValue);
+
+        // Get conversion factor from energy(meV) to wavelength(angstroms)
+        Mantid::Kernel::Units::Energy energyUnit;
+        double wavelengthFactor(0.0), wavelengthPower(0.0);
+        energyUnit.quickConversion("Wavelength", wavelengthFactor,wavelengthPower);
+
+        //get efixed value
+        double efixed(0.0), usignTheta(0.0);
+
+        if ( ! det->isMonitor() )
+        {
+          usignTheta = ws->detectorTwoTheta(det)/2.0;
+          std::vector<double> efixedVec = det->getNumberParameter("Efixed"); 
+          if ( efixedVec.empty() )
+          {
+            int detid = det->getID();
+            IDetector_const_sptr detectorSingle = ws->getInstrument()->getDetector(detid);
+            efixedVec = detectorSingle->getNumberParameter("Efixed");
+          }
+          if (! efixedVec.empty() ) 
+          {
+            efixed = efixedVec.at(0);
+          }
+        }
+        else
+        {
+          usignTheta = 0.0;
+          efixed = DBL_MIN;
+        }
+
+        const double stheta = std::sin(usignTheta);
+
+        //Calculate the wavelength to allow it to be used to convert to elasticQ. 
+        double wavelength = wavelengthFactor*std::pow(efixed, wavelengthPower);
+        // The MomentumTransfer value.
+        double q = 4.0*M_PI*stheta/wavelength;
+
+        colValues << QVariant(q); 
       }
 
       colValues << QVariant(phi) // rtp
@@ -1172,12 +1178,6 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
         t->setCell(row, col, colValue.toDouble());
       }
     }
-  }
-
-  //remove extra workspace after we're finished
-  if(calcQ)
-  {
-    AnalysisDataService::Instance().remove(out->name());
   }
 
   t->showNormal();
