@@ -18,6 +18,7 @@ set ( TEST_PY_FILES
   RetrieveRunInfoTest.py
   RunPythonScriptTest.py
   SANSWideAngleCorrectionTest.py
+  SortXAxisTest.py
   Stitch1DTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
