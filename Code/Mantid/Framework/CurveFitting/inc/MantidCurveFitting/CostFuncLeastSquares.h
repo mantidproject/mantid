@@ -94,7 +94,14 @@ protected:
     API::FunctionValues_sptr values,
     bool evalFunction = true, bool evalDeriv = true, bool evalHessian = true) const;
 
-private:
+  /// Get weight (1/sigma)
+  virtual double getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW=1.0) const;
+
+  /// Calcualte sqrt(W). Final cost function = sum_i [ (obs_i - cal_i) / (sigma * sqrt(W))]**2
+  virtual double calSqrtW(API::FunctionValues_sptr values) const;
+
+  /// Flag to include constraint in cost function value
+  const bool m_includePenalty;
 
   mutable double m_value;
   mutable GSLVector m_der;
