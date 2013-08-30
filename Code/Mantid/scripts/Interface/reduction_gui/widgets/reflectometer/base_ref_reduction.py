@@ -540,9 +540,9 @@ class BaseRefWidget(BaseWidget):
         content += "if (os.environ.has_key(\"MANTIDPATH\")):\n"
         content += "    del os.environ[\"MANTIDPATH\"]\n"
         content += "sys.path.insert(0,'/opt/mantidnightly/bin')\n"
-        content += "from MantidFramework import mtd\n"
-        content += "mtd.initialize()\n"
-        content += "from mantidsimple import *\n\n"
+        script += "import mantid\n"
+        script += "from mantid.simpleapi import *\n"
+        script += "from mantid.kernel import ConfigService\n"
         
         content += "eventFileAbs=sys.argv[1]\n"
         content += "outputDir=sys.argv[2]\n\n"
@@ -550,10 +550,7 @@ class BaseRefWidget(BaseWidget):
         content += "eventFile = os.path.split(eventFileAbs)[-1]\n"
         content += "nexusDir = eventFileAbs.replace(eventFile, '')\n"
         content += "runNumber = eventFile.split('_')[2]\n"
-        content += "configService = mtd.getSettings()\n"
-        content += "dataSearchPath = configService.getDataSearchDirs()\n"
-        content += "dataSearchPath.append(nexusDir)\n"
-        content += "configService.setDataSearchDirs(dataSearchPath)\n\n"
+        content += "ConfigService.Instance().appendDataSearchDir(nexusDir)\n\n"
         
         # Place holder for reduction script
         content += "\n"

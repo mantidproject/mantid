@@ -11,18 +11,6 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from base_ref_reduction import BaseRefWidget
 import ui.reflectometer.ui_data_refl_simple
 
-IS_IN_MANTIDPLOT = False
-try:
-    import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
-    from reduction.instruments.reflectometer import data_manipulation
-
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
-
 class DataReflWidget(BaseRefWidget):    
     """
         Widget that present instrument details to the user

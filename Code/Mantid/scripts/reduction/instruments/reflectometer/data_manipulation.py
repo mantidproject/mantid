@@ -2,7 +2,6 @@ import mantidplot
 import mantid
 import os
 from mantid.simpleapi import *
-#from mantidsimple import *
 
 def tof_distribution(file_path, callback=None,
                      range_min=None, range_max=None):
@@ -79,7 +78,6 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     def _load_entry(entry, ws, title=""):
         # 1D plot
         ws_output = "%s %s" % (ws_output_base, title)
-#        if mtd.workspaceExists(ws_output):
         if 1==0:
 #        if mtd.doesExist(ws_output):
             ws_list.append(ws_output)
