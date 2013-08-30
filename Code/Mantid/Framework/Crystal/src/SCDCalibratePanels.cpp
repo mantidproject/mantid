@@ -1872,7 +1872,7 @@ namespace Mantid
 
       ofstream oss3(FileName.c_str());
       oss3 << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
-      oss3 << " <parameter-file instrument=\"" << instrument->getName() << "\" date=\""
+      oss3 << " <parameter-file instrument=\"" << instrument->getName() << "\" valid-from=\""
         << instrument->getValidFromDate().toISO8601String() << "\">" << endl;
       ParameterMap_sptr pmap = instrument->getParameterMap();
 
