@@ -58,8 +58,23 @@ namespace Algorithms
     /// Process input propeties
     void processProperties();
 
+    /// Check the input properties and functions
+    void prescreenInputData();
+
+    /// Fit peak in a simple one-step approach
+    void fitPeakOneStep();
+
+    /// Fit peak in a robust manner.  Multiple fit will be
+    void fitPeakMultipleStep();
+
+    /// Fit a single peak function with pure peak workspace
+    double fitPeakFuncion();
+
     /// Fit background with multiple domain
     API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
+
+    /// Fit peak and background composite function
+    void fitCompositeFunction();
 
     /// Make a pure peak WS in the fit window region
     void makePurePeakWS(const std::vector<double>& vec_bkgd);
@@ -69,8 +84,23 @@ namespace Algorithms
                        size_t wsindex, double xmin, double xmax,
                        std::vector<double>& vec_caldata);
 
+    /// Process and store fit result
+    void processNStoreFitResult(double rwp);
+
     /// Set up a vector of guessed FWHM
     void setupGuessedFWHM(std::vector<double>& vec_FWHM);
+
+    /// Get vector index
+    size_t getVectorIndex(double x);
+
+    /// Push/store a fit result
+    void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap);
+
+    /// Pop
+    void pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func);
+
+    /// Backup data
+    void backupOriginalData(std::vector<double>& vecy, std::vector<double> &vece);
 
     /// Input data workspace
     API::MatrixWorkspace_sptr m_dataWS;
@@ -89,17 +119,53 @@ namespace Algorithms
     /// Maximum peak position
     double m_maxPeakX;
 
+    /// Vector index of m_minFitX
+    size_t i_minFitX;
+    /// Vector index of m_maxFitX
+    size_t i_maxFitX;
+    /// Vector index of m_minPeakX
+    size_t i_minPeakX;
+    /// Vector index of m_maxPeakX
+    size_t i_maxPeakX;
+
     /// fitting strategy
     bool m_fitBkgdFirst;
 
     /// output option
     bool m_outputRawParams;
 
-    /// Flag about guessed FWHM
+    /// User guessed FWHM
+    double m_userGuessedFWHM;
+    /// User guessed peak centre
+    double m_userPeakCentre;
+
+    /// Minimum guessed peak width (pixels)
+    int m_minGuessedPeakWidth;
+    /// Maximum guessed peak width (pixels)
+    double m_maxGuessedPeakWidth;
+    /// Step width of tried FWHM
+    double m_fwhmFitStep;
+    /// Flag about guessed FWHM (pixels)
     bool m_fitWithStepPeakWidth;
 
     /// Use peak position tolerance as a criterial for peak fit
     bool m_usePeakPositionTolerance;
+    /// Tolerance on peak positions as criteria
+    double m_peakPositionTolerance;
+
+
+
+    /// Minimizer
+    std::string m_minimizer;
+
+    /// Storage map for background function
+    std::map<std::string, double> m_bkupBkgdFunc;
+    /// Storage map for peak function
+    std::map<std::string, double> m_bkupPeakFunc;
+    /// Best fitted peak function
+    std::map<std::string, double> m_bestPeakFunc;
+    /// Best Rwp ...
+    double m_bestRwp;
 
 
   };
