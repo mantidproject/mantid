@@ -228,6 +228,7 @@ set ( INC_FILES
 	inc/MantidKernel/VMD.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
+	inc/MantidKernel/WarningSuppressions.h
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
