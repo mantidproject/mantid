@@ -76,6 +76,8 @@ namespace Mantid
         std::string getSearchQuery(const CatalogSearchParam& inputs);
         // Saves "DataFiles" result to output workspace.
         void saveDataFiles(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
+        // Saves "DataSets" information to the output workspace.
+        void saveDataSets(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
         // Helper method that formats a given timestamp.
         std::string formatDateTime(time_t timestamp);
 

@@ -322,6 +322,63 @@ namespace Mantid
      */
     void ICat4Catalog::getDataSets(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
+      ICATPortBindingProxy icat;
+
+      ns1__search request;
+      ns1__searchResponse response;
+
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+
+      std::string query = "Datafile <-> Dataset <-> Investigation[name = '" + boost::lexical_cast<std::string>(investigationId) + "']";
+      request.query     = &query;
+
+      int result = icat.search(&request, &response);
+
+      if (result == 0)
+      {
+        saveDataSets(response.return_, outputws);
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
+    }
+
+    /**
+     * Loops through the response vector and saves the datasets details to a table workspace.
+     * @param response :: A vector containing the results of the search query.
+     * @param outputws :: Shared pointer to output workspace.
+     */
+    void ICat4Catalog::saveDataSets(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
+    {
+      // Add rows headers to the output workspace.
+      outputws->addColumn("str","Name");
+      outputws->addColumn("str","Status");
+      outputws->addColumn("str","Type");
+      outputws->addColumn("str","Description");
+      outputws->addColumn("str","Sample Id");
+      std::string temp("");
+
+      std::vector<xsd__anyType*>::const_iterator iter;
+      for(iter = response.begin(); iter != response.end(); ++iter)
+      {
+        try
+        {
+          API::TableRow table = outputws->appendRow();
+          // These are just temporary values in order for the GUI to not die.
+          // These along with related GUI aspects will be removed in another ticket.
+          savetoTableWorkspace(&temp, table);
+          savetoTableWorkspace(&temp, table);
+          savetoTableWorkspace(&temp, table);
+          savetoTableWorkspace(&temp, table);
+          savetoTableWorkspace(&temp, table);
+        }
+        catch(std::runtime_error&)
+        {
+          throw std::runtime_error("An error occurred when saving file data to workspace.");
+        }
+      }
     }
 
     /**
