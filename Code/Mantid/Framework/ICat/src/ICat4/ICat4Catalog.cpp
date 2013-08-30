@@ -286,24 +286,31 @@ namespace Mantid
       {
         // Cast from xsd__anyType to subclass (xsd__string).
         ns1__investigation * investigation = dynamic_cast<ns1__investigation*>(*iter);
-        // Now attempt to add the relevant data to the output workspace.
-        try
+        if (investigation)
         {
-          API::TableRow table = outputws->appendRow();
-          // Now add the relevant investigation data to the table.
-          savetoTableWorkspace(investigation->name, table); // Investigation number
-          savetoTableWorkspace(investigation->title, table);
-          savetoTableWorkspace(investigation->instrument->name, table);
-          // Verify that the run parameters vector exist prior to doing anything.
-          // Since some investigations may not have run parameters.
-          if (!investigation->parameters.empty())
+          // Now attempt to add the relevant data to the output workspace.
+          try
           {
-            savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
+            API::TableRow table = outputws->appendRow();
+            // Now add the relevant investigation data to the table.
+            savetoTableWorkspace(investigation->name, table); // Investigation number
+            savetoTableWorkspace(investigation->title, table);
+            savetoTableWorkspace(investigation->instrument->name, table);
+            // Verify that the run parameters vector exist prior to doing anything.
+            // Since some investigations may not have run parameters.
+            if (!investigation->parameters.empty())
+            {
+              savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
+            }
+          }
+          catch(std::runtime_error&)
+          {
+            throw std::runtime_error("An error occurred when saving the ICat search results data to Workspace");
           }
         }
-        catch(std::runtime_error&)
+        else
         {
-          throw std::runtime_error("An error occurred when saving the ICat search results data to Workspace");
+          throw std::runtime_error("ICat4Catalog::saveInvestigations expected an investigation. Please contact the Mantid development team.");
         }
       }
     }
@@ -370,26 +377,31 @@ namespace Mantid
       outputws->addColumn("long64","Id");
       outputws->addColumn("str","Create Time");
 
-      // Add data to each row in the output workspace.
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
       {
         ns1__datafile * datafile = dynamic_cast<ns1__datafile*>(*iter);
-        try
+        if (datafile)
         {
-          API::TableRow table = outputws->appendRow();
-          // Now add the relevant investigation data to the table.
-          savetoTableWorkspace(datafile->name, table);
-          savetoTableWorkspace(datafile->location, table);
-          savetoTableWorkspace(datafile->id, table);
+          try
+          {
+            API::TableRow table = outputws->appendRow();
+            // Now add the relevant investigation data to the table.
+            savetoTableWorkspace(datafile->name, table);
+            savetoTableWorkspace(datafile->location, table);
+            savetoTableWorkspace(datafile->id, table);
 
-          // Make human readable createTime.
-          std::string createDate = formatDateTime(*(datafile->createTime));
-          savetoTableWorkspace(&createDate, table);
+            std::string createDate = formatDateTime(*(datafile->createTime));
+            savetoTableWorkspace(&createDate, table);
+          }
+          catch(std::runtime_error&)
+          {
+            throw std::runtime_error("An error occurred when saving file data to workspace.");
+          }
         }
-        catch(std::runtime_error&)
+        else
         {
-          throw std::runtime_error("An error occurred when saving file data to workspace.");
+          throw std::runtime_error("ICat4Catalog::saveDataFiles expected a datafile. Please contact the Mantid development team.");
         }
       }
     }
@@ -413,15 +425,19 @@ namespace Mantid
 
       int result = icat.search(&request, &response);
 
-      // Was the search successful?
       if (result == 0)
       {
         for(unsigned i = 0; i < response.return_.size(); ++i)
         {
-          // Cast from xsd__anyType to subclass (xsd__string).
-          xsd__string * instrument = dynamic_cast<xsd__string*>(response.return_[i]);
-          // Then add it to the instruments vector.
-          instruments.push_back(instrument->__item);
+          xsd__string * instrument = dynamic_cast<xsd__string*>(response.return_[i]);;
+          if (instrument)
+          {
+            instruments.push_back(instrument->__item);
+          }
+          else
+          {
+            throw std::runtime_error("ICat4Catalog::listInstruments expected an instrument. Please contact the Mantid development team.");
+          }
         }
       }
       else
@@ -449,13 +465,19 @@ namespace Mantid
 
       int result = icat.search(&request, &response);
 
-      // Was the search successful?
       if (result == 0)
       {
         for(unsigned i = 0; i < response.return_.size(); ++i)
         {
           xsd__string * investigation = dynamic_cast<xsd__string*>(response.return_[i]);
-          invstTypes.push_back(investigation->__item);
+          if (investigation)
+          {
+            invstTypes.push_back(investigation->__item);
+          }
+          else
+          {
+            throw std::runtime_error("ICat4Catalog::listInvestigationTypes expected a string. Please contact the Mantid development team.");
+          }
         }
       }
       else

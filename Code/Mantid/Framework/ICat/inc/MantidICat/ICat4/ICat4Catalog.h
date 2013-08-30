@@ -71,14 +71,13 @@ namespace Mantid
         // Defines the SSL authentication scheme.
         void setSSLContext(ICat4::ICATPortBindingProxy& icat);
         // Saves "MyData" query result to output workspace.
-        void saveInvestigations(std::vector<ICat4::xsd__anyType *>return_, API::ITableWorkspace_sptr& outputws);
+        void saveInvestigations(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
         // Creates a search query string based on inputs provided by the user.
         std::string getSearchQuery(const CatalogSearchParam& inputs);
         // Saves "DataFiles" result to output workspace.
-        void saveDataFiles(std::vector<ICat4::xsd__anyType *>return_, API::ITableWorkspace_sptr& outputws);
+        void saveDataFiles(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
         // Helper method that formats a given timestamp.
         std::string formatDateTime(time_t timestamp);
-
 
         /**
          * Template method to save data to table workspace
