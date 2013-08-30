@@ -93,14 +93,14 @@ void CostFuncRwp::addVal(API::FunctionDomain_sptr domain, API::FunctionValues_sp
   double denVal = 0.0;
 
   // FIXME : This might give a wrong answer in case of multiple-domain
-  for (size_t i = i; i < ny; ++i)
+  for (size_t i = 0; i < ny; ++i)
   {
     double obsval = values->getFitData(i);
     double calval = values->getCalculated(i);
-    double weight = values->getFitWeight(i);
+    double inv_sigma = values->getFitWeight(i);
     double val = calval - obsval;
-    retVal += val * val * weight;
-    denVal += obsval * obsval * weight;
+    retVal += val * val * inv_sigma * inv_sigma;
+    denVal += obsval * obsval * inv_sigma * inv_sigma;
   }
   
   PARALLEL_ATOMIC
@@ -233,7 +233,6 @@ double CostFuncRwp::valDerivHessian(bool evalFunction, bool evalDeriv, bool eval
   if (evalDeriv)
   {
     // Derivative (vector)
-    size_t i = 0;
     for(size_t ip = 0; ip < np; ++ip)
     {
       if ( !m_function->isActive(ip) )
@@ -330,7 +329,18 @@ void CostFuncRwp::addValDerivHessian(
 
   size_t iActiveP = 0;
   double fVal = 0.0;
-  double denValue = 0.0;
+
+  double weight = 0.0;
+  if (evalFunction)
+  {
+    for (size_t id = 0; id < ndata; ++id)
+    {
+      double sigma = values->getFitWeight(id);
+      double obs = values->getFitData(id);
+      weight += sigma*sigma*obs*obs;
+    }
+  }
+
 
   for(size_t ip = 0; ip < nparm; ++ip)
   {
@@ -343,7 +353,7 @@ void CostFuncRwp::addValDerivHessian(
       double calc = values->getCalculated(id);
       double obs = values->getFitData(id);
       double w = values->getFitWeight(id);
-#if 1
+#if 0
       double y = ( calc - obs ) * w;
       d += y * jacobian.get(id,ip) * w;
       if (iActiveP == 0 && evalFunction)
@@ -351,14 +361,12 @@ void CostFuncRwp::addValDerivHessian(
         fVal += y * y;
       }
 #else
-      // FIXME - Need to check with Roman whether it is correct about "d"
+      // TODO - Verify
       double diff = calc - obs;
-      double y = (calc-obs) * w ;
-      d += y * jacobian.get(id, ip) * w;
+      d += diff * jacobian.get(id, ip) * w * w / weight;
       if (iActiveP == 0 && evalFunction)
       {
-        fVal += diff * diff * w;
-        denValue += obs * obs * w;
+        fVal += diff * diff * w * w / weight;
       }
 #endif
     }
@@ -375,7 +383,7 @@ void CostFuncRwp::addValDerivHessian(
   {
     PARALLEL_ATOMIC
     m_value += fVal;
-    throw std::runtime_error("Does it look right? ");
+    // TODO - Question: Is m_value set to zero before?
   }
 
   if (evalHessian)
@@ -398,12 +406,11 @@ void CostFuncRwp::addValDerivHessian(
         for(size_t k = 0; k < ndata; ++k) // over fitting data
         {
           double w = values->getFitWeight(k);
-#if 1
+#if 0
           d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
 #else
           // FIXME/TODO - Dig out the formular for Rwp
-          throw std::runtime_error("Implement by formular of Rwp ASAP!");
-          d += DBL_MAX;
+          d += jacobian.get(k,i) * jacobian.get(k,j) * w * w / weight;
 #endif
         }
         PARALLEL_CRITICAL(hessian_set)
