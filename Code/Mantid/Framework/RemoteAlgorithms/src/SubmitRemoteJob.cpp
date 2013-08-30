@@ -94,7 +94,7 @@ void SubmitRemoteJob::exec()
 
   postData["TransID"] = getPropertyValue("TransactionID");
   postData["NumNodes"] = getPropertyValue( "NumNodes");
-  postData["CoresPernode"] = getPropertyValue( "CoresPerNode");
+  postData["CoresPerNode"] = getPropertyValue( "CoresPerNode");
 
   postData["ScriptName"] = getPropertyValue( "ScriptName");
   postData[getPropertyValue("ScriptName")] = getPropertyValue( "PythonScript");
