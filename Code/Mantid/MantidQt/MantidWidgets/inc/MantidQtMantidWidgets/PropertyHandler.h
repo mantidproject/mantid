@@ -124,6 +124,9 @@ public:
    */
   void setAttribute(const QString& attName, const QString& attValue);
 
+  /// Set function vector attribute value
+  void setVectorAttribute(QtProperty* prop);
+
   /**
    * Update the parameter properties
    */
@@ -202,6 +205,7 @@ private:
   QList<QtProperty*> m_parameters; //< function parameter properties
   QMap<QString,QtProperty*> m_ties;//< tie properties
   QMap<QString,std::pair<QtProperty*,QtProperty*> > m_constraints;//< constraints
+  QList<QtProperty*> m_vectorMembers; //< vector member properties
   bool m_isMultispectral; ///< true if fitting to multiple spectra using MultiBG function
   QtProperty* m_workspace; ///< workspace name for multispectral fitting
   QtProperty* m_workspaceIndex; ///< workspace index for multispectral fitting
@@ -209,6 +213,8 @@ private:
   int m_ci; //< approximate index in the workspace at the peak centre
   //mutable FunctionCurve* m_curve;//< the curve to plot the handled function
   mutable bool m_hasPlot;
+
+  friend class CreateAttributeProperty;
 };
 
 } // MantidQt
