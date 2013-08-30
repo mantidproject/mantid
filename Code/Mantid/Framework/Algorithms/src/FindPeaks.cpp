@@ -2277,8 +2277,6 @@ namespace Algorithms
     // Calculate Rwp
     double sumnom = 0;
     double sumdenom = 0;
-    double sumrpnom = 0;
-    double sumrpdenom = 0;
 
     size_t numpts = domain.size();
     for (size_t i = 0; i < numpts; ++i)
