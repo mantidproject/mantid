@@ -10,11 +10,6 @@
 
 #include <iomanip>
 
-namespace
-{
-  const bool debug = false;
-}
-
 namespace Mantid
 {
 namespace CurveFitting
@@ -22,12 +17,56 @@ namespace CurveFitting
 
 DECLARE_COSTFUNCTION(CostFuncRwp,Rwp)
 
+//----------------------------------------------------------------------------------------------
 /**
  * Constructor
  */
-CostFuncRwp::CostFuncRwp() : CostFuncFitting(),m_value(0),m_pushed(false),
+#if 0
+CostFuncRwp::CostFuncRwp() : CostFuncLeastSquares(),
+  m_includePenalty(false),
+  m_value(0),
+  m_pushed(false),
   m_log(Kernel::Logger::get("CostFuncRwp")) {}
+#else
+CostFuncRwp::CostFuncRwp() : CostFuncLeastSquares()
+{
+  m_includePenalty = false;
+  m_value = 0.;
+  m_pushed = false;
+}
+// m_log(Kernel::Logger::get("CostFuncRwp"));
+#endif
 
+
+
+//----------------------------------------------------------------------------------------------
+/** Get weight of data point i(1/sigma)
+  */
+double CostFuncRwp::getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW) const
+{
+  return (values->getFitWeight(i)/sqrtW);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get square root of normalization weight (W)
+  */
+double CostFuncRwp::calSqrtW(API::FunctionValues_sptr values) const
+{
+  double weight = 0.0;
+
+  // FIXME : This might give a wrong answer in case of multiple-domain
+  size_t ny = values->size();
+  for (size_t i = 0; i < ny; ++i)
+  {
+    double obsval = values->getFitData(i);
+    double inv_sigma = values->getFitWeight(i);
+    weight += obsval * obsval * inv_sigma * inv_sigma;
+  }
+
+  return sqrt(weight);
+}
+
+#if 0
 //----------------------------------------------------------------------
 /** Calculate value of cost function
  *  @return :: The value of the function
@@ -58,21 +97,6 @@ double CostFuncRwp::val() const
     }
     addVal(m_domain,simpleValues);
   }
-
-#if 0
-  // add penalty
-  for(size_t i=0;i<m_function->nParams();++i)
-  {
-    if ( !m_function->isActive(i) ) continue;
-    API::IConstraint* c = m_function->getConstraint(i);
-    if (c)
-    {
-      m_value += c->check();
-    }
-  }
-#else
-  // There is no PENALTY in Rwp
-#endif
 
   m_dirtyVal = false;
   return m_value;
@@ -207,28 +231,11 @@ double CostFuncRwp::valDerivHessian(bool evalFunction, bool evalDeriv, bool eval
 
   // Add values/derivatives/Hessians from constraint: NOT IN RWP!
   size_t np = m_function->nParams();
-#if 0
-  // Add constraints penalty
-  size_t np = m_function->nParams();
-  if (evalFunction)
-  {
-    for(size_t i = 0; i < np; ++i)
-    {
-      API::IConstraint* c = m_function->getConstraint(i);
-      if (c)
-      {
-        m_value += c->check();
-      }
-    }
-    m_dirtyVal = false;
-  }
-#else
   // No constraint penalty
   if (evalFunction)
   {
     m_dirtyVal = false;
   }
-#endif
 
   if (evalDeriv)
   {
@@ -237,17 +244,6 @@ double CostFuncRwp::valDerivHessian(bool evalFunction, bool evalDeriv, bool eval
     {
       if ( !m_function->isActive(ip) )
         continue;
-#if 0
-      API::IConstraint* c = m_function->getConstraint(ip);
-      if (c)
-      {
-        double d =  m_der.get(i) + c->checkDeriv();
-        m_der.set(i,d);
-      }
-      ++i;
-#else
-      // TODO - Verify that there is no need to do this step.
-#endif
     }
     m_dirtyDeriv = false;
   }
@@ -260,16 +256,6 @@ double CostFuncRwp::valDerivHessian(bool evalFunction, bool evalDeriv, bool eval
     {
       if ( !m_function->isActive(ip) )
         continue;
-#if 0
-      API::IConstraint* c = m_function->getConstraint(ip);
-      if (c)
-      {
-        double d =  m_hessian.get(i,i) + c->checkDeriv2();
-        m_hessian.set(i,i,d);
-      }
-#else
-      // TODO - Verify that there is no need to add constraint's derivative to Hessian
-#endif
       ++i;
     }
     // clear the dirty flag if hessian was actually calculated
@@ -310,23 +296,6 @@ void CostFuncRwp::addValDerivHessian(
   }
   function->functionDeriv(*domain,jacobian);
 
-#if 0
-  // Out b/c no debug
-  if (debug)
-  {
-    std::cerr << "Jacobian:\n";
-    for(size_t i = 0; i < ny; ++i)
-    {
-      for(size_t ip = 0; ip < np; ++ip)
-      {
-        if ( !m_function->isActive(ip) ) continue;
-        std::cerr << jacobian.get(i,ip) << ' ';
-      }
-      std::cerr << std::endl;
-    }
-  }
-#endif
-
   size_t iActiveP = 0;
   double fVal = 0.0;
 
@@ -353,14 +322,6 @@ void CostFuncRwp::addValDerivHessian(
       double calc = values->getCalculated(id);
       double obs = values->getFitData(id);
       double w = values->getFitWeight(id);
-#if 0
-      double y = ( calc - obs ) * w;
-      d += y * jacobian.get(id,ip) * w;
-      if (iActiveP == 0 && evalFunction)
-      {
-        fVal += y * y;
-      }
-#else
       // TODO - Verify
       double diff = calc - obs;
       d += diff * jacobian.get(id, ip) * w * w / weight;
@@ -368,7 +329,6 @@ void CostFuncRwp::addValDerivHessian(
       {
         fVal += diff * diff * w * w / weight;
       }
-#endif
     }
     PARALLEL_CRITICAL(der_set)
     {
@@ -406,12 +366,8 @@ void CostFuncRwp::addValDerivHessian(
         for(size_t k = 0; k < ndata; ++k) // over fitting data
         {
           double w = values->getFitWeight(k);
-#if 0
-          d += jacobian.get(k,i) * jacobian.get(k,j) * w * w;
-#else
           // FIXME/TODO - Dig out the formular for Rwp
           d += jacobian.get(k,i) * jacobian.get(k,j) * w * w / weight;
-#endif
         }
         PARALLEL_CRITICAL(hessian_set)
         {
@@ -605,6 +561,7 @@ void CostFuncRwp::calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel)
 
   return;
 }
+#endif
 
 } // namespace CurveFitting
 } // namespace Mantid

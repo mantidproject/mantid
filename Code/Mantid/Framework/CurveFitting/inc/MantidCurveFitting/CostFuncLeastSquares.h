@@ -101,7 +101,7 @@ protected:
   virtual double calSqrtW(API::FunctionValues_sptr values) const;
 
   /// Flag to include constraint in cost function value
-  const bool m_includePenalty;
+  bool m_includePenalty;
 
   mutable double m_value;
   mutable GSLVector m_der;

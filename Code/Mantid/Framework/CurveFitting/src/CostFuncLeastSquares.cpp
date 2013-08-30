@@ -192,12 +192,15 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
   size_t np = m_function->nParams();
   if (evalFunction)
   {
-    for(size_t i = 0; i < np; ++i)
+    if (m_includePenalty)
     {
-      API::IConstraint* c = m_function->getConstraint(i);
-      if (c)
+      for(size_t i = 0; i < np; ++i)
       {
-        m_value += c->check();
+        API::IConstraint* c = m_function->getConstraint(i);
+        if (c)
+        {
+          m_value += c->check();
+        }
       }
     }
     m_dirtyVal = false;
@@ -205,34 +208,40 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
 
   if (evalDeriv)
   {
-    size_t i = 0;
-    for(size_t ip = 0; ip < np; ++ip)
+    if (m_includePenalty)
     {
-      if ( !m_function->isActive(ip) ) continue;
-      API::IConstraint* c = m_function->getConstraint(ip);
-      if (c)
+      size_t i = 0;
+      for(size_t ip = 0; ip < np; ++ip)
       {
-        double d =  m_der.get(i) + c->checkDeriv();
-        m_der.set(i,d);
+        if ( !m_function->isActive(ip) ) continue;
+        API::IConstraint* c = m_function->getConstraint(ip);
+        if (c)
+        {
+          double d =  m_der.get(i) + c->checkDeriv();
+          m_der.set(i,d);
+        }
+        ++i;
       }
-      ++i;
     }
     m_dirtyDeriv = false;
   }
 
   if (evalDeriv)
   {
-    size_t i = 0;
-    for(size_t ip = 0; ip < np; ++ip)
+    if (m_includePenalty)
     {
-      if ( !m_function->isActive(ip) ) continue;
-      API::IConstraint* c = m_function->getConstraint(ip);
-      if (c)
+      size_t i = 0;
+      for(size_t ip = 0; ip < np; ++ip)
       {
-        double d =  m_hessian.get(i,i) + c->checkDeriv2();
-        m_hessian.set(i,i,d);
+        if ( !m_function->isActive(ip) ) continue;
+        API::IConstraint* c = m_function->getConstraint(ip);
+        if (c)
+        {
+          double d =  m_hessian.get(i,i) + c->checkDeriv2();
+          m_hessian.set(i,i,d);
+        }
+        ++i;
       }
-      ++i;
     }
     // clear the dirty flag if hessian was actually calculated
     m_dirtyHessian = m_hessian.isEmpty();
@@ -514,7 +523,8 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix& covar, double ep
   */
 double CostFuncLeastSquares::getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW) const
 {
-  return (values->getFitWeight(i) / sqrtW);
+  UNUSED_ARG(sqrtW);
+  return (values->getFitWeight(i));
 }
 
 //----------------------------------------------------------------------------------------------

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/CostFuncFitting.h"
+#include "MantidCurveFitting/CostFuncLeastSquares.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 #include "MantidCurveFitting/GSLVector.h"
 
@@ -19,7 +19,7 @@ namespace CurveFitting
   class SeqDomain;
   class ParDomain;
 
-/** Cost function for Rwp ... ... TODO: Make it complete!
+/** Cost function for Rwp = (sum_i (( obs_i - cal_i )/sigma_i)**2 ) / (sum_i (obs_i/sigma_i)**2)
 
     @author
     @date
@@ -44,7 +44,7 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CostFuncRwp : public CostFuncFitting
+class DLLExport CostFuncRwp : public CostFuncLeastSquares
 {
 public:
   /// Constructor
@@ -58,56 +58,14 @@ public:
   /// Get short name of minimizer - useful for say labels in guis
   virtual std::string shortName() const {return "Rwp";}
 
-  /// Calculate value of cost function
-  virtual double val() const;
-
-  /// Calculate the derivatives of the cost function
-  /// @param der :: Container to output the derivatives
-  virtual void deriv(std::vector<double>& der) const;
-
-  /// Calculate the value and the derivatives of the cost function
-  /// @param der :: Container to output the derivatives
-  /// @return :: The value of the function
-  virtual double valAndDeriv(std::vector<double>& der) const;
-
-  virtual double valDerivHessian(bool evalFunction = true, bool evalDeriv = true, bool evalHessian = true) const;
-  const GSLVector& getDeriv() const;
-  const GSLMatrix& getHessian() const;
-  void push();
-  void pop();
-  void drop();
-
-  void setParameters(const GSLVector& params);
-  void getParameters(GSLVector& params) const;
-
-protected:
-
-  virtual void calActiveCovarianceMatrix(GSLMatrix& covar, double epsrel = 1e-8);
-
-  void addVal(
-    API::FunctionDomain_sptr domain,
-    API::FunctionValues_sptr values
-    )const;
-  void addValDerivHessian(
-    API::IFunction_sptr function,
-    API::FunctionDomain_sptr domain,
-    API::FunctionValues_sptr values,
-    bool evalFunction = true, bool evalDeriv = true, bool evalHessian = true) const;
-
 private:
 
-  mutable double m_value;
-  mutable GSLVector m_der;
-  mutable GSLMatrix m_hessian;
+  /// Get weight (1/sigma)
+  virtual double getWeight(API::FunctionValues_sptr values, size_t i, double sqrtW=1.0) const;
 
-  mutable bool m_pushed;
-  mutable double m_pushedValue;
-  mutable GSLVector m_pushedParams;
+  /// Calcualte sqrt(W). Final cost function = sum_i [ (obs_i - cal_i) / (sigma * sqrt(W))]**2
+  virtual double calSqrtW(API::FunctionValues_sptr values) const;
 
-  friend class SeqDomain;
-  friend class ParDomain;
-
-  Kernel::Logger & m_log;
 };
 
 } // namespace CurveFitting
