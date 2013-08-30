@@ -3,6 +3,10 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IBackgroundFunction.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 
 namespace Mantid
@@ -50,7 +54,54 @@ namespace Algorithms
     virtual void initDocs();
     void init();
     void exec();
-    
+
+    /// Process input propeties
+    void processProperties();
+
+    /// Fit background with multiple domain
+    API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
+
+    /// Make a pure peak WS in the fit window region
+    void makePurePeakWS(const std::vector<double>& vec_bkgd);
+
+    /// Fit a function.
+    double fitFunction(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws,
+                       size_t wsindex, double xmin, double xmax,
+                       std::vector<double>& vec_caldata);
+
+    /// Set up a vector of guessed FWHM
+    void setupGuessedFWHM(std::vector<double>& vec_FWHM);
+
+    /// Input data workspace
+    API::MatrixWorkspace_sptr m_dataWS;
+    size_t m_wsIndex;
+
+    /// Peak function
+    API::IPeakFunction_sptr m_peakFunc;
+    /// Background function
+    API::IBackgroundFunction_sptr m_bkgdFunc;
+    /// Minimum fit position
+    double m_minFitX;
+    /// Maximum fit position
+    double m_maxFitX;
+    /// Minimum peak position
+    double m_minPeakX;
+    /// Maximum peak position
+    double m_maxPeakX;
+
+    /// fitting strategy
+    bool m_fitBkgdFirst;
+
+    /// output option
+    bool m_outputRawParams;
+
+    /// Flag about guessed FWHM
+    bool m_fitWithStepPeakWidth;
+
+    /// Use peak position tolerance as a criterial for peak fit
+    bool m_usePeakPositionTolerance;
+
+
   };
 
 
