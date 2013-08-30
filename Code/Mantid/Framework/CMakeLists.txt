@@ -141,7 +141,7 @@ add_subdirectory (MDAlgorithms)
 add_subdirectory (MDEvents)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
-#add_subdirectory (ISISLiveData)
+add_subdirectory (ISISLiveData)
 
 ###########################################################################
 # Add a custom target to build all of the Framework
@@ -151,8 +151,7 @@ set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI PythonKernelModule
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms
-                     LiveData
-#                     ISISLiveData
+                     LiveData ISISLiveData
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} ) 

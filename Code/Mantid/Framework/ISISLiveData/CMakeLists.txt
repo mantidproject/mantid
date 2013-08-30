@@ -1,8 +1,10 @@
 set ( SRC_FILES
+   src/example.cpp
 )
 
 set ( INC_FILES
   inc/MantidISISLiveData/DllConfig.h
+  inc/MantidISISLiveData/TCPEventStreamDefs.h
 )
 
 set ( TEST_FILES
