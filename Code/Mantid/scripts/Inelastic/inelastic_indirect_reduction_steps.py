@@ -764,8 +764,8 @@ class NormaliseToUnityStep(ReductionStep):
         if self._factor:
             factor = self._factor
         else:
-            factor = ( sum / self._no_hist )
-        Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=factor,Operation= 'Multiply') 
+            factor = 1 / ( sum / self._no_hist )
+        Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=factor,Operation='Multiply') 
         
     def set_factor(self, factor):
         self._factor = factor
