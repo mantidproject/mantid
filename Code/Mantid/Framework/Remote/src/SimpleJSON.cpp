@@ -252,11 +252,35 @@ bool JSONValue::getValue( double &v) const
 
 bool JSONValue::getValue( std::string &v) const
 {
-  if (m_type != JSONValue::STRING)
-    return false;
+  // Since booleans and numbers can be easily converted to strings,
+  // we'll make this function a little smarter and have it do the
+  // conversion if necessary (instead of just returning false)
+  bool rv = true;  // assume success
+  std::ostringstream convert;
+  switch (m_type)
+  {
+  case JSONValue::STRING:
+    v = *mp_string;
+    break;
 
-  v = *mp_string;
-  return true;
+  case JSONValue::NUMBER:
+    convert << m_num << std::flush;
+    v = convert.str();
+    break;
+
+  case JSONValue::BOOL:
+    if (m_bool)
+      v = "true";
+    else
+      v = "false";
+    break;
+
+  default:
+    rv = false;
+  }
+
+
+  return rv;
 }
 
 bool JSONValue::getValue( JSONArray &v) const
