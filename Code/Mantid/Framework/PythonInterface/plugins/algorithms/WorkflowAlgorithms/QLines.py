@@ -3,6 +3,7 @@ from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid import config
+import os
 
 class QLines(PythonAlgorithm):
  
