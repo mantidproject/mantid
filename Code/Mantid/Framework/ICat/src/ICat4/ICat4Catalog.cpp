@@ -133,7 +133,6 @@ namespace Mantid
         // Format the timestamps in order to compare them.
         std::string startDate = formatDateTime(inputs.getStartDate());
         std::string endDate   = formatDateTime(inputs.getEndDate());
-
         // Make it so...
         investigationWhere.push_back("startDate >= '" + startDate + "' AND startDate <= '" + endDate + "' OR endDate >= '" + startDate + "' AND endDate <= '" + endDate + "'");
       }
@@ -141,7 +140,7 @@ namespace Mantid
       // Investigation name (title)
       if(!inputs.getInvestigationName().empty())
       {
-        investigationWhere.push_back("name LIKE '%" + inputs.getInvestigationName() + "%' ");
+        investigationWhere.push_back("title LIKE '%" + inputs.getInvestigationName() + "%' ");
       }
 
       // Investigation abstract
@@ -156,13 +155,13 @@ namespace Mantid
       // Add the investigation result to the query if it exists.
       if (!investigationResult.empty())
       {
-        querySegments.push_back("DISTINCT Investigation[" + investigationResult + "]");
+        querySegments.push_back("Investigation[" + investigationResult + "]");
       }
 
       // Investigation type
       if(!inputs.getInvestigationType().empty())
       {
-        querySegments.push_back("InvestigationUserType[name IN ('" + inputs.getInvestigationType() + "')]");
+        querySegments.push_back("InvestigationType[name IN ('" + inputs.getInvestigationType() + "')]");
       }
 
       // Investigator's surname
@@ -184,8 +183,20 @@ namespace Mantid
         // Convert the start and end runs to string.
         std::string runStart = Strings::toString(inputs.getRunStart());
         std::string runEnd   = Strings::toString(inputs.getRunEnd());
-        querySegments.push_back("DatafileParameter[type.name ='run_number' AND numericValue BETWEEN " + runStart + " AND " + runEnd + "]");
-        queryDataset = true;
+
+        // To be able to use DatafileParameter we need to have access to Dataset and Datafile.
+        // If queryDataset is true, then we can rest assured that the relevant access is possible.
+        if (queryDataset)
+        {
+          querySegments.push_back("DatafileParameter[type.name ='run_number' AND numericValue BETWEEN " + runStart + " AND " + runEnd + "]");
+        }
+        else
+        {
+          // Otherwise we directly include them ourselves.
+          querySegments.push_back("Dataset <-> Datafile <-> DatafileParameter[type.name ='run_number' AND numericValue BETWEEN " + runStart + " AND " + runEnd + "]");
+          // We then set queryDataset to true since Sample can not be included if a dataset is.
+          queryDataset = true;
+        }
       }
 
       // Instrument name
@@ -209,13 +220,19 @@ namespace Mantid
       // Now we build the query from the segments. For each segment, we append a join ("<->").
       std::string query = Strings::join(querySegments.begin(), querySegments.end(), " <-> ");
 
+      // We then append the required includes to output related data, such as instrument name and run parameters.
+      if (!query.empty())
+      {
+        query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> ");
+      }
+
       return (query);
     }
 
     /**
      * Searches for the relevant data based on user input.
-     * @param inputs  :: reference to a class contains search inputs
-     * @param ws_sptr :: shared pointer to search results workspace
+     * @param inputs   :: reference to a class contains search inputs
+     * @param outputws :: shared pointer to search results workspace
      */
     void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws)
     {
@@ -258,8 +275,7 @@ namespace Mantid
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
       // Add rows headers to the output workspace.
-      outputws->addColumn("str","InvestigationId");
-      outputws->addColumn("str","Proposal");
+      outputws->addColumn("str","Investigation Number");
       outputws->addColumn("str","Title");
       outputws->addColumn("str","Instrument");
       outputws->addColumn("str","Run Range");
@@ -275,11 +291,15 @@ namespace Mantid
         {
           API::TableRow table = outputws->appendRow();
           // Now add the relevant investigation data to the table.
-          savetoTableWorkspace(investigation->name, table);    // Investigation ID
-          savetoTableWorkspace(investigation->summary, table); // Investigation proposal
-          savetoTableWorkspace(investigation->title, table);   // Investigation title
-          savetoTableWorkspace(investigation->instrument->name, table); // Instrument name
-          savetoTableWorkspace(investigation->parameters[0]->stringValue, table); // Run parameters
+          savetoTableWorkspace(investigation->name, table); // Investigation number
+          savetoTableWorkspace(investigation->title, table);
+          savetoTableWorkspace(investigation->instrument->name, table);
+          // Verify that the run parameters vector exist prior to doing anything.
+          // Since some investigations may not have run parameters.
+          if (!investigation->parameters.empty())
+          {
+            savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
+          }
         }
         catch(std::runtime_error&)
         {
@@ -291,16 +311,16 @@ namespace Mantid
     /**
      * Returns the datasets associated to the given investigation id.
      * @param investigationId :: unique identifier of the investigation
-     * @param datasetsws_sptr :: shared pointer to datasets
+     * @param outputws        :: shared pointer to datasets
      */
-    void ICat4Catalog::getDataSets(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& datasetsws_sptr)
+    void ICat4Catalog::getDataSets(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
     }
 
     /**
      * Returns the datafiles associated to the given investigation id.
      * @param investigationId  :: unique identifier of the investigation
-     * @param datafilesws_sptr :: shared pointer to datasets
+     * @param outputws         :: shared pointer to datasets
      */
     void ICat4Catalog::getDataFiles(const long long& investigationId, Mantid::API::ITableWorkspace_sptr& outputws)
     {
@@ -340,7 +360,7 @@ namespace Mantid
     /**
      * Saves result from "getDataFiles" to workspace.
      * @param investigationId :: unique identifier of the investigation
-     * @param datasetsws_sptr :: shared pointer to datasets
+     * @param outputws        :: shared pointer to datasets
      */
     void ICat4Catalog::saveDataFiles(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
@@ -434,7 +454,6 @@ namespace Mantid
       {
         for(unsigned i = 0; i < response.return_.size(); ++i)
         {
-          // Cast from xsd__anyType to subclass (xsd__string).
           xsd__string * investigation = dynamic_cast<xsd__string*>(response.return_[i]);
           invstTypes.push_back(investigation->__item);
         }
