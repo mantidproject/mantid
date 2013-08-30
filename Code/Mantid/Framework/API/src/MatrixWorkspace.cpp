@@ -1224,10 +1224,10 @@ namespace Mantid
       virtual bool getIsIntegrated() const {return m_axis.length() == 1;}
 
       /// @return the minimum extent of this dimension
-      virtual coord_t getMinimum() const {return coord_t(m_axis(0));}
+      virtual coord_t getMinimum() const {return coord_t(m_axis.getMin());}
 
       /// @return the maximum extent of this dimension
-      virtual coord_t getMaximum() const {return coord_t(m_axis(m_axis.length()-1));}
+      virtual coord_t getMaximum() const {return coord_t(m_axis.getMax());}
 
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
       virtual size_t getNBins() const {return m_axis.length();}
