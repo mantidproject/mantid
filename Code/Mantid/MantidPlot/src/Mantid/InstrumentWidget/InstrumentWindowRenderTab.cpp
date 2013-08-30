@@ -14,6 +14,7 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QAction>
+#include <QActionGroup>
 #include <QSignalMapper>
 #include <QMessageBox>
 #include <QToolTip>
@@ -41,13 +42,57 @@ InstrumentWindowTab(instrWindow)
   connect(m_instrWindow,SIGNAL(scaleTypeChanged(int)),this,SLOT(scaleTypeChanged(int)));
   connect(m_instrWindow,SIGNAL(glOptionChanged(bool)),this,SLOT(glOptionChanged(bool)));
 
-  // Render Mode control
-  m_renderMode = new QComboBox(this);
-  m_renderMode->setToolTip("Set render mode");
-  QStringList modeList;
-  modeList << "Full 3D" << "Cylindrical X"  << "Cylindrical Y" << "Cylindrical Z" << "Spherical X" << "Spherical Y" << "Spherical Z";
-  m_renderMode->insertItems(0,modeList);
-  connect(m_renderMode,SIGNAL(currentIndexChanged(int)), this, SLOT(setSurfaceType(int)));
+  // Surface type controls
+  m_surfaceTypeButton = new QPushButton("Render mode",this);
+  m_surfaceTypeButton->setToolTip("Set render mode");
+
+  QSignalMapper *signalMapper = new QSignalMapper(this);
+  connect(signalMapper,SIGNAL(mapped(int)),this,SLOT(setSurfaceType(int)));
+
+  m_full3D = new QAction("Full 3D",this);
+  m_full3D->setCheckable(true);
+  connect(m_full3D,SIGNAL(triggered()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(m_full3D, 0);
+  m_cylindricalX = new QAction("Cylindrical X",this);
+  m_cylindricalX->setCheckable(true);
+  connect(m_cylindricalX,SIGNAL(triggered()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(m_cylindricalX, 1);
+  m_cylindricalY = new QAction("Cylindrical Y",this);
+  m_cylindricalY->setCheckable(true);
+  connect(m_cylindricalY,SIGNAL(triggered()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(m_cylindricalY, 2);
+  m_cylindricalZ = new QAction("Cylindrical Z",this);
+  m_cylindricalZ->setCheckable(true);
+  connect(m_cylindricalZ,SIGNAL(triggered()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(m_cylindricalZ, 3);
+  m_sphericalX = new QAction("Spherical X",this);
+  m_sphericalX->setCheckable(true);
+  connect(m_sphericalX,SIGNAL(triggered()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(m_sphericalX, 4);
+  m_sphericalY = new QAction("Spherical Y",this);
+  m_sphericalY->setCheckable(true);
+  connect(m_sphericalY,SIGNAL(triggered()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(m_sphericalY, 5);
+  m_sphericalZ = new QAction("Spherical Z",this);
+  m_sphericalZ->setCheckable(true);
+  connect(m_sphericalZ,SIGNAL(triggered()),signalMapper,SLOT(map()));
+  signalMapper->setMapping(m_sphericalZ, 6);
+
+  m_surfaceTypeActionGroup = new QActionGroup(this);
+  m_surfaceTypeActionGroup->setExclusive(true);
+  m_surfaceTypeActionGroup->addAction(m_full3D);
+  m_surfaceTypeActionGroup->addAction(m_cylindricalX);
+  m_surfaceTypeActionGroup->addAction(m_cylindricalY);
+  m_surfaceTypeActionGroup->addAction(m_cylindricalZ);
+  m_surfaceTypeActionGroup->addAction(m_sphericalX);
+  m_surfaceTypeActionGroup->addAction(m_sphericalY);
+  m_surfaceTypeActionGroup->addAction(m_sphericalZ);
+
+  QMenu *renderModeMenu = new QMenu(this);
+  renderModeMenu->addActions(m_surfaceTypeActionGroup->actions());
+  connect(renderModeMenu,SIGNAL(hovered(QAction*)),this,SLOT(showMenuToolTip(QAction*)));
+
+  m_surfaceTypeButton->setMenu( renderModeMenu );
 
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
@@ -129,7 +174,7 @@ InstrumentWindowTab(instrWindow)
   connect(m_autoscaling,SIGNAL(toggled(bool)),this,SLOT(setColorMapAutoscaling(bool)));
 
   // layout
-  renderControlsLayout->addWidget(m_renderMode);
+  renderControlsLayout->addWidget(m_surfaceTypeButton);
   renderControlsLayout->addLayout(unwrappedControlsLayout);
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(displaySettings);
@@ -182,6 +227,23 @@ void InstrumentWindowRenderTab::setPrecisionMenuItemChecked(int n)
             prec->setChecked( true );
             break;
         }
+    }
+}
+
+/**
+ * Enable/disable the Full 3D menu option
+ * @param on :: True to enable.
+ */
+void InstrumentWindowRenderTab::enable3DSurface(bool on)
+{
+    m_full3D->setEnabled( on );
+    if ( on )
+    {
+        m_full3D->setToolTip("");
+    }
+    else
+    {
+        m_full3D->setToolTip("Disabled: check \"Use OpenGL\" option in Display Settings to enable");
     }
 }
 
@@ -348,6 +410,7 @@ void InstrumentWindowRenderTab::enableGL(bool on)
   m_GLView->blockSignals(true);
   m_GLView->setChecked(m_instrWindow->isGLEnabled());
   m_GLView->blockSignals(false);
+  enable3DSurface(on);
 }
 
 
@@ -498,26 +561,29 @@ void InstrumentWindowRenderTab::displaySettingsAboutToshow()
  */
 void InstrumentWindowRenderTab::setSurfaceType(int index)
 {
-  m_renderMode->blockSignals(true);
-  m_renderMode->setCurrentIndex( index );
-  m_renderMode->blockSignals(false);
-  
-  m_instrWindow->setSurfaceType( index );
-  showResetView( index );
-  showFlipControl( index );
+    if ( (int) m_instrWindow->getSurfaceType() != index )
+    {
+        m_instrWindow->setSurfaceType( index );
+    }
 }
 
 /**
   * Respond to surface change from script.
   * @param typeIndex :: Index selected in the surface type combo box.
   */
-void InstrumentWindowRenderTab::surfaceTypeChanged(int typeIndex)
+void InstrumentWindowRenderTab::surfaceTypeChanged(int index)
 {
-    m_renderMode->blockSignals(true);
-    m_renderMode->setCurrentIndex( typeIndex );
-    m_renderMode->blockSignals(false);
-    showResetView( typeIndex );
-    showFlipControl( typeIndex );
+    // display action's text on the render mode button
+    QAction *action = m_surfaceTypeActionGroup->actions()[index];
+    m_surfaceTypeButton->setText( action->text() );
+
+    // if action isn't checked then this method is called from script
+    if ( !action->isChecked() )
+    {
+        // checking action calls setSurfaceType slot
+        action->setChecked(true);
+    }
+
 }
 
 /**
@@ -559,3 +625,4 @@ void InstrumentWindowRenderTab::showMenuToolTip(QAction *action)
 {
     QToolTip::showText(QCursor::pos(),action->toolTip(),this);
 }
+
