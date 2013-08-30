@@ -4,8 +4,13 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/FitPeak.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 using Mantid::Algorithms::FitPeak;
+
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 class FitPeakTest : public CxxTest::TestSuite
 {
@@ -16,9 +21,21 @@ public:
   static void destroySuite( FitPeakTest *suite ) { delete suite; }
 
 
-  void test_Something()
+  void test_FitPeakWithHighBkgd()
   {
-    TSM_ASSERT( "You forgot to write a test!", 0);
+    // Generate data
+    MatrixWorkspace_sptr dataws = gen_4866P5Data();
+
+  }
+
+
+
+  /** Generate a workspace contains PG3_4866 5-th peak
+    */
+  MatrixWorkspace_sptr gen_4866P5Data()
+  {
+
+
   }
 
 
