@@ -1,11 +1,11 @@
 #include "MantidRemoteAlgorithms/QueryRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidRemote/RemoteJobManager.h"
+#include "MantidKernel/RemoteJobManager.h"
+#include "MantidRemote/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"
 
@@ -37,13 +37,6 @@ void QueryRemoteFile::init()
   // The transaction ID comes from the StartRemoteTransaction algortithm
   declareProperty( "TransactionID", "", requireValue, "", Direction::Input);
 
-  // TODO: Can we figure out the user name/group name automatically?
-  declareProperty( "UserName", "", requireValue, "", Direction::Input);
-
-  // Password doesn't get echoed to the screen...
-  declareProperty( new MaskedProperty<std::string>( "Password", "", requireValue, Direction::Input), "");
-
-
   declareProperty(new ArrayProperty<std::string>( "FileNames", Direction::Output));
 
 }
@@ -60,20 +53,31 @@ void QueryRemoteFile::exec()
     throw( std::runtime_error( std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  // Set the username and password from the properties
-  jobManager->setUserName( getPropertyValue ("UserName"));
-  jobManager->setPassword( getPropertyValue( "Password"));
-
-  std::vector <std::string> files;
-  std::string errMsg;
-  if (jobManager->listFiles( getPropertyValue("TransactionID"), files, errMsg) == RemoteJobManager::JM_OK)
+  std::istream &respStream = jobManager->httpGet("/files", std::string("TransID=") + getPropertyValue("TransactionID"));
+  JSONObject resp;
+  initFromStream( resp, respStream);
+  if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
-    setProperty( "FileNames", files);
+
+    JSONArray files;
+    std::vector<std::string> filenames;
+    std::string oneFile;
+    resp["Files"].getValue( files);
+    for (unsigned int i = 0; i < files.size(); i++)
+    {
+      files[i].getValue( oneFile);
+      filenames.push_back(oneFile);
+    }
+
+    setProperty( "FileNames", filenames);
   }
   else
   {
-    throw( std::runtime_error( "Error listing remote files: " + errMsg));
+    std::string errMsg;
+    resp["Err_Msg"].getValue( errMsg);
+    throw( std::runtime_error( errMsg));
   }
+
 }
 
 } // end namespace RemoteAlgorithms

@@ -37,7 +37,7 @@ public:
   // It's up to the various algorithms to know what to do with these functions
 
   // Perform an HTTP GET request (with optional HTTP Basic Auth)
-  std::istream & httpGet( const std::string &path, const std::string &query_str,
+  std::istream & httpGet( const std::string &path, const std::string &query_str = "",
                           const std::string &username = "",
                           const std::string &password = "");
 

@@ -12,8 +12,8 @@ Submit a job to be executed on the specified remote compute resource.
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidRemote/RemoteTask.h"
-#include "MantidRemote/RemoteJobManager.h"
+#include "MantidRemote/SimpleJSON.h"
+#include "MantidKernel/RemoteJobManager.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -47,6 +47,9 @@ void SubmitRemoteJob::init()
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
   declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
 
+
+  // Note: these 2 properties are 'implementation specific'.  We know that Fermi needs them, but we really
+  // ought to query the information URL before requiring them.
   declareProperty( "NumNodes", 0,  mustBePositive, "", Direction::Input);
   declareProperty( "CoresPerNode", 0,  mustBePositive, "", Direction::Input);
   // Number of actual MPI processes will be (NumNodes * CoresPerNode)
@@ -55,29 +58,18 @@ void SubmitRemoteJob::init()
   // all the jobs the user has submitted recently...)
   declareProperty( "TaskName", "", Direction::Input);
 
-  // TODO: Can we figure out the user name/group name automatically?
-  // (Group can probably be in the facilities.xml file.  Username can from
-  // from the user's prefs file.  Password should never be written to disk ever!
-  // Note that these are really implementation details: some other cluster
-  // might want globus certificates or something like that...
-  declareProperty( "UserName", "", requireValue, "", Direction::Input);
-  declareProperty( "GroupName", "", requireValue, "", Direction::Input);
-
-  // Password doesn't get echoed to the screen...
-  declareProperty( new MaskedProperty<std::string>( "Password", "", requireValue, Direction::Input), "");
-
   // The transaction ID comes from the StartRemoteTransaction algortithm
   declareProperty( "TransactionID", "", requireValue, "", Direction::Input);
-
-  // Assuming the submission succeeded, this property will be set with a value
-  // we can use to track the job
-  declareProperty( "JobID", "", Direction::Output);
 
   // Name of the python script to execute
   declareProperty( "ScriptName", "", requireValue, "", Direction::Input);
 
-  // Command line arguments for the script
-  declareProperty( "ScriptArguments", "", Direction::Input);
+  // The actual python code
+  declareProperty( "PythonScript", "", requireValue, "", Direction::Input);
+
+  // Assuming the submission succeeded, this property will be set with a value
+  // we can use to track the job
+  declareProperty( "JobID", "", Direction::Output);
 }
 
 void SubmitRemoteJob::exec()
@@ -98,32 +90,30 @@ void SubmitRemoteJob::exec()
     throw( std::runtime_error( std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
+  RemoteJobManager::PostDataMap postData;
 
-  // Create a RemoteTask object for this job
-  RemoteTask task(getPropertyValue( "TaskName"), getPropertyValue( "TransactionID"));
-  task.appendResource( "group", getPropertyValue( "GroupName"));
-  task.appendResource( "num_nodes", getPropertyValue( "NumNodes"));
-  task.appendResource( "cores_per_node", getPropertyValue( "CoresPerNode"));
-  task.appendResource ( "executable", getPropertyValue( "ScriptName"));
+  postData["TransID"] = getPropertyValue("TransactionID");
+  postData["NumNodes"] = getPropertyValue( "NumNodes");
+  postData["CoresPernode"] = getPropertyValue( "CoresPerNode");
 
-  // Set the username and password from the properties
-  jobManager->setUserName( getPropertyValue ("UserName"));
-  jobManager->setPassword( getPropertyValue( "Password"));
+  postData["ScriptName"] = getPropertyValue( "ScriptName");
+  postData[getPropertyValue("ScriptName")] = getPropertyValue( "PythonScript");
 
-  // append command line options
-  task.appendCmdLineParam( getPropertyValue( "ScriptArguments"));
-
-  std::string retMsg;
-  bool jobOutput = jobManager->submitJob( task, retMsg);
-
-  if (jobOutput)
+  std::istream &respStream = jobManager->httpPost("/submit", postData);
+  JSONObject resp;
+  initFromStream( resp, respStream);
+  if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
-    setPropertyValue( "JobID", retMsg);
-    g_log.information() << "Job submitted.  JobID: " << retMsg << std::endl;
+    std::string jobId;
+    resp["JobID"].getValue( jobId);
+    setPropertyValue( "JobID", jobId);
+    g_log.information() << "Job submitted.  Job ID =  " << getPropertyValue("JobID") << std::endl;
   }
   else
   {
-    throw( std::runtime_error( "Job submission failed: " + retMsg));
+    std::string errMsg;
+    resp["Err_Msg"].getValue( errMsg);
+    throw( std::runtime_error( errMsg));
   }
 }
 
