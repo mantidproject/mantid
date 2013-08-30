@@ -214,7 +214,7 @@ void CheckWorkspacesMatch::doComparison()
       return;
     }
   }
-  // Check some event-based stuff
+  // Check some peak-based stuff
   if (tws1 && tws2)
   {
     // Check some table-based stuff
@@ -228,6 +228,26 @@ void CheckWorkspacesMatch::doComparison()
       result = "Mismatched number of columns.";
       return;
     }
+
+    // sort the workspaces before comparing
+    {
+      auto sortPeaks = createChildAlgorithm("SortPeaksWorkspace");
+      sortPeaks->setProperty("InputWorkspace", tws1);
+      sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
+      sortPeaks->setProperty("SortAscending", true);
+      sortPeaks->executeAsChildAlg();
+      IPeaksWorkspace_sptr temp = sortPeaks->getProperty("OutputWorkspace");
+      tws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(temp);
+
+      sortPeaks = createChildAlgorithm("SortPeaksWorkspace");
+      sortPeaks->setProperty("InputWorkspace", tws2);
+      sortPeaks->setProperty("ColumnNameToSortBy", "DSpacing");
+      sortPeaks->setProperty("SortAscending", true);
+      sortPeaks->executeAsChildAlg();
+      temp = sortPeaks->getProperty("OutputWorkspace");
+      tws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(temp);
+    }
+
     const double tolerance = getProperty("Tolerance");
     for (int i =0; i<tws1->getNumberPeaks(); i++)
     {
