@@ -257,41 +257,24 @@ class Detector(BaseScriptElement):
             Update data members according to reduction results
         """
         if IS_IN_MANTIDPLOT:
-            # Allow the use of the old reducer code, which uses
-            # the Python API v1
-            if self.PYTHON_API==1:
-                from reduction.command_interface import ReductionSingleton
-                if ReductionSingleton()._beam_finder is not None:
-                    pos = ReductionSingleton()._beam_finder.get_beam_center()
-                    self.x_position = pos[0]
-                    self.y_position = pos[1]
-                    
-                    if self.use_sample_beam_center:
-                        self.flood_x_position = self.x_position
-                        self.flood_y_position = self.y_position
-                    elif self.sensitivity_corr:
-                        pos_flood = ReductionSingleton()._sensitivity_correcter.get_beam_center()
-                        self.flood_x_position = pos_flood[0]
-                        self.flood_y_position = pos_flood[1]
-            else:
-                from mantid.api import PropertyManagerDataService
-                from reduction_workflow.command_interface import ReductionSingleton
-                property_manager_name = ReductionSingleton().get_reduction_table_name()
-                property_manager = PropertyManagerDataService.retrieve(property_manager_name)
-                if property_manager.existsProperty("LatestBeamCenterX"):
-                    self.x_position = property_manager.getProperty("LatestBeamCenterX").value
-                if property_manager.existsProperty("LatestBeamCenterY"):
-                    self.y_position = property_manager.getProperty("LatestBeamCenterY").value
+            from mantid.api import PropertyManagerDataService
+            from reduction_workflow.command_interface import ReductionSingleton
+            property_manager_name = ReductionSingleton().get_reduction_table_name()
+            property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+            if property_manager.existsProperty("LatestBeamCenterX"):
+                self.x_position = property_manager.getProperty("LatestBeamCenterX").value
+            if property_manager.existsProperty("LatestBeamCenterY"):
+                self.y_position = property_manager.getProperty("LatestBeamCenterY").value
 
-                if self.use_sample_beam_center:
+            if self.use_sample_beam_center:
+                self.flood_x_position = self.x_position
+                self.flood_y_position = self.y_position
+            elif self.sensitivity_corr:
+                if property_manager.existsProperty("SensitivityBeamCenterXUsed"):
+                    self.flood_x_position = property_manager.getProperty("SensitivityBeamCenterXUsed").value
+                else:
                     self.flood_x_position = self.x_position
+                if property_manager.existsProperty("SensitivityBeamCenterYUsed"):
+                    self.flood_y_position = property_manager.getProperty("SensitivityBeamCenterYUsed").value
+                else:
                     self.flood_y_position = self.y_position
-                elif self.sensitivity_corr:
-                    if property_manager.existsProperty("SensitivityBeamCenterXUsed"):
-                        self.flood_x_position = property_manager.getProperty("SensitivityBeamCenterXUsed").value
-                    else:
-                        self.flood_x_position = self.x_position
-                    if property_manager.existsProperty("SensitivityBeamCenterYUsed"):
-                        self.flood_y_position = property_manager.getProperty("SensitivityBeamCenterYUsed").value
-                    else:
-                        self.flood_y_position = self.y_position

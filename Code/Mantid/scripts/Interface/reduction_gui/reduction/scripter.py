@@ -31,7 +31,6 @@ class BaseScriptElement(object):
     """
     
     UPDATE_1_CHANGESET_CUTOFF = 10735
-    PYTHON_API = 1
     
     def __str__(self):
         """
