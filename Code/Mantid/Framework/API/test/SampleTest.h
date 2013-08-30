@@ -9,14 +9,13 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::Sample;
 using Mantid::API::SampleEnvironment;
-using Mantid::Kernel::NexusTestHelper;
 
 class SampleTest : public CxxTest::TestSuite
 {

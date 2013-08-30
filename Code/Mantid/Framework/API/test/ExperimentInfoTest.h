@@ -8,12 +8,11 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Matrix.h"
 
-
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <boost/regex.hpp>
@@ -26,7 +25,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::NexusTestHelper;
 
 class FakeChopper : public Mantid::API::ChopperModel
 {

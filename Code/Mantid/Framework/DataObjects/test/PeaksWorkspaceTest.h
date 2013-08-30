@@ -14,7 +14,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
