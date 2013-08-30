@@ -580,9 +580,8 @@ void InstrumentWindowRenderTab::surfaceTypeChanged(int index)
     // if action isn't checked then this method is called from script
     if ( !action->isChecked() )
     {
-        enable3DSurface( action == m_full3D );
+        // checking action calls setSurfaceType slot
         action->setChecked(true);
-        // checking action calls this slot again
     }
 
 }
