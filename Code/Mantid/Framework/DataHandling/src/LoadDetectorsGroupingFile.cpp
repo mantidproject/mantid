@@ -184,15 +184,32 @@ namespace DataHandling
       LoadGroupXMLFile loader;
       loader.loadXMLFile(inputFile.toString());
 
-      mUserGiveInstrument = loader.isGivenInstrumentName();
-      mInstrumentName = loader.getInstrumentName();
+      // Load an instrument, if given
+      if(loader.isGivenInstrumentName())
+      {
+        const std::string instrumentName = loader.getInstrumentName();
+    
+        std::string date("");
 
-      mGroupComponentsMap = loader.getGroupComponentsMap();
-      mGroupDetectorsMap = loader.getGroupDetectorsMap();
-      mGroupSpectraMap = loader.getGroupSpectraMap();
+        if(loader.isGivenDate())
+          date = loader.getDate();
   
+        // Get a relevant IDF for a given instrument name and date. If date is empty -
+        // the most recent will be used.
+        const std::string instrumentFilename = ExperimentInfo::getInstrumentFilename(instrumentName,date);
+  
+        // Load an instrument
+        Algorithm_sptr childAlg = this->createChildAlgorithm("LoadInstrument");
+        MatrixWorkspace_sptr tempWS(new DataObjects::Workspace2D());
+        childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
+        childAlg->setPropertyValue("Filename", instrumentFilename);
+        childAlg->setProperty("RewriteSpectraMap", false);
+        childAlg->executeAsChildAlg();
+        mInstrument = tempWS->getInstrument();
+      }
+
       // 2. Check if detector IDs are given
-      if (!mUserGiveInstrument)
+      if (!mInstrument)
       {
         std::map<int, std::vector<detid_t> >::iterator dit;
         for (dit = mGroupDetectorsMap.begin(); dit != mGroupDetectorsMap.end(); ++dit)
@@ -201,6 +218,10 @@ namespace DataHandling
             throw std::invalid_argument("Grouping file specifies detector ID without instrument name");
         }
       }
+
+      mGroupComponentsMap = loader.getGroupComponentsMap();
+      mGroupDetectorsMap = loader.getGroupDetectorsMap();
+      mGroupSpectraMap = loader.getGroupSpectraMap();
 
       // 3. Create output workspace
       this->intializeGroupingWorkspace();
@@ -260,7 +281,7 @@ namespace DataHandling
   void LoadDetectorsGroupingFile::setByComponents(){
 
     // 0. Check
-    if (!mUserGiveInstrument)
+    if (!mInstrument)
     {
       std::map<int, std::vector<std::string> >::iterator mapiter;
       bool norecord = true;
@@ -280,7 +301,6 @@ namespace DataHandling
     }
 
     // 1. Prepare
-    Geometry::Instrument_const_sptr minstrument = mGroupWS->getInstrument();
     detid2index_map* indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
 
     // 2. Set
@@ -292,7 +312,7 @@ namespace DataHandling
       for (size_t i = 0; i < it->second.size(); i ++){
 
         // a) get component
-        Geometry::IComponent_const_sptr component = minstrument->getComponentByName(it->second[i]);
+        Geometry::IComponent_const_sptr component = mInstrument->getComponentByName(it->second[i]);
 
 
         // b) component -> component assembly --> children (more than detectors)
@@ -340,7 +360,7 @@ namespace DataHandling
   void LoadDetectorsGroupingFile::setByDetectors(){
 
     // 0. Check
-    if (!mUserGiveInstrument && mGroupDetectorsMap.size()>0)
+    if (!mInstrument && mGroupDetectorsMap.size()>0)
     {
       std::map<int, std::vector<detid_t> >::iterator mapiter;
       bool norecord = true;
@@ -359,7 +379,6 @@ namespace DataHandling
     }
 
     // 1. Prepare
-    Geometry::Instrument_const_sptr minstrument = mGroupWS->getInstrument();
     detid2index_map* indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
 
     // 2. Set GroupingWorkspace
@@ -441,19 +460,10 @@ namespace DataHandling
    */
   void LoadDetectorsGroupingFile::intializeGroupingWorkspace(){
 
-    if (mUserGiveInstrument)
+    if (mInstrument)
     {
-      // 1. Create Instrument
-      Algorithm_sptr childAlg = this->createChildAlgorithm("LoadInstrument");
-      MatrixWorkspace_sptr tempWS(new DataObjects::Workspace2D());
-      childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
-      childAlg->setPropertyValue("InstrumentName", mInstrumentName);
-      childAlg->setProperty("RewriteSpectraMap", false);
-      childAlg->executeAsChildAlg();
-      Geometry::Instrument_const_sptr minstrument = tempWS->getInstrument();
-
-      // 2. Create GroupingWorkspace with  instrument
-      mGroupWS = DataObjects::GroupingWorkspace_sptr(new DataObjects::GroupingWorkspace(minstrument));
+      // Create GroupingWorkspace with  instrument
+      mGroupWS = DataObjects::GroupingWorkspace_sptr(new DataObjects::GroupingWorkspace(mInstrument));
     }
     else
     {
@@ -587,6 +597,9 @@ namespace DataHandling
 
         // Optional instrument name
         mInstrumentName = getAttributeValueByName(pNode, "instrument", mUserGiveInstrument);
+
+        // Optional date for which is relevant
+        mDate = getAttributeValueByName(pNode, "idf-date", mUserGiveDate);
        
         // Optional grouping description
         mDescription = getAttributeValueByName(pNode, "description", mUserGiveDescription);

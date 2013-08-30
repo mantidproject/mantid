@@ -22,8 +22,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
 using ScopedFileHelper::ScopedFile;
-
-using ScopedFileHelper::ScopedFile;
+using Mantid::DataObjects::GroupingWorkspace;
 
 class LoadDetectorsGroupingFileTest : public CxxTest::TestSuite
 {
@@ -75,7 +74,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
+    GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0],    1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(3695)[0], 1.0, 1.0E-5);
@@ -107,7 +106,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
+    GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0],    1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(3695)[0], 1.0, 1.0E-5);
@@ -157,7 +156,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
+    GroupingWorkspace_sptr gws = boost::dynamic_pointer_cast<GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
@@ -207,8 +206,8 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    DataObjects::GroupingWorkspace_sptr gws =
-        boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
+    GroupingWorkspace_sptr gws =
+        boost::dynamic_pointer_cast<GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(31)[0], 1.0, 1.0E-5);
@@ -248,7 +247,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
+    auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     // Check that description was loaded
     TS_ASSERT_EQUALS(gws->run().getProperty("Description")->value(), "musr longitudinal (64 detectors)");
@@ -289,7 +288,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
+    auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
@@ -329,7 +328,7 @@ public:
     load.execute();
     TS_ASSERT(load.isExecuted());
 
-    auto gws = boost::dynamic_pointer_cast<DataObjects::GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
+    auto gws = boost::dynamic_pointer_cast<GroupingWorkspace>(API::AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT_DELTA(gws->dataY(0)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(1)[0], 1.0, 1.0E-5);
@@ -423,6 +422,37 @@ public:
 
     TS_ASSERT_THROWS_EQUALS(load.execute(), const Exception::ParseError& e, e.what(), errorMsg);
     TS_ASSERT(!load.isExecuted());
+  }
+
+  void test_SelectIdfUsingSpecifiedDate()
+  {
+    std::ostringstream os;
+
+    os << "<?xml version=\"1.0\"?>" << std::endl;
+    os << "<detector-grouping instrument=\"EMU\" idf-date=\"2009-12-30 00:00:00\">" << std::endl;
+    os << "  <group>" << std::endl;
+    os << "    <ids>1</ids>" << std::endl;
+    os << "  </group>" << std::endl;
+    os << "</detector-grouping>" << std::endl;
+
+    ScopedFile file(os.str(), "test_SelectIdfUsingSpecifiedDate.xml");
+
+    LoadDetectorsGroupingFile load;
+    load.initialize();
+
+    load.setChild(true); // So output workspace is not going to ADS
+
+    TS_ASSERT(load.setProperty("InputFile", file.getFileName()));
+    load.setPropertyValue("OutputWorkspace", "Grouping");
+
+    load.execute();
+    TS_ASSERT(load.isExecuted());
+
+    GroupingWorkspace_sptr gws = load.getProperty("OutputWorkspace");
+
+    // If everything works correctly, should have 32 spectra in the workspace, although the latest
+    // IDF for EMU instrument has 96 detectors.
+    TS_ASSERT_EQUALS(gws->getNumberHistograms(), 32);
   }
 
 };

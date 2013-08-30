@@ -85,10 +85,10 @@ namespace DataHandling
 
      /// Grouping Workspace
      DataObjects::GroupingWorkspace_sptr mGroupWS;
-     /// Instrument name
-     std::string mInstrumentName;
-     /// User-define instrument name
-     bool mUserGiveInstrument;
+
+     /// Instrument to use if given by user
+     Geometry::Instrument_const_sptr mInstrument;
+
      /// XML document loaded
      Poco::XML::Document* pDoc;
      /// Root element of the parsed XML
@@ -116,24 +116,14 @@ namespace DataHandling
       mStartGroupID = startgroupid;
     }
 
-    std::string getInstrumentName()
-    {
-      return mInstrumentName;
-    }
-    bool isGivenInstrumentName()
-    {
-      return mUserGiveInstrument;
-    }
+    std::string getInstrumentName() { return mInstrumentName; }
+    bool isGivenInstrumentName() { return mUserGiveInstrument; }
 
-    std::string getDescription()
-    {
-        return mDescription;
-    }
+    std::string getDate() { return mDate; }
+    bool isGivenDate() { return mUserGiveDate; }
 
-    bool isGivenDescription()
-    {
-        return mUserGiveDescription;
-    }
+    std::string getDescription() { return mDescription; }
+    bool isGivenDescription() { return mUserGiveDescription; }
 
     /// Data structures to store XML to Group/Detector conversion map
     std::map<int, std::vector<std::string> > getGroupComponentsMap()
@@ -159,6 +149,11 @@ namespace DataHandling
     std::string mInstrumentName;
     /// User-define instrument name
     bool mUserGiveInstrument;
+
+    /// Date in ISO 8601 for which this grouping is relevant
+    std::string mDate;
+    /// Whether date is given by user
+    bool mUserGiveDate;
 
     /// Grouping description. Empty if not specified.
     std::string mDescription;
