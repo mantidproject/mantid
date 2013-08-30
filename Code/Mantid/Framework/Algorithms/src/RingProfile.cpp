@@ -222,7 +222,8 @@ namespace Algorithms
     
     // the horizontal axis is configured as degrees and copy the values of X
     API::Axis * const horizontal = new API::NumericAxis(refX.size()); 
-    horizontal->unit() = boost::shared_ptr<Kernel::Unit>(new Kernel::Units::Degrees);
+    horizontal->unit() = boost::shared_ptr<Kernel::Unit>(new Kernel::Units::Phi);
+    horizontal->title() = "Ring Angle";
     for (size_t j=0; j< refX.size() ; j++)
       horizontal->setValue(j, refX[j]);  
     outputWS->replaceAxis(0, horizontal); 
@@ -273,7 +274,7 @@ void RingProfile::checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr
     i = inputWS->getNumberHistograms() -1; 
     while (true){
       i--; 
-      if (i <= 0 )
+      if (i == 0 )
         throw std::invalid_argument("There is no region defined for the instrument of this workspace");
 
       auto det = inputWS->getDetector(i); 
@@ -324,6 +325,8 @@ void RingProfile::checkInputsForSpectraWorkspace(const API::MatrixWorkspace_sptr
       yOutside = 1; 
     if (centre_z - min_radius > zMax || centre_z + min_radius < zMin)
       zOutside = 1;
+    
+    summed = xOutside + yOutside + zOutside;
 
     if (summed >= 2){
       std::stringstream s; 
@@ -404,7 +407,7 @@ void RingProfile::checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr
  * The main method to calculate the ring profile for workspaces based on instruments. 
  * 
  * It will iterate over all the spectrum inside the workspace. 
- * For each spectrum, it will use the ::getBinForPixel method to identify 
+ * For each spectrum, it will use the RingProfile::getBinForPixel method to identify 
  * where, in the output_bins, the sum of all the spectrum values should be placed in. 
  * 
  * @param inputWS: pointer to the input workspace
@@ -489,7 +492,7 @@ int RingProfile::getBinForPixel(Mantid::Geometry::IDetector_const_sptr det ){
  * The main method to calculate the ring profile for 2d image based workspace. 
  * 
  * It will iterate over all the spectrum inside the workspace. 
- * For each spectrum, it will use the ::getBinForPixel method to identify 
+ * For each spectrum, it will use the RingProfile::getBinForPixel method to identify 
  * where, in the output_bins, the elements of the spectrum should be placed in. 
  * 
  * @param inputWS: pointer to the input workspace
@@ -542,7 +545,7 @@ void RingProfile::processNumericImageRingProfile(const API::MatrixWorkspace_sptr
  * position. 
  * @param ws: pointer to the workspace
  * @param spectrum_index: index of the spectrum
- * @param vector<int> bin positions (for each column inside the spectrum, the correspondent bin_pos)
+ * @param bins_pos: bin positions (for each column inside the spectrum, the correspondent bin_pos)
  */
 void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws, 
                                  int spectrum_index, std::vector<int> & bins_pos ){
@@ -560,13 +563,12 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws,
 
   // the reference to X bins (the limits for each pixel in the horizontal direction)
   auto xvec = ws->dataX(spectrum_index);
+
   double xpos; 
   double diffx;
   double distance;
   double angle; 
-  // g_log.debug() << "minR=" << min_radius << ", maxR=" << max_radius << ", start_angle = " << start_angle
-  //               << ", num_bins" << num_bins << std::endl; 
-  
+
   // for each pixel inside this row
   for (size_t i = 0; i< xvec.size()-1; i++){
 
@@ -574,9 +576,6 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws,
     diffx = xpos - centre_x; 
     // calculate the distance => norm of pixel position - centre
     distance = sqrt(pow(diffx, 2.0) + diffy_quad);
-    
-    //    g_log.debug() << "Distance found for v[" << i << "] = " << distance << "|("<< xpos << ", " 
-    //               <<ypos << ")|" << std::endl; 
     
     // check if the distance is inside the ring
     if (distance < min_radius || distance > max_radius || distance == 0){
