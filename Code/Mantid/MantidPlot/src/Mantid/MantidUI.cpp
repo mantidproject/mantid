@@ -21,6 +21,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/UnitConversion.h"
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -1118,11 +1119,6 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
       if(calcQ)
       {
-        // Get conversion factor from energy(meV) to wavelength(angstroms)
-        Mantid::Kernel::Units::Energy energyUnit;
-        double wavelengthFactor(0.0), wavelengthPower(0.0);
-        energyUnit.quickConversion("Wavelength", wavelengthFactor,wavelengthPower);
-
         // Get unsigned theta and efixed value
         double efixed(0.0), usignTheta(0.0);
         bool noEfixed(false);
@@ -1138,19 +1134,13 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
         if(!noEfixed)
         {
-          const double stheta = std::sin(usignTheta);
-          //Calculate the wavelength to allow it to be used to convert to elasticQ. 
-          double wavelength = wavelengthFactor*std::pow(efixed, wavelengthPower);
-          // The MomentumTransfer value.
-          double q = 4.0*M_PI*stheta/wavelength;
-
+          double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
           colValues << QVariant(q);
         }
         else
         {
           colValues << QVariant("No Efixed");
         }
-
       }
 
       colValues << QVariant(phi) // rtp
