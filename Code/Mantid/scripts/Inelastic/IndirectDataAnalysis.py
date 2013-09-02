@@ -419,13 +419,13 @@ def furyPlot(inWS, spec):
     layer = graph.activeLayer()
     layer.setScale(mp.Layer.Left, 0, 1.0)
 
-def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
+def fury(samWorkspaces, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         Plot=False): 
     StartTime('Fury')
     workdir = config['defaultsave.directory']
-    LoadNexus(Filename=sam_files[0], OutputWorkspace='__sam_tmp') # SAMPLE
-    nsam,npt = CheckHistZero('__sam_tmp')
-    Xin = mtd['__sam_tmp'].readX(0)
+    samTemp = samWorkspaces[0]
+    nsam,npt = CheckHistZero(samTemp)
+    Xin = mtd[samTemp].readX(0)
     d1 = Xin[1]-Xin[0]
     if d1 < 1e-8:
         error = 'Data energy bin is zero'
@@ -443,26 +443,19 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
     if Verbose:
         logger.notice('Reading RES file : '+res_file)
     LoadNexus(Filename=res_file, OutputWorkspace='res_data') # RES
-    CheckAnalysers('__sam_tmp','res_data',Verbose)
+    CheckAnalysers(samTemp,'res_data',Verbose)
     nres,nptr = CheckHistZero('res_data')
     if nres > 1:
-        CheckHistSame('__sam_tmp','Sample','res_data','Resolution')
-    DeleteWorkspace('__sam_tmp')
+        CheckHistSame(samTemp,'Sample','res_data','Resolution')
     Rebin(InputWorkspace='res_data', OutputWorkspace='res_data', Params=rebinParam)
     Integration(InputWorkspace='res_data', OutputWorkspace='res_int')
     ConvertToPointData(InputWorkspace='res_data', OutputWorkspace='res_data')
     ExtractFFTSpectrum(InputWorkspace='res_data', OutputWorkspace='res_fft', FFTPart=2)
     Divide(LHSWorkspace='res_fft', RHSWorkspace='res_int', OutputWorkspace='res')
-    for sam_file in sam_files:
-        (direct, filename) = os.path.split(sam_file)
+    for samWs in samWorkspaces:
+        (direct, filename) = os.path.split(samWs)
         (root, ext) = os.path.splitext(filename)
-        if (ext == '.nxs'):
-            if Verbose:
-                logger.notice('Reading sample file : '+sam_file)
-            LoadNexus(Filename=sam_file, OutputWorkspace='sam_data') # SAMPLE
-            Rebin(InputWorkspace='sam_data', OutputWorkspace='sam_data', Params=rebinParam)
-        else: #input is workspace
-            Rebin(InputWorkspace=sam_file, OutputWorkspace='sam_data', Params=rebinParam)
+        Rebin(InputWorkspace=samWs, OutputWorkspace='sam_data', Params=rebinParam)
         Integration(InputWorkspace='sam_data', OutputWorkspace='sam_int')
         ConvertToPointData(InputWorkspace='sam_data', OutputWorkspace='sam_data')
         ExtractFFTSpectrum(InputWorkspace='sam_data', OutputWorkspace='sam_fft', FFTPart=2)
