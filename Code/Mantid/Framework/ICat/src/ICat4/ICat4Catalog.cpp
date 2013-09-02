@@ -235,6 +235,34 @@ namespace Mantid
      */
     void ICat4Catalog::search(const CatalogSearchParam& inputs, Mantid::API::ITableWorkspace_sptr& outputws)
     {
+      // Obtain the query from user input.
+      std::string query = getSearchQuery(inputs);
+
+      if (query.empty())
+      {
+        // Would be better to open a dialog box in the GUI for the user to visually see what's wrong.
+        throw std::runtime_error("You have not selected any inputs to search for!");
+      }
+
+      ICATPortBindingProxy icat;
+
+      ns1__search request;
+      ns1__searchResponse response;
+
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+      request.query = &query;
+
+      int result = icat.search(&request, &response);
+
+      if (result == 0)
+      {
+        saveInvestigations(response.return_, outputws);
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
     }
 
     /**
@@ -661,12 +689,12 @@ namespace Mantid
     /**
      * Formats a given timestamp to human readable datetime.
      * @param timestamp :: Unix timestamp.
-     * @return string   :: Formatted Unix timestamp in the format "%Y-%b-%d %H:%M:%S"
+     * @return string   :: Formatted Unix timestamp in the format "%F %T" ("2011-12-25 00:00:00")
      */
     std::string ICat4Catalog::formatDateTime(time_t timestamp)
     {
       auto dateTime = DateAndTime(boost::posix_time::from_time_t(timestamp));
-      return (dateTime.toFormattedString());
+      return (dateTime.toFormattedString("%F %T"));
     }
 
   }
