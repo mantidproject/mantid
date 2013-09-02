@@ -226,6 +226,8 @@ private:
   Mantid::DataObjects::PeaksWorkspace_sptr testWorkspace;
 
 public:
+  static FilterPeaksTestPerformance *createSuite() { return new FilterPeaksTestPerformance(); }
+  static void destroySuite( FilterPeaksTestPerformance *suite ) { delete suite; }
 
   FilterPeaksTestPerformance()
   {

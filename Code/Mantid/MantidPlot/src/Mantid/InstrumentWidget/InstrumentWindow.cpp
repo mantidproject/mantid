@@ -297,6 +297,13 @@ void InstrumentWindow::updateInfoText()
 
 void InstrumentWindow::setSurfaceType(int type)
 {
+  // we cannot do 3D without OpenGL
+  if ( type == FULL3D && !isGLEnabled() )
+  {
+    QMessageBox::warning(this,"Mantid - Warning","OpenGL must be enabled to render the instrument in 3D.");
+    return;
+  }
+
   if (type < RENDERMODE_SIZE)
   {
     QApplication::setOverrideCursor(Qt::WaitCursor);
@@ -337,14 +344,10 @@ void InstrumentWindow::setSurfaceType(int type)
       showPeakLabels = settings.value("Mantid/InstrumentWindow/ShowPeakLabels",true).toBool();
     }
 
-    // which display to use?
-    bool useOpenGL = isGLEnabled();
+    // create a new surface
     if (m_surfaceType == FULL3D)
     {
-      Projection3D* p3d = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
-      surface = p3d;
-      // always OpenGL in 3D
-      useOpenGL = true;
+      surface = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
     }
     else if (m_surfaceType <= CYLINDRICAL_Z)
     {
@@ -359,8 +362,6 @@ void InstrumentWindow::setSurfaceType(int type)
     surface->setShowPeakLabelsFlag(showPeakLabels);
     // set new surface
     setSurface(surface);
-    // make sure to switch to the right instrument display
-    selectOpenGLDisplay( useOpenGL );
 
     // init tabs with new surface
     foreach (InstrumentWindowTab* tab, m_tabs)
@@ -373,6 +374,7 @@ void InstrumentWindow::setSurfaceType(int type)
     connect(surface,SIGNAL(updateInfoText()),this,SLOT(updateInfoText()),Qt::QueuedConnection);
     QApplication::restoreOverrideCursor();
   }
+  emit surfaceTypeChanged( type );
   updateInfoText();
   update();
 }
@@ -414,7 +416,6 @@ void InstrumentWindow::setSurfaceType(const QString& typeStr)
     typeIndex = 6;
   }
   setSurfaceType( typeIndex );
-  emit surfaceTypeChanged( typeIndex );
 }
 
 /**
@@ -1263,7 +1264,7 @@ void InstrumentWindow::enableGL( bool on )
 /// True if the GL instrument display is currently on
 bool InstrumentWindow::isGLEnabled() const
 {
-    return m_useOpenGL || ( m_surfaceType == FULL3D );
+    return m_useOpenGL;
 }
 
 /**

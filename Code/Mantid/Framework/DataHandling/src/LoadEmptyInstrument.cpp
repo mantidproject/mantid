@@ -197,10 +197,11 @@ namespace Mantid
       {
         loadInst->execute();
       }
-      catch (std::runtime_error& )
+      catch (std::runtime_error& exc)
       {
-        g_log.error("Unable to successfully run LoadInstrument Child Algorithm");
-        throw std::runtime_error("Unable to obtain valid instrument.");
+        std::ostringstream os;
+        os << "Unable to run LoadInstrument: '" << exc.what() << "'\n";
+        throw std::runtime_error(os.str());
       }
       
       return ws;

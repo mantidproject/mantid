@@ -157,7 +157,7 @@ public:
     trans.execute();
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
     TS_ASSERT_DELTA( output->readY(0)[0], 0.2, 0.005 )
-
+      
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
     Mantid::API::AnalysisDataService::Instance().remove(emptyWS);
@@ -229,6 +229,84 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove("CalculateTransmissionTest_log");
     Mantid::API::AnalysisDataService::Instance().remove("CalculateTransmissionTest_linear");
   }
+
+  void testPolyFit(){
+    CalculateTransmission trans;
+    trans.initialize();
+    trans.setPropertyValue("SampleRunWorkspace", m_transWS);
+    trans.setPropertyValue("DirectRunWorkspace", m_dirWS);
+    trans.setProperty("IncidentBeamMonitor",1);
+    trans.setProperty("TransmissionMonitor",2);
+    trans.setProperty("FitMethod","Polynomial");
+    trans.setProperty("PolynomialOrder",3); 
+    std::string outputWS("CalculateTransmissionTest_poly"); 
+    trans.setPropertyValue("OutputWorkspace", outputWS);
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("OutputUnfittedData", true) )
+    TS_ASSERT_THROWS_NOTHING( trans.execute() );
+    TS_ASSERT( trans.isExecuted() );
+    
+    Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
+    
+    TS_ASSERT_THROWS_NOTHING(fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
+    TS_ASSERT_THROWS_NOTHING(unfitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_unfitted")));
+    
+    {
+    const Mantid::MantidVec &fitted_y = fitted->readY(0), & fitted_x = fitted->readX(0); 
+     
+    //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
+      double x;
+    
+      for (unsigned int i = 0; i < fitted_y.size(); ++i)
+        {
+          x = fitted_x[i]; //(fitted_x[i] + fitted_x[i+1])* 0.5;
+          TS_ASSERT_DELTA(fitted_y[i], 26.6936 -9.31494*x + 1.11532*x*x -0.044502*x*x*x, 0.01);
+        }
+    }
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS+"_unfitted");    
+  }
+  void testPolyFitWithRebin(){
+    CalculateTransmission trans;
+    trans.initialize();
+    trans.setPropertyValue("SampleRunWorkspace", m_transWS);
+    trans.setPropertyValue("DirectRunWorkspace", m_dirWS);
+    trans.setProperty("IncidentBeamMonitor",1);
+    trans.setProperty("TransmissionMonitor",2);
+    trans.setProperty("FitMethod","Polynomial");
+    trans.setProperty("PolynomialOrder",3); 
+    trans.setProperty("RebinParams","7.5, 0.1, 9");
+    std::string outputWS("CalculateTransmissionTest_poly2"); 
+    trans.setPropertyValue("OutputWorkspace", outputWS);
+    TS_ASSERT_THROWS_NOTHING( trans.setProperty("OutputUnfittedData", true) )
+    TS_ASSERT_THROWS_NOTHING( trans.execute() );
+    TS_ASSERT( trans.isExecuted() );
+    
+    Mantid::API::MatrixWorkspace_const_sptr fitted, unfitted;
+    
+    TS_ASSERT_THROWS_NOTHING(fitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
+    TS_ASSERT_THROWS_NOTHING(unfitted = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(outputWS + "_unfitted")));
+    
+    {
+    const Mantid::MantidVec &fitted_y = fitted->readY(0), & fitted_x = fitted->readX(0); 
+     
+    //  TS_ASSERT_EQUALS(fitted_y.size(), unfitted_y.size());
+      double x;
+    
+      for (unsigned int i = 0; i < fitted_y.size(); ++i)
+        {
+          x = (fitted_x[i] + fitted_x[i+1])* 0.5;
+          TS_ASSERT_DELTA(fitted_y[i], 26.6936 -9.31494*x + 1.11532*x*x -0.044502*x*x*x, 0.01);
+        }
+    }
+
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS+"_unfitted");    
+  }
+
 
   CalculateTransmissionTest() :
     m_dirWS("CalculateTransmissionTest_direct"), m_transWS("CalculateTransmissionTest_trans")

@@ -139,6 +139,7 @@ namespace CurveFitting
 
       FunctionDomain1DVector domain(xvalues);
       FunctionValues values(domain);
+      g_log.information() << "Background function (in LeBailFunction): " << m_background->asString() << ".\n";
       m_background->function(domain, values);
       size_t numpts = out.size();
       for (size_t i = 0; i < numpts; ++i)
@@ -502,10 +503,6 @@ namespace CurveFitting
       peak->setHeight(1.0);
       vector<double> localpeakvalue(ndata, 0.0);
       peak->function(localpeakvalue, datax);
-#if 0
-      for (size_t i = 0; i < localpeakvalue.size(); ++i)
-        g_log.notice() << "Point " << i << " : " << localpeakvalue[i] << ".\n";
-#endif
 
       // check data
       size_t numbadpts(0);
@@ -549,14 +546,6 @@ namespace CurveFitting
       IPowderDiffPeakFunction_sptr peak = peakgroup[ipk].second;
       double intensity = 0.0;
 
-#if 0
-      g_log.notice() << "nData = " << ndata << ".\n";
-      g_log.notice() << "Data X from " << datax.front() << " to " << datax.back()
-                     << " for X and Sum[Y] " << ".\n";
-      for (size_t i = 0; i < ndata; ++i)
-        g_log.notice() << datax[i] << "\t\t" << sumYs[i] << ".\n";
-#endif
-
       for (size_t i = 0; i < ndata; ++i)
       {
         double temp;
@@ -565,9 +554,6 @@ namespace CurveFitting
           // Reasonable non-zero value
           double peaktogroupratio = peakvalues[ipk][i]/sumYs[i];
           temp = datay[i] * peaktogroupratio;
-#if 0
-          g_log.debug() << "Data " << i << " is " << datay[i] << ", Peak Ratio = " << peaktogroupratio << ".\n";
-#endif
         }
         else
         {
@@ -580,9 +566,6 @@ namespace CurveFitting
         else
           deltax = datax[i] - datax[i-1];
 
-#if 0
-        g_log.notice() << "Intensity = " << intensity << " by increment = " << temp << " x " << deltax << ".\n";
-#endif
         intensity += temp * deltax;
       } // for data points
 
@@ -881,8 +864,11 @@ namespace CurveFitting
     * The supported background types are Polynomial/Linear/Flat and Chebyshev
     * @param backgroundtype :: string, type of background, such as Polynomial, Chebyshev
     * @param vecparvalues :: vector of parameter values from order 0.
+    * @param startx :: background's StartX.  Used by Chebyshev
+    * @param endx :: background's EndX.  Used by Chebyshev
     */
-  void LeBailFunction::addBackgroundFunction(string backgroundtype, std::vector<double>& vecparvalues)
+  void LeBailFunction::addBackgroundFunction(string backgroundtype, const std::vector<double>& vecparvalues,
+                                             double startx, double endx)
   {
     // Check
     if (backgroundtype.compare("Polynomial") && backgroundtype.compare("Chebyshev"))
@@ -893,23 +879,40 @@ namespace CurveFitting
     }
 
     // Determine order from number of input parameters
-    size_t order = vecparvalues.size();
+    size_t numbkgdvec = vecparvalues.size();
 
     // Create background function from factory
     auto background = FunctionFactory::Instance().createFunction(backgroundtype);
     m_background = boost::dynamic_pointer_cast<BackgroundFunction>(background);
 
-    // Set order and init
-    m_background->setAttributeValue("n", int(order));
+    // Set order and init: remember that for background function polynomial and chebyshev,
+    // n is always equal to number of order parameter plus 1.
+    int order = static_cast<int>(numbkgdvec)-1;
+    if (order < 0)
+      order = 0;
+    m_background->setAttributeValue("n", order);
     m_background->initialize();
 
     // Set parameters
-    for (size_t i = 0; i < order; ++i)
+    if (numbkgdvec > 0)
     {
-      m_background->setParameter(i, vecparvalues[i]);
-      g_log.information() << "Background function: set " << m_background->parameterName(i)
-                          << " = " << vecparvalues[i] << ".\n";
+      for (size_t i = 0; i < numbkgdvec; ++i)
+      {
+        m_background->setParameter(i, vecparvalues[i]);
+        g_log.debug() << "Background function: set " << m_background->parameterName(i)
+                      << " = " << vecparvalues[i] << ".\n";
+      }
     }
+    else
+    {
+      // Set a flat zero background as default
+      m_background->setParameter(0, 0.);
+    }
+
+    if (startx > 0.)
+      m_background->setAttributeValue("StartX", startx);
+    if (endx > 0.)
+      m_background->setAttributeValue("EndX", endx);
 
     return;
   }
@@ -954,7 +957,6 @@ namespace CurveFitting
   {
     for (size_t ipk = 0; ipk < m_numPeaks; ++ipk)
     {
-#if 1
       stringstream ss1, ss2;
       ss1 << "f" << ipk << "." << paramname;
       ss2 << paramvalue;
@@ -964,14 +966,12 @@ namespace CurveFitting
 
       g_log.debug() << "Set up tie | " << tiepart1 << " <---> " << tievalue << " | \n";
 
-#else
-      // FIXME - // TODO: Make a map between peak parameter name and index. And use fix() to replace tie
+      // FIXME & TODO: Make a map between peak parameter name and index. And use fix() to replace tie
       /*--  Code prepared to replace the existing block
       ThermalNeutronBk2BkExpConvPVoigt_sptr thispeak = m_dspPeaks[ipk].second;
       size_t iparam = findIndex(thispeak, funcparam.name);
       thispeak->fix(iparam);
       --*/
-#endif
 
     } // For each peak
 
@@ -987,26 +987,6 @@ namespace CurveFitting
 
     for (size_t iparam = 0; iparam < numbkgdparams; ++iparam)
       m_background->fix(iparam);
-
-#if 0
-    original code just for backup
-
-    std::vector<std::string> bkgdparnames = m_background->getParameterNames();
-    for (size_t ib = 0; ib < bkgdparnames.size(); ++ib)
-    {
-      std::string parname = bkgdparnames[ib];
-      double parvalue = m_background->getParameter(parname);
-      std::stringstream ss1, ss2;
-      ss1 << "f" << funcindex << "." << parname;
-      ss2 << parvalue;
-      std::string tiepart1 = ss1.str();
-      std::string tievalue = ss2.str();
-
-      g_log.debug() << "Step 2: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /\n";
-
-      m_compsiteFunction->tie(tiepart1, tievalue);
-    }
-#endif
 
     return;
   }
@@ -1175,18 +1155,5 @@ namespace CurveFitting
     return maxvalue;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Calculate d-space value of a Bragg peak of a cubic unit cell.
-    * d = a/sqrt(h**2+k**2+l**2)
-
-  double calCubicDSpace(double a, int h, int k, int l)
-  {
-    double hklfactor = sqrt(double(h*h)+double(k*k)+double(l*l));
-    double d = a/hklfactor;
-    // cout << "DB143 a = " << a << " (HKL) = " << h << ", " << k << ", " << l << ": d = " << d << std::endl;
-
-    return d;
-  }
-  */
 } // namespace Mantid
 } // namespace CurveFitting

@@ -104,10 +104,9 @@ void PointByPointVCorrection::exec()
     std::transform(Y1.begin(),Y1.end(),resultY.begin(),resultY.begin(),std::multiplies<double>()); // Now resultY contains the A_i=s_i/v_i*Dlam_i
 
     // Calculate the errors squared related to A_i at this point
-    double r = 0.0;
     for (int j=0;j<size-1;j++)
     {
-      r=0;
+      double r=0.0;
       if (std::abs(Y1[j])>1e-7)
         r+=std::pow(E1[j]/Y1[j],2);
       if (std::abs(Y2[j])>1e-7)
@@ -126,10 +125,10 @@ void PointByPointVCorrection::exec()
     // Now propagate the error bars due to the normaliser
     double error2_factor1=std::inner_product(E1.begin(),E1.end(),E1.begin(),0.0);
     double error2_factor2=0;
-    double test;
+
     for (int j=0;j<size-1;j++)
     {
-      test=std::abs(std::pow(resultY[j],2));
+      double test=std::abs(std::pow(resultY[j],2));
       if (test>DBL_MAX)
         test=0;
       error2_factor2+=errors[j]*test/factor2/factor2;

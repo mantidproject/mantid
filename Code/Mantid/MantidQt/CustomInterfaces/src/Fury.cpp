@@ -57,7 +57,12 @@ namespace IDA
   
     connect(uiForm().fury_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().fury_swInput, SLOT(setCurrentIndex(int)));  
     connect(uiForm().fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resType(const QString&)));
+
+    //signals to plot input files
     connect(uiForm().fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
+    connect(uiForm().fury_iconFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
+    connect(uiForm().fury_wsSample, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
+    connect(uiForm().fury_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
   }
 
   void Fury::run()
@@ -150,6 +155,11 @@ namespace IDA
     MatrixWorkspace_const_sptr workspace;
     if ( uiForm().fury_cbInputType->currentIndex() == 0 )
     {
+      if(uiForm().fury_iconFile->isEmpty())
+      {
+        return;
+      }
+
       if ( uiForm().fury_iconFile->isValid() )
       {
         QString filename = uiForm().fury_iconFile->getFirstFilename();
@@ -158,7 +168,6 @@ namespace IDA
         workspace = runLoadNexus(filename, wsname);
         if(!workspace)
         {
-          showInformationBox(QString("Unable to load file: ") + filename);
           return;
         }
       }
@@ -173,7 +182,6 @@ namespace IDA
       QString wsname = uiForm().fury_wsSample->currentText();
       if(wsname.isEmpty())
       {
-        showInformationBox("No workspace selected.");
         return;
       }
       try

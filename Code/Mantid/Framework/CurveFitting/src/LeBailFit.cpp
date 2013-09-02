@@ -45,18 +45,6 @@ See [[Le Bail Fit]].
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/TextAxis.h"
 
-/*
-#include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidKernel/Statistics.h"
-
-#include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/Chebyshev.h"
-#include "MantidAPI/FuncMinimizerFactory.h"
-*/
-
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <iomanip>
@@ -412,6 +400,7 @@ namespace CurveFitting
 
     // Calculate diffraction pattern
     Rfactor rfactor(-DBL_MAX, -DBL_MAX);
+    // FIXME - It should be a new ticket to turn on this option (use user-specified peak height)
     bool useinputpeakheights = this->getProperty("UseInputPeakHeights");
     if (useinputpeakheights)
       g_log.warning("UseInputPeakHeights is temporarily turned off now. ");
@@ -420,7 +409,7 @@ namespace CurveFitting
     map<string, double> profilemap = convertToDoubleMap(m_funcParameters);
     m_lebailFunction->setProfileParameterValues(profilemap);
 
-    // Calculate background
+    // Calculate peak intensities and diffraction pattern
     vector<double> emptyvec;
     bool resultphysical = calculateDiffractionPattern(m_dataWS->readX(m_wsIndex), m_dataWS->readY(m_wsIndex),
                                                       true, true, emptyvec, vecY, rfactor);
@@ -431,6 +420,10 @@ namespace CurveFitting
       return;
     }
 
+    // Calculate background
+    MantidVec& vec_bkgd = m_outputWS->dataY(INPUTBKGDINDEX);
+    m_lebailFunction->function(vec_bkgd, vecX, false, true);
+
     // Set up output workspaces
     size_t numpts = vecY.size();
     for (size_t i = 0; i < numpts; ++i)
@@ -440,7 +433,7 @@ namespace CurveFitting
 
     // Calcualte individual peaks
     bool ploteachpeak = this->getProperty("PlotIndividualPeaks");
-    g_log.notice() << "Output individual peaks  = " << ploteachpeak << ".\n";
+    g_log.information() << "Output individual peaks  = " << ploteachpeak << ".\n";
     if (ploteachpeak)
     {
       for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
@@ -587,7 +580,8 @@ namespace CurveFitting
     calculateDiffractionPattern(m_outputWS->readX(INPUTPUREPEAKINDEX), m_outputWS->readY(INPUTPUREPEAKINDEX),
                                   false, true, backgroundvalues, valueVec, outputR);
 
-    g_log.notice() << "[DBx604] Best Rwp = " << bestR.Rwp << ",  vs. recovered best Rwp = " << outputR.Rwp << ".\n";
+    g_log.notice() << "[RefineBackground] Best Rwp = " << bestR.Rwp << ",  vs. recovered best Rwp = "
+                   << outputR.Rwp << ".\n";
 
     // 4. Add data (0: experimental, 1: calcualted, 2: difference)
     for (size_t i = 0; i < numpts; ++i)
@@ -671,8 +665,6 @@ namespace CurveFitting
     return;
   }
 
-
-
   //===================================  Set up the Le Bail Fit   ================================
   //----------------------------------------------------------------------------------------------
   /** Create LeBailFunction, including creating Le Bail function, add peaks and background
@@ -697,7 +689,7 @@ namespace CurveFitting
     m_lebailFunction->addPeaks(vecHKL);
 
     // Add background
-    m_lebailFunction->addBackgroundFunction(m_backgroundType, m_backgroundParameters);
+    m_lebailFunction->addBackgroundFunction(m_backgroundType, m_backgroundParameters, m_startX, m_endX);
 
     return;
   }
@@ -709,7 +701,7 @@ namespace CurveFitting
    */
   API::MatrixWorkspace_sptr LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex)
   {
-    // 1. Read inputs
+    // Process input property 'FitRegion' for range of data to fit/calculate
     std::vector<double> fitrange = this->getProperty("FitRegion");
 
     double tof_min, tof_max;
@@ -731,7 +723,7 @@ namespace CurveFitting
       tof_max = inpws->readX(wsindex).back();
     }
 
-    // 2.Call  CropWorkspace()
+    // Crop workspace
     API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
     cropalg->initialize();
 
@@ -752,7 +744,8 @@ namespace CurveFitting
     API::MatrixWorkspace_sptr cropws = cropalg->getProperty("OutputWorkspace");
     if (!cropws)
     {
-      g_log.error() << "Unable to retrieve a Workspace2D object from ChildAlgorithm Crop.\n";
+      g_log.error("Unable to retrieve a Workspace2D object from ChildAlgorithm CropWorkspace");
+      throw runtime_error("Unable to retrieve a Workspace2D object from ChildAlgorithm CropWorkspace");
     }
     else
     {
@@ -791,6 +784,8 @@ namespace CurveFitting
     }
 
     m_dataWS = this->cropWorkspace(inpWS, m_wsIndex);
+    m_startX = m_dataWS->readX(0).front();
+    m_endX = m_dataWS->readX(0).back();
 
     // b) Minimizer
     std::string minim = getProperty("Minimizer");
@@ -1080,7 +1075,7 @@ namespace CurveFitting
       hasPeakHeight = true;
     }
 
-    /* FIXME This section is disabled presently
+    /* FIXME This section is disabled.  It should be a new ticket to turn on this option.
     bool userexcludepeaks = false;
     if (colnames.size() >= 5 && colnames[4].compare("Include/Exclude") == 0)
     {
@@ -1127,32 +1122,36 @@ namespace CurveFitting
   {
     g_log.debug() << "DB1105A Parsing background TableWorkspace.\n";
 
-    // 1. Clear (output) map
+    // Clear (output) map
     bkgdorderparams.clear();
-    std::map<std::string, double> parmap;
 
-    // 2. Check
+    // Check background parameter table workspace
     std::vector<std::string> colnames = bkgdparamws->getColumnNames();
     if (colnames.size() < 2)
     {
-      g_log.error() << "Input parameter table workspace must have more than 1 columns\n";
-      throw std::invalid_argument("Invalid input background table workspace. ");
+      stringstream errss;
+      errss << "Input background parameter table workspace " << bkgdparamws->name() << " has only "
+            << colnames.size() << " columns, which is fewer than 2 columns as required. ";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
     }
     else
     {
       if (!(boost::starts_with(colnames[0], "Name") && boost::starts_with(colnames[1], "Value")))
       {
         // Column 0 and 1 must be Name and Value (at least started with)
-        g_log.error() << "Input parameter table workspace have wrong column definition.\n";
+        stringstream errss;
+        errss << "Input parameter table workspace have wrong column definition. "
+              << "Column 0 should be Name.  And column 1 should be Value. Current input is: \n";
         for (size_t i = 0; i < 2; ++i)
-          g_log.error() << "Column " << i << " Should Be Name.  But Input is " << colnames[0] << "\n";
-        throw std::invalid_argument("Invalid input background table workspace. ");
+          errss << "Column " << i << ": " << colnames[0] << "\n";
+        g_log.error(errss.str());
+        throw runtime_error(errss.str());
       }
     }
 
-    g_log.debug() << "DB1105B Background TableWorkspace is valid.\n";
-
-    // 3. Input
+    // Parse input table workspace to a map.  Valid parameter names must start with A.
+    std::map<std::string, double> parmap;
     for (size_t ir = 0; ir < bkgdparamws->rowCount(); ++ir)
     {
       API::TableRow row = bkgdparamws->getRow(ir);
@@ -1167,7 +1166,7 @@ namespace CurveFitting
       }
     }
 
-    // 4. Sort: increasing order
+    // Sort: increasing order
     bkgdorderparams.reserve(parmap.size());
     for (size_t i = 0; i < parmap.size(); ++i)
     {
@@ -1185,14 +1184,15 @@ namespace CurveFitting
       bkgdorderparams[tmporder] = parvalue;
     }
 
-    // 5. Debug output
+    // Debug output
     std::stringstream msg;
-    msg << "Background Order = " << bkgdorderparams.size() << ": ";
+    msg << "Finished importing background TableWorkspace. " << "Background Order = "
+        << bkgdorderparams.size() << ": ";
     for (size_t iod = 0; iod < bkgdorderparams.size(); ++iod)
     {
       msg << "A" << iod << " = " << bkgdorderparams[iod] << "; ";
     }
-    g_log.information() << "DB1105 Importing background TableWorkspace is finished. " << msg.str() << "\n";
+    g_log.information(msg.str());
 
     return;
   }
@@ -1256,8 +1256,6 @@ namespace CurveFitting
 
     // 4. Set
     this->setProperty("OutputPeaksWorkspace", peakWS);
-
-    g_log.notice("[DBx403] Set property to OutputPeaksWorkspace.");
 
     return;
   }
@@ -1510,7 +1508,7 @@ namespace CurveFitting
     m_bestRp = currR.Rp + 0.001;
     bookKeepBestMCResult(parammap, vecBkgd, currR, 0);
 
-    g_log.notice() << "[DBx255] Random-walk Starting Rwp = " << currR.Rwp
+    g_log.notice() << "[MC-Start] Random-walk Starting Rwp = " << currR.Rwp
                    << ", Rp = " << currR.Rp << "\n";
 
     // Random walk loops
@@ -1970,7 +1968,7 @@ namespace CurveFitting
    */
   bool LeBailFit::calculateDiffractionPattern(const MantidVec& vecX, const MantidVec &vecY,
                                               bool inputraw, bool outputwithbkgd,
-                                              MantidVec& vecBkgd,  MantidVec& values,
+                                              const MantidVec& vecBkgd,  MantidVec& values,
                                               Rfactor& rfactor)
   {
     vector<double> veccalbkgd;
@@ -1995,13 +1993,13 @@ namespace CurveFitting
       if (vecBkgd.size() == vecY.size())
       {
         // Use input background
-        g_log.debug() << "Calculate diffraction pattern from raw and input background vector. " << ".\n";
+        g_log.information() << "Calculate diffraction pattern from raw and input background vector. " << ".\n";
         ::transform(vecY.begin(), vecY.end(), vecBkgd.begin(), vecPureY.begin(), ::minus<double>());
       }
       else
       {
         // Calculate background
-        g_log.debug() << "Calculate diffraction pattern from input data and newly calculated background. " << ".\n";
+        g_log.information() << "Calculate diffraction pattern from input data and newly calculated background. " << ".\n";
         veccalbkgd.assign(vecY.size(), 0.);
         m_lebailFunction->function(veccalbkgd, vecX, false, true);
         ::transform(vecY.begin(), vecY.end(), veccalbkgd.begin(), vecPureY.begin(), ::minus<double>());
@@ -2009,7 +2007,7 @@ namespace CurveFitting
 
       // Calculate peak intensity
       peaksvalid = m_lebailFunction->calculatePeaksIntensities(vecX, vecPureY, values);
-    }
+    } // [input is raw]
     else
     {
       // Calculate peaks intensities
@@ -2098,14 +2096,11 @@ namespace CurveFitting
     {
       // Find out the i-th parameter to be refined or not
       string paramname = mcgroup[i];
-#if 0
-      Parameter& param = curparammap[paramname];
-#else
       map<string, Parameter>::iterator mapiter = curparammap.find(paramname);
       if (mapiter == curparammap.end())
         throw runtime_error("Parameter to update is not in the pool of parameters to get updated.");
       Parameter& param = mapiter->second;
-#endif
+
       if (param.fit)
         anyparamtorefine = true;
       else
@@ -2182,23 +2177,15 @@ namespace CurveFitting
       }
 
       // Apply to new parameter map
-#if 0
-      newparammap[paramname].curvalue = newvalue;
-#else
       map<string, Parameter>::iterator newmiter = newparammap.find(paramname);
       if (newmiter == newparammap.end())
         throw runtime_error("New parameter map does not contain parameter that is updated.");
       newmiter->second.curvalue = newvalue;
-#endif
       g_log.information() << "[ProposeNewValue] " << paramname << " --> " << newvalue
                           << "; random number = " << randomnumber << "\n";
 
       // g) record some trace
-#if 0
-      Parameter& p = curparammap[paramname];
-#else
       Parameter& p = param;
-#endif
       if (stepsize > 0)
       {
         p.movedirection = 1;
@@ -2332,7 +2319,7 @@ namespace CurveFitting
       g_log.debug() << "[TestRandom] dice " << dice << "\n";
       double bar = exp(-(new_goodness-cur_goodness)/(cur_goodness*m_Temperature));
       // double bar = exp(-(newrwp-currwp)/m_bestRwp);
-      // g_log.notice() << "[DBx329] Bar = " << bar << ", Dice = " << dice << "\n";
+      // g_log.debug() << "[DBx329] Bar = " << bar << ", Dice = " << dice << "\n";
       if (dice < bar)
       {
         // random number (dice, 0 and 1) is smaller than bar (between -infty and 0)
@@ -2525,17 +2512,27 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Smooth background by fitting the background to specified background function
-   * @param wsindex  :  raw data's workspace index
-   * @param domain      domain of X's
-   * @param peakdata:   pattern of pure peaks
-   * @param background: output of smoothed background
+    * Algorithm: 1. calculate background by removing calculated peaks from raw data
+    *            2. fit background by a specified background function.
+    * @param wsindex  :  raw data's workspace index
+    * @param domain      domain of X's
+    * @param peakdata:   pattern of pure peaks
+    * @param background: output of smoothed background
     */
   void LeBailFit::smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVector domain,
                                              FunctionValues peakdata, vector<double>& background)
   {
+    // FIXME - This method may not be a good solution.
+    // TODO  - Create a new ticket to use the algorithm in ProcessBackground here.
+
+    UNUSED_ARG(wsindex);
+    UNUSED_ARG(peakdata);
     UNUSED_ARG(domain);
     UNUSED_ARG(background);
 
+    throw runtime_error("Need to re-consider this method.");
+
+    /* Below is the original code to modifying from
     // 1. Make data ready
     MantidVec& vecData = m_dataWS->dataY(wsindex);
     MantidVec& vecFitBkgd = m_outputWS->dataY(CALBKGDINDEX);
@@ -2551,8 +2548,6 @@ namespace CurveFitting
     }
 
     // 2. Fit
-    throw runtime_error("Need to re-consider this method.");
-    /* Below is the original code to modifying from
     Chebyshev_sptr bkgdfunc(new Chebyshev);
     bkgdfunc->setAttributeValue("n", 6);
 

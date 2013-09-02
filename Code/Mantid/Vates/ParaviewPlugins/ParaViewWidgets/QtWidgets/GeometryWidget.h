@@ -68,6 +68,7 @@ View of an MVP pattern. Controlled by an Presenter, which this View owns.
 - The view may be commanded by the presenter to raise events, so that owners of this widget may subscribe to and observe changes.
 
 */
+// cppcheck-suppress class_X_Y
 class EXPORT_OPT_MANTIDPARVIEW GeometryWidget: public QWidget, public Mantid::VATES::GeometryView
 {
 

@@ -374,6 +374,56 @@ public:
       if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
   }
 
+  void testExecSaveLabel()
+  {
+    SaveNexusProcessed alg;
+    if ( !alg.isInitialized() ) alg.initialize();
+
+    // create dummy 2D-workspace
+    Workspace2D_sptr localWorkspace2D = boost::dynamic_pointer_cast<Workspace2D>
+      (WorkspaceFactory::Instance().create("Workspace2D",1,10,10));
+
+    //set units to be a label
+    localWorkspace2D->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+    auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(localWorkspace2D->getAxis(0)->unit());
+    label->setLabel("Temperature","K");
+
+    double d = 0.0;
+    for(int i = 0; i<10; ++i,d+=0.1)
+    {
+      localWorkspace2D->dataX(0)[i] = d;
+      localWorkspace2D->dataY(0)[i] = d;
+      localWorkspace2D->dataE(0)[i] = d;
+    }
+
+    AnalysisDataService::Instance().addOrReplace("testSpace", localWorkspace2D);
+
+    // Now set it...
+    // specify name of file to save workspace to
+    alg.setPropertyValue("InputWorkspace", "testSpace");
+    outputFile = "SaveNexusProcessedTest_testExec.nxs";
+    //entryName = "test";
+    dataName = "spectra";
+    title = "A simple workspace saved in Processed Nexus format";
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outputFile));
+    outputFile = alg.getPropertyValue("Filename");
+    //alg.setPropertyValue("EntryName", entryName);
+    alg.setPropertyValue("Title", title);
+    if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
+
+    std::string result;
+    TS_ASSERT_THROWS_NOTHING( result = alg.getPropertyValue("Filename") );
+    TS_ASSERT( ! result.compare(outputFile));
+
+    // changed so that 1D workspaces are no longer written.
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
+
+    if(clearfiles) Poco::File(outputFile).remove();
+
+    AnalysisDataService::Instance().remove("testSpace");
+  }
+
 
 
 private:

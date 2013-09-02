@@ -14,6 +14,7 @@ namespace
   class MockWorkspace : public Workspace
   {
     virtual const std::string id() const { return "MockWorkspace"; }
+    virtual const std::string toString() const { return ""; }
     virtual size_t getMemorySize() const { return 1; }
   };
   typedef boost::shared_ptr<MockWorkspace> MockWorkspace_sptr;
@@ -404,24 +405,29 @@ public:
       ads.clear();
   }
 
-  void test_createInfoTree()
+  void test_topLevelItems_Does_Not_Contain_Workspaces_That_Are_In_A_Group_In_The_List()
   {
-      // this adds 1 group to the ADS (5 ws's altogether)
-      auto group = addGroupWithGroupToADS("group");
-      // plus 1 more ws
-      addToADS("workspace");
-      // ADS must have 6 ws's now
-      TS_ASSERT_EQUALS( ads.size(), 6 );
+    // this adds 1 group to the ADS (5 ws's altogether)
+    auto group = addGroupWithGroupToADS("snapshot_group");
+    // plus 1 more ws
+    auto leaf = addToADS("single_workspace");
+    // ADS must have 6 ws's now
+    TS_ASSERT_EQUALS( ads.size(), 6 );
 
-      auto root = ads.createInfoTree();
-      TS_ASSERT( root );
-      // there are 2 ws's at top level
-      TS_ASSERT_EQUALS( root->nodes().size(), 2 );
-      TS_ASSERT_EQUALS( root->nodes()[0]->nodes().size(), 2 );
-      TS_ASSERT_EQUALS( root->nodes()[1]->nodes().size(), 0 );
+    auto topLevelItems = ads.topLevelItems();
+    // Only 2
+    TS_ASSERT_EQUALS(2, topLevelItems.size());
 
-      delete root;
-      ads.clear();
+    auto it = topLevelItems.find("snapshot_group");
+    TS_ASSERT(it != topLevelItems.end());
+    TS_ASSERT_EQUALS("snapshot_group", it->first);
+    TS_ASSERT_EQUALS(group, it->second);
+
+    it = topLevelItems.find("single_workspace");
+    TS_ASSERT(it != topLevelItems.end());
+    TS_ASSERT_EQUALS("single_workspace", it->first);
+    TS_ASSERT_EQUALS(leaf, it->second);
+
   }
 
 private:

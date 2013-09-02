@@ -301,7 +301,7 @@ std::vector<std::string> FacilityInfo::computeResources() const
   while (it != m_computeResources.end())
   {
     names.push_back( (*it).first);
-    it++;
+    ++it;
   }
 
   return names;

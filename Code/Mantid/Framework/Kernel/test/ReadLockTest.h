@@ -21,7 +21,7 @@ public:
   /// Can this object be accessed from multiple threads safely
   virtual bool threadSafe() const { return true; }
   /// Serializes the object to a string
-  virtual std::string toString() const { return "Nothing"; }
+  virtual const std::string toString() const { return "Nothing"; }
   friend class ReadLockTest;
 };
 

@@ -123,7 +123,7 @@ public:
       row >> x >> y;
       TS_ASSERT_EQUALS( double(x), X[i] );
       TS_ASSERT_EQUALS( y, Y[i] );
-      TS_ASSERT_EQUALS( 1.0, E[i] );
+      TS_ASSERT_EQUALS( 0.0, E[i] );
     }
 
     API::AnalysisDataService::Instance().remove("out");

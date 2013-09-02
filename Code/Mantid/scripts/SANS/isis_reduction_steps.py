@@ -1188,43 +1188,33 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         as a function of wavelength. The results are stored as a workspace
     """
     
-    # The different ways of doing a fit, convert the possible ways of specifying this into the stand way it's shown on the GUI 
+    # The different ways of doing a fit, convert the possible ways of specifying this (also the way it is specified in the GUI to the way it can be send to CalculateTransmission 
     TRANS_FIT_OPTIONS = {
-        'YLOG' : 'Logarithmic',
+        'YLOG' : 'Log',
         'STRAIGHT' : 'Linear',
-        'CLEAR' : 'Off',
+        'CLEAR' : 'Linear',
         # Add Mantid ones as well
-        'LOGARITHMIC' : 'Logarithmic',
-        'LOG' : 'Logarithmic',
+        'LOGARITHMIC' : 'Log',
+        'LOG' : 'Log',
         'LINEAR' : 'Linear',
         'LIN' : 'Linear',
-        'OFF' : 'Off'}
-    
-    
-    # Relate the different GUI names for doing a fit to the arguments that can be sent to CalculateTransmission 
-    CALC_TRANS_FIT_PARAMS = {
-        'Logarithmic' : 'Log',
-        'Linear' : 'Linear',
-        'Off' : 'Linear'
-    }
-
+        'OFF' : 'Linear',
+        'POLYNOMIAL':'Polynomial'}
+     
     #map to restrict the possible values of _trans_type
     CAN_SAMPLE_SUFFIXES = {
         False : 'sample',
         True : 'can'}
     
-    DEFAULT_FIT = 'Logarithmic'
+    DEFAULT_FIT = 'LOGARITHMIC'
 
     def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()
         #set these variables to None, which means they haven't been set and defaults will be set further down
-        self.lambda_min = None
-        self._min_set = False
-        self.lambda_max = None
-        self._max_set = False
-        self.fit_method = None
-        self._method_set = False
-        self._use_full_range = None
+        self.fit_props = ['lambda_min', 'lambda_max', 'fit_method', 'order']
+        self.fit_settings = dict()
+        for prop in self.fit_props:
+            self.fit_settings['both::'+prop] = None
         # An optional LoadTransmissions object that contains the names of the transmission and direct workspaces for the sample
         self.samp_loader = None
         # An optional LoadTransmissions objects for the can's transmission and direct workspaces
@@ -1256,7 +1246,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             return self.samp_loader
 
 
-    def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
+    def set_trans_fit(self, fit_method, min_=None, max_=None, override=True, selector='both'):
         """
             Set how the transmission fraction fit is calculated, the range of wavelengths
             to use and the fit method
@@ -1264,31 +1254,53 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             @param max: highest wavelength to use
             @param fit_method: the fit type to pass to CalculateTransmission ('Logarithmic' or 'Linear')or 'Off'
             @param override: if set to False this call won't override the settings set by a previous call (default True)
+            @param selector: define if the given settings is valid for SAMPLE, CAN or BOTH transmissions.
         """
-        if fit_method:
-            if (not self._method_set) or override:
-                fit_method = fit_method.upper()
-                if fit_method in self.TRANS_FIT_OPTIONS.keys():
-                    self.fit_method = self.TRANS_FIT_OPTIONS[fit_method]
-                else:
-                    self.fit_method = self.DEFAULT_FIT
-                    _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
-                self._method_set = override
+        FITMETHOD = 'fit_method'
+        LAMBDAMIN = 'lambda_min'
+        LAMBDAMAX = 'lambda_max'
+        ORDER = 'order'
+        # processing the selector input
+        select = selector.lower()
+        if select not in ['both', 'can', 'sample']:
+            _issueWarning('Invalid selector option ('+selector+'). Fit to transmission skipped')
+            return
+        select += "::"
 
-        if min: min = float(min)
-        if max: max = float(max)
-        if not min is None:
-            if (not self._min_set) or override:
-                self.lambda_min = min
-                self._min_set = override
-                if self.fit_method == 'Off':
-                    _issueWarning('Transmission calculation: The minimum wavelength was set but fitting was set to off and so it will not be used')
-        if not max is None:
-            if (not self._max_set) or override:
-                self.lambda_max = max
-                self._max_set = override
-                if self.fit_method == 'Off':
-                    _issueWarning('Transmission calculation: The maximum wavelength was set but fitting was set to off and so it will not be used')
+        if not override and self.fit_settings.has_key(select + FITMETHOD) and self.fit_settings[select + FITMETHOD]:
+            #it was already configured and this request does not want to override
+            return
+        
+        if not fit_method:
+            # there is not point calling fit_method without fit_method argument
+            return
+        
+        fit_method = fit_method.upper()
+        if 'POLYNOMIAL' in fit_method:
+            order_str = fit_method[10:]
+            fit_method = 'POLYNOMIAL'
+            self.fit_settings[select+ORDER] = int(order_str)
+        if fit_method not in self.TRANS_FIT_OPTIONS.keys():
+            _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
+            fit_method = self.DEFAULT_FIT             
+
+        # get variables for this selector
+        sel_settings = dict()
+        for prop in self.fit_props:
+            sel_settings[prop] = self.fit_settings[select+prop] if self.fit_settings.has_key(select+prop) else self.fit_settings['both::'+prop]        
+
+        # copy fit_method
+        sel_settings[FITMETHOD] = fit_method        
+        
+        if min_: 
+            sel_settings[LAMBDAMIN] = float(min_) if fit_method not in ['OFF', 'CLEAR'] else None
+        if max_: 
+            sel_settings[LAMBDAMAX] = float(max_) if fit_method not in ['OFF', 'CLEAR'] else None
+
+        # apply the propertis to self.fit_settings
+        for prop in self.fit_props:
+            self.fit_settings[select+prop] = sel_settings[prop]
+
 
     def setup_wksp(self, inputWS, inst, wavbining, pre_monitor, post_monitor):
         """
@@ -1375,7 +1387,11 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         else:
             return loader.trans.wksp_name, loader.direct.wksp_name
 
-    def calculate(self, reducer):       
+    def calculate(self, reducer):
+        LAMBDAMIN = 'lambda_min'
+        LAMBDAMAX = 'lambda_max'
+        FITMETHOD = 'fit_method'
+        ORDER = 'order'
         #get the settings required to do the calculation
         trans_raw, direct_raw = self._get_run_wksps(reducer)
         
@@ -1384,10 +1400,12 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         if not direct_raw:
             raise RuntimeError('Attempting transmission correction with no direct file')
 
-        if self.fit_method:
-            fit_meth = self.fit_method
-        else:
-            fit_meth = self.DEFAULT_FIT
+        select = 'can::' if reducer.is_can() else 'direct::'
+
+        # get variables for this selector
+        sel_settings = dict()
+        for prop in self.fit_props:
+            sel_settings[prop] = self.fit_settings[select+prop] if self.fit_settings.has_key(select+prop) else self.fit_settings['both::'+prop]
 
         if self._trans_spec:
             post_sample = self._trans_spec
@@ -1396,22 +1414,19 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
 
         pre_sample = reducer.instrument.incid_mon_4_trans_calc
 
-        if self._use_full_range is None:
-            use_instrum_default_range = reducer.full_trans_wav
-        else:
-            use_instrum_default_range = self._use_full_range
+        use_instrum_default_range = reducer.full_trans_wav
 
         #there are a number of settings and defaults that determine the wavelength to use, go through each in order of increasing precedence
         if use_instrum_default_range:
             translambda_min = reducer.instrument.WAV_RANGE_MIN
             translambda_max = reducer.instrument.WAV_RANGE_MAX
         else:
-            if self.lambda_min and (fit_meth != 'Off'):
-                translambda_min = self.lambda_min
+            if sel_settings[LAMBDAMIN]:
+                translambda_min = sel_settings[LAMBDAMIN]
             else:
                 translambda_min = reducer.to_wavelen.wav_low
-            if self.lambda_max and (fit_meth != 'Off'):
-                translambda_max = self.lambda_max
+            if sel_settings[LAMBDAMAX]:
+                translambda_max = sel_settings[LAMBDAMAX]
             else:
                 translambda_max = reducer.to_wavelen.wav_high
 
@@ -1429,16 +1444,26 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                     trans_raw, translambda_min, translambda_max, reducer)
         
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
-        fit_type = self.CALC_TRANS_FIT_PARAMS[fit_meth]
-        CalculateTransmission(SampleRunWorkspace=trans_tmp_out,DirectRunWorkspace=direct_tmp_out,OutputWorkspace= fittedtransws,IncidentBeamMonitor=
-            pre_sample,TransmissionMonitor= post_sample,RebinParams= reducer.to_wavelen.get_rebin(), FitMethod=fit_type, OutputUnfittedData=True)
+        options = dict()
+        if sel_settings[FITMETHOD]:
+            options['FitMethod'] = self.TRANS_FIT_OPTIONS[sel_settings[FITMETHOD]]
+            if sel_settings[FITMETHOD] == "POLYNOMIAL":
+                options['PolynomialOrder'] = sel_settings[ORDER]
+        else:
+            options['FitMethod'] = self.TRANS_FIT_OPTIONS[self.DEFAULT_FIT]
+
+        CalculateTransmission(SampleRunWorkspace=trans_tmp_out, DirectRunWorkspace=direct_tmp_out,
+                              OutputWorkspace=fittedtransws, IncidentBeamMonitor=pre_sample,
+                              TransmissionMonitor=post_sample, 
+                              RebinParams=reducer.to_wavelen.get_rebin(), 
+                              OutputUnfittedData=True, **options) # options FitMethod, PolynomialOrder if present
 
         # Remove temporaries
         DeleteWorkspace(Workspace=trans_tmp_out)
         if direct_tmp_out != trans_tmp_out:
             DeleteWorkspace(Workspace=direct_tmp_out)
             
-        if fit_meth == 'Off':
+        if sel_settings[FITMETHOD] in ['OFF', 'CLEAR']:
             result = unfittedtransws
             DeleteWorkspace(fittedtransws)
         else:
@@ -1466,6 +1491,23 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         unfitted = fitted_name + "_unfitted"
         
         return fitted_name, unfitted
+
+    def _get_fit_property(self,selector, property_name):
+        if self.fit_settings.has_key(selector+'::' + property_name):
+            return self.fit_settings[selector+'::' + property_name]
+        else:
+            return self.fit_settings['both::'+property_name]
+        
+
+    def lambdaMin(self, selector):
+        return self._get_fit_property(selector.lower(), 'lambda_min')
+    def lambdaMax(self, selector):
+        return self._get_fit_property(selector.lower(), 'lambda_max')
+    def fitMethod(self, selector):
+        resp = self._get_fit_property(selector.lower(), 'fit_method')
+        if 'POLYNOMIAL' == resp:
+            resp += str(self._get_fit_property(selector.lower(), 'order'))
+        return resp
 
 class AbsoluteUnitsISIS(ReductionStep):
     DEFAULT_SCALING = 100.0
@@ -1861,18 +1903,30 @@ class UserFile(ReductionStep):
                 reducer.to_Q.set_gravity(False, override=False)
         
         elif upper_line.startswith('FIT/TRANS/'):
-            params = upper_line[10:].split()
-            nparams = len(params)
-            if nparams == 3 or nparams == 1:
+            #check if the selector is passed:
+            selector = 'BOTH'
+            if 'SAMPLE' in upper_line:
+                selector = 'SAMPLE'
+                params = upper_line[17:].split() # remove FIT/TRANS/SAMPLE/
+            elif 'CAN' in upper_line:
+                selector = 'CAN'
+                params = upper_line[14:].split() # remove FIT/TRANS/CAN/
+            else:
+                params = upper_line[10:].split() # remove FIT/TRANS/            
+
+            try:
+                nparams = len(params)
                 if nparams == 1:
                     fit_type = params[0]
                     lambdamin = lambdamax = None
-                else:
+                elif nparams == 3:
                     fit_type, lambdamin, lambdamax = params
-
-                reducer.transmission_calculator.set_trans_fit(min=lambdamin, 
-                    max=lambdamax, fit_method=fit_type, override=False)
-            else:
+                else:
+                    raise 1
+                reducer.transmission_calculator.set_trans_fit(min_=lambdamin, max_=lambdamax,
+                                                              fit_method=fit_type, override=False, 
+                                                              selector=selector)
+            except:
                 _issueWarning('Incorrectly formatted FIT/TRANS line, %s, line ignored' % upper_line)
 
         elif upper_line.startswith('FIT/MONITOR'):

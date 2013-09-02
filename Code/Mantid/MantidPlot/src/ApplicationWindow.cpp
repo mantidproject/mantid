@@ -932,14 +932,6 @@ void ApplicationWindow::initToolBars()
   btnCursor->setCheckable( true );
   btnCursor->setIcon(QIcon(getQPixmap("select_xpm")) );
   //plotTools->addAction(btnCursor); disabled until fixed (#2783)
-
-  btnSelect = new QAction(tr("&Select Data Range"), this);
-  btnSelect->setShortcut( tr("ALT+S") );
-  btnSelect->setActionGroup(dataTools);
-  btnSelect->setCheckable( true );
-  btnSelect->setIcon(QIcon(getQPixmap("cursors_xpm")) );
-  //plotTools->addAction(btnSelect); disabled until fixed (#2783)
-
   btnPicker = new QAction(tr("S&creen Reader"), this);
   btnPicker->setActionGroup(dataTools);
   btnPicker->setCheckable( true );
@@ -1320,7 +1312,6 @@ void ApplicationWindow::plotDataMenuAboutToShow()
   plotDataMenu->addAction(actionUnzoom);
   plotDataMenu->insertSeparator();
   plotDataMenu->addAction(btnCursor);
-  plotDataMenu->addAction(btnSelect);
   plotDataMenu->addAction(btnPicker);
   plotDataMenu->insertSeparator();
   plotDataMenu->addAction(actionDrawPoints);
@@ -6273,7 +6264,7 @@ bool ApplicationWindow::setWindowName(MdiSubWindow *w, const QString &text)
 
   newName.replace("_", "-");
 
-  // cppcheck-suppress unintvar
+  // cppcheck-suppress uninitvar
   while(alreadyUsedName(newName)){
     QMessageBox::critical(this, tr("MantidPlot - Error"), tr("Name <b>%1</b> already exists!").arg(newName)+//Mantid
         "<p>"+tr("Please choose another name!")+
@@ -12389,8 +12380,6 @@ void ApplicationWindow::pickDataTool( QAction* action )
 
   if (action == btnCursor)
     showCursor();
-  else if (action == btnSelect)
-    showRangeSelectors();
   else if (action == btnPicker)
     showScreenReader();
   else if (action == btnMovePoints)
@@ -13831,10 +13820,6 @@ void ApplicationWindow::translateActionsStrings()
   btnCursor->setShortcut(tr("CTRL+D"));
   btnCursor->setToolTip(tr("Data Reader"));
 
-  btnSelect->setMenuText(tr("&Select Data Range"));
-  btnSelect->setShortcut(tr("ALT+S"));
-  btnSelect->setToolTip(tr("Select data range"));
-
   btnPicker->setMenuText(tr("S&creen Reader"));
   btnPicker->setToolTip(tr("Screen reader"));
 
@@ -14525,7 +14510,7 @@ void ApplicationWindow::showMantidConcepts()
 }
 void ApplicationWindow::showalgorithmDescriptions()
 {
-  std::string url("qthelp://org.mantidproject/doc/html/algorithms_index.html");
+  //std::string url("qthelp://org.mantidproject/doc/html/algorithms_index.html");
   HelpWindow::Instance().showAlgorithm();
 }
 
@@ -17490,10 +17475,7 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
     if (g->zoomOn())
       btnZoomIn->setOn(true);
 
-    else if (g->areRangeSelectorsOn())
-      btnSelect->setOn(true);
-    //else if (dynamic_cast<PeakPickerTool1D*>(tool))
-    //  btnPeakPick->setOn(true);
+    else if (g->areRangeSelectorsOn()){}
     else if (dynamic_cast<PeakPickerTool*>(tool))
       btnMultiPeakPick->setOn(true);
     else if (dynamic_cast<DataPickerTool*>(tool))

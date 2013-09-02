@@ -164,6 +164,11 @@ namespace Mantid
       /// checks if the candidate is the member of the group
       MANTID_KERNEL_DLL int isMember(const std::vector<std::string> &group, const std::string &candidate);
 
+      /// Parses a number range, e.g. "1,4-9,54-111,3,10", to the vector containing all the elements 
+      /// within the range
+      MANTID_KERNEL_DLL std::vector<int> parseRange(const std::string& str, const std::string& elemSep = ",", 
+                                                    const std::string& rangeSep = "-");
+
     }   // NAMESPACE Strings
 
   }   // NAMESPACE Kernel

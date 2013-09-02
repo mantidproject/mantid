@@ -107,17 +107,20 @@ namespace Mantid
         std::string parName = term->terms()[0].name();
         std::string parValue = term->terms()[1].str();
         if (fun->hasAttribute(parName))
-        {// set attribute
+        {
+          // set attribute
           if (parValue.size() > 1 && parValue[0] == '"')
-          {// remove the double quotes
+          {
+            // remove the double quotes
             parValue = parValue.substr(1,parValue.size()-2);
           }
-          IFunction::Attribute att = fun->getAttribute(parName);
-          att.fromString(parValue);
+          IFunction::Attribute att = fun->getAttribute( parName );
+          att.fromString( parValue );
           fun->setAttribute(parName,att);
         }
         else if (parName.size() >= 10 && parName.substr(0,10) == "constraint")
-        {// or it can be a list of constraints
+        {
+          // or it can be a list of constraints
           addConstraints(fun,(*term)[1]);
         }
         else if (parName == "ties")
@@ -130,7 +133,8 @@ namespace Mantid
           parentAttributes[parName] = parValue;
         }
         else
-        {// set initial parameter value
+        {
+          // set initial parameter value
           fun->setParameter(parName,atof(parValue.c_str()));
         }
       }// for term

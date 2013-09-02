@@ -2,6 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACES_INDIRECT_H_
 
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/C2ETab.h"
 #include "ui_ConvertToEnergy.h"
 
 #include <qwt_plot.h>
@@ -177,6 +178,8 @@ namespace MantidQt
       QtDoublePropertyManager* m_sltDblMng;
       QtBoolPropertyManager* m_sltBlnMng;
       QtGroupPropertyManager* m_sltGrpMng;
+
+      C2ETab* m_tab_trans;
     };
   }
 }

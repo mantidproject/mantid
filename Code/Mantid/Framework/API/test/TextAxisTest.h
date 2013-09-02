@@ -96,6 +96,47 @@ public:
     delete newTextAxis;
   }
 
+  void test_getMin_when_numeric_entry()
+  {
+    TextAxis ta(2);
+    ta.setLabel(0,"3.1");
+    ta.setLabel(1,"4.2");
+    TS_ASSERT_EQUALS(3.1, ta.getMin())
+  }
+
+  void test_getMax_when_numeric_entry()
+  {
+    TextAxis ta(2);
+    ta.setLabel(0,"3.1");
+    ta.setLabel(1,"4.2");
+    TS_ASSERT_EQUALS(4.2, ta.getMax())
+  }
+
+  void test_getMin_when_not_numeric()
+  {
+    TextAxis ta(2);
+    ta.setLabel(0,"x3.1");
+    ta.setLabel(1,"x4.2");
+    TS_ASSERT_EQUALS(0, ta.getMin())
+  }
+
+  void test_getMax_when_numeric()
+  {
+    TextAxis ta(2);
+    ta.setLabel(0,"x3.1");
+    ta.setLabel(1,"x4.2");
+    TS_ASSERT_EQUALS(1, ta.getMax())
+  }
+
+  void test_getMinMax_when_mixed_numeric_non_numeric()
+  {
+    TextAxis ta(2);
+    ta.setLabel(0,"5.1");
+    ta.setLabel(1,"x");
+    TS_ASSERT_EQUALS(5.1, ta.getMin())
+    TS_ASSERT_EQUALS(ta.getMin() + 1, ta.getMax())
+  }
+
 
 };
 

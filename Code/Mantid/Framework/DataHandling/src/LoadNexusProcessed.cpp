@@ -31,6 +31,7 @@ The Child Algorithms used by LoadMuonNexus are:
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -48,6 +49,8 @@ The Child Algorithms used by LoadMuonNexus are:
 #include "MantidNexus/NexusFileIO.h"
 #include <nexus/NeXusFile.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/regex.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <Poco/DateTimeParser.h>
 #include <Poco/Path.h>
@@ -176,6 +179,22 @@ void LoadNexusProcessed::exec()
     //This forms the name of the group
     std::string base_name = getPropertyValue("OutputWorkspace");
     // First member of group should be the group itself, for some reason!
+
+    //load names of each of the workspaces and check for a common stem
+    std::vector<std::string> names(nperiods+1);
+    bool commonStem = checkForCommonNameStem(root, names);
+
+    //remove existing workspace and replace with the one being loaded
+    bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
+    if(wsExists)
+    {
+      Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("DeleteWorkspace");
+      alg->initialize();
+      alg->setChild(true);
+      alg->setProperty("Workspace", base_name);
+      alg->execute();
+    }
+
     base_name += "_";
     const std::string prop_name = "OutputWorkspace_";
     double nperiods_d = static_cast<double>(nperiods);
@@ -183,8 +202,12 @@ void LoadNexusProcessed::exec()
     {
       std::ostringstream os;
       os << p;
+
+      //decide what the workspace should be called
+      std::string wsName = buildWorkspaceName(names[p], base_name, p, commonStem);
+
       Workspace_sptr local_workspace = loadEntry(root, basename + os.str(), static_cast<double>(p-1)/nperiods_d, 1./nperiods_d);
-      declareProperty(new WorkspaceProperty<API::Workspace>(prop_name + os.str(), base_name + os.str(),
+      declareProperty(new WorkspaceProperty<API::Workspace>(prop_name + os.str(), wsName,
           Direction::Output));
       //wksp_group->add(base_name + os.str());
       wksp_group->addWorkspace(local_workspace);
@@ -199,6 +222,139 @@ void LoadNexusProcessed::exec()
   m_axis1vals.clear();
 }
 
+
+/**
+ * Decides what to call a child of a group workspace.
+ *
+ * This function uses information about if the child workspace has a common stem
+ * and checks if the file contained a workspace name to decide what it should be called
+ *
+ * @param name :: The name loaded from the file (possibly the empty string if none was loaded)
+ * @param baseName :: The name group workspace
+ * @param wsIndex :: The current index of this workspace
+ * @param commonStem :: Whether the workspaces share a common name stem
+ *
+ * @return The name of the workspace
+ */
+std::string LoadNexusProcessed::buildWorkspaceName(const std::string& name, const std::string& baseName, int64_t wsIndex, bool commonStem)
+{
+  std::string wsName;
+  std::string index = boost::lexical_cast<std::string>(wsIndex);
+
+  //if we don't have a common stem then use name tag
+  if(!commonStem)
+  {
+    if(!name.empty())
+    {
+      //use name loaded from file there's no common stem
+      wsName = name;
+    }
+    else
+    {
+      //if the name property wasn't defined just use <OutputWorkspaceName>_n
+      wsName = baseName + index;
+    }
+  }
+  else
+  {
+    //we have a common stem so rename accordingly
+    boost::smatch results;
+    const boost::regex exp(".*_(\\d+$)");
+    //if we have a common name stem then name is <OutputWorkspaceName>_n
+    if(boost::regex_search(name, results, exp))
+    {
+      wsName = baseName + std::string(results[1].first, results[1].second);
+    }
+    else
+    {
+      //use default name if we couldn't match for some reason
+      wsName = baseName + index;
+    }
+  }
+
+  correctForWorkspaceNameClash(wsName);
+
+  return wsName;
+}
+
+/**
+ * Append an index to the name if it already exists in the AnalysisDataService
+ *
+ * @param wsName :: Name to call the workspace
+ */
+void LoadNexusProcessed::correctForWorkspaceNameClash(std::string& wsName)
+{
+  bool noClash(false);
+
+  for (int i =0; !noClash; ++i )
+  {
+    std::string wsIndex = ""; //dont use an index if there is no other workspace
+    if(i > 0)
+    {
+      wsIndex = "_" + boost::lexical_cast<std::string>(i);
+    }
+
+    bool wsExists = AnalysisDataService::Instance().doesExist(wsName+wsIndex);
+    if(!wsExists)
+    {
+      wsName += wsIndex;
+      noClash = true;
+    }
+  }
+}
+
+/**
+ * Check if the workspace name contains a common stem and load the workspace names
+ *
+ * @param root :: the root for the NeXus document
+ * @param names :: vector to store the names to be loaded.
+ * @return Whether there was a common stem.
+ */
+bool LoadNexusProcessed::checkForCommonNameStem(NXRoot & root, std::vector<std::string>& names)
+{
+  bool success(true);
+  int64_t nperiods = static_cast<int64_t>(root.groups().size());
+  for( int64_t p = 1; p <= nperiods; ++p )
+  {
+    std::ostringstream os;
+    os << p;
+
+    names[p] = loadWorkspaceName(root, "mantid_workspace_" + os.str());
+
+    boost::smatch results;
+    const boost::regex exp(".*_\\d+$");
+
+    //check if the workspace name has an index on the end
+    if (!boost::regex_match(names[p], results, exp))
+    {
+      success = false;
+    }
+  }
+
+  return success;
+}
+
+/**
+ * Load the workspace name, if the attribute exists
+ *
+ * @param root :: Root of NeXus file
+ * @param entr_name :: Entry in NeXus file to look at
+ * @return The workspace name. If none found an empty string is returned.
+ */
+std::string LoadNexusProcessed::loadWorkspaceName(NXRoot & root, const std::string& entry_name)
+{
+  NXEntry mtd_entry = root.openEntry(entry_name);
+  try
+  {
+    return mtd_entry.getString("workspace_name");
+  }
+  catch (std::runtime_error&)
+  {
+    return std::string("");
+  }
+
+  return std::string("");
+}
 
 
 //-------------------------------------------------------------------------------------------------
@@ -874,6 +1030,13 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   try
   {
     local_workspace->getAxis(0)->unit() = UnitFactory::Instance().create(unit1);
+    if(unit1 == "Label")
+    {
+      auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(local_workspace->getAxis(0)->unit());
+      auto ax = wksp_cls.openNXDouble("axis1");
+      label->setLabel(ax.attributes("caption"), ax.attributes("label"));
+    }
+
     //If this doesn't throw then it is a numeric access so grab the data so we can set it later
     axis2.load();
     m_axis1vals = MantidVec(axis2(), axis2() + axis2.dim0());
@@ -896,6 +1059,12 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
       Mantid::API::NumericAxis* newAxis = new Mantid::API::NumericAxis(nspectra);
       local_workspace->replaceAxis(1, newAxis);
       newAxis->unit() = UnitFactory::Instance().create(unit2);
+      if(unit2 == "Label")
+      {
+        auto label = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(newAxis->unit());
+        auto ax = wksp_cls.openNXDouble("axis2");
+        label->setLabel(ax.attributes("caption"), ax.attributes("label"));
+      }
     }
     catch( std::runtime_error & )
     {

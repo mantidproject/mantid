@@ -71,7 +71,6 @@ class BackgroundWidget(BaseWidget):
             self.set_state(state)
         else:
             m = Background()
-            if self._settings.api2: m.PYTHON_API=2
             self.set_state(m)
             
         self._last_direct_state = None
@@ -159,7 +158,6 @@ class BackgroundWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = Background()
-        if self._settings.api2: m.PYTHON_API=2
         m.background_corr = self._content.background_chk.isChecked()
         m.background_file = str(self._content.background_edit.text())
         
@@ -254,10 +252,8 @@ class BackgroundWidget(BaseWidget):
         
         fname = str(self._content.background_edit.text())
         if len(str(fname).strip())>0:
-            api = 2 if self._settings.api2 else 1
             dataproxy = self._data_proxy(fname, "__background_raw")
             if len(dataproxy.errors)>0:
-                #QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
             
             self._settings.last_data_ws = dataproxy.data_ws

@@ -3,7 +3,7 @@
 #include "MantidGeometry/IDetector.h"
 
 UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor* rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis):
-    UnwrappedSurface(rootActor,origin,axis)
+    RotationSurface(rootActor,origin,axis)
 {
   init();
 }
@@ -11,13 +11,13 @@ UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor* rootActor, const Man
 //------------------------------------------------------------------------------
 /** Convert physical position to UV projection
  *
+ * @param pos :: position in 3D
  * @param u :: set to U
  * @param v :: set to V
  * @param uscale :: scaling for u direction
  * @param vscale :: scaling for v direction
- * @param pos :: position in 3D
  */
-void UnwrappedCylinder::project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const
+void UnwrappedCylinder::project(const Mantid::Kernel::V3D & pos, double & u, double & v, double & uscale, double & vscale) const
 {
   // projection to cylinder axis
   v = pos.scalar_prod(m_zaxis);
@@ -29,32 +29,17 @@ void UnwrappedCylinder::project(double & u, double & v, double & uscale, double 
   vscale = 1.;
 }
 
-
-void UnwrappedCylinder::calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const
+void UnwrappedCylinder::rotate(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const
 {
-  // Basis vectors for a detector image on the screen
-  const Mantid::Kernel::V3D X(-1,0,0);
-  const Mantid::Kernel::V3D Y(0,1,0);
-  const Mantid::Kernel::V3D Z(0,0,-1);
+  Mantid::Kernel::V3D eye, up;
+  eye = m_pos - udet.detector->getPos();
+  up = m_zaxis;
+  up.normalize();
+  eye = eye - up * eye.scalar_prod(up);
+  eye.normalize();
 
-  // Find basis with x axis pointing to the detector from the sample,
-  // z axis is coplanar with x and m_zaxis, and y making the basis right handed
-  Mantid::Kernel::V3D x,y,z;
-  z = udet.detector->getPos() - m_pos;
-  y = m_zaxis;
-  y.normalize();
-  x = y.cross_prod(z);
-  x.normalize();
-  z = z - y * z.scalar_prod(y);
-  z.normalize();
   Mantid::Kernel::Quat R1;
-  InstrumentActor::BasisRotation(x,y,z,X,Y,Z,R1);
-
+  InstrumentActor::rotateToLookAt(eye, up, R1);
   R =  R1 * udet.detector->getRotation();
 }
 
-
-double UnwrappedCylinder::uPeriod()const
-{
-  return 2 * M_PI;
-}

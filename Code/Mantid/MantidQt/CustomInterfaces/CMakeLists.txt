@@ -1,5 +1,6 @@
 set ( SRC_FILES
     src/ApplyCorr.cpp
+    src/C2ETab.cpp
     src/CalcCorr.cpp
     src/ConvertToEnergy.cpp
     src/ConvFit.cpp
@@ -26,6 +27,7 @@ set ( SRC_FILES
 	src/SANSDiagnostics.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
+	src/Transmission.cpp
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
 	src/StepScan.cpp
@@ -41,6 +43,7 @@ set ( SRC_FILES
 set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
     inc/MantidQtCustomInterfaces/ApplyCorr.h
+    inc/MantidQtCustomInterfaces/C2ETab.h
     inc/MantidQtCustomInterfaces/CalcCorr.h
 	inc/MantidQtCustomInterfaces/ConvertToEnergy.h
     inc/MantidQtCustomInterfaces/ConvFit.h
@@ -68,6 +71,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
+	inc/MantidQtCustomInterfaces/Transmission.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
 	inc/MantidQtCustomInterfaces/MantidEVWorker.h
 	inc/MantidQtCustomInterfaces/StepScan.h
@@ -83,6 +87,7 @@ set ( SRC_UNITY_IGNORE_FILES )
 
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ApplyCorr.h
+                inc/MantidQtCustomInterfaces/C2ETab.h
                 inc/MantidQtCustomInterfaces/CalcCorr.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/ConvFit.h
@@ -105,6 +110,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+                inc/MantidQtCustomInterfaces/Transmission.h
 		inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
 )

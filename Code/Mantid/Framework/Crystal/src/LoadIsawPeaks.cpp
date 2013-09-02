@@ -172,10 +172,11 @@ namespace Crystal
        g_log.error()<<"Missing L1 or Time offset"<<std::endl;
        throw std::invalid_argument("Missing L1 or Time offset");
      }
-     double L1;
+
      try
      {
        std::istringstream iss( L1s+" "+T0s, std::istringstream::in);
+       double L1;
        iss>>L1;
        iss>>T0;
        V3D sampPos=instr->getSample()->getPos();
@@ -222,11 +223,13 @@ namespace Crystal
       startChar = getWord( in, false);// blank lines ?? and # lines ignore
 
       std::istringstream iss( line, std::istringstream::in);
-      int  bankNum,nrows,ncols;
-      double width,height,depth,detD,Centx,Centy,Centz,Basex,Basey,Basez,
+      int  bankNum;
+      double width,height,Centx,Centy,Centz,Basex,Basey,Basez,
              Upx,Upy,Upz;
       try
       {
+         int  nrows,ncols;
+         double depth,detD;
          iss>>bankNum>>nrows>>ncols>>width>>height>>depth>>detD
             >>Centx>>Centy>>Centz>>Basex>>Basey>>Basez
             >>Upx>>Upy>>Upz;

@@ -228,6 +228,7 @@ set ( INC_FILES
 	inc/MantidKernel/VMD.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/VisibleWhenProperty.h
+	inc/MantidKernel/WarningSuppressions.h
 	inc/MantidKernel/WriteLock.h
 	inc/MantidKernel/XMLInstantiator.h
 	inc/MantidKernel/cow_ptr.h
@@ -366,6 +367,7 @@ add_subdirectory ( test )
 # determine it from git and the file already exists. This makes sure the 
 # version number is correct when building off the source tarball
 
+include (PatchVersionNumber)
 if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in
                    ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp

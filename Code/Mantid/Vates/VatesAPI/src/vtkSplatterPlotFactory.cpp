@@ -48,7 +48,8 @@ namespace VATES
    */
   vtkSplatterPlotFactory::vtkSplatterPlotFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t numPoints, const double percentToUse ) :
   m_thresholdRange(thresholdRange), m_scalarName(scalarName), 
-  m_numPoints(numPoints), m_percentToUse(percentToUse)
+  m_numPoints(numPoints), m_percentToUse(percentToUse),
+  m_buildSortedList(true), m_wsName("")
   {
   }
 
@@ -111,42 +112,43 @@ namespace VATES
       std::cout << tim << " to retrieve the "<< boxes.size() << " boxes down."<< std::endl;
     }
 
-    // get list of boxes with signal > 0 and sort
-    // the list in order of decreasing signal
-    std::vector< MDBox<MDE,nd> * > sorted_boxes;
-    sorted_boxes.reserve( 100000 );
-    for (size_t i = 0; i < boxes.size(); i++)
+    std::string new_name = ws->getName();
+    if (new_name != m_wsName || m_buildSortedList)
     {
-      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
-      if (box)
+      m_wsName = new_name;
+      m_buildSortedList = false;
+      m_sortedBoxes.clear();
+      // get list of boxes with signal > 0 and sort
+      // the list in order of decreasing signal
+      for (size_t i = 0; i < boxes.size(); i++)
       {
-        size_t newPoints = box->getNPoints();
-        if (newPoints > 0)
+        MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+        if (box)
         {
-          sorted_boxes.push_back(box);
+          size_t newPoints = box->getNPoints();
+          if (newPoints > 0)
+          {
+            m_sortedBoxes.push_back(box);
+          }
         }
+      }
+
+      if (VERBOSE)
+      {
+        std::cout << "START SORTING" << std::endl;
+      }
+      std::sort(m_sortedBoxes.begin(), m_sortedBoxes.end(),
+                CompareNormalizedSignal);
+      if (VERBOSE)
+      {
+        std::cout << "DONE SORTING" << std::endl;
       }
     }
 
-    if (VERBOSE)
+    size_t num_boxes_to_use = static_cast<size_t>(percent_to_use * static_cast<double>(m_sortedBoxes.size()) / 100.0);
+    if (num_boxes_to_use >= m_sortedBoxes.size())
     {
-      std::cout << "START SORTING" << std::endl;
-    }
-    std::sort(sorted_boxes.begin(), sorted_boxes.end(), CompareNormalizedSignal);
-    if (VERBOSE)
-    {
-      std::cout << "DONE SORTING" << std::endl;
-    }
-
-    size_t num_boxes_to_use = static_cast<size_t>(percent_to_use * static_cast<double>(sorted_boxes.size()) / 100.0);
-    if (num_boxes_to_use <= 0)
-    {
-      num_boxes_to_use = 1;
-    }
-
-    if (num_boxes_to_use >= sorted_boxes.size())
-    {
-      num_boxes_to_use = sorted_boxes.size()-1;
+      num_boxes_to_use = m_sortedBoxes.size()-1;
     }
 
     // restrict the number of points to the
@@ -154,7 +156,7 @@ namespace VATES
     size_t total_points_available = 0;
     for (size_t i = 0; i < num_boxes_to_use; i++)
     {
-      size_t newPoints = sorted_boxes[i]->getNPoints();
+      size_t newPoints = m_sortedBoxes[i]->getNPoints();
       total_points_available += newPoints;
     }
 
@@ -179,7 +181,7 @@ namespace VATES
     {
       std::cout << "numPoints                 = " << numPoints << std::endl;
       std::cout << "num boxes in all          = " << boxes.size() << std::endl;
-      std::cout << "num boxes above zero      = " << sorted_boxes.size() << std::endl;
+      std::cout << "num boxes above zero      = " << m_sortedBoxes.size() << std::endl;
       std::cout << "num boxes to use          = " << num_boxes_to_use << std::endl;
       std::cout << "total_points_available    = " << total_points_available << std::endl;
       std::cout << "points needed per box     = " << points_per_box << std::endl;
@@ -205,7 +207,7 @@ namespace VATES
     bool   done       = false;
     while (box_index < num_boxes_to_use && !done)
     {
-      MDBox<MDE,nd> *box = sorted_boxes[box_index];
+      MDBox<MDE,nd> *box = dynamic_cast<MDBox<MDE,nd> *>(m_sortedBoxes[box_index]);
       box_index++;
       float signal_normalized = float(box->getSignalNormalized());
       size_t newPoints = box->getNPoints();
@@ -304,6 +306,12 @@ namespace VATES
   {
     UNUSED_ARG(progressUpdating);
 
+    // If initialize() wasn't run, we don't have a workspace.
+    if(!m_workspace)
+    {
+      throw std::runtime_error("Invalid vtkSplatterPlotFactory. Workspace is null");
+    }
+
     size_t nd = m_workspace->getNumDims();
      
     Mantid::Kernel::ReadLock lock(*m_workspace);
@@ -375,10 +383,6 @@ namespace VATES
     if(!m_workspace)
     {
       throw std::invalid_argument("Workspace is null or not IMDEventWorkspace");
-    }
-    if(!m_workspace)
-    {
-      throw std::runtime_error("Invalid vtkSplatterPlotFactory. Workspace is null");
     }
     if (m_workspace->getNumDims() < 3)
     {

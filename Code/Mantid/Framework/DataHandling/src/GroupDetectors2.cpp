@@ -1067,9 +1067,9 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<
   }
   Poco::StringTokenizer ranges(line, "-");
 
-  size_t loop = 0;
   try
   {
+    size_t loop = 0;
     do
     {
       Poco::StringTokenizer beforeHyphen(ranges[loop], " ", IGNORE_SPACES);

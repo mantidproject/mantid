@@ -540,14 +540,12 @@ private:
 // Performance test
 //-------------------------------------------------------------------------------------------------------------------------
 
-namespace
-{
-}
-
 class LoadDetectorInfoTestPerformance : public CxxTest::TestSuite
 {
-
 public:
+  static LoadDetectorInfoTestPerformance *createSuite() { return new LoadDetectorInfoTestPerformance(); }
+  static void destroySuite(LoadDetectorInfoTestPerformance *suite) { delete suite; }
+
   LoadDetectorInfoTestPerformance()
     : m_testfile("LoadDetectorInfoTestPerformance_largefile.dat"),
       m_wsName("LoadDetectorInfoTestPerformance")

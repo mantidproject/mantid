@@ -93,7 +93,8 @@ namespace Algorithms
     grouping.push_back("bank");
     declareProperty("GroupDetectorsBy", "", boost::make_shared<StringListValidator>(grouping),
         "Only used if GroupNames is empty: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks");
-
+    declareProperty("MaxRecursionDepth", 5,
+                    "Number of levels to search into the instrument (default=5)");
 
     declareProperty(new WorkspaceProperty<GroupingWorkspace>("OutputWorkspace","",Direction::Output),
         "An output GroupingWorkspace.");
@@ -106,6 +107,7 @@ namespace Algorithms
     std::string groupby("Specify Grouping");
     setPropertyGroup("GroupNames", groupby);
     setPropertyGroup("GroupDetectorsBy", groupby);
+    setPropertyGroup("MaxRecursionDepth", groupby);
 
     // output properties
     declareProperty("NumberGroupedSpectraResult", EMPTY_INT(), "The number of spectra in groups", Direction::Output);
@@ -324,6 +326,8 @@ namespace Algorithms
       {
           sortnames = true;
           GroupNames = "";
+          int maxRecurseDepth = this->getProperty("MaxRecursionDepth");
+
           // cppcheck-suppress syntaxError
           PRAGMA_OMP(parallel for schedule(dynamic, 1) )
           for (int num = 0; num < 300; ++num)
@@ -331,7 +335,7 @@ namespace Algorithms
               PARALLEL_START_INTERUPT_REGION
               std::ostringstream mess;
               mess<< grouping<<num;
-              IComponent_const_sptr comp = inst->getComponentByName(mess.str(), 15);
+              IComponent_const_sptr comp = inst->getComponentByName(mess.str(), maxRecurseDepth);
               PARALLEL_CRITICAL(GroupNames)
               if(comp) GroupNames+=mess.str()+",";
               PARALLEL_END_INTERUPT_REGION

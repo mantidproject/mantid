@@ -1,4 +1,4 @@
 # This contains the 'patch' part of the version number, obtained from 'git describe' in CommonSetup.cmake
 
-set ( VERSION_PATCH "@MtdVersion_WC_LAST_CHANGED_REV@" )
+set ( VERSION_PATCH "@MtdVersion_WC_LAST_CHANGED_DATETIME@" )
 

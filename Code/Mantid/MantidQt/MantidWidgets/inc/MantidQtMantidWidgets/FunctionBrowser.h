@@ -90,7 +90,7 @@ public:
   /// Return FunctionFactory function string
   QString getFunctionString();
   /// Return the function
-  Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL);
+  Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL, bool attributesOnly = false);
 
 protected:
   /// Create the Qt property browser
@@ -123,12 +123,16 @@ protected:
   bool isFunction(QtProperty* prop) const;
   /// Check if property is a function attribute
   bool isAttribute(QtProperty* prop) const;
-  /// Check if property is a function attribute
+  /// Check if property is a string attribute
   bool isStringAttribute(QtProperty* prop) const;
-  /// Check if property is a function attribute
+  /// Check if property is a double attribute
   bool isDoubleAttribute(QtProperty* prop) const;
-  /// Check if property is a function attribute
+  /// Check if property is a int attribute
   bool isIntAttribute(QtProperty* prop) const;
+  /// Check if property is a bool attribute
+  bool isBoolAttribute(QtProperty* prop) const;
+  /// Check if property is a vector attribute
+  bool isVectorAttribute(QtProperty* prop) const;
   /// Check if property is a function paramater
   bool isParameter(QtProperty* prop) const;
   /// Get attribute as a string
@@ -190,6 +194,8 @@ protected slots:
 
   /// Called when a function attribute property is changed
   void attributeChanged(QtProperty*);
+  /// Called when a member of a vector attribute is changed
+  void attributeVectorDoubleChanged(QtProperty*);
 
 protected:
   /// Manager for function group properties
@@ -212,6 +218,12 @@ protected:
   QtStringPropertyManager *m_constraintManager;
   /// Manager for Formula attributes
   QtStringPropertyManager *m_formulaManager;
+  /// Manager for vector attribute properties
+  QtGroupPropertyManager *m_attributeVectorManager;
+  /// Manager for vector attribute member properties
+  QtDoublePropertyManager *m_attributeVectorDoubleManager;
+  /// Manager for vector attribute size properties
+  QtIntPropertyManager *m_attributeSizeManager;
 
 
   /// Qt property browser which displays properties

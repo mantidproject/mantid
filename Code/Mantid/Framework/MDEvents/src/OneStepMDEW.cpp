@@ -74,34 +74,21 @@ namespace Mantid
       std::string tempWsName = getPropertyValue("OutputWorkspace") + "_nxs";
 
       Algorithm_sptr childAlg;
-
       // -------- First we load the event nexus file -------------
-      childAlg = AlgorithmFactory::Instance().create("LoadEventNexus", 1); // new Mantid::NeXus::LoadEventNexus();
+      childAlg = AlgorithmFactory::Instance().create("LoadEventNexus", 1);
       childAlg->initialize();
       childAlg->setPropertyValue("Filename", getPropertyValue("Filename"));
       childAlg->setPropertyValue("OutputWorkspace", tempWsName);
       childAlg->executeAsChildAlg();
 
-      //    Workspace_sptr tempWS = childAlg->getProperty<Workspace>("OutputWorkspace");
-      //    IEventWorkspace_sptr tempEventWS = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(tempWsName);
-      //    IEventWorkspace_sptr tempEventWS = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(tempWsName);
-
-
       // --------- Now Convert -------------------------------
-      //childAlg = createChildAlgorithm("ConvertToDiffractionMDWorkspace");
-      childAlg = AlgorithmFactory::Instance().create("ConvertToDiffractionMDWorkspace", 1);  // new ConvertToDiffractionMDWorkspace();
-      childAlg->initialize();
+      childAlg = createChildAlgorithm("ConvertToDiffractionMDWorkspace");
       childAlg->setPropertyValue("InputWorkspace", tempWsName);
       childAlg->setProperty<bool>("ClearInputWorkspace", false);
       childAlg->setProperty<bool>("LorentzCorrection", true);
-      childAlg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
       childAlg->executeAsChildAlg();
 
-      //    Workspace_sptr tempWS = childAlg->getProperty("OutputWorkspace");
-      //    IMDEventWorkspace_sptr outWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(tempWS);
-      IMDEventWorkspace_sptr outWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(
-        AnalysisDataService::Instance().retrieve(getPropertyValue("OutputWorkspace")));
-
+      IMDEventWorkspace_sptr outWS = childAlg->getProperty("OutputWorkspace");
       setProperty<Workspace_sptr>("OutputWorkspace", outWS);
     }
 

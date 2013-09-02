@@ -118,7 +118,7 @@
 <component type="module_la">
   <location  r="0" t="0" p="2.86241" name="mod0"/>
   <location  r="0" t="0" p="0" name="mod1"/>
-  <location  r="0" t="" p="-2.86241" name="mod2"/>
+  <location  r="0" t="0" p="-2.86241" name="mod2"/>
 </component>
 </type>
 <type name="module_bsk">

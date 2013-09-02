@@ -28,7 +28,8 @@ StepScan::StepScan(QWidget *parent)
   : UserSubWindow(parent), m_dataReloadNeeded(false),
     m_instrument(ConfigService::Instance().getInstrument().name()),
     m_addObserver(*this, &StepScan::handleAddEvent),
-    m_replObserver(*this, &StepScan::handleReplEvent)
+    m_replObserver(*this, &StepScan::handleReplEvent),
+    m_replaceObserverAdded(false)
 {
 }
 
@@ -78,6 +79,7 @@ void StepScan::cleanupWorkspaces()
     m_inputWSName.clear();
     if ( ADS.doesExist( m_plotWSName ) ) ADS.remove( m_plotWSName );
     m_plotWSName.clear();
+    disconnect( SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)) );
   }
 
   m_uiForm.startButton->setEnabled(false);
@@ -122,6 +124,8 @@ void StepScan::startLiveListener()
   // TODO: Run entirely asynchronously (see AlgorithmRunner)
   IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("UpdateEvery",5.0);
+  startLiveData->setProperty("FromNow",false);
+  startLiveData->setProperty("FromStartOfRun",true);
   startLiveData->setProperty("Instrument",m_instrument);
   m_inputWSName = "__live";
   startLiveData->setProperty("OutputWorkspace",m_inputWSName);
@@ -140,6 +144,10 @@ void StepScan::startLiveListener()
   m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
   setupOptionControls();
+
+  addReplaceObserverOnce();
+  connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
+           SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
 
   QApplication::restoreOverrideCursor();
 }
@@ -199,7 +207,7 @@ void StepScan::launchInstrumentWindow()
   // Attach the observers so that if a mask workspace is generated over in the instrument view,
   // it is automatically selected by the combobox over here
   AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
+  addReplaceObserverOnce();
 }
 
 void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
@@ -358,7 +366,8 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
 
   IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("Instrument", m_instrument);
-  // TODO: startLive->setProperty("FromStartOfRun",true);
+  startLiveData->setProperty("FromNow",false);
+  startLiveData->setProperty("FromStartOfRun",true);
   startLiveData->setProperty("UpdateEvery",10.0);
   startLiveData->setProperty("PreserveEvents",true);
   startLiveData->setProperty("PostProcessingAlgorithm","StepScan");
@@ -375,9 +384,6 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
   // Keep track of the algorithm that's pulling in the live data
   m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
-  connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
-           SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
   connect( this, SIGNAL(updatePlot(const QString&)), SLOT(generateCurve(const QString&)) );
 }
 
@@ -392,11 +398,11 @@ void StepScan::generateCurve( const QString& var )
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("ConvertTableToMatrixWorkspace");
   alg->setLogging(false); // Don't log this algorithm
   alg->setPropertyValue("InputWorkspace", m_tableWSName);
-  // TODO: Make workspace hidden once ticket #6803 is fixed
-  m_plotWSName = "plot_" + m_tableWSName;
+  m_plotWSName = m_tableWSName + "_plot";
   alg->setPropertyValue("OutputWorkspace", m_plotWSName);
   alg->setPropertyValue("ColumnX", var.toStdString() );
   alg->setPropertyValue("ColumnY", "Counts" );
+  alg->setPropertyValue("ColumnE", "Error" );
   if ( ! alg->execute() ) return;
 
   // Now create one for the normalisation, if required
@@ -439,7 +445,7 @@ void StepScan::plotCurve()
   // Has to be done via python
   std::string pyCode = "g = graph('" + title + "')\n"
                        "if g is None:\n"
-                       "    g = plotSpectrum('" + m_plotWSName + "',0,type=Layer.Scatter)\n"
+                       "    g = plotSpectrum('" + m_plotWSName + "',0,True,type=Layer.Scatter)\n"
                        "    l = g.activeLayer()\n"
                        "    l.legend().hide()\n"
                        "    l.removeTitle()\n"
@@ -462,6 +468,15 @@ void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_pt
   checkForMaskWorkspace(pNf->object_name());
   checkForResultTableUpdate(pNf->object_name());
   checkForVaryingLogs(pNf->object_name());
+}
+
+void StepScan::addReplaceObserverOnce()
+{
+  if ( ! m_replaceObserverAdded )
+  {
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
+    m_replaceObserverAdded = true;
+  }
 }
 
 void StepScan::checkForMaskWorkspace(const std::string & wsName)

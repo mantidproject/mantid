@@ -59,6 +59,11 @@ protected:
 class MultiDomainFunctionTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static MultiDomainFunctionTest *createSuite() { return new MultiDomainFunctionTest(); }
+  static void destroySuite( MultiDomainFunctionTest *suite ) { delete suite; }
+
   MultiDomainFunctionTest()
   {
     FrameworkManager::Instance();

@@ -33,15 +33,14 @@ public:
 
   void testCreateWithoutInitializeThrows()
   {
-    //FakeProgressAction progressUpdate;
-    //vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-    //TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.", factory.create(progressUpdate), std::runtime_error);
+    FakeProgressAction progressUpdate;
+    vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
+    TSM_ASSERT_THROWS("Have NOT initalized object. Should throw.", factory.create(progressUpdate), std::runtime_error);
   }
 
   void testInitializeWithNullWorkspaceThrows()
   {
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
-
     IMDEventWorkspace* ws = NULL;
     TSM_ASSERT_THROWS("This is a NULL workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
   }
@@ -49,7 +48,6 @@ public:
   void testInitializeWithWrongWorkspaceTypeThrows()
   {
     IMDWorkspace* ws = new MockIMDWorkspace;
-
     vtkSplatterPlotFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     TSM_ASSERT_THROWS("This is an invalid workspace. Should throw.", factory.initialize( Workspace_sptr(ws) ), std::invalid_argument);
   }

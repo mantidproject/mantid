@@ -158,8 +158,9 @@ void SANSSensitivityCorrection::exec()
 
   if (reductionManager->existsProperty(entryName))
   {
-    floodWS = reductionManager->getProperty(entryName);
-    floodWSName = reductionManager->getPropertyValue(entryName);
+    std::string wsName = reductionManager->getPropertyValue(entryName);
+    floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName) );
+    m_output_message += "   |Using "+wsName+"\n";
   } else {
     // Load the flood field if we don't have it already
     // First, try to determine whether we need to load data or a sensitivity workspace...
@@ -327,12 +328,15 @@ void SANSSensitivityCorrection::exec()
       floodWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
     }
     std::string floodWSOutputName = getPropertyValue("OutputSensitivityWorkspace");
-    if (!floodWSOutputName.size()==0)
-      setProperty("OutputSensitivityWorkspace", floodWS);
-    AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
-    reductionManager->declareProperty(new WorkspaceProperty<>(entryName,floodWSName,Direction::InOut));
-    reductionManager->setPropertyValue(entryName, floodWSName);
-    reductionManager->setProperty(entryName, floodWS);
+    if (floodWSOutputName.size()==0)
+    {
+      setPropertyValue("OutputSensitivityWorkspace", floodWSName);
+      AnalysisDataService::Instance().addOrReplace(floodWSName, floodWS);
+      reductionManager->declareProperty(new WorkspaceProperty<>(entryName,floodWSName,Direction::InOut));
+      reductionManager->setPropertyValue(entryName, floodWSName);
+      reductionManager->setProperty(entryName, floodWS);
+    }
+    setProperty("OutputSensitivityWorkspace", floodWS);
   }
 
   progress.report(3, "Loaded flood field");

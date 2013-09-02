@@ -91,6 +91,8 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Optimization\\PeakFinding"; }
+  /// needed by FindPeaksBackground
+  int getVectorIndex(const MantidVec &vecX, double x);
 
 private:
   /// Sets documentation strings for this algorithm
@@ -121,9 +123,6 @@ private:
 
   /// Fit peak
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max, const int i_centre);
-
-
-  int getVectorIndex(const MantidVec &vecX, double x);
 
   void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum, const int &i_centre, const int &i_min, const int &i_max,
                              double &in_bg0, double &in_bg1, double &in_bg2);
@@ -170,14 +169,11 @@ private:
   /// Set boundary/contraint on peak's centre
   std::string makePeakCentreConstraint(API::IFunction_sptr peak, double peakleftboundary, double peakrightboundary, bool composite);
 
-  void estimateLinearBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
+  void estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
                                 double& out_bg0, double& out_bg1, double& out_bg2);
 
-  void estimateFlatBackground(const MantidVec& Y, const size_t i_min, const size_t i_max,
-                              double& out_bg0, double& out_bg1, double& out_bg2);
-
-  bool estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
-                              size_t i_min, size_t i_max, double& centre, double& height, double& fwhm, std::string &error);
+  std::string estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
+                              size_t i_min, size_t i_max, double& centre, double& height, double& fwhm);
 
   /// Calulate a function with given data range, and its goodness of fit, Rwp.
   double calculateFunctionRwp(API::IFunction_sptr function, API::MatrixWorkspace_sptr dataws,

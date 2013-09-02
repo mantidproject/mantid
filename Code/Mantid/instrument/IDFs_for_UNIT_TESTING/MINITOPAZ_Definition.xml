@@ -15,7 +15,7 @@ This is a mini version similar to TOPAZ but used for unit testing.
     <reference-frame>
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
-      <handedness axis="right"/>
+      <handedness val="right"/>
     </reference-frame>
   </defaults>
 

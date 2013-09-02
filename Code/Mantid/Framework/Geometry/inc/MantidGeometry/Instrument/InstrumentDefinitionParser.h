@@ -134,7 +134,7 @@ namespace Geometry
 
     /// Set parameter/logfile info (if any) associated with component
     void setLogfile(const Geometry::IComponent* comp, const Poco::XML::Element* pElem,
-                              std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache);
+                              InstrumentParameterCache& logfileCache);
 
     /// Parse position of facing element to V3D
     Kernel::V3D parseFacingElementToV3D(Poco::XML::Element* pElem);

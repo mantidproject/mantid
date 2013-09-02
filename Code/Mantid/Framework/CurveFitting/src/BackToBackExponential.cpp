@@ -78,7 +78,8 @@ namespace CurveFitting
      double h0 = height();
      if ( h0 == 0.0 )
      {
-       h0 = 1e-6;
+       setParameter( 0, 1e-6 );
+       h0 = height();
      }
      double area = getParameter( 0 ); // == I
      area *= h / h0;

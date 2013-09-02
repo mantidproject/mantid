@@ -44,8 +44,6 @@ class SCDCalibratePanelsTest : public CxxTest::TestSuite
 
 public:
 
-  SCDCalibratePanelsTest(){}
-
   void test_data()
    {
      FrameworkManager::Instance();

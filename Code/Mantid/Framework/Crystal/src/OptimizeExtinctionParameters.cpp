@@ -143,7 +143,6 @@ namespace Mantid
       if(type.compare(7,2,"II")==0)nopt = 2;
       size_t iter = 0;
       int status = 0;
-      double size;
      
       /* Starting point */
       x = gsl_vector_alloc (nopt);
@@ -170,7 +169,7 @@ namespace Mantid
         if (status)
           break;
     
-        size = gsl_multimin_fminimizer_size (s);
+        double size = gsl_multimin_fminimizer_size (s);
         status = gsl_multimin_test_size (size, 1e-4);
     
       }
