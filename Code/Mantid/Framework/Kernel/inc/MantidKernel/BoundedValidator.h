@@ -83,6 +83,10 @@ public:
   const TYPE&    lower()    const { return m_lowerBound; }
   /// Return the upper bound value
   const TYPE&    upper()    const { return m_upperBound; }
+  /// Check if lower bound is inclusive
+  bool isLowerInclusive() const { return m_lowerInclusive; }
+  /// Check if upper bound is inclusive
+  bool isUpperInclusive() const { return m_upperInclusive; }
 
   /// Set lower bound value
   void setLower( const TYPE& value, const bool inclusive=false ) { 

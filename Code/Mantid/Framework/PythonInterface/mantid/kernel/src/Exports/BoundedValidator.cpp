@@ -83,6 +83,8 @@ namespace
                                         setBounds_Overload( "Set both bounds", (arg("lower")=object(), arg("upper")=object(), arg("inclusive")=false))) \
       .def("hasLower", &BoundedValidator<ElementType>::hasLower, "Returns True if a lower bound has been set" ) \
       .def("hasUpper", &BoundedValidator<ElementType>::hasUpper, "Returns True if an upper bound has been set" ) \
+      .def("isLowerInclusive", &BoundedValidator<ElementType>::isLowerInclusive, "Returns True if the lower bound is inclusive" ) \
+      .def("isUpperInclusive", &BoundedValidator<ElementType>::isUpperInclusive, "Returns True if the upper bound is inclusive" ) \
     ;
 }
 
