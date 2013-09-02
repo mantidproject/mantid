@@ -97,7 +97,7 @@ public:
 
   /// Set upper bound value
   void setUpper( const TYPE& value, const bool inclusive=false ) { 
-    m_lowerInclusive = inclusive; 
+    m_upperInclusive = inclusive;
     m_hasUpperBound = true;
     m_upperBound = value;
   }
