@@ -1119,25 +1119,18 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
       if(calcQ)
       {
-        // Get unsigned theta and efixed value
+
         double efixed(0.0), usignTheta(0.0);
-        bool noEfixed(false);
         try
         {
+          // Get unsigned theta and efixed value
           efixed = ws->getEFixed(det);
           usignTheta = ws->detectorTwoTheta(det)/2.0;
-        }
-        catch (std::runtime_error&)
-        {
-          noEfixed = true;
-        }
 
-        if(!noEfixed)
-        {
           double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
           colValues << QVariant(q);
         }
-        else
+        catch (std::runtime_error&)
         {
           colValues << QVariant("No Efixed");
         }
