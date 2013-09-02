@@ -490,9 +490,6 @@ private:
   /// This method accepts user inputs and executes loadraw/load nexus algorithm
   std::string extractLogTime(Mantid::Kernel::DateAndTime value,bool useAbsoluteDate, Mantid::Kernel::DateAndTime start);
 
-  /// Check if the given technique is applicable for this instrument
-  bool checkTechnique(Mantid::API::MatrixWorkspace_const_sptr ws, const std::string& technique);
-
   // Private variables
 
   ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow

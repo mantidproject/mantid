@@ -743,9 +743,23 @@ namespace API
       }
       else
       {
-        std::ostringstream os;
-        os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but detector has no Efixed parameter attached. ID=" << detector->getID();
-        throw std::runtime_error(os.str());
+        std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
+        if ( efixedVec.empty() )
+        {
+          int detid = detector->getID();
+          IDetector_const_sptr detectorSingle = getInstrument()->getDetector(detid);
+          efixedVec = detectorSingle->getNumberParameter("Efixed");
+        }
+        if (! efixedVec.empty() )
+        {
+          return efixedVec.at(0);
+        }
+        else
+        {
+          std::ostringstream os;
+          os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but detector has no Efixed parameter attached. ID=" << detector->getID();
+          throw std::runtime_error(os.str());
+        }
       }
     }
     else

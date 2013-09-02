@@ -1011,8 +1011,16 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 {
   using namespace Mantid::Geometry;
 
-  //check if indirect instrument
-  bool calcQ = checkTechnique(ws, "indirect");
+  //check if efixed value is available
+  bool calcQ(true);
+  try
+  {
+    auto detector = ws->getDetector(0);
+    ws->getEFixed(detector);
+  } catch(std::runtime_error&)
+  {
+    calcQ = false;
+  }
 
   // Prepare column names. Types will be determined from QVariant
   QStringList colNames;
@@ -1110,36 +1118,27 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
 
       if(calcQ)
       {
-
         // Get conversion factor from energy(meV) to wavelength(angstroms)
         Mantid::Kernel::Units::Energy energyUnit;
         double wavelengthFactor(0.0), wavelengthPower(0.0);
         energyUnit.quickConversion("Wavelength", wavelengthFactor,wavelengthPower);
 
-        // Get efixed value
+        // Get unsigned theta and efixed value
         double efixed(0.0), usignTheta(0.0);
-        bool noEfixed(true);
-        if ( ! det->isMonitor() )
+        bool noEfixed(false);
+        try
         {
+          efixed = ws->getEFixed(det);
           usignTheta = ws->detectorTwoTheta(det)/2.0;
-          std::vector<double> efixedVec = det->getNumberParameter("Efixed"); 
-          if ( efixedVec.empty() )
-          {
-            int detid = det->getID();
-            IDetector_const_sptr detectorSingle = ws->getInstrument()->getDetector(detid);
-            efixedVec = detectorSingle->getNumberParameter("Efixed");
-          }
-          if (! efixedVec.empty() ) 
-          {
-            efixed = efixedVec.at(0);
-            noEfixed = false;
-          }
+        }
+        catch (std::runtime_error&)
+        {
+          noEfixed = true;
         }
 
         if(!noEfixed)
         {
           const double stheta = std::sin(usignTheta);
-
           //Calculate the wavelength to allow it to be used to convert to elasticQ. 
           double wavelength = wavelengthFactor*std::pow(efixed, wavelengthPower);
           // The MomentumTransfer value.
@@ -1220,43 +1219,6 @@ bool MantidUI::drop(QDropEvent* e)
 
   return false;
 }
-
-/**
- * Check if the given technique is applicable to this instrument
- *
- * @param ws :: The workspace with accompanying instrument
- * @param technique :: String defining the technique to look for
- * @return Whether the technique is applicable
- */
-bool MantidUI::checkTechnique(Mantid::API::MatrixWorkspace_const_sptr ws, const std::string& technique)
-{
-  //get list of techniques for this instrument
-  std::string instName  = ws->getInstrument()->getName();
-  auto inst = Mantid::Kernel::ConfigService::Instance().getInstrument(instName);
-  auto techniques = inst.techniques();
-
-  //check if the instrument is and indirect instrument
-  std::set<std::string>::const_iterator iter = techniques.begin();
-  for(; iter != techniques.end(); ++iter)
-  {
-    //convert to lowercase
-    std::string str = boost::algorithm::to_lower_copy(*iter);
-
-    //check each token for our applicable technique
-    boost::tokenizer<> tokens(str);
-    boost::tokenizer<>::iterator tok = tokens.begin();
-    for(; tok != tokens.end(); ++tok)
-    {
-      if(*tok == technique)
-      {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
 
 /**
 executes Save Nexus
