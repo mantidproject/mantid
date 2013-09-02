@@ -431,8 +431,8 @@ namespace Mantid
       // Add rows headers to the output workspace.
       outputws->addColumn("str","Name");
       outputws->addColumn("str","Location");
-      outputws->addColumn("long64","Id");
       outputws->addColumn("str","Create Time");
+      outputws->addColumn("long64","Id");
 
       std::vector<xsd__anyType*>::const_iterator iter;
       for(iter = response.begin(); iter != response.end(); ++iter)
@@ -446,10 +446,11 @@ namespace Mantid
             // Now add the relevant investigation data to the table.
             savetoTableWorkspace(datafile->name, table);
             savetoTableWorkspace(datafile->location, table);
-            savetoTableWorkspace(datafile->id, table);
 
             std::string createDate = formatDateTime(*(datafile->createTime));
             savetoTableWorkspace(&createDate, table);
+
+            savetoTableWorkspace(datafile->id, table);
           }
           catch(std::runtime_error&)
           {
@@ -545,19 +546,53 @@ namespace Mantid
 
     /**
      * Gets the file location string from the archives.
-     * @param fileid       :: id of the file
-     * @param filelocation :: location string  of the file
+     * @param fileID       :: id of the file
+     * @param fileLocation :: location string  of the file
      */
-    void ICat4Catalog::getFileLocation(const long long & fileid, std::string & filelocation)
+    void ICat4Catalog::getFileLocation(const long long & fileID, std::string & fileLocation)
     {
+      ICATPortBindingProxy icat;
+
+      ns1__get request;
+      ns1__getResponse response;
+
+      std::string sessionID = Session::Instance().getSessionId();
+      request.sessionId     = &sessionID;
+
+      std::string query     = "Datafile";
+      request.query         = &query;
+      request.primaryKey    = fileID;
+
+      int result = icat.get(&request, &response);
+
+      if (result == 0)
+      {
+        ns1__datafile * datafile = dynamic_cast<ns1__datafile*>(response.return_);
+
+        if (datafile)
+        {
+          if(datafile->location)
+          {
+            fileLocation = *(datafile->location);
+          }
+        }
+        else
+        {
+          throw std::runtime_error("ICat4Catalog::getFileLocation expected a datafile. Please contact the Mantid development team.");
+        }
+      }
+      else
+      {
+        throwErrorMessage(icat);
+      }
     }
 
     /**
-     * Downloads a file from the given url.
-     * @param fileid :: id of the file
-     * @param url    :: url  of the file
+     * Downloads a file from the given url if not downloaded from archive.
+     * @param fileID :: id of the file
+     * @param url    :: url of the file
      */
-    void ICat4Catalog::getDownloadURL(const long long & fileid, std::string& url)
+    void ICat4Catalog::getDownloadURL(const long long & fileID, std::string& url)
     {
     }
 
