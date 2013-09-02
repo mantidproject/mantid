@@ -61,11 +61,11 @@ namespace IDA
 
   void Fury::run()
   {
-    QString filenames = uiForm().fury_dsInput->getCurrentDataName();
+    QString wsNames = uiForm().fury_dsInput->getCurrentDataName();
 
     QString pyInput =
       "from IndirectDataAnalysis import fury\n"
-      "samples = [r'" + filenames + "']\n"
+      "samples = [r'" + wsNames + "']\n"
       "resolution = r'" + uiForm().fury_resFile->getFirstFilename() + "'\n"
       "rebin = '" + m_furProp["ELow"]->valueText() +","+ m_furProp["EWidth"]->valueText() +","+m_furProp["EHigh"]->valueText()+"'\n";
 
