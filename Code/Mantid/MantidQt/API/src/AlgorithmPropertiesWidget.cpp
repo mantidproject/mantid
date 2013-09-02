@@ -10,7 +10,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
-#include <list>
+#include <vector>
 #include <algorithm>
 
 using namespace Mantid::Kernel;
@@ -320,7 +320,7 @@ namespace API
   {
     if (m_propWidgets.contains(propName))
     {
-      typedef std::list<PropertyWidget*> CollectionOfPropertyWidget;
+      typedef std::vector<PropertyWidget*> CollectionOfPropertyWidget;
       CollectionOfPropertyWidget candidateReplacementSources;
       PropertyWidget * propWidget = m_propWidgets[propName];
       if (propWidget)
