@@ -3,6 +3,7 @@
 
 #include "MantidAPI/ICatalog.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidKernel/Logger.h"
 #include "MantidICat/CatalogSearchParam.h"
 
 namespace Mantid
@@ -37,7 +38,7 @@ namespace Mantid
     {
       public:
         /// Constructor
-        ICat4Catalog();
+        ICat4Catalog():g_log(Kernel::Logger::get("ICat4Catalog")) {}
         /// Destructor
         virtual ~ICat4Catalog();
         /// Log the user into the catalog system.
@@ -80,6 +81,8 @@ namespace Mantid
         void saveDataSets(std::vector<ICat4::xsd__anyType*> response, API::ITableWorkspace_sptr& outputws);
         // Helper method that formats a given timestamp.
         std::string formatDateTime(time_t timestamp);
+        // Reference to the logger class.
+        Kernel::Logger& g_log;
 
         /**
          * Template method to save data to table workspace

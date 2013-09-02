@@ -10,15 +10,12 @@ namespace Mantid
 {
   namespace ICat
   {
-    using namespace ICat4;
     using namespace Kernel;
+    using namespace ICat4;
 
     DECLARE_CATALOG(ICat4Catalog)
 
-    /// constructor
-    ICat4Catalog::ICat4Catalog() { }
-
-    /// destructor
+    /// Destructor
     ICat4Catalog::~ICat4Catalog() { }
 
     /**
@@ -226,6 +223,8 @@ namespace Mantid
         query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> ");
       }
 
+      g_log.debug() << "Query: { " << query << " }" << std::endl;
+
       return (query);
     }
 
@@ -302,6 +301,7 @@ namespace Mantid
             {
               savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
             }
+
           }
           catch(std::runtime_error&)
           {
@@ -574,6 +574,7 @@ namespace Mantid
           if(datafile->location)
           {
             fileLocation = *(datafile->location);
+            g_log.debug() << "Filelocation: { " << fileLocation << " }" << std::endl;
           }
         }
         else
