@@ -179,7 +179,7 @@ def getInstrumentDetails(instrument):
 def getReflectionDetails(inst, analyser, refl):
     idf_dir = config['instrumentDefinition.directory']
     ws = '__empty_' + inst
-    if (mtd[ws] == None):
+    if not mtd.doesExist(ws):
         idf_file = inst + '_Definition.xml'
         idf = os.path.join(idf_dir, idf_file)
         LoadEmptyInstrument(Filename=idf, OutputWorkspace=ws)
