@@ -68,10 +68,26 @@ void QueryRemoteJob::exec()
   initFromStream( resp, respStream);
   if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
-    setProperty( "JobStatusString", resp["JobStatus"]);
-    setProperty( "JobName", resp["JobName"]);
-    setProperty( "ScriptName", resp["ScriptName"]);
-    setProperty( "TransID", resp["TransID"]);
+    JSONObject status;
+    if (resp[getPropertyValue("JobID")].getType() != JSONValue::OBJECT)
+    {
+      throw( std::runtime_error( "Expected value not found in return stream.  Has the client/server protocol changed?!?"));
+    }
+
+    resp[getPropertyValue("JobID")].getValue(status);
+    std::string value;
+
+    status["JobStatus"].getValue( value);
+    setProperty( "JobStatusString", value);
+
+    status["JobName"].getValue( value);
+    setProperty( "JobName", value);
+
+    status["ScriptName"].getValue( value);
+    setProperty( "ScriptName", value);
+
+    status["TransID"].getValue( value);
+    setProperty( "TransID", value);
   }
   else
   {
