@@ -630,8 +630,15 @@ void MuonAnalysisResultTableTab::createTable()
         }
       }
     }  
+
+    std::string tableName = getFileName();
+
     // Save the table to the ADS
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(getFileName(),table);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(tableName,table);
+
+    // Python code to show a table on the screen
+    QString code = "importTableWorkspace('" + QString::fromStdString(tableName) +"', True)";
+    emit runPythonCode(code, false);
   }
   else
   {
