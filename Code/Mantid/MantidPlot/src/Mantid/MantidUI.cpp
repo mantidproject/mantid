@@ -662,6 +662,7 @@ void MantidUI::showVatesSimpleInterface()
       {
         connect(m_appWindow, SIGNAL(shutting_down()),
                 vsui, SLOT(shutdown()));
+        connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
         vsui->setupPluginMode();

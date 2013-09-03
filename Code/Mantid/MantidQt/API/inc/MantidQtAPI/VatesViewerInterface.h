@@ -65,6 +65,10 @@ public:
   /// Enum to track the workspace type
   enum WorkspaceType { MDEW, PEAKS, MDHW };
 
+signals:
+  /// Interface is asking to be closed
+  void requestClose();
+
 public slots:
   /// Perform any clean up on main window shutdown
   virtual void shutdown();
