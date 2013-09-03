@@ -705,22 +705,9 @@ namespace Geometry
         << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.beta()
         << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.gamma();
 
-    // determine whether there is a non-zero uncertainty
-    bool showUncertainties(false);
-    if (unitCell.errora() > 0)
-      showUncertainties = true;
-    if (!showUncertainties && (unitCell.errorb() > 0))
-      showUncertainties = true;
-    if (!showUncertainties && (unitCell.errorc() > 0))
-      showUncertainties = true;
-    if (!showUncertainties && (unitCell.erroralpha() > 0))
-      showUncertainties = true;
-    if (!showUncertainties && (unitCell.errorbeta() > 0))
-      showUncertainties = true;
-    if (!showUncertainties && (unitCell.errorgamma() > 0))
-      showUncertainties = true;
-
-    if (showUncertainties)
+    // write out the uncertainty if there is a positive one somewhere
+    if ((unitCell.errora() > 0) || (unitCell.errorb() > 0) || (unitCell.errorc() > 0)
+        || (unitCell.erroralpha() > 0) || (unitCell.errorbeta() > 0) || (unitCell.errorgamma() > 0))
       out << "\nParameter Errors  :"
           << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errora()
           << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorb()
