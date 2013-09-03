@@ -132,7 +132,7 @@ namespace DataHandling
     else
     {
       stringstream errmsg;
-      errmsg << "Input .irf file " << filename << " cannot be open. ";
+      errmsg << "Input fullprof file " << filename << " cannot be open. ";
       g_log.error(errmsg.str());
       throw runtime_error(errmsg.str());
     }
