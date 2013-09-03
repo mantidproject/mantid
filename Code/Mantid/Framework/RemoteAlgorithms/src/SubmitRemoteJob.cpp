@@ -101,7 +101,7 @@ void SubmitRemoteJob::exec()
   std::istream &respStream = jobManager->httpPost("/submit", postData);
   JSONObject resp;
   initFromStream( resp, respStream);
-  if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+  if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_CREATED)
   {
     std::string jobId;
     resp["JobID"].getValue( jobId);
