@@ -637,8 +637,15 @@ void MuonAnalysisResultTableTab::createTable()
     Mantid::API::AnalysisDataService::Instance().addOrReplace(tableName,table);
 
     // Python code to show a table on the screen
-    QString code = "importTableWorkspace('" + QString::fromStdString(tableName) +"', True)";
-    emit runPythonCode(code, false);
+    std::stringstream code;
+    code << "found = False" << std::endl
+         << "for w in windows():" << std::endl
+         << "  if w.windowLabel() == '" << tableName << "':" << std::endl
+         << "    found = True; w.show()" << std::endl
+         << "if not found:" << std::endl
+         << "  importTableWorkspace('" << tableName << "', True)" << std::endl;
+
+    emit runPythonCode(QString::fromStdString(code.str()), false);
   }
   else
   {
