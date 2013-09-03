@@ -63,13 +63,13 @@ namespace DataHandling
     vector<std::string> exts;
     exts.push_back(".prf");
     exts.push_back(".irf");
-    declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+    declareProperty(new FileProperty("InputFilename", "", FileProperty::Load, exts),
         "Path to an Fullprof file to load.");
 
     // Output file
     vector<std::string> extso;
     extso.push_back(".xml");
-    declareProperty(new FileProperty("Filename", "", FileProperty::Save, extso),
+    declareProperty(new FileProperty("OutputFilename", "", FileProperty::Save, extso),
       "The name to give to the parameter file.");
 
     return;
