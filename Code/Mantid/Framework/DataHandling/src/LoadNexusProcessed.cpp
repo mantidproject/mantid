@@ -132,6 +132,7 @@ void LoadNexusProcessed::init()
                   "List of spectrum numbers to read.");
   declareProperty("EntryNumber", (int64_t)0, mustBePositive,
                   "The particular entry number to read. Default load all workspaces and creates a workspacegroup (default: read all entries)." );
+  declareProperty("LoadHistory", true, "If true, the workspace history will be loaded");
 }
 
 
@@ -1119,7 +1120,8 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   m_cppFile->openPath(mtd_entry.path());
   try
   {
-    local_workspace->history().loadNexus(m_cppFile);
+    bool load_history = getProperty("LoadHistory");
+    if (load_history) local_workspace->history().loadNexus(m_cppFile);
   }
   catch (std::out_of_range&)
   {
