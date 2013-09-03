@@ -8,7 +8,6 @@ or input data necessary to run a Mantid algorithm on the remote compute resource
 #include "MantidRemoteAlgorithms/UploadRemoteFile.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/RemoteJobManager.h"
 #include "MantidKernel/ListValidator.h"
 

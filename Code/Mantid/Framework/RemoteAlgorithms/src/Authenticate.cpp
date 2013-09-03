@@ -6,7 +6,6 @@ other remote algorithms.
 *WIKI*/
 
 #include "MantidRemoteAlgorithms/Authenticate.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
@@ -14,7 +13,6 @@ other remote algorithms.
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RemoteJobManager.h"
 
-#include "MantidRemote/RemoteTask.h"
 #include "MantidRemote/SimpleJSON.h"
 
 #include <boost/shared_ptr.hpp>
@@ -39,9 +37,6 @@ using namespace Mantid::Kernel;
 void Authenticate::init()
 {
   // Unlike most algorithms, this wone doesn't deal with workspaces....
-
-  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
-  mustBePositive->setLower(0);
 
   auto requireValue = boost::make_shared<MandatoryValidator<std::string> >();
 

@@ -9,7 +9,6 @@ Submit a job to be executed on the specified remote compute resource.
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/ListValidator.h"
 
 #include "MantidRemote/SimpleJSON.h"
