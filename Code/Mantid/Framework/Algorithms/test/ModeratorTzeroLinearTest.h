@@ -40,66 +40,6 @@ public:
     TS_ASSERT( alg.isInitialized() );
   }
 
-  void testExec2D()
-  {
-    //load ASCII histogram file, data
-    const std::string inputWStr("inputWS");
-    Mantid::DataHandling::LoadAscii loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "BSS_11841_histo.dat");
-    loader.setPropertyValue("Unit", "TOF");
-    loader.setPropertyValue("OutputWorkspace", inputWStr);
-    loader.execute();
-    TS_ASSERT(loader.isExecuted() );
-
-    //load the instrument into the workspace
-    Mantid::DataHandling::LoadInstrument loaderX;
-    loaderX.initialize();
-    loaderX.setPropertyValue("InstrumentName", "BASIS");
-    loaderX.setPropertyValue("Workspace", inputWStr);
-    loaderX.execute();
-    TS_ASSERT(loader.isExecuted() );
-
-    if (!alg.isInitialized()) alg.initialize();
-
-    //transform the time-of-flight values
-    alg.setPropertyValue("InputWorkspace", inputWStr);
-    const std::string outputWStr("outputWS");
-    alg.setPropertyValue("OutputWorkspace", outputWStr);
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
-  } //end of void testExec2D()
-
-  void testExecEvents2()
-  {
-
-    //load events file. Input and ouptut are set to be non-equal
-    Mantid::DataHandling::LoadEventNexus loader;
-    loader.initialize();
-    loader.setPropertyValue("Filename", "BSS_11841_event.nxs");
-    const std::string inputWStr("inputWS");
-    loader.setPropertyValue("OutputWorkspace", inputWStr);
-    loader.execute();
-    TS_ASSERT(loader.isExecuted() );
-
-    if (!alg.isInitialized()) alg.initialize();
-
-    //transform the time-of-flight values
-    alg.setPropertyValue("InputWorkspace", inputWStr);
-    const std::string outputWStr("outputWS");
-    alg.setPropertyValue("OutputWorkspace", outputWStr);
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
-
-    //retrieve pointers to input and output workspaces
-    MatrixWorkspace_sptr inputWS, outputWS;
-    TS_ASSERT_THROWS_NOTHING(inputWS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWStr));
-    TS_ASSERT_THROWS_NOTHING(outputWS=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWStr));
-
-    //Spectrum index 422 of BSS_11841_event.nxs containing three events
-    //std::size_t wkspIndex = 422;
-  }
-
   void testExecThrowsDeltaEmode()
   {
     MatrixWorkspace_sptr testWS = CreateHistogramWorkspace();
