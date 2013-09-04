@@ -63,11 +63,11 @@ namespace Algorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ModeratorTzeroLinear : public Mantid::API::Algorithm
+class DLLExport ModeratorTzeroLinear : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  ModeratorTzeroLinear() : Mantid::API::Algorithm() {}
+  ModeratorTzeroLinear() : API::Algorithm() {}
   /// Virtual destructor
   virtual ~ModeratorTzeroLinear() {}
   /// Algorithm's name
@@ -81,7 +81,7 @@ private:
   //conversion constants applicable to histogram and event workspaces
   double m_gradient;
   double m_intercept;
-  Mantid::Geometry::Instrument_const_sptr m_instrument;
+  Geometry::Instrument_const_sptr m_instrument;
   // Sets documentation strings for this algorithm
   virtual void initDocs();
   // Initialisation code
@@ -91,7 +91,7 @@ private:
   // Execution code for event workspace
   void execEvent();
   // Calculate time from sample to detector and initial flight path
-  void CalculateTfLi(Mantid::API::MatrixWorkspace_sptr inputWS, size_t i, double &t_f, double &L_i);
+  void calculateTfLi(API::MatrixWorkspace_const_sptr inputWS, size_t i, double &t_f, double &L_i);
 
 };
 
