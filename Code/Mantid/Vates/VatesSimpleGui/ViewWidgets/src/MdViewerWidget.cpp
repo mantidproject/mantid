@@ -842,8 +842,9 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
 }
 
 /**
- * This function responds to a workspace being deleted. Currently, everything
- * goes!
+ * This function responds to a workspace being deleted. If there are one or
+ * more PeaksWorkspaces present, the requested one will be deleted. Otherwise,
+ * if it is an IMDWorkspace, everything goes!
  * @param wsName : Name of workspace being deleted
  * @param ws : Pointer to workspace being deleted
  */
@@ -854,6 +855,16 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
   if (NULL != src)
   {
+    unsigned int numSources = this->currentView->getNumSources();
+    if (numSources > 1)
+    {
+      pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+      if (this->currentView->isPeaksWorkspace(src))
+      {
+        builder->destroy(src);
+        return;
+      }
+    }
     emit this->requestClose();
   }
 }
