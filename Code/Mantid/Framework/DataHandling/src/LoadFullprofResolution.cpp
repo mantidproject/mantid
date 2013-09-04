@@ -296,12 +296,20 @@ namespace DataHandling
     double cwl;
     int tmpbankid;
     parseBankLine(bankline, cwl, tmpbankid);
-    g_log.debug() << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid << "\n";
+    if(tmpbankid != -1) 
+    {
+      g_log.debug() << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid << "\n";
+    }
+    else
+    {
+      g_log.warning() << "No CWL found for bank " << bankid;
+      tmpbankid = bankid;
+    }
     if (bankid != tmpbankid)
     {
       stringstream errss;
       errss << "Input bank ID (" << bankid << ") is not same as the bank ID (" << tmpbankid
-            << ") found in the specified region from input. ";
+        << ") found in the specified region from input. ";
       throw runtime_error(errss.str());
     }
 
