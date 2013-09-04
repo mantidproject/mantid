@@ -1,6 +1,14 @@
 #ifndef REMOTEJOBMANAGER_H
 #define REMOTEJOBMANAGER_H
 
+// HACK! Workaround for Poco headers trying to include both winsock.h and winsock2.h
+// If this actually works, I'll see if I can get on an actual Windows machine and
+// try to sort out a better solution
+#if defined(_WIN32) || defined(WIN32)
+  #include <winsock2.h>
+#endif
+
+
 #include <string>
 #include <ostream>
 #include <vector>
