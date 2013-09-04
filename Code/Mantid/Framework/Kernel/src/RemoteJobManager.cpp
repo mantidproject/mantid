@@ -1,3 +1,8 @@
+// HACK! Workaround for Poco headers trying to include both winsock.h and winsock2.h
+// If this actually works, I'll see if I can get on an actual Windows machine and
+// try to sort out a better solution
+#define WIN32_LEAN_AND_MEAN
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/RemoteJobManager.h"
