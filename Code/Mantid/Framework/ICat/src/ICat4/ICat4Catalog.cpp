@@ -75,7 +75,7 @@ namespace Mantid
       }
       else
       {
-        throwErrorMessage(icat);
+        throw std::runtime_error("Username or password supplied is invalid.");
       }
     }
 
