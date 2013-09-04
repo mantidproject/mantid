@@ -816,18 +816,28 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
   if (NULL != src)
   {
-    int wsType = MantidQt::API::VatesViewerInterface::MDEW;
-    if (this->currentView->isMDHistoWorkspace(src))
-    {
-      wsType = MantidQt::API::VatesViewerInterface::MDHW;
-    }
-    if (this->currentView->isPeaksWorkspace(src))
-    {
-      wsType = MantidQt::API::VatesViewerInterface::PEAKS;
-    }
-    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-    builder->destroy(src);
-    this->renderWorkspace(wsName.c_str(), wsType);
+    // Have to mark the filter as modified to get it to update. Do this by
+    // changing the requested workspace name to a dummy name and then change
+    // back. However, push the change all the way down for it to work.
+    vtkSMPropertyHelper(src->getProxy(),
+                        "Mantid Workspace Name").Set("ChangeMe!");
+    vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
+    srcProxy->UpdateVTKObjects();
+    srcProxy->Modified();
+    srcProxy->UpdatePipelineInformation();
+    src->updatePipeline();
+
+    vtkSMPropertyHelper(src->getProxy(),
+                        "Mantid Workspace Name").Set(wsName.c_str());
+    // Update the source so that it retrieves the data from the Mantid workspace
+    srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
+    srcProxy->UpdateVTKObjects();
+    srcProxy->Modified();
+    srcProxy->UpdatePipelineInformation();
+    src->updatePipeline();
+
+    this->currentView->setColorsForView();
+    this->currentView->renderAll();;
   }
 }
 
