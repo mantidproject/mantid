@@ -641,7 +641,7 @@ void MuonAnalysisResultTableTab::createTable()
     code << "found = False" << std::endl
          << "for w in windows():" << std::endl
          << "  if w.windowLabel() == '" << tableName << "':" << std::endl
-         << "    found = True; w.show()" << std::endl
+         << "    found = True; w.show(); w.setFocus()" << std::endl
          << "if not found:" << std::endl
          << "  importTableWorkspace('" << tableName << "', True)" << std::endl;
 
