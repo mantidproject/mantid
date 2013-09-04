@@ -38,6 +38,7 @@ namespace
       .def("nthValue", &TimeSeriesProperty<TYPE>::nthValue) \
       .def("nthTime", &TimeSeriesProperty<TYPE>::nthTime) \
       .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics) \
+      .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue) \
       ;
   ;
 }
