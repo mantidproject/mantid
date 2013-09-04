@@ -143,9 +143,11 @@ namespace Mantid
 
       }
 
+      // Inform the user where they files are being saved.
+      g_log.notice() << "Saving file to: " <<  filelocations.at(0);
+
       //set the filelocations  property
       setProperty("FileLocations",filelocations);
-
     }
 
     /** This method checks the file extn and if it's a raw file reurns true
