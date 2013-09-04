@@ -587,7 +587,6 @@ using namespace DataObjects;
 
     // The array of indices for each event list #
     int dims_array[1];
-    int64_t * indices_array = VectorHelper::iteratorToArray<int64_t>(indices.begin(), indices.end(), dims_array);
     if (indices.size() > 0)
     {
       if (compress)
@@ -595,13 +594,12 @@ using namespace DataObjects;
       else
         NXmakedata(fileID, "indices", NX_INT64, 1, dims_array);
       NXopendata(fileID, "indices");
-      NXputdata(fileID, (void*)(indices_array) );
+      NXputdata(fileID, (void*)(indices.data()) );
       std::string yUnits=ws->YUnit();
       std::string yUnitLabel=ws->YUnitLabel();
       NXputattr (fileID, "units",  reinterpret_cast<void*>(const_cast<char*>(yUnits.c_str())), static_cast<int>(yUnits.size()), NX_CHAR);
       NXputattr (fileID, "unit_label",  reinterpret_cast<void*>(const_cast<char*>(yUnitLabel.c_str())), static_cast<int>(yUnitLabel.size()), NX_CHAR);
       NXclosedata(fileID);
-      delete [] indices_array;
     }
 
     // Write out each field
@@ -738,11 +736,11 @@ using namespace DataObjects;
 
     // Copy the detector IDs to an array.
     const std::set<detid_t>& dets = el.getDetectorIDs();
-    detid_t * detectorIDs = VectorHelper::iteratorToArray<detid_t>(dets.begin(), dets.end(), dims_array);
 
     // Write out the detector IDs
     if (!dets.empty())
     {
+      detid_t * detectorIDs = VectorHelper::iteratorToArray<detid_t>(dets.begin(), dets.end(), dims_array);
       NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs), false );
       delete [] detectorIDs;
     }
