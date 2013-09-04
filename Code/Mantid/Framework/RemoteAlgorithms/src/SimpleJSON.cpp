@@ -11,7 +11,7 @@
   RGM - 23 July 2012
   ******************************************************************/
 
-#include "MantidRemote/SimpleJSON.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 
 #include <algorithm>  // for transform() function
 #include <sstream>

@@ -13,7 +13,7 @@ other remote algorithms.
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RemoteJobManager.h"
 
-#include "MantidRemote/SimpleJSON.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>

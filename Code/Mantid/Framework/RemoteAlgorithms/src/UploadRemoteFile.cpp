@@ -11,7 +11,7 @@ or input data necessary to run a Mantid algorithm on the remote compute resource
 #include "MantidKernel/RemoteJobManager.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidRemote/SimpleJSON.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"
 

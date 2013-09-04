@@ -3,7 +3,7 @@
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidRemote/SimpleJSON.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/RemoteJobManager.h"
 
 #include "boost/make_shared.hpp"

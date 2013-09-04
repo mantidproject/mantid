@@ -11,7 +11,7 @@ Submit a job to be executed on the specified remote compute resource.
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidRemote/SimpleJSON.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 #include "MantidKernel/RemoteJobManager.h"
 
 #include <boost/shared_ptr.hpp>
