@@ -1234,7 +1234,7 @@ AxesDialog::AxesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
 void AxesDialog::initScalesPage()
 {
   scalesPage = new QWidget();
-
+/*
   QGroupBox * middleBox = new QGroupBox(QString());
   QGridLayout * middleLayout = new QGridLayout(middleBox);
 
@@ -1391,6 +1391,21 @@ void AxesDialog::initScalesPage()
   vl->addLayout(hl);
   vl->addWidget(boxAxesBreaks);
 
+  //// this is wrong and shouldn't happen i'll have to see what update plot is doing
+  connect(btnInvert,SIGNAL(clicked()), this, SLOT(updatePlot()));
+  ////
+  ////these need moved to the new object
+  connect(boxScaleType,SIGNAL(activated(int)), this, SLOT(updateMinorTicksList(int)));
+    //btnstep and btn major need changed to radiobuttons
+    connect(btnStep,SIGNAL(clicked()), this, SLOT(stepEnabled()));
+    connect(btnMajor,SIGNAL(clicked()), this, SLOT(stepDisabled()));
+    //
+  connect(boxEnd, SIGNAL(valueChanged(double)), this, SLOT(endvalueChanged(double)));
+  connect(boxStart, SIGNAL(valueChanged(double)), this, SLOT(startvalueChanged(double)));
+  ////
+
+  */
+
   QPixmap image0( ( const char** ) bottom_scl_xpm );
   QPixmap image1( ( const char** ) left_scl_xpm );
   QPixmap image2( ( const char** ) top_scl_xpm );
@@ -1417,19 +1432,16 @@ void AxesDialog::initScalesPage()
   // resize the list to the maximum width
   axesList->resize(axesList->maximumWidth(),axesList->height());
 
+  //the layout that will hold the ScaleAxisDetails widget
+  scalePrefsArea = new QVBoxLayout();
+
   QHBoxLayout* mainLayout = new QHBoxLayout(scalesPage);
   mainLayout->addWidget(axesList);
-  mainLayout->addLayout(vl);
+  mainLayout->addLayout(scalePrefsArea);
 
   generalDialog->addTab(scalesPage, tr( "Scale" ));
-
-  connect(btnInvert,SIGNAL(clicked()), this, SLOT(updatePlot()));
   connect(axesList,SIGNAL(currentRowChanged(int)), this, SLOT(updateScale()));
-  connect(boxScaleType,SIGNAL(activated(int)), this, SLOT(updateMinorTicksList(int)));
-  connect(btnStep,SIGNAL(clicked()), this, SLOT(stepEnabled()));
-  connect(btnMajor,SIGNAL(clicked()), this, SLOT(stepDisabled()));
-  connect(boxEnd, SIGNAL(valueChanged(double)), this, SLOT(endvalueChanged(double)));
-  connect(boxStart, SIGNAL(valueChanged(double)), this, SLOT(startvalueChanged(double)));
+
 }
 
 void AxesDialog::initGridPage()
@@ -2427,7 +2439,7 @@ void AxesDialog::changeBaselineDist(int baseline)
 bool AxesDialog::updatePlot()
 {
   if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(scalesPage))
-  {		
+  {
 
     int a = mapToQwtAxis(axesList->currentRow());
     ScaleDraw::ScaleType type = d_graph->axisType(a);

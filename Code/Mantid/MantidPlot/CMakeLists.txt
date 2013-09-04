@@ -10,6 +10,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/ArrowMarker.cpp
                    src/AssociationsDialog.cpp
                    src/AxesDialog.cpp
+                   src/AxisDetails.cpp
                    src/Bar.cpp
                    src/BoxCurve.cpp
                    src/CanvasPicker.cpp
@@ -239,6 +240,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/ArrowMarker.h
                    src/AssociationsDialog.h
                    src/AxesDialog.h
+                   src/AxisDetails.h
                    src/Bar.h
                    src/BoxCurve.h
                    src/CanvasPicker.h
@@ -542,6 +544,7 @@ include_directories ( ${CMAKE_CURRENT_SOURCE_DIR} )
 set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/AssociationsDialog.h
                         src/AxesDialog.h
+                        src/AxisDetails.h
                         src/CanvasPicker.h
                         src/ColorMapDialog.h
                         src/CommandLineInterpreter.h
