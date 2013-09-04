@@ -102,7 +102,7 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("You are not currently logged into the system.");
+        throw std::runtime_error("You are not currently logged into the cataloging system.");
       }
     }
 
