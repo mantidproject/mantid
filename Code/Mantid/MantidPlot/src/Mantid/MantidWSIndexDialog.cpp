@@ -473,7 +473,7 @@ void Interval::init(int start, int end)
 //----------------------------------
 IntervalList::IntervalList(void)
 {
-  
+
 }
 
 IntervalList::IntervalList(QString intervals)
@@ -714,7 +714,7 @@ bool IntervalList::isParsable(const QString &input)
 {
   try
   {
-    new IntervalList(input);
+    IntervalList(input);
     return true;
   } 
   catch (std::exception&)
