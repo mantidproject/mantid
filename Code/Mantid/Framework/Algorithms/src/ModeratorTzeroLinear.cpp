@@ -95,15 +95,13 @@ void ModeratorTzeroLinear::exec()
   m_instrument = inputWS->getInstrument();
 
   //deltaE-mode (should be "indirect")
-  std::string Emode;
   try
   {
-    Emode = m_instrument->getStringParameter("deltaE-mode")[0];
-    g_log.debug() << "Instrument Geometry: " << Emode << std::endl;
-    if(Emode != "indirect")
-    {
-      throw std::invalid_argument("Instrument geometry must be of type indirect.");
-    }
+    std::vector<std::string> Emode=m_instrument->getStringParameter("deltaE-mode");
+    if(Emode.empty())
+      throw Exception::InstrumentDefinitionError("Unable to retrieve instrument geometry (direct or indirect) parameter", inputWS->getTitle());
+    if(Emode[0]!= "indirect")
+      throw Exception::InstrumentDefinitionError("Instrument geometry must be of type indirect.");
   }
   catch (Exception::NotFoundError &)
   {
@@ -114,11 +112,17 @@ void ModeratorTzeroLinear::exec()
   //gradient, intercept constants
   try
   {
-    m_gradient = m_instrument->getNumberParameter("Moderator.TimeZero.gradient")[0]; //[gradient]=microsecond/Angstrom
+    const std::vector<double> gradientParam = m_instrument->getNumberParameter("Moderator.TimeZero.gradient");
+    if ( gradientParam.empty() )
+      throw Exception::InstrumentDefinitionError("Unable to retrieve Moderator Time Zero parameters (gradient)", inputWS->getTitle());
+    m_gradient = gradientParam[0]; //[gradient]=microsecond/Angstrom
     //conversion factor for gradient from microsecond/Angstrom to meters
     double convfactor = 1e+4*PhysicalConstants::h/PhysicalConstants::NeutronMass;
     m_gradient *= convfactor; //[gradient] = meter
-    m_intercept = m_instrument->getNumberParameter("Moderator.TimeZero.intercept")[0]; //[intercept]=microsecond
+    const std::vector<double> interceptParam = m_instrument->getNumberParameter("Moderator.TimeZero.intercept");
+    if ( interceptParam.empty() )
+      throw Exception::InstrumentDefinitionError("Unable to retrieve Moderator Time Zero parameters (intercept)", inputWS->getTitle());
+    m_intercept = interceptParam[0]; //[intercept]=microsecond
     g_log.debug() << "Moderator Time Zero: gradient=" << m_gradient << "intercept=" << m_intercept << std::endl;
   }
   catch (Exception::NotFoundError &)
