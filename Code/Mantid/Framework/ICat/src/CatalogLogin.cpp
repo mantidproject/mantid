@@ -58,6 +58,8 @@ namespace Mantid
       {
         throwCatalogError();
       }
+      g_log.notice() << "Verifying user credentials..." << std::endl;
+      progress(0.5);
       catalog_sptr->login(username,password,"");
 
     }
