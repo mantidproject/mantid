@@ -1022,6 +1022,7 @@ namespace Algorithms
     std::vector<double> fwvec;
     fwvec.push_back(vecX[i_min]);
     fwvec.push_back(vecX[i_max]);
+    estimate->setProperty("BackgroundType", m_backgroundType);
     estimate->setProperty("FitWindow", fwvec);
     estimate->executeAsChildAlg();
     // Get back the result
