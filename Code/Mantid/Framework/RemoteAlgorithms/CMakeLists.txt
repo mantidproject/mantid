@@ -1,4 +1,5 @@
 set( SRC_FILES
+	src/AbortRemoteJob.cpp
 	src/Authenticate.cpp
 	src/DownloadRemoteFile.cpp
 	src/QueryAllRemoteJobs.cpp
@@ -11,6 +12,7 @@ set( SRC_FILES
 )
 
 set( INC_FILES
+	inc/MantidRemoteAlgorithms/AbortRemoteJob.h
 	inc/MantidRemoteAlgorithms/Authenticate.h
 	inc/MantidRemoteAlgorithms/DownloadRemoteFile.h
 	inc/MantidRemoteAlgorithms/QueryAllRemoteJobs.h
