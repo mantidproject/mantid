@@ -75,7 +75,7 @@ namespace Mantid
       }
       else
       {
-        throwErrorMessage(icat);
+        throw std::runtime_error("Username or password supplied is invalid.");
       }
     }
 
@@ -102,7 +102,7 @@ namespace Mantid
       }
       else
       {
-        throw std::runtime_error("You are not currently logged into the system.");
+        throw std::runtime_error("You are not currently logged into the cataloging system.");
       }
     }
 
@@ -331,9 +331,10 @@ namespace Mantid
             }
 
           }
-          catch(std::runtime_error&)
+          catch(std::runtime_error& exception)
           {
-            throw std::runtime_error("An error occurred when saving the ICat search results data to Workspace");
+            g_log.information("An error occurred when saving the ICat search results data to Workspace");
+            throw exception;
           }
         }
         else
@@ -402,9 +403,10 @@ namespace Mantid
           savetoTableWorkspace(&temp, table);
           savetoTableWorkspace(&temp, table);
         }
-        catch(std::runtime_error&)
+        catch(std::runtime_error& exception)
         {
-          throw std::runtime_error("An error occurred when saving file data to workspace.");
+          g_log.information("An error occurred when saving file data to workspace.");
+          throw exception;
         }
       }
     }
@@ -480,9 +482,10 @@ namespace Mantid
 
             savetoTableWorkspace(datafile->id, table);
           }
-          catch(std::runtime_error&)
+          catch(std::runtime_error& exception)
           {
-            throw std::runtime_error("An error occurred when saving file data to workspace.");
+            g_log.information("An error occurred when saving file data to workspace.");
+            throw exception;
           }
         }
         else
@@ -623,6 +626,8 @@ namespace Mantid
      */
     void ICat4Catalog::getDownloadURL(const long long & fileID, std::string& url)
     {
+      UNUSED_ARG(fileID);
+      UNUSED_ARG(url);
     }
 
     /**

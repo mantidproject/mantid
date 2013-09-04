@@ -5,7 +5,7 @@
 
 # Some XML files are slightly larger than the allowed limit but they
 # should compress well
-*.xml              hooks.MaxObjectKiB130204=2048
+*.xml              hooks.MaxObjectKiB130902=2048
 
 # Allowing gSoap generated files to be committed.
 /Code/Mantid/Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/ICat3H.h              hooks.MaxObjectKiB130819=2048 

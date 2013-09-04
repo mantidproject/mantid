@@ -710,7 +710,7 @@ namespace Mantid
       int ret=icat.logout(&request,&response);
       if(ret!=0)
       {
-        CErrorHandling::throwErrorMessages(icat);
+        throw std::runtime_error("You are not currently logged into the cataloging system.");
       }
 
       return ret;
@@ -1003,8 +1003,7 @@ namespace Mantid
       }
       else
       {
-        CErrorHandling::throwErrorMessages(icat);
-        return;
+        throw std::runtime_error("Username or password supplied is invalid.");
       }
 
     }
