@@ -124,14 +124,26 @@ namespace Mantid
       // As such, we will query for sample only when dataset inputs are not used.
       bool queryDataset = false;
 
-      // Investigation Start and end date
+      // Format the timestamps in order to compare them.
+      std::string startDate = formatDateTime(inputs.getStartDate());
+      std::string endDate   = formatDateTime(inputs.getEndDate());
+
+      // Investigation startDate if endDate is not selected
+      if (inputs.getStartDate() != 0 && inputs.getEndDate() == 0)
+      {
+        investigationWhere.push_back("startDate >= '" + startDate + "'");
+      }
+
+      // Investigation endDate if startdate is not selected
+      if (inputs.getEndDate() != 0 && inputs.getStartDate() == 0)
+      {
+        investigationWhere.push_back("endDate <= '" + endDate + "'");
+      }
+
+      // Investigation Start and end date if both selected
       if(inputs.getStartDate() != 0 && inputs.getEndDate() != 0)
       {
-        // Format the timestamps in order to compare them.
-        std::string startDate = formatDateTime(inputs.getStartDate());
-        std::string endDate   = formatDateTime(inputs.getEndDate());
-        // Make it so...
-        investigationWhere.push_back("startDate >= '" + startDate + "' AND startDate <= '" + endDate + "' OR endDate >= '" + startDate + "' AND endDate <= '" + endDate + "'");
+        investigationWhere.push_back("startDate BETWEEN '" + startDate + "' AND '" + endDate + "'");
       }
 
       // Investigation name (title)
