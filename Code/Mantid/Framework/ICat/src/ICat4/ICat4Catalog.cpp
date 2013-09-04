@@ -623,6 +623,8 @@ namespace Mantid
      */
     void ICat4Catalog::getDownloadURL(const long long & fileID, std::string& url)
     {
+      UNUSED_ARG(fileID);
+      UNUSED_ARG(url);
     }
 
     /**
