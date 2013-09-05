@@ -104,6 +104,21 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   }
 }
 
+/**
+ * Initialize local Python environmnet. 
+ */
+void MuonAnalysis::initLocalPython()
+{
+  runPythonCode("from mantid.simpleapi import *");
+
+  // TODO: Following shouldn't be here. It is now because ApplicationWindow sets up the Python 
+  // environment only after the UserSubWindow is shown.
+
+  // Hide the toolbars, if user wants to
+  if(m_uiForm.hideToolbars->isChecked())
+    setToolbarsHidden(true);
+}
+
 /// Set up the dialog layout
 void MuonAnalysis::initLayout()
 {
@@ -3600,9 +3615,9 @@ void MuonAnalysis::showEvent(QShowEvent *e)
 void MuonAnalysis::setToolbarsHidden(bool hidden)
 {
   if (hidden == true)
-    emit hideToolbars();
+    runPythonCode("setToolbarsVisible(False)");
   else
-    emit showToolbars();
+    runPythonCode("setToolbarsVisible(True)");
 }
 
 

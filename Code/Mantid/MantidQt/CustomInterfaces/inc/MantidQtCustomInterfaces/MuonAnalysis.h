@@ -66,11 +66,6 @@ public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
 
-  void initLocalPython()
-  {
-    runPythonCode("from mantid.simpleapi import *");
-  }
-
 private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
@@ -185,8 +180,11 @@ private slots:
 
 
 private:
+  /// Initialize local Python environment
+  void initLocalPython();
+
   /// Initialize the layout
-  virtual void initLayout();
+  void initLayout();
 
   /// Set start up interface look
   void startUpLook();
