@@ -83,6 +83,12 @@ namespace API
     alg->addObserver(m_progressObserver);
   }
 
+  /// Get back a pointer to the running algorithm
+  Mantid::API::IAlgorithm_sptr AlgorithmRunner::getAlgorithm() const
+  {
+    return m_asyncAlg;
+  }
+
   //--------------------------------------------------------------------------------------
   /** Observer called when the asynchronous algorithm has completed.
    *

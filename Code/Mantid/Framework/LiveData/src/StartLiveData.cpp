@@ -258,6 +258,8 @@ namespace LiveData
       // Give the listener directly to LoadLiveData (don't re-create it)
       monitorAlg->setLiveListener(listener);
 
+      // Check for possible cancellation
+      interruption_point();
       // Launch asyncronously
       monitorAlg->executeAsync();
 

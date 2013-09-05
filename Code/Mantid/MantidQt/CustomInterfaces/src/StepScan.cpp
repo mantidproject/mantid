@@ -27,6 +27,7 @@ using namespace Mantid::API;
 StepScan::StepScan(QWidget *parent)
   : UserSubWindow(parent), m_dataReloadNeeded(false),
     m_instrument(ConfigService::Instance().getInstrument().name()),
+    m_algRunner(new API::AlgorithmRunner(this)),
     m_addObserver(*this, &StepScan::handleAddEvent),
     m_replObserver(*this, &StepScan::handleReplEvent),
     m_replaceObserverAdded(false)
@@ -35,6 +36,8 @@ StepScan::StepScan(QWidget *parent)
 
 StepScan::~StepScan()
 {
+  // Stop any async algorithm
+  m_algRunner->cancelRunningAlgorithm();
   // Stop live data collection, if running
   m_uiForm.mWRunFiles->stopLiveAlgorithm();
   // Disconnect the observers for the mask workspace combobox
@@ -116,12 +119,12 @@ void StepScan::startLiveListener()
     return;
   }
 
-  QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-
   // Remove any previously-loaded workspaces
   cleanupWorkspaces();
 
-  // TODO: Run entirely asynchronously (see AlgorithmRunner)
+  m_algRunner->cancelRunningAlgorithm();
+  connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(startLiveListenerComplete(bool)));
+
   IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
   startLiveData->setProperty("UpdateEvery",5.0);
   startLiveData->setProperty("FromNow",false);
@@ -129,27 +132,35 @@ void StepScan::startLiveListener()
   startLiveData->setProperty("Instrument",m_instrument);
   m_inputWSName = "__live";
   startLiveData->setProperty("OutputWorkspace",m_inputWSName);
-  try {
-    const bool executed = startLiveData->execute();
-    if ( ! executed ) throw std::runtime_error("Unable to run StartLiveData");
-  } catch (std::runtime_error&)
+  if ( ! startLiveData->validateInputs().empty() )
   {
-    QApplication::restoreOverrideCursor();
     QMessageBox::critical(this,"StartLiveData failed","Unable to start live data collection");
     m_uiForm.mWRunFiles->liveButtonSetChecked(false);
     return;
   }
+  m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData);
+  m_algRunner->startAlgorithm(startLiveData);
+}
 
-  // Keep track of the algorithm that's pulling in the live data
-  m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
+void StepScan::startLiveListenerComplete(bool error)
+{
+  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(startLiveListenerComplete(bool)));
+  if ( ! error )
+  {
+    // Keep track of the algorithm that's pulling in the live data
+    m_uiForm.mWRunFiles->setLiveAlgorithm(m_algRunner->getAlgorithm()->getProperty("MonitorLiveData"));
 
-  setupOptionControls();
+    setupOptionControls();
 
-  addReplaceObserverOnce();
-  connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
-           SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
-
-  QApplication::restoreOverrideCursor();
+    addReplaceObserverOnce();
+    connect( this, SIGNAL(logsUpdated(const Mantid::API::MatrixWorkspace_const_sptr &)),
+             SLOT(expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &)) );
+  }
+  else
+  {
+    QMessageBox::critical(this,"StartLiveData failed","Unable to start live data collection");
+    m_uiForm.mWRunFiles->liveButtonSetChecked(false);
+  }
 }
 
 void StepScan::loadFile()
@@ -161,28 +172,32 @@ void StepScan::loadFile()
   {
     m_inputFilename = filename;
 
-    QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
-
     // Remove any previously-loaded workspaces
     cleanupWorkspaces();
 
-    // TODO: Run entirely asynchronously (see AlgorithmRunner or AlgorithmObserver)
+    m_algRunner->cancelRunningAlgorithm();
+    connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(loadFileComplete(bool)));
+
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadEventNexus");
     alg->setPropertyValue("Filename", filename.toStdString());
     m_inputWSName = "__" + QFileInfo(filename).baseName().toStdString();
     alg->setPropertyValue("OutputWorkspace", m_inputWSName);
     alg->setProperty("LoadMonitors", true);
-    if ( alg->execute() )  // executeAsync???
-    {
-      QApplication::restoreOverrideCursor();
-      m_dataReloadNeeded = false;
-      setupOptionControls();
-    }
-    else
-    {
-      QApplication::restoreOverrideCursor();
-      QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
-    }
+    m_algRunner->startAlgorithm(alg);
+  }
+}
+
+void StepScan::loadFileComplete(bool error)
+{
+  disconnect(m_algRunner, SIGNAL(algorithmComplete(bool)), this, SLOT(loadFileComplete(bool)));
+  if ( ! error )
+  {
+    m_dataReloadNeeded = false;
+    setupOptionControls();
+  }
+  else
+  {
+    QMessageBox::warning(this,"File loading failed","Is this an event nexus file?");
   }
 }
 

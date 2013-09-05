@@ -59,6 +59,7 @@ namespace API
     void cancelRunningAlgorithm();
 
     void startAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+    Mantid::API::IAlgorithm_sptr getAlgorithm() const;
 
   signals:
     /// Signal emitted when the algorithm has completed execution/encountered an error
