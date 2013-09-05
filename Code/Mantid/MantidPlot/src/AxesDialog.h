@@ -48,6 +48,7 @@ class QPushButton;
 class QRadioButton;
 class QSpinBox;
 class QTabWidget;
+class QVBoxLayout;
 class QWidget;
 class QStringList;
 class ColorBox;
@@ -80,8 +81,6 @@ class AxesDialog: public QDialog
     void showAxesPage();
     void showGridPage();
     void showFormulaBox();
-    void endvalueChanged(double);
-    void startvalueChanged(double);
 
     //! Shows the dialog as a modal dialog
     /**
@@ -98,8 +97,6 @@ class AxesDialog: public QDialog
     void updateTitleBox(int axis);
     bool updatePlot();
     void updateScale();
-    void stepEnabled();
-    void stepDisabled();
     void majorGridEnabled(bool on);
     void minorGridEnabled(bool on);
     void showGridOptions(int axis);
@@ -114,7 +111,6 @@ class AxesDialog: public QDialog
     int mapToQwtAxis(int axis);
     int mapToQwtAxisId();
     void updateTickLabelsList(bool);
-    void updateMinorTicksList(int scaleType);
     void setTicksType(int);
     void updateMajTicksType(int);
     void updateMinTicksType(int);
@@ -148,34 +144,34 @@ class AxesDialog: public QDialog
     void setGraph(Graph *g);
 
     ApplicationWindow* d_app;
-    Graph* d_graph;
-    QVBoxLayout* scalePrefsArea, axesPrefsArea;
+    Graph *d_graph;
+    QVBoxLayout *scalePrefsArea, *axesPrefsArea;
 //common widgets
     QPushButton* buttonApply, *buttonOk, *buttonCancel;
     QTabWidget* generalDialog;
     QWidget* scalesPage, *gridPage, *axesPage, *frame;
 
-   /*
-//to migrate to scale details
-    DoubleSpinBox* boxEnd;
-    DoubleSpinBox* boxStart;
-    QComboBox* boxScaleType;
-    QComboBox* boxMinorValue;
-    DoubleSpinBox* boxStep;
-    QCheckBox* btnStep, *btnInvert;
-    QSpinBox* boxMajorValue;
-    QCheckBox* btnMajor;
-    QGroupBox *boxAxesBreaks;
-    DoubleSpinBox *boxBreakStart, *boxBreakEnd, *boxStepBeforeBreak,
-        *boxStepAfterBreak;
-    QSpinBox *boxBreakPosition, *boxBreakWidth;
-    QComboBox *boxMinorTicksBeforeBreak, *boxMinorTicksAfterBreak;
-    QCheckBox *boxLog10AfterBreak, *boxBreakDecoration;
-    QComboBox *boxUnit;
-    QLabel *boxScaleTypeLabel, *minorBoxLabel;
-    QDateTimeEdit *boxStartDateTime, *boxEndDateTime;
-    QTimeEdit *boxStartTime, *boxEndTime;
-    */
+    /*
+     //to migrate to scale details
+     DoubleSpinBox* boxEnd;
+     DoubleSpinBox* boxStart;
+     QComboBox* boxScaleType;
+     QComboBox* boxMinorValue;
+     DoubleSpinBox* boxStep;
+     QCheckBox* btnStep, *btnInvert;
+     QSpinBox* boxMajorValue;
+     QCheckBox* btnMajor;
+     QGroupBox *boxAxesBreaks;
+     DoubleSpinBox *boxBreakStart, *boxBreakEnd, *boxStepBeforeBreak,
+     *boxStepAfterBreak;
+     QSpinBox *boxBreakPosition, *boxBreakWidth;
+     QComboBox *boxMinorTicksBeforeBreak, *boxMinorTicksAfterBreak;
+     QCheckBox *boxLog10AfterBreak, *boxBreakDecoration;
+     QComboBox *boxUnit;
+     QLabel *boxScaleTypeLabel, *minorBoxLabel;
+     QDateTimeEdit *boxStartDateTime, *boxEndDateTime;
+     QTimeEdit *boxStartTime, *boxEndTime;
+     */
 
     QListWidget* axesList;
     QCheckBox* boxMajorGrid;
@@ -217,7 +213,7 @@ class AxesDialog: public QDialog
     bool xAxisOn, yAxisOn, topAxisOn, rightAxisOn;
     int xBottomLabelsRotation, xTopLabelsRotation;
 
-    QCheckBox  *boxAntialiseGrid;
+    QCheckBox *boxAntialiseGrid;
     QComboBox *boxApplyGridFormat;
     //! Last selected tab
     QWidget* lastPage;

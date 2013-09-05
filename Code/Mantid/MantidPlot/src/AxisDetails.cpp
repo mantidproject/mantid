@@ -3,8 +3,29 @@
 //--------------------------
 
 #include "AxisDetails.h"
+#include "ApplicationWindow.h"
+#include "DoubleSpinBox.h"
+//#include <qwt_scale_widget.h>
+//#include <qwt_plot.h>
+#include "qwt_compat.h"
+#include "Plot.h"
+#include "plot2D/ScaleEngine.h"
 
 #include <QWidget>
+#include <QSpinBox>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QGroupBox>
+#include <QComboBox>
+#include <QLabel>
+#include <QDateTimeEdit>
+#include <QTimeEdit>
+#include <QLayout>
+
+#include <QDate>
+#include <QList>
+#include <QListWidget>
+#include <QVector>
 
 AxisAxisDetails::AxisAxisDetails(QWidget *parent) :
     QWidget(parent)
@@ -15,32 +36,36 @@ AxisAxisDetails::~AxisAxisDetails()
 {
 
 }
-ScaleAxisDetails::ScaleAxisDetails(QWidget *parent) :
+
+ScaleAxisDetails::ScaleAxisDetails(ApplicationWindow* app, Graph* graph,
+    int mappedaxis, QWidget *parent) :
     QWidget(parent)
 {
+  d_app = app;
+  d_graph = graph;
   QGroupBox * middleBox = new QGroupBox(QString());
   QGridLayout * middleLayout = new QGridLayout(middleBox);
 
-  middleLayout->addWidget(new QLabel(tr( "From" )), 0, 0);
+  middleLayout->addWidget(new QLabel(tr("From")), 0, 0);
   dspnStart = new DoubleSpinBox();
   dspnStart->setLocale(d_app->locale());
   dspnStart->setDecimals(d_app->d_decimal_digits);
-  middleLayout->addWidget( dspnStart, 0, 1 );
+  middleLayout->addWidget(dspnStart, 0, 1);
 
   dteStartDateTime = new QDateTimeEdit();
   dteStartDateTime->setCalendarPopup(true);
-  middleLayout->addWidget( dteStartDateTime, 0, 1 );
+  middleLayout->addWidget(dteStartDateTime, 0, 1);
   dteStartDateTime->hide();
 
   timStartTime = new QTimeEdit();
-  middleLayout->addWidget(timStartTime, 0, 1 );
+  middleLayout->addWidget(timStartTime, 0, 1);
   timStartTime->hide();
 
-  middleLayout->addWidget(new QLabel(tr( "To" )), 1, 0);
+  middleLayout->addWidget(new QLabel(tr("To")), 1, 0);
   dspnEnd = new DoubleSpinBox();
   dspnEnd->setLocale(d_app->locale());
   dspnEnd->setDecimals(d_app->d_decimal_digits);
-  middleLayout->addWidget( dspnEnd, 1, 1);
+  middleLayout->addWidget(dspnEnd, 1, 1);
 
   dteEndDateTime = new QDateTimeEdit();
   dteEndDateTime->setCalendarPopup(true);
@@ -51,17 +76,17 @@ ScaleAxisDetails::ScaleAxisDetails(QWidget *parent) :
   middleLayout->addWidget(timEndTime, 1, 1);
   timEndTime->hide();
 
-  lblScaleTypeLabel = new QLabel(tr( "Type" ));
+  lblScaleTypeLabel = new QLabel(tr("Type"));
   cmbScaleType = new QComboBox();
-  cmbScaleType->addItem(tr( "linear" ) );
-  cmbScaleType->addItem(tr( "logarithmic" ) );
-  middleLayout->addWidget( lblScaleTypeLabel, 2, 0);
-  middleLayout->addWidget( cmbScaleType, 2, 1);
+  cmbScaleType->addItem(tr("linear"));
+  cmbScaleType->addItem(tr("logarithmic"));
+  middleLayout->addWidget(lblScaleTypeLabel, 2, 0);
+  middleLayout->addWidget(cmbScaleType, 2, 1);
 
   chkInvert = new QCheckBox();
-  chkInvert->setText( tr( "Inverted" ) );
+  chkInvert->setText(tr("Inverted"));
   chkInvert->setChecked(false);
-  middleLayout->addWidget( chkInvert, 3, 1 );
+  middleLayout->addWidget(chkInvert, 3, 1);
   middleLayout->setRowStretch(4, 1);
 
   grpAxesBreaks = new QGroupBox(tr("Show Axis &Break"));
@@ -116,25 +141,27 @@ ScaleAxisDetails::ScaleAxisDetails(QWidget *parent) :
   breaksLayout->addWidget(new QLabel(tr("Minor Ticks Before")), 3, 2);
   cmbMinorTicksBeforeBreak = new QComboBox();
   cmbMinorTicksBeforeBreak->setEditable(true);
-  cmbMinorTicksBeforeBreak->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
+  cmbMinorTicksBeforeBreak->addItems(
+      QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
   breaksLayout->addWidget(cmbMinorTicksBeforeBreak, 3, 3);
 
   breaksLayout->addWidget(new QLabel(tr("Minor Ticks After")), 4, 2);
-  cmbMinorTicksAfterBreak  = new QComboBox();
+  cmbMinorTicksAfterBreak = new QComboBox();
   cmbMinorTicksAfterBreak->setEditable(true);
-  cmbMinorTicksAfterBreak->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
+  cmbMinorTicksAfterBreak->addItems(
+      QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
   breaksLayout->addWidget(cmbMinorTicksAfterBreak, 4, 3);
 
   QGroupBox *rightBox = new QGroupBox(QString());
   QGridLayout *rightLayout = new QGridLayout(rightBox);
 
   QWidget * stepWidget = new QWidget();
-  QHBoxLayout * stepWidgetLayout = new QHBoxLayout( stepWidget );
+  QHBoxLayout * stepWidgetLayout = new QHBoxLayout(stepWidget);
   stepWidgetLayout->setMargin(0);
 
-  chkStep = new QCheckBox(tr("Step"));
-  chkStep->setChecked(true);
-  rightLayout->addWidget( chkStep, 0, 0 );
+  radStep = new QRadioButton(tr("Step"));
+  radStep->setChecked(true);
+  rightLayout->addWidget(radStep, 0, 0);
 
   dspnStep = new DoubleSpinBox();
   dspnStep->setMinimum(0.0);
@@ -144,27 +171,27 @@ ScaleAxisDetails::ScaleAxisDetails(QWidget *parent) :
 
   cmbUnit = new QComboBox();
   cmbUnit->hide();
-  stepWidgetLayout->addWidget( cmbUnit );
+  stepWidgetLayout->addWidget(cmbUnit);
 
-  rightLayout->addWidget( stepWidget, 0, 1 );
+  rightLayout->addWidget(stepWidget, 0, 1);
 
-  chkMajor = new QCheckBox();
-  chkMajor->setText( tr( "Major Ticks" ) );
-  rightLayout->addWidget( chkMajor, 1, 0);
+  radMajor = new QRadioButton(tr("Major Ticks"));
+  rightLayout->addWidget(radMajor, 1, 0);
 
   spnMajorValue = new QSpinBox();
   spnMajorValue->setDisabled(true);
-  rightLayout->addWidget( spnMajorValue, 1, 1);
+  rightLayout->addWidget(spnMajorValue, 1, 1);
 
-  lblMinorBox = new QLabel( tr( "Minor Ticks" ));
-  rightLayout->addWidget( lblMinorBox, 2, 0);
+  lblMinorBox = new QLabel(tr("Minor Ticks"));
+  rightLayout->addWidget(lblMinorBox, 2, 0);
 
   cmbMinorValue = new QComboBox();
   cmbMinorValue->setEditable(true);
-  cmbMinorValue->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
-  rightLayout->addWidget( cmbMinorValue, 2, 1);
+  cmbMinorValue->addItems(
+      QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
+  rightLayout->addWidget(cmbMinorValue, 2, 1);
 
-  rightLayout->setRowStretch( 3, 1 );
+  rightLayout->setRowStretch(3, 1);
 
   QHBoxLayout* hl = new QHBoxLayout();
   hl->addWidget(middleBox);
@@ -175,22 +202,217 @@ ScaleAxisDetails::ScaleAxisDetails(QWidget *parent) :
   vl->addWidget(grpAxesBreaks);
 
   //// this is wrong and shouldn't happen i'll have to see what update plot is doing
-  //connect(btnInvert,SIGNAL(clicked()), this, SLOT(updatePlot()));
+  //connect(chkInvert,SIGNAL(clicked()), this, SLOT(updatePlot()));
   ////
-  ////these need moved to the new object
-  connect(boxScaleType,SIGNAL(activated(int)), this, SLOT(updateMinorTicksList(int)));
-    //btnstep and btn major need changed to radiobuttons
-    connect(btnStep,SIGNAL(clicked()), this, SLOT(stepEnabled()));
-    connect(btnMajor,SIGNAL(clicked()), this, SLOT(stepDisabled()));
-    //
-  connect(boxEnd, SIGNAL(valueChanged(double)), this, SLOT(endvalueChanged(double)));
-  connect(boxStart, SIGNAL(valueChanged(double)), this, SLOT(startvalueChanged(double)));
-  ////
+  connect(radStep, SIGNAL(clicked()), this, SLOT(radiosSwitched()));
+  connect(radMajor, SIGNAL(clicked()), this, SLOT(radiosSwitched()));
+  ////disabled until i can find out what they actually do
+  //connect(cmbScaleType,SIGNAL(activated(int)), this, SLOT(updateMinorTicksList(int)));
+  //connect(dspnEnd, SIGNAL(valueChanged(double)), this, SLOT(endvalueChanged(double)));
+  //connect(dspnStart, SIGNAL(valueChanged(double)), this, SLOT(startvalueChanged(double)));
 
   //QVBoxLayout *main_layout = new QVBoxLayout(this);
   //main_layout->addLayout(vl);
+  initWidgets(mappedaxis);
 }
 ScaleAxisDetails::~ScaleAxisDetails()
 {
 
+}
+
+void ScaleAxisDetails::radiosSwitched()
+{
+
+}
+
+/**
+ slot called when the  To spinbox value changed
+ */
+/*
+ void ScaleAxisDetails::endvalueChanged(double endVal)
+ {
+ //is this even doing anything?
+ (void) endVal;
+ if(d_graph)
+ d_graph->changeIntensity( true);
+ }
+
+ void ScaleAxisDetails::startvalueChanged(double startVal)
+ {
+ //is this even doing anything?
+ (void) startVal;
+ if(d_graph)
+ d_graph->changeIntensity( true);
+ }
+
+ void ScaleAxisDetails::updateMinorTicksList(int scaleType)
+ {
+ //is this even doing anything?
+ (void) scaleType;
+ }
+ */
+
+void ScaleAxisDetails::initWidgets(int a)
+{
+  //int axis = axesList->currentRow(); //happens before running constructor as "a" will be passed in
+
+  /* these dont' happen any more
+   dspnStart->clear();
+   dspnEnd->clear();
+   dspnStep->clear();
+   cmbUnit->hide();
+   cmbUnit->clear();
+   */
+
+  Plot *d_plot = d_graph->plotWidget();
+  //int a = mapToQwtAxis(axis);//happens before running constructor as "a" will be passed in
+  const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(a);
+  double start = QMIN(scDiv->lBound(), scDiv->hBound());
+  double end = QMAX(scDiv->lBound(), scDiv->hBound());
+  ScaleDraw::ScaleType type = d_graph->axisType(a);
+  if (type == ScaleDraw::Date)
+  {
+    ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(a));
+    QDateTime origin = sclDraw->dateTimeOrigin();
+
+    dspnStart->hide();
+    timStartTime->hide();
+    dteStartDateTime->show();
+    dteStartDateTime->setDisplayFormat(sclDraw->format());
+    dteStartDateTime->setDateTime(origin.addSecs((int) start));
+
+    dspnEnd->hide();
+    timEndTime->hide();
+    dteEndDateTime->show();
+    dteEndDateTime->setDisplayFormat(sclDraw->format());
+    dteEndDateTime->setDateTime(origin.addSecs((int) end));
+
+    cmbUnit->show();
+    cmbUnit->insertItem(tr("days"));
+    cmbUnit->insertItem(tr("weeks"));
+    dspnStep->setValue(d_graph->axisStep(a) / 86400.0);
+    dspnStep->setSingleStep(1);
+  }
+  else if (type == ScaleDraw::Time)
+  {
+    ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(a));
+    QTime origin = sclDraw->dateTimeOrigin().time();
+
+    dspnStart->hide();
+    dteStartDateTime->hide();
+    timStartTime->show();
+    timStartTime->setDisplayFormat(sclDraw->format());
+    timStartTime->setTime(origin.addMSecs((int) start));
+
+    dspnEnd->hide();
+    dteEndDateTime->hide();
+    timEndTime->show();
+    timEndTime->setDisplayFormat(sclDraw->format());
+    timEndTime->setTime(origin.addMSecs((int) end));
+
+    cmbUnit->show();
+    cmbUnit->insertItem(tr("millisec."));
+    cmbUnit->insertItem(tr("sec."));
+    cmbUnit->insertItem(tr("min."));
+    cmbUnit->insertItem(tr("hours"));
+    cmbUnit->setCurrentIndex(1);
+    dspnStep->setValue(d_graph->axisStep(a) / 1e3);
+    dspnStep->setSingleStep(1000);
+  }
+  else
+  {
+    dspnStart->show();
+    dspnStart->setValue(start);
+    timStartTime->hide();
+    dteStartDateTime->hide();
+    dspnEnd->show();
+    dspnEnd->setValue(end);
+    timEndTime->hide();
+    dteEndDateTime->hide();
+    dspnStep->setValue(d_graph->axisStep(a));
+    dspnStep->setSingleStep(0.1);
+  }
+
+  double range = fabs(scDiv->range());
+  QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(a);
+  ScaleEngine* sc_engine = dynamic_cast<ScaleEngine*>(qwtsc_engine);
+  if (sc_engine)
+  {
+    if (sc_engine->axisBreakLeft() > -DBL_MAX)
+      dspnBreakStart->setValue(sc_engine->axisBreakLeft());
+    else
+      dspnBreakStart->setValue(start + 0.25 * range);
+
+    if (sc_engine->axisBreakRight() < DBL_MAX)
+      dspnBreakEnd->setValue(sc_engine->axisBreakRight());
+    else
+      dspnBreakEnd->setValue(start + 0.75 * range);
+
+    grpAxesBreaks->setChecked(sc_engine->hasBreak());
+
+    spnBreakPosition->setValue(sc_engine->breakPosition());
+    spnBreakWidth->setValue(sc_engine->breakWidth());
+    dspnStepBeforeBreak->setValue(sc_engine->stepBeforeBreak());
+    dspnStepAfterBreak->setValue(sc_engine->stepAfterBreak());
+
+    QwtScaleTransformation::Type scale_type = sc_engine->type();
+    cmbMinorTicksBeforeBreak->clear();
+    if (scale_type == QwtScaleTransformation::Log10)
+      cmbMinorTicksBeforeBreak->addItems(
+          QStringList() << "0" << "2" << "4" << "8");
+    else
+      cmbMinorTicksBeforeBreak->addItems(
+          QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
+    cmbMinorTicksBeforeBreak->setEditText(
+        QString::number(sc_engine->minTicksBeforeBreak()));
+
+    cmbMinorTicksAfterBreak->setEditText(
+        QString::number(sc_engine->minTicksAfterBreak()));
+    chkLog10AfterBreak->setChecked(sc_engine->log10ScaleAfterBreak());
+    chkBreakDecoration->setChecked(sc_engine->hasBreakDecoration());
+    chkInvert->setChecked(sc_engine->testAttribute(QwtScaleEngine::Inverted));
+    cmbScaleType->setCurrentItem(scale_type);
+    cmbMinorValue->clear();
+    if (scale_type == QwtScaleTransformation::Log10)
+      cmbMinorValue->addItems(QStringList() << "0" << "2" << "4" << "8");
+    else
+      cmbMinorValue->addItems(
+          QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
+
+    cmbMinorValue->setEditText(QString::number(d_plot->axisMaxMinor(a)));
+
+    bool isColorMap = d_graph->isColorBarEnabled(a);
+    grpAxesBreaks->setEnabled(!isColorMap);
+    if (isColorMap)
+    {
+      grpAxesBreaks->setChecked(false);
+    }
+
+  }
+  else
+  {
+    grpAxesBreaks->setChecked(false);
+    grpAxesBreaks->setEnabled(false);
+  }
+
+  QwtValueList lst = scDiv->ticks(QwtScaleDiv::MajorTick);
+  spnMajorValue->setValue(lst.count());
+
+  if (d_graph->axisStep(a) != 0.0)
+  {
+    radStep->setChecked(true);
+    dspnStep->setEnabled(true);
+    cmbUnit->setEnabled(true);
+
+    radMajor->setChecked(false);
+    spnMajorValue->setEnabled(false);
+  }
+  else
+  {
+    radStep->setChecked(false);
+    dspnStep->setEnabled(false);
+    cmbUnit->setEnabled(false);
+    radMajor->setChecked(true);
+    spnMajorValue->setEnabled(true);
+  }
 }
