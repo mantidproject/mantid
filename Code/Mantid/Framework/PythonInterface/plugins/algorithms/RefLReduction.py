@@ -379,19 +379,7 @@ class RefLReduction(PythonAlgorithm):
         
         
 #         # convert to Q without correction
-        [q_axis, y_axis, y_error_axis] = wks_utility.convertToQWithoutCorrection(tof_axis_full,
-                                                                y_axis, 
-                                                                y_error_axis,
-                                                                peak_range = dataPeakRange,  
-                                                                central_pixel = data_central_pixel,
-                                                                source_to_detector_distance = dMD,
-                                                                sample_to_detector_distance = dSD,
-                                                                theta = theta,
-                                                                first_slit_size = first_slit_size,
-                                                                last_slit_size = last_slit_size)
-
-        # convert To Q with correction
-#         [q_axis, y_axis, y_error_axis] = wks_utility.convertToQ(tof_axis_full,
+#         [q_axis, y_axis, y_error_axis] = wks_utility.convertToQWithoutCorrection(tof_axis_full,
 #                                                                 y_axis, 
 #                                                                 y_error_axis,
 #                                                                 peak_range = dataPeakRange,  
@@ -401,6 +389,18 @@ class RefLReduction(PythonAlgorithm):
 #                                                                 theta = theta,
 #                                                                 first_slit_size = first_slit_size,
 #                                                                 last_slit_size = last_slit_size)
+
+        # convert To Q with correction
+        [q_axis, y_axis, y_error_axis] = wks_utility.convertToQ(tof_axis_full,
+                                                                y_axis, 
+                                                                y_error_axis,
+                                                                peak_range = dataPeakRange,  
+                                                                central_pixel = data_central_pixel,
+                                                                source_to_detector_distance = dMD,
+                                                                sample_to_detector_distance = dSD,
+                                                                theta = theta,
+                                                                first_slit_size = first_slit_size,
+                                                                last_slit_size = last_slit_size)
 #         ## debugging only
 #         name_output_ws = self.getPropertyValue("OutputWorkspace")
 #         fileName = '/mnt/hgfs/j35/Dropbox/temporary/beforeRebin_' + name_output_ws + '.txt'
@@ -428,9 +428,6 @@ class RefLReduction(PythonAlgorithm):
 #         _time = int(time.time())
 #         name_output_ws = self.getPropertyValue("OutputWorkspace")
 #         name_output_ws = name_output_ws + '_#' + str(_time) + 'ts'
-        print '**** q_range ****'
-        print q_range
-        print 
         q_rebin = Rebin(InputWorkspace=q_workspace,
                         Params=q_range,         
                         PreserveEvents=True)
