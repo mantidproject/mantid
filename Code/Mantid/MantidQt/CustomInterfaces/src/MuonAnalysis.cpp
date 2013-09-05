@@ -2073,10 +2073,10 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
     // create first part of plotting Python string
     QString gNum = QString::number(wsIndex);
     QString pyS;
-    if ( m_uiForm.showErrorBars->isChecked() )
-      pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ",True)\n";
-    else
-      pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ")\n";
+
+    // Plot error bars by default. If not needed they will get hidden when plot style if applied.
+    pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ",True)\n";
+
     // Add the objectName for the peakPickerTool to find
     pyS += "gs.setObjectName(\"" + wsName + "\")\n"
            "l = gs.activeLayer()\n"
