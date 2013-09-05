@@ -16,7 +16,6 @@ class MSGReducer(reducer.Reducer):
     
     _instrument_name = None #: Name of the instrument used in experiment.
     _sum = False #: Whether to sum input files or treat them sequentially.
-    _load_logs = False #: Whether to load the log file(s) associated with the raw file.
     _monitor_index = None #: Index of Monitor specturm.
     _multiple_frames = False
     _detector_range = [-1, -1]
@@ -37,7 +36,6 @@ class MSGReducer(reducer.Reducer):
         loadData = steps.LoadData()
         loadData.set_ws_list(self._data_files)
         loadData.set_sum(self._sum)
-        loadData.set_load_logs(self._load_logs)
         loadData.set_monitor_index(self._monitor_index)
         loadData.set_detector_range(self._detector_range[0],
             self._detector_range[1])
@@ -148,15 +146,6 @@ class MSGReducer(reducer.Reducer):
         if not isinstance(value, bool):
             raise TypeError("value must be either True or False (boolean)")
         self._sum = value
-    
-    def set_load_logs(self, value):
-        """Mark whether the log file(s) associated with a raw file should be
-        loaded along with the raw file.
-        The default value for this is False.
-        """
-        if not isinstance(value, bool):
-            raise TypeError("value must be either True or False (boolean)")
-        self._load_logs = value
         
     def set_save_formats(self, formats):
         """Selects the save formats in which to export the reduced data.

@@ -288,13 +288,6 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QCheckBox" name="ckLoadLogs">
-                    <property name="text">
-                     <string>Load Logs</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
                    <widget class="QCheckBox" name="ckUseCalib">
                     <property name="toolTip">
                      <string>Use calibration file to adjust for detector efficiency.</string>
