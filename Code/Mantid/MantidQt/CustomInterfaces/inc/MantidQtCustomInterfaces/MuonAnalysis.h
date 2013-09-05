@@ -63,8 +63,6 @@ public:
   /// Name of the interface
   static std::string name() { return "Muon Analysis"; }
 
-
-public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
 
@@ -125,8 +123,8 @@ private slots:
   /// User select instrument
   void userSelectInstrument(const QString& prefix);
 
-  /// User clicks hide toolbars checkbox
-  void showHideToolbars(bool state);
+  /// Hide/show MantidPlot toolbars
+  void setToolbarsHidden(bool hidden);
 
   /// Run the plot button on the home tab.
   void runFrontPlotButton();

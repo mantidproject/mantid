@@ -175,7 +175,7 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this,
     SLOT(runFrontGroupGroupPairComboBox(int)));
 
-  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(showHideToolbars(bool)));
+  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(setToolbarsHidden(bool)));
 
   // connect "?" (Help) Button
   connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
@@ -3442,7 +3442,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
   if (m_uiForm.hideToolbars->isChecked())
-    emit hideToolbars();
+    setToolbarsHidden(true);
 
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
@@ -3558,9 +3558,10 @@ bool MuonAnalysis::isAutoUpdateEnabled()
 */
 void MuonAnalysis::closeEvent(QCloseEvent *e)
 {
-  // Show the toolbar
+  // Show the toolbars
   if (m_uiForm.hideToolbars->isChecked())
-    emit showToolbars();
+    setToolbarsHidden(false);
+
   // delete the peak picker tool because it is no longer needed.
   emit fittingRequested(m_uiForm.fitBrowser, "");
   e->accept();
@@ -3583,19 +3584,22 @@ void MuonAnalysis::showEvent(QShowEvent *e)
   {
     m_uiForm.loadCurrent->setDisabled(false);
   }
-  // Hide the toolbar
+
+  // Hide the toolbars
   if (m_uiForm.hideToolbars->isChecked() )
-    emit hideToolbars();
+    setToolbarsHidden(true);
+
   e->accept();
 }
 
 
 /**
-* Show/Hide Toolbar
-*/
-void MuonAnalysis::showHideToolbars(bool state)
+ * Hide/show MantidPlot toolbars.
+ * @param hidden If true, toolbars will be hidden, if false - shown
+ */
+void MuonAnalysis::setToolbarsHidden(bool hidden)
 {
-  if (state == true)
+  if (hidden == true)
     emit hideToolbars();
   else
     emit showToolbars();
