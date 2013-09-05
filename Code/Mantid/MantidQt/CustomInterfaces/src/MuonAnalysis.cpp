@@ -109,7 +109,14 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
  */
 void MuonAnalysis::initLocalPython()
 {
-  runPythonCode("from mantid.simpleapi import *");
+  std::stringstream code;
+
+  code << "from mantid.simpleapi import *" << std::endl
+       // Needed for Python GUI API
+       << "from PyQt4.QtGui import QPen, QBrush, QColor" << std::endl
+       << "from PyQt4.QtCore import QSize" << std::endl;
+
+  runPythonCode(QString::fromStdString(code.str()));
 
   // TODO: Following shouldn't be here. It is now because ApplicationWindow sets up the Python 
   // environment only after the UserSubWindow is shown.
@@ -2110,6 +2117,45 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
     runPythonCode( pyS );
 }
 
+/**
+ * TODO: comment
+ */
+void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QString>& params)
+{
+  std::stringstream code;
+
+  // Just to save some typing
+  using std::endl;
+
+       // Get parameters
+  code << "graphName = '" << wsName.toStdString() << "'" << endl
+       << "connectType = " << params["ConnectType"].toStdString() << endl
+       << "showErrors = " << params["ShowErrors"].toStdString() << endl
+
+       // Set whether to show symbols
+       << "symbolStyle = PlotSymbol.NoSymbol if connectType == 0 else PlotSymbol.Ellipse" << endl
+       << "symbol = PlotSymbol(symbolStyle, QBrush(), QPen(), QSize(5,5))" << endl
+
+       // Set whether to show line
+       << "pen = QPen(Qt.black)" << endl
+       << "pen.setStyle(Qt.NoPen if connectType == 1 else Qt.SolidLine)" << endl
+
+       // Find graph and get its active layer
+       << "l = graph(graphName).activeLayer()" << endl
+
+       // Update parameters
+       << "l.setCurveSymbol(0, symbol)" << endl
+       << "l.setCurvePen(0, pen)" << endl
+       << "errorSettings = l.errorBarSettings(0, 0)" << endl
+       << "errorSettings.drawMinusSide(showErrors)" << endl
+       << "errorSettings.drawPlusSide(showErrors)" << endl
+
+       // Replot
+       << "l.replot()" << endl;
+
+  runPythonCode(QString::fromStdString(code.str()));
+}
+
 void MuonAnalysis::showPlot(const QString& wsName)
 {
   m_currentDataName = wsName;
@@ -2119,8 +2165,7 @@ void MuonAnalysis::showPlot(const QString& wsName)
 
   // Change the plot style of the graph so that it matches what is selected on
   // the plot options tab.
-  QStringList plotDetails = m_fitDataTab->getAllPlotDetails(m_currentDataName);
-  changePlotType(plotDetails);
+  setPlotStyle(m_currentDataName + "-1", m_optionTab->parsePlotStyleParams());
 
   setConnectedDataText();
 
@@ -2251,8 +2296,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab.
-    QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
-    changePlotType(plotDetails);
+    setPlotStyle(titleLabel + "-1", m_optionTab->parsePlotStyleParams());
 
     m_currentDataName = titleLabel;
     setConnectedDataText();
@@ -2381,9 +2425,8 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     plotSpectrum(cropWS, 0);
 
     // Change the plot style of the graph so that it matches what is selected on
-    // the plot options tab. Default is set to line (0).
-    QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
-    changePlotType(plotDetails);
+    // the plot options tab
+    setPlotStyle(titleLabel + "-1", m_optionTab->parsePlotStyleParams());
     
     m_currentDataName = titleLabel;
     setConnectedDataText();

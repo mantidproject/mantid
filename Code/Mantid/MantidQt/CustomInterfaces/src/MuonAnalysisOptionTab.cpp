@@ -476,6 +476,24 @@ void MuonAnalysisOptionTab::storeCustomTimeValue()
   }
 }
 
+/**
+ * Get plot style parameters from widgets. Those include:
+ *   - ConnectType
+ *   - ShowErrors
+ *
+ * @param workspace :: The workspace name of the plot to be created.
+ */
+QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
+{
+  QMap<QString, QString> params;
+
+  params["ConnectType"] = QString::number(m_uiForm.connectPlotType->currentIndex());
+
+  params["ShowErrors"] = m_uiForm.showErrorBars->isChecked() ? "True" : "False";
+
+  return(params);
+}
+
 }
 }
 }

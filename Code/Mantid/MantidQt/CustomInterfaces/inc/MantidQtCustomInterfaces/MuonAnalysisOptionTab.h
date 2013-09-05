@@ -81,6 +81,9 @@ public:
   /// Set the stored custom time value.
   void setStoredCustomTimeValue(const QString & storedCustomTimeValue);
 
+  /// Get plot style parameters from widgets
+  QMap<QString, QString> parsePlotStyleParams() const;
+
 public slots:
   /// Set the run time in muon analysis and save into settings.
   void runTimeComboBox(int index);

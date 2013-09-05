@@ -274,6 +274,9 @@ private:
   /// plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale = false);
 
+  /// Set various style parameters for all the plots of the given ws
+  void setPlotStyle(const QString& wsName, const QMap<QString, QString>& params);
+
   /// get period labels
   QStringList getPeriodLabels() const;
 
