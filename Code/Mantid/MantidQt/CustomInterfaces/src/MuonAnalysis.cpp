@@ -3554,9 +3554,9 @@ bool MuonAnalysis::isAutoUpdateEnabled()
 }
 
 /**
-* Re-open the toolbars after closing MuonAnalysis
-*/
-void MuonAnalysis::closeEvent(QCloseEvent *e)
+ * Executed when interface gets hidden or closed
+ */
+void MuonAnalysis::hideEvent(QHideEvent *e)
 {
   // Show the toolbars
   if (m_uiForm.hideToolbars->isChecked())
@@ -3569,8 +3569,8 @@ void MuonAnalysis::closeEvent(QCloseEvent *e)
 
 
 /**
-* Hide the toolbar after opening MuonAnalysis if setting requires it
-*/
+ * Executed when interface gets shown
+ */
 void MuonAnalysis::showEvent(QShowEvent *e)
 {
   const std::string facility = ConfigService::Instance().getFacility().name();

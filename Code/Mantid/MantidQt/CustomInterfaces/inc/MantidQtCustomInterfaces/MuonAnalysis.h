@@ -194,10 +194,10 @@ private:
   /// Change the connected data text.
   void setConnectedDataText();
 
-  /// Catch when the interface is closed and do something before.
-  void closeEvent(QCloseEvent *e);
+  /// Executed when interface gets hidden or closed
+  void hideEvent(QHideEvent *e);
   
-  /// Catch when the interface is shown and do something before.
+  /// Executed when interface gets shown
   void showEvent(QShowEvent *e);
 
   /// Input file changed - update GUI accordingly
