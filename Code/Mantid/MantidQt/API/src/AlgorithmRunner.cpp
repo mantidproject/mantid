@@ -26,6 +26,12 @@ namespace API
    */
   AlgorithmRunner::~AlgorithmRunner()
   {
+    if (m_asyncAlg)
+    {
+      m_asyncAlg->removeObserver(m_finishedObserver);
+      m_asyncAlg->removeObserver(m_errorObserver);
+      m_asyncAlg->removeObserver(m_progressObserver);
+    }
     delete m_asyncResult;
   }
   
@@ -37,7 +43,7 @@ namespace API
    */
   void AlgorithmRunner::cancelRunningAlgorithm()
   {
-    // Cancel any currently running rebinning algorithms
+    // Cancel any currently running algorithms
     if (m_asyncAlg)
     {
       if (m_asyncAlg->isRunning())
@@ -48,6 +54,9 @@ namespace API
         delete m_asyncResult;
         m_asyncResult = NULL;
       }
+      m_asyncAlg->removeObserver(m_finishedObserver);
+      m_asyncAlg->removeObserver(m_errorObserver);
+      m_asyncAlg->removeObserver(m_progressObserver);
       m_asyncAlg.reset();
     }
   }
