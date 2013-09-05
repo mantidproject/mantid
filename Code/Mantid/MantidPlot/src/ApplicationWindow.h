@@ -1071,6 +1071,10 @@ public slots:
   { confirmCloseFolder = value; }
   /** The very fist method to be executed as soon as the QApplication event loop starts*/
   void about2Start();
+
+  /// Show/hide MantidPlot toolbars.
+  void setToolbarsVisible(bool visible);
+
 signals:
   void modified();
   void shutting_down();
@@ -1113,8 +1117,6 @@ private:
   void disableActions();
   void customColumnActions();
   void disableToolbars();
-  void showToolbars();
-  void hideToolbars();
   void customToolBars(MdiSubWindow* w);
   void customMultilayerToolButtons(MultiLayer* w);
   void customMenu(MdiSubWindow* w);

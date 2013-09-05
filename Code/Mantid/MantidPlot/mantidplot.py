@@ -343,6 +343,15 @@ def selectMultiPeak(source, showFitPropertyBrowser = True, xmin = None, xmax = N
     else:
         threadsafe_call(_qti.app.selectMultiPeak, source._getHeldObject(), showFitPropertyBrowser)
 
+#------------------------------------------------------------------------------
+def setToolbarsVisible(visible):
+    """Show/hide MantidPlot toolbars
+
+    Args:
+        visible: If True, make toolbars visible, if False - hidden 
+    """
+    threadsafe_call(_qti.app.setToolbarsVisible, visible)
+
 #-----------------------------------------------------------------------------
 #-------------------------- Project/Folder functions -----------------------
 #-----------------------------------------------------------------------------

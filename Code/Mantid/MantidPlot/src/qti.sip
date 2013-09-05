@@ -1160,6 +1160,9 @@ public:
   void addUserMenuAction(const QString &, const QString &, const QString &);
 
   void setConfirmFolderClose(bool value);
+
+  void setToolbarsVisible(bool visible);
+
   //--------------
 private:
   ApplicationWindow(const ApplicationWindow&);

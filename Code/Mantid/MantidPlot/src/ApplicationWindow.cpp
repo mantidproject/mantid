@@ -1686,20 +1686,16 @@ void ApplicationWindow::disableToolbars()
   plotTools->setEnabled(false);
 }
 
-void ApplicationWindow::hideToolbars()
+/**
+ * Show/hide MantidPlot toolbars.
+ * @param visible If true, make toolbar visible, if false - hidden
+ */
+void ApplicationWindow::setToolbarsVisible(bool visible)
 {
-  standardTools->setVisible(false);
-  displayBar->setVisible(false);
-  plotTools->setVisible(false);
-  formatToolBar->setVisible(false);
-}
-
-void ApplicationWindow::showToolbars()
-{
-  standardTools->setVisible(true);
-  displayBar->setVisible(true);
-  plotTools->setVisible(true);
-  formatToolBar->setVisible(true);
+  standardTools->setVisible(visible);
+  displayBar->setVisible(visible);
+  plotTools->setVisible(visible);
+  formatToolBar->setVisible(visible);
 }
 
 void ApplicationWindow::plot3DRibbon()
@@ -17000,8 +16996,6 @@ else
   MantidQt::API::UserSubWindow *user_interface = interfaceManager.createSubWindow(action_data, usr_win);
   if(user_interface)
   {
-    connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
-    connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
     setGeometry(usr_win,user_interface);
     connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
         SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
