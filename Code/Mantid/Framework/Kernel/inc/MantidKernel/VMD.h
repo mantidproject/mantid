@@ -240,7 +240,6 @@ namespace Kernel
     /** Constructor from string
      * @param str :: string of comma or space-separated numbers for each component */
     VMDBase(const std::string & str)
-    : nd(nd)
     {
       using boost::algorithm::split;
       using boost::algorithm::is_any_of;

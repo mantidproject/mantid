@@ -1157,12 +1157,12 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   //Read necessary arrays from the file
   // Detector list contains a list of all of the detector numbers. If it not present then we can't update the spectra
   // map
-  boost::shared_array<int> det_list(new int);
+  boost::shared_array<int> det_list;
   try
   {
     NXInt detlist_group = detgroup.openNXInt("detector_list");
     detlist_group.load();
-    det_list.swap(detlist_group.sharedBuffer());
+    det_list = detlist_group.sharedBuffer();
   }
   catch(std::runtime_error &)
   {
@@ -1182,12 +1182,12 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   //Spectra block - Contains spectrum numbers for each workspace index
   // This might not exist so wrap and check. If it doesn't exist create a default mapping
   bool have_spectra(true);
-  boost::shared_array<int> spectra(new int);
+  boost::shared_array<int> spectra;
   try
   {
     NXInt spectra_block = detgroup.openNXInt("spectra");
     spectra_block.load();
-    spectra.swap(spectra_block.sharedBuffer());
+    spectra = spectra_block.sharedBuffer();
   }
   catch(std::runtime_error &)
   {
