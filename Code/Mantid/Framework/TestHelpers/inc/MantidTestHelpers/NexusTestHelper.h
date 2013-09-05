@@ -1,17 +1,15 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This file MAY NOT be modified to use anything from a package other than Kernel.
+ *********************************************************************************/
 #ifndef MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
 #define MANTID_NEXUSCPP_NEXUSTESTHELPER_H_
     
-#include "MantidKernel/System.h"
 #include <nexus/NeXusFile.hpp>
 
+/** A Helper class for easily writing nexus saving/loading tests.
 
-namespace Mantid
-{
-namespace Kernel
-{
-
-  /** A Helper class for easily writing nexus saving/loading tests.
-    
     @author Janik Zikovsky
     @date 2011-09-07
 
@@ -35,27 +33,23 @@ namespace Kernel
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport NexusTestHelper 
-  {
-  public:
-    NexusTestHelper(bool deleteFile = true);
-    virtual ~NexusTestHelper();
+class NexusTestHelper
+{
+public:
+  NexusTestHelper(bool deleteFile = true);
+  virtual ~NexusTestHelper();
 
-    void createFile(std::string barefilename);
-    void reopenFile();
+  void createFile(std::string barefilename);
+  void reopenFile();
 
-    /// Nexus file handle
-    ::NeXus::File * file;
+  /// Nexus file handle
+  ::NeXus::File * file;
 
-    /// Created filename (full path)
-    std::string filename;
+  /// Created filename (full path)
+  std::string filename;
 
-    /// Do you delete when finished?
-    bool deleteFile;
-  };
-
-
-} // namespace Kernel
-} // namespace Mantid
+  /// Do you delete when finished?
+  bool deleteFile;
+};
 
 #endif  /* MANTID_NEXUSCPP_NEXUSTESTHELPER_H_ */
