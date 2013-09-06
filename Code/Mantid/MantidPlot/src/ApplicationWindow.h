@@ -1195,9 +1195,6 @@ private:
   /// Run the peakPickerTool for the new plot and delete it for the old plot if there was one.
   void runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot);
 
-  /// Show the graphs
-  void showGraphs();
-
   // TODO: a lot of this stuff should be private
 public:
   //! End of line convention used for copy/paste operations and when exporting tables/matrices to ASCII files.

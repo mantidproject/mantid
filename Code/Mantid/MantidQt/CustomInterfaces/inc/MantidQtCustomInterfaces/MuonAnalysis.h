@@ -163,11 +163,17 @@ private slots:
    */
   bool isAutoUpdateEnabled();
 
-  /**
-   * Show a plot for a given workspace. Hides previous plot if exists.
-   * @param wsName The name of workspace to be plotted. Should exist in ADS.
-   */
+  // Show a plot for a given workspace. Closes previous plot if exists.
   void showPlot(const QString& wsName);
+
+  /// Closes the window with the plot of the given ws
+  void closePlotWindow(const QString& wsName);
+
+  /// Hides all the plot windows (MultiLayer ones)
+  void hideAllPlotWindows();
+
+  /// Shows all the plot windows (MultiLayer ones)
+  void showAllPlotWindows();
 
   /// Called when the plot function has been changed on the home page.
   void changeHomeFunction();
@@ -270,12 +276,6 @@ private:
 
   /// Plot pair
   void plotPair(const std::string& plotType);
-
-  /// Closes the window with the plot of the given ws
-  void closePlotWindow(const QString& wsName);
-
-  /// Hides all the plot windows (MultiLayer ones)
-  void hideAllPlotWindows();
 
   // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
   //       (as we are doing with pairs)

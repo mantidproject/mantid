@@ -155,7 +155,7 @@ void MuonAnalysis::initLayout()
   setConnectedDataText();
 
   // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
-  connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SIGNAL (showGraphs()));
+  connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SLOT(showAllPlotWindows()));
 
   // connect guess alpha
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked()));
@@ -2198,10 +2198,30 @@ void MuonAnalysis::hideAllPlotWindows()
   runPythonCode(code);
 }
 
+/**
+ * Shows all the plot windows (MultiLayer ones)
+ */
+void MuonAnalysis::showAllPlotWindows()
+{
+  QString code;
+
+  code += "for w in windows():\n"
+          "  if w.inherits('MultiLayer'):\n"
+          "    w.show()\n";
+
+  runPythonCode(code);
+}
+
+/**
+ * Show a plot for a given workspace. Closes previous plot if exists.
+ * @param wsName The name of workspace to be plotted. Should exist in ADS.
+ */
 void MuonAnalysis::showPlot(const QString& wsName)
 {
   // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
   //       only one groups)
+
+  // TODO: if we are using Python, can first check if window exists, and just show it in that case
 
   m_currentDataName = wsName;
 

@@ -17001,8 +17001,6 @@ else
         SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
     if(user_interface->objectName() == "Muon Analysis")
     {
-      // Shows the graph
-      connect(user_interface, SIGNAL(showGraphs()), this, SLOT(showGraphs()));
       //If the fitting is requested then run the peak picker tool in runConnectFitting
       connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
           SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
@@ -17079,19 +17077,6 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
       }
     }
   } 
-}
-
-/**
-* Show all the graphs that are hidden
-*/
-void ApplicationWindow::showGraphs()
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-      activateWindow(w);
-  }
 }
 
 void ApplicationWindow::loadCustomActions()
