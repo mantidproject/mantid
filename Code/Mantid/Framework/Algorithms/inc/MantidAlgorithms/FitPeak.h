@@ -102,6 +102,12 @@ namespace Algorithms
     /// Backup data
     void backupOriginalData(std::vector<double>& vecy, std::vector<double> &vece);
 
+    /// Create functions
+    void createFunctions();
+
+    /// Get an index of a value in a sorted vector.  The index should be the item with value nearest to X
+    size_t getVectorIndex(const MantidVec& vecx, double x);
+
     /// Input data workspace
     API::MatrixWorkspace_sptr m_dataWS;
     size_t m_wsIndex;
@@ -144,7 +150,7 @@ namespace Algorithms
     /// Maximum guessed peak width (pixels)
     double m_maxGuessedPeakWidth;
     /// Step width of tried FWHM
-    double m_fwhmFitStep;
+    int m_fwhmFitStep;
     /// Flag about guessed FWHM (pixels)
     bool m_fitWithStepPeakWidth;
 
@@ -153,7 +159,11 @@ namespace Algorithms
     /// Tolerance on peak positions as criteria
     double m_peakPositionTolerance;
 
+    /// Function information
+    std::string m_peakFuncType;
+    std::string m_backgroundType;
 
+    DataObjects::TableWorkspace_sptr m_parameterTableWS;
 
     /// Minimizer
     std::string m_minimizer;
@@ -166,6 +176,10 @@ namespace Algorithms
     std::map<std::string, double> m_bestPeakFunc;
     /// Best Rwp ...
     double m_bestRwp;
+
+    /// Backups
+    std::vector<double> m_vecybkup;
+    std::vector<double> m_vecebkup;
 
 
   };

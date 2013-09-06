@@ -25,10 +25,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FitPeak.h"
-// #include "FitPeak.h"
 #include "MantidAPI/FunctionProperty.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -91,11 +93,26 @@ namespace Algorithms
     mustBeNonNegative->setLower(0);
     declareProperty("WorkspaceIndex", 0, mustBeNonNegative, "Workspace index ");
 
+#if 0
     declareProperty(new FunctionProperty("PeakFunction"),
                     "Peak function parameters defining the fitting function and its initial values");
 
     declareProperty(new FunctionProperty("BackgroundFunction"),
                     "Background function parameters defining the fitting function and its initial values");
+#else
+    std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
+    declareProperty("PeakFunction", "Gaussian", boost::make_shared<StringListValidator>(peakNames));
+
+    vector<string> bkgdtypes;
+    bkgdtypes.push_back("Flat");
+    bkgdtypes.push_back("Linear");
+    bkgdtypes.push_back("Quadratic");
+    declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
+                    "Type of Background.");
+
+    declareProperty(new WorkspaceProperty<TableWorkspace>("ParameterTable", "", Direction::InOut),
+                    "Name of the table workspace containing the parameter names and values. ");
+#endif
 
     declareProperty(new ArrayProperty<double>("FitWindow"),
                     "Enter a comma-separated list of the expected X-position of windows to fit. "
@@ -146,13 +163,49 @@ namespace Algorithms
       fitPeakOneStep();
     }
 
-
+    // Output
 
     return;
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Process input propeties
+  /** Create functions from input properties
+    */
+  void FitPeak::createFunctions()
+  {
+    // Generate peak function
+    m_peakFuncType = getPropertyValue("PeakFunction");
+    m_peakFunc = boost::dynamic_pointer_cast<IPeakFunction>(
+          FunctionFactory::Instance().createFunction(m_peakFuncType));
+
+    // Generate background function
+    m_backgroundType = getPropertyValue("BackgroundFunction");
+    m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
+          FunctionFactory::Instance().createFunction(m_peakFuncType));
+
+    // Parse Tableworkspace (parameters values for input)
+    m_parameterTableWS = getProperty("ParameterTable");
+
+    // vector<string> peakparnames = m_peakFunc->getParameterNames();
+    // vector<string> bkgdparnames = m_bkgdFunc->getParameterNames();
+
+    size_t numrows = m_parameterTableWS->rowCount();
+    for (size_t i = 0; i < numrows; ++i)
+    {
+      TableRow row = m_parameterTableWS->getRow(i);
+      string parname;
+      double parvalue;
+      row >> parname >> parvalue;
+      // FIXME - Not sure if set a non-existing parameter can crash the code or be very expensive!
+      m_peakFunc->setParameter(parname, parvalue);
+      m_bkgdFunc->setParameter(parname, parvalue);
+    }
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Process input properties
     */
   void FitPeak::processProperties()
   {
@@ -445,7 +498,7 @@ namespace Algorithms
     backupOriginalData(bkupY, bkupE);
 
     // Fit background
-    // FIXME - Make the UI right!
+    // FIXME - fit bakcground related to multiple domain.  Read Roman's email ...
 #if 1
     m_bkgdFunc = fitBackground(m_bkgdFunc);
 #else
@@ -563,11 +616,19 @@ namespace Algorithms
     return;
   }
 
-  /// Pop
+  //----------------------------------------------------------------------------------------------
+  /** Restore the parameters value to a function from a string/double map
+    */
   void FitPeak::pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func)
   {
-    // FIXME - Implement ASAP
-    throw runtime_error("ASAP");
+    // TODO - One possible optimization is to record function parameters in index/value
+    std::map<std::string, double>::const_iterator miter;
+    for (miter = funcparammap.begin(); miter != funcparammap.end(); ++miter)
+    {
+      string parname = miter->first;
+      double parvalue = miter->second;
+      func->setParameter(parname, parvalue);
+    }
 
     return;
   }
@@ -686,19 +747,39 @@ namespace Algorithms
 
   }
 
-  size_t FitPeak::getVectorIndex(double x)
+  //----------------------------------------------------------------------------------------------
+  /** Get an index of a value in a sorted vector.  The index should be the item with value nearest to X
+    */
+  size_t FitPeak::getVectorIndex(const MantidVec& vecx, double x)
   {
-    // FIXME - Implement ASAP.
-    throw runtime_error("ASAP");
+    size_t index;
+    if (x <= vecx.front())
+    {
+      index = 0;
+    }
+    else if (x >= vecx.back())
+    {
+      index = vecx.size()-1;
+    }
+    else
+    {
+      vector<double>::const_iterator fiter;
+      fiter = lower_bound(vecx.begin(), vecx.end(), x);
+      index = static_cast<size_t>(fiter-vecx.begin());
+      if (index == 0)
+        throw runtime_error("It seems impossible to have this value. ");
+      if (x-vecx[index-1] < vecx[index]-x)
+        --index;
+    }
 
-    return 0;
+    return index;
   }
 
   /// Backup data
   void FitPeak::backupOriginalData(std::vector<double>& vecy, std::vector<double>& vece)
   {
-    // FIXME - Implement ASAP.
-    throw runtime_error("ASAP");
+    m_vecybkup.assign(vecy.begin(), vecy.end());
+    m_vecebkup.assign(vece.begin(), vece.end());
 
     return;
   }
