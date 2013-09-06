@@ -124,8 +124,8 @@ private:
   /// Fit peak
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max, const int i_centre);
 
-  void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum, int i_centre, int i_min, int i_max,
-                             double &in_bg0, double &in_bg1, double &in_bg2, int i_peakmin, int i_peakmax);
+  void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum, const int &i_centre, const int &i_min, const int &i_max,
+                             double &in_bg0, double &in_bg1, double &in_bg2, const int& i_peakmin, const int& i_peakmax);
 
   void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
       const double& in_bg0, const double& in_bg1, const double& in_bg2);
@@ -168,6 +168,9 @@ private:
 
   /// Set boundary/contraint on peak's centre
   std::string makePeakCentreConstraint(API::IFunction_sptr peak, double peakleftboundary, double peakrightboundary, bool composite);
+
+  void estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
+                                double& out_bg0, double& out_bg1, double& out_bg2);
 
   std::string estimatePeakParameters(const MantidVec& vecX, const MantidVec& vecY,
                               size_t i_min, size_t i_max, double& centre, double& height, double& fwhm);

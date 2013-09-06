@@ -635,10 +635,10 @@ namespace CurveFitting
       m_function->iterationFinished();
       if(g_log.is(Kernel::Logger::Priority::PRIO_INFORMATION))
       {
-        g_log.debug() << "Iteration " << iter << ", cost function = " << minimizer->costFunctionVal() << "\n";
+        g_log.information() << "Iteration " << iter << ", cost function = " << minimizer->costFunctionVal() << "\n";
       }
     }
-    g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
+    g_log.information() << "Number of minimizer iterations=" << iter << "\n";
 
     if (static_cast<int>(iter) >= maxIterations)
     {
