@@ -2128,7 +2128,7 @@ void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QStri
   using std::endl;
 
        // Get parameters
-  code << "graphName = '" << wsName.toStdString() << "'" << endl
+  code << "graphName = '" << wsName.toStdString() << "-1" << "'" << endl
        << "connectType = " << params["ConnectType"].toStdString() << endl
        << "showErrors = " << params["ShowErrors"].toStdString() << endl
 
@@ -2165,7 +2165,7 @@ void MuonAnalysis::showPlot(const QString& wsName)
 
   // Change the plot style of the graph so that it matches what is selected on
   // the plot options tab.
-  setPlotStyle(m_currentDataName + "-1", m_optionTab->parsePlotStyleParams());
+  setPlotStyle(m_currentDataName, m_optionTab->parsePlotStyleParams());
 
   setConnectedDataText();
 
@@ -2296,7 +2296,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab.
-    setPlotStyle(titleLabel + "-1", m_optionTab->parsePlotStyleParams());
+    setPlotStyle(titleLabel, m_optionTab->parsePlotStyleParams());
 
     m_currentDataName = titleLabel;
     setConnectedDataText();
@@ -2426,7 +2426,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab
-    setPlotStyle(titleLabel + "-1", m_optionTab->parsePlotStyleParams());
+    setPlotStyle(titleLabel, m_optionTab->parsePlotStyleParams());
     
     m_currentDataName = titleLabel;
     setConnectedDataText();
