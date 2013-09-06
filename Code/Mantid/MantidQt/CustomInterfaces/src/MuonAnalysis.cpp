@@ -2082,33 +2082,6 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
            "l = gs.activeLayer()\n"
            "l.setCurveTitle(0, \"" + wsName + "\")\n"
            "l.setTitle(\"" + m_title.c_str() + "\")\n";
-      
-    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(wsName.toStdString());
-    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-    if ( !m_uiForm.yAxisAutoscale->isChecked() )
-    {
-      const Mantid::MantidVec& dataY = matrix_workspace->readY(wsIndex);
-      double min = 0.0; double max = 0.0;
-
-      if (m_uiForm.yAxisMinimumInput->text().isEmpty())
-      {
-        min = *min_element(dataY.begin(), dataY.end());
-      }
-      else
-      {
-        min = boost::lexical_cast<double>(m_uiForm.yAxisMinimumInput->text().toStdString());
-      }
-
-      if (m_uiForm.yAxisMaximumInput->text().isEmpty())
-      {
-        max = *max_element(dataY.begin(), dataY.end());
-      }
-      else
-      {
-        max = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
-      }     
-      pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
-    }
 
     if ( ylogscale )
       pyS += "l.logYlinX()\n";
@@ -2148,16 +2121,58 @@ void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QStri
        << "l.setCurvePen(0, pen)" << endl
        << "errorSettings = l.errorBarSettings(0, 0)" << endl
        << "errorSettings.drawMinusSide(showErrors)" << endl
-       << "errorSettings.drawPlusSide(showErrors)" << endl
+       << "errorSettings.drawPlusSide(showErrors)" << endl;
+
+  // If autoscaling disabled - set manual values
+  if(params["YAxisAuto"] == "False")
+  {
+    code << "l.setAxisScale(Layer.Left," << params["YAxisMin"].toStdString() << "," << params["YAxisMax"].toStdString() << ")" << endl;
+  }
 
        // Replot
-       << "l.replot()" << endl;
+  code << "l.replot()" << endl;
 
   runPythonCode(QString::fromStdString(code.str()));
 }
 
+/**
+ * TODO: comment
+ */
+QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, const int wsIndex)
+{
+  // Get parameter values from the options tab
+  QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
+
+  // If autoscale disabled
+  if(params["YAxisAuto"] == "False")
+  {
+    // Get specified min/max values for Y axis
+    QString min = params["YAxisMin"];
+    QString max = params["YAxisMax"];
+
+    // If any of those is not specified - get min and max by default
+    if(min.isEmpty() || max.isEmpty())
+    {
+      Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+      MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      const Mantid::MantidVec& dataY = matrix_workspace->readY(wsIndex);
+
+      if(min.isEmpty())
+        params["YAxisMin"] = QString::number(*min_element(dataY.begin(), dataY.end()));
+
+      if(max.isEmpty())
+        params["YAxisMax"] = QString::number(*max_element(dataY.begin(), dataY.end()));
+    }
+  }
+
+  return params;
+}
+
 void MuonAnalysis::showPlot(const QString& wsName)
 {
+  // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
+  //       only one groups)
+
   m_currentDataName = wsName;
 
   emit closeGraph(m_currentDataName + "-1");
@@ -2165,7 +2180,7 @@ void MuonAnalysis::showPlot(const QString& wsName)
 
   // Change the plot style of the graph so that it matches what is selected on
   // the plot options tab.
-  setPlotStyle(m_currentDataName, m_optionTab->parsePlotStyleParams());
+  setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
 
   setConnectedDataText();
 
@@ -2296,7 +2311,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab.
-    setPlotStyle(titleLabel, m_optionTab->parsePlotStyleParams());
+    setPlotStyle(titleLabel, getPlotStyleParams(titleLabel, groupNum));
 
     m_currentDataName = titleLabel;
     setConnectedDataText();
@@ -2426,7 +2441,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab
-    setPlotStyle(titleLabel, m_optionTab->parsePlotStyleParams());
+    setPlotStyle(titleLabel, getPlotStyleParams(titleLabel, 0));
     
     m_currentDataName = titleLabel;
     setConnectedDataText();

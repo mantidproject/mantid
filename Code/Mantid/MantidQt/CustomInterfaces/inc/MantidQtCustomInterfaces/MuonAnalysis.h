@@ -271,11 +271,18 @@ private:
   /// Plot pair
   void plotPair(const std::string& plotType);
 
-  /// plots specific WS spectrum (used by plotPair and plotGroup)
+  // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
+  //       (as we are doing with pairs)
+
+  /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale = false);
 
   /// Set various style parameters for all the plots of the given ws
   void setPlotStyle(const QString& wsName, const QMap<QString, QString>& params);
+
+  /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
+  /// something is not specified
+  QMap<QString, QString> getPlotStyleParams(const QString& wsName, const int wsIndex);
 
   /// get period labels
   QStringList getPeriodLabels() const;

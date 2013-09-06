@@ -477,9 +477,7 @@ void MuonAnalysisOptionTab::storeCustomTimeValue()
 }
 
 /**
- * Get plot style parameters from widgets. Those include:
- *   - ConnectType
- *   - ShowErrors
+ * Get plot style parameters from widgets.
  *
  * @param workspace :: The workspace name of the plot to be created.
  */
@@ -490,6 +488,10 @@ QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
   params["ConnectType"] = QString::number(m_uiForm.connectPlotType->currentIndex());
 
   params["ShowErrors"] = m_uiForm.showErrorBars->isChecked() ? "True" : "False";
+
+  params["YAxisAuto"] = m_uiForm.yAxisAutoscale->isChecked() ? "True" : "False";
+  params["YAxisMin"] = m_uiForm.yAxisMinimumInput->text();
+  params["YAxisMax"] = m_uiForm.yAxisMaximumInput->text();
 
   return(params);
 }
