@@ -122,7 +122,6 @@ void StepScan::startLiveListener()
   // Remove any previously-loaded workspaces
   cleanupWorkspaces();
 
-  m_algRunner->cancelRunningAlgorithm();
   connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(startLiveListenerComplete(bool)));
 
   IAlgorithm_sptr startLiveData = AlgorithmManager::Instance().create("StartLiveData");
@@ -163,7 +162,7 @@ void StepScan::startLiveListenerComplete(bool error)
   }
 }
 
-void StepScan::loadFile()
+void StepScan::loadFile(bool async)
 {
   const QString filename = m_uiForm.mWRunFiles->getFirstFilename();
   // This handles the fact that mwRunFiles emits the filesFound signal more than
@@ -175,15 +174,22 @@ void StepScan::loadFile()
     // Remove any previously-loaded workspaces
     cleanupWorkspaces();
 
-    m_algRunner->cancelRunningAlgorithm();
-    connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(loadFileComplete(bool)));
-
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadEventNexus");
     alg->setPropertyValue("Filename", filename.toStdString());
     m_inputWSName = "__" + QFileInfo(filename).baseName().toStdString();
     alg->setPropertyValue("OutputWorkspace", m_inputWSName);
     alg->setProperty("LoadMonitors", true);
-    m_algRunner->startAlgorithm(alg);
+
+    if ( async )
+    {
+      connect(m_algRunner, SIGNAL(algorithmComplete(bool)), SLOT(loadFileComplete(bool)));
+      m_algRunner->startAlgorithm(alg);
+    }
+    else
+    {
+      alg->execute();
+      loadFileComplete(!alg->isExecuted());
+    }
   }
 }
 
@@ -346,19 +352,27 @@ void StepScan::runStepScanAlg()
   if ( !stepScan ) return;
 
   QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+  // Block mouse clicks while the algorithms runs. Have to be sure to unset this below.
+  setAttribute( Qt::WA_TransparentForMouseEvents );
 
+  bool algSuccessful;
   if ( m_uiForm.mWRunFiles->liveButtonIsChecked() )  // Live data
   {
-    runStepScanAlgLive(stepScan->toString());
+    algSuccessful = runStepScanAlgLive(stepScan->toString());
   }
   else  // Offline data
   {
-    if ( m_dataReloadNeeded ) loadFile(); // Reload if workspace isn't fresh
+    if ( m_dataReloadNeeded ) loadFile(false); // Reload if workspace isn't fresh
     stepScan->setPropertyValue("InputWorkspace", m_inputWSName);
-    stepScan->execute();
+    algSuccessful = stepScan->execute();
   }
 
-  QApplication::restoreOverrideCursor();
+  if ( !algSuccessful )
+  {
+    QApplication::restoreOverrideCursor();
+    setAttribute( Qt::WA_TransparentForMouseEvents, false );
+    return;
+  }
 
   // Now that the algorithm's been run, connect up the signal to change the plot variable
   connect( m_uiForm.plotVariable, SIGNAL(currentIndexChanged(const QString &)),
@@ -368,9 +382,11 @@ void StepScan::runStepScanAlg()
            SLOT(updateForNormalizationChange()) );
   // Create the plot for the first time
   generateCurve( m_uiForm.plotVariable->currentText() );
+  QApplication::restoreOverrideCursor();
+  setAttribute( Qt::WA_TransparentForMouseEvents, false );
 }
 
-void StepScan::runStepScanAlgLive(std::string stepScanProperties)
+bool StepScan::runStepScanAlgLive(std::string stepScanProperties)
 {
   // First stop the currently running live algorithm
   IAlgorithm_const_sptr oldMonitorLiveData = m_uiForm.mWRunFiles->stopLiveAlgorithm();
@@ -393,13 +409,20 @@ void StepScan::runStepScanAlgLive(std::string stepScanProperties)
   // The previous listener needs to finish before this one can start
   while ( oldMonitorLiveData->isRunning() )
   {
-    Poco::Thread::sleep(200);
+    Poco::Thread::sleep(100);
   }
-  startLiveData->execute();
+  auto result = startLiveData->executeAsync();
+  while ( !result.available() )
+  {
+    Poco::Thread::sleep(100);
+  }
+  if ( ! startLiveData->isExecuted() ) return false;
+
   // Keep track of the algorithm that's pulling in the live data
   m_uiForm.mWRunFiles->setLiveAlgorithm(startLiveData->getProperty("MonitorLiveData"));
 
   connect( this, SIGNAL(updatePlot(const QString&)), SLOT(generateCurve(const QString&)) );
+  return true;
 }
 
 void StepScan::updateForNormalizationChange()

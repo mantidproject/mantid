@@ -34,14 +34,14 @@ signals:
 private slots:
   void triggerLiveListener(bool checked);
   void startLiveListenerComplete(bool error);
-  void loadFile();
+  void loadFile(bool async = true);
   void loadFileComplete(bool error);
   void launchInstrumentWindow();
   void fillPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr& ws);
   void expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr& ws);
   void fillNormalizationCombobox();
   void runStepScanAlg();
-  void runStepScanAlgLive(std::string stepScanProperties);
+  bool runStepScanAlgLive(std::string stepScanProperties);
 
   void updateForNormalizationChange();
   void generateCurve(const QString& var);
