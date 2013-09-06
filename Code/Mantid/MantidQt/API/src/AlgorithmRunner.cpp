@@ -47,7 +47,9 @@ namespace API
     if (m_asyncAlg)
     {
       if (m_asyncAlg->isRunning())
+      {
         m_asyncAlg->cancel();
+      }
       if (m_asyncResult)
       {
         m_asyncResult->tryWait(1000);
@@ -72,6 +74,8 @@ namespace API
       throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given a NULL Algorithm");
     if (!alg->isInitialized())
       throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given an uninitialized Algorithm");
+
+    cancelRunningAlgorithm();
 
     // Start asynchronous execution
     m_asyncAlg = alg;

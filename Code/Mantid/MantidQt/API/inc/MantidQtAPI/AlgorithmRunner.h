@@ -24,7 +24,7 @@ namespace API
    * TO USE:
    *  - Create the AlgorithmRunner object.
    *  - Connect the desired signal(s) to slots on your GUI.
-   *  - Call cancelRunningAlgorithm() then startAlgorithm() to start.
+   *  - Call startAlgorithm() to start.
     
     @date 2012-04-23
 
