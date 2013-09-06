@@ -714,7 +714,7 @@ bool IntervalList::isParsable(const QString &input)
 {
   try
   {
-    IntervalList(input);
+    IntervalList interval(input);
     return true;
   } 
   catch (std::exception&)
