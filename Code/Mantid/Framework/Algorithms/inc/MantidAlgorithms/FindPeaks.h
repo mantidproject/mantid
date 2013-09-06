@@ -124,8 +124,8 @@ private:
   /// Fit peak
   void fitPeak(const API::MatrixWorkspace_sptr &input, const int spectrum, const int i_min, const int i_max, const int i_centre);
 
-  void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum, const int &i_centre, const int &i_min, const int &i_max,
-                             double &in_bg0, double &in_bg1, double &in_bg2, const int& i_peakmin, const int& i_peakmax);
+  void fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum, int i_centre, int i_min, int i_max,
+                             double &in_bg0, double &in_bg1, double &in_bg2, int i_peakmin, int i_peakmax);
 
   void fitPeakOneStep(const API::MatrixWorkspace_sptr &input, const int spectrum, const int& i0, const int& i2, const int& i4,
       const double& in_bg0, const double& in_bg1, const double& in_bg2);

@@ -1181,9 +1181,9 @@ namespace Algorithms
     * @param in_bg2: guessed value of a2 (output)
     */
   void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum,
-                                        const int& i_centre, const int& i_min, const int& i_max,
+                                        int i_centre, int i_min, int i_max,
                                         double& in_bg0, double& in_bg1, double& in_bg2,
-                                        const int& i_peakmin, const int& i_peakmax)
+                                        int i_peakmin, int i_peakmax)
   {
     // Check that the indices provided are sensible
     if (i_min >= i_centre || i_max <= i_centre || i_min < 0)
