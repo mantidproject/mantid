@@ -522,7 +522,7 @@ namespace CurveFitting
     // Calculate Lorenzian part
     double omega2(0.);
 
-    cout << "Eta = " << eta << "; X = " << x << " N = " << N << ".\n";
+    g_log.debug() << "Eta = " << eta << "; X = " << x << " N = " << N << ".\n";
 
     if (eta >= 1.0E-8)
     {
@@ -533,17 +533,17 @@ namespace CurveFitting
       double omega2b = imag(exp(q)*Mantid::API::E1(q)); 
       omega2 = -1.0*N*eta*(omega2a + omega2b)*TWO_OVER_PI;
 
-      cout << "Exp(p) = " << exp(p) << ", Exp(q) = " << exp(q) << ".\n";
+      g_log.debug() << "Exp(p) = " << exp(p) << ", Exp(q) = " << exp(q) << ".\n";
 
       if (omega2 != omega2)
       {
-        cout << "Omega2 is not physical.  Omega2a = " << omega2a
-                        << ", Omega2b = " << omega2b << ", p = " << p.real() << ", " << p.imag() << ".\n";
+        g_log.debug() << "Omega2 is not physical.  Omega2a = " << omega2a
+                      << ", Omega2b = " << omega2b << ", p = " << p.real() << ", " << p.imag() << ".\n";
       }
       else
       {
-        cout << "X = " << x << " is OK. Omega 2 = " << omega2 << ", Omega2A = " << omega2a
-             << ", Omega2B = " << omega2b << "\n";
+        g_log.debug() << "X = " << x << " is OK. Omega 2 = " << omega2 << ", Omega2A = " << omega2a
+                      << ", Omega2B = " << omega2b << "\n";
       }
 
     }
@@ -563,7 +563,8 @@ namespace CurveFitting
       }
     }
 
-    g_log.information() << "[DB] Final Value = " << omega << endl;
+    g_log.debug() << "[DB] Final Value of Omega = " << omega << ".\n";
+
     return omega;
   }
 
