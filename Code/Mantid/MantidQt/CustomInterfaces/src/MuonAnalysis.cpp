@@ -109,14 +109,15 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
  */
 void MuonAnalysis::initLocalPython()
 {
-  std::stringstream code;
+  QString code;
 
-  code << "from mantid.simpleapi import *" << std::endl
-       // Needed for Python GUI API
-       << "from PyQt4.QtGui import QPen, QBrush, QColor" << std::endl
-       << "from PyQt4.QtCore import QSize" << std::endl;
+  code += "from mantid.simpleapi import *\n";
 
-  runPythonCode(QString::fromStdString(code.str()));
+  // Needed for Python GUI API
+  code += "from PyQt4.QtGui import QPen, QBrush, QColor\n"
+          "from PyQt4.QtCore import QSize\n";
+
+  runPythonCode(code);
 
   // TODO: Following shouldn't be here. It is now because ApplicationWindow sets up the Python 
   // environment only after the UserSubWindow is shown.
@@ -2095,44 +2096,34 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
  */
 void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QString>& params)
 {
-  std::stringstream code;
+  QString code;
 
-  // Just to save some typing
-  using std::endl;
+  // Get parameters
+  code += "graphName = '" + wsName + "-1" + "'\n"
+          "connectType = " + params["ConnectType"] + "\n"
+          "showErrors = " + params["ShowErrors"] + "\n";
+  // Set whether to show symbols
+  code += "symbolStyle = PlotSymbol.NoSymbol if connectType == 0 else PlotSymbol.Ellipse\n"
+          "symbol = PlotSymbol(symbolStyle, QBrush(), QPen(), QSize(5,5))\n";
+  // Set whether to show line
+  code += "pen = QPen(Qt.black)\n"
+          "pen.setStyle(Qt.NoPen if connectType == 1 else Qt.SolidLine)\n";
+  // Update parameters of the active layer of the graph
+  code += "l = graph(graphName).activeLayer()\n"
+          "l.setCurveSymbol(0, symbol)\n"
+          "l.setCurvePen(0, pen)\n"
+          "errorSettings = l.errorBarSettings(0, 0)\n"
+          "errorSettings.drawMinusSide(showErrors)\n"
+          "errorSettings.drawPlusSide(showErrors)\n";
 
-       // Get parameters
-  code << "graphName = '" << wsName.toStdString() << "-1" << "'" << endl
-       << "connectType = " << params["ConnectType"].toStdString() << endl
-       << "showErrors = " << params["ShowErrors"].toStdString() << endl
-
-       // Set whether to show symbols
-       << "symbolStyle = PlotSymbol.NoSymbol if connectType == 0 else PlotSymbol.Ellipse" << endl
-       << "symbol = PlotSymbol(symbolStyle, QBrush(), QPen(), QSize(5,5))" << endl
-
-       // Set whether to show line
-       << "pen = QPen(Qt.black)" << endl
-       << "pen.setStyle(Qt.NoPen if connectType == 1 else Qt.SolidLine)" << endl
-
-       // Find graph and get its active layer
-       << "l = graph(graphName).activeLayer()" << endl
-
-       // Update parameters
-       << "l.setCurveSymbol(0, symbol)" << endl
-       << "l.setCurvePen(0, pen)" << endl
-       << "errorSettings = l.errorBarSettings(0, 0)" << endl
-       << "errorSettings.drawMinusSide(showErrors)" << endl
-       << "errorSettings.drawPlusSide(showErrors)" << endl;
-
-  // If autoscaling disabled - set manual values
+  // If autoscaling disabled - set manual Y axis values
   if(params["YAxisAuto"] == "False")
-  {
-    code << "l.setAxisScale(Layer.Left," << params["YAxisMin"].toStdString() << "," << params["YAxisMax"].toStdString() << ")" << endl;
-  }
+    code += "l.setAxisScale(Layer.Left," + params["YAxisMin"] + "," + params["YAxisMax"] + ")\n";
 
-       // Replot
-  code << "l.replot()" << endl;
+  // Replot
+  code += "l.replot()\n";
 
-  runPythonCode(QString::fromStdString(code.str()));
+  runPythonCode(code);
 }
 
 /**
