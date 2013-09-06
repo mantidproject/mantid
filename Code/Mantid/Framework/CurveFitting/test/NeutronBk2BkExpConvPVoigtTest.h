@@ -19,7 +19,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Set and get parameter
     */
-  void test_accessParameter()
+  void Ptest_accessParameter()
   {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
@@ -40,7 +40,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void test_calculatePeakPositions()
+  void Ptest_calculatePeakPositions()
   {
     // (1,1,1)
     NeutronBk2BkExpConvPVoigt func;
@@ -103,7 +103,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void TODO_test_calculatePeakShape()
+  void TODOtest_calculatePeakShape()
   {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();
@@ -137,7 +137,6 @@ public:
     double fwhm = func.fwhm();
     TS_ASSERT_DELTA(fwhm, 47.049, 0.001);
 
-    /*
     cout << "FWHM = " << fwhm << ".\n";
 
     vector<double> vecX;
@@ -153,13 +152,12 @@ public:
       cout << vecX[i] << "\t\t" << vecY[i] << "\n";
 
     TS_ASSERT_EQUALS(1, 432);
-    */
   }
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void test_calculateVulcanPeakPositions()
+  void Ptest_calculateVulcanPeakPositions()
   {
     // (2, 2, 0)
     NeutronBk2BkExpConvPVoigt func;
@@ -229,7 +227,7 @@ public:
   //----------------------------------------------------------------------------------------------
   /** Calculate peak positions: data is from Fullprof's sample: arg_si
     */
-  void TODO_test_calculateVulcanProfile()
+  void test_calculateVulcanProfile()
   {
     NeutronBk2BkExpConvPVoigt func;
     func.initialize();

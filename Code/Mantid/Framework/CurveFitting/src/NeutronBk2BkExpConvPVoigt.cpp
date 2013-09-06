@@ -495,9 +495,9 @@ namespace CurveFitting
  *  This is the core component to calcualte peak profile
  */
   double NeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta, const double N,
-                                                    const double alpha, const double beta, const double H,
-                                                    const double sigma2, const double invert_sqrt2sigma,
-                                                    const bool explicitoutput) const
+                                             const double alpha, const double beta, const double H,
+                                             const double sigma2, const double invert_sqrt2sigma,
+                                             const bool explicitoutput) const
   {
     // Transform to variable u, v, y, z
     const double u = 0.5*alpha*(alpha*sigma2+2.*x);
@@ -521,20 +521,37 @@ namespace CurveFitting
 
     // Calculate Lorenzian part
     double omega2(0.);
+
+    cout << "Eta = " << eta << "; X = " << x << " N = " << N << ".\n";
+
     if (eta >= 1.0E-8)
     {
       const double SQRT_H_5 = sqrt(H)*.5;
       std::complex<double> p(alpha*x, alpha*SQRT_H_5);
       std::complex<double> q(-beta*x, beta*SQRT_H_5);
       double omega2a = imag(exp(p)*Mantid::API::E1(p));
-      double omega2b = imag(exp(q)*Mantid::API::E1(q));
+      double omega2b = imag(exp(q)*Mantid::API::E1(q)); 
       omega2 = -1.0*N*eta*(omega2a + omega2b)*TWO_OVER_PI;
+
+      cout << "Exp(p) = " << exp(p) << ", Exp(q) = " << exp(q) << ".\n";
+
+      if (omega2 != omega2)
+      {
+        cout << "Omega2 is not physical.  Omega2a = " << omega2a
+                        << ", Omega2b = " << omega2b << ", p = " << p.real() << ", " << p.imag() << ".\n";
+      }
+      else
+      {
+        cout << "X = " << x << " is OK. Omega 2 = " << omega2 << ", Omega2A = " << omega2a
+             << ", Omega2B = " << omega2b << "\n";
+      }
+
     }
     const double omega = omega1+omega2;
 
-    if (explicitoutput)
+    if (explicitoutput || omega != omega)
     {
-      if (omega <= NEG_DBL_MAX || omega >= DBL_MAX)
+      if (omega <= NEG_DBL_MAX || omega >= DBL_MAX || omega != omega)
       {
         stringstream errss;
         errss << "Find omega = " << omega << " is infinity! omega1 = " << omega1 << ", omega2 = " << omega2 << "\n";
@@ -546,7 +563,7 @@ namespace CurveFitting
       }
     }
 
-    // cout << "[DB] Final Value = " << omega << endl;
+    g_log.information() << "[DB] Final Value = " << omega << endl;
     return omega;
   }
 
