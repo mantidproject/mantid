@@ -586,7 +586,7 @@ using namespace DataObjects;
     NXopengroup(fileID,"event_workspace","NXdata");
 
     // The array of indices for each event list #
-    int dims_array[1] { static_cast<int>(indices.size()) };
+    int dims_array[1] = { static_cast<int>(indices.size()) };
     if (indices.size() > 0)
     {
       if (compress)
