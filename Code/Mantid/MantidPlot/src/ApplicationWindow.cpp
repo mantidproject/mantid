@@ -17001,8 +17001,6 @@ else
         SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
     if(user_interface->objectName() == "Muon Analysis")
     {
-      // Hides the graph
-      connect(user_interface, SIGNAL(hideGraphs(const QString &)), this, SLOT(hideGraphs(const QString &)));
       // Shows the graph
       connect(user_interface, SIGNAL(showGraphs()), this, SLOT(showGraphs()));
       //If the fitting is requested then run the peak picker tool in runConnectFitting
@@ -17082,29 +17080,6 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
     }
   } 
 }
-
-/**
-* Hide all the graphs apart from the exception. Default not to have exception.
-*
-* @params exception :: The workspace not to be hidden. Default is no exception ("").
-*/
-void ApplicationWindow::hideGraphs(const QString & exception)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() != exception)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->setHidden();
-      }
-    }
-  }
-}
-
 
 /**
 * Show all the graphs that are hidden

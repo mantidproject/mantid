@@ -110,7 +110,6 @@ signals:
   ///Connects MantidPlot up with the muon analysis custom interface and in turn the fitPropertyBrowser. (Emitted when a new graph is created).
   void fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&);
 
-  void hideGraphs(const QString & exception = ""); // wsName
   void showGraphs();
   
 protected:

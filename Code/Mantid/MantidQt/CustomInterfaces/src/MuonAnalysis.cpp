@@ -2184,6 +2184,20 @@ void MuonAnalysis::closePlotWindow(const QString& wsName)
   runPythonCode(code);
 }
 
+/**
+ * Hides all the plot windows (MultiLayer ones)
+ */
+void MuonAnalysis::hideAllPlotWindows()
+{
+  QString code;
+
+  code += "for w in windows():\n"
+          "  if w.inherits('MultiLayer'):\n"
+          "    w.hide()\n";
+
+  runPythonCode(code);
+}
+
 void MuonAnalysis::showPlot(const QString& wsName)
 {
   // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
@@ -2242,13 +2256,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     // curve plot label
     QString titleLabel = cropWS;
 
-    // Should we hide all graphs except for the one specified
-    // Note the "-1" is added when a new graph for a WS is created
-    // for the first time. The 2nd time a plot is created for the 
-    // same WS I believe this number is "-2". Currently do not 
-    // fully understand the purpose of this exception here. 
-    if (m_uiForm.hideGraphs->isChecked() )
-      emit hideGraphs(titleLabel + "-1"); 
+    // Hide all the previous plot windows, if requested by user
+    if (m_uiForm.hideGraphs->isChecked())
+      hideAllPlotWindows();
 
     // check if user specified periods - if multiple period data 
     QStringList periodLabel = getPeriodLabels();
@@ -2369,13 +2379,9 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     // curve plot label
     QString titleLabel = cropWS;
 
-    // Should we hide all graphs except for the one specified
-    // Note the "-1" is added when a new graph for a WS is created
-    // for the first time. The 2nd time a plot is created for the 
-    // same WS I believe this number is "-2". Currently do not 
-    // fully understand the purpose of this exception here. 
-    if (m_uiForm.hideGraphs->isChecked() )
-      emit hideGraphs(titleLabel + "-1"); 
+    // Hide all the previous plot windows, if requested by user
+    if (m_uiForm.hideGraphs->isChecked())
+      hideAllPlotWindows();
 
     // check if user specified periods - if multiple period data 
     QStringList periodLabel = getPeriodLabels();

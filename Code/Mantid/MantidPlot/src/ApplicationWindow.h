@@ -1195,9 +1195,6 @@ private:
   /// Run the peakPickerTool for the new plot and delete it for the old plot if there was one.
   void runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot);
 
-  /// Hide all graphs apart from the exception (default to no exception)
-  void hideGraphs(const QString & exception = "");
-
   /// Show the graphs
   void showGraphs();
 
