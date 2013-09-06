@@ -214,7 +214,7 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element* elem)
     Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_compute->item(i));
     std::string name = elem->getAttribute("name");
 
-    m_computeResources.insert( make_pair(name, boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
+    m_computeResources.insert( std::make_pair(name, boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
   }
   pNL_compute->release();
 
