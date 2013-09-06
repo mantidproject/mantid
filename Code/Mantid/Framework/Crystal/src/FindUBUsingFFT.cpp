@@ -51,7 +51,22 @@ namespace Crystal
   FindUBUsingFFT::~FindUBUsingFFT()
   {
   }
-  
+
+  const std::string FindUBUsingFFT::name() const
+  {
+    return "FindUBUsingFFT";
+  }
+
+  int FindUBUsingFFT::version() const
+  {
+    return 1;
+  }
+
+  const std::string FindUBUsingFFT::category() const
+  {
+    return "Crystal";
+  }
+
   //--------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void FindUBUsingFFT::initDocs()
@@ -134,37 +149,18 @@ namespace Crystal
                           miller_ind, indexed_qs, fit_error );
       IndexingUtils::Optimize_UB(UB, miller_ind,indexed_qs,sigabc);
 
-     char logInfo[200];
      int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
-     sprintf(logInfo,
-            std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(),
-            num_indexed, n_peaks, tolerance);
-     g_log.notice(std::string(logInfo));
+     g_log.notice() << "New UB will index " << num_indexed << " Peaks out of " << n_peaks
+                    << " with tolerance of " << std::setprecision(3) << std::setw(5) << tolerance
+                    << "\n";
 
       OrientedLattice o_lattice;
       o_lattice.setUB( UB );
-
       o_lattice.setError(sigabc[0],sigabc[1],sigabc[2],sigabc[3],sigabc[4],sigabc[5]);
 
-      double calc_a = o_lattice.a();
-      double calc_b = o_lattice.b();
-      double calc_c = o_lattice.c();
-      double calc_alpha = o_lattice.alpha();
-      double calc_beta  = o_lattice.beta();
-      double calc_gamma = o_lattice.gamma();
-                                       // Show the modified lattice parameters
-      sprintf( logInfo, 
-               std::string("Lattice Parameters: %8.3f %8.3f %8.3f %8.3f %8.3f %8.3f").c_str(),
-               calc_a, calc_b, calc_c, calc_alpha, calc_beta, calc_gamma);
-      g_log.notice( std::string(logInfo) );
 
-      g_log.notice()<<"Parameter Errors  :"<<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[0]
-                                           <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[1]
-                                           <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[2]
-                                           <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[3]
-                                           <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[4]
-                                           <<std::fixed<<std::setprecision(3)<<std::setw(9)<<sigabc[5]
-                                           <<std::endl;
+      // Show the modified lattice parameters
+      g_log.notice() << o_lattice << "\n";
 
 
       ws->mutableSample().setOrientedLattice( new OrientedLattice(o_lattice) );
