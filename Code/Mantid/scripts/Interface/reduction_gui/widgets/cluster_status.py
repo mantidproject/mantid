@@ -1,5 +1,6 @@
 from PyQt4 import QtGui, uic, QtCore
 import os
+import datetime
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.widgets import util
@@ -141,18 +142,26 @@ class RemoteJobsWidget(BaseWidget):
             self._settings.cluster_pass = pwd
             util.set_valid(self._content.username_edit, True)
             util.set_valid(self._content.password_edit, True)
-        
-        alg = AlgorithmManager.create("QueryAllRemoteJobs")
+        alg = AlgorithmManager.create("Authenticate")
         alg.initialize()
         alg.setProperty("ComputeResource", str(self._settings.compute_resource))
         alg.setProperty("UserName", str(self._settings.cluster_user))
         alg.setProperty("Password", str(self._settings.cluster_pass))
         alg.execute()
+        
+        alg = AlgorithmManager.create("QueryAllRemoteJobs")
+        alg.initialize()
+        alg.setProperty("ComputeResource", str(self._settings.compute_resource))
+        alg.execute()
         job_id = alg.getProperty("JobId").value
         job_status = alg.getProperty("JobStatusString").value
         job_name = alg.getProperty("JobName").value
-        job_start = alg.getProperty("JobStartTime").value
-        job_end = alg.getProperty("JobCompletionTime").value
+        
+        njobs = len(job_name)
+        job_start = njobs*[datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")]
+        job_end = njobs*[datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")]
+        #job_start = alg.getProperty("JobStartTime").value
+        #job_end = alg.getProperty("JobCompletionTime").value
                 
         job_list = zip(*(job_id, job_status, job_name, job_start, job_end))
         
@@ -164,7 +173,7 @@ class RemoteJobsWidget(BaseWidget):
             
             # Make sure that only recent jobs are displayed
             oldest = DateAndTime(str(self._content.date_time_edit.dateTime().toString(QtCore.Qt.ISODate)))
-            this_job = DateAndTime(str(job_list[i][4]))
+            this_job = DateAndTime(job_list[i][4])
             unavailable = DateAndTime(0)
             unavailable.setToMinimum()
             if this_job>unavailable and this_job<oldest:
@@ -189,7 +198,7 @@ class RemoteJobsWidget(BaseWidget):
             
             # Start time
             time_displayed = str(job_list[i][3]).replace('T', ' ')
-            if DateAndTime(str(job_list[i][3])) == unavailable:
+            if DateAndTime(job_list[i][3]) == unavailable:
                 time_displayed = ''
             item = QtGui.QTableWidgetItem(time_displayed)
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
