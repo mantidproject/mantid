@@ -999,17 +999,15 @@ namespace Algorithms
 	int i_peakmin = 0;
 	int i_peakmax = i_max - i_min + 1;
     const MantidVec &vecX = input->readX(spectrum);
-    const MantidVec &vecY = input->readY(spectrum);
 
     g_log.information() << "Fit Peak @ " << vecX[i_centre] << "  of Spectrum " << spectrum << ". Fit peak In Range "
                         << vecX[i_min] << ", " << vecX[i_max] << "  i_min = " << i_min << ", i_max = "
                         << i_max << ", i_centre = " << i_centre << ".\n";
 
     // Estimate background: output-> m_backgroundFunction
-    double in_bg0;
-    double in_bg1;
-    double in_bg2;
-    estimateBackground(vecX, vecY, i_min, i_max, in_bg0, in_bg1, in_bg2);
+    double in_bg0 = 0.0;
+    double in_bg1 = 0.0;
+    double in_bg2 = 0.0;
 
     IAlgorithm_sptr estimate = createChildAlgorithm("FindPeakBackground");
     estimate->setProperty("InputWorkspace", input);
@@ -1181,9 +1179,9 @@ namespace Algorithms
     * @param in_bg2: guessed value of a2 (output)
     */
   void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, const size_t spectrum,
-                                        const int& i_centre, const int& i_min, const int& i_max,
+                                        int i_centre, int i_min, int i_max,
                                         double& in_bg0, double& in_bg1, double& in_bg2,
-                                        const int& i_peakmin, const int& i_peakmax)
+                                        int i_peakmin, int i_peakmax)
   {
     // Check that the indices provided are sensible
     if (i_min >= i_centre || i_max <= i_centre || i_min < 0)
@@ -1857,81 +1855,6 @@ namespace Algorithms
     return std::string();
   }
 
-
-  //----------------------------------------------------------------------------------------------
-  /** Estimate background
-    * @param X :: vec for X
-    * @param Y :: vec for Y
-    * @param i_min :: index of minimum in X to estimate background
-    * @param i_max :: index of maximum in X to estimate background
-    * @param out_bg0 :: interception
-    * @param out_bg1 :: slope
-    * @param out_bg2 :: a2 = 0
-    */
-  void FindPeaks::estimateBackground(const MantidVec& X, const MantidVec& Y, const size_t i_min, const size_t i_max,
-                                           double& out_bg0, double& out_bg1, double& out_bg2)
-  {
-    // Validate input
-    if (i_min >= i_max)
-      throw std::runtime_error("i_min cannot larger or equal to i_max");
-
-    // FIXME - THIS IS A MAGIC NUMBER
-    const size_t MAGICNUMBER = 12;
-    size_t numavg;
-    if (i_max - i_min > MAGICNUMBER)
-      numavg = 3;
-    else
-      numavg = 1;
-
-    // Get (x0, y0) and (xf, yf)
-    double x0, y0, xf, yf;
-
-    x0 = 0.0;
-    y0 = 0.0;
-    xf = 0.0;
-    yf = 0.0;
-    for (size_t i = 0; i < numavg; ++i)
-    {
-      x0 += X[i_min+i];
-      y0 += Y[i_min+i];
-
-      xf += X[i_max-i];
-      yf += Y[i_max-i];
-    }
-    x0 = x0 / static_cast<double>(numavg);
-    y0 = y0 / static_cast<double>(numavg);
-    xf = xf / static_cast<double>(numavg);
-    yf = yf / static_cast<double>(numavg);
-
-    // g_log.debug() << "[F1145] Spec = " << specdb << "(X0, Y0) = " << x0 << ", " << y0 << "; (Xf, Yf) = "
-    //              << xf << ", " << yf << ". (Averaged from " << numavg << " background points.)" << "\n";
-
-    // Esitmate
-    out_bg2 = 0.;
-    if (m_backgroundFunction->nParams() > 1) // linear background
-    {
-      out_bg1 = (y0-yf)/(x0-xf);
-      out_bg0 = (xf*y0-x0*yf)/(xf-x0);
-    }
-    else // flat background
-    {
-      out_bg1 = 0.;
-      out_bg0 = 0.5*(y0 + yf);
-    }
-
-    m_backgroundFunction->setParameter("A0", out_bg0);
-    if (m_backgroundFunction->nParams() > 1)
-    {
-      m_backgroundFunction->setParameter("A1", out_bg1);
-      if (m_backgroundFunction->nParams() > 2)
-        m_backgroundFunction->setParameter("A2", out_bg2);
-    }
-
-    g_log.debug() << "Estimated background: A0 = " << out_bg0 << ", A1 = "
-                        << out_bg1 << ", A2 = " << out_bg2 << "\n";
-
-    return;
-  }
 
   //----------------------------------------------------------------------------------------------
   /** Add the fit record (failure) to output workspace
