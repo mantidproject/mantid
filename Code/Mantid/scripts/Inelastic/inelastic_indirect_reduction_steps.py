@@ -138,7 +138,6 @@ class LoadData(ReductionStep):
         else:
             workspaces = [output_ws]
 
-
         logger.debug('self._monitor_index = ' + str(self._monitor_index))
 
         for ws in workspaces:
@@ -149,6 +148,7 @@ class LoadData(ReductionStep):
                 ## Extract Monitor Spectrum
                 ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace= ws+'_mon',WorkspaceIndex= self._monitor_index)
                 ## Crop the workspace to remove uninteresting detectors
+
                 CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,
                     StartWorkspaceIndex=self._detector_range_start,
                     EndWorkspaceIndex=self._detector_range_end)
@@ -525,8 +525,8 @@ class HandleMonitor(ReductionStep):
     def _monitor_efficiency(self, monitor):
         inst = mtd[monitor].getInstrument()
         try:
-            area = inst.getNumberParameter('Workflow.MonitorArea')[0]
-            thickness = inst.getNumberParameter('Workflow.MonitorThickness')[0]
+            area = inst.getNumberParameter('Workflow.Monitor1-Area')[0]
+            thickness = inst.getNumberParameter('Workflow.Monitor1-Thickness')[0]
             attenuation= inst.getNumberParameter('Workflow.Monitor1-Attenuation')[0]
         except IndexError:
             raise ValueError('Unable to retrieve monitor thickness, area and '
