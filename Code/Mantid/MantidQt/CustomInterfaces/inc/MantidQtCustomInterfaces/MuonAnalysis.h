@@ -271,6 +271,9 @@ private:
   /// Plot pair
   void plotPair(const std::string& plotType);
 
+  /// Closes the window with the plot of the given ws
+  void closePlotWindow(const QString& wsName);
+
   // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
   //       (as we are doing with pairs)
 

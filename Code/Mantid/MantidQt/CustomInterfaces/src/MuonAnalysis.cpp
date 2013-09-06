@@ -2168,6 +2168,22 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, c
   return params;
 }
 
+/**
+ * Closes the window with the plot of the given ws.
+ * @param wsName Name of the workspace which plot window to close
+ */
+void MuonAnalysis::closePlotWindow(const QString& wsName)
+{
+  QString code;
+
+  code += "g = graph('"+ wsName + "-1')\n"
+          "if g != None:\n"
+          "  g.confirmClose(False)\n"
+          "  g.close()\n";
+
+  runPythonCode(code);
+}
+
 void MuonAnalysis::showPlot(const QString& wsName)
 {
   // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
@@ -2175,7 +2191,7 @@ void MuonAnalysis::showPlot(const QString& wsName)
 
   m_currentDataName = wsName;
 
-  emit closeGraph(m_currentDataName + "-1");
+  closePlotWindow(m_currentDataName);
   plotSpectrum(m_currentDataName, 0, false);
 
   // Change the plot style of the graph so that it matches what is selected on
@@ -2461,7 +2477,7 @@ QString MuonAnalysis::getNewPlotName(const QString & cropWSfirstPart)
     {
       if((m_uiForm.plotCreation->currentIndex() == 0) || (m_uiForm.plotCreation->currentIndex() == 2) )
       {
-        emit closeGraph(cropWS + "-1");
+        closePlotWindow(cropWS);
         AnalysisDataService::Instance().remove(cropWS.toStdString());
         break;
       }

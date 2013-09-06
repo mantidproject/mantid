@@ -17001,8 +17001,6 @@ else
         SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
     if(user_interface->objectName() == "Muon Analysis")
     {
-      // Closes the active graph
-      connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
       // Hides the graph
       connect(user_interface, SIGNAL(hideGraphs(const QString &)), this, SLOT(hideGraphs(const QString &)));
       // Shows the graph
@@ -17084,31 +17082,6 @@ void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBr
     }
   } 
 }
-
-
-/**
-* Close a given graph
-*
-* @params wsName :: The name of the graph to delete.
-*/
-void ApplicationWindow::closeGraph(const QString & wsName)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() == wsName)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->close();
-        break;
-      }
-    }
-  }
-}
-
 
 /**
 * Hide all the graphs apart from the exception. Default not to have exception.
