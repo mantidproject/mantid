@@ -2092,29 +2092,33 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
 }
 
 /**
- * TODO: comment
+ * Set various style parameters for the plot of the given ws
+ * @param wsName Workspace which plot to style
+ * @param params Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
+                 of possible keys
  */
 void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QString>& params)
 {
   QString code;
 
-  // Get parameters
-  code += "graphName = '" + wsName + "-1" + "'\n"
-          "connectType = " + params["ConnectType"] + "\n"
-          "showErrors = " + params["ShowErrors"] + "\n";
+  // Get the active layer of the graph
+  code += "l = graph('"+ wsName + "-1').activeLayer()\n";
+
   // Set whether to show symbols
-  code += "symbolStyle = PlotSymbol.NoSymbol if connectType == 0 else PlotSymbol.Ellipse\n"
-          "symbol = PlotSymbol(symbolStyle, QBrush(), QPen(), QSize(5,5))\n";
+  QString symbolStyle = (params["ConnectType"] == "0") ? QString("PlotSymbol.NoSymbol") : QString("PlotSymbol.Ellipse");
+  code += "l.setCurveSymbol(0, PlotSymbol(" + symbolStyle +", QBrush(), QPen(), QSize(5,5)))\n";
+
   // Set whether to show line
+  QString penStyle = (params["ConnectType"] == "1") ? QString("Qt.NoPen") : QString("Qt.SolidLine");
   code += "pen = QPen(Qt.black)\n"
-          "pen.setStyle(Qt.NoPen if connectType == 1 else Qt.SolidLine)\n";
-  // Update parameters of the active layer of the graph
-  code += "l = graph(graphName).activeLayer()\n"
-          "l.setCurveSymbol(0, symbol)\n"
-          "l.setCurvePen(0, pen)\n"
-          "errorSettings = l.errorBarSettings(0, 0)\n"
-          "errorSettings.drawMinusSide(showErrors)\n"
-          "errorSettings.drawPlusSide(showErrors)\n";
+          "pen.setStyle(" + penStyle +")\n"
+          "l.setCurvePen(0, pen)\n";
+
+  // Set error settings
+  QString showErrors = (params["ShowErrors"] == "True") ? QString("True") : QString("False");
+  code += "errorSettings = l.errorBarSettings(0, 0)\n"
+          "errorSettings.drawMinusSide(" + showErrors + ")\n"
+          "errorSettings.drawPlusSide(" + showErrors + ")\n";
 
   // If autoscaling disabled - set manual Y axis values
   if(params["YAxisAuto"] == "False")
@@ -2127,7 +2131,12 @@ void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QStri
 }
 
 /**
- * TODO: comment
+ * Get current plot style parameters. wsName and wsIndex are used to get default values if 
+ * something is not specified.
+ * @param wsName Workspace plot of which we want to style
+ * @param wsIndex Workspace index of the plot data
+ * @return Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
+           of possible keys
  */
 QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, const int wsIndex)
 {

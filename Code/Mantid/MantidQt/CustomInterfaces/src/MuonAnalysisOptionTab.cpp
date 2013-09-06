@@ -477,7 +477,11 @@ void MuonAnalysisOptionTab::storeCustomTimeValue()
 }
 
 /**
- * Get plot style parameters from widgets.
+ * Get plot style parameters from widgets. Parameters are as follows:
+ *   - ConnectType: 0 for Line, 1 for Scatter, 3 for Line + Symbol
+ *   - ShowErrors: True of False
+ *   - YAxisAuto: True or False
+ *   - YAxisMin/YAxisMax: Double values
  *
  * @param workspace :: The workspace name of the plot to be created.
  */

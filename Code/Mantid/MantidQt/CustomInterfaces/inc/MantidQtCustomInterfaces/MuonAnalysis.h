@@ -277,7 +277,7 @@ private:
   /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale = false);
 
-  /// Set various style parameters for all the plots of the given ws
+  /// Set various style parameters for the plot of the given ws
   void setPlotStyle(const QString& wsName, const QMap<QString, QString>& params);
 
   /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
