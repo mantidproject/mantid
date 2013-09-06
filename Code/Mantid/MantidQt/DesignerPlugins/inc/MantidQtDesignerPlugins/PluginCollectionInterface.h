@@ -4,6 +4,7 @@
 #include <QtDesigner>
 #include <QtPlugin>
 #include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
+#include "MantidQtMantidWidgets/DataSelector.h"
 #include "MantidQtDesignerPlugins/DesignerPlugin.h"
 #include "MantidQtMantidWidgets/ScriptEditor.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
@@ -142,5 +143,9 @@ DECLARE_WIDGET_PLUGIN(ProcessingAlgoWidgetPlugin,
 DECLARE_WIDGET_PLUGIN(MessageDisplayPlugin,
     MantidQt::MantidWidgets::MessageDisplay,
     "Display messages with various priorities, optionally connecting to the logging framework");
+
+DECLARE_WIDGET_PLUGIN(DataSelectorPlugin,
+    MantidQt::MantidWidgets::DataSelector,
+    "Choose a file path or workspace to work with");
 
 #endif
