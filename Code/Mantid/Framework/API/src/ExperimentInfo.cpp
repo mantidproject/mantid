@@ -680,6 +680,13 @@ namespace API
     }
   }
 
+  void ExperimentInfo::setEFixed(const detid_t detID, const double value)
+  {
+      IDetector_const_sptr det = getInstrument()->getDetector(detID);
+      Geometry::ParameterMap& pmap = instrumentParameters();
+      pmap.addDouble(det.get(), "Efixed", value);
+  }
+
   // used to terminate SAX process
   class DummyException {
   public:
