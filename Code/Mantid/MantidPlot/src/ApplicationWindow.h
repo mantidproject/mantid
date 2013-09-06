@@ -1153,8 +1153,6 @@ private:
   void showUserDirectoryDialog();
   void performCustomAction(QAction *);
 
-  void setPlotType(const QStringList & plotType);
-
   void hideSelectedColumns();
   void showAllColumns();
   void closedLastCopiedLayer(){lastCopiedLayer = NULL;};

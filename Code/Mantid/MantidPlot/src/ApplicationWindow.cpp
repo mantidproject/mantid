@@ -17001,8 +17001,6 @@ else
         SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
     if(user_interface->objectName() == "Muon Analysis")
     {
-      // Re-emits the signal caught from the muon analysis
-      connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
       // Closes the active graph
       connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
       // Hides the graph
@@ -17147,79 +17145,6 @@ void ApplicationWindow::showGraphs()
       activateWindow(w);
   }
 }
-
-
-/**
-* Makes sure that it is dealing with a graph and then tells the plotDialog class 
-* to change the plot style
-*
-* @params plotDetails :: This includes all details of the plot [wsName, connectType, plotType, Errors, Color]
-*/
-void ApplicationWindow::setPlotType(const QStringList & plotDetails)
-{
-  if (plotDetails.size() == 0)
-  {
-    QMessageBox::information(this, "Mantid - Error", "Plot type or workspace name is missing. Please contact a Mantid team member.");
-  }
-  else
-  {
-    if (plotDetails.size() > 3)
-    {
-      int connectType = plotDetails[1].toInt();
-      QList<MdiSubWindow *> windows = windowsList();
-      foreach (MdiSubWindow *w, windows) 
-      {
-        if (w->isA("MultiLayer"))
-        {
-          MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-          {
-            // Check to see if graph is the new one by comparing the names
-            if (w->objectName() == plotDetails[0] + "-1")
-            {
-              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this, plot);
-              //pd->setMultiLayer(plot);
-              Graph *g = plot->activeGraph();
-              if (g)
-              {
-                int curveNum(-1);
-
-                if (plotDetails[2] == "Data")
-                {
-                  curveNum = g->curveIndex(plotDetails[0]); //workspaceName
-                  if (plotDetails[3] == "AllErrors") // if all errors, display all errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(true, true);
-                  }
-                  else // don't show errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(false, false);
-                  }
-                }
-                if (curveNum > -1) // If one of the curves has been changed 
-                {
-                  // line(0) scatter(1) line+symbol(2)
-                  if (connectType >= 0 && connectType <= 2)
-                  {
-                    if (plotDetails.size() > 4)
-                      pd->setPlotType(connectType, curveNum, plotDetails[4]);
-                    else
-                      pd->setPlotType(connectType, curveNum);            
-                  }
-                  g->replot();
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 
 void ApplicationWindow::loadCustomActions()
 {

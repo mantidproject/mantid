@@ -107,9 +107,6 @@ signals:
   /// Emitted to start a (generally small) script running
   void runAsPythonScript(const QString& code, bool);
 
-  /// Change the plot style/color
-  void setAsPlotType(const QStringList & plotDetails);
-
   ///Connects MantidPlot up with the muon analysis custom interface and in turn the fitPropertyBrowser. (Emitted when a new graph is created).
   void fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&);
 
@@ -133,9 +130,6 @@ protected:
   QString runPythonCode(const QString & code, bool no_output = false);
   QString openFileDialog(const bool save, const QStringList &exts);
   QLabel* newValidator(QWidget *parent);
-
-  /// Change the plot style/color
-  void changePlotType(const QStringList & plotDetails);
 
 private:
   // This is so that it can set the name
