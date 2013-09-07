@@ -5,6 +5,7 @@
 
 find_path ( OPENCASCADE_INCLUDE_DIR Standard.hxx PATHS
                 /usr/include/opencascade
+		/usr/include/oce
                 /usr/local/include/opencascade
                 /usr/local/inc
                 /opt/OpenCASCADE/inc
