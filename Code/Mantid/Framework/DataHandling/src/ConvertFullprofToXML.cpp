@@ -3,7 +3,7 @@
 Convert the initial fitting parameters in a Fullprof file to XML format in an [[InstrumentParameterFile]].
 
 *WIKI*/
-#include "MantidDataHandling/ConvertFullprofToXml.h"
+#include "MantidDataHandling/ConvertFullprofToXML.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
