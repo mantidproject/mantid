@@ -51,7 +51,7 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 27);
+    TS_ASSERT_EQUALS(outws->rowCount(), 28);
 
     // 3. Verify value
     map<string, double> parammap;
@@ -93,7 +93,7 @@ public:
     TS_ASSERT(outws);
 
     TS_ASSERT_EQUALS(outws->columnCount(), 2);
-    TS_ASSERT_EQUALS(outws->rowCount(), 27);
+    TS_ASSERT_EQUALS(outws->rowCount(), 28);
 
     // 3. Verify value
     map<string, double> parammap;
@@ -138,7 +138,7 @@ public:
 
     // Check table workspace size
     TS_ASSERT_EQUALS(outws->columnCount(), 3);
-    TS_ASSERT_EQUALS(outws->rowCount(), 27);
+    TS_ASSERT_EQUALS(outws->rowCount(), 28);
 
     // Verify value
     map<string, double> parammap1;
@@ -191,7 +191,7 @@ public:
 
     // Check table workspace size
     TS_ASSERT_EQUALS(outws->columnCount(), 4);
-    TS_ASSERT_EQUALS(outws->rowCount(), 27);
+    TS_ASSERT_EQUALS(outws->rowCount(), 28);
 
     // Verify value
     map<string, double> parammap1;

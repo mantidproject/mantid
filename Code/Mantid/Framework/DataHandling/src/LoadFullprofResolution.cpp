@@ -304,6 +304,7 @@ namespace DataHandling
             << ") found in the specified region from input. ";
       throw runtime_error(errss.str());
     }
+    parammap["CWL"] = cwl;
 
     double tempdb;
     for (int i = startlineindex+1; i <= endlineindex; ++i)
