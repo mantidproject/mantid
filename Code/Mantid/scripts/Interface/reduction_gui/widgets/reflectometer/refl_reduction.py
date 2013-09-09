@@ -121,6 +121,9 @@ class DataReflWidget(BaseRefWidget):
         q_step = float(self._summary.q_step_edit.text())
         if self._summary.log_scale_chk.isChecked():
             q_step = -q_step
+
+        # Scaling factor file
+#         data.scaling_factor_file_flag = self._summary.use_sf_config_switch.isChecked()
             
         # Angle offset
         if hasattr(m, "angle_offset"):
