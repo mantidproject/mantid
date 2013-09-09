@@ -190,7 +190,6 @@ namespace DataHandling
       file.openGroup(m_top_entry_name, "NXentry");
     
       //Now we want to go through all the bankN_event entries
-      typedef std::map<std::string,std::string> string_map_t; 
       map<string, string> entries = file.getEntries();
       map<string,string>::const_iterator it = entries.begin();
       std::string classType = "NXevent_data";

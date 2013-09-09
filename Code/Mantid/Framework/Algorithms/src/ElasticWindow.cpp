@@ -150,9 +150,6 @@ void ElasticWindow::exec()
   tranQ2->setPropertyValue("OutputWorkspace", "outQSquared");
   tranQ2->execute();
   outputQSquared = tranQ2->getProperty("OutputWorkspace");
-  startProgress += stepProgress;
-  endProgress += stepProgress;
-
 
   setProperty("OutputInQ", outputQ);
   setProperty("OutputInQSquared", outputQSquared);

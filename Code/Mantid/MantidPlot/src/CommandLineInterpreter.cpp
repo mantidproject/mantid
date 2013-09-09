@@ -668,6 +668,7 @@ bool CommandLineInterpreter::handleKeyPress(QKeyEvent* event)
   else if (key == Qt::Key_Delete)
   {
     cursorToEnd = false;
+    handled = (indexOfCursorLine() != indexOfLastLine());
   }
   if(cursorToEnd && key != Qt::Key_Control &&
       (indexOfCursorLine() != indexOfLastLine() || event->matches(QKeySequence::Paste)))
@@ -694,7 +695,7 @@ bool CommandLineInterpreter::handleBackspace()
     getCursorPosition(&dummy, &index);
 
     //check if the cursor is > the start of the line
-    return (index == 0);
+    return (index == 0 || indexOfCursorLine() != indexOfLastLine());
   }
 }
 

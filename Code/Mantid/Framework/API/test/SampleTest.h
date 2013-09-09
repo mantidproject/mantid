@@ -9,14 +9,13 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using Mantid::API::Sample;
 using Mantid::API::SampleEnvironment;
-using Mantid::Kernel::NexusTestHelper;
 
 class SampleTest : public CxxTest::TestSuite
 {
@@ -130,6 +129,97 @@ public:
     TS_ASSERT_EQUALS(retLatt.a(), 1.0);
     TS_ASSERT_EQUALS(retLatt.b(), 2.0);
     TS_ASSERT_EQUALS(retLatt.c(), 3.0);
+
+  }
+
+  void test_clearOrientedLattice()
+  {
+    Sample sample;
+    OrientedLattice *latt = new OrientedLattice(1.0,2.0,3.0, 90, 90, 90);
+    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(latt));
+
+    TS_ASSERT(sample.hasOrientedLattice())
+    TS_ASSERT_THROWS_NOTHING(sample.getOrientedLattice())
+
+    // Now clear it.
+    sample.clearOrientedLattice();
+
+    TS_ASSERT(!sample.hasOrientedLattice())
+    TS_ASSERT_THROWS(sample.getOrientedLattice(), std::runtime_error&)
+  }
+
+  void test_clearOrientedLattice_and_the_copy_constructor()
+  {
+    // Create a sample with an oriented lattice.
+    Sample sampleA;
+    OrientedLattice *latticeA = new OrientedLattice(1.0,2.0,3.0, 90, 90, 90);
+    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(latticeA));
+
+    // Copy the sample.
+    Sample sampleB(sampleA);
+
+    // Check oriented lattice objects on both.
+    TS_ASSERT(sampleA.hasOrientedLattice())
+    TS_ASSERT_THROWS_NOTHING(sampleA.getOrientedLattice())
+    TS_ASSERT(sampleB.hasOrientedLattice())
+    TS_ASSERT_THROWS_NOTHING(sampleB.getOrientedLattice())
+
+    // Now clear one.
+    sampleA.clearOrientedLattice();
+
+    // One should be cleared, the other should not.
+    TS_ASSERT(!sampleA.hasOrientedLattice())
+    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error&)
+    TS_ASSERT(sampleB.hasOrientedLattice())
+    TS_ASSERT_THROWS_NOTHING(sampleB.getOrientedLattice())
+
+    // Now clear both.
+    sampleA.clearOrientedLattice(); // Not strictly necessary, but object should be able to survive such calls.
+    sampleB.clearOrientedLattice();
+
+    // Both should be cleared.
+    TS_ASSERT(!sampleA.hasOrientedLattice())
+    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error&)
+    TS_ASSERT(!sampleB.hasOrientedLattice())
+    TS_ASSERT_THROWS(sampleB.getOrientedLattice(), std::runtime_error&)
+
+  }
+
+  void test_clearOrientedLattice_and_assignment()
+  {
+    // Create a sample with an oriented lattice.
+    Sample sampleA;
+    OrientedLattice *latticeA = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
+    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(latticeA));
+
+    // Create and then assign to the sample.
+    Sample sampleB;
+    sampleB = sampleA;
+
+    // Check oriented lattice objects on both.
+    TS_ASSERT(sampleA.hasOrientedLattice())
+    TS_ASSERT_THROWS_NOTHING(sampleA.getOrientedLattice())
+    TS_ASSERT(sampleB.hasOrientedLattice())
+    TS_ASSERT_THROWS_NOTHING(sampleB.getOrientedLattice())
+
+    // Now clear one.
+    sampleA.clearOrientedLattice();
+
+    // One should be cleared, the other should not.
+    TS_ASSERT(!sampleA.hasOrientedLattice())
+    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error&)
+    TS_ASSERT(sampleB.hasOrientedLattice())
+    TS_ASSERT_THROWS_NOTHING(sampleB.getOrientedLattice())
+
+    // Now clear both.
+    sampleA.clearOrientedLattice(); // Not strictly necessary, but object should be able to survive such calls.
+    sampleB.clearOrientedLattice();
+
+    // Both should be cleared.
+    TS_ASSERT(!sampleA.hasOrientedLattice())
+    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error&)
+    TS_ASSERT(!sampleB.hasOrientedLattice())
+    TS_ASSERT_THROWS(sampleB.getOrientedLattice(), std::runtime_error&)
 
   }
 

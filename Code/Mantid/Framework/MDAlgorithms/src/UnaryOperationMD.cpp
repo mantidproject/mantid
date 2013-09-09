@@ -99,7 +99,6 @@ namespace Mantid
         // B = f(A) -> So first we clone A (lhs) into B
         IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
         clone->setProperty("InputWorkspace", m_in);
-        clone->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
         clone->executeAsChildAlg();
         m_out = clone->getProperty("OutputWorkspace");
       }

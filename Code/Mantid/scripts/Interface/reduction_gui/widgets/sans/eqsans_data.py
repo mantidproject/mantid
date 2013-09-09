@@ -31,7 +31,6 @@ class DataSetsWidget(BaseWidget):
             self.set_state(state)
         else:
             m = DataSets()
-            if self._settings.api2: m.PYTHON_API=2
             self.set_state(m)
             
     def initialize_content(self):
@@ -124,9 +123,6 @@ class DataSetsWidget(BaseWidget):
             self._content.background_plot_button.hide()
             self._content.bck_empty_plot_button.hide()
             self._content.bck_sample_plot_button.hide()
-            
-        #if not self._settings.api2:
-        #    self._content.separate_jobs_check.hide()
         
     def _background_plot_clicked(self):
         self.show_instrument(file_name=self._content.background_edit.text)
@@ -229,7 +225,6 @@ class DataSetsWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = DataSets()
-        if self._settings.api2: m.PYTHON_API=2
 
         m.transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
         m.transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)

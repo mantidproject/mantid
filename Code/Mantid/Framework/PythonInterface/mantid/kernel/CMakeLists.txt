@@ -17,6 +17,7 @@ set ( EXPORT_FILES
   src/Exports/ArrayProperty.cpp
   src/Exports/Quat.cpp
   src/Exports/V3D.cpp
+  src/Exports/VMD.cpp
   src/Exports/StlContainers.cpp
   src/Exports/Logger.cpp
   src/Exports/Unit.cpp

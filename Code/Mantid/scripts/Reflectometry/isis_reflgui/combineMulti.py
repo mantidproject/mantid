@@ -159,13 +159,13 @@ def groupGet(wksp,whattoget,field=''):
 	elif (whattoget == 'samp' and field != ''):
 		if isinstance(mtd[wksp], WorkspaceGroup):
 			try:
-				res = mtd[wksp + '_1'].getSampleDetails().getLogData(field).value				
+				res = mtd[wksp + '_1'].getRun().getLogData(field).value				
 			except RuntimeError:
 				res = 0
 				print "Block "+field+" not found."			
 		else:
 			try:
-				res = mtd[wksp].getSampleDetails().getLogData(field).value
+				res = mtd[wksp].getRun().getLogData(field).value
 			except RuntimeError:		
 				res = 0
 				print "Block "+field+" not found."
@@ -178,7 +178,7 @@ def groupGet(wksp,whattoget,field=''):
 
 def _testCombine():
 	from quick import quick
-	mtd.settings['default.instrument'] = "SURF"
+	config['default.instrument'] = "SURF"
 
 	[w1lam,w1q,th] = quick(94511,theta=0.25,trans='94504')
 	[w2lam,w2q,th] = quick(94512,theta=0.65,trans='94504')

@@ -132,7 +132,7 @@ public:
     }
     else
     {
-      TS_ASSERT_DELTA( BinCount, 213623., 001000.);
+      TS_ASSERT_DELTA( BinCount, 7., 001000.);
     }
 
     if (MaxPeaks > 1)

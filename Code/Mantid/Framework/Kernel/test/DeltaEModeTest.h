@@ -9,6 +9,11 @@ using Mantid::Kernel::DeltaEMode;
 class DeltaEModeTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static DeltaEModeTest *createSuite() { return new DeltaEModeTest(); }
+  static void destroySuite( DeltaEModeTest *suite ) { delete suite; }
+  
   DeltaEModeTest() :
     m_elasticString("Elastic"),
     m_directString("Direct"),

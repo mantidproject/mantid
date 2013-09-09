@@ -430,7 +430,7 @@ namespace Algorithms
       API::MatrixWorkspace_sptr outputWS;
 
       // make output Workspace the same type is the input, but with new length of signal array
-      outputWS = API::WorkspaceFactory::Instance().create(inputWS,numSpectra,m_numBins,m_numBins);
+      outputWS = API::WorkspaceFactory::Instance().create(inputWS,numSpectra,m_numBins+1,m_numBins);
 
 
       // Copy over the 'vertical' axis

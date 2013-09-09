@@ -14,7 +14,7 @@ def EndTime(prog):
 
 def loadInst(instrument):    
     ws = '__empty_' + instrument
-    if (mtd[ws] == None):
+    if not mtd.doesExist(ws):
         idf_dir = config['instrumentDefinition.directory']
         idf = idf_dir + instrument + '_Definition.xml'
         LoadEmptyInstrument(Filename=idf, OutputWorkspace=ws)

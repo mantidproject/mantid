@@ -17,7 +17,8 @@ void export_DataItem()
     .def("id", &DataItem::id, "The string ID of the class")
     .def("name", &DataItem::name, "The name of the object")
     .def("threadSafe", &DataItem::threadSafe, "Returns true if the object can be accessed safely from multiple threads")
-    .def("__str__", &DataItem::toString, "Returns a serialised version of the object")
+    .def("__str__", &DataItem::name, "Returns the string name of the object if it has been stored")
+    .def("__repr__", &DataItem::toString, "Returns a description of the object")
   ;
 }
 

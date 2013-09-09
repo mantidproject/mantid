@@ -38,9 +38,7 @@ RemoveLowResTOF::RemoveLowResTOF(): m_progress(NULL)
 /// Destructor
 RemoveLowResTOF::~RemoveLowResTOF()
 {
-  if(m_progress)
-    delete m_progress;
-  m_progress=NULL;
+  delete m_progress;
 }
 
 /// Algorithm's name for identification overriding a virtual method

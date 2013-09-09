@@ -10,7 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
+//#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <Poco/File.h>
@@ -96,79 +96,71 @@ public:
 
   void testSolidAngle()
   {
-    //load ARCS instrument, with all detectors 1
-    //Median Detector test with solid angle correction turned off should have no failures.
-    //With the correction turned on, and SignificanceTest = 0.01 should mask the short banks
+    Mantid::DataObjects::Workspace2D_sptr ws=WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 10, 1);
 
-    // Load the empty instrument
-    Mantid::DataHandling::LoadEmptyInstrument loader;
-    loader.initialize();
-    // TODO: (ticket #5973) Update the next line to not have a hard coded value for the filename 
-    std::string inputFile = "ARCS_Definition_20121011-.xml";
-    loader.setPropertyValue("Filename", inputFile);
-    loader.setPropertyValue("OutputWorkspace", "SolidAngle");
-    loader.execute();
+    for(size_t i=0;i<ws->getNumberHistograms();i++)
+    {
+        ws->dataY(i)[0]=std::floor(1e9*ws->getDetector(i)->solidAngle(V3D(0,0,0)));
+    }
+    AnalysisDataService::Instance().addOrReplace("MDTSolidAngle",ws);
 
     MedianDetectorTest alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     // Set the properties
-    alg.setPropertyValue("InputWorkspace", "SolidAngle");
+    alg.setPropertyValue("InputWorkspace", "MDTSolidAngle");
     alg.setPropertyValue("OutputWorkspace","MedianDetectorTestOutput");
     // set significance test to small
-    alg.setProperty("StartWorkspaceIndex",2);//no monitors
-    alg.setProperty("SignificanceTest", 0.01);
-    alg.setProperty("CorrectForSolidAngle",true);
+    alg.setProperty("SignificanceTest", 0.00001);
+    alg.setProperty("CorrectForSolidAngle",false);
 
 
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
     int numFailed = alg.getProperty("NumberOfFailures");
-    TS_ASSERT_EQUALS(numFailed, 2048);
+    TS_ASSERT_EQUALS(numFailed, 200);
 
-    alg.setProperty("CorrectForSolidAngle",false);
+    alg.setProperty("CorrectForSolidAngle",true);
     TS_ASSERT_THROWS_NOTHING( alg.execute());
     TS_ASSERT( alg.isExecuted() );
     numFailed = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed, 0);
+    AnalysisDataService::Instance().remove("MDTSolidAngle");
+
   }
 
   void testLevelsUp()
   {
-      //load ARCS instrument, with all detectors 1
-      //With the solid angle correction turned on, and SignificanceTest = 0.01 should mask the short banks
-      //With the solid angle corection on, and LevelsUp=1, should be no failures
-      // Load the empty instrument
-      Mantid::DataHandling::LoadEmptyInstrument loader;
-      loader.initialize();
-      // TODO: (ticket #5973) Update the next line to not have a hard coded value for the filename 
-      std::string inputFile = "ARCS_Definition_20121011-.xml";
-      loader.setPropertyValue("Filename", inputFile);
-      loader.setPropertyValue("OutputWorkspace", "SolidAngle");
-      loader.execute();
+      Mantid::DataObjects::Workspace2D_sptr ws=WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 10, 1);
+
+      for(size_t i=0;i<ws->getNumberHistograms();i++)
+      {
+          ws->dataY(i)[0]=std::floor(1e9*ws->getDetector(i)->solidAngle(V3D(0,0,0)));
+      }
+      AnalysisDataService::Instance().addOrReplace("MDTLevelsUp",ws);
 
       MedianDetectorTest alg;
       TS_ASSERT_THROWS_NOTHING(alg.initialize());
       TS_ASSERT(alg.isInitialized());
       // Set the properties
-      alg.setPropertyValue("InputWorkspace", "SolidAngle");
+      alg.setPropertyValue("InputWorkspace", "MDTLevelsUp");
       alg.setPropertyValue("OutputWorkspace","MedianDetectorTestOutput");
       // set significance test to small
-      alg.setProperty("StartWorkspaceIndex",2);//no monitors
-      alg.setProperty("SignificanceTest", 0.01);
-      alg.setProperty("CorrectForSolidAngle",true);
-
+      alg.setProperty("SignificanceTest", 0.00001);
+      alg.setProperty("CorrectForSolidAngle",false);
+      alg.setProperty("LevelsUp","0");
 
       TS_ASSERT_THROWS_NOTHING( alg.execute());
       TS_ASSERT( alg.isExecuted() );
       int numFailed = alg.getProperty("NumberOfFailures");
-      TS_ASSERT_EQUALS(numFailed, 2048);
+      TS_ASSERT_EQUALS(numFailed, 200);
 
       alg.setProperty("LevelsUp","1");
       TS_ASSERT_THROWS_NOTHING( alg.execute());
       TS_ASSERT( alg.isExecuted() );
       numFailed = alg.getProperty("NumberOfFailures");
       TS_ASSERT_EQUALS(numFailed, 0);
+      AnalysisDataService::Instance().remove("MDTLevelsUp");
   }
 
   MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput")
@@ -219,7 +211,7 @@ public:
 
     // Register the workspace in the data service
     AnalysisDataService::Instance().add(m_IWSName, space);
-    
+
     // Load the instrument data
     Mantid::DataHandling::LoadInstrument loader;
     loader.initialize();

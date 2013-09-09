@@ -1,3 +1,11 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This header MAY NOT be included in any test from a package below DataObjects
+ *    (e.g. Kernel, Geometry, API).
+ *  Conversely, this file (and its cpp) MAY NOT be modified to use anything from a
+ *  package higher than DataObjects (e.g. any algorithm), even if via the factory.
+ *********************************************************************************/
 #ifndef WORKSPACECREATIONHELPER_H_
 #define WORKSPACECREATIONHELPER_H_
 //------------------------------------------------------------------------------

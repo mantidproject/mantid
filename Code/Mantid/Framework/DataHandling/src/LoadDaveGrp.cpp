@@ -42,7 +42,8 @@ LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0)
 int LoadDaveGrp::confidence(Kernel::FileDescriptor & descriptor) const
 {
   const std::string & extn = descriptor.extension();
-  if(extn.compare(".grp") != 0 && extn.compare(".sqe") != 0 && extn.compare(".txt") != 0) return 0;
+  if(extn.compare(".grp") != 0 && extn.compare(".sqe") != 0 &&
+     extn.compare(".txt") != 0 && extn.compare(".dat") != 0) return 0;
 
   if(!descriptor.isAscii()) return 0;
 
@@ -91,6 +92,7 @@ void LoadDaveGrp::init()
   exts.push_back(".grp");
   exts.push_back(".sqe");
   exts.push_back(".txt");
+  exts.push_back(".dat");
 
   this->declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),
                         "A DAVE grouped ASCII file");

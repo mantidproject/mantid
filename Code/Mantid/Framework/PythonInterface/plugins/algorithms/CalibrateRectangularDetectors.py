@@ -83,6 +83,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              "Maximum window around a peak to search for it. Optional.")
+        self.declareProperty("MinimumPeakHeight", 2., "Minimum value allowed for peak height")
         self.declareProperty("PeakFunction", "Gaussian", StringListValidator(["BackToBackExponential", "Gaussian", "Lorentzian"]),
                              "Type of peak to fit. Used only with CrossCorrelation=False")
         self.declareProperty("BackgroundType", "Flat", StringListValidator(['Flat', 'Linear', 'Quadratic']),
@@ -313,8 +314,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             for ws in [str(wksp)+"cc3", str(wksp)+"offset3", str(wksp)+"mask3"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, 
+        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, 
                                 OutputWorkspace=str(wksp)+"group")
+        if (numGroupedSpectra==0) or (numGroups==0):
+            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
         lcinst = str(self._instrument)
         
         if "dspacemap" in self._outTypes:
@@ -366,8 +369,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if not "histo" in self.getProperty("Extension").value:
             wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                          Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, 
+        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, 
                                 OutputWorkspace=str(wksp)+"group")
+        if (numGroupedSpectra==0) or (numGroups==0):
+            raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
         if len(self._smoothGroups) > 0:
             wksp = SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
                               NPoints=self._smoothGroups, GroupingWorkspace=str(wksp)+"group")
@@ -378,6 +383,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         GetDetOffsetsMultiPeaks(InputWorkspace=str(wksp), OutputWorkspace=str(wksp)+"offset",
                                 DReference=self._peakpos, 
                                 FitWindowMaxWidth=self.getProperty("PeakWindowMax").value, 
+                                MinimumPeakHeight=self.getProperty("MinimumPeakHeight").value,
                                 BackgroundType=self.getProperty("BackgroundType").value,
                                 MaxOffset=self._maxoffset, NumberPeaksWorkspace=str(wksp)+"peaks", 
                                 MaskWorkspace=str(wksp)+"mask")
@@ -493,9 +499,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if (backNum > 0):
                 backRun = self._loadData(backNum, SUFFIX, filterWall)
                 samRun -= backRun
-            origRun = samRun
-            if str(self._instrument) == "SNAP":
-                origRun = CloneWorkspace(samRun, "tmp")
             if self.getProperty("CrossCorrelation").value:
                 samRun = self._cccalibrate(samRun, calib, filterLogs)
             else:
@@ -503,19 +506,16 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if self._xpixelbin*self._ypixelbin>1 or len(self._smoothGroups) > 0:
                 if AnalysisDataService.doesExist(str(samRun)):
                     AnalysisDataService.remove(str(samRun))
-                if str(self._instrument) == "SNAP":
-                    samRun = RenameWorkspace(origRun,"%s_%d" % (self._instrument, samNum))
-                else:
-                    samRun = self._loadData(samNum, SUFFIX, filterWall)
-                    LRef = self.getProperty("UnwrapRef").value
-                    DIFCref = self.getProperty("LowResRef").value
-                    if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
-                        if LRef > 0:
-                            wksp = UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
-                                             LRef=LRef)
-                        if DIFCref > 0:
-                            wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
-                                                   ReferenceDIFC=DIFCref)
+                samRun = self._loadData(samNum, SUFFIX, filterWall)
+                LRef = self.getProperty("UnwrapRef").value
+                DIFCref = self.getProperty("LowResRef").value
+                if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
+                    if LRef > 0:
+                        wksp = UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
+                                         LRef=LRef)
+                    if DIFCref > 0:
+                        wksp = RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp.name(), 
+                                               ReferenceDIFC=DIFCref)
             else:
                 samRun = ConvertUnits(InputWorkspace=samRun, OutputWorkspace=samRun.name(),
                                       Target="TOF")

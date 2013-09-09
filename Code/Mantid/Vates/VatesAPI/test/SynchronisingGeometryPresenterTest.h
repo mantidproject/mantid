@@ -153,6 +153,7 @@ public:
     MockGeometryView gView;
     EXPECT_CALL(gView, getDimensionViewFactory()).WillOnce(ReturnRef(factory));
     EXPECT_CALL(gView, addDimensionView(_)).Times(5);
+    EXPECT_CALL(gView, getBinDisplayMode()).Times(1).WillOnce(Return(Simple));
 
     MDGeometryXMLParser parser(constructXML());
     parser.execute();
@@ -211,6 +212,7 @@ public:
     
     NiceMock<MockGeometryView> gView;
     EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
+    EXPECT_CALL(gView, getBinDisplayMode()).Times(1).WillOnce(Return(Simple));
 
     MDGeometryXMLParser parser(constructXML());
     parser.execute();
@@ -234,6 +236,7 @@ public:
     
     NiceMock<MockGeometryView> gView;
     EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
+    EXPECT_CALL(gView, getBinDisplayMode()).Times(1).WillOnce(Return(Simple));
 
     MDGeometryXMLParser parser(constructXML());
     parser.execute();
@@ -268,7 +271,7 @@ public:
     
     NiceMock<MockGeometryView> gView;
     EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
-    EXPECT_CALL(gView, getBinDisplayMode()).Times(1).WillOnce(Return(Simple)); //Will return (SIMPLE) the same Mode as the original, so nothing should happen.
+    EXPECT_CALL(gView, getBinDisplayMode()).Times(2).WillRepeatedly(Return(Simple)); //Will return (SIMPLE) the same Mode as the original, so nothing should happen.
 
     MDGeometryXMLParser parser(constructXML());
     parser.execute();
@@ -294,7 +297,7 @@ public:
     
     NiceMock<MockGeometryView> gView;
     EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
-    EXPECT_CALL(gView, getBinDisplayMode()).Times(1).WillOnce(Return(LowHighStep)); //Will return (LowHighStep) a different Mode to the original.
+    EXPECT_CALL(gView, getBinDisplayMode()).Times(2).WillOnce(Return(Simple)).WillOnce(Return(LowHighStep)); //Will return (LowHighStep) a different Mode to the original.
 
     MDGeometryXMLParser parser(constructXML());
     parser.execute();
@@ -320,7 +323,7 @@ public:
     
     NiceMock<MockGeometryView> gView;
     EXPECT_CALL(gView, getDimensionViewFactory()).WillRepeatedly(ReturnRef(factory));
-    EXPECT_CALL(gView, getBinDisplayMode()).Times(2).WillRepeatedly(Return(LowHighStep)); //Will return (LowHighStep) a different Mode to the original.
+    EXPECT_CALL(gView, getBinDisplayMode()).Times(3).WillOnce(Return(Simple)).WillRepeatedly(Return(LowHighStep)); //Will return (LowHighStep) a different Mode to the original.
 
     MDGeometryXMLParser parser(constructXML());
     parser.execute();

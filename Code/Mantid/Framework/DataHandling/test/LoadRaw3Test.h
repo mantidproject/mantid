@@ -681,7 +681,6 @@ public:
     ads.remove(outputWSName);
   }
 
-
   //no monitors in the selected range 
   void testSeparateMonitorswithMixedLimits()
   {
@@ -933,7 +932,91 @@ public:
     AnalysisDataService::Instance().remove("managedws2");
     AnalysisDataService::Instance().remove("managedws2_Monitors");
     conf.setString(managed,oldValue);
-  } 
+  }
+
+  void testExecWithRawDatafile_s_type()
+  {
+    LoadRaw3 loader12;
+    if ( !loader12.isInitialized() ) loader12.initialize();
+
+    // Now set it...
+    loader12.setPropertyValue("Filename", "CSP74683.s02");
+    loader12.setPropertyValue("LoadMonitors", "Include");
+
+    outputSpace = "LoadLogTest-rawdatafile_so_type";
+    loader12.setPropertyValue("OutputWorkspace", outputSpace);
+
+    TS_ASSERT_THROWS_NOTHING(loader12.execute());
+    TS_ASSERT( loader12.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+
+    // Obtain the expected log files which should be in the same directory as the raw datafile
+    Property *l_property = output2D->run().getLogData( std::string("ICPevent") );
+    TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
+    std::string timeSeriesString = l_timeSeriesString->value();
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,26), "2007-Oct-02 17:16:04   END" );
+
+    AnalysisDataService::Instance().remove(outputSpace);
+
+  }
+
+  void test_withAlternativeDatastream()
+  {
+    LoadRaw3 loader13;
+    if ( !loader13.isInitialized() ) loader13.initialize();
+
+    // Now set it...
+    loader13.setPropertyValue("Filename", "OFFSPEC00004622.raw");
+    loader13.setPropertyValue("LoadMonitors", "Include");
+
+    outputSpace = "ads_datafile";
+    loader13.setPropertyValue("OutputWorkspace", outputSpace);
+
+    TS_ASSERT_THROWS_NOTHING(loader13.execute());
+    TS_ASSERT( loader13.isExecuted() );
+
+    // Get back the saved workspace
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+
+    Property *l_property = output2D->run().getLogData( std::string("ICPevent") );
+    TimeSeriesProperty<std::string> *l_timeSeriesString = dynamic_cast<TimeSeriesProperty<std::string>*>(l_property);
+    std::string timeSeriesString = l_timeSeriesString->value();
+    TS_ASSERT_EQUALS( timeSeriesString.substr(0,36), "2009-Nov-11 11:25:57   CHANGE_PERIOD" );
+
+    Property* string_property = output2D->run().getLogData( std::string("RF1Ampon") );
+    TimeSeriesProperty<std::string> *l_timeSeriesString1 = dynamic_cast<TimeSeriesProperty<std::string>*>(string_property);
+    std::map<DateAndTime, std::string> vmap = l_timeSeriesString1->valueAsMap();
+    std::map<DateAndTime, std::string>::const_iterator itr;
+    for( itr = vmap.begin(); itr != vmap.end(); ++itr )
+    {
+      TS_ASSERT_EQUALS( itr->second, "False" );
+    }
+
+    string_property = output2D->run().getLogData( std::string("ShutterStatus") );
+    l_timeSeriesString1 = dynamic_cast<TimeSeriesProperty<std::string>*>(string_property);
+    std::map<DateAndTime, std::string> vmap1 = l_timeSeriesString1->valueAsMap();
+    for( itr = vmap1.begin(); itr != vmap1.end(); ++itr )
+    {
+      TS_ASSERT_EQUALS( itr->second, "OPEN" );
+    }
+
+    Property* double_property = output2D->run().getLogData( std::string("b2v2") );
+    TimeSeriesProperty<double> *l_timeSeriesDouble1 = dynamic_cast<TimeSeriesProperty<double>*>(double_property);
+    std::map<DateAndTime,double> vmapb2v2 = l_timeSeriesDouble1->valueAsMap();
+    std::map<DateAndTime,double>::const_iterator vmapb2v2itr;
+    for( vmapb2v2itr = vmapb2v2.begin(); vmapb2v2itr != vmapb2v2.end(); ++vmapb2v2itr )
+    {
+      TS_ASSERT_EQUALS( vmapb2v2itr->second, -0.004 );
+    }
+
+    AnalysisDataService::Instance().remove(outputSpace);
+  }
 
 private:
 
@@ -977,7 +1060,5 @@ public:
     TS_ASSERT( loader.execute() );
   }
 };
-
-
 
 #endif /*LoadRaw3TEST_H_*/

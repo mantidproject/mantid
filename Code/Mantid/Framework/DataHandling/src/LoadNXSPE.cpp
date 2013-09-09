@@ -2,7 +2,7 @@
 
 Algorithm to load an NXSPE file into a workspace2D. It will create a new instrument, that can be overwritten later by the LoadInstrument algorithm.
 
-'''NOTE:''' In the current implementation, the rendering of the NXSPE instrument is VERY memry intensive.
+'''NOTE:''' In the current implementation, the rendering of the NXSPE instrument is VERY memory intensive.
 
 
 *WIKI*/
@@ -302,9 +302,7 @@ namespace DataHandling
     Geometry::ObjComponent *sample = new Geometry::ObjComponent("sample");
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
-
-    Geometry::Detector *det;
-
+    
     Geometry::Object_const_sptr cuboid(createCuboid(0.1,0.1,0.1));//FIXME: memory hog on rendering. Also, make each detector separate size
     for (std::size_t i=0;i<numSpectra;++i)
     {
@@ -317,14 +315,12 @@ namespace DataHandling
       Kernel::V3D pos;
       pos.spherical(r,polar.at(i),azimuthal.at(i));
 
-      det = new Geometry::Detector("pixel",static_cast<int>(i+1),sample);
+      Geometry::Detector *det = new Geometry::Detector("pixel",static_cast<int>(i+1),sample);
       det->setPos(pos);
       det->setShape(cuboid);
       instrument->add(det);
       instrument->markAsDetector(det);
     }
-
-
 
     setProperty("OutputWorkspace", outputWS);
   }

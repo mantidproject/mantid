@@ -1,3 +1,11 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This header MAY NOT be included in any test from a package below API
+ *    (e.g. Kernel, Geometry).
+ *  Conversely, this file MAY NOT be modified to use anything from a package higher
+ *  than API (e.g. any algorithm or concrete workspace), even if via the factory.
+ *********************************************************************************/
 #ifndef MANTID_TESTHELPERS_BOXCONTROLLER_DUMMUY_IO_H
 #define MANTID_TESTHELPERS_BOXCONTROLLER_DUMMUY_IO_H
 

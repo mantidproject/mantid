@@ -2,6 +2,9 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/System.h"
 #include <stdexcept>
+#include <iomanip>
+#include <ios>
+#include <iostream>
 #include <cfloat>
 
 namespace Mantid
@@ -690,6 +693,31 @@ namespace Geometry
     calculateB();
     return;
   }  
+
+  std::ostream& operator<<(std::ostream &out, const UnitCell& unitCell)
+  {
+    // always show the lattice constants
+    out << "Lattice Parameters:"
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.a()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.b()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.c()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.alpha()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.beta()
+        << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.gamma();
+
+    // write out the uncertainty if there is a positive one somewhere
+    if ((unitCell.errora() > 0) || (unitCell.errorb() > 0) || (unitCell.errorc() > 0)
+        || (unitCell.erroralpha() > 0) || (unitCell.errorbeta() > 0) || (unitCell.errorgamma() > 0))
+      out << "\nParameter Errors  :"
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errora()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorb()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorc()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.erroralpha()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorbeta()
+          << std::fixed << std::setprecision(3) << std::setw(9) << unitCell.errorgamma();
+
+    return out;
+  }
 
 
 } // namespace Mantid

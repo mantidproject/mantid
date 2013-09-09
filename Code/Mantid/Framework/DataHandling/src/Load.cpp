@@ -779,6 +779,9 @@ namespace Mantid
             //childWs->setName(isGroup->getName() + "_" + boost::lexical_cast<std::string>(count));
             group->addWorkspace(childWs);
           }
+
+          // Remove the old group from the ADS
+          AnalysisDataService::Instance().remove(isGroup->getName());
         }
         else
         {

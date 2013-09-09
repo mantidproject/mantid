@@ -51,6 +51,9 @@ namespace Mantid
                         const double l1, const double l2,
                         const double twoTheta, const DeltaEMode::Type emode, const double efixed);
 
+      /// Convert to ElasticQ
+      static double run(const double twoTheta, const double efixed);
+
     private:
       /// Perform a quick conversion
       static double convertQuickly(const double srcValue, const double factor, const double power);
@@ -59,6 +62,9 @@ namespace Mantid
                                   const double srcValue,
                                   const double l1, const double l2,
                                   const double twoTheta, const DeltaEMode::Type emode, const double efixed);
+
+      /// Convert to ElasticQ from Energy
+      static double convertToElasticQ(const double twoTheta, const double efixed);
     };
 
 

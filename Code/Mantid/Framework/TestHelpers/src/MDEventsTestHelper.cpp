@@ -1,3 +1,10 @@
+/*********************************************************************************
+ *  PLEASE READ THIS!!!!!!!
+ *
+ *  This collection of functions MAY NOT be used in any test from a package below
+ *  the level of MDEvents (e.g. Kernel, Geometry, API, DataObjects).
+ *********************************************************************************/
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -245,7 +252,7 @@ namespace MDEventsTestHelper
           MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, max, numBins)),
           MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, max, numBins)),
           MDHistoDimension_sptr(new MDHistoDimension("z","z","m", 0.0, max, numBins)),
-          MDHistoDimension_sptr(new MDHistoDimension("t","z","m", 0.0, max, numBins))
+          MDHistoDimension_sptr(new MDHistoDimension("t","t","m", 0.0, max, numBins))
           );
     }
     Mantid::MDEvents::MDHistoWorkspace_sptr ws_sptr(ws);

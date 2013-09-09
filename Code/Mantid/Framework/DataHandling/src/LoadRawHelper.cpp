@@ -10,6 +10,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Glob.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
@@ -19,8 +20,11 @@
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/shared_ptr.hpp>
+#include <Poco/File.h>
 #include <Poco/Path.h>
+#include <Poco/DirectoryIterator.h>
 #include <Poco/DateTimeParser.h>
+#include <Poco/DateTimeFormat.h>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
 #include "MantidKernel/Strings.h"
@@ -650,45 +654,68 @@ namespace Mantid
     /// @param localWorkspace :: The workspace to load the logs for
     /// @param progStart :: starting progress fraction
     /// @param progEnd :: ending progress fraction
-    void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd )
+    void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd)
     {
+      //search for the log file to load, and save their names in a set.
+      std::list<std::string> logFiles = searchForLogFiles(fileName);
 
       g_log.debug("Loading the log files...");
       if( progStart < progEnd ) {
         m_prog = progStart;
       }
+
       progress(m_prog, "Reading log files...");
-      IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
-      // Pass through the same input filename
-      loadLog->setPropertyValue("Filename", fileName);
-      // Set the workspace property to be the same one filled above
-      loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
 
-      // Enable progress reporting by Child Algorithm - if progress range has duration
-      if( progStart < progEnd ) {
-        loadLog->addObserver(m_progressObserver);
-        setChildStartProgress(progStart);
-        setChildEndProgress(progEnd);
-      }
-
-
-      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-      try
+      //Iterate over and load each log file into the localWorkspace.
+      std::list<std::string>::const_iterator logPath;
+      for (logPath = logFiles.begin(); logPath != logFiles.end(); ++logPath)
       {
-        loadLog->execute();
-      } catch (std::exception&)
-      {
-        g_log.error("Unable to successfully run LoadLog Child Algorithm");
-      }
+        // Create a new object for each log file.
+        IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
+        // Pass through the same input filename
+        loadLog->setPropertyValue("Filename", *logPath);
+        // Set the workspace property to be the same one filled above
+        loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+        // Pass the name of the log file explicitly to LoadLog.
+        loadLog->setPropertyValue("Names", extractLogName(*logPath));
+        // Enable progress reporting by Child Algorithm - if progress range has duration
+        if ( progStart < progEnd )
+        {
+          loadLog->addObserver(m_progressObserver);
+          setChildStartProgress(progStart);
+          setChildEndProgress(progEnd);
+        }
+        // Now execute the Child Algorithm. Catch and log any error, but don't stop.
+        try
+        {
+          loadLog->execute();
+        }
+        catch (std::exception&)
+        {
+          g_log.error("Unable to successfully run LoadLog Child Algorithm");
+        }
 
-      if (!loadLog->isExecuted())
-      {
-        g_log.error("Unable to successfully run LoadLog Child Algorithm");
+        if (!loadLog->isExecuted())
+        {
+          g_log.error("Unable to successfully run LoadLog Child Algorithm");
+        }
       }
-
       // Make log creator object and add the run status log if we have the appropriate ICP log
       m_logCreator.reset(new ISISRunLogs(localWorkspace->run(), m_numberOfPeriods));
       m_logCreator->addStatusLog(localWorkspace->mutableRun());
+    }
+
+    /**
+     * Extract the log name from the path to the log file.
+     * @param path :: Path to the log file
+     * @return logName :: The name of the log file.
+     */
+    std::string LoadRawHelper::extractLogName(const std::string &path)
+    {
+      // The log file's name, including workspace (e.g. CSP78173_ICPevent)
+      std::string fileName = Poco::Path(Poco::Path(path).getFileName()).getBaseName();
+      // Return only the log name (excluding workspace, e.g. ICPevent)
+      return (fileName.substr(fileName.find('_') + 1));
     }
 
     /**
@@ -1032,7 +1059,6 @@ namespace Mantid
             }
             interruption_point();
           }
-
         }
         else
         {
@@ -1061,6 +1087,182 @@ namespace Mantid
         if(c == 126) confidence = 80;
       }
       return confidence;
+    }
+
+    /**
+     * Searches for log files related to RAW file loaded using LoadLog algorithm.
+     * @param pathToRawFile The path and name of the raw file.
+     * @returns A set containing paths to log files related to RAW file used.
+     */
+    std::list<std::string> LoadRawHelper::searchForLogFiles(const std::string& pathToRawFile)
+    {
+      // If pathToRawFile is the filename of a raw datafile then search for potential log files
+      // in the directory of this raw datafile. Otherwise check if it is a potential
+      // log file. Add the filename of these potential log files to: potentialLogFiles.
+      std::set<std::string> potentialLogFiles;
+      // Using a list instead of a set to preserve order. The three column names will
+      // be added to the end of the list. This means if a column exists in the two
+      // and three column file then it will be overridden correctly.
+      std::list<std::string> potentialLogFilesList;
+
+      // File property checks whether the given path exists, just check that is actually a file
+      Poco::File l_path( pathToRawFile );
+      if ( l_path.isDirectory() )
+      {
+        g_log.error("In LoadLog: " + pathToRawFile + " must be a filename not a directory.");
+        throw Exception::FileError("Filename is a directory:" , pathToRawFile);
+      }
+
+      // start the process or populating potential log files into the container: potentialLogFiles
+      std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
+      if ( isAscii(pathToRawFile) && l_filenamePart.rfind("_") != std::string::npos )
+      {
+        // then we will assume that the file is an ISIS log file
+        potentialLogFiles.insert(pathToRawFile);
+      }
+      else
+      {
+        // then we will assume that the file is an ISIS raw file. The file validator
+        // will have warned the user if the extension is not one of the suggested ones.
+
+        // strip out the raw data file identifier
+        std::string l_rawID("");
+        size_t idx = l_filenamePart.rfind('.');
+
+        if( idx != std::string::npos )
+        {
+          l_rawID = l_filenamePart.substr(0, l_filenamePart.rfind('.'));
+        }
+        else
+        {
+          l_rawID = l_filenamePart;
+        }
+        /// check for alternate data stream exists for raw file
+        /// if exists open the stream and read  log files name  from ADS
+        if(adsExists(pathToRawFile))
+        {
+          potentialLogFiles = getLogFilenamesfromADS(pathToRawFile);
+        }
+        else
+        {
+          // look for log files in the directory of the raw datafile
+          std::string pattern(l_rawID + "_*.txt");
+          Poco::Path dir(pathToRawFile);
+          dir.makeParent();
+
+          try
+          {
+            Kernel::Glob::glob(Poco::Path(dir).resolve(pattern),potentialLogFiles);
+            //push potential log files from set to list.
+            potentialLogFilesList.insert(potentialLogFilesList.begin(), potentialLogFiles.begin(), potentialLogFiles.end());
+          }
+          catch(std::exception &)
+          {
+          }
+        }
+        // Remove extension from path, and append .log to path.
+        std::string logName = pathToRawFile.substr(0, pathToRawFile.rfind('.')) + ".log";
+        // Check if log file exists in current directory.
+        std::ifstream fileExists(logName.c_str());
+        if(fileExists)
+        {
+          // Push three column filename to end of list.
+          potentialLogFilesList.insert(potentialLogFilesList.end(), logName);
+        }
+      }
+      return (potentialLogFilesList);
+    }
+
+    /**
+     * This method looks for ADS with name checksum exists
+     * @param pathToFile The path and name of the file.
+     * @return True if ADS stream checksum exists
+     */
+    bool LoadRawHelper::adsExists(const std::string &pathToFile)
+    {
+      #ifdef _WIN32
+        std::string adsname(pathToFile+":checksum");
+        std::ifstream adstream(adsname.c_str());
+        if (!adstream)
+        {
+          return false;
+        }
+        adstream.close();
+        return true;
+      #else
+        UNUSED_ARG(pathToFile);
+        return (false);
+      #endif
+    }
+
+    /**
+     * This method reads the checksum ADS associated with the raw file and returns the filenames of the log files
+     * @param pathToRawFile The path and name of the raw file.
+     * @return list of logfile names.
+     */
+    std::set<std::string> LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile)
+    {
+      std::string adsname(pathToRawFile + ":checksum");
+      std::ifstream adstream(adsname.c_str());
+      if(!adstream)
+      {
+        return (std::set<std::string>());
+      }
+
+      std::string str;
+      std::string path;
+      std::string logFile;
+      std::set<std::string>logfilesList;
+      Poco::Path logpath(pathToRawFile);
+      size_t pos = pathToRawFile.find_last_of("/");
+      if (pos == std::string::npos)
+      {
+        pos = pathToRawFile.find_last_of("\\");
+      }
+      if (pos!=std::string::npos)
+      {
+        path = pathToRawFile.substr(0,pos);
+      }
+      while (Mantid::Kernel::extractToEOL(adstream,str))
+      {
+        std::string fileName;
+        pos = str.find("*");
+        if ( pos == std::string::npos )
+           continue;
+        fileName = str.substr(pos+1,str.length()-pos);
+        pos = fileName.find("txt");
+        if ( pos == std::string::npos )
+          continue;
+        logFile = path + "/" + fileName;
+        if ( logFile.empty() )
+          continue;
+        logfilesList.insert(logFile);
+      }
+      return (logfilesList);
+    }
+
+    /**
+     * Checks whether filename is a simple text file
+     * @param filename :: The filename to inspect
+     * @returns true if the filename has the .txt extension
+     */
+    bool LoadRawHelper::isAscii(const std::string& filename)
+    {
+      FILE* file = fopen(filename.c_str(), "rb");
+      char data[256];
+      size_t n = fread(data, 1, sizeof(data), file);
+      fclose(file);
+      char *pend = &data[n];
+      // Call it a binary file if we find a non-ascii character in the first 256 bytes of the file.
+      for( char *p = data;  p < pend; ++p )
+      {
+        unsigned long ch = (unsigned long)*p;
+        if( !(ch <= 0x7F) )
+        {
+          return false;
+        }
+      }
+      return true;
     }
 
   } // namespace DataHandling

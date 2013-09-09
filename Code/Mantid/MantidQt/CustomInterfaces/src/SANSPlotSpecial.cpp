@@ -220,7 +220,9 @@ void SANSPlotSpecial::clearInterceptDerived()
 
   for ( int i = 0; i < m_uiForm.tbDerived->rowCount(); i++ )
   {
-    m_uiForm.tbDerived->item(i, SANSPlotSpecial::InterceptDerived)->setText("");
+    auto wi = m_uiForm.tbDerived->item(i, SANSPlotSpecial::InterceptDerived);
+    if (wi)
+      wi->setText("");
   }
 
   m_rearrangingTable = false;

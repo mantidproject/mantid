@@ -23,7 +23,7 @@ PluginCollectionInterface::PluginCollectionInterface(QObject *parent) : QObject(
   m_widgets.append(new SafeQwtPlotPlugin(this));
   m_widgets.append(new AlgorithmPropertiesWidgetPlugin(this));
   m_widgets.append(new ProcessingAlgoWidgetPlugin(this));
-
+  m_widgets.append(new DataSelectorPlugin(this));
   m_widgets.append(new FitBrowserPlugin(this));
   m_widgets.append(new MuonFitBrowserPlugin(this));
   m_widgets.append(new MessageDisplayPlugin(this));

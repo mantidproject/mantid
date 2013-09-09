@@ -4,7 +4,9 @@
 
 Create a [[CalFile|calibration file]] for diffraction focusing based on list of names of the instrument tree.
 
-If a new file name is specified then offsets in the file are all sets to zero and all detectors are selected. If a valid calibration file already exists at the location specified by the [[CalFile|GroupingFileName]] then any existing offsets and selection values will be maintained and only the grouping values changed.
+If a new file name is specified then offsets in the file are all sets to zero and all detectors are selected. 
+If a valid calibration file already exists at the location specified by the [[CalFile|GroupingFileName]] 
+then any existing offsets and selection values will be maintained and only the grouping values changed.
 
 Detectors not assigned to any group will appear as group 0, i.e. not included when using AlignDetector or DiffractionFocussing algorithms.
 
@@ -56,8 +58,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CreateCalFileByNames::initDocs()
     {
-      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree. Deprecated: use [[CreateGroupingWorkspace]] instead.");
-      this->setOptionalMessage("Create a calibration file (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree. Deprecated: use [[CreateGroupingWorkspace]] instead.");
+      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.");
+      this->setOptionalMessage("Create a calibration file (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.");
     }
     
 
@@ -68,8 +70,6 @@ namespace Mantid
 
     CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
     {
-      this->useAlgorithm("CreateGroupingWorkspace");
-      this->deprecatedDate("2011-05-10");
     }
 
     /** Initialisation method. Declares properties to be used in algorithm.

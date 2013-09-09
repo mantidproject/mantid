@@ -53,33 +53,33 @@ class MantidSampleLogDialog : public QDialog
   Q_OBJECT
   
 public:
-  //Constructor
+  ///Constructor
   MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags = 0, size_t experimentInfoIndex = 0);
 
 private slots:
-  //Plot logs
+  ///Plot logs
   void importSelectedLogs();
 
-  // Show the stats of the selected log
+  /// Show the stats of the selected log
   void showLogStatistics();
   void showLogStatisticsOfItem(QTreeWidgetItem * item);
 
-  //Context menu popup
+  ///Context menu popup
   void popupMenu(const QPoint & pos);
 
-  //Import a single item
+  ///Import a single item
   void importItem(QTreeWidgetItem *item);
 
   void selectExpInfoNumber(int num);
 
 private:
-  //Initialize the layout
+  ///Initialize the layout
   void init();
   
-  //A tree widget
+  ///A tree widget
   QTreeWidget *m_tree;
 
-  //The workspace name
+  ///The workspace name
   std::string m_wsname;
 
   /// Index into the ExperimentInfo list.
@@ -88,22 +88,25 @@ private:
   /// The actual experiment info being looked at.
   Mantid::API::ExperimentInfo_const_sptr m_ei;
 
-  //Buttons to do things  
+  ///Buttons to do things
   QPushButton *buttonPlot, *buttonClose;
 
-  // Filter radio buttons
+  /// Filter radio buttons
   QRadioButton *filterNone, *filterStatus, *filterPeriod, *filterStatusPeriod;
-  
-  // Stats labels
-  QLabel* statLabels[5]; //minLabel, maxLabel, meanLabel, medianLabel, stddevLabel;
 
-  // Testboxes with stats data
-  QLineEdit  * statValues[5];
+  /// Number of statistic values
+  static const std::size_t NUM_STATS = 6;
+
+  /// Stats labels
+  QLabel* statLabels[NUM_STATS]; //minLabel, maxLabel, meanLabel, medianLabel, stddevLabel;
+
+  /// Testboxes with stats data
+  QLineEdit  * statValues[NUM_STATS];
 
   /// Widget to select the # of the experiment info to look at.
   QSpinBox * m_spinNumber;
 
-  //A pointer to the MantidUI object
+  ///A pointer to the MantidUI object
   MantidUI* m_mantidUI;
   /// these values are used to specify the format of the log file, all of which are stored as strings
   enum logType

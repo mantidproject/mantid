@@ -81,21 +81,6 @@ public:
         TS_ASSERT_EQUALS(maskWS->isMasked(detIds), true);
     }
 
-    void test_InfoNode()
-    {
-      Mantid::DataObjects::MaskWorkspace* ws = new Mantid::DataObjects::MaskWorkspace(10);
-      ws->initialize(100, 1, 1);
-
-      Mantid::API::Workspace::InfoNode rootNode( *ws );
-      ws->addInfoNodeTo( rootNode );
-      auto &node = *rootNode.nodes()[0];
-      TS_ASSERT_EQUALS( node.nodes().size(), 0 );
-      TS_ASSERT_EQUALS( node.lines().size(), 4 );
-      TS_ASSERT_EQUALS( node.lines()[0], "MaskWorkspace" );
-      TS_ASSERT_EQUALS( node.lines()[1], "Title: " );
-      TS_ASSERT_EQUALS( node.lines()[2], "Histograms: 100" );
-      TS_ASSERT_EQUALS( node.lines()[3], "Masked: 0" );
-    }
 };
 
 #endif // MANTID_DATAOBJECTS_MASKWORKSPACETEST_H

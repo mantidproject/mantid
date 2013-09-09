@@ -240,7 +240,6 @@ namespace Kernel
     /** Constructor from string
      * @param str :: string of comma or space-separated numbers for each component */
     VMDBase(const std::string & str)
-    : nd(nd)
     {
       using boost::algorithm::split;
       using boost::algorithm::is_any_of;
@@ -499,7 +498,7 @@ namespace Kernel
     /** @return the length of this vector */
     TYPE length() const
     {
-      return TYPE(sqrt(this->scalar_prod(*this)));
+      return TYPE(std::sqrt(this->norm2()));
     }
 
     /** @return the length of this vector */
@@ -508,6 +507,11 @@ namespace Kernel
       return this->length();
     }
 
+    /** @return the length of this vector */
+    TYPE norm2() const
+    {
+      return this->scalar_prod(*this);
+    }
 
     //-------------------------------------------------------------------------------------------
     /** Normalize this vector to unity length

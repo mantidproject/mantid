@@ -72,7 +72,6 @@ namespace Algorithms
   {
     IAlgorithm_sptr alg = this->createChildAlgorithm("LoadEmptyInstrument", 0.0, 0.3, true);
     alg->setPropertyValue("Filename", getPropertyValue("Filename"));
-    alg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
     alg->executeAsChildAlg();
 
     MatrixWorkspace_sptr mws = alg->getProperty("OutputWorkspace");

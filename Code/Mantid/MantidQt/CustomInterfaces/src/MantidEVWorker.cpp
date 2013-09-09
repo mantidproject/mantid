@@ -8,8 +8,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
+#include "MantidAPI/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include <exception>
 
@@ -990,9 +989,8 @@ bool MantidEVWorker::getUB( const std::string & peaks_ws_name,
 
     if ( lab_coords )    // Try to get goniometer matrix from first peak 
     {                    // and adjust UB for goniometer rotation
-      Mantid::DataObjects::Peak peak = Mantid::DataObjects::Peak(peaks_ws->getPeak(0));
-      Mantid::Kernel::Matrix<double> goniometer_matrix(3, 3, true);
-      goniometer_matrix = peak.getGoniometerMatrix();
+      const IPeak & peak = peaks_ws->getPeak(0);
+      auto goniometer_matrix = peak.getGoniometerMatrix();
       UB = goniometer_matrix * UB;
     }
   }
@@ -1013,41 +1011,83 @@ bool MantidEVWorker::getUB( const std::string & peaks_ws_name,
  *                        lattice from.
  *  @param md_ws_name     The name of the md workspace to copy the
  *                        lattice to.
+ *  @param event_ws_name  The name of the event workspace to copy the
+ *                        lattice to.
  *  @return true if the copy was done, false if something went wrong.
  */
 bool MantidEVWorker::copyLattice( const std::string & peaks_ws_name,
-                                  const std::string & md_ws_name )
+                                  const std::string & md_ws_name,
+                                  const std::string & event_ws_name)
                            
 {
-  if ( !isPeaksWorkspace( peaks_ws_name ) )
+  // fail if peaks workspace is not there
+  if ( !isPeaksWorkspace(peaks_ws_name) )
   {
     return false;
   }
 
-  if ( !isMDWorkspace( md_ws_name ) )
+  // must have either md or event workspace
+  if ((md_ws_name.empty()) && (event_ws_name.empty()))
   {
-    return false;
+      return false;
   }
 
-  try
+  // copy onto md workspace
+  if (!md_ws_name.empty())
   {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CopySample");
-    alg->setProperty("InputWorkspace",peaks_ws_name);
-    alg->setProperty("OutputWorkspace",md_ws_name);
-    alg->setProperty("CopyName",       false);
-    alg->setProperty("CopyMaterial",   false);
-    alg->setProperty("CopyEnvironment",false);
-    alg->setProperty("CopyShape",      false);
-    alg->setProperty("CopyLattice",    true);
-    alg->execute();
+    if (!isMDWorkspace(md_ws_name))
+    {
+      return false;
+    }
+
+    try
+    {
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CopySample");
+      alg->setProperty("InputWorkspace",peaks_ws_name);
+      alg->setProperty("OutputWorkspace",md_ws_name);
+      alg->setProperty("CopyName",       false);
+      alg->setProperty("CopyMaterial",   false);
+      alg->setProperty("CopyEnvironment",false);
+      alg->setProperty("CopyShape",      false);
+      alg->setProperty("CopyLattice",    true);
+      alg->execute();
+    }
+    catch(...)
+    {
+      g_log.notice() << "\n";
+      g_log.notice() << "CopySample from " << peaks_ws_name <<
+                        " to " << md_ws_name << " FAILED\n\n";
+      return false;
+    }
   }
-  catch(...)
+
+  // copy onto
+  if (!event_ws_name.empty())
   {
-    g_log.notice() << std::endl;
-    g_log.notice() << "CopySample from " << peaks_ws_name <<
-                                 " to " << md_ws_name << " FAILED" << std::endl;
-    g_log.notice() << std::endl;
-    return false;
+    if (!isEventWorkspace(event_ws_name))
+    {
+      return false;
+    }
+
+    try
+    {
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("CopySample");
+      alg->setProperty("InputWorkspace",peaks_ws_name);
+      alg->setProperty("OutputWorkspace",event_ws_name);
+      alg->setProperty("CopyName",       false);
+      alg->setProperty("CopyMaterial",   false);
+      alg->setProperty("CopyEnvironment",false);
+      alg->setProperty("CopyShape",      false);
+      alg->setProperty("CopyLattice",    true);
+      alg->execute();
+    }
+    catch(...)
+    {
+      g_log.notice() << "\n";
+      g_log.notice() << "CopySample from " << peaks_ws_name <<
+                        " to " << event_ws_name << " FAILED\n\n";
+      return false;
+    }
   }
 
   return true;
@@ -1065,14 +1105,12 @@ bool MantidEVWorker::copyLattice( const std::string & peaks_ws_name,
  *                         it is in sample coordinates.
  * @param  Q               The Q-vector.
  */
-std::vector< std::pair<std::string,std::string> >MantidEVWorker::PointInfo( const std::string & peaks_ws_name,
-                                                                                  bool          lab_coords,
-                                                                            Mantid::Kernel::V3D Q)
+std::vector< std::pair<std::string,std::string> > MantidEVWorker::PointInfo( const std::string & peaks_ws_name,
+                                                                             bool lab_coords,
+                                                                             Mantid::Kernel::V3D Q)
 {
-  const auto& ADS = AnalysisDataService::Instance();
-  Mantid::DataObjects::PeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<Mantid::DataObjects::PeaksWorkspace>(peaks_ws_name);
-
-  return peaks_ws->PeakInfo( Q , lab_coords); 
+  IPeaksWorkspace_sptr peaks_ws = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(peaks_ws_name);
+  return peaks_ws->peakInfo( Q , lab_coords);
 }
 
 } // namespace CustomInterfaces

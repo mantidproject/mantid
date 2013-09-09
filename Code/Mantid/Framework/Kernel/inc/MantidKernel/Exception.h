@@ -39,7 +39,12 @@ namespace Kernel
         <li><b>std::range_error</b> - Thrown to indicate range errors in internal computations.</li>
         <li><b>std::overflow_error</b> - Thrown to indicate arithmetic overflow.</li>
         <li><b>std::underflow_error</b> - Thrown to indicate arithmetic underflow.</li>
-        <li><b>FileError</b> - Thrown to indicate errors with file operations.</li>
+        <li>
+          <b>FileError</b> - Thrown to indicate errors with file operations.
+          <ul>
+            <li><b>ParseError</b> - Thrown to indicate errors when parsing a file.</li>
+          </ul>
+        </li>
         <li><b>NotFoundError</b> - Thrown to indicate that an item was not found in a collection.</li>
         <li><b>ExistsError</b> - Thrown to indicate that an item was is already found in a collection.</li>
         <li><b>InstrumentDefinitionError</b> - Thrown to indicate a problem with the instrument definition.</li>
@@ -94,6 +99,33 @@ class MANTID_KERNEL_DLL FileError : public std::runtime_error
   FileError& operator=(const FileError& A);
   /// Destructor
   ~FileError() throw() {}
+
+  const char* what() const throw();
+};
+
+/// Records the filename, the description of failure and the line on which it happened
+class MANTID_KERNEL_DLL ParseError : public FileError
+{
+ private:
+  /// Number of the line where the error occured
+  const int m_lineNumber;
+  /// The message returned by what()
+  std::string m_outMessage;
+
+ public:
+  /** 
+   * Constructor
+   * @param desc :: Error description
+   * @param fileName :: Filename where happened
+   * @param lineNumber :: Number of the line where error happened
+   */
+  ParseError(const std::string& desc, const std::string& fileName, const int& lineNumber);
+  /// Copy constructor
+  ParseError(const ParseError& A);
+  /// Assignment operator
+  ParseError& operator=(const ParseError& A);
+  /// Destructor
+  ~ParseError() throw() {}
 
   const char* what() const throw();
 };

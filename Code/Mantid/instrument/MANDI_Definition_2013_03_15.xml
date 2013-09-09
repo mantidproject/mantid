@@ -2,7 +2,7 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument name="MANDI" valid-from   ="2013-03-15 00:00:00"
-                         valid-to     ="2100-01-31 23:59:59"
+                         valid-to     ="2013-07-31 23:59:59"
 		         last-modified="2013-03-18 10:00:00">
   <!--Created by Vickie Lynch-->
   <!--Modified by Vickie Lynch using the MANDI.py script from the Translation Service calibration/geometry/ code. -->
@@ -14,7 +14,7 @@
     <reference-frame>
       <along-beam axis="z"/>
       <pointing-up axis="y"/>
-      <handedness axis="right"/>
+      <handedness val="right"/>
     </reference-frame>
     <default-view view="spherical_y"/>
   </defaults>

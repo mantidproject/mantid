@@ -224,9 +224,6 @@ namespace Mantid
           // This is the assumed deployment directory for parameter files, where we need to be 
           // relative to the directory of the executable, not the current working directory.
           directoryName = Poco::Path(configService.getPropertiesDir()).resolve("../instrument").toString();
-          // Remove the path from the filename
-          std::string instrumentFile = m_filename.substr(dir_end+1,m_filename.size());
-
         }
         fullPathParamIDF = getFullPathParamIDF( directoryName );
       }

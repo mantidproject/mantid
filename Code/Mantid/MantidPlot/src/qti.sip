@@ -63,6 +63,8 @@ public:
   void show();
   void hide();
   bool close();
+  
+  void setFocus();
 
 private:
   MdiSubWindow(const MdiSubWindow&);

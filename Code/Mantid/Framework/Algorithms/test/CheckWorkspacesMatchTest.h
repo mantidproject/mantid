@@ -602,7 +602,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",ws2) );
     
     TS_ASSERT( checker.execute() );
-    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Instrument ParameterMap mismatch" );
+    TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Instrument ParameterMap mismatch (differences in ordering ignored)" );
     // Same, using the !Mantid::API::equals() function
     TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
