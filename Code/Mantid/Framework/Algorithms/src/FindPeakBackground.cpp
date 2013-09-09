@@ -186,7 +186,12 @@ namespace Algorithms
 
       double Ymean, Yvariance, Ysigma;
       MantidVec maskedY;
-      for (size_t l = l0; l < n; ++l)maskedY.push_back(inpY[l]);
+      MantidVec::const_iterator in = std::min_element(inpY.begin(), inpY.end());
+      double bkg0 = inpY[in - inpY.begin()];
+      for (size_t l = l0; l < n; ++l)
+      {
+          maskedY.push_back(inpY[l]-bkg0);
+      }
       MantidVec mask(n-l0,0.0);
       double xn = static_cast<double>(n-l0);
       do
@@ -236,12 +241,12 @@ namespace Algorithms
 				  peaks.push_back(cont_peak());
 				  peaks[peaks.size()-1].start = l+l0;
 			  }
-			  if (peaks.size() > 0)
+			  else if (peaks.size() > 0)
 			  {
 				  size_t ipeak = peaks.size()-1;
 				  if (mask[l] != mask[l-1] && mask[l] == 0)
 				  {
-					  peaks[ipeak].stop = l+l0-1;
+					  peaks[ipeak].stop = l+l0;
 				  }
 				  if (inpY[l+l0] > peaks[ipeak].maxY) peaks[ipeak].maxY = inpY[l+l0];
 			  }
@@ -305,6 +310,13 @@ namespace Algorithms
       throw std::runtime_error("i_min cannot larger or equal to i_max");
     if (p_min >= p_max)
       throw std::runtime_error("p_min cannot larger or equal to p_max");
+
+    // set all parameters to zero
+    out_bg0 = 0.;
+    out_bg1 = 0.;
+    out_bg2 = 0.;
+
+    // accumulate sum
     double sum = 0.0;
     double sumX = 0.0;
     double sumY = 0.0;
@@ -320,22 +332,75 @@ namespace Algorithms
 		  sumXY += X[i]*Y[i];
     }
 
-    // Estimate
-    out_bg0 = 0.;
-    out_bg1 = 0.;
-    out_bg2 = 0.;
-    if (m_backgroundType.compare("Linear") == 0) // linear background
+    // Estimate flat background
+    double bg0_flat = 0.;
+    if(sum != 0.)
+      bg0_flat = sumY/sum;
+
+    // Estimate linear - use Cramer's rule for 2 x 2 matrix
+    double bg0_linear = 0.;
+    double bg1_linear = 0.;
+    double determinant = sum*sumX2-sumX*sumX;
+    if (determinant != 0)
     {
-      // Cramer's rule for 2 x 2 matrix
-      double devisor = sum*sumX2-sumX*sumX;
-      if (devisor != 0)
+      bg0_linear = (sumY*sumX2-sumX*sumXY) / determinant;
+      bg1_linear = (sum*sumXY-sumY*sumX) / determinant;
+    }
+
+    // TODO Estimate quadratic background
+    double bg0_quadratic = 0.;
+    double bg1_quadratic = 0.;
+    double bg2_quadratic = 0.;
+
+    // calculate the chisq - not normalized by the number of points
+    const double INVALID_CHISQ(1.e10); // big invalid value
+    double chisq_flat = 0.;
+    double chisq_linear = 0.;
+    double chisq_quadratic = INVALID_CHISQ;
+    if (sum !=0)
+    {
+      for (size_t i = i_min; i < i_max; ++i)
       {
-		  out_bg0 = (sumY*sumX2-sumX*sumXY)/devisor;
-		  out_bg1 = (sum*sumXY-sumY*sumX)/devisor;
+        if(i >= p_min && i < p_max) continue;
+
+        // accumulate for flat
+        chisq_flat += (bg0_flat - Y[i])*(bg0_flat - Y[i]);
+
+        // accumulate for linear
+        double temp = bg0_linear + bg1_linear * X[i] - Y[i];
+        chisq_linear += (temp * temp);
+
+        // accumulate for quadratic
+        temp = bg0_quadratic + bg1_quadratic * X[i] + bg2_quadratic * X[i] * X[i] - Y[i];
+        chisq_quadratic += (temp * temp);
       }
     }
-    else // flat background
-    {     if(sum != 0) out_bg0 = sumY/sum;
+    chisq_quadratic = INVALID_CHISQ; // TODO
+    if (m_backgroundType == "Flat")
+    {
+      chisq_linear = INVALID_CHISQ;
+      chisq_quadratic = INVALID_CHISQ;
+    }
+    else if (m_backgroundType == "Linear")
+    {
+      chisq_quadratic = INVALID_CHISQ;
+    }
+
+    // choose the right background function to apply
+    if ((chisq_quadratic < chisq_flat) && (chisq_quadratic < chisq_linear))
+    {
+      out_bg0 = bg0_quadratic;
+      out_bg1 = bg1_quadratic;
+      out_bg2 = bg2_quadratic;
+    }
+    else if ((chisq_linear < chisq_flat) && (chisq_linear < chisq_quadratic))
+    {
+      out_bg0 = bg0_linear;
+      out_bg1 = bg1_linear;
+    }
+    else
+    {
+      out_bg0 = bg0_flat;
     }
 
     g_log.debug() << "Estimated background: A0 = " << out_bg0 << ", A1 = "
