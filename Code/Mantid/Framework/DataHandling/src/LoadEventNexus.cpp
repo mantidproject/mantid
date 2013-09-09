@@ -1042,7 +1042,7 @@ void LoadEventNexus::init()
   setPropertyGroup("SingleBankPixelsOnly", grp2);
 
   declareProperty(
-      new PropertyWithValue<bool>("Precount", false, Direction::Input),
+      new PropertyWithValue<bool>("Precount", true, Direction::Input),
       "Pre-count the number of events in each pixel before allocating memory (optional, default False). "
       "This can significantly reduce memory use and memory fragmentation; it may also speed up loading.");
 
