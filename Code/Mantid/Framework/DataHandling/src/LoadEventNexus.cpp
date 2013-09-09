@@ -179,6 +179,8 @@ public:
     prog->report(entry_name + ": precount");
 
     // ---- Pre-counting events per pixel ID ----
+    auto & outputWS = *(alg->WS);
+
     if (alg->precount)
     {
       std::vector<size_t> counts(m_max_id-m_min_id+1, 0);
@@ -190,6 +192,7 @@ public:
       }
 
       // Now we pre-allocate (reserve) the vectors of events in each pixel counted
+      const size_t numEventLists = outputWS.getNumberHistograms();
       for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++)
       {
         if (counts[pixID-m_min_id] > 0)
@@ -197,7 +200,10 @@ public:
           //Find the the workspace index corresponding to that pixel ID
           size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
           // Allocate it
-          alg->WS->getEventList(wi).reserve( counts[pixID-m_min_id] );
+          if ( wi < numEventLists )
+          {
+            outputWS.getEventList(wi).reserve( counts[pixID-m_min_id] );
+          }
           if (alg->getCancel()) break; // User cancellation
         }
       }
@@ -228,9 +234,6 @@ public:
     }
 
     prog->report(entry_name + ": filling events");
-
-    // The workspace
-    EventWorkspace_sptr WS = alg->WS;
 
     // Will we need to compress?
     bool compress = (alg->compressTolerance >= 0);
@@ -347,7 +350,7 @@ public:
         {
           //Find the the workspace index corresponding to that pixel ID
           size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
-          EventList * el = WS->getEventListPtr(wi);
+          EventList * el = outputWS.getEventListPtr(wi);
           if (compress)
             el->compressEvents(alg->compressTolerance, el);
           else
