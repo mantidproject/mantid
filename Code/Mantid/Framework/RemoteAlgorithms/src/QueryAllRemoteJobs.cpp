@@ -62,7 +62,13 @@ void QueryAllRemoteJobs::exec()
 
   std::istream &respStream = jobManager->httpGet("/query");
   JSONObject resp;
+  try {
   initFromStream( resp, respStream);
+  } catch (JSONParseException &ex) {
+    // Nobody else knows what a JSONParseException is, so rethrow as a runtime_error
+    throw( std::runtime_error( "Error parsing data returned from the server.  This probably indicates a server-side error of some kind."));
+  }
+
   if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
     std::vector<std::string> jobIds;
