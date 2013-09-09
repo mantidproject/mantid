@@ -544,6 +544,7 @@ void FitPropertyBrowser::executeSetupManageMenu(const QString& item)
 /// Destructor
 FitPropertyBrowser::~FitPropertyBrowser()
 {
+  m_compositeFunction.reset();
 }
 
 /// Get handler to the root composite function

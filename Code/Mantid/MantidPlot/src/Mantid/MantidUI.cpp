@@ -305,6 +305,8 @@ MantidUI::~MantidUI()
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
+
+  delete m_fitFunction;
 }
 
 void MantidUI::saveSettings() const

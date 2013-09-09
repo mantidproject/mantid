@@ -2,7 +2,6 @@
 #define MANTID_API_TABLEROW_H_
 
 #include "MantidAPI/Column.h"
-#include "MantidKernel/Logger.h"
 
 #include <boost/lexical_cast.hpp>
 #include <ostream>
@@ -24,17 +23,6 @@ namespace API
 {
 
 class TableRowHelper;
-
-#ifdef _WIN32
-#ifdef IN_MANTID_API
-  #define TableRow_DllExport __declspec( dllexport )
-#else
-  #define TableRow_DllExport __declspec( dllimport )
-#endif
-#else
-  #define TableRow_DllExport
-  #define TableRow_DllImport
-#endif
 
 /** \class TableRow
 
@@ -67,7 +55,7 @@ class TableRowHelper;
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class TableRow_DllExport TableRow
+class MANTID_API_DLL TableRow
 {
 public:
     TableRow(const TableRowHelper& trh);
@@ -182,7 +170,7 @@ public:
     std::string& String(size_t col){return cell<std::string>(col);}
 
 private:
-    friend TableRow_DllExport std::ostream& operator<<(std::ostream& s,const TableRow& row);
+    friend MANTID_API_DLL std::ostream& operator<<(std::ostream& s,const TableRow& row);
     std::vector< Column_sptr > m_columns;  ///< Pointers to the columns in the ITableWorkspace
     size_t m_row;          ///< Row number in the TableWorkspace
     mutable size_t m_col;          ///< Current column number (for streaming operations)
@@ -192,7 +180,7 @@ private:
     static Kernel::Logger& g_log;
 };
 
-TableRow_DllExport std::ostream& operator<<(std::ostream& s,const TableRow& row);
+MANTID_API_DLL std::ostream& operator<<(std::ostream& s,const TableRow& row);
 
 } // namespace API
 } // namespace Mantid
