@@ -648,7 +648,7 @@ void ApplicationWindow::initGlobalConstants()
   appStyle = qApp->style()->objectName();
   d_app_rect = QRect();
   projectname = "untitled";
-  lastCopiedLayer = 0;
+  lastCopiedLayer = NULL;
   d_text_copy = NULL;
   d_arrow_copy = NULL;
   d_image_copy = NULL;
@@ -9492,8 +9492,6 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
   }
 
   mantidUI->shutdown();
-  delete mantidUI;
-  mantidUI = NULL;
 
   if( scriptingWindow )
   {
@@ -16210,18 +16208,10 @@ void ApplicationWindow::fitFrameToLayer()
 
 ApplicationWindow::~ApplicationWindow()
 {
-  if (lastCopiedLayer)
-    delete lastCopiedLayer;
-
+  delete lastCopiedLayer;
   delete hiddenWindows;
-
-  if (scriptingWindow)
-  {
-    delete scriptingWindow;
-  }
-
-  if (d_text_editor)
-    delete d_text_editor;
+  delete scriptingWindow;
+  delete d_text_editor;
 
   while(!d_user_menus.isEmpty())
   {
@@ -16233,6 +16223,7 @@ ApplicationWindow::~ApplicationWindow()
   QApplication::clipboard()->clear(QClipboard::Clipboard);
 
   btnPointer->setChecked(true);
+  delete mantidUI;
 }
 
 QString ApplicationWindow::versionString()
