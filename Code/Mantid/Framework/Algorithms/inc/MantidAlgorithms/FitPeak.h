@@ -68,13 +68,16 @@ namespace Algorithms
     void fitPeakMultipleStep();
 
     /// Fit a single peak function with pure peak workspace
-    double fitPeakFuncion();
+    double fitPeakFuncion(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_const_sptr dataws,
+                          size_t wsindex, double startx, double endx);
 
     /// Fit background with multiple domain
     API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
 
     /// Fit peak and background composite function
-    void fitCompositeFunction();
+    bool fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
+                              API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
+                              double startx, double endx);
 
     /// Make a pure peak WS in the fit window region
     void makePurePeakWS(const std::vector<double>& vec_bkgd);
@@ -84,14 +87,16 @@ namespace Algorithms
                        size_t wsindex, double xmin, double xmax,
                        std::vector<double>& vec_caldata);
 
+    /// Fit a function in multi-domain
+    double fitFunctionMD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws,
+                         size_t wsindex, std::vector<double> xmin, std::vector<double> xmax,
+                         std::vector<double>& vec_caldata);
+
     /// Process and store fit result
     void processNStoreFitResult(double rwp);
 
     /// Set up a vector of guessed FWHM
     void setupGuessedFWHM(std::vector<double>& vec_FWHM);
-
-    /// Get vector index
-    size_t getVectorIndex(double x);
 
     /// Push/store a fit result
     void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap);
