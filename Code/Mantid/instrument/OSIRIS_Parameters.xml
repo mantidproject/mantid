@@ -21,7 +21,7 @@
 
 <!-- Reduction workflow parameters under this line -->
 <parameter name="Workflow.Monitor1-ID" >
-  <value val="1" />
+  <value val="0" />
 </parameter>
 <parameter name="Workflow.Monitor1-Area" >
   <value val="1.276e-3" />
@@ -36,7 +36,7 @@
   <value val="1e6" />
 </parameter>
 <parameter name="Workflow.Monitor2-ID" >
-  <value val="2" />
+  <value val="1" />
 </parameter>
 <parameter name="Workflow.Monitor2-Area" >
   <value val="1.276e-3" />
