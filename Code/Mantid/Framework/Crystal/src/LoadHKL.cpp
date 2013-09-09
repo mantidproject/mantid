@@ -170,10 +170,10 @@ namespace Crystal
     g_log.notice() << "LinearScatteringCoef = " << smu << " LinearAbsorptionCoef = " << amu << " Radius = " << radius << " calculated from tbar and transmission of 2 peaks\n";
     API::Run & mrun = ws->mutableRun();
     mrun.addProperty<double>("Radius", radius, true);
-	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
+    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
   			0.0, 0.0, smu, 0.0, smu, amu);
-    Material *mat = new Material("SetInLoadHKL", *neutron, 1.0);
-    ws->mutableSample().setMaterial(*mat);
+    Material mat("SetInLoadHKL", neutron, 1.0);
+    ws->mutableSample().setMaterial(mat);
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
 
 
