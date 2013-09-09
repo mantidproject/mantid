@@ -31,14 +31,14 @@ namespace DataHandling
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ConvertFullprofToXml : public API::Algorithm
+  class DLLExport ConvertFullprofToXML : public API::Algorithm
   {
   public:
-    ConvertFullprofToXml();
-    virtual ~ConvertFullprofToXml();
+    ConvertFullprofToXML();
+    virtual ~ConvertFullprofToXML();
 
     /// Algorithm's name for identification overriding a virtual method
-    virtual const std::string name() const { return "ConvertFullprofToXml";}
+    virtual const std::string name() const { return "ConvertFullprofToXML";}
 
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 1;}

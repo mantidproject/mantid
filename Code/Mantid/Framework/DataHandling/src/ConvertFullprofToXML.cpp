@@ -27,26 +27,26 @@ namespace Mantid
 namespace DataHandling
 {
 
-  DECLARE_ALGORITHM(ConvertFullprofToXml)
+  DECLARE_ALGORITHM(ConvertFullprofToXML)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
- ConvertFullprofToXml::ConvertFullprofToXml()
+ ConvertFullprofToXML::ConvertFullprofToXML()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  ConvertFullprofToXml::~ConvertFullprofToXml()
+  ConvertFullprofToXML::~ConvertFullprofToXML()
   {
   }
 
   //----------------------------------------------------------------------------------------------
   /** Sets documentation strings for this algorithm
     */
-  void ConvertFullprofToXml::initDocs()
+  void ConvertFullprofToXML::initDocs()
   {
     setWikiSummary("Convert the initial fitting parameters in a Fullprof file to XML format in an Instrument Parameter File");
     setOptionalMessage("Convert the initial fitting parameters in a Fullprof file to XML format in an Instrument Parameter File");
@@ -57,7 +57,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Implement abstract Algorithm methods
    */
-  void ConvertFullprofToXml::init()
+  void ConvertFullprofToXML::init()
   {
     // Input file name
     vector<std::string> exts;
@@ -78,7 +78,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Implement abstract Algorithm methods
     */
-  void ConvertFullprofToXml::exec()
+  void ConvertFullprofToXML::exec()
   {
     // Get input
     string datafile = getProperty("Filename");
@@ -102,7 +102,7 @@ namespace DataHandling
     * @param filename :: string for name of the .irf file
     * @param lines :: vector of strings for each non-empty line in .irf file
     */
-  void ConvertFullprofToXml::loadFile(string filename, vector<string>& lines)
+  void ConvertFullprofToXML::loadFile(string filename, vector<string>& lines)
   {
     string line;
 
@@ -147,7 +147,7 @@ namespace DataHandling
     * @param bankstartindexmap :: [output] map to indicate the first line of each bank in vector lines.
     * @param bankendindexmap :: [output] map to indicate the last lie of each bank in vector lines
     */
-  void ConvertFullprofToXml::scanBanks(const vector<string>& lines, vector<int>& banks,
+  void ConvertFullprofToXML::scanBanks(const vector<string>& lines, vector<int>& banks,
                                          map<int, int>& bankstartindexmap, map<int, int>& bankendindexmap)
   {
     int startindex = -1;
@@ -207,7 +207,7 @@ namespace DataHandling
     * @param startlineindex :: [input] index of the first line of the bank in vector of lines
     * @param endlineindex :: [input] index of the last line of the bank in vector of lines
     */
-  void ConvertFullprofToXml::parseResolutionStrings(map<string, double>& parammap, const vector<string>& lines,
+  void ConvertFullprofToXML::parseResolutionStrings(map<string, double>& parammap, const vector<string>& lines,
                                                       int bankid, int startlineindex, int endlineindex)
   {
     string bankline = lines[startlineindex];
@@ -473,7 +473,7 @@ namespace DataHandling
   //----------------------------------------------------------------------------------------------
   /** Parse a line containig bank information
     */
-  void ConvertFullprofToXml::parseBankLine(string line, double& cwl, int& bankid)
+  void ConvertFullprofToXML::parseBankLine(string line, double& cwl, int& bankid)
   {
     // 1. Split along 'Bank'
     std::vector<std::string> v;
