@@ -20,7 +20,7 @@ public:
     TS_ASSERT_EQUALS(bv.upper(), 5);
   }
 
-  void testConstructorInclusive()
+  void testConstructorExclusive()
   {
     BoundedValidator<int> bv(2, 5, true);
     // Test that all the base class member variables are correctly assigned to
@@ -29,8 +29,8 @@ public:
     TS_ASSERT_EQUALS(bv.lower(), 2);
     TS_ASSERT_EQUALS(bv.upper(), 5);
 
-    TS_ASSERT(bv.isLowerInclusive());
-    TS_ASSERT(bv.isUpperInclusive());
+    TS_ASSERT(bv.isLowerExclusive());
+    TS_ASSERT(bv.isUpperExclusive());
   }
 
   void testClone()
@@ -44,8 +44,8 @@ public:
     TS_ASSERT_EQUALS( bv->hasUpper(), bvv->hasUpper() )
     TS_ASSERT_EQUALS( bv->lower(), bvv->lower() )
     TS_ASSERT_EQUALS( bv->upper(), bvv->upper() )
-    TS_ASSERT_EQUALS( bv->isLowerInclusive(), bvv->isLowerInclusive() )
-    TS_ASSERT_EQUALS( bv->isUpperInclusive(), bvv->isUpperInclusive() )
+    TS_ASSERT_EQUALS( bv->isLowerExclusive(), bvv->isLowerExclusive() )
+    TS_ASSERT_EQUALS( bv->isUpperExclusive(), bvv->isUpperExclusive() )
   }
 
 
@@ -56,8 +56,8 @@ public:
     TS_ASSERT_EQUALS(bv.hasUpper(), true);
     TS_ASSERT_EQUALS(bv.lower(), 2);
     TS_ASSERT_EQUALS(bv.upper(), 5);
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), true);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), true);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), true);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), true);
 
 
     bv.clearLower();
@@ -65,16 +65,16 @@ public:
     TS_ASSERT_EQUALS(bv.hasUpper(), true);
     TS_ASSERT_EQUALS(bv.lower(), 0);
     TS_ASSERT_EQUALS(bv.upper(), 5);
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), false);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), true);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), false);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), true);
 
     bv.clearUpper();
     TS_ASSERT_EQUALS(bv.hasLower(), false);
     TS_ASSERT_EQUALS(bv.hasUpper(), false);
     TS_ASSERT_EQUALS(bv.lower(), 0);
     TS_ASSERT_EQUALS(bv.upper(), 0);
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), false);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), false);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), false);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), false);
   }
 
   void testDoubleClear()
@@ -84,8 +84,8 @@ public:
     TS_ASSERT_EQUALS(bv.hasUpper(), true);
     TS_ASSERT_EQUALS(bv.lower(), 2.0);
     TS_ASSERT_EQUALS(bv.upper(), 5.0);
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), true);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), true);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), true);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), true);
 
 
     bv.clearBounds();
@@ -93,8 +93,8 @@ public:
     TS_ASSERT_EQUALS(bv.hasUpper(), false);
     TS_ASSERT_EQUALS(bv.lower(), 0);
     TS_ASSERT_EQUALS(bv.upper(), 0);
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), false);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), false);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), false);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), false);
 
   }
 
@@ -105,8 +105,8 @@ public:
     TS_ASSERT_EQUALS(bv.hasUpper(), true);
     TS_ASSERT_EQUALS(bv.lower(), "A");
     TS_ASSERT_EQUALS(bv.upper(), "B");
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), false);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), false);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), false);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), false);
 
 
     bv.clearBounds();
@@ -114,8 +114,8 @@ public:
     TS_ASSERT_EQUALS(bv.hasUpper(), false);
     TS_ASSERT_EQUALS(bv.lower(), "");
     TS_ASSERT_EQUALS(bv.upper(), "");
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), false);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), false);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), false);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), false);
 
 
     bv.setBounds("C", "D", true);
@@ -123,8 +123,8 @@ public:
     TS_ASSERT_EQUALS(bv.hasUpper(), true);
     TS_ASSERT_EQUALS(bv.lower(), "C");
     TS_ASSERT_EQUALS(bv.upper(), "D");
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), true);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), true);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), true);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), true);
 
   }
 
@@ -135,16 +135,16 @@ public:
     TS_ASSERT_EQUALS(bv.hasUpper(), true);
     TS_ASSERT_EQUALS(bv.lower(), "A");
     TS_ASSERT_EQUALS(bv.upper(), "B");
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), false);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), false);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), false);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), false);
 
     bv.clearBounds();
     TS_ASSERT_EQUALS(bv.hasLower(), false);
     TS_ASSERT_EQUALS(bv.hasUpper(), false);
     TS_ASSERT_EQUALS(bv.lower(), "");
     TS_ASSERT_EQUALS(bv.upper(), "");
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), false);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), false);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), false);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), false);
 
     bv.setLower("C", true);
     bv.setUpper("D");
@@ -152,16 +152,16 @@ public:
     TS_ASSERT_EQUALS(bv.hasUpper(), true);
     TS_ASSERT_EQUALS(bv.lower(), "C");
     TS_ASSERT_EQUALS(bv.upper(), "D");
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), true);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), false);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), true);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), false);
 
     bv.setUpper("E");
     TS_ASSERT_EQUALS(bv.hasLower(), true);
     TS_ASSERT_EQUALS(bv.hasUpper(), true);
     TS_ASSERT_EQUALS(bv.lower(), "C");
     TS_ASSERT_EQUALS(bv.upper(), "E");
-    TS_ASSERT_EQUALS(bv.isLowerInclusive(), true);
-    TS_ASSERT_EQUALS(bv.isUpperInclusive(), false);
+    TS_ASSERT_EQUALS(bv.isLowerExclusive(), true);
+    TS_ASSERT_EQUALS(bv.isUpperExclusive(), false);
 
   }
 
@@ -227,7 +227,7 @@ public:
     TS_ASSERT_EQUALS(ps.isValid("TA"), "");
   }
 
-  void testBoundedValidatorInclusive()
+  void testBoundedValidatorExclusive()
   {
     std::string start("Selected value "), end(")");
     std::string greaterThanEq(" is >= the upper bound (");

@@ -17,7 +17,7 @@ namespace Kernel
 /** @class BoundedValidator BoundedValidator.h Kernel/BoundedValidator.h
 
     BoundedValidator is a validator that requires the values to be between upper or lower bounds, or both. 
-    It offers both inclusive or exclusive bounds. By default the validator uses exclusive bounds. 
+    It offers both inclusive or exclusive bounds. By default the validator uses inclusive bounds.
 
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
@@ -50,8 +50,8 @@ public:
   BoundedValidator() :  TypedValidator<TYPE>(),
     m_hasLowerBound( false), 
     m_hasUpperBound( false),
-    m_lowerInclusive(false),
-    m_upperInclusive(false), 
+    m_lowerExclusive(false),
+    m_upperExclusive(false),
     m_lowerBound(TYPE() ), 
     m_upperBound(TYPE() )
   {
@@ -61,12 +61,12 @@ public:
    * @param lowerBound :: The lower bounding value
    * @param upperBound :: The upper bounding value
    */
-  BoundedValidator(const TYPE lowerBound, const TYPE upperBound, bool inclusive=false)
+  BoundedValidator(const TYPE lowerBound, const TYPE upperBound, bool exclusive=false)
   : TypedValidator<TYPE>(),
     m_hasLowerBound( true), 
     m_hasUpperBound( true),
-    m_lowerInclusive(inclusive),
-    m_upperInclusive(inclusive),
+    m_lowerExclusive(exclusive),
+    m_upperExclusive(exclusive),
     m_lowerBound(lowerBound), 
     m_upperBound(upperBound)
   {}
@@ -83,35 +83,35 @@ public:
   const TYPE&    lower()    const { return m_lowerBound; }
   /// Return the upper bound value
   const TYPE&    upper()    const { return m_upperBound; }
-  /// Check if lower bound is inclusive
-  bool isLowerInclusive() const { return m_lowerInclusive; }
-  /// Check if upper bound is inclusive
-  bool isUpperInclusive() const { return m_upperInclusive; }
+  /// Check if lower bound is exclusive
+  bool isLowerexclusive() const { return m_lowerExclusive; }
+  /// Check if upper bound is exclusive
+  bool isUpperexclusive() const { return m_upperExclusive; }
 
   /// Set lower bound value
-  void setLower( const TYPE& value, const bool inclusive=false ) { 
-    m_lowerInclusive = inclusive; 
+  void setLower( const TYPE& value, const bool exclusive=false ) {
+    m_lowerExclusive = exclusive;
     m_hasLowerBound = true; 
     m_lowerBound = value; 
   }
 
   /// Set upper bound value
-  void setUpper( const TYPE& value, const bool inclusive=false ) { 
-    m_upperInclusive = inclusive;
+  void setUpper( const TYPE& value, const bool exclusive=false ) {
+    m_upperExclusive = exclusive;
     m_hasUpperBound = true;
     m_upperBound = value;
   }
 
   /// Clear lower bound value
-  void clearLower()  { m_hasLowerBound = false; m_lowerBound = TYPE(); m_lowerInclusive = false;}
+  void clearLower()  { m_hasLowerBound = false; m_lowerBound = TYPE(); m_lowerExclusive = false;}
   /// Clear upper bound value
-  void clearUpper()  { m_hasUpperBound = false; m_upperBound = TYPE(); m_upperInclusive = false;}
+  void clearUpper()  { m_hasUpperBound = false; m_upperBound = TYPE(); m_upperExclusive = false;}
 
   /// Set both bounds (lower and upper) at the same time
-  void setBounds( const TYPE& lower, const TYPE& upper, const bool inclusive=false ) 
+  void setBounds( const TYPE& lower, const TYPE& upper, const bool exclusive=false )
   {
-    setLower( lower, inclusive );
-    setUpper( upper, inclusive ); 
+    setLower( lower, exclusive );
+    setUpper( upper, exclusive );
   }
 
   /// Clear both bounds (lower and upper) at the same time
@@ -132,9 +132,9 @@ private:
   /// Has a upper bound set true/false
   bool  m_hasUpperBound;
   /// Lower bound is exclusive
-  bool m_lowerInclusive;
+  bool m_lowerExclusive;
   /// Upper bound is exclusive
-  bool m_upperInclusive;
+  bool m_upperExclusive;
   /// the lower bound
   TYPE     m_lowerBound;
   ///the upper bound
@@ -152,16 +152,16 @@ private:
     //load in the "no error" condition
     error << "";
     //it is allowed not to have a lower bound, if not then you don't need to check
-    if ( m_hasLowerBound && ( value < m_lowerBound || (value == m_lowerBound && m_lowerInclusive ) ) )
+    if ( m_hasLowerBound && ( value < m_lowerBound || (value == m_lowerBound && m_lowerExclusive ) ) )
     {
 		  error << "Selected value " << value << " is ";
-      (m_lowerInclusive) ? error << "<=" : error << "<";
+      (m_lowerExclusive) ? error << "<=" : error << "<";
       error << " the lower bound (" << m_lowerBound << ")";
     }
-    if ( m_hasUpperBound && ( value > m_upperBound || (value == m_upperBound && m_upperInclusive )  ) )
+    if ( m_hasUpperBound && ( value > m_upperBound || (value == m_upperBound && m_upperExclusive )  ) )
     {
       error << "Selected value " << value << " is ";
-      (m_upperInclusive) ? error << ">=" : error << ">"; 
+      (m_upperExclusive) ? error << ">=" : error << ">";
       error << " the upper bound (" << m_upperBound << ")";
     }
     return error.str();
