@@ -1,13 +1,15 @@
 from PyQt4 import QtGui, uic, QtCore
 import os
+import sys
 import datetime
+from functools import partial
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.widgets import util
 import ui.ui_cluster_status
 
 import mantid.simpleapi as api
-from mantid.kernel import ConfigService, DateAndTime
+from mantid.kernel import ConfigService, DateAndTime, Logger
 from mantid.api import AlgorithmManager
 
 from reduction_gui.reduction.scripter import BaseScriptElement
@@ -116,7 +118,7 @@ class RemoteJobsWidget(BaseWidget):
             Clear the job table and set the headers
         """
         self._content.job_table.clear()
-        headers = ["Job ID", "Title", "Status", "Start", "End"]
+        headers = ["Job ID", "Title", "Status", "Start", "End", "Action"]
         self._content.job_table.setColumnCount(len(headers))
         self._content.job_table.setHorizontalHeaderLabels(headers)        
         # Stretch the columns evenly
@@ -156,6 +158,7 @@ class RemoteJobsWidget(BaseWidget):
         job_id = alg.getProperty("JobId").value
         job_status = alg.getProperty("JobStatusString").value
         job_name = alg.getProperty("JobName").value
+        job_trans_id = alg.getProperty("TransID").value
         
         njobs = len(job_name)
         job_start = njobs*[datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")]
@@ -163,7 +166,7 @@ class RemoteJobsWidget(BaseWidget):
         #job_start = alg.getProperty("JobStartTime").value
         #job_end = alg.getProperty("JobCompletionTime").value
                 
-        job_list = zip(*(job_id, job_status, job_name, job_start, job_end))
+        job_list = zip(*(job_id, job_status, job_name, job_start, job_end, job_trans_id))
         
         self._clear_table()
         self._content.job_table.setSortingEnabled(False)
@@ -185,6 +188,7 @@ class RemoteJobsWidget(BaseWidget):
             item = QtGui.QTableWidgetItem(str(job_list[i][0]))
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
             self._content.job_table.setItem(i, 0, item)
+            job_id = str(job_list[i][0])
           
             # Title
             item = QtGui.QTableWidgetItem(str(job_list[i][2]))
@@ -195,6 +199,7 @@ class RemoteJobsWidget(BaseWidget):
             item = QtGui.QTableWidgetItem(str(job_list[i][1]))
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
             self._content.job_table.setItem(i, 2, item)
+            is_running = str(job_list[i][1]).lower()=='running'
             
             # Start time
             time_displayed = str(job_list[i][3]).replace('T', ' ')
@@ -211,9 +216,49 @@ class RemoteJobsWidget(BaseWidget):
             item = QtGui.QTableWidgetItem(time_displayed)
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
             self._content.job_table.setItem(i, 4, item)
-          
+            
+            # create an cell widget
+            btn = QtGui.QPushButton(self._content.job_table)
+            if is_running:
+                btn.setText('Abort')
+                btn.setToolTip('Cleanly abort this job')
+            else:
+                btn.setText('Remove')
+                btn.setToolTip('Remove this job and its temporary files')
+            call_back = partial(self._remove_job, is_running=is_running, job_id=job_id, trans_id=job_list[i][5])
+            self.connect(btn, QtCore.SIGNAL("clicked()"), call_back)
+            self._content.job_table.setCellWidget(i, 5, btn)          
+
+
         self._content.job_table.setSortingEnabled(True)
         self._content.job_table.sortItems(3, 1)
     
+    def _remove_job(self, trans_id, job_id=None, is_running=False):
+        """
+            Abort job and/or stop transaction
+            @param trans_id: remote transaction ID
+            @param job_id: remote job ID
+            @param is_running: True if the job is currently running
+        """
+        if is_running:
+            try:
+                # At this point we are authenticated so just purge
+                alg = AlgorithmManager.create("AbortRemoteJob")
+                alg.initialize()
+                alg.setProperty("ComputeResource", str(self._settings.compute_resource))
+                alg.setProperty("JobID", job_id)
+                alg.execute()
+            except:
+                Logger.get("cluster_status").error("Problem aborting job: %s" % sys.exc_value)
+        try:
+            alg = AlgorithmManager.create("StopRemoteTransaction")
+            alg.initialize()
+            alg.setProperty("ComputeResource", str(self._settings.compute_resource))
+            alg.setProperty("TransactionID", trans_id)
+            alg.execute()
+        except:
+            Logger.get("cluster_status").error("Project stopping remote transaction: %s" % sys.exc_value)
+        self._update_content()
+
     def get_state(self):
         return RemoteJobs()
