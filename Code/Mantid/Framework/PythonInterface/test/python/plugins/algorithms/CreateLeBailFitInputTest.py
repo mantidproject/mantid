@@ -33,9 +33,9 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         paramname0 = paramws.cell(0, 0)
         
         if paramname0.lower() == "bank":
-            numrowgood = 28
+            numrowgood = 29
         else:
-            numrowgood = 27
+            numrowgood = 28
         print "Parameter name of first line = ", paramname0
 
         self.assertEqual(numrowgood, paramws.rowCount())
