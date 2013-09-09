@@ -34,7 +34,7 @@ set ( TEST_PY_FILES
 )
 
 include_directories ( inc )
-include_directories ( ../ImageViewer/inc )
+include_directories ( ../SpectrumViewer/inc )
 
 
 ###########################################################################

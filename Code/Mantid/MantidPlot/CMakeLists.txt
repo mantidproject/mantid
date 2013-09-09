@@ -812,7 +812,7 @@ include_directories ( ../QtPropertyBrowser/src )
 include_directories ( ../MantidQt/API/inc )
 include_directories ( ../MantidQt/MantidWidgets/inc )
 include_directories ( ../MantidQt/SliceViewer/inc )
-include_directories ( ../MantidQt/ImageViewer/inc )
+include_directories ( ../MantidQt/SpectrumViewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
 # ui_ files end up in these places
 include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
