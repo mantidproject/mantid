@@ -72,6 +72,7 @@ void test_transformHKL()
   TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
 
   boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
+  boost::regex_match("[0,0,L]", transform.getFreePeakAxisRegex());
 }
 
 void test_transformHLK()
@@ -89,6 +90,7 @@ void test_transformHLK()
   TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
 
   boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
+  boost::regex_match("[0,K,0]", transform.getFreePeakAxisRegex());
 }
 
 void test_transformLKH()
@@ -106,6 +108,7 @@ void test_transformLKH()
   TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
 
   boost::regex_match("H (Lattice)", transform.getFreePeakAxisRegex());
+  boost::regex_match("[H,0,0]", transform.getFreePeakAxisRegex());
 }
 
 void test_transformLHK()
@@ -123,6 +126,33 @@ void test_transformLHK()
   TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
 
   boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
+  boost::regex_match("[0,K,0]", transform.getFreePeakAxisRegex());
+}
+
+// Check that the peaks transform works when the dimension labels are square bracket notation.
+void test_transformLHK_via_regex_v2()
+{
+  try
+  {
+  PeakTransformHKL transform("[0,0,L]", "[H,0,0]");
+  V3D original(0, 1, 2);
+  V3D transformed = transform.transform(original);
+  TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> L
+  TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> H
+  TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> K
+
+  V3D backToOriginal = transform.transformBack(transformed);
+  TS_ASSERT_EQUALS(backToOriginal.X(), original.X());
+  TS_ASSERT_EQUALS(backToOriginal.Y(), original.Y());
+  TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
+
+  boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
+  boost::regex_match("[0,K,0]", transform.getFreePeakAxisRegex());
+  }
+  catch(PeakTransformException& ex)
+  {
+    std::cout << "THROWS!!!" << ex.what() << std::endl;
+  }
 }
 
 void test_transformKLH()
@@ -140,6 +170,7 @@ void test_transformKLH()
   TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
 
   boost::regex_match("H (Lattice)", transform.getFreePeakAxisRegex());
+  boost::regex_match("[H,0,0]", transform.getFreePeakAxisRegex());
 }
 
 void test_transformKHL()
@@ -157,6 +188,7 @@ void test_transformKHL()
   TS_ASSERT_EQUALS(backToOriginal.Z(), original.Z());
 
   boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
+  boost::regex_match("[0,0,L]", transform.getFreePeakAxisRegex());
 }
 
 void test_copy_construction()

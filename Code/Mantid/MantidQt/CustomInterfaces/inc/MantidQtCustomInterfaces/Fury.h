@@ -25,7 +25,7 @@ namespace IDA
 
   private slots:
     void resType(const QString& type);
-    void plotInput();
+    void plotInput(const QString& wsname);
     void minChanged(double val);
     void maxChanged(double val);
     void updateRS(QtProperty* prop, double val);
