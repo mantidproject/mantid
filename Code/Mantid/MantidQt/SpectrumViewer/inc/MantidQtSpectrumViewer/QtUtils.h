@@ -9,8 +9,8 @@
 /**
     @class QtUtils 
   
-       This class has some static methods to simplify interaction with
-    Qt and Qwt for the ImageView data viewer.
+    This class has some static methods to simplify interaction with
+    Qt and Qwt for the SpectrumView data viewer.
  
     @author Dennis Mikkelson 
     @date   2012-04-03 

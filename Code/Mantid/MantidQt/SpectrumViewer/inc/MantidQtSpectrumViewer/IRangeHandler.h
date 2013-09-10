@@ -9,7 +9,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 /** An interface to the RangeHandler class, which manages the min, max and step
-    range controls for the ImageView data viewer.
+    range controls for the SpectrumView data viewer.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

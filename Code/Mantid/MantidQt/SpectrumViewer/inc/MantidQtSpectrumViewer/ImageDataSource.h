@@ -11,7 +11,7 @@
     @class ImageDataSource 
   
        This class is an abstract base class for classes that can provide 
-    data to be displayed in an ImageView data viewer.
+    data to be displayed in an SpectrumView data viewer.
  
     @author Dennis Mikkelson 
     @date   2012-04-03 

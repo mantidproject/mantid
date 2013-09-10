@@ -8,9 +8,9 @@
 /**
     @class ArrayDataSource 
   
-       This class provides a wrapper around a simple 2-D array of doubles
+    This class provides a wrapper around a simple 2-D array of doubles
     stored in row-major order in a 1-D array, so that the array can be
-    viewed using the ImageView data viewer.
+    viewed using the SpectrumView data viewer.
  
     @author Dennis Mikkelson 
     @date   2012-05-14 

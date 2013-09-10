@@ -11,8 +11,8 @@
 /**
     @class SliderHandler 
   
-      This manages the horizontal and vertical scroll bars for the
-    ImageView data viewer. 
+    This manages the horizontal and vertical scroll bars for the
+    SpectrumView data viewer. 
  
     @author Dennis Mikkelson 
     @date   2012-04-03 

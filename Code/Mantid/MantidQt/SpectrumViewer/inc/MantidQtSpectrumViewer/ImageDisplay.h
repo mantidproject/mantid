@@ -17,8 +17,8 @@
 /**
     @class ImageDisplay 
   
-       This class provides the image display and coordinates the image and
-    graph displays for the ImageView data viewer.
+    This class provides the image display and coordinates the image and
+    graph displays for the SpectrumView data viewer.
  
     @author Dennis Mikkelson 
     @date   2012-04-03 

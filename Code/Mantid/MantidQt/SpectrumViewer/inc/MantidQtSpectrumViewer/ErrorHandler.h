@@ -7,7 +7,7 @@
     @class ErrorHandler 
   
       This class has static methods that do various basic calculations 
-    needed by other parts of the ImageView package.
+    needed by other parts of the SpectrumView package.
  
     @author Dennis Mikkelson 
     @date   2012-05-18 

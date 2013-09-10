@@ -10,7 +10,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 /** An interface to the SliderHandler, which manages the horizontal and vertical
-    scroll bars for the ImageView data viewer.
+    scroll bars for the SpectrumView data viewer.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

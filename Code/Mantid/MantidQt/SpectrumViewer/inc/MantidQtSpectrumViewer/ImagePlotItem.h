@@ -14,7 +14,7 @@
     @class ImagePlotItem 
   
        This class is responsible for actually drawing the image data onto
-    a QwtPlot for the ImageView data viewer.
+    a QwtPlot for the SpectrumView data viewer.
  
     @author Dennis Mikkelson 
     @date   2012-04-03 

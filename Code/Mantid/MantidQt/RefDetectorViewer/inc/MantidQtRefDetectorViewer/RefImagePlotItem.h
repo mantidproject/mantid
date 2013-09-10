@@ -10,7 +10,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 /** This class is responsible for actually drawing the image data onto
-    a QwtPlot for the ImageView data viewer.
+    a QwtPlot for the SpectrumView data viewer.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
