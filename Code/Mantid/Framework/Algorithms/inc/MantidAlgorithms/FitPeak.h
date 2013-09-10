@@ -75,7 +75,7 @@ namespace Algorithms
     API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
 
     /// Fit peak and background composite function
-    bool fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
+    double fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
                               API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
                               double startx, double endx);
 
@@ -85,7 +85,7 @@ namespace Algorithms
     /// Fit a function.
     double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws,
                        size_t wsindex, double xmin, double xmax,
-                       std::vector<double>& vec_caldata);
+                       std::vector<double>& vec_caldata, bool calmode=false);
 
     /// Fit a function in multi-domain
     double fitFunctionMD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws,
@@ -112,6 +112,9 @@ namespace Algorithms
 
     /// Get an index of a value in a sorted vector.  The index should be the item with value nearest to X
     size_t getVectorIndex(const MantidVec& vecx, double x);
+
+    /// Check the fitted peak value to see whether it is valud
+    double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
 
     /// Input data workspace
     API::MatrixWorkspace_sptr m_dataWS;

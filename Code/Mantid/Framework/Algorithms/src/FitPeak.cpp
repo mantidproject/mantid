@@ -46,6 +46,7 @@ using namespace Mantid::Kernel;
 using namespace std;
 
 const bool DEBUG219 = true;
+const double MAGICNUMBER = 2.0;
 
 namespace Mantid
 {
@@ -344,7 +345,7 @@ namespace Algorithms
     */
   double FitPeak::fitFunctionSD(IFunction_sptr fitfunc, MatrixWorkspace_const_sptr dataws,
                               size_t wsindex, double xmin, double xmax,
-                              vector<double>& vec_caldata)
+                              vector<double>& vec_caldata, bool calmode)
   {
     // Check:
     if (vec_caldata.size() != dataws->readY(wsindex).size())
@@ -461,7 +462,14 @@ namespace Algorithms
 
     push(bkgdfunc, m_bkupBkgdFunc);
 
-    double chi2 = fitFunctionMD(bkgdfunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX, vec_bkgd);
+    vector<double> vec_xmin(2);
+    vector<double> vec_xmax(2);
+    vec_xmin[0] = m_minFitX;
+    vec_xmin[1] = m_maxPeakX;
+    vec_xmax[0] = m_minPeakX;
+    vec_xmax[1] = m_maxFitX;
+    double chi2 = fitFunctionMD(boost::dynamic_pointer_cast<IFunction>(bkgdfunc),
+                                m_dataWS, m_wsIndex, vec_xmin, vec_xmax, vec_bkgd);
 
     if (chi2 > DBL_MAX-1)
     {
@@ -582,7 +590,8 @@ namespace Algorithms
       m_peakFunc->setFwhm(vec_FWHM[i]);
 
       // Fit
-      double rwp = fitPeakFuncion(m_peakFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX);
+      string error;
+      double rwp = fitPeakFuncion(m_peakFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX, error);
 
       // Store result
       processNStoreFitResult(rwp);
@@ -716,7 +725,19 @@ namespace Algorithms
 
     vector<double> vec_calY;
     double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, vec_calY);
-    if (goodness < EMPTY_DBL)
+
+
+    return goodness;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Check the fitted peak value to see whether it is valud
+    * @return :: Rwp/chi2
+    */
+  double FitPeak::checkFittedPeak(IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason)
+  {
+    if (costfuncvalue < DBL_MAX)
     {
       // Fit is successful.  Check whether the fit result is physical
       stringstream errorss;
@@ -725,20 +746,20 @@ namespace Algorithms
       {
         errorss << "Peak centre (at " << peakcentre << " ) is out of specified range )"
                 << m_minPeakX << ", " << m_maxPeakX << "). ";
-        goodness = DBL_MAX;
+        costfuncvalue = DBL_MAX;
       }
 
       double peakheight = peakfunc->height();
       if (peakheight < 0)
       {
         errorss << "Peak height (" << peakheight << ") is negative. ";
-        goodness = DBL_MAX;
+        costfuncvalue = DBL_MAX;
       }
       double peakfwhm = peakfunc->fwhm();
       if (peakfwhm > (m_maxFitX - m_minFitX) * MAGICNUMBER)
       {
         errorss << "Peak width is unreasonably wide. ";
-        goodness = DBL_MAX;
+        costfuncvalue = DBL_MAX;
       }
       errorreason = errorss.str();
     }
@@ -748,16 +769,17 @@ namespace Algorithms
       errorreason = "Fit() on peak function is NOT successful.";
     }
 
-    return goodness;
+    return costfuncvalue;
   }
+
 
   //----------------------------------------------------------------------------------------------
   /** Fit peak function and background function as composite function
     * @return :: Rwp/chi2
     */
   double FitPeak::fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
-                                     API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
-                                     double startx, double endx)
+                                       API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
+                                       double startx, double endx)
   {
     boost::shared_ptr<CompositeFunction> compfunc = boost::shared_ptr<CompositeFunction>();
     compfunc->addFunction(peakfunc);
@@ -768,8 +790,10 @@ namespace Algorithms
     vector<double> vec_calY;
     bool modecal = true;
     double goodness_init = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, vec_calY, modecal);
-    push(peakfunc);
-    push(bkgdfunc);
+
+    map<string, double> bkuppeakmap, bkupbkgdmap;
+    push(peakfunc, bkuppeakmap);
+    push(bkgdfunc, bkupbkgdmap);
 
     // Fit
     modecal = false;
@@ -789,8 +813,8 @@ namespace Algorithms
       goodness = goodness_init;
       errorreason = "";
       g_log.information("Fit peak/background composite function FAILS to render a better solution.");
-      pop(peakfunc);
-      pop(bkgdfunc);
+      pop(bkuppeakmap, peakfunc);
+      pop(bkupbkgdmap, bkgdfunc);
     }
     else
     {
