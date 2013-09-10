@@ -7,6 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/TableRow.h"
 
 using Mantid::Algorithms::FitPeak;
 
@@ -48,7 +49,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("WorkspaceIndex", 0));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakFunction", "Gaussian"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundFunction", "Quadratic"));
-    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("ParameterTable", Peak5_Parameters));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("ParameterTable", "Peak5_Parameters"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("FitWindow", "a, b"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("PeakRange", "c, d"));
     TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("FitBackgroundFirst", true));
@@ -82,7 +83,7 @@ public:
     */
   TableWorkspace_sptr gen_PeakBkgdTable()
   {
-    TableWorkspace_sptr partablews = boost::shared_sptr<TableWorkspace>();
+    TableWorkspace_sptr partablews = boost::make_shared<TableWorkspace>();
     partablews->addColumn("str", "Name");
     partablews->addColumn("double", "Value");
 
