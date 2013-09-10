@@ -34,7 +34,7 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageDisplay : public ImageView::ImageDisplay
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageDisplay : public SpectrumView::ImageDisplay
 {
   public:
      /// Make an ImageDisplay to display with the given widgets and controls 
@@ -42,8 +42,8 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageDisplay : public ImageView::
                       RefSliderHandler* slider_handler,
                       RefRangeHandler*  range_handler,
                       RefLimitsHandler* limits_handler,
-                      ImageView::GraphDisplay*  h_graph,
-                      ImageView::GraphDisplay*  v_graph,
+                      SpectrumView::GraphDisplay*  h_graph,
+                      SpectrumView::GraphDisplay*  v_graph,
                       QTableWidget*  table_widget);
 
      ~RefImageDisplay();
@@ -56,7 +56,7 @@ private:
      RefLimitsHandler*    m_limitsHandler; // Owned by RefImagePlotItem
 };
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif   // REF_IMAGE_DISPLAY_H

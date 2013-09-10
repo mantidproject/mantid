@@ -41,7 +41,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -70,7 +70,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView : public QMainWindow
     void*            saved_emode_handler;    // EModeHandler*
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif   // IMAGE_VIEW_H

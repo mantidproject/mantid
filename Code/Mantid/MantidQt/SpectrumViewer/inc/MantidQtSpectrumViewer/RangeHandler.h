@@ -38,7 +38,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -65,7 +65,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler : public IRangeHandler
     size_t         total_n_steps;
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView
 
 #endif // RANGE_HANDLER_H

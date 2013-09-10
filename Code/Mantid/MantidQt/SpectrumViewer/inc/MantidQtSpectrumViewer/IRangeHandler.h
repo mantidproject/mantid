@@ -6,7 +6,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 /** An interface to the RangeHandler class, which manages the min, max and step
     range controls for the ImageView data viewer.
@@ -43,7 +43,7 @@ public:
   virtual void GetRange( double &min, double &max, double &step ) = 0;
 };
 
-} // namespace ImageView
+} // namespace SpectrumView
 } // namespace MantidQt 
 
 #endif // IRANGE_HANDLER_H

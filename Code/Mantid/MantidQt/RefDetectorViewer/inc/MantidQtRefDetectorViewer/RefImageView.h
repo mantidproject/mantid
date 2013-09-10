@@ -50,15 +50,15 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
   public:
 
      /// Construct an ImageView to display data from the specified data source 
-     RefImageView( ImageView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
+     RefImageView( SpectrumView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
 
     ~RefImageView();    
     
     RefIVConnections* getIVConnections();
 
   private:
-    ImageView::GraphDisplay*    h_graph;
-    ImageView::GraphDisplay*    v_graph;
+    SpectrumView::GraphDisplay*    h_graph;
+    SpectrumView::GraphDisplay*    v_graph;
                                  
     // keep void pointers to the following objects, to avoid having to 
     // include ui_ImageView.h, which disappears by the time MantidPlot is
@@ -72,7 +72,7 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
     RefIVConnections*            saved_iv_connections;   // IVConnections*
 };
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif   // REF_IMAGE_VIEW_H

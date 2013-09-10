@@ -40,7 +40,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay 
@@ -94,8 +94,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay
            max_y;
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
-
 
 #endif   // GRAPH_DISPLAY_H

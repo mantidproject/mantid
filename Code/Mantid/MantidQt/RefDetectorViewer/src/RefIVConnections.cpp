@@ -12,7 +12,7 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
-  using namespace ImageView;
+  using namespace SpectrumView;
 
 /**
  * Construct the object that links the GUI components to the other specifed
@@ -594,7 +594,5 @@ void RefIVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
   delete[] rgb_data;
 }
 
-
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
-

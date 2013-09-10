@@ -13,7 +13,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -122,6 +122,5 @@ ImageView::~ImageView()
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
-

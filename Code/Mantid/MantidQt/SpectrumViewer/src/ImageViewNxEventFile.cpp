@@ -15,7 +15,7 @@
 #include "MantidQtSpectrumViewer/MatrixWSImageView.h"
 
 using namespace MantidQt;
-using namespace ImageView;
+using namespace SpectrumView;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -52,7 +52,7 @@ int main( int argc, char** argv )
 
   std::cout << "Got EventWorkspace, making EventWSDataSource..." << std::endl;
 
-  MantidQt::ImageView::MatrixWSImageView image_view( WS );
+  MantidQt::SpectrumView::MatrixWSImageView image_view( WS );
 
   return a.exec();
 }

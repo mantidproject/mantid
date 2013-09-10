@@ -11,7 +11,7 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
-  using namespace ImageView;
+  using namespace SpectrumView;
 
 /**
  *  Construct a RefRangeHandler object to manage min, max and step controls
@@ -226,5 +226,5 @@ void RefRangeHandler::SetRange( double min, double max, double step, char type )
 }
 
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView

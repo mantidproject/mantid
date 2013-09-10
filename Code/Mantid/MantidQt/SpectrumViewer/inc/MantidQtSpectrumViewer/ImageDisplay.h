@@ -46,7 +46,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -133,8 +133,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      double               total_x_max;
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
-
 
 #endif   // IMAGE_DISPLAY_H

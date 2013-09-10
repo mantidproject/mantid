@@ -31,7 +31,7 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem : public ImageView::ImagePlotItem
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem : public SpectrumView::ImagePlotItem
 {
 
 public:

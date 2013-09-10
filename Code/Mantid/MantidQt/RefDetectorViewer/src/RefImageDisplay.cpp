@@ -10,7 +10,7 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
-  using namespace ImageView;
+  using namespace SpectrumView;
 
 /**
  * Make an RefImageDisplay to display with the given widgets and controls.
@@ -34,7 +34,7 @@ RefImageDisplay::RefImageDisplay(  QwtPlot*       image_plot,
                              GraphDisplay*  h_graph,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget)
-  : ImageView::ImageDisplay(image_plot,slider_handler,range_handler,h_graph,v_graph,table_widget),
+  : SpectrumView::ImageDisplay(image_plot,slider_handler,range_handler,h_graph,v_graph,table_widget),
     m_limitsHandler(limits_handler)
 {
   // We need a different ImagePlotItem class, so delete the one created in the
@@ -73,5 +73,5 @@ QPair<double,double> RefImageDisplay::SetPointedAtPoint( QPoint point, int mouse
   return xy;
 }
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 

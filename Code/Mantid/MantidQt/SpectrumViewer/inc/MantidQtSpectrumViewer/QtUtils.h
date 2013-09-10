@@ -38,7 +38,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -70,7 +70,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER QtUtils
                        QLineEdit* q_line_edit );
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif   // QT_UTILS_H

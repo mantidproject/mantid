@@ -11,7 +11,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -555,6 +555,5 @@ void IVConnections::online_help_slot()
 
 }
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
-

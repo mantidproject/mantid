@@ -42,7 +42,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
@@ -92,7 +92,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
     EModeHandler* saved_emode_handler;
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif // MATRIX_WS_DATA_SOURCE_H

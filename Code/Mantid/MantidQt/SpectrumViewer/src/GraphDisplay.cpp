@@ -11,7 +11,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -269,5 +269,5 @@ void GraphDisplay::ShowInfoList( double x, double y )
   }
 }
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 

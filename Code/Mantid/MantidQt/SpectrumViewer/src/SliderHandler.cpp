@@ -6,7 +6,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -165,5 +165,5 @@ void SliderHandler::GetVSliderInterval( int &y_min, int &y_max )
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView

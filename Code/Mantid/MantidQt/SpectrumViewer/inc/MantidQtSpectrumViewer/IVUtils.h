@@ -37,7 +37,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -108,8 +108,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVUtils
                                    size_t & steps );
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
-
 
 #endif   // IV_UTILS_H

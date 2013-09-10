@@ -9,7 +9,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -98,5 +98,5 @@ void EModeHandler::SetEFixed( const double efixed )
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView

@@ -37,7 +37,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EModeHandler 
@@ -63,7 +63,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EModeHandler
     Ui_ImageViewer* iv_ui;
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView
 
 #endif // EMODE_HANDLER_H

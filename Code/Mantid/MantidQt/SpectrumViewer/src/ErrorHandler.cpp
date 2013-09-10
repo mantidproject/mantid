@@ -6,7 +6,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 using namespace Mantid;
@@ -46,5 +46,5 @@ void ErrorHandler::Notice( std::string  text )
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 

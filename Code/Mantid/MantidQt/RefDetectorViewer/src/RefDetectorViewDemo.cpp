@@ -43,7 +43,7 @@ float * MakeTestData( double total_xmin, double total_xmax,
                                                 // mark a row 1/4 way up
   double point = (total_ymax - total_ymin)/4 + total_ymin;
   double mark_row = 0;
-  ImageView::IVUtils::Interpolate( total_ymin, total_ymax, point,
+  SpectrumView::IVUtils::Interpolate( total_ymin, total_ymax, point,
                                0.0, (double)total_rows, mark_row );
 
   size_t row_offset = (int)(mark_row) * total_cols;
@@ -56,7 +56,7 @@ float * MakeTestData( double total_xmin, double total_xmax,
                                                  // mark a col 1/10 way over
   point = (total_xmax - total_xmin)/10 + total_xmin;
   double mark_col = 0;
-  ImageView::IVUtils::Interpolate( total_xmin, total_xmax, point,
+  SpectrumView::IVUtils::Interpolate( total_xmin, total_xmax, point,
                                0.0, (double)total_cols, mark_col );
 
   size_t col_offset = (int)( mark_col );
@@ -77,8 +77,8 @@ int main( int argc, char **argv )
 
   float * data = MakeTestData( 10, 110, 220, 320, 2000, 2000 );
 
-  ImageView::ArrayDataSource* source =
-                   new ImageView::ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
+  SpectrumView::ArrayDataSource* source =
+                   new SpectrumView::ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
 
   MantidQt::RefDetectorViewer::RefImageView image_view( source, 10, 110, 220, 320, 200, 500 );
 

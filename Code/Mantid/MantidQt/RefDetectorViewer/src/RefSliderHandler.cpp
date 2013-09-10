@@ -27,7 +27,7 @@ RefSliderHandler::RefSliderHandler( Ui_RefImageViewer* iv_ui )
  * @param data_source  ImageDataSource that provides the data to be drawn
  */
 void RefSliderHandler::ConfigureSliders( QRect            draw_area,
-                                      ImageView::ImageDataSource* data_source )
+                                      SpectrumView::ImageDataSource* data_source )
 {
   QScrollBar* v_scroll = iv_ui->imageVerticalScrollBar;
   int n_rows = (int)data_source->GetNRows();
@@ -165,5 +165,5 @@ void RefSliderHandler::GetVSliderInterval( int &y_min, int &y_max )
 }
 
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView

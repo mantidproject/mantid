@@ -4,7 +4,7 @@
 
 using Mantid::API::MatrixWorkspace_const_sptr;
 using namespace MantidQt;
-using namespace ImageView;
+using namespace SpectrumView;
 
 /**
  * Construct an ImageView for the specified matrix workspace

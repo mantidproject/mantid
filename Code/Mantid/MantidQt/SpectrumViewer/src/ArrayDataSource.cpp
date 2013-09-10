@@ -7,7 +7,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -155,5 +155,5 @@ void ArrayDataSource::GetInfoList( double x,
   IVUtils::PushNameValue( "Y", 8, 3, y, list );
 }
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView

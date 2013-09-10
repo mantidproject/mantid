@@ -24,7 +24,7 @@ using namespace Geometry;
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -469,5 +469,5 @@ void MatrixWSDataSource::GetInfoList( double x,
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView

@@ -63,8 +63,8 @@ public:
   RefIVConnections( Ui_RefImageViewer* ui, 
                  RefImageView*     image_view,
                  RefImageDisplay*  image_display,
-                 ImageView::GraphDisplay*  h_graph_display,
-                 ImageView::GraphDisplay*  v_graph_display );
+                 SpectrumView::GraphDisplay*  h_graph_display,
+                 SpectrumView::GraphDisplay*  v_graph_display );
 
   ~RefIVConnections();
 
@@ -109,18 +109,17 @@ private:
   Ui_RefImageViewer*   iv_ui;
   RefImageView*       iv_main_window;
   RefImageDisplay*    image_display;
-  ImageView::GraphDisplay*    h_graph_display;
-  ImageView::GraphDisplay*    v_graph_display;
-  ImageView::TrackingPicker*  image_picker;
-  ImageView::TrackingPicker*  image_picker2;
-  ImageView::TrackingPicker*  h_graph_picker;
-  ImageView::TrackingPicker*  v_graph_picker;
+  SpectrumView::GraphDisplay*    h_graph_display;
+  SpectrumView::GraphDisplay*    v_graph_display;
+  SpectrumView::TrackingPicker*  image_picker;
+  SpectrumView::TrackingPicker*  image_picker2;
+  SpectrumView::TrackingPicker*  h_graph_picker;
+  SpectrumView::TrackingPicker*  v_graph_picker;
   QActionGroup*    color_group;
 
 };
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
-
 
 #endif  // REF_IV_CONNECTIONS_H

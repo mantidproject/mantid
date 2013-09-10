@@ -38,7 +38,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ArrayDataSource: public ImageDataSource
@@ -73,7 +73,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ArrayDataSource: public ImageDataSource
     float* data;  
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif // ARRAY_DATA_SOURCE_H

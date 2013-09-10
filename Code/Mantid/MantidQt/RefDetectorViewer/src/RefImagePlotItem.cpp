@@ -6,7 +6,7 @@ namespace RefDetectorViewer
 {
  
 RefImagePlotItem::RefImagePlotItem(const RefLimitsHandler * const limitsHandler)
-  : ImageView::ImagePlotItem(), m_limitsHandler(limitsHandler)
+  : SpectrumView::ImagePlotItem(), m_limitsHandler(limitsHandler)
 {
 }
 
@@ -40,7 +40,7 @@ void RefImagePlotItem::draw(       QPainter    * painter,
 
   //////////////////////////////////////////////////////////////////////////////////
   // TODO: Eliminate the code duplication (from ImagePlotItem::draw) in this section
-  ImageView::DataArray* data_array;
+  SpectrumView::DataArray* data_array;
   if ( buffer_ID == 0 )
   {
     data_array = data_array_0;
@@ -132,5 +132,5 @@ void RefImagePlotItem::draw(       QPainter    * painter,
 
 }
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 

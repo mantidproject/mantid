@@ -1,4 +1,4 @@
-    #ifndef IMAGE_DATA_SOURCE_H
+#ifndef IMAGE_DATA_SOURCE_H
 #define IMAGE_DATA_SOURCE_H
 
 #include <cstddef>
@@ -39,7 +39,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -111,8 +111,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDataSource
     size_t total_cols;
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
-
 
 #endif // IMAGE_DATA_SOURCE_H

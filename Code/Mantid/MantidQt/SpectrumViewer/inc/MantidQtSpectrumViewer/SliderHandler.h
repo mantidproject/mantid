@@ -40,7 +40,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -81,7 +81,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler : public ISliderHandler
     Ui_ImageViewer*   iv_ui;
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView
 
 #endif // SLIDER_HANDLER_H

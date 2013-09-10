@@ -42,7 +42,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -85,8 +85,7 @@ private:
 
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
-
 
 #endif  // IMAGE_PLOT_ITEM_H 

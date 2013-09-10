@@ -6,7 +6,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -173,5 +173,5 @@ DataArray* ImageDataSource::GetDataArray( bool is_log_x )
                        total_rows, total_cols, is_log_x );
 }
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 

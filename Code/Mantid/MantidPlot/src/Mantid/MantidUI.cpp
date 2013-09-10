@@ -705,7 +705,7 @@ void MantidUI::showImageViewer()
              AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if ( matwsp )
     {
-      MantidQt::ImageView::MatrixWSImageView image_view( matwsp );
+      MantidQt::SpectrumView::MatrixWSImageView image_view( matwsp );
     }
     else
     {

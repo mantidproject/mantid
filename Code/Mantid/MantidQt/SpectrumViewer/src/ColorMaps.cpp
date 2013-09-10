@@ -7,7 +7,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -231,5 +231,5 @@ void ColorMaps::InterpolateColorScale( double base_red[],
 
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 

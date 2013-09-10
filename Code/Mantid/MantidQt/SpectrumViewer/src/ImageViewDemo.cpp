@@ -10,7 +10,7 @@
 #include "MantidQtSpectrumViewer/ArrayDataSource.h"
 
 using namespace MantidQt;
-using namespace ImageView;
+using namespace SpectrumView;
 
 /**
  * Construct an array of test data over the specified region with the
@@ -80,7 +80,7 @@ int main( int argc, char **argv )
   ArrayDataSource* source = 
                    new ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
 
-  MantidQt::ImageView::ImageView image_view( source );
+  MantidQt::SpectrumView::ImageView image_view( source );
 
                        // Don't delete on close in this case, since image_view
                        // will be deleted when the application ends

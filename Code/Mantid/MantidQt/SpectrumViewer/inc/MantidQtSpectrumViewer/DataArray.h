@@ -37,7 +37,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER DataArray
@@ -129,7 +129,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER DataArray
                         // but will be deleted in this object's Destructor
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif // DATA_ARRAY_H

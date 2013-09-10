@@ -37,7 +37,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER TrackingPicker : public QwtPlotPicker
@@ -69,7 +69,7 @@ private:
 
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView
 
 #endif  // TRACKING_PICKER_H

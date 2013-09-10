@@ -17,7 +17,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -555,5 +555,5 @@ bool ImageDisplay::DataSourceRangeChanged()
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 

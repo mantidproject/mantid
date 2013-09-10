@@ -9,7 +9,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -169,5 +169,5 @@ void RangeHandler::SetRange( double min, double max, double step )
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView

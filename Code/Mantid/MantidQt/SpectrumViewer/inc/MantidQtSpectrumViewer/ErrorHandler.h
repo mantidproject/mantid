@@ -35,7 +35,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -54,8 +54,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ErrorHandler
 
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
-
 
 #endif   // ERROR_HANLDER_H

@@ -7,7 +7,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 /** An interface to the SliderHandler, which manages the horizontal and vertical
     scroll bars for the ImageView data viewer.
@@ -54,7 +54,7 @@ public:
   virtual void GetVSliderInterval( int &y_min, int &y_max ) = 0;
 };
 
-} // namespace ImageView
+} // namespace SpectrumView
 } // namespace MantidQt 
 
 #endif // ISLIDER_HANDLER_H

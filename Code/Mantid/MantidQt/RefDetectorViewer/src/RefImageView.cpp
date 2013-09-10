@@ -33,7 +33,7 @@ namespace RefDetectorViewer
  *  @param tof_min The min time of flight value
  *  @param tof_max  The max time of flight value
  */
-RefImageView::RefImageView( ImageView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
+RefImageView::RefImageView( SpectrumView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
 {
   Ui_RefImageViewer* ui = new Ui_RefImageViewer();
   saved_ui          = ui; 
@@ -58,8 +58,8 @@ RefImageView::RefImageView( ImageView::ImageDataSource* data_source, int peak_mi
   // This ends up being owned by the RefImagePlotItem instance
   RefLimitsHandler* limits_handler = new RefLimitsHandler(ui);
 
-  h_graph = new ImageView::GraphDisplay( ui->h_graphPlot, NULL, false );
-  v_graph = new ImageView::GraphDisplay( ui->v_graphPlot, NULL, true );
+  h_graph = new SpectrumView::GraphDisplay( ui->h_graphPlot, NULL, false );
+  v_graph = new SpectrumView::GraphDisplay( ui->v_graphPlot, NULL, true );
 
 
   RefImageDisplay* image_display = new RefImageDisplay( ui->imagePlot,
@@ -131,6 +131,5 @@ RefImageView::~RefImageView()
 }
 
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
-

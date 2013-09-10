@@ -38,7 +38,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSImageView 
@@ -54,7 +54,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSImageView
     ImageView *image_view;
 };
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif // MATRIX_WS_IMAGE_VIEW_H

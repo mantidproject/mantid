@@ -6,7 +6,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -409,5 +409,5 @@ bool IVUtils::CalculateInterval( double   global_min,
   return true;
 }
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 

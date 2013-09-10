@@ -5,7 +5,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
   
 
@@ -246,5 +246,5 @@ void ImagePlotItem::draw(       QPainter    * painter,
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 

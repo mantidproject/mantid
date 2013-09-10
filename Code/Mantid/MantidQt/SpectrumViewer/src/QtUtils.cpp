@@ -4,7 +4,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -87,5 +87,5 @@ void  QtUtils::SetText( int        width,
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView

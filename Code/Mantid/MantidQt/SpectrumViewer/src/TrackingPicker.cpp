@@ -3,7 +3,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 
@@ -71,5 +71,5 @@ QwtText TrackingPicker::trackerText( const QwtDoublePoint & pos ) const
   }
 }
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView

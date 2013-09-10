@@ -9,7 +9,7 @@
 
 namespace MantidQt
 {
-namespace ImageView
+namespace SpectrumView
 {
 
 /**
@@ -385,5 +385,5 @@ double DataArray::YOfRow( size_t row ) const
 }
 
 
+} // namespace SpectrumView
 } // namespace MantidQt 
-} // namespace ImageView 
