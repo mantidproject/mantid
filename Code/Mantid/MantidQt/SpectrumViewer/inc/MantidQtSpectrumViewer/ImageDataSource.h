@@ -4,8 +4,8 @@
 #include <cstddef>
 #include <vector>
 #include <string>
-#include "MantidQtImageViewer/DataArray.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DataArray.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
     @class ImageDataSource 

@@ -1,7 +1,7 @@
 #ifndef  REF_IMAGE_DISPLAY_H
 #define  REF_IMAGE_DISPLAY_H
 
-#include "MantidQtImageViewer/ImageDisplay.h"
+#include "MantidQtSpectrumViewer/ImageDisplay.h"
 #include "MantidQtRefDetectorViewer/RefSliderHandler.h"
 #include "MantidQtRefDetectorViewer/RefRangeHandler.h"
 #include "MantidQtRefDetectorViewer/RefLimitsHandler.h"

@@ -1,10 +1,10 @@
 #ifndef RANGE_HANDLER_H
 #define RANGE_HANDLER_H
 
-#include "MantidQtImageViewer/IRangeHandler.h"
+#include "MantidQtSpectrumViewer/IRangeHandler.h"
 #include "ui_ImageView.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
     @class RangeHandler 

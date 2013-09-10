@@ -2,8 +2,8 @@
 
 #include <math.h>
 
-#include "MantidQtImageViewer/ArrayDataSource.h"
-#include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/ArrayDataSource.h"
+#include "MantidQtSpectrumViewer/IVUtils.h"
 
 namespace MantidQt
 {

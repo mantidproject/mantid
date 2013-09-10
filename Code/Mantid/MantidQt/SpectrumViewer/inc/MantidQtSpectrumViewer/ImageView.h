@@ -4,9 +4,9 @@
 #include <QMainWindow>
 #include <QtGui>
 
-#include "MantidQtImageViewer/GraphDisplay.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/GraphDisplay.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
     @class ImageView 

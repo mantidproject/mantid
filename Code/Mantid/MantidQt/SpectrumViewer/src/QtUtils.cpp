@@ -1,6 +1,6 @@
 
-#include "MantidQtImageViewer/QtUtils.h" 
-#include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/QtUtils.h" 
+#include "MantidQtSpectrumViewer/IVUtils.h"
 
 namespace MantidQt
 {

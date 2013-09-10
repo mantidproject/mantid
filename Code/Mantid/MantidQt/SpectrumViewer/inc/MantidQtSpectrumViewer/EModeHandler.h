@@ -1,16 +1,18 @@
-#ifndef  ERROR_HANDLER_H
-#define  ERROR_HANDLER_H
+#ifndef EMODE_HANDLER_H
+#define EMODE_HANDLER_H
 
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "ui_ImageView.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
-    @class ErrorHandler 
+    @class EModeHandler 
   
-      This class has static methods that do various basic calculations 
-    needed by other parts of the ImageView package.
+      This manages the instrument type combo box (emode) and E Fixed controls 
+    for the ImageView data viewer. 
  
     @author Dennis Mikkelson 
-    @date   2012-05-18 
+    @date   2012-10-12
      
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
   
@@ -38,24 +40,30 @@ namespace MantidQt
 namespace ImageView
 {
 
-
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ErrorHandler 
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EModeHandler 
 {
   public:
 
-    /// Display the specified string in an error message 
-    static void Error( std::string  text );
+    /// Construct object to manage E Mode controls in the UI
+    EModeHandler( Ui_ImageViewer* iv_ui );
 
-    /// Display the specified string in a warning message 
-    static void Warning( std::string  text );
+    /// Get the E Mode to control units calculation, from the combo box
+    int GetEMode();
 
-    /// Display the specified string in a notice message 
-    static void Notice( std::string  text );
+    /// Set the E Mode to control units calculation, in the combo box
+    void SetEMode( const int mode );
 
+    /// Get the E Fixed value from the GUI
+    double GetEFixed();
+
+    /// Set the E Fixed value in the GUI
+    void SetEFixed( const double efixed );
+
+  private:
+    Ui_ImageViewer* iv_ui;
 };
 
 } // namespace MantidQt 
-} // namespace ImageView 
+} // namespace ImageView
 
-
-#endif   // ERROR_HANLDER_H
+#endif // EMODE_HANDLER_H

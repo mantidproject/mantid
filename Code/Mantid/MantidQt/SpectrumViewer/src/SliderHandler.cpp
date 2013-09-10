@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include <QScrollBar>
-#include "MantidQtImageViewer/SliderHandler.h"
+#include "MantidQtSpectrumViewer/SliderHandler.h"
 
 namespace MantidQt
 {

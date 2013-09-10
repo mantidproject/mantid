@@ -5,9 +5,9 @@
 #include <QString>
 #include <qwt_scale_engine.h>
 
-#include "MantidQtImageViewer/GraphDisplay.h"
-#include "MantidQtImageViewer/QtUtils.h"
-#include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/GraphDisplay.h"
+#include "MantidQtSpectrumViewer/QtUtils.h"
+#include "MantidQtSpectrumViewer/IVUtils.h"
 
 namespace MantidQt
 {

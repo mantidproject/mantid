@@ -3,7 +3,7 @@
 
 #include <qwt_plot_picker.h>
 #include <qwt_plot_canvas.h>
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /** 
    @class TrackingPicker

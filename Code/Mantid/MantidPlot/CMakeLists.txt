@@ -882,7 +882,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 target_link_libraries ( MantidPlot 
                         ${CORE_MANTIDLIBS}
                         MantidQtAPI MantidWidgets MantidQtSliceViewer MantidQtFactory
-                        MantidQtImageViewer 
+                        MantidQtSpectrumViewer 
                         QtPropertyBrowser ${QT_LIBRARIES} 
                         ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
                         ${QSCINTILLA_LIBRARIES}

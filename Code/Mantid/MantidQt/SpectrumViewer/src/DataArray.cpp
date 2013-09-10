@@ -5,7 +5,7 @@
 #include <iostream>
 #include <math.h>
 
-#include "MantidQtImageViewer/DataArray.h"
+#include "MantidQtSpectrumViewer/DataArray.h"
 
 namespace MantidQt
 {

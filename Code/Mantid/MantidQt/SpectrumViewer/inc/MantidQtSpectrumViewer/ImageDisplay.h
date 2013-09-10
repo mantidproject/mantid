@@ -7,12 +7,12 @@
 #include <QTableWidget>
 #include <qwt_plot.h>
 
-#include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/GraphDisplay.h"
-#include "MantidQtImageViewer/ImagePlotItem.h"
-#include "MantidQtImageViewer/ISliderHandler.h"
-#include "MantidQtImageViewer/IRangeHandler.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/GraphDisplay.h"
+#include "MantidQtSpectrumViewer/ImagePlotItem.h"
+#include "MantidQtSpectrumViewer/ISliderHandler.h"
+#include "MantidQtSpectrumViewer/IRangeHandler.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
     @class ImageDisplay 

@@ -8,12 +8,12 @@
 #include <qimage.h>
 #include <qwt_scale_engine.h>
 
-#include "MantidQtImageViewer/ImageDisplay.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/DataArray.h"
-#include "MantidQtImageViewer/ColorMaps.h"
-#include "MantidQtImageViewer/QtUtils.h"
-#include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/ImageDisplay.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/DataArray.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
+#include "MantidQtSpectrumViewer/QtUtils.h"
+#include "MantidQtSpectrumViewer/IVUtils.h"
 
 namespace MantidQt
 {

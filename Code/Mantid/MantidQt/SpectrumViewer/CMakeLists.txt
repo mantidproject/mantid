@@ -21,35 +21,35 @@ set ( SRC_FILES
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-       inc/MantidQtImageViewer/ColorMaps.h
-       inc/MantidQtImageViewer/ImageDisplay.h
-       inc/MantidQtImageViewer/IVConnections.h
-       inc/MantidQtImageViewer/DataArray.h
-       inc/MantidQtImageViewer/ImagePlotItem.h
-       inc/MantidQtImageViewer/IVUtils.h
-       inc/MantidQtImageViewer/TrackingPicker.h
-       inc/MantidQtImageViewer/GraphDisplay.h
-       inc/MantidQtImageViewer/ImageView.h
-       inc/MantidQtImageViewer/QtUtils.h
-       inc/MantidQtImageViewer/ImageDataSource.h
-       inc/MantidQtImageViewer/ISliderHandler.h
-       inc/MantidQtImageViewer/IRangeHandler.h
-       inc/MantidQtImageViewer/SliderHandler.h
-       inc/MantidQtImageViewer/RangeHandler.h
-       inc/MantidQtImageViewer/EModeHandler.h
-       inc/MantidQtImageViewer/MatrixWSDataSource.h
-       inc/MantidQtImageViewer/MatrixWSImageView.h
-       inc/MantidQtImageViewer/ArrayDataSource.h
-       inc/MantidQtImageViewer/ErrorHandler.h
+       inc/MantidQtSpectrumViewer/ColorMaps.h
+       inc/MantidQtSpectrumViewer/ImageDisplay.h
+       inc/MantidQtSpectrumViewer/IVConnections.h
+       inc/MantidQtSpectrumViewer/DataArray.h
+       inc/MantidQtSpectrumViewer/ImagePlotItem.h
+       inc/MantidQtSpectrumViewer/IVUtils.h
+       inc/MantidQtSpectrumViewer/TrackingPicker.h
+       inc/MantidQtSpectrumViewer/GraphDisplay.h
+       inc/MantidQtSpectrumViewer/ImageView.h
+       inc/MantidQtSpectrumViewer/QtUtils.h
+       inc/MantidQtSpectrumViewer/ImageDataSource.h
+       inc/MantidQtSpectrumViewer/ISliderHandler.h
+       inc/MantidQtSpectrumViewer/IRangeHandler.h
+       inc/MantidQtSpectrumViewer/SliderHandler.h
+       inc/MantidQtSpectrumViewer/RangeHandler.h
+       inc/MantidQtSpectrumViewer/EModeHandler.h
+       inc/MantidQtSpectrumViewer/MatrixWSDataSource.h
+       inc/MantidQtSpectrumViewer/MatrixWSImageView.h
+       inc/MantidQtSpectrumViewer/ArrayDataSource.h
+       inc/MantidQtSpectrumViewer/ErrorHandler.h
 )
 
 set ( MOC_FILES 
-       inc/MantidQtImageViewer/IVConnections.h
-       inc/MantidQtImageViewer/TrackingPicker.h
+       inc/MantidQtSpectrumViewer/IVConnections.h
+       inc/MantidQtSpectrumViewer/TrackingPicker.h
 )
 
 set ( UI_FILES 
-       inc/MantidQtImageViewer/ImageView.ui
+       inc/MantidQtSpectrumViewer/ImageView.ui
 )
 
 # Python unit tests
@@ -77,10 +77,10 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 add_definitions ( -DIN_MANTIDQT_IMAGEVIEWER )
 
 # This creates the target library
-add_library ( MantidQtImageViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
+add_library ( MantidQtSpectrumViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtImageViewer
+target_link_libraries ( MantidQtSpectrumViewer
                         MantidQtAPI MantidWidgets ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
@@ -89,10 +89,10 @@ target_link_libraries ( MantidQtImageViewer
 
 if ( NOT WIN32 )
 add_executable ( ImageViewDemo EXCLUDE_FROM_ALL src/ImageViewDemo.cpp )
-target_link_libraries ( ImageViewDemo MantidQtImageViewer )
+target_link_libraries ( ImageViewDemo MantidQtSpectrumViewer )
 
 add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL src/ImageViewNxEventFile.cpp )
-target_link_libraries ( ImageViewNxEventFile MantidQtImageViewer )
+target_link_libraries ( ImageViewNxEventFile MantidQtSpectrumViewer )
 endif ()
 
 ###########################################################################
@@ -104,6 +104,6 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidQtImageViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
+install ( TARGETS MantidQtSpectrumViewer ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
 

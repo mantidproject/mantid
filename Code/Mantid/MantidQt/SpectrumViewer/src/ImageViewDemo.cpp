@@ -5,9 +5,9 @@
 #include <QMainWindow>
 #include <QtGui>
 
-#include "MantidQtImageViewer/IVUtils.h"
-#include "MantidQtImageViewer/ImageView.h"
-#include "MantidQtImageViewer/ArrayDataSource.h"
+#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/ImageView.h"
+#include "MantidQtSpectrumViewer/ArrayDataSource.h"
 
 using namespace MantidQt;
 using namespace ImageView;

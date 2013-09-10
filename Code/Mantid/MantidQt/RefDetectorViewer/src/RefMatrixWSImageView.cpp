@@ -1,6 +1,6 @@
 #include <iostream>
 #include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
-#include "MantidQtImageViewer/ArrayDataSource.h"
+#include "MantidQtSpectrumViewer/ArrayDataSource.h"
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Algorithm.h"

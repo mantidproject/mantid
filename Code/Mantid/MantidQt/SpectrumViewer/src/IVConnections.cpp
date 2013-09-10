@@ -6,8 +6,8 @@
 
 #include "MantidQtAPI/MantidColorMap.h"
 
-#include "MantidQtImageViewer/IVConnections.h"
-#include "MantidQtImageViewer/ColorMaps.h"
+#include "MantidQtSpectrumViewer/IVConnections.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
 
 namespace MantidQt
 {

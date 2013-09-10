@@ -3,7 +3,7 @@
 
 #include <QVector>
 
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
     @class IVUtils 

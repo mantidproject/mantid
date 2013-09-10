@@ -1,6 +1,6 @@
 #include <iostream>
 #include  "MantidQtRefDetectorViewer/RefImageView.h"
-#include  "MantidQtImageViewer/ColorMaps.h"
+#include  "MantidQtSpectrumViewer/ColorMaps.h"
 
 #include "ui_RefImageView.h"
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"

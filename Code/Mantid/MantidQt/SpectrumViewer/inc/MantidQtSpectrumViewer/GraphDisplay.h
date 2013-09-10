@@ -5,8 +5,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-#include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
     @class GraphDisplay 

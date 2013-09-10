@@ -1,23 +1,19 @@
-#ifndef MATRIX_WS_DATA_SOURCE_H
-#define MATRIX_WS_DATA_SOURCE_H
+#ifndef ARRAY_DATA_SOURCE_H
+#define ARRAY_DATA_SOURCE_H
 
 #include <cstddef>
-
-#include "MantidQtImageViewer/DataArray.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/EModeHandler.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
-
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtSpectrumViewer/DataArray.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
 
 /**
-    @class MatrixWSDataSource 
+    @class ArrayDataSource 
   
-       This class provides a concrete implementation of an ImageDataSource
-    that gets it's data from a matrix workspace.
+       This class provides a wrapper around a simple 2-D array of doubles
+    stored in row-major order in a 1-D array, so that the array can be
+    viewed using the ImageView data viewer.
  
     @author Dennis Mikkelson 
-    @date   2012-05-08 
+    @date   2012-05-14 
      
     Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
   
@@ -45,26 +41,17 @@ namespace MantidQt
 namespace ImageView
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ArrayDataSource: public ImageDataSource
 {
   public:
 
-    /// Construct a DataSource object around the specifed MatrixWorkspace
-    MatrixWSDataSource( Mantid::API::MatrixWorkspace_const_sptr mat_ws );
+    /// Construct a DataSource object based on the specified array of floats
+    ArrayDataSource( double total_xmin, double total_xmax,
+                     double total_ymin, double total_ymax,
+                     size_t total_rows, size_t total_cols,
+                     float* data );
 
-   ~MatrixWSDataSource();
-
-    /// OVERRIDES: Get the smallest 'x' value covered by the data
-    virtual double GetXMin();
-
-    /// OVERRIDES: Get the largest 'x' value covered by the data
-    virtual double GetXMax();
-
-    /// OVERRIDES: Get the largest 'y' value covered by the data
-    virtual double GetYMax();
-
-    /// OVERRIDES: Get the total number of rows of data
-    virtual size_t GetNRows();
+    ~ArrayDataSource();
 
     /// Get DataArray covering full range of data in x, and y directions
     DataArray * GetDataArray( bool is_log_x );
@@ -78,21 +65,15 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
                               size_t  n_cols,
                               bool    is_log_x );
 
-    /// Set the class that gets the emode & efixed info from the user.
-    void SetEModeHandler( EModeHandler* emode_handler );
-
     /// Get a list containing pairs of strings with information about x,y
     void GetInfoList( double x,
                       double y,
                       std::vector<std::string> &list );
-
-
   private:
-    Mantid::API::MatrixWorkspace_const_sptr  mat_ws;
-    EModeHandler* saved_emode_handler;
+    float* data;  
 };
 
 } // namespace MantidQt 
 } // namespace ImageView 
 
-#endif // MATRIX_WS_DATA_SOURCE_H
+#endif // ARRAY_DATA_SOURCE_H

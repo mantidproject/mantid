@@ -1,9 +1,9 @@
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtImageViewer/DataArray.h"
-#include "MantidQtImageViewer/ColorMaps.h"
-#include "MantidQtImageViewer/QtUtils.h"
-#include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/DataArray.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
+#include "MantidQtSpectrumViewer/QtUtils.h"
+#include "MantidQtSpectrumViewer/IVUtils.h"
 #include "MantidQtRefDetectorViewer/RefImagePlotItem.h"
 
 namespace MantidQt

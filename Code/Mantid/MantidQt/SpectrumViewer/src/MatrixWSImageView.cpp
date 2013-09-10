@@ -1,6 +1,6 @@
 #include <iostream>
-#include "MantidQtImageViewer/MatrixWSImageView.h"
-#include "MantidQtImageViewer/MatrixWSDataSource.h"
+#include "MantidQtSpectrumViewer/MatrixWSImageView.h"
+#include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
 
 using Mantid::API::MatrixWorkspace_const_sptr;
 using namespace MantidQt;

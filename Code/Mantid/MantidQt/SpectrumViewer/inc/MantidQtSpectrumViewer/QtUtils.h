@@ -4,7 +4,7 @@
 #include <QTableWidget>
 #include <QLineEdit>
 
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
     @class QtUtils 

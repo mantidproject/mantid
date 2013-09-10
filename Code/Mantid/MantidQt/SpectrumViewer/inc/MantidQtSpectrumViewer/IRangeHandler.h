@@ -1,8 +1,8 @@
 #ifndef IRANGE_HANDLER_H
 #define IRANGE_HANDLER_H
 
-#include "MantidQtImageViewer/DllOptionIV.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
 
 namespace MantidQt
 {

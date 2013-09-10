@@ -1,11 +1,11 @@
 #ifndef REF_SLIDER_HANDLER_H
 #define REF_SLIDER_HANDLER_H
 
-#include "MantidQtImageViewer/ISliderHandler.h"
+#include "MantidQtSpectrumViewer/ISliderHandler.h"
 #include <QRect>
 
 #include "ui_RefImageView.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
 #include "MantidQtRefDetectorViewer/DllOption.h"
 
 /**

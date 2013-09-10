@@ -1,7 +1,7 @@
 #ifndef REF_IMAGE_PLOT_ITEM_H
 #define REF_IMAGE_PLOT_ITEM_H
 
-#include "MantidQtImageViewer/ImagePlotItem.h"
+#include "MantidQtSpectrumViewer/ImagePlotItem.h"
 #include "DllOption.h"
 #include "MantidQtRefDetectorViewer/RefLimitsHandler.h"
 

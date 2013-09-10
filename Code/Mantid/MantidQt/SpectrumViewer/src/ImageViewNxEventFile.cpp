@@ -12,7 +12,7 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidAPI/IEventWorkspace.h"
 
-#include "MantidQtImageViewer/MatrixWSImageView.h"
+#include "MantidQtSpectrumViewer/MatrixWSImageView.h"
 
 using namespace MantidQt;
 using namespace ImageView;

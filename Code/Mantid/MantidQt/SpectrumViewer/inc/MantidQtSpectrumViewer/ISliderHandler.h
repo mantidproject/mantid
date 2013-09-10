@@ -1,9 +1,9 @@
 #ifndef ISLIDER_HANDLER_H
 #define ISLIDER_HANDLER_H
 
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 #include <QRect>
-#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
 
 namespace MantidQt
 {

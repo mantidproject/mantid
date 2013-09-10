@@ -6,11 +6,11 @@
 #include <QActionGroup>
 
 #include "ui_ImageView.h"
-#include "MantidQtImageViewer/ImageView.h"
-#include "MantidQtImageViewer/TrackingPicker.h"
-#include "MantidQtImageViewer/ImageDisplay.h"
-#include "MantidQtImageViewer/GraphDisplay.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/ImageView.h"
+#include "MantidQtSpectrumViewer/TrackingPicker.h"
+#include "MantidQtSpectrumViewer/ImageDisplay.h"
+#include "MantidQtSpectrumViewer/GraphDisplay.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 
 /**

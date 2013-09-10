@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <QThread>
-#include "MantidQtImageViewer/ImagePlotItem.h"
+#include "MantidQtSpectrumViewer/ImagePlotItem.h"
 
 namespace MantidQt
 {

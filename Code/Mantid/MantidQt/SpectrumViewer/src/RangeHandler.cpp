@@ -2,10 +2,10 @@
 #include <iostream>
 #include <QLineEdit>
 
-#include "MantidQtImageViewer/RangeHandler.h"
-#include "MantidQtImageViewer/QtUtils.h"
-#include "MantidQtImageViewer/IVUtils.h"
-#include "MantidQtImageViewer/ErrorHandler.h"
+#include "MantidQtSpectrumViewer/RangeHandler.h"
+#include "MantidQtSpectrumViewer/QtUtils.h"
+#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/ErrorHandler.h"
 
 namespace MantidQt
 {

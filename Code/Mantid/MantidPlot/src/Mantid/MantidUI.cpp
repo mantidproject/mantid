@@ -69,7 +69,7 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
-#include "MantidQtImageViewer/MatrixWSImageView.h"
+#include "MantidQtSpectrumViewer/MatrixWSImageView.h"
 #include <typeinfo>
 
 using namespace std;

@@ -4,9 +4,9 @@
 #include <qwt_plot_canvas.h>
 
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
-#include "MantidQtImageViewer/ColorMaps.h"
-#include "MantidQtImageViewer/IVUtils.h"
-#include "MantidQtImageViewer/ErrorHandler.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
+#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/ErrorHandler.h"
 
 namespace MantidQt
 {

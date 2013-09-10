@@ -1,10 +1,10 @@
 #ifndef MATRIX_WS_IMAGE_VIEW_H
 #define MATRIX_WS_IMAGE_VIEW_H
 
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtImageViewer/ImageView.h"
+#include "MantidQtSpectrumViewer/ImageView.h"
 
 /**
     @class MatrixWSDataSource 

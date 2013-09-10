@@ -1,9 +1,9 @@
 #ifndef REF_RANGE_HANDLER_H
 #define REF_RANGE_HANDLER_H
 
-#include "MantidQtImageViewer/IRangeHandler.h"
+#include "MantidQtSpectrumViewer/IRangeHandler.h"
 #include "ui_RefImageView.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
 #include "DllOption.h"
 
 /**

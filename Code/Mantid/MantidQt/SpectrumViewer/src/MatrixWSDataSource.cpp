@@ -8,14 +8,14 @@
 
 #include <QThread>
 
-#include "MantidQtImageViewer/MatrixWSDataSource.h"
-#include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
+#include "MantidQtSpectrumViewer/IVUtils.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Run.h"
-#include "MantidQtImageViewer/ErrorHandler.h"
+#include "MantidQtSpectrumViewer/ErrorHandler.h"
 
 using namespace Mantid;
 using namespace Kernel;

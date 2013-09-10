@@ -2,7 +2,7 @@
 
 #include "MantidKernel/Logger.h"
 
-#include "MantidQtImageViewer/ErrorHandler.h"
+#include "MantidQtSpectrumViewer/ErrorHandler.h"
 
 namespace MantidQt
 {

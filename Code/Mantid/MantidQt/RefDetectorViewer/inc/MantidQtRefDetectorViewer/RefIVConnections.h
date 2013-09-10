@@ -7,9 +7,9 @@
 
 #include "ui_RefImageView.h"
 #include "MantidQtRefDetectorViewer/RefImageView.h"
-#include "MantidQtImageViewer/TrackingPicker.h"
+#include "MantidQtSpectrumViewer/TrackingPicker.h"
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
-#include "MantidQtImageViewer/GraphDisplay.h"
+#include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "DllOption.h"
 
 

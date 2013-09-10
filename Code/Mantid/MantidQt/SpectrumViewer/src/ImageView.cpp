@@ -1,15 +1,15 @@
 
 #include <iostream>
-#include  "MantidQtImageViewer/ImageView.h"
-#include  "MantidQtImageViewer/ColorMaps.h"
+#include  "MantidQtSpectrumViewer/ImageView.h"
+#include  "MantidQtSpectrumViewer/ColorMaps.h"
 
 #include "ui_ImageView.h"
-#include "MantidQtImageViewer/IVConnections.h"
-#include "MantidQtImageViewer/ImageDisplay.h"
-#include "MantidQtImageViewer/SliderHandler.h"
-#include "MantidQtImageViewer/RangeHandler.h"
-#include "MantidQtImageViewer/EModeHandler.h"
-#include "MantidQtImageViewer/MatrixWSDataSource.h"
+#include "MantidQtSpectrumViewer/IVConnections.h"
+#include "MantidQtSpectrumViewer/ImageDisplay.h"
+#include "MantidQtSpectrumViewer/SliderHandler.h"
+#include "MantidQtSpectrumViewer/RangeHandler.h"
+#include "MantidQtSpectrumViewer/EModeHandler.h"
+#include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
 
 namespace MantidQt
 {

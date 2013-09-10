@@ -1,5 +1,5 @@
 
-#include "MantidQtImageViewer/TrackingPicker.h" 
+#include "MantidQtSpectrumViewer/TrackingPicker.h" 
 
 namespace MantidQt
 {

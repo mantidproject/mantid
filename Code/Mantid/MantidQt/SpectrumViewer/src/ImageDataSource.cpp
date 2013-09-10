@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/ImageDataSource.h"
 
 namespace MantidQt
 {

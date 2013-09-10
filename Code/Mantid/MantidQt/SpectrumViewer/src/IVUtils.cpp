@@ -2,7 +2,7 @@
 #include <sstream>
 #include <math.h>
 
-#include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/IVUtils.h"
 
 namespace MantidQt
 {

@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-#include "MantidQtImageViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
     @class DataArray 
