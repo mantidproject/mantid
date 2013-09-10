@@ -359,7 +359,7 @@ namespace Mantid
       // densities are calculated using Newton's method for numerical integration
       if (x.size() == y.size())
       {
-        for (size_t j = 0; j < x.size(); ++j)
+        for (size_t j = 0; j < x.size()-1; ++j)
         {
           const double xVal = .5*static_cast<double>(x[j]+x[j+1]) - mean; // change of variables
           const double xDelta = static_cast<double>(x[j+1]-x[j]);
