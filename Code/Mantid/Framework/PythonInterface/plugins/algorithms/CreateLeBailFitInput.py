@@ -182,15 +182,28 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def generateBraggReflections(self, hklmax):
         """ Generate Bragg reflections from (0, 0, 0) to (HKL)_max
         """
+        import math
+
         # Generate reflections
+        max_hkl_sq = hklmax[0]**2 + hklmax[1]**2 + hklmax[2]**2
+        max_m = int(math.sqrt(max_hkl_sq)) + 1
+
+        # Note: the maximum HKL is defined by (HKL)^2.  Therefore, the iteration should reach some larger integer
+        #       to avoid skipping some valid reflections
+
         hkldict = {}
-        for h in xrange(0, hklmax[0]): 
-            for k in xrange(h, hklmax[1]): 
-                for l in xrange(k, hklmax[2]): 
+        for h in xrange(0, max_m):
+            for k in xrange(h, max_m):
+                for l in xrange(k, max_m):
                     dsq = h*h + k*k + l*l 
-                    if hkldict.has_key(dsq) is False: 
-                        hkldict[dsq] = []
-                    hkldict[dsq].append([h, k, l])
+                    if dsq <= max_hkl_sq:
+                        if hkldict.has_key(dsq) is False: 
+                            hkldict[dsq] = []
+                        hkldict[dsq].append([h, k, l])
+                    # ENDIF
+                # ENDFOR (l)
+            # ENDFOR (k)
+        # ENDFOR (h)
 
         # Create table workspace
         tablews = WorkspaceFactory.createTable()
