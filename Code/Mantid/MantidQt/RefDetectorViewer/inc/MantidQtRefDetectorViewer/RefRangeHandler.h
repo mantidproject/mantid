@@ -9,7 +9,7 @@
 /**
     @class RangeHandler 
   
-      This manages the min, max and step range controls for the ImageView 
+    This manages the min, max and step range controls for the SpectrumView 
     data viewer. 
  
     @author Dennis Mikkelson 

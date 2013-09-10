@@ -18,12 +18,12 @@ namespace RefDetectorViewer
 
 
 /**
- *  Construct an ImageView to display data from the specified data source.
+ *  Construct an SpectrumView to display data from the specified data source.
  *  The specified ImageDataSource must be constructed elsewhere and passed
- *  into this ImageView constructor.  Most other components of the ImageView
+ *  into this SpectrumView constructor.  Most other components of the SpectrumView
  *  are managed by this class.  That is the graphs, image display and other
- *  parts of the ImageView are constructed here and are deleted when the
- *  ImageView destructor is called.
+ *  parts of the SpectrumView are constructed here and are deleted when the
+ *  SpectrumView destructor is called.
  *
  *  @param data_source  The source of the data that will be displayed. 
  *  @param peak_min The min peak value
@@ -106,7 +106,7 @@ RefImageView::RefImageView( SpectrumView::ImageDataSource* data_source, int peak
 
 RefImageView::~RefImageView()
 {
-//  std::cout << "ImageView destructor called" << std::endl;
+//  std::cout << "RefImageView destructor called" << std::endl;
 
   delete  h_graph;
   delete  v_graph;

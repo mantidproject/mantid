@@ -12,7 +12,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-/** This class extends the ImageViewer::ImageDisplay class to communicate left-clicks
+/** This class extends the SpectrumViewer::ImageDisplay class to communicate left-clicks
     to the RefLimitsHandler (and thence to the peak/background/TOF line edits in the gui)
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory

@@ -11,8 +11,8 @@
 /**
     @class GraphDisplay 
   
-       This class handles the display of vertical and horizontal cuts
-    through the data in an ImageView display.
+    This class handles the display of vertical and horizontal cuts
+    through the data in an SpectrumView display.
  
     @author Dennis Mikkelson 
     @date   2012-04-03 

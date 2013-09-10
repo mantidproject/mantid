@@ -6,7 +6,7 @@
 #include <QtGui>
 
 #include "MantidQtSpectrumViewer/IVUtils.h"
-#include "MantidQtSpectrumViewer/ImageView.h"
+#include "MantidQtSpectrumViewer/SpectrumView.h"
 #include "MantidQtSpectrumViewer/ArrayDataSource.h"
 
 using namespace MantidQt;
@@ -80,11 +80,11 @@ int main( int argc, char **argv )
   ArrayDataSource* source = 
                    new ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
 
-  MantidQt::SpectrumView::ImageView image_view( source );
+  MantidQt::SpectrumView::SpectrumView spectrum_view( source );
 
                        // Don't delete on close in this case, since image_view
                        // will be deleted when the application ends
-  image_view.setAttribute(Qt::WA_DeleteOnClose,false);
+  spectrum_view.setAttribute(Qt::WA_DeleteOnClose,false);
 
   return a.exec();
 }

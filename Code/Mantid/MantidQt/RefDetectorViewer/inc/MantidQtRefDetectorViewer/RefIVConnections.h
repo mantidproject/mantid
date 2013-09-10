@@ -16,10 +16,10 @@
 /**
     @class RefIVConnections 
   
-       This class provides the connections between the ImageView GUI components
+       This class provides the connections between the SpectrumView GUI components
     made using QtDesigner and the classes that do the actual work for the
-    ImageView.  It basically provides SLOTS that are called by the GUI 
-   components' SIGNALS and in turn call methods on the ImageView 
+    SpectrumView.  It basically provides SLOTS that are called by the GUI 
+   components' SIGNALS and in turn call methods on the SpectrumView 
    implementation objects.
  
     @author Dennis Mikkelson 
