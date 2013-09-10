@@ -96,6 +96,9 @@ namespace CurveFitting
     /// Return the composite function
     API::IFunction_sptr getFunction();
 
+    /// Get reference to a peak
+    API::IPowderDiffPeakFunction_sptr getPeak(size_t peakindex);
+
     /// Force to make all peaks to calculate peak parameters
     void calPeaksParameters();
 
@@ -123,9 +126,6 @@ namespace CurveFitting
   private:
     /// Log
     static Kernel::Logger& g_log;
-
-    /// Get reference to a peak
-    API::IPowderDiffPeakFunction_sptr getPeak(size_t peakindex);
 
     /// Set peak parameters
     void setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,

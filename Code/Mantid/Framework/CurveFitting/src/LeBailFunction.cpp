@@ -302,13 +302,16 @@ namespace CurveFitting
                             << tofh << ", which is out of user specified boundary (" << m_minTOFPeakCentre
                             << ", " << m_maxTOFPeakCentre << "). " << ".\n";
       }
-      double dsp = newpeak->getPeakParameter("d_h");
+      else
+      {
+        double dsp = newpeak->getPeakParameter("d_h");
 
-      // Add new peak to all related data storage
-      m_vecPeaks.push_back(newpeak);
-      // FIXME - Refining lattice size is not considered here!
-      m_dspPeakVec.push_back(make_pair(dsp, newpeak));
-      m_mapHKLPeak.insert(make_pair(hkl, newpeak));
+        // Add new peak to all related data storage
+        m_vecPeaks.push_back(newpeak);
+        // FIXME - Refining lattice size is not considered here!
+        m_dspPeakVec.push_back(make_pair(dsp, newpeak));
+        m_mapHKLPeak.insert(make_pair(hkl, newpeak));
+      }
     }
 
     m_numPeaks = m_vecPeaks.size();
