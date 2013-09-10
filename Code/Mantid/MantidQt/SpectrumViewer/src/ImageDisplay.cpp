@@ -51,8 +51,8 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
                           256,
                           negative_color_table );
 
-  image_plot_item = new ImagePlotItem;
-  setupImagePlotItem();
+  image_plot_item = new SpectrumPlotItem;
+  setupSpectrumPlotItem();
 }
 
 
@@ -62,8 +62,8 @@ ImageDisplay::~ImageDisplay()
   delete image_plot_item;
 }
 
-/// Set some properties of the ImagePlotItem object
-void ImageDisplay::setupImagePlotItem()
+/// Set some properties of the SpectrumPlotItem object
+void ImageDisplay::setupSpectrumPlotItem()
 {
   image_plot_item->setXAxis( QwtPlot::xBottom );
   image_plot_item->setYAxis( QwtPlot::yLeft );
@@ -98,7 +98,7 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
 
   int    n_rows = 500;         // get reasonable size initial image data
   int    n_cols = 500;     
-                               // data_array is deleted in the ImagePlotItem
+                               // data_array is deleted in the SpectrumPlotItem
   data_array = data_source->GetDataArray( total_x_min, total_x_max,
                                           total_y_min, total_y_max,
                                           n_rows, n_cols,
@@ -257,7 +257,6 @@ void ImageDisplay::UpdateImage()
 
   bool is_log_x = ( x_step < 0 );
                                          // NOTE: The DataArray is deleted
-                                         //       in the ImagePlotItem.
   data_array = data_source->GetDataArray( scale_x_min, scale_x_max, 
                                           scale_y_min, scale_y_max, 
                                           n_rows, n_cols,

@@ -9,7 +9,7 @@
 
 #include "MantidQtSpectrumViewer/ImageDataSource.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/ImagePlotItem.h"
+#include "MantidQtSpectrumViewer/SpectrumPlotItem.h"
 #include "MantidQtSpectrumViewer/ISliderHandler.h"
 #include "MantidQtSpectrumViewer/IRangeHandler.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
@@ -64,8 +64,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
 
      virtual ~ImageDisplay();
 
-     /// Set some properties of the ImagePlotItem object
-     void setupImagePlotItem();
+     /// Set some properties of the SpectrumPlotItem object
+     void setupSpectrumPlotItem();
 
      /// Set the source of the image data and information for the table
      void SetDataSource( ImageDataSource* data_source );
@@ -93,7 +93,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      void SetVGraph( double x );
 
   protected:
-     ImagePlotItem*       image_plot_item;
+     SpectrumPlotItem*       image_plot_item;
 
   private:
      /// Check if the DataSource has been changed under us

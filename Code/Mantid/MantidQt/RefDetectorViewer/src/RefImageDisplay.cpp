@@ -37,11 +37,11 @@ RefImageDisplay::RefImageDisplay(  QwtPlot*       image_plot,
   : SpectrumView::ImageDisplay(image_plot,slider_handler,range_handler,h_graph,v_graph,table_widget),
     m_limitsHandler(limits_handler)
 {
-  // We need a different ImagePlotItem class, so delete the one created in the
+  // We need a different SpectrumPlotItem class, so delete the one created in the
   // base class constructor and create the one we want
   delete image_plot_item;
   image_plot_item = new RefImagePlotItem(limits_handler);
-  setupImagePlotItem();
+  setupSpectrumPlotItem();
 }
 
 RefImageDisplay::~RefImageDisplay()

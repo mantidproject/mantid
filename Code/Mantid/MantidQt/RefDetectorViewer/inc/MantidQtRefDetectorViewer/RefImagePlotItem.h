@@ -1,7 +1,7 @@
 #ifndef REF_IMAGE_PLOT_ITEM_H
 #define REF_IMAGE_PLOT_ITEM_H
 
-#include "MantidQtSpectrumViewer/ImagePlotItem.h"
+#include "MantidQtSpectrumViewer/SpectrumPlotItem.h"
 #include "DllOption.h"
 #include "MantidQtRefDetectorViewer/RefLimitsHandler.h"
 
@@ -31,7 +31,7 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem : public SpectrumView::ImagePlotItem
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem : public SpectrumView::SpectrumPlotItem
 {
 
 public:

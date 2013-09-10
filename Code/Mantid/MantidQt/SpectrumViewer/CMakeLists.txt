@@ -4,7 +4,7 @@ set ( SRC_FILES
        src/IVUtils.cpp        
        src/TrackingPicker.cpp
        src/DataArray.cpp        
-       src/ImagePlotItem.cpp  
+       src/SpectrumPlotItem.cpp  
        src/QtUtils.cpp
        src/GraphDisplay.cpp     
        src/SpectrumView.cpp      
@@ -25,7 +25,7 @@ set ( INC_FILES
        inc/MantidQtSpectrumViewer/ImageDisplay.h
        inc/MantidQtSpectrumViewer/IVConnections.h
        inc/MantidQtSpectrumViewer/DataArray.h
-       inc/MantidQtSpectrumViewer/ImagePlotItem.h
+       inc/MantidQtSpectrumViewer/SpectrumPlotItem.h
        inc/MantidQtSpectrumViewer/IVUtils.h
        inc/MantidQtSpectrumViewer/TrackingPicker.h
        inc/MantidQtSpectrumViewer/GraphDisplay.h

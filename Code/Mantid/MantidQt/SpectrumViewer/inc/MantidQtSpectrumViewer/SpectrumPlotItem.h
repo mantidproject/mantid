@@ -1,5 +1,5 @@
-#ifndef IMAGE_PLOT_ITEM_H
-#define IMAGE_PLOT_ITEM_H
+#ifndef SPECTRUM_PLOT_ITEM_H
+#define SPECTRUM_PLOT_ITEM_H
 
 #include <QPainter>
 #include <QRect>
@@ -11,7 +11,7 @@
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
-    @class ImagePlotItem 
+    @class SpectrumPlotItem 
   
        This class is responsible for actually drawing the image data onto
     a QwtPlot for the SpectrumView data viewer.
@@ -46,15 +46,15 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImagePlotItem : public QwtPlotItem
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SpectrumPlotItem : public QwtPlotItem
 {
 
 public:
   
   /// Construct basic plot item with NO data to plot.
-  ImagePlotItem();
+  SpectrumPlotItem();
 
-  virtual ~ImagePlotItem();
+  virtual ~SpectrumPlotItem();
   
   /// Specify the data to be plotted and the color table to use
   void SetData( DataArray* data_array, 
@@ -88,4 +88,4 @@ private:
 } // namespace SpectrumView
 } // namespace MantidQt 
 
-#endif  // IMAGE_PLOT_ITEM_H 
+#endif  // SPECTRUM_PLOT_ITEM_H

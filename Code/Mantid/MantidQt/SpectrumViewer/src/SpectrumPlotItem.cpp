@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <QThread>
-#include "MantidQtSpectrumViewer/ImagePlotItem.h"
+#include "MantidQtSpectrumViewer/SpectrumPlotItem.h"
 
 namespace MantidQt
 {
@@ -12,7 +12,7 @@ namespace SpectrumView
 /**
  * Construct basic plot item with NO data to plot.
  */
-ImagePlotItem::ImagePlotItem()
+SpectrumPlotItem::SpectrumPlotItem()
 {
   buffer_ID            = 0;
   data_array_0         = 0;
@@ -23,9 +23,9 @@ ImagePlotItem::ImagePlotItem()
 }
 
 
-ImagePlotItem::~ImagePlotItem()
+SpectrumPlotItem::~SpectrumPlotItem()
 {
-  //std::cout << "ImagePlotItem destructor called" << std::endl;
+  //std::cout << "SpectrumPlotItem destructor called" << std::endl;
 
   if ( data_array_0 )
   {
@@ -51,7 +51,7 @@ ImagePlotItem::~ImagePlotItem()
  *                              must have the same number of entries as the
  *                              positive color table.
  */
-void ImagePlotItem::SetData( DataArray*         data_array, 
+void SpectrumPlotItem::SetData( DataArray*         data_array, 
                              std::vector<QRgb>* positive_color_table,
                              std::vector<QRgb>* negative_color_table )
 {
@@ -91,7 +91,7 @@ void ImagePlotItem::SetData( DataArray*         data_array,
  *                          that will be used to scale the corresponding
  *                          image values before mappign to a color index.
  */
-void ImagePlotItem::SetIntensityTable( std::vector<double>* intensity_table )
+void SpectrumPlotItem::SetIntensityTable( std::vector<double>* intensity_table )
 {
   this->intensity_table = intensity_table;
 }
@@ -108,13 +108,13 @@ void ImagePlotItem::SetIntensityTable( std::vector<double>* intensity_table )
  *  @param  canvasRect  rectangle containing the pixel region where QWT will 
  *                      draw the image.  This rectangle is slightly larger
  *                      than the actual rectangle used for the image.  This
- *                      parameter is NOT USED by the ImagePlotItem, but is
+ *                      parameter is NOT USED by the SpectrumPlotItem, but is
  *                      passed in when QWT calls this method. 
  */
-void ImagePlotItem::draw(       QPainter    * painter,
-                          const QwtScaleMap & xMap, 
-                          const QwtScaleMap & yMap,
-                          const QRect       &       ) const
+void SpectrumPlotItem::draw(QPainter    * painter,
+			    const QwtScaleMap & xMap, 
+			    const QwtScaleMap & yMap,
+			    const QRect       &       ) const
 {
   if ( !positive_color_table )     // if no color table, the data is not yet
   {                                // set, so just return
