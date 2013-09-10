@@ -25,7 +25,51 @@ public:
   static FitPeakTest *createSuite() { return new FitPeakTest(); }
   static void destroySuite( FitPeakTest *suite ) { delete suite; }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test on init and setup
+    */
+  void test_Init()
+  {
+    // Generate input workspace
+    MatrixWorkspace_sptr dataws = gen_4866P5Data();
+    AnalysisDataService::Instance().addOrReplace("PG3_4866Peak5", dataws);
 
+    TableWorkspace_sptr partws = gen_PeakBkgdTable();
+    AnalysisDataService::Instance().addOrReplace("Peak5_Parameters", partws);
+
+    // Initialize FitPeak
+    FitPeak fitpeak;
+
+    fitpeak.initialize();
+    TS_ASSERT(fitpeak.isInitialized());
+
+    // Set properties
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("InputWorkspace", "PG3_4866Peak5"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("WorkspaceIndex", 0));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("PeakFunction", "Gaussian"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("BackgroundFunction", "Quadratic"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("ParameterTable", Peak5_Parameters));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("FitWindow", "a, b"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setPropertyValue("PeakRange", "c, d"));
+    TS_ASSERT_THROWS_NOTHING(fitpeak.setProperty("FitBackgroundFirst", true));
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test on fit background with multi-domain
+    */
+  void test_FitBackground()
+  {
+    FitPeak fitpeak;
+
+
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Test on fit a peak with significantly high background
+    */
   void test_FitPeakWithHighBkgd()
   {
     // Generate data
@@ -33,8 +77,37 @@ public:
 
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Generate a workspace contains PG3_4866 5-th peak
+    */
+  TableWorkspace_sptr gen_PeakBkgdTable()
+  {
+    TableWorkspace_sptr partablews = boost::shared_sptr<TableWorkspace>();
+    partablews->addColumn("str", "Name");
+    partablews->addColumn("double", "Value");
+
+    // Add peak profile
+    TableRow newrow = partablews->appendRow();
+    newrow << "Height" << 1.0;
+
+    newrow = partablews->appendRow();
+    newrow << "X0" << 0.59;
+
+    newrow = partablews->appendRow();
+    newrow << "Sigma" << 0.01;
+
+    // Add background
+    newrow = partablews->appendRow();
+    newrow << "A0" << 1000.;
+
+    newrow = partablews->appendRow();
+    newrow << "A1" << -10.;
+
+    return partablews;
+  }
 
 
+  //----------------------------------------------------------------------------------------------
   /** Generate a workspace contains PG3_4866 5-th peak
     */
   MatrixWorkspace_sptr gen_4866P5Data()

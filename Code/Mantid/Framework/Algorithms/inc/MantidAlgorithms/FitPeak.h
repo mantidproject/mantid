@@ -69,7 +69,7 @@ namespace Algorithms
 
     /// Fit a single peak function with pure peak workspace
     double fitPeakFuncion(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_const_sptr dataws,
-                          size_t wsindex, double startx, double endx);
+                          size_t wsindex, double startx, double endx, std::string &errorreason);
 
     /// Fit background with multiple domain
     API::IBackgroundFunction_sptr fitBackground(API::IBackgroundFunction_sptr bkgdfunc);
@@ -83,7 +83,7 @@ namespace Algorithms
     void makePurePeakWS(const std::vector<double>& vec_bkgd);
 
     /// Fit a function.
-    double fitFunction(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws,
+    double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws,
                        size_t wsindex, double xmin, double xmax,
                        std::vector<double>& vec_caldata);
 
@@ -186,6 +186,7 @@ namespace Algorithms
     std::vector<double> m_vecybkup;
     std::vector<double> m_vecebkup;
 
+    std::string m_costFunction;
 
   };
 

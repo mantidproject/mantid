@@ -186,7 +186,7 @@ namespace Algorithms
     // Generate background function
     m_backgroundType = getPropertyValue("BackgroundFunction");
     m_bkgdFunc = boost::dynamic_pointer_cast<IBackgroundFunction>(
-          FunctionFactory::Instance().createFunction(m_peakFuncType));
+          FunctionFactory::Instance().createFunction(m_backgroundType));
 
     // Parse Tableworkspace (parameters values for input)
     m_parameterTableWS = getProperty("ParameterTable");
@@ -306,6 +306,8 @@ namespace Algorithms
     else
       m_usePeakPositionTolerance = true;
 
+    m_costFunction = "Least squares";
+
     return;
   }
 
@@ -336,9 +338,11 @@ namespace Algorithms
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Fit function
+  /** Fit function in single domain
+    * @exception :: (1) Fit cannot be called. (2) Fit.isExecuted is false (cannot be executed)
+    * @return :: chi^2 or Rwp depending on input.  If fit is not SUCCESSFUL, return DBL_MAX
     */
-  double FitPeak::fitFunction(IFunction_sptr fitfunc, MatrixWorkspace_const_sptr dataws,
+  double FitPeak::fitFunctionSD(IFunction_sptr fitfunc, MatrixWorkspace_const_sptr dataws,
                               size_t wsindex, double xmin, double xmax,
                               vector<double>& vec_caldata)
   {
@@ -368,7 +372,8 @@ namespace Algorithms
     fit->setProperty("StartX", xmin);
     fit->setProperty("EndX", xmax);
     fit->setProperty("Minimizer", m_minimizer);
-    fit->setProperty("CostFunction", "Least squares");
+    // FIXME -
+    fit->setProperty("CostFunction", m_costFunction);
 
     // Execute fit and get result of fitting background
     fit->executeAsChildAlg();
@@ -388,7 +393,6 @@ namespace Algorithms
 
       API::MatrixWorkspace_sptr outws = fit->getProperty("OutputWorkspace");
 
-      // FIXME : It might not work for multiple domain
       const MantidVec& vec_fitY = outws->readY(wsindex);
       for (size_t i = i_minFitX; i < i_maxFitX; ++i)
       {
@@ -457,7 +461,7 @@ namespace Algorithms
 
     push(bkgdfunc, m_bkupBkgdFunc);
 
-    double chi2 = fitFunction(bkgdfunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX, vec_bkgd);
+    double chi2 = fitFunctionMD(bkgdfunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX, vec_bkgd);
 
     if (chi2 > DBL_MAX-1)
     {
@@ -686,10 +690,12 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Fit peak function (only).
+    * In this function, the fit result will be examined if fit is 'successful' in order to rule out
+    * some fit with unphysical result.
     * @return :: chi-square/Rwp
     */
   double FitPeak::fitPeakFuncion(API::IPeakFunction_sptr peakfunc, MatrixWorkspace_const_sptr dataws,
-                                 size_t wsindex, double startx, double endx)
+                                 size_t wsindex, double startx, double endx, std::string& errorreason)
   {
     // Check validity and debug output
     if (peakfunc)
@@ -709,44 +715,47 @@ namespace Algorithms
     }
 
     vector<double> vec_calY;
-    double goodness = fitFunction(peakfunc, dataws, wsindex, startx, endx, vec_calY);
-
-    // FIXME - Below this line, the code has not been examined.
-#if TOEXAM
-    // Analyze result
-    std::string fitpeakstatus = gfit->getProperty("OutputStatus");
-    bool isfitgood = isFitSuccessful(fitpeakstatus);
-
-    double final_rwp;
-    if (isfitgood)
+    double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, vec_calY);
+    if (goodness < EMPTY_DBL)
     {
-      final_rwp = calculateFunctionRwp(peakbkgdfunc, dataws, wsindex, startx, endx);
+      // Fit is successful.  Check whether the fit result is physical
+      stringstream errorss;
+      double peakcentre = peakfunc->centre();
+      if (peakcentre < m_minPeakX || peakcentre > m_maxPeakX)
+      {
+        errorss << "Peak centre (at " << peakcentre << " ) is out of specified range )"
+                << m_minPeakX << ", " << m_maxPeakX << "). ";
+        goodness = DBL_MAX;
+      }
 
-      std::stringstream dbss;
-
-      std::vector<std::string> parnames = peakbkgdfunc->getParameterNames();
-      dbss << "[Fx357] Fit Peak (+background) Status = " << fitpeakstatus << ". Starting Rwp = "
-           << init_rwp << ".  Final Rwp = " << final_rwp << ".\n";
-      for (size_t i = 0; i < parnames.size(); ++i)
-        dbss << parnames[i] << "\t = " << peakbkgdfunc->getParameter(parnames[i]) << "\n";
-      g_log.debug(dbss.str());
+      double peakheight = peakfunc->height();
+      if (peakheight < 0)
+      {
+        errorss << "Peak height (" << peakheight << ") is negative. ";
+        goodness = DBL_MAX;
+      }
+      double peakfwhm = peakfunc->fwhm();
+      if (peakfwhm > (m_maxFitX - m_minFitX) * MAGICNUMBER)
+      {
+        errorss << "Peak width is unreasonably wide. ";
+        goodness = DBL_MAX;
+      }
+      errorreason = errorss.str();
     }
     else
     {
-      final_rwp = DBL_MAX;
+      // Fit is not successful
+      errorreason = "Fit() on peak function is NOT successful.";
     }
 
-#endif
-
     return goodness;
-
   }
 
   //----------------------------------------------------------------------------------------------
   /** Fit peak function and background function as composite function
     * @return :: Rwp/chi2
     */
-  bool FitPeak::fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
+  double FitPeak::fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
                                      API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
                                      double startx, double endx)
   {
@@ -754,8 +763,39 @@ namespace Algorithms
     compfunc->addFunction(peakfunc);
     compfunc->addFunction(bkgdfunc);
 
+    // Do calculation for starting chi^2/Rwp
+    // FIXME - Whether there is any way to retrieve this information from Fit()?
     vector<double> vec_calY;
-    double goodness = fitFunction(compfunc, dataws, wsindex, startx, endx, vec_calY);
+    bool modecal = true;
+    double goodness_init = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, vec_calY, modecal);
+    push(peakfunc);
+    push(bkgdfunc);
+
+    // Fit
+    modecal = false;
+    double goodness = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, vec_calY, modecal);
+    string errorreason;
+    goodness = checkFittedPeak(peakfunc, goodness, errorreason);
+
+    double goodness_final;
+    if (goodness < goodness_init)
+    {
+      // Fit for composite function renders a better result
+      goodness_final = goodness;
+      errorreason = "";
+    }
+    else if (goodness_init <= goodness && goodness_init < DBL_MAX)
+    {
+      goodness = goodness_init;
+      errorreason = "";
+      g_log.information("Fit peak/background composite function FAILS to render a better solution.");
+      pop(peakfunc);
+      pop(bkgdfunc);
+    }
+    else
+    {
+      g_log.information("Fit peak-background function fails in all approaches! ");
+    }
 
     return goodness;
   }
