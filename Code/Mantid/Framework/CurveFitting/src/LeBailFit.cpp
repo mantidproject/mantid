@@ -1239,14 +1239,29 @@ namespace CurveFitting
     peakWS->addColumn("str", "FitStatus");
 
     // Add each peak in LeBailFunction to peak/table workspace
-    for (size_t ipk = 0; ipk < m_inputPeakInfoVec.size(); ++ipk)
+    for (size_t ipk = 0; ipk < m_lebailFunction->getNumberOfPeaks(); ++ipk)
     {
-      // Miller index
+
+      // Miller index and peak parameters
+      IPowderDiffPeakFunction_sptr peak = m_lebailFunction->getPeak(ipk);
+
+      int h, k, l;
+      peak->getMillerIndex(h, k, l);
+      double tof_h = peak->centre();
+      double height = peak->height();
+      double alpha = peak->getPeakParameter("Alpha");
+      double beta = peak->getPeakParameter("Beta");
+      double sigma2 = peak->getPeakParameter("Sigma2");
+      double gamma = peak->getPeakParameter("Gamma");
+      double fwhm = peak->fwhm();
+
+#if 0
+      m_lebailFunction->getPeak(i)
+
       vector<int>& hkl = m_inputPeakInfoVec[ipk].first;
       int h = hkl[0];
       int k = hkl[1];
       int l = hkl[2];
-
 
       double tof_h = m_lebailFunction->getPeakParameter(hkl, "TOF_h");
       double height = m_lebailFunction->getPeakParameter(hkl, "Height");
@@ -1255,6 +1270,7 @@ namespace CurveFitting
       double sigma2 = m_lebailFunction->getPeakParameter(hkl, "Sigma2");
       double gamma = m_lebailFunction->getPeakParameter(hkl, "Gamma");
       double fwhm = m_lebailFunction->getPeakParameter(hkl, "FWHM");
+#endif
 
       // New row
       API::TableRow newrow = peakWS->appendRow();
