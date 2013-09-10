@@ -1255,23 +1255,6 @@ namespace CurveFitting
       double gamma = peak->getPeakParameter("Gamma");
       double fwhm = peak->fwhm();
 
-#if 0
-      m_lebailFunction->getPeak(i)
-
-      vector<int>& hkl = m_inputPeakInfoVec[ipk].first;
-      int h = hkl[0];
-      int k = hkl[1];
-      int l = hkl[2];
-
-      double tof_h = m_lebailFunction->getPeakParameter(hkl, "TOF_h");
-      double height = m_lebailFunction->getPeakParameter(hkl, "Height");
-      double alpha = m_lebailFunction->getPeakParameter(hkl, "Alpha");
-      double beta = m_lebailFunction->getPeakParameter(hkl, "Beta");
-      double sigma2 = m_lebailFunction->getPeakParameter(hkl, "Sigma2");
-      double gamma = m_lebailFunction->getPeakParameter(hkl, "Gamma");
-      double fwhm = m_lebailFunction->getPeakParameter(hkl, "FWHM");
-#endif
-
       // New row
       API::TableRow newrow = peakWS->appendRow();
       newrow << h << k << l << height << tof_h << alpha << beta << sigma2 << gamma << fwhm
@@ -1286,7 +1269,7 @@ namespace CurveFitting
       }
     }
 
-    // 4. Set
+    // Set property
     this->setProperty("OutputPeaksWorkspace", peakWS);
 
     return;
