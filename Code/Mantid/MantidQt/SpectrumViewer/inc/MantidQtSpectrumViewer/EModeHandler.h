@@ -1,7 +1,7 @@
 #ifndef EMODE_HANDLER_H
 #define EMODE_HANDLER_H
 
-#include "ui_ImageView.h"
+#include "ui_SpectrumView.h"
 #include "MantidQtSpectrumViewer/ImageDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
@@ -9,7 +9,7 @@
     @class EModeHandler 
   
       This manages the instrument type combo box (emode) and E Fixed controls 
-    for the ImageView data viewer. 
+    for the SpectrumView data viewer. 
  
     @author Dennis Mikkelson 
     @date   2012-10-12
@@ -45,7 +45,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EModeHandler
   public:
 
     /// Construct object to manage E Mode controls in the UI
-    EModeHandler( Ui_ImageViewer* iv_ui );
+    EModeHandler( Ui_SpectrumViewer* iv_ui );
 
     /// Get the E Mode to control units calculation, from the combo box
     int GetEMode();
@@ -60,7 +60,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EModeHandler
     void SetEFixed( const double efixed );
 
   private:
-    Ui_ImageViewer* iv_ui;
+    Ui_SpectrumViewer* iv_ui;
 };
 
 } // namespace SpectrumView

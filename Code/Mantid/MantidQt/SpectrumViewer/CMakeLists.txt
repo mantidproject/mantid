@@ -7,7 +7,7 @@ set ( SRC_FILES
        src/ImagePlotItem.cpp  
        src/QtUtils.cpp
        src/GraphDisplay.cpp     
-       src/ImageView.cpp      
+       src/SpectrumView.cpp      
        src/SliderHandler.cpp
        src/RangeHandler.cpp
        src/EModeHandler.cpp
@@ -29,7 +29,7 @@ set ( INC_FILES
        inc/MantidQtSpectrumViewer/IVUtils.h
        inc/MantidQtSpectrumViewer/TrackingPicker.h
        inc/MantidQtSpectrumViewer/GraphDisplay.h
-       inc/MantidQtSpectrumViewer/ImageView.h
+       inc/MantidQtSpectrumViewer/SpectrumView.h
        inc/MantidQtSpectrumViewer/QtUtils.h
        inc/MantidQtSpectrumViewer/ImageDataSource.h
        inc/MantidQtSpectrumViewer/ISliderHandler.h
@@ -49,7 +49,7 @@ set ( MOC_FILES
 )
 
 set ( UI_FILES 
-       inc/MantidQtSpectrumViewer/ImageView.ui
+       inc/MantidQtSpectrumViewer/SpectrumView.ui
 )
 
 # Python unit tests

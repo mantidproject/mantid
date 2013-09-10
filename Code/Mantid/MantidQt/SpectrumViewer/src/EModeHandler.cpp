@@ -16,7 +16,7 @@ namespace SpectrumView
  *  Construct an EModeHandler object to manage the E Mode and E Fixed controls 
  *  in the specified UI
  */
-EModeHandler::EModeHandler( Ui_ImageViewer* iv_ui )
+EModeHandler::EModeHandler( Ui_SpectrumViewer* iv_ui )
 {
   this->iv_ui = iv_ui;
 }

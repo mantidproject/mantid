@@ -13,7 +13,7 @@ namespace SpectrumView
  *  Construct a SliderHandler object to manage the image scrollbars from the 
  *  specified UI.
  */
-SliderHandler::SliderHandler( Ui_ImageViewer* iv_ui ) : ISliderHandler()
+SliderHandler::SliderHandler( Ui_SpectrumViewer* iv_ui ) : ISliderHandler()
 {
   this->iv_ui = iv_ui;
 }

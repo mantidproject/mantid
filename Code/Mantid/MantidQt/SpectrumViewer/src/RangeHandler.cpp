@@ -16,7 +16,7 @@ namespace SpectrumView
  *  Construct a RangeHandler object to manage min, max and step controls 
  *  in the specified UI
  */
-RangeHandler::RangeHandler( Ui_ImageViewer* iv_ui ) : IRangeHandler()
+RangeHandler::RangeHandler( Ui_SpectrumViewer* iv_ui ) : IRangeHandler()
 {
   this->iv_ui = iv_ui;
 }

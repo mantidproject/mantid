@@ -1,9 +1,9 @@
 
 #include <iostream>
-#include  "MantidQtSpectrumViewer/ImageView.h"
+#include  "MantidQtSpectrumViewer/SpectrumView.h"
 #include  "MantidQtSpectrumViewer/ColorMaps.h"
 
-#include "ui_ImageView.h"
+#include "ui_SpectrumView.h"
 #include "MantidQtSpectrumViewer/IVConnections.h"
 #include "MantidQtSpectrumViewer/ImageDisplay.h"
 #include "MantidQtSpectrumViewer/SliderHandler.h"
@@ -18,18 +18,18 @@ namespace SpectrumView
 
 
 /**
- *  Construct an ImageView to display data from the specified data source.
+ *  Construct an SpectrumView to display data from the specified data source.
  *  The specified ImageDataSource must be constructed elsewhere and passed
- *  into this ImageView constructor.  Most other components of the ImageView
+ *  into this SpectrumView constructor.  Most other components of the SpectrumView
  *  are managed by this class.  That is the graphs, image display and other
- *  parts of the ImageView are constructed here and are deleted when the
- *  ImageView destructor is called.
+ *  parts of the SpectrumView are constructed here and are deleted when the
+ *  SpectrumView destructor is called.
  *
  *  @param data_source  The source of the data that will be displayed. 
  */
-ImageView::ImageView( ImageDataSource* data_source )
+SpectrumView::SpectrumView( ImageDataSource* data_source )
 {
-  Ui_ImageViewer* ui = new Ui_ImageViewer();
+  Ui_SpectrumViewer* ui = new Ui_SpectrumViewer();
   saved_ui          = ui; 
 
                                           // IF we have a MatrixWSDataSource
@@ -88,9 +88,9 @@ ImageView::ImageView( ImageDataSource* data_source )
 }
 
 
-ImageView::~ImageView()
+SpectrumView::~SpectrumView()
 {
-//  std::cout << "ImageView destructor called" << std::endl;
+//  std::cout << "SpectrumView destructor called" << std::endl;
 
   delete  h_graph;
   delete  v_graph;
@@ -110,7 +110,7 @@ ImageView::~ImageView()
                              static_cast<IVConnections*>(saved_iv_connections);
   delete  iv_connections;
 
-  Ui_ImageViewer* ui = static_cast<Ui_ImageViewer*>(saved_ui);
+  Ui_SpectrumViewer* ui = static_cast<Ui_SpectrumViewer*>(saved_ui);
   delete  ui;
 
   if ( saved_emode_handler != 0 )

@@ -4,7 +4,7 @@
 #include "MantidQtSpectrumViewer/ISliderHandler.h"
 #include <QRect>
 
-#include "ui_ImageView.h"
+#include "ui_SpectrumView.h"
 #include "MantidQtSpectrumViewer/ImageDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
@@ -12,7 +12,7 @@
     @class SliderHandler 
   
       This manages the horizontal and vertical scroll bars for the
-    ImageView data viewer. 
+    SpectrumView data viewer. 
  
     @author Dennis Mikkelson 
     @date   2012-04-03 
@@ -49,7 +49,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler : public ISliderHandler
   public:
 
     /// Construct object to manage image scrollbars from the specified UI
-    SliderHandler( Ui_ImageViewer* iv_ui );
+    SliderHandler( Ui_SpectrumViewer* iv_ui );
 
     /// Configure the image scrollbars for the specified data and drawing area
     void ConfigureSliders( QRect            draw_area, 
@@ -78,7 +78,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler : public ISliderHandler
                           int         n_pixels,
                           int         val );
 
-    Ui_ImageViewer*   iv_ui;
+    Ui_SpectrumViewer*   iv_ui;
 };
 
 } // namespace SpectrumView

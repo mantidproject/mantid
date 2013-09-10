@@ -1,5 +1,5 @@
-#ifndef  IMAGE_VIEW_H
-#define  IMAGE_VIEW_H
+#ifndef  SPECTRUM_VIEW_H
+#define  SPECTRUM_VIEW_H
 
 #include <QMainWindow>
 #include <QtGui>
@@ -9,10 +9,10 @@
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
-    @class ImageView 
+    @class SpectrumView 
   
-      This is the QMainWindow for the ImageView data viewer.  Data is
-    displayed in an ImageView, by constructing the ImageView object and
+      This is the QMainWindow for the SpectrumView data viewer.  Data is
+    displayed in an SpectrumView, by constructing the SpectrumView object and
     specifying a particular data source.
  
     @author Dennis Mikkelson 
@@ -45,24 +45,24 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView : public QMainWindow
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SpectrumView : public QMainWindow
 {
   public:
 
-     /// Construct an ImageView to display data from the specified data source 
-     ImageView( ImageDataSource* data_source );
+     /// Construct an SpectrumView to display data from the specified data source 
+     SpectrumView( ImageDataSource* data_source );
 
-    ~ImageView();
+    ~SpectrumView();
 
   private:
     GraphDisplay*    h_graph;
     GraphDisplay*    v_graph;
                                  
     // keep void pointers to the following objects, to avoid having to 
-    // include ui_ImageView.h, which disappears by the time MantidPlot is
+    // include ui_SpectrumView.h, which disappears by the time MantidPlot is
     // being built.  We need the pointers so we can delete them in the 
     // destructor.  
-    void*            saved_ui;               // Ui_ImageViewer*
+    void*            saved_ui;               // Ui_SpectrumViewer*
     void*            saved_slider_handler;   // SliderHandler*
     void*            saved_range_handler;    // RangeHandler*
     void*            saved_image_display;    // ImageDisplay*
@@ -73,4 +73,4 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView : public QMainWindow
 } // namespace SpectrumView
 } // namespace MantidQt 
 
-#endif   // IMAGE_VIEW_H
+#endif   // SPECTRUM_VIEW_H

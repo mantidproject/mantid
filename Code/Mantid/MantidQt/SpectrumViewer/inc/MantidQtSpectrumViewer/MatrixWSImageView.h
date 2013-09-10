@@ -4,13 +4,13 @@
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtSpectrumViewer/ImageView.h"
+#include "MantidQtSpectrumViewer/SpectrumView.h"
 
 /**
     @class MatrixWSDataSource 
   
        This is the top level class for showing a matrix workspace
-    using an ImageViewer.
+    using an SpectrumViewer.
  
     @author Dennis Mikkelson 
     @date   2012-05-08 
@@ -51,7 +51,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSImageView
    ~MatrixWSImageView();
 
   private:
-    ImageView *image_view;
+    SpectrumView *image_view;
 };
 
 } // namespace SpectrumView

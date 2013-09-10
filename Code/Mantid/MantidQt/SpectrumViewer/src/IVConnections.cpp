@@ -18,10 +18,10 @@ namespace SpectrumView
  * Construct the object that links the GUI components to the other specifed
  * higher level objects.  This class just keeps pointers to the parameters.
  * The objects passed in must be constructed elsewhere and must be deleted
- * elsewhere, when the ImageViewer is closed.
+ * elsewhere, when the SpectrumViewer is closed.
  *
  * @param ui               The object containing the gui components for 
- *                         the ImageView viewer.
+ *                         the SpectrumView viewer.
  * @param iv_main_window   The main window.
  * @param image_display    The ImageDisplay object that will display the
  *                         image
@@ -31,8 +31,8 @@ namespace SpectrumView
  *                         vertical cuts through the image
  *
  */
-IVConnections::IVConnections( Ui_ImageViewer* ui, 
-                              ImageView*      iv_main_window,
+IVConnections::IVConnections( Ui_SpectrumViewer* ui, 
+                              SpectrumView*      iv_main_window,
                               ImageDisplay*   image_display,
                               GraphDisplay*   h_graph_display,
                               GraphDisplay*   v_graph_display )

@@ -5,8 +5,8 @@
 #include <QtGui/QWidget>
 #include <QActionGroup>
 
-#include "ui_ImageView.h"
-#include "MantidQtSpectrumViewer/ImageView.h"
+#include "ui_SpectrumView.h"
+#include "MantidQtSpectrumViewer/SpectrumView.h"
 #include "MantidQtSpectrumViewer/TrackingPicker.h"
 #include "MantidQtSpectrumViewer/ImageDisplay.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
@@ -16,10 +16,10 @@
 /**
     @class IVConnections 
   
-       This class provides the connections between the ImageView GUI components
+       This class provides the connections between the SpectrumView GUI components
     made using QtDesigner and the classes that do the actual work for the
-    ImageView.  It basically provides SLOTS that are called by the GUI 
-   components' SIGNALS and in turn call methods on the ImageView 
+    SpectrumView.  It basically provides SLOTS that are called by the GUI 
+   components' SIGNALS and in turn call methods on the SpectrumView 
    implementation objects.
  
     @author Dennis Mikkelson 
@@ -60,8 +60,8 @@ public:
 
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  IVConnections( Ui_ImageViewer* ui, 
-                 ImageView*     image_view,
+  IVConnections( Ui_SpectrumViewer* ui, 
+                 SpectrumView*     image_view,
                  ImageDisplay*  image_display,
                  GraphDisplay*  h_graph_display,
                  GraphDisplay*  v_graph_display );
@@ -98,8 +98,8 @@ public slots:
  
 private:
 
-  Ui_ImageViewer*  iv_ui;
-  ImageView*       iv_main_window;
+  Ui_SpectrumViewer*  iv_ui;
+  SpectrumView*       iv_main_window;
   ImageDisplay*    image_display;
   GraphDisplay*    h_graph_display;
   GraphDisplay*    v_graph_display;
