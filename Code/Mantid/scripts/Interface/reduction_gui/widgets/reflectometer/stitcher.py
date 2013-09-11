@@ -69,7 +69,7 @@ class ReflData(object):
         
         if parent_layout is not None:
             parent_layout.addLayout(self._layout)
-            parent_layout.connect(self._edit_ctrl, QtCore.SIGNAL("returnPressed()"), self._scale_updated)
+            parent_layout.connect(self._edit_ctrl, QtCore.SIGNAL("returnPressed()"), self._return_pressed)
         
     def is_selected(self):
         return self._radio.isChecked()
@@ -91,6 +91,11 @@ class ReflData(object):
                     xmax = _xmax
         return xmin, xmax
         
+    def _return_pressed(self):
+        self._scale_updated()
+        if self._call_back is not None:
+            self._call_back()
+        
     def _scale_updated(self):
         """
             Called when the scaling factors are updated
@@ -103,10 +108,7 @@ class ReflData(object):
                     item.set_scale(self._scale)
                     item.apply_scale(xmin=xmin, xmax=xmax)
                 except:
-                    pass
-            
-        if self._call_back is not None:
-            self._call_back()
+                    pass            
             
     def delete(self):
         if self._radio is not None:
@@ -275,6 +277,7 @@ class StitcherWidget(BaseWidget):
         
     def _add_entry(self, workspace):
         entry = ReflData(workspace, parent_layout=self._content.angle_list_layout)
+        entry.connect_to_scale(self.plot_result)
         self._workspace_list.append(entry)
 
     def is_running(self, is_running):
