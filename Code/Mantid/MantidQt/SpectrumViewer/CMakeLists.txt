@@ -12,7 +12,7 @@ set ( SRC_FILES
        src/RangeHandler.cpp
        src/EModeHandler.cpp
        src/SpectrumDataSource.cpp  
-       src/IVConnections.cpp 
+       src/SVConnections.cpp 
        src/MatrixWSDataSource.cpp
        src/MatrixWSImageView.cpp
        src/ArrayDataSource.cpp
@@ -23,7 +23,7 @@ set ( SRC_FILES
 set ( INC_FILES
        inc/MantidQtSpectrumViewer/ColorMaps.h
        inc/MantidQtSpectrumViewer/SpectrumDisplay.h
-       inc/MantidQtSpectrumViewer/IVConnections.h
+       inc/MantidQtSpectrumViewer/SVConnections.h
        inc/MantidQtSpectrumViewer/DataArray.h
        inc/MantidQtSpectrumViewer/SpectrumPlotItem.h
        inc/MantidQtSpectrumViewer/SVUtils.h
@@ -44,7 +44,7 @@ set ( INC_FILES
 )
 
 set ( MOC_FILES 
-       inc/MantidQtSpectrumViewer/IVConnections.h
+       inc/MantidQtSpectrumViewer/SVConnections.h
        inc/MantidQtSpectrumViewer/TrackingPicker.h
 )
 

@@ -6,7 +6,7 @@
 
 #include "MantidQtAPI/MantidColorMap.h"
 
-#include "MantidQtSpectrumViewer/IVConnections.h"
+#include "MantidQtSpectrumViewer/SVConnections.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 
 namespace MantidQt
@@ -31,7 +31,7 @@ namespace SpectrumView
  *                         vertical cuts through the image
  *
  */
-IVConnections::IVConnections( Ui_SpectrumViewer* ui, 
+SVConnections::SVConnections( Ui_SpectrumViewer* ui, 
                               SpectrumView*      iv_main_window,
                               SpectrumDisplay*   spectrum_display,
                               GraphDisplay*   h_graph_display,
@@ -264,7 +264,7 @@ IVConnections::IVConnections( Ui_SpectrumViewer* ui,
 }
 
 
-IVConnections::~IVConnections()
+SVConnections::~SVConnections()
 {
   delete image_picker;
   delete h_graph_picker;
@@ -273,13 +273,13 @@ IVConnections::~IVConnections()
 }
 
 
-void IVConnections::close_viewer()
+void SVConnections::close_viewer()
 {
   iv_main_window->close();
 }
 
 
-void IVConnections::toggle_Hscroll()
+void SVConnections::toggle_Hscroll()
 {
   bool is_on = iv_ui->action_Hscroll->isChecked();
   iv_ui->imageHorizontalScrollBar->setVisible( is_on );
@@ -288,7 +288,7 @@ void IVConnections::toggle_Hscroll()
 }
 
 
-void IVConnections::toggle_Vscroll()
+void SVConnections::toggle_Vscroll()
 {
   bool is_on = iv_ui->action_Vscroll->isChecked();
   iv_ui->imageVerticalScrollBar->setVisible( is_on );
@@ -297,13 +297,13 @@ void IVConnections::toggle_Vscroll()
 }
 
 
-void IVConnections::image_horizontal_range_changed()
+void SVConnections::image_horizontal_range_changed()
 {
   spectrum_display->UpdateRange();
 }
 
 
-void IVConnections::graph_range_changed()
+void SVConnections::graph_range_changed()
 {
   double value = (double)iv_ui->graph_max_slider->value();
   double min   = (double)iv_ui->graph_max_slider->minimum();
@@ -318,19 +318,19 @@ void IVConnections::graph_range_changed()
 }
 
 
-void IVConnections::v_scroll_bar_moved()
+void SVConnections::v_scroll_bar_moved()
 {
   spectrum_display->UpdateImage();
 }
 
 
-void IVConnections::h_scroll_bar_moved()
+void SVConnections::h_scroll_bar_moved()
 {
   spectrum_display->UpdateImage();
 }
 
 
-void IVConnections::imageSplitter_moved()
+void SVConnections::imageSplitter_moved()
 {
   QList<int> sizes = iv_ui->imageSplitter->sizes();
   QList<int> vgraph_sizes;
@@ -342,7 +342,7 @@ void IVConnections::imageSplitter_moved()
 }
 
 
-void IVConnections::imagePicker_moved()
+void SVConnections::imagePicker_moved()
 {
   QwtPolygon selected_points = image_picker->selection();
   if ( selected_points.size() >= 1 )
@@ -353,7 +353,7 @@ void IVConnections::imagePicker_moved()
 }
 
 
-void IVConnections::h_graphPicker_moved()
+void SVConnections::h_graphPicker_moved()
 {
   QwtPolygon selected_points = h_graph_picker->selection();
   if ( selected_points.size() >= 1 )
@@ -364,7 +364,7 @@ void IVConnections::h_graphPicker_moved()
 }
 
 
-void IVConnections::v_graphPicker_moved()
+void SVConnections::v_graphPicker_moved()
 {
   QwtPolygon selected_points = v_graph_picker->selection();
   if ( selected_points.size() >= 1 )
@@ -374,7 +374,7 @@ void IVConnections::v_graphPicker_moved()
   }
 }
 
-void IVConnections::intensity_slider_moved()
+void SVConnections::intensity_slider_moved()
 {
   double value = (double)iv_ui->intensity_slider->value();
   double min   = (double)iv_ui->intensity_slider->minimum();
@@ -384,7 +384,7 @@ void IVConnections::intensity_slider_moved()
   spectrum_display->SetIntensity( scaled_value );
 }
 
-void IVConnections::heat_color_scale()
+void SVConnections::heat_color_scale()
 {
   std::vector<QRgb> positive_color_table;
   ColorMaps::GetColorMap( ColorMaps::HEAT, 256, positive_color_table );
@@ -396,7 +396,7 @@ void IVConnections::heat_color_scale()
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
-void IVConnections::gray_color_scale()
+void SVConnections::gray_color_scale()
 {
   std::vector<QRgb> positive_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, positive_color_table );
@@ -408,7 +408,7 @@ void IVConnections::gray_color_scale()
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
-void IVConnections::negative_gray_color_scale()
+void SVConnections::negative_gray_color_scale()
 {
   std::vector<QRgb> positive_color_table;
   ColorMaps::GetColorMap( ColorMaps::NEGATIVE_GRAY,256, positive_color_table);
@@ -420,7 +420,7 @@ void IVConnections::negative_gray_color_scale()
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
-void IVConnections::green_yellow_color_scale()
+void SVConnections::green_yellow_color_scale()
 {
   std::vector<QRgb> positive_color_table;
   ColorMaps::GetColorMap( ColorMaps::GREEN_YELLOW, 256, positive_color_table);
@@ -432,7 +432,7 @@ void IVConnections::green_yellow_color_scale()
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
-void IVConnections::rainbow_color_scale()
+void SVConnections::rainbow_color_scale()
 {
   std::vector<QRgb> positive_color_table;
   ColorMaps::GetColorMap( ColorMaps::RAINBOW, 256, positive_color_table );
@@ -444,7 +444,7 @@ void IVConnections::rainbow_color_scale()
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
-void IVConnections::optimal_color_scale()
+void SVConnections::optimal_color_scale()
 {
   std::vector<QRgb> positive_color_table;
   ColorMaps::GetColorMap( ColorMaps::OPTIMAL, 256, positive_color_table );
@@ -456,7 +456,7 @@ void IVConnections::optimal_color_scale()
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
-void IVConnections::multi_color_scale()
+void SVConnections::multi_color_scale()
 {
   std::vector<QRgb> positive_color_table;
   ColorMaps::GetColorMap( ColorMaps::MULTI, 256, positive_color_table );
@@ -468,7 +468,7 @@ void IVConnections::multi_color_scale()
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
-void IVConnections::spectrum_color_scale()
+void SVConnections::spectrum_color_scale()
 {
   std::vector<QRgb> positive_color_table;
   ColorMaps::GetColorMap( ColorMaps::SPECTRUM, 256, positive_color_table );
@@ -481,7 +481,7 @@ void IVConnections::spectrum_color_scale()
 }
 
 
-void IVConnections::load_color_map()
+void SVConnections::load_color_map()
 {
   QString file_name = MantidColorMap::loadMapDialog( "", this->iv_main_window );
 
@@ -517,7 +517,7 @@ void IVConnections::load_color_map()
  *                               same number of entries as the positive
  *                               color table.
  */
-void IVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
+void SVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
                                     std::vector<QRgb> & negative_color_table )
 {
   size_t total_colors = positive_color_table.size() + 
@@ -549,7 +549,7 @@ void IVConnections::ShowColorScale( std::vector<QRgb> & positive_color_table,
 }
 
 
-void IVConnections::online_help_slot()
+void SVConnections::online_help_slot()
 {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_ImageViewer"));
 

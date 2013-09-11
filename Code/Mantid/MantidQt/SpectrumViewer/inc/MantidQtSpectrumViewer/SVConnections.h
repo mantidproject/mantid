@@ -1,5 +1,5 @@
-#ifndef IV_CONNECTIONS_H
-#define IV_CONNECTIONS_H
+#ifndef SV_CONNECTIONS_H
+#define SV_CONNECTIONS_H
 
 #include <QtCore/QtCore>
 #include <QtGui/QWidget>
@@ -14,7 +14,7 @@
 
 
 /**
-    @class IVConnections 
+    @class SVConnections 
   
        This class provides the connections between the SpectrumView GUI components
     made using QtDesigner and the classes that do the actual work for the
@@ -52,7 +52,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER IVConnections: public QWidget
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SVConnections: public QWidget
 {
   Q_OBJECT
 
@@ -60,13 +60,13 @@ public:
 
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  IVConnections( Ui_SpectrumViewer* ui, 
+  SVConnections( Ui_SpectrumViewer* ui, 
                  SpectrumView*     image_view,
                  SpectrumDisplay*  spectrum_display,
                  GraphDisplay*  h_graph_display,
                  GraphDisplay*  v_graph_display );
 
-  ~IVConnections();
+  ~SVConnections();
 
   /// Set the pix map that shows the color scale from the specified color maps
   void ShowColorScale( std::vector<QRgb> & positive_color_table,
@@ -113,4 +113,4 @@ private:
 } // namespace SpectrumView
 } // namespace MantidQt 
 
-#endif  // IV_CONNECTIONS_H
+#endif  // SV_CONNECTIONS_H

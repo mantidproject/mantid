@@ -4,7 +4,7 @@
 #include  "MantidQtSpectrumViewer/ColorMaps.h"
 
 #include "ui_SpectrumView.h"
-#include "MantidQtSpectrumViewer/IVConnections.h"
+#include "MantidQtSpectrumViewer/SVConnections.h"
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/SliderHandler.h"
 #include "MantidQtSpectrumViewer/RangeHandler.h"
@@ -79,10 +79,10 @@ SpectrumView::SpectrumView( SpectrumDataSource* data_source )
 							   ui->image_table );
   saved_spectrum_display = spectrum_display;
 
-  IVConnections* iv_connections = new IVConnections( ui, this, 
+  SVConnections* sv_connections = new SVConnections( ui, this, 
                                                      spectrum_display, 
                                                      h_graph, v_graph );
-  saved_iv_connections = iv_connections;
+  saved_sv_connections = sv_connections;
 
   spectrum_display->SetDataSource( data_source );
 }
@@ -106,9 +106,9 @@ SpectrumView::~SpectrumView()
                              static_cast<RangeHandler*>(saved_range_handler);
   delete  range_handler;
 
-  IVConnections* iv_connections = 
-                             static_cast<IVConnections*>(saved_iv_connections);
-  delete  iv_connections;
+  SVConnections* sv_connections = 
+                             static_cast<SVConnections*>(saved_sv_connections);
+  delete  sv_connections;
 
   Ui_SpectrumViewer* ui = static_cast<Ui_SpectrumViewer*>(saved_ui);
   delete  ui;
