@@ -1,7 +1,7 @@
 #ifndef  REF_IMAGE_DISPLAY_H
 #define  REF_IMAGE_DISPLAY_H
 
-#include "MantidQtSpectrumViewer/ImageDisplay.h"
+#include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtRefDetectorViewer/RefSliderHandler.h"
 #include "MantidQtRefDetectorViewer/RefRangeHandler.h"
 #include "MantidQtRefDetectorViewer/RefLimitsHandler.h"
@@ -12,7 +12,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-/** This class extends the SpectrumViewer::ImageDisplay class to communicate left-clicks
+/** This class extends the SpectrumViewer::SpectrumDisplay class to communicate left-clicks
     to the RefLimitsHandler (and thence to the peak/background/TOF line edits in the gui)
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -34,10 +34,10 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageDisplay : public SpectrumView::ImageDisplay
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageDisplay : public SpectrumView::SpectrumDisplay
 {
   public:
-     /// Make an ImageDisplay to display with the given widgets and controls 
+     /// Make a SpectrumDisplay to display with the given widgets and controls 
      RefImageDisplay( QwtPlot*       image_plot, 
                       RefSliderHandler* slider_handler,
                       RefRangeHandler*  range_handler,

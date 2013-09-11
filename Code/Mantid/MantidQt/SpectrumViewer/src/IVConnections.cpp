@@ -23,7 +23,7 @@ namespace SpectrumView
  * @param ui               The object containing the gui components for 
  *                         the SpectrumView viewer.
  * @param iv_main_window   The main window.
- * @param image_display    The ImageDisplay object that will display the
+ * @param spectrum_display    The SpectrumDisplay object that will display the
  *                         image
  * @param h_graph_display  The GraphDisplay object that will display 
  *                         horizontal cuts through the image
@@ -33,7 +33,7 @@ namespace SpectrumView
  */
 IVConnections::IVConnections( Ui_SpectrumViewer* ui, 
                               SpectrumView*      iv_main_window,
-                              ImageDisplay*   image_display,
+                              SpectrumDisplay*   spectrum_display,
                               GraphDisplay*   h_graph_display,
                               GraphDisplay*   v_graph_display )
 {
@@ -52,7 +52,7 @@ IVConnections::IVConnections( Ui_SpectrumViewer* ui,
                     this, SLOT(close_viewer()) );
  
                               // now set up the gui components
-  this->image_display   = image_display;
+  this->spectrum_display   = spectrum_display;
   this->h_graph_display = h_graph_display;
   this->v_graph_display = v_graph_display;
 
@@ -284,7 +284,7 @@ void IVConnections::toggle_Hscroll()
   bool is_on = iv_ui->action_Hscroll->isChecked();
   iv_ui->imageHorizontalScrollBar->setVisible( is_on );
   iv_ui->imageHorizontalScrollBar->setEnabled( is_on );
-  image_display->UpdateImage();
+  spectrum_display->UpdateImage();
 }
 
 
@@ -293,13 +293,13 @@ void IVConnections::toggle_Vscroll()
   bool is_on = iv_ui->action_Vscroll->isChecked();
   iv_ui->imageVerticalScrollBar->setVisible( is_on );
   iv_ui->imageVerticalScrollBar->setEnabled( is_on );
-  image_display->UpdateImage();
+  spectrum_display->UpdateImage();
 }
 
 
 void IVConnections::image_horizontal_range_changed()
 {
-  image_display->UpdateRange();
+  spectrum_display->UpdateRange();
 }
 
 
@@ -320,13 +320,13 @@ void IVConnections::graph_range_changed()
 
 void IVConnections::v_scroll_bar_moved()
 {
-  image_display->UpdateImage();
+  spectrum_display->UpdateImage();
 }
 
 
 void IVConnections::h_scroll_bar_moved()
 {
-  image_display->UpdateImage();
+  spectrum_display->UpdateImage();
 }
 
 
@@ -338,7 +338,7 @@ void IVConnections::imageSplitter_moved()
   vgraph_sizes.append( 30 );
   vgraph_sizes.append( sizes[1] );
   iv_ui->vgraphSplitter->setSizes( vgraph_sizes );
-  image_display->UpdateImage();
+  spectrum_display->UpdateImage();
 }
 
 
@@ -348,7 +348,7 @@ void IVConnections::imagePicker_moved()
   if ( selected_points.size() >= 1 )
   {
     int index = selected_points.size() - 1;
-    image_display->SetPointedAtPoint( selected_points[index] );
+    spectrum_display->SetPointedAtPoint( selected_points[index] );
   }
 }
 
@@ -381,7 +381,7 @@ void IVConnections::intensity_slider_moved()
   double max   = (double)iv_ui->intensity_slider->maximum();
 
   double scaled_value = 100.0*(value - min)/(max - min);
-  image_display->SetIntensity( scaled_value );
+  spectrum_display->SetIntensity( scaled_value );
 }
 
 void IVConnections::heat_color_scale()
@@ -392,7 +392,7 @@ void IVConnections::heat_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  spectrum_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -404,7 +404,7 @@ void IVConnections::gray_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  spectrum_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -416,7 +416,7 @@ void IVConnections::negative_gray_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::HEAT, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  spectrum_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -428,7 +428,7 @@ void IVConnections::green_yellow_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  spectrum_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -440,7 +440,7 @@ void IVConnections::rainbow_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  spectrum_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -452,7 +452,7 @@ void IVConnections::optimal_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  spectrum_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -464,7 +464,7 @@ void IVConnections::multi_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  spectrum_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -476,7 +476,7 @@ void IVConnections::spectrum_color_scale()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  spectrum_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 
@@ -501,7 +501,7 @@ void IVConnections::load_color_map()
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, n_colors, negative_color_table );
 
-  image_display->SetColorScales( positive_color_table, negative_color_table );
+  spectrum_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );
 }
 

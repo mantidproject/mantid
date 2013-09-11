@@ -1,5 +1,5 @@
-#ifndef  IMAGE_DISPLAY_H
-#define  IMAGE_DISPLAY_H
+#ifndef  SPECTRUM_DISPLAY_H
+#define  SPECTRUM_DISPLAY_H
 
 #include <QColor>
 #include <QPoint>
@@ -15,7 +15,7 @@
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
-    @class ImageDisplay 
+    @class SpectrumDisplay 
   
     This class provides the image display and coordinates the image and
     graph displays for the SpectrumView data viewer.
@@ -50,19 +50,19 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SpectrumDisplay
 {
   public:
 
-     /// Make an ImageDisplay to display with the given widgets and controls 
-     ImageDisplay( QwtPlot*       image_plot, 
+     /// Make an SpectrumDisplay to display with the given widgets and controls 
+     SpectrumDisplay( QwtPlot*       image_plot, 
                    ISliderHandler* slider_handler,
                    IRangeHandler*  range_handler,
                    GraphDisplay*  h_graph,
                    GraphDisplay*  v_graph,
                    QTableWidget*  table_widget );
 
-     virtual ~ImageDisplay();
+     virtual ~SpectrumDisplay();
 
      /// Set some properties of the SpectrumPlotItem object
      void setupSpectrumPlotItem();
@@ -136,4 +136,4 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
 } // namespace SpectrumView
 } // namespace MantidQt 
 
-#endif   // IMAGE_DISPLAY_H
+#endif   // SPECTRUM_DISPLAY_H

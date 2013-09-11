@@ -5,7 +5,7 @@
 
 #include "ui_SpectrumView.h"
 #include "MantidQtSpectrumViewer/IVConnections.h"
-#include "MantidQtSpectrumViewer/ImageDisplay.h"
+#include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/SliderHandler.h"
 #include "MantidQtSpectrumViewer/RangeHandler.h"
 #include "MantidQtSpectrumViewer/EModeHandler.h"
@@ -72,19 +72,19 @@ SpectrumView::SpectrumView( ImageDataSource* data_source )
   h_graph = new GraphDisplay( ui->h_graphPlot, ui->h_graph_table, false );
   v_graph = new GraphDisplay( ui->v_graphPlot, ui->v_graph_table, true );
 
-  ImageDisplay* image_display = new ImageDisplay( ui->imagePlot,
-                                                  slider_handler,
-                                                  range_handler,
-                                                  h_graph, v_graph,
-                                                  ui->image_table );
-  saved_image_display = image_display;
+  SpectrumDisplay* spectrum_display = new SpectrumDisplay( ui->imagePlot,
+							   slider_handler,
+							   range_handler,
+							   h_graph, v_graph,
+							   ui->image_table );
+  saved_spectrum_display = spectrum_display;
 
   IVConnections* iv_connections = new IVConnections( ui, this, 
-                                                     image_display, 
+                                                     spectrum_display, 
                                                      h_graph, v_graph );
   saved_iv_connections = iv_connections;
 
-  image_display->SetDataSource( data_source );
+  spectrum_display->SetDataSource( data_source );
 }
 
 
@@ -95,8 +95,8 @@ SpectrumView::~SpectrumView()
   delete  h_graph;
   delete  v_graph;
 
-  ImageDisplay* image_display = static_cast<ImageDisplay*>(saved_image_display);
-  delete  image_display;
+  SpectrumDisplay* spectrum_display = static_cast<SpectrumDisplay*>(saved_spectrum_display);
+  delete  spectrum_display;
 
   SliderHandler* slider_handler = 
                              static_cast<SliderHandler*>(saved_slider_handler);

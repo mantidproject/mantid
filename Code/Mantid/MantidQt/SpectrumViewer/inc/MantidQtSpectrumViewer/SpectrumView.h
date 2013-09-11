@@ -65,7 +65,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SpectrumView : public QMainWindow
     void*            saved_ui;               // Ui_SpectrumViewer*
     void*            saved_slider_handler;   // SliderHandler*
     void*            saved_range_handler;    // RangeHandler*
-    void*            saved_image_display;    // ImageDisplay*
+    void*            saved_spectrum_display; // SpectrumDisplay*
     void*            saved_iv_connections;   // IVConnections*
     void*            saved_emode_handler;    // EModeHandler*
 };

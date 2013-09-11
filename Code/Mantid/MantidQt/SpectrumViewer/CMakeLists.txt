@@ -1,6 +1,6 @@
 set ( SRC_FILES
        src/ColorMaps.cpp        
-       src/ImageDisplay.cpp   
+       src/SpectrumDisplay.cpp   
        src/IVUtils.cpp        
        src/TrackingPicker.cpp
        src/DataArray.cpp        
@@ -22,7 +22,7 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
        inc/MantidQtSpectrumViewer/ColorMaps.h
-       inc/MantidQtSpectrumViewer/ImageDisplay.h
+       inc/MantidQtSpectrumViewer/SpectrumDisplay.h
        inc/MantidQtSpectrumViewer/IVConnections.h
        inc/MantidQtSpectrumViewer/DataArray.h
        inc/MantidQtSpectrumViewer/SpectrumPlotItem.h

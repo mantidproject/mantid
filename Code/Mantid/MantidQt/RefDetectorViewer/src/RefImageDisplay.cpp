@@ -34,7 +34,7 @@ RefImageDisplay::RefImageDisplay(  QwtPlot*       image_plot,
                              GraphDisplay*  h_graph,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget)
-  : SpectrumView::ImageDisplay(image_plot,slider_handler,range_handler,h_graph,v_graph,table_widget),
+  : SpectrumView::SpectrumDisplay(image_plot,slider_handler,range_handler,h_graph,v_graph,table_widget),
     m_limitsHandler(limits_handler)
 {
   // We need a different SpectrumPlotItem class, so delete the one created in the
@@ -61,7 +61,7 @@ RefImageDisplay::~RefImageDisplay()
 QPair<double,double> RefImageDisplay::SetPointedAtPoint( QPoint point, int mouseClick)
 {
   // Call the base class method for most of the work
-  QPair<double,double> xy = ImageDisplay::SetPointedAtPoint( point, mouseClick );
+  QPair<double,double> xy = SpectrumDisplay::SetPointedAtPoint( point, mouseClick );
 
   // Now, for a left click, set the position in the appropriate lineedit
   if (mouseClick == 1)  //left click

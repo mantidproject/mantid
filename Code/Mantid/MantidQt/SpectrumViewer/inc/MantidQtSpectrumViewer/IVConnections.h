@@ -8,7 +8,7 @@
 #include "ui_SpectrumView.h"
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 #include "MantidQtSpectrumViewer/TrackingPicker.h"
-#include "MantidQtSpectrumViewer/ImageDisplay.h"
+#include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
@@ -62,7 +62,7 @@ public:
   /// higher level objects.
   IVConnections( Ui_SpectrumViewer* ui, 
                  SpectrumView*     image_view,
-                 ImageDisplay*  image_display,
+                 SpectrumDisplay*  spectrum_display,
                  GraphDisplay*  h_graph_display,
                  GraphDisplay*  v_graph_display );
 
@@ -100,7 +100,7 @@ private:
 
   Ui_SpectrumViewer*  iv_ui;
   SpectrumView*       iv_main_window;
-  ImageDisplay*    image_display;
+  SpectrumDisplay*    spectrum_display;
   GraphDisplay*    h_graph_display;
   GraphDisplay*    v_graph_display;
   TrackingPicker*  image_picker;

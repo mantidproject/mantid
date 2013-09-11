@@ -8,7 +8,7 @@
 #include <qimage.h>
 #include <qwt_scale_engine.h>
 
-#include "MantidQtSpectrumViewer/ImageDisplay.h"
+#include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/ImageDataSource.h"
 #include "MantidQtSpectrumViewer/DataArray.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
@@ -21,7 +21,7 @@ namespace SpectrumView
 {
 
 /**
- * Make an ImageDisplay to display with the given widgets and controls.
+ * Make an SpectrumDisplay to display with the given widgets and controls.
  *
  * @param image_plot      The QwtPlot that will hold the image
  * @param slider_handler  The object that manages interaction with the
@@ -34,7 +34,7 @@ namespace SpectrumView
  * @param table_widget    The widget where the information about a pointed
  *                        at location will be displayed.
  */
-ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
+SpectrumDisplay::SpectrumDisplay(  QwtPlot*       image_plot,
                              ISliderHandler* slider_handler,
                              IRangeHandler*  range_handler,
                              GraphDisplay*  h_graph,
@@ -56,14 +56,14 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
 }
 
 
-ImageDisplay::~ImageDisplay()
+SpectrumDisplay::~SpectrumDisplay()
 {
-  // std::cout << "ImageDisplay destructor called" << std::endl;
+  // std::cout << "SpectrumDisplay destructor called" << std::endl;
   delete image_plot_item;
 }
 
 /// Set some properties of the SpectrumPlotItem object
-void ImageDisplay::setupSpectrumPlotItem()
+void SpectrumDisplay::setupSpectrumPlotItem()
 {
   image_plot_item->setXAxis( QwtPlot::xBottom );
   image_plot_item->setYAxis( QwtPlot::yLeft );
@@ -81,7 +81,7 @@ void ImageDisplay::setupSpectrumPlotItem()
  * @param data_source The ImageDataSource that provides the array of values
  *                    and information for the table.
  */
-void ImageDisplay::SetDataSource( ImageDataSource* data_source )
+void SpectrumDisplay::SetDataSource( ImageDataSource* data_source )
 {
   this->data_source = data_source;
   h_graph_display->SetDataSource( data_source );
@@ -126,7 +126,7 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
  *  the xmin, xmax or step controls.  It should not be called directly from
  *  other threads.
  */
-void ImageDisplay::UpdateRange()
+void SpectrumDisplay::UpdateRange()
 {
   if ( data_source == 0 )
   {
@@ -164,7 +164,7 @@ void ImageDisplay::UpdateRange()
  *  intensity tables are changed.  It should not be called directly from
  *  other threads.
  */
-void ImageDisplay::UpdateImage()
+void SpectrumDisplay::UpdateImage()
 {
   if ( data_source == 0 )
   {
@@ -308,7 +308,7 @@ void ImageDisplay::UpdateImage()
  *                               same number of entries as the positive
  *                               color table.
  */
-void ImageDisplay::SetColorScales( std::vector<QRgb> & positive_color_table,
+void SpectrumDisplay::SetColorScales( std::vector<QRgb> & positive_color_table,
                                    std::vector<QRgb> & negative_color_table )
 {
   this->positive_color_table.resize( positive_color_table.size() );
@@ -337,7 +337,7 @@ void ImageDisplay::SetColorScales( std::vector<QRgb> & positive_color_table,
  *  @param control_parameter  This is clamped between 0 (linear) and
  *                            100 (most emphasis on low intensity values)
  */
-void ImageDisplay::SetIntensity( double control_parameter )
+void SpectrumDisplay::SetIntensity( double control_parameter )
 {
   size_t DEFAULT_SIZE = 100000;
   ColorMaps::GetIntensityMap( control_parameter, DEFAULT_SIZE, intensity_table);
@@ -356,7 +356,7 @@ void ImageDisplay::SetIntensity( double control_parameter )
  * @param mouseClick Which mouse button was clicked (used by derived class)
  * @return A pair containing the (x,y) values in the graph of the point
  */
-QPair<double,double> ImageDisplay::SetPointedAtPoint( QPoint point, int /*mouseClick*/ )
+QPair<double,double> SpectrumDisplay::SetPointedAtPoint( QPoint point, int /*mouseClick*/ )
 {
   if ( data_source == 0 || data_array == 0 )
   { 
@@ -381,7 +381,7 @@ QPair<double,double> ImageDisplay::SetPointedAtPoint( QPoint point, int /*mouseC
  *
  *  @param y   The y-value of the horizontal cut through the image.
  */
-void ImageDisplay::SetHGraph( double y )
+void SpectrumDisplay::SetHGraph( double y )
 {
   if ( y < data_array->GetYMin() || y > data_array->GetYMax()  )
   {
@@ -427,7 +427,7 @@ void ImageDisplay::SetHGraph( double y )
  *
  *  @param x   The x-value of the vertical cut through the image.
  */
-void ImageDisplay::SetVGraph( double x )
+void SpectrumDisplay::SetVGraph( double x )
 {
   if ( x < data_array->GetXMin() || x > data_array->GetXMax()  )
   {
@@ -473,7 +473,7 @@ void ImageDisplay::SetVGraph( double x )
  *  @param x  The x coordinate of the pointed at location on the image.
  *  @param y  The y coordinate of the pointed at location on the image.
  */
-void ImageDisplay::ShowInfoList( double x, double y )
+void SpectrumDisplay::ShowInfoList( double x, double y )
 {
   std::vector<std::string> info_list;
   data_source->GetInfoList( x, y, info_list );
@@ -507,7 +507,7 @@ void ImageDisplay::ShowInfoList( double x, double y )
  *  @param rect  A QRect object that will be filled out with position, width
  *               and height of the pixel region covered by the image.
  */
-void ImageDisplay::GetDisplayRectangle( QRect &rect )
+void SpectrumDisplay::GetDisplayRectangle( QRect &rect )
 {
   QwtScaleMap xMap = image_plot->canvasMap( QwtPlot::xBottom ); 
   QwtScaleMap yMap = image_plot->canvasMap( QwtPlot::yLeft ); 
@@ -538,7 +538,7 @@ void ImageDisplay::GetDisplayRectangle( QRect &rect )
 }
 
 
-bool ImageDisplay::DataSourceRangeChanged()
+bool SpectrumDisplay::DataSourceRangeChanged()
 {
   if ( total_y_min != data_source->GetYMin() ||
        total_y_max != data_source->GetYMax() ||
