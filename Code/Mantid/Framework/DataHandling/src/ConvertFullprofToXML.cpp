@@ -127,12 +127,15 @@ namespace DataHandling
     writer.setNewLine("\n");
     writer.setOptions(XMLWriter::PRETTY_PRINT);
 
+    // Get current time
+    Kernel::DateAndTime date = Kernel::DateAndTime::getCurrentTime();
+    std::string ISOdate = date.toISO8601String();
+    std::string ISOdateShort = ISOdate.substr(0,19); // Remove fraction of seconds
+
     // Create document
     Poco::XML::Document* mDoc = new Document();
     Element* rootElem = mDoc->createElement("parameter-file");
-    rootElem->setAttribute("instrument", "TEST");
-    mDoc->appendChild(rootElem);
-    rootElem->setAttribute("date", "2013-09-11 04:00:00");
+    rootElem->setAttribute("date", ISOdateShort);
     mDoc->appendChild(rootElem);
 
     Element* gElem = mDoc->createElement("test-element");
