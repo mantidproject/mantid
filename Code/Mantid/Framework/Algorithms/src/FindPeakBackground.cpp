@@ -270,7 +270,7 @@ namespace Algorithms
 			  // assume background is 12 first and last points
 			  min_peak = l0+12;
 			  max_peak = n-13;
-			  if (min_peak > sizey)min_peak = sizey;
+			  if (min_peak > sizey)min_peak = sizey-1;
 			  a0 = 0.0;
 			  a1 = 0.0;
 			  a2 = 0.0;
