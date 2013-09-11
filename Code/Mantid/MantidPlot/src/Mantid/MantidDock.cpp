@@ -170,8 +170,8 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_showListData = new QAction(tr("List Data"), this);
   connect(m_showListData, SIGNAL(activated()), m_mantidUI, SLOT(showListData())); 
 
-  m_showImageViewer = new QAction(tr("Show Image Viewer"), this);
-  connect(m_showImageViewer, SIGNAL(activated()), m_mantidUI, SLOT(showImageViewer()));
+  m_showSpectrumViewer = new QAction(tr("Show Spectrum Viewer"), this);
+  connect(m_showSpectrumViewer, SIGNAL(activated()), m_mantidUI, SLOT(showImageViewer()));
 
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
   { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/SliceViewerWindow_icon.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -436,7 +436,7 @@ void MantidDockWidget::addMatrixWorkspaceMenuItems(QMenu *menu, const Mantid::AP
   m_plotSpec->setEnabled ( matrixWS->blocksize() > 1 );
   m_plotSpecErr->setEnabled ( matrixWS->blocksize() > 1 );
 
-  menu->addAction(m_showImageViewer); // The 2D image viewer
+  menu->addAction(m_showSpectrumViewer); // The 2D spectrum viewer
 
   menu->addAction(m_colorFill);
   // Show the color fill plot if you have more than one histogram
