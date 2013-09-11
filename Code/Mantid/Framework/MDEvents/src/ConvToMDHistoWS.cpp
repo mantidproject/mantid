@@ -244,7 +244,7 @@ namespace Mantid
 
       if(m_spectraChunk<1)m_spectraChunk=1;
       // TMP
-      m_spectraChunk = 10;
+      //m_spectraChunk = 10;
 
     }
 
