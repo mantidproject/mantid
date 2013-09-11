@@ -19,6 +19,20 @@ Convert the initial fitting parameters in a Fullprof file to XML format in an [[
 
 #include <fstream>
 
+// Needed for writing the XML file (will be moved to a child algorithm)
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
+
+using namespace Poco::XML;
+
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeFilter.h>
+
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -101,7 +115,32 @@ namespace DataHandling
 
     // Write into Parameter File
     // This code will later go into a child algorithm to enable it to be used by other algorithms
-    // CODE YET TO BE WRITTEN
+    // CODE INCOMPLETE
+
+    std::ofstream outFile(paramfile.c_str());
+    if (!outFile)
+    {
+      throw Mantid::Kernel::Exception::FileError("Unable to open file:", paramfile);
+    }
+
+    DOMWriter writer;
+    writer.setNewLine("\n");
+    writer.setOptions(XMLWriter::PRETTY_PRINT);
+
+    // Create document
+    Poco::XML::Document* mDoc = new Document();
+    Element* rootElem = mDoc->createElement("parameter-file");
+    rootElem->setAttribute("instrument", "TEST");
+    mDoc->appendChild(rootElem);
+    rootElem->setAttribute("date", "2013-09-11 04:00:00");
+    mDoc->appendChild(rootElem);
+
+    Element* gElem = mDoc->createElement("test-element");
+    gElem->setAttribute("name", "name value");
+    rootElem->appendChild(gElem);
+
+    // Write document structure into file
+    writer.writeNode(outFile, mDoc);
 
     // Remove table workspace after use
     AnalysisDataService::Instance().remove("ParamTable");
