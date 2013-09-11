@@ -31,6 +31,7 @@ set ( SRC_FILES
 	src/SANSDiagnostics.cpp
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
+	src/Stretch.cpp
 	src/Transmission.cpp
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
@@ -79,6 +80,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
+	inc/MantidQtCustomInterfaces/Stretch.h
 	inc/MantidQtCustomInterfaces/Transmission.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
 	inc/MantidQtCustomInterfaces/MantidEVWorker.h
@@ -122,6 +124,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
+                inc/MantidQtCustomInterfaces/Stretch.h
                 inc/MantidQtCustomInterfaces/Transmission.h
 								inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
@@ -137,7 +140,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
-               inc/MantidQtCustomInterfaces/SANSRunWindow.ui
+               inc/MantidQtCustomInterfaces/SANSRunWindow.ui	
+               inc/MantidQtCustomInterfaces/Stretch.ui
                inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
 )

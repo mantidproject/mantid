@@ -1,5 +1,4 @@
 #include "MantidQtCustomInterfaces/Quasi.h"
-#include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
 namespace MantidQt
 {
