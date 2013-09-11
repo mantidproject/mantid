@@ -1,5 +1,5 @@
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/DataArray.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"

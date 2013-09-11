@@ -5,7 +5,7 @@
 #include <QtGui>
 
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "DllOption.h"
 
 /**
@@ -50,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImageView : public QMainWindow
   public:
 
      /// Construct an RefImageView to display data from the specified data source 
-     RefImageView( SpectrumView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
+     RefImageView( SpectrumView::SpectrumDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max);
 
     ~RefImageView();    
     

@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 
 namespace MantidQt
 {
@@ -20,7 +20,7 @@ namespace SpectrumView
  *  @param total_rows  The total number of rows the data is divided into
  *  @param total_cols  The total number of columns the data is divided into
  */
-ImageDataSource::ImageDataSource( double total_xmin, double total_xmax,
+SpectrumDataSource::SpectrumDataSource( double total_xmin, double total_xmax,
                                   double total_ymin, double total_ymax,
                                   size_t total_rows, size_t total_cols )
 {
@@ -33,7 +33,7 @@ ImageDataSource::ImageDataSource( double total_xmin, double total_xmax,
 }
 
 
-ImageDataSource::~ImageDataSource()
+SpectrumDataSource::~SpectrumDataSource()
 {
 }
 
@@ -41,7 +41,7 @@ ImageDataSource::~ImageDataSource()
 /**
  * Get the smallest 'x' value covered by the data.
  */
-double ImageDataSource::GetXMin()
+double SpectrumDataSource::GetXMin()
 {
   return total_xmin;
 }
@@ -50,7 +50,7 @@ double ImageDataSource::GetXMin()
 /**
  * Get the largest 'x' value covered by the data.
  */
-double ImageDataSource::GetXMax()
+double SpectrumDataSource::GetXMax()
 {
   return total_xmax;
 }
@@ -59,7 +59,7 @@ double ImageDataSource::GetXMax()
 /**
  * Get the smallest 'y' value covered by the data.
  */
-double ImageDataSource::GetYMin()
+double SpectrumDataSource::GetYMin()
 {
   return total_ymin;
 }
@@ -68,7 +68,7 @@ double ImageDataSource::GetYMin()
 /**
  * Get the largest 'y' value covered by the data.
  */
-double ImageDataSource::GetYMax()
+double SpectrumDataSource::GetYMax()
 {
   return total_ymax;
 }
@@ -77,7 +77,7 @@ double ImageDataSource::GetYMax()
 /**
  * Get the total number of rows the data is divided into
  */
-size_t ImageDataSource::GetNRows()
+size_t SpectrumDataSource::GetNRows()
 {
   return total_rows;
 }
@@ -86,7 +86,7 @@ size_t ImageDataSource::GetNRows()
 /**
  * Get the total number of columns the data is divided into
  */
-size_t ImageDataSource::GetNCols()
+size_t SpectrumDataSource::GetNCols()
 {
   return total_cols;
 }
@@ -97,7 +97,7 @@ size_t ImageDataSource::GetNCols()
  * @param x   If x is more than xmax it will be set to xmax. If x is less 
  *            than xmin, it will be set to xmin.
  */
-void ImageDataSource::RestrictX( double & x )
+void SpectrumDataSource::RestrictX( double & x )
 {
   if ( x > total_xmax )
   {
@@ -115,7 +115,7 @@ void ImageDataSource::RestrictX( double & x )
  * @param y   If y is more than ymax it will be set to ymax. If y is less 
  *            than ymin, it will be set to ymin.
  */
-void ImageDataSource::RestrictY( double & y )
+void SpectrumDataSource::RestrictY( double & y )
 {
   if ( y > total_ymax )
   {
@@ -133,7 +133,7 @@ void ImageDataSource::RestrictY( double & y )
  * @param row  If row is more than n_rows-1, it is set to n_rows-1.  If
  *             row < 0 it is set to zero.
  */
-void ImageDataSource::RestrictRow( int & row )
+void SpectrumDataSource::RestrictRow( int & row )
 {
   if ( row >= (int)total_rows )
   {
@@ -151,7 +151,7 @@ void ImageDataSource::RestrictRow( int & row )
  * @param col  If col is more than n_cols-1, it is set to n_cols-1.  If
  *             col < 0 it is set to zero.
  */
-void ImageDataSource::RestrictCol( int & col )
+void SpectrumDataSource::RestrictCol( int & col )
 {
   if ( col >= (int)total_cols )
   {
@@ -167,7 +167,7 @@ void ImageDataSource::RestrictCol( int & col )
 /**
  *  Convenience method to get all the data at the maximum resolution.
  */
-DataArray* ImageDataSource::GetDataArray( bool is_log_x )
+DataArray* SpectrumDataSource::GetDataArray( bool is_log_x )
 {
   return GetDataArray( total_xmin, total_xmax, total_ymin, total_ymax,
                        total_rows, total_cols, is_log_x );

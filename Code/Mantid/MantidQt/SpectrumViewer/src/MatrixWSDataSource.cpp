@@ -33,7 +33,7 @@ namespace SpectrumView
  * @param mat_ws  Shared pointer to the matrix workspace being "wrapped"
  */
 MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_const_sptr mat_ws )
-                 :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
+                 :SpectrumDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
   this->mat_ws = mat_ws;
 

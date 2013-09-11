@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include "MantidQtSpectrumViewer/DataArray.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 
 /**
     @class ArrayDataSource 
@@ -41,7 +41,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public ImageDataSource
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ArrayDataSource: public SpectrumDataSource
 {
   public:
 

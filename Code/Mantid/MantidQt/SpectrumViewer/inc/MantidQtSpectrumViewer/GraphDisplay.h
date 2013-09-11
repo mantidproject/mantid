@@ -5,7 +5,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
@@ -55,7 +55,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
   ~GraphDisplay();
 
    /// Set the source of information for the table of position information 
-   void SetDataSource( ImageDataSource* data_source );
+   void SetDataSource( SpectrumDataSource* data_source );
 
    /// Set the actual data that will be displayed on the graph
    void SetData( const QVector<double> & xData,
@@ -81,7 +81,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay
    QwtPlot*          graph_plot;
    QwtPlotCurve*     curve;
    QTableWidget*     graph_table;
-   ImageDataSource*  data_source;
+   SpectrumDataSource*  data_source;
 
    bool    is_vertical;
    bool    is_log_x;

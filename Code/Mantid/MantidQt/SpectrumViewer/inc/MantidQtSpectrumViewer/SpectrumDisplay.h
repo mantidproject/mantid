@@ -7,7 +7,7 @@
 #include <QTableWidget>
 #include <qwt_plot.h>
 
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "MantidQtSpectrumViewer/SpectrumPlotItem.h"
 #include "MantidQtSpectrumViewer/ISliderHandler.h"
@@ -68,7 +68,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      void setupSpectrumPlotItem();
 
      /// Set the source of the image data and information for the table
-     void SetDataSource( ImageDataSource* data_source );
+     void SetDataSource( SpectrumDataSource* data_source );
 
      /// Rebuild the scroll bars and image due to change of xmin, xmax, step
      void UpdateRange();
@@ -109,7 +109,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      std::vector<QRgb>    negative_color_table;
      std::vector<double>  intensity_table;
 
-     ImageDataSource*     data_source;
+     SpectrumDataSource*     data_source;
      DataArray*           data_array;
 
      QwtPlot*             image_plot;

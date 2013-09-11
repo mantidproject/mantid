@@ -19,7 +19,7 @@ namespace RefDetectorViewer
 
 /**
  *  Construct an SpectrumView to display data from the specified data source.
- *  The specified ImageDataSource must be constructed elsewhere and passed
+ *  The specified SpectrumDataSource must be constructed elsewhere and passed
  *  into this SpectrumView constructor.  Most other components of the SpectrumView
  *  are managed by this class.  That is the graphs, image display and other
  *  parts of the SpectrumView are constructed here and are deleted when the
@@ -33,7 +33,7 @@ namespace RefDetectorViewer
  *  @param tof_min The min time of flight value
  *  @param tof_max  The max time of flight value
  */
-RefImageView::RefImageView( SpectrumView::ImageDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
+RefImageView::RefImageView( SpectrumView::SpectrumDataSource* data_source, int peak_min, int peak_max, int back_min, int back_max, int tof_min, int tof_max)
 {
   Ui_RefImageViewer* ui = new Ui_RefImageViewer();
   saved_ui          = ui; 

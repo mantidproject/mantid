@@ -5,7 +5,7 @@
 #include <QRect>
 
 #include "ui_SpectrumView.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
@@ -53,7 +53,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SliderHandler : public ISliderHandler
 
     /// Configure the image scrollbars for the specified data and drawing area
     void ConfigureSliders( QRect            draw_area, 
-                           ImageDataSource* data_source );
+                           SpectrumDataSource* data_source );
 
     /// Configure the horizontal scrollbar to cover the specified range
     void ConfigureHSlider( int         n_data_steps, 

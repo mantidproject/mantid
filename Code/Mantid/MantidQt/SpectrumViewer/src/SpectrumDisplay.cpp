@@ -9,7 +9,7 @@
 #include <qwt_scale_engine.h>
 
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/DataArray.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
@@ -78,10 +78,10 @@ void SpectrumDisplay::setupSpectrumPlotItem()
  * Set the data source from which the image and data table information will
  * be obtained.
  *
- * @param data_source The ImageDataSource that provides the array of values
+ * @param data_source The SpectrumDataSource that provides the array of values
  *                    and information for the table.
  */
-void SpectrumDisplay::SetDataSource( ImageDataSource* data_source )
+void SpectrumDisplay::SetDataSource( SpectrumDataSource* data_source )
 {
   this->data_source = data_source;
   h_graph_display->SetDataSource( data_source );

@@ -59,10 +59,10 @@ GraphDisplay::~GraphDisplay()
  * Set the data source from which the table information will be obtained
  * (must be set to allow information to be displayed in the table.)
  *
- * @param data_source The ImageDataSource that provides information for
+ * @param data_source The SpectrumDataSource that provides information for
  *                    the table.
  */
-void GraphDisplay::SetDataSource( ImageDataSource* data_source )
+void GraphDisplay::SetDataSource( SpectrumDataSource* data_source )
 {
   this->data_source = data_source;
 }

@@ -3,7 +3,7 @@
 
 #include "MantidQtSpectrumViewer/IRangeHandler.h"
 #include "ui_SpectrumView.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
@@ -50,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER RangeHandler : public IRangeHandler
     RangeHandler( Ui_SpectrumViewer* iv_ui );
 
     /// Configure min, max and step controls for the specified data source
-    void ConfigureRangeControls( ImageDataSource* data_source );
+    void ConfigureRangeControls( SpectrumDataSource* data_source );
 
     /// Get the range of data to display in the image, from GUI controls
     void GetRange( double &min, double &max, double &step );

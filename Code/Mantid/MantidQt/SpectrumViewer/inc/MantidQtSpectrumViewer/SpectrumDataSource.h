@@ -1,5 +1,5 @@
-#ifndef IMAGE_DATA_SOURCE_H
-#define IMAGE_DATA_SOURCE_H
+#ifndef SPECTRUM_DATA_SOURCE_H
+#define SPECTRUM_DATA_SOURCE_H
 
 #include <cstddef>
 #include <vector>
@@ -8,7 +8,7 @@
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
-    @class ImageDataSource 
+    @class SpectrumDataSource 
   
        This class is an abstract base class for classes that can provide 
     data to be displayed in an SpectrumView data viewer.
@@ -43,16 +43,16 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ImageDataSource
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDataSource
 {
   public:
 
     /// construct data source with specified total range and data size
-    ImageDataSource( double total_xmin, double total_xmax,
-                     double total_ymin, double total_ymax,
-                     size_t total_rows, size_t total_cols );
+    SpectrumDataSource( double total_xmin, double total_xmax,
+			double total_ymin, double total_ymax,
+			size_t total_rows, size_t total_cols );
 
-    virtual ~ImageDataSource();
+    virtual ~SpectrumDataSource();
 
     /// Get the smallest 'x' value covered by the data
     virtual double GetXMin();
@@ -114,4 +114,4 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ImageDataSource
 } // namespace SpectrumView
 } // namespace MantidQt 
 
-#endif // IMAGE_DATA_SOURCE_H
+#endif // SPECTRUM_DATA_SOURCE_H

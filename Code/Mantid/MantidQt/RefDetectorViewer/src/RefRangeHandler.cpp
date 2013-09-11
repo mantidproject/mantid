@@ -26,9 +26,9 @@ RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* iv_ui )
 /**
  * Configure the min, max and step controls for the specified data source.
  *
- * @param data_source  ImageDataSource that provides the data to be drawn
+ * @param data_source  SpectrumDataSource that provides the data to be drawn
  */
-void RefRangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
+void RefRangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
 {
   
     //x axis

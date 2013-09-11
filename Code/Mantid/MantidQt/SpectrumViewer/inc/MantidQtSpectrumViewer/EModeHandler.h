@@ -2,7 +2,7 @@
 #define EMODE_HANDLER_H
 
 #include "ui_SpectrumView.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**

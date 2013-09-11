@@ -19,7 +19,7 @@ namespace SpectrumView
 
 /**
  *  Construct an SpectrumView to display data from the specified data source.
- *  The specified ImageDataSource must be constructed elsewhere and passed
+ *  The specified SpectrumDataSource must be constructed elsewhere and passed
  *  into this SpectrumView constructor.  Most other components of the SpectrumView
  *  are managed by this class.  That is the graphs, image display and other
  *  parts of the SpectrumView are constructed here and are deleted when the
@@ -27,7 +27,7 @@ namespace SpectrumView
  *
  *  @param data_source  The source of the data that will be displayed. 
  */
-SpectrumView::SpectrumView( ImageDataSource* data_source )
+SpectrumView::SpectrumView( SpectrumDataSource* data_source )
 {
   Ui_SpectrumViewer* ui = new Ui_SpectrumViewer();
   saved_ui          = ui; 

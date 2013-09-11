@@ -11,7 +11,7 @@ set ( SRC_FILES
        src/SliderHandler.cpp
        src/RangeHandler.cpp
        src/EModeHandler.cpp
-       src/ImageDataSource.cpp  
+       src/SpectrumDataSource.cpp  
        src/IVConnections.cpp 
        src/MatrixWSDataSource.cpp
        src/MatrixWSImageView.cpp
@@ -31,7 +31,7 @@ set ( INC_FILES
        inc/MantidQtSpectrumViewer/GraphDisplay.h
        inc/MantidQtSpectrumViewer/SpectrumView.h
        inc/MantidQtSpectrumViewer/QtUtils.h
-       inc/MantidQtSpectrumViewer/ImageDataSource.h
+       inc/MantidQtSpectrumViewer/SpectrumDataSource.h
        inc/MantidQtSpectrumViewer/ISliderHandler.h
        inc/MantidQtSpectrumViewer/IRangeHandler.h
        inc/MantidQtSpectrumViewer/SliderHandler.h

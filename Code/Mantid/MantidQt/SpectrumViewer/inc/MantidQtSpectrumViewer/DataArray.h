@@ -9,7 +9,7 @@
     @class DataArray 
   
        This class provides a simple immutable wrapper around a block of data
-    returned from an ImageDataSource.
+    returned from an SpectrumDataSource.
  
     @author Dennis Mikkelson 
     @date   2012-04-03 
@@ -125,7 +125,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER DataArray
     size_t n_rows;   
     size_t n_cols;
     float *data;        // This is given a reference to the data block,
-                        // which is allocated in the ImageDataSource,
+                        // which is allocated in the SpectrumDataSource,
                         // but will be deleted in this object's Destructor
 };
 

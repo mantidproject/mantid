@@ -5,7 +5,7 @@
 #include <QtGui>
 
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
 /**
@@ -50,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumView : public QMainWindow
   public:
 
      /// Construct an SpectrumView to display data from the specified data source 
-     SpectrumView( ImageDataSource* data_source );
+     SpectrumView( SpectrumDataSource* data_source );
 
     ~SpectrumView();
 

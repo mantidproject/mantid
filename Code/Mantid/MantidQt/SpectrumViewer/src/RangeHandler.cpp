@@ -25,9 +25,9 @@ RangeHandler::RangeHandler( Ui_SpectrumViewer* iv_ui ) : IRangeHandler()
 /**
  * Configure the min, max and step controls for the specified data source.
  *
- * @param data_source  ImageDataSource that provides the data to be drawn
+ * @param data_source  SpectrumDataSource that provides the data to be drawn
  */
-void RangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
+void RangeHandler::ConfigureRangeControls( SpectrumDataSource* data_source )
 {
   
   total_min_x   = data_source->GetXMin();

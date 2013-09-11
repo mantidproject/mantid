@@ -2,7 +2,7 @@
 #define IRANGE_HANDLER_H
 
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 
 namespace MantidQt
 {
@@ -38,7 +38,7 @@ public:
   virtual ~IRangeHandler() {}
 
   /// Configure min, max and step controls for the specified data source
-  virtual void ConfigureRangeControls( ImageDataSource* data_source ) = 0;
+  virtual void ConfigureRangeControls( SpectrumDataSource* data_source ) = 0;
   /// Get the range of data to display in the image, from GUI controls
   virtual void GetRange( double &min, double &max, double &step ) = 0;
 };

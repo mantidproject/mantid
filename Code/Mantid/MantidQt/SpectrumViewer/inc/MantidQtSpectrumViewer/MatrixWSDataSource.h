@@ -4,7 +4,7 @@
 #include <cstddef>
 
 #include "MantidQtSpectrumViewer/DataArray.h"
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtSpectrumViewer/EModeHandler.h"
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 
@@ -13,7 +13,7 @@
 /**
     @class MatrixWSDataSource 
   
-       This class provides a concrete implementation of an ImageDataSource
+       This class provides a concrete implementation of an SpectrumDataSource
     that gets it's data from a matrix workspace.
  
     @author Dennis Mikkelson 
@@ -45,7 +45,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public ImageDataSource
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public SpectrumDataSource
 {
   public:
 

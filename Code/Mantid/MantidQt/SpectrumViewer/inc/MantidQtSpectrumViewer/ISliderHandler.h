@@ -3,7 +3,7 @@
 
 #include "MantidQtSpectrumViewer/DllOptionIV.h"
 #include <QRect>
-#include "MantidQtSpectrumViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 
 namespace MantidQt
 {
@@ -40,10 +40,10 @@ public:
 
   /// Configure the image scrollbars for the specified data and drawing area
   virtual void ConfigureSliders( QRect            draw_area,
-                                 ImageDataSource* data_source ) = 0;
+                                 SpectrumDataSource* data_source ) = 0;
   /// Configure the horizontal scrollbar to cover the specified range
   virtual void ConfigureHSlider( int         n_data_steps,
-                         int         n_pixels ) = 0;
+				 int         n_pixels ) = 0;
   /// Return true if the image horizontal scrollbar is enabled.
   virtual bool HSliderOn() = 0;
   /// Return true if the image vertical scrollbar is enabled.
