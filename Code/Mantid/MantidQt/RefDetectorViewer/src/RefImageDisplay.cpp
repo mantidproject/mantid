@@ -3,7 +3,6 @@
 #include "MantidQtSpectrumViewer/DataArray.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/IVUtils.h"
 #include "MantidQtRefDetectorViewer/RefImagePlotItem.h"
 
 namespace MantidQt

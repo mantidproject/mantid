@@ -7,7 +7,7 @@
 
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 
 namespace MantidQt
 {
@@ -110,14 +110,14 @@ void GraphDisplay::SetData(const QVector<double> & xData,
     this->image_x = cut_value;
     min_y = yData[0];
     max_y = yData[yData.size()-1];
-    IVUtils::FindValidInterval( xData, min_x, max_x );
+    SVUtils::FindValidInterval( xData, min_x, max_x );
   }
   else
   {
     this->image_y = cut_value;
     min_x = xData[0];
     max_x = xData[xData.size()-1];
-    IVUtils::FindValidInterval( yData, min_y, max_y );
+    SVUtils::FindValidInterval( yData, min_y, max_y );
 
     if ( is_log_x )                // only set log scale for x if NOT vertical
     {

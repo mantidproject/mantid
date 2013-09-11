@@ -1,6 +1,6 @@
 
 #include "MantidQtSpectrumViewer/QtUtils.h" 
-#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 
 namespace MantidQt
 {
@@ -47,7 +47,7 @@ void  QtUtils::SetTableEntry( int           row,
                               QTableWidget* table )
 {
   std::string str;
-  IVUtils::Format( width, precision, value, str );
+  SVUtils::Format( width, precision, value, str );
   SetTableEntry( row, col, str, table );
 }
 
@@ -82,7 +82,7 @@ void  QtUtils::SetText( int        width,
                         QLineEdit* q_line_edit )
 {
   std::string str;
-  IVUtils::Format( width, precision, value, str );
+  SVUtils::Format( width, precision, value, str );
   SetText( str, q_line_edit );
 }
 

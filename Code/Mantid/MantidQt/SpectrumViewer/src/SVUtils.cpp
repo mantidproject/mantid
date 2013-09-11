@@ -2,7 +2,7 @@
 #include <sstream>
 #include <math.h>
 
-#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 
 namespace MantidQt
 {
@@ -18,7 +18,7 @@ namespace SpectrumView
  * @return true if the string could be successfully converted to a double,
  *         and return false otherwise.
  */
-bool IVUtils::StringToDouble( std::string  text,
+bool SVUtils::StringToDouble( std::string  text,
                               double      &value )
 {
   std::istringstream strs(text);
@@ -39,7 +39,7 @@ bool IVUtils::StringToDouble( std::string  text,
  *  @param value     The double precsion number to be formatted
  *  @param str       String that will be set to the formatted number
  */
-void IVUtils::Format( int            width,
+void SVUtils::Format( int            width,
                       int            precision,
                       double         value,
                       std::string  & str )
@@ -67,7 +67,7 @@ void IVUtils::Format( int            width,
  *                   the list
  *  @param list      The list of strings to which the name,value pair is added.
  */
-void IVUtils::PushNameValue( const std::string               & name,
+void SVUtils::PushNameValue( const std::string               & name,
                                    int                         width,
                                    int                         precision,
                                    double                      value,
@@ -97,7 +97,7 @@ void IVUtils::PushNameValue( const std::string               & name,
  * @param max     Set to be greater than or equal to all values in the list
  *                and strictly more than min.
  */
-bool IVUtils::FindValidInterval( const QVector<double>  & values,
+bool SVUtils::FindValidInterval( const QVector<double>  & values,
                                        double           & min,
                                        double           & max )
 {
@@ -128,7 +128,7 @@ bool IVUtils::FindValidInterval( const QVector<double>  & values,
  * @return true if the original values were OK and are unchanged, return
  *         false if min or max was altered to make a valid interval.
  */
-bool IVUtils::FindValidInterval( double  & min,
+bool SVUtils::FindValidInterval( double  & min,
                                  double  & max )
 {
   bool values_OK = true;
@@ -172,7 +172,7 @@ bool IVUtils::FindValidInterval( double  & min,
  * @return true if the original values were OK and are unchanged, return
  *         false if min or max was altered to make a valid interval.
  */
-bool IVUtils::FindValidLogInterval( double  & min,
+bool SVUtils::FindValidLogInterval( double  & min,
                                     double  & max )
 {
   bool values_OK = true;
@@ -239,7 +239,7 @@ bool IVUtils::FindValidLogInterval( double  & min,
  *          linearly or "lograrithmically".  If the data is invalid, this
  *          will return 0.
  */
-int IVUtils::NumSteps( double min, double max, double step )
+int SVUtils::NumSteps( double min, double max, double step )
 {
   int n_bins = 0;
 
@@ -288,7 +288,7 @@ int IVUtils::NumSteps( double min, double max, double step )
  * @return true if the calculated value is in [new_min,new_max] and false
  *         if it is outside of the interval.
  */
-bool IVUtils::Interpolate( double   min,
+bool SVUtils::Interpolate( double   min,
                            double   max,
                            double   val,
                            double   new_min,
@@ -321,7 +321,7 @@ bool IVUtils::Interpolate( double   min,
  * @return true if the calculated value is in [new_min,new_max] and false
  *         if it is outside of the interval.
  */
-bool IVUtils::LogInterpolate( double   min,
+bool SVUtils::LogInterpolate( double   min,
                               double   max,
                               double   val,
                               double   new_min,
@@ -363,7 +363,7 @@ bool IVUtils::LogInterpolate( double   min,
  *                      between the min and max values.  This will be adjusted
  *                      to be no more than the number of steps available.
  */
-bool IVUtils::CalculateInterval( double   global_min,
+bool SVUtils::CalculateInterval( double   global_min,
                                  double   global_max,
                                  size_t   global_steps,
                                  size_t & first_index,

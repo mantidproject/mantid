@@ -13,7 +13,7 @@
 #include "MantidQtSpectrumViewer/DataArray.h"
 #include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 
 namespace MantidQt
 {
@@ -147,7 +147,7 @@ void SpectrumDisplay::UpdateRange()
   double step = (total_x_max - total_x_min)/2000;
   range_handler->GetRange( min, max, step );
     
-  int n_bins = IVUtils::NumSteps( min, max, step );
+  int n_bins = SVUtils::NumSteps( min, max, step );
   if ( n_bins == 0 )
   {
     return;
@@ -189,7 +189,7 @@ void SpectrumDisplay::UpdateImage()
   range_handler->GetRange( scale_x_min, scale_x_max, x_step );
 
   int n_rows = (int)data_source->GetNRows();
-  int n_cols = IVUtils::NumSteps( scale_x_min, scale_x_max, x_step );
+  int n_cols = SVUtils::NumSteps( scale_x_min, scale_x_max, x_step );
 
                                      // This works for linear or log scales
   if ( n_rows == 0 || n_cols == 0 )
@@ -206,9 +206,9 @@ void SpectrumDisplay::UpdateImage()
     double new_y_min = 0;
     double new_y_max = 0;
 
-    IVUtils::Interpolate( 0, n_rows, y_min, 
+    SVUtils::Interpolate( 0, n_rows, y_min, 
                           scale_y_min, scale_y_max, new_y_min );
-    IVUtils::Interpolate( 0, n_rows, y_max, 
+    SVUtils::Interpolate( 0, n_rows, y_max, 
                           scale_y_min, scale_y_max, new_y_max );
 
     scale_y_min = new_y_min;
@@ -228,16 +228,16 @@ void SpectrumDisplay::UpdateImage()
 
     if ( x_step > 0 )       // linear scale, so interpolate linearly
     {
-      IVUtils::Interpolate( 0, n_cols, x_min,
+      SVUtils::Interpolate( 0, n_cols, x_min,
                             scale_x_min, scale_x_max, new_x_min );
-      IVUtils::Interpolate( 0, n_cols, x_max,
+      SVUtils::Interpolate( 0, n_cols, x_max,
                             scale_x_min, scale_x_max, new_x_max );
     }
     else                    // log scale, so interpolate "logarithmically"
     {
-      IVUtils::LogInterpolate( 0, n_cols, x_min,
+      SVUtils::LogInterpolate( 0, n_cols, x_min,
                                scale_x_min, scale_x_max, new_x_min );
-      IVUtils::LogInterpolate( 0, n_cols, x_max,
+      SVUtils::LogInterpolate( 0, n_cols, x_max,
                                scale_x_min, scale_x_max, new_x_max );
     }
 

@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include <QtGui>
 
-#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 #include "MantidQtRefDetectorViewer/RefImageView.h"
 #include "MantidQtSpectrumViewer/ArrayDataSource.h"
 
@@ -43,7 +43,7 @@ float * MakeTestData( double total_xmin, double total_xmax,
                                                 // mark a row 1/4 way up
   double point = (total_ymax - total_ymin)/4 + total_ymin;
   double mark_row = 0;
-  SpectrumView::IVUtils::Interpolate( total_ymin, total_ymax, point,
+  SpectrumView::SVUtils::Interpolate( total_ymin, total_ymax, point,
                                0.0, (double)total_rows, mark_row );
 
   size_t row_offset = (int)(mark_row) * total_cols;
@@ -56,7 +56,7 @@ float * MakeTestData( double total_xmin, double total_xmax,
                                                  // mark a col 1/10 way over
   point = (total_xmax - total_xmin)/10 + total_xmin;
   double mark_col = 0;
-  SpectrumView::IVUtils::Interpolate( total_xmin, total_xmax, point,
+  SpectrumView::SVUtils::Interpolate( total_xmin, total_xmax, point,
                                0.0, (double)total_cols, mark_col );
 
   size_t col_offset = (int)( mark_col );

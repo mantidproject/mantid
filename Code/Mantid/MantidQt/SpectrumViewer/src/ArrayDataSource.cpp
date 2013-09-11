@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "MantidQtSpectrumViewer/ArrayDataSource.h"
-#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 
 namespace MantidQt
 {
@@ -74,11 +74,11 @@ DataArray * ArrayDataSource::GetDataArray( double xmin,   double  xmax,
                                            bool   is_log_x )
 {
   size_t first_col;
-  IVUtils::CalculateInterval( total_xmin, total_xmax, total_cols,
+  SVUtils::CalculateInterval( total_xmin, total_xmax, total_cols,
                               first_col, xmin, xmax, n_cols );
 
   size_t first_row;
-  IVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
+  SVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
                               first_row, ymin, ymax, n_rows );
 
   float* new_data = new float[n_rows * n_cols];   // This is deleted in the
@@ -96,13 +96,13 @@ DataArray * ArrayDataSource::GetDataArray( double xmin,   double  xmax,
   for ( size_t row = 0; row < n_rows; row++ )     // each destination position
   {
     mid_y = ymin + ((double)row + 0.5) * y_step;
-    IVUtils::Interpolate( total_ymin, total_ymax, mid_y,
+    SVUtils::Interpolate( total_ymin, total_ymax, mid_y,
                                  0.0, (double)total_rows, d_y_index );
     source_row = (size_t)d_y_index;
     for ( size_t col = 0; col < n_cols; col++ )
     {
       mid_x = xmin + ((double)col + 0.5) * x_step;
-      IVUtils::Interpolate( total_xmin, total_xmax, mid_x,
+      SVUtils::Interpolate( total_xmin, total_xmax, mid_x,
                                    0.0, (double)total_cols, d_x_index );
       source_col = (size_t)d_x_index;             
       new_data[index] = data[source_row * total_cols + source_col];
@@ -151,8 +151,8 @@ void ArrayDataSource::GetInfoList( double x,
 {
   list.clear();
 
-  IVUtils::PushNameValue( "X", 8, 3, x, list );
-  IVUtils::PushNameValue( "Y", 8, 3, y, list );
+  SVUtils::PushNameValue( "X", 8, 3, x, list );
+  SVUtils::PushNameValue( "Y", 8, 3, y, list );
 }
 
 } // namespace SpectrumView

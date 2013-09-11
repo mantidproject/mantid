@@ -9,7 +9,7 @@
 #include <QThread>
 
 #include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
-#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
@@ -137,7 +137,7 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
                                                   // but rows must be aligned 
                                                   // to get whole spectra
   size_t first_row;
-  IVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
+  SVUtils::CalculateInterval( total_ymin, total_ymax, total_rows,
                               first_row, ymin, ymax, n_rows );
 
   float* new_data = new float[n_rows * n_cols];   // this array is deleted in
@@ -174,7 +174,7 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
   for ( size_t i = 0; i < n_rows; i++ )
   {
     mid_y = ymin + ((double)i + 0.5) * y_step;
-    IVUtils::Interpolate( total_ymin, total_ymax, mid_y,
+    SVUtils::Interpolate( total_ymin, total_ymax, mid_y,
                                  0.0, (double)total_rows, d_y_index );
     source_row = (size_t)d_y_index;
     y_vals.clear();
@@ -246,14 +246,14 @@ void MatrixWSDataSource::GetInfoList( double x,
   const ISpectrum* spec = mat_ws->getSpectrum( row );
 
   double spec_num = spec->getSpectrumNo();
-  IVUtils::PushNameValue( "Spec Num", 8, 0, spec_num, list );
+  SVUtils::PushNameValue( "Spec Num", 8, 0, spec_num, list );
 
   std::string x_label = "";
   Unit_sptr& old_unit = mat_ws->getAxis(0)->unit();
   if ( old_unit != 0 )
   {
     x_label = old_unit->caption();
-    IVUtils::PushNameValue( x_label, 8, 3, x, list );
+    SVUtils::PushNameValue( x_label, 8, 3, x, list );
   }
 
   double d_id = 0;
@@ -262,7 +262,7 @@ void MatrixWSDataSource::GetInfoList( double x,
   {
     std::set<detid_t>::iterator it = ids.begin();
     d_id = (double)*it;
-    IVUtils::PushNameValue( "Det ID", 8, 0, d_id, list );
+    SVUtils::PushNameValue( "Det ID", 8, 0, d_id, list );
   }
 
   IDetector_const_sptr det;          // now try to do various unit conversions
@@ -418,7 +418,7 @@ void MatrixWSDataSource::GetInfoList( double x,
                                                emode, efixed, delta );
     if ( ! (x_label == "Time-of-flight") )
     {
-      IVUtils::PushNameValue( "Time-of-flight", 8, 1, tof, list );
+      SVUtils::PushNameValue( "Time-of-flight", 8, 1, tof, list );
     }
 
     if ( ! (x_label == "Wavelength") )
@@ -426,7 +426,7 @@ void MatrixWSDataSource::GetInfoList( double x,
       const Unit_sptr& wl_unit = UnitFactory::Instance().create("Wavelength");
       double wavelength = wl_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
                                                          emode, efixed, delta );
-      IVUtils::PushNameValue( "Wavelength", 8, 4, wavelength, list );
+      SVUtils::PushNameValue( "Wavelength", 8, 4, wavelength, list );
     }
 
     if ( ! (x_label == "Energy") )
@@ -434,7 +434,7 @@ void MatrixWSDataSource::GetInfoList( double x,
       const Unit_sptr& e_unit = UnitFactory::Instance().create("Energy");
       double energy = e_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
                                                     emode, efixed, delta );
-      IVUtils::PushNameValue( "Energy", 8, 4, energy, list );
+      SVUtils::PushNameValue( "Energy", 8, 4, energy, list );
     }
 
     if ( (! (x_label == "d-Spacing")) && (two_theta != 0.0) && ( emode == 0 ) )
@@ -442,7 +442,7 @@ void MatrixWSDataSource::GetInfoList( double x,
       const Unit_sptr& d_unit = UnitFactory::Instance().create("dSpacing");
       double d_spacing = d_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
                                                        emode, efixed, delta );
-      IVUtils::PushNameValue( "d-Spacing", 8, 4, d_spacing, list );
+      SVUtils::PushNameValue( "d-Spacing", 8, 4, d_spacing, list );
     }
 
     if ( (! (x_label == "q")) && (two_theta != 0.0) )
@@ -450,7 +450,7 @@ void MatrixWSDataSource::GetInfoList( double x,
       const Unit_sptr& q_unit=UnitFactory::Instance().create("MomentumTransfer");
       double mag_q = q_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
                                                    emode, efixed, delta );
-      IVUtils::PushNameValue( "|Q|", 8, 4, mag_q, list );
+      SVUtils::PushNameValue( "|Q|", 8, 4, mag_q, list );
     }
 
     if ( (! (x_label == "DeltaE")) && (two_theta != 0.0) && ( emode != 0 ) )
@@ -458,7 +458,7 @@ void MatrixWSDataSource::GetInfoList( double x,
       const Unit_sptr& deltaE_unit=UnitFactory::Instance().create("DeltaE");
       double delta_E = deltaE_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
                                                           emode, efixed, delta );
-      IVUtils::PushNameValue( "DeltaE", 8, 4, delta_E, list );
+      SVUtils::PushNameValue( "DeltaE", 8, 4, delta_E, list );
     }
   }
   catch (std::exception & e)

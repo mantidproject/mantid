@@ -4,7 +4,7 @@
 
 #include "MantidQtRefDetectorViewer/RefRangeHandler.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 #include "MantidQtSpectrumViewer/ErrorHandler.h"
 
 namespace MantidQt
@@ -96,17 +96,17 @@ void RefRangeHandler::GetRange( double &min, double &max, double &step )
   QLineEdit* max_control  = iv_ui->x_max_input;
 //  QLineEdit* step_control = iv_ui->step_input;
 
-  if ( !IVUtils::StringToDouble(  min_control->text().toStdString(), min ) )
+  if ( !SVUtils::StringToDouble(  min_control->text().toStdString(), min ) )
   {
     ErrorHandler::Error("X Min is not a NUMBER! Value reset.");
     min = original_min;
   }
-  if ( !IVUtils::StringToDouble(  max_control->text().toStdString(), max ) )
+  if ( !SVUtils::StringToDouble(  max_control->text().toStdString(), max ) )
   {
     ErrorHandler::Error("X Max is not a NUMBER! Value reset.");
     max = original_max;
   }
-//  if ( !IVUtils::StringToDouble(  step_control->text().toStdString(), step ) )
+//  if ( !SVUtils::StringToDouble(  step_control->text().toStdString(), step ) )
 //  {
 //    ErrorHandler::Error("Step is not a NUMBER! Value reset.");
 //    step = original_step;
@@ -122,7 +122,7 @@ void RefRangeHandler::GetRange( double &min, double &max, double &step )
 
   if ( step > 0 )
   {
-    if ( !IVUtils::FindValidInterval( min, max ) )
+    if ( !SVUtils::FindValidInterval( min, max ) )
     {
       ErrorHandler::Warning( 
              "In GetRange: [Min,Max] interval invalid, values adjusted" );
@@ -133,7 +133,7 @@ void RefRangeHandler::GetRange( double &min, double &max, double &step )
   }
   else
   {
-    if ( !IVUtils::FindValidLogInterval( min, max ) )
+    if ( !SVUtils::FindValidLogInterval( min, max ) )
     {
       ErrorHandler::Warning(
           "In GetRange: [Min,Max] log interval invalid, values adjusted");
@@ -161,7 +161,7 @@ void RefRangeHandler::SetRange( double min, double max, double step, char type )
 {
     if (type == 'x') {  
     
-  if ( !IVUtils::FindValidInterval( min, max ) )
+  if ( !SVUtils::FindValidInterval( min, max ) )
   {
     ErrorHandler::Warning( 
             "In SetRange: [XMin,XMax] interval invalid, values adjusted" );
@@ -193,7 +193,7 @@ void RefRangeHandler::SetRange( double min, double max, double step, char type )
     
     if (type == 'y') {  
         
-        if ( !IVUtils::FindValidInterval( min, max ) )
+        if ( !SVUtils::FindValidInterval( min, max ) )
         {
             ErrorHandler::Warning( 
                                   "In SetRange: [YMin,YMax] interval invalid, values adjusted" );

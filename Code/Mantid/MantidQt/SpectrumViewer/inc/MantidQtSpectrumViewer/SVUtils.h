@@ -1,12 +1,12 @@
-#ifndef  IV_UTILS_H
-#define  IV_UTILS_H
+#ifndef  SV_UTILS_H
+#define  SV_UTILS_H
 
 #include <QVector>
 
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
-    @class IVUtils 
+    @class SVUtils 
   
       This class has static methods that do various basic calculations 
     needed by other parts of the SpectrumView package.
@@ -41,7 +41,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER IVUtils
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SVUtils
 {
   public:
 
@@ -111,4 +111,4 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER IVUtils
 } // namespace SpectrumView
 } // namespace MantidQt 
 
-#endif   // IV_UTILS_H
+#endif   // SV_UTILS_H

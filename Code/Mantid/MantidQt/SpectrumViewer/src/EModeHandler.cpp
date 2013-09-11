@@ -4,7 +4,7 @@
 
 #include "MantidQtSpectrumViewer/EModeHandler.h"
 #include "MantidQtSpectrumViewer/QtUtils.h"
-#include "MantidQtSpectrumViewer/IVUtils.h"
+#include "MantidQtSpectrumViewer/SVUtils.h"
 #include "MantidQtSpectrumViewer/ErrorHandler.h"
 
 namespace MantidQt
@@ -62,7 +62,7 @@ double EModeHandler::GetEFixed()
 {
   double efixed;
   std::string text = iv_ui->efixed_control->text().toStdString();
-  if ( !IVUtils::StringToDouble( text, efixed ) )
+  if ( !SVUtils::StringToDouble( text, efixed ) )
   {
     ErrorHandler::Error("E Fixed is not a NUMBER! Value reset to default.");
     efixed = 0;
