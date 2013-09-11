@@ -2098,19 +2098,32 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
 
 void MuonAnalysis::showPlot(const QString& wsName)
 {
-  m_currentDataName = wsName;
+  // If empty -> no workspaces available to choose (e.g. all were deleted)
+  if(wsName.isEmpty())
+  {
+    setCurrentDataName(NOT_AVAILABLE);
+  }
+  // Just in case, check if exists. Shouldn't happen normally.
+  // TODO: can happen if currently connected ws gets deleted. Observe deletion event and do 
+  //       something in that case
+  else if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+  {
+    g_log.warning("Can't show workspace which doesn't exist.");
+  }
+  else
+  {
+    setCurrentDataName(wsName);
 
-  emit closeGraph(m_currentDataName + "-1");
-  plotSpectrum(m_currentDataName, 0, false);
+    emit closeGraph(m_currentDataName + "-1");
+    plotSpectrum(m_currentDataName, 0, false);
 
-  // Change the plot style of the graph so that it matches what is selected on
-  // the plot options tab.
-  QStringList plotDetails = m_fitDataTab->getAllPlotDetails(m_currentDataName);
-  changePlotType(plotDetails);
+    // Change the plot style of the graph so that it matches what is selected on
+    // the plot options tab.
+    QStringList plotDetails = m_fitDataTab->getAllPlotDetails(m_currentDataName);
+    changePlotType(plotDetails);
 
-  setConnectedDataText();
-
-  emit activatePPTool(m_currentDataName + "-1");
+    emit activatePPTool(m_currentDataName + "-1");
+  }
 }
 
 /**
@@ -3464,8 +3477,9 @@ void MuonAnalysis::changeTab(int newTabNumber)
     // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
 
-    // Show connected plot and attach PP tool to it
-    showPlot(m_currentDataName);
+    // Show connected plot and attach PP tool to it (if has been assigned)
+    if(m_currentDataName != NOT_AVAILABLE)
+      showPlot(m_currentDataName);
     
     // In future, when workspace gets changed, show its plot and attach PP tool to it
     connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
