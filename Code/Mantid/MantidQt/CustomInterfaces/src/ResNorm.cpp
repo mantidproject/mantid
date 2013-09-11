@@ -5,7 +5,7 @@ namespace MantidQt
 	namespace CustomInterfaces
 	{
 		ResNorm::ResNorm(QWidget * parent) : 
-			IndirectBayesTab(parent),	m_intManager(new QtIntPropertyManager())
+			IndirectBayesTab(parent)
 		{
 			m_uiForm.setupUi(parent);
 

@@ -34,8 +34,14 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="autoLoad">
+        <bool>false</bool>
+       </property>
        <property name="loadLabelText" stdset="0">
         <string>Load</string>
+       </property>
+       <property name="showLoad">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

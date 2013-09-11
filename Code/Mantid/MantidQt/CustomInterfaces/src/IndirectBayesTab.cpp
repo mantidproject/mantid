@@ -10,7 +10,7 @@ namespace MantidQt
      */
     IndirectBayesTab::IndirectBayesTab(QWidget * parent) : QWidget(parent),  
       m_plot(new QwtPlot(parent)), m_propTree(new QtTreePropertyBrowser()), 
-      m_properties(), m_dblManager(new QtDoublePropertyManager())
+      m_properties(), m_dblManager(new QtDoublePropertyManager()), m_intManager(new QtIntPropertyManager())
     {
     }
 

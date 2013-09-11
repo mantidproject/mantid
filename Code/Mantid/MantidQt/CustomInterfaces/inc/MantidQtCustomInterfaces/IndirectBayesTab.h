@@ -69,6 +69,8 @@ namespace MantidQt
 			QMap<QString, QtProperty*> m_properties;
 			/// Double manager to create properties
 			QtDoublePropertyManager* m_dblManager;
+			/// Int manager to create properties
+			QtIntPropertyManager* m_intManager;
 
 		};
 	} // namespace CustomInterfaces

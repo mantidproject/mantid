@@ -23,6 +23,36 @@
        </property>
       </widget>
      </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="cbOutputFrom">
+       <item>
+        <property name="text">
+         <string>QLr</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>QLd</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="cbFunction">
+       <item>
+        <property name="text">
+         <string>Chudley-Elliott</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="lblFunc">
+       <property name="text">
+        <string>Function: </string>
+       </property>
+      </widget>
+     </item>
      <item row="0" column="1">
       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample">
        <property name="sizePolicy">
@@ -36,20 +66,37 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="lblFunc">
+     <item row="3" column="1">
+      <widget class="QComboBox" name="cbWidth">
+       <item>
+        <property name="text">
+         <string>FW11</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FW21</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FW22</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="lblOutputFrom">
        <property name="text">
-        <string>Function: </string>
+        <string>Output From: </string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="cbFunction">
-       <item>
-        <property name="text">
-         <string>Chudley-Elliott</string>
-        </property>
-       </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="lblWidth">
+       <property name="text">
+        <string>Width: </string>
+       </property>
       </widget>
      </item>
     </layout>

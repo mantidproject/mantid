@@ -19,9 +19,7 @@ namespace MantidQt
 			virtual void help();
 			virtual void validate();
 			virtual void run();
-			
-			/// Int manager to create properties
-			QtIntPropertyManager* m_intManager;
+	
 			//The ui form
 			Ui::ResNorm m_uiForm;
 
