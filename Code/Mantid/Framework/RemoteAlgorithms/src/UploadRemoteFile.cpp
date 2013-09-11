@@ -65,7 +65,8 @@ void UploadRemoteFile::exec()
   RemoteJobManager::PostDataMap postData;
   postData["TransID"] = getPropertyValue("TransactionID");
 
-  std::ifstream infile( getPropertyValue("LocalFileName"));
+  std::string localFileName = getPropertyValue("LocalFileName");
+  std::ifstream infile( localFileName.c_str());
   if (infile.good())
   {
     // Yes, we're reading the entire file into memory.  Obviously, this is only
