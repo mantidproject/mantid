@@ -90,7 +90,7 @@ namespace Algorithms
     std::vector<std::string> bkgdtypes;
     bkgdtypes.push_back("Flat");
     bkgdtypes.push_back("Linear");
-    //bkgdtypes.push_back("Quadratic");
+    bkgdtypes.push_back("Quadratic");
     declareProperty("BackgroundType", "Linear", boost::make_shared<StringListValidator>(bkgdtypes),
                     "Type of Background.");
 
@@ -267,9 +267,10 @@ namespace Algorithms
 		  }
 		  else
 		  {
-			  // assume peak is larger than window so no background
-			  min_peak = l0;
-			  max_peak = n-1;
+			  // assume background is 12 first and last points
+			  min_peak = l0+12;
+			  max_peak = n-13;
+			  if (min_peak > sizey)min_peak = sizey-1;
 			  a0 = 0.0;
 			  a1 = 0.0;
 			  a2 = 0.0;
@@ -322,6 +323,9 @@ namespace Algorithms
     double sumY = 0.0;
     double sumX2 = 0.0;
     double sumXY = 0.0;
+    double sumX2Y = 0.0;
+    double sumX3 = 0.0;
+    double sumX4 = 0.0;
     for (size_t i = i_min; i < i_max; ++i)
     {
 		  if(i >= p_min && i < p_max) continue;
@@ -330,6 +334,9 @@ namespace Algorithms
 		  sumX2 += X[i]*X[i];
 		  sumY += Y[i];
 		  sumXY += X[i]*Y[i];
+		  sumX2Y += X[i]*X[i]*Y[i];
+		  sumX3 += X[i]*X[i]*X[i];
+		  sumX4 += X[i]*X[i]*X[i]*X[i];
     }
 
     // Estimate flat background
@@ -347,16 +354,28 @@ namespace Algorithms
       bg1_linear = (sum*sumXY-sumY*sumX) / determinant;
     }
 
-    // TODO Estimate quadratic background
+    // Estimate quadratic - use Cramer's rule for 3 x 3 matrix
+
+    // | a b c |
+    // | d e f |
+    // | g h i |
+    //3 x 3 determinate:  aei+bfg+cdh-ceg-bdi-afh
+
     double bg0_quadratic = 0.;
     double bg1_quadratic = 0.;
     double bg2_quadratic = 0.;
+    determinant = sum*sumX2*sumX4+sumX*sumX3*sumX2+sumX2*sumX*sumX3-sumX2*sumX2*sumX2-sumX*sumX*sumX4-sum*sumX3*sumX3;
+    if (determinant != 0)
+    {
+      bg0_quadratic = (sumY*sumX2*sumX4+sumX*sumX3*sumX2Y+sumX2*sumXY*sumX3-sumX2*sumX2*sumX2Y-sumX*sumXY*sumX4-sumY*sumX3*sumX3) / determinant;
+      bg1_quadratic = (sum*sumXY*sumX4+sumY*sumX3*sumX2+sumX2*sumX*sumX2Y-sumX2*sumXY*sumX2-sumY*sumX*sumX4-sum*sumX3*sumX2Y) / determinant;
+      bg2_quadratic = (sum*sumX2*sumX2Y+sumX*sumXY*sumX2+sumY*sumX*sumX3-sumY*sumX2*sumX2-sumX*sumX*sumX2Y-sum*sumXY*sumX3) / determinant;
+    }
 
     // calculate the chisq - not normalized by the number of points
-    const double INVALID_CHISQ(1.e10); // big invalid value
     double chisq_flat = 0.;
     double chisq_linear = 0.;
-    double chisq_quadratic = INVALID_CHISQ;
+    double chisq_quadratic = 0.;
     if (sum !=0)
     {
       for (size_t i = i_min; i < i_max; ++i)
@@ -375,7 +394,7 @@ namespace Algorithms
         chisq_quadratic += (temp * temp);
       }
     }
-    chisq_quadratic = INVALID_CHISQ; // TODO
+    const double INVALID_CHISQ(1.e10); // big invalid value
     if (m_backgroundType == "Flat")
     {
       chisq_linear = INVALID_CHISQ;
