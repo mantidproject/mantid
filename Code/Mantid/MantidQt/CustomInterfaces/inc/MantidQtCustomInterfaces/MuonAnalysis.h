@@ -427,6 +427,8 @@ private:
   /// a different time zero need to adjust the relative offset to this value
   double m_nexusTimeZero;
 
+  static const QString NOT_AVAILABLE;
+
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
 };

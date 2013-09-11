@@ -72,12 +72,15 @@ using namespace Mantid::Geometry;
 // Initialize the logger
 Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 
+// Static constants
+const QString MuonAnalysis::NOT_AVAILABLE("N/A");
+
 //----------------------
 // Public member functions
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName("N/A"), 
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(NOT_AVAILABLE), 
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
   m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
