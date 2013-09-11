@@ -5,8 +5,7 @@ namespace MantidQt
 	namespace CustomInterfaces
 	{
 		Stretch::Stretch(QWidget * parent) : 
-			IndirectBayesTab(parent), m_plot(new QwtPlot(parent)),
-			m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager())
+			IndirectBayesTab(parent)
 		{
 			m_uiForm.setupUi(parent);
 

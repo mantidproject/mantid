@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/IndirectBayesTab.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
+	src/JumpFit.cpp
     src/MSDFit.cpp
 	src/MuonAnalysis.cpp
 	src/MuonAnalysisFitDataTab.cpp
@@ -67,6 +68,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+	inc/MantidQtCustomInterfaces/JumpFit.h
     inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
@@ -113,6 +115,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 								inc/MantidQtCustomInterfaces/IndirectBayesTab.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+                inc/MantidQtCustomInterfaces/JumpFit.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
@@ -136,6 +139,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
+               inc/MantidQtCustomInterfaces/JumpFit.ui
                inc/MantidQtCustomInterfaces/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/Quasi.ui
                inc/MantidQtCustomInterfaces/ResNorm.ui

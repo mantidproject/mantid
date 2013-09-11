@@ -1,29 +1,27 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_RESNORM_H_
-#define MANTIDQTCUSTOMINTERFACES_RESNORM_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
+#define MANTIDQTCUSTOMINTERFACES_JUMPFIT_H_
 
-#include "ui_ResNorm.h"
+#include "ui_JumpFit.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
 namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		class DLLExport ResNorm : public IndirectBayesTab
+		class DLLExport JumpFit : public IndirectBayesTab
 		{
 			Q_OBJECT
 
 		public:
-			ResNorm(QWidget * parent = 0);
+			JumpFit(QWidget * parent = 0);
 
 		private:
 			virtual void help();
 			virtual void validate();
 			virtual void run();
-			
-			/// Int manager to create properties
-			QtIntPropertyManager* m_intManager;
+
 			//The ui form
-			Ui::ResNorm m_uiForm;
+			Ui::JumpFit m_uiForm;
 
 		};
 	} // namespace CustomInterfaces

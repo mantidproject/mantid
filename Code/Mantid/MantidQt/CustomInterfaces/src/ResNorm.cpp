@@ -5,8 +5,7 @@ namespace MantidQt
 	namespace CustomInterfaces
 	{
 		ResNorm::ResNorm(QWidget * parent) : 
-			IndirectBayesTab(parent), m_plot(new QwtPlot(parent)),
-			m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager())
+			IndirectBayesTab(parent),	m_intManager(new QtIntPropertyManager())
 		{
 			m_uiForm.setupUi(parent);
 
@@ -14,15 +13,14 @@ namespace MantidQt
 			m_uiForm.treeSpace->addWidget(m_propTree);
 			m_properties["EMin"] = m_dblManager->addProperty("EMin");
 			m_properties["EMax"] = m_dblManager->addProperty("EMax");
-			m_properties["VanBinning"] = m_dblManager->addProperty("Van Binning");
+			m_properties["VanBinning"] = m_intManager->addProperty("Van Binning");
 			
 			m_dblManager->setDecimals(m_properties["EMin"], NUM_DECIMALS);
 			m_dblManager->setDecimals(m_properties["EMax"], NUM_DECIMALS);
-			m_dblManager->setDecimals(m_properties["VanBinning"], NUM_DECIMALS);
 
 			m_propTree->addProperty(m_properties["EMin"]);
 			m_propTree->addProperty(m_properties["EMax"]);
-			m_propTree->addProperty(m_properties["Binning"]);
+			m_propTree->addProperty(m_properties["VanBinning"]);
 
 			//add the plot to the ui form
 			m_uiForm.plotSpace->addWidget(m_plot);

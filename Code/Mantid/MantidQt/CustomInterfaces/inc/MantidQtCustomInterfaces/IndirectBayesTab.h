@@ -5,6 +5,7 @@
 
 #include <QMap>
 #include <QtDoublePropertyManager>
+#include <QtIntPropertyManager>
 #include <QtTreePropertyBrowser>
 #include <QWidget>
 
@@ -58,6 +59,16 @@ namespace MantidQt
 			virtual void help() = 0;
 			virtual void validate() = 0;
 			virtual void run() = 0;
+
+		protected:
+			/// Plot of the input
+			QwtPlot* m_plot;
+			/// Tree of the properties
+			QtTreePropertyBrowser* m_propTree;
+			/// Internal list of the properties
+			QMap<QString, QtProperty*> m_properties;
+			/// Double manager to create properties
+			QtDoublePropertyManager* m_dblManager;
 
 		};
 	} // namespace CustomInterfaces

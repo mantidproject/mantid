@@ -20,14 +20,6 @@ namespace MantidQt
 			virtual void validate();
 			virtual void run();
 
-			/// Plot of the input
-			QwtPlot* m_plot;
-			/// Tree of the properties
-			QtTreePropertyBrowser* m_propTree;
-			/// Internal list of the properties
-			QMap<QString, QtProperty*> m_properties;
-			/// Double manager to create properties
-			QtDoublePropertyManager* m_dblManager;
 			//The ui form
 			Ui::Stretch m_uiForm;
 
