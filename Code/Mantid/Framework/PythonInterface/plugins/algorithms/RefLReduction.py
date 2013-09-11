@@ -41,7 +41,7 @@ class RefLReduction(PythonAlgorithm):
         
 #         self.declareProperty("NormalizationRunNumber", 0, 
 #                              Description="Run number of the normalization run to use")
-        self.declareProperty("NormalizationRunNumber", "", "Run number of the normalization run to use")
+        self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
 
 #         self.declareListProperty("SignalPeakPixelRange", [126, 134], 
 #                                  Validator=ArrayBoundedValidator(Lower=0),
