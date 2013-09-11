@@ -30,7 +30,7 @@ namespace SpectrumView
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IRangeHandler
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER IRangeHandler
 {
 public:
   /// Construct object to manage min, max and step controls in the UI

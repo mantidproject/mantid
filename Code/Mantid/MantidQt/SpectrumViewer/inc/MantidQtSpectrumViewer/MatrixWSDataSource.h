@@ -45,7 +45,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSDataSource: public ImageDataSource
 {
   public:
 

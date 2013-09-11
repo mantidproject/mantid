@@ -40,7 +40,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER EModeHandler 
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER EModeHandler 
 {
   public:
 

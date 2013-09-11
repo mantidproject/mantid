@@ -42,7 +42,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler : public IRangeHandler
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER RangeHandler : public IRangeHandler
 {
   public:
 

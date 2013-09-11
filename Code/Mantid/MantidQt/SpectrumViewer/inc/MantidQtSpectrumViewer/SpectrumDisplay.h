@@ -50,7 +50,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SpectrumDisplay
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
 {
   public:
 

@@ -44,7 +44,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler : public ISliderHandler
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SliderHandler : public ISliderHandler
 {
   public:
 

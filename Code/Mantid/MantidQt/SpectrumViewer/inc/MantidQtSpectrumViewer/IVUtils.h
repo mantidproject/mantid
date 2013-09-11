@@ -41,7 +41,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVUtils
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER IVUtils
 {
   public:
 

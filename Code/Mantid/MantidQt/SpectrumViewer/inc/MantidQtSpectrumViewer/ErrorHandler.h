@@ -39,7 +39,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ErrorHandler 
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ErrorHandler 
 {
   public:
 

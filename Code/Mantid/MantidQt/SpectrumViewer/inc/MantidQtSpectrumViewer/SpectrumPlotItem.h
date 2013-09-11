@@ -46,7 +46,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SpectrumPlotItem : public QwtPlotItem
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumPlotItem : public QwtPlotItem
 {
 
 public:

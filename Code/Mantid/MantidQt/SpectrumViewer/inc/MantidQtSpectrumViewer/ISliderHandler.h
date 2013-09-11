@@ -31,7 +31,7 @@ namespace SpectrumView
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ISliderHandler
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ISliderHandler
 {
 public:
   /// Construct object to manage image scrollbars from the specified UI

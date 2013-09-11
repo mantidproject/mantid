@@ -43,7 +43,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay 
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER GraphDisplay 
 {
   public:
 

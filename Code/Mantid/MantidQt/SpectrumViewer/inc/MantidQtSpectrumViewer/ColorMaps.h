@@ -41,7 +41,7 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ColorMaps
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER ColorMaps
 {
 
 public:

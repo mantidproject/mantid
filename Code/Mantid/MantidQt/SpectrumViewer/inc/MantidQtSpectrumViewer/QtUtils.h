@@ -42,7 +42,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER QtUtils
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER QtUtils
 {
   public:
   /// enter the specified string in the table

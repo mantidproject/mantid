@@ -52,7 +52,7 @@ namespace SpectrumView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER IVConnections: public QWidget
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER IVConnections: public QWidget
 {
   Q_OBJECT
 
