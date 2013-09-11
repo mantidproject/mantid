@@ -119,6 +119,7 @@ UserSubWindow* InterfaceManager::createSubWindow(const QString & interface_name,
     g_log.debug() << "Created a specialised interface for " << iname << std::endl;
     user_win->setParent(parent);
     user_win->setInterfaceName(interface_name);
+    user_win->initializeLayout(); 
   }
   else
   {
