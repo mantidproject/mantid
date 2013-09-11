@@ -35,7 +35,7 @@
         </sizepolicy>
        </property>
        <property name="loadLabelText" stdset="0">
-        <string>Plot</string>
+        <string>Load</string>
        </property>
       </widget>
      </item>
