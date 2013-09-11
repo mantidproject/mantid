@@ -49,6 +49,7 @@ class QRadioButton;
 class QSpinBox;
 class QTabWidget;
 class QVBoxLayout;
+class QHBoxLayout;
 class QWidget;
 class QStringList;
 class ColorBox;
@@ -145,7 +146,7 @@ class AxesDialog: public QDialog
 
     ApplicationWindow* d_app;
     Graph *d_graph;
-    QVBoxLayout *scalePrefsArea, *axesPrefsArea;
+    QFrame *scalePrefsArea, *axesPrefsArea;
 //common widgets
     QPushButton* buttonApply, *buttonOk, *buttonCancel;
     QTabWidget* generalDialog;
@@ -172,7 +173,7 @@ class AxesDialog: public QDialog
      QDateTimeEdit *boxStartDateTime, *boxEndDateTime;
      QTimeEdit *boxStartTime, *boxEndTime;
      */
-
+    QHBoxLayout* scalesLayout;
     QListWidget* axesList;
     QCheckBox* boxMajorGrid;
     QCheckBox* boxMinorGrid;

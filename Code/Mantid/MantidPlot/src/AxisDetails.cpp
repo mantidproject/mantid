@@ -36,13 +36,14 @@ AxisAxisDetails::~AxisAxisDetails()
 {
 
 }
-
 ScaleAxisDetails::ScaleAxisDetails(ApplicationWindow* app, Graph* graph,
     int mappedaxis, QWidget *parent) :
     QWidget(parent)
 {
   d_app = app;
   d_graph = graph;
+  m_mappedaxis = mappedaxis;
+  m_initialised = false;
   QGroupBox * middleBox = new QGroupBox(QString());
   QGridLayout * middleLayout = new QGridLayout(middleBox);
 
@@ -213,7 +214,7 @@ ScaleAxisDetails::ScaleAxisDetails(ApplicationWindow* app, Graph* graph,
 
   //QVBoxLayout *main_layout = new QVBoxLayout(this);
   //main_layout->addLayout(vl);
-  initWidgets(mappedaxis);
+  //initWidgets(mappedaxis);
 }
 ScaleAxisDetails::~ScaleAxisDetails()
 {
@@ -252,7 +253,7 @@ void ScaleAxisDetails::radiosSwitched()
  }
  */
 
-void ScaleAxisDetails::initWidgets(int a)
+void ScaleAxisDetails::initWidgets()
 {
   //int axis = axesList->currentRow(); //happens before running constructor as "a" will be passed in
 
@@ -263,156 +264,166 @@ void ScaleAxisDetails::initWidgets(int a)
    cmbUnit->hide();
    cmbUnit->clear();
    */
-
-  Plot *d_plot = d_graph->plotWidget();
-  //int a = mapToQwtAxis(axis);//happens before running constructor as "a" will be passed in
-  const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(a);
-  double start = QMIN(scDiv->lBound(), scDiv->hBound());
-  double end = QMAX(scDiv->lBound(), scDiv->hBound());
-  ScaleDraw::ScaleType type = d_graph->axisType(a);
-  if (type == ScaleDraw::Date)
+  if (m_initialised)
   {
-    ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(a));
-    QDateTime origin = sclDraw->dateTimeOrigin();
-
-    dspnStart->hide();
-    timStartTime->hide();
-    dteStartDateTime->show();
-    dteStartDateTime->setDisplayFormat(sclDraw->format());
-    dteStartDateTime->setDateTime(origin.addSecs((int) start));
-
-    dspnEnd->hide();
-    timEndTime->hide();
-    dteEndDateTime->show();
-    dteEndDateTime->setDisplayFormat(sclDraw->format());
-    dteEndDateTime->setDateTime(origin.addSecs((int) end));
-
-    cmbUnit->show();
-    cmbUnit->insertItem(tr("days"));
-    cmbUnit->insertItem(tr("weeks"));
-    dspnStep->setValue(d_graph->axisStep(a) / 86400.0);
-    dspnStep->setSingleStep(1);
-  }
-  else if (type == ScaleDraw::Time)
-  {
-    ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(a));
-    QTime origin = sclDraw->dateTimeOrigin().time();
-
-    dspnStart->hide();
-    dteStartDateTime->hide();
-    timStartTime->show();
-    timStartTime->setDisplayFormat(sclDraw->format());
-    timStartTime->setTime(origin.addMSecs((int) start));
-
-    dspnEnd->hide();
-    dteEndDateTime->hide();
-    timEndTime->show();
-    timEndTime->setDisplayFormat(sclDraw->format());
-    timEndTime->setTime(origin.addMSecs((int) end));
-
-    cmbUnit->show();
-    cmbUnit->insertItem(tr("millisec."));
-    cmbUnit->insertItem(tr("sec."));
-    cmbUnit->insertItem(tr("min."));
-    cmbUnit->insertItem(tr("hours"));
-    cmbUnit->setCurrentIndex(1);
-    dspnStep->setValue(d_graph->axisStep(a) / 1e3);
-    dspnStep->setSingleStep(1000);
+    return;
   }
   else
   {
-    dspnStart->show();
-    dspnStart->setValue(start);
-    timStartTime->hide();
-    dteStartDateTime->hide();
-    dspnEnd->show();
-    dspnEnd->setValue(end);
-    timEndTime->hide();
-    dteEndDateTime->hide();
-    dspnStep->setValue(d_graph->axisStep(a));
-    dspnStep->setSingleStep(0.1);
-  }
-
-  double range = fabs(scDiv->range());
-  QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(a);
-  ScaleEngine* sc_engine = dynamic_cast<ScaleEngine*>(qwtsc_engine);
-  if (sc_engine)
-  {
-    if (sc_engine->axisBreakLeft() > -DBL_MAX)
-      dspnBreakStart->setValue(sc_engine->axisBreakLeft());
-    else
-      dspnBreakStart->setValue(start + 0.25 * range);
-
-    if (sc_engine->axisBreakRight() < DBL_MAX)
-      dspnBreakEnd->setValue(sc_engine->axisBreakRight());
-    else
-      dspnBreakEnd->setValue(start + 0.75 * range);
-
-    grpAxesBreaks->setChecked(sc_engine->hasBreak());
-
-    spnBreakPosition->setValue(sc_engine->breakPosition());
-    spnBreakWidth->setValue(sc_engine->breakWidth());
-    dspnStepBeforeBreak->setValue(sc_engine->stepBeforeBreak());
-    dspnStepAfterBreak->setValue(sc_engine->stepAfterBreak());
-
-    QwtScaleTransformation::Type scale_type = sc_engine->type();
-    cmbMinorTicksBeforeBreak->clear();
-    if (scale_type == QwtScaleTransformation::Log10)
-      cmbMinorTicksBeforeBreak->addItems(
-          QStringList() << "0" << "2" << "4" << "8");
-    else
-      cmbMinorTicksBeforeBreak->addItems(
-          QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
-    cmbMinorTicksBeforeBreak->setEditText(
-        QString::number(sc_engine->minTicksBeforeBreak()));
-
-    cmbMinorTicksAfterBreak->setEditText(
-        QString::number(sc_engine->minTicksAfterBreak()));
-    chkLog10AfterBreak->setChecked(sc_engine->log10ScaleAfterBreak());
-    chkBreakDecoration->setChecked(sc_engine->hasBreakDecoration());
-    chkInvert->setChecked(sc_engine->testAttribute(QwtScaleEngine::Inverted));
-    cmbScaleType->setCurrentItem(scale_type);
-    cmbMinorValue->clear();
-    if (scale_type == QwtScaleTransformation::Log10)
-      cmbMinorValue->addItems(QStringList() << "0" << "2" << "4" << "8");
-    else
-      cmbMinorValue->addItems(
-          QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
-
-    cmbMinorValue->setEditText(QString::number(d_plot->axisMaxMinor(a)));
-
-    bool isColorMap = d_graph->isColorBarEnabled(a);
-    grpAxesBreaks->setEnabled(!isColorMap);
-    if (isColorMap)
+    Plot *d_plot = d_graph->plotWidget();
+    //int mappedaxis = mapToQwtAxis(axis);//happens before running constructor as "a" will be passed in
+    const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(m_mappedaxis);
+    double start = QMIN(scDiv->lBound(), scDiv->hBound());
+    double end = QMAX(scDiv->lBound(), scDiv->hBound());
+    ScaleDraw::ScaleType type = d_graph->axisType(m_mappedaxis);
+    if (type == ScaleDraw::Date)
     {
-      grpAxesBreaks->setChecked(false);
+      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(
+          m_mappedaxis));
+      QDateTime origin = sclDraw->dateTimeOrigin();
+
+      dspnStart->hide();
+      timStartTime->hide();
+      dteStartDateTime->show();
+      dteStartDateTime->setDisplayFormat(sclDraw->format());
+      dteStartDateTime->setDateTime(origin.addSecs((int) start));
+
+      dspnEnd->hide();
+      timEndTime->hide();
+      dteEndDateTime->show();
+      dteEndDateTime->setDisplayFormat(sclDraw->format());
+      dteEndDateTime->setDateTime(origin.addSecs((int) end));
+
+      cmbUnit->show();
+      cmbUnit->insertItem(tr("days"));
+      cmbUnit->insertItem(tr("weeks"));
+      dspnStep->setValue(d_graph->axisStep(m_mappedaxis) / 86400.0);
+      dspnStep->setSingleStep(1);
+    }
+    else if (type == ScaleDraw::Time)
+    {
+      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(
+          m_mappedaxis));
+      QTime origin = sclDraw->dateTimeOrigin().time();
+
+      dspnStart->hide();
+      dteStartDateTime->hide();
+      timStartTime->show();
+      timStartTime->setDisplayFormat(sclDraw->format());
+      timStartTime->setTime(origin.addMSecs((int) start));
+
+      dspnEnd->hide();
+      dteEndDateTime->hide();
+      timEndTime->show();
+      timEndTime->setDisplayFormat(sclDraw->format());
+      timEndTime->setTime(origin.addMSecs((int) end));
+
+      cmbUnit->show();
+      cmbUnit->insertItem(tr("millisec."));
+      cmbUnit->insertItem(tr("sec."));
+      cmbUnit->insertItem(tr("min."));
+      cmbUnit->insertItem(tr("hours"));
+      cmbUnit->setCurrentIndex(1);
+      dspnStep->setValue(d_graph->axisStep(m_mappedaxis) / 1e3);
+      dspnStep->setSingleStep(1000);
+    }
+    else
+    {
+      dspnStart->show();
+      dspnStart->setValue(start);
+      timStartTime->hide();
+      dteStartDateTime->hide();
+      dspnEnd->show();
+      dspnEnd->setValue(end);
+      timEndTime->hide();
+      dteEndDateTime->hide();
+      dspnStep->setValue(d_graph->axisStep(m_mappedaxis));
+      dspnStep->setSingleStep(0.1);
     }
 
-  }
-  else
-  {
-    grpAxesBreaks->setChecked(false);
-    grpAxesBreaks->setEnabled(false);
-  }
+    double range = fabs(scDiv->range());
+    QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(m_mappedaxis);
+    ScaleEngine* sc_engine = dynamic_cast<ScaleEngine*>(qwtsc_engine);
+    if (sc_engine)
+    {
+      if (sc_engine->axisBreakLeft() > -DBL_MAX)
+        dspnBreakStart->setValue(sc_engine->axisBreakLeft());
+      else
+        dspnBreakStart->setValue(start + 0.25 * range);
 
-  QwtValueList lst = scDiv->ticks(QwtScaleDiv::MajorTick);
-  spnMajorValue->setValue(lst.count());
+      if (sc_engine->axisBreakRight() < DBL_MAX)
+        dspnBreakEnd->setValue(sc_engine->axisBreakRight());
+      else
+        dspnBreakEnd->setValue(start + 0.75 * range);
 
-  if (d_graph->axisStep(a) != 0.0)
-  {
-    radStep->setChecked(true);
-    dspnStep->setEnabled(true);
-    cmbUnit->setEnabled(true);
+      grpAxesBreaks->setChecked(sc_engine->hasBreak());
 
-    radMajor->setChecked(false);
-    spnMajorValue->setEnabled(false);
-  }
-  else
-  {
-    radStep->setChecked(false);
-    dspnStep->setEnabled(false);
-    cmbUnit->setEnabled(false);
-    radMajor->setChecked(true);
-    spnMajorValue->setEnabled(true);
+      spnBreakPosition->setValue(sc_engine->breakPosition());
+      spnBreakWidth->setValue(sc_engine->breakWidth());
+      dspnStepBeforeBreak->setValue(sc_engine->stepBeforeBreak());
+      dspnStepAfterBreak->setValue(sc_engine->stepAfterBreak());
+
+      QwtScaleTransformation::Type scale_type = sc_engine->type();
+      cmbMinorTicksBeforeBreak->clear();
+      if (scale_type == QwtScaleTransformation::Log10)
+        cmbMinorTicksBeforeBreak->addItems(
+            QStringList() << "0" << "2" << "4" << "8");
+      else
+        cmbMinorTicksBeforeBreak->addItems(
+            QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
+      cmbMinorTicksBeforeBreak->setEditText(
+          QString::number(sc_engine->minTicksBeforeBreak()));
+
+      cmbMinorTicksAfterBreak->setEditText(
+          QString::number(sc_engine->minTicksAfterBreak()));
+      chkLog10AfterBreak->setChecked(sc_engine->log10ScaleAfterBreak());
+      chkBreakDecoration->setChecked(sc_engine->hasBreakDecoration());
+      chkInvert->setChecked(sc_engine->testAttribute(QwtScaleEngine::Inverted));
+      cmbScaleType->setCurrentItem(scale_type);
+      cmbMinorValue->clear();
+      if (scale_type == QwtScaleTransformation::Log10)
+        cmbMinorValue->addItems(QStringList() << "0" << "2" << "4" << "8");
+      else
+        cmbMinorValue->addItems(
+            QStringList() << "0" << "1" << "4" << "9" << "14" << "19");
+
+      cmbMinorValue->setEditText(
+          QString::number(d_plot->axisMaxMinor(m_mappedaxis)));
+
+      bool isColorMap = d_graph->isColorBarEnabled(m_mappedaxis);
+      grpAxesBreaks->setEnabled(!isColorMap);
+      if (isColorMap)
+      {
+        grpAxesBreaks->setChecked(false);
+      }
+
+    }
+    else
+    {
+      grpAxesBreaks->setChecked(false);
+      grpAxesBreaks->setEnabled(false);
+    }
+
+    QwtValueList lst = scDiv->ticks(QwtScaleDiv::MajorTick);
+    spnMajorValue->setValue(lst.count());
+
+    if (d_graph->axisStep(m_mappedaxis) != 0.0)
+    {
+      radStep->setChecked(true);
+      dspnStep->setEnabled(true);
+      cmbUnit->setEnabled(true);
+
+      radMajor->setChecked(false);
+      spnMajorValue->setEnabled(false);
+    }
+    else
+    {
+      radStep->setChecked(false);
+      dspnStep->setEnabled(false);
+      cmbUnit->setEnabled(false);
+      radMajor->setChecked(true);
+      spnMajorValue->setEnabled(true);
+    }
+    m_initialised = true;
   }
 }

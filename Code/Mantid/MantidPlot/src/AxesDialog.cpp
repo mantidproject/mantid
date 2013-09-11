@@ -525,163 +525,98 @@ static const char* image3_data[] =
         ". . @ 7.&.] d x.l . . . . . . . . . . . . . . . . . . . . . . @ , , &.# , K . . . . . . . . . . . . . . . . . . . J.% G.4.4.4.4.K.. . . . . . . . . ",
         ". . . _ D., 5 : . . . . . . . . . . . . . . . . . . . . . . . 2., , , , , j . . . . . . . . . . . . . . . . . . . 9., , , , , , 8.. . . . . . . . . " };
 
-static const char*  image4_data[] = {
-    "35 32 4 1",
-    "# c #000000",
-    "a c #bfbfbf",
-    "b c #ff0000",
-    ". c #ffffff",
-    "...................................",
-    ".........#.....#.....#.....#.......",
-    ".....#.#.#.#.#.#.#.#.#.#.#.#.......",
-    ".....#.#.#.#.#.#.#.#.#.#.#.#.......",
-    "....##########################.....",
-    "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
-    "..###aaaaaaaaaaaaaaaaaaaaaaaa###...",
-    "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
-    "..###aaaaaaaaaaaaaaaaaaaaaaaa###...",
-    "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
-    ".####aaaaaaaaaaaaaaaa#aaaaaaa####..",
-    "....#aaaaaaaaaaaaaaa#a#aaaaaa#.....",
-    "..###aaaaaaaaaaaaaaa#a#aaaaaa###...",
-    "....#aaaaaaaaaaaaaa#aaa#aaaaa#.....",
-    "..###aaaaaaa#aaaaaa#aaa#aaaaa###...",
-    "....#aaaaaa#a#aaaa#aaaaa#aaaa#.....",
-    ".####aaaaaa#a#aaaa#aaaaa#aaaa####..",
-    "....#aaaaa#aaa#aa#aaaaaaa#aaa#.....",
-    "..###aaaaa#aaa###aaaaaaaaa######...",
-    "....#aaaa#aaaaa#aaaaaaaaaaaaa#.....",
-    "..###aaaa#aaaaa#aaaaaaaaaaaaa###...",
-    "....#aaa#aaaaaaa#aaaaaaaaaaaa#.....",
-    ".#######aaaaaaaaa#####aaaaaaa####..",
-    "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
-    "..###aaaaaaaaaaaaaaaaaaaaaaaa###...",
-    "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
-    "....bbbbbbbbbbbbbbbbbbbbbbbbbb.....",
-    "....bbbbbbbbbbbbbbbbbbbbbbbbbb.....",
-    ".....b.b.b.b.b.b.b.b.b.b.b.b.......",
-    ".....b.b.b.b.b.b.b.b.b.b.b.b.......",
-    ".........b.....b.....b.....b.......",
-    "..................................."};
+static const char* image4_data[] =
+    { "35 32 4 1", "# c #000000", "a c #bfbfbf", "b c #ff0000", ". c #ffffff",
+        "...................................",
+        ".........#.....#.....#.....#.......",
+        ".....#.#.#.#.#.#.#.#.#.#.#.#.......",
+        ".....#.#.#.#.#.#.#.#.#.#.#.#.......",
+        "....##########################.....",
+        "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
+        "..###aaaaaaaaaaaaaaaaaaaaaaaa###...",
+        "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
+        "..###aaaaaaaaaaaaaaaaaaaaaaaa###...",
+        "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
+        ".####aaaaaaaaaaaaaaaa#aaaaaaa####..",
+        "....#aaaaaaaaaaaaaaa#a#aaaaaa#.....",
+        "..###aaaaaaaaaaaaaaa#a#aaaaaa###...",
+        "....#aaaaaaaaaaaaaa#aaa#aaaaa#.....",
+        "..###aaaaaaa#aaaaaa#aaa#aaaaa###...",
+        "....#aaaaaa#a#aaaa#aaaaa#aaaa#.....",
+        ".####aaaaaa#a#aaaa#aaaaa#aaaa####..",
+        "....#aaaaa#aaa#aa#aaaaaaa#aaa#.....",
+        "..###aaaaa#aaa###aaaaaaaaa######...",
+        "....#aaaa#aaaaa#aaaaaaaaaaaaa#.....",
+        "..###aaaa#aaaaa#aaaaaaaaaaaaa###...",
+        "....#aaa#aaaaaaa#aaaaaaaaaaaa#.....",
+        ".#######aaaaaaaaa#####aaaaaaa####..",
+        "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
+        "..###aaaaaaaaaaaaaaaaaaaaaaaa###...",
+        "....#aaaaaaaaaaaaaaaaaaaaaaaa#.....",
+        "....bbbbbbbbbbbbbbbbbbbbbbbbbb.....",
+        "....bbbbbbbbbbbbbbbbbbbbbbbbbb.....",
+        ".....b.b.b.b.b.b.b.b.b.b.b.b.......",
+        ".....b.b.b.b.b.b.b.b.b.b.b.b.......",
+        ".........b.....b.....b.....b.......",
+        "..................................." };
 
-static const char*  image5_data[] = {
-    "33 32 4 1",
-    "# c #000000",
-    "b c #bfbfbf",
-    "a c #ff0000",
-    ". c #ffffff",
-    ".................................",
-    ".........#.....#.....#.....#.....",
-    ".....#.#.#.#.#.#.#.#.#.#.#.#.....",
-    ".....#.#.#.#.#.#.#.#.#.#.#.#.....",
-    "....aa########################...",
-    "....aabbbbbbbbbbbbbbbbbbbbbbb#...",
-    "..aaaabbbbbbbbbbbbbbbbbbbbbbb###.",
-    "....aabbbbbbbbbbbbbbbbbbbbbbb#...",
-    "..aaaabbbbbbbbbbbbbbbbbbbbbbb###.",
-    "....aabbbbbbbbbbbbbbbbbbbbbbb#...",
-    ".aaaaabbbbbbbbbbbbbbb#bbbbbbb####",
-    "....aabbbbbbbbbbbbbb#b#bbbbbb#...",
-    "..aaaabbbbbbbbbbbbbb#b#bbbbbb###.",
-    "....aabbbbbbbbbbbbb#bbb#bbbbb#...",
-    "..aaaabbbbbb#bbbbbb#bbb#bbbbb###.",
-    "....aabbbbb#b#bbbb#bbbbb#bbbb#...",
-    ".aaaaabbbbb#b#bbbb#bbbbb#bbbb####",
-    "....aabbbb#bbb#bb#bbbbbbb#bbb#...",
-    "..aaaabbbb#bbb###bbbbbbbbb######.",
-    "....aabbb#bbbbb#bbbbbbbbbbbbb#...",
-    "..aaaabbb#bbbbb#bbbbbbbbbbbbb###.",
-    "....aabb#bbbbbbb#bbbbbbbbbbbb#...",
-    ".aaaaa##bbbbbbbbb#####bbbbbbb####",
-    "....aabbbbbbbbbbbbbbbbbbbbbbb#...",
-    "..aaaabbbbbbbbbbbbbbbbbbbbbbb###.",
-    "....aabbbbbbbbbbbbbbbbbbbbbbb#...",
-    "....aabbbbbbbbbbbbbbbbbbbbbbb#...",
-    "....aa########################...",
-    ".....#.#.#.#.#.#.#.#.#.#.#.#.....",
-    ".....#.#.#.#.#.#.#.#.#.#.#.#.....",
-    ".........#.....#.....#.....#.....",
-    "................................."};
+static const char* image5_data[] = { "33 32 4 1", "# c #000000", "b c #bfbfbf",
+    "a c #ff0000", ". c #ffffff", ".................................",
+    ".........#.....#.....#.....#.....", ".....#.#.#.#.#.#.#.#.#.#.#.#.....",
+    ".....#.#.#.#.#.#.#.#.#.#.#.#.....", "....aa########################...",
+    "....aabbbbbbbbbbbbbbbbbbbbbbb#...", "..aaaabbbbbbbbbbbbbbbbbbbbbbb###.",
+    "....aabbbbbbbbbbbbbbbbbbbbbbb#...", "..aaaabbbbbbbbbbbbbbbbbbbbbbb###.",
+    "....aabbbbbbbbbbbbbbbbbbbbbbb#...", ".aaaaabbbbbbbbbbbbbbb#bbbbbbb####",
+    "....aabbbbbbbbbbbbbb#b#bbbbbb#...", "..aaaabbbbbbbbbbbbbb#b#bbbbbb###.",
+    "....aabbbbbbbbbbbbb#bbb#bbbbb#...", "..aaaabbbbbb#bbbbbb#bbb#bbbbb###.",
+    "....aabbbbb#b#bbbb#bbbbb#bbbb#...", ".aaaaabbbbb#b#bbbb#bbbbb#bbbb####",
+    "....aabbbb#bbb#bb#bbbbbbb#bbb#...", "..aaaabbbb#bbb###bbbbbbbbb######.",
+    "....aabbb#bbbbb#bbbbbbbbbbbbb#...", "..aaaabbb#bbbbb#bbbbbbbbbbbbb###.",
+    "....aabb#bbbbbbb#bbbbbbbbbbbb#...", ".aaaaa##bbbbbbbbb#####bbbbbbb####",
+    "....aabbbbbbbbbbbbbbbbbbbbbbb#...", "..aaaabbbbbbbbbbbbbbbbbbbbbbb###.",
+    "....aabbbbbbbbbbbbbbbbbbbbbbb#...", "....aabbbbbbbbbbbbbbbbbbbbbbb#...",
+    "....aa########################...", ".....#.#.#.#.#.#.#.#.#.#.#.#.....",
+    ".....#.#.#.#.#.#.#.#.#.#.#.#.....", ".........#.....#.....#.....#.....",
+    "................................." };
 
-static const char*  image6_data[] = {
-    "34 34 4 1",
-    "a c #000000",
-    "b c #bfbfbf",
-    "# c #ff0000",
-    ". c #ffffff",
-    "..................................",
-    "..................................",
-    ".........#.....#.....#.....#......",
-    ".....#.#.#.#.#.#.#.#.#.#.#.#......",
-    ".....#.#.#.#.#.#.#.#.#.#.#.#......",
-    "....##########################....",
-    "....##########################....",
-    "..aaabbbbbbbbbbbbbbbbbbbbbbbbaaa..",
-    "....abbbbbbbbbbbbbbbbbbbbbbbba....",
-    "..aaabbbbbbbbbbbbbbbbbbbbbbbbaaa..",
-    "....abbbbbbbbbbbbbbbbbbbbbbbba....",
-    ".aaaabbbbbbbbbbbbbbbbabbbbbbbaaaa.",
-    "....abbbbbbbbbbbbbbbababbbbbba....",
-    "..aaabbbbbbbbbbbbbbbababbbbbbaaa..",
-    "....abbbbbbbbbbbbbbabbbabbbbba....",
-    "..aaabbbbbbbabbbbbbabbbabbbbbaaa..",
-    "....abbbbbbababbbbabbbbbabbbba....",
-    ".aaaabbbbbbababbbbabbbbbabbbbaaaa.",
-    "....abbbbbabbbabbabbbbbbbabbba....",
-    "..aaabbbbbabbbaaabbbbbbbbbaaaaaa..",
-    "....abbbbabbbbbabbbbbbbbbbbbba....",
-    "..aaabbbbabbbbbabbbbbbbbbbbbbaaa..",
-    "....abbbabbbbbbbabbbbbbbbbbbba....",
-    ".aaaaaaabbbbbbbbbaaaaabbbbbbbaaaa.",
-    "....abbbbbbbbbbbbbbbbbbbbbbbba....",
-    "..aaabbbbbbbbbbbbbbbbbbbbbbbbaaa..",
-    "....abbbbbbbbbbbbbbbbbbbbbbbba....",
-    "....abbbbbbbbbbbbbbbbbbbbbbbba....",
-    "....aaaaaaaaaaaaaaaaaaaaaaaaaa....",
-    ".....a.a.a.a.a.a.a.a.a.a.a.a......",
-    ".....a.a.a.a.a.a.a.a.a.a.a.a......",
-    ".........a.....a.....a.....a......",
-    "..................................",
-    ".................................."};
+static const char* image6_data[] = { "34 34 4 1", "a c #000000", "b c #bfbfbf",
+    "# c #ff0000", ". c #ffffff", "..................................",
+    "..................................", ".........#.....#.....#.....#......",
+    ".....#.#.#.#.#.#.#.#.#.#.#.#......", ".....#.#.#.#.#.#.#.#.#.#.#.#......",
+    "....##########################....", "....##########################....",
+    "..aaabbbbbbbbbbbbbbbbbbbbbbbbaaa..", "....abbbbbbbbbbbbbbbbbbbbbbbba....",
+    "..aaabbbbbbbbbbbbbbbbbbbbbbbbaaa..", "....abbbbbbbbbbbbbbbbbbbbbbbba....",
+    ".aaaabbbbbbbbbbbbbbbbabbbbbbbaaaa.", "....abbbbbbbbbbbbbbbababbbbbba....",
+    "..aaabbbbbbbbbbbbbbbababbbbbbaaa..", "....abbbbbbbbbbbbbbabbbabbbbba....",
+    "..aaabbbbbbbabbbbbbabbbabbbbbaaa..", "....abbbbbbababbbbabbbbbabbbba....",
+    ".aaaabbbbbbababbbbabbbbbabbbbaaaa.", "....abbbbbabbbabbabbbbbbbabbba....",
+    "..aaabbbbbabbbaaabbbbbbbbbaaaaaa..", "....abbbbabbbbbabbbbbbbbbbbbba....",
+    "..aaabbbbabbbbbabbbbbbbbbbbbbaaa..", "....abbbabbbbbbbabbbbbbbbbbbba....",
+    ".aaaaaaabbbbbbbbbaaaaabbbbbbbaaaa.", "....abbbbbbbbbbbbbbbbbbbbbbbba....",
+    "..aaabbbbbbbbbbbbbbbbbbbbbbbbaaa..", "....abbbbbbbbbbbbbbbbbbbbbbbba....",
+    "....abbbbbbbbbbbbbbbbbbbbbbbba....", "....aaaaaaaaaaaaaaaaaaaaaaaaaa....",
+    ".....a.a.a.a.a.a.a.a.a.a.a.a......", ".....a.a.a.a.a.a.a.a.a.a.a.a......",
+    ".........a.....a.....a.....a......", "..................................",
+    ".................................." };
 
-static const char*  image7_data[] = {
-    "32 32 4 1",
-    "# c #000000",
-    "b c #bfbfbf",
-    "a c #ff0000",
-    ". c #ffffff",
-    "................................",
-    "........#.....#.....#.....#.....",
-    "....#.#.#.#.#.#.#.#.#.#.#.#.....",
-    "....#.#.#.#.#.#.#.#.#.#.#.#.....",
-    "...########################aa...",
-    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...",
-    ".###bbbbbbbbbbbbbbbbbbbbbbbaaaa.",
-    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...",
-    ".###bbbbbbbbbbbbbbbbbbbbbbbaaaa.",
-    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...",
-    "####bbbbbbbbbbbbbbbb#bbbbbbaaaaa",
-    "...#bbbbbbbbbbbbbbb#b#bbbbbaa...",
-    ".###bbbbbbbbbbbbbbb#b#bbbbbaaaa.",
-    "...#bbbbbbbbbbbbbb#bbb#bbbbaa...",
-    ".###bbbbbbb#bbbbbb#bbb#bbbbaaaa.",
-    "...#bbbbbb#b#bbbb#bbbbb#bbbaa...",
-    "####bbbbbb#b#bbbb#bbbbb#bbbaaaaa",
-    "...#bbbbb#bbb#bb#bbbbbbb#bbaa...",
-    ".###bbbbb#bbb###bbbbbbbbb##aaaa.",
-    "...#bbbb#bbbbb#bbbbbbbbbbbbaa...",
-    ".###bbbb#bbbbb#bbbbbbbbbbbbaaaa.",
-    "...#bbb#bbbbbbb#bbbbbbbbbbbaa...",
-    "#######bbbbbbbbb#####bbbbbbaaaaa",
-    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...",
-    ".###bbbbbbbbbbbbbbbbbbbbbbbaaaa.",
-    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...",
-    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...",
-    "...########################aa...",
-    "....#.#.#.#.#.#.#.#.#.#.#.#.....",
-    "....#.#.#.#.#.#.#.#.#.#.#.#.....",
-    "........#.....#.....#.....#.....",
-    "................................"};
+static const char* image7_data[] = { "32 32 4 1", "# c #000000", "b c #bfbfbf",
+    "a c #ff0000", ". c #ffffff", "................................",
+    "........#.....#.....#.....#.....", "....#.#.#.#.#.#.#.#.#.#.#.#.....",
+    "....#.#.#.#.#.#.#.#.#.#.#.#.....", "...########################aa...",
+    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...", ".###bbbbbbbbbbbbbbbbbbbbbbbaaaa.",
+    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...", ".###bbbbbbbbbbbbbbbbbbbbbbbaaaa.",
+    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...", "####bbbbbbbbbbbbbbbb#bbbbbbaaaaa",
+    "...#bbbbbbbbbbbbbbb#b#bbbbbaa...", ".###bbbbbbbbbbbbbbb#b#bbbbbaaaa.",
+    "...#bbbbbbbbbbbbbb#bbb#bbbbaa...", ".###bbbbbbb#bbbbbb#bbb#bbbbaaaa.",
+    "...#bbbbbb#b#bbbb#bbbbb#bbbaa...", "####bbbbbb#b#bbbb#bbbbb#bbbaaaaa",
+    "...#bbbbb#bbb#bb#bbbbbbb#bbaa...", ".###bbbbb#bbb###bbbbbbbbb##aaaa.",
+    "...#bbbb#bbbbb#bbbbbbbbbbbbaa...", ".###bbbb#bbbbb#bbbbbbbbbbbbaaaa.",
+    "...#bbb#bbbbbbb#bbbbbbbbbbbaa...", "#######bbbbbbbbb#####bbbbbbaaaaa",
+    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...", ".###bbbbbbbbbbbbbbbbbbbbbbbaaaa.",
+    "...#bbbbbbbbbbbbbbbbbbbbbbbaa...", "...#bbbbbbbbbbbbbbbbbbbbbbbaa...",
+    "...########################aa...", "....#.#.#.#.#.#.#.#.#.#.#.#.....",
+    "....#.#.#.#.#.#.#.#.#.#.#.#.....", "........#.....#.....#.....#.....",
+    "................................" };
 
 #ifndef M_PI
 #define M_PI	3.141592653589793238462643
@@ -698,11 +633,14 @@ AxesDialog::AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl) :
 
   generalDialog = new QTabWidget();
 
+  setGraph(g);
+
   initScalesPage();
   initGridPage();
   initAxesPage();
   initFramePage();
 
+  //axesList->setCurrentRow(0);
   QHBoxLayout * bottomButtons = new QHBoxLayout();
   bottomButtons->addStretch();
 
@@ -729,13 +667,12 @@ AxesDialog::AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl) :
   connect(buttonApply, SIGNAL( clicked() ), this, SLOT(updatePlot() ));
   connect(generalDialog, SIGNAL( currentChanged ( QWidget * ) ), this,
       SLOT(pageChanged ( QWidget * ) ));
-
-  setGraph(g);
 }
 
 void AxesDialog::initScalesPage()
 {
   scalesPage = new QWidget();
+  scalesLayout = new QHBoxLayout(scalesPage);
   /*
    QGroupBox * middleBox = new QGroupBox(QString());
    QGridLayout * middleLayout = new QGridLayout(middleBox);
@@ -914,14 +851,25 @@ void AxesDialog::initScalesPage()
   QPixmap image3((const char**) right_scl_xpm);
 
   axesList = new QListWidget();
-  axesList->addItem(new QListWidgetItem(image0, tr("Bottom")));
-  axesList->addItem(new QListWidgetItem(image1, tr("Left")));
-  axesList->addItem(new QListWidgetItem(image2, tr("Top")));
-  axesList->addItem(new QListWidgetItem(image3, tr("Right")));
+  QListWidgetItem* listBottom = new QListWidgetItem(image0, tr("Bottom"));
+  QListWidgetItem* listLeft = new QListWidgetItem(image1, tr("Left"));
+  QListWidgetItem* listTop = new QListWidgetItem(image2, tr("Top"));
+  QListWidgetItem* listRight = new QListWidgetItem(image3, tr("Right"));
+  axesList->addItem(listBottom);
+  axesList->addItem(listLeft);
+  axesList->addItem(listTop);
+  axesList->addItem(listRight);
+  m_Scale_map.insert(listBottom,
+      new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(0)));
+  m_Scale_map.insert(listLeft,
+      new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(1)));
+  m_Scale_map.insert(listTop,
+      new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(2)));
+  m_Scale_map.insert(listRight,
+      new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(3)));
   axesList->setSizePolicy(
       QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
   axesList->setIconSize(image0.size());
-  axesList->setCurrentRow(-1);
 
   // calculate a sensible width for the items list
   // (default QListWidget size is 256 which looks too big)
@@ -936,11 +884,10 @@ void AxesDialog::initScalesPage()
   axesList->resize(axesList->maximumWidth(), axesList->height());
 
   //the layout that will hold the ScaleAxisDetails widget
-  scalePrefsArea = new QVBoxLayout();
+  scalePrefsArea = new QFrame();
 
-  QHBoxLayout* mainLayout = new QHBoxLayout(scalesPage);
-  mainLayout->addWidget(axesList);
-  mainLayout->addLayout(scalePrefsArea);
+  scalesLayout->addWidget(axesList);
+  //mainLayout->addLayout(scalePrefsArea);
 
   generalDialog->addTab(scalesPage, tr("Scale"));
   connect(axesList, SIGNAL(currentRowChanged(int)), this, SLOT(updateScale()));
@@ -1050,7 +997,7 @@ void AxesDialog::initGridPage()
   axesGridList->addItem(new QListWidgetItem(image3, tr("Horizontal")));
   axesGridList->addItem(new QListWidgetItem(image2, tr("Vertical")));
   axesGridList->setIconSize(image3.size());
-  axesGridList->setCurrentRow(0);
+  //axesGridList->setCurrentRow(0);
 
   // calculate a sensible width for the items list
   // (default QListWidget size is 256 which looks too big)
@@ -1069,6 +1016,8 @@ void AxesDialog::initGridPage()
   mainLayout2->addWidget(rightBox);
 
   generalDialog->addTab(gridPage, tr("Grid"));
+
+  showGridOptions(axesGridList->currentRow());
 
   //grid page slot connections
   connect(axesGridList, SIGNAL(currentRowChanged(int)), this,
@@ -1110,7 +1059,7 @@ void AxesDialog::initAxesPage()
   axesTitlesList->setMaximumWidth((int) (image6.width() * 1.5));
   axesTitlesList->setSizePolicy(
       QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
-  axesTitlesList->setCurrentRow(-1);
+  //axesTitlesList->setCurrentRow(-1);
 
   // calculate a sensible width for the items list
   // (default QListWidget size is 256 which looks too big)
@@ -1224,6 +1173,8 @@ void AxesDialog::initAxesPage()
   rightBoxLayout->addWidget(labelTable, 1, 0);
 
   boxTableName = new QComboBox();
+  boxTableName->insertStringList(tablesList);
+  boxColName->insertStringList(d_app->columnsList(Table::All));
   rightBoxLayout->addWidget(boxTableName, 1, 1);
 
   label2 = new QLabel(tr("Format"));
@@ -1268,6 +1219,8 @@ void AxesDialog::initAxesPage()
   QHBoxLayout * mainLayout3 = new QHBoxLayout(axesPage);
   mainLayout3->addWidget(axesTitlesList);
   mainLayout3->addLayout(rightLayout);
+
+  updateTitleBox(0);
 
   generalDialog->addTab(axesPage, tr("Axis"));
 
@@ -1319,6 +1272,7 @@ void AxesDialog::initFramePage()
 {
   frame = new QWidget();
 
+  Plot *p = d_graph->plotWidget();
   boxFramed = new QGroupBox(tr("Canvas frame"));
   boxFramed->setCheckable(true);
 
@@ -1362,6 +1316,18 @@ void AxesDialog::initFramePage()
   mainLayout->addWidget(boxAxes);
 
   generalDialog->addTab(frame, tr("General"));
+
+  boxAxesLinewidth->setValue(p->axesLinewidth());
+  boxBackbones->setChecked(d_graph->axesBackbones());
+
+  boxFramed->setChecked(d_graph->canvasFrameWidth() > 0);
+  boxFrameColor->blockSignals(true);
+  boxFrameColor->setColor(d_graph->canvasFrameColor());
+  boxFrameColor->blockSignals(false);
+  boxFrameWidth->setValue(d_graph->canvasFrameWidth());
+
+  boxMinorTicksLength->setValue(p->minorTickLength());
+  boxMajorTicksLength->setValue(p->majorTickLength());
 
   connect(boxFrameColor, SIGNAL(colorChanged()), this,
       SLOT(pickCanvasFrameColor()));
@@ -2151,9 +2117,6 @@ void AxesDialog::setGraph(Graph *g)
   Plot *p = d_graph->plotWidget();
 
   tablesList = d_app->tableNames();
-  boxTableName->insertStringList(tablesList);
-
-  boxColName->insertStringList(d_app->columnsList(Table::All));
 
   xAxisOn = p->axisEnabled(QwtPlot::xBottom);
   yAxisOn = p->axisEnabled(QwtPlot::yLeft);
@@ -2167,8 +2130,6 @@ void AxesDialog::setGraph(Graph *g)
 
   majTicks = p->getMajorTicksType();
   minTicks = p->getMinorTicksType();
-
-  updateTitleBox(0);
 
   xBottomLabelsRotation = g->labelsRotation(QwtPlot::xBottom);
   xTopLabelsRotation = g->labelsRotation(QwtPlot::xTop);
@@ -2186,19 +2147,6 @@ void AxesDialog::setGraph(Graph *g)
       axesBaseline << 0;
   }
 
-  boxAxesLinewidth->setValue(p->axesLinewidth());
-  boxBackbones->setChecked(d_graph->axesBackbones());
-
-  boxFramed->setChecked(d_graph->canvasFrameWidth() > 0);
-  boxFrameColor->blockSignals(true);
-  boxFrameColor->setColor(d_graph->canvasFrameColor());
-  boxFrameColor->blockSignals(false);
-  boxFrameWidth->setValue(d_graph->canvasFrameWidth());
-
-  boxMinorTicksLength->setValue(p->minorTickLength());
-  boxMajorTicksLength->setValue(p->majorTickLength());
-
-  showGridOptions(axesGridList->currentRow());
 }
 
 int AxesDialog::mapToQwtAxisId()
@@ -2229,6 +2177,51 @@ int AxesDialog::mapToQwtAxis(int axis)
 
 void AxesDialog::updateScale()
 {
+
+  //QList<QListWidgetItem*> selection = axesList->selectedItems();
+  //if (selection.isEmpty())
+    //return;
+
+  // Remove the current widget if one exists in the scroll area
+  //if( scalePrefsArea->widget() ) scalePrefsArea->takeWidget();
+
+  //scalesLayout->takeAt(1);
+  std::cerr << std::endl;
+  std::cerr << std::endl;
+  auto takereturn = scalesLayout->takeAt(1);
+  std::cerr << "Return from takeat() - " << takereturn << std::endl;
+  if (takereturn)
+  {
+    auto returnwidget = takereturn->widget();
+    std::cerr << "Return from widget() - " << returnwidget << std::endl;
+  }
+  int testrow = axesList->currentRow();
+  std::cerr << "Return from currentRow() - " << testrow << std::endl;
+  QListWidgetItem *item = axesList->currentItem();
+  std::cerr << "Return from axesList->currentItem() address of list item - " << item << std::endl;
+  ScaleAxisDetails *obj = NULL;
+  std::cerr << "Address of obj NULL - " << obj << std::endl;
+  if (m_Scale_map.contains(item))
+  {
+    obj = m_Scale_map.value(item);
+    obj->initWidgets();
+    std::cerr << "Address of obj from map - " << obj << std::endl;
+  }
+  else
+  {
+    obj = new ScaleAxisDetails(d_app, d_graph,
+        mapToQwtAxis(axesList->currentRow()));
+    m_Scale_map.insert(item, obj);
+    obj->initWidgets();
+    std::cerr << "Address of obj from map - " << obj << std::endl;
+  }
+  //Set it as the currently displayed widget
+
+  scalesLayout->addWidget(obj);
+  std::cerr << "Address of obj added to scalesLayout - " << obj << std::endl;
+  std::cerr << std::endl;
+  std::cerr << std::endl;
+
   /*
    int axis = axesList->currentRow();
    boxStart->clear();

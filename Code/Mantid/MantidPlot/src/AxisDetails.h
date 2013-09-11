@@ -48,7 +48,7 @@ class AxisAxisDetails: public QWidget
     //details for each axis in the Axis tab
   public:
     AxisAxisDetails(QWidget *parent = 0); // populate and fill in with existing data
-    ~AxisAxisDetails();
+    virtual ~AxisAxisDetails();
 };
 
 class ScaleAxisDetails: public QWidget
@@ -56,9 +56,9 @@ class ScaleAxisDetails: public QWidget
   Q_OBJECT
     //details for each axis in the Scale Tab
   public:
-    ScaleAxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis,
-        QWidget *parent = 0); // populate and fill in with existing data
-    ~ScaleAxisDetails();
+    ScaleAxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent = 0); // populate and fill in with existing data
+    virtual ~ScaleAxisDetails();
+    void initWidgets();
   private slots:
 
     //void updateMinorTicksList(int scaleType);
@@ -89,7 +89,8 @@ class ScaleAxisDetails: public QWidget
     QDateTimeEdit *dteStartDateTime, *dteEndDateTime;
     //formerly *boxStartTime, *boxEndTime;
     QTimeEdit *timStartTime, *timEndTime;
-    void initWidgets(int a);
+    int m_mappedaxis;
+    bool m_initialised;
 };
 
 #endif /* AXISDETAILS_H_ */
