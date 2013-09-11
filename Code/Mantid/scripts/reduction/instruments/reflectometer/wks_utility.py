@@ -919,6 +919,12 @@ def loadNeXus(runNumbers, type):
     add them or just return the workspace created
     """
     
+    wks_name = ''
+    if (type == 'data'):
+        wks_name = 'ws_event_data'
+    else:
+        wks_name = 'ws_event_norm'
+    
     print '-> loading ', type
     if (type == 'data') and len(runNumbers) > 1:
         
@@ -940,13 +946,13 @@ def loadNeXus(runNumbers, type):
                 raise RuntimeError(msg)
                 
             if _index == 0:
-                ws_event_data = LoadEventNexus(Filename=data_file)
+                ws_event_data = LoadEventNexus(Filename=data_file,OutputWorskpace=wks_name)
                 _index += 1
             else:
                 tmp = LoadEventNexus(Filename=data_file)
                 Plus(LHSWorkspace=ws_event_data,
                      RHSWorkspace=tmp, 
-                     OutputWorkspace=ws_event_data)
+                     OutputWorkspace=wks_name)
                 DeleteWorkspace(tmp)
     else:
 
@@ -959,7 +965,7 @@ def loadNeXus(runNumbers, type):
             msg += "Add your data folder to your User Data Directories in the File menu"
             raise RuntimeError(msg)
 
-        ws_event_data = LoadEventNexus(Filename=data_file)
+        ws_event_data = LoadEventNexus(Filename=data_file, OutputWorkspace=wks_name)
     
     return ws_event_data
     
@@ -1482,7 +1488,7 @@ def applyScalingFactor(tof_axis,
                                                                                    a, b, 
                                                                                    a_error, b_error)
 
-            return [tof_axis, y_data, y_data_error]
+        return [tof_axis, y_data, y_data_error]
 
     else:
         
