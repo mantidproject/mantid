@@ -4,6 +4,7 @@
 //----------------------
 // Includes
 //----------------------
+#include "ui_IndirectBayes.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
@@ -38,7 +39,7 @@ namespace MantidQt
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
     */
 
-    class IndiectBayes : public MantidQt::API::UserSubWindow
+    class DLLExport IndirectBayes : public MantidQt::API::UserSubWindow
     {
       Q_OBJECT
 
@@ -53,17 +54,20 @@ namespace MantidQt
 
     public: // public constructor, destructor and functions
       /// Default Constructor
-      IndiectBayes(QWidget *parent = 0);
+      IndirectBayes(QWidget *parent = 0);
       ///Destructor
-      ~IndiectBayes();
+      ~IndirectBayes();
       /// Interface name
       static std::string name() { return "Indirect Bayes"; }
+      virtual void initLayout();
 
 		private:
 			std::map<unsigned int, IndirectBayesTab*> m_bayesTabs;
-    };
 
+      ///Main interface window
+      Ui::IndirectBayes m_uiForm;
+    };
   }
 }
 
-#endif //MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
+#endif

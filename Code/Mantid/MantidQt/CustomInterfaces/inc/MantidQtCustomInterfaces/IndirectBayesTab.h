@@ -2,7 +2,15 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 
 #include "MantidKernel/System.h"
+
+#include <QMap>
+#include <QtDoublePropertyManager>
+#include <QtTreePropertyBrowser>
 #include <QWidget>
+
+#include <qwt_plot.h>
+#include <qwt_plot_curve.h>
+
 
 namespace MantidQt
 {
@@ -35,6 +43,10 @@ namespace MantidQt
 			File change history is stored at: <https://github.com/mantidproject/mantid>
 			Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
+
+		/// precision of double properties in bayes tabs
+		static const unsigned int NUM_DECIMALS = 6;
+
 		class DLLExport IndirectBayesTab : public QWidget
 		{
 			Q_OBJECT
@@ -43,6 +55,7 @@ namespace MantidQt
 			IndirectBayesTab(QWidget * parent = 0);
 			~IndirectBayesTab();
 
+			virtual void help() = 0;
 			virtual void validate() = 0;
 			virtual void run() = 0;
 
@@ -50,4 +63,4 @@ namespace MantidQt
 	} // namespace CustomInterfaces
 } // namespace Mantid
 
-#endif  MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
+#endif

@@ -1,13 +1,14 @@
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_RESNORM_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_RESNORM_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_RESNORM_H_
+#define MANTIDQTCUSTOMINTERFACES_RESNORM_H_
 
+#include "ui_ResNorm.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
 namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		class ResNorm : public IndirectBayesTab
+		class DLLExport ResNorm : public IndirectBayesTab
 		{
 			Q_OBJECT
 
@@ -15,10 +16,23 @@ namespace MantidQt
 			ResNorm(QWidget * parent = 0);
 
 		private:
+			virtual void help();
 			virtual void validate();
 			virtual void run();
+
+			/// Plot of the input
+			QwtPlot* m_plot;
+			/// Tree of the properties
+			QtTreePropertyBrowser* m_propTree;
+			/// Internal list of the properties
+			QMap<QString, QtProperty*> m_properties;
+			/// Double manager to create properties
+			QtDoublePropertyManager* m_dblManager;
+			//The ui form
+			Ui::ResNorm m_uiForm;
+
 		};
 	} // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif  MANTIDQTCUSTOMINTERFACESIDA_RESNORM_H_
+#endif
