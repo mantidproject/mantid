@@ -203,11 +203,6 @@ void MuonAnalysis::initLayout()
   // connect the fit function widget buttons to their respective slots.
   loadFittings();
 
-  // When workspace gets changed, show its plot
-  connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                         this, SLOT(showPlot(const QString&)),
-          Qt::QueuedConnection);
-
   // Detect when the tab is changed
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
 
@@ -3449,19 +3444,35 @@ void MuonAnalysis::changeTab(int newTabNumber)
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
-  if(oldTabNumber == 3) // DA tab
+  if(oldTabNumber == 3) // Closing DA tab
   {
+    // Say MantidPlot to use default fit prop. browser
     emit setFitPropertyBrowser(NULL);
+
+    // Remove PP tool from any plots it was attached to
     emit activatePPTool("");
+
+    // Disconnect to avoid problems when filling list of workspaces in fit prop. browser
+    disconnect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
+                              this, SLOT(showPlot(const QString&)));
   }
 
-  if (newTabNumber == 3) // DA tab
+  if (newTabNumber == 3) // Opening DA tab
   {
+    // Say MantidPlot to use Muon Analysis fit prop. browser
     emit setFitPropertyBrowser(m_uiForm.fitBrowser);
-    emit activatePPTool(m_currentDataName + "-1");
+
+    // Show connected plot and attach PP tool to it
+    showPlot(m_currentDataName);
+    
+    // In future, when workspace gets changed, show its plot and attach PP tool to it
+    connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
+                           this, SLOT(showPlot(const QString&)), Qt::QueuedConnection);
   }
-  else if(newTabNumber == 4) // Results table tab
+  else if(newTabNumber == 4) // Opening results table tab
+  {
     m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
+  }
 }
 
 /**
