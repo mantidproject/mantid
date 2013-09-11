@@ -267,9 +267,10 @@ namespace Algorithms
 		  }
 		  else
 		  {
-			  // assume peak is larger than window so no background
-			  min_peak = l0;
-			  max_peak = n-1;
+			  // assume background is 12 first and last points
+			  min_peak = l0+12;
+			  max_peak = n-13;
+			  if (min_peak > sizey)min_peak = sizey;
 			  a0 = 0.0;
 			  a1 = 0.0;
 			  a2 = 0.0;
@@ -354,15 +355,21 @@ namespace Algorithms
     }
 
     // Estimate quadratic - use Cramer's rule for 3 x 3 matrix
+
+    // | a b c |
+    // | d e f |
+    // | g h i |
+    //3 x 3 determinate:  aei+bfg+cdh-ceg-bdi-afh
+
     double bg0_quadratic = 0.;
     double bg1_quadratic = 0.;
     double bg2_quadratic = 0.;
-    determinant = 1*sumX2*sumX4+sumX*sumX3*sumX2+sumX2*sumX*sumX3-sumX2*sumX2*sumX2-sumX*sumX*sumX4-1*sumX3*sumX3;
+    determinant = sum*sumX2*sumX4+sumX*sumX3*sumX2+sumX2*sumX*sumX3-sumX2*sumX2*sumX2-sumX*sumX*sumX4-sum*sumX3*sumX3;
     if (determinant != 0)
     {
-      bg0_quadratic = (sumY*sumX2*sumX4+sumX*sumX3*sumXY+sumX2*sumXY*sumX3-sumX2*sumX2*sumXY-sumX*sumXY*sumX4-sumY*sumX3*sumX3) / determinant;
-      bg1_quadratic = (1*sumXY*sumX4+sumY*sumX3*sumX2+sumX2*sumX*sumX2Y-sumX2*sumXY*sumX2-sumY*sumX*sumX4-1*sumX3*sumX2Y) / determinant;
-      bg2_quadratic = (1*sumX2*sumX2Y+sumX*sumXY*sumX2+sumY*sumX*sumX3-sumY*sumX2*sumX2-sumX*sumX*sumX2Y-1*sumXY*sumX3) / determinant;
+      bg0_quadratic = (sumY*sumX2*sumX4+sumX*sumX3*sumX2Y+sumX2*sumXY*sumX3-sumX2*sumX2*sumX2Y-sumX*sumXY*sumX4-sumY*sumX3*sumX3) / determinant;
+      bg1_quadratic = (sum*sumXY*sumX4+sumY*sumX3*sumX2+sumX2*sumX*sumX2Y-sumX2*sumXY*sumX2-sumY*sumX*sumX4-sum*sumX3*sumX2Y) / determinant;
+      bg2_quadratic = (sum*sumX2*sumX2Y+sumX*sumXY*sumX2+sumY*sumX*sumX3-sumY*sumX2*sumX2-sumX*sumX*sumX2Y-sum*sumXY*sumX3) / determinant;
     }
 
     // calculate the chisq - not normalized by the number of points
