@@ -62,7 +62,8 @@ void DownloadRemoteFile::exec()
   if ( jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
 
-    std::ofstream outfile( getPropertyValue("LocalFileName"));
+    std::string localFileName = getPropertyValue("LocalFileName");
+    std::ofstream outfile( localFileName.c_str());
     if (outfile.good())
     {
       outfile << respStream.rdbuf();
