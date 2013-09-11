@@ -14,6 +14,8 @@ set ( SRC_FILES
     src/IDATab.cpp
 	src/IO_MuonGrouping.cpp
 	src/Indirect.cpp
+	src/IndirectBayes.cpp
+	src/IndirectBayesTab.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
     src/MSDFit.cpp
@@ -23,6 +25,7 @@ set ( SRC_FILES
 	src/MuonAnalysisOptionTab.cpp
 	src/MuonAnalysisResultTableTab.cpp
 	src/QtWorkspaceMementoModel.cpp
+	src/ResNorm.cpp
 	src/SANSAddFiles.cpp
 	src/SANSDiagnostics.cpp
 	src/SANSPlotSpecial.cpp
@@ -33,7 +36,7 @@ set ( SRC_FILES
 	src/StepScan.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
-  src/UserInputValidator.cpp
+	src/UserInputValidator.cpp
 	src/WorkspaceInADS.cpp
 	src/WorkspaceMemento.cpp
 	src/RawFileMemento.cpp
@@ -58,6 +61,8 @@ set ( INC_FILES
     inc/MantidQtCustomInterfaces/IDATab.h
 	inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
 	inc/MantidQtCustomInterfaces/Indirect.h
+	inc/MantidQtCustomInterfaces/IndirectBayes.h
+	inc/MantidQtCustomInterfaces/IndirectBayesTab.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
     inc/MantidQtCustomInterfaces/MSDFit.h
@@ -67,6 +72,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
 	inc/MantidQtCustomInterfaces/QtWorkspaceMementoModel.h
+	inc/MantidQtCustomInterfaces/ResNorm.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
@@ -79,7 +85,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/WorkspaceMemento.h
 	inc/MantidQtCustomInterfaces/RawFileMemento.h
 	inc/MantidQtCustomInterfaces/WorkspaceInADS.h
-  inc/MantidQtCustomInterfaces/UserInputValidator.h
+	inc/MantidQtCustomInterfaces/UserInputValidator.h
 	inc/MantidQtCustomInterfaces/deltaECalc.h
 )
 
@@ -99,6 +105,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/IDATab.h
                 inc/MantidQtCustomInterfaces/Indirect.h
+				inc/MantidQtCustomInterfaces/IndirectBayes.h
+				inc/MantidQtCustomInterfaces/IndirectBayesTab.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
@@ -106,12 +114,13 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h
+				inc/MantidQtCustomInterfaces/ResNorm.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/Transmission.h
-		inc/MantidQtCustomInterfaces/MantidEV.h
+				inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
 )
 
