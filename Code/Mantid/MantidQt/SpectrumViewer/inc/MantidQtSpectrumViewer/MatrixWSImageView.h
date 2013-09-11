@@ -1,7 +1,7 @@
 #ifndef MATRIX_WS_IMAGE_VIEW_H
 #define MATRIX_WS_IMAGE_VIEW_H
 
-#include "MantidQtSpectrumViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionSV.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidQtSpectrumViewer/SpectrumView.h"

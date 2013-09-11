@@ -10,7 +10,7 @@
 #include "MantidQtSpectrumViewer/TrackingPicker.h"
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/GraphDisplay.h"
-#include "MantidQtSpectrumViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 
 /**

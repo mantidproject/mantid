@@ -3,7 +3,7 @@
 
 #include "ui_SpectrumView.h"
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
-#include "MantidQtSpectrumViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
     @class EModeHandler 

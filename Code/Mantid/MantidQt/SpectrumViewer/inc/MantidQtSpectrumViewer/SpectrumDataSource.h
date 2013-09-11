@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include "MantidQtSpectrumViewer/DataArray.h"
-#include "MantidQtSpectrumViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
     @class SpectrumDataSource 

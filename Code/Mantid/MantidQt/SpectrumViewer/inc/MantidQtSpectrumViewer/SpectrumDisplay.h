@@ -12,7 +12,7 @@
 #include "MantidQtSpectrumViewer/SpectrumPlotItem.h"
 #include "MantidQtSpectrumViewer/ISliderHandler.h"
 #include "MantidQtSpectrumViewer/IRangeHandler.h"
-#include "MantidQtSpectrumViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
     @class SpectrumDisplay 

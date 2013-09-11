@@ -8,7 +8,7 @@
 #include <qwt_scale_map.h>
 
 #include "MantidQtSpectrumViewer/DataArray.h"
-#include "MantidQtSpectrumViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionSV.h"
 
 /**
     @class SpectrumPlotItem 

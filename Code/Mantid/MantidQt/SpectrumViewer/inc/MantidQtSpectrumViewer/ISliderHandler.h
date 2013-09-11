@@ -1,7 +1,7 @@
 #ifndef ISLIDER_HANDLER_H
 #define ISLIDER_HANDLER_H
 
-#include "MantidQtSpectrumViewer/DllOptionIV.h"
+#include "MantidQtSpectrumViewer/DllOptionSV.h"
 #include <QRect>
 #include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 
