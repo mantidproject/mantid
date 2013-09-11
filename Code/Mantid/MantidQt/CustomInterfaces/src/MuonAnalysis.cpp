@@ -80,7 +80,7 @@ const QString MuonAnalysis::NOT_AVAILABLE("N/A");
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(NOT_AVAILABLE), 
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(), 
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
   m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
@@ -131,7 +131,7 @@ void MuonAnalysis::initLayout()
   m_optionTab->initLayout();
   m_fitDataTab->init();
 
-  setConnectedDataText();
+  setCurrentDataName(NOT_AVAILABLE);
 
   // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
   connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SIGNAL (showGraphs()));
@@ -235,10 +235,14 @@ void MuonAnalysis::muonAnalysisHelpGroupingClicked()
 
 
 /**
-* Set connected data text.
-*/
-void MuonAnalysis::setConnectedDataText()
+ * Set the connected workspace name.
+ * @param name The new connected ws name
+ */
+void MuonAnalysis::setCurrentDataName(const QString& name)
 {
+  m_currentDataName = name;
+
+  // Update labels
   m_uiForm.connectedDataHome->setText("Connected: " + m_currentDataName);
   m_uiForm.connectedDataGrouping->setText("Connected: " + m_currentDataName);
   m_uiForm.connectedDataSettings->setText("Connected: " + m_currentDataName);
@@ -2236,8 +2240,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
     changePlotType(plotDetails);
 
-    m_currentDataName = titleLabel;
-    setConnectedDataText();
+    setCurrentDataName(titleLabel);
   }
   m_updating = false;
 }
@@ -2367,8 +2370,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
     changePlotType(plotDetails);
     
-    m_currentDataName = titleLabel;
-    setConnectedDataText();
+    setCurrentDataName(titleLabel);
   }
   m_updating = false;
 }

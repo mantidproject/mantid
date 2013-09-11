@@ -193,8 +193,8 @@ private:
   /// Set start up interface look
   void startUpLook();
 
-  /// Change the connected data text.
-  void setConnectedDataText();
+  /// Change the connected data name
+  void setCurrentDataName(const QString& name);
 
   /// Catch when the interface is closed and do something before.
   void closeEvent(QCloseEvent *e);
