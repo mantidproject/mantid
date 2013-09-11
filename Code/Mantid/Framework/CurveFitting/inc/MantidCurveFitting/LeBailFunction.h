@@ -73,7 +73,10 @@ namespace CurveFitting
     bool hasProfileParameter(std::string paramname);
 
     /// Check whether the newly set parameters are correct, i.e., all peaks are physical
-    bool isParameterValid() const;
+    bool isParameterValid(double maxfwhm=DBL_MAX) const;
+
+    /// Set peak position tolerance during importing/adding peaks
+    void setPeakCentreTolerance(double peakpostol,  double tofmin, double tofmax);
 
     /// Generate peaks, and add them to this composite function
     void addPeaks(std::vector<std::vector<int> > peakhkls);
@@ -92,6 +95,9 @@ namespace CurveFitting
 
     /// Return the composite function
     API::IFunction_sptr getFunction();
+
+    /// Get reference to a peak
+    API::IPowderDiffPeakFunction_sptr getPeak(size_t peakindex);
 
     /// Force to make all peaks to calculate peak parameters
     void calPeaksParameters();
@@ -120,9 +126,6 @@ namespace CurveFitting
   private:
     /// Log
     static Kernel::Logger& g_log;
-
-    /// Get reference to a peak
-    API::IPowderDiffPeakFunction_sptr getPeak(size_t peakindex);
 
     /// Set peak parameters
     void setPeakParameters(IPowderDiffPeakFunction_sptr peak, map<string, double > parammap,
@@ -179,6 +182,8 @@ namespace CurveFitting
 
     std::vector<double> heights;
 
+    double m_minTOFPeakCentre;
+    double m_maxTOFPeakCentre;
     /*
     double mL1;
     double mL2;
