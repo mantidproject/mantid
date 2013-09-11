@@ -1386,7 +1386,7 @@ def applyScalingFactor(tof_axis,
     function that apply scaling factor to data using sfCalculator.txt
     file created by the sfCalculator procedure
     """
-    sf_file = 'NaN'
+    #sf_file = 'NaN'
     if (os.path.isfile(sf_file)):
     
         print '-> scaling factor file FOUND! (', sf_file, ')'
