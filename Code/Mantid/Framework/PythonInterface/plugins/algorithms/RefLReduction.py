@@ -4,8 +4,6 @@ Liquids Reflectometer (REFL) reduction
 
 *WIKI*"""
 
-#from MantidFramework import *
-#from mantidsimple import *
 from mantid.api import *
 from mantid.simpleapi import *
 from numpy import zeros, shape, arange
