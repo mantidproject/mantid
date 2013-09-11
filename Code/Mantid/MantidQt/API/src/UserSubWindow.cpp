@@ -77,6 +77,10 @@ bool UserSubWindow::isPyInitialized() const
   return m_isPyInitialized; 
 }
 
+/**
+ * Return the name of the interface
+ * @return Interface name
+ */
 QString UserSubWindow::interfaceName() const
 {
   return m_ifacename;

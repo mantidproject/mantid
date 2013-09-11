@@ -110,9 +110,6 @@ void MuonAnalysis::initLayout()
 
   m_uiForm.fitBrowser->init();
 
-  // Delete current PP tool (if any), as we start not on the DA tab
-  emit activatePPTool("");
-
   // alow appending files
   m_uiForm.mwRunFiles->allowMultipleFiles(true);
 

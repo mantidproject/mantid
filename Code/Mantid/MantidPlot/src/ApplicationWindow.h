@@ -1192,12 +1192,7 @@ private:
   /// Open up the SetupParaview dialog
   void showSetupParaview();
 
-  /**
-  * This searches for the plot with a selected name and then attaches Peak Picker tool to it. It
-  * also disables the tool from all the other plots.
-  * 
-  * @param plotName The name of the plot we want to attach the tool to.
-  */
+  /// Attach a PP tool to plot with a given name, and detach from all the other plots.
   void activatePPTool(const QString& plotName);
 
   /// Delete a plot with a given workspace name

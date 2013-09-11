@@ -17017,7 +17017,7 @@ else
   {
     connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
     connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
-    setGeometry(usr_win, user_interface);
+    setGeometry(usr_win,user_interface);
     connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
         SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
     if(user_interface->interfaceName() == "Muon Analysis")
@@ -17050,6 +17050,12 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
 #endif
 }
 
+/**
+ * Searches for the plot with a specified name and then attaches Peak Picker tool to it. Disables 
+ * the tool from all the other plots.
+ * 
+ * @param plotName The name of the plot we want to attach the tool to.
+ */
 void ApplicationWindow::activatePPTool(const QString& plotName)
 {
   QList<MdiSubWindow *> windows = windowsList();
