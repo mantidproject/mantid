@@ -740,9 +740,8 @@ using namespace DataObjects;
     // Write out the detector IDs
     if (!dets.empty())
     {
-      detid_t * detectorIDs = VectorHelper::iteratorToArray<detid_t>(dets.begin(), dets.end(), dims_array);
-      NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs), false );
-      delete [] detectorIDs;
+      std::vector<detid_t> detectorIDs(dets.begin(),dets.end());
+      NXwritedata("detector_IDs", NX_INT64, 1, dims_array, (void*)(detectorIDs.data()), false );
     }
 
     std::string eventType("UNKNOWN");
