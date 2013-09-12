@@ -177,8 +177,8 @@ SliceViewer::SliceViewer(QWidget *parent)
 /// Destructor
 SliceViewer::~SliceViewer()
 {
-  delete m_data;
   saveSettings();
+  delete m_data;
   // Don't delete Qt objects, I think these are auto-deleted
 }
 

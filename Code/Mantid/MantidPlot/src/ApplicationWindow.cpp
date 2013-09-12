@@ -12087,8 +12087,7 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
 }
 Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &specgramwsName,const QStringList &lst)
 {
-  ProjectData *prjData=new ProjectData;
-  if(!prjData)return 0;
+  ProjectData prjData;
 
   foreach (QString str, lst) {
     if(str.contains("<ColorMap>"))
@@ -12097,7 +12096,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
     QString colormapLine=lst[index+1];
     QStringList list=colormapLine.split("\t");
     QString colormapFile=list[2];
-    prjData->setColormapFile(colormapFile);
+    prjData.setColormapFile(colormapFile);
     }
     if(str.contains("<ColorPolicy>"))
     { 	//read the colormap policy to set gray scale
@@ -12106,7 +12105,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=colormapPolicy.indexOf(">");
       int index2=colormapPolicy.lastIndexOf("<");
       bool gray=colormapPolicy.mid(index1+1,index2-index1-1).toInt();
-      prjData->setGrayScale(gray);
+      prjData.setGrayScale(gray);
 
     }
     if (str.contains("\t<ContourLines>"))
@@ -12116,14 +12115,14 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=contourlines.indexOf(">");
       int index2=contourlines.lastIndexOf("<");
       int bcontour=contourlines.mid(index1+1,index2-index1-1).toInt();
-      if(bcontour)prjData->setContourMode(true);
+      if(bcontour)prjData.setContourMode(true);
 
       //setting contour levels
       QString contourlevels=lst[index+1];
       index1=contourlevels.indexOf(">");
       index2=contourlevels.lastIndexOf("<");
       int levels=contourlevels.mid(index1+1,index2-index1-1).toInt();
-      prjData->setContourLevels(levels);
+      prjData.setContourLevels(levels);
 
       //setting contour default pen
       QString pen=lst[index+2];
@@ -12145,15 +12144,15 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
         QString penstyle=stylestring.mid(index1+1,index2-index1-1);
         QColor qcolor(pencolor);
         QPen pen = QPen(qcolor, penwidth.toDouble(),Graph::getPenStyle(penstyle.toInt()));
-        prjData->setDefaultContourPen(pen);
-        prjData->setColorMapPen(false);
+        prjData.setDefaultContourPen(pen);
+        prjData.setColorMapPen(false);
       }
       else if (pen.contains("<CustomPen>"))
       {	ContourLinesEditor* contourLinesEditor = new ContourLinesEditor(this->locale());
-      prjData->setCotntourLinesEditor(contourLinesEditor);
-      prjData->setCustomPen(true);
+      prjData.setCotntourLinesEditor(contourLinesEditor);
+      prjData.setCustomPen(true);
       }
-      else prjData->setColorMapPen(true);
+      else prjData.setColorMapPen(true);
     }
     if(str.contains("<IntensityChanged>"))
     {	 //read the intensity changed line from file and setting the spectrogram flag for intenisity
@@ -12163,7 +12162,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=intensity.indexOf(">");
       int index2=intensity.lastIndexOf("<");
       bool bIntensity=intensity.mid(index1+1,index2-index1-1).toInt();
-      prjData->setIntensity(bIntensity);
+      prjData.setIntensity(bIntensity);
     }
 
   }
@@ -12175,8 +12174,13 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
     if( *matrixItr && specgramwsName==(*matrixItr)->getWorkspaceName() )
       m = *matrixItr;
   }
-  if(!m) return 0 ;
-  Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,prjData);
+
+  if ( !m )
+  {
+    return NULL;
+  }
+
+  Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,&prjData);
   if ( ag->multiLayer() != NULL )
   {
     m->attachMultilayer( ag->multiLayer() );

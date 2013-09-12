@@ -44,9 +44,9 @@ namespace MDAlgorithms
     ~BinMD();
 
     /// Algorithm's name for identification
-    virtual const std::string name() const { return "BinMD";};
+    virtual const std::string name() const { return "BinMD";}
     /// Algorithm's version for identification
-    virtual int version() const { return 1;};
+    virtual int version() const { return 1;}
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}
 
@@ -68,7 +68,7 @@ namespace MDAlgorithms
 
     /// Method to bin a single MDBox
     template<typename MDE, size_t nd>
-    void binMDBox(MDEvents::MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax);
+    void binMDBox(MDEvents::MDBox<MDE, nd> * box, const size_t * const chunkMin, const size_t * const chunkMax);
 
 
     /// The output MDHistoWorkspace

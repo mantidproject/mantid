@@ -172,10 +172,11 @@ namespace DataHandling
       string dataDir;
       LoadPreNexus lp;
       lp.parseRuninfo(filename, dataDir, eventFilenames);
-      for (size_t i = 0; i < eventFilenames.size(); i++) {
-        Mantid::Kernel::BinaryFile<DasEvent> * eventfile = new BinaryFile<DasEvent>(dataDir + eventFilenames[i]);
+      for (size_t i = 0; i < eventFilenames.size(); i++)
+      {
+        BinaryFile<DasEvent> eventfile(dataDir + eventFilenames[i]);
         // Factor of 2 for compression
-        filesize += static_cast<double>(eventfile->getNumElements()) * 48.0 / (1024.0*1024.0*1024.0);
+        filesize += static_cast<double>(eventfile.getNumElements()) * 48.0 / (1024.0*1024.0*1024.0);
       }
     }
     //Event Nexus
@@ -243,14 +244,15 @@ namespace DataHandling
         filesize = double(info.getSize()) * 24.0 / (1024.0*1024.0*1024.0);
         g_log.notice() << "Wksp size is " << filesize << " GB" << std::endl;
 
-        LoadRawHelper *helper = new LoadRawHelper;
-        FILE* file = helper->openRawFile(filename);
+        LoadRawHelper helper;
+        FILE* file = helper.openRawFile(filename);
         ISISRAW iraw;
         iraw.ioRAW(file, true);
 
         // Read in the number of spectra in the RAW file
         m_numberOfSpectra = iraw.t_nsp1;
         g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra" << std::endl;
+        fclose(file);
     }
     //Histo Nexus
     else if(fileType == HISTO_NEXUS_FILE)
