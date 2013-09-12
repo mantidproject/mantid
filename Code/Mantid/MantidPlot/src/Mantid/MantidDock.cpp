@@ -171,7 +171,7 @@ void MantidDockWidget::createWorkspaceMenuActions()
   connect(m_showListData, SIGNAL(activated()), m_mantidUI, SLOT(showListData())); 
 
   m_showSpectrumViewer = new QAction(tr("Show Spectrum Viewer"), this);
-  connect(m_showSpectrumViewer, SIGNAL(activated()), m_mantidUI, SLOT(showImageViewer()));
+  connect(m_showSpectrumViewer, SIGNAL(activated()), m_mantidUI, SLOT(showSpectrumViewer()));
 
   m_showSliceViewer = new QAction(tr("Show Slice Viewer"), this);
   { QIcon icon; icon.addFile(QString::fromUtf8(":/SliceViewer/icons/SliceViewerWindow_icon.png"), QSize(), QIcon::Normal, QIcon::Off);

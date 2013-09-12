@@ -696,7 +696,7 @@ void MantidUI::showVatesSimpleInterface()
   }
 }
 
-void MantidUI::showImageViewer()
+void MantidUI::showSpectrumViewer()
 {
   QString wsName = getSelectedWorkspaceName();
   try
@@ -705,7 +705,7 @@ void MantidUI::showImageViewer()
              AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if ( matwsp )
     {
-      MantidQt::SpectrumView::MatrixWSImageView image_view( matwsp );
+      MantidQt::SpectrumView::MatrixWSImageView spectrum_view( matwsp );
     }
     else
     {
