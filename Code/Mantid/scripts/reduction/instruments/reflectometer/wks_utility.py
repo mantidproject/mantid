@@ -1392,7 +1392,7 @@ def applyScalingFactor(tof_axis,
     function that apply scaling factor to data using sfCalculator.txt
     file created by the sfCalculator procedure
     """
-    sf_file = 'NaN'
+
     if (os.path.isfile(sf_file)):
     
         print '-> scaling factor file FOUND! (', sf_file, ')'
@@ -1517,10 +1517,12 @@ def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_e
     final_y_data = zeros((nbr_pixel, nbr_tof))
     final_y_data_error = zeros((nbr_pixel, nbr_tof))
     for x in range(nbr_pixel):
+        
         [ratio_array, ratio_array_error] = divideArrays(y_data[x,:], 
                                                         y_data_error[x,:], 
                                                         x_axis_factors, 
                                                         x_axis_factors_error)
+        
         final_y_data[x,:] = ratio_array[:]
         final_y_data_error[x,:] = ratio_array_error
 
@@ -1538,14 +1540,22 @@ def divideArrays(num_array, num_error_array, den_array, den_error_array):
     # calculate the ratio array
     ratio_array = zeros(nbr_elements)
     for i in range(nbr_elements):
-        ratio_array[i] = num_array[i] / den_array[i]
+        if den_array[i] is 0:
+            _tmp_ratio = 0
+        else:
+            _tmp_ratio = num_array[i] / den_array[i]
+        ratio_array[i] = _tmp_ratio
         
     # calculate the error of the ratio array
     ratio_error_array = zeros(nbr_elements)
     for i in range(nbr_elements):
-        tmp1 = pow(num_error_array[i] / num_array[i],2)
-        tmp2 = pow(den_error_array[i] / den_array[i],2)
-        ratio_error_array[i] = sqrt(tmp1+tmp2)*(num_array[i]/den_array[i]) 
+        
+        if (num_array[i] == 0) or (den_array[i] == 0): 
+            ratio_error_array[i] = 0 
+        else:
+            tmp1 = pow(num_error_array[i] / num_array[i],2)
+            tmp2 = pow(den_error_array[i] / den_array[i],2)
+            ratio_error_array[i] = sqrt(tmp1+tmp2)*(num_array[i]/den_array[i])
 
     return [ratio_array, ratio_error_array]
 
