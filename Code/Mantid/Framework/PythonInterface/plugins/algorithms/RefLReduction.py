@@ -401,6 +401,7 @@ class RefLReduction(PythonAlgorithm):
                                                                 theta = theta,
                                                                 first_slit_size = first_slit_size,
                                                                 last_slit_size = last_slit_size)
+
 #         ## debugging only
 #         name_output_ws = self.getPropertyValue("OutputWorkspace")
 #         fileName = '/mnt/hgfs/j35/Dropbox/temporary/beforeRebin_' + name_output_ws + '.txt'

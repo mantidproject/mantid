@@ -1788,8 +1788,8 @@ def getQaxis(dMD, dSD, theta, tof_axis, y_range, central_pixel,
 
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = len(tof_axis)
-    tmp_q_axis = zeros(sz_tof-1)
-    q_array = zeros((len(y_range), sz_tof - 1))
+    tmp_q_axis = zeros(sz_tof)
+    q_array = zeros((len(y_range), sz_tof))
 
     index_y = range(len(y_range))
     for y in index_y:
@@ -1806,11 +1806,13 @@ def getQaxis(dMD, dSD, theta, tof_axis, y_range, central_pixel,
         else:
             _theta = theta
 
-        for t in range(sz_tof-1):
-            tof1 = tof_axis[t]
-            tof2 = tof_axis[t+1]
-            tofm = (tof1+tof2)/2.
-            _Q = _const * math.sin(_theta) / (tofm*1e-6)
+        for t in range(sz_tof):
+#            tof1 = tof_axis[t]
+#            tof2 = tof_axis[t+1]
+#            tofm = (tof1+tof2)/2.
+            tof = tof_axis[t]
+#            _Q = _const * math.sin(_theta) / (tofm*1e-6)
+            _Q = _const * math.sin(_theta) / (tof*1e-6)
             q_array[y, t] = _Q * 1e-10
           
     return q_array    
@@ -1889,7 +1891,7 @@ def cropAxisToOnlyNonzeroElements(q_rebin, dataPeakRange):
     nbrPixel = dataPeakRange[1] - dataPeakRange[0] + 1
     
     x_axis = q_rebin.readX(0)[:]
-    sz = x_axis.shape[0]
+    sz = x_axis.shape[0]-1
     
     index_first_non_zero_value = sz;
     index_last_non_zero_value = 0; 

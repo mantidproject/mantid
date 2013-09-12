@@ -366,6 +366,17 @@ class BaseRefWidget(BaseWidget):
         self.y_axis = new_y_axis
         self.e_axis = new_e_axis
     
+    def _average_y_of_same_x_(self, x_axis, y_axis, e_axis):
+        """
+        2 y values sharing the same x-axis will be average using
+        the weighted mean
+        """
+        pass
+    
+    
+    
+    
+    
     def _create_ascii_clicked(self):
         """
         Reached by the "Create ASCII" button
@@ -416,6 +427,7 @@ class BaseRefWidget(BaseWidget):
         e_axis = mt.readE(0)[:]
         
         self._smooth_x_axis(x_axis, y_axis, e_axis)
+        
         x_axis = self.x_axis
         y_axis = self.y_axis
         e_axis = self.e_axis
