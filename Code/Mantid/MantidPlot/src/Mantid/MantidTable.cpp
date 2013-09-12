@@ -61,8 +61,8 @@ void MantidTable::fillTable()
     return;
   }
 
-  resizeCols(static_cast<int>(m_ws->columnCount()));
-  resizeRows(static_cast<int>(m_ws->rowCount()));
+  setNumCols(static_cast<int>(m_ws->columnCount()));
+  setNumRows(static_cast<int>(m_ws->rowCount()));
 
   // Add all columns
   for(int i=0; i < static_cast<int>(m_ws->columnCount());i++)
