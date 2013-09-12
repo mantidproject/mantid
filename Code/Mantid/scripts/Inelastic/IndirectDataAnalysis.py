@@ -1124,14 +1124,6 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
                 logger.notice('Output file created : '+res_path)
     EndTime('ApplyCorrections')
 
-from mantid.api import NumericAxis      
-def replace_workspace_axis(wsName, new_values, new_unit):
-    ax1 = NumericAxis.create(len(new_values))
-    for i in range(len(new_values)):
-        ax1.setValue(i, new_values[i])
-    ax1.setUnit(new_unit)
-    mtd[wsName].replaceAxis(1, ax1)      #axis=1 is vertical
-
 def plotCorrResult(inWS,PlotResult):
     nHist = mtd[inWS].getNumberHistograms()
     if (PlotResult == 'Spectrum' or PlotResult == 'Both'):
