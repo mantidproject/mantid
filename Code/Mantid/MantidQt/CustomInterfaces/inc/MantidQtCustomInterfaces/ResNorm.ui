@@ -40,6 +40,16 @@
        <property name="loadLabelText" stdset="0">
         <string>Load</string>
        </property>
+       <property name="workspaceSuffixes" stdset="0">
+        <stringlist>
+         <string>_res</string>
+        </stringlist>
+       </property>
+       <property name="fileBrowserSuffixes" stdset="0">
+        <stringlist>
+         <string>_res.nxs</string>
+        </stringlist>
+       </property>
        <property name="showLoad">
         <bool>false</bool>
        </property>
