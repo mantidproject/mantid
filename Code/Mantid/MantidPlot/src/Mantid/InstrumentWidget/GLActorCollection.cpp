@@ -78,32 +78,11 @@ void GLActorCollection::drawGL(bool picking )const
   }
 }
 
-bool GLActorCollection::accept(GLActorVisitor& visitor)
+bool GLActorCollection::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
 {
-  const SetVisibilityVisitor* svv = dynamic_cast<const SetVisibilityVisitor*>(&visitor);
-  // accepting a set visibility visitor. 
-  if (svv)
-  {
-    if (visitor.visit(this)) return true;
-    bool ok = false;
-    for(std::vector<GLActor*>::const_iterator it = mActorsList.begin();it != mActorsList.end();++it)
-    {
-      if ((**it).accept(visitor))
-      {
-        ok = true;
-      }
-    }
-    if (ok)
-    {
-      m_visible = true;
-    }
-    return ok;
-  }
-
-  // default visitor
   for(std::vector<GLActor*>::const_iterator it = mActorsList.begin();it != mActorsList.end();++it)
   {
-    if ((**it).accept(visitor)) return true;
+    if ( (**it).accept(visitor,rule) && rule == Finish ) return true;
   }
   return visitor.visit(this);
 }
@@ -178,10 +157,20 @@ void GLActorCollection::invalidateDisplayList()const
   }
 }
 
-void GLActorCollection::setVisibility(bool on)
+void GLActorCollection::setChildVisibility(bool on)
 {
+  GLActor::setVisibility(on);
   for(std::vector<GLActor*>::const_iterator it = mActorsList.begin();it != mActorsList.end();++it)
   {
-    (**it).setVisibility(on);
+    (**it).setChildVisibility(on);
   }
+}
+
+bool GLActorCollection::hasChildVisible() const
+{
+    for(std::vector<GLActor*>::const_iterator it = mActorsList.begin();it != mActorsList.end();++it)
+    {
+      if ( (**it).hasChildVisible() ) return true;
+    }
+    return false;
 }

@@ -50,6 +50,7 @@ class ComponentActor : public GLActor
 public:
   ComponentActor(const InstrumentActor& instrActor,const Mantid::Geometry::ComponentID& compID); ///< Default Constructor
   virtual std::string type()const {return "ComponentActor";} ///< Type of the GL object
+  bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
   boost::shared_ptr<const Mantid::Geometry::IComponent> getComponent() const;
   boost::shared_ptr<const Mantid::Geometry::IObjComponent> getObjComponent() const;
   boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector() const;

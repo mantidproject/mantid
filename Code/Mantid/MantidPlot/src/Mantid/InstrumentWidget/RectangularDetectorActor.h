@@ -50,7 +50,7 @@ namespace Geometry
 
 class ObjComponentActor;
 
-class RectangularDetectorActor : public ICompAssemblyActor //ObjComponentActor
+class RectangularDetectorActor : public ICompAssemblyActor
 {
 public:
   /// Constructor
@@ -75,7 +75,8 @@ public:
 
   void draw(bool picking = false)const;  ///< Method that defines ObjComponent geometry. Calls ObjComponent draw method
   void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const;
-  bool accept(GLActorVisitor& visitor);
+  bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  bool isChildDetector(const Mantid::Geometry::ComponentID& id ) const;
   virtual void setColors();
 
   int genTexture(char * & image_data, std::vector<GLColor>& list, bool useDetectorIDs);

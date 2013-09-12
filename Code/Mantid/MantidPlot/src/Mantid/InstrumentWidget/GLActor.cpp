@@ -5,7 +5,7 @@ GLActor::~GLActor()
 {
 }
 
-bool GLActor::accept(GLActorVisitor& visitor)
+bool GLActor::accept(GLActorVisitor& visitor, VisitorAcceptRule)
 {
   return visitor.visit(this);
 }

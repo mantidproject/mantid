@@ -17,6 +17,11 @@ ComponentActor::ComponentActor(const InstrumentActor& instrActor, const Mantid::
 {
 }
 
+bool ComponentActor::accept(GLActorVisitor &visitor, GLActor::VisitorAcceptRule)
+{
+    return visitor.visit(this);
+}
+
 boost::shared_ptr<const Mantid::Geometry::IComponent> ComponentActor::getComponent() const
 {
   return m_instrActor.getInstrument()->getComponentByID(m_id);

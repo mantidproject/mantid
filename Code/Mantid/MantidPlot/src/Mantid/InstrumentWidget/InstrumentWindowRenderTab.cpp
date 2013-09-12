@@ -424,7 +424,7 @@ void InstrumentWindowRenderTab::showEvent (QShowEvent *)
   InstrumentActor* actor = m_instrWindow->getInstrumentActor();
   if ( actor )
   {
-    auto visitor = SetAllVisibleVisitor();
+    auto visitor = SetAllVisibleVisitor(actor->areGuidesShown());
     actor->accept( visitor );
     getSurface()->updateView();
     getSurface()->requestRedraw();

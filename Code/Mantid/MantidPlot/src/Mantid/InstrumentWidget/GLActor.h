@@ -63,11 +63,18 @@ namespace Mantid
 class GLActor
 {
 public:
+  /// Rules for visitor propagation. If vistor's visit(...) method returns true
+  /// the propagation can be continued (VisitAll) or abandoned (Finish)
+  enum VisitorAcceptRule { VisitAll, Finish };
   GLActor():m_visible(true){}
   ///< Virtual destructor
   virtual ~GLActor();
   /// Toggle the visibility of the actor.
   virtual void setVisibility(bool on){m_visible = on;}
+  /// Toggle the visibility of the child actors (if exist).
+  virtual void setChildVisibility(bool on){setVisibility(on);}
+  /// Check if any child is visible
+  virtual bool hasChildVisible() const {return true;}
   /// Get the visibility status.
   bool isVisible()const{return m_visible;}
   /// Draw the actor in 3D.
@@ -75,7 +82,7 @@ public:
   /// Get the 3D bounding box of the actor
   virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const = 0;
   /// Accept a visitor 
-  virtual bool accept(GLActorVisitor& visitor);
+  virtual bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
   /// Convert a "pick ID" to a colour to put into the pick image.
   static GLColor makePickColor(size_t pickID);
   /// Decode a pick colour and return corresponding "pick ID"
