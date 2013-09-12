@@ -14,6 +14,7 @@ namespace Mantid
       return (val!=buf);
     }
 
+
     /** method sets up all internal variables necessary to convert from Matrix2D workspace to MDEvent workspace 
     @param WSD         -- the class describing the target MD workspace, sorurce matrtix workspace and the transformations, necessary to perform on these workspaces
     @param inWSWrapper -- the class wrapping the target MD workspace
@@ -157,18 +158,36 @@ namespace Mantid
       Kernel::ThreadPool tp(ts,nThreads, new API::Progress(*pProgress));  
       //<<<--  Thread control stuff
 
+      if (runMultithreaded )
+        nThreads = static_cast<int>(tp.getNumPhysicalCores());
+      else
+        nThreads =1;
+
       // estimate the size of data conversion a single thread should perform
       //TO DO: this piece of code should be carefully rethinked
-      //size_t nThreads = tp.getNumPhysicalCores();
-      size_t nThr = 1;
-      this->estimateThreadWork(nThr,specSize);
+      size_t eventsChunkNum = bc->getSignifEventsNumber();
+      this->estimateThreadWork(nThreads,specSize,eventsChunkNum);
 
       //External loop over the spectra:
-      for (size_t i = 0; i < nValidSpectra; i+=m_spectraChunk)
+      for (size_t i = 0; i < nValidSpectra; i+=m_spectraChunk*nThreads)
       {
-        size_t nThreadEv = this->conversionChunk(i);
-        nAddedEvents+=nThreadEv;
-        nEventsInWS +=nThreadEv;
+        if (runMultithreaded)
+        {
+           m_numAddedPoints = 0;
+           for(size_t j=0;j<nThreads;j++)
+              ts->push(new ChunkOfWork(this,&ConvToMDHistoWS::conversionChunk,&ConvToMDHistoWS::addNPoits,i+j));
+
+            //tp.start();
+            nAddedEvents+=eventsChunkNum;
+            nEventsInWS +=eventsChunkNum;
+
+        }
+        else
+        {
+          size_t nThreadEv = this->conversionChunk(i);
+          nAddedEvents+=nThreadEv;
+          nEventsInWS +=nThreadEv;
+        }
 
         if (bc->shouldSplitBoxes(nEventsInWS,nAddedEvents,lastNumBoxes))
         {
@@ -221,28 +240,24 @@ namespace Mantid
     * @param nThreads  -- number of threads used to process data
     * @param specSize  -- the size of single spectra in matrix workspace;
     */
-    void ConvToMDHistoWS::estimateThreadWork(size_t nThreads,size_t specSize)
+    void ConvToMDHistoWS::estimateThreadWork(size_t nThreads,size_t specSize,size_t nPointsToProcess)
     {
+      if (nThreads==0)nThreads=1;
+
+      // buffer size is at least a spectra size or more
       m_bufferSize     = ((specSize>DATA_BUFFER_SIZE)?specSize:DATA_BUFFER_SIZE);
       if(m_bufferSize%specSize!=0)
       {
         m_bufferSize = ((m_bufferSize/specSize)+1)*specSize;
       }
-      size_t nSpectras = this->m_InWS2D->getNPoints()/(specSize);
-      m_spectraChunk =  nSpectras/nThreads;
-      // estimate number of points, produced by single thread;
-      size_t nPoints = m_spectraChunk*nThreads;
-      // experimental parameter, which defines the number of points, which can be added to ws efficiently;
-      if(nPoints > 10000000)
-      {
-        nPoints = 10000000;
-        m_spectraChunk = nPoints/nThreads+1;
-      }
-      // the usfullness of this criteria is questionable;
-      //if(m_spectraChunk*specSize>10*m_bufferSize)m_spectraChunk = 10*m_bufferSize;
-      //if(nSpectras/m_spectraChunk<nThreads)m_spectraChunk=nSpectras/nThreads;
 
-      if(m_spectraChunk<1)m_spectraChunk=1;
+      //
+      size_t nSpectras = nPointsToProcess/specSize+1;
+
+      m_spectraChunk =  nSpectras/nThreads;
+      if(m_spectraChunk<1)m_spectraChunk =1;
+
+      //if(m_spectraChunk<1)m_spectraChunk=1;
       // TMP
       //m_spectraChunk = 10;
 

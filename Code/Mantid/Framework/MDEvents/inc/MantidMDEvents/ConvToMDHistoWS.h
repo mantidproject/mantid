@@ -13,6 +13,9 @@
 #include "MantidMDEvents/ConvToMDBase.h"
 // coordinate transformation
 #include "MantidMDEvents/MDTransfInterface.h"
+#include "MantidKernel/Multithreaded.h"
+#include "MantidKernel/Task.h"
+#include "Poco/ScopedLock.h"
 
 namespace Mantid
 {
@@ -48,6 +51,9 @@ namespace MDEvents
 */
 
 //-----------------------------------------------
+// predefined declaration of the class, which do chunk of conversion in case of multithreaded execution (linux do not understand friend without it)
+class ChunkOfWork;
+
 class ConvToMDHistoWS: public ConvToMDBase
 {
 
@@ -61,12 +67,52 @@ private:
    // the size of temporary buffer, each thread stores data in before adding these data to target MD workspace;
    size_t m_bufferSize;
    // internal function used to identify m_spectraChunk and m_bufferSize
-   void estimateThreadWork(size_t nThreads,size_t specSize);
+   void estimateThreadWork(size_t nThreads,size_t specSize,size_t nPointsToProcess);
   // the function does a chunk of work. Expected to run on a thread. 
    size_t conversionChunk(size_t job_ID);
+
+   friend class ChunkOfWork;
+
+   // counter for number of workspace points used for multithreaded calculations of number of actual points;
+   size_t m_numAddedPoints;
+   Kernel::Mutex m_npLock;
+
+   size_t addNPoits(size_t numPoints)
+   {
+     Poco::ScopedLock<Kernel::Mutex> lock(m_npLock);
+     m_numAddedPoints+=numPoints;
+     return 0;
+   }
+
 };
 
- 
+/** Helper class for multithreaded adding -- poor replacement for bind, but we are thinking of adding more options here in a future*/ 
+class ChunkOfWork :  public Kernel::Task
+{
+     ConvToMDHistoWS *classHolder;
+     // function pointer to the conversion chunk above
+      typedef  size_t (ConvToMDHistoWS::*fpRunMethod)(size_t) ;
+      fpRunMethod runMethod;
+
+      fpRunMethod countPoints;
+
+      // the Id for the conversion job 
+      size_t job_ID;
+public:
+      /**Constructor */
+      ChunkOfWork(ConvToMDHistoWS *Converter,fpRunMethod conversionChunk ,fpRunMethod addPoints,size_t theJI)
+        :classHolder(Converter),runMethod(conversionChunk),countPoints(addPoints),job_ID(theJI)
+        {  };
+      /** Overloaded POCO run method used to run the job*/ 
+      void run()
+      {
+        size_t nAddedPoints = (classHolder->*runMethod)(job_ID);
+        (classHolder->*countPoints)(nAddedPoints);
+      }
+
+};
+
+
 } // endNamespace MDAlgorithms
 } // endNamespace Mantid
 

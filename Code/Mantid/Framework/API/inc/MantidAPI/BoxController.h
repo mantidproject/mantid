@@ -43,13 +43,16 @@ namespace API
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
       m_addingEvents_eventsPerTask = 1000;
+      m_SignifEventsNumber = 10000000;
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
       m_splitInto.resize(this->nd, 1);
       resetNumBoxes();
     }
 
     virtual ~BoxController();
-
+    /** get number of events used as significatn in box splitting (the box splitting begins after that)*/ 
+    size_t getSignifEventsNumber()const
+    {return m_SignifEventsNumber;}
     // create new box controller from the existing one
     virtual BoxController *clone()const;
     /// Serialize
@@ -260,8 +263,8 @@ namespace API
       //  (because when the workspace gets very large you should split less often)
       // But no more often than every 10 million events.
       size_t comparisonPoint = nEventsInOutput/16;
-      if (comparisonPoint < 10000000)
-          comparisonPoint = 10000000;
+      if (comparisonPoint < m_SignifEventsNumber)
+          comparisonPoint = m_SignifEventsNumber;
       if (eventsAdded > (comparisonPoint))return true;
 
       // Return true if the average # of events per box is big enough to split.
@@ -412,6 +415,9 @@ namespace API
 
     /// Splitting threshold
     size_t m_SplitThreshold;
+
+    /// this number of events takes noticeple time to process. Identified experimentally and used in box splitting limings
+    size_t m_SignifEventsNumber;
 
     /** Maximum splitting depth: don't go further than this many levels of recursion.
      * This avoids infinite recursion and should be set to a value that gives a smallest
