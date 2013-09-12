@@ -365,18 +365,113 @@ class BaseRefWidget(BaseWidget):
         self.x_axis = new_x_axis
         self.y_axis = new_y_axis
         self.e_axis = new_e_axis
+        
+    def weightedMean(self, data_array, error_array):
     
-    def _average_y_of_same_x_(self, x_axis, y_axis, e_axis):
+        sz = len(data_array)
+    
+        # calculate the numerator of mean
+        dataNum = 0;
+        for i in range(sz):
+            if not (data_array[i] == 0):
+                tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
+                dataNum += tmpFactor
+    
+        # calculate denominator
+        dataDen = 0;
+        for i in range(sz):
+            if not (error_array[i] == 0):
+                tmpFactor = 1./float((pow(error_array[i],2)))
+                dataDen += tmpFactor
+
+        if dataDen == 0:
+            mean = 0
+            mean_error = 0
+        else:            
+            mean = float(dataNum) / float(dataDen)
+            mean_error = math.sqrt(1/dataDen)     
+
+        return [mean, mean_error]
+
+    def _average_y_of_same_x_(self):
         """
         2 y values sharing the same x-axis will be average using
         the weighted mean
         """
-        pass
-    
-    
-    
-    
-    
+        
+        ws_list = AnalysisDataService.getObjectNames()
+        scaled_ws_list = []
+
+        # Get the list of scaled histos
+        for ws in ws_list:
+            if ws.endswith("_scaled"):
+                scaled_ws_list.append(ws)
+        
+        # Convert each histo to histograms and rebin to final binning
+        for ws in scaled_ws_list:
+            new_name = "%s_histo" % ws
+            ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
+            Rebin(InputWorkspace=new_name, Params="0.005,-0.005,0.015",
+                  OutputWorkspace=new_name)
+
+        # Take the first rebinned histo as our output
+        data_y = mtd[scaled_ws_list[0]+'_histo'].dataY(0)
+        data_e = mtd[scaled_ws_list[0]+'_histo'].dataE(0)
+
+        # Add in the other histos, averaging the overlaps
+        for i in range(1, len(scaled_ws_list)):
+            data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)
+            data_e_i = mtd[scaled_ws_list[i]+'_histo'].dataE(0)
+            for j in range(len(data_y_i)):
+                if data_y[j]>0 and data_y_i[j]>0:
+                    [data_y[j], data_e[j]] = self.weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]]);
+                elif (data_y[j] == 0) and (data_y_i[j]>0):
+                    data_y[j] = data_y_i[j]
+                    data_e[j] = data_e_i[j]
+
+        return scaled_ws_list[0]+'_histo'
+
+#        new_x_axis = []
+#        new_y_axis = []
+#        new_e_axis = []
+#        
+#        sz = len(x_axis)        
+#        i=0
+#        while (i < sz-1):
+#            
+#            _left_x = x_axis[i]
+#            _right_x = x_axis[i+1]
+#
+#            _left_y = y_axis[i]
+#            _left_e = e_axis[i]
+#
+#            if (_left_x == _right_x):
+#                
+#                _right_y = y_axis[i+1]
+#                _right_e = e_axis[i+1]
+#
+#                #calculate weighted mean 
+#                import wks_utility
+#                [_y_mean, _e_mean] = wks_utility.weightedMean([_left_y, _right_y], [_left_e, _right_e])
+#   
+#                new_x_axis.append(_left_x)
+#                new_y_axis.append(_y_mean)
+#                new_e_axis.append(_e_mean)
+#                
+#                i+=1
+#            
+#            else:
+#            
+#                new_x_axis.append(_left_x)
+#                new_y_axis.append(_left_y)
+#                new_e_axis.append(_left_e)
+#    
+#            i+=1
+#    
+#        self.x_axis = new_x_axis
+#        self.y_axis = new_y_axis
+#        self.e_axis = new_e_axis
+        
     def _create_ascii_clicked(self):
         """
         Reached by the "Create ASCII" button
@@ -421,18 +516,21 @@ class BaseRefWidget(BaseWidget):
 #              OutputWorkspace='ref_combined',
 #              Params=q_binning)
             
-        mt = mtd['ref_combined']
-        x_axis = mt.readX(0)[:]
-        y_axis = mt.readY(0)[:]
-        e_axis = mt.readE(0)[:]
+        wks_file_name = self._average_y_of_same_x_()
         
-        self._smooth_x_axis(x_axis, y_axis, e_axis)
+#        
+#        mt = mtd['ref_combined']
+#        x_axis = mt.readX(0)[:]
+#        y_axis = mt.readY(0)[:]
+#        e_axis = mt.readE(0)[:]
+#        
+#        self._smooth_x_axis(x_axis, y_axis, e_axis)
         
-        x_axis = self.x_axis
-        y_axis = self.y_axis
-        e_axis = self.e_axis
+        x_axis = mtd[wks_file_name].readX(0)[:]
+        y_axis = mtd[wks_file_name].readY(0)[:]
+        e_axis = mtd[wks_file_name].readE(0)[:]
         
-        sz = len(x_axis)
+        sz = len(x_axis)-1
         for i in range(sz):
             _line = str(x_axis[i])
             _line += ' ' + str(y_axis[i])
