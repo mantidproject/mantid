@@ -407,11 +407,18 @@ class BaseRefWidget(BaseWidget):
             if ws.endswith("_scaled"):
                 scaled_ws_list.append(ws)
         
+        
+        # get binning parameters
+        _from_q = str(self._summary.q_min_edit.text())
+        _bin_size = str(self._summary.q_step_edit.text())
+        _bin_max = str(2)
+        binning_parameters = _from_q + ',-' + _bin_size + ',' + _bin_max
+        
         # Convert each histo to histograms and rebin to final binning
         for ws in scaled_ws_list:
             new_name = "%s_histo" % ws
             ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
-            Rebin(InputWorkspace=new_name, Params="0.005,-0.005,0.015",
+            Rebin(InputWorkspace=new_name, Params=binning_parameters,
                   OutputWorkspace=new_name)
 
         # Take the first rebinned histo as our output
