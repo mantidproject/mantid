@@ -52,7 +52,7 @@ int main( int argc, char** argv )
 
   std::cout << "Got EventWorkspace, making EventWSDataSource..." << std::endl;
 
-  MantidQt::SpectrumView::MatrixWSImageView image_view( WS );
+  MantidQt::SpectrumView::MatrixWSImageView spectrum_view( WS );
 
   return a.exec();
 }

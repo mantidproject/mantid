@@ -72,7 +72,7 @@ SpectrumView::SpectrumView( SpectrumDataSource* data_source )
   h_graph = new GraphDisplay( ui->h_graphPlot, ui->h_graph_table, false );
   v_graph = new GraphDisplay( ui->v_graphPlot, ui->v_graph_table, true );
 
-  SpectrumDisplay* spectrum_display = new SpectrumDisplay( ui->imagePlot,
+  SpectrumDisplay* spectrum_display = new SpectrumDisplay( ui->spectrumPlot,
 							   slider_handler,
 							   range_handler,
 							   h_graph, v_graph,

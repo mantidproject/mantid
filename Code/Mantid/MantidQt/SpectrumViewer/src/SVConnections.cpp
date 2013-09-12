@@ -102,7 +102,7 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   sv_ui->graph_max_slider->setTickPosition(QSlider::TicksBelow);
   sv_ui->graph_max_slider->setSliderPosition(100);
 
-  image_picker = new TrackingPicker( sv_ui->imagePlot->canvas() );
+  image_picker = new TrackingPicker( sv_ui->spectrumPlot->canvas() );
   image_picker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
   image_picker->setTrackerMode(QwtPicker::ActiveOnly);
   image_picker->setRubberBandPen(QColor(Qt::gray));
