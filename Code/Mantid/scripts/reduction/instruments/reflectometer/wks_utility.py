@@ -1789,11 +1789,7 @@ def getQaxis(dMD, dSD, theta,
 
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = len(tof_axis)
-<<<<<<< HEAD
-    tmp_q_axis = zeros(sz_tof-1)
-=======
     tmp_q_axis = zeros(sz_tof)
->>>>>>> origin/7924_branch_fix
     q_array = zeros((len(y_range), sz_tof))
 
     index_y = range(len(y_range))
