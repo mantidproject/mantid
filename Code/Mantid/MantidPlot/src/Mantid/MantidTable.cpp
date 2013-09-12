@@ -61,6 +61,11 @@ void MantidTable::fillTable()
     return;
   }
 
+  // Make sure table is empty
+  setNumRows(0);
+  setNumCols(0);
+
+  // Resize to fit the new workspace
   setNumCols(static_cast<int>(m_ws->columnCount()));
   setNumRows(static_cast<int>(m_ws->rowCount()));
 
