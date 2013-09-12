@@ -191,6 +191,7 @@
 #include "MantidQtAPI/Message.h"
 
 #include "MantidQtMantidWidgets/ICatSearch.h"
+#include "MantidQtMantidWidgets/ICatSearchTwo.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -1233,6 +1234,7 @@ void ApplicationWindow::initMainMenu()
   icat->addAction(actionICatLogin);//Login menu item
   icat->addAction(actionMydataSearch);// my data search menu item
   icat->addAction(actionICatSearch);//search menu item
+  icat->addAction(actionICatSearchTwo); // new ICAT GUI menu item
   icat->addAction(actionAdvancedSearch); //advanced search menu item
   icat->addAction(actionICatLogout);//logout menu item
   disableActions();
@@ -13323,6 +13325,10 @@ void ApplicationWindow::createActions()
   actionICatLogin->setToolTip(tr("Catalog Login"));
   connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
 
+  actionICatSearchTwo = new QAction("Search",this);
+  actionICatSearchTwo->setToolTip(tr("Search data in archives."));
+  connect(actionICatSearchTwo, SIGNAL(activated()), this, SLOT(ICatSearchTwo()));
+
   actionICatSearch=new QAction("Basic Search",this);
   actionICatSearch->setToolTip(tr("Catalog Basic Search"));
   connect(actionICatSearch, SIGNAL(activated()), this, SLOT(ICatIsisSearch()));
@@ -17550,6 +17556,21 @@ void ApplicationWindow::panOnPlot()
 void ApplicationWindow::ICatLogin()
 {
   mantidUI->executeAlgorithm("CatalogLogin",1);
+}
+
+void ApplicationWindow::ICatSearchTwo()
+{
+  MdiSubWindow* usr_win = new MdiSubWindow(this);
+  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
+  QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearchTwo(usr_win);
+  if(icatsearch_interface)
+  {
+    setGeometry(usr_win,icatsearch_interface);
+  }
+  else
+  {
+    delete usr_win;
+  }
 }
 
 void ApplicationWindow::ICatIsisSearch()
