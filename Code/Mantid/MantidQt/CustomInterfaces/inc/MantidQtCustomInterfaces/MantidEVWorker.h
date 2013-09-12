@@ -170,8 +170,8 @@ public:
                     Mantid::Kernel::Matrix<double> & UB );
 
   /// Copy the oriented lattice from the peaks workspace to the ND workspace
-  bool copyLattice( const std::string & peaks_ws_name,
-                    const std::string & md_ws_name );               
+  bool copyLattice(const std::string & peaks_ws_name,
+                    const std::string & md_ws_name , const std::string &event_ws_name);
 
   /// Get Info about a Q-Vector from a PeaksWorkspace
   std::vector< std::pair< std::string, std::string > >

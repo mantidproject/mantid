@@ -260,7 +260,7 @@ namespace Mantid
         sumdenom += weight*obs_i*obs_i;
       }
 
-      Rfactor rfactor;
+      Rfactor rfactor(0., 0.);
       rfactor.Rp = (sumrpnom/sumrpdenom);
       rfactor.Rwp = std::sqrt(sumnom/sumdenom);
 

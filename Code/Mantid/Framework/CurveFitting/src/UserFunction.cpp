@@ -68,9 +68,10 @@ namespace Mantid
      */
     void UserFunction::setAttribute(const std::string& attName,const Attribute& value)
     {
+      IFunction::setAttribute(attName,value);
+
       if (attName != "Formula")
       {
-        IFunction::setAttribute(attName,value);
         return;
       }
 
@@ -91,12 +92,14 @@ namespace Mantid
       }
       catch(...)
       {
-        throw std::invalid_argument("Cannot parse expression " + m_formula);
+          // Formula may be edited by a GUI component
+          return;
       }
 
       if (!m_x_set)
       {
-        throw std::invalid_argument("Formula does not contain the x variable");
+          // Formula may be edited by a GUI component
+          return;
       }
 
 

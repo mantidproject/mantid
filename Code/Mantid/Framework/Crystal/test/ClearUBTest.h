@@ -7,6 +7,7 @@
 #include "MantidCrystal/ClearUB.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 using Mantid::Crystal::ClearUB;
 using namespace Mantid::MDEvents;
@@ -18,8 +19,22 @@ class ClearUBTest : public CxxTest::TestSuite
 
 private:
 
+  // Single return type
+  struct SingleReturnType
+  {
+    ExperimentInfo_sptr ExperimentInfo;
+    bool DidClear;
+  };
+
+  // Multiple return type
+  struct MultipleReturnType
+  {
+    MultipleExperimentInfos_sptr ExperimentInfos;
+    bool DidClear;
+  };
+
   // Helper method to create a matrix workspace.
-  std::string createMatrixWorkspace(bool withOrientedLattice = true)
+  std::string createMatrixWorkspace(const bool withOrientedLattice = true)
   {
     auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, 2);
     if(withOrientedLattice)
@@ -34,24 +49,25 @@ private:
   }
 
   // Helper method to create a MDHW
-  std::string createMDHistoWorkspace()
+  std::string createMDHistoWorkspace(const uint16_t nExperimentInfosToAdd = 2)
   {
     const std::string wsName = "TestWorkspace";
     auto ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
+    ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(new OrientedLattice(1.0,2.0,3.0, 90, 90,90));
 
-    ExperimentInfo_sptr experimentInfo1 = boost::make_shared<ExperimentInfo>();
-    experimentInfo1->mutableSample().setOrientedLattice(new OrientedLattice(1.0,2.0,3.0, 90, 90, 90));
-    ExperimentInfo_sptr experimentInfo2 = boost::make_shared<ExperimentInfo>();
-    experimentInfo2->mutableSample().setOrientedLattice(new OrientedLattice(1.0,2.0,3.0, 90, 90, 90));
+    for(uint16_t i = 1; i < nExperimentInfosToAdd; ++i)
+    {
+      ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
+      ws->addExperimentInfo(experimentInfo);
+      ws->getExperimentInfo(i)->mutableSample().setOrientedLattice(new OrientedLattice(1.0,2.0,3.0, 90, 90,90));
+    }
 
-    ws->addExperimentInfo(experimentInfo1);
-    ws->addExperimentInfo(experimentInfo2);
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
     return wsName;
   }
 
   // Execute the algorithm
-  ExperimentInfo_sptr doExecute(const std::string& wsName)
+  SingleReturnType doExecute(const std::string& wsName)
   {
     // Create and run the algorithm
     ClearUB alg;
@@ -64,11 +80,14 @@ private:
 
     //Check results
     auto expInfo = AnalysisDataService::Instance().retrieveWS<ExperimentInfo>(wsName);
-    return expInfo;
+    SingleReturnType output;
+    output.ExperimentInfo = expInfo;
+    output.DidClear = alg.getProperty("DoesClear");
+    return output;
   }
 
   // Execute the algorithm
-  MultipleExperimentInfos_sptr doExecuteMultiInfo(const std::string& wsName)
+  MultipleReturnType doExecuteMultiInfo(const std::string& wsName)
   {
     // Create and run the algorithm
     ClearUB alg;
@@ -81,7 +100,10 @@ private:
 
     //Check results
     auto expInfos = AnalysisDataService::Instance().retrieveWS<MultipleExperimentInfos>(wsName);
-    return expInfos;
+    MultipleReturnType output;
+    output.ExperimentInfos = expInfos;
+    output.DidClear = alg.getProperty("DoesClear");
+    return output;
   }
 
 public:
@@ -105,10 +127,12 @@ public:
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     TSM_ASSERT("OrientedLattice should be present!", ws->sample().hasOrientedLattice());
   
-    auto expInfo = doExecute(wsName);
+    auto output = doExecute(wsName);
+    auto expInfo = output.ExperimentInfo;
     
     TS_ASSERT( expInfo)
     TSM_ASSERT("OrientedLattice should be gone!", !expInfo->sample().hasOrientedLattice());
+    TSM_ASSERT("OutputFlag should indicate removal", output.DidClear);
 
     // Clean up.
     AnalysisDataService::Instance().remove(wsName);
@@ -119,7 +143,8 @@ public:
     // Name of the output workspace.
     const std::string wsName = createMDHistoWorkspace();
 
-    auto expInfo = doExecuteMultiInfo(wsName);
+    auto output = doExecuteMultiInfo(wsName);
+    auto expInfo = output.ExperimentInfos;
 
     TS_ASSERT( expInfo)
 
@@ -129,7 +154,7 @@ public:
     {
       TSM_ASSERT("OrientedLattice should be gone!", !expInfo->getExperimentInfo(i)->sample().hasOrientedLattice());
     }
-
+    TSM_ASSERT("OutputFlag should indicate removal", output.DidClear);
     // Clean up.
     AnalysisDataService::Instance().remove(wsName);
   }
@@ -142,12 +167,24 @@ public:
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
     TSM_ASSERT("No oriented lattice to begin with", !ws->sample().hasOrientedLattice());
 
-    auto expInfo = doExecute(wsName);
+    auto output = doExecute(wsName);
+    auto expInfo = output.ExperimentInfo;
 
     TS_ASSERT( expInfo)
     TSM_ASSERT("OrientedLattice should be gone!", !expInfo->sample().hasOrientedLattice());
 
     // Clean up.
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void test_throw_if_not_experimentinfo_workspace()
+  {
+    using Mantid::DataObjects::TableWorkspace;
+    Workspace_sptr inws = boost::make_shared<TableWorkspace>();
+    const std::string wsName = "tablews";
+    AnalysisDataService::Instance().addOrReplace(wsName, inws);
+
+    TSM_ASSERT_THROWS("Input workspace type is not derived from ExperimentInfo or MultipleExperimentInfo, so should throw.", doExecute(wsName), std::invalid_argument&);
     AnalysisDataService::Instance().remove(wsName);
   }
 

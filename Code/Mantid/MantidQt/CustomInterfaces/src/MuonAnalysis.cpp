@@ -20,6 +20,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/V3D.h"
@@ -125,16 +126,18 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.nextRun, SIGNAL(clicked()), this, SLOT(checkAppendingNextRun()));
 
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
-  m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
-  m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
-
   m_optionTab->initLayout();
-  m_fitDataTab->init();
-
-  setCurrentDataName(NOT_AVAILABLE);
-
   // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
   connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SIGNAL (showGraphs()));
+
+  m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
+  m_fitDataTab->init();
+
+  m_resultTableTab = new MuonAnalysisResultTableTab(m_uiForm);
+  connect(m_resultTableTab, SIGNAL(runPythonCode(const QString&, bool)),
+                      this, SIGNAL(runAsPythonScript(const QString&, bool)));
+
+  setCurrentDataName(NOT_AVAILABLE);
 
   // connect guess alpha
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked()));
@@ -1735,6 +1738,8 @@ void MuonAnalysis::updateFront()
       m_uiForm.frontAlphaNumber->setVisible(true);
 
       m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(m_pairToRow[index-numG],3)->text());
+
+      m_uiForm.frontAlphaNumber->setCursorPosition(0);
     }
     else
     {

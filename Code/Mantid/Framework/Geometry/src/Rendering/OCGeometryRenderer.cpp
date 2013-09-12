@@ -3,15 +3,17 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Quat.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <climits>
 
 // Squash a warning coming out of an OpenCascade header
 #ifdef __INTEL_COMPILER
   #pragma warning disable 191
 #endif
-
 #include "MantidGeometry/Rendering/OpenCascadeConfig.h"
+GCC_DIAG_OFF(conversion)
 #include <gp_Pnt.hxx>
+GCC_DIAG_ON(conversion)
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Face.hxx>

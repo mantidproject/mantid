@@ -59,6 +59,7 @@ class WorkspaceGroup;
 class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Workspace>
 {
  public:
+
   /** @name Extra notifications only applicable to the ADS */
   //@{
   /// GroupWorkspaces notification is send from GroupWorkspaces algorithm
@@ -132,15 +133,13 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
 
    /** @name Methods to work with workspace groups */
    //@{
-
    void addToGroup(const std::string& groupName, const std::string& wsName);
    void deepRemoveGroup(const std::string& name);
    void removeFromGroup(const std::string& groupName, const std::string& wsName);
-
    //@}
 
-   /// Create an info tree out of InfoNodes to describe the current state of the ADS.
-   Workspace::InfoNode *createInfoTree() const;
+   /// Return a lookup of the top level items
+   std::map<std::string,Workspace_sptr> topLevelItems() const;
 
 private:
    /// Checks the name is valid, throwing if not

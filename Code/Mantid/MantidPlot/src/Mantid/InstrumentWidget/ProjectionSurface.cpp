@@ -29,10 +29,8 @@ using Mantid::Kernel::V3D;
   * @param origin :: Defines the origin of the projection reference system (if applicable)
   * @param axis :: 
   */
-ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis):
+ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
     m_instrActor(rootActor),
-    m_pos(origin),
-    m_zaxis(axis),
     m_viewImage(NULL),
     m_pickImage(NULL),
     m_viewRect(),

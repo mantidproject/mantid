@@ -5,6 +5,7 @@
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
@@ -1307,6 +1308,7 @@ namespace MDEvents
     } // (for each box)
   }
   //-----------------------------------------------------------------------------------------------
+GCC_DIAG_OFF(array-bounds)
   /** Integrate the signal within a sphere; for example, to perform single-crystal
    * peak integration.
    * The CoordTransform object could be used for more complex shapes, e.g. "lentil" integration, as long
@@ -1433,9 +1435,13 @@ namespace MDEvents
             radiusTransform.apply(eventCenter, out);
             // add event to appropriate y channel
             size_t xchannel;
-            if (out[1] < 0) xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2)-1;
-            else xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2)-1;
-            if (xchannel < numSteps ) signal_fit[xchannel] += coordTable[k*nColumns];
+            if (out[1] < 0)
+              xchannel = static_cast<int>(out[1] / deltaQ - 0.5) + static_cast<int>(numSteps / 2)-1;
+            else
+              xchannel = static_cast<int>(out[1] / deltaQ + 0.5) + static_cast<int>(numSteps / 2)-1;
+
+            if (xchannel < numSteps )
+              signal_fit[xchannel] += coordTable[k*nColumns];
           }
         }
         //box->releaseEvents();
@@ -1459,7 +1465,6 @@ namespace MDEvents
         // Distance from center to the peak integration center
         coord_t out[nd];
         radiusTransform.apply(boxCenter, out);
-
         if (out[0] < std::sqrt(diagonalSquared*0.72 + radius*radius) && std::fabs(out[1]) < std::sqrt(diagonalSquared*0.72 + 0.25*length*length))
         {
           // If the center is closer than the size of the box, then it MIGHT be touching.
@@ -1490,6 +1495,8 @@ namespace MDEvents
     delete [] verticesContained;
     delete [] boxMightTouch;
   }
+GCC_DIAG_ON(array-bounds)
+
   /**
   Getter for the masking status of the gridded box.
   @return TRUE if ANY ONE of its referenced boxes is masked.

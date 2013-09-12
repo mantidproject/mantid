@@ -22,7 +22,11 @@ private:
   enum TestObjectType { NoChopper, WithChopper, NoAperture, WithAperture, NoDetShape, WithDetShape};
 
 public:
-
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static CachedExperimentInfoTest *createSuite() { return new CachedExperimentInfoTest(); }
+  static void destroySuite( CachedExperimentInfoTest *suite ) { delete suite; }
+  
   CachedExperimentInfoTest() : m_test_ei(12.1), m_test_ef(15.5), m_sourcePos(0.0,0.0,-10.0),
     m_chopperPos(0,0,-3.), m_aperturePos(0.,0.,-8.)
   {

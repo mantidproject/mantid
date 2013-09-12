@@ -55,8 +55,7 @@ namespace API
     virtual void clearMRU() const = 0;
 
   protected:
-      /// Create and return a new InfoNode describing this workspace.
-      virtual InfoNode *createInfoNode() const;
+      virtual const std::string toString() const;
   };
 
   ///shared pointer to the matrix workspace base class

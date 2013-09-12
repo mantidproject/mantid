@@ -366,7 +366,8 @@ void DiffractionFocussing2::execEvent()
   //Copy required stuff from it
   API::WorkspaceFactory::Instance().initializeFromParent(m_matrixInputW, out, true);
 
-  bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
+  MatrixWorkspace_const_sptr outputWS = getProperty("OutputWorkspace");
+  bool inPlace = ( m_matrixInputW == outputWS );
   if (inPlace)
     g_log.debug("Focussing EventWorkspace in-place.");
   g_log.debug() << nGroups << " groups found in .cal file (counting group 0).\n";

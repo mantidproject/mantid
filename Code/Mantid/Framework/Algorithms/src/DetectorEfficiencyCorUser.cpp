@@ -227,9 +227,13 @@ MantidVec DetectorEfficiencyCorUser::calculateEfficiency(double eff0,
 		MantidVec::iterator effOut_it = effOut.begin();
 		for (; effOut_it != effOut.end(); ++xIn_it, ++effOut_it) {
 			if (conditionForEnergy ) {
+        // cppcheck cannot see that this is used by reference by muparser
+        // cppcheck-suppress unreadVariable
 				e =  std::fabs(m_Ei + *xIn_it);
 			}
 			else {
+        // cppcheck cannot see that this is used by reference by muparser
+        // cppcheck-suppress unreadVariable
 				e =  std::fabs(m_Ei - *xIn_it);
 			}
 			double eff = p.Eval();

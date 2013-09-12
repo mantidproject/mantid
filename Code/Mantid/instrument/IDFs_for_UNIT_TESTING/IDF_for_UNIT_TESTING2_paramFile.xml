@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument="IDF_for_UNIT_TESTING2" date="blah...">
+<parameter-file instrument="IDF_for_UNIT_TESTING2" valid-from="blah...">
 
 <component-link name="nickel-holder" >
   <parameter name="fjols-test-paramfile"> <value val="2000.0" /> </parameter>

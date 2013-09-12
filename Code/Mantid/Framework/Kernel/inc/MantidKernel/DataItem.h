@@ -66,7 +66,7 @@ namespace Mantid
       /// Can this object be accessed from multiple threads safely
       virtual bool threadSafe() const = 0;
       /// Serializes the object to a string
-      virtual std::string toString() const = 0;
+      virtual const std::string toString() const = 0;
       //@}
 
     protected:

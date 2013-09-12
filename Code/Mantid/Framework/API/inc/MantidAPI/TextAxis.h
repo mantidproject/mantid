@@ -66,11 +66,10 @@ public:
   std::string label(const std::size_t& index)const;
   /// Set the label at the given index
   void setLabel(const std::size_t& index, const std::string& lbl);
-
- /// returns min value defined on axis
-  double getMin()const{return boost::lexical_cast<double>(m_values.front()) ; }
-   /// returns max value defined on axis
-  double getMax()const{return boost::lexical_cast<double>(m_values.back()); }
+  /// returns min value defined on axis
+  double getMin() const;
+  /// returns max value defined on axis
+  double getMax() const;
 private:
   /// Private, undefined copy assignment operator
   const TextAxis& operator=(const TextAxis&);

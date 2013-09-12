@@ -914,7 +914,7 @@ void FitDialog::chooseFolder()
 void FitDialog::loadPlugins()
 {
     d_plugins.clear();
-	typedef char* (*fitFunc)();
+    //typedef char* (*fitFunc)();
 
 	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
 	QString path = app->fitPluginsPath + "/";

@@ -1464,7 +1464,7 @@ private:
   QAction *actionShowScriptWindow, *actionShowScriptInterpreter, *actionIPythonConsole;
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
-  QAction *btnCursor, *btnSelect, *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
+  QAction *btnCursor, /* *btnSelect,*/ *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
   QAction *btnZoomIn, *btnZoomOut, *btnPointer, *btnLine, *btnArrow, *btnLabel;
   QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
   QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;

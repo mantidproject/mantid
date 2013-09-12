@@ -25,7 +25,7 @@ namespace MantidQt
     const QString QPeaksTableModel::FINAL_ENERGY("E_f");
     const QString QPeaksTableModel::TOF("TOF");
     const QString QPeaksTableModel::DSPACING = "DSpacing";
-    const QString QPeaksTableModel::INT = "Intens";
+    const QString QPeaksTableModel::INT = "Int";
     const QString QPeaksTableModel::SIGMINT = "SigInt";
     const QString QPeaksTableModel::INT_SIGINT("Int/SigInt");
     const QString QPeaksTableModel::BINCOUNT("BinCount");
@@ -373,10 +373,15 @@ namespace MantidQt
       const bool isSortable = m_sortableColumns[columnName];
       if(isSortable)
       {
-       // TODO raise event and propagate through to Proper presenter.
-       peaksSorted(columnName.toStdString(), order== Qt::AscendingOrder);
+        std::string rationalName(columnName.toStdString());
+        if (columnName == QPeaksTableModel::INT)
+          rationalName = "Intens";
+        else if (columnName == QPeaksTableModel::RUNNUMBER)
+          rationalName = "RunNumber";
+        // TODO raise event and propagate through to Proper presenter.
+        peaksSorted(rationalName, order== Qt::AscendingOrder);
 
-       emit layoutChanged(); //This should tell the view that the data has changed.
+        emit layoutChanged(); //This should tell the view that the data has changed.
       }
     }
   }

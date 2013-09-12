@@ -108,8 +108,7 @@ namespace Mantid
       API::WorkspaceGroup_sptr createGroupWorkspace();
 
       //Constructs the time channel (X) vector(s)     
-      std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes,
-          const int64_t& lengthIn);
+      std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes, const int64_t& lengthIn);
       /// loadinstrument Child Algorithm
       void runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr, double, double );
       /// loadinstrumentfromraw algorithm
@@ -165,7 +164,6 @@ namespace Mantid
       void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
           DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >);
 
-
       /// Has the spectrum_list property been set?
       bool m_list;
       /// Have the spectrum_min/max properties been set?
@@ -193,14 +191,11 @@ namespace Mantid
       /// The current value of the progress counter
       double m_prog;
 
-
       /// number of spectra
       specid_t m_numberOfSpectra;
 
       /// a vector holding the indexes of monitors
       std::vector<specid_t> m_monitordetectorList;
-
-
 
       /// boolean for list spectra options
       bool m_bmspeclist;
@@ -210,6 +205,17 @@ namespace Mantid
 
       /// A ptr to the log creator
       boost::scoped_ptr<ISISRunLogs> m_logCreator;
+
+      /// Search for the log files in the workspace, and output their names as a set.
+      std::list<std::string> searchForLogFiles(const std::string& fileName);
+      /// Extract the log name from the path to the specific log file.
+      std::string extractLogName(const std::string &path);
+      /// Checks if the file is an ASCII file
+      bool isAscii(const std::string& filenamePart);
+      /// if  alternate data stream named checksum exists for the raw file
+      bool adsExists(const std::string &pathToFile);
+      /// returns the list of log files from ADS checksum
+      std::set<std::string> getLogFilenamesfromADS(const std::string &pathToFile);
     };
 
   } // namespace DataHandling

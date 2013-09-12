@@ -25,10 +25,17 @@ MantidAbout::MantidAbout(QWidget *parent) : MantidQt::API::MantidDialog(parent)
   releasedate->setText(releaseDate);
 
   QString version(Mantid::Kernel::MantidVersion::version());
-  // Add on the SHA-1 to the version number here (but not in the more visible places)
-  version.append("-").append(Mantid::Kernel::MantidVersion::revision());
   QLabel* releaseversion = m_uiForm.release_versionvalue;
   releaseversion->setText(version);
+
+  QString release(Mantid::Kernel::MantidVersion::revision());
+  release.insert(0, "<p>");
+  release.append(" (<a href=\"http://github.com/mantidproject/mantid/commit/");
+  release.append(Mantid::Kernel::MantidVersion::revisionFull());
+  release.append("\">on github</a>)</p>");
+  QLabel* releaselabel = m_uiForm.revision_value;
+  releaselabel->setText(release);
+  releaselabel->setOpenExternalLinks(true);
 
   QLabel* builtusing_labelvalue = m_uiForm.builtusing_labelvalue;
   QString builtusing = "QtiPlot " + QString::number(maj_version) + "." + QString::number(min_version)

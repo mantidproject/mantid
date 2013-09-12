@@ -3,6 +3,9 @@
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/Memory.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+using namespace Mantid::API;
 
 class CreateWorkspaceTest : public CxxTest::TestSuite
 {
@@ -119,6 +122,26 @@ public:
 
     // Remove workspace
     Mantid::API::AnalysisDataService::Instance().remove("test_CreateWorkspace");
+  }
+
+  void testParenting()
+  {
+    MatrixWorkspace_sptr parent = WorkspaceCreationHelper::CreateEventWorkspace(1,1,1);
+    WorkspaceCreationHelper::AddTSPEntry(parent->mutableRun(),"ALogEntry",99.0);
+
+    Mantid::Algorithms::CreateWorkspace alg;
+    alg.initialize();
+    const std::string outWS = "testParenting";
+    alg.setPropertyValue("OutputWorkspace",outWS);
+    alg.setProperty<std::vector<double> >("DataX", std::vector<double>(2,1.1));
+    alg.setProperty<std::vector<double> >("DataY", std::vector<double>(2,1.1));
+    alg.setProperty("ParentWorkspace", parent);
+    TS_ASSERT( alg.execute() );
+
+    MatrixWorkspace_const_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWS);
+    TS_ASSERT( output->run().hasProperty("ALogEntry") );
+
+    AnalysisDataService::Instance().remove(outWS);
   }
 };
 

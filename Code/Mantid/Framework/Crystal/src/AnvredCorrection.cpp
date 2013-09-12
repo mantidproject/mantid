@@ -536,7 +536,6 @@ double AnvredCorrection::absor_sphere(double& twoth, double& wl)
 //  double power_ns = 2.4;                   // lower power needed to find
                                              // peaks in ARCS data with no
                                              // incident spectrum
-    double   lamda;
 
     double power = power_th;
 
@@ -554,7 +553,7 @@ double AnvredCorrection::absor_sphere(double& twoth, double& wl)
 
     for ( size_t i = 0; i < lamda_weight.size(); i++ )
     {
-      lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
+      double lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
       lamda_weight[i] *= (double)(1/std::pow(lamda,power));
     }
 

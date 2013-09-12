@@ -496,7 +496,6 @@ void Fit1D::exec()
 
   int iter = 0;
   int status;
-  double size; // for simplex algorithm
   double finalCostFuncVal;
   double dof = static_cast<double>(l_data.n - l_data.p);  // dof stands for degrees of freedom
 
@@ -536,7 +535,7 @@ void Fit1D::exec()
       if (status)  // break if error
         break;
 
-      size = gsl_multimin_fminimizer_size(simplexMinimizer);
+      double size = gsl_multimin_fminimizer_size(simplexMinimizer);
       status = gsl_multimin_test_size(size, 1e-2);
 	  prog.report();
     }

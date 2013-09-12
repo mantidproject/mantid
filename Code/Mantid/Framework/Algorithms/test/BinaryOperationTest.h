@@ -121,7 +121,7 @@ public:
 
   void testMaskedSpectraPropagation()
   {
-    const int nHist = 10,nBins=20;
+    const int nHist = 5,nBins=10;
     std::set<int64_t> masking;
     masking.insert(0);
     masking.insert(2);
@@ -176,8 +176,8 @@ public:
   BinaryOperation::BinaryOperationTable * do_test_buildBinaryOperationTable(std::vector< std::vector<int> > lhs, std::vector< std::vector<int> > rhs,
       bool expect_throw = false)
   {
-    EventWorkspace_sptr lhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 100, 1.0);
-    EventWorkspace_sptr rhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 100, 1.0);
+    EventWorkspace_sptr lhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(lhs, 50, 1.0);
+    EventWorkspace_sptr rhsWS = WorkspaceCreationHelper::CreateGroupedEventWorkspace(rhs, 50, 1.0);
     BinaryOperation::BinaryOperationTable * table = 0;
     Mantid::Kernel::Timer timer1;
     if (expect_throw)
@@ -267,20 +267,20 @@ public:
   }
 
 
-  void test_buildBinaryOperationTable_simpleLHS_by_groupedRHS_veryLarge()
+  void test_buildBinaryOperationTable_simpleLHS_by_groupedRHS_large()
   {
-    std::vector< std::vector<int> > lhs(16000), rhs(16);
-    for (int i=0; i<16000; i++)
+    std::vector< std::vector<int> > lhs(2000, std::vector<int>(1)), rhs(20, std::vector<int>(100));
+    for (int i=0; i<2000; i++)
     {
       // 1 detector per pixel in lhs
-      lhs[i].push_back(i);
-      // 10000 detectors in each on the rhs
-      rhs[i/1000].push_back(i);
+      lhs[i][0] = i;
+      // 1000 detectors in each on the rhs
+      rhs[i/100][i%100] = i;
     }
     BinaryOperation::BinaryOperationTable * table = do_test_buildBinaryOperationTable(lhs, rhs);
-    for (int i=0; i<16000; i++)
+    for (int i=0; i<2000; i++)
     {
-      TS_ASSERT_EQUALS( (*table)[i], i/1000);
+      TS_ASSERT_EQUALS( (*table)[i], i/100);
     }
   }
 

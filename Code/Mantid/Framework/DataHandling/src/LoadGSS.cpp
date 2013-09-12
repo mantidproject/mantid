@@ -125,17 +125,7 @@ namespace Mantid
       std::string wsTitle;
       std::string slogTitle;
       std::string instrumentname = "Generic";
-      bool slogtitleset = false;
       char filetype = 'x';
-
-      int nSpec = 0;
-      bool calslogx0 = true;
-      double bc4 = 0;
-      double bc3 = 0;
-
-      bool db1 = true;
-
-      bool multiplybybinwidth = false;
 
       std::ifstream input(filename.c_str(), std::ios_base::in);
 
@@ -153,6 +143,14 @@ namespace Mantid
 
         // 2. Loop all the lines
         bool isOutOfHead = false;
+        bool slogtitleset = false;
+        bool multiplybybinwidth = false;
+        bool db1 = true;      
+        int nSpec = 0;
+        bool calslogx0 = true;
+        double bc4 = 0;
+        double bc3 = 0;
+
         while (!input.eof() && input.getline(currentLine, 256))
         {
 

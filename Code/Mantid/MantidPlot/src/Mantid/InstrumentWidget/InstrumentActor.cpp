@@ -872,6 +872,53 @@ void InstrumentActor::BasisRotation(const Mantid::Kernel::V3D& Xfrom,
 }
 
 /**
+ * Calculate a rotation to look in a particular direction.
+ *
+ * @param eye :: A direction to look in
+ * @param up :: A vector showing the 'up' direction after the rotation. It doesn't have to be normal to eye
+ *   just non-collinear. If up is collinear to eye the actual 'up' direction is undefined.
+ * @param R :: The result rotation.
+ */
+void InstrumentActor::rotateToLookAt(const Mantid::Kernel::V3D &eye, const Mantid::Kernel::V3D &up, Mantid::Kernel::Quat &R)
+{
+    if ( eye.nullVector() )
+    {
+        throw std::runtime_error("The eye vector is null in InstrumentActor::rotateToLookAt.");
+    }
+
+    // Basis vectors of the OpenGL reference frame. Z points into the screen, Y points up.
+    const Mantid::Kernel::V3D X(1,0,0);
+    const Mantid::Kernel::V3D Y(0,1,0);
+    const Mantid::Kernel::V3D Z(0,0,1);
+
+    Mantid::Kernel::V3D x,y,z;
+    z = eye;
+    z.normalize();
+    y = up;
+    x = y.cross_prod(z);
+    if (x.nullVector())
+    {
+        // up || eye
+        if ( z.X() != 0.0 )
+        {
+            x.setY(1.0);
+        }
+        else if ( z.Y() != 0.0 )
+        {
+            x.setZ(1.0);
+        }
+        else
+        {
+            x.setX(1.0);
+        }
+    }
+    x.normalize();
+    y = z.cross_prod(x);
+
+    BasisRotation(x,y,z,X,Y,Z,R);
+}
+
+/**
  * Find the offsets in the spectrum's x vector of the bounds of integration.
  * @param wi :: The works[ace index of the spectrum.
  * @param imin :: Index of the lower bound: x_min == readX(wi)[imin]

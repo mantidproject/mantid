@@ -85,7 +85,6 @@ namespace MDAlgorithms
   template<typename MDE, size_t nd>
   void CloneMDWorkspace::doClone(const typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    std::string outWSName = getPropertyValue("OutputWorkspace");
     Progress prog(this, 0.0, 10.0, 100);
     BoxController_sptr bc = ws->getBoxController();
 
@@ -125,7 +124,6 @@ namespace MDAlgorithms
       alg->setPropertyValue("Filename", outFilename);
       alg->setPropertyValue("FileBackEnd", "1");
       alg->setPropertyValue("Memory", "0"); //TODO: How much memory?
-      alg->setPropertyValue("OutputWorkspace", outWSName);
       alg->executeAsChildAlg();
 
       // Set the output workspace to this

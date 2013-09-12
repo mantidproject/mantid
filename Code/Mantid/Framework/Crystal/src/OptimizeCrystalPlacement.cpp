@@ -578,9 +578,6 @@ namespace Mantid
 
     }
 
-      std::string OutputPeaksName= getPropertyValue("ModifiedPeaksWorkspace");
-
-      setPropertyValue( "ModifiedPeaksWorkspace", OutputPeaksName);
       setProperty( "ModifiedPeaksWorkspace", OutPeaks);
       setProperty("nIndexed", nIndexed);
       g_log.notice()<< "Number indexed after optimization= " << nIndexed << " at tolerance = " << HKLintOffsetMax << std::endl;

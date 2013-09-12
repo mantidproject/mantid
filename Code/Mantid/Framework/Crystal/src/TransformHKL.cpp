@@ -46,6 +46,21 @@ namespace Crystal
   {
   }
 
+  const std::string TransformHKL::name() const
+  {
+    return "TransformHKL";
+  }
+
+  int TransformHKL::version() const
+  {
+    return 1;
+  }
+
+  const std::string TransformHKL::category() const
+  {
+    return "Crystal";
+  }
+
   //--------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
   void TransformHKL::initDocs()
@@ -188,9 +203,10 @@ namespace Crystal
     double average_error = IndexingUtils::IndexingError( UB, miller_indices, q_vectors );
 
     // Tell the user what happened.
-    g_log.notice() << "Transformed Miller indices on previously valid indexed Peaks. " << std::endl;
-    g_log.notice() << "Set hkl to 0,0,0 on peaks previously indexed out of tolerance. " << std::endl;
-    g_log.notice() << "Now, " << num_indexed << " are indexed with average error " << average_error << std::endl;
+    g_log.notice() << o_lattice << "\n";
+    g_log.notice() << "Transformed Miller indices on previously valid indexed Peaks.\n";
+    g_log.notice() << "Set hkl to 0,0,0 on peaks previously indexed out of tolerance.\n";
+    g_log.notice() << "Now, " << num_indexed << " are indexed with average error " << average_error << "\n";
 
     // Save output properties
     this->setProperty("NumIndexed", num_indexed);

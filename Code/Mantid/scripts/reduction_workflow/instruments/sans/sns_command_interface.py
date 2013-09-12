@@ -33,7 +33,7 @@ from hfir_command_interface import Stitch
 from mantid.api import AlgorithmManager
 from mantid.kernel import Logger
 import mantid.simpleapi as simpleapi
-from reduction.find_data import find_data
+from reduction_workflow.find_data import find_data
 
 def EQSANS(keep_events=False, property_manager=None):
     Clear()

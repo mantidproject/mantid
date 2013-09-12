@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <vector>
 
 namespace Mantid
 {
@@ -50,6 +51,17 @@ namespace Mantid
     GSLVector(const size_t n)
     {
       m_vector = gsl_vector_alloc(n);
+    }
+
+    /// Construct from a std vector
+    /// @param v :: A std vector.
+    GSLVector(const std::vector<double>& v)
+    {
+      m_vector = gsl_vector_alloc( v.size() );
+      for(size_t i = 0; i < v.size(); ++i)
+      {
+          set( i, v[i] );
+      }
     }
 
     /// Copy constructor.

@@ -1,5 +1,6 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/PythonObjectInstantiator.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
 
@@ -62,6 +63,7 @@ namespace
   // Python algorithm registration mutex in anonymous namespace (aka static)
   Poco::Mutex PYALG_REGISTER_MUTEX;
 
+GCC_DIAG_OFF(cast-qual)
   /**
    * A free function to subscribe a Python algorithm into the factory
    * @param obj :: A Python object that should either be a class type derived from PythonAlgorithm
@@ -93,6 +95,7 @@ namespace
 
   ///@endcond
 }
+GCC_DIAG_ON(cast-qual)
 
 void export_AlgorithmFactory()
 {

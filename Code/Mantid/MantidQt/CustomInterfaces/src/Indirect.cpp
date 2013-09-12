@@ -1,5 +1,5 @@
 #include "MantidQtCustomInterfaces/Indirect.h"
-
+#include "MantidQtCustomInterfaces/Transmission.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtCustomInterfaces/Background.h"
 
@@ -54,8 +54,8 @@ Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) :
   m_calCalR1(NULL), m_calCalR2(NULL), m_calResR1(NULL),
   m_calCalCurve(NULL), m_calResCurve(NULL),
   // Null pointers - Diagnostics Tab
-  m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL)
-
+  m_sltPlot(NULL), m_sltR1(NULL), m_sltR2(NULL), m_sltDataCurve(NULL),
+  m_tab_trans(new Transmission(m_uiForm,this))
 {
   // Constructor
 }
@@ -94,9 +94,12 @@ void Indirect::initLayout()
   connect(m_uiForm.ind_runFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
 
   // "Calibration" tab
+  connect(m_uiForm.cal_leRunNo, SIGNAL(filesFound()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(calPlotEnergy()));
   connect(m_uiForm.cal_ckRES, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
+  connect(m_uiForm.cal_ckIntensityScaleMultiplier, SIGNAL(toggled(bool)), this, SLOT(intensityScaleMultiplierCheck(bool)));
+  connect(m_uiForm.cal_leIntensityScaleMultiplier, SIGNAL(textChanged(const QString &)), this, SLOT(calibValidateIntensity(const QString &)));
 
   // "SofQW" tab
   connect(m_uiForm.sqw_ckRebinE, SIGNAL(toggled(bool)), this, SLOT(sOfQwRebinE(bool)));
@@ -106,13 +109,19 @@ void Indirect::initLayout()
   connect(m_uiForm.sqw_pbPlotInput, SIGNAL(clicked()), this, SLOT(sOfQwPlotInput()));
 
   // "Slice" tab
+  connect(m_uiForm.slice_inputFile, SIGNAL(filesFound()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_pbPlotRaw, SIGNAL(clicked()), this, SLOT(slicePlotRaw()));
   connect(m_uiForm.slice_ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(sliceCalib(bool)));
+
+  // "Transmission" tab
+  connect(m_tab_trans, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
 
   // create validators
   m_valInt = new QIntValidator(this);
   m_valDbl = new QDoubleValidator(this);
   m_valPosDbl = new QDoubleValidator(this);
+
+
   // Tolerance chosen arbitrarily. Avoids dividing by zero elsewhere.
   const double tolerance = 0.00001;
   m_valPosDbl->setBottom(tolerance);
@@ -127,6 +136,7 @@ void Indirect::initLayout()
   m_uiForm.rebin_leEHigh->setValidator(m_valDbl);
 
   m_uiForm.leScaleMultiplier->setValidator(m_valPosDbl);
+  m_uiForm.cal_leIntensityScaleMultiplier->setValidator(m_valDbl);
   
   m_uiForm.sqw_leELow->setValidator(m_valDbl);
   m_uiForm.sqw_leEWidth->setValidator(m_valDbl);
@@ -139,6 +149,8 @@ void Indirect::initLayout()
   // set default values for save formats
   m_uiForm.save_ckSPE->setChecked(false);
   m_uiForm.save_ckNexus->setChecked(true);
+
+  m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
 
   // nudge "Background Removal" button to display whether it is
   // set to "OFF" or "ON".
@@ -173,6 +185,8 @@ void Indirect::helpClicked()
     url += "Diagnostics";
   else if ( tabName == "S(Q, w)" )
     url += "SofQW";
+  else if (tabName == "Transmission")
+    url += "Transmission";
   QDesktopServices::openUrl(QUrl(url));
 }
 /**
@@ -198,6 +212,10 @@ void Indirect::runClicked()
   else if ( tabName == "S(Q, w)" )
   {
     sOfQwClicked();
+  }
+  else if (tabName == "Transmission")
+  {
+    m_tab_trans->runTab();
   }
 }
 
@@ -547,6 +565,12 @@ QString Indirect::savePyCode()
 */
 void Indirect::createRESfile(const QString& file)
 {
+  QString scaleFactor("None");
+  if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
+  {
+    scaleFactor = m_uiForm.cal_leIntensityScaleMultiplier->text();
+  }
+
   QString pyInput =
     "from IndirectEnergyConversion import resolution\n"
     "iconOpt = { 'first': " +QString::number(m_calDblMng->value(m_calResProp["SpecMin"]))+
@@ -569,7 +593,7 @@ void Indirect::createRESfile(const QString& file)
     "background = " + background + "\n"
     "rebinParam = '" + rebinParam + "'\n"
     "file = " + file + "\n"
-    "resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot)\n";
+    "resolution(file, iconOpt, rebinParam, background, instrument, analyser, reflection, plotOpt = plot, factor="+scaleFactor+")\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 
@@ -1408,6 +1432,22 @@ void Indirect::scaleMultiplierCheck(bool state)
   m_uiForm.leScaleMultiplier->setEnabled(state);
 }
 
+void Indirect::intensityScaleMultiplierCheck(bool state)
+{
+  m_uiForm.cal_leIntensityScaleMultiplier->setEnabled(state);
+}
+
+void Indirect::calibValidateIntensity(const QString & text)
+{
+  if(!text.isEmpty())
+  {
+    m_uiForm.cal_valIntensityScaleMultiplier->setText(" ");
+  }
+  else
+  {
+    m_uiForm.cal_valIntensityScaleMultiplier->setText("*");
+  }
+}
 
 
 void Indirect::useCalib(bool state)
@@ -1441,8 +1481,15 @@ void Indirect::calibCreate()
         + m_calCalProp["PeakMin"]->valueText() + ","
         + m_calCalProp["PeakMax"]->valueText() + ")\n"
       "calib.set_analyser('" + m_uiForm.cbAnalyser->currentText() + "')\n"
-      "calib.set_reflection('" + m_uiForm.cbReflection->currentText() + "')\n"
-      "calib.execute(None, None)\n"
+      "calib.set_reflection('" + m_uiForm.cbReflection->currentText() + "')\n";
+
+    //scale values by arbitrary scalar if requested
+    if(m_uiForm.cal_ckIntensityScaleMultiplier->isChecked())
+    {
+      reducer += "calib.set_intensity_scale("+m_uiForm.cal_leIntensityScaleMultiplier->text()+")\n";
+    }
+
+    reducer += "calib.execute(None, None)\n"
       "result = calib.result_workspace()\n"
       "print result\n"
       "SaveNexus(InputWorkspace=result, Filename=result+'.nxs')\n";
@@ -1490,9 +1537,8 @@ void Indirect::calPlotRaw()
 {
   QString filename = m_uiForm.cal_leRunNo->getFirstFilename();
   
-  if ( filename == "" )
+  if ( filename.isEmpty() )
   {
-    showInformationBox("Please enter a run number.");
     return;
   }
     
@@ -1548,6 +1594,7 @@ void Indirect::calPlotEnergy()
     showInformationBox("Run number not valid.");
     return;
   }
+
   QString files = "[r'" + m_uiForm.cal_leRunNo->getFilenames().join("', r'") + "']";
   QString pyInput =
     "from IndirectEnergyConversion import resolution\n"
@@ -1646,14 +1693,12 @@ void Indirect::sOfQwClicked()
         "filename = r'" +m_uiForm.sqw_inputFile->getFirstFilename() + "'\n"
         "(dir, file) = os.path.split(filename)\n"
         "(sqwInput, ext) = os.path.splitext(file)\n"
-        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n"
-        "cleanup = True\n"; 
+        "LoadNexus(Filename=filename, OutputWorkspace=sqwInput)\n";
     }
     else
     {
       pyInput +=
-        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n"
-        "cleanup = False\n";
+        "sqwInput = '" + m_uiForm.sqw_cbWorkspace->currentText() + "'\n";
     }
 
     // Create output name before rebinning
@@ -1663,10 +1708,7 @@ void Indirect::sOfQwClicked()
     {
       QString eRebinString = m_uiForm.sqw_leELow->text()+","+m_uiForm.sqw_leEWidth->text()+","+m_uiForm.sqw_leEHigh->text();
       pyInput += "Rebin(InputWorkspace=sqwInput, OutputWorkspace=sqwInput+'_r', Params='" + eRebinString + "')\n"
-        "if cleanup:\n"
-        "    DeleteWorkspace(sqwInput)\n"
-        "sqwInput += '_r'\n"
-        "cleanup = True\n";
+        "sqwInput += '_r'\n";
     }
     pyInput +=
       "efixed = " + m_uiForm.leEfixed->text() + "\n"
@@ -1678,10 +1720,6 @@ void Indirect::sOfQwClicked()
       pyInput += "SofQW2(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
     else if(m_uiForm.sqw_cbRebinType->currentText() == "Parallelepiped/Fractional Area (SofQW3)")
       pyInput += "SofQW3(InputWorkspace=sqwInput, OutputWorkspace=sqwOutput, QAxisBinning=rebin, EMode='Indirect', EFixed=efixed)\n";
-    
-    pyInput +=
-      "if cleanup:\n"
-      "    DeleteWorkspace(sqwInput)\n";
 
     if ( m_uiForm.sqw_ckSave->isChecked() )
     {

@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="facilities">
+    <xs:complexType>
+      <xs:choice maxOccurs="unbounded">
+        <xs:element name="facility">
+          <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+              <xs:element name="archive" minOccurs="0">
+                <xs:complexType>
+                  <xs:choice>
+                    <xs:element name="archiveSearch" maxOccurs="unbounded">
+                      <xs:complexType>
+                        <xs:attribute name="plugin"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="computeResource" minOccurs="0">
+                <xs:complexType>
+                  <xs:choice maxOccurs="unbounded">
+                    <xs:element name="baseURL" type="xs:string" />
+                    <xs:element name="configFileURL" type="xs:string" />
+                    <xs:element name="mpirunExecutable" type="xs:string" />
+                    <xs:element name="pythonExecutable" type="xs:string" />
+                  </xs:choice>
+                  <xs:attribute name="name"/>
+                  <xs:attribute name="type"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="catalog" minOccurs="0">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="name" type="xs:string" use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="soapEndPoint" minOccurs="0">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="url" type="xs:string" use="required" />
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="instrument" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:choice maxOccurs="unbounded">
+                    <xs:element name="zeropadding">
+                      <xs:complexType>
+                        <xs:attribute name="size" type="xs:int" use="required"/>
+                        <xs:attribute name="startRunNumber"/>
+                        <xs:attribute name="prefix" type="xs:string"/>
+                      </xs:complexType>
+                    </xs:element>
+                    <xs:element name="technique" maxOccurs="unbounded" type="xs:string"/>
+                    <xs:element name="livedata">
+                      <xs:complexType>
+                        <xs:attribute name ="address" type="xs:string" use="required"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:choice>
+                  <xs:attribute name="name" type="xs:string" use="required"/>
+                  <xs:attribute name="shortname" type="xs:string" use="optional"/>
+                  <xs:attribute name="beamline" type="xs:string" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="livedata" minOccurs="0">
+                <xs:complexType>
+                  <xs:attribute name="listener" type="xs:string" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+            <xs:attribute name="name"/>
+            <xs:attribute name="zeropadding"/>
+            <xs:attribute name="FileExtensions"/>
+            <xs:attribute name="delimiter"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

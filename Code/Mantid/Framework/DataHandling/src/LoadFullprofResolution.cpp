@@ -5,6 +5,7 @@ Load Fullprof resolution (.irf) file to TableWorkspace(s)
 *WIKI*/
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 
@@ -15,6 +16,13 @@ Load Fullprof resolution (.irf) file to TableWorkspace(s)
 #include <boost/algorithm/string/predicate.hpp>
 
 #include <fstream>
+
+/**
+  CHANGE:
+  1. Remove the 2nd output for bank information
+  2. Make the output to be a n(bank) + 1 column workspace
+
+  **/
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -27,9 +35,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-
   DECLARE_ALGORITHM(LoadFullprofResolution)
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -72,12 +78,10 @@ namespace DataHandling
     declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
 
     // Bank to import
-    declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is the first bank in the file.");
+    declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load. "
+                    "Default is all banks contained in input .irf file.");
 
-
-    // Type of output workspace
-    declareProperty("BankInformation", false, "If true, output workspace contains the bank information. "
-                    "Otherwise, output workspace contains profile parameters. ");
+    // declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is all banks in .irf file.");
 
     return;
   }
@@ -87,67 +91,87 @@ namespace DataHandling
     */
   void LoadFullprofResolution::exec()
   {
-    // 1. Get input
+    // Get input
     string datafile = getProperty("Filename");
-    int bankid = getProperty("Bank");
+    vector<int> outputbankids = getProperty("Banks");
 
-    // 2. Import data
+    // Import data
     vector<string> lines;
     loadFile(datafile, lines);
 
-    // 3. Examine bank information
-    vector<int> banks;
+    // Examine bank information
+    vector<int> vec_bankinirf;
     map<int, int> bankstartindexmap, bankendindexmap;
-    scanBanks(lines, banks, bankstartindexmap, bankendindexmap);
+    scanBanks(lines, vec_bankinirf, bankstartindexmap, bankendindexmap);
+    sort(vec_bankinirf.begin(), vec_bankinirf.end());
 
-    if (banks.empty())
+    for (size_t i = 0; i < vec_bankinirf.size(); ++i)
+      g_log.debug() << "Irf containing bank " << vec_bankinirf[i] << ".\n";
+
+    vector<int> vec_bankids; // bank IDs to output to table workspace
+
+    if (vec_bankinirf.empty())
     {
       throw runtime_error("No Bank is found in input file.");
     }
-
-    // 2-different functions
-    bool exportbankinfo = getProperty("BankInformation");
-    TableWorkspace_sptr outws;
-    if (exportbankinfo)
+    else if (outputbankids.size() == 0)
     {
-      // 4. Export bank information
-      outws = genInfoTableWorkspace(banks);
+      vec_bankids = vec_bankinirf;
     }
     else
     {
-      // 5. Parse .irf and export profile parameters
-      // a) Check whether input bank ID exists in .irf file
-      if (bankid != EMPTY_INT())
+      sort(outputbankids.begin(), outputbankids.end());
+      for (size_t i = 0; i < outputbankids.size(); ++i)
       {
-        // User has bank ID input
-        sort(banks.begin(), banks.end());
-        vector<int>::iterator fiter = lower_bound(banks.begin(), banks.end(), bankid);
-        if (fiter == banks.end() || *fiter != bankid)
+        int outputbankid = outputbankids[i];
+        if (outputbankid < 0)
         {
-          stringstream errmsg;
-          errmsg << "User input bank (ID) = " << bankid << " cannot be found in input .irf file "
-                 << datafile << ".\n";
-          errmsg << "In input .irf file, Bank ID ";
-          for (size_t i = 0; i < banks.size(); ++i)
-            errmsg << banks[i] << ", ";
-          errmsg << " are found.";
-          g_log.error(errmsg.str());
-          throw runtime_error(errmsg.str());
+          g_log.warning() << "Input bank ID (" << outputbankid << ") is negative.  It is not allowed and ignored. " << ".\n";
+        }
+        else
+        {
+          vector<int>::iterator fiter = lower_bound(vec_bankinirf.begin(), vec_bankinirf.end(), outputbankid);
+          if (fiter == vec_bankinirf.end() || *fiter != outputbankid)
+          {
+            // Specified bank ID does not exist.
+            stringstream errmsg;
+            errmsg << "Specified output bank (ID = " << outputbankid << ") cannot be found in input "
+                   << datafile << ", which includes bank : ";
+            for (size_t i = 0; i < vec_bankinirf.size(); ++i)
+            {
+              errmsg << vec_bankinirf[i];
+              if (i != vec_bankinirf.size()-1)
+                errmsg << ",";
+            }
+            g_log.error(errmsg.str());
+            throw runtime_error(errmsg.str());
+          }
+          else
+          {
+            vec_bankids.push_back(outputbankid);
+          }
         }
       }
-      else
+      if (vec_bankids.size() == 0)
       {
-        // Default bank ID.  Use the first appeared.
-        bankid = banks[0];
+        g_log.error("There is no valid specified bank IDs for output.");
+        throw runtime_error("There is no valid specified bank IDs for output.");
       }
+    }
 
-      // b) Parse to a map
+    // Parse .irf and export profile parameters
+    map<int, map<string, double> > bankparammap;
+    for (size_t i = 0; i < vec_bankids.size(); ++i)
+    {
+      int bankid = vec_bankids[i];
+      g_log.debug() << "Parse bank " << bankid << " of total " << vec_bankids.size() << ".\n";
       map<string, double> parammap;
       parseResolutionStrings(parammap, lines, bankid, bankstartindexmap[bankid], bankendindexmap[bankid]);
-
-      // c) Generate output workspaces
-      outws = genTableWorkspace(parammap);
+      bankparammap.insert(make_pair(bankid, parammap));
     }
+
+    // Generate output table workspace
+    TableWorkspace_sptr outws = genTableWorkspace(bankparammap);
 
     // 6. Output
     setProperty("OutputWorkspace", outws);
@@ -155,7 +179,8 @@ namespace DataHandling
     return;
   }
 
-  /** Load file
+  //----------------------------------------------------------------------------------------------
+  /** Load file to a vector of strings.  Each string is a non-empty line.
     * @param filename :: string for name of the .irf file
     * @param lines :: vector of strings for each non-empty line in .irf file
     */
@@ -197,11 +222,12 @@ namespace DataHandling
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Scan lines for bank IDs
     * @param lines :: vector of string of all non-empty lines in input file;
-    * @param banks :: output vector of integers for existing banks in .irf file;
-    * @param bankstartindexmap :: map to indicate the first line of each bank in vector lines.
-    * @param bankendindexmap :: map to indicate the last lie of each bank in vector lines
+    * @param banks :: [output] vector of integers for existing banks in .irf file;
+    * @param bankstartindexmap :: [output] map to indicate the first line of each bank in vector lines.
+    * @param bankendindexmap :: [output] map to indicate the last lie of each bank in vector lines
     */
   void LoadFullprofResolution::scanBanks(const vector<string>& lines, vector<int>& banks,
                                          map<int, int>& bankstartindexmap, map<int, int>& bankendindexmap)
@@ -255,7 +281,13 @@ namespace DataHandling
     return;
   }
 
-  /** Parse .irf file to a map
+  //----------------------------------------------------------------------------------------------
+  /** Parse one bank in a .irf file to a map of parameter name and value
+    * @param parammap :: [output] parameter name and value map
+    * @param lines :: [input] vector of lines from .irf file;
+    * @param bankid :: [input] ID of the bank to get parsed
+    * @param startlineindex :: [input] index of the first line of the bank in vector of lines
+    * @param endlineindex :: [input] index of the last line of the bank in vector of lines
     */
   void LoadFullprofResolution::parseResolutionStrings(map<string, double>& parammap, const vector<string>& lines,
                                                       int bankid, int startlineindex, int endlineindex)
@@ -267,8 +299,12 @@ namespace DataHandling
     g_log.debug() << "Found CWL = " << cwl << ", Bank ID = " << tmpbankid << "\n";
     if (bankid != tmpbankid)
     {
-      throw runtime_error("Scanned bank is not same as bank found in the specified region.");
+      stringstream errss;
+      errss << "Input bank ID (" << bankid << ") is not same as the bank ID (" << tmpbankid
+            << ") found in the specified region from input. ";
+      throw runtime_error(errss.str());
     }
+    parammap["CWL"] = cwl;
 
     double tempdb;
     for (int i = startlineindex+1; i <= endlineindex; ++i)
@@ -307,7 +343,7 @@ namespace DataHandling
       {
         vector<string> terms;
         boost::split(terms, line, boost::is_any_of(" "), boost::token_compress_on);
-        if (terms.size() != 2 || terms.size() != 4)
+        if (terms.size() != 2 && terms.size() != 4)
         {
           stringstream errmsg;
           errmsg << "Line TOFRG has " << terms.size() << " terms.  Different from 2/4 terms in definition.";
@@ -517,7 +553,9 @@ namespace DataHandling
     return;
   }
 
-
+  //----------------------------------------------------------------------------------------------
+  /** Parse a line containig bank information
+    */
   void LoadFullprofResolution::parseBankLine(string line, double& cwl, int& bankid)
   {
     // 1. Split along 'Bank'
@@ -560,47 +598,100 @@ namespace DataHandling
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Generate output workspace
     */
-  TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(map<string, double> parammap)
+  TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(map<int, map<string, double> > bankparammap)
   {
+    g_log.notice() << "Start to generate table workspace ...." << ".\n";
+
+    // Retrieve some information
+    size_t numbanks = bankparammap.size();
+    if (numbanks == 0)
+      throw runtime_error("Unable to generate a table from an empty map!");
+
+    map<int, map<string, double> >::iterator bankmapiter = bankparammap.begin();
+    size_t numparams = bankmapiter->second.size();
+
+    // vector of all parameter name
+    vector<string> vec_parname;
+    vector<int> vec_bankids;
+
+    map<string, double>::iterator parmapiter;
+    for (parmapiter = bankmapiter->second.begin(); parmapiter != bankmapiter->second.end(); ++parmapiter)
+    {
+      string parname = parmapiter->first;
+      vec_parname.push_back(parname);
+    }
+
+    for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end(); ++bankmapiter)
+    {
+      int bankid = bankmapiter->first;
+      vec_bankids.push_back(bankid);
+    }
+
+    g_log.debug() << "[DBx240] Number of imported parameters is " << numparams
+                  << ", Number of banks = " << vec_bankids.size() << "." << "\n";
+
+    // Create TableWorkspace
     TableWorkspace_sptr tablews(new TableWorkspace());
 
-    // 1. Set column
+    // set columns :
+    // Any 2 columns cannot have the same name.
     tablews->addColumn("str", "Name");
-    tablews->addColumn("double", "Value");
-
-    // 2. Add rows
-    size_t numparams = parammap.size();
-    g_log.debug() << "[DBx240] Number of imported parameters is " << numparams << "\n";
-
-    map<string, double>::iterator mapiter;
-    for (mapiter = parammap.begin(); mapiter != parammap.end(); ++mapiter)
+    for (size_t i = 0; i < numbanks; ++i)
     {
-      string parname = mapiter->first;
-      double parvalue = mapiter->second;
-
-      TableRow newrow = tablews->appendRow();
-      newrow << parname << parvalue;
+      stringstream colnamess;
+      int bankid = vec_bankids[i];
+      colnamess << "Value_" << bankid;
+      tablews->addColumn("double", colnamess.str());
     }
 
-    return tablews;
-  }
+    g_log.debug() << "Number of column = " << tablews->columnCount() << ".\n";
 
-  //----------------------------------------------------------------------------------------------
-  /** Generate bank information workspace
-    */
-  TableWorkspace_sptr LoadFullprofResolution::genInfoTableWorkspace(vector<int> banks)
-  {
-    TableWorkspace_sptr tablews(new TableWorkspace());
+    // add BANK ID row
+    TableRow newrow = tablews->appendRow();
+    newrow << "BANK";
+    for (size_t i = 0; i < numbanks; ++i)
+      newrow << static_cast<double>(vec_bankids[i]);
 
-    tablews->addColumn("int", "Bank");
+    g_log.debug() << "Number of row now = " << tablews->rowCount() << ".\n";
 
-    for (size_t i = 0; i < banks.size(); ++i)
+    // add profile parameter rows
+    for (size_t i = 0; i < numparams; ++i)
     {
       TableRow newrow = tablews->appendRow();
-      newrow << banks[i];
-    }
+
+      string parname = vec_parname[i];
+      newrow << parname;
+
+      for (size_t j = 0; j < numbanks; ++j)
+      {
+        int bankid = vec_bankids[j];
+
+        // Locate map of bank 'bankid'
+        map<int, map<string, double> >::iterator bpmapiter;
+        bpmapiter = bankparammap.find(bankid);
+        if (bpmapiter == bankparammap.end())
+        {
+          throw runtime_error("Bank cannot be found in map.");
+        }
+
+        // Locate parameter
+        map<string, double>::iterator parmapiter;
+        parmapiter = bpmapiter->second.find(parname);
+        if (parmapiter == bpmapiter->second.end())
+        {
+          throw runtime_error("Parameter cannot be found in a bank's map.");
+        }
+        else
+        {
+          double pvalue = parmapiter->second;
+          newrow << pvalue;
+        }
+
+      } // END(j)
+    } // END(i)
 
     return tablews;
   }

@@ -251,6 +251,8 @@ private slots:
   void checkList();
   /// Adds a warning message to the tab title
   void setLoggerTabTitleToWarn();
+  /// Handle selection of the transmission
+  void transSelectorChanged(int ); 
 
   
 private:

@@ -3,7 +3,7 @@ filename = 'fe_demo_30.sqw'
 ws_in ='fe_demo_30' 
 
 #Load an SQW file and internally convert to a Multidimensional event workspace (MDEW)
-if not mtd.workspaceExists(ws_in):
+if not mtd.doesExist(ws_in):
  LoadSQW(filename, OutputWorkspace=ws_in)
 
 #Bin the workspace in an axis aligned manner. Creates a Histogrammed MD workspace.

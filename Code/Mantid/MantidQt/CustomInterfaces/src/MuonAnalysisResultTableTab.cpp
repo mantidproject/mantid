@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/MuonAnalysisResultTableTab.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/TableRow.h"
 
 #include "MantidQtAPI/UserSubWindow.h"
 
@@ -629,8 +630,22 @@ void MuonAnalysisResultTableTab::createTable()
         }
       }
     }  
+
+    std::string tableName = getFileName();
+
     // Save the table to the ADS
-    Mantid::API::AnalysisDataService::Instance().addOrReplace(getFileName(),table);
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(tableName,table);
+
+    // Python code to show a table on the screen
+    std::stringstream code;
+    code << "found = False" << std::endl
+         << "for w in windows():" << std::endl
+         << "  if w.windowLabel() == '" << tableName << "':" << std::endl
+         << "    found = True; w.show(); w.setFocus()" << std::endl
+         << "if not found:" << std::endl
+         << "  importTableWorkspace('" << tableName << "', True)" << std::endl;
+
+    emit runPythonCode(QString::fromStdString(code.str()), false);
   }
   else
   {

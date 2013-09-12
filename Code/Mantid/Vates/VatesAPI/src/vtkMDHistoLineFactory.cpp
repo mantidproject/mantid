@@ -86,7 +86,6 @@ namespace Mantid
         signal->SetNumberOfComponents(1);
 
         UnstructuredPoint unstructPoint;
-        float signalScalar;
         const int nPointsX = nBinsX;
         Column column(nPointsX);
 
@@ -104,7 +103,7 @@ namespace Mantid
           progressUpdating.eventRaised(progressFactor * double(i));
           in[0] = minX + static_cast<coord_t>(i) * incrementX; //Calculate increment in x;
 
-          signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
+          float signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i));
 
           if (boost::math::isnan( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
           {

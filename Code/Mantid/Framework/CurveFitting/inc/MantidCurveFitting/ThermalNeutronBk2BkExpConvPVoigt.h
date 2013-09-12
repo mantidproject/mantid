@@ -2,15 +2,10 @@
 #define MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVOIGT_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IFunctionWithLocation.h"
-#include "MantidAPI/IFunctionMW.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidAPI/IPowderDiffPeakFunction.h"
 #include "MantidKernel/Logger.h"
-#include <complex>
 
-using namespace std;
+#include <complex>
 
 namespace Mantid
 {
@@ -43,8 +38,8 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-  class DLLExport ThermalNeutronBk2BkExpConvPVoigt : virtual public API::ParamFunction,public virtual API::IFunction1D,
-      virtual public API::IFunctionMW
+  // virtual public API::ParamFunction,public virtual API::IFunction1D, virtual public API::IFunctionMW
+  class DLLExport ThermalNeutronBk2BkExpConvPVoigt : public API::IPowderDiffPeakFunction
   {
   public:
     ThermalNeutronBk2BkExpConvPVoigt();
@@ -55,22 +50,23 @@ namespace CurveFitting
     virtual const std::string category() const { return "General";}
 
     /// Overwrite IPeakFunction base class methods
-    double centre()const;
-    double height()const;
-    double fwhm()const;
-    void setHeight(const double h);
+    /*
+    virtual double centre()const;
 
-    void setPeakRadius(const int& r);
+    virtual double fwhm()const;
+    virtual void setHeight(const double h);
+    virtual void setPeakRadius(const int& r);
+    */
 
     //--------------- ThermalNeutron peak function special ---------------------------------------
     /// Set Miller Indicies
-    void setMillerIndex(int h, int k, int l);
+    virtual void setMillerIndex(int h, int k, int l);
 
     /// Get Miller Index from this peak
-    void getMillerIndex(int& h, int &k, int &l);
+    virtual void getMillerIndex(int& h, int &k, int &l);
 
     /// Get peak parameters
-    double getPeakParameter(std::string);
+    virtual double getPeakParameter(std::string);
 
     /// Calculate peak parameters (alpha, beta, sigma2..)
     void calculateParameters(bool explicitoutput) const;
@@ -78,13 +74,15 @@ namespace CurveFitting
     // double &gamma, double &N,
 
     /// Core function to calcualte peak values for whole region
-    void functionLocal(vector<double>& out, const vector<double> &xValues) const;
+    // void functionLocal(vector<double>& out, const vector<double> &xValues) const;
 
     /// Set up the flag to show whether (from client) cell parameter value changed
+    /*
     void setUnitCellParameterValueChangeFlag(bool changed)
     {
       m_cellParamValueChanged = changed;
     }
+    */
 
     /// Override setting a new value to the i-th parameter
     void setParameter(size_t i, const double& value, bool explicitlySet=true);
@@ -92,12 +90,21 @@ namespace CurveFitting
     /// Override setting a new value to a parameter by name
     void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
 
-    void function1D(double* out, const double* xValues, const size_t nData)const;
+    /// Set peak's height
+    virtual void setHeight(const double h);
+    /// Get peak's height
+    virtual double height()const;
 
-  protected:
+    using IFunction1D::function;
+    virtual void function(std::vector<double>& out, const std::vector<double>& xValues) const;
+
+    /// Function you want to fit to.
+    virtual void function1D(double* out, const double* xValues, const size_t nData)const;
+
+  private:
     //----- Overwrite IFunction ------------------------------------------------
     /// Fuction local
-    virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
+    void functionLocal(double* out, const double* xValues, const size_t nData)const;
     /// Derivative
     virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
     /// Derivative
@@ -108,7 +115,6 @@ namespace CurveFitting
 
     static int s_peakRadius;
 
-  private:
     /// Static reference to the logger class
     static Kernel::Logger& g_log;
 
@@ -132,12 +138,6 @@ namespace CurveFitting
 
     //------------------------------------------  Variables --------------------------------------
 
-    /// Miller Indices
-    int mH;
-    int mK;
-    int mL;
-    bool mHKLSet;
-
     /// BackToBackExponential parameters
     mutable double m_Alpha;
     mutable double m_Beta;
@@ -145,21 +145,15 @@ namespace CurveFitting
     mutable double m_Gamma;
 
     /// FWHM
-    mutable double m_fwhm;
+    // mutable double m_fwhm;
 
     /// Centre
-    mutable double m_centre;
-    mutable double m_dcentre;
+    // mutable double m_centre;
+    // mutable double m_dcentre;
 
     /// Thermal/Epithermal neutron related
     mutable double m_eta;
     mutable double m_N;
-
-    /// Unit cell
-    mutable Geometry::UnitCell m_unitCell;
-
-    /// Unit cell size
-    double m_unitCellSize;
 
     /// Override setting a new value to the
 
@@ -170,16 +164,11 @@ namespace CurveFitting
     mutable bool m_cancel;
     /// Set if an exception is thrown, and not caught, within a parallel region
     mutable bool m_parallelException;
-    /// Reference to the logger class
-
-    /// Flag to show cell parameter value changed.
-    mutable bool m_cellParamValueChanged;
-
     /// Flag to show whether the unit cell has been calcualted
     mutable bool m_dspaceCalculated;
 
     /// Flag to indicate whether there is new parameter value set after calculating parameters
-    mutable bool m_newValueSet;
+    // mutable bool m_newValueSet;
     
 };
 

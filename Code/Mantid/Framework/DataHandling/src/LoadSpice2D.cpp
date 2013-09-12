@@ -273,7 +273,6 @@ namespace Mantid
       from_element<double>(trap_pos, sasEntryElem, "trap_y_76mm", fileName);
       if (trap_pos>highest_trap)
       {
-        highest_trap = trap_pos;
         beam_trap_diam = 76.2;
       }
 

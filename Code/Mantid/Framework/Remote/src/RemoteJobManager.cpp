@@ -389,7 +389,7 @@ RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::uploadFile( const st
   auto fileLen = infile.tellg();
   infile.seekg (0, std::ios_base::beg);
 
-  req.setContentLength( postData.str().size() + fileLen + strlen(httpLineEnd) + finalBoundaryLine.size());
+  req.setContentLength(postData.str().size() + static_cast<std::streamsize>(fileLen) + strlen(httpLineEnd) + finalBoundaryLine.size());
   //req.setContentLength( postData.str().size());
 
   std::ostream &postStream = session.sendRequest( req);

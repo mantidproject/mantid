@@ -165,7 +165,6 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
 
   // Get the original points
   vtkPoints *points = data->GetPoints();
-  double *inPoint;
   double outPoint[3];
   vtkPoints *newPoints = vtkPoints::New();
   newPoints->Allocate(points->GetNumberOfPoints());
@@ -226,7 +225,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
 
   for(int i = 0; i < points->GetNumberOfPoints(); i++)
   {
-    inPoint = points->GetPoint(i);
+    double *inPoint = points->GetPoint(i);
     vtkMatrix3x3::MultiplyPoint(skew, inPoint, outPoint);
     newPoints->InsertNextPoint(outPoint);
   }

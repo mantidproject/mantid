@@ -5,12 +5,6 @@
 // Includes
 //----------------------
 #include "ui_MuonAnalysis.h"
-
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/TableRow.h"
-
 #include <QTableWidget>
 
 namespace Ui
@@ -59,6 +53,10 @@ class MuonAnalysisResultTableTab : public QWidget
 public:
   MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm);
   void populateTables(const QStringList& wsList);
+
+signals:
+  /// Emitted to run some (usually simple) Python code
+  void runPythonCode(const QString& code, bool async);
 
 private slots:
   void helpResultsClicked();

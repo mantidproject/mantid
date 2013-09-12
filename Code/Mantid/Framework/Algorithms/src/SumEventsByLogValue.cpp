@@ -174,22 +174,24 @@ namespace Algorithms
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
-    // For now, no errors. Do we need them?
 
     // Create a table workspace to hold the sum.
     ITableWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().createTable();
     auto logValues = outputWorkspace->addColumn("int",m_logName);
     auto counts = outputWorkspace->addColumn("int","Counts");
+    auto errors = outputWorkspace->addColumn("double","Error");
     outputWorkspace->setRowCount(xLength); // One row per log value across the full range
     // Set type for benefit of MantidPlot
     logValues->setPlotType(1); // X
     counts->setPlotType(2);    // Y
+    errors->setPlotType(5);    // E
 
     // Transfer the results to the table
     for ( int i = 0; i < xLength; ++i )
     {
       logValues->cell<int>(i) = minVal+i;
       counts->cell<int>(i) = Y[i];
+      errors->cell<double>(i) = std::sqrt(Y[i]);
     }
 
     // Columns for normalisation: monitors (if available), time & proton charge

@@ -20,6 +20,8 @@
  * warnings easily.
  */
 
+#include "MantidKernel/WarningSuppressions.h"
+
 #ifdef _MSC_VER
   #pragma warning(push)
   #pragma warning(disable:4244)
@@ -27,14 +29,17 @@
   #pragma warning(disable:4250)
   #pragma warning(disable:4005)
   #pragma warning(disable:4503)
-#elif defined __GNUC__ && !(defined(__INTEL_COMPILER))
-  #pragma GCC diagnostic ignored "-Wconversion"
-  #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-  #pragma GCC diagnostic ignored "-Wunused-parameter"
-  #pragma GCC diagnostic ignored "-Wtype-limits"
-  #pragma GCC diagnostic ignored "-Wunused-value"
-  #pragma GCC diagnostic ignored "-Wstrict-aliasing"
-  #pragma GCC diagnostic ignored "-Wuninitialized"
+#endif
+
+GCC_DIAG_OFF(conversion)
+GCC_DIAG_OFF(missing-field-initializers)
+GCC_DIAG_OFF(unused-parameter)
+GCC_DIAG_OFF(type-limits)
+GCC_DIAG_OFF(unused-value)
+GCC_DIAG_OFF(strict-aliasing)
+GCC_DIAG_OFF(uninitialized)
+#if GCC_VERSION >= 40800 // 4.8.0
+  GCC_DIAG_OFF(unused-local-typedefs)
 #endif
 
 #include "boostpython/converter/arg_to_python_base.cpp"

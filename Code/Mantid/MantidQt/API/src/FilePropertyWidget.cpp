@@ -94,20 +94,29 @@ namespace API
   /** For file dialogs
    *
    * @param exts :: vector of extensions
+   * @param defaultExt :: default extension to use
    * @return a string that filters files by extenstions
    */
-  QString getFileDialogFilter(const std::set<std::string> & exts)
+  QString getFileDialogFilter(const std::set<std::string>& exts, const std::string& defaultExt)
   {
-    QString filter;
+    QString filter("");
+
+    if( !defaultExt.empty() )
+    {
+      filter.append(QString::fromStdString(defaultExt) + " (*" + QString::fromStdString(defaultExt) + ");;");
+    }
+
     if( !exts.empty() )
     {
       // --------- Load a File -------------
-      filter = "";
       std::set<std::string>::const_iterator iend = exts.end();
       // Push a wild-card onto the front of each file suffix
       for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
       {
-        filter.append(QString::fromStdString(*itr) + " (*" + QString::fromStdString(*itr) + ");;");
+        if( (*itr) != defaultExt )
+        {
+          filter.append(QString::fromStdString(*itr) + " (*" + QString::fromStdString(*itr) + ");;");
+        }
       }
       filter.trimmed();
     }
@@ -129,6 +138,7 @@ namespace API
 
     //The allowed values in this context are file extensions
     std::set<std::string> exts = prop->allowedValues();
+    std::string defaultExt = prop->getDefaultExt();
 
     /* MG 20/07/09: Static functions such as these that use native Windows and MAC dialogs
        in those environments are alot faster. This is unforunately at the expense of
@@ -137,14 +147,13 @@ namespace API
     QString filename;
     if( prop->isLoadProperty() )
     {
-      QString filter = getFileDialogFilter(exts);
+      QString filter = getFileDialogFilter(exts, defaultExt);
       filename = QFileDialog::getOpenFileName(NULL, "Open file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
     }
     else if ( prop->isSaveProperty() )
     {
       // --------- Save a File -------------
       //Have each filter on a separate line with the default as the first
-      std::string defaultExt = prop->getDefaultExt();
       QString filter;
       if( !defaultExt.empty() )
       {
@@ -220,7 +229,7 @@ namespace API
       dynamic_cast< Mantid::API::MultipleFileProperty* >( baseProp );
     if( !prop ) return QStringList();
 
-    QString filter = getFileDialogFilter(prop->getExts());
+    QString filter = getFileDialogFilter(prop->getExts(), prop->getDefaultExt());
     QStringList files = QFileDialog::getOpenFileNames(NULL, "Open Multiple Files", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter);
 
     return files;

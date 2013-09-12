@@ -84,7 +84,7 @@ namespace MDAlgorithms
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("RHSWorkspace", "", Direction::Input), "Input MD Histo Workspace");
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("LHSWorkspace", "", Direction::Input), "Input MD Histo Workspace");
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspace", "", Direction::Output), "Input MD Histo Workspace");
-    auto overlap_validator = new CompositeValidator();
+    auto overlap_validator = boost::make_shared<CompositeValidator>();
     overlap_validator->add(boost::make_shared<BoundedValidator<double> >(0.0, 1.0));
     overlap_validator->add(boost::make_shared<MandatoryValidator<double> >());    
 

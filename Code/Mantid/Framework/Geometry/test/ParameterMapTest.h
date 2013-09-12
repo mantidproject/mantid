@@ -51,6 +51,53 @@ public:
      TS_ASSERT_EQUALS(ParameterMap::rotz(),"rotz");
   }
 
+  void test_Equality_Operator()
+  {
+    const std::string name("TestName");
+    const double value(5.1);
+   
+    ParameterMap pmapA;
+    ParameterMap pmapB;
+    // Empty
+    TS_ASSERT_EQUALS(pmapA,pmapB);
+    
+    pmapA.addDouble(m_testInstrument.get(), name, value);
+    // Map equals itself
+    TS_ASSERT_EQUALS(pmapA,pmapA);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapB);
+
+    // Same name/value/component
+    pmapB.addDouble(m_testInstrument.get(), name, value);
+    // Now equal
+    TS_ASSERT_EQUALS(pmapA,pmapB);
+
+    ParameterMap pmapC;
+    // Same name/value different component
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    pmapC.addDouble(comp.get(), name, value);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapC);
+
+    // Same name/component different value
+    ParameterMap pmapD;
+    pmapD.addDouble(m_testInstrument.get(), name, value + 1.0);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapD);
+
+    // Same value/component different name
+    ParameterMap pmapE;
+    pmapE.addDouble(m_testInstrument.get(), name + "_differ", value);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapE);
+
+    //Different type
+    ParameterMap pmapF;
+    pmapF.addInt(m_testInstrument.get(), name, 5);
+    // Differs from other
+    TS_ASSERT_DIFFERS(pmapA,pmapF);
+  }
+
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In()
   {
     // Add a parameter for the first component of the instrument
@@ -105,6 +152,18 @@ public:
     pmap.add<int>(type, m_testInstrument.get(),name,value);
     TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pInt()), true);
     TS_ASSERT_EQUALS(pmap.contains(m_testInstrument.get(), name, ParameterMap::pDouble()), false);
+  }
+
+  void testMap_Contains_Parameter()
+  {
+    ParameterMap pmap;
+    const std::string name("NewValue");
+    pmap.addInt(m_testInstrument.get(), name, 1);
+    auto param = pmap.get(m_testInstrument.get(), name);
+    
+    TS_ASSERT(pmap.contains(m_testInstrument.get(), *param));
+    auto empty = Mantid::Geometry::ParameterFactory::create("int","testparam");
+    TS_ASSERT(!pmap.contains(m_testInstrument.get(), *empty));
   }
 
   void testParameter_Name_Matching_Is_Case_Insensitive()

@@ -119,14 +119,16 @@ public:
     //TS_ASSERT_EQUALS( outWS->columnCount(), 4 );
     TS_ASSERT_EQUALS( outWS->Int(0,0), 1 );
     TS_ASSERT_EQUALS( outWS->Int(0,1), 270 );
+    TS_ASSERT_EQUALS( outWS->Double(0,2), std::sqrt(270.0) );
     TS_ASSERT_EQUALS( outWS->Int(1,0), 2 );
     TS_ASSERT_EQUALS( outWS->Int(1,1), 30 );
+    TS_ASSERT_EQUALS( outWS->Double(1,2), std::sqrt(30.0) );
 
     // Check the times & the proton charge
-    TS_ASSERT_EQUALS( outWS->Double(0,2), 89.0 );
-    TS_ASSERT_EQUALS( outWS->Double(1,2), 10.0 );
-    TS_ASSERT_EQUALS( outWS->Double(0,3), 90.0E7 );
-    TS_ASSERT_EQUALS( outWS->Double(1,3), 10.0E7 );
+    TS_ASSERT_EQUALS( outWS->Double(0,3), 89.0 );
+    TS_ASSERT_EQUALS( outWS->Double(1,3), 10.0 );
+    TS_ASSERT_EQUALS( outWS->Double(0,4), 90.0E7 );
+    TS_ASSERT_EQUALS( outWS->Double(1,4), 10.0E7 );
     // Save more complex tests for a system test
   }
 
@@ -191,9 +193,9 @@ public:
     std::vector<int> index;
     std::vector<double> dbl1, dbl2;
     DateAndTime startTime("2010-01-01T00:00:00");
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 100; ++i)
     {
-      times.push_back(startTime + i*100.0);
+      times.push_back(startTime + i*10.0);
       index.push_back(i);
       dbl1.push_back(i*0.1);
       dbl2.push_back(6.0);

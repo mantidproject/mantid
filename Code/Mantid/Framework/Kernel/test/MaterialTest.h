@@ -7,10 +7,9 @@
 
 #include "MantidKernel/Material.h"
 #include "MantidKernel/NeutronAtom.h"
-#include "MantidKernel/NexusTestHelper.h"
+#include "MantidTestHelpers/NexusTestHelper.h"
 
 using Mantid::Kernel::Material;
-using Mantid::Kernel::NexusTestHelper;
 
 class MaterialTest: public CxxTest::TestSuite
 {

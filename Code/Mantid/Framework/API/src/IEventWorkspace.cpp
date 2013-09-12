@@ -17,26 +17,26 @@ namespace API
 {
 
 /**
- * @return :: A pointer to the created info node.
  */
-API::Workspace::InfoNode *IEventWorkspace::createInfoNode() const
+const std::string IEventWorkspace::toString() const
 {
-    auto node = MatrixWorkspace::createInfoNode();
-    std::string extra("");
-    switch ( getEventType() )
-    {
-    case WEIGHTED:
-      extra = " (weighted)";
-      break;
-    case WEIGHTED_NOTIME:
-      extra = " (weighted, no times)";
-      break;
-    case TOF:
-      extra = "";
-      break;
-    }
-    node->addLine( "Events: " + boost::lexical_cast<std::string>(getNumberEvents()) + extra );
-    return node;
+  std::ostringstream os;
+  os << MatrixWorkspace::toString() << "\n";
+
+  os << "Events: " + boost::lexical_cast<std::string>(getNumberEvents());
+  switch ( getEventType() )
+  {
+  case WEIGHTED:
+    os << " (weighted)\n";
+    break;
+  case WEIGHTED_NOTIME:
+    os << " (weighted, no times)\n";
+    break;
+  case TOF:
+    os << "\n";
+    break;
+  }
+  return os.str();
 }
 
 }
