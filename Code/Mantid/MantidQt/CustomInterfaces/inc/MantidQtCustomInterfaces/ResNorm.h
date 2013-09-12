@@ -15,9 +15,14 @@ namespace MantidQt
 		public:
 			ResNorm(QWidget * parent = 0);
 
+		private slots:
+			/// Handle when the vanadium input is ready
+			void handleVanadiumInputReady(const QString& filename);
+
 		private:
-			virtual void help();
-			virtual void validate();
+			/// Inherited methods from IndirectBayesTab
+			virtual QString help() { return "ResNorm"; };
+			virtual bool validate();
 			virtual void run();
 	
 			//The ui form

@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 
-#include "MantidKernel/System.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QMap>
 #include <QtDoublePropertyManager>
@@ -56,13 +56,28 @@ namespace MantidQt
 			IndirectBayesTab(QWidget * parent = 0);
 			~IndirectBayesTab();
 
-			virtual void help() = 0;
-			virtual void validate() = 0;
+			QString tabHelpURL();
+
+			virtual QString help() = 0;
+			virtual bool validate() = 0;
 			virtual void run() = 0;
 
+		signals:
+			/// Send signal to parent window to execute python script
+			void executePythonScript(const QString& pyInput, bool output);
+
 		protected:
+			/// Function to plot a workspace to the miniplot using a workspace name
+			void plotMiniPlot(const QString& workspace, size_t index);
+			/// Function to plot a workspace to the miniplot using a workspace pointer
+			void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex);
+			/// Function to run a string as python code
+			void runPythonScript(const QString& pyInput);
+
 			/// Plot of the input
 			QwtPlot* m_plot;
+			/// Curve on the plot
+			QwtPlotCurve* m_curve;
 			/// Tree of the properties
 			QtTreePropertyBrowser* m_propTree;
 			/// Internal list of the properties

@@ -39,17 +39,12 @@ namespace MantidQt
     	m_plot->setAxisFont(QwtPlot::yLeft, parent->font());
 		}
 
-		void Stretch::validate()
+		bool Stretch::validate()
 		{
-
+			return true;
 		}
 
 		void Stretch::run() 
-		{
-
-		}
-
-		void Stretch::help()
 		{
 
 		}

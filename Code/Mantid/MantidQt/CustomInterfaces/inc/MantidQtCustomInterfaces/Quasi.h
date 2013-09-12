@@ -16,8 +16,8 @@ namespace MantidQt
 			Quasi(QWidget * parent = 0);
 
 		private:
-			virtual void help();
-			virtual void validate();
+			virtual QString help() { return "Quasi"; };
+			virtual bool validate();
 			virtual void run();
 
 			//The ui form

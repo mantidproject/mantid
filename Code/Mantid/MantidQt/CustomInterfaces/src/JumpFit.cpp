@@ -28,17 +28,12 @@ namespace MantidQt
     	m_plot->setAxisFont(QwtPlot::yLeft, parent->font());
 		}
 
-		void JumpFit::validate()
+		bool JumpFit::validate()
 		{
-
+			return true;
 		}
 
 		void JumpFit::run() 
-		{
-
-		}
-
-		void JumpFit::help()
 		{
 
 		}

@@ -70,7 +70,7 @@
        </property>
        <property name="fileBrowserSuffixes" stdset="0">
         <stringlist>
-         <string>*_res.nxs</string>
+         <string>*_red.nxs</string>
         </stringlist>
        </property>
       </widget>

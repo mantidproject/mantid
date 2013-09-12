@@ -8,6 +8,9 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
+#include <QDesktopServices>
+#include <QUrl>
+
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -60,6 +63,12 @@ namespace MantidQt
       /// Interface name
       static std::string name() { return "Indirect Bayes"; }
       virtual void initLayout();
+
+    private slots:
+      /// Run the appropriate action depending based on the selected tab
+      void runClicked();
+      void helpClicked();
+      void manageUserDirectories();
 
 		private:
 			std::map<unsigned int, IndirectBayesTab*> m_bayesTabs;

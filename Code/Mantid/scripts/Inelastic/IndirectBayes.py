@@ -764,7 +764,7 @@ def QuestPlot(inputWS,Plot):
 
 # ResNorm programs
 
-def ResNormRun(vname,rname,erange,nbins,Verbose,Plot,Save):
+def ResNormRun(vname,rname,erange,nbins,Verbose=False,Plot=False,Save=False):
 	StartTime('ResNorm')
 	workdir = config['defaultsave.directory']
 	array_len = 4096                                    # length of Fortran array

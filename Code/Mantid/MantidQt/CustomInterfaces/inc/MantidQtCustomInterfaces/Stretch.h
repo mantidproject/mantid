@@ -16,8 +16,8 @@ namespace MantidQt
 			Stretch(QWidget * parent = 0);
 
 		private:
-			virtual void help();
-			virtual void validate();
+			virtual QString help() { return "Stretch"; };
+			virtual bool validate();
 			virtual void run();
 
 			//The ui form
