@@ -1775,7 +1775,8 @@ def reverseQAxis(q_axis):
     new_q_axis = fliplr(q_axis)
     return new_q_axis
 
-def getQaxis(dMD, dSD, theta, tof_axis, y_range, central_pixel, 
+def getQaxis(dMD, dSD, theta, 
+             tof_axis, y_range, central_pixel, 
              first_slit_size,
              last_slit_size):
     """
@@ -1977,4 +1978,3 @@ def cleanupData(final_data_y_axis, final_data_y_error_axis):
     
     
     
-
