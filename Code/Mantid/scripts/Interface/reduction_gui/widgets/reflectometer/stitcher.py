@@ -240,7 +240,7 @@ class StitcherWidget(BaseWidget):
         # Apply and save buttons
         self.connect(self._content.pick_unity_range_btn, QtCore.SIGNAL("clicked()"), self._pick_specular_ridge)        
         self.connect(self._content.auto_scale_btn, QtCore.SIGNAL("clicked()"), self._apply)        
-        self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._save_result)
+        self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._set_unity_scale)
         self._content.min_q_unity_edit.setText("0.00")
         self._content.max_q_unity_edit.setText("0.01")
         self._content.max_q_unity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_q_unity_edit))
@@ -267,7 +267,21 @@ class StitcherWidget(BaseWidget):
             self.radio_group.addButton(self._content.on_off_radio)
             self.radio_group.addButton(self._content.on_on_radio)
             self.radio_group.setExclusive(True)
-                 
+
+    def _set_unity_scale(self):
+        """ 
+            Set scaling factors to reference
+        """
+        ref= 0
+        for item in self._workspace_list:
+            if item.is_selected():
+                ref = item.get_scale()
+                break
+        for item in self._workspace_list:
+            item.set_scale(ref)
+        self.plot_result()
+        
+
     def _email_options_changed(self):
         """
             Send-email checkbox has changed states
