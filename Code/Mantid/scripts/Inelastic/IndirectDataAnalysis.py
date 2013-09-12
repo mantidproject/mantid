@@ -116,6 +116,10 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
         unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
         unitx.setLabel('Time' , 'ns')
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
+        AddSampleLog(Workspace=fout, LogName="Fit Program", LogType="String", LogText='ConvFit')
+        AddSampleLog(Workspace=fout, LogName='Background', LogType='String', LogText=str(options[0]))
+        AddSampleLog(Workspace=fout, LogName='Delta', LogType='String', LogText=str(options[1]))
+        AddSampleLog(Workspace=fout, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
         DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
         DeleteWorkspace(fitWS+str(i)+'_Parameters')
         if i == 0:
