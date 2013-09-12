@@ -1502,7 +1502,7 @@ def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_e
     """
     
     x_axis = tof_axis    
-    nbr_tof = len(x_axis)
+    nbr_tof = len(x_axis)-1
     x_axis_factors = zeros(nbr_tof)
     x_axis_factors_error = zeros(nbr_tof)
     for i in range(nbr_tof):
