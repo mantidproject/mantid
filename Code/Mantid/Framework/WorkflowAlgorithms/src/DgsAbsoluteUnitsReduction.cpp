@@ -9,6 +9,7 @@ vanadium can be used in conjunction with the data reduction.
 #include "MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
@@ -154,8 +155,6 @@ namespace Mantid
       etConv->executeAsChildAlg();
       MatrixWorkspace_sptr outputWS = etConv->getProperty("OutputWorkspace");
 
-      Property *prop = outputWS.get()->run().getProperty("Ei");
-      const double calculatedEi = boost::lexical_cast<double>(prop->value());
 
       const double vanadiumMass = getDblPropOrParam("VanadiumMass",
           reductionManager, "vanadium-mass", outputWS);
@@ -237,15 +236,9 @@ namespace Mantid
       // If the absolute units detector vanadium is used, do extra correction.
       if (absIdetVanWS)
       {
-        double xsection = 0.0;
-        if (200.0 <= calculatedEi)
-        {
-          xsection = 421.0;
-        }
-        else
-        {
-          xsection = 400.0 + (calculatedEi / 10.0);
-        }
+        NeutronAtom neutronVanadium=getNeutronAtom(vanadium.z_number);
+        double xsection =(neutronVanadium.inc_scatt_xs+neutronVanadium.coh_scatt_xs)*1e3/4./M_PI; //cross section per steradian in milibarns
+
         outputWS /= xsection;
         const double sampleMass = reductionManager->getProperty("SampleMass");
         const double sampleRmm = reductionManager->getProperty("SampleRmm");
