@@ -1,5 +1,5 @@
-#ifndef MATRIX_WS_IMAGE_VIEW_H
-#define MATRIX_WS_IMAGE_VIEW_H
+#ifndef MATRIX_WS_SPECTRUM_VIEW_H
+#define MATRIX_WS_SPECTRUM_VIEW_H
 
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -41,14 +41,14 @@ namespace MantidQt
 namespace SpectrumView
 {
 
-class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSImageView 
+class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSSpectrumView
 {
   public:
 
     /// Construct an image viewer for the specifed MatrixWorkspace
-    MatrixWSImageView( Mantid::API::MatrixWorkspace_const_sptr mat_ws );
+    MatrixWSSpectrumView( Mantid::API::MatrixWorkspace_const_sptr mat_ws );
 
-   ~MatrixWSImageView();
+   ~MatrixWSSpectrumView();
 
   private:
     SpectrumView *image_view;
@@ -57,4 +57,4 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSImageView
 } // namespace SpectrumView
 } // namespace MantidQt 
 
-#endif // MATRIX_WS_IMAGE_VIEW_H
+#endif // MATRIX_WS_SPECTRUM_VIEW_H

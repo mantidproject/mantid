@@ -69,7 +69,7 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
-#include "MantidQtSpectrumViewer/MatrixWSImageView.h"
+#include "MantidQtSpectrumViewer/MatrixWSSpectrumView.h"
 #include <typeinfo>
 
 using namespace std;
@@ -705,7 +705,7 @@ void MantidUI::showSpectrumViewer()
              AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if ( matwsp )
     {
-      MantidQt::SpectrumView::MatrixWSImageView spectrum_view( matwsp );
+      MantidQt::SpectrumView::MatrixWSSpectrumView spectrum_view( matwsp );
     }
     else
     {

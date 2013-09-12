@@ -1,5 +1,5 @@
 #include <iostream>
-#include "MantidQtSpectrumViewer/MatrixWSImageView.h"
+#include "MantidQtSpectrumViewer/MatrixWSSpectrumView.h"
 #include "MantidQtSpectrumViewer/MatrixWSDataSource.h"
 
 using Mantid::API::MatrixWorkspace_const_sptr;
@@ -9,7 +9,7 @@ using namespace SpectrumView;
 /**
  * Construct an SpectrumView for the specified matrix workspace
  */
-MatrixWSImageView::MatrixWSImageView( MatrixWorkspace_const_sptr mat_ws )
+MatrixWSSpectrumView::MatrixWSSpectrumView( MatrixWorkspace_const_sptr mat_ws )
 {
   MatrixWSDataSource* source = new MatrixWSDataSource( mat_ws );
 
@@ -27,7 +27,7 @@ MatrixWSImageView::MatrixWSImageView( MatrixWorkspace_const_sptr mat_ws )
   image_view->setCaption( qtitle );
 }
 
-MatrixWSImageView::~MatrixWSImageView()
+MatrixWSSpectrumView::~MatrixWSSpectrumView()
 {
   // nothing to do here, since image_view is deleted when the window closes
 }

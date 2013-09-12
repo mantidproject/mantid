@@ -21,7 +21,7 @@ using namespace Mantid::API;
 
 int main( int argc, char** argv )
 {
-  std::cout << "Start of ImageViewNxEventFile..." << std::endl;
+  std::cout << "Start of SpectrumViewNxEventFile..." << std::endl;
   if ( argc < 2 )
   {
     std::cout << "Please enter a NeXus event file name on the command line!" 

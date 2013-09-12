@@ -14,7 +14,7 @@ set ( SRC_FILES
        src/SpectrumDataSource.cpp  
        src/SVConnections.cpp 
        src/MatrixWSDataSource.cpp
-       src/MatrixWSImageView.cpp
+       src/MatrixWSSpectrumView.cpp
        src/ArrayDataSource.cpp
        src/ErrorHandler.cpp
 )
@@ -38,7 +38,7 @@ set ( INC_FILES
        inc/MantidQtSpectrumViewer/RangeHandler.h
        inc/MantidQtSpectrumViewer/EModeHandler.h
        inc/MantidQtSpectrumViewer/MatrixWSDataSource.h
-       inc/MantidQtSpectrumViewer/MatrixWSImageView.h
+       inc/MantidQtSpectrumViewer/MatrixWSSpectrumView.h
        inc/MantidQtSpectrumViewer/ArrayDataSource.h
        inc/MantidQtSpectrumViewer/ErrorHandler.h
 )
@@ -88,11 +88,11 @@ target_link_libraries ( MantidQtSpectrumViewer
 ###########################################################################
 
 if ( NOT WIN32 )
-add_executable ( ImageViewDemo EXCLUDE_FROM_ALL src/ImageViewDemo.cpp )
-target_link_libraries ( ImageViewDemo MantidQtSpectrumViewer )
+add_executable ( SpectrumViewDemo EXCLUDE_FROM_ALL src/SpectrumViewDemo.cpp )
+target_link_libraries ( SpectrumViewDemo MantidQtSpectrumViewer )
 
-add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL src/ImageViewNxEventFile.cpp )
-target_link_libraries ( ImageViewNxEventFile MantidQtSpectrumViewer )
+add_executable ( SpectrumViewNxEventFile EXCLUDE_FROM_ALL src/SpectrumViewNxEventFile.cpp )
+target_link_libraries ( SpectrumViewNxEventFile MantidQtSpectrumViewer )
 endif ()
 
 ###########################################################################
