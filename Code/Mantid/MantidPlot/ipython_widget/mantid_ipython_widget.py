@@ -14,12 +14,8 @@ class MantidIPythonWidget(RichIPythonWidget):
 
         # Figure out the full path to the mantidplotrc.py file and then %run it
         from os import path
-        mantidplotpath = path.split(path.dirname(__file__))[0]
-        if not mantidplotpath:
-            # If the the file is in the cwd, then path.dirname returns an empty string
-            mantidplotrc = 'mantidplotrc.py'
-        else:
-            mantidplotrc = mantidplotpath + '/mantidplotrc.py'
+        mantidplotpath = path.split(path.dirname(__file__))[0] # It's the directory above this one
+        mantidplotrc = path.join(mantidplotpath, 'mantidplotrc.py')
         kernel.shell.run_line_magic('run',mantidplotrc)
     
         kernel_client = kernel_manager.client()
