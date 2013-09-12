@@ -5,7 +5,7 @@ set ( TEST_FILES
   PropertyWithValueFactoryTest.h
   PythonObjectInstantiatorTest.h
   PySequenceToVectorTest.h
-)  
+)
   
 if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
