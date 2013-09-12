@@ -70,6 +70,7 @@ class ReflData(object):
         if parent_layout is not None:
             parent_layout.addLayout(self._layout)
             parent_layout.connect(self._edit_ctrl, QtCore.SIGNAL("returnPressed()"), self._return_pressed)
+            #parent_layout.connect(self._radio, QtCore.SIGNAL("toggled()"), self._reference_updated)            
         
     def is_selected(self):
         return self._radio.isChecked()
