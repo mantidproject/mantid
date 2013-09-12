@@ -17002,7 +17002,7 @@ else
     setGeometry(usr_win,user_interface);
     connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
         SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
-    if(user_interface->objectName() == "Muon Analysis")
+    if(user_interface->interfaceName() == "Muon Analysis")
     {
       // Re-emits the signal caught from the muon analysis
       connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
@@ -17012,10 +17012,13 @@ else
       connect(user_interface, SIGNAL(hideGraphs(const QString &)), this, SLOT(hideGraphs(const QString &)));
       // Shows the graph
       connect(user_interface, SIGNAL(showGraphs()), this, SLOT(showGraphs()));
-      //If the fitting is requested then run the peak picker tool in runConnectFitting
-      connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
-          SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
-    }
+      // Activate Peak Picker tool on the requested plot
+      connect(user_interface, SIGNAL(activatePPTool(const QString&)), 
+                        this, SLOT(activatePPTool(const QString&)));
+      // Update the used fit property browser
+      connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
+                    mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
+    } 
     user_interface->initializeLocalPython();
   }
   else
@@ -17028,66 +17031,39 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
     tr("MantidPlot was not built with Python scripting support included!"));
 #endif
 }
-/**This searches for the graph with a selected name and then attaches the fitFunctionBrowser to it
-*  This also disables the fitFunctionBrowser from all the other graphs.
-* 
-* @param fpb The fit property browser from the custom interface
-* @param nameOfPlot A string variable containing the name of the graph we want to fit.
-*
-*/
-void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot)
+
+/**
+ * Searches for the plot with a specified name and then attaches Peak Picker tool to it. Disables 
+ * the tool from all the other plots.
+ * 
+ * @param plotName The name of the plot we want to attach the tool to.
+ */
+void ApplicationWindow::activatePPTool(const QString& plotName)
 {
-  // Loop through all multilayer (i.e. plots) windows displayed in Mantidplot 
-  // and apply pickpickertool to relevant plot
-  // Search and delete any current peak picker tools first
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) 
   {
     if (w->isA("MultiLayer"))
     {
       MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
+
+      QList<Graph *> layers = plot->layersList();
+
+      if (w->objectName() == plotName)
       {
-        // Check to see if graph is the new one by comparing the names
-        if (w->objectName() != nameOfPlot)
+        foreach(Graph *g, layers)
         {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Delete the PeakPickerTool
-            g->disableTools();
-          }
+          PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, true);
+          g->setActiveTool(ppicker);
         }
+      }
+      else
+      {
+        foreach(Graph *g, layers)
+          g->disableTools();
       }
     }
   }
-  // now check for graphs to add the peak picker tool to.
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-      {
-        if (w->objectName() == nameOfPlot)
-        {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Go through and set up the PeakPickerTool for the new graph
-            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true, true);
-            g->setActiveTool(ppicker);
-          }
-        }     
-      }
-    }
-  } 
 }
 
 

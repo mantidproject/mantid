@@ -73,12 +73,15 @@ using namespace Mantid::Geometry;
 // Initialize the logger
 Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 
+// Static constants
+const QString MuonAnalysis::NOT_AVAILABLE("N/A");
+
 //----------------------
 // Public member functions
 //----------------------
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
-  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName("N/A"), 
+  UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName(), 
   m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),m_tabNumber(0), m_groupNames(), 
   m_settingsGroup("CustomInterfaces/MuonAnalysis/"),  m_updating(false), m_loaded(false), 
   m_deadTimesChanged(false), m_textToDisplay(""), m_nexusTimeZero(0.0)
@@ -134,7 +137,7 @@ void MuonAnalysis::initLayout()
   connect(m_resultTableTab, SIGNAL(runPythonCode(const QString&, bool)),
                       this, SIGNAL(runAsPythonScript(const QString&, bool)));
 
-  setConnectedDataText();
+  setCurrentDataName(NOT_AVAILABLE);
 
   // connect guess alpha
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked()));
@@ -203,11 +206,6 @@ void MuonAnalysis::initLayout()
   // connect the fit function widget buttons to their respective slots.
   loadFittings();
 
-  // When workspace gets changed, show its plot
-  connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
-                         this, SLOT(showPlot(const QString&)),
-          Qt::QueuedConnection);
-
   // Detect when the tab is changed
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(changeTab(int)));
 
@@ -240,10 +238,14 @@ void MuonAnalysis::muonAnalysisHelpGroupingClicked()
 
 
 /**
-* Set connected data text.
-*/
-void MuonAnalysis::setConnectedDataText()
+ * Set the connected workspace name.
+ * @param name The new connected ws name
+ */
+void MuonAnalysis::setCurrentDataName(const QString& name)
 {
+  m_currentDataName = name;
+
+  // Update labels
   m_uiForm.connectedDataHome->setText("Connected: " + m_currentDataName);
   m_uiForm.connectedDataGrouping->setText("Connected: " + m_currentDataName);
   m_uiForm.connectedDataSettings->setText("Connected: " + m_currentDataName);
@@ -2101,19 +2103,32 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
 
 void MuonAnalysis::showPlot(const QString& wsName)
 {
-  m_currentDataName = wsName;
+  // If empty -> no workspaces available to choose (e.g. all were deleted)
+  if(wsName.isEmpty())
+  {
+    setCurrentDataName(NOT_AVAILABLE);
+  }
+  // Just in case, check if exists. Shouldn't happen normally.
+  // TODO: can happen if currently connected ws gets deleted. Observe deletion event and do 
+  //       something in that case
+  else if(!AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+  {
+    g_log.warning("Can't show workspace which doesn't exist.");
+  }
+  else
+  {
+    setCurrentDataName(wsName);
 
-  emit closeGraph(m_currentDataName + "-1");
-  plotSpectrum(m_currentDataName, 0, false);
+    emit closeGraph(m_currentDataName + "-1");
+    plotSpectrum(m_currentDataName, 0, false);
 
-  // Change the plot style of the graph so that it matches what is selected on
-  // the plot options tab.
-  QStringList plotDetails = m_fitDataTab->getAllPlotDetails(m_currentDataName);
-  changePlotType(plotDetails);
+    // Change the plot style of the graph so that it matches what is selected on
+    // the plot options tab.
+    QStringList plotDetails = m_fitDataTab->getAllPlotDetails(m_currentDataName);
+    changePlotType(plotDetails);
 
-  setConnectedDataText();
-
-  emit fittingRequested(m_uiForm.fitBrowser, m_currentDataName + "-1");
+    emit activatePPTool(m_currentDataName + "-1");
+  }
 }
 
 /**
@@ -2243,8 +2258,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
     changePlotType(plotDetails);
 
-    m_currentDataName = titleLabel;
-    setConnectedDataText();
+    setCurrentDataName(titleLabel);
   }
   m_updating = false;
 }
@@ -2374,8 +2388,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
     changePlotType(plotDetails);
     
-    m_currentDataName = titleLabel;
-    setConnectedDataText();
+    setCurrentDataName(titleLabel);
   }
   m_updating = false;
 }
@@ -3451,14 +3464,36 @@ void MuonAnalysis::changeTab(int newTabNumber)
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
 
-  // If we are leaving the DA tab, unassign the PP tool
-  if(oldTabNumber == 3)
-    emit fittingRequested(m_uiForm.fitBrowser, "");
+  if(oldTabNumber == 3) // Closing DA tab
+  {
+    // Say MantidPlot to use default fit prop. browser
+    emit setFitPropertyBrowser(NULL);
 
-  if (newTabNumber == 3)
-    emit fittingRequested(m_uiForm.fitBrowser, m_currentDataName + "-1");
-  else if(newTabNumber == 4)
+    // Remove PP tool from any plots it was attached to
+    emit activatePPTool("");
+
+    // Disconnect to avoid problems when filling list of workspaces in fit prop. browser
+    disconnect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
+                              this, SLOT(showPlot(const QString&)));
+  }
+
+  if (newTabNumber == 3) // Opening DA tab
+  {
+    // Say MantidPlot to use Muon Analysis fit prop. browser
+    emit setFitPropertyBrowser(m_uiForm.fitBrowser);
+
+    // Show connected plot and attach PP tool to it (if has been assigned)
+    if(m_currentDataName != NOT_AVAILABLE)
+      showPlot(m_currentDataName);
+    
+    // In future, when workspace gets changed, show its plot and attach PP tool to it
+    connect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
+                           this, SLOT(showPlot(const QString&)), Qt::QueuedConnection);
+  }
+  else if(newTabNumber == 4) // Opening results table tab
+  {
     m_resultTableTab->populateTables(m_uiForm.fitBrowser->getWorkspaceNames());
+  }
 }
 
 /**
@@ -3565,8 +3600,14 @@ void MuonAnalysis::closeEvent(QCloseEvent *e)
   // Show the toolbar
   if (m_uiForm.hideToolbars->isChecked())
     emit showToolbars();
-  // delete the peak picker tool because it is no longer needed.
-  emit fittingRequested(m_uiForm.fitBrowser, "");
+
+  // If closed while on DA tab, reassign fit property browser to default one
+  if(m_tabNumber == 3)
+    emit setFitPropertyBrowser(NULL);
+
+  // Delete the peak picker tool because it is no longer needed.
+  emit activatePPTool("");
+
   e->accept();
 }
 
@@ -3590,9 +3631,9 @@ void MuonAnalysis::showEvent(QShowEvent *e)
   // Hide the toolbar
   if (m_uiForm.hideToolbars->isChecked() )
     emit hideToolbars();
+
   e->accept();
 }
-
 
 /**
 * Show/Hide Toolbar
