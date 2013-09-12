@@ -23,6 +23,7 @@ class LoadData(ReductionStep):
 
     _multiple_frames = False
     _sum = False
+    _load_logs = False
     _monitor_index = None
     _detector_range_start = None
     _detector_range_end = None
@@ -37,6 +38,7 @@ class LoadData(ReductionStep):
         """
         super(LoadData, self).__init__()
         self._sum = False
+        self._load_logs = False
         self._multiple_frames = False
         self._monitor_index = None
         self._detector_range_start = None
@@ -68,6 +70,9 @@ class LoadData(ReductionStep):
             ## Need to adjust the reducer's list of workspaces
             self._data_files = {}
             self._data_files[wsname] = wsname
+
+    def set_load_logs(self, value):
+        self._load_logs = value
 
     def set_sum(self, value):
         self._sum = value
@@ -160,7 +165,12 @@ class LoadData(ReductionStep):
             loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1-198", **self._extra_load_opts)
             loader_name = "LoadVesuvio"
         else:
-            loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=True, **self._extra_load_opts)
+            loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
+            if self._load_logs == True:
+                loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=True, **self._extra_load_opts)
+                logger.notice("Loaded sample logs")
+            else:
+                loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
             loader_handle = loaded_ws.getHistory().lastAlgorithm()
             loader_name = loader_handle.getPropertyValue("LoaderName")
         return loader_name

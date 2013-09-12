@@ -258,6 +258,11 @@ void Indirect::runConvertToEnergy()
       "reducer.set_calibration_workspace(loadNexus(r'"+m_uiForm.ind_calibFile->getFirstFilename()+"'))\n";
   }
 
+  if ( m_uiForm.ckLoadLogs->isChecked() )
+  {
+    pyInput += "reducer.set_load_logs(True)\n";
+  }
+
   if ( ! m_uiForm.rebin_ckDNR->isChecked() )
   {
     QString rebin;
