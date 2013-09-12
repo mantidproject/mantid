@@ -1,28 +1,23 @@
-#ifndef SUBMITREMOTEJOB_H_
-#define SUBMITREMOTEJOB_H_
+#ifndef AUTHENTICATE_H_
+#define AUTHENTICATE_H_
 
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
 namespace RemoteAlgorithms {
-/*** Submit a job to be executed on the remote compute resource.
+/*** Authenticate to the remote compute resource.
     
     Input Properties:
     <UL>
     <LI> ComputeResource  - The name of the compute resource that will execute the job </LI>
-    <LI> NumNodes         - The number of nodes to reserve for this job </LI>
-    <LI> CoresPerNode     - The number of cores this job will use on each node </LI>
-    <LI> TaskName         - A short, human readable identifier for the job (Optional) </LI>
-    <LI> TransactionID    - ID of the transaction this job belongs to.  See StartRemoteTransaction </LI>  
-    <LI> PythonScript     - The actual python code that will be executed </LI>
-    <LI> ScriptName       - A name for the python script </LI>
+    <LI> UserName         - User name on the compute resource </LI>
+    <LI> Password         - Password for the compute resource </LI>
     </UL>
 
-    Output Properties:
-    <UL>
-    <LI> JobID            - An ID for tracking the status of the submitted job (Queued, Running,
-      Completed, Error, etc..) </LI>
-    <\UL>
+    Output Properties: None.
+    If the authentication is successfull, a cookie is received that is stored internally and
+    re-used for all subsequent interactions with the compute resource.
+
     
     @author Ross Miller, ORNL
     @date 04/30/2013
@@ -48,15 +43,15 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class SubmitRemoteJob : public Mantid::API::Algorithm
+class Authenticate : public Mantid::API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  SubmitRemoteJob() : Mantid::API::Algorithm() {}
+  Authenticate() : Mantid::API::Algorithm() {}
   /// Virtual destructor
-  virtual ~SubmitRemoteJob() {}
+  virtual ~Authenticate() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SubmitRemoteJob"; }
+  virtual const std::string name() const { return "Authenticate"; }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -72,4 +67,4 @@ private:
 
 } // end namespace RemoteAlgorithms
 } // end namespace Mantid
-#endif /*SUBMITREMOTEJOB_H_*/
+#endif /*AUTHENTICATE_H_*/
