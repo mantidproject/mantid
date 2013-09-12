@@ -55,7 +55,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
   public:
 
      /// Make an SpectrumDisplay to display with the given widgets and controls 
-     SpectrumDisplay( QwtPlot*       image_plot, 
+     SpectrumDisplay( QwtPlot*       spectrum_plot,
                    ISliderHandler* slider_handler,
                    IRangeHandler*  range_handler,
                    GraphDisplay*  h_graph,
@@ -93,7 +93,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      void SetVGraph( double x );
 
   protected:
-     SpectrumPlotItem*       image_plot_item;
+     SpectrumPlotItem*       spectrum_plot_item;
 
   private:
      /// Check if the DataSource has been changed under us
@@ -112,7 +112,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SpectrumDisplay
      SpectrumDataSource*     data_source;
      DataArray*           data_array;
 
-     QwtPlot*             image_plot;
+     QwtPlot*             spectrum_plot;
 
      ISliderHandler*       slider_handler;
      IRangeHandler*        range_handler;

@@ -9,7 +9,7 @@
 /**
     @class MatrixWSDataSource 
   
-       This is the top level class for showing a matrix workspace
+    This is the top level class for showing a matrix workspace
     using an SpectrumViewer.
  
     @author Dennis Mikkelson 
@@ -45,13 +45,13 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER MatrixWSSpectrumView
 {
   public:
 
-    /// Construct an image viewer for the specifed MatrixWorkspace
+    /// Construct a spectrum viewer for the specifed MatrixWorkspace
     MatrixWSSpectrumView( Mantid::API::MatrixWorkspace_const_sptr mat_ws );
 
    ~MatrixWSSpectrumView();
 
   private:
-    SpectrumView *image_view;
+    SpectrumView *spectrum_view;
 };
 
 } // namespace SpectrumView

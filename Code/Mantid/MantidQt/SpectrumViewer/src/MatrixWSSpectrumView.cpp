@@ -13,10 +13,10 @@ MatrixWSSpectrumView::MatrixWSSpectrumView( MatrixWorkspace_const_sptr mat_ws )
 {
   MatrixWSDataSource* source = new MatrixWSDataSource( mat_ws );
 
-  image_view = new SpectrumView( source );  // this is the QMainWindow
-                                         // for the viewer.  It is
-                                         // deleted when the window
-                                         // is closed
+  spectrum_view = new SpectrumView( source );  // this is the QMainWindow
+                                               // for the viewer.  It is
+                                               // deleted when the window
+                                               // is closed
 
   std::string title = std::string("SpectrumView ( ") + 
                                    mat_ws->getTitle() + 
@@ -24,11 +24,11 @@ MatrixWSSpectrumView::MatrixWSSpectrumView( MatrixWorkspace_const_sptr mat_ws )
 
   QString qtitle = QString::fromStdString(title);
 
-  image_view->setCaption( qtitle );
+  spectrum_view->setCaption( qtitle );
 }
 
 MatrixWSSpectrumView::~MatrixWSSpectrumView()
 {
-  // nothing to do here, since image_view is deleted when the window closes
+  // nothing to do here, since spectrum_view is deleted when the window closes
 }
 

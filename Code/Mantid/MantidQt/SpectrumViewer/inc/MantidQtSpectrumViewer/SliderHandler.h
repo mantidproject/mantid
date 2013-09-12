@@ -49,7 +49,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SliderHandler : public ISliderHandler
   public:
 
     /// Construct object to manage image scrollbars from the specified UI
-    SliderHandler( Ui_SpectrumViewer* iv_ui );
+    SliderHandler( Ui_SpectrumViewer* sv_ui );
 
     /// Configure the image scrollbars for the specified data and drawing area
     void ConfigureSliders( QRect            draw_area, 
@@ -78,7 +78,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER SliderHandler : public ISliderHandler
                           int         n_pixels,
                           int         val );
 
-    Ui_SpectrumViewer*   iv_ui;
+    Ui_SpectrumViewer*   sv_ui;
 };
 
 } // namespace SpectrumView

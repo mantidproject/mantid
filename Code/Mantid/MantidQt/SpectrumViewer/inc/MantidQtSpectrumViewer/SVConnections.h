@@ -61,7 +61,7 @@ public:
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
   SVConnections( Ui_SpectrumViewer* ui, 
-                 SpectrumView*     image_view,
+                 SpectrumView*     spectrum_view,
                  SpectrumDisplay*  spectrum_display,
                  GraphDisplay*  h_graph_display,
                  GraphDisplay*  v_graph_display );
@@ -98,8 +98,8 @@ public slots:
  
 private:
 
-  Ui_SpectrumViewer*  iv_ui;
-  SpectrumView*       iv_main_window;
+  Ui_SpectrumViewer*  sv_ui;
+  SpectrumView*       sv_main_window;
   SpectrumDisplay*    spectrum_display;
   GraphDisplay*    h_graph_display;
   GraphDisplay*    v_graph_display;

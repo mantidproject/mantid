@@ -23,7 +23,7 @@ namespace SpectrumView
 /**
  * Make an SpectrumDisplay to display with the given widgets and controls.
  *
- * @param image_plot      The QwtPlot that will hold the image
+ * @param spectrum_plot   The QwtPlot that will hold the image
  * @param slider_handler  The object that manages interaction with the
  *                        horizontal and vertical scroll bars
  * @param range_handler   The object that manages interaction with the range.
@@ -34,13 +34,13 @@ namespace SpectrumView
  * @param table_widget    The widget where the information about a pointed
  *                        at location will be displayed.
  */
-SpectrumDisplay::SpectrumDisplay(  QwtPlot*       image_plot,
+SpectrumDisplay::SpectrumDisplay(  QwtPlot*       spectrum_plot,
                              ISliderHandler* slider_handler,
                              IRangeHandler*  range_handler,
                              GraphDisplay*  h_graph,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget )
-  : data_source(0), image_plot(image_plot), slider_handler(slider_handler),
+  : data_source(0), spectrum_plot(spectrum_plot), slider_handler(slider_handler),
     range_handler(range_handler), h_graph_display(h_graph), v_graph_display(v_graph),
     image_table(table_widget)
 {
@@ -51,7 +51,7 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*       image_plot,
                           256,
                           negative_color_table );
 
-  image_plot_item = new SpectrumPlotItem;
+  spectrum_plot_item = new SpectrumPlotItem;
   setupSpectrumPlotItem();
 }
 
@@ -59,16 +59,16 @@ SpectrumDisplay::SpectrumDisplay(  QwtPlot*       image_plot,
 SpectrumDisplay::~SpectrumDisplay()
 {
   // std::cout << "SpectrumDisplay destructor called" << std::endl;
-  delete image_plot_item;
+  delete spectrum_plot_item;
 }
 
 /// Set some properties of the SpectrumPlotItem object
 void SpectrumDisplay::setupSpectrumPlotItem()
 {
-  image_plot_item->setXAxis( QwtPlot::xBottom );
-  image_plot_item->setYAxis( QwtPlot::yLeft );
+  spectrum_plot_item->setXAxis( QwtPlot::xBottom );
+  spectrum_plot_item->setYAxis( QwtPlot::yLeft );
 
-  image_plot_item->attach( image_plot );
+  spectrum_plot_item->attach( spectrum_plot );
 
   double DEFAULT_INTENSITY = 30;
   SetIntensity( DEFAULT_INTENSITY );
@@ -104,12 +104,12 @@ void SpectrumDisplay::SetDataSource( SpectrumDataSource* data_source )
                                           n_rows, n_cols,
                                           false );
 
-  image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
+  spectrum_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
                                               data_array->GetXMax() );
-  image_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
+  spectrum_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
                                             data_array->GetYMax() );
 
-  image_plot_item->SetData(  data_array, 
+  spectrum_plot_item->SetData(  data_array,
                             &positive_color_table, 
                             &negative_color_table );
 
@@ -266,26 +266,26 @@ void SpectrumDisplay::UpdateImage()
                                          // provide log binned data, so check
                                          // if log binned data was returned.
 
-  image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
+  spectrum_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
                                               data_array->GetXMax() );
   if ( is_log_x )
   {
     QwtLog10ScaleEngine* log_engine = new QwtLog10ScaleEngine();
-    image_plot->setAxisScaleEngine( QwtPlot::xBottom, log_engine );
+    spectrum_plot->setAxisScaleEngine( QwtPlot::xBottom, log_engine );
   }
   else
   {
     QwtLinearScaleEngine* linear_engine = new QwtLinearScaleEngine();
-    image_plot->setAxisScaleEngine( QwtPlot::xBottom, linear_engine );
+    spectrum_plot->setAxisScaleEngine( QwtPlot::xBottom, linear_engine );
   }
 
-  image_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
+  spectrum_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
                                             data_array->GetYMax() );
 
-  image_plot_item->SetData( data_array, 
+  spectrum_plot_item->SetData( data_array,
                            &positive_color_table,
                            &negative_color_table );
-  image_plot->replot();
+  spectrum_plot->replot();
 
   SetVGraph( pointed_at_x );
   SetHGraph( pointed_at_y );
@@ -341,7 +341,7 @@ void SpectrumDisplay::SetIntensity( double control_parameter )
 {
   size_t DEFAULT_SIZE = 100000;
   ColorMaps::GetIntensityMap( control_parameter, DEFAULT_SIZE, intensity_table);
-  image_plot_item->SetIntensityTable( &intensity_table );
+  spectrum_plot_item->SetIntensityTable( &intensity_table );
   UpdateImage();
 }
 
@@ -363,8 +363,8 @@ QPair<double,double> SpectrumDisplay::SetPointedAtPoint( QPoint point, int /*mou
     return qMakePair(0.0,0.0);
   }
 
-  double x = image_plot->invTransform( QwtPlot::xBottom, point.x() );
-  double y = image_plot->invTransform( QwtPlot::yLeft, point.y() );
+  double x = spectrum_plot->invTransform( QwtPlot::xBottom, point.x() );
+  double y = spectrum_plot->invTransform( QwtPlot::yLeft, point.y() );
 
   SetHGraph( y );
   SetVGraph( x );
@@ -509,8 +509,8 @@ void SpectrumDisplay::ShowInfoList( double x, double y )
  */
 void SpectrumDisplay::GetDisplayRectangle( QRect &rect )
 {
-  QwtScaleMap xMap = image_plot->canvasMap( QwtPlot::xBottom ); 
-  QwtScaleMap yMap = image_plot->canvasMap( QwtPlot::yLeft ); 
+  QwtScaleMap xMap = spectrum_plot->canvasMap( QwtPlot::xBottom );
+  QwtScaleMap yMap = spectrum_plot->canvasMap( QwtPlot::yLeft );
 
   double x_min = data_array->GetXMin();
   double x_max = data_array->GetXMax();

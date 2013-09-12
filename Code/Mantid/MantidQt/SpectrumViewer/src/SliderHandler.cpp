@@ -13,9 +13,9 @@ namespace SpectrumView
  *  Construct a SliderHandler object to manage the image scrollbars from the 
  *  specified UI.
  */
-SliderHandler::SliderHandler( Ui_SpectrumViewer* iv_ui ) : ISliderHandler()
+SliderHandler::SliderHandler( Ui_SpectrumViewer* sv_ui ) : ISliderHandler()
 {
-  this->iv_ui = iv_ui;
+  this->sv_ui = sv_ui;
 }
 
 
@@ -29,7 +29,7 @@ SliderHandler::SliderHandler( Ui_SpectrumViewer* iv_ui ) : ISliderHandler()
 void SliderHandler::ConfigureSliders( QRect            draw_area, 
                                       SpectrumDataSource* data_source )
 {
-  QScrollBar* v_scroll = iv_ui->imageVerticalScrollBar;
+  QScrollBar* v_scroll = sv_ui->imageVerticalScrollBar;
   int n_rows = (int)data_source->GetNRows();
   ConfigureSlider( v_scroll, n_rows, draw_area.height(), n_rows );
 
@@ -49,7 +49,7 @@ void SliderHandler::ConfigureSliders( QRect            draw_area,
 void SliderHandler::ConfigureHSlider( int         n_data_steps,
                                       int         n_pixels )
 {
-  QScrollBar* h_scroll = iv_ui->imageHorizontalScrollBar;
+  QScrollBar* h_scroll = sv_ui->imageHorizontalScrollBar;
   ConfigureSlider( h_scroll, n_data_steps, n_pixels, 0 );
 }
 
@@ -108,7 +108,7 @@ void SliderHandler::ConfigureSlider( QScrollBar* scroll_bar,
  */
 bool SliderHandler::HSliderOn()
 {
-  return iv_ui->imageHorizontalScrollBar->isEnabled();
+  return sv_ui->imageHorizontalScrollBar->isEnabled();
 }
 
 
@@ -117,7 +117,7 @@ bool SliderHandler::HSliderOn()
  */
 bool SliderHandler::VSliderOn()
 {
-  return iv_ui->imageVerticalScrollBar->isEnabled();
+  return sv_ui->imageVerticalScrollBar->isEnabled();
 }
 
 
@@ -133,7 +133,7 @@ bool SliderHandler::VSliderOn()
  */
 void SliderHandler::GetHSliderInterval( int &x_min, int &x_max )
 {
-  QScrollBar* h_scroll = iv_ui->imageHorizontalScrollBar;
+  QScrollBar* h_scroll = sv_ui->imageHorizontalScrollBar;
   int step  = h_scroll->pageStep();
   int value = h_scroll->value();
 
@@ -154,7 +154,7 @@ void SliderHandler::GetHSliderInterval( int &x_min, int &x_max )
  */
 void SliderHandler::GetVSliderInterval( int &y_min, int &y_max )
 {
-  QScrollBar* v_scroll = iv_ui->imageVerticalScrollBar;
+  QScrollBar* v_scroll = sv_ui->imageVerticalScrollBar;
   int max   = v_scroll->maximum();
   int step  = v_scroll->pageStep();
   int value = v_scroll->value();

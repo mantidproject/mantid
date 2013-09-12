@@ -16,9 +16,9 @@ namespace SpectrumView
  *  Construct an EModeHandler object to manage the E Mode and E Fixed controls 
  *  in the specified UI
  */
-EModeHandler::EModeHandler( Ui_SpectrumViewer* iv_ui )
+EModeHandler::EModeHandler( Ui_SpectrumViewer* sv_ui )
 {
-  this->iv_ui = iv_ui;
+  this->sv_ui = sv_ui;
 }
 
 
@@ -27,7 +27,7 @@ EModeHandler::EModeHandler( Ui_SpectrumViewer* iv_ui )
  */
 int EModeHandler::GetEMode()
 {
-  return iv_ui->emode_combo_box->currentIndex();
+  return sv_ui->emode_combo_box->currentIndex();
 }
 
 
@@ -45,7 +45,7 @@ void EModeHandler::SetEMode( const int mode )
 {
   if ( mode >= 0 && mode <= 2 )
   {
-     iv_ui->emode_combo_box->setCurrentIndex( mode );
+     sv_ui->emode_combo_box->setCurrentIndex( mode );
   }
   else
   {
@@ -61,7 +61,7 @@ void EModeHandler::SetEMode( const int mode )
 double EModeHandler::GetEFixed()
 {
   double efixed;
-  std::string text = iv_ui->efixed_control->text().toStdString();
+  std::string text = sv_ui->efixed_control->text().toStdString();
   if ( !SVUtils::StringToDouble( text, efixed ) )
   {
     ErrorHandler::Error("E Fixed is not a NUMBER! Value reset to default.");
@@ -94,7 +94,7 @@ void EModeHandler::SetEFixed( const double efixed )
     new_value = 0;
   }
 
-  QtUtils::SetText( 10, 4, new_value, iv_ui->efixed_control );
+  QtUtils::SetText( 10, 4, new_value, sv_ui->efixed_control );
 }
 
 

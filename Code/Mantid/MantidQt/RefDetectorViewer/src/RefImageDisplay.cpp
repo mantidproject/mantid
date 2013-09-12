@@ -38,8 +38,8 @@ RefImageDisplay::RefImageDisplay(  QwtPlot*       image_plot,
 {
   // We need a different SpectrumPlotItem class, so delete the one created in the
   // base class constructor and create the one we want
-  delete image_plot_item;
-  image_plot_item = new RefImagePlotItem(limits_handler);
+  delete spectrum_plot_item;
+  spectrum_plot_item = new RefImagePlotItem(limits_handler);
   setupSpectrumPlotItem();
 }
 

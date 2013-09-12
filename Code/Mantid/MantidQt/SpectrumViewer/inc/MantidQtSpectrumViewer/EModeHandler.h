@@ -45,7 +45,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER EModeHandler
   public:
 
     /// Construct object to manage E Mode controls in the UI
-    EModeHandler( Ui_SpectrumViewer* iv_ui );
+    EModeHandler(Ui_SpectrumViewer* sv_ui );
 
     /// Get the E Mode to control units calculation, from the combo box
     int GetEMode();
@@ -60,7 +60,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER EModeHandler
     void SetEFixed( const double efixed );
 
   private:
-    Ui_SpectrumViewer* iv_ui;
+    Ui_SpectrumViewer* sv_ui;
 };
 
 } // namespace SpectrumView

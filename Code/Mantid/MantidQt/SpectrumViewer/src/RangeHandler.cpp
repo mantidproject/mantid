@@ -16,9 +16,9 @@ namespace SpectrumView
  *  Construct a RangeHandler object to manage min, max and step controls 
  *  in the specified UI
  */
-RangeHandler::RangeHandler( Ui_SpectrumViewer* iv_ui ) : IRangeHandler()
+RangeHandler::RangeHandler( Ui_SpectrumViewer* sv_ui ) : IRangeHandler()
 {
-  this->iv_ui = iv_ui;
+  this->sv_ui = sv_ui;
 }
 
 
@@ -73,9 +73,9 @@ void RangeHandler::GetRange( double &min, double &max, double &step )
   double original_max  = max;
   double original_step = step;
 
-  QLineEdit* min_control  = iv_ui->x_min_input;
-  QLineEdit* max_control  = iv_ui->x_max_input;
-  QLineEdit* step_control = iv_ui->step_input;
+  QLineEdit* min_control  = sv_ui->x_min_input;
+  QLineEdit* max_control  = sv_ui->x_max_input;
+  QLineEdit* step_control = sv_ui->step_input;
 
   if ( !SVUtils::StringToDouble(  min_control->text().toStdString(), min ) )
   {
@@ -163,9 +163,9 @@ void RangeHandler::SetRange( double min, double max, double step )
     step = (max-min)/2000.0;
   }
 
-  QtUtils::SetText( 8, 2, min, iv_ui->x_min_input );
-  QtUtils::SetText( 8, 2, max, iv_ui->x_max_input );
-  QtUtils::SetText( 8, 6, step, iv_ui->step_input );
+  QtUtils::SetText( 8, 2, min, sv_ui->x_min_input );
+  QtUtils::SetText( 8, 2, max, sv_ui->x_max_input );
+  QtUtils::SetText( 8, 6, step, sv_ui->step_input );
 }
 
 

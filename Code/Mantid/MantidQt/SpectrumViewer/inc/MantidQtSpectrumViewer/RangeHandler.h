@@ -47,7 +47,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER RangeHandler : public IRangeHandler
   public:
 
     /// Construct object to manage min, max and step controls in the UI
-    RangeHandler( Ui_SpectrumViewer* iv_ui );
+    RangeHandler( Ui_SpectrumViewer* sv_ui );
 
     /// Configure min, max and step controls for the specified data source
     void ConfigureRangeControls( SpectrumDataSource* data_source );
@@ -59,7 +59,7 @@ class EXPORT_OPT_MANTIDQT_SPECTRUMVIEWER RangeHandler : public IRangeHandler
     void SetRange( double min, double max, double step );
 
   private:
-    Ui_SpectrumViewer* iv_ui;
+    Ui_SpectrumViewer* sv_ui;
     double         total_min_x;
     double         total_max_x;
     size_t         total_n_steps;
