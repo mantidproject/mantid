@@ -209,7 +209,7 @@ class RefLReduction(PythonAlgorithm):
         # data_y_axis.shape -> (256,61)
 
         #substract background
-        [data_y_axis, data_y_error_axis] = wks_utility.substractBackground(tof_axis, 
+        [data_y_axis, data_y_error_axis] = wks_utility.substractBackground(tof_axis , 
                                                                            data_y_axis, 
                                                                            data_y_error_axis,
                                                                            dataPeakRange,
