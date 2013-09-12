@@ -98,6 +98,13 @@ void SubmitRemoteJob::exec()
   postData["ScriptName"] = getPropertyValue( "ScriptName");
   postData[getPropertyValue("ScriptName")] = getPropertyValue( "PythonScript");
 
+  // Job name is optional
+  std::string jobName = getPropertyValue("TaskName");
+  if (jobName.length() > 0)
+  {
+    postData["JobName"] = jobName;
+  }
+
   std::istream &respStream = jobManager->httpPost("/submit", postData);
   JSONObject resp;
   initFromStream( resp, respStream);
