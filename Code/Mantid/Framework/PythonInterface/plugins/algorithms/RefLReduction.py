@@ -289,6 +289,8 @@ class RefLReduction(PythonAlgorithm):
         # divide data by normalization
         #print data_y_axis.shape #(7,62) = (nbr_pixels, nbr_tof)
         
+        
+        
         [final_data_y_axis, final_data_y_error_axis] = wks_utility.divideDataByNormalization(data_y_axis,
                                                                                              data_y_error_axis,
                                                                                              av_norm,
@@ -361,13 +363,13 @@ class RefLReduction(PythonAlgorithm):
 #                                      final_error_axis)
 
         # apply Scaling factor    
-        [tof_axis, y_axis, y_error_axis] = wks_utility.applyScalingFactor(tof_axis, 
-                                                                          final_data_y_axis, 
-                                                                          final_data_y_error_axis, 
-                                                                          incidentMedium,
-                                                                          sfFile,
-                                                                          slitsValuePrecision,
-                                                                          slitsWidthFlag)
+        [tof_axis_full, y_axis, y_error_axis] = wks_utility.applyScalingFactor(tof_axis_full, 
+                                                                               final_data_y_axis, 
+                                                                               final_data_y_error_axis, 
+                                                                               incidentMedium,
+                                                                               sfFile,
+                                                                               slitsValuePrecision,
+                                                                               slitsWidthFlag)
         
 #         ## DEBUGGING ONLY
 #         wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Dropbox/temporary/data_before_convertToQ_not_integrated.txt',
@@ -399,6 +401,7 @@ class RefLReduction(PythonAlgorithm):
                                                                 theta = theta,
                                                                 first_slit_size = first_slit_size,
                                                                 last_slit_size = last_slit_size)
+
 #         ## debugging only
 #         name_output_ws = self.getPropertyValue("OutputWorkspace")
 #         fileName = '/mnt/hgfs/j35/Dropbox/temporary/beforeRebin_' + name_output_ws + '.txt'
@@ -533,5 +536,3 @@ class RefLReduction(PythonAlgorithm):
         
 AlgorithmFactory.subscribe(RefLReduction)
 # registerAlgorithm(RefLReduction())
-
-
