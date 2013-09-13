@@ -26,13 +26,15 @@ IndirectBayes::IndirectBayes(QWidget *parent) : UserSubWindow(parent)
 	m_bayesTabs.insert(std::make_pair(STRETCH, new Stretch(m_uiForm.indirectBayesTabs->widget(STRETCH))));
 	m_bayesTabs.insert(std::make_pair(JUMP_FIT, new JumpFit(m_uiForm.indirectBayesTabs->widget(JUMP_FIT))));
 
-	//Connect each tab to the python execution method
+	//Connect each tab to the actions available in this GUI
 	std::map<unsigned int, IndirectBayesTab*>::iterator iter;
 	for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter)
 	{
 		connect(iter->second, SIGNAL(executePythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
+		connect(iter->second, SIGNAL(showMessageBox(const QString&)), this, SIGNAL(showMessageBox(const QString&)));
 	}
 
+	//Connect statements for the buttons shared between all tabs on the Indirect Bayes interface
 	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 	connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
 	connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
@@ -42,6 +44,13 @@ void IndirectBayes::initLayout()
 {
 }
 
+/**
+ * Slot to run the underlying algorithm code based on the currently selected
+ * tab.
+ * 
+ * This method checks the tabs validate method is passing before calling
+ * the run method.
+ */
 void IndirectBayes::runClicked()
 {
 	int tabIndex = m_uiForm.indirectBayesTabs->currentIndex();
@@ -52,6 +61,10 @@ void IndirectBayes::runClicked()
 	}
 }
 
+/**
+ * Slot to open a new browser window and navigate to the help page
+ * on the wiki for the currently selected tab.
+ */
 void IndirectBayes::helpClicked()
 {
 	int tabIndex = m_uiForm.indirectBayesTabs->currentIndex();
@@ -59,11 +72,26 @@ void IndirectBayes::helpClicked()
 	QDesktopServices::openUrl(QUrl(url));
 }
 
+/**
+ * Slot to show the manage user dicrectories dialog when the user clicks
+ * the button on the interface.
+ */
 void IndirectBayes::manageUserDirectories()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
+}
+
+/**
+ * Slot to wrap the protected showInformationBox method defined
+ * in UserSubWindow and provide access to composed tabs.
+ * 
+ * @param message :: The message to display in the message box
+ */
+void showMessageBox(const QString& message)
+{
+  showInformationBox(const QString & message);
 }
 
 IndirectBayes::~IndirectBayes()

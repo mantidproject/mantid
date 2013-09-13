@@ -31,6 +31,9 @@ namespace MantidQt
     	m_plot->setAxisFont(QwtPlot::yLeft, parent->font());
 		}
 
+		/**
+		 * Validate the form to check we can run the program
+		 */
 		bool ResNorm::validate()
 		{
 			//check we have files/workspaces available to run with
@@ -43,6 +46,10 @@ namespace MantidQt
 			return true;
 		}
 
+		/**
+		 * Collect the settings on the GUI and build a python
+		 * script that runs ResNorm
+		 */
 		void ResNorm::run() 
 		{
 			QString verbose("False");
@@ -52,9 +59,11 @@ namespace MantidQt
 			QString pyInput = 
 				"from IndirectBayes import ResNormRun\n";
 
+			// get the file names
 			QString VanName = m_uiForm.dsVanadium->getCurrentDataName();
 			QString ResName = m_uiForm.dsResolution->getCurrentDataName();
 
+			//get the parameters for ResNomr
 			QString EMin = m_properties["EMin"]->valueText();
 			QString EMax = m_properties["EMax"]->valueText();
 
@@ -62,6 +71,7 @@ namespace MantidQt
 
 			QString nBin = m_properties["VanBinning"]->valueText();
 
+			//get output options
 			if(m_uiForm.ckVerbose->isChecked()){ verbose = "True"; }
 			if(m_uiForm.ckPlot->isChecked()){ plot = "True"; }
 			if(m_uiForm.ckSave->isChecked()){ save ="True"; }
@@ -72,6 +82,11 @@ namespace MantidQt
 			runPythonScript(pyInput);
 		}
 
+		/**
+		 * Plots the loaded file to the miniplot
+		 * 
+		 * @param filename :: The name of the workspace to plot
+		 */
 		void ResNorm::handleVanadiumInputReady(const QString& filename)
 		{
 			plotMiniPlot(filename, 0);

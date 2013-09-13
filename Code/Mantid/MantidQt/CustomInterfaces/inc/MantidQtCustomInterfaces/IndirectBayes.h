@@ -47,6 +47,8 @@ namespace MantidQt
       Q_OBJECT
 
 		public: //public constants and enums
+
+      /// Enumeration for the index of each tab
 			enum TabChoice
 			{
 				RES_NORM,
@@ -65,12 +67,19 @@ namespace MantidQt
       virtual void initLayout();
 
     private slots:
-      /// Run the appropriate action depending based on the selected tab
+      // Run the appropriate action depending based on the selected tab
+
+      /// Slot for clicking on the run button
       void runClicked();
+      /// Slot for clicking on the hlep button
       void helpClicked();
+      /// Slot for clicking on the manage directories button
       void manageUserDirectories();
+      /// Slot showing a message box to the user
+      void showMessageBox(const QString& message);
 
 		private:
+      /// Map of tabs indexed by position on the window
 			std::map<unsigned int, IndirectBayesTab*> m_bayesTabs;
 
       ///Main interface window

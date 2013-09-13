@@ -56,8 +56,10 @@ namespace MantidQt
 			IndirectBayesTab(QWidget * parent = 0);
 			~IndirectBayesTab();
 
+			/// Returns a URL for the wiki help page for this interface
 			QString tabHelpURL();
 
+			/// Base methods implemented in derived classes 
 			virtual QString help() = 0;
 			virtual bool validate() = 0;
 			virtual void run() = 0;
@@ -65,6 +67,8 @@ namespace MantidQt
 		signals:
 			/// Send signal to parent window to execute python script
 			void executePythonScript(const QString& pyInput, bool output);
+			/// Send signal to parent window to show a message box to user
+			void showMessageBox(const QString& message);
 
 		protected:
 			/// Function to plot a workspace to the miniplot using a workspace name
