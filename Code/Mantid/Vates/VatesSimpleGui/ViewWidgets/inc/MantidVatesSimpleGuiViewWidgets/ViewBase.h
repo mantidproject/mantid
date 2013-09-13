@@ -77,6 +77,8 @@ public:
   virtual void destroyView() = 0;
   /// Retrieve the current time step.
   virtual double getCurrentTimeStep();
+  /// Find the number of true sources in the pipeline.
+  unsigned int getNumSources();
   /// Get the active ParaView source.
   pqPipelineSource *getPvActiveSrc();
   /**
@@ -88,6 +90,8 @@ public:
   virtual QString getWorkspaceName();
   /// Check if pipeline has filter.
   virtual bool hasFilter(const QString &name);
+  /// Check if pipeline has given workspace.
+  virtual pqPipelineSource *hasWorkspace(const QString &name);
   /// Check if file/workspace is a MDHistoWorkspace.
   virtual bool isMDHistoWorkspace(pqPipelineSource *src);
   /// Check if file/workspace is a Peaks one.
@@ -188,8 +192,6 @@ private:
   pqRenderView *getPvActiveView();
   /// Return the appropriate representation.
   pqPipelineRepresentation *getRep();
-  /// Find the number of true sources in the pipeline.
-  unsigned int getNumSources();
   /// Collect time information for animation controls.
   void handleTimeInfo(vtkSMDoubleVectorProperty *dvp, bool doUpdate);
 

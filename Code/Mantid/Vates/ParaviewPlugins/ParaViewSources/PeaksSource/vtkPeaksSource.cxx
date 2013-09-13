@@ -162,3 +162,8 @@ char* vtkPeaksSource::GetWorkspaceTypeName()
 {
   return const_cast<char*>(m_wsTypeName.c_str());
 }
+
+const char* vtkPeaksSource::GetWorkspaceName()
+{
+  return m_wsName.c_str();
+}
