@@ -33,7 +33,7 @@ _translations = {
     'Doucet, Mathieu'         : 'Doucet, Mathieu',
     'Nick Draper'             : 'Draper, Nick',
     'Ronald Fowler'           : 'Fowler, Ronald',
-    'Martyn Gigg'             : 'Gigg, Martyn',
+    'Martyn Gigg'             : 'Gigg, Martyn A.',
     'Samuel Jackson'          : 'Jackson, Samuel',
     'Dereck Kachere'          : 'Kachere, Dereck',
     'Ricardo Leal'            : 'Leal, Ricardo',
