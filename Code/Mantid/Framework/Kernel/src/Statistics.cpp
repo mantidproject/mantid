@@ -293,37 +293,31 @@ namespace Mantid
       // initialize a result vector with all zeros
       std::vector<double> result(maxMoment+1, 0.);
 
-      // as backwards as it sounds, the outer loop should be the points rather than the moments
+      // cache the maximum index
+      size_t numPoints = y.size();
+      if (isDensity)
+        numPoints = x.size()-1;
 
       // densities are calculated using Newton's method for numerical integration
-      if (isDensity)
+      // as backwards as it sounds, the outer loop should be the points rather than the moments
+      for (size_t j = 0; j < numPoints; ++j)
       {
-        for (size_t j = 0; j < x.size()-1; ++j)
+        // reduce item lookup - and central x for histogram
+        const double xVal = .5*static_cast<double>(x[j]+x[j+1]);
+        // this variable will be (x^n)*y
+        double temp = static_cast<double>(y[j]); // correct for histogram
+        if (isDensity)
         {
-          const double xVal = .5*static_cast<double>(x[j]+x[j+1]); // reduce item lookup
           const double xDelta = static_cast<double>(x[j+1]-x[j]);
-          double temp = .5*static_cast<double>(y[j]+y[j+1])*xDelta; // this variable will be (x^n)*y
-          result[0] += temp;
-          for (size_t i = 1; i < result.size(); ++i)
-          {
-            temp *= xVal;
-            result[i] += temp;
-          }
+          temp = .5*(temp + static_cast<double>(y[j+1]))*xDelta;
         }
-      }
-      else
-      {
-        for (size_t j = 0; j < y.size(); ++j)
+
+        // accumulate the moments
+        result[0] += temp;
+        for (size_t i = 1; i < result.size(); ++i)
         {
-          // central x in histogram
-          const double xVal = .5*static_cast<double>(x[j]+x[j+1]);
-          double temp = static_cast<double>(y[j]);
-          result[0] += temp;
-          for (size_t i = 1; i < result.size(); ++i)
-          {
-            temp *= xVal;
-            result[i] += temp;
-          }
+          temp *= xVal;
+          result[i] += temp;
         }
       }
 
@@ -354,37 +348,39 @@ namespace Mantid
       if (maxMoment == 0)
         return result;
 
-      // as backwards as it sounds, the outer loop should be the points rather than the moments
+      // densities have the same number of x and y
+      bool isDensity(x.size() == y.size());
+
+      // cache the maximum index
+      size_t numPoints = y.size();
+      if (isDensity)
+        numPoints = x.size()-1;
 
       // densities are calculated using Newton's method for numerical integration
-      if (x.size() == y.size())
+      // as backwards as it sounds, the outer loop should be the points rather than the moments
+      for (size_t j = 0; j < numPoints; ++j)
       {
-        for (size_t j = 0; j < x.size()-1; ++j)
+        // central x in histogram with a change of variables - and just change for density
+        const double xVal = .5*static_cast<double>(x[j]+x[j+1]) - mean; // change of variables
+
+        // this variable will be (x^n)*y
+        double temp;
+        if (isDensity)
         {
-          const double xVal = .5*static_cast<double>(x[j]+x[j+1]) - mean; // change of variables
           const double xDelta = static_cast<double>(x[j+1]-x[j]);
-          double temp = xVal * .5*static_cast<double>(y[j]+y[j+1])*xDelta; // this variable will be (x^n)*y
-          result[1] += temp;
-          for (size_t i = 2; i < result.size(); ++i)
-          {
-            temp *= xVal;
-            result[i] += temp;
-          }
+          temp = xVal * .5*static_cast<double>(y[j]+y[j+1])*xDelta;
         }
-      }
-      else
-      {
-        for (size_t j = 0; j < y.size(); ++j)
+        else
         {
-          // central x in histogram with a change of variables
-          const double xVal = .5*static_cast<double>(x[j]+x[j+1]) - mean;
-          double temp = xVal * static_cast<double>(y[j]);
-          result[1] += temp;
-          for (size_t i = 2; i < result.size(); ++i)
-          {
-            temp *= xVal;
-            result[i] += temp;
-          }
+          temp = xVal * static_cast<double>(y[j]);
+        }
+
+        // accumulate the moment
+        result[1] += temp;
+        for (size_t i = 2; i < result.size(); ++i)
+        {
+          temp *= xVal;
+          result[i] += temp;
         }
       }
 
