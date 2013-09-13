@@ -43,16 +43,16 @@ class JumpFit(PythonAlgorithm):
 		sam = self.getPropertyValue('SamNumber')
 
 		sname = prefix+sam+'_'+ana+'_'+prog
-		cropOp = self.getProperty('CropQ')
+		cropOp = self.getProperty('CropQ').value
 		if cropOp:
 			qmin = self.getPropertyValue('Qmin')
 			qmax = self.getPropertyValue('Qmax')
 			qrange = [qmin, qmax]
 		else:
 			qrange = [0.0, 5.0]
-		verbOp = self.getProperty('Verbose')
-		plotOp = self.getProperty('Plot')
-		saveOp = self.getProperty('Save')
+		verbOp = self.getProperty('Verbose').value
+		plotOp = self.getProperty('Plot').value
+		saveOp = self.getProperty('Save').value
 
 		workdir = config['defaultsave.directory']
 		if inType == 'File':
