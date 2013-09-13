@@ -15,6 +15,13 @@ namespace MantidQt
 		public:
 			JumpFit(QWidget * parent = 0);
 
+		private slots:
+			/// Slot for when the min range on the range selector changes
+			virtual void minValueChanged(double min);
+			/// Slot for when the min range on the range selector changes
+			virtual void maxValueChanged(double max);
+			void updateProperties(QtProperty* prop, double val);
+
 		private:
 			virtual QString help() { return "JumpFit"; };
 			virtual bool validate();

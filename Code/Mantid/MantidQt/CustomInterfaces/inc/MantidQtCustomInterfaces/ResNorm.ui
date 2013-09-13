@@ -75,7 +75,7 @@
        </property>
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
-         <string>*_red</string>
+         <string>_red</string>
         </stringlist>
        </property>
        <property name="fileBrowserSuffixes" stdset="0">

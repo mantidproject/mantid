@@ -31,7 +31,7 @@ IndirectBayes::IndirectBayes(QWidget *parent) : UserSubWindow(parent)
 	for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter)
 	{
 		connect(iter->second, SIGNAL(executePythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
-		connect(iter->second, SIGNAL(showMessageBox(const QString&)), this, SIGNAL(showMessageBox(const QString&)));
+		connect(iter->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
 	}
 
 	//Connect statements for the buttons shared between all tabs on the Indirect Bayes interface
@@ -89,9 +89,9 @@ void IndirectBayes::manageUserDirectories()
  * 
  * @param message :: The message to display in the message box
  */
-void showMessageBox(const QString& message)
+void IndirectBayes::showMessageBox(const QString& message)
 {
-  showInformationBox(const QString & message);
+  showInformationBox(message);
 }
 
 IndirectBayes::~IndirectBayes()

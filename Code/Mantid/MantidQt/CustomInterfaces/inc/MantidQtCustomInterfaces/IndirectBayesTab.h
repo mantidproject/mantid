@@ -2,8 +2,10 @@
 #define MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QMap>
+#include <QDoubleValidator>
 #include <QtDoublePropertyManager>
 #include <QtIntPropertyManager>
 #include <QtTreePropertyBrowser>
@@ -12,6 +14,23 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
+// Suppress a warning coming out of code that isn't ours
+#if defined(__INTEL_COMPILER)
+  #pragma warning disable 1125
+#elif defined(__GNUC__)
+  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
+    #pragma GCC diagnostic push
+  #endif
+  #pragma GCC diagnostic ignored "-Woverloaded-virtual"
+#endif
+#include "DoubleEditorFactory.h"
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1125
+#elif defined(__GNUC__)
+  #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 6 )
+    #pragma GCC diagnostic pop
+  #endif
+#endif
 
 namespace MantidQt
 {
@@ -47,6 +66,8 @@ namespace MantidQt
 
 		/// precision of double properties in bayes tabs
 		static const unsigned int NUM_DECIMALS = 6;
+		/// precision for integer properties in bayes tabs
+		static const unsigned int INT_DECIMALS = 0;
 
 		class DLLExport IndirectBayesTab : public QWidget
 		{
@@ -70,6 +91,16 @@ namespace MantidQt
 			/// Send signal to parent window to show a message box to user
 			void showMessageBox(const QString& message);
 
+		protected slots:
+			/// Slot for when the min range on the range selector changes
+			virtual void minValueChanged(double min) = 0;
+			/// Slot for when the min range on the range selector changes
+			virtual void maxValueChanged(double max) = 0;
+			/// Slot to handle when a user edits a property
+			virtual void updateProperties(QtProperty* prop, double val) = 0;
+			/// Function to set the range selector on the mini plot
+			void setMiniPlotRange(double min, double max);
+
 		protected:
 			/// Function to plot a workspace to the miniplot using a workspace name
 			void plotMiniPlot(const QString& workspace, size_t index);
@@ -77,19 +108,28 @@ namespace MantidQt
 			void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex);
 			/// Function to run a string as python code
 			void runPythonScript(const QString& pyInput);
+			/// Function to read an instrument's resolution from the IPF using a string
+	    double getInstrumentResolution(const QString& filename);
+			/// Function to read an instrument's resolution from the IPF using a workspace pointer
+			double getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
+
+			/// Function to get the range of the curve displayed on the mini plot
+			std::pair<double,double> getCurveRange();
 
 			/// Plot of the input
 			QwtPlot* m_plot;
 			/// Curve on the plot
 			QwtPlotCurve* m_curve;
+			/// Range selector widget for mini plot
+			MantidQt::MantidWidgets::RangeSelector* m_rangeSelector;
 			/// Tree of the properties
 			QtTreePropertyBrowser* m_propTree;
 			/// Internal list of the properties
 			QMap<QString, QtProperty*> m_properties;
 			/// Double manager to create properties
 			QtDoublePropertyManager* m_dblManager;
-			/// Int manager to create properties
-			QtIntPropertyManager* m_intManager;
+			/// Double editor facotry for the properties browser
+			DoubleEditorFactory* m_dblEdFac;
 
 		};
 	} // namespace CustomInterfaces

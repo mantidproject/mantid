@@ -18,13 +18,18 @@ namespace MantidQt
 		private slots:
 			/// Handle when the vanadium input is ready
 			void handleVanadiumInputReady(const QString& filename);
+			/// Slot for when the min range on the range selector changes
+			virtual void minValueChanged(double min);
+			/// Slot for when the min range on the range selector changes
+			virtual void maxValueChanged(double max);
+			void updateProperties(QtProperty* prop, double val);
 
 		private:
 			/// Inherited methods from IndirectBayesTab
 			virtual QString help() { return "ResNorm"; };
 			virtual bool validate();
 			virtual void run();
-	
+			
 			//The ui form
 			Ui::ResNorm m_uiForm;
 

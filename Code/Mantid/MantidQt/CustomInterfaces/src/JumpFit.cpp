@@ -37,5 +37,27 @@ namespace MantidQt
 		{
 
 		}
+
+		void JumpFit::minValueChanged(double min)
+    {
+      m_dblManager->setValue(m_properties["QMin"], min);
+    }
+
+    void JumpFit::maxValueChanged(double max)
+    {
+			m_dblManager->setValue(m_properties["QMax"], max);	
+    }
+
+    void JumpFit::updateProperties(QtProperty* prop, double val)
+    {
+    	if(prop == m_properties["QMin"])
+    	{
+    		m_rangeSelector->setMinimum(val);
+    	}
+    	else if (prop == m_properties["QMax"])
+    	{
+				m_rangeSelector->setMaximum(val);
+    	}
+    }
 	} // namespace CustomInterfaces
 } // namespace MantidQt

@@ -10,9 +10,16 @@ namespace MantidQt
     /** Constructor
      */
     IndirectBayesTab::IndirectBayesTab(QWidget * parent) : QWidget(parent),  
-      m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_propTree(new QtTreePropertyBrowser()), 
-      m_properties(), m_dblManager(new QtDoublePropertyManager()), m_intManager(new QtIntPropertyManager())
+      m_plot(new QwtPlot(parent)), m_curve(new QwtPlotCurve()), m_rangeSelector(new MantidWidgets::RangeSelector(m_plot)),
+      m_propTree(new QtTreePropertyBrowser()), m_properties(), m_dblManager(new QtDoublePropertyManager()), 
+      m_dblEdFac(new DoubleEditorFactory())
     {
+      m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
+      m_rangeSelector->setInfoOnly(false);
+
+      connect(m_rangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+      connect(m_rangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+      connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
     }
 
     //----------------------------------------------------------------------------------------------
@@ -92,6 +99,48 @@ namespace MantidQt
 
         m_plot->replot();
       }
+    }
+
+    double IndirectBayesTab::getInstrumentResolution(const QString& workspace)
+    {
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
+      return getInstrumentResolution(ws);
+    }
+
+    double IndirectBayesTab::getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+    {
+      auto inst = ws->getInstrument();
+      auto analyser = inst->getStringParameter("analyser");
+
+      if(analyser.size() > 0)
+      {
+        auto comp = inst->getComponentByName(analyser[0]);
+        auto params = comp->getNumberParameter("resolution", true);
+
+        //set the default instrument resolution
+        if(params.size() > 0)
+        {
+          return params[0];
+        }
+      }
+
+      return 0;
+    }
+
+    void IndirectBayesTab::setMiniPlotRange(double min, double max)
+    {
+      m_rangeSelector->setMinimum(min);
+      m_rangeSelector->setMaximum(max);
+    }
+
+    std::pair<double,double> IndirectBayesTab::getCurveRange()
+    {
+      size_t npts = m_curve->data().size();
+
+      if( npts < 2 )
+        throw std::invalid_argument("Too few points on data curve to determine range.");
+
+      return std::make_pair(m_curve->data().x(0), m_curve->data().x(npts-1));
     }
   }
 } // namespace MantidQt
