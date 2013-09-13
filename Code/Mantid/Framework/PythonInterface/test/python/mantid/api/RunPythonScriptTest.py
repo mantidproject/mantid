@@ -69,7 +69,7 @@ class RunPythonScriptTest(unittest.TestCase):
         self.assertTrue(isinstance(group, WorkspaceGroup))
         self.assertAlmostEqual(5.0, mtd['ws_1'].readY(0)[0], 8)
 
-    def xtest_code_with_a_mixture_of_line_endings_succeeds(self):
+    def test_code_with_a_mixture_of_line_endings_succeeds(self):
         code = "Scale(input,OutputWorkspace=output,Factor=5)\n"
         code += "Scale(input,OutputWorkspace=output,Factor=10,Operation='Add')\r"
         code += "Scale(input,OutputWorkspace=output,Factor=20)\r\n"

@@ -14,8 +14,7 @@ names 'input' & 'output' respectively.
 #include <boost/python/exec.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/import.hpp>
-
-#include <Poco/RegularExpression.h>
+#include <boost/regex.hpp>
 
 namespace Mantid
 {
@@ -92,8 +91,8 @@ namespace Mantid
     {
       std::string userCode = getPropertyValue("Code");
       // Unify line endings
-      Poco::RegularExpression nonUnixLineEndings("(\r\n|\r)", Poco::RegularExpression::RE_NEWLINE_ANYCRLF);
-      nonUnixLineEndings.subst(userCode, "\n", Poco::RegularExpression::RE_GLOBAL);
+      boost::regex eol("\\R"); // \R is Perl syntax for matching any EOL sequence
+      userCode = boost::regex_replace(userCode, eol, "\n"); // converts all to LF
 
       // Wrap and indent the user code (see method documentation)
       std::istringstream is(userCode);
