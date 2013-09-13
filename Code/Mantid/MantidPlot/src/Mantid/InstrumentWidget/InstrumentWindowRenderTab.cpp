@@ -131,9 +131,8 @@ InstrumentWindowTab(instrWindow)
   QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().
   getString("MantidOptions.InstrumentView.UseOpenGL")).toUpper();
   bool useOpenGL = setting == "ON";
-  m_instrWindow->enableGL( useOpenGL );
-  m_GLView->setChecked( useOpenGL );
   connect(m_GLView, SIGNAL( toggled(bool) ), this, SLOT( enableGL(bool) ));
+  enableGL( useOpenGL );
 
   displaySettingsMenu->addAction(m_colorMap);
   displaySettingsMenu->addAction(m_backgroundColor);
