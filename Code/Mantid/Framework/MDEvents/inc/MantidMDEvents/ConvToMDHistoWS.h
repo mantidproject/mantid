@@ -75,8 +75,10 @@ private:
 
    // counter for number of workspace points used for multithreaded calculations of number of actual points;
    size_t m_numAddedPoints;
+   // mutex for adding number of calculated points in multithreaded mode
    Kernel::Mutex m_npLock;
 
+   // the function - helper for ChunkOfWork class which calculates number of actually added by thread points
    size_t addNPoits(size_t numPoints)
    {
      Poco::ScopedLock<Kernel::Mutex> lock(m_npLock);
@@ -86,7 +88,7 @@ private:
 
 };
 
-/** Helper class for multithreaded adding -- poor replacement for bind, but we are thinking of adding more options here in a future*/ 
+/** Helper class for multithreaded adding -- poor replacement for bind, but does a bit more then just running the addition and allow avoiding mutexes in single-thread mode*/ 
 class ChunkOfWork :  public Kernel::Task
 {
      ConvToMDHistoWS *classHolder;

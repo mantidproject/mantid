@@ -177,9 +177,9 @@ namespace Mantid
            for(size_t j=0;j<nThreads;j++)
               ts->push(new ChunkOfWork(this,&ConvToMDHistoWS::conversionChunk,&ConvToMDHistoWS::addNPoits,i+j));
 
-            //tp.start();
-            nAddedEvents+=eventsChunkNum;
-            nEventsInWS +=eventsChunkNum;
+            tp.joinAll();
+            nAddedEvents+=m_numAddedPoints;
+            nEventsInWS +=m_numAddedPoints;
 
         }
         else
@@ -261,6 +261,8 @@ namespace Mantid
       // TMP
       //m_spectraChunk = 10;
 
+      //m_spectraChunk = 1;
+      //m_bufferSize  = specSize;
     }
 
   } // endNamespace MDEvents
