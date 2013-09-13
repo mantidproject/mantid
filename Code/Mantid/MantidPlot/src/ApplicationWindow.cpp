@@ -17560,17 +17560,8 @@ void ApplicationWindow::ICatLogin()
 
 void ApplicationWindow::ICatSearchTwo()
 {
-  MdiSubWindow* usr_win = new MdiSubWindow(this);
-  usr_win->setAttribute(Qt::WA_DeleteOnClose, false);
-  QWidget* icatsearch_interface = new MantidQt::MantidWidgets::ICatSearchTwo(usr_win);
-  if(icatsearch_interface)
-  {
-    setGeometry(usr_win,icatsearch_interface);
-  }
-  else
-  {
-    delete usr_win;
-  }
+  icatsearch = new MantidQt::MantidWidgets::ICatSearchTwo();
+  icatsearch->show();
 }
 
 void ApplicationWindow::ICatIsisSearch()

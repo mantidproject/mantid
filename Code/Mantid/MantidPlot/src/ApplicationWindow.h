@@ -1405,6 +1405,8 @@ private:
   QWidgetList *hiddenWindows;
   QLineEdit *info;
 
+  QWidget* icatsearch;
+
   QMenu *windowsMenu, *foldersMenu, *view, *graph, *fileMenu, *format, *edit, *recent;
   QMenu *help, *plot2DMenu, *analysisMenu, *multiPeakMenu, *icat;
   QMenu *matrixMenu, *plot3DMenu, *plotDataMenu, *tablesDepend, *scriptingMenu;
