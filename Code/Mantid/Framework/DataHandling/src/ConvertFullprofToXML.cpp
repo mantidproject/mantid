@@ -106,23 +106,27 @@ namespace DataHandling
     //vector<int> outputbankids = getProperty("Banks");
 
     // Load with LoadFullprofResolution
-    LoadFullprofResolution loader;
-    loader.initialize();
-    loader.setProperty("Filename",datafile);
-    loader.setProperty("OutputWorkspace","ParamTable");
-
-    loader.executeAsChildAlg();
+    //LoadFullprofResolution loader;
+    //loader.initialize();
+    auto loader = createChildAlgorithm("LoadFullprofResolution");
+    loader->setProperty("Filename",datafile);
+    loader->executeAsChildAlg();
 
     // Write into Parameter File
     // This code will later go into a child algorithm to enable it to be used by other algorithms
     // CODE INCOMPLETE
 
+    // Set up access to table workspace ParamTable
+    API::ITableWorkspace_sptr paramTable = loader->getProperty("OutputWorkspace");
+
+    // Set up access to Output file
     std::ofstream outFile(paramfile.c_str());
     if (!outFile)
     {
       throw Mantid::Kernel::Exception::FileError("Unable to open file:", paramfile);
     }
 
+    // Set up writer to Paremeter file
     DOMWriter writer;
     writer.setNewLine("\n");
     writer.setOptions(XMLWriter::PRETTY_PRINT);
@@ -138,15 +142,22 @@ namespace DataHandling
     rootElem->setAttribute("date", ISOdateShort);
     mDoc->appendChild(rootElem);
 
-    Element* gElem = mDoc->createElement("test-element");
-    gElem->setAttribute("name", "name value");
-    rootElem->appendChild(gElem);
+    if(paramTable->columnCount() < 2){
+      throw std::runtime_error("No banks found");
+    }
+    size_t num_banks = paramTable->columnCount()-1;
+
+    for( size_t i=0; i<num_banks; ++i)
+    {
+      std::ostringstream bankName;
+      bankName << "Bank" << (i+1);
+      Element* bankElem = mDoc->createElement(bankName.str());
+      rootElem->appendChild(bankElem);
+    }
+
 
     // Write document structure into file
     writer.writeNode(outFile, mDoc);
-
-    // Remove table workspace after use
-    AnalysisDataService::Instance().remove("ParamTable");
 
     return;
   }

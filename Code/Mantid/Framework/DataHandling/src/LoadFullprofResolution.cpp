@@ -74,7 +74,7 @@ namespace DataHandling
         "Path to an Fullprof .irf file to load.");
 
     // Output workspace
-    auto wsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "", Direction::Output);
+    auto wsprop = new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace", "", Direction::Output);
     declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
 
     // Bank to import
@@ -171,7 +171,7 @@ namespace DataHandling
     }
 
     // Generate output table workspace
-    TableWorkspace_sptr outws = genTableWorkspace(bankparammap);
+    API::ITableWorkspace_sptr outws = genTableWorkspace(bankparammap);
 
     // 6. Output
     setProperty("OutputWorkspace", outws);
