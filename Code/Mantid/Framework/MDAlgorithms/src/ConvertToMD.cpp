@@ -307,7 +307,10 @@ ConvertToMD::init()
 "by the Lorentz multiplier:\n <math>sin(\\theta)^2/\\lambda^4</math>. Currently works in Q3D Elastic case only "
 "and is ignored in any other case."
                     );
-
+    declareProperty(new PropertyWithValue<bool>("IgnoreZeroSignals", false, Direction::Input),
+ "Enabling this property forces algorithm to ignore bins with zero signal for input matxix workspace. Input events workspaces are not affected. "
+ "This violates the data normalization but may substantially accelerate calculations in situations when the normalization is not important. (e.g.  peak finding)."
+      );
     declareProperty(new ArrayProperty<double>("MinValues"),
 "It has to be N comma separated values, where N is the number of dimensions of the target workspace. Values "
 "smaller then specified here will not be added to workspace.\n Number N is defined by properties 4,6 and 7 and "
@@ -395,8 +398,9 @@ void ConvertToMD::exec()
      ConvToMDSelector AlgoSelector;
      m_Convertor  = AlgoSelector.convSelector(m_InWS2D,m_Convertor);
 
+     bool ignoreZeros = getProperty("IgnoreZeroSignals");
     // initate conversion and estimate amout of job to do
-     size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
+     size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper,ignoreZeros);
     // progress reporter
      m_Progress.reset(new API::Progress(this,0.0,1.0,n_steps)); 
 

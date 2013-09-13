@@ -18,11 +18,12 @@ namespace Mantid
     /** method sets up all internal variables necessary to convert from Matrix2D workspace to MDEvent workspace 
     @param WSD         -- the class describing the target MD workspace, sorurce matrtix workspace and the transformations, necessary to perform on these workspaces
     @param inWSWrapper -- the class wrapping the target MD workspace
+    @param ignoreZeros  -- if zero value signals should be rejected
     */
-    size_t  ConvToMDHistoWS::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+    size_t  ConvToMDHistoWS::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper, bool ignoreZeros)
     {
 
-      size_t numSpec=ConvToMDBase::initialize(WSD,inWSWrapper);
+      size_t numSpec=ConvToMDBase::initialize(WSD,inWSWrapper,ignoreZeros);
 
       // check if we indeed have matrix workspace as input.
       DataObjects::Workspace2D_const_sptr pWS2D  = boost::dynamic_pointer_cast<const DataObjects::Workspace2D>(m_InWS2D);
@@ -39,6 +40,8 @@ namespace Mantid
     size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra)
     {
       size_t nAddedEvents(0),nBufEvents(0);
+      // cach global variable locally
+      bool ignoreZeros(m_IgnoreZeros);
 
       const size_t specSize = this->m_InWS2D->blocksize();    
       // preprocessed detectors associate each spectra with a detector (position)
@@ -87,6 +90,8 @@ namespace Mantid
           double signal = Signal[j];
           // drop NaN events
           if(isNaN(signal))continue;
+          // drop 0 -value signals if necessary.
+          if(ignoreZeros &&(signal==0.))continue;
           double errorSq  = Error[j]*Error[j];
 
           if(!m_QConverter->calcMatrixCoordinates(XtargetUnits,i,j,locCoord,signal,errorSq))continue; // skip ND outside the range

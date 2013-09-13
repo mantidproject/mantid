@@ -55,7 +55,7 @@ class ConvToMDHistoWS: public ConvToMDBase
 {
 
 public:
-    size_t  initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
+    size_t  initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper, bool ignoreZeros);
 
     void runConversion(API::Progress *pProgress);
 private:
