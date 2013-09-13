@@ -8,10 +8,7 @@ import reduction_gui.widgets.util as util
 import ui.reflectometer.ui_refl_stitching
 
 import mantidplot
-from MantidFramework import *
-mtd.initialise(False)
-from mantidsimple import *
-
+from mantid.simpleapi import *
 from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
 
 from reduction_gui.reduction.scripter import BaseScriptElement
@@ -147,17 +144,17 @@ class ReflData(object):
         
         if self.name.find("Off_Off")>0:
             ws_name = self.name.replace("Off_Off", "On_Off")
-            if mtd.workspaceExists(ws_name):
+            if AnalysisDataService.doesExist(ws_name):
                 self._data[ReflData.ON_OFF] = DataSet(ws_name)
                 self._data[ReflData.ON_OFF].load(True, True)
     
             ws_name = self.name.replace("Off_Off", "Off_On")
-            if mtd.workspaceExists(ws_name):
+            if AnalysisDataService.doesExist(ws_name):
                 self._data[ReflData.OFF_ON] = DataSet(ws_name)
                 self._data[ReflData.OFF_ON].load(True, True)
     
             ws_name = self.name.replace("Off_Off", "On_On")
-            if mtd.workspaceExists(ws_name):
+            if AnalysisDataService.doesExist(ws_name):
                 self._data[ReflData.ON_ON] = DataSet(ws_name)
                 self._data[ReflData.ON_ON].load(True, True)
     
@@ -342,7 +339,7 @@ class StitcherWidget(BaseWidget):
             self._content.min_q_unity_edit.setText("%-g" % xmin)
             self._content.max_q_unity_edit.setText("%-g" % xmax)
                 
-        if mtd.workspaceExists(self._workspace_list[refID].name):
+        if AnalysisDataService.doesExist(self._workspace_list[refID].name):
             data_stitching.RangeSelector.connect([self._workspace_list[refID].name], call_back)
             
     def _scale_data_sets(self):
@@ -392,7 +389,7 @@ class StitcherWidget(BaseWidget):
             s.append(ref_data)
         
         if s.size()==0:
-            mtd.sendLogMessage("No data to scale")
+            Logger.get("Stitcher").notice("No data to scale")
             return
         
         s.set_reference(refID)
@@ -473,7 +470,7 @@ class StitcherWidget(BaseWidget):
                                "Off_On", "On_On"]
                     for pol in pol_list:
                         try:
-                            if mtd.workspaceExists('ref_'+pol):
+                            if AnalysisDataService.doesExist('ref_'+pol):
                                 root, ext = os.path.splitext(os.path.basename(fname))
                                 outdir, filename = os.path.split(fname)
                                 outname = "%s_%s.txt" % (root, pol)
@@ -484,7 +481,7 @@ class StitcherWidget(BaseWidget):
                                           Separator="Space")             
                                 file_list.append(file_path)                   
                         except:
-                            mtd.sendLogMessage("Could not save polarization %s" % pol)
+                            Logger.get("Stitcher").notice("Could not save polarization %s" % pol)
             if send_email:
                 self._email_data(file_list)
                 
@@ -536,7 +533,7 @@ class StitcherWidget(BaseWidget):
         # Refresh combo boxes
         if self._settings.instrument_name == "REFL":
             _tmp_workspace_list = []    
-            for item in mtd.keys():
+            for item in AnalysisDataService.getObjectNames():
                 #retrieve workspaces of interest
                 if item.startswith("reflectivity") and item.endswith("ts"):
                     _tmp_workspace_list.append(item)
@@ -557,7 +554,7 @@ class StitcherWidget(BaseWidget):
                     self._add_entry(item)
 
         else: #REF_M
-            for item in mtd.keys():
+            for item in AnalysisDataService.getObjectNames():
                 if item.startswith("reflectivity") and not item.endswith("scaled") and item.find('On_Off')<0 and item.find('Off_On')<0  and item.find('On_On')<0:
                     self._add_entry(item)
                 
