@@ -79,7 +79,8 @@ _blacklist = [
 # Used for sponsors / contributors who should be included, but who are not
 # listed as authors on Git.
 _whitelist = [
-
+    'Taylor, Jon',
+    'Perring, Toby'
 ]
 
 import subprocess
