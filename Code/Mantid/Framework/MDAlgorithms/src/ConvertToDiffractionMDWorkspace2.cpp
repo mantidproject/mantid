@@ -132,7 +132,7 @@ namespace MDAlgorithms
     // disable property on interface
      this->setPropertySettings("ClearInputWorkspace",  new DisabledProperty());
 
-    declareProperty(new PropertyWithValue<bool>("OneEventPerBin", false, Direction::Input),
+    declareProperty(new PropertyWithValue<bool>("OneEventPerBin", true, Direction::Input),
         "Use the histogram representation (event for event workspaces).\n"
         "One MDEvent will be created for each histogram bin (even empty ones).\n"
         "Warning! This can use signficantly more memory!");
