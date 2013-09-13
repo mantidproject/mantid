@@ -1,5 +1,5 @@
 #include "ScriptCode.h"
-#include <Poco/RegularExpression.h>
+#include <boost/regex.hpp>
 
 /// Empty code
 ScriptCode::ScriptCode() : m_code(), m_offset()
@@ -46,6 +46,7 @@ ScriptCode::ScriptCode(const QString & codeStr, const int offset)
  */
 void ScriptCode::convertLineEndingsToUnix()
 {
-  static Poco::RegularExpression nonUnixLineEndings("(\r\n|\r)", Poco::RegularExpression::RE_NEWLINE_ANYCRLF);
-  nonUnixLineEndings.subst(m_code, "\n", Poco::RegularExpression::RE_GLOBAL);
+  // Unify line endings
+  static boost::regex eol("\\R"); // \R is Perl syntax for matching any EOL sequence
+  m_code = boost::regex_replace(m_code, eol, "\n"); // converts all to LF
 }
