@@ -59,7 +59,11 @@ private:
   void processProperties();
 
   /// Set up some constant by default
-  void initConstants(int chopperfrequency);
+  void initConstants(const std::map<unsigned int, std::map<std::string, double> >& profmap);
+
+  /// Set up chopper/instrument constant parameters from profile map
+  boost::shared_ptr<ChopperConfiguration> setupInstrumentConstants(
+      const std::map<unsigned int, std::map<std::string, double> >& profmap);
 
   /// Set up for PG3 chopper constants
   boost::shared_ptr<ChopperConfiguration> setupPG3Constants(int intfrequency);
@@ -102,6 +106,9 @@ private:
 
   /// Load fullprof resolution file.
   void loadFullprofResolutionFile(std::string irffilename);
+
+  /// Calcualte d-space value.
+  double calDspRange(double dtt1, double zero, double tof);
 
   // TODO Replace it with gsl's erfc()
   double erfc(double xx);

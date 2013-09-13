@@ -102,13 +102,19 @@ public:
   bool isInitialized() const;
   /// Has the Python initialization function been run
   bool isPyInitialized() const;
+  
+  // Returns the name of the interface
+  QString interfaceName() const;
 
 signals:
   /// Emitted to start a (generally small) script running
   void runAsPythonScript(const QString& code, bool);
 
-  ///Connects MantidPlot up with the muon analysis custom interface and in turn the fitPropertyBrowser. (Emitted when a new graph is created).
-  void fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&);
+  /// Thrown to attach PP tool to the plot with given name
+  void activatePPTool(const QString& plotName);
+
+  /// Thrown when used fit property browser should be changed to given one
+  void setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* browser);
   
 protected:
   /**@name Virtual Functions */

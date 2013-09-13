@@ -659,6 +659,16 @@ namespace Mantid
       // 'Normalise' by the total time
       return numerator/totalTime;
     }
+    /** Calculates the time-weighted average of a property.
+     *  @return The time-weighted average value of the log.
+     */
+    template<typename TYPE>
+    double TimeSeriesProperty<TYPE>::timeAverageValue() const
+    {
+      TimeSplitterType filter;
+      filter.push_back(SplittingInterval(this->firstTime(), this->lastTime()));
+      return this->averageValueInFilter(filter);
+    }
 
     /** Function specialization for TimeSeriesProperty<std::string>
      *  @throws Kernel::Exception::NotImplementedError always

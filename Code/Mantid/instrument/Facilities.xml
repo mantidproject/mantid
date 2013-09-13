@@ -260,11 +260,8 @@
       <archiveSearch plugin="SNSDataSearchICAT2" />
    </archive>
 
-   <computeResource name="Fermi" type="MWS">
-      <baseURL>https://fermi.ornl.gov/moab</baseURL>
-      <configFileURL>https://fermi.ornl.gov/moab/config.xml</configFileURL>
-      <mpirunExecutable>/usr/lib64/openmpi/bin/mpirun</mpirunExecutable>
-      <pythonExecutable>/usr/bin/python</pythonExecutable>
+   <computeResource name="Fermi">
+      <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
    </computeResource>
 
    <instrument name="DAS"> 

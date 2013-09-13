@@ -1,12 +1,11 @@
 #include "MantidRemoteAlgorithms/QueryAllRemoteJobs.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/MaskedProperty.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidRemote/RemoteJobManager.h"
+#include "MantidKernel/RemoteJobManager.h"
+#include "MantidRemoteAlgorithms/SimpleJSON.h"
 
 #include "boost/make_shared.hpp"
 
@@ -29,28 +28,24 @@ void QueryAllRemoteJobs::init()
 {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string> >();
   auto nullValidator = boost::make_shared<NullValidator>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance().getFacility().computeResources();
   declareProperty( "ComputeResource", "", boost::make_shared<StringListValidator>(computes), "", Direction::Input);
 
-  // TODO: Can we figure out the user name name automatically?
-  declareProperty( "UserName", "", requireValue, "", Direction::Input);
-
-  // Password doesn't get echoed to the screen...
-  declareProperty( new MaskedProperty<std::string>( "Password", "", requireValue, Direction::Input), "");
-
   // Mantid can't store arbitrary structs in its properties, so we're going to declare several
   // array properties for different pieces of data.  Values from the same array index are for
   // the same job.
   declareProperty( new ArrayProperty<std::string>("JobId", nullValidator, Direction::Output));
   declareProperty( new ArrayProperty<std::string>("JobStatusString", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<int>("JobStatusNum", nullValidator, Direction::Output));
   declareProperty( new ArrayProperty<std::string>("JobName", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("JobStartTime", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("JobCompletionTime", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("ScriptName", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("TransID", nullValidator, Direction::Output));
+
+// These aren't implemented on the server side, yet
+//  declareProperty( new ArrayProperty<std::string>("JobStartTime", nullValidator, Direction::Output));
+//  declareProperty( new ArrayProperty<std::string>("JobCompletionTime", nullValidator, Direction::Output));
 }
 
 void QueryAllRemoteJobs::exec()
@@ -65,41 +60,65 @@ void QueryAllRemoteJobs::exec()
     throw( std::runtime_error( std::string("Unable to create a compute resource named " + getPropertyValue("ComputeResource"))));
   }
 
-  // Set the username and password from the properties
-  jobManager->setUserName( getPropertyValue ("UserName"));
-  jobManager->setPassword( getPropertyValue( "Password"));
+  std::istream &respStream = jobManager->httpGet("/query");
+  JSONObject resp;
+  try {
+  initFromStream( resp, respStream);
+  } catch (JSONParseException &ex) {
+    // Nobody else knows what a JSONParseException is, so rethrow as a runtime_error
+    throw( std::runtime_error( "Error parsing data returned from the server.  This probably indicates a server-side error of some kind."));
+  }
 
-  std::string errMsg;
-  std::vector<RemoteJob> jobList;
-
-  if (jobManager->jobStatusAll( jobList, errMsg))
+  if (jobManager->lastStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
     std::vector<std::string> jobIds;
     std::vector<std::string> jobStatusStrs;
-    std::vector<int> jobStatusNums;
     std::vector<std::string> jobNames;
-    std::vector<std::string> jobStartTimes;
-    std::vector<std::string> jobCompletionTimes;
-    for (unsigned i = 0; i < jobList.size(); i++)
+    std::vector<std::string> scriptNames;
+    std::vector<std::string> transIds;
+
+// These haven't been implemented on the server side yet
+//    std::vector<std::string> jobStartTimes;
+//    std::vector<std::string> jobCompletionTimes;
+
+    JSONObject::const_iterator it = resp.begin();
+    while (it != resp.end())
     {
-      jobIds.push_back(jobList[i].m_jobId);
-      jobStatusStrs.push_back( jobList[i].statusString());
-      jobStatusNums.push_back((int)jobList[i].m_status);
-      jobNames.push_back(jobList[i].m_algName);
-      jobStartTimes.push_back(jobList[i].m_startTime.toISO8601String());
-      jobCompletionTimes.push_back(jobList[i].m_completionTime.toISO8601String());
+      jobIds.push_back( (*it).first);
+      JSONObject jobData;
+      (*it).second.getValue(jobData);
+
+      std::string value;
+      jobData["JobStatus"].getValue( value);
+      jobStatusStrs.push_back( value);
+
+      jobData["JobName"].getValue( value);
+      jobNames.push_back(value);
+
+      jobData["ScriptName"].getValue( value);
+      scriptNames.push_back(value);
+
+      jobData["TransID"].getValue( value);
+      transIds.push_back(value);
+
+      it++;
     }
 
     setProperty( "JobId", jobIds);
     setProperty( "JobStatusString", jobStatusStrs);
-    setProperty( "JobStatusNum", jobStatusNums);
     setProperty( "JobName", jobNames);
-    setProperty( "JobStartTime", jobStartTimes);
-    setProperty( "JobCompletionTime", jobCompletionTimes);
+    setProperty( "ScriptName", scriptNames);
+    setProperty( "TransID", transIds);
+
+//    setProperty( "JobStartTime", jobStartTimes);
+//    setProperty( "JobCompletionTime", jobCompletionTimes);
+
   }
   else
   {
-    throw( std::runtime_error( "Error querying remote jobs: " + errMsg));
+    std::string errMsg;
+    resp["Err_Msg"].getValue( errMsg);
+    throw( std::runtime_error( errMsg));
   }
   
 }

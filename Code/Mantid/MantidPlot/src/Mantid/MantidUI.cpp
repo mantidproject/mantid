@@ -17,9 +17,11 @@
 #include "../ScriptingWindow.h"
 
 #include "MantidKernel/Property.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/UnitConversion.h"
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -34,7 +36,6 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-
 
 #include <QMessageBox>
 #include <QTextEdit>
@@ -54,16 +55,22 @@
 #include <windows.h>
 #endif
 
+#include <algorithm>
+#include <locale>
 #include <set>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+#include <boost/tokenizer.hpp>
+
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
 #include "MantidQtImageViewer/MatrixWSImageView.h"
+#include <typeinfo>
 
 using namespace std;
 
@@ -185,19 +192,22 @@ void MantidUI::init()
   Mantid::Kernel::ConfigService::Instance().addObserver(m_configServiceObserver);
 
   m_exploreAlgorithms->update();
+
   try
   {
-    m_fitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
-    m_fitFunction->init();
+    m_defaultFitFunction = new MantidQt::MantidWidgets::FitPropertyBrowser(m_appWindow, this);
+    m_defaultFitFunction->init();
         // this make the progress bar work with Fit algorithm running form the fit browser
-    connect(m_fitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
-      this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
-    m_fitFunction->hide();
-    m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_fitFunction );
+    connect(m_defaultFitFunction,SIGNAL(executeFit(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)),
+            this,SLOT(executeAlgorithm(QString,QMap<QString,QString>,Mantid::API::AlgorithmObserver*)));
+    m_defaultFitFunction->hide();
+    m_appWindow->addDockWidget( Qt::LeftDockWidgetArea, m_defaultFitFunction );
 
+    m_fitFunction = m_defaultFitFunction;
   }
   catch(...)
   {
+    m_defaultFitFunction = NULL;
     m_fitFunction = NULL;
     showCritical("The curve fitting plugin is missing");
   }
@@ -298,6 +308,8 @@ MantidUI::~MantidUI()
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
+
+  delete m_fitFunction;
 }
 
 void MantidUI::saveSettings() const
@@ -1000,21 +1012,39 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
  * @param indices :: Limit the table to these workspace indices
  * @param include_data :: If true then first value from the each spectrum is displayed
  */
-Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws, 
+Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws,
                                      const std::vector<int>& indices, bool include_data)
 {
   using namespace Mantid::Geometry;
+
+  //check if efixed value is available
+  bool calcQ(true);
+  try
+  {
+    auto detector = ws->getDetector(0);
+    ws->getEFixed(detector);
+  } catch(std::runtime_error&)
+  {
+    calcQ = false;
+  }
+
   // Prepare column names. Types will be determined from QVariant
   QStringList colNames;
   colNames << "Index" << "Spectrum No" << "Detector ID(s)";
   if( include_data )
   {
-    colNames << "Data Value" << "Data Error";  
+    colNames << "Data Value" << "Data Error";
   }
-  colNames << "R" << "Theta" << "Phi" << "Monitor";
-  
+
+  colNames << "R" << "Theta";
+  if(calcQ)
+  {
+    colNames << "Q";
+  }
+  colNames << "Phi" << "Monitor";
+
   const int ncols = static_cast<int>(colNames.size());
-  const int nrows = indices.empty()? static_cast<int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
+  const int nrows = indices.empty()? static_cast <int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
   Table* t = new Table(appWindow()->scriptingEnv(), nrows, ncols, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
   // Set the column names
@@ -1090,7 +1120,28 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::
       {
         colValues << QVariant(dataY0) << QVariant(dataE0); // data
       }
-      colValues << QVariant(R) << QVariant(theta) << QVariant(phi) // rtp
+      colValues << QVariant(R) << QVariant(theta);
+
+      if(calcQ)
+      {
+
+        double efixed(0.0), usignTheta(0.0);
+        try
+        {
+          // Get unsigned theta and efixed value
+          efixed = ws->getEFixed(det);
+          usignTheta = ws->detectorTwoTheta(det)/2.0;
+
+          double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+          colValues << QVariant(q);
+        }
+        catch (std::runtime_error&)
+        {
+          colValues << QVariant("No Efixed");
+        }
+      }
+
+      colValues << QVariant(phi) // rtp
                 << QVariant(isMonitor);         // monitor
     }
     catch(...)
@@ -1627,6 +1678,15 @@ void MantidUI::renameWorkspace(QStringList wsName)
   }
 
 }
+
+void MantidUI::setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* newBrowser)
+{
+  if(newBrowser == NULL)
+    m_fitFunction = m_defaultFitFunction;
+  else
+    m_fitFunction = newBrowser;
+}
+
 void MantidUI::groupWorkspaces()
 {
   try

@@ -72,7 +72,7 @@ class ReflData(object):
         
         if parent_layout is not None:
             parent_layout.addLayout(self._layout)
-            parent_layout.connect(self._edit_ctrl, QtCore.SIGNAL("returnPressed()"), self._scale_updated)
+            parent_layout.connect(self._edit_ctrl, QtCore.SIGNAL("returnPressed()"), self._return_pressed)
             #parent_layout.connect(self._radio, QtCore.SIGNAL("toggled()"), self._reference_updated)
         
     def is_selected(self):
@@ -95,6 +95,11 @@ class ReflData(object):
                     xmax = _xmax
         return xmin, xmax
         
+    def _return_pressed(self):
+        self._scale_updated()
+        if self._call_back is not None:
+            self._call_back()
+        
     def _scale_updated(self):
         """
             Called when the scaling factors are updated
@@ -107,10 +112,7 @@ class ReflData(object):
                     item.set_scale(self._scale)
                     item.apply_scale(xmin=xmin, xmax=xmax)
                 except:
-                    pass
-            
-        if self._call_back is not None:
-            self._call_back()
+                    pass            
             
     def delete(self):
         if self._radio is not None:
@@ -238,7 +240,7 @@ class StitcherWidget(BaseWidget):
         # Apply and save buttons
         self.connect(self._content.pick_unity_range_btn, QtCore.SIGNAL("clicked()"), self._pick_specular_ridge)        
         self.connect(self._content.auto_scale_btn, QtCore.SIGNAL("clicked()"), self._apply)        
-        self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._save_result)
+        self.connect(self._content.save_btn, QtCore.SIGNAL("clicked()"), self._set_unity_scale)
         self._content.min_q_unity_edit.setText("0.00")
         self._content.max_q_unity_edit.setText("0.01")
         self._content.max_q_unity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_q_unity_edit))
@@ -265,7 +267,21 @@ class StitcherWidget(BaseWidget):
             self.radio_group.addButton(self._content.on_off_radio)
             self.radio_group.addButton(self._content.on_on_radio)
             self.radio_group.setExclusive(True)
-                 
+
+    def _set_unity_scale(self):
+        """ 
+            Set scaling factors to reference
+        """
+        ref= 0
+        for item in self._workspace_list:
+            if item.is_selected():
+                ref = item.get_scale()
+                break
+        for item in self._workspace_list:
+            item.set_scale(ref)
+        self.plot_result()
+        
+
     def _email_options_changed(self):
         """
             Send-email checkbox has changed states
@@ -279,6 +295,7 @@ class StitcherWidget(BaseWidget):
         
     def _add_entry(self, workspace):
         entry = ReflData(workspace, parent_layout=self._content.angle_list_layout)
+        entry.connect_to_scale(self.plot_result)
         self._workspace_list.append(entry)
 
     def is_running(self, is_running):

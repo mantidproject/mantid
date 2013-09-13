@@ -8,6 +8,7 @@
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include <cmath>
+#include <iosfwd>
 #include <vector>
 
 namespace Mantid
@@ -173,6 +174,8 @@ namespace Geometry
       void calculateReciprocalLattice();
       void calculateB();
   };
+
+  MANTID_GEOMETRY_DLL std::ostream& operator<<(std::ostream &out, const UnitCell& unitCell);
 } // namespace Mantid
 } // namespace Geometry
 

@@ -305,6 +305,7 @@ set ( TEST_FILES
 	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
 	LiveListenerFactoryTest.h
+        LogManagerTest.h
 	MDGeometryTest.h
 	MatrixWorkspaceMDIteratorTest.h
 	MemoryManagerTest.h

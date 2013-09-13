@@ -66,6 +66,7 @@ find_package ( ZLIB REQUIRED )
 set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
 
 find_package ( PythonInterp )
+
 if ( MSVC )
   # Wrapper script to call either python or python_d depending on directory contents
   set ( PYTHON_EXE_WRAPPER_SRC "${CMAKE_MODULE_PATH}/../win_python.bat" )

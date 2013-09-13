@@ -1,8 +1,9 @@
-from numpy import zeros, arctan2, arange, shape, sqrt
+from numpy import zeros, arctan2, arange, shape, sqrt, fliplr, asfarray, where, mean, sum
 from mantid.simpleapi import *
 # from MantidFramework import *
 import math
 import os.path
+import sys
 
 h = 6.626e-34 #m^2 kg s^-1
 m = 1.675e-27 #kg
@@ -139,11 +140,11 @@ def getS2w(mt=None):
     return None
 
 
-def getLambdaValue(mt):
+def getLambdaValue(mt_name):
     """
     return the lambdaRequest value
     """
-    mt_run = mt.getRun()
+    mt_run = mtd[mt_name].getRun()
     _lambda = mt_run.getProperty('LambdaRequest').value
     return _lambda
 
@@ -287,7 +288,7 @@ def createIntegratedWorkspace(mt1,
     
     y_size = toYpixel - fromYpixel + 1
     y_range = arange(y_size) + fromYpixel
-    
+
     for x in x_range:
         for y in y_range:
             _index = int((maxY) * x + y)
@@ -306,6 +307,11 @@ def createIntegratedWorkspace(mt1,
                                       ParentWorkspace=mt1.name())
     
     return outputWorkspace
+
+
+
+
+
     
 def convertWorkspaceToQ(ws_data,
                         fromYpixel, toYpixel,
@@ -585,9 +591,11 @@ def getQHisto(source_to_detector, theta, tof_array):
     
     return q_array
 
-def ref_beamdiv_correct(cpix, mt, det_secondary,
+def ref_beamdiv_correct(cpix, det_secondary,
                         pixel_index,
-                        pixel_width=0.0007):
+                        pixel_width = 0.0007,
+                        first_slit_size = None,
+                        last_slit_size = None):
     """
     This function calculates the acceptance diagram, determines pixel overlap
     and computes the offset to the scattering angle.
@@ -600,10 +608,8 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
     if cpix is None:
         cpix = 133.5
         
-#    first_slit_size = getS1h(mt)
-    first_slit_size = getSheight(mt, '1')
-#    last_slit_size = getS2h(mt)
-    last_slit_size = getSheight(mt,'2')
+#     first_slit_size = getSheight(mt, '1')
+#     last_slit_size = getSheight(mt,'2')
     
     last_slit_dist = 0.654 #m
     slit_dist = 0.885000050068 #m
@@ -907,3 +913,1068 @@ def _applySFtoArray(workspace, a, b, a_error, b_error):
 
     return workspace
         
+def loadNeXus(runNumbers, type):
+    """
+    will retrieve the data from the runNumbers specify and will 
+    add them or just return the workspace created
+    """
+    
+    wks_name = ''
+    if (type == 'data'):
+        wks_name = 'ws_event_data'
+    else:
+        wks_name = 'ws_event_norm'
+    
+    print '-> loading ', type
+    if (type == 'data') and len(runNumbers) > 1:
+        
+        _list = []
+        for _run in runNumbers:
+            _list.append(str(_run))
+        list_run = ','.join(_list)
+        print '--> working with runs: ' + str(list_run)
+
+        _index = 0            
+        for _run in runNumbers:
+
+        # Find full path to event NeXus data file
+            try:
+                data_file = FileFinder.findRuns("REF_L%d" %_run)[0]
+            except RuntimeError:
+                msg = "RefLReduction: could not find run %d\n" % _run
+                msg += "Add your data folder to your User Data Directories in the File menu"
+                raise RuntimeError(msg)
+                
+            if _index == 0:
+                ws_event_data = LoadEventNexus(Filename=data_file,OutputWorskpace=wks_name)
+                _index += 1
+            else:
+                tmp = LoadEventNexus(Filename=data_file)
+                Plus(LHSWorkspace=ws_event_data,
+                     RHSWorkspace=tmp, 
+                     OutputWorkspace=wks_name)
+                DeleteWorkspace(tmp)
+    else:
+
+        print '--> Working with run: ' + str(runNumbers)
+            
+        try:
+            data_file = FileFinder.findRuns("REF_L%d" %runNumbers)[0]
+        except RuntimeError:
+            msg = "RefLReduction: could not find run %d\n" %runNumbers[0]
+            msg += "Add your data folder to your User Data Directories in the File menu"
+            raise RuntimeError(msg)
+
+        ws_event_data = LoadEventNexus(Filename=data_file, OutputWorkspace=wks_name)
+    
+    return ws_event_data
+    
+def rebinNeXus(inputWorkspace, params, type):
+    """
+    will rebin the event workspace according to the params
+    params[0]: min value
+    params[1]: bin size
+    params[2]: max value
+    """
+    print '--> rebin ', type 
+    ws_histo_data = Rebin(InputWorkspace=inputWorkspace,
+                          Params=params,         
+                          PreserveEvents=True);
+    return ws_histo_data
+     
+def cropTOF(inputWorkspace, min, max, type): 
+    """ 
+    will crop the nexus (workspace) using min and max value 
+    used here to crop the TOF range
+    """
+    print '--> crop ' , type , ' workspace in TOF'
+    ws_histo_data = CropWorkspace(InputWorkspace = inputWorkspace,
+                                      XMin = min,
+                                      XMax = max)
+    return ws_histo_data
+    
+def normalizeNeXus(inputWorkspace, type):
+    """ 
+    normalize nexus by proton charge
+    """
+    print '--> normalize ', type
+    ws_histo_data = NormaliseByCurrent(InputWorkspace=inputWorkspace)
+    return ws_histo_data
+    
+def integrateOverLowResRange(mt1, 
+                            dataLowResRange,
+                            type):
+    """
+        This creates the integrated workspace over the low resolution range leaving
+        us with a [256,nbr TOF] workspace
+        returns the new workspace handle
+        BUT this algorithm also makes sure that the error value is 1 when counts
+        is 0 !
+    """
+
+    print '--> integrated over low res range of ', type
+    _tof_axis = mt1.readX(0)[:].copy()
+    nbr_tof = len(_tof_axis)
+#     t_range = arange(nbr_tof-1)
+    
+    # -1 to work with index directly
+    fromXpixel = min(dataLowResRange) - 1
+    toXpixel = max(dataLowResRange) - 1
+    
+    _y_axis = zeros((256, len(_tof_axis) - 1))
+    _y_error_axis = zeros((256, len(_tof_axis) - 1))
+
+    x_size = toXpixel - fromXpixel + 1 
+    x_range = arange(x_size) + fromXpixel
+    
+    y_range = range(256)
+
+    for x in x_range:
+        for y in y_range:
+            _index = int((256) * x + y)
+            _y_axis[y, :] += mt1.readY(_index)[:].copy()
+            
+            _tmp_error_axis = mt1.readE(_index)[:].copy()
+            # 0 -> 1
+#             index_where_0 = where(_tmp_error_axis == 0)
+#             _tmp_error_axis[index_where_0] = 1
+            
+            _y_error_axis[y, :] += _tmp_error_axis * _tmp_error_axis
+#             _y_error_axis[y, :] += ((mt1.readE(_index)[:]) * (mt1.readE(_index)[:]))
+
+    _y_error_axis = sqrt(_y_error_axis)
+
+    return [_tof_axis, _y_axis, _y_error_axis]
+
+def substractBackground(tof_axis, y_axis, y_error_axis,
+                        peakRange, backFlag, backRange,
+                        type):
+    """
+    shape of y_axis : [256, nbr_tof]
+    This routine will calculate the background, remove it from the peak
+    and will return only the range of peak  -> [peak_size, nbr_tof]
+    
+    """
+    
+    # give a friendly name to peak and back ranges
+    # -1 because we are working with 0 index arrays
+    peakMin = peakRange[0]-1
+    peakMax = peakRange[1]-1
+    backMin = backRange[0]-1
+    backMax = backRange[1]-1
+
+    if not backFlag:
+        print '---> no ', type, ' background requested!'
+        return [y_axis[peakMin:peakMax+1,:], y_error_axis[peakMin:peakMax+1,:]]
+
+    print '--> background subtraction of ', type
+    
+    # retrieve data
+    _tofAxis = tof_axis
+    nbrTof = len(_tofAxis)
+    
+    # by default, no space for background subtraction below and above peak
+    bMinBack = False
+    bMaxBack = False
+        
+    # size peak
+    szPeak = peakMax - peakMin + 1
+    
+    # init arrays
+    minBack = []
+    minBackError = []
+    maxBack = []
+    maxBackError = []
+    
+#     peakArray = zeros(nbrTof, szPeak)
+#     peakErrorArray = zeros(nbrTof, szPeak)
+
+    final_y_axis = zeros((szPeak, nbrTof))
+    final_y_error_axis = zeros((szPeak, nbrTof))
+
+    for t in range(nbrTof):
+
+        if backMin < (peakMin):
+            bMinBack = True
+            _backMinArray = y_axis[backMin:peakMin, t]
+            _backMinErrorArray = y_error_axis[backMin:peakMin, t]
+            [_backMin, _backMinError] = weightedMean(_backMinArray,
+                                                          _backMinErrorArray)
+             
+        if (peakMax) < backMax:
+            bMaxBack = True
+            _backMaxArray = y_axis[peakMax+1:backMax+1, t]
+
+            _backMaxErrorArray = y_error_axis[peakMax+1:backMax+1, t]
+            [_backMax, _backMaxError] = weightedMean(_backMaxArray, _backMaxErrorArray)    
+    
+        # if no max background use min background
+        if not bMaxBack:
+            background = _backMin
+            background_error = _backMinError
+        
+        # if no min background use max background
+        if not bMinBack:
+            background = _backMax
+            background_error = _backMaxError
+            
+        if bMinBack and bMaxBack:
+            [background, background_error] = weightedMean([_backMin, _backMax], [_backMinError, _backMaxError])
+        
+        # remove background for each pixel of the peak
+        for x in range(szPeak):
+            final_y_axis[x,t] = float(y_axis[peakMin + x,t]) - float(background)
+            final_y_error_axis[x,t] = float(math.sqrt(pow(y_error_axis[peakMin+x,t],2) + pow(background_error,2)))
+    
+#         if t == nbrTof-2:
+#             print float(y_axis[peakMin + x,t]) - float(background)
+    
+    return [final_y_axis, final_y_error_axis]
+
+def weightedMean(data_array, error_array):
+    
+    sz = len(data_array)
+    
+    # calculate the numerator of mean
+    dataNum = 0;
+    for i in range(sz):
+        if not (data_array[i] == 0):
+            tmpFactor = float(data_array[i]) / float((pow(error_array[i],2)))
+            dataNum += tmpFactor
+    
+    # calculate denominator
+    dataDen = 0;
+    for i in range(sz):
+        if not (error_array[i] == 0):
+            tmpFactor = 1./float((pow(error_array[i],2)))
+            dataDen += tmpFactor
+
+    if dataDen == 0:
+        mean = 0
+        mean_error = 0
+    else:            
+        mean = float(dataNum) / float(dataDen)
+        mean_error = math.sqrt(1/dataDen)     
+
+    return [mean, mean_error]
+
+def weightedMeanOfRange(norm_y_axis, norm_y_error_axis):
+    """
+    will calculate the weighted Mean of the region given
+    """
+        
+    # get nbr tof
+    dim = norm_y_axis.shape
+    nbr_tof = dim[1]
+    
+    final_array = zeros(nbr_tof)
+    final_array_error = zeros(nbr_tof)
+    
+    for t in range(nbr_tof):
+        _tmp_range = norm_y_axis[:, t]
+        _tmp_range_error = norm_y_error_axis[:,t]
+        [_mean,_mean_error] = weightedMean(_tmp_range, _tmp_range_error)
+        final_array[t] = _mean
+        final_array_error[t] = _mean_error
+    
+    return [final_array, final_array_error]
+
+def meanOfRange(norm_y_axis, norm_y_error_axis):
+    """
+    will calculate the mean of range 
+    """
+    
+    # get nbr tof
+    dim = norm_y_axis.shape
+    nbr_tof = dim[1]
+    
+    final_array = zeros(nbr_tof)
+    final_array_error = zeros(nbr_tof)
+    
+    for t in range(nbr_tof):
+        _tmp_range = norm_y_axis[:,t]
+        _tmp_range_error = norm_y_error_axis[:,t]
+        [_mean,_mean_error] = myMean(_tmp_range, _tmp_range_error)
+        final_array[t] = _mean
+        final_array_error[t] = _mean_error
+        
+    return [final_array, final_array_error]
+        
+def myMean(data_array, error_array):    
+    
+    sz=size(data_array)
+    
+    _mean = mean(data_array)
+    _mean_error = sqrt(sum(_mean*_mean))/float(sz[0])
+
+    return [_mean, _mean_error]
+
+def divideDataByNormalization(data_y_axis,
+                              data_y_error_axis,
+                              av_norm,
+                              av_norm_error):
+    
+    print '-> divide data by normalization'
+    
+    data_size = data_y_axis.shape
+    nbr_pixel = data_size[0]
+    nbr_tof = data_size[1]
+
+    new_data_y_axis = zeros((nbr_pixel, nbr_tof))
+    new_data_y_error_axis = zeros((nbr_pixel, nbr_tof))
+    
+    for t in range(nbr_tof):
+        for x in range(nbr_pixel):
+            
+            if (not av_norm[t] == 0) and (not data_y_axis[x,t] == 0) :
+                                
+                tmp_value = float(data_y_axis[x,t]) / float(av_norm[t])
+            
+                tmp_error_1 = pow(float(data_y_error_axis[x,t]) / float(data_y_axis[x,t]),2)
+                tmp_error_2 = pow(float(av_norm_error[t]) / float(av_norm[t]),2)
+                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * (float(data_y_axis[x,t]) / float(av_norm[t]))
+            
+#                 if t == 61:
+#                     print 'data_y_error_axis[x,t]: ' , float(data_y_error_axis[x,t])
+#                     print 'data_y_axis[x,t]: ' , float(data_y_axis[x,t])
+#                     print 'tmp_error_1: ' , tmp_error_1
+#                     print 'av_norm_error[t]: ' , av_norm_error[t]
+#                     print 'av_norm[t]: ' , av_norm[t]
+#                     print 'tmp_error_2: ' , tmp_error_2
+#                     print 'tmp_error: ' , tmp_error
+#                     print
+
+                new_data_y_axis[x,t] = tmp_value
+                new_data_y_error_axis[x,t] = tmp_error
+    
+    return [new_data_y_axis, new_data_y_error_axis]
+    
+def sumWithError(value, error):
+    """ will sume the array of values and will return the sum and the
+    error that goes with it
+    """
+    
+    sum_value = sum(value)
+    
+    tmp_sum_error = 0
+    for i in range(len(value)):
+        tmp_value = pow(error[i],2)
+        tmp_sum_error += tmp_value
+    
+    sum_error = math.sqrt(tmp_sum_error)
+    
+    return [sum_value, sum_error]
+    
+def integratedOverPixelDim(data_y_axis, data_y_error_axis):
+
+    size = data_y_axis.shape
+    nbr_pixel = size[0]
+    nbr_tof = size[1]
+    
+    final_data = zeros(nbr_tof)
+    final_data_error = zeros(nbr_tof)
+    for t in range(nbr_tof):
+        [data, error] = sumWithError(data_y_axis[:,t], data_y_error_axis[:,t])
+        final_data[t] = data
+        final_data_error[t] = error
+    
+    return [final_data, final_data_error]
+
+def fullSumWithError(data_y_axis, data_y_error_axis):
+    size = data_y_axis.shape
+    nbr_pixel = size[0]
+    nbr_tof = size[1]
+    
+    final_data = zeros(nbr_tof)
+    final_data_error = zeros(nbr_tof)
+    for t in range(nbr_tof):
+        [data, error] = sumWithError(data_y_axis[:,t], data_y_error_axis[:,t])
+        final_data[t] = data
+        final_data_error[t] = error
+    
+    return [final_data, final_data_error]
+
+def ouput_ascii_file(file_name,
+                     x_axis,
+                     y_axis, 
+                     y_error_axis):
+
+    f=open(file_name,'w')
+    
+    sz_x_axis = len(x_axis)
+    for i in range(sz_x_axis-1):
+        f.write(str(x_axis[i]) + "," + str(y_axis[i]) + "," + str(y_error_axis[i]) + "\n");
+    
+    f.close
+      
+def ouput_big_ascii_file(file_name, 
+                         x_axis,
+                         y_axis,
+                         y_error_axis):
+      
+    f=open(file_name,'w')
+      
+    sz = y_axis.shape # (nbr_pixel, nbr_tof)
+    nbr_tof = sz[1]
+    nbr_pixel = sz[0]
+      
+    for t in range(nbr_tof):
+        _tmp_str = str(x_axis[t])
+        for x in range(nbr_pixel):
+            _tmp_str += ' ,' + str(y_axis[x,t]) + " ," + str(y_error_axis[x,t])
+              
+        _tmp_str += '\n'
+        f.write(_tmp_str)
+
+    f.close
+      
+
+
+def ouput_big_Q_ascii_file(file_name, 
+                         x_axis,
+                         y_axis,
+                         y_error_axis):
+      
+    print x_axis.shape
+    print y_axis.shape
+    print y_error_axis.shape
+      
+      
+    f=open(file_name,'w')
+      
+    sz = y_axis.shape # (nbr_pixel, nbr_tof)
+    nbr_tof = sz[1]
+    nbr_pixel = sz[0]
+      
+    for t in range(nbr_tof):
+        _tmp_str = ''
+        for x in range(nbr_pixel):
+            _tmp_str += str(x_axis[x,t]) +  ',' + str(y_axis[x,t]) + " ," + str(y_error_axis[x,t]) + ',,' 
+        _tmp_str += '\n'
+        f.write(_tmp_str)
+
+    f.close
+      
+        
+def divideData1DbyNormalization(inte_data_y_axis, 
+                                inte_data_y_error_axis,
+                                av_norm,
+                                av_norm_error):     
+        
+    print '-> divide data by normalization'
+    
+    nbrPixel = inte_data_y_axis.shape
+    
+    final_data = zeros(nbrPixel)
+    final_data_error = zeros(nbrPixel)
+    
+    for x in range(nbrPixel[0]):
+        if not av_norm[x] == 0:
+            
+            final_data[x] = inte_data_y_axis[x] / av_norm[x]
+        
+            tmp1 = pow(float(inte_data_y_error_axis[x]) / float(inte_data_y_axis[x]),2)
+            tmp2 = pow(float(av_norm_error[x]) / float(av_norm[x]),2)
+            tmp_error = sqrt(tmp1 + tmp2) * (float(inte_data_y_axis[x] / av_norm[x]))
+        
+            final_data_error[x] = tmp_error
+    
+    return [final_data, final_data_error]
+
+def applyScalingFactor(tof_axis, 
+                       y_data,
+                       y_data_error,
+                       incident_medium,
+                       sf_file,
+                       valuePrecision,
+                       slitsWidthFlag):
+    """" 
+    function that apply scaling factor to data using sfCalculator.txt
+    file created by the sfCalculator procedure
+    """
+    #sf_file = 'NaN'
+    if (os.path.isfile(sf_file)):
+    
+        print '-> scaling factor file FOUND! (', sf_file, ')'
+    
+        #parse file and put info into array
+        f = open(sf_file, 'r')
+        sfFactorTable = []
+        for line in f.read().split('\n'):
+            if (len(line) > 0 and line[0] != '#'):
+                sfFactorTable.append(line.split(' '))
+        f.close()
+    
+        sz_table = shape(sfFactorTable)
+        nbr_row = sz_table[0]
+        
+        _incidentMedium = incident_medium.strip()
+
+        _lr = getLambdaValue('ws_event_data')
+        _lr_value = _lr[0]
+        _lr_value = float("{0:.2f}".format(_lr_value))
+
+        #retrieve s1h and s2h values
+        s1h = getS1h(mtd['ws_event_data'])
+        s2h = getS2h(mtd['ws_event_data'])
+        
+        s1h_value = abs(s1h)
+        s2h_value = abs(s2h)
+     
+        #retrieve s1w and s2w values
+        s1w = getS1w(mtd['ws_event_data'])
+        s2w = getS2w(mtd['ws_event_data'])
+        
+        s1w_value = abs(s1w)
+        s2w_value = abs(s2w)
+        
+        print '--> Data Lambda Requested: {0:2f}'.format(_lr_value)
+        print '--> Data S1H: {0:2f}'.format(s1h_value)
+        print '--> Data S2H: {0:2f}'.format(s2h_value)
+        print '--> Data S1W: {0:2f}'.format(s1w_value)
+        print '--> Data S2W: {0:2f}'.format(s2w_value)
+
+        for i in range(nbr_row):
+            
+            _file_incidentMedium = getFieldValue(sfFactorTable,i,0)
+            if (_file_incidentMedium.strip() == _incidentMedium.strip()):
+                _file_lambdaRequested = getFieldValue(sfFactorTable,i,1)
+                if (isWithinPrecisionRange(_file_lambdaRequested, 
+                                           _lr_value, 
+                                           valuePrecision)):
+                    _file_s1h = getFieldValue(sfFactorTable,i,2)
+                    if(isWithinPrecisionRange(_file_s1h,
+                                              s1h_value,
+                                              valuePrecision)):
+                        _file_s2h = getFieldValue(sfFactorTable,i,3)
+                        if(isWithinPrecisionRange(_file_s2h,
+                                                  s2h_value,
+                                                  valuePrecision)):
+                            if (slitsWidthFlag):
+                                _file_s1w = getFieldValue(sfFactorTable,i,4)
+                                if(isWithinPrecisionRange(_file_s1w,
+                                                          s1w_value,
+                                                          valuePrecision)):
+                                    _file_s2w = getFieldValue(sfFactorTable,i,5)
+                                    if(isWithinPrecisionRange(_file_s2w,
+                                                              s2w_value,
+                                                              valuePrecision)):
+                            
+                                        print '--> Found a perfect match'
+                                        a = float(getFieldValue(sfFactorTable,i,6))
+                                        b = float(getFieldValue(sfFactorTable,i,7))  
+                                        a_error = float(getFieldValue(sfFactorTable,i,8))
+                                        b_error = float(getFieldValue(sfFactorTable,i,9))
+                
+                                        [y_data, y_data_error] = applyScalingFactorToArray(tof_axis, 
+                                                                                           y_data,
+                                                                                           y_data_error,
+                                                                                           a, b, 
+                                                                                           a_error, b_error)
+
+                                        return [tof_axis, y_data, y_data_error]
+
+                            else:
+                                    
+                                print '--> Found a perfect match'
+                                a = float(getFieldValue(sfFactorTable,i,6))
+                                b = float(getFieldValue(sfFactorTable,i,7))  
+                                a_error = float(getFieldValue(sfFactorTable,i,8))
+                                b_error = float(getFieldValue(sfFactorTable,i,9))
+                
+                                [y_data, y_data_error] = applyScalingFactorToArray(tof_axis,
+                                                                                   y_data, 
+                                                                                   y_data_error,
+                                                                                   a, b, 
+                                                                                   a_error, b_error)
+
+        return [tof_axis, y_data, y_data_error]
+
+    else:
+        
+        print '-> scaling factor file for requested lambda NOT FOUND!'
+        return [tof_axis, y_data, y_data_error]
+
+def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_error):
+    """
+    This function will create for each x-axis value the corresponding
+    scaling factor using the formula y=a+bx and 
+    """
+    
+    x_axis = tof_axis    
+    nbr_tof = len(x_axis)-1
+    x_axis_factors = zeros(nbr_tof)
+    x_axis_factors_error = zeros(nbr_tof)
+    for i in range(nbr_tof):
+        _x_value = float(x_axis[i])
+        _factor = _x_value * b + a
+        x_axis_factors[i] = _factor
+        _factor_error = _x_value * b_error + a_error
+        x_axis_factors_error[i] = _factor_error 
+
+    sz = y_data.shape
+    nbr_pixel = sz[0]
+    final_y_data = zeros((nbr_pixel, nbr_tof))
+    final_y_data_error = zeros((nbr_pixel, nbr_tof))
+    for x in range(nbr_pixel):
+        
+        [ratio_array, ratio_array_error] = divideArrays(y_data[x,:], 
+                                                        y_data_error[x,:], 
+                                                        x_axis_factors, 
+                                                        x_axis_factors_error)
+        
+        final_y_data[x,:] = ratio_array[:]
+        final_y_data_error[x,:] = ratio_array_error
+
+    return [final_y_data, final_y_data_error]
+
+def divideArrays(num_array, num_error_array, den_array, den_error_array):
+    """
+    This function calculates the ratio of two arrays and calculate the
+    respective error values
+    """
+    
+    sz = num_array.shape
+    nbr_elements = sz[0]
+    
+    # calculate the ratio array
+    ratio_array = zeros(nbr_elements)
+    for i in range(nbr_elements):
+        if den_array[i] is 0:
+            _tmp_ratio = 0
+        else:
+            _tmp_ratio = num_array[i] / den_array[i]
+        ratio_array[i] = _tmp_ratio
+        
+    # calculate the error of the ratio array
+    ratio_error_array = zeros(nbr_elements)
+    for i in range(nbr_elements):
+        
+        if (num_array[i] == 0) or (den_array[i] == 0): 
+            ratio_error_array[i] = 0 
+        else:
+            tmp1 = pow(num_error_array[i] / num_array[i],2)
+            tmp2 = pow(den_error_array[i] / den_array[i],2)
+            ratio_error_array[i] = sqrt(tmp1+tmp2)*(num_array[i]/den_array[i])
+
+    return [ratio_array, ratio_error_array]
+
+def getCentralPixel(ws_event_data, dataPeakRange):
+    """
+    This function will calculate the central pixel position
+    """
+    
+    pixelXtof_data = getPixelXTOF(ws_event_data, maxX=304, maxY=256)
+    pixelXtof_1d = pixelXtof_data.sum(axis=1)        
+    # Keep only range of pixels
+    pixelXtof_roi = pixelXtof_1d[dataPeakRange[0]:dataPeakRange[1]]
+    sz = pixelXtof_roi.size
+    _num = 0
+    _den = 0
+    start_pixel = dataPeakRange[0]
+    for i in range(sz):
+        _num += (start_pixel * pixelXtof_roi[i])
+        start_pixel = start_pixel + 1
+        _den += pixelXtof_roi[i]
+    data_cpix = _num / _den    
+    print '--> central pixel is {0:.1f}'.format(data_cpix)
+        
+    return data_cpix
+
+def getDistances(ws_event_data):
+    """
+    calculates the distance between the moderator and the detector (dMD)
+    and the distance between the sample and the detector
+    """
+    
+    print '--> calculating dMD (moderator-detector) and dSD (sample-detector)'
+    sample = ws_event_data.getInstrument().getSample()
+    source = ws_event_data.getInstrument().getSource()
+    dSM = sample.getDistance(source)
+    
+    # Create array of distances pixel->sample
+    dPS_array = zeros((256, 304))
+    for x in range(304):
+        for y in range(256):
+            _index = 256 * x + y
+            detector = ws_event_data.getDetector(_index)
+            dPS_array[y, x] = sample.getDistance(detector)
+        
+    # Array of distances pixel->source
+    dMP_array = dPS_array + dSM
+    # Distance sample->center of detector
+    dSD = dPS_array[256./2.,304./2.]
+    # Distance source->center of detector        
+    dMD = dSD + dSM
+
+    return [dMD, dSD]
+
+def  getTheta(ws_event_data, angleOffsetDeg):
+    """
+    will calculate the theta angle offset
+    """
+    print '--> retrieving thi and tthd'
+    mt_run = ws_event_data.getRun()
+    thi_value = mt_run.getProperty('thi').value[0]
+    thi_units = mt_run.getProperty('thi').units
+    tthd_value = mt_run.getProperty('tthd').value[0]
+    tthd_units = mt_run.getProperty('tthd').units
+    thi_rad = angleUnitConversion(value=thi_value,
+                                  from_units=thi_units,
+                                  to_units='rad')
+    print '---> thi (rad): ', thi_rad
+    tthd_rad = angleUnitConversion(value=tthd_value,
+                                   from_units=tthd_units,
+                                   to_units='rad')
+    print '---> tthd (rad): ', tthd_rad
+    
+    theta = math.fabs(tthd_rad - thi_rad)/2.
+    angleOffsetRad = (angleOffsetDeg * math.pi) / 180.
+    theta += angleOffsetRad
+    print '---> theta (rad): ', theta
+
+    return theta
+
+def getSlitsSize(mt):    
+    print '---> retrieving slits size'
+    first_slit_size = getSheight(mt, '1')
+    last_slit_size = getSheight(mt,'2')
+    print '----> first_slit_size: ' , first_slit_size
+    print '----> last_slit_size: ' , last_slit_size
+    return [first_slit_size, last_slit_size]
+
+def getQrange(ws_histo_data, theta, dMD, q_min, q_step):
+    """ 
+    will determine the true q axis according to the qMin and qStep specified
+    and the geometry of the instrument
+    """ 
+    print '---> calculating Qrange'
+    _tof_axis = ws_histo_data.readX(0)
+    _const = float(4) * math.pi * m * dMD / h
+    sz_tof = shape(_tof_axis)[0]
+    _q_axis = zeros(sz_tof-1)
+    for t in range(sz_tof-1):
+        tof1 = _tof_axis[t]
+        tof2 = _tof_axis[t+1]
+        tofm = (tof1+tof2)/2.
+        _Q = _const * math.sin(theta) / (tofm*1e-6)
+        _q_axis[t] = _Q*1e-10
+    q_max = max(_q_axis)
+    if (q_min >= q_max):
+        q_min = min(_q_axis)
+    print '----> q_min: ', q_min
+    print '----> q_step: ', q_step
+    print '----> q_max: ', q_max
+    
+    return [q_min, q_step, q_max]
+
+def convertToQ(tof_axis,
+               y_axis,
+               y_error_axis,
+               peak_range = None,
+               central_pixel = None,
+               source_to_detector_distance = None,
+               sample_to_detector_distance = None,
+               theta = None,
+               first_slit_size = None,
+               last_slit_size = None):
+    """
+    will convert the tof_axis into q_axis according to q range specified
+    """
+    
+    y_size = (peak_range[1] - peak_range[0] + 1)
+    y_range = arange(y_size) + peak_range[0]
+    _q_axis = getQaxis(source_to_detector_distance,
+                       sample_to_detector_distance,
+                       theta,
+                       tof_axis,
+                       y_range,
+                       central_pixel,
+                       first_slit_size,
+                       last_slit_size)
+        
+    _q_axis_min_max_index = findQaxisMinMax(_q_axis)
+    
+
+    # now we need to put the various counts from y_axis into the right
+    # boxes
+    _y_axis = zeros((y_size, len(tof_axis)-1))
+    _y_error_axis = zeros((y_size, len(tof_axis)-1))
+    
+    # now determine the _y_axis and _y_error_axis
+    for _y_index in range(y_size):
+    
+        # get the q_axis of the given peak pixel
+        _tmp_q_axis = _q_axis[_y_index]
+        q_axis = _tmp_q_axis[::-1] #reverse the axis (now in increasing order)
+        
+        _tmp_peak_pixel = y_range[_y_index]
+        _y_axis_tmp = y_axis[_y_index,:]
+        _y_error_axis_tmp = y_error_axis[_y_index,:]
+        
+        # keep only the overlap region of Qs
+        _q_min = _q_axis_min_max_index[_y_index, 0]
+        if (_q_min != 0):
+            _y_axis_tmp[0:_q_min] = 0
+            _y_error_axis_tmp[0:_q_min] = 0
+       
+        _q_max = int(_q_axis_min_max_index[_y_index, 1])
+        sz = shape(_y_axis_tmp)[0]
+        if (_q_max != sz):
+            _index_q_max_range = arange(sz - _q_max) + _q_max
+            for i in _index_q_max_range:
+                _y_axis_tmp[i] = 0
+                _y_error_axis_tmp[i] = 0 
+        
+        _y_axis[_y_index, :] = _y_axis_tmp[::-1]
+        _y_error_axis[_y_index, :] = _y_error_axis_tmp[::-1]
+
+    # reverse the _q_axis here as well
+    q_axis_reverse = reverseQAxis(_q_axis)
+
+    return [q_axis_reverse, _y_axis, _y_error_axis]
+
+def convertToQWithoutCorrection(tof_axis,
+               y_axis,
+               y_error_axis,
+               peak_range = None,
+               central_pixel = None,
+               source_to_detector_distance = None,
+               sample_to_detector_distance = None,
+               theta = None,
+               first_slit_size = None,
+               last_slit_size = None):
+    """
+    will convert the tof_axis into q_axis according to q range specified
+    but without using any geometry correction
+    """
+
+    _const = float(4) * math.pi * m * source_to_detector_distance / h
+    _q_axis = 1e-10 * _const * math.sin(theta) / (tof_axis[0:-1] * 1e-6)
+    
+    sz = y_axis.shape
+    nbr_pixel = sz[0]
+    
+    sz_q_axis = _q_axis.shape
+    nbr_q = sz_q_axis[0]
+    
+    q_axis_2d = zeros((nbr_pixel, nbr_q))
+    for p in range(nbr_pixel):
+        q_axis_2d[p,:] = _q_axis
+    
+    q_axis_reverse = reverseQAxis(q_axis_2d)
+    y_axis_reverse = fliplr(y_axis)
+    y_error_axis_reverse = fliplr(y_error_axis)
+
+    return [q_axis_reverse, y_axis_reverse, y_error_axis_reverse]
+
+def reverseQAxis(q_axis):
+    """
+    will reverse each q_axis for the respective pixels
+    """
+    new_q_axis = fliplr(q_axis)
+    return new_q_axis
+
+def getQaxis(dMD, dSD, theta, 
+             tof_axis, y_range, central_pixel, 
+             first_slit_size,
+             last_slit_size):
+    """
+    This function converts the pixel/TOF array to the R(Q) array
+    using Q = (4.Pi.Mn)/h  *  L.sin(theta/2)/TOF
+    with    L: distance central_pixel->source
+            TOF: TOF of pixel
+            theta: angle of detector
+    """
+
+    _const = float(4) * math.pi * m * dMD / h
+    sz_tof = len(tof_axis)
+    tmp_q_axis = zeros(sz_tof)
+    q_array = zeros((len(y_range), sz_tof))
+
+    index_y = range(len(y_range))
+    for y in index_y:
+        _px = y_range[y]
+        dangle = ref_beamdiv_correct(central_pixel, 
+                                     dSD, 
+                                     _px,
+                                     0.0007,  
+                                     first_slit_size,
+                                     last_slit_size)
+         
+        if dangle is not None:
+            _theta = theta + dangle
+        else:
+            _theta = theta
+
+        for t in range(sz_tof):
+#            tof1 = tof_axis[t]
+#            tof2 = tof_axis[t+1]
+#            tofm = (tof1+tof2)/2.
+            tof = tof_axis[t]
+#            _Q = _const * math.sin(_theta) / (tofm*1e-6)
+            _Q = _const * math.sin(_theta) / (tof*1e-6)
+            q_array[y, t] = _Q * 1e-10
+          
+    return q_array    
+
+def integrateOverPeakRange(wks, dataPeakRange):
+    """
+        getting just the mean of the peak
+    """
+    
+    final_x_axis = wks.readX(0)[:]
+    sz = final_x_axis.shape
+    nbr_q = sz[0]
+
+    # make temp big array
+    nbrPixel = dataPeakRange[1] - dataPeakRange[0] + 1
+    bigY = zeros((nbrPixel, nbr_q))
+    bigE = zeros((nbrPixel, nbr_q))
+    for x in range(nbrPixel):
+        _tmp_y = wks.readY(x)[:]
+        bigY[x,:] = _tmp_y
+        _tmp_e = wks.readE(x)[:]
+        bigE[x,:] = _tmp_e
+
+    final_y_axis = zeros(nbr_q)
+    final_y_error_axis = zeros(nbr_q)
+    
+    # range(nbr_q -2) + 1 to get rid of first and last q values (edge effect)
+    rangeOfQ = range(nbr_q-1)
+    for q in rangeOfQ[1:-1]:
+        
+        _tmp_y = bigY[:,q]
+        _tmp_y_error = bigE[:,q]
+        
+#         [_y, _y_error] = myMean(_tmp_y, _tmp_y_error)
+        [_y, _y_error] = sumWithError(_tmp_y, _tmp_y_error)
+        
+        final_y_axis[q] = _y
+        final_y_error_axis[q] = _y_error
+        
+    return [final_x_axis, final_y_axis, final_y_error_axis]
+        
+def createQworkspace(q_axis, y_axis, y_error_axis):
+    
+    sz = q_axis.shape
+    nbr_pixel = sz[0]
+    nbr_tof = sz[1]
+    
+    q_axis_1d = q_axis.flatten()
+    y_axis_1d = y_axis.flatten()
+    y_error_axis_1d = y_error_axis.flatten()
+
+    q_workspace = CreateWorkspace(DataX=q_axis_1d,
+                           DataY=y_axis_1d,
+                           DataE=y_error_axis_1d,
+                           Nspec=nbr_pixel,
+                           UnitX="Wavelength")
+    q_workspace.setDistribution(True)
+    
+    return q_workspace
+ 
+def createFinalWorkspace(q_axis, final_y_axis, final_error_axis, name_output_ws):
+    
+    final_workspace = CreateWorkspace(OutputWorkspace=name_output_ws,
+                                      DataX=q_axis,
+                                      DataY=final_y_axis,
+                                      DataE=final_error_axis,
+                                      Nspec=1,
+                                      UnitX="Wavelength")
+    
+    return final_workspace
+    
+def cropAxisToOnlyNonzeroElements(q_rebin, dataPeakRange):
+    """
+    This function will only keep the range of Q that have only nonzero counts
+    """
+    nbrPixel = dataPeakRange[1] - dataPeakRange[0] + 1
+    
+    x_axis = q_rebin.readX(0)[:]
+    sz = x_axis.shape[0]-1
+    
+    index_first_non_zero_value = sz;
+    index_last_non_zero_value = 0; 
+
+    for x in range(nbrPixel):
+        _pixel_axis = q_rebin.readY(x)[:]
+        
+        for t in range(sz):
+            _value = _pixel_axis[t]
+            if _value != float(0):
+                if index_first_non_zero_value > t:
+                    index_first_non_zero_value = t
+                break
+            
+        for t in range(sz-1,-1,-1):
+            _value = _pixel_axis[t]
+            if _value != float(0):
+                if index_last_non_zero_value < t:
+                    index_last_non_zero_value = t
+                break
+    
+    # crop data
+    new_x_axis = x_axis[index_first_non_zero_value:index_last_non_zero_value+1]
+    new_xrange = index_last_non_zero_value - index_first_non_zero_value + 1
+    new_y_axis = zeros((nbrPixel, new_xrange))
+    new_y_error_axis = zeros((nbrPixel, new_xrange))
+    for x in range(nbrPixel):
+        _tmp = q_rebin.readY(x)[:]
+        _tmp_E = q_rebin.readE(x)[:]
+        new_y_axis[x,:] = _tmp[index_first_non_zero_value:index_last_non_zero_value+1]
+        new_y_error_axis[x,:] = _tmp_E[index_first_non_zero_value:index_last_non_zero_value+1]
+    
+    new_y_axis = new_y_axis.flatten()
+    new_y_error_axis = new_y_error_axis.flatten()
+
+    new_x_axis = asfarray(new_x_axis)
+    new_y_axis = asfarray(new_y_axis)
+    new_y_error_axis = asfarray(new_y_error_axis)
+
+    nonzero_q_rebin_wks = CreateWorkspace(DataX=new_x_axis,
+                                          DataY=new_y_axis,
+                                          DataE=new_y_error_axis,
+                                          Nspec=int(nbrPixel),
+                                          UnitX="Wavelength")
+    
+    return nonzero_q_rebin_wks
+
+def cleanupData(final_data_y_axis, final_data_y_error_axis):
+    
+    sz = final_data_y_axis.shape
+    nbrPixel = sz[0]
+    nbrTof = sz[1]
+    
+    for x in range(nbrPixel):
+        for t in range(nbrTof):
+            
+            _data = final_data_y_axis[x,t]
+            _error = final_data_y_error_axis[x,t]
+            
+            # if error is > value, remove point
+            if _error >= _data:
+                _data = 0
+                _error = 0
+            
+            # if value is below 10^-12
+            if _data < 1e-12:
+                _data = 0
+                _error = 0
+                
+            final_data_y_axis[x,t] = _data
+            final_data_y_error_axis[x,t] = _error
+            
+    return [final_data_y_axis, final_data_y_error_axis]
+    
+    
+                
+                
+            
+    
+    
+    
+    
+    
+    
+    

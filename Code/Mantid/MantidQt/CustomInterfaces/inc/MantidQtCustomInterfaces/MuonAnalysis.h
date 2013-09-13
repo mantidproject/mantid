@@ -195,8 +195,8 @@ private:
   /// Set start up interface look
   void startUpLook();
 
-  /// Change the connected data text.
-  void setConnectedDataText();
+  /// Change the connected data name
+  void setCurrentDataName(const QString& name);
 
   /// Executed when interface gets hidden or closed
   void hideEvent(QHideEvent *e);
@@ -438,6 +438,8 @@ private:
   /// the x-axis has already been adjusted to that nexus time zero so if user select
   /// a different time zero need to adjust the relative offset to this value
   double m_nexusTimeZero;
+
+  static const QString NOT_AVAILABLE;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;

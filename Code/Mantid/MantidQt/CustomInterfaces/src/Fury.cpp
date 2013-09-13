@@ -55,32 +55,24 @@ namespace IDA
     connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
     connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
   
-    connect(uiForm().fury_cbInputType, SIGNAL(currentIndexChanged(int)), uiForm().fury_swInput, SLOT(setCurrentIndex(int)));  
     connect(uiForm().fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(resType(const QString&)));
-
-    //signals to plot input files
-    connect(uiForm().fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(plotInput()));
-    connect(uiForm().fury_iconFile, SIGNAL(filesFound()), this, SLOT(plotInput()));
-    connect(uiForm().fury_wsSample, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
-    connect(uiForm().fury_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(plotInput()));
+    connect(uiForm().fury_dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
   }
 
   void Fury::run()
   {
-    QString filenames;
-    switch ( uiForm().fury_cbInputType->currentIndex() )
-    {
-    case 0:
-      filenames = uiForm().fury_iconFile->getFilenames().join("', r'");
-      break;
-    case 1:
-      filenames = uiForm().fury_wsSample->currentText();
-      break;
-    }
+    QString wsName = uiForm().fury_dsInput->getCurrentDataName();
 
     QString pyInput =
-      "from IndirectDataAnalysis import fury\n"
-      "samples = [r'" + filenames + "']\n"
+      "from IndirectDataAnalysis import fury\n";
+
+    //in case the user removed the workspace somehow
+    if(!Mantid::API::AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+    {
+      pyInput += wsName + " = LoadNexus('"+wsName+".nxs')\n";
+    }
+
+    pyInput += "samples = [r'" + wsName + "']\n"
       "resolution = r'" + uiForm().fury_resFile->getFirstFilename() + "'\n"
       "rebin = '" + m_furProp["ELow"]->valueText() +","+ m_furProp["EWidth"]->valueText() +","+m_furProp["EHigh"]->valueText()+"'\n";
 
@@ -105,17 +97,8 @@ namespace IDA
   QString Fury::validate()
   {
     UserInputValidator uiv;
-
-    switch ( uiForm().fury_cbInputType->currentIndex() )
-    {
-      case 0:
-        uiv.checkMWRunFilesIsValid("Reduction", uiForm().fury_iconFile); break;
-      case 1:
-        uiv.checkWorkspaceSelectorIsNotEmpty("Reduction", uiForm().fury_wsSample); break;
-    }
-
     uiv.checkMWRunFilesIsValid("Resolution", uiForm().fury_resFile);
-    
+
     double eLow   = m_furDblMng->value(m_furProp["ELow"]);
     double eWidth = m_furDblMng->value(m_furProp["EWidth"]);
     double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
@@ -127,7 +110,7 @@ namespace IDA
 
   void Fury::loadSettings(const QSettings & settings)
   {
-    uiForm().fury_iconFile->readSettings(settings.group());
+    uiForm().fury_dsInput->readSettings(settings.group());
     uiForm().fury_resFile->readSettings(settings.group());
   }
 
@@ -147,52 +130,20 @@ namespace IDA
     uiForm().fury_resFile->setFileExtensions(exts);
   }
 
-  void Fury::plotInput()
+  void Fury::plotInput(const QString& wsname)
   {
     using Mantid::API::MatrixWorkspace;
     using Mantid::API::MatrixWorkspace_const_sptr;
 
     MatrixWorkspace_const_sptr workspace;
-    if ( uiForm().fury_cbInputType->currentIndex() == 0 )
+    try
     {
-      if(uiForm().fury_iconFile->isEmpty())
-      {
-        return;
-      }
-
-      if ( uiForm().fury_iconFile->isValid() )
-      {
-        QString filename = uiForm().fury_iconFile->getFirstFilename();
-        QFileInfo fi(filename);
-        QString wsname = fi.baseName();
-        workspace = runLoadNexus(filename, wsname);
-        if(!workspace)
-        {
-          return;
-        }
-      }
-      else
-      {
-        showInformationBox("Selected input files are invalid.");
-        return;
-      }
+      workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
     }
-    else if ( uiForm().fury_cbInputType->currentIndex() == 1 )
+    catch(Mantid::Kernel::Exception::NotFoundError&)
     {
-      QString wsname = uiForm().fury_wsSample->currentText();
-      if(wsname.isEmpty())
-      {
-        return;
-      }
-      try
-      {
-        workspace = Mantid::API::AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsname.toStdString());
-      }
-      catch(Mantid::Kernel::Exception::NotFoundError&)
-      {
-        showInformationBox(QString("Unable to retrieve workspace: " + wsname));
-        return;
-      }
+      showInformationBox(QString("Unable to retrieve workspace: " + wsname));
+      return;
     }
 
     m_furCurve = plotMiniplot(m_furPlot, m_furCurve, workspace, 0);

@@ -55,7 +55,6 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusDescriptor.cpp
-	src/NexusTestHelper.cpp
 	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
@@ -69,6 +68,7 @@ set ( SRC_FILES
 	src/ReadLock.cpp
 	src/RebinParamsValidator.cpp
 	src/RegexStrings.cpp
+	src/RemoteJobManager.cpp
 	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
 	src/StartsWithValidator.cpp
@@ -181,7 +181,6 @@ set ( INC_FILES
 	inc/MantidKernel/NDRandomNumberGenerator.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusDescriptor.h
-	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
@@ -199,6 +198,7 @@ set ( INC_FILES
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/RegistrationHelper.h
+	inc/MantidKernel/RemoteJobManager.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
 	inc/MantidKernel/StartsWithValidator.h

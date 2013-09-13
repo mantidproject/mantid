@@ -648,7 +648,7 @@ void ApplicationWindow::initGlobalConstants()
   appStyle = qApp->style()->objectName();
   d_app_rect = QRect();
   projectname = "untitled";
-  lastCopiedLayer = 0;
+  lastCopiedLayer = NULL;
   d_text_copy = NULL;
   d_arrow_copy = NULL;
   d_image_copy = NULL;
@@ -12083,8 +12083,7 @@ Graph3D* ApplicationWindow::openSurfacePlot(ApplicationWindow* app, const QStrin
 }
 Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &specgramwsName,const QStringList &lst)
 {
-  ProjectData *prjData=new ProjectData;
-  if(!prjData)return 0;
+  ProjectData prjData;
 
   foreach (QString str, lst) {
     if(str.contains("<ColorMap>"))
@@ -12093,7 +12092,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
     QString colormapLine=lst[index+1];
     QStringList list=colormapLine.split("\t");
     QString colormapFile=list[2];
-    prjData->setColormapFile(colormapFile);
+    prjData.setColormapFile(colormapFile);
     }
     if(str.contains("<ColorPolicy>"))
     { 	//read the colormap policy to set gray scale
@@ -12102,7 +12101,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=colormapPolicy.indexOf(">");
       int index2=colormapPolicy.lastIndexOf("<");
       bool gray=colormapPolicy.mid(index1+1,index2-index1-1).toInt();
-      prjData->setGrayScale(gray);
+      prjData.setGrayScale(gray);
 
     }
     if (str.contains("\t<ContourLines>"))
@@ -12112,14 +12111,14 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=contourlines.indexOf(">");
       int index2=contourlines.lastIndexOf("<");
       int bcontour=contourlines.mid(index1+1,index2-index1-1).toInt();
-      if(bcontour)prjData->setContourMode(true);
+      if(bcontour)prjData.setContourMode(true);
 
       //setting contour levels
       QString contourlevels=lst[index+1];
       index1=contourlevels.indexOf(">");
       index2=contourlevels.lastIndexOf("<");
       int levels=contourlevels.mid(index1+1,index2-index1-1).toInt();
-      prjData->setContourLevels(levels);
+      prjData.setContourLevels(levels);
 
       //setting contour default pen
       QString pen=lst[index+2];
@@ -12141,15 +12140,15 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
         QString penstyle=stylestring.mid(index1+1,index2-index1-1);
         QColor qcolor(pencolor);
         QPen pen = QPen(qcolor, penwidth.toDouble(),Graph::getPenStyle(penstyle.toInt()));
-        prjData->setDefaultContourPen(pen);
-        prjData->setColorMapPen(false);
+        prjData.setDefaultContourPen(pen);
+        prjData.setColorMapPen(false);
       }
       else if (pen.contains("<CustomPen>"))
       {	ContourLinesEditor* contourLinesEditor = new ContourLinesEditor(this->locale());
-      prjData->setCotntourLinesEditor(contourLinesEditor);
-      prjData->setCustomPen(true);
+      prjData.setCotntourLinesEditor(contourLinesEditor);
+      prjData.setCustomPen(true);
       }
-      else prjData->setColorMapPen(true);
+      else prjData.setColorMapPen(true);
     }
     if(str.contains("<IntensityChanged>"))
     {	 //read the intensity changed line from file and setting the spectrogram flag for intenisity
@@ -12159,7 +12158,7 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
       int index1=intensity.indexOf(">");
       int index2=intensity.lastIndexOf("<");
       bool bIntensity=intensity.mid(index1+1,index2-index1-1).toInt();
-      prjData->setIntensity(bIntensity);
+      prjData.setIntensity(bIntensity);
     }
 
   }
@@ -12171,8 +12170,13 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
     if( *matrixItr && specgramwsName==(*matrixItr)->getWorkspaceName() )
       m = *matrixItr;
   }
-  if(!m) return 0 ;
-  Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,prjData);
+
+  if ( !m )
+  {
+    return NULL;
+  }
+
+  Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,&prjData);
   if ( ag->multiLayer() != NULL )
   {
     m->attachMultilayer( ag->multiLayer() );
@@ -16204,25 +16208,22 @@ void ApplicationWindow::fitFrameToLayer()
 
 ApplicationWindow::~ApplicationWindow()
 {
-  if (lastCopiedLayer)
-    delete lastCopiedLayer;
-
+  delete lastCopiedLayer;
   delete hiddenWindows;
+  delete scriptingWindow;
+  delete d_text_editor;
 
-  if (scriptingWindow)
+  while(!d_user_menus.isEmpty())
   {
-    delete scriptingWindow;
+    QMenu *menu = d_user_menus.takeLast();
+    delete menu;
   }
-
-  if (d_text_editor)
-    delete d_text_editor;
+  delete current_folder;
 
   QApplication::clipboard()->clear(QClipboard::Clipboard);
 
   btnPointer->setChecked(true);
-
-  //Mantid
-  if (mantidUI) delete mantidUI;
+  delete mantidUI;
 }
 
 QString ApplicationWindow::versionString()
@@ -16999,12 +17000,14 @@ else
     setGeometry(usr_win,user_interface);
     connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
         SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
-    if(user_interface->objectName() == "Muon Analysis")
+    if(user_interface->interfaceName() == "Muon Analysis")
     {
-      //If the fitting is requested then run the peak picker tool in runConnectFitting
-      connect(user_interface, SIGNAL(fittingRequested(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)), this,
-          SLOT(runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser*, const QString&)));
-    }
+      connect(user_interface, SIGNAL(activatePPTool(const QString&)), 
+                        this, SLOT(activatePPTool(const QString&)));
+      // Update the used fit property browser
+      connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
+                    mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
+    } 
     user_interface->initializeLocalPython();
   }
   else
@@ -17017,66 +17020,39 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
     tr("MantidPlot was not built with Python scripting support included!"));
 #endif
 }
-/**This searches for the graph with a selected name and then attaches the fitFunctionBrowser to it
-*  This also disables the fitFunctionBrowser from all the other graphs.
-* 
-* @param fpb The fit property browser from the custom interface
-* @param nameOfPlot A string variable containing the name of the graph we want to fit.
-*
-*/
-void ApplicationWindow::runConnectFitting(MantidQt::MantidWidgets::FitPropertyBrowser* fpb, const QString& nameOfPlot)
+
+/**
+ * Searches for the plot with a specified name and then attaches Peak Picker tool to it. Disables 
+ * the tool from all the other plots.
+ * 
+ * @param plotName The name of the plot we want to attach the tool to.
+ */
+void ApplicationWindow::activatePPTool(const QString& plotName)
 {
-  // Loop through all multilayer (i.e. plots) windows displayed in Mantidplot 
-  // and apply pickpickertool to relevant plot
-  // Search and delete any current peak picker tools first
   QList<MdiSubWindow *> windows = windowsList();
   foreach (MdiSubWindow *w, windows) 
   {
     if (w->isA("MultiLayer"))
     {
       MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
+
+      QList<Graph *> layers = plot->layersList();
+
+      if (w->objectName() == plotName)
       {
-        // Check to see if graph is the new one by comparing the names
-        if (w->objectName() != nameOfPlot)
+        foreach(Graph *g, layers)
         {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Delete the PeakPickerTool
-            g->disableTools();
-          }
+          PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, true);
+          g->setActiveTool(ppicker);
         }
+      }
+      else
+      {
+        foreach(Graph *g, layers)
+          g->disableTools();
       }
     }
   }
-  // now check for graphs to add the peak picker tool to.
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-      {
-        if (w->objectName() == nameOfPlot)
-        {
-          QList<Graph *> layers = plot->layersList();
-          if (layers.size() > 1) // Check to see if more than one graph with the same name on the layer
-          {
-            QMessageBox::information(this, "Mantid - Warning", "More than one graph detected on this layer. Default is to take the first graph"); 
-          }
-          foreach(Graph *g, layers)
-          {
-            // Go through and set up the PeakPickerTool for the new graph
-            PeakPickerTool* ppicker = new PeakPickerTool(g, fpb, mantidUI, true, true);
-            g->setActiveTool(ppicker);
-          }
-        }     
-      }
-    }
-  } 
 }
 
 void ApplicationWindow::loadCustomActions()

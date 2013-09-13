@@ -655,15 +655,36 @@ namespace API
       }
       else
       {
-        std::ostringstream os;
-        os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but detector has no Efixed parameter attached. ID=" << detector->getID();
-        throw std::runtime_error(os.str());
+        std::vector<double> efixedVec = detector->getNumberParameter("Efixed");
+        if ( efixedVec.empty() )
+        {
+          int detid = detector->getID();
+          IDetector_const_sptr detectorSingle = getInstrument()->getDetector(detid);
+          efixedVec = detectorSingle->getNumberParameter("Efixed");
+        }
+        if (! efixedVec.empty() )
+        {
+          return efixedVec.at(0);
+        }
+        else
+        {
+          std::ostringstream os;
+          os << "ExperimentInfo::getEFixed - Indirect mode efixed requested but detector has no Efixed parameter attached. ID=" << detector->getID();
+          throw std::runtime_error(os.str());
+        }
       }
     }
     else
     {
       throw std::runtime_error("ExperimentInfo::getEFixed - EFixed requested for elastic mode, don't know what to do!");
     }
+  }
+
+  void ExperimentInfo::setEFixed(const detid_t detID, const double value)
+  {
+      IDetector_const_sptr det = getInstrument()->getDetector(detID);
+      Geometry::ParameterMap& pmap = instrumentParameters();
+      pmap.addDouble(det.get(), "Efixed", value);
   }
 
   // used to terminate SAX process

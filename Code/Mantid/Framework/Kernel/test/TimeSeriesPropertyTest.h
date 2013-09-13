@@ -500,6 +500,19 @@ public:
     delete intLog;
   }
 
+  void test_timeAverageValue()
+  {
+    auto dblLog = createDoubleTSP();
+    auto intLog = createIntegerTSP(5);
+
+    TS_ASSERT_DELTA(dblLog->timeAverageValue(), 7.6966, .0001);
+    TS_ASSERT_DELTA(intLog->timeAverageValue(), 2.5,    .0001);
+
+    // Clean up
+    delete dblLog;
+    delete intLog;
+  }
+
   void test_averageValueInFilter_throws_for_string_property()
   {
     TimeSplitterType splitter;

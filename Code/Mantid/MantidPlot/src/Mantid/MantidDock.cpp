@@ -272,7 +272,8 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   // Clear it first
   while( item->childCount() > 0 )
   {
-    item->takeChild(0);
+    auto * widgetItem = item->takeChild(0);
+    delete widgetItem;
   }
 
   Workspace_sptr workspace = userData.value<Workspace_sptr>();

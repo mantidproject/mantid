@@ -369,7 +369,7 @@ skip</string>
              <item>
               <widget class="QPushButton" name="save_btn">
                <property name="text">
-                <string>Save</string>
+                <string>Set scale</string>
                </property>
               </widget>
              </item>

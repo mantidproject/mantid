@@ -184,11 +184,15 @@ QString FFT::fftTable()
 	gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc (d_n);
 	gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc (d_n);
 
-	if(!amp || !wavetable || !workspace){
-		QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
-                        tr("Could not allocate memory, operation aborted!"));
-        d_init_err = true;
-        return "";
+	if(!amp || !wavetable || !workspace)
+	{
+	  QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+				tr("Could not allocate memory, operation aborted!"));
+	  delete[] amp;
+	  if (wavetable) gsl_fft_complex_wavetable_free (wavetable);
+	  if (workspace) gsl_fft_complex_workspace_free (workspace);
+	  d_init_err = true;
+	  return "";
 	}
 
 	double df = 1.0/(double)(d_n*d_sampling);//frequency sampling
