@@ -48,6 +48,7 @@ class QPushButton;
 class QRadioButton;
 class QSpinBox;
 class QTabWidget;
+class QStackedLayout;
 class QVBoxLayout;
 class QHBoxLayout;
 class QWidget;
@@ -94,9 +95,9 @@ class AxesDialog: public QDialog
     void showAxisFormula(int axis);
     void customAxisLabelFont();
     void setAxisType(int axis);
-    void updateAxisType(int axis);
+    //void updateAxisType(int axis);
     void updateTitleBox(int axis);
-    bool updatePlot();
+    bool apply();
     void updateScale();
     void majorGridEnabled(bool on);
     void minorGridEnabled(bool on);
@@ -139,40 +140,36 @@ class AxesDialog: public QDialog
     //! generate UI for the grid page
     void initGridPage();
     //! generate UI for the general page
-    void initFramePage();
+    void initGeneralPage();
     //! Modifies the grid
     void applyChangesToGrid(Grid *grid);
     void setGraph(Graph *g);
 
     ApplicationWindow* d_app;
     Graph *d_graph;
-    QFrame *scalePrefsArea, *axesPrefsArea;
+    //QFrame *scalePrefsArea, *axesPrefsArea;
+	  QStackedLayout *scalePrefsArea, *axesPrefsArea;
 //common widgets
     QPushButton* buttonApply, *buttonOk, *buttonCancel;
     QTabWidget* generalDialog;
-    QWidget* scalesPage, *gridPage, *axesPage, *frame;
+    QWidget *scalesPage, *gridPage, *axesPage, *generalPage;
 
     /*
-     //to migrate to scale details
-     DoubleSpinBox* boxEnd;
-     DoubleSpinBox* boxStart;
-     QComboBox* boxScaleType;
-     QComboBox* boxMinorValue;
-     DoubleSpinBox* boxStep;
-     QCheckBox* btnStep, *btnInvert;
-     QSpinBox* boxMajorValue;
-     QCheckBox* btnMajor;
-     QGroupBox *boxAxesBreaks;
-     DoubleSpinBox *boxBreakStart, *boxBreakEnd, *boxStepBeforeBreak,
-     *boxStepAfterBreak;
-     QSpinBox *boxBreakPosition, *boxBreakWidth;
-     QComboBox *boxMinorTicksBeforeBreak, *boxMinorTicksAfterBreak;
-     QCheckBox *boxLog10AfterBreak, *boxBreakDecoration;
-     QComboBox *boxUnit;
-     QLabel *boxScaleTypeLabel, *minorBoxLabel;
-     QDateTimeEdit *boxStartDateTime, *boxEndDateTime;
-     QTimeEdit *boxStartTime, *boxEndTime;
-     */
+    QCheckBox *boxShowAxis;
+    QGroupBox *labelBox;
+    QTextEdit *boxFormula, *boxTitle;
+    QPushButton * buttonLabelFont;
+    TextFormatButtons *formatButtons;
+    QComboBox *boxMajorTicksType, *boxTableName, *boxMinorTicksType, *boxAxisType, *boxFormat, 
+        *boxColName;
+    QPushButton* btnAxesFont;
+    ColorButton *boxAxisColor, *boxAxisNumColor;
+    QSpinBox *boxPrecision, *boxAngle, *boxBaseline;
+    QGroupBox *boxShowLabels;
+    QLabel *label1, *label2, *label3, *labelTable;
+    QCheckBox *boxShowFormula;
+    */
+
     QHBoxLayout* scalesLayout;
     QListWidget* axesList;
     QCheckBox* boxMajorGrid;
@@ -188,25 +185,13 @@ class AxesDialog: public QDialog
     QCheckBox* boxYLine;
     QListWidget* axesGridList;
     QListWidget* axesTitlesList;
-    QGroupBox *boxShowLabels;
-    QCheckBox *boxShowAxis;
 
-    QTextEdit *boxFormula, *boxTitle;
-    QSpinBox *boxFrameWidth, *boxPrecision, *boxAngle, *boxBaseline,
-        *boxAxesLinewidth;
-    QPushButton* btnAxesFont;
-    QCheckBox *boxBackbones, *boxShowFormula;
-    ColorButton* boxAxisColor;
-    QComboBox *boxMajorTicksType, *boxMinorTicksType, *boxFormat, *boxAxisType,
-        *boxColName;
+    QSpinBox *boxFrameWidth, *boxAxesLinewidth;
+    QCheckBox *boxBackbones;
     QGroupBox *boxFramed;
-    QLabel *label1, *label2, *label3, *labelTable;
     QSpinBox *boxMajorTicksLength, *boxMinorTicksLength, *boxBorderWidth;
-    QComboBox *boxTableName, *boxGridXAxis, *boxGridYAxis;
-    ColorButton *boxFrameColor, *boxAxisNumColor;
-    QGroupBox *labelBox;
-    QPushButton * buttonLabelFont;
-    TextFormatButtons *formatButtons;
+    QComboBox *boxGridXAxis, *boxGridYAxis;
+    ColorButton *boxFrameColor;
 
     QStringList tickLabelsOn, tablesList;
     QList<int> majTicks, minTicks, axesBaseline;
@@ -228,6 +213,7 @@ class AxesDialog: public QDialog
     QMap<QListWidgetItem*, AxisAxisDetails*> m_Axis_map;
     ///A map of QListWidgetItem objects to their Scale details objects
     QMap<QListWidgetItem*, ScaleAxisDetails*> m_Scale_map;
+	int oldaxis;
 };
 
 #endif

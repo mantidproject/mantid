@@ -49,6 +49,7 @@
 #include <QSpinBox>
 #include <QTabWidget>
 #include <QLayout>
+#include <QStackedLayout>
 #include <QMessageBox>
 #include <QFontDialog>
 #include <QDate>
@@ -622,6 +623,11 @@ static const char* image7_data[] = { "32 32 4 1", "# c #000000", "b c #bfbfbf",
 #define M_PI	3.141592653589793238462643
 #endif
 //Mantid::Kernel::Logger & AxesDialog::g_log=Mantid::Kernel::Logger::get("AxesDialog");
+
+///////////////////
+// Public Functions
+///////////////////
+
 AxesDialog::AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl) :
     QDialog(g, fl), d_app(app), d_graph(NULL), m_updatePlot(false)
 {
@@ -634,11 +640,11 @@ AxesDialog::AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl) :
   generalDialog = new QTabWidget();
 
   setGraph(g);
-
+  oldaxis = 0;
   initScalesPage();
   initGridPage();
   initAxesPage();
-  initFramePage();
+  initGeneralPage();
 
   //axesList->setCurrentRow(0);
   QHBoxLayout * bottomButtons = new QHBoxLayout();
@@ -664,186 +670,78 @@ AxesDialog::AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl) :
   lastPage = scalesPage;
   connect(buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ));
   connect(buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ));
-  connect(buttonApply, SIGNAL( clicked() ), this, SLOT(updatePlot() ));
+  connect(buttonApply, SIGNAL( clicked() ), this, SLOT(apply() ));
   connect(generalDialog, SIGNAL( currentChanged ( QWidget * ) ), this,
       SLOT(pageChanged ( QWidget * ) ));
 }
+
+void AxesDialog::showAxesPage()
+{
+  if (generalDialog->currentWidget() != dynamic_cast<QWidget*>(axesPage))
+    generalDialog->setCurrentWidget(axesPage);
+}
+
+void AxesDialog::showGridPage()
+{
+  if (generalDialog->currentWidget() != dynamic_cast<QWidget*>(gridPage))
+    generalDialog->setCurrentWidget(gridPage);
+}
+
+void AxesDialog::showGeneralPage()
+{
+  generalDialog->showPage(generalPage);
+}
+
+void AxesDialog::showFormulaBox()
+{
+  if (boxShowFormula->isChecked())
+    boxFormula->show();
+  else
+    boxFormula->hide();
+}
+
+int AxesDialog::exec()
+{
+  axesList->setCurrentRow(0);
+  axesGridList->setCurrentRow(0);
+  axesTitlesList->setCurrentRow(0);
+  setModal(true);
+  show();
+  return 0;
+}
+
+void AxesDialog::setCurrentScale(int axisPos)
+{
+  int axis = -1;
+  switch (axisPos)
+  {
+    case QwtScaleDraw::LeftScale:
+      axis = 1;
+      break;
+    case QwtScaleDraw::BottomScale:
+      axis = 0;
+      break;
+    case QwtScaleDraw::RightScale:
+      axis = 3;
+      break;
+    case QwtScaleDraw::TopScale:
+      axis = 2;
+      break;
+  }
+  if (generalDialog->currentPage() == dynamic_cast<QWidget*>(scalesPage))
+    axesList->setCurrentRow(axis);
+  else if (generalDialog->currentPage() == dynamic_cast<QWidget*>(axesPage))
+    axesTitlesList->setCurrentRow(axis);
+}
+
+///////////////////
+//Private functions
+///////////////////
 
 void AxesDialog::initScalesPage()
 {
   scalesPage = new QWidget();
   scalesLayout = new QHBoxLayout(scalesPage);
-  /*
-   QGroupBox * middleBox = new QGroupBox(QString());
-   QGridLayout * middleLayout = new QGridLayout(middleBox);
-
-   middleLayout->addWidget(new QLabel(tr( "From" )), 0, 0);
-   boxStart = new DoubleSpinBox();
-   boxStart->setLocale(d_app->locale());
-   boxStart->setDecimals(d_app->d_decimal_digits);
-   middleLayout->addWidget( boxStart, 0, 1 );
-
-   boxStartDateTime = new QDateTimeEdit();
-   boxStartDateTime->setCalendarPopup(true);
-   middleLayout->addWidget( boxStartDateTime, 0, 1 );
-   boxStartDateTime->hide();
-
-   boxStartTime = new QTimeEdit();
-   middleLayout->addWidget(boxStartTime, 0, 1 );
-   boxStartTime->hide();
-
-   middleLayout->addWidget(new QLabel(tr( "To" )), 1, 0);
-   boxEnd = new DoubleSpinBox();
-   boxEnd->setLocale(d_app->locale());
-   boxEnd->setDecimals(d_app->d_decimal_digits);
-   middleLayout->addWidget( boxEnd, 1, 1);
-
-   boxEndDateTime = new QDateTimeEdit();
-   boxEndDateTime->setCalendarPopup(true);
-   middleLayout->addWidget(boxEndDateTime, 1, 1);
-   boxEndDateTime->hide();
-
-   boxEndTime = new QTimeEdit();
-   middleLayout->addWidget(boxEndTime, 1, 1);
-   boxEndTime->hide();
-
-   boxScaleTypeLabel = new QLabel(tr( "Type" ));
-   boxScaleType = new QComboBox();
-   boxScaleType->addItem(tr( "linear" ) );
-   boxScaleType->addItem(tr( "logarithmic" ) );
-   middleLayout->addWidget( boxScaleTypeLabel, 2, 0);
-   middleLayout->addWidget( boxScaleType, 2, 1);
-
-   btnInvert = new QCheckBox();
-   btnInvert->setText( tr( "Inverted" ) );
-   btnInvert->setChecked(false);
-   middleLayout->addWidget( btnInvert, 3, 1 );
-   middleLayout->setRowStretch(4, 1);
-
-   boxAxesBreaks = new QGroupBox(tr("Show Axis &Break"));
-   boxAxesBreaks->setCheckable(true);
-   boxAxesBreaks->setChecked(false);
-
-   QGridLayout * breaksLayout = new QGridLayout(boxAxesBreaks);
-   boxBreakDecoration = new QCheckBox(tr("Draw Break &Decoration"));
-   breaksLayout->addWidget(boxBreakDecoration, 0, 1);
-
-   breaksLayout->addWidget(new QLabel(tr("From")), 1, 0);
-   boxBreakStart = new DoubleSpinBox();
-   boxBreakStart->setLocale(d_app->locale());
-   boxBreakStart->setDecimals(d_app->d_decimal_digits);
-   breaksLayout->addWidget(boxBreakStart, 1, 1);
-
-   breaksLayout->addWidget(new QLabel(tr("To")), 2, 0);
-   boxBreakEnd = new DoubleSpinBox();
-   boxBreakEnd->setLocale(d_app->locale());
-   boxBreakEnd->setDecimals(d_app->d_decimal_digits);
-   breaksLayout->addWidget(boxBreakEnd, 2, 1);
-
-   breaksLayout->addWidget(new QLabel(tr("Position")), 3, 0);
-   boxBreakPosition = new QSpinBox();
-   boxBreakPosition->setSuffix(" (" + tr("% of Axis Length") + ")");
-   breaksLayout->addWidget(boxBreakPosition, 3, 1);
-
-   breaksLayout->addWidget(new QLabel(tr("Width")), 4, 0);
-   boxBreakWidth = new QSpinBox();
-   boxBreakWidth->setSuffix(" (" + tr("pixels") + ")");
-   breaksLayout->addWidget(boxBreakWidth, 4, 1);
-
-   boxLog10AfterBreak = new QCheckBox(tr("&Log10 Scale After Break"));
-   breaksLayout->addWidget(boxLog10AfterBreak, 0, 3);
-
-   breaksLayout->addWidget(new QLabel(tr("Step Before Break")), 1, 2);
-   boxStepBeforeBreak = new DoubleSpinBox();
-   boxStepBeforeBreak->setMinimum(0.0);
-   boxStepBeforeBreak->setSpecialValueText(tr("Guess"));
-   boxStepBeforeBreak->setLocale(d_app->locale());
-   boxStepBeforeBreak->setDecimals(d_app->d_decimal_digits);
-   breaksLayout->addWidget(boxStepBeforeBreak, 1, 3);
-
-   breaksLayout->addWidget(new QLabel(tr("Step After Break")), 2, 2);
-   boxStepAfterBreak = new DoubleSpinBox();
-   boxStepAfterBreak->setMinimum(0.0);
-   boxStepAfterBreak->setSpecialValueText(tr("Guess"));
-   boxStepAfterBreak->setLocale(d_app->locale());
-   boxStepAfterBreak->setDecimals(d_app->d_decimal_digits);
-   breaksLayout->addWidget(boxStepAfterBreak, 2, 3);
-
-   breaksLayout->addWidget(new QLabel(tr("Minor Ticks Before")), 3, 2);
-   boxMinorTicksBeforeBreak = new QComboBox();
-   boxMinorTicksBeforeBreak->setEditable(true);
-   boxMinorTicksBeforeBreak->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
-   breaksLayout->addWidget(boxMinorTicksBeforeBreak, 3, 3);
-
-   breaksLayout->addWidget(new QLabel(tr("Minor Ticks After")), 4, 2);
-   boxMinorTicksAfterBreak  = new QComboBox();
-   boxMinorTicksAfterBreak->setEditable(true);
-   boxMinorTicksAfterBreak->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
-   breaksLayout->addWidget(boxMinorTicksAfterBreak, 4, 3);
-
-   QGroupBox *rightBox = new QGroupBox(QString());
-   QGridLayout *rightLayout = new QGridLayout(rightBox);
-
-   QWidget * stepWidget = new QWidget();
-   QHBoxLayout * stepWidgetLayout = new QHBoxLayout( stepWidget );
-   stepWidgetLayout->setMargin(0);
-
-   btnStep = new QCheckBox(tr("Step"));
-   btnStep->setChecked(true);
-   rightLayout->addWidget( btnStep, 0, 0 );
-
-   boxStep = new DoubleSpinBox();
-   boxStep->setMinimum(0.0);
-   boxStep->setLocale(d_app->locale());
-   boxStep->setDecimals(d_app->d_decimal_digits);
-   stepWidgetLayout->addWidget(boxStep);
-
-   boxUnit = new QComboBox();
-   boxUnit->hide();
-   stepWidgetLayout->addWidget( boxUnit );
-
-   rightLayout->addWidget( stepWidget, 0, 1 );
-
-   btnMajor = new QCheckBox();
-   btnMajor->setText( tr( "Major Ticks" ) );
-   rightLayout->addWidget( btnMajor, 1, 0);
-
-   boxMajorValue = new QSpinBox();
-   boxMajorValue->setDisabled(true);
-   rightLayout->addWidget( boxMajorValue, 1, 1);
-
-   minorBoxLabel = new QLabel( tr( "Minor Ticks" ));
-   rightLayout->addWidget( minorBoxLabel, 2, 0);
-
-   boxMinorValue = new QComboBox();
-   boxMinorValue->setEditable(true);
-   boxMinorValue->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
-   rightLayout->addWidget( boxMinorValue, 2, 1);
-
-   rightLayout->setRowStretch( 3, 1 );
-
-   QHBoxLayout* hl = new QHBoxLayout();
-   hl->addWidget(middleBox);
-   hl->addWidget(rightBox);
-
-   QVBoxLayout* vl = new QVBoxLayout();
-   vl->addLayout(hl);
-   vl->addWidget(boxAxesBreaks);
-
-   //// this is wrong and shouldn't happen i'll have to see what update plot is doing
-   connect(btnInvert,SIGNAL(clicked()), this, SLOT(updatePlot()));
-   ////
-   ////these need moved to the new object
-   connect(boxScaleType,SIGNAL(activated(int)), this, SLOT(updateMinorTicksList(int)));
-   //btnstep and btn major need changed to radiobuttons
-   connect(btnStep,SIGNAL(clicked()), this, SLOT(stepEnabled()));
-   connect(btnMajor,SIGNAL(clicked()), this, SLOT(stepDisabled()));
-   //
-   connect(boxEnd, SIGNAL(valueChanged(double)), this, SLOT(endvalueChanged(double)));
-   connect(boxStart, SIGNAL(valueChanged(double)), this, SLOT(startvalueChanged(double)));
-   ////
-
-   */
 
   QPixmap image0((const char**) bottom_scl_xpm);
   QPixmap image1((const char**) left_scl_xpm);
@@ -851,22 +749,32 @@ void AxesDialog::initScalesPage()
   QPixmap image3((const char**) right_scl_xpm);
 
   axesList = new QListWidget();
+  scalePrefsArea = new QStackedLayout();
   QListWidgetItem* listBottom = new QListWidgetItem(image0, tr("Bottom"));
   QListWidgetItem* listLeft = new QListWidgetItem(image1, tr("Left"));
   QListWidgetItem* listTop = new QListWidgetItem(image2, tr("Top"));
   QListWidgetItem* listRight = new QListWidgetItem(image3, tr("Right"));
+
+  ScaleAxisDetails* prefsBottom = new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(0));
+  ScaleAxisDetails* prefsLeft = new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(1));
+  ScaleAxisDetails* prefsTop = new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(2));
+  ScaleAxisDetails* prefsRight = new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(3));
+
+  scalePrefsArea->addWidget(prefsBottom);
+  scalePrefsArea->addWidget(prefsLeft);
+  scalePrefsArea->addWidget(prefsTop);
+  scalePrefsArea->addWidget(prefsRight);
+
   axesList->addItem(listBottom);
   axesList->addItem(listLeft);
   axesList->addItem(listTop);
   axesList->addItem(listRight);
-  m_Scale_map.insert(listBottom,
-      new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(0)));
-  m_Scale_map.insert(listLeft,
-      new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(1)));
-  m_Scale_map.insert(listTop,
-      new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(2)));
-  m_Scale_map.insert(listRight,
-      new ScaleAxisDetails(d_app, d_graph, mapToQwtAxis(3)));
+
+  m_Scale_map.insert(listBottom,prefsBottom);
+  m_Scale_map.insert(listLeft,prefsLeft);
+  m_Scale_map.insert(listTop,prefsTop);
+  m_Scale_map.insert(listRight,prefsRight);
+
   axesList->setSizePolicy(
       QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
   axesList->setIconSize(image0.size());
@@ -883,15 +791,11 @@ void AxesDialog::initScalesPage()
   // resize the list to the maximum width
   axesList->resize(axesList->maximumWidth(), axesList->height());
 
-  //the layout that will hold the ScaleAxisDetails widget
-  scalePrefsArea = new QFrame();
-
   scalesLayout->addWidget(axesList);
-  //mainLayout->addLayout(scalePrefsArea);
+  scalesLayout->addLayout(scalePrefsArea);
 
   generalDialog->addTab(scalesPage, tr("Scale"));
-  connect(axesList, SIGNAL(currentRowChanged(int)), this, SLOT(updateScale()));
-
+  connect(axesList, SIGNAL(currentRowChanged(int)), scalePrefsArea, SLOT(setCurrentIndex(int)));
 }
 
 void AxesDialog::initGridPage()
@@ -1023,6 +927,8 @@ void AxesDialog::initGridPage()
   connect(axesGridList, SIGNAL(currentRowChanged(int)), this,
       SLOT(showGridOptions(int)));
 
+  //these bypass apply()
+  /*
   connect(boxMajorGrid, SIGNAL(toggled(bool)), this,
       SLOT(majorGridEnabled(bool)));
   connect(boxMinorGrid, SIGNAL(toggled(bool)), this,
@@ -1036,8 +942,9 @@ void AxesDialog::initGridPage()
       SLOT(updateGrid()));
   connect(boxWidthMinor, SIGNAL(valueChanged(double)), this,
       SLOT(updateGrid()));
-  connect(boxXLine, SIGNAL(clicked()), this, SLOT(updatePlot()));
-  connect(boxYLine, SIGNAL(clicked()), this, SLOT(updatePlot()));
+  connect(boxXLine, SIGNAL(clicked()), this, SLOT(apply()));
+  connect(boxYLine, SIGNAL(clicked()), this, SLOT(apply()));
+  */
 }
 
 void AxesDialog::initAxesPage()
@@ -1073,6 +980,10 @@ void AxesDialog::initAxesPage()
   // resize the list to the maximum width
   axesTitlesList->resize(axesTitlesList->maximumWidth(),
       axesTitlesList->height());
+
+
+
+/*
 
   QHBoxLayout * topLayout = new QHBoxLayout();
 
@@ -1216,6 +1127,11 @@ void AxesDialog::initAxesPage()
   rightLayout->addLayout(bottomLayout);
   rightLayout->addStretch(1);
 
+
+  */
+
+
+
   QHBoxLayout * mainLayout3 = new QHBoxLayout(axesPage);
   mainLayout3->addWidget(axesTitlesList);
   mainLayout3->addLayout(rightLayout);
@@ -1268,9 +1184,9 @@ void AxesDialog::initAxesPage()
       SLOT(setLabelsNumericFormat(int)));
 }
 
-void AxesDialog::initFramePage()
+void AxesDialog::initGeneralPage()
 {
-  frame = new QWidget();
+  generalPage = new QWidget();
 
   Plot *p = d_graph->plotWidget();
   boxFramed = new QGroupBox(tr("Canvas frame"));
@@ -1311,11 +1227,11 @@ void AxesDialog::initFramePage()
 
   boxAxesLayout->setRowStretch(4, 1);
 
-  QHBoxLayout * mainLayout = new QHBoxLayout(frame);
+  QHBoxLayout * mainLayout = new QHBoxLayout(generalPage);
   mainLayout->addWidget(boxFramed);
   mainLayout->addWidget(boxAxes);
 
-  generalDialog->addTab(frame, tr("General"));
+  generalDialog->addTab(generalPage, tr("General"));
 
   boxAxesLinewidth->setValue(p->axesLinewidth());
   boxBackbones->setChecked(d_graph->axesBackbones());
@@ -1329,6 +1245,8 @@ void AxesDialog::initFramePage()
   boxMinorTicksLength->setValue(p->minorTickLength());
   boxMajorTicksLength->setValue(p->majorTickLength());
 
+  /*
+  //All of these bypass apply()
   connect(boxFrameColor, SIGNAL(colorChanged()), this,
       SLOT(pickCanvasFrameColor()));
   connect(boxBackbones, SIGNAL(toggled(bool)), this,
@@ -1342,64 +1260,7 @@ void AxesDialog::initFramePage()
       SLOT(changeMajorTicksLength(int)));
   connect(boxMinorTicksLength, SIGNAL(valueChanged (int)), this,
       SLOT(changeMinorTicksLength(int)));
-}
-
-void AxesDialog::changeMinorTicksLength(int minLength)
-{
-  if (generalDialog->currentWidget() != frame)
-    return;
-
-  d_graph->changeTicksLength(minLength, boxMajorTicksLength->value());
-  boxMajorTicksLength->setMinValue(minLength);
-}
-
-void AxesDialog::changeMajorTicksLength(int majLength)
-{
-  if (generalDialog->currentWidget() != frame)
-    return;
-
-  d_graph->changeTicksLength(boxMinorTicksLength->value(), majLength);
-  boxMinorTicksLength->setMaxValue(majLength);
-}
-
-void AxesDialog::drawAxesBackbones(bool draw)
-{
-  if (generalDialog->currentWidget() != frame)
-    return;
-
-  d_graph->drawAxesBackbones(draw);
-}
-
-void AxesDialog::changeAxesLinewidth(int width)
-{
-  if (generalDialog->currentWidget() != frame)
-    return;
-
-  d_graph->setAxesLinewidth(width);
-}
-
-void AxesDialog::drawFrame(bool framed)
-{
-  if (generalDialog->currentWidget() != frame)
-    return;
-
-  if (framed)
-    d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
-  else
-    d_graph->setCanvasFrame(0);
-}
-
-void AxesDialog::updateFrame(int width)
-{
-  if (generalDialog->currentWidget() != frame)
-    return;
-
-  d_graph->setCanvasFrame(width, boxFrameColor->color());
-}
-
-void AxesDialog::pickCanvasFrameColor()
-{
-  d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
+      */
 }
 
 void AxesDialog::showAxisFormatOptions(int format)
@@ -1529,11 +1390,16 @@ void AxesDialog::showAxisFormatOptions(int format)
   }
 }
 
+//This isn't actually used
+/*
 void AxesDialog::updateAxisType(int)
 {
   int a = mapToQwtAxisId();
   boxAxisType->setCurrentIndex(a);
 }
+
+*/
+
 
 void AxesDialog::showAxis()
 {
@@ -1707,128 +1573,10 @@ void AxesDialog::customAxisFont()
 
 void AxesDialog::accept()
 {
-  if (updatePlot())
+  if (apply())
     close();
 }
 
-void AxesDialog::majorGridEnabled(bool on)
-{
-  boxTypeMajor->setEnabled(on);
-  boxColorMajor->setEnabled(on);
-  boxWidthMajor->setEnabled(on);
-
-  updateGrid();
-}
-
-void AxesDialog::minorGridEnabled(bool on)
-{
-  boxTypeMinor->setEnabled(on);
-  boxColorMinor->setEnabled(on);
-  boxWidthMinor->setEnabled(on);
-
-  updateGrid();
-}
-
-void AxesDialog::updateGrid()
-{
-  if (generalDialog->currentWidget() != gridPage)
-    return;
-
-  switch (boxApplyGridFormat->currentIndex())
-  {
-    case 0:
-    {
-      applyChangesToGrid(d_graph->plotWidget()->grid());
-      d_graph->replot();
-      d_graph->notifyChanges();
-    }
-      break;
-
-    case 1:
-    {
-      MultiLayer *plot = d_graph->multiLayer();
-      if (!plot)
-        return;
-
-      QList<Graph *> layers = plot->layersList();
-      foreach(Graph *g, layers)
-      {
-        if (g->isPiePlot())
-          continue;
-
-        applyChangesToGrid(g->plotWidget()->grid());
-        g->replot();
-      }
-      plot->applicationWindow()->modifiedProject();
-    }
-      break;
-
-    case 2:
-    {
-      if (!d_app)
-        return;
-
-      QList<MdiSubWindow *> windows = d_app->windowsList();
-      foreach(MdiSubWindow *w, windows)
-      {
-        if (w->isA("MultiLayer"))
-        {
-          QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
-          foreach(Graph *g, layers)
-          {
-            if (g->isPiePlot())
-              continue;
-            applyChangesToGrid(g->plotWidget()->grid());
-            g->replot();
-          }
-        }
-      }
-      d_app->modifiedProject();
-    }
-      break;
-  }
-}
-
-void AxesDialog::applyChangesToGrid(Grid *grid)
-{
-  if (!grid)
-    return;
-
-  if (axesGridList->currentRow() == 1)
-  {
-    grid->enableX(boxMajorGrid->isChecked());
-    grid->enableXMin(boxMinorGrid->isChecked());
-
-    grid->setMajPenX(
-        QPen(ColorBox::color(boxColorMajor->currentIndex()),
-            boxWidthMajor->value(),
-            Graph::getPenStyle(boxTypeMajor->currentIndex())));
-    grid->setMinPenX(
-        QPen(ColorBox::color(boxColorMinor->currentIndex()),
-            boxWidthMinor->value(),
-            Graph::getPenStyle(boxTypeMinor->currentIndex())));
-  }
-  else
-  {
-    grid->enableY(boxMajorGrid->isChecked());
-    grid->enableYMin(boxMinorGrid->isChecked());
-
-    grid->setMajPenY(
-        QPen(ColorBox::color(boxColorMajor->currentIndex()),
-            boxWidthMajor->value(),
-            Graph::getPenStyle(boxTypeMajor->currentIndex())));
-    grid->setMinPenY(
-        QPen(ColorBox::color(boxColorMinor->currentIndex()),
-            boxWidthMinor->value(),
-            Graph::getPenStyle(boxTypeMinor->currentIndex())));
-  }
-
-  grid->enableZeroLineX(boxXLine->isChecked());
-  grid->enableZeroLineY(boxYLine->isChecked());
-  grid->setAxis(boxGridXAxis->currentIndex() + 2, boxGridYAxis->currentIndex());
-  grid->setRenderHint(QwtPlotItem::RenderAntialiased,
-      boxAntialiseGrid->isChecked());
-}
 
 void AxesDialog::showGridOptions(int axis)
 {
@@ -1949,162 +1697,6 @@ void AxesDialog::changeBaselineDist(int baseline)
       boxAngle->value(), baseline, formula, boxAxisNumColor->color());
 }
 
-bool AxesDialog::updatePlot()
-{
-  /*
-   if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(scalesPage))
-   {
-
-   int a = mapToQwtAxis(axesList->currentRow());
-   ScaleDraw::ScaleType type = d_graph->axisType(a);
-
-   double start = 0.0, end = 0.0;
-   if (type == ScaleDraw::Date){
-   ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_graph->plotWidget()->axisScaleDraw(a));
-   QDateTime origin = sclDraw->dateTimeOrigin();
-   start = (double)origin.secsTo(boxStartDateTime->dateTime());
-   end = (double)origin.secsTo(boxEndDateTime->dateTime());
-   } else if (type == ScaleDraw::Time){
-   ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_graph->plotWidget()->axisScaleDraw(a));
-   QTime origin = sclDraw->dateTimeOrigin().time();
-   start = (double)origin.msecsTo(boxStartTime->time());
-   end = (double)origin.msecsTo(boxEndTime->time());
-   } else {
-   start = boxStart->value();
-   end = boxEnd->value();
-   }
-
-   if (start >= end){
-   QMessageBox::warning(this,tr("MantidPlot - Error"),
-   "Invalid option to set the 'From' greater than 'To' for the scale settings.\nOperation aborted! ");
-   return false;
-   }
-
-   double step = 0.0;
-   if (btnStep->isChecked()){
-   step = boxStep->value();
-   if (type == ScaleDraw::Time){
-   switch (boxUnit->currentIndex())
-   {
-   case 0:
-   break;
-   case 1:
-   step *= 1e3;
-   break;
-   case 2:
-   step *= 6e4;
-   break;
-   case 3:
-   step *= 36e5;
-   break;
-   }
-   } else if (type == ScaleDraw::Date){
-   switch (boxUnit->currentIndex())
-   {
-   case 0:
-   step *= 86400;
-   break;
-   case 1:
-   step *= 604800;
-   break;
-   }
-   }
-   }
-
-   double breakLeft = -DBL_MAX, breakRight = DBL_MAX;
-   if (boxAxesBreaks->isChecked()){
-   breakLeft = qMin(boxBreakStart->value(), boxBreakEnd->value());
-   breakRight = qMax(boxBreakStart->value(), boxBreakEnd->value());
-   }
-   d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
-   boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
-   boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
-   boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
-   boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
-   d_graph->notifyChanges();
-   }
-   else if (generalDialog->currentWidget() == gridPage)
-   updateGrid();
-   else if (generalDialog->currentWidget() == dynamic_cast<QWidget*>(axesPage))
-   {
-   int axis = mapToQwtAxisId();
-   int format = boxAxisType->currentIndex();
-
-   int baseline = boxBaseline->value();
-   axesBaseline[axis] = baseline;
-
-   QString formatInfo = QString::null;
-   if (format == ScaleDraw::Numeric)
-   {
-   if (boxShowFormula->isChecked())
-   {
-   QString formula = boxFormula->text().lower();
-   try
-   {
-   double value = 1.0;
-   MyParser parser;
-   if (formula.contains("x"))
-   parser.DefineVar("x", &value);
-   else if (formula.contains("y"))
-   parser.DefineVar("y", &value);
-   parser.SetExpr(formula.ascii());
-   parser.Eval();
-   }
-   catch(mu::ParserError &e)
-   {
-   QMessageBox::critical(this, tr("MantidPlot - Formula input error"), QString::fromStdString(e.GetMsg())+"\n"+
-   tr("Valid variables are 'x' for Top/Bottom axes and 'y' for Left/Right axes!"));
-   boxFormula->setFocus();
-   m_updatePlot=false;
-   return m_updatePlot;
-   //return false;
-   }
-   }
-   } else if (format == ScaleDraw::Time || format == ScaleDraw::Date){
-   QStringList lst = d_graph->axisFormatInfo(axis).split(";", QString::KeepEmptyParts);
-   if ((int)lst.count() >= 2)
-   lst[1] = boxFormat->currentText();
-   formatInfo = lst.join(";");
-   } else if (format == ScaleDraw::Day || format == ScaleDraw::Month)
-   formatInfo = QString::number(boxFormat->currentIndex());
-   else if (format == ScaleDraw::ColHeader)
-   formatInfo = boxTableName->currentText();
-   else
-   formatInfo = boxColName->currentText();
-
-   if (d_graph->axisTitle(axis) != boxTitle->text())
-   d_graph->setAxisTitle(axis, boxTitle->text());
-
-   if (axis == QwtPlot::xBottom)
-   xBottomLabelsRotation=boxAngle->value();
-   else if (axis == QwtPlot::xTop)
-   xTopLabelsRotation=boxAngle->value();
-
-   QString formula = boxFormula->text();
-   if (!boxShowFormula->isChecked())
-   formula = QString();
-   showAxis(axis, format, formatInfo, boxShowAxis->isChecked(), boxMajorTicksType->currentIndex(), boxMinorTicksType->currentIndex(),
-   boxShowLabels->isChecked(), boxAxisColor->color(), boxFormat->currentIndex(),
-   boxPrecision->value(), boxAngle->value(), baseline, formula, boxAxisNumColor->color());
-   }
-   else if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(frame)){
-   d_graph->setAxesLinewidth(boxAxesLinewidth->value());
-   d_graph->changeTicksLength(boxMinorTicksLength->value(), boxMajorTicksLength->value());
-   if (boxFramed->isChecked())
-   d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
-   else
-   d_graph->setCanvasFrame(0);
-   d_graph->drawAxesBackbones(boxBackbones->isChecked());
-   d_graph->replot();
-   }
-   m_updatePlot=true;
-   return m_updatePlot;
-   //return true;
-   */
-  //Disablign this code for now as it needs rewriting and probably renaming
-  return true;
-}
-
 void AxesDialog::setGraph(Graph *g)
 {
   if (!d_app)
@@ -2186,6 +1778,8 @@ void AxesDialog::updateScale()
   //if( scalePrefsArea->widget() ) scalePrefsArea->takeWidget();
 
   //scalesLayout->takeAt(1);
+
+  /*
   std::cerr << std::endl;
   std::cerr << std::endl;
   auto takereturn = scalesLayout->takeAt(1);
@@ -2194,6 +1788,7 @@ void AxesDialog::updateScale()
   {
     auto returnwidget = takereturn->widget();
     std::cerr << "Return from widget() - " << returnwidget << std::endl;
+	m_Scale_map.value[axesList->item(oldaxis)] = takereturn->widget();
   }
   int testrow = axesList->currentRow();
   std::cerr << "Return from currentRow() - " << testrow << std::endl;
@@ -2206,6 +1801,8 @@ void AxesDialog::updateScale()
     obj = m_Scale_map.value(item);
     obj->initWidgets();
     std::cerr << "Address of obj from map - " << obj << std::endl;
+	std::cerr << "Contents of dspnStart - " << obj->testreturn() << std::endl;
+
   }
   else
   {
@@ -2221,6 +1818,9 @@ void AxesDialog::updateScale()
   std::cerr << "Address of obj added to scalesLayout - " << obj << std::endl;
   std::cerr << std::endl;
   std::cerr << std::endl;
+
+  */
+
 
   /*
    int axis = axesList->currentRow();
@@ -2509,42 +2109,6 @@ void AxesDialog::updateTickLabelsList(bool on)
       boxBaseline->value(), formula, boxAxisNumColor->color());
 }
 
-void AxesDialog::setCurrentScale(int axisPos)
-{
-  int axis = -1;
-  switch (axisPos)
-  {
-    case QwtScaleDraw::LeftScale:
-      axis = 1;
-      break;
-    case QwtScaleDraw::BottomScale:
-      axis = 0;
-      break;
-    case QwtScaleDraw::RightScale:
-      axis = 3;
-      break;
-    case QwtScaleDraw::TopScale:
-      axis = 2;
-      break;
-  }
-  if (generalDialog->currentPage() == dynamic_cast<QWidget*>(scalesPage))
-    axesList->setCurrentRow(axis);
-  else if (generalDialog->currentPage() == dynamic_cast<QWidget*>(axesPage))
-    axesTitlesList->setCurrentRow(axis);
-}
-
-void AxesDialog::showAxesPage()
-{
-  if (generalDialog->currentWidget() != dynamic_cast<QWidget*>(axesPage))
-    generalDialog->setCurrentWidget(axesPage);
-}
-
-void AxesDialog::showGridPage()
-{
-  if (generalDialog->currentWidget() != dynamic_cast<QWidget*>(gridPage))
-    generalDialog->setCurrentWidget(gridPage);
-}
-
 void AxesDialog::setLabelsNumericFormat(int)
 {
   int axis = mapToQwtAxisId();
@@ -2636,19 +2200,6 @@ void AxesDialog::updateLabelsFormat(int)
   }
 }
 
-void AxesDialog::showGeneralPage()
-{
-  generalDialog->showPage(frame);
-}
-
-void AxesDialog::showFormulaBox()
-{
-  if (boxShowFormula->isChecked())
-    boxFormula->show();
-  else
-    boxFormula->hide();
-}
-
 void AxesDialog::customAxisLabelFont()
 {
   int axis = mapToQwtAxisId();
@@ -2673,16 +2224,6 @@ void AxesDialog::pageChanged(QWidget *page)
   }
 }
 
-int AxesDialog::exec()
-{
-  axesList->setCurrentRow(0);
-  axesGridList->setCurrentRow(0);
-  axesTitlesList->setCurrentRow(0);
-  setModal(true);
-  show();
-  return 0;
-}
-
 void AxesDialog::showAxis(int axis, int type, const QString& labelsColName,
     bool axisOn, int majTicksType, int minTicksType, bool labelsOn,
     const QColor& c, int format, int prec, int rotation, int baselineDist,
@@ -2700,4 +2241,342 @@ void AxesDialog::showAxis(int axis, int type, const QString& labelsColName,
   d_graph->showAxis(axis, type, labelsColName, w, axisOn, majTicksType,
       minTicksType, labelsOn, c, format, prec, rotation, baselineDist, formula,
       labelsColor);
+}
+
+void AxesDialog::updateGrid()
+{
+  if (generalDialog->currentWidget() != gridPage)
+    return;
+
+  switch (boxApplyGridFormat->currentIndex())
+  {
+    case 0:
+    {
+      applyChangesToGrid(d_graph->plotWidget()->grid());
+      d_graph->replot();
+      d_graph->notifyChanges();
+    }
+      break;
+
+    case 1:
+    {
+      MultiLayer *plot = d_graph->multiLayer();
+      if (!plot)
+        return;
+
+      QList<Graph *> layers = plot->layersList();
+      foreach(Graph *g, layers)
+      {
+        if (g->isPiePlot())
+          continue;
+
+        applyChangesToGrid(g->plotWidget()->grid());
+        g->replot();
+      }
+      plot->applicationWindow()->modifiedProject();
+    }
+      break;
+
+    case 2:
+    {
+      if (!d_app)
+        return;
+
+      QList<MdiSubWindow *> windows = d_app->windowsList();
+      foreach(MdiSubWindow *w, windows)
+      {
+        if (w->isA("MultiLayer"))
+        {
+          QList<Graph *> layers = (dynamic_cast<MultiLayer*>(w))->layersList();
+          foreach(Graph *g, layers)
+          {
+            if (g->isPiePlot())
+              continue;
+            applyChangesToGrid(g->plotWidget()->grid());
+            g->replot();
+          }
+        }
+      }
+      d_app->modifiedProject();
+    }
+      break;
+  }
+}
+
+void AxesDialog::applyChangesToGrid(Grid *grid)
+{
+  if (!grid)
+    return;
+
+  if (axesGridList->currentRow() == 1)
+  {
+    grid->enableX(boxMajorGrid->isChecked());
+    grid->enableXMin(boxMinorGrid->isChecked());
+
+    grid->setMajPenX(
+        QPen(ColorBox::color(boxColorMajor->currentIndex()),
+            boxWidthMajor->value(),
+            Graph::getPenStyle(boxTypeMajor->currentIndex())));
+    grid->setMinPenX(
+        QPen(ColorBox::color(boxColorMinor->currentIndex()),
+            boxWidthMinor->value(),
+            Graph::getPenStyle(boxTypeMinor->currentIndex())));
+  }
+  else
+  {
+    grid->enableY(boxMajorGrid->isChecked());
+    grid->enableYMin(boxMinorGrid->isChecked());
+
+    grid->setMajPenY(
+        QPen(ColorBox::color(boxColorMajor->currentIndex()),
+            boxWidthMajor->value(),
+            Graph::getPenStyle(boxTypeMajor->currentIndex())));
+    grid->setMinPenY(
+        QPen(ColorBox::color(boxColorMinor->currentIndex()),
+            boxWidthMinor->value(),
+            Graph::getPenStyle(boxTypeMinor->currentIndex())));
+  }
+
+  grid->enableZeroLineX(boxXLine->isChecked());
+  grid->enableZeroLineY(boxYLine->isChecked());
+  grid->setAxis(boxGridXAxis->currentIndex() + 2, boxGridYAxis->currentIndex());
+  grid->setRenderHint(QwtPlotItem::RenderAntialiased,
+      boxAntialiseGrid->isChecked());
+}
+
+
+void AxesDialog::changeMinorTicksLength(int minLength)
+{
+  if (generalDialog->currentWidget() != generalPage)
+    return;
+
+  d_graph->changeTicksLength(minLength, boxMajorTicksLength->value());
+  boxMajorTicksLength->setMinValue(minLength);
+}
+
+void AxesDialog::changeMajorTicksLength(int majLength)
+{
+  if (generalDialog->currentWidget() != generalPage)
+    return;
+
+  d_graph->changeTicksLength(boxMinorTicksLength->value(), majLength);
+  boxMinorTicksLength->setMaxValue(majLength);
+}
+
+void AxesDialog::drawAxesBackbones(bool draw)
+{
+  if (generalDialog->currentWidget() != generalPage)
+    return;
+
+  d_graph->drawAxesBackbones(draw);
+}
+
+void AxesDialog::changeAxesLinewidth(int width)
+{
+  if (generalDialog->currentWidget() != generalPage)
+    return;
+
+  d_graph->setAxesLinewidth(width);
+}
+
+void AxesDialog::drawFrame(bool framed)
+{
+  if (generalDialog->currentWidget() != generalPage)
+    return;
+
+  if (framed)
+    d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
+  else
+    d_graph->setCanvasFrame(0);
+}
+
+void AxesDialog::updateFrame(int width)
+{
+  if (generalDialog->currentWidget() != generalPage)
+    return;
+
+  d_graph->setCanvasFrame(width, boxFrameColor->color());
+}
+
+void AxesDialog::pickCanvasFrameColor()
+{
+  d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
+}
+
+void AxesDialog::majorGridEnabled(bool on)
+{
+  boxTypeMajor->setEnabled(on);
+  boxColorMajor->setEnabled(on);
+  boxWidthMajor->setEnabled(on);
+
+  updateGrid();
+}
+
+void AxesDialog::minorGridEnabled(bool on)
+{
+  boxTypeMinor->setEnabled(on);
+  boxColorMinor->setEnabled(on);
+  boxWidthMinor->setEnabled(on);
+
+  updateGrid();
+}
+
+bool AxesDialog::apply()
+{
+
+//this is gettign rewritten to check and press ALL tabs when apply or ok is pressed
+
+  /*
+
+  if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(scalesPage))
+  {
+
+    int a = mapToQwtAxis(axesList->currentRow());
+    ScaleDraw::ScaleType type = d_graph->axisType(a);
+
+    double start = 0.0, end = 0.0;
+    if (type == ScaleDraw::Date){
+      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_graph->plotWidget()->axisScaleDraw(a));
+      QDateTime origin = sclDraw->dateTimeOrigin();
+      start = (double)origin.secsTo(boxStartDateTime->dateTime());
+      end = (double)origin.secsTo(boxEndDateTime->dateTime());
+    } else if (type == ScaleDraw::Time){
+      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_graph->plotWidget()->axisScaleDraw(a));
+      QTime origin = sclDraw->dateTimeOrigin().time();
+      start = (double)origin.msecsTo(boxStartTime->time());
+      end = (double)origin.msecsTo(boxEndTime->time());
+    } else {
+      start = boxStart->value();
+      end = boxEnd->value();
+    }
+
+    if (start >= end){
+      QMessageBox::warning(this,tr("MantidPlot - Error"),
+        "Invalid option to set the 'From' greater than 'To' for the scale settings.\nOperation aborted! ");
+      return false;
+    }
+
+    double step = 0.0;
+    if (btnStep->isChecked()){
+      step = boxStep->value();
+      if (type == ScaleDraw::Time){
+        switch (boxUnit->currentIndex())
+        {
+        case 0:
+          break;
+        case 1:
+          step *= 1e3;
+          break;
+        case 2:
+          step *= 6e4;
+          break;
+        case 3:
+          step *= 36e5;
+          break;
+        }
+      } else if (type == ScaleDraw::Date){
+        switch (boxUnit->currentIndex())
+        {
+        case 0:
+          step *= 86400;
+          break;
+        case 1:
+          step *= 604800;
+          break;
+        }
+      }
+    }
+
+    double breakLeft = -DBL_MAX, breakRight = DBL_MAX;
+    if (boxAxesBreaks->isChecked()){
+      breakLeft = qMin(boxBreakStart->value(), boxBreakEnd->value());
+      breakRight = qMax(boxBreakStart->value(), boxBreakEnd->value());
+    }
+    d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
+      boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
+      boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
+      boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
+      boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
+    d_graph->notifyChanges();
+  }
+  else if (generalDialog->currentWidget() == gridPage)
+    updateGrid();
+  else if (generalDialog->currentWidget() == dynamic_cast<QWidget*>(axesPage))
+  {
+    int axis = mapToQwtAxisId();
+    int format = boxAxisType->currentIndex();
+
+    int baseline = boxBaseline->value();
+    axesBaseline[axis] = baseline;
+
+    QString formatInfo = QString::null;
+    if (format == ScaleDraw::Numeric)
+    {
+      if (boxShowFormula->isChecked())
+      {
+        QString formula = boxFormula->text().lower();
+        try
+        {
+          double value = 1.0;
+          MyParser parser;
+          if (formula.contains("x"))
+            parser.DefineVar("x", &value);
+          else if (formula.contains("y"))
+            parser.DefineVar("y", &value);
+          parser.SetExpr(formula.ascii());
+          parser.Eval();
+        }
+        catch(mu::ParserError &e)
+        {
+          QMessageBox::critical(this, tr("MantidPlot - Formula input error"), QString::fromStdString(e.GetMsg())+"\n"+
+            tr("Valid variables are 'x' for Top/Bottom axes and 'y' for Left/Right axes!"));
+          boxFormula->setFocus();
+          m_updatePlot=false;
+          return m_updatePlot;
+          //return false;
+        }
+      }
+    } else if (format == ScaleDraw::Time || format == ScaleDraw::Date){
+      QStringList lst = d_graph->axisFormatInfo(axis).split(";", QString::KeepEmptyParts);
+      if ((int)lst.count() >= 2)
+        lst[1] = boxFormat->currentText();
+      formatInfo = lst.join(";");
+    } else if (format == ScaleDraw::Day || format == ScaleDraw::Month)
+      formatInfo = QString::number(boxFormat->currentIndex());
+    else if (format == ScaleDraw::ColHeader)
+      formatInfo = boxTableName->currentText();
+    else
+      formatInfo = boxColName->currentText();
+
+    if (d_graph->axisTitle(axis) != boxTitle->text())
+      d_graph->setAxisTitle(axis, boxTitle->text());
+
+    if (axis == QwtPlot::xBottom)
+      xBottomLabelsRotation=boxAngle->value();
+    else if (axis == QwtPlot::xTop)
+      xTopLabelsRotation=boxAngle->value();
+
+    QString formula = boxFormula->text();
+    if (!boxShowFormula->isChecked())
+      formula = QString();
+    showAxis(axis, format, formatInfo, boxShowAxis->isChecked(), boxMajorTicksType->currentIndex(), boxMinorTicksType->currentIndex(),
+      boxShowLabels->isChecked(), boxAxisColor->color(), boxFormat->currentIndex(),
+      boxPrecision->value(), boxAngle->value(), baseline, formula, boxAxisNumColor->color());
+  }
+  else if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(generalPage)){
+    d_graph->setAxesLinewidth(boxAxesLinewidth->value());
+    d_graph->changeTicksLength(boxMinorTicksLength->value(), boxMajorTicksLength->value());
+    if (boxFramed->isChecked())
+      d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
+    else
+      d_graph->setCanvasFrame(0);
+    d_graph->drawAxesBackbones(boxBackbones->isChecked());
+    d_graph->replot();
+  }
+  m_updatePlot=true;
+  return m_updatePlot;
+  //return true;
+   */
+  //Disablign this code for now as it needs rewriting and probably renaming
+  return true;
 }

@@ -31,11 +31,155 @@ AxisAxisDetails::AxisAxisDetails(QWidget *parent) :
     QWidget(parent)
 {
 
+  QHBoxLayout * topLayout = new QHBoxLayout();
+
+  boxShowAxis = new QCheckBox(tr("Show"));
+  boxShowAxis->setChecked(true);
+  topLayout->addWidget(boxShowAxis);
+
+  labelBox = new QGroupBox(tr("Title"));
+  topLayout->addWidget(labelBox);
+
+  QVBoxLayout *labelBoxLayout = new QVBoxLayout(labelBox);
+  labelBoxLayout->setSpacing(2);
+
+  boxTitle = new QTextEdit();
+  boxTitle->setTextFormat(Qt::PlainText);
+  QFontMetrics metrics(this->font());
+  boxTitle->setMaximumHeight(3 * metrics.height());
+  labelBoxLayout->addWidget(boxTitle);
+
+  QHBoxLayout *hl = new QHBoxLayout();
+  hl->setMargin(0);
+  hl->setSpacing(2);
+  buttonLabelFont = new QPushButton(tr("&Font"));
+  hl->addWidget(buttonLabelFont);
+
+  formatButtons = new TextFormatButtons(boxTitle, TextFormatButtons::AxisLabel);
+  hl->addWidget(formatButtons);
+  hl->addStretch();
+
+  boxTitle->setMaximumWidth(buttonLabelFont->width() + formatButtons->width());
+  labelBoxLayout->addLayout(hl);
+
+  QHBoxLayout * bottomLayout = new QHBoxLayout();
+
+  QGroupBox *leftBox = new QGroupBox(QString());
+  bottomLayout->addWidget(leftBox);
+  QGridLayout * leftBoxLayout = new QGridLayout(leftBox);
+
+  leftBoxLayout->addWidget(new QLabel(tr("Type")), 0, 0);
+
+  boxAxisType = new QComboBox();
+  boxAxisType->addItem(tr("Numeric"));
+  boxAxisType->addItem(tr("Text from table"));
+  boxAxisType->addItem(tr("Day of the week"));
+  boxAxisType->addItem(tr("Month"));
+  boxAxisType->addItem(tr("Time"));
+  boxAxisType->addItem(tr("Date"));
+  boxAxisType->addItem(tr("Column Headings"));
+  leftBoxLayout->addWidget(boxAxisType, 0, 1);
+
+  leftBoxLayout->addWidget(new QLabel(tr("Font")), 1, 0);
+
+  btnAxesFont = new QPushButton();
+  btnAxesFont->setText(tr("Axis &Font"));
+  leftBoxLayout->addWidget(btnAxesFont, 1, 1);
+
+  leftBoxLayout->addWidget(new QLabel(tr("Color")), 2, 0);
+  boxAxisColor = new ColorButton();
+  leftBoxLayout->addWidget(boxAxisColor, 2, 1);
+
+  leftBoxLayout->addWidget(new QLabel(tr("Major Ticks")), 3, 0);
+
+  boxMajorTicksType = new QComboBox();
+  boxMajorTicksType->addItem(tr("None"));
+  boxMajorTicksType->addItem(tr("Out"));
+  boxMajorTicksType->addItem(tr("In & Out"));
+  boxMajorTicksType->addItem(tr("In"));
+  leftBoxLayout->addWidget(boxMajorTicksType, 3, 1);
+
+  leftBoxLayout->addWidget(new QLabel(tr("Minor Ticks")), 4, 0);
+
+  boxMinorTicksType = new QComboBox();
+  boxMinorTicksType->addItem(tr("None"));
+  boxMinorTicksType->addItem(tr("Out"));
+  boxMinorTicksType->addItem(tr("In & Out"));
+  boxMinorTicksType->addItem(tr("In"));
+  leftBoxLayout->addWidget(boxMinorTicksType, 4, 1);
+
+  leftBoxLayout->addWidget(new QLabel(tr("Stand-off")), 5, 0);
+  boxBaseline = new QSpinBox();
+  boxBaseline->setRange(0, 1000);
+  leftBoxLayout->addWidget(boxBaseline);
+
+  boxShowLabels = new QGroupBox(tr("Show Labels"));
+  boxShowLabels->setCheckable(true);
+  boxShowLabels->setChecked(true);
+
+  bottomLayout->addWidget(boxShowLabels);
+  QGridLayout *rightBoxLayout = new QGridLayout(boxShowLabels);
+
+  label1 = new QLabel(tr("Column"));
+  rightBoxLayout->addWidget(label1, 0, 0);
+
+  boxColName = new QComboBox();
+  rightBoxLayout->addWidget(boxColName, 0, 1);
+
+  labelTable = new QLabel(tr("Table"));
+  rightBoxLayout->addWidget(labelTable, 1, 0);
+
+  boxTableName = new QComboBox();
+  boxTableName->insertStringList(tablesList);
+  boxColName->insertStringList(d_app->columnsList(Table::All));
+  rightBoxLayout->addWidget(boxTableName, 1, 1);
+
+  label2 = new QLabel(tr("Format"));
+  rightBoxLayout->addWidget(label2, 2, 0);
+
+  boxFormat = new QComboBox();
+  boxFormat->setDuplicatesEnabled(false);
+  rightBoxLayout->addWidget(boxFormat, 2, 1);
+
+  label3 = new QLabel(tr("Precision"));
+  rightBoxLayout->addWidget(label3, 3, 0);
+  boxPrecision = new QSpinBox();
+  boxPrecision->setRange(0, 10);
+  rightBoxLayout->addWidget(boxPrecision, 3, 1);
+
+  rightBoxLayout->addWidget(new QLabel(tr("Angle")), 4, 0);
+
+  boxAngle = new QSpinBox();
+  boxAngle->setRange(-90, 90);
+  boxAngle->setSingleStep(5);
+  rightBoxLayout->addWidget(boxAngle, 4, 1);
+
+  rightBoxLayout->addWidget(new QLabel(tr("Color")), 5, 0);
+  boxAxisNumColor = new ColorButton();
+  rightBoxLayout->addWidget(boxAxisNumColor, 5, 1);
+
+  boxShowFormula = new QCheckBox(tr("For&mula"));
+  rightBoxLayout->addWidget(boxShowFormula, 6, 0);
+
+  boxFormula = new QTextEdit();
+  boxFormula->setTextFormat(Qt::PlainText);
+  boxFormula->setMaximumHeight(3 * metrics.height());
+  boxFormula->hide();
+  rightBoxLayout->addWidget(boxFormula, 6, 1);
+  rightBoxLayout->setRowStretch(7, 1);
+
+  QVBoxLayout * rightLayout = new QVBoxLayout(this);
+  rightLayout->addLayout(topLayout);
+  rightLayout->addLayout(bottomLayout);
+  rightLayout->addStretch(1);
+
 }
 AxisAxisDetails::~AxisAxisDetails()
 {
 
 }
+
+
 ScaleAxisDetails::ScaleAxisDetails(ApplicationWindow* app, Graph* graph,
     int mappedaxis, QWidget *parent) :
     QWidget(parent)
@@ -202,19 +346,15 @@ ScaleAxisDetails::ScaleAxisDetails(ApplicationWindow* app, Graph* graph,
   vl->addLayout(hl);
   vl->addWidget(grpAxesBreaks);
 
-  //// this is wrong and shouldn't happen i'll have to see what update plot is doing
+  //// these bypass Apply()
   //connect(chkInvert,SIGNAL(clicked()), this, SLOT(updatePlot()));
-  ////
-  connect(radStep, SIGNAL(clicked()), this, SLOT(radiosSwitched()));
-  connect(radMajor, SIGNAL(clicked()), this, SLOT(radiosSwitched()));
-  ////disabled until i can find out what they actually do
   //connect(cmbScaleType,SIGNAL(activated(int)), this, SLOT(updateMinorTicksList(int)));
   //connect(dspnEnd, SIGNAL(valueChanged(double)), this, SLOT(endvalueChanged(double)));
   //connect(dspnStart, SIGNAL(valueChanged(double)), this, SLOT(startvalueChanged(double)));
-
-  //QVBoxLayout *main_layout = new QVBoxLayout(this);
-  //main_layout->addLayout(vl);
-  //initWidgets(mappedaxis);
+  ////
+  connect(radStep, SIGNAL(clicked()), this, SLOT(radiosSwitched()));
+  connect(radMajor, SIGNAL(clicked()), this, SLOT(radiosSwitched()));
+  initWidgets();
 }
 ScaleAxisDetails::~ScaleAxisDetails()
 {
@@ -232,7 +372,7 @@ void ScaleAxisDetails::radiosSwitched()
 /*
  void ScaleAxisDetails::endvalueChanged(double endVal)
  {
- //is this even doing anything?
+ //these bypass apply
  (void) endVal;
  if(d_graph)
  d_graph->changeIntensity( true);
@@ -245,7 +385,6 @@ void ScaleAxisDetails::radiosSwitched()
  if(d_graph)
  d_graph->changeIntensity( true);
  }
-
  void ScaleAxisDetails::updateMinorTicksList(int scaleType)
  {
  //is this even doing anything?
@@ -255,15 +394,6 @@ void ScaleAxisDetails::radiosSwitched()
 
 void ScaleAxisDetails::initWidgets()
 {
-  //int axis = axesList->currentRow(); //happens before running constructor as "a" will be passed in
-
-  /* these dont' happen any more
-   dspnStart->clear();
-   dspnEnd->clear();
-   dspnStep->clear();
-   cmbUnit->hide();
-   cmbUnit->clear();
-   */
   if (m_initialised)
   {
     return;
@@ -271,7 +401,6 @@ void ScaleAxisDetails::initWidgets()
   else
   {
     Plot *d_plot = d_graph->plotWidget();
-    //int mappedaxis = mapToQwtAxis(axis);//happens before running constructor as "a" will be passed in
     const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(m_mappedaxis);
     double start = QMIN(scDiv->lBound(), scDiv->hBound());
     double end = QMAX(scDiv->lBound(), scDiv->hBound());

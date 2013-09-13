@@ -49,6 +49,13 @@ class AxisAxisDetails: public QWidget
   public:
     AxisAxisDetails(QWidget *parent = 0); // populate and fill in with existing data
     virtual ~AxisAxisDetails();
+    void initWidgets();
+    bool modified();
+  //private slots:
+
+  private:
+    bool m_modified;
+
 };
 
 class ScaleAxisDetails: public QWidget
@@ -59,6 +66,7 @@ class ScaleAxisDetails: public QWidget
     ScaleAxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent = 0); // populate and fill in with existing data
     virtual ~ScaleAxisDetails();
     void initWidgets();
+    bool modified();
   private slots:
 
     //void updateMinorTicksList(int scaleType);
@@ -67,6 +75,7 @@ class ScaleAxisDetails: public QWidget
     void radiosSwitched();
 
   private:
+    bool m_modified;
     ApplicationWindow* d_app;
     Graph* d_graph;
     //formerly  *boxEnd, *boxStart, *boxStep, *boxBreakStart, *boxBreakEnd, *boxStepBeforeBreak, *boxStepAfterBreak;
