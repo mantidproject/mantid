@@ -700,8 +700,15 @@ class ConvertToEnergy(ReductionStep):
             if self._rebin_string is not None:
                 if not self._multiple_frames:
                     Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= self._rebin_string)
+            else:
+                try:
+                    # Rebin whole workspace to first spectrum to allow grouping to proceed
+                    RebinToWorkspace(WorkspaceToRebin=ws,WorkspaceToMatch=ws,
+                                     OutputWorkspace=ws)
+                except Exception:
+                    logger.information("RebinToWorkspace failed. Attempting to continue without it.")
                     
-        if self._multiple_frames:
+        if self._multiple_frames and self._rebin_string is not None:
             self._rebin_mf(workspaces)
 
     def set_rebin_string(self, value):
