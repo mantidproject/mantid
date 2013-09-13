@@ -18,7 +18,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Catalogue search</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
@@ -257,7 +257,7 @@
          </widget>
         </item>
         <item row="0" column="4">
-         <widget class="QLineEdit" name="startDateBtn">
+         <widget class="QLineEdit" name="startDateTxt">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -276,7 +276,7 @@
          </widget>
         </item>
         <item row="1" column="4">
-         <widget class="QLineEdit" name="endDateBtn">
+         <widget class="QLineEdit" name="endDateTxt">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -391,7 +391,7 @@
          </widget>
         </item>
         <item row="3" column="4" colspan="2">
-         <widget class="QLineEdit" name="advNameTxt_2"/>
+         <widget class="QLineEdit" name="advSampleTxt"/>
         </item>
         <item row="4" column="0">
          <widget class="QLabel" name="advAbstractLbl">
