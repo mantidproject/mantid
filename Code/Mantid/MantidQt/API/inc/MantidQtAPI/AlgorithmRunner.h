@@ -24,7 +24,7 @@ namespace API
    * TO USE:
    *  - Create the AlgorithmRunner object.
    *  - Connect the desired signal(s) to slots on your GUI.
-   *  - Call cancelRunningAlgorithm() then startAlgorithm() to start.
+   *  - Call startAlgorithm() to start.
     
     @date 2012-04-23
 
@@ -53,12 +53,13 @@ namespace API
     Q_OBJECT
 
   public:
-    AlgorithmRunner();
+    explicit AlgorithmRunner(QObject * parent = 0);
     virtual ~AlgorithmRunner();
     
     void cancelRunningAlgorithm();
 
     void startAlgorithm(Mantid::API::IAlgorithm_sptr alg);
+    Mantid::API::IAlgorithm_sptr getAlgorithm() const;
 
   signals:
     /// Signal emitted when the algorithm has completed execution/encountered an error
@@ -80,10 +81,10 @@ namespace API
     Poco::NObserver<AlgorithmRunner, Mantid::API::Algorithm::ErrorNotification> m_errorObserver;
 
     /// For the asynchronous call in dynamic rebinning. Holds the result of asyncExecute() algorithm call
-    Poco::ActiveResult<bool> * m_asyncRebinResult;
+    Poco::ActiveResult<bool> * m_asyncResult;
 
     /// Reference to the algorithm executing asynchronously.
-    Mantid::API::IAlgorithm_sptr m_asyncRebinAlg;
+    Mantid::API::IAlgorithm_sptr m_asyncAlg;
 
   };
 

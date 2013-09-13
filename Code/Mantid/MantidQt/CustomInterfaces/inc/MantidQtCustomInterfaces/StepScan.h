@@ -6,6 +6,7 @@
 //----------------------
 #include "ui_StepScan.h"
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IAlgorithm.h"
 
@@ -32,13 +33,15 @@ signals:
 
 private slots:
   void triggerLiveListener(bool checked);
-  void loadFile();
+  void startLiveListenerComplete(bool error);
+  void loadFile(bool async = true);
+  void loadFileComplete(bool error);
   void launchInstrumentWindow();
   void fillPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr& ws);
   void expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr& ws);
   void fillNormalizationCombobox();
   void runStepScanAlg();
-  void runStepScanAlgLive(std::string stepScanProperties);
+  bool runStepScanAlgLive(std::string stepScanProperties);
 
   void updateForNormalizationChange();
   void generateCurve(const QString& var);
@@ -67,6 +70,7 @@ private:
   bool m_dataReloadNeeded;
   const std::string m_instrument; ///< The default instrument (for live data)
 
+  API::AlgorithmRunner * m_algRunner; ///< Object for running algorithms asynchronously
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAddNotification> m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification> m_replObserver;
   bool m_replaceObserverAdded;
