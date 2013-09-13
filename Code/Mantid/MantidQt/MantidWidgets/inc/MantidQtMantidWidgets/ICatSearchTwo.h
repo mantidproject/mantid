@@ -33,8 +33,6 @@ namespace MantidQt
       void populateInvestigationTypeBox();
       /// Perform the search.
       bool executeSearch();
-      /// Hides the advanced option on startup.
-      void hideAdvancedOptions();
 
       ///////////////////////////////////////////////////////////////////////////////
       // Methods for: "Search results"
@@ -69,7 +67,7 @@ namespace MantidQt
       void onHelp();
       /// When checked, show the Catalog search frame.
       void showCatalogSearch();
-      /// When checked, show the search results frame.
+      /// Shows/Hides the "Search results" frame when search results combo box is checked.
       void showSearchResults();
       /// When checked, show the data file info frame.
       void showDataFileInfo();
@@ -86,6 +84,8 @@ namespace MantidQt
       void advancedSearchChecked();
       /// Perform the "Search" operation when the search button is clicked.
       void onSearch();
+      /// When the "Search" button is clicked, display "Search results" frame.
+      void searchClicked();
       /// Reset all fields when "Reset" is clicked.
       void onReset();
 
