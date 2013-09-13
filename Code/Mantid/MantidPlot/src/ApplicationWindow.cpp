@@ -191,7 +191,7 @@
 #include "MantidQtAPI/Message.h"
 
 #include "MantidQtMantidWidgets/ICatSearch.h"
-#include "MantidQtMantidWidgets/ICatSearchTwo.h"
+#include "MantidQtMantidWidgets/ICatSearch2.h"
 #include "MantidQtMantidWidgets/ICatMyDataSearch.h"
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
@@ -1234,7 +1234,7 @@ void ApplicationWindow::initMainMenu()
   icat->addAction(actionICatLogin);//Login menu item
   icat->addAction(actionMydataSearch);// my data search menu item
   icat->addAction(actionICatSearch);//search menu item
-  icat->addAction(actionICatSearchTwo); // new ICAT GUI menu item
+  icat->addAction(actionICatSearch2); // new ICAT GUI menu item
   icat->addAction(actionAdvancedSearch); //advanced search menu item
   icat->addAction(actionICatLogout);//logout menu item
   disableActions();
@@ -13325,9 +13325,9 @@ void ApplicationWindow::createActions()
   actionICatLogin->setToolTip(tr("Catalog Login"));
   connect(actionICatLogin, SIGNAL(activated()), this, SLOT(ICatLogin()));
 
-  actionICatSearchTwo = new QAction("Search",this);
-  actionICatSearchTwo->setToolTip(tr("Search data in archives."));
-  connect(actionICatSearchTwo, SIGNAL(activated()), this, SLOT(ICatSearchTwo()));
+  actionICatSearch2 = new QAction("Search",this);
+  actionICatSearch2->setToolTip(tr("Search data in archives."));
+  connect(actionICatSearch2, SIGNAL(activated()), this, SLOT(ICatSearch2()));
 
   actionICatSearch=new QAction("Basic Search",this);
   actionICatSearch->setToolTip(tr("Catalog Basic Search"));
@@ -17558,9 +17558,9 @@ void ApplicationWindow::ICatLogin()
   mantidUI->executeAlgorithm("CatalogLogin",1);
 }
 
-void ApplicationWindow::ICatSearchTwo()
+void ApplicationWindow::ICatSearch2()
 {
-  icatsearch = new MantidQt::MantidWidgets::ICatSearchTwo();
+  icatsearch = new MantidQt::MantidWidgets::ICatSearch2();
   icatsearch->show();
 }
 

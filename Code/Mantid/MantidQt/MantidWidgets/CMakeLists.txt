@@ -10,7 +10,7 @@ set ( SRC_FILES
 	src/ICatInvestigation.cpp
 	src/ICatMyDataSearch.cpp
 	src/ICatSearch.cpp
-	src/ICatSearchTwo.cpp
+	src/ICatSearch2.cpp
 	src/ICatUtils.cpp
 	src/InstrumentSelector.cpp
 	src/MessageDisplay.cpp
@@ -51,7 +51,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/ICatInvestigation.h
     inc/MantidQtMantidWidgets/ICatMyDataSearch.h
     inc/MantidQtMantidWidgets/ICatSearch.h
-    inc/MantidQtMantidWidgets/ICatSearchTwo.h
+    inc/MantidQtMantidWidgets/ICatSearch2.h
     inc/MantidQtMantidWidgets/ICatUtils.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
@@ -87,7 +87,7 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/ICatInvestigation.ui
     inc/MantidQtMantidWidgets/ICatMyDataSearch.ui
     inc/MantidQtMantidWidgets/ICatSearch.ui
-    inc/MantidQtMantidWidgets/ICatSearchTwo.ui
+    inc/MantidQtMantidWidgets/ICatSearch2.ui
     inc/MantidQtMantidWidgets/MultifitSetupDialog.ui
     inc/MantidQtMantidWidgets/MWDiag.ui
     inc/MantidQtMantidWidgets/MWRunFiles.ui

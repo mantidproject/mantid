@@ -1,4 +1,4 @@
-#include "MantidQtMantidWidgets/ICatSearchTwo.h"
+#include "MantidQtMantidWidgets/ICatSearch2.h"
 
 namespace MantidQt
 {
@@ -7,7 +7,7 @@ namespace MantidQt
     /**
      * Constructor
      */
-    ICatSearchTwo::ICatSearchTwo(QWidget* parent) : QWidget(parent)
+    ICatSearch2::ICatSearch2(QWidget* parent) : QWidget(parent)
     {
       initLayout();
     }
@@ -15,12 +15,12 @@ namespace MantidQt
     /**
      * Destructor
      */
-    ICatSearchTwo::~ICatSearchTwo(){}
+    ICatSearch2::~ICatSearch2(){}
 
     /**
      * Initialise the  default layout.
      */
-    void ICatSearchTwo::initLayout()
+    void ICatSearch2::initLayout()
     {
       // Draw the GUI from .ui header generated file.
       icatUiForm.setupUi(this);
@@ -58,7 +58,7 @@ namespace MantidQt
     /**
      * Opens the login dialog to allow the user to log into another facility.
      */
-    void ICatSearchTwo::onFacilityLogin()
+    void ICatSearch2::onFacilityLogin()
     {
 
     }
@@ -66,7 +66,7 @@ namespace MantidQt
     /**
      * Sends the user to relevant search page on the Mantid project site.
      */
-    void ICatSearchTwo::onHelp()
+    void ICatSearch2::onHelp()
     {
 
     }
@@ -74,7 +74,7 @@ namespace MantidQt
     /**
      * Shows/hides the "Catalog search" frame when search combo box is checked.
      */
-    void ICatSearchTwo::showCatalogSearch()
+    void ICatSearch2::showCatalogSearch()
     {
       if (icatUiForm.searchCbox->isChecked())
       {
@@ -89,7 +89,7 @@ namespace MantidQt
     /**
      * Hides the search frame, and shows search results frame when "Search" button pressed.
      */
-    void ICatSearchTwo::searchClicked()
+    void ICatSearch2::searchClicked()
     {
       if (icatUiForm.searchBtn)
       {
@@ -102,7 +102,7 @@ namespace MantidQt
     /**
      * Shows/Hides the "Search results" frame when search results combo box is checked.
      */
-    void ICatSearchTwo::showSearchResults()
+    void ICatSearch2::showSearchResults()
     {
       if (icatUiForm.searchResultsCbox->isChecked())
       {
@@ -117,7 +117,7 @@ namespace MantidQt
     /**
      * Hides "Search results" frame when a result is double clicked.
      */
-    void ICatSearchTwo::showDataFileInfo()
+    void ICatSearch2::showDataFileInfo()
     {
 
     }
@@ -129,7 +129,7 @@ namespace MantidQt
     /**
      * Populates the "Instrument" drop-box
      */
-    void ICatSearchTwo::populateInstrumentBox()
+    void ICatSearch2::populateInstrumentBox()
     {
 
     }
@@ -137,7 +137,7 @@ namespace MantidQt
     /**
      * Populates the "Investigation type" drop-box.
      */
-    void ICatSearchTwo::populateInvestigationTypeBox()
+    void ICatSearch2::populateInvestigationTypeBox()
     {
 
     }
@@ -145,7 +145,7 @@ namespace MantidQt
     /**
      * Perform the search.
      */
-    bool ICatSearchTwo::executeSearch()
+    bool ICatSearch2::executeSearch()
     {
 
     }
@@ -157,7 +157,7 @@ namespace MantidQt
     /**
      * Opens the DateTime Calender box when spe.
      */
-    void ICatSearchTwo::openCalendar()
+    void ICatSearch2::openCalendar()
     {
 
     }
@@ -165,7 +165,7 @@ namespace MantidQt
     /**
      * Search through the user's data only when "My data" is checked.
      */
-    void ICatSearchTwo::onMyDataOnlyChecked()
+    void ICatSearch2::onMyDataOnlyChecked()
     {
 
     }
@@ -173,7 +173,7 @@ namespace MantidQt
     /**
      * Show or hide advanced options if "Advanced Search" checked.
      */
-    void ICatSearchTwo::advancedSearchChecked()
+    void ICatSearch2::advancedSearchChecked()
     {
       if (icatUiForm.advSearchCbox->isChecked())
       {
@@ -202,7 +202,7 @@ namespace MantidQt
     /**
      * Perform the search operation when the "Search" button is clicked.
      */
-    void ICatSearchTwo::onSearch()
+    void ICatSearch2::onSearch()
     {
 
     }
@@ -210,7 +210,7 @@ namespace MantidQt
     /**
      * Reset all fields when the "Reset" button is pressed.
      */
-    void ICatSearchTwo::onReset()
+    void ICatSearch2::onReset()
     {
       // Clear normal search fields.
       icatUiForm.invesNameTxt->clear();
@@ -234,7 +234,7 @@ namespace MantidQt
     /**
      * Outputs the results of the search into the "Search results" table.
      */
-    void ICatSearchTwo::populateResultTable()
+    void ICatSearch2::populateResultTable()
     {
 
     }
@@ -242,7 +242,7 @@ namespace MantidQt
     /**
      * When an investigation is double clicked open we want to call populateDataFileTable using the investigation name.
      */
-    void ICatSearchTwo::investigationClicked()
+    void ICatSearch2::investigationClicked()
     {
 
     }
@@ -250,7 +250,7 @@ namespace MantidQt
     /**
      * Updates the "Displaying info" text box with relevant result info (e.g. 500 of 18,832)
      */
-    void ICatSearchTwo::resultInfoUpdate()
+    void ICatSearch2::resultInfoUpdate()
     {
 
     }
@@ -258,7 +258,7 @@ namespace MantidQt
     /**
      * Updates the page numbers (e.g. m & n in: Page m of n )
      */
-    void ICatSearchTwo::pageNumberUpdate()
+    void ICatSearch2::pageNumberUpdate()
     {
 
     }
@@ -270,7 +270,7 @@ namespace MantidQt
     /**
      * Populate the result table, and update the page number.
      */
-    bool ICatSearchTwo::nextPageClicked()
+    bool ICatSearch2::nextPageClicked()
     {
 
     }
@@ -278,7 +278,7 @@ namespace MantidQt
     /**
      * Populate the result table, and update the page number.
      */
-    bool ICatSearchTwo::prevPageClicked()
+    bool ICatSearch2::prevPageClicked()
     {
 
     }
@@ -286,7 +286,7 @@ namespace MantidQt
     /**
      * Populate's result table depending page number input by user.
      */
-    bool ICatSearchTwo::goToInputPage()
+    bool ICatSearch2::goToInputPage()
     {
 
     }
@@ -294,7 +294,7 @@ namespace MantidQt
     /**
      * Checks that the investigation is selected and performs investigationClicked.
      */
-    bool ICatSearchTwo::investigationSelected()
+    bool ICatSearch2::investigationSelected()
     {
 
     }
@@ -306,7 +306,7 @@ namespace MantidQt
     /**
      * Outputs related dataFiles (from selected investigation) into the "DataFile information" table.
      */
-    void ICatSearchTwo::populateDataFileTable()
+    void ICatSearch2::populateDataFileTable()
     {
 
     }
@@ -314,7 +314,7 @@ namespace MantidQt
     /**
      * Obtains the names of the selected dataFiles, in preparation for download.
      */
-    void ICatSearchTwo::getCheckedFileNames()
+    void ICatSearch2::getCheckedFileNames()
     {
 
     }
@@ -322,7 +322,7 @@ namespace MantidQt
     /**
      * Updates the dataFile text boxes with relevant info regarding the selected dataFile.
      */
-    void ICatSearchTwo::updateDataFileLabel()
+    void ICatSearch2::updateDataFileLabel()
     {
 
     }
@@ -330,7 +330,7 @@ namespace MantidQt
     /**
      * Filters the "DataFile information" table to display user specified files (based on file extension).
      */
-    void ICatSearchTwo::filterDataFileType()
+    void ICatSearch2::filterDataFileType()
     {
 
     }
@@ -342,7 +342,7 @@ namespace MantidQt
     /**
      * Performs filter option for specified filer type.
      */
-    void ICatSearchTwo::doFilter()
+    void ICatSearch2::doFilter()
     {
 
     }
@@ -350,7 +350,7 @@ namespace MantidQt
     /**
      * Downloads selected datFiles to a specified location.
      */
-    void ICatSearchTwo::downloadDataFiles()
+    void ICatSearch2::downloadDataFiles()
     {
 
     }
@@ -358,7 +358,7 @@ namespace MantidQt
     /**
      * Loads the selected dataFiles into workspaces.
      */
-    void ICatSearchTwo::loadDataFile()
+    void ICatSearch2::loadDataFile()
     {
 
     }
