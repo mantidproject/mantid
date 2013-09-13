@@ -61,7 +61,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 20 propeties",20,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 21 propeties",21,(size_t)(pAlg->getProperties().size()));
 }
 
 
