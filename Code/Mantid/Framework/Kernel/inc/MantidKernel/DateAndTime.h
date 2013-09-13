@@ -81,6 +81,7 @@ public:
   bool operator<=(const DateAndTime& rhs) const;
   bool operator>(const DateAndTime& rhs) const;
   bool operator>=(const DateAndTime& rhs) const;
+  bool equals(const DateAndTime& rhs, const int64_t tol=1) const;
 
   DateAndTime operator+(const int64_t nanosec) const;
   DateAndTime& operator+=(const int64_t nanosec);
