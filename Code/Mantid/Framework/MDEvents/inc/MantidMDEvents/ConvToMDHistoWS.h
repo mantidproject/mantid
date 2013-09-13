@@ -51,9 +51,6 @@ namespace MDEvents
 */
 
 //-----------------------------------------------
-// predefined declaration of the class, which do chunk of conversion in case of multithreaded execution (linux do not understand friend without it)
-class ChunkOfWork;
-
 class ConvToMDHistoWS: public ConvToMDBase
 {
 
@@ -71,47 +68,7 @@ private:
   // the function does a chunk of work. Expected to run on a thread. 
    size_t conversionChunk(size_t job_ID);
 
-   friend class ChunkOfWork;
-
-   // counter for number of workspace points used for multithreaded calculations of number of actual points;
-   size_t m_numAddedPoints;
-   // mutex for adding number of calculated points in multithreaded mode
-   Kernel::Mutex m_npLock;
-
-   // the function - helper for ChunkOfWork class which calculates number of actually added by thread points
-   size_t addNPoits(size_t numPoints)
-   {
-     Poco::ScopedLock<Kernel::Mutex> lock(m_npLock);
-     m_numAddedPoints+=numPoints;
-     return 0;
-   }
-
-};
-
-/** Helper class for multithreaded adding -- poor replacement for bind, but does a bit more then just running the addition and allow avoiding mutexes in single-thread mode*/ 
-class ChunkOfWork :  public Kernel::Task
-{
-     ConvToMDHistoWS *classHolder;
-     // function pointer to the conversion chunk above
-      typedef  size_t (ConvToMDHistoWS::*fpRunMethod)(size_t) ;
-      fpRunMethod runMethod;
-
-      fpRunMethod countPoints;
-
-      // the Id for the conversion job 
-      size_t job_ID;
-public:
-      /**Constructor */
-      ChunkOfWork(ConvToMDHistoWS *Converter,fpRunMethod conversionChunk ,fpRunMethod addPoints,size_t theJI)
-        :classHolder(Converter),runMethod(conversionChunk),countPoints(addPoints),job_ID(theJI)
-        {  };
-      /** Overloaded POCO run method used to run the job*/ 
-      void run()
-      {
-        size_t nAddedPoints = (classHolder->*runMethod)(job_ID);
-        (classHolder->*countPoints)(nAddedPoints);
-      }
-
+ 
 };
 
 

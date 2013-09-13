@@ -169,25 +169,12 @@ namespace Mantid
       this->estimateThreadWork(nThreads,specSize,eventsChunkNum);
 
       //External loop over the spectra:
-      for (size_t i = 0; i < nValidSpectra; i+=m_spectraChunk*nThreads)
+      for (size_t i = 0; i < nValidSpectra; i+=m_spectraChunk)
       {
-        if (runMultithreaded)
-        {
-           m_numAddedPoints = 0;
-           for(size_t j=0;j<nThreads;j++)
-              ts->push(new ChunkOfWork(this,&ConvToMDHistoWS::conversionChunk,&ConvToMDHistoWS::addNPoits,i+j));
+         size_t nThreadEv = this->conversionChunk(i);
+         nAddedEvents+=nThreadEv;
+         nEventsInWS +=nThreadEv;
 
-            tp.joinAll();
-            nAddedEvents+=m_numAddedPoints;
-            nEventsInWS +=m_numAddedPoints;
-
-        }
-        else
-        {
-          size_t nThreadEv = this->conversionChunk(i);
-          nAddedEvents+=nThreadEv;
-          nEventsInWS +=nThreadEv;
-        }
 
         if (bc->shouldSplitBoxes(nEventsInWS,nAddedEvents,lastNumBoxes))
         {
