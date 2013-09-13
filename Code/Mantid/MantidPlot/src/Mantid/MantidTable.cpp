@@ -40,11 +40,12 @@ m_transposed(transpose)
   }
   setHeaderColType();
 
+  // Filling can take a while, so process any pending events and set appropriate cursor
+  QApplication::processEvents();
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
   // Set name and stuff
   parent->initTable(this, parent->generateUniqueName("Table-"));
-  
-  // Filling can take a while
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   // Fill up the view
   this->fillTable();
@@ -64,7 +65,6 @@ m_transposed(transpose)
  */
 void MantidTable::updateTable()
 {
-  hide();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   // Delete old data
@@ -75,7 +75,6 @@ void MantidTable::updateTable()
   fillTable();
 
   QApplication::restoreOverrideCursor();
-  show();
 }
 
 /** Refresh the table by filling it */
@@ -88,8 +87,8 @@ void MantidTable::fillTable()
   }
 
   // Resize to fit the new workspace
-  setNumCols(static_cast<int>(m_ws->columnCount()));
   setNumRows(static_cast<int>(m_ws->rowCount()));
+  setNumCols(static_cast<int>(m_ws->columnCount()));
 
   // Add all columns
   for(int i=0; i < static_cast<int>(m_ws->columnCount());i++)
