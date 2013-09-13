@@ -69,7 +69,7 @@
 #include "MantidQtFactory/WidgetFactory.h"
 #include "MantidAPI/MemoryManager.h"
 
-#include "MantidQtImageViewer/MatrixWSImageView.h"
+#include "MantidQtSpectrumViewer/MatrixWSSpectrumView.h"
 #include <typeinfo>
 
 using namespace std;
@@ -699,7 +699,7 @@ void MantidUI::showVatesSimpleInterface()
   }
 }
 
-void MantidUI::showImageViewer()
+void MantidUI::showSpectrumViewer()
 {
   QString wsName = getSelectedWorkspaceName();
   try
@@ -708,7 +708,7 @@ void MantidUI::showImageViewer()
              AnalysisDataService::Instance().retrieve( wsName.toStdString()) );
     if ( matwsp )
     {
-      MantidQt::ImageView::MatrixWSImageView image_view( matwsp );
+      MantidQt::SpectrumView::MatrixWSSpectrumView spectrum_view( matwsp );
     }
     else
     {
