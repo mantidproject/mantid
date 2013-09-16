@@ -26,7 +26,7 @@ include_directories ( inc )
 target_link_libraries ( ISISLiveData ${MANTIDLIBS} )
 
 # Add the unit tests directory
-add_subdirectory ( test )
+# add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings
