@@ -352,8 +352,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Fill out the defaults    
         dialog = ClusterDialog(self._compute_resources)
         if self.general_settings.cluster_user is not None:
-            dialog.username_edit.setText(QtCore.QString(str(self.general_settings.cluster_user)))
-            dialog.pass_edit.setText(QtCore.QString(str(self.general_settings.cluster_pass)))
+            dialog.username_edit.setText(str(self.general_settings.cluster_user))
+            dialog.pass_edit.setText(str(self.general_settings.cluster_pass))
             
         dialog.nodes_box.setValue(int(self._number_of_nodes))
         dialog.cores_box.setValue(int(self._cores_per_node))
