@@ -272,7 +272,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self.file_menu.addSeparator()
             for i, fname in enumerate(recent_files):
                 action = QtGui.QAction("&%d %s" % (i+1, QtCore.QFileInfo(fname).fileName()), self)
-                action.setData(QtCore.QVariant(fname))
+                action.setData(fname)
                 self.connect(action, QtCore.SIGNAL("triggered()"), self.open_file)
                 self.file_menu.addAction(action)
 
@@ -465,7 +465,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if file_path is None:
             action = self.sender()
             if isinstance(action, QtGui.QAction):
-                file_path = unicode(action.data().toString())
+                file_path = unicode(action.data())
             
         # Check whether the file describes the current instrument
         try:
@@ -494,12 +494,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._filename = file_path
         self._update_file_menu()
         self._set_window_title()
-        
+
         if file_path in self._recent_files:
-            self._recent_files.removeAll(file_path)
-        self._recent_files.prepend(file_path)
-        while self._recent_files.count() > 10:
-            self._recent_files.takeLast()
+            self._recent_files.remove(file_path)
+        self._recent_files.insert(0,file_path)
+        while len(self._recent_files) > 10:
+            self._recent_files.pop()
 
     def _new(self, *argv):
         """
@@ -560,10 +560,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             if not fname.endswith('.xml'):
                 fname += ".xml"
             if fname in self._recent_files:
-                self._recent_files.removeAll(fname)
-            self._recent_files.prepend(fname)
-            while self._recent_files.count() > 10:
-                self._recent_files.takeLast()                
+                self._recent_files.remove(fname)
+            self._recent_files.insert(0,fname)
+            while len(self._recent_files) > 10:
+                self._recent_files.pop()                
             self._last_directory = str(QtCore.QFileInfo(fname_qstr).path())
             self._filename = fname
             self._save()
