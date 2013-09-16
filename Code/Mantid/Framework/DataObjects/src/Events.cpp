@@ -123,6 +123,50 @@ namespace DataObjects
     return (this->m_pulsetime.equals(rhs.m_pulsetime, tolPulse));
   }
 
+
+
+  /** () operator: return the tof (X value) of the event.
+   * This is useful for std operations like comparisons
+   * and std::lower_bound
+   * @return :: double, the tof (X value) of the event.
+   */
+  double TofEvent::operator()() const
+  {
+    return this->m_tof;
+  }
+
+  /** Return the 'x value'. Despite the name, this can be in any unit in the UnitFactory.
+   *  If it is time-of-flight, it will be in microseconds.
+   */
+  double TofEvent::tof() const
+  {
+    return m_tof;
+  }
+
+  /// Return the pulse time
+  Mantid::Kernel::DateAndTime TofEvent::pulseTime() const
+  {
+    return m_pulsetime;
+  }
+
+  /// Return the weight of the event - exactly 1.0 always
+  double TofEvent::weight() const
+  {
+    return 1.0;
+  }
+
+  /// Return the error of the event - exactly 1.0 always
+  double TofEvent::error() const
+  {
+    return 1.0;
+  }
+
+  /// Return the errorSquared of the event - exactly 1.0 always
+  double TofEvent::errorSquared() const
+  {
+    return 1.0;
+  }
+
   /** Output a string representation of the event to a stream
    * @param os :: Stream
    * @param event :: TofEvent to output to the stream
@@ -132,10 +176,6 @@ namespace DataObjects
     os << event.m_tof << "," << event.m_pulsetime.toSimpleString();
     return os;
   }
-
-
-
-
 
   //==========================================================================
   /// --------------------- WeightedEvent stuff ------------------------------
@@ -266,6 +306,33 @@ namespace DataObjects
     return (this->m_pulsetime.equals(rhs.m_pulsetime, tolPulse));
   }
 
+  /// Return the weight of the neutron, as a double (it is saved as a float).
+  double WeightedEvent::weight() const
+  {
+    return m_weight;
+  }
+
+  //------------------------------------------------------------------------
+  /** @return the error of the neutron, as a double (it is saved as a float).
+   * Note: this returns the actual error; the value is saved
+   * internally as the SQUARED error, so this function calculates sqrt().
+   * For more speed, use errorSquared().
+   *
+   */
+  double WeightedEvent::error() const
+  {
+    return std::sqrt( double(m_errorSquared) );
+  }
+
+  //------------------------------------------------------------------------
+  /** @return the square of the error for this event.
+   * This is how the error is saved internally, so this is faster than error()
+   */
+  double WeightedEvent::errorSquared() const
+  {
+    return m_errorSquared;
+  }
+
   /** Output a string representation of the event to a stream
    * @param os :: Stream
    * @param event :: WeightedEvent to output to the stream
@@ -275,13 +342,6 @@ namespace DataObjects
     os << event.m_tof << "," << event.m_pulsetime.toSimpleString() << " (W" << event.m_weight << " +- " << event.error() << ")";
     return os;
   }
-
-
-
-
-
-
-
 
   //==========================================================================
   /// --------------------- WeightedEventNoTime stuff ------------------------
@@ -450,6 +510,43 @@ namespace DataObjects
       return false;
     // then it is just if the pulse-times are equal
     return true;
+  }
+
+  double WeightedEventNoTime::operator()() const
+  {
+    return this->m_tof;
+  }
+
+  /// Return the time-of-flight of the neutron, as a double.
+  double WeightedEventNoTime::tof() const
+  {
+    return m_tof;
+  }
+
+  /** Return the pulse time; this returns 0 since this
+   * type of Event has no time associated.
+   */
+  Mantid::Kernel::DateAndTime WeightedEventNoTime::pulseTime() const
+  {
+    return 0;
+  }
+
+  /// Return the weight of the neutron, as a double (it is saved as a float).
+  double WeightedEventNoTime::weight() const
+  {
+    return m_weight;
+  }
+
+  /// Return the error of the neutron, as a double (it is saved as a float).
+  double WeightedEventNoTime::error() const
+  {
+    return std::sqrt( double(m_errorSquared) );
+  }
+
+  /// Return the squared error of the neutron, as a double
+  double WeightedEventNoTime::errorSquared() const
+  {
+    return m_errorSquared;
   }
 
 } // DataObjects
