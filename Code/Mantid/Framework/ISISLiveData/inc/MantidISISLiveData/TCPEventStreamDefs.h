@@ -2,6 +2,14 @@
 #define TCP_EVENT_STREAM_DEFS_H
 
 #include <cstring>
+#include <cstdint>
+
+// to ignore warnings when comparing header versions
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+    #pragma GCC diagnostic ignored "-Wtype-limits"
+#elif defined(_WIN32)
+    #pragma warning( disable: 4296)
+#endif
 
 namespace Mantid
 {
