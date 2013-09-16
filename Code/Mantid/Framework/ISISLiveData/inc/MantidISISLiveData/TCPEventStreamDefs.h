@@ -1,6 +1,8 @@
 #ifndef TCP_EVENT_STREAM_DEFS_H
 #define TCP_EVENT_STREAM_DEFS_H
 
+#include <cstring>
+
 namespace Mantid
 {
 namespace ISISLiveData
@@ -49,7 +51,7 @@ struct TCPStreamEventHeaderSetup
 	int run_state;     ///< SETUP etc
     char inst_name[32];   ///< instrument name
 
-	TCPStreamEventHeaderSetup() : start_time(0), run_number(0), run_state(0), length(sizeof(TCPStreamEventHeaderSetup)) { inst_name[0] = '\0'; }
+    TCPStreamEventHeaderSetup() : length(sizeof(TCPStreamEventHeaderSetup)), start_time(0), run_number(0), run_state(0) { inst_name[0] = '\0'; }
 	bool isValid() const { return length >= sizeof(TCPStreamEventHeaderSetup); }
 	uint32_t changedFields(const TCPStreamEventHeaderSetup& ref) const
 	{
@@ -78,7 +80,7 @@ struct TCPStreamEventHeaderNeutron
 	float frame_time_zero;  ///< time offset from run_start of this frame, in seconds
 	uint32_t nevents;		///< number of TCPStreamEvent() structures in this packet
 
-	TCPStreamEventHeaderNeutron() : nevents(0), length(sizeof(TCPStreamEventHeaderNeutron)) { }
+    TCPStreamEventHeaderNeutron() : length(sizeof(TCPStreamEventHeaderNeutron)), nevents(0) { }
 	bool isValid() const { return length >= sizeof(TCPStreamEventHeaderNeutron); }
 };
 

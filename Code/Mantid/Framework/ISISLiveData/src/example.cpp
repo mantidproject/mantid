@@ -7,6 +7,8 @@
 
 #include "MantidISISLiveData/TCPEventStreamDefs.h"
 
+#include <iostream>
+
 namespace Mantid
 {
 namespace ISISLiveData
@@ -17,11 +19,11 @@ int liveData(const std::string& host)
 {
 	static char* junk_buffer[10000];
 	Poco::Net::StreamSocket s;
-	unsigned port = 10000;
+    Poco::UInt16 port = 10000;
 	Poco::Net::SocketAddress address(host, port);
 	s.connect(address);
 	TCPStreamEventDataSetup setup;
-	while( s.available() < sizeof(setup) )
+    while( s.available() < static_cast<int>(sizeof(setup)) )
 	{
 		Poco::Thread::sleep(1000);
 	}
@@ -34,7 +36,7 @@ int liveData(const std::string& host)
 	TCPStreamEventDataNeutron events;
 	while(true)
 	{
-		while(s.available() < sizeof(events.head))
+        while(s.available() < static_cast<int>(sizeof(events.head)))
 		{
 			Poco::Thread::sleep(100);
 		}
@@ -47,8 +49,8 @@ int liveData(const std::string& host)
 		{
 			throw std::runtime_error("corrupt stream - you should reconnect");
 		}
-		s.receiveBytes(junk_buffer, events.head.length - sizeof(events.head));
-		while(s.available() < sizeof(events.head_n))
+        s.receiveBytes(junk_buffer, events.head.length - static_cast<uint32_t>(sizeof(events.head)));
+        while(s.available() < static_cast<int>(sizeof(events.head_n)))
 		{
 			Poco::Thread::sleep(100);
 		}
@@ -57,19 +59,19 @@ int liveData(const std::string& host)
 		{
 			throw std::runtime_error("corrupt stream - you should reconnect");
 		}
-		s.receiveBytes(junk_buffer, events.head_n.length - sizeof(events.head_n));
+        s.receiveBytes(junk_buffer, events.head_n.length - static_cast<uint32_t>(sizeof(events.head_n)));
 		events.data.resize(events.head_n.nevents);
-		int nread = 0;
+        uint32_t nread = 0;
 		while( nread < events.head_n.nevents )
 		{
-			int ntoread = s.available() / sizeof(TCPStreamEventNeutron);
+            int ntoread = s.available() / static_cast<int>(sizeof(TCPStreamEventNeutron));
 			if ( ntoread > (events.head_n.nevents - nread) )
 			{
 				ntoread = events.head_n.nevents - nread;
 			}
 			if (ntoread > 0)
 			{
-				s.receiveBytes(&(events.data[nread]), ntoread * sizeof(TCPStreamEventNeutron));
+                s.receiveBytes(&(events.data[nread]), ntoread * static_cast<int>(sizeof(TCPStreamEventNeutron)));
 				nread += ntoread;
 			}
 			else
@@ -81,7 +83,7 @@ int liveData(const std::string& host)
 		{
 			throw std::runtime_error("corrupt stream - you should reconnect");
 		}
-		TCPStreamEventHeader& head = events.head;
+        //TCPStreamEventHeader& head = events.head;
 		TCPStreamEventHeaderNeutron& head_n = events.head_n;
 		std::cerr << "Read " << nread << " events for frame number " << head_n.frame_number << " time " << head_n.frame_time_zero << std::endl;
 		for(int i=0; i<10; ++i)
