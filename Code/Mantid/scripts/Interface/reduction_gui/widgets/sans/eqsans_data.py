@@ -401,11 +401,11 @@ class DataSetsWidget(BaseWidget):
             
             self._settings.last_data_ws = dataproxy.data_ws
             if dataproxy.sample_detector_distance is not None:
-                self._settings.emit_key_value("sample_detector_distance", QtCore.QString(str(dataproxy.sample_detector_distance)))
+                self._settings.emit_key_value("sample_detector_distance", str(dataproxy.sample_detector_distance))
             # Keep for later
             #if dataproxy.sample_thickness is not None:
             #    self._settings.emit_key_value("sample_thickness", QtCore.QString(str(dataproxy.sample_thickness)))
             if dataproxy.beam_diameter is not None:
-                self._settings.emit_key_value("beam_diameter", QtCore.QString(str(dataproxy.beam_diameter)))
+                self._settings.emit_key_value("beam_diameter", str(dataproxy.beam_diameter))
              
             self._emit_experiment_parameters()    

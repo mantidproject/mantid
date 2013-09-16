@@ -151,12 +151,12 @@ class BeamSpreader(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
-        self._content.spreader_trans_edit.setText(QtCore.QString(str(state.spreader_trans)))
-        self._content.spreader_trans_spread_edit.setText(QtCore.QString(str(state.spreader_trans_spread)))
-        self._content.sample_scatt_edit.setText(QtCore.QString(state.sample_scatt))
-        self._content.sample_spread_edit.setText(QtCore.QString(state.sample_spreader))
-        self._content.direct_scatt_edit.setText(QtCore.QString(state.direct_scatt))
-        self._content.direct_spread_edit.setText(QtCore.QString(state.direct_spreader))
+        self._content.spreader_trans_edit.setText(str(state.spreader_trans))
+        self._content.spreader_trans_spread_edit.setText(str(state.spreader_trans_spread))
+        self._content.sample_scatt_edit.setText(state.sample_scatt)
+        self._content.sample_spread_edit.setText(state.sample_spreader)
+        self._content.direct_scatt_edit.setText(state.direct_scatt)
+        self._content.direct_spread_edit.setText(state.direct_spreader)
     
     def get_state(self):
         """
@@ -390,11 +390,11 @@ class SampleDataWidget(BaseWidget):
 
     def _emit_experiment_parameters(self):
         sdd = util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
-        self._settings.emit_key_value("sample_detector_distance", QtCore.QString(str(sdd)))
+        self._settings.emit_key_value("sample_detector_distance", str(sdd))
         wavelength = util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
-        self._settings.emit_key_value("wavelength", QtCore.QString(str(wavelength)))
+        self._settings.emit_key_value("wavelength", str(wavelength))
         spread = self._content.wavelength_spread_edit.text()
-        self._settings.emit_key_value("wavelength_spread", QtCore.QString(spread))
+        self._settings.emit_key_value("wavelength_spread", spread)
         
         
     def get_data_info(self):
@@ -416,17 +416,17 @@ class SampleDataWidget(BaseWidget):
             
             self._settings.last_data_ws = dataproxy.data_ws
             if dataproxy.sample_detector_distance is not None:
-                self._content.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
+                self._content.sample_dist_edit.setText(str(dataproxy.sample_detector_distance))
                 util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
             if dataproxy.wavelength is not None:
-                self._content.wavelength_edit.setText(QtCore.QString(str(dataproxy.wavelength)))
+                self._content.wavelength_edit.setText(str(dataproxy.wavelength))
                 util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
             if dataproxy.wavelength_spread is not None:
-                self._content.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
+                self._content.wavelength_spread_edit.setText(str(dataproxy.wavelength_spread))
             # This will be enabled once the meta data contains the sample thickness - will be turned into check box
             #if dataproxy.sample_thickness is not None:
             #    self._content.thickness_edit.setText(QtCore.QString(str(dataproxy.sample_thickness)))
             if dataproxy.beam_diameter is not None:
-                self._settings.emit_key_value("beam_diameter", QtCore.QString(str(dataproxy.beam_diameter)))
+                self._settings.emit_key_value("beam_diameter", str(dataproxy.beam_diameter))
              
             self._emit_experiment_parameters()    

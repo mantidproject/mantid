@@ -72,22 +72,22 @@ class SANSInstrumentWidget(BaseWidget):
         if key == "sample_detector_distance":
             self._sample_detector_distance = value
             if not self._summary.sample_dist_chk.isChecked():
-                self._summary.sample_dist_edit.setText(QtCore.QString(str(value)))
+                self._summary.sample_dist_edit.setText(str(value))
                 util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
         elif key == "wavelength":
             self._wavelength = value
             if not self._summary.wavelength_chk.isChecked():
-                self._summary.wavelength_edit.setText(QtCore.QString(str(value)))
+                self._summary.wavelength_edit.setText(str(value))
                 util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
         elif key == "wavelength_spread":
             self._wavelength_spread = value
             if not self._summary.wavelength_chk.isChecked():
-                self._summary.wavelength_spread_edit.setText(QtCore.QString(str(value)))
+                self._summary.wavelength_spread_edit.setText(str(value))
         elif key == "beam_diameter":
             value_float = float(value)
             self._beam_diameter = "%-6.1f" % value_float
             if not self._summary.beamstop_chk.isChecked():
-                self._summary.scale_beam_radius_edit.setText(QtCore.QString(self._beam_diameter))
+                self._summary.scale_beam_radius_edit.setText(self._beam_diameter)
                 util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
 
     def content(self):
@@ -180,7 +180,7 @@ class SANSInstrumentWidget(BaseWidget):
         # Keep track of current value so we can restore it if the check box is clicked again
         if self._beam_diameter_supplied != is_checked:
             current_value = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit)
-            self._summary.scale_beam_radius_edit.setText(QtCore.QString(str(self._beam_diameter)))
+            self._summary.scale_beam_radius_edit.setText(str(self._beam_diameter))
             util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
             self._beam_diameter = current_value
             self._beam_diameter_supplied = is_checked
@@ -221,7 +221,7 @@ class SANSInstrumentWidget(BaseWidget):
         # Keep track of current value so we can restore it if the check box is clicked again
         if self._sample_detector_distance_supplied != is_checked:
             current_value = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
-            self._summary.sample_dist_edit.setText(QtCore.QString(str(self._sample_detector_distance)))
+            self._summary.sample_dist_edit.setText(str(self._sample_detector_distance))
             util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
             self._sample_detector_distance = current_value
             
@@ -234,12 +234,12 @@ class SANSInstrumentWidget(BaseWidget):
         # Keep track of current value so we can restore it if the check box is clicked again
         if self._wavelength_supplied != is_checked:
             current_value = util._check_and_get_float_line_edit(self._summary.wavelength_edit)
-            self._summary.wavelength_edit.setText(QtCore.QString(str(self._wavelength)))
+            self._summary.wavelength_edit.setText(str(self._wavelength))
             util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0)
             self._wavelength = current_value
     
             current_value = util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
-            self._summary.wavelength_spread_edit.setText(QtCore.QString(str(self._wavelength_spread)))
+            self._summary.wavelength_spread_edit.setText(str(self._wavelength_spread))
             util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
             self._wavelength_spread = current_value
             
