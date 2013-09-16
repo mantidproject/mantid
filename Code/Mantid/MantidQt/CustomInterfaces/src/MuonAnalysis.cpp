@@ -634,21 +634,20 @@ void MuonAnalysis::runLoadCurrent()
     << "Plot/analyse Period:";
   m_uiForm.homePeriodsLabel->setText(periodLabel.str().c_str());
 
-  while ( m_uiForm.homePeriodBox1->count() != 0 )
-    m_uiForm.homePeriodBox1->removeItem(0);
-  while ( m_uiForm.homePeriodBox2->count() != 0 )
-    m_uiForm.homePeriodBox2->removeItem(0);
+  // Remove all the previous items
+  m_uiForm.homePeriodBox1->clear();
+  m_uiForm.homePeriodBox2->clear();
 
   m_uiForm.homePeriodBox2->addItem("None");
+
   for ( int i = 1; i <= numPeriods; i++ )
   {
-    std::stringstream strInt;
-    strInt << i;
-    m_uiForm.homePeriodBox1->addItem(strInt.str().c_str());
-    m_uiForm.homePeriodBox2->addItem(strInt.str().c_str());
+    m_uiForm.homePeriodBox1->addItem(QString::number(i));
+    m_uiForm.homePeriodBox2->addItem(QString::number(i));
   }
 
-  if (wsPeriods)
+  // We only need period algebra widgets enabled if we have more than 1 period
+  if(numPeriods > 1)
   {
     m_uiForm.homePeriodBox2->setEnabled(true);
     m_uiForm.homePeriodBoxMath->setEnabled(true);
