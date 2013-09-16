@@ -2194,6 +2194,30 @@ void MuonAnalysis::closePlotWindow(const QString& wsName)
 }
 
 /**
+ * Enable PP tool for the plot of the given WS.
+ * @param wsName Name of the WS which plot PP tool will be attached to.
+ */
+void MuonAnalysis::selectMultiPeak(const QString& wsName)
+{
+  QString code;
+
+  code += "g = graph('" + wsName + "-1')\n"
+          "if g != None:\n"
+          "  g.show()\n"
+          "  selectMultiPeak(g)\n";
+
+  runPythonCode(code);
+}
+
+/**
+ * Disable tools for all the graphs within MantidPlot.
+ */
+void MuonAnalysis::disableAllTools()
+{
+  runPythonCode("disableTools()");
+}
+
+/**
  * Hides all the plot windows (MultiLayer ones)
  */
 void MuonAnalysis::hideAllPlotWindows()
@@ -2255,7 +2279,8 @@ void MuonAnalysis::showPlot(const QString& wsName)
     // the plot options tab.
     setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
 
-    emit activatePPTool(m_currentDataName + "-1");
+    disableAllTools();
+    selectMultiPeak(m_currentDataName);
   }
 }
 
@@ -3588,7 +3613,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
     emit setFitPropertyBrowser(NULL);
 
     // Remove PP tool from any plots it was attached to
-    emit activatePPTool("");
+    disableAllTools();
 
     // Disconnect to avoid problems when filling list of workspaces in fit prop. browser
     disconnect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
@@ -3724,7 +3749,7 @@ void MuonAnalysis::hideEvent(QHideEvent *e)
     emit setFitPropertyBrowser(NULL);
 
   // Delete the peak picker tool because it is no longer needed.
-  emit activatePPTool("");
+  disableAllTools();
 
   e->accept();
 }

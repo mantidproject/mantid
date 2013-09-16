@@ -169,6 +169,12 @@ private slots:
   /// Closes the window with the plot of the given ws
   void closePlotWindow(const QString& wsName);
 
+  /// Enable PP tool for the plot of the given WS
+  void selectMultiPeak(const QString& wsName);
+
+  /// Disable tools for all the graphs within MantidPlot
+  void disableAllTools();
+
   /// Hides all the plot windows (MultiLayer ones)
   void hideAllPlotWindows();
 
