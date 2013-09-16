@@ -64,7 +64,7 @@ public:
     TS_ASSERT_EQUALS( idsFor3.count(30), 1 );
   }
 
-  void test_vector_constructor()
+  void test_vector_constructor_uses_all_spectra_by_default()
   {
     // Empty is fine for the input
     std::vector<specid_t> specs;
@@ -84,6 +84,37 @@ public:
 
     SpectrumDetectorMapping map2(specs, detids);
     check_the_map(map2);
+  }
+
+  void test_vector_constructor_ignores_detectors_in_ignore_list()
+  {
+    const int ndets = 5;
+    std::vector<specid_t> specs(ndets,0);
+    std::vector<detid_t> detids(ndets,0);
+    for(int i = 0; i < ndets; ++i)
+    {
+      specs[i] = i+1;
+      detids[i] = 10*(i+1);
+    }
+
+    // Ignore first & last
+    const size_t nmons = 2;
+    std::vector<detid_t> monids(nmons, 0);
+    monids[0] = 10;
+    monids[1] = 50;
+
+    SpectrumDetectorMapping map(specs, detids, monids);
+
+    TS_ASSERT_EQUALS(3, map.getMapping().size());
+    auto idsFor1 = map.getDetectorIDsForSpectrumNo(2);
+    TS_ASSERT_EQUALS( idsFor1.size(), 1 );
+    TS_ASSERT_EQUALS( idsFor1.count(20), 1 );
+    auto idsFor2 = map.getDetectorIDsForSpectrumNo(3);
+    TS_ASSERT_EQUALS( idsFor2.size(), 1 );
+    TS_ASSERT_EQUALS( idsFor2.count(30), 1 );
+    auto idsFor3 = map.getDetectorIDsForSpectrumNo(4);
+    TS_ASSERT_EQUALS( idsFor3.size(), 1 );
+    TS_ASSERT_EQUALS( idsFor3.count(40), 1 );
   }
 
   void test_array_constructor_null_inputs()

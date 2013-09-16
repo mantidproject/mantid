@@ -48,7 +48,8 @@ namespace API
     typedef boost::unordered_map<specid_t, std::set<detid_t>> sdmap;
   public:
     explicit SpectrumDetectorMapping(const MatrixWorkspace * const workspace);
-    SpectrumDetectorMapping(const std::vector<specid_t>& spectrumNumbers, const std::vector<detid_t>& detectorIDs);
+    SpectrumDetectorMapping(const std::vector<specid_t>& spectrumNumbers, const std::vector<detid_t>& detectorIDs,
+                            const std::vector<detid_t>& ignoreDetIDs = std::vector<detid_t>());
     SpectrumDetectorMapping(const specid_t* const spectrumNumbers, const detid_t* const detectorIDs, size_t arrayLengths);
     virtual ~SpectrumDetectorMapping();
 
@@ -58,6 +59,8 @@ namespace API
   private:
     void fillMapFromArray(const specid_t * const spectrumNumbers, const detid_t * const detectorIDs,
                           const size_t arrayLengths);
+    void fillMapFromVector(const std::vector<specid_t>& spectrumNumbers, const std::vector<detid_t>& detectorIDs,
+                            const std::vector<detid_t>& ignoreDetIDs);
 
     /// The mapping of a spectrum number to zero or more detector IDs
     sdmap m_mapping;

@@ -22,17 +22,18 @@ namespace API
     }
   }
 
-  /** Constructor that fills the map from a pair of vectors.
-   *  @throws std::invalid_argument if the vectors are not of equal length
+  /** Constructor that fills the map from a pair of vectors, ignoring the IDs in the optional ignore list
+   *  @throws std::invalid_argument if the spectrumNumbers & detectorIDs vectors are not of equal length
    */
-  SpectrumDetectorMapping::SpectrumDetectorMapping(const std::vector<specid_t>& spectrumNumbers , const std::vector<detid_t>& detectorIDs)
+  SpectrumDetectorMapping::SpectrumDetectorMapping(const std::vector<specid_t>& spectrumNumbers , const std::vector<detid_t>& detectorIDs, 
+                                                   const std::vector<detid_t>& ignoreDetIDs)
   {
     if ( spectrumNumbers.size() != detectorIDs.size() )
     {
       throw std::invalid_argument("SpectrumDetectorMapping: Different length spectrum number & detector ID array passed");
     }
 
-    fillMapFromArray( spectrumNumbers.data(), detectorIDs.data(), spectrumNumbers.size() );
+    fillMapFromVector(spectrumNumbers, detectorIDs, ignoreDetIDs);
   }
 
   /** Constructor that fills the map from a pair c-style arrays.
@@ -49,13 +50,26 @@ namespace API
     fillMapFromArray(spectrumNumbers, detectorIDs, arrayLengths);
   }
 
-  /// Called by the vector & c-array constructors to do the actual filling
+  /// Called by the c-array constructors to do the actual filling
   void SpectrumDetectorMapping::fillMapFromArray(const specid_t * const spectrumNumbers,
-      const detid_t * const detectorIDs, const size_t arrayLengths)
+                                                 const detid_t * const detectorIDs, const size_t arrayLengths)
   {
     for ( size_t i = 0; i < arrayLengths; ++i )
     {
       m_mapping[spectrumNumbers[i]].insert(detectorIDs[i]);
+    }
+  }
+
+  /// Called by the vector constructors to do the actual filling
+  void SpectrumDetectorMapping::fillMapFromVector(const std::vector<specid_t>& spectrumNumbers, const std::vector<detid_t>& detectorIDs, 
+                                                  const std::vector<detid_t>& ignoreDetIDs)
+  {
+    std::set<detid_t> ignoreIDs(ignoreDetIDs.begin(), ignoreDetIDs.end());
+    const size_t nspec(spectrumNumbers.size());
+    for ( size_t i = 0; i < nspec; ++i )
+    {
+      auto id = detectorIDs[i];
+      if(ignoreIDs.count(id) == 0 ) m_mapping[spectrumNumbers[i]].insert(id);
     }
   }
 
