@@ -102,9 +102,6 @@ public:
   bool isInitialized() const;
   /// Has the Python initialization function been run
   bool isPyInitialized() const;
-  
-  // Returns the name of the interface
-  QString interfaceName() const;
 
 signals:
   /// Emitted to start a (generally small) script running

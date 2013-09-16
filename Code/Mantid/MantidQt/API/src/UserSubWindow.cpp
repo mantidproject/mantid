@@ -78,15 +78,6 @@ bool UserSubWindow::isPyInitialized() const
 }
 
 /**
- * Return the name of the interface
- * @return Interface name
- */
-QString UserSubWindow::interfaceName() const
-{
-  return m_ifacename;
-}
-
-/**
  * Initialize local Python environment. This is called once when the interface is created and
  * is meant to be used to run one off code, i.e. importing modules.
  */
