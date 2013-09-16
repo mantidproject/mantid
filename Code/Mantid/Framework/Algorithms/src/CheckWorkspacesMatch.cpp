@@ -20,6 +20,7 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include <cmath>
 #include <sstream>
 
 namespace Mantid

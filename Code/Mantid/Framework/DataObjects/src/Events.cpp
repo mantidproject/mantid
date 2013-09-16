@@ -3,6 +3,7 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/DateAndTime.h"
+#include <cmath>
 #include <functional>
 #include <math.h>
 
