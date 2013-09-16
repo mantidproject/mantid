@@ -329,7 +329,7 @@ void CheckWorkspacesMatch::doComparison()
           s1 = peak1.getCol();
           s2 = peak2.getCol();
         }
-        if (std::abs(s1 - s2) > tolerance)
+        if (std::fdim(s1, s2) > tolerance)
         {
           g_log.debug() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
           result = "Data mismatch";
@@ -399,14 +399,15 @@ void CheckWorkspacesMatch::doComparison()
     prog = new Progress(this, 0.0, 1.0, numhist*5);
 
     // Both will end up sorted anyway
-    ews1->sortAll(TOF_SORT, prog);
-    ews2->sortAll(TOF_SORT, prog);
+    ews1->sortAll(PULSETIMETOF_SORT, prog);
+    ews2->sortAll(PULSETIMETOF_SORT, prog);
 
     if (ews1->getNumberHistograms() != ews2->getNumberHistograms())
     {
       result = "Mismatched number of histograms.";
       return;
     }
+    double ToleranceTOF = 0.05; //TODO should be smarter
     bool mismatchedEvent = false;
     int mismatchedEventWI = 0;
     //PARALLEL_FOR2(ews1, ews2)
@@ -418,7 +419,7 @@ void CheckWorkspacesMatch::doComparison()
       {
         const EventList &el1 = ews1->getEventList(i);
         const EventList &el2 = ews2->getEventList(i);
-        if (el1 != el2)
+        if (!el1.equals(el2, ToleranceTOF, Tolerance, 1))
         {
           mismatchedEvent = true;
           mismatchedEventWI = i;
@@ -428,7 +429,7 @@ void CheckWorkspacesMatch::doComparison()
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-        if ( mismatchedEvent)
+    if ( mismatchedEvent)
     {
       std::ostringstream mess;
       mess << "Mismatched event list at workspace index " << mismatchedEventWI;
@@ -445,7 +446,7 @@ void CheckWorkspacesMatch::doComparison()
 
   // First check the data - always do this
   if ( ! checkData(ws1,ws2) ) return;
-  
+
   // Now do the other ones if requested. Bail out as soon as we see a failure.
   prog->reportIncrement(numhist/5, "Axes");
   if ( static_cast<bool>(getProperty("CheckAxes")) && ! checkAxes(ws1,ws2) ) return;
@@ -496,7 +497,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   
   const double tolerance = getProperty("Tolerance");
   bool resultBool = true;
-  
+
   // Now check the data itself
   //PARALLEL_FOR2(ws1, ws2)
   for ( int i = 0; i < static_cast<int>(numHists); ++i )
@@ -522,39 +523,41 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         {
             double s1=0.5*(X1[j]+X2[j]);
             if (s1>tolerance)
-                err = (std::abs(X1[j]-X2[j])/s1 > tolerance);
+                err = (std::fdim(X1[j],X2[j]) > tolerance*s1);
             else
-                err = (std::abs(X1[j]-X2[j]) > tolerance);
+                err = (std::fdim(X1[j],X2[j]) > tolerance);
 
             double s2=0.5*(Y1[j]+Y2[j]);
             if (s2>tolerance)
-               err = ((std::abs(Y1[j]-Y2[j])/s2 > tolerance)||err);
+               err = ((std::fdim(Y1[j],Y2[j]) > tolerance*s2)||err);
             else
-               err = ((std::abs(Y1[j]-Y2[j]) > tolerance)||err);
+               err = ((std::fdim(Y1[j],Y2[j]) > tolerance)||err);
 
 
             double s3=0.5*(E1[j]+E2[j]);
             if (s3>tolerance)
-               err = ((std::abs(E1[j]-E2[j])/s3 > tolerance)||err);
+               err = ((std::fdim(E1[j],E2[j]) > tolerance*s3)||err);
             else
-               err = ((std::abs(E1[j]-E2[j]) > tolerance)||err);
+               err = ((std::fdim(E1[j],E2[j]) > tolerance)||err);
         }
         else
-            err = (std::abs(X1[j]-X2[j]) > tolerance || std::abs(Y1[j]-Y2[j]) > tolerance || std::abs(E1[j]-E2[j]) > tolerance);
+            err = (std::fdim(X1[j],X2[j]) > tolerance || std::fdim(Y1[j],Y2[j]) > tolerance
+                   || std::fdim(E1[j],E2[j]) > tolerance);
 
         if (err)
         {
           g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
           g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
           g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
-          g_log.debug() << " Difference (X,Y,E) = (" << std::abs(X1[j]-X2[j]) << "," << std::abs(Y1[j]-Y2[j]) << "," << std::abs(E1[j]-E2[j]) << ")\n";
+          g_log.debug() << " Difference (X,Y,E) = (" << std::fdim(X1[j],X2[j]) << ","
+                        << std::fdim(Y1[j],Y2[j]) << "," << std::fdim(E1[j],E2[j]) << ")\n";
           result = "Data mismatch";
           resultBool = checkAllData;
         }
       }
 
       // Extra one for histogram data
-      if ( histogram && std::abs(X1.back()-X2.back()) > tolerance )
+      if ( histogram && std::fdim(X1.back(), X2.back()) > tolerance )
       {
         result = "Data mismatch";
         resultBool = checkAllData;
@@ -564,8 +567,8 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-      // If all is well, return true
-      return resultBool;
+  // If all is well, return true
+  return resultBool;
 }
 
 /// Checks that the axes matches
