@@ -2305,8 +2305,16 @@ bool LoadEventNexus::loadSpectraMapping(const std::string& filename, const bool 
   else
   {
     g_log.debug() << "Loading only detector spectra from " << filename << "\n";
-    SpectrumDetectorMapping mapping(spec,udet);
-    WS->resizeTo(mapping.getMapping().size()-nmons);
+    SpectrumDetectorMapping mapping(spec,udet,monitors);
+    const auto & sdmap = mapping.getMapping();
+    WS->resizeTo(sdmap.size());
+    auto it = sdmap.begin();
+    for( size_t i = 0; i < WS->getNumberHistograms(); ++i )
+    {
+      auto * spec = WS->getSpectrum(i);
+      spec->setSpectrumNo(it->first);
+      ++it;
+    }
     WS->updateSpectraUsing(mapping);
   }
   return true;
