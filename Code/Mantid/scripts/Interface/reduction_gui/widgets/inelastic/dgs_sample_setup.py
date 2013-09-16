@@ -171,9 +171,9 @@ class SampleSetupWidget(BaseWidget):
             self._check_and_set_lineedit_content(self._content.ei_guess_edit, 
                                                  state.incident_energy_guess)
         self._content.use_ei_guess_chkbox.setChecked(state.use_ei_guess)
-        self._content.tzero_guess_edit.setText(QtCore.QString(str(state.tzero_guess)))
-        self._content.monitor1_specid_edit.setText(QtCore.QString(str(state.monitor1_specid)))
-        self._content.monitor2_specid_edit.setText(QtCore.QString(str(state.monitor2_specid)))
+        self._content.tzero_guess_edit.setText(str(state.tzero_guess))
+        self._content.monitor1_specid_edit.setText(str(state.monitor1_specid))
+        self._content.monitor2_specid_edit.setText(str(state.monitor2_specid))
         self._content.et_range_box.setChecked(state.rebin_et)
         self._content.etr_low_edit.setText(state.et_range_low)
         self._content.etr_width_edit.setText(state.et_range_width)
