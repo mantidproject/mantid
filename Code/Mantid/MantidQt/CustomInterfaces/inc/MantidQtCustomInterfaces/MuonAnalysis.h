@@ -231,6 +231,9 @@ private:
   /// Update front anc pair combo box
   void updateFrontAndCombo();
 
+  /// Updates widgets related to period algebra
+  void updatePeriodWidgets(int numPeriods);
+
   /// Calculate number of detectors from string of type 1-3, 5, 10-15
   int numOfDetectors(const std::string& str) const;
 

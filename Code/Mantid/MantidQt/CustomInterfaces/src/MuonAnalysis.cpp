@@ -628,37 +628,8 @@ void MuonAnalysis::runLoadCurrent()
     + matrix_workspace->getComment();
   m_uiForm.infoBrowser->setText(infoStr.c_str());
 
-  // Populate period information
-  std::stringstream periodLabel;
-  periodLabel << "Data collected in " << numPeriods << " Periods. "
-    << "Plot/analyse Period:";
-  m_uiForm.homePeriodsLabel->setText(periodLabel.str().c_str());
-
-  // Remove all the previous items
-  m_uiForm.homePeriodBox1->clear();
-  m_uiForm.homePeriodBox2->clear();
-
-  m_uiForm.homePeriodBox2->addItem("None");
-
-  for ( int i = 1; i <= numPeriods; i++ )
-  {
-    m_uiForm.homePeriodBox1->addItem(QString::number(i));
-    m_uiForm.homePeriodBox2->addItem(QString::number(i));
-  }
-
-  // We only need period algebra widgets enabled if we have more than 1 period
-  if(numPeriods > 1)
-  {
-    m_uiForm.homePeriodBox2->setEnabled(true);
-    m_uiForm.homePeriodBoxMath->setEnabled(true);
-  }
-  else
-  {
-    m_uiForm.homePeriodBox2->setEnabled(false);
-    m_uiForm.homePeriodBoxMath->setEnabled(false);
-  }
+  updatePeriodWidgets(numPeriods);
 }
-
 
 /**
  * Pair table plot button (slot)
@@ -1311,36 +1282,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   // Include all the run information.
   m_uiForm.infoBrowser->setText(infoStr.c_str());
 
-  // Populate period information
-  std::stringstream periodLabel;
-  periodLabel << "Data collected in " << numPeriods << " Periods. "
-    << "Plot/analyse Period:";
-  m_uiForm.homePeriodsLabel->setText(periodLabel.str().c_str());
-
-  while ( m_uiForm.homePeriodBox1->count() != 0 )
-    m_uiForm.homePeriodBox1->removeItem(0);
-  while ( m_uiForm.homePeriodBox2->count() != 0 )
-    m_uiForm.homePeriodBox2->removeItem(0);
-
-  m_uiForm.homePeriodBox2->addItem("None");
-  for ( int i = 1; i <= numPeriods; i++ )
-  {
-    std::stringstream strInt;
-    strInt << i;
-    m_uiForm.homePeriodBox1->addItem(strInt.str().c_str());
-    m_uiForm.homePeriodBox2->addItem(strInt.str().c_str());
-  }
-
-  if (wsPeriods)
-  {
-    m_uiForm.homePeriodBox2->setEnabled(true);
-    m_uiForm.homePeriodBoxMath->setEnabled(true);
-  }
-  else
-  {
-    m_uiForm.homePeriodBox2->setEnabled(false);
-    m_uiForm.homePeriodBoxMath->setEnabled(false);
-  }
+  updatePeriodWidgets(numPeriods);
 
   // Populate bin width info in Plot options
   double binWidth = matrix_workspace->dataX(0)[1]-matrix_workspace->dataX(0)[0];
@@ -1780,6 +1722,41 @@ void MuonAnalysis::updateFrontAndCombo()
     m_uiForm.frontGroupGroupPairComboBox->setCurrentIndex(currentI);
 
   updateFront();
+}
+
+/**
+ * Updates widgets related to period algebra.
+ * @param newNumPeriods Number of periods available
+ */
+void MuonAnalysis::updatePeriodWidgets(int numPeriods)
+{
+  QString periodLabel = "Data collected in " + QString::number(numPeriods)
+                        + " periods. Plot/analyse period: ";
+  m_uiForm.homePeriodsLabel->setText(periodLabel);
+
+  // Remove all the previous items
+  m_uiForm.homePeriodBox1->clear();
+  m_uiForm.homePeriodBox2->clear();
+
+  m_uiForm.homePeriodBox2->addItem("None");
+
+  for ( int i = 1; i <= numPeriods; i++ )
+  {
+    m_uiForm.homePeriodBox1->addItem(QString::number(i));
+    m_uiForm.homePeriodBox2->addItem(QString::number(i));
+  }
+
+  // We only need period widgets enabled if we have more than 1 period
+  if(numPeriods > 1)
+  {
+    m_uiForm.homePeriodBox2->setEnabled(true);
+    m_uiForm.homePeriodBoxMath->setEnabled(true);
+  }
+  else
+  {
+    m_uiForm.homePeriodBox2->setEnabled(false);
+    m_uiForm.homePeriodBoxMath->setEnabled(false);
+  }
 }
 
 
