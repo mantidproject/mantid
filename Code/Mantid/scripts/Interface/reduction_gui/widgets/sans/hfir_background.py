@@ -130,14 +130,14 @@ class BackgroundWidget(BaseWidget):
         """
         bck_file = str(self._content.background_edit.text()).strip()
         self._content.background_chk.setChecked(state.background_corr)
-        self._content.background_edit.setText(QtCore.QString(state.background_file))
+        self._content.background_edit.setText(state.background_file)
         if state.background_file.strip() != bck_file:
             self.get_data_info()
         self._background_clicked(state.background_corr)
 
         if self.show_transmission:
-            self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission))
-            self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission_spread))
+            self._content.transmission_edit.setText(str("%6.4f" % state.bck_transmission))
+            self._content.dtransmission_edit.setText(str("%6.4f" % state.bck_transmission_spread))
             #self._content.thickness_edit.setText(QtCore.QString("%6.4f" % state.sample_thickness))
                     
             if isinstance(state.trans_calculation_method, state.DirectBeam):
@@ -149,7 +149,7 @@ class BackgroundWidget(BaseWidget):
     
             self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
             self._content.theta_dep_chk.setChecked(state.theta_dependent)
-            self._content.trans_dark_current_edit.setText(QtCore.QString(str(state.trans_dark_current)))
+            self._content.trans_dark_current_edit.setText(str(state.trans_dark_current))
             self._calculate_clicked(state.calculate_transmission)
         
         

@@ -60,9 +60,9 @@ class DirectBeam(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
-        self._content.beam_radius_edit.setText(QtCore.QString(str(state.beam_radius)))
-        self._content.sample_edit.setText(QtCore.QString(state.sample_file))
-        self._content.direct_edit.setText(QtCore.QString(state.direct_beam))
+        self._content.beam_radius_edit.setText(str(state.beam_radius))
+        self._content.sample_edit.setText(state.sample_file)
+        self._content.direct_edit.setText(state.direct_beam)
 
     def get_state(self):
         """
@@ -72,8 +72,8 @@ class DirectBeam(BaseWidget):
         m.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
         m.sample_file = unicode(self._content.sample_edit.text())
         m.direct_beam = unicode(self._content.direct_edit.text())
-        self._settings.emit_key_value("TRANS_SAMPLE", QtCore.QString(str(self._content.sample_edit.text())))
-        self._settings.emit_key_value("TRANS_DIRECT", QtCore.QString(str(self._content.direct_edit.text())))
+        self._settings.emit_key_value("TRANS_SAMPLE", str(self._content.sample_edit.text()))
+        self._settings.emit_key_value("TRANS_DIRECT", str(self._content.direct_edit.text()))
         return m
     
     def _sample_browse(self):
@@ -257,9 +257,9 @@ class SampleDataWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
-        self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.transmission))
-        self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.transmission_spread))
-        self._content.thickness_edit.setText(QtCore.QString("%6.4f" % state.sample_thickness))
+        self._content.transmission_edit.setText(str("%6.4f" % state.transmission))
+        self._content.dtransmission_edit.setText(str("%6.4f" % state.transmission_spread))
+        self._content.thickness_edit.setText(str("%6.4f" % state.sample_thickness))
         
         if isinstance(state.calculation_method, state.DirectBeam):
             self._content.direct_beam_chk.setChecked(True)
@@ -270,7 +270,7 @@ class SampleDataWidget(BaseWidget):
 
         self._content.calculate_chk.setChecked(state.calculate_transmission)
         self._content.theta_dep_chk.setChecked(state.theta_dependent)
-        self._content.dark_current_edit.setText(QtCore.QString(str(state.dark_current)))
+        self._content.dark_current_edit.setText(str(state.dark_current))
         self._calculate_clicked(state.calculate_transmission)
         
         # Data file
@@ -280,7 +280,7 @@ class SampleDataWidget(BaseWidget):
         if len(data_files)>0:
             current_file = data_files[0].strip()
         
-        self._content.data_file_edit.setText(QtCore.QString(';'.join(state.data_files)))
+        self._content.data_file_edit.setText(str(';'.join(state.data_files)))
         if len(state.data_files)>0:
             self._settings.last_file = state.data_files[0]
             self._settings.last_data_ws = ''
