@@ -45,25 +45,20 @@ class GeneralSettings(QtCore.QObject):
             Write the current settings to a QSettings object
             @param settings: QSettings object
         """
-        last_dir = QtCore.QVariant(QtCore.QString(self.data_path))
-        settings.setValue("general_data_path", last_dir)
-        debug_mode = QtCore.QVariant(self.debug)
-        settings.setValue("debug_mode", debug_mode)
-        advanced_mode = QtCore.QVariant(self.advanced)
-        settings.setValue("advanced_mode", advanced_mode)
-        instr_name = QtCore.QVariant(QtCore.QString(self.instrument_name))
-        settings.setValue("instrument_name", instr_name)
-        facility_name = QtCore.QVariant(QtCore.QString(self.facility_name))
-        settings.setValue("facility_name", facility_name)
+        settings.setValue("general_data_path", str(self.data_path))
+        settings.setValue("debug_mode", self.debug)
+        settings.setValue("advanced_mode", self.advanced)
+        settings.setValue("instrument_name", str(self.instrument_name))
+        settings.setValue("facility_name", str(self.facility_name))
         
     def from_settings(self, settings):
         """
             Get the settings from a QSettings object
             @param settings: QSettings object
         """
-        self.data_path = unicode(settings.value("general_data_path", QtCore.QVariant('.')).toString())
-        self.debug = settings.value("debug_mode", QtCore.QVariant('false')).toBool()
-        self.advanced = settings.value("advanced_mode", QtCore.QVariant('true')).toBool()
-        self.instrument_name = unicode(settings.value("instrument_name", QtCore.QVariant('')).toString())
-        self.facility_name = unicode(settings.value("facility_name", QtCore.QVariant('')).toString())
+        self.data_path = unicode(settings.value("general_data_path", '.'))
+        self.debug = settings.value("debug_mode", False)
+        self.advanced = settings.value("advanced_mode", True)
+        self.instrument_name = unicode(settings.value("instrument_name", ''))
+        self.facility_name = unicode(settings.value("facility_name", ''))
         

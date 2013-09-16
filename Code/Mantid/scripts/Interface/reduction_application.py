@@ -56,7 +56,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         
         # Name handle for the instrument
         if instrument is None:
-            instrument = unicode(settings.value("instrument_name", QtCore.QVariant('')).toString())
+            instrument = unicode(settings.value("instrument_name", ''))
             if instrument_list is not None and instrument not in instrument_list:
                 instrument = None
 
@@ -70,11 +70,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._interface = None
         
         # Recent files
-        self._recent_files = settings.value("recent_files", QtCore.QVariant([])).toStringList()
+        self._recent_files = settings.value("recent_files", [])
         
         # Folder to open files in
-        self._last_directory = unicode(settings.value("last_directory", QtCore.QVariant('.')).toString())
-        self._last_export_directory = unicode(settings.value("last_export_directory", QtCore.QVariant('.')).toString())
+        self._last_directory = unicode(settings.value("last_directory", '.'))
+        self._last_export_directory = unicode(settings.value("last_export_directory", '.'))
         
         # Current file name
         self._filename = None
@@ -402,29 +402,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         else:    
             settings = QtCore.QSettings()
             
-            if self._instrument is not None:
-                instrument = QtCore.QVariant(QtCore.QString(self._instrument))
-            else: 
-                instrument = QtCore.QVariant()    
-            settings.setValue("instrument_name", instrument)
-            
-            if self._filename is not None:
-                filename = QtCore.QVariant(QtCore.QString(self._filename))
-            else:
-                filename = QtCore.QVariant()    
-            settings.setValue("last_file", filename)
-            
-            if self._recent_files is not []:
-                recent_files = QtCore.QVariant(self._recent_files)
-            else:
-                recent_files = QtCore.QVariant()
-            settings.setValue("recent_files", recent_files)
-            
-            last_dir = QtCore.QVariant(QtCore.QString(self._last_directory))
-            settings.setValue("last_directory", last_dir)
-    
-            last_export_dir = QtCore.QVariant(QtCore.QString(self._last_export_directory))
-            settings.setValue("last_export_directory", last_export_dir)
+            settings.setValue("instrument_name", self._instrument)            
+            settings.setValue("last_file", self._filename)            
+            settings.setValue("recent_files", self._recent_files)
+            settings.setValue("last_directory", str(self._last_directory))
+            settings.setValue("last_export_directory", str(self._last_export_directory))
             
             # General settings
             self.general_settings.to_settings(settings)
