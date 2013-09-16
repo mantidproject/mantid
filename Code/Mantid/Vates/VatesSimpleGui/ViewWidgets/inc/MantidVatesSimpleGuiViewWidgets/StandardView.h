@@ -68,6 +68,7 @@ public:
   void resetDisplay();
   /// @see ViewBase::updateUI()
   void updateUI();
+  /// @see ViewBase::updateView()
   void updateView();
 
 protected slots:
@@ -77,6 +78,7 @@ protected slots:
   void onDestroyingSource(pqPipelineSource *src);
   /// Invoke the RebinnerCutter on the current dataset.
   void onRebinButtonClicked();
+  /// Perform operations when rendering is done.
   void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.
   void onScaleButtonClicked();

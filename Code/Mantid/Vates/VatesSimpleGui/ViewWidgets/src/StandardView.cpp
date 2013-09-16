@@ -154,6 +154,10 @@ void StandardView::onScaleButtonClicked()
                                        this->getPvActiveSrc());
 }
 
+/**
+ * This function is responsible for calling resetCamera if the internal
+ * variable cameraReset has been set to true.
+ */
 void StandardView::onRenderDone()
 {
   if (this->cameraReset)

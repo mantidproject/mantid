@@ -507,7 +507,6 @@ void MdViewerWidget::checkForUpdates()
     this->currentView->setAxisScales();
     pqActiveObjects::instance().setActiveSource(src);
     this->currentView->setTimeSteps(true);
-    //this->currentView->resetCamera();
     this->currentView->updateView();
     this->currentView->updateUI();
   }

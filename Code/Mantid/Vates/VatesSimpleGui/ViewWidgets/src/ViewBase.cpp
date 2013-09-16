@@ -614,6 +614,9 @@ void ViewBase::updateUI()
 {
 }
 
+/**
+ * This function is where one specifies updates to the held view.
+ */
 void ViewBase::updateView()
 {
 }
