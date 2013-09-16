@@ -549,6 +549,11 @@ namespace DataHandling
           tempdb = atof(terms[4].c_str());
           parammap["Beta1t"] = tempdb;
         }
+      }  // "ALFBT"
+      else if (boost::starts_with(line,"END"))
+      {
+        // Ignore END line
+        g_log.debug() << "END line of bank";
       }
       else
       {
