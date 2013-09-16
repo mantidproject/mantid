@@ -81,6 +81,8 @@ public:
   bool operator<(const TofEvent & rhs) const;
   bool operator<(const double rhs_tof) const;
   bool operator>(const TofEvent & rhs) const;
+  bool equals(const TofEvent & rhs, const double tolTof,
+              const int64_t tolPulse) const;
 
   //------------------------------------------------------------------------
   /** () operator: return the tof (X value) of the event.
@@ -183,6 +185,8 @@ public:
   WeightedEvent& operator=(const WeightedEvent & rhs);
 
   bool operator==(const WeightedEvent & other) const;
+  bool equals(const WeightedEvent & rhs, const double tolTof,
+              const double tolWeight, const int64_t tolPulse) const;
 
   //------------------------------------------------------------------------
   /// Return the weight of the neutron, as a double (it is saved as a float).
@@ -277,6 +281,8 @@ public:
   bool operator==(const WeightedEventNoTime & other) const;
   bool operator<(const WeightedEventNoTime & rhs) const;
   bool operator<(const double rhs) const;
+  bool equals(const WeightedEventNoTime & rhs, const double tolTof,
+              const double tolWeight) const;
 
   //------------------------------------------------------------------------
   /** () operator: return the tof (X value) of the event.

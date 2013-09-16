@@ -64,6 +64,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	CompressedWorkspace2DTest.h
 	EventListTest.h
+	EventsTest.h
 	EventWorkspaceMRUTest.h
 	EventWorkspaceTest.h
 	GroupingWorkspaceTest.h
