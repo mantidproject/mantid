@@ -407,7 +407,14 @@ void CheckWorkspacesMatch::doComparison()
       result = "Mismatched number of histograms.";
       return;
     }
-    double ToleranceTOF = 0.05; //TODO should be smarter
+
+    // determine the tolerance for "tof" attribute of events
+    double ToleranceTOF = Tolerance;
+    // actual time-of flight is 50 nanoseconds
+    if ((ws1->getAxis(0)->unit()->label() == "microsecond")
+        || (ws2->getAxis(0)->unit()->label() == "microsecond"))
+      ToleranceTOF = 0.05;
+
     bool mismatchedEvent = false;
     int mismatchedEventWI = 0;
     //PARALLEL_FOR2(ews1, ews2)
