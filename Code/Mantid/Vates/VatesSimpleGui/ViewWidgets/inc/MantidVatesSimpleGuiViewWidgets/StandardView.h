@@ -68,6 +68,7 @@ public:
   void resetDisplay();
   /// @see ViewBase::updateUI()
   void updateUI();
+  void updateView();
 
 protected slots:
   /// Add a slice to the current dataset.
@@ -76,12 +77,14 @@ protected slots:
   void onDestroyingSource(pqPipelineSource *src);
   /// Invoke the RebinnerCutter on the current dataset.
   void onRebinButtonClicked();
+  void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.
   void onScaleButtonClicked();
 
 private:
   Q_DISABLE_COPY(StandardView)
 
+  bool cameraReset;
   QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
   QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
   Ui::StandardView ui; ///< The standard view's UI form

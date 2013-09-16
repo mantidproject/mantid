@@ -39,6 +39,7 @@ namespace SimpleGui
 StandardView::StandardView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
+  this->cameraReset = false;
 
   // Set the cut button to create a slice on the data
   QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
@@ -58,6 +59,9 @@ StandardView::StandardView(QWidget *parent) : ViewBase(parent)
                    this, SLOT(onDestroyingSource(pqPipelineSource*)));
 
   this->view = this->createRenderView(this->ui.renderFrame);
+
+  QObject::connect(this->view.data(), SIGNAL(endRender()),
+                   this, SLOT(onRenderDone()));
 }
 
 StandardView::~StandardView()
@@ -150,6 +154,15 @@ void StandardView::onScaleButtonClicked()
                                        this->getPvActiveSrc());
 }
 
+void StandardView::onRenderDone()
+{
+  if (this->cameraReset)
+  {
+    this->resetCamera();
+    this->cameraReset = false;
+  }
+}
+
 void StandardView::renderAll()
 {
   std::cout << "In StandardView::renderAll" << std::endl;
@@ -172,6 +185,11 @@ void StandardView::resetCamera()
 void StandardView::updateUI()
 {
   this->ui.cutButton->setEnabled(true);
+}
+
+void StandardView::updateView()
+{
+  this->cameraReset = true;
 }
 
 /**

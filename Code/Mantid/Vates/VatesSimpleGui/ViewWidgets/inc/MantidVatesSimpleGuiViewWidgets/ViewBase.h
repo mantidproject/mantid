@@ -138,6 +138,7 @@ public slots:
   void setTimeSteps(bool withUpdate = false);
   /// Provide updates to UI.
   virtual void updateUI();
+  virtual void updateView();
 
 signals:
   /**
