@@ -1725,37 +1725,41 @@ void MuonAnalysis::updateFrontAndCombo()
 }
 
 /**
- * Updates widgets related to period algebra.
+ * Updates widgets related to period algebra. If number of periods has not changed - does nothing.
  * @param newNumPeriods Number of periods available
  */
 void MuonAnalysis::updatePeriodWidgets(int numPeriods)
 {
-  QString periodLabel = "Data collected in " + QString::number(numPeriods)
-                        + " periods. Plot/analyse period: ";
-  m_uiForm.homePeriodsLabel->setText(periodLabel);
-
-  // Remove all the previous items
-  m_uiForm.homePeriodBox1->clear();
-  m_uiForm.homePeriodBox2->clear();
-
-  m_uiForm.homePeriodBox2->addItem("None");
-
-  for ( int i = 1; i <= numPeriods; i++ )
+  // Update widgets only if the number of periods has changed
+  if(numPeriods != m_uiForm.homePeriodBox1->count())
   {
-    m_uiForm.homePeriodBox1->addItem(QString::number(i));
-    m_uiForm.homePeriodBox2->addItem(QString::number(i));
-  }
+    QString periodLabel = "Data collected in " + QString::number(numPeriods)
+                          + " periods. Plot/analyse period: ";
+    m_uiForm.homePeriodsLabel->setText(periodLabel);
 
-  // We only need period widgets enabled if we have more than 1 period
-  if(numPeriods > 1)
-  {
-    m_uiForm.homePeriodBox2->setEnabled(true);
-    m_uiForm.homePeriodBoxMath->setEnabled(true);
-  }
-  else
-  {
-    m_uiForm.homePeriodBox2->setEnabled(false);
-    m_uiForm.homePeriodBoxMath->setEnabled(false);
+    // Remove all the previous items
+    m_uiForm.homePeriodBox1->clear();
+    m_uiForm.homePeriodBox2->clear();
+
+    m_uiForm.homePeriodBox2->addItem("None");
+
+    for ( int i = 1; i <= numPeriods; i++ )
+    {
+      m_uiForm.homePeriodBox1->addItem(QString::number(i));
+      m_uiForm.homePeriodBox2->addItem(QString::number(i));
+    }
+
+    // We only need period widgets enabled if we have more than 1 period
+    if(numPeriods > 1)
+    {
+      m_uiForm.homePeriodBox2->setEnabled(true);
+      m_uiForm.homePeriodBoxMath->setEnabled(true);
+    }
+    else
+    {
+      m_uiForm.homePeriodBox2->setEnabled(false);
+      m_uiForm.homePeriodBoxMath->setEnabled(false);
+    }  
   }
 }
 
