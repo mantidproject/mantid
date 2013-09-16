@@ -1192,9 +1192,6 @@ private:
   /// Open up the SetupParaview dialog
   void showSetupParaview();
 
-  /// Attach a PP tool to plot with a given name, and detach from all the other plots.
-  void activatePPTool(const QString& plotName);
-
   // TODO: a lot of this stuff should be private
 public:
   //! End of line convention used for copy/paste operations and when exporting tables/matrices to ASCII files.

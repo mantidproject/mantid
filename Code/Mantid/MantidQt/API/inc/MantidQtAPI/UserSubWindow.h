@@ -110,9 +110,6 @@ signals:
   /// Emitted to start a (generally small) script running
   void runAsPythonScript(const QString& code, bool);
 
-  /// Thrown to attach PP tool to the plot with given name
-  void activatePPTool(const QString& plotName);
-
   /// Thrown when used fit property browser should be changed to given one
   void setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser* browser);
   

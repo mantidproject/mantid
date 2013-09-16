@@ -17002,8 +17002,6 @@ else
         SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
     if(user_interface->interfaceName() == "Muon Analysis")
     {
-      connect(user_interface, SIGNAL(activatePPTool(const QString&)), 
-                        this, SLOT(activatePPTool(const QString&)));
       // Update the used fit property browser
       connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
                     mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
@@ -17019,40 +17017,6 @@ else
 QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
     tr("MantidPlot was not built with Python scripting support included!"));
 #endif
-}
-
-/**
- * Searches for the plot with a specified name and then attaches Peak Picker tool to it. Disables 
- * the tool from all the other plots.
- * 
- * @param plotName The name of the plot we want to attach the tool to.
- */
-void ApplicationWindow::activatePPTool(const QString& plotName)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-
-      QList<Graph *> layers = plot->layersList();
-
-      if (w->objectName() == plotName)
-      {
-        foreach(Graph *g, layers)
-        {
-          PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, true);
-          g->setActiveTool(ppicker);
-        }
-      }
-      else
-      {
-        foreach(Graph *g, layers)
-          g->disableTools();
-      }
-    }
-  }
 }
 
 void ApplicationWindow::loadCustomActions()
