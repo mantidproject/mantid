@@ -1,4 +1,3 @@
-
 # File: ReduceSCD_Parallel.py
 #
 # Version 2.0, modified to work with Mantid's new python interface.
@@ -78,6 +77,11 @@ cell_type             = params_dictionary[ "cell_type" ]
 centering             = params_dictionary[ "centering" ]
 run_nums              = params_dictionary[ "run_nums" ]
 
+# determine what python executable to launch new jobs with
+python = sys.executable
+if python is None: # not all platforms define this variable
+   python = 'python'
+
 #
 # Make the list of separate process commands.  If a slurm queue name
 # was specified, run the processes using slurm, otherwise just use
@@ -87,7 +91,7 @@ list=[]
 index = 0
 for r_num in run_nums:
   list.append( ProcessThread() )
-  cmd = 'python ' + reduce_one_run_script + ' ' + config_file_name + ' ' + str(r_num)
+  cmd = '%s %s %s %s' % (python, reduce_one_run_script, config_file_name, str(r_num))
   if slurm_queue_name is not None:
     console_file = output_directory + "/" + str(r_num) + "_output.txt"
     cmd =  'srun -p ' + slurm_queue_name + \
