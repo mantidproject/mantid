@@ -582,7 +582,8 @@ void InstrumentWindowRenderTab::surfaceTypeChanged(int index)
         // checking action calls setSurfaceType slot
         action->setChecked(true);
     }
-
+    showFlipControl( index );
+    showResetView( index );
 }
 
 /**
