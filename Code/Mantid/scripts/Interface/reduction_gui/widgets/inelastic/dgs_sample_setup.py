@@ -108,7 +108,7 @@ class SampleSetupWidget(BaseWidget):
 
     def _check_and_set_lineedit_content(self, lineedit, content):
         lineedit.setText(content)
-        util.set_valid(lineedit, not lineedit.text().isEmpty())
+        util.set_valid(lineedit, not lineedit.text() == '')
         
     def _connect_validated_lineedit(self, ui_ctrl):
         call_back = partial(self._validate_edit, ctrl=ui_ctrl)
@@ -122,7 +122,7 @@ class SampleSetupWidget(BaseWidget):
             if not ctrl.isValid():
                 is_valid = False
         else:
-            if ctrl.text().isEmpty():
+            if not ctrl.text():
                 is_valid = False
         util.set_valid(ctrl, is_valid)
 
