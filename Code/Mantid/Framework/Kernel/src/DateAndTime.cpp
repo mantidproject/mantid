@@ -633,7 +633,6 @@ bool DateAndTime::operator==(const boost::posix_time::ptime& rhs) const
 bool DateAndTime::equals(const DateAndTime& rhs, const int64_t tol) const
 {
   int64_t diff = _nanoseconds - rhs._nanoseconds;
-  std::cout << "DIFF:" << diff << std::endl;
   if (diff > tol)
     return false;
   else if (diff < -1*tol)
