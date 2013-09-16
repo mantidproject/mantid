@@ -118,7 +118,7 @@ namespace DataObjects
              const int64_t tolPulse) const
   {
     // compare m_tof
-    if (fdim(this->m_tof, rhs.m_tof) > tolTof)
+    if (std::fdim(this->m_tof, rhs.m_tof) > tolTof)
       return false;
     // then it is just if the pulse-times are equal
     return (this->m_pulsetime.equals(rhs.m_pulsetime, tolPulse));
@@ -297,11 +297,11 @@ namespace DataObjects
   bool WeightedEvent::equals(const WeightedEvent & rhs, const double tolTof,
              const double tolWeight, const int64_t tolPulse) const
   {
-    if (fdim(this->m_tof, rhs.m_tof) > tolTof)
+    if (std::fdim(this->m_tof, rhs.m_tof) > tolTof)
       return false;
-    if (fdim(this->m_weight, rhs.m_weight) > tolWeight)
+    if (std::fdim(this->m_weight, rhs.m_weight) > tolWeight)
       return false;
-    if (fdim(this->m_errorSquared, rhs.m_errorSquared) > tolWeight)
+    if (std::fdim(this->m_errorSquared, rhs.m_errorSquared) > tolWeight)
       return false;
     // then it is just if the pulse-times are equal
     return (this->m_pulsetime.equals(rhs.m_pulsetime, tolPulse));
@@ -503,11 +503,11 @@ namespace DataObjects
   bool WeightedEventNoTime::equals(const WeightedEventNoTime & rhs, const double tolTof,
              const double tolWeight) const
   {
-    if (fdim(this->m_tof, rhs.m_tof) > tolTof)
+    if (std::fdim(this->m_tof, rhs.m_tof) > tolTof)
       return false;
-    if (fdim(this->m_weight, rhs.m_weight) > tolWeight)
+    if (std::fdim(this->m_weight, rhs.m_weight) > tolWeight)
       return false;
-    if (fdim(this->m_errorSquared, rhs.m_errorSquared) > tolWeight)
+    if (std::fdim(this->m_errorSquared, rhs.m_errorSquared) > tolWeight)
       return false;
     // then it is just if the pulse-times are equal
     return true;
