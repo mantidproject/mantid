@@ -3,7 +3,6 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/DateAndTime.h"
-#include <cmath>
 #include <functional>
 #include <math.h>
 
@@ -118,7 +117,7 @@ namespace DataObjects
              const int64_t tolPulse) const
   {
     // compare m_tof
-    if (std::fdim(this->m_tof, rhs.m_tof) > tolTof)
+    if (std::fabs(this->m_tof - rhs.m_tof) > tolTof)
       return false;
     // then it is just if the pulse-times are equal
     return (this->m_pulsetime.equals(rhs.m_pulsetime, tolPulse));
@@ -297,11 +296,11 @@ namespace DataObjects
   bool WeightedEvent::equals(const WeightedEvent & rhs, const double tolTof,
              const double tolWeight, const int64_t tolPulse) const
   {
-    if (std::fdim(this->m_tof, rhs.m_tof) > tolTof)
+    if (std::fabs(this->m_tof - rhs.m_tof) > tolTof)
       return false;
-    if (std::fdim(this->m_weight, rhs.m_weight) > tolWeight)
+    if (std::fabs(this->m_weight - rhs.m_weight) > tolWeight)
       return false;
-    if (std::fdim(this->m_errorSquared, rhs.m_errorSquared) > tolWeight)
+    if (std::fabs(this->m_errorSquared - rhs.m_errorSquared) > tolWeight)
       return false;
     // then it is just if the pulse-times are equal
     return (this->m_pulsetime.equals(rhs.m_pulsetime, tolPulse));
@@ -503,11 +502,11 @@ namespace DataObjects
   bool WeightedEventNoTime::equals(const WeightedEventNoTime & rhs, const double tolTof,
              const double tolWeight) const
   {
-    if (std::fdim(this->m_tof, rhs.m_tof) > tolTof)
+    if (std::fabs(this->m_tof - rhs.m_tof) > tolTof)
       return false;
-    if (std::fdim(this->m_weight, rhs.m_weight) > tolWeight)
+    if (std::fabs(this->m_weight - rhs.m_weight) > tolWeight)
       return false;
-    if (std::fdim(this->m_errorSquared, rhs.m_errorSquared) > tolWeight)
+    if (std::fabs(this->m_errorSquared - rhs.m_errorSquared) > tolWeight)
       return false;
     // then it is just if the pulse-times are equal
     return true;
