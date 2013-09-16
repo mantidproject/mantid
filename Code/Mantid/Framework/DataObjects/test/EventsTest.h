@@ -25,7 +25,7 @@ public:
   {
     // tof event
     TofEvent tofEvent1(20.0, Kernel::DateAndTime("1990-01-02 00:00:02.000"));
-    TofEvent tofEvent2(20.1, Kernel::DateAndTime("1990-01-02 00:00:02.000000001"));
+    TofEvent tofEvent2(20.05, Kernel::DateAndTime("1990-01-02 00:00:02.000000001"));
 
     TS_ASSERT( tofEvent1 == tofEvent1 );
     TS_ASSERT( !(tofEvent1 == tofEvent2) );
@@ -33,7 +33,7 @@ public:
 
     // weighted
     WeightedEvent wghtEvent1(20.0, Kernel::DateAndTime("1990-01-02 00:00:02.000"), 1., 1.);
-    WeightedEvent wghtEvent2(20.1, Kernel::DateAndTime("1990-01-02 00:00:02.000000001"), 1.1, 1.);
+    WeightedEvent wghtEvent2(20.05, Kernel::DateAndTime("1990-01-02 00:00:02.000000001"), 1.05, 1.);
 
     TS_ASSERT( wghtEvent1 == wghtEvent1 );
     TS_ASSERT( !(wghtEvent1 == wghtEvent2) );
@@ -41,7 +41,7 @@ public:
 
     // weighted no time
     WeightedEventNoTime notimeEvent1(20.0, 1., 1. );
-    WeightedEventNoTime notimeEvent2(20.1, 1.1, 1.1 );
+    WeightedEventNoTime notimeEvent2(20.05, 1.05, 1.05 );
 
     TS_ASSERT( notimeEvent1 == notimeEvent1 );
     TS_ASSERT( !(notimeEvent1 == notimeEvent2) );
