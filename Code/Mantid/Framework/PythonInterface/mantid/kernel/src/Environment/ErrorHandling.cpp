@@ -1,11 +1,13 @@
 //-------------------------------------------
 // Includes
 //-------------------------------------------
-#include "MantidPythonInterface/kernel/Environment/CallMethod.h"
-#include <sstream>
-#include <frameobject.h>
+#include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
+#include "MantidPythonInterface/kernel/Environment/Threading.h"
 
-using std::stringstream;
+#include <frameobject.h> //Python
+
+#include <sstream>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -15,7 +17,7 @@ namespace Environment
 {
   namespace 
   {
-    void tracebackToMsg(stringstream & msg, PyTracebackObject* traceback, bool root=true) 
+    void tracebackToMsg(std::stringstream & msg, PyTracebackObject* traceback, bool root=true) 
     {
       if(traceback == NULL) return;
       msg << "\n  ";
@@ -32,21 +34,22 @@ namespace Environment
 
   /**
    * Convert a python error state to a C++ exception
+   * @param withTrace If true then a traceback will be included in the exception message
+   * @throws std::runtime_error
    */
-  void translateErrorToException(const bool withTrace)
+  void throwRuntimeError(const bool withTrace)
   {
     GlobalInterpreterLock gil;
     if( !PyErr_Occurred() ) 
     {
-      boost::python::throw_error_already_set();
-      return;
+      throw std::runtime_error("ErrorHandling::throwRuntimeError - No Python error state set!");
     }
     PyObject *exception(NULL), *value(NULL), *traceback(NULL);
     PyErr_Fetch(&exception, &value, &traceback);
     PyErr_NormalizeException(&exception, &value, &traceback);
     PyErr_Clear();
     PyObject *str_repr = PyObject_Str(value);
-    stringstream msg;
+    std::stringstream msg;
     if( value && str_repr )
     {
       msg << PyString_AsString(str_repr);

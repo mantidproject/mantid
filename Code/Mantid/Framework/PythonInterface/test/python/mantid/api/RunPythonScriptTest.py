@@ -79,9 +79,13 @@ class RunPythonScriptTest(unittest.TestCase):
         self.assertAlmostEqual(300.0, mtd['ws'].readY(0)[0], 8)
 
     # ======================== Failure cases =====================================================
+    def test_syntax_error_in_code_raises_Runtime_Error(self):
+        code = "print 'unclosed quote"
+        self.assertRaises(RuntimeError,RunPythonScript,Code=code)
+
     def test_Code_Without_Workspaces_Fails_If_Code_Uses_Workspace_References(self):
         code = "output = input*5"
-        self.assertRaises(TypeError,RunPythonScript,Code=code)
+        self.assertRaises(RuntimeError,RunPythonScript,Code=code)
 
     def test_Code_Not_Creating_Output_Workspace_Fails_If_OutputWS_Is_Specified(self):
         code = "x = 5"
