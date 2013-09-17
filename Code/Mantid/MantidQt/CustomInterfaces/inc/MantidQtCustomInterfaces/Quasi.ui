@@ -24,7 +24,7 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsInput">
+      <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -80,7 +80,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QComboBox" name="cb">
+      <widget class="QComboBox" name="cbProgram">
        <item>
         <property name="text">
          <string>QL</string>
@@ -91,6 +91,13 @@
          <string>QSe</string>
         </property>
        </item>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="lblProgram">
+       <property name="text">
+        <string>Program</string>
+       </property>
       </widget>
      </item>
     </layout>
@@ -125,6 +132,9 @@
         </item>
         <item row="1" column="1">
          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwFixWidthDat">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="label" stdset="0">
            <string/>
           </property>
@@ -147,12 +157,17 @@
             </property>
             <item>
              <property name="text">
+              <string>Sloping</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Flat</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>Sloping</string>
+              <string>Zero</string>
              </property>
             </item>
            </widget>
@@ -180,10 +195,20 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QCheckBox" name="chkSequence">
+            <property name="text">
+             <string>Sequence</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item row="2" column="1">
          <widget class="MantidQt::MantidWidgets::DataSelector" name="dsResNorm">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -239,7 +264,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_44">
      <item>
-      <widget class="QCheckBox" name="ckVerbose">
+      <widget class="QCheckBox" name="chkVerbose">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -262,10 +287,44 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="ckPlot">
+      <widget class="QLabel" name="lblPlotResult">
        <property name="text">
-        <string>Plot Result</string>
+        <string>Plot Result: </string>
        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cbPlot">
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ProbBeta</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Intensity</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>FwHm</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Fit</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>All</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -282,7 +341,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="ckSave">
+      <widget class="QCheckBox" name="chkSave">
        <property name="text">
         <string>Save Result</string>
        </property>

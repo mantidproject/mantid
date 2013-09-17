@@ -62,7 +62,7 @@ namespace MantidQt
     {
     	if(prop == m_properties["EMin"])
     	{
-    		updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val)
+    		updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{

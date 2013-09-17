@@ -20,7 +20,10 @@ namespace MantidQt
 			virtual void minValueChanged(double min);
 			/// Slot for when the min range on the range selector changes
 			virtual void maxValueChanged(double max);
+			/// Slot to update the guides when the range properties change
 			void updateProperties(QtProperty* prop, double val);
+			/// Slot to handle when a new sample file is available
+			void handleSampleInputReady(const QString& filename);
 
 		private:
 			virtual QString help() { return "Quasi"; };

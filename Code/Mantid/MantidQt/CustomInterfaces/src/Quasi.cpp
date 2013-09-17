@@ -32,41 +32,133 @@ namespace MantidQt
 
 			//Set default values
 			m_dblManager->setValue(m_properties["SampleBinning"], 1);
+			m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
 			m_dblManager->setValue(m_properties["ResBinning"], 1);
+			m_dblManager->setMinimum(m_properties["ResBinning"], 1);
+
+			//Connect optional form elements with enabling checkboxes
+			connect(m_uiForm.chkFixWidth, SIGNAL(toggled(bool)), m_uiForm.mwFixWidthDat, SLOT(setEnabled(bool)));
+			connect(m_uiForm.chkUseResNorm, SIGNAL(toggled(bool)), m_uiForm.dsResNorm, SLOT(setEnabled(bool)));
+
+			//Connect the data selector for the sample to the mini plot
+			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 		}
 
 		bool Quasi::validate()
 		{
+			if(m_uiForm.dsSample->getCurrentDataName().isEmpty())
+			{
+				emit showMessageBox("Please correct the following:\n Could not find the specified reduction file");
+				return false;
+			}
+			if(m_uiForm.dsResolution->getCurrentDataName().isEmpty())
+			{
+				emit showMessageBox("Please correct the following:\n Could not find the specified resolution file");
+				return false;
+			}
+			if(m_uiForm.chkFixWidth->isChecked() &&
+					 !m_uiForm.mwFixWidthDat->isValid())
+			{
+				emit showMessageBox("Please correct the following:\n Could not find the specified Fixed Width file");
+				return false;
+			}
+			if(m_uiForm.chkUseResNorm->isChecked() &&
+					 m_uiForm.dsResNorm->getCurrentDataName().isEmpty())
+			{
+				emit showMessageBox("Please correct the following:\n Could not find the specified ResNorm file");
+				return false;
+			}
 			return true;
 		}
 
 		void Quasi::run() 
 		{
+			// Using 1/0 instead of True/False for compatibility with underlying Fortran code
+			// in some places
 			QString verbose("False");
-			QString plot("False");
 			QString save("False");
+			QString elasticPeak("0");
+			QString sequence("False");
+
+			QString fixedWidth("0");
+			QString fixedWidthFile("");
+
+			QString useResNorm("0");
+			QString resNormFile("");
 
 			QString pyInput = 
 				"from IndirectBayes import QLRun\n";
 
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
 			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+			QString program = m_uiForm.cbProgram->currentText();
 
-			QString eMin = m_dblManager->value(m_properties["EMin"]);
-			QString eMax = m_dblManager->value(m_properties["EMax"]);
+			// Collect input from fit options section
+			QString background = m_uiForm.cbBackground->currentText();
+			if(background == "Sloping")
+			{
+				background = "2";
+			}
+			else if( background == "Flat")
+			{
+				background = "1";
+			}
+
+			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "1"; }
+			if(m_uiForm.chkSequence->isChecked()) { sequence = "True"; }
+
+			if(m_uiForm.chkFixWidth->isChecked()) 
+			{ 
+				fixedWidth = "1";
+				fixedWidthFile = m_uiForm.mwFixWidthDat->getFirstFilename();
+			}
+
+			if(m_uiForm.chkUseResNorm->isChecked())
+			{
+				useResNorm = "1";
+				resNormFile = m_uiForm.dsResNorm->getCurrentDataName();
+			}
+
+			QString fitOps = "[" + elasticPeak + ", " + background + ", " + fixedWidth + ", " + useResNorm + "]";
+
+			//Collect input from the properties browser
+			QString eMin = m_properties["EMin"]->valueText();
+			QString eMax = m_properties["EMax"]->valueText();
 			QString eRange = "[" + eMin + "," + eMax + "]";
 
-			QString sampleBins = m_dblManager->value(m_properties["SampleBinning"]);
-			QString resBins = m_dblManager->value(m_properties["ResBinning"]);
+			QString sampleBins = m_properties["SampleBinning"]->valueText();
+			QString resBins = m_properties["ResBinning"]->valueText();
+			QString nBins = "[" + sampleBins + "," + resBins + "]";
 
-			if(m_uiForm.ckVerbose->isChecked()){ verbose = "True"; }
-			if(m_uiForm.ckPlot->isChecked()){ plot = "True"; }
-			if(m_uiForm.ckSave->isChecked()){ save ="True"; }
+			//Output options
+			if(m_uiForm.chkVerbose->isChecked()) { verbose = "True"; }
+			if(m_uiForm.chkSave->isChecked()) { save = "True"; }
+			QString plot = m_uiForm.cbPlot->currentText();
 
-			pyInput += "QLRun("+sampleName+", "+resName+", "+eRange+", "+sampleBins+","+resBins+","
-										" Save="+save+", Plot="+plot+", Verbose="+verbose+")\n";
+			pyInput += "QLRun('"+program+"','"+sampleName+"','"+resName+"','"+resNormFile+"',"+eRange+","
+										" "+nBins+","+fitOps+",'"+fixedWidthFile+"',"+sequence+", "
+										" Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
 
 			runPythonScript(pyInput);
+		}
+
+		void Quasi::handleSampleInputReady(const QString& filename)
+		{
+			plotMiniPlot(filename, 0);
+			std::pair<double,double> res;
+			std::pair<double,double> range = getCurveRange();
+
+			//Use the values from the instrument parameter file if we can
+			if(getInstrumentResolution(filename, res))
+			{
+				setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], res);
+			}
+			else
+			{
+				setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], range);
+			}
+
+			setPlotRange(m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		void Quasi::minValueChanged(double min)
@@ -83,7 +175,7 @@ namespace MantidQt
     {
     	if(prop == m_properties["EMin"])
     	{
-    		updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val)
+    		updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{

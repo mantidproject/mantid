@@ -79,9 +79,9 @@ namespace MantidQt
 			QString nBin = m_properties["VanBinning"]->valueText();
 
 			// get output options
-			if(m_uiForm.ckVerbose->isChecked()){ verbose = "True"; }
-			if(m_uiForm.ckPlot->isChecked()){ plot = "True"; }
-			if(m_uiForm.ckSave->isChecked()){ save ="True"; }
+			if(m_uiForm.chkVerbose->isChecked()){ verbose = "True"; }
+			if(m_uiForm.chkPlot->isChecked()){ plot = "True"; }
+			if(m_uiForm.chkSave->isChecked()){ save ="True"; }
 
 			pyInput += "ResNormRun("+VanName+", "+ResName+", "+ERange+", "+nBin+","
 										" Save="+save+", Plot="+plot+", Verbose="+verbose+")\n";

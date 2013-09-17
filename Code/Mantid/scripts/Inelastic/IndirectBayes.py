@@ -136,7 +136,7 @@ def CheckBinning(nbins):
 	return nbin,nrbin
 
 # QLines programs
-def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,Save):
+def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose=False,Plot='None',Save=False):
 	StartTime(program)
 	workdir = config['defaultsave.directory']
 	facility = config['default.facility']
