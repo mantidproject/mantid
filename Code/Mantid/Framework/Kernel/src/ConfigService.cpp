@@ -441,7 +441,7 @@ void ConfigServiceImpl::configureLogging()
       if (Poco::File(logpath).canWrite() == false)
       {
           // if we cannot write to the default directory then set use the system temp
-          logpath = Poco::Path::temp();
+          logpath = Poco::Path::temp() + "mantid.log";
       }
 
       m_logFilePath = logpath.toString();
