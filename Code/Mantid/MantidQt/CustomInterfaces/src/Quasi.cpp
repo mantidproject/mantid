@@ -11,7 +11,7 @@ namespace MantidQt
 
 			//add the plot to the ui form
 			m_uiForm.plotSpace->addWidget(m_plot);
-			
+
 			//add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
 
@@ -42,7 +42,31 @@ namespace MantidQt
 
 		void Quasi::run() 
 		{
+			QString verbose("False");
+			QString plot("False");
+			QString save("False");
 
+			QString pyInput = 
+				"from IndirectBayes import QLRun\n";
+
+			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+
+			QString eMin = m_dblManager->value(m_properties["EMin"]);
+			QString eMax = m_dblManager->value(m_properties["EMax"]);
+			QString eRange = "[" + eMin + "," + eMax + "]";
+
+			QString sampleBins = m_dblManager->value(m_properties["SampleBinning"]);
+			QString resBins = m_dblManager->value(m_properties["ResBinning"]);
+
+			if(m_uiForm.ckVerbose->isChecked()){ verbose = "True"; }
+			if(m_uiForm.ckPlot->isChecked()){ plot = "True"; }
+			if(m_uiForm.ckSave->isChecked()){ save ="True"; }
+
+			pyInput += "QLRun("+sampleName+", "+resName+", "+eRange+", "+sampleBins+","+resBins+","
+										" Save="+save+", Plot="+plot+", Verbose="+verbose+")\n";
+
+			runPythonScript(pyInput);
 		}
 
 		void Quasi::minValueChanged(double min)
