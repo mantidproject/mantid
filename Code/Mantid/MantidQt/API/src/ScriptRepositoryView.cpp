@@ -390,7 +390,7 @@ void ScriptRepositoryView::CheckBoxDelegate::paint(QPainter *painter, const QSty
   else
     modifiedOption.state |= QStyle::State_Off;
   // draw it 
-  QApplication::style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &modifiedOption, painter); 
+  QApplication::style()->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &modifiedOption, painter); 
 
 }
 
