@@ -1,5 +1,5 @@
 #include "MantidAPI/MDGeometry.h"
-#include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
+#include "MantidPythonInterface/kernel/Policies/DowncastReturnedValue.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include <boost/python/class.hpp>
@@ -9,7 +9,7 @@
 
 using Mantid::API::MDGeometry;
 using Mantid::Geometry::IMDDimension_const_sptr;
-using Mantid::PythonInterface::Policies::downcast_returned_value;
+using Mantid::PythonInterface::Policies::DowncastReturnedValue;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;
@@ -84,7 +84,7 @@ void export_MDGeometry()
     .def("numOriginalWorkspaces", &MDGeometry::numOriginalWorkspaces,
          "Returns the number of source workspaces attached" )
 
-    .def("getOriginalWorkspace", &MDGeometry::getOriginalWorkspace, (args("index")), return_value_policy<downcast_returned_value>(),
+    .def("getOriginalWorkspace", &MDGeometry::getOriginalWorkspace, (args("index")), return_value_policy<DowncastReturnedValue>(),
          "Returns the source workspace attached at the given index")
 
     .def("getOrigin", (const Mantid::Kernel::VMD & (MDGeometry::*)() const)&MDGeometry::getOrigin,

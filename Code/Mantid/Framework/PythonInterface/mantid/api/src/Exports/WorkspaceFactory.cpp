@@ -1,7 +1,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
+#include "MantidPythonInterface/kernel/Policies/DowncastReturnedValue.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
@@ -53,9 +53,9 @@ void export_WorkspaceFactory()
          createFromParent_Overload(createFromParentDoc,
                                    (arg("parent"), arg("NVectors")=-1,
                                     arg("XLength")=-1,
-                                    arg("YLength")=-1))[return_value_policy<Policies::downcast_returned_value>()])
+                                    arg("YLength")=-1))[return_value_policy<Policies::DowncastReturnedValue>()])
 
-    .def("create", (createFromScratchPtr)&WorkspaceFactoryImpl::create, return_value_policy<Policies::downcast_returned_value>(),
+    .def("create", (createFromScratchPtr)&WorkspaceFactoryImpl::create, return_value_policy<Policies::DowncastReturnedValue>(),
         createFromScratchDoc, (arg("className"), arg("NVectors"), arg("XLength"), arg("YLength")))
 
     .def("createTable", &WorkspaceFactoryImpl::createTable,

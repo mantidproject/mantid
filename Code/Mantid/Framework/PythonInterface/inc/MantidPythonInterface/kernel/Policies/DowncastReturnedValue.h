@@ -52,7 +52,7 @@ namespace Mantid
        * Only used for DataItem's at the moment
        */
       template<class T>
-      struct to_python_value_with_downcast
+      struct ToPythonValueWithDowncast
       {
         inline PyObject* operator()(const T & p) const
         {
@@ -82,7 +82,7 @@ namespace Mantid
        * This defines the required an internal type apply::type
        * used by the return_value_policy mechanism
        */
-      struct downcast_returned_value
+      struct DowncastReturnedValue
       {
         template <class T>
         struct apply
@@ -90,7 +90,7 @@ namespace Mantid
           typedef typename boost::mpl::if_c<
               boost::mpl::or_<boost::is_convertible<T, boost::shared_ptr<Kernel::DataItem> >,
                               boost::is_convertible<T, boost::weak_ptr<Kernel::DataItem> > >::value
-              , to_python_value_with_downcast<T>
+              , ToPythonValueWithDowncast<T>
               , boost::python::to_python_value<T>
               >::type type;
         };
