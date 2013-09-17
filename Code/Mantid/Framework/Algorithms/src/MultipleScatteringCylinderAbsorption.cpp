@@ -206,8 +206,8 @@ double MultipleScatteringCylinderAbsorption::AttFac(const double sigir, const do
         att   = att + Z[J-1] * facts * facti;
         facts = -facts * sigsr / static_cast<double>(j+1);
       }
-   }
-  facti = -facti * sigir / static_cast<double>(i+1);
+    }
+    facti = -facti * sigir / static_cast<double>(i+1);
   }
   return att;
 }
@@ -228,7 +228,7 @@ inline double MultipleScatteringCylinderAbsorption::wavelength( double path_leng
  * Parameter total_path is in meters, and the sample radius is in cm.
  */
 void MultipleScatteringCylinderAbsorption::apply_msa_correction( 
-                double total_path, double angle_deg, double radius,
+                double total_path, double angle_rad, double radius,
                 double coeff1,  double coeff2, double coeff3,
                 vector<double>& tof, vector<double>& y_val)
 {
@@ -242,7 +242,7 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(
     is_histogram = false;
 
   vector<double> Z(Z_initial, Z_initial+Z_size);   // initialize Z array for this angle
-  ZSet(angle_deg, Z);
+  ZSet(angle_rad, Z);
 
   double Q2     = coeff1 * coeff2;
   double sigsct = coeff2 * coeff3;
