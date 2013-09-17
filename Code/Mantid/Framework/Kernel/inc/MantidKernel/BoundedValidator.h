@@ -63,8 +63,8 @@ public:
    */
   BoundedValidator(const TYPE lowerBound, const TYPE upperBound, bool exclusive=false)
   : TypedValidator<TYPE>(),
-    m_hasLowerBound( true), 
-    m_hasUpperBound( true),
+    m_hasLowerBound(true), 
+    m_hasUpperBound(true),
     m_lowerExclusive(exclusive),
     m_upperExclusive(exclusive),
     m_lowerBound(lowerBound), 
@@ -84,34 +84,43 @@ public:
   /// Return the upper bound value
   const TYPE&    upper()    const { return m_upperBound; }
   /// Check if lower bound is exclusive
-  bool isLowerexclusive() const { return m_lowerExclusive; }
+  bool isLowerExclusive() const { return m_lowerExclusive; }
   /// Check if upper bound is exclusive
-  bool isUpperexclusive() const { return m_upperExclusive; }
+  bool isUpperExclusive() const { return m_upperExclusive; }
+  /// Set the lower bound to be exclusive
+  void setLowerExclusive( const bool exclusive ) { m_lowerExclusive = exclusive; }
+  /// Set the upper bound to be exclusive
+  void setUpperExclusive( const bool exclusive ) { m_upperExclusive = exclusive; }
+
+  /// Set both the upper and lower bounds to be exclusive
+  void setExclusive( const bool exclusive )
+  {
+    setLowerExclusive( exclusive );
+    setUpperExclusive( exclusive );
+  }
 
   /// Set lower bound value
-  void setLower( const TYPE& value, const bool exclusive=false ) {
-    m_lowerExclusive = exclusive;
+  void setLower( const TYPE& value ) {
     m_hasLowerBound = true; 
     m_lowerBound = value; 
   }
 
   /// Set upper bound value
-  void setUpper( const TYPE& value, const bool exclusive=false ) {
-    m_upperExclusive = exclusive;
+  void setUpper( const TYPE& value ) {
     m_hasUpperBound = true;
     m_upperBound = value;
   }
 
   /// Clear lower bound value
-  void clearLower()  { m_hasLowerBound = false; m_lowerBound = TYPE(); m_lowerExclusive = false;}
+  void clearLower()  { m_hasLowerBound = false; m_lowerBound = TYPE(); }
   /// Clear upper bound value
-  void clearUpper()  { m_hasUpperBound = false; m_upperBound = TYPE(); m_upperExclusive = false;}
+  void clearUpper()  { m_hasUpperBound = false; m_upperBound = TYPE(); }
 
   /// Set both bounds (lower and upper) at the same time
-  void setBounds( const TYPE& lower, const TYPE& upper, const bool exclusive=false )
+  void setBounds( const TYPE& lower, const TYPE& upper )
   {
-    setLower( lower, exclusive );
-    setUpper( upper, exclusive );
+    setLower( lower );
+    setUpper( upper );
   }
 
   /// Clear both bounds (lower and upper) at the same time
