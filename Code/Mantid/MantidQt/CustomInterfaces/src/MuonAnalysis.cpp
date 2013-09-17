@@ -1119,9 +1119,13 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       {
         getDeadTimeFromFile(deadTimeFile);
       }
-      catch (std::exception&)
+      catch(std::runtime_error& e)
       {
-        QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
+        QMessageBox::warning(this, "Mantid - MuonAnalysis", e.what());
+      }
+      catch(...)
+      {
+        QMessageBox::warning(this, "Mantid - MuonAnalysis","A problem occurred while applying dead times.");
       }
     }
   }
@@ -1521,8 +1525,7 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
       else
       {
         Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
-        QMessageBox::information(this, "Mantid - Muon Analysis", "This kind of workspace is not compatible with applying dead times");
-        return;
+        throw std::runtime_error("This kind of workspace is not compatible with applying dead times");
       }
       Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
     }
@@ -1530,8 +1533,7 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
   else
   {
     Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
-    QMessageBox::information(this, "Mantid - Muon Analysis", "Failed to load dead times from the file " + fileName);
-    return;
+    throw std::runtime_error("Failed to load dead times from the file " + fileName.toStdString());
   }
 }
 
