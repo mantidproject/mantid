@@ -9,6 +9,8 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
+			//add the plot to the ui form
+			m_uiForm.plotSpace->addWidget(m_plot);
 			//add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
 
@@ -20,12 +22,6 @@ namespace MantidQt
 
 			m_propTree->addProperty(m_properties["QMin"]);
 			m_propTree->addProperty(m_properties["QMax"]);
-
-			//add the plot to the ui form
-			m_uiForm.plotSpace->addWidget(m_plot);
-			m_plot->setCanvasBackground(Qt::white);
-   		m_plot->setAxisFont(QwtPlot::xBottom, parent->font());
-    	m_plot->setAxisFont(QwtPlot::yLeft, parent->font());
 		}
 
 		bool JumpFit::validate()
@@ -50,13 +46,13 @@ namespace MantidQt
 
     void JumpFit::updateProperties(QtProperty* prop, double val)
     {
-    	if(prop == m_properties["QMin"])
+    	if(prop == m_properties["QMax"])
     	{
-    		m_rangeSelector->setMinimum(val);
+    		updateLowerGuide(m_properties["QMin"], m_properties["QMax"], val)
     	}
     	else if (prop == m_properties["QMax"])
     	{
-				m_rangeSelector->setMaximum(val);
+				updateUpperGuide(m_properties["QMin"], m_properties["QMax"], val);
     	}
     }
 	} // namespace CustomInterfaces

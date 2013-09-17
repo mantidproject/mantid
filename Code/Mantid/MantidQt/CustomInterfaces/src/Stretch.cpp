@@ -9,6 +9,8 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
+			//add the plot to the ui form
+			m_uiForm.plotSpace->addWidget(m_plot);
 			//add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
 
@@ -34,12 +36,6 @@ namespace MantidQt
 			m_dblManager->setValue(m_properties["Sigma"], 50);
 			m_dblManager->setValue(m_properties["Beta"], 50);
 			m_dblManager->setValue(m_properties["SampleBinning"], 1);
-
-			//add the plot to the ui form
-			m_uiForm.plotSpace->addWidget(m_plot);
-			m_plot->setCanvasBackground(Qt::white);
-   		m_plot->setAxisFont(QwtPlot::xBottom, parent->font());
-    	m_plot->setAxisFont(QwtPlot::yLeft, parent->font());
 		}
 
 		bool Stretch::validate()
@@ -66,11 +62,11 @@ namespace MantidQt
     {
     	if(prop == m_properties["EMin"])
     	{
-    		m_rangeSelector->setMinimum(val);
+    		updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val)
     	}
     	else if (prop == m_properties["EMax"])
     	{
-				m_rangeSelector->setMaximum(val);
+				updateUpperGuide(m_properties["EMin"], m_properties["EMax"], val);
     	}
     }
 

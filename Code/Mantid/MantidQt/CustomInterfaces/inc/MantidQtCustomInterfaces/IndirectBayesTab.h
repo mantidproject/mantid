@@ -98,14 +98,14 @@ namespace MantidQt
 			virtual void maxValueChanged(double max) = 0;
 			/// Slot to handle when a user edits a property
 			virtual void updateProperties(QtProperty* prop, double val) = 0;
-			/// Function to set the range selector on the mini plot
-			void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
 
 		protected:
 			/// Function to plot a workspace to the miniplot using a workspace name
 			void plotMiniPlot(const QString& workspace, size_t index);
 			/// Function to plot a workspace to the miniplot using a workspace pointer
 			void plotMiniPlot(const Mantid::API::MatrixWorkspace_const_sptr & workspace, size_t wsIndex);
+			/// Function to set the range selector on the mini plot
+			void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
 			/// Function to run a string as python code
 			void runPythonScript(const QString& pyInput);
 			/// Function to read an instrument's resolution from the IPF using a string

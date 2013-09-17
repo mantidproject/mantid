@@ -20,6 +20,11 @@ namespace MantidQt
       connect(m_rangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
       connect(m_rangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
       connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
+
+      // initilise plot
+      m_plot->setCanvasBackground(Qt::white);
+      m_plot->setAxisFont(QwtPlot::xBottom, parent->font());
+      m_plot->setAxisFont(QwtPlot::yLeft, parent->font());
     }
 
     //----------------------------------------------------------------------------------------------

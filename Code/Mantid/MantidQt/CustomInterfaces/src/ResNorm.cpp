@@ -9,8 +9,8 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			connect(m_uiForm.dsVanadium, SIGNAL(dataReady(const QString&)), this, SLOT(handleVanadiumInputReady(const QString&)));
-
+			//add the plot to the ui form
+			m_uiForm.plotSpace->addWidget(m_plot);
 			//add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
 			m_properties["EMin"] = m_dblManager->addProperty("EMin");
@@ -29,11 +29,8 @@ namespace MantidQt
 			m_dblManager->setValue(m_properties["VanBinning"], 1);
 			m_dblManager->setMinimum(m_properties["VanBinning"], 1);
 
-			//add the plot to the ui form
-			m_uiForm.plotSpace->addWidget(m_plot);
-			m_plot->setCanvasBackground(Qt::white);
-   		m_plot->setAxisFont(QwtPlot::xBottom, parent->font());
-    	m_plot->setAxisFont(QwtPlot::yLeft, parent->font());
+			// Connect data selector to handler method
+			connect(m_uiForm.dsVanadium, SIGNAL(dataReady(const QString&)), this, SLOT(handleVanadiumInputReady(const QString&)));
 		}
 
 		/**
