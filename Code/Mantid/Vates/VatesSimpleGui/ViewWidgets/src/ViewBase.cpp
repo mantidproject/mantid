@@ -615,6 +615,13 @@ void ViewBase::updateUI()
 }
 
 /**
+ * This function is where one specifies updates to the held view.
+ */
+void ViewBase::updateView()
+{
+}
+
+/**
  * This function checks the current pipeline for a filter with the specified
  * name. The function works for generic filter names only.
  * @param name the name of the filter to search for
