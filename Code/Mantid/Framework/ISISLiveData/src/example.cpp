@@ -60,11 +60,11 @@ int liveData(const std::string& host)
 			throw std::runtime_error("corrupt stream - you should reconnect");
 		}
         s.receiveBytes(junk_buffer, events.head_n.length - static_cast<uint32_t>(sizeof(events.head_n)));
-		events.data.resize(events.head_n.nevents);
+        events.data.resize(events.head_n.nevents);
         uint32_t nread = 0;
 		while( nread < events.head_n.nevents )
 		{
-            int ntoread = s.available() / static_cast<int>(sizeof(TCPStreamEventNeutron));
+      uint32_t ntoread = static_cast<uint32_t>(s.available() / static_cast<int>(sizeof(TCPStreamEventNeutron)));
 			if ( ntoread > (events.head_n.nevents - nread) )
 			{
 				ntoread = events.head_n.nevents - nread;
