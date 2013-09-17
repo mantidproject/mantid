@@ -131,9 +131,9 @@ class BaseWidget(QtGui.QWidget):
             qflist = QtGui.QFileDialog.getOpenFileNames(self, title,
                                                               self._settings.data_path, 
                                                               data_type)
-            if qflist.count()>0:
+            if len(qflist)>0:
                 flist = []
-                for i in range(qflist.count()):
+                for i in range(len(qflist)):
                     flist.append(str(QtCore.QFileInfo(qflist[i]).filePath()))
                 # Store the location of the loaded file
                 self._settings.data_path = str(QtCore.QFileInfo(qflist[i]).path())
