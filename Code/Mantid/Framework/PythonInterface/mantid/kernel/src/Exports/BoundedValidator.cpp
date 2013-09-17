@@ -44,11 +44,11 @@ namespace
     const bool exclusive = false)
   {
     BoundedValidator<T> * validator = new BoundedValidator<T>();
-    if(!lower.is_none())
+    if(lower.ptr() != Py_None)
     {
       validator->setLower(extract<T>(lower), exclusive);
     }
-    if(!upper.is_none())
+    if(upper.ptr() != Py_None)
     {
       validator->setUpper(extract<T>(upper), exclusive);
     }
