@@ -101,13 +101,27 @@ namespace MantidQt
       }
     }
 
-    double IndirectBayesTab::getInstrumentResolution(const QString& workspace)
+    /**
+     * Checks the workspace's intrument for a resolution parameter to use as 
+     * a default for the energy range on the mini plot
+     *
+     * @param workspace :: Name of the workspace to use
+     * @param res :: The retrieved values for the resolution parameter (if one was found)
+     */
+    bool IndirectBayesTab::getInstrumentResolution(const QString& workspace, std::pair<double,double>& res)
     {
       auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(workspace.toStdString());
-      return getInstrumentResolution(ws);
+      return getInstrumentResolution(ws, res);
     }
 
-    double IndirectBayesTab::getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws)
+    /**
+     * Checks the workspace's intrument for a resolution parameter to use as 
+     * a default for the energy range on the mini plot
+     *
+     * @param workspace :: Pointer to the workspace to use
+     * @param res :: The retrieved values for the resolution parameter (if one was found)
+     */
+    bool IndirectBayesTab::getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, std::pair<double,double>& res)
     {
       auto inst = ws->getInstrument();
       auto analyser = inst->getStringParameter("analyser");
@@ -120,19 +134,19 @@ namespace MantidQt
         //set the default instrument resolution
         if(params.size() > 0)
         {
-          return params[0];
+          res = std::make_pair(-params[0], params[0]);
+          return true;
         }
       }
 
-      return 0;
+      return false;
     }
 
-    void IndirectBayesTab::setMiniPlotRange(double min, double max)
-    {
-      m_rangeSelector->setMinimum(min);
-      m_rangeSelector->setMaximum(max);
-    }
-
+    /**
+     * Gets the range of the curve plotted in the mini plot
+     *
+     * @param A pair containing the maximum and minimum points of the curve
+     */
     std::pair<double,double> IndirectBayesTab::getCurveRange()
     {
       size_t npts = m_curve->data().size();
@@ -141,6 +155,77 @@ namespace MantidQt
         throw std::invalid_argument("Too few points on data curve to determine range.");
 
       return std::make_pair(m_curve->data().x(0), m_curve->data().x(npts-1));
+    }
+
+    /**
+     * Sets the edge bounds of plot to prevent the user inputting invalid values
+     * 
+     * @param min :: The lower bound property in the property browser
+     * @param max :: The upper bound property in the property browser
+     * @param bounds :: The upper and lower bounds to be set
+     */
+    void IndirectBayesTab::setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds)
+    {
+      m_dblManager->setMinimum(min, bounds.first);
+      m_dblManager->setMaximum(min, bounds.second);
+      m_dblManager->setMinimum(max, bounds.first);
+      m_dblManager->setMaximum(max, bounds.second);
+      m_rangeSelector->setRange(bounds.first, bounds.second);
+    }
+
+    /**
+     * Set the position of the guides on the mini plot
+     * 
+     * @param lower :: The lower bound property in the property browser
+     * @param upper :: The upper bound property in the property browser
+     * @param bounds :: The upper and lower bounds to be set
+     */
+    void IndirectBayesTab::setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds)
+    {
+      m_dblManager->setValue(lower, bounds.first);
+      m_dblManager->setValue(upper, bounds.second);
+      m_rangeSelector->setMinimum(bounds.first);
+      m_rangeSelector->setMaximum(bounds.second);
+    }
+
+    /**
+     * Set the position of the lower guide on the mini plot
+     * 
+     * @param lower :: The lower guide property in the property browser
+     * @param upper :: The upper guide property in the property browser
+     * @param value :: The value of the lower guide
+     */
+    void IndirectBayesTab::updateLowerGuide(QtProperty* lower, QtProperty* upper, double value)
+    {
+      // Check if the user is setting the max less than the min
+      if(value > m_dblManager->value(upper))
+      {
+        m_dblManager->setValue(lower, m_dblManager->value(upper));
+      }
+      else
+      {
+        m_rangeSelector->setMinimum(value);
+      }
+    }
+
+    /**
+     * Set the position of the upper guide on the mini plot
+     * 
+     * @param lower :: The lower guide property in the property browser
+     * @param upper :: The upper guide property in the property browser
+     * @param value :: The value of the upper guide
+     */
+    void IndirectBayesTab::updateUpperGuide(QtProperty* lower, QtProperty* upper, double value)
+    {
+      // Check if the user is setting the min greater than the max
+      if(value < m_dblManager->value(lower))
+      {
+        m_dblManager->setValue(upper, m_dblManager->value(lower));
+      }
+      else
+      {
+        m_rangeSelector->setMaximum(value);
+      }
     }
   }
 } // namespace MantidQt

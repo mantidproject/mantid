@@ -99,7 +99,7 @@ namespace MantidQt
 			/// Slot to handle when a user edits a property
 			virtual void updateProperties(QtProperty* prop, double val) = 0;
 			/// Function to set the range selector on the mini plot
-			void setMiniPlotRange(double min, double max);
+			void setMiniPlotGuides(QtProperty* lower, QtProperty* upper, const std::pair<double, double>& bounds);
 
 		protected:
 			/// Function to plot a workspace to the miniplot using a workspace name
@@ -109,10 +109,15 @@ namespace MantidQt
 			/// Function to run a string as python code
 			void runPythonScript(const QString& pyInput);
 			/// Function to read an instrument's resolution from the IPF using a string
-	    double getInstrumentResolution(const QString& filename);
+	    bool getInstrumentResolution(const QString& filename, std::pair<double,double>& res);
 			/// Function to read an instrument's resolution from the IPF using a workspace pointer
-			double getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws);
-
+			bool getInstrumentResolution(Mantid::API::MatrixWorkspace_const_sptr ws, std::pair<double,double>& res);
+			/// Function to set the range limits of the plot
+			void setPlotRange(QtProperty* min, QtProperty* max, const std::pair<double, double>& bounds);
+			/// Function to set the position of the lower guide on the plot
+	    void updateLowerGuide(QtProperty* lower, QtProperty* upper, double value);
+			/// Function to set the position of the upper guide on the plot
+	    void updateUpperGuide(QtProperty* lower, QtProperty* upper, double value);
 			/// Function to get the range of the curve displayed on the mini plot
 			std::pair<double,double> getCurveRange();
 

@@ -42,9 +42,14 @@ namespace MantidQt
 		bool ResNorm::validate()
 		{
 			//check we have files/workspaces available to run with
-			if(m_uiForm.dsResolution->getCurrentDataName().isEmpty() ||
-					m_uiForm.dsVanadium->getCurrentDataName().isEmpty())
+			if(m_uiForm.dsVanadium->getCurrentDataName().isEmpty())
 			{
+				emit showMessageBox("Please correct the following:\n Could not find the specified reduction file");
+				return false;
+			}
+			if(m_uiForm.dsResolution->getCurrentDataName().isEmpty())
+			{
+				emit showMessageBox("Please correct the following:\n Could not find the specified resolution file");
 				return false;
 			}
 
@@ -68,7 +73,7 @@ namespace MantidQt
 			QString VanName = m_uiForm.dsVanadium->getCurrentDataName();
 			QString ResName = m_uiForm.dsResolution->getCurrentDataName();
 
-			//get the parameters for ResNomr
+			// get the parameters for ResNorm
 			QString EMin = m_properties["EMin"]->valueText();
 			QString EMax = m_properties["EMax"]->valueText();
 
@@ -76,7 +81,7 @@ namespace MantidQt
 
 			QString nBin = m_properties["VanBinning"]->valueText();
 
-			//get output options
+			// get output options
 			if(m_uiForm.ckVerbose->isChecked()){ verbose = "True"; }
 			if(m_uiForm.ckPlot->isChecked()){ plot = "True"; }
 			if(m_uiForm.ckSave->isChecked()){ save ="True"; }
@@ -94,65 +99,58 @@ namespace MantidQt
 		 */
 		void ResNorm::handleVanadiumInputReady(const QString& filename)
 		{
-			double res = getInstrumentResolution(filename);
 			plotMiniPlot(filename, 0);
-			std::pair<double, double> range = getCurveRange();
+			std::pair<double,double> res;
+			std::pair<double,double> range = getCurveRange();
 
-			if(res != 0)
+			//Use the values from the instrument parameter file if we can
+			if(getInstrumentResolution(filename, res))
 			{
-				m_dblManager->setValue(m_properties["EMin"], -res);
-				m_dblManager->setValue(m_properties["EMax"], res);
-				setMiniPlotRange(-res, res);
+				setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], res);
 			}
 			else
 			{
-				m_dblManager->setValue(m_properties["EMin"], range.first);
-				m_dblManager->setValue(m_properties["EMax"], range.second);
-				setMiniPlotRange(range.first, range.second);
+				setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], range);
 			}
 
-			m_dblManager->setMinimum(m_properties["EMin"], range.first);
-			m_dblManager->setMaximum(m_properties["EMin"], range.second);
-			m_dblManager->setMinimum(m_properties["EMax"], range.first);
-			m_dblManager->setMaximum(m_properties["EMax"], range.second);
-			m_rangeSelector->setRange(range.first, range.second);
+			setPlotRange(m_properties["EMin"], m_properties["EMax"], range);
 		}
 
+		/**
+		 * Updates the property manager when the lower guide is moved on the mini plot
+		 *
+		 * @param min :: The new value of the lower guide
+		 */
 		void ResNorm::minValueChanged(double min)
     {
       m_dblManager->setValue(m_properties["EMin"], min);
     }
 
+		/**
+		 * Updates the property manager when the upper guide is moved on the mini plot
+		 *
+		 * @param max :: The new value of the upper guide
+		 */
     void ResNorm::maxValueChanged(double max)
     {
 			m_dblManager->setValue(m_properties["EMax"], max);	
     }
 
+		/**
+		 * Handles when properties in the property manager are updated.
+		 *
+		 * @param prop :: The property being updated
+		 * @param val :: The new value for the property
+		 */
     void ResNorm::updateProperties(QtProperty* prop, double val)
     {
     	if(prop == m_properties["EMin"])
     	{
-    		// Check if the user is setting the max less than the min
-    		if(val > m_dblManager->value(m_properties["EMax"]))
-    		{
-    			m_dblManager->setValue(m_properties["EMin"], m_dblManager->value(m_properties["EMax"]));
-    		}
-    		else
-    		{
-					m_rangeSelector->setMinimum(val);
-    		}
+				updateLowerGuide(m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{
-    		// Check if the user is setting the min greater than the max
-    		if(val < m_dblManager->value(m_properties["EMin"]))
-    		{
-    			m_dblManager->setValue(m_properties["EMax"], m_dblManager->value(m_properties["EMin"]));
-    		}
-    		else
-    		{
-    			m_rangeSelector->setMaximum(val);
-    		}
+    		updateUpperGuide(m_properties["EMin"], m_properties["EMax"], val);
 			}
     }
 	} // namespace CustomInterfaces
