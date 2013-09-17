@@ -5,6 +5,7 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
 
+from testhelpers import WorkspaceCreationHelper
 
 class RunPythonScriptTest(unittest.TestCase):
     """
@@ -42,6 +43,19 @@ class RunPythonScriptTest(unittest.TestCase):
         self.assertAlmostEqual(ws_out.dataY(0)[1],10.0, 3)
         self.assertAlmostEqual(ws_out.dataY(0)[2],15.0, 3)
 
+    def test_input_MatrixWorkspace_has_correct_python_type_when_executed(self):
+        code = """from mantid.api import MatrixWorkspace
+if not isinstance(input, MatrixWorkspace): raise RuntimeError("Input workspace is not a MatrixWorkspace in Python: Type=%s" % str(type(input)))
+"""
+        RunPythonScript(InputWorkspace="ws", Code=code)
+
+    def test_input_EventWorkspace_has_correct_python_type_when_executed(self):
+        test_eventws = ConvertToEventWorkspace(InputWorkspace='ws')
+        code = """from mantid.api import IEventWorkspace
+if not isinstance(input, IEventWorkspace): raise RuntimeError("Input workspace is not an IEventWorkspace in Python: Type=%s" % str(type(input)))
+"""
+        RunPythonScript(InputWorkspace=test_eventws, Code=code)
+        
     # Properties handle MDWorkspace types.
     def test_withMDWorkspace(self):
         CreateMDWorkspace(OutputWorkspace="ws", Dimensions='1', Extents='-10,10', Names='x', Units='m')
@@ -49,6 +63,12 @@ class RunPythonScriptTest(unittest.TestCase):
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace='ws_out')
         ws_out = mtd['ws_out']
         self.assertTrue(isinstance(ws_out, IMDWorkspace))
+
+        # Check type
+        code = """from mantid.api import IMDEventWorkspace
+if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace is not an IMDHistoWorkspace in Python: Type=%s" % str(type(input)))
+"""
+        RunPythonScript(InputWorkspace=mtd['ws'], Code=code)
         
     def test_withNoInputWorkspace(self):
         c = RunPythonScript(Code="output = CreateSingleValuedWorkspace(DataValue='1')")

@@ -10,6 +10,7 @@ names 'input' & 'output' respectively.
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
+#include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/python/exec.hpp>
@@ -123,11 +124,34 @@ namespace Mantid
       using namespace API;
       using namespace boost::python;
 
-      // Local context (no GIL required to build)
-      auto locals = buildLocals();
-      executeScript(script, locals);
-
+      auto locals = doExecuteScript(script);
       return extractOutputWorkspace(locals);
+    }
+
+    /**
+     * Uses the __main__ object to define the globals context and together with the given locals
+     * dictionary executes the script. The GIL is acquired and released during this call
+     * @param script The script code
+     * @returns A dictionary defining the input & output variables
+     */
+    boost::python::dict RunPythonScript::doExecuteScript(const std::string & script) const
+    {
+      // Execution
+      Environment::GlobalInterpreterLock gil;
+      // Retrieve the main module.
+      auto main = boost::python::import("__main__");
+      // Retrieve the main module's namespace
+      boost::python::object globals(main.attr("__dict__"));
+      boost::python::dict locals = buildLocals();
+      try
+      {
+        boost::python::exec(script.c_str(), globals, locals);
+      }
+      catch(boost::python::error_already_set &)
+      {
+        Environment::throwRuntimeError();
+      }
+      return locals;
     }
 
     /**
@@ -149,8 +173,13 @@ namespace Mantid
       API::Workspace_sptr inputWS = getProperty("InputWorkspace");
       if(inputWS)
       {
-        const converter::registration *entry = converter::registry::query(typeid(API::Workspace_sptr));
-        locals["input"] = object(handle<>(entry->to_python((const void *)&inputWS)));
+        // We have a generic workspace ptr but the Python needs to see the derived type so
+        // that it can access the appropriate methods for that instance
+        // The downcast_returned_value policy is already in place for this and is used in many
+        // method exports as part of a return_value_policy struct.
+        // It is called manually here.
+        typedef typename Policies::downcast_returned_value::apply<API::Workspace_sptr>::type WorkspaceDowncaster;
+        locals["input"] = object(handle<>(WorkspaceDowncaster()(inputWS)));
       }
       std::string outputWSName = getPropertyValue("OutputWorkspace");
       if(!outputWSName.empty())
@@ -160,30 +189,6 @@ namespace Mantid
       return locals;
     }
 
-    /**
-     * Uses the __main__ object to define the globals context and together with the given locals
-     * dictionary executes the script. The GIL is acquired and released during this call
-     * @param script The script code
-     * @param locals A dictionary defining the input & output variables (this may get modified)
-     * @return A pointer giving the output workspace
-     */
-    void RunPythonScript::executeScript(const std::string & script, boost::python::dict & locals) const
-    {
-      // Execution
-      Environment::GlobalInterpreterLock gil;
-      // Retrieve the main module.
-      auto main = boost::python::import("__main__");
-      // Retrieve the main module's namespace
-      boost::python::object globals(main.attr("__dict__"));
-      try
-      {
-        boost::python::exec(script.c_str(), globals, locals);
-      }
-      catch(boost::python::error_already_set &)
-      {
-        Environment::throwRuntimeError();
-      }
-    }
 
     /**
      * If an output workspace was created then extract it from the given dictionary

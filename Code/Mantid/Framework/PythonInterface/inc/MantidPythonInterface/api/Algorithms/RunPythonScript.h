@@ -50,10 +50,10 @@ namespace Mantid
       std::string scriptCode() const;
       /// Sets up the code context & executes it
       boost::shared_ptr<API::Workspace> executeScript(const std::string & script) const;
+      /// Execute the code in the given local context
+      boost::python::dict doExecuteScript(const std::string & script) const;
       /// Builds the local dictionary that defines part of the execution context of the script
       boost::python::dict buildLocals() const;
-      /// Execute the code in the given local context
-      void executeScript(const std::string & script, boost::python::dict & locals) const;
       /// Extracts any output workspace pointer that was created
       boost::shared_ptr<API::Workspace> extractOutputWorkspace(const boost::python::dict & locals) const;
     };
