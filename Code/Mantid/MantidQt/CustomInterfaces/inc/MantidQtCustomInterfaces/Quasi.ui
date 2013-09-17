@@ -71,7 +71,7 @@
        </property>
        <property name="fileBrowserSuffixes" stdset="0">
         <stringlist>
-         <string>_res</string>
+         <string>_res.nxs</string>
         </stringlist>
        </property>
        <property name="showLoad">

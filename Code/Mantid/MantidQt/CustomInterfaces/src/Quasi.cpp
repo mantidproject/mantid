@@ -86,6 +86,8 @@ namespace MantidQt
 			QString useResNorm("0");
 			QString resNormFile("");
 
+			QString background("0");
+
 			QString pyInput = 
 				"from IndirectBayes import QLRun\n";
 
@@ -94,12 +96,12 @@ namespace MantidQt
 			QString program = m_uiForm.cbProgram->currentText();
 
 			// Collect input from fit options section
-			QString background = m_uiForm.cbBackground->currentText();
-			if(background == "Sloping")
+			QString backgroundTxt = m_uiForm.cbBackground->currentText();
+			if(backgroundTxt == "Sloping")
 			{
 				background = "2";
 			}
-			else if( background == "Flat")
+			else if( backgroundTxt == "Flat")
 			{
 				background = "1";
 			}
