@@ -189,7 +189,7 @@ namespace Mantid
 
       // Might be None, string or a workspace object
       object pyoutput = locals["output"];
-      if(pyoutput.is_none()) return Workspace_sptr();
+      if(pyoutput.ptr() == Py_None) return Workspace_sptr();
 
       extract<Workspace_sptr> workspaceExtractor(pyoutput);
       if(workspaceExtractor.check())
