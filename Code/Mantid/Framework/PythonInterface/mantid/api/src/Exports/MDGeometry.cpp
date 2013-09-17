@@ -1,7 +1,7 @@
 #include "MantidAPI/MDGeometry.h"
-#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
-
+#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
+#include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/list.hpp>
@@ -9,8 +9,9 @@
 
 using Mantid::API::MDGeometry;
 using Mantid::Geometry::IMDDimension_const_sptr;
-using Mantid::PythonInterface::Policies::VectorToNumpy;
 using Mantid::PythonInterface::Policies::downcast_returned_value;
+using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
+using Mantid::PythonInterface::Policies::VectorToNumpy;
 using namespace boost::python;
 
 namespace
@@ -26,11 +27,9 @@ namespace
     auto dimensions = self.getNonIntegratedDimensions();
 
     boost::python::list nonIntegrated;
-    //auto converter = boost::python::to_python_value<IMDDimension_const_sptr>();
     for(auto it = dimensions.begin(); it != dimensions.end(); ++it)
     {
-      //auto item = converter(*it);
-      nonIntegrated.append(*it);
+      nonIntegrated.append(boost::const_pointer_cast<Mantid::Geometry::IMDDimension>(*it));
     }
     return nonIntegrated;
   }
@@ -42,10 +41,10 @@ void export_MDGeometry()
   class_<MDGeometry,boost::noncopyable>("MDGeometry", no_init)
     .def("getNumDims", &MDGeometry::getNumDims, "Returns the number of dimensions present")
 
-    .def("getDimension", &MDGeometry::getDimension, (args("index")),
+    .def("getDimension", &MDGeometry::getDimension, (args("index")), return_value_policy<RemoveConstSharedPtr>(),
          "Returns the description of the dimension at the given index (starts from 0). Raises RuntimeError if index is out of range.")
 
-    .def("getDimensionWithId", &MDGeometry::getDimensionWithId, (args("id")),
+    .def("getDimensionWithId", &MDGeometry::getDimensionWithId, (args("id")), return_value_policy<RemoveConstSharedPtr>(),
          "Returns the description of the dimension with the given id string. Raises ValueError if the string is not a known id.")
 
     .def("getDimensionIndexByName", &MDGeometry::getDimensionIndexByName, (args("name")),
@@ -60,16 +59,16 @@ void export_MDGeometry()
     .def("estimateResolution", &MDGeometry::estimateResolution, return_value_policy<VectorToNumpy>(),
          "Returns a numpy array containing the width of the smallest bin in each dimension")
 
-    .def("getXDimension", &MDGeometry::getXDimension,
+    .def("getXDimension", &MDGeometry::getXDimension, return_value_policy<RemoveConstSharedPtr>(),
          "Returns the dimension description mapped to X")
 
-    .def("getYDimension", &MDGeometry::getYDimension,
+    .def("getYDimension", &MDGeometry::getYDimension, return_value_policy<RemoveConstSharedPtr>(),
          "Returns the dimension description mapped to Y")
 
-    .def("getZDimension", &MDGeometry::getZDimension,
+    .def("getZDimension", &MDGeometry::getZDimension, return_value_policy<RemoveConstSharedPtr>(),
           "Returns the dimension description mapped to Z")
 
-    .def("getTDimension", &MDGeometry::getTDimension,
+    .def("getTDimension", &MDGeometry::getTDimension, return_value_policy<RemoveConstSharedPtr>(),
          "Returns the dimension description mapped to time")
 
     .def("getGeometryXML", &MDGeometry::getGeometryXML,
