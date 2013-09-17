@@ -18,7 +18,7 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-
+class LineViewerCurve; // Forward dec curve class
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER LineViewer : public QWidget
 {
     Q_OBJECT
@@ -65,6 +65,7 @@ private:
     void updateStartEnd();
     void updateBinWidth();
     void readTextboxes();
+    bool isLogScaledY() const;
 
 public slots:
     void startEndTextEdited();
@@ -78,6 +79,7 @@ public slots:
     void textBinWidth_changed();
     void refreshPlot();
     void lineIntegrationComplete(bool error);
+    void onToggleLogYAxis();
 
 signals:
     /// Signal emitted when the planar width changes
@@ -106,10 +108,10 @@ private:
     QwtPlot * m_plot;
 
     /// Curve of the preview
-    QwtPlotCurve * m_previewCurve;
+    LineViewerCurve * m_previewCurve;
 
     /// Curve of the full integrated
-    QwtPlotCurve * m_fullCurve;
+    LineViewerCurve * m_fullCurve;
 
     /// Vector of labels with the dimension names
     QVector<QLabel *> m_dimensionLabel;
