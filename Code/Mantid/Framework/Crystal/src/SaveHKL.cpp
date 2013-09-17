@@ -102,6 +102,8 @@ namespace Crystal
 
     declareProperty("AppendFile", false, "Append to file if true.\n"
       "If false, new file (default).");
+    declareProperty("ApplyAnvredCorrections", false, "Apply anvred corrections to peaks if true.\n"
+      "If false, no corrections during save (default).");
 
     std::vector<std::string> exts;
     exts.push_back(".hkl");
@@ -202,7 +204,7 @@ namespace Crystal
       double transmission = absor_sphere(scattering, lambda, tbar);
       if(dsp < dMin || lambda < wlMin || lambda > wlMax) continue;
 
-      // Anvred write from Art Schultz
+      // Anvred write from Art Schultz/
       //hklFile.write('%4d%4d%4d%8.2f%8.2f%4d%8.4f%7.4f%7d%7d%7.4f%4d%9.5f%9.4f\n' 
       //    % (H, K, L, FSQ, SIGFSQ, hstnum, WL, TBAR, CURHST, SEQNUM, TRANSMISSION, DN, TWOTH, DSP))
       // HKL is flipped by -1 due to different q convention in ISAW vs mantid.
@@ -210,11 +212,23 @@ namespace Crystal
       out <<  std::setw( 4 ) << Utils::round(-p.getH())
           <<  std::setw( 4 ) << Utils::round(-p.getK())
           <<  std::setw( 4 ) << Utils::round(-p.getL());
+      double correc = scaleFactor;
+      bool correctPeaks = getProperty("ApplyAnvredCorrections");
+      if(correctPeaks)
+      {
+		  double sinsqt = std::pow(lambda/(2.0*dsp),2);
+		  double eff = 1.0;
+		  double wl4 = std::pow(lambda,4);
+		  double cmonx = 1.0;
+		  if(p.getMonitorCount() > 0) cmonx = 1e6 / p.getMonitorCount();
+		  double spect = 1; // need to read in spectra
+		  correc = scaleFactor*( sinsqt * cmonx ) / ( wl4*spect*eff )/transmission;
+      }
 
       // SHELX can read data without the space between the l and intensity
-      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getIntensity();
+      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << correc*p.getIntensity();
 
-      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << scaleFactor*p.getSigmaIntensity();
+      out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << correc*p.getSigmaIntensity();
 
       if (bank != bankold) firstrun++;
       out << std::setw( 4 ) << firstrun;
