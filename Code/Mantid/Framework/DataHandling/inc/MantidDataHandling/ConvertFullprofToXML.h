@@ -1,8 +1,8 @@
 #ifndef MANTID_DATAHANDLING_CONVERTFULLPROFTOXML_H_
 #define MANTID_DATAHANDLING_CONVERTFULLPROFTOXML_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid
 {
@@ -57,14 +57,8 @@ namespace DataHandling
     /// Load file to a vector of strings
     void loadFile(std::string filename, std::vector<std::string>& lines);
 
-    /// Scan imported file for bank information
-    void scanBanks(const std::vector<std::string>& lines, std::vector<int>& banks,
-                   std::map<int, int> &bankstartindexmap, std::map<int, int> &bankendindexmap);
-
-    /// Parse .irf file to a map
-    void parseResolutionStrings(std::map<std::string, double>& parammap, const std::vector<std::string>& lines, int bankid, int startlineindex, int endlineindex);
-    
-    void parseBankLine(std::string line, double& cwl, int& bankid);
+    /// Get row numbers of the parameters in the table workspace
+    void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);
 
   };
 

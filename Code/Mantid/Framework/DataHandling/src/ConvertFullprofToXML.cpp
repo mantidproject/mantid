@@ -6,16 +6,7 @@ Convert the initial fitting parameters in a Fullprof file to XML format in an [[
 #include "MantidDataHandling/ConvertFullprofToXML.h"
 #include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
-
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/iter_find.hpp>
-#include <boost/algorithm/string/finder.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 
 #include <fstream>
 
@@ -24,9 +15,6 @@ Convert the initial fitting parameters in a Fullprof file to XML format in an [[
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-
-using namespace Poco::XML;
-
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
@@ -34,16 +22,12 @@ using namespace Poco::XML;
 #include <Poco/DOM/NodeFilter.h>
 
 
-using namespace Mantid;
-using namespace Mantid::API;
-using namespace Mantid::DataObjects;
-using namespace Mantid::Kernel;
-using namespace std;
-
 namespace Mantid
 {
 namespace DataHandling
 {
+  using namespace API;
+  using namespace Poco::XML;
 
   DECLARE_ALGORITHM(ConvertFullprofToXML)
 
@@ -78,14 +62,14 @@ namespace DataHandling
   void ConvertFullprofToXML::init()
   {
     // Input file name
-    vector<std::string> exts;
+    std::vector<std::string> exts;
     exts.push_back(".irf");
     exts.push_back(".prf");
     declareProperty(new FileProperty("InputFilename", "", FileProperty::Load, exts),
         "Path to an Fullprof file to load.");
 
     // Output file
-    vector<std::string> extso;
+    std::vector<std::string> extso;
     extso.push_back(".xml");
     declareProperty(new FileProperty("OutputFilename", "", FileProperty::Save, extso),
       "The name to give to the parameter file.");
@@ -99,15 +83,13 @@ namespace DataHandling
   void ConvertFullprofToXML::exec()
   {
     // Get input
-    string datafile = getProperty("InputFilename");
+    std::string datafile = getProperty("InputFilename");
     // Get Output
-    string paramfile = getProperty("OutputFilename");
+    std::string paramfile = getProperty("OutputFilename");
 
     //vector<int> outputbankids = getProperty("Banks");
 
     // Load with LoadFullprofResolution
-    //LoadFullprofResolution loader;
-    //loader.initialize();
     auto loader = createChildAlgorithm("LoadFullprofResolution");
     loader->setProperty("Filename",datafile);
     loader->executeAsChildAlg();
@@ -142,6 +124,12 @@ namespace DataHandling
     rootElem->setAttribute("date", ISOdateShort);
     mDoc->appendChild(rootElem);
 
+    // Add instrument
+    Element* instrumentElem = mDoc->createElement("component-link");
+    instrumentElem->setAttribute("name","wholeInstrument");
+    rootElem->appendChild(instrumentElem);
+
+    // Add banks
     if(paramTable->columnCount() < 2){
       throw std::runtime_error("No banks found");
     }
@@ -151,13 +139,34 @@ namespace DataHandling
     {
       std::ostringstream bankName;
       bankName << "Bank" << (i+1);
-      Element* bankElem = mDoc->createElement(bankName.str());
+      Element* bankElem = mDoc->createElement("component-link");
+      bankElem->setAttribute("name",bankName.str());
       rootElem->appendChild(bankElem);
     }
 
 
     // Write document structure into file
     writer.writeNode(outFile, mDoc);
+
+    return;
+  }
+
+  /* This function fills in a list of the row numbers starting 0 of the parameters
+     in the table workspace, so one can find the position in a column of
+     the value of the given parameter.
+  */
+  void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap)
+  {
+    parammap.clear();
+
+    size_t numrows = tablews->rowCount();
+    for (size_t i = 0; i < numrows; ++i)
+    {
+      TableRow row = tablews->getRow(i);
+      std::string name;
+      row >> name;
+      parammap.insert(std::make_pair(name, i));
+    }
 
     return;
   }
