@@ -58,9 +58,10 @@ using namespace Geometry;
                  2.0,0.0,0.0,0.0,0.0,0.0,
                  3.104279270,0.0,0.0,0.0,0.0,0.0 };
 
-  static const double  H_ES  = PhysicalConstants::h * 1e7;     // h in erg seconds
-  static const double  MN_KG = PhysicalConstants::NeutronMass;  // mass of neutron(kg)
-  static const double  ANGST_PER_US_PER_M = H_ES/MN_KG/1000.;
+  static const double H_ES  = PhysicalConstants::h * 1e7;     ///< h in erg seconds
+  static const double MN_KG = PhysicalConstants::NeutronMass;  ///< mass of neutron(kg)
+  static const double ANGST_PER_US_PER_M = H_ES/MN_KG/1000.;
+  static const double LAMBDA_REF = 1.81; ///< Wavelength that the calculations are based on
 
 /**
  * Initialize the properties to default values
@@ -91,11 +92,15 @@ void MultipleScatteringCylinderAbsorption::exec()
   double coeff2     = getProperty("SampleNumberDensity");
   double coeff3     = getProperty("ScatteringXSection");
   const Material& sampleMaterial = in_WS->sample().getMaterial();
-  if( sampleMaterial.totalScatterXSection(1.81) != 0.0)
+  if( sampleMaterial.totalScatterXSection(LAMBDA_REF) != 0.0)
   {
-    if (coeff2 == 0.0721) coeff2 =  sampleMaterial.numberDensity();
-    if (coeff3 == 5.1) coeff3 =  sampleMaterial.totalScatterXSection(1.81);
-    if (coeff1 == 2.8) coeff1 = sampleMaterial.absorbXSection(1.81);
+    g_log.information() << "Using material \"" << sampleMaterial.name() << "\" from workspace\n";
+    if (coeff1 == 2.8)
+      coeff1 = sampleMaterial.absorbXSection(LAMBDA_REF)/LAMBDA_REF;
+    if ((coeff2 == 0.0721) && (!isEmpty(sampleMaterial.numberDensity())))
+      coeff2 = sampleMaterial.numberDensity();
+    if (coeff3 == 5.1)
+      coeff3 =  sampleMaterial.totalScatterXSection(LAMBDA_REF);
   }
   else  //Save input in Sample with wrong atomic number and name
   {
@@ -104,6 +109,8 @@ void MultipleScatteringCylinderAbsorption::exec()
     Material mat("SetInMultipleScattering", neutron, coeff2);
     in_WS->mutableSample().setMaterial(mat);
   }
+  g_log.debug() << "radius=" << radius << " coeff1=" << coeff1 << " coeff2=" << coeff2
+                << " coeff3=" << coeff3 << "\n";
 
   // geometry stuff
   size_t nHist = in_WS->getNumberHistograms();
