@@ -8,6 +8,7 @@ names 'input' & 'output' respectively.
 *WIKI*/
 
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
+#include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -174,7 +175,14 @@ namespace Mantid
       auto main = boost::python::import("__main__");
       // Retrieve the main module's namespace
       boost::python::object globals(main.attr("__dict__"));
-      boost::python::exec(script.c_str(), globals, locals);
+      try
+      {
+        boost::python::exec(script.c_str(), globals, locals);
+      }
+      catch(boost::python::error_already_set &)
+      {
+        Environment::throwRuntimeError();
+      }
     }
 
     /**
