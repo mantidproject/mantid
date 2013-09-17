@@ -198,12 +198,7 @@ double MantidQwtIMDWorkspaceData::x(size_t i) const
 */
 double MantidQwtIMDWorkspaceData::y(size_t i) const
 {
-  Mantid::signal_t tmp = m_Y[i];
-  if (m_logScale && tmp <= 0.)
-  {
-    tmp = m_minPositive;
-  }
-  return tmp;
+  return m_Y[i];
 }
 
 /// Returns the x position of the error bar for the i-th data point (bin)
@@ -215,15 +210,7 @@ double MantidQwtIMDWorkspaceData::ex(size_t i) const
 /// Returns the error of the i-th data point
 double MantidQwtIMDWorkspaceData::e(size_t i) const
 {
-  if (m_logScale)
-    {
-      if (m_Y[i] <= 0.0)
-        return 0;
-      else
-        return m_E[i];
-    }
-    else
-      return m_E[i];
+  return m_E[i];
 }
 
 /// Number of error bars to plot

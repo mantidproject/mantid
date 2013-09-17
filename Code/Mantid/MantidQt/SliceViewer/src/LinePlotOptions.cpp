@@ -19,7 +19,6 @@ LinePlotOptions::LinePlotOptions(QWidget *parent)
   QObject::connect(ui.radNoNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
   QObject::connect(ui.radNumEventsNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
   QObject::connect(ui.radVolumeNormalization, SIGNAL(toggled(bool)), this, SLOT(radNormalization_changed()));
-  QObject::connect(ui.ckLog10, SIGNAL(toggled(bool)), this, SLOT(onYScalingChanged()));
 }
 
 LinePlotOptions::~LinePlotOptions()
@@ -173,22 +172,5 @@ void LinePlotOptions::radNormalization_changed()
     m_normalize = Mantid::API::NoNormalization;
   // Send out a signal
   emit changedNormalization();
-}
-
-/**
- * Handler for changes to the Y-axis log scale.
- */
-void LinePlotOptions::onYScalingChanged()
-{
-  emit changedYLogScaling();
-}
-
-/**
- * Getter for the currently set option of the isLogScaled control.
- * @return
- */
-bool LinePlotOptions::isLogScaledY() const
-{
-  return ui.ckLog10->isChecked();
 }
 
