@@ -9,6 +9,8 @@
 #include <QIntValidator>
 #include <qwt_plot_curve.h>
 #include <qwt_plot.h>
+#include <qwt_scale_engine.h>
+#include <qwt_scale_div.h>
 #include "MantidQtAPI/MantidQwtIMDWorkspaceData.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
@@ -26,6 +28,71 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
+
+  /**
+   * Custom QwtPlotCurve to support log scaling in LineViewer plotting.
+   */
+  class LineViewerCurve: public QwtPlotCurve
+    {
+    public:
+
+    /**
+     * Constructor
+     * @param curveTitle : Title for the curve
+     * @param logScale : Log scaling, default to false.
+     */
+    LineViewerCurve(const QString& curveTitle, bool logScale = false ) : m_logScale(logScale),
+          QwtPlotCurve(curveTitle)
+      {
+      }
+
+      /**
+       * Create a bounding rectangle.
+       * @return
+       */
+      virtual QwtDoubleRect boundingRect() const
+      {
+        if (m_boundingRect.isNull())
+        {
+          const QwtData& data = this->data();
+          if (data.size() == 0) return QwtDoubleRect(0,0,1,1);
+          double y_min = std::numeric_limits<double>::infinity();
+          double y_max = -y_min;
+          for(size_t i=0;i<data.size();++i)
+          {
+            double y = data.y(i);
+            if (y == std::numeric_limits<double>::infinity() || y != y) continue;
+            if (y < y_min && (!m_logScale || y > 0.)) y_min = y;
+            if (y > y_max) y_max = y;
+          }
+          double x_min = data.x(0);
+          double x_max = data.x(data.size()-1);
+          m_boundingRect = QwtDoubleRect(x_min,y_min,x_max-x_min,y_max-y_min);
+        }
+        return m_boundingRect;
+      }
+
+      /**
+       * Setter for the log scaling
+       * @param logScale
+       */
+      void setLogScale(bool logScale)
+      {
+        m_logScale = logScale;
+      }
+
+      /**
+       * Destructor
+       */
+      virtual ~LineViewerCurve()
+      {
+      }
+
+    private:
+      /// The bounding rect used by qwt to set the axes
+        mutable QwtDoubleRect m_boundingRect;
+        bool m_logScale;
+    };
 
 
 LineViewer::LineViewer(QWidget *parent)
@@ -49,8 +116,8 @@ LineViewer::LineViewer(QWidget *parent)
   m_plotLayout->addWidget(m_plot, 1);
 
   // Make the 2 curves
-  m_previewCurve = new QwtPlotCurve("Preview");
-  m_fullCurve = new QwtPlotCurve("Integrated");
+  m_previewCurve = new LineViewerCurve("Preview Plot");
+  m_fullCurve = new LineViewerCurve("Full Plot");
   m_previewCurve->attach(m_plot);
   m_fullCurve->attach(m_plot);
   m_previewCurve->setVisible(false);
@@ -78,6 +145,7 @@ LineViewer::LineViewer(QWidget *parent)
 
   QObject::connect(m_lineOptions, SIGNAL(changedPlotAxis()), this, SLOT(refreshPlot()));
   QObject::connect(m_lineOptions, SIGNAL(changedNormalization()), this, SLOT(refreshPlot()));
+  QObject::connect(m_lineOptions, SIGNAL(changedYLogScaling()), this, SLOT(onToggleLogYAxis()));
 }
 
 LineViewer::~LineViewer()
@@ -948,7 +1016,7 @@ int LineViewer::getPlotAxis() const
  * using the current parameters. */
 void LineViewer::showPreview()
 {
-  MantidQwtIMDWorkspaceData curveData(m_ws, false,
+  MantidQwtIMDWorkspaceData curveData(m_ws, isLogScaledY(),
       m_start, m_end, m_lineOptions->getNormalization());
   curveData.setPreviewMode(true);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
@@ -974,11 +1042,20 @@ Gets the dimension index corresponding to the lineviewers preview plot x axis.
 */
 int LineViewer::getXAxisDimensionIndex() const
 {
-  MantidQwtIMDWorkspaceData curveData(m_ws, false,
+  MantidQwtIMDWorkspaceData curveData(m_ws, isLogScaledY(),
       m_start, m_end, m_lineOptions->getNormalization());
   curveData.setPreviewMode(true);
   curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
   return curveData.currentPlotXAxis();
+}
+
+/**
+ * Getter for the log scaled status.
+ * @return True if and only if the y-axis is log scaled.
+ */
+bool LineViewer::isLogScaledY() const
+{
+  return m_lineOptions->isLogScaledY();
 }
 
 //-----------------------------------------------------------------------------
@@ -991,7 +1068,7 @@ void LineViewer::showFull()
   MatrixWorkspace_const_sptr sliceMatrix = boost::dynamic_pointer_cast<const MatrixWorkspace>(m_sliceWS);
   if (sliceMatrix)
   {
-    MantidQwtMatrixWorkspaceData curveData(sliceMatrix, 0, false /*not logScale*/);
+    MantidQwtMatrixWorkspaceData curveData(sliceMatrix, 0, isLogScaledY());
     m_fullCurve->setData(curveData);
     Unit_const_sptr unit = sliceMatrix->getAxis(0)->unit();
     std::string title = unit->caption() + " (" + unit->label() + ")";
@@ -1001,7 +1078,7 @@ void LineViewer::showFull()
   }
   else
   {
-    MantidQwtIMDWorkspaceData curveData(m_sliceWS, false,
+    MantidQwtIMDWorkspaceData curveData(m_sliceWS, isLogScaledY(),
         VMD(), VMD(), m_lineOptions->getNormalization());
     curveData.setPreviewMode(false);
     curveData.setPlotAxisChoice(m_lineOptions->getPlotAxis());
@@ -1034,6 +1111,45 @@ void LineViewer::refreshPlot()
     showFull();
 }
 
+void LineViewer::onToggleLogYAxis()
+{
+  const QwtScaleDiv *div = m_plot->axisScaleDiv(QwtPlot::yLeft);
+  double from = div->lowerBound();
+  double to = div->upperBound();
+  const bool logScaled = m_lineOptions->isLogScaledY();
+  QwtScaleEngine* engine = NULL;
+  double yPositiveMin = 0;
+  LineViewerCurve* curve = m_previewCurve;
+  if (m_fullCurve->isVisible())
+  {
+    curve = m_fullCurve;
+  }
+  if (logScaled)
+  {
+    engine = new QwtLog10ScaleEngine();
+
+    yPositiveMin = to;
+    int n = curve->dataSize();
+    for (int i = 0; i < n; ++i)
+    {
+      double y = curve->y(i);
+      if (y > 0 && y < yPositiveMin)
+      {
+        yPositiveMin = y;
+      }
+    }
+  }
+  else
+  {
+    engine = new QwtLinearScaleEngine();
+    yPositiveMin = from;
+  }
+  curve->setLogScale(logScaled);
+  m_plot->setAxisScaleEngine(QwtPlot::yLeft, engine);
+  m_plot->setAxisScale(QwtPlot::yLeft, yPositiveMin, to);
+  refreshPlot(); // Data should now be log scale.
+  m_plot->replot();
+}
 
 } // namespace
 }
