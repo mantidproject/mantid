@@ -4,6 +4,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace.h"
 
+#include <Poco/DOM/Element.h>
+
 namespace Mantid
 {
 namespace DataHandling
@@ -56,6 +58,12 @@ namespace DataHandling
 
     /// Load file to a vector of strings
     void loadFile(std::string filename, std::vector<std::string>& lines);
+
+    /// Add an ALFBE parameter 
+    void addALFBEparameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string paramName);
+
+    // Translate a parameter name from as it appears in the table workspace to its name in the XML file
+    std::string getXMLParameterName( const std::string name );
 
     /// Get row numbers of the parameters in the table workspace
     void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);

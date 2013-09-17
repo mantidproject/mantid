@@ -128,6 +128,7 @@ namespace DataHandling
     Element* instrumentElem = mDoc->createElement("component-link");
     instrumentElem->setAttribute("name","wholeInstrument");
     rootElem->appendChild(instrumentElem);
+    addALFBEparameter( paramTable, mDoc, instrumentElem, "Alph0");
 
     // Add banks
     if(paramTable->columnCount() < 2){
@@ -151,11 +152,36 @@ namespace DataHandling
     return;
   }
 
+  /* Add an ALFBE parameter to the XML document according to the table workspace
+  *
+  *  paramName is the name of the parameter as it appears in the table workspace
+  */
+  void ConvertFullprofToXML::addALFBEparameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Element* parent, const std::string paramName)
+  {
+     Element* parameterElem = mDoc->createElement("parameter");
+     parameterElem->setAttribute("name", getXMLParameterName(paramName));
+     parameterElem->setAttribute("type","fitting");
+     parent->appendChild(parameterElem);
+  }
+
+  /*
+  *  Get the XML name of a parameter given its Table Workspace name
+  */
+  std::string ConvertFullprofToXML::getXMLParameterName( const std::string name )
+  {
+    std::string prefix = "IkedaCarpenterPV:";
+    if(name == "Alph0") return prefix+"Alpha0";
+    if(name == "Beta0") return prefix+"Beta0";
+    if(name == "Alph1") return prefix+"Alpha1";
+    if(name == "Beta1") return prefix+"Kappa";
+    return "?"+name;
+  }
+
   /* This function fills in a list of the row numbers starting 0 of the parameters
      in the table workspace, so one can find the position in a column of
      the value of the given parameter.
   */
-  void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap)
+  void ConvertFullprofToXML::getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap)
   {
     parammap.clear();
 
