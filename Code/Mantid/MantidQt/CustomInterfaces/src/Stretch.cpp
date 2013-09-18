@@ -34,8 +34,13 @@ namespace MantidQt
 
 			//default values
 			m_dblManager->setValue(m_properties["Sigma"], 50);
+			m_dblManager->setMinimum(m_properties["Sigma"], 1);
+			m_dblManager->setMaximum(m_properties["Sigma"], 200);
 			m_dblManager->setValue(m_properties["Beta"], 50);
+			m_dblManager->setMinimum(m_properties["Beta"], 1);
+			m_dblManager->setMaximum(m_properties["Beta"], 200);
 			m_dblManager->setValue(m_properties["SampleBinning"], 1);
+			m_dblManager->setMinimum(m_properties["SampleBinning"], 1);
 
 			//Connect the data selector for the sample to the mini plot
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
