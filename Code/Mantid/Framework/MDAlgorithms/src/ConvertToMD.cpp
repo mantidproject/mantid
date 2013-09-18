@@ -4,6 +4,7 @@
 
 The algorithm uses [[Unit_Factory|Unit Factory ]] and existing unit conversion procedures from input Workspace Units to the Units, necessary for transformation into correspondent MD Event workspace. It also uses [[PreprocessDetectorsToMD]] algorithm to help with transformation to reciprocal space.
 
+If min, max or both lists of values (properties 12 and 13) for the algorithm are not specified, [[ConvertToMDHelper]] is used to estimate missing min-max values. This algorithm is also used to calculate min-max values if specified min-max values are deemed incorrect (e.g. less values then dimensions or some min values are bigger then max values)
 == Notes ==
 <ol>
 <li> For elastic analysis (<math> dEAnalysisMode=Elastic</math>) the target [[units|unit]] is momentum <math>k</math>.
