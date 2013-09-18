@@ -22,18 +22,17 @@ def combineDataMulti(wksp_list,output_wksp,beg_overlap,end_overlap,Qmin,Qmax,bin
 	"""
 
 	# check if overlaps have correct number of entries
+	defaultoverlaps = False
 	if type(beg_overlap) != list:
 		beg_overlap = [beg_overlap]
 	if type(end_overlap) != list:
 		end_overlap = [end_overlap]
 	if len(wksp_list) != len(beg_overlap):
 		print "Using default values!"
-		defaultoverlaps = 1
-	else:
-		defaultoverlaps = 0
+		defaultoverlaps = True
 		
     #copy first workspace into temporary wksp 'currentSum'
-	currentSum = CropWorkspace(InputWorkspace=wksp_list[0])
+	currentSum = mtd[wksp_list[0]]
 	print "Length: ",len(wksp_list), wksp_list
 	
 	for i in range(0,len(wksp_list)-1):
@@ -46,35 +45,22 @@ def combineDataMulti(wksp_list,output_wksp,beg_overlap,end_overlap,Qmin,Qmax,bin
 			overlapLow = beg_overlap[i+1]
 			overlapHigh = end_overlap[i]
 			
-        #check if multiperiod
+        #check if multi-period
 		if isinstance(currentSum, WorkspaceGroup):
-			tempwksp,sf = combine2('currentSum_'+str(which_period),wksp_list[i+1]+'_'+str(which_period),'_currentSum',overlapLow,overlapHigh,Qmin,Qmax,binning,scale_high)
-            #if (sum(mtd['currentSum_2'].dataY(0))):
-			print tempwksp, sf
-			
-			DeleteWorkspace("_currentSum")
-			#CropWorkspace(wksp_list[0],'currentSum')
-			print wksp_list
-			combine2(currentSum.name(),wksp_list[i+1],'temp',overlapLow,overlapHigh,Qmin,Qmax,binning,scale_high,sf)
-			currentSum=CropWorkspace(InputWorkspace='temp')
-			DeleteWorkspace("temp")
+			raise RuntimeError("combineMulti, does not support multi-period input workspaces")
 		else:
 			print "Iteration",i
 			currentSum, scale_factor = stitch2(currentSum, mtd[wksp_list[i+1]], currentSum.name(), overlapLow, overlapHigh, Qmin, Qmax, binning, scale_high)
 	RenameWorkspace(InputWorkspace=currentSum.name(),OutputWorkspace=output_wksp)
+	
+	# Remove any existing workspaces from the workspace list.
 	if not keep:
 		names = mtd.getObjectNames()
 		for ws in wksp_list:
-			#print ws.rstrip("_binned")
 			candidate = ws
 			if candidate in names: 
 				DeleteWorkspace(candidate)
-			candidate = ws.rstrip("_IvsQ_binned")+"_IvsLam"
-			if  candidate in names:
-				DeleteWorkspace(candidate)
-			candidate = ws.rstrip("_IvsQ_binned")+"_IvsQ"
-			if candidate in names:
-				DeleteWorkspace(candidate)
+				
 	return mtd[output_wksp]
 
 def stitch2(ws1, ws2, output_ws_name, begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh=True,scalefactor=-1.0):
@@ -183,6 +169,7 @@ def getWorkspace(wksp):
 
 def groupGet(wksp,whattoget,field=''):
 	'''
+	Auxiliary function.
 	returns information about instrument or sample details for a given workspace wksp,
 	also if the workspace is a group (info from first group element)
 	'''
