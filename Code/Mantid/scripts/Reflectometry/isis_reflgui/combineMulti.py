@@ -7,59 +7,64 @@ from PyQt4 import QtCore, uic
 import math
 from mantid.api import WorkspaceGroup
 
-def combineDataMulti(wkspList,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh=1,scalefactor=-1.0,whichPeriod=1,keep=0):
-	'''
-	keep=1: keep individual workspcaes in Mantid, otheriwse delete wkspList
-	'''
+def combineDataMulti(wksp_list,output_wksp,beg_overlap,end_overlap,Qmin,Qmax,binning,scale_high=1,scale_factor=-1.0,which_period=1,keep=0):
+	"""
+	Function stitches multiple workspaces together. Workspaces should have an X-axis in mod Q, and the Spectrum axis as I/I0
+	
+	wksp_list: A list of workspaces to stitch together
+	ouput_wksp: output workspace name
+	beg_overlap: The beginning of the overlap region. List argument, each entry matches the entry in the wksp_list
+	end_overlap: The end of the overlap region. List argument, each entry matches the entry in the wksp_list
+	Qmin: Q minimum of the final output workspace
+	Qmax: Q maximum of the input workspace
+	which_period: Which period to use if multiperiod workspaces are provided.
+	keep=1: keep individual workspaces in Mantid, otherwise delete wksp_list
+	"""
 
 	# check if overlaps have correct number of entries
-	if type(begoverlap) != list:
-		begoverlap = [begoverlap]
-	if type(endoverlap) != list:
-		endoverlap = [endoverlap]
-	if len(wkspList) != len(begoverlap):
+	if type(beg_overlap) != list:
+		beg_overlap = [beg_overlap]
+	if type(end_overlap) != list:
+		end_overlap = [end_overlap]
+	if len(wksp_list) != len(beg_overlap):
 		print "Using default values!"
 		defaultoverlaps = 1
 	else:
 		defaultoverlaps = 0
 		
     #copy first workspace into temporary wksp 'currentSum'
-	CropWorkspace(InputWorkspace=wkspList[0],OutputWorkspace='currentSum')
-	print "Length: ",len(wkspList),wkspList
+	currentSum = CropWorkspace(InputWorkspace=wksp_list[0])
+	print "Length: ",len(wksp_list), wksp_list
 	
-	for i in range(0,len(wkspList)-1):
-		w1=getWorkspace('currentSum')
-		w2=getWorkspace(wkspList[i+1])
+	for i in range(0,len(wksp_list)-1):
+		w1=currentSum
+		w2=getWorkspace(wksp_list[i+1])
 		if defaultoverlaps:
 			overlapLow = w2.readX(0)[0]
 			overlapHigh = 0.5*max(w1.readX(0))
 		else:
-			overlapLow = begoverlap[i+1]
-			overlapHigh = endoverlap[i]
+			overlapLow = beg_overlap[i+1]
+			overlapHigh = end_overlap[i]
 			
         #check if multiperiod
-		if isinstance(mtd['currentSum'], WorkspaceGroup):
-			tempwksp,sf = combine2('currentSum_'+str(whichPeriod),wkspList[i+1]+'_'+str(whichPeriod),'_currentSum',overlapLow,overlapHigh,Qmin,Qmax,binning,scalehigh)
+		if isinstance(currentSum, WorkspaceGroup):
+			tempwksp,sf = combine2('currentSum_'+str(which_period),wksp_list[i+1]+'_'+str(which_period),'_currentSum',overlapLow,overlapHigh,Qmin,Qmax,binning,scale_high)
             #if (sum(mtd['currentSum_2'].dataY(0))):
 			print tempwksp, sf
 			
 			DeleteWorkspace("_currentSum")
-			#CropWorkspace(wkspList[0],'currentSum')
-			print wkspList
-			combine2('currentSum',wkspList[i+1],'temp',overlapLow,overlapHigh,Qmin,Qmax,binning,scalehigh,sf)
-			CropWorkspace(InputWorkspace='temp',OutputWorkspace='currentSum')
+			#CropWorkspace(wksp_list[0],'currentSum')
+			print wksp_list
+			combine2(currentSum.name(),wksp_list[i+1],'temp',overlapLow,overlapHigh,Qmin,Qmax,binning,scale_high,sf)
+			currentSum=CropWorkspace(InputWorkspace='temp')
 			DeleteWorkspace("temp")
-            #else:
-			
-			#	combine2('currentSum_1',wkspList[i+1]+'_1','currentSum',begoverlap,endoverlap,Qmin,Qmax,binning,sf)
-			
 		else:
 			print "Iteration",i
-			combine2('currentSum',wkspList[i+1],'currentSum',overlapLow,overlapHigh,Qmin,Qmax,binning,scalehigh)
-	RenameWorkspace(InputWorkspace='currentSum',OutputWorkspace=outputwksp)
+			currentSum, scale_factor = stitch2(currentSum, mtd[wksp_list[i+1]], currentSum.name(), overlapLow, overlapHigh, Qmin, Qmax, binning, scale_high)
+	RenameWorkspace(InputWorkspace=currentSum.name(),OutputWorkspace=output_wksp)
 	if not keep:
 		names = mtd.getObjectNames()
-		for ws in wkspList:
+		for ws in wksp_list:
 			#print ws.rstrip("_binned")
 			candidate = ws
 			if candidate in names: 
@@ -70,12 +75,44 @@ def combineDataMulti(wkspList,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning
 			candidate = ws.rstrip("_IvsQ_binned")+"_IvsQ"
 			if candidate in names:
 				DeleteWorkspace(candidate)
-	return mtd[outputwksp]
+	return mtd[output_wksp]
 
+def stitch2(ws1, ws2, output_ws_name, begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh=True,scalefactor=-1.0):
+	"""
+	Function stitches two workspaces together and returns a stitched workspace along with the scale factor
+	
+	ws1: First workspace to stitch
+	ws2: Second workspace to stitch
+	output_ws_name: The name to give the outputworkspace
+	begoverlap: The beginning of the overlap region
+	endoverlap: The end of the overlap region
+	Qmin: Final minimum Q in the Q range
+	Qmax: Final maximum Q in the Q range
+	binning: Binning stride to use
+	scalehigh: if True, scale ws2, otherwise scale ws1
+	scalefactor: Use the manual scaling factor provided if > 0
+	"""
+	out = combine2(ws1.name(),ws2.name(),output_ws_name,begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh,scalefactor)
+	return mtd[output_ws_name], out[1]
+	
 
-def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh=1,scalefactor=-1.0):
+def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh=True,scalefactor=-1.0):
+    """
+	Function stitches two workspaces together and returns a stitched workspace name along with the scale factor
+	
+	wksp1: First workspace name to stitch
+	wksp2: Second workspace name to stitch
+	outputwksp: The name to give the outputworkspace
+	begoverlap: The beginning of the overlap region
+	endoverlap: The end of the overlap region
+	Qmin: Final minimum Q in the Q range
+	Qmax: Final maximum Q in the Q range
+	binning: Binning stride to use
+	scalehigh: if True, scale ws2, otherwise scale ws1
+	scalefactor: Use the manual scaling factor provided if > 0
+	"""
+    
     import numpy as np
-
     print "OVERLAPS:", begoverlap, endoverlap
     Rebin(InputWorkspace=wksp1,OutputWorkspace=wksp1+"reb",Params=str(Qmin)+","+str(binning)+","+str(Qmax))
     w1=getWorkspace(wksp1+"reb")
@@ -138,12 +175,14 @@ def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scal
 
 		
 def getWorkspace(wksp):
-    if isinstance(mtd[wksp], WorkspaceGroup):
-        wout = mtd[wksp+'_1']
-    else:
-        wout = mtd[wksp]
-        
-    return wout
+	"""
+	Get the workspace if it is not a group workspace. If it is a group workspace, get the first period.
+	"""
+	if isinstance(mtd[wksp], WorkspaceGroup):
+		wout = mtd[wksp+'_1']
+	else:
+		wout = mtd[wksp]
+	return wout
 
 def groupGet(wksp,whattoget,field=''):
 	'''
@@ -176,34 +215,4 @@ def groupGet(wksp,whattoget,field=''):
 		else:
 			return mtd[wksp].getNumberHistograms()
 
-def _testCombine():
-	from quick import quick
-	config['default.instrument'] = "SURF"
-
-	[w1lam,w1q,th] = quick(94511,theta=0.25,trans='94504')
-	[w2lam,w2q,th] = quick(94512,theta=0.65,trans='94504')
-	[w3lam,w3q,th] = quick(94513,theta=1.5,trans='94504')
-
-	wksp=['94511_IvsQ','94512_IvsQ','94513_IvsQ']
-
-	wcomb = combineDataMulti(wksp,'94511_13_IvsQ',0.0,0.1,0.001,0.3,binning=-0.02)
-
-	plotSpectrum("94511_13_IvsQ",0)
-
-def  _doAllTests():
-	_testCombine()
-	return True
-
-if __name__ == '__main__':
-	''' This is the debugging and testing area of the file.  The code below is run when ever the 
-	   script is called directly from a shell command line or the execute all menu option in mantid. 
-	'''
-	#Debugging = True  # Turn the debugging on and the testing code off
-	Debugging = False # Turn the debugging off and the testing on
-	
-	if Debugging == False:
-		_doAllTests()  
-	else:    #Debugging code goes below
-		
-		print "No debugging at the moment..."
 	
