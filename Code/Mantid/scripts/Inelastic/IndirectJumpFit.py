@@ -1,5 +1,6 @@
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
+from IndirectImport import import_mantidplot
 import os.path
 mp = import_mantidplot()
 
