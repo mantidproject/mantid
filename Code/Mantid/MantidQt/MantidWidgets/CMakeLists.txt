@@ -2,8 +2,8 @@ set ( SRC_FILES
 	src/AlgorithmSelectorWidget.cpp
 	src/DataSelector.cpp
 	src/DiagResults.cpp
-        src/FindReplaceDialog.cpp
-        src/FindDialog.cpp
+	src/FindReplaceDialog.cpp
+	src/FindDialog.cpp
 	src/FitPropertyBrowser.cpp
 	src/FunctionBrowser.cpp
 	src/ICatAdvancedSearch.cpp
@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/ICatMyDataSearch.cpp
 	src/ICatSearch.cpp
 	src/ICatSearch2.cpp
+	src/ICatHelper.cpp
 	src/ICatUtils.cpp
 	src/InstrumentSelector.cpp
 	src/MessageDisplay.cpp
@@ -52,6 +53,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/ICatMyDataSearch.h
     inc/MantidQtMantidWidgets/ICatSearch.h
     inc/MantidQtMantidWidgets/ICatSearch2.h
+    inc/MantidQtMantidWidgets/ICatHelper.h
     inc/MantidQtMantidWidgets/ICatUtils.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
