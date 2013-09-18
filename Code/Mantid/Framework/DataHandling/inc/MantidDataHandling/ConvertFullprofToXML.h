@@ -60,13 +60,13 @@ namespace DataHandling
     void loadFile(std::string filename, std::vector<std::string>& lines);
 
     /// Add an ALFBE parameter 
-    void addALFBEparameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string paramName);
+    void addALFBEparameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
 
     /// Get value for XML eq attribute for parameter
-    std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string name, size_t columnIndex);
+    std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string& name, size_t columnIndex);
 
     // Translate a parameter name from as it appears in the table workspace to its name in the XML file
-    std::string getXMLParameterName( const std::string name );
+    std::string getXMLParameterName( const std::string& name );
 
     /// Get row numbers of the parameters in the table workspace
     void getTableRowNumbers(const API::ITableWorkspace_sptr & tablews, std::map<std::string, size_t>& parammap);

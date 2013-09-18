@@ -21,6 +21,8 @@ Convert the initial fitting parameters in a Fullprof file to XML format in an [[
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
 
+#include <boost/lexical_cast.hpp>
+
 
 namespace Mantid
 {
@@ -161,7 +163,7 @@ namespace DataHandling
   *
   *  paramName is the name of the parameter as it appears in the table workspace
   */
-  void ConvertFullprofToXML::addALFBEparameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Element* parent, const std::string paramName)
+  void ConvertFullprofToXML::addALFBEparameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Element* parent, const std::string& paramName)
   {
      Element* parameterElem = mDoc->createElement("parameter");
      parameterElem->setAttribute("name", getXMLParameterName(paramName));
@@ -182,7 +184,7 @@ namespace DataHandling
   /*
   *  Get the XML name of a parameter given its Table Workspace name
   */
-  std::string ConvertFullprofToXML::getXMLParameterName( const std::string name )
+  std::string ConvertFullprofToXML::getXMLParameterName( const std::string& name )
   {
     std::string prefix = "IkedaCarpenterPV:";
     if(name == "Alph0") return prefix+"Alpha0";
@@ -196,12 +198,12 @@ namespace DataHandling
   * Get the value string to put in the XML eq attribute of the formula element of the paramenter element
   * given the name of the parameter in the table workspace.
   */
-  std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string name, size_t columnIndex)
+  std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string& name, size_t columnIndex)
   {
     size_t paramNumber = m_rowNumbers[name];
     API::Column_const_sptr column = tablews->getColumn( columnIndex );
     double eqValue = column->cell<double>(paramNumber);
-    return std::to_string(eqValue);
+    return boost::lexical_cast<std::string>(eqValue);
   }
 
   /* This function fills in a list of the row numbers starting 0 of the parameters
