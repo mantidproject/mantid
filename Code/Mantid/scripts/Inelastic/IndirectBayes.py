@@ -312,8 +312,8 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,
 
 	#Add some sample logs to the output workspace
 	AddSampleLog(Workspace=outWS, LogName="Fit Program", LogType="String", LogText=prog)
-	AddSampleLog(Workspace=outWS, LogName="Energy min", LogType="String", LogText=str(erange[0]))
-	AddSampleLog(Workspace=outWS, LogName="Energy max", LogType="String", LogText=str(erange[1]))
+	AddSampleLog(Workspace=outWS, LogName="Energy min", LogType="Number", LogText=str(erange[0]))
+	AddSampleLog(Workspace=outWS, LogName="Energy max", LogType="Number", LogText=str(erange[1]))
 
 	if Save:
 		fit_path = os.path.join(workdir,fitWS+'.nxs')
