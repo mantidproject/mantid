@@ -55,6 +55,8 @@ namespace MantidQt
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
+      // Although this is an advanced option performing it here allows it to be performed once only.
+      populateInvestigationTypeBox();
 
       // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
@@ -156,11 +158,25 @@ namespace MantidQt
     }
 
     /**
-     * Populates the "Investigation type" drop-box.
+     * Populates the "Investigation type" list-box.
      */
     void ICatSearch2::populateInvestigationTypeBox()
     {
+      // Obtain the list of investigation types to display in the list-box.
+      std::vector<std::string> invesTypeList = icatHelper->getInvestigationTypeList();
 
+      std::vector<std::string>::const_iterator citr;
+      for (citr = invesTypeList.begin(); citr != invesTypeList.end(); ++citr)
+      {
+        // Add each instrument to the instrument box.
+        icatUiForm.advTypeLbox->addItem(QString::fromStdString(*citr));
+      }
+
+      // Sort the list-box by investigation type.
+      icatUiForm.advTypeLbox->model()->sort(0);
+      // Make the default investigation type empty so the user has to select one.
+      icatUiForm.advTypeLbox->insertItem(-1,"");
+      icatUiForm.advTypeLbox->setCurrentIndex(0);
     }
 
     /**

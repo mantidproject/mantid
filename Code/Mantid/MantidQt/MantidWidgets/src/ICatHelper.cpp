@@ -28,5 +28,27 @@ namespace MantidQt
       return (catalogAlgorithm->getProperty("InstrumentList"));
     }
 
+    /**
+     * Obtain the list of investigation types from the ICAT Catalog algorithm.
+     * @return :: A vector containing the list of all investigation types available.
+     */
+    std::vector<std::string> ICatHelper::getInvestigationTypeList()
+    {
+      QString algName("CatalogListInvestigationTypes");
+      Mantid::API::IAlgorithm_sptr catalogAlgorithm;
+      try
+      {
+        catalogAlgorithm = Mantid::API::AlgorithmManager::Instance().create(algName.toStdString());
+      }
+      catch(std::runtime_error& exception)
+      {
+        exception.what();
+      }
+
+      catalogAlgorithm->execute();
+      // return the vector containing the list of investigation types available.
+      return (catalogAlgorithm->getProperty("InvestigationTypes"));
+    }
+
   }
 }

@@ -13,6 +13,8 @@ namespace MantidQt
     public:
       /// Obtain the list of instruments that are available.
       std::vector<std::string> getInstrumentList();
+      /// Obtain the list of instruments that are available.
+      std::vector<std::string> getInvestigationTypeList();
     };
   }
 }
