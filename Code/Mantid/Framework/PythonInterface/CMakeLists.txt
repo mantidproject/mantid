@@ -94,7 +94,7 @@ add_subdirectory ( mantid )
 ###########################################################################
 # Python algorithms
 ###########################################################################
-clean_orphaned_pyc_files ( ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
+clean_orphaned_pyc_files ( ${CMAKE_CURRENT_SOURCE_DIR}/plugins )
 
 ###########################################################################
 # tests 
