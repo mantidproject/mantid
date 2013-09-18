@@ -87,8 +87,6 @@ namespace DataHandling
     // Get Output
     std::string paramfile = getProperty("OutputFilename");
 
-    //vector<int> outputbankids = getProperty("Banks");
-
     // Load with LoadFullprofResolution
     auto loader = createChildAlgorithm("LoadFullprofResolution");
     loader->setProperty("Filename",datafile);
@@ -100,6 +98,8 @@ namespace DataHandling
 
     // Set up access to table workspace ParamTable
     API::ITableWorkspace_sptr paramTable = loader->getProperty("OutputWorkspace");
+    // get the table workspace row numbers of the parameters and store them for later use
+    getTableRowNumbers( paramTable, m_rowNumbers);
 
     // Set up access to Output file
     std::ofstream outFile(paramfile.c_str());
@@ -161,8 +161,18 @@ namespace DataHandling
      Element* parameterElem = mDoc->createElement("parameter");
      parameterElem->setAttribute("name", getXMLParameterName(paramName));
      parameterElem->setAttribute("type","fitting");
+
+     Element *formulaElem = mDoc->createElement("formula");
+     formulaElem->setAttribute("eq",getXMLEqValue(tablews, paramName, 1));
+     if(paramName != "Beta1") formulaElem->setAttribute("result-unit","TOF");
+     parameterElem->appendChild(formulaElem);
+
+     Element* fixedElem = mDoc->createElement("fixed");
+     parameterElem->appendChild(fixedElem);
+
      parent->appendChild(parameterElem);
   }
+
 
   /*
   *  Get the XML name of a parameter given its Table Workspace name
@@ -175,6 +185,16 @@ namespace DataHandling
     if(name == "Alph1") return prefix+"Alpha1";
     if(name == "Beta1") return prefix+"Kappa";
     return "?"+name;
+  }
+
+  /*
+  * Get the value string to put in the XML eq attribute of the formula element of the paramenter element
+  * given the name of the parameter in the table workspace.
+  */
+  std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string name, size_t bankNumber)
+  {
+    //API::Column_const_sptr column = tablews->getColumn( bankNumber );
+    return "?"+name+std::to_string(bankNumber);
   }
 
   /* This function fills in a list of the row numbers starting 0 of the parameters
