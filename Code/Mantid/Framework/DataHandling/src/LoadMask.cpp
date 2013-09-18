@@ -225,7 +225,7 @@ namespace DataHandling
                                         std::vector<int32_t> pairdetids_up)
   {
     // 1. Get index map
-    detid2index_map* indexmap = mMaskWS->getDetectorIDToWorkspaceIndexMap(true);
+    const detid2index_map indexmap = mMaskWS->getDetectorIDToWorkspaceIndexMap(true);
 
     // 2. Mask
     g_log.debug() << "Mask = " << tomask <<  "  Final Single IDs Size = " << singledetids.size() << std::endl;
@@ -233,9 +233,9 @@ namespace DataHandling
     for (size_t i = 0; i < singledetids.size(); i ++)
     {
       detid_t detid = singledetids[i];
-      detid2index_map::iterator it;
-      it = indexmap->find(detid);
-      if (it != indexmap->end())
+      detid2index_map::const_iterator it;
+      it = indexmap.find(detid);
+      if (it != indexmap.end())
       {
         size_t index = it->second;
         if (tomask)
@@ -254,9 +254,6 @@ namespace DataHandling
     {
       g_log.error() << "To Be Implemented Soon For Pair (" << pairdetids_low[i] << ", " << pairdetids_up[i] << "!" << std::endl;
     }
-
-    // 4. Clear
-    delete indexmap;
 
     return;
   }
@@ -394,9 +391,8 @@ namespace DataHandling
     }
 
     // 2. Get Map
-    // 1. Get map
-    spec2index_map* s2imap = mMaskWS->getSpectrumToWorkspaceIndexMap();
-    spec2index_map::iterator s2iter;
+    const spec2index_map s2imap = mMaskWS->getSpectrumToWorkspaceIndexMap();
+    spec2index_map::const_iterator s2iter;
 
     // 3. Set mask
     for (size_t i = 0; i < pairslow.size(); i ++)
@@ -406,8 +402,8 @@ namespace DataHandling
 
       for (int32_t specid=pairslow[i]; specid<=pairsup[i]; specid++)
       {
-        s2iter = s2imap->find(specid);
-        if (s2iter == s2imap->end())
+        s2iter = s2imap.find(specid);
+        if (s2iter == s2imap.end())
         {
           // spectrum not found.  bad brach
           g_log.error() << "Spectrum " << specid << " does not have an entry in GroupWorkspace's spec2index map" << std::endl;

@@ -301,7 +301,7 @@ namespace DataHandling
     }
 
     // 1. Prepare
-    detid2index_map* indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
+    const detid2index_map indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
 
     // 2. Set
     for (std::map<int, std::vector<std::string> >::iterator it =  mGroupComponentsMap.begin();
@@ -331,8 +331,8 @@ namespace DataHandling
           if (det){
             // Component is DETECTOR:
             int32_t detid = det->getID();
-            detid2index_map::iterator itx = indexmap->find(detid);
-            if (itx != indexmap->end()){
+            detid2index_map::const_iterator itx = indexmap.find(detid);
+            if (itx != indexmap.end()){
               size_t wsindex = itx->second;
               mGroupWS->dataY(wsindex)[0] = it->first;
             }
@@ -346,9 +346,6 @@ namespace DataHandling
        } // ENDFOR (component)
 
     } // ENDFOR GroupID
-
-    // 3. Clear
-    delete indexmap;
 
     return;
   }
@@ -379,7 +376,7 @@ namespace DataHandling
     }
 
     // 1. Prepare
-    detid2index_map* indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
+    const detid2index_map indexmap = mGroupWS->getDetectorIDToWorkspaceIndexMap(true);
 
     // 2. Set GroupingWorkspace
     for (std::map<int, std::vector<detid_t> >::iterator it =  mGroupDetectorsMap.begin();
@@ -389,9 +386,9 @@ namespace DataHandling
 
       for (size_t i = 0; i < it->second.size(); i ++){
         detid_t detid = it->second[i];
-        detid2index_map::iterator itx = indexmap->find(detid);
+        detid2index_map::const_iterator itx = indexmap.find(detid);
 
-        if (itx != indexmap->end())
+        if (itx != indexmap.end())
         {
           size_t wsindex = itx->second;
           mGroupWS->dataY(wsindex)[0] = it->first;
@@ -400,9 +397,6 @@ namespace DataHandling
         }
       } // ENDFOR detid (in range)
     } // ENDFOR each group ID
-
-    // 3. Clear
-    delete indexmap;
 
     return;
   }
@@ -413,8 +407,8 @@ namespace DataHandling
   void LoadDetectorsGroupingFile::setBySpectrumIDs()
   {
     // 1. Get map
-    spec2index_map* s2imap = mGroupWS->getSpectrumToWorkspaceIndexMap();
-    spec2index_map::iterator s2iter;
+    const spec2index_map s2imap = mGroupWS->getSpectrumToWorkspaceIndexMap();
+    spec2index_map::const_iterator s2iter;
 
     // 2. Locate in loop
     //      std::map<int, std::vector<int> > mGroupSpectraMap;
@@ -425,8 +419,8 @@ namespace DataHandling
       for (size_t isp=0; isp<gsiter->second.size(); isp++)
       {
         int specid = gsiter->second[isp];
-        s2iter = s2imap->find(specid);
-        if (s2iter == s2imap->end())
+        s2iter = s2imap.find(specid);
+        if (s2iter == s2imap.end())
         {
           g_log.error() << "Spectrum " << specid << " does not have an entry in GroupWorkspace's spec2index map" << std::endl;
           throw std::runtime_error("Logic error");
@@ -448,9 +442,6 @@ namespace DataHandling
         } // IF-ELSE: spectrum ID has an entry
       } // FOR: each spectrum ID
     } // FOR: each group ID
-
-    // 3. Clean
-    delete s2imap;
 
     return;
   }
