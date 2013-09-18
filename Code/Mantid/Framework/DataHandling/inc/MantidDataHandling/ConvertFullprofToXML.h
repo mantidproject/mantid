@@ -63,7 +63,7 @@ namespace DataHandling
     void addALFBEparameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string paramName);
 
     /// Get value for XML eq attribute for parameter
-    std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string name, size_t bankNumber);
+    std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string name, size_t columnIndex);
 
     // Translate a parameter name from as it appears in the table workspace to its name in the XML file
     std::string getXMLParameterName( const std::string name );

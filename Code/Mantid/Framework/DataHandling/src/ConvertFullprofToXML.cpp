@@ -129,6 +129,9 @@ namespace DataHandling
     instrumentElem->setAttribute("name","wholeInstrument");
     rootElem->appendChild(instrumentElem);
     addALFBEparameter( paramTable, mDoc, instrumentElem, "Alph0");
+    addALFBEparameter( paramTable, mDoc, instrumentElem, "Beta0");
+    addALFBEparameter( paramTable, mDoc, instrumentElem, "Alph1");
+    addALFBEparameter( paramTable, mDoc, instrumentElem, "Beta1");
 
     // Add banks
     if(paramTable->columnCount() < 2){
@@ -193,10 +196,12 @@ namespace DataHandling
   * Get the value string to put in the XML eq attribute of the formula element of the paramenter element
   * given the name of the parameter in the table workspace.
   */
-  std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string name, size_t bankNumber)
+  std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string name, size_t columnIndex)
   {
-    //API::Column_const_sptr column = tablews->getColumn( bankNumber );
-    return "?"+name+std::to_string(bankNumber);
+    size_t paramNumber = m_rowNumbers[name];
+    API::Column_const_sptr column = tablews->getColumn( columnIndex );
+    double eqValue = column->cell<double>(paramNumber);
+    return std::to_string(eqValue);
   }
 
   /* This function fills in a list of the row numbers starting 0 of the parameters
