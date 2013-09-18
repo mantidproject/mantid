@@ -813,38 +813,3 @@ def ResNormPlot(inputWS,Plot):
 	if (Plot == 'Fit' or Plot == 'All'):
 		fWS = inputWS + '_ResNorm_Fit'
 		f_plot=mp.plotSpectrum(fWS,0,False)
-
-# Jump programs
-def JumpRun(samWS,jump,Verbose,Plot,Save):
-# Chudley-Elliott    HWHM=A*(1-sin*(Q*K)/(Q*K))
-# for Q->0 W=A*Q^2*K^2/6
-# Singwi-Sjolander  HWHM=A*(1-exp(-r*Q^2))
-# for Q->0 W=A*Q^2*r
-	StartTime('Jump fit : '+jump+' ; ')
-	workdir = config['defaultsave.directory']
-	if Verbose:
-		logger.notice('Parameters in ' + samWS+'_Workspace')
-	x = mtd[samWS].readX(0)
-	xmax = x[len(x)-1]
-	if jump == 'CE':
-		aval = xmax
-		bval = 1.5
-		func = 'name=UserFunction, Formula=a*(1-(sin(x*b))/(x*b)), a='+str(aval)+', b='+str(bval)
-	if jump == 'SS':
-		aval = xmax
-		bval = 0.24
-		func = 'name=UserFunction, Formula=a*(1-exp(-x*x*b)), a='+str(aval)+', b='+str(bval)
-	fitWS = samWS +'_'+jump +'fit'
-	Fit(Function=func, InputWorkspace=samWS, CreateOutput=True, Output=fitWS)
-	if Save:
-		fit_path = os.path.join(workdir,fitWS+'.nxs')
-		SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
-		if Verbose:
-			logger.notice('Fit file is ' + fit_path)
-	if Plot:
-		JumpPlot(fitWS+'_Workspace')
-	EndTime('Jump fit : '+jump+' ; ')
-
-def JumpPlot(inputWS):
-    j_plot=mp.plotSpectrum(inputWS+'_Data',0,True)
-    mp.mergePlots(j_plot,mp.plotSpectrum(inputWS+'_Fit',0,False))

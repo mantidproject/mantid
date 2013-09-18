@@ -4,7 +4,7 @@ from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
 import os.path
-from IndirectBayes import JumpRun
+from IndirectJumpFit import JumpRun
 
 class JumpFit(PythonAlgorithm):
  
