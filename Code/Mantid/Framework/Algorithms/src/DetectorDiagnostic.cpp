@@ -553,16 +553,10 @@ namespace Mantid
       }
 
       //check if not grouped. If grouped, it will throw
-      try
-      {
-        detid2index_map *d2i=countsWS->getDetectorIDToWorkspaceIndexMap(true);
-        d2i->clear();
-      }
-      catch(...)
+      if ( countsWS->hasGroupedDetectors() )
       {
         throw std::runtime_error("Median detector test: not able to create detector to spectra map. Try with LevelUp=0.");
       }
-
 
       for(size_t i=0;i < countsWS->getNumberHistograms();i++)
       {

@@ -371,7 +371,7 @@ namespace Mantid
       }
     }
 
-	//---------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------
     /** Does the workspace has any grouped detectors?
     *  @return true if the workspace has any grouped detectors, otherwise false
     */
@@ -385,8 +385,8 @@ namespace Mantid
         auto detList = getSpectrum(workspaceIndex)->getDetectorIDs();
         if (detList.size() > 1)
         {
-			retVal=true;
-			break;
+          retVal=true;
+          break;
         }
       }
       return retVal;

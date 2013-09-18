@@ -1012,8 +1012,7 @@ namespace Mantid
       // Initialize the table; filled with -1 meaning no match
       table->resize(lhs_nhist, -1);
 
-      detid2index_map * rhs_det_to_wi;
-      rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap();
+      const detid2index_map rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap();
 
       PARALLEL_FOR_NO_WSP_CHECK()
       for (int lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
@@ -1042,7 +1041,7 @@ namespace Mantid
 
 
         // ----------------- Scrambled Detector IDs with one Detector per Spectrum --------------------------------------
-        if (!done && rhs_det_to_wi && (lhsDets.size() == 1))
+        if (!done && (lhsDets.size() == 1))
         {
           //Didn't find it. Try to use the RHS map.
 
@@ -1051,8 +1050,8 @@ namespace Mantid
           detid_t lhs_detector_ID = *lhsDets_it;
 
           //Now we use the RHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
-          detid2index_map::iterator map_it = rhs_det_to_wi->find(lhs_detector_ID);
-          if (map_it != rhs_det_to_wi->end())
+          detid2index_map::const_iterator map_it = rhs_det_to_wi.find(lhs_detector_ID);
+          if (map_it != rhs_det_to_wi.end())
           {
             rhsWI = map_it->second; //This is the workspace index in the RHS that matched lhs_detector_ID
           }
