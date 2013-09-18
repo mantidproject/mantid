@@ -215,7 +215,7 @@ void MuonAnalysis::initLayout()
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileEditingFinished()), this, SLOT(deadTimeFileSelected() ) );
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );
 }
 
 /**
