@@ -121,7 +121,7 @@ namespace Mantid
 
       bool m_workspaceInitialized;
       std::string m_wsName;
-      detid2index_map * m_indexMap;  // maps pixel id's to workspace indexes
+      detid2index_map m_indexMap;  // maps pixel id's to workspace indexes
 
       // We need these 2 strings to initialize m_buffer
       std::string m_instrumentName;
