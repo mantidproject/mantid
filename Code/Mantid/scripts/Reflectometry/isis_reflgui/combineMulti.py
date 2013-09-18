@@ -114,64 +114,58 @@ def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scal
     
     import numpy as np
     print "OVERLAPS:", begoverlap, endoverlap
-    Rebin(InputWorkspace=wksp1,OutputWorkspace=wksp1+"reb",Params=str(Qmin)+","+str(binning)+","+str(Qmax))
-    w1=getWorkspace(wksp1+"reb")
-    #nzind=np.nonzero(w1.dataY(0))[0]
-    #w1.dataY(0)[int(nzind[0])]=0.0	#set  edge of zeropadding to zero
-    
-    RebinToWorkspace(WorkspaceToRebin=wksp2,WorkspaceToMatch=wksp1+"reb",OutputWorkspace=wksp2+"reb")
-    w2=getWorkspace(wksp2+"reb")
+    w1 = Rebin(InputWorkspace=wksp1, Params=str(Qmin)+","+str(binning)+","+str(Qmax))
+    w2 = RebinToWorkspace(WorkspaceToRebin=wksp2,WorkspaceToMatch=w1)
     nzind=np.nonzero(w1.dataY(0))[0]
     w2.dataY(0)[int(nzind[0])]=0.0	#set  edge of zeropadding to zero
-    Rebin(InputWorkspace=wksp2,OutputWorkspace=wksp2+"reb",Params=str(Qmin)+","+str(binning)+","+str(Qmax))
+    w2 = Rebin(InputWorkspace=wksp2, Params=str(Qmin)+","+str(binning)+","+str(Qmax))
 
     # find the bin numbers to avoid gaps
-    a1=getWorkspace(wksp1+"reb").binIndexOf(begoverlap)
-    a2=getWorkspace(wksp1+"reb").binIndexOf(endoverlap)
-    wksp1len=len(getWorkspace(wksp1+"reb").dataX(0))
-    wksp2len=len(getWorkspace(wksp2+"reb").dataX(0))
-    #begoverlap = getWorkspace(wksp1+"reb").binIndexOf(endoverlap)w2.readX(0)[1]
-
+    a1=w1.binIndexOf(begoverlap)
+    a2=w1.binIndexOf(endoverlap)
+    wksp1len=len(w1.dataX(0))
+    wksp2len=len(w1.dataX(0))
 
     if scalefactor <= 0.0:
-        Integration(InputWorkspace=wksp1+"reb",OutputWorkspace="i1temp", RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
-        Integration(InputWorkspace=wksp2+"reb",OutputWorkspace="i2temp", RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
+        i1temp = Integration(InputWorkspace=w1, RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
+        i2temp = Integration(InputWorkspace=w2, RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
         if scalehigh:
-            Multiply(LHSWorkspace=wksp2+"reb",RHSWorkspace="i1temp",OutputWorkspace=wksp2+"reb")
-            Divide(LHSWorkspace=wksp2+"reb",RHSWorkspace="i2temp",OutputWorkspace=wksp2+"reb")
+            w2 = Multiply(LHSWorkspace=w2,RHSWorkspace=i1temp)
+            w2 = Divide(LHSWorkspace=w2,RHSWorkspace=i2temp)
         else:
-            Multiply(LHSWorkspace=wksp1+"reb",RHSWorkspace="i2temp",OutputWorkspace=wksp1+"reb")
-            Divide(LHSWorkspace=wksp1+"reb",RHSWorkspace="i1temp",OutputWorkspace=wksp1+"reb")
+            w1 = Multiply(LHSWorkspace=w1, RHSWorkspace=i2temp)
+            w1 = Divide(LHSWorkspace=w1, RHSWorkspace=i1temp)
         
-        y1=getWorkspace("i1temp").readY(0)
-        y2=getWorkspace("i2temp").readY(0)
+        y1=i1temp.readY(0)
+        y2=i2temp.readY(0)
         scalefactor = y1[0]/y2[0]
         print "scale factor="+str(scalefactor)
     else:
-        MultiplyRange(wksp2+"reb",wksp2+"reb","0",str(wksp2len-2),str(scalefactor))
+        w2 = MultiplyRange(InputWorkspace=w2, StartBin=0, EndBin=wksp2len-2, Factor=scalefactor)
         
     
-    MultiplyRange(InputWorkspace=wksp1+"reb",OutputWorkspace="overlap1",StartBin=0,EndBin=a1-1)
-    MultiplyRange(InputWorkspace="overlap1", OutputWorkspace="overlap1",StartBin=a2,EndBin=wksp1len-2)
+    overlap1 = MultiplyRange(InputWorkspace=w1, StartBin=0,EndBin=a1-1)
+    overlap1 = MultiplyRange(InputWorkspace=overlap1,StartBin=a2,EndBin=wksp1len-2)
 	
-    MultiplyRange(InputWorkspace=wksp2+"reb",OutputWorkspace="overlap2",StartBin=0,EndBin=a1)#-1
-    MultiplyRange(InputWorkspace="overlap2",OutputWorkspace="overlap2",StartBin=a2+1,EndBin=wksp1len-2)
+    overlap2 = MultiplyRange(InputWorkspace=w2,StartBin=0,EndBin=a1)#-1
+    overlap2 = MultiplyRange(InputWorkspace=overlap2,StartBin=a2+1,EndBin=wksp1len-2)
 	
-    MultiplyRange(InputWorkspace=wksp1+"reb",OutputWorkspace=wksp1+"reb",StartBin=a1, EndBin=wksp1len-2)
-    MultiplyRange(InputWorkspace=wksp2+"reb",OutputWorkspace=wksp2+"reb",StartBin=0, EndBin=a2)
-    WeightedMean(InputWorkspace1="overlap1",InputWorkspace2="overlap2",OutputWorkspace="overlapave")
-    Plus(LHSWorkspace=wksp1+"reb",RHSWorkspace="overlapave",OutputWorkspace='temp1')
-    Plus(LHSWorkspace='temp1',RHSWorkspace=wksp2+"reb",OutputWorkspace=outputwksp)    
+    w1=MultiplyRange(InputWorkspace=w1,StartBin=a1, EndBin=wksp1len-2)
+    w2=MultiplyRange(InputWorkspace=w2,StartBin=0, EndBin=a2)
     
-    DeleteWorkspace("temp1")
-    DeleteWorkspace(wksp1+"reb")
-    DeleteWorkspace(wksp2+"reb")
-    DeleteWorkspace("i1temp")
-    DeleteWorkspace("i2temp")
-    DeleteWorkspace("overlap1")
-    DeleteWorkspace("overlap2")
-    DeleteWorkspace("overlapave")
-    return outputwksp, scalefactor
+    overlapave = WeightedMean(InputWorkspace1=overlap1,InputWorkspace2=overlap2)
+    temp1 = Plus(LHSWorkspace=w1,RHSWorkspace=overlapave)
+    result = Plus(LHSWorkspace=temp1, RHSWorkspace=w2, OutputWorkspace=outputwksp)    
+    
+    DeleteWorkspace(temp1)
+    DeleteWorkspace(w1)
+    DeleteWorkspace(w2)
+    DeleteWorkspace(i1temp)
+    DeleteWorkspace(i2temp)
+    DeleteWorkspace(overlap1)
+    DeleteWorkspace(overlap2)
+    DeleteWorkspace(overlapave)
+    return result.name(), scalefactor
 
 		
 def getWorkspace(wksp):
