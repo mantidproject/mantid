@@ -147,15 +147,17 @@ public:
     TS_ASSERT_EQUALS(outws->columnCount(), 3);
     TS_ASSERT_EQUALS(outws->rowCount(), 27);
 
-    // Verify value
+    // Verify value (including bank number)
     map<string, double> parammap1;
     parseTableWorkspace(outws, parammap1);
+    TS_ASSERT_DELTA(parammap1["BANK"], 1.0, 0.0001);
     TS_ASSERT_DELTA(parammap1["Dtt1"], 22580.59157, 0.0001);
     TS_ASSERT_DELTA(parammap1["Sig1"], sqrt(0.00044), 0.0001);
     TS_ASSERT_DELTA(parammap1["Alph0t"], 0.010156, 0.00001);
 
     map<string, double> parammap2;
     parseTableWorkspace2(outws, parammap2);
+    TS_ASSERT_DELTA(parammap2["BANK"], 3.0, 0.0001);
     TS_ASSERT_DELTA(parammap2["Dtt1"], 22586.10156, 0.0001);
     TS_ASSERT_DELTA(parammap2["Sig1"], sqrt(10.00), 0.0001);
     TS_ASSERT_DELTA(parammap2["Alph0t"], 86.059, 0.00001);
