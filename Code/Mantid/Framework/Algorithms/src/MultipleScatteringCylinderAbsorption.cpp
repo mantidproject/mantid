@@ -68,6 +68,28 @@ using namespace Geometry;
   static const double ANGST_PER_US_PER_M = H_ES/MN_KG/1000.;
   static const double LAMBDA_REF = 1.81; ///< Wavelength that the calculations are based on
 
+  MultipleScatteringCylinderAbsorption::MultipleScatteringCylinderAbsorption() :
+    API::Algorithm()
+  {}
+
+  MultipleScatteringCylinderAbsorption::~MultipleScatteringCylinderAbsorption()
+  {}
+
+  const std::string MultipleScatteringCylinderAbsorption::name() const
+  {
+    return "MultipleScatteringCylinderAbsorption";
+  }
+
+  int MultipleScatteringCylinderAbsorption::version() const
+  {
+    return 1;
+  }
+
+  const std::string MultipleScatteringCylinderAbsorption::category() const
+  {
+    return "CorrectionFunctions\\AbsorptionCorrections";
+  }
+
 /**
  * Initialize the properties to default values
  */

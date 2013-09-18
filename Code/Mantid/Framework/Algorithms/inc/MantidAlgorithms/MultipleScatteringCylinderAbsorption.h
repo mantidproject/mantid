@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include <vector>
 
 namespace Mantid
@@ -47,19 +46,19 @@ class DLLExport MultipleScatteringCylinderAbsorption : public API::Algorithm
 public:
 
   /// Default constructor
-  MultipleScatteringCylinderAbsorption() : API::Algorithm() {};
+  MultipleScatteringCylinderAbsorption();
 
   /// Destructor
-  virtual ~MultipleScatteringCylinderAbsorption() {};
+  virtual ~MultipleScatteringCylinderAbsorption();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "MultipleScatteringCylinderAbsorption";}
+  virtual const std::string name() const;
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1;}
+  virtual int version() const;
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "CorrectionFunctions\\AbsorptionCorrections";}
+  virtual const std::string category() const;
 
 private:
 
