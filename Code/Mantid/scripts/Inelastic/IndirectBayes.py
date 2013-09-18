@@ -11,8 +11,6 @@ if is_supported_f2py_platform():
     Qse     = import_f2py("QLse")
     Que     = import_f2py("Quest")
     resnorm = import_f2py("ResNorm")
-    cefit   = import_f2py("CEfit")
-    ssfit   = import_f2py("SSfit")
 else:
     unsupported_message()
 
@@ -817,64 +815,34 @@ def ResNormPlot(inputWS,Plot):
 		f_plot=mp.plotSpectrum(fWS,0,False)
 
 # Jump programs
-
-def JumpRun(sname,jump,prog,fw,Crop,qrange,Verbose,Plot,Save):
+def JumpRun(samWS,jump,Verbose,Plot,Save):
+# Chudley-Elliott    HWHM=A*(1-sin*(Q*K)/(Q*K))
+# for Q->0 W=A*Q^2*K^2/6
+# Singwi-Sjolander  HWHM=A*(1-exp(-r*Q^2))
+# for Q->0 W=A*Q^2*r
 	StartTime('Jump fit : '+jump+' ; ')
 	workdir = config['defaultsave.directory']
-	array_len = 1000                                    # length of Fortran array
-	pname = sname+'_Parameters'
-	if fw == 'FW11':
-		fwn = '1'
-	if fw == 'FW21':
-		fwn = '2'
-	if fw == 'FW22':
-		fwn = '3'
 	if Verbose:
-		logger.notice('Parameters in ' + pname + ' ; number ' +fwn)
-	samWS = pname +'_'+ fwn
-	CloneWorkspace(InputWorkspace=samWS, OutputWorkspace='__crop')
-	if Crop:
-		CropWorkspace(InputWorkspace=samWS, OutputWorkspace='__crop',
-			XMin=qrange[0], XMax=qrange[1])
-		if Verbose:
-			logger.notice('Cropping from Q= ' + qrange[0] +' to '+ qrange[1])
-	nd,X,Y,E = GetXYE('__crop',0,array_len)
-	if nd == 0:
-		error = 'No points in parameter file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	ftWS = sname +'_'+ jump + 'fit_' +fw
-	wrk = workdir + ftWS
-	lwrk = len(wrk)
-	wrk.ljust(140,' ')
+		logger.notice('Parameters in ' + samWS+'_Workspace')
+	x = mtd[samWS].readX(0)
+	xmax = x[len(x)-1]
 	if jump == 'CE':
-		kill,res,nout,Xout,Yout=cefit.cefit(nd,X,Y,E,wrk,lwrk)
-#      SUBROUTINE cefit(nd,X_in,Y_in,E_in,sfile,l_fn,kill,res,no,XOUT,YOUT)
-		if Verbose:
-			logger.notice(' Normalised Chi-squared = ' +str(res[0]))
-			logger.notice(' Log10[Prob(Chudley-Elliot|{Data})] = ' +str(res[1]))
-			logger.notice(' Coeff.  A =  ' +str(res[2])+ ' +- ' +str(res[3]))
-			logger.notice(' Coeff.  K =  ' +str(res[4])+ ' +- ' +str(res[5]))
+		aval = xmax
+		bval = 1.5
+		func = 'name=UserFunction, Formula=a*(1-(sin(x*b))/(x*b)), a='+str(aval)+', b='+str(bval)
 	if jump == 'SS':
-		kill,res,nout,Xout,Yout=ssfit.ssfit(nd,X,Y,E,wrk,lwrk)
-		if Verbose:
-			logger.notice(' Normalised Chi-squared = ' +str(res[0]))
-			logger.notice(' Log10[Prob(Singwi-Sjolander|{Data})] = ' +str(res[1]))
-			logger.notice(' Coeff.  A =  ' +str(res[2])+ ' +- ' +str(res[3]))
-			logger.notice(' Coeff.  RR =  ' +str(res[4])+ ' +- ' +str(res[5]))
-	CreateWorkspace(OutputWorkspace=ftWS+'_Fit', DataX=Xout[:nout], DataY=Yout[:nout], DataE=np.zeros(nout),
-		Nspec=1, UnitX='MomentumTransfer')
-	CloneWorkspace(InputWorkspace=samWS, OutputWorkspace=ftWS+'_Data')
-	group = ftWS + '_Data,'+ ftWS +'_Fit'
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=ftWS)
+		aval = xmax
+		bval = 0.24
+		func = 'name=UserFunction, Formula=a*(1-exp(-x*x*b)), a='+str(aval)+', b='+str(bval)
+	fitWS = samWS +'_'+jump +'fit'
+	Fit(Function=func, InputWorkspace=samWS, CreateOutput=True, Output=fitWS)
 	if Save:
-		fit_path = os.path.join(workdir,ftWS+'.nxs')
-		SaveNexusProcessed(InputWorkspace=ftWS, Filename=fit_path)
+		fit_path = os.path.join(workdir,fitWS+'.nxs')
+		SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
 		if Verbose:
 			logger.notice('Fit file is ' + fit_path)
 	if Plot:
-		JumpPlot(ftWS)
-	DeleteWorkspace('__crop')
+		JumpPlot(fitWS+'_Workspace')
 	EndTime('Jump fit : '+jump+' ; ')
 
 def JumpPlot(inputWS):
