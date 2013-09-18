@@ -43,7 +43,7 @@ class JumpFit(PythonAlgorithm):
 			index = 4
 		sam = self.getPropertyValue('SamNumber')
 
-		samWS = prefix+sam+'_'+ana+'_'+prog
+		samWS = prefix+sam+'_'+ana+'_'+prog+'_Workspace'
 		cropOp = self.getProperty('CropQ').value
 		verbOp = self.getProperty('Verbose').value
 		plotOp = self.getProperty('Plot').value
@@ -51,7 +51,7 @@ class JumpFit(PythonAlgorithm):
 
 		workdir = config['defaultsave.directory']
 		if inType == 'File':
-			path = os.path.join(workdir, samWS+'_Workspace.nxs')					# path name for nxs file
+			path = os.path.join(workdir, samWS)					# path name for nxs file
 			LoadNexusProcessed(Filename=path, OutputWorkspace=samWS)
 			message = 'Input from File : '+path
 		else:

@@ -1,5 +1,6 @@
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
+from IndirectCommon import *
 from IndirectImport import import_mantidplot
 import os.path
 mp = import_mantidplot()
@@ -13,7 +14,7 @@ def JumpRun(samWS,jump,Verbose,Plot,Save):
 	StartTime('Jump fit : '+jump+' ; ')
 	workdir = config['defaultsave.directory']
 	if Verbose:
-		logger.notice('Parameters in ' + samWS+'_Workspace')
+		logger.notice('Parameters in ' + samWS)
 	x = mtd[samWS].readX(0)
 	xmax = x[len(x)-1]
 	if jump == 'CE':
