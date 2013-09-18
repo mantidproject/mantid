@@ -49,6 +49,12 @@ void QueryRemoteJob::init()
   // Transaction ID this job is associated with
   declareProperty( "TransID", "", nullValidator, "",  Direction::Output);
 
+  // Times for job submit, job start and job complete (may be empty depending
+  // on the server-side implementation)
+  declareProperty( "SubmitTime", "", nullValidator, "",  Direction::Output);
+  declareProperty( "StartTime", "", nullValidator, "",  Direction::Output);
+  declareProperty( "CompletionTime", "", nullValidator, "",  Direction::Output);
+
 }
 
 void QueryRemoteJob::exec()
@@ -88,6 +94,21 @@ void QueryRemoteJob::exec()
 
     status["TransID"].getValue( value);
     setProperty( "TransID", value);
+
+    // The time stuff is actually an optional extension.  We could check the info
+    // URL and see if the server implements it, but it's easier to just look in
+    // the output and see if the values are there...
+    if (status.find( "SubmitTime") != status.end())
+    {
+      status["SubmitTime"].getValue( value);
+      setProperty( "SubmitTime", value);
+
+      status["StartTime"].getValue( value);
+      setProperty( "StartTime", value);
+
+      status["CompletionTime"].getValue( value);
+      setProperty( "CompletionTime", value);
+    }
   }
   else
   {
