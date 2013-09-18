@@ -152,6 +152,9 @@ void MultipleScatteringCylinderAbsorption::exec()
     throw std::runtime_error("Failed to find sample in the instrument for InputWorkspace");
   double l1 = source->getDistance(*sample);
 
+  //Initialize progress reporting.
+  Progress prog(this,0.0,1.0, nHist);
+
   EventWorkspace_sptr in_WSevent = boost::dynamic_pointer_cast<EventWorkspace>( in_WS );
   if (in_WSevent)
   {
@@ -192,6 +195,7 @@ void MultipleScatteringCylinderAbsorption::exec()
         events[i] = WeightedEventNoTime(tof_vec[i], y_vec[i], err_vec[i]);
       }
       eventList.setSortOrder(Mantid::DataObjects::TOF_SORT);
+      prog.report();
     }
 
     // set the output workspace
@@ -223,9 +227,10 @@ void MultipleScatteringCylinderAbsorption::exec()
       out_WS->dataX(index).assign( tof_vec.begin(), tof_vec.end() );
       out_WS->dataY(index).assign(   y_vec.begin(),   y_vec.end() );
       out_WS->dataE(index).assign( err_vec.begin(), err_vec.end() );
-
-      setProperty("OutputWorkspace",out_WS);
+      prog.report();
     }
+    setProperty("OutputWorkspace",out_WS);
+
   }
 }
 
