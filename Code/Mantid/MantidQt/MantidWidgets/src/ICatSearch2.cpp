@@ -9,6 +9,8 @@ namespace MantidQt
      */
     ICatSearch2::ICatSearch2(QWidget* parent) : QWidget(parent)
     {
+      // Verify if the user has logged in.
+      // if they have: continue...
       initLayout();
     }
 
@@ -51,8 +53,13 @@ namespace MantidQt
       // Show "Search results" frame when user clicks related check box.
       connect(icatUiForm.searchResultsCbox,SIGNAL(clicked()),this,SLOT(showSearchResults()));
 
-      // Resize to improve UX.
+      // No need for error handling as that's dealt with in the algorithm being used.
+      populateInstrumentBox();
+
+      // Resize to minimum width/height to improve UX.
       this->resize(minimumSizeHint());
+      // Auto contract GUI to improve UX.
+      this->layout()->setSizeConstraint(QLayout::SetFixedSize);
     }
 
     /**
@@ -127,11 +134,25 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Populates the "Instrument" drop-box
+     * Populates the "Instrument" list-box
      */
     void ICatSearch2::populateInstrumentBox()
     {
+      // Obtain the list of instruments to display in the drop-box.
+      std::vector<std::string> instrumentList = icatHelper->getInstrumentList();
 
+      std::vector<std::string>::const_iterator citr;
+      for (citr = instrumentList.begin(); citr != instrumentList.end(); ++citr)
+      {
+        // Add each instrument to the instrument box.
+        icatUiForm.instrumentLbox->addItem(QString::fromStdString(*citr));
+      }
+
+      // Sort the drop-box by instrument name.
+      icatUiForm.instrumentLbox->model()->sort(0);
+      // Make the default instrument empty so the user has to select one.
+      icatUiForm.instrumentLbox->insertItem(-1,"");
+      icatUiForm.instrumentLbox->setCurrentIndex(0);
     }
 
     /**
@@ -155,11 +176,10 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Opens the DateTime Calender box when spe.
+     * Opens the DateTime Calendar box when start or end date selected.
      */
     void ICatSearch2::openCalendar()
     {
-
     }
 
     /**
@@ -215,7 +235,7 @@ namespace MantidQt
       // Clear normal search fields.
       icatUiForm.invesNameTxt->clear();
       icatUiForm.startDateTxt->clear();
-      icatUiForm.instrumenLbox->clear();
+      icatUiForm.instrumentLbox->clear();
       icatUiForm.endDateTxt->clear();
       icatUiForm.runRangeTxt->clear();
       icatUiForm.keywordsTxt->clear();
