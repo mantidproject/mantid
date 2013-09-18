@@ -430,17 +430,16 @@ class SNSPowderReduction(PythonAlgorithm):
             elif canRun < 0: # turn off the correction
                 canRun = 0
             if canRun > 0:
+                if self.getProperty("FilterCharacterizations").value:
+                    canFilterWall = timeFilterWall
+                else:
+                    canFilterWall = (0., 0.)
                 if ("%s_%d" % (self._instrument, canRun)) in mtd:
                     canRun = mtd["%s_%d" % (self._instrument, canRun)]
-                    canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 else:
-                    if self.getProperty("FilterCharacterizations").value:
-                        canRun = self._focusChunks(canRun, SUFFIX, timeFilterWall, calib,
+                    canRun = self._focusChunks(canRun, SUFFIX, canFilterWall, calib,
                                preserveEvents=preserveEvents)
-                    else:
-                        canRun = self._focusChunks(canRun, SUFFIX, (0., 0.), calib,
-                               preserveEvents=preserveEvents)
-                    canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
+                canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 workspacelist.append(str(canRun))
             else:
                 canRun = None
@@ -455,6 +454,10 @@ class SNSPowderReduction(PythonAlgorithm):
                 vanRun = 0
             self.log().information("F313C:  Correction SamRun = %s, VanRun = %s of type %s" % (str(samRun), str(vanRun), str(type(vanRun))))
             if vanRun > 0:
+                if self.getProperty("FilterCharacterizations").value:
+                    vanFilterWall = timeFilterWall
+                else:
+                    vanFilterWall = (0., 0.)
                 if ("%s_%d" % (self._instrument, vanRun)) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
@@ -463,19 +466,11 @@ class SNSPowderReduction(PythonAlgorithm):
                         vnoiseRun = 0
                     else:
                         vnoiseRun = self._info.vnoise # noise run for the vanadium
-                    if self.getProperty("FilterCharacterizations").value:
-                        vanRun = self._focusChunks(vanRun, SUFFIX, timeFilterWall, calib,
-                               preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
-                    else:
-                        vanRun = self._focusChunks(vanRun, SUFFIX, (0., 0.), calib,
-                               preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
+                    vanRun = self._focusChunks(vanRun, SUFFIX, vanFilterWall, calib,
+                                               preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
 
                     if (vnoiseRun > 0):
-                        if self.getProperty("FilterCharacterizations").value:
-                            vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, timeFilterWall, calib,
-                               preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
-                        else:
-                            vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, (0., 0.), calib,
+                        vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, vanFilterWall, calib,
                                preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
                         if HAVE_MPI:
                             if rank == 0:
@@ -522,12 +517,8 @@ class SNSPowderReduction(PythonAlgorithm):
                         if ("%s_%d" % (self._instrument, vbackRun)) in mtd:
                             vbackRun = mtd["%s_%d" % (self._instrument, vbackRun)]
                         else:
-                            if self.getProperty("FilterCharacterizations").value:
-                                vbackRun = self._focusChunks(vbackRun, SUFFIX, timeFilterWall, calib,
-                                   preserveEvents=False)
-                            else:
-                                vbackRun = self._focusChunks(vbackRun, SUFFIX, (0., 0.), calib,
-                                   preserveEvents=False)
+                            vbackRun = self._focusChunks(vbackRun, SUFFIX, vanFilterWall, calib,
+                                                         preserveEvents=False)
                         vanRun -= vbackRun
                         workspacelist.append(str(vbackRun))
 
