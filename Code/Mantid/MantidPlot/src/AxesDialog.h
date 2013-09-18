@@ -82,7 +82,7 @@ class AxesDialog: public QDialog
     void showGeneralPage();
     void showAxesPage();
     void showGridPage();
-    void showFormulaBox();
+    //void showFormulaBox();
 
     //! Shows the dialog as a modal dialog
     /**
@@ -92,45 +92,23 @@ class AxesDialog: public QDialog
     int exec();
 
   private slots:
-    void showAxisFormula(int axis);
-    void customAxisLabelFont();
-    void setAxisType(int axis);
-    //void updateAxisType(int axis);
-    void updateTitleBox(int axis);
     bool apply();
     void updateScale();
     void majorGridEnabled(bool on);
     void minorGridEnabled(bool on);
     void showGridOptions(int axis);
     void accept();
-    void customAxisFont();
-    void showAxis();
-    void updateShowBox(int axis);
     void drawFrame(bool framed);
-    void pickAxisColor();
-    void pickAxisNumColor();
-    void updateAxisColor(int);
     int mapToQwtAxis(int axis);
     int mapToQwtAxisId();
-    void updateTickLabelsList(bool);
-    void setTicksType(int);
-    void updateMajTicksType(int);
-    void updateMinTicksType(int);
     void updateGrid();
     void updateFrame(int);
-    void setLabelsNumericFormat(int);
-    void updateLabelsFormat(int);
-    void showAxisFormatOptions(int format);
-    void setBaselineDist(int);
-    void changeBaselineDist(int baseline);
     void changeMinorTicksLength(int minLength);
     void changeMajorTicksLength(int majLength);
     void pickCanvasFrameColor();
     void changeAxesLinewidth(int);
     void drawAxesBackbones(bool);
     void pageChanged(QWidget *page);
-    void showAxis(int, int, const QString&, bool, int, int, bool, const QColor&,
-        int, int, int, int, const QString&, const QColor&);
 
   protected:
     //! generate UI for the axes page
@@ -154,23 +132,7 @@ class AxesDialog: public QDialog
     QTabWidget* generalDialog;
     QWidget *scalesPage, *gridPage, *axesPage, *generalPage;
 
-    /*
-    QCheckBox *boxShowAxis;
-    QGroupBox *labelBox;
-    QTextEdit *boxFormula, *boxTitle;
-    QPushButton * buttonLabelFont;
-    TextFormatButtons *formatButtons;
-    QComboBox *boxMajorTicksType, *boxTableName, *boxMinorTicksType, *boxAxisType, *boxFormat, 
-        *boxColName;
-    QPushButton* btnAxesFont;
-    ColorButton *boxAxisColor, *boxAxisNumColor;
-    QSpinBox *boxPrecision, *boxAngle, *boxBaseline;
-    QGroupBox *boxShowLabels;
-    QLabel *label1, *label2, *label3, *labelTable;
-    QCheckBox *boxShowFormula;
-    */
-
-    QHBoxLayout* scalesLayout;
+    QHBoxLayout *scalesLayout, *axesLayout;
     QListWidget* axesList;
     QCheckBox* boxMajorGrid;
     QCheckBox* boxMinorGrid;
@@ -192,12 +154,6 @@ class AxesDialog: public QDialog
     QSpinBox *boxMajorTicksLength, *boxMinorTicksLength, *boxBorderWidth;
     QComboBox *boxGridXAxis, *boxGridYAxis;
     ColorButton *boxFrameColor;
-
-    QStringList tickLabelsOn, tablesList;
-    QList<int> majTicks, minTicks, axesBaseline;
-    QFont xBottomFont, yLeftFont, xTopFont, yRightFont;
-    bool xAxisOn, yAxisOn, topAxisOn, rightAxisOn;
-    int xBottomLabelsRotation, xTopLabelsRotation;
 
     QCheckBox *boxAntialiseGrid;
     QComboBox *boxApplyGridFormat;
