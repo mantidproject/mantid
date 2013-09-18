@@ -127,41 +127,44 @@ def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scal
     wksp2len=len(w1.dataX(0))
 
     if scalefactor <= 0.0:
-        i1temp = Integration(InputWorkspace=w1, RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
-        i2temp = Integration(InputWorkspace=w2, RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
+        w1_overlap_int = Integration(InputWorkspace=w1, RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
+        w2_overlap_int = Integration(InputWorkspace=w2, RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
         if scalehigh:
-            w2 = Multiply(LHSWorkspace=w2,RHSWorkspace=i1temp)
-            w2 = Divide(LHSWorkspace=w2,RHSWorkspace=i2temp)
+            w2 *= (w1_overlap_int/w2_overlap_int)
         else:
-            w1 = Multiply(LHSWorkspace=w1, RHSWorkspace=i2temp)
-            w1 = Divide(LHSWorkspace=w1, RHSWorkspace=i1temp)
+            w1 *= (w2_overlap_int/w1_overlap_int)
         
-        y1=i1temp.readY(0)
-        y2=i2temp.readY(0)
+        y1=w1_overlap_int.readY(0)
+        y2=w2_overlap_int.readY(0)
         scalefactor = y1[0]/y2[0]
         print "scale factor="+str(scalefactor)
     else:
         w2 = MultiplyRange(InputWorkspace=w2, StartBin=0, EndBin=wksp2len-2, Factor=scalefactor)
         
-    
-    overlap1 = MultiplyRange(InputWorkspace=w1, StartBin=0,EndBin=a1-1)
-    overlap1 = MultiplyRange(InputWorkspace=overlap1,StartBin=a2,EndBin=wksp1len-2)
+    # Mask out everything BUT the overlap region as a new workspace.
+    overlap1 = MultiplyRange(InputWorkspace=w1, StartBin=0,EndBin=a1-1,Factor=0)
+    overlap1 = MultiplyRange(InputWorkspace=overlap1,StartBin=a2,EndBin=wksp1len-2,Factor=0)
 	
-    overlap2 = MultiplyRange(InputWorkspace=w2,StartBin=0,EndBin=a1)#-1
-    overlap2 = MultiplyRange(InputWorkspace=overlap2,StartBin=a2+1,EndBin=wksp1len-2)
+	# Mask out everything BUT the overlap region as a new workspace.
+    overlap2 = MultiplyRange(InputWorkspace=w2,StartBin=0,EndBin=a1,Factor=0)#-1
+    overlap2 = MultiplyRange(InputWorkspace=overlap2,StartBin=a2+1,EndBin=wksp1len-2,Factor=0)
 	
-    w1=MultiplyRange(InputWorkspace=w1,StartBin=a1, EndBin=wksp1len-2)
-    w2=MultiplyRange(InputWorkspace=w2,StartBin=0, EndBin=a2)
+	# Mask out everything AFTER the start of the overlap region
+    w1=MultiplyRange(InputWorkspace=w1,StartBin=a1, EndBin=wksp1len-2,Factor=0)
+    # Mask out everything BEFORE the end of the overlap region
+    w2=MultiplyRange(InputWorkspace=w2,StartBin=0, EndBin=a2,Factor=0)
     
+    # Calculate a weighted mean for the overlap region
     overlapave = WeightedMean(InputWorkspace1=overlap1,InputWorkspace2=overlap2)
-    temp1 = Plus(LHSWorkspace=w1,RHSWorkspace=overlapave)
-    result = Plus(LHSWorkspace=temp1, RHSWorkspace=w2, OutputWorkspace=outputwksp)    
+    # Add the Three masked workspaces together to create a complete x-range
+    result = w1 + overlapave + w2
+    result = RenameWorkspace(InputWorkspace=result, OutputWorkspace=outputwksp)    
     
-    DeleteWorkspace(temp1)
+    # Cleanup
     DeleteWorkspace(w1)
     DeleteWorkspace(w2)
-    DeleteWorkspace(i1temp)
-    DeleteWorkspace(i2temp)
+    DeleteWorkspace(w1_overlap_int)
+    DeleteWorkspace(w2_overlap_int)
     DeleteWorkspace(overlap1)
     DeleteWorkspace(overlap2)
     DeleteWorkspace(overlapave)
