@@ -138,8 +138,10 @@ namespace DataHandling
 
     for( size_t i=0; i<num_banks; ++i)
     {
+      API::Column_const_sptr column = paramTable->getColumn( i+1 );
+      const double bankNumber = column->cell<double>(0);
       std::ostringstream bankName;
-      bankName << "Bank" << (i+1);
+      bankName << "Bank" << bankNumber;
       Element* bankElem = mDoc->createElement("component-link");
       bankElem->setAttribute("name",bankName.str());
       rootElem->appendChild(bankElem);
