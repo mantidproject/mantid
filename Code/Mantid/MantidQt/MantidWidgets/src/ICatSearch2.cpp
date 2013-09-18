@@ -46,13 +46,15 @@ namespace MantidQt
       connect(icatUiForm.searchCbox,SIGNAL(clicked()),this,SLOT(showCatalogSearch()));
       // Show advanced search options if "Advanced search" is checked.
       connect(icatUiForm.advSearchCbox,SIGNAL(clicked()),this,SLOT(advancedSearchChecked()));
+      // Open calender when start or end date is selected
+      connect(icatUiForm.startDatePicker,SIGNAL(clicked()),this, SLOT(openCalendar()));
+      connect(icatUiForm.endDatePicker,SIGNAL(clicked()),this, SLOT(openCalendar()));
       // Clear all fields when reset button is pressed.
       connect(icatUiForm.resetBtn,SIGNAL(clicked()),this,SLOT(onReset()));
       // Show "Search results" frame when user tries to "Search".
       connect(icatUiForm.searchBtn,SIGNAL(clicked()),this,SLOT(searchClicked()));
       // Show "Search results" frame when user clicks related check box.
       connect(icatUiForm.searchResultsCbox,SIGNAL(clicked()),this,SLOT(showSearchResults()));
-
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
       // Although this is an advanced option performing it here allows it to be performed once only.
@@ -136,6 +138,26 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Updates text field depending on button picker selected.
+     * @param :: The name of the text field is derived from the buttonName.
+     */
+    void ICatSearch2::dateSelected(std::string buttonName)
+    {
+      if (buttonName.compare("startDatePicker") == 0)
+      {
+        // Since the user wants to select a startDate we disable the endDate button to prevent any issues.
+        icatUiForm.endDatePicker->setEnabled(false);
+        // Update the text field and re-enable the button.
+        connect(calendar, SIGNAL(selectionChanged()),this, SLOT(updateStartDate()));
+      }
+      else
+      {
+        icatUiForm.startDatePicker->setEnabled(false);
+        connect(calendar, SIGNAL(selectionChanged()),this, SLOT(updateEndDate()));
+      }
+    }
+
+    /**
      * Populates the "Instrument" list-box
      */
     void ICatSearch2::populateInstrumentBox()
@@ -149,7 +171,6 @@ namespace MantidQt
         // Add each instrument to the instrument box.
         icatUiForm.instrumentLbox->addItem(QString::fromStdString(*citr));
       }
-
       // Sort the drop-box by instrument name.
       icatUiForm.instrumentLbox->model()->sort(0);
       // Make the default instrument empty so the user has to select one.
@@ -196,6 +217,48 @@ namespace MantidQt
      */
     void ICatSearch2::openCalendar()
     {
+      // Pop the calendar out into it's own window.
+      QWidget* parent = qobject_cast<QWidget*>(this->parent());
+      calendar = new QCalendarWidget(parent);
+
+      // Set min/max dates to prevent user selecting unusual dates.
+      calendar->setMinimumDate(QDate(1950, 1, 1));
+      calendar->setMaximumDate(QDate(2050, 1, 1));
+
+      // Make the calendar wide and tall enough to see all dates.
+      calendar->setGeometry(QRect(180, 0, 445, 210));
+
+      // Improve UX, then display the calendar.
+      calendar->setGridVisible(true);
+      calendar->setHeaderVisible(false);
+      calendar->setWindowTitle("Calendar picker");
+      calendar->show();
+
+      // Uses the previously clicked button (startDatePicker or endDatePicker) to determine which
+      // text field that the opened calendar is coordinating with (e.g. the one we want to write date to).
+      dateSelected(sender()->name());
+    }
+
+    /**
+     * Update startDate text field when startDatePicker is used and date is selected.
+     */
+    void ICatSearch2::updateStartDate()
+    {
+      // Update the text field with the user selected date then close the calendar.
+      icatUiForm.startDateTxt->setText(calendar->selectedDate().toString("dd/MM/yyyy"));
+      calendar->close();
+      // Re-enable the button to allow the user to select an endDate if they wish.
+      icatUiForm.endDatePicker->setEnabled(true);
+    }
+
+    /**
+     * Update endDate text field when endDatePicker is used and date is selected.
+     */
+    void ICatSearch2::updateEndDate()
+    {
+      icatUiForm.endDateTxt->setText(calendar->selectedDate().toString("dd/MM/yyyy"));
+      calendar->close();
+      icatUiForm.startDatePicker->setEnabled(true);
     }
 
     /**
