@@ -60,12 +60,13 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
             output_ws_name = self.getPropertyValue('OutputWorkspace')
             msg, ws, trans_ws, trans_name = self._call_sans_transmission(workspace, output_ws_name)
             self.setPropertyValue("OutputMessage", msg)
+            self.setProperty("OutputWorkspace", ws)
             if trans_ws is not None:
                 self.setPropertyValue("TransmissionWorkspace", trans_name)
                 self.setProperty("TransmissionWorkspace", trans_ws)
         else:
             ws = self._with_frame_skipping(workspace)            
-            self.setProperty("OutputWorkspace", ws)
+            #self.setProperty("OutputWorkspace", ws)
     
     def _call_sans_transmission(self, workspace, output_workspace_name):
         """
