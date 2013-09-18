@@ -45,9 +45,9 @@ void QueryAllRemoteJobs::init()
 
   // Times for job submit, job start and job complete (may be empty depending
   // on the server-side implementation)
-  declareProperty( new ArrayProperty<std::string>("SubmitTime", nullValidator,  Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("StartTime", nullValidator, Direction::Output));
-  declareProperty( new ArrayProperty<std::string>("CompletionTime", nullValidator,  Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("SubmitDate", nullValidator,  Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("StartDate", nullValidator, Direction::Output));
+  declareProperty( new ArrayProperty<std::string>("CompletionDate", nullValidator,  Direction::Output));
 }
 
 void QueryAllRemoteJobs::exec()
@@ -78,9 +78,9 @@ void QueryAllRemoteJobs::exec()
     std::vector<std::string> jobNames;
     std::vector<std::string> scriptNames;
     std::vector<std::string> transIds;
-    std::vector<std::string> submitTimes;
-    std::vector<std::string> startTimes;
-    std::vector<std::string> completionTimes;
+    std::vector<std::string> submitDates;
+    std::vector<std::string> startDates;
+    std::vector<std::string> completionDates;
 
     JSONObject::const_iterator it = resp.begin();
     while (it != resp.end())
@@ -106,24 +106,24 @@ void QueryAllRemoteJobs::exec()
       // The time stuff is actually an optional extension.  We could check the info
       // URL and see if the server implements it, but it's easier to just look in
       // the output and see if the values are there...
-      if (jobData.find( "SubmitTime") != jobData.end())
+      if (jobData.find( "SubmitDate") != jobData.end())
       {
-        jobData["SubmitTime"].getValue( value);
-        submitTimes.push_back( value);
+        jobData["SubmitDate"].getValue( value);
+        submitDates.push_back( value);
 
-        jobData["StartTime"].getValue( value);
-        startTimes.push_back( value);
+        jobData["StartDate"].getValue( value);
+        startDates.push_back( value);
 
-        jobData["CompletionTime"].getValue( value);
-        completionTimes.push_back( value);
+        jobData["CompletionDate"].getValue( value);
+        completionDates.push_back( value);
       }
       else
       {
         // push back empty strings just so all the array properties have the same
         // number of elements
-        submitTimes.push_back( "");
-        startTimes.push_back( "");
-        completionTimes.push_back( "");
+        submitDates.push_back( "");
+        startDates.push_back( "");
+        completionDates.push_back( "");
       }
 
       it++;
@@ -134,9 +134,9 @@ void QueryAllRemoteJobs::exec()
     setProperty( "JobName", jobNames);
     setProperty( "ScriptName", scriptNames);
     setProperty( "TransID", transIds);
-    setProperty( "SubmitTime", submitTimes);
-    setProperty( "StartTime", startTimes);
-    setProperty( "CompletionTime", completionTimes);
+    setProperty( "SubmitDate", submitDates);
+    setProperty( "StartDate", startDates);
+    setProperty( "CompletionDate", completionDates);
 
   }
   else
