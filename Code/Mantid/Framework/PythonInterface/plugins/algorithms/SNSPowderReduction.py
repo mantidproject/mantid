@@ -19,9 +19,10 @@ all_algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 if 'GatherWorkspaces' in all_algs:
     HAVE_MPI = True
     from mpi4py import MPI
-    rank = MPI.COMM_WORLD.Get_rank()
+    mpiRank = MPI.COMM_WORLD.Get_rank()
 else:
     HAVE_MPI = False
+    mpiRank = 0 # simplify if clauses
 
 COMPRESS_TOL_TOF = .01
 
@@ -152,7 +153,6 @@ class SNSPowderReduction(PythonAlgorithm):
             self._data[info.freq][info.wl]=info
         def __getFrequency(self, request):
             for freq in self._data.keys():
-                # commit 579b5941a6618dc8c4f2ad7838484e375a24ac37
                 if abs(float(freq)-request) == 0.:                    
                     return freq
                 if 100. * abs(float(freq)-request)/request < 5.:
@@ -472,26 +472,7 @@ class SNSPowderReduction(PythonAlgorithm):
                     if (vnoiseRun > 0):
                         vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, vanFilterWall, calib,
                                preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
-                        if HAVE_MPI:
-                            if rank == 0:
-                                vnoiseRun = api.ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
-                                vnoiseRun = api.FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
-                                          Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                                try:
-                                    vanDuration = vanRun.getRun().get('duration')
-                                    vanDuration = vanDuration.value
-                                except:
-                                    vanDuration = 1.
-                                try:
-                                    vbackDuration = vnoiseRun.getRun().get('duration')
-                                    vbackDuration = vbackDuration.value
-                                except:
-                                    vbackDuration = 1.
-                                vnoiseRun *= (vanDuration/vbackDuration)
-                                vanRun -= vnoiseRun
-                                vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                                workspacelist.append(str(vnoiseRun))
-                        else:
+                        if mpiRank == 0:
                             vnoiseRun = api.ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
                             vnoiseRun = api.FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
                                       Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
@@ -522,9 +503,8 @@ class SNSPowderReduction(PythonAlgorithm):
                         vanRun -= vbackRun
                         workspacelist.append(str(vbackRun))
 
-                    if HAVE_MPI:
-                        if rank > 0:
-                            return
+                    if mpiRank > 0:
+                        return
                     if self.getProperty("StripVanadiumPeaks").value:
                         vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
                         # api.CloneWorkspace(InputWorkspace=vanRun, OutputWorkspace=str(vanRun)+"_Raw")
@@ -545,9 +525,8 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 vanRun = None
 
-            if HAVE_MPI:
-                if rank > 0:
-                    return
+            if mpiRank > 0:
+                return
             if samRun == 0:
                 return
             # the final bit of math
@@ -575,13 +554,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 samRun = api.ResetNegatives(InputWorkspace=samRun, OutputWorkspace=samRun, AddMinimum=addMin, ResetValue=0.)
 
             # write out the files
-            if HAVE_MPI:
-                if rank == 0:
-                    self._save(samRun, self._info, normalized, False)
-                    samRun = str(samRun)
-            else:
+            if mpiRank == 0:
                 self._save(samRun, self._info, normalized, False)
-                samRunws = samRun
                 samRun = str(samRun)
             #mtd.releaseFreeMemory()
 
@@ -625,7 +599,7 @@ class SNSPowderReduction(PythonAlgorithm):
             self.log().debug("Load run %s: unable to get events of %s.  Error message: %s" % (str(runnumber), str(wksp), str(e)))
 
         if HAVE_MPI:
-            msg = "MPI Task = %s ;" % (str(rank))
+            msg = "MPI Task = %s ;" % (str(mpiRank))
             try: 
                 msg += "Number Events = " + str(wksp.getNumberEvents())
             except Exception as e: 
@@ -886,13 +860,11 @@ class SNSPowderReduction(PythonAlgorithm):
         frequency = None
         if "SpeedRequest1" in logs.keys():
             frequency = logs['SpeedRequest1']
-            # f5aa61589450be6e43ee592a4aadc63926a83f82 
             if frequency.getStatistics().mean == 0.: 
                 self.log().information("'SpeedRequest1' mean value is zero")                
                 frequency = None 
         else:
             self.log().information("'SpeedRequest1' is not specified in logs")
-        # f5aa61589450be6e43ee592a4aadc63926a83f82
         if frequency is None and "Speed1" in logs.keys():
             frequency = logs['Speed1']
             if frequency.getStatistics().mean == 0.:
