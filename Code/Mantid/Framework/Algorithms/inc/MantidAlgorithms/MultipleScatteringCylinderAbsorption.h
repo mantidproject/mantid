@@ -95,7 +95,8 @@ private:
                              double radius,
                              double coeff1, double coeff2, double coeff3,
                              std::vector<double>& tof,
-                             std::vector<double>& y_val);
+                             std::vector<double>& y_val,
+                             std::vector<double>&errors);
 };
 
 } // namespace Algorithm

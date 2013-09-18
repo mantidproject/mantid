@@ -9,6 +9,7 @@ The java code was translated to C++ in Mantid by Dennis Mikkelson.
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/MultipleScatteringCylinderAbsorption.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PhysicalConstants.h"
 
@@ -23,6 +24,10 @@ DECLARE_ALGORITHM(MultipleScatteringCylinderAbsorption)   // Register the class 
 
 using namespace Kernel;
 using namespace API;
+using Mantid::DataObjects::EventList;
+using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::EventWorkspace_sptr;
+using Mantid::DataObjects::WeightedEventNoTime;
 using std::vector;
 using namespace Mantid::PhysicalConstants;
 using namespace Geometry;
@@ -125,31 +130,81 @@ void MultipleScatteringCylinderAbsorption::exec()
     throw std::runtime_error("Failed to find sample in the instrument for InputWorkspace");
   double l1 = source->getDistance(*sample);
 
-  // Create the new workspace
-  MatrixWorkspace_sptr out_WS = WorkspaceFactory::Instance().create(in_WS, nHist,
-      in_WS->readX(0).size(), in_WS->readY(0).size());
+  EventWorkspace_sptr in_WSevent = boost::dynamic_pointer_cast<EventWorkspace>( in_WS );
+  if (in_WSevent)
+  {
+    // first compress events just to make sure it is a compressed workspace
+    API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
+    compressAlg->setProperty("InputWorkspace", in_WSevent);
+    compressAlg->setProperty("Tolerance", .01);
+    compressAlg->executeAsChildAlg();
+    EventWorkspace_sptr out_WSevent = compressAlg->getProperty("OutputWorkspace");
 
-  for (size_t index = 0; index < nHist; ++index) {
-    IDetector_const_sptr det = in_WS->getDetector(index);
-    if (det == NULL)
-      throw std::runtime_error("Failed to find detector");
-    if ( det->isMasked() ) continue;
-    double l2 = det->getDistance(*sample);
-    double tth_rad = in_WS->detectorTwoTheta(det);
-    double total_path = l1 + l2;
+    // double check the output type
+    if (out_WSevent->getEventType() != API::WEIGHTED_NOTIME)
+      throw std::runtime_error("Can only work with weighted events");
 
-    MantidVec tof_vec = in_WS->readX(index);
-    MantidVec y_vec   = in_WS->readY(index);
+    // now do the correction
+    for (size_t index = 0; index < nHist; ++index) {
+      IDetector_const_sptr det = in_WS->getDetector(index);
+      if (det == NULL)
+        throw std::runtime_error("Failed to find detector");
+      if ( det->isMasked() ) continue;
+      double l2 = det->getDistance(*sample);
+      double tth_rad = in_WS->detectorTwoTheta(det);
+      double total_path = l1 + l2;
 
-    apply_msa_correction( total_path, tth_rad, radius,
-                          coeff1, coeff2, coeff3,
-                          tof_vec, y_vec);
+      EventList& eventList = out_WSevent->getEventList(index);
+      vector<double> tof_vec, y_vec, err_vec;
+      eventList.getTofs(tof_vec);
+      eventList.getWeights(y_vec);
+      eventList.getWeightErrors(err_vec);
 
-    out_WS->dataX(index).assign( tof_vec.begin(), tof_vec.end() );
-    out_WS->dataY(index).assign(   y_vec.begin(),   y_vec.end() );
+      apply_msa_correction( total_path, tth_rad, radius,
+                            coeff1, coeff2, coeff3,
+                            tof_vec, y_vec, err_vec);
+
+      std::vector<WeightedEventNoTime>& events = eventList.getWeightedEventsNoTime();
+      for (size_t i = 0; i < events.size(); ++i)
+      {
+        events[i] = WeightedEventNoTime(tof_vec[i], y_vec[i], err_vec[i]);
+      }
+      eventList.setSortOrder(Mantid::DataObjects::TOF_SORT);
+    }
+
+    // set the output workspace
+    this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(out_WSevent));
   }
-  
-  setProperty("OutputWorkspace",out_WS);
+  else // histogram case
+  {
+    // Create the new workspace
+    MatrixWorkspace_sptr out_WS = WorkspaceFactory::Instance().create(in_WS, nHist,
+                                                                      in_WS->readX(0).size(), in_WS->readY(0).size());
+
+    for (size_t index = 0; index < nHist; ++index) {
+      IDetector_const_sptr det = in_WS->getDetector(index);
+      if (det == NULL)
+        throw std::runtime_error("Failed to find detector");
+      if ( det->isMasked() ) continue;
+      double l2 = det->getDistance(*sample);
+      double tth_rad = in_WS->detectorTwoTheta(det);
+      double total_path = l1 + l2;
+
+      MantidVec tof_vec = in_WS->readX(index);
+      MantidVec y_vec   = in_WS->readY(index);
+      MantidVec err_vec = in_WS->readE(index);
+
+      apply_msa_correction( total_path, tth_rad, radius,
+                            coeff1, coeff2, coeff3,
+                            tof_vec, y_vec, err_vec);
+
+      out_WS->dataX(index).assign( tof_vec.begin(), tof_vec.end() );
+      out_WS->dataY(index).assign(   y_vec.begin(),   y_vec.end() );
+      out_WS->dataE(index).assign( err_vec.begin(), err_vec.end() );
+
+      setProperty("OutputWorkspace",out_WS);
+    }
+  }
 }
 
 
@@ -227,10 +282,9 @@ inline double MultipleScatteringCylinderAbsorption::wavelength( double path_leng
  * Alter the values in the y_vals[] to account for multiple scattering.
  * Parameter total_path is in meters, and the sample radius is in cm.
  */
-void MultipleScatteringCylinderAbsorption::apply_msa_correction( 
-                double total_path, double angle_rad, double radius,
+void MultipleScatteringCylinderAbsorption::apply_msa_correction(double total_path, double angle_rad, double radius,
                 double coeff1,  double coeff2, double coeff3,
-                vector<double>& tof, vector<double>& y_val)
+                vector<double>& tof, vector<double>& y_val, std::vector<double> &errors)
 {
   const double  coeff4 =  1.1967;
   const double  coeff5 = -0.8667;
@@ -264,7 +318,9 @@ void MultipleScatteringCylinderAbsorption::apply_msa_correction(
     double delta = coeff4 * sigir + coeff5 * sigir * sigir;
     double deltp = (delta * sigsct) / (sigsct + sigabs) ;
 
-    y_val[j] *= ( 1.0 - deltp ) / temp;
+    temp = ( 1.0 - deltp ) / temp;
+    y_val[j] *= temp;
+    errors[j] *= temp;
   }
 }
 
