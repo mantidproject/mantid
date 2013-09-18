@@ -1686,20 +1686,16 @@ void ApplicationWindow::disableToolbars()
   plotTools->setEnabled(false);
 }
 
-void ApplicationWindow::hideToolbars()
+/**
+ * Show/hide MantidPlot toolbars.
+ * @param visible If true, make toolbar visible, if false - hidden
+ */
+void ApplicationWindow::setToolbarsVisible(bool visible)
 {
-  standardTools->setVisible(false);
-  displayBar->setVisible(false);
-  plotTools->setVisible(false);
-  formatToolBar->setVisible(false);
-}
-
-void ApplicationWindow::showToolbars()
-{
-  standardTools->setVisible(true);
-  displayBar->setVisible(true);
-  plotTools->setVisible(true);
-  formatToolBar->setVisible(true);
+  standardTools->setVisible(visible);
+  displayBar->setVisible(visible);
+  plotTools->setVisible(visible);
+  formatToolBar->setVisible(visible);
 }
 
 void ApplicationWindow::plot3DRibbon()
@@ -17001,28 +16997,12 @@ else
   MantidQt::API::UserSubWindow *user_interface = interfaceManager.createSubWindow(action_data, usr_win);
   if(user_interface)
   {
-    connect(user_interface, SIGNAL(hideToolbars()), this, SLOT(hideToolbars()));
-    connect(user_interface, SIGNAL(showToolbars()), this, SLOT(showToolbars()));
     setGeometry(usr_win,user_interface);
-    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), this,
-        SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
-    if(user_interface->interfaceName() == "Muon Analysis")
-    {
-      // Re-emits the signal caught from the muon analysis
-      connect(user_interface, SIGNAL(setAsPlotType(const QStringList &)), this, SLOT(setPlotType(const QStringList &)));
-      // Closes the active graph
-      connect(user_interface, SIGNAL(closeGraph(const QString &)), this, SLOT(closeGraph(const QString &)));
-      // Hides the graph
-      connect(user_interface, SIGNAL(hideGraphs(const QString &)), this, SLOT(hideGraphs(const QString &)));
-      // Shows the graph
-      connect(user_interface, SIGNAL(showGraphs()), this, SLOT(showGraphs()));
-      // Activate Peak Picker tool on the requested plot
-      connect(user_interface, SIGNAL(activatePPTool(const QString&)), 
-                        this, SLOT(activatePPTool(const QString&)));
-      // Update the used fit property browser
-      connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
-                    mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
-    } 
+    connect(user_interface, SIGNAL(runAsPythonScript(const QString&, bool)), 
+                      this, SLOT(runPythonScript(const QString&, bool)), Qt::DirectConnection);
+    // Update the used fit property browser
+    connect(user_interface, SIGNAL(setFitPropertyBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)),
+                  mantidUI, SLOT(setFitFunctionBrowser(MantidQt::MantidWidgets::FitPropertyBrowser*)));
     user_interface->initializeLocalPython();
   }
   else
@@ -17035,174 +17015,6 @@ QMessageBox::critical(this, tr("MantidPlot") + " - " + tr("Error"),//Mantid
     tr("MantidPlot was not built with Python scripting support included!"));
 #endif
 }
-
-/**
- * Searches for the plot with a specified name and then attaches Peak Picker tool to it. Disables 
- * the tool from all the other plots.
- * 
- * @param plotName The name of the plot we want to attach the tool to.
- */
-void ApplicationWindow::activatePPTool(const QString& plotName)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-
-      QList<Graph *> layers = plot->layersList();
-
-      if (w->objectName() == plotName)
-      {
-        foreach(Graph *g, layers)
-        {
-          PeakPickerTool* ppicker = new PeakPickerTool(g, mantidUI->fitFunctionBrowser(), mantidUI, true);
-          g->setActiveTool(ppicker);
-        }
-      }
-      else
-      {
-        foreach(Graph *g, layers)
-          g->disableTools();
-      }
-    }
-  }
-}
-
-
-/**
-* Close a given graph
-*
-* @params wsName :: The name of the graph to delete.
-*/
-void ApplicationWindow::closeGraph(const QString & wsName)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() == wsName)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->close();
-        break;
-      }
-    }
-  }
-}
-
-
-/**
-* Hide all the graphs apart from the exception. Default not to have exception.
-*
-* @params exception :: The workspace not to be hidden. Default is no exception ("").
-*/
-void ApplicationWindow::hideGraphs(const QString & exception)
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-    {
-      if (w->objectName() != exception)
-      {
-        MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-        plot->setconfirmcloseFlag(false);
-        w->setHidden();
-      }
-    }
-  }
-}
-
-
-/**
-* Show all the graphs that are hidden
-*/
-void ApplicationWindow::showGraphs()
-{
-  QList<MdiSubWindow *> windows = windowsList();
-  foreach (MdiSubWindow *w, windows) 
-  {
-    if (w->isA("MultiLayer"))
-      activateWindow(w);
-  }
-}
-
-
-/**
-* Makes sure that it is dealing with a graph and then tells the plotDialog class 
-* to change the plot style
-*
-* @params plotDetails :: This includes all details of the plot [wsName, connectType, plotType, Errors, Color]
-*/
-void ApplicationWindow::setPlotType(const QStringList & plotDetails)
-{
-  if (plotDetails.size() == 0)
-  {
-    QMessageBox::information(this, "Mantid - Error", "Plot type or workspace name is missing. Please contact a Mantid team member.");
-  }
-  else
-  {
-    if (plotDetails.size() > 3)
-    {
-      int connectType = plotDetails[1].toInt();
-      QList<MdiSubWindow *> windows = windowsList();
-      foreach (MdiSubWindow *w, windows) 
-      {
-        if (w->isA("MultiLayer"))
-        {
-          MultiLayer *plot = dynamic_cast<MultiLayer*>(w);
-          {
-            // Check to see if graph is the new one by comparing the names
-            if (w->objectName() == plotDetails[0] + "-1")
-            {
-              PlotDialog* pd = new PlotDialog(d_extended_plot_dialog, this, plot);
-              //pd->setMultiLayer(plot);
-              Graph *g = plot->activeGraph();
-              if (g)
-              {
-                int curveNum(-1);
-
-                if (plotDetails[2] == "Data")
-                {
-                  curveNum = g->curveIndex(plotDetails[0]); //workspaceName
-                  if (plotDetails[3] == "AllErrors") // if all errors, display all errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(true, true);
-                  }
-                  else // don't show errors
-                  {
-                    QwtPlotCurve *temp = g->curve(curveNum);
-                    MantidMatrixCurve *curve = dynamic_cast<MantidMatrixCurve *>(temp);
-                    curve->setErrorBars(false, false);
-                  }
-                }
-                if (curveNum > -1) // If one of the curves has been changed 
-                {
-                  // line(0) scatter(1) line+symbol(2)
-                  if (connectType >= 0 && connectType <= 2)
-                  {
-                    if (plotDetails.size() > 4)
-                      pd->setPlotType(connectType, curveNum, plotDetails[4]);
-                    else
-                      pd->setPlotType(connectType, curveNum);            
-                  }
-                  g->replot();
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 
 void ApplicationWindow::loadCustomActions()
 {

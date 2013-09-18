@@ -107,6 +107,29 @@ MuonAnalysis::MuonAnalysis(QWidget *parent) :
   }
 }
 
+/**
+ * Initialize local Python environmnet. 
+ */
+void MuonAnalysis::initLocalPython()
+{
+  QString code;
+
+  code += "from mantid.simpleapi import *\n";
+
+  // Needed for Python GUI API
+  code += "from PyQt4.QtGui import QPen, QBrush, QColor\n"
+          "from PyQt4.QtCore import QSize\n";
+
+  runPythonCode(code);
+
+  // TODO: Following shouldn't be here. It is now because ApplicationWindow sets up the Python 
+  // environment only after the UserSubWindow is shown.
+
+  // Hide the toolbars, if user wants to
+  if(m_uiForm.hideToolbars->isChecked())
+    setToolbarsHidden(true);
+}
+
 /// Set up the dialog layout
 void MuonAnalysis::initLayout()
 {
@@ -128,7 +151,7 @@ void MuonAnalysis::initLayout()
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
   m_optionTab->initLayout();
   // Add the graphs back to mantid if the user selects not to hide graphs on settings tab.
-  connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SIGNAL (showGraphs()));
+  connect(m_optionTab, SIGNAL(notHidingGraphs()), this, SLOT(showAllPlotWindows()));
 
   m_fitDataTab = new MuonAnalysisFitDataTab(m_uiForm);
   m_fitDataTab->init();
@@ -180,7 +203,7 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.frontGroupGroupPairComboBox, SIGNAL(currentIndexChanged(int)), this,
     SLOT(runFrontGroupGroupPairComboBox(int)));
 
-  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(showHideToolbars(bool)));
+  connect(m_uiForm.hideToolbars, SIGNAL(toggled(bool)), this, SLOT(setToolbarsHidden(bool)));
 
   // connect "?" (Help) Button
   connect(m_uiForm.muonAnalysisHelp, SIGNAL(clicked()), this, SLOT(muonAnalysisHelpClicked()));
@@ -2047,42 +2070,15 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
     // create first part of plotting Python string
     QString gNum = QString::number(wsIndex);
     QString pyS;
-    if ( m_uiForm.showErrorBars->isChecked() )
-      pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ",True)\n";
-    else
-      pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ")\n";
+
+    // Plot error bars by default. If not needed they will get hidden when plot style if applied.
+    pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ",True)\n";
+
     // Add the objectName for the peakPickerTool to find
     pyS += "gs.setObjectName(\"" + wsName + "\")\n"
            "l = gs.activeLayer()\n"
            "l.setCurveTitle(0, \"" + wsName + "\")\n"
            "l.setTitle(\"" + m_title.c_str() + "\")\n";
-      
-    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(wsName.toStdString());
-    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-    if ( !m_uiForm.yAxisAutoscale->isChecked() )
-    {
-      const Mantid::MantidVec& dataY = matrix_workspace->readY(wsIndex);
-      double min = 0.0; double max = 0.0;
-
-      if (m_uiForm.yAxisMinimumInput->text().isEmpty())
-      {
-        min = *min_element(dataY.begin(), dataY.end());
-      }
-      else
-      {
-        min = boost::lexical_cast<double>(m_uiForm.yAxisMinimumInput->text().toStdString());
-      }
-
-      if (m_uiForm.yAxisMaximumInput->text().isEmpty())
-      {
-        max = *max_element(dataY.begin(), dataY.end());
-      }
-      else
-      {
-        max = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
-      }     
-      pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
-    }
 
     if ( ylogscale )
       pyS += "l.logYlinX()\n";
@@ -2091,8 +2087,162 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex, const 
     runPythonCode( pyS );
 }
 
+/**
+ * Set various style parameters for the plot of the given ws
+ * @param wsName Workspace which plot to style
+ * @param params Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
+                 of possible keys
+ */
+void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QString>& params)
+{
+  QString code;
+
+  // Get the active layer of the graph
+  code += "l = graph('"+ wsName + "-1').activeLayer()\n";
+
+  // Set whether to show symbols
+  QString symbolStyle = (params["ConnectType"] == "0") ? QString("PlotSymbol.NoSymbol") : QString("PlotSymbol.Ellipse");
+  code += "l.setCurveSymbol(0, PlotSymbol(" + symbolStyle +", QBrush(), QPen(), QSize(5,5)))\n";
+
+  // Set whether to show line
+  QString penStyle = (params["ConnectType"] == "1") ? QString("Qt.NoPen") : QString("Qt.SolidLine");
+  code += "pen = QPen(Qt.black)\n"
+          "pen.setStyle(" + penStyle +")\n"
+          "l.setCurvePen(0, pen)\n";
+
+  // Set error settings
+  QString showErrors = (params["ShowErrors"] == "True") ? QString("True") : QString("False");
+  code += "errorSettings = l.errorBarSettings(0, 0)\n"
+          "errorSettings.drawMinusSide(" + showErrors + ")\n"
+          "errorSettings.drawPlusSide(" + showErrors + ")\n";
+
+  // If autoscaling disabled - set manual Y axis values
+  if(params["YAxisAuto"] == "False")
+    code += "l.setAxisScale(Layer.Left," + params["YAxisMin"] + "," + params["YAxisMax"] + ")\n";
+
+  // Replot
+  code += "l.replot()\n";
+
+  runPythonCode(code);
+}
+
+/**
+ * Get current plot style parameters. wsName and wsIndex are used to get default values if 
+ * something is not specified.
+ * @param wsName Workspace plot of which we want to style
+ * @param wsIndex Workspace index of the plot data
+ * @return Maps of the parameters, see MuonAnalysisOptionTab::parsePlotStyleParams for list
+           of possible keys
+ */
+QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString& wsName, const int wsIndex)
+{
+  // Get parameter values from the options tab
+  QMap<QString, QString> params = m_optionTab->parsePlotStyleParams();
+
+  // If autoscale disabled
+  if(params["YAxisAuto"] == "False")
+  {
+    // Get specified min/max values for Y axis
+    QString min = params["YAxisMin"];
+    QString max = params["YAxisMax"];
+
+    // If any of those is not specified - get min and max by default
+    if(min.isEmpty() || max.isEmpty())
+    {
+      Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+      MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      const Mantid::MantidVec& dataY = matrix_workspace->readY(wsIndex);
+
+      if(min.isEmpty())
+        params["YAxisMin"] = QString::number(*min_element(dataY.begin(), dataY.end()));
+
+      if(max.isEmpty())
+        params["YAxisMax"] = QString::number(*max_element(dataY.begin(), dataY.end()));
+    }
+  }
+
+  return params;
+}
+
+/**
+ * Closes the window with the plot of the given ws.
+ * @param wsName Name of the workspace which plot window to close
+ */
+void MuonAnalysis::closePlotWindow(const QString& wsName)
+{
+  QString code;
+
+  code += "g = graph('"+ wsName + "-1')\n"
+          "if g != None:\n"
+          "  g.confirmClose(False)\n"
+          "  g.close()\n";
+
+  runPythonCode(code);
+}
+
+/**
+ * Enable PP tool for the plot of the given WS.
+ * @param wsName Name of the WS which plot PP tool will be attached to.
+ */
+void MuonAnalysis::selectMultiPeak(const QString& wsName)
+{
+  QString code;
+
+  code += "g = graph('" + wsName + "-1')\n"
+          "if g != None:\n"
+          "  g.show()\n"
+          "  selectMultiPeak(g)\n";
+
+  runPythonCode(code);
+}
+
+/**
+ * Disable tools for all the graphs within MantidPlot.
+ */
+void MuonAnalysis::disableAllTools()
+{
+  runPythonCode("disableTools()");
+}
+
+/**
+ * Hides all the plot windows (MultiLayer ones)
+ */
+void MuonAnalysis::hideAllPlotWindows()
+{
+  QString code;
+
+  code += "for w in windows():\n"
+          "  if w.inherits('MultiLayer'):\n"
+          "    w.hide()\n";
+
+  runPythonCode(code);
+}
+
+/**
+ * Shows all the plot windows (MultiLayer ones)
+ */
+void MuonAnalysis::showAllPlotWindows()
+{
+  QString code;
+
+  code += "for w in windows():\n"
+          "  if w.inherits('MultiLayer'):\n"
+          "    w.show()\n";
+
+  runPythonCode(code);
+}
+
+/**
+ * Show a plot for a given workspace. Closes previous plot if exists.
+ * @param wsName The name of workspace to be plotted. Should exist in ADS.
+ */
 void MuonAnalysis::showPlot(const QString& wsName)
 {
+  // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
+  //       only one groups)
+
+  // TODO: if we are using Python, can first check if window exists, and just show it in that case
+
   // If empty -> no workspaces available to choose (e.g. all were deleted)
   if(wsName.isEmpty())
   {
@@ -2109,15 +2259,15 @@ void MuonAnalysis::showPlot(const QString& wsName)
   {
     setCurrentDataName(wsName);
 
-    emit closeGraph(m_currentDataName + "-1");
+    closePlotWindow(m_currentDataName);
     plotSpectrum(m_currentDataName, 0, false);
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab.
-    QStringList plotDetails = m_fitDataTab->getAllPlotDetails(m_currentDataName);
-    changePlotType(plotDetails);
+    setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
 
-    emit activatePPTool(m_currentDataName + "-1");
+    disableAllTools();
+    selectMultiPeak(m_currentDataName);
   }
 }
 
@@ -2160,13 +2310,9 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     // curve plot label
     QString titleLabel = cropWS;
 
-    // Should we hide all graphs except for the one specified
-    // Note the "-1" is added when a new graph for a WS is created
-    // for the first time. The 2nd time a plot is created for the 
-    // same WS I believe this number is "-2". Currently do not 
-    // fully understand the purpose of this exception here. 
-    if (m_uiForm.hideGraphs->isChecked() )
-      emit hideGraphs(titleLabel + "-1"); 
+    // Hide all the previous plot windows, if requested by user
+    if (m_uiForm.hideGraphs->isChecked())
+      hideAllPlotWindows();
 
     // check if user specified periods - if multiple period data 
     QStringList periodLabel = getPeriodLabels();
@@ -2245,8 +2391,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab.
-    QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
-    changePlotType(plotDetails);
+    setPlotStyle(titleLabel, getPlotStyleParams(titleLabel, groupNum));
 
     setCurrentDataName(titleLabel);
   }
@@ -2287,13 +2432,9 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     // curve plot label
     QString titleLabel = cropWS;
 
-    // Should we hide all graphs except for the one specified
-    // Note the "-1" is added when a new graph for a WS is created
-    // for the first time. The 2nd time a plot is created for the 
-    // same WS I believe this number is "-2". Currently do not 
-    // fully understand the purpose of this exception here. 
-    if (m_uiForm.hideGraphs->isChecked() )
-      emit hideGraphs(titleLabel + "-1"); 
+    // Hide all the previous plot windows, if requested by user
+    if (m_uiForm.hideGraphs->isChecked())
+      hideAllPlotWindows();
 
     // check if user specified periods - if multiple period data 
     QStringList periodLabel = getPeriodLabels();
@@ -2374,9 +2515,8 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     plotSpectrum(cropWS, 0);
 
     // Change the plot style of the graph so that it matches what is selected on
-    // the plot options tab. Default is set to line (0).
-    QStringList plotDetails = m_fitDataTab->getAllPlotDetails(titleLabel);
-    changePlotType(plotDetails);
+    // the plot options tab
+    setPlotStyle(titleLabel, getPlotStyleParams(titleLabel, 0));
     
     setCurrentDataName(titleLabel);
   }
@@ -2395,7 +2535,7 @@ QString MuonAnalysis::getNewPlotName(const QString & cropWSfirstPart)
     {
       if((m_uiForm.plotCreation->currentIndex() == 0) || (m_uiForm.plotCreation->currentIndex() == 2) )
       {
-        emit closeGraph(cropWS + "-1");
+        closePlotWindow(cropWS);
         AnalysisDataService::Instance().remove(cropWS.toStdString());
         break;
       }
@@ -3449,7 +3589,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 
   // Make sure all toolbars are still not visible. May have brought them back to do a plot.
   if (m_uiForm.hideToolbars->isChecked())
-    emit hideToolbars();
+    setToolbarsHidden(true);
 
   m_uiForm.fitBrowser->setStartX(m_uiForm.timeAxisStartAtInput->text().toDouble());
   m_uiForm.fitBrowser->setEndX(m_uiForm.timeAxisFinishAtInput->text().toDouble());
@@ -3460,7 +3600,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
     emit setFitPropertyBrowser(NULL);
 
     // Remove PP tool from any plots it was attached to
-    emit activatePPTool("");
+    disableAllTools();
 
     // Disconnect to avoid problems when filling list of workspaces in fit prop. browser
     disconnect(m_uiForm.fitBrowser, SIGNAL(workspaceNameChanged(const QString&)),
@@ -3583,28 +3723,28 @@ bool MuonAnalysis::isAutoUpdateEnabled()
 }
 
 /**
-* Re-open the toolbars after closing MuonAnalysis
-*/
-void MuonAnalysis::closeEvent(QCloseEvent *e)
+ * Executed when interface gets hidden or closed
+ */
+void MuonAnalysis::hideEvent(QHideEvent *e)
 {
-  // Show the toolbar
+  // Show the toolbars
   if (m_uiForm.hideToolbars->isChecked())
-    emit showToolbars();
+    setToolbarsHidden(false);
 
   // If closed while on DA tab, reassign fit property browser to default one
   if(m_tabNumber == 3)
     emit setFitPropertyBrowser(NULL);
 
   // Delete the peak picker tool because it is no longer needed.
-  emit activatePPTool("");
+  disableAllTools();
 
   e->accept();
 }
 
 
 /**
-* Hide the toolbar after opening MuonAnalysis if setting requires it
-*/
+ * Executed when interface gets shown
+ */
 void MuonAnalysis::showEvent(QShowEvent *e)
 {
   const std::string facility = ConfigService::Instance().getFacility().name();
@@ -3618,22 +3758,24 @@ void MuonAnalysis::showEvent(QShowEvent *e)
   {
     m_uiForm.loadCurrent->setDisabled(false);
   }
-  // Hide the toolbar
+
+  // Hide the toolbars
   if (m_uiForm.hideToolbars->isChecked() )
-    emit hideToolbars();
+    setToolbarsHidden(true);
 
   e->accept();
 }
 
 /**
-* Show/Hide Toolbar
-*/
-void MuonAnalysis::showHideToolbars(bool state)
+ * Hide/show MantidPlot toolbars.
+ * @param hidden If true, toolbars will be hidden, if false - shown
+ */
+void MuonAnalysis::setToolbarsHidden(bool hidden)
 {
-  if (state == true)
-    emit hideToolbars();
+  if (hidden == true)
+    runPythonCode("setToolbarsVisible(False)");
   else
-    emit showToolbars();
+    runPythonCode("setToolbarsVisible(True)");
 }
 
 

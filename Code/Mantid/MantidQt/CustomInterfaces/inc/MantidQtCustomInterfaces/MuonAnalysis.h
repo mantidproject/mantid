@@ -63,15 +63,8 @@ public:
   /// Name of the interface
   static std::string name() { return "Muon Analysis"; }
 
-
-public:
   /// Default Constructor
   MuonAnalysis(QWidget *parent = 0);
-
-  void initLocalPython()
-  {
-    runPythonCode("from mantid.simpleapi import *");
-  }
 
 private slots:
   /// Guess Alpha clicked
@@ -125,8 +118,8 @@ private slots:
   /// User select instrument
   void userSelectInstrument(const QString& prefix);
 
-  /// User clicks hide toolbars checkbox
-  void showHideToolbars(bool state);
+  /// Hide/show MantidPlot toolbars
+  void setToolbarsHidden(bool hidden);
 
   /// Run the plot button on the home tab.
   void runFrontPlotButton();
@@ -170,11 +163,23 @@ private slots:
    */
   bool isAutoUpdateEnabled();
 
-  /**
-   * Show a plot for a given workspace. Hides previous plot if exists.
-   * @param wsName The name of workspace to be plotted. Should exist in ADS.
-   */
+  // Show a plot for a given workspace. Closes previous plot if exists.
   void showPlot(const QString& wsName);
+
+  /// Closes the window with the plot of the given ws
+  void closePlotWindow(const QString& wsName);
+
+  /// Enable PP tool for the plot of the given WS
+  void selectMultiPeak(const QString& wsName);
+
+  /// Disable tools for all the graphs within MantidPlot
+  void disableAllTools();
+
+  /// Hides all the plot windows (MultiLayer ones)
+  void hideAllPlotWindows();
+
+  /// Shows all the plot windows (MultiLayer ones)
+  void showAllPlotWindows();
 
   /// Called when the plot function has been changed on the home page.
   void changeHomeFunction();
@@ -187,8 +192,11 @@ private slots:
 
 
 private:
+  /// Initialize local Python environment
+  void initLocalPython();
+
   /// Initialize the layout
-  virtual void initLayout();
+  void initLayout();
 
   /// Set start up interface look
   void startUpLook();
@@ -196,10 +204,10 @@ private:
   /// Change the connected data name
   void setCurrentDataName(const QString& name);
 
-  /// Catch when the interface is closed and do something before.
-  void closeEvent(QCloseEvent *e);
+  /// Executed when interface gets hidden or closed
+  void hideEvent(QHideEvent *e);
   
-  /// Catch when the interface is shown and do something before.
+  /// Executed when interface gets shown
   void showEvent(QShowEvent *e);
 
   /// Input file changed - update GUI accordingly
@@ -278,8 +286,18 @@ private:
   /// Plot pair
   void plotPair(const std::string& plotType);
 
-  /// plots specific WS spectrum (used by plotPair and plotGroup)
+  // TODO: wsIndex can be removed from functions below if we put only one group to the workspace
+  //       (as we are doing with pairs)
+
+  /// Plots specific WS spectrum (used by plotPair and plotGroup)
   void plotSpectrum(const QString& wsName, const int wsIndex, const bool ylogscale = false);
+
+  /// Set various style parameters for the plot of the given ws
+  void setPlotStyle(const QString& wsName, const QMap<QString, QString>& params);
+
+  /// Get current plot style parameters. wsName and wsIndex are used to get default values if 
+  /// something is not specified
+  QMap<QString, QString> getPlotStyleParams(const QString& wsName, const int wsIndex);
 
   /// get period labels
   QStringList getPeriodLabels() const;
