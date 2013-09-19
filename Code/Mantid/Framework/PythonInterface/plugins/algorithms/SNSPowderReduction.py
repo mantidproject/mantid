@@ -466,32 +466,10 @@ class SNSPowderReduction(PythonAlgorithm):
                         vnoiseRun = 0
                     else:
                         vnoiseRun = self._info.vnoise # noise run for the vanadium
+                        if vnoiseRun > 0:
+                            raise RuntimeError("Vanadium noise correction has been removed from the workflow")
                     vanRun = self._focusChunks(vanRun, SUFFIX, vanFilterWall, calib,
-                                               preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
-
-                    if (vnoiseRun > 0):
-                        vnoiseRun = self._focusChunks(vnoiseRun, SUFFIX, vanFilterWall, calib,
-                               preserveEvents=False, normByCurrent = False, filterBadPulsesOverride=False)
-                        if mpiRank == 0:
-                            vnoiseRun = api.ConvertUnits(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Target="TOF")
-                            vnoiseRun = api.FFTSmooth(InputWorkspace=vnoiseRun, OutputWorkspace=vnoiseRun, Filter="Butterworth",
-                                      Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
-                            try:
-                                vanDuration = vanRun.getRun().get('duration')
-                                vanDuration = vanDuration.value
-                            except:
-                                vanDuration = 1.
-                            try:
-                                vbackDuration = vnoiseRun.getRun().get('duration')
-                                vbackDuration = vbackDuration.value
-                            except:
-                                vbackDuration = 1.
-                            vnoiseRun *= (vanDuration/vbackDuration)
-                            vanRun -= vnoiseRun
-                            vanRun = api.NormaliseByCurrent(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                            workspacelist.append(str(vnoiseRun))
-                    else:
-                        vnoiseRun = None
+                                               preserveEvents=False, normByCurrent=normbycurrent)
 
                     vbackRun = self.getProperty("VanadiumBackgroundNumber").value
                     if vbackRun > 0:
