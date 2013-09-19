@@ -4,7 +4,6 @@ from mantid.kernel import StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
 import os.path
-from IndirectJumpFit import JumpRun
 
 class JumpConvFit(PythonAlgorithm):
  
@@ -29,6 +28,7 @@ class JumpConvFit(PythonAlgorithm):
 
  
 	def PyExec(self):
+		from IndirectJumpFit import JumpRun
 		
 		self.log().information('Jump input')
 		inType = self.getPropertyValue('InputType')
