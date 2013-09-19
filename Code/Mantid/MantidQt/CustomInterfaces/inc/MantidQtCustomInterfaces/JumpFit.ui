@@ -23,37 +23,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="cbOutputFrom">
-       <item>
-        <property name="text">
-         <string>QLr</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>QLd</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="cbFunction">
-       <item>
-        <property name="text">
-         <string>Chudley-Elliott</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="lblFunc">
-       <property name="text">
-        <string>Function: </string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
+     <item row="0" column="1" colspan="3">
       <widget class="MantidQt::MantidWidgets::DataSelector" name="dsSample">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -64,9 +34,19 @@
        <property name="loadLabelText" stdset="0">
         <string>Plot</string>
        </property>
+       <property name="workspaceSuffixes" stdset="0">
+        <stringlist>
+         <string>_red</string>
+        </stringlist>
+       </property>
+       <property name="fileBrowserSuffixes" stdset="0">
+        <stringlist>
+         <string>_red.nxs</string>
+        </stringlist>
+       </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="1" column="3">
       <widget class="QComboBox" name="cbWidth">
        <item>
         <property name="text">
@@ -85,21 +65,50 @@
        </item>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="lblOutputFrom">
-       <property name="text">
-        <string>Output From: </string>
-       </property>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="cbFunction">
+       <item>
+        <property name="text">
+         <string>Chudley-Elliott</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Singwi-Sjolander</string>
+        </property>
+       </item>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="1" column="2">
       <widget class="QLabel" name="lblWidth">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Width: </string>
        </property>
       </widget>
      </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="lblFunc">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Fit Function: </string>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout_2"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">

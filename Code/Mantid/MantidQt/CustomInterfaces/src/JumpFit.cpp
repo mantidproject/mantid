@@ -68,7 +68,7 @@ namespace MantidQt
 
     void JumpFit::updateProperties(QtProperty* prop, double val)
     {
-    	if(prop == m_properties["QMax"])
+    	if(prop == m_properties["QMin"])
     	{
     		updateLowerGuide(m_properties["QMin"], m_properties["QMax"], val);
     	}
