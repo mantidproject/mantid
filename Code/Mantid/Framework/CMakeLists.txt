@@ -100,10 +100,7 @@ include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
-if(MAKE_REMOTE_JOBS)
-  add_subdirectory (RemoteAlgorithms)
-endif(MAKE_REMOTE_JOBS)
-
+add_subdirectory (RemoteAlgorithms)
 add_subdirectory (Nexus)
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
