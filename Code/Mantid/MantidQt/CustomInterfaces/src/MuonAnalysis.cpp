@@ -3632,6 +3632,7 @@ void MuonAnalysis::changeTab(int newTabNumber)
 void MuonAnalysis::connectAutoUpdate()
 {
   // Home tab Auto Updates
+  connect(m_uiForm.timeZeroFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(firstPeriodSelectionChanged()));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
