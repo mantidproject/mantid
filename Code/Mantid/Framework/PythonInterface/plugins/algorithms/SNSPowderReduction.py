@@ -502,6 +502,8 @@ class SNSPowderReduction(PythonAlgorithm):
                                                          preserveEvents=False)
                         vanRun -= vbackRun
                         workspacelist.append(str(vbackRun))
+                    else:
+                        vbackRun = None
 
                     if mpiRank > 0:
                         return
@@ -848,11 +850,9 @@ class SNSPowderReduction(PythonAlgorithm):
 
         # About return
         if splitwksp is None:
-            returnee = wksplist[0]
+            return wksplist[0]
         else:
-            returnee = wksplist
-
-        return returnee
+            return wksplist
 
     def _getinfo(self, wksp):
         logs = wksp.getRun()
