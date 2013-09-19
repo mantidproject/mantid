@@ -134,6 +134,23 @@ public:
     check_the_map(map);
   }
 
+  void test_getSpectrumNumbers()
+  {
+    specid_t specs[] = {5,4,4,3};
+    detid_t detids[] = {10,99,20,30};
+
+    SpectrumDetectorMapping map(specs, detids, 4);
+    auto uniqueSpecs = map.getSpectrumNumbers();
+
+    TS_ASSERT_EQUALS(3, uniqueSpecs.size());
+
+    TS_ASSERT_EQUALS(1, uniqueSpecs.count(3));
+    TS_ASSERT_EQUALS(1, uniqueSpecs.count(4));
+    TS_ASSERT_EQUALS(1, uniqueSpecs.count(5));
+
+  }
+
+
   void test_getDetectorIDsForSpectrumNo()
   {
     auto ws = boost::make_shared<WorkspaceTester>();

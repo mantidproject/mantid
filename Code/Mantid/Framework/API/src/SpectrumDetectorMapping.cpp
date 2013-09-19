@@ -61,7 +61,8 @@ namespace API
   }
 
   /// Called by the vector constructors to do the actual filling
-  void SpectrumDetectorMapping::fillMapFromVector(const std::vector<specid_t>& spectrumNumbers, const std::vector<detid_t>& detectorIDs, 
+  void SpectrumDetectorMapping::fillMapFromVector(const std::vector<specid_t>& spectrumNumbers,
+                                                  const std::vector<detid_t>& detectorIDs,
                                                   const std::vector<detid_t>& ignoreDetIDs)
   {
     std::set<detid_t> ignoreIDs(ignoreDetIDs.begin(), ignoreDetIDs.end());
@@ -76,6 +77,19 @@ namespace API
   /// Destructor
   SpectrumDetectorMapping::~SpectrumDetectorMapping()
   {}
+
+  /// @returns An ordered set of the unique spectrum numbers
+  std::set<specid_t> SpectrumDetectorMapping::getSpectrumNumbers() const
+  {
+    std::set<specid_t> specs;
+    auto itend = m_mapping.end();
+    for(auto it = m_mapping.begin(); it != itend; ++it)
+    {
+      specs.insert(it->first);
+    }
+    return specs;
+  }
+
 
   const std::set<detid_t>&
   SpectrumDetectorMapping::getDetectorIDsForSpectrumNo(const specid_t spectrumNo) const

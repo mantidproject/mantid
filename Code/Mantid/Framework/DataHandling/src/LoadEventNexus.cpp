@@ -2257,6 +2257,21 @@ bool LoadEventNexus::loadSpectraMapping(const std::string& filename, const bool 
   {
     return false; // Doesn't exist
   }
+
+  // The ISIS spectrum mapping is defined by 2 arrays in isis_vms_compat block:
+  //   UDET - An array of detector IDs
+  //   SPEC - An array of spectrum numbers
+  // There sizes must match. Hardware allows more than one detector ID to be mapped to a single spectrum
+  // and this is encoded in the SPEC/UDET arrays by repeating the spectrum number in the array
+  // for each mapped detector, e.g.
+  //
+  // 1 1001
+  // 1 1002
+  // 2 2001
+  // 3 3001
+  //
+  // defines 3 spectra, where the first spectrum contains 2 detectors
+
   // UDET
   file.openData("UDET");
   std::vector<int32_t> udet;
@@ -2305,8 +2320,18 @@ bool LoadEventNexus::loadSpectraMapping(const std::string& filename, const bool 
   else
   {
     g_log.debug() << "Loading only detector spectra from " << filename << "\n";
-    SpectrumDetectorMapping mapping(spec,udet);
-    WS->resizeTo(mapping.getMapping().size()-nmons);
+    SpectrumDetectorMapping mapping(spec,udet, monitors);
+    WS->resizeTo(mapping.getMapping().size());
+    // Make sure spectrum numbers are correct
+    auto uniqueSpectra = mapping.getSpectrumNumbers();
+    auto itend = uniqueSpectra.end();
+    size_t counter = 0;
+    for(auto it = uniqueSpectra.begin(); it != itend; ++it)
+    {
+      WS->getSpectrum(counter)->setSpectrumNo(*it);
+      ++counter;
+    }
+    // Fill detectors based on this mapping
     WS->updateSpectraUsing(mapping);
   }
   return true;

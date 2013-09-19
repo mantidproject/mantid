@@ -53,6 +53,7 @@ namespace API
     SpectrumDetectorMapping(const specid_t* const spectrumNumbers, const detid_t* const detectorIDs, size_t arrayLengths);
     virtual ~SpectrumDetectorMapping();
 
+    std::set<specid_t> getSpectrumNumbers() const;
     const std::set<detid_t>& getDetectorIDsForSpectrumNo(const specid_t spectrumNo) const;
     const sdmap& getMapping() const;
 
