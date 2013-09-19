@@ -1117,6 +1117,9 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     // Get dead times from file.
     else if (m_uiForm.deadTimeType->currentIndex() == 2)
     {
+      if(!m_uiForm.mwRunDeadTimeFile->isValid())
+        throw std::runtime_error("Specified Dead Time file is not valid.");
+
       QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
 
       getDeadTimeFromFile(deadTimeFile);
