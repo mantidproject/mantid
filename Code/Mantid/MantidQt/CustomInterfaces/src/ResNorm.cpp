@@ -60,7 +60,6 @@ namespace MantidQt
 		void ResNorm::run() 
 		{
 			QString verbose("False");
-			QString plot("False");
 			QString save("False");
 
 			QString pyInput = 
@@ -80,8 +79,8 @@ namespace MantidQt
 
 			// get output options
 			if(m_uiForm.chkVerbose->isChecked()){ verbose = "True"; }
-			if(m_uiForm.chkPlot->isChecked()){ plot = "True"; }
 			if(m_uiForm.chkSave->isChecked()){ save ="True"; }
+			QString plot = m_uiForm.cbPlot->currentText();
 
 			pyInput += "ResNormRun('"+VanName+"', '"+ResName+"', "+ERange+", "+nBin+","
 										" Save="+save+", Plot="+plot+", Verbose="+verbose+")\n";
@@ -103,6 +102,10 @@ namespace MantidQt
 			//Use the values from the instrument parameter file if we can
 			if(getInstrumentResolution(filename, res))
 			{
+				//ResNorm resolution should be +/- 10 * the IPF resolution
+				res.first = res.first * 10;
+				res.second = res.second * 10;
+
 				setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], res);
 			}
 			else

@@ -123,10 +123,39 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="chkPlot">
+      <widget class="QLabel" name="lblPlot">
        <property name="text">
-        <string>Plot Result</string>
+        <string>Plot Result: </string>
        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="cbPlot">
+       <item>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Intensity</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Stretch</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Fit</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>All</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
