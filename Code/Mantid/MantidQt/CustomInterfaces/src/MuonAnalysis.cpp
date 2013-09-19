@@ -1108,11 +1108,24 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     loadMuonAlg->setProperty("AutoGroup", false);
     if (loadMuonAlg->execute() )
     {
-      mainFieldDirection = loadMuonAlg->getPropertyValue("MainFieldDirection");
+      
       timeZero = loadMuonAlg->getProperty("TimeZero");
       firstGoodData = loadMuonAlg->getProperty("FirstGoodData");
-      if (m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS")
+
+
+      if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS")
+      {
+        // ARGUS doesn't support dead time correction, so leave deadTimes empty.
+
+        // Some of the ARGUS data files contain wrong information about the instrument main field
+        // direction. It is alway longitudinal.
+        mainFieldDirection = "longitudinal";
+      }
+      else
+      {
+        mainFieldDirection = loadMuonAlg->getPropertyValue("MainFieldDirection");
         deadTimes = loadMuonAlg->getProperty("DeadTimes");
+      }
     }
     else
     {
