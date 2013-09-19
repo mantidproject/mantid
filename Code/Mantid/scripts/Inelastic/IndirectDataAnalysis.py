@@ -206,7 +206,7 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
     wsname = confitParsToWS(outNm, inputWS, specMin, specMax)
 
     # Add some information about convfit to the output workspace
-    options = getConvFitOption(ftype, bgd, Verbose)
+    options = getConvFitOption(ftype, bgd[:-2], Verbose)
     AddSampleLog(Workspace=wsname, LogName="Fit Program", LogType="String", LogText='ConvFit')
     AddSampleLog(Workspace=wsname, LogName='Background', LogType='String', LogText=str(options[0]))
     AddSampleLog(Workspace=wsname, LogName='Delta', LogType='String', LogText=str(options[1]))
