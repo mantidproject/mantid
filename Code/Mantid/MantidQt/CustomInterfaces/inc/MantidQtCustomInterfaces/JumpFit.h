@@ -16,10 +16,13 @@ namespace MantidQt
 			JumpFit(QWidget * parent = 0);
 
 		private slots:
+			/// Handle when the sample input is ready
+			void handleSampleInputReady(const QString& filename);
 			/// Slot for when the min range on the range selector changes
 			virtual void minValueChanged(double min);
 			/// Slot for when the min range on the range selector changes
 			virtual void maxValueChanged(double max);
+			/// Slot to update the guides when the range properties change
 			void updateProperties(QtProperty* prop, double val);
 
 		private:

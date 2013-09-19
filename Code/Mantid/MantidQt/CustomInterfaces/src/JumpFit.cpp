@@ -22,6 +22,9 @@ namespace MantidQt
 
 			m_propTree->addProperty(m_properties["QMin"]);
 			m_propTree->addProperty(m_properties["QMax"]);
+
+			// Connect data selector to handler method
+			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 		}
 
 		bool JumpFit::validate()
@@ -32,6 +35,25 @@ namespace MantidQt
 		void JumpFit::run() 
 		{
 
+		}
+
+		void JumpFit::handleSampleInputReady(const QString& filename)
+		{
+			plotMiniPlot(filename, 0);
+			std::pair<double,double> res;
+			std::pair<double,double> range = getCurveRange();
+
+			//Use the values from the instrument parameter file if we can
+			if(getInstrumentResolution(filename, res))
+			{
+				setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], res);
+			}
+			else
+			{
+				setMiniPlotGuides(m_properties["QMin"], m_properties["QMax"], range);
+			}
+
+			setPlotRange(m_properties["QMin"], m_properties["QMax"], range);
 		}
 
 		void JumpFit::minValueChanged(double min)
