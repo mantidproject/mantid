@@ -32,7 +32,7 @@ def combineDataMulti(wksp_list,output_wksp,beg_overlap,end_overlap,Qmin,Qmax,bin
 		defaultoverlaps = True
 		
     #copy first workspace into temporary wksp 'currentSum'
-	currentSum = mtd[wksp_list[0]]
+	currentSum = CloneWorkspace(InputWorkspace=wksp_list[0])
 	print "Length: ",len(wksp_list), wksp_list
 	
 	for i in range(0,len(wksp_list)-1):
