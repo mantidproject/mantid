@@ -25,6 +25,7 @@ else:
     mpiRank = 0 # simplify if clauses
 
 COMPRESS_TOL_TOF = .01
+EVENT_WORKSPACE_ID = "EventWorkspace"
 
 class SNSPowderReduction(PythonAlgorithm):
     class PDConfigFile(object):
@@ -366,7 +367,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
                                            % (tempinfo.wl, info.wl))
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
-                    if not "histo" in SUFFIX and preserveEvents:
+                    if samRun.id() == EVENT_WORKSPACE_ID:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                        Tolerance=COMPRESS_TOL_TOF) # 10ns
                     api.DeleteWorkspace(str(temp))
@@ -512,7 +513,7 @@ class SNSPowderReduction(PythonAlgorithm):
             # the final bit of math
             if canRun is not None:
                 samRun -= canRun
-                if not "histo" in SUFFIX and preserveEvents:
+                if samRun.id() == EVENT_WORKSPACE_ID:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
@@ -524,7 +525,7 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 normalized = False
 
-            if not "histo" in SUFFIX and preserveEvents and HAVE_MPI is False:
+            if samRun.id() == EVENT_WORKSPACE_ID:
                 samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns/
 
@@ -678,7 +679,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
             # Filtering... 
             tempwslist = []
-            if not "histo" in extension:
+            if temp.id() == EVENT_WORKSPACE_ID:
                 # Filter bad pulses
                 if (self._filterBadPulses and filterBadPulsesOverride):
                     temp = api.FilterBadPulses(InputWorkspace=temp, OutputWorkspace=temp)
@@ -803,7 +804,7 @@ class SNSPowderReduction(PythonAlgorithm):
             #        print "[DB1050-X] Number of events = %d of split-workspace %d" % (wksplist[itemp].getNumberEvents(), itemp)
             #    except Exception as e:
             #        print e
-            if preserveEvents and not "histo" in extension:
+            if wksplist[itemp].id() == EVENT_WORKSPACE_ID:
                 wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp], 
                     OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
 
