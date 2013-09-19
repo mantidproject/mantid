@@ -577,18 +577,18 @@ def C2Se(sname):
 		Eb.append(be[1])
 	Vaxis = []
 	dataX = np.array(Xout)
-	dataY = np.array(Yf1)
-	dataE = np.array(Ef1)
+	dataY = np.array(Yf)
+	dataE = np.array(Ef)
 	nhist = 1
 	Vaxis.append('width')
 	dataX = np.append(dataX,np.array(Xout))
-	dataY = np.append(dataY,np.array(Yi1))
-	dataE = np.append(dataE,np.array(Ei1))
+	dataY = np.append(dataY,np.array(Yi))
+	dataE = np.append(dataE,np.array(Ei))
 	nhist += 1
 	Vaxis.append('ampl')
 	dataX = np.append(dataX,np.array(Xout))
-	dataY = np.append(dataY,np.array(Yb1))
-	dataE = np.append(dataE,np.array(Eb1))
+	dataY = np.append(dataY,np.array(Yb))
+	dataE = np.append(dataE,np.array(Eb))
 	nhist += 1
 	Vaxis.append('beta')
 	logger.notice('Vaxis=' + str(Vaxis))
