@@ -67,7 +67,7 @@ namespace MantidQt
       /// When the facility login button is clicked
       void onFacilityLogin();
       /// When the help button is clicked.
-      void onHelp();
+      void helpClicked();
       /// When checked, show the Catalog search frame.
       void showCatalogSearch();
       /// Shows/Hides the "Search results" frame when search results combo box is checked.

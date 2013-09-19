@@ -1,5 +1,8 @@
 #include "MantidQtMantidWidgets/ICatSearch2.h"
 
+#include <QDesktopServices>
+#include <QUrl>
+
 namespace MantidQt
 {
   namespace MantidWidgets
@@ -42,6 +45,8 @@ namespace MantidQt
       m_icatUiForm.searchResultsCbox->setEnabled(false);
       m_icatUiForm.dataFileCbox->setEnabled(false);
 
+      // Show related help page when a user clicks on the "Help" button.
+      connect(m_icatUiForm.dataFileHelpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
       // Show "Search" frame when user clicks "Catalog search" check box.
       connect(m_icatUiForm.searchCbox,SIGNAL(clicked()),this,SLOT(showCatalogSearch()));
       // Show advanced search options if "Advanced search" is checked.
@@ -77,9 +82,9 @@ namespace MantidQt
     /**
      * Sends the user to relevant search page on the Mantid project site.
      */
-    void ICatSearch2::onHelp()
+    void ICatSearch2::helpClicked()
     {
-
+      QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Search"));
     }
 
     /**
