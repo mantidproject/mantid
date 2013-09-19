@@ -37,5 +37,4 @@ def JumpRun(samWS,jump,Verbose,Plot,Save):
 	EndTime('Jump fit : '+jump+' ; ')
 
 def JumpPlot(inputWS):
-    j_plot=mp.plotSpectrum(inputWS+'_Data',0,True)
-    mp.mergePlots(j_plot,mp.plotSpectrum(inputWS+'_Fit',0,False))
+    j_plot=mp.plotSpectrum(inputWS,[0,1,2],True)

@@ -40,7 +40,7 @@ class JumpConvFit(PythonAlgorithm):
 		last = self.getPropertyValue('Last spectrum')
 		jump = self.getPropertyValue('Fit')
 
-		samWS = prefix+sam+'_'+ana+'_conv_'+func+'_s'+first+'_to_'+last
+		samWS = prefix+sam+'_'+ana+'_conv_'+func+'_s'+first+'_to_'+last+"_Workspace"
 		prog = 'conv'
 		cropOp = self.getProperty('CropQ').value
 		verbOp = self.getProperty('Verbose').value
@@ -49,7 +49,7 @@ class JumpConvFit(PythonAlgorithm):
 
 		workdir = config['defaultsave.directory']
 		if inType == 'File':
-			path = os.path.join(workdir, samWS+'_Workspace.nxs')					# path name for nxs file
+			path = os.path.join(workdir, samWS)					# path name for nxs file
 			LoadNexus(Filename=path, OutputWorkspace=samWS)
 			message = 'Input from File : '+path
 		else:
