@@ -60,7 +60,13 @@ namespace DataHandling
     void loadFile(std::string filename, std::vector<std::string>& lines);
 
     /// Add an ALFBE parameter 
-    void addALFBEparameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
+    void addALFBEParameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, const std::string& paramName);
+
+    /// Add set of Sigma parameters 
+    void addSigmaParameters(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, size_t columnIndex);
+
+    /// Add set of Gamma parameters 
+    void addGammaParameters(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, size_t columnIndex);
 
     /// Get value for XML eq attribute for parameter
     std::string getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string& name, size_t columnIndex);

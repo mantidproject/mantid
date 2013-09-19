@@ -130,10 +130,10 @@ namespace DataHandling
     Element* instrumentElem = mDoc->createElement("component-link");
     instrumentElem->setAttribute("name","wholeInstrument");
     rootElem->appendChild(instrumentElem);
-    addALFBEparameter( paramTable, mDoc, instrumentElem, "Alph0");
-    addALFBEparameter( paramTable, mDoc, instrumentElem, "Beta0");
-    addALFBEparameter( paramTable, mDoc, instrumentElem, "Alph1");
-    addALFBEparameter( paramTable, mDoc, instrumentElem, "Beta1");
+    addALFBEParameter( paramTable, mDoc, instrumentElem, "Alph0");
+    addALFBEParameter( paramTable, mDoc, instrumentElem, "Beta0");
+    addALFBEParameter( paramTable, mDoc, instrumentElem, "Alph1");
+    addALFBEParameter( paramTable, mDoc, instrumentElem, "Beta1");
 
     // Add banks
     if(paramTable->columnCount() < 2){
@@ -149,6 +149,8 @@ namespace DataHandling
       bankName << "Bank" << bankNumber;
       Element* bankElem = mDoc->createElement("component-link");
       bankElem->setAttribute("name",bankName.str());
+      addSigmaParameters( paramTable, mDoc, bankElem, i+1);
+      addGammaParameters( paramTable, mDoc, bankElem, i+1);
       rootElem->appendChild(bankElem);
     }
 
@@ -163,7 +165,7 @@ namespace DataHandling
   *
   *  paramName is the name of the parameter as it appears in the table workspace
   */
-  void ConvertFullprofToXML::addALFBEparameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Element* parent, const std::string& paramName)
+  void ConvertFullprofToXML::addALFBEParameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Element* parent, const std::string& paramName)
   {
      Element* parameterElem = mDoc->createElement("parameter");
      parameterElem->setAttribute("name", getXMLParameterName(paramName));
@@ -180,12 +182,52 @@ namespace DataHandling
      parent->appendChild(parameterElem);
   }
 
+  /* Add a set of SIGMA paraters to the XML document according to the table workspace
+   * for the bank at the given column of the table workspace
+   */
+  void ConvertFullprofToXML::addSigmaParameters(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, size_t columnIndex)
+  {
+     Element* parameterElem = mDoc->createElement("parameter");
+     parameterElem->setAttribute("name", "IkedaCarpenterPV:SigmaSquared");
+     parameterElem->setAttribute("type","fitting");
+
+     Element *formulaElem = mDoc->createElement("formula");
+     std::string eqValue = getXMLEqValue(tablews, "Sig1", columnIndex)+"*centre^2+"+getXMLEqValue(tablews, "Sig0", columnIndex);
+     formulaElem->setAttribute("eq", eqValue);
+     formulaElem->setAttribute("unit","dSpacing");
+     formulaElem->setAttribute("result-unit","TOF^2");
+     parameterElem->appendChild(formulaElem);
+
+     parent->appendChild(parameterElem);
+  }
+
+   /* Add a set of GAMMA paraters to the XML document according to the table workspace
+   * for the bank at the given column of the table workspace
+   */
+  void ConvertFullprofToXML::addGammaParameters(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, size_t columnIndex)
+  {
+     Element* parameterElem = mDoc->createElement("parameter");
+     parameterElem->setAttribute("name", "IkedaCarpenterPV:Gamma");
+     parameterElem->setAttribute("type","fitting");
+
+     Element *formulaElem = mDoc->createElement("formula");
+     std::string eqValue = getXMLEqValue(tablews, "Gam1", columnIndex)+"*centre";
+     formulaElem->setAttribute("eq", eqValue);
+     formulaElem->setAttribute("unit","dSpacing");
+     formulaElem->setAttribute("result-unit","TOF");
+     parameterElem->appendChild(formulaElem);
+
+     parent->appendChild(parameterElem);
+  }
+
+
 
   /*
   *  Get the XML name of a parameter given its Table Workspace name
   */
   std::string ConvertFullprofToXML::getXMLParameterName( const std::string& name )
   {
+    // Only used for ALFBE parameters
     std::string prefix = "IkedaCarpenterPV:";
     if(name == "Alph0") return prefix+"Alpha0";
     if(name == "Beta0") return prefix+"Beta0";
@@ -203,6 +245,7 @@ namespace DataHandling
     size_t paramNumber = m_rowNumbers[name];
     API::Column_const_sptr column = tablews->getColumn( columnIndex );
     double eqValue = column->cell<double>(paramNumber);
+    if(name.substr(0,3) == "Sig") eqValue = eqValue*eqValue; // Square the sigma values
     return boost::lexical_cast<std::string>(eqValue);
   }
 
