@@ -764,12 +764,11 @@ def QuestPlot(inputWS,Plot):
 
 # ResNorm programs
 
-def ResNormRun(vname,rname,erange,nbins,Verbose=False,Plot=False,Save=False):
+def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot=False,Save=False):
 	StartTime('ResNorm')
 	workdir = config['defaultsave.directory']
 	array_len = 4096                                    # length of Fortran array
 	CheckXrange(erange,'Energy')
-	nbin,nrbin = CheckBinning(nbins)
 	CheckAnalysers(vname,rname,Verbose)
 	nvan,ntc = CheckHistZero(vname)
 	theta,Q = GetThetaQ(vname)

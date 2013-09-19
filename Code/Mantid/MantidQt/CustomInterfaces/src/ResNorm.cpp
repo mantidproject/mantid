@@ -83,7 +83,7 @@ namespace MantidQt
 			if(m_uiForm.chkPlot->isChecked()){ plot = "True"; }
 			if(m_uiForm.chkSave->isChecked()){ save ="True"; }
 
-			pyInput += "ResNormRun("+VanName+", "+ResName+", "+ERange+", "+nBin+","
+			pyInput += "ResNormRun('"+VanName+"', '"+ResName+"', "+ERange+", "+nBin+","
 										" Save="+save+", Plot="+plot+", Verbose="+verbose+")\n";
 
 			runPythonScript(pyInput);

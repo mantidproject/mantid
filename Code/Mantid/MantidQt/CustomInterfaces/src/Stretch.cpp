@@ -97,6 +97,7 @@ namespace MantidQt
 			QString betaSig = "[" + beta + ", " + sigma + "]";
 
 			QString nBins = m_properties["SampleBinning"]->valueText();
+			nBins = "[" + nBins + ", 1]";
 
 			//Output options
 			if(m_uiForm.chkVerbose->isChecked()) { verbose = "True"; }
