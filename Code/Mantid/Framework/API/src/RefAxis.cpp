@@ -94,15 +94,5 @@ bool RefAxis::operator==(const Axis& axis2) const
 	return true;
 }
 
-double RefAxis::getMin()const
-{
-	throw std::runtime_error("RefAxis cannot determine minimum value. Use readX on the workspace instead");
-}
-double RefAxis::getMax()const
-{
-	throw std::runtime_error("RefAxis cannot determine maximum value. Use readX on the workspace instead");
-}
-
-
 } // namespace API
 } // namespace Mantid

@@ -52,8 +52,6 @@ public:
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex) const;
   virtual void setValue(const std::size_t& index, const double& value);
   virtual bool operator==(const Axis&) const;
-  virtual double getMin()const;
-  virtual double getMax()const;
 
 private:
   RefAxis(const RefAxis& right, const MatrixWorkspace* const parentWorkspace);

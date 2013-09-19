@@ -108,17 +108,6 @@ public:
     TS_ASSERT_THROWS( refAxis->setValue(0,9.9), std::domain_error )
   }
 
-  void testGetMin()
-  {
-	  Axis* newRefAxis = refAxis->clone(5,space2);
-	  TS_ASSERT_THROWS( newRefAxis->getMin(), std::runtime_error )
-  }
-    void testGetMin()
-  {
-	  Axis* newRefAxis = refAxis->clone(5,space2);
-	  TS_ASSERT_THROWS( newRefAxis->getMax(), std::runtime_error )
-  }
-
 private:
   MatrixWorkspace *space, *space2;
   RefAxis *refAxis;
