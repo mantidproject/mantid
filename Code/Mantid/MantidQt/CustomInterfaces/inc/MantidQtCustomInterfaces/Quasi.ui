@@ -62,7 +62,7 @@
         </sizepolicy>
        </property>
        <property name="autoLoad">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
@@ -75,7 +75,7 @@
         </stringlist>
        </property>
        <property name="showLoad">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
       </widget>
      </item>
