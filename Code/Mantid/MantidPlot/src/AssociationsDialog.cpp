@@ -40,7 +40,6 @@
 #include <QPushButton>
 #include <QTableWidget>
 #include <QHeaderView>
-#include <QCheckBox>
 #include <QEvent>
 #include <QLayout>
 #include <QApplication>
@@ -72,6 +71,8 @@ AssociationsDialog::AssociationsDialog( Graph* g, Qt::WFlags fl )
   table->setHorizontalHeaderLabels(QStringList() << tr("Column") << tr("X") << tr("Y") << tr("xErr") << tr("yErr"));
     vl->addWidget(table);
 
+  connect(table, SIGNAL(itemClicked(QTableWidgetItem*)), this, SLOT(processStateChange(QTableWidgetItem*)));
+  
   associations = new QListWidget();
   associations->setSelectionMode ( QListWidget::SingleSelection );
     vl->addWidget(associations);
@@ -98,6 +99,7 @@ AssociationsDialog::AssociationsDialog( Graph* g, Qt::WFlags fl )
   connect(btnApply, SIGNAL(clicked()),this, SLOT(updateCurves()));
 
   setGraph(g);
+
 }
 
 void AssociationsDialog::accept()
@@ -231,13 +233,10 @@ if (active_table != t){
   for (int j=1; j < table->columnCount(); j++){
     for (int i=0; i < table->rowCount(); i++ )
       {
-            QTableWidgetItem *cell = new QTableWidgetItem();
-            cell->setBackground (QBrush(Qt::lightGray));
-            table->setItem(i, j, cell);
-
-      QCheckBox* cb = new QCheckBox(table);
-      cb->installEventFilter(this);
-      table->setCellWidget(i, j, cb);
+        QTableWidgetItem *cell = new QTableWidgetItem();
+        cell->setBackground(QBrush(Qt::lightGray));
+        cell->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        table->setItem(i, j, cell);
       }
     }
   }
@@ -268,21 +267,23 @@ else if (n == 1){//box plots
   table->hideColumn(4);
   }
 
-QCheckBox *it = 0;
+QTableWidgetItem* it;
 for (int i=0; i < table->rowCount(); i++ )
-  {
-  it = dynamic_cast<QCheckBox *>(table->cellWidget(i, 1));
-  if (table->item(i, 0)->text() == xColName)
-    it->setChecked(true);
-  else
-    it->setChecked(false);
+{
+  it = table->item(i, 1);
 
-  it = dynamic_cast<QCheckBox *>(table->cellWidget(i, 2));
-  if (table->item(i,0)->text() == yColName)
-    it->setChecked(true);
+  if (table->item(i, 0)->text() == xColName)
+    it->setCheckState(Qt::Checked);
   else
-    it->setChecked(false);
-  }
+    it->setCheckState(Qt::Unchecked);
+
+  it = table->item(i, 2);
+
+  if (table->item(i,0)->text() == yColName)
+    it->setCheckState(Qt::Checked);
+  else
+    it->setCheckState(Qt::Unchecked);
+}
 
 bool xerr = false, yerr = false, vectors = false;
 QString errColName, xEndColName, yEndColName;
@@ -316,34 +317,36 @@ if (n > 2){
     }
 }
 
+
 for (int i=0; i < table->rowCount(); i++){
-  it = dynamic_cast<QCheckBox *>(table->cellWidget(i, 3));
+  it = table->item(i, 3);
   if (xerr || vectors){
     if (table->item(i,0)->text() == errColName || table->item(i,0)->text() == xEndColName)
-      it->setChecked(true);
+      it->setCheckState(Qt::Checked);
     else
-      it->setChecked(false);
+      it->setCheckState(Qt::Unchecked);
     } else
-    it->setChecked(false);
+    it->setCheckState(Qt::Unchecked);
 
-  it = dynamic_cast<QCheckBox *>(table->cellWidget(i, 4));
+  it = table->item(i, 4);
   if (yerr || vectors){
     if (table->item(i,0)->text() == errColName || table->item(i,0)->text() == yEndColName)
-      it->setChecked(true);
+      it->setCheckState(Qt::Checked);
     else
-      it->setChecked(false);
+      it->setCheckState(Qt::Unchecked);
     } else
-    it->setChecked(false);
+    it->setCheckState(Qt::Unchecked);
   }
 }
 
 void AssociationsDialog::uncheckCol(int col)
 {
-for (int i=0; i < table->rowCount(); i++ ){
-  QCheckBox *it = dynamic_cast<QCheckBox *>(table->cellWidget(i, col));
-  if (it)
-    it->setChecked(false);
-  }
+  // Can't uncheck header column
+  if(col == 0)
+    return;
+
+  for (int i = 0; i < table->rowCount(); i++ )
+    table->item(i, col)->setCheckState(Qt::Unchecked);
 }
 
 void AssociationsDialog::setGraph(Graph *g)
@@ -433,36 +436,20 @@ plotAssociationsList [index] = text;
 associations->item(index)->setText(text);
 }
 
-bool AssociationsDialog::eventFilter(QObject *object, QEvent *e)
+void AssociationsDialog::processStateChange(QTableWidgetItem* item)
 {
-QTableWidgetItem* it = (QTableWidgetItem*)object;
-if (!it)
-  return false;
+  // Ignore the header column
+  if(item->column() == 0)
+    return;
 
-if (e->type() == QEvent::MouseButtonPress){
-  if (dynamic_cast<QCheckBox*>(it)->isChecked())
-    return true;
+  // Ignore uncheck events
+  if(item->checkState() == Qt::Unchecked)
+    return;
 
-  int col = 0, row = 0;
-  for (int j=1; j<table->columnCount(); j++){
-    for (int i=0; i < table->rowCount(); i++ ){
-      QCheckBox* cb = dynamic_cast<QCheckBox*>(table->cellWidget(i, j));
-      if ( cb == dynamic_cast<QCheckBox *>(object)){
-        row = i;
-        col = j;
-        break;
-        }
-      }
-    }
+  // Make sure that's the only checked item in the columns
+  uncheckCol(item->column());
+  item->setCheckState(Qt::Checked);
 
-  uncheckCol(col);
-  dynamic_cast<QCheckBox*>(it)->setChecked(true);
-
-  updatePlotAssociation(row, col);
-  return true;
-  }
-else if (e->type() == QEvent::MouseButtonDblClick)
-  return true;
-else
-  return false;
+  // Update association
+  updatePlotAssociation(item->row(), item->column());
 }
