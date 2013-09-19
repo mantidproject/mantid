@@ -312,7 +312,7 @@
            <widget class="QLineEdit" name="runRangeTxt"/>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="invesNameTxt"/>
+           <widget class="QLineEdit" name="InvestigationName"/>
           </item>
           <item row="0" column="0">
            <widget class="QLabel" name="invesNameLbl">
@@ -351,7 +351,7 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QComboBox" name="instrumentLbox">
+           <widget class="QComboBox" name="Instrument">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -406,7 +406,7 @@
            </widget>
           </item>
           <item row="0" column="4">
-           <widget class="QLineEdit" name="startDateTxt">
+           <widget class="QLineEdit" name="StartDate">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -425,7 +425,7 @@
            </widget>
           </item>
           <item row="1" column="4">
-           <widget class="QLineEdit" name="endDateTxt">
+           <widget class="QLineEdit" name="EndDate">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -524,7 +524,7 @@
            </layout>
           </item>
           <item row="2" column="4" colspan="2">
-           <widget class="QLineEdit" name="keywordsTxt"/>
+           <widget class="QLineEdit" name="Keywords"/>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="advNameLbl">
@@ -540,7 +540,7 @@
            </widget>
           </item>
           <item row="3" column="4" colspan="2">
-           <widget class="QLineEdit" name="advSampleTxt"/>
+           <widget class="QLineEdit" name="SampleName"/>
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="advAbstractLbl">
@@ -582,7 +582,7 @@
            </widget>
           </item>
           <item row="4" column="4" colspan="2">
-           <widget class="QComboBox" name="advTypeLbox">
+           <widget class="QComboBox" name="InvestigationType">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -592,10 +592,10 @@
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QLineEdit" name="advNameTxt"/>
+           <widget class="QLineEdit" name="InvestigatorSurname"/>
           </item>
           <item row="4" column="1">
-           <widget class="QLineEdit" name="advAbstractTxt"/>
+           <widget class="QLineEdit" name="InvestigationAbstract"/>
           </item>
          </layout>
         </item>
@@ -671,7 +671,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="dataFileHelpBtn">
+        <widget class="QPushButton" name="helpBtn">
          <property name="font">
           <font>
            <weight>50</weight>

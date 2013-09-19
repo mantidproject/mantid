@@ -46,7 +46,7 @@ namespace MantidQt
       m_icatUiForm.dataFileCbox->setEnabled(false);
 
       // Show related help page when a user clicks on the "Help" button.
-      connect(m_icatUiForm.dataFileHelpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
+      connect(m_icatUiForm.helpBtn,SIGNAL(clicked()),this,SLOT(helpClicked()));
       // Show "Search" frame when user clicks "Catalog search" check box.
       connect(m_icatUiForm.searchCbox,SIGNAL(clicked()),this,SLOT(showCatalogSearch()));
       // Show advanced search options if "Advanced search" is checked.
@@ -174,13 +174,13 @@ namespace MantidQt
       for (citr = instrumentList.begin(); citr != instrumentList.end(); ++citr)
       {
         // Add each instrument to the instrument box.
-        m_icatUiForm.instrumentLbox->addItem(QString::fromStdString(*citr));
+        m_icatUiForm.Instrument->addItem(QString::fromStdString(*citr));
       }
       // Sort the drop-box by instrument name.
-      m_icatUiForm.instrumentLbox->model()->sort(0);
+      m_icatUiForm.Instrument->model()->sort(0);
       // Make the default instrument empty so the user has to select one.
-      m_icatUiForm.instrumentLbox->insertItem(-1,"");
-      m_icatUiForm.instrumentLbox->setCurrentIndex(0);
+      m_icatUiForm.Instrument->insertItem(-1,"");
+      m_icatUiForm.Instrument->setCurrentIndex(0);
     }
 
     /**
@@ -195,14 +195,14 @@ namespace MantidQt
       for (citr = invesTypeList.begin(); citr != invesTypeList.end(); ++citr)
       {
         // Add each instrument to the instrument box.
-        m_icatUiForm.advTypeLbox->addItem(QString::fromStdString(*citr));
+        m_icatUiForm.InvestigationType->addItem(QString::fromStdString(*citr));
       }
 
       // Sort the list-box by investigation type.
-      m_icatUiForm.advTypeLbox->model()->sort(0);
+      m_icatUiForm.InvestigationType->model()->sort(0);
       // Make the default investigation type empty so the user has to select one.
-      m_icatUiForm.advTypeLbox->insertItem(-1,"");
-      m_icatUiForm.advTypeLbox->setCurrentIndex(0);
+      m_icatUiForm.InvestigationType->insertItem(-1,"");
+      m_icatUiForm.InvestigationType->setCurrentIndex(0);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -242,7 +242,7 @@ namespace MantidQt
     void ICatSearch2::updateStartDate()
     {
       // Update the text field with the user selected date then close the m_calendar.
-      m_icatUiForm.startDateTxt->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
+      m_icatUiForm.StartDate->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
       m_calendar->close();
       // Re-enable the button to allow the user to select an endDate if they wish.
       m_icatUiForm.endDatePicker->setEnabled(true);
@@ -253,7 +253,7 @@ namespace MantidQt
      */
     void ICatSearch2::updateEndDate()
     {
-      m_icatUiForm.endDateTxt->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
+      m_icatUiForm.EndDate->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
       m_calendar->close();
       m_icatUiForm.startDatePicker->setEnabled(true);
     }
@@ -274,24 +274,24 @@ namespace MantidQt
       if (m_icatUiForm.advSearchCbox->isChecked())
       {
         m_icatUiForm.advNameLbl->show();
-        m_icatUiForm.advNameTxt->show();
+        m_icatUiForm.InvestigatorSurname->show();
         m_icatUiForm.advAbstractLbl->show();
-        m_icatUiForm.advAbstractTxt->show();
+        m_icatUiForm.InvestigationAbstract->show();
         m_icatUiForm.advSampleLbl->show();
-        m_icatUiForm.advSampleTxt->show();
+        m_icatUiForm.SampleName->show();
         m_icatUiForm.advTypeLbl->show();
-        m_icatUiForm.advTypeLbox->show();
+        m_icatUiForm.InvestigationType->show();
       }
       else
       {
         m_icatUiForm.advNameLbl->hide();
-        m_icatUiForm.advNameTxt->hide();
+        m_icatUiForm.InvestigatorSurname->hide();
         m_icatUiForm.advAbstractLbl->hide();
-        m_icatUiForm.advAbstractTxt->hide();
+        m_icatUiForm.InvestigationAbstract->hide();
         m_icatUiForm.advSampleLbl->hide();
-        m_icatUiForm.advSampleTxt->hide();
+        m_icatUiForm.SampleName->hide();
         m_icatUiForm.advTypeLbl->hide();
-        m_icatUiForm.advTypeLbox->hide();
+        m_icatUiForm.InvestigationType->hide();
       }
     }
 
@@ -309,17 +309,17 @@ namespace MantidQt
     void ICatSearch2::onReset()
     {
       // Clear normal search fields.
-      m_icatUiForm.invesNameTxt->clear();
-      m_icatUiForm.startDateTxt->clear();
-      m_icatUiForm.instrumentLbox->clear();
-      m_icatUiForm.endDateTxt->clear();
+      m_icatUiForm.InvestigationName->clear();
+      m_icatUiForm.StartDate->clear();
+      m_icatUiForm.Instrument->clear();
+      m_icatUiForm.EndDate->clear();
       m_icatUiForm.runRangeTxt->clear();
-      m_icatUiForm.keywordsTxt->clear();
+      m_icatUiForm.Keywords->clear();
       // Clear advanced options as well.
-      m_icatUiForm.advNameTxt->clear();
-      m_icatUiForm.advAbstractTxt->clear();
-      m_icatUiForm.advSampleTxt->clear();
-      m_icatUiForm.advTypeLbox->clear();
+      m_icatUiForm.InvestigatorSurname->clear();
+      m_icatUiForm.InvestigationAbstract->clear();
+      m_icatUiForm.SampleName->clear();
+      m_icatUiForm.InvestigationType->clear();
     }
 
 
