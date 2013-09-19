@@ -357,5 +357,24 @@ def DivideByThickness(thickness=1.0):
         
 def Stitch(data_list=[], q_min=None, q_max=None, output_workspace=None,
            scale=None, save_output=False):
+    """
+        Stitch a set of SANS data sets
+        
+        @param data_list: List of workspaces to stitch.
+        @param q_min: Minimum Q-value of the overlap between two consecutive data sets.
+                      The q_min argument must be an array when stitching more than two data sets.
+                      The length of the array should be 1 less than the number of data sets.
+        @param q_max: Maximum Q-value of the overlap between two consecutive data sets (must be an array for more than two data sets).
+                      The q_max argument must be an array when stitching more than two data sets.
+                      The length of the array should be 1 less than the number of data sets.
+        @param output_workspace: Name of the output workspace containing the stitched data.
+        @param scale: Scaling factor. 
+                      The scaling factor should either be a single number
+                      or a list of length equal to the number of data sets.
+                      The former will scale everything by the given factor, while the
+                      latter will assign the given scaling factors to the data sets.
+        @param save_output: If true, the output will be saved in the current working directory.
+    """
     from LargeScaleStructures.data_stitching import stitch
-    stitch(data_list, q_min=q_min, q_max=q_max, scale=scale, save_output=save_output)
+    stitch(data_list, q_min=q_min, q_max=q_max, output_workspace=output_workspace,
+           scale=scale, save_output=save_output)
