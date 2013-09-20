@@ -438,7 +438,14 @@ void ConfigServiceImpl::configureLogging()
       m_logFilePath = getUserPropertiesDir() + "mantid.log";
       logpath.assign(m_logFilePath);
       logpath = logpath.absolute();
+      if (Poco::File(logpath).canWrite() == false)
+      {
+          // if we cannot write to the default directory then set use the system temp
+          logpath = Poco::Path::temp() + "mantid.log";
+      }
+
       m_logFilePath = logpath.toString();
+
     }
     // Set the line in the configuration properties.
     //  this'll be picked up by LoggingConfigurator (somehow)
@@ -454,10 +461,10 @@ void ConfigServiceImpl::configureLogging()
     // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf);
-  } catch (std::exception& e)
-  {
-    std::cerr << "Trouble configuring the logging framework " << e.what() << std::endl;
-  }
+    } catch (std::exception& e)
+    {
+        std::cerr << "Trouble configuring the logging framework " << e.what() << std::endl;
+    }
 
 }
 

@@ -1,7 +1,7 @@
 #ifndef REF_IMAGE_PLOT_ITEM_H
 #define REF_IMAGE_PLOT_ITEM_H
 
-#include "MantidQtImageViewer/ImagePlotItem.h"
+#include "MantidQtSpectrumViewer/SpectrumPlotItem.h"
 #include "DllOption.h"
 #include "MantidQtRefDetectorViewer/RefLimitsHandler.h"
 
@@ -10,7 +10,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 /** This class is responsible for actually drawing the image data onto
-    a QwtPlot for the ImageView data viewer.
+    a QwtPlot for the SpectrumView data viewer.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,7 +31,7 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem : public ImageView::ImagePlotItem
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefImagePlotItem : public SpectrumView::SpectrumPlotItem
 {
 
 public:

@@ -194,7 +194,10 @@
 		<parameter name="abs-median-signif">
 			<value val="3.3" />
 		</parameter>
-
+		
+		<parameter name="treat-background-as-events" type="string">
+			<value val="yes" />
+		</parameter>
 
 	</component-link>
 </parameter-file>

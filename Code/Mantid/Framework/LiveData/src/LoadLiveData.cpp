@@ -56,6 +56,7 @@ This could cause Mantid to run very slowly or to crash due to lack of memory.
 *WIKI*/
 
 #include "MantidLiveData/LoadLiveData.h"
+#include "MantidLiveData/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidKernel/ReadLock.h"
@@ -422,7 +423,24 @@ namespace LiveData
     bool dataReset = listener->dataReset();
 
     // The listener returns a MatrixWorkspace containing the chunk of live data.
-    Workspace_sptr chunkWS = listener->extractData();
+    Workspace_sptr chunkWS;
+    bool dataNotYetGiven = true;
+    while ( dataNotYetGiven )
+    {
+      try {
+        chunkWS = listener->extractData();
+        dataNotYetGiven = false;
+      } catch (Exception::NotYet& ex) {
+        g_log.warning() << "The " << listener->name() << " is not ready to return data: " << ex.what() << "\n";
+        g_log.warning() << "Trying again in 10 seconds - cancel the algorithm to stop.\n";
+        const int tenSeconds = 40;
+        for ( int i = 0; i < tenSeconds; ++i )
+        {
+          Poco::Thread::sleep(10000/tenSeconds); // 250 ms
+          this->interruption_point();
+        }
+      }
+    }
 
     // TODO: Have the ILiveListener tell me exactly the time stamp
     DateAndTime lastTimeStamp = DateAndTime::getCurrentTime();

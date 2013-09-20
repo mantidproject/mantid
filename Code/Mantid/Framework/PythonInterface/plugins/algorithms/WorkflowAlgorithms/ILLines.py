@@ -45,11 +45,11 @@ class ILLines(PythonAlgorithm):
 		rinType = self.getPropertyValue('ResInputType')
 		rtype = self.getPropertyValue('ResType')
 		res = self.getPropertyValue('ResNumber')
-		elastic = self.getProperty('ElasticOption')
+		elastic = self.getProperty('ElasticOption').value
 		bgd = self.getPropertyValue('BackgroundOption')
-		width = self.getProperty('FixWidth')
+		width = self.getProperty('FixWidth').value
 		wfile = self.getPropertyValue('WidthFile')
-		resnorm = self.getProperty('ResNorm')
+		resnorm = self.getProperty('ResNorm').value
 		resn = self.getPropertyValue('ResNormNumber')
 		emin = self.getPropertyValue('EnergyMin')
 		emax = self.getPropertyValue('EnergyMax')
@@ -80,9 +80,9 @@ class ILLines(PythonAlgorithm):
 		else:
 			o_res = 0
 		fitOp = [o_el, o_bgd, o_w1, o_res]
-		verbOp = self.getProperty('Verbose')
+		verbOp = self.getProperty('Verbose').value
 		plotOp = self.getPropertyValue('Plot')
-		saveOp = self.getProperty('Save')
+		saveOp = self.getProperty('Save').value
 		Main.QLStart(prog,inType,sname,rinType,rname,rtype,rsname,erange,nbins,fitOp,wfile,verbOp,plotOp,saveOp)
 #def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
 

@@ -80,7 +80,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
   ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
-  ${HEADER_DIR}/kernel/Policies/downcast_returned_value.h
+  ${HEADER_DIR}/kernel/Policies/DowncastReturnedValue.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/RegisterSingleValueHandler.h
@@ -89,6 +89,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
   ${HEADER_DIR}/kernel/Registry/DowncastRegistry.h
+  ${HEADER_DIR}/kernel/IsNone.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/SharedPtrToPythonMacro.h
@@ -145,7 +146,7 @@ configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CU
 # Create the target for this directory
 #############################################################################################
 
-add_library ( PythonKernelModule ${SRC_FILES} ${BOOST_PYTHON_SRC} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_library ( PythonKernelModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies

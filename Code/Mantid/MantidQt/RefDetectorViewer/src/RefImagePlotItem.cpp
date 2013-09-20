@@ -6,7 +6,7 @@ namespace RefDetectorViewer
 {
  
 RefImagePlotItem::RefImagePlotItem(const RefLimitsHandler * const limitsHandler)
-  : ImageView::ImagePlotItem(), m_limitsHandler(limitsHandler)
+  : SpectrumView::SpectrumPlotItem(), m_limitsHandler(limitsHandler)
 {
 }
 
@@ -18,7 +18,7 @@ RefImagePlotItem::~RefImagePlotItem()
 
 /**
  *  Draw the image (this is called by QWT and must not be called directly.)
- *  Extends the base class (ImagePlotItem) method to draw lines on the plot
+ *  Extends the base class (SpectrumPlotItem) method to draw lines on the plot
  *
  *  @param  painter     The QPainter object used by QWT to draw the image
  *  @param  xMap        The QwtScaleMap used by QWT to map x-values to pixel
@@ -28,7 +28,7 @@ RefImagePlotItem::~RefImagePlotItem()
  *  @param  canvasRect  rectangle containing the pixel region where QWT will 
  *                      draw the image.  This rectangle is slightly larger
  *                      than the actual rectangle used for the image.  This
- *                      parameter is NOT USED by the ImagePlotItem, but is
+ *                      parameter is NOT USED by the SpectrumPlotItem, but is
  *                      passed in when QWT calls this method. 
  */
 void RefImagePlotItem::draw(       QPainter    * painter,
@@ -36,11 +36,11 @@ void RefImagePlotItem::draw(       QPainter    * painter,
                           const QwtScaleMap & yMap,
                           const QRect       & canvasRect) const
 {
-  ImagePlotItem::draw(painter,xMap,yMap,canvasRect);
+  SpectrumPlotItem::draw(painter,xMap,yMap,canvasRect);
 
   //////////////////////////////////////////////////////////////////////////////////
-  // TODO: Eliminate the code duplication (from ImagePlotItem::draw) in this section
-  ImageView::DataArray* data_array;
+  // TODO: Eliminate the code duplication (from SpectrumPlotItem::draw) in this section
+  SpectrumView::DataArray* data_array;
   if ( buffer_ID == 0 )
   {
     data_array = data_array_0;
@@ -132,5 +132,5 @@ void RefImagePlotItem::draw(       QPainter    * painter,
 
 }
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 

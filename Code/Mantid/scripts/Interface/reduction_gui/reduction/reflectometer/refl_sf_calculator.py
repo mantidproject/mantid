@@ -139,9 +139,8 @@ class REFLSFCalculatorScripter(BaseReductionScripter):
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
         script += "import os\n"
-        script += "from MantidFramework import *\n"
-        script += "mtd.initialise(False)\n"
-        script += "from mantidsimple import *\n\n"
+        script += "import mantid\n"
+        script += "from mantid.simpleapi import *\n"
         script += "import sfCalculator\n"
                 
         script += "REF_RED_OUTPUT_MESSAGE = ''\n\n"

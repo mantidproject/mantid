@@ -166,6 +166,8 @@ namespace MDAlgorithms
     declareProperty("IntegrateIfOnEdge", true, "Only warning if all of peak outer radius is not on detector (default).\n"
         "If false, do not integrate if the outer radius is not on a detector.");
 
+    declareProperty("AdaptiveQRadius", false, "Default is false.   If true, all input radii are multiplied by the magnitude of Q at the peak center so each peak has a different integration radius.");
+
     declareProperty("Cylinder", false, "Default is sphere.  Use next five parameters for cylinder.");
 
     declareProperty(new PropertyWithValue<double>("CylinderLength",0.0,Direction::Input),
@@ -227,6 +229,7 @@ namespace MDAlgorithms
     Workspace2D_sptr wsProfile2D,wsFit2D,wsDiff2D;
     size_t numSteps = 0;
     bool cylinderBool = getProperty("Cylinder");
+    bool adaptiveQRadius = getProperty("AdaptiveQRadius");
     if (cylinderBool)
     {
         numSteps = 100;
@@ -337,17 +340,28 @@ namespace MDAlgorithms
 	  double background_total = 0.0;
       if (!cylinderBool)
 	  {
+			// modulus of Q
+			coord_t lenQpeak = 1.0;
+			if (adaptiveQRadius)
+			{
+				lenQpeak = 0.0;
+				for (size_t d=0; d<nd; d++)
+				{
+					lenQpeak += center[d] * center[d];
+				}
+				lenQpeak = std::sqrt(lenQpeak);
+			}
 			CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
 			// Perform the integration into whatever box is contained within.
-			ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(PeakRadius*PeakRadius), signal, errorSquared);
+			ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(lenQpeak*PeakRadius*lenQpeak*PeakRadius), signal, errorSquared);
 
 			// Integrate around the background radius
 
 			if (BackgroundOuterRadius > PeakRadius )
 			{
 				// Get the total signal inside "BackgroundOuterRadius"
-				ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundOuterRadius*BackgroundOuterRadius), bgSignal, bgErrorSquared);
+				ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(lenQpeak*BackgroundOuterRadius*lenQpeak*BackgroundOuterRadius), bgSignal, bgErrorSquared);
 
 				// Evaluate the signal inside "BackgroundInnerRadius"
 				signal_t interiorSignal = 0;
@@ -356,7 +370,7 @@ namespace MDAlgorithms
 				// Integrate this 3rd radius, if needed
 				if (BackgroundInnerRadius != PeakRadius)
 				{
-					ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(BackgroundInnerRadius*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
+					ws->getBox()->integrateSphere(sphere, static_cast<coord_t>(lenQpeak*BackgroundInnerRadius*lenQpeak*BackgroundInnerRadius), interiorSignal, interiorErrorSquared);
 				}
 				else
 				{

@@ -89,9 +89,9 @@ class MuscatFunc(PythonAlgorithm):
 		coeff = [float(c1), float(c2), float(c3), float(c4), float(c5)]
 		kr1 = 1
 
-		verbOp = self.getProperty('Verbose')
+		verbOp = self.getProperty('Verbose').value
 		plotOp = self.getPropertyValue('Plot')
-		saveOp = self.getProperty('Save')
+		saveOp = self.getProperty('Save').value
 		Main.MuscatFuncStart(sname,geom,neut,beam,sam,grid,disp,coeff,kr1,verbOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(MuscatFunc)         # Register algorithm with Mantid

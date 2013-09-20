@@ -60,7 +60,7 @@ private:
     
 };
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
 
 #endif // REF_MATRIX_WS_IMAGE_VIEW_H

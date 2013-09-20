@@ -21,8 +21,6 @@ namespace
   // Macro to reduce copy-and-paste
   #define EXPORT_TIMESERIES_PROP(TYPE, Prefix)\
     register_ptr_to_python<TimeSeriesProperty<TYPE>*>();\
-    register_ptr_to_python<const TimeSeriesProperty<TYPE>*>();\
-    implicitly_convertible<TimeSeriesProperty<TYPE>*,const TimeSeriesProperty<TYPE>*>();\
     \
     class_<TimeSeriesProperty<TYPE>, bases<Property>, boost::noncopyable>(#Prefix"TimeSeriesProperty", init<const std::string&>())\
       .add_property("value", make_function(&Mantid::Kernel::TimeSeriesProperty<TYPE>::valuesAsVector, return_value_policy<VectorToNumpy>())) \

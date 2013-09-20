@@ -12,17 +12,7 @@ from PyQt4 import QtCore
 # python Qt4 bindings for GUI objects
 from PyQt4 import QtGui
 
-# import the MainWindow widget from the converted .ui files
-#from peak_back_selection_1d import Ui_MplMainWindow
-#from matplotlib.figure import Figure
-#from matplotlib.patches import Rectangle
-
-# import the Qt4Agg FigureCanvas Object, that binds Figure to 
-# Qt4Agg backend. It also inherits from QWidget
-#from matplotlib.backends.backend_qt4agg import  FigureCanvasQTAgg as FigureCanvas
-#from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-
-from mantidsimple import *
+from mantid.simpleapi import *
 
 #blue
 CSS_PEAK = """QLineEdit {
@@ -59,7 +49,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
     y1=None
     y2=None
     
-#    def __init__(self, parent=None, peakFrom=4, peakTo=6, backFrom=2, backTo=8, lowresFrom=4, lowresTo=6):
     def __init__(self, wk1=None, wk2=None, parent=None, type='data'):
 
         mt1 = mtd[wk1]
@@ -96,8 +85,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.create_menu()
         self.create_main_frame()
         
-#        self.initialize_application()
-
         #peak text fields
         QtCore.QObject.connect(self.peakFrom, QtCore.SIGNAL("returnPressed()"), self.update_plot)
         QtCore.QObject.connect(self.peakTo, QtCore.SIGNAL("returnPressed()"), self.update_plot)
@@ -204,17 +191,11 @@ class DesignerMainWindow(QtGui.QMainWindow):
         self.topHorizontalLayout.addLayout(self.topHorizontalLayoutRight)
         
         #Plot and toolbar
-#        plot_frame = QtGui.QWidget()
         self.main_frame = QtGui.QWidget(self)
 
         self.dpi = 100
         self.fig = Figure((6.0, 4.0), dpi=self.dpi)
 
-#        self.axes = self.fig.add_subplot(111)
-#        t=np.arange(0.0, 3.0, 0.01)
-#        s=np.cos(np.pi*t)
-#        self.axes.plot(t,s)
-        
         self.canvas = FigureCanvas(self.fig)
         self.canvas.setParent(self.main_frame)
 
@@ -264,10 +245,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
         close_action = self.create_action("&Close", shortcut="Ctrl+Q", slot=self.close, tip="Close the application")
         self.add_actions(self._file_menu, (close_action,))
 
-#    def initialize_application(self):
-#        bPeak = self.peakSwitch.isChecked()
-#        self.update_peak_back_selection_mode(bPeak)
-
     def peak_input_changed(self):
         self.update_graph()
 
@@ -288,11 +265,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
             self.peakTo.setStyleSheet(CSS_DESACTIVATED)
             self.backFrom.setStyleSheet(CSS_ACTIVATED)
             self.backTo.setStyleSheet(CSS_ACTIVATED)
-
-#            new_style = CSS_ACTIVATED.replace("QLineEdit", class_name)
-#            self.from_peak_input.setStyleSheet(new_style)
-#            self.to_peak_input.setStyleSheet(new_style)
-
 
     def update_peak_selection_mode(self):
         self.update_peak_back_selection_mode(True)
@@ -332,9 +304,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
 
     def parse_file(self, filename):
         """ parse a text file to extract letters frequencies """
-        # dict initialization
-#        letters = {}
-
         # lower-case letter ordinal numbers
         for i in range(97,122+1):
             letters[chr(i)] = 0
@@ -473,15 +442,12 @@ class DesignerMainWindow(QtGui.QMainWindow):
     
         parent = self.parent
 
-#        print isinteractive()   #False
         #top plot will be for peak and background selection
         axes = self.fig.add_subplot(211)
         
         x = self.x1
         y = self.y1
 
-#        x=np.arange(0,10,0.1)
-#        y=x*x
         bLinear = self.linear.isChecked()
 
         if bLinear:
@@ -552,8 +518,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
         x = self.x2
         y = self.y2
 
-#        x=np.arange(0,10,0.1)
-#        y=x*x
         if bLinear:
             line2, = axes2.plot(x,y,color='black')
         else:
@@ -593,17 +557,3 @@ class DesignerMainWindow(QtGui.QMainWindow):
         #set the x-axes range visible
         axes.set_xlim(self.peak_back_xlim)
         axes2.set_xlim(self.low_res_xlim)
-
-# create the GUI application
-#app = QtGui.QApplication(sys.argv)
-## instantiate the main window
-#dmw = DesignerMainWindow()
-## show it
-#dmw.show()
-## start the Qt main loop execution, existing from this script
-## with the same return code of Qt application
-#sys.exit(app.exec_())
-
-
-
-    

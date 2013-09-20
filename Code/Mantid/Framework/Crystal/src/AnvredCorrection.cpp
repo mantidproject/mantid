@@ -390,19 +390,19 @@ void AnvredCorrection::retrieveBaseProperties()
   amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
   radius = getProperty("Radius"); // in cm
   power_th = getProperty("PowerLambda"); // in cm
-  const Material *m_sampleMaterial = &(m_inputWS->sample().getMaterial());
-  if( m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) != 0.0)
+  const Material& sampleMaterial = m_inputWS->sample().getMaterial();
+  if( sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) != 0.0)
   {
-	double rho =  m_sampleMaterial->numberDensity();
-	if(smu == EMPTY_DBL()) smu =  m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
-	if(amu == EMPTY_DBL()) amu = m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    double rho =  sampleMaterial.numberDensity();
+    if (smu == EMPTY_DBL()) smu =  sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+    if (amu == EMPTY_DBL()) amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   }
   else  //Save input in Sample with wrong atomic number and name
   {
-	NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
+    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
   			0.0, 0.0, smu, 0.0, smu, amu);
-    Material *mat = new Material("SetInAnvredCorrection", *neutron, 1.0);
-    m_inputWS->mutableSample().setMaterial(*mat);
+    Material mat("SetInAnvredCorrection", neutron, 1.0);
+    m_inputWS->mutableSample().setMaterial(mat);
   }
   // Call the virtual function for any further properties
   retrieveProperties();
