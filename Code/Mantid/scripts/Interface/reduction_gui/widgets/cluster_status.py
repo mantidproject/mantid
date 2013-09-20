@@ -161,8 +161,6 @@ class RemoteJobsWidget(BaseWidget):
         job_trans_id = alg.getProperty("TransID").value
         
         njobs = len(job_name)
-        #job_start = njobs*[datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")]
-        #job_end = njobs*[datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")]
         job_start = alg.getProperty("StartDate").value
         job_end = alg.getProperty("CompletionDate").value
                 
