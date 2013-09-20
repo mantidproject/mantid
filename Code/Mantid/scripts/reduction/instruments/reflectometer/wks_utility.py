@@ -1882,6 +1882,7 @@ def createFinalWorkspace(q_axis, final_y_axis, final_error_axis, name_output_ws)
                                       DataE=final_error_axis,
                                       Nspec=1,
                                       UnitX="Wavelength")
+    final_workspace.setDistribution(True)
     
     return final_workspace
     
