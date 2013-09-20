@@ -34,10 +34,6 @@
  * an implicit conversion between them both
  */
 #define REGISTER_SHARED_PTR_TO_PYTHON(TYPE) \
-  boost::python::register_ptr_to_python<boost::shared_ptr<TYPE> >();\
-  boost::python::register_ptr_to_python<boost::shared_ptr<const TYPE> >();\
-  boost::python::implicitly_convertible<boost::shared_ptr<TYPE>, boost::shared_ptr<const TYPE> >();
-
-
+  boost::python::register_ptr_to_python<boost::shared_ptr<TYPE> >();
 
 #endif /* MANTID_PYTHONINTERFACE_REGISTERSHAREDPTRTOPYTHON_H_ */
