@@ -3387,29 +3387,23 @@ void ApplicationWindow::convertTableToWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
-  {
-    mt = convertTableToTableWorkspace(t);
-  }
+  convertTableToTableWorkspace(t);
 }
 
 /**
- * Convert Table in the active window to a TableWorkspace
+ * Convert Table in the active window to a MatrixWorkspace
  */
 void ApplicationWindow::convertTableToMatrixWorkspace()
 {
   Table* t = dynamic_cast<Table*>(activeWindow(TableWindow));
   if (!t) return;
-  MantidTable* mt = dynamic_cast<MantidTable*>(t);
-  if (!mt)
+  if(auto *mt = dynamic_cast<MantidTable*>(t))
   {
     mt = convertTableToTableWorkspace(t);
+    QMap<QString,QString> params;
+    params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
+    mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
   }
-  if ( !mt ) return;
-  QMap<QString,QString> params;
-  params["InputWorkspace"] = QString::fromStdString(mt->getWorkspaceName());
-  mantidUI->executeAlgorithmDlg("ConvertTableToMatrixWorkspace",params);
 }
 
 /**
@@ -3486,8 +3480,7 @@ MantidTable* ApplicationWindow::convertTableToTableWorkspace(Table* t)
   {
     Mantid::API::AnalysisDataService::Instance().add(wsName,tws);
   }
-  MantidTable* mt = new MantidTable(scriptingEnv(), tws, t->objectName(), this);
-  return mt;
+  return new MantidTable(scriptingEnv(), tws, t->objectName(), this);
 }
 
 Matrix* ApplicationWindow::tableToMatrix(Table* t)
