@@ -265,6 +265,25 @@ public:
     TS_ASSERT( !ptrDet8->isValid(V3D(0.0,0.0,2.02)+ptrDet8->getPos()) );
     TS_ASSERT( ptrDet8->isValid(V3D(0.5,0.5,0.1)+ptrDet8->getPos()) );
 
+    // test of guide.
+    boost::shared_ptr<const IDetector> ptrDet9 = i->getDetector(9);
+    TS_ASSERT( ptrDet9->isValid(V3D( 2.0,-2.0, 1.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D( 2.0, 2.0, 1.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D(-2.0, 2.0, 1.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D(-2.0,-2.0, 1.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D( 1.0,-1.0,-1.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D( 1.0, 1.0,-1.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D(-1.0, 1.0,-1.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D(-1.0,-1.0,-1.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D( 1.5,-1.5, 0.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D( 1.5, 1.5, 0.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D(-1.5, 1.5, 0.0) + ptrDet9->getPos()) );
+    TS_ASSERT( ptrDet9->isValid(V3D(-1.5,-1.5, 0.0) + ptrDet9->getPos()) );
+    TS_ASSERT(!ptrDet9->isValid(V3D( 2.0,-2.0, 0.0) + ptrDet9->getPos()) );
+    TS_ASSERT(!ptrDet9->isValid(V3D( 2.0, 2.0, 0.0) + ptrDet9->getPos()) );
+    TS_ASSERT(!ptrDet9->isValid(V3D(-2.0, 2.0, 0.0) + ptrDet9->getPos()) );
+    TS_ASSERT(!ptrDet9->isValid(V3D(-2.0,-2.0, 0.0) + ptrDet9->getPos()) );
+
     // test for "cuboid-rotating-test".
     boost::shared_ptr<const IDetector> ptrDet10 = i->getDetector(10);
     TS_ASSERT( ptrDet10->isValid(V3D(0.0,0.0,0.1)+ptrDet10->getPos()) );

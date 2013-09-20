@@ -106,7 +106,77 @@ public:
     TS_ASSERT( shape_sptr->isValid(V3D(0.004,0.003,0.003)) );
     TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.-0.003,-0.036)) );
     TS_ASSERT( !shape_sptr->isValid(V3D(0.0,-0.003, -0.038)) );
-	}
+  }
+	
+  void testGuideDefaults()
+  {
+    std::string xmlShape = "<guide id=\"shape\">";
+    xmlShape +=	"<aperture-start height=\"2.0\" width=\"2.0\" />";
+    xmlShape +=	"<length val=\"2.0\" />";
+    xmlShape +=	"<aperture-end height=\"4.0\" width=\"4.0\" />";
+    xmlShape +=	"</guide>";
+    xmlShape +=	"<algebra val=\"shape\"/>";
+
+    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    // Vertices.
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0,-2.0, 1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0, 2.0, 1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(-2.0, 2.0, 1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(-2.0,-2.0, 1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0,-1.0,-1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0, 1.0,-1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(-1.0, 1.0,-1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(-1.0,-1.0,-1.0)) );
+
+    // Middle of edges that connect front and back faces.
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.5,-1.5, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.5, 1.5, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(-1.5, 1.5, 0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(-1.5,-1.5, 0.0)) );
+
+    // Close to, but outside of shape.
+    TS_ASSERT(!shape_sptr->isValid(V3D( 1.6,-1.6, 0.0)) );
+    TS_ASSERT(!shape_sptr->isValid(V3D( 1.6, 1.6, 0.0)) );
+    TS_ASSERT(!shape_sptr->isValid(V3D(-1.6, 1.6, 0.0)) );
+    TS_ASSERT(!shape_sptr->isValid(V3D(-1.6,-1.6, 0.0)) );
+  }
+	
+  void testGuideDifferentAxisAndCentre()
+  {
+    std::string xmlShape = "<guide id=\"shape\">";
+    xmlShape +=	"<aperture-start height=\"2.0\" width=\"2.0\" />";
+    xmlShape +=	"<length val=\"2.0\" />";
+    xmlShape +=	"<aperture-end height=\"4.0\" width=\"4.0\" />";
+    xmlShape +=	"<centre x=\"0.0\" y=\"0.0\" z=\"-1.0\" />";
+    xmlShape +=	"<axis x=\"1.0\" y=\"0.0\" z=\"0\" />";
+    xmlShape +=	"</guide>";
+    xmlShape +=	"<algebra val=\"shape\"/>";
+
+    boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    // Vertices.
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0,-2.0, 2.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0, 2.0, 2.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0, 2.0,-2.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 2.0,-2.0,-2.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0,-1.0, 1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 1.0, 1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0, 1.0,-1.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 0.0,-1.0,-1.0)) );
+
+    // Middle of edges that connect front and back faces.
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0,-1.5, 1.5)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0, 1.5, 1.5)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0, 1.5,-1.5)) );
+    TS_ASSERT( shape_sptr->isValid(V3D( 1.0,-1.5,-1.5)) );
+    
+    // Close to, but outside of shape.
+    TS_ASSERT(!shape_sptr->isValid(V3D( 1.0,-1.6, 1.6)) );
+    TS_ASSERT(!shape_sptr->isValid(V3D( 1.0, 1.6, 1.6)) );
+    TS_ASSERT(!shape_sptr->isValid(V3D( 1.0, 1.6,-1.6)) );
+    TS_ASSERT(!shape_sptr->isValid(V3D( 1.0,-1.6,-1.6)) );
+  }
 
 	void testSphere()
 	{

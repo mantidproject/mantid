@@ -115,7 +115,40 @@
       </xs:element>
     </xs:choice>
   </xs:complexType>
-  
+
+  <!-- Guide Parameters -->
+  <xs:complexType name="guide-parameters">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="axis">
+        <xs:complexType>
+          <xs:attributeGroup ref="cartesian"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="centre">
+        <xs:complexType>
+          <xs:attributeGroup ref="cartesian"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="aperture-start">
+        <xs:complexType>
+          <xs:attribute name="height"/>
+          <xs:attribute name="width"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="aperture-end">
+        <xs:complexType>
+          <xs:attribute name="height"/>
+          <xs:attribute name="width"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="length">
+        <xs:complexType>
+          <xs:attribute name="val"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+  </xs:complexType>
+    
   <!-- Define <parameter> Type-->
   <xs:complexType name="parameterType">
     <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -489,6 +522,15 @@
                     <xs:complexType>
                       <xs:complexContent>
                         <xs:extension base="point-parameters">
+                          <xs:attribute name ="id"/>
+                        </xs:extension>
+                      </xs:complexContent>
+                    </xs:complexType>
+                  </xs:element>
+                  <xs:element name="guide">
+                    <xs:complexType>
+                      <xs:complexContent>
+                        <xs:extension base="guide-parameters">
                           <xs:attribute name ="id"/>
                         </xs:extension>
                       </xs:complexContent>
