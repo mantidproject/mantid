@@ -54,7 +54,7 @@ class JumpConvFit(PythonAlgorithm):
 			message = 'Input from File : '+path
 		else:
 			message = 'Input from Workspace : '+samWS
-		ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=samWS, WorkspaceIndex=1)
+		ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=samWS, WorkspaceIndex=0)
 		inGR = mtd[samWS].getRun()
 		val = inGR.getLogData('Fit Program').value
 		if verbOp:
