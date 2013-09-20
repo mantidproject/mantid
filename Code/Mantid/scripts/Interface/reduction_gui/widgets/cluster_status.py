@@ -161,6 +161,8 @@ class RemoteJobsWidget(BaseWidget):
         job_trans_id = alg.getProperty("TransID").value
         
         njobs = len(job_name)
+        #job_start = njobs*[datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")]
+        #job_end = njobs*[datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")]
         job_start = alg.getProperty("StartDate").value
         job_end = alg.getProperty("CompletionDate").value
                 
@@ -169,15 +171,18 @@ class RemoteJobsWidget(BaseWidget):
         self._clear_table()
         self._content.job_table.setSortingEnabled(False)
         self._content.job_table.setRowCount(len(job_list))
+        unavailable = DateAndTime(0)
+        unavailable.setToMinimum()
 
         for i in range(len(job_list)):
-            
             # Make sure that only recent jobs are displayed
             oldest = DateAndTime(str(self._content.date_time_edit.dateTime().toString(QtCore.Qt.ISODate)))
-            this_job = DateAndTime(job_list[i][4])
-            unavailable = DateAndTime(0)
-            unavailable.setToMinimum()
-            if this_job>unavailable and this_job<oldest:
+            end_time = job_list[i][4]
+            if end_time == '': 
+                job_end = unavailable
+            else:
+                job_end = DateAndTime(end_time)
+            if job_end>unavailable and job_end<oldest:
                 self._content.job_table.setRowHidden(i, True)
                 continue
             self._content.job_table.setRowHidden(i, False)
@@ -208,8 +213,8 @@ class RemoteJobsWidget(BaseWidget):
             self._content.job_table.setItem(i, 3, item)
             
             # Completion time
-            time_displayed = str(job_list[i][4]).replace('T', ' ')
-            if DateAndTime(str(job_list[i][4])) == unavailable:
+            time_displayed = end_time.replace('T', ' ')
+            if job_end == unavailable:
                 time_displayed = ''
             item = QtGui.QTableWidgetItem(time_displayed)
             item.setFlags(QtCore.Qt.ItemIsSelectable |QtCore.Qt.ItemIsEnabled )
