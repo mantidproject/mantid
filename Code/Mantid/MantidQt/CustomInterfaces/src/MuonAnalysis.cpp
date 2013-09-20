@@ -238,7 +238,7 @@ void MuonAnalysis::initLayout()
   ConfigService::Instance().setString("curvefitting.peakRadius","99");
 
   connect(m_uiForm.deadTimeType, SIGNAL(currentIndexChanged(int)), this, SLOT(changeDeadTimeType(int) ) );
-  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileEditingFinished()), this, SLOT(deadTimeFileSelected() ) );
+  connect(m_uiForm.mwRunDeadTimeFile, SIGNAL(fileFindingFinished()), this, SLOT(deadTimeFileSelected() ) );
 }
 
 /**
@@ -1139,8 +1139,12 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   if (m_previousFilenames.size() > 1)
     plusRangeWorkspaces();
 
-  if (m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS")
+  try // ... to apply dead time correction
   {
+    // ARGUS does not support dead time corr.
+    if (m_uiForm.instrSelector->currentText().toUpper() == "ARGUS" && m_uiForm.deadTimeType->currentIndex() != 0)
+      throw std::runtime_error("Dead times are currently not implemented in ARGUS files.");
+
     // Get dead times from data.
     if (m_uiForm.deadTimeType->currentIndex() == 1)
     {
@@ -1149,22 +1153,20 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     // Get dead times from file.
     else if (m_uiForm.deadTimeType->currentIndex() == 2)
     {
+      if(!m_uiForm.mwRunDeadTimeFile->isValid())
+        throw std::runtime_error("Specified Dead Time file is not valid.");
+
       QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
 
-      try
-      {
-        getDeadTimeFromFile(deadTimeFile);
-      }
-      catch (std::exception&)
-      {
-        QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
-      }
+      getDeadTimeFromFile(deadTimeFile);
     }
   }
-  else if (m_uiForm.deadTimeType->currentIndex() != 0)
+  catch(std::exception& e)
   {
-    QMessageBox::information(this, "Mantid - Muon Analysis", "Dead times are currently not implemented in ARGUS files."
-                          + QString("\nAs a result, no dead times will be applied.") );
+    QString errorMsg(e.what());
+    errorMsg += "\n\nNo Dead Time correction applied.";
+
+    QMessageBox::warning(this, "Mantid - MuonAnalysis", errorMsg);
   }
 
   // Make the options available
@@ -1557,8 +1559,7 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
       else
       {
         Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
-        QMessageBox::information(this, "Mantid - Muon Analysis", "This kind of workspace is not compatible with applying dead times");
-        return;
+        throw std::runtime_error("This kind of workspace is not compatible with applying dead times");
       }
       Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
     }
@@ -1566,8 +1567,7 @@ void MuonAnalysis::getDeadTimeFromFile(const QString & fileName)
   else
   {
     Mantid::API::AnalysisDataService::Instance().remove("tempMuonDeadTime123qwe");
-    QMessageBox::information(this, "Mantid - Muon Analysis", "Failed to load dead times from the file " + fileName);
-    return;
+    throw std::runtime_error("Failed to load dead times from the file " + fileName.toStdString());
   }
 }
 
