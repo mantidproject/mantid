@@ -2305,17 +2305,13 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList
    }
 
    Table *t = createTableFromBins(wsName, ws, binsList, errors);
+   if(!t) return NULL;
    t->confirmClose(false);
    t->setAttribute(Qt::WA_QuitOnClose);
-   MultiLayer* ml(NULL);
-   if( !t )
-   {
-     QApplication::restoreOverrideCursor();
-     return ml;
-   }
 
    // TODO: Use the default style instead of a line if nothing is passed into this method
-   ml = appWindow()->multilayerPlot(t,t->colNames(),style);
+   MultiLayer *ml = appWindow()->multilayerPlot(t,t->colNames(),style);
+   if(!ml) return NULL;
    m->setBinGraph(ml,t);
    ml->confirmClose(false);
    QApplication::restoreOverrideCursor();
