@@ -147,19 +147,8 @@ namespace MantidQt
 		void Quasi::handleSampleInputReady(const QString& filename)
 		{
 			plotMiniPlot(filename, 0);
-			std::pair<double,double> res;
 			std::pair<double,double> range = getCurveRange();
-
-			//Use the values from the instrument parameter file if we can
-			if(getInstrumentResolution(filename, res))
-			{
-				setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], res);
-			}
-			else
-			{
-				setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], range);
-			}
-
+			setMiniPlotGuides(m_properties["EMin"], m_properties["EMax"], range);
 			setPlotRange(m_properties["EMin"], m_properties["EMax"], range);
 		}
 
