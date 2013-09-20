@@ -25,8 +25,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-#ifndef AXISDETAILS_H_
-#define AXISDETAILS_H_
+#ifndef AXISAXISDETAILS_H_
+#define AXISAXISDETAILS_H_
 
 #include <QWidget>
 #include <QList>
@@ -108,58 +108,13 @@ private:
   void updateTitleBox(int axis);
   void updateShowBox(int axis);
   void updateAxisColor(int);
-  void updateTickLabelsList(bool);
+  //void updateTickLabelsList(bool);
   void setTicksType(int);
   void setLabelsNumericFormat(int);
   void updateLabelsFormat(int);
   void setBaselineDist(int);
   void apply(int, int, const QString&, bool, int, int, bool, const QColor&,
       int, int, int, int, const QString&, const QColor&);
+  bool valid();
 };
-//
-class ScaleAxisDetails: public QWidget
-{
-  Q_OBJECT
-    //details for each axis in the Scale Tab
-public:
-  ScaleAxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent = 0); // populate and fill in with existing data
-  virtual ~ScaleAxisDetails();
-  void initWidgets();
-  bool modified();
-  void apply();
-private slots:
-
-    //void updateMinorTicksList(int scaleType);
-    //void endvalueChanged(double);
-    //void startvalueChanged(double);
-    void radiosSwitched();
-
-private:
-  bool m_modified;
-  ApplicationWindow* d_app;
-  Graph* d_graph;
-  //formerly  *boxEnd, *boxStart, *boxStep, *boxBreakStart, *boxBreakEnd, *boxStepBeforeBreak, *boxStepAfterBreak;
-  DoubleSpinBox *dspnEnd, *dspnStart, *dspnStep, *dspnBreakStart,
-    *dspnBreakEnd, *dspnStepBeforeBreak, *dspnStepAfterBreak;
-  //formerly *btnInvert, *boxLog10AfterBreak, *boxBreakDecoration;
-  QCheckBox *chkInvert, *chkLog10AfterBreak, *chkBreakDecoration;
-  //formerly *btnStep,*btnMajor
-  QRadioButton *radStep, *radMajor;
-  //formerly *boxMajorValue, *boxBreakPosition, *boxBreakWidth;
-  QSpinBox *spnMajorValue, *spnBreakPosition, *spnBreakWidth;
-  //formerly *boxAxesBreaks;
-  QGroupBox *grpAxesBreaks;
-  //formerly *boxMinorTicksBeforeBreak, *boxMinorTicksAfterBreak, *boxScaleType, *boxMinorValue, *boxUnit;
-  QComboBox *cmbMinorTicksBeforeBreak, *cmbMinorTicksAfterBreak,
-    *cmbScaleType, *cmbMinorValue, *cmbUnit;
-  //formerly *boxScaleTypeLabel, *minorBoxLabel;
-  QLabel *lblScaleTypeLabel, *lblMinorBox;
-  //formerly *boxStartDateTime, *boxEndDateTime;
-  QDateTimeEdit *dteStartDateTime, *dteEndDateTime;
-  //formerly *boxStartTime, *boxEndTime;
-  QTimeEdit *timStartTime, *timEndTime;
-  int m_mappedaxis;
-  bool m_initialised;
-};
-
-#endif /* AXISDETAILS_H_ */
+#endif /* AXISAXISDETAILS_H_ */

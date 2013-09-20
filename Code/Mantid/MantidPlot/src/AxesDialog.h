@@ -33,7 +33,8 @@
 #include <QLabel>
 #include <QList>
 #include <QTextEdit>
-#include "AxisDetails.h"
+#include "AxisAxisDetails.h"
+#include "ScaleAxisDetails.h"
 //#include "MantidKernel/Logger.h"
 
 class QTimeEdit;
