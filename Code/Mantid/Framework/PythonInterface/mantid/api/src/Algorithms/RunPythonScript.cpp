@@ -178,7 +178,7 @@ namespace Mantid
         // The DowncastReturnedValue policy is already in place for this and is used in many
         // method exports as part of a return_value_policy struct.
         // It is called manually here.
-        typedef typename Policies::DowncastReturnedValue::apply<API::Workspace_sptr>::type WorkspaceDowncaster;
+        typedef Policies::DowncastReturnedValue::apply<API::Workspace_sptr>::type WorkspaceDowncaster;
         locals["input"] = object(handle<>(WorkspaceDowncaster()(inputWS)));
       }
       std::string outputWSName = getPropertyValue("OutputWorkspace");
