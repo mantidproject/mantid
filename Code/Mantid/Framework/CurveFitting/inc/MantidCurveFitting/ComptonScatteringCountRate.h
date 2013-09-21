@@ -61,8 +61,11 @@ namespace CurveFitting
     /// Cache ptrs to the individial profiles
     void cacheComptonProfiles();
     /// Set up the constraint matrices
-    void createConstraintMatrices();
-
+    void createConstraintMatrices(const MantidVec & xValues);
+    /// Set up positivity constraint matrix
+    void createPositivityCM(const MantidVec & xValues);
+    /// Set up equality constraint matrix
+    void createEqualityCM(const size_t nmasses);
     
     /// Holder for non-owning functions cast as ComptonProfiles
     std::vector<ComptonProfile*> m_profiles;
@@ -72,6 +75,8 @@ namespace CurveFitting
     mutable Kernel::DblMatrix m_cmatrix;
     /// Intensity equality constraints
     Kernel::DblMatrix m_eqMatrix;
+    /// The order of the background
+    int m_bkgdPolyN;
     /// Errors on the data
     std::vector<double>  m_errors;
     /// Ratio of data & errors
