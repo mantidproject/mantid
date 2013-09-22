@@ -53,18 +53,18 @@ public:
 
   void test_Function_Accepts_Having_No_Equality_Constraints_When_Setting_Workspace()
   {
-    auto func = createFunctionWithParamsSet(); // No equality matrix set
+    using namespace Mantid::API;
+    IFunction_sptr func = createFunctionNoBackground(); // No equality matrix set
     double x0(165.0),x1(166.0),dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
 
     TS_ASSERT_THROWS_NOTHING(func->setWorkspace(testWS));
   }
 
-  void test_Function_Gives_Expected_Results_Given_Test_Data()
+  void test_Function_With_No_Background_Gives_Expected_Results_Given_Test_Data()
   {
-    using namespace Mantid::API;
-
-     auto func = createFunctionWithParamsSet();
+     using namespace Mantid::API;
+     IFunction_sptr func = createFunctionNoBackground();
      double x0(165.0),x1(166.0),dx(0.5);
      auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
      func->setWorkspace(testWS);
@@ -80,9 +80,30 @@ public:
      TS_ASSERT_DELTA(2, values.getCalculated(2), tol);
   }
 
+  void test_Function_Including_Background_Gives_Expected_Results_Given_Test_Data()
+  {
+     using namespace Mantid::API;
+     IFunction_sptr func = createFunctionWithBackground();
+     double x0(165.0),x1(166.0),dx(0.5);
+     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+     func->setWorkspace(testWS);
+     const auto & dataX = testWS->readX(0);
+     FunctionDomain1DView domain(dataX.data(), dataX.size());
+     FunctionValues values(domain);
+
+     TS_ASSERT_THROWS_NOTHING(func->function(domain, values));
+
+     const double tol(1e-10);
+     TS_ASSERT_DELTA(2.25, values.getCalculated(0), tol); // Each member returns 1
+     TS_ASSERT_DELTA(2.25, values.getCalculated(1), tol);
+     TS_ASSERT_DELTA(2.25, values.getCalculated(2), tol);
+  }
+
+
   void test_Iteration_Starting_Resets_Intensity_Parameters_Correctly_Without_Equality_Matrix()
   {
-    auto func = createFunctionWithParamsSet();
+    using namespace Mantid::API;
+    IFunction_sptr func = createFunctionNoBackground();
     double x0(165.0),x1(166.0),dx(0.5);
     auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
     func->setWorkspace(testWS);
@@ -96,7 +117,8 @@ public:
 
   void test_Iteration_Starting_Resets_Intensity_Parameters_Satisfying_Equality_Matrix()
   {
-    auto func = createFunctionWithParamsSet();
+    using namespace Mantid::API;
+    IFunction_sptr func = createFunctionNoBackground();
     func->setAttributeValue("IntensityConstraints", "Matrix(1|2)1|-2"); // I_1 = 2I_2
 
     double x0(165.0),x1(166.0),dx(0.5);
@@ -104,11 +126,31 @@ public:
     func->setWorkspace(testWS);
 
     func->iterationStarting();
-    TS_ASSERT_DELTA(func->getParameter(0),5.0, 1e-10);
-    TS_ASSERT_DELTA(func->getParameter(1),0.6666666633, 1e-10);
-    TS_ASSERT_DELTA(func->getParameter(2),10.0, 1e-10);
-    TS_ASSERT_DELTA(func->getParameter(3),0.3333333317, 1e-10);
+    TS_ASSERT_DELTA(func->getParameter(0),5.0, 1e-10); // width_1
+    TS_ASSERT_DELTA(func->getParameter(1),0.6666666633, 1e-10); // I_1
+    TS_ASSERT_DELTA(func->getParameter(2),10.0, 1e-10); // width_2
+    TS_ASSERT_DELTA(func->getParameter(3),0.3333333317, 1e-10); //I_2
   }
+
+  void test_Iteration_Starting_Resets_Intensity_Parameters_And_Background_Parameters_With_Background_Included()
+  {
+    using namespace Mantid::API;
+    IFunction_sptr func = createFunctionWithBackground();
+    func->setAttributeValue("IntensityConstraints", "Matrix(1|2)1|-2"); // I_1 = 2I_2
+
+    double x0(165.0),x1(166.0),dx(0.5);
+    auto testWS = ComptonProfileTestHelpers::createSingleSpectrumTestWorkspace(x0,x1,dx);
+    func->setWorkspace(testWS);
+
+    func->iterationStarting();
+    TS_ASSERT_DELTA(func->getParameter(0),5.0, 1e-10); // width_1
+    TS_ASSERT_DELTA(func->getParameter(1),-0.0506748344, 1e-10); // I_1
+    TS_ASSERT_DELTA(func->getParameter(2),10.0, 1e-10); //width_2
+    TS_ASSERT_DELTA(func->getParameter(3),-0.0253374172, 1e-10); // I_2
+    TS_ASSERT_DELTA(func->getParameter(4),-0.0422290287, 1e-10); // background A_0
+    TS_ASSERT_DELTA(func->getParameter(5),0.00675680781, 1e-10); // background A_1
+  }
+
 
 private:
 
@@ -141,7 +183,38 @@ private:
     }
   };
 
-  Mantid::API::IFunction_sptr createFunctionWithParamsSet()
+  /// Background impl for testing
+  /// Retursns canned answer of 0.25
+  class LinearStub : public Mantid::API::IFunction1D, Mantid::API::ParamFunction
+  {
+  public:
+    LinearStub()
+    {
+      declareAttribute("n",Mantid::API::IFunction::Attribute(1));
+      declareParameter("A0",1.0);
+      declareParameter("A1",1.0);
+    }
+    std::string name() const { return "LinearStub"; }
+    void function1D(double* out, const double*, const size_t nData) const
+    {
+      for(size_t i = 0; i < nData; ++i) out[i] = 0.25;
+    }
+  };
+
+  Mantid::API::IFunction_sptr createFunctionWithBackground()
+  {
+    auto func = createFunctionNoBackground();
+
+    auto background = boost::make_shared<LinearStub>();
+    background->initialize();
+    func->addFunction(background);
+    func->setUpForFit();
+
+    return func;
+  }
+
+  boost::shared_ptr<Mantid::CurveFitting::ComptonScatteringCountRate>
+  createFunctionNoBackground()
   {
     auto func1 = boost::make_shared<ComptonProfileStub>();
     func1->initialize();
