@@ -1,12 +1,14 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
+#include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 
 #include <boost/python/class.hpp>
 
 using namespace Mantid::Geometry;
 using Mantid::detid_t;
 using namespace boost::python;
+using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 
 void export_Instrument()
 {
@@ -24,7 +26,7 @@ void export_Instrument()
     .def("getReferenceFrame", (boost::shared_ptr<const ReferenceFrame> (Instrument::*)())&Instrument::getReferenceFrame )
     .def("getValidFromDate", &Instrument::getValidFromDate, "Return the valid from date of the instrument")
     .def("getValidToDate", &Instrument::getValidToDate, "Return the valid to date of the instrument")
-    .def("getBaseInstrument", &Instrument::baseInstrument,"Return reference to the base instrument")
+    .def("getBaseInstrument", &Instrument::baseInstrument,return_value_policy<RemoveConstSharedPtr>(), "Return reference to the base instrument")
       ;
     ;
     
