@@ -959,7 +959,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
       throw runtime_error(errss.str());
     }
 
-    fprintf(pFile, "INS %2d ICONS%10.3f%10.3f%10.3f%10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero,0.0, 0, 0.0);
+    fprintf(pFile, "INS %2d ICONS%10.3f%10.3f%10.3f          %10.3f%5d%10.3f\n", bankid, instC*1.00009, 0.0, zero, 0.0, 0, 0.0);
     fprintf(pFile, "INS %2dBNKPAR%10.3f%10.3f%10.3f%10.3f%10.3f%5d%5d\n", bankid, m_L2, twotheta, 0., 0., 0.2, 1, 1);
 
     fprintf(pFile, "INS %2dBAKGD     1    4    Y    0    Y\n", bankid);
