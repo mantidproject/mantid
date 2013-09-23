@@ -1159,11 +1159,6 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
 
       getDeadTimeFromFile(deadTimeFile);
-
-      // Remember the filename for the next time interface is opened
-      QSettings group;
-      group.beginGroup(m_settingsGroup + "DeadTimeOptions");
-      group.setValue("deadTimeFile", deadTimeFile);
     }
   }
   catch(std::exception& e)
@@ -3835,8 +3830,13 @@ void MuonAnalysis::changeDeadTimeType(int choice)
 */
 void MuonAnalysis::deadTimeFileSelected()
 {
-  if(m_uiForm.mwRunDeadTimeFile->getText().isEmpty())
+  if(!m_uiForm.mwRunDeadTimeFile->isValid())
     return;
+
+  // Remember the filename for the next time interface is opened
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "DeadTimeOptions");
+  group.setValue("deadTimeFile", m_uiForm.mwRunDeadTimeFile->getText());
 
   m_deadTimesChanged = true;
   homeTabUpdatePlot();
