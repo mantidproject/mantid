@@ -68,7 +68,7 @@ public:
     // dmax changes from tabulated value (2.06) to converted-value (2.05263)
     // and thus cause the change of tabulated value in .prm file
 
-    TS_ASSERT_EQUALS(veclines[0], "INS  1 ICONS 22748.017     0.000     0.000     0.000    0     0.000");
+    TS_ASSERT_EQUALS(veclines[0], "INS  1 ICONS 22748.017     0.000     0.000               0.000    0     0.000");
     // TS_ASSERT_EQUALS(veclines[1], "INS  1PAB3 2   0.11303   3.91095   0.70362   0.24580");
     TS_ASSERT_EQUALS(veclines[1], "INS  1PAB3 2   0.11295   3.90798   0.70397   0.24584");
 
