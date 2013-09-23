@@ -10,7 +10,7 @@ import os
 class FixGSASInstrumentFileTest(unittest.TestCase):
 
     def test_FixLineSize(self):
-        """ Test to load a .hkl file
+        """ Test to fix the line width of prm file
         """
         # Create a test file
         prmfilename = "test.prm"
@@ -24,19 +24,20 @@ class FixGSASInstrumentFileTest(unittest.TestCase):
         # Verify 
         ofile = open(prmfilename, "r")
         lines = ofile.readlines()
+        ofile.close()
         self.assertEqual(len(lines), 55)
 
         for line in lines:
             ct = len(line.split("\n")[0])
             self.assertEqual(ct, 80)
 
-        # Delete the test hkl file
+        # Delete the test prm file
         os.remove(prmfilename)
 
         return
 
     def _createPrmFile(self, filename):
-        """ Create a .hkl file
+        """ Create a .prm file
         """
         prmfile = open(filename, "w")
 
