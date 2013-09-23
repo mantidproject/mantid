@@ -36,6 +36,7 @@ There are 2 places in this algorithm that can set the value of  <math>L_1</math>
 *WIKI*/
 
 #include "MantidAlgorithms/SaveGSASInstrumentFile.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -428,6 +429,24 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
 
     // Convert to GSAS
     convertToGSAS(m_vecBankID2File, m_gsasFileName, bankprofileparammap);
+
+    // Fix?
+    Mantid::API::FrameworkManager::Instance();
+    IAlgorithm_sptr fit;
+    try
+    {
+      // Fitting the candidate peaks to a Gaussian
+      fit = createChildAlgorithm("FixGSASInstrumentFile", -1, -1, true);
+      fit->initialize();
+      fit->setProperty("InputFilename", m_gsasFileName);
+      fit->execute();
+    }
+    catch (Exception::NotFoundError &)
+    {
+      std::string errorstr("FindPeaks algorithm requires the CurveFitting library");
+      g_log.error(errorstr);
+      throw std::runtime_error(errorstr);
+    }
 
     return;
   }

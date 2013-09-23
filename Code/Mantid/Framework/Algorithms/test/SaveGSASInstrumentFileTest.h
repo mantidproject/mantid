@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/SaveGSASInstrumentFile.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include <fstream>
 #include <Poco/File.h>
@@ -28,6 +29,8 @@ public:
 
   void test_SaveGSSInstrumentFile_1Bank()
   {
+    Mantid::API::FrameworkManager::Instance();
+
     // Load a (local) table workspace
     loadProfileTable("PG3ProfileTable");
     TableWorkspace_sptr profiletablews = boost::dynamic_pointer_cast<TableWorkspace>(
