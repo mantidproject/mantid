@@ -7,6 +7,10 @@
 #include <fstream>
 #include <Poco/File.h>
 
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Element.h>
+
 using Mantid::DataHandling::ConvertFullprofToXML;
 
 using namespace Mantid;
@@ -61,6 +65,13 @@ public:
     // has the algorithm written a file to disk?
     outputFilename = alg.getPropertyValue("outputFilename"); //Get absolute path
     TS_ASSERT( Poco::File(outputFilename).exists() );
+
+    // Check output file
+    std::string xmlText = Strings::loadFile(outputFilename);
+    Poco::XML::DOMParser pParser;
+    Poco::XML::Document* doc;
+    TS_ASSERT_THROWS_NOTHING(doc = pParser.parseString(xmlText));
+    TS_ASSERT(doc);
 
     //Clean up
     Poco::File(inputFilename).remove();

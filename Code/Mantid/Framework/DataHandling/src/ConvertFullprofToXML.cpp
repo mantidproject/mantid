@@ -14,12 +14,6 @@ Convert the initial fitting parameters in a Fullprof file to XML format in an [[
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
 
 #include <boost/lexical_cast.hpp>
 
