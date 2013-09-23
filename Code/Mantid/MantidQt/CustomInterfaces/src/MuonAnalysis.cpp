@@ -3810,6 +3810,7 @@ void MuonAnalysis::setToolbarsHidden(bool hidden)
 void MuonAnalysis::changeDeadTimeType(int choice)
 {
   m_deadTimesChanged = true;
+
   if (choice == 0 || choice == 1) // if choice == none || choice == from file
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
@@ -3818,6 +3819,7 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   else // choice must be from workspace
   {
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
+    m_uiForm.mwRunDeadTimeFile->setUserInput("");
   }
 
   QSettings group;
@@ -3833,6 +3835,9 @@ void MuonAnalysis::changeDeadTimeType(int choice)
 */
 void MuonAnalysis::deadTimeFileSelected()
 {
+  if(m_uiForm.mwRunDeadTimeFile->getText().isEmpty())
+    return;
+
   m_deadTimesChanged = true;
   homeTabUpdatePlot();
 }
