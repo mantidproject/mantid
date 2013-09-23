@@ -63,10 +63,14 @@ class Stitch1D(PythonAlgorithm):
                 scalefactor = y1[0]/y2[0]
             else:
                 lhs_rebinned *= (rhsOverlapIntegrated/lhsOverlapIntegrated)
-                scalefactor = y2[0]/y1[0]
-            
+                scalefactor = y2[0]/y1[0]   
+            DeleteWorkspace(lhsOverlapIntegrated)
+            DeleteWorkspace(rhsOverlapIntegrated) 
         else:
-            rhs_rebinned = MultiplyRange(InputWorkspace=w2, StartBin=0, Factor=manualScaleFactor)
+            if scaleRHSWorkspace:
+                rhs_rebinned *= manualScaleFactor
+            else:
+                lhs_rebinned *= manualScaleFactor
             scalefactor = manualScaleFactor
         
         # Mask out everything BUT the overlap region as a new workspace.
@@ -87,6 +91,7 @@ class Stitch1D(PythonAlgorithm):
         if self.has_non_zero_errors(overlap1) and self.has_non_zero_errors(overlap2):
             overlapave = WeightedMean(InputWorkspace1=overlap1,InputWorkspace2=overlap2)
         else:
+            self.log().information("Using un-weighted mean for Stitch1D overlap mean")
             overlapave = (overlap1 + overlap2)/2
             
         # Add the Three masked workspaces together to create a complete x-range
@@ -96,8 +101,6 @@ class Stitch1D(PythonAlgorithm):
         # Cleanup
         DeleteWorkspace(lhs_rebinned)
         DeleteWorkspace(rhs_rebinned)
-        DeleteWorkspace(lhsOverlapIntegrated)
-        DeleteWorkspace(rhsOverlapIntegrated)
         DeleteWorkspace(overlap1)
         DeleteWorkspace(overlap2)
         DeleteWorkspace(overlapave)
