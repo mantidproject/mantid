@@ -63,7 +63,7 @@ class Stitch1DTest(unittest.TestCase):
         self.assertEquals(1, len(numpy.unique(yValues)), "Output YVaues should all be 2")
         self.assertEquals(2, yValues[0], "Output YValues should all be 2")
         # Check that the output E-Values are correct.
-        self.assertEquals(0, numpy.count_nonzero(eValues), "Output Error values should all be non-zero")
+        self.assertEquals(0, len(eValues.nonzero()[0]), "Output Error values should all be non-zero")
         # Check that the output X-Values are correct.
         self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))
         DeleteWorkspace(stitched[0])
@@ -84,7 +84,7 @@ class Stitch1DTest(unittest.TestCase):
         self.assertEquals(1, len(numpy.unique(yValues)), "Output YVaues should all be 2")
         self.assertEquals(3, yValues[0], "Output YValues should all be 3")
         # Check that the output E-Values are correct.
-        self.assertEquals(0, numpy.count_nonzero(eValues), "Output Error values should all be non-zero")
+        self.assertEquals(0, len(eValues.nonzero()[0]), "Output Error values should all be non-zero")
         # Check that the output X-Values are correct.
         self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))     
         DeleteWorkspace(stitched[0]) 
@@ -100,7 +100,7 @@ class Stitch1DTest(unittest.TestCase):
         self.assertEquals(1, len(numpy.unique(yValues)), "Output YVaues should all be 2")
         self.assertEquals(2, yValues[0], "Output YValues should all be 2")
         # Check that the output E-Values are correct.
-        self.assertEquals(0, numpy.count_nonzero(eValues), "Output Error values should all be non-zero")
+        self.assertEquals(0, len(eValues.nonzero()[0]), "Output Error values should all be non-zero")
         # Check that the output X-Values are correct.
         self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))     
         DeleteWorkspace(stitched[0]) 
@@ -116,7 +116,7 @@ class Stitch1DTest(unittest.TestCase):
         self.assertEquals(1, len(numpy.unique(yValues)), "Output YVaues should all be 2")
         self.assertEquals(3, yValues[0], "Output YValues should all be 3")
         # Check that the output E-Values are correct.
-        self.assertEquals(0, numpy.count_nonzero(eValues), "Output Error values should all be non-zero")
+        self.assertEquals(0, len(eValues.nonzero()[0]), "Output Error values should all be non-zero")
         # Check that the output X-Values are correct.
         self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))     
         DeleteWorkspace(stitched[0]) 
