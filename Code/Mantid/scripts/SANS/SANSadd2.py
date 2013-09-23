@@ -100,8 +100,10 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         logger.notice(binning)        
         Rebin(InputWorkspace='AddFilesSumTempory',OutputWorkspace='AddFilesSumTempory_Rebin',Params= binning, PreserveEvents=False)
         
+        # loading the nexus file using LoadNexus is necessary because it has some metadata
+        # that is not in LoadEventNexus. This must be fixed.
         filename, ext = _makeFilename(runs[0], defType, inst)
-        LoadNexus(Filename=filename, OutputWorkspace='AddFilesSumTempory')
+        LoadNexus(Filename=filename, OutputWorkspace='AddFilesSumTempory', SpectrumMax=wsInMonitor.getNumberHistograms())
         # User may have selected a binning which is different from the default
         Rebin(InputWorkspace='AddFilesSumTempory',OutputWorkspace='AddFilesSumTempory',Params= binning)
         # For now the monitor binning must be the same as the detector binning
@@ -116,10 +118,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         for i in range(mon_n):
             wsOut.setY(i,wsInMonitor.dataY(i))
             wsOut.setE(i,wsInMonitor.dataE(i))               
-                
-        for i in range(mon_n, wsOut.getNumberHistograms()):
-            wsOut.setY(i, wsInDetector.dataY(i))
-            wsOut.setE(i, wsInDetector.dataE(i))
+        ConjoinWorkspaces(wsOut, wsInDetector, CheckOverlapping=True)
                        
         if 'AddFilesSumTempory_Rebin' in mtd : DeleteWorkspace('AddFilesSumTempory_Rebin')
 
