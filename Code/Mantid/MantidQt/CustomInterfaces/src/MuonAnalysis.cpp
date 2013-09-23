@@ -1159,6 +1159,11 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
       QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
 
       getDeadTimeFromFile(deadTimeFile);
+
+      // Remember the filename for the next time interface is opened
+      QSettings group;
+      group.beginGroup(m_settingsGroup + "DeadTimeOptions");
+      group.setValue("deadTimeFile", deadTimeFile);
     }
   }
   catch(std::exception& e)
@@ -3335,6 +3340,10 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   int deadTimeTypeIndex = deadTimeOptions.value("deadTimes", 0).toInt();
   m_uiForm.deadTimeType->setCurrentIndex(deadTimeTypeIndex);
+
+  QString savedDeadTimeFile = deadTimeOptions.value("deadTimeFile").toString();
+  m_uiForm.mwRunDeadTimeFile->setUserInput(savedDeadTimeFile);
+
   if (deadTimeTypeIndex != 2)
     m_uiForm.mwRunDeadTimeFile->setVisible(false);
 }
