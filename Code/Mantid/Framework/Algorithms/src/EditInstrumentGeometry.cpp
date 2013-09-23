@@ -267,7 +267,7 @@ namespace Algorithms
     }
 
     // Keep original instrument and set the new instrument, if necessary
-    const auto spec2indexmap(workspace->getSpectrumToWorkspaceIndexMap());
+    const auto spec2indexmap = workspace->getSpectrumToWorkspaceIndexMap();
 
     // ??? Condition: spectrum has 1 and only 1 detector
     size_t nspec = workspace->getNumberHistograms();
