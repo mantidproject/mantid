@@ -50,42 +50,34 @@ def GetXYE(inWS,n,array_len):
 	Y=PadArray(Yin,array_len)
 	E=PadArray(Ein,array_len)
 	return N,X,Y,E
-
-def GetResNorm(ngrp):
-	if ngrp == 0:                                # read values from WS
-		dtnorm = mtd['ResNorm_1'].readY(0)
-		xscale = mtd['ResNorm_2'].readY(0)
-	else:                                        # constant values
-		dtnorm = []
-		xscale = []
-		for m in range(0,ngrp):
-			dtnorm.append(1.0)
-			xscale.append(1.0)
-	dtn=PadArray(dtnorm,51)                      # pad for Fortran call
-	xsc=PadArray(xscale,51)
-	return dtn,xsc
 	
-def ReadNormFile(o_res,nsam,Verbose):            # get norm & scale values
+def ReadNormFile(o_res,nsam,resnormWS,Verbose):            # get norm & scale values
 	if o_res == 1:                     # use ResNorm file option=o_res
-		Xin = mtd['ResNorm_1'].readX(0)
-		nrm = len(Xin)						# no. points from length of x array
+		if Verbose:
+			logger.notice('ResNorm file is ' + resnormWS)
+		dtnorm = mtd[resnormWS+'_Intensity'].readX(0)
+		nrm = len(dtnorm)						# no. points from length of x array
 		if nrm == 0:				
-			error = 'ResNorm file has no dtnorm points'			
+			error = 'ResNorm file has no Intensity points'			
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
-		Xin = mtd['ResNorm_2'].readX(0)					# no. points from length of x array
-		if len(Xin) == 0:				
-			error = 'ResNorm file has no xscale points'			
+		xscale = mtd[resnormWS+'_Stretch'].readX(0)					# no. points from length of x array
+		if len(xscale) == 0:				
+			error = 'ResNorm file has no Stretch points'			
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
 		if nrm != nsam:				# check that no. groups are the same
 			error = 'ResNorm groups (' +str(nrm) + ') not = Sample (' +str(nsam) +')'			
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
-		else:
-			dtn,xsc = GetResNorm(0)
-	if o_res == 0:                     # do not use ResNorm file option=o_res
-		dtn,xsc = GetResNorm(nsam)
+	else:
+		dtnorm = []
+		xscale = []
+		for m in range(0,nsam):
+			dtnorm.append(1.0)
+			xscale.append(1.0)
+	dtn=PadArray(dtnorm,51)                      # pad for Fortran call
+	xsc=PadArray(xscale,51)
 	return dtn,xsc
 
 def ReadWidthFile(op_w1,wfile,ngrp,Verbose):                       # reads width file ASCII
@@ -172,7 +164,7 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose=False
 		logger.notice(' Number of spectra = '+str(nsam))
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 	Wy,We = ReadWidthFile(fitOp[2],wfile,nsam,Verbose)
-	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
+	dtn,xsc = ReadNormFile(fitOp[3],nsam,resnormWS,Verbose)
 	fname = samWS[:-4] + '_'+ prog
 	probWS = fname + '_Prob'
 	fitWS = fname + '_Fit'
@@ -828,11 +820,11 @@ def ResNormRun(vname,rname,erange,nbin,Verbose=False,Plot=False,Save=False):
 	CreateWorkspace(OutputWorkspace=fname+'_ResNorm_Stretch', DataX=xPar, DataY=yPar2, DataE=xPar,
 		NSpec=1, UnitX='MomentumTransfer')
 	group = fname + '_ResNorm_Intensity,'+ fname + '_ResNorm_Stretch'
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_ResNorm_Paras')
+	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_ResNorm')
 	GroupWorkspaces(InputWorkspaces='Data,Fit',OutputWorkspace=fname+'_ResNorm_Fit')
 	if Save:
-		par_path = os.path.join(workdir,fname+'_ResNorm_Paras.nxs')
-		SaveNexusProcessed(InputWorkspace=fname+'_ResNorm_Paras', Filename=par_path)
+		par_path = os.path.join(workdir,fname+'_ResNorm.nxs')
+		SaveNexus(InputWorkspace=fname+'_ResNorm', Filename=par_path)
 		fit_path = os.path.join(workdir,fname+'_ResNorm_Fit.nxs')
 		SaveNexusProcessed(InputWorkspace=fname+'_ResNorm_Fit', Filename=fit_path)
 		if Verbose:
