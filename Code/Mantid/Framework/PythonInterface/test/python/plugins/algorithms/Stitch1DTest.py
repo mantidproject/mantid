@@ -26,10 +26,30 @@ class Stitch1DTest(unittest.TestCase):
         # Cleanup
         DeleteWorkspace(self.a)
         DeleteWorkspace(self.b)
+        
+    def test_endoverap_outside_range_throws(self):
+        try:
+            stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=self.x[0], EndOverlap=self.x[-1] + 0.001, Params='0.2')
+            self.assertTrue(False, "Should have thrown with EndOverlap > x max")
+        except RuntimeError:
+            pass 
+    
+    def test_startoverap_outside_range_throws(self):
+        try:
+            stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=self.x[0]-0.001, EndOverlap=self.x[-1], Params='0.2')
+            self.assertTrue(False, "Should have thrown with StartOverlap < x max")
+        except RuntimeError:
+            pass 
+          
+    def test_startoverap_greater_than_end_overlap_throws(self):
+        try:
+            stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=self.x[-1], EndOverlap=self.x[0], Params='0.2')
+            self.assertTrue(False, "Should have thrown with StartOverlap < x max")
+        except RuntimeError:
+            pass
           
     def test_stitching_scale_right(self):
-        stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2')
-    
+        stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2')    
         # Check the types returned 
         self.assertTrue(isinstance(stitched, tuple), "Output should be a tuple containing OuputWorkspace as well as the scale factor")
         self.assertTrue(isinstance(stitched[0], MatrixWorkspace))

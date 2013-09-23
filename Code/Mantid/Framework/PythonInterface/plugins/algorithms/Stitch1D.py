@@ -50,6 +50,16 @@ class Stitch1D(PythonAlgorithm):
         lhs_rebinned = Rebin(InputWorkspace=self.getProperty("LHSWorkspace").value, Params=params)
         rhs_rebinned = Rebin(InputWorkspace=self.getProperty("RHSWorkspace").value, Params=params)
         
+        xRange = lhs_rebinned.readX(0)
+        minX = xRange[0]
+        maxX = xRange[-1]
+        if(startOverlap < minX):
+            raise RuntimeError("Stitch1D StartOverlap is outside the X range after rebinning")
+        if(endOverlap > maxX):
+            raise RuntimeError("Stitch1D EndOverlap is outside the X range after rebinning")
+        
+        if(startOverlap > endOverlap):
+            raise RuntimeError("Stitch1D cannot have a StartOverlap > EndOverlap")
         a1=lhs_rebinned.binIndexOf(startOverlap)
         a2=lhs_rebinned.binIndexOf(endOverlap)
     
