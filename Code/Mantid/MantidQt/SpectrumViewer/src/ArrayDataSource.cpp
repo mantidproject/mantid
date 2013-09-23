@@ -47,6 +47,13 @@ ArrayDataSource::~ArrayDataSource()
   delete[] data;
 }
 
+bool ArrayDataSource::hasData(const std::string& wsName,
+                     const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  UNUSED_ARG(wsName);
+  UNUSED_ARG(ws);
+  return false;
+}
 
 /**
  * Get a data array covering the specified range of data, at the specified
