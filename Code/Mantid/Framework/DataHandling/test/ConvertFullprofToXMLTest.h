@@ -72,6 +72,8 @@ public:
     Poco::XML::Document* doc;
     TS_ASSERT_THROWS_NOTHING(doc = pParser.parseString(xmlText));
     TS_ASSERT(doc);
+    Poco::XML::Element* rootElem = doc->documentElement();
+    TS_ASSERT(rootElem->hasChildNodes());
 
     //Clean up
     Poco::File(inputFilename).remove();
