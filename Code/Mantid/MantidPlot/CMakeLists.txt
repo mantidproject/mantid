@@ -812,7 +812,7 @@ include_directories ( ../QtPropertyBrowser/src )
 include_directories ( ../MantidQt/API/inc )
 include_directories ( ../MantidQt/MantidWidgets/inc )
 include_directories ( ../MantidQt/SliceViewer/inc )
-include_directories ( ../MantidQt/ImageViewer/inc )
+include_directories ( ../MantidQt/SpectrumViewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
 # ui_ files end up in these places
 include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
@@ -882,7 +882,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 target_link_libraries ( MantidPlot 
                         ${CORE_MANTIDLIBS}
                         MantidQtAPI MantidWidgets MantidQtSliceViewer MantidQtFactory
-                        MantidQtImageViewer 
+                        MantidQtSpectrumViewer 
                         QtPropertyBrowser ${QT_LIBRARIES} 
                         ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
                         ${QSCINTILLA_LIBRARIES}

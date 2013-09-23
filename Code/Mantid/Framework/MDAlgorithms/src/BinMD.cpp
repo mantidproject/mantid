@@ -174,7 +174,7 @@ namespace MDAlgorithms
    * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)
    */
   template<typename MDE, size_t nd>
-  inline void BinMD::binMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax)
+  inline void BinMD::binMDBox(MDBox<MDE, nd> * box, const size_t * const chunkMin, const size_t * const chunkMax)
   {
     // An array to hold the rotated/transformed coordinates
     coord_t * outCenter = new coord_t[m_outD];
@@ -374,8 +374,8 @@ namespace MDAlgorithms
     {
       PARALLEL_START_INTERUPT_REGION
       // Region of interest for this chunk.
-      size_t * chunkMin = new size_t[m_outD];
-      size_t * chunkMax = new size_t[m_outD];
+      std::vector<size_t> chunkMin(m_outD);
+      std::vector<size_t> chunkMax(m_outD);
       for (size_t bd=0; bd<m_outD; bd++)
       {
         // Same limits in the other dimensions
@@ -390,7 +390,7 @@ namespace MDAlgorithms
         chunkMax[chunkDimension] = size_t(chunk+chunkNumBins);
 
       // Build an implicit function (it needs to be in the space of the MDEventWorkspace)
-      MDImplicitFunction * function = this->getImplicitFunctionForChunk(chunkMin, chunkMax);
+      MDImplicitFunction * function = this->getImplicitFunctionForChunk(chunkMin.data(), chunkMax.data());
 
       // Use getBoxes() to get an array with a pointer to each box
       std::vector<API::IMDNode *> boxes;
@@ -418,7 +418,7 @@ namespace MDAlgorithms
         MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
         // Perform the binning in this separate method.
         if (box)
-          this->binMDBox(box, chunkMin, chunkMax);
+          this->binMDBox(box, chunkMin.data(), chunkMax.data());
 
         // Progress reporting
         if (prog) prog->report();

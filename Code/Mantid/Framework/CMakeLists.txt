@@ -88,7 +88,6 @@ include_directories (API/inc)
 add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
-add_subdirectory (PythonAPI)
 add_subdirectory (PythonInterface)
 
 find_package ( Matlab )
@@ -101,13 +100,7 @@ add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
 if(MAKE_REMOTE_JOBS)
-  include_directories (Remote/inc)
-  add_subdirectory (Remote)
-  set ( MANTIDLIBS ${MANTIDLIBS} Remote )
-  add_subdirectory (RemoteAlgorithms)  # this line needs to come after the include_directories
-                                       # line in order for things to compile.  This probably
-                                       # means I've done something wrong somewhere else...
-                                       # RGM - 30 April 2013
+  add_subdirectory (RemoteAlgorithms)
 endif(MAKE_REMOTE_JOBS)
 
 add_subdirectory (Nexus)
@@ -141,18 +134,17 @@ add_subdirectory (MDAlgorithms)
 add_subdirectory (MDEvents)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
-#add_subdirectory (ISISLiveData)
+add_subdirectory (ISISLiveData)
 
 ###########################################################################
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API PythonAPI PythonKernelModule 
+set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule 
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms MDEvents WorkflowAlgorithms
-                     LiveData
-#                     ISISLiveData
+                     LiveData ISISLiveData
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} ) 

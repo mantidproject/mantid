@@ -919,6 +919,12 @@ def loadNeXus(runNumbers, type):
     add them or just return the workspace created
     """
     
+    wks_name = ''
+    if (type == 'data'):
+        wks_name = 'ws_event_data'
+    else:
+        wks_name = 'ws_event_norm'
+    
     print '-> loading ', type
     if (type == 'data') and len(runNumbers) > 1:
         
@@ -940,13 +946,13 @@ def loadNeXus(runNumbers, type):
                 raise RuntimeError(msg)
                 
             if _index == 0:
-                ws_event_data = LoadEventNexus(Filename=data_file)
+                ws_event_data = LoadEventNexus(Filename=data_file,OutputWorskpace=wks_name)
                 _index += 1
             else:
                 tmp = LoadEventNexus(Filename=data_file)
                 Plus(LHSWorkspace=ws_event_data,
                      RHSWorkspace=tmp, 
-                     OutputWorkspace=ws_event_data)
+                     OutputWorkspace=wks_name)
                 DeleteWorkspace(tmp)
     else:
 
@@ -959,7 +965,7 @@ def loadNeXus(runNumbers, type):
             msg += "Add your data folder to your User Data Directories in the File menu"
             raise RuntimeError(msg)
 
-        ws_event_data = LoadEventNexus(Filename=data_file)
+        ws_event_data = LoadEventNexus(Filename=data_file, OutputWorkspace=wks_name)
     
     return ws_event_data
     
@@ -1386,7 +1392,7 @@ def applyScalingFactor(tof_axis,
     function that apply scaling factor to data using sfCalculator.txt
     file created by the sfCalculator procedure
     """
-    sf_file = 'NaN'
+    #sf_file = 'NaN'
     if (os.path.isfile(sf_file)):
     
         print '-> scaling factor file FOUND! (', sf_file, ')'
@@ -1482,7 +1488,7 @@ def applyScalingFactor(tof_axis,
                                                                                    a, b, 
                                                                                    a_error, b_error)
 
-            return [tof_axis, y_data, y_data_error]
+        return [tof_axis, y_data, y_data_error]
 
     else:
         
@@ -1496,7 +1502,7 @@ def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_e
     """
     
     x_axis = tof_axis    
-    nbr_tof = len(x_axis)
+    nbr_tof = len(x_axis)-1
     x_axis_factors = zeros(nbr_tof)
     x_axis_factors_error = zeros(nbr_tof)
     for i in range(nbr_tof):
@@ -1511,10 +1517,12 @@ def applyScalingFactorToArray(tof_axis, y_data, y_data_error, a, b, a_error, b_e
     final_y_data = zeros((nbr_pixel, nbr_tof))
     final_y_data_error = zeros((nbr_pixel, nbr_tof))
     for x in range(nbr_pixel):
+        
         [ratio_array, ratio_array_error] = divideArrays(y_data[x,:], 
                                                         y_data_error[x,:], 
                                                         x_axis_factors, 
                                                         x_axis_factors_error)
+        
         final_y_data[x,:] = ratio_array[:]
         final_y_data_error[x,:] = ratio_array_error
 
@@ -1532,14 +1540,22 @@ def divideArrays(num_array, num_error_array, den_array, den_error_array):
     # calculate the ratio array
     ratio_array = zeros(nbr_elements)
     for i in range(nbr_elements):
-        ratio_array[i] = num_array[i] / den_array[i]
+        if den_array[i] is 0:
+            _tmp_ratio = 0
+        else:
+            _tmp_ratio = num_array[i] / den_array[i]
+        ratio_array[i] = _tmp_ratio
         
     # calculate the error of the ratio array
     ratio_error_array = zeros(nbr_elements)
     for i in range(nbr_elements):
-        tmp1 = pow(num_error_array[i] / num_array[i],2)
-        tmp2 = pow(den_error_array[i] / den_array[i],2)
-        ratio_error_array[i] = sqrt(tmp1+tmp2)*(num_array[i]/den_array[i]) 
+        
+        if (num_array[i] == 0) or (den_array[i] == 0): 
+            ratio_error_array[i] = 0 
+        else:
+            tmp1 = pow(num_error_array[i] / num_array[i],2)
+            tmp2 = pow(den_error_array[i] / den_array[i],2)
+            ratio_error_array[i] = sqrt(tmp1+tmp2)*(num_array[i]/den_array[i])
 
     return [ratio_array, ratio_error_array]
 
@@ -1759,7 +1775,8 @@ def reverseQAxis(q_axis):
     new_q_axis = fliplr(q_axis)
     return new_q_axis
 
-def getQaxis(dMD, dSD, theta, tof_axis, y_range, central_pixel, 
+def getQaxis(dMD, dSD, theta, 
+             tof_axis, y_range, central_pixel, 
              first_slit_size,
              last_slit_size):
     """
@@ -1772,8 +1789,8 @@ def getQaxis(dMD, dSD, theta, tof_axis, y_range, central_pixel,
 
     _const = float(4) * math.pi * m * dMD / h
     sz_tof = len(tof_axis)
-    tmp_q_axis = zeros(sz_tof-1)
-    q_array = zeros((len(y_range), sz_tof - 1))
+    tmp_q_axis = zeros(sz_tof)
+    q_array = zeros((len(y_range), sz_tof))
 
     index_y = range(len(y_range))
     for y in index_y:
@@ -1790,11 +1807,13 @@ def getQaxis(dMD, dSD, theta, tof_axis, y_range, central_pixel,
         else:
             _theta = theta
 
-        for t in range(sz_tof-1):
-            tof1 = tof_axis[t]
-            tof2 = tof_axis[t+1]
-            tofm = (tof1+tof2)/2.
-            _Q = _const * math.sin(_theta) / (tofm*1e-6)
+        for t in range(sz_tof):
+#            tof1 = tof_axis[t]
+#            tof2 = tof_axis[t+1]
+#            tofm = (tof1+tof2)/2.
+            tof = tof_axis[t]
+#            _Q = _const * math.sin(_theta) / (tofm*1e-6)
+            _Q = _const * math.sin(_theta) / (tof*1e-6)
             q_array[y, t] = _Q * 1e-10
           
     return q_array    
@@ -1873,7 +1892,7 @@ def cropAxisToOnlyNonzeroElements(q_rebin, dataPeakRange):
     nbrPixel = dataPeakRange[1] - dataPeakRange[0] + 1
     
     x_axis = q_rebin.readX(0)[:]
-    sz = x_axis.shape[0]
+    sz = x_axis.shape[0]-1
     
     index_first_non_zero_value = sz;
     index_last_non_zero_value = 0; 
@@ -1959,4 +1978,3 @@ def cleanupData(final_data_y_axis, final_data_y_error_axis):
     
     
     
-

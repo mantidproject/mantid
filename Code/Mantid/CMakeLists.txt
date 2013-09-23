@@ -117,11 +117,6 @@ include_directories ( Framework/API/inc )
 
 set ( CORE_MANTIDLIBS Kernel Geometry API )
 
-if ( MAKE_REMOTE_JOBS )
-  include_directories ( Framework/Remote/inc )
-  LIST( APPEND CORE_MANTIDLIBS Remote)
-endif (MAKE_REMOTE_JOBS)
-
 # Add a target for all GUI tests
 add_custom_target ( GUITests ) 
 add_dependencies ( check GUITests )

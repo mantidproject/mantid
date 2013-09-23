@@ -2,6 +2,7 @@
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidLiveData/SNSLiveEventDataListener.h"
+#include "MantidLiveData/Exception.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -1201,32 +1202,32 @@ namespace LiveData
   /// @return shared pointer to a workspace containing the accumulated data
   boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData()
   {
-    // Block until the background thread has actually initialized the workspace
+    // Check to see if the background thread has thrown an exception.  If so, re-throw it here.
+    if ( m_backgroundException )
+    {
+      throw( *m_backgroundException );
+    }
+
+    // Check whether the background thread has actually initialized the workspace
     // (Which won't happen until the SMS sends it the packet with the geometry
     // information in it.)
-    //
-    // Limit the maximum time we block to 10 seconds.  If we haven't initialized by
-    // that time, there's probably a problem upstream.  The only thing we can do,
-    // though, is throw an exception.
-
-#define MAX_BLOCK_TIME  10 // in seconds
-    Mantid::Kernel::DateAndTime endTime = Mantid::Kernel::DateAndTime::getCurrentTime();
-    endTime += (double)MAX_BLOCK_TIME;
-    while (m_workspaceInitialized == false)
+    // First wait up to 10 seconds, then if it's still not initialized throw a NotYet
+    // exception so that the user has the opportunity to cancel.
+    static const double maxBlockTime = 10.0;
+    const DateAndTime endTime = DateAndTime::getCurrentTime() + maxBlockTime;
+    while ( ( ! m_workspaceInitialized ) && ( DateAndTime::getCurrentTime() < endTime ) )
     {
-      if  (Mantid::Kernel::DateAndTime::getCurrentTime() > endTime)
-      {
-        // Note: If you're stepping through the initializtion code in
-        // a debugger, you probably ought to comment out this line
-        throw std::runtime_error( "SNSLiveEventDataListener timed out without initializing.");
-      }
+      Poco::Thread::sleep( 100 ); // 100 milliseconds
+    }
+    if ( ! m_workspaceInitialized )
+    {
+      throw Exception::NotYet("The workspace has not yet been initialized.");
+    }
 
-      // Check to see if the background thread has thrown an exception.  If so, re-throw it here.
-      if (m_backgroundException)
-      {
-        throw( *m_backgroundException);
-      }
-      Poco::Thread::sleep( 100);  // 100 milliseconds
+    // Throw if the request was for data from the start of a run, but we're not yet in a run.
+    if ( m_ignorePackets ) // This variable is (un)set in ignorePacket()
+    {
+      throw Exception::NotYet("Waiting for a run to start.");
     }
 
     using namespace DataObjects;
@@ -1319,21 +1320,10 @@ namespace LiveData
     // Are we looking for the start of the run?
     if (m_filterUntilRunStart)
     {
-      if (hdr.type() == ADARA::PacketType::RUN_STATUS_V0)
+      if (hdr.type() == ADARA::PacketType::RUN_STATUS_V0 && status == ADARA::RunStatus::NEW_RUN)
       {
-        if (status == ADARA::RunStatus::NEW_RUN)
-        {
-          // A new run is starting...
-          m_ignorePackets = false;
-        }
-        else  // If we receive any other status, then it means we weren't in a run.  In this case,
-              // we're going to throw an exception so that the algorithm will shut down.
-              // (Note: we're currently in the background thread here, so our exception will
-              // be caught by the handlers up in the run() function and then re-thrown from
-              // the foreground thread....
-        {
-          throw std::runtime_error("User requested data from start of current run, but system is not currently in a run.");
-        }
+        // A new run is starting...
+        m_ignorePackets = false;
       }
     }
     else  // Filter based solely on time

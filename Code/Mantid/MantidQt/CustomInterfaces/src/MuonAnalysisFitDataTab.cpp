@@ -107,36 +107,6 @@ void MuonAnalysisFitDataTab::groupFittedWorkspaces(QString workspaceName)
   }
 }
 
-
-/**
-* Set up the string that will contain all the data needed for changing the data.
-* [wsName, connectType, plotType, Errors, Color]
-*
-* @param workspace :: The workspace name of the plot to be created.
-*/
-QStringList MuonAnalysisFitDataTab::getAllPlotDetails(const QString & workspace)
-{
-  QStringList allPlotDetails;
-  allPlotDetails.push_back(workspace);
-
-  QString fitType("");
-  fitType.setNum(m_uiForm.connectPlotType->currentIndex());
-
-  allPlotDetails.push_back(fitType);
-  allPlotDetails.push_back("Data");
-  if(m_uiForm.showErrorBars->isChecked())
-  {
-    allPlotDetails.push_back("AllErrors");
-  }
-  else
-  {
-    allPlotDetails.push_back("NoErrors");
-  }
-  allPlotDetails.push_back("Black");
-
-  return(allPlotDetails);
-}
-
 }
 }
 }

@@ -547,7 +547,7 @@ mantidpy = addCompList('mtdpymod',MANTIDRELEASE + '/mantid','mantid',binDir, exc
 addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll',MANTIDRELEASE + '/MantidQtAPI.dll',MantidDlls)
 addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll',MANTIDRELEASE + '/MantidWidgets.dll',MantidDlls)
 addFileV('MantidQtSliceViewer','MQTSV.dll','MantidQtSliceViewer.dll',MANTIDRELEASE + '/MantidQtSliceViewer.dll',MantidDlls)
-addFileV('MantidQtImageViewer','MQTIV.dll','MantidQtImageViewer.dll',MANTIDRELEASE + '/MantidQtImageViewer.dll',MantidDlls)
+addFileV('MantidQtSpectrumViewer','MQTIV.dll','MantidQtSpectrumViewer.dll',MANTIDRELEASE + '/MantidQtSpectrumViewer.dll',MantidDlls)
 addFileV('MantidQtFactory','MQTFA.dll','MantidQtFactory.dll',MANTIDRELEASE + '/MantidQtFactory.dll',MantidDlls)
 addFileV('mantidqtpython','MQTP.dll','mantidqtpython.pyd',MANTIDRELEASE + '/mantidqtpython.pyd',MantidDlls)
 

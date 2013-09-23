@@ -476,6 +476,30 @@ void MuonAnalysisOptionTab::storeCustomTimeValue()
   }
 }
 
+/**
+ * Get plot style parameters from widgets. Parameters are as follows:
+ *   - ConnectType: 0 for Line, 1 for Scatter, 3 for Line + Symbol
+ *   - ShowErrors: True of False
+ *   - YAxisAuto: True or False
+ *   - YAxisMin/YAxisMax: Double values
+ *
+ * @param workspace :: The workspace name of the plot to be created.
+ */
+QMap<QString, QString> MuonAnalysisOptionTab::parsePlotStyleParams() const
+{
+  QMap<QString, QString> params;
+
+  params["ConnectType"] = QString::number(m_uiForm.connectPlotType->currentIndex());
+
+  params["ShowErrors"] = m_uiForm.showErrorBars->isChecked() ? "True" : "False";
+
+  params["YAxisAuto"] = m_uiForm.yAxisAutoscale->isChecked() ? "True" : "False";
+  params["YAxisMin"] = m_uiForm.yAxisMinimumInput->text();
+  params["YAxisMax"] = m_uiForm.yAxisMaximumInput->text();
+
+  return(params);
+}
+
 }
 }
 }

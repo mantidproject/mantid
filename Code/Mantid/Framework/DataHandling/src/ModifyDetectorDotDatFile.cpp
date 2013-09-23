@@ -1,8 +1,7 @@
 /*WIKI* 
 
-Modifies an ISIS detector dot data file, so that the detector positions are as in the given workspace. 
-This algorithm can be used to transfer a calibration done via the [[ApplyCalibration]] algorithm to an ISIS detector dot dat file 
-by selecting a workspace that has been modified by ApplyCalibration.
+
+Modifies an ISIS detector dot data file, so that the detector positions are as in the given workspace. This algorithm can be used to transfer a calibration done via the [[ApplyCalibration]] algorithm to an ISIS detector dot dat file by selecting a workspace that has been modified by ApplyCalibration.
 
 A typical ISIS dot data file has a format like this:
 
@@ -16,9 +15,9 @@ A typical ISIS dot data file has a format like this:
  1110002   5.300   2.88794     3    52.26477  -140.72720     0.02540     0.02540     0.00283     0.02750   ...
     ....
 
+
 Each row corresponds to a detector whose type is indicated in the <code>code</code> column.
-The algorithm will only modify values in colums <code>l2</code>, <code>theta</code> and <code>phi</code> and 
-only if the value in the <code>code</code> column is 3, which indicates a PSD gas tube.
+The algorithm will only modify values in colums <code>l2</code>, <code>theta</code> and <code>phi</code> and only if the value in the <code>code</code> column is 3, which indicates a PSD gas tube.
 For more details about the detector dot data file see [[LoadDetectorInfo#File_format]].
 
 *WIKI*/

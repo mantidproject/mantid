@@ -90,19 +90,19 @@ void MultipleScatteringCylinderAbsorption::exec()
   double coeff1     = getProperty("AttenuationXSection");
   double coeff2     = getProperty("SampleNumberDensity");
   double coeff3     = getProperty("ScatteringXSection");
-  const Material *m_sampleMaterial = &(in_WS->sample().getMaterial());
-  if( m_sampleMaterial->totalScatterXSection(1.81) != 0.0)
+  const Material& sampleMaterial = in_WS->sample().getMaterial();
+  if( sampleMaterial.totalScatterXSection(1.81) != 0.0)
   {
-        if(coeff2 == 0.0721) coeff2 =  m_sampleMaterial->numberDensity();
-        if(coeff3 == 5.1) coeff3 =  m_sampleMaterial->totalScatterXSection(1.81);
-        if(coeff1 == 2.8) coeff1 = m_sampleMaterial->absorbXSection(1.81);
+    if (coeff2 == 0.0721) coeff2 =  sampleMaterial.numberDensity();
+    if (coeff3 == 5.1) coeff3 =  sampleMaterial.totalScatterXSection(1.81);
+    if (coeff1 == 2.8) coeff1 = sampleMaterial.absorbXSection(1.81);
   }
   else  //Save input in Sample with wrong atomic number and name
   {
-    NeutronAtom *neutron = new NeutronAtom(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
+    NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
                         0.0, 0.0, coeff3, 0.0, coeff3, coeff1);
-    Material *mat = new Material("SetInMultipleScattering", *neutron, coeff2);
-    in_WS->mutableSample().setMaterial(*mat);
+    Material mat("SetInMultipleScattering", neutron, coeff2);
+    in_WS->mutableSample().setMaterial(mat);
   }
 
   // geometry stuff

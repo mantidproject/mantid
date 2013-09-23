@@ -1,18 +1,18 @@
 #ifndef REF_SLIDER_HANDLER_H
 #define REF_SLIDER_HANDLER_H
 
-#include "MantidQtImageViewer/ISliderHandler.h"
+#include "MantidQtSpectrumViewer/ISliderHandler.h"
 #include <QRect>
 
 #include "ui_RefImageView.h"
-#include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtSpectrumViewer/SpectrumDataSource.h"
 #include "MantidQtRefDetectorViewer/DllOption.h"
 
 /**
     @class SliderHandler 
   
-      This manages the horizontal and vertical scroll bars for the
-    ImageView data viewer. 
+    This manages the horizontal and vertical scroll bars for the
+    SpectrumView data viewer. 
  
     @author Dennis Mikkelson 
     @date   2012-04-03 
@@ -44,7 +44,7 @@ namespace RefDetectorViewer
 {
 
 
-class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public ImageView::ISliderHandler
+class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public SpectrumView::ISliderHandler
 {
   public:
 
@@ -53,7 +53,7 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public ImageView:
 
     /// Configure the image scrollbars for the specified data and drawing area
     void ConfigureSliders( QRect            draw_area, 
-                           ImageView::ImageDataSource* data_source );
+                           SpectrumView::SpectrumDataSource* data_source );
 
     /// Configure the horizontal scrollbar to cover the specified range
     void ConfigureHSlider( int         n_data_steps, 
@@ -81,7 +81,7 @@ class EXPORT_OPT_MANTIDQT_REFDETECTORVIEWER RefSliderHandler : public ImageView:
     Ui_RefImageViewer*   iv_ui;
 };
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView
 
 #endif // REF_SLIDER_HANDLER_H

@@ -48,6 +48,8 @@ public:
   void SetUnintPeakMarkerSize(double mSize);
   /// Update the algorithm progress.
   void updateAlgorithmProgress(double progress, const std::string& message);
+  /// Getter for the workspace name
+  const char* GetWorkspaceName();
   /// Getter for the workspace type
   char* GetWorkspaceTypeName();
 

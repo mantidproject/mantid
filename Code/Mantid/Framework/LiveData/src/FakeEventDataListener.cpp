@@ -1,4 +1,5 @@
 #include "MantidLiveData/FakeEventDataListener.h"
+#include "MantidLiveData/Exception.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/MersenneTwister.h"
@@ -18,13 +19,15 @@ namespace LiveData
   /// Constructor
   FakeEventDataListener::FakeEventDataListener() : ILiveListener(),
       m_buffer(), m_rand(new Kernel::MersenneTwister(5489)), m_timer(), m_callbackloop(1),
-      m_runNumber(1)
+      m_numExtractDataCalls(0), m_runNumber(1)
   {
     if ( ! ConfigService::Instance().getValue("fakeeventdatalistener.datarate",m_datarate) )
       m_datarate = 200; // Default data rate. Low so that our lowest-powered buildserver can cope.
     // For auto-ending and restarting runs
     if ( ! ConfigService::Instance().getValue("fakeeventdatalistener.endrunevery",m_endRunEvery) )
       m_endRunEvery = 0;
+    if ( ! ConfigService::Instance().getValue("fakeeventdatalistener.notyettimes",m_notyettimes) )
+      m_notyettimes = 0;
   }
     
   /// Destructor
@@ -89,6 +92,10 @@ namespace LiveData
 
   boost::shared_ptr<Workspace> FakeEventDataListener::extractData()
   {
+    // This is here to test the LoadLiveData side of the 'NotYet' exception
+    // Note the post-increment of the call count in the comparison
+    if ( m_numExtractDataCalls++ < m_notyettimes ) throw Exception::NotYet("No workspace yet!");
+
     /* For the very first try, just add a small number of uniformly distributed events.
      * Next: 1. Add some kind of distribution
      *       2. Continuously add events in a separate thread once start has been called
