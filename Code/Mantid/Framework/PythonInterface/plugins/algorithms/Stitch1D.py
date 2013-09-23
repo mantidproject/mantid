@@ -34,7 +34,7 @@ class Stitch1D(PythonAlgorithm):
     
     def has_non_zero_errors(self, ws):
         errors = ws.extractE()
-        count = np.count_nonzero(errors)
+        count = len(errors.nonzero()[0])
         return count > 0
             
     def PyExec(self):
