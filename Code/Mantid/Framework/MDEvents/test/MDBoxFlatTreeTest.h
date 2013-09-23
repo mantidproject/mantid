@@ -13,7 +13,7 @@
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 
-class MDEventFlatTreeTest :public CxxTest::TestSuite
+class MDBoxFlatTreeTest :public CxxTest::TestSuite
 {
 private:
   
@@ -22,8 +22,8 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static MDEventFlatTreeTest *createSuite() { return new MDEventFlatTreeTest(); }
-  static void destroySuite( MDEventFlatTreeTest *suite ) { delete suite; }
+  static MDBoxFlatTreeTest  *createSuite() { return new MDBoxFlatTreeTest (); }
+  static void destroySuite( MDBoxFlatTreeTest  *suite ) { delete suite; }
 
   void testFlatTreeOperations()
   {
@@ -60,7 +60,7 @@ public:
       testFile.remove();
   }
 
-  MDEventFlatTreeTest()
+  MDBoxFlatTreeTest()
   {
       // load dependent DLL, which are used in MDEventsTestHelper (e.g. MDAlgorithms to create MD workspace)
 //      Mantid::API::FrameworkManager::Instance();

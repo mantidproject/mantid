@@ -140,7 +140,7 @@ set ( TEST_FILES
 	MDBinTest.h
 	MDBoxBaseTest.h
 	MDBoxIteratorTest.h
-	MDBoxFlatTreeTest.h    
+    MDBoxFlatTreeTest.h     
 	MDBoxTest.h
 	MDBoxSaveableTest.h    
 	MDDimensionStatsTest.h
