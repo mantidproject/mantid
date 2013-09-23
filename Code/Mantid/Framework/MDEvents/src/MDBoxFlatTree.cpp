@@ -450,7 +450,8 @@ namespace Mantid
 
     uint64_t totalNumEvents(0);
     m_nDim = int(bc->getNDims());
-    if(m_nDim<=0||m_nDim>MDEventFactory::getMaxNumDim())throw std::runtime_error("Workspace dimesnions are not defined properly in the box controller");
+    int maxNdim = int(MDEventFactory::getMaxNumDim());
+    if(m_nDim<=0||m_nDim>maxNdim)throw std::runtime_error("Workspace dimesnions are not defined properly in the box controller");
 
     int iEventType(0);
     if(m_eventType=="MDLeanEvent")
