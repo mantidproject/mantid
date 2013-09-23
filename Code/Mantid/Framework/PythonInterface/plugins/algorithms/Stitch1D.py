@@ -56,14 +56,15 @@ class Stitch1D(PythonAlgorithm):
         if not useManualScaleFactor:
             lhsOverlapIntegrated = Integration(InputWorkspace=lhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
             rhsOverlapIntegrated = Integration(InputWorkspace=rhs_rebinned, RangeLower=startOverlap, RangeUpper=endOverlap)
-            if scaleRHSWorkspace:
-                rhs_rebinned *= (lhsOverlapIntegrated/rhsOverlapIntegrated)
-            else:
-                lhs_rebined *= (rhsOverlapIntegrated/lhsOverlapIntegrated)
-            
             y1=lhsOverlapIntegrated.readY(0)
             y2=rhsOverlapIntegrated.readY(0)
-            scalefactor = y1[0]/y2[0]
+            if scaleRHSWorkspace:
+                rhs_rebinned *= (lhsOverlapIntegrated/rhsOverlapIntegrated)
+                scalefactor = y1[0]/y2[0]
+            else:
+                lhs_rebinned *= (rhsOverlapIntegrated/lhsOverlapIntegrated)
+                scalefactor = y2[0]/y1[0]
+            
         else:
             rhs_rebinned = MultiplyRange(InputWorkspace=w2, StartBin=0, Factor=manualScaleFactor)
             scalefactor = manualScaleFactor
