@@ -36,6 +36,8 @@ namespace MantidQt
       void populateInstrumentBox();
       /// Populate the investigation type list-box.
       void populateInvestigationTypeBox();
+      /// Obtain the users' text input for each search field.
+      std::map<std::string, std::string> getSearchFields();
 
       ///////////////////////////////////////////////////////////////////////////////
       // Methods for: "Search results"

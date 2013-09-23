@@ -51,7 +51,7 @@ namespace MantidQt
       connect(m_icatUiForm.searchCbox,SIGNAL(clicked()),this,SLOT(showCatalogSearch()));
       // Show advanced search options if "Advanced search" is checked.
       connect(m_icatUiForm.advSearchCbox,SIGNAL(clicked()),this,SLOT(advancedSearchChecked()));
-      // Open calender when start or end date is selected
+      // Open calendar when start or end date is selected
       connect(m_icatUiForm.startDatePicker,SIGNAL(clicked()),this, SLOT(openCalendar()));
       connect(m_icatUiForm.endDatePicker,SIGNAL(clicked()),this, SLOT(openCalendar()));
       // Clear all fields when reset button is pressed.
@@ -99,19 +99,6 @@ namespace MantidQt
       else
       {
         m_icatUiForm.searchFrame->hide();
-      }
-    }
-
-    /**
-     * Hides the search frame, and shows search results frame when "Search" button pressed.
-     */
-    void ICatSearch2::searchClicked()
-    {
-      if (m_icatUiForm.searchBtn)
-      {
-        m_icatUiForm.resFrame->show();
-        m_icatUiForm.searchResultsCbox->setEnabled(true);
-        m_icatUiForm.searchResultsCbox->setChecked(true);
       }
     }
 
@@ -203,6 +190,32 @@ namespace MantidQt
       // Make the default investigation type empty so the user has to select one.
       m_icatUiForm.InvestigationType->insertItem(-1,"");
       m_icatUiForm.InvestigationType->setCurrentIndex(0);
+    }
+
+    /**
+     * Get the users' input for each search field.
+     * @return :: A map containing all users' search fields - (key => FieldName, value => FieldValue).
+     */
+    std::map<std::string, std::string> ICatSearch2::getSearchFields()
+    {
+      std::map<std::string, std::string> searchFieldInput;
+
+      // Since we check if the field is empty in the algorithm, there's no need to check if advanced was clicked.
+      // Left side of form.
+      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationName", m_icatUiForm.InvestigationName->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("Instrument", m_icatUiForm.Instrument->currentText().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("runRange", m_icatUiForm.runRangeTxt->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigatorSurname", m_icatUiForm.InvestigatorSurname->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationAbstract", m_icatUiForm.InvestigationAbstract->text().toStdString()));
+
+      // Right side of form.
+      searchFieldInput.insert(std::pair<std::string, std::string>("StartDate", m_icatUiForm.StartDate->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("EndDate", m_icatUiForm.EndDate->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("Keywords", m_icatUiForm.Keywords->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("SampleName", m_icatUiForm.SampleName->text().toStdString()));
+      searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationType", m_icatUiForm.InvestigationType->currentText().toStdString()));
+
+      return (searchFieldInput);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -301,6 +314,21 @@ namespace MantidQt
     void ICatSearch2::onSearch()
     {
 
+    }
+
+    /**
+     * Hides the search frame, and shows search results frame when "Search" button pressed.
+     */
+    void ICatSearch2::searchClicked()
+    {
+      if (m_icatUiForm.searchBtn)
+      {
+        m_icatUiForm.resFrame->show();
+        m_icatUiForm.searchResultsCbox->setEnabled(true);
+        m_icatUiForm.searchResultsCbox->setChecked(true);
+        // Perform the search using the values the user has input.
+        m_icatHelper->executeSearch(getSearchFields());
+      }
     }
 
     /**
