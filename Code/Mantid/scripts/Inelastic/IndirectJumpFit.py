@@ -6,12 +6,26 @@ import os.path
 mp = import_mantidplot()
 
 # Jump programs
-def JumpRun(samWS,jump,Verbose,Plot,Save):
+def JumpRun(samWS,jump,width,qmin,qmax,Verbose=False,Plot=False,Save=False):
 # Chudley-Elliott    HWHM=A*(1-sin*(Q*K)/(Q*K))
 # for Q->0 W=A*Q^2*K^2/6
 # Singwi-Sjolander  HWHM=A*(1-exp(-r*Q^2))
 # for Q->0 W=A*Q^2*r
 	StartTime('Jump fit : '+jump+' ; ')
+
+	ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=samWS, WorkspaceIndex=width)
+
+	if Verbose:
+		logger.notice('Cropping from Q= ' + str(qmin) +' to '+ str(qmax))
+	CropWorkspace(InputWorkspace=samWS, OutputWorkspace=samWS,XMin=qmin, XMax=qmax)
+
+	if Verbose:
+		inGR = mtd[samWS].getRun()
+		log = inGR.getLogData('Fit Program')
+		if log:
+			val = log.value
+			logger.notice('Fit program was : '+val)
+
 	workdir = config['defaultsave.directory']
 	if Verbose:
 		logger.notice('Parameters in ' + samWS)

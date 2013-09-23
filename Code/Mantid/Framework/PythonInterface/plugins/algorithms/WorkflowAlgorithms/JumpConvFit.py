@@ -47,6 +47,11 @@ class JumpConvFit(PythonAlgorithm):
 		plotOp = self.getProperty('Plot').value
 		saveOp = self.getProperty('Save').value
 
+		qmin = self.getProperty('Qmin').value
+		qmin = float(qmin)
+		qmax = self.getProperty('Qmax').value
+		qmax = float(qmax)
+
 		workdir = config['defaultsave.directory']
 		if inType == 'File':
 			path = os.path.join(workdir, samWS)					# path name for nxs file
@@ -54,30 +59,7 @@ class JumpConvFit(PythonAlgorithm):
 			message = 'Input from File : '+path
 		else:
 			message = 'Input from Workspace : '+samWS
-		ExtractSingleSpectrum(InputWorkspace=samWS, OutputWorkspace=samWS, WorkspaceIndex=0)
-		inGR = mtd[samWS].getRun()
-		val = inGR.getLogData('Fit Program').value
-		if verbOp:
-			logger.notice(message)
-			logger.notice('Fit program was : '+val)
-		x = mtd[samWS].readX(0)
-		xmin = x[0]
-		xmax = x[len(x)-1]
-		if cropOp:
-			Crop = False
-			qmin = self.getPropertyValue('Qmin')
-			qmin = float(qmin)
-			qmax = self.getPropertyValue('Qmax')
-			qmax = float(qmax)
-			if qmin > xmin:
-				Crop = True
-			if qmax < xmax:
-				Crop = True
-			if Crop:
-				CropWorkspace(InputWorkspace=samWS, OutputWorkspace=samWS,
-					XMin=qmin, XMax=qmax)
-				if verbOp:
-					logger.notice('Cropping from Q= ' + str(qmin) +' to '+ str(qmax))
-		JumpRun(samWS,jump,verbOp,plotOp,saveOp)
+
+		JumpRun(samWS,jump,0,qmin,qmax,verbOp,plotOp,saveOp)
 
 AlgorithmFactory.subscribe(JumpConvFit)         # Register algorithm with Mantid
