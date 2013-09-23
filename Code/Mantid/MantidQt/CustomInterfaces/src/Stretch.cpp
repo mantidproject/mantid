@@ -48,16 +48,18 @@ namespace MantidQt
 
 		bool Stretch::validate()
 		{
-			if(m_uiForm.dsSample->getCurrentDataName().isEmpty())
-			{
-				emit showMessageBox("Please correct the following:\n Could not find the specified reduction file");
-				return false;
-			}
-			if(m_uiForm.dsResolution->getCurrentDataName().isEmpty())
-			{
-				emit showMessageBox("Please correct the following:\n Could not find the specified resolution file");
-				return false;
-			}
+						//check that the sample file exists
+			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+			QString samplePath = m_uiForm.dsSample->getFullFilePath();
+
+			if(!checkFileLoaded(sampleName, samplePath)) return false;
+
+			//check that the resolution file exists
+			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+			QString resPath = m_uiForm.dsResolution->getFullFilePath();
+
+			if(!checkFileLoaded(resName, resPath)) return false;
+
 			return true;
 		}
 
@@ -88,7 +90,7 @@ namespace MantidQt
 			}
 
 			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "1"; }
-			if(m_uiForm.chkSequence->isChecked()) { sequence = "True"; }
+			if(m_uiForm.chkSequentialFit->isChecked()) { sequence = "True"; }
 
 			QString fitOps = "[" + elasticPeak + ", " + background + ", 0, 0]";
 

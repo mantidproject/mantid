@@ -46,28 +46,35 @@ namespace MantidQt
 
 		bool Quasi::validate()
 		{
-			if(m_uiForm.dsSample->getCurrentDataName().isEmpty())
+			//check that the sample file exists
+			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+			QString samplePath = m_uiForm.dsSample->getFullFilePath();
+
+			if(!checkFileLoaded(sampleName, samplePath)) return false;
+
+			//check that the resolution file exists
+			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+			QString resPath = m_uiForm.dsResolution->getFullFilePath();
+
+			if(!checkFileLoaded(resName, resPath)) return false;
+
+			//check that the ResNorm file is valid if we are using it
+			if(m_uiForm.chkUseResNorm->isChecked())
 			{
-				emit showMessageBox("Please correct the following:\n Could not find the specified reduction file");
-				return false;
+				QString resNormFile = m_uiForm.dsResNorm->getCurrentDataName();
+				QString resNormPath = m_uiForm.dsResNorm->getFullFilePath();
+
+				if(!checkFileLoaded(resNormFile, resNormPath)) return false;
 			}
-			if(m_uiForm.dsResolution->getCurrentDataName().isEmpty())
-			{
-				emit showMessageBox("Please correct the following:\n Could not find the specified resolution file");
-				return false;
-			}
+
+			//check fixed width file exists
 			if(m_uiForm.chkFixWidth->isChecked() &&
 					 !m_uiForm.mwFixWidthDat->isValid())
 			{
 				emit showMessageBox("Please correct the following:\n Could not find the specified Fixed Width file");
 				return false;
 			}
-			if(m_uiForm.chkUseResNorm->isChecked() &&
-					 m_uiForm.dsResNorm->getCurrentDataName().isEmpty())
-			{
-				emit showMessageBox("Please correct the following:\n Could not find the specified ResNorm file");
-				return false;
-			}
+
 			return true;
 		}
 
@@ -93,7 +100,17 @@ namespace MantidQt
 
 			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
 			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+
 			QString program = m_uiForm.cbProgram->currentText();
+
+			if(program == "Lorenzians")
+			{
+				program = "QL";
+			}
+			else
+			{
+				program = "QSe";
+			}
 
 			// Collect input from fit options section
 			QString backgroundTxt = m_uiForm.cbBackground->currentText();
@@ -107,7 +124,7 @@ namespace MantidQt
 			}
 
 			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "1"; }
-			if(m_uiForm.chkSequence->isChecked()) { sequence = "True"; }
+			if(m_uiForm.chkSequentialFit->isChecked()) { sequence = "True"; }
 
 			if(m_uiForm.chkFixWidth->isChecked()) 
 			{ 

@@ -120,6 +120,8 @@ namespace MantidQt
 	    void updateUpperGuide(QtProperty* lower, QtProperty* upper, double value);
 			/// Function to get the range of the curve displayed on the mini plot
 			std::pair<double,double> getCurveRange();
+			/// Function to check if the file name provided is available
+			bool checkFileLoaded(const QString& filename, const QString& filepath);
 
 			/// Plot of the input
 			QwtPlot* m_plot;

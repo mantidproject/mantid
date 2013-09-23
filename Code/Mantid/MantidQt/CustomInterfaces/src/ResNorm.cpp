@@ -38,17 +38,17 @@ namespace MantidQt
 		 */
 		bool ResNorm::validate()
 		{
-			//check we have files/workspaces available to run with
-			if(m_uiForm.dsVanadium->getCurrentDataName().isEmpty())
-			{
-				emit showMessageBox("Please correct the following:\n Could not find the specified reduction file");
-				return false;
-			}
-			if(m_uiForm.dsResolution->getCurrentDataName().isEmpty())
-			{
-				emit showMessageBox("Please correct the following:\n Could not find the specified resolution file");
-				return false;
-			}
+			//check that the sample file exists
+			QString sampleName = m_uiForm.dsVanadium->getCurrentDataName();
+			QString samplePath = m_uiForm.dsVanadium->getFullFilePath();
+
+			if(!checkFileLoaded(sampleName, samplePath)) return false;
+
+			//check that the resolution file exists
+			QString resName = m_uiForm.dsResolution->getCurrentDataName();
+			QString resPath = m_uiForm.dsResolution->getFullFilePath();
+
+			if(!checkFileLoaded(resName, resPath)) return false;
 
 			return true;
 		}
