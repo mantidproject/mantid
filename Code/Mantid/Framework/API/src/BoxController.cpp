@@ -48,6 +48,37 @@ namespace API
 
   }
 
+
+  bool BoxController::operator==(const BoxController & other) const
+  {
+    if(nd != other.nd || m_maxId!=other.m_maxId || m_SplitThreshold != other.m_SplitThreshold ||
+      m_maxDepth != other.m_maxDepth  || m_numSplit != other.m_numSplit ||
+      m_splitInto.size() != other.m_splitInto.size()|| m_numMDBoxes.size()!=other.m_numMDBoxes.size()||
+      m_numMDGridBoxes.size()!=other.m_numMDGridBoxes.size() || m_maxNumMDBoxes.size()!= other.m_maxNumMDBoxes.size())return false;
+
+    for(size_t i=0;i<m_splitInto.size();i++)
+    {
+      if(m_splitInto[i]!=other.m_splitInto[i])return false;
+    }
+
+    for(size_t i=0;i<m_numMDBoxes.size();i++)
+    {
+      if(m_numMDBoxes[i]!=other.m_numMDBoxes[i])return false;
+      if(m_numMDGridBoxes[i]!=other.m_numMDGridBoxes[i])return false;
+      if(m_maxNumMDBoxes[i]!=other.m_maxNumMDBoxes[i])return false;
+    }
+    // Should we compare this?
+    /// number of events sitting in the boxes which should be split but are already split up to the max depth
+     //volatile size_t m_numEventsAtMax;
+    /// For adding events tasks
+    //size_t m_addingEvents_eventsPerTask;
+    /// For adding events tasks
+    //size_t m_addingEvents_numTasksPerBlock;
+
+
+    return true;
+  }
+
   /// Destructor
   BoxController::~BoxController()
   {
