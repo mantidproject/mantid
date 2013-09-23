@@ -26,6 +26,7 @@ namespace MantidQt
 			void updateProperties(QtProperty* prop, double val);
 
 		private:
+			/// Inherited methods from IndirectBayesTab
 			virtual QString help() { return "JumpFit"; };
 			virtual bool validate();
 			virtual void run();

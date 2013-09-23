@@ -34,7 +34,9 @@ namespace MantidQt
 		}
 
 		/**
-		 * Validate the form to check we can run the program
+		 * Validate the form to check the program can be run
+		 * 
+		 * @return :: Whether the form was valid
 		 */
 		bool ResNorm::validate()
 		{
@@ -89,7 +91,8 @@ namespace MantidQt
 		}
 
 		/**
-		 * Plots the loaded file to the miniplot
+		 * Plots the loaded file to the miniplot and sets the guides
+		 * and the range
 		 * 
 		 * @param filename :: The name of the workspace to plot
 		 */

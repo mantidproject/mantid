@@ -46,6 +46,11 @@ namespace MantidQt
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 		}
 
+		/**
+		 * Validate the form to check the program can be run
+		 * 
+		 * @return :: Whether the form was valid
+		 */
 		bool Stretch::validate()
 		{
 						//check that the sample file exists
@@ -63,6 +68,10 @@ namespace MantidQt
 			return true;
 		}
 
+		/**
+		 * Collect the settings on the GUI and build a python
+		 * script that runs Stretch
+		 */
 		void Stretch::run() 
 		{
 			QString save("False");
@@ -117,6 +126,12 @@ namespace MantidQt
 			runPythonScript(pyInput);
 		}
 
+		/**
+		 * Plots the loaded file to the miniplot and sets the guides
+		 * and the range
+		 * 
+		 * @param filename :: The name of the workspace to plot
+		 */
 		void Stretch::handleSampleInputReady(const QString& filename)
 		{
 			plotMiniPlot(filename, 0);
@@ -125,16 +140,32 @@ namespace MantidQt
 			setPlotRange(m_properties["EMin"], m_properties["EMax"], range);
 		}
 
+		/**
+		 * Updates the property manager when the lower guide is moved on the mini plot
+		 *
+		 * @param min :: The new value of the lower guide
+		 */
 		void Stretch::minValueChanged(double min)
     {
       m_dblManager->setValue(m_properties["EMin"], min);
     }
 
+		/**
+		 * Updates the property manager when the upper guide is moved on the mini plot
+		 *
+		 * @param max :: The new value of the upper guide
+		 */
     void Stretch::maxValueChanged(double max)
     {
 			m_dblManager->setValue(m_properties["EMax"], max);	
     }
 
+		/**
+		 * Handles when properties in the property manager are updated.
+		 *
+		 * @param prop :: The property being updated
+		 * @param val :: The new value for the property
+		 */
     void Stretch::updateProperties(QtProperty* prop, double val)
     {
     	if(prop == m_properties["EMin"])

@@ -30,6 +30,11 @@ namespace MantidQt
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 		}
 
+		/**
+		 * Validate the form to check the program can be run
+		 * 
+		 * @return :: Whether the form was valid
+		 */
 		bool JumpFit::validate()
 		{
 			//check that the sample file is loaded
@@ -41,6 +46,10 @@ namespace MantidQt
 			return true;
 		}
 
+		/**
+		 * Collect the settings on the GUI and build a python
+		 * script that runs JumpFit
+		 */
 		void JumpFit::run() 
 		{
 			QString verbose("False");
@@ -83,6 +92,12 @@ namespace MantidQt
 			runPythonScript(pyInput);
 		}
 
+		/**
+		 * Plots the loaded file to the miniplot and sets the guides
+		 * and the range
+		 * 
+		 * @param filename :: The name of the workspace to plot
+		 */
 		void JumpFit::handleSampleInputReady(const QString& filename)
 		{
 			plotMiniPlot(filename, 0);
@@ -102,16 +117,32 @@ namespace MantidQt
 			setPlotRange(m_properties["QMin"], m_properties["QMax"], range);
 		}
 
+		/**
+		 * Updates the property manager when the lower guide is moved on the mini plot
+		 *
+		 * @param min :: The new value of the lower guide
+		 */
 		void JumpFit::minValueChanged(double min)
     {
       m_dblManager->setValue(m_properties["QMin"], min);
     }
 
+		/**
+		 * Updates the property manager when the upper guide is moved on the mini plot
+		 *
+		 * @param max :: The new value of the upper guide
+		 */
     void JumpFit::maxValueChanged(double max)
     {
 			m_dblManager->setValue(m_properties["QMax"], max);	
     }
 
+		/**
+		 * Handles when properties in the property manager are updated.
+		 *
+		 * @param prop :: The property being updated
+		 * @param val :: The new value for the property
+		 */
     void JumpFit::updateProperties(QtProperty* prop, double val)
     {
     	if(prop == m_properties["QMin"])

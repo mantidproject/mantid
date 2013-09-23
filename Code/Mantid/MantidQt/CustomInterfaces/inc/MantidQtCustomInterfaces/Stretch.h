@@ -26,6 +26,7 @@ namespace MantidQt
 			void handleSampleInputReady(const QString& filename);
 
 		private:
+			/// Inherited methods from IndirectBayesTab
 			virtual QString help() { return "Stretch"; };
 			virtual bool validate();
 			virtual void run();
