@@ -3817,7 +3817,6 @@ void MuonAnalysis::changeDeadTimeType(int choice)
   }
   else // choice must be from workspace
   {
-    m_uiForm.mwRunDeadTimeFile->setText("");
     m_uiForm.mwRunDeadTimeFile->setVisible(true);
   }
 
