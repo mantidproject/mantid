@@ -1,5 +1,8 @@
 #include "MantidQtCustomInterfaces/JumpFit.h"
 
+#include <string>
+#include <boost/lexical_cast.hpp>
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -29,12 +32,55 @@ namespace MantidQt
 
 		bool JumpFit::validate()
 		{
+			//check that the sample file is loaded
+			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+			QString samplePath = m_uiForm.dsSample->getFullFilePath();
+
+			if(!checkFileLoaded(sampleName, samplePath)) return false;
+
 			return true;
 		}
 
 		void JumpFit::run() 
 		{
+			QString verbose("False");
+			QString plot("False");
+			QString save("False");
+			
+			QString sample = m_uiForm.dsSample->getCurrentDataName();
 
+			//fit function to use
+			QString fitFunction("CE");
+			switch(m_uiForm.cbFunction->currentIndex())
+			{
+				case 0:
+					fitFunction = "CE"; // Use Chudley-Elliott
+					break;
+				case 1:
+					fitFunction = "SS"; // Use Singwi-Sjolander
+					break;
+			}
+
+			// width should be 0, 2 or 4
+			int width = m_uiForm.cbWidth->currentIndex() * 2;
+			QString widthTxt = boost::lexical_cast<std::string>(width).c_str();
+
+			// Cropping values
+			QString QMin = m_properties["QMin"]->valueText();
+			QString QMax = m_properties["QMax"]->valueText();
+
+			//output options
+			if(m_uiForm.chkVerbose->isChecked()) { verbose = "True"; }
+			if(m_uiForm.chkSave->isChecked()) { save = "True"; }
+			if(m_uiForm.chkPlot->isChecked()) { plot = "True"; }
+
+			QString pyInput = 
+				"from IndirectJumpFit import JumpRun\n";
+
+			pyInput += "JumpRun("+sample+","+fitFunction+","+widthTxt+","+QMin+","+QMax+","
+									"Save="+save+", Plot='"+plot+"', Verbose="+verbose+")\n";
+
+			runPythonScript(pyInput);
 		}
 
 		void JumpFit::handleSampleInputReady(const QString& filename)
