@@ -46,7 +46,10 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/DataHandling/src/LoadRaw/
         Framework/ICat/inc/MantidICat/ICat3/GSoapGenerated/
         Framework/ICat/src/ICat3/GSoapGenerated/
-        Framework/ICat/src/GSoapGenerated.cpp
+        Framework/ICat/src/ICat3/ICat3GSoapGenerated.cpp
+        Framework/ICat/inc/MantidICat/ICat4/GSoapGenerated/
+        Framework/ICat/src/ICat4/GSoapGenerated/
+        Framework/ICat/src/ICat4/ICat4GSoapGenerated.cpp
         Framework/ICat/src/GSoap/
         Framework/ICat/src/GSoap.cpp
         Framework/Kernel/src/ANN/
