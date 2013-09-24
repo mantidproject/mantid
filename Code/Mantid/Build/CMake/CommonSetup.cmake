@@ -254,7 +254,6 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/API/inc
         Framework/TestHelpers/inc
         Framework/Crystal/inc
-        Framework/PythonAPI/inc
         Framework/Kernel/inc
         Vates/VatesAPI/inc
         Vates/VatesSimpleGui/ViewWidgets/inc
@@ -280,7 +279,6 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/Kernel/src/ANN/
         Framework/Kernel/src/ANN_complete.cpp
         Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp
-        Framework/PythonAPI/src/
         MantidPlot/src/nrutil.cpp
         MantidPlot/src/origin/OPJFile.cpp
       )
@@ -289,8 +287,6 @@ if ( CPPCHECK_EXECUTABLE )
   set ( CPPCHECK_HEADER_EXCLUDES
         MantidPlot/src/origin/OPJFile.h
 		MantidPlot/src/origin/tree.hh
-        Framework/PythonAPI/inc/boost/python/detail/referent_storage.hpp
-        Framework/PythonAPI/inc/boost/python/detail/type_list_impl_no_pts.hpp
       )
 
   # setup the standard arguments
