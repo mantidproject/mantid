@@ -3175,9 +3175,10 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
 
       // --- Drawing error columns -----------------------------
       if (colType == Table::xErr || colType == Table::yErr){
-        int ycol = w->colY(colIndex);
+        QString yColName = w->colName(w->colY(colIndex));
+        QString xColName = w->colName(w->colX(colIndex));
 
-        if (ycol < 0)
+        if (xColName.isEmpty() || yColName.isEmpty())
           return false;
 
         int dir;
@@ -3186,17 +3187,17 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
         else
           dir = QwtErrorPlotCurve::Vertical;
 
-        PlotCurve* c = addErrorBars(w->colName(ycol), w, colName, dir);
+        PlotCurve* c = addErrorBars(xColName, yColName, w, colName, dir);
         updateCurveLayout(c, &cl);
       // --- Drawing label columns -----------------------------
       } else if (colType == Table::Label){
-        int xcol = w->colX(colIndex);
-        int ycol = w->colY(colIndex);
+        QString xColName = w->colName(w->colX(colIndex));
+        QString yColName = w->colName(w->colY(colIndex));
 
-        if (xcol < 0 || ycol < 0)
+        if (xColName.isEmpty() || yColName.isEmpty())
           return false;
 
-        DataCurve* mc = masterCurve(w->colName(xcol), w->colName(ycol));
+        DataCurve* mc = masterCurve(xColName, yColName);
         if (!mc)
           return false;
 
@@ -3205,7 +3206,12 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       // --- Drawing Y columns -----------------------------
       } else if (colType == Table::Y)
       {
-        PlotCurve* c = insertCurve(w, colName, style, startRow, endRow);
+        QString xColName = w->colName(w->colX(colIndex));
+
+        if (xColName.isEmpty())
+          return false;
+
+        PlotCurve* c = insertCurve(w, xColName, colName, style, startRow, endRow);
         updateCurveLayout(c, &cl);
       }
     }
