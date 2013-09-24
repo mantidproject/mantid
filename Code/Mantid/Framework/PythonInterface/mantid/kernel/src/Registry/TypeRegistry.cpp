@@ -98,7 +98,7 @@ namespace Mantid
         * Attempts to find a derived type for the given object amongst the
         * known converters (This could be slow)
         */
-      const PyTypeObject * findDerivedType(boost::python::object value)
+      const PyTypeObject * findDerivedType(const boost::python::object & value)
        {
          TypeIDMap & typeHandlers = typeRegistry();
          TypeIDMap::const_iterator iend = typeHandlers.end();
