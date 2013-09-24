@@ -259,8 +259,10 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         if ( len(eRange) == 4 ): 
             range2 = str(eRange[2])+' to '+str(eRange[3])
             logger.notice('Using 2 energy ranges from '+range1+' & '+range2)
+            Range2 = True
         elif ( len(eRange) == 2 ):
             logger.notice('Using 1 energy range from '+range1)
+            Range2 = False
     nr = 0
     inputRuns = sorted(inputFiles)
     for file in inputRuns:
@@ -342,21 +344,15 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     elfWS = ename+'_elf'    # interchange Q & T
     CreateWorkspace(OutputWorkspace=elfWS, DataX=datTx, DataY=datTy, DataE=datTe,
         Nspec=nQ, UnitX='Energy', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=q1)
-    unitx = mtd[elfWS].getAxis(0).setUnit("Label")
-    unitx.setLabel(unit[0], unit[1])
     DeleteWorkspace('__elf')
     e1WS = ename+'_eq1'
     CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
         Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
-    unity = mtd[e1WS].getAxis(1).setUnit("Label")
-    unity.setLabel(unit[0], unit[1])
     label = unit[0]+' / '+unit[1]
     AddSampleLog(Workspace=e1WS, LogName="Vaxis", LogType="String", LogText=label)
     e2WS = ename+'_eq2'
     CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
         Nspec=nr, UnitX='QSquared', VerticalAxisUnit='Energy', VerticalAxisValues=Taxis)
-    unity = mtd[e2WS].getAxis(1).setUnit("Label")
-    unity.setLabel(unit[0], unit[1])
     AddSampleLog(Workspace=e2WS, LogName="Vaxis", LogType="String", LogText=label)
     if unit[0] == 'Temperature':
         nT = len(Tvalue)
@@ -375,6 +371,23 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
                 logger.notice(text)
                 logger.notice('Normalised eq1 by scale factor : '+str(normFactor))
 
+    unity = mtd[e1WS].getAxis(1).setUnit("Label")
+    unity.setLabel(unit[0], unit[1])
+    label = unit[0]+' / '+unit[1]
+
+    addElwinLogs(e1WS, label, eRange, Range2)
+    AddSampleLog(Workspace=e1WS, LogName="Temperature normalise", LogType="String", LogText=str(Normalise))
+    if Normalise:
+        AddSampleLog(Workspace=e1WS, LogName="Temperature value", LogType="String", LogText=str(yval[0]))
+    
+    unity = mtd[e2WS].getAxis(1).setUnit("Label")
+    unity.setLabel(unit[0], unit[1])
+    addElwinLogs(e2WS, label, eRange, Range2)
+    
+    unitx = mtd[elfWS].getAxis(0).setUnit("Label")
+    unitx.setLabel(unit[0], unit[1])
+    addElwinLogs(elfWS, label, eRange, Range2)
+
     if Save:
         e1_path = os.path.join(workdir, e1WS+'.nxs')					# path name for nxs file
         e2_path = os.path.join(workdir, e2WS+'.nxs')					# path name for nxs file
@@ -390,6 +403,18 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
         elwinPlot(e1WS,e2WS,elfWS)
     EndTime('Elwin')
     return e1WS,e2WS
+
+# Add sample log to each of the workspaces created by Elwin
+def addElwinLogs(ws, label, eRange, Range2):
+
+    AddSampleLog(Workspace=ws, LogName="Vaxis", LogType="String", LogText=label)
+    AddSampleLog(Workspace=ws, LogName="Range1 start", LogType="String", LogText=str(eRange[0]))
+    AddSampleLog(Workspace=ws, LogName="Range1 end", LogType="String", LogText=str(eRange[1]))
+    AddSampleLog(Workspace=ws, LogName="Two ranges", LogType="String", LogText=str(Range2))
+
+    if Range2:
+        AddSampleLog(Workspace=ws, LogName="Range2 start", LogType="String", LogText=str(eRange[2]))
+        AddSampleLog(Workspace=ws, LogName="Range2 end", LogType="String", LogText=str(eRange[3]))
 
 def elwinPlot(eq1,eq2,elf):
     nhist = mtd[eq1].getNumberHistograms()                      # no. of hist/groups in sam
