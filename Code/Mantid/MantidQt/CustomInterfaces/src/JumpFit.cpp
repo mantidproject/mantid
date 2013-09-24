@@ -93,6 +93,17 @@ namespace MantidQt
 		}
 
 		/**
+		 * Set the data selectors to use the default save directory
+		 * when browsing for input files.
+		 *  
+		 * @param filename :: The name of the workspace to plot
+		 */
+		void JumpFit::loadSettings(const QSettings& settings)
+		{
+			m_uiForm.dsSample->readSettings(settings.group());
+		}
+
+		/**
 		 * Plots the loaded file to the miniplot and sets the guides
 		 * and the range
 		 * 

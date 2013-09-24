@@ -8,6 +8,7 @@
 #include <QDoubleValidator>
 #include <QtDoublePropertyManager>
 #include <QtIntPropertyManager>
+#include <QSettings>
 #include <QtTreePropertyBrowser>
 #include <QWidget>
 
@@ -84,6 +85,7 @@ namespace MantidQt
 			virtual QString help() = 0;
 			virtual bool validate() = 0;
 			virtual void run() = 0;
+			virtual void loadSettings(const QSettings& settings) = 0;
 
 		signals:
 			/// Send signal to parent window to execute python script

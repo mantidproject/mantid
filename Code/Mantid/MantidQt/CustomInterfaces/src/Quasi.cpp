@@ -45,6 +45,20 @@ namespace MantidQt
 		}
 
 		/**
+		 * Set the data selectors to use the default save directory
+		 * when browsing for input files.
+		 *  
+		 * @param filename :: The name of the workspace to plot
+		 */
+		void Quasi::loadSettings(const QSettings& settings)
+		{
+			m_uiForm.dsSample->readSettings(settings.group());
+			m_uiForm.dsResolution->readSettings(settings.group());
+			m_uiForm.dsResNorm->readSettings(settings.group());
+			m_uiForm.mwFixWidthDat->readSettings(settings.group());
+		}
+
+		/**
 		 * Validate the form to check the program can be run
 		 * 
 		 * @return :: Whether the form was valid

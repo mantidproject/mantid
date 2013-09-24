@@ -15,6 +15,13 @@ namespace MantidQt
 		public:
 			Stretch(QWidget * parent = 0);
 
+			// Inherited methods from IndirectBayesTab
+			QString help() { return "Stretch"; };
+			bool validate();
+			void run();
+			/// Load default settings into the interface
+			void loadSettings(const QSettings& settings);
+
 		private slots:
 			/// Slot for when the min range on the range selector changes
 			virtual void minValueChanged(double min);
@@ -26,11 +33,6 @@ namespace MantidQt
 			void handleSampleInputReady(const QString& filename);
 
 		private:
-			/// Inherited methods from IndirectBayesTab
-			virtual QString help() { return "Stretch"; };
-			virtual bool validate();
-			virtual void run();
-			
 			//The ui form
 			Ui::Stretch m_uiForm;
 

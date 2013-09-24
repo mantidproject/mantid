@@ -8,9 +8,6 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
-#include <QDesktopServices>
-#include <QUrl>
-
 namespace MantidQt
 {
   namespace CustomInterfaces
@@ -79,6 +76,9 @@ namespace MantidQt
       void showMessageBox(const QString& message);
 
 		private:
+      /// Load default interface settings for each tab
+      void loadSettings();
+
       /// Map of tabs indexed by position on the window
 			std::map<unsigned int, IndirectBayesTab*> m_bayesTabs;
 

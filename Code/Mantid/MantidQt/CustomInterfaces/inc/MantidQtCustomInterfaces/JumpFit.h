@@ -15,6 +15,13 @@ namespace MantidQt
 		public:
 			JumpFit(QWidget * parent = 0);
 
+			// Inherited methods from IndirectBayesTab
+			QString help() { return "JumpFit"; };
+			bool validate();
+			void run();
+			/// Load default settings into the interface
+			void loadSettings(const QSettings& settings);
+
 		private slots:
 			/// Handle when the sample input is ready
 			void handleSampleInputReady(const QString& filename);
@@ -26,10 +33,7 @@ namespace MantidQt
 			void updateProperties(QtProperty* prop, double val);
 
 		private:
-			/// Inherited methods from IndirectBayesTab
-			virtual QString help() { return "JumpFit"; };
-			virtual bool validate();
-			virtual void run();
+
 
 			//The ui form
 			Ui::JumpFit m_uiForm;

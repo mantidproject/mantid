@@ -15,6 +15,13 @@ namespace MantidQt
 		public:
 			ResNorm(QWidget * parent = 0);
 
+			// Inherited methods from IndirectBayesTab
+			QString help() { return "ResNorm"; };
+			bool validate();
+			void run();
+			/// Load default settings into the interface
+			void loadSettings(const QSettings& settings);
+
 		private slots:
 			/// Handle when the vanadium input is ready
 			void handleVanadiumInputReady(const QString& filename);
@@ -26,10 +33,6 @@ namespace MantidQt
 			void updateProperties(QtProperty* prop, double val);
 
 		private:
-			/// Inherited methods from IndirectBayesTab
-			virtual QString help() { return "ResNorm"; };
-			virtual bool validate();
-			virtual void run();
 			
 			//The ui form
 			Ui::ResNorm m_uiForm;
