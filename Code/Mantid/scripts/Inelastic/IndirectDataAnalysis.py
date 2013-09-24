@@ -363,10 +363,12 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
             lo = nT-1
             hi = 0
         text = 'Temperature range : '+str(Tvalue[lo])+' to '+str(Tvalue[hi])
+        AddSampleLog(Workspace=e1WS, LogName="Temperature normalise", LogType="String", LogText=str(Normalise))
         if Normalise:
             yval = mtd[e1WS].readY(lo)
             normFactor = 1.0/yval[0]
             Scale(InputWorkspace=e1WS, OutputWorkspace=e1WS, Factor=normFactor, Operation='Multiply')
+            AddSampleLog(Workspace=e1WS, LogName="Temperature value", LogType="String", LogText=str(yval[0]))
             if Verbose:
                 logger.notice(text)
                 logger.notice('Normalised eq1 by scale factor : '+str(normFactor))
@@ -374,11 +376,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     unity = mtd[e1WS].getAxis(1).setUnit("Label")
     unity.setLabel(unit[0], unit[1])
     label = unit[0]+' / '+unit[1]
-
     addElwinLogs(e1WS, label, eRange, Range2)
-    AddSampleLog(Workspace=e1WS, LogName="Temperature normalise", LogType="String", LogText=str(Normalise))
-    if Normalise:
-        AddSampleLog(Workspace=e1WS, LogName="Temperature value", LogType="String", LogText=str(yval[0]))
     
     unity = mtd[e2WS].getAxis(1).setUnit("Label")
     unity.setLabel(unit[0], unit[1])
@@ -408,13 +406,13 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
 def addElwinLogs(ws, label, eRange, Range2):
 
     AddSampleLog(Workspace=ws, LogName="Vaxis", LogType="String", LogText=label)
-    AddSampleLog(Workspace=ws, LogName="Range1 start", LogType="String", LogText=str(eRange[0]))
-    AddSampleLog(Workspace=ws, LogName="Range1 end", LogType="String", LogText=str(eRange[1]))
+    AddSampleLog(Workspace=ws, LogName="Range1 start", LogType="Number", LogText=str(eRange[0]))
+    AddSampleLog(Workspace=ws, LogName="Range1 end", LogType="Number", LogText=str(eRange[1]))
     AddSampleLog(Workspace=ws, LogName="Two ranges", LogType="String", LogText=str(Range2))
 
     if Range2:
-        AddSampleLog(Workspace=ws, LogName="Range2 start", LogType="String", LogText=str(eRange[2]))
-        AddSampleLog(Workspace=ws, LogName="Range2 end", LogType="String", LogText=str(eRange[3]))
+        AddSampleLog(Workspace=ws, LogName="Range2 start", LogType="Number", LogText=str(eRange[2]))
+        AddSampleLog(Workspace=ws, LogName="Range2 end", LogType="Number", LogText=str(eRange[3]))
 
 def elwinPlot(eq1,eq2,elf):
     nhist = mtd[eq1].getNumberHistograms()                      # no. of hist/groups in sam
