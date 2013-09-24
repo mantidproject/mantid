@@ -69,7 +69,7 @@ def createConvFitFun(options, par, file):
         lor_2 = 'name=Lorentzian,Amplitude='+str(par[ip+3])+',PeakCentre='+str(par[ip+4])+',HWHM='+str(par[ip+5])
         lor_fun = lor_fun +';'+ lor_2 +';ties=(f0.PeakCentre=f1.PeakCentre)'
     if options[1]:
-        delta_fun = 'name=DeltaFunction,Amplitude='+str(par[2])
+        delta_fun = 'name=DeltaFunction,Height='+str(par[2])
         lor_fun = delta_fun +';' + lor_fun
     func = bgd_fun +';'+ pk_1 +';('+ lor_fun +'))'
     return func
