@@ -223,7 +223,6 @@ ConfigServiceImpl::ConfigServiceImpl() :
   m_ConfigPaths.insert(std::make_pair("requiredpythonscript.directories", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directory", true));
   m_ConfigPaths.insert(std::make_pair("pythonscripts.directories", true));
-  m_ConfigPaths.insert(std::make_pair("pythonalgorithms.directories", true));
   m_ConfigPaths.insert(std::make_pair("python.plugins.directories", true));
   m_ConfigPaths.insert(std::make_pair("user.python.plugins.directories", true));
   m_ConfigPaths.insert(std::make_pair("datasearch.directories", true));
