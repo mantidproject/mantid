@@ -47,7 +47,7 @@ public:
   {
     // Generate file
     string inputFilename("TestConvertFullprofToXMLInput.irf");
-    string outputFilename("ConvertFullprofToXMLOutput.xml");
+    string outputFilename("TestConvertFullprofToXMLOutput.xml");
     generate2BankIrfFile(inputFilename);
 
     // Init LoadFullprofResolution
@@ -72,8 +72,30 @@ public:
     Poco::XML::Document* doc;
     TS_ASSERT_THROWS_NOTHING(doc = pParser.parseString(xmlText));
     TS_ASSERT(doc);
-    Poco::XML::Element* rootElem = doc->documentElement();
-    TS_ASSERT(rootElem->hasChildNodes());
+    if(doc) 
+    {
+      Poco::XML::Element* rootElem = doc->documentElement();
+      TS_ASSERT(rootElem->hasChildNodes());
+      Poco::XML::Element* componentLinkElem1 = rootElem->getChildElement("component-link");
+      TS_ASSERT(componentLinkElem1);
+      if(componentLinkElem1)
+      {
+        TS_ASSERT_EQUALS(componentLinkElem1->getAttribute("name"),"wholeInstrument");
+        Poco::XML::Element* paramElem1 = componentLinkElem1->getChildElement("parameter");
+        TS_ASSERT(paramElem1);
+        if(paramElem1)
+        {
+          TS_ASSERT_EQUALS(paramElem1->getAttribute("type"),"fitting");
+          TS_ASSERT_EQUALS(paramElem1->getAttribute("name"),"IkedaCarpenterPV:Alpha0");
+          Poco::XML::Element* formulaElem = paramElem1->getChildElement("formula");
+          TS_ASSERT(formulaElem);
+          if(formulaElem)
+          {
+            TS_ASSERT_EQUALS(formulaElem->getAttribute("result-unit"),"TOF");
+          }
+        }
+      }
+    }
 
     //Clean up
     Poco::File(inputFilename).remove();
@@ -96,7 +118,6 @@ public:
       ofile << "! For use in testing ConvertFullprofToXML        (Res=6)                       \n";
       ofile << "! ----------------------------------------------  Bank 1  CWL =   0.5330A      \n";
       ofile << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt          \n";
-      ofile << "NPROF 10                                                                       \n";
       ofile << "!       Tof-min(us)    step      Tof-max(us)                                   \n";
       ofile << "TOFRG   5000.2300      4.0002  51000.0000                                      \n";
       ofile << "!          Zero    Dtt1                                                        \n";
@@ -116,7 +137,6 @@ public:
       ofile << "END                                                                            \n";
       ofile << "! ----------------------------------------------  Bank 3                 \n";
       ofile << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt    \n";
-      ofile << "NPROF 10                                                                 \n";
       ofile << "!       Tof-min(us)    step      Tof-max(us)                             \n";
       ofile << "TOFRG   9800.0000      5.0000   86000.0000                               \n";
       ofile << "!       Zero   Dtt1                                                      \n";
