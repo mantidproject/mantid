@@ -1,4 +1,5 @@
 #include "MantidQtMantidWidgets/ICatSearch2.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -131,7 +132,7 @@ namespace MantidQt
 
     /**
      * Updates text field depending on button picker selected.
-     * @param :: The name of the text field is derived from the buttonName.
+     * @param buttonName :: The name of the text field is derived from the buttonName.
      */
     void ICatSearch2::dateSelected(std::string buttonName)
     {
@@ -323,11 +324,16 @@ namespace MantidQt
     {
       if (m_icatUiForm.searchBtn)
       {
-        m_icatUiForm.resFrame->show();
         m_icatUiForm.searchResultsCbox->setEnabled(true);
         m_icatUiForm.searchResultsCbox->setChecked(true);
+        m_icatUiForm.resFrame->show();
+        //
+        m_icatUiForm.searchResultsLbl->hide();
+        m_icatUiForm.numOfResultsLbl->setText("searching investigations...");
         // Perform the search using the values the user has input.
         m_icatHelper->executeSearch(getSearchFields());
+        //
+        populateResultTable();
       }
     }
 
@@ -356,11 +362,97 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Embolden the headers in the results table.
+     */
+    void ICatSearch2::emboldenResultHeaders()
+    {
+      QFont font;
+      font.setBold(true);
+      for (int i = 0; i < m_icatUiForm.searchResultsTbl->columnCount(); ++i)
+      {
+        // Embolden the headers of the table.
+        m_icatUiForm.searchResultsTbl->horizontalHeaderItem(i)->setFont(font);
+      }
+    }
+
+    /**
+     * Set the table properties prior to adding data to it.
+     * @param numOfRows    :: The number of rows in the workspace.
+     * @param numOfColumns :: The number of columns in the workspace.
+     */
+    void ICatSearch2::setupResultTable(size_t& numOfRows, size_t& numOfColumns)
+    {
+      m_icatUiForm.searchResultsTbl->setRowCount(static_cast<int>(numOfRows));
+      m_icatUiForm.searchResultsTbl->setColumnCount(static_cast<int>(numOfColumns));
+
+      // Improve the appearance of table to make it easier to read.
+      m_icatUiForm.searchResultsTbl->setAlternatingRowColors(true);
+      m_icatUiForm.searchResultsTbl->setStyleSheet("alternate-background-color: rgb(216, 225, 255)");
+      m_icatUiForm.searchResultsTbl->setSortingEnabled(false);
+      m_icatUiForm.searchResultsTbl->verticalHeader()->setVisible(false);
+
+      // Update the label to inform the user of how many investigations have been returned from the search.
+      m_icatUiForm.numOfResultsLbl->setText(QString::number(numOfRows));
+      m_icatUiForm.searchResultsLbl->show();
+
+      // Sort by endDate with the most recent being first.
+      m_icatUiForm.searchResultsTbl->sortByColumn(4,Qt::DescendingOrder);
+      m_icatUiForm.searchResultsTbl->setSortingEnabled(true);
+
+      // Set the height on each row to 20 for UX improvement.
+      for (size_t i = 0; i < numOfRows; ++i)
+      {
+        m_icatUiForm.searchResultsTbl->setRowHeight(static_cast<int>(i),20);
+      }
+    }
+
+    /**
      * Outputs the results of the search into the "Search results" table.
      */
     void ICatSearch2::populateResultTable()
     {
+      // Obtain a pointer to the "searchResults" workspace where the search results are saved.
+      auto workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("searchResults"));
 
+      size_t numOfRows = workspace->rowCount();
+      size_t numOfColumns = workspace->columnCount();
+
+      // Set the result's table properties prior to adding data.
+      setupResultTable(numOfRows, numOfColumns);
+
+      // This will contain the list of column names.
+      QStringList columnHeaders;
+
+      // Add the data from the workspace to the search results table.
+      for(size_t col = 0 ; col < numOfColumns; col++)
+      {
+        // Get the column name to display as the header of table widget
+        Mantid::API::Column_sptr column = workspace->getColumn(col);
+        columnHeaders.push_back(QString::fromStdString(column->name()));
+
+        for(size_t row = 0; row < numOfRows; ++row)
+        {
+          // Prints the value from the row to the ostringstream to use later.
+          std::ostringstream ostr;
+          column->print(row,ostr);
+
+          // Add a result to the table.
+          QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
+          m_icatUiForm.searchResultsTbl->setItem(static_cast<int>(row),static_cast<int>(col), newItem);
+
+          // Allow the row to be selected, and enabled.
+          newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+          newItem->setToolTip(QString::fromStdString(ostr.str()));
+        }
+      }
+      // Set the table widgets header labels from the table workspace.
+      m_icatUiForm.searchResultsTbl->setHorizontalHeaderLabels(columnHeaders);
+
+      // Embolden the headers of the table.
+      emboldenResultHeaders();
+
+      // Resize the label to improve the viewing experience.
+      m_icatUiForm.searchResultsTbl->resizeColumnsToContents();
     }
 
     /**

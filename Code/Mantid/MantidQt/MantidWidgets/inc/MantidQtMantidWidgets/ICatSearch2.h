@@ -43,6 +43,10 @@ namespace MantidQt
       // Methods for: "Search results"
       ///////////////////////////////////////////////////////////////////////////////
 
+      /// Make the headers in the results table bold.
+      void emboldenResultHeaders();
+      /// Setup results table prior to adding data to it, such hiding vertial header.
+      void setupResultTable(size_t& numOfRows, size_t& numOfColumns);
       /// Outputs the results of the query into a table.
       void populateResultTable();
       /// When an investigation is double clicked we want to call populateDataFileTable using the investigation name.

@@ -302,10 +302,11 @@ namespace Mantid
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
       // Add rows headers to the output workspace.
-      outputws->addColumn("str","Investigation Number");
       outputws->addColumn("str","Title");
       outputws->addColumn("str","Instrument");
-      outputws->addColumn("str","Run Range");
+      outputws->addColumn("str","Run range");
+      outputws->addColumn("str","Start date");
+      outputws->addColumn("str","End date");
 
       // Add data to each row in the output workspace.
       std::vector<xsd__anyType*>::const_iterator iter;
@@ -320,7 +321,6 @@ namespace Mantid
           {
             API::TableRow table = outputws->appendRow();
             // Now add the relevant investigation data to the table.
-            savetoTableWorkspace(investigation->name, table); // Investigation number
             savetoTableWorkspace(investigation->title, table);
             savetoTableWorkspace(investigation->instrument->name, table);
             // Verify that the run parameters vector exist prior to doing anything.
@@ -329,7 +329,17 @@ namespace Mantid
             {
               savetoTableWorkspace(investigation->parameters[0]->stringValue, table);
             }
-
+            // Again, we need to check first if start and end date exist prior to insertion.
+            if (investigation->startDate)
+            {
+              std::string startDate = formatDateTime(*investigation->startDate);
+              savetoTableWorkspace(&startDate, table);
+            }
+            if (investigation->endDate)
+            {
+              std::string endDate = formatDateTime(*investigation->endDate);
+              savetoTableWorkspace(&endDate, table);
+            }
           }
           catch(std::runtime_error& exception)
           {

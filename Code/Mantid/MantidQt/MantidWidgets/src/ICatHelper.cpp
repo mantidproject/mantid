@@ -1,6 +1,8 @@
 #include "MantidQtMantidWidgets/ICatHelper.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 
+#include <QCoreApplication>
+
 namespace MantidQt
 {
   namespace MantidWidgets
@@ -79,7 +81,12 @@ namespace MantidQt
           catalogAlgorithm->setProperty(it->first, value);
         }
       }
-      catalogAlgorithm->execute();
+      // Allow asynchronous execution to update label while search is being carried out.
+      Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
+      while( !result.available() )
+      {
+        QCoreApplication::processEvents();
+      }
     }
   }
 
