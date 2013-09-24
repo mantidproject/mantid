@@ -435,10 +435,10 @@ namespace Mantid
 
   /** Method recovers the interconnected box structure from the plain tree into box tree, recovering both boxes and their connectivity
     * does the opposite to the initFlatStructure operation (the class contants remains unchanged)
-
    @param  Boxes       :: the return vector of pointers to interconnected boxes. All previous pointers found in the vector will be overwritten (beware of memory loss)
    @param  bc          :: shard pointer to the box controller, which each box uses
    @param  FileBackEnd :: if one should make the data file backed, namely restore/calculate the data, nesessary to obtain events file positions
+   @parman BoxStructureOnly :: restore box tree only ignoring information about the box events
 
    @returns   totalNumEvents :: total number of events the box structure should contain and allocated memory for.
   */
