@@ -128,7 +128,7 @@ def CheckBinning(nbins):
 	return nbin,nrbin
 
 # QLines programs
-def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose=False,Plot='None',Save=False):
+def QLRun(program,samWS,resWS,resnormWS,erange,nbins,fitOp,wfile,Loop,Verbose=False,Plot='None',Save=False):
 	StartTime(program)
 	workdir = config['defaultsave.directory']
 	facility = config['default.facility']
@@ -664,7 +664,6 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
 	if Verbose:
 		logger.notice(' Number of spectra = '+str(nsam))
 		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
-	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
 	fname = samWS[:-4] + '_'+ prog
 	wrks=workdir + samWS[:-4]
 	if Verbose:
