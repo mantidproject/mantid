@@ -3147,8 +3147,9 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
   else {
     QStringList drawableNames;
     int noOfErrorCols = 0;
+    QString xColNameGiven;
 
-    // Select only those column names which we can draw
+    // Select only those column names which we can draw and search for any X columns specified
     for (int i = 0; i < names.count(); i++)
     {
       int d = w->colPlotDesignation(w->colIndex(names[i]));
@@ -3160,6 +3161,13 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
         // Count error columns
         if(d == Table::xErr || d == Table::yErr)
           noOfErrorCols++;
+      } else if(d == Table::X)
+      {
+        // If multiple X columns are specified, it's an error, as we don't know which one to use
+        if(!xColNameGiven.isEmpty())
+          return false;
+
+        xColNameGiven = names[i];
       }
     }
 
@@ -3181,7 +3189,13 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
         // For other column types, we find associated Y column
         yColName = w->colName(w->colY(colIndex));
 
-      QString xColName = w->colName(w->colX(colIndex));
+      QString xColName;
+      if(!xColNameGiven.isEmpty())
+        // If X column is given - use it
+        xColName = xColNameGiven;
+      else
+        // Otherise, use associated one
+        xColName = w->colName(w->colX(colIndex));
 
       if (xColName.isEmpty() || yColName.isEmpty())
         return false;
