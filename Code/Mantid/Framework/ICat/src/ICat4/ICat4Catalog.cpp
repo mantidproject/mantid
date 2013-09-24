@@ -317,6 +317,7 @@ namespace Mantid
     void ICat4Catalog::saveInvestigations(std::vector<xsd__anyType*> response, API::ITableWorkspace_sptr& outputws)
     {
       // Add rows headers to the output workspace.
+      outputws->addColumn("str","Investigation id");
       outputws->addColumn("str","Title");
       outputws->addColumn("str","Instrument");
       outputws->addColumn("str","Run range");
@@ -336,6 +337,7 @@ namespace Mantid
           {
             API::TableRow table = outputws->appendRow();
             // Now add the relevant investigation data to the table.
+            savetoTableWorkspace(investigation->name, table);
             savetoTableWorkspace(investigation->title, table);
             savetoTableWorkspace(investigation->instrument->name, table);
             // Verify that the run parameters vector exist prior to doing anything.

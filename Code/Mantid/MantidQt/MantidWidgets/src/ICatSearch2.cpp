@@ -440,6 +440,9 @@ namespace MantidQt
           newItem->setToolTip(QString::fromStdString(ostr.str()));
         }
       }
+      // Hide the "Investigation id" column (It's used by the CatalogGetDataFiles algorithm).
+      m_icatUiForm.searchResultsTbl->setColumnHidden(0, true);
+
       // Set the table widgets header labels from the table workspace.
       m_icatUiForm.searchResultsTbl->setHorizontalHeaderLabels(columnHeaders);
 
