@@ -77,8 +77,7 @@ namespace MantidQt
 			QString save("False");
 			QString verbose("False");
 
-			QString elasticPeak("0");
-			QString background("0");
+			QString elasticPeak("False");
 			QString sequence("False");
 
 			QString pyInput = 
@@ -88,17 +87,9 @@ namespace MantidQt
 			QString resName = m_uiForm.dsResolution->getCurrentDataName();
 
 			// Collect input from options section
-			QString backgroundTxt = m_uiForm.cbBackground->currentText();
-			if(backgroundTxt == "Sloping")
-			{
-				background = "2";
-			}
-			else if( backgroundTxt == "Flat")
-			{
-				background = "1";
-			}
+			QString background = m_uiForm.cbBackground->currentText();
 
-			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "1"; }
+			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "True"; }
 			if(m_uiForm.chkSequentialFit->isChecked()) { sequence = "True"; }
 
 			QString fitOps = "[" + elasticPeak + ", " + background + ", 0, 0]";

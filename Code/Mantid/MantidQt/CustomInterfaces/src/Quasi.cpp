@@ -93,16 +93,14 @@ namespace MantidQt
 			// in some places
 			QString verbose("False");
 			QString save("False");
-			QString elasticPeak("0");
+			QString elasticPeak("False");
 			QString sequence("False");
 
-			QString fixedWidth("0");
+			QString fixedWidth("False");
 			QString fixedWidthFile("");
 
-			QString useResNorm("0");
+			QString useResNorm("False");
 			QString resNormFile("");
-
-			QString background("0");
 
 			QString pyInput = 
 				"from IndirectBayes import QLRun\n";
@@ -122,28 +120,20 @@ namespace MantidQt
 			}
 
 			// Collect input from fit options section
-			QString backgroundTxt = m_uiForm.cbBackground->currentText();
-			if(backgroundTxt == "Sloping")
-			{
-				background = "2";
-			}
-			else if( backgroundTxt == "Flat")
-			{
-				background = "1";
-			}
+			QString background = m_uiForm.cbBackground->currentText();
 
-			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "1"; }
+			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "True"; }
 			if(m_uiForm.chkSequentialFit->isChecked()) { sequence = "True"; }
 
 			if(m_uiForm.chkFixWidth->isChecked()) 
 			{ 
-				fixedWidth = "1";
+				fixedWidth = "True";
 				fixedWidthFile = m_uiForm.mwFixWidthDat->getFirstFilename();
 			}
 
 			if(m_uiForm.chkUseResNorm->isChecked())
 			{
-				useResNorm = "1";
+				useResNorm = "True";
 				resNormFile = m_uiForm.dsResNorm->getCurrentDataName();
 			}
 
