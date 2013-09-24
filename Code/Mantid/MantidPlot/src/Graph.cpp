@@ -3173,14 +3173,21 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       int colIndex = w->colIndex(colName);
       int colType = w->colPlotDesignation(colIndex);
 
+      QString yColName;
+      if(colType == Table::Y)
+        // For Y columns we use the column itself as Y
+        yColName = colName;
+      else 
+        // For other column types, we find associated Y column
+        yColName = w->colName(w->colY(colIndex));
+
+      QString xColName = w->colName(w->colX(colIndex));
+
+      if (xColName.isEmpty() || yColName.isEmpty())
+        return false;
+
       // --- Drawing error columns -----------------------------
       if (colType == Table::xErr || colType == Table::yErr){
-        QString yColName = w->colName(w->colY(colIndex));
-        QString xColName = w->colName(w->colX(colIndex));
-
-        if (xColName.isEmpty() || yColName.isEmpty())
-          return false;
-
         int dir;
         if(colType == Table::xErr)
           dir = QwtErrorPlotCurve::Horizontal;
@@ -3191,12 +3198,6 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
         updateCurveLayout(c, &cl);
       // --- Drawing label columns -----------------------------
       } else if (colType == Table::Label){
-        QString xColName = w->colName(w->colX(colIndex));
-        QString yColName = w->colName(w->colY(colIndex));
-
-        if (xColName.isEmpty() || yColName.isEmpty())
-          return false;
-
         DataCurve* mc = masterCurve(xColName, yColName);
         if (!mc)
           return false;
@@ -3206,12 +3207,7 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       // --- Drawing Y columns -----------------------------
       } else if (colType == Table::Y)
       {
-        QString xColName = w->colName(w->colX(colIndex));
-
-        if (xColName.isEmpty())
-          return false;
-
-        PlotCurve* c = insertCurve(w, xColName, colName, style, startRow, endRow);
+        PlotCurve* c = insertCurve(w, xColName, yColName, style, startRow, endRow);
         updateCurveLayout(c, &cl);
       }
     }
