@@ -92,7 +92,7 @@ namespace MantidQt
 			if(m_uiForm.chkElasticPeak->isChecked()) { elasticPeak = "True"; }
 			if(m_uiForm.chkSequentialFit->isChecked()) { sequence = "True"; }
 
-			QString fitOps = "[" + elasticPeak + ", " + background + ", 0, 0]";
+			QString fitOps = "[" + elasticPeak + ", '" + background + "', 0, 0]";
 
 			//Collect input from the properties browser
 			QString eMin = m_properties["EMin"]->valueText();

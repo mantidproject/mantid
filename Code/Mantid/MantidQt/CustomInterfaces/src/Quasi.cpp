@@ -151,7 +151,7 @@ namespace MantidQt
 				resNormFile = m_uiForm.dsResNorm->getCurrentDataName();
 			}
 
-			QString fitOps = "[" + elasticPeak + ", " + background + ", " + fixedWidth + ", " + useResNorm + "]";
+			QString fitOps = "[" + elasticPeak + ", '" + background + "', " + fixedWidth + ", " + useResNorm + "]";
 
 			//Collect input from the properties browser
 			QString eMin = m_properties["EMin"]->valueText();
