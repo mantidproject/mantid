@@ -183,7 +183,7 @@ namespace Mantid
             m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(NULL); // it is done this way as it is possible trying to do single threaded split more efficiently
           }
           // Count the new # of boxes.
-          lastNumBoxes = m_OutWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+          lastNumBoxes = bc->getTotalNumMDBoxes();
           nAddedEvents = 0;
           pProgress->report(i,"Adding Events");
         }
