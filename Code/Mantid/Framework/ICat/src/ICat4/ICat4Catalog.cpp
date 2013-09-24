@@ -220,7 +220,22 @@ namespace Mantid
       // We then append the required includes to output related data, such as instrument name and run parameters.
       if (!query.empty())
       {
-        query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> ");
+        // If the user wants to search through their data in their archive.
+        if (inputs.getMyData())
+        {
+          query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user] <-> ");
+        }
+        // Otherwise, we search the entire archive.
+        else
+        {
+          query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> ");
+        }
+      }
+
+      // If the user has only selected the "My data only" button (E.g. they want to display all their "My data").
+      if (query.empty() && inputs.getMyData())
+      {
+        query.insert(0, "DISTINCT Investigation INCLUDE Instrument, InvestigationParameter <-> InvestigationUser <-> User[name = :user]");
       }
 
       g_log.debug() << "Query: { " << query << " }" << std::endl;

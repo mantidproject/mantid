@@ -101,6 +101,12 @@ namespace Mantid
        */
       void setDatafileName(const std::string& datafileName );
 
+      /**
+       * Sets the "My data only" checkbox.
+       * @param flag :: Flag to search in "My data" only.
+       */
+      void setMyData(bool flag);
+
       /**This method  returns the start run number
        *@returns  run start number
        */
@@ -172,6 +178,12 @@ namespace Mantid
        */
       time_t getTimevalue(const std::string& sDate);
 
+      /**
+       * Is "My data only" selected?
+       * @returns true if my data checkbox is selected.
+       */
+      bool getMyData() const;
+
     private:
       /// start run number
       double m_startRun;
@@ -201,7 +213,8 @@ namespace Mantid
       std::string m_investigationType;
       /// data file name
       std::string m_datafileName;
-
+      /// My data checkbox
+      bool m_myData;
     };
 
   }

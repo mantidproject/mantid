@@ -62,6 +62,7 @@ namespace Mantid
       declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
       declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
       declareProperty("DataFileName","", "The name of the data file to search.");
+      declareProperty("myData",false, "Boolean option to do my data only search.");
 
       declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
           "The name of the workspace that will be created to store the ICat investigations search result.");
@@ -178,7 +179,8 @@ namespace Mantid
       std::string dataFileName=getPropertyValue("DataFileName");
       params.setDatafileName(dataFileName);
 
-
+      bool mydata = boost::lexical_cast<bool>(getPropertyValue("myData"));
+      params.setMyData(mydata);
     }
 
 

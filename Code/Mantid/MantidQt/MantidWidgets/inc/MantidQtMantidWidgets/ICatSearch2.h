@@ -91,8 +91,6 @@ namespace MantidQt
       void updateStartDate();
       /// Update endDate text field when endDatePicker is used and date is selected.
       void updateEndDate();
-      /// Only search through their data when checked.
-      void onMyDataOnlyChecked();
       /// Show the advanced field when checked.
       void advancedSearchChecked();
       /// Perform the "Search" operation when the search button is clicked.

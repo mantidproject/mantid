@@ -201,7 +201,6 @@ namespace MantidQt
     {
       std::map<std::string, std::string> searchFieldInput;
 
-      // Since we check if the field is empty in the algorithm, there's no need to check if advanced was clicked.
       // Left side of form.
       searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationName", m_icatUiForm.InvestigationName->text().toStdString()));
       searchFieldInput.insert(std::pair<std::string, std::string>("Instrument", m_icatUiForm.Instrument->currentText().toStdString()));
@@ -215,6 +214,10 @@ namespace MantidQt
       searchFieldInput.insert(std::pair<std::string, std::string>("Keywords", m_icatUiForm.Keywords->text().toStdString()));
       searchFieldInput.insert(std::pair<std::string, std::string>("SampleName", m_icatUiForm.SampleName->text().toStdString()));
       searchFieldInput.insert(std::pair<std::string, std::string>("InvestigationType", m_icatUiForm.InvestigationType->currentText().toStdString()));
+
+      // Since we check if the field is empty in the algorithm, there's no need to check if advanced was clicked.
+      // If the "My data only" field is checked. We return the state of the checkbox (1 is true, 0 is false).
+      searchFieldInput.insert(std::pair<std::string, std::string>("myData", boost::lexical_cast<std::string>(m_icatUiForm.myDataCbox->isChecked())));
 
       return (searchFieldInput);
     }
@@ -270,14 +273,6 @@ namespace MantidQt
       m_icatUiForm.EndDate->setText(m_calendar->selectedDate().toString("dd/MM/yyyy"));
       m_calendar->close();
       m_icatUiForm.startDatePicker->setEnabled(true);
-    }
-
-    /**
-     * Search through the user's data only when "My data" is checked.
-     */
-    void ICatSearch2::onMyDataOnlyChecked()
-    {
-
     }
 
     /**
