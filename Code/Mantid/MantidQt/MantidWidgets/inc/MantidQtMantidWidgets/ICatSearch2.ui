@@ -690,20 +690,6 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="numOfResultsLbl">
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <italic>true</italic>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
         <widget class="QLabel" name="searchResultsLbl">
          <property name="font">
           <font>
@@ -713,13 +699,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Investigation found.</string>
-         </property>
-         <property name="margin">
-          <number>0</number>
-         </property>
-         <property name="indent">
-          <number>-10</number>
+          <string/>
          </property>
         </widget>
        </item>

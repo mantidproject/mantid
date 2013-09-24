@@ -36,9 +36,6 @@ namespace MantidQt
       m_icatUiForm.resFrame->hide();
       m_icatUiForm.dataFileFrame->hide();
 
-      // Hide the "investigation found" label until user has searched.
-      m_icatUiForm.searchResultsLbl->hide();
-
       // Hide advanced input fields until "Advanced search" is checked.
       advancedSearchChecked();
 
@@ -322,12 +319,11 @@ namespace MantidQt
         m_icatUiForm.searchResultsCbox->setEnabled(true);
         m_icatUiForm.searchResultsCbox->setChecked(true);
         m_icatUiForm.resFrame->show();
-        //
-        m_icatUiForm.searchResultsLbl->hide();
-        m_icatUiForm.numOfResultsLbl->setText("searching investigations...");
+        // Hide the "Investigations found" label
+        m_icatUiForm.searchResultsLbl->setText("searching investigations...");
         // Perform the search using the values the user has input.
         m_icatHelper->executeSearch(getSearchFields());
-        //
+        // Populate the result table from the searchResult workspace.
         populateResultTable();
       }
     }
@@ -387,8 +383,7 @@ namespace MantidQt
       m_icatUiForm.searchResultsTbl->verticalHeader()->setVisible(false);
 
       // Update the label to inform the user of how many investigations have been returned from the search.
-      m_icatUiForm.numOfResultsLbl->setText(QString::number(numOfRows));
-      m_icatUiForm.searchResultsLbl->show();
+      m_icatUiForm.searchResultsLbl->setText(QString::number(numOfRows) + " Investigation found.");
 
       // Sort by endDate with the most recent being first.
       m_icatUiForm.searchResultsTbl->sortByColumn(4,Qt::DescendingOrder);
@@ -406,8 +401,20 @@ namespace MantidQt
      */
     void ICatSearch2::populateResultTable()
     {
-      // Obtain a pointer to the "searchResults" workspace where the search results are saved.
-      auto workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("searchResults"));
+      // Obtain a pointer to the "searchResults" workspace where the search results are saved if it exists.
+      Mantid::API::ITableWorkspace_sptr workspace;
+      // Check to see if the workspace exists...
+      if(Mantid::API::AnalysisDataService::Instance().doesExist("searchResults"))
+      {
+        // If it does, then let's use it!
+        workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("searchResults"));
+      }
+      else
+      {
+        // Otherwise an error will be thrown (in ICat4Catalog). We will reproduce that error on the ICAT form for the user.
+        m_icatUiForm.searchResultsLbl->setText("You have not input any terms to search for.");
+        return;
+      }
 
       size_t numOfRows = workspace->rowCount();
       size_t numOfColumns = workspace->columnCount();

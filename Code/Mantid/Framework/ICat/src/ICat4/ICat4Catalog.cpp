@@ -255,8 +255,7 @@ namespace Mantid
 
       if (query.empty())
       {
-        // Would be better to open a dialog box in the GUI for the user to visually see what's wrong.
-        throw std::runtime_error("You have not selected any inputs to search for!");
+        throw std::runtime_error("You have not input any terms to search for.");
       }
 
       ICATPortBindingProxy icat;
