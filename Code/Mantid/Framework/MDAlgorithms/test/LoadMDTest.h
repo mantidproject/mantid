@@ -104,7 +104,10 @@ public:
         TS_ASSERT_DELTA( box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), 1e-5);
         TS_ASSERT_DELTA( box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), 1e-5);
       }
-      TS_ASSERT_DELTA( box1->getInverseVolume(), box2->getInverseVolume(), 1e-3);
+      double vol = box1->getInverseVolume;
+      if(vol == 0)vol = 1;
+      TS_ASSERT(std::fabs(vol-box2->getInverseVolume())/vol<1e-3);
+
       if (!BoxStructureOnly)
       {
         TS_ASSERT_DELTA( box1->getSignal(), box2->getSignal(), 1e-3);
@@ -121,9 +124,7 @@ public:
       {
         for (size_t d=0; d<nd; d++)
         {
-          double vol = gridbox1->getBoxSize(d);
-          if(vol == 0)vol = 1;
-          TS_ASSERT( std::fabs(vol-gridbox2->getBoxSize(d))/vol<1e-4);
+          TS_ASSERT_DELTA( gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), 1e-4);
         }
       }
 
