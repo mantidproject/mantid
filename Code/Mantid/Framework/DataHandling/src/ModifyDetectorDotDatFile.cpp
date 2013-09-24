@@ -124,10 +124,14 @@ namespace DataHandling
     int detectorCount, numColumns;
     getline( in, str );
     std::istringstream header2(str);
+    // what you get from the header is the Number_of_user_table_parameters
+    // while the number of columns must add the 5 required for the data format
     header2 >> detectorCount >> numColumns;
+    numColumns+=5; 
     out << str << "\n";
-    // check that we have at least 1 detector and six columns
-    if( detectorCount < 1 || numColumns < 6) {
+    // check that we have at least 1 detector and six columns 
+    // and a reasonable number of columns. This is because, if there is not column specified, he will get a very large number of columns.
+    if( detectorCount < 1 || numColumns < 5 || numColumns > 1000) {
           out.close();
           in.close();
           throw Exception::FileError("Incompatible file format found when reading line 2 in the input file", inputFilename);
