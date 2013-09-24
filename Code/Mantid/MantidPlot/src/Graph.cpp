@@ -3145,34 +3145,38 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
   else if (style == VectXYXY || style == VectXYAM)
     plotVectorCurve(w, names, style, startRow, endRow);
   else {
-    int curves = (int)names.count();
-    int errCurves = 0;
-    QStringList lst = QStringList();
-    for (int i=0; i<curves; i++)
-    {//We rearrange the list so that the error bars are placed at the end
-      int j = w->colIndex(names[i]);
-      if (w->colPlotDesignation(j) == Table::xErr || w->colPlotDesignation(j) == Table::yErr ||
-          w->colPlotDesignation(j) == Table::Label){
-        errCurves++;
-        lst << names[i];
-      } else
-        lst.prepend(names[i]);
+    QStringList drawableNames;
+    int noOfErrorCols = 0;
+
+    // Select only those column names which we can draw
+    for (int i = 0; i < names.count(); i++)
+    {
+      int d = w->colPlotDesignation(w->colIndex(names[i]));
+
+      if (d == Table::Y || d == Table::xErr || d == Table::yErr || d == Table::Label)
+      {
+        drawableNames << names[i];
+
+        // Count error columns
+        if(d == Table::xErr || d == Table::yErr)
+          noOfErrorCols++;
+      }
     }
 
-    for (int i=0; i<curves; i++){
-      int j = w->colIndex(names[i]);
+    for (int i = 0; i < drawableNames.count(); i++){
+      int j = w->colIndex(drawableNames[i]);
       PlotCurve *c = NULL;
       if (w->colPlotDesignation(j) == Table::xErr || w->colPlotDesignation(j) == Table::yErr){
-        int ycol = w->colY(w->colIndex(names[i]));
+        int ycol = w->colY(w->colIndex(drawableNames[i]));
         if (ycol < 0)
           return false;
 
         if (w->colPlotDesignation(j) == Table::xErr)
-          c = dynamic_cast<PlotCurve *>(addErrorBars(w->colName(ycol), w, names[i], static_cast<int>(QwtErrorPlotCurve::Horizontal)));
+          c = dynamic_cast<PlotCurve *>(addErrorBars(w->colName(ycol), w, drawableNames[i], static_cast<int>(QwtErrorPlotCurve::Horizontal)));
         else
-          c = dynamic_cast<PlotCurve *>(addErrorBars(w->colName(ycol), w, names[i]));
+          c = dynamic_cast<PlotCurve *>(addErrorBars(w->colName(ycol), w, drawableNames[i]));
       } else if (w->colPlotDesignation(j) == Table::Label){
-        QString labelsCol = names[i];
+        QString labelsCol = drawableNames[i];
         int xcol = w->colX(w->colIndex(labelsCol));
         int ycol = w->colY(w->colIndex(labelsCol));
         if (xcol < 0 || ycol < 0)
@@ -3185,10 +3189,10 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
         } else
           return false;
       } else
-        c = dynamic_cast<PlotCurve *>(insertCurve(w, names[i], style, startRow, endRow));
+        c = dynamic_cast<PlotCurve *>(insertCurve(w, drawableNames[i], style, startRow, endRow));
 
       if (c){
-        CurveLayout cl = initCurveLayout(style, curves - errCurves);
+        CurveLayout cl = initCurveLayout(style, drawableNames.count() - noOfErrorCols);
         cl.sSize = sSize;
         cl.lWidth = float(lWidth);
         updateCurveLayout(c, &cl);	
