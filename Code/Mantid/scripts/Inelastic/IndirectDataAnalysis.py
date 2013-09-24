@@ -368,7 +368,7 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
             yval = mtd[e1WS].readY(lo)
             normFactor = 1.0/yval[0]
             Scale(InputWorkspace=e1WS, OutputWorkspace=e1WS, Factor=normFactor, Operation='Multiply')
-            AddSampleLog(Workspace=e1WS, LogName="Temperature value", LogType="String", LogText=str(yval[0]))
+            AddSampleLog(Workspace=e1WS, LogName="Temperature value", LogType="Number", LogText=str(yval[0]))
             if Verbose:
                 logger.notice(text)
                 logger.notice('Normalised eq1 by scale factor : '+str(normFactor))
