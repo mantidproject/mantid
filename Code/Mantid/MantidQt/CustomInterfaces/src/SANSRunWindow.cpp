@@ -2511,11 +2511,17 @@ void SANSRunWindow::handleRunFindCentre()
 
   // define the number of interactions and close the FindBeamCentre method call.
   bool ok; 
-  double tolerance = m_uiForm.toleranceLineEdit->text().toDouble(&ok); 
+  QString tolerance_str(m_uiForm.toleranceLineEdit->text());
+  double tolerance = tolerance_str.toDouble(&ok); 
   if (ok)
     tolerance *= 1e-4; // transform in um
-  else
-    tolerance = 1.251e-4; // default value
+  if ((!ok || tolerance < 0) && ! tolerance_str.isEmpty()){
+    QString info("You have chosen an invalid value for tolerance. Correct it or leave it blank to use the default value.");
+    QMessageBox::warning(this, "Wrong Input", info);
+    m_uiForm.toleranceLineEdit->setFocus(Qt::OtherFocusReason); 
+    setProcessingState(Ready);
+    return;
+  }
   py_code += ", tolerance=" + QString::number(tolerance) + ")"; 
 
   
