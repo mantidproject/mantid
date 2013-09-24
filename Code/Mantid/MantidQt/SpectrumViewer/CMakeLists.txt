@@ -44,6 +44,7 @@ set ( INC_FILES
 )
 
 set ( MOC_FILES 
+       inc/MantidQtSpectrumViewer/SpectrumView.h
        inc/MantidQtSpectrumViewer/SVConnections.h
        inc/MantidQtSpectrumViewer/TrackingPicker.h
 )
