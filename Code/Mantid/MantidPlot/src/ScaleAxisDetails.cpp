@@ -211,6 +211,10 @@ ScaleAxisDetails::~ScaleAxisDetails()
 {
 
 }
+void ScaleAxisDetails::setModified()
+{
+  m_modified = true;
+}
 
 void ScaleAxisDetails::radiosSwitched()
 {
@@ -512,7 +516,7 @@ void ScaleAxisDetails::apply()
   d_graph->notifyChanges();
 }
 
-bool ScaleAxisDetails::validate()
+bool ScaleAxisDetails::valid()
 {
 return true;
 }

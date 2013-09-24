@@ -1621,7 +1621,20 @@ void AxesDialog::minorGridEnabled(bool on)
 
 bool AxesDialog::apply()
 {
+/*
+auto anaxis = axesPrefsArea->itemAt(mapToQwtAxis(axesTitlesList->currentRow()));
+auto awidget = anaxis->widget();
 
+  if (axesPrefsArea->currentWidget()==dynamic_cast<AxisAxisDetails*>(awidget))
+  {
+    AxisAxisDetails *currentaxis = dynamic_cast<AxisAxisDetails*>(awidget);
+  }
+  */
+  for (auto axisItr = m_Axis_map.begin(); axisItr != m_Axis_map.end(); axisItr++)
+  {
+    AxisAxisDetails *axis = axisItr.value();
+    axis->apply();
+  }
 //this is gettign rewritten to check and press ALL tabs when apply or ok is pressed
 
   /*

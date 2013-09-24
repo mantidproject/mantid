@@ -58,8 +58,7 @@ public:
   void initWidgets();
   bool modified();
   void apply();
-public slots:
-
+  bool valid();
 
 private slots:
   void enableFormulaBox();
@@ -67,17 +66,18 @@ private slots:
   void setLabelFont();
   void setScaleFont();
   void setAxisFormatOptions(int format);
+  void setModified();
 
 private:
-  bool m_modified;
+  bool m_modified, m_initialised;
 
   ApplicationWindow* d_app;
   Graph* d_graph;
 
   //formerly *boxShowAxis, *boxShowFormula;
   QCheckBox *chkShowAxis, *chkShowFormula;
-  //formerly *labelBox, *boxShowLabels;
-  QGroupBox *grpLabel, *grpShowLabels;
+  //formerly *labelBox, *boxShowLabels, *leftBox;
+  QGroupBox *grpTitle, *grpShowLabels, *grpAxisDisplay;
   //formerly *boxFormula, *boxTitle;
   QTextEdit *txtFormula, *txtTitle;
   //formerly *buttonLabelFont, *btnAxesFont;
@@ -89,11 +89,10 @@ private:
   ColorButton *cbtnAxisColor, *cbtnAxisNumColor;
   //formerly *boxPrecision, *boxAngle, *boxBaseline;
   QSpinBox *spnPrecision, *spnAngle, *spnBaseline;
-  //formerly *label1, *label2, *label3, *labelTable;
-  QLabel *label1, *label2, *label3, *labelTable;
-  //QStringList tickLabelsOn;
+  //formerly *label1, *label2, *label3, *lblTable;
+  QLabel *lblColumn, *lblFormat, *lblPrecision, *lblTable;
 
-  QFont m_labelFont, m_scaleFont;
+QFont m_labelFont, m_scaleFont;
 
   int m_mappedaxis;
   //m_mappedaxis is eqivelent to maptoQwtAxisId() as that should be passed into the constuctor via the enum; 
@@ -102,19 +101,13 @@ private:
 
   void setEnabled();
 
-
-  //void showAxisFormula();
   void updateAxisType(int axis);
   void updateTitleBox(int axis);
   void updateShowBox(int axis);
   void updateAxisColor(int);
-  //void updateTickLabelsList(bool);
   void setTicksType(int);
   void setLabelsNumericFormat(int);
   void updateLabelsFormat(int);
   void setBaselineDist(int);
-  void apply(int, int, const QString&, bool, int, int, bool, const QColor&,
-      int, int, int, int, const QString&, const QColor&);
-  bool valid();
 };
 #endif /* AXISAXISDETAILS_H_ */

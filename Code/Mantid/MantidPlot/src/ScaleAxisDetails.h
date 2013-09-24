@@ -58,18 +58,22 @@ public:
   void initWidgets();
   bool modified();
   void apply();
+  bool valid();
+
 private slots:
   //void updateMinorTicksList(int scaleType);
   //void endvalueChanged(double);
   //void startvalueChanged(double);
   void radiosSwitched();
+  void setModified();
+
 private:
-  bool m_modified;
+  bool m_modified, m_initialised, validate();
   ApplicationWindow* d_app;
   Graph* d_graph;
+
   //formerly  *boxEnd, *boxStart, *boxStep, *boxBreakStart, *boxBreakEnd, *boxStepBeforeBreak, *boxStepAfterBreak;
-  DoubleSpinBox *dspnEnd, *dspnStart, *dspnStep, *dspnBreakStart,
-    *dspnBreakEnd, *dspnStepBeforeBreak, *dspnStepAfterBreak;
+  DoubleSpinBox *dspnEnd, *dspnStart, *dspnStep, *dspnBreakStart, *dspnBreakEnd, *dspnStepBeforeBreak, *dspnStepAfterBreak;
   //formerly *btnInvert, *boxLog10AfterBreak, *boxBreakDecoration;
   QCheckBox *chkInvert, *chkLog10AfterBreak, *chkBreakDecoration;
   //formerly *btnStep,*btnMajor
@@ -79,17 +83,15 @@ private:
   //formerly *boxAxesBreaks;
   QGroupBox *grpAxesBreaks;
   //formerly *boxMinorTicksBeforeBreak, *boxMinorTicksAfterBreak, *boxScaleType, *boxMinorValue, *boxUnit;
-  QComboBox *cmbMinorTicksBeforeBreak, *cmbMinorTicksAfterBreak,
-    *cmbScaleType, *cmbMinorValue, *cmbUnit;
+  QComboBox *cmbMinorTicksBeforeBreak, *cmbMinorTicksAfterBreak, *cmbScaleType, *cmbMinorValue, *cmbUnit;
   //formerly *boxScaleTypeLabel, *minorBoxLabel;
   QLabel *lblScaleTypeLabel, *lblMinorBox;
   //formerly *boxStartDateTime, *boxEndDateTime;
   QDateTimeEdit *dteStartDateTime, *dteEndDateTime;
   //formerly *boxStartTime, *boxEndTime;
   QTimeEdit *timStartTime, *timEndTime;
+
   int m_mappedaxis;
-  bool m_initialised;
-  bool validate();
   void checkstep();
 };
 
