@@ -48,6 +48,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Graph3D.cpp
                    src/Graph.cpp
                    src/Grid.cpp
+                   src/GridDetails.cpp
                    src/ImageDialog.cpp
                    src/ImageExportDialog.cpp
                    src/ImageMarker.cpp
@@ -282,6 +283,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Graph3D.h
                    src/Graph.h
                    src/Grid.h
+                   src/GridDetails.h
                    src/ImageDialog.h
                    src/ImageExportDialog.h
                    src/ImageMarker.h
@@ -578,6 +580,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/Graph3D.h
                         src/Graph.h
                         src/Grid.h
+                        src/GridDetails.h
                         src/ImageDialog.h
                         src/ImageExportDialog.h
                         src/ImportASCIIDialog.h
