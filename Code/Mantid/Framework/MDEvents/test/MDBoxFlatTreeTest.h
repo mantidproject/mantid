@@ -56,6 +56,23 @@ public:
     std::vector<API::IMDNode *>Boxes;
     TS_ASSERT_THROWS_NOTHING(BoxStoredTree.restoreBoxTree(Boxes ,new_bc, false,false));
 
+    std::vector<API::IMDNode *>OldBoxes;
+    TS_ASSERT_THROWS_NOTHING(spEw3->getBoxes(OldBoxes, 1000, false));
+    // just in case, should be already sorted
+    API::IMDNode::sortObjByID(OldBoxes);
+
+    for(size_t i=0;i<OldBoxes.size();i++)
+    {
+      TS_ASSERT(OldBoxes[i]->getID()==Boxes[i]->getID());
+      size_t numChildren = Boxes[i]->getNumChildren();
+      TS_ASSERT(OldBoxes[i]->getNumChildren()==numChildren);
+      if(numChildren>0)
+      {
+         TS_ASSERT(OldBoxes[i]->getChild(0)->getID()==Boxes[i]->getChild(0)->getID());
+      }
+    }
+
+
     if(testFile.exists())
       testFile.remove();
   }
