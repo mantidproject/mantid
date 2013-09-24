@@ -121,7 +121,9 @@ public:
       {
         for (size_t d=0; d<nd; d++)
         {
-          TS_ASSERT_DELTA( gridbox1->getBoxSize(d), gridbox2->getBoxSize(d), 1e-4);
+          double vol = gridbox1->getBoxSize(d);
+          if(vol == 0)vol = 1;
+          TS_ASSERT( std::fabs(vol-gridbox2->getBoxSize(d))/vol<1e-4);
         }
       }
 
