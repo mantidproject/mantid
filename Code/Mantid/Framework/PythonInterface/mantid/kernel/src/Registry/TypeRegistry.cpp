@@ -102,13 +102,13 @@ namespace Mantid
        {
          TypeIDMap & typeHandlers = typeRegistry();
          TypeIDMap::const_iterator iend = typeHandlers.end();
-         const PyTypeObject *result(NULL);
+         PyTypeObject *result(NULL);
 
          for(TypeIDMap::const_iterator it = typeHandlers.begin(); it != iend; ++it)
          {
            if( it->second->checkExtract(value) )
            {
-             const PyTypeObject *derivedType = it->second->pythonType();
+             PyTypeObject *derivedType = const_cast<PyTypeObject*>(it->second->pythonType());
              if( !result )
              {
                result = derivedType;
