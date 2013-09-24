@@ -5,6 +5,7 @@ set ( TEST_FILES
   PropertyWithValueFactoryTest.h
   PythonObjectInstantiatorTest.h
   PySequenceToVectorTest.h
+  RunPythonScriptTest.h
 )
   
 if ( CXXTEST_FOUND )

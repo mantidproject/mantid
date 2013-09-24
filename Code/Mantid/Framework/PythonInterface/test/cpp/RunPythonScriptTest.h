@@ -30,11 +30,11 @@ public:
     RunPythonScript alg;
     alg.initialize();
    
-    TS_ASSERT_EQUALS(3, alg.getProperties());
+    TS_ASSERT_EQUALS(3, alg.getProperties().size());
 
-    TS_ASSERT(alg.hasProperty("InputWorkspace"));
-    TS_ASSERT(alg.hasProperty("Code"));
-    TS_ASSERT(alg.hasProperty("OutputWorkspace"));
+    TS_ASSERT(alg.existsProperty("InputWorkspace"));
+    TS_ASSERT(alg.existsProperty("Code"));
+    TS_ASSERT(alg.existsProperty("OutputWorkspace"));
   }
 
 };
