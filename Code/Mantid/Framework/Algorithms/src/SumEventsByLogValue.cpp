@@ -281,7 +281,6 @@ namespace Algorithms
   {
     if ( log->realSize() == 0 ) return;
 
-    // TODO: Handle weighted events and avoid the vector copy below
     const auto pulseTimes = eventList.getPulseTimes();
     for ( std::size_t eventIndex = 0; eventIndex < pulseTimes.size(); ++eventIndex )
     {
@@ -388,12 +387,10 @@ namespace Algorithms
       const Kernel::TimeSplitterType& filter)
   {
     // Clone the proton charge log and filter the clone on this log value
-    auto protonChargeLogClone = protonChargeLog->clone();
+    boost::scoped_ptr<TimeSeriesProperty<double>> protonChargeLogClone(protonChargeLog->clone());
     protonChargeLogClone->filterByTimes(filter);
     // Seems like the only way to sum this is to yank out the values
     const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
-    // Delete the clone
-    delete protonChargeLogClone;
 
     return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
   }
@@ -430,7 +427,6 @@ namespace Algorithms
     {
       PARALLEL_START_INTERUPT_REGION
       const IEventList & eventList = m_inputWorkspace->getEventList(spec);
-      // TODO: Handle weighted events and avoid the vector copy below
       const auto pulseTimes = eventList.getPulseTimes();
       for ( std::size_t eventIndex = 0; eventIndex < pulseTimes.size(); ++eventIndex )
       {
