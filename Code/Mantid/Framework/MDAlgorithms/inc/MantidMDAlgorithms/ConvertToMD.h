@@ -55,11 +55,11 @@ namespace MDAlgorithms
     ~ConvertToMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "ConvertToMD";};
+    virtual const std::string name() const;
     /// Algorithm's version for identification 
-    virtual int version() const { return 1;};
+    virtual int version() const;
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "MDAlgorithms";}  
+    virtual const std::string category() const;
 
 
   private:

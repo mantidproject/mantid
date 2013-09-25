@@ -209,6 +209,22 @@ inline bool isNaN(T val)
   volatile T buf=val;
   return (val!=buf);
 }
+
+const std::string ConvertToMD::name() const
+{
+  return "ConvertToMD";
+}
+
+int ConvertToMD::version() const
+{
+  return 1;
+}
+
+const std::string ConvertToMD::category() const
+{
+  return "MDAlgorithms";
+}
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
