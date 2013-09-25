@@ -368,6 +368,48 @@ ConvertToMD::init()
  
 }
 
+std::map<std::string, std::string> ConvertToMD::validateInputs()
+{
+  std::map<std::string, std::string> result;
+
+  std::vector<double> minVals = this->getProperty("MinValues");
+  std::vector<double> maxVals = this->getProperty("MaxValues");
+
+  if (minVals.size() != maxVals.size())
+  {
+    std::stringstream msg;
+    msg << "Rank of MinValues != MaxValues (" << minVals.size() << "!=" << maxVals.size() << ")";
+    result["MinValues"] = msg.str();
+    result["MaxValues"] = msg.str();
+  }
+  else
+  {
+    std::stringstream msg;
+
+    size_t rank = minVals.size();
+    for (size_t i = 0; i < rank; ++i)
+    {
+      if (minVals[i] >= maxVals[i])
+      {
+        if (msg.str().empty())
+          msg << "max not bigger than min ";
+        else
+          msg << ", ";
+        msg << "at index=" << (i+1) << " ("
+            << minVals[i] << ">=" << maxVals[i] << ")";
+      }
+    }
+
+    if (!msg.str().empty())
+    {
+      result["MinValues"] = msg.str();
+      result["MaxValues"] = msg.str();
+    }
+  }
+
+  return result;
+}
+
  //----------------------------------------------------------------------------------------------
 /* Execute the algorithm.   */
 void ConvertToMD::exec()

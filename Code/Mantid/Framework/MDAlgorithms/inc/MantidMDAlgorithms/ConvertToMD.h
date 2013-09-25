@@ -64,6 +64,7 @@ namespace MDAlgorithms
 
   private:
     void init();
+    std::map<std::string, std::string> validateInputs();
     void exec();
    /// Sets documentation strings for this algorithm
     virtual void initDocs();  
