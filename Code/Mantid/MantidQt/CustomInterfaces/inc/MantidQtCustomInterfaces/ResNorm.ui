@@ -189,8 +189,6 @@
         </item>
        </layout>
        <zorder>chkSave</zorder>
-       <zorder>horizontalSpacer_18</zorder>
-       <zorder>horizontalSpacer_17</zorder>
        <zorder>chkVerbose</zorder>
        <zorder>lblPlot</zorder>
        <zorder>cbPlot</zorder>
