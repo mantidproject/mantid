@@ -96,16 +96,16 @@ public:
           if( numParameters == 4) // We only check parameters if there are the expected number of them.
           { 
             Poco::XML::Element* paramElem1 = static_cast<Poco::XML::Element*>(parameterNodeList->item(0));
-            do_test_paramemeter( paramElem1, "IkedaCarpenterPV:Alpha0", 0.000008, "TOF", "", true );
+            do_test_paramemeter( paramElem1, "IkedaCarpenterPV:Alpha0", 0.000008, 0.0,"TOF", "", true );
 
             Poco::XML::Element* paramElem2 = static_cast<Poco::XML::Element*>(parameterNodeList->item(1));
-            do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Beta0", 6.251096, "TOF", "", true );
+            do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Beta0", 6.251096, 0.0, "TOF", "", true );
 
             Poco::XML::Element* paramElem3 = static_cast<Poco::XML::Element*>(parameterNodeList->item(2));
-            do_test_paramemeter( paramElem3, "IkedaCarpenterPV:Alpha1", 0.0, "TOF", "", true );
+            do_test_paramemeter( paramElem3, "IkedaCarpenterPV:Alpha1", 0.0, 0.0, "TOF", "", true );
 
             Poco::XML::Element* paramElem4 = static_cast<Poco::XML::Element*>(parameterNodeList->item(3));
-            do_test_paramemeter( paramElem4, "IkedaCarpenterPV:Kappa", 0.0, "", "", true );
+            do_test_paramemeter( paramElem4, "IkedaCarpenterPV:Kappa", 0.0, 0.0, "", "", true );
           }
 
           parameterNodeList->release();  // Finished with parameter list
@@ -125,10 +125,10 @@ public:
           if(numParameters== 2) // We only check parameters if there are the expected number of them.
           {
             Poco::XML::Element* paramElem1 = static_cast<Poco::XML::Element*>(parameterNodeList->item(0));
-            do_test_paramemeter( paramElem1, "IkedaCarpenterPV:SigmaSquared", 0.0, "TOF^2", "dSpacing", false );
+            do_test_paramemeter( paramElem1, "IkedaCarpenterPV:SigmaSquared", 0.00044, 0.355, "TOF^2", "dSpacing", false );
 
             Poco::XML::Element* paramElem2 = static_cast<Poco::XML::Element*>(parameterNodeList->item(1));
-            do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Gamma", 0.0, "TOF", "dSpacing", false );
+            do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Gamma", 0.0, 0.0, "TOF", "dSpacing", false );
           }
 
           parameterNodeList->release();  // Finished with parameter list
@@ -148,10 +148,10 @@ public:
           if(numParameters== 2) // We only check parameters if there are the expected number of them.
           {
             Poco::XML::Element* paramElem1 = static_cast<Poco::XML::Element*>(parameterNodeList->item(0));
-            do_test_paramemeter( paramElem1, "IkedaCarpenterPV:SigmaSquared", 0.0, "TOF^2", "dSpacing", false );
+            do_test_paramemeter( paramElem1, "IkedaCarpenterPV:SigmaSquared", 10.0, 0.0, "TOF^2", "dSpacing", false );
 
             Poco::XML::Element* paramElem2 = static_cast<Poco::XML::Element*>(parameterNodeList->item(1));
-            do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Gamma", 0.0, "TOF", "dSpacing", false );
+            do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Gamma", 2.742, 0.0, "TOF", "dSpacing", false );
           }
 
           parameterNodeList->release();  // Finished with parameter list
@@ -170,9 +170,9 @@ public:
   }
 
     //----------------------------------------------------------------------------------------------
-  /** Do a test on a parameter element
+  /** Do test on a parameter element
     */
-  void do_test_paramemeter(const Poco::XML::Element* paramElem, const std::string& name, const double eq, const std::string& resultUnit, const std::string& unit, bool fixed )
+  void do_test_paramemeter(const Poco::XML::Element* paramElem, const std::string& name, const double eq1, const double eq2, const std::string& resultUnit, const std::string& unit, bool fixed )
   {
      TS_ASSERT(paramElem);
      if(paramElem)
@@ -183,7 +183,8 @@ public:
           TS_ASSERT(formulaElem);
           if(formulaElem)
           {
-             std::string eqString = formulaElem->getAttribute("eq"); // Don't yet know how to convert to double!
+             std::string eqString = formulaElem->getAttribute("eq"); 
+             do_test_eq_value (eqString, name, eq1, eq2 );
              TS_ASSERT_EQUALS(formulaElem->getAttribute("result-unit"),resultUnit);
              TS_ASSERT_EQUALS(formulaElem->getAttribute("unit"),unit);
           }
@@ -197,6 +198,12 @@ public:
             TS_ASSERT(!fixedElem);
           }
      }
+  }
+
+  /** Do test on the eq value of given parameter element.
+  */
+  void do_test_eq_value (const std::string& eqvalue, const std::string& name, const double eq1, const double eq2)
+  {
   }
 
   //----------------------------------------------------------------------------------------------
