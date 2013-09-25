@@ -118,8 +118,11 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/CreateMDWorkspace.ui
                inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.ui
+               inc/MantidQtCustomInterfaces/ForCE.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
+               inc/MantidQtCustomInterfaces/IndirectForeign.ui
+               inc/MantidQtCustomInterfaces/MolDyn.ui
                inc/MantidQtCustomInterfaces/MuonAnalysis.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
