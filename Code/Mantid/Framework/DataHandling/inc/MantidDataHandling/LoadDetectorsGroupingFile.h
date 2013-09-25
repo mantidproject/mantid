@@ -177,14 +177,8 @@ namespace DataHandling
     void initializeXMLParser(const std::string & filename);
     /// Parse XML
     void parseXML();
-    /// Convert detector ID combination string to vector of detectors
-    void parseDetectorIDs(std::string inputstring, std::vector<detid_t>& detids);
-    /// Convert spectrum IDs combintation string to vector of spectrum ids
-    void parseSpectrumIDs(std::string inputstring, std::vector<int>& specids);
     /// Get attribute value from an XML node
     static std::string getAttributeValueByName(Poco::XML::Node* pNode, std::string attributename, bool& found);
-    /// Split and convert string
-    void parseRangeText(std::string inputstr, std::vector<int32_t>& singles, std::vector<int32_t>& pairs);
 
   };
 
