@@ -57,7 +57,7 @@ namespace Mantid
         inline PyObject* operator()(const T & p) const
         {
           PyObject *pyo = boost::python::to_python_value<T>()(p);
-          const PyTypeObject * derivedType = Registry::getDerivedType(pyo);
+          PyTypeObject * derivedType = const_cast<PyTypeObject*>(Registry::getDerivedType(pyo));
           if( derivedType )
           {
             PyObject_SetAttrString(pyo, "__class__", (PyObject*)derivedType);
