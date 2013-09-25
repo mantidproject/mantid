@@ -80,7 +80,9 @@ public:
       Poco::XML::NodeList* componentLinkNodeList = rootElem->getElementsByTagName("component-link");; // get component-link elements
       size_t numComponentLinks = componentLinkNodeList->length();
       TS_ASSERT_EQUALS(numComponentLinks,3); // Three component-link elements expected
-      if( numComponentLinks == 3) { // We only check the component-links if there are the expected number of them.
+      if( numComponentLinks == 3)  // We only check the component-links if there are the expected number of them.
+      { 
+        // Whole Instrument
         Poco::XML::Element* componentLinkElem1 = static_cast<Poco::XML::Element*>(componentLinkNodeList->item(0));
         TS_ASSERT(componentLinkElem1);
         if(componentLinkElem1)
@@ -91,8 +93,8 @@ public:
           size_t numParameters = parameterNodeList->length();
           TS_ASSERT_EQUALS(numParameters,4); // Four parameter elements expected
 
-          if( numParameters == 4) { // We only check parameters if there are the expected number of them.
-
+          if( numParameters == 4) // We only check parameters if there are the expected number of them.
+          { 
             Poco::XML::Element* paramElem1 = static_cast<Poco::XML::Element*>(parameterNodeList->item(0));
             do_test_paramemeter( paramElem1, "IkedaCarpenterPV:Alpha0", 0.000008, "TOF", "", true );
 
@@ -101,16 +103,63 @@ public:
 
             Poco::XML::Element* paramElem3 = static_cast<Poco::XML::Element*>(parameterNodeList->item(2));
             do_test_paramemeter( paramElem3, "IkedaCarpenterPV:Alpha1", 0.0, "TOF", "", true );
-            
+
             Poco::XML::Element* paramElem4 = static_cast<Poco::XML::Element*>(parameterNodeList->item(3));
             do_test_paramemeter( paramElem4, "IkedaCarpenterPV:Kappa", 0.0, "", "", true );
           }
 
           parameterNodeList->release();  // Finished with parameter list
         }
+
+        // Bank1
+        Poco::XML::Element* componentLinkElem2 = static_cast<Poco::XML::Element*>(componentLinkNodeList->item(1));
+        TS_ASSERT(componentLinkElem2);
+        if(componentLinkElem2)
+        {
+          TS_ASSERT_EQUALS(componentLinkElem2->getAttribute("name"),"Bank1");
+
+          Poco::XML::NodeList* parameterNodeList = componentLinkElem2->getElementsByTagName("parameter"); // get parameter elements
+          size_t numParameters = parameterNodeList->length();
+          TS_ASSERT_EQUALS(numParameters,2); // Two parameter elements expected
+
+          if(numParameters== 2) // We only check parameters if there are the expected number of them.
+          {
+            Poco::XML::Element* paramElem1 = static_cast<Poco::XML::Element*>(parameterNodeList->item(0));
+            do_test_paramemeter( paramElem1, "IkedaCarpenterPV:SigmaSquared", 0.0, "TOF^2", "dSpacing", false );
+
+            Poco::XML::Element* paramElem2 = static_cast<Poco::XML::Element*>(parameterNodeList->item(1));
+            do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Gamma", 0.0, "TOF", "dSpacing", false );
+          }
+
+          parameterNodeList->release();  // Finished with parameter list
+        }
+
+        // Bank3
+        Poco::XML::Element* componentLinkElem3 = static_cast<Poco::XML::Element*>(componentLinkNodeList->item(2));
+        TS_ASSERT(componentLinkElem3);
+        if(componentLinkElem3)
+        {
+          TS_ASSERT_EQUALS(componentLinkElem3->getAttribute("name"),"Bank3");
+
+          Poco::XML::NodeList* parameterNodeList = componentLinkElem2->getElementsByTagName("parameter"); // get parameter elements
+          size_t numParameters = parameterNodeList->length();
+          TS_ASSERT_EQUALS(numParameters,2); // Two parameter elements expected
+
+          if(numParameters== 2) // We only check parameters if there are the expected number of them.
+          {
+            Poco::XML::Element* paramElem1 = static_cast<Poco::XML::Element*>(parameterNodeList->item(0));
+            do_test_paramemeter( paramElem1, "IkedaCarpenterPV:SigmaSquared", 0.0, "TOF^2", "dSpacing", false );
+
+            Poco::XML::Element* paramElem2 = static_cast<Poco::XML::Element*>(parameterNodeList->item(1));
+            do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Gamma", 0.0, "TOF", "dSpacing", false );
+          }
+
+          parameterNodeList->release();  // Finished with parameter list
+        }
+
+        componentLinkNodeList->release(); // Finished with component-link list
+        doc->release(); // Finished with document
       }
-      componentLinkNodeList->release(); // Finished with component-link list
-      doc->release(); // Finished with document
     }
 
     //Clean up
