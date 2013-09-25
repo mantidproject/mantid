@@ -58,6 +58,11 @@ namespace MantidQt
       connect(m_icatUiForm.searchBtn,SIGNAL(clicked()),this,SLOT(searchClicked()));
       // Show "Search results" frame when user clicks related check box.
       connect(m_icatUiForm.searchResultsCbox,SIGNAL(clicked()),this,SLOT(showSearchResults()));
+      // When the user has double clicked on an investigation they wish to view datafiles for then load the relevant datafiles.
+      connect(m_icatUiForm.searchResultsTbl,SIGNAL(itemDoubleClicked(QTableWidgetItem*)),this,SLOT(investigationSelected(QTableWidgetItem*)));
+      // Show "DataFile frame" when the user selects an investigation.
+      connect(m_icatUiForm.dataFileCbox,SIGNAL(clicked()),this,SLOT(showDataFileInfo()));
+
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
       // Although this is an advanced option performing it here allows it to be performed once only.
@@ -120,7 +125,96 @@ namespace MantidQt
      */
     void ICatSearch2::showDataFileInfo()
     {
+      if (m_icatUiForm.dataFileCbox->isChecked())
+      {
+        m_icatUiForm.dataFileFrame->show();
+      }
+      else
+      {
+        m_icatUiForm.dataFileFrame->hide();
+      }
+    }
 
+    /**
+     * Embolden the headers in the provided table.
+     */
+    void ICatSearch2::emboldenTableHeaders(QTableWidget* table)
+    {
+      QFont font;
+      font.setBold(true);
+      for (int i = 0; i < table->columnCount(); ++i)
+      {
+        table->horizontalHeaderItem(i)->setFont(font);
+      }
+    }
+
+    /**
+     * Set the table properties prior to adding data to it.
+     * @param table        :: The table we want to setup.
+     * @param numOfRows    :: The number of rows in the workspace.
+     * @param numOfColumns :: The number of columns in the workspace.
+     */
+    void ICatSearch2::setupTable(QTableWidget* table, size_t numOfRows, size_t numOfColumns)
+    {
+      table->setRowCount(static_cast<int>(numOfRows));
+      table->setColumnCount(static_cast<int>(numOfColumns));
+
+      // Improve the appearance of table to make it easier to read.
+      table->setAlternatingRowColors(true);
+      table->setStyleSheet("alternate-background-color: rgb(216, 225, 255)");
+      table->setSortingEnabled(false);
+      table->verticalHeader()->setVisible(false);
+
+      // Sort by endDate with the most recent being first.
+      table->sortByColumn(4,Qt::DescendingOrder);
+      table->setSortingEnabled(true);
+
+      // Set the height on each row to 20 for UX improvement.
+      for (size_t i = 0; i < numOfRows; ++i)
+      {
+        table->setRowHeight(static_cast<int>(i),20);
+      }
+    }
+
+    /**
+     * Populate the provided table with data from the provided workspace.
+     * @param table :: The table we want to setup.
+     */
+    void ICatSearch2::populateTable(QTableWidget* table, Mantid::API::ITableWorkspace_sptr workspace)
+    {
+      //NOTE: This method freezes up the ICAT search GUI. We will need to do this adding in another thread.
+
+      // This will contain the list of column names.
+      QStringList columnHeaders;
+
+      // Add the data from the workspace to the search results table.
+      for(size_t col = 0 ; col < workspace->columnCount(); col++)
+      {
+        // Get the column name to display as the header of table widget
+        Mantid::API::Column_sptr column = workspace->getColumn(col);
+        columnHeaders.push_back(QString::fromStdString(column->name()));
+
+        for(size_t row = 0; row < workspace->rowCount(); ++row)
+        {
+          // Prints the value from the row to the ostringstream to use later.
+          std::ostringstream ostr;
+          column->print(row,ostr);
+
+          // Add a result to the table.
+          QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
+          table->setItem(static_cast<int>(row),static_cast<int>(col), newItem);
+
+          // Allow the row to be selected, and enabled.
+          newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+          newItem->setToolTip(QString::fromStdString(ostr.str()));
+        }
+      }
+
+      // Set the table widgets header labels from the table workspace.
+      table->setHorizontalHeaderLabels(columnHeaders);
+
+      // Resize the label to improve the viewing experience.
+      table->resizeColumnsToContents();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -192,7 +286,7 @@ namespace MantidQt
 
     /**
      * Get the users' input for each search field.
-     * @return :: A map containing all users' search fields - (key => FieldName, value => FieldValue).
+     * @return A map containing all users' search fields - (key => FieldName, value => FieldValue).
      */
     std::map<std::string, std::string> ICatSearch2::getSearchFields()
     {
@@ -242,7 +336,7 @@ namespace MantidQt
       // Improve UX, then display the m_calendar.
       m_calendar->setGridVisible(true);
       m_calendar->setHeaderVisible(false);
-      m_calendar->setWindowTitle("m_calendar picker");
+      m_calendar->setWindowTitle("Calendar picker");
       m_calendar->show();
 
       // Uses the previously clicked button (startDatePicker or endDatePicker) to determine which
@@ -311,7 +405,6 @@ namespace MantidQt
         m_icatUiForm.searchResultsCbox->setEnabled(true);
         m_icatUiForm.searchResultsCbox->setChecked(true);
         m_icatUiForm.resFrame->show();
-        // Hide the "Investigations found" label
         m_icatUiForm.searchResultsLbl->setText("searching investigations...");
         // Perform the search using the values the user has input.
         m_icatHelper->executeSearch(getSearchFields());
@@ -325,18 +418,16 @@ namespace MantidQt
      */
     void ICatSearch2::onReset()
     {
-      // Clear normal search fields.
-      m_icatUiForm.InvestigationName->clear();
-      m_icatUiForm.StartDate->clear();
+      // Clear the QLineEdit boxes.
+      foreach(QLineEdit *widget, this->findChildren<QLineEdit*>())
+      {
+        widget->clear();
+      }
+      // Clear all other elements.
       m_icatUiForm.Instrument->clear();
-      m_icatUiForm.EndDate->clear();
-      m_icatUiForm.runRangeTxt->clear();
-      m_icatUiForm.Keywords->clear();
-      // Clear advanced options as well.
-      m_icatUiForm.InvestigatorSurname->clear();
-      m_icatUiForm.InvestigationAbstract->clear();
-      m_icatUiForm.SampleName->clear();
       m_icatUiForm.InvestigationType->clear();
+      m_icatUiForm.advSearchCbox->setChecked(false);
+      m_icatUiForm.myDataCbox->setChecked(false);
     }
 
 
@@ -345,60 +436,16 @@ namespace MantidQt
     ///////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Embolden the headers in the results table.
-     */
-    void ICatSearch2::emboldenResultHeaders()
-    {
-      QFont font;
-      font.setBold(true);
-      for (int i = 0; i < m_icatUiForm.searchResultsTbl->columnCount(); ++i)
-      {
-        // Embolden the headers of the table.
-        m_icatUiForm.searchResultsTbl->horizontalHeaderItem(i)->setFont(font);
-      }
-    }
-
-    /**
-     * Set the table properties prior to adding data to it.
-     * @param numOfRows    :: The number of rows in the workspace.
-     * @param numOfColumns :: The number of columns in the workspace.
-     */
-    void ICatSearch2::setupResultTable(size_t& numOfRows, size_t& numOfColumns)
-    {
-      m_icatUiForm.searchResultsTbl->setRowCount(static_cast<int>(numOfRows));
-      m_icatUiForm.searchResultsTbl->setColumnCount(static_cast<int>(numOfColumns));
-
-      // Improve the appearance of table to make it easier to read.
-      m_icatUiForm.searchResultsTbl->setAlternatingRowColors(true);
-      m_icatUiForm.searchResultsTbl->setStyleSheet("alternate-background-color: rgb(216, 225, 255)");
-      m_icatUiForm.searchResultsTbl->setSortingEnabled(false);
-      m_icatUiForm.searchResultsTbl->verticalHeader()->setVisible(false);
-
-      // Update the label to inform the user of how many investigations have been returned from the search.
-      m_icatUiForm.searchResultsLbl->setText(QString::number(numOfRows) + " Investigation found.");
-
-      // Sort by endDate with the most recent being first.
-      m_icatUiForm.searchResultsTbl->sortByColumn(4,Qt::DescendingOrder);
-      m_icatUiForm.searchResultsTbl->setSortingEnabled(true);
-
-      // Set the height on each row to 20 for UX improvement.
-      for (size_t i = 0; i < numOfRows; ++i)
-      {
-        m_icatUiForm.searchResultsTbl->setRowHeight(static_cast<int>(i),20);
-      }
-    }
-
-    /**
      * Outputs the results of the search into the "Search results" table.
      */
     void ICatSearch2::populateResultTable()
     {
       // Obtain a pointer to the "searchResults" workspace where the search results are saved if it exists.
       Mantid::API::ITableWorkspace_sptr workspace;
+
       // Check to see if the workspace exists...
       if(Mantid::API::AnalysisDataService::Instance().doesExist("searchResults"))
       {
-        // If it does, then let's use it!
         workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("searchResults"));
       }
       else
@@ -408,48 +455,23 @@ namespace MantidQt
         return;
       }
 
-      size_t numOfRows = workspace->rowCount();
-      size_t numOfColumns = workspace->columnCount();
+      // Create local variable for convenience and reusability.
+      QTableWidget* resultsTable = m_icatUiForm.searchResultsTbl;
 
       // Set the result's table properties prior to adding data.
-      setupResultTable(numOfRows, numOfColumns);
+      setupTable(resultsTable, workspace->rowCount(), workspace->columnCount());
 
-      // This will contain the list of column names.
-      QStringList columnHeaders;
+      // Update the label to inform the user of how many investigations have been returned from the search.
+      m_icatUiForm.searchResultsLbl->setText(QString::number(workspace->rowCount()) + " Investigation found.");
 
-      // Add the data from the workspace to the search results table.
-      for(size_t col = 0 ; col < numOfColumns; col++)
-      {
-        // Get the column name to display as the header of table widget
-        Mantid::API::Column_sptr column = workspace->getColumn(col);
-        columnHeaders.push_back(QString::fromStdString(column->name()));
+      // Add data from the workspace to the results table.
+      populateTable(resultsTable, workspace);
 
-        for(size_t row = 0; row < numOfRows; ++row)
-        {
-          // Prints the value from the row to the ostringstream to use later.
-          std::ostringstream ostr;
-          column->print(row,ostr);
+      // Make the headers of the table bold.
+      emboldenTableHeaders(resultsTable);
 
-          // Add a result to the table.
-          QTableWidgetItem *newItem  = new QTableWidgetItem(QString::fromStdString(ostr.str()));
-          m_icatUiForm.searchResultsTbl->setItem(static_cast<int>(row),static_cast<int>(col), newItem);
-
-          // Allow the row to be selected, and enabled.
-          newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-          newItem->setToolTip(QString::fromStdString(ostr.str()));
-        }
-      }
       // Hide the "Investigation id" column (It's used by the CatalogGetDataFiles algorithm).
-      m_icatUiForm.searchResultsTbl->setColumnHidden(0, true);
-
-      // Set the table widgets header labels from the table workspace.
-      m_icatUiForm.searchResultsTbl->setHorizontalHeaderLabels(columnHeaders);
-
-      // Embolden the headers of the table.
-      emboldenResultHeaders();
-
-      // Resize the label to improve the viewing experience.
-      m_icatUiForm.searchResultsTbl->resizeColumnsToContents();
+      resultsTable->setColumnHidden(0, true);
     }
 
     /**
@@ -497,11 +519,29 @@ namespace MantidQt
     }
 
     /**
-     * Checks that the investigation is selected and performs investigationClicked.
+     * Hides the "search results" frame, and shows the "dataFiles" frame when an investigation is selected.
      */
     void ICatSearch2::investigationSelected(QTableWidgetItem* item)
     {
+      //
+      m_icatUiForm.dataFileCbox->setEnabled(true);
+      m_icatUiForm.dataFileCbox->setChecked(true);
+      m_icatUiForm.dataFileFrame->show();
 
+      // Inform the user that the search is in progress.
+      m_icatUiForm.dataFileLbl->setText("searching for related datafiles...");
+
+      // Obtain the investigation id from the selected
+      QTableWidgetItem* investigationId = m_icatUiForm.searchResultsTbl->item(item->row(),0);
+
+      // Update the labels in the dataFiles information frame to show relevant info to use.
+      updateDataFileLabels(item);
+
+      // Perform the "search" and obtain the related data files for the selected investigation.
+      m_icatHelper->executeGetDataFiles(investigationId->text().toLongLong());
+
+      // Populate the dataFile table from the "dataFileResults" workspace.
+      populateDataFileTable();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -513,6 +553,33 @@ namespace MantidQt
      */
     void ICatSearch2::populateDataFileTable()
     {
+      // Obtain a pointer to the "dataFileResults" workspace where the related datafiles for the user selected invesitgation exist.
+      Mantid::API::ITableWorkspace_sptr workspace;
+
+      // Check to see if the workspace exists...
+      if(Mantid::API::AnalysisDataService::Instance().doesExist("dataFileResults"))
+      {
+        workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("dataFileResults"));
+      }
+      else
+      {
+        return;
+      }
+
+      // Create local variable for convenience and reusability.
+      QTableWidget* dataFileTable = m_icatUiForm.dataFileResultsTbl;
+
+      // Set the result's table properties prior to adding data.
+      setupTable(dataFileTable, workspace->rowCount(), workspace->columnCount());
+
+      // Update the label to inform the user of how many dataFiles relating to the selected investigation have been found.
+      m_icatUiForm.dataFileLbl->setText(QString::number(workspace->rowCount()) + " datafiles found.");
+
+      // Add data from the workspace to the results table.
+      populateTable(dataFileTable, workspace);
+
+      // Make the headers of the table bold.
+      emboldenTableHeaders(dataFileTable);
 
     }
 
@@ -527,9 +594,16 @@ namespace MantidQt
     /**
      * Updates the dataFile text boxes with relevant info regarding the selected dataFile.
      */
-    void ICatSearch2::updateDataFileLabel()
+    void ICatSearch2::updateDataFileLabels(QTableWidgetItem* item)
     {
+      // Set the "title" label using the data from the investigation results workspace.
+      m_icatUiForm.dataFileTitleRes->setText(m_icatUiForm.searchResultsTbl->item(item->row(),1)->text());
 
+      // Set the instrument label using data from the investigation results workspace.
+      m_icatUiForm.dataFileInstrumentRes->setText(m_icatUiForm.searchResultsTbl->item(item->row(),2)->text());
+
+      // Show the related "run-range" for the specific dataFiles.
+      m_icatUiForm.dataFileRunRangeRes->setText(m_icatUiForm.searchResultsTbl->item(item->row(),3)->text());
     }
 
     /**

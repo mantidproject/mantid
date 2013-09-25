@@ -17,8 +17,9 @@ namespace MantidQt
       std::vector<std::string> getInvestigationTypeList();
       /// Run the search algorithm with the given user input.
       void executeSearch(std::map<std::string, std::string> userInputs);
-
+      /// Search for all related dataFiles for the specified investigation.
+      void executeGetDataFiles(int64_t investigationId);
     };
-  }
-}
+  } // namespace MantidWidgets
+} // namespace MantidQt
 #endif // MANTIDQTWIDGETS_ICATHELPER_H_

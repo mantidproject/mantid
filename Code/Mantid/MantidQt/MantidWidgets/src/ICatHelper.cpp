@@ -10,7 +10,7 @@ namespace MantidQt
 
     /**
      * Obtain the list of instruments from the ICAT Catalog algorithm.
-     * @return :: A vector containing the list of all instruments available.
+     * @return A vector containing the list of all instruments available.
      */
     std::vector<std::string> ICatHelper::getInstrumentList()
     {
@@ -31,7 +31,7 @@ namespace MantidQt
 
     /**
      * Obtain the list of investigation types from the ICAT Catalog algorithm.
-     * @return :: A vector containing the list of all investigation types available.
+     * @return A vector containing the list of all investigation types available.
      */
     std::vector<std::string> ICatHelper::getInvestigationTypeList()
     {
@@ -51,8 +51,8 @@ namespace MantidQt
     }
 
     /**
-     * Search the archive with the user input terms provided.
-     * @param :: A map containing all users' search fields - (key => FieldName, value => FieldValue).
+     * Search the archive with the user input terms provided and save them to a workspace ("searchResults").
+     * @param userInputFields :: A map containing all users' search fields - (key => FieldName, value => FieldValue).
      */
     void ICatHelper::executeSearch(std::map<std::string, std::string> userInputFields)
     {
@@ -88,8 +88,35 @@ namespace MantidQt
         QCoreApplication::processEvents();
       }
     }
-  }
 
-}
+    /**
+     * Search the archives for all dataFiles related to an "investigation id" then save results to workspace ("dataFileResults").
+     * @param investigationId :: The investigation id to use for the search.
+     */
+    void ICatHelper::executeGetDataFiles(int64_t investigationId)
+    {
+      Mantid::API::IAlgorithm_sptr catalogAlgorithm;
+      try
+      {
+        catalogAlgorithm = Mantid::API::AlgorithmManager::Instance().create("CatalogGetDataFiles");
+      }
+      catch(std::runtime_error& exception)
+      {
+        exception.what();
+      }
+
+      // Search for all related dataFiles to this investigation id.
+      catalogAlgorithm->setProperty("InvestigationId", investigationId);
+      // This will be the workspace where the content of the search result is saved to.
+      catalogAlgorithm->setPropertyValue("OutputWorkspace","dataFileResults");
+
+      // Allow asynchronous execution to update label(s) while search is being carried out.
+      Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
+      while( !result.available() )
+      {
+        QCoreApplication::processEvents();
+      }
+    }
+
   } // namespace MantidWidgets
 } // namespace MantidQt

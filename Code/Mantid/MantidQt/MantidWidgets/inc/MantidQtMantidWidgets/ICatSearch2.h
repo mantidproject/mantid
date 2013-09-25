@@ -25,6 +25,12 @@ namespace MantidQt
     private:
       /// Initialise the layout
       virtual void initLayout();
+      /// Make the headers in the provided table bold.
+      void emboldenTableHeaders(QTableWidget* table);
+      /// Setup table prior to adding data to it, such hiding vertical header.
+      void setupTable(QTableWidget* table, size_t numOfRows, size_t numOfColumns);
+      /// Populate the provided table with data from the provided workspace.
+      void populateTable(QTableWidget* table, Mantid::API::ITableWorkspace_sptr workspace);
 
       ///////////////////////////////////////////////////////////////////////////////
       /// Methods for: "Catalog Search"
@@ -43,10 +49,6 @@ namespace MantidQt
       // Methods for: "Search results"
       ///////////////////////////////////////////////////////////////////////////////
 
-      /// Make the headers in the results table bold.
-      void emboldenResultHeaders();
-      /// Setup results table prior to adding data to it, such hiding vertical header.
-      void setupResultTable(size_t& numOfRows, size_t& numOfColumns);
       /// Outputs the results of the query into a table.
       void populateResultTable();
       /// Updates the "Displaying info" text box with relevant result info (e.g. 500 of 18,832)
@@ -63,7 +65,7 @@ namespace MantidQt
       /// Obtain the names of the selected files. (Used in downloadDataFiles).
       void getCheckedFileNames();
       /// Updates the dataFile text boxes with relevant info about the selected dataFile.
-      void updateDataFileLabel();
+      void updateDataFileLabels(QTableWidgetItem* item);
       /// Filter the table to show only results by data type user wants to view.
       void filterDataFileType();
 

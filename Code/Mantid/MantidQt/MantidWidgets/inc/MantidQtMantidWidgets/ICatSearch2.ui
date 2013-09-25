@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>666</width>
-    <height>943</height>
+    <height>945</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,29 +23,6 @@
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
     <layout class="QGridLayout" name="mainGrid">
-     <item row="5" column="0">
-      <widget class="QCheckBox" name="dataFileCbox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <italic>true</italic>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Click to display datafile information.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-       <property name="text">
-        <string>Datafile information</string>
-       </property>
-      </widget>
-     </item>
      <item row="4" column="0">
       <widget class="QFrame" name="resFrame">
        <property name="frameShape">
@@ -185,45 +162,6 @@
           </item>
           <item>
            <widget class="QLabel" name="resDisplayingTxt">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Displaying</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="resDisplayStartTxt">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="resDisplayOfTxt">
-            <property name="font">
-             <font>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>of</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="resDisplayEndTxt">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -969,6 +907,60 @@
         </item>
        </layout>
       </widget>
+     </item>
+     <item row="5" column="0">
+      <layout class="QHBoxLayout" name="dataFileHeader">
+       <item>
+        <widget class="QCheckBox" name="dataFileCbox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <italic>true</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:400;&quot;&gt;Click to show or hide search results.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>Datafiles information:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="dataFileLbl">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <italic>true</italic>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="dataFileSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>10</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
