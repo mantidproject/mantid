@@ -10,6 +10,7 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
 
 using Mantid::DataHandling::ConvertFullprofToXML;
 
@@ -69,32 +70,47 @@ public:
     // Check output file
     std::string xmlText = Strings::loadFile(outputFilename);
     Poco::XML::DOMParser pParser;
-    Poco::XML::Document* doc;
+    Poco::XML::Document* doc=0;
     TS_ASSERT_THROWS_NOTHING(doc = pParser.parseString(xmlText));
     TS_ASSERT(doc);
     if(doc) 
     {
       Poco::XML::Element* rootElem = doc->documentElement();
       TS_ASSERT(rootElem->hasChildNodes());
-      Poco::XML::Element* componentLinkElem1 = rootElem->getChildElement("component-link");
-      TS_ASSERT(componentLinkElem1);
-      if(componentLinkElem1)
-      {
-        TS_ASSERT_EQUALS(componentLinkElem1->getAttribute("name"),"wholeInstrument");
-        Poco::XML::Element* paramElem1 = componentLinkElem1->getChildElement("parameter");
-        TS_ASSERT(paramElem1);
-        if(paramElem1)
+      Poco::XML::NodeList* componentLinkNodeList = rootElem->getElementsByTagName("component-link");; // get component-link elements
+      size_t numComponentLinks = componentLinkNodeList->length();
+      TS_ASSERT_EQUALS(numComponentLinks,3); // Three component-link elements expected
+      if( numComponentLinks == 3) { // We only check the component-links if there are the expected number of them.
+        Poco::XML::Element* componentLinkElem1 = static_cast<Poco::XML::Element*>(componentLinkNodeList->item(0));
+        TS_ASSERT(componentLinkElem1);
+        if(componentLinkElem1)
         {
-          TS_ASSERT_EQUALS(paramElem1->getAttribute("type"),"fitting");
-          TS_ASSERT_EQUALS(paramElem1->getAttribute("name"),"IkedaCarpenterPV:Alpha0");
-          Poco::XML::Element* formulaElem = paramElem1->getChildElement("formula");
-          TS_ASSERT(formulaElem);
-          if(formulaElem)
-          {
-            TS_ASSERT_EQUALS(formulaElem->getAttribute("result-unit"),"TOF");
+          TS_ASSERT_EQUALS(componentLinkElem1->getAttribute("name"),"wholeInstrument");
+
+          Poco::XML::NodeList* parameterNodeList = componentLinkElem1->getElementsByTagName("parameter"); // get parameter elements
+          size_t numParameters = parameterNodeList->length();
+          TS_ASSERT_EQUALS(numParameters,4); // Four parameter elements expected
+
+          if( numParameters == 4) { // We only check parameters if there are the expected number of them.
+
+            Poco::XML::Element* paramElem1 = static_cast<Poco::XML::Element*>(parameterNodeList->item(0));
+            do_test_paramemeter( paramElem1, "IkedaCarpenterPV:Alpha0", 0.000008, "TOF", "", true );
+
+            Poco::XML::Element* paramElem2 = static_cast<Poco::XML::Element*>(parameterNodeList->item(1));
+            do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Beta0", 6.251096, "TOF", "", true );
+
+            Poco::XML::Element* paramElem3 = static_cast<Poco::XML::Element*>(parameterNodeList->item(2));
+            do_test_paramemeter( paramElem3, "IkedaCarpenterPV:Alpha1", 0.0, "TOF", "", true );
+            
+            Poco::XML::Element* paramElem4 = static_cast<Poco::XML::Element*>(parameterNodeList->item(3));
+            do_test_paramemeter( paramElem4, "IkedaCarpenterPV:Kappa", 0.0, "", "", true );
           }
+
+          parameterNodeList->release();  // Finished with parameter list
         }
       }
+      componentLinkNodeList->release(); // Finished with component-link list
+      doc->release(); // Finished with document
     }
 
     //Clean up
@@ -102,6 +118,36 @@ public:
     Poco::File(outputFilename).remove();
 
     return;
+  }
+
+    //----------------------------------------------------------------------------------------------
+  /** Do a test on a parameter element
+    */
+  void do_test_paramemeter(const Poco::XML::Element* paramElem, const std::string& name, const double eq, const std::string& resultUnit, const std::string& unit, bool fixed )
+  {
+     TS_ASSERT(paramElem);
+     if(paramElem)
+     {
+          TS_ASSERT_EQUALS(paramElem->getAttribute("type"),"fitting");
+          TS_ASSERT_EQUALS(paramElem->getAttribute("name"),name);
+          Poco::XML::Element* formulaElem = paramElem->getChildElement("formula");
+          TS_ASSERT(formulaElem);
+          if(formulaElem)
+          {
+             std::string eqString = formulaElem->getAttribute("eq"); // Don't yet know how to convert to double!
+             TS_ASSERT_EQUALS(formulaElem->getAttribute("result-unit"),resultUnit);
+             TS_ASSERT_EQUALS(formulaElem->getAttribute("unit"),unit);
+          }
+          Poco::XML::Element* fixedElem = paramElem->getChildElement("fixed");
+          if(fixed)
+          {
+            TS_ASSERT(fixedElem);
+          } 
+          else
+          {
+            TS_ASSERT(!fixedElem);
+          }
+     }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -131,7 +177,7 @@ public:
       ofile << "!           Gam-2       Gam-1       Gam-0                                      \n";
       ofile << "GAMMA       0.000       0.000       0.000                                      \n";
       ofile << "!         alph0       beta0       alph1       beta1                            \n";
-      ofile << "ALFBE    0.000008    6.251096    0.000000    0.000000                          \n";
+      ofile << "ALFBE    0.000008    6.251096    0.100000   -0.100000                          \n";
       ofile << "!         alph0t      beta0t      alph1t      beta1t                           \n";
       ofile << "ALFBT   0.010156   85.918922    0.000000    0.000000                           \n";
       ofile << "END                                                                            \n";
