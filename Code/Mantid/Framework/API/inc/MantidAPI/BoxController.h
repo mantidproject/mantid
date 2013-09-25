@@ -43,18 +43,15 @@ namespace API
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
       m_addingEvents_eventsPerTask = 1000;
-      m_SignifEventsNumber = 10000000;
+      m_significantEventsNumber = 10000000;
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
       m_splitInto.resize(this->nd, 1);
       resetNumBoxes();
     }
 
     virtual ~BoxController();
-    /** get number of events used as significatn in box splitting (the box splitting begins after that)*/ 
-    size_t getSignifEventsNumber()const
-    {return m_SignifEventsNumber;}
     // create new box controller from the existing one
-    virtual BoxController *clone()const;
+    virtual BoxController *clone() const;
     /// Serialize
     std::string toXMLString() const;
 
@@ -241,6 +238,12 @@ namespace API
       resetNumBoxes();
     }
 
+    /// The number of events that triggers box splitting
+    size_t getSignificantEventsNumber() const
+    {
+      return m_significantEventsNumber;
+    }
+
     //-----------------------------------------------------------------------------------
     /** Determine when would be a good time to split MDBoxes into MDGridBoxes.
      * This is to be called while adding events. Splitting boxes too frequently
@@ -257,15 +260,13 @@ namespace API
       // Avoid divide by zero
       if(numMDBoxes == 0)
         return false;
-     // Performance depends pretty strongly on WHEN you split the boxes.
+      // Performance depends pretty strongly on WHEN you split the boxes.
       // This is an empirically-determined way to optimize the splitting calls.
       // Split when adding 1/16^th as many events as are already in the output,
       //  (because when the workspace gets very large you should split less often)
       // But no more often than every 10 million events.
-      size_t comparisonPoint = nEventsInOutput/16;
-      if (comparisonPoint < m_SignifEventsNumber)
-          comparisonPoint = m_SignifEventsNumber;
-      if (eventsAdded > (comparisonPoint))return true;
+      const size_t comparisonPoint = std::max(nEventsInOutput/16, m_significantEventsNumber);
+      if (eventsAdded > comparisonPoint) return true;
 
       // Return true if the average # of events per box is big enough to split.
       return ((eventsAdded / numMDBoxes) > m_SplitThreshold);
@@ -416,8 +417,8 @@ namespace API
     /// Splitting threshold
     size_t m_SplitThreshold;
 
-    /// this number of events takes noticeple time to process. Identified experimentally and used in box splitting limings
-    size_t m_SignifEventsNumber;
+    /// This empirically-determined number of events takes a noticeable time to process and triggers box splitting.
+    size_t m_significantEventsNumber;
 
     /** Maximum splitting depth: don't go further than this many levels of recursion.
      * This avoids infinite recursion and should be set to a value that gives a smallest

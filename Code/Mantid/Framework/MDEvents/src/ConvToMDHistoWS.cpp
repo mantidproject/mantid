@@ -40,8 +40,8 @@ namespace Mantid
     size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra)
     {
       size_t nAddedEvents(0),nBufEvents(0);
-      // cach global variable locally
-      bool ignoreZeros(m_IgnoreZeros);
+      // cache global variable locally
+      bool ignoreZeros(m_ignoreZeros);
 
       const size_t specSize = this->m_InWS2D->blocksize();    
       // preprocessed detectors associate each spectra with a detector (position)
@@ -170,15 +170,15 @@ namespace Mantid
 
       // estimate the size of data conversion a single thread should perform
       //TO DO: this piece of code should be carefully rethinked
-      size_t eventsChunkNum = bc->getSignifEventsNumber();
+      size_t eventsChunkNum = bc->getSignificantEventsNumber();
       this->estimateThreadWork(nThreads,specSize,eventsChunkNum);
 
       //External loop over the spectra:
       for (size_t i = 0; i < nValidSpectra; i+=m_spectraChunk)
       {
-         size_t nThreadEv = this->conversionChunk(i);
-         nAddedEvents+=nThreadEv;
-         nEventsInWS +=nThreadEv;
+        size_t nThreadEv = this->conversionChunk(i);
+        nAddedEvents+=nThreadEv;
+        nEventsInWS +=nThreadEv;
 
 
         if (bc->shouldSplitBoxes(nEventsInWS,nAddedEvents,lastNumBoxes))
@@ -234,7 +234,7 @@ namespace Mantid
     */
     void ConvToMDHistoWS::estimateThreadWork(size_t nThreads,size_t specSize,size_t nPointsToProcess)
     {
-      if (nThreads==0)nThreads=1;
+      if (nThreads==0) nThreads=1;
 
       // buffer size is at least a spectra size or more
       m_bufferSize     = ((specSize>DATA_BUFFER_SIZE)?specSize:DATA_BUFFER_SIZE);
@@ -243,18 +243,8 @@ namespace Mantid
         m_bufferSize = ((m_bufferSize/specSize)+1)*specSize;
       }
 
-      //
       size_t nSpectras = nPointsToProcess/specSize+1;
-
-      m_spectraChunk =  nSpectras/nThreads;
-      if(m_spectraChunk<1)m_spectraChunk =1;
-
-      //if(m_spectraChunk<1)m_spectraChunk=1;
-      // TMP
-      //m_spectraChunk = 10;
-
-      //m_spectraChunk = 1;
-      //m_bufferSize  = specSize;
+      m_spectraChunk =  std::max(nSpectras/nThreads, static_cast<size_t>(1));
     }
 
   } // endNamespace MDEvents

@@ -308,8 +308,8 @@ ConvertToMD::init()
 "and is ignored in any other case."
                     );
     declareProperty(new PropertyWithValue<bool>("IgnoreZeroSignals", false, Direction::Input),
- "Enabling this property forces algorithm to ignore bins with zero signal for input matxix workspace. Input events workspaces are not affected. "
- "This violates the data normalization but may substantially accelerate calculations in situations when the normalization is not important. (e.g.  peak finding)."
+ "Enabling this property forces the algorithm to ignore bins with zero signal for an input matrix workspace. Input event workspaces are not affected. "
+ "This violates the data normalization but may substantially accelerate calculations in situations when the normalization is not important (e.g. peak finding)."
       );
     declareProperty(new ArrayProperty<double>("MinValues"),
 "It has to be N comma separated values, where N is the number of dimensions of the target workspace. Values "

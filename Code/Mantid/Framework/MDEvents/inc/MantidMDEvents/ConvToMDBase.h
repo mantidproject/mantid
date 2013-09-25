@@ -94,8 +94,8 @@ namespace MDEvents
    // On multiprocessor machine the algorithm should run and utilizes all cores (see Kernel::Threadpool), 
    // but this can be chenged setting this parameter to 0 (no multithreading) or positive number specifying the requested nymber of threads
    int m_NumThreads;
-   // propery which indicates that data with 0 signal should be  ignored
-   bool m_IgnoreZeros;
+   // Flag which indicates that data with 0 signal should be ignored
+   bool m_ignoreZeros;
    /// Any special coordinate system used.
    Mantid::API::SpecialCoordinateSystem m_coordinateSystem;
  private:

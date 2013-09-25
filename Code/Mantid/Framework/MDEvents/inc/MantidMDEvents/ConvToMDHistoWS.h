@@ -13,9 +13,6 @@
 #include "MantidMDEvents/ConvToMDBase.h"
 // coordinate transformation
 #include "MantidMDEvents/MDTransfInterface.h"
-//#include "MantidKernel/Multithreaded.h"
-#include "MantidKernel/Task.h"
-#include "Poco/ScopedLock.h"
 
 namespace Mantid
 {

@@ -19,7 +19,7 @@ namespace Mantid
     size_t  ConvToMDBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper, bool ignoreZeros)
     {
 
-      m_IgnoreZeros = ignoreZeros;
+      m_ignoreZeros = ignoreZeros;
       m_InWS2D = WSD.getInWS();
       // preprocessed detectors information:       
        // check if detector information has been precalculated:
