@@ -124,7 +124,7 @@ namespace MantidQt
 
 			QString program = m_uiForm.cbProgram->currentText();
 
-			if(program == "Lorenzians")
+			if(program == "Lorentzians")
 			{
 				program = "QL";
 			}
