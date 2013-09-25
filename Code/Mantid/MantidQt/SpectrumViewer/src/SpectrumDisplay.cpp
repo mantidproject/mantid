@@ -62,6 +62,12 @@ SpectrumDisplay::~SpectrumDisplay()
   delete spectrum_plot_item;
 }
 
+bool SpectrumDisplay::hasData(const std::string& wsName,
+                              const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  return this->data_source->hasData(wsName, ws);
+}
+
 /// Set some properties of the SpectrumPlotItem object
 void SpectrumDisplay::setupSpectrumPlotItem()
 {
