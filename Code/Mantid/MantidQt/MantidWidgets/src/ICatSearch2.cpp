@@ -217,6 +217,23 @@ namespace MantidQt
       table->resizeColumnsToContents();
     }
 
+    /**
+     * Clears data associated with previous search.
+     * @param table     :: The table to modify and remove previous results from.
+     * @param workspace :: The workspace to remove.
+     */
+    void ICatSearch2::clearSearch(QTableWidget* table, std::string & workspace)
+    {
+      // Remove workspace if it exists.
+      if(Mantid::API::AnalysisDataService::Instance().doesExist(workspace))
+      {
+        Mantid::API::AnalysisDataService::Instance().remove(workspace);
+      }
+
+      // In order to reset fields for the table
+      setupTable(table, 0, 0);
+
+    }
     ///////////////////////////////////////////////////////////////////////////////
     /// Methods for "Catalog Search".
     ///////////////////////////////////////////////////////////////////////////////
@@ -406,8 +423,14 @@ namespace MantidQt
         m_icatUiForm.searchResultsCbox->setChecked(true);
         m_icatUiForm.resFrame->show();
         m_icatUiForm.searchResultsLbl->setText("searching investigations...");
+
+        // Remove previous search results.
+        std::string searchResults = "searchResults";
+        clearSearch(m_icatUiForm.searchResultsTbl, searchResults);
+
         // Perform the search using the values the user has input.
         m_icatHelper->executeSearch(getSearchFields());
+
         // Populate the result table from the searchResult workspace.
         populateResultTable();
       }
@@ -533,6 +556,10 @@ namespace MantidQt
 
       // Obtain the investigation id from the selected
       QTableWidgetItem* investigationId = m_icatUiForm.searchResultsTbl->item(item->row(),0);
+
+      // Remove previous dataFile search results.
+      std::string dataFileResults = "dataFileResults";
+      clearSearch(m_icatUiForm.dataFileResultsTbl, dataFileResults);
 
       // Update the labels in the dataFiles information frame to show relevant info to use.
       updateDataFileLabels(item);

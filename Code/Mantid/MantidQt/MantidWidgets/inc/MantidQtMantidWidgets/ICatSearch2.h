@@ -31,6 +31,8 @@ namespace MantidQt
       void setupTable(QTableWidget* table, size_t numOfRows, size_t numOfColumns);
       /// Populate the provided table with data from the provided workspace.
       void populateTable(QTableWidget* table, Mantid::API::ITableWorkspace_sptr workspace);
+      /// Removes data associated with previous search.
+      void clearSearch(QTableWidget* table, std::string& workspace);
 
       ///////////////////////////////////////////////////////////////////////////////
       /// Methods for: "Catalog Search"
