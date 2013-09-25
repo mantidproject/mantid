@@ -91,3 +91,5 @@ namespace MantidQt
   }
 
 }
+  } // namespace MantidWidgets
+} // namespace MantidQt

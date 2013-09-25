@@ -45,12 +45,10 @@ namespace MantidQt
 
       /// Make the headers in the results table bold.
       void emboldenResultHeaders();
-      /// Setup results table prior to adding data to it, such hiding vertial header.
+      /// Setup results table prior to adding data to it, such hiding vertical header.
       void setupResultTable(size_t& numOfRows, size_t& numOfColumns);
       /// Outputs the results of the query into a table.
       void populateResultTable();
-      /// When an investigation is double clicked we want to call populateDataFileTable using the investigation name.
-      void investigationClicked();
       /// Updates the "Displaying info" text box with relevant result info (e.g. 500 of 18,832)
       void resultInfoUpdate();
       /// Updates the page numbers (e.g. m & n in: Page m of n )
@@ -85,7 +83,7 @@ namespace MantidQt
       /// SLOTS for: "Catalog Search"
       ///////////////////////////////////////////////////////////////////////////////
 
-      /// Open the DateTime Calender to select date.
+      /// Open the DateTime Calendar to select date.
       void openCalendar();
       /// Update startDate text field when startDatePicker is used and date is selected.
       void updateStartDate();
@@ -93,8 +91,6 @@ namespace MantidQt
       void updateEndDate();
       /// Show the advanced field when checked.
       void advancedSearchChecked();
-      /// Perform the "Search" operation when the search button is clicked.
-      void onSearch();
       /// When the "Search" button is clicked, display "Search results" frame.
       void searchClicked();
       /// Reset all fields when "Reset" is clicked.
@@ -110,7 +106,7 @@ namespace MantidQt
       /// Populate's result table depending page number input by user.
       bool goToInputPage();
       /// Checks that the investigation is selected and performs investigationClicked.
-      bool investigationSelected();
+      void investigationSelected(QTableWidgetItem* item);
 
       ///////////////////////////////////////////////////////////////////////////////
       // SLOTS for: "Datafile information"

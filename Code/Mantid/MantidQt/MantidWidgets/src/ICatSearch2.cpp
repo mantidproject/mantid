@@ -302,14 +302,6 @@ namespace MantidQt
     }
 
     /**
-     * Perform the search operation when the "Search" button is clicked.
-     */
-    void ICatSearch2::onSearch()
-    {
-
-    }
-
-    /**
      * Hides the search frame, and shows search results frame when "Search" button pressed.
      */
     void ICatSearch2::searchClicked()
@@ -461,14 +453,6 @@ namespace MantidQt
     }
 
     /**
-     * When an investigation is double clicked open we want to call populateDataFileTable using the investigation name.
-     */
-    void ICatSearch2::investigationClicked()
-    {
-
-    }
-
-    /**
      * Updates the "Displaying info" text box with relevant result info (e.g. 500 of 18,832)
      */
     void ICatSearch2::resultInfoUpdate()
@@ -515,7 +499,7 @@ namespace MantidQt
     /**
      * Checks that the investigation is selected and performs investigationClicked.
      */
-    bool ICatSearch2::investigationSelected()
+    void ICatSearch2::investigationSelected(QTableWidgetItem* item)
     {
 
     }
@@ -584,5 +568,5 @@ namespace MantidQt
 
     }
 
-  }
-}
+  } // namespace MantidWidgets
+} // namespace MantidQt
