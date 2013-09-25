@@ -254,15 +254,14 @@ def elwin(inputFiles, eRange, log_type='sample', Normalise = False,
     workdir = config['defaultsave.directory']
     CheckXrange(eRange,'Energy')
     tempWS = '__temp'
+    Range2 = ( len(eRange) == 4 )
     if Verbose:
         range1 = str(eRange[0])+' to '+str(eRange[1])
         if ( len(eRange) == 4 ): 
             range2 = str(eRange[2])+' to '+str(eRange[3])
             logger.notice('Using 2 energy ranges from '+range1+' & '+range2)
-            Range2 = True
         elif ( len(eRange) == 2 ):
             logger.notice('Using 1 energy range from '+range1)
-            Range2 = False
     nr = 0
     inputRuns = sorted(inputFiles)
     for file in inputRuns:
