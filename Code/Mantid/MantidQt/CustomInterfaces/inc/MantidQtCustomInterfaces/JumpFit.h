@@ -25,6 +25,8 @@ namespace MantidQt
 		private slots:
 			/// Handle when the sample input is ready
 			void handleSampleInputReady(const QString& filename);
+			/// Slot to handle plotting a different spectrum of the workspace
+			void handleWidthChange(int index);
 			/// Slot for when the min range on the range selector changes
 			virtual void minValueChanged(double min);
 			/// Slot for when the min range on the range selector changes

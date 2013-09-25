@@ -28,6 +28,8 @@ namespace MantidQt
 
 			// Connect data selector to handler method
 			connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
+			// Connect width selector to handler method
+			connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWidthChange(int)));
 		}
 
 		/**
@@ -115,6 +117,25 @@ namespace MantidQt
 			std::pair<double,double> res;
 			std::pair<double,double> range = getCurveRange();
 
+			auto ws = Mantid::API::AnalysisDataService::Instance().retrieve(filename.toStdString());
+			auto mws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws);
+
+			size_t size = mws->getNumberHistograms();
+
+			if(size <= 2)
+			{
+				// we're using a ConvFit file as input
+				// we only have one spectra so disable selecting anything but the first
+				m_uiForm.cbWidth->setCurrentIndex(0);
+				m_uiForm.cbWidth->setEnabled(false);
+			}
+			else
+			{
+				//we're using a QLines files as input
+				//enable the option to select other spectra
+				m_uiForm.cbWidth->setEnabled(true);
+			}
+
 			//Use the values from the instrument parameter file if we can
 			if(getInstrumentResolution(filename, res))
 			{
@@ -126,6 +147,23 @@ namespace MantidQt
 			}
 
 			setPlotRange(m_properties["QMin"], m_properties["QMax"], range);
+		}
+
+
+		/**
+		 * Plots the loaded file to the miniplot when the selected spectrum changes
+		 * 
+		 * @param index :: The name spectrum index to plot
+		 */
+		void JumpFit::handleWidthChange(int index)
+		{
+			QString sampleName = m_uiForm.dsSample->getCurrentDataName();
+			QString samplePath = m_uiForm.dsSample->getFullFilePath();
+
+			if(checkFileLoaded(sampleName, samplePath))
+			{
+				plotMiniPlot(sampleName, index*2);
+			}
 		}
 
 		/**

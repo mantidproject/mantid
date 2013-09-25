@@ -36,12 +36,12 @@
        </property>
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
-         <string>_red</string>
+         <string>_Workspace</string>
         </stringlist>
        </property>
        <property name="fileBrowserSuffixes" stdset="0">
         <stringlist>
-         <string>_red.nxs</string>
+         <string>_Workspace.nxs</string>
         </stringlist>
        </property>
       </widget>
