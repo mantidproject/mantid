@@ -160,10 +160,15 @@ namespace Algorithms
     const int maxVal = log->maxValue();
     const int xLength = maxVal - minVal + 1;
 
+    if ( xLength > 10000 )
+    {
+      g_log.warning() << "Did you really want to create a " << xLength << " row table? This will take some time!\n";
+    }
+
     // Accumulate things in a local vector before transferring to the table
     std::vector<int> Y(xLength);
     const int numSpec = static_cast<int>(m_inputWorkspace->getNumberHistograms());
-    Progress prog(this,0.0,1.0,numSpec);
+    Progress prog(this,0.0,1.0,numSpec+xLength);
     PARALLEL_FOR1(m_inputWorkspace)
     for ( int spec = 0; spec < numSpec; ++spec )
     {
@@ -245,8 +250,10 @@ namespace Algorithms
       }
       timeCol->cell<double>(row) = duration;
 
+      interruption_point();
       // Sum up the proton charge for this log value
       if ( protonChargeLog ) protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, filter);
+      interruption_point();
 
       for ( auto log = otherLogs.begin(); log != otherLogs.end(); ++log )
       {
@@ -254,6 +261,7 @@ namespace Algorithms
         // Have to (maybe inefficiently) fetch back column by name - move outside loop if too slow
         outputWorkspace->getColumn(log->first)->cell<double>(row) = log->second->averageValueInFilter(filter);
       }
+      prog.report();
     }
 
     setProperty("OutputWorkspace",outputWorkspace);
