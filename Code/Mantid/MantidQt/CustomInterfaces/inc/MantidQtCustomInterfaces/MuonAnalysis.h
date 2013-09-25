@@ -124,6 +124,9 @@ private slots:
   /// Run the plot button on the home tab.
   void runFrontPlotButton();
 
+  /// Creates a plot of selected group/pair.
+  void plotSelectedItem();
+
   /// 
   void runFrontGroupGroupPairComboBox(int index);
 

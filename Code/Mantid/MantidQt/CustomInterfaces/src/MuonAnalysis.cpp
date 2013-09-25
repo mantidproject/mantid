@@ -322,7 +322,15 @@ void MuonAnalysis::runFrontPlotButton()
     return;
   }
 
-  // get current index
+  plotSelectedItem();
+}
+
+/**
+ * Creates a plot of selected group/pair.
+ */
+void MuonAnalysis::plotSelectedItem()
+{
+  // Get current index
   int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
 
   if (index < 0)
@@ -1332,10 +1340,8 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
     static const QChar MU_SYM(956);
     m_uiForm.optionLabelBinWidth->setText(QString("Data collected with histogram bins of ") + QString::number(binWidth) + QString(" %1s").arg(MU_SYM));
 
-    // finally the preferred default by users are to by default
-    // straight away plot the data
-    if (m_uiForm.frontPlotButton->isEnabled() )
-      runFrontPlotButton();
+    if(m_uiForm.frontPlotButton->isEnabled())
+      plotSelectedItem();
   }
   catch(std::exception& e)
   {
