@@ -111,22 +111,6 @@ def ReadWidthFile(width,wfile,ngrp,Verbose):                       # reads width
 	We=PadArray(We,51)
 	return Wy,We
 
-def CheckBinning(nbins):
-	nbin = nbins[0]
-	if nbin == '0':
-		error = 'Sample binning is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	if len(nbins) == 2:
-		nrbin = nbins[1]
-		if nrbin == '0':
-			error = 'Resolution binning is Zero'			
-			logger.notice('ERROR *** ' + error)
-			sys.exit(error)
-	else:
-		nrbin = 1
-	return nbin,nrbin
-
 # QLines programs
 def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose=False,Plot='None',Save=False):
 	StartTime(program)
@@ -134,7 +118,7 @@ def QLRun(program,samWS,resWS,resnormWS,erange,nbins,Fit,wfile,Loop,Verbose=Fals
 	facility = config['default.facility']
 	array_len = 4096						   # length of array in Fortran
 	CheckXrange(erange,'Energy')
-	nbin,nrbin = CheckBinning(nbins)
+	nbin,nrbin = nbins[0],nbins[1]
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
 		logger.notice('Resolution is ' + resWS)
@@ -654,33 +638,12 @@ def QLPlotQSe(inputWS,Plot,res_plot,Loop):
 
 # Quest programs
 
-def CheckBetSig(nbs):
-	Nsig = int(nbs[1])
-	if Nsig == 0:
-		error = 'Number of sigma points is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	if Nsig > 200:
-		error = 'Max number of sigma points is 200'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	Nbet = int(nbs[0])
-	if Nbet == 0:
-		error = 'Number of beta points is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	if Nbet > 200:
-		error = 'Max number of beta points is 200'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	return Nbet,Nsig
-
 def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	StartTime('Quest')
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
 	CheckXrange(erange,'Energy')
-	nbin,nrbin = CheckBinning(nbins)
+	nbin,nrbin = nbins[0],nbins[1]
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
 		logger.notice('Resolution is ' + resWS)
@@ -724,7 +687,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	wrkr=resWS
 	wrkr.ljust(140,' ')
 	wrk = [wrks, wrkr]
-	Nbet,Nsig = CheckBetSig(nbs)
+	Nbet,Nsig = nbs[0], nbs[1]
 	eBet0 = np.zeros(Nbet)                  # set errors to zero
 	eSig0 = np.zeros(Nsig)                  # set errors to zero
 	rscl = 1.0
