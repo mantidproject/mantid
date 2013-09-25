@@ -68,7 +68,7 @@ namespace Algorithms
     void fitPeakMultipleStep();
 
     /// Fit a single peak function with pure peak workspace
-    double fitPeakFuncion(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_const_sptr dataws,
+    double fitPeakFuncion(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
                           size_t wsindex, double startx, double endx, std::string &errorreason);
 
     /// Fit background with multiple domain
@@ -76,21 +76,19 @@ namespace Algorithms
 
     /// Fit peak and background composite function
     double fitCompositeFunction(API::IPeakFunction_sptr peakfunc, API::IBackgroundFunction_sptr bkgdfunc,
-                              API::MatrixWorkspace_const_sptr dataws, size_t wsindex,
+                              API::MatrixWorkspace_sptr dataws, size_t wsindex,
                               double startx, double endx);
 
     /// Make a pure peak WS in the fit window region
-    void makePurePeakWS(const std::vector<double>& vec_bkgd);
+    void makePurePeakWS();
 
     /// Fit a function.
-    double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws,
-                       size_t wsindex, double xmin, double xmax,
-                       std::vector<double>& vec_caldata, bool calmode=false);
+    double fitFunctionSD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws,
+                       size_t wsindex, double xmin, double xmax, bool calmode);
 
     /// Fit a function in multi-domain
-    double fitFunctionMD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_const_sptr dataws,
-                         size_t wsindex, std::vector<double> xmin, std::vector<double> xmax,
-                         std::vector<double>& vec_caldata);
+    double fitFunctionMD(API::IFunction_sptr fitfunc, API::MatrixWorkspace_sptr dataws,
+                         size_t wsindex, std::vector<double> vec_xmin, std::vector<double> vec_xmax);
 
     /// Process and store fit result
     void processNStoreFitResult(double rwp);
@@ -156,7 +154,7 @@ namespace Algorithms
     /// Minimum guessed peak width (pixels)
     int m_minGuessedPeakWidth;
     /// Maximum guessed peak width (pixels)
-    double m_maxGuessedPeakWidth;
+    int m_maxGuessedPeakWidth;
     /// Step width of tried FWHM
     int m_fwhmFitStep;
     /// Flag about guessed FWHM (pixels)
@@ -171,7 +169,8 @@ namespace Algorithms
     std::string m_peakFuncType;
     std::string m_backgroundType;
 
-    DataObjects::TableWorkspace_sptr m_parameterTableWS;
+    DataObjects::TableWorkspace_sptr m_peakParameterTableWS;
+    DataObjects::TableWorkspace_sptr m_bkgdParameterTableWS;
 
     /// Minimizer
     std::string m_minimizer;
