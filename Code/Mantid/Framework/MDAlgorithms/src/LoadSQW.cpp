@@ -203,10 +203,6 @@ namespace Mantid
      */
     int LoadSQW::confidence(Kernel::FileDescriptor & descriptor) const
     {
-      const std::string & filePath = descriptor.filename();
-      const size_t filenameLength = filePath.size();
-
-
 
       // only .sqw can be considered 
       const std::string & extn = descriptor.extension();
