@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/Indirect.cpp
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
+  src/IndirectForeign.cpp
     src/MSDFit.cpp
 	src/MuonAnalysis.cpp
 	src/MuonAnalysisFitDataTab.cpp
@@ -60,6 +61,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect.h
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+  inc/MantidQtCustomInterfaces/IndirectForeign.h
     inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
@@ -101,6 +103,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
+                inc/MantidQtCustomInterfaces/IndirectForeign.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
