@@ -206,19 +206,18 @@ namespace Mantid
       const std::string & filePath = descriptor.filename();
       const size_t filenameLength = filePath.size();
 
-      // Avoid some known file types that have different loaders
-      int confidence(0);
-      if( filePath.compare(filenameLength - 12,12,"_runinfo.xml") == 0 ||
-          filePath.compare(filenameLength - 6,6,".peaks") == 0 ||
-          filePath.compare(filenameLength - 10,10,".integrate") == 0 )
-      {
-        confidence = 0;
-      }
-      else if(descriptor.isAscii())
-      {
-        confidence = 10; // Low so that others may try
-      }
-      return confidence;
+
+
+      // only .sqw can be considered 
+      const std::string & extn = descriptor.extension();
+      if(extn.compare(".sqw") != 0) return 0;
+
+
+     if(descriptor.isAscii())
+     {
+         return 10; // Low so that others may try
+     }
+     return 80; // probably it is sqw indeed
     }
 
 
