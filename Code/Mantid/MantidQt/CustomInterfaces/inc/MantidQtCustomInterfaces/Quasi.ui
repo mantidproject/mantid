@@ -67,11 +67,13 @@
        <property name="workspaceSuffixes" stdset="0">
         <stringlist>
          <string>_res</string>
+         <string>_red</string>
         </stringlist>
        </property>
        <property name="fileBrowserSuffixes" stdset="0">
         <stringlist>
          <string>_res.nxs</string>
+         <string>_red.nxs</string>
         </stringlist>
        </property>
        <property name="showLoad">
@@ -83,7 +85,7 @@
       <widget class="QComboBox" name="cbProgram">
        <item>
         <property name="text">
-         <string>Lorenzians</string>
+         <string>Lorentzians</string>
         </property>
        </item>
        <item>
