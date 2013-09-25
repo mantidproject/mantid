@@ -202,7 +202,6 @@ namespace DataHandling
 
     /// Return the map parsed from file. Should only be called after the file is parsed,
     /// otherwise a map will always be empty.
-    /// TODO: make return const pointer.
     std::map<int, std::vector<int> > getGroupSpectraMap() { return m_groupSpectraMap; }
 
   private:
