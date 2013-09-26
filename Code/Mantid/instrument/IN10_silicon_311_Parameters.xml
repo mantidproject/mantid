@@ -8,7 +8,7 @@
 </parameter>
 
 <parameter name="efixed-val">
-	<value val="2.082" />
+	<value val="7.627 />
 </parameter>
 
 
@@ -18,12 +18,12 @@
 </parameter>
 
 <parameter name="reflection" type="string">
-  <value val="111" />
+  <value val="311" />
 </parameter>
 
 </component-link>
   <component-link name="silicon">
-    <parameter name="Efixed"> <value val="2.082" /> </parameter>
-    <parameter name="resolution"> <value val="0.001" /> </parameter>
+    <parameter name="Efixed"> <value val="7.627" /> </parameter>
+    <parameter name="resolution"> <value val="0.002" /> </parameter>
   </component-link>
 </parameter-file>
