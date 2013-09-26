@@ -54,6 +54,10 @@ namespace Mantid
       (void) lhsX; //Avoid compiler warning
 
       const int bins = static_cast<int>(lhsE.size());
+
+      g_log.notice("Here is called!");
+      std::cout << "Here is called!" << "\n";
+
       for (int j=0; j<bins; ++j)
       {
         // Get references to the input Y's
@@ -65,7 +69,7 @@ namespace Mantid
         // (Sa c/a)2 + (Sb c/b)2 = (Sc)2
         // = (Sa 1/b)2 + (Sb (a/b2))2
         // (Sc)2 = (1/b)2( (Sa)2 + (Sb a/b)2 )
-        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY*rhsE[j]/rightY, 2) )/rightY;
+        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY*rhsE[j]/rightY, 2) )/fabs(rightY);
 
         // Copy the result last in case one of the input workspaces is also any output
         YOut[j] = leftY/rightY;;
@@ -76,6 +80,10 @@ namespace Mantid
                                         const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
     {
       (void) lhsX; //Avoid compiler warning
+
+      g_log.notice("Here 2 in Divide!");
+      std::cout << "Here 2 in Divide!" << ".\n";
+
       if (rhsY == 0) g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero." << std::endl;
 
       // Do the right-hand part of the error calculation just once
@@ -87,7 +95,7 @@ namespace Mantid
         const double leftY = lhsY[j];
 
         // see comment in the function above for the error formula
-        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY, 2)*rhsFactor )/rhsY;
+        EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY, 2)*rhsFactor )/fabs(rhsY);
         // Copy the result last in case one of the input workspaces is also any output
         YOut[j] = leftY/rhsY;
       }
