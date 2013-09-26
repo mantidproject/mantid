@@ -3,7 +3,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES
-  inc/MantidISISLiveData/DllConfig.h
+  #inc/MantidISISLiveData/DllConfig.h
   inc/MantidISISLiveData/TCPEventStreamDefs.h
 )
 
