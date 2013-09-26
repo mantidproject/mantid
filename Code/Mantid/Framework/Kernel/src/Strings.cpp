@@ -1163,6 +1163,8 @@ namespace Mantid
 #endif
       template MANTID_KERNEL_DLL std::string toString(const std::string value);
 
+      template MANTID_KERNEL_DLL std::string toString(const std::vector<int> &value);
+
       // this block should generate the vector ones as well
       template MANTID_KERNEL_DLL std::string toString(const std::set<int> &value);
       template MANTID_KERNEL_DLL std::string toString(const std::set<int16_t> &value);
