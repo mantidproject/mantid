@@ -470,9 +470,9 @@ namespace MantidQt
       Mantid::API::ITableWorkspace_sptr workspace;
 
       // Check to see if the workspace exists...
-      if(Mantid::API::AnalysisDataService::Instance().doesExist("searchResults"))
+      if(Mantid::API::AnalysisDataService::Instance().doesExist("__searchResults"))
       {
-        workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("searchResults"));
+        workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("__searchResults"));
       }
       else
       {
@@ -590,9 +590,9 @@ namespace MantidQt
       Mantid::API::ITableWorkspace_sptr workspace;
 
       // Check to see if the workspace exists...
-      if(Mantid::API::AnalysisDataService::Instance().doesExist("dataFileResults"))
+      if(Mantid::API::AnalysisDataService::Instance().doesExist("__dataFileResults"))
       {
-        workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("dataFileResults"));
+        workspace = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("__dataFileResults"));
       }
       else
       {

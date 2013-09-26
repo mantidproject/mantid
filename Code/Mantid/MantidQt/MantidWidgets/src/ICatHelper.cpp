@@ -67,7 +67,7 @@ namespace MantidQt
       }
 
       // This will be the workspace where the content of the search result is output to.
-      catalogAlgorithm->setProperty("OutputWorkspace", "searchResults");
+      catalogAlgorithm->setProperty("OutputWorkspace", "__searchResults");
 
       // Iterate over the provided map of user input fields. For each field that isn't empty (e.g. a value was input by the user)
       // then we will set the algorithm property with the key and value of that specific value.
@@ -108,7 +108,7 @@ namespace MantidQt
       // Search for all related dataFiles to this investigation id.
       catalogAlgorithm->setProperty("InvestigationId", investigationId);
       // This will be the workspace where the content of the search result is saved to.
-      catalogAlgorithm->setPropertyValue("OutputWorkspace","dataFileResults");
+      catalogAlgorithm->setPropertyValue("OutputWorkspace","__dataFileResults");
 
       // Allow asynchronous execution to update label(s) while search is being carried out.
       Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
