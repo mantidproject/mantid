@@ -1,5 +1,8 @@
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtCustomInterfaces/IndirectForeign.h"
+#include "MantidQtCustomInterfaces/ForCE.h"
+#include "MantidQtCustomInterfaces/MolDyn.h"
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -20,8 +23,8 @@ IndirectForeign::IndirectForeign(QWidget *parent) : UserSubWindow(parent)
 	m_uiForm.setupUi(this);
 
 	//insert each tab into the interface on creation
-	m_foreignTabs.insert(std::make_pair(FORCE, new ForCE(m_uiForm.IndirectForeignTabs->widget(RES_NORM))));
-	m_foreignTabs.insert(std::make_pair(MOLDYN, new MolDyn(m_uiForm.IndirectForeignTabs->widget(QUASI))));
+	m_foreignTabs.insert(std::make_pair(FORCE, new ForCE(m_uiForm.IndirectForeignTabs->widget(FORCE))));
+	m_foreignTabs.insert(std::make_pair(MOLDYN, new MolDyn(m_uiForm.IndirectForeignTabs->widget(MOLDYN))));
 
 	//Connect each tab to the actions available in this GUI
 	std::map<unsigned int, IndirectForeignTab*>::iterator iter;

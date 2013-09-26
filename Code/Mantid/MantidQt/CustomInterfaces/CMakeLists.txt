@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/CreateMDWorkspaceAlgDialog.cpp	
     src/Elwin.cpp
 	src/EventNexusFileMemento.cpp
+  src/ForCE.cpp
     src/Fury.cpp
     src/FuryFit.cpp
 	src/Homer.cpp
@@ -17,6 +18,8 @@ set ( SRC_FILES
 	src/IndirectDataAnalysis.cpp
 	src/IndirectDiffractionReduction.cpp
   src/IndirectForeign.cpp
+  src/IndirectForeignTab.cpp
+  src/MolDyn.cpp
     src/MSDFit.cpp
 	src/MuonAnalysis.cpp
 	src/MuonAnalysisFitDataTab.cpp
@@ -52,7 +55,8 @@ set ( INC_FILES
     inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
     inc/MantidQtCustomInterfaces/DllConfig.h
     inc/MantidQtCustomInterfaces/Elwin.h
-	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h	
+	inc/MantidQtCustomInterfaces/EventNexusFileMemento.h
+  inc/MantidQtCustomInterfaces/ForCE.h
     inc/MantidQtCustomInterfaces/Fury.h
     inc/MantidQtCustomInterfaces/FuryFit.h
 	inc/MantidQtCustomInterfaces/Homer.h
@@ -62,6 +66,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
 	inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
   inc/MantidQtCustomInterfaces/IndirectForeign.h
+  inc/MantidQtCustomInterfaces/IndirectForeignTab.h
+  inc/MantidQtCustomInterfaces/MolDyn.h
     inc/MantidQtCustomInterfaces/MSDFit.h
 	inc/MantidQtCustomInterfaces/MuonAnalysis.h
 	inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h
@@ -96,6 +102,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspace.h
                 inc/MantidQtCustomInterfaces/CreateMDWorkspaceAlgDialog.h
                 inc/MantidQtCustomInterfaces/Elwin.h
+                inc/MantidQtCustomInterfaces/ForCE.h
                 inc/MantidQtCustomInterfaces/Fury.h
                 inc/MantidQtCustomInterfaces/FuryFit.h
                 inc/MantidQtCustomInterfaces/Homer.h
@@ -104,6 +111,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectDataAnalysis.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/IndirectForeign.h
+                inc/MantidQtCustomInterfaces/IndirectForeignTab.h
+                inc/MantidQtCustomInterfaces/MolDyn.h
                 inc/MantidQtCustomInterfaces/MSDFit.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisFitDataTab.h

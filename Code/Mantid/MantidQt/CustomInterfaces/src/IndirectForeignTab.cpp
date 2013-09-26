@@ -1,4 +1,5 @@
 #include "MantidQtAPI/UserSubWindow.h"
+#include "MantidQtCustomInterfaces/IndirectForeignTab.h"
 
 namespace MantidQt
 {

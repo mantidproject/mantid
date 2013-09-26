@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="indirectForeignTabs">
+    <widget class="QTabWidget" name="IndirectForeignTabs">
      <property name="currentIndex">
       <number>0</number>
      </property>
