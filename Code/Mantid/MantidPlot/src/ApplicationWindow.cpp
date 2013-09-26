@@ -507,6 +507,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   m_iface_script = NULL;
   loadCustomActions();
 
+  // Nullify icatsearch
+  icatsearch = NULL;
+
   // Print a warning message if the scripting language is set to muParser
   if (defaultScriptingLang == "muParser")
   {
@@ -9495,6 +9498,12 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   mantidUI->shutdown();
 
+  if (icatsearch)
+  {
+    icatsearch->disconnect();
+    delete icatsearch;
+  }
+
   if( scriptingWindow )
   {
     scriptingWindow->disconnect();
@@ -17560,8 +17569,16 @@ void ApplicationWindow::ICatLogin()
 
 void ApplicationWindow::ICatSearch2()
 {
-  icatsearch = new MantidQt::MantidWidgets::ICatSearch2();
-  icatsearch->show();
+  if (icatsearch == NULL)
+  {
+    icatsearch = new MantidQt::MantidWidgets::ICatSearch2();
+    icatsearch->show();
+  }
+  if (icatsearch)
+  {
+    icatsearch->show();
+    icatsearch->raise();
+  }
 }
 
 void ApplicationWindow::ICatIsisSearch()
