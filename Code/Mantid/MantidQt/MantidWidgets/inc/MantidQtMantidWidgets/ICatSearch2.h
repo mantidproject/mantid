@@ -68,8 +68,12 @@ namespace MantidQt
       void getCheckedFileNames();
       /// Updates the dataFile text boxes with relevant info about the selected dataFile.
       void updateDataFileLabels(QTableWidgetItem* item);
+      /// Obtain all file extensions from the provided column (dataFileResults -> File name).
+      std::set<std::string> getDataFileExtensions(Mantid::API::Column_sptr column);
+      /// Add the list of file extensions to the "Filter type..." drop-down.
+      void populateDataFileType(std::set<std::string> extensions);
       /// Filter the table to show only results by data type user wants to view.
-      void filterDataFileType();
+      void filterDataFileType(int index);
 
     private slots:
       /// When the facility login button is clicked
@@ -117,7 +121,7 @@ namespace MantidQt
       ///////////////////////////////////////////////////////////////////////////////
 
       /// Performs filterDataFileType() for specified filer type.
-      void doFilter();
+      void doFilter(int index);
       /// Downloads selected datFiles to a specified location.
       void downloadDataFiles();
       /// Loads the selected dataFiles into workspaces.

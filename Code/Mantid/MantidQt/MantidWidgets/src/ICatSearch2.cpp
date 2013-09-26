@@ -1,5 +1,6 @@
 #include "MantidQtMantidWidgets/ICatSearch2.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include <Poco/Path.h>
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -62,6 +63,8 @@ namespace MantidQt
       connect(m_icatUiForm.searchResultsTbl,SIGNAL(itemDoubleClicked(QTableWidgetItem*)),this,SLOT(investigationSelected(QTableWidgetItem*)));
       // Show "DataFile frame" when the user selects an investigation.
       connect(m_icatUiForm.dataFileCbox,SIGNAL(clicked()),this,SLOT(showDataFileInfo()));
+      // When the user has selected a filter type then perform the filter for the specified type.
+      connect(m_icatUiForm.dataFileFilterCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(doFilter(int)));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
@@ -550,6 +553,9 @@ namespace MantidQt
       m_icatUiForm.dataFileCbox->setEnabled(true);
       m_icatUiForm.dataFileCbox->setChecked(true);
       m_icatUiForm.dataFileFrame->show();
+      // Have to clear the combo-box in order to prevent the user from seeing the extensions of previous search.
+      m_icatUiForm.dataFileFilterCombo->clear();
+      m_icatUiForm.dataFileFilterCombo->addItem("Filter type...");
 
       // Inform the user that the search is in progress.
       m_icatUiForm.dataFileLbl->setText("searching for related datafiles...");
@@ -608,6 +614,12 @@ namespace MantidQt
       // Make the headers of the table bold.
       emboldenTableHeaders(dataFileTable);
 
+      // Obtain the list of extensions of all dataFiles for the chosen investigation.
+      // "File name" is the first column of "dataFileResults" so we make use of it.
+      std::set<std::string> extensions = getDataFileExtensions(workspace.get()->getColumn(0));
+
+      // Populate the "Filter type..." combo-box with all possible file extensions.
+      populateDataFileType(extensions);
     }
 
     /**
@@ -634,11 +646,59 @@ namespace MantidQt
     }
 
     /**
+     * Obtain all file extensions from the provided column.
+     * @param column :: The fileName column in the dataFile workspace.
+     * @return A set containing all file extensions.
+     */
+    std::set<std::string> ICatSearch2::getDataFileExtensions(Mantid::API::Column_sptr column)
+    {
+      std::set<std::string> extensions;
+
+      // For every filename in the column...
+      for (unsigned row = 0; row < column->size(); row++)
+      {
+        // Add the file extension to the set if it does not exist.
+        extensions.insert(Poco::Path(column->cell<std::string>(row)).getExtension());
+      }
+
+      return (extensions);
+    }
+
+    /**
+     * Add the list of file extensions to the "Filter type..." drop-down.
+     */
+    void ICatSearch2::populateDataFileType(std::set<std::string> extensions)
+    {
+      for( std::set<std::string>::const_iterator iter = extensions.begin(); iter != extensions.end(); ++iter)
+      {
+        m_icatUiForm.dataFileFilterCombo->addItem(QString::fromStdString("." + *iter));
+      }
+    }
+
+    /**
      * Filters the "DataFile information" table to display user specified files (based on file extension).
      */
-    void ICatSearch2::filterDataFileType()
+    void ICatSearch2::filterDataFileType(int index)
     {
+      QTableWidget* table = m_icatUiForm.dataFileResultsTbl;
 
+      for (int row = 0; row < table->rowCount(); ++row)
+      {
+        // Hide row by default, in order to show only relevant ones.
+        table->setRowHidden(row,true);
+        // We only need to check the first column to compare file extensions as it's the file name.
+        for (int col = 0; col < 1; ++col)
+        {
+          QTableWidgetItem *item = table->item(row,col);
+          // Show the relevant rows depending on file extension.
+          // 0 index is "Filter type..." so all will be shown.
+          if (index == 0 || (item->text().contains(m_icatUiForm.dataFileFilterCombo->text(index))))
+          {
+            table->setRowHidden(row,false);
+            break;
+          }
+        }
+      }
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -648,9 +708,10 @@ namespace MantidQt
     /**
      * Performs filter option for specified filer type.
      */
-    void ICatSearch2::doFilter()
+    void ICatSearch2::doFilter(int index)
     {
-
+      // Filter by the user selected file extension.
+      filterDataFileType(index);
     }
 
     /**
