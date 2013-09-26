@@ -168,8 +168,10 @@ namespace DataHandling
            continue;
        }
 
-       // First six columns in the file, the detector ID and a code for the type of detector CODE = 3 (psd gas tube)
-       istr >> detID >> offset >> dump >> code >> dump >> dump;
+       // First five columns in the file, the detector ID and a code for the type of detector CODE = 3 (psd gas tube)
+       istr >> detID >> offset >> dump >> code >> dump;
+       if (numColumns > 5)
+         istr >> dump; // get phi
 
        if( code == 3 ){
           // This is detector will look for it in workspace and if found use its position
@@ -187,7 +189,9 @@ namespace DataHandling
               oss.precision(pOffset);
               oss << std::setw(wDet) << detID << std::setw(wOff) << offset;
               oss.precision(pOther);
-              oss << std::setw(wRad) << l2 << std::setw(wCode) << code << std::setw(wAng) << theta << std::setw(wAng) << phi ;
+              oss << std::setw(wRad) << l2 << std::setw(wCode) << code << std::setw(wAng) << theta << std::setw(wAng); 
+              if (numColumns > 5) 
+                oss << phi ; // insert phi
               std::string prefix = oss.str();
               std::string suffix = str.substr( width, std::string::npos );
               out << prefix << suffix << "\n";
