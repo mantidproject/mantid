@@ -50,17 +50,17 @@
       <widget class="QComboBox" name="cbWidth">
        <item>
         <property name="text">
-         <string>FW11</string>
+         <string>1.1</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>FW21</string>
+         <string>2.1</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>FW22</string>
+         <string>2.2</string>
         </property>
        </item>
       </widget>

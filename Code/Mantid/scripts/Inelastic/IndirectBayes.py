@@ -905,4 +905,4 @@ def JumpRun(sname,jump,prog,width,Crop,qrange,Verbose,Plot,Save):
 
 def JumpPlot(inputWS):
     j_plot=mp.plotSpectrum(inputWS+'_Data',0,True)
-    mp.mergePlots(j_plot,mp.plotSpectrum(inputWS+'_Fit',0,False))
+    mp.mergePlots(j_plot,mp.plotSpectrum(inputWS+'_Fit',0,True))
