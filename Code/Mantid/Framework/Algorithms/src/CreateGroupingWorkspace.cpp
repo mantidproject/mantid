@@ -54,6 +54,20 @@ namespace Algorithms
   {
   }
   
+  const std::string CreateGroupingWorkspace::name() const
+  {
+    return "CreateGroupingWorkspace";
+  }
+
+  int CreateGroupingWorkspace::version() const
+  {
+    return 1;
+  }
+
+  const std::string CreateGroupingWorkspace::category() const
+  {
+    return "Utility\\Workspaces;Transforms\\Grouping";
+  }
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
