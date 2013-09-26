@@ -152,6 +152,55 @@ namespace CurveFitting
   int NeutronBk2BkExpConvPVoigt::s_peakRadius = 5;
 
   //----------------------------------------------------------------------------------------------
+  /** Define the fittable parameters
+   * Notice that Sig0, Sig1 and Sig2 are NOT the squared value recorded in Fullprof
+   */
+  void NeutronBk2BkExpConvPVoigt::init()
+  {
+    // Peak height (0)
+    declareParameter("Height", 1.0, "Intensity of peak");
+
+    // Instrument geometry related (1 ~ 3)
+    declareParameter("Dtt1", 1.0, "coefficient 1 for d-spacing calculation for epithermal neutron part");
+    declareParameter("Dtt2", 1.0, "coefficient 2 for d-spacing calculation for epithermal neutron part");
+    declareParameter("Zero", 0.0, "Zero shift for epithermal neutron");
+
+    // Peak profile related (4 ~ 7) Back to back Expoential
+    declareParameter("Alph0",1.6, "exponential constant for rising part of epithermal neutron pulse");
+    declareParameter("Alph1",1.5, "exponential constant for rising part of expithermal neutron pulse");
+    declareParameter("Beta0",1.6, "exponential constant of decaying part of epithermal neutron pulse");
+    declareParameter("Beta1",1.5, "exponential constant of decaying part of epithermal neutron pulse");
+
+    // Pseudo-Voigt (8 ~ 13)
+    declareParameter("Sig0", 1.0, "variance parameter 1 of the Gaussian component of the psuedovoigt function");
+    declareParameter("Sig1", 1.0, "variance parameter 2 of the Gaussian component of the psuedovoigt function");
+    declareParameter("Sig2", 1.0, "variance parameter 3 of the Gaussian component of the psuedovoigt function");
+
+    declareParameter("Gam0", 0.0, "FWHM parameter 1 of the Lorentzian component of the psuedovoigt function");
+    declareParameter("Gam1", 0.0, "FWHM parameter 2 of the Lorentzian component of the psuedovoigt function");
+    declareParameter("Gam2", 0.0, "FWHM parameter 3 of the Lorentzian component of the psuedovoigt function");
+
+    // Lattice parameter (14)
+    declareParameter("LatticeConstant", 10.0, "lattice constant for the sample");
+
+    declareParameter("H", 0.0, "Miller index H. ");
+    declareParameter("K", 0.0, "Miller index K. ");
+    declareParameter("L", 0.0, "Miller index L. ");
+
+    // Some build-in constant
+    LATTICEINDEX = 14;
+    HEIGHTINDEX = 0;
+
+    // Unit cell
+    m_unitCellSize = -DBL_MAX;
+
+    // Set flag
+    m_cellParamValueChanged = true;
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Get peak parameters stored locally
    * Get some internal parameters values including
    * (a) Alpha, (b) Beta, (c) Gamma, (d) Sigma2
@@ -223,6 +272,31 @@ namespace CurveFitting
 
     double latticeconstant = getParameter(LATTICEINDEX);
 
+    if (!mHKLSet)
+    {
+      // Miller index can only be set once.  Either via parameters or client-called setMillerIndex
+      double h = getParameter(15);
+      double k = getParameter(16);
+      double l = getParameter(17);
+      mH = static_cast<int>(h);
+      mK = static_cast<int>(k);
+      mL = static_cast<int>(l);
+
+      // Check value valid or not
+      if (mH*mH + mK*mK + mL*mL < 1.0E-8)
+      {
+        stringstream errmsg;
+        errmsg << "H = K = L = 0 is not allowed";
+        g_log.error(errmsg.str());
+        throw std::invalid_argument(errmsg.str());
+      }
+
+      g_log.debug() << "Set (HKL) from input parameter = " << mH << ", " << mK << ", "
+                    << mL << "\n";
+
+      mHKLSet = true;
+    }
+
     double dh, tof_h, eta, alpha, beta, H, sigma2, gamma, N;
 
     // Calcualte Peak Position d-spacing if necessary
@@ -253,8 +327,10 @@ namespace CurveFitting
     sigma2 = sig0*sig0 + sig1*sig1*std::pow(dh, 2) + sig2*sig2*std::pow(dh, 4);
     gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
 
-    g_log.notice() << "[DBx123] Gam-0 = " << gam0 << ", Gam-1 = " << gam1 << ", Gam-2 = " << gam2
-                   << ", Gamma = " << gamma << ".\n";
+    g_log.debug() << "[F001] TOF_h = " << tof_h << ", Alpha = " << alpha
+                  << ", Beta = " << beta << ", Gamma = " << gamma
+                  << "(Gam-0 = " << gam0 << ", Gam-1 = " << gam1 << ", Gam-2 = " << gam2
+                  << ")." << "\n";
 
     // Calcualte H for the peak
     calHandEta(sigma2, gamma, H, eta);
@@ -356,17 +432,20 @@ namespace CurveFitting
     * @param xValues: The x-values to evaluate the peak at.
    */
   void NeutronBk2BkExpConvPVoigt::function(vector<double>& out, const vector<double> &xValues) const
-  {
-    // calculate peak parameters
+  {    
+    // Calculate peak parameters
+    if (m_hasNewParameterValue)
+      calculateParameters(false);
+    else
+      g_log.debug("Function() has no new parameters to calculate. ");
+
+    // Get some other parmeters
     const double HEIGHT = getParameter(HEIGHTINDEX);
     const double INVERT_SQRT2SIGMA = 1.0/sqrt(2.0*m_Sigma2);
 
-    if (m_hasNewParameterValue)
-      calculateParameters(false);
-
+    // Calculate where to start and to end calculating
     const double RANGE = m_fwhm*PEAKRANGE;
 
-    // calculate where to start and to end calculating
     const double LEFT_VALUE = m_centre - RANGE;
     vector<double>::const_iterator iter = std::lower_bound(xValues.begin(), xValues.end(), LEFT_VALUE);
 
@@ -390,71 +469,36 @@ namespace CurveFitting
     */
   void NeutronBk2BkExpConvPVoigt::function1D(double* out, const double* xValues, const size_t nData)const
   {
-    // calculate some parameter for the (peak-like) function
-    const double height = getParameter(HEIGHTINDEX);
-    const double invert_sigma2 = 1.0/sqrt(2.0*m_Sigma2);
-    double dx = fabs(s_peakRadius*this->fwhm());
+    // Calculate peak parameters
+    if (m_hasNewParameterValue)
+      calculateParameters(false);
+    else
+      g_log.debug("Function() has no new parameters to calculate. ");
+
+    // Get some other parameters
+    const double HEIGHT = getParameter(HEIGHTINDEX);
+    const double INVERT_SQRT2SIGMA = 1.0/sqrt(2.0*m_Sigma2);
 
     // On each data point
+    const double RANGE = m_fwhm*PEAKRANGE;
+    g_log.debug() << "[F002] Peak centre = " << m_centre << "; Calcualtion Range = " << RANGE << ".\n";
+
     for(size_t i = 0; i < nData; ++i)
     {
-      if (fabs(xValues[i] - m_centre) < dx)
+      if (fabs(xValues[i] - m_centre) < RANGE)
       {
         // In peak range
-        out[i] = height
-            * calOmega(xValues[i] - m_centre, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, invert_sigma2);
+        out[i] = HEIGHT
+            * calOmega(xValues[i] - m_centre, m_eta, m_N, m_Alpha, m_Beta, m_fwhm, m_Sigma2, INVERT_SQRT2SIGMA);
+        g_log.debug() << "TOF = " << xValues[i] << " = " << out[i] << "\n";
       }
       else
       {
         // Out of peak range
         out[i] = 0.0;
+        g_log.debug() << "TOF = " << xValues[i] << " out of calculation range. " << ".\n";
       }
     }
-
-    return;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Define the fittable parameters
-   * Notice that Sig0, Sig1 and Sig2 are NOT the squared value recorded in Fullprof
-   */
-  void NeutronBk2BkExpConvPVoigt::init()
-  {
-    // Peak height (0)
-    declareParameter("Height", 1.0, "Intensity of peak");
-
-    // Instrument geometry related (1 ~ 3)
-    declareParameter("Dtt1", 1.0, "coefficient 1 for d-spacing calculation for epithermal neutron part");
-    declareParameter("Dtt2", 1.0, "coefficient 2 for d-spacing calculation for epithermal neutron part");
-    declareParameter("Zero", 0.0, "Zero shift for epithermal neutron");
-
-    // Peak profile related (4 ~ 7) Back to back Expoential
-    declareParameter("Alph0",1.6, "exponential constant for rising part of epithermal neutron pulse");
-    declareParameter("Alph1",1.5, "exponential constant for rising part of expithermal neutron pulse");
-    declareParameter("Beta0",1.6, "exponential constant of decaying part of epithermal neutron pulse");
-    declareParameter("Beta1",1.5, "exponential constant of decaying part of epithermal neutron pulse");
-
-    // Pseudo-Voigt (8 ~ 13)
-    declareParameter("Sig0", 1.0, "variance parameter 1 of the Gaussian component of the psuedovoigt function");
-    declareParameter("Sig1", 1.0, "variance parameter 2 of the Gaussian component of the psuedovoigt function");
-    declareParameter("Sig2", 1.0, "variance parameter 3 of the Gaussian component of the psuedovoigt function");
-
-    declareParameter("Gam0", 0.0, "FWHM parameter 1 of the Lorentzian component of the psuedovoigt function");
-    declareParameter("Gam1", 0.0, "FWHM parameter 2 of the Lorentzian component of the psuedovoigt function");
-    declareParameter("Gam2", 0.0, "FWHM parameter 3 of the Lorentzian component of the psuedovoigt function");
-
-    // Lattice parameter (14)
-    declareParameter("LatticeConstant", 10.0, "lattice constant for the sample");
-
-    // Some build-in constant
-    LATTICEINDEX = 14;
-    HEIGHTINDEX = 0;
-
-    // Unit cell
-    m_unitCellSize = -DBL_MAX;
-
-    // Set flag
-    m_cellParamValueChanged = true;
 
     return;
   }
@@ -483,7 +527,7 @@ namespace CurveFitting
     }
     else
     {
-      g_log.notice() << "[DBx121] Eta = " << eta << "; Gamma = " << gamma << ".\n";
+      g_log.debug() << "[DBx121] Eta = " << eta << "; Gamma = " << gamma << ".\n";
     }
 
     return;

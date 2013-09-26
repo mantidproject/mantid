@@ -146,10 +146,10 @@ protected:
   mutable bool m_parameterValid;
 
   /// Miller Indices
-  int mH;
-  int mK;
-  int mL;
-  bool mHKLSet;
+  mutable int mH;
+  mutable int mK;
+  mutable int mL;
+  mutable bool mHKLSet;
 
   size_t LATTICEINDEX;
   size_t HEIGHTINDEX;
