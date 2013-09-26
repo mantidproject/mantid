@@ -55,9 +55,6 @@ namespace Mantid
 
       const int bins = static_cast<int>(lhsE.size());
 
-      g_log.notice("Here is called!");
-      std::cout << "Here is called!" << "\n";
-
       for (int j=0; j<bins; ++j)
       {
         // Get references to the input Y's
@@ -81,10 +78,9 @@ namespace Mantid
     {
       (void) lhsX; //Avoid compiler warning
 
-      g_log.notice("Here 2 in Divide!");
-      std::cout << "Here 2 in Divide!" << ".\n";
-
-      if (rhsY == 0) g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero." << std::endl;
+      if (rhsY == 0)
+        g_log.warning() << "Division by zero: the RHS workspace is a single-valued workspace with value zero."
+                        << "\n";
 
       // Do the right-hand part of the error calculation just once
       const double rhsFactor = pow(rhsE/rhsY,2);
