@@ -169,86 +169,108 @@ public:
     return;
   }
 
-    //----------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Do test on a parameter element
-    */
+  ** parameElem: parameter element to be tested
+  ** name:       expected name of parameter element to be tested 
+  ** eq1:        expected value of first double
+  ** eq2:        expected value of second double, if expected
+  ** resultUnit: expected value of result-unit
+  ** unit:       expected value of unit
+  ** fixed:      true if parameter is expected to be fixed
+  */
   void do_test_paramemeter(const Poco::XML::Element* paramElem, const std::string& name, const double eq1, const double eq2, const std::string& resultUnit, const std::string& unit, bool fixed )
   {
-     TS_ASSERT(paramElem);
-     if(paramElem)
-     {
-          TS_ASSERT_EQUALS(paramElem->getAttribute("type"),"fitting");
-          TS_ASSERT_EQUALS(paramElem->getAttribute("name"),name);
-          Poco::XML::Element* formulaElem = paramElem->getChildElement("formula");
-          TS_ASSERT(formulaElem);
-          if(formulaElem)
-          {
-             std::string eqString = formulaElem->getAttribute("eq"); 
-             do_test_eq_value (eqString, name, eq1, eq2 );
-             TS_ASSERT_EQUALS(formulaElem->getAttribute("result-unit"),resultUnit);
-             TS_ASSERT_EQUALS(formulaElem->getAttribute("unit"),unit);
-          }
-          Poco::XML::Element* fixedElem = paramElem->getChildElement("fixed");
-          if(fixed)
-          {
-            TS_ASSERT(fixedElem);
-          } 
-          else
-          {
-            TS_ASSERT(!fixedElem);
-          }
-     }
+    TS_ASSERT(paramElem);
+    if(paramElem)
+    {
+      TS_ASSERT_EQUALS(paramElem->getAttribute("type"),"fitting");
+      TS_ASSERT_EQUALS(paramElem->getAttribute("name"),name);
+      Poco::XML::Element* formulaElem = paramElem->getChildElement("formula");
+      TS_ASSERT(formulaElem);
+      if(formulaElem)
+      {
+        std::string eqString = formulaElem->getAttribute("eq"); 
+        do_test_eq_value (eqString, name, eq1, eq2 );
+        TS_ASSERT_EQUALS(formulaElem->getAttribute("result-unit"),resultUnit);
+        TS_ASSERT_EQUALS(formulaElem->getAttribute("unit"),unit);
+      }
+      Poco::XML::Element* fixedElem = paramElem->getChildElement("fixed");
+      if(fixed)
+      {
+        TS_ASSERT(fixedElem);
+      } 
+      else
+      {
+        TS_ASSERT(!fixedElem);
+      }
+    }
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Do test on the eq value of given parameter element.
+  **  eqValue: value to be tested
+  **  name:    name of parameter element to be tested (determines format of eqValue)
+  **  eq1:     expected value of first double in eqValue
+  **  eq2:     expected value of second double in eqValue, if expected
   */
   void do_test_eq_value (const std::string& eqValue, const std::string& name, const double eq1, const double eq2)
   {
     if(name == "IkedaCarpenterPV:SigmaSquared")
     {
+      // eqValue string expected to be something like "0.00043999999999999996*centre^2+0.35499999999999993"
       size_t endEq1 = eqValue.find("*centre^2+",1);
       if(endEq1 == std::string::npos) TS_FAIL("'*centre^2+' not found in the value of 'eq' for Sigma squared.");
-      std::string eq1Value = eqValue.substr(0,endEq1);
-      std::string eq2Value = eqValue.substr(endEq1+10,std::string::npos);
-      double eq1v = parse_double(eq1Value);
-      TS_ASSERT_DELTA( eq1v, eq1, 0.0000001);
-      double eq2v = parse_double(eq2Value);
-      TS_ASSERT_DELTA( eq2v, eq2, 0.0000001);
+      else 
+      {
+        std::string eq1Value = eqValue.substr(0,endEq1);
+        std::string eq2Value = eqValue.substr(endEq1+10,std::string::npos);
+        double eq1v = parse_double(eq1Value);
+        TS_ASSERT_DELTA( eq1v, eq1, 0.0000001);
+        double eq2v = parse_double(eq2Value);
+        TS_ASSERT_DELTA( eq2v, eq2, 0.0000001);
+      }
     }
     else if (name == "IkedaCarpenterPV:Gamma") 
     {
+      // eqValue string expected to be something like "2.742*centre"
       size_t endEq1 = eqValue.find("*centre",1);
       if(endEq1 == std::string::npos) TS_FAIL("'*centre' not found in the value of 'eq' for Gamma.");
-      std::string eq1Value = eqValue.substr(0,endEq1);
-      double eq1v = parse_double(eq1Value);
-      TS_ASSERT_DELTA( eq1v, eq1, 0.0000001)
+      else
+      {
+        std::string eq1Value = eqValue.substr(0,endEq1);
+        double eq1v = parse_double(eq1Value);
+        TS_ASSERT_DELTA( eq1v, eq1, 0.0000001)
+      }
     }
     else
     {
+      // eqValue string expected to be just a double
       double eqv = parse_double(eqValue);
       TS_ASSERT_DELTA( eqv, eq1, 0.0000001)
     }
   }
 
-  /** Read a double value from a string
+  //----------------------------------------------------------------------------------------------
+  /** Read a double value from a string and test success of this
   */
   double parse_double ( const std::string& value )
   {
-   try
-   {
-     return boost::lexical_cast<double>( value ) ;
-   }
-   catch(boost::bad_lexical_cast&)
-   { 
-     std::string errorMessage = "Can't read double from '"+value+"'.";
-     TS_FAIL(errorMessage);
-     return 0.0; 
-   }
+    try
+    {
+      return boost::lexical_cast<double>( value ) ;
+    }
+    catch(boost::bad_lexical_cast&)
+    { 
+      std::string errorMessage = "Can't read double from '"+value+"'.";
+      TS_FAIL(errorMessage);
+      return 0.0; 
+    }
   }
 
   //----------------------------------------------------------------------------------------------
   /** Generate a 2 bank .irf file
-    */
+  */
   void generate2BankIrfFile(string filename)
   {
     ofstream ofile;
