@@ -102,10 +102,10 @@ public:
             do_test_paramemeter( paramElem2, "IkedaCarpenterPV:Beta0", 6.251096, 0.0, "TOF", "", true );
 
             Poco::XML::Element* paramElem3 = static_cast<Poco::XML::Element*>(parameterNodeList->item(2));
-            do_test_paramemeter( paramElem3, "IkedaCarpenterPV:Alpha1", 0.0, 0.0, "TOF", "", true );
+            do_test_paramemeter( paramElem3, "IkedaCarpenterPV:Alpha1", 0.1, 0.0, "TOF", "", true );
 
             Poco::XML::Element* paramElem4 = static_cast<Poco::XML::Element*>(parameterNodeList->item(3));
-            do_test_paramemeter( paramElem4, "IkedaCarpenterPV:Kappa", 0.0, 0.0, "", "", true );
+            do_test_paramemeter( paramElem4, "IkedaCarpenterPV:Kappa", -0.1, 0.0, "", "", true );
           }
 
           parameterNodeList->release();  // Finished with parameter list
@@ -141,7 +141,7 @@ public:
         {
           TS_ASSERT_EQUALS(componentLinkElem3->getAttribute("name"),"Bank3");
 
-          Poco::XML::NodeList* parameterNodeList = componentLinkElem2->getElementsByTagName("parameter"); // get parameter elements
+          Poco::XML::NodeList* parameterNodeList = componentLinkElem3->getElementsByTagName("parameter"); // get parameter elements
           size_t numParameters = parameterNodeList->length();
           TS_ASSERT_EQUALS(numParameters,2); // Two parameter elements expected
 
@@ -202,8 +202,48 @@ public:
 
   /** Do test on the eq value of given parameter element.
   */
-  void do_test_eq_value (const std::string& eqvalue, const std::string& name, const double eq1, const double eq2)
+  void do_test_eq_value (const std::string& eqValue, const std::string& name, const double eq1, const double eq2)
   {
+    if(name == "IkedaCarpenterPV:SigmaSquared")
+    {
+      size_t endEq1 = eqValue.find("*centre^2+",1);
+      if(endEq1 == std::string::npos) TS_FAIL("'*centre^2+' not found in the value of 'eq' for Sigma squared.");
+      std::string eq1Value = eqValue.substr(0,endEq1);
+      std::string eq2Value = eqValue.substr(endEq1+10,std::string::npos);
+      double eq1v = parse_double(eq1Value);
+      TS_ASSERT_DELTA( eq1v, eq1, 0.0000001);
+      double eq2v = parse_double(eq2Value);
+      TS_ASSERT_DELTA( eq2v, eq2, 0.0000001);
+    }
+    else if (name == "IkedaCarpenterPV:Gamma") 
+    {
+      size_t endEq1 = eqValue.find("*centre",1);
+      if(endEq1 == std::string::npos) TS_FAIL("'*centre' not found in the value of 'eq' for Gamma.");
+      std::string eq1Value = eqValue.substr(0,endEq1);
+      double eq1v = parse_double(eq1Value);
+      TS_ASSERT_DELTA( eq1v, eq1, 0.0000001)
+    }
+    else
+    {
+      double eqv = parse_double(eqValue);
+      TS_ASSERT_DELTA( eqv, eq1, 0.0000001)
+    }
+  }
+
+  /** Read a double value from a string
+  */
+  double parse_double ( const std::string& value )
+  {
+   try
+   {
+     return boost::lexical_cast<double>( value ) ;
+   }
+   catch(boost::bad_lexical_cast&)
+   { 
+     std::string errorMessage = "Can't read double from '"+value+"'.";
+     TS_FAIL(errorMessage);
+     return 0.0; 
+   }
   }
 
   //----------------------------------------------------------------------------------------------
@@ -252,7 +292,7 @@ public:
       ofile << "!       Gam-2     Gam-1     Gam-0                                        \n";
       ofile << "GAMMA     0.000     2.742      0.000                                     \n";
       ofile << "!          alph0       beta0       alph1       beta1                     \n";
-      ofile << "ALFBE        1.500      3.012      5.502      9.639                      \n";
+      ofile << "ALFBE    0.000008    6.251096    0.100000   -0.100000                    \n";
       ofile << "!         alph0t      beta0t      alph1t      beta1t                     \n";
       ofile << "ALFBT       86.059     96.487     13.445      3.435                      \n";
 
