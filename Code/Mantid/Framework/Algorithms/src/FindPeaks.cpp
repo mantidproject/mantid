@@ -997,7 +997,7 @@ namespace Algorithms
                           const int i_max, const int i_centre)
   {
 	int i_peakmin = 0;
-	int i_peakmax = i_max - i_min + 1;
+	int i_peakmax = i_max - i_min;
     const MantidVec &vecX = input->readX(spectrum);
     const MantidVec &vecY = input->readY(spectrum);
 
@@ -1030,7 +1030,7 @@ namespace Algorithms
     if (peaklist->rowCount() > 0)
     {
     	if(peaklist->Int(0,1) >= i_min)i_peakmin = peaklist->Int(0,1) - i_min;
-    	if(peaklist->Int(0,2) >= i_min)i_peakmax = peaklist->Int(0,2) - i_min;
+    	if(peaklist->Int(0,2) >= i_min)i_peakmax = peaklist->Int(0,2) - i_min - 1;
     	in_bg0 = peaklist->Double(0,3);
     	in_bg1 = peaklist->Double(0,4);
     	in_bg2 = peaklist->Double(0,5);
