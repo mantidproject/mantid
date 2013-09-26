@@ -1,0 +1,28 @@
+#ifndef MANTID_ALGORITHMS_FIXGSASINSTRUMENTFILETEST_H_
+#define MANTID_ALGORITHMS_FIXGSASINSTRUMENTFILETEST_H_
+
+#include <cxxtest/TestSuite.h>
+
+#include "MantidAlgorithms/FixGSASInstrumentFile.h"
+
+using Mantid::Algorithms::FixGSASInstrumentFile;
+
+class FixGSASInstrumentFileTest : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static FixGSASInstrumentFileTest *createSuite() { return new FixGSASInstrumentFileTest(); }
+  static void destroySuite( FixGSASInstrumentFileTest *suite ) { delete suite; }
+
+
+  void test_Something()
+  {
+    TSM_ASSERT( "You forgot to write a test!", 0);
+  }
+
+
+};
+
+
+#endif /* MANTID_ALGORITHMS_FIXGSASINSTRUMENTFILETEST_H_ */
