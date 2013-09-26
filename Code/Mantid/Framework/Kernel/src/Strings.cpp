@@ -734,7 +734,9 @@ namespace Mantid
           stop = start;
           for ( ; it != last; ++it)
           {
-            if ( (stop + static_cast<T>(1)) == *(it+1) )
+            if( it+1 == last )
+              break;
+            else if ( (stop + static_cast<T>(1)) == *(it+1) )
               stop = *(it+1);
             else
               break;
