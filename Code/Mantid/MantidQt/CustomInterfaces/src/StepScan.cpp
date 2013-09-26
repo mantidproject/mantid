@@ -322,9 +322,11 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
   m_tableWSName = m_inputWSName.substr(2) + "_StepScan";
   stepScan->setPropertyValue("OutputWorkspace", m_tableWSName);
 
+  // ROI masking
   const QString maskWS = m_uiForm.maskWorkspace->currentText();
   stepScan->setPropertyValue("MaskWorkspace",maskWS.toStdString());
 
+  // Filtering on time (or other unit)
   const QString xminStr = m_uiForm.xmin->text();
   const QString xmaxStr = m_uiForm.xmax->text();
   const double xmin = xminStr.toDouble();
@@ -337,7 +339,15 @@ IAlgorithm_sptr StepScan::setupStepScanAlg()
   }
   if ( ! xminStr.isEmpty() ) stepScan->setProperty("XMin",xmin);
   if ( ! xmaxStr.isEmpty() ) stepScan->setProperty("XMax",xmax);
-  // TODO: Update when entries added to rangeUnit combobox
+  switch (m_uiForm.rangeUnit->currentIndex())
+  {
+  case 1:
+    stepScan->setProperty("RangeUnit","dSpacing");
+    break;
+  default:
+    // The default value for the property is TOF (which is index 0 in the combobox)
+    break;
+  }
 
   // If any of the filtering options were set, next time round we'll need to reload the data
   // as they cause the workspace to be changed
