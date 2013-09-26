@@ -580,18 +580,18 @@ def C2Se(sname):
 		Eb.append(be[1])
 	Vaxis = []
 	dataX = np.array(Xout)
-	dataY = np.array(Yf1)
-	dataE = np.array(Ef1)
+	dataY = np.array(Yf)
+	dataE = np.array(Ef)
 	nhist = 1
 	Vaxis.append('width')
 	dataX = np.append(dataX,np.array(Xout))
-	dataY = np.append(dataY,np.array(Yi1))
-	dataE = np.append(dataE,np.array(Ei1))
+	dataY = np.append(dataY,np.array(Yi))
+	dataE = np.append(dataE,np.array(Ei))
 	nhist += 1
 	Vaxis.append('ampl')
 	dataX = np.append(dataX,np.array(Xout))
-	dataY = np.append(dataY,np.array(Yb1))
-	dataE = np.append(dataE,np.array(Eb1))
+	dataY = np.append(dataY,np.array(Yb))
+	dataE = np.append(dataE,np.array(Eb))
 	nhist += 1
 	Vaxis.append('beta')
 	logger.notice('Vaxis=' + str(Vaxis))
@@ -758,6 +758,14 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,Fit,Loop,Verbose,Plot,Save):
 	if (Plot != 'None'):
 		QuestPlot(fname,Plot)
 	EndTime('Quest')
+
+def QuestPlot(inputWS,Plot):
+	if (Plot == 'Sigma' or Plot == 'All'):
+		sig_plot=mp.plotSpectrum(inputWS+'_Sigma',0,True)
+	if (Plot == 'Beta' or Plot == 'All'):
+		beta_plot = mp.plotSpectrum(inputWS+'_Beta',0,True)
+	if(Plot == 'All'):
+		mp.mergePlots(sig_plot,beta_plot)
 
 # ResNorm programs
 
