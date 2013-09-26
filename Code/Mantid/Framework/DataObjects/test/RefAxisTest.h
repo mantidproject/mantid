@@ -113,7 +113,7 @@ public:
 	  Axis* newRefAxis = refAxis->clone(5,space2);
 	  TS_ASSERT_THROWS( newRefAxis->getMin(), std::runtime_error )
   }
-    void testGetMin()
+    void testGetMax()
   {
 	  Axis* newRefAxis = refAxis->clone(5,space2);
 	  TS_ASSERT_THROWS( newRefAxis->getMax(), std::runtime_error )
