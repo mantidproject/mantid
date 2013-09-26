@@ -91,9 +91,16 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 def IbackStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('Iback')
 	workdir = config['defaultsave.directory']
-	file = instr +'_'+ run
-	filext = file + '.asc'
-	path = FileFinder.getFullPath(filext)
+
+	#check if user browsed for file
+	path = FileFinder.getFullPath(run + '.asc');
+	if(path != ""):
+		file = instr +'_'+ run
+		path = FileFinder.getFullPath(file + '.asc')
+	else: #else user gave a run number
+		file = run
+	
+	fileext = file + '.asc'
 	if Verbose:
 		logger.notice('Reading file : ' + path)
 	handle = open(path, 'r')

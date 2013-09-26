@@ -32,8 +32,40 @@ namespace MantidQt
 			QString plot("False");
 			QString save("False");
 
+			QString useMap("False");
+			QString rejectZero("False");
+
+			QString filename = m_uiForm.mwRun->getFirstFilename();
+			QFileInfo finfo(filename);
+			QString ext = finfo.extension().toLower();
+			QString basename = finfo.basename();
+
+			QSting instrument = m_uiForm.cbInstrument->currentText();
+			QString analyser = m_uiForm.cbAnalyser->currentText();
+			QString reflection = m_uiForm.cbReflection->currentText();
+
+			if(m_uiForm.chkUseMap->isChecked()){ useMap ="True"; }
+			if(m_uiForm.chkRejectZero->isChecked()){ rejectZero ="True"; }
+
+			if(m_uiForm.chkVerbose->isChecked()){ verbose = "True"; }
+			if(m_uiForm.chkPlot->isChecked()){ plot = "True"; }
+			if(m_uiForm.chkSave->isChecked()){ save ="True"; }
+
+			QString pyFunc ("");
+			if(ext == ".asc") //using ascii files
+			{
+				pyFunc += "IbackStart";
+			} 
+			else if(ext == ".inx") //using inx files
+			{
+				pyFunc += "InxStart";
+			}
+
 			QString pyInput = 
-				"from IndirectBayes import ForCERun\n";
+				"from IndirectForce import "+pyFunc+"\n";
+
+			pyInput += "("+instrument+","+basename+","+analyser+","+reflection+","+rejectZero+","+useMap+""
+											","+verbose+","+plot+","+save+")";
 
 			runPythonScript(pyInput);
 		}

@@ -27,6 +27,12 @@
        <property name="label" stdset="0">
         <string>Run: </string>
        </property>
+       <property name="fileExtensions">
+        <stringlist>
+         <string>.dat</string>
+         <string>.cdl</string>
+        </stringlist>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
