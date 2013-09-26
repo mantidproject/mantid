@@ -235,6 +235,8 @@ void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
 {
   // Hold the name of the scan index log in a common place
   const std::string scan_index("scan_index");
+  // If this has already been set to something, keep track of what
+  auto currentSetting = m_uiForm.plotVariable->currentText();
   // Clear the combobox and immediately re-insert 'scan_index' (so it's the first entry)
   m_uiForm.plotVariable->clear();
   m_uiForm.plotVariable->addItem( QString::fromStdString(scan_index) );
@@ -254,6 +256,8 @@ void StepScan::fillPlotVarCombobox(const MatrixWorkspace_const_sptr& ws)
 
   expandPlotVarCombobox( ws );
 
+  // Set back to whatever it was set to before
+  m_uiForm.plotVariable->setCurrentIndex(m_uiForm.plotVariable->findText(currentSetting));
   // Now that this has been populated, allow the user to select from it
   m_uiForm.plotVariable->setEnabled(true);
   // Now's the time to enable the start button as well
