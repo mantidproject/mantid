@@ -172,6 +172,9 @@ private slots:
   /// Closes the window with the plot of the given ws
   void closePlotWindow(const QString& wsName);
 
+  /// Checks if the plot for the workspace does exist.
+  bool plotExists(const QString& wsName);
+
   /// Enable PP tool for the plot of the given WS
   void selectMultiPeak(const QString& wsName);
 
