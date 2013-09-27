@@ -7,8 +7,8 @@ When connected starts sending event packets.
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidLiveData/FakeISISEventDAE.h"
-#include "MantidLiveData/ISIS/TCPEventStreamDefs.h"
+#include "MantidISISLiveData/FakeISISEventDAE.h"
+#include "MantidISISLiveData/TCPEventStreamDefs.h"
 
 #include <Poco/Net/TCPServer.h>
 #include <Poco/Net/StreamSocket.h>
@@ -18,7 +18,7 @@ When connected starts sending event packets.
 
 namespace Mantid
 {
-namespace LiveData
+namespace ISISLiveData
 {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FakeISISEventDAE);
@@ -162,7 +162,7 @@ void FakeISISEventDAE::exec()
     {
       break;
     }
-    progress( 0.0, "Fake DAE" );
+    progress( 0.0, "Fake ISIS event DAE" );
 
     // Sleep for 50 msec
     Poco::Thread::sleep(50);

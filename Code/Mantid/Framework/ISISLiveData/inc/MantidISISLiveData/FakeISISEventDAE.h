@@ -1,5 +1,5 @@
-#ifndef MANTID_LIVEDATA_FAKEISISHISTODAE_H_
-#define MANTID_LIVEDATA_FAKEISISHISTODAE_H_
+#ifndef MANTID_ISISLIVEDATA_FAKEISISHISTODAE_H_
+#define MANTID_ISISLIVEDATA_FAKEISISHISTODAE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -16,7 +16,7 @@ namespace Poco
 
 namespace Mantid
 {
-namespace LiveData
+namespace ISISLiveData
 {
 /**
     Simulates ISIS histogram DAE. It runs continuously until canceled and listens to port 6789 for

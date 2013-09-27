@@ -77,14 +77,15 @@ ISISLiveEventDataListener::~ISISLiveEventDataListener()
 
 bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 {
-    std::cerr << "Connecting to " << address.toString() << std::endl;
     // If we don't have an address, force a connection to the test server running on
     // localhost on the default port
     if (address.host().toString().compare( "0.0.0.0") == 0)
     {
-      Poco::Net::SocketAddress tempAddress("localhost:10000");
+      Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
       try {
+          std::cerr << "Connecting to test service " << tempAddress.toString() << std::endl;
         m_socket.connect( tempAddress);  // BLOCKING connect
+        std::cerr << "Actually connected to " << m_socket.address().toString() << std::endl;
       } catch (...) {
         g_log.error() << "Connection to " << tempAddress.toString() << " failed." << std::endl;
         return false;
@@ -93,6 +94,7 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     else
     {
         try {
+            std::cerr << "Connecting to live DAE " << address.toString() << std::endl;
           m_socket.connect( address);  // BLOCKING connect
         } catch (...) {
           g_log.debug() << "Connection to " << address.toString() << " failed." << std::endl;

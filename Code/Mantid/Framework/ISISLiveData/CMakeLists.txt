@@ -1,10 +1,12 @@
 set ( SRC_FILES
    src/example.cpp
+   src/FakeISISEventDAE.cpp
 )
 
 set ( INC_FILES
   #inc/MantidISISLiveData/DllConfig.h
   inc/MantidISISLiveData/TCPEventStreamDefs.h
+  inc/MantidISISLiveData/FakeISISEventDAE.h
 )
 
 set ( TEST_FILES
