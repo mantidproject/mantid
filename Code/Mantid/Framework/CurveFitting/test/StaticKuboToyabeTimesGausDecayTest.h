@@ -61,7 +61,7 @@ public:
 
   void test_Params()
   {
-    TS_ASSERT_DELTA(fn.getParameter("A"), 0.2, 0.0001);
+    TS_ASSERT_DELTA(fn.getParameter("A"), 1.0, 0.0001);
     TS_ASSERT_DELTA(fn.getParameter("Delta"), 0.2, 0.0001);
     TS_ASSERT_DELTA(fn.getParameter("Sigma"), 0.2, 0.0001);
   }
