@@ -3,6 +3,9 @@
 
 #include "ui_ForCE.h"
 #include "MantidQtCustomInterfaces/IndirectForeignTab.h"
+#include "MantidAPI/ExperimentInfo.h"
+
+#include <QComboBox>
 
 namespace MantidQt
 {
@@ -22,7 +25,16 @@ namespace MantidQt
 			/// Load default settings into the interface
 			void loadSettings(const QSettings& settings);
 
+		private slots:
+			/// Populate the analyser and reflection options on the interface
+			void instrumentChanged(const QString& instrument);
+			/// Populate the reflection option given the analyser
+			void analyserChanged(const QString& analyser);
+
 		private:
+			/// Load the IDF file and get the instrument
+			Mantid::Geometry::Instrument_const_sptr getInstrument(const QString& instrument);
+
 			//The ui form
 			Ui::ForCE m_uiForm;
 

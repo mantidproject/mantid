@@ -51,7 +51,13 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="cbInstrument"/>
+        <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="cbInstrument">
+         <property name="techniques">
+          <stringlist>
+           <string>Reactor Indirect Geometry Spectroscopy</string>
+          </stringlist>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>
@@ -220,6 +226,11 @@
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::InstrumentSelector</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/InstrumentSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

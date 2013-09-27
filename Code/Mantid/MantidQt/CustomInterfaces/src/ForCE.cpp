@@ -1,6 +1,10 @@
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtCustomInterfaces/ForCE.h"
 
 #include <QFileInfo>
+#include <QStringList>
 
 namespace MantidQt
 {
@@ -11,6 +15,14 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
+			connect(m_uiForm.cbInstrument, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrumentChanged(const QString&)));
+			connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(analyserChanged(const QString&)));
+
+			// Setup analysers and reflections
+			QString currentIntrument = m_uiForm.cbInstrument->currentText();
+			instrumentChanged(currentIntrument);
+			QString currentAnalyser = m_uiForm.cbAnalyser->currentText();
+			analyserChanged(currentAnalyser);
 		}
 
 		/**
@@ -20,7 +32,6 @@ namespace MantidQt
 		 */
 		bool ForCE::validate()
 		{
-
 			return true;
 		}
 
@@ -82,5 +93,68 @@ namespace MantidQt
 		{
 			m_uiForm.mwRun->readSettings(settings.group());
 		}
+
+		/**
+		 * Set the analyser and reflection options when the instrument changes.
+		 *  
+		 * @param settings :: The settings to loading into the interface
+		 */
+		void ForCE::instrumentChanged(const QString& instrument)
+		{
+			using namespace Mantid::API;
+
+	    auto inst = getInstrument(instrument);
+	    if(inst)
+	    {
+	    	auto analysers = inst->getStringParameter("analysers");
+
+		    m_uiForm.cbAnalyser->clear();
+
+		    if( analysers.size() > 0 )
+		    {
+	    		QStringList refs = QString(analysers[0].c_str()).split(',');
+	    		m_uiForm.cbAnalyser->addItems(refs);
+		    }
+	    }
+    }
+
+    Mantid::Geometry::Instrument_const_sptr ForCE::getInstrument(const QString& instrument)
+    {
+    	using namespace Mantid::API;
+
+    	std::string idfPath = ExperimentInfo::getInstrumentFilename(instrument.toStdString());
+    	Algorithm_sptr loadEmptyInst = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument", -1);
+
+      loadEmptyInst->initialize();
+      loadEmptyInst->setChild(true);
+      loadEmptyInst->setRethrows(true);
+      loadEmptyInst->setPropertyValue("Filename", idfPath);
+      loadEmptyInst->setPropertyValue("OutputWorkspace", "__" + instrument.toStdString() + "_defintion");
+      loadEmptyInst->executeAsChildAlg();
+
+			MatrixWorkspace_sptr idfWs = loadEmptyInst->getProperty("OutputWorkspace");
+	    return idfWs->getInstrument();
+    }
+
+    void ForCE::analyserChanged(const QString& analyser)
+    {
+    	using namespace Mantid::API;
+
+    	auto inst = getInstrument(m_uiForm.cbInstrument->currentText());
+
+    	m_uiForm.cbReflection->clear();
+
+    	if(inst)
+    	{
+	    	auto reflections = inst->getStringParameter("refl-"+analyser.toStdString());
+	    	
+	    	if( reflections.size() > 0 )
+	    	{
+	    		QStringList refs = QString(reflections[0].c_str()).split(',');
+	    		m_uiForm.cbReflection->addItems(refs);
+	    	}
+    	}
+    }
+
 	} // namespace CustomInterfaces
 } // namespace MantidQt
