@@ -3,8 +3,14 @@ import mantid
 from mantid.simpleapi import LoadAscii, ConvertToHistogram, DeleteWorkspace, mtd
 from reduction import Reducer, ReductionStep, validate_step
 
-# Make sure we can import the UI
-from reduction_application import ReductionGUI
+# ReductionGUI relies on sqlite3, which in Windows Debug mode we cannot easily
+# support.  Here we test if we can import it, and if not then we will skip the
+# "test_imports" test later.
+try:
+    import sqlite3
+    skip_import_test = False
+except ImportError:
+    skip_import_test = True
 
 class TestReductionStep(ReductionStep):
     def __init__(self):
@@ -114,6 +120,7 @@ class ReducerTest(unittest.TestCase):
         r.clear_data_files()
         self.assertEqual(len(r._data_files), 0)
 
+    @unittest.skipIf(skip_import_test, "We don't have access to sqlite3 on Windows Debug.")
     def test_imports(self):
         import reduction_gui
         import reduction_application
