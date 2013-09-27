@@ -106,7 +106,6 @@ where
  *WIKI*/
 
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPVoigt.h"
-// #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidKernel/EmptyValues.h"
@@ -193,6 +192,9 @@ namespace CurveFitting
     // Lattice parameter (23)
     declareParameter("LatticeConstant", 10.0, "lattice constant for the sample");
 
+    LATTICEINDEX = 23;
+    HEIGHTINDEX = 0;
+
     // Unit cell
     m_unitCellSize = 10.0;
 
@@ -210,7 +212,6 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Set Miller Indices for this peak
-   */
   void ThermalNeutronBk2BkExpConvPVoigt::setMillerIndex(int h, int k, int l)
   {
     // Check validity and set flag
@@ -244,10 +245,10 @@ namespace CurveFitting
 
     return;
   }
+     */
 
   //----------------------------------------------------------------------------------------------
   /** Get Miller Index from this peak
-   */
   void ThermalNeutronBk2BkExpConvPVoigt::getMillerIndex(int& h, int &k, int &l)
   {
     h = static_cast<int>(mH);
@@ -256,8 +257,9 @@ namespace CurveFitting
 
     return;
   }
+  */
 
-    //----------------------------------------------------------------------------------------------
+  //----------------------------------------------------------------------------------------------
   /** Get peak parameters stored locally
    * Get some internal parameters values including
    * (a) Alpha, (b) Beta, (c) Gamma, (d) Sigma2
@@ -335,7 +337,7 @@ namespace CurveFitting
     double gam1 = getParameter(21);
     double gam2 = getParameter(22);
 
-    double latticeconstant = getParameter(23);
+    double latticeconstant = getParameter(LATTICEINDEX);
 
     double dh, tof_h, eta, alpha, beta, H, sigma2, gamma, N;
 
@@ -554,23 +556,23 @@ namespace CurveFitting
    */
 
   /** Set peak height
-   */
+
   void ThermalNeutronBk2BkExpConvPVoigt::setHeight(const double h)
   {
-    setParameter(0, h);
+    setParameter(HEIGHTINDEX, h);
 
     return;
   }
+     */
 
 
   /** Get peak's height
-    */
   double ThermalNeutronBk2BkExpConvPVoigt::height() const
   {
-    double height = this->getParameter(0);
+    double height = this->getParameter(HEIGHTINDEX);
     return height;
   }
-
+    */
 
   /** Get peak's FWHM
 
@@ -644,8 +646,8 @@ namespace CurveFitting
       const double SQRT_H_5 = sqrt(H)*.5;
       std::complex<double> p(alpha*x, alpha*SQRT_H_5);
       std::complex<double> q(-beta*x, beta*SQRT_H_5);
-      double omega2a = imag(exp(p)*E1(p));
-      double omega2b = imag(exp(q)*E1(q));
+      double omega2a = imag(exp(p)*Mantid::API::E1(p));
+      double omega2b = imag(exp(q)*Mantid::API::E1(q));
       omega2 = -1.0*N*eta*(omega2a + omega2b)*TWO_OVER_PI;
     }
     const double omega = omega1+omega2;
@@ -673,7 +675,7 @@ namespace CurveFitting
     */
   void ThermalNeutronBk2BkExpConvPVoigt::setParameter(size_t i, const double& value, bool explicitlySet)
   {
-    if (i == 23)
+    if (i == LATTICEINDEX)
     {
       // Lattice parameter
       if (fabs(m_unitCellSize-value) > 1.0E-8)
@@ -707,7 +709,7 @@ namespace CurveFitting
       {
         // If change in value is non-trivial
         m_cellParamValueChanged = true;
-        ParamFunction::setParameter(23, value, explicitlySet);
+        ParamFunction::setParameter(LATTICEINDEX, value, explicitlySet);
         m_hasNewParameterValue = true;
         m_unitCellSize = value;
       }
@@ -736,8 +738,7 @@ namespace CurveFitting
 
   //-------------------------  External Functions ---------------------------------------------------
   /** Implementation of complex integral E_1
-   */
-  std::complex<double> E1(std::complex<double> z)
+  std::complex<double> E1X(std::complex<double> z)
   {
 
 
@@ -797,6 +798,7 @@ namespace CurveFitting
 
     return exp_e1;
   }
+     */
 
   //----------------------------------------------------------------------------------------------
   /** (Migrated from IPeakFunction)
