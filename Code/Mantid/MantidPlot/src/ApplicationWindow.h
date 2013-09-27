@@ -1071,6 +1071,10 @@ public slots:
   { confirmCloseFolder = value; }
   /** The very fist method to be executed as soon as the QApplication event loop starts*/
   void about2Start();
+
+  /// Show/hide MantidPlot toolbars.
+  void setToolbarsVisible(bool visible);
+
 signals:
   void modified();
   void shutting_down();
@@ -1113,8 +1117,6 @@ private:
   void disableActions();
   void customColumnActions();
   void disableToolbars();
-  void showToolbars();
-  void hideToolbars();
   void customToolBars(MdiSubWindow* w);
   void customMultilayerToolButtons(MultiLayer* w);
   void customMenu(MdiSubWindow* w);
@@ -1150,8 +1152,6 @@ private:
   void showCustomActionDialog();
   void showUserDirectoryDialog();
   void performCustomAction(QAction *);
-
-  void setPlotType(const QStringList & plotType);
 
   void hideSelectedColumns();
   void showAllColumns();
@@ -1191,18 +1191,6 @@ private:
 
   /// Open up the SetupParaview dialog
   void showSetupParaview();
-
-  /// Attach a PP tool to plot with a given name, and detach from all the other plots.
-  void activatePPTool(const QString& plotName);
-
-  /// Delete a plot with a given workspace name
-  void closeGraph(const QString & wsName);
-
-  /// Hide all graphs apart from the exception (default to no exception)
-  void hideGraphs(const QString & exception = "");
-
-  /// Show the graphs
-  void showGraphs();
 
   // TODO: a lot of this stuff should be private
 public:

@@ -95,6 +95,8 @@
   </instrument>
 
   <instrument name="PEARL" shortname="PRL">
+    <zeropadding size="5" startRunNumber="1" prefix="PRL"/> 
+    <zeropadding size="8" startRunNumber="71010" prefix="PEARL"/>
     <technique>Neutron Diffraction</technique>
     <livedata address="NDXPEARL:6789" />
   </instrument>

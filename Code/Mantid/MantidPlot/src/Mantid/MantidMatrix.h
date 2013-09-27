@@ -145,7 +145,7 @@ public:
   /// returns the workspace name
   const std::string & getWorkspaceName();
 
-  Spectrogram* plotSpectrogram(Graph* plot ,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData*prjdata);
+  Spectrogram* plotSpectrogram(Graph* plot, ApplicationWindow* app, Graph::CurveType type, bool project, const ProjectData * const prjdata);
   /// Add a multilayer as a dependent mdi sub-window. This method is addeed to fix a crash (ticket #5732).
   /// A better solution is needed
   void attachMultilayer(MultiLayer*);
@@ -297,26 +297,26 @@ public:
                  m_customPen(0),m_contourLabels(0),m_colormapPen(0),m_ContourLinesEditor(0)
   {}
   ~ProjectData(){}
-  bool getGrayScale()const {return m_grayScale;}
-  bool getIntensity()const  {return m_intensityChanged;}
-  bool getContourMode()const{return m_contourMode;}
+  bool getGrayScale() const {return m_grayScale;}
+  bool getIntensity() const {return m_intensityChanged;}
+  bool getContourMode() const {return m_contourMode;}
   const QString& getColormapFile() const {return m_colormapFile;}
   void  setGrayScale(bool grayscale) {m_grayScale=grayscale;}
   void setIntensity(bool intensity)  {m_intensityChanged=intensity;}
-  void setColormapFile(const QString & fileName){m_colormapFile=fileName;}
-  void setContourMode(bool contourmode){m_contourMode=contourmode;}
-  void setContourLevels(int levels){m_contourLevels=levels;}
-  int getContourLevels()const{return m_contourLevels;}
-  void setDefaultContourPen(const QPen& defaultpen){m_defaultPen=defaultpen;}
-  QPen getDefaultContourPen()const {return  m_defaultPen;}
-  void setColorMapPen(bool colormappen){m_colormapPen=colormappen;}
-  bool getColorMapPen(){return m_colormapPen;}
-  void setCustomPen(bool custompen){m_customPen=custompen;}
-  bool getcustomPen(){return m_customPen;}
-  void setContourLineLabels(bool contourlabels){m_contourLabels=contourlabels;}
-  bool getContourLineLabels(){return m_contourLabels;}
-  void setCotntourLinesEditor(ContourLinesEditor *ceditor){m_ContourLinesEditor=ceditor;}
-  ContourLinesEditor* getContourLinesEditor(){return m_ContourLinesEditor;}
+  void setColormapFile(const QString & fileName) {m_colormapFile=fileName;}
+  void setContourMode(bool contourmode) {m_contourMode=contourmode;}
+  void setContourLevels(int levels) {m_contourLevels=levels;}
+  int getContourLevels() const {return m_contourLevels;}
+  void setDefaultContourPen(const QPen& defaultpen) {m_defaultPen=defaultpen;}
+  QPen getDefaultContourPen() const {return  m_defaultPen;}
+  void setColorMapPen(bool colormappen) {m_colormapPen=colormappen;}
+  bool getColorMapPen() const {return m_colormapPen;}
+  void setCustomPen(bool custompen) {m_customPen=custompen;}
+  bool getcustomPen() const {return m_customPen;}
+  void setContourLineLabels(bool contourlabels) {m_contourLabels=contourlabels;}
+  bool getContourLineLabels() const {return m_contourLabels;}
+  void setCotntourLinesEditor(ContourLinesEditor *ceditor) {m_ContourLinesEditor=ceditor;}
+  ContourLinesEditor* getContourLinesEditor() const {return m_ContourLinesEditor;}
 
 private:
   bool m_grayScale;

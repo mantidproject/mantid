@@ -748,7 +748,7 @@ namespace MDAlgorithms
    *        NULL to use the entire range.
    * @return MDImplicitFunction created
    */
-  MDImplicitFunction * SlicingAlgorithm::getGeneralImplicitFunction(size_t * chunkMin, size_t * chunkMax)
+  MDImplicitFunction * SlicingAlgorithm::getGeneralImplicitFunction(const size_t * const chunkMin, const size_t * const chunkMax)
   {
     size_t nd = m_inWS->getNumDims();
 
@@ -914,7 +914,7 @@ namespace MDAlgorithms
    *        NULL to use the entire range.
    * @return MDImplicitFunction created
    */
-  MDImplicitFunction * SlicingAlgorithm::getImplicitFunctionForChunk(size_t * chunkMin, size_t * chunkMax)
+  MDImplicitFunction * SlicingAlgorithm::getImplicitFunctionForChunk(const size_t * const chunkMin, const size_t * const chunkMax)
   {
     size_t nd = m_inWS->getNumDims();
     if (m_axisAligned)

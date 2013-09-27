@@ -24,6 +24,13 @@ The input Boolean parameter ''centre'' is for filtering by log value(s).  If opt
  * stopping time = log_time - tolerance_time;
 It is a shift to left.
 
+==== Parameter: ''LogValueTolerance'' and ''LogValueInterval'' ====
+These two parameters are used to determine the log value intervals for filtering events. 
+
+Let user-specified minimum log value to be 'min',  LogValueTolerance to be 'tol', and LogValueInterval to be 'delta', then the log value intervals are (min-tol, min-tol+delta), (min-tol+delta, min-tol+2delta), ... 
+
+The default value of LogValueTolerance is LogValueInterval devided by 2. 
+
 ==== About how log value is recorded ====
 SNS DAS records log values upon its changing.  The frequency of log sampling is significantly faster than change of the log, i.e., sample environment devices.  Therefore, it is reasonable to assume that all the log value changes as step functions.
 

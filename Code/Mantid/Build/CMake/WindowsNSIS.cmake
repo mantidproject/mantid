@@ -28,12 +28,6 @@
     
     # Manually place necessary files and directories
     
-    # Python bundle here.
-    install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/DLLs DESTINATION bin PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-    install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/Lib DESTINATION bin PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE PATTERN "_d.pyd" EXCLUDE )
-    install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/Python27/Scripts DESTINATION bin PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
-    install ( FILES ${PY_DLL_PREFIX}${PY_DLL_SUFFIX_RELEASE} ${PYTHON_EXECUTABLE} ${PYTHONW_EXECUTABLE} DESTINATION bin )
-
     # include files
     install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/boost DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
     install ( DIRECTORY ${CMAKE_INCLUDE_PATH}/Poco DESTINATION include PATTERN ".svn" EXCLUDE PATTERN ".git" EXCLUDE )
@@ -99,7 +93,7 @@
     REGEX "${CMAKE_LIBRARY_PATH}/CRT/*" EXCLUDE
     REGEX "${CMAKE_LIBRARY_PATH}/Python27/*" EXCLUDE 
     REGEX "${CMAKE_LIBRARY_PATH}/qt_plugins/*" EXCLUDE 
-    REGEX "(QtDesigner4.dll)|(QtDesignerComponents4.dll)|(QtScript4.dll)|(-gd-)|(d4.dll)|(_d.dll)" EXCLUDE
+    REGEX "(QtDesigner4.dll)|(QtDesignerComponents4.dll)|(QtScript4.dll)|(-gd-)|(-gyd)|(d4.dll)|(_d.dll)" EXCLUDE
     REGEX "boost_signals" EXCLUDE
     PATTERN ".git" EXCLUDE )
 

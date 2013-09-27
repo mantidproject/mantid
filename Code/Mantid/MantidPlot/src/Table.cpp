@@ -2912,92 +2912,93 @@ void Table::restore(QString& spec)
     emit modifiedData(this, colName(j));
 }
 
-void Table::setNumRows(int rows)
+void Table::setNumRows(int newNumRows)
 {
-  d_table->setNumRows(rows);
-}
+  int oldNumRows = d_table->numRows();
 
-void Table::setNumCols(int cols)
-{
-  d_table->setNumCols(cols);
-}
-
-void Table::resizeRows(int r)
-{
-  int rows = d_table->numRows();
-  if (rows == r)
+  if(oldNumRows == newNumRows)
     return;
 
-  if (rows > r){
-    QString text= tr("Rows will be deleted from the table!");
-    text+="<p>"+tr("Do you really want to continue?");
-    int i,cols = d_table->numCols();
-    switch( QMessageBox::information(this,tr("MantidPlot"), text, tr("Yes"), tr("Cancel"), 0, 1 ) )
+  d_table->setNumRows(newNumRows);
+
+  if(newNumRows < oldNumRows)
+  {
+    // When rows are deleted, values of some formulas might get changed, so update all columns
+    int numCols = d_table->numCols();
+    for (int i = 0; i < numCols; i++)
+      emit modifiedData(this, colName(i));
+  } 
+}
+
+void Table::setNumCols(int newNumCols)
+{
+  int oldNumCols = d_table->numCols();
+
+  if(oldNumCols == newNumCols)
+    return;
+
+  // If removing columns
+  if(newNumCols < oldNumCols)
+  {
+    for (int i = 0; i < (oldNumCols - newNumCols); i++)
     {
-    case 0:
-      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      d_table->setNumRows(r);
-      for (i=0; i<cols; i++)
-        emit modifiedData(this, colName(i));
+      // We are removing the last column in the list
+      emit removedCol(colName(col_label.size() - 1));
 
-      QApplication::restoreOverrideCursor();
-      break;
-
-    case 1:
-      return;
-      break;
+      commands.removeLast();
+      comments.removeLast();
+      col_format.removeLast();
+      col_label.removeLast();
+      colTypes.removeLast();
+      col_plot_type.removeLast();
     }
-  } else {
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    d_table->setNumRows(r);
-    QApplication::restoreOverrideCursor();
+
+    // This will take care of removing columns
+    d_table->setNumCols(newNumCols);
   }
+  // If adding columns
+  else if(newNumCols > oldNumCols)
+  {
+    addColumns(newNumCols-oldNumCols);
+    setHeaderColType();
+  }
+}
+
+void Table::resizeRows(int newNumRows)
+{
+  if (newNumRows < d_table->numRows()) {
+    // Confirm that user wants to remove rows
+    QString text= tr("Rows will be deleted from the table!") + "<p>" 
+                  + tr("Do you really want to continue?");
+    int answer = QMessageBox::information(this,tr("MantidPlot"), text, tr("Yes"), tr("Cancel"), 0, 1);
+    
+    if(answer == 1)
+      return;
+  }
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  setNumRows(newNumRows);
+  QApplication::restoreOverrideCursor();
 
   emit modifiedWindow(this);
 }
 
-void Table::resizeCols(int c)
+void Table::resizeCols(int newNumCols)
 {
-  int cols = d_table->numCols();
-  if (cols == c)
-    return;
+  if (newNumCols < d_table->numCols()) {
+    // Confirm that user wants to remove columns
+    QString text = tr("Columns will be deleted from the table!") + "<p>" 
+                   + tr("Do you really want to continue?");
+    int answer = QMessageBox::information(this,tr("MantidPlot"), text, tr("Yes"), tr("Cancel"), 0, 1);
 
-  if (cols > c){
-    QString text= tr("Columns will be deleted from the table!");
-    text+="<p>"+tr("Do you really want to continue?");
-    switch( QMessageBox::information(this,tr("MantidPlot"), text, tr("Yes"), tr("Cancel"), 0, 1 ) ){
-    case 0: {
-      QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-      Q3MemArray<int> columns(cols-c);
-      for (int i=cols-1; i>=c; i--){
-        QString name = colName(i);
-        emit removedCol(name);
-        columns[i-c]=i;
-
-        commands.removeLast();
-        comments.removeLast();
-        col_format.removeLast();
-        col_label.removeLast();
-        colTypes.removeLast();
-        col_plot_type.removeLast();
-      }
-
-      d_table->removeColumns(columns);
-      QApplication::restoreOverrideCursor();
-      break;
-    }
-
-    case 1:
+    if(answer == 1)
       return;
-      break;
-    }
   }
-  else{
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    addColumns(c-cols);
-    setHeaderColType();
-    QApplication::restoreOverrideCursor();
-  }
+
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  setNumCols(newNumCols);
+  QApplication::restoreOverrideCursor();
+
   emit modifiedWindow(this);
 }
 

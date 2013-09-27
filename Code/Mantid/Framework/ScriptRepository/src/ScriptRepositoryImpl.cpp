@@ -1738,7 +1738,7 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
     // from windows and linux and macs. 
 #if defined(_WIN32) || defined(_WIN64)
     std::string errmsg, proxy_option;
-    g_log.notice() << "Attempt to get the proxy configuration for this connection" << std::endl; 
+    g_log.debug() << "Attempt to get the proxy configuration for this connection" << std::endl; 
     if(get_proxy_configuration_win(remote_url, proxy_option,errmsg))
     {
       if (!proxy_option.empty()){
@@ -1758,11 +1758,12 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
           PROXYSERVER = proxy_option;
           PROXYPORT = 8080;
         }
-        g_log.notice() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
-        } 
+        g_log.information() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
+        }
+      
     }
     else{
-    g_log.warning() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. " 
+    g_log.information() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. " 
               << errmsg << std::endl; 
     }
 #else  // linux and mac
@@ -1774,6 +1775,9 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
       Poco::URI uri_p(proxy_var);
       PROXYSERVER = uri_p.getHost(); 
       PROXYPORT = uri_p.getPort();
+    }
+#endif 
+    if (!PROXYSERVER.empty()){
       try{
         // test if the proxy is valid for connecting to remote repository
         Poco::URI uri(remote_url); 
@@ -1795,15 +1799,15 @@ bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned sh
       }
       catch(Poco::Net::HostNotFoundException & ex){
         g_log.information() << "ScriptRepository found that proxy can not be used for this connection.\n"
-                            << ex.displayText() << std::endl; 
+                          << ex.displayText() << std::endl; 
         PROXYSERVER = "";        
       }catch(...){
         g_log.warning() << "Unexpected error while looking for the proxy for ScriptRepository." << std::endl; 
         PROXYSERVER = ""; 
       }
     }
-#endif    
-  }
+
+  } // end of the configuration of the proxy
   firstTime = false;
   
   bool ret_value; 

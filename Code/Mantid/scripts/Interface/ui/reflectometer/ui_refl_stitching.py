@@ -265,7 +265,7 @@ class Ui_Frame(object):
         self.label_7.setText(QtGui.QApplication.translate("Frame", "1/Å  ", None, QtGui.QApplication.UnicodeUTF8))
         self.pick_unity_range_btn.setText(QtGui.QApplication.translate("Frame", "Pick range", None, QtGui.QApplication.UnicodeUTF8))
         self.auto_scale_btn.setText(QtGui.QApplication.translate("Frame", "Auto scale", None, QtGui.QApplication.UnicodeUTF8))
-        self.save_btn.setText(QtGui.QApplication.translate("Frame", "Save", None, QtGui.QApplication.UnicodeUTF8))
+        self.save_btn.setText(QtGui.QApplication.translate("Frame", "Set scale", None, QtGui.QApplication.UnicodeUTF8))
         self.ref_pol_label.setText(QtGui.QApplication.translate("Frame", "Reference cross-section:", None, QtGui.QApplication.UnicodeUTF8))
         self.off_off_radio.setText(QtGui.QApplication.translate("Frame", "Off-Off", None, QtGui.QApplication.UnicodeUTF8))
         self.on_off_radio.setText(QtGui.QApplication.translate("Frame", "On-Off", None, QtGui.QApplication.UnicodeUTF8))

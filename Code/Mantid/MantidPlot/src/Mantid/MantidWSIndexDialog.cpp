@@ -11,6 +11,7 @@
 #include <QtAlgorithms> 
 #include <boost/lexical_cast.hpp>
 #include <exception>
+#include <QPalette>
 
 //----------------------------------
 // MantidWSIndexDialog public methods
@@ -91,38 +92,31 @@ QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
 // MantidWSIndexDialog private slots
 //----------------------------------
 void MantidWSIndexDialog::plot()
-{
-  try
+{    
+  int npos = 0;
+  QString wsText = m_wsField->lineEdit()->text();
+  QString spectraTest = m_spectraField->lineEdit()->text();
+  QValidator::State wsState = m_wsField->lineEdit()->validator()->validate(wsText, npos);
+  QValidator::State spectraState = m_spectraField->lineEdit()->validator()->validate(spectraTest, npos);
+  
+  // If the user typed in the wsField ...
+  if(wsState == QValidator::Acceptable)
   {
-    int npos = 0;
-    QString wsText = m_wsField->text();
-    QString spectraTest = m_spectraField->text();
-    QValidator::State wsState = m_wsField->validator()->validate(wsText, npos);
-    QValidator::State spectraState = m_spectraField->validator()->validate(spectraTest, npos);
-
-    // If the user typed in the wsField ...
-    if(wsState == QValidator::Acceptable)
-    {
-      m_wsIndexChoice.addIntervals(m_wsField->text());
-      accept();
-    }
-    // Else if the user typed in the spectraField ...
-    else if(spectraState == QValidator::Acceptable)
-    {
-      m_spectraIdChoice.addIntervals(m_spectraField->text());
-      accept();
-    }
+    m_wsIndexChoice.addIntervals(m_wsField->lineEdit()->text());
+    accept();
   }
-  catch (std::exception &)
+  // Else if the user typed in the spectraField ...
+  else if(spectraState == QValidator::Acceptable)
   {
-    // Text could not be parsed.  Probably dont need this as we only
-    // parse "QValidator::Acceptable" fields anyway ...
+    m_spectraIdChoice.addIntervals(m_spectraField->lineEdit()->text());
+    accept();
+  }else{
+    QString error_message("Invalid input. It is not in the range available"); 
+    if (!wsText.isEmpty())
+      m_wsField->setError(error_message); 
+    if (!spectraTest.isEmpty())
+      m_spectraField->setError(error_message); 
   }
-
-  // We reach here if the user has typed nothing, or alternatively
-  // has failed to type in anything we can parse.
-
-  // TODO - Add functionality to warn the user?
 }
 
 void MantidWSIndexDialog::plotAll()
@@ -133,12 +127,16 @@ void MantidWSIndexDialog::plotAll()
 
 void MantidWSIndexDialog::editedWsField()
 {
-  if(m_spectra) m_spectraField->clear();
+  if(m_spectra) {
+    m_spectraField->lineEdit()->clear();
+    m_spectraField->setError(""); 
+  }
 }
 
 void MantidWSIndexDialog::editedSpectraField()
 {
-  m_wsField->clear();
+  m_wsField->lineEdit()->clear();
+  m_wsField->setError(""); 
 }
 
 //----------------------------------
@@ -159,30 +157,30 @@ void MantidWSIndexDialog::initWorkspaceBox()
 {
   m_wsBox = new QVBoxLayout;
   m_wsMessage = new QLabel(tr("Enter Workspace Indices: " + m_wsIndexIntervals.toQString()));
-  m_wsField = new QLineEdit();
+  m_wsField = new QLineEditWithErrorMark();
 
-  m_wsField->setValidator(new IntervalListValidator(this, m_wsIndexIntervals));
+  m_wsField->lineEdit()->setValidator(new IntervalListValidator(this, m_wsIndexIntervals));
   m_wsBox->add(m_wsMessage);
   m_wsBox->add(m_wsField);
   m_outer->addItem(m_wsBox);
 
-  connect(m_wsField, SIGNAL(textEdited(const QString &)), this, SLOT(editedWsField()));
+  connect(m_wsField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedWsField()));
 }
 
 void MantidWSIndexDialog::initSpectraBox()
 {
   m_spectraBox = new QVBoxLayout;
   m_spectraMessage = new QLabel(tr("Enter Spectra IDs: " + m_spectraIdIntervals.toQString()));
-  m_spectraField = new QLineEdit();
+  m_spectraField = new QLineEditWithErrorMark();
   m_orMessage = new QLabel(tr("<br>Or"));
 
-  m_spectraField->setValidator(new IntervalListValidator(this, m_spectraIdIntervals));
+  m_spectraField->lineEdit()->setValidator(new IntervalListValidator(this, m_spectraIdIntervals));
   m_spectraBox->add(m_spectraMessage);
   m_spectraBox->add(m_spectraField);
   m_spectraBox->add(m_orMessage);
   if(m_spectra) m_outer->addItem(m_spectraBox);
 
-  connect(m_spectraField, SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
+  connect(m_spectraField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
 }
 
 void MantidWSIndexDialog::initButtons()
@@ -473,7 +471,7 @@ void Interval::init(int start, int end)
 //----------------------------------
 IntervalList::IntervalList(void)
 {
-  
+
 }
 
 IntervalList::IntervalList(QString intervals)
@@ -714,7 +712,7 @@ bool IntervalList::isParsable(const QString &input)
 {
   try
   {
-    new IntervalList(input);
+    IntervalList interval(input);
     return true;
   } 
   catch (std::exception&)
@@ -875,4 +873,31 @@ QValidator::State IntervalListValidator::validate(QString &input, int &pos) cons
     return QValidator::Intermediate;
   
   return QValidator::Invalid;
+}
+
+
+
+//////////////////////////////////////
+// QLineEditWithErrorMark
+//////////////////////////////////////
+MantidWSIndexDialog::QLineEditWithErrorMark::QLineEditWithErrorMark(QWidget * parent): QWidget(parent){
+  QGridLayout * layout = new QGridLayout(); 
+  _lineEdit = new QLineEdit(); 
+  m_validLbl = new QLabel("*"); // make it red
+  QPalette pal = m_validLbl->palette(); 
+  pal.setColor(QPalette::WindowText, Qt::darkRed); 
+  m_validLbl->setPalette(pal); 
+  layout->addWidget(_lineEdit,0,0); 
+  layout->addWidget(m_validLbl,0,1);
+  m_validLbl->setVisible(false);
+  setLayout(layout);
+}
+
+void MantidWSIndexDialog::QLineEditWithErrorMark::setError(QString error){
+  if(error.isEmpty()){
+    m_validLbl->setVisible(false); 
+  }else{
+    m_validLbl->setVisible(true); 
+    m_validLbl->setToolTip(error.trimmed()); 
+  }
 }

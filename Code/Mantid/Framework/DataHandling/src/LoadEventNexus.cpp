@@ -179,6 +179,8 @@ public:
     prog->report(entry_name + ": precount");
 
     // ---- Pre-counting events per pixel ID ----
+    auto & outputWS = *(alg->WS);
+
     if (alg->precount)
     {
       std::vector<size_t> counts(m_max_id-m_min_id+1, 0);
@@ -190,6 +192,7 @@ public:
       }
 
       // Now we pre-allocate (reserve) the vectors of events in each pixel counted
+      const size_t numEventLists = outputWS.getNumberHistograms();
       for (detid_t pixID = m_min_id; pixID <= m_max_id; pixID++)
       {
         if (counts[pixID-m_min_id] > 0)
@@ -197,7 +200,10 @@ public:
           //Find the the workspace index corresponding to that pixel ID
           size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
           // Allocate it
-          alg->WS->getEventList(wi).reserve( counts[pixID-m_min_id] );
+          if ( wi < numEventLists )
+          {
+            outputWS.getEventList(wi).reserve( counts[pixID-m_min_id] );
+          }
           if (alg->getCancel()) break; // User cancellation
         }
       }
@@ -228,9 +234,6 @@ public:
     }
 
     prog->report(entry_name + ": filling events");
-
-    // The workspace
-    EventWorkspace_sptr WS = alg->WS;
 
     // Will we need to compress?
     bool compress = (alg->compressTolerance >= 0);
@@ -347,7 +350,7 @@ public:
         {
           //Find the the workspace index corresponding to that pixel ID
           size_t wi = pixelID_to_wi_vector[pixID+pixelID_to_wi_offset];
-          EventList * el = WS->getEventListPtr(wi);
+          EventList * el = outputWS.getEventListPtr(wi);
           if (compress)
             el->compressEvents(alg->compressTolerance, el);
           else
@@ -1042,7 +1045,7 @@ void LoadEventNexus::init()
   setPropertyGroup("SingleBankPixelsOnly", grp2);
 
   declareProperty(
-      new PropertyWithValue<bool>("Precount", false, Direction::Input),
+      new PropertyWithValue<bool>("Precount", true, Direction::Input),
       "Pre-count the number of events in each pixel before allocating memory (optional, default False). "
       "This can significantly reduce memory use and memory fragmentation; it may also speed up loading.");
 
@@ -1439,6 +1442,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
       file.closeGroup();
     }
   }
+  
+  loadSampleDataISIScompatibility(file, WS); 
 
   //Close up the file
   file.closeGroup();
@@ -1452,6 +1457,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   // set more properties on the workspace
   try
   {
+    // this is a static method that is why it is passing the file path
     loadEntryMetadata(m_filename, WS, m_top_entry_name);
   }
   catch (std::runtime_error & e)
@@ -1784,6 +1790,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
   // close the file
   file.close();
 }
+
 
 //-----------------------------------------------------------------------------
 /** Load the instrument from the nexus file or if not found from the IDF file
@@ -2547,6 +2554,57 @@ void LoadEventNexus::loadTimeOfFlightData(::NeXus::File& file, DataObjects::Even
   } // for wi
   file.closeData();
 }
+
+/** Load information of the sample. It is valid only for ISIS it get the information from 
+ *  the group isis_vms_compat. 
+ * 
+ *   If it does not find this group, it assumes that there is nothing to do. 
+ *   But, if the information is there, but not in the way it was expected, it will log the occurrence. 
+ * 
+ * @note: It does essentially the same thing of the method: LoadISISNexus2::loadSampleData
+ * 
+ * @param nexusfilename : path for the nexus file
+ * @param WS : pointer to the workspace
+ */
+void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS){
+  try
+  {
+    file.openGroup("isis_vms_compat", "IXvms");
+  }
+  catch( ::NeXus::Exception & )
+  {
+    g_log.debug() << "No isis_vms_compat group" << std::endl;
+    // No problem, it just means that this entry does not exist
+    return;
+  }
+
+  // read the data
+  try
+  {
+    std::vector<int32_t> spb; 
+    std::vector<float> rspb;
+    file.readData("SPB", spb);
+    file.readData("RSPB",rspb);
+    
+    WS->mutableSample().setGeometryFlag(spb[2]); // the flag is in the third value
+    WS->mutableSample().setThickness(rspb[3]); 
+    WS->mutableSample().setHeight(rspb[4]); 
+    WS->mutableSample().setWidth(rspb[5]); 
+  }
+  catch ( ::NeXus::Exception & ex)
+  {
+    // it means that the data was not as expected, report the problem
+    g_log.warning() << "Wrong definition found in isis_vms_compat :> " << ex.what() << std::endl; 
+  }
+
+  const Sample & samp(WS->mutableSample()); 
+  g_log.debug() << "Sample geometry -  ID: " << samp.getGeometryFlag() << ", thickness: " << samp.getThickness() 
+                << ", height: " << samp.getHeight() << ", width: "
+                << samp.getWidth() << "\n";
+
+  file.closeGroup();
+}
+
 
 } // namespace DataHandling
 } // namespace Mantid
