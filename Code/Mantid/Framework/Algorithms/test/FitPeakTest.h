@@ -137,7 +137,7 @@ public:
     newrow << "Height" << 1.0;
 
     newrow = partablews->appendRow();
-    newrow << "PeakCentre" << 0.59;
+    newrow << "PeakCentre" << 0.5936;
 
     newrow = partablews->appendRow();
     newrow << "Sigma" << 0.01;
