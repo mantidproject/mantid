@@ -18,9 +18,9 @@ namespace CurveFitting
   
   void StaticKuboToyabeTimesGausDecay::init() 
   {
-    declareParameter("A", 0.2, "Amplitude at time 0");
-    declareParameter("Delta", 0.2, "Decay rate");
-    declareParameter("Sigma", 0.2, "Decay rate");
+    declareParameter("A", 1.0, "Amplitude at time 0");
+    declareParameter("Delta", 0.2, "StaticKuboToyabe decay rate");
+    declareParameter("Sigma", 0.2, "Gaus decay rate");
   }
   
   void StaticKuboToyabeTimesGausDecay::function1D(double* out, const double* xValues, const size_t nData) const
