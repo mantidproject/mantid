@@ -20,8 +20,8 @@ DECLARE_FUNCTION(StaticKuboToyabeTimesExpDecay)
 void StaticKuboToyabeTimesExpDecay::init() 
 {
   declareParameter("A", 0.2, "Amplitude at time 0");
-  declareParameter("Delta", 0.2, "Decay rate");
-  declareParameter("Lambda", 0.2, "Decay rate");
+  declareParameter("Delta", 0.2, "StaticKuboToyabe decay rate");
+  declareParameter("Lambda", 0.2, "Exponential decay rate");
 }
 
 void StaticKuboToyabeTimesExpDecay::function1D(double* out, const double* xValues, const size_t nData) const
