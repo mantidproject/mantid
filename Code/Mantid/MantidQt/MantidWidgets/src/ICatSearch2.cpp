@@ -212,12 +212,14 @@ namespace MantidQt
           newItem->setToolTip(QString::fromStdString(ostr.str()));
         }
       }
-
+      // Stretch the columns to fit table.
+      table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
       // Set the table widgets header labels from the table workspace.
       table->setHorizontalHeaderLabels(columnHeaders);
-
       // Resize the label to improve the viewing experience.
       table->resizeColumnsToContents();
+      // Make the headers of the table bold.
+      emboldenTableHeaders(table);
     }
 
     /**
@@ -493,9 +495,6 @@ namespace MantidQt
       // Add data from the workspace to the results table.
       populateTable(resultsTable, workspace);
 
-      // Make the headers of the table bold.
-      emboldenTableHeaders(resultsTable);
-
       // Hide the "Investigation id" column (It's used by the CatalogGetDataFiles algorithm).
       resultsTable->setColumnHidden(0, true);
     }
@@ -610,9 +609,6 @@ namespace MantidQt
 
       // Add data from the workspace to the results table.
       populateTable(dataFileTable, workspace);
-
-      // Make the headers of the table bold.
-      emboldenTableHeaders(dataFileTable);
 
       // Obtain the list of extensions of all dataFiles for the chosen investigation.
       // "File name" is the first column of "dataFileResults" so we make use of it.
