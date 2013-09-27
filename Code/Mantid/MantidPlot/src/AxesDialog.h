@@ -26,6 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
+ //Heavily edited and refactored ot fix bugs by Keith Brown
 #ifndef AXESDIALOG_H
 #define AXESDIALOG_H
 
@@ -95,7 +96,6 @@ class AxesDialog: public QDialog
 
   private slots:
     bool apply();
-    void updateScale();
     //void majorGridEnabled(bool on);
     //void minorGridEnabled(bool on);
     //void showGridOptions(int axis);

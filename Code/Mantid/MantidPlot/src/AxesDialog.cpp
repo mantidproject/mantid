@@ -819,7 +819,6 @@ void AxesDialog::initGridPage()
   axesGridList->addItem(new QListWidgetItem(image3, tr("Horizontal")));
   axesGridList->addItem(new QListWidgetItem(image2, tr("Vertical")));
   axesGridList->setIconSize(image3.size());
-  //axesGridList->setCurrentRow(0);
   // calculate a sensible width for the items list
   // (default QListWidget size is 256 which looks too big)
   QFontMetrics fm(axesGridList->font());
@@ -1065,211 +1064,6 @@ int AxesDialog::mapToQwtAxis(int axis)
   return a;
 }
 
-void AxesDialog::updateScale()
-{
-
-  //QList<QListWidgetItem*> selection = axesList->selectedItems();
-  //if (selection.isEmpty())
-  //return;
-
-  // Remove the current widget if one exists in the scroll area
-  //if( scalePrefsArea->widget() ) scalePrefsArea->takeWidget();
-
-  //scalesLayout->takeAt(1);
-
-  /*
-  std::cerr << std::endl;
-  std::cerr << std::endl;
-  auto takereturn = scalesLayout->takeAt(1);
-  std::cerr << "Return from takeat() - " << takereturn << std::endl;
-  if (takereturn)
-  {
-  auto returnwidget = takereturn->widget();
-  std::cerr << "Return from widget() - " << returnwidget << std::endl;
-  m_Scale_list.value[axesList->item(oldaxis)] = takereturn->widget();
-  }
-  int testrow = axesList->currentRow();
-  std::cerr << "Return from currentRow() - " << testrow << std::endl;
-  QListWidgetItem *item = axesList->currentItem();
-  std::cerr << "Return from axesList->currentItem() address of list item - " << item << std::endl;
-  ScaleDetails *obj = NULL;
-  std::cerr << "Address of obj NULL - " << obj << std::endl;
-  if (m_Scale_list.contains(item))
-  {
-  obj = m_Scale_list.value(item);
-  obj->initWidgets();
-  std::cerr << "Address of obj from map - " << obj << std::endl;
-  std::cerr << "Contents of dspnStart - " << obj->testreturn() << std::endl;
-
-  }
-  else
-  {
-  obj = new ScaleDetails(d_app, d_graph,
-  mapToQwtAxis(axesList->currentRow()));
-  m_Scale_list.insert(item, obj);
-  obj->initWidgets();
-  std::cerr << "Address of obj from map - " << obj << std::endl;
-  }
-  //Set it as the currently displayed widget
-
-  scalesLayout->addWidget(obj);
-  std::cerr << "Address of obj added to scalesLayout - " << obj << std::endl;
-  std::cerr << std::endl;
-  std::cerr << std::endl;
-
-  */
-
-
-  /*
-  int axis = axesList->currentRow();
-  boxStart->clear();
-  boxEnd->clear();
-  boxStep->clear();
-  boxUnit->hide();
-  boxUnit->clear();
-
-  Plot *d_plot = d_graph->plotWidget();
-  int a = mapToQwtAxis(axis);
-  const QwtScaleDiv *scDiv = d_plot->axisScaleDiv(a);
-  double start = QMIN(scDiv->lBound(), scDiv->hBound());
-  double end = QMAX(scDiv->lBound(), scDiv->hBound());
-  ScaleDraw::ScaleType type = d_graph->axisType(a);
-  if (type == ScaleDraw::Date){
-  ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(a));
-  QDateTime origin = sclDraw->dateTimeOrigin();
-
-  boxStart->hide();
-  boxStartTime->hide();
-  boxStartDateTime->show();
-  boxStartDateTime->setDisplayFormat(sclDraw->format());
-  boxStartDateTime->setDateTime(origin.addSecs((int)start));
-
-  boxEnd->hide();
-  boxEndTime->hide();
-  boxEndDateTime->show();
-  boxEndDateTime->setDisplayFormat(sclDraw->format());
-  boxEndDateTime->setDateTime(origin.addSecs((int)end));
-
-  boxUnit->show();
-  boxUnit->insertItem(tr("days"));
-  boxUnit->insertItem(tr("weeks"));
-  boxStep->setValue(d_graph->axisStep(a)/86400.0);
-  boxStep->setSingleStep(1);
-  } else if (type == ScaleDraw::Time){
-  ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(a));
-  QTime origin = sclDraw->dateTimeOrigin().time();
-
-  boxStart->hide();
-  boxStartDateTime->hide();
-  boxStartTime->show();
-  boxStartTime->setDisplayFormat(sclDraw->format());
-  boxStartTime->setTime(origin.addMSecs((int)start));
-
-  boxEnd->hide();
-  boxEndDateTime->hide();
-  boxEndTime->show();
-  boxEndTime->setDisplayFormat(sclDraw->format());
-  boxEndTime->setTime(origin.addMSecs((int)end));
-
-  boxUnit->show();
-  boxUnit->insertItem(tr("millisec."));
-  boxUnit->insertItem(tr("sec."));
-  boxUnit->insertItem(tr("min."));
-  boxUnit->insertItem(tr("hours"));
-  boxUnit->setCurrentIndex(1);
-  boxStep->setValue(d_graph->axisStep(a)/1e3);
-  boxStep->setSingleStep(1000);
-  } else {
-  boxStart->show();
-  boxStart->setValue(start);
-  boxStartTime->hide();
-  boxStartDateTime->hide();
-  boxEnd->show();
-  boxEnd->setValue(end);
-  boxEndTime->hide();
-  boxEndDateTime->hide();
-  boxStep->setValue(d_graph->axisStep(a));
-  boxStep->setSingleStep(0.1);
-  }
-
-  double range = fabs(scDiv->range());
-  QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(a);
-  ScaleEngine* sc_engine=dynamic_cast<ScaleEngine*>(qwtsc_engine);
-  if(sc_engine)
-  {
-  if (sc_engine->axisBreakLeft() > -DBL_MAX)
-  boxBreakStart->setValue(sc_engine->axisBreakLeft());
-  else
-  boxBreakStart->setValue(start + 0.25*range);
-
-  if (sc_engine->axisBreakRight() < DBL_MAX)
-  boxBreakEnd->setValue(sc_engine->axisBreakRight());
-  else
-  boxBreakEnd->setValue(start + 0.75*range);
-
-  boxAxesBreaks->setChecked(sc_engine->hasBreak());
-
-  boxBreakPosition->setValue(sc_engine->breakPosition());
-  boxBreakWidth->setValue(sc_engine->breakWidth());
-  boxStepBeforeBreak->setValue(sc_engine->stepBeforeBreak());
-  boxStepAfterBreak->setValue(sc_engine->stepAfterBreak());
-
-  QwtScaleTransformation::Type scale_type = sc_engine->type();
-  boxMinorTicksBeforeBreak->clear();
-  if (scale_type == QwtScaleTransformation::Log10)
-  boxMinorTicksBeforeBreak->addItems(QStringList()<<"0"<<"2"<<"4"<<"8");
-  else
-  boxMinorTicksBeforeBreak->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
-  boxMinorTicksBeforeBreak->setEditText(QString::number(sc_engine->minTicksBeforeBreak()));
-
-
-  boxMinorTicksAfterBreak->setEditText(QString::number(sc_engine->minTicksAfterBreak()));
-  boxLog10AfterBreak->setChecked(sc_engine->log10ScaleAfterBreak());
-  boxBreakDecoration->setChecked(sc_engine->hasBreakDecoration());
-  btnInvert->setChecked(sc_engine->testAttribute(QwtScaleEngine::Inverted));
-  boxScaleType->setCurrentItem(scale_type);
-  boxMinorValue->clear();
-  if (scale_type == QwtScaleTransformation::Log10)
-  boxMinorValue->addItems(QStringList()<<"0"<<"2"<<"4"<<"8");
-  else
-  boxMinorValue->addItems(QStringList()<<"0"<<"1"<<"4"<<"9"<<"14"<<"19");
-
-  boxMinorValue->setEditText(QString::number(d_plot->axisMaxMinor(a)));
-
-  bool isColorMap = d_graph->isColorBarEnabled(mapToQwtAxis(axis));
-  boxAxesBreaks->setEnabled (!isColorMap);
-  if (isColorMap)
-  {
-  boxAxesBreaks->setChecked (false);
-  }
-
-  }
-  else
-  {
-  boxAxesBreaks->setChecked(false);
-  boxAxesBreaks->setEnabled (false);
-  }
-
-  QwtValueList lst = scDiv->ticks (QwtScaleDiv::MajorTick);
-  boxMajorValue->setValue(lst.count());
-
-  if (d_graph->axisStep(a) != 0.0){
-  btnStep->setChecked(true);
-  boxStep->setEnabled(true);
-  boxUnit->setEnabled(true);
-
-  btnMajor->setChecked(false);
-  boxMajorValue->setEnabled(false);
-  } else{
-  btnStep->setChecked(false);
-  boxStep->setEnabled(false);
-  boxUnit->setEnabled(false);
-  btnMajor->setChecked(true);
-  boxMajorValue->setEnabled(true);
-  }
-  */
-}
-
 void AxesDialog::pageChanged(QWidget *page)
 {
   if (lastPage == scalesPage && page == axesPage)
@@ -1369,48 +1163,6 @@ void AxesDialog::updateGrid()
   }
 }
 
-//void AxesDialog::applyChangesToGrid(Grid *grid)
-//{
-//  if (!grid)
-//    return;
-//
-//  if (axesGridList->currentRow() == 1)
-//  {
-//    grid->enableX(boxMajorGrid->isChecked());
-//    grid->enableXMin(boxMinorGrid->isChecked());
-//
-//    grid->setMajPenX(
-//        QPen(ColorBox::color(boxColorMajor->currentIndex()),
-//            boxWidthMajor->value(),
-//            Graph::getPenStyle(boxTypeMajor->currentIndex())));
-//    grid->setMinPenX(
-//        QPen(ColorBox::color(boxColorMinor->currentIndex()),
-//            boxWidthMinor->value(),
-//            Graph::getPenStyle(boxTypeMinor->currentIndex())));
-//  }
-//  else
-//  {
-//    grid->enableY(boxMajorGrid->isChecked());
-//    grid->enableYMin(boxMinorGrid->isChecked());
-//
-//    grid->setMajPenY(
-//        QPen(ColorBox::color(boxColorMajor->currentIndex()),
-//            boxWidthMajor->value(),
-//            Graph::getPenStyle(boxTypeMajor->currentIndex())));
-//    grid->setMinPenY(
-//        QPen(ColorBox::color(boxColorMinor->currentIndex()),
-//            boxWidthMinor->value(),
-//            Graph::getPenStyle(boxTypeMinor->currentIndex())));
-//  }
-//
-//  grid->enableZeroLineX(boxXLine->isChecked());
-//  grid->enableZeroLineY(boxYLine->isChecked());
-//  grid->setAxis(boxGridXAxis->currentIndex() + 2, boxGridYAxis->currentIndex());
-//  grid->setRenderHint(QwtPlotItem::RenderAntialiased,
-//      boxAntialiseGrid->isChecked());
-//}
-
-
 void AxesDialog::changeMinorTicksLength(int minLength)
 {
   if (generalDialog->currentWidget() != generalPage)
@@ -1469,35 +1221,9 @@ void AxesDialog::pickCanvasFrameColor()
   d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
 }
 
-//void AxesDialog::majorGridEnabled(bool on)
-//{
-//  boxTypeMajor->setEnabled(on);
-//  boxColorMajor->setEnabled(on);
-//  boxWidthMajor->setEnabled(on);
-//
-//  updateGrid();
-//}
-//
-//void AxesDialog::minorGridEnabled(bool on)
-//{
-//  boxTypeMinor->setEnabled(on);
-//  boxColorMinor->setEnabled(on);
-//  boxWidthMinor->setEnabled(on);
-//
-//  updateGrid();
-//}
-
 bool AxesDialog::apply()
 {
-  /*
-  auto anaxis = axesPrefsArea->itemAt(mapToQwtAxis(axesTitlesList->currentRow()));
-  auto awidget = anaxis->widget();
-
-  if (axesPrefsArea->currentWidget()==dynamic_cast<AxisDetails*>(awidget))
-  {
-  AxisDetails *currentaxis = dynamic_cast<AxisDetails*>(awidget);
-  }
-  */
+  //Check if all tabs and axes are valid first
   updateGrid();
   for (auto axisItr = m_Axis_list.begin(); axisItr != m_Axis_list.end(); axisItr++)
   {
@@ -1508,153 +1234,18 @@ bool AxesDialog::apply()
     (*scaleItr)->apply();
   }
   //this is gettign rewritten to check and press ALL tabs when apply or ok is pressed
-
   /*
-
-  if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(scalesPage))
-  {
-
-  int a = mapToQwtAxis(axesList->currentRow());
-  ScaleDraw::ScaleType type = d_graph->axisType(a);
-
-  double start = 0.0, end = 0.0;
-  if (type == ScaleDraw::Date){
-  ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_graph->plotWidget()->axisScaleDraw(a));
-  QDateTime origin = sclDraw->dateTimeOrigin();
-  start = (double)origin.secsTo(boxStartDateTime->dateTime());
-  end = (double)origin.secsTo(boxEndDateTime->dateTime());
-  } else if (type == ScaleDraw::Time){
-  ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_graph->plotWidget()->axisScaleDraw(a));
-  QTime origin = sclDraw->dateTimeOrigin().time();
-  start = (double)origin.msecsTo(boxStartTime->time());
-  end = (double)origin.msecsTo(boxEndTime->time());
-  } else {
-  start = boxStart->value();
-  end = boxEnd->value();
-  }
-
-  if (start >= end){
-  QMessageBox::warning(this,tr("MantidPlot - Error"),
-  "Invalid option to set the 'From' greater than 'To' for the scale settings.\nOperation aborted! ");
-  return false;
-  }
-
-  double step = 0.0;
-  if (btnStep->isChecked()){
-  step = boxStep->value();
-  if (type == ScaleDraw::Time){
-  switch (boxUnit->currentIndex())
-  {
-  case 0:
-  break;
-  case 1:
-  step *= 1e3;
-  break;
-  case 2:
-  step *= 6e4;
-  break;
-  case 3:
-  step *= 36e5;
-  break;
-  }
-  } else if (type == ScaleDraw::Date){
-  switch (boxUnit->currentIndex())
-  {
-  case 0:
-  step *= 86400;
-  break;
-  case 1:
-  step *= 604800;
-  break;
-  }
-  }
-  }
-
-  double breakLeft = -DBL_MAX, breakRight = DBL_MAX;
-  if (boxAxesBreaks->isChecked()){
-  breakLeft = qMin(boxBreakStart->value(), boxBreakEnd->value());
-  breakRight = qMax(boxBreakStart->value(), boxBreakEnd->value());
-  }
-  d_graph->setScale(a, start, end, step, boxMajorValue->value(), boxMinorValue->currentText().toInt(),
-  boxScaleType->currentIndex(), btnInvert->isChecked(), breakLeft, breakRight,
-  boxBreakPosition->value(), boxStepBeforeBreak->value(), boxStepAfterBreak->value(),
-  boxMinorTicksBeforeBreak->currentText().toInt(), boxMinorTicksAfterBreak->currentText().toInt(),
-  boxLog10AfterBreak->isChecked(), boxBreakWidth->value(), boxBreakDecoration->isChecked());
-  d_graph->notifyChanges();
-  }
-  else if (generalDialog->currentWidget() == gridPage)
-  updateGrid();
-  else if (generalDialog->currentWidget() == dynamic_cast<QWidget*>(axesPage))
-  {
-  int axis = mapToQwtAxisId();
-  int format = cmbAxisType->currentIndex();
-
-  int baseline = spnBaseline->value();
-  axesBaseline[axis] = baseline;
-
-  QString formatInfo = QString::null;
-  if (format == ScaleDraw::Numeric)
-  {
-  if (boxShowFormula->isChecked())
-  {
-  QString formula = txtFormula->text().lower();
-  try
-  {
-  double value = 1.0;
-  MyParser parser;
-  if (formula.contains("x"))
-  parser.DefineVar("x", &value);
-  else if (formula.contains("y"))
-  parser.DefineVar("y", &value);
-  parser.SetExpr(formula.ascii());
-  parser.Eval();
-  }
-  catch(mu::ParserError &e)
-  {
-  QMessageBox::critical(this, tr("MantidPlot - Formula input error"), QString::fromStdString(e.GetMsg())+"\n"+
-  tr("Valid variables are 'x' for Top/Bottom axes and 'y' for Left/Right axes!"));
-  txtFormula->setFocus();
-  m_updatePlot=false;
-  return m_updatePlot;
-  //return false;
-  }
-  }
-  } else if (format == ScaleDraw::Time || format == ScaleDraw::Date){
-  QStringList lst = d_graph->axisFormatInfo(axis).split(";", QString::KeepEmptyParts);
-  if ((int)lst.count() >= 2)
-  lst[1] = cmbFormat->currentText();
-  formatInfo = lst.join(";");
-  } else if (format == ScaleDraw::Day || format == ScaleDraw::Month)
-  formatInfo = QString::number(cmbFormat->currentIndex());
-  else if (format == ScaleDraw::ColHeader)
-  formatInfo = cmbTableName->currentText();
-  else
-  formatInfo = cmbColName->currentText();
-
-  if (d_graph->axisTitle(axis) != txtTitle->text())
-  d_graph->setAxisTitle(axis, txtTitle->text());
-
-  if (axis == QwtPlot::xBottom)
-  xBottomLabelsRotation=spnAngle->value();
-  else if (axis == QwtPlot::xTop)
-  xTopLabelsRotation=spnAngle->value();
-
-  QString formula = txtFormula->text();
-  if (!boxShowFormula->isChecked())
-  formula = QString();
-  showAxis(axis, format, formatInfo, boxShowAxis->isChecked(), cmbMajorTicksType->currentIndex(), cmbMinorTicksType->currentIndex(),
-  grpShowLabels->isChecked(), cbtnAxisColor->color(), cmbFormat->currentIndex(),
-  spnPrecision->value(), spnAngle->value(), baseline, formula, cbtnAxisNumColor->color());
+  
   }
   else if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(generalPage)){
-  d_graph->setAxesLinewidth(boxAxesLinewidth->value());
-  d_graph->changeTicksLength(boxMinorTicksLength->value(), boxMajorTicksLength->value());
-  if (boxFramed->isChecked())
-  d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
-  else
-  d_graph->setCanvasFrame(0);
-  d_graph->drawAxesBackbones(boxBackbones->isChecked());
-  d_graph->replot();
+    d_graph->setAxesLinewidth(boxAxesLinewidth->value());
+    d_graph->changeTicksLength(boxMinorTicksLength->value(), boxMajorTicksLength->value());
+    if (boxFramed->isChecked())
+      d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
+    else
+      d_graph->setCanvasFrame(0);
+    d_graph->drawAxesBackbones(boxBackbones->isChecked());
+    d_graph->replot();
   }
   m_updatePlot=true;
   return m_updatePlot;

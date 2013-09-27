@@ -329,6 +329,36 @@ void AxisDetails::setModified()
 
 bool AxisDetails::valid()
 {
+/*
+if (format == ScaleDraw::Numeric)
+    {
+      if (boxShowFormula->isChecked())
+      {
+        QString formula = txtFormula->text().lower();
+        try
+        {
+          double value = 1.0;
+          MyParser parser;
+          if (formula.contains("x"))
+            parser.DefineVar("x", &value);
+          else if (formula.contains("y"))
+            parser.DefineVar("y", &value);
+          parser.SetExpr(formula.ascii());
+          parser.Eval();
+        }
+        catch(mu::ParserError &e)
+        {
+          QMessageBox::critical(this, tr("MantidPlot - Formula input error"), QString::fromStdString(e.GetMsg())+"\n"+
+            tr("Valid variables are 'x' for Top/Bottom axes and 'y' for Left/Right axes!"));
+          txtFormula->setFocus();
+          m_updatePlot=false;
+          return m_updatePlot;
+          //return false;
+        }
+      }
+    }
+*/
+
   Table *w = d_app->table(cmbColName->currentText());
   return m_initialised && d_app && d_graph && !((cmbAxisType->currentIndex() == ScaleDraw::Text || cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
 }
@@ -357,7 +387,10 @@ void AxisDetails::apply()
       lst[1] = cmbFormat->currentText();
       formatInfo = lst.join(";");
     }
-
+    else if (format == ScaleDraw::ColHeader)
+    {
+      formatInfo = cmbTableName->currentText();
+    }
     d_graph->showAxis(m_mappedaxis, cmbAxisType->currentIndex(), formatInfo, w, chkShowAxis->isChecked(), cmbMajorTicksType->currentIndex(),
       cmbMinorTicksType->currentIndex(), grpShowLabels->isChecked(), cbtnAxisColor->color(), cmbFormat->currentIndex(), spnPrecision->value(), spnAngle->value(), spnBaseline->value(), formula,
       cbtnAxisNumColor->color());
