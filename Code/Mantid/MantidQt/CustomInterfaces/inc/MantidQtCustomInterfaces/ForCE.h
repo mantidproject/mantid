@@ -19,7 +19,7 @@ namespace MantidQt
 			ForCE(QWidget * parent = 0);
 
 			// Inherited methods from IndirectForeignTab
-			QString help() { return "ForCE"; };
+			QString help() { return "Neutron_Force"; };
 			bool validate();
 			void run();
 			/// Load default settings into the interface
