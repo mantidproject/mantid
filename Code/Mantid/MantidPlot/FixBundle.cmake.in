@@ -79,8 +79,7 @@ set ( mantidpylibs ${mantidpydir}/kernel/_kernel.so
                    ${mantidpydir}/geometry/_geometry.so
                    ${mantidpydir}/api/_api.so )
 
-set ( other_libs ${bundle}/Contents/MacOS/libMantidPythonAPI.so
-                 ${bundle}/Contents/MacOS/mantidqtpython.so
+set ( other_libs ${bundle}/Contents/MacOS/mantidqtpython.so
 		 ${mantid_plugins}
                  ${pyqt_libs} ${qtplugins} ${pvplugins}
                  ${mantidpylibs} ${mtdqtplugins} )
