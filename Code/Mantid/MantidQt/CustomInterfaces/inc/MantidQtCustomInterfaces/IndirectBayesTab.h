@@ -3,6 +3,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
+#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
 
 #include <QMap>
 #include <QDoubleValidator>

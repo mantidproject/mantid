@@ -1,5 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidQtAPI/MantidQwtMatrixWorkspaceData.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectBayesTab.h"
 
@@ -83,6 +84,8 @@ namespace MantidQt
     {
       using Mantid::MantidVec;
 
+      MantidQwtMatrixWorkspaceData wsData(workspace, static_cast<int>(wsIndex), false);
+
       if ( m_curve != NULL )
       {
         m_curve->attach(0);
@@ -97,11 +100,8 @@ namespace MantidQt
       }
       else
       {
-        auto dataX = workspace->readX(wsIndex);
-        auto dataY = workspace->readY(wsIndex);
-
         m_curve = new QwtPlotCurve();
-        m_curve->setData(&dataX[0], &dataY[0], static_cast<int>(workspace->blocksize()));
+        m_curve->setData(wsData);
         m_curve->attach(m_plot);
 
         m_plot->replot();
