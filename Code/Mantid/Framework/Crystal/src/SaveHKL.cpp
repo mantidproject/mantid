@@ -222,7 +222,7 @@ namespace Crystal
 		std::string STRING;
 		std::ifstream infile;
                 std::string spectraFile = getPropertyValue("SpectraFile");
-		infile.open (spectraFile);
+		infile.open (spectraFile.c_str());
 		size_t a = 0;
 		if (iSpec == 1)
 		{
