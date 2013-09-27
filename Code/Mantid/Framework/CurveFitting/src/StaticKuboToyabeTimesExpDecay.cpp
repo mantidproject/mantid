@@ -1,3 +1,8 @@
+/*WIKI*
+Fitting function for use by Muon scientists defined by:
+
+<math> \mbox{A}\times ( \exp(-{Delta}^2 \times {x}^2 / 2 ) \times ( 1 - ( {Delta}^2 \times {x}^2 ) ) \times  \frac 2 3 + \frac 1 3 ) \times \exp(-{Lambda} \times {x}) </math>
+ *WIKI*/
 #include "MantidCurveFitting/StaticKuboToyabeTimesExpDecay.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <cmath>
@@ -30,8 +35,8 @@ void StaticKuboToyabeTimesExpDecay::function1D(double* out, const double* xValue
 
   for (size_t i = 0; i < nData; i++) {
     double x = xValues[i];
-    double DSquared = pow(D*x,2);
-    out[i] = A*(exp(-DSquared/2)*(1-DSquared)*C1 + C2)*exp(-L*x);
+    double DXSquared = pow(D*x,2);
+    out[i] = A*(exp(-DXSquared/2)*(1-DXSquared)*C1 + C2)*exp(-L*x);
   } 
 
 }
