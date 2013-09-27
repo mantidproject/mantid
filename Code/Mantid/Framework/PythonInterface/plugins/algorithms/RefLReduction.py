@@ -217,10 +217,11 @@ class RefLReduction(PythonAlgorithm):
                                                                            dataBackRange,
                                                                            'data')
         
-#         wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Dropbox/temporary/data_file_not_integrated.txt',
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Desktop/DebugMantid/DataAndNormBeingSameFile/data_file_back_sub_not_integrated.txt',
 #                                      data_tof_axis,
 #                                      data_y_axis,
 #                                      data_y_error_axis)
+         
          
 # #         ## DEBUGGING ONLY
 #         [inte_data_y_axis, inte_data_y_error_axis] = wks_utility.integratedOverPixelDim(data_y_axis, data_y_error_axis)          
@@ -259,6 +260,11 @@ class RefLReduction(PythonAlgorithm):
                                                         normBackRange,
                                                         'normalization') 
 
+#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Desktop/DebugMantid/DataAndNormBeingSameFile/norm_file_back_sub_not_integrated.txt',
+#                                      norm_tof_axis,
+#                                      norm_y_axis,
+#                                      norm_y_error_axis)
+
         # get average mean of peak region for each TOF
 #         [av_norm, av_norm_error] = wks_utility.meanOfRange(norm_y_axis, 
 #                                                            norm_y_error_axis)
@@ -266,11 +272,15 @@ class RefLReduction(PythonAlgorithm):
         [av_norm, av_norm_error] = wks_utility.fullSumWithError(norm_y_axis, 
                                                            norm_y_error_axis)
 
+
+        
+
+
 #         ## DEBUGGING ONLY
-#         wks_utility.ouput_ascii_file('/mnt/hgfs/j35/Dropbox/temporary/norm_file.txt',
-#                                      norm_tof_axis,
-#                                      av_norm, 
-#                                      av_norm_error)
+#        wks_utility.ouput_ascii_file('/mnt/hgfs/j35/Desktop/DebugMantid/DataAndNormBeingSameFile/norm_file_back_sub_integrated.txt',
+#                                     norm_tof_axis, 
+#                                     av_norm, 
+#                                     av_norm_error)
 
 #         ## DEBUGGING ONLY
 #         [inte_data_y_axis, inte_data_y_error_axis] = wks_utility.integratedOverPixelDim(data_y_axis, data_y_error_axis)          
@@ -296,6 +306,7 @@ class RefLReduction(PythonAlgorithm):
                                                                                              av_norm,
                                                                                              av_norm_error)
 
+
 #         ## DEBUGGING ONLY
 #         my_x_axis = zeros((17,240))
 #         for i in range(17):
@@ -308,11 +319,12 @@ class RefLReduction(PythonAlgorithm):
 #                                            final_data_y_axis, 
 #                                            final_data_y_error_axis)
         
-        # cleanup data
-        [final_data_y_axis, final_data_y_error_axis] = wks_utility.cleanupData(final_data_y_axis,
-                                                                               final_data_y_error_axis)
 
             
+        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Desktop/DebugMantid/DataAndNormBeingSameFile/data_over_norm_file_not_integrated.txt',
+                                      tof_axis,
+                                      final_data_y_axis,
+                                      final_data_y_error_axis)
 
 #         ## debugging only
 #         name_output_ws = self.getPropertyValue("OutputWorkspace")
@@ -488,6 +500,11 @@ class RefLReduction(PythonAlgorithm):
                      
         
         
+#                # cleanup data
+        [final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis,
+                                                                        final_error_axis)
+
+        
         # create final workspace
         import time
         _time = int(time.time())
@@ -495,7 +512,7 @@ class RefLReduction(PythonAlgorithm):
         name_output_ws = name_output_ws + '_#' + str(_time) + 'ts'
         final_workspace = wks_utility.createFinalWorkspace(final_x_axis, 
                                                            final_y_axis, 
-                                                           final_error_axis,
+                                                           final_y_error_axis,
                                                            name_output_ws)
          
         
