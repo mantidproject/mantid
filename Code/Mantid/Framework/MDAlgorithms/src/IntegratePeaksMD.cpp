@@ -230,6 +230,9 @@ namespace MDAlgorithms
     size_t numSteps = 0;
     bool cylinderBool = getProperty("Cylinder");
     bool adaptiveQRadius = getProperty("AdaptiveQRadius");
+    std::vector<double> PeakRadiusVector(peakWS->getNumberPeaks(),PeakRadius);
+    std::vector<double> BackgroundInnerRadiusVector(peakWS->getNumberPeaks(),BackgroundInnerRadius);
+    std::vector<double> BackgroundOuterRadiusVector(peakWS->getNumberPeaks(),BackgroundOuterRadius);
     if (cylinderBool)
     {
         numSteps = 100;
@@ -351,6 +354,9 @@ namespace MDAlgorithms
 				}
 				lenQpeak = std::sqrt(lenQpeak);
 			}
+			PeakRadiusVector[i] = lenQpeak*PeakRadius;
+			BackgroundInnerRadiusVector[i] = lenQpeak*BackgroundInnerRadius;
+			BackgroundOuterRadiusVector[i] = lenQpeak*BackgroundOuterRadius;
 			CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
 			// Perform the integration into whatever box is contained within.
@@ -622,9 +628,9 @@ namespace MDAlgorithms
     // This flag is used by the PeaksWorkspace to evaluate whether it has been integrated.
     peakWS->mutableRun().addProperty("PeaksIntegrated", 1, true); 
     // These flags are specific to the algorithm.
-    peakWS->mutableRun().addProperty("PeakRadius", PeakRadius, true);
-    peakWS->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadius, true);
-    peakWS->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadius, true);
+    peakWS->mutableRun().addProperty("PeakRadius", PeakRadiusVector, true);
+    peakWS->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadiusVector, true);
+    peakWS->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadiusVector, true);
 
     // save profiles in peaks file
     const std::string outfile = getProperty("ProfilesFile");

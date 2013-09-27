@@ -19,12 +19,12 @@ namespace MantidQt
     {
       if (m_peaksWS->hasIntegratedPeaks())
       {
-        m_peakRadius = boost::lexical_cast<double>(
-            m_peaksWS->run().getProperty("PeakRadius")->value());
-        m_backgroundInnerRadius = boost::lexical_cast<double>(
-            m_peaksWS->run().getProperty("BackgroundInnerRadius")->value());
-        m_backgroundOuterRadius = boost::lexical_cast<double>(
-            m_peaksWS->run().getProperty("BackgroundOuterRadius")->value());
+        m_peakRadius =
+            m_peaksWS->run().getPropertyValueAsType<std::vector<double> >("PeakRadius");
+        m_backgroundInnerRadius =
+            m_peaksWS->run().getPropertyValueAsType<std::vector<double> >("BackgroundInnerRadius");
+        m_backgroundOuterRadius =
+            m_peaksWS->run().getPropertyValueAsType<std::vector<double> >("BackgroundOuterRadius");
         m_FOM = 2; // Possible to display workspaces with this factory.
       }
     }
@@ -37,7 +37,7 @@ namespace MantidQt
       {
         const IPeak& peak = m_peaksWS->getPeak(static_cast<int>(i));
         auto position = transform->transformPeak(peak);
-        physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, m_peakRadius, m_backgroundInnerRadius, m_backgroundOuterRadius);
+        physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, m_peakRadius[i], m_backgroundInnerRadius[i], m_backgroundOuterRadius[i]);
       }
 
       // Make the overlay widget.
