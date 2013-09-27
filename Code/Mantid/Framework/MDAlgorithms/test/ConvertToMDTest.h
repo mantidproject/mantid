@@ -61,7 +61,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algortithm should have 20 propeties",20,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algortithm should have 21 propeties",21,(size_t)(pAlg->getProperties().size()));
 }
 
 
@@ -291,7 +291,7 @@ void test_EventNoUnitsConv()
 
     ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWsEv);
-    TS_ASSERT_THROWS_NOTHING(pConvMethods->initialize(WSD,pTargWS));
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->initialize(WSD,pTargWS,false));
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();
@@ -327,7 +327,7 @@ void test_EventFromTOFConv()
 
     ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWsEv);
-    pConvMethods->initialize(WSD,pTargWS);
+    pConvMethods->initialize(WSD,pTargWS,false);
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();
@@ -365,7 +365,7 @@ void test_HistoFromTOFConv()
 
     ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWs2D);
-    pConvMethods->initialize(WSD,pTargWS);
+    pConvMethods->initialize(WSD,pTargWS,false);
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();
@@ -406,7 +406,7 @@ void test_HistoNoUnitsConv()
 
     ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWs2D);
-    pConvMethods->initialize(WSD,pTargWS);
+    pConvMethods->initialize(WSD,pTargWS,false);
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();

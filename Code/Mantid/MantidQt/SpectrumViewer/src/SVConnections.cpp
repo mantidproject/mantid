@@ -73,16 +73,21 @@ SVConnections::SVConnections( Ui_SpectrumViewer* ui,
   sv_ui->left_right_splitter->setSizes( horiz_sizes );
 
   sv_ui->imageHorizontalScrollBar->setFocusPolicy( Qt::StrongFocus );
+  sv_ui->imageHorizontalScrollBar->setMouseTracking(true);
   sv_ui->imageHorizontalScrollBar->setMinimum(20);
   sv_ui->imageHorizontalScrollBar->setMaximum(2000);
   sv_ui->imageHorizontalScrollBar->setPageStep(30);
   sv_ui->imageHorizontalScrollBar->setSingleStep(30/2);
 
   sv_ui->imageVerticalScrollBar->setFocusPolicy( Qt::StrongFocus );
+  sv_ui->imageVerticalScrollBar->setMouseTracking(true);
   sv_ui->imageVerticalScrollBar->setMinimum(0);
   sv_ui->imageVerticalScrollBar->setMaximum(10000000);
   sv_ui->imageVerticalScrollBar->setPageStep(500);
   sv_ui->imageVerticalScrollBar->setSingleStep(500/2);
+
+  // for forwarding scroll wheel events
+  sv_ui->spectrumPlot->canvas()->installEventFilter(this);
 
   sv_ui->action_Hscroll->setCheckable(true);
   sv_ui->action_Hscroll->setChecked(false);
@@ -270,6 +275,33 @@ SVConnections::~SVConnections()
   delete h_graph_picker;
   delete v_graph_picker;
   delete color_group;
+}
+
+/**
+ * @param object Object that the event came from.
+ * @param event The event being filtered.
+ * @return true if the event was consumed.
+ */
+bool SVConnections::eventFilter(QObject *object, QEvent *event)
+{
+  UNUSED_ARG(object);
+
+  if (event->type() == QEvent::Wheel)
+  {
+    QWheelEvent *wheelEvent = dynamic_cast<QWheelEvent *>(event);
+    if (wheelEvent)
+    {
+      if (wheelEvent->orientation() == Qt::Orientation::Vertical)
+      {
+        return sv_ui->imageVerticalScrollBar->event(wheelEvent);
+      }
+      else if (wheelEvent->orientation() == Qt::Orientation::Horizontal)
+      {
+        return sv_ui->imageHorizontalScrollBar->event(wheelEvent);
+      }
+    }
+  }
+  return false;
 }
 
 

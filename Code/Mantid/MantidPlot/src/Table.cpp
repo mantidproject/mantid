@@ -945,6 +945,17 @@ QStringList Table::selectedYColumns()
   return names;
 }
 
+QStringList Table::selectedXColumns()
+{
+  QStringList names;
+  for (int i=0;i<d_table->numCols();i++)
+  {
+    if(d_table->isColumnSelected (i) && col_plot_type[i] == X)
+      names<<QString(name())+"_"+col_label[i];
+  }
+  return names;
+}
+
 QStringList Table::selectedErrColumns()
 {
   QStringList names;

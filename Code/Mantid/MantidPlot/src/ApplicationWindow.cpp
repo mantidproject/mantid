@@ -16448,6 +16448,9 @@ bool ApplicationWindow::validFor2DPlot(Table *table)
   if (!table->selectedYColumns().count()){
     QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Please select a Y column to plot!"));//Mantid
     return false;
+  } else if (table->selectedXColumns().count() > 1){
+    QMessageBox::warning(this, tr("MantidPlot - Error"), tr("Can't plot using multiple X columns!"));//Mantid
+    return false;
   } else if (table->numCols()<2) {
     QMessageBox::critical(this, tr("MantidPlot - Error"),tr("You need at least two columns for this operation!"));//Mantid
     return false;
@@ -16470,7 +16473,7 @@ MultiLayer* ApplicationWindow::generate2DGraph(Graph::CurveType type)
       return 0;
 
     Q3TableSelection sel = table->getSelection();
-    return multilayerPlot(table, table->drawableColumnSelection(), type, sel.topRow(), sel.bottomRow());
+    return multilayerPlot(table, table->selectedColumns(), type, sel.topRow(), sel.bottomRow());
   } else if (w->isA("Matrix")){
     Matrix *m = static_cast<Matrix *>(w);
     return plotHistogram(m);
