@@ -97,6 +97,8 @@ public slots:
   void online_help_slot();
  
 private:
+  /// Event filter for mouse wheel capture
+  bool eventFilter(QObject *object, QEvent *event);
 
   Ui_SpectrumViewer*  sv_ui;
   SpectrumView*       sv_main_window;
