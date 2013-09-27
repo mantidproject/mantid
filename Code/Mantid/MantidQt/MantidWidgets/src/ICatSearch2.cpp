@@ -658,7 +658,8 @@ namespace MantidQt
       for (unsigned row = 0; row < column->size(); row++)
       {
         // Add the file extension to the set if it does not exist.
-        extensions.insert(Poco::Path(column->cell<std::string>(row)).getExtension());
+        QString extension = QString::fromStdString(Poco::Path(column->cell<std::string>(row)).getExtension());
+        extensions.insert(extension.toLower().toStdString());
       }
 
       return (extensions);
@@ -690,9 +691,9 @@ namespace MantidQt
         for (int col = 0; col < 1; ++col)
         {
           QTableWidgetItem *item = table->item(row,col);
-          // Show the relevant rows depending on file extension.
-          // 0 index is "Filter type..." so all will be shown.
-          if (index == 0 || (item->text().contains(m_icatUiForm.dataFileFilterCombo->text(index))))
+          // Show the relevant rows depending on file extension. 0 index is "Filter type..." so all will be shown.
+          // Have to convert to lowercase as ".TXT", and ".txt" should be filtered as the same.
+          if (index == 0 || (item->text().toLower().contains(m_icatUiForm.dataFileFilterCombo->text(index).toLower())))
           {
             table->setRowHidden(row,false);
             break;
