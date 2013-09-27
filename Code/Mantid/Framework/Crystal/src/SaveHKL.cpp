@@ -111,6 +111,8 @@ namespace Crystal
       "Linear absorption coefficient at 1.8 Angstroms in 1/cm if not set with SetSampleMaterial");
     declareProperty("Radius", EMPTY_DBL(), mustBePositive, "Radius of the sample in centimeters");
     declareProperty("PowerLambda", 4.0, "Power of lamda ");
+    declareProperty(new FileProperty("SpectraFile", "", API::FileProperty::OptionalLoad, ".dat"),
+        " Spectrum data read from a spectrum file.");
 
     std::vector<std::string> exts;
     exts.push_back(".hkl");
@@ -136,22 +138,27 @@ namespace Crystal
     // Sequence and run number
     int seqNum = 1;
     int bankSequence = 0;
+    int runSequence = 0;
     int bankold = -1;
+    int runold = -1;
     std::map<int, double> detScale;
 
-    detScale[17] = 1.092114823;
-    detScale[18] = 0.869105443;
-    detScale[22] = 1.081377685;
-    detScale[26] = 1.055199489;
-    detScale[27] = 1.070308725;
-    detScale[28] = 0.886157884;
-    detScale[36] = 1.112773972;
-    detScale[37] = 1.012894506;
-    detScale[38] = 1.049384146;
-    detScale[39] = 0.890313805;
-    detScale[47] = 1.068553893;
-    detScale[48] = 0.900566426;
-    detScale[58] = 0.911249203;
+    if (ws->getInstrument()->getName() == "TOPAZ")
+    {
+      detScale[17] = 1.092114823;
+      detScale[18] = 0.869105443;
+      detScale[22] = 1.081377685;
+      detScale[26] = 1.055199489;
+      detScale[27] = 1.070308725;
+      detScale[28] = 0.886157884;
+      detScale[36] = 1.112773972;
+      detScale[37] = 1.012894506;
+      detScale[38] = 1.049384146;
+      detScale[39] = 0.890313805;
+      detScale[47] = 1.068553893;
+      detScale[48] = 0.900566426;
+      detScale[58] = 0.911249203;
+    }
 
     std::fstream out;
     bool append = getProperty("AppendFile");
@@ -160,7 +167,7 @@ namespace Crystal
       out.open( filename.c_str(), std::ios::in|std::ios::out|std::ios::ate);
       std::streamoff pos = out.tellp();
       out.seekp (28);
-      out >> bankSequence;
+      out >> runSequence;
       out.seekp (pos - 110);
       out >> seqNum;
       out.seekp (pos - 73);
@@ -214,7 +221,8 @@ namespace Crystal
 		std::vector<double> spec(11);
 		std::string STRING;
 		std::ifstream infile;
-		infile.open ("SCD_spec_coeff.dat");
+                std::string spectraFile = getPropertyValue("SpectraFile");
+		infile.open (spectraFile);
 		size_t a = 0;
 		if (iSpec == 1)
 		{
@@ -291,6 +299,7 @@ namespace Crystal
       double correc = scaleFactor;
       double relSigSpect = 0.0;
       if (bank != bankold) bankSequence++;
+      if (run != runold) runSequence++;
       if(correctPeaks)
       {
 			// correct for the slant path throught the scintillator glass
@@ -327,16 +336,18 @@ namespace Crystal
 			{
 				throw std::runtime_error("Wavelength for normalizing to spectrum is out of range.");
 			}
-			correc = scaleFactor * sinsqt * cmonx * sp_ratio * detScale[bank] / ( wl4 * spect * transmission);
+			correc = scaleFactor * sinsqt * cmonx * sp_ratio / ( wl4 * spect * transmission);
+			if (ws->getInstrument()->getName() == "TOPAZ" && detScale.find(bank) != detScale.end())
+                          correc *= detScale[bank];
       }
 
       // SHELX can read data without the space between the l and intensity
       out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) << correc*p.getIntensity();
 
       out << std::setw( 8 ) << std::fixed << std::setprecision( 2 ) <<
-    		  std::sqrt(std::pow(correc*p.getSigmaIntensity(),2)+std::pow(relSigSpect*p.getIntensity(),2));
+    		  std::sqrt(std::pow(correc*p.getSigmaIntensity(),2)+std::pow(relSigSpect*correc*p.getIntensity(),2));
 
-      out << std::setw( 4 ) << bankSequence;
+      out << std::setw( 4 ) << runSequence;
 
       out << std::setw( 8 ) << std::fixed << std::setprecision( 4 ) << lambda;
 
@@ -344,12 +355,13 @@ namespace Crystal
 
       out <<  std::setw( 7 ) <<  run;
 
-      out <<  std::setw( 7 ) <<  seqNum;
+      out <<  std::setw( 7 ) <<  wi + seqNum;
 
       out << std::setw( 7 ) <<  std::fixed << std::setprecision( 4 ) << transmission;
 
       out <<  std::setw( 4 ) << std::right <<  bank;
       bankold = bank;
+      runold = run;
 
       out << std::setw( 9 ) << std::fixed << std::setprecision( 5 )
         << scattering; //two-theta scattering
@@ -359,8 +371,6 @@ namespace Crystal
 
       out << std::endl;
 
-      // Count the sequence
-      seqNum++;
     }
     out << "   0   0   0    0.00    0.00   0  0.0000 0.0000      0      0 0.0000   0";
     out << std::endl;
