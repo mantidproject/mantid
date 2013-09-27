@@ -1,5 +1,7 @@
 #include "MantidQtCustomInterfaces/ForCE.h"
 
+#include <QFileInfo>
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -38,9 +40,9 @@ namespace MantidQt
 			QString filename = m_uiForm.mwRun->getFirstFilename();
 			QFileInfo finfo(filename);
 			QString ext = finfo.extension().toLower();
-			QString basename = finfo.basename();
+			QString basename = finfo.baseName();
 
-			QSting instrument = m_uiForm.cbInstrument->currentText();
+			QString instrument = m_uiForm.cbInstrument->currentText();
 			QString analyser = m_uiForm.cbAnalyser->currentText();
 			QString reflection = m_uiForm.cbReflection->currentText();
 
