@@ -1187,7 +1187,6 @@ class BaseRefWidget(BaseWidget):
         try:
             f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))[0]
 #            print FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
-            print f            
             range_min = int(self._summary.data_from_tof.text())
             range_max = int(self._summary.data_to_tof.text())
         
@@ -1195,11 +1194,9 @@ class BaseRefWidget(BaseWidget):
                 self._summary.data_from_tof.setText("%-d" % int(xmin))
                 self._summary.data_to_tof.setText("%-d" % int(xmax))
                 
-            print '#1'
             data_manipulation.tof_distribution(f, call_back,
                                                range_min=range_min,
                                                range_max=range_max)
-            print '#2'
         except:
             pass
 
