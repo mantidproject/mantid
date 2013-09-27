@@ -134,6 +134,9 @@ private:
   QAtomicInt m_updateCount;
   bool m_treeUpdating;
   Mantid::API::AnalysisDataServiceImpl & m_ads;
+  /// Temporarily keeps names of selected workspaces during tree update
+  /// in order to restore selection after update
+  QStringList m_selectedNames;
 
   static Mantid::Kernel::Logger& logObject;
 };

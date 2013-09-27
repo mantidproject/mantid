@@ -286,6 +286,7 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
       auto ws = group->getItem(i);
       auto * node = addTreeEntry(std::make_pair(ws->name(), ws), item);
       excludeItemFromSort(node);
+      if(m_selectedNames.contains(node->text(0))) node->setSelected(true);
     }
   }
   else
@@ -378,13 +379,24 @@ void MantidDockWidget::setTreeUpdating(const bool state)
 void MantidDockWidget::populateTopLevel(const std::map<std::string,Mantid::API::Workspace_sptr> & topLevelItems,
                                         const QStringList & expanded)
 {
+  // collect names of selected workspaces
+  QList<QTreeWidgetItem *> selected = m_tree->selectedItems();
+  m_selectedNames.clear(); // just in case
+  foreach( QTreeWidgetItem *item, selected)
+  {
+      m_selectedNames << item->text(0);
+  }
+
+  // populate the tree from scratch
   m_tree->clear();
   auto iend = topLevelItems.end();
   for(auto it = topLevelItems.begin(); it != iend; ++it)
   {
     auto *node = addTreeEntry(*it);
     if(expanded.contains(node->text(0))) node->setExpanded(true);
+    if(m_selectedNames.contains(node->text(0))) node->setSelected(true);
   }
+  m_selectedNames.clear();
 }
 
 /**
