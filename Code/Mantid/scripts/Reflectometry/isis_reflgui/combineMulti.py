@@ -1,9 +1,5 @@
-#from ReflectometerCors import *
 from l2q import *
 from mantid.simpleapi import *
-#from mantid.simpleapi import *  # New API
-#from mantidplot import *
-from PyQt4 import QtCore, uic
 import math
 from mantid.api import WorkspaceGroup
 
@@ -37,7 +33,7 @@ def combineDataMulti(wksp_list,output_wksp,beg_overlap,end_overlap,Qmin,Qmax,bin
 	
 	for i in range(0,len(wksp_list)-1):
 		w1=currentSum
-		w2=getWorkspace(wksp_list[i+1])
+		w2=getWorkspace(wksp_list[i+1]) # TODO: distinguishing between a group and a individual workspace is unnecessary for an algorithm. But custom group behavior WILL be required.
 		if defaultoverlaps:
 			overlapLow = w2.readX(0)[0]
 			overlapHigh = 0.5*max(w1.readX(0))
@@ -118,41 +114,10 @@ def getWorkspace(wksp):
 	Get the workspace if it is not a group workspace. If it is a group workspace, get the first period.
 	"""
 	if isinstance(mtd[wksp], WorkspaceGroup):
-		wout = mtd[wksp+'_1']
+		wout = mtd[wksp][0]
 	else:
 		wout = mtd[wksp]
 	return wout
 
-def groupGet(wksp,whattoget,field=''):
-	'''
-	Auxiliary function.
-	returns information about instrument or sample details for a given workspace wksp,
-	also if the workspace is a group (info from first group element)
-	'''
-	if (whattoget == 'inst'):
-		if isinstance(mtd[wksp], WorkspaceGroup):
-			return mtd[wksp+'_1'].getInstrument()
-		else:
-			return mtd[wksp].getInstrument()
-			
-	elif (whattoget == 'samp' and field != ''):
-		if isinstance(mtd[wksp], WorkspaceGroup):
-			try:
-				res = mtd[wksp + '_1'].getRun().getLogData(field).value				
-			except RuntimeError:
-				res = 0
-				print "Block "+field+" not found."			
-		else:
-			try:
-				res = mtd[wksp].getRun().getLogData(field).value
-			except RuntimeError:		
-				res = 0
-				print "Block "+field+" not found."
-		return res
-	elif (whattoget == 'wksp'):
-		if isinstance(mtd[wksp], WorkspaceGroup):
-			return mtd[wksp+'_1'].getNumberHistograms()
-		else:
-			return mtd[wksp].getNumberHistograms()
 
 	
