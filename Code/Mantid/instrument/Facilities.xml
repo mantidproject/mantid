@@ -404,6 +404,21 @@
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
   </instrument>
+
+  <instrument name="IN10">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="IN13">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="IN16">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Indirect Geometry Spectroscopy</technique>
+  </instrument>
   
   <instrument name="D33">
     <technique>SANS</technique> 
