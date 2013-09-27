@@ -2,7 +2,7 @@
 // Includes
 //--------------------------
 
-#include "AxisAxisDetails.h"
+#include "AxisDetails.h"
 #include "ApplicationWindow.h"
 #include "DoubleSpinBox.h"
 #include <qwt_scale_widget.h>
@@ -13,8 +13,8 @@
 
 #include <QWidget>
 #include <QSpinBox>
-#include <QCheckBox>
 #include <QRadioButton>
+#include <QCheckBox>
 #include <QGroupBox>
 #include <QComboBox>
 #include <QLabel>
@@ -33,7 +33,7 @@
 #include <ColorButton.h>
 #include <QFontDialog>
 
-AxisAxisDetails::AxisAxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent) : QWidget(parent)
+AxisDetails::AxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent) : QWidget(parent)
 {
   d_app = app;
   d_graph = graph;
@@ -43,7 +43,6 @@ AxisAxisDetails::AxisAxisDetails(ApplicationWindow* app, Graph* graph, int mappe
   QHBoxLayout * topLayout = new QHBoxLayout();
 
   chkShowAxis = new QCheckBox(tr("Show"));
-  //chkShowAxis->setChecked(true);
   topLayout->addWidget(chkShowAxis);
 
   grpTitle = new QGroupBox(tr("Title"));
@@ -195,12 +194,12 @@ AxisAxisDetails::AxisAxisDetails(ApplicationWindow* app, Graph* graph, int mappe
   initWidgets();
 }
 
-AxisAxisDetails::~AxisAxisDetails()
+AxisDetails::~AxisDetails()
 {
 
 }
 
-void AxisAxisDetails::initWidgets()
+void AxisDetails::initWidgets()
 {
   if (m_initialised)
   {
@@ -277,20 +276,17 @@ void AxisAxisDetails::initWidgets()
 
     QString formula = d_graph->axisFormula(m_mappedaxis);
     txtFormula->setFixedWidth(150);
-    //change this, txtFormula should always be visible if it's numeric, but disabled if the checkbox is out and shouldn't clear
+
     if (!formula.isEmpty())
     {
       chkShowFormula->setChecked(true);
       txtFormula->setEnabled(true);
-      //txtFormula->show();
       txtFormula->setText(formula);
     }
     else
     {
       chkShowFormula->setChecked(false);
       txtFormula->setEnabled(false);
-      //txtFormula->clear();
-      //txtFormula->hide();
     }
     showAxis();
 
@@ -326,18 +322,87 @@ void AxisAxisDetails::initWidgets()
   }
 }
 
-void AxisAxisDetails::setLabelFont()
+void AxisDetails::setModified()
 {
-  bool okF;
-  QFont oldFont = d_graph->axisTitleFont(m_mappedaxis);
-  QFont fnt = QFontDialog::getFont(&okF, oldFont, this);
-  if (okF && fnt != oldFont)
+  m_modified = true;
+}
+
+bool AxisDetails::valid()
+{
+  Table *w = d_app->table(cmbColName->currentText());
+  return m_initialised && d_app && d_graph && !((cmbAxisType->currentIndex() == ScaleDraw::Text || cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
+}
+
+void AxisDetails::apply()
+{
+  if (m_modified && valid())
   {
-    m_labelFont = fnt;
+    Table *w = d_app->table(cmbColName->currentText());
+
+    QString formula = txtFormula->text();
+    if (!chkShowFormula->isChecked())
+    {
+      formula = QString();
+    }
+
+    int type = cmbAxisType->currentIndex();
+    QString formatInfo = cmbColName->currentText();
+    if (type == ScaleDraw::Day || type == ScaleDraw::Month)
+    {
+      formatInfo = QString::number(cmbFormat->currentIndex());
+    }
+    else if (type == ScaleDraw::Time || type == ScaleDraw::Date)
+    {
+      QStringList lst = d_graph->axisFormatInfo(m_mappedaxis).split(";", QString::SkipEmptyParts);
+      lst[1] = cmbFormat->currentText();
+      formatInfo = lst.join(";");
+    }
+
+    d_graph->showAxis(m_mappedaxis, cmbAxisType->currentIndex(), formatInfo, w, chkShowAxis->isChecked(), cmbMajorTicksType->currentIndex(),
+      cmbMinorTicksType->currentIndex(), grpShowLabels->isChecked(), cbtnAxisColor->color(), cmbFormat->currentIndex(), spnPrecision->value(), spnAngle->value(), spnBaseline->value(), formula,
+      cbtnAxisNumColor->color());
+    d_graph->setAxisTitle(m_mappedaxis, txtTitle->text());
+    d_graph->setAxisFont(m_mappedaxis, m_scaleFont);
+    d_graph->setAxisTitleFont(m_mappedaxis, m_labelFont);
+    m_modified = false;
   }
 }
 
-void AxisAxisDetails::setAxisFormatOptions(int type)
+void AxisDetails::showAxis()
+{
+  bool shown = chkShowAxis->isChecked();
+  bool labels = grpShowLabels->isChecked();
+
+  grpShowLabels->setEnabled(shown);
+  grpAxisDisplay->setEnabled(shown);
+  grpTitle->setEnabled(shown);
+
+  if (shown)
+  {
+    cmbFormat->setEnabled(labels);
+    cmbColName->setEnabled(labels);
+    chkShowFormula->setEnabled(labels);
+    txtFormula->setEnabled(labels);
+
+    //this should so the work of the below IF but on one line and slightly more efficently as i assume setDisabled negates that given to it
+    spnAngle->setEnabled((m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop) && labels);
+    /*
+    if (m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop)
+    {
+    spnAngle->setEnabled(labels);
+    }
+    else
+    {
+    spnAngle->setDisabled(true);
+    }
+    */
+    spnPrecision->setEnabled(labels && (cmbAxisType->currentIndex() == ScaleDraw::Numeric) && (cmbFormat->currentIndex() != 0));
+
+    enableFormulaBox();
+  }
+}
+
+void AxisDetails::setAxisFormatOptions(int type)
 {
   cmbFormat->clear();
   cmbFormat->setEditable(false);
@@ -464,80 +529,30 @@ void AxisAxisDetails::setAxisFormatOptions(int type)
   }
 }
 
-void AxisAxisDetails::showAxis()
-{
-  //this is needed
-  bool shown = chkShowAxis->isChecked();
-  bool labels = grpShowLabels->isChecked();
-
-  //this needs reducing and the parenting feature can take care of most of this
-
-  //it should jsut need these three
-  grpShowLabels->setEnabled(shown);
-  grpAxisDisplay->setEnabled(shown);
-  grpTitle->setEnabled(shown);
-
-  /*
-  txtTitle->setEnabled(shown);
-  cbtnAxisColor->setEnabled(shown);
-  cbtnAxisNumColor->setEnabled(shown);
-  btnAxesFont->setEnabled(shown);
-  cmbMajorTicksType->setEnabled(shown);
-  cmbMinorTicksType->setEnabled(shown);
-  cmbAxisType->setEnabled(shown);
-  spnBaseline->setEnabled(shown);
-  */
-
-  if (shown)
-  {
-    //all of these previously relied on shown
-    cmbFormat->setEnabled(labels);
-    cmbColName->setEnabled(labels);
-    chkShowFormula->setEnabled(labels);
-    txtFormula->setEnabled(labels);
-
-    //this should so the work of the below IF but on one line and slightly more efficently as i assume setDisabled negates that given to it
-    spnAngle->setEnabled((m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop) && labels);
-    /*
-    if (m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop)
-    {
-    spnAngle->setEnabled(labels);
-    }
-    else
-    {
-    spnAngle->setDisabled(true);
-    }
-    */
-    spnPrecision->setEnabled(labels && (cmbAxisType->currentIndex() == ScaleDraw::Numeric) && (cmbFormat->currentIndex() != 0));
-
-    if (chkShowFormula->isChecked())
-    {
-      txtFormula->setEnabled(true);
-      //txtFormula->show();
-    }
-    else
-    {
-      txtFormula->setEnabled(false);
-      //txtFormula->hide();
-    }
-  }
-}
-
-void AxisAxisDetails::enableFormulaBox()
+void AxisDetails::enableFormulaBox()
 {
   if (chkShowFormula->isChecked())
   {
     txtFormula->setEnabled(true);
-    //txtFormula->show();
   }
   else
   {
     txtFormula->setEnabled(false);
-    //txtFormula->hide();
   }
 }
 
-void AxisAxisDetails::setScaleFont()
+void AxisDetails::setLabelFont()
+{
+  bool okF;
+  QFont oldFont = d_graph->axisTitleFont(m_mappedaxis);
+  QFont fnt = QFontDialog::getFont(&okF, oldFont, this);
+  if (okF && fnt != oldFont)
+  {
+    m_labelFont = fnt;
+  }
+}
+
+void AxisDetails::setScaleFont()
 {
   bool okF;
   QFont oldFont = d_graph->axisFont(m_mappedaxis);
@@ -546,51 +561,4 @@ void AxisAxisDetails::setScaleFont()
   {
     m_scaleFont = fnt;
   }  
-}
-
-void AxisAxisDetails::setModified()
-{
-  m_modified = true;
-}
-
-//to be merged into an apply method
-bool AxisAxisDetails::valid()
-{
-  Table *w = d_app->table(cmbColName->currentText());
-  return !((cmbAxisType->currentIndex() == ScaleDraw::Text || cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
-}
-
-void AxisAxisDetails::apply()
-{
-  if (!(d_app && d_graph && valid()) || !m_modified)
-    return;
-
-  Table *w = d_app->table(cmbColName->currentText());
-
-  QString formula = txtFormula->text();
-  if (!chkShowFormula->isChecked())
-  {
-    formula = QString();
-  }
-
-  int type = cmbAxisType->currentIndex();
-  QString formatInfo = cmbColName->currentText();
-  if (type == ScaleDraw::Day || type == ScaleDraw::Month)
-  {
-    formatInfo = QString::number(cmbFormat->currentIndex());
-  }
-  else if (type == ScaleDraw::Time || type == ScaleDraw::Date)
-  {
-    QStringList lst = d_graph->axisFormatInfo(m_mappedaxis).split(";", QString::SkipEmptyParts);
-    lst[1] = cmbFormat->currentText();
-    formatInfo = lst.join(";");
-  }
-
-  d_graph->showAxis(m_mappedaxis, cmbAxisType->currentIndex(), formatInfo, w, chkShowAxis->isChecked(), cmbMajorTicksType->currentIndex(),
-    cmbMinorTicksType->currentIndex(), grpShowLabels->isChecked(), cbtnAxisColor->color(), cmbFormat->currentIndex(), spnPrecision->value(), spnAngle->value(), spnBaseline->value(), formula,
-    cbtnAxisNumColor->color());
-  d_graph->setAxisTitle(m_mappedaxis, txtTitle->text());
-  d_graph->setAxisFont(m_mappedaxis, m_scaleFont);
-  d_graph->setAxisTitleFont(m_mappedaxis, m_labelFont);
-  m_modified = false;
 }

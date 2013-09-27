@@ -30,28 +30,40 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 
 #include <QWidget>
 #include <QList>
+#include <DoubleSpinBox.h>
 class ApplicationWindow;
 class Graph;
+class QCheckBox;
+class ColorBox;
+class QComboBox;
+class DoubleSpinBox;
+class Grid;
 //The grid tab
 class GridDetails: public QWidget
 {
   Q_OBJECT
 public:
-  GridDetails(ApplicationWindow* app, Graph* graph, QWidget *parent = 0); // populate and fill in with existing data
+  GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QWidget *parent = 0); // populate and fill in with existing data
   virtual ~GridDetails();
   void initWidgets();
-  bool modified(){return m_modified;};
-  void apply();
-  bool valid();
+  bool modified(){return m_modified;}
+  void apply(Grid *grid, bool antialias);
 public slots:
+  void setModified();
 
 private slots:
-  void setModified();
+  void majorGridEnabled(bool on);
+  void minorGridEnabled(bool on);
 
 private:
   bool m_modified, m_initialised;
+  QCheckBox *boxMajorGrid, *boxMinorGrid, *boxZeroLine;
+  ColorBox *boxColorMinor, *boxColorMajor;
+  QComboBox *boxTypeMajor, *boxTypeMinor, *boxGridAxis;
+  DoubleSpinBox *boxWidthMajor, *boxWidthMinor;
 
   ApplicationWindow* d_app;
   Graph* d_graph;
+  int m_alignment; //0 = horzontal, 1 = vertical, anything else sets this to 0;
 };
 #endif /* GRIDDETAILS_H_ */

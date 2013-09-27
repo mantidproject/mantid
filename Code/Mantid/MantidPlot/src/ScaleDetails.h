@@ -25,8 +25,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-#ifndef SCALEAXISDETAILS_H_
-#define SCALEAXISDETAILS_H_
+#ifndef SCALEDETAILS_H_
+#define SCALEDETAILS_H_
 
 #include <QWidget>
 #include <QList>
@@ -48,15 +48,15 @@ class Graph;
 class TextFormatButtons;
 class ColorButton;
 
-class ScaleAxisDetails: public QWidget
+class ScaleDetails: public QWidget
 {
   Q_OBJECT
     //details for each axis in the Scale Tab
 public:
-  ScaleAxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent = 0); // populate and fill in with existing data
-  virtual ~ScaleAxisDetails();
+  ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent = 0); // populate and fill in with existing data
+  virtual ~ScaleDetails();
   void initWidgets();
-  bool modified();
+  bool modified(){return m_modified;}
   void apply();
   bool valid();
 
@@ -95,4 +95,4 @@ private:
   void checkstep();
 };
 
-#endif /* SCALEAXISDETAILS_H_ */
+#endif /* ScaleDetails_H_ */

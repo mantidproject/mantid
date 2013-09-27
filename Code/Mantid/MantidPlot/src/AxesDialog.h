@@ -33,8 +33,9 @@
 #include <QLabel>
 #include <QList>
 #include <QTextEdit>
-#include "AxisAxisDetails.h"
-#include "ScaleAxisDetails.h"
+#include "AxisDetails.h"
+#include "ScaleDetails.h"
+#include "GridDetails.h"
 //#include "MantidKernel/Logger.h"
 
 class QTimeEdit;
@@ -77,7 +78,7 @@ class AxesDialog: public QDialog
      * @param fl :: window flags
      */
     AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0);
-
+    virtual ~AxesDialog();
   public slots:
     void setCurrentScale(int axisPos);
     void showGeneralPage();
@@ -95,9 +96,9 @@ class AxesDialog: public QDialog
   private slots:
     bool apply();
     void updateScale();
-    void majorGridEnabled(bool on);
-    void minorGridEnabled(bool on);
-    void showGridOptions(int axis);
+    //void majorGridEnabled(bool on);
+    //void minorGridEnabled(bool on);
+    //void showGridOptions(int axis);
     void accept();
     void drawFrame(bool framed);
     int mapToQwtAxis(int axis);
@@ -121,13 +122,13 @@ class AxesDialog: public QDialog
     //! generate UI for the general page
     void initGeneralPage();
     //! Modifies the grid
-    void applyChangesToGrid(Grid *grid);
+    //void applyChangesToGrid(Grid *grid);
     void setGraph(Graph *g);
 
     ApplicationWindow* d_app;
     Graph *d_graph;
     //QFrame *scalePrefsArea, *axesPrefsArea;
-	  QStackedLayout *scalePrefsArea, *axesPrefsArea;
+	  QStackedLayout *scalePrefsArea, *axesPrefsArea, *gridPrefsArea;
 //common widgets
     QPushButton* buttonApply, *buttonOk, *buttonCancel;
     QTabWidget* generalDialog;
@@ -135,28 +136,15 @@ class AxesDialog: public QDialog
 
     QHBoxLayout *scalesLayout, *axesLayout;
     QListWidget* axesList;
-    QCheckBox* boxMajorGrid;
-    QCheckBox* boxMinorGrid;
-    QComboBox* boxTypeMajor;
-    ColorBox* boxColorMinor;
-    ColorBox* boxColorMajor;
     ColorButton *boxCanvasColor;
-    DoubleSpinBox* boxWidthMajor;
-    QComboBox* boxTypeMinor;
-    DoubleSpinBox* boxWidthMinor;
-    QCheckBox* boxXLine;
-    QCheckBox* boxYLine;
     QListWidget* axesGridList;
     QListWidget* axesTitlesList;
 
     QSpinBox *boxFrameWidth, *boxAxesLinewidth;
-    QCheckBox *boxBackbones;
+    QCheckBox *boxBackbones, *boxAntialiseGrid;
     QGroupBox *boxFramed;
     QSpinBox *boxMajorTicksLength, *boxMinorTicksLength, *boxBorderWidth;
-    QComboBox *boxGridXAxis, *boxGridYAxis;
     ColorButton *boxFrameColor;
-
-    QCheckBox *boxAntialiseGrid;
     QComboBox *boxApplyGridFormat;
     //! Last selected tab
     QWidget* lastPage;
@@ -167,9 +155,11 @@ class AxesDialog: public QDialog
   private:
 
     ///A map of QListWidgetItem objects to their Axis details objects
-    QMap<QListWidgetItem*, AxisAxisDetails*> m_Axis_map;
+    QList<AxisDetails*> m_Axis_list;
     ///A map of QListWidgetItem objects to their Scale details objects
-    QMap<QListWidgetItem*, ScaleAxisDetails*> m_Scale_map;
+    QList<ScaleDetails*> m_Scale_list;
+    ///A map of QListWidgetItem objects to their Scale details objects
+    QList<GridDetails*> m_Grid_list;
 	int oldaxis;
 };
 

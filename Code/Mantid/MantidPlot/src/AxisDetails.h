@@ -25,8 +25,8 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-#ifndef AXISAXISDETAILS_H_
-#define AXISAXISDETAILS_H_
+#ifndef AXISDETAILS_H_
+#define AXISDETAILS_H_
 
 #include <QWidget>
 #include <QList>
@@ -48,15 +48,15 @@ class Graph;
 class TextFormatButtons;
 class ColorButton;
 
-class AxisAxisDetails: public QWidget
+class AxisDetails: public QWidget
 {
   Q_OBJECT
     //details for each axis in the Axis tab
 public:
-  AxisAxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent = 0); // populate and fill in with existing data
-  virtual ~AxisAxisDetails();
+  AxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent = 0); // populate and fill in with existing data
+  virtual ~AxisDetails();
   void initWidgets();
-  bool modified();
+  bool modified(){return m_modified;}
   void apply();
   bool valid();
 
@@ -110,4 +110,4 @@ QFont m_labelFont, m_scaleFont;
   void updateLabelsFormat(int);
   void setBaselineDist(int);
 };
-#endif /* AXISAXISDETAILS_H_ */
+#endif /* AxisDetails_H_ */
