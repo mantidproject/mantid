@@ -75,6 +75,7 @@ set ( SRC_FILES
 	src/SplineSmoothing.cpp
 	src/StaticKuboToyabe.cpp
 	src/StaticKuboToyabeTimesExpDecay.cpp
+	src/StaticKuboToyabeTimesGausDecay.cpp
 	src/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
 	src/StretchExpMuon.cpp
@@ -174,6 +175,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SplineSmoothing.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/StaticKuboToyabeTimesExpDecay.h
+	inc/MantidCurveFitting/StaticKuboToyabeTimesGausDecay.h
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
 	inc/MantidCurveFitting/StretchExpMuon.h
@@ -256,6 +258,7 @@ set ( TEST_FILES
 	SplineSmoothingTest.h
 	StaticKuboToyabeTest.h
 	StaticKuboToyabeTimesExpDecayTest.h
+	StaticKuboToyabeTimesGausDecayTest.h
 	StretchExpMuonTest.h
 	StretchExpTest.h
 	TabulatedFunctionTest.h
