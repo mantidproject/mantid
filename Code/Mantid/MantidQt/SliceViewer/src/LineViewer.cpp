@@ -29,70 +29,75 @@ namespace MantidQt
 namespace SliceViewer
 {
 
+/**
+* Custom QwtPlotCurve to support log scaling in LineViewer plotting.
+*/
+class LineViewerCurve: public QwtPlotCurve
+{
+public:
+
+/**
+ * Constructor
+ * @param curveTitle : Title for the curve
+ * @param logScale : Log scaling, default to false.
+ */
+LineViewerCurve(const QString& curveTitle, bool logScale = false ) : m_logScale(logScale),
+      QwtPlotCurve(curveTitle)
+  {
+  }
+
   /**
-   * Custom QwtPlotCurve to support log scaling in LineViewer plotting.
+   * Create a bounding rectangle.
+   * @return
    */
-  class LineViewerCurve: public QwtPlotCurve
+  virtual QwtDoubleRect boundingRect() const
+  {
+    if (m_boundingRect.isNull())
     {
-    public:
+      const QwtData& data = this->data();
 
-    /**
-     * Constructor
-     * @param curveTitle : Title for the curve
-     * @param logScale : Log scaling, default to false.
-     */
-    LineViewerCurve(const QString& curveTitle, bool logScale = false ) : m_logScale(logScale),
-          QwtPlotCurve(curveTitle)
+      if (data.size() == 0) return QwtDoubleRect(0,0,1,1);
+      double y_min = std::numeric_limits<double>::infinity();
+      double y_max = -y_min;
+      for(size_t i=0;i<data.size();++i)
       {
+        double y = data.y(i);
+        if (y == std::numeric_limits<double>::infinity() || y != y) continue;
+        if (y < y_min && (!m_logScale || y > 0.)) y_min = y;
+        if (y > y_max) y_max = y;
       }
+      double x_min = data.x(0);
+      double x_max = data.x(data.size()-1);
+      m_boundingRect = QwtDoubleRect(x_min,y_min,x_max-x_min,y_max-y_min);
+      // Need the following casts to get back a writeable pointer to the workspace data.
+      MantidQwtWorkspaceData* wsData = const_cast<MantidQwtWorkspaceData*>(dynamic_cast<const MantidQwtWorkspaceData*>(&data));
+      wsData->saveLowestPositiveValue(m_boundingRect.y());
+    }
+    return m_boundingRect;
+  }
 
-      /**
-       * Create a bounding rectangle.
-       * @return
-       */
-      virtual QwtDoubleRect boundingRect() const
-      {
-        if (m_boundingRect.isNull())
-        {
-          const QwtData& data = this->data();
-          if (data.size() == 0) return QwtDoubleRect(0,0,1,1);
-          double y_min = std::numeric_limits<double>::infinity();
-          double y_max = -y_min;
-          for(size_t i=0;i<data.size();++i)
-          {
-            double y = data.y(i);
-            if (y == std::numeric_limits<double>::infinity() || y != y) continue;
-            if (y < y_min && (!m_logScale || y > 0.)) y_min = y;
-            if (y > y_max) y_max = y;
-          }
-          double x_min = data.x(0);
-          double x_max = data.x(data.size()-1);
-          m_boundingRect = QwtDoubleRect(x_min,y_min,x_max-x_min,y_max-y_min);
-        }
-        return m_boundingRect;
-      }
+  /**
+   * Setter for the log scaling
+   * @param logScale
+   */
+  void setLogScale(bool logScale)
+  {
+    m_logScale = logScale;
+    m_boundingRect = QwtDoubleRect(); // invalidate the bounding box
+  }
 
-      /**
-       * Setter for the log scaling
-       * @param logScale
-       */
-      void setLogScale(bool logScale)
-      {
-        m_logScale = logScale;
-      }
+  /**
+   * Destructor
+   */
+  virtual ~LineViewerCurve()
+  {
+  }
 
-      /**
-       * Destructor
-       */
-      virtual ~LineViewerCurve()
-      {
-      }
-
-    private:
-      /// The bounding rect used by qwt to set the axes
-        mutable QwtDoubleRect m_boundingRect;
-        bool m_logScale;
-    };
+private:
+  /// The bounding rect used by qwt to set the axes
+    mutable QwtDoubleRect m_boundingRect;
+    bool m_logScale;
+};
 
 
 LineViewer::LineViewer(QWidget *parent)
@@ -1111,6 +1116,30 @@ void LineViewer::refreshPlot()
     showFull();
 }
 
+/**
+ * Helper method to get the positive min value.
+ * @param curve : Curve to look through the data of.
+ * @param to : Start value
+ * @return : Positive min value.
+ */
+double getPositiveMin(LineViewerCurve* curve, const double to)
+{
+  double yPositiveMin = to;
+  int n = curve->dataSize();
+  for (int i = 0; i < n; ++i)
+  {
+    double y = curve->y(i);
+    if (y > 0 && y < yPositiveMin)
+    {
+      yPositiveMin = y;
+    }
+  }
+  return yPositiveMin;
+}
+
+/**
+ * Handler for the log10 toggle axis event.
+ */
 void LineViewer::onToggleLogYAxis()
 {
   const QwtScaleDiv *div = m_plot->axisScaleDiv(QwtPlot::yLeft);
@@ -1127,17 +1156,7 @@ void LineViewer::onToggleLogYAxis()
   if (logScaled)
   {
     engine = new QwtLog10ScaleEngine();
-
-    yPositiveMin = to;
-    int n = curve->dataSize();
-    for (int i = 0; i < n; ++i)
-    {
-      double y = curve->y(i);
-      if (y > 0 && y < yPositiveMin)
-      {
-        yPositiveMin = y;
-      }
-    }
+    yPositiveMin = getPositiveMin(curve, to);
   }
   else
   {
