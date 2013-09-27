@@ -4,13 +4,13 @@ set ( SRC_FILES
 	# src/ChebyshevPolynomialBackground.cpp
 	src/Abragam.cpp
 	src/BFGS_Minimizer.cpp
+	src/BSpline.cpp
 	src/BackToBackExponential.cpp
 	src/BackgroundFunction.cpp
 	src/BivariateNormal.cpp
 	src/Bk2BkExpConvPV.cpp
-  src/BoundaryConstraint.cpp
-  src/BSpline.cpp
-  src/Chebyshev.cpp
+	src/BoundaryConstraint.cpp
+	src/Chebyshev.cpp
 	src/ComptonProfile.cpp
 	src/ComptonScatteringCountRate.cpp
 	src/Convolution.cpp
@@ -73,6 +73,7 @@ set ( SRC_FILES
 	src/SplineInterpolation.cpp
 	src/SplineSmoothing.cpp
 	src/StaticKuboToyabe.cpp
+	src/StaticKuboToyabeTimesGausDecay.cpp
 	src/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
 	src/StretchExpMuon.cpp
@@ -95,13 +96,13 @@ set ( INC_FILES
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	inc/MantidCurveFitting/Abragam.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
+	inc/MantidCurveFitting/BSpline.h
 	inc/MantidCurveFitting/BackToBackExponential.h
 	inc/MantidCurveFitting/BackgroundFunction.h
 	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
-  inc/MantidCurveFitting/BoundaryConstraint.h
-  inc/MantidCurveFitting/BSpline.h
-  inc/MantidCurveFitting/Chebyshev.h
+	inc/MantidCurveFitting/BoundaryConstraint.h
+	inc/MantidCurveFitting/Chebyshev.h
 	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/ComptonProfile.h
 	inc/MantidCurveFitting/ComptonScatteringCountRate.h
@@ -170,6 +171,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SplineInterpolation.h
 	inc/MantidCurveFitting/SplineSmoothing.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
+	inc/MantidCurveFitting/StaticKuboToyabeTimesGausDecay.h
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
 	inc/MantidCurveFitting/StretchExpMuon.h
@@ -191,12 +193,12 @@ set ( TEST_FILES
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
 	BFGSTest.h
+	BSplineTest.h
 	BackToBackExponentialTest.h
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
-  BoundaryConstraintTest.h
-  BSplineTest.h
-  ChebyshevTest.h
+	BoundaryConstraintTest.h
+	ChebyshevTest.h
 	CompositeFunctionTest.h
 	ComptonProfileTest.h
 	ComptonScatteringCountRateTest.h
@@ -250,6 +252,7 @@ set ( TEST_FILES
 	SplineInterpolationTest.h
 	SplineSmoothingTest.h
 	StaticKuboToyabeTest.h
+	StaticKuboToyabeTimesGausDecayTest.h
 	StretchExpMuonTest.h
 	StretchExpTest.h
 	TabulatedFunctionTest.h
