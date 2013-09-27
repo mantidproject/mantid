@@ -188,36 +188,36 @@ namespace Crystal
     std::vector<std::vector<double> > spectra;
     std::vector<std::vector<double> > time;
     int iSpec = 0;
+    smu = getProperty("LinearScatteringCoef"); // in 1/cm
+    amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
+    radius = getProperty("Radius"); // in cm
+    power_th = getProperty("PowerLambda"); // in cm
+    const Material& sampleMaterial = ws->sample().getMaterial();
+    if( sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) != 0.0)
+    {
+      double rho =  sampleMaterial.numberDensity();
+      if (smu == EMPTY_DBL()) smu =  sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
+      if (amu == EMPTY_DBL()) amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    }
+    else  //Save input in Sample with wrong atomic number and name
+    {
+      NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
+    			0.0, 0.0, smu, 0.0, smu, amu);
+      Material mat("SetInAnvredCorrection", neutron, 1.0);
+      ws->mutableSample().setMaterial(mat);
+    }
+    API::Run & run = ws->mutableRun();
+    if ( run.hasProperty("Radius") )
+    {
+      Kernel::Property* prop = run.getProperty("Radius");
+      if (radius == EMPTY_DBL()) radius = boost::lexical_cast<double,std::string>(prop->value());
+    }
+    else
+     {
+      run.addProperty<double>("Radius", radius, true);
+    }
     if(correctPeaks)
     {
-        smu = getProperty("LinearScatteringCoef"); // in 1/cm
-        amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
-        radius = getProperty("Radius"); // in cm
-        power_th = getProperty("PowerLambda"); // in cm
-        const Material& sampleMaterial = ws->sample().getMaterial();
-        if( sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) != 0.0)
-        {
-          double rho =  sampleMaterial.numberDensity();
-          if (smu == EMPTY_DBL()) smu =  sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) * rho;
-          if (amu == EMPTY_DBL()) amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
-        }
-        else  //Save input in Sample with wrong atomic number and name
-        {
-          NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()), static_cast<uint16_t>(0),
-        			0.0, 0.0, smu, 0.0, smu, amu);
-          Material mat("SetInAnvredCorrection", neutron, 1.0);
-          ws->mutableSample().setMaterial(mat);
-        }
-        API::Run & run = ws->mutableRun();
-        if ( run.hasProperty("Radius") )
-        {
-          Kernel::Property* prop = run.getProperty("Radius");
-          if (radius == EMPTY_DBL()) radius = boost::lexical_cast<double,std::string>(prop->value());
-        }
-        else
-        {
-          run.addProperty<double>("Radius", radius, true);
-        }
 		std::vector<double> spec(11);
 		std::string STRING;
 		std::ifstream infile;
