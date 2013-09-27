@@ -195,7 +195,7 @@ void MergeRuns::buildAdditionTables()
   EventWorkspace_sptr lhs = m_inEventWS[0];
   int lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
 
-  detid2index_map * lhs_det_to_wi = NULL;
+  detid2index_map lhs_det_to_wi;
   try
   {
     lhs_det_to_wi = lhs->getDetectorIDToWorkspaceIndexMap(true);
@@ -240,7 +240,7 @@ void MergeRuns::buildAdditionTables()
         }
       }
 
-      if (!done && lhs_det_to_wi && (inDets.size() == 1))
+      if (!done && !lhs_det_to_wi.empty() && (inDets.size() == 1))
       {
         //Didn't find it. Try to use the LHS map.
 
@@ -249,8 +249,8 @@ void MergeRuns::buildAdditionTables()
         detid_t rhs_detector_ID = *inDets_it;
 
         //Now we use the LHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
-        detid2index_map::iterator map_it = lhs_det_to_wi->find(rhs_detector_ID);
-        if (map_it != lhs_det_to_wi->end())
+        detid2index_map::const_iterator map_it = lhs_det_to_wi.find(rhs_detector_ID);
+        if (map_it != lhs_det_to_wi.end())
         {
           outWI = static_cast<int>(map_it->second); //This is the workspace index in the LHS that matched rhs_detector_ID
         }
@@ -298,9 +298,6 @@ void MergeRuns::buildAdditionTables()
     m_tables.push_back(table);
 
   } //each of the workspaces being added
-
-  //Free up memory
-  delete lhs_det_to_wi;
 
   if (m_tables.size() != m_inEventWS.size()-1)
     throw std::runtime_error("MergeRuns::buildAdditionTables: Mismatch between the number of addition tables and the number of workspaces");

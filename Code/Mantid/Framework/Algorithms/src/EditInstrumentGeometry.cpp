@@ -272,7 +272,7 @@ namespace Algorithms
     }
 
     // Keep original instrument and set the new instrument, if necessary
-    boost::shared_ptr<std::map<specid_t,size_t> > spec2indexmap(workspace->getSpectrumToWorkspaceIndexMap());
+    const auto spec2indexmap = workspace->getSpectrumToWorkspaceIndexMap();
 
     // ??? Condition: spectrum has 1 and only 1 detector
     size_t nspec = workspace->getNumberHistograms();
@@ -287,8 +287,8 @@ namespace Algorithms
     for (size_t i = 0; i < specids.size(); i ++)
     {
       // Find spectrum's workspace index
-      spec2index_map::iterator it = spec2indexmap->find(specids[i]);
-      if (it == spec2indexmap->end())
+      spec2index_map::const_iterator it = spec2indexmap.find(specids[i]);
+      if (it == spec2indexmap.end())
       {
         stringstream errss;
         errss << "Spectrum ID " << specids[i] << " is not found. "

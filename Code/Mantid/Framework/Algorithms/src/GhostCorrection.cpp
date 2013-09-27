@@ -52,7 +52,6 @@ namespace Mantid
       this->tof_to_d = NULL;
       this->groupedGhostMaps.clear();
       this->rawGhostMap = NULL;
-      this->input_detectorIDToWorkspaceIndexMap = NULL;
       this->useAlgorithm("");
       this->deprecatedDate("2011-05-10");
     }
@@ -63,7 +62,6 @@ namespace Mantid
     {
       delete this->tof_to_d;
       delete this->rawGhostMap;
-      delete this->input_detectorIDToWorkspaceIndexMap;
       for (size_t i=0; i < this->groupedGhostMaps.size(); i++)
         delete this->groupedGhostMaps[i];
     }
@@ -120,6 +118,9 @@ namespace Mantid
      */
     void GhostCorrection::loadGhostMap(std::string ghostMapFile)
     {
+      //Prepare the map you need
+      const auto input_detectorIDToWorkspaceIndexMap = inputW->getDetectorIDToWorkspaceIndexMap(true);
+
       //Open the file
       BinaryFile<GhostDestinationValue> ghostFile(ghostMapFile);
 
@@ -143,10 +144,9 @@ namespace Mantid
       for (int inPixelId = 0; inPixelId < numInPixels; inPixelId++)
       {
         //Find the input workspace index corresponding to this input Pixel ID
-        detid2index_map::iterator it;
-        it = input_detectorIDToWorkspaceIndexMap->find(inPixelId);
+        auto it = input_detectorIDToWorkspaceIndexMap.find(inPixelId);
 
-        if (it != input_detectorIDToWorkspaceIndexMap->end())
+        if (it != input_detectorIDToWorkspaceIndexMap.end())
         {
           //A valid workspace index was found, this one:
           int64_t inputWorkspaceIndex = it->second;
@@ -263,9 +263,6 @@ namespace Mantid
       Workspace2D_sptr outputWS2D = boost::dynamic_pointer_cast<Workspace2D>(outputW);
       for (std::size_t i=0; i < outputWS2D->getNumberHistograms(); i++)
         outputWS2D->setX(i, XValues_new);
-
-      //Prepare the maps you need
-      input_detectorIDToWorkspaceIndexMap = inputW->getDetectorIDToWorkspaceIndexMap(true);
 
       //Load the ghostmapping file
       this->loadGhostMap( getProperty("GhostCorrectionFilename") );

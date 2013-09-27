@@ -147,7 +147,6 @@ m_sampleActor(NULL)
 InstrumentActor::~InstrumentActor()
 {
   saveSettings();
-  delete m_detid2index_map;
 }
 
 /** Used to set visibility of an actor corresponding to a particular component
@@ -314,7 +313,13 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
  */
 size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const
 {
-    return (*m_detid2index_map)[id];
+  auto mapEntry = m_detid2index_map.find(id);
+  if ( mapEntry == m_detid2index_map.end() )
+  {
+    throw Kernel::Exception::NotFoundError("Detector ID not in workspace",id);
+  }
+
+  return mapEntry->second;
 }
 
 /**
