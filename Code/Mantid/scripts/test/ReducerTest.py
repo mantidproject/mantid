@@ -120,10 +120,10 @@ class ReducerTest(unittest.TestCase):
         r.clear_data_files()
         self.assertEqual(len(r._data_files), 0)
 
-    @unittest.skipIf(skip_import_test, "We don't have access to sqlite3 on Windows Debug.")
     def test_imports(self):
-        import reduction_gui
-        import reduction_application
+        if not skip_import_test:
+            import reduction_gui
+            import reduction_application
         
 
 if __name__ == '__main__':
