@@ -1143,8 +1143,9 @@ double getPositiveMin(LineViewerCurve* curve, const double to)
 void LineViewer::onToggleLogYAxis()
 {
   const QwtScaleDiv *div = m_plot->axisScaleDiv(QwtPlot::yLeft);
-  double from = div->lowerBound();
-  double to = div->upperBound();
+  auto interval = div->interval();
+  double from = interval.minValue();
+  double to = interval.maxValue();
   const bool logScaled = m_lineOptions->isLogScaledY();
   QwtScaleEngine* engine = NULL;
   double yPositiveMin = 0;
