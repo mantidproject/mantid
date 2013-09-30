@@ -71,6 +71,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         
         # Recent files
         self._recent_files = settings.value("recent_files", [])
+        if self._recent_files is None:  # An empty list saved to QSettings comes back as 'None'
+            self._recent_files = []
         
         # Folder to open files in
         self._last_directory = unicode(settings.value("last_directory", '.'))
@@ -265,6 +267,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         
         recent_files = []
         for fname in self._recent_files:
+            print fname
             if fname != self._filename and QtCore.QFile.exists(fname) and not fname in recent_files:
                 recent_files.append(fname)
                 
