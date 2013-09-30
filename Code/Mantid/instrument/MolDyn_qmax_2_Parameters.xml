@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "MolDyn" date = "2010-07-15T00:00:00">
+
+<component-link name = "MolDyn">
+
+<parameter name="analysis-type" type="string">
+  <value val="spectroscopy" />
+</parameter>
+
+<parameter name="efixed-val">
+	<value val="1.8450" />
+</parameter>
+
+<component-link name="simul">
+<parameter name="Efixed"> <value val="1.8450" /> </parameter>
+</component-link>
+
+<parameter name="analyser" type="string">
+  <value val="qmax" />
+</parameter>
+
+<parameter name="reflection" type="string">
+  <value val="2" />
+</parameter>
+
+</component-link>
+
+</parameter-file>

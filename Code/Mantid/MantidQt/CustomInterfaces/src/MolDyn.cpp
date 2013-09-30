@@ -1,5 +1,8 @@
 #include "MantidQtCustomInterfaces/MolDyn.h"
 
+#include <QFileInfo>
+#include <QString>
+
 namespace MantidQt
 {
 	namespace CustomInterfaces
@@ -8,7 +11,6 @@ namespace MantidQt
 			IndirectForeignTab(parent)
 		{
 			m_uiForm.setupUi(parent);
-
 		}
 
 		/**
@@ -18,6 +20,15 @@ namespace MantidQt
 		 */
 		bool MolDyn::validate()
 		{
+			QString filename = m_uiForm.mwRun->getFirstFilename();
+			QFileInfo finfo(filename);
+			QString ext = finfo.extension().toLower();
+
+			if(ext != "dat" && ext != "cdl")
+			{
+				emit showMessageBox("File is not of expected type:\n File type must be .dat or .cdl");
+				return false;
+			} 
 
 			return true;
 		}
@@ -32,8 +43,32 @@ namespace MantidQt
 			QString plot("False");
 			QString save("False");
 
+			QString filename = m_uiForm.mwRun->getFirstFilename();
+			QFileInfo finfo(filename);
+			QString ext = finfo.extension().toLower();
+
+			QString funcNames = m_uiForm.leFunctionNames->text();
+
+			//output options
+			if(m_uiForm.chkVerbose->isChecked()){ verbose = "True"; }
+			if(m_uiForm.chkSave->isChecked()){ save ="True"; }
+			plot = m_uiForm.cbPlot->currentText();
+
+
 			QString pyInput = 
-				"from IndirectBayes import MolDynRun\n";
+				"from MolDynTransfer import ";
+
+			QString pyFunc("");
+			if(ext == "dat")
+			{
+				pyFunc = "MolDynText";
+				pyInput += pyFunc + "\n" + pyFunc + "('"+filename+"',"+verbose+",'"+plot+"',"+save+")";
+			}
+			else if (ext == "cdl")
+			{
+				pyFunc = "MolDynImport";
+				pyInput += pyFunc + "\n" + pyFunc + "('"+filename+"','"+funcNames+"',"+verbose+",'"+plot+"',"+save+")";
+			}
 
 			runPythonScript(pyInput);
 		}

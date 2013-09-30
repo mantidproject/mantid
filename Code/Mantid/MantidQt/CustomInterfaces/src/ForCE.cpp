@@ -18,6 +18,7 @@ namespace MantidQt
 			connect(m_uiForm.cbInstrument, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(instrumentChanged(const QString&)));
 			connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(analyserChanged(const QString&)));
 			connect(m_uiForm.mwRun, SIGNAL(filesFound()), this, SLOT(handleFilesFound()));
+			connect(m_uiForm.chkUseMap, SIGNAL(toggled(bool)), m_uiForm.mwMapFile, SLOT(setEnabled(bool)));
 
 			QString instrument = m_uiForm.cbInstrument->currentText();
 			instrumentChanged(instrument);
@@ -34,7 +35,7 @@ namespace MantidQt
 			QFileInfo finfo(filename);
 			QString ext = finfo.extension().toLower();
 
-			if(ext != "asc" && ext != "inx") //using ascii files
+			if(ext != "asc" && ext != "inx")
 			{
 				emit showMessageBox("File is not of expected type:\n File type must be .asc or .inx");
 				return false;
@@ -51,7 +52,7 @@ namespace MantidQt
 		{
 			QString verbose("False");
 			QString plot("False");
-			QString save("False");
+			QString save("None");
 
 			QString useMap("False");
 			QString rejectZero("False");
@@ -65,12 +66,15 @@ namespace MantidQt
 			QString reflection = m_uiForm.cbReflection->currentText();
 
 			if(m_uiForm.chkUseMap->isChecked()){ useMap ="True"; }
+			QString mapPath = m_uiForm.mwMapFile->getFirstFilename();
+
 			if(m_uiForm.chkRejectZero->isChecked()){ rejectZero ="True"; }
 
 			//output options
 			if(m_uiForm.chkVerbose->isChecked()){ verbose = "True"; }
-			if(m_uiForm.chkPlot->isChecked()){ plot = "True"; }
-			if(m_uiForm.chkSave->isChecked()){ save ="True"; }
+			if(m_uiForm.chkSave->isChecked()){ save = "True"; }
+			plot = m_uiForm.cbPlot->currentText();
+
 
 			QString pyFunc ("");
 			if(ext == "asc") //using ascii files
@@ -85,8 +89,8 @@ namespace MantidQt
 			QString pyInput = 
 				"from IndirectForce import "+pyFunc+"\n";
 
-			pyInput += pyFunc + "('"+instrument+"','"+filename+"','"+analyser+"','"+reflection+"',"+rejectZero+","+useMap+""
-											","+verbose+","+plot+","+save+")";
+			pyInput += pyFunc + "('"+instrument+"','"+filename+"','"+analyser+"','"+reflection+"',"+rejectZero+","+useMap+",'"+mapPath+"'"
+											","+verbose+",'"+plot+"',"+save+")";
 
 			runPythonScript(pyInput);
 		}

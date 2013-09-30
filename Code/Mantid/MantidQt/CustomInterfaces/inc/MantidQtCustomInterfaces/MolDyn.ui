@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>629</width>
-    <height>160</height>
+    <width>673</width>
+    <height>155</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -102,10 +102,34 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="chkPlot">
+       <widget class="QLabel" name="lblPlot">
         <property name="text">
-         <string>Plot Result</string>
+         <string>Plot Result: </string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbPlot">
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Spectrum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Contour</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Both</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

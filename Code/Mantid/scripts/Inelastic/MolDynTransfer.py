@@ -74,21 +74,38 @@ def MakeList(a,l1,l2):
 		alist = asc.split(',')
 	return alist
 
-def MolDynImport(file,functions,Verbose,Plot,Save):      #Ascii start routine
+# Load an dat/cdl file
+def loadFile(path):
+	try:
+		handle = open(path, 'r')
+		asc = []
+		for line in handle:
+			line = line.rstrip()
+			asc.append(line)
+		handle.close()
+
+		return asc
+	except:
+		error = 'ERROR *** Could not load ' + path
+		sys.exit(error)
+
+def MolDynImport(fname,functions,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('MolDynImport')
 	workdir = config['defaultsave.directory']
-	filext = file + '.cdl'
-	path = os.path.join(workdir, filext)
+
+	functions = functions.split(',')
+
+	path = fname
+	base = os.path.basename(path)
+	fname = os.path.splitext(base)[0]
+
 	if Verbose:
 		logger.notice('Functions : '+str(functions))
 		logger.notice('Reading file : ' + path)
-	handle = open(path, 'r')
-	asc = []
-	for line in handle:
-		line = line.rstrip()
-		asc.append(line)
-	handle.close()
+
+	asc = loadFile(path)
 	lasc = len(asc)
+
 # raw head
 	nQ,nT,nF = FindDimensions(asc,Verbose)
 	ldata = FindStarts(asc,'data:',0)
@@ -145,11 +162,15 @@ def MolDynImport(file,functions,Verbose,Plot,Save):      #Ascii start routine
 			xEn = np.array(T)
 			eZero = np.zeros(nT)
 			xUnit = 'TOF'
-		if func[:3] == 'Sqw':
+		elif func[:3] == 'Sqw':
 			nP = nF
 			xEn = np.array(F)
 			eZero = np.zeros(nF)
 			xUnit = 'Energy'
+		else:
+			error = "ERROR *** Failed to parse function string" + func
+			sys.exit(error)
+
 		for n in range(0,nQ):
 			for m in range(lstart,lasc):
 				char = asc[m]
@@ -186,7 +207,7 @@ def MolDynImport(file,functions,Verbose,Plot,Save):      #Ascii start routine
 				xDat = np.append(xDat,xEn)
 				yDat = np.append(yDat,np.array(S))
 				eDat = np.append(eDat,eZero)
-		outWS = file+'_'+func
+		outWS = fname+'_'+func
 		CreateWorkspace(OutputWorkspace=outWS, DataX=xDat, DataY=yDat, DataE=eDat,
 			Nspec=nQ, UnitX=xUnit, VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
 		if Save:
@@ -210,20 +231,20 @@ def plotMolDyn(inWS,Plot):
 	if (Plot == 'Contour' or Plot == 'Both'):
 		cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
 
-def MolDynText(file,Verbose,Plot,Save):      #Ascii start routine
+def MolDynText(fname,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('MolDynAscii')
 	workdir = config['defaultsave.directory']
-	filext = file + '.dat'
-	path = os.path.join(workdir, filext)
+	
+	path = fname
+	base = os.path.basename(path)
+	fname = os.path.splitext(base)[0]
+
 	if Verbose:
 		logger.notice('Reading file : ' + path)
-	handle = open(path, 'r')
-	asc = []
-	for line in handle:
-		line = line.rstrip()
-		asc.append(line)
-	handle.close()
+
+	asc = loadFile(path)
 	lasc = len(asc)
+
 	val = SplitLine(asc[3])
 	Q = []
 	for n in range(1,len(val)):
@@ -259,7 +280,7 @@ def MolDynText(file,Verbose,Plot,Save):      #Ascii start routine
 			xDat = np.append(xDat,xT)
 			yDat = np.append(yDat,np.array(S))
 			eDat = np.append(eDat,eZero)
-	outWS = file + '_iqt'
+	outWS = fname + '_iqt'
 	CreateWorkspace(OutputWorkspace=outWS, DataX=xDat, DataY=yDat, DataE=eDat,
 		Nspec=nQ, UnitX='TOF')
 #		Nspec=nQ, UnitX='TOF', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
@@ -271,7 +292,7 @@ def MolDynText(file,Verbose,Plot,Save):      #Ascii start routine
 	else:
 		refl = '4'
 	InstrParas(outWS,instr,ana,refl)
-	efixed = RunParas(outWS,instr,file,file,Verbose)	
+	efixed = RunParas(outWS,instr,fname,fname,Verbose)	
 	if Verbose:
 		logger.notice('Qmax = '+str(Qmax)+' ; efixed = '+str(efixed))
 	pi4 = 4.0*math.pi

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>722</width>
-    <height>192</height>
+    <width>761</width>
+    <height>222</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -105,40 +105,57 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_8">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_7">
-       <item alignment="Qt::AlignHCenter">
-        <widget class="QCheckBox" name="chkUseMap">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Use Map</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QCheckBox" name="chkUseMap">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Use Map</string>
+       </property>
+      </widget>
      </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_6">
-       <item alignment="Qt::AlignHCenter">
-        <widget class="QCheckBox" name="chkRejectZero">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Reject Zero</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+     <item row="0" column="1">
+      <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwMapFile">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="label" stdset="0">
+        <string>Map File:</string>
+       </property>
+       <property name="fileExtensions">
+        <stringlist>
+         <string>.map</string>
+        </stringlist>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <item alignment="Qt::AlignLeft">
+      <widget class="QCheckBox" name="chkRejectZero">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Reject Zero</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -191,10 +208,34 @@
        </spacer>
       </item>
       <item>
-       <widget class="QCheckBox" name="chkPlot">
+       <widget class="QLabel" name="lblPlot">
         <property name="text">
-         <string>Plot Result</string>
+         <string>Plot Result: </string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbPlot">
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Spectrum</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Contour</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Both</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>

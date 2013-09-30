@@ -106,7 +106,7 @@ def getFilePath(run,ext,intr):
 		fname = instr + "_" + run
 
 	if path:
-		return asc, fname
+		return path, fname
 	else:
 		error = 'ERROR *** Could not find ' + ext + ' file'
 		sys.exit(error)
@@ -126,14 +126,15 @@ def loadFile(path):
 		error = 'ERROR *** Could not load ' + path
 		sys.exit(error)
 
-def IbackStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):      #Ascii start routine
+def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('Iback')
 	workdir = config['defaultsave.directory']
 
 	if Verbose:
 		logger.notice('Reading file : ' + path)
 
-	asc, fname = getFilePath(run, '.asc', instr)
+	path, fname = getFilePath(run, '.asc', instr)
+	asc = loadFile(path)
 	lasc = len(asc)
 
 # raw head
@@ -246,7 +247,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):      #Ascii s
 	efixed = RunParas(ascWS,instr,run,title,Verbose)
 	ChangeAngles(ascWS,instr,theta,Verbose)
 	if useM:
-		map = ReadMap(instr,Verbose)
+		map = ReadMap(mapPath,Verbose)
 		UseMap(ascWS,map,Verbose)
 	if rejectZ:
 		RejectZero(ascWS,tot,Verbose)
@@ -279,11 +280,12 @@ def ReadInxGroup(asc,n,lgrp):                  # read ascii x,y,e
 	npt = len(x)
 	return Q,npt,x,y,e                                 #values of x,y,e as lists
 
-def InxStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):
+def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
 	StartTime('Inx')
 	workdir = config['defaultsave.directory']
 
-	asc, fname = getFilePath(run, '.inx', instr)
+	path, fname = getFilePath(run, '.inx', instr)
+	asc = loadFile(path)
 	lasc = len(asc)
 
 	val = ExtractInt(asc[0])
@@ -336,7 +338,7 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):
 		theta.append(ang)
 	ChangeAngles(ascWS,instr,theta,Verbose)
 	if useM:
-		map = ReadMap(instr,Verbose)
+		map = ReadMap(mapPath,Verbose)
 		UseMap(ascWS,map,Verbose)
 	if rejectZ:
 		RejectZero(ascWS,tot,Verbose)
@@ -370,11 +372,10 @@ def RejectZero(inWS,tot,Verbose):
 			if Verbose:
 				logger.notice('** spectrum '+str(n+1)+' rejected')
 
-def ReadMap(instr,Verbose):
+def ReadMap(path,Verbose):
 	workdir = config['defaultsave.directory']
 
-	path = FileFinder.getFullPath(instr + "_map.asc")
-	asc, fname = loadFile(path)
+	asc = loadFile(path)
 
 	lasc = len(asc)
 	if Verbose:
