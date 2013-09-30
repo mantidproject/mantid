@@ -7,6 +7,7 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include "MantidKernel/UnitFactory.h"
 
@@ -22,6 +23,7 @@ namespace LiveData
 
 DECLARE_LISTENER(ISISLiveEventDataListener)
 
+// receive a header and check if it's valid
 #define RECEIVE(buffer,msg)  \
 {\
     long timeout = 0;\
@@ -38,11 +40,19 @@ DECLARE_LISTENER(ISISLiveEventDataListener)
     }\
 }
 
+namespace {
+// buffer to collect data that cannot be processed
+static char* junk_buffer[10000];
+}
+
+// receive data that cannot be processed
+#define COLLECT_JUNK(head) m_socket.receiveBytes(junk_buffer, head.length - static_cast<uint32_t>(sizeof(head)));
+
 // Get a reference to the logger
 Kernel::Logger& ISISLiveEventDataListener::g_log = Kernel::Logger::get("ISISLiveEventDataListener");
 
 /**
- * The destructor
+ * The constructor
  */
 ISISLiveEventDataListener::ISISLiveEventDataListener():API::ILiveListener(),
     m_isConnected(false),
@@ -50,6 +60,9 @@ ISISLiveEventDataListener::ISISLiveEventDataListener():API::ILiveListener(),
 {
 }
 
+/**
+ * The destructor
+ */
 ISISLiveEventDataListener::~ISISLiveEventDataListener()
 {
     // Stop the background thread
@@ -75,6 +88,7 @@ ISISLiveEventDataListener::~ISISLiveEventDataListener()
     }
 }
 
+// connect the listener to DAE
 bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 {
     // If we don't have an address, force a connection to the test server running on
@@ -83,9 +97,7 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     {
       Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
       try {
-          std::cerr << "Connecting to test service " << tempAddress.toString() << std::endl;
         m_socket.connect( tempAddress);  // BLOCKING connect
-        std::cerr << "Actually connected to " << m_socket.address().toString() << std::endl;
       } catch (...) {
         g_log.error() << "Connection to " << tempAddress.toString() << " failed." << std::endl;
         return false;
@@ -94,7 +106,6 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     else
     {
         try {
-            std::cerr << "Connecting to live DAE " << address.toString() << std::endl;
           m_socket.connect( address);  // BLOCKING connect
         } catch (...) {
           g_log.debug() << "Connection to " << address.toString() << " failed." << std::endl;
@@ -104,19 +115,26 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
 
     m_socket.setReceiveTimeout( Poco::Timespan( RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
     g_log.debug() << "Connected to " << m_socket.address().toString() << std::endl;
-    std::cerr << "Connected to " << m_socket.address().toString() << std::endl;
+
+    TCPStreamEventDataSetup setup;
+    RECEIVE(setup,"Wrong version");
+    std::cerr << "run number " << setup.head_setup.run_number<< " instr " << setup.head_setup.inst_name  << std::endl;
+
+    // initialize the buffer workspace
+    initEventBuffer( setup );
 
     m_isConnected = true;
     return m_isConnected;
 }
 
+// start event collection
 void ISISLiveEventDataListener::start(Kernel::DateAndTime startTime)
 {
     (void)startTime;
     m_thread.start( *this);
-    std::cerr << "Start" << std::endl;
 }
 
+// return a workspace with collected events
 boost::shared_ptr<API::Workspace> ISISLiveEventDataListener::extractData()
 {
     if ( !m_eventBuffer )
@@ -161,44 +179,34 @@ API::ILiveListener::RunStatus ISISLiveEventDataListener::runStatus()
  */
 void ISISLiveEventDataListener::run()
 {
-    static char* junk_buffer[10000];
 
     try
     {
-        TCPStreamEventDataSetup setup;
-        RECEIVE(setup,"Wrong version");
-        std::cerr << "run number " << setup.head_setup.run_number<< " instr " << setup.head_setup.inst_name  << std::endl;
-
-        // initialize the buffer workspace
-        initEventBuffer( setup );
-
         if (m_isConnected == false) // sanity check
         {
-          throw std::runtime_error( std::string("ISISLiveEventDataListener::run(): No connection to the DAE."));
+          throw std::runtime_error( std::string("No connection to the DAE."));
           return;  // should never be called, but here just in case exceptions are disabled
         }
 
         TCPStreamEventDataNeutron events;
         while (m_stopThread == false)
         {
+            // get the header with the type of the packet
             RECEIVE(events.head,"Corrupt stream - you should reconnect.");
-
             if ( !(events.head.type == TCPStreamEventHeader::Neutron) )
             {
-                // run finished (?)
-                m_stopThread = true;
-                break;
+                // don't know what to do with it - stop
+                throw std::runtime_error("Unknown packet type.");
             }
+            COLLECT_JUNK( events.head );
 
-            std::cerr << "junk " << events.head.length - static_cast<uint32_t>(sizeof(events.head)) << std::endl;
-            // ???
-            m_socket.receiveBytes(junk_buffer, events.head.length - static_cast<uint32_t>(sizeof(events.head)));
-
+            // get the header with the sream size
             RECEIVE(events.head_n,"Corrupt stream - you should reconnect.");
+            COLLECT_JUNK( events.head_n );
 
-            m_socket.receiveBytes(junk_buffer, events.head_n.length - static_cast<uint32_t>(sizeof(events.head_n)));
             events.data.resize(events.head_n.nevents);
             uint32_t nread = 0;
+            // receive the events
             while( nread < events.head_n.nevents )
             {
                 int ntoread = m_socket.available() / static_cast<int>(sizeof(TCPStreamEventNeutron));
@@ -223,7 +231,6 @@ void ISISLiveEventDataListener::run()
 
             // store the events
             saveEvents( events.data );
-
         }
 
     } catch (std::runtime_error &e) {  // exception handler for generic runtime exceptions
@@ -271,7 +278,6 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
     alg->setProperty("MakeEventWorkspace", true);
     alg->setProperty("OutputWorkspace", "tmp");
     alg->setChild(true);
-    //alg->executeAsChildAlg();
     alg->execute();
     // check if the instrument was loaded
     if ( !alg->isExecuted() )
@@ -291,6 +297,9 @@ void ISISLiveEventDataListener::initEventBuffer(const TCPStreamEventDataSetup &s
     {
         throw std::runtime_error("Couldn't create an event workspace for instrument " + instrName);
     }
+    // Set the units
+    m_eventBuffer->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+    m_eventBuffer->setYUnit( "Counts");
 }
 
 /**
@@ -305,7 +314,6 @@ void ISISLiveEventDataListener::saveEvents(const std::vector<TCPStreamEventNeutr
     {
         Mantid::DataObjects::TofEvent event( it->time_of_flight );
         m_eventBuffer->getEventList( it->spectrum ).addEventQuickly( event );
-        std::cerr << it->time_of_flight << ' ' << it->spectrum << std::endl;
     }
 }
 

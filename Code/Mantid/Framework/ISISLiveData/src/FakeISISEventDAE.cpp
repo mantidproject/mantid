@@ -35,7 +35,7 @@ public:
    * @param soc :: A socket that provides communication with the client.
    */
   TestServerConnection( const Poco::Net::StreamSocket & soc ):
-  Poco::Net::TCPServerConnection(soc)
+      Poco::Net::TCPServerConnection(soc)
   {
     sendInitialSetup();
   }
@@ -65,18 +65,22 @@ public:
    */
   void run()
   {
-      TCPStreamEventDataNeutron data;
-      data.head_n.nevents = 100;
-
-      socket().sendBytes(&data.head,(int)sizeof(data.head));
-      socket().sendBytes(&data.head_n,(int)sizeof(data.head_n));
-
-      for(uint32_t i = 0; i < data.head_n.nevents; ++i)
+      for(;;)
       {
-          TCPStreamEventNeutron neutron;
-          neutron.time_of_flight = 0.01f;
-          neutron.spectrum = 3;
-          socket().sendBytes(&neutron,(int)sizeof(neutron));
+          Poco::Thread::sleep(1000);
+          TCPStreamEventDataNeutron data;
+          data.head_n.nevents = 100;
+
+          socket().sendBytes(&data.head,(int)sizeof(data.head));
+          socket().sendBytes(&data.head_n,(int)sizeof(data.head_n));
+
+          for(uint32_t i = 0; i < data.head_n.nevents; ++i)
+          {
+              TCPStreamEventNeutron neutron;
+              neutron.time_of_flight = 0.01f;
+              neutron.spectrum = 3;
+              socket().sendBytes(&neutron,(int)sizeof(neutron));
+          }
       }
       TCPStreamEventDataSetup setup;
       setup.head_setup.run_number = 1234;
