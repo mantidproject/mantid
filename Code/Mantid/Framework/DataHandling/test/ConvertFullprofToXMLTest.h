@@ -116,7 +116,7 @@ public:
         TS_ASSERT(componentLinkElem2);
         if(componentLinkElem2)
         {
-          TS_ASSERT_EQUALS(componentLinkElem2->getAttribute("name"),"Bank1");
+          TS_ASSERT_EQUALS(componentLinkElem2->getAttribute("name"),"bank1");
 
           Poco::XML::NodeList* parameterNodeList = componentLinkElem2->getElementsByTagName("parameter"); // get parameter elements
           size_t numParameters = parameterNodeList->length();
@@ -139,7 +139,7 @@ public:
         TS_ASSERT(componentLinkElem3);
         if(componentLinkElem3)
         {
-          TS_ASSERT_EQUALS(componentLinkElem3->getAttribute("name"),"Bank3");
+          TS_ASSERT_EQUALS(componentLinkElem3->getAttribute("name"),"bank3");
 
           Poco::XML::NodeList* parameterNodeList = componentLinkElem3->getElementsByTagName("parameter"); // get parameter elements
           size_t numParameters = parameterNodeList->length();

@@ -140,7 +140,7 @@ namespace DataHandling
       API::Column_const_sptr column = paramTable->getColumn( i+1 );
       const double bankNumber = column->cell<double>(0);
       std::ostringstream bankName;
-      bankName << "Bank" << bankNumber;
+      bankName << "bank" << bankNumber;
       Element* bankElem = mDoc->createElement("component-link");
       bankElem->setAttribute("name",bankName.str());
       addSigmaParameters( paramTable, mDoc, bankElem, i+1);
