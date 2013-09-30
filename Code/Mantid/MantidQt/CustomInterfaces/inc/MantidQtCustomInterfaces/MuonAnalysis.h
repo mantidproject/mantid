@@ -160,6 +160,9 @@ private slots:
   /// Update the pair plot based on changes on the group page.
   void settingsTabUpdatePlot();
 
+  /// Updates the style of the current plot according to actual parameters on settings tab.
+  void updateCurrentPlotStyle();
+
   /**
    * Checks whether plots should be auto-updated when some settings change
    * @return true if enabled, false if not

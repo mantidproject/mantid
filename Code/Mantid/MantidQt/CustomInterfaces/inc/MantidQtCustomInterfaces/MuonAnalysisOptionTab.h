@@ -99,6 +99,9 @@ signals:
   /// Update the plot because something has changed.
   void settingsTabUpdatePlot();
 
+  /// Emitted when plot style parameters has changed.
+  void plotStyleChanged();
+
   /// Tell Muon interface to show the muon graphs
   void notHidingGraphs();
 

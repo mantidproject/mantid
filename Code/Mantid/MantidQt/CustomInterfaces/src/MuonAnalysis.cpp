@@ -2136,6 +2136,8 @@ void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QStri
   // If autoscaling disabled - set manual Y axis values
   if(params["YAxisAuto"] == "False")
     code += "l.setAxisScale(Layer.Left," + params["YAxisMin"] + "," + params["YAxisMax"] + ")\n";
+  else
+    code += "l.setAutoScale()\n";
 
   // Replot
   code += "l.replot()\n";
@@ -3693,6 +3695,7 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.optionStepSizeText, SIGNAL(editingFinished()), this, SLOT(settingsTabUpdatePlot()));
 
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_optionTab, SIGNAL(plotStyleChanged()), this, SLOT(updateCurrentPlotStyle()));
 }
 
 void MuonAnalysis::changeHomeFunction()
@@ -3757,6 +3760,31 @@ void MuonAnalysis::settingsTabUpdatePlot()
 {
   if (isAutoUpdateEnabled() && m_tabNumber == 2 && m_loaded == true)
     runFrontPlotButton();
+}
+
+/**
+ * Updates the style of the current plot according to actual parameters on settings tab.
+ */
+void MuonAnalysis::updateCurrentPlotStyle()
+{
+  if (isAutoUpdateEnabled() && m_currentDataName != NOT_AVAILABLE)
+  {
+    if(plotExists(m_currentDataName))
+    {
+      // TODO: This index magic wouldn't be needed if we'd store only a single group in a workspace.
+
+      // Get selected group index
+      int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+
+      // Check if pair is selected
+      if(index >= numGroups())
+        index = 0;
+
+      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, index));
+    }
+    else
+      runFrontPlotButton();
+  }
 }
 
 bool MuonAnalysis::isAutoUpdateEnabled()
