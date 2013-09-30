@@ -91,7 +91,7 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 # Get the path to the file
 # checks if we already know the path, else
 # returns searches of the file based on run number and instrument
-def getFilePath(run,ext,intr):
+def getFilePath(run,ext,instr):
 	path = None
 	fname = None
 	if(os.path.isfile(run)): 
@@ -130,10 +130,11 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
 	StartTime('Iback')
 	workdir = config['defaultsave.directory']
 
+	path, fname = getFilePath(run, '.asc', instr)
+
 	if Verbose:
 		logger.notice('Reading file : ' + path)
 
-	path, fname = getFilePath(run, '.asc', instr)
 	asc = loadFile(path)
 	lasc = len(asc)
 
@@ -285,6 +286,10 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):
 	workdir = config['defaultsave.directory']
 
 	path, fname = getFilePath(run, '.inx', instr)
+
+	if Verbose:
+		logger.notice('Reading file : ' + path)
+
 	asc = loadFile(path)
 	lasc = len(asc)
 
