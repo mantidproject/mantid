@@ -1,8 +1,8 @@
 #include "MantidCurveFitting/ComptonScatteringCountRate.h"
-#include "MantidCurveFitting/SimplexMinimizer.h"
-
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
+
+
 
 namespace Mantid
 {
@@ -113,7 +113,7 @@ namespace CurveFitting
      */
     const size_t nparams(m_cmatrix.numCols());
 
-    // Compute minimization with of Cx where the amplitudes are set to 1.0 for J(y)
+    // Compute minimization with of Cx where the amplitudes are set to 1.0
     std::vector<double> x0(nparams, 1);
     setFixedParameterValues(x0);
     // Compute the constraint matrix
@@ -128,8 +128,8 @@ namespace CurveFitting
   }
 
   /**
-   * Set the fixed parameters to the given values
-   * @param values A new set of values to set
+   * Set the first N fixed parameters to the values given by the N values vector
+   * @param values A new set of N values to set
    */
   void ComptonScatteringCountRate::setFixedParameterValues(const std::vector<double> & values)
   {
@@ -139,7 +139,7 @@ namespace CurveFitting
     for(size_t i = 0; i < nparams; ++i)
     {
       this->setParameter(m_fixedParamIndices[i], values[i], true);
-    }    
+    }
   }
 
   /**
@@ -154,6 +154,19 @@ namespace CurveFitting
       auto *profile = m_profiles[i];
       const size_t numFilled = profile->fillConstraintMatrix(m_cmatrix,start,m_errors);
       start += numFilled;
+    }
+
+    if(g_log.is(Logger::Priority::PRIO_DEBUG))
+    {
+      g_log.debug() << "--- CM ---\n";
+      for(size_t i = 0; i < m_cmatrix.numRows(); ++i)
+      {
+        for(size_t j = 0; j < m_cmatrix.numCols(); ++j)
+        {
+          g_log.debug() << m_cmatrix[i][j] << "  ";
+        }
+        g_log.debug() << "\n";
+      }
     }
   }
 
@@ -179,6 +192,15 @@ namespace CurveFitting
     m_dataErrorRatio.resize(m_errors.size());
     std::transform(values.begin(), values.end(), m_errors.begin(),
                    m_dataErrorRatio.begin(), std::divides<double>());
+
+    if(g_log.is(Kernel::Logger::Priority::PRIO_DEBUG))
+    {
+      g_log.debug() << "-- data/error --\n";
+      for(size_t i = 0; i < m_errors.size(); ++i)
+      {
+        g_log.debug() << m_dataErrorRatio[i] << "\n";
+      }
+    }
 
     cacheFunctions();
     createConstraintMatrices(matrix->readX(wsIndex));
@@ -254,11 +276,12 @@ namespace CurveFitting
     if(function1D->hasAttribute(m_bkgdOrderAttr))
     {
       m_bkgdPolyN = function1D->getAttribute(m_bkgdOrderAttr).asInt();
-      const size_t npars = static_cast<size_t>(m_bkgdPolyN + 1); // constant term
-      // we assume the parameters are at index 0->N on the background
-      for(size_t i = 0; i < npars; ++i)
+      const size_t npars = static_cast<size_t>(m_bkgdPolyN + 1); // + constant term
+      // we assume the parameters are at index 0->N on the background so we need to
+      // reverse them
+      for(size_t i = npars; i > 0; --i) // i = from npars->1
       {
-        const size_t indexOfFixed = paramsOffset + i;
+        const size_t indexOfFixed = paramsOffset + (i-1);
         this->fix(indexOfFixed);
         m_fixedParamIndices.push_back(indexOfFixed);
       }
@@ -294,21 +317,11 @@ namespace CurveFitting
       throw std::invalid_argument(os.str());
     }
 
-    createPositivityCM(nmasses, xValues);
+    createPositivityCM(xValues);
     createEqualityCM(nmasses);
 
     if(g_log.is(Logger::Priority::PRIO_DEBUG))
     {
-      g_log.debug() << "--- CM ---\n";
-      for(size_t i = 0; i < m_cmatrix.numRows(); ++i)
-      {
-        for(size_t j = 0; j < m_cmatrix.numCols(); ++j)
-        {
-          g_log.debug() << m_cmatrix[i][j] << "  ";
-        }
-        g_log.debug() << "\n";
-      }
-
       g_log.debug() << "\n--- aeq ---\n";
       for(size_t i = 0; i < m_eqMatrix.numRows(); ++i)
       {
@@ -323,35 +336,32 @@ namespace CurveFitting
   }
 
   /**
-   * @param nmasses The number of distinct masses
    * @param xValues The X data for the fitted spectrum
    */
-  void ComptonScatteringCountRate::createPositivityCM(const size_t nmasses, const MantidVec & xValues)
+  void ComptonScatteringCountRate::createPositivityCM(const MantidVec & xValues)
   {
     // -- Constraint matrix for J(y) > 0 --
-    // The first N columns are filled with J(y) for each mass + extra for the first mass hermite
-    // terms.
-    // If a background is required then followed by a column for each order of the background polynomial
-    // with x^(j)/errors where j increases over the order of the polynomial
+    // The first N columns are filled with J(y) for each mass + N_h for the first mass hermite
+    // terms included + (n+1) for each termn the background of order n
+    // The background columns are filled with x^j/error where j=(1,n+1)
     const size_t nrows(xValues.size());
-    size_t nColsCMatrix(nmasses);
-    if(m_bkgdPolyN > 0) nColsCMatrix += (m_bkgdPolyN + 1);
+    size_t nColsCMatrix(m_fixedParamIndices.size());
     m_cmatrix = Kernel::DblMatrix(nrows, nColsCMatrix);
 
     // Fill background values as they don't change at all
     if(m_bkgdPolyN > 0)
     {
+      size_t polyStartCol = nColsCMatrix - m_bkgdPolyN - 1;
       for(size_t i = 0; i < nrows; ++i) //rows
       {
         double * row = m_cmatrix[i];
         const double & xi = xValues[i];
         const double & erri = m_errors[i];
-        size_t polyN = 0;
-        for(size_t j = nmasses; j < nColsCMatrix; ++j) //cols
+        size_t polyN = m_bkgdPolyN;
+        for(size_t j = polyStartCol; j < nColsCMatrix; ++j) //cols
         {
-          const double power = static_cast<double>(polyN);
-          row[j] = std::pow(xi, power)/erri;
-          ++polyN;
+          row[j] = std::pow(xi, static_cast<double>(polyN))/erri;
+          --polyN;
         }
       }
     }
@@ -391,8 +401,6 @@ namespace CurveFitting
     }
 
   }
-
-
 
 } // namespace CurveFitting
 } // namespace Mantid

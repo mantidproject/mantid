@@ -2,8 +2,8 @@
 #define MANTID_CURVEFITTING_COMPTONSCATTERINGCOUNTRATE_H_
 
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/ComptonProfile.h"
+#include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/Matrix.h"
 
 namespace Mantid
@@ -69,7 +69,7 @@ namespace CurveFitting
     /// Set up the constraint matrices
     void createConstraintMatrices(const MantidVec & xValues);
     /// Set up positivity constraint matrix
-    void createPositivityCM(const size_t nmasses, const MantidVec & xValues);
+    void createPositivityCM(const MantidVec & xValues);
     /// Set up equality constraint matrix
     void createEqualityCM(const size_t nmasses);
     
@@ -90,6 +90,8 @@ namespace CurveFitting
     /// Ratio of data & errors
     std::vector<double> m_dataErrorRatio;
   };
+
+
 
 } // namespace CurveFitting
 } // namespace Mantid
