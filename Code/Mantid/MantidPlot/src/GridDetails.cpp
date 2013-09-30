@@ -19,7 +19,7 @@
 #include <ColorBox.h>
 #include <Grid.h>
 
-/** The constructor for a single set of widgets containing parameters for the scale of an axis.
+/** The constructor for a single set of widgets containing parameters for a sigle direction of gridlines.
 *  @param app :: the containing application window
 *  @param graph :: the graph the dialog is settign the options for
 *  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis

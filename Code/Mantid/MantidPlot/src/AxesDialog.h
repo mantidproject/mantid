@@ -26,7 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
- //Heavily edited and refactored ot fix bugs by Keith Brown
+ //Heavily edited and refactored to fix bugs by Keith Brown
 #ifndef AXESDIALOG_H
 #define AXESDIALOG_H
 
@@ -73,11 +73,6 @@ class AxesDialog: public QDialog
   Q_OBJECT
 
   public:
-    //! Constructor
-    /**
-     * @param parent :: parent widget
-     * @param fl :: window flags
-     */
     AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl = 0);
     virtual ~AxesDialog();
   public slots:
