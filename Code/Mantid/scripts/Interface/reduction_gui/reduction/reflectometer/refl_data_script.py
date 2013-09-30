@@ -52,6 +52,9 @@ class DataSets(BaseScriptElement):
     scaling_factor_file_flag = True
     slits_width_flag = True
 
+    #geometry correction
+    geometry_correction_switch = False
+
     #incident medium list and selected value
     incident_medium_list = ['H2O']
     incident_medium_index_selected = 0
@@ -94,6 +97,7 @@ class DataSets(BaseScriptElement):
         _list = _incident_medium_str.split(',')
                 
         script += "              IncidentMediumSelected='%s',\n" % str(_list[self.incident_medium_index_selected])
+        script += "              GeometryCorrectionFlag=%s,\n" % str(self.geometry_correction_switch)
         script += "              QMin=%s,\n" % str(self.q_min)
         script += "              QStep=%s,\n" % str(self.q_step)
 
@@ -177,6 +181,9 @@ class DataSets(BaseScriptElement):
         xml += "<scaling_factor_flag>%s</scaling_factor_flag>\n" % str(self.scaling_factor_file_flag)
         xml += "<scaling_factor_file>%s</scaling_factor_file>\n" % str(self.scaling_factor_file)
         xml += "<slits_width_flag>%s</slits_width_flag>\n" % str(self.slits_width_flag)
+        
+        # geometry correction
+        xml += "<geometry_correction_switch>%s</geometry_correction_switch>\n" % str(self.geometry_correction_switch)
         
         #incident medium
         xml += "<incident_medium_list>%s</incident_medium_list>\n" % str(self.incident_medium_list[0])
@@ -291,6 +298,9 @@ class DataSets(BaseScriptElement):
         self.slits_width_flag = BaseScriptElement.getBoolElement(instrument_dom, "slits_width_flag")
         self.scaling_factor_file_flag = BaseScriptElement.getBoolElement(instrument_dom, "scaling_factor_flag")
         
+        # geometry correction switch
+        self.geometry_correction_switch = BaseScriptElement.getBoolElement(instrument_dom, "geometry_correction_switch")
+        
         #incident medium selected
         if BaseScriptElement.getStringList(instrument_dom, "incident_medium_list") != []:        
             self.incident_medium_list = BaseScriptElement.getStringList(instrument_dom, "incident_medium_list")
@@ -343,6 +353,9 @@ class DataSets(BaseScriptElement):
         self.scaling_factor_file = DataSets.scaling_factor_file
         self.slits_width_flag = DataSets.slits_width_flag
         self.scaling_factor_file_flag = DataSets.scaling_factor_file_flag
+        
+        #geometry correction
+        self.geometry_correction_switch = DataSets.geometry_correction_switch
         
         #incident medium selected
         self.incident_medium_list = DataSets.incident_medium_list

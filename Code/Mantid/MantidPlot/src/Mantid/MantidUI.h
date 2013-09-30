@@ -311,6 +311,7 @@ signals:
 
   void workspaces_cleared();
   void ADS_updated();
+  void workspace_renamed(QString,QString);
 
   void needToCreateLoadDAEMantidMatrix(const QString&);
 
