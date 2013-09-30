@@ -680,6 +680,12 @@ AxesDialog::~AxesDialog()
 
 }
 
+void AxesDialog::accept()
+{
+  if (apply())
+    close();
+}
+
 void AxesDialog::showAxesPage()
 {
   if (generalDialog->currentWidget() != dynamic_cast<QWidget*>(axesPage))
@@ -696,7 +702,6 @@ void AxesDialog::showGeneralPage()
 {
   generalDialog->showPage(generalPage);
 }
-
 
 int AxesDialog::exec()
 {
@@ -800,6 +805,70 @@ void AxesDialog::initScalesPage()
   connect(axesList, SIGNAL(currentRowChanged(int)), scalePrefsArea, SLOT(setCurrentIndex(int)));
 }
 
+void AxesDialog::initAxesPage()
+{
+  axesPage = new QWidget();
+  axesLayout = new QHBoxLayout(axesPage);
+  //axes page
+  QPixmap image4((const char**) image4_data);
+  QPixmap image5((const char**) image5_data);
+  QPixmap image6((const char**) image6_data);
+  QPixmap image7((const char**) image7_data);
+
+  axesTitlesList = new QListWidget();
+  axesPrefsArea = new QStackedLayout();
+  QListWidgetItem* listBottom = new QListWidgetItem(image4, tr("Bottom"));
+  QListWidgetItem* listLeft = new QListWidgetItem(image5, tr("Left"));
+  QListWidgetItem* listTop = new QListWidgetItem(image6, tr("Top"));
+  QListWidgetItem* listRight = new QListWidgetItem(image7, tr("Right"));
+
+  AxisDetails* prefsBottom = new AxisDetails(d_app, d_graph, QwtPlot::xBottom);
+  AxisDetails* prefsLeft = new AxisDetails(d_app, d_graph, QwtPlot::yLeft);
+  AxisDetails* prefsTop = new AxisDetails(d_app, d_graph, QwtPlot::xTop);
+  AxisDetails* prefsRight = new AxisDetails(d_app, d_graph, QwtPlot::yRight);
+
+  axesPrefsArea->addWidget(prefsBottom);
+  axesPrefsArea->addWidget(prefsLeft);
+  axesPrefsArea->addWidget(prefsTop);
+  axesPrefsArea->addWidget(prefsRight);
+
+  axesTitlesList->addItem(listBottom);
+  axesTitlesList->addItem(listLeft);
+  axesTitlesList->addItem(listTop);
+  axesTitlesList->addItem(listRight);
+
+  m_Axis_list.append(prefsBottom);
+  m_Axis_list.append(prefsLeft);
+  m_Axis_list.append(prefsTop);
+  m_Axis_list.append(prefsRight);
+
+  axesTitlesList->setIconSize(image6.size());
+  axesTitlesList->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
+
+  // calculate a sensible width for the items list
+  // (default QListWidget size is 256 which looks too big)
+  QFontMetrics fm(axesTitlesList->font());
+  int width = 32;
+
+  for (int i = 0; i < axesTitlesList->count(); i++)
+  {
+    if (fm.width(axesTitlesList->item(i)->text()) > width)
+    {
+      width = fm.width(axesTitlesList->item(i)->text());
+    }
+  }
+
+  axesTitlesList->setMaximumWidth(axesTitlesList->iconSize().width() + width + 50);
+  // resize the list to the maximum width
+  axesTitlesList->resize(axesTitlesList->maximumWidth(),axesTitlesList->height());
+
+  axesLayout->addWidget(axesTitlesList);
+  axesLayout->addLayout(axesPrefsArea);
+
+  generalDialog->addTab(axesPage, tr("Axis"));
+  connect(axesTitlesList, SIGNAL(currentRowChanged(int)), axesPrefsArea, SLOT(setCurrentIndex(int)));
+}
+
 void AxesDialog::initGridPage()
 {
   Grid *grd = dynamic_cast<Grid *>(d_graph->plotWidget()->grid());
@@ -876,75 +945,12 @@ void AxesDialog::initGridPage()
   connect(boxAntialiseGrid, SIGNAL(clicked()),prefsVert,SLOT(setModified()));
 }
 
-void AxesDialog::initAxesPage()
-{
-  axesPage = new QWidget();
-  axesLayout = new QHBoxLayout(axesPage);
-  //axes page
-  QPixmap image4((const char**) image4_data);
-  QPixmap image5((const char**) image5_data);
-  QPixmap image6((const char**) image6_data);
-  QPixmap image7((const char**) image7_data);
-
-  axesTitlesList = new QListWidget();
-  axesPrefsArea = new QStackedLayout();
-  QListWidgetItem* listBottom = new QListWidgetItem(image4, tr("Bottom"));
-  QListWidgetItem* listLeft = new QListWidgetItem(image5, tr("Left"));
-  QListWidgetItem* listTop = new QListWidgetItem(image6, tr("Top"));
-  QListWidgetItem* listRight = new QListWidgetItem(image7, tr("Right"));
-
-  AxisDetails* prefsBottom = new AxisDetails(d_app, d_graph, QwtPlot::xBottom);
-  AxisDetails* prefsLeft = new AxisDetails(d_app, d_graph, QwtPlot::yLeft);
-  AxisDetails* prefsTop = new AxisDetails(d_app, d_graph, QwtPlot::xTop);
-  AxisDetails* prefsRight = new AxisDetails(d_app, d_graph, QwtPlot::yRight);
-
-  axesPrefsArea->addWidget(prefsBottom);
-  axesPrefsArea->addWidget(prefsLeft);
-  axesPrefsArea->addWidget(prefsTop);
-  axesPrefsArea->addWidget(prefsRight);
-
-  axesTitlesList->addItem(listBottom);
-  axesTitlesList->addItem(listLeft);
-  axesTitlesList->addItem(listTop);
-  axesTitlesList->addItem(listRight);
-
-  m_Axis_list.append(prefsBottom);
-  m_Axis_list.append(prefsLeft);
-  m_Axis_list.append(prefsTop);
-  m_Axis_list.append(prefsRight);
-
-  axesTitlesList->setIconSize(image6.size());
-  axesTitlesList->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding));
-
-  // calculate a sensible width for the items list
-  // (default QListWidget size is 256 which looks too big)
-  QFontMetrics fm(axesTitlesList->font());
-  int width = 32;
-
-  for (int i = 0; i < axesTitlesList->count(); i++)
-  {
-    if (fm.width(axesTitlesList->item(i)->text()) > width)
-    {
-      width = fm.width(axesTitlesList->item(i)->text());
-    }
-  }
-
-  axesTitlesList->setMaximumWidth(axesTitlesList->iconSize().width() + width + 50);
-  // resize the list to the maximum width
-  axesTitlesList->resize(axesTitlesList->maximumWidth(),axesTitlesList->height());
-
-  axesLayout->addWidget(axesTitlesList);
-  axesLayout->addLayout(axesPrefsArea);
-
-  generalDialog->addTab(axesPage, tr("Axis"));
-  connect(axesTitlesList, SIGNAL(currentRowChanged(int)), axesPrefsArea, SLOT(setCurrentIndex(int)));
-}
-
 void AxesDialog::initGeneralPage()
 {
   generalPage = new QWidget();
 
   Plot *p = d_graph->plotWidget();
+
   boxFramed = new QGroupBox(tr("Canvas frame"));
   boxFramed->setCheckable(true);
 
@@ -952,7 +958,6 @@ void AxesDialog::initGeneralPage()
   boxFramedLayout->addWidget(new QLabel(tr("Color")), 0, 0);
   boxFrameColor = new ColorButton(boxFramed);
   boxFramedLayout->addWidget(boxFrameColor, 0, 1);
-
   boxFramedLayout->addWidget(new QLabel(tr("Width")), 1, 0);
   boxFrameWidth = new QSpinBox();
   boxFrameWidth->setMinimum(1);
@@ -962,6 +967,7 @@ void AxesDialog::initGeneralPage()
 
   QGroupBox * boxAxes = new QGroupBox(tr("Axes"));
   QGridLayout * boxAxesLayout = new QGridLayout(boxAxes);
+
   boxBackbones = new QCheckBox();
   boxBackbones->setText(tr("Draw backbones"));
   boxAxesLayout->addWidget(boxBackbones, 0, 0);
@@ -980,7 +986,6 @@ void AxesDialog::initGeneralPage()
   boxMinorTicksLength = new QSpinBox();
   boxMinorTicksLength->setRange(0, 1000);
   boxAxesLayout->addWidget(boxMinorTicksLength, 3, 1);
-
   boxAxesLayout->setRowStretch(4, 1);
 
   QHBoxLayout * mainLayout = new QHBoxLayout(generalPage);
@@ -989,40 +994,19 @@ void AxesDialog::initGeneralPage()
 
   generalDialog->addTab(generalPage, tr("General"));
 
-  boxAxesLinewidth->setValue(p->axesLinewidth());
-  boxBackbones->setChecked(d_graph->axesBackbones());
-
   boxFramed->setChecked(d_graph->canvasFrameWidth() > 0);
-  boxFrameColor->blockSignals(true);
   boxFrameColor->setColor(d_graph->canvasFrameColor());
-  boxFrameColor->blockSignals(false);
   boxFrameWidth->setValue(d_graph->canvasFrameWidth());
 
+  boxBackbones->setChecked(d_graph->axesBackbones());
+  boxAxesLinewidth->setValue(p->axesLinewidth());
   boxMinorTicksLength->setValue(p->minorTickLength());
   boxMajorTicksLength->setValue(p->majorTickLength());
 
-  /*
-  //All of these bypass apply()
-  connect(boxFrameColor, SIGNAL(colorChanged()), this,
-  SLOT(pickCanvasFrameColor()));
-  connect(boxBackbones, SIGNAL(toggled(bool)), this,
-  SLOT(drawAxesBackbones(bool)));
-  connect(boxFramed, SIGNAL(toggled(bool)), this, SLOT(drawFrame(bool)));
-  connect(boxFrameWidth, SIGNAL(valueChanged (int)), this,
-  SLOT(updateFrame(int)));
-  connect(boxAxesLinewidth, SIGNAL(valueChanged (int)), this,
-  SLOT(changeAxesLinewidth(int)));
   connect(boxMajorTicksLength, SIGNAL(valueChanged (int)), this,
-  SLOT(changeMajorTicksLength(int)));
+    SLOT(changeMajorTicksLength(int)));
   connect(boxMinorTicksLength, SIGNAL(valueChanged (int)), this,
-  SLOT(changeMinorTicksLength(int)));
-  */
-}
-
-void AxesDialog::accept()
-{
-  if (apply())
-    close();
+    SLOT(changeMinorTicksLength(int)));
 }
 
 void AxesDialog::setGraph(Graph *g)
@@ -1035,33 +1019,16 @@ void AxesDialog::setGraph(Graph *g)
 
   d_graph = g;
   Plot *p = d_graph->plotWidget();
-
 }
 
-int AxesDialog::mapToQwtAxisId()
+void AxesDialog::changeMinorTicksLength(int minLength)
 {
-  return mapToQwtAxis(axesTitlesList->currentRow());
+  boxMajorTicksLength->setMinValue(minLength);
 }
 
-int AxesDialog::mapToQwtAxis(int axis)
+void AxesDialog::changeMajorTicksLength(int majLength)
 {
-  int a = -1;
-  switch (axis)
-  {
-  case 0:
-    a = QwtPlot::xBottom;
-    break;
-  case 1:
-    a = QwtPlot::yLeft;
-    break;
-  case 2:
-    a = QwtPlot::xTop;
-    break;
-  case 3:
-    a = QwtPlot::yRight;
-    break;
-  }
-  return a;
+  boxMinorTicksLength->setMaxValue(majLength);
 }
 
 void AxesDialog::pageChanged(QWidget *page)
@@ -1130,7 +1097,6 @@ void AxesDialog::updateGrid()
       {
         return;
       }
-
       for (auto gridItr = m_Grid_list.begin(); gridItr != m_Grid_list.end(); gridItr++)
       {
         if ((*gridItr)->modified())
@@ -1163,67 +1129,23 @@ void AxesDialog::updateGrid()
   }
 }
 
-void AxesDialog::changeMinorTicksLength(int minLength)
-{
-  if (generalDialog->currentWidget() != generalPage)
-    return;
-
-  d_graph->changeTicksLength(minLength, boxMajorTicksLength->value());
-  boxMajorTicksLength->setMinValue(minLength);
-}
-
-void AxesDialog::changeMajorTicksLength(int majLength)
-{
-  if (generalDialog->currentWidget() != generalPage)
-    return;
-
-  d_graph->changeTicksLength(boxMinorTicksLength->value(), majLength);
-  boxMinorTicksLength->setMaxValue(majLength);
-}
-
-void AxesDialog::drawAxesBackbones(bool draw)
-{
-  if (generalDialog->currentWidget() != generalPage)
-    return;
-
-  d_graph->drawAxesBackbones(draw);
-}
-
-void AxesDialog::changeAxesLinewidth(int width)
-{
-  if (generalDialog->currentWidget() != generalPage)
-    return;
-
-  d_graph->setAxesLinewidth(width);
-}
-
-void AxesDialog::drawFrame(bool framed)
-{
-  if (generalDialog->currentWidget() != generalPage)
-    return;
-
-  if (framed)
-    d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
-  else
-    d_graph->setCanvasFrame(0);
-}
-
-void AxesDialog::updateFrame(int width)
-{
-  if (generalDialog->currentWidget() != generalPage)
-    return;
-
-  d_graph->setCanvasFrame(width, boxFrameColor->color());
-}
-
-void AxesDialog::pickCanvasFrameColor()
-{
-  d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
-}
-
 bool AxesDialog::apply()
 {
   //Check if all tabs and axes are valid first
+  for (auto axisItr = m_Axis_list.begin(); axisItr != m_Axis_list.end(); axisItr++)
+  {
+    if(!((*axisItr)->valid()))
+    {
+      return false;
+    }
+  }
+  for (auto scaleItr = m_Scale_list.begin(); scaleItr != m_Scale_list.end(); scaleItr++)
+  {
+    if(!((*scaleItr)->valid()))
+    {
+      return false;
+    }
+  }
   updateGrid();
   for (auto axisItr = m_Axis_list.begin(); axisItr != m_Axis_list.end(); axisItr++)
   {
@@ -1233,24 +1155,18 @@ bool AxesDialog::apply()
   {
     (*scaleItr)->apply();
   }
-  //this is gettign rewritten to check and press ALL tabs when apply or ok is pressed
-  /*
-  
+  d_graph->changeTicksLength(boxMinorTicksLength->value(), boxMajorTicksLength->value());
+  d_graph->drawAxesBackbones(boxBackbones->isChecked());
+  d_graph->setAxesLinewidth(boxAxesLinewidth->value());
+  if (boxFramed->isChecked())
+  {
+    d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
   }
-  else if (generalDialog->currentWidget()==dynamic_cast<QWidget*>(generalPage)){
-    d_graph->setAxesLinewidth(boxAxesLinewidth->value());
-    d_graph->changeTicksLength(boxMinorTicksLength->value(), boxMajorTicksLength->value());
-    if (boxFramed->isChecked())
-      d_graph->setCanvasFrame(boxFrameWidth->value(), boxFrameColor->color());
-    else
-      d_graph->setCanvasFrame(0);
-    d_graph->drawAxesBackbones(boxBackbones->isChecked());
-    d_graph->replot();
+  else
+  {
+    d_graph->setCanvasFrame(0);
   }
-  m_updatePlot=true;
-  return m_updatePlot;
-  //return true;
-  */
-  //Disablign this code for now as it needs rewriting and probably renaming
+  d_graph->replot();
+
   return true;
 }

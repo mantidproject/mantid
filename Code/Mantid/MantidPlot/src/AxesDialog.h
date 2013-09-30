@@ -85,31 +85,14 @@ class AxesDialog: public QDialog
     void showGeneralPage();
     void showAxesPage();
     void showGridPage();
-    //void showFormulaBox();
-
-    //! Shows the dialog as a modal dialog
-    /**
-     * Show the dialog as a modal dialog and do
-     * some initialization.
-     */
     int exec();
 
   private slots:
     bool apply();
-    //void majorGridEnabled(bool on);
-    //void minorGridEnabled(bool on);
-    //void showGridOptions(int axis);
     void accept();
-    void drawFrame(bool framed);
-    int mapToQwtAxis(int axis);
-    int mapToQwtAxisId();
     void updateGrid();
-    void updateFrame(int);
     void changeMinorTicksLength(int minLength);
     void changeMajorTicksLength(int majLength);
-    void pickCanvasFrameColor();
-    void changeAxesLinewidth(int);
-    void drawAxesBackbones(bool);
     void pageChanged(QWidget *page);
 
   protected:
@@ -127,7 +110,6 @@ class AxesDialog: public QDialog
 
     ApplicationWindow* d_app;
     Graph *d_graph;
-    //QFrame *scalePrefsArea, *axesPrefsArea;
 	  QStackedLayout *scalePrefsArea, *axesPrefsArea, *gridPrefsArea;
 //common widgets
     QPushButton* buttonApply, *buttonOk, *buttonCancel;

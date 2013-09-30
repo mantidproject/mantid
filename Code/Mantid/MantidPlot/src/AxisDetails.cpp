@@ -387,7 +387,7 @@ void AxisDetails::apply()
       lst[1] = cmbFormat->currentText();
       formatInfo = lst.join(";");
     }
-    else if (format == ScaleDraw::ColHeader)
+    else if (type == ScaleDraw::ColHeader)
     {
       formatInfo = cmbTableName->currentText();
     }
