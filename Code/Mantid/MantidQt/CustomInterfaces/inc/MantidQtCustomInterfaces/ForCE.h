@@ -6,6 +6,8 @@
 #include "MantidAPI/ExperimentInfo.h"
 
 #include <QComboBox>
+#include <QMap>
+#include <QStringList>
 
 namespace MantidQt
 {
@@ -30,12 +32,15 @@ namespace MantidQt
 			void instrumentChanged(const QString& instrument);
 			/// Populate the reflection option given the analyser
 			void analyserChanged(const QString& analyser);
+			/// Set the instrument based on the file name if possible
+			void handleFilesFound();
 
 		private:
 			/// Load the IDF file and get the instrument
 			Mantid::Geometry::Instrument_const_sptr getInstrument(const QString& instrument);
-
-			//The ui form
+			/// Map to store instrument analysers and reflections for this instrument
+			QMap<QString, QStringList> m_paramMap;
+			/// The ui form
 			Ui::ForCE m_uiForm;
 
 		};

@@ -15,14 +15,12 @@ namespace MantidQt
 		{
 			m_uiForm.setupUi(parent);
 
-			connect(m_uiForm.cbInstrument, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(instrumentChanged(const QString&)));
+			connect(m_uiForm.cbInstrument, SIGNAL(instrumentSelectionChanged(const QString&)), this, SLOT(instrumentChanged(const QString&)));
 			connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(analyserChanged(const QString&)));
+			connect(m_uiForm.mwRun, SIGNAL(filesFound()), this, SLOT(handleFilesFound()));
 
-			// Setup analysers and reflections
-			QString currentIntrument = m_uiForm.cbInstrument->currentText();
-			instrumentChanged(currentIntrument);
-			QString currentAnalyser = m_uiForm.cbAnalyser->currentText();
-			analyserChanged(currentAnalyser);
+			QString instrument = m_uiForm.cbInstrument->currentText();
+			instrumentChanged(instrument);
 		}
 
 		/**
@@ -32,6 +30,16 @@ namespace MantidQt
 		 */
 		bool ForCE::validate()
 		{
+			QString filename = m_uiForm.mwRun->getFirstFilename();
+			QFileInfo finfo(filename);
+			QString ext = finfo.extension().toLower();
+
+			if(ext != "asc" && ext != "inx") //using ascii files
+			{
+				emit showMessageBox("File is not of expected type:\n File type must be .asc or .inx");
+				return false;
+			} 
+
 			return true;
 		}
 
@@ -51,7 +59,6 @@ namespace MantidQt
 			QString filename = m_uiForm.mwRun->getFirstFilename();
 			QFileInfo finfo(filename);
 			QString ext = finfo.extension().toLower();
-			QString basename = finfo.baseName();
 
 			QString instrument = m_uiForm.cbInstrument->currentText();
 			QString analyser = m_uiForm.cbAnalyser->currentText();
@@ -60,16 +67,17 @@ namespace MantidQt
 			if(m_uiForm.chkUseMap->isChecked()){ useMap ="True"; }
 			if(m_uiForm.chkRejectZero->isChecked()){ rejectZero ="True"; }
 
+			//output options
 			if(m_uiForm.chkVerbose->isChecked()){ verbose = "True"; }
 			if(m_uiForm.chkPlot->isChecked()){ plot = "True"; }
 			if(m_uiForm.chkSave->isChecked()){ save ="True"; }
 
 			QString pyFunc ("");
-			if(ext == ".asc") //using ascii files
+			if(ext == "asc") //using ascii files
 			{
 				pyFunc += "IbackStart";
 			} 
-			else if(ext == ".inx") //using inx files
+			else if(ext == "inx") //using inx files
 			{
 				pyFunc += "InxStart";
 			}
@@ -77,14 +85,14 @@ namespace MantidQt
 			QString pyInput = 
 				"from IndirectForce import "+pyFunc+"\n";
 
-			pyInput += "("+instrument+","+basename+","+analyser+","+reflection+","+rejectZero+","+useMap+""
+			pyInput += pyFunc + "('"+instrument+"','"+filename+"','"+analyser+"','"+reflection+"',"+rejectZero+","+useMap+""
 											","+verbose+","+plot+","+save+")";
 
 			runPythonScript(pyInput);
 		}
 
 		/**
-		 * Set the data selectors to use the default save directory
+		 * Set the file browser to use the default save directory
 		 * when browsing for input files.
 		 *  
 		 * @param settings :: The settings to loading into the interface
@@ -95,64 +103,147 @@ namespace MantidQt
 		}
 
 		/**
-		 * Set the analyser and reflection options when the instrument changes.
+		 * Set the analyser option when the instrument changes.
 		 *  
-		 * @param settings :: The settings to loading into the interface
+		 * @param instrument :: The name of the instrument
 		 */
 		void ForCE::instrumentChanged(const QString& instrument)
 		{
 			using namespace Mantid::API;
 
-	    auto inst = getInstrument(instrument);
-	    if(inst)
-	    {
-	    	auto analysers = inst->getStringParameter("analysers");
+			if(!instrument.isEmpty())
+			{
+				m_uiForm.cbInstrument->blockSignals(true);
+				try
+				{
+					auto inst = getInstrument(instrument);
+					if(inst)
+			    {
+			    	m_paramMap.clear();
 
-		    m_uiForm.cbAnalyser->clear();
+			    	auto analysers = inst->getStringParameter("analysers");
 
-		    if( analysers.size() > 0 )
-		    {
-	    		QStringList refs = QString(analysers[0].c_str()).split(',');
-	    		m_uiForm.cbAnalyser->addItems(refs);
-		    }
-	    }
+				    m_uiForm.cbAnalyser->clear();
+
+				    if( analysers.size() > 0 )
+				    {
+				    	// load analysers and add them to the interface
+			    		QStringList analysersList = QString(analysers[0].c_str()).split(',');
+			    		m_uiForm.cbAnalyser->addItems(analysersList);
+
+			    		// for each analyser for this instrument, get there reflections 
+							QStringList::const_iterator it;
+			    		for( it = analysersList.begin(); it != analysersList.end(); ++it) {
+								
+								auto reflections = inst->getStringParameter("refl-"+it->toStdString());
+
+					    	if( reflections.size() > 0 )
+					    	{
+					    		QStringList refs = QString(reflections[0].c_str()).split(',');
+
+					    		// analyser => list of reflections
+					    		m_paramMap[*it] = refs;
+					    	}
+							}
+
+							// set the list of reflections for the current analyser
+							analyserChanged(analysersList[0]);
+				    }
+				  }
+				}
+				catch(std::runtime_error e)
+				{
+					emit showMessageBox(e.what());
+				}
+				m_uiForm.cbInstrument->blockSignals(false);
+			}
     }
 
+		/**
+		 * Get a pointer to the instrument.
+		 *
+		 * This will use LoadEmptyInstrument and get the instrument details off of
+		 * the workspace. It also uses ExperimentInfo to get the most relevant instrument
+		 * defintion.
+		 *  
+		 * @param instrument :: The name of the instrument
+		 * @return Pointer to the instrument
+		 */
     Mantid::Geometry::Instrument_const_sptr ForCE::getInstrument(const QString& instrument)
     {
     	using namespace Mantid::API;
 
+			MatrixWorkspace_sptr idfWs;
+
+    	// Find the file path of the insturment file
+			std::string inst = instrument.toStdString();
     	std::string idfPath = ExperimentInfo::getInstrumentFilename(instrument.toStdString());
-    	Algorithm_sptr loadEmptyInst = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument", -1);
+    	if(idfPath.empty())
+    	{
+    		throw std::runtime_error("Could not locate instrument file for instrument " + instrument.toStdString());
+    	}
 
-      loadEmptyInst->initialize();
-      loadEmptyInst->setChild(true);
-      loadEmptyInst->setRethrows(true);
-      loadEmptyInst->setPropertyValue("Filename", idfPath);
-      loadEmptyInst->setPropertyValue("OutputWorkspace", "__" + instrument.toStdString() + "_defintion");
-      loadEmptyInst->executeAsChildAlg();
+    	// Attempt to load instrument file using LoadEmptyInstrument
+    	try
+    	{
+    		Algorithm_sptr loadEmptyInst = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument", -1);
 
-			MatrixWorkspace_sptr idfWs = loadEmptyInst->getProperty("OutputWorkspace");
+	      loadEmptyInst->initialize();
+	      loadEmptyInst->setChild(true);
+	      loadEmptyInst->setRethrows(true);
+	      loadEmptyInst->setPropertyValue("Filename", idfPath);
+	      loadEmptyInst->setPropertyValue("OutputWorkspace", "__" + instrument.toStdString() + "_defintion");
+	      loadEmptyInst->executeAsChildAlg();
+
+	      idfWs = loadEmptyInst->getProperty("OutputWorkspace");
+    	}
+    	catch(std::runtime_error ex)
+    	{
+    		throw std::runtime_error("Could not load instrument file for instrument" + instrument.toStdString()
+    					+ "\n " + ex.what());
+    	}
+
 	    return idfWs->getInstrument();
     }
 
+		/**
+		 * Set the reflection option when the analyser changes.
+		 *  
+		 * @param analyser :: The name of the analyser
+		 */
     void ForCE::analyserChanged(const QString& analyser)
     {
     	using namespace Mantid::API;
 
-    	auto inst = getInstrument(m_uiForm.cbInstrument->currentText());
-
-    	m_uiForm.cbReflection->clear();
-
-    	if(inst)
+    	if(!analyser.isEmpty())
     	{
-	    	auto reflections = inst->getStringParameter("refl-"+analyser.toStdString());
-	    	
-	    	if( reflections.size() > 0 )
-	    	{
-	    		QStringList refs = QString(reflections[0].c_str()).split(',');
-	    		m_uiForm.cbReflection->addItems(refs);
-	    	}
+    		m_uiForm.cbReflection->clear();
+    		m_uiForm.cbReflection->addItems(m_paramMap[analyser]);
+    	}
+    }
+
+		/**
+		 * Set the instrument selected in the combobox based on
+		 * the file name of the run is possible.
+		 *
+		 * Assumes that names have the form <instrument>_<run-number>.<ext>
+		 */
+    void ForCE::handleFilesFound()
+    {
+    	//get first part of basename
+    	QString filename = m_uiForm.mwRun->getFirstFilename();
+    	QFileInfo finfo(filename);
+    	QStringList fnameParts = finfo.baseName().split('_');
+    	
+    	if( fnameParts.size() > 0 )
+    	{
+    		//Check if the first part of the name is in the instruments list
+    		int instrIndex = m_uiForm.cbInstrument->findText(fnameParts[0]);
+
+    		if( instrIndex >= 0 )
+    		{
+    			m_uiForm.cbInstrument->setCurrentIndex(instrIndex);
+    		}
     	}
     }
 

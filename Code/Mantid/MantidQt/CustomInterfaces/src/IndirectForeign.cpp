@@ -20,6 +20,11 @@ using namespace MantidQt::CustomInterfaces;
 
 IndirectForeign::IndirectForeign(QWidget *parent) : UserSubWindow(parent)
 {
+
+}
+
+void IndirectForeign::initLayout()
+{
 	m_uiForm.setupUi(this);
 
 	//insert each tab into the interface on creation
@@ -41,10 +46,6 @@ IndirectForeign::IndirectForeign(QWidget *parent) : UserSubWindow(parent)
 	connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 	connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
 	connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
-}
-
-void IndirectForeign::initLayout()
-{
 }
 
 /**

@@ -88,28 +88,54 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 		e.append(ee)
 	return next,x,y,e                                #values of x,y,e as lists
 
+# Get the path to the file
+# checks if we already know the path, else
+# returns searches of the file based on run number and instrument
+def getFilePath(run,ext,intr):
+	path = None
+	fname = None
+	if(os.path.isfile(run)): 
+		#using full file path 
+		path = run
+		#base name less extension
+		base = os.path.basename(path)
+		fname = os.path.splitext(base)[0]
+	else:
+		#using run number
+		path = FileFinder.getFullPath(instr + "_" + run + ext)
+		fname = instr + "_" + run
+
+	if path:
+		return asc, fname
+	else:
+		error = 'ERROR *** Could not find ' + ext + ' file'
+		sys.exit(error)
+
+# Load an ascii/inx file
+def loadFile(path):
+	try:
+		handle = open(path, 'r')
+		asc = []
+		for line in handle:
+			line = line.rstrip()
+			asc.append(line)
+		handle.close()
+
+		return asc
+	except:
+		error = 'ERROR *** Could not load ' + path
+		sys.exit(error)
+
 def IbackStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('Iback')
 	workdir = config['defaultsave.directory']
 
-	#check if user browsed for file
-	path = FileFinder.getFullPath(run + '.asc');
-	if(path != ""):
-		file = instr +'_'+ run
-		path = FileFinder.getFullPath(file + '.asc')
-	else: #else user gave a run number
-		file = run
-	
-	fileext = file + '.asc'
 	if Verbose:
 		logger.notice('Reading file : ' + path)
-	handle = open(path, 'r')
-	asc = []
-	for line in handle:
-		line = line.rstrip()
-		asc.append(line)
-	handle.close()
+
+	asc, fname = getFilePath(run, '.asc', instr)
 	lasc = len(asc)
+
 # raw head
 	text = asc[1]
 	run = text[:8]
@@ -209,8 +235,8 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):      #Ascii s
 			Qaxis += ','
 		xDat.append(2*xDat[new-1]-xDat[new-2])
 		Qaxis += str(theta[n])
-	ascWS = file +'_' +ana+refl +'_asc'
-	outWS = file +'_' +ana+refl +'_red'
+	ascWS = fname +'_' +ana+refl +'_asc'
+	outWS = fname +'_' +ana+refl +'_red'
 	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
 		Nspec=nsp, UnitX='Energy')
 	Divide(LHSWorkspace=ascWS, RHSWorkspace=monWS, OutputWorkspace=ascWS,
@@ -256,18 +282,10 @@ def ReadInxGroup(asc,n,lgrp):                  # read ascii x,y,e
 def InxStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):
 	StartTime('Inx')
 	workdir = config['defaultsave.directory']
-	file = instr +'_'+ run
-	filext = file + '.inx'
-	path = FileFinder.getFullPath(filext)
-	if Verbose:
-		logger.notice('Reading file : ' + path)
-	handle = open(path, 'r')
-	asc = []
-	for line in handle:
-		line = line.rstrip()
-		asc.append(line)
-	handle.close()
+
+	asc, fname = getFilePath(run, '.inx', instr)
 	lasc = len(asc)
+
 	val = ExtractInt(asc[0])
 	lgrp = int(val[0])
 	ngrp = int(val[2])
@@ -303,8 +321,8 @@ def InxStart(instr,run,ana,refl,rejectZ,useM,Verbose,Plot,Save):
 			eDat.append(ed[n])
 		xDat.append(2*xd[nd-1]-xd[nd-2])
 		ns += 1
-	ascWS = file +'_' +ana+refl +'_asc'
-	outWS = file +'_' +ana+refl +'_red'
+	ascWS = fname +'_' +ana+refl +'_asc'
+	outWS = fname +'_' +ana+refl +'_red'
 	CreateWorkspace(OutputWorkspace=ascWS, DataX=xDat, DataY=yDat, DataE=eDat,
 		Nspec=ns, UnitX='Energy')
 	InstrParas(ascWS,instr,ana,refl)
@@ -354,14 +372,10 @@ def RejectZero(inWS,tot,Verbose):
 
 def ReadMap(instr,Verbose):
 	workdir = config['defaultsave.directory']
-	file = instr +'_map.asc'
-	path = os.path.join(workdir, file)
-	handle = open(path, 'r')
-	asc = []
-	for line in handle:
-		line = line.rstrip()
-		asc.append(line)
-	handle.close()
+
+	path = FileFinder.getFullPath(instr + "_map.asc")
+	asc, fname = loadFile(path)
+
 	lasc = len(asc)
 	if Verbose:
 		logger.notice('Map file : ' + path +' ; spectra = ' +str(lasc-1))

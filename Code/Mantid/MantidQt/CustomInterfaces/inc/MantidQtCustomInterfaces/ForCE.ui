@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>626</width>
-    <height>193</height>
+    <width>722</width>
+    <height>192</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -55,6 +55,7 @@
          <property name="techniques">
           <stringlist>
            <string>Reactor Indirect Geometry Spectroscopy</string>
+           <string>TOF Indirect Geometry Spectroscopy</string>
           </stringlist>
          </property>
         </widget>
