@@ -3,7 +3,6 @@
 """
 import sys, os
 import traceback
-from PyQt4 import QtGui, QtCore, uic
 import math
 
 # Check whether Mantid is available
@@ -15,7 +14,12 @@ try:
     from mantid.api import AlgorithmFactory
     CLUSTER_ENABLED = "SubmitRemoteJob" in AlgorithmFactory.getRegisteredAlgorithms(True)
 except:
+    import sip
+    sip.setapi('QString',2)
+    sip.setapi('QVariant',2)
     pass
+
+from PyQt4 import QtGui, QtCore, uic
 
 REDUCTION_WARNING = False
 WARNING_MESSAGE = ""
