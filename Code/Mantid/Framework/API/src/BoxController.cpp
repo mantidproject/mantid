@@ -209,7 +209,6 @@ namespace API
     this->m_numMDGridBoxes = splitStringIntoVector<size_t>(s);
 
     this->calcNumSplit();
-    pDoc->release();
   }
   /** function clears the file-backed status of the box controller */ 
    void BoxController::clearFileBacked()
