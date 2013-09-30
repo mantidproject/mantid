@@ -34,6 +34,12 @@
 #include <ColorButton.h>
 #include <QFontDialog>
 
+/** The constructor for a single set of widgets containing parameters for the scale of an axis.
+*  @param app :: the containing application window
+*  @param graph :: the graph the dialog is settign the options for
+*  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
+*  @param parent :: the QWidget that acts as this widget's parent in the hierachy
+*/
 AxisDetails::AxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent) : QWidget(parent)
 {
   m_app = app;
@@ -200,6 +206,9 @@ AxisDetails::~AxisDetails()
 
 }
 
+/** Initialisation method. Sets up all widgets and variables not done in the constructor.
+*
+*/
 void AxisDetails::initWidgets()
 {
   if (m_initialised)
@@ -323,11 +332,17 @@ void AxisDetails::initWidgets()
   }
 }
 
+/** Sets the modifed flag to true so that the changes may be applied.
+*
+*/
 void AxisDetails::setModified()
 {
   m_modified = true;
 }
 
+/** Checks to see if this axis has valid parameters
+*
+*/
 bool AxisDetails::valid()
 {
   if (m_cmbAxisType->currentIndex() == ScaleDraw::Numeric)
@@ -361,6 +376,9 @@ bool AxisDetails::valid()
   return m_initialised && m_app && m_graph && !((m_cmbAxisType->currentIndex() == ScaleDraw::Text || m_cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
 }
 
+/** Applies the grid paremeters to the graphs
+*
+*/
 void AxisDetails::apply()
 {
   if (m_modified && valid())
@@ -398,6 +416,9 @@ void AxisDetails::apply()
   }
 }
 
+/** Applies the grid paremeters to the graphs
+*
+*/
 void AxisDetails::showAxis()
 {
   bool shown = m_chkShowAxis->isChecked();
@@ -422,6 +443,9 @@ void AxisDetails::showAxis()
   }
 }
 
+/** Enables, Disables, Hides or Shows widgets apropriate to the current Axis Format
+*
+*/
 void AxisDetails::setAxisFormatOptions(int type)
 {
   m_cmbFormat->clear();
@@ -548,6 +572,9 @@ void AxisDetails::setAxisFormatOptions(int type)
   }
 }
 
+/** enables or disables the formula text entry fields
+*
+*/
 void AxisDetails::enableFormulaBox()
 {
   if (m_chkShowFormula->isChecked())
@@ -560,6 +587,9 @@ void AxisDetails::enableFormulaBox()
   }
 }
 
+/** sets the font to use on the scale title
+*
+*/
 void AxisDetails::setLabelFont()
 {
   bool okF;
@@ -571,6 +601,9 @@ void AxisDetails::setLabelFont()
   }
 }
 
+/** sets the font to use on the scale numbers
+*
+*/
 void AxisDetails::setScaleFont()
 {
   bool okF;

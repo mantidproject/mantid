@@ -19,6 +19,12 @@
 #include <ColorBox.h>
 #include <Grid.h>
 
+/** The constructor for a single set of widgets containing parameters for the scale of an axis.
+*  @param app :: the containing application window
+*  @param graph :: the graph the dialog is settign the options for
+*  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
+*  @param parent :: the QWidget that acts as this widget's parent in the hierachy
+*/
 GridDetails::GridDetails(ApplicationWindow* app, Graph* graph, int alignment, QWidget *parent) : QWidget(parent)
 {
   m_app = app;
@@ -119,6 +125,9 @@ GridDetails::~GridDetails()
 
 }
 
+/** Initialisation method. Sets up all widgets and variables not done in the constructor.
+*
+*/
 void GridDetails::initWidgets()
 {
   if (m_initialised)
@@ -196,11 +205,17 @@ void GridDetails::initWidgets()
   }
 }
 
+/** Sets the modifed flag to true so that the changes may be applied.
+*
+*/
 void GridDetails::setModified()
 {
   m_modified = true;
 }
 
+/** Applies the grid paremeters to the graphs
+*
+*/
 void GridDetails::apply(Grid *grid, bool antialias)
 {
   if (m_modified && grid)
@@ -231,6 +246,9 @@ void GridDetails::apply(Grid *grid, bool antialias)
   }
 }
 
+/** Enables or disables widgets corresponding to the current value of the majorGridEnabled check box.
+*
+*/
 void GridDetails::majorGridEnabled(bool on)
 {
   m_cmbTypeMajor->setEnabled(on);
@@ -238,6 +256,9 @@ void GridDetails::majorGridEnabled(bool on)
   m_dspnWidthMajor->setEnabled(on);
 }
 
+/** Enables or disables widgets corresponding to the current value of the minorGridEnabled check box.
+*
+*/
 void GridDetails::minorGridEnabled(bool on)
 {
   m_cmbTypeMinor->setEnabled(on);

@@ -628,6 +628,11 @@ static const char* image7_data[] = { "32 32 4 1", "# c #000000", "b c #bfbfbf",
 // Public Functions
 ///////////////////
 
+/** The constructor for a single set of widgets containing parameters for the scale of an axis.
+*  @param app :: the containing application window
+*  @param g :: the graph the dialog is settign the options for
+*  @param fl :: The QT flags fro thsi window
+*/
 AxesDialog::AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl) :
   QDialog(g, fl), m_app(app), m_graph(g)
 {
@@ -677,12 +682,18 @@ AxesDialog::~AxesDialog()
 
 }
 
+/**Applies changes then closes the dialog
+*
+*/
 void AxesDialog::accept()
 {
   if (apply())
     close();
 }
 
+/**shows the Axes tab
+*
+*/
 void AxesDialog::showAxesPage()
 {
   if (m_generalDialog->currentWidget() != dynamic_cast<QWidget*>(m_axesPage))
@@ -691,6 +702,9 @@ void AxesDialog::showAxesPage()
   }
 }
 
+/**shows the Grid tab
+*
+*/
 void AxesDialog::showGridPage()
 {
   if (m_generalDialog->currentWidget() != dynamic_cast<QWidget*>(m_gridPage))
@@ -699,11 +713,17 @@ void AxesDialog::showGridPage()
   }
 }
 
+/**shows the General tab
+*
+*/
 void AxesDialog::showGeneralPage()
 {
   m_generalDialog->showPage(m_generalPage);
 }
 
+/**launches the dialog
+*
+*/
 int AxesDialog::exec()
 {
   m_lstScales->setCurrentRow(0);
@@ -714,6 +734,9 @@ int AxesDialog::exec()
   return 0;
 }
 
+/**sets the current shown axis of scale and axis tabs
+*
+*/
 void AxesDialog::setCurrentScale(int axisPos)
 {
   int axis = -1;
@@ -754,6 +777,9 @@ void AxesDialog::setCurrentScale(int axisPos)
 //Private functions
 ///////////////////
 
+/**initialises the scales tab
+*
+*/
 void AxesDialog::initScalesPage()
 {
   m_scalesPage = new QWidget();
@@ -818,6 +844,9 @@ void AxesDialog::initScalesPage()
   connect(m_lstScales, SIGNAL(currentRowChanged(int)), m_scalePrefsArea, SLOT(setCurrentIndex(int)));
 }
 
+/**initialises the axes tab
+*
+*/
 void AxesDialog::initAxesPage()
 {
   m_axesPage = new QWidget();
@@ -882,6 +911,9 @@ void AxesDialog::initAxesPage()
   connect(m_lstAxes, SIGNAL(currentRowChanged(int)), m_axesPrefsArea, SLOT(setCurrentIndex(int)));
 }
 
+/**initialises the grid tab
+*
+*/
 void AxesDialog::initGridPage()
 {
   Grid *grd = dynamic_cast<Grid *>(m_graph->plotWidget()->grid());
@@ -958,6 +990,9 @@ void AxesDialog::initGridPage()
   connect(m_chkAntialiseGrid, SIGNAL(clicked()),prefsVert,SLOT(setModified()));
 }
 
+/**initialises the general tab
+*
+*/
 void AxesDialog::initGeneralPage()
 {
   m_generalPage = new QWidget();
@@ -1030,21 +1065,36 @@ void AxesDialog::initGeneralPage()
   connect(m_grpFramed,SIGNAL(clicked()),this, SLOT(setModified()));
 }
 
+/**sets the flag that shows the general tab has been modified
+*
+*/
 void AxesDialog::setModified()
 {
   m_generalModified = true;
 }
 
+/** sets the Minimum length of major ticks
+*
+*  @param minLength :: the current value of m_spnMinorTicksLength
+*/
 void AxesDialog::changeMinorTicksLength(int minLength)
 {
   m_spnMajorTicksLength->setMinValue(minLength);
 }
 
+/** sets the Maximum length of minor ticks
+*
+*  @param majLength :: the current value of m_spnMajorTicksLength
+*/
 void AxesDialog::changeMajorTicksLength(int majLength)
 {
   m_spnMinorTicksLength->setMaxValue(majLength);
 }
 
+/** makes sure the selected axis on the scale and axis tabs are the same
+*
+*  @param page :: the tab that has just been switched to
+*/
 void AxesDialog::pageChanged(QWidget *page)
 {
   if (m_lastPage == m_scalesPage && page == m_axesPage)
@@ -1059,6 +1109,9 @@ void AxesDialog::pageChanged(QWidget *page)
   }
 }
 
+/**updates the grid overlay on the graph
+*
+*/
 void AxesDialog::updateGrid()
 {
   bool antiAlias = m_chkAntialiseGrid->isChecked();
@@ -1141,6 +1194,9 @@ void AxesDialog::updateGrid()
   }
 }
 
+/**applies the changes throughout the entire dialog to the graph
+*
+*/
 bool AxesDialog::apply()
 {
   //Check if all tabs and axes are valid first

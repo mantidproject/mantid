@@ -33,6 +33,12 @@
 #include <ColorButton.h>
 #include <QFontDialog>
 
+/** The constructor for a single set of widgets containing parameters for the scale of an axis.
+*  @param app :: the containing application window
+*  @param graph :: the graph the dialog is settign the options for
+*  @param mappedaxis :: the QwtPlot::axis value that corresponds to this axis
+*  @param parent :: the QWidget that acts as this widget's parent in the hierachy
+*/
 ScaleDetails::ScaleDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent) : QWidget(parent)
 {
   m_app = app;
@@ -210,6 +216,9 @@ ScaleDetails::~ScaleDetails()
 
 }
 
+/** Initialisation method. Sets up all widgets and variables not done in the constructor.
+*
+*/
 void ScaleDetails::initWidgets()
 {
   if (m_initialised)
@@ -399,12 +408,17 @@ void ScaleDetails::initWidgets()
   }
 }
 
+/** Checks to see if this axis has valid parameters
+*
+*/
 bool ScaleDetails::valid()
 {
-  //  QMessageBox::warning(this,tr("MantidPlot - Error"), "Invalid option to set the 'From' greater than 'To' for the scale settings.\nOperation aborted! ");
   return m_initialised && m_app && m_graph && !(m_dspnStart->value() >= m_dspnEnd->value());
 }
 
+/** Applies this axis' parameters to the graph
+*
+*/
 void ScaleDetails::apply()
 {
   if (m_modified && valid())
@@ -484,11 +498,17 @@ void ScaleDetails::apply()
   }
 }
 
+/** Sets the modifed flag to true so that the changes may be applied.
+*
+*/
 void ScaleDetails::setModified()
 {
   m_modified = true;
 }
 
+/** enables and disables the appropriate field depending on the current radio button
+*
+*/
 void ScaleDetails::radiosSwitched()
 {
   if (m_radStep->isChecked())
@@ -509,6 +529,9 @@ void ScaleDetails::radiosSwitched()
   }
 }
 
+/** Enables or disables widgets corresponding to the current value of the step parameter.
+*
+*/
 void ScaleDetails::checkstep()
 {
   if (m_dspnStep->value() != 0.0)
@@ -529,4 +552,3 @@ void ScaleDetails::checkstep()
     m_spnMajorValue->setEnabled(true);
   }
 }
-
