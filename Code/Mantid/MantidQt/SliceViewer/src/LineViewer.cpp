@@ -41,8 +41,7 @@ public:
  * @param curveTitle : Title for the curve
  * @param logScale : Log scaling, default to false.
  */
-LineViewerCurve(const QString& curveTitle, bool logScale = false ) : m_logScale(logScale),
-      QwtPlotCurve(curveTitle)
+LineViewerCurve(const QString& curveTitle, bool logScale = false ) :  QwtPlotCurve(curveTitle), m_logScale(logScale)
   {
   }
 
