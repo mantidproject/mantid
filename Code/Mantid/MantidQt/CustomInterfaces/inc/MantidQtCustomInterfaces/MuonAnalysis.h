@@ -163,13 +163,10 @@ private slots:
   /// Updates the style of the current plot according to actual parameters on settings tab.
   void updateCurrentPlotStyle();
 
-  /**
-   * Checks whether plots should be auto-updated when some settings change
-   * @return true if enabled, false if not
-   */
+  /// Checks whether plots should be auto-updated when some settings change.
   bool isAutoUpdateEnabled();
 
-  // Show a plot for a given workspace. Closes previous plot if exists.
+  /// Show a plot for a given workspace. Closes previous plot if exists.
   void showPlot(const QString& wsName);
 
   /// Closes the window with the plot of the given ws
