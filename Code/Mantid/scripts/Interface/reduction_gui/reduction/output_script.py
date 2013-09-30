@@ -1,11 +1,11 @@
 from scripter import BaseScriptElement
-from mantid.api import AnalysisDataService
 
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
     IS_IN_MANTIDPLOT = True
+    from mantid.api import AnalysisDataService
 except:
     pass
  
