@@ -94,6 +94,7 @@ class AxesDialog: public QDialog
     void changeMinorTicksLength(int minLength);
     void changeMajorTicksLength(int majLength);
     void pageChanged(QWidget *page);
+    void setModified();
 
   protected:
     //! generate UI for the axes page
@@ -104,35 +105,22 @@ class AxesDialog: public QDialog
     void initGridPage();
     //! generate UI for the general page
     void initGeneralPage();
-    //! Modifies the grid
-    //void applyChangesToGrid(Grid *grid);
-    void setGraph(Graph *g);
 
-    ApplicationWindow* d_app;
-    Graph *d_graph;
-	  QStackedLayout *scalePrefsArea, *axesPrefsArea, *gridPrefsArea;
+    ApplicationWindow* m_app;
+    Graph *m_graph;
+	  QStackedLayout *m_scalePrefsArea, *m_axesPrefsArea, *m_gridPrefsArea;
 //common widgets
-    QPushButton* buttonApply, *buttonOk, *buttonCancel;
-    QTabWidget* generalDialog;
-    QWidget *scalesPage, *gridPage, *axesPage, *generalPage;
+    QPushButton *m_btnApply, *m_btnOk, *m_btnCancel;
+    QTabWidget *m_generalDialog;
+    QWidget *m_scalesPage, *m_gridPage, *m_axesPage, *m_generalPage, *m_lastPage;
 
     QHBoxLayout *scalesLayout, *axesLayout;
-    QListWidget* axesList;
-    ColorButton *boxCanvasColor;
-    QListWidget* axesGridList;
-    QListWidget* axesTitlesList;
-
-    QSpinBox *boxFrameWidth, *boxAxesLinewidth;
-    QCheckBox *boxBackbones, *boxAntialiseGrid;
-    QGroupBox *boxFramed;
-    QSpinBox *boxMajorTicksLength, *boxMinorTicksLength, *boxBorderWidth;
-    ColorButton *boxFrameColor;
-    QComboBox *boxApplyGridFormat;
-    //! Last selected tab
-    QWidget* lastPage;
-    bool m_updatePlot;
-
-    //static Mantid::Kernel::Logger &g_log;
+    QListWidget *m_lstScales, *m_lstGrid, *m_lstAxes;
+    ColorButton *m_cbtnFrameColor;
+    QSpinBox *m_spnFrameWidth, *m_spnAxesLinewidth, *m_spnMajorTicksLength, *m_spnMinorTicksLength;
+    QCheckBox *m_chkBackbones, *m_chkAntialiseGrid;
+    QGroupBox *m_grpFramed;
+    QComboBox *m_cmbApplyGridFormat;
 
   private:
 
@@ -142,7 +130,7 @@ class AxesDialog: public QDialog
     QList<ScaleDetails*> m_Scale_list;
     ///A map of QListWidgetItem objects to their Scale details objects
     QList<GridDetails*> m_Grid_list;
-	int oldaxis;
+    bool m_generalModified;
 };
 
 #endif

@@ -8,6 +8,7 @@
 #include <qwt_scale_widget.h>
 //#include <qwt_plot.h>
 #include "qwt_compat.h"
+#include "MyParser.h"
 #include "Plot.h"
 #include "plot2D/ScaleEngine.h"
 
@@ -35,145 +36,145 @@
 
 AxisDetails::AxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, QWidget *parent) : QWidget(parent)
 {
-  d_app = app;
-  d_graph = graph;
-  tablesList = d_app->tableNames();
+  m_app = app;
+  m_graph = graph;
+  m_tablesList = m_app->tableNames();
   m_mappedaxis = mappedaxis;
   m_initialised = false;
   QHBoxLayout * topLayout = new QHBoxLayout();
 
-  chkShowAxis = new QCheckBox(tr("Show"));
-  topLayout->addWidget(chkShowAxis);
+  m_chkShowAxis = new QCheckBox(tr("Show"));
+  topLayout->addWidget(m_chkShowAxis);
 
-  grpTitle = new QGroupBox(tr("Title"));
-  topLayout->addWidget(grpTitle);
+  m_grpTitle = new QGroupBox(tr("Title"));
+  topLayout->addWidget(m_grpTitle);
 
-  QVBoxLayout *titleBoxLayout = new QVBoxLayout(grpTitle);
+  QVBoxLayout *titleBoxLayout = new QVBoxLayout(m_grpTitle);
   titleBoxLayout->setSpacing(2);
 
-  txtTitle = new QTextEdit();
-  txtTitle->setTextFormat(Qt::PlainText);
+  m_txtTitle = new QTextEdit();
+  m_txtTitle->setTextFormat(Qt::PlainText);
   QFontMetrics metrics(this->font());
-  txtTitle->setMaximumHeight(3 * metrics.height());
-  titleBoxLayout->addWidget(txtTitle);
+  m_txtTitle->setMaximumHeight(3 * metrics.height());
+  titleBoxLayout->addWidget(m_txtTitle);
 
   QHBoxLayout *hl = new QHBoxLayout();
   hl->setMargin(0);
   hl->setSpacing(2);
-  btnLabelFont = new QPushButton(tr("&Font"));
-  hl->addWidget(btnLabelFont);
+  m_btnLabelFont = new QPushButton(tr("&Font"));
+  hl->addWidget(m_btnLabelFont);
 
-  formatButtons = new TextFormatButtons(txtTitle, TextFormatButtons::AxisLabel);
-  hl->addWidget(formatButtons);
+  m_formatButtons = new TextFormatButtons(m_txtTitle, TextFormatButtons::AxisLabel);
+  hl->addWidget(m_formatButtons);
   hl->addStretch();
 
-  txtTitle->setMaximumWidth(btnLabelFont->width() + formatButtons->width());
+  m_txtTitle->setMaximumWidth(m_btnLabelFont->width() + m_formatButtons->width());
   titleBoxLayout->addLayout(hl);
 
   QHBoxLayout * bottomLayout = new QHBoxLayout();
 
-  grpAxisDisplay = new QGroupBox(QString());
-  bottomLayout->addWidget(grpAxisDisplay);
-  QGridLayout * leftBoxLayout = new QGridLayout(grpAxisDisplay);
+  m_grpAxisDisplay = new QGroupBox(QString());
+  bottomLayout->addWidget(m_grpAxisDisplay);
+  QGridLayout * leftBoxLayout = new QGridLayout(m_grpAxisDisplay);
 
   leftBoxLayout->addWidget(new QLabel(tr("Type")), 0, 0);
 
-  cmbAxisType = new QComboBox();
-  cmbAxisType->addItem(tr("Numeric"));
-  cmbAxisType->addItem(tr("Text from table"));
-  cmbAxisType->addItem(tr("Day of the week"));
-  cmbAxisType->addItem(tr("Month"));
-  cmbAxisType->addItem(tr("Time"));
-  cmbAxisType->addItem(tr("Date"));
-  cmbAxisType->addItem(tr("Column Headings"));
-  leftBoxLayout->addWidget(cmbAxisType, 0, 1);
+  m_cmbAxisType = new QComboBox();
+  m_cmbAxisType->addItem(tr("Numeric"));
+  m_cmbAxisType->addItem(tr("Text from table"));
+  m_cmbAxisType->addItem(tr("Day of the week"));
+  m_cmbAxisType->addItem(tr("Month"));
+  m_cmbAxisType->addItem(tr("Time"));
+  m_cmbAxisType->addItem(tr("Date"));
+  m_cmbAxisType->addItem(tr("Column Headings"));
+  leftBoxLayout->addWidget(m_cmbAxisType, 0, 1);
 
   leftBoxLayout->addWidget(new QLabel(tr("Font")), 1, 0);
 
-  btnAxesFont = new QPushButton();
-  btnAxesFont->setText(tr("Axis &Font"));
-  leftBoxLayout->addWidget(btnAxesFont, 1, 1);
+  m_btnAxesFont = new QPushButton();
+  m_btnAxesFont->setText(tr("Axis &Font"));
+  leftBoxLayout->addWidget(m_btnAxesFont, 1, 1);
 
   leftBoxLayout->addWidget(new QLabel(tr("Color")), 2, 0);
-  cbtnAxisColor = new ColorButton();
-  leftBoxLayout->addWidget(cbtnAxisColor, 2, 1);
+  m_cbtnAxisColor = new ColorButton();
+  leftBoxLayout->addWidget(m_cbtnAxisColor, 2, 1);
 
   leftBoxLayout->addWidget(new QLabel(tr("Major Ticks")), 3, 0);
 
-  cmbMajorTicksType = new QComboBox();
-  cmbMajorTicksType->addItem(tr("None"));
-  cmbMajorTicksType->addItem(tr("Out"));
-  cmbMajorTicksType->addItem(tr("In & Out"));
-  cmbMajorTicksType->addItem(tr("In"));
-  leftBoxLayout->addWidget(cmbMajorTicksType, 3, 1);
+  m_cmbMajorTicksType = new QComboBox();
+  m_cmbMajorTicksType->addItem(tr("None"));
+  m_cmbMajorTicksType->addItem(tr("Out"));
+  m_cmbMajorTicksType->addItem(tr("In & Out"));
+  m_cmbMajorTicksType->addItem(tr("In"));
+  leftBoxLayout->addWidget(m_cmbMajorTicksType, 3, 1);
 
   leftBoxLayout->addWidget(new QLabel(tr("Minor Ticks")), 4, 0);
 
-  cmbMinorTicksType = new QComboBox();
-  cmbMinorTicksType->addItem(tr("None"));
-  cmbMinorTicksType->addItem(tr("Out"));
-  cmbMinorTicksType->addItem(tr("In & Out"));
-  cmbMinorTicksType->addItem(tr("In"));
-  leftBoxLayout->addWidget(cmbMinorTicksType, 4, 1);
+  m_cmbMinorTicksType = new QComboBox();
+  m_cmbMinorTicksType->addItem(tr("None"));
+  m_cmbMinorTicksType->addItem(tr("Out"));
+  m_cmbMinorTicksType->addItem(tr("In & Out"));
+  m_cmbMinorTicksType->addItem(tr("In"));
+  leftBoxLayout->addWidget(m_cmbMinorTicksType, 4, 1);
 
   leftBoxLayout->addWidget(new QLabel(tr("Stand-off")), 5, 0);
-  spnBaseline = new QSpinBox();
-  spnBaseline->setRange(0, 1000);
-  leftBoxLayout->addWidget(spnBaseline);
+  m_spnBaseline = new QSpinBox();
+  m_spnBaseline->setRange(0, 1000);
+  leftBoxLayout->addWidget(m_spnBaseline);
 
-  grpShowLabels = new QGroupBox(tr("Show Labels"));
-  grpShowLabels->setCheckable(true);
-  grpShowLabels->setChecked(true);
+  m_grpShowLabels = new QGroupBox(tr("Show Labels"));
+  m_grpShowLabels->setCheckable(true);
+  m_grpShowLabels->setChecked(true);
 
-  bottomLayout->addWidget(grpShowLabels);
-  QGridLayout *rightBoxLayout = new QGridLayout(grpShowLabels);
+  bottomLayout->addWidget(m_grpShowLabels);
+  QGridLayout *rightBoxLayout = new QGridLayout(m_grpShowLabels);
 
-  lblColumn = new QLabel(tr("Column"));
-  rightBoxLayout->addWidget(lblColumn, 0, 0);
+  m_lblColumn = new QLabel(tr("Column"));
+  rightBoxLayout->addWidget(m_lblColumn, 0, 0);
 
-  cmbColName = new QComboBox();
-  rightBoxLayout->addWidget(cmbColName, 0, 1);
+  m_cmbColName = new QComboBox();
+  rightBoxLayout->addWidget(m_cmbColName, 0, 1);
 
-  lblTable = new QLabel(tr("Table"));
-  rightBoxLayout->addWidget(lblTable, 1, 0);
+  m_lblTable = new QLabel(tr("Table"));
+  rightBoxLayout->addWidget(m_lblTable, 1, 0);
 
-  cmbTableName = new QComboBox();
-  cmbTableName->insertStringList(tablesList);
-  cmbColName->insertStringList(d_app->columnsList(Table::All));
-  rightBoxLayout->addWidget(cmbTableName, 1, 1);
+  m_cmbTableName = new QComboBox();
+  m_cmbTableName->insertStringList(m_tablesList);
+  m_cmbColName->insertStringList(m_app->columnsList(Table::All));
+  rightBoxLayout->addWidget(m_cmbTableName, 1, 1);
 
-  lblFormat = new QLabel(tr("Format"));
-  rightBoxLayout->addWidget(lblFormat, 2, 0);
+  m_lblFormat = new QLabel(tr("Format"));
+  rightBoxLayout->addWidget(m_lblFormat, 2, 0);
 
-  cmbFormat = new QComboBox();
-  cmbFormat->setDuplicatesEnabled(false);
-  rightBoxLayout->addWidget(cmbFormat, 2, 1);
+  m_cmbFormat = new QComboBox();
+  m_cmbFormat->setDuplicatesEnabled(false);
+  rightBoxLayout->addWidget(m_cmbFormat, 2, 1);
 
-  lblPrecision = new QLabel(tr("Precision"));
-  rightBoxLayout->addWidget(lblPrecision, 3, 0);
-  spnPrecision = new QSpinBox();
-  spnPrecision->setRange(0, 10);
-  rightBoxLayout->addWidget(spnPrecision, 3, 1);
+  m_lblPrecision = new QLabel(tr("Precision"));
+  rightBoxLayout->addWidget(m_lblPrecision, 3, 0);
+  m_spnPrecision = new QSpinBox();
+  m_spnPrecision->setRange(0, 10);
+  rightBoxLayout->addWidget(m_spnPrecision, 3, 1);
 
   rightBoxLayout->addWidget(new QLabel(tr("Angle")), 4, 0);
 
-  spnAngle = new QSpinBox();
-  spnAngle->setRange(-90, 90);
-  spnAngle->setSingleStep(5);
-  rightBoxLayout->addWidget(spnAngle, 4, 1);
+  m_spnAngle = new QSpinBox();
+  m_spnAngle->setRange(-90, 90);
+  m_spnAngle->setSingleStep(5);
+  rightBoxLayout->addWidget(m_spnAngle, 4, 1);
 
   rightBoxLayout->addWidget(new QLabel(tr("Color")), 5, 0);
-  cbtnAxisNumColor = new ColorButton();
-  rightBoxLayout->addWidget(cbtnAxisNumColor, 5, 1);
+  m_cbtnAxisNumColor = new ColorButton();
+  rightBoxLayout->addWidget(m_cbtnAxisNumColor, 5, 1);
 
-  chkShowFormula = new QCheckBox(tr("For&mula"));
-  rightBoxLayout->addWidget(chkShowFormula, 6, 0);
+  m_chkShowFormula = new QCheckBox(tr("For&mula"));
+  rightBoxLayout->addWidget(m_chkShowFormula, 6, 0);
 
-  txtFormula = new QTextEdit();
-  txtFormula->setTextFormat(Qt::PlainText);
-  txtFormula->setMaximumHeight(3 * metrics.height());
-  //txtFormula->hide();
-  rightBoxLayout->addWidget(txtFormula, 6, 1);
+  m_txtFormula = new QTextEdit();
+  m_txtFormula->setTextFormat(Qt::PlainText);
+  m_txtFormula->setMaximumHeight(3 * metrics.height());
+  //m_txtFormula->hide();
+  rightBoxLayout->addWidget(m_txtFormula, 6, 1);
   rightBoxLayout->setRowStretch(7, 1);
 
   QVBoxLayout * rightLayout = new QVBoxLayout(this);
@@ -181,15 +182,15 @@ AxisDetails::AxisDetails(ApplicationWindow* app, Graph* graph, int mappedaxis, Q
   rightLayout->addLayout(bottomLayout);
   rightLayout->addStretch(1);
 
-  connect(chkShowFormula, SIGNAL(clicked()), this, SLOT(enableFormulaBox()));
-  connect(cmbAxisType, SIGNAL(activated(int)), this, SLOT(setAxisFormatOptions(int)));
+  connect(m_chkShowFormula, SIGNAL(clicked()), this, SLOT(enableFormulaBox()));
+  connect(m_cmbAxisType, SIGNAL(activated(int)), this, SLOT(setAxisFormatOptions(int)));
 
-  connect(grpShowLabels, SIGNAL(clicked(bool)), this,  SLOT(showAxis()));
-  connect(chkShowAxis, SIGNAL(clicked()), this, SLOT(showAxis()));
-  connect(cmbFormat, SIGNAL(activated(int)), this,  SLOT(showAxis()));
+  connect(m_grpShowLabels, SIGNAL(clicked(bool)), this,  SLOT(showAxis()));
+  connect(m_chkShowAxis, SIGNAL(clicked()), this, SLOT(showAxis()));
+  connect(m_cmbFormat, SIGNAL(activated(int)), this,  SLOT(showAxis()));
 
-  connect(btnAxesFont, SIGNAL(clicked()), this, SLOT(setScaleFont()));
-  connect(btnLabelFont, SIGNAL(clicked()), this, SLOT(setLabelFont()));
+  connect(m_btnAxesFont, SIGNAL(clicked()), this, SLOT(setScaleFont()));
+  connect(m_btnLabelFont, SIGNAL(clicked()), this, SLOT(setLabelFont()));
 
   initWidgets();
 }
@@ -207,8 +208,8 @@ void AxisDetails::initWidgets()
   }
   else
   {
-    Plot *p = d_graph->plotWidget();
-    int style = (int) d_graph->axisType(m_mappedaxis);
+    Plot *p = m_graph->plotWidget();
+    int style = (int) m_graph->axisType(m_mappedaxis);
 
     bool axisOn = p->axisEnabled(m_mappedaxis);
     const QList<int> majTicks = p->getMajorTicksType();
@@ -220,102 +221,102 @@ void AxisDetails::initWidgets()
     int format = p->axisLabelFormat(m_mappedaxis);
 
     //Top
-    chkShowAxis->setChecked(axisOn);
-    txtTitle->setText(d_graph->axisTitle(m_mappedaxis));
-    m_labelFont = d_graph->axisTitleFont(m_mappedaxis);
+    m_chkShowAxis->setChecked(axisOn);
+    m_txtTitle->setText(m_graph->axisTitle(m_mappedaxis));
+    m_labelFont = m_graph->axisTitleFont(m_mappedaxis);
 
     //bottom left
-    cmbAxisType->setCurrentIndex(style);
+    m_cmbAxisType->setCurrentIndex(style);
     setAxisFormatOptions(style);
     m_scaleFont = p->axisFont(m_mappedaxis);
 
-    cbtnAxisColor->setColor(d_graph->axisColor(m_mappedaxis));
+    m_cbtnAxisColor->setColor(m_graph->axisColor(m_mappedaxis));
 
-    cmbMajorTicksType->setCurrentIndex(majTicks[m_mappedaxis]);
-    cmbMinorTicksType->setCurrentIndex(minTicks[m_mappedaxis]);
+    m_cmbMajorTicksType->setCurrentIndex(majTicks[m_mappedaxis]);
+    m_cmbMinorTicksType->setCurrentIndex(minTicks[m_mappedaxis]);
 
     QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(p->axisWidget(m_mappedaxis));
     if (scale)
     {
-      spnBaseline->setValue(scale->margin());
+      m_spnBaseline->setValue(scale->margin());
     }
     else
     {
-      spnBaseline->setValue(0);
+      m_spnBaseline->setValue(0);
     }
 
     //bottom right
-    grpShowLabels->setChecked(labelsOn);
+    m_grpShowLabels->setChecked(labelsOn);
 
-    cmbFormat->setEnabled(labelsOn && axisOn);
-    cmbFormat->setCurrentIndex(format);
+    m_cmbFormat->setEnabled(labelsOn && axisOn);
+    m_cmbFormat->setCurrentIndex(format);
 
-    if (cmbAxisType->currentIndex() == ScaleDraw::Numeric)
+    if (m_cmbAxisType->currentIndex() == ScaleDraw::Numeric)
     {
-      spnPrecision->setValue(p->axisLabelPrecision(m_mappedaxis));
+      m_spnPrecision->setValue(p->axisLabelPrecision(m_mappedaxis));
     }
-    else if (cmbAxisType->currentIndex() == ScaleDraw::Text)
+    else if (m_cmbAxisType->currentIndex() == ScaleDraw::Text)
     {
-      cmbColName->setCurrentText(d_graph->axisFormatInfo(m_mappedaxis));
+      m_cmbColName->setCurrentText(m_graph->axisFormatInfo(m_mappedaxis));
     }
 
-    spnPrecision->setEnabled(format != 0);
+    m_spnPrecision->setEnabled(format != 0);
 
     if (m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop)
     {
-      spnAngle->setEnabled(labelsOn && axisOn);
-      spnAngle->setValue(d_graph->labelsRotation(m_mappedaxis));
+      m_spnAngle->setEnabled(labelsOn && axisOn);
+      m_spnAngle->setValue(m_graph->labelsRotation(m_mappedaxis));
     }
     else
     {
-      spnAngle->setEnabled(false);
-      spnAngle->setValue(0);
+      m_spnAngle->setEnabled(false);
+      m_spnAngle->setValue(0);
     }
 
-    cbtnAxisNumColor->setColor(d_graph->axisLabelsColor(m_mappedaxis));
+    m_cbtnAxisNumColor->setColor(m_graph->axisLabelsColor(m_mappedaxis));
 
-    QString formula = d_graph->axisFormula(m_mappedaxis);
-    txtFormula->setFixedWidth(150);
+    QString formula = m_graph->axisFormula(m_mappedaxis);
+    m_txtFormula->setFixedWidth(150);
 
     if (!formula.isEmpty())
     {
-      chkShowFormula->setChecked(true);
-      txtFormula->setEnabled(true);
-      txtFormula->setText(formula);
+      m_chkShowFormula->setChecked(true);
+      m_txtFormula->setEnabled(true);
+      m_txtFormula->setText(formula);
     }
     else
     {
-      chkShowFormula->setChecked(false);
-      txtFormula->setEnabled(false);
+      m_chkShowFormula->setChecked(false);
+      m_txtFormula->setEnabled(false);
     }
     showAxis();
 
-    connect(chkShowFormula, SIGNAL(stateChanged(int)), this, SLOT(setModified()));
-    connect(chkShowAxis, SIGNAL(stateChanged(int)), this, SLOT(setModified()));
+    connect(m_chkShowFormula, SIGNAL(stateChanged(int)), this, SLOT(setModified()));
+    connect(m_chkShowAxis, SIGNAL(stateChanged(int)), this, SLOT(setModified()));
 
-    connect(cmbAxisType, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
-    connect(cmbAxisType, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
-    connect(cmbMajorTicksType, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
-    connect(cmbMajorTicksType, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
-    connect(cmbTableName, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
-    connect(cmbTableName, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
-    connect(cmbMinorTicksType, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
-    connect(cmbMinorTicksType, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
-    connect(cmbColName, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
-    connect(cmbColName, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
-    connect(cmbFormat, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
-    connect(cmbFormat, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
-    connect(grpShowLabels, SIGNAL(clicked(bool)), this,  SLOT(setModified()));
-    connect(btnAxesFont, SIGNAL(clicked()), this, SLOT(setModified()));
-    connect(btnLabelFont, SIGNAL(clicked()), this, SLOT(setModified()));
-    connect(txtFormula, SIGNAL(textChanged()), this, SLOT(setModified()));
-    connect(txtTitle, SIGNAL(textChanged()), this, SLOT(setModified()));
-    connect(formatButtons, SIGNAL(formattingModified()), this, SLOT(setModified()));
-    connect(spnPrecision,SIGNAL(valueChanged(int)), this, SLOT(setModified()));
-    connect(spnAngle,SIGNAL(valueChanged(int)), this, SLOT(setModified()));
-    connect(spnBaseline,SIGNAL(valueChanged(int)), this, SLOT(setModified()));
-    connect(cbtnAxisColor, SIGNAL(colorChanged()), this, SLOT(setModified()));
-    connect(cbtnAxisNumColor, SIGNAL(colorChanged()), this, SLOT(setModified()));
+    connect(m_cmbAxisType, SIGNAL(currentIndexChanged(int)), this, SLOT(setModified()));
+    connect(m_cmbAxisType, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbMajorTicksType, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
+    connect(m_cmbMajorTicksType, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbTableName, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
+    connect(m_cmbTableName, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbMinorTicksType, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
+    connect(m_cmbMinorTicksType, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbColName, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
+    connect(m_cmbColName, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_cmbFormat, SIGNAL(currentIndexChanged(int)), this,  SLOT(setModified()));
+    connect(m_cmbFormat, SIGNAL(editTextChanged(QString)), this, SLOT(setModified()));
+    connect(m_grpShowLabels, SIGNAL(clicked(bool)), this,  SLOT(setModified()));
+    connect(m_btnAxesFont, SIGNAL(clicked()), this, SLOT(setModified()));
+    connect(m_btnLabelFont, SIGNAL(clicked()), this, SLOT(setModified()));
+    connect(m_txtFormula, SIGNAL(textChanged()), this, SLOT(setModified()));
+    connect(m_txtTitle, SIGNAL(textChanged()), this, SLOT(setModified()));
+    connect(m_formatButtons, SIGNAL(formattingModified()), this, SLOT(setModified()));
+    connect(m_spnPrecision,SIGNAL(valueChanged(int)), this, SLOT(setModified()));
+    connect(m_spnAngle,SIGNAL(valueChanged(int)), this, SLOT(setModified()));
+    connect(m_spnBaseline,SIGNAL(valueChanged(int)), this, SLOT(setModified()));
+    connect(m_cbtnAxisColor, SIGNAL(colorChanged()), this, SLOT(setModified()));
+    connect(m_cbtnAxisNumColor, SIGNAL(colorChanged()), this, SLOT(setModified()));
 
     m_modified = false;
     m_initialised = true;
@@ -329,107 +330,93 @@ void AxisDetails::setModified()
 
 bool AxisDetails::valid()
 {
-/*
-if (format == ScaleDraw::Numeric)
+  if (m_cmbAxisType->currentIndex() == ScaleDraw::Numeric)
+  {
+    if (m_chkShowFormula->isChecked())
     {
-      if (boxShowFormula->isChecked())
+      QString formula = m_txtFormula->text().lower();
+      try
       {
-        QString formula = txtFormula->text().lower();
-        try
+        double value = 1.0;
+        MyParser parser;
+        if (formula.contains("x"))
         {
-          double value = 1.0;
-          MyParser parser;
-          if (formula.contains("x"))
-            parser.DefineVar("x", &value);
-          else if (formula.contains("y"))
-            parser.DefineVar("y", &value);
-          parser.SetExpr(formula.ascii());
-          parser.Eval();
+          parser.DefineVar("x", &value);
         }
-        catch(mu::ParserError &e)
+        else if (formula.contains("y"))
         {
-          QMessageBox::critical(this, tr("MantidPlot - Formula input error"), QString::fromStdString(e.GetMsg())+"\n"+
-            tr("Valid variables are 'x' for Top/Bottom axes and 'y' for Left/Right axes!"));
-          txtFormula->setFocus();
-          m_updatePlot=false;
-          return m_updatePlot;
-          //return false;
+          parser.DefineVar("y", &value);
         }
+        parser.SetExpr(formula.ascii());
+        parser.Eval();
+      }
+      catch(mu::ParserError &e)
+      {
+        QMessageBox::critical(this, tr("MantidPlot - Formula input error"), QString::fromStdString(e.GetMsg())+"\n"+tr("Valid variables are 'x' for Top/Bottom axes and 'y' for Left/Right axes!"));
+        return false;
       }
     }
-*/
-
-  Table *w = d_app->table(cmbColName->currentText());
-  return m_initialised && d_app && d_graph && !((cmbAxisType->currentIndex() == ScaleDraw::Text || cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
+  }
+  Table *w = m_app->table(m_cmbColName->currentText());
+  return m_initialised && m_app && m_graph && !((m_cmbAxisType->currentIndex() == ScaleDraw::Text || m_cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
 }
 
 void AxisDetails::apply()
 {
   if (m_modified && valid())
   {
-    Table *w = d_app->table(cmbColName->currentText());
+    Table *w = m_app->table(m_cmbColName->currentText());
 
-    QString formula = txtFormula->text();
-    if (!chkShowFormula->isChecked())
+    QString formula = m_txtFormula->text();
+    if (!m_chkShowFormula->isChecked())
     {
       formula = QString();
     }
-
-    int type = cmbAxisType->currentIndex();
-    QString formatInfo = cmbColName->currentText();
+    int type = m_cmbAxisType->currentIndex();
+    QString formatInfo = m_cmbColName->currentText();
     if (type == ScaleDraw::Day || type == ScaleDraw::Month)
     {
-      formatInfo = QString::number(cmbFormat->currentIndex());
+      formatInfo = QString::number(m_cmbFormat->currentIndex());
     }
     else if (type == ScaleDraw::Time || type == ScaleDraw::Date)
     {
-      QStringList lst = d_graph->axisFormatInfo(m_mappedaxis).split(";", QString::SkipEmptyParts);
-      lst[1] = cmbFormat->currentText();
+      QStringList lst = m_graph->axisFormatInfo(m_mappedaxis).split(";", QString::SkipEmptyParts);
+      lst[1] = m_cmbFormat->currentText();
       formatInfo = lst.join(";");
     }
     else if (type == ScaleDraw::ColHeader)
     {
-      formatInfo = cmbTableName->currentText();
+      formatInfo = m_cmbTableName->currentText();
     }
-    d_graph->showAxis(m_mappedaxis, cmbAxisType->currentIndex(), formatInfo, w, chkShowAxis->isChecked(), cmbMajorTicksType->currentIndex(),
-      cmbMinorTicksType->currentIndex(), grpShowLabels->isChecked(), cbtnAxisColor->color(), cmbFormat->currentIndex(), spnPrecision->value(), spnAngle->value(), spnBaseline->value(), formula,
-      cbtnAxisNumColor->color());
-    d_graph->setAxisTitle(m_mappedaxis, txtTitle->text());
-    d_graph->setAxisFont(m_mappedaxis, m_scaleFont);
-    d_graph->setAxisTitleFont(m_mappedaxis, m_labelFont);
+    m_graph->showAxis(m_mappedaxis, m_cmbAxisType->currentIndex(), formatInfo, w, m_chkShowAxis->isChecked(), m_cmbMajorTicksType->currentIndex(),
+      m_cmbMinorTicksType->currentIndex(), m_grpShowLabels->isChecked(), m_cbtnAxisColor->color(), m_cmbFormat->currentIndex(), m_spnPrecision->value(),
+      m_spnAngle->value(), m_spnBaseline->value(), formula, m_cbtnAxisNumColor->color());
+    m_graph->setAxisTitle(m_mappedaxis, m_txtTitle->text());
+    m_graph->setAxisFont(m_mappedaxis, m_scaleFont);
+    m_graph->setAxisTitleFont(m_mappedaxis, m_labelFont);
     m_modified = false;
   }
 }
 
 void AxisDetails::showAxis()
 {
-  bool shown = chkShowAxis->isChecked();
-  bool labels = grpShowLabels->isChecked();
+  bool shown = m_chkShowAxis->isChecked();
+  bool labels = m_grpShowLabels->isChecked();
 
-  grpShowLabels->setEnabled(shown);
-  grpAxisDisplay->setEnabled(shown);
-  grpTitle->setEnabled(shown);
+  m_grpShowLabels->setEnabled(shown);
+  m_grpAxisDisplay->setEnabled(shown);
+  m_grpTitle->setEnabled(shown);
 
   if (shown)
   {
-    cmbFormat->setEnabled(labels);
-    cmbColName->setEnabled(labels);
-    chkShowFormula->setEnabled(labels);
-    txtFormula->setEnabled(labels);
+    m_cmbFormat->setEnabled(labels);
+    m_cmbColName->setEnabled(labels);
+    m_chkShowFormula->setEnabled(labels);
+    m_txtFormula->setEnabled(labels);
 
     //this should so the work of the below IF but on one line and slightly more efficently as i assume setDisabled negates that given to it
-    spnAngle->setEnabled((m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop) && labels);
-    /*
-    if (m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop)
-    {
-    spnAngle->setEnabled(labels);
-    }
-    else
-    {
-    spnAngle->setDisabled(true);
-    }
-    */
-    spnPrecision->setEnabled(labels && (cmbAxisType->currentIndex() == ScaleDraw::Numeric) && (cmbFormat->currentIndex() != 0));
+    m_spnAngle->setEnabled((m_mappedaxis == QwtPlot::xBottom || m_mappedaxis == QwtPlot::xTop) && labels);
+    m_spnPrecision->setEnabled(labels && (m_cmbAxisType->currentIndex() == ScaleDraw::Numeric) && (m_cmbFormat->currentIndex() != 0));
 
     enableFormulaBox();
   }
@@ -437,147 +424,146 @@ void AxisDetails::showAxis()
 
 void AxisDetails::setAxisFormatOptions(int type)
 {
-  cmbFormat->clear();
-  cmbFormat->setEditable(false);
-  cmbFormat->hide();
-  spnPrecision->hide();
-  cmbColName->hide();
-  lblColumn->hide();
-  lblFormat->hide();
-  lblPrecision->hide();
-  chkShowFormula->hide();
-  txtFormula->hide();
-  cmbTableName->hide();
-  lblTable->hide();
+  m_cmbFormat->clear();
+  m_cmbFormat->setEditable(false);
+  m_cmbFormat->hide();
+  m_spnPrecision->hide();
+  m_cmbColName->hide();
+  m_lblColumn->hide();
+  m_lblFormat->hide();
+  m_lblPrecision->hide();
+  m_chkShowFormula->hide();
+  m_txtFormula->hide();
+  m_cmbTableName->hide();
+  m_lblTable->hide();
 
   switch (type)
   {
   case 0:
-    lblFormat->show();
-    cmbFormat->show();
-    cmbFormat->insertItem(tr("Automatic"));
-    cmbFormat->insertItem(tr("Decimal: 100.0"));
-    cmbFormat->insertItem(tr("Scientific: 1e2"));
-    cmbFormat->insertItem(tr("Scientific: 10^2"));
-    cmbFormat->setCurrentIndex(d_graph->plotWidget()->axisLabelFormat(m_mappedaxis));
+    {
+      m_lblFormat->show();
+      m_cmbFormat->show();
+      m_cmbFormat->insertItem(tr("Automatic"));
+      m_cmbFormat->insertItem(tr("Decimal: 100.0"));
+      m_cmbFormat->insertItem(tr("Scientific: 1e2"));
+      m_cmbFormat->insertItem(tr("Scientific: 10^2"));
+      m_cmbFormat->setCurrentIndex(m_graph->plotWidget()->axisLabelFormat(m_mappedaxis));
 
-    lblPrecision->show();
-    spnPrecision->show();
-    spnPrecision->setEnabled(cmbFormat->currentIndex() != 0);
-    chkShowFormula->show();
-    txtFormula->show();
+      m_lblPrecision->show();
+      m_spnPrecision->show();
+      m_spnPrecision->setEnabled(m_cmbFormat->currentIndex() != 0);
+      m_chkShowFormula->show();
+      m_txtFormula->show();
 
-    enableFormulaBox();
-    break;
-
+      enableFormulaBox();
+      break;
+    }
   case 1:
-    lblColumn->show();
-    cmbColName->show();
-    break;
-
+    {
+      m_lblColumn->show();
+      m_cmbColName->show();
+      break;
+    }
   case 2:
     {
       int day = (QDate::currentDate()).dayOfWeek();
-      lblFormat->show();
-      cmbFormat->show();
-      cmbFormat->insertItem(QDate::shortDayName(day));
-      cmbFormat->insertItem(QDate::longDayName(day));
-      cmbFormat->insertItem((QDate::shortDayName(day)).left(1));
-      cmbFormat->setCurrentIndex((d_graph->axisFormatInfo(m_mappedaxis)).toInt());
+      m_lblFormat->show();
+      m_cmbFormat->show();
+      m_cmbFormat->insertItem(QDate::shortDayName(day));
+      m_cmbFormat->insertItem(QDate::longDayName(day));
+      m_cmbFormat->insertItem((QDate::shortDayName(day)).left(1));
+      m_cmbFormat->setCurrentIndex((m_graph->axisFormatInfo(m_mappedaxis)).toInt());
+      break;
     }
-    break;
-
   case 3:
     {
       int month = (QDate::currentDate()).month();
-      lblFormat->show();
-      cmbFormat->show();
-      cmbFormat->insertItem(QDate::shortMonthName(month));
-      cmbFormat->insertItem(QDate::longMonthName(month));
-      cmbFormat->insertItem((QDate::shortMonthName(month)).left(1));
-      cmbFormat->setCurrentIndex((d_graph->axisFormatInfo(m_mappedaxis)).toInt());
+      m_lblFormat->show();
+      m_cmbFormat->show();
+      m_cmbFormat->insertItem(QDate::shortMonthName(month));
+      m_cmbFormat->insertItem(QDate::longMonthName(month));
+      m_cmbFormat->insertItem((QDate::shortMonthName(month)).left(1));
+      m_cmbFormat->setCurrentIndex((m_graph->axisFormatInfo(m_mappedaxis)).toInt());
     }
     break;
 
   case 4:
     {
-      lblFormat->show();
-      cmbFormat->show();
-      cmbFormat->setEditable(true);
+      m_lblFormat->show();
+      m_cmbFormat->show();
+      m_cmbFormat->setEditable(true);
 
-      QStringList lst = (d_graph->axisFormatInfo(m_mappedaxis)).split(";",
+      QStringList lst = (m_graph->axisFormatInfo(m_mappedaxis)).split(";",
         QString::KeepEmptyParts);
       if (lst.count() == 2)
       {
-        cmbFormat->insertItem(lst[1]);
-        cmbFormat->setCurrentText(lst[1]);
+        m_cmbFormat->insertItem(lst[1]);
+        m_cmbFormat->setCurrentText(lst[1]);
       }
 
-      cmbFormat->insertItem("h");
-      cmbFormat->insertItem("h ap");
-      cmbFormat->insertItem("h AP");
-      cmbFormat->insertItem("h:mm");
-      cmbFormat->insertItem("h:mm ap");
-      cmbFormat->insertItem("hh:mm");
-      cmbFormat->insertItem("h:mm:ss");
-      cmbFormat->insertItem("h:mm:ss.zzz");
-      cmbFormat->insertItem("mm:ss");
-      cmbFormat->insertItem("mm:ss.zzz");
-      cmbFormat->insertItem("hmm");
-      cmbFormat->insertItem("hmmss");
-      cmbFormat->insertItem("hhmmss");
+      m_cmbFormat->insertItem("h");
+      m_cmbFormat->insertItem("h ap");
+      m_cmbFormat->insertItem("h AP");
+      m_cmbFormat->insertItem("h:mm");
+      m_cmbFormat->insertItem("h:mm ap");
+      m_cmbFormat->insertItem("hh:mm");
+      m_cmbFormat->insertItem("h:mm:ss");
+      m_cmbFormat->insertItem("h:mm:ss.zzz");
+      m_cmbFormat->insertItem("mm:ss");
+      m_cmbFormat->insertItem("mm:ss.zzz");
+      m_cmbFormat->insertItem("hmm");
+      m_cmbFormat->insertItem("hmmss");
+      m_cmbFormat->insertItem("hhmmss");
+      break;
     }
-    break;
-
   case 5:
     {
-      lblFormat->show();
-      cmbFormat->show();
-      cmbFormat->setEditable(true);
+      m_lblFormat->show();
+      m_cmbFormat->show();
+      m_cmbFormat->setEditable(true);
 
-      QStringList lst = (d_graph->axisFormatInfo(m_mappedaxis)).split(";",
+      QStringList lst = (m_graph->axisFormatInfo(m_mappedaxis)).split(";",
         QString::KeepEmptyParts);
       if (lst.count() == 2)
       {
-        cmbFormat->insertItem(lst[1]);
-        cmbFormat->setCurrentText(lst[1]);
+        m_cmbFormat->insertItem(lst[1]);
+        m_cmbFormat->setCurrentText(lst[1]);
       }
-      cmbFormat->insertItem("yyyy-MM-dd");
-      cmbFormat->insertItem("dd.MM.yyyy");
-      cmbFormat->insertItem("ddd MMMM d yy");
-      cmbFormat->insertItem("dd/MM/yyyy");
-      cmbFormat->insertItem("HH:mm:ss");
+      m_cmbFormat->insertItem("yyyy-MM-dd");
+      m_cmbFormat->insertItem("dd.MM.yyyy");
+      m_cmbFormat->insertItem("ddd MMMM d yy");
+      m_cmbFormat->insertItem("dd/MM/yyyy");
+      m_cmbFormat->insertItem("HH:mm:ss");
+      break;
     }
-    break;
-
   case 6:
     {
-      lblTable->show();
-      QString tableName = d_graph->axisFormatInfo(m_mappedaxis);
-      if (tablesList.contains(tableName))
-        cmbTableName->setCurrentText(tableName);
-      cmbTableName->show();
+      m_lblTable->show();
+      QString tableName = m_graph->axisFormatInfo(m_mappedaxis);
+      if (m_tablesList.contains(tableName))
+        m_cmbTableName->setCurrentText(tableName);
+      m_cmbTableName->show();
+      break;
     }
-    break;
   }
 }
 
 void AxisDetails::enableFormulaBox()
 {
-  if (chkShowFormula->isChecked())
+  if (m_chkShowFormula->isChecked())
   {
-    txtFormula->setEnabled(true);
+    m_txtFormula->setEnabled(true);
   }
   else
   {
-    txtFormula->setEnabled(false);
+    m_txtFormula->setEnabled(false);
   }
 }
 
 void AxisDetails::setLabelFont()
 {
   bool okF;
-  QFont oldFont = d_graph->axisTitleFont(m_mappedaxis);
+  QFont oldFont = m_graph->axisTitleFont(m_mappedaxis);
   QFont fnt = QFontDialog::getFont(&okF, oldFont, this);
   if (okF && fnt != oldFont)
   {
@@ -588,7 +574,7 @@ void AxisDetails::setLabelFont()
 void AxisDetails::setScaleFont()
 {
   bool okF;
-  QFont oldFont = d_graph->axisFont(m_mappedaxis);
+  QFont oldFont = m_graph->axisFont(m_mappedaxis);
   QFont fnt = QFontDialog::getFont(&okF, oldFont, this);
   if (okF && fnt != oldFont)
   {

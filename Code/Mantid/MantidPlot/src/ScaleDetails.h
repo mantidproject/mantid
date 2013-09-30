@@ -61,38 +61,27 @@ public:
   bool valid();
 
 private slots:
-  //void updateMinorTicksList(int scaleType);
-  //void endvalueChanged(double);
-  //void startvalueChanged(double);
   void radiosSwitched();
   void setModified();
 
 private:
-  bool m_modified, m_initialised, validate();
-  ApplicationWindow* d_app;
-  Graph* d_graph;
-
-  //formerly  *boxEnd, *boxStart, *boxStep, *boxBreakStart, *boxBreakEnd, *boxStepBeforeBreak, *boxStepAfterBreak;
-  DoubleSpinBox *dspnEnd, *dspnStart, *dspnStep, *dspnBreakStart, *dspnBreakEnd, *dspnStepBeforeBreak, *dspnStepAfterBreak;
-  //formerly *btnInvert, *boxLog10AfterBreak, *boxBreakDecoration;
-  QCheckBox *chkInvert, *chkLog10AfterBreak, *chkBreakDecoration;
-  //formerly *btnStep,*btnMajor
-  QRadioButton *radStep, *radMajor;
-  //formerly *boxMajorValue, *boxBreakPosition, *boxBreakWidth;
-  QSpinBox *spnMajorValue, *spnBreakPosition, *spnBreakWidth;
-  //formerly *boxAxesBreaks;
-  QGroupBox *grpAxesBreaks;
-  //formerly *boxMinorTicksBeforeBreak, *boxMinorTicksAfterBreak, *boxScaleType, *boxMinorValue, *boxUnit;
-  QComboBox *cmbMinorTicksBeforeBreak, *cmbMinorTicksAfterBreak, *cmbScaleType, *cmbMinorValue, *cmbUnit;
-  //formerly *boxScaleTypeLabel, *minorBoxLabel;
-  QLabel *lblScaleTypeLabel, *lblMinorBox;
-  //formerly *boxStartDateTime, *boxEndDateTime;
-  QDateTimeEdit *dteStartDateTime, *dteEndDateTime;
-  //formerly *boxStartTime, *boxEndTime;
-  QTimeEdit *timStartTime, *timEndTime;
-
+  bool m_modified, m_initialised;
   int m_mappedaxis;
+  ApplicationWindow* m_app;
+  Graph* m_graph;
+
+  DoubleSpinBox *m_dspnEnd, *m_dspnStart, *m_dspnStep, *m_dspnBreakStart, *m_dspnBreakEnd, *m_dspnStepBeforeBreak, *m_dspnStepAfterBreak;
+  QCheckBox *m_chkInvert, *m_chkLog10AfterBreak, *m_chkBreakDecoration;
+  QRadioButton *m_radStep, *m_radMajor;
+  QSpinBox *m_spnMajorValue, *m_spnBreakPosition, *m_spnBreakWidth;
+  QGroupBox *m_grpAxesBreaks;
+  QComboBox *m_cmbMinorTicksBeforeBreak, *m_cmbMinorTicksAfterBreak, *m_cmbScaleType, *m_cmbMinorValue, *m_cmbUnit;
+  QLabel *m_lblScaleTypeLabel, *m_lblMinorBox;
+  QDateTimeEdit *m_dteStartDateTime, *m_dteEndDateTime;
+  QTimeEdit *m_timStartTime, *m_timEndTime;
+
   void checkstep();
+  bool validate();
 };
 
 #endif /* ScaleDetails_H_ */

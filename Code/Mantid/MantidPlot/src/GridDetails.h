@@ -57,13 +57,13 @@ private slots:
 
 private:
   bool m_modified, m_initialised;
-  QCheckBox *boxMajorGrid, *boxMinorGrid, *boxZeroLine;
-  ColorBox *boxColorMinor, *boxColorMajor;
-  QComboBox *boxTypeMajor, *boxTypeMinor, *boxGridAxis;
-  DoubleSpinBox *boxWidthMajor, *boxWidthMinor;
+  QCheckBox *m_chkMajorGrid, *m_chkMinorGrid, *m_chkZeroLine;
+  ColorBox *m_cboxColorMinor, *m_cboxColorMajor;
+  QComboBox *m_cmbTypeMajor, *m_cmbTypeMinor, *m_cmbGridAxis;
+  DoubleSpinBox *m_dspnWidthMajor, *m_dspnWidthMinor;
 
-  ApplicationWindow* d_app;
-  Graph* d_graph;
+  ApplicationWindow* m_app;
+  Graph* m_graph;
   int m_alignment; //0 = horzontal, 1 = vertical, anything else sets this to 0;
 };
 #endif /* GRIDDETAILS_H_ */

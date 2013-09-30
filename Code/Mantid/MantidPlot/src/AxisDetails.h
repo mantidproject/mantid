@@ -70,37 +70,22 @@ private slots:
 
 private:
   bool m_modified, m_initialised;
-
-  ApplicationWindow* d_app;
-  Graph* d_graph;
-
-  //formerly *boxShowAxis, *boxShowFormula;
-  QCheckBox *chkShowAxis, *chkShowFormula;
-  //formerly *labelBox, *boxShowLabels, *leftBox;
-  QGroupBox *grpTitle, *grpShowLabels, *grpAxisDisplay;
-  //formerly *boxFormula, *boxTitle;
-  QTextEdit *txtFormula, *txtTitle;
-  //formerly *buttonLabelFont, *btnAxesFont;
-  QPushButton *btnLabelFont, *btnAxesFont;
-  TextFormatButtons *formatButtons;
-  //formerly *boxMajorTicksType, *boxTableName, *boxMinorTicksType, *boxAxisType, *boxFormat, *boxColName;
-  QComboBox *cmbMajorTicksType, *cmbTableName, *cmbMinorTicksType, *cmbAxisType, *cmbFormat, *cmbColName;
-  //formerly *boxAxisColor, *boxAxisNumColor;
-  ColorButton *cbtnAxisColor, *cbtnAxisNumColor;
-  //formerly *boxPrecision, *boxAngle, *boxBaseline;
-  QSpinBox *spnPrecision, *spnAngle, *spnBaseline;
-  //formerly *label1, *label2, *label3, *lblTable;
-  QLabel *lblColumn, *lblFormat, *lblPrecision, *lblTable;
-
-QFont m_labelFont, m_scaleFont;
-
   int m_mappedaxis;
-  //m_mappedaxis is eqivelent to maptoQwtAxisId() as that should be passed into the constuctor via the enum; 
-
-  QStringList tablesList;
+  ApplicationWindow* m_app;
+  Graph* m_graph;
+  QCheckBox *m_chkShowAxis, *m_chkShowFormula;
+  QGroupBox *m_grpTitle, *m_grpShowLabels, *m_grpAxisDisplay;
+  QTextEdit *m_txtFormula, *m_txtTitle;
+  QPushButton *m_btnLabelFont, *m_btnAxesFont;
+  TextFormatButtons *m_formatButtons;
+  QComboBox *m_cmbMajorTicksType, *m_cmbTableName, *m_cmbMinorTicksType, *m_cmbAxisType, *m_cmbFormat, *m_cmbColName;
+  ColorButton *m_cbtnAxisColor, *m_cbtnAxisNumColor;
+  QSpinBox *m_spnPrecision, *m_spnAngle, *m_spnBaseline;
+  QLabel *m_lblColumn, *m_lblFormat, *m_lblPrecision, *m_lblTable;
+  QFont m_labelFont, m_scaleFont;
+  QStringList m_tablesList;
 
   void setEnabled();
-
   void updateAxisType(int axis);
   void updateTitleBox(int axis);
   void updateShowBox(int axis);
