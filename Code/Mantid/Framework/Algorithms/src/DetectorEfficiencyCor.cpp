@@ -1,7 +1,7 @@
 /*WIKI* 
 
 
-The probability of neutron detection by each detector in the [[workspace]] is calculated from the neutrons' kinetic energy, angle between their path and the detector axis, detector gas pressure, radius and wall thickness. The detectors must be cylindrical and their <sup>3</sup>He partial pressure, wall thickness and radius stored in the input workspace, the first in atmospheres and the last two in metres. The [[LoadDetectorInfo]] algorithm can write this information to a workspace from a raw file or a data file (a .dat or .sca file). That workspace then needs to be converted so that its X-values are in [[Unit_Factory|units]] of energy transfer, e.g. using the [[ConvertUnits|ConvertUnits]] algorithm.
+The probability of neutron detection by each detector in the [[workspace]] is calculated from the neutrons' kinetic energy, angle between their path and the detector axis, detector gas pressure, radius and wall thickness. The detectors must be cylindrical and their <sup>3</sup>He partial pressure, wall thickness and radius stored in the input workspace, the first in atmospheres and the last two in metres. That workspace then needs to be converted so that its X-values are in [[Unit_Factory|units]] of energy transfer, e.g. using the [[ConvertUnits|ConvertUnits]] algorithm.
 
 To estimate the true number of neutrons that entered the detector the counts in each bin are divided by the detector efficiency of that detector at that energy.
 
@@ -240,13 +240,13 @@ void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn)
   {
     IDetector_const_sptr det_member = m_inputWS->getInstrument()->getDetector(*it);
     
-    Parameter_sptr par = m_paraMap->get(det_member.get(),"3He(atm)");
+    Parameter_sptr par = m_paraMap->getRecursive(det_member.get(),"3He(atm)");
     if ( !par )
     {
       throw Exception::NotFoundError("3He(atm)", spectraIn);
     }
     const double atms = par->value<double>();
-    par = m_paraMap->get(det_member.get(),"wallT(m)");
+    par = m_paraMap->getRecursive(det_member.get(),"wallT(m)");
     if ( !par )
     {
       throw Exception::NotFoundError("wallT(m)", spectraIn);
