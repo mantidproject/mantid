@@ -1068,6 +1068,23 @@ namespace Mantid
       m_filterApplied = false;
     }
 
+    /** Clears out all but the last value in the property.
+     *  The last value is the last entry in the m_values vector - no sorting is
+     *  done or checked for to ensure that the last value is the most recent in time.
+     *  It is up to the client to call sort() first if this is a requirement.
+     */
+    template<typename TYPE>
+    void TimeSeriesProperty<TYPE>::clearOutdated()
+    {
+      if ( realSize() > 1 )
+      {
+        auto lastValue = m_values.back();
+        clear();
+        m_values.push_back(lastValue);
+        m_size = 1;
+      }
+    }
+
     /**
      * Clears and creates a TimeSeriesProperty from these parameters:
      *  @param start_time :: The reference time as a boost::posix_time::ptime value
