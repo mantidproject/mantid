@@ -156,6 +156,7 @@ namespace CurveFitting
     // Peak type
     vector<string> peaktypes;
     peaktypes.push_back("ThermalNeutronBk2BkExpConvPVoigt");
+    peaktypes.push_back("NeutronBk2BkExpConvPVoigt");
     auto peaktypevalidator = boost::make_shared<StringListValidator>(peaktypes);
     declareProperty("PeakType", "ThermalNeutronBk2BkExpConvPVoigt", peaktypevalidator, "Peak profile type.");
 

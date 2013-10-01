@@ -589,8 +589,6 @@ public:
 
   void generateVulcanPeak220(std::vector<double>& vecx, std::vector<double>& vecy, std::vector<double>& vece)
   {
-
-
     vecx.push_back(31019.30000);        vecy.push_back(0.02624178);         vece.push_back(0.00092672);
     vecx.push_back(31050.40000);        vecy.push_back(0.02646138);         vece.push_back(0.00093232);
     vecx.push_back(31081.40000);        vecy.push_back(0.02809566);         vece.push_back(0.00096305);
