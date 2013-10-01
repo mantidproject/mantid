@@ -101,10 +101,10 @@ private:
 
     int m_wsIndex;
 
-    double mLowerBound;
-    double mUpperBound;
+    double m_lowerBound;
+    double m_upperBound;
 
-    double mTolerance;
+    // double mTolerance;
 
     /// Number of FWHM of range of peak to be removed.
     double m_numFWHM;

@@ -14,6 +14,7 @@ Algorithm will fit these few points (''BackgroundPoints'') to a background funct
 #include "MantidKernel/Property.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
@@ -69,31 +70,29 @@ DECLARE_ALGORITHM(ProcessBackground)
     // Input and output Workspace
     declareProperty(new WorkspaceProperty<Workspace2D>("InputWorkspace", "Anonymous", Direction::Input),
                             "Name of the output workspace containing the processed background.");
+
+    // Workspace index
+    declareProperty("WorkspaceIndex", 0, "Workspace index for the input workspaces.");
+
+    // Output workspace
     declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "", Direction::Output),
                             "Output workspace containing processed background");
-    declareProperty(new WorkspaceProperty<Workspace2D>("ReferenceWorkspace", "", Direction::Input,
-                                                       PropertyMode::Optional),
-                    "Name of the workspace containing the data required by function DeleteRegion.");
+
+    auto refwsprop = new WorkspaceProperty<Workspace2D>("ReferenceWorkspace", "", Direction::Input,
+                                                        PropertyMode::Optional);
+    declareProperty(refwsprop, "Name of the workspace containing the data required by function AddRegion.");
+    setPropertySettings("ReferenceWorkspace",
+                        new VisibleWhenProperty("ReferenceWorkspace", IS_EQUAL_TO,  "AddRegion"));
 
     // Function Options
     std::vector<std::string> options;
+    options.push_back("SelectBackgroundPoints");
     options.push_back("RemovePeaks");
     options.push_back("DeleteRegion");
     options.push_back("AddRegion");
-    options.push_back("SelectBackgroundPoints");
 
     auto validator = boost::make_shared<Kernel::StringListValidator>(options);
     declareProperty("Options", "RemovePeaks", validator, "Name of the functionality realized by this algorithm.");
-
-    // declareProperty("WorkspaceIndex", 0, "Workspace index of the spectrum to have background processed. ");
-
-    vector<string> pointsselectmode;
-    pointsselectmode.push_back("All Background Points");
-    pointsselectmode.push_back("Input Background Points Only");
-
-    auto modevalidator = boost::make_shared<StringListValidator>(pointsselectmode);
-    declareProperty("BackgroundPointSelectMode", "All Background Points", modevalidator,
-                    "Mode to select background points. ");
 
     // Boundary
     declareProperty("LowerBound", Mantid::EMPTY_DBL(), "Lower boundary of the data to have background processed.");
@@ -105,23 +104,44 @@ DECLARE_ALGORITHM(ProcessBackground)
     bkgdtype.push_back("Chebyshev");
     auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
     declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Type of the background. Options include Polynomial and Chebyshev.");
+    setPropertySettings("BackgroundType",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
+
+    declareProperty("BackgroundOrder", 0, "Order of polynomial or chebyshev background. ");
+    setPropertySettings("BackgroundOrder",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // User input background points for "SelectBackground"
     auto arrayproperty = new Kernel::ArrayProperty<double>("BackgroundPoints");
     declareProperty(arrayproperty, "Vector of doubles, each of which is the X-axis value of the background point selected by user.");
+    setPropertySettings("BackgroundPoints",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
-    // Workspace index
-    declareProperty("WorkspaceIndex", 0, "Workspace index for the input workspaces.");
+    // Mode to select background
+    vector<string> pointsselectmode;
+    pointsselectmode.push_back("All Background Points");
+    pointsselectmode.push_back("Input Background Points Only");
+    auto modevalidator = boost::make_shared<StringListValidator>(pointsselectmode);
+    declareProperty("BackgroundPointSelectMode", "All Background Points", modevalidator,
+                    "Mode to select background points. ");
+    setPropertySettings("BackgroundPointSelectMode",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Background tolerance
     declareProperty("NoiseTolerance", 1.0, "Tolerance of noise range. ");
+    setPropertySettings("NoiseTolerance",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Peak table workspac for "RemovePeaks"
     declareProperty(new WorkspaceProperty<TableWorkspace>("BraggPeakTableWorkspace", "", Direction::Input, PropertyMode::Optional),
                     "Name of table workspace containing peaks' parameters. ");
+    setPropertySettings("BraggPeakTableWorkspace",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "RemovePeaks"));
 
     // Number of FWHM to have peak removed
     declareProperty("NumberOfFWHM", 1.0, "Number of FWHM to as the peak region to have peak removed. ");
+    setPropertySettings("NumberOfFWHM",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "RemovePeaks"));
 
     return;
   }
@@ -131,21 +151,23 @@ DECLARE_ALGORITHM(ProcessBackground)
     */
   void ProcessBackground::exec()
   {
-    // 1. Get workspace
+    // Process general properties
     m_dataWS = this->getProperty("InputWorkspace");
     if (!m_dataWS)
     {
       g_log.error() << "Input Workspace cannot be obtained." << std::endl;
       throw std::invalid_argument("Input Workspace cannot be obtained.");
     }
-    m_wsIndex = getProperty("WorkspaceIndex");
-    if (m_wsIndex < 0 || m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms()))
+
+    int intemp = getProperty("WorkspaceIndex");
+    if (intemp < 0)
+        throw std::invalid_argument("WorkspaceIndex is not allowed to be less than 0. ");
+    m_wsIndex = size_t(intemp);
+    if (m_wsIndex >= static_cast<int>(m_dataWS->getNumberHistograms()))
       throw runtime_error("Workspace index is out of boundary.");
 
-    mLowerBound = getProperty("LowerBound");
-    mUpperBound = getProperty("UpperBound");
-
-    mTolerance = getProperty("NoiseTolerance");
+    m_lowerBound = getProperty("LowerBound");
+    m_upperBound = getProperty("UpperBound");
 
     // 2. Do different work
     std::string option = getProperty("Options");
@@ -307,11 +329,11 @@ DECLARE_ALGORITHM(ProcessBackground)
   void ProcessBackground::deleteRegion()
   {
       // 1. Check boundary
-      if (mLowerBound == Mantid::EMPTY_DBL() || mUpperBound == Mantid::EMPTY_DBL())
+      if (m_lowerBound == Mantid::EMPTY_DBL() || m_upperBound == Mantid::EMPTY_DBL())
       {
           throw std::invalid_argument("Using DeleteRegion.  Both LowerBound and UpperBound must be specified.");
       }
-      if (mLowerBound >= mUpperBound)
+      if (m_lowerBound >= m_upperBound)
       {
           throw std::invalid_argument("Lower boundary cannot be equal or larger than upper boundary.");
       }
@@ -326,7 +348,7 @@ DECLARE_ALGORITHM(ProcessBackground)
       for (size_t i = 0; i < dataY.size(); ++i)
       {
           double xtmp = dataX[i];
-          if (xtmp < mLowerBound || xtmp > mUpperBound)
+          if (xtmp < m_lowerBound || xtmp > m_upperBound)
           {
               vx.push_back(dataX[i]);
               vy.push_back(dataY[i]);
@@ -364,11 +386,11 @@ DECLARE_ALGORITHM(ProcessBackground)
   void ProcessBackground::addRegion()
   {
       // 1. Check boundary
-      if (mLowerBound == Mantid::EMPTY_DBL() || mUpperBound == Mantid::EMPTY_DBL())
+      if (m_lowerBound == Mantid::EMPTY_DBL() || m_upperBound == Mantid::EMPTY_DBL())
       {
           throw std::invalid_argument("Using AddRegion.  Both LowerBound and UpperBound must be specified.");
       }
-      if (mLowerBound >= mUpperBound)
+      if (m_lowerBound >= m_upperBound)
       {
           throw std::invalid_argument("Lower boundary cannot be equal or larger than upper boundary.");
       }
@@ -382,7 +404,7 @@ DECLARE_ALGORITHM(ProcessBackground)
       for (size_t i = 0; i < dataY.size(); ++i)
       {
           double xtmp = dataX[i];
-          if (xtmp < mLowerBound || xtmp > mUpperBound)
+          if (xtmp < m_lowerBound || xtmp > m_upperBound)
           {
               vx.push_back(dataX[i]);
               vy.push_back(dataY[i]);
@@ -407,9 +429,9 @@ DECLARE_ALGORITHM(ProcessBackground)
 
       // 4. Insert
       std::vector<double>::const_iterator refiter;
-      refiter = std::lower_bound(refX.begin(), refX.end(), mLowerBound);
+      refiter = std::lower_bound(refX.begin(), refX.end(), m_lowerBound);
       size_t sindex = size_t(refiter-refX.begin());
-      refiter = std::lower_bound(refX.begin(), refX.end(), mUpperBound);
+      refiter = std::lower_bound(refX.begin(), refX.end(), m_upperBound);
       size_t eindex = size_t(refiter-refX.begin());
 
       for (size_t i = sindex; i < eindex; ++i)
@@ -462,45 +484,45 @@ DECLARE_ALGORITHM(ProcessBackground)
     */
   void ProcessBackground::execSelectBkgdPoints()
   {
-    // 1. Get data
+    // Get special input properties
     std::vector<double> bkgdpoints = getProperty("BackgroundPoints");
-    int intemp = getProperty("WorkspaceIndex");
-    if (intemp < 0)
-        throw std::invalid_argument("WorkspaceIndex is not allowed to be less than 0. ");
-    size_t wsindex = size_t(intemp);
+    string mode = getProperty("BackgroundPointSelectMode");
 
-    // 2. Construct background workspace for fit
+    // Construct background workspace for fit
     std::vector<double> realx, realy, reale;
+    const MantidVec& vecX = m_dataWS->readX(m_wsIndex);
+    const MantidVec& vecY = m_dataWS->readY(m_wsIndex);
+    const MantidVec& vecE = m_dataWS->readE(m_wsIndex);
     for (size_t i = 0; i < bkgdpoints.size(); ++i)
     {
-      // a) Data validity test
+      // Data range validation
       double bkgdpoint = bkgdpoints[i];
-      if (bkgdpoint < m_dataWS->readX(wsindex)[0])
+      if (bkgdpoint < vecX.front())
       {
-        g_log.warning() << "Input background point " << bkgdpoint << " is out of lower boundary.  Use X[0] = "
-                        << m_dataWS->readX(wsindex)[0] << " instead." << std::endl;
-        bkgdpoint = m_dataWS->readX(wsindex)[0];
+        g_log.warning() << "Input background point " << bkgdpoint << " is out of lower boundary.  "
+                        << "Use X[0] = " << vecX.front() << " instead." << "\n";
+        bkgdpoint = vecX.front();
       }
-      else if (bkgdpoint > m_dataWS->readX(wsindex).back())
+      else if (bkgdpoint > vecX.back())
       {
         g_log.warning() << "Input background point " << bkgdpoint << " is out of upper boundary.  Use X[-1] = "
-                        << m_dataWS->readX(wsindex).back() << " instead." << std::endl;
-        bkgdpoint = m_dataWS->readX(wsindex).back();
+                        << vecX.back() << " instead." << "\n";
+        bkgdpoint =vecX.back();
       }
 
-      // b) Find the index in
+      // Find the index in
       std::vector<double>::const_iterator it;
-      it = std::lower_bound(m_dataWS->readX(wsindex).begin(), m_dataWS->readX(wsindex).end(), bkgdpoint);
-      size_t index = size_t(it - m_dataWS->readX(wsindex).begin());
+      it = std::lower_bound(vecX.begin(), vecX.end(), bkgdpoint);
+      size_t index = size_t(it - vecX.begin());
 
       g_log.debug() << "DBx502 Background Points " << i << " Index = " << index << " For TOF = "
-                    << bkgdpoints[i] << " in [" << m_dataWS->readX(wsindex)[0] << ", "
-                    << m_dataWS->readX(wsindex).back() << "] " << std::endl;
+                    << bkgdpoints[i] << " in [" << vecX[0] << ", "
+                    << vecX.back() << "] " << "\n";
 
-      // b) Add to list
-      realx.push_back(m_dataWS->readX(wsindex)[index]);
-      realy.push_back(m_dataWS->readY(wsindex)[index]);
-      reale.push_back(m_dataWS->readE(wsindex)[index]);
+      // Add to list
+      realx.push_back(vecX[index]);
+      realy.push_back(vecY[index]);
+      reale.push_back(vecE[index]);
 
     } // ENDFOR (i)
 
@@ -512,15 +534,13 @@ DECLARE_ALGORITHM(ProcessBackground)
       bkgdWS->dataX(0)[i] = realx[i];
       bkgdWS->dataY(0)[i] = realy[i];
       bkgdWS->dataE(0)[i] = reale[i];
-      // std::cout << "DBx514 Index = " << i << "  Add " << realx[i] << ", " << realy[i] << ", " << reale[i] << std::endl;
     }
 
-    // 3. Select background points according to mode
-    string mode = getProperty("BackgroundPointSelectMode");
+    // Select background points according to mode
     if (mode.compare("All Background Points") == 0)
     {
       // Select (possibly) all background points
-      m_outputWS = autoBackgroundSelection(wsindex, bkgdWS);
+      m_outputWS = autoBackgroundSelection(m_wsIndex, bkgdWS);
     }
     else if (mode.compare("Input Background Points Only") == 0)
     {
@@ -544,22 +564,24 @@ DECLARE_ALGORITHM(ProcessBackground)
    */
   DataObjects::Workspace2D_sptr ProcessBackground::autoBackgroundSelection(size_t wsindex, Workspace2D_sptr bkgdWS)
   {
-    // 1. Get background type and create bakground function
+    // Get background type and create bakground function
     std::string backgroundtype = getProperty("BackgroundType");
+    int bkgdorder = getProperty("BackgroundOrder");
+    double noisetolerance = getProperty("NoiseTolerance");
 
     CurveFitting::BackgroundFunction_sptr bkgdfunction;
 
     if (backgroundtype.compare("Polynomial") == 0)
     {
-      CurveFitting::Polynomial poly;
-      bkgdfunction =
-          boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(boost::make_shared<CurveFitting::Polynomial>(poly));
+      bkgdfunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(
+            boost::make_shared<CurveFitting::Polynomial>());
     }
     else if (backgroundtype.compare("Chebyshev") == 0)
     {
-      CurveFitting::Chebyshev cheby;
-      bkgdfunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>
-          (boost::make_shared<CurveFitting::Chebyshev>(cheby));
+      Chebyshev_sptr cheby = boost::make_shared<CurveFitting::Chebyshev>();
+      bkgdfunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(cheby);
+      bkgdfunction->setAttributeValue("StartX", m_lowerBound);
+      bkgdfunction->setAttributeValue("EndX", m_upperBound);
     }
     else
     {
@@ -570,12 +592,12 @@ DECLARE_ALGORITHM(ProcessBackground)
     }
 
     bkgdfunction->initialize();;
-    bkgdfunction->setAttributeValue("n", 6);
+    bkgdfunction->setAttributeValue("n", bkgdorder);
 
     g_log.debug() << "DBx622 Background Workspace has " << bkgdWS->readX(0).size()
                   << " data points." << std::endl;
 
-    // 2. Fit input background pionts
+    // Fit input (a few) background pionts to get initial guess
     API::IAlgorithm_sptr fit;
     try
     {
@@ -587,8 +609,8 @@ DECLARE_ALGORITHM(ProcessBackground)
       throw;
     }
 
-    double startx = bkgdWS->readX(0)[0];
-    double endx = bkgdWS->readX(0).back();
+    double startx = m_lowerBound;
+    double endx = m_upperBound;
     fit->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
     fit->setProperty("InputWorkspace", bkgdWS);
     fit->setProperty("WorkspaceIndex", 0);
@@ -600,23 +622,26 @@ DECLARE_ALGORITHM(ProcessBackground)
 
     fit->executeAsChildAlg();
 
-    // 4. Get fit result
+    // Get fit result
     // a) Status
     std::string fitStatus = fit->getProperty("OutputStatus");
     bool allowedfailure = (fitStatus.find("cannot") < fitStatus.size()) &&
         (fitStatus.find("tolerance") < fitStatus.size());
     if (fitStatus.compare("success") != 0 && !allowedfailure)
     {
-      g_log.error() << "ProcessBackground: Fit Status = " << fitStatus << ".  Not to update fit result" << std::endl;
+      g_log.error() << "ProcessBackground: Fit Status = " << fitStatus
+                    << ".  Not to update fit result" << std::endl;
       throw std::runtime_error("Bad Fit");
     }
 
     // b) check that chi2 got better
     const double chi2 = fit->getProperty("OutputChi2overDoF");
-    g_log.notice() << "Fit background: Fit Status = " << fitStatus << ", chi2 = " << chi2 << std::endl;
+    g_log.notice() << "Fit background: Fit Status = " << fitStatus << ", chi2 = "
+                   << chi2 << "\n";
 
     // c) get out the parameter names
     API::IFunction_sptr func = fit->getProperty("Function");
+    /* Comment out as not being used
     std::vector<std::string> parnames = func->getParameterNames();
     std::map<std::string, double> parvalues;
     for (size_t iname = 0; iname < parnames.size(); ++iname)
@@ -624,12 +649,10 @@ DECLARE_ALGORITHM(ProcessBackground)
       double value = func->getParameter(parnames[iname]);
       parvalues.insert(std::make_pair(parnames[iname], value));
     }
+    DataObject::Workspace2D_const_sptr theorybackground = AnalysisDataService::Instance().retrieve(wsname);
+    */
 
-    /*
-      DataObject::Workspace2D_const_sptr theorybackground = AnalysisDataService::Instance().retrieve(wsname);
-      */
-
-    // 5. Filter and construct for the output workspace
+    // Filter and construct for the output workspace
     // a) Calcualte theoretical values
     const std::vector<double> x = m_dataWS->readX(wsindex);
     API::FunctionDomain1DVector domain(x);
@@ -642,7 +665,7 @@ DECLARE_ALGORITHM(ProcessBackground)
     {
       double y = m_dataWS->readY(wsindex)[i];
       double theoryy = values[i];
-      if (y >= (theoryy-mTolerance) && y <= (theoryy+mTolerance) )
+      if (y >= (theoryy-noisetolerance) && y <= (theoryy+noisetolerance) )
       {
         // Selected
         double x = domain[i];
