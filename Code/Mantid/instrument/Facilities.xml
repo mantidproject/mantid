@@ -7,10 +7,14 @@
   </archive>
   
   <catalog name="ICat3Catalog">
+    <soapendpoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT"></soapendpoint>
+    <filelocation>
+      <prefix regex="\\isis\inst$"></prefix>
+      <windows replacement=""></windows>
+      <linux replacement="/archive"></linux>
+      <mac replacement="/archive"></mac>
+    </filelocation>
   </catalog>
-
-  <soapEndPoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT">
-  </soapEndPoint>
   
   <instrument name="ALF">  
     <technique>Single Crystal Diffraction</technique>
