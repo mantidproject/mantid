@@ -56,19 +56,17 @@ class LoadRun(object):
         self._period = int(entry)
         #set to the total number of periods in the file
         self.periods_in_file = None
-
-        self._spec_min = None
-        self._spec_max = None
         self.ext = ''
         self.shortrun_no = -1
         #the name of the loaded workspace in Mantid
         self.wksp_name = ''
         
-    def _load(self, inst = None, is_can=False):
+    def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
             Load a workspace and read the logs into the passed instrument reference
             @param inst: a reference to the current instrument
-            @param iscan: set this to True for can runs 
+            @param iscan: set this to True for can runs
+            @param extra_options: arguments to pass on to the Load Algorithm.
             @return: log values, number of periods in the workspace
         """
         if self._period > 1:
@@ -81,30 +79,21 @@ class LoadRun(object):
             period = 1
 
         if os.path.splitext(self._data_file)[1].lower().startswith('.r') or os.path.splitext(self._data_file)[1].lower().startswith('.s'):
-            try:
-                outWs = LoadRaw(Filename=self._data_file, 
-                                OutputWorkspace=workspace, 
-                                SpectrumMin=self._spec_min, 
-                                SpectrumMax=self._spec_max)
-            except ValueError:
-                # MG - 2011-02-24: Temporary fix to load .sav or .s* files. Lets the file property
-                # work it out
-                file_hint = os.path.splitext(self._data_file)[0]
-                outWs = LoadRaw(Filename=file_hint, 
-                                OutputWorkspace=workspace, 
-                                SpectrumMin=self._spec_min, 
-                                SpectrumMax=self._spec_max)
-                
+            outWs = LoadRaw(Filename=self._data_file, 
+                            OutputWorkspace=workspace,
+                            **extra_options)
+
             alg = outWs.getHistory().lastAlgorithm()
             self._data_file = alg.getPropertyValue("Filename")
             LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
 
             workspace = self._leaveSinglePeriod(workspace, period)
         else:
+            if period != 1:
+                extra_options['EntryNumber']=period
             outWs = LoadNexus(Filename=self._data_file, 
                               OutputWorkspace=workspace,
-                SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, 
-                EntryNumber=period)
+                              **extra_options)
             alg = outWs.getHistory().lastAlgorithm()            
             self._data_file = alg.getPropertyValue("Filename")
 
@@ -216,26 +205,20 @@ class LoadRun(object):
         if not self._reload:
             raise NotImplementedError('Raw workspaces must be reloaded, run with reload=True')
 
+        spectrum_limits = dict()
         if self._is_trans:
-            try:
-                if reducer.instrument.name() == 'SANS2D' and int(self.shortrun_no) < 568:
-                    dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
-                    self._spec_min = dimension*dimension*2
-                    self._spec_max = self._spec_min + 4
-                else:
-                    self._spec_min = None
-                    self._spec_max = 8
-                self.periods_in_file, logs = self._load(reducer.instrument)
-            except RuntimeError, err:
-                sanslog.warning(str(err))
-                return '', -1
-        else:
-            try:
-                self.periods_in_file, logs = self._load(reducer.instrument)
-            except RuntimeError, details:
-                sanslog.warning(str(details))
-                self.wksp_name = ''
-                return '', -1
+            if reducer.instrument.name() == 'SANS2D' and int(self.shortrun_no) < 568:
+                dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
+                spec_min = dimension*dimension*2
+                spectrum_limits = {'SpectrumMin':spec_min, 'SpectrumMax':spec_min + 4}
+
+        try:
+            # the spectrum_limits is not the default only for transmission data
+            self.periods_in_file, logs = self._load(reducer.instrument, extra_options=spectrum_limits)
+        except RuntimeError, details:
+            sanslog.warning(str(details))
+            self.wksp_name = ''
+            return '', -1
         
         return logs
 
