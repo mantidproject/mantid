@@ -2598,7 +2598,6 @@ void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid
   }
   catch( ::NeXus::Exception & )
   {
-    g_log.debug() << "No isis_vms_compat group" << std::endl;
     // No problem, it just means that this entry does not exist
     return;
   }
@@ -2619,13 +2618,11 @@ void LoadEventNexus::loadSampleDataISIScompatibility(::NeXus::File& file, Mantid
   catch ( ::NeXus::Exception & ex)
   {
     // it means that the data was not as expected, report the problem
-    g_log.warning() << "Wrong definition found in isis_vms_compat :> " << ex.what() << std::endl; 
+    std::stringstream s;
+    s << "Wrong definition found in isis_vms_compat :> " << ex.what(); 
+    file.closeGroup();
+    throw std::runtime_error(s.str());
   }
-
-  const Sample & samp(WS->mutableSample()); 
-  g_log.debug() << "Sample geometry -  ID: " << samp.getGeometryFlag() << ", thickness: " << samp.getThickness() 
-                << ", height: " << samp.getHeight() << ", width: "
-                << samp.getWidth() << "\n";
 
   file.closeGroup();
 }
