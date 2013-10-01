@@ -2,6 +2,8 @@
 #include "CompAssemblyActor.h"
 #include "ObjComponentActor.h"
 #include "SampleActor.h"
+#include "ComponentActor.h"
+#include "ObjCompAssemblyActor.h"
 #include "RectangularDetectorActor.h"
 #include "GLActorVisitor.h"
 
@@ -168,6 +170,13 @@ bool InstrumentActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
   }
   invalidateDisplayLists();
   return ok;
+}
+
+bool InstrumentActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule rule) const
+{
+    bool ok = m_scene.accept(visitor, rule);
+    visitor.visit(this);
+    return ok;
 }
 
 void InstrumentActor::setChildVisibility(bool on)

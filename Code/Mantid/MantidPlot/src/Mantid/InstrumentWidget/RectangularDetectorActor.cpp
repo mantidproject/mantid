@@ -135,7 +135,12 @@ void RectangularDetectorActor::draw(bool picking)const
  */
 bool RectangularDetectorActor::accept(GLActorVisitor& visitor, VisitorAcceptRule)
 {
-  return visitor.visit(this);
+    return visitor.visit(this);
+}
+
+bool RectangularDetectorActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule) const
+{
+    return visitor.visit(this);
 }
 
 bool RectangularDetectorActor::isChildDetector(const ComponentID &id) const

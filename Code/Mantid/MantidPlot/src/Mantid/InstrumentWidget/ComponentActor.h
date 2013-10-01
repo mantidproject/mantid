@@ -40,6 +40,7 @@ namespace Mantid
     class IObjComponent;
     class IDetector;
     class ObjCompAssembly;
+    class CompAssembly;
   }
 }
 
@@ -51,10 +52,12 @@ public:
   ComponentActor(const InstrumentActor& instrActor,const Mantid::Geometry::ComponentID& compID); ///< Default Constructor
   virtual std::string type()const {return "ComponentActor";} ///< Type of the GL object
   bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll)const;
   boost::shared_ptr<const Mantid::Geometry::IComponent> getComponent() const;
   boost::shared_ptr<const Mantid::Geometry::IObjComponent> getObjComponent() const;
   boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector() const;
   boost::shared_ptr<const Mantid::Geometry::ObjCompAssembly> getObjCompAssembly() const;
+  boost::shared_ptr<const Mantid::Geometry::CompAssembly> getCompAssembly() const;
   virtual void setColors(){}
   /// Check if the component is a non-detector.
   bool isNonDetector() const;

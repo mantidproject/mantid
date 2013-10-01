@@ -1,13 +1,11 @@
 #ifndef GLACTORVISITOR_H
 #define GLACTORVISITOR_H
 
-#include "GLActor.h"
-#include "GLActorCollection.h"
-#include "ComponentActor.h"
-#include "CompAssemblyActor.h"
-#include "ObjCompAssemblyActor.h"
-
-
+class GLActor;
+class GLActorCollection;
+class ComponentActor;
+class CompAssemblyActor;
+class ObjCompAssemblyActor;
 class InstrumentActor;
 class RectangularDetectorActor;
 
@@ -43,6 +41,24 @@ bool visit(CompAssemblyActor *actor){return visit( (GLActor*) actor);}\
 bool visit(ObjCompAssemblyActor *actor){return visit( (GLActor*) actor);}\
 bool visit(RectangularDetectorActor *actor){return visit( (GLActor*) actor);}\
 bool visit(InstrumentActor *actor){return visit( (GLActor*) actor);}
+
+/**
+ * A base class for an actor visitor (const version).
+ */
+class GLActorConstVisitor
+{
+public:
+  /// Virtual destructor.
+  virtual ~GLActorConstVisitor(){}
+  /// Abstract method that must be implemented in sub-classes
+    virtual bool visit(const GLActor*) = 0;
+    virtual bool visit(const GLActorCollection*) = 0;
+    virtual bool visit(const CompAssemblyActor*) = 0;
+    virtual bool visit(const ObjCompAssemblyActor*) = 0;
+    virtual bool visit(const ComponentActor*) = 0;
+    virtual bool visit(const InstrumentActor*) = 0;
+    virtual bool visit(const RectangularDetectorActor*) = 0;
+};
 
 
 

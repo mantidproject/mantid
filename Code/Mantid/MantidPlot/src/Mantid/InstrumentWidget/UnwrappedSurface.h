@@ -70,7 +70,7 @@ public:
   *
   * In init() the implementation must set values for:
   *
-  *   m_u_min, m_u_max, m_v_min, m_v_max, m_height_max, m_width_max,
+  *   m_u_min, m_u_max, m_v_min, m_v_max, m_height_max, m_width_max, m_viewRect,
   *   m_unwrappedDetectors, m_assemblies
   *
   */

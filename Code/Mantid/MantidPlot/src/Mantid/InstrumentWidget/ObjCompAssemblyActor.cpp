@@ -154,6 +154,11 @@ void ObjCompAssemblyActor::setColors()
 
 bool ObjCompAssemblyActor::accept(GLActorVisitor &visitor, GLActor::VisitorAcceptRule )
 {
-  return visitor.visit(this);
+    return visitor.visit(this);
+}
+
+bool ObjCompAssemblyActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule) const
+{
+    return visitor.visit(this);
 }
 

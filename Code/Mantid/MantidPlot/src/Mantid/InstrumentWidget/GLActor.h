@@ -22,6 +22,7 @@
 #include <QList>
 
 class GLActorVisitor;
+class GLActorConstVisitor;
 
 namespace Mantid
 {
@@ -81,8 +82,10 @@ public:
   virtual void draw(bool picking = false)const = 0;
   /// Get the 3D bounding box of the actor
   virtual void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const = 0;
-  /// Accept a visitor 
+  /// Accept a visitor
   virtual bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  /// Accept a const visitor
+  virtual bool accept(GLActorConstVisitor &visitor, VisitorAcceptRule rule = VisitAll) const;
   /// Convert a "pick ID" to a colour to put into the pick image.
   static GLColor makePickColor(size_t pickID);
   /// Decode a pick colour and return corresponding "pick ID"

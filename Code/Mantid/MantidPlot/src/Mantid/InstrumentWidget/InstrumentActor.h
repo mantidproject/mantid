@@ -59,6 +59,8 @@ public:
   void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
   /// Run visitors callback on each component
   bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  /// Run visitors callback on each component (const version)
+  bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll) const;
   /// Toggle the visibility of the child actors (if exist).
   virtual void setChildVisibility(bool);
   /// Check if any child is visible

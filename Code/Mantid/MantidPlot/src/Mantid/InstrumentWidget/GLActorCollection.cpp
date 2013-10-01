@@ -87,6 +87,15 @@ bool GLActorCollection::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
   return visitor.visit(this);
 }
 
+bool GLActorCollection::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule rule) const
+{
+    for(std::vector<GLActor*>::const_iterator it = mActorsList.begin();it != mActorsList.end();++it)
+    {
+      if ( (**it).accept(visitor,rule) && rule == Finish ) return true;
+    }
+    return visitor.visit(this);
+}
+
 /**
  * This method addes a new actor to the collection.
  * @param a :: input actor to be added to the list

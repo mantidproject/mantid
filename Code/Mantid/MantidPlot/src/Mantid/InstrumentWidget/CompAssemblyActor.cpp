@@ -165,6 +165,19 @@ bool CompAssemblyActor::accept(GLActorVisitor& visitor, VisitorAcceptRule rule)
   return visitor.visit(this);
 }
 
+bool CompAssemblyActor::accept(GLActorConstVisitor &visitor, GLActor::VisitorAcceptRule rule) const
+{
+    for(std::vector<ObjComponentActor*>::iterator itrObjComp=mChildObjCompActors.begin();itrObjComp!=mChildObjCompActors.end();++itrObjComp)
+    {
+      if ( (**itrObjComp).accept(visitor,rule) && rule == Finish ) return true;
+    }
+    for(std::vector<ICompAssemblyActor*>::iterator itrObjAssem=mChildCompAssemActors.begin();itrObjAssem!=mChildCompAssemActors.end();++itrObjAssem)
+    {
+      if ( (**itrObjAssem).accept(visitor,rule) && rule == Finish ) return true;
+    }
+    return visitor.visit(this);
+}
+
 //------------------------------------------------------------------------------------------------
 /**
  * Append the bounding box CompAssembly bounding box

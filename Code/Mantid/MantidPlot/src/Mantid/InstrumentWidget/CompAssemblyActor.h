@@ -61,6 +61,7 @@ public:
   void setChildVisibility(bool);
   bool hasChildVisible() const;
   bool accept(GLActorVisitor& visitor, VisitorAcceptRule rule = VisitAll);
+  bool accept(GLActorConstVisitor& visitor, VisitorAcceptRule rule = VisitAll)const;
   virtual void setColors();
 
 protected:
