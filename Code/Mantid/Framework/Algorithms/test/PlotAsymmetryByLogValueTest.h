@@ -24,7 +24,7 @@ public:
   static void destroySuite( PlotAsymmetryByLogValueTest *suite ) { delete suite; }
 
   PlotAsymmetryByLogValueTest()
-    :firstRun("MUSR00015189.nxs"),lastRun("MUSR00015199.nxs")
+    :firstRun("MUSR00015189.nxs"),lastRun("MUSR00015193.nxs")
   {
   }
 
@@ -47,7 +47,7 @@ public:
       );
 
     TS_ASSERT(outWS);
-    TS_ASSERT_EQUALS(outWS->blocksize(),11);
+    TS_ASSERT_EQUALS(outWS->blocksize(),5);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(),4);
     const Mantid::MantidVec& Y = outWS->readY(0);
     TS_ASSERT_DELTA(Y[0],0.0128845,0.001);
@@ -55,12 +55,6 @@ public:
     TS_ASSERT_DELTA(Y[2],0.0387179,0.00001);
     TS_ASSERT_DELTA(Y[3],0.0545464,0.00001);
     TS_ASSERT_DELTA(Y[4],0.0906989,0.00001);
-    TS_ASSERT_DELTA(Y[5],0.107688,0.00001);
-    TS_ASSERT_DELTA(Y[6],0.0782618,0.00001);
-    TS_ASSERT_DELTA(Y[7],0.0448036,0.00001);
-    TS_ASSERT_DELTA(Y[8],0.0278501,0.00001);
-    TS_ASSERT_DELTA(Y[9],0.0191948,0.00001);
-    TS_ASSERT_DELTA(Y[10],0.0142141,0.00001);
 
     const TextAxis* axis = dynamic_cast<const TextAxis*>(outWS->getAxis(1));
     TS_ASSERT(axis);
@@ -95,7 +89,7 @@ public:
       );
 
     TS_ASSERT(outWS);
-    TS_ASSERT_EQUALS(outWS->blocksize(),11);
+    TS_ASSERT_EQUALS(outWS->blocksize(),5);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(),4);
     const Mantid::MantidVec& Y = outWS->readY(0);
     TS_ASSERT_DELTA(Y[0],-0.01236,0.001);
@@ -103,12 +97,7 @@ public:
     TS_ASSERT_DELTA(Y[2],0.020093,0.00001);
     TS_ASSERT_DELTA(Y[3],0.037658,0.00001);
     TS_ASSERT_DELTA(Y[4],0.085060,0.00001);
-    TS_ASSERT_DELTA(Y[5],0.054248,0.00001);
-    TS_ASSERT_DELTA(Y[6],0.042526,0.00001);
-    TS_ASSERT_DELTA(Y[7],0.012002,0.00001);
-    TS_ASSERT_DELTA(Y[8],0.029188,0.00001);
-    TS_ASSERT_DELTA(Y[9],0.009614,0.00001);
-    TS_ASSERT_DELTA(Y[10],0.007757,0.00001);
+
     AnalysisDataService::Instance().clear();
   }
 
