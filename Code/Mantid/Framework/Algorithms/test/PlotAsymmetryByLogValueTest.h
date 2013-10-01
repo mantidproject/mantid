@@ -7,13 +7,18 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/SaveNexus.h"
+
 #include <iostream>
+#include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
+using namespace Mantid::DataHandling;
 
 class PlotAsymmetryByLogValueTest : public CxxTest::TestSuite
 {
@@ -160,6 +165,101 @@ public:
     TS_ASSERT( ! alg.isExecuted() );
 
     AnalysisDataService::Instance().clear();
+  }
+
+  void test_DeadTimeCorrection_FromRunData()
+  {
+    const std::string ws = "Test_DeadTimeCorrection_FromRunData_Ws";
+
+    PlotAsymmetryByLogValue alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace", ws);
+    alg.setPropertyValue("LogValue","run_number");
+    alg.setPropertyValue("DeadTimeCorrType","FromRunData");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT(outWs);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 5);
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),1);
+
+    const Mantid::MantidVec& Y = outWs->readY(0);
+
+    TS_ASSERT_DELTA(Y[0], 0.150616294231, 0.00001);
+    TS_ASSERT_DELTA(Y[1], 0.143444393798, 0.00001);
+    TS_ASSERT_DELTA(Y[2], 0.128855908289, 0.00001);
+    TS_ASSERT_DELTA(Y[3], 0.109394706098, 0.00001);
+    TS_ASSERT_DELTA(Y[4], 0.0753987939882,0.00001);
+
+    AnalysisDataService::Instance().remove(ws);
+  }
+
+  void test_DeadTimeCorrection_FromSpecifiedFile()
+  {
+    const std::string ws = "Ws";
+    const std::string deadTimeWs = "DeadTimeWs";
+    const std::string deadTimeFile = "TestDeadTimeFile.nxs";
+
+    ITableWorkspace_sptr deadTimeTable = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    deadTimeTable->addColumn("int","spectrum");
+    deadTimeTable->addColumn("double","dead-time");
+
+    for(int i = 0; i < 64; i++)
+    {
+      TableRow row = deadTimeTable->appendRow();
+      row << (i+1) << 0.015;
+    }
+
+    AnalysisDataService::Instance().addOrReplace(deadTimeWs, deadTimeTable);
+
+    // Save dead time table to file
+    SaveNexus saveNexusAlg;
+    TS_ASSERT_THROWS_NOTHING(saveNexusAlg.initialize());
+    saveNexusAlg.setPropertyValue("InputWorkspace", deadTimeWs);
+    saveNexusAlg.setPropertyValue("Filename", deadTimeFile);
+    TS_ASSERT_THROWS_NOTHING(saveNexusAlg.execute());
+    TS_ASSERT(saveNexusAlg.isExecuted());
+
+    PlotAsymmetryByLogValue alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("FirstRun", firstRun);
+    alg.setPropertyValue("LastRun", lastRun);
+    alg.setPropertyValue("OutputWorkspace", ws);
+    alg.setPropertyValue("LogValue", "run_number");
+    alg.setPropertyValue("DeadTimeCorrType", "FromSpecifiedFile");
+    alg.setPropertyValue("DeadTimeCorrFile", deadTimeFile);
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+      AnalysisDataService::Instance().retrieve(ws));
+
+    TS_ASSERT(outWs);
+    TS_ASSERT_EQUALS(outWs->blocksize(), 5);
+    TS_ASSERT_EQUALS(outWs->getNumberHistograms(),1);
+
+    const Mantid::MantidVec& Y = outWs->readY(0);
+
+    TS_ASSERT_DELTA(Y[0], 0.151080923001, 0.00001);
+    TS_ASSERT_DELTA(Y[1], 0.143898031353, 0.00001);
+    TS_ASSERT_DELTA(Y[2], 0.129297179508, 0.00001);
+    TS_ASSERT_DELTA(Y[3], 0.109825415218, 0.00001);
+    TS_ASSERT_DELTA(Y[4], 0.0758170520939,0.00001);
+
+    AnalysisDataService::Instance().remove(ws);
+    AnalysisDataService::Instance().remove(deadTimeWs);
+    Poco::File(deadTimeFile).remove();
   }
 
 private:
