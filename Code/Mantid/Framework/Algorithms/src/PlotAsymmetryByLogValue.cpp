@@ -109,9 +109,10 @@ namespace Mantid
     */
     void PlotAsymmetryByLogValue::init()
     {
-      std::string ext(".nxs");
-      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, ext), "The name of the first workspace in the series.");
-      declareProperty(new FileProperty("LastRun","", FileProperty::Load, ext), "The name of the last workspace in the series.");
+      std::string nexusExt(".nxs");
+
+      declareProperty(new FileProperty("FirstRun","", FileProperty::Load, nexusExt), "The name of the first workspace in the series.");
+      declareProperty(new FileProperty("LastRun","", FileProperty::Load, nexusExt), "The name of the last workspace in the series.");
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "The name of the output workspace containing the resulting asymmetries.");
       declareProperty("LogValue","",boost::make_shared<MandatoryValidator<std::string>>(), "The name of the log values which will be used as the x-axis in the output workspace.");
       declareProperty("Red", 1, "The period number for the 'red' data.");
@@ -129,6 +130,18 @@ namespace Mantid
          "The list of spectra for the forward group. If not specified the following happens. The data will be grouped according to grouping information in the data, if available. The forward will use the first of these groups.");
        declareProperty(new ArrayProperty<int> ("BackwardSpectra"),
          "The list of spectra for the backward group. If not specified the following happens. The data will be grouped according to grouping information in the data, if available. The backward will use the second of these groups.");
+    
+      std::vector<std::string> deadTimeCorrTypes;
+      deadTimeCorrTypes.push_back("None");
+      deadTimeCorrTypes.push_back("FromRunData");
+      deadTimeCorrTypes.push_back("FromSpecifiedFile");
+
+      declareProperty("DeadTimeCorrType", deadTimeCorrTypes[0], 
+        boost::make_shared<StringListValidator>(deadTimeCorrTypes), 
+        "Type of Dead Time Correction to apply.");
+
+      declareProperty(new FileProperty("DeadTimeCorrFile", "", FileProperty::OptionalLoad, nexusExt), 
+        "Custom file with Dead Times. Will be used only if appropriate DeadTimeCorrType is set.");
     }
 
     /** 
