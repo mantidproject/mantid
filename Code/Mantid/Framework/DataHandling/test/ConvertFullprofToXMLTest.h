@@ -87,7 +87,7 @@ public:
         TS_ASSERT(componentLinkElem1);
         if(componentLinkElem1)
         {
-          TS_ASSERT_EQUALS(componentLinkElem1->getAttribute("name"),"wholeInstrument");
+          TS_ASSERT_EQUALS(componentLinkElem1->getAttribute("name"),"GEM");
 
           Poco::XML::NodeList* parameterNodeList = componentLinkElem1->getElementsByTagName("parameter"); // get parameter elements
           size_t numParameters = parameterNodeList->length();
