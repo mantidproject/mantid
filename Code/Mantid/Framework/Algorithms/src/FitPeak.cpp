@@ -29,6 +29,7 @@
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/ListValidator.h"
@@ -184,6 +185,7 @@ namespace Algorithms
     }
 
     // Output
+    setupOutput();
 
     return;
   }
@@ -347,39 +349,8 @@ namespace Algorithms
   {
     // FIXME - Implement ASAP
     throw runtime_error("ASAP");
+    // TODO - Set up a composite function, and call fitSD.
   }
-
-  //----------------------------------------------------------------------------------------------
-  /** Check input data and get some information parameters
-    */
-  void FitPeak::prescreenInputData()
-  {
-    g_log.information("Running prescreenInputData. ");
-
-    // Check functions
-    if (!m_peakFunc || !m_bkgdFunc)
-      throw runtime_error("Either peak function or background function has not been set up.");
-
-    // Check validity on peak centre
-    double centre_guess = m_peakFunc->centre();
-    g_log.information() << "Fit Peak with given window:  Guessed center = " << centre_guess
-                        << "  x-min = " << m_minFitX
-                        << ", x-max = " << m_maxFitX << "\n";
-    if (m_minFitX >= centre_guess || m_maxFitX <= centre_guess)
-    {
-      g_log.error("Peak centre is out side of fit window.");
-      throw runtime_error("Peak centre is out side of fit window. ");
-    }
-
-    // Peak width and centre: from user input
-    m_userGuessedFWHM = m_peakFunc->fwhm();
-    m_userPeakCentre = m_peakFunc->centre();
-
-    g_log.information("Finished running prescreenInputData. ");
-
-    return;
-  }
-
 
   //----------------------------------------------------------------------------------------------
   /** Fit peak in a robust manner.  Multiple fit will be
@@ -451,6 +422,75 @@ namespace Algorithms
 
     return;
   }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Check input data and get some information parameters
+    */
+  void FitPeak::prescreenInputData()
+  {
+    g_log.information("Running prescreenInputData. ");
+
+    // Check functions
+    if (!m_peakFunc || !m_bkgdFunc)
+      throw runtime_error("Either peak function or background function has not been set up.");
+
+    // Check validity on peak centre
+    double centre_guess = m_peakFunc->centre();
+    g_log.information() << "Fit Peak with given window:  Guessed center = " << centre_guess
+                        << "  x-min = " << m_minFitX
+                        << ", x-max = " << m_maxFitX << "\n";
+    if (m_minFitX >= centre_guess || m_maxFitX <= centre_guess)
+    {
+      g_log.error("Peak centre is out side of fit window.");
+      throw runtime_error("Peak centre is out side of fit window. ");
+    }
+
+    // Peak width and centre: from user input
+    m_userGuessedFWHM = m_peakFunc->fwhm();
+    m_userPeakCentre = m_peakFunc->centre();
+
+    g_log.information("Finished running prescreenInputData. ");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set up the output workspaces
+    * including (1) data workspace (2) function parameter workspace
+    */
+  void FitPeak::setupOutput()
+  {
+    // Data workspace
+    size_t nspec = 1;
+    size_t sizex = m_dataWS->readX(m_wsIndex).size();
+    size_t sizey = m_dataWS->readY(m_wsIndex).size();
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          WorkspaceFactory::Instance().create("Workspace2D", nspec, sizex, sizey));
+    FunctionDomain1DVector domain(m_dataWS->readX(m_wsIndex));
+    FunctionValues values(domain);
+
+    CompositeFunction_sptr compfunc = boost::make_shared<CompositeFunction>();
+    compfunc->addFunction(m_peakFunc);
+    compfunc->addFunction(m_bkgdFunc);
+    compfunc->function(domain, values);
+    for (size_t i = 0; i < sizex; ++i)
+      outws->dataX(0)[i] = domain[i];
+    for (size_t i = 0; i < sizey; ++i)
+      outws->dataY(0)[i] = values[i];
+
+    setProperty("OutputWorkspace", outws);
+
+    // Function parameter table workspaces
+    TableWorkspace_sptr peaktablews = genOutputTableWS(m_peakFunc, m_fitErrorPeakFunc);
+    setProperty("PeakParametrTable", peaktablews);
+
+    TableWorkspace_sptr bkgdtablews = genOutputTableWS(m_bkgdFunc, m_fitErrorBkgdFunc);
+    setProperty("BackgroundParameterTable", bkgdtablews);
+
+    return;
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Fit background with multiple domain
@@ -613,7 +653,7 @@ namespace Algorithms
     }
 
     // Store result if
-    if (rwp < m_bestRwp)
+    if (rwp < m_bestRwp && fitsuccess)
     {
       push(m_peakFunc, m_bestPeakFunc);
     }
@@ -684,6 +724,7 @@ namespace Algorithms
       g_log.information(dbss.str());
     }
 
+    // TODO: get the error getError(i)
     double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, false);
     g_log.information() << "[D] Goodness-Fit = " << goodness << "\n";
 
@@ -932,6 +973,7 @@ namespace Algorithms
 
     // Execute fit and get result of fitting background
     g_log.information() << "Fit function: " << fit->asString() << ".\n";
+
 #if 0
     CompositeFunction_sptr comfunc = boost::dynamic_pointer_cast<CompositeFunction>(fitfunc);
     bool plot = false;
@@ -973,6 +1015,12 @@ namespace Algorithms
     {
       for (size_t i = 0; i < parnames.size(); ++i)
         fitfunc->unfix(i);
+    }
+    else
+    {
+      // TODO - Set up the map m_fitErrorPeakFunc and m_fitErrorBkgdFunc...
+      //        may not be at this location.
+      fitfunc->getError(i);
     }
 
     g_log.information() << "Fit function " << fitfunc->asString() << ": Fit-status = " << fitStatus
@@ -1096,6 +1144,30 @@ namespace Algorithms
     return chi2;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Generate table workspace
+    */
+  TableWorkspace_sptr FitPeak::genOutputTableWS(IFunction_sptr func, map<string, double> fiterrormap)
+  {
+    // Empty table
+    TableWorkspace_sptr outtablews = boost::make_shared<TableWorkspace>();
+    outtablews->addColumn("str", "Name");
+    outtablews->addColumn("double", "Value");
+    outtablews->addColumn("double", "Error");
+
+    // Set paraemters
+    vector<string> parnames = func->getParameterNames();
+    for (size_t i = 0; i < parnames.size(); ++i)
+    {
+      string& parname = parnames[i];
+      double parvalue = func->getParameter(parname);
+      double error = fiterrormap[parname];
+      TableRow newrow = outtablews->appendRow();
+      newrow << parname << parvalue << error;
+    }
+
+    return outtablews;
+  }
 
   void FitPeakRemains()
   {

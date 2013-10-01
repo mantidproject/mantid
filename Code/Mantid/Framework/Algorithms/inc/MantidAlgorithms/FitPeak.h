@@ -67,6 +67,9 @@ namespace Algorithms
     /// Fit peak in a robust manner.  Multiple fit will be
     void fitPeakMultipleStep();
 
+    /// Set up the output workspaces
+    void setupOutput();
+
     /// Fit a single peak function with pure peak workspace
     double fitPeakFuncion(API::IPeakFunction_sptr peakfunc, API::MatrixWorkspace_sptr dataws,
                           size_t wsindex, double startx, double endx, std::string &errorreason);
@@ -120,6 +123,10 @@ namespace Algorithms
 
     /// Check the fitted peak value to see whether it is valud
     double checkFittedPeak(API::IPeakFunction_sptr peakfunc, double costfuncvalue, std::string& errorreason);
+
+    /// Generate table workspace
+    DataObjects::TableWorkspace_sptr genOutputTableWS(API::IFunction_sptr func,
+                                                      std::map<std::string, double> fiterrormap);
 
     /// Input data workspace
     API::MatrixWorkspace_sptr m_dataWS;
@@ -196,6 +203,10 @@ namespace Algorithms
     std::vector<double> m_vecebkup;
 
     std::string m_costFunction;
+
+    /// Fitting result
+    std::map<std::string, double> m_fitErrorPeakFunc;
+    std::map<std::string, double> m_fitErrorBkgdFunc;
 
   };
 
