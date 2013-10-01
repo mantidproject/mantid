@@ -90,7 +90,6 @@ namespace DataHandling
 
     // Write into Parameter File
     // This code will later go into a child algorithm to enable it to be used by other algorithms
-    // CODE INCOMPLETE
 
     // Set up access to table workspace ParamTable
     API::ITableWorkspace_sptr paramTable = loader->getProperty("OutputWorkspace");
@@ -122,7 +121,7 @@ namespace DataHandling
 
     // Add instrument
     Element* instrumentElem = mDoc->createElement("component-link");
-    instrumentElem->setAttribute("name","wholeInstrument");
+    instrumentElem->setAttribute("name","GEM"); // We only support GEM at the present time
     rootElem->appendChild(instrumentElem);
     addALFBEParameter( paramTable, mDoc, instrumentElem, "Alph0");
     addALFBEParameter( paramTable, mDoc, instrumentElem, "Beta0");
