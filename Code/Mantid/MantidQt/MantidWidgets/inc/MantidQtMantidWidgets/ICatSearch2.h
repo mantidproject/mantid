@@ -33,6 +33,14 @@ namespace MantidQt
       void populateTable(QTableWidget* table, Mantid::API::ITableWorkspace_sptr workspace);
       /// Removes data associated with previous search.
       void clearSearch(QTableWidget* table, std::string& workspace);
+      ///  Clear the "search" frame when an investigation has been selected.
+      void clearSearchFrame();
+      /// Clear the "search results" frame if no results are returned from search.
+      void clearSearchResultFrame();
+      /// Clear "dataFileFrame" when the user tries to search again.
+      void clearDataFileFrame();
+      /// Show the search results frame.
+      void showSearchResultsFrame();
 
       ///////////////////////////////////////////////////////////////////////////////
       /// Methods for: "Catalog Search"

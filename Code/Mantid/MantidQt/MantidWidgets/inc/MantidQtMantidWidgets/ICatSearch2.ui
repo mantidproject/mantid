@@ -18,7 +18,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Catalogue search</string>
+   <string>Catalog search</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item>
@@ -698,7 +698,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Title:</string>
+             <string>Investigation title:</string>
             </property>
            </widget>
           </item>
@@ -768,7 +768,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Proposal:</string>
+             <string>Investigation proposal:</string>
             </property>
            </widget>
           </item>

@@ -1,5 +1,5 @@
-#include "MantidQtMantidWidgets/ICatSearch2.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidQtMantidWidgets/ICatSearch2.h"
 #include <Poco/Path.h>
 
 #include <QDesktopServices>
@@ -182,6 +182,7 @@ namespace MantidQt
     /**
      * Populate the provided table with data from the provided workspace.
      * @param table :: The table we want to setup.
+     * @param workspace :: The workspace to obtain data information from.
      */
     void ICatSearch2::populateTable(QTableWidget* table, Mantid::API::ITableWorkspace_sptr workspace)
     {
@@ -239,6 +240,49 @@ namespace MantidQt
       setupTable(table, 0, 0);
 
     }
+
+    /**
+     * Clear the "search" frame when an investigation has been selected.
+     */
+    void ICatSearch2::clearSearchFrame()
+    {
+      m_icatUiForm.searchCbox->setChecked(false);
+      m_icatUiForm.searchFrame->hide();
+    }
+
+    /**
+     * Clear the "search results" frame if no results are returned from search.
+     */
+    void ICatSearch2::clearSearchResultFrame()
+    {
+      m_icatUiForm.searchResultsLbl->setText("0 investigations found.");
+      m_icatUiForm.searchResultsCbox->setEnabled(false);
+      m_icatUiForm.searchResultsCbox->setChecked(false);
+      m_icatUiForm.searchResultsTbl->clear();
+      m_icatUiForm.resFrame->hide();
+    }
+
+    /**
+     * Clear "dataFileFrame" when the user tries to search again.
+     */
+    void ICatSearch2::clearDataFileFrame()
+    {
+      m_icatUiForm.dataFileCbox->setEnabled(false);
+      m_icatUiForm.dataFileCbox->setChecked(false);
+      m_icatUiForm.dataFileLbl->clear();
+      m_icatUiForm.dataFileFrame->hide();
+    }
+
+    /**
+     * Show the search results frame.
+     */
+    void ICatSearch2::showSearchResultsFrame()
+    {
+      m_icatUiForm.searchResultsCbox->setEnabled(true);
+      m_icatUiForm.searchResultsCbox->setChecked(true);
+      m_icatUiForm.resFrame->show();
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     /// Methods for "Catalog Search".
     ///////////////////////////////////////////////////////////////////////////////
@@ -424,9 +468,11 @@ namespace MantidQt
     {
       if (m_icatUiForm.searchBtn)
       {
-        m_icatUiForm.searchResultsCbox->setEnabled(true);
-        m_icatUiForm.searchResultsCbox->setChecked(true);
-        m_icatUiForm.resFrame->show();
+        clearDataFileFrame();
+
+        showSearchResultsFrame();
+
+        // Update the label to inform the user that searching is in progress.
         m_icatUiForm.searchResultsLbl->setText("searching investigations...");
 
         // Remove previous search results.
@@ -483,6 +529,13 @@ namespace MantidQt
         return;
       }
 
+      // If there are no results then clear search form and don't try to setup table.
+      if (workspace->rowCount() == 0)
+      {
+        clearSearchResultFrame();
+        return;
+      }
+
       // Create local variable for convenience and reusability.
       QTableWidget* resultsTable = m_icatUiForm.searchResultsTbl;
 
@@ -490,7 +543,7 @@ namespace MantidQt
       setupTable(resultsTable, workspace->rowCount(), workspace->columnCount());
 
       // Update the label to inform the user of how many investigations have been returned from the search.
-      m_icatUiForm.searchResultsLbl->setText(QString::number(workspace->rowCount()) + " Investigation found.");
+      m_icatUiForm.searchResultsLbl->setText(QString::number(workspace->rowCount()) + " investigations found.");
 
       // Add data from the workspace to the results table.
       populateTable(resultsTable, workspace);
@@ -548,6 +601,7 @@ namespace MantidQt
      */
     void ICatSearch2::investigationSelected(QTableWidgetItem* item)
     {
+      clearSearchFrame();
       //
       m_icatUiForm.dataFileCbox->setEnabled(true);
       m_icatUiForm.dataFileCbox->setChecked(true);
@@ -595,6 +649,14 @@ namespace MantidQt
       }
       else
       {
+        return;
+      }
+
+      // If there are no results then cdon't try to setup table.
+      if (workspace->rowCount() == 0)
+      {
+        clearDataFileFrame();
+        m_icatUiForm.dataFileLbl->setText(QString::number(workspace->rowCount()) + " 0 datafiles found.");
         return;
       }
 
