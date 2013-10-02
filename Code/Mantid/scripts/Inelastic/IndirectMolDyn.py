@@ -99,6 +99,9 @@ def MolDynImport(fname,functions,Verbose,Plot,Save):      #Ascii start routine
 	base = os.path.basename(path)
 	fname = os.path.splitext(base)[0]
 
+	if(not os.path.isfile(path)):
+		path = FileFinder.getFullPath(path)
+
 	if Verbose:
 		logger.notice('Functions : '+str(functions))
 		logger.notice('Reading file : ' + path)
@@ -238,6 +241,9 @@ def MolDynText(fname,Verbose,Plot,Save):      #Ascii start routine
 	path = fname
 	base = os.path.basename(path)
 	fname = os.path.splitext(base)[0]
+
+	if(not os.path.isfile(path)):
+		path = FileFinder.getFullPath(path)
 
 	if Verbose:
 		logger.notice('Reading file : ' + path)

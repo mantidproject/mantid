@@ -1,5 +1,5 @@
 #include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtCustomInterfaces/IndirectForeignTab.h"
+#include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
 
 namespace MantidQt
 {
@@ -9,7 +9,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    IndirectForeignTab::IndirectForeignTab(QWidget * parent) : QWidget(parent)
+    IndirectLoadAsciiTab::IndirectLoadAsciiTab(QWidget * parent) : QWidget(parent)
     {
 
     }
@@ -17,7 +17,7 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Destructor
      */
-    IndirectForeignTab::~IndirectForeignTab()
+    IndirectLoadAsciiTab::~IndirectLoadAsciiTab()
     {
     }
 
@@ -26,7 +26,7 @@ namespace MantidQt
      * 
      * @return The URL to the wiki page
      */
-    QString IndirectForeignTab::tabHelpURL()
+    QString IndirectLoadAsciiTab::tabHelpURL()
     { 
       return "http://www.mantidproject.org/IndirectBayes:" + help();
     }
@@ -37,7 +37,7 @@ namespace MantidQt
      * 
      * @param pyInput :: A string of python code to execute
      */
-    void IndirectForeignTab::runPythonScript(const QString& pyInput)
+    void IndirectLoadAsciiTab::runPythonScript(const QString& pyInput)
     {
       emit executePythonScript(pyInput, false);
     }

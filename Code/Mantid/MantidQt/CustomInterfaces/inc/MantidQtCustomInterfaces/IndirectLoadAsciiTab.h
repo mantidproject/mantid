@@ -1,5 +1,5 @@
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTFOREIGNTAB_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTFOREIGNTAB_H_
+#ifndef MANTID_CUSTOMINTERFACES_IndirectLoadAsciiTAB_H_
+#define MANTID_CUSTOMINTERFACES_IndirectLoadAsciiTAB_H_
 
 #include "MantidKernel/System.h"
 #include <QSettings>
@@ -37,13 +37,13 @@ namespace MantidQt
 			Code Documentation is available at: <http://doxygen.mantidproject.org>
 		*/
 
-		class DLLExport IndirectForeignTab : public QWidget
+		class DLLExport IndirectLoadAsciiTab : public QWidget
 		{
 			Q_OBJECT
 
 		public:
-			IndirectForeignTab(QWidget * parent = 0);
-			~IndirectForeignTab();
+			IndirectLoadAsciiTab(QWidget * parent = 0);
+			~IndirectLoadAsciiTab();
 
 			/// Returns a URL for the wiki help page for this interface
 			QString tabHelpURL();

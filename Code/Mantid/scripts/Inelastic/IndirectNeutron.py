@@ -130,7 +130,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
 	StartTime('Iback')
 	workdir = config['defaultsave.directory']
 
-	path, fname = getFilePath(instr,'.asc',run)
+	path, fname = getFilePath(run,'.asc',instr)
 
 	if Verbose:
 		logger.notice('Reading file : ' + path)
@@ -475,10 +475,10 @@ def RunParas(ascWS,instr,run,title,Verbose):
 
 def IN13Start(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('IN13')
-	samWS = IN13Read(instr,run,Verbose,Plot,Save)
+	samWS = IN13Read(instr,run,ana,refl,Verbose,Plot,Save)
 	EndTime('IN13')
 
-def IN13Read(instr,run,Verbose,Plot,Save):      #Ascii start routine
+def IN13Read(instr,run,ana,refl,Verbose,Plot,Save):      #Ascii start routine
 	workdir = config['defaultsave.directory']
 	
 	path, fname = getFilePath(run,'.asc', instr)
@@ -557,8 +557,8 @@ def IN13Read(instr,run,Verbose,Plot,Save):      #Ascii start routine
 # create WS
 	npt = len(xDat)
 	xDat.append(2*xDat[npt-1]-xDat[npt-2])
-	ascWS = fname +'_' +'_ang'
-	outWS = fname +'_' +'_q'
+	ascWS = fname + '_' + ana + refl + '_ang'
+	outWS = fname + '_' + ana + refl + '_q'
 	xD = np.array(xDat)
 	k0 = 4*math.pi/wave
 	Q = []

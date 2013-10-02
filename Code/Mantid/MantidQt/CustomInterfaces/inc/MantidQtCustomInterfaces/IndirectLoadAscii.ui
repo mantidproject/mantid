@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>IndirectForeign</class>
- <widget class="QWidget" name="IndirectForeign">
+ <class>IndirectLoadAscii</class>
+ <widget class="QWidget" name="IndirectLoadAscii">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,15 +11,15 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Indirect Foreign</string>
+   <string>Indirect Load ASCII</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="IndirectForeignTabs">
+    <widget class="QTabWidget" name="IndirectLoadAsciiTabs">
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="forCE">
+     <widget class="QWidget" name="neutron">
       <attribute name="title">
        <string>Neutron</string>
       </attribute>

@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/MolDyn.h"
+#include "MantidQtCustomInterfaces/IndirectMolDyn.h"
 
 #include <QFileInfo>
 #include <QString>
@@ -7,8 +7,8 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		MolDyn::MolDyn(QWidget * parent) : 
-			IndirectForeignTab(parent)
+		IndirectMolDyn::IndirectMolDyn(QWidget * parent) : 
+			IndirectLoadAsciiTab(parent)
 		{
 			m_uiForm.setupUi(parent);
 		}
@@ -18,7 +18,7 @@ namespace MantidQt
 		 * 
 		 * @return :: Whether the form was valid
 		 */
-		bool MolDyn::validate()
+		bool IndirectMolDyn::validate()
 		{
 			QString filename = m_uiForm.mwRun->getFirstFilename();
 			QFileInfo finfo(filename);
@@ -35,9 +35,9 @@ namespace MantidQt
 
 		/**
 		 * Collect the settings on the GUI and build a python
-		 * script that runs MolDyn
+		 * script that runs IndirectMolDyn
 		 */
-		void MolDyn::run() 
+		void IndirectMolDyn::run() 
 		{
 			QString verbose("False");
 			QString plot("False");
@@ -56,7 +56,7 @@ namespace MantidQt
 
 
 			QString pyInput = 
-				"from MolDynTransfer import ";
+				"from IndirectMolDyn import ";
 
 			QString pyFunc("");
 			if(ext == "dat")
@@ -79,7 +79,7 @@ namespace MantidQt
 		 *  
 		 * @param settings :: The settings to loading into the interface
 		 */
-		void MolDyn::loadSettings(const QSettings& settings)
+		void IndirectMolDyn::loadSettings(const QSettings& settings)
 		{
 			m_uiForm.mwRun->readSettings(settings.group());
 		}

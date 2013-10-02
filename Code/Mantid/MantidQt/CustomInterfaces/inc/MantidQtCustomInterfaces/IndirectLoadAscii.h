@@ -1,12 +1,12 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTFOREIGN_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTFOREIGN_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_IndirectLoadAscii_H_
+#define MANTIDQTCUSTOMINTERFACES_IndirectLoadAscii_H_
 
 //----------------------
 // Includes
 //----------------------
-#include "ui_IndirectForeign.h"
+#include "ui_IndirectLoadAscii.h"
 #include "MantidQtAPI/UserSubWindow.h"
-#include "MantidQtCustomInterfaces/IndirectForeignTab.h"
+#include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
 
 namespace MantidQt
 {
@@ -39,7 +39,7 @@ namespace MantidQt
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
     */
 
-    class DLLExport IndirectForeign : public MantidQt::API::UserSubWindow
+    class DLLExport IndirectLoadAscii : public MantidQt::API::UserSubWindow
     {
       Q_OBJECT
 
@@ -48,17 +48,17 @@ namespace MantidQt
       /// Enumeration for the index of each tab
 			enum TabChoice
 			{
-				FORCE,
+				NEUTRON,
 				MOLDYN,
 			};
 
     public: // public constructor, destructor and functions
       /// Default Constructor
-      IndirectForeign(QWidget *parent = 0);
+      IndirectLoadAscii(QWidget *parent = 0);
       ///Destructor
-      ~IndirectForeign();
+      ~IndirectLoadAscii();
       /// Interface name
-      static std::string name() { return "Indirect Foreign"; }
+      static std::string name() { return "Indirect Load Ascii"; }
       virtual void initLayout();
 
     private slots:
@@ -78,10 +78,10 @@ namespace MantidQt
       void loadSettings();
 
       /// Map of tabs indexed by position on the window
-			std::map<unsigned int, IndirectForeignTab*> m_foreignTabs;
+			std::map<unsigned int, IndirectLoadAsciiTab*> m_loadAsciiTabs;
 
       ///Main interface window
-      Ui::IndirectForeign m_uiForm;
+      Ui::IndirectLoadAscii m_uiForm;
     };
   }
 }

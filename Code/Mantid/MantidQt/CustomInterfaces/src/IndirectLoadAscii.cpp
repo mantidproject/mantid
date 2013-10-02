@@ -1,8 +1,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
-#include "MantidQtCustomInterfaces/IndirectForeign.h"
-#include "MantidQtCustomInterfaces/ForCE.h"
-#include "MantidQtCustomInterfaces/MolDyn.h"
+#include "MantidQtCustomInterfaces/IndirectLoadAscii.h"
+#include "MantidQtCustomInterfaces/IndirectNeutron.h"
+#include "MantidQtCustomInterfaces/IndirectMolDyn.h"
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -12,28 +12,28 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(IndirectForeign);
+    DECLARE_SUBWINDOW(IndirectLoadAscii);
   }
 }
 
 using namespace MantidQt::CustomInterfaces;
 
-IndirectForeign::IndirectForeign(QWidget *parent) : UserSubWindow(parent)
+IndirectLoadAscii::IndirectLoadAscii(QWidget *parent) : UserSubWindow(parent)
 {
 
 }
 
-void IndirectForeign::initLayout()
+void IndirectLoadAscii::initLayout()
 {
 	m_uiForm.setupUi(this);
 
 	//insert each tab into the interface on creation
-	m_foreignTabs.insert(std::make_pair(FORCE, new ForCE(m_uiForm.IndirectForeignTabs->widget(FORCE))));
-	m_foreignTabs.insert(std::make_pair(MOLDYN, new MolDyn(m_uiForm.IndirectForeignTabs->widget(MOLDYN))));
+	m_loadAsciiTabs.insert(std::make_pair(NEUTRON, new IndirectNeutron(m_uiForm.IndirectLoadAsciiTabs->widget(NEUTRON))));
+	m_loadAsciiTabs.insert(std::make_pair(MOLDYN, new IndirectMolDyn(m_uiForm.IndirectLoadAsciiTabs->widget(MOLDYN))));
 
 	//Connect each tab to the actions available in this GUI
-	std::map<unsigned int, IndirectForeignTab*>::iterator iter;
-	for (iter = m_foreignTabs.begin(); iter != m_foreignTabs.end(); ++iter)
+	std::map<unsigned int, IndirectLoadAsciiTab*>::iterator iter;
+	for (iter = m_loadAsciiTabs.begin(); iter != m_loadAsciiTabs.end(); ++iter)
 	{
 		connect(iter->second, SIGNAL(executePythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
 		connect(iter->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
@@ -53,7 +53,7 @@ void IndirectForeign::initLayout()
  *
  * This includes setting the default browsing directory to be the default save directory.
  */
-void IndirectForeign::loadSettings()
+void IndirectLoadAscii::loadSettings()
 {
   QSettings settings;
   QString settingsGroup = "CustomInterfaces/IndirectAnalysis/";
@@ -62,8 +62,8 @@ void IndirectForeign::loadSettings()
   settings.beginGroup(settingsGroup + "ProcessedFiles");
   settings.setValue("last_directory", saveDir);
 
-	std::map<unsigned int, IndirectForeignTab*>::iterator iter;
-	for (iter = m_foreignTabs.begin(); iter != m_foreignTabs.end(); ++iter)
+	std::map<unsigned int, IndirectLoadAsciiTab*>::iterator iter;
+	for (iter = m_loadAsciiTabs.begin(); iter != m_loadAsciiTabs.end(); ++iter)
 	{
   	iter->second->loadSettings(settings);
   }
@@ -79,13 +79,13 @@ void IndirectForeign::loadSettings()
  * This method checks the tabs validate method is passing before calling
  * the run method.
  */
-void IndirectForeign::runClicked()
+void IndirectLoadAscii::runClicked()
 {
-	int tabIndex = m_uiForm.IndirectForeignTabs->currentIndex();
+	int tabIndex = m_uiForm.IndirectLoadAsciiTabs->currentIndex();
 
-	if(m_foreignTabs[tabIndex]->validate())
+	if(m_loadAsciiTabs[tabIndex]->validate())
 	{
-		m_foreignTabs[tabIndex]->run();
+		m_loadAsciiTabs[tabIndex]->run();
 	}
 }
 
@@ -93,10 +93,10 @@ void IndirectForeign::runClicked()
  * Slot to open a new browser window and navigate to the help page
  * on the wiki for the currently selected tab.
  */
-void IndirectForeign::helpClicked()
+void IndirectLoadAscii::helpClicked()
 {
-	int tabIndex = m_uiForm.IndirectForeignTabs->currentIndex();
-	QString url = m_foreignTabs[tabIndex]->tabHelpURL();
+	int tabIndex = m_uiForm.IndirectLoadAsciiTabs->currentIndex();
+	QString url = m_loadAsciiTabs[tabIndex]->tabHelpURL();
 	QDesktopServices::openUrl(QUrl(url));
 }
 
@@ -104,7 +104,7 @@ void IndirectForeign::helpClicked()
  * Slot to show the manage user dicrectories dialog when the user clicks
  * the button on the interface.
  */
-void IndirectForeign::manageUserDirectories()
+void IndirectLoadAscii::manageUserDirectories()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
@@ -117,11 +117,11 @@ void IndirectForeign::manageUserDirectories()
  * 
  * @param message :: The message to display in the message box
  */
-void IndirectForeign::showMessageBox(const QString& message)
+void IndirectLoadAscii::showMessageBox(const QString& message)
 {
   showInformationBox(message);
 }
 
-IndirectForeign::~IndirectForeign()
+IndirectLoadAscii::~IndirectLoadAscii()
 {
 }

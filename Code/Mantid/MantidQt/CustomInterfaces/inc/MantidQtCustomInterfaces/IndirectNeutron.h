@@ -1,8 +1,8 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_FORCE_H_
-#define MANTIDQTCUSTOMINTERFACES_FORCE_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_IndirectNeutron_H_
+#define MANTIDQTCUSTOMINTERFACES_IndirectNeutron_H_
 
-#include "ui_ForCE.h"
-#include "MantidQtCustomInterfaces/IndirectForeignTab.h"
+#include "ui_IndirectNeutron.h"
+#include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
 #include "MantidAPI/ExperimentInfo.h"
 
 #include <QComboBox>
@@ -13,15 +13,15 @@ namespace MantidQt
 {
 	namespace CustomInterfaces
 	{
-		class DLLExport ForCE : public IndirectForeignTab
+		class DLLExport IndirectNeutron : public IndirectLoadAsciiTab
 		{
 			Q_OBJECT
 
 		public:
-			ForCE(QWidget * parent = 0);
+			IndirectNeutron(QWidget * parent = 0);
 
-			// Inherited methods from IndirectForeignTab
-			QString help() { return "Neutron_Force"; };
+			// Inherited methods from IndirectLoadAsciiTab
+			QString help() { return "Indirect_Neutron"; };
 			bool validate();
 			void run();
 			/// Load default settings into the interface
@@ -41,7 +41,7 @@ namespace MantidQt
 			/// Map to store instrument analysers and reflections for this instrument
 			QMap<QString, QStringList> m_paramMap;
 			/// The ui form
-			Ui::ForCE m_uiForm;
+			Ui::IndirectNeutron m_uiForm;
 
 		};
 	} // namespace CustomInterfaces
