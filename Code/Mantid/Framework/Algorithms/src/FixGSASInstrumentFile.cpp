@@ -83,7 +83,7 @@ namespace Algorithms
     // Parse file
     vector<string> vec_line;
     ifstream infile;
-    infile.open(infilename, ios::in);
+    infile.open(infilename.c_str(), ios::in);
     if (!infile.is_open())
     {
       stringstream errss;
@@ -96,9 +96,6 @@ namespace Algorithms
     {
       // Split "\n"
       vector <string> fields;
-
-      g_log.information() << "Original = \"" << line << "\"\n";
-
       boost::algorithm::split( fields, line, boost::algorithm::is_any_of( "\n" ) );
       if (fields.size() == 0)
         throw runtime_error("Impossible to have an empty line. ");
