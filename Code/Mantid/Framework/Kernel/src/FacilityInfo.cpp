@@ -5,6 +5,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/CatalogInfo.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -42,9 +43,13 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   fillZeroPadding(elem);
   fillDelimiter(elem);
   fillExtensions(elem);
-  fillSoapEndPoint(elem);
+
+  Mantid::Kernel::CatalogInfo catalog(elem);
+  // Make use of the catalog class to set related attributes.
+  m_soapEndPoint = catalog.soapEndPoint();
+  m_catalogName  = catalog.catalogName();
+
   fillArchiveNames(elem);
-  fillCatalogName(elem);
   fillLiveListener(elem);
   fillComputeResources(elem);
   fillInstruments(elem); // Make sure this is last as it picks up some defaults that are set above
