@@ -86,7 +86,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
     if isFirstDataSetEvent:
         wsInMonitor = mtd['AddFilesSumTempory_monitors']
         if binning == 'Monitors':
-            monX = wsInMonitor.dataX(i)
+            monX = wsInMonitor.dataX(0)
             binning = str(monX[0])
             binGap = monX[1] - monX[0]
             binning = binning + "," + str(binGap)
