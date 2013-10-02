@@ -18,6 +18,7 @@ PanelsSurface::PanelsSurface(const InstrumentActor* rootActor,const Mantid::Kern
     m_pos(origin),
     m_zaxis(axis)
 {
+    setupAxes();
     init();
 }
 
@@ -30,7 +31,7 @@ void PanelsSurface::init()
     m_assemblies.clear();
 
     size_t ndet = m_instrActor->ndetectors();
-    m_unwrappedDetectors.resize(ndet);
+    //m_unwrappedDetectors.resize(ndet);
     if (ndet == 0) return;
 
     // Pre-calculate all the detector positions (serial because
@@ -41,10 +42,10 @@ void PanelsSurface::init()
 
     findFlatBanks();
 
-    m_u_min = 0;
-    m_u_max = 1;
-    m_v_min = 0;
-    m_v_max = 1;
+//    m_u_min = 0;
+//    m_u_max = 1;
+//    m_v_min = 0;
+//    m_v_max = 1;
     m_height_max = 0.1;
     m_width_max = 0.1;
     m_viewRect = RectF( QPointF(m_u_min,m_v_min), QPointF(m_u_max,m_v_max) );
@@ -61,6 +62,30 @@ void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &
 {
     (void)udet;
     (void)R;
+}
+
+/**
+  * Given the z axis, define the x and y ones.
+  */
+void PanelsSurface::setupAxes()
+{
+    double R, theta, phi;
+    m_zaxis.getSpherical( R, theta, phi );
+    if ( theta <= 45.0 )
+    {
+        m_xaxis = Mantid::Kernel::V3D(1,0,0);
+    }
+    else if ( phi <= 45.0 )
+    {
+        m_xaxis = Mantid::Kernel::V3D(0,1,0);
+    }
+    else
+    {
+        m_xaxis = Mantid::Kernel::V3D(0,0,1);
+    }
+    m_yaxis = m_zaxis.cross_prod( m_xaxis );
+    m_yaxis.normalize();
+    m_xaxis = m_yaxis.cross_prod( m_zaxis );
 }
 
 //-----------------------------------------------------------------------------------------------//
@@ -150,7 +175,7 @@ public:
             ndetectors += objCompAssembly->nelements();
             objCompAssemblies << objCompAssembly->getComponentID();
         }
-        std::cerr << "CompAssemblyActor " << ndetectors << std::endl;
+        //std::cerr << "CompAssemblyActor " << ndetectors << std::endl;
         if ( !objCompAssemblies.isEmpty() )
         {
             m_surface.addFlatBank(assembly->getComponentID(), normal, objCompAssemblies);
@@ -186,21 +211,83 @@ void PanelsSurface::findFlatBanks()
 void PanelsSurface::addFlatBank(ComponentID bankId, const Mantid::Kernel::V3D &normal, QList<ComponentID> objCompAssemblies)
 {
     int index = m_flatBanks.size();
+    // save bank info
     FlatBankInfo info;
     info.id = bankId;
-    info.normal = normal;
-    m_flatBanks << info;
+    bool doneRotation = false;
+    Mantid::Kernel::V3D pos0;
     Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
+    // loop over the assemblies and process the detectors
     foreach(ComponentID id, objCompAssemblies)
     {
         Mantid::Geometry::ICompAssembly_const_sptr assembly = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(
                     instr->getComponentByID(id));
         assert(assembly);
         int nelem = assembly->nelements();
+        m_unwrappedDetectors.reserve( m_unwrappedDetectors.size() + nelem );
         for(int i = 0; i < nelem; ++i)
         {
-            Mantid::Geometry::IDetector_const_sptr det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(assembly->getChild(i));
+            // setup detector info
+            Mantid::Geometry::IDetector_const_sptr det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>( assembly->getChild(i) );
+            Mantid::Kernel::V3D pos = det->getPos();
+            if ( !doneRotation )
+            {
+                pos0 = pos;
+                info.rotation = calcBankRotation( pos0, normal );
+                doneRotation = true;
+            }
+            UnwrappedDetector udet;
+            udet.detector = det;
+            m_instrActor->getColor( det->getID() ).getUB3( &udet.color[0] );
+            pos -= pos0;
+            info.rotation.rotate(pos);
+            pos += pos0;
+            udet.u = m_xaxis.scalar_prod( pos );
+            udet.v = m_yaxis.scalar_prod( pos );
+            udet.uscale = udet.vscale = 1.0;
+            if ( udet.u < m_u_min ) m_u_min = udet.u;
+            if ( udet.u > m_u_max ) m_u_max = udet.u;
+            if ( udet.v < m_v_min ) m_v_min = udet.v;
+            if ( udet.v > m_v_max ) m_v_max = udet.v;
+            udet.height = 0.001;
+            udet.width = 0.001;
+            m_unwrappedDetectors.push_back( udet );
         }
     }
+    m_flatBanks << info;
+    //std::cerr << "NDet " << m_unwrappedDetectors.size() << std::endl;
+}
+
+/**
+  * Calculate the rotation needed to place a bank on the projection plane.
+  *
+  * @param detPos :: Position of a detector of the bank.
+  * @param normal :: Normal to the bank's plane.
+  */
+Mantid::Kernel::Quat PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) const
+{
+    Mantid::Kernel::Quat R; // identity
+    Mantid::Kernel::V3D rotAxis = normal.cross_prod(m_zaxis);
+    if ( rotAxis.nullVector() )
+    {
+        // normal is parallel to z-axis
+        if ( detPos.scalar_prod(m_zaxis) < 0 )
+        {
+            return Mantid::Kernel::Quat(180,m_yaxis);
+        }
+        return Mantid::Kernel::Quat();
+    }
+
+    // signed shortest distance from the bank's plane to the origin (m_pos)
+    double a = normal.scalar_prod( m_pos - detPos );
+    // if a is negative the origin is on the "back" side of the plane
+    // (the "front" side is facing in the direction of the normal)
+    if ( a < 0.0 )
+    {
+        // we need to flip the normal to make the side looking at the origin to be the front one
+        normal *= -1;
+        rotAxis *= -1;
+    }
+    return Mantid::Kernel::Quat( normal, m_zaxis );
 }
 

@@ -7,8 +7,8 @@ struct FlatBankInfo
 {
     /// Component id of the bank
     Mantid::Geometry::ComponentID id;
-    /// Normal to bank's plane
-    Mantid::Kernel::V3D normal;
+    /// Bank's rotation
+    Mantid::Kernel::Quat rotation;
 };
 
 /**
@@ -34,10 +34,14 @@ public:
 protected:
 
   void rotate(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const;
+  // Setup the projection axes
+  void setupAxes();
   // Find all flat banks of detectors.
   void findFlatBanks();
   // Add a flat bank
   void addFlatBank(Mantid::Geometry::ComponentID id, const Mantid::Kernel::V3D &normal, QList<Mantid::Geometry::ComponentID> objCompAssemblies);
+  // Calculate bank rotation
+  Mantid::Kernel::Quat calcBankRotation( const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal ) const;
 
 protected:
 
@@ -45,6 +49,8 @@ protected:
   /// The z axis defines the plane of the projection. All flat banks
   /// are rotated to be parallel to this plane.
   const Mantid::Kernel::V3D m_zaxis;
+  Mantid::Kernel::V3D m_xaxis;
+  Mantid::Kernel::V3D m_yaxis;
 
   /// Keep info of the flat banks
   QList<FlatBankInfo> m_flatBanks;
