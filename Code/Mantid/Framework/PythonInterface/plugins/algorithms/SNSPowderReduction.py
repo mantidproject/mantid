@@ -245,7 +245,6 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("SaveAs", "gsas", StringListValidator(outfiletypes))
         self.declareProperty("OutputFilePrefix", "", "Overrides the default filename for the output file (Optional).")
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
-        self.declareProperty("NormalizeByCurrent", True, "Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
 
         tableprop = ITableWorkspaceProperty("SplittersWorkspace", "", Direction.Input, PropertyMode.Optional)
@@ -253,7 +252,8 @@ class SNSPowderReduction(PythonAlgorithm):
         infotableprop = ITableWorkspaceProperty("SplitInformationWorkspace", "", Direction.Input, PropertyMode.Optional)
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
-        self.declareProperty("LowResolutionSpectraOffset", -1,  "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
+        self.declareProperty("LowResolutionSpectraOffset", -1,
+                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
 
         return
 
@@ -294,7 +294,6 @@ class SNSPowderReduction(PythonAlgorithm):
         if HAVE_MPI and preserveEvents == True:
             self.log().warning("preserveEvents set to False for MPI tasks.")
             preserveEvents = False
-        normbycurrent = self.getProperty("NormalizeByCurrent").value
         self._info = None
         self._infodict = {}
         self._chunks = self.getProperty("MaxChunkSize").value
@@ -351,7 +350,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 self.log().information("[Sum] Process run number %s. " %(str(runnumber)))
 
                 temp = self._focusChunks(temp, SUFFIX, timeFilterWall, calib, 
-                        preserveEvents=preserveEvents, normByCurrent=normbycurrent)
+                        preserveEvents=preserveEvents)
                 tempinfo = self._getinfo(temp)
 
                 if samRun is None:
@@ -385,7 +384,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if not self.getProperty("Sum").value and samRun > 0:
                 self._info = None
                 returned = self._focusChunks(samRun, SUFFIX, timeFilterWall, calib, self._splitws, 
-                        preserveEvents=preserveEvents, normByCurrent=normbycurrent)
+                        preserveEvents=preserveEvents)
 
                 if returned.__class__.__name__ == "list":
                     # Returned with a list of workspaces
@@ -470,7 +469,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         if vnoiseRun > 0:
                             raise RuntimeError("Vanadium noise correction has been removed from the workflow")
                     vanRun = self._focusChunks(vanRun, SUFFIX, vanFilterWall, calib,
-                                               preserveEvents=False, normByCurrent=normbycurrent)
+                                               preserveEvents=False)
 
                     vbackRun = self.getProperty("VanadiumBackgroundNumber").value
                     if vbackRun > 0:
@@ -606,7 +605,7 @@ class SNSPowderReduction(PythonAlgorithm):
         return strategy
 
     def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True,
-               normByCurrent=True, filterBadPulsesOverride=True):
+               filterBadPulsesOverride=True):
         """ Load, (optional) split and focus data in chunks
 
         Arguments: 
@@ -808,13 +807,12 @@ class SNSPowderReduction(PythonAlgorithm):
                 wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp], 
                     OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
 
-            if normByCurrent:
-                try:
-                    wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
-                            OutputWorkspace=wksplist[itemp])
-                    wksplist[itemp].getRun()['gsas_monitor'] = 1
-                except Exception, e:
-                    self.log().warning(str(e))
+            try:
+                wksplist[itemp] = api.NormaliseByCurrent(InputWorkspace=wksplist[itemp], 
+                                                         OutputWorkspace=wksplist[itemp])
+                wksplist[itemp].getRun()['gsas_monitor'] = 1
+            except Exception, e:
+                self.log().warning(str(e))
 
             self._save(wksplist[itemp], self._info, False, True)
             self.log().information("Done focussing data of %d." % (itemp))
