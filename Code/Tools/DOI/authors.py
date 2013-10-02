@@ -59,7 +59,7 @@ _translations = {
     'Lakshmi Sastry'          : 'Sastry, Lakshmi',
     'AndreiSavici'            : 'Savici, Andrei',
     'Andrei Savici'           : 'Savici, Andrei',
-    'Russell Taylor'          : 'Taylor, Russell',
+    'Russell Taylor'          : 'Taylor, Russell J.',
     'Roman Tolchenov'         : 'Tolchenov, Roman',
     'Robert Whitley'          : 'Whitley, Robert',
     'Michael Whitty'          : 'Whitty, Michael',
