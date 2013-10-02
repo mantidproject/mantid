@@ -69,7 +69,7 @@ public:
   void createFaultFile(std::string prmfilename)
   {
     ofstream ofile;
-    ofile.open(prmfilename, ios::out);
+    ofile.open(prmfilename.c_str(), ios::out);
     ofile << "            12345678901234567890123456789012345678901234567890123456789012345678\n";
     ofile << "ID    TEST \n";
     ofile << "INS   BANK      5\n";
