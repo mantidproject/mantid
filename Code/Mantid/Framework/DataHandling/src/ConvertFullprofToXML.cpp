@@ -64,6 +64,9 @@ namespace DataHandling
     declareProperty(new FileProperty("InputFilename", "", FileProperty::Load, exts),
         "Path to an Fullprof file to load.");
 
+    // Instrument name
+    declareProperty("InstrumentName", "", "Name of instrument for the input file" );
+
     // Output file
     std::vector<std::string> extso;
     extso.push_back(".xml");
@@ -75,13 +78,23 @@ namespace DataHandling
 
   //----------------------------------------------------------------------------------------------
   /** Implement abstract Algorithm methods
-    */
+  */
   void ConvertFullprofToXML::exec()
   {
     // Get input
     std::string datafile = getProperty("InputFilename");
+
+    // Get instrument
+    std::string instrumentName = getProperty("InstrumentName");
+
     // Get Output
     std::string paramfile = getProperty("OutputFilename");
+
+
+    // We need the instrument name because it is not extracted by LoadFullprofResolution and is
+    // needed by fitting despite also being available in the IDF.
+    if ( instrumentName.empty() )
+      throw std::runtime_error("The InstrumentName property must be set.");
 
     // Load with LoadFullprofResolution
     auto loader = createChildAlgorithm("LoadFullprofResolution");
@@ -121,7 +134,7 @@ namespace DataHandling
 
     // Add instrument
     Element* instrumentElem = mDoc->createElement("component-link");
-    instrumentElem->setAttribute("name","GEM"); // We only support GEM at the present time
+    instrumentElem->setAttribute("name",instrumentName);
     rootElem->appendChild(instrumentElem);
     addALFBEParameter( paramTable, mDoc, instrumentElem, "Alph0");
     addALFBEParameter( paramTable, mDoc, instrumentElem, "Beta0");
@@ -160,19 +173,19 @@ namespace DataHandling
   */
   void ConvertFullprofToXML::addALFBEParameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Element* parent, const std::string& paramName)
   {
-     Element* parameterElem = mDoc->createElement("parameter");
-     parameterElem->setAttribute("name", getXMLParameterName(paramName));
-     parameterElem->setAttribute("type","fitting");
+    Element* parameterElem = mDoc->createElement("parameter");
+    parameterElem->setAttribute("name", getXMLParameterName(paramName));
+    parameterElem->setAttribute("type","fitting");
 
-     Element *formulaElem = mDoc->createElement("formula");
-     formulaElem->setAttribute("eq",getXMLEqValue(tablews, paramName, 1));
-     if(paramName != "Beta1") formulaElem->setAttribute("result-unit","TOF");
-     parameterElem->appendChild(formulaElem);
+    Element *formulaElem = mDoc->createElement("formula");
+    formulaElem->setAttribute("eq",getXMLEqValue(tablews, paramName, 1));
+    if(paramName != "Beta1") formulaElem->setAttribute("result-unit","TOF");
+    parameterElem->appendChild(formulaElem);
 
-     Element* fixedElem = mDoc->createElement("fixed");
-     parameterElem->appendChild(fixedElem);
+    Element* fixedElem = mDoc->createElement("fixed");
+    parameterElem->appendChild(fixedElem);
 
-     parent->appendChild(parameterElem);
+    parent->appendChild(parameterElem);
   }
 
   /* Add a set of SIGMA paraters to the XML document according to the table workspace

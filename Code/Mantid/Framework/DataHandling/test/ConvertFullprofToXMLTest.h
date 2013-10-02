@@ -57,6 +57,7 @@ public:
 
     // Set up
     alg.setProperty("InputFilename", inputFilename);
+    alg.setProperty("InstrumentName","POWGEN");
     alg.setProperty("OutputFileName", outputFilename);
 
     // Execute
@@ -87,7 +88,7 @@ public:
         TS_ASSERT(componentLinkElem1);
         if(componentLinkElem1)
         {
-          TS_ASSERT_EQUALS(componentLinkElem1->getAttribute("name"),"GEM");
+          TS_ASSERT_EQUALS(componentLinkElem1->getAttribute("name"),"POWGEN");
 
           Poco::XML::NodeList* parameterNodeList = componentLinkElem1->getElementsByTagName("parameter"); // get parameter elements
           size_t numParameters = parameterNodeList->length();
@@ -167,6 +168,36 @@ public:
     Poco::File(outputFilename).remove();
 
     return;
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Test missing instrument parameter
+  */
+  void testMissingInstrument()
+  {
+    // Generate file
+    string inputFilename("TestConvertFullprofToXMLInput.irf");
+    string outputFilename("TestConvertFullprofToXMLMissingInstrumentOutput.xml");
+    generate2BankIrfFile(inputFilename);
+
+    // Init LoadFullprofResolution
+    ConvertFullprofToXML alg;
+    alg.initialize();
+
+    // Set up
+    alg.setProperty("InputFilename", inputFilename);
+    alg.setProperty("InstrumentName","");
+    alg.setProperty("OutputFileName", outputFilename);
+
+    // Execute
+    TS_ASSERT(! alg.execute());
+
+    // Not only should algorithm fail, but also writes nothing to file.
+    outputFilename = alg.getPropertyValue("outputFilename"); //Get absolute path
+    TS_ASSERT( !Poco::File(outputFilename).exists() );
+
+   //Clean up
+    Poco::File(inputFilename).remove();
   }
 
   //----------------------------------------------------------------------------------------------
