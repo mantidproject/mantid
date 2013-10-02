@@ -1,10 +1,11 @@
 #include "MantidAlgorithms/FixGSASInstrumentFile.h"
 
-#include "MantidDataHandling/LoadFullprofResolution.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/TableRow.h"
+
+#include <fstream>
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
@@ -12,11 +13,20 @@
 #include <boost/algorithm/string/finder.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
+using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
+using namespace std;
+
 namespace Mantid
 {
 namespace Algorithms
 {
 
+  DECLARE_ALGORITHM(FixGSASInstrumentFile)
+
+  const size_t LINESIZE = 80;
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -35,10 +45,10 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Sets documentation strings for this algorithm
     */
-  void LoadFullprofResolution::initDocs()
+  void FixGSASInstrumentFile::initDocs()
   {
-    setWikiSummary("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s).");
-    setOptionalMessage("Load Fullprof's resolution (.irf) file to one or multiple TableWorkspace(s).");
+    setWikiSummary("Fix format error in an GSAS instrument file.");
+    setOptionalMessage("Fix format error in an GSAS instrument file.");
 
     return;
   }
@@ -46,23 +56,79 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Implement abstract Algorithm methods
    */
-  void LoadFullprofResolution::init()
+  void FixGSASInstrumentFile::init()
   {
-    // Input file name
+    // Input file
     vector<std::string> exts;
-    exts.push_back(".irf");
-    declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "Path to an Fullprof .irf file to load.");
+    exts.push_back(".prm");
+    exts.push_back(".iparm");
+    declareProperty(new FileProperty("InputFilename", "", FileProperty::Load, exts),
+        "Name of the GSAS instrument parameter file to get fixed for format. ");
 
-    // Output workspace
-    auto wsprop = new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "", Direction::Output);
-    declareProperty(wsprop, "Name of the output TableWorkspace containing profile parameters or bank information. ");
+    // Output file
+    declareProperty(new FileProperty("OutputFilename", "", FileProperty::Save, exts),
+        "Name of the output GSAS instrument parameter file to have format fixed. ");
 
-    // Bank to import
-    declareProperty(new ArrayProperty<int>("Banks"), "ID(s) of specified bank(s) to load. "
-                    "Default is all banks contained in input .irf file.");
+    return;
+  }
 
-    // declareProperty("Bank", EMPTY_INT(), "ID of a specific bank to load. Default is all banks in .irf file.");
+  //----------------------------------------------------------------------------------------------
+  /** Execution
+   */
+  void FixGSASInstrumentFile::exec()
+  {
+    // Properties
+    string infilename = getProperty("InputFilename");
+
+    // Parse file
+    vector<string> vec_line;
+    ifstream infile;
+    infile.open(infilename, ios::in);
+    if (!infile.is_open())
+    {
+      stringstream errss;
+      errss << "File " << infilename << " cannot be opened for reading. " << ".\n";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+    string line;
+    while (getline(infile, line))
+    {
+      // Split "\n"
+      vector <string> fields;
+
+      g_log.information() << "Original = \"" << line << "\"\n";
+
+      boost::algorithm::split( fields, line, boost::algorithm::is_any_of( "\n" ) );
+      if (fields.size() == 0)
+        throw runtime_error("Impossible to have an empty line. ");
+      vec_line.push_back(fields[0]);
+    }
+    infile.close();
+
+    // Write out
+    string outfilename = getPropertyValue("OutputFilename");
+    ofstream ofile;
+    ofile.open(outfilename, ios::out);
+    if (!ofile.is_open())
+    {
+      stringstream errss;
+      errss << "File " << outfilename << " cannot be opened for writing. " << ".\n";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+
+    for (size_t i = 0; i < vec_line.size(); ++i)
+    {
+      string& line = vec_line[i];
+      ofile << line;
+      for (size_t j = line.size(); j < LINESIZE; ++j)
+        ofile << " ";
+      ofile << "\n";
+    }
+
+    ofile.close();
 
     return;
   }
