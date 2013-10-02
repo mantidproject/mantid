@@ -67,13 +67,12 @@ namespace API
       if(m_numMDGridBoxes[i]!=other.m_numMDGridBoxes[i])return false;
       if(m_maxNumMDBoxes[i]!=other.m_maxNumMDBoxes[i])return false;
     }
-    // Should we compare this?
-    /// number of events sitting in the boxes which should be split but are already split up to the max depth
-     //volatile size_t m_numEventsAtMax;
-    /// For adding events tasks
-    //size_t m_addingEvents_eventsPerTask;
-    /// For adding events tasks
-    //size_t m_addingEvents_numTasksPerBlock;
+    //There are number of variables which are
+    // 1) derived: not  Should we compare this?
+    // umber of events sitting in the boxes which should be split but are already split up to the max depth: volatile size_t m_numEventsAtMax;
+    // 2) Dynamical and related to current processor and dynamical jobs allocation:
+    // For adding events tasks: size_t m_addingEvents_eventsPerTask;  m_addingEvents_numTasksPerBlock;
+    // These variables are not compared but may need to be compared in a future for some purposes.
 
 
     return true;
