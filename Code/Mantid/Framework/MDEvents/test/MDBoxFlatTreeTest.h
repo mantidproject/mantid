@@ -15,15 +15,19 @@ using namespace Mantid::MDEvents;
 
 class MDBoxFlatTreeTest :public CxxTest::TestSuite
 {
-private:
-  
-    Mantid::API::IMDEventWorkspace_sptr spEw3;
-
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static MDBoxFlatTreeTest  *createSuite() { return new MDBoxFlatTreeTest (); }
   static void destroySuite( MDBoxFlatTreeTest  *suite ) { delete suite; }
+
+  MDBoxFlatTreeTest()
+  {
+    // load dependent DLL, which are used in MDEventsTestHelper (e.g. MDAlgorithms to create MD workspace)
+    // Mantid::API::FrameworkManager::Instance();
+    // make non-file backet mdEv workspace with 10000 events
+     spEw3 = MDEventsTestHelper::makeFileBackedMDEW("TestLeanEvWS", false,10000);
+  }
 
   void testFlatTreeOperations()
   {
@@ -77,13 +81,9 @@ public:
       testFile.remove();
   }
 
-  MDBoxFlatTreeTest()
-  {
-      // load dependent DLL, which are used in MDEventsTestHelper (e.g. MDAlgorithms to create MD workspace)
-//      Mantid::API::FrameworkManager::Instance();
-    // make non-file backet mdEv workspace with 10000 events
-     spEw3 = MDEventsTestHelper::makeFileBackedMDEW("TestLeanEvWS", false,10000);
-  }
+private:
+ 
+    Mantid::API::IMDEventWorkspace_sptr spEw3;
 
 };
 
