@@ -209,6 +209,7 @@ namespace Mantid
       /// Load a spectra mapping from the given file
       bool loadSpectraMapping(const std::string& filename, const bool monitorsOnly, const std::string& entry_name);
 
+      static void loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS);
     private:
 
       // ISIS specific methods for dealing with wide events
@@ -218,7 +219,7 @@ namespace Mantid
       static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
         const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
 
-      void loadSampleDataISIScompatibility(::NeXus::File& file, Mantid::API::MatrixWorkspace_sptr WS);
+
     public:
       /// name of top level NXentry to use
       std::string m_top_entry_name;
