@@ -5,6 +5,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
+#include <boost/make_shared.hpp>
+
 using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::ParameterMap_sptr;
 using Mantid::Geometry::Parameter_sptr;
@@ -314,6 +316,101 @@ public:
 private:
   Instrument_sptr m_testInstrument;
 };
+
+
+//---------------------------------- Performance Tests ----------------------------------------
+class ParameterMapTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  static ParameterMapTestPerformance *createSuite() { return new ParameterMapTestPerformance(); }
+  static void destroySuite( ParameterMapTestPerformance *suite ) { delete suite; }
+
+  ParameterMapTestPerformance()
+  {
+    using namespace Mantid::Geometry;
+    using namespace Mantid::Kernel;
+
+    m_testInst = boost::make_shared<Instrument>(("basic"));
+
+    // One object
+    const double cylRadius(0.004), cylHeight(0.0002);
+    Object_sptr pixelShape = \
+        ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0),
+                                                      V3D(0.,1.0,0.), "pixel-shape");
+
+    //Create a hierarchy
+    // Inst
+    //   -- topbank
+    //     -- subbank_1
+    //       -- subbank_2
+    //        -- leaf
+
+    //Make a new top bank
+    CompAssembly *topbank = new CompAssembly("topbank");
+    //Make a new subbank
+    CompAssembly *subbank1 = new CompAssembly("subbank_1");
+    //Make a new subbank
+    CompAssembly *subbank2 = new CompAssembly("subbank_2");
+    subbank1->add(subbank2);
+    m_leaf = new Detector("pixel-00", 1, pixelShape, subbank2); // position irrelevant here
+    subbank2->add(m_leaf);
+
+    m_testInst->markAsDetector(m_leaf);
+    m_testInst->add(subbank1);
+    m_testInst->add(topbank);
+
+    // Add a parameter at the top level
+    m_pmap.addDouble(m_testInst->getComponentID(), "instlevel",10.0);
+    // and at leaf level
+    m_pmap.addDouble(m_leaf->getComponentID(), "leaflevel",11.0);
+  }
+
+  void test_Inst_Par_Lookup_Via_GetRecursive_And_Leaf_Component()
+  {
+    // Look for the top level instrument parameter via a leaf component
+
+    Mantid::Geometry::Parameter_sptr par_sptr;
+
+    for(size_t i = 0; i < 10000; ++i)
+    {
+      par_sptr = m_pmap.getRecursive(m_leaf->getComponentID(), "instlevel");
+    }
+    // Use it to ensure the compiler doesn't optimise the loop away
+    TS_ASSERT_DELTA(10.0, par_sptr->value<double>(),1e-12);
+  }
+
+  void test_Leaf_Par_Lookup_Via_GetRecursive_And_Leaf_Component()
+  {
+    Mantid::Geometry::Parameter_sptr par_sptr;
+
+    for(size_t i = 0; i < 10000; ++i)
+    {
+      par_sptr = m_pmap.getRecursive(m_leaf->getComponentID(), "leaflevel");
+    }
+    // Use it to ensure the compiler doesn't optimise the loop away
+    TS_ASSERT_DELTA(11.0, par_sptr->value<double>(),1e-12);
+  }
+
+  void test_Leaf_Par_Lookup_Via_Get_And_Leaf_Component()
+  {
+    Mantid::Geometry::Parameter_sptr par_sptr;
+
+    for(size_t i = 0; i < 10000; ++i)
+    {
+      par_sptr = m_pmap.get(m_leaf->getComponentID(), "leaflevel");
+    }
+    // Use it to ensure the compiler doesn't optimise the loop away
+    TS_ASSERT_DELTA(11.0, par_sptr->value<double>(),1e-12);
+  }
+
+
+private:
+  Mantid::Geometry::Instrument_sptr m_testInst;
+  Mantid::Geometry::ParameterMap m_pmap;
+  Mantid::Geometry::IDetector *m_leaf;
+};
+
 
 
 #endif /* PARAMETERMAPTEST_H_ */
