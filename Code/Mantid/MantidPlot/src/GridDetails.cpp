@@ -136,7 +136,6 @@ void GridDetails::initWidgets()
   }
   else
   {
-    Plot *p = m_graph->plotWidget();
     Grid *grd = dynamic_cast<Grid *>(m_graph->plotWidget()->grid());
     if (!grd)
     {
