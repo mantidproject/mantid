@@ -63,23 +63,25 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
-
       /// Execute algorithm for EventWorkspaces
       void execEvent();
     
       /// Create output workspace
-      API::MatrixWorkspace_sptr createOutputWS(API::MatrixWorkspace_sptr input);
+      API::MatrixWorkspace_sptr createOutputWS(const API::MatrixWorkspace_sptr & input);
+      /// Get the scale factor for the given spectrum
+      double getScaleFactor(const API::MatrixWorkspace_const_sptr & inputWS, const size_t index);
        
       /// The progress reporting object
       API::Progress *m_progress;
 
       /// Scaling factor
-      double factor;
+      double m_factor;
+      /// instrument parameter name
+      std::string m_parname;
       /// Start workspace index
-      int wi_min;
+      int m_wi_min;
       /// Stop workspace index
-      int wi_max;
-       
+      int m_wi_max;
     };
 
   } // namespace Algorithm
