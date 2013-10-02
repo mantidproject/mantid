@@ -439,6 +439,7 @@ ChopperConfiguration::ChopperConfiguration(const int freq, const std::string& ba
       fit = createChildAlgorithm("FixGSASInstrumentFile", -1, -1, true);
       fit->initialize();
       fit->setProperty("InputFilename", m_gsasFileName);
+      fit->setProperty("OutputFilename", m_gsasFileName);
       fit->execute();
     }
     catch (Exception::NotFoundError &)
