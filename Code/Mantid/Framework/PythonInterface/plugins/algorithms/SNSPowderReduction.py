@@ -593,15 +593,17 @@ class SNSPowderReduction(PythonAlgorithm):
         wksp = "%s_%d" % (self._instrument, runnumber)
         strategy = []
         self.log().debug("[Fx116] Run file Name : %s,\t\tMax chunk size: %s" % (str(wksp+extension), str(self._chunks)))
-        if True:
-            Chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks)
-        else:
-            api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
-            Chunks = AnalysisDataService.retrieve("Chunks")
-        for row in Chunks: strategy.append(row)
+        chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks)
+        for row in chunks:
+            strategy.append(row)
         #For table with no rows
         if not strategy:
             strategy.append({})
+
+        # delete chunks workspace
+        chunks = str(chunks)
+        mtd.remove(chunks)
+
         return strategy
 
     def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True,
@@ -794,8 +796,6 @@ class SNSPowderReduction(PythonAlgorithm):
             # When chunks are added, add iparamFile
             for itemp in xrange(numwksp): 
                 wksplist[itemp].getRun()['iparm_file'] = self._config.iparmFile
-
-        api.DeleteWorkspace('Chunks')
 
         for itemp in xrange(numwksp): 
             #if wksplist[itemp].__class__.__name__.count("Event") > 0: 
