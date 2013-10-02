@@ -175,7 +175,7 @@ namespace Mantid
         }
       }
       // Check if the caches need invalidating
-      if( name == pos() || name == rot() ) clearCache();
+      if( name == pos() || name == rot() ) clearPositionSensitiveCaches();
     }
 
     /**
@@ -238,7 +238,7 @@ namespace Mantid
       }
 
       //clear the position cache
-      clearCache();
+      clearPositionSensitiveCaches();
       // finally add or update "pos" parameter
       if (param)
         param->set(position);
@@ -315,7 +315,7 @@ namespace Mantid
       }
 
       //clear the position cache
-      clearCache();
+      clearPositionSensitiveCaches();
 
       // finally add or update "pos" parameter
       if (param)
@@ -409,7 +409,7 @@ namespace Mantid
     void ParameterMap::addV3D(const IComponent* comp,const std::string& name, const std::string& value)
     {
       add(pV3D(),comp,name,value);
-      clearCache();
+      clearPositionSensitiveCaches();
     }
 
     /**
@@ -421,7 +421,7 @@ namespace Mantid
     void ParameterMap::addV3D(const IComponent* comp,const std::string& name, const V3D& value)
     {
       add(pV3D(),comp,name,value);
-      clearCache();
+      clearPositionSensitiveCaches();
     }
 
     /**  
@@ -433,36 +433,11 @@ namespace Mantid
     void ParameterMap::addQuat(const IComponent* comp,const std::string& name, const Quat& value)
     {
       add(pQuat(),comp,name,value);
-      clearCache();
+      clearPositionSensitiveCaches();
     }
 
     /**
-     * FASTER LOOKUPin multithreaded loops . Does the named parameter exist for the given component. 
-     * In a multi-threaded loop this yields much better performance than the counterpart
-     * using std::string as it does not dynamically allocate any memory
-     * @param comp :: The component to be searched
-     * @param name :: The name of the parameter
-     * @returns A boolean indicating if the map contains the named parameter. If the type is given then
-     * this must also match
-     */
-    bool ParameterMap::contains(const IComponent* comp, const char * name) const
-    {
-      if( m_map.empty() ) return false;
-      const ComponentID id = comp->getComponentID();
-      std::pair<pmap_cit,pmap_cit> components = m_map.equal_range(id);
-      for( pmap_cit itr = components.first; itr != components.second; ++itr )
-      {
-        if( boost::iequals(itr->second->nameAsCString(), name) )
-        {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    /**
-     * SLOWER VERSION in multithreaded loops. Does the named parameter exist for the given component
-     * and given type
+     * Does the named parameter exist for the given component and given type
      * @param comp :: The component to be searched
      * @param name :: The name of the parameter
      * @param type :: The type of the component as a string
@@ -513,41 +488,7 @@ namespace Mantid
         return false;
     }
 
-    /** FASTER LOOKUP in multithreaded loops. Return a named parameter
-     * @param comp :: Component to which parameter is related
-     * @param name :: Parameter name
-     * @returns The named parameter if it exists or a NULL shared pointer if not
-     */
-    Parameter_sptr ParameterMap::get(const IComponent* comp, const char* name) const
-    {
-      Parameter_sptr result = Parameter_sptr();
-      PARALLEL_CRITICAL(ParameterMap_get)
-      {
-        if( !m_map.empty() )
-        {
-          const ComponentID id = comp->getComponentID();
-          pmap_cit it_found = m_map.find(id);
-          if( it_found != m_map.end() && it_found->first )
-          {
-            pmap_cit itr = m_map.lower_bound(id);
-            pmap_cit itr_end = m_map.upper_bound(id);
-            for( ; itr != itr_end; ++itr )
-            {
-              Parameter_sptr param = itr->second;
-              if( boost::iequals(param->nameAsCString(), name) )
-              {
-                result = param;
-                break;
-              }
-            }
-          }
-        }
-      }
-      return result;
-    }
-
-
-    /** SLOWER LOOKUP in multithreaded loops. Return a named parameter of a given type
+    /** Return a named parameter of a given type
      * @param comp :: Component to which parameter is related
      * @param name :: Parameter name
      * @param type :: An optional type string
@@ -617,28 +558,6 @@ namespace Mantid
         } //!m_map.empty()
       } // PARALLEL_CRITICAL(ParameterMap_get)
       return result;
-    }
-
-    /** FASTER LOOKUP in multithreaded loops. Find a parameter by name, recursively going up
-     * the component tree to higher parents.
-     * @param comp :: The component to start the search with
-     * @param name :: Parameter name
-     * @returns the first matching parameter.
-     */
-    Parameter_sptr ParameterMap::getRecursive(const IComponent* comp, const char * name) const
-    {
-      boost::shared_ptr<const IComponent> compInFocus(comp,NoDeleting());
-      while( compInFocus != NULL )
-      {
-        Parameter_sptr param = get(compInFocus.get(), name);
-        if (param)
-        {
-          return param;
-        }
-        compInFocus = compInFocus->getParent();
-      }
-      //Nothing was found!
-      return Parameter_sptr();
     }
 
      /** Looks recursively upwards in the component tree for the first instance of a component with a matching type.
@@ -759,9 +678,9 @@ namespace Mantid
     }
 
     /**
-     * Clears the cache and nearest neighbour information managed by the parameter map.
+     * Clears the location, rotation & bounding box caches
      */
-    void ParameterMap::clearCache()
+    void ParameterMap::clearPositionSensitiveCaches()
     {
       m_cacheLocMap.clear();
       m_cacheRotMap.clear();
@@ -841,6 +760,25 @@ namespace Mantid
       return m_boundingBoxMap.getCache(comp->getComponentID(),box);
     }
 
+    //--------------------------------------------------------------------------------------------
+    /** Save the object to an open NeXus file.
+     * @param file :: open NeXus file
+     * @param group :: name of the group to create
+     */
+    void ParameterMap::saveNexus(::NeXus::File * file, const std::string & group) const
+    {
+      file->makeGroup(group, "NXnote", true);
+      file->putAttr("version", 1);
+      file->writeData("author", "");
+      file->writeData("date", Kernel::DateAndTime::getCurrentTime().toISO8601String());
+      file->writeData("description", "A string representation of the parameter map. The format is either: |detID:id-value;param-type;param-name;param-value| for a detector or  |comp-name;param-type;param-name;param-value| for other components.");
+      file->writeData("type", "text/plain");
+      std::string s = this->asString();
+      file->writeData("data", s);
+      file->closeGroup();
+    }
+
+
     //--------------------------------------------------------------------------
     // Private methods
     //--------------------------------------------------------------------------
@@ -860,7 +798,6 @@ namespace Mantid
         param = this->get(comp, name);
         if( param->type() != type )
         {
-          reportError("ParameterMap::add - Type mismatch on replacement of '" + name + "' parameter");
           throw std::runtime_error("ParameterMap::add - Type mismatch on parameter replacement");
         }
         created = false;
@@ -873,85 +810,6 @@ namespace Mantid
       }
       return param;
     }
-    
-    /** Logs an error
-     *  @param str :: The error message
-     */
-    void ParameterMap::reportError(const std::string& str)
-    {
-      g_log.error(str);
-    }
-
-
-
-    //--------------------------------------------------------------------------------------------
-    /** Save the object to an open NeXus file.
-     * @param file :: open NeXus file
-     * @param group :: name of the group to create
-     */
-    void ParameterMap::saveNexus(::NeXus::File * file, const std::string & group) const
-    {
-      file->makeGroup(group, "NXnote", true);
-      file->putAttr("version", 1);
-      file->writeData("author", "");
-      file->writeData("date", Kernel::DateAndTime::getCurrentTime().toISO8601String());
-      file->writeData("description", "A string representation of the parameter map. The format is either: |detID:id-value;param-type;param-name;param-value| for a detector or  |comp-name;param-type;param-name;param-value| for other components.");
-      file->writeData("type", "text/plain");
-      std::string s = this->asString();
-      file->writeData("data", s);
-      file->closeGroup();
-    }
-//
-//    //--------------------------------------------------------------------------------------------
-//    /** Load the object from an open NeXus file.
-//     * @param file :: open NeXus file
-//     * @param group :: name of the group to open
-//     * @param instr :: the BASE instrument for the workspace.
-//     */
-//    void ParameterMap::loadNexus(::NeXus::File * file, const std::string & group, Instrument_const_sptr instr)
-//    {
-//      file->openGroup(group, "NXnote");
-//      std::string details;
-//      file->readData("data", details);
-//      file->closeGroup();
-//      if (details.size() <= 1) return;
-//
-//      // Split the string that was made by asString()
-//      int options = Poco::StringTokenizer::TOK_IGNORE_EMPTY;
-//      options += Poco::StringTokenizer::TOK_TRIM;
-//      Poco::StringTokenizer splitter(details, "|", options);
-//
-//      Poco::StringTokenizer::Iterator iend = splitter.end();
-//      for( Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend; ++itr )
-//      {
-//        Poco::StringTokenizer tokens(*itr, ";");
-//        if( tokens.count() != 4 ) continue;
-//        std::string comp_name = tokens[0];
-//        const Geometry::IComponent* comp = 0;
-//        if (comp_name.find("detID:") != std::string::npos)
-//        {
-//          int detID = atoi(comp_name.substr(6).c_str());
-//          comp = instr->getDetector(detID).get();
-//          if (!comp)
-//          {
-//            g_log.warning()<<"Cannot find detector "<<detID<<'\n';
-//            continue;
-//          }
-//        }
-//        else
-//        {
-//          comp = instr->getComponentByName(comp_name).get();
-//          if (!comp)
-//          {
-//            g_log.warning()<<"Cannot find component "<<comp_name<<'\n';
-//            continue;
-//          }
-//        }
-//        if( !comp ) continue;
-//        this->add(tokens[1], comp, tokens[2], tokens[3]);
-//      }
-//    }
-
 
   } // Namespace Geometry
 } // Namespace Mantid
