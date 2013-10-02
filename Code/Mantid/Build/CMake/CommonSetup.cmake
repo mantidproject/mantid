@@ -132,10 +132,18 @@ if ( GIT_FOUND )
       string (REPLACE ":" "" ISOTIME ${ISOTIME})
 
       # convert the timezone into something that can be evaluated for math
-      string (REPLACE "-" "+" ISOTIMEZONE ${ISOTIMEZONE})
-      string (REGEX REPLACE "^([0-9]+)" "-\\1" ISOTIMEZONE ${ISOTIMEZONE})
+      if (ISOTIMEZONE STREQUAL "+0000")
+        set (ISOTIMEZONE "") # GMT do nothing
+      else ()
+        string( SUBSTRING ${ISOTIMEZONE} 0 1 ISOTIMEZONESIGN)
+	if (ISOTIMEZONESIGN STREQUAL "+")
+	  string (REPLACE "+" "-" ISOTIMEZONE ${ISOTIMEZONE})
+        else ()
+	  string (REPLACE "-" "+" ISOTIMEZONE ${ISOTIMEZONE})
+	endif()
+      endif ()
 
-      # revert the timezone from the time
+      # remove the timezone from the time to convert to GMT
       math (EXPR ISOTIME "${ISOTIME}${ISOTIMEZONE}" )
 
       # deal with times crossing midnight
