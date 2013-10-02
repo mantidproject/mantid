@@ -1,6 +1,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidQtCustomInterfaces/ForCE.h"
 
 #include <QFileInfo>
@@ -77,7 +79,13 @@ namespace MantidQt
 
 
 			QString pyFunc ("");
-			if(ext == "asc") //using ascii files
+			//IN13 has a different loading routine
+			if(instrument == "IN13")
+			{
+				ext = "asc";
+				pyFunc = "IN13Start";
+			}
+			else if(ext == "asc") //using ascii files
 			{
 				pyFunc += "IbackStart";
 			} 

@@ -21,7 +21,7 @@
      </property>
      <widget class="QWidget" name="forCE">
       <attribute name="title">
-       <string>Neutron Force</string>
+       <string>Neutron</string>
       </attribute>
      </widget>
      <widget class="QWidget" name="molDyn">

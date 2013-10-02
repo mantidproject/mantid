@@ -108,7 +108,7 @@ def getFilePath(run,ext,instr):
 	if path:
 		return path, fname
 	else:
-		error = 'ERROR *** Could not find ' + ext + ' file'
+		error = 'ERROR *** Could not find ' + ext + ' file: ' + fname
 		sys.exit(error)
 
 # Load an ascii/inx file
@@ -130,7 +130,7 @@ def IbackStart(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      
 	StartTime('Iback')
 	workdir = config['defaultsave.directory']
 
-	path, fname = getFilePath(run, '.asc', instr)
+	path, fname = getFilePath(instr,'.asc',run)
 
 	if Verbose:
 		logger.notice('Reading file : ' + path)
@@ -470,3 +470,159 @@ def RunParas(ascWS,instr,run,title,Verbose):
 		logger.notice('Analyser : ' +an+ref +' with energy = ' + str(efixed))
 	return efixed
 
+# IN13 routines
+# These routines are specific to loading data for the ILL IN13 instrument
+
+def IN13Start(instr,run,ana,refl,rejectZ,useM,mapPath,Verbose,Plot,Save):      #Ascii start routine
+	StartTime('IN13')
+	samWS = IN13Read(instr,run,Verbose,Plot,Save)
+	EndTime('IN13')
+
+def IN13Read(instr,run,Verbose,Plot,Save):      #Ascii start routine
+	workdir = config['defaultsave.directory']
+	
+	path, fname = getFilePath(run,'.asc', instr)
+
+	if Verbose:
+		logger.notice('Reading file : ' + path)
+
+	asc = loadFile(path)
+	lasc = len(asc)
+
+# header block
+	text = asc[1]
+	run = text[:8]
+	text = asc[4]    # run line
+	instr = text[:4]
+	time = text[14:33]   # user line
+	next,Ival = Iblock(asc,5)
+	nsubsp = Ival[0]
+	nspec = Ival[153]-2
+# text block
+	text = asc[25]
+	title = text[:20]
+# para1 block
+	next,Fval = Fblock(asc,32)
+	ntemp = int(Fval[6])
+	f1 = ntemp/10
+	ltemp = int(f1)
+	f2 = f1 -10*ltemp
+	if f2 >= 0.:
+		ltemp = ltemp +1
+	wave = 2.0*Fval[81]
+	if Verbose:
+		logger.notice('No. sub-spectra : ' + str(nsubsp))
+		logger.notice('No. spectra : ' + str(nspec))
+		logger.notice('Scan type : ' + str(int(Fval[8]))+
+			' ; Average energy : ' + str(Fval[9]))
+		logger.notice('CaF2 lattice : ' + str(Fval[81])+
+			' ; Graphite lattice : ' + str(Fval[82]))
+		logger.notice('Wavelength : ' + str(wave))
+		logger.notice('No. temperatures : ' + str(ntemp))
+		logger.notice('No. temperature lines : ' + str(ltemp))
+# para2 block
+	next,Fval = Fblock(asc,next)
+	angles = Fval[:nspec]
+	if Verbose:
+		logger.notice('Angles : ' + str(angles))
+	lspec = 4 +ltemp
+# monitors
+	psd = next + (nspec+2048)*lspec
+	l1m1 = psd + 1
+	txt = asc[l1m1]
+	l2m1 = l1m1 +3
+	mon1 = ExtractFloat(asc[l2m1])
+	if Verbose:
+		logger.notice('Mon1 : Line '+str(l2m1)+' : ' + asc[l2m1])
+# raw spectra
+	first = next
+	xDat = angles
+	y2D = []
+	e2D = []
+	for n in range(0,nspec):
+		ylist = []
+		elist = []
+		l1 = first + lspec*n + 1
+		if Verbose:
+			logger.notice('Line '+str(l1)+' : ' + asc[l1])
+		for l in range(0,ltemp):
+			l2 = l1 + 3 + l
+			val = ExtractFloat(asc[l2])
+			nval = len(val)
+			for m in range(0,nval):
+				ylist.append(val[m]/mon1[m])
+				elist.append(math.sqrt(val[m])/mon1[m])
+		y2D.append(ylist)
+		e2D.append(elist)
+# create WS
+	npt = len(xDat)
+	xDat.append(2*xDat[npt-1]-xDat[npt-2])
+	ascWS = fname +'_' +'_ang'
+	outWS = fname +'_' +'_q'
+	xD = np.array(xDat)
+	k0 = 4*math.pi/wave
+	Q = []
+	for n in range(0,nspec):
+		if angles[n] >= 180.0:
+			angles[n] = 360.0 - angles[n]
+		theta = math.radians(angles[n]/2.)
+		qq = k0*math.sin(theta)
+		Q.append(qq)
+	Qa = np.array(Q)
+	sorted_indices=Qa.argsort()
+	sorted_Q=Qa[sorted_indices]
+	lxdq = len(sorted_Q)
+	xlast = 2*sorted_Q[lxdq-1]-sorted_Q[lxdq-2]
+	sorted_Q = np.append(sorted_Q,xlast)
+	xDq = sorted_Q
+	for m in range(0,nval):
+		ylist = []
+		elist = []
+		for n in range(0,nspec):
+			ylist.append(y2D[n][m])
+			elist.append(e2D[n][m])
+		y1D = np.array(ylist)
+		e1D = np.array(elist)
+		y1Dq = y1D[sorted_indices]
+		e1Dq = e1D[sorted_indices]
+		if m == 0:
+			xData = xD
+			yData = y1D
+			eData = e1D
+			xDq = sorted_Q
+			yDq = y1Dq
+			eDq = e1Dq
+		else:
+			xData = np.append(xData,xD)
+			yData = np.append(yData,y1D)
+			eData = np.append(eData,e1D)
+			xDq = np.append(xDq,sorted_Q)
+			yDq = np.append(yDq,y1Dq)
+			eDq = np.append(eDq,e1Dq)
+	CreateWorkspace(OutputWorkspace=ascWS, DataX=xData, DataY=yData, DataE=eData,
+		Nspec=3, UnitX='MomentumTransfer')
+	IN13Paras(ascWS,run,title,wave,Verbose)
+	CreateWorkspace(OutputWorkspace=outWS, DataX=xDq, DataY=yDq, DataE=eDq,
+		Nspec=3, UnitX='MomentumTransfer')
+	IN13Paras(outWS,run,title,wave,Verbose)
+	if Save:
+		opath = os.path.join(workdir,outWS+'.nxs')
+		SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
+		if Verbose:
+			logger.notice('Output file : ' + opath)
+	if (Plot != 'None'):
+		plotForce(outWS,Plot)
+	return outWS
+
+def IN13Paras(ascWS,run,title,wave,Verbose):
+	ws = mtd[ascWS]
+	AddSampleLog(Workspace=ascWS, LogName="facility", LogType="String", LogText="ILL")
+	ws.getRun()['run_number'] = run
+	ws.getRun()['run_title'] = title
+	if Verbose:
+		facility = ws.getRun().getLogData('facility').value
+		logger.notice('Facility is ' +facility)
+		runNo = ws.getRun()['run_number'].value
+		runTitle = ws.getRun()['run_title'].value.strip()
+		logger.notice('Run : ' +runNo + ' ; Title : ' + runTitle)
+		logger.notice('Wavelength : ' + str(wave))
