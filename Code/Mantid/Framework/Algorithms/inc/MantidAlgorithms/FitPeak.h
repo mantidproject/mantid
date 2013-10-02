@@ -98,13 +98,14 @@ namespace Algorithms
                          size_t wsindex, std::vector<double> vec_xmin, std::vector<double> vec_xmax);
 
     /// Process and store fit result
-    void processNStoreFitResult(double rwp);
+    void processNStoreFitResult(double rwp,  bool storebkgd);
 
     /// Set up a vector of guessed FWHM
     void setupGuessedFWHM(std::vector<double>& vec_FWHM);
 
     /// Push/store a fit result
-    void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap);
+    void push(API::IFunction_const_sptr func, std::map<std::string, double>& funcparammap,
+              std::map<std::string, double>& paramerrormap);
 
     /// Pop
     void pop(const std::map<std::string, double>& funcparammap, API::IFunction_sptr func);
@@ -195,6 +196,8 @@ namespace Algorithms
     std::map<std::string, double> m_bkupPeakFunc;
     /// Best fitted peak function
     std::map<std::string, double> m_bestPeakFunc;
+    /// Best background function
+    std::map<std::string, double> m_bestBkgdFunc;
     /// Best Rwp ...
     double m_bestRwp;
 

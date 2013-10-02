@@ -347,9 +347,37 @@ namespace Algorithms
   /// Fit peak in one step
   void FitPeak::fitPeakOneStep()
   {
-    // FIXME - Implement ASAP
-    throw runtime_error("ASAP");
-    // TODO - Set up a composite function, and call fitSD.
+    // Set up a composite function
+    CompositeFunction_sptr compfunc = boost::make_shared<CompositeFunction>();
+    compfunc->addFunction(m_peakFunc);
+    compfunc->addFunction(m_bkgdFunc);
+
+    // Set up a list of guessed FWHM
+    // Calculate guessed FWHM
+    std::vector<double> vec_FWHM;
+    setupGuessedFWHM(vec_FWHM);
+
+    // Store starting setup
+    map<string, double> temperrormap;
+    push(m_peakFunc, m_bkupPeakFunc, temperrormap);
+    push(m_bkgdFunc, m_bkupBkgdFunc, temperrormap);
+
+    // Fit with different starting values of peak width
+    for (size_t i = 0; i < vec_FWHM.size(); ++i)
+    {
+      // set FWHM
+      m_peakFunc->setFwhm(vec_FWHM[i]);
+
+      // fit and process result
+      double goodndess = fitFunctionSD(compfunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX, false);
+      processNStoreFitResult(goodndess, true);
+
+      // restore the function parameters
+      pop(m_bkupPeakFunc, m_peakFunc);
+      pop(m_bkupBkgdFunc, m_bkgdFunc);
+    }
+
+    return;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -383,7 +411,8 @@ namespace Algorithms
     setupGuessedFWHM(vec_FWHM);
 
     // Store starting setup
-    push(m_peakFunc, m_bkupPeakFunc);
+    map<string, double> bkupPeakErrorMap;
+    push(m_peakFunc, m_bkupPeakFunc, bkupPeakErrorMap);
 
     // Fit with different starting values of peak width
     for (size_t i = 0; i < vec_FWHM.size(); ++i)
@@ -402,7 +431,7 @@ namespace Algorithms
       double rwp = fitPeakFuncion(m_peakFunc, m_dataWS, m_wsIndex, m_minFitX, m_maxFitX, error);
 
       // Store result
-      processNStoreFitResult(rwp);
+      processNStoreFitResult(rwp,false);
     }
 
     // Make a combo fit
@@ -498,7 +527,8 @@ namespace Algorithms
   IBackgroundFunction_sptr FitPeak::fitBackground(IBackgroundFunction_sptr bkgdfunc)
   {
     // backkup
-    push(bkgdfunc, m_bkupBkgdFunc);
+    map<string, double> errormap;
+    push(bkgdfunc, m_bkupBkgdFunc, errormap);
 
     std::vector<double> vec_bkgd;
     vector<double> vec_xmin(2);
@@ -607,8 +637,10 @@ namespace Algorithms
 
   //----------------------------------------------------------------------------------------------
   /** Process and store fit result
+    * @param rwp :: goodness of this fit
+    * @param storebkgd :: option to store (i.e., push) background function as well
     */
-  void FitPeak::processNStoreFitResult(double rwp)
+  void FitPeak::processNStoreFitResult(double rwp, bool storebkgd)
   {
     bool fitsuccess = true;
     string failreason("");
@@ -655,7 +687,9 @@ namespace Algorithms
     // Store result if
     if (rwp < m_bestRwp && fitsuccess)
     {
-      push(m_peakFunc, m_bestPeakFunc);
+      push(m_peakFunc, m_bestPeakFunc, m_fitErrorPeakFunc);
+      if (storebkgd)
+        push(m_bkgdFunc, m_bestBkgdFunc, m_fitErrorBkgdFunc);
     }
 
     return;
@@ -664,10 +698,12 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Push/store a fit result
     */
-  void FitPeak::push(IFunction_const_sptr func, std::map<std::string, double>& funcparammap)
+  void FitPeak::push(IFunction_const_sptr func, std::map<std::string, double>& funcparammap,
+                     std::map<std::string, double>& paramerrormap)
   {
     // Clear map
     funcparammap.clear();
+    paramerrormap.clear();
 
     // Set up
     vector<string> funcparnames = func->getParameterNames();
@@ -676,6 +712,9 @@ namespace Algorithms
     {
       double parvalue = func->getParameter(i);
       funcparammap.insert(make_pair(funcparnames[i], parvalue));
+
+      double parerror = func->getError(i);
+      paramerrormap.insert(make_pair(funcparnames[i], parerror));
     }
 
     return;
@@ -724,7 +763,6 @@ namespace Algorithms
       g_log.information(dbss.str());
     }
 
-    // TODO: get the error getError(i)
     double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx, false);
     g_log.information() << "[D] Goodness-Fit = " << goodness << "\n";
 
@@ -833,9 +871,9 @@ namespace Algorithms
     double goodness_init = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
     g_log.information() << "[D] Pre-fit: Goodness = " << goodness_init << ".\n";
 
-    map<string, double> bkuppeakmap, bkupbkgdmap;
-    push(peakfunc, bkuppeakmap);
-    push(bkgdfunc, bkupbkgdmap);
+    map<string, double> bkuppeakmap, bkupbkgdmap, bkuppeakerrormap, bkupbkgderrormap;
+    push(peakfunc, bkuppeakmap, bkuppeakerrormap);
+    push(bkgdfunc, bkupbkgdmap, bkupbkgderrormap);
 
     // Fit
     modecal = false;
@@ -1015,12 +1053,6 @@ namespace Algorithms
     {
       for (size_t i = 0; i < parnames.size(); ++i)
         fitfunc->unfix(i);
-    }
-    else
-    {
-      // TODO - Set up the map m_fitErrorPeakFunc and m_fitErrorBkgdFunc...
-      //        may not be at this location.
-      fitfunc->getError(i);
     }
 
     g_log.information() << "Fit function " << fitfunc->asString() << ": Fit-status = " << fitStatus
