@@ -168,6 +168,10 @@ DECLARE_ALGORITHM(ProcessBackground)
 
     m_lowerBound = getProperty("LowerBound");
     m_upperBound = getProperty("UpperBound");
+    if (isEmpty(m_lowerBound))
+      m_lowerBound = m_dataWS->readX(m_wsIndex).front();
+    if (isEmpty(m_upperBound))
+      m_upperBound = m_dataWS->readX(m_wsIndex).back();
 
     // 2. Do different work
     std::string option = getProperty("Options");
@@ -575,11 +579,15 @@ DECLARE_ALGORITHM(ProcessBackground)
     {
       bkgdfunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(
             boost::make_shared<CurveFitting::Polynomial>());
+      bkgdfunction->initialize();
     }
     else if (backgroundtype.compare("Chebyshev") == 0)
     {
       Chebyshev_sptr cheby = boost::make_shared<CurveFitting::Chebyshev>();
       bkgdfunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(cheby);
+      bkgdfunction->initialize();
+
+      g_log.debug() << "[D] Chebyshev is set to range " << m_lowerBound << ", " << m_upperBound << "\n";
       bkgdfunction->setAttributeValue("StartX", m_lowerBound);
       bkgdfunction->setAttributeValue("EndX", m_upperBound);
     }
@@ -591,7 +599,6 @@ DECLARE_ALGORITHM(ProcessBackground)
       throw std::invalid_argument(errss.str());
     }
 
-    bkgdfunction->initialize();;
     bkgdfunction->setAttributeValue("n", bkgdorder);
 
     g_log.debug() << "DBx622 Background Workspace has " << bkgdWS->readX(0).size()
@@ -636,8 +643,8 @@ DECLARE_ALGORITHM(ProcessBackground)
 
     // b) check that chi2 got better
     const double chi2 = fit->getProperty("OutputChi2overDoF");
-    g_log.notice() << "Fit background: Fit Status = " << fitStatus << ", chi2 = "
-                   << chi2 << "\n";
+    g_log.information() << "Fit background: Fit Status = " << fitStatus << ", chi2 = "
+                        << chi2 << "\n";
 
     // c) get out the parameter names
     API::IFunction_sptr func = fit->getProperty("Function");
@@ -675,6 +682,8 @@ DECLARE_ALGORITHM(ProcessBackground)
         vece.push_back(e);
       }
     }
+    g_log.information() << "Found " << vecx.size() << " background points out of " << m_dataWS->readX(wsindex).size()
+                        << " total data points. " << "\n";
 
     // c) Build new
     Workspace2D_sptr outws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
