@@ -49,7 +49,7 @@ _translations = {
     'Sri Nagella'             : 'Nagella, Sri',
     'T Nielsen'               : 'Nielsen, Torben',
     'Karl Palmen'             : 'Palmen, Karl',
-    'Peter Parker'            : 'Parker, Peter George',
+    'Peter Parker'            : 'Parker, Peter G.',
     'Gesner Passos'           : 'Passos, Gesner',
     'Pete Peterson'           : 'Peterson, Peter F.',
     'Peter Peterson'          : 'Peterson, Peter F.',
