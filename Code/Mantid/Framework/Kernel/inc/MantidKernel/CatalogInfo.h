@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/Logger.h"
+#include <string>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -49,20 +49,34 @@ namespace Mantid
     class MANTID_KERNEL_DLL CatalogInfo
     {
       public:
+        /// Constructor
+        CatalogInfo(const Poco::XML::Element* element);
         /// Obtain catalog name from the facility file.
-        std::string catalogName(const Poco::XML::Element* element);
+        std::string catalogName();
         /// Obtain soap end point from the facility file.
-        std::string soapEndPoint(const Poco::XML::Element* element);
+        std::string soapEndPoint();
+        /// Obtain the regex prefix from the  facility file.
+        std::string catalogPrefix();
         /// Obtain Windows prefix from the facility file.
-        std::string windowsPrefix(const Poco::XML::Element* element);
+        std::string windowsPrefix();
         /// Obtain Macintosh prefix from facility file.
-        std::string macPrefix(const Poco::XML::Element* element);
+        std::string macPrefix();
         /// Obtain Linux prefix from facility file.
-        std::string linuxPrefix(const Poco::XML::Element* element);
+        std::string linuxPrefix();
         /// Transform's the archive path based on operating system used.
-        std::string transformArchivePath(std::string& path);
-        /// Replaces backward slash with forward slashes for Unix compatibility.
-        void replaceBackwardSlash(std::string& path);
+        std::string transformArchivePath(std::string path);
+
+      private:
+        /// Obtain the attribute from a given element tag and attribute name.
+        std::string getAttribute(const Poco::XML::Element* element, const std::string &tagName, const std::string &attributeName);
+
+        std::string m_catalogName;
+        std::string m_soapEndPoint;
+        std::string m_catalogPrefix;
+        std::string m_windowsPrefix;
+        std::string m_macPrefix;
+        std::string m_linuxPrefix;
+
     };
 
   } // namespace Kernel
