@@ -48,7 +48,7 @@ public:
 
     // Check each line
     ifstream chkfile;
-    chkfile.open(prmfilename, ios::in);
+    chkfile.open(prmfilename.c_str(), ios::in);
     if (chkfile.is_open())
     {
       string line;

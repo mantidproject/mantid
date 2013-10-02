@@ -109,7 +109,7 @@ namespace Algorithms
     // Write out
     string outfilename = getPropertyValue("OutputFilename");
     ofstream ofile;
-    ofile.open(outfilename, ios::out);
+    ofile.open(outfilename.c_str(), ios::out);
     if (!ofile.is_open())
     {
       stringstream errss;
