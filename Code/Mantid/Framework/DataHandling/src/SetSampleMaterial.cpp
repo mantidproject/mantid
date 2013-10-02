@@ -60,6 +60,12 @@ namespace DataHandling
   {
     return "SetSampleMaterial";
   }
+
+  int SetSampleMaterial::version() const
+  {
+    return (1);
+  }
+
   const std::string SetSampleMaterial::category() const
   {
     return "Sample;DataHandling";
