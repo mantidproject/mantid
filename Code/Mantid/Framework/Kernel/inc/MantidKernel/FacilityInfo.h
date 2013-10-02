@@ -94,9 +94,7 @@ private:
   void fillZeroPadding(const Poco::XML::Element* elem);
   void fillDelimiter(const Poco::XML::Element* elem);
   void fillExtensions(const Poco::XML::Element* elem);
-  void fillSoapEndPoint(const Poco::XML::Element* elem);
   void fillArchiveNames(const Poco::XML::Element* elem);
-  void fillCatalogName(const Poco::XML::Element* elem);
   void fillInstruments(const Poco::XML::Element* elem);
   void fillLiveListener(const Poco::XML::Element* elem);
   void fillHTTPProxy(const Poco::XML::Element* elem);
