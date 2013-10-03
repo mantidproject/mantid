@@ -328,13 +328,19 @@ namespace WorkflowAlgorithms
       }
 
       if (doCorrection) {
+        double tempmin;
+        double tempmax;
+        m_outputW->getXMinMax(tempmin, tempmax);
+
         g_log.information() << "running CropWorkspace(Xmin=" << xmin
                             << ", Xmax=" << xmax << ")\n" ;
         API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
         cropAlg->setProperty("InputWorkspace", m_outputW);
         cropAlg->setProperty("OutputWorkspace", m_outputW);
-        if (xmin > 0.)cropAlg->setProperty("Xmin", xmin);
-        if (xmax > 0.)cropAlg->setProperty("Xmax", xmax);
+        if ((xmin > 0.) && (xmin > tempmin))
+          cropAlg->setProperty("Xmin", xmin);
+        if ((xmax > 0.) && (xmax < tempmax))
+          cropAlg->setProperty("Xmax", xmax);
         cropAlg->executeAsChildAlg();
         m_outputW = cropAlg->getProperty("OutputWorkspace");
       }
@@ -620,6 +626,12 @@ namespace WorkflowAlgorithms
     */
   API::MatrixWorkspace_sptr AlignAndFocusPowder::diffractionFocus(API::MatrixWorkspace_sptr ws)
   {
+    if (!m_groupWS)
+    {
+      g_log.information() << "not focussing data\n";
+      return ws;
+    }
+
     g_log.information() << "running DiffractionFocussing. \n";
 
     API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
@@ -773,7 +785,7 @@ namespace WorkflowAlgorithms
   {
 
     // check if the workspaces exist with their canonical names so they are not reloaded for chunks
-    if (!m_groupWS)
+    if ((!m_groupWS) && (!calFileName.empty()))
     {
       try
       {
@@ -783,7 +795,7 @@ namespace WorkflowAlgorithms
         ; // not noteworthy
       }
     }
-    if (!m_offsetsWS)
+    if ((!m_offsetsWS) && (!calFileName.empty()))
     {
       try
       {
@@ -794,7 +806,7 @@ namespace WorkflowAlgorithms
         ; // not noteworthy
       }
     }
-    if (!m_maskWS)
+    if ((!m_maskWS) && (!calFileName.empty()))
     {
       try
       {
@@ -808,6 +820,10 @@ namespace WorkflowAlgorithms
 
     // see if everything exists to exit early
     if (m_groupWS && m_offsetsWS && m_maskWS)
+      return;
+
+    // see if the calfile is specified
+    if (calFileName.empty())
       return;
 
     g_log.information() << "Loading Calibration file \"" << calFileName << "\"\n";
