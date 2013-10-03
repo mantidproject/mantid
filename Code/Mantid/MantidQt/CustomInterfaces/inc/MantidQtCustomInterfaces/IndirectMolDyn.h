@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_IndirectMolDyn_H_
-#define MANTIDQTCUSTOMINTERFACES_IndirectMolDyn_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTMOLDYN_H_
+#define MANTIDQTCUSTOMINTERFACES_INDIRECTMOLDYN_H_
 
 #include "ui_IndirectMolDyn.h"
 #include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"

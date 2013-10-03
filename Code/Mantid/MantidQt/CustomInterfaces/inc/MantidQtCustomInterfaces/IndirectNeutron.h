@@ -1,5 +1,5 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_IndirectNeutron_H_
-#define MANTIDQTCUSTOMINTERFACES_IndirectNeutron_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTNEUTRON_H_
+#define MANTIDQTCUSTOMINTERFACES_INDIRECTNEUTRON_H_
 
 #include "ui_IndirectNeutron.h"
 #include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
