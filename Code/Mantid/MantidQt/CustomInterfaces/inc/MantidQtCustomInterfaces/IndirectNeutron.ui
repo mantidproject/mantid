@@ -55,7 +55,6 @@
          <property name="techniques">
           <stringlist>
            <string>Reactor Indirect Geometry Spectroscopy</string>
-           <string>TOF Indirect Geometry Spectroscopy</string>
           </stringlist>
          </property>
         </widget>
