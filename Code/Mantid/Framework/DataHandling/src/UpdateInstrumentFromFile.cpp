@@ -96,7 +96,7 @@ namespace Mantid
       exts.push_back(".s*");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The filename of the input file.\n"
-        "Currently supports RAW, ISIS NeXus & multi-column (at least 2) ascii file"
+        "Currently supports RAW, ISIS NeXus, DAT & multi-column (at least 2) ascii files"
         );
       declareProperty("MoveMonitors", (!m_ignoreMonitors),
                       "If true the positions of any detectors marked as monitors "
@@ -109,8 +109,7 @@ namespace Mantid
                       "Keywords=spectrum,ID,R,theta,phi. A dash means skip column. Keywords are recognised"
                       "as identifying components to move to new positions. Any other names in the list"
                       "are added as instrument parameters.");
-
-
+      declareProperty("SkipFirstNLines", 0, "If the file is ASCII, then skip this number of lines at the start of the file");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -148,6 +147,14 @@ namespace Mantid
 
       if(FileDescriptor::isAscii(filename))
       {
+        // If no header specified & the extension is .dat or .sca, then assume ISIS
+        // DAT file structure
+        if(getPropertyValue("AsciiHeader").empty() &&
+           (boost::iends_with(filename,".dat") || boost::iends_with(filename,".sca")))
+        {
+          this->setPropertyValue("AsciiHeader", "ID,-,R,-,theta,phi,-,-,-,-,-,-,-,-,-,-,-,-,-");
+          this->setProperty("SkipFirstNLines",2);
+        }
         updateFromAscii(filename);
         return;
       }
@@ -263,11 +270,19 @@ namespace Mantid
       const spec2index_map specToIndex(m_workspace->getSpectrumToWorkspaceIndexMap());
 
       std::ifstream datfile(filename.c_str(), std::ios_base::in);
-
+      const int skipNLines = getProperty("SkipFirstNLines");
       std::string line;
+      int lineCount(0);
+      while(lineCount < skipNLines)
+      {
+        std::getline(datfile,line);
+        ++lineCount;
+      }
+
       std::vector<double> colValues(header.colCount - 1, 0.0);
       while(std::getline(datfile,line))
       {
+        boost::trim(line);
         std::istringstream is(line);
         // Column 0 should be ID/spectrum number
         int32_t detOrSpec(-1000);
@@ -418,10 +433,6 @@ namespace Mantid
           try
           {
             Geometry::IDetector_const_sptr det = inst->getDetector(detID[i]);
-            if( m_ignoreMonitors && det->isMonitor() )
-            {
-              continue;
-            }
             setDetectorPosition(det, l2[i], theta[i], phi[i]);
           }
           catch (Kernel::Exception::NotFoundError&)
@@ -442,6 +453,8 @@ namespace Mantid
     void UpdateInstrumentFromFile::setDetectorPosition(const Geometry::IDetector_const_sptr & det, const float l2,
                                                        const float theta, const float phi)
     {
+      if( m_ignoreMonitors && det->isMonitor() ) return;
+
       Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
       Kernel::V3D pos;
       if (!m_ignorePhi)
