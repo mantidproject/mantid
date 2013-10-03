@@ -54,6 +54,28 @@ namespace WorkflowAlgorithms
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(AlignAndFocusPowder)
 
+  AlignAndFocusPowder::AlignAndFocusPowder() :
+    API::Algorithm()
+  {}
+
+  AlignAndFocusPowder::~AlignAndFocusPowder()
+  {}
+
+  const std::string AlignAndFocusPowder::name() const
+  {
+    return "AlignAndFocusPowder";
+  }
+
+  int AlignAndFocusPowder::version() const
+  {
+    return 1;
+  }
+
+  const std::string AlignAndFocusPowder::category() const
+  {
+    return "Workflow\\Diffraction";
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Sets documentation strings for this algorithm
     */

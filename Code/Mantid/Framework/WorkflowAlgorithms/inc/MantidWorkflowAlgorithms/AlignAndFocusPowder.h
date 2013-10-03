@@ -58,15 +58,15 @@ namespace Mantid
     {
     public:
       /// Empty Constructor
-      AlignAndFocusPowder() : API::Algorithm() {}
+      AlignAndFocusPowder();
       /// Destructor
-      virtual ~AlignAndFocusPowder() {}
+      virtual ~AlignAndFocusPowder();
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "AlignAndFocusPowder";}
+      virtual const std::string name() const;
       /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return 1;}
+      virtual int version() const;
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "Workflow\\Diffraction";}
+      virtual const std::string category() const;
     
     private:
       /// Sets documentation strings for this algorithm
