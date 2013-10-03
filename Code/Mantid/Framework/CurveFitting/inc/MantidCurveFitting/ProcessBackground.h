@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -85,6 +86,9 @@ private:
     /// Select background points (main)
     void execSelectBkgdPoints();
 
+    /// Select background points (main)
+    void execSelectBkgdPoints2();
+
     /// Parse peak centre and FWHM from a table workspace
     void parsePeakTableWorkspace(DataObjects::TableWorkspace_sptr peaktablews, std::vector<double>& vec_peakcentre,
                                  std::vector<double>& vec_peakfwhm);
@@ -94,7 +98,13 @@ private:
                         std::vector<double> v_fwhm);
 
     /// Select background points automatically
-    DataObjects::Workspace2D_sptr autoBackgroundSelection(size_t wsindex, DataObjects::Workspace2D_sptr bkgdWS);
+    DataObjects::Workspace2D_sptr autoBackgroundSelection(DataObjects::Workspace2D_sptr bkgdWS);
+
+    /// Create a background function from input properties
+    BackgroundFunction_sptr createBackgroundFunction();
+
+    /// Filter non-background data points out and create a background workspace
+    DataObjects::Workspace2D_sptr filterForBackground(BackgroundFunction_sptr bkgdfunction);
 
     DataObjects::Workspace2D_const_sptr m_dataWS;
     DataObjects::Workspace2D_sptr m_outputWS;
