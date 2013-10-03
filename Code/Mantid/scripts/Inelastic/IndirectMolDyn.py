@@ -6,7 +6,7 @@ from mantid import config, logger, mtd
 from mantid.kernel import V3D
 import sys, math, os.path, numpy as np
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
-from IndirectForce import ChangeAngles, InstrParas, RunParas
+from IndirectLoadAscii import ChangeAngles, InstrParas, RunParas
 mp = import_mantidplot()
 
 #  Routines for Ascii file of MolDyn data
