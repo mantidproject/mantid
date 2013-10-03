@@ -1,12 +1,15 @@
-#ifndef MANTIDQTCUSTOMINTERFACES_IndirectLoadAscii_H_
-#define MANTIDQTCUSTOMINTERFACES_IndirectLoadAscii_H_
+#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTLOADASCII_H_
+#define MANTIDQTCUSTOMINTERFACES_INDIRECTLOADASCII_H_
 
 //----------------------
 // Includes
 //----------------------
 #include "ui_IndirectLoadAscii.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/IndirectLoadAsciiTab.h"
+
+#include <Poco/NObserver.h>
 
 namespace MantidQt
 {
@@ -76,10 +79,15 @@ namespace MantidQt
 		private:
       /// Load default interface settings for each tab
       void loadSettings();
+      /// Called upon a close event.
+      virtual void closeEvent(QCloseEvent*);
+      /// handle POCO event
+      void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf);
 
       /// Map of tabs indexed by position on the window
 			std::map<unsigned int, IndirectLoadAsciiTab*> m_loadAsciiTabs;
-
+      /// Change Observer for ConfigService (monitors user directories)
+      Poco::NObserver<IndirectLoadAscii, Mantid::Kernel::ConfigValChangeNotification> m_changeObserver;
       ///Main interface window
       Ui::IndirectLoadAscii m_uiForm;
     };

@@ -18,7 +18,8 @@ namespace MantidQt
 
 using namespace MantidQt::CustomInterfaces;
 
-IndirectLoadAscii::IndirectLoadAscii(QWidget *parent) : UserSubWindow(parent)
+IndirectLoadAscii::IndirectLoadAscii(QWidget *parent) : UserSubWindow(parent),
+	m_changeObserver(*this, &IndirectLoadAscii::handleDirectoryChange)
 {
 
 }
@@ -26,6 +27,9 @@ IndirectLoadAscii::IndirectLoadAscii(QWidget *parent) : UserSubWindow(parent)
 void IndirectLoadAscii::initLayout()
 {
 	m_uiForm.setupUi(this);
+	
+  // Connect Poco Notification Observer
+  Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
 	//insert each tab into the interface on creation
 	m_loadAsciiTabs.insert(std::make_pair(NEUTRON, new IndirectNeutron(m_uiForm.IndirectLoadAsciiTabs->widget(NEUTRON))));
@@ -37,7 +41,6 @@ void IndirectLoadAscii::initLayout()
 	{
 		connect(iter->second, SIGNAL(executePythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
 		connect(iter->second, SIGNAL(showMessageBox(const QString&)), this, SLOT(showMessageBox(const QString&)));
-		
 	}
 
 	loadSettings();
@@ -47,6 +50,30 @@ void IndirectLoadAscii::initLayout()
 	connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
 	connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
 }
+
+  /**
+   * Handles closing the window.
+   *
+   * @param :: the detected close event
+   */
+  void IndirectLoadAscii::closeEvent(QCloseEvent*)
+  {
+    Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
+  }
+
+  /**
+   * Handles a change in directory.
+   *
+   * @param pNf :: notification
+   */
+  void IndirectLoadAscii::handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf)
+  {
+    std::string key = pNf->key();
+    if ( key == "defaultsave.directory" )
+    {
+      loadSettings();
+    }
+  }
 
 /**
  * Load the setting for each tab on the interface.
