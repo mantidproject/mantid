@@ -237,7 +237,7 @@ namespace Mantid
       if (absIdetVanWS)
       {
         NeutronAtom neutronVanadium=getNeutronAtom(vanadium.z_number);
-        double xsection =(neutronVanadium.inc_scatt_xs+neutronVanadium.coh_scatt_xs)*1e3/4./M_PI; //cross section per steradian in milibarns
+        double xsection = (neutronVanadium.inc_scatt_xs+neutronVanadium.coh_scatt_xs) * 1e3 / 4. / M_PI; //cross section per steradian in millibarns
 
         outputWS /= xsection;
         const double sampleMass = reductionManager->getProperty("SampleMass");
