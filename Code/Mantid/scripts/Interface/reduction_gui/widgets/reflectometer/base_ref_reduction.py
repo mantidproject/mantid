@@ -441,50 +441,11 @@ class BaseRefWidget(BaseWidget):
 
         return scaled_ws_list[0]+'_histo'
 
-#        new_x_axis = []
-#        new_y_axis = []
-#        new_e_axis = []
-#        
-#        sz = len(x_axis)        
-#        i=0
-#        while (i < sz-1):
-#            
-#            _left_x = x_axis[i]
-#            _right_x = x_axis[i+1]
-#
-#            _left_y = y_axis[i]
-#            _left_e = e_axis[i]
-#
-#            if (_left_x == _right_x):
-#                
-#                _right_y = y_axis[i+1]
-#                _right_e = e_axis[i+1]
-#
-#                #calculate weighted mean 
-#                import wks_utility
-#                [_y_mean, _e_mean] = wks_utility.weightedMean([_left_y, _right_y], [_left_e, _right_e])
-#   
-#                new_x_axis.append(_left_x)
-#                new_y_axis.append(_y_mean)
-#                new_e_axis.append(_e_mean)
-#                
-#                i+=1
-#            
-#            else:
-#            
-#                new_x_axis.append(_left_x)
-#                new_y_axis.append(_left_y)
-#                new_e_axis.append(_left_e)
-#    
-#            i+=1
-#    
-#        self.x_axis = new_x_axis
-#        self.y_axis = new_y_axis
-#        self.e_axis = new_e_axis
+
         
     def _create_ascii_clicked(self):
         """
-        Reached by the "Create ASCII" button
+        Reached by the 'Create ASCII' button
         """
         #make sure there is the right output workspace called '
 #        if not mtd.workspaceExists('ref_combined'):
@@ -527,8 +488,7 @@ class BaseRefWidget(BaseWidget):
 #              Params=q_binning)
             
         wks_file_name = self._average_y_of_same_x_()
-        
-#        
+
 #        mt = mtd['ref_combined']
 #        x_axis = mt.readX(0)[:]
 #        y_axis = mt.readY(0)[:]
@@ -542,14 +502,15 @@ class BaseRefWidget(BaseWidget):
         
         sz = len(x_axis)-1
         for i in range(sz):
-            _line = str(x_axis[i])
-            _line += ' ' + str(y_axis[i])
-            _line += ' ' + str(e_axis[i])
-            if _with_4th_flag:
-                _precision = str(dq0 + dq_over_q * x_axis[i])
-                _line += ' ' + _precision
-            
-            text.append(_line)
+            # do not display data where R=0
+            if (y_axis[i] > 1e-15):
+                _line = str(x_axis[i])
+                _line += ' ' + str(y_axis[i])
+                _line += ' ' + str(e_axis[i])
+                if _with_4th_flag:
+                    _precision = str(dq0 + dq_over_q * x_axis[i])
+                    _line += ' ' + _precision
+                text.append(_line)
     
         f=open(file_name,'w')
         for _line in text:
