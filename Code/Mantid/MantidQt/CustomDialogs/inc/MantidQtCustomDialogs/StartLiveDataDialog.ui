@@ -53,7 +53,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_4">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QRadioButton" name="radNow">
               <property name="toolTip">
@@ -67,23 +67,6 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
               </property>
              </widget>
             </item>
-            <item>
-             <spacer name="horizontalSpacer_14">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
              <widget class="QRadioButton" name="radStartOfRun">
               <property name="toolTip">
@@ -113,52 +96,45 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <widget class="QRadioButton" name="radAbsoluteTime">
+              <property name="maximumSize">
+               <size>
+                <width>15</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="toolTip">
                <string>Start collecting data from a specific time:</string>
               </property>
               <property name="text">
-               <string>Absolute Time (UTC):</string>
+               <string/>
               </property>
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_2">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
-            <item>
-             <widget class="QDateTimeEdit" name="dateTimeEdit">
+             <widget class="QSpinBox" name="dateTimeEdit">
               <property name="enabled">
                <bool>false</bool>
               </property>
               <property name="minimumSize">
                <size>
-                <width>200</width>
+                <width>0</width>
                 <height>0</height>
                </size>
               </property>
-              <property name="displayFormat">
-               <string>MM/dd/yyyy hh:mm:ss AP</string>
-              </property>
-              <property name="timeSpec">
-               <enum>Qt::UTC</enum>
+              <property name="maximum">
+               <number>9999</number>
               </property>
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_13">
+             <widget class="QLabel" name="minutes">
+              <property name="text">
+               <string>minutes ago</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
