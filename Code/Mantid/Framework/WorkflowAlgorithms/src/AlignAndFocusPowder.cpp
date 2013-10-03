@@ -522,7 +522,7 @@ namespace WorkflowAlgorithms
         m_lowResW = rebin(m_lowResW);
     }
 
-    if (l1 > 0)
+    if (l1 > 0 || !tths.empty() || !l2s.empty() || !phis.empty())
     {
       size_t numreg = m_outputW->getNumberHistograms();
 
@@ -648,11 +648,16 @@ namespace WorkflowAlgorithms
 
     API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
     editAlg->setProperty("Workspace", ws);
-    editAlg->setProperty("PrimaryFlightPath", l1);
-    editAlg->setProperty("Polar", polars);
-    editAlg->setProperty("SpectrumIDs", specids);
-    editAlg->setProperty("L2", l2s);
-    editAlg->setProperty("Azimuthal", phis);
+    if (l1 > 0.)
+      editAlg->setProperty("PrimaryFlightPath", l1);
+    if (!polars.empty())
+      editAlg->setProperty("Polar", polars);
+    if (!specids.empty())
+      editAlg->setProperty("SpectrumIDs", specids);
+    if (!l2s.empty())
+      editAlg->setProperty("L2", l2s);
+    if (!phis.empty())
+      editAlg->setProperty("Azimuthal", phis);
     editAlg->executeAsChildAlg();
 
     ws = editAlg->getProperty("Workspace");
