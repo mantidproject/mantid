@@ -181,19 +181,27 @@ public:
 
   void testRecursive_Parameter_Search_Moves_Up_The_Instrument_Tree()
   {
-    // Attach a parameter to the instrument
-    const std::string topLevel("TopLevelParameter");
-    const int value(2);
+    // Attach 2 parameters to the instrument
+    const std::string topLevel1("top1"), topLevel2("top2");
+    const int value1(2), value2(3);
     ParameterMap pmap;
-    pmap.addInt(m_testInstrument.get(), topLevel, value);
+    pmap.addInt(m_testInstrument.get(), topLevel1, value1);
+    pmap.addInt(m_testInstrument.get(), topLevel2, value2);
     //Ask for the parameter on a child
     IComponent_sptr comp = m_testInstrument->getChild(0);
     // Non-recursive should not find the parameter
-    Parameter_sptr fetched = pmap.get(comp.get(), topLevel);
+    Parameter_sptr fetched = pmap.get(comp.get(), topLevel1);
     TS_ASSERT_EQUALS(fetched, Parameter_sptr());
-    fetched = pmap.getRecursive(comp.get(), topLevel);
+
+    fetched = pmap.getRecursive(comp.get(), topLevel1);
     TS_ASSERT(fetched);
-    TS_ASSERT_EQUALS(fetched->value<int>(), value);
+    TS_ASSERT_EQUALS(fetched->value<int>(), value1);
+
+    // Check that the correct parameter name is found even after a first call that
+    // would be cache the previous one
+    fetched = pmap.getRecursive(comp.get(), topLevel2);
+    TS_ASSERT(fetched);
+    TS_ASSERT_EQUALS(fetched->value<int>(), value2);
   }
 
   void testClearByName_Only_Removes_Named_Parameter()
@@ -360,7 +368,7 @@ public:
     m_testInst->add(subbank1);
     m_testInst->add(topbank);
 
-    // Add a parameter at the top level
+    // Add a double parameter at the top level
     m_pmap.addDouble(m_testInst->getComponentID(), "instlevel",10.0);
     // and at leaf level
     m_pmap.addDouble(m_leaf->getComponentID(), "leaflevel",11.0);

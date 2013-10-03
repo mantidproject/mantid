@@ -593,19 +593,17 @@ namespace Mantid
     Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, 
                                               const std::string & type) const
     {
-      if( m_map.empty() ) return Parameter_sptr();
-      boost::shared_ptr<const IComponent> compInFocus(comp,NoDeleting());
-      while( compInFocus != NULL )
+      Parameter_sptr result = this->get(comp->getComponentID(), name, type);
+      if(result) return result;
+
+      auto parent = comp->getParent();
+      while(parent)
       {
-        Parameter_sptr param = get(compInFocus.get(), name, type);
-        if (param)
-        {
-          return param;
-        }
-        compInFocus = compInFocus->getParent();
+        result = get(parent->getComponentID(), name, type);
+        if(result) return result;
+        parent = parent->getParent();
       }
-      //Nothing was found!
-      return Parameter_sptr();
+      return result;
     }
 
     /**  
