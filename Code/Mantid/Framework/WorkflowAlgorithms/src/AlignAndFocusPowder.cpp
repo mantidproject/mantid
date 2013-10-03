@@ -145,6 +145,41 @@ namespace WorkflowAlgorithms
 
   }
 
+  template <typename NumT>
+  void splitVectors(const std::vector<NumT> &orig, const size_t numVal,
+                    const std::string &label,
+                    std::vector<NumT> &left, std::vector<NumT> &right)
+  {
+    // clear the outputs
+    left.clear();
+    right.clear();
+
+    // check that there is work to do
+    if (orig.empty())
+      return;
+
+    // do the spliting
+    if (orig.size() == numVal)
+    {
+      left.assign(orig.begin(), orig.end());
+      right.assign(orig.begin(), orig.end());
+    }
+    else if (orig.size() == 2*numVal)
+    {
+      left.assign(orig.begin(), orig.begin() + numVal);
+      right.assign(orig.begin() + numVal, orig.begin());
+    }
+    else
+    {
+      std::stringstream msg;
+      msg << "Input number of " << label << " ids is not equal to "
+            << "the number of histograms or empty ("
+            << orig.size() << " != 0 or " << numVal
+            << " or " << (2*numVal) << ")";
+      throw std::runtime_error(msg.str());
+    }
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Executes the algorithm
    *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
@@ -161,7 +196,7 @@ namespace WorkflowAlgorithms
     m_offsetsWS = getProperty("OffsetsWorkspace");
     m_maskWS = getProperty("MaskWorkspace");
     m_groupWS = getProperty("GroupingWorkspace");
-    l1 = getProperty("PrimaryFlightPath");
+    m_l1 = getProperty("PrimaryFlightPath");
     specids = getProperty("SpectrumIDs");
     l2s = getProperty("L2");
     tths = getProperty("Polar");
@@ -522,91 +557,31 @@ namespace WorkflowAlgorithms
         m_lowResW = rebin(m_lowResW);
     }
 
-    if (l1 > 0 || !tths.empty() || !l2s.empty() || !phis.empty())
+    // edit the instrument geometry
+    if (m_l1 > 0 || !tths.empty() || !l2s.empty() || !phis.empty())
     {
       size_t numreg = m_outputW->getNumberHistograms();
 
-      // Check size
-      if (tths.size() < numreg)
-        throw std::runtime_error("Input number of 2thetas is smaller than number of histogram.");
-      if (l2s.size() < numreg)
-        throw std::runtime_error("Input number of L2s is smaller than number of histogram.");
-      if (phis.size() < numreg)
-        throw std::runtime_error("Input number of azimuthals is smaller than number of histogram.");
-
-      std::vector<int32_t> vec_specid_reg;
-      if (specids.size() >= numreg)
-      {
-        vec_specid_reg.resize(numreg, 0);
-        std::copy(specids.begin(), (specids.begin()+numreg), vec_specid_reg.begin());
-      }
-
-      std::vector<double> vec_polar_reg(numreg, 0.);
-      std::copy(tths.begin(), (tths.begin()+numreg), vec_polar_reg.begin());
-      std::vector<double> vec_l2_reg(numreg, 0.);
-      std::copy(l2s.begin(), (l2s.begin()+numreg), vec_l2_reg.begin());
-      std::vector<double> vec_azimuthal_reg(numreg, 0.);
-      std::copy(phis.begin(), (phis.begin()+numreg), vec_azimuthal_reg.begin());
+      // set up the vectors for doing everything
+      std::vector<int32_t> specidsReg;
+      std::vector<int32_t> specidsLow;
+      splitVectors(specids, numreg, "specids", specidsReg, specidsLow);
+      std::vector<double> tthsReg;
+      std::vector<double> tthsLow;
+      splitVectors(tths, numreg, "two-theta", tthsReg, tthsLow);
+      std::vector<double> l2sReg;
+      std::vector<double> l2sLow;
+      splitVectors(l2s, numreg, "L2", l2sReg, l2sLow);
+      std::vector<double> phisReg;
+      std::vector<double> phisLow;
+      splitVectors(phis, numreg, "phi", phisReg, phisLow);
 
       // Edit instrument
-      m_outputW = editInstrument(m_outputW, vec_polar_reg, vec_specid_reg, vec_l2_reg, vec_azimuthal_reg);
+      m_outputW = editInstrument(m_outputW, tthsReg, specidsReg, l2sReg, phisReg);
 
       if (m_processLowResTOF)
       {
-        size_t numlow = m_lowResW->getNumberHistograms();
-        // FIXME : There must be some bug in constructing the vectors for EditInstrumentGeometry
-
-        // Check size
-        size_t numall = numreg+numlow;
-        g_log.information() << "[DBx931] Num-All = " << numall << ".\n";
-        if (tths.size() != numall)
-        {
-          std::stringstream errss;
-          errss << "Input number of 2thetas (" << tths.size() << " is not equal to "
-                << "the number of normal and low resolution histograms " << numall << ".\n";
-          for (size_t i = 0; i < tths.size(); ++i)
-          {
-            errss << "2theta[" << i << "] = " << tths[i] << "\n";
-          }
-          g_log.error(errss.str());
-          throw std::runtime_error(errss.str());
-        }
-        if (l2s.size() != numall)
-          throw std::runtime_error("Input number of L2s is not equal to the number of low and high histograms.");
-        if (phis.size() != numall)
-          throw std::runtime_error("Input number of azimuthals is not equal to the number of low and high histograms.");
-
-        std::vector<int32_t> vec_specid_low;
-        if (specids.size() == numall)
-        {
-          //   vec_specid_low.resize(numlow, 0);
-          //   std::copy((specids.begin()+numreg), specids.end(), vec_specid_low.begin());
-          for (size_t i = 0; i < numlow; ++i)
-          {
-            vec_specid_low.push_back(specids[numreg+i]);
-            g_log.information() << i << " : " << vec_specid_low[i] << ".\n";
-          }
-        }
-        else if (specids.size() == 0)
-        {
-          ;
-        }
-        else
-        {
-          std::stringstream errss;
-          errss << "SpecIDs has a weird size = " << specids.size() << ", OutputW's size = " << numreg
-                << ", LowResW's size = " << numlow << ".\n";
-        }
-
-        std::vector<double> vec_polar_low, vec_l2_low, vec_azimuthal_low;
-        for (size_t i = 0; i < numlow; ++i)
-        {
-          vec_polar_low.push_back(tths[numreg+i]);
-          vec_l2_low.push_back(l2s[numreg+i]);
-          vec_azimuthal_low.push_back(phis[numreg+i]);
-        }
-
-        m_lowResW = editInstrument(m_lowResW, vec_polar_low, vec_specid_low, vec_l2_low, vec_azimuthal_low);
+        m_lowResW = editInstrument(m_lowResW, tthsLow, specidsLow, l2sLow, phisLow);
       }
     }
 
@@ -618,6 +593,22 @@ namespace WorkflowAlgorithms
 
     // Convert units to TOF
     m_outputW = convertUnits(m_outputW, "TOF");
+
+    // compress again if appropriate
+    double tolerance = getProperty("CompressTolerance");
+    m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+    if ((m_outputEW) && (tolerance > 0.))
+    {
+      g_log.information() << "running CompressEvents(Tolerance=" << tolerance << ")\n";
+      API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
+      compressAlg->setProperty("InputWorkspace", m_outputEW);
+      compressAlg->setProperty("OutputWorkspace", m_outputEW);
+      compressAlg->setProperty("OutputWorkspace", m_outputEW);
+      compressAlg->setProperty("Tolerance",tolerance);
+      compressAlg->executeAsChildAlg();
+      m_outputEW = compressAlg->getProperty("OutputWorkspace");
+      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
+    }
 
     if ((!m_params.empty()) && (m_params.size() != 1))
     {
@@ -648,8 +639,8 @@ namespace WorkflowAlgorithms
 
     API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
     editAlg->setProperty("Workspace", ws);
-    if (l1 > 0.)
-      editAlg->setProperty("PrimaryFlightPath", l1);
+    if (m_l1 > 0.)
+      editAlg->setProperty("PrimaryFlightPath", m_l1);
     if (!polars.empty())
       editAlg->setProperty("Polar", polars);
     if (!specids.empty())

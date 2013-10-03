@@ -98,7 +98,7 @@ namespace Mantid
       DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
       API::MatrixWorkspace_sptr m_maskWS;
       DataObjects::GroupingWorkspace_sptr m_groupWS;
-      double l1;
+      double m_l1;
       std::vector<int32_t> specids;
       std::vector<double> l2s;
       std::vector<double> tths;
