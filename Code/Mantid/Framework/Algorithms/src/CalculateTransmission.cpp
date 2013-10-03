@@ -79,7 +79,7 @@ void CalculateTransmission::init()
     "this can be followed by a comma and more widths and last boundary pairs.\n"
     "Negative width values indicate logarithmic binning.");
 
-  std::vector<std::string> options(7);
+  std::vector<std::string> options(3);
   options[0] = "Linear";
   options[1] = "Log";
   options[2] = "Polynomial"; 
