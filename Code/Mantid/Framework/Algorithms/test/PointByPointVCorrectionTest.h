@@ -51,6 +51,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out") );
 
     // Check a few values
+    TS_ASSERT_DELTA( output->readX(1)[4], 6.5, 0.0001 );
+    TS_ASSERT_DELTA( output->readX(1)[1], 2.0, 0.0001 );
+    TS_ASSERT_DELTA( output->readX(0)[0], 0.5, 0.000001 );
     TS_ASSERT_DELTA( output->readY(1)[4], 2.9999, 0.0001 );
     TS_ASSERT_DELTA( output->readY(1)[1], 2.9999, 0.0001 );
     TS_ASSERT_DELTA( output->readY(0)[0], 2.0, 0.000001 );
