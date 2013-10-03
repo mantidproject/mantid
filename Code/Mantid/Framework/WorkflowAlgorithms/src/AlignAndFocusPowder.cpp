@@ -55,11 +55,14 @@ namespace WorkflowAlgorithms
   DECLARE_ALGORITHM(AlignAndFocusPowder)
 
   AlignAndFocusPowder::AlignAndFocusPowder() :
-    API::Algorithm()
+    API::Algorithm(), m_progress(NULL)
   {}
 
   AlignAndFocusPowder::~AlignAndFocusPowder()
-  {}
+  {
+    if (m_progress)
+      delete m_progress;
+  }
 
   const std::string AlignAndFocusPowder::name() const
   {
@@ -340,6 +343,9 @@ namespace WorkflowAlgorithms
       }
     }
 
+    // set up a progress bar with the "correct" number of steps
+    m_progress = new Progress(this, 0., 1., 21);
+
     // filter the input events if appropriate
     if (m_inputEW)
     {
@@ -356,6 +362,7 @@ namespace WorkflowAlgorithms
         m_outputW = filterPAlg->getProperty("OutputWorkspace");
         m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
       }
+      m_progress->report();
 
       double tolerance = getProperty("CompressTolerance");
       if (tolerance > 0.)
@@ -375,6 +382,11 @@ namespace WorkflowAlgorithms
         g_log.information() << "Not compressing event list\n";
         doSortEvents(m_outputW); // still sort to help some thing out
       }
+      m_progress->report();
+    }
+    else
+    {
+      m_progress->reportIncrement(2);
     }
 
     if (xmin > 0. || xmax > 0.)
@@ -402,6 +414,7 @@ namespace WorkflowAlgorithms
         m_outputW = cropAlg->getProperty("OutputWorkspace");
       }
     }
+    m_progress->report();
 
     if (m_maskWS)
     {
@@ -412,9 +425,12 @@ namespace WorkflowAlgorithms
       maskAlg->executeAsChildAlg();
       m_outputW = maskAlg->getProperty("Workspace");
     }
+    m_progress->report();
 
     if(!dspace)
       m_outputW = rebin(m_outputW);
+    m_progress->report();
+
 
     if (m_offsetsWS)
     {
@@ -428,20 +444,15 @@ namespace WorkflowAlgorithms
     }
     else
     {
-      g_log.information() << "running ConvertUnits\n";
-      API::IAlgorithm_sptr convertUnitsAlg = createChildAlgorithm("ConvertUnits");
-      convertUnitsAlg->setProperty("InputWorkspace", m_outputW);
-      convertUnitsAlg->setProperty("OutputWorkspace", m_outputW);
-      convertUnitsAlg->setProperty("Target", "dSpacing");
-      convertUnitsAlg->setProperty("EMode", "Elastic");
-      convertUnitsAlg->executeAsChildAlg();
-      m_outputW = convertUnitsAlg->getProperty("OutputWorkspace");
+      m_outputW = convertUnits(m_outputW, "dSpacing");
     }
+    m_progress->report();
 
     if(LRef > 0. || minwl > 0. || DIFCref > 0.)
     {
       m_outputW = convertUnits(m_outputW, "TOF");
     }
+    m_progress->report();
 
     // Beyond this point, low resolution TOF workspace is considered.
     if(LRef > 0.)
@@ -457,6 +468,7 @@ namespace WorkflowAlgorithms
       removeAlg->executeAsChildAlg();
       m_outputW = removeAlg->getProperty("OutputWorkspace");
     }
+    m_progress->report();
 
     if(minwl > 0.)
     {
@@ -503,6 +515,7 @@ namespace WorkflowAlgorithms
       if (m_processLowResTOF)
         m_lowResW = removeAlg->getProperty("LowResTOFWorkspace");
     }
+    m_progress->report();
 
     EventWorkspace_sptr ews = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     if (ews)
@@ -517,8 +530,7 @@ namespace WorkflowAlgorithms
                             << "Number of low TOF events = " << numlowevents << ".\n";
       }
     }
-
-    // FIXED - Refactor beyond this point!
+    m_progress->report();
 
     // Convert units
     if(LRef > 0. || minwl > 0. || DIFCref > 0.)
@@ -527,6 +539,7 @@ namespace WorkflowAlgorithms
       if (m_processLowResTOF)
         m_lowResW = convertUnits(m_lowResW, "dSpacing");
     }
+    m_progress->report();
 
     if(dspace)
     {
@@ -534,19 +547,23 @@ namespace WorkflowAlgorithms
       if (m_processLowResTOF)
     	  m_lowResW = rebin(m_lowResW);
     }
+    m_progress->report();
 
     doSortEvents(m_outputW);
     if (m_processLowResTOF)
       doSortEvents(m_lowResW);
+    m_progress->report();
 
     // Diffraction focus
     m_outputW = diffractionFocus(m_outputW);
     if (m_processLowResTOF)
       m_lowResW = diffractionFocus(m_lowResW);
+    m_progress->report();
 
     doSortEvents(m_outputW);
     if (m_processLowResTOF)
       doSortEvents(m_lowResW);
+    m_progress->report();
 
     // this next call should probably be in for rebin as well
     // but it changes the system tests
@@ -556,6 +573,7 @@ namespace WorkflowAlgorithms
       if (m_processLowResTOF)
         m_lowResW = rebin(m_lowResW);
     }
+    m_progress->report();
 
     // edit the instrument geometry
     if (m_l1 > 0 || !tths.empty() || !l2s.empty() || !phis.empty())
@@ -584,15 +602,18 @@ namespace WorkflowAlgorithms
         m_lowResW = editInstrument(m_lowResW, tthsLow, specidsLow, l2sLow, phisLow);
       }
     }
+    m_progress->report();
 
     // Conjoin 2 workspaces if there is low resolution
     if (m_processLowResTOF)
     {
       m_outputW = conjoinWorkspaces(m_outputW, m_lowResW, m_lowResSpecOffset);
     }
+    m_progress->report();
 
     // Convert units to TOF
     m_outputW = convertUnits(m_outputW, "TOF");
+    m_progress->report();
 
     // compress again if appropriate
     double tolerance = getProperty("CompressTolerance");
@@ -609,6 +630,7 @@ namespace WorkflowAlgorithms
       m_outputEW = compressAlg->getProperty("OutputWorkspace");
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
     }
+    m_progress->report();
 
     if ((!m_params.empty()) && (m_params.size() != 1))
     {
@@ -621,6 +643,7 @@ namespace WorkflowAlgorithms
       m_dmaxs.clear();
 
     m_outputW = rebin(m_outputW);
+    m_progress->report();
 
     // return the output workspace
     setProperty("OutputWorkspace",m_outputW);

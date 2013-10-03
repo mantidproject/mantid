@@ -128,6 +128,7 @@ namespace Mantid
       /// Offset to low resolution TOF spectra
       size_t m_lowResSpecOffset;
 
+      API::Progress* m_progress;   ///< Progress reporting
     };
 
   } // namespace WorkflowAlgorithm
