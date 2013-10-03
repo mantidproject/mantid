@@ -201,18 +201,17 @@ void CheckWorkspacesMatch::doComparison()
     throw Kernel::Exception::NotImplementedError("This algorithm does not (yet) work for table workspaces");
   }
 
+  // ==============================================================================
+  // Peaks workspaces
+  // ==============================================================================
+
   // Check that both workspaces are the same type
-  bool checkType = getProperty("CheckType");
-  PeaksWorkspace_sptr tws1, tws2;
-  tws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(w1);
-  tws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(w2);
-  if (checkType)
+  PeaksWorkspace_sptr tws1 = boost::dynamic_pointer_cast<PeaksWorkspace>(w1);
+  PeaksWorkspace_sptr tws2 = boost::dynamic_pointer_cast<PeaksWorkspace>(w2);
+  if ((tws1 && !tws2) ||(!tws1 && tws2))
   {
-    if ((tws1 && !tws2) ||(!tws1 && tws2))
-    {
-      result = "One workspace is an PeaksWorkspace and the other is not.";
-      return;
-    }
+    result = "One workspace is an PeaksWorkspace and the other is not.";
+    return;
   }
   // Check some peak-based stuff
   if (tws1 && tws2)
@@ -340,50 +339,44 @@ void CheckWorkspacesMatch::doComparison()
     return;
   }
 
+  // ==============================================================================
+  // MD workspaces
+  // ==============================================================================
+
   // Check things for IMDEventWorkspaces
-  IMDEventWorkspace_const_sptr mdews1, mdews2;
-  mdews1 = boost::dynamic_pointer_cast<const IMDEventWorkspace>(w1);
-  mdews2 = boost::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
-  if (checkType)
+  IMDEventWorkspace_const_sptr mdews1 = boost::dynamic_pointer_cast<const IMDEventWorkspace>(w1);
+  IMDEventWorkspace_const_sptr mdews2 = boost::dynamic_pointer_cast<const IMDEventWorkspace>(w2);
+  if ((mdews1 && !mdews2) ||(!mdews1 && mdews2))
   {
-    if ((mdews1 && !mdews2) ||(!mdews1 && mdews2))
-    {
-      result = "One workspace is an IMDEventWorkspace and the other is not.";
-      return;
-    }
-  }
-  if (mdews1 && mdews2)
-  {
-    this->doMDComparison(w1, w2);
+    result = "One workspace is an IMDEventWorkspace and the other is not.";
     return;
   }
-
   // Check things for IMDHistoWorkspaces
-  IMDHistoWorkspace_const_sptr mdhws1, mdhws2;
-  mdhws1 = boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
-  mdhws2 = boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
-  if (checkType)
+  IMDHistoWorkspace_const_sptr mdhws1 = boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w1);
+  IMDHistoWorkspace_const_sptr mdhws2 = boost::dynamic_pointer_cast<const IMDHistoWorkspace>(w2);
+  if ((mdhws1 && !mdhws2) ||(!mdhws1 && mdhws2))
   {
-    if ((mdhws1 && !mdhws2) ||(!mdhws1 && mdhws2))
-    {
-      result = "One workspace is an IMDHistoWorkspace and the other is not.";
-      return;
-    }
+    result = "One workspace is an IMDHistoWorkspace and the other is not.";
+    return;
   }
-  if (mdhws1 && mdhws2)
+
+  if (mdhws1 || mdews1) // The '2' workspaces must match because of the checks above
   {
     this->doMDComparison(w1, w2);
     return;
   }
 
-  MatrixWorkspace_const_sptr ws1, ws2;
-  ws1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(w1);
-  ws2 = boost::dynamic_pointer_cast<const MatrixWorkspace>(w2);
+  // ==============================================================================
+  // Event workspaces
+  // ==============================================================================
 
-  EventWorkspace_const_sptr ews1, ews2;
-  ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
-  ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
-  if (checkType)
+  // These casts must succeed or there's a logical problem in the code
+  MatrixWorkspace_const_sptr ws1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(w1);
+  MatrixWorkspace_const_sptr ws2 = boost::dynamic_pointer_cast<const MatrixWorkspace>(w2);
+
+  EventWorkspace_const_sptr ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
+  EventWorkspace_const_sptr ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
+  if ( getProperty("CheckType") )
   {
     if ((ews1 && !ews2) ||(!ews1 && ews2))
     {
@@ -406,6 +399,9 @@ void CheckWorkspacesMatch::doComparison()
     prog = new Progress(this, 0.0, 1.0, numhist*2);
   }
 
+  // ==============================================================================
+  // Matrix workspaces (Event & 2D)
+  // ==============================================================================
 
   // First check the data - always do this
   if ( ! checkData(ws1,ws2) ) return;
