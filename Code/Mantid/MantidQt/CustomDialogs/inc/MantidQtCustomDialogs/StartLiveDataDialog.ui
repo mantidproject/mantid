@@ -98,7 +98,7 @@ QGroupBox::title { background-color: transparent;  subcontrol-position: top cent
              <widget class="QRadioButton" name="radAbsoluteTime">
               <property name="maximumSize">
                <size>
-                <width>15</width>
+                <width>17</width>
                 <height>16777215</height>
                </size>
               </property>
