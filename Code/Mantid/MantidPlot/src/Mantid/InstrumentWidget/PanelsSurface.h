@@ -3,12 +3,28 @@
 
 #include "UnwrappedSurface.h"
 
+#include <QPolygonF>
+
+class PanelsSurface;
+
 struct FlatBankInfo
 {
+    FlatBankInfo(PanelsSurface *s):surface(s){}
     /// Component id of the bank
     Mantid::Geometry::ComponentID id;
     /// Bank's rotation
     Mantid::Kernel::Quat rotation;
+    /// Bounding rect of the projection
+    //RectF rect;
+    /// Starting index of bank's detectors in m_unwrappedDetectors vector
+    size_t startDetectorIndex;
+    /// Ending index of bank's detectors in m_unwrappedDetectors vector (1 past the last one)
+    size_t endDetectorIndex;
+    // translate the bank by a vector
+    void translate(const QPointF &shift);
+    QPolygonF polygon;
+private:
+    PanelsSurface *surface;
 };
 
 /**
@@ -27,8 +43,8 @@ class PanelsSurface: public UnwrappedSurface
 {
 public:
   PanelsSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
+  ~PanelsSurface();
   void init();
-
   void project(const Mantid::Kernel::V3D & pos, double & u, double & v, double & uscale, double & vscale) const;
 
 protected:
@@ -42,6 +58,12 @@ protected:
   void addFlatBank(Mantid::Geometry::ComponentID id, const Mantid::Kernel::V3D &normal, QList<Mantid::Geometry::ComponentID> objCompAssemblies);
   // Calculate bank rotation
   Mantid::Kernel::Quat calcBankRotation( const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal ) const;
+  // Spread the banks over the projection plane
+  void spreadBanks();
+  // Find index of the largest bank
+  int findLargestBank() const;
+  bool isOverlapped( QPolygonF &rect, int iexclude ) const;
+  void clearBanks();
 
 protected:
 
@@ -51,13 +73,15 @@ protected:
   const Mantid::Kernel::V3D m_zaxis;
   Mantid::Kernel::V3D m_xaxis;
   Mantid::Kernel::V3D m_yaxis;
+  QPointF m_origin; ///< Origin in uv coords
 
   /// Keep info of the flat banks
-  QList<FlatBankInfo> m_flatBanks;
+  QList<FlatBankInfo*> m_flatBanks;
   /// Maps detector ids to indices of FlatBankInfos in m_flatBanks
-  QMap<Mantid::detid_t,int> m_detector2bankMap;
+  //QMap<Mantid::detid_t,int> m_detector2bankMap;
 
   friend class FlatBankFinder;
+  friend class FlatBankInfo;
 
 };
 
