@@ -1970,6 +1970,32 @@ def cleanupData(final_data_y_axis, final_data_y_error_axis):
     
     
                 
+def cleanupData1D(final_data_y_axis, final_data_y_error_axis):
+    
+    sz = final_data_y_axis.shape
+    nbrTof = sz[0]
+    
+    for t in range(nbrTof):
+            
+        _data = final_data_y_axis[t]
+        _error = final_data_y_error_axis[t]
+            
+        # if error is > value, remove point
+        if _error >= _data:
+            _data = 0
+            _error = 0
+            
+        # if value is below 10^-12
+        if _data < 1e-12:
+            _data = 0
+            _error = 0
+                
+        final_data_y_axis[t] = _data
+        final_data_y_error_axis[t] = _error
+            
+    return [final_data_y_axis, final_data_y_error_axis]
+    
+    
                 
             
     
