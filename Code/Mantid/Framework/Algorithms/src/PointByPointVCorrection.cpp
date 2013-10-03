@@ -83,6 +83,8 @@ void PointByPointVCorrection::exec()
 		PARALLEL_START_INTERUPT_REGION
 
     const MantidVec& X=inputWS1->readX(i);
+    outputWS->setX( i, inputWS1->refX(i) );
+
     const MantidVec& Y1=inputWS1->readY(i);
     const MantidVec& Y2=inputWS2->readY(i);
     const MantidVec& E1=inputWS1->readE(i);
