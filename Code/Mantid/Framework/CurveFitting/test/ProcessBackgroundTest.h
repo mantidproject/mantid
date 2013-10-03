@@ -210,6 +210,7 @@ public:
     alg.setProperty("Options", "SelectBackgroundPoints");
     alg.setProperty("BackgroundPointSelectMode", "Input Background Points Only");
 
+    alg.setProperty("SelectionMode", "FitGivenDataPoints");
     alg.setProperty("BackgroundType", "Polynomial");
     alg.setProperty("BackgroundPoints", bkgdpts);
 

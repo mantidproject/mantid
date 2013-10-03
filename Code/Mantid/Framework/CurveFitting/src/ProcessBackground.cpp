@@ -78,12 +78,6 @@ DECLARE_ALGORITHM(ProcessBackground)
     declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "", Direction::Output),
                             "Output workspace containing processed background");
 
-    auto refwsprop = new WorkspaceProperty<Workspace2D>("ReferenceWorkspace", "", Direction::Input,
-                                                        PropertyMode::Optional);
-    declareProperty(refwsprop, "Name of the workspace containing the data required by function AddRegion.");
-    setPropertySettings("ReferenceWorkspace",
-                        new VisibleWhenProperty("ReferenceWorkspace", IS_EQUAL_TO,  "AddRegion"));
-
     // Function Options
     std::vector<std::string> options;
     options.push_back("SelectBackgroundPoints");
@@ -98,6 +92,12 @@ DECLARE_ALGORITHM(ProcessBackground)
     declareProperty("LowerBound", Mantid::EMPTY_DBL(), "Lower boundary of the data to have background processed.");
     declareProperty("UpperBound", Mantid::EMPTY_DBL(), "Upper boundary of the data to have background processed.");
 
+    auto refwsprop = new WorkspaceProperty<Workspace2D>("ReferenceWorkspace", "", Direction::Input,
+                                                        PropertyMode::Optional);
+    declareProperty(refwsprop, "Name of the workspace containing the data required by function AddRegion.");
+    setPropertySettings("ReferenceWorkspace",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "AddRegion"));
+
     // Optional Function Type
     std::vector<std::string> bkgdtype;
     bkgdtype.push_back("Polynomial");
@@ -108,12 +108,15 @@ DECLARE_ALGORITHM(ProcessBackground)
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     vector<string> funcoptions;
+    funcoptions.push_back("N/A");
     funcoptions.push_back("FitGivenDataPoints");
     funcoptions.push_back("UserFunction");
     auto fovalidator = boost::make_shared<StringListValidator>(funcoptions);
-    declareProperty("SelectionMode", "FitGivenDataPoints", fovalidator,
+    declareProperty("SelectionMode", "N/A", fovalidator,
                     "If choise is UserFunction, background will be selected by an input background "
                     "function.  Otherwise, background function will be fitted from user's input data points.");
+    setPropertySettings("SelectionMode",
+                        new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     declareProperty("BackgroundOrder", 0, "Order of polynomial or chebyshev background. ");
     setPropertySettings("BackgroundOrder",
@@ -155,14 +158,16 @@ DECLARE_ALGORITHM(ProcessBackground)
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
     // Optional output workspace
-    declareProperty(new WorkspaceProperty<Workspace2D>("UserBackgroundWorkspace", "", Direction::Output, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<Workspace2D>("UserBackgroundWorkspace", "", Direction::Output,
+                                                       PropertyMode::Optional),
                             "Output workspace containing fitted background from points specified by users.");
     setPropertySettings("UserBackgroundWorkspace",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "SelectBackgroundPoints"));
 
 
     // Peak table workspac for "RemovePeaks"
-    declareProperty(new WorkspaceProperty<TableWorkspace>("BraggPeakTableWorkspace", "", Direction::Input, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<TableWorkspace>("BraggPeakTableWorkspace", "", Direction::Input,
+                                                          PropertyMode::Optional),
                     "Name of table workspace containing peaks' parameters. ");
     setPropertySettings("BraggPeakTableWorkspace",
                         new VisibleWhenProperty("Options", IS_EQUAL_TO,  "RemovePeaks"));
@@ -219,14 +224,17 @@ DECLARE_ALGORITHM(ProcessBackground)
     else if (option.compare("SelectBackgroundPoints") == 0)
     {
       string smode = getProperty("SelectionMode");
-      bool option2 = smode == "FitGivenDataPoints";
-      if (option2)
+      if (smode == "FitGivenDataPoints")
       {
         execSelectBkgdPoints();
       }
-      else
+      else if (smode == "UserFunction")
       {
         execSelectBkgdPoints2();
+      }
+      else
+      {
+        throw runtime_error("N/A is not supported.");
       }
     }
     else
@@ -258,6 +266,11 @@ DECLARE_ALGORITHM(ProcessBackground)
     RemovePeaks remove;
     remove.setup(peaktablews);
     m_outputWS = remove.removePeaks(m_dataWS, m_wsIndex, m_numFWHM);
+
+    // Dummy
+    Workspace2D_sptr dummyws = boost::dynamic_pointer_cast<Workspace2D>(
+          WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1));
+    setProperty("UserBackgroundWorkspace", dummyws);
 
     return;
   }
