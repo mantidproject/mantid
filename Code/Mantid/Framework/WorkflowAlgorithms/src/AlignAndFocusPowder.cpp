@@ -346,23 +346,40 @@ namespace WorkflowAlgorithms
       }
     }
 
-    g_log.information() << "running MaskDetectors\n";
-    API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
-    maskAlg->setProperty("Workspace", m_outputW);
-    maskAlg->setProperty("MaskedWorkspace", m_maskWS);
-    maskAlg->executeAsChildAlg();
-    m_outputW = maskAlg->getProperty("Workspace");
+    if (m_maskWS)
+    {
+      g_log.information() << "running MaskDetectors\n";
+      API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
+      maskAlg->setProperty("Workspace", m_outputW);
+      maskAlg->setProperty("MaskedWorkspace", m_maskWS);
+      maskAlg->executeAsChildAlg();
+      m_outputW = maskAlg->getProperty("Workspace");
+    }
 
     if(!dspace)
       m_outputW = rebin(m_outputW);
 
-    g_log.information() << "running AlignDetectors\n";
-    API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
-    alignAlg->setProperty("InputWorkspace", m_outputW);
-    alignAlg->setProperty("OutputWorkspace", m_outputW);
-    alignAlg->setProperty("OffsetsWorkspace", m_offsetsWS);
-    alignAlg->executeAsChildAlg();
-    m_outputW = alignAlg->getProperty("OutputWorkspace");
+    if (m_offsetsWS)
+    {
+      g_log.information() << "running AlignDetectors\n";
+      API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
+      alignAlg->setProperty("InputWorkspace", m_outputW);
+      alignAlg->setProperty("OutputWorkspace", m_outputW);
+      alignAlg->setProperty("OffsetsWorkspace", m_offsetsWS);
+      alignAlg->executeAsChildAlg();
+      m_outputW = alignAlg->getProperty("OutputWorkspace");
+    }
+    else
+    {
+      g_log.information() << "running ConvertUnits\n";
+      API::IAlgorithm_sptr convertUnitsAlg = createChildAlgorithm("ConvertUnits");
+      convertUnitsAlg->setProperty("InputWorkspace", m_outputW);
+      convertUnitsAlg->setProperty("OutputWorkspace", m_outputW);
+      convertUnitsAlg->setProperty("Target", "dSpacing");
+      convertUnitsAlg->setProperty("EMode", "Elastic");
+      convertUnitsAlg->executeAsChildAlg();
+      m_outputW = convertUnitsAlg->getProperty("OutputWorkspace");
+    }
 
     if(LRef > 0. || minwl > 0. || DIFCref > 0.)
     {
