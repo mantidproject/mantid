@@ -76,7 +76,7 @@ def createConvFitFun(options, par, file):
 
 ##############################################################################
 
-def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
+def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, Verbose):
     options = getConvFitOption(ftype, bgd[:-2], Verbose)   
     params = mtd[outNm+'_Parameters']
     A0 = params.column(1)     #bgd A0 value
@@ -94,8 +94,8 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
         H2 = params.column(ip+6)        #height2 value
         C2 = params.column(ip+8)      #centre2 value
         W2 = params.column(ip+10)      #width2 value
-    nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(nHist):
+
+    for i in range(0,specMax-specMin):
         paras = [A0[i], A1[i]]
         if options[1]:
             paras.append(D1[i])
@@ -112,7 +112,7 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
             logger.notice('Fit func : '+func)      
         fitWS = outNm + '_Result_'
         fout = fitWS + str(i)
-        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i,Output=fout,MaxIterations=0)
+        Fit(Function=func,InputWorkspace=inputWS,WorkspaceIndex=i+specMin,Output=fout,MaxIterations=0)
         unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
         unitx.setLabel('Time' , 'ns')
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
@@ -201,7 +201,7 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
         StartX=startX, EndX=endX, FitType='Sequential')
     wsname = confitParsToWS(outNm, inputWS, specMin, specMax)
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
-    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose)
+    getConvFitResult(inputWS, resFile, outNm, ftype, bgd, specMin, specMax, Verbose)
     if Save:
         o_path = os.path.join(workdir, wsname+'.nxs')                    # path name for nxs file
         if Verbose:
