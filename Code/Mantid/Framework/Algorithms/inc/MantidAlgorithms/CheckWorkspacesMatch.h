@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -92,11 +93,10 @@ private:
   /// Execution code
   void exec();
   
-  // property indicate that relative error tolerance in data is set up rather then absolute error. 
-  bool m_ErrorIsRelative;
   void doComparison();
   // Compare two MD workspaces
   void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);
+  bool checkEventLists(DataObjects::EventWorkspace_const_sptr ews1, DataObjects::EventWorkspace_const_sptr ews2);
   bool checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkAxes(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);
   bool checkSpectraMap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);

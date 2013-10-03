@@ -173,7 +173,7 @@ void CheckWorkspacesMatch::init()
 void CheckWorkspacesMatch::exec()
 {
   result.clear();
-  m_ErrorIsRelative = getProperty("ToleranceRelerr");
+
   this->doComparison();
   
   if ( result != "")
@@ -398,51 +398,7 @@ void CheckWorkspacesMatch::doComparison()
   {
     prog = new Progress(this, 0.0, 1.0, numhist*5);
 
-    // Both will end up sorted anyway
-    ews1->sortAll(PULSETIMETOF_SORT, prog);
-    ews2->sortAll(PULSETIMETOF_SORT, prog);
-
-    if (ews1->getNumberHistograms() != ews2->getNumberHistograms())
-    {
-      result = "Mismatched number of histograms.";
-      return;
-    }
-
-    // determine the tolerance for "tof" attribute of events
-    double ToleranceTOF = Tolerance;
-    // actual time-of flight is 50 nanoseconds
-    if ((ws1->getAxis(0)->unit()->label() == "microsecond")
-        || (ws2->getAxis(0)->unit()->label() == "microsecond"))
-      ToleranceTOF = 0.05;
-
-    bool mismatchedEvent = false;
-    int mismatchedEventWI = 0;
-    //PARALLEL_FOR2(ews1, ews2)
-    for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
-    {
-      PARALLEL_START_INTERUPT_REGION
-          prog->report("EventLists");
-      if (!mismatchedEvent) // This guard will avoid checking unnecessarily
-      {
-        const EventList &el1 = ews1->getEventList(i);
-        const EventList &el2 = ews2->getEventList(i);
-        if (!el1.equals(el2, ToleranceTOF, Tolerance, 1))
-        {
-          mismatchedEvent = true;
-          mismatchedEventWI = i;
-        }
-      }
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-
-    if ( mismatchedEvent)
-    {
-      std::ostringstream mess;
-      mess << "Mismatched event list at workspace index " << mismatchedEventWI;
-      result = mess.str();
-      return;
-    }
+    if ( ! checkEventLists(ews1, ews2) ) return;
   }
   else
   {
@@ -473,11 +429,63 @@ void CheckWorkspacesMatch::doComparison()
   return;
 }
 
-/// Checks that the data matches
-/// @param ws1 :: the first workspace
-/// @param ws2 :: the second workspace
-/// @retval true The data matches
-/// @retval false The data does not matches
+bool CheckWorkspacesMatch::checkEventLists(DataObjects::EventWorkspace_const_sptr ews1, DataObjects::EventWorkspace_const_sptr ews2)
+{
+  // Both will end up sorted anyway
+  ews1->sortAll(PULSETIMETOF_SORT, prog);
+  ews2->sortAll(PULSETIMETOF_SORT, prog);
+
+  if (ews1->getNumberHistograms() != ews2->getNumberHistograms())
+  {
+    result = "Mismatched number of histograms.";
+    return false;
+  }
+
+  // determine the tolerance for "tof" attribute of events
+  double ToleranceTOF = Tolerance;
+  // actual time-of flight is 50 nanoseconds
+  if ((ews1->getAxis(0)->unit()->label() == "microsecond")
+      || (ews2->getAxis(0)->unit()->label() == "microsecond"))
+    ToleranceTOF = 0.05;
+
+  bool mismatchedEvent = false;
+  int mismatchedEventWI = 0;
+  //PARALLEL_FOR2(ews1, ews2)
+  for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
+  {
+    PARALLEL_START_INTERUPT_REGION
+    prog->report("EventLists");
+    if (!mismatchedEvent) // This guard will avoid checking unnecessarily
+    {
+      const EventList &el1 = ews1->getEventList(i);
+      const EventList &el2 = ews2->getEventList(i);
+      if (!el1.equals(el2, ToleranceTOF, Tolerance, 1))
+      {
+        mismatchedEvent = true;
+        mismatchedEventWI = i;
+      }
+    }
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+
+  if ( mismatchedEvent)
+  {
+    std::ostringstream mess;
+    mess << "Mismatched event list at workspace index " << mismatchedEventWI;
+    result = mess.str();
+    return false;
+  }
+
+  return true;
+}
+
+/** Checks that the data matches
+ *  @param ws1 :: the first workspace
+ *  @param ws2 :: the second workspace
+ *  @retval true The data matches
+ *  @retval false The data does not matches
+ */
 bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
 {
   // Cache a few things for later use
@@ -522,7 +530,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
       const MantidVec& Y2 = ws2->readY(i);
       const MantidVec& E2 = ws2->readE(i);
 
-      bool RelErr = m_ErrorIsRelative;
+      bool RelErr = getProperty("ToleranceRelErr");
       for ( int j = 0; j < static_cast<int>(numBins); ++j )
       {
         bool err;
