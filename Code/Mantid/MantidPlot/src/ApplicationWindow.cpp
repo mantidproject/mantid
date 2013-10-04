@@ -3043,7 +3043,7 @@ Table* ApplicationWindow::newHiddenTable(const QString& name, const QString& lab
 void ApplicationWindow::initTable(Table* w, const QString& caption)
 {
   QString name = caption;
-  name = name.replace ("_","-");
+  //name = name.replace ("_","-");
 
   while(name.isEmpty() || alreadyUsedName(name))
     name = generateUniqueName(tr("Table"));

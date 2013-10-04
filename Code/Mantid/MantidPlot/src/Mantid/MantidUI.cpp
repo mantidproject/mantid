@@ -2417,7 +2417,7 @@ void MantidUI::importString(const QString &logName, const QString &data)
 *  @param sep :: the seperator character
 *  @param caption :: the caption to appear on the table window title bar, defualts to logname if left blank
 */
-void MantidUI::importString(const QString &logName, const QString &data, const QString &sep, const QString &caption)
+void MantidUI::importString(const QString &logName, const QString &data, const QString &sep, const QString &wsName)
 {
   QStringList loglines =  QStringList(data);
   if (sep.length() > 0)
@@ -2429,15 +2429,17 @@ void MantidUI::importString(const QString &logName, const QString &data, const Q
   if( !t ) return;
   //Have to replace "_" since the legend widget uses them to separate things
   QString label;
-  if (caption.isEmpty())
+  if (wsName.isEmpty())
   {
     label = logName;
+    label.replace("_","-");
   }
   else
   {
-    label = caption;
+    label = logName;
+    label.replace("_","-");
+    label = wsName + "-" + label;
   }
-  label.replace("_","-");
 
   //appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
   appWindow()->initTable(t, appWindow()->generateUniqueName(label + "-"));
@@ -2460,7 +2462,7 @@ void MantidUI::importString(const QString &logName, const QString &data, const Q
 *  @param data :: a formated string with the time series data to display
 *  @param caption :: the caption to appear on the table window title bar, defualts to logname if left blank
 */
-void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, const QString &caption)
+void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, const QString &wsName)
 {
   QStringList loglines = data.split("\n", QString::SkipEmptyParts);
 
@@ -2470,15 +2472,17 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, c
   //t->askOnCloseEvent(false);
   //Have to replace "_" since the legend widget uses them to separate things
   QString label;
-  if (caption.isEmpty())
+  if (wsName.isEmpty())
   {
     label = logName;
+    label.replace("_","-");
   }
   else
   {
-    label = caption;
+    label = logName;
+    label.replace("_","-");
+    label = wsName + "-" + label;
   }
-  label.replace("_","-");
 
   //appWindow()->initTable(t, appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
   appWindow()->initTable(t, appWindow()->generateUniqueName(label + "-"));
@@ -2522,7 +2526,7 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data, c
 * - 3 filter by status & period
 * @param caption :: the caption to appear on the table window title bar, defualts to logname if left blank
 */
-void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName, int filter, const QString &caption)
+void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName, int filter)
 {
   //if you need to add a final filter valure to the end of the filter to match the extent of the data, then set this to the index of the row to add the value
   int addFinalFilterValueIndex = 0;
@@ -2546,15 +2550,17 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   if( !t ) return;
   //Have to replace "_" since the legend widget uses them to separate things
   QString label;
-  if (caption.isEmpty())
+  if (wsName.isEmpty())
   {
     label = logName;
+    label.replace("_","-");
   }
   else
   {
-    label = caption;
+    label = logName;
+    label.replace("_","-");
+    label = wsName + "-" + label;
   }
-  label.replace("_","-");
 
   //Get the starting time of the log.
   Mantid::Kernel::DateAndTime startTime;

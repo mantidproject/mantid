@@ -429,9 +429,9 @@ signals:
     MultiLayer* plotInstrumentSpectrumList(const QString&,std::set<int>);
 
     void importString(const QString &logName, const QString &data);
-    void importString(const QString &logName, const QString &data, const QString &sep, const QString &caption = QString());
-    void importStrSeriesLog(const QString &logName, const QString &data, const QString &caption = QString());
-    void importNumSeriesLog(const QString &wsName, const QString &logname, int filter, const QString &caption = QString());
+    void importString(const QString &logName, const QString &data, const QString &sep, const QString &wsName = QString());
+    void importStrSeriesLog(const QString &logName, const QString &data, const QString &wsName = QString());
+    void importNumSeriesLog(const QString &wsName, const QString &logname, int filter);
 
     // Clear all Mantid related memory
     void clearAllMemory();

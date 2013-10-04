@@ -273,21 +273,21 @@ void MantidSampleLogDialog::importItem(QTreeWidgetItem * item)
   {
   case numeric :
   case string :
-    m_mantidUI->importString(item->text(0), item->data(0, Qt::UserRole).toString(), QString(""), caption); //Pretty much just print out the string
+    m_mantidUI->importString(item->text(0), item->data(0, Qt::UserRole).toString(), QString(""), QString::fromStdString(m_wsname)); //Pretty much just print out the string
     break;
   case numTSeries :
     if (filterStatus->isChecked()) filter = 1;
     if (filterPeriod->isChecked()) filter = 2;
     if (filterStatusPeriod->isChecked()) filter = 3;
-    m_mantidUI->importNumSeriesLog(QString::fromStdString(m_wsname), item->text(0), filter, caption);
+    m_mantidUI->importNumSeriesLog(QString::fromStdString(m_wsname), item->text(0), filter);
     break;
   case stringTSeries :
-    m_mantidUI->importStrSeriesLog(item->text(0), item->data(0, Qt::UserRole).toString(), caption);
+    m_mantidUI->importStrSeriesLog(item->text(0), item->data(0, Qt::UserRole).toString(), QString::fromStdString(m_wsname));
     break;
   case numericArray :
     logData=m_ei->getLog(item->text(0).toStdString());
     if (!logData) return;
-    m_mantidUI->importString(item->text(0),QString::fromStdString(logData->value()), QString::fromStdString(","), caption);
+    m_mantidUI->importString(item->text(0),QString::fromStdString(logData->value()), QString::fromStdString(","), QString::fromStdString(m_wsname));
     break;
   default :
     throw std::invalid_argument("Error importing log entry, wrong data type");
