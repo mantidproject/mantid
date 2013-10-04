@@ -92,7 +92,8 @@ private:
   void exec();
   
   void doComparison();
-  void doPeaksComparison(API::IPeaksWorkspace_const_sptr tws1, API::IPeaksWorkspace_const_sptr tws2);
+  void doPeaksComparison(API::IPeaksWorkspace_sptr tws1, API::IPeaksWorkspace_sptr tws2);
+  void doTableComparison(API::ITableWorkspace_const_sptr tws1, API::ITableWorkspace_const_sptr tws2);
   void doMDComparison(API::Workspace_sptr w1, API::Workspace_sptr w2);
   bool checkEventLists(DataObjects::EventWorkspace_const_sptr ews1, DataObjects::EventWorkspace_const_sptr ews2);
   bool checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2);

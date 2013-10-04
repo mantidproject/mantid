@@ -16,6 +16,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidMDEvents/MDBoxBase.h"
+#include "MantidKernel/V3D.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -764,17 +765,143 @@ public:
     cleanupGroup(groupTwo);
   }
 
-  void test_tableworkspaces()
+  void test_empty_tableworkspaces_match()
   {
-    Workspace_sptr table = WorkspaceFactory::Instance().createTable();
+    Mantid::Algorithms::CheckWorkspacesMatch alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", WorkspaceFactory::Instance().createTable()) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", WorkspaceFactory::Instance().createTable()) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Success!" );
+  }
+
+  void test_tableworkspace_different_number_of_columns_fails()
+  {
+    auto table1 = WorkspaceFactory::Instance().createTable();
+    auto table2 = WorkspaceFactory::Instance().createTable();
+    table1->addColumns("int","aColumn",2);
+    table2->addColumns("int","aColumn",3);
+
+    Mantid::Algorithms::CheckWorkspacesMatch alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", table1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", table2) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Number of columns mismatch" );
+  }
+
+  void test_tableworkspace_different_number_of_rows_fails()
+  {
+    auto table1 = WorkspaceFactory::Instance().createTable();
+    auto table2 = WorkspaceFactory::Instance().createTable();
+    table1->addColumn("double","aColumn");
+    table1->appendRow();
+    table1->appendRow();
+    table2->addColumn("double","aColumn");
+    table2->appendRow();
+
+    Mantid::Algorithms::CheckWorkspacesMatch alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", table1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", table2) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Number of rows mismatch" );
+  }
+
+  void test_tableworkspace_matches_itself()
+  {
+    auto table = setupTableWorkspace();
     Mantid::Algorithms::CheckWorkspacesMatch alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", table) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", table) );
-    TS_ASSERT( ! alg.execute() );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Success!" );
+  }
+
+  void test_tableworkspace_different_column_names_fails()
+  {
+    auto table1 = setupTableWorkspace();
+    table1->getColumn(5)->setName("SomethingElse");
+    auto table2 = setupTableWorkspace();
+    Mantid::Algorithms::CheckWorkspacesMatch alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", table1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", table2) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Column name mismatch" );
+  }
+
+  void test_tableworkspace_different_column_types_fails()
+  {
+    auto table1 = setupTableWorkspace();
+    auto table2 = setupTableWorkspace();
+    table2->removeColumn("V3D");
+    table2->addColumn("int","V3D");
+    Mantid::Algorithms::CheckWorkspacesMatch alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", table1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", table2) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Column type mismatch" );
+  }
+
+  void test_tableworkspace_different_data_fails()
+  {
+    auto table1 = setupTableWorkspace();
+    auto table2 = setupTableWorkspace();
+    table2->cell<size_t>(1,3) = 123;
+    Mantid::Algorithms::CheckWorkspacesMatch alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", table1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", table2) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Table data mismatch" );
+
+    table2 = setupTableWorkspace();
+    table1->cell<std::string>(2,7) = "?";
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", table1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", table2) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Table data mismatch" );
+
+    table1 = setupTableWorkspace();
+    table2->cell<Mantid::Kernel::V3D>(0,8) = Mantid::Kernel::V3D(9.9,8.8,7.7);
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", table1) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", table2) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Table data mismatch" );
   }
 
 private:
+
+  ITableWorkspace_sptr setupTableWorkspace()
+  {
+    auto table = WorkspaceFactory::Instance().createTable();
+    // One column of each type
+    table->addColumn("int","int");
+    table->addColumn("int32_t","int32");
+    table->addColumn("long64","int64");
+    table->addColumn("size_t","uint");
+    table->addColumn("float","float");
+    table->addColumn("double","double");
+    table->addColumn("bool","bool");
+    table->addColumn("str","string");
+    table->addColumn("V3D","V3D");
+
+    // A few rows
+    TableRow row1 = table->appendRow();
+    row1 << -1 << static_cast<int32_t>(0) << static_cast<int64_t>(1) << static_cast<size_t>(10)
+         << 5.5f << -9.9 << true << "Hello" << Mantid::Kernel::V3D();
+    TableRow row2 = table->appendRow();
+    row2 << 1 << static_cast<int32_t>(-2) << static_cast<int64_t>(-2) << static_cast<size_t>(100)
+         << 0.0f << 101.0 << false << "World" << Mantid::Kernel::V3D(-1,3,4);
+    TableRow row3 = table->appendRow();
+    row3 << 6 << static_cast<int32_t>(3) << static_cast<int64_t>(0) << static_cast<size_t>(0)
+         << -99.0f << 0.0 << false << "!" << Mantid::Kernel::V3D(1,6,10);
+
+    return table;
+  }
 
   void doGroupTest(const std::string & inputWSOne, const std::string & inputWSTwo,
                    const std::string & expectedResult,

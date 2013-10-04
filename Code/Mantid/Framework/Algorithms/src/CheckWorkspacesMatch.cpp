@@ -18,6 +18,7 @@ In the case of [[EventWorkspace]]s, they are checked to hold identical event lis
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <sstream>
@@ -162,7 +163,8 @@ void CheckWorkspacesMatch::init()
   
   declareProperty("Result","",Direction::Output);
 
-  declareProperty("ToleranceRelErr",false, "Treat tolerance as relative error rather then the absolute error");   
+  declareProperty("ToleranceRelErr",false, "Treat tolerance as relative error rather then the absolute error.\n"\
+                                           "This is only applicable to Matrix workspaces.");
   declareProperty("CheckAllData",false, "Usually checking data ends when first mismatch occurs. This forces algorithm to check all data and print mismatch to the debug log.\n"\
                                         "Very often such logs are huge so making it true should be the last option.");    // Have this one false by default - it can be a lot of printing. 
 
@@ -195,28 +197,40 @@ void CheckWorkspacesMatch::doComparison()
   Workspace_sptr w1 = getProperty("Workspace1");
   Workspace_sptr w2 = getProperty("Workspace2");
 
-  // Not implemented yet for table workspaces
-  if ( w1->id() == "TableWorkspace" || w2->id() == "TableWorkspace" )
-  {
-    throw Kernel::Exception::NotImplementedError("This algorithm does not (yet) work for table workspaces");
-  }
-
   // ==============================================================================
   // Peaks workspaces
   // ==============================================================================
 
   // Check that both workspaces are the same type
-  IPeaksWorkspace_sptr tws1 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w1);
-  IPeaksWorkspace_sptr tws2 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w2);
-  if ((tws1 && !tws2) ||(!tws1 && tws2))
+  IPeaksWorkspace_sptr pws1 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w1);
+  IPeaksWorkspace_sptr pws2 = boost::dynamic_pointer_cast<IPeaksWorkspace>(w2);
+  if ((pws1 && !pws2) ||(!pws1 && pws2))
   {
-    result = "One workspace is an PeaksWorkspace and the other is not.";
+    result = "One workspace is a PeaksWorkspace and the other is not.";
     return;
   }
   // Check some peak-based stuff
+  if (pws1 && pws2)
+  {
+    doPeaksComparison(pws1,pws2);
+    return;
+  }
+
+  // ==============================================================================
+  // Table workspaces
+  // ==============================================================================
+
+  // Check that both workspaces are the same type
+  auto tws1 = boost::dynamic_pointer_cast<const ITableWorkspace>(w1);
+  auto tws2 = boost::dynamic_pointer_cast<const ITableWorkspace>(w2);
+  if ((tws1 && !tws2) ||(!tws1 && tws2))
+  {
+    result = "One workspace is a TableWorkspace and the other is not.";
+    return;
+  }
   if (tws1 && tws2)
   {
-    doPeaksComparison(tws1,tws2);
+    doTableComparison(tws1,tws2);
     return;
   }
 
@@ -737,7 +751,7 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run& run1, const API::R
   return true;
 }
 
-void CheckWorkspacesMatch::doPeaksComparison(API::IPeaksWorkspace_const_sptr tws1, API::IPeaksWorkspace_const_sptr tws2)
+void CheckWorkspacesMatch::doPeaksComparison(API::IPeaksWorkspace_sptr tws1, API::IPeaksWorkspace_sptr tws2)
 {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks())
@@ -858,6 +872,62 @@ void CheckWorkspacesMatch::doPeaksComparison(API::IPeaksWorkspace_const_sptr tws
     }
   }
   return;
+}
+
+void CheckWorkspacesMatch::doTableComparison(API::ITableWorkspace_const_sptr tws1, API::ITableWorkspace_const_sptr tws2)
+{
+  // First the easy things
+  const auto numCols = tws1->columnCount();
+  if ( numCols != tws2->columnCount() )
+  {
+    g_log.debug() << "Number of columns mismatch (" << numCols << " vs " << tws2->columnCount() << ")\n";
+    result = "Number of columns mismatch";
+    return;
+  }
+  const auto numRows = tws1->rowCount();
+  if ( numRows != tws2->rowCount() )
+  {
+    g_log.debug() << "Number of rows mismatch (" << numRows << " vs " << tws2->rowCount() << ")\n";
+    result = "Number of rows mismatch";
+    return;
+  }
+
+  for (size_t i = 0; i < numCols; ++i)
+  {
+    auto c1 = tws1->getColumn(i);
+    auto c2 = tws2->getColumn(i);
+
+    if ( c1->name() != c2->name() )
+    {
+      g_log.debug() << "Column name mismatch at column " << i << " (" << c1->name() << " vs " << c2->name() << ")\n";
+      result = "Column name mismatch";
+      return;
+    }
+    if ( c1->type() != c2->type() )
+    {
+      g_log.debug() << "Column type mismatch at column " << i << " (" << c1->type() << " vs " << c2->type() << ")\n";
+      result = "Column type mismatch";
+      return;
+    }
+  }
+
+  const bool checkAllData = getProperty("CheckAllData");
+
+  for (size_t i = 0; i < numRows; ++i)
+  {
+    const TableRow r1 = boost::const_pointer_cast<ITableWorkspace>(tws1)->getRow(i);
+    const TableRow r2 = boost::const_pointer_cast<ITableWorkspace>(tws2)->getRow(i);
+    // Easiest, if not the fastest, way to compare is via strings
+    std::stringstream r1s, r2s;
+    r1s << r1;
+    r2s << r2;
+    if ( r1s.str() != r2s.str() )
+    {
+      g_log.debug() << "Table data mismatch at row " << i << " (" << r1s << " vs " << r2s << ")\n";
+      result = "Table data mismatch";
+      if ( !checkAllData ) return;
+    }
+  } // loop over columns
 }
 
 void CheckWorkspacesMatch::doMDComparison(Workspace_sptr w1, Workspace_sptr w2)
