@@ -224,21 +224,17 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
         Reducer.log('one2one map selected')
 
     
-          
     if  Reducer.det_cal_file != None : 
-        if isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file in mtd : # it is a file
+        if isinstance(sample_run,api.Workspace) or mtd.doesExist(sample_run):
+            Reducer.log('Input is pre-loaded workspace, ignoring specified det_cal_file "%s"' % str(Reducer.det_cal_file))
+            Reducer.log('Use UpdateInstrumentFromFile to apply calibration to %s' % (str(sample_run)))
+        elif isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file in mtd : # it is a file
             Reducer.log('Setting detector calibration file to '+Reducer.det_cal_file)
         else:
            Reducer.log('Setting detector calibration to {0}, which is probably a workspace '.format(str(Reducer.det_cal_file)))
     else:
         Reducer.log('Setting detector calibration to detector block info from '+str(sample_run))
 
-    
-    if mtd.doesExist(str(sample_run))==True and Reducer.det_cal_file == None:
-        Reducer.log('For data input type: workspace detector calibration must be specified','error')
-        Reducer.log('use Keyword det_cal_file with a valid detctor file or run number','error')
-        return
-              
     # check if reducer can find all non-run files necessary for the reduction before starting long run. 
     Reducer.check_necessary_files(monovan_run);
     
