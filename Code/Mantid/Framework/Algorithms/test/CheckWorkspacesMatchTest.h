@@ -873,6 +873,16 @@ public:
     TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "Table data mismatch" );
   }
 
+  void test_mixing_peaks_and_table_workspaces_fails()
+  {
+    Mantid::Algorithms::CheckWorkspacesMatch alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", WorkspaceFactory::Instance().createTable()) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", WorkspaceFactory::Instance().createPeaks()) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "One workspace is a PeaksWorkspace and the other is not." );
+  }
+
 private:
 
   ITableWorkspace_sptr setupTableWorkspace()
