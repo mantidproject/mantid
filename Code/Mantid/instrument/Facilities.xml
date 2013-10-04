@@ -9,7 +9,7 @@
   <catalog name="ICat3Catalog">
     <soapendpoint url="https://facilities01.esc.rl.ac.uk:443/ICATService/ICAT"></soapendpoint>
     <filelocation>
-      <prefix regex="\\\\isis\\inst\$"></prefix>
+      <prefix regex="\\\\isis\\inst\$\\Instruments\$"></prefix>
       <windows replacement=""></windows>
       <linux replacement="/archive"></linux>
       <mac replacement="/archive"></mac>
