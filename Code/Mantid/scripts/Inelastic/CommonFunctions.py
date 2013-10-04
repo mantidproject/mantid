@@ -1,3 +1,4 @@
+import mantid
 from mantid.simpleapi import *
 import os
 import string
@@ -69,7 +70,7 @@ def mark_as_loaded(filename):
         logger.notice("Marking %s as loaded." % filename)
         _loaded_data.append(data_name)
 
-def load_runs(runs, sum=True):
+def load_runs(inst_name, runs, sum=True, calibration=None):
     """
     Loads a list of files, summing if the required.    
     """
@@ -95,9 +96,9 @@ def load_runs(runs, sum=True):
                 return loaded
     else:
         # Try a single run
-        return load_run(runs)
+        return load_run(inst_name, runs, calibration)
 
-def load_run(run_number, force=False):
+def load_run(inst_name, run_number, calibration=None, force=False):
     """Loads run into the given workspace. 
     
     The AddSampleLog algorithm is used to add a Filename property
@@ -132,20 +133,19 @@ def load_run(run_number, force=False):
         logger.notice("%s already loaded" % filename)
         return mtd[output_name]
 
-    ext = os.path.splitext(filename)[1]
-    if filename.endswith("_event.nxs"):
-        LoadEventNexus(Filename=filename, OutputWorkspace=output_name) 
-    elif ext.startswith(".n"):
-        LoadNexus(Filename=filename,OutputWorkspace=output_name)
-    elif filename.endswith("_event.dat"):
-        #load the events
-        LoadEventPreNexus(EventFilename=filename, OutputWorkspace=output_name)       
-    else:
-        LoadRaw(Filename=filename,OutputWorkspace=output_name)
-        #LoadDetectorInfo(output_name, filename)
+    Load(Filename=filename, OutputWorkspace=output_name)
+    
+    if type(calibration) == str or type(calibration) == int:
+        logger.debug('load_data: Moving detectors to positions specified in cal file "%s"' % str(calibration))
+        filename = calibration
+        skip_lines = None
+        if type(filename) == int: # assume run number
+            filename = inst_name + str(filename)
+        UpdateInstrumentFromFile(Workspace=output_name,Filename=filename,MoveMonitors=False, IgnorePhi=False)
+    elif isinstance(calibration, mantid.api.Workspace):
+        logger.debug('load_data: Copying detectors positions from workspace "%s": ' % calibration.name())
+        CopyInstrumentParameters(InputWorkspace=self.__det_cal_file_ws,OutputWorkspace=output_name)
 
-    # Attach the filename to the workspace so that it can be retrieved later in the reduction chain
-    AddSampleLog(Workspace=output_name,LogName="Filename",LogText=filename)
     logger.notice("Loaded %s" % filename)
     return mtd[output_name]
 

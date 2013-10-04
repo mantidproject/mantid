@@ -164,7 +164,7 @@ class DirectEnergyConversion(object):
                 kwargs['sample_run'] = sample
             
             # Set up the background integrals
-            result_ws = common.load_runs(sample)
+            result_ws = self.load_data(sample)
             result_ws = self.normalise(result_ws, result_ws.name(), self.normalise_method)
             if 'background_test_range' in kwargs:
                 bkgd_range = kwargs['background_test_range']
@@ -309,7 +309,7 @@ class DirectEnergyConversion(object):
             else:
                 tzero = Tzero
             # apply T0 shift
-            ChangeBinOffset(InputWorkspace=data_ws,OutputWorkspace=result_name,Offset= -tzero)
+            ScaleX(InputWorkspace=data_ws,OutputWorkspace=result_name,Operation="Add",Factor=-tzero)
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
             if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename'].value
@@ -355,7 +355,7 @@ class DirectEnergyConversion(object):
             
             mon1_peak = 0.0
             # apply T0 shift
-            ChangeBinOffset(InputWorkspace=data_ws,OutputWorkspace= result_name,Offset=-tzero)
+            ScaleX(InputWorkspace=data_ws,OutputWorkspace= result_name,Operation="Add",Factor=-tzero)
             self.incident_energy = ei_value
         else:
             # Do ISIS stuff for Ei
@@ -381,40 +381,8 @@ class DirectEnergyConversion(object):
             # Convert back to TOF
             ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
         else:
-            # TODO: This algorithm needs to be separated so that it doesn't actually
-            # do the correction as well so that it can be moved next to LoadRaw where
-            # it belongs
-            if self.det_cal_file == None:
-                run = data_ws.getRun()
-                if 'Filename' in run:
-                    filename = run['Filename'].value
-                else:
-                    raise RuntimeError('Cannot run LoadDetectorInfo: "Filename" property not found on input mono workspace')
-                if self.relocate_dets: 
-                    self.log('_do_mono: Moving detectors to positions specified in RAW file.'+filename)
-                    
-                LoadDetectorInfo(Workspace=result_name,DataFilename=filename,RelocateDets=self.relocate_dets)
-            else:
-                self.log('_do_mono: Raw file detector header is superceeded') 
-                if self.relocate_dets: 
-                    self.log('_do_mono: Moving detectors to positions specified in cal file ','debug')
-                    if str(self.det_cal_file) in mtd: # it is already workspace 
-                        self.__det_cal_file_ws = mtd[str(self.det_cal_file)]
-                    if isinstance(self.det_cal_file,api.Workspace): # it is already workspace 
-                        self.__det_cal_file_ws = self.det_cal_file
-
-                    if self.__det_cal_file_ws == None :
-                        self.log('_do_mono: Loading detector info from file ' +str(self.det_cal_file),'debug')    
-                        file = FileFinder.getFullPath(str(self.det_cal_file))
-                        if len(file) == 0: # try to find run
-                            file = common.find_file(self.det_cal_file)
-
-                        LoadDetectorInfo(Workspace=result_name,DataFilename=file,RelocateDets= self.relocate_dets)
-                        self.log('_do_mono: Loading detector info completed ','debug')                                            
-                    else:
-                        self.log('_do_mono: Copying detectors positions from det_cal_file workspace: '+self.__det_cal_file_ws.name())                    
-                        CopyInstrumentParameters(InputWorkspace=self.__det_cal_file_ws,OutputWorkspace=result_name)
-                        self.log('_do_mono: Copying detectors positions complete','debug')
+            # Correct for detector delay time
+            ScaleX(InputWorkspace=result_name, OutputWorkspace=result_name,Operation="Add",InstrumentParameter="DelayTime")
 
         if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
@@ -455,7 +423,7 @@ class DirectEnergyConversion(object):
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= self.energy_bins,PreserveEvents=False)
         
         if self.apply_detector_eff:
-            if (self.__facility == "SNS"):
+            if self.__facility == "SNS":
                 # Need to be in lambda for detector efficiency correction
                 ConvertUnits(InputWorkspace=result_name,OutputWorkspace= result_name, Target="Wavelength", EMode="Direct", EFixed=ei_value)
                 He3TubeEfficiency(InputWorkspace=result_name,OutputWorkspace=result_name)
@@ -564,7 +532,13 @@ class DirectEnergyConversion(object):
      
     def get_ei(self, input_ws, resultws_name, ei_guess):
         """
-        Calculate incident energy of neutrons
+        Calculate incident energy of neutrons and the time of the of the 
+        peak in the monitor spectrum
+        The X data is corrected to set the first monitor peak at t=0 by subtracting
+            t_mon + t_det_delay
+        where the detector delay time is retrieved from the the instrument
+        The position of the "source" component is also moved to match the position of
+        the first monitor
         """
         fix_ei = str(self.fix_ei).lower()
         if fix_ei == 'true':
@@ -583,8 +557,7 @@ class DirectEnergyConversion(object):
                   EnergyEstimate=ei_guess,FixEi=self.fix_ei)
 
         self.incident_energy = ei
-        # Adjust the TOF such that the first monitor peak is at t=0
-        ChangeBinOffset(InputWorkspace=input_ws,OutputWorkspace= resultws_name,Offset= -float(str(mon1_peak)))
+        ScaleX(InputWorkspace=input_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak)
         mon1_det = input_ws.getDetector(mon1_index)
         mon1_pos = mon1_det.getPos()
         src_name = input_ws.getInstrument().getSource().getName()
@@ -761,14 +734,20 @@ class DirectEnergyConversion(object):
             else:
                 self.log("Unknown file format {0} requested while saving results.".format(ext))
    
-
     #-------------------------------------------------------------------------------
     def load_data(self, runs,new_ws_name=None,keep_previous_ws=False):
         """
         Load a run or list of runs. If a list of runs is given then
         they are summed into one.
         """
-        result_ws = common.load_runs(runs, sum=True)
+        calibration = None
+        if self.relocate_dets:
+            if self.__det_cal_file_ws:
+                calibration = self.__det_cal_file_ws
+            else:
+                calibration = self.det_cal_file
+        result_ws = common.load_runs(self.instr_name, runs, calibration=calibration, sum=True)
+        
         if new_ws_name != None :
             if keep_previous_ws:
                 result_ws = CloneWorkspace(InputWorkspace = result_ws,OutputWorkspace = new_ws_name)

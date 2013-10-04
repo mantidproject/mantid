@@ -84,9 +84,9 @@ const double g_helium_prefactor = 2.0*143.23*3.49416/10.0;
 const double DIST_TO_UNIVERSE_EDGE = 1e3;
 
 // Name of pressure parameter
-const std::string PRESSURE_PARAM = "3He(atm)";
+const std::string PRESSURE_PARAM = "TubePressure";
 // Name of wall thickness parameter
-const std::string THICKNESS_PARAM = "wallT(m)";
+const std::string THICKNESS_PARAM = "TubeThickness";
 }
 
 // this default constructor calls default constructors and sets other member data to imposible (flag) values 
