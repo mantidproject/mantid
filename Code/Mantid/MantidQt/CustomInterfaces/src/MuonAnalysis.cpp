@@ -2136,6 +2136,8 @@ void MuonAnalysis::setPlotStyle(const QString& wsName, const QMap<QString, QStri
   // If autoscaling disabled - set manual Y axis values
   if(params["YAxisAuto"] == "False")
     code += "l.setAxisScale(Layer.Left," + params["YAxisMin"] + "," + params["YAxisMax"] + ")\n";
+  else
+    code += "l.setAutoScale()\n";
 
   // Replot
   code += "l.replot()\n";
@@ -2198,16 +2200,45 @@ void MuonAnalysis::closePlotWindow(const QString& wsName)
 }
 
 /**
+ * Checks if the plot for the workspace does exist.
+ * @param wsName Name of the workspace
+ * @return True if exists, false if not
+ */
+bool MuonAnalysis::plotExists(const QString& wsName)
+{
+  QString code;
+
+  code += "g = graph('%1-1')\n"
+          "if g != None:\n"
+          "  print('1')\n"
+          "else:\n"
+          "  print('0')\n";
+  
+  QString output = runPythonCode(code.arg(wsName));
+
+  bool ok;
+  int outputCode = output.toInt(&ok);
+
+  if(!ok)
+    throw std::logic_error("Script should print 0 or 1");
+
+  return (outputCode == 1);
+}
+
+/**
  * Enable PP tool for the plot of the given WS.
  * @param wsName Name of the WS which plot PP tool will be attached to.
  */
 void MuonAnalysis::selectMultiPeak(const QString& wsName)
 {
+  disableAllTools();
+
   QString code;
 
   code += "g = graph('" + wsName + "-1')\n"
           "if g != None:\n"
           "  g.show()\n"
+          "  g.setFocus()\n"
           "  selectMultiPeak(g)\n";
 
   runPythonCode(code);
@@ -2258,8 +2289,6 @@ void MuonAnalysis::showPlot(const QString& wsName)
   // TODO: use selected wsIndex, as two groups might be in one ws (before we make ws contain 
   //       only one groups)
 
-  // TODO: if we are using Python, can first check if window exists, and just show it in that case
-
   // If empty -> no workspaces available to choose (e.g. all were deleted)
   if(wsName.isEmpty())
   {
@@ -2276,14 +2305,12 @@ void MuonAnalysis::showPlot(const QString& wsName)
   {
     setCurrentDataName(wsName);
 
-    closePlotWindow(m_currentDataName);
-    plotSpectrum(m_currentDataName, 0, false);
+    if(!plotExists(wsName))
+    {
+      plotSpectrum(m_currentDataName, 0, false);
+      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
+    }
 
-    // Change the plot style of the graph so that it matches what is selected on
-    // the plot options tab.
-    setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, 0));
-
-    disableAllTools();
     selectMultiPeak(m_currentDataName);
   }
 }
@@ -3668,6 +3695,7 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.optionStepSizeText, SIGNAL(editingFinished()), this, SLOT(settingsTabUpdatePlot()));
 
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_optionTab, SIGNAL(plotStyleChanged()), this, SLOT(updateCurrentPlotStyle()));
 }
 
 void MuonAnalysis::changeHomeFunction()
@@ -3732,6 +3760,31 @@ void MuonAnalysis::settingsTabUpdatePlot()
 {
   if (isAutoUpdateEnabled() && m_tabNumber == 2 && m_loaded == true)
     runFrontPlotButton();
+}
+
+/**
+ * Updates the style of the current plot according to actual parameters on settings tab.
+ */
+void MuonAnalysis::updateCurrentPlotStyle()
+{
+  if (isAutoUpdateEnabled() && m_currentDataName != NOT_AVAILABLE)
+  {
+    if(plotExists(m_currentDataName))
+    {
+      // TODO: This index magic wouldn't be needed if we'd store only a single group in a workspace.
+
+      // Get selected group index
+      int index = m_uiForm.frontGroupGroupPairComboBox->currentIndex();
+
+      // Check if pair is selected
+      if(index >= numGroups())
+        index = 0;
+
+      setPlotStyle(m_currentDataName, getPlotStyleParams(m_currentDataName, index));
+    }
+    else
+      runFrontPlotButton();
+  }
 }
 
 bool MuonAnalysis::isAutoUpdateEnabled()
