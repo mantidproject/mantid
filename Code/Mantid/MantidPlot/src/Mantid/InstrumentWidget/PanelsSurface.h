@@ -14,15 +14,16 @@ struct FlatBankInfo
     Mantid::Geometry::ComponentID id;
     /// Bank's rotation
     Mantid::Kernel::Quat rotation;
-    /// Bounding rect of the projection
-    //RectF rect;
+    /// Bounding rect
+    RectF rect;
     /// Starting index of bank's detectors in m_unwrappedDetectors vector
     size_t startDetectorIndex;
     /// Ending index of bank's detectors in m_unwrappedDetectors vector (1 past the last one)
     size_t endDetectorIndex;
+    /// Bank's shape
+    QPolygonF polygon;
     // translate the bank by a vector
     void translate(const QPointF &shift);
-    QPolygonF polygon;
 private:
     PanelsSurface *surface;
 };
@@ -50,6 +51,8 @@ public:
 protected:
 
   void rotate(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const;
+  void drawCustom(QPainter *painter) const;
+
   // Setup the projection axes
   void setupAxes();
   // Find all flat banks of detectors.
@@ -62,7 +65,7 @@ protected:
   void spreadBanks();
   // Find index of the largest bank
   int findLargestBank() const;
-  bool isOverlapped( QPolygonF &rect, int iexclude ) const;
+  bool isOverlapped( QPolygonF &polygon, int iexclude ) const;
   void clearBanks();
 
 protected:
@@ -78,7 +81,7 @@ protected:
   /// Keep info of the flat banks
   QList<FlatBankInfo*> m_flatBanks;
   /// Maps detector ids to indices of FlatBankInfos in m_flatBanks
-  //QMap<Mantid::detid_t,int> m_detector2bankMap;
+  QMap<Mantid::detid_t,int> m_detector2bankMap;
 
   friend class FlatBankFinder;
   friend class FlatBankInfo;

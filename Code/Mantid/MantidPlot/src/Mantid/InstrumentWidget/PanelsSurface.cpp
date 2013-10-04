@@ -10,6 +10,7 @@
 #include <QCursor>
 #include <QMessageBox>
 #include <QApplication>
+#include <QtDebug>
 
 using namespace Mantid::Geometry;
 
@@ -87,13 +88,25 @@ void PanelsSurface::init()
 void PanelsSurface::project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale, double &vscale) const
 {
     (void)pos;
-    u = v = uscale = vscale = 0.0;
+    u = v = 0;
+    uscale = vscale = 1.0;
 }
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const
 {
-    (void)udet;
-    (void)R;
+    int index = m_detector2bankMap[udet.detector->getID()];
+    FlatBankInfo &info = *m_flatBanks[index];
+    R =  info.rotation * udet.detector->getRotation();
+}
+
+void PanelsSurface::drawCustom(QPainter *painter) const
+{
+    painter->setPen(QColor(255,0,0));
+    for(int i = 0; i < m_flatBanks.size(); ++i)
+    {
+        painter->drawPolygon(m_flatBanks[i]->polygon);
+        //painter->drawRect(m_flatBanks[i]->polygon.boundingRect());
+    }
 }
 
 /**
@@ -244,10 +257,12 @@ void PanelsSurface::findFlatBanks()
   */
 void PanelsSurface::addFlatBank(ComponentID bankId, const Mantid::Kernel::V3D &normal, QList<ComponentID> objCompAssemblies)
 {
-    //int index = m_flatBanks.size();
+    int index = m_flatBanks.size();
     // save bank info
     FlatBankInfo *info = new FlatBankInfo(this);
+    m_flatBanks << info;
     info->id = bankId;
+    // record the first detector index of the bank
     info->startDetectorIndex = m_unwrappedDetectors.size();
     bool doneRotation = false;
     // keep reference position on the bank's plane
@@ -270,42 +285,55 @@ void PanelsSurface::addFlatBank(ComponentID bankId, const Mantid::Kernel::V3D &n
             if ( !doneRotation )
             {
                 pos0 = pos;
-                p0.rx() = m_xaxis.scalar_prod( pos0 );
-                p0.ry() = m_yaxis.scalar_prod( pos0 );
+                // find the rotation to put the bank on the plane
                 info->rotation = calcBankRotation( pos0, normal );
                 Mantid::Kernel::V3D pos1 = assembly->getChild(nelem-1)->getPos();
                 pos1 -= pos0;
                 info->rotation.rotate(pos1);
                 pos1 += pos0;
+                // start forming the outline polygon
+                p0.rx() = m_xaxis.scalar_prod( pos0 );
+                p0.ry() = m_yaxis.scalar_prod( pos0 );
                 p1.rx() = m_xaxis.scalar_prod( pos1 );
                 p1.ry() = m_yaxis.scalar_prod( pos1 );
                 QVector<QPointF> vert;
-                vert << p0 << p1;
+                vert << p1 << p0;
                 info->polygon = QPolygonF(vert);
                 doneRotation = true;
             }
+            Mantid::detid_t detid = det->getID();
+            m_detector2bankMap[detid] = index;
             UnwrappedDetector udet;
             udet.detector = det;
-            m_instrActor->getColor( det->getID() ).getUB3( &udet.color[0] );
+            // get the colour
+            m_instrActor->getColor( detid ).getUB3( &udet.color[0] );
+            // apply bank's rotation
             pos -= pos0;
             info->rotation.rotate(pos);
             pos += pos0;
             udet.u = m_xaxis.scalar_prod( pos );
             udet.v = m_yaxis.scalar_prod( pos );
             udet.uscale = udet.vscale = 1.0;
-            //info->rect.include( QPointF(udet.u,udet.v) );
-            udet.height = 0.001;
-            udet.width = 0.001;
+            this->calcSize(udet);
             m_unwrappedDetectors.push_back( udet );
         }
+        // update the outline polygon
         UnwrappedDetector &udet0 = *(m_unwrappedDetectors.end() - nelem);
         UnwrappedDetector &udet1 = m_unwrappedDetectors.back();
+        //      get the tube end points
+        QPointF p3 = QPointF(udet0.u,udet0.v);
+        QPointF p4 = QPointF(udet1.u,udet1.v);
         QVector<QPointF> vert;
-        vert << p0 << p1 << QPointF(udet0.u,udet0.v) << QPointF(udet1.u,udet1.v);
+        //      add a quadrilateral formed by end points of two nearest tubes
+        //      assumption is made here that any two adjacent tubes in an assembly's children's list
+        //      are close to each other
+        vert << p0 << p1 << p4 << p3;
         info->polygon = info->polygon.united(QPolygonF(vert));
+        p0 = p3;
+        p1 = p4;
     }
+    // record the end detector index of the bank
     info->endDetectorIndex = m_unwrappedDetectors.size();
-    m_flatBanks << info;
 }
 
 /**
@@ -396,13 +424,12 @@ int PanelsSurface::findLargestBank() const
     return index;
 }
 
-bool PanelsSurface::isOverlapped(QPolygonF &rect, int iexclude) const
+bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const
 {
     for(int i = 0; i < m_flatBanks.size(); ++i)
     {
         if ( i == iexclude ) continue;
-        //if ( rect.doesIntersect(m_flatBanks[i]->rect) ) return true;
-        QPolygonF poly = rect.intersected(m_flatBanks[i]->polygon);
+        QPolygonF poly = polygon.intersected(m_flatBanks[i]->polygon);
         if (poly.size() > 0 ) return true;
     }
     return false;

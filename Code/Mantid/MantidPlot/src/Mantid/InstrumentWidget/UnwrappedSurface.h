@@ -13,6 +13,7 @@
 #include <QStack>
 #include <QSet>
 #include <QMap>
+#include <QPainter>
 
 namespace Mantid{
   namespace Geometry{
@@ -148,6 +149,9 @@ protected:
   virtual void calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos);
   virtual void calcSize(UnwrappedDetector& udet);
   virtual QString getDimInfo() const;
+  /// Called in non-picking drawSimpleToImage to draw something other than detectors
+  /// Useful for debuging
+  virtual void drawCustom(QPainter*) const {}
   //@}
 
   /** @name Protected methods */
