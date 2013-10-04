@@ -247,6 +247,7 @@ set ( TEST_FILES
 	BoundedValidatorTest.h
 	CPUTimerTest.h
 	CacheTest.h
+	CatalogInfoTest.h
 	CompositeValidatorTest.h
 	ConfigServiceTest.h
 	DataServiceTest.h
