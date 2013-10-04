@@ -111,6 +111,7 @@ namespace Mantid
         }
       #endif
 
+      UNUSED_ARG(isWindowsPath);
       return ("");
     }
 
