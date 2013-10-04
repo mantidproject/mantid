@@ -1232,18 +1232,8 @@ def divideDataByNormalization(data_y_axis,
             
                 tmp_error_1 = pow(float(data_y_error_axis[x,t]) / float(data_y_axis[x,t]),2)
                 tmp_error_2 = pow(float(av_norm_error[t]) / float(av_norm[t]),2)
-                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * (float(data_y_axis[x,t]) / float(av_norm[t]))
+                tmp_error = sqrt(tmp_error_1 + tmp_error_2) * abs(float(data_y_axis[x,t]) / float(av_norm[t]))
             
-#                 if t == 61:
-#                     print 'data_y_error_axis[x,t]: ' , float(data_y_error_axis[x,t])
-#                     print 'data_y_axis[x,t]: ' , float(data_y_axis[x,t])
-#                     print 'tmp_error_1: ' , tmp_error_1
-#                     print 'av_norm_error[t]: ' , av_norm_error[t]
-#                     print 'av_norm[t]: ' , av_norm[t]
-#                     print 'tmp_error_2: ' , tmp_error_2
-#                     print 'tmp_error: ' , tmp_error
-#                     print
-
                 new_data_y_axis[x,t] = tmp_value
                 new_data_y_error_axis[x,t] = tmp_error
     
