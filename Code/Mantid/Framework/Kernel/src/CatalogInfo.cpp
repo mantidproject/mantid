@@ -3,6 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/CatalogInfo.h"
 
+#include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
+
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
@@ -78,7 +81,62 @@ namespace Mantid
      */
     std::string CatalogInfo::transformArchivePath(std::string path)
     {
+      bool isWindowsPath = false;
 
+      // Check to see if path is a windows path.
+      std::size_t pos = path.find("\\");
+      if (pos != std::string::npos)
+      {
+        isWindowsPath = true;
+      }
+
+      #ifdef __linux__
+        std::string filePath = replacePrefix(path,catalogPrefix(),linuxPrefix());
+        boost::replace_all(filePath, "\\", "/");
+        return filePath;
+      #elif __APPLE__
+        std::string filePath = replacePrefix(path,catalogPrefix(),macPrefix());
+        boost::replace_all(filePath, "\\", "/");
+        return filePath;
+      #elif _WIN32
+        if (isWindowsPath)
+        {
+          return path;
+        }
+        else
+        {
+          std::string filePath = replacePrefix(path,linuxPrefix(),windowsPrefix());
+          boost::replace_all(filePath, "/", "\\");
+          return filePath;
+        }
+      #endif
+
+      return ("");
+    }
+
+    /**
+     * Replace the content of a string using regex.
+     * @param path   :: An string to search and replace on.
+     * @param regex  :: The regex to search for.
+     * @param prefix :: Replace result of regex with this prefix.
+     */
+    std::string CatalogInfo::replacePrefix(std::string path, std::string regex, std::string prefix)
+    {
+      boost::regex re(regex);
+      // Assign the result of the replacement back to path and return it.
+      path = boost::regex_replace(path, re, prefix);
+      return (path);
+    }
+
+    /**
+     * Replace all occurrences of the search string in the input with the format string.
+     * @param path    :: An string to search and replace on.
+     * @param search  :: A substring to be searched for.
+     * @param format  :: A substitute string.
+     */
+    void CatalogInfo::replaceInString(std::string path, std::string search, std::string format)
+    {
+      boost::replace_all(path, search, format);
     }
 
     /**
