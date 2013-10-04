@@ -883,6 +883,16 @@ public:
     TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "One workspace is a PeaksWorkspace and the other is not." );
   }
 
+  void test_mixing_matrix_and_table_workspaces_fails()
+  {
+    Mantid::Algorithms::CheckWorkspacesMatch alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace1", WorkspaceFactory::Instance().createTable()) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Workspace2", WorkspaceFactory::Instance().create("Workspace2D",1,1,1)) );
+    TS_ASSERT( alg.execute() );
+    TS_ASSERT_EQUALS( alg.getPropertyValue("Result"), "One workspace is a TableWorkspace and the other is not." );
+  }
+
 private:
 
   ITableWorkspace_sptr setupTableWorkspace()
