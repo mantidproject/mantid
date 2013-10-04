@@ -822,6 +822,16 @@ copy_python_files_to_dir ( "${MTDPLOTPY_FILES}"
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
                             MTDPLOT_INSTALL_FILES )
 
+# IPython scripts
+set( IPY_FILES 
+  __init__.py
+  mantid_ipython_widget.py
+)
+copy_python_files_to_dir ( "${IPY_FILES}" 
+                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_widget
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_widget 
+                            IPYTHON_INSTALL_FILES )
+
 ###########################################################################
 # MantidPlot executable
 ###########################################################################
@@ -829,7 +839,7 @@ copy_python_files_to_dir ( "${MTDPLOTPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp 
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} 
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
 )
 
 # Library dependencies
@@ -961,6 +971,9 @@ install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR}
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 foreach(PY_FILE ${MTDPLOTPY_FILES} )
   install ( FILES mantidplotpy/${PY_FILE} DESTINATION ${BIN_DIR}/mantidplotpy )
+endforeach()
+foreach(PY_FILE ${IPY_FILES} )
+  install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
 endforeach()
 
 if ( APPLE )

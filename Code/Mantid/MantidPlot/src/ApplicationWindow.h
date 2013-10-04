@@ -1342,6 +1342,8 @@ public:
   //! The scripting language to use for new projects.
   QString defaultScriptingLang;
 
+  QDockWidget *m_interpreterDock;
+
 private:
   mutable MdiSubWindow *d_active_window;
   MdiSubWindow* getActiveWindow() const;
@@ -1378,7 +1380,6 @@ private:
   QTranslator *appTranslator, *qtTranslator;
   QDockWidget *explorerWindow, *undoStackWindow;
   MantidQt::MantidWidgets::MessageDisplay *resultsLog;
-  QDockWidget *m_interpreterDock;
   QMdiArea *d_workspace;
 
   QToolBar *standardTools, *plotTools, *displayBar;

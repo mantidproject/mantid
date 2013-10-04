@@ -499,8 +499,9 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   //Scripting
   m_script_envs = QHash<QString, ScriptingEnv*>();
   setScriptingLanguage(defaultScriptingLang);
-  //delete m_interpreterDock->widget();
+  delete m_interpreterDock->widget();
   m_iface_script = NULL;
+  runPythonScript("from ipython_widget import *\nw = _qti.app._getInterpreterDock()\nw.setWidget(MantidIPythonWidget())",false,true,true);
   loadCustomActions();
 
   // Print a warning message if the scripting language is set to muParser
