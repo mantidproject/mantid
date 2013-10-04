@@ -3,7 +3,6 @@
 """
 import sys, os
 import traceback
-from PyQt4 import QtGui, QtCore, uic
 import math
 
 # Check whether Mantid is available
@@ -15,7 +14,12 @@ try:
     from mantid.api import AlgorithmFactory
     CLUSTER_ENABLED = "SubmitRemoteJob" in AlgorithmFactory.getRegisteredAlgorithms(True)
 except:
+    import sip
+    sip.setapi('QString',2)
+    sip.setapi('QVariant',2)
     pass
+
+from PyQt4 import QtGui, QtCore, uic
 
 REDUCTION_WARNING = False
 WARNING_MESSAGE = ""
@@ -56,7 +60,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         
         # Name handle for the instrument
         if instrument is None:
-            instrument = unicode(settings.value("instrument_name", QtCore.QVariant('')).toString())
+            instrument = unicode(settings.value("instrument_name", ''))
             if instrument_list is not None and instrument not in instrument_list:
                 instrument = None
 
@@ -70,11 +74,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._interface = None
         
         # Recent files
-        self._recent_files = settings.value("recent_files", QtCore.QVariant([])).toStringList()
+        self._recent_files = settings.value("recent_files", [])
+        if self._recent_files is None:  # An empty list saved to QSettings comes back as 'None'
+            self._recent_files = []
         
         # Folder to open files in
-        self._last_directory = unicode(settings.value("last_directory", QtCore.QVariant('.')).toString())
-        self._last_export_directory = unicode(settings.value("last_export_directory", QtCore.QVariant('.')).toString())
+        self._last_directory = unicode(settings.value("last_directory", '.'))
+        self._last_export_directory = unicode(settings.value("last_export_directory", '.'))
         
         # Current file name
         self._filename = None
@@ -272,7 +278,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self.file_menu.addSeparator()
             for i, fname in enumerate(recent_files):
                 action = QtGui.QAction("&%d %s" % (i+1, QtCore.QFileInfo(fname).fileName()), self)
-                action.setData(QtCore.QVariant(fname))
+                action.setData(fname)
                 self.connect(action, QtCore.SIGNAL("triggered()"), self.open_file)
                 self.file_menu.addAction(action)
 
@@ -352,8 +358,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Fill out the defaults    
         dialog = ClusterDialog(self._compute_resources)
         if self.general_settings.cluster_user is not None:
-            dialog.username_edit.setText(QtCore.QString(str(self.general_settings.cluster_user)))
-            dialog.pass_edit.setText(QtCore.QString(str(self.general_settings.cluster_pass)))
+            dialog.username_edit.setText(str(self.general_settings.cluster_user))
+            dialog.pass_edit.setText(str(self.general_settings.cluster_pass))
             
         dialog.nodes_box.setValue(int(self._number_of_nodes))
         dialog.cores_box.setValue(int(self._cores_per_node))
@@ -402,29 +408,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         else:    
             settings = QtCore.QSettings()
             
-            if self._instrument is not None:
-                instrument = QtCore.QVariant(QtCore.QString(self._instrument))
-            else: 
-                instrument = QtCore.QVariant()    
-            settings.setValue("instrument_name", instrument)
-            
-            if self._filename is not None:
-                filename = QtCore.QVariant(QtCore.QString(self._filename))
-            else:
-                filename = QtCore.QVariant()    
-            settings.setValue("last_file", filename)
-            
-            if self._recent_files is not []:
-                recent_files = QtCore.QVariant(self._recent_files)
-            else:
-                recent_files = QtCore.QVariant()
-            settings.setValue("recent_files", recent_files)
-            
-            last_dir = QtCore.QVariant(QtCore.QString(self._last_directory))
-            settings.setValue("last_directory", last_dir)
-    
-            last_export_dir = QtCore.QVariant(QtCore.QString(self._last_export_directory))
-            settings.setValue("last_export_directory", last_export_dir)
+            settings.setValue("instrument_name", self._instrument)            
+            settings.setValue("last_file", self._filename)            
+            settings.setValue("recent_files", self._recent_files)
+            settings.setValue("last_directory", str(self._last_directory))
+            settings.setValue("last_export_directory", str(self._last_export_directory))
             
             # General settings
             self.general_settings.to_settings(settings)
@@ -483,7 +471,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if file_path is None:
             action = self.sender()
             if isinstance(action, QtGui.QAction):
-                file_path = unicode(action.data().toString())
+                file_path = unicode(action.data())
             
         # Check whether the file describes the current instrument
         try:
@@ -512,12 +500,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._filename = file_path
         self._update_file_menu()
         self._set_window_title()
-        
+
         if file_path in self._recent_files:
-            self._recent_files.removeAll(file_path)
-        self._recent_files.prepend(file_path)
-        while self._recent_files.count() > 10:
-            self._recent_files.takeLast()
+            self._recent_files.remove(file_path)
+        self._recent_files.insert(0,file_path)
+        while len(self._recent_files) > 10:
+            self._recent_files.pop()
 
     def _new(self, *argv):
         """
@@ -578,10 +566,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             if not fname.endswith('.xml'):
                 fname += ".xml"
             if fname in self._recent_files:
-                self._recent_files.removeAll(fname)
-            self._recent_files.prepend(fname)
-            while self._recent_files.count() > 10:
-                self._recent_files.takeLast()                
+                self._recent_files.remove(fname)
+            self._recent_files.insert(0,fname)
+            while len(self._recent_files) > 10:
+                self._recent_files.pop()                
             self._last_directory = str(QtCore.QFileInfo(fname_qstr).path())
             self._filename = fname
             self._save()

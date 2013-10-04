@@ -108,7 +108,7 @@ class SampleSetupWidget(BaseWidget):
 
     def _check_and_set_lineedit_content(self, lineedit, content):
         lineedit.setText(content)
-        util.set_valid(lineedit, not lineedit.text().isEmpty())
+        util.set_valid(lineedit, not lineedit.text() == '')
         
     def _connect_validated_lineedit(self, ui_ctrl):
         call_back = partial(self._validate_edit, ctrl=ui_ctrl)
@@ -122,7 +122,7 @@ class SampleSetupWidget(BaseWidget):
             if not ctrl.isValid():
                 is_valid = False
         else:
-            if ctrl.text().isEmpty():
+            if not ctrl.text():
                 is_valid = False
         util.set_valid(ctrl, is_valid)
 
@@ -171,9 +171,9 @@ class SampleSetupWidget(BaseWidget):
             self._check_and_set_lineedit_content(self._content.ei_guess_edit, 
                                                  state.incident_energy_guess)
         self._content.use_ei_guess_chkbox.setChecked(state.use_ei_guess)
-        self._content.tzero_guess_edit.setText(QtCore.QString(str(state.tzero_guess)))
-        self._content.monitor1_specid_edit.setText(QtCore.QString(str(state.monitor1_specid)))
-        self._content.monitor2_specid_edit.setText(QtCore.QString(str(state.monitor2_specid)))
+        self._content.tzero_guess_edit.setText(str(state.tzero_guess))
+        self._content.monitor1_specid_edit.setText(str(state.monitor1_specid))
+        self._content.monitor2_specid_edit.setText(str(state.monitor2_specid))
         self._content.et_range_box.setChecked(state.rebin_et)
         self._content.etr_low_edit.setText(state.et_range_low)
         self._content.etr_width_edit.setText(state.et_range_width)

@@ -1221,7 +1221,7 @@ class BaseRefWidget(BaseWidget):
             while i < self._summary.angle_list.count():
                 
                 current_item = self._summary.angle_list.item(i)
-                state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+                state = current_item.data(QtCore.Qt.UserRole)
                 
                 _q_min = self._summary.q_min_edit.text()
                 state.q_min = float(_q_min)
@@ -1293,7 +1293,7 @@ class BaseRefWidget(BaseWidget):
         self._summary.remove_btn.setEnabled(False)  
         current_item =  self._summary.angle_list.currentItem()
         if current_item is not None:
-            state = current_item.data(QtCore.Qt.UserRole).toPyObject()
+            state = current_item.data(QtCore.Qt.UserRole)
             self.set_editing_state(state)
             self._reset_warnings()
         self._summary.angle_list.setEnabled(True)
