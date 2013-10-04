@@ -3,6 +3,8 @@
 
 #include "UnwrappedSurface.h"
 
+#include "MantidKernel/Logger.h"
+
 #include <QPolygonF>
 
 class PanelsSurface;
@@ -59,8 +61,12 @@ protected:
   void findFlatBanks();
   // Add a flat bank
   void addFlatBank(Mantid::Geometry::ComponentID id, const Mantid::Kernel::V3D &normal, QList<Mantid::Geometry::ComponentID> objCompAssemblies);
+  // Add a rectangular detector
+  void addRectangularDetector(Mantid::Geometry::ComponentID bankId);
   // Calculate bank rotation
   Mantid::Kernel::Quat calcBankRotation( const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal ) const;
+  // Add a detector from an assembly
+  void addDetector(const Mantid::Geometry::IDetector_const_sptr det, const Mantid::Kernel::V3D &refPos, int index, Mantid::Kernel::Quat &rotation);
   // Spread the banks over the projection plane
   void spreadBanks();
   // Find index of the largest bank
@@ -82,6 +88,9 @@ protected:
   QList<FlatBankInfo*> m_flatBanks;
   /// Maps detector ids to indices of FlatBankInfos in m_flatBanks
   QMap<Mantid::detid_t,int> m_detector2bankMap;
+
+  /// The logger
+  static Mantid::Kernel::Logger &g_log;
 
   friend class FlatBankFinder;
   friend class FlatBankInfo;
