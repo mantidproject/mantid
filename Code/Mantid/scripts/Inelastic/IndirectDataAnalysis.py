@@ -1052,11 +1052,11 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
     applyCorrections routine.'''
     StartTime('ApplyCorrections')
     workdir = config['defaultsave.directory']
-    CheckAnalysers(sample,container,Verbose)
     s_hist,sxlen = CheckHistZero(sample)
     sam_name = getWSprefix(sample)
     efixed = getEfixed(sample)
     if container != '':
+        CheckAnalysers(sample,container,Verbose)
         CheckHistSame(sample,'Sample',container,'Container')
         (instr, can_run) = getInstrRun(container)
         if ScaleOrNotToScale:
