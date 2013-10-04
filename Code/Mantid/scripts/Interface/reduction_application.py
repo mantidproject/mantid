@@ -271,7 +271,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         
         recent_files = []
         for fname in self._recent_files:
-            print fname
             if fname != self._filename and QtCore.QFile.exists(fname) and not fname in recent_files:
                 recent_files.append(fname)
                 
