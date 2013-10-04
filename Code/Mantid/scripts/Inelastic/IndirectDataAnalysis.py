@@ -116,6 +116,10 @@ def getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose):
         unitx = mtd[fout+'_Workspace'].getAxis(0).setUnit("Label")
         unitx.setLabel('Time' , 'ns')
         RenameWorkspace(InputWorkspace=fout+'_Workspace', OutputWorkspace=fout)
+        AddSampleLog(Workspace=fout, LogName="Fit Program", LogType="String", LogText='ConvFit')
+        AddSampleLog(Workspace=fout, LogName='Background', LogType='String', LogText=str(options[0]))
+        AddSampleLog(Workspace=fout, LogName='Delta', LogType='String', LogText=str(options[1]))
+        AddSampleLog(Workspace=fout, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
         DeleteWorkspace(fitWS+str(i)+'_NormalisedCovarianceMatrix')
         DeleteWorkspace(fitWS+str(i)+'_Parameters')
         if i == 0:
@@ -200,6 +204,14 @@ def confitSeq(inputWS, func, startX, endX, Save, Plot, ftype, bgd, specMin, spec
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startX, EndX=endX, FitType='Sequential')
     wsname = confitParsToWS(outNm, inputWS, specMin, specMax)
+
+    # Add some information about convfit to the output workspace
+    options = getConvFitOption(ftype, bgd[:-2], Verbose)
+    AddSampleLog(Workspace=wsname, LogName="Fit Program", LogType="String", LogText='ConvFit')
+    AddSampleLog(Workspace=wsname, LogName='Background', LogType='String', LogText=str(options[0]))
+    AddSampleLog(Workspace=wsname, LogName='Delta', LogType='String', LogText=str(options[1]))
+    AddSampleLog(Workspace=wsname, LogName='Lorentzians', LogType='String', LogText=str(options[2]))
+
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm + "_Parameters")
     getConvFitResult(inputWS, resFile, outNm, ftype, bgd, Verbose)
     if Save:
