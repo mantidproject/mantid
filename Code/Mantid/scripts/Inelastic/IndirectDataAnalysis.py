@@ -1033,8 +1033,8 @@ def applyCorrections(inputWS, canWS, corr, Verbose=False):
         EMode='Indirect', EFixed=efixed)
     ConvertUnits(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS, Target='DeltaE',
         EMode='Indirect', EFixed=efixed)
-    CloneWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw')
-    replace_workspace_axis(CorrectedWS+'_rqw', Q, 'MomentumTransfer')
+    ConvertSpectrumAxis(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_rqw', 
+        Target='ElasticQ', EMode='Indirect', EFixed=efixed)
     RenameWorkspace(InputWorkspace=CorrectedWS, OutputWorkspace=CorrectedWS+'_red')
     if canWS != '':
         DeleteWorkspace(CorrectedCanWS)
@@ -1055,6 +1055,7 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
     CheckAnalysers(sample,container,Verbose)
     s_hist,sxlen = CheckHistZero(sample)
     sam_name = getWSprefix(sample)
+    efixed = getEfixed(sample)
     if container != '':
         CheckHistSame(sample,'Sample',container,'Container')
         (instr, can_run) = getInstrRun(container)
@@ -1091,9 +1092,8 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
             if Verbose:
                 logger.notice('Subtracting '+container+' from '+sample)
             Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
-            CloneWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw')
-            theta,Q = GetThetaQ(sample)
-            replace_workspace_axis(sub_result+'_rqw', Q, 'MomentumTransfer')
+            ConvertSpectrumAxis(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_rqw', 
+                Target='ElasticQ', EMode='Indirect', EFixed=efixed)
             RenameWorkspace(InputWorkspace=sub_result, OutputWorkspace=sub_result+'_red')
             rws = mtd[sub_result+'_red']
             outNm= sub_result + '_Result_'
@@ -1135,14 +1135,6 @@ def abscorFeeder(sample, container, geom, useCor, Verbose=False, ScaleOrNotToSca
             if Verbose:
                 logger.notice('Output file created : '+res_path)
     EndTime('ApplyCorrections')
-
-from mantid.api import NumericAxis      
-def replace_workspace_axis(wsName, new_values, new_unit):
-    ax1 = NumericAxis.create(len(new_values))
-    for i in range(len(new_values)):
-        ax1.setValue(i, new_values[i])
-    ax1.setUnit(new_unit)
-    mtd[wsName].replaceAxis(1, ax1)      #axis=1 is vertical
 
 def plotCorrResult(inWS,PlotResult):
     nHist = mtd[inWS].getNumberHistograms()
