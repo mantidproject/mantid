@@ -225,7 +225,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     
     if  Reducer.det_cal_file != None : 
-        if isinstance(sample_run,api.Workspace) or mtd.doesExist(sample_run):
+        if isinstance(sample_run,api.Workspace) or (type(sample_run) == str and mtd.doesExist(sample_run)):
             Reducer.log('Input is pre-loaded workspace, ignoring specified det_cal_file "%s"' % str(Reducer.det_cal_file))
             Reducer.log('Use UpdateInstrumentFromFile to apply calibration to %s' % (str(sample_run)))
         elif isinstance(Reducer.det_cal_file,str) and not Reducer.det_cal_file in mtd : # it is a file
