@@ -497,7 +497,8 @@ namespace Mantid
     Parameter_sptr ParameterMap::get(const IComponent* comp, const std::string& name, 
                                      const std::string & type) const
     {
-      Parameter_sptr result = Parameter_sptr();
+      Parameter_sptr result;
+      if(!comp) return result;
       PARALLEL_CRITICAL(ParameterMap_get)
       {
         if( !m_map.empty() )
