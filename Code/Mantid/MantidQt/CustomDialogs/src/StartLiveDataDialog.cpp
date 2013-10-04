@@ -105,7 +105,6 @@ void StartLiveDataDialog::initLayout()
   tie(ui.radNow, "FromNow");
   tie(ui.radStartOfRun, "FromStartOfRun");
   tie(ui.radAbsoluteTime, "FromTime");
-  tie(ui.dateTimeEdit, "StartTime");
   radioTimeClicked();
 
   tie(ui.chkPreserveEvents, "PreserveEvents");
@@ -116,12 +115,6 @@ void StartLiveDataDialog::initLayout()
 
   tie(ui.editAccumulationWorkspace, "AccumulationWorkspace", ui.gridLayout);
   tie(ui.editOutputWorkspace, "OutputWorkspace", ui.gridLayout);
-
-  // == Prevent the user from entering invalid values in the DateTime edit box ==
-  QDateTime epochStart( QDateTime::fromString( "1990-01-01T00:00:00", Qt::ISODate));
-  epochStart.setTimeSpec( Qt::UTC);
-  ui.dateTimeEdit->setMinimumDateTime( epochStart);
-  ui.dateTimeEdit->setMaximumDateTime( QDateTime::currentDateTime().toUTC());
 
   // ========== Update GUIs =============
   ui.processingAlgo->update();
@@ -334,6 +327,14 @@ void StartLiveDataDialog::setDefaultAccumulationMethod(const QString& inst)
   catch( Mantid::Kernel::Exception::NotFoundError& )
   {
   }
+}
+
+void StartLiveDataDialog::accept()
+{
+  AlgorithmDialog::accept();
+  // Now manually set the StartTime property as there's a computation needed
+  DateAndTime startTime = DateAndTime::getCurrentTime() - ui.dateTimeEdit->value()*60.0;
+  m_algorithm->setPropertyValue("StartTime",startTime.toISO8601String());
 }
 
 }

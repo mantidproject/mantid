@@ -63,13 +63,13 @@ class SANSInstrumentWidget(BaseWidget):
         if key == "sample_detector_distance":
             self._sample_detector_distance = value
             if not self._summary.sample_dist_chk.isChecked():
-                self._summary.sample_dist_edit.setText(QtCore.QString(str(value)))
+                self._summary.sample_dist_edit.setText(str(value))
                 util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
         elif key == "beam_diameter":
             value_float = float(value)
             self._beam_diameter = "%-6.1f" % value_float
             if not self._summary.beamstop_chk.isChecked():
-                self._summary.scale_beam_radius_edit.setText(QtCore.QString(self._beam_diameter))
+                self._summary.scale_beam_radius_edit.setText(str(self._beam_diameter))
                 util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
 
     def content(self):
@@ -107,9 +107,9 @@ class SANSInstrumentWidget(BaseWidget):
         g3.setExclusive(True)
         
         # Q range
-        self._summary.n_q_bins_edit.setText(QtCore.QString("100"))
+        self._summary.n_q_bins_edit.setText("100")
             
-        self._summary.scale_edit.setText(QtCore.QString("1"))
+        self._summary.scale_edit.setText("1")
             
         self._summary.instr_name_label.hide()    
         self._dark_clicked(self._summary.dark_current_check.isChecked())  
@@ -256,7 +256,7 @@ class SANSInstrumentWidget(BaseWidget):
         # Keep track of current value so we can restore it if the check box is clicked again
         if self._beam_diameter_supplied != is_checked:
             current_value = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit)
-            self._summary.scale_beam_radius_edit.setText(QtCore.QString(str(self._beam_diameter)))
+            self._summary.scale_beam_radius_edit.setText(str(self._beam_diameter))
             util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
             self._beam_diameter = current_value
             self._beam_diameter_supplied = is_checked
@@ -297,7 +297,7 @@ class SANSInstrumentWidget(BaseWidget):
         # Keep track of current value so we can restore it if the check box is clicked again
         if self._sample_detector_distance_supplied != is_checked:
             current_value = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
-            self._summary.sample_dist_edit.setText(QtCore.QString(str(self._sample_detector_distance)))
+            self._summary.sample_dist_edit.setText(str(self._sample_detector_distance))
             util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
             self._sample_detector_distance = current_value
             
@@ -318,18 +318,18 @@ class SANSInstrumentWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: InstrumentDescription object
         """
-        self._summary.instr_name_label.setText(QtCore.QString(state.instrument_name))
+        self._summary.instr_name_label.setText(state.instrument_name)
         #npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
         #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
         #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
        
         # Absolute scaling
         self._summary.scale_chk.setChecked(state.calculate_scale)
-        self._summary.scale_edit.setText(QtCore.QString("%-6.3g" % state.scaling_factor))
-        self._summary.scale_data_edit.setText(QtCore.QString(state.scaling_direct_file))
-        self._summary.scale_att_trans_edit.setText(QtCore.QString(str(state.scaling_att_trans)))
+        self._summary.scale_edit.setText(str("%-6.3g" % state.scaling_factor))
+        self._summary.scale_data_edit.setText(state.scaling_direct_file)
+        self._summary.scale_att_trans_edit.setText(str(state.scaling_att_trans))
         
-        self._summary.scale_beam_radius_edit.setText(QtCore.QString("%-6.3g" % state.scaling_beam_diam))
+        self._summary.scale_beam_radius_edit.setText(str("%-6.3g" % state.scaling_beam_diam))
         if self._beam_diameter is None:
             self._beam_diameter = state.scaling_beam_diam
         self._beam_diameter_supplied = state.manual_beam_diam        
@@ -362,25 +362,25 @@ class SANSInstrumentWidget(BaseWidget):
         
         # Dark current
         self._summary.dark_current_check.setChecked(state.dark_current_corr)
-        self._summary.dark_file_edit.setText(QtCore.QString(state.dark_current_data))
+        self._summary.dark_file_edit.setText(state.dark_current_data)
         self._dark_clicked(self._summary.dark_current_check.isChecked())  
         
         # Q range
-        self._summary.n_q_bins_edit.setText(QtCore.QString(str(state.n_q_bins)))
+        self._summary.n_q_bins_edit.setText(str(state.n_q_bins))
         self._summary.log_binning_radio.setChecked(state.log_binning)
         self._summary.lin_binning_radio.setChecked(not state.log_binning)
         
         # TOF cuts
         self._summary.tof_cut_chk.setChecked(state.use_config_cutoff)
         self._tof_clicked(self._summary.tof_cut_chk.isChecked())  
-        self._summary.low_tof_edit.setText(QtCore.QString(str(state.low_TOF_cut)))
-        self._summary.high_tof_edit.setText(QtCore.QString(str(state.high_TOF_cut)))
+        self._summary.low_tof_edit.setText(str(state.low_TOF_cut))
+        self._summary.high_tof_edit.setText(str(state.high_TOF_cut))
         
         # Config Mask
         self._summary.config_mask_chk.setChecked(state.use_config_mask)
         
         # Mask
-        self._summary.mask_edit.setText(QtCore.QString(str(state.mask_file)))
+        self._summary.mask_edit.setText(str(state.mask_file))
         self._summary.mask_check.setChecked(state.use_mask_file)
         self._mask_checked(state.use_mask_file)
         self._masked_detectors = state.detector_ids
@@ -388,31 +388,31 @@ class SANSInstrumentWidget(BaseWidget):
         
         # Resolution parameters
         self._summary.resolution_chk.setChecked(state.compute_resolution)
-        self._summary.sample_apert_edit.setText(QtCore.QString(str(state.sample_aperture_diameter)))
+        self._summary.sample_apert_edit.setText(str(state.sample_aperture_diameter))
         self._resolution_clicked(self._summary.resolution_chk.isChecked())
         
         self._summary.tof_correction_chk.setChecked(state.perform_TOF_correction)
         self._summary.beam_monitor_chk.setChecked(state.use_beam_monitor)
-        self._summary.beam_monitor_edit.setText(QtCore.QString(str(state.beam_monitor_reference)))
+        self._summary.beam_monitor_edit.setText(str(state.beam_monitor_reference))
         self._beam_monitor_clicked(self._summary.beam_monitor_chk.isChecked())
 
         # Output directory
         self._summary.select_output_dir_radio.setChecked(not state.use_data_directory)
         self._summary.use_data_dir_radio.setChecked(state.use_data_directory)
         if len(state.output_directory.strip())>0:
-            self._summary.output_dir_edit.setText(QtCore.QString(str(state.output_directory)))
+            self._summary.output_dir_edit.setText(str(state.output_directory))
         else:
-            self._summary.output_dir_edit.setText(QtCore.QString(str(os.path.expanduser('~'))))
+            self._summary.output_dir_edit.setText(str(os.path.expanduser('~')))
         self._output_dir_clicked()        
 
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
         #to_display = str(stored_value) if is_enabled else ''
         edit_widget.setEnabled(is_enabled)
         chk_widget.setChecked(is_enabled)
-        edit_widget.setText(QtCore.QString(str(stored_value)))
+        edit_widget.setText(str(stored_value))
         if suppl_value is not None and suppl_edit is not None:
             suppl_edit.setEnabled(is_enabled)
-            suppl_edit.setText(QtCore.QString(str(suppl_value)))
+            suppl_edit.setText(str(suppl_value))
 
     def get_state(self):
         """
@@ -481,7 +481,7 @@ class SANSInstrumentWidget(BaseWidget):
         m.output_directory = str(self._summary.output_dir_edit.text())
         self._settings.data_output_dir = m.output_directory
         
-        self._settings.emit_key_value("DARK_CURRENT", QtCore.QString(str(self._summary.dark_file_edit.text())))
+        self._settings.emit_key_value("DARK_CURRENT", str(self._summary.dark_file_edit.text()))
         return m
 
     def _show_help(self):

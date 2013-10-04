@@ -81,6 +81,7 @@ def SANS2D():
         instrument = isis_instrument.SANS2D()
         
         ReductionSingleton().set_instrument(instrument)
+	config['default.instrument']='SANS2D'
     except:
         return False
     return True
@@ -95,6 +96,7 @@ def LOQ():
         instrument = isis_instrument.LOQ()
 
         ReductionSingleton().set_instrument(instrument)
+	config['default.instrument']='LOQ'
     except:
         return False
     return True

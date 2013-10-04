@@ -1,9 +1,5 @@
-#from ReflectometerCors import *
 from l2q import *
 from mantid.simpleapi import *
-#from mantid.simpleapi import *  # New API
-#from mantidplot import *
-from PyQt4 import QtCore, uic
 import math
 from mantid.api import WorkspaceGroup
 
@@ -37,7 +33,7 @@ def combineDataMulti(wksp_list,output_wksp,beg_overlap,end_overlap,Qmin,Qmax,bin
 	
 	for i in range(0,len(wksp_list)-1):
 		w1=currentSum
-		w2=getWorkspace(wksp_list[i+1])
+		w2=getWorkspace(wksp_list[i+1]) # TODO: distinguishing between a group and a individual workspace is unnecessary for an algorithm. But custom group behavior WILL be required.
 		if defaultoverlaps:
 			overlapLow = w2.readX(0)[0]
 			overlapHigh = 0.5*max(w1.readX(0))
@@ -78,8 +74,13 @@ def stitch2(ws1, ws2, output_ws_name, begoverlap,endoverlap,Qmin,Qmax,binning,sc
 	scalehigh: if True, scale ws2, otherwise scale ws1
 	scalefactor: Use the manual scaling factor provided if > 0
 	"""
-	out = combine2(ws1.name(),ws2.name(),output_ws_name,begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh,scalefactor)
-	return mtd[output_ws_name], out[1]
+	# Interally use the Stitch1D algorithm.
+	outputs = Stitch1D(LHSWorkspace=ws1, RHSWorkspace=ws2, 
+			OutputWorkspace=output_ws_name, StartOverlap=begoverlap, EndOverlap=endoverlap, 
+			UseManualScaleFactor=(not scalefactor == -1),
+			ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax))
+	
+	return outputs
 	
 
 def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scalehigh=True,scalefactor=-1.0):
@@ -98,105 +99,25 @@ def combine2(wksp1,wksp2,outputwksp,begoverlap,endoverlap,Qmin,Qmax,binning,scal
 	scalefactor: Use the manual scaling factor provided if > 0
 	"""
     
-    import numpy as np
-    print "OVERLAPS:", begoverlap, endoverlap
-    w1 = Rebin(InputWorkspace=wksp1, Params=str(Qmin)+","+str(binning)+","+str(Qmax))
-    w2 = RebinToWorkspace(WorkspaceToRebin=wksp2,WorkspaceToMatch=w1)
-    nzind=np.nonzero(w1.dataY(0))[0]
-    w2.dataY(0)[int(nzind[0])]=0.0	#set  edge of zeropadding to zero
-    w2 = Rebin(InputWorkspace=wksp2, Params=str(Qmin)+","+str(binning)+","+str(Qmax))
-
-    # find the bin numbers to avoid gaps
-    a1=w1.binIndexOf(begoverlap)
-    a2=w1.binIndexOf(endoverlap)
-    wksp1len=len(w1.dataX(0))
-    wksp2len=len(w1.dataX(0))
-
-    if scalefactor <= 0.0:
-        w1_overlap_int = Integration(InputWorkspace=w1, RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
-        w2_overlap_int = Integration(InputWorkspace=w2, RangeLower=str(begoverlap), RangeUpper=str(endoverlap))
-        if scalehigh:
-            w2 *= (w1_overlap_int/w2_overlap_int)
-        else:
-            w1 *= (w2_overlap_int/w1_overlap_int)
-        
-        y1=w1_overlap_int.readY(0)
-        y2=w2_overlap_int.readY(0)
-        scalefactor = y1[0]/y2[0]
-        print "scale factor="+str(scalefactor)
-    else:
-        w2 = MultiplyRange(InputWorkspace=w2, StartBin=0, EndBin=wksp2len-2, Factor=scalefactor)
-        
-    # Mask out everything BUT the overlap region as a new workspace.
-    overlap1 = MultiplyRange(InputWorkspace=w1, StartBin=0,EndBin=a1-1,Factor=0)
-    overlap1 = MultiplyRange(InputWorkspace=overlap1,StartBin=a2,EndBin=wksp1len-2,Factor=0)
-	
-	# Mask out everything BUT the overlap region as a new workspace.
-    overlap2 = MultiplyRange(InputWorkspace=w2,StartBin=0,EndBin=a1,Factor=0)#-1
-    overlap2 = MultiplyRange(InputWorkspace=overlap2,StartBin=a2+1,EndBin=wksp1len-2,Factor=0)
-	
-	# Mask out everything AFTER the start of the overlap region
-    w1=MultiplyRange(InputWorkspace=w1,StartBin=a1, EndBin=wksp1len-2,Factor=0)
-    # Mask out everything BEFORE the end of the overlap region
-    w2=MultiplyRange(InputWorkspace=w2,StartBin=0, EndBin=a2,Factor=0)
+    # Interally use the Stitch1D algorithm.
+    outputs = Stitch1D(LHSWorkspace=mtd[wksp1], RHSWorkspace=mtd[wksp2], 
+			OutputWorkspace=outputwksp, StartOverlap=begoverlap, EndOverlap=endoverlap, 
+			UseManualScaleFactor=(not scalefactor == -1),
+			ManualScaleFactor=scalefactor, Params="%f,%f,%f" % (Qmin, binning, Qmax))
     
-    # Calculate a weighted mean for the overlap region
-    overlapave = WeightedMean(InputWorkspace1=overlap1,InputWorkspace2=overlap2)
-    # Add the Three masked workspaces together to create a complete x-range
-    result = w1 + overlapave + w2
-    result = RenameWorkspace(InputWorkspace=result, OutputWorkspace=outputwksp)    
+    outscalefactor = outputs[1]
     
-    # Cleanup
-    DeleteWorkspace(w1)
-    DeleteWorkspace(w2)
-    DeleteWorkspace(w1_overlap_int)
-    DeleteWorkspace(w2_overlap_int)
-    DeleteWorkspace(overlap1)
-    DeleteWorkspace(overlap2)
-    DeleteWorkspace(overlapave)
-    return result.name(), scalefactor
-
+    return (outputwksp, outscalefactor)
 		
 def getWorkspace(wksp):
 	"""
 	Get the workspace if it is not a group workspace. If it is a group workspace, get the first period.
 	"""
 	if isinstance(mtd[wksp], WorkspaceGroup):
-		wout = mtd[wksp+'_1']
+		wout = mtd[wksp][0]
 	else:
 		wout = mtd[wksp]
 	return wout
 
-def groupGet(wksp,whattoget,field=''):
-	'''
-	Auxiliary function.
-	returns information about instrument or sample details for a given workspace wksp,
-	also if the workspace is a group (info from first group element)
-	'''
-	if (whattoget == 'inst'):
-		if isinstance(mtd[wksp], WorkspaceGroup):
-			return mtd[wksp+'_1'].getInstrument()
-		else:
-			return mtd[wksp].getInstrument()
-			
-	elif (whattoget == 'samp' and field != ''):
-		if isinstance(mtd[wksp], WorkspaceGroup):
-			try:
-				res = mtd[wksp + '_1'].getRun().getLogData(field).value				
-			except RuntimeError:
-				res = 0
-				print "Block "+field+" not found."			
-		else:
-			try:
-				res = mtd[wksp].getRun().getLogData(field).value
-			except RuntimeError:		
-				res = 0
-				print "Block "+field+" not found."
-		return res
-	elif (whattoget == 'wksp'):
-		if isinstance(mtd[wksp], WorkspaceGroup):
-			return mtd[wksp+'_1'].getNumberHistograms()
-		else:
-			return mtd[wksp].getNumberHistograms()
 
 	

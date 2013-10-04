@@ -41,7 +41,7 @@ namespace Crystal
   int HasUB::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string HasUB::category() const { return "crystal";}
+  const std::string HasUB::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
