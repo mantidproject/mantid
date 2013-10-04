@@ -60,6 +60,12 @@ namespace DataHandling
   {
     return "SetSampleMaterial";
   }
+
+  int SetSampleMaterial::version() const
+  {
+    return (1);
+  }
+
   const std::string SetSampleMaterial::category() const
   {
     return "Sample;DataHandling";
@@ -262,7 +268,8 @@ namespace DataHandling
     {
       // Use chemical formula if given by user
       Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbol);
-      g_log.notice() << "Found " << CF.atoms.size() << " atoms in \"" << chemicalSymbol << "\"\n";
+      g_log.notice() << "Found " << CF.atoms.size() << " types of atoms in \""
+                     << chemicalSymbol << "\"\n";
 
       double numAtoms = 0.; // number of atoms in formula
       NeutronAtom neutron(0, 0., 0., 0., 0., 0., 0.); // starting thing for neutronic information
