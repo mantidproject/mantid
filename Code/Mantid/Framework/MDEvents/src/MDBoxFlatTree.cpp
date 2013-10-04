@@ -513,7 +513,9 @@ namespace Mantid
       ibox->setID(i);
       // calculate volume from extents;
       ibox->calcVolume();
-      if(std::fabs(ibox->getInverseVolume()-m_InverseVolume[i])>1.e-4)
+      double vol = m_InverseVolume[i];
+      if(vol<=FLT_EPSILON)vol=1;
+      if(std::fabs((ibox->getInverseVolume()-vol)/vol)>1.e-5)
       {
           g_log.debug()<<" Accuracy warning for box N "<<i<<" as stored inverse volume is : "<<m_InverseVolume[i]<<" and calculated from extents: "<<ibox->getInverseVolume()<<std::endl;
           ibox->setInverseVolume(coord_t(m_InverseVolume[i]));
