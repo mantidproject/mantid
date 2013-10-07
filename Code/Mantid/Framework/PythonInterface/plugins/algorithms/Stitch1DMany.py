@@ -2,6 +2,10 @@
 
 Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputing a stitched Matrix Workspace. This algorithm is a wrapper over [[Stitch1DMD]].
 
+The algorithm expects  pairs of StartOverlaps and EndOverlaps values. The order in which these are provided determines the pairing. 
+There should be N entries in each of these StartOverlaps and EndOverlaps lists, where N = 1 -(No of workspaces to stitch). 
+StartOverlaps and EndOverlaps are in the same units as the X-axis for the workspace.
+
 *WIKI*"""
 #from mantid.simpleapi import *
 
@@ -34,11 +38,9 @@ class Stitch1DMany(PythonAlgorithm):
         self.declareProperty(name="UseManualScaleFactor", defaultValue=False, doc="True to use a provided value for the scale factor.")
         self.declareProperty(name="ManualScaleFactor", defaultValue=1.0, doc="Provided value for the scale factor.")
         self.declareProperty(name="OutScaleFactor", defaultValue=-2.0, direction = Direction.Output, doc="The actual used value for the scaling factor.")
-    
-    def has_non_zero_errors(self, ws):
-        errors = ws.extractE()
-        count = len(errors.nonzero()[0])
-        return count > 0
+        
+    def __workspace_from_split_name(self, list_of_names, index):
+            return mtd[list_of_names[index].strip()]
             
     def PyExec(self):
     
@@ -60,16 +62,26 @@ class Stitch1DMany(PythonAlgorithm):
         if not (len(startOverlaps) == (numberOfWorkspaces- 1)):
             raise ValueError("Wrong number of StartOverlaps, should be %i not %i" % (numberOfWorkspaces - 1, startOverlaps))
         
-        print "INPUT WORKSPACES ", inputWorkspaces
-        print "START OVERLAPS ", startOverlaps
-        lhsWS = mtd[inputWorkspaces[0]]    
-        for i in range(1, numberOfWorkspaces):
-            rhsWS = mtd[inputWorkspaces[i].strip()]
-            lhsWS, scaleFactor = Stitch1D(LHSWorkspace=lhsWS, RHSWorkspace=rhsWS, StartOverlap=startOverlaps[i-1], EndOverlap=endOverlaps[i-1], Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  ManualScaleFactor=manualScaleFactor)
+        scaleFactor = None
         
-        self.setProperty('OutputWorkspace', lhsWS)
+        # Iterate forward through the workspaces
+        if scaleRHSWorkspace:
+            lhsWS = self.__workspace_from_split_name(inputWorkspaces, 0)   
+            for i in range(1, numberOfWorkspaces, 1):
+                rhsWS = self.__workspace_from_split_name(inputWorkspaces, i)
+                lhsWS, scaleFactor = Stitch1D(LHSWorkspace=lhsWS, RHSWorkspace=rhsWS, StartOverlap=startOverlaps[i-1], EndOverlap=endOverlaps[i-1], Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  ManualScaleFactor=manualScaleFactor)
+            self.setProperty('OutputWorkspace', lhsWS)
+            DeleteWorkspace(lhsWS)
+        # Iterate backwards through the workspaces.
+        else:
+            rhsWS = self.__workspace_from_split_name(inputWorkspaces, -1) 
+            for i in range(0, numberOfWorkspaces-1, 1):
+                lhsWS = self.__workspace_from_split_name(inputWorkspaces, i)
+                rhsWS, scaleFactor = Stitch1D(LHSWorkspace=lhsWS, RHSWorkspace=rhsWS, StartOverlap=startOverlaps[i-1], EndOverlap=endOverlaps[i-1], Params=params, ScaleRHSWorkspace=scaleRHSWorkspace, UseManualScaleFactor=useManualScaleFactor,  ManualScaleFactor=manualScaleFactor)            
+            self.setProperty('OutputWorkspace', rhsWS)
+            DeleteWorkspace(rhsWS)
+        
         self.setProperty('OutScaleFactor', scaleFactor)
-        
         return None
         
 

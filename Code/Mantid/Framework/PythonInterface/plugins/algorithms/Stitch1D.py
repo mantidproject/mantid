@@ -38,9 +38,10 @@ class Stitch1D(PythonAlgorithm):
         return count > 0
             
     def PyExec(self):
+        rangeTolerance = 1e-9
         # Just forward the other properties on.
-        startOverlap = self.getProperty('StartOverlap').value
-        endOverlap = self.getProperty('EndOverlap').value
+        startOverlap = self.getProperty('StartOverlap').value - rangeTolerance
+        endOverlap = self.getProperty('EndOverlap').value + rangeTolerance
         scaleRHSWorkspace = self.getProperty('ScaleRHSWorkspace').value
         useManualScaleFactor = self.getProperty('UseManualScaleFactor').value
         manualScaleFactor = self.getProperty('ManualScaleFactor').value
