@@ -238,7 +238,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
         break; 
       case 2:// autoupdate option
     	status = repo_ptr->fileStatus(path.toStdString());
-    	if (status == REMOTE_ONLY)
+    	if (status == REMOTE_ONLY || status == LOCAL_ONLY)
     		return QVariant();
         inf = repo_ptr->fileInfo(path.toStdString()); 
         return inf.auto_update?QString("true"):QString("false");
