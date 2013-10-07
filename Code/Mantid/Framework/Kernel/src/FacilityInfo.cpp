@@ -28,9 +28,8 @@ Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
   * @throw std::runtime_error if name or file extensions are not defined
   */
 FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
-  m_catalogs(elem), m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(), m_extensions(),
-  m_soapEndPoint(), m_archiveSearch(), m_instruments(), m_catalogName(), m_liveListener(),
-  m_computeResources()
+  m_catalogs(elem), m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(),
+  m_extensions(), m_archiveSearch(), m_instruments(), m_liveListener(), m_computeResources()
 {
   if (m_name.empty())
   {
@@ -42,11 +41,6 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   fillZeroPadding(elem);
   fillDelimiter(elem);
   fillExtensions(elem);
-
-  // Make use of the catalog class to set related attributes.
-  m_soapEndPoint = m_catalogs.soapEndPoint();
-  m_catalogName  = m_catalogs.catalogName();
-
   fillArchiveNames(elem);
   fillLiveListener(elem);
   fillComputeResources(elem);

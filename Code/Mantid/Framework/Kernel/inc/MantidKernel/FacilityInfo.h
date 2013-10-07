@@ -70,10 +70,6 @@ public:
   /// Returns the preferred file extension
   const std::string & preferredExtension()const { return m_extensions.front(); }
 
-  /// Return the soap endpoint name
-  const std::string & getSoapEndPoint() const { return m_soapEndPoint; }
-  /// Returns the catalog name
-  const std::string & catalogName()const {return m_catalogName;}
   /// Return the archive search interface names
   const std::vector<std::string> & archiveSearch() const { return m_archiveSearch; }
   /// Returns the name of the default live listener
@@ -109,10 +105,8 @@ private:
   int m_zeroPadding;                           ///< default zero padding for this facility
   std::string m_delimiter;                     ///< default delimiter between instrument name and run number
   std::vector<std::string> m_extensions;       ///< file extensions in order of preference
-  std::string m_soapEndPoint;                  ///< names of the soap end point
   std::vector<std::string> m_archiveSearch;    ///< names of the archive search interface
   std::vector<InstrumentInfo> m_instruments;   ///< list of instruments of this facility
-  std::string m_catalogName;                   ///< name of the catalog system of this facility
   std::string m_liveListener;                  ///< name of the default live listener
   typedef std::map< std::string, boost::shared_ptr<RemoteJobManager>  > ComputeResourcesMap;
   ComputeResourcesMap m_computeResources;      ///< list of compute resources (clusters, etc...) available at this facility
