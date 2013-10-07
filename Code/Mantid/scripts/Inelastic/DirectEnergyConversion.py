@@ -380,9 +380,6 @@ class DirectEnergyConversion(object):
             RenameWorkspace(InputWorkspace="_tmp_rebin_ws",OutputWorkspace= result_name)
             # Convert back to TOF
             ConvertUnits(InputWorkspace=result_name,OutputWorkspace=result_name, Target="TOF",EMode="Direct", EFixed=ei_value)
-        else:
-            # Correct for detector delay time
-            ScaleX(InputWorkspace=result_name, OutputWorkspace=result_name,Operation="Add",InstrumentParameter="DelayTime")
 
         if self.check_background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined such region
@@ -557,7 +554,8 @@ class DirectEnergyConversion(object):
                   EnergyEstimate=ei_guess,FixEi=self.fix_ei)
 
         self.incident_energy = ei
-        ScaleX(InputWorkspace=input_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak)
+        ScaleX(InputWorkspace=input_ws,OutputWorkspace=resultws_name,Operation="Add",Factor=-mon1_peak,
+               InstrumentParameter="DelayTime",Combine=True)
         mon1_det = input_ws.getDetector(mon1_index)
         mon1_pos = mon1_det.getPos()
         src_name = input_ws.getInstrument().getSource().getName()
