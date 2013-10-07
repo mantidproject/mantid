@@ -311,6 +311,10 @@ namespace MantidQt
           {
             optionsBox->addItem(QString::fromStdString(*vitr));
           }
+          // Set current as visible
+          int index = optionsBox->findText(QString::fromStdString(prop->value()));
+          if( index >= 0 ) optionsBox->setCurrentIndex(index);
+
           addValidator = false;
         }
         // else render a text box
