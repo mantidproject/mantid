@@ -52,7 +52,7 @@ namespace Mantid
         /// Constructor
         CatalogInfo(const Poco::XML::Element* element);
         /// Obtain catalog name from the facility file.
-        std::string catalogName();
+        const std::string catalogName() const;
         /// Obtain soap end point from the facility file.
         std::string soapEndPoint();
         /// Obtain the regex prefix from the  facility file.

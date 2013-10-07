@@ -30,7 +30,7 @@ namespace Mantid
     /**
      * Obtain catalog name from the facility file.
      */
-    std::string CatalogInfo::catalogName()
+    const std::string CatalogInfo::catalogName() const
     {
       return (m_catalogName);
     }

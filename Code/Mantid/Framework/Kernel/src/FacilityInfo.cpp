@@ -5,7 +5,6 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/CatalogInfo.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -28,8 +27,8 @@ Logger& FacilityInfo::g_log(Logger::get("FacilityInfo"));
   * @param elem :: The Poco::XML::Element to read the data from
   * @throw std::runtime_error if name or file extensions are not defined
   */
-FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) : 
-  m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(), m_extensions(),
+FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
+  m_catalogs(elem), m_name(elem->getAttribute("name")), m_zeroPadding(0), m_delimiter(), m_extensions(),
   m_soapEndPoint(), m_archiveSearch(), m_instruments(), m_catalogName(), m_liveListener(),
   m_computeResources()
 {
@@ -44,10 +43,9 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   fillDelimiter(elem);
   fillExtensions(elem);
 
-  Mantid::Kernel::CatalogInfo catalog(elem);
   // Make use of the catalog class to set related attributes.
-  m_soapEndPoint = catalog.soapEndPoint();
-  m_catalogName  = catalog.catalogName();
+  m_soapEndPoint = m_catalogs.soapEndPoint();
+  m_catalogName  = m_catalogs.catalogName();
 
   fillArchiveNames(elem);
   fillLiveListener(elem);
