@@ -65,6 +65,7 @@ import xml.etree.ElementTree as ET
 
 import subprocess
 import re
+import os
 from datetime import date
 
 import authors
@@ -292,6 +293,36 @@ def check_if_doi_exists(base, doi, destination, options):
         raise Exception(
             "Unexpected result back from server: \"" + result[0] + "\"")
 
+def check_for_curl():
+    '''A check to see whether we can call cURL on the command line.  Based on
+    an implementation of "which" found at http://stackoverflow.com/a/379535.
+    If cURL cannot be called an exception will be raised, else the script will
+    be free to continue.
+
+    This appears to work on both Linux and Windows.
+    '''
+    def is_exe(fpath):
+        return os.path.exists(fpath) and os.access(fpath, os.X_OK)
+
+    def ext_candidates(fpath):
+        yield fpath
+        for ext in os.environ.get("PATHEXT", "").split(os.pathsep):
+            yield fpath + ext
+
+    fpath, fname = os.path.split("curl")
+    if fpath:
+        if is_exe("curl"):
+            return # Found cURL.
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, "curl")
+            for candidate in ext_candidates(exe_file):
+                if is_exe(candidate):
+                    return # Found cURL.
+
+    raise Exception('This script requires that cURL be installed and ' + \
+                    'available on the PATH.')
+
 def run(options):
     '''Creating a usable DOI is (for our purposes at least) a two step
     process: metadata has to be constructed and then sent to the server, and
@@ -427,6 +458,8 @@ def run(options):
     quit()
 
 if __name__ == "__main__":
+    check_for_curl()
+
     parser = argparse.ArgumentParser(
         description="Script to generate the DOI needed for a Mantid release."
     )
