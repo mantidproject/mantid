@@ -70,7 +70,7 @@ namespace Mantid
         /// Replace the content of a string using regex.
         std::string replacePrefix(std::string path, std::string regex, std::string prefix);
         /// Replace all occurrences of the search string in the input with the format string.
-        void replaceInString(std::string path, std::string search, std::string format);
+        std::string replaceAllOccurences(std::string path, std::string search, std::string format);
         /// Obtain the attribute from a given element tag and attribute name.
         std::string getAttribute(const Poco::XML::Element* element, const std::string &tagName, const std::string &attributeName);
 

@@ -76,42 +76,38 @@ namespace Mantid
     }
 
     /**
-     * Transform's the archive path based on operating system used.
+     * Transform's the archive path based on operating system (OS) used.
      * @param path :: The archive path from ICAT to perform the transform on.
+     * @return The path to the archive for the user's OS.
      */
     std::string CatalogInfo::transformArchivePath(std::string path)
     {
-      bool isWindowsPath = false;
-
-      // Check to see if path is a windows path.
-      std::size_t pos = path.find("\\");
-      if (pos != std::string::npos)
-      {
-        isWindowsPath = true;
-      }
-
       #ifdef __linux__
-        std::string filePath = replacePrefix(path,catalogPrefix(),linuxPrefix());
-        boost::replace_all(filePath, "\\", "/");
-        return filePath;
+        path = replacePrefix(path,catalogPrefix(),linuxPrefix());
+        path = replaceAllOccurences(path, "\\", "/");
+        return path;
       #elif __APPLE__
-        std::string filePath = replacePrefix(path,catalogPrefix(),macPrefix());
-        boost::replace_all(filePath, "\\", "/");
-        return filePath;
+        path = replacePrefix(path,catalogPrefix(),macPrefix());
+        path = replaceAllOccurences(path, "\\", "/");
+        return path;
       #elif _WIN32
-        if (isWindowsPath)
+        // Check to see if path is a windows path.
+        std::size_t pos = path.find("\\");
+
+        if (pos != std::string::npos)
         {
+          // The path is a windows path, so return it.
           return path;
         }
         else
         {
-          std::string filePath = replacePrefix(path,linuxPrefix(),windowsPrefix());
-          boost::replace_all(filePath, "/", "\\");
-          return filePath;
+          path = replacePrefix(path,linuxPrefix(),windowsPrefix());
+          path = replaceAllOccurences(path, "/", "\\");
+          return path;
         }
       #endif
 
-      UNUSED_ARG(isWindowsPath);
+      // This is used to suppress compiler "return" warning.
       return ("");
     }
 
@@ -120,6 +116,7 @@ namespace Mantid
      * @param path   :: An string to search and replace on.
      * @param regex  :: The regex to search for.
      * @param prefix :: Replace result of regex with this prefix.
+     * @return A string containing the replacement.
      */
     std::string CatalogInfo::replacePrefix(std::string path, std::string regex, std::string prefix)
     {
@@ -134,16 +131,19 @@ namespace Mantid
      * @param path    :: An string to search and replace on.
      * @param search  :: A substring to be searched for.
      * @param format  :: A substitute string.
+     * @return A string containing the replacement.
      */
-    void CatalogInfo::replaceInString(std::string path, std::string search, std::string format)
+    std::string CatalogInfo::replaceAllOccurences(std::string path, std::string search, std::string format)
     {
       boost::replace_all(path, search, format);
+      return (path);
     }
 
     /**
      * Obtain the attribute from a given element tag and attribute name.
      * @param tagName :: The name of the tag to search for.
      * @param attributeName :: The name of the attribute for the given tag.
+     * @return The contents of the attribute from an XML element.
      */
     std::string CatalogInfo::getAttribute(const Poco::XML::Element* element, const std::string &tagName, const std::string &attributeName)
     {
