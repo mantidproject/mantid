@@ -7,6 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace.h"
 
+#include <boost/function.hpp>
+
 namespace Mantid
 {
   namespace Algorithms
@@ -75,9 +77,13 @@ namespace Mantid
       API::Progress *m_progress;
 
       /// Scaling factor
-      double m_factor;
+      double m_algFactor;
       /// instrument parameter name
       std::string m_parname;
+      /// Flag whether we are combining input parameters
+      bool m_combine;
+      /// Function defining request operation
+      boost::function<double (double,double)> m_binOp;
       /// Start workspace index
       int m_wi_min;
       /// Stop workspace index

@@ -133,7 +133,7 @@ public:
     auto inst = inputWS->getInstrument();
     pmap.addDouble(inst->getComponentID(), parname, instFactor);
 
-    auto result = runScaleX(inputWS, "Multiply", -1, parname);
+    auto result = runScaleX(inputWS, "Multiply", -1.0, parname);
 
     const size_t xsize = result->blocksize();
     for(size_t i = 0; i < result->getNumberHistograms(); ++i)
@@ -200,6 +200,58 @@ public:
 
   }
 
+  void testMultiplyOperationWithCombineMulitpliesTheInstrumentAndFactorArguments()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10,10);
+    auto & pmap = inputWS->instrumentParameters();
+    const std::string parname("factor");
+    const double instFactor(10);
+    auto inst = inputWS->getInstrument();
+    pmap.addDouble(inst->getComponentID(), parname, instFactor);
+
+    double algFactor(2.0);
+    bool combine(true);
+    auto result = runScaleX(inputWS, "Multiply", algFactor, parname, combine);
+
+    MatrixWorkspace::const_iterator inIt(*inputWS);
+    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
+    {
+      TS_ASSERT_EQUALS( it->X(), 20.0*inIt->X() );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+    }
+
+  }
+
+  void testAddOperationWithCombineAddsTheInstrumentAndFactorArguments()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10,10);
+    auto & pmap = inputWS->instrumentParameters();
+    const std::string parname("factor");
+    const double instFactor(10);
+    auto inst = inputWS->getInstrument();
+    pmap.addDouble(inst->getComponentID(), parname, instFactor);
+
+    double algFactor(2.0);
+    bool combine(true);
+    auto result = runScaleX(inputWS, "Add", algFactor, parname, combine);
+
+    MatrixWorkspace::const_iterator inIt(*inputWS);
+    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
+    {
+      TS_ASSERT_EQUALS( it->X(), 12.0 + inIt->X() );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+    }
+
+  }
+
 
   //------------------------------- Failure cases --------------------------------------
   void testInputByInstrumentParameterThrowsForMissingParameter()
@@ -224,11 +276,34 @@ public:
     AnalysisDataService::Instance().remove("tomultiply");
   }
 
+  void testCombineInputFailsIfInstrumentParameterNotSupplied()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+
+    Mantid::Algorithms::ScaleX scale;
+    scale.initialize();
+    scale.setRethrows(true);
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10,10);
+    AnalysisDataService::Instance().add("tomultiply",inputWS);
+
+    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("InputWorkspace","tomultiply") );
+    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("OutputWorkspace","multiplied") );
+    TS_ASSERT_THROWS_NOTHING( scale.setProperty("Combine",true) );
+
+    TS_ASSERT_THROWS(scale.execute(), std::invalid_argument);
+    TS_ASSERT( !scale.isExecuted() );
+
+     AnalysisDataService::Instance().remove("tomultiply");
+
+  }
+
   private:
 
     Mantid::API::MatrixWorkspace_sptr runScaleX(const Mantid::API::MatrixWorkspace_sptr & inputWS,
-                                                const std::string & op, const double factor,
-                                                const std::string & instPar = "")
+                                                const std::string & op, const double factor = -1.0,
+                                                const std::string & instPar = "", const bool combine=false)
     {
       Mantid::Algorithms::ScaleX scale;
       scale.initialize();
@@ -237,14 +312,9 @@ public:
       TS_ASSERT_THROWS_NOTHING( scale.setProperty("InputWorkspace",inputWS));
       TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("OutputWorkspace","__unused") );
       TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("Operation",op) );
-      if(instPar.empty())
-      {
-        TS_ASSERT_THROWS_NOTHING( scale.setProperty("Factor",factor) );
-      }
-      else
-      {
-        TS_ASSERT_THROWS_NOTHING( scale.setProperty("InstrumentParameter", instPar) );
-      }
+      if(factor > 0.0) TS_ASSERT_THROWS_NOTHING( scale.setProperty("Factor",factor) );
+      if(combine || !instPar.empty()) TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("InstrumentParameter", instPar) )
+      TS_ASSERT_THROWS_NOTHING( scale.setProperty("Combine", combine) );
 
       TS_ASSERT_THROWS_NOTHING( scale.execute() );
       TS_ASSERT( scale.isExecuted() );

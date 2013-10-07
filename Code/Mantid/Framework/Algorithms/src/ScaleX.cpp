@@ -13,8 +13,6 @@ Scales the X axis of the input workspace by the amount requested. The amount can
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <boost/function.hpp>
-
 namespace Mantid
 {
  namespace Algorithms
@@ -37,7 +35,10 @@ void ScaleX::initDocs()
 /**
  * Default constructor
  */
-ScaleX::ScaleX() : API::Algorithm(), m_progress(NULL) {}
+ScaleX::ScaleX() : API::Algorithm(), m_progress(NULL), m_algFactor(1.0),
+                   m_parname(), m_combine(false), m_binOp(), m_wi_min(-1), m_wi_max(-1)
+{
+}
 
 /**
  * Destructor
@@ -57,7 +58,7 @@ void ScaleX::init()
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace");
   auto isDouble = boost::make_shared<BoundedValidator<double> >();
-  declareProperty("Factor", 1.0, isDouble, "The value by which to scale the input workspace. Default is 1.0");
+  declareProperty("Factor", m_algFactor, isDouble, "The value by which to scale the input workspace. Default is 1.0");
   std::vector<std::string> op(2);
   op[0] = "Multiply";
   op[1] = "Add";
@@ -67,7 +68,10 @@ void ScaleX::init()
   declareProperty("IndexMin", 0, mustBePositive, "The workspace index of the first spectrum to scale. Only used if IndexMax is set.");
   declareProperty("IndexMax", Mantid::EMPTY_INT(), mustBePositive, "The workspace index of the last spectrum to scale. Only used if explicitly set.");
   //Add InstrumentParameter property here so as not to mess with the parameter order for current scripts
-  declareProperty("InstrumentParameter", "", "The name of an instrument parameter whose value is used to scale as the input factor");
+  declareProperty("InstrumentParameter", m_parname, "The name of an instrument parameter whose value is used to scale as the input factor");
+  declareProperty("Combine", m_combine, "If true, combine the value given in the Factor property with the value "
+                  "obtained from the instrument parameter. The factors are combined using the operation specified "
+                  "in the Operation parameter");
 }
 
 /**
@@ -77,8 +81,13 @@ void ScaleX::exec()
 {
   //Get input workspace and offset
   const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
-  m_factor = getProperty("Factor");
+  m_algFactor = getProperty("Factor");
   m_parname = getPropertyValue("InstrumentParameter");
+  m_combine = getProperty("Combine");
+  if(m_combine && m_parname.empty())
+  {
+    throw std::invalid_argument("Combine behaviour requested but the InstrumentParameter argument is blank.");
+  }
 
   const std::string op = getPropertyValue("Operation");
   API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);
@@ -104,6 +113,11 @@ void ScaleX::exec()
       throw std::invalid_argument("Inconsistent properties defined");
     }
   }
+  // Setup appropriate binary function
+  const bool multiply = (op=="Multiply");
+  if(multiply) m_binOp = std::multiplies<double>();
+  else m_binOp = std::plus<double>();
+
   //Check if its an event workspace
   EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (eventWS != NULL)
@@ -111,11 +125,6 @@ void ScaleX::exec()
     this->execEvent();
     return;
   }
-
-  const bool multiply = (op=="Multiply");
-  boost::function<double (double x,double factor)> scale;
-  if(multiply) scale = std::multiplies<double>();
-  else scale = std::plus<double>();
 
   // do the shift in X
   PARALLEL_FOR2(inputW, outputW)
@@ -136,9 +145,9 @@ void ScaleX::exec()
     {
       double factor = getScaleFactor(inputW, i);
       // Do the offsetting
-      std::transform(inX.begin(), inX.end(), outX.begin(), std::bind2nd(scale, factor));
+      std::transform(inX.begin(), inX.end(), outX.begin(), std::bind2nd(m_binOp, factor));
       // reverse the vector if multiplicative factor was negative
-      if(multiply && m_factor < 0.0)
+      if(multiply && factor < 0.0)
       {
         std::reverse( outX.begin(), outX.end() );
         std::reverse( outY.begin(), outY.end() );
@@ -205,7 +214,7 @@ void ScaleX::execEvent()
       if(op=="Multiply")
       {
         outputWS->getEventList(i).scaleTof(getScaleFactor(inputWS, i));
-        if( m_factor < 0 )
+        if( m_algFactor < 0 )
         {
           outputWS->getEventList(i).reverse();
         }
@@ -244,7 +253,7 @@ API::MatrixWorkspace_sptr ScaleX::createOutputWS(const API::MatrixWorkspace_sptr
  */
 double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr & inputWS, const size_t index)
 {
-  if(m_parname.empty()) return m_factor;
+  if(m_parname.empty()) return m_algFactor;
 
   // Try and get factor from component. If we see a DetectorGroup use this will use the first component
   Geometry::IDetector_const_sptr det;
@@ -268,7 +277,11 @@ double ScaleX::getScaleFactor(const API::MatrixWorkspace_const_sptr & inputWS, c
 
   const auto & pmap = inputWS->constInstrumentParameters();
   auto par = pmap.getRecursive(det->getComponentID(), m_parname);
-  if(par) return par->value<double>();
+  if(par)
+  {
+    if(!m_combine) return par->value<double>();
+    else return m_binOp(m_algFactor,par->value<double>());
+  }
   else
   {
     std::ostringstream os;
