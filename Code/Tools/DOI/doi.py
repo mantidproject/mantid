@@ -34,6 +34,14 @@ NOTES:
   both the test server and the main server) before a valid DOI could be
   created.  This was done through the British Library, via Tom Griffin.
 
+- Mantid DOIs will be "linked" using the relationship identifiers available in
+  the metadata schema.  Each incremental-release DOI will be linked to the
+  previous DOI using the "IsNextVersionOf" field.  The metadata for the
+  previous DOI will then have to be changed to include a "IsPreviousVersionOf"
+  field.  Each incremental-release DOI will also be linked to the "main" Mantid
+  DOI via a "IsPartOf" field.  The main DOI itself will have no relationship
+  identifiers.
+
 USEFUL LINKS:
 
 - The DataCite DOI API documentation can be found at:
@@ -60,6 +68,12 @@ import re
 from datetime import date
 
 import authors
+
+# Successful responses from the DataCite servers appear to only come in one of
+# two forms:
+# - 'OK'
+# - 'OK ([DOI])'
+SUCCESS_RESPONSE = '^OK( \((.+)\))?$'
 
 def build_xml_form(doi, relationships, creator_name_list, version_str):
     '''Builds the xml form containing the metadata for the DOI.  Where helpful,
@@ -203,10 +217,13 @@ def _http_request(body, method, url, options):
     proc = subprocess.Popen(args,stdout=subprocess.PIPE)
     result = proc.stdout.readlines()
 
-    print result
+    print "Server Response: " + str(result)
     return result
 
 def delete_doi(base, doi, options):
+    '''Will attempt to delete the given DOI.  Note that this does not actually
+    remove the DOI from the DataCite servers, it simply makes it "inactive".
+    '''
     print "\n\nAttempting to delete the following DOI:"
     print 'DOI = ' + doi
     _http_request(
@@ -217,27 +234,47 @@ def delete_doi(base, doi, options):
     )
 
 def create_or_update_metadata(xml_form, base, doi, options):
+    '''Attempts to create some new metadata for the doi of the given address.
+    Metadata must be created before a doi can be created.  If the metadata
+    already exists, then it will simply be updated.
+    '''
     print "\nAttempting to create / update metadata:"
-    _http_request(
+    result = _http_request(
         body    = xml_form,
         method  = "PUT",
         url     = base + "metadata/" + doi,
         options = options
     )
 
+    if not re.match(SUCCESS_RESPONSE, result[0]):
+        raise Exception('Creation/updating metadata unsuccessful.  Quitting.')
+
 def create_or_update_doi(base, doi, destination, options):
+    '''Attempts to create a new DOI of the given address.  Metadata must be
+    created before this can be successful.  If the doi already exists, then it
+    will simply be updated.
+    '''
     print "\n\nAttempting to create / update the following DOI:"
     print 'DOI = ' + doi
     print 'URL = ' + destination
-    _http_request(
+    result = _http_request(
         body    = 'doi=' + doi + '\n' + 'url=' + destination,
         method  = "PUT",
         url     = base + "doi/" + doi,
         options = options
     )
 
+    if not re.match(SUCCESS_RESPONSE, result[0]):
+        raise Exception('Creation/updating DOI unsuccessful.  Quitting.')
+
 def check_if_doi_exists(base, doi, destination, options):
-    print "\nChecking if \"" + base + "doi/" + doi + "\" DOI already exists."
+    '''Attempts to check if the given doi exists by querying the server and
+    seeing if what comes back is the expected DOI destination.  Returns True
+    if a doi is found (and the destination returned by the server is the same
+    as the given destination), else false.  Throws if the response from the
+    server is unrecognised, or if there is no response at all.
+    '''
+    print "\nChecking if \"" + base + "doi/" + doi + "\" DOI exists."
     result = _http_request(
         body    = '',
         method  = 'GET',
@@ -246,7 +283,7 @@ def check_if_doi_exists(base, doi, destination, options):
     )
 
     if result[0] == 'DOI not found':
-        print "DOI not found."
+        print "\"" + doi + "\" does not exist"
         return False
     elif result[0] == destination:
         print "DOI found."
@@ -283,6 +320,8 @@ def run(options):
 
     if options.main:
         doi = main_doi
+        prev_doi = ''
+        has_previous_version = False
     else: # Incremental release DOI.
         prev_doi = '10.5286/Software/Mantid' + prev_version_str
         doi = '10.5286/Software/Mantid' + version_str
@@ -305,13 +344,15 @@ def run(options):
         delete_doi(server_url_base, doi, options)
         quit()
 
+    # If the user ran this script with the --main flag, then all we need to do
+    # is create a single, unlinked DOI to the main project page.
     if options.main:
         creator_name_list = authors.authors_up_to_git_tag(tag)
         xml_form = build_xml_form(doi, {}, creator_name_list, version_str)
 
         create_or_update_metadata(xml_form, server_url_base, doi, options)
         create_or_update_doi(server_url_base, doi, destination, options)
-
+    # Else it's an incremental-release DOI that we need to make.
     else:
         has_previous_version = check_if_doi_exists(
             server_url_base,
@@ -325,11 +366,19 @@ def run(options):
             relationships[prev_doi] = 'IsNewVersionOf'
         
         creator_name_list = authors.authors_under_git_tag(tag)
-        xml_form = build_xml_form(doi, relationships, creator_name_list, version_str)
+        xml_form = build_xml_form(
+            doi,
+            relationships,
+            creator_name_list,
+            version_str
+        )
 
+        # Create/update the metadata and DOI.
         create_or_update_metadata(xml_form, server_url_base, doi, options)
         create_or_update_doi(server_url_base, doi, destination, options)
 
+        # Create/update the metadata and DOI of the previous version, if it
+        # was found to have a DOI.
         if has_previous_version:
             prev_relationships = { 
                 main_doi : 'IsPartOf',
@@ -337,19 +386,45 @@ def run(options):
             }
         
             prev_creator_name_list = authors.authors_under_git_tag(prev_tag)
-            prev_xml_form = build_xml_form(prev_doi, prev_relationships, prev_creator_name_list, prev_version_str)
+            prev_xml_form = build_xml_form(
+                prev_doi,
+                prev_relationships,
+                prev_creator_name_list,
+                prev_version_str
+            )
 
-            create_or_update_metadata(prev_xml_form, server_url_base, prev_doi, options)
+            create_or_update_metadata(
+                prev_xml_form,
+                server_url_base,
+                prev_doi,
+                options
+            )
 
-        if not options.test:
-            print "\n\nIf successfully created, the DOI can be resolved at:"
-            print 'http://dx.doi.org/' + doi
+    # Print out a custom success message, depending on the initial options.
+    if not options.test:
+        method        = "resolved"
+        doi_add       = 'http://dx.doi.org/' + doi
+        meta_add      = 'https://mds.datacite.org/metadata/' + doi
+        prev_meta_add = 'https://mds.datacite.org/metadata/' + prev_doi
+    else:
+        method        = "inspected"
+        doi_add       = 'https://test.datacite.org/mds/doi/' + doi
+        meta_add      = 'https://test.datacite.org/mds/metadata/' + doi
+        prev_meta_add = 'https://test.datacite.org/mds/metadata/' + prev_doi
 
-        print "\n\nIf successfully created, the metadata form can be inspected at:"
-        if options.test:
-            print 'https://test.datacite.org/mds/metadata/' + doi
-        else:
-            print 'https://mds.datacite.org/metadata/' + doi
+    if has_previous_version:
+        message = "\nSUCCESS!" + \
+                  "\nThe DOI can be %s at \"%s\"." % (method, doi_add) + \
+                  "\nThe new metadata can be inspected at \"%s\"." % (meta_add) + \
+                  "\nThe previous metadata can be inspected at" + \
+                  "\"%s\"." % (prev_meta_add)
+    else:
+        message = "\nSUCCESS!" + \
+                  "\nThe DOI can be %s at \"%s\"." % (method, doi_add) + \
+                  "\nThe metadata can be inspected at \"%s\"." % (meta_add)
+    print message
+
+    quit()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
