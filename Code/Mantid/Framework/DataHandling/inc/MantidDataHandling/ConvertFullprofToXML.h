@@ -11,7 +11,7 @@ namespace Mantid
 namespace DataHandling
 {
 
-  /** LoadFullprofResolution : Load Fullprof resolution (.irf) file to TableWorkspace(s)
+  /** ConvertFullprofToXML : Convert a fullprof resolution file to an instrument parameter file
     
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

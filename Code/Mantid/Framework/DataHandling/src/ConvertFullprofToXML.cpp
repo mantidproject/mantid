@@ -5,6 +5,7 @@ Convert the initial fitting parameters in a Fullprof file to XML format in an [[
 *WIKI*/
 #include "MantidDataHandling/ConvertFullprofToXML.h"
 #include "MantidDataHandling/LoadFullprofResolution.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/TableRow.h"
 
@@ -14,6 +15,7 @@ Convert the initial fitting parameters in a Fullprof file to XML format in an [[
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/AutoPtr.h>
 
 #include <boost/lexical_cast.hpp>
 
@@ -23,6 +25,7 @@ namespace Mantid
 namespace DataHandling
 {
   using namespace API;
+  using namespace Kernel;
   using namespace Poco::XML;
 
   DECLARE_ALGORITHM(ConvertFullprofToXML)
@@ -65,7 +68,7 @@ namespace DataHandling
         "Path to an Fullprof file to load.");
 
     // Instrument name
-    declareProperty("InstrumentName", "", "Name of instrument for the input file" );
+    declareProperty("InstrumentName", "",boost::make_shared<MandatoryValidator<std::string>>(), "Name of instrument for the input file" );
 
     // Output file
     std::vector<std::string> extso;
@@ -127,13 +130,13 @@ namespace DataHandling
     std::string ISOdateShort = ISOdate.substr(0,19); // Remove fraction of seconds
 
     // Create document
-    Poco::XML::Document* mDoc = new Document();
-    Element* rootElem = mDoc->createElement("parameter-file");
+    AutoPtr<Document> mDoc = new Document();
+    AutoPtr<Element> rootElem = mDoc->createElement("parameter-file");
     rootElem->setAttribute("date", ISOdateShort);
     mDoc->appendChild(rootElem);
 
     // Add instrument
-    Element* instrumentElem = mDoc->createElement("component-link");
+    AutoPtr<Element> instrumentElem = mDoc->createElement("component-link");
     instrumentElem->setAttribute("name",instrumentName);
     rootElem->appendChild(instrumentElem);
     addALFBEParameter( paramTable, mDoc, instrumentElem, "Alph0");
@@ -153,7 +156,7 @@ namespace DataHandling
       const double bankNumber = column->cell<double>(0);
       std::ostringstream bankName;
       bankName << "bank" << bankNumber;
-      Element* bankElem = mDoc->createElement("component-link");
+      AutoPtr<Element> bankElem = mDoc->createElement("component-link");
       bankElem->setAttribute("name",bankName.str());
       addSigmaParameters( paramTable, mDoc, bankElem, i+1);
       addGammaParameters( paramTable, mDoc, bankElem, i+1);
@@ -173,16 +176,16 @@ namespace DataHandling
   */
   void ConvertFullprofToXML::addALFBEParameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Element* parent, const std::string& paramName)
   {
-    Element* parameterElem = mDoc->createElement("parameter");
+    AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
     parameterElem->setAttribute("name", getXMLParameterName(paramName));
     parameterElem->setAttribute("type","fitting");
 
-    Element *formulaElem = mDoc->createElement("formula");
+    AutoPtr<Element> formulaElem = mDoc->createElement("formula");
     formulaElem->setAttribute("eq",getXMLEqValue(tablews, paramName, 1));
     if(paramName != "Beta1") formulaElem->setAttribute("result-unit","TOF");
     parameterElem->appendChild(formulaElem);
 
-    Element* fixedElem = mDoc->createElement("fixed");
+    AutoPtr<Element> fixedElem = mDoc->createElement("fixed");
     parameterElem->appendChild(fixedElem);
 
     parent->appendChild(parameterElem);
@@ -193,11 +196,11 @@ namespace DataHandling
    */
   void ConvertFullprofToXML::addSigmaParameters(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, size_t columnIndex)
   {
-     Element* parameterElem = mDoc->createElement("parameter");
+     AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
      parameterElem->setAttribute("name", "IkedaCarpenterPV:SigmaSquared");
      parameterElem->setAttribute("type","fitting");
 
-     Element *formulaElem = mDoc->createElement("formula");
+     AutoPtr<Element> formulaElem = mDoc->createElement("formula");
      std::string eqValue = getXMLEqValue(tablews, "Sig1", columnIndex)+"*centre^2+"+getXMLEqValue(tablews, "Sig0", columnIndex);
      formulaElem->setAttribute("eq", eqValue);
      formulaElem->setAttribute("unit","dSpacing");
@@ -212,11 +215,11 @@ namespace DataHandling
    */
   void ConvertFullprofToXML::addGammaParameters(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, size_t columnIndex)
   {
-     Element* parameterElem = mDoc->createElement("parameter");
+     AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
      parameterElem->setAttribute("name", "IkedaCarpenterPV:Gamma");
      parameterElem->setAttribute("type","fitting");
 
-     Element *formulaElem = mDoc->createElement("formula");
+     AutoPtr<Element> formulaElem = mDoc->createElement("formula");
      std::string eqValue = getXMLEqValue(tablews, "Gam1", columnIndex)+"*centre";
      formulaElem->setAttribute("eq", eqValue);
      formulaElem->setAttribute("unit","dSpacing");
