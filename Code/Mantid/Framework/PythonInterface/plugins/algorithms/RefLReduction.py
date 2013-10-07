@@ -138,7 +138,6 @@ class RefLReduction(PythonAlgorithm):
 
         # geometry correction
         geometryCorrectionFlag = self.getProperty("GeometryCorrectionFlag").value
-        print 'geometryCorrectionFlag: ' , geometryCorrectionFlag
 
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
@@ -183,6 +182,7 @@ class RefLReduction(PythonAlgorithm):
         ws_histo_data = wks_utility.rebinNeXus(ws_event_data,
                               [binTOFrange[0], binTOFsteps, binTOFrange[1]],
                               'data')
+        
         # get q range
         q_range = wks_utility.getQrange(ws_histo_data, theta, dMD, qMin, qStep)
 
@@ -194,8 +194,10 @@ class RefLReduction(PythonAlgorithm):
                                       TOFrange[0],
                                       TOFrange[1],
                                       'data')
+
         # normalize by current proton charge
         ws_histo_data = wks_utility.normalizeNeXus(ws_histo_data, 'data')
+        
         # integrate over low resolution range
         [data_tof_axis, data_y_axis, data_y_error_axis] = wks_utility.integrateOverLowResRange(ws_histo_data,
                                                             dataLowResRange,
@@ -215,7 +217,7 @@ class RefLReduction(PythonAlgorithm):
                                                                            dataBackFlag,
                                                                            dataBackRange,
                                                                            'data')
-        
+                
         # work with normalization        
         
         # load normalization
@@ -255,8 +257,8 @@ class RefLReduction(PythonAlgorithm):
         [final_data_y_axis, final_data_y_error_axis] = wks_utility.divideDataByNormalization(data_y_axis,
                                                                                              data_y_error_axis,
                                                                                              av_norm,
-                                                                                             av_norm_error)
-
+                                                                                             av_norm_error)        
+        
         # apply Scaling factor    
         [tof_axis_full, y_axis, y_error_axis] = wks_utility.applyScalingFactor(tof_axis_full, 
                                                                                final_data_y_axis, 
