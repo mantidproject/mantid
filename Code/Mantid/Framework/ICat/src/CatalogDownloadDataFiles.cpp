@@ -48,20 +48,18 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CatalogDownloadDataFiles::initDocs()
     {
-      this->setWikiSummary("Downloads the given data files from the data server ");
-      this->setOptionalMessage("Downloads the given data files from the data server");
+      this->setWikiSummary("Obtains a list of file paths to the data files the user wants to download from the archives, or has downloaded and saved locally.");
     }
-
 
     /// declaring algorithm properties
     void CatalogDownloadDataFiles::init()
     {
       declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
-      declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
-      declareProperty(new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(), 
+      declareProperty(new ArrayProperty<std::string> ("Filenames"),"List of filenames to download from the data server");
+      declareProperty(new ArrayProperty<std::string>("Filelocations",std::vector<std::string>(),
                                                      boost::make_shared<NullValidator>(),
                                                      Direction::Output),
-                      "A list of containing  locations of files downloaded from data server");
+                      "A list of file locations to the ICAT datafiles.");
     }
 
     /// Raise an error concerning catalog searching
@@ -78,86 +76,86 @@ namespace Mantid
     /// Execute the algorithm
     void CatalogDownloadDataFiles::exec()
     {
+      ICatalog_sptr catalog;
 
-      ICatalog_sptr catalog_sptr;
       try
       {
-        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
+        catalog = CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogInfo().catalogName());
 
       }
       catch(Kernel::Exception::NotFoundError&)
       {
         throwCatalogError();
       }
-      if(!catalog_sptr)
+
+      if(!catalog)
       {
         throwCatalogError();
       }
 
-      CatalogInfo catalog = ConfigService::Instance().getFacility().catalogInfo();
-      //get file ids
-      std::vector<int64_t> fileids = getProperty("FileIds");
-      //get file names
-      std::vector<std::string> filenames= getProperty("FileNames");
+      // Used in order to transform the archive path to the user's operating system.
+      CatalogInfo catalogInfo = ConfigService::Instance().getFacility().catalogInfo();
 
-      std::vector<std::string> filelocations;
-      std::vector<int64_t>::const_iterator citr1 =fileids.begin();
-      std::vector<std::string>::const_iterator citr2=filenames.begin();
-      m_prog =0.0;
-      //loop over file ids
-      for(;citr1!=fileids.end();++citr1,++citr2)
+      std::vector<int64_t> fileIDs       = getProperty("FileIds");
+      std::vector<std::string> fileNames = getProperty("FileNames");
+
+      // Stores the paths to the related files located in the archives (if user has access).
+      // Otherwise, stores the path to the downloaded file.
+      std::vector<std::string> fileLocations;
+
+      m_prog = 0.0;
+
+      std::vector<int64_t>::const_iterator fileID       = fileIDs.begin();
+      std::vector<std::string>::const_iterator fileName = fileNames.begin();
+
+      // For every file with the given ID.
+      for(; fileID != fileIDs.end(); ++fileID, ++fileName)
       {
-        m_prog+=0.1;
-        double prog=m_prog/(double(fileids.size())/10);
-
-        std::string filelocation;
-        //get the location string from catalog
+        m_prog += 0.1;
+        double prog = m_prog / (double(fileIDs.size()) /10 );
 
         progress(prog,"getting location string...");
-        catalog_sptr->getFileLocation(*citr1,filelocation);
 
-        // Transform the catalog path to the path of the user's operating system.
-        filelocation = catalog.transformArchivePath(filelocation);
+        // The location of the file on the ICAT server (E.g. in the archives).
+        std::string fileLocation;
+        catalog->getFileLocation(*fileID,fileLocation);
 
-        //if we are able to open the file from the location returned by getDatafile api
-        //the user got the permission to acess archive
-        std::ifstream isisfile(filelocation.c_str());
+        // Transform the archive path to the path of the user's operating system.
+        fileLocation = catalogInfo.transformArchivePath(fileLocation);
+
+        // Can we open the file (Hence, have access to the archives?)
+        std::ifstream isisfile(fileLocation.c_str());
         if(isisfile)
         {
-          g_log.information()<<"isis archive location for the file with id  "<<*citr1<<" is "<<filelocation<<std::endl;
-          filelocations.push_back(filelocation);
+          g_log.information() << "File(" << *fileName << ") located in archives. Preparing to download..." << std::endl;
+
+          fileLocations.push_back(fileLocation);
         }
         else
         {
-          g_log.information()<<"File with id "<<*citr1<<" can not be opened from archive,now file will be downloaded over internet from data server"<<std::endl;
+          g_log.information() << "Unable to open file(" << *fileName << ") from archive. Beginning to download over Internet." << std::endl;
 
-          std::string url;
           progress(prog/2,"getting the url ....");
-          //getting the url for the file to downlaod from respective catalog
-          catalog_sptr->getDownloadURL(*citr1,url);
+
+          // Obtain URL for related file to download from net.
+          std::string url;
+          catalog->getDownloadURL(*fileID,url);
 
           progress(prog,"downloading over internet...");
 
-          // Download file from the data server to the machine where mantid is installed
-          std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*citr2);
+          // Download file from the data server to the machine where Mantid is installed
+          std::string fullPathDownloadedFile = doDownloadandSavetoLocalDrive(url,*fileName);
 
-          // replace "\" with "/" before adding to filelocations
-          replaceBackwardSlash(fullPathDownloadedFile);
-          filelocations.push_back(fullPathDownloadedFile);
+          fileLocations.push_back(fullPathDownloadedFile);
         }
-
       }
 
-      // Inform the user where they files are being saved.
-      g_log.notice() << "Saving file to: " <<  filelocations.at(0);
-
-      //set the filelocations  property
-      setProperty("FileLocations",filelocations);
+      // Set the fileLocations property
+      setProperty("FileLocations",fileLocations);
     }
 
-    /** This method checks the file extn and if it's a raw file reurns true
-     * This is useful when the we download a file over internet and save to local drive,
-     * to open the file in binary or ascii mode
+    /**
+     * Checks to see if the file to be downloaded is a datafile.
      * @param fileName ::  file name
      * @returns true if the file is a data file
      */
@@ -176,7 +174,8 @@ namespace Mantid
 
     }
 
-    /** This method downloads file over internet using Poco HTTPClientSession
+    /**
+     * Downloads file over Internet using Poco HTTPClientSession
      * @param URL- URL of the file to down load
      * @param fileName ::  file name
      * @return Full path of where file is saved to
@@ -223,7 +222,8 @@ namespace Mantid
       return retVal_FullPath;
     }
 
-    /** This method saves the input stream to a file
+    /**
+     * Saves the input stream to a file
      * @param rs :: input stream
      * @param fileName :: name of the output file
      * @return Full path of where file is saved to
@@ -248,7 +248,8 @@ namespace Mantid
       return filepath;
     }
 
-    /** This method is used for unit testing purpose.
+    /**
+     * This method is used for unit testing purpose.
      * as the Poco::Net library httpget throws an exception when the nd server n/w is slow
      * I'm testing the download from mantid server.
      * as the downlaod method I've written is private I can't access that in unit testing.
@@ -262,22 +263,6 @@ namespace Mantid
       return doDownloadandSavetoLocalDrive(URL,fileName);
 
     }
-    /** This method replaces backward slash with forward slash for linux compatibility.
-     * @param inputString :: input string
-     */
-    void CatalogDownloadDataFiles::replaceBackwardSlash(std::string& inputString)
-    {
-      std::basic_string <char>::iterator iter;
-      for(iter=inputString.begin();iter!=inputString.end();++iter)
-      {
-        if((*iter)=='\\')
-        {
-          (*iter)='/';
-        }
-      }
-
-    }
-
 
   }
 }
