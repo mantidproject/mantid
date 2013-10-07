@@ -5,12 +5,12 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/RemoteJobManagerFactory.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/StringTokenizer.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/shared_ptr.hpp>
 #include <algorithm>
 #include <iostream>
 
@@ -212,18 +212,9 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element* elem)
   for (unsigned long i = 0; i < n; i++)
   {
     Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_compute->item(i));
-    std::string type = elem->getAttribute("type");
     std::string name = elem->getAttribute("name");
 
-    if (RemoteJobManagerFactory::Instance().exists(type))
-    {
-      m_computeResources.insert( make_pair(name, RemoteJobManagerFactory::Instance().create(elem)));
-    }
-    else
-    {
-      // Log a warning about not having an instantiator for the requested type...
-      g_log.warning( "No instantiator registered for compute resource \"" + name + "\" of type \"" + type + "\"");
-    }
+    m_computeResources.insert( std::make_pair(name, boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
   }
   pNL_compute->release();
 
@@ -297,7 +288,7 @@ std::vector<InstrumentInfo> FacilityInfo::instruments(const std::string& tech)co
 std::vector<std::string> FacilityInfo::computeResources() const
 {
   std::vector<std::string> names;
-  std::map< std::string, boost::shared_ptr<RemoteJobManager> >::const_iterator it = m_computeResources.begin();
+  ComputeResourcesMap::const_iterator it = m_computeResources.begin();
   while (it != m_computeResources.end())
   {
     names.push_back( (*it).first);
@@ -313,12 +304,12 @@ std::vector<std::string> FacilityInfo::computeResources() const
   * @return a shared pointer to the RemoteJobManager instance (or
   * Null if the name wasn't recognized)
   */
-boost::shared_ptr <RemoteJobManager> FacilityInfo::getRemoteJobManager( const std::string &name) const
+boost::shared_ptr<RemoteJobManager> FacilityInfo::getRemoteJobManager( const std::string &name) const
 {
   auto it = m_computeResources.find( name);
   if (it == m_computeResources.end())
   {
-    return boost::shared_ptr<RemoteJobManager>();  // return Null
+    return boost::shared_ptr<RemoteJobManager>();  // TODO: should we throw an exception instead??
   }
   return (*it).second;
 }

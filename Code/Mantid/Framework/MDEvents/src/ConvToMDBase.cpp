@@ -16,9 +16,10 @@ namespace Mantid
     *                      unit conversion (if any) 
     * @param inWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
     */
-    size_t  ConvToMDBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+    size_t  ConvToMDBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper, bool ignoreZeros)
     {
 
+      m_ignoreZeros = ignoreZeros;
       m_InWS2D = WSD.getInWS();
       // preprocessed detectors information:       
        // check if detector information has been precalculated:

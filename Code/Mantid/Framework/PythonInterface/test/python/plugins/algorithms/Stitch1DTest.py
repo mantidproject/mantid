@@ -1,72 +1,125 @@
 import unittest
 import numpy
+from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
-from testhelpers import run_algorithm
 
 class Stitch1DTest(unittest.TestCase):
-          
-    def test_stitching(self):
-        x = numpy.arange(-1, 1, 0.2)
-        e = [1,1,1,1,1,1,1,1,1,1]
-        alg_lhs =  run_algorithm("CreateWorkspace", UnitX="1/q", DataX=x, DataY='0,0,0,3,3,3,3,3,3,3', NSpec='1', DataE=e, OutputWorkspace='a')
-        alg_rhs =  run_algorithm("CreateWorkspace", UnitX="1/q", DataX=x, DataY='2,2,2,2,2,2,2,0,0,0', NSpec='1', DataE=e, OutputWorkspace='b')
-        
-        alg_out = run_algorithm("Stitch1D", LHSWorkspace=alg_lhs.getPropertyValue("OutputWorkspace"), RHSWorkspace=alg_rhs.getPropertyValue("OutputWorkspace"), OutputWorkspace="c", StartOverlap=0.3, EndOverlap=0.7, rethrow=True)
-        out_ws = mtd[alg_out.getPropertyValue("OutputWorkspace")]
-        
-        self.assertEquals(1, out_ws.getNumberHistograms())
-        output_signal =  out_ws.readY(0)
-        
-        expected_output_signal =[3,3,3,3,3,3,3,3,3,3]
-        
-        for i in range(0, len(output_signal)):
-            self.assertEqual(round(expected_output_signal[i], 5), round(output_signal[i],5) ) 
-
-            
-    def test_calculates_scaling_factor_correctly(self):
-        # Signal = 1, 1, 1, but only the middle to the end of the range is marked as overlap, so only 1, 1 used.
-        alg_a = run_algorithm("CreateWorkspace", UnitX="A", DataX='-1,0,1', DataY='1,1,1', NSpec='1', DataE='1,1,1', OutputWorkspace='flat_signal')
-        # Signal = 1, 2, 3, but only the middle to the end of the range is marked as overlap, so only 2, 3 used.
-        alg_b = run_algorithm("CreateWorkspace", UnitX="A", DataX='-1,0,1', DataY='1,2,3', NSpec='1', DataE='1,1,1', OutputWorkspace='rising_signal')
-   
-        alg = run_algorithm("Stitch1D", LHSWorkspace='flat_signal', RHSWorkspace='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,rethrow=True) 
-        self.assertTrue(alg.isExecuted())
-        
-        b_use_manual_scaling = alg.getProperty("UseManualScaleFactor").value
-        self.assertEqual(False, b_use_manual_scaling)
-        
-        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
-        
-         # 1 * (( 1 + 1) / (2 + 3)) = 0.4
-        self.assertEqual(0.4, scale_factor)
-          
-    def test_calculates_scaling_factor_correctly_inverted(self):
-        # Signal = 1, 1, 1, but only the middle to the end of the range is marked as overlap, so only 1, 1 used.
-        alg_lhs = run_algorithm("CreateWorkspace", UnitX="A", DataX='-1,0,1', DataY='1,1,1', NSpec='1', DataE='1,1,1', OutputWorkspace='flat_signal')
-        # Signal = 1, 2, 3, but only the middle to the end of the range is marked as overlap, so only 2, 3 used.
-        alg_rhs = run_algorithm("CreateWorkspace", UnitX="A", DataX='-1,0,1', DataY='1,2,3', NSpec='1', DataE='1,1,1', OutputWorkspace='rising_signal')
-   
-        alg = run_algorithm("Stitch1D", LHSWorkspace=alg_lhs.getPropertyValue("OutputWorkspace"), RHSWorkspace=alg_rhs.getPropertyValue("OutputWorkspace"),OutputWorkspace='converted',ScaleRHSWorkspace=False,StartOverlap=0.5,EndOverlap=1,rethrow=True) 
-        self.assertTrue(alg.isExecuted())
-        
-        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
-        
-        # 1 * ((2 + 3)/( 1 + 1)) = 2.5
-        self.assertEqual(2.5, scale_factor)
-        
-    def test_manual_scaling_factor(self):
     
-        alg_a = run_algorithm("CreateWorkspace", UnitX="A", DataX='-1,0,1', DataY='1,1,1', NSpec='1', DataE='1,1,1', OutputWorkspace='a')
-        alg_b = run_algorithm("CreateWorkspace", UnitX="A", DataX='-1,0,1', DataY='1,1,1', NSpec='1', DataE='1,1,1', OutputWorkspace='b')
+    a = None
+    b = None
+    x = None
+    e = None
         
-        expected_manual_scale_factor = 2.2
+    def setUp(self):
+        x = numpy.arange(-1, 1.2, 0.2)
+        e = numpy.arange(-1, 1, 0.2)
+        e.fill(0)
+        self.e = e
+        self.x = x
+        a =  CreateWorkspace(UnitX="1/q", DataX=x, DataY=[0,0,0,3,3,3,3,3,3,3], NSpec=1, DataE=e)
+        b =  CreateWorkspace(UnitX="1/q", DataX=x, DataY=[2,2,2,2,2,2,2,0,0,0], NSpec=1, DataE=e)
+        self.a = a
+        self.b = b
+    
+    def tearDown(self):
+        # Cleanup
+        DeleteWorkspace(self.a)
+        DeleteWorkspace(self.b)
         
-        alg = run_algorithm("Stitch1D", LHSWorkspace='a', RHSWorkspace='b',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleRHSWorkspace=True,UseManualScaleFactor=True,ManualScaleFactor=expected_manual_scale_factor,rethrow=True) 
-        self.assertTrue(alg.isExecuted())
+    def test_endoverap_outside_range_throws(self):
+        try:
+            stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=self.x[0], EndOverlap=self.x[-1] + 0.001, Params='0.2')
+            self.assertTrue(False, "Should have thrown with EndOverlap > x max")
+        except RuntimeError:
+            pass 
+    
+    def test_startoverap_outside_range_throws(self):
+        try:
+            stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=self.x[0]-0.001, EndOverlap=self.x[-1], Params='0.2')
+            self.assertTrue(False, "Should have thrown with StartOverlap < x max")
+        except RuntimeError:
+            pass 
+          
+    def test_startoverap_greater_than_end_overlap_throws(self):
+        try:
+            stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=self.x[-1], EndOverlap=self.x[0], Params='0.2')
+            self.assertTrue(False, "Should have thrown with StartOverlap < x max")
+        except RuntimeError:
+            pass
+          
+    def test_stitching_scale_right(self):
+        stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2')    
+        # Check the types returned 
+        self.assertTrue(isinstance(stitched, tuple), "Output should be a tuple containing OuputWorkspace as well as the scale factor")
+        self.assertTrue(isinstance(stitched[0], MatrixWorkspace))
+        # Check the scale factor
+        self.assertAlmostEquals(stitched[1], 2.0/3.0, places=9)
+        # Fetch the arrays from the output workspace
+        yValues = numpy.around(stitched[0].readY(0), decimals=6)
+        eValues = numpy.around(stitched[0].readE(0), decimals=6)
+        xValues = numpy.around(stitched[0].readX(0), decimals=6)
+        # Check that the output Y-Values are correct.
+        self.assertEquals(1, len(numpy.unique(yValues)), "Output YVaues should all be 2")
+        self.assertEquals(2, yValues[0], "Output YValues should all be 2")
+        # Check that the output E-Values are correct.
+        self.assertEquals(0, len(eValues.nonzero()[0]), "Output Error values should all be non-zero")
+        # Check that the output X-Values are correct.
+        self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))
+        DeleteWorkspace(stitched[0])
+
+    def test_stitching_scale_left(self):
+        stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2', ScaleRHSWorkspace=False)
+    
+        # Check the types returned 
+        self.assertTrue(isinstance(stitched, tuple), "Output should be a tuple containing OuputWorkspace as well as the scale factor")
+        self.assertTrue(isinstance(stitched[0], MatrixWorkspace))
+        # Check the scale factor
+        self.assertAlmostEquals(stitched[1], 3.0/2.0, places=9)
+        # Fetch the arrays from the output workspace
+        yValues = numpy.around(stitched[0].readY(0), decimals=6)
+        eValues = numpy.around(stitched[0].readE(0), decimals=6)
+        xValues = numpy.around(stitched[0].readX(0), decimals=6)
+        # Check that the output Y-Values are correct.
+        self.assertEquals(1, len(numpy.unique(yValues)), "Output YVaues should all be 2")
+        self.assertEquals(3, yValues[0], "Output YValues should all be 3")
+        # Check that the output E-Values are correct.
+        self.assertEquals(0, len(eValues.nonzero()[0]), "Output Error values should all be non-zero")
+        # Check that the output X-Values are correct.
+        self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))     
+        DeleteWorkspace(stitched[0]) 
         
-        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
-        self.assertEqual(expected_manual_scale_factor, scale_factor)
+    def test_stitching_manual_scale_factor_scale_right(self):
+        stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, ScaleRHSWorkspace=True, UseManualScaleFactor=True,  StartOverlap=-0.4, EndOverlap=0.4, Params='0.2',  ManualScaleFactor=2.0/3.0)
+        self.assertAlmostEquals(stitched[1], 2.0/3.0, places=9)
+        # Fetch the arrays from the output workspace
+        yValues = numpy.around(stitched[0].readY(0), decimals=6)
+        eValues = numpy.around(stitched[0].readE(0), decimals=6)
+        xValues = numpy.around(stitched[0].readX(0), decimals=6)
+        # Check that the output Y-Values are correct.
+        self.assertEquals(1, len(numpy.unique(yValues)), "Output YVaues should all be 2")
+        self.assertEquals(2, yValues[0], "Output YValues should all be 2")
+        # Check that the output E-Values are correct.
+        self.assertEquals(0, len(eValues.nonzero()[0]), "Output Error values should all be non-zero")
+        # Check that the output X-Values are correct.
+        self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))     
+        DeleteWorkspace(stitched[0]) 
+ 
+    def test_stitching_manual_scale_factor_scale_left(self):
+        stitched = Stitch1D(LHSWorkspace=self.b, RHSWorkspace=self.a, StartOverlap=-0.4, EndOverlap=0.4, Params='0.2', ScaleRHSWorkspace=False, UseManualScaleFactor=True,  ManualScaleFactor=3.0/2.0)
+        self.assertAlmostEquals(stitched[1], 3.0/2.0, places=9)
+        # Fetch the arrays from the output workspace
+        yValues = numpy.around(stitched[0].readY(0), decimals=6)
+        eValues = numpy.around(stitched[0].readE(0), decimals=6)
+        xValues = numpy.around(stitched[0].readX(0), decimals=6)
+        # Check that the output Y-Values are correct.
+        self.assertEquals(1, len(numpy.unique(yValues)), "Output YVaues should all be 2")
+        self.assertEquals(3, yValues[0], "Output YValues should all be 3")
+        # Check that the output E-Values are correct.
+        self.assertEquals(0, len(eValues.nonzero()[0]), "Output Error values should all be non-zero")
+        # Check that the output X-Values are correct.
+        self.assertEquals(set(numpy.around(self.x, decimals=6)), set(xValues))     
+        DeleteWorkspace(stitched[0]) 
  
 if __name__ == '__main__':
     unittest.main()

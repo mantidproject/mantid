@@ -7,19 +7,19 @@
 
 #include "ui_RefImageView.h"
 #include "MantidQtRefDetectorViewer/RefImageView.h"
-#include "MantidQtImageViewer/TrackingPicker.h"
+#include "MantidQtSpectrumViewer/TrackingPicker.h"
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
-#include "MantidQtImageViewer/GraphDisplay.h"
+#include "MantidQtSpectrumViewer/GraphDisplay.h"
 #include "DllOption.h"
 
 
 /**
     @class RefIVConnections 
   
-       This class provides the connections between the ImageView GUI components
+       This class provides the connections between the SpectrumView GUI components
     made using QtDesigner and the classes that do the actual work for the
-    ImageView.  It basically provides SLOTS that are called by the GUI 
-   components' SIGNALS and in turn call methods on the ImageView 
+    SpectrumView.  It basically provides SLOTS that are called by the GUI 
+   components' SIGNALS and in turn call methods on the SpectrumView 
    implementation objects.
  
     @author Dennis Mikkelson 
@@ -63,8 +63,8 @@ public:
   RefIVConnections( Ui_RefImageViewer* ui, 
                  RefImageView*     image_view,
                  RefImageDisplay*  image_display,
-                 ImageView::GraphDisplay*  h_graph_display,
-                 ImageView::GraphDisplay*  v_graph_display );
+                 SpectrumView::GraphDisplay*  h_graph_display,
+                 SpectrumView::GraphDisplay*  v_graph_display );
 
   ~RefIVConnections();
 
@@ -109,18 +109,17 @@ private:
   Ui_RefImageViewer*   iv_ui;
   RefImageView*       iv_main_window;
   RefImageDisplay*    image_display;
-  ImageView::GraphDisplay*    h_graph_display;
-  ImageView::GraphDisplay*    v_graph_display;
-  ImageView::TrackingPicker*  image_picker;
-  ImageView::TrackingPicker*  image_picker2;
-  ImageView::TrackingPicker*  h_graph_picker;
-  ImageView::TrackingPicker*  v_graph_picker;
+  SpectrumView::GraphDisplay*    h_graph_display;
+  SpectrumView::GraphDisplay*    v_graph_display;
+  SpectrumView::TrackingPicker*  image_picker;
+  SpectrumView::TrackingPicker*  image_picker2;
+  SpectrumView::TrackingPicker*  h_graph_picker;
+  SpectrumView::TrackingPicker*  v_graph_picker;
   QActionGroup*    color_group;
 
 };
 
+} // namespace RefDetectorViewer
 } // namespace MantidQt 
-} // namespace ImageView 
-
 
 #endif  // REF_IV_CONNECTIONS_H

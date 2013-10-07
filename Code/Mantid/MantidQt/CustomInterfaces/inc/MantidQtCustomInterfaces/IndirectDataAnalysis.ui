@@ -1036,6 +1036,13 @@
                  </property>
                 </widget>
                </item>
+               <item>
+                <widget class="QCheckBox" name="confit_ckTieCentres">
+                 <property name="text">
+                  <string>Tie Centres</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </item>
             </layout>
@@ -2158,7 +2165,7 @@
               <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer">
                <property name="Suffix" stdset="0">
                 <stringlist>
-                 <string>_res</string>
+                 <string>_red</string>
                 </stringlist>
                </property>
               </widget>

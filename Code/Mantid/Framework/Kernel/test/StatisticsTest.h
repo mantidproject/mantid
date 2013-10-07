@@ -2,6 +2,7 @@
 #define STATISTICSTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <cmath>
 #include <vector>
 #include <string>
 #include "MantidKernel/Statistics.h"
@@ -180,6 +181,88 @@ public:
     vector<double> obsE;
 
     TS_ASSERT_THROWS_ANYTHING(getRFactor(obsY, calY, obsE));
+  }
+
+  /// Test moment calculations about origin and mean
+  void test_getMoments()
+  {
+    const double mean = 5.;
+    const double sigma = 4.;
+    const double deltaX = .2;
+    const size_t numX = 200;
+    // calculate to have same number of points left and right of function
+    const double offsetX = mean - (.5 * deltaX * static_cast<double>(numX));
+    // variance about origin
+    double expVar = mean*mean+sigma*sigma;
+    // skew about origin
+    double expSkew = mean*mean*mean+3.*mean*sigma*sigma;
+
+    // x-values to try out
+    vector<double> x;
+    for (size_t i = 0; i < numX; ++i)
+      x.push_back(static_cast<double>(i) * deltaX + offsetX);
+
+    // just declare so we can have test of exception handling
+    vector<double> y;
+
+    TS_ASSERT_THROWS(getMomentsAboutOrigin(x, y), std::out_of_range);
+
+    // now calculate the y-values
+    for (size_t i = 0; i < numX; ++i)
+    {
+      double temp = (x[i]-mean)/sigma;
+      y.push_back(exp(-.5*temp*temp)/(sigma * sqrt(2.*M_PI)));
+    }
+
+    // Normal distribution values are taken from the wikipedia page
+    {
+      std::cout << "Normal distribution about origin" << std::endl;
+      vector<double> aboutOrigin = getMomentsAboutOrigin(x, y);
+      TS_ASSERT_EQUALS(aboutOrigin.size(), 4);
+      TS_ASSERT_DELTA(aboutOrigin[0], 1., .0001);
+      TS_ASSERT_DELTA(aboutOrigin[1], mean, .0001);
+      TS_ASSERT_DELTA(aboutOrigin[2], expVar, .001*expVar);
+      TS_ASSERT_DELTA(aboutOrigin[3], expSkew, .001*expSkew);
+
+      std::cout << "Normal distribution about mean" << std::endl;
+      vector<double> aboutMean = getMomentsAboutMean(x, y);
+      TS_ASSERT_EQUALS(aboutMean.size(), 4);
+      TS_ASSERT_DELTA(aboutMean[0], 1., .0001);
+      TS_ASSERT_DELTA(aboutMean[1], 0., .0001);
+      TS_ASSERT_DELTA(aboutMean[2], sigma*sigma, .001*expVar);
+      TS_ASSERT_DELTA(aboutMean[3], 0., .0001*expSkew);
+    }
+
+    // Now a gaussian function as a histogram
+    y.clear();
+    for (size_t i = 0; i < numX-1; ++i) // one less y than x makes it a histogram
+    {
+      double templeft = (x[i]-mean)/sigma;
+      templeft = exp(-.5*templeft*templeft)/(sigma * sqrt(2.*M_PI));
+      double tempright = (x[i+1]-mean)/sigma;
+      tempright = exp(-.5*tempright*tempright)/(sigma * sqrt(2.*M_PI));
+      y.push_back(.5*deltaX*(templeft+tempright));
+//      std::cout << i << ":\t" << x[i] << "\t" << y[i] << std::endl;
+    }
+
+    // Normal distribution values are taken from the wikipedia page
+    {
+      std::cout << "Normal distribution about origin" << std::endl;
+      vector<double> aboutOrigin = getMomentsAboutOrigin(x, y);
+      TS_ASSERT_EQUALS(aboutOrigin.size(), 4);
+      TS_ASSERT_DELTA(aboutOrigin[0], 1., .0001);
+      TS_ASSERT_DELTA(aboutOrigin[1], mean, .0001);
+      TS_ASSERT_DELTA(aboutOrigin[2], expVar, .001*expVar);
+      TS_ASSERT_DELTA(aboutOrigin[3], expSkew, .001*expSkew);
+
+      std::cout << "Normal distribution about mean" << std::endl;
+      vector<double> aboutMean = getMomentsAboutMean(x, y);
+      TS_ASSERT_EQUALS(aboutMean.size(), 4);
+      TS_ASSERT_DELTA(aboutMean[0], 1., .0001);
+      TS_ASSERT_DELTA(aboutMean[1], 0., .0001);
+      TS_ASSERT_DELTA(aboutMean[2], sigma*sigma, .001*expVar);
+      TS_ASSERT_DELTA(aboutMean[3], 0., .0001*expSkew);
+    }
   }
 
 };

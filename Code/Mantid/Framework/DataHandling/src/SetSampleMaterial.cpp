@@ -60,6 +60,12 @@ namespace DataHandling
   {
     return "SetSampleMaterial";
   }
+
+  int SetSampleMaterial::version() const
+  {
+    return (1);
+  }
+
   const std::string SetSampleMaterial::category() const
   {
     return "Sample;DataHandling";
@@ -257,12 +263,13 @@ namespace DataHandling
     const int z_number = getProperty("AtomicNumber");
     const int a_number = getProperty("MassNumber");
 
-    Material *mat = NULL;
+    boost::scoped_ptr<Material> mat;
     if (!chemicalSymbol.empty())
     {
       // Use chemical formula if given by user
       Material::ChemicalFormula CF = Material::parseChemicalFormula(chemicalSymbol);
-      g_log.notice() << "Found " << CF.atoms.size() << " atoms in \"" << chemicalSymbol << "\"\n";
+      g_log.notice() << "Found " << CF.atoms.size() << " types of atoms in \""
+                     << chemicalSymbol << "\"\n";
 
       double numAtoms = 0.; // number of atoms in formula
       NeutronAtom neutron(0, 0., 0., 0., 0., 0., 0.); // starting thing for neutronic information
@@ -280,7 +287,7 @@ namespace DataHandling
       fixNeutron(neutron, coh_xs, inc_xs, sigma_atten, sigma_s);
 
       // create the material
-      mat = new Material(chemicalSymbol, neutron, rho);
+      mat.reset(new Material(chemicalSymbol, neutron, rho));
     }
     else
     {
@@ -290,38 +297,31 @@ namespace DataHandling
       fixNeutron(neutron, coh_xs, inc_xs, sigma_atten, sigma_s);
 
       // create the material
-      mat = new Material(chemicalSymbol, neutron, rho);
+      mat.reset(new Material(chemicalSymbol, neutron, rho));
     }
 
     // set the material on workspace
-    if (mat != NULL)
+    expInfo->mutableSample().setMaterial(*mat);
+    g_log.notice() << "Sample number density ";
+    if (isEmpty(mat->numberDensity()))
     {
-      expInfo->mutableSample().setMaterial(*mat);
-      g_log.notice() << "Sample number density ";
-      if (isEmpty(mat->numberDensity()))
-      {
-        g_log.notice() << "was not specified\n";
-      }
-      else
-      {
-        g_log.notice() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
-        setProperty("SampleNumberDensityResult", mat->numberDensity()); // in atoms/Angstrom^3
-      }
-      g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << "Angstroms\n"
-                     << "    Coherent "   << mat->cohScatterXSection() << " barns\n"
-                     << "    Incoherent " << mat->incohScatterXSection() << " barns\n"
-                     << "    Total "      << mat->totalScatterXSection() << " barns\n"
-                     << "    Absorption " << mat->absorbXSection() << " barns\n";
-      setProperty("CoherentXSectionResult", mat->cohScatterXSection()); // in barns
-      setProperty("IncoherentXSectionResult", mat->incohScatterXSection()); // in barns
-      setProperty("TotalXSectionResult",mat->totalScatterXSection()); // in barns
-      setProperty("AbsorptionXSectionResult",mat->absorbXSection()); // in barns
-      setProperty("ReferenceWavelength",NeutronAtom::ReferenceLambda); // in Angstroms
+      g_log.notice() << "was not specified\n";
     }
     else
     {
-      throw std::runtime_error("Failed to create a material");
+      g_log.notice() << "= " << mat->numberDensity() << " atoms/Angstrom^3\n";
+      setProperty("SampleNumberDensityResult", mat->numberDensity()); // in atoms/Angstrom^3
     }
+    g_log.notice() << "Cross sections for wavelength = " << NeutronAtom::ReferenceLambda << "Angstroms\n"
+                   << "    Coherent "   << mat->cohScatterXSection() << " barns\n"
+                   << "    Incoherent " << mat->incohScatterXSection() << " barns\n"
+                   << "    Total "      << mat->totalScatterXSection() << " barns\n"
+                   << "    Absorption " << mat->absorbXSection() << " barns\n";
+    setProperty("CoherentXSectionResult", mat->cohScatterXSection()); // in barns
+    setProperty("IncoherentXSectionResult", mat->incohScatterXSection()); // in barns
+    setProperty("TotalXSectionResult",mat->totalScatterXSection()); // in barns
+    setProperty("AbsorptionXSectionResult",mat->absorbXSection()); // in barns
+    setProperty("ReferenceWavelength",NeutronAtom::ReferenceLambda); // in Angstroms
 
     // Done!
     progress(1);

@@ -28,9 +28,9 @@ class Symmetrise(PythonAlgorithm):
 		cut = self.getPropertyValue('Xcut')
 		cut = float(cut)
 
-		verbOp = self.getProperty('Verbose')
-		plotOp = self.getProperty('Plot')
-		saveOp = self.getProperty('Save')
+		verbOp = self.getProperty('Verbose').value
+		plotOp = self.getProperty('Plot').value
+		saveOp = self.getProperty('Save').value
                 import IndirectSymm as Main
 		Main.SymmStart(inType,sam,cut,verbOp,plotOp,saveOp)
 

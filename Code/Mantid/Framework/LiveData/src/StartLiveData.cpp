@@ -220,23 +220,22 @@ namespace LiveData
     // Get the listener (and start listening) as early as possible
     ILiveListener_sptr listener = this->getLiveListener();
 
-    LoadLiveData loadAlg;
-    loadAlg.initialize();
-    loadAlg.setChild(true);
+    auto loadAlg = boost::dynamic_pointer_cast<LoadLiveData>(createChildAlgorithm("LoadLiveData"));
+    if ( ! loadAlg ) throw std::logic_error("Error creating LoadLiveData - contact the Mantid developer team");
     // Copy settings from THIS to LoadAlg
-    loadAlg.copyPropertyValuesFrom(*this);
+    loadAlg->copyPropertyValuesFrom(*this);
     // Force replacing the output workspace on the first run, to clear out old junk.
-    loadAlg.setPropertyValue("AccumulationMethod", "Replace");
+    loadAlg->setPropertyValue("AccumulationMethod", "Replace");
     // Give the listener directly to LoadLiveData (don't re-create it)
-    loadAlg.setLiveListener(listener);
+    loadAlg->setLiveListener(listener);
 
     // Run the LoadLiveData for the first time.
-    loadAlg.executeAsChildAlg();
+    loadAlg->executeAsChildAlg();
 
     // Copy the output workspace properties from LoadLiveData
-    Workspace_sptr outWS = loadAlg.getProperty("OutputWorkspace");
+    Workspace_sptr outWS = loadAlg->getProperty("OutputWorkspace");
     this->setProperty("OutputWorkspace", outWS);
-    Workspace_sptr accumWS = loadAlg.getProperty("AccumulationWorkspace");
+    Workspace_sptr accumWS = loadAlg->getProperty("AccumulationWorkspace");
     this->setProperty("AccumulationWorkspace", accumWS);
 
 
@@ -258,6 +257,8 @@ namespace LiveData
       // Give the listener directly to LoadLiveData (don't re-create it)
       monitorAlg->setLiveListener(listener);
 
+      // Check for possible cancellation
+      interruption_point();
       // Launch asyncronously
       monitorAlg->executeAsync();
 

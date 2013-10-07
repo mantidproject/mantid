@@ -577,6 +577,47 @@ namespace DataObjects
     return (!this->operator==(rhs));
   }
 
+  bool EventList::equals(const EventList& rhs, const double tolTof,
+             const double tolWeight, const int64_t tolPulse) const
+  {
+    // generic checks
+    if (this->getNumberEvents() != rhs.getNumberEvents())
+      return false;
+    if (this->eventType != rhs.eventType)
+      return false;
+
+    // loop over the events
+    size_t numEvents = this->getNumberEvents();
+    switch (this->eventType) {
+    case TOF:
+      for (size_t i=0; i < numEvents; ++i)
+      {
+        if (! this->events[i].equals(rhs.events[i], tolTof, tolPulse))
+          return false;
+      }
+      break;
+    case WEIGHTED:
+      for (size_t i=0; i < numEvents; ++i)
+      {
+        if (! this->weightedEvents[i].equals(rhs.weightedEvents[i], tolTof, tolWeight, tolPulse))
+          return false;
+      }
+      break;
+    case WEIGHTED_NOTIME:
+      for (size_t i=0; i < numEvents; ++i)
+      {
+        if (! this->weightedEventsNoTime[i].equals(rhs.weightedEventsNoTime[i], tolTof, tolWeight))
+          return false;
+      }
+      break;
+    default:
+      break;
+    }
+
+    // anything that gets this far is equal within tolerances
+    return true;
+  }
+
   // -----------------------------------------------------------------------------------------------
   /** Return the type of Event vector contained within.
    * @return :: a EventType value.

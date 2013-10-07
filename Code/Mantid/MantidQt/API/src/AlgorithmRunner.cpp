@@ -13,11 +13,11 @@ namespace API
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  AlgorithmRunner::AlgorithmRunner() :
+  AlgorithmRunner::AlgorithmRunner(QObject * parent) : QObject(parent),
     m_finishedObserver(*this, &AlgorithmRunner::handleAlgorithmFinishedNotification),
     m_progressObserver(*this, &AlgorithmRunner::handleAlgorithmProgressNotification),
     m_errorObserver(*this, &AlgorithmRunner::handleAlgorithmErrorNotification),
-    m_asyncRebinResult(NULL)
+    m_asyncResult(NULL)
   {
   }
     
@@ -26,6 +26,13 @@ namespace API
    */
   AlgorithmRunner::~AlgorithmRunner()
   {
+    if (m_asyncAlg)
+    {
+      m_asyncAlg->removeObserver(m_finishedObserver);
+      m_asyncAlg->removeObserver(m_errorObserver);
+      m_asyncAlg->removeObserver(m_progressObserver);
+    }
+    delete m_asyncResult;
   }
   
 
@@ -36,18 +43,23 @@ namespace API
    */
   void AlgorithmRunner::cancelRunningAlgorithm()
   {
-    // Cancel any currently running rebinning algorithms
-    if (m_asyncRebinAlg)
+    // Cancel any currently running algorithms
+    if (m_asyncAlg)
     {
-      if (m_asyncRebinAlg->isRunning())
-        m_asyncRebinAlg->cancel();
-      if (m_asyncRebinResult)
+      if (m_asyncAlg->isRunning())
       {
-        m_asyncRebinResult->tryWait(1000);
-        delete m_asyncRebinResult;
-        m_asyncRebinResult = NULL;
+        m_asyncAlg->cancel();
       }
-      m_asyncRebinAlg.reset();
+      if (m_asyncResult)
+      {
+        m_asyncResult->tryWait(1000);
+        delete m_asyncResult;
+        m_asyncResult = NULL;
+      }
+      m_asyncAlg->removeObserver(m_finishedObserver);
+      m_asyncAlg->removeObserver(m_errorObserver);
+      m_asyncAlg->removeObserver(m_progressObserver);
+      m_asyncAlg.reset();
     }
   }
 
@@ -63,14 +75,22 @@ namespace API
     if (!alg->isInitialized())
       throw std::invalid_argument("AlgorithmRunner::startAlgorithm() given an uninitialized Algorithm");
 
+    cancelRunningAlgorithm();
+
     // Start asynchronous execution
-    m_asyncRebinAlg = alg;
-    m_asyncRebinResult = new Poco::ActiveResult<bool>(m_asyncRebinAlg->executeAsync());
+    m_asyncAlg = alg;
+    m_asyncResult = new Poco::ActiveResult<bool>(m_asyncAlg->executeAsync());
 
     // Observe the algorithm
     alg->addObserver(m_finishedObserver);
     alg->addObserver(m_errorObserver);
     alg->addObserver(m_progressObserver);
+  }
+
+  /// Get back a pointer to the running algorithm
+  Mantid::API::IAlgorithm_sptr AlgorithmRunner::getAlgorithm() const
+  {
+    return m_asyncAlg;
   }
 
   //--------------------------------------------------------------------------------------

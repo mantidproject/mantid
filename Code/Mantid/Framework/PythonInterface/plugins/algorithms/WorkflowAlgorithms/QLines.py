@@ -51,11 +51,11 @@ class QLines(PythonAlgorithm):
 		rinType = self.getPropertyValue('ResInputType')
 		rtype = self.getPropertyValue('ResType')
 		res = self.getPropertyValue('ResNumber')
-		elastic = self.getProperty('ElasticOption')
+		elastic = self.getProperty('ElasticOption').value
 		bgd = self.getPropertyValue('BackgroundOption')
-		width = self.getProperty('FixWidth')
+		width = self.getProperty('FixWidth').value
 		wfile = self.getPropertyValue('WidthFile')
-		resnorm = self.getProperty('ResNorm')
+		resnorm = self.getProperty('ResNorm').value
 		resn = self.getPropertyValue('ResNormNumber')
 		emin = self.getPropertyValue('EnergyMin')
 		emax = self.getPropertyValue('EnergyMax')
@@ -90,10 +90,10 @@ class QLines(PythonAlgorithm):
 		else:
 			o_res = 0
 		fitOp = [o_el, o_bgd, o_w1, o_res]
-		loopOp = self.getProperty('Sequence')
-		verbOp = self.getProperty('Verbose')
+		loopOp = self.getProperty('Sequence').value
+		verbOp = self.getProperty('Verbose').value
 		plotOp = self.getPropertyValue('Plot')
-		saveOp = self.getProperty('Save')
+		saveOp = self.getProperty('Save').value
 
 		workdir = config['defaultsave.directory']
 		if inType == 'File':

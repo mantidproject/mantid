@@ -15,9 +15,6 @@ namespace Algorithms
    *  or an instrument IDF file.
    *
    *  Optionally uses bank names to create the groups.
-   * 
-   * @author Janik Zikovsky
-   * @date 2011-05-02
    */
   class DLLExport CreateGroupingWorkspace  : public API::Algorithm
   {
@@ -26,11 +23,11 @@ namespace Algorithms
     ~CreateGroupingWorkspace();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "CreateGroupingWorkspace";};
+    virtual const std::string name() const;
     /// Algorithm's version for identification 
-    virtual int version() const { return 1;};
+    virtual int version() const;
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "Utility\\Workspaces;Transforms\\Grouping";}
+    virtual const std::string category() const;
     
   private:
     /// Sets documentation strings for this algorithm

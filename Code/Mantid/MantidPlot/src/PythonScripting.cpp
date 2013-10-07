@@ -176,6 +176,9 @@ bool PythonScripting::start()
       return false;
     }
 
+    // Our use of the IPython console requires that we use the v2 api for these PyQt types
+    // This has to be set before the very first import of PyQt (which happens in init_qti)
+    PyRun_SimpleString("import sip\nsip.setapi('QString',2)\nsip.setapi('QVariant',2)");
     //Embedded qti module needs sip definitions initializing before it can be used
     init_qti();
 

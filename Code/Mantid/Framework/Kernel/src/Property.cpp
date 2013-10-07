@@ -99,6 +99,18 @@ std::string Property::isValid() const
   // the no error condition
   return "";
 }
+
+/** 
+ * Set the PropertySettings determining when this property is visible/enabled.
+ * Takes ownership of the given object
+ * @param settings A pointer to an object specifying the settings type 
+ */
+void Property::setSettings(IPropertySettings * settings)
+{ 
+  if(m_settings) delete m_settings;
+  m_settings = settings;
+}
+
 /**
 * Whether to remember this property input
 * @return whether to remember this property's input

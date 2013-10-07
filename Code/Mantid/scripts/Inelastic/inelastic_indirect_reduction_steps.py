@@ -138,7 +138,6 @@ class LoadData(ReductionStep):
         else:
             workspaces = [output_ws]
 
-
         logger.debug('self._monitor_index = ' + str(self._monitor_index))
 
         for ws in workspaces:
@@ -149,6 +148,7 @@ class LoadData(ReductionStep):
                 ## Extract Monitor Spectrum
                 ExtractSingleSpectrum(InputWorkspace=ws,OutputWorkspace= ws+'_mon',WorkspaceIndex= self._monitor_index)
                 ## Crop the workspace to remove uninteresting detectors
+
                 CropWorkspace(InputWorkspace=ws,OutputWorkspace= ws,
                     StartWorkspaceIndex=self._detector_range_start,
                     EndWorkspaceIndex=self._detector_range_end)
@@ -345,6 +345,16 @@ class CreateCalibrationWorkspace(ReductionStep):
         ntu.execute(reducer, cwsn)
         
         RenameWorkspace(InputWorkspace=cwsn,OutputWorkspace= outWS_n)
+
+        # Add data about the files creation to the logs
+        if self._intensity_scale:
+            AddSampleLog(Workspace=outWS_n, LogName='Scale Factor', LogType='Number', LogText=str(self._intensity_scale))
+
+        AddSampleLog(Workspace=outWS_n, LogName='Peak Min', LogType='Number', LogText=str(peakMin))
+        AddSampleLog(Workspace=outWS_n, LogName='Peak Max', LogType='Number', LogText=str(peakMax))
+        AddSampleLog(Workspace=outWS_n, LogName='Back Min', LogType='Number', LogText=str(backMin))
+        AddSampleLog(Workspace=outWS_n, LogName='Back Max', LogType='Number', LogText=str(backMax))
+
         self._calib_workspace = outWS_n # Set result workspace value
         if ( len(runs) > 1 ):
             for run in runs:
@@ -528,15 +538,16 @@ class HandleMonitor(ReductionStep):
     def _monitor_efficiency(self, monitor):
         inst = mtd[monitor].getInstrument()
         try:
-            area = inst.getNumberParameter('Workflow.MonitorArea')[0]
-            thickness = inst.getNumberParameter('Workflow.MonitorThickness')[0]
+            area = inst.getNumberParameter('Workflow.Monitor1-Area')[0]
+            thickness = inst.getNumberParameter('Workflow.Monitor1-Thickness')[0]
+            attenuation= inst.getNumberParameter('Workflow.Monitor1-Attenuation')[0]
         except IndexError:
-            raise ValueError('Unable to retrieve monitor thickness and '
-                'area from Instrument Parameter file.')
+            raise ValueError('Unable to retrieve monitor thickness, area and '
+                'attenuation from Instrument Parameter file.')
         else:
-            if ( area == -1 or thickness == -1 ):
+            if ( area == -1 or thickness == -1 or attenuation == -1):
                 return
-            OneMinusExponentialCor(InputWorkspace=monitor,OutputWorkspace= monitor,C= (8.3 * thickness),C1= area)
+            OneMinusExponentialCor(InputWorkspace=monitor,OutputWorkspace= monitor,C= (attenuation * thickness),C1= area)
 
     def _scale_monitor(self, monitor):
         """Some instruments wish to scale their data. Doing this at the
@@ -700,8 +711,15 @@ class ConvertToEnergy(ReductionStep):
             if self._rebin_string is not None:
                 if not self._multiple_frames:
                     Rebin(InputWorkspace=ws,OutputWorkspace= ws,Params= self._rebin_string)
+            else:
+                try:
+                    # Rebin whole workspace to first spectrum to allow grouping to proceed
+                    RebinToWorkspace(WorkspaceToRebin=ws,WorkspaceToMatch=ws,
+                                     OutputWorkspace=ws)
+                except Exception:
+                    logger.information("RebinToWorkspace failed. Attempting to continue without it.")
                     
-        if self._multiple_frames:
+        if self._multiple_frames and self._rebin_string is not None:
             self._rebin_mf(workspaces)
 
     def set_rebin_string(self, value):
@@ -738,7 +756,7 @@ class NormaliseToUnityStep(ReductionStep):
     """
         A simple step to normalise a workspace to a given factor
     """
-    _factor = 1.0
+    _factor = None
     _peak_min = None
     _peak_max = None
     _no_hist = 1.0
@@ -749,13 +767,16 @@ class NormaliseToUnityStep(ReductionStep):
         tempSum = SumSpectra(InputWorkspace=ws, OutputWorkspace='__tempSum')
         sum = tempSum.readY(0)[0]
         DeleteWorkspace(tempSum)
-   
-        value = self._factor / ( sum / self._no_hist )
-        Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=value,Operation= 'Multiply') 
+        
+        factor = 1.0
+        if self._factor:
+            factor = self._factor
+        else:
+            factor = 1 / ( sum / self._no_hist )
+        Scale(InputWorkspace=ws,OutputWorkspace=ws,Factor=factor,Operation='Multiply') 
         
     def set_factor(self, factor):
-        if factor is not None:
-            self._factor = factor
+        self._factor = factor
         
     def set_peak_range(self, pmin, pmax):
         self._peak_min = pmin

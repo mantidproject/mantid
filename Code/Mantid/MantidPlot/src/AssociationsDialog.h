@@ -30,6 +30,7 @@
 #define ASSOCIATIONSDIALOG_H
 
 #include <QDialog>
+#include <QTableWidgetItem>
 
 class QLabel;
 class QListWidget;
@@ -54,25 +55,25 @@ private slots:
     void updateTable(int index);
     void updateCurves();
     void accept();
+    void processStateChange(QTableWidgetItem* item);
 
 private:
-	void setGraph(Graph *g);
+    void setGraph(Graph *g);
   void changePlotAssociation(int curve, const QString& text);
-	void updateColumnTypes();
-	void uncheckCol(int col);
-	void updatePlotAssociation(int row, int col);
-	QString plotAssociation(const QString& text);
+    void updateColumnTypes();
+    void uncheckCol(int col);
+    void updatePlotAssociation(int row, int col);
+    QString plotAssociation(const QString& text);
     Table *findTable(int index);
-    bool eventFilter(QObject *object, QEvent *e);
 
-	QList <MdiSubWindow*> tables;
-	Table *active_table;
-	Graph *graph;
-	QStringList plotAssociationsList;
+    QList <MdiSubWindow*> tables;
+    Table *active_table;
+    Graph *graph;
+    QStringList plotAssociationsList;
 
     QLabel* tableCaptionLabel;
-	QTableWidget *table;
-	QPushButton *btnOK, *btnCancel, *btnApply;
+    QTableWidget *table;
+    QPushButton *btnOK, *btnCancel, *btnApply;
     QListWidget* associations;
 };
 

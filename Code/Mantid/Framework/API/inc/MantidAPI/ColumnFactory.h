@@ -57,30 +57,11 @@ namespace API
 
     File change history is stored at: <https://github.com/mantidproject/mantid>    
 */
-
-#ifdef _WIN32
-#ifdef IN_MANTID_API
-  #define ColumnFactory_DllExport __declspec( dllexport )
-#else
-  #define ColumnFactory_DllExport __declspec( dllimport )
-#endif
-#else
-  #define ColumnFactory_DllExport
-  #define ColumnFactory_DllImport
-#endif
-
-  class ColumnFactory_DllExport ColumnFactoryImpl : public Kernel::DynamicFactory<Column>
+  class MANTID_API_DLL ColumnFactoryImpl : public Kernel::DynamicFactory<Column>
   {
   public:
           ///Creates an instance of a column
       boost::shared_ptr<Column> create(const std::string& type) const;
-
-      /*// Column factory specific function to subscribe columns, calls the dynamic factory subscribe function internally
-          template <class C>
-      void subscribe()
-          {
-          Kernel::DynamicFactory<Algorithm>::subscribe<C>();    
-          }*/
 
   private:
         friend struct Mantid::Kernel::CreateUsingNew<ColumnFactoryImpl>;
@@ -101,9 +82,9 @@ namespace API
         ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-        template class ColumnFactory_DllExport Mantid::Kernel::SingletonHolder<ColumnFactoryImpl>;
+        template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<ColumnFactoryImpl>;
 #endif /* _WIN32 */
-        typedef ColumnFactory_DllExport Mantid::Kernel::SingletonHolder<ColumnFactoryImpl> ColumnFactory;
+        typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<ColumnFactoryImpl> ColumnFactory;
         
 } // namespace API
 } // namespace Mantid

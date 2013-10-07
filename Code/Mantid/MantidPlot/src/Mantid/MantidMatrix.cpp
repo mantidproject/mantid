@@ -684,14 +684,13 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
   //#799 fix for  multiple dialog creation on double clicking/ on right click menu scale on  2d plot
   //   a->connectMultilayerPlot(g);
   Graph* plot = g->activeGraph();
-  ProjectData *prjData=0;
-  plotSpectrogram(plot,a,type,false,prjData);
+  plotSpectrogram(plot,a,type,false,NULL);
  // g->confirmClose(false);
   QApplication::restoreOverrideCursor();
   return g;
 }
 
-Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData *prjData)
+Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot, ApplicationWindow* app, Graph::CurveType type,bool project,const ProjectData* const prjData)
 {
   app->setPreferences(plot);
   plot->setTitle(tr("Workspace ") + name());

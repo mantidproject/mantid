@@ -2,19 +2,21 @@ import mantidplot
 import mantid
 import os
 from mantid.simpleapi import *
-#from mantidsimple import *
 
 def tof_distribution(file_path, callback=None,
                      range_min=None, range_max=None):
     """
         Plot counts as a function of TOF for a given REF_L data file
     """
+    
+    print 'entering tof_distribution'
+    
     basename = os.path.basename(file_path)
     ws_raw = "__%s" % basename
     ws = "__TOF_distribution"
     
-    if not mtd.workspaceExists(ws_raw):
-        LoadEventNexus(Filename=file_path, OutputWorkspace=ws_raw)
+#     if not mtd.workspaceExists(ws_raw):
+    LoadEventNexus(Filename=file_path, OutputWorkspace=ws_raw)
     
     Rebin(InputWorkspace=ws_raw, OutputWorkspace=ws,Params="0,200,200000")
     SumSpectra(InputWorkspace=ws, OutputWorkspace=ws)
@@ -36,6 +38,7 @@ def tof_distribution(file_path, callback=None,
                                              xmin=xmin, xmax=xmax,
                                              range_min=range_min,
                                              range_max=range_max)
+        
     
 def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                                  range_min=None, range_max=None,
@@ -79,23 +82,17 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
     def _load_entry(entry, ws, title=""):
         # 1D plot
         ws_output = "%s %s" % (ws_output_base, title)
-#        if mtd.workspaceExists(ws_output):
         if 1==0:
-#        if mtd.doesExist(ws_output):
             ws_list.append(ws_output)
         else:
-#            if not mtd.workspaceExists(ws):
-            if not mtd.doesExist(ws):
-                ws = LoadEventNexus(Filename=file_path,
-                               NXentryName=entry)
+#            if not mtd.doesExist(ws):
+            ws = LoadEventNexus(Filename=file_path,
+                                NXentryName=entry)
 
-#            if mtd[ws].getNumberEvents()==0:
             if ws.getNumberEvents()==0:
-                #mtd.deleteWorkspace(ws)
                 print 'No data in entry %s' % entry
                 return
     
-#            instr_dir = mtd.getSettings().getInstrumentDirectory()
             instr_dir = config.getInstrumentDirectory()
             
             if is_pixel_y:
@@ -109,15 +106,12 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                 GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws_output,
                                MapFile=grouping_file)
                 
-#            Transpose(InputWorkspace=ws_output, OutputWorkspace=ws_output)
             ws_output = Transpose(InputWorkspace=ws_output)
             
             # The Y pixel numbers start at 1 from the perspective of the users
             # They also read in reversed order
             if False and is_pixel_y:
-#                x=mtd[ws_output].dataX(0)
                 x=ws_output.dataX(0)
-#                y_reversed=mtd[ws_output].dataY(0)
                 y_reversed= ws_output.dataY(0)
 
                 y=[i for i in y_reversed]
@@ -126,15 +120,9 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                     y_reversed[i] = y[len(y)-1-i]
                 
             # Copy over the units
-#            units = mtd[ws_output].getAxis(0).getUnit().name()
-#            mtd[ws_output].getAxis(0).setUnit(units)
-#            units = ws_output.getAxis(0).getUnit().label()
-#            ws_output.getAxis(0).setUnit(units)
             ws_list.append(ws_output)
                 
             # 2D plot
-#            output_2d = ws_output+'_2D'
-#            Rebin(InputWorkspace=ws,OutputWorkspace=output_2d,Params="%d,200,%d" % (tof_min, tof_max))
             output_2d = Rebin(InputWorkspace=ws,Params="%d,200,%d" % (tof_min, tof_max))
 
             if is_pixel_y:
@@ -142,13 +130,9 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                                              "REFL_Detector_Grouping_Sum_X.xml")
                 output_2d = GroupDetectors(InputWorkspace=output_2d,
                                MapFile=grouping_file)
-#                GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
-#                               MapFile=grouping_file)
             else:
                 grouping_file = os.path.join(instr_dir, "Grouping",
                                              "REFL_Detector_Grouping_Sum_Y.xml")
-#                GroupDetectors(InputWorkspace=output_2d, OutputWorkspace=output_2d,
-#                               MapFile=grouping_file)
                 output_2d = GroupDetectors(InputWorkspace=output_2d,
                                MapFile=grouping_file)
 

@@ -82,6 +82,10 @@ namespace Mantid
        *    - the returned workspace is for the caller to do with as they wish.
        *  IF THIS METHOD IS CALLED BEFORE start() THEN THE RESULTS ARE UNDEFINED!!!
        *  @return A pointer to the workspace containing the buffered data.
+       *  @throws LiveData::Exception::NotYet If the listenere is not yet ready to
+       *    return a workspace. This exception will be caught by LoadLiveData, which
+       *    will call extractData() again a short while later. Any other exception
+       *    will stop the calling algorithm.
        */
       virtual boost::shared_ptr<Workspace> extractData() = 0;
 

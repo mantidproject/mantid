@@ -80,6 +80,10 @@ namespace CurveFitting
       m_functionParameters.insert(make_pair(parname, 0.0));
     }
 
+    // Importing peak position tolerance
+    m_minTOFPeakCentre = 0;
+    m_maxTOFPeakCentre = DBL_MAX;
+
     return;
   }
 
@@ -199,7 +203,7 @@ namespace CurveFitting
   /** Check whether the newly set parameters are correct, i.e., all peaks are physical
     * This function would be used with setParameters() and etc.
     */
-  bool LeBailFunction::isParameterValid() const
+  bool LeBailFunction::isParameterValid(double maxfwhm) const
   {
     // Re-calculate peak parameter if there is some modification
     if (m_hasNewPeakValue)
@@ -213,6 +217,8 @@ namespace CurveFitting
     {
       IPowderDiffPeakFunction_sptr peak = m_vecPeaks[i];
       bool isvalid = peak->isPhysical();
+      if (isvalid && maxfwhm >= 0)
+        isvalid = peak->fwhm() < maxfwhm;
       if (!isvalid)
       {
         arevalid = false;
@@ -220,7 +226,7 @@ namespace CurveFitting
         int h, k, l;
         peak->getMillerIndex(h, k, l);
         g_log.information() << "Peak [" << h << ", " << k << ", " << l << "] @ TOF = " << peak->centre()
-                            << " has unphysical parameters. " << ".\n";
+                            << " has unphysical parameters or unreasonable large FWHM" << ".\n";
         break;
       }
     }
@@ -244,6 +250,18 @@ namespace CurveFitting
     return;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Set peak position tolerance during importing/adding peaks
+    * @param peakhkls :: list of Miller indexes (HKL)
+   */
+  void LeBailFunction::setPeakCentreTolerance(double peakpostol,  double tofmin, double tofmax)
+  {
+    // m_usePeakPosTol = true;
+    m_minTOFPeakCentre = tofmin - peakpostol;
+    m_maxTOFPeakCentre = tofmax + peakpostol;
+
+    return;
+  }
 
 
   //----------------------------------------------------------------------------------------------
@@ -277,13 +295,23 @@ namespace CurveFitting
       int k = hkl[1];
       int l = hkl[2];
       IPowderDiffPeakFunction_sptr newpeak = generatePeak(h, k, l);
-      double dsp = newpeak->getPeakParameter("d_h");
+      double tofh = newpeak->centre();
+      if (tofh < m_minTOFPeakCentre || tofh > m_maxTOFPeakCentre)
+      {
+        g_log.information() << "Peak " << h << ", " << k << ", " << l << " 's centre is at TOF = "
+                            << tofh << ", which is out of user specified boundary (" << m_minTOFPeakCentre
+                            << ", " << m_maxTOFPeakCentre << "). " << ".\n";
+      }
+      else
+      {
+        double dsp = newpeak->getPeakParameter("d_h");
 
-      // Add new peak to all related data storage
-      m_vecPeaks.push_back(newpeak);
-      // FIXME - Refining lattice size is not considered here!
-      m_dspPeakVec.push_back(make_pair(dsp, newpeak));
-      m_mapHKLPeak.insert(make_pair(hkl, newpeak));
+        // Add new peak to all related data storage
+        m_vecPeaks.push_back(newpeak);
+        // FIXME - Refining lattice size is not considered here!
+        m_dspPeakVec.push_back(make_pair(dsp, newpeak));
+        m_mapHKLPeak.insert(make_pair(hkl, newpeak));
+      }
     }
 
     m_numPeaks = m_vecPeaks.size();
@@ -375,6 +403,7 @@ namespace CurveFitting
    * @param vecX:  vector of X array
    * @param vecY:  vector for data with background removed.
    * @param vec_summedpeaks :: vector of summation of all peaks, i.e., output of sum_peaks
+   * @return :: boolean whether the peaks' heights are physical
    */
   bool LeBailFunction::calculateGroupPeakIntensities(vector<pair<double, IPowderDiffPeakFunction_sptr> > peakgroup,
                                                      const vector<double>& vecX, const vector<double>& vecY,
@@ -387,7 +416,7 @@ namespace CurveFitting
     }
     else
     {
-      g_log.information() << "[Fx155] Peaks group size = " << peakgroup.size() << "\n";
+      g_log.debug() << "[Fx155] Peaks group size = " << peakgroup.size() << "\n";
     }
     if (peakgroup.size() > 1)
       sort(peakgroup.begin(), peakgroup.end());
@@ -410,16 +439,13 @@ namespace CurveFitting
       stringstream msg;
       int h, k, l;
       leftpeak->getMillerIndex(h, k, l);
-      msg << "Peak group's left boundary " << leftbound << " is out side of "
-          << "input data workspace's left bound (" << vecX[0]
-          << ")! Accuracy of its peak intensity might be affected."
-          << "Peaks group has " << peakgroup.size() << " peaks, where the left most peak "
-          << "is at " << leftpeak->centre() << " (HKL) = " << h << ", " << k << ", " << l << ".\n"
-          << "[DBx] " << leftpeak->asString() << ".";
-      if (leftpeak->centre() - leftpeak->fwhm() < vecX.front())
-        g_log.warning(msg.str());
-      else
-        g_log.information(msg.str());
+      msg << "Peak group (containing " << peakgroup.size() << " peaks) has its left boundary (TOF = "
+          << leftbound << ") out side of input data workspace's left boundary (" << vecX.front()
+          << ").  Accuracy of its peak intensity might be affected. "
+          << "Group's left boundary is determined by its leftmost peak ("<< h << ", " << k << ", " << l
+          << ") at TOF = " << leftpeak->centre() << " with FWHM = " << leftpeak->fwhm() << ". ";
+
+      g_log.information(msg.str());
 
       leftbound = vecX[0] + 0.1;
     }
@@ -432,10 +458,7 @@ namespace CurveFitting
           << "input data workspace's right bound (" << vecX.back()
           << ")! Accuracy of its peak intensity might be affected. ";
 
-      if (rightpeak->centre() + rightpeak->fwhm() > vecX.back())
-        g_log.warning(msg.str());
-      else
-        g_log.information(msg.str());
+      g_log.information(msg.str());
 
       rightbound = vecX.back() - 0.1;
     }
@@ -487,8 +510,8 @@ namespace CurveFitting
       g_log.error(errmsg.str());
       throw runtime_error(errmsg.str());
     }
-    g_log.information() << "[DBx356] Number of data points = " << ndata << " index from " << ileft
-                        << " to " << iright << ";  Size(datax, datay) = " << datax.size() << "\n";
+    g_log.debug() << "[DBx356] Number of data points = " << ndata << " index from " << ileft
+                  << " to " << iright << ";  Size(datax, datay) = " << datax.size() << "\n";
 
     // Prepare to integrate dataY to calculate peak intensity
     vector<double> sumYs(ndata, 0.0);
@@ -496,6 +519,7 @@ namespace CurveFitting
     vector<vector<double> > peakvalues(numPeaks);
 
     // Integrage peak by peak
+    bool datavalueinvalid = false;
     for (size_t ipk = 0; ipk < numPeaks; ++ipk)
     {
       // calculate peak function value.  Peak height should be set to a non-zero value
@@ -531,82 +555,86 @@ namespace CurveFitting
         int h, k, l;
         peak->getMillerIndex(h, k, l);
         stringstream warnss;
-        warnss << "Peak (" << h << ", " << k << ", " << l <<") @ TOF = " << peak->centre() \
-               << " has " << numbadpts << " data points, whose "
-               << "values exceed limit (i.e., not physical).\n";
-        g_log.warning(warnss.str());
+        warnss << "Peak (" << h << ", " << k << ", " << l <<") @ TOF = " << peak->centre()
+               << " has " << numbadpts << " data points, "
+               << "whose values exceed limit (i.e., not physical). ";
+        g_log.debug(warnss.str());
+        datavalueinvalid = true;
       }
       peakvalues[ipk].assign(localpeakvalue.begin(), localpeakvalue.end());
     } // For All peaks
 
     // Calculate intensity of all peaks
-    bool peakheightsphysical = true;
-    for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
+    bool peakheightsphysical = !datavalueinvalid;
+    if (peakheightsphysical)
     {
-      IPowderDiffPeakFunction_sptr peak = peakgroup[ipk].second;
-      double intensity = 0.0;
-
-      for (size_t i = 0; i < ndata; ++i)
+      for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
       {
-        double temp;
-        if (sumYs[i] > 1.0E-5)
+        IPowderDiffPeakFunction_sptr peak = peakgroup[ipk].second;
+        double intensity = 0.0;
+
+        for (size_t i = 0; i < ndata; ++i)
         {
-          // Reasonable non-zero value
-          double peaktogroupratio = peakvalues[ipk][i]/sumYs[i];
-          temp = datay[i] * peaktogroupratio;
-        }
-        else
+          double temp;
+          if (sumYs[i] > 1.0E-5)
+          {
+            // Reasonable non-zero value
+            double peaktogroupratio = peakvalues[ipk][i]/sumYs[i];
+            temp = datay[i] * peaktogroupratio;
+          }
+          else
+          {
+            // SumY too smaller
+            temp = 0.0;
+          }
+          double deltax;
+          if (i == 0)
+            deltax = datax[1] - datax[0];
+          else
+            deltax = datax[i] - datax[i-1];
+
+          intensity += temp * deltax;
+        } // for data points
+
+        if (intensity != intensity)
         {
-          // SumY too smaller
-          temp = 0.0;
+          // Unphysical intensity: NaN
+          intensity = 0.0;
+          peakheightsphysical = false;
+
+          int h, k, l;
+          peak->getMillerIndex(h, k, l);
+          g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = NaN!\n";
+
         }
-        double deltax;
-        if (i == 0)
-          deltax = datax[1] - datax[0];
-        else
-          deltax = datax[i] - datax[i-1];
+        else if (intensity <= -DBL_MAX || intensity >= DBL_MAX)
+        {
+          // Unphysical intensity: NaN
+          intensity = 0.0;
+          peakheightsphysical = false;
 
-        intensity += temp * deltax;
-      } // for data points
+          int h, k, l;
+          peak->getMillerIndex(h, k, l);
+          g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = Infty!\n";
+        }
+        else if (intensity < 0.0)
+        {
+          // No negative intensity
+          g_log.debug() << "[Fx134] Set peak @ " << peak->centre() << "'s intensity to 0.0 instead of "
+                        << intensity << ".\n";
+          intensity = 0.0;
+        }
+        g_log.debug() << "[Fx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
+        peak->setHeight(intensity);
 
-      if (intensity != intensity)
-      {
-        // Unphysical intensity: NaN
-        intensity = 0.0;
-        peakheightsphysical = false;
+        // Add peak's value to peaksvalues
+        for (size_t i = ileft; i < iright; ++i)
+        {
+          vec_summedpeaks[i] += (intensity * peakvalues[ipk][i-ileft]);
+        }
 
-        int h, k, l;
-        peak->getMillerIndex(h, k, l);
-        g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = NaN!\n";
-
-      }
-      else if (intensity <= -DBL_MAX || intensity >= DBL_MAX)
-      {
-        // Unphysical intensity: NaN
-        intensity = 0.0;
-        peakheightsphysical = false;
-
-        int h, k, l;
-        peak->getMillerIndex(h, k, l);
-        g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = Infty!\n";
-      }
-      else if (intensity < 0.0)
-      {
-        // No negative intensity
-        g_log.debug() << "[Fx134] Set peak @ " << peak->centre() << "'s intensity to 0.0 instead of "
-                      << intensity << ".\n";
-        intensity = 0.0;
-      }
-      g_log.debug() << "[Fx407] Peak @ " << peak->centre() << ": Set Intensity = " << intensity << "\n";
-      peak->setHeight(intensity);
-
-      // Add peak's value to peaksvalues
-      for (size_t i = ileft; i < iright; ++i)
-      {
-        vec_summedpeaks[i] += (intensity * peakvalues[ipk][i-ileft]);
-      }
-
-    } // ENDFOR each peak
+      } // ENDFOR each peak
+    }
 
     return peakheightsphysical;
   }
@@ -853,8 +881,8 @@ namespace CurveFitting
       ipk += 1;
     }
 
-    g_log.information() << "[Calculate Peak Intensity]:  Number of Peak Groups = " << peakgroupvec.size()
-                        << "\n";
+    g_log.debug() << "[Calculate Peak Intensity]:  Number of Peak Groups = " << peakgroupvec.size()
+                  << "\n";
 
     return;
   }

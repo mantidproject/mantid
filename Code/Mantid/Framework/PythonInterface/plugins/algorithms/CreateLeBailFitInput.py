@@ -24,10 +24,12 @@ the peak profile parameters include Alpha, Beta, Sigma, centre and height.
 This algorithm is designed to work with other algorithms to do Le Bail fit.  The introduction can be found in the wiki page of [[Le Bail Fit]].
 
 *WIKI*"""
-from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
-from mantid.kernel import Direction, StringListValidator, FloatBoundedValidator
+#from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
+#from mantid.kernel import Direction, StringListValidator, FloatBoundedValidator
 
 import mantid.simpleapi as api
+from mantid.api import *
+from mantid.kernel import *
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
@@ -52,11 +54,19 @@ class CreateLeBailFitInput(PythonAlgorithm):
         
         self.declareProperty("Instrument", "POWGEN", StringListValidator(instruments), "Powder diffractometer's name")
 
-        self.declareProperty(FileProperty("ReflectionsFile","", FileAction.Load, ['.hkl']),
+        self.declareProperty(FileProperty("ReflectionsFile","", FileAction.OptionalLoad, ['.hkl']),
                 "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl file that contains the peaks.")
 
         self.declareProperty(FileProperty("FullprofParameterFile", "", FileAction.Load, ['.irf']),
                 "Fullprof's .irf file containing the peak parameters.")
+
+        self.declareProperty("GenerateBraggReflections", False, 
+                "Generate Bragg reflections other than reading a Fullprof .irf file. ")
+        
+        arrvalidator = IntArrayBoundedValidator()
+        arrvalidator.setLower(0)
+        self.declareProperty(IntArrayProperty("MaxHKL", values=[12, 12, 12], validator=arrvalidator, 
+            direction=Direction.Input), "Maximum reflection (HKL) to generate")
 
         self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
@@ -82,11 +92,19 @@ class CreateLeBailFitInput(PythonAlgorithm):
         self.setProperty("BraggPeakParameterWorkspace", hklWS)
 
         # 2. Get Other Properties
-        instrument = self.getProperty("Instrument")
+        instrument = self.getPropertyValue("Instrument")
         reflectionfilename = self.getPropertyValue("ReflectionsFile")
 
         # 3. Import reflections list
-        hklws = self.importFullProfHKLFile(reflectionfilename)
+        genhkl = self.getProperty("GenerateBraggReflections").value
+        print "GeneraateHKL? = ", genhkl
+        if genhkl is True:
+            hklmax = self.getProperty("MaxHKL").value
+            if len(hklmax) != 3:
+                raise NotImplementedError("MaxHKL must have 3 integers")
+            hklws = self.generateBraggReflections(hklmax)
+        else: 
+            hklws = self.importFullProfHKLFile(reflectionfilename)
         self.setProperty("BraggPeakParameterWorkspace", hklws)
 
         return
@@ -159,6 +177,49 @@ class CreateLeBailFitInput(PythonAlgorithm):
         api.DeleteWorkspace(Workspace=irfwsname)
         
         return tablews
+
+
+    def generateBraggReflections(self, hklmax):
+        """ Generate Bragg reflections from (0, 0, 0) to (HKL)_max
+        """
+        import math
+
+        # Generate reflections
+        max_hkl_sq = hklmax[0]**2 + hklmax[1]**2 + hklmax[2]**2
+        max_m = int(math.sqrt(max_hkl_sq)) + 1
+
+        # Note: the maximum HKL is defined by (HKL)^2.  Therefore, the iteration should reach some larger integer
+        #       to avoid skipping some valid reflections
+
+        hkldict = {}
+        for h in xrange(0, max_m):
+            for k in xrange(h, max_m):
+                for l in xrange(k, max_m):
+                    dsq = h*h + k*k + l*l 
+                    if dsq <= max_hkl_sq:
+                        if hkldict.has_key(dsq) is False: 
+                            hkldict[dsq] = []
+                        hkldict[dsq].append([h, k, l])
+                    # ENDIF
+                # ENDFOR (l)
+            # ENDFOR (k)
+        # ENDFOR (h)
+
+        # Create table workspace
+        tablews = WorkspaceFactory.createTable()
+        
+        tablews.addColumn("int", "H")
+        tablews.addColumn("int", "K")
+        tablews.addColumn("int", "L")
+
+        # Add reflections
+        for dsp in sorted(hkldict.keys()):
+            hkl = hkldict[dsp][0]
+            if hkl[0] + hkl[1] + hkl[2] > 0:
+                tablews.addRow(hkl)
+
+        return tablews
+        
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CreateLeBailFitInput)

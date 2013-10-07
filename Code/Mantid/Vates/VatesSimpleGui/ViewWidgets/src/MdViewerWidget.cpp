@@ -91,6 +91,7 @@ namespace Vates
 {
 namespace SimpleGui
 {
+using namespace Mantid::API;
 using namespace MantidQt::API;
 
 REGISTER_VATESGUI(MdViewerWidget)
@@ -100,6 +101,11 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface()
 {
+  // Calling workspace observer functions.
+  observeAfterReplace();
+  observePreDelete();
+  observeADSClear();
+
   this->internalSetup(true);
 }
 
@@ -503,12 +509,11 @@ void MdViewerWidget::checkForUpdates()
 
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
-    this->currentView->resetDisplay();
     this->currentView->onAutoScale();
     this->currentView->setAxisScales();
     pqActiveObjects::instance().setActiveSource(src);
     this->currentView->setTimeSteps(true);
-    this->currentView->resetCamera();
+    this->currentView->updateView();
     this->currentView->updateUI();
   }
   if (QString(proxy->GetXMLName()).contains("Threshold"))
@@ -793,6 +798,73 @@ void MdViewerWidget::updateAppState()
   {
     this->currentView->onLodThresholdChange(true, this->lodThreshold);
     this->lodAction->setChecked(true);
+  }
+}
+
+/**
+ * This function responds to the replacement of a workspace. It does not
+ * handle workspace renaming. Also, by default it replaces the original
+ * representation with a new one, deleting the old one first.
+ * @param wsName : Name of workspace changing
+ * @param ws : Pointer to changing workspace
+ */
+void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
+                                        const boost::shared_ptr<Mantid::API::Workspace> ws)
+{
+  UNUSED_ARG(ws);
+  pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
+  if (NULL != src)
+  {
+    // Have to mark the filter as modified to get it to update. Do this by
+    // changing the requested workspace name to a dummy name and then change
+    // back. However, push the change all the way down for it to work.
+    vtkSMPropertyHelper(src->getProxy(),
+                        "Mantid Workspace Name").Set("ChangeMe!");
+    vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
+    srcProxy->UpdateVTKObjects();
+    srcProxy->Modified();
+    srcProxy->UpdatePipelineInformation();
+    src->updatePipeline();
+
+    vtkSMPropertyHelper(src->getProxy(),
+                        "Mantid Workspace Name").Set(wsName.c_str());
+    // Update the source so that it retrieves the data from the Mantid workspace
+    srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
+    srcProxy->UpdateVTKObjects();
+    srcProxy->Modified();
+    srcProxy->UpdatePipelineInformation();
+    src->updatePipeline();
+
+    this->currentView->setColorsForView();
+    this->currentView->renderAll();;
+  }
+}
+
+/**
+ * This function responds to a workspace being deleted. If there are one or
+ * more PeaksWorkspaces present, the requested one will be deleted. Otherwise,
+ * if it is an IMDWorkspace, everything goes!
+ * @param wsName : Name of workspace being deleted
+ * @param ws : Pointer to workspace being deleted
+ */
+void MdViewerWidget::preDeleteHandle(const std::string &wsName,
+                                     const boost::shared_ptr<Workspace> ws)
+{
+  UNUSED_ARG(ws);
+  pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
+  if (NULL != src)
+  {
+    unsigned int numSources = this->currentView->getNumSources();
+    if (numSources > 1)
+    {
+      pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+      if (this->currentView->isPeaksWorkspace(src))
+      {
+        builder->destroy(src);
+        return;
+      }
+    }
+    emit this->requestClose();
   }
 }
 

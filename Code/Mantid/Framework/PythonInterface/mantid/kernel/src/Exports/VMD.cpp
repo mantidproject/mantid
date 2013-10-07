@@ -19,7 +19,7 @@ namespace
    * @param index An index whose value is to be returned
    * @throws An out_of_range error if the index is out of range
    */
-  VMD_t getItem(const VMD & self, const size_t index)
+  VMD_t getItem(VMD & self, const size_t index)
   {
     if( index < self.getNumDims() )
     {

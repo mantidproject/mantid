@@ -18,6 +18,7 @@ import isis_instrument
 import os
 import math
 import copy
+import re
 
 def _issueWarning(msg):
     """
@@ -55,19 +56,17 @@ class LoadRun(object):
         self._period = int(entry)
         #set to the total number of periods in the file
         self.periods_in_file = None
-
-        self._spec_min = None
-        self._spec_max = None
         self.ext = ''
         self.shortrun_no = -1
         #the name of the loaded workspace in Mantid
         self.wksp_name = ''
         
-    def _load(self, inst = None, is_can=False):
+    def _load(self, inst = None, is_can=False, extra_options=dict()):
         """
             Load a workspace and read the logs into the passed instrument reference
             @param inst: a reference to the current instrument
-            @param iscan: set this to True for can runs 
+            @param iscan: set this to True for can runs
+            @param extra_options: arguments to pass on to the Load Algorithm.
             @return: log values, number of periods in the workspace
         """
         if self._period > 1:
@@ -80,30 +79,21 @@ class LoadRun(object):
             period = 1
 
         if os.path.splitext(self._data_file)[1].lower().startswith('.r') or os.path.splitext(self._data_file)[1].lower().startswith('.s'):
-            try:
-                outWs = LoadRaw(Filename=self._data_file, 
-                                OutputWorkspace=workspace, 
-                                SpectrumMin=self._spec_min, 
-                                SpectrumMax=self._spec_max)
-            except ValueError:
-                # MG - 2011-02-24: Temporary fix to load .sav or .s* files. Lets the file property
-                # work it out
-                file_hint = os.path.splitext(self._data_file)[0]
-                outWs = LoadRaw(Filename=file_hint, 
-                                OutputWorkspace=workspace, 
-                                SpectrumMin=self._spec_min, 
-                                SpectrumMax=self._spec_max)
-                
+            outWs = LoadRaw(Filename=self._data_file, 
+                            OutputWorkspace=workspace,
+                            **extra_options)
+
             alg = outWs.getHistory().lastAlgorithm()
             self._data_file = alg.getPropertyValue("Filename")
             LoadSampleDetailsFromRaw(InputWorkspace=workspace, Filename=self._data_file)
 
             workspace = self._leaveSinglePeriod(workspace, period)
         else:
+            if period != 1:
+                extra_options['EntryNumber']=period
             outWs = LoadNexus(Filename=self._data_file, 
                               OutputWorkspace=workspace,
-                SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, 
-                EntryNumber=period)
+                              **extra_options)
             alg = outWs.getHistory().lastAlgorithm()            
             self._data_file = alg.getPropertyValue("Filename")
 
@@ -205,53 +195,30 @@ class LoadRun(object):
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
         
         try:
-            data_file = self._extract_run_details(
-                self._data_file, self._is_trans, prefix=reducer.instrument.name(), 
-                run_number_width=reducer.instrument.run_number_width)
+            if reducer.instrument.name() == "":
+                raise AttributeError
         except AttributeError:
             raise AttributeError('No instrument has been assign, run SANS2D or LOQ first')
 
+        self._data_file = self._extract_run_details(self._data_file)
+
         if not self._reload:
             raise NotImplementedError('Raw workspaces must be reloaded, run with reload=True')
-            #this old code should be checked before reimplementing not reloading raw workspaces 
-            #if self._period > 1:
-            #    workspace = self._get_workspace_name(self._period)
-            #else:
-            #    workspace = self._get_workspace_name()
-            #self.periods_in_file = self._find_workspace_num_periods(workspace)
-            #if mantid.workspaceExists(workspace):
-            #    self.wksp_name = workspace
-            #    return ''
-            #period_definitely_inc = self._get_workspace_name(self._period)
-            #if mantid.workspaceExists(period_definitely_inc):
-            #    self.wksp_name = period_definitely_inc
-            #    return ''
 
-        self._data_file = os.path.join(reducer._data_path, data_file)
-        # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
-        if not os.path.exists(self._data_file):
-            self._data_file = data_file
-
+        spectrum_limits = dict()
         if self._is_trans:
-            try:
-                if reducer.instrument.name() == 'SANS2D' and int(self.shortrun_no) < 568:
-                    dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
-                    self._spec_min = dimension*dimension*2
-                    self._spec_max = self._spec_min + 4
-                else:
-                    self._spec_min = None
-                    self._spec_max = 8
-                self.periods_in_file, logs = self._load(reducer.instrument)
-            except RuntimeError, err:
-                sanslog.warning(str(err))
-                return '', -1
-        else:
-            try:
-                self.periods_in_file, logs = self._load(reducer.instrument)
-            except RuntimeError, details:
-                sanslog.warning(str(details))
-                self.wksp_name = ''
-                return '', -1
+            if reducer.instrument.name() == 'SANS2D' and int(self.shortrun_no) < 568:
+                dimension = SANSUtility.GetInstrumentDetails(reducer.instrument)[0]
+                spec_min = dimension*dimension*2
+                spectrum_limits = {'SpectrumMin':spec_min, 'SpectrumMax':spec_min + 4}
+
+        try:
+            # the spectrum_limits is not the default only for transmission data
+            self.periods_in_file, logs = self._load(reducer.instrument, extra_options=spectrum_limits)
+        except RuntimeError, details:
+            sanslog.warning(str(details))
+            self.wksp_name = ''
+            return '', -1
         
         return logs
 
@@ -292,56 +259,16 @@ class LoadRun(object):
                 DeleteWorkspace(inWs)
                 
 
-    def _extract_run_details(self, run_string, is_trans=False, prefix='', run_number_width=-1):
+    def _extract_run_details(self, run_string):
         """
             Takes a run number and file type and generates the filename, workspace name and log name
             @param run_string: either the name of a run file or a run number followed by a dot and then the file type, i.e. file extension
-            @param is_trans: true for transmission files, false for sample files (default is false)
-            @param prefix: expect this string to come before the run number (normally instrument name)
-            @param run_number_width: ISIS instruments often produce files with a fixed number of digits padded with zeros
         """
-        pieces = run_string.split('.')
-        if len(pieces) > 2: 
-            # this means that the foldername has '.',  so costruct the pieces to ignore foldername with '.' 
-            extension = pieces[-1]
-            body = '.'.join(pieces[:-1])
-            pieces = [body, extension]
-        if len(pieces) != 2:
-             raise RuntimeError, "Invalid run specified: " + run_string + ". Please use RUNNUMBER.EXT format"
-        
-        #get a consistent format for path names, the Linux/Mac version
-        if run_string.find('\\') > -1 and run_string.find('/') == -1:
-            #means we have windows style their paths contain \ but can't contain /   
-            run_string = run_string.replace('\\', '/')
-
-        #interpret an entire file name
-        if run_string.find('/') > -1 or (prefix and run_string.find(prefix) == 0 ):
-            #assume we have a complete filename
-            filename = run_string
-            #remove the path name
-            names = run_string.split('/')
-            run_name = names[len(names)-1]
-            #remove the extension
-            file_parts = run_name.split('.')
-            run_name = file_parts[0]
-            self.ext = file_parts[len(file_parts)-1]
-            run_name = run_name.upper()
-            if run_name.endswith('-ADD'):
-                #remove the add files specifier, if it's there
-                end = len(run_name)-len('-ADD')
-                run_name = run_name[0:end]
-            names = run_name.split(prefix)
-            self.shortrun_no = names[len(names)-1]
-
-        else:#this is a run number dot extension
-            run_no = pieces[0]
-            self.ext = pieces[1]
-            fullrun_no, self.shortrun_no = _padRunNumber(run_no, run_number_width)
-            filename = prefix+fullrun_no+'.'+self.ext
-            
-        self.shortrun_no = int(self.shortrun_no)
-
-        return filename 
+        listOfFiles = FileFinder.findRuns(run_string)
+        firstFile = listOfFiles[0]
+        self.ext = firstFile[-3:]
+        self.shortrun_no = int(re.findall(r'\d+',run_string)[-1])
+        return firstFile
     
     def _find_workspace_num_periods(self, workspace): 
         """

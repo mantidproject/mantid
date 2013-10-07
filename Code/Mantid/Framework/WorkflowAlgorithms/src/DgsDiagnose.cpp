@@ -313,7 +313,7 @@ namespace Mantid
 
       MatrixWorkspace_sptr maskWS;
       std::vector<std::string> diag_spectra = dvWS->getInstrument()->getStringParameter("diag_spectra");
-      if (diag_spectra.empty())
+      if (diag_spectra.empty() || "None" == diag_spectra[0])
       {
         diag->execute();
         maskWS = diag->getProperty("OutputWorkspace");
