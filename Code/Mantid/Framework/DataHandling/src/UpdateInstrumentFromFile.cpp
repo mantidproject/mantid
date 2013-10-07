@@ -39,6 +39,7 @@ would tell the algorithm to interpret the columns as:
 //----------------------------------------------------------------------
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
 #include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidAPI/FileProperty.h"
@@ -46,12 +47,11 @@ would tell the algorithm to interpret the columns as:
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 #include "LoadRaw/isisraw2.h"
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <nexus/NeXusException.hpp>
 #include <Poco/StringTokenizer.h>
 
 #include <fstream>
@@ -136,11 +136,14 @@ namespace Mantid
       if(NexusDescriptor::isHDF(filename))
       {
         LoadISISNexus2 isisNexus;
-        auto *descriptor = new Kernel::NexusDescriptor(filename);
-        if(isisNexus.confidence(*descriptor) > 0)
+        LoadEventNexus eventNexus;
+        boost::scoped_ptr<Kernel::NexusDescriptor> descriptor(new Kernel::NexusDescriptor(filename));
+        if(isisNexus.confidence(*descriptor) > 0 || eventNexus.confidence(*descriptor) > 0)
         {
-          delete descriptor;
-          updateFromNeXus(filename);
+          auto & nxFile = descriptor->data();
+          const auto & rootEntry = descriptor->firstEntryNameType();
+          nxFile.openGroup(rootEntry.first, rootEntry.second);
+          updateFromNeXus(nxFile);
           return;
         }
       }
@@ -207,33 +210,17 @@ namespace Mantid
 
     /**
     * Update the detector information from a NeXus file
-    * @param filename :: The input filename
+    * @param nxFile :: Handle to a NeXus file where the root group has been opened
     */
-    void UpdateInstrumentFromFile::updateFromNeXus(const std::string & filename)
+    void UpdateInstrumentFromFile::updateFromNeXus(::NeXus::File & nxFile)
     {
       try
       {
-        ::NeXus::File file(filename);
+        nxFile.openGroup("isis_vms_compat","IXvms");
       }
       catch(::NeXus::Exception&)
       {
-        throw std::runtime_error("Input file does not look like an ISIS NeXus file.");
-      }
-      ::NeXus::File nxFile(filename);
-      try
-      {
-        nxFile.openPath("raw_data_1/isis_vms_compat");
-      }
-      catch(::NeXus::Exception&)
-      {
-        try
-        {
-          nxFile.openPath("entry/isis_vms_compat"); // Could be original event file.
-        }
-        catch(::NeXus::Exception&)
-        {
-          throw std::runtime_error("Unknown NeXus flavour. Cannot update instrument positions.");
-        }
+        throw std::runtime_error("Unknown NeXus flavour. Cannot update instrument positions using this type of file");
       }
       // Det ID
       std::vector<int32_t> detID;
