@@ -49,8 +49,6 @@ USEFUL LINKS:
 PROBLEMS LEFT TO SOLVE:
 
 - The exact wording of the "description" metadata field.
-
-- Completing the translation table, the whitelist and the blacklist.
 """
 
 import argparse
@@ -58,11 +56,12 @@ import argparse
 import xml.etree.ElementTree as ET
 
 import subprocess
+import re
 from datetime import date
 
 import authors
 
-def build_xml_form(options, doi):
+def build_xml_form(doi, relationships, creator_name_list, version_str):
     '''Builds the xml form containing the metadata for the DOI.  Where helpful,
     comments showing the definition / allowed values of the data fields have
     been taken from section 2.3 of:
@@ -91,13 +90,6 @@ def build_xml_form(options, doi):
     #
     # Use all authors up to and including the version tag if creating the
     # "main" DOI, else only use authors who contributed to that version.
-    if options.main:
-        creator_name_list = authors.authors_up_to_git_version(
-            options.major, options.minor, options.patch)
-    else:
-        creator_name_list = authors.authors_under_git_tag(
-            options.major, options.minor, options.patch)
-
     creators = ET.SubElement(root, 'creators')
     for creator_name in creator_name_list:
         creator = ET.SubElement(creators, 'creator')
@@ -145,21 +137,19 @@ def build_xml_form(options, doi):
     # "The version number of the resource." Suggested practice is to "register
     # a new identifier for a major version change."  We'll be ignoring this
     # as we're having a new DOI for every major/minor/patch release.
-    ET.SubElement(root, 'version').text = '%d.%d' % (options.major, 
-                                                     options.minor)
+    ET.SubElement(root, 'version').text = version_str
 
     # "Identifiers of related resources. These must be globally unique
     # identifiers."
-    if not options.main:
-        # If this is not the "main" DOI (and is instead pointing to a new
-        # version of Mantid) then we set up a relation between the two.
+    if relationships:
         related_identifiers = ET.SubElement(root, 'relatedIdentifiers')
+    for doi, relation_type in relationships.items():
         related_identifier = ET.SubElement(
             related_identifiers, 'relatedIdentifier'
         )
-        related_identifier.text = '10.5286/Software/Mantid'
+        related_identifier.text = doi
         related_identifier.set('relatedIdentifierType', 'DOI')
-        related_identifier.set('relationType', 'IsNewVersionOf')
+        related_identifier.set('relationType', relation_type)
 
     # "Provide a rights management statement for the resource or reference a
     # service providing such information. Include embargo information if
@@ -210,9 +200,60 @@ def _http_request(body, method, url, options):
 
     args.append(url)
 
-    result = subprocess.check_call(args)
+    proc = subprocess.Popen(args,stdout=subprocess.PIPE)
+    result = proc.stdout.readlines()
 
-    if options.debug: print result
+    print result
+    return result
+
+def delete_doi(base, doi, options):
+    print "\n\nAttempting to delete the following DOI:"
+    print 'DOI = ' + doi
+    _http_request(
+        body    = '',
+        method  = 'DELETE',
+        url     = base + "doi/" + doi,
+        options = options
+    )
+
+def create_or_update_metadata(xml_form, base, doi, options):
+    print "\nAttempting to create / update metadata:"
+    _http_request(
+        body    = xml_form,
+        method  = "PUT",
+        url     = base + "metadata/" + doi,
+        options = options
+    )
+
+def create_or_update_doi(base, doi, destination, options):
+    print "\n\nAttempting to create / update the following DOI:"
+    print 'DOI = ' + doi
+    print 'URL = ' + destination
+    _http_request(
+        body    = 'doi=' + doi + '\n' + 'url=' + destination,
+        method  = "PUT",
+        url     = base + "doi/" + doi,
+        options = options
+    )
+
+def check_if_doi_exists(base, doi, destination, options):
+    print "\nChecking if \"" + base + "doi/" + doi + "\" DOI already exists."
+    result = _http_request(
+        body    = '',
+        method  = 'GET',
+        url     = base + "doi/" + doi,
+        options = options
+    )
+
+    if result[0] == 'DOI not found':
+        print "DOI not found."
+        return False
+    elif result[0] == destination:
+        print "DOI found."
+        return True
+    else:
+        raise Exception(
+            "Unexpected result back from server: \"" + result[0] + "\"")
 
 def run(options):
     '''Creating a usable DOI is (for our purposes at least) a two step
@@ -221,20 +262,38 @@ def run(options):
 
     If pre-existing DOI's or metadata are submitted then they will overwrite
     what was there previously.
+
+    We also have to amend the metadata for the previous DOI (if one exists),
+    so that we can set up a IsPreviousVersionOf/IsNewVersionOf relationship
+    between the two DOIs.
     '''
-    # We use the convention whereby the patch number is ignored if it is zero,
-    # i.e. "3.0.0" becomes "3.0".
-    if options.patch == 0:
-        options.version = '%d.%d' % (options.major, options.minor)
-    else:
-        options.version = '%d.%d.%d' % (options.major, 
-                                    options.minor,
-                                    options.patch)
+    # Get the git tag and "version string" of this version as well as the
+    # version before it if this is an incremental release.
+    version = options.major, options.minor, options.patch
+    version_str = authors.get_version_string(options.major,
+                                             options.minor,
+                                             options.patch)
+    tag = authors.find_tag(*version)
+    if not options.main:
+        prev_tag = authors.get_previous_tag(tag)
+        prev_version = authors.get_version_from_git_tag(prev_tag)
+        prev_version_str = authors.get_version_string(*prev_version)
+
+    main_doi = '10.5286/Software/Mantid'
 
     if options.main:
-        doi = '10.5286/Software/Mantid'
+        doi = main_doi
     else: # Incremental release DOI.
-        doi = '10.5286/Software/Mantid' + options.version
+        prev_doi = '10.5286/Software/Mantid' + prev_version_str
+        doi = '10.5286/Software/Mantid' + version_str
+
+    if options.main:
+        destination = 'http://www.mantidproject.org'
+    else:
+        destination = 'http://www.mantidproject.org/Release_Notes_' + \
+                      version_str
+        prev_destination = 'http://www.mantidproject.org/Release_Notes_' +\
+                               prev_version_str
 
     # Use the test server if running in test mode.
     if options.test:
@@ -243,52 +302,54 @@ def run(options):
         server_url_base = 'https://mds.datacite.org/'
 
     if options.delete:
-        print "\n\nAttempting to delete the following DOI:"
-        print 'DOI = ' + doi
-        _http_request(
-            body    = '',
-            method  = 'DELETE',
-            url     = server_url_base + "doi/" + doi,
-            options = options
-        )
-
+        delete_doi(server_url_base, doi, options)
         quit()
 
-    xml_form = build_xml_form(options, doi)
-
-    print "\nAttempting to create / update metadata:"
-    _http_request(
-        body    = xml_form,
-        method  = "PUT",
-        url     = server_url_base + "metadata/" + doi,
-        options = options
-    )
-
     if options.main:
-        destination = 'http://www.mantidproject.org'
+        creator_name_list = authors.authors_up_to_git_tag(tag)
+        xml_form = build_xml_form(doi, {}, creator_name_list, version_str)
+
+        create_or_update_metadata(xml_form, server_url_base, doi, options)
+        create_or_update_doi(server_url_base, doi, destination, options)
+
     else:
-        destination = 'http://www.mantidproject.org/Release_Notes_' + \
-                      options.version
+        has_previous_version = check_if_doi_exists(
+            server_url_base,
+            prev_doi,
+            prev_destination,
+            options
+        )
 
-    print "\n\nAttempting to create / update the following DOI:"
-    print 'DOI = ' + doi
-    print 'URL = ' + destination
-    _http_request(
-        body    = 'doi=' + doi + '\n' + 'url=' + destination,
-        method  = "PUT",
-        url     = server_url_base + "doi/" + doi,
-        options = options
-    )
+        relationships = { main_doi : 'IsPartOf' }
+        if has_previous_version:
+            relationships[prev_doi] = 'IsNewVersionOf'
+        
+        creator_name_list = authors.authors_under_git_tag(tag)
+        xml_form = build_xml_form(doi, relationships, creator_name_list, version_str)
 
-    if not options.test:
-        print "\n\nIf successfully created, the DOI can be resolved at:"
-        print 'http://dx.doi.org/' + doi
+        create_or_update_metadata(xml_form, server_url_base, doi, options)
+        create_or_update_doi(server_url_base, doi, destination, options)
 
-    print "\n\nIf successfully created, the metadata form can be inspected at:"
-    if options.test:
-        print 'https://test.datacite.org/mds/metadata/' + doi
-    else:
-        print 'https://mds.datacite.org/metadata/' + doi
+        if has_previous_version:
+            prev_relationships = { 
+                main_doi : 'IsPartOf',
+                doi      : 'IsPreviousVersionOf'
+            }
+        
+            prev_creator_name_list = authors.authors_under_git_tag(prev_tag)
+            prev_xml_form = build_xml_form(prev_doi, prev_relationships, prev_creator_name_list, prev_version_str)
+
+            create_or_update_metadata(prev_xml_form, server_url_base, prev_doi, options)
+
+        if not options.test:
+            print "\n\nIf successfully created, the DOI can be resolved at:"
+            print 'http://dx.doi.org/' + doi
+
+        print "\n\nIf successfully created, the metadata form can be inspected at:"
+        if options.test:
+            print 'https://test.datacite.org/mds/metadata/' + doi
+        else:
+            print 'https://mds.datacite.org/metadata/' + doi
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(

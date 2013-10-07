@@ -1,5 +1,5 @@
 from itertools import chain, ifilterfalse
-import string, os
+import string, os, re
 
 # Authors in Git that do not have a translation listed here or that have not
 # been blacklisted will cause the DOI script to fail.
@@ -142,9 +142,10 @@ def _authors_from_tag_info(tag_info):
         '--reverse'
     ]
 
-    return subprocess.check_output(args).replace('"', '').split('\n')
+    authors = subprocess.check_output(args).replace('"', '').split('\n')
+    return _clean_up_author_list(authors)
 
-def _find_tag(major, minor, patch):
+def find_tag(major, minor, patch):
     '''Return the Git tag, if it actually exists.  Where the patch number is
     zero, check for "v[major].[minor].[patch]" as well as "v[major].[minor]".
     '''
@@ -160,23 +161,55 @@ def _find_tag(major, minor, patch):
     raise Exception(
         "Could not find the following tag(s): " + str(suggested_tags))
 
-def authors_up_to_git_version(major, minor, patch):
-    '''Get a list of all authors who have made a commit, up to and including
-    the tag of the given version.
+def get_previous_tag(tag):
+    '''Given an existing git tag, will return the tag that is found before it.
     '''
-    authors = _authors_from_tag_info(_find_tag(major, minor, patch))    
-    return _clean_up_author_list(authors)
+    all_tags = _get_all_git_tags()
+    if not tag in all_tags:
+        return None
 
-def authors_under_git_tag(major, minor, patch):
-    '''Get a list of all authors who have made a commit, up to and including
-    the tag of the given version, but from the tag of the previous version.
-    I.e. if given "2, 6, 1" as inputs, then only commits between the tags
-    "v2.6.0" and "v2.6.1" will be included.
+    return all_tags[all_tags.index(tag) - 1]
+
+def get_version_string(major, minor, patch):
+    '''We use the convention whereby the patch number is ignored if it is zero,
+    i.e. "3.0.0" becomes "3.0".
     '''
-    tag = _find_tag(major, minor, patch)
+    if patch == 0:
+        return '%d.%d' % (major, minor)
+    else:
+        return '%d.%d.%d' % (major, minor, patch)
+
+def get_version_from_git_tag(tag):
+    '''Given a tag from Git, extract the major, minor and patch version
+    numbers.
+    '''
+    short_regexp = '^v(\d+).(\d+)$'
+    long_regexp  = '^v(\d+).(\d+).(\d+)$'
+
+    if re.match(short_regexp, tag):
+        a, b = [int(x) for x in re.findall('\d+', tag)]
+        c = 0
+    elif re.match(long_regexp, tag):
+        a, b, c = [int(x) for x in re.findall('\d+', tag)]
+    else:
+        raise Exception(
+            "Unable to parse version information from \"" + tag + "\"")
+    return a, b, c
+
+def authors_up_to_git_tag(tag):
+    '''Get a list of all authors who have made a commit, up to and including
+    the given tag.
+    '''
+    return _authors_from_tag_info(tag)
+
+def authors_under_git_tag(tag):
+    '''Get a list of all authors who have made a commit, up to and including
+    the given tag, but after the tag of the previous version.  I.e. if given
+    "2, 6, 1" as inputs, then only commits between the tags "v2.6.0" and
+    "v2.6.1" will be included.
+    '''
     all_tags = _get_all_git_tags()
 
     previous_tag = all_tags[all_tags.index(tag) - 1]
     
-    authors = _authors_from_tag_info(previous_tag + '..' + tag)
-    return _clean_up_author_list(authors)
+    return _authors_from_tag_info(previous_tag + '..' + tag)
