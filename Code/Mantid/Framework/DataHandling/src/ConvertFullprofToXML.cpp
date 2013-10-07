@@ -139,10 +139,11 @@ namespace DataHandling
     AutoPtr<Element> instrumentElem = mDoc->createElement("component-link");
     instrumentElem->setAttribute("name",instrumentName);
     rootElem->appendChild(instrumentElem);
-    addALFBEParameter( paramTable, mDoc, instrumentElem, "Alph0");
-    addALFBEParameter( paramTable, mDoc, instrumentElem, "Beta0");
-    addALFBEParameter( paramTable, mDoc, instrumentElem, "Alph1");
-    addALFBEParameter( paramTable, mDoc, instrumentElem, "Beta1");
+    API::Column_const_sptr column1 = paramTable->getColumn( 1 );
+    addALFBEParameter( column1, mDoc, instrumentElem, "Alph0");
+    addALFBEParameter( column1, mDoc, instrumentElem, "Beta0");
+    addALFBEParameter( column1, mDoc, instrumentElem, "Alph1");
+    addALFBEParameter( column1, mDoc, instrumentElem, "Beta1");
 
     // Add banks
     if(paramTable->columnCount() < 2){
@@ -158,8 +159,8 @@ namespace DataHandling
       bankName << "bank" << bankNumber;
       AutoPtr<Element> bankElem = mDoc->createElement("component-link");
       bankElem->setAttribute("name",bankName.str());
-      addSigmaParameters( paramTable, mDoc, bankElem, i+1);
-      addGammaParameters( paramTable, mDoc, bankElem, i+1);
+      addSigmaParameters( column, mDoc, bankElem );
+      addGammaParameters( column, mDoc, bankElem );
       rootElem->appendChild(bankElem);
     }
 
@@ -174,14 +175,14 @@ namespace DataHandling
   *
   *  paramName is the name of the parameter as it appears in the table workspace
   */
-  void ConvertFullprofToXML::addALFBEParameter(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Element* parent, const std::string& paramName)
+  void ConvertFullprofToXML::addALFBEParameter(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Element* parent, const std::string& paramName)
   {
     AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
     parameterElem->setAttribute("name", getXMLParameterName(paramName));
     parameterElem->setAttribute("type","fitting");
 
     AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-    formulaElem->setAttribute("eq",getXMLEqValue(tablews, paramName, 1));
+    formulaElem->setAttribute("eq",getXMLEqValue(column, paramName));
     if(paramName != "Beta1") formulaElem->setAttribute("result-unit","TOF");
     parameterElem->appendChild(formulaElem);
 
@@ -194,14 +195,14 @@ namespace DataHandling
   /* Add a set of SIGMA paraters to the XML document according to the table workspace
    * for the bank at the given column of the table workspace
    */
-  void ConvertFullprofToXML::addSigmaParameters(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, size_t columnIndex)
+  void ConvertFullprofToXML::addSigmaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
   {
      AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
      parameterElem->setAttribute("name", "IkedaCarpenterPV:SigmaSquared");
      parameterElem->setAttribute("type","fitting");
 
      AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-     std::string eqValue = getXMLEqValue(tablews, "Sig1", columnIndex)+"*centre^2+"+getXMLEqValue(tablews, "Sig0", columnIndex);
+     std::string eqValue = getXMLEqValue(column, "Sig1")+"*centre^2+"+getXMLEqValue(column, "Sig0");
      formulaElem->setAttribute("eq", eqValue);
      formulaElem->setAttribute("unit","dSpacing");
      formulaElem->setAttribute("result-unit","TOF^2");
@@ -213,14 +214,14 @@ namespace DataHandling
    /* Add a set of GAMMA paraters to the XML document according to the table workspace
    * for the bank at the given column of the table workspace
    */
-  void ConvertFullprofToXML::addGammaParameters(const API::ITableWorkspace_sptr & tablews, Poco::XML::Document* mDoc, Poco::XML::Element* parent, size_t columnIndex)
+  void ConvertFullprofToXML::addGammaParameters(const API::Column_const_sptr column, Poco::XML::Document* mDoc, Poco::XML::Element* parent )
   {
      AutoPtr<Element> parameterElem = mDoc->createElement("parameter");
      parameterElem->setAttribute("name", "IkedaCarpenterPV:Gamma");
      parameterElem->setAttribute("type","fitting");
 
      AutoPtr<Element> formulaElem = mDoc->createElement("formula");
-     std::string eqValue = getXMLEqValue(tablews, "Gam1", columnIndex)+"*centre";
+     std::string eqValue = getXMLEqValue(column, "Gam1" )+"*centre";
      formulaElem->setAttribute("eq", eqValue);
      formulaElem->setAttribute("unit","dSpacing");
      formulaElem->setAttribute("result-unit","TOF");
@@ -249,10 +250,10 @@ namespace DataHandling
   * Get the value string to put in the XML eq attribute of the formula element of the paramenter element
   * given the name of the parameter in the table workspace.
   */
-  std::string ConvertFullprofToXML::getXMLEqValue( const API::ITableWorkspace_sptr & tablews, const std::string& name, size_t columnIndex)
+  std::string ConvertFullprofToXML::getXMLEqValue( const API::Column_const_sptr column, const std::string& name )
   {
     size_t paramNumber = m_rowNumbers[name];
-    API::Column_const_sptr column = tablews->getColumn( columnIndex );
+    //API::Column_const_sptr column = tablews->getColumn( columnIndex );
     double eqValue = column->cell<double>(paramNumber);
     if(name.substr(0,3) == "Sig") eqValue = eqValue*eqValue; // Square the sigma values
     return boost::lexical_cast<std::string>(eqValue);
