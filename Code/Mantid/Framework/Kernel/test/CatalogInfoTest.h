@@ -72,28 +72,29 @@ class CatalogInfoTest : public CxxTest::TestSuite
       TS_ASSERT_THROWS_NOTHING(catalogInfo = getCatalogFromXML(facilitiesXml));
 
       // Set the paths to test against.
-      std::string linuxPath = "/archive/NDXSANDALS/Instrument/data/cycle_05_3/ALF06716.LOG";
-      std::string macPath   = "/archive/NDXSANDALS/Instrument/data/cycle_05_3/ALF06716.LOG";
-      std::string winPath   = "\\\\isis\\inst$\\Instruments$\\NDXSANDALS\\Instrument\\data\\cycle_05_3\\ALF06716.LOG";
+      std::string linuxPrefixPath = "/archive/NDXSANDALS/Instrument/data/cycle_05_3/ALF06716.LOG";
+      std::string macPrefixPath   = "/archive/NDXSANDALS/Instrument/data/cycle_05_3/ALF06716.LOG";
+      std::string winPrefixPath   = "\\NDXSANDALS\\Instrument\\data\\cycle_05_3\\ALF06716.LOG";
+      std::string winDefaultPath  = "\\\\isis\\inst$\\Instruments$\\NDXSANDALS\\Instrument\\data\\cycle_05_3\\ALF06716.LOG";
 
       // Perform the transformation of each path prior to assertions for re-usability of code.
-      std::string transFormLin = catalogInfo->transformArchivePath(linuxPath);
-      std::string transFormMac = catalogInfo->transformArchivePath(macPath);
-      std::string transFormWin = catalogInfo->transformArchivePath(winPath);
+      std::string transformLin = catalogInfo->transformArchivePath(linuxPrefixPath);
+      std::string transformMac = catalogInfo->transformArchivePath(macPrefixPath);
+      std::string transformWin = catalogInfo->transformArchivePath(winDefaultPath);
 
-      // adadad
+      // Test each variation
       #ifdef __linux__
-        TS_ASSERT_EQUALS(linuxPath, transFormMac);
-        TS_ASSERT_EQUALS(linuxPath, transFormWin);
-        TS_ASSERT_EQUALS(linuxPath, transFormLin);
+        TS_ASSERT_EQUALS(linuxPrefixPath, transformMac);
+        TS_ASSERT_EQUALS(linuxPrefixPath, transformWin);
+        TS_ASSERT_EQUALS(linuxPrefixPath, transformLin);
       #elif __APPLE__
-        TS_ASSERT_EQUALS(macPath, transFormMac);
-        TS_ASSERT_EQUALS(macPath, transFormWin);
-        TS_ASSERT_EQUALS(macPath, transFormLin);
+        TS_ASSERT_EQUALS(macPrefixPath, transformMac);
+        TS_ASSERT_EQUALS(macPrefixPath, transformWin);
+        TS_ASSERT_EQUALS(macPrefixPath, transformLin);
       #elif _WIN32
-        TS_ASSERT_EQUALS(winPath, transFormMac);
-        TS_ASSERT_EQUALS(winPath, transFormWin);
-        TS_ASSERT_EQUALS(winPath, transFormLin);
+        TS_ASSERT_EQUALS(winDefaultPath, transformWin);
+        TS_ASSERT_EQUALS(winPrefixPath, transformMac);
+        TS_ASSERT_EQUALS(winPrefixPath, transformLin);
       #endif
 
       delete catalogInfo;
