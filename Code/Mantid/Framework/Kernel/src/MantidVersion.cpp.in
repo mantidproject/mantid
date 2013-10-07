@@ -3,6 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/MantidVersion.h"
 
+#include <sstream>
+#include <boost/lexical_cast.hpp>
+
 namespace Mantid
 {
 namespace Kernel
@@ -28,6 +31,32 @@ const char* MantidVersion::revisionFull()
 const char* MantidVersion::releaseDate()
 {
   return "@MtdVersion_WC_LAST_CHANGED_DATE@";
+}
+
+const char* MantidVersion::mainDOI()
+{
+  return "http://dx.doi.org/10.5286/Software/Mantid";
+}
+
+std::string MantidVersion::releaseDOI()
+{
+  int patchVersion;
+  try
+  {
+    patchVersion = boost::lexical_cast<int>(@MtdVersion_WC_LAST_CHANGED_REV@);
+  }
+  catch(boost::bad_lexical_cast &)
+  {
+    patchVersion = 0;
+  }
+
+  std::stringstream doi;
+  doi << mainDOI() << "@VERSION_MAJOR@.@VERSION_MINOR@";
+
+  if( patchVersion != 0 )
+    doi << "." << patchVersion;
+
+  return doi.str();
 }
 
 } // namespace Kernel
