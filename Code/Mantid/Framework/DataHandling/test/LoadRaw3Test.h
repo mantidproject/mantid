@@ -399,7 +399,7 @@ public:
     TS_ASSERT_EQUALS( ptrDet->getID(), 60);
 
     Mantid::Geometry::ParameterMap& pmap = output2D->instrumentParameters();
-    TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 156);
+    TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 157);
     AnalysisDataService::Instance().remove("parameterIDF");
   }
 
