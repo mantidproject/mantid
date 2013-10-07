@@ -172,7 +172,7 @@ void Homer::setUpPage2()
      kept separate in "diag/"*/
 
   m_diagPage = new MWDiag(this, getInstrumentSettingsGroup() + "/diag", m_uiForm.cbInst);
-	
+  
   QLayout *diagLayout = m_uiForm.tabDiagnoseDetectors->layout();
   diagLayout->addWidget(m_diagPage);
 
@@ -545,10 +545,10 @@ void Homer::runClicked()
   try
   {
     if (runScripts())
-	  { 
+    { 
       m_saveChanged = false;
       saveSettings();
-	  }
+    }
   }
   catch (std::invalid_argument &e)
   {// can be caused by an invalid user entry that was detected
@@ -777,9 +777,9 @@ void Homer::setIDFValues(const QString &)
     "print mono.monovan_integr_range[0]\n"
     "print mono.monovan_integr_range[1]\n"
     "print mono.van_mass\n"
-    "print mono.background_range[0]\n"
-    "print mono.background_range[1]\n"
-    "print str(mono.background)\n";
+    "print mono.bkgd_range[0]\n"
+    "print mono.bkgd_range[1]\n"
+    "print str(mono.check_background)\n";
   
   QString pyOutput = runPythonCode(param_defs).trimmed();
   QStringList values = pyOutput.split("\n", QString::SkipEmptyParts);
@@ -787,7 +787,7 @@ void Homer::setIDFValues(const QString &)
   {
     QMessageBox::critical(this->parentWidget(), "Homer", 
       "Error setting default parameter values.\n"
-		  "Check instrument parameter file");
+      "Check instrument parameter file");
     return;
   }
 

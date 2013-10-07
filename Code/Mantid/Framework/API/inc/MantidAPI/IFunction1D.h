@@ -62,10 +62,16 @@ public:
   /* Overidden methods */
 
   virtual void function(const FunctionDomain& domain,FunctionValues& values)const;
+  virtual void derivative(const FunctionDomain& domain,FunctionValues& values, const size_t order=1)const;
+
   void functionDeriv(const FunctionDomain& domain, Jacobian& jacobian);
 
   /// Function you want to fit to.
   virtual void function1D(double* out, const double* xValues, const size_t nData)const = 0;
+
+  /// Function to calculate the derivatives of the data set
+  virtual void derivative1D(double* out, const double* xValues, const size_t nData, const size_t order)const;
+
   /// Derivatives of function with respect to active parameters
   virtual void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData);
 

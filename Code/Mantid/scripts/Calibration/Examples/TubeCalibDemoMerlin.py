@@ -3,10 +3,9 @@ Tube Calibration Demonstration program for MERLIN.
 
 .. attention::
 
-  MERLIN instruments are loaded with already calibrated values. In order to effectivelly test
-  the calibration methods, it is necessary to switch off the loading calibration values.   
-
-  To to this, comment the section **det-pos-source** from **MERLIN_Parameters.xml**. 
+  MERLIN instruments are loaded with already calibrated values. The calibration works nicelly with these files, 
+  but if you want to see the uncalibrated file you can do it.
+  Look at `How to reset detectors calibration <http://www.mantidproject.org/How_to_reset_detectors_calibration>`_.
 
 In this example, the calibration of the whole MERLIN instrument is shown. It demonstrate how to 
 use :py:func:`tube.calibrate` to calibrate MERLIN tubes.
@@ -204,7 +203,7 @@ def calibrateMerlin(filename):
 
   # calibrating others inside door3
   # 5_8, 5_7, 5_6, 5_5, 5_4, 5_3, 5_2, 5_1, 4_8, 4_7, 4_6, 4_5, 4_4, 4_3, 4_2, 4_1, 3_8, 3_7, 3_6, 3_5, 3_4
-  part_3 = ['MERLIN/door3/tube_3_%d'%(i) for i in [4,5,6]]
+  part_3 = ['MERLIN/door3/tube_3_%d'%(i) for i in [4,5,6,7,8]]
   part_4 = ['MERLIN/door3/tube_4_%d'%(i) for i in range(1,9)]
   part_5 = ['MERLIN/door3/tube_5_%d'%(i) for i in range(1,9)]
   CalibratedComponent = part_3 + part_4 + part_5

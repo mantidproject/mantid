@@ -29,10 +29,12 @@ using Mantid::Kernel::ConfigServiceImpl;
 #pragma warning( disable : 4250 )
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
+#include <Winhttp.h>
 #pragma warning( pop )
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
+#include <stdlib.h>
 #endif
 #include <Poco/StreamCopier.h>
 #include <Poco/Net/NetException.h>
@@ -268,7 +270,7 @@ namespace API
     }
       
     // install the two files inside the given folder
-    
+    g_log.debug() << "ScriptRepository attempt to doDownload file " << path << std::endl;
     // download the repository json
     doDownloadFile(std::string(remote_url).append("repository.json"),
                    rep_json_file);
@@ -743,6 +745,14 @@ namespace API
       Poco::URI uri(remote_upload); 
       std::string path(uri.getPathAndQuery());
       HTTPClientSession session(uri.getHost(), uri.getPort()); 
+
+      // configure proxy
+      std::string proxy_config; 
+      unsigned short proxy_port; 
+      if (getProxyConfig(proxy_config, proxy_port))
+        session.setProxy(proxy_config, proxy_port);
+      // proxy end
+
       HTTPRequest req(HTTPRequest::HTTP_POST, path, 
                       HTTPMessage::HTTP_1_0); 
       HTMLForm form(HTMLForm::ENCODING_MULTIPART); 
@@ -1024,6 +1034,12 @@ namespace API
                       HTTPMessage::HTTP_1_0); 
       g_log.debug() << "Receive request to delete file " << file_path << " using " << url << std::endl; 
 
+      // configure proxy
+      std::string proxy_config; 
+      unsigned short proxy_port; 
+      if (getProxyConfig(proxy_config, proxy_port))
+        session.setProxy(proxy_config, proxy_port);
+      // proxy end
 
       // fill up the form required from the server to delete one file, with the fields 
       // path, author, comment, email
@@ -1197,7 +1213,7 @@ namespace API
       the Mantid Web Service. This is the only method for the downloading and update
       that performs a real connection to the Mantid Web Service. 
       
-      This method was presente at the Script Repository Design, as an strategy to perform 
+      This method was present at the Script Repository Design, as an strategy to perform 
       unit tests, but also, helps the definition of a clear separation of the logic and 
       organization of the ScriptRepository, from the conneciton to the Mantid Web service, 
       making it more decoupled. 
@@ -1209,7 +1225,7 @@ namespace API
       
       url_file = "http://mantidweb/repository/README.md"
       
-      The result it to connect to the http server, and request the path given.
+      The result is to connect to the http server, and request the path given.
       
       The answer, will be inserted at the local_file_path. 
       
@@ -1222,15 +1238,28 @@ namespace API
   void ScriptRepositoryImpl::doDownloadFile(const std::string & url_file, 
                                             const std::string & local_file_path)
   {
+    g_log.debug() << "DoDownloadFile : " << url_file << " to file: " << local_file_path << std::endl; 
     // get the information from url_file
     Poco::URI uri(url_file);
     std::string path(uri.getPathAndQuery());
     if (path.empty()) path = "/";
-    std::string given_path = std::string(path.begin()+18, path.end());// remove the "/scriptrepository/" from the path
+    std::string given_path; 
+    if (path.find("/scriptrepository") != std::string::npos)
+      given_path = std::string(path.begin()+18, path.end());// remove the "/scriptrepository/" from the path
+    else
+      given_path = path; 
     //Configure Poco HTTP Client Session
     try{
       Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-      session.setTimeout(Poco::Timespan(2,0));// 2 secconds
+      session.setTimeout(Poco::Timespan(2,0));// 2 secconds	
+
+      // configure proxy
+      std::string proxy_config; 
+      unsigned short proxy_port; 
+      if (getProxyConfig(proxy_config, proxy_port))
+        session.setProxy(proxy_config, proxy_port);
+      // proxy end
+
       Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path,
                                      Poco::Net::HTTPMessage::HTTP_1_1);
       Poco::Net::HTTPResponse response;
@@ -1592,6 +1621,204 @@ namespace API
     return path; 
   }
 
+#if defined(_WIN32) || defined(_WIN64)
+bool get_proxy_configuration_win(const std::string & target_url, std::string &proxy_str, std::string & err_msg){
+HINTERNET  hSession = NULL;
+  std::wstring proxy;
+  std::wstring wtarget_url;
+  if (target_url.find("http://") == std::string::npos){
+    wtarget_url = L"http://";    
+  }
+  wtarget_url += std::wstring(target_url.begin(),target_url.end());  
+  bool fail = false; 
+  std::stringstream info;
+  WINHTTP_CURRENT_USER_IE_PROXY_CONFIG ie_proxy;
+  WINHTTP_AUTOPROXY_OPTIONS proxy_options;
+  WINHTTP_PROXY_INFO proxy_info;
+  ZeroMemory( &proxy_options, sizeof(proxy_options)); 
+  ZeroMemory( &ie_proxy, sizeof(ie_proxy)); 
+  ZeroMemory( &proxy_info, sizeof(proxy_info));
+
+  // the loop is just to allow us to go out of this session whenever we want
+  while(true){
+    // Use WinHttpOpen to obtain a session handle.
+    hSession = WinHttpOpen( L"ScriptRepository FindingProxy/1.0",  
+                          WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+                          WINHTTP_NO_PROXY_NAME, 
+                          WINHTTP_NO_PROXY_BYPASS, 0 );
+    if (!hSession)
+    {
+      fail = true;
+      info << "Failed to create the session (Error Code: " << GetLastError() << ").";
+      break;
+    }
+  // get the configuration of the web browser
+  if (!WinHttpGetIEProxyConfigForCurrentUser(&ie_proxy)){
+    fail = true;
+    info << "Could not find the proxy settings (Error code :" << GetLastError();    
+    break;
+  }
+
+  if (ie_proxy.lpszProxy){
+    // the proxy was already given, 
+    // it is not necessary to query the system for the auto proxy
+    proxy = ie_proxy.lpszProxy; 
+    break;
+  }
+  
+  if (ie_proxy.fAutoDetect){
+    // if auto detect, than setup the proxy to auto detect
+    proxy_options.dwFlags |= WINHTTP_AUTOPROXY_AUTO_DETECT; 
+    proxy_options.dwAutoDetectFlags = WINHTTP_AUTO_DETECT_TYPE_DNS_A;
+  }
+  
+  if (ie_proxy.lpszAutoConfigUrl){
+    // configure to auto proxy
+    proxy_options.dwFlags |= WINHTTP_AUTOPROXY_CONFIG_URL; 
+    proxy_options.lpszAutoConfigUrl = ie_proxy.lpszAutoConfigUrl;   
+  }
+  
+  
+  if (!WinHttpGetProxyForUrl(hSession, wtarget_url.c_str(), &proxy_options, &proxy_info)){
+    info << "Could not find the proxy for this url (Error code :" << GetLastError() <<").";
+    fail = true;
+     break;
+  }
+
+  //std::cout << "get proxy for url passed" << std::endl;
+  if (proxy_info.dwAccessType == WINHTTP_ACCESS_TYPE_NO_PROXY){
+    // no proxy (return an empty proxy)
+    break;
+  }
+
+  if (proxy_info.lpszProxy){
+    //proxy found. Get it.
+      proxy = proxy_info.lpszProxy;
+      break;
+    }
+  break; // loop finished
+  }
+
+  // free memory of all possibly allocated objects
+  // ie_proxy
+  if (ie_proxy.lpszAutoConfigUrl)
+    GlobalFree(ie_proxy.lpszAutoConfigUrl); 
+  if (ie_proxy.lpszProxy)
+    GlobalFree(ie_proxy.lpszProxy); 
+  if (ie_proxy.lpszProxyBypass)
+    GlobalFree(ie_proxy.lpszProxyBypass);
+  // proxy_info
+  if (proxy_info.lpszProxyBypass)
+      GlobalFree(proxy_info.lpszProxyBypass);
+  if (proxy_info.lpszProxy)
+    GlobalFree(proxy_info.lpszProxy); 
+
+  // hSession
+  if( hSession ) WinHttpCloseHandle( hSession );
+  
+  if (fail){
+    err_msg = info.str();    
+  }
+  proxy_str = std::string(proxy.begin(),proxy.end());  
+  return !fail;
+}
+#endif
+
+bool ScriptRepositoryImpl::getProxyConfig(std::string& proxy_server, unsigned short& proxy_port){
+  // these variables are made static, so, to not query the system for the proxy configuration 
+  // everytime this information is needed
+  static std::string PROXYSERVER=""; 
+  static unsigned short PROXYPORT=0;   
+  static bool firstTime = true;
+  
+  // the first time this function is called, PROXYXERVER will be empty.
+  if (firstTime){
+    // attempt to get the proxy configuration
+    // setup the proxy. The setup of the proxy will be dealt differently 
+    // from windows and linux and macs. 
+#if defined(_WIN32) || defined(_WIN64)
+    std::string errmsg, proxy_option;
+    g_log.notice() << "Attempt to get the proxy configuration for this connection" << std::endl; 
+    if(get_proxy_configuration_win(remote_url, proxy_option,errmsg))
+    {
+      if (!proxy_option.empty()){
+        size_t pos = proxy_option.rfind(':');
+        if (pos != std::string::npos){
+          if (pos == 4 || pos == 5) // means it found http(s):
+          {
+            PROXYSERVER = proxy_option;
+            PROXYPORT = 8080; // default port for proxy
+          }else{
+          PROXYSERVER = std::string(proxy_option.begin(),proxy_option.begin()+pos);
+          std::stringstream port_str;
+          port_str << std::string(proxy_option.begin()+pos+1,proxy_option.end());
+          port_str >> PROXYPORT;
+          }
+        }else{
+          PROXYSERVER = proxy_option;
+          PROXYPORT = 8080;
+        }
+        g_log.notice() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
+        } 
+    }
+    else{
+    g_log.warning() << "ScriptRepository failed to find the proxy information. It will attempt without proxy. " 
+              << errmsg << std::endl; 
+    }
+#else  // linux and mac
+    char * proxy_var = getenv("http_proxy"); 
+    if (proxy_var == 0)
+      proxy_var = getenv("HTTP_PROXY"); 
+    
+    if (proxy_var != 0){      
+      Poco::URI uri_p(proxy_var);
+      PROXYSERVER = uri_p.getHost(); 
+      PROXYPORT = uri_p.getPort();
+      try{
+        // test if the proxy is valid for connecting to remote repository
+        Poco::URI uri(remote_url); 
+        Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort()); 
+        // setup a request to read the remote url
+        Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, "/",
+                                       Poco::Net::HTTPMessage::HTTP_1_1);
+        // through the proxy
+        session.setProxy(PROXYSERVER, PROXYPORT);        
+        session.sendRequest(request);  // if it fails, it will throw exception here.
+        
+        // clear the answer.
+        Poco::Net::HTTPResponse response; 
+        std::istream & rs = session.receiveResponse(response); 
+        Poco::NullOutputStream null; 
+        Poco::StreamCopier::copyStream(rs, null);
+        // report that the proxy was configured
+        g_log.information() << "ScriptRepository proxy found. Host: " << PROXYSERVER << " Port: " << PROXYPORT << std::endl; 
+      }
+      catch(Poco::Net::HostNotFoundException & ex){
+        g_log.information() << "ScriptRepository found that proxy can not be used for this connection.\n"
+                            << ex.displayText() << std::endl; 
+        PROXYSERVER = "";        
+      }catch(...){
+        g_log.warning() << "Unexpected error while looking for the proxy for ScriptRepository." << std::endl; 
+        PROXYSERVER = ""; 
+      }
+    }
+#endif    
+  }
+  firstTime = false;
+  
+  bool ret_value; 
+  
+  // it means no proxy configured.
+  if (PROXYSERVER.empty())
+    ret_value =  false;
+  
+  else{
+    proxy_server = PROXYSERVER; 
+    proxy_port = PROXYPORT;
+    ret_value = true;
+  }
+  return ret_value;
+}
 
 }// END API
 }// END MANTID

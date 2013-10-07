@@ -1,15 +1,15 @@
 """
 This file is concerned with calibrating a specified set of tubes
 
-The main function is getCaibration(....) which is at the end of this file. 
+The main function is :func:`getCalibration` which is at the end of this file. 
 It populates an empty Calibration Table Workspace with the new positions of the pixel detectors after calibration.
 This Calibration Table Workspace can be used later to move the pixel detectors to the calibrated positions.
 
-Users should not need to directly call any other function other than getCaibration(....) from this file.
-
-Author: Karl palmen ISIS and for readPeakFile Gesner Passos ISIS
+Users should not need to directly call any other function other than :func:`getCalibration` from this file.
 
 """
+## Author: Karl palmen ISIS and for readPeakFile Gesner Passos ISIS
+
 
 import numpy
 from mantid.simpleapi import *
@@ -283,22 +283,22 @@ def correctTube( AP, BP, CP, nDets ):
     # print xBinNew	 
     return xBinNew
     
-def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False ): 
+def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False, polinFit=2 ): 
     """     
        Corrects position errors in a tube given an array of points and their ideal positions.
        
-       @param tubePoints: Array of Slit Points along tube to be fitted (in pixels) 
-       @param idealTubePoints: The corresponding points in an ideal tube (Y-coords advised)
-       @param nDets: Number of pixel detectors in tube
-       @parame Testmode: If true, detectors at the position of a slit will be moved out of the way
+       :param tubePoints: Array of Slit Points along tube to be fitted (in pixels) 
+       :param idealTubePoints: The corresponding points in an ideal tube (Y-coords advised)
+       :param nDets: Number of pixel detectors in tube
+       :param Testmode: If true, detectors at the position of a slit will be moved out of the way
                          to show the reckoned slit positions when the instrument is displayed.
+       :param polinFit: Order of the polinomial to fit for the ideal positions
 
        Return Value: Array of corrected Xs  (in same units as ideal tube points)
        
        Note that any element of tubePoints not between 0.0 and nDets is considered a rogue point and so is ignored. 
     """           
     
-    xResult = []
     #print "correctTubeToIdealTube"
 
     # Check the arguments
@@ -324,29 +324,24 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False )
     # Check number of usable points
     if( len(usedTubePoints) < 3):
         print "Too few usable points in tube",len(usedTubePoints)
-        return xResult
+        return []
                 
     # Fit quadratic to ideal tube points 
-    CreateWorkspace(dataX=usedTubePoints,dataY=usedIdealTubePoints, OutputWorkspace="QuadraticFittingWorkspace")
+    CreateWorkspace(dataX=usedTubePoints,dataY=usedIdealTubePoints, OutputWorkspace="PolyFittingWorkspace")
     try:
-       Fit(InputWorkspace="QuadraticFittingWorkspace",Function='name=Quadratic',StartX=str(0.0),EndX=str(nDets),Output="QF")
+       Fit(InputWorkspace="PolyFittingWorkspace",Function='name=Polynomial,n=%d'%(polinFit),StartX=str(0.0),EndX=str(nDets),Output="QF")
     except:
        print "Fit failed"
-       return xResult
+       return []
     
     paramQF = mtd['QF_Parameters']
-    rowP0 = paramQF.row(0).items()
-    rowP1 = paramQF.row(1).items()
-    rowP2 = paramQF.row(2).items()
-    rowErr = paramQF.row(3).items() # may use to check accuracy of fit
     
-    p0 = rowP0[1][1]
-    p1 = rowP1[1][1]
-    p2 = rowP2[1][1]
+    # get the coeficients, get the Value from every row, and exclude the last one because it is the error
+    # rowErr is the last one, it could be used to check accuracy of fit
+    c = [r['Value'] for r in paramQF][:-1]
     
     # Modify the output array by the fitted quadratic
-    for i in range(nDets):
-        xResult.append( p0 + p1*i + p2*i*i)
+    xResult = numpy.polynomial.polynomial.polyval(range(nDets),c)
         
     # In test mode, shove the pixels that are closest to the reckoned peaks 
     # to the position of the first detector so that the resulting gaps can be seen.
@@ -385,15 +380,17 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
         return  detIDs, detPositions 
 
     # Correct positions of detectors in tube by quadratic fit
-    pixels = correctTubeToIdealTube ( tubePts, idealTubePts, nDets, TestMode=peakTestMode )
+    pixels = correctTubeToIdealTube ( tubePts, idealTubePts, nDets, TestMode=peakTestMode, polinFit=polinFit )
     #print pixels
     if( len(pixels) != nDets):
        print "Tube correction failed."
        return detIDs, detPositions 
-    
+    baseInstrument = ws.getInstrument().getBaseInstrument()
     # Get tube unit vector 
-    det0 = ws.getDetector( whichTube[0])
-    detN = ws.getDetector (whichTube[-1])
+    # get the detector from the baseInstrument, in order to get the positions
+    # before any calibration being loaded.
+    det0 = baseInstrument.getDetector(ws.getDetector( whichTube[0]).getID())
+    detN = baseInstrument.getDetector(ws.getDetector (whichTube[-1]).getID())
     d0pos,dNpos = det0.getPos(),detN.getPos()
     ## identical to norm of vector: |dNpos - d0pos|
     tubeLength = det0.getDistance(detN)
@@ -465,27 +462,29 @@ def readPeakFile(file_name):
     
     
     
-""" THESE FUNCTIONS NEXT SHOULD BE THE ONLY FUNCTIONS THE USER CALLS FROM THIS FILE
-"""
+### THESE FUNCTIONS NEXT SHOULD BE THE ONLY FUNCTIONS THE USER CALLS FROM THIS FILE
+
 def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable, 
                     overridePeaks=dict(), excludeShortTubes=0.0, plotTube=[], 
                     rangeList = None, polinFit=2, peaksTestMode=False):
     """     
-       Get the results the calibration and put them in the calibration table provided.
+    Get the results the calibration and put them in the calibration table provided.
              
-       :param ws: Integrated Workspace with tubes to be calibrated 
-       :param tubeSet: Specification of Set of tubes to be calibrated
-       :param calibTable: Empty calibration table into which the calibration results are placed
-       :param fitPar: A TubeCalibFitParam object for fitting the peaks
-       :param iTube: The ideal tube
-       :param peaksTable: Peaks table into wich the peaks positions will be put
-       :param overridePeak: dictionary with tube indexes keys and an array of peaks in pixels to override those that would be fitted for one tube
-       :param exludeShortTubes: Exlude tubes shorter than specified length from calibration
-       :param plotTube: List of tube indexes that will be ploted
-       :param rangelist: list of the tube indexes that will be calibrated. Default None, means all the tubes in tubeSet
-       :param polinFit: Order of the polinomial to fit against the known positions. Acceptable: 2, 3
-       :param peakTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
-       
+    :param ws: Integrated Workspace with tubes to be calibrated 
+    :param tubeSet: Specification of Set of tubes to be calibrated ( :class:`~tube_spec.TubeSpec` object)
+    :param calibTable: Empty calibration table into which the calibration results are placed. It is composed by 'Detector ID' and a V3D column 'Detector Position'. It will be filled with the IDs and calibrated positions of the detectors. 
+    :param fitPar: A :class:`~tube_calib_fit_params.TubeCalibFitParams` object for fitting the peaks
+    :param iTube: The :class:`~ideal_tube.IdealTube` which contains the positions in metres of the shadows of the slits, bars or edges used for calibration.
+    :param peaksTable: Peaks table into wich the peaks positions will be put
+    :param overridePeak: dictionary with tube indexes keys and an array of peaks in pixels to override those that would be fitted for one tube
+    :param exludeShortTubes: Exlude tubes shorter than specified length from calibration
+    :param plotTube: List of tube indexes that will be ploted
+    :param rangelist: list of the tube indexes that will be calibrated. Default None, means all the tubes in tubeSet
+    :param polinFit: Order of the polinomial to fit against the known positions. Acceptable: 2, 3
+    :param peakTestMode: true if shoving detectors that are reckoned to be at peak away (for test purposes)
+
+    
+    This is the main method called from :func:`~tube.calibrate` to perform the calibration.
     """
     nTubes = tubeSet.getNumTubes()
     print "Number of tubes =",nTubes
@@ -541,7 +540,7 @@ def getCalibration( ws, tubeSet, calibTable, fitPar, iTube, peaksTable,
     # Delete temporary workspaces used in the calibration
     for ws_name in ('TubePlot','CalibPoint_NormalisedCovarianceMatrix', 
                     'CalibPoint_NormalisedCovarianceMatrix','CalibPoint_NormalisedCovarianceMatrix',
-                    'CalibPoint_Parameters', 'CalibPoint_Workspace', 'QuadraticFittingWorkspace', 
+                    'CalibPoint_Parameters', 'CalibPoint_Workspace', 'PolyFittingWorkspace', 
                     'QF_NormalisedCovarianceMatrix', 'QF_Parameters', 'QF_Workspace', 
                     'Z1_Workspace', 'Z1_Parameters', 'Z1_NormalisedCovarianceMatrix'):
         try:
@@ -596,7 +595,7 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
        return                
     
     # Delete temporary workspaces for getting new detector positions
-    DeleteWorkspace('QuadraticFittingWorkspace')
+    DeleteWorkspace('PolyFittingWorkspace')
     DeleteWorkspace('QF_NormalisedCovarianceMatrix')
     DeleteWorkspace('QF_Parameters')
     DeleteWorkspace('QF_Workspace')
@@ -606,13 +605,13 @@ def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
 ## implement this function
 def constructIdealTubeFromRealTube( ws, tube, fitPar, funcForm ):
    """     
-      Construct an ideal tube from an actual tube (assumed ideal) 
+   Construct an ideal tube from an actual tube (assumed ideal) 
 
-      :param ws: integrated workspace          
-      :param tube: specification of one tube (if several tubes, only first tube is used)
-      :param fitPar: initial fit parameters for peak of the tube
-      :param funcForm: listing the type of known positions 1=Gaussian; 2=edge
-      :rtype: IdealTube
+   :param ws: integrated workspace          
+   :param tube: specification of one tube (if several tubes, only first tube is used)
+   :param fitPar: initial fit parameters for peak of the tube
+   :param funcForm: listing the type of known positions 1=Gaussian; 2=edge
+   :rtype: IdealTube
       
    """   
    # Get workspace indices

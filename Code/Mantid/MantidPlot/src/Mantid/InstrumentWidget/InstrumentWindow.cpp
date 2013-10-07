@@ -368,7 +368,7 @@ void InstrumentWindow::setSurfaceType(int type)
         tab->initSurface();
     }
 
-    connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
+    //connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
     connect(surface,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),this,SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)));
     connect(surface,SIGNAL(updateInfoText()),this,SLOT(updateInfoText()),Qt::QueuedConnection);
     QApplication::restoreOverrideCursor();
@@ -459,20 +459,6 @@ void InstrumentWindow::changeColormap(const QString &filename)
   {
     setupColorMap();
     updateInstrumentView();
-  }
-}
-
-void InstrumentWindow::showPickOptions()
-{
-  if ( !m_selectedDetectors.empty() )
-  {
-    QMenu context(m_InstrumentDisplay);
-
-    context.addAction(mInfoAction);
-    context.addAction(mPlotAction);
-    context.addAction(mDetTableAction);
-
-    context.exec(QCursor::pos());
   }
 }
 
@@ -931,12 +917,6 @@ void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
 void InstrumentWindow::setBinRange(double xmin,double xmax)
 {
   m_xIntegration->setRange(xmin,xmax);
-}
-
-void InstrumentWindow::multipleDetectorsSelected(QList<int>& detlist)
-{
-  m_selectedDetectors = detlist;
-  showPickOptions();
 }
 
 /**

@@ -96,6 +96,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/FakeMDEventData.h
 	inc/MantidMDAlgorithms/FindPeaksMD.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
+        inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/InvalidParameter.h

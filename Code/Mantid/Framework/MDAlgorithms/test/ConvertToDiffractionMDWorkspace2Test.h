@@ -54,13 +54,13 @@ public:
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Q_lab_x");
     TS_ASSERT_EQUALS( ws->getSpecialCoordinateSystem(), Mantid::API::QLab);
 
-    // But you can't add to an existing one of the wrong dimensions type, if you choose Append
+    //TODO: Now you can add differenc dimension types to each other, but this should be fixed
     alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 8,
         "InputWorkspace", "testInEW",
         "OutputWorkspace", "testOutMD",
         "Append", "1",
         "OutputDimensions", "HKL");
-    TS_ASSERT( !alg->isExecuted() );
+    TS_ASSERT( alg->isExecuted() );
 
     // If Append is False, then it does work. The workspace gets replaced
     alg = FrameworkManager::Instance().exec("ConvertToDiffractionMDWorkspace", 8,

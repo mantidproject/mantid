@@ -71,6 +71,7 @@ public:
   void applyMaskWorkspace();
   /// Remove the attached mask workspace without applying the mask.
   void clearMaskWorkspace();
+
   /// Get the color map.
   const MantidColorMap & getColorMap() const;
   /// Load a new color map from a file
@@ -83,6 +84,7 @@ public:
   void setAutoscaling(bool);
   /// Get colormap scale autoscaling status.
   bool autoscaling()const{return m_autoscaling;}
+
   /// Set the integration range.
   void setIntegrationRange(const double& xmin,const double& xmax);
   /// Get the minimum data value on the color map scale.
@@ -103,6 +105,7 @@ public:
   double maxBinValue()const{return m_BinMaxValue;}
   /// Return true if the integration range covers the whole of the x-axis in the data workspace.
   bool wholeRange()const;
+
   /// Get the number of detectors in the instrument.
   size_t ndetectors()const{return m_detIDs.size();}
   /// Get shared pointer to a detector by a pick ID converted form a color in the pick image.
@@ -121,6 +124,11 @@ public:
   size_t getWorkspaceIndex(Mantid::detid_t id) const;
   /// Get the integrated counts of a detector by its detector ID.
   double getIntegratedCounts(Mantid::detid_t id)const;
+  /// Sum the counts in detectors
+  void sumDetectors(QList<int>& dets, std::vector<double>&x, std::vector<double>&y, std::vector<double>* err = NULL) const;
+  /// Calc indexes for min and max bin values
+  void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax) const;
+
   /// Update the detector colors to match the integrated counts within the current integration range.
   void update();
   /// Invalidate the OpenGL display lists to force full re-drawing of the instrument and creation of new lists.
@@ -139,6 +147,7 @@ public:
                   Mantid::Kernel::Quat& R,
                   bool out = false
                   );
+
 
   /* Masking */
 

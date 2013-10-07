@@ -437,6 +437,31 @@ namespace WorkspaceCreationHelper
     return ws;
   }
 
+  Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithNonUniformInstrument(int numBanks, bool clearEvents)
+  {
+    // Number of detectors in a bank as created by createTestInstrumentCylindrical
+    const int DETECTORS_PER_BANK(9);
+
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(numBanks, false, 0.0025, 0.005);
+    EventWorkspace_sptr ws = CreateEventWorkspace2(numBanks * DETECTORS_PER_BANK, 100);
+    ws->setInstrument(inst);
+
+    std::vector<detid_t> detectorIds = inst->getDetectorIDs();
+
+    // Should be equal if DETECTORS_PER_BANK is correct
+    assert(detectorIds.size() == ws->getNumberHistograms());
+
+    // Re-assign detector IDs
+    for(size_t wi = 0; wi < ws->getNumberHistograms(); wi++)
+    {
+      ws->getEventList(wi).clearDetectorIDs();
+      if(clearEvents)
+        ws->getEventList(wi).clear(true);
+      ws->getEventList(wi).setDetectorID(detectorIds[wi]);
+    }
+
+    return ws;
+  }
 
   //================================================================================================================
   WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value)
@@ -469,8 +494,8 @@ namespace WorkspaceCreationHelper
   }
 
   /** Create event workspace with:
-   * 50 pixels
-   * 100 histogrammed bins from 0.0 in steps of 1.0
+   * numPixels pixels
+   * numBins histogrammed bins from 0.0 in steps of 1.0
    * 200 events; two in each bin, at time 0.5, 1.5, etc.
    * PulseTime = 0 second x2, 1 second x2, 2 seconds x2, etc. after 2010-01-01
    */

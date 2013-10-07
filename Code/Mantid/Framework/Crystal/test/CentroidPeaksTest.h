@@ -8,6 +8,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/FacilityHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include <boost/random/linear_congruential.hpp>
@@ -40,6 +41,8 @@ public:
    */
   EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents)
   {
+    FacilityHelper::ScopedFacilities loadTESTFacility("IDFs_for_UNIT_TESTING/UnitTestFacilities.xml", "TEST");
+
     int numPixels = 10000;
     int numBins = 16;
     double binDelta = 10.0;
@@ -122,11 +125,6 @@ public:
     TS_ASSERT_EQUALS( dets.size(), 100*100);
 
     return retVal;
-  }
-
-  void setUp()
-  {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "TEST");
   }
     
   void test_Init()

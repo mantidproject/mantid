@@ -48,6 +48,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
   connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SIGNAL(shapeCreated()));
   connect(&m_maskShapes,SIGNAL(shapeSelected()),this,SIGNAL(shapeSelected()));
   connect(&m_maskShapes,SIGNAL(shapesDeselected()),this,SIGNAL(shapesDeselected()));
+  connect(&m_maskShapes,SIGNAL(shapesRemoved()),this,SIGNAL(shapesRemoved()));
   connect(&m_maskShapes,SIGNAL(shapeChanged()),this,SIGNAL(shapeChanged()));
   connect(&m_maskShapes,SIGNAL(cleared()),this,SIGNAL(shapesCleared()));
 
@@ -58,8 +59,6 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
   setInputController(AddPeakMode, pickController);
   connect(pickController,SIGNAL(pickPointAt(int,int)),this,SLOT(pickDetectorAt(int,int)));
   connect(pickController,SIGNAL(touchPointAt(int,int)),this,SLOT(touchDetectorAt(int,int)));
-  connect(pickController,SIGNAL(setSelection(QRect)),this,SLOT(setSelectionRect(QRect)));
-  connect(pickController,SIGNAL(finishSelection()),this,SLOT(selectMultipleDetectors()));
 
   // create and connect the mask drawing input controller
   InputControllerDrawShape* drawController = new InputControllerDrawShape(this);
@@ -68,12 +67,16 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
   connect(this,SIGNAL(signalToStartCreatingShape2D(QString,QColor,QColor)),drawController,SLOT(startCreatingShape2D(QString,QColor,QColor)));
   connect(drawController,SIGNAL(moveRightBottomTo(int,int)),&m_maskShapes,SLOT(moveRightBottomTo(int,int)));
   connect(drawController,SIGNAL(selectAt(int,int)),&m_maskShapes,SLOT(selectShapeOrControlPointAt(int,int)));
+  connect(drawController,SIGNAL(selectCtrlAt(int,int)),&m_maskShapes,SLOT(addToSelectionShapeAt(int,int)));
   connect(drawController,SIGNAL(moveBy(int,int)),&m_maskShapes,SLOT(moveShapeOrControlPointBy(int,int)));
   connect(drawController,SIGNAL(touchPointAt(int,int)),&m_maskShapes,SLOT(touchShapeOrControlPointAt(int,int)));
   connect(drawController,SIGNAL(disabled()),&m_maskShapes,SLOT(deselectAll()));
   connect(drawController,SIGNAL(removeSelectedShapes()),&m_maskShapes,SLOT(removeSelectedShapes()));
   connect(drawController,SIGNAL(deselectAll()),&m_maskShapes,SLOT(deselectAll()));
   connect(drawController,SIGNAL(restoreOverrideCursor()),&m_maskShapes,SLOT(restoreOverrideCursor()));
+  connect(drawController,SIGNAL(setSelection(QRect)),this,SLOT(setSelectionRect(QRect)));
+  connect(drawController,SIGNAL(finishSelection(QRect)),this,SLOT(selectMultipleMasks(QRect)));
+  connect(drawController,SIGNAL(finishSelection(QRect)),this,SIGNAL(shapeChangeFinished()));
 
   // create and connect the peak eraser controller
   InputControllerErase* eraseController = new InputControllerErase(this);
@@ -471,8 +474,7 @@ QString ProjectionSurface::getInfoText() const
     {
     case PickSingleMode:
     case PickTubeMode:
-        return "Move cursor over instrument to see detector information. "
-                "Left click and drag to select multiple detectors.";
+        return "Move cursor over instrument to see detector information. ";
     case AddPeakMode:
         return "Click on a detector then click on the mini-plot to add a peak.";
     case DrawMode:
@@ -699,7 +701,10 @@ void ProjectionSurface::setShowPeakLabelsFlag(bool on)
   */
 void ProjectionSurface::setSelectionRect(const QRect &rect)
 {
-    m_selectRect = rect;
+    if ( m_interactionMode != DrawMode || !m_maskShapes.hasSelection() )
+    {
+        m_selectRect = rect;
+    }
 }
 
 /**
@@ -711,13 +716,15 @@ void ProjectionSurface::emptySelectionRect()
 }
 
 /**
-  * Send multipleDetectorsSelected signal.
-  */
-void ProjectionSurface::selectMultipleDetectors()
+ * Select multiple mask shapes as a result of a rubber-band selection
+ * @param rect :: The rubber band rect.
+ */
+void ProjectionSurface::selectMultipleMasks(const QRect &rect)
 {
-    QList<int> detList;
-    getSelectedDetectors(detList);
-    emit multipleDetectorsSelected(detList);
+    if ( !m_maskShapes.hasSelection() )
+    {
+        m_maskShapes.selectIn( rect );
+    }
     emptySelectionRect();
 }
 

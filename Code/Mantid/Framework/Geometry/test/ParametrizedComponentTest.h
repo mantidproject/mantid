@@ -79,7 +79,7 @@ public:
     TS_ASSERT_EQUALS(pq.getRelativeRot(),Quat(1,1,1,1));
   }
 
-  void testGetParameter()
+  void testGetParameterAndItsType()
   {
     Component * paramComp = createSingleParameterizedComponent();
     TS_ASSERT_EQUALS(paramComp->getStringParameter(m_strName).size(), 1);
@@ -87,6 +87,16 @@ public:
     TS_ASSERT_EQUALS(paramComp->getNumberParameter(m_dblName)[0], m_dblValue);
     TS_ASSERT_EQUALS(paramComp->getPositionParameter(m_posName)[0], m_posValue);
     TS_ASSERT_EQUALS(paramComp->getRotationParameter(m_quatName)[0], m_quatValue);
+
+    std::string typeName;
+    TS_ASSERT_THROWS_NOTHING(typeName= paramComp->getParameterType(m_strName));
+    TS_ASSERT_EQUALS(ParameterMap::pString(),typeName);
+    TS_ASSERT_THROWS_NOTHING(typeName= paramComp->getParameterType(m_dblName));
+    TS_ASSERT_EQUALS(ParameterMap::pDouble(),typeName);
+    TS_ASSERT_THROWS_NOTHING(typeName= paramComp->getParameterType(m_posName));
+    TS_ASSERT_EQUALS(ParameterMap::pV3D(),typeName);
+    TS_ASSERT_THROWS_NOTHING(typeName= paramComp->getParameterType(m_quatName));
+    TS_ASSERT_EQUALS(ParameterMap::pQuat(),typeName);
 
     cleanUpComponent();
   }

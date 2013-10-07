@@ -182,7 +182,9 @@ namespace API
     // Delete all widgets in the layout
     QLayoutItem *child;
     while ((child = m_inputGrid->takeAt(0)) != 0) {
-      delete child->widget();
+      if(child->widget())
+        child->widget()->deleteLater();
+
       delete child;
     }
 
@@ -226,7 +228,7 @@ namespace API
           else
           {
             // Make a groupbox with a border and a light background
-            QGroupBox * grpBox = new QGroupBox(QString::fromStdString(group) );
+            QGroupBox* grpBox = new QGroupBox(QString::fromStdString(group) );
             grpBox->setAutoFillBackground(true);
             grpBox->setStyleSheet(
                 "QGroupBox { border: 1px solid gray;  border-radius: 4px; font-weight: bold; margin-top: 4px; margin-bottom: 4px; padding-top: 16px; }"
@@ -238,9 +240,12 @@ namespace API
             // Put the frame in the main grid
             m_inputGrid->addWidget(grpBox, row, 0, 1, 4);
 
+            m_groupWidgets[QString::fromStdString(group)] = grpBox;
+
             // Make a layout in the grp box
             m_currentGrid = new QGridLayout;
             grpBox->setLayout(m_currentGrid);
+
             row++;
           }
         }

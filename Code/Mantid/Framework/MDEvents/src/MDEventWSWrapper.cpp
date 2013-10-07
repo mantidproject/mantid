@@ -69,11 +69,24 @@ void MDEventWSWrapper::addMDDataND(float *sigErr,uint16_t *runIndex,uint32_t* de
 {
 
   MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(m_Workspace.get());
-  if(!pWs)throw(std::bad_cast());
-
-  for(size_t i=0;i<dataSize;i++)
+  if(pWs)
   {
-    pWs->addEvent(MDEvents::MDEvent<nd>(*(sigErr+2*i),*(sigErr+2*i+1),*(runIndex+i),*(detId+i),(Coord+i*nd)));
+    for(size_t i=0;i<dataSize;i++)
+    {
+      pWs->addEvent(MDEvents::MDEvent<nd>(*(sigErr+2*i),*(sigErr+2*i+1),*(runIndex+i),*(detId+i),(Coord+i*nd)));
+    }
+  }
+  else
+  {
+    MDEvents::MDEventWorkspace<MDEvents::MDLeanEvent<nd>,nd> *const pLWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDLeanEvent<nd>,nd> *>(m_Workspace.get());
+
+    if(!pLWs) throw std::runtime_error("Bad Cast: Target MD workspace to add events does not correspond to type of events you try to add to it");
+
+    for(size_t i=0;i<dataSize;i++)
+    {
+      pLWs->addEvent(MDEvents::MDLeanEvent<nd>(*(sigErr+2*i),*(sigErr+2*i+1),(Coord+i*nd)));
+    }
+
   }
 
 

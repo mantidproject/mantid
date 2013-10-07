@@ -1241,6 +1241,7 @@ namespace Mantid
 
       bool foundRect = false;
       bool foundNonRect = false;
+
       IComponent_const_sptr comp;
 
       while(!compQueue.empty() && !(foundRect && foundNonRect))
@@ -1248,9 +1249,12 @@ namespace Mantid
         comp = compQueue.front();
         compQueue.pop();
 
-        // Skip source and sample components
-        if(getSource()->getComponentID() == comp->getComponentID() 
-           || getSample()->getComponentID() == comp->getComponentID())
+        // Skip source, is has one
+        if(m_sourceCache && m_sourceCache->getComponentID() == comp->getComponentID())
+          continue;
+
+        // Skip sample, if has one
+        if(m_sampleCache && m_sampleCache->getComponentID() == comp->getComponentID())
           continue;
 
         // Skip monitors

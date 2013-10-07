@@ -44,7 +44,7 @@ namespace Crystal
   int PeaksInRegion::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string PeaksInRegion::category() const { return "crystal";}
+  const std::string PeaksInRegion::category() const { return "Crystal";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm

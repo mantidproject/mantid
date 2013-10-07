@@ -452,7 +452,7 @@ namespace Mantid
           cnvToDist->executeAsChildAlg();
           outputWS = cnvToDist->getProperty("Workspace");
 
-          IAlgorithm_sptr flatBg = this->createChildAlgorithm("FlatBackground");
+          IAlgorithm_sptr flatBg = this->createChildAlgorithm("CalculateFlatBackground");
           flatBg->setProperty("InputWorkspace", outputWS);
           flatBg->setProperty("OutputWorkspace", outputWS);
           flatBg->setProperty("StartX", tibTofStart);

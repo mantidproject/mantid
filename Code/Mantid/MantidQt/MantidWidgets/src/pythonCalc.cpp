@@ -40,15 +40,15 @@ QString pythonCalc::checkNoErrors(const QHash<const QWidget * const, QLabel *> &
   for ( ; errs != m_fails.end(); ++errs)
   {// there are two maps, one links errors to the invalid control and one links controls to validators, put them together to load the errors into the validators
     if ( validLbls.find(errs->first) == validLbls.end() )
-	  {// can't find a validator label for this control, throw here, it'll get caught below and a dialog box will be raised
-	    return QString::fromStdString(errs->second);
-	  }
-	  validLbls[errs->first]->setToolTip(QString::fromStdString(errs->second));
-	  validLbls[errs->first]->show();
+    {// can't find a validator label for this control, throw here, it'll get caught below and a dialog box will be raised
+      return QString::fromStdString(errs->second);
+    }
+    validLbls[errs->first]->setToolTip(QString::fromStdString(errs->second));
+    validLbls[errs->first]->show();
   }
   if ( m_fails.size() > 0 )
   {// some errors were displayed in the loop above
-	  return "One or more settings are invalid. The invalid settings are\nmarked with a *, hold your mouse over the * for more information";
+    return "One or more settings are invalid. The invalid settings are\nmarked with a *, hold your mouse over the * for more information";
   }
   return "";
 }
@@ -68,8 +68,8 @@ void pythonCalc::appendFile(const QString &pythonFile)
     QString line;
     while( !stream.atEnd() )
     {
-	    line = stream.readLine();
-  	  m_pyScript.append(line + "\n");
+      line = stream.readLine();
+      m_pyScript.append(line + "\n");
     }
     py_script.close();
   }
@@ -96,8 +96,8 @@ void pythonCalc::loadFile(const QString &pythonFile)
     QString line;
     while( !stream.atEnd() )
     {
-	    line = stream.readLine();
-  	  m_pyScript.append(line + "\n");
+      line = stream.readLine();
+      m_pyScript.append(line + "\n");
     }
     py_script.close();
   }
@@ -153,6 +153,8 @@ void pythonCalc::appendChk(const QLineEdit * const userVal, Property * const che
 */
 QString pythonCalc::run()
 {
+ //std::cerr<<"Script:\n";
+ //std::cerr<<m_pyScript.toStdString()<<std::endl;
  QString tests = runPythonCode(m_pyScript, false);
  //std::cerr << "results\n";
  //std::cerr << tests.toStdString() << "\n";

@@ -460,6 +460,13 @@ class BaseReductionScripter(object):
         else:
             raise RuntimeError, "Reduction could not be executed: Mantid could not be imported"
 
+    def apply_live(self):
+        """
+            Construct and execute a call to StartLiveData for the current instrument
+        """
+        script = self.to_live_script()
+        self.execute_script(script)
+
     def cluster_submit(self, output_dir, user, pwd, resource=None,
                        nodes=4, cores_per_node=4, job_name=None):
         """
