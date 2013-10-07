@@ -261,6 +261,8 @@ private:
     private slots:
     // call back method executed after finishing the thread
     void uploadFinished();
+
+    int setAutoUpdateRecursively(RepoItem * item, bool option);
   };
 
 }; // namespace API
