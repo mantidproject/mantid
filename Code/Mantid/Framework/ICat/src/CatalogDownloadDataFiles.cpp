@@ -94,6 +94,7 @@ namespace Mantid
         throwCatalogError();
       }
 
+      CatalogInfo catalog = ConfigService::Instance().getFacility().catalogInfo();
       //get file ids
       std::vector<int64_t> fileids = getProperty("FileIds");
       //get file names
@@ -114,6 +115,9 @@ namespace Mantid
 
         progress(prog,"getting location string...");
         catalog_sptr->getFileLocation(*citr1,filelocation);
+
+        // Transform the catalog path to the path of the user's operating system.
+        filelocation = catalog.transformArchivePath(filelocation);
 
         //if we are able to open the file from the location returned by getDatafile api
         //the user got the permission to acess archive
