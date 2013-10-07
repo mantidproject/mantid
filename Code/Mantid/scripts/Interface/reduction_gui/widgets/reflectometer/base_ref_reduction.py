@@ -60,6 +60,8 @@ class BaseRefWidget(BaseWidget):
         self._summary.data_to_tof.setValidator(QtGui.QIntValidator(self._summary.data_to_tof))
         self._summary.dq0.setValidator(QtGui.QDoubleValidator(self._summary.dq0))
         self._summary.dq_over_q.setValidator(QtGui.QDoubleValidator(self._summary.dq_over_q))
+#        self._summary.overlapValueMeanRadioButton(QtGui.setChecked(False)
+#        self._summary.overlapValueLowestErrorRadioButton.setChecked(True)
 
         self._summary.x_min_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_min_edit))
         self._summary.x_max_edit.setValidator(QtGui.QDoubleValidator(self._summary.x_max_edit))
@@ -175,8 +177,14 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.dq_over_q, QtCore.SIGNAL("textChanged(QString)"), call_back)
         call_back = partial(self._edit_event, ctrl=self._summary.fourth_column_switch)
         self.connect(self._summary.fourth_column_switch, QtCore.SIGNAL("clicked()"), call_back)
+        
+        #overlap values
+        call_back = partial(self._edit_event, ctrl=self._summary.overlapValueMeanRadioButton)
+        self.connect(self._summary.overlapValueMeanRadioButton, QtCore.SIGNAL("clicked()"), call_back)
+        call_back = partial(self._edit_event, ctrl=self._summary.overlapValueLowestErrorRadioButton)
+        self.connect(self._summary.overlapValueLowestErrorRadioButton, QtCore.SIGNAL("clicked()"), call_back)
  
-         #name of output file changed
+        #name of output file changed
         call_back = partial(self._edit_event, ctrl=self._summary.cfg_scaling_factor_file_name)
         self.connect(self._summary.cfg_scaling_factor_file_name_browse, QtCore.SIGNAL("clicked()"), call_back)
 
@@ -440,51 +448,61 @@ class BaseRefWidget(BaseWidget):
                     data_e[j] = data_e_i[j]
 
         return scaled_ws_list[0]+'_histo'
+        
+    def _produce_y_of_same_x_(self, isUsingLessErrorValue):
+        """
+        2 y values sharing the same x-axis will be average using
+        the weighted mean
+        """
+        
+        ws_list = AnalysisDataService.getObjectNames()
+        scaled_ws_list = []
 
-#        new_x_axis = []
-#        new_y_axis = []
-#        new_e_axis = []
-#        
-#        sz = len(x_axis)        
-#        i=0
-#        while (i < sz-1):
-#            
-#            _left_x = x_axis[i]
-#            _right_x = x_axis[i+1]
-#
-#            _left_y = y_axis[i]
-#            _left_e = e_axis[i]
-#
-#            if (_left_x == _right_x):
-#                
-#                _right_y = y_axis[i+1]
-#                _right_e = e_axis[i+1]
-#
-#                #calculate weighted mean 
-#                import wks_utility
-#                [_y_mean, _e_mean] = wks_utility.weightedMean([_left_y, _right_y], [_left_e, _right_e])
-#   
-#                new_x_axis.append(_left_x)
-#                new_y_axis.append(_y_mean)
-#                new_e_axis.append(_e_mean)
-#                
-#                i+=1
-#            
-#            else:
-#            
-#                new_x_axis.append(_left_x)
-#                new_y_axis.append(_left_y)
-#                new_e_axis.append(_left_e)
-#    
-#            i+=1
-#    
-#        self.x_axis = new_x_axis
-#        self.y_axis = new_y_axis
-#        self.e_axis = new_e_axis
+        # Get the list of scaled histos
+        for ws in ws_list:
+            if ws.endswith("_scaled"):
+                scaled_ws_list.append(ws)
+        
+        
+        # get binning parameters
+        _from_q = str(self._summary.q_min_edit.text())
+        _bin_size = str(self._summary.q_step_edit.text())
+        _bin_max = str(2)
+        binning_parameters = _from_q + ',-' + _bin_size + ',' + _bin_max
+        
+        # Convert each histo to histograms and rebin to final binning
+        for ws in scaled_ws_list:
+            new_name = "%s_histo" % ws
+            ConvertToHistogram(InputWorkspace=ws, OutputWorkspace=new_name)
+            Rebin(InputWorkspace=new_name, Params=binning_parameters,
+                  OutputWorkspace=new_name)
+
+        # Take the first rebinned histo as our output
+        data_y = mtd[scaled_ws_list[0]+'_histo'].dataY(0)
+        data_e = mtd[scaled_ws_list[0]+'_histo'].dataE(0)
+
+        # Add in the other histos, averaging the overlaps
+        for i in range(1, len(scaled_ws_list)):
+            data_y_i = mtd[scaled_ws_list[i]+'_histo'].dataY(0)
+            data_e_i = mtd[scaled_ws_list[i]+'_histo'].dataE(0)
+            for j in range(len(data_y_i)):
+                if data_y[j]>0 and data_y_i[j]>0:
+                    if isUsingLessErrorValue:
+                        if (data_e[j] > data_e_i[j]):
+                            data_y[j] = data_y_i[j]
+                            data_e[j] = data_e_i[j]
+                    else:
+                        [data_y[j], data_e[j]] = self.weightedMean([data_y[j], data_y_i[j]], [data_e[j], data_e_i[j]])
+                    
+                elif (data_y[j] == 0) and (data_y_i[j]>0):
+                    data_y[j] = data_y_i[j]
+                    data_e[j] = data_e_i[j]
+
+        return scaled_ws_list[0]+'_histo'
         
     def _create_ascii_clicked(self):
         """
-        Reached by the "Create ASCII" button
+        Reached by the 'Create ASCII' button
         """
         #make sure there is the right output workspace called '
 #        if not mtd.workspaceExists('ref_combined'):
@@ -526,9 +544,10 @@ class BaseRefWidget(BaseWidget):
 #              OutputWorkspace='ref_combined',
 #              Params=q_binning)
             
-        wks_file_name = self._average_y_of_same_x_()
-        
-#        
+        #using mean or value with less error
+        _overlap_less_error_flag = self._summary.overlapValueLowestErrorRadioButton.isChecked()
+        wks_file_name = self._produce_y_of_same_x_(_overlap_less_error_flag)
+
 #        mt = mtd['ref_combined']
 #        x_axis = mt.readX(0)[:]
 #        y_axis = mt.readY(0)[:]
@@ -542,14 +561,15 @@ class BaseRefWidget(BaseWidget):
         
         sz = len(x_axis)-1
         for i in range(sz):
-            _line = str(x_axis[i])
-            _line += ' ' + str(y_axis[i])
-            _line += ' ' + str(e_axis[i])
-            if _with_4th_flag:
-                _precision = str(dq0 + dq_over_q * x_axis[i])
-                _line += ' ' + _precision
-            
-            text.append(_line)
+            # do not display data where R=0
+            if (y_axis[i] > 1e-15):
+                _line = str(x_axis[i])
+                _line += ' ' + str(y_axis[i])
+                _line += ' ' + str(e_axis[i])
+                if _with_4th_flag:
+                    _precision = str(dq0 + dq_over_q * x_axis[i])
+                    _line += ' ' + _precision
+                text.append(_line)
     
         f=open(file_name,'w')
         for _line in text:
@@ -642,6 +662,8 @@ class BaseRefWidget(BaseWidget):
         util.set_edited(self._summary.q_step_edit, False)
         util.set_edited(self._summary.cfg_scaling_factor_file_name, False)
         util.set_edited(self._summary.incident_medium_combobox, False)
+        util.set_edited(self._summary.overlapValueLowestErrorRadioButton, False)
+        util.set_edited(self._summary.overlapValueMeanRadioButton, False)
         util.set_edited(self._summary.dq0, False)
         util.set_edited(self._summary.dq_over_q, False)
         util.set_edited(self._summary.fourth_column_switch, False)
@@ -1249,7 +1271,11 @@ class BaseRefWidget(BaseWidget):
                 state.incident_medium_list = [_incident_medium_string]
                 
                 state.incident_medium_index_selected = _incident_medium_index_selected
-                
+
+                # how to treat overlap values
+                state.overlap_lowest_error = self._summary.overlapValueLowestErrorRadioButton.isChecked()               
+                state.overlap_mean_value = self._summary.overlapValueMeanRadioButton.isChecked()
+
                 #4th column (precision)
                 state.fourth_column_dq0 = self._summary.dq0.text()
                 state.fourth_column_dq_over_q = self._summary.dq_over_q.text()
@@ -1275,7 +1301,11 @@ class BaseRefWidget(BaseWidget):
                 
             _incident_medium_string = (',').join(_incident_medium_list)
             state.incident_medium_list = [_incident_medium_string]
-                
+            
+            # how to treat overlap values
+            state.overlap_lowest_error = self._summary.overlapValueLowestErrorRadioButton.isChecked()               
+            state.overlap_mean_value = self._summary.overlapValueMeanRadioButton.isChecked()
+    
             state.incident_medium_index_selected = _incident_medium_index_selected
                 
             item_widget.setData(QtCore.Qt.UserRole, state)
@@ -1391,6 +1421,10 @@ class BaseRefWidget(BaseWidget):
         self._summary.log_scale_chk.setChecked(state.q_step<0)
         self._summary.q_step_edit.setText(str(math.fabs(state.q_step)))
 
+        # overlap ascii values
+        self._summary.overlapValueLowestErrorRadioButton.setChecked(state.overlap_lowest_error)
+        self._summary.overlapValueMeanRadioButton.setChecked(state.overlap_mean_value)
+
         # Output directory
         if hasattr(state, "output_dir"):
             if len(str(state.output_dir).strip())>0:
@@ -1403,7 +1437,7 @@ class BaseRefWidget(BaseWidget):
         self._use_sf_config_clicked(state.scaling_factor_file_flag)
             
         # geomery correction
-        self._summary.geometry_correction_switch.setChecked(state.geometry_correction_switch)    
+        self._summary.geometry_correction_switch.setChecked(state.geometry_correction_switch)
             
         self._reset_warnings()
         self._summary.data_run_number_edit.setText(str(','.join([str(i) for i in state.data_files])))
