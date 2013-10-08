@@ -646,8 +646,8 @@ AxesDialog::AxesDialog(ApplicationWindow* app, Graph* g, Qt::WFlags fl) :
   m_generalModified = false;
 
   initScalesPage();
-  initGridPage();
   initAxesPage();
+  initGridPage();
   initGeneralPage();
 
   QHBoxLayout * bottomButtons = new QHBoxLayout();
@@ -792,6 +792,9 @@ void AxesDialog::initScalesPage()
 
   m_lstScales = new QListWidget();
   m_scalePrefsArea = new QStackedLayout();
+  scalesLayout->addWidget(m_lstScales);
+  scalesLayout->addLayout(m_scalePrefsArea);
+
   QListWidgetItem* listBottom = new QListWidgetItem(image0, tr("Bottom"));
   QListWidgetItem* listLeft = new QListWidgetItem(image1, tr("Left"));
   QListWidgetItem* listTop = new QListWidgetItem(image2, tr("Top"));
@@ -837,8 +840,6 @@ void AxesDialog::initScalesPage()
   // resize the list to the maximum width
   m_lstScales->resize(m_lstScales->maximumWidth(), m_lstScales->height());
 
-  scalesLayout->addWidget(m_lstScales);
-  scalesLayout->addLayout(m_scalePrefsArea);
 
   m_generalDialog->addTab(m_scalesPage, tr("Scale"));
   connect(m_lstScales, SIGNAL(currentRowChanged(int)), m_scalePrefsArea, SLOT(setCurrentIndex(int)));
@@ -859,6 +860,9 @@ void AxesDialog::initAxesPage()
 
   m_lstAxes = new QListWidget();
   m_axesPrefsArea = new QStackedLayout();
+  axesLayout->addWidget(m_lstAxes);
+  axesLayout->addLayout(m_axesPrefsArea);
+
   QListWidgetItem* listBottom = new QListWidgetItem(image4, tr("Bottom"));
   QListWidgetItem* listLeft = new QListWidgetItem(image5, tr("Left"));
   QListWidgetItem* listTop = new QListWidgetItem(image6, tr("Top"));
@@ -904,8 +908,6 @@ void AxesDialog::initAxesPage()
   // resize the list to the maximum width
   m_lstAxes->resize(m_lstAxes->maximumWidth(),m_lstAxes->height());
 
-  axesLayout->addWidget(m_lstAxes);
-  axesLayout->addLayout(m_axesPrefsArea);
 
   m_generalDialog->addTab(m_axesPage, tr("Axis"));
   connect(m_lstAxes, SIGNAL(currentRowChanged(int)), m_axesPrefsArea, SLOT(setCurrentIndex(int)));
@@ -923,13 +925,18 @@ void AxesDialog::initGridPage()
   }
   m_gridPage = new QWidget();
 
-  QVBoxLayout* gridPageLayout = new QVBoxLayout(m_gridPage);
-  QGroupBox * rightBox = new QGroupBox(QString());
-
   QPixmap image2((const char**) image2_data);
   QPixmap image3((const char**) image3_data);
 
+  QVBoxLayout* gridPageLayout = new QVBoxLayout(m_gridPage);
+  QGroupBox * rightBox = new QGroupBox(QString());
+  m_gridPrefsArea = new QStackedLayout(rightBox);
+
   m_lstGrid = new QListWidget();
+  QHBoxLayout* topBox = new QHBoxLayout();
+  topBox->addWidget(m_lstGrid);
+  topBox->addWidget(rightBox);
+
   m_lstGrid->addItem(new QListWidgetItem(image3, tr("Horizontal")));
   m_lstGrid->addItem(new QListWidgetItem(image2, tr("Vertical")));
   m_lstGrid->setIconSize(image3.size());
@@ -949,7 +956,6 @@ void AxesDialog::initGridPage()
   // resize the list to the maximum width
   m_lstGrid->resize(m_lstGrid->maximumWidth(), m_lstGrid->height());
 
-  m_gridPrefsArea = new QStackedLayout(rightBox);
 
   GridDetails* prefsHor = new GridDetails(m_app, m_graph, 0);
   GridDetails* prefsVert = new GridDetails(m_app, m_graph, 1);
@@ -972,10 +978,6 @@ void AxesDialog::initGridPage()
   m_chkAntialiseGrid = new QCheckBox(tr("An&tialised"));
   bottombox->addWidget(m_chkAntialiseGrid, 0, 2, Qt::AlignLeft);
   m_chkAntialiseGrid->setChecked(grd->testRenderHint(QwtPlotItem::RenderAntialiased));
-
-  QHBoxLayout* topBox = new QHBoxLayout();
-  topBox->addWidget(m_lstGrid);
-  topBox->addWidget(rightBox);
 
   gridPageLayout->addLayout(topBox);
   gridPageLayout->addLayout(bottombox);
