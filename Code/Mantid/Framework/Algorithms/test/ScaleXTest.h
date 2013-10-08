@@ -12,89 +12,316 @@ class ScaleXTest : public CxxTest::TestSuite
 public:
   void testName()
   {
-    TS_ASSERT_EQUALS( scale.name(), "ScaleX" )
+    Mantid::Algorithms::ScaleX scale;
+    TS_ASSERT_EQUALS( scale.name(), "ScaleX" );
   }
 
   void testVersion()
   {
-    TS_ASSERT_EQUALS( scale.version(), 1 )
+    Mantid::Algorithms::ScaleX scale;
+    TS_ASSERT_EQUALS( scale.version(), 1 );
   }
 
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( scale.initialize() )
-    TS_ASSERT( scale.isInitialized() )
+    Mantid::Algorithms::ScaleX scale;
+    TS_ASSERT_THROWS_NOTHING( scale.initialize() );
+    TS_ASSERT( scale.isInitialized() );
   }
 
-  void testMultiply()
+  void testMultiplyOnWS2D()
   {
     using namespace Mantid::API;
     using namespace Mantid::Kernel;
 
-    if (!scale.isInitialized()) scale.initialize();
+    auto inputWS = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
+    double factor = 2.5;
+    auto result = runScaleX(inputWS, "Multiply", factor);
 
-    AnalysisDataService::Instance().add("tomultiply",WorkspaceCreationHelper::Create2DWorkspace123(10,10));
-    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("InputWorkspace","tomultiply") )
-    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("OutputWorkspace","multiplied") )
-    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("Factor","2.5") )
-
-    TS_ASSERT_THROWS_NOTHING( scale.execute() )
-    TS_ASSERT( scale.isExecuted() )
-
-    MatrixWorkspace_const_sptr in,result;
-    TS_ASSERT_THROWS_NOTHING( in = boost::dynamic_pointer_cast<MatrixWorkspace>
-                                (AnalysisDataService::Instance().retrieve("tomultiply")) )
-    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<MatrixWorkspace>
-                                (AnalysisDataService::Instance().retrieve("multiplied")) )
-
-    MatrixWorkspace::const_iterator inIt(*in);
+    MatrixWorkspace::const_iterator inIt(*inputWS);
     for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
     {
-      TS_ASSERT_EQUALS( it->X(), 2.5*inIt->X() )
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() )
-      TS_ASSERT_EQUALS( it->E(), inIt->E() )
+      TS_ASSERT_EQUALS( it->X(), 2.5*inIt->X() );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
     }
+  }
+
+  void testAddOnWS2D()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    auto inputWS = WorkspaceCreationHelper::Create2DWorkspace123(10,10);
+    double factor = 2.5;
+    auto result = runScaleX(inputWS, "Add", factor);
+
+    MatrixWorkspace::const_iterator inIt(*inputWS);
+    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
+    {
+      TS_ASSERT_EQUALS( it->X(), 2.5 + inIt->X() );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+    }
+  }
+
+  void testMulitplyOnEvents()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    Mantid::Algorithms::ScaleX scale;
+    scale.initialize();
+
+    auto inputWS = WorkspaceCreationHelper::CreateEventWorkspace2(10,10);
+    double factor(2.5);
+    auto result = runScaleX(inputWS, "Multiply", factor);
+
+    TS_ASSERT_EQUALS("EventWorkspace", result->id());
+
+    MatrixWorkspace::const_iterator inIt(*inputWS);
+    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
+    {
+      TS_ASSERT_EQUALS( it->X(), 2.5*inIt->X() );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+    }
+  }
+
+  void testAddOnEvents()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    Mantid::Algorithms::ScaleX scale;
+    scale.initialize();
+
+    auto inputWS = WorkspaceCreationHelper::CreateEventWorkspace2(10,10);
+    double factor(2.5);
+    auto result = runScaleX(inputWS, "Add", factor);
+
+    TS_ASSERT_EQUALS("EventWorkspace", result->id());
+
+    MatrixWorkspace::const_iterator inIt(*inputWS);
+    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
+    {
+      TS_ASSERT_EQUALS( it->X(), 2.5 + inIt->X() );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+    }
+  }
+
+
+  void test_X_Scaled_By_Factor_Attached_To_Leaf_Component_Or_Higher_Level_Component_On_WS2D()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10,10);
+    auto & pmap = inputWS->instrumentParameters();
+    const std::string parname("factor");
+
+    auto det1 = inputWS->getDetector(0);
+    const double det1Factor(5);
+    pmap.addDouble(det1->getComponentID(), parname, det1Factor);
+
+    auto det2 = inputWS->getDetector(1);
+    const double det2Factor(10);
+    pmap.addDouble(det2->getComponentID(), parname, det2Factor);
+
+    const double instFactor(100);
+    auto inst = inputWS->getInstrument();
+    pmap.addDouble(inst->getComponentID(), parname, instFactor);
+
+    auto result = runScaleX(inputWS, "Multiply", -1.0, parname);
+
+    const size_t xsize = result->blocksize();
+    for(size_t i = 0; i < result->getNumberHistograms(); ++i)
+    {
+      double factor(1.0);
+      if(i == 0) factor = det1Factor;
+      else if(i == 1) factor = det2Factor;
+      else factor = instFactor;
+
+      for(size_t j = 0; j < xsize; ++j)
+      {
+        TS_ASSERT_DELTA(result->readX(i)[j], factor*inputWS->readX(i)[j], 1e-12);
+        TS_ASSERT_EQUALS(result->readY(i)[j], inputWS->readY(i)[j]);
+        TS_ASSERT_EQUALS(result->readE(i)[j], inputWS->readE(i)[j]);
+      }
+    }
+
+  }
+
+  void test_X_Scaled_By_Factor_Attached_To_Leaf_Component_Or_Higher_Level_Component_On_Events()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+
+    auto inputWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2,3);
+    auto & pmap = inputWS->instrumentParameters();
+    const std::string parname("factor");
+
+    auto det1 = inputWS->getDetector(0);
+    const double det1Factor(5);
+    pmap.addDouble(det1->getComponentID(), parname, det1Factor);
+
+    auto det2 = inputWS->getDetector(1);
+    const double det2Factor(10);
+    pmap.addDouble(det2->getComponentID(), parname, det2Factor);
+
+    const double instFactor(100);
+    auto inst = inputWS->getInstrument();
+    pmap.addDouble(inst->getComponentID(), parname, instFactor);
+
+    auto result = runScaleX(inputWS, "Multiply", -1, parname);
+    auto resultEventWS = boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(result);
+    TS_ASSERT(resultEventWS);
+
+    for(size_t i = 0; i < resultEventWS->getNumberHistograms(); ++i)
+    {
+      double factor(1.0);
+      if(i == 0) factor = det1Factor;
+      else if(i == 1) factor = det2Factor;
+      else factor = instFactor;
+
+      auto inEvents = resultEventWS->getEventListPtr(i);
+      auto outEvents = resultEventWS->getEventListPtr(i);
+      TS_ASSERT_EQUALS(outEvents->getNumberEvents(), inEvents->getNumberEvents());
+
+      auto inTOFs = inEvents->getTofs();
+      auto outTOFs = outEvents->getTofs();
+      TS_ASSERT_EQUALS(inTOFs.size(),outTOFs.size());
+      for(size_t j = 0; i < inTOFs.size(); ++j)
+      {
+        TS_ASSERT_DELTA(outTOFs[j], factor*inTOFs[j], 1e-12);
+      }
+    }
+
+  }
+
+  void testMultiplyOperationWithCombineMulitpliesTheInstrumentAndFactorArguments()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10,10);
+    auto & pmap = inputWS->instrumentParameters();
+    const std::string parname("factor");
+    const double instFactor(10);
+    auto inst = inputWS->getInstrument();
+    pmap.addDouble(inst->getComponentID(), parname, instFactor);
+
+    double algFactor(2.0);
+    bool combine(true);
+    auto result = runScaleX(inputWS, "Multiply", algFactor, parname, combine);
+
+    MatrixWorkspace::const_iterator inIt(*inputWS);
+    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
+    {
+      TS_ASSERT_EQUALS( it->X(), 20.0*inIt->X() );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+    }
+
+  }
+
+  void testAddOperationWithCombineAddsTheInstrumentAndFactorArguments()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Kernel;
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10,10);
+    auto & pmap = inputWS->instrumentParameters();
+    const std::string parname("factor");
+    const double instFactor(10);
+    auto inst = inputWS->getInstrument();
+    pmap.addDouble(inst->getComponentID(), parname, instFactor);
+
+    double algFactor(2.0);
+    bool combine(true);
+    auto result = runScaleX(inputWS, "Add", algFactor, parname, combine);
+
+    MatrixWorkspace::const_iterator inIt(*inputWS);
+    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
+    {
+      TS_ASSERT_EQUALS( it->X(), 12.0 + inIt->X() );
+      TS_ASSERT_EQUALS( it->Y(), inIt->Y() );
+      TS_ASSERT_EQUALS( it->E(), inIt->E() );
+    }
+
+  }
+
+
+  //------------------------------- Failure cases --------------------------------------
+  void testInputByInstrumentParameterThrowsForMissingParameter()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+
+    Mantid::Algorithms::ScaleX scale;
+    scale.initialize();
+    scale.setRethrows(true);
+
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10,10);
+    AnalysisDataService::Instance().add("tomultiply",inputWS);
+
+    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("InputWorkspace","tomultiply") );
+    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("OutputWorkspace","multiplied") );
+    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("InstrumentParameter","factor") );
+
+    TS_ASSERT_THROWS(scale.execute(), std::runtime_error);
+    TS_ASSERT( !scale.isExecuted() );
 
     AnalysisDataService::Instance().remove("tomultiply");
-    AnalysisDataService::Instance().remove("multiplied");
   }
 
-  void testAdd()
+  void testCombineInputFailsIfInstrumentParameterNotSupplied()
   {
     using namespace Mantid::API;
-    using namespace Mantid::Kernel;
+    using namespace Mantid::Geometry;
 
-    if (!scale.isInitialized()) scale.initialize();
+    Mantid::Algorithms::ScaleX scale;
+    scale.initialize();
+    scale.setRethrows(true);
 
-    AnalysisDataService::Instance().add("toadd",WorkspaceCreationHelper::Create2DWorkspace123(10,10));
-    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("InputWorkspace","toadd") )
-    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("OutputWorkspace","added") )
-    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("Factor","2.5") )
-    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("Operation","Add") )
+    auto inputWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10,10);
+    AnalysisDataService::Instance().add("tomultiply",inputWS);
 
-    TS_ASSERT_THROWS_NOTHING( scale.execute() )
-    TS_ASSERT( scale.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("InputWorkspace","tomultiply") );
+    TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("OutputWorkspace","multiplied") );
+    TS_ASSERT_THROWS_NOTHING( scale.setProperty("Combine",true) );
 
-    MatrixWorkspace_const_sptr in,result;
-    TS_ASSERT_THROWS_NOTHING( in = boost::dynamic_pointer_cast<MatrixWorkspace>
-                                (AnalysisDataService::Instance().retrieve("toadd")) )
-    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<MatrixWorkspace>
-                                (AnalysisDataService::Instance().retrieve("added")) )
+    TS_ASSERT_THROWS(scale.execute(), std::invalid_argument);
+    TS_ASSERT( !scale.isExecuted() );
 
-    MatrixWorkspace::const_iterator inIt(*in);
-    for (MatrixWorkspace::const_iterator it(*result); it != it.end(); ++it,++inIt)
-    {
-      TS_ASSERT_EQUALS( it->X(), 2.5+inIt->X() )
-      TS_ASSERT_EQUALS( it->Y(), inIt->Y() )
-      TS_ASSERT_EQUALS( it->E(), inIt->E() )
-    }
+     AnalysisDataService::Instance().remove("tomultiply");
 
-    AnalysisDataService::Instance().remove("toadd");
-    AnalysisDataService::Instance().remove("added");
   }
 
-private:
-  Mantid::Algorithms::ScaleX scale;
+  private:
+
+    Mantid::API::MatrixWorkspace_sptr runScaleX(const Mantid::API::MatrixWorkspace_sptr & inputWS,
+                                                const std::string & op, const double factor = -1.0,
+                                                const std::string & instPar = "", const bool combine=false)
+    {
+      Mantid::Algorithms::ScaleX scale;
+      scale.initialize();
+      scale.setChild(true);
+
+      TS_ASSERT_THROWS_NOTHING( scale.setProperty("InputWorkspace",inputWS));
+      TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("OutputWorkspace","__unused") );
+      TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("Operation",op) );
+      if(factor > 0.0) TS_ASSERT_THROWS_NOTHING( scale.setProperty("Factor",factor) );
+      if(combine || !instPar.empty()) TS_ASSERT_THROWS_NOTHING( scale.setPropertyValue("InstrumentParameter", instPar) )
+      TS_ASSERT_THROWS_NOTHING( scale.setProperty("Combine", combine) );
+
+      TS_ASSERT_THROWS_NOTHING( scale.execute() );
+      TS_ASSERT( scale.isExecuted() );
+
+      return scale.getProperty("OutputWorkspace");
+    }
+
 };
 
 #endif /*SCALEXTEST_H_*/

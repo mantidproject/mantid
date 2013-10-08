@@ -4,9 +4,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/V3D.h"
 #include <climits>
+#include <list>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace Mantid
 {
@@ -28,9 +29,9 @@ namespace Algorithms
    
   T.G.Perring June 1990:
   
-  Algorithm is based on a combinateion of Taylor series and
-  assymptotic expansion of the double integral for the
-  efficiency, linearly interpolating betweent the two in 
+  Algorithm is based on a combination of Taylor series and
+  asymptotic expansion of the double integral for the
+  efficiency, linearly interpolating between the two in
   region of common accuracy. Checked against numerical
   integration to yield relative accuracy of 1 part in 10^12
   or better over the entire domain of the input arguments
@@ -49,8 +50,8 @@ namespace Algorithms
 
   These data are not quite consistent, but the errors are small :
     2200 m/s = 25.299 meV
-    5327 barns & 1.4323 cm-1 ==> 10atms ofideal gas at 272.9K
-   but at what temperature are the tubes "10 atms" ?
+    5327 barns & 1.4323 cm-1 ==> 10atms of ideal gas at 272.9K
+   but at what temperature are the tubes at "10 atms" ?
 
   Shall use  1.4323 cm-1 @ 3.49416 A-1 with sigma prop. 1/v
 
@@ -103,9 +104,9 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
-  void getDetectorGeometry(boost::shared_ptr<const Geometry::IDetector> det, double & detRadius, Kernel::V3D & detAxis);
+  void getDetectorGeometry(const Geometry::IDetector_const_sptr & det, double & detRadius, Kernel::V3D & detAxis);
   /// Computes the distance to the given shape from a starting point
-  double distToSurface(const Kernel::V3D start, const Geometry::Object *shape) const;
+  double distToSurface(const Kernel::V3D & start, const Geometry::Object *shape) const;
   /// Computes the detector efficiency for a given paramater
   double detectorEfficiency(const double alpha) const;
   /// Computes an approximate expansion of a Chebysev polynomial
@@ -132,24 +133,13 @@ private:
   /// Sample position
   Kernel::V3D m_samplePos;
   /// The spectra numbers that were skipped
-  std::vector<int64_t> m_spectraSkipped;
+  std::list<int64_t> m_spectraSkipped;
 
 
   // Implement abstract Algorithm methods
   void init();
   void exec();
 
-  ///// Links the energy to the wave number, I got this from Prof T.G.Perring 
-  //const double KSquaredToE;
-  ///// coefficients for Taylor series/assymptotic expansion used at large wavenumbers and large angle
-  //const double c_eff_f[];
-  ///// coefficients for Taylor series/assymptotic expansion used at low wavenumbers and low angle
-  //const double c_eff_g[];
-  ///// the number of coefficients in each of the c_eff_f and c_eff_g arrays
-  //const short NUMCOEFS;
-  ///// constants to use for the ISIS 3He detectors 2.0*sigref*wref/atmref
-  //const double g_helium_prefactor;
-  
 };
 
 } // namespace Algorithms
