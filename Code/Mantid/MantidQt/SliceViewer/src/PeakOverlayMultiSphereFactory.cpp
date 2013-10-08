@@ -19,12 +19,29 @@ namespace MantidQt
     {
       if (m_peaksWS->hasIntegratedPeaks())
       {
-        m_peakRadius =
-            m_peaksWS->run().getPropertyValueAsType<std::vector<double> >("PeakRadius");
-        m_backgroundInnerRadius =
-            m_peaksWS->run().getPropertyValueAsType<std::vector<double> >("BackgroundInnerRadius");
-        m_backgroundOuterRadius =
-            m_peaksWS->run().getPropertyValueAsType<std::vector<double> >("BackgroundOuterRadius");
+    	  try
+    	  {
+				m_peakRadius =
+					m_peaksWS->run().getPropertyValueAsType<std::vector<double> >("PeakRadius");
+				m_backgroundInnerRadius =
+					m_peaksWS->run().getPropertyValueAsType<std::vector<double> >("BackgroundInnerRadius");
+				m_backgroundOuterRadius =
+					m_peaksWS->run().getPropertyValueAsType<std::vector<double> >("BackgroundOuterRadius");
+    	  }
+    	  catch (...)
+    	  {
+				double m_peakRadius0 = m_peaksWS->run().getPropertyValueAsType<double>("PeakRadius");
+				double m_backgroundInnerRadius0 =
+					m_peaksWS->run().getPropertyValueAsType<double>("BackgroundInnerRadius");
+				double m_backgroundOuterRadius0 =
+					m_peaksWS->run().getPropertyValueAsType<double>("BackgroundOuterRadius");
+				for(size_t i = 0; i < m_peaksWS->rowCount(); ++i)
+				{
+					m_peakRadius.push_back(m_peakRadius0);
+					m_backgroundInnerRadius.push_back(m_backgroundInnerRadius0);
+					m_backgroundOuterRadius.push_back(m_backgroundOuterRadius0);
+				}
+    	  }
         m_FOM = 2; // Possible to display workspaces with this factory.
       }
     }
