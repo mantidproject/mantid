@@ -97,11 +97,21 @@ public:
 
 public:
   /// Constructor
-  ScriptEditor(QWidget* parent = 0, QsciLexer* lexer = NULL);
+  ScriptEditor(QWidget* parent = 0, QsciLexer* lexer = NULL,
+               const QString & settingsGroup = "");
   ///Destructor
   ~ScriptEditor();
 
-  // Set a new code lexer for this object
+  /// Set the name of the group to save the settings for
+  void setSettingsGroup(const QString & name);
+  /// Settings group
+  QString settingsGroup() const;
+  /// Read settings from persistent store
+  void readSettings();
+  /// Write settings from persistent store
+  void writeSettings();
+
+  /// Set a new code lexer for this object
   void setLexer(QsciLexer *);
   // Make the object resize to margin to fit the contents
   void setAutoMarginResize();
@@ -179,6 +189,10 @@ signals:
   void undoAvailable(bool);
   /// Inform observers that redo information is available
   void redoAvailable(bool);
+  /// Emitted when a zoom in is requested
+  void textZoomedIn();
+  /// Emitted when a zoom in is requested
+  void textZoomedOut();
 
 protected:
   /// Write to the given device
@@ -187,12 +201,6 @@ protected:
 private slots:
 
 private:
-  /// Settings group
-  QString settingsGroup() const;
-  /// Read settings from persistent store
-  void readSettings();
-  /// Write settings from persistent store
-  void writeSettings();
   /// Forward a KeyPress event to QsciScintilla base class. Necessary due to bug in QsciScintilla
   void forwardKeyPressToBase(QKeyEvent *event);
 
@@ -215,6 +223,8 @@ private:
   int m_zoomLevel;
   /// A pointer to the find replace dialog
   FindReplaceDialog *m_findDialog;
+  /// Name of group that the settings are stored under
+  QString m_settingsGroup;
 };
 
 

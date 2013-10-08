@@ -37,7 +37,7 @@
 MultiTabScriptInterpreter::MultiTabScriptInterpreter(ScriptingEnv *env, QWidget *parent)
   : QTabWidget(parent), Scripted(env), m_last_dir(""),
     m_cursor_pos(), m_reportProgress(false), m_recentScriptList(), m_nullScript(new NullScriptFileInterpreter),
-    m_current(m_nullScript)
+    m_current(m_nullScript), m_globalZoomLevel(0)
 {
   connect(this, SIGNAL(currentChanged(int)), this, SLOT(tabSelectionChanged(int)));
 }
@@ -85,7 +85,7 @@ bool MultiTabScriptInterpreter::isExecuting()
  */
 void MultiTabScriptInterpreter::newTab(int index, const QString & filename)
 {
-  ScriptFileInterpreter *scriptRunner = new ScriptFileInterpreter(this);
+  ScriptFileInterpreter *scriptRunner = new ScriptFileInterpreter(this,"ScriptWindow");
   scriptRunner->setup(*scriptingEnv(), filename);
   scriptRunner->toggleProgressReporting(m_reportProgress);
   connect(scriptRunner, SIGNAL(editorModificationChanged(bool)),
@@ -94,6 +94,12 @@ void MultiTabScriptInterpreter::newTab(int index, const QString & filename)
   setCurrentIndex(index);
   setTabTitle(scriptRunner, filename); // Make sure the tooltip is set
   scriptRunner->setFocus();
+  scriptRunner->editor()->zoomIn(globalZoomLevel());
+  connect(scriptRunner->editor(), SIGNAL(textZoomedIn()), this, SLOT(zoomInAllButCurrent()));
+  connect(scriptRunner->editor(), SIGNAL(textZoomedIn()), this, SLOT(trackZoomIn()));
+  connect(scriptRunner->editor(), SIGNAL(textZoomedOut()), this, SLOT(zoomOutAllButCurrent()));
+  connect(scriptRunner->editor(), SIGNAL(textZoomedOut()), this, SLOT(trackZoomOut()));
+
   emit newTabCreated(index);
   emit tabCountChanged(count());
 }
@@ -283,16 +289,60 @@ void MultiTabScriptInterpreter::evaluate()
   QMessageBox::information(this, "MantidPlot", "Evaluate is not implemented.");
 }
 
-/// Increase font size
+/// Tracks the global zoom level
+void MultiTabScriptInterpreter::trackZoomIn()
+{
+  ++m_globalZoomLevel;
+}
+
+/// Tracks the global zoom level
+void MultiTabScriptInterpreter::trackZoomOut()
+{
+  --m_globalZoomLevel;
+}
+
+/// Increase font size on all tabs
 void MultiTabScriptInterpreter::zoomIn()
 {
-  m_current->zoomInOnScript();
+  for(int index = 0; index < count(); ++index)
+  {
+    interpreterAt(index)->editor()->zoomIn();
+  }
 }
-/// Decrease font size
+
+/**
+ * @param skipIndex The tab that should be skipped
+ */
+void MultiTabScriptInterpreter::zoomInAllButCurrent()
+{
+  int skipIndex = this->currentIndex();
+  for(int i = 0; i < count(); ++i)
+  {
+    if(i != skipIndex) interpreterAt(i)->editor()->zoomIn();
+  }
+}
+
+/// Decrease font size on all tabs
 void MultiTabScriptInterpreter::zoomOut()
 {
-  m_current->zoomOutOnScript();
+  for(int i = 0; i < count(); ++i)
+  {
+    interpreterAt(i)->editor()->zoomOut();
+  }
 }
+
+/**
+ * @param skipIndex The tab that should be skipped
+ */
+void MultiTabScriptInterpreter::zoomOutAllButCurrent()
+{
+  int skipIndex = this->currentIndex();
+  for(int i = 0; i < count(); ++i)
+  {
+    if(i != skipIndex) interpreterAt(i)->editor()->zoomOut();
+  }
+}
+
 
 /**
  * Toggle the progress arrow on/off
@@ -522,6 +572,7 @@ void MultiTabScriptInterpreter::closeTabAtIndex(int index)
 {
   ScriptFileInterpreter *interpreter = interpreterAt(index);
   interpreter->prepareToClose();
+  emit tabClosing(index);
   removeTab(index);
   emit tabClosed(index);
   const int nTabs = count();

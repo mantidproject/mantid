@@ -138,22 +138,17 @@ QColor ScriptEditor::g_error_colour = QColor("red");
  * Constructor
  * @param parent :: The parent widget (can be NULL)
  * @param codelexer :: define the syntax highlighting and code completion.
+ * @param settingsGroup :: Used when saving settings to persistent store
  */
-ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer) :
+ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer, const QString & settingsGroup) :
   QsciScintilla(parent), m_filename(""), m_progressArrowKey(markerDefine(QsciScintilla::RightArrow)),
   m_currentExecLine(0), m_completer(NULL),m_previousKey(0),  m_zoomLevel(0),
-  m_findDialog(new FindReplaceDialog(this))
+  m_findDialog(new FindReplaceDialog(this)), m_settingsGroup(settingsGroup)
 {
   //Syntax highlighting and code completion
   setLexer(codelexer);
   readSettings();
 
-#ifdef __APPLE__
-  // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
-  if( m_zoomLevel == 0 ) m_zoomLevel = 4;
-#endif
-
-  zoomIn(m_zoomLevel);
   setMarginLineNumbers(1,true);
 
   //Editor properties
@@ -169,7 +164,6 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer) :
  */
 ScriptEditor::~ScriptEditor()
 {
-  writeSettings();
   if( m_completer )
   {
     delete m_completer;
@@ -179,6 +173,39 @@ ScriptEditor::~ScriptEditor()
     delete current;
   }
 }
+
+/**
+ * @param name The name of the group
+ */
+void ScriptEditor::setSettingsGroup(const QString & name)
+{
+  m_settingsGroup = name;
+}
+
+/// Settings group
+/**
+ * Returns a string containing the settings group to use
+ * @return A QString containing the group to use within the QSettings class
+ */
+QString ScriptEditor::settingsGroup() const
+{
+  return m_settingsGroup;
+}
+
+/**
+ * Read settings saved to persistent store
+ */
+void ScriptEditor::readSettings()
+{
+}
+
+/**
+ * Read settings saved to persistent store
+ */
+void ScriptEditor::writeSettings()
+{
+}
+
 
 /**
  * Set a new code lexer for this object. Note that this clears all auto complete information
@@ -345,10 +372,12 @@ void ScriptEditor::wheelEvent( QWheelEvent * e )
     if ( e->delta() > 0 )
     {
       zoomIn();
+      emit textZoomedIn(); // allows tracking
     }
     else
     {
       zoomOut();
+      emit textZoomedOut(); //allows tracking
     }
   }
   else
@@ -487,6 +516,7 @@ void ScriptEditor::zoomIn()
 {
   ++m_zoomLevel;
   QsciScintilla::zoomIn();
+
 }
 
 /**
@@ -495,6 +525,11 @@ void ScriptEditor::zoomIn()
  */
 void ScriptEditor::zoomIn(int level)
 {
+#ifdef __APPLE__
+  // Make all fonts 4 points bigger on the Mac because otherwise they're tiny!
+  if( level == 0 ) level = 4;
+#endif
+
   m_zoomLevel = level;
   QsciScintilla::zoomIn(level);
 }
@@ -529,38 +564,6 @@ void ScriptEditor::writeToDevice(QIODevice & device) const
 //------------------------------------------------
 // Private member functions
 //------------------------------------------------
-
-/// Settings group
-/**
- * Returns a string containing the settings group to use
- * @return A QString containing the group to use within the QSettings class
- */
-QString ScriptEditor::settingsGroup() const
-{
-  return "/ScriptWindow";
-}
-
-/**
- * Read settings saved to persistent store
- */
-void ScriptEditor::readSettings()
-{
-  QSettings settings;
-  settings.beginGroup(settingsGroup());
-  m_zoomLevel = settings.readNumEntry("ZoomLevel", 0);
-  settings.endGroup();
-}
-
-/**
- * Read settings saved to persistent store
- */
-void ScriptEditor::writeSettings()
-{
-  QSettings settings;
-  settings.beginGroup(settingsGroup());
-  settings.setValue("ZoomLevel", m_zoomLevel);
-  settings.endGroup();
-}
 
 /**
  * Forward the QKeyEvent to the QsciScintilla base class. 

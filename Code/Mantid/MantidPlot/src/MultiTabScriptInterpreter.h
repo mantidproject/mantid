@@ -72,6 +72,9 @@ public:
   /// Is a script running in the environment
   bool isExecuting();
 
+  /// Returns the global zoom level
+  int globalZoomLevel() const { return m_globalZoomLevel; }
+
  /// this method appends the file names of scripts
  ///in different tabs to a string and returns 
   QString saveToString();
@@ -85,6 +88,8 @@ public:
 signals:
   /// Signal that a tab has been created
   void newTabCreated(int);
+  /// Signal that a tab is about to close, parametrised by the index
+  void tabClosing(int);
   /// Signal that a tab has closed, parametrised by the index
   void tabClosed(int);
   /// Signal that the last tab has closed
@@ -140,10 +145,19 @@ public slots:
   /// Evaluate
   void evaluate();
 
+  /// Tracks the global zoom level
+  void trackZoomIn();
+  /// Tracks the global zoom level
+  void trackZoomOut();
+
   /// Increase font size
   void zoomIn();
+  /// Increase font size on all tabs except that given
+  void zoomInAllButCurrent();
   /// Decrease font size
   void zoomOut();
+  /// Decrease font size on all tabs except that given
+  void zoomOutAllButCurrent();
 
   /// Toggle the progress reporting arrow
   void toggleProgressReporting(bool on);
@@ -199,6 +213,8 @@ private:
   NullScriptFileInterpreter *m_nullScript;
   /// A pointer to the current interpreter
   ScriptFileInterpreter *m_current;
+  /// Store the current global zoom level
+  int m_globalZoomLevel;
 };
 
 #endif

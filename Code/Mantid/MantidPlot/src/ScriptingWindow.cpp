@@ -4,11 +4,16 @@
 #include "ScriptingWindow.h"
 #include "MultiTabScriptInterpreter.h"
 #include "ScriptingEnv.h"
+#include "ScriptFileInterpreter.h"
 #include "pixmaps.h"
 
 // Mantid
 #include "MantidKernel/ConfigService.h"
 #include "ApplicationWindow.h"
+
+// MantidQt
+#include "MantidQtMantidWidgets/ScriptEditor.h"
+
 //Qt
 #include <QTextEdit>
 #include <QMenuBar>
@@ -82,6 +87,7 @@ void ScriptingWindow::saveSettings()
   settings.setValue("/ProgressArrow", m_toggleProgress->isChecked());
   settings.setValue("/LastDirectoryVisited", m_manager->m_last_dir);
   settings.setValue("/RecentScripts",m_manager->recentScripts());
+  settings.setValue("/ZoomLevel",m_manager->globalZoomLevel());
   settings.endGroup();
 }
 
@@ -100,8 +106,9 @@ void ScriptingWindow::readSettings()
   }
   m_manager->m_last_dir = lastdir;
   m_toggleProgress->setChecked(settings.value("ProgressArrow", true).toBool());
-
   m_manager->setRecentScripts(settings.value("/RecentScripts").toStringList());
+  m_manager->m_globalZoomLevel = settings.value("ZoomLevel",0).toInt();
+
   settings.endGroup();
 
 }
@@ -532,10 +539,12 @@ void ScriptingWindow::initWindowMenuActions()
   m_zoomIn->setShortcut(Qt::SHIFT+Qt::CTRL+Qt::Key_Equal);
   m_zoomIn->setShortcut(Qt::CTRL+Qt::Key_Plus);
   connect(m_zoomIn, SIGNAL(triggered()), m_manager, SLOT(zoomIn()));
+  connect(m_zoomIn, SIGNAL(triggered()), m_manager, SLOT(trackZoomIn()));
 
   m_zoomOut = new QAction(("Decrease font size"), this);
   m_zoomOut->setShortcut(QKeySequence::ZoomOut);
   connect(m_zoomOut, SIGNAL(triggered()), m_manager, SLOT(zoomOut()));
+  connect(m_zoomOut, SIGNAL(triggered()), m_manager, SLOT(trackZoomOut()));
 
   // Toggle the progress arrow
   m_toggleProgress = new QAction(tr("&Progress Reporting"), this);
