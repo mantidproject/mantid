@@ -107,7 +107,8 @@ void CostFuncLeastSquares::addVal(API::FunctionDomain_sptr domain, API::Function
     //     << "; d(Rwp) = " << val * val << "\n";
   }
   
-  std::cout << "m_value (before) = " << m_value << "\n";
+  // std::cout << "m_value (before) = " << m_value << "\n";
+
   PARALLEL_ATOMIC
   m_value += m_factor * retVal;
 
