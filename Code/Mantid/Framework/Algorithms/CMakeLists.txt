@@ -102,8 +102,8 @@ set ( SRC_FILES
 	src/FindCenterOfMassPosition2.cpp
 	src/FindDeadDetectors.cpp
 	src/FindDetectorsOutsideLimits.cpp
-	src/FindPeaks.cpp
 	src/FindPeakBackground.cpp
+	src/FindPeaks.cpp
 	src/FlatBackground.cpp
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
@@ -161,6 +161,7 @@ set ( SRC_FILES
 	src/Q1DWeighted.cpp
 	src/Qhelper.cpp
 	src/Qxy.cpp
+	src/RadiusSum.cpp
 	src/RayTracerTester.cpp
 	src/ReadGroupsFromFile.cpp
 	src/RealFFT.cpp
@@ -326,8 +327,8 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindCenterOfMassPosition2.h
 	inc/MantidAlgorithms/FindDeadDetectors.h
 	inc/MantidAlgorithms/FindDetectorsOutsideLimits.h
-	inc/MantidAlgorithms/FindPeaks.h
 	inc/MantidAlgorithms/FindPeakBackground.h
+	inc/MantidAlgorithms/FindPeaks.h
 	inc/MantidAlgorithms/FlatBackground.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
 	inc/MantidAlgorithms/GSLFunctions.h
@@ -386,6 +387,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Q1DWeighted.h
 	inc/MantidAlgorithms/Qhelper.h
 	inc/MantidAlgorithms/Qxy.h
+	inc/MantidAlgorithms/RadiusSum.h
 	inc/MantidAlgorithms/RayTracerTester.h
 	inc/MantidAlgorithms/ReadGroupsFromFile.h
 	inc/MantidAlgorithms/RealFFT.h
@@ -554,8 +556,8 @@ set ( TEST_FILES
 	FindCenterOfMassPositionTest.h
 	FindDeadDetectorsTest.h
 	FindDetectorsOutsideLimitsTest.h
-	FindPeaksTest.h
 	FindPeakBackgroundTest.h
+	FindPeaksTest.h
 	FlatBackgroundTest.h
 	FlatPlateAbsorptionTest.h
 	GenerateEventsFilterTest.h
@@ -605,6 +607,7 @@ set ( TEST_FILES
 	Q1DTest.h
 	Q1DWeightedTest.h
 	QxyTest.h
+	RadiusSumTest.h
 	RayTracerTesterTest.h
 	ReadGroupsFromFileTest.h
 	RealFFTTest.h
