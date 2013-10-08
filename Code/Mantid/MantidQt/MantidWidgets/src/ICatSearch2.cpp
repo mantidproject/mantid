@@ -65,6 +65,10 @@ namespace MantidQt
       connect(m_icatUiForm.dataFileCbox,SIGNAL(clicked()),this,SLOT(showDataFileInfo()));
       // When the user has selected a filter type then perform the filter for the specified type.
       connect(m_icatUiForm.dataFileFilterCombo,SIGNAL(currentIndexChanged(int)),this,SLOT(doFilter(int)));
+      // When the user clicks "download to..." then open a dialog and download the file(s) to that location.
+      connect(m_icatUiForm.dataFileFootDownloadBtn,SIGNAL(clicked()),this,SLOT(downloadDataFiles()));
+      // When the user clicks the "load" button then load their selected datafiles into a workspace.
+      connect(m_icatUiForm.dataFileLoadBtn,SIGNAL(clicked()),this,SLOT(loadDataFiles()));
 
       // No need for error handling as that's dealt with in the algorithm being used.
       populateInstrumentBox();
@@ -675,7 +679,7 @@ namespace MantidQt
         return;
       }
 
-      // If there are no results then cdon't try to setup table.
+      // If there are no results then don't try to setup table.
       if (workspace->rowCount() == 0)
       {
         clearDataFileFrame();
@@ -728,12 +732,31 @@ namespace MantidQt
       }
     }
 
+    /**
      * Obtains the names of the selected dataFiles, in preparation for download.
+     *
+     * @return A vector containing the fileID and fileName of the datafile(s) to download.
      */
-    void ICatSearch2::getCheckedFileNames()
+    std::vector<std::pair<int64_t, std::string>> ICatSearch2::selectedDataFileNames()
     {
+      QTableWidget* table =  m_icatUiForm.dataFileResultsTbl;
 
+      // Holds the FileID, and fileName in order to perform search to download later.
+      std::vector<std::pair<int64_t, std::string>> fileInfo;
+
+      for (int row = 0; row < table->rowCount(); row++)
+      {
+        if (table->item(row, 0)->checkState())
+        {
+          fileInfo.push_back(std::make_pair(
+              table->item(row, headerIndexByName(table, "Id"))->text().toLongLong(),
+              table->item(row, headerIndexByName(table, "Name"))->text().toStdString())
+          );
+        }
+      }
+      return (fileInfo);
     }
+
 
     /**
      * Updates the dataFile text boxes with relevant info regarding the selected dataFile.

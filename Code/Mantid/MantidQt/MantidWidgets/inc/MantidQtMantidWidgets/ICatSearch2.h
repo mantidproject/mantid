@@ -102,6 +102,8 @@ namespace MantidQt
       void populateDataFileTable();
       /// Add a row of checkboxes to the first column of a table.
       void addCheckBoxes(QTableWidget* table);
+      /// Obtain the file details (file ID and name) for the file to download. (Used in downloadDataFiles).
+      std::vector<std::pair<int64_t, std::string>> selectedDataFileNames();
       /// Updates the dataFile text boxes with relevant info about the selected dataFile.
       void updateDataFileLabels(QTableWidgetItem* item);
       /// Obtain all file extensions from the provided column (dataFileResults -> File name).
