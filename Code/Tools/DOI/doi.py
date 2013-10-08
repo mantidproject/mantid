@@ -17,9 +17,8 @@ server at https://test.datacite.org/mds/doi/10.5286/Software/.
 Using the "--debug" flag should print out some (hopefully) useful extra info
 about what is going on under the hood.
 
-Using the "--delete" flag will "make inactive" the DOI metadata with the given
-details.  Note that this does NOT delete the DOI itself, just the metadata that
-accompanies the DOI.
+Using the "--delete" flag will the DOI metadata with the given details
+"inactive", as well as pointing the DOI to a "DOI invalid" page.
 
 NOTES:
 
@@ -75,6 +74,9 @@ import authors
 # - 'OK'
 # - 'OK ([DOI])'
 SUCCESS_RESPONSE = '^OK( \((.+)\))?$'
+
+# Point all "deleted" DOIs to here:
+INVALID_URL = 'http://www.datacite.org/invalidDOI'
 
 def build_xml_form(doi, relationships, creator_name_list, version_str):
     '''Builds the xml form containing the metadata for the DOI.  Where helpful,
@@ -223,16 +225,30 @@ def _http_request(body, method, url, options):
 
 def delete_doi(base, doi, options):
     '''Will attempt to delete the given DOI.  Note that this does not actually
-    remove the DOI from the DataCite servers, it simply makes it "inactive".
+    remove the DOI from the DataCite servers; it makes its metadata "inactive"
+    and points the DOI to a "DOI invalid" page.
     '''
-    print "\n\nAttempting to delete the following DOI:"
-    print 'DOI = ' + doi
-    _http_request(
+    print "\nAttempting to delete the meta data for:" + doi
+    result = _http_request(
         body    = '',
         method  = 'DELETE',
+        url     = base + "metadata/" + doi,
+        options = options
+    )
+
+    if not re.match(SUCCESS_RESPONSE, result[0]):
+        raise Exception('Deleting metadata unsuccessful.  Quitting.')
+
+    print "\nAttempting to point " + doi + " to invalid page."
+    result = _http_request(
+        body    = 'doi=' + doi + '\n' + 'url=' + INVALID_URL,
+        method  = "PUT",
         url     = base + "doi/" + doi,
         options = options
     )
+
+    if not re.match(SUCCESS_RESPONSE, result[0]):
+        raise Exception('Pointing DOI to invalid page was unsuccessful.')
 
 def create_or_update_metadata(xml_form, base, doi, options):
     '''Attempts to create some new metadata for the doi of the given address.
@@ -255,7 +271,7 @@ def create_or_update_doi(base, doi, destination, options):
     created before this can be successful.  If the doi already exists, then it
     will simply be updated.
     '''
-    print "\n\nAttempting to create / update the following DOI:"
+    print "\nAttempting to create / update the following DOI:"
     print 'DOI = ' + doi
     print 'URL = ' + destination
     result = _http_request(
@@ -283,7 +299,7 @@ def check_if_doi_exists(base, doi, destination, options):
         options = options
     )
 
-    if result[0] == 'DOI not found':
+    if result[0] == 'DOI not found' or result[0] == INVALID_URL:
         print "\"" + doi + "\" does not exist"
         return False
     elif result[0] == destination:
@@ -436,7 +452,7 @@ def run(options):
         message = "\nSUCCESS!" + \
                   "\nThe DOI can be %s at \"%s\"." % (method, doi_add) + \
                   "\nThe new metadata can be inspected at \"%s\"." % (meta_add) + \
-                  "\nThe previous metadata can be inspected at" + \
+                  "\nThe previous version's metadata can be inspected at" + \
                   "\"%s\"." % (prev_meta_add)
     else:
         message = "\nSUCCESS!" + \
