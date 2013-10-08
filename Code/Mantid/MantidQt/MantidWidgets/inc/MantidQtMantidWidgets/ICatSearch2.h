@@ -11,6 +11,32 @@ namespace MantidQt
 {
   namespace MantidWidgets
   {
+    /**
+      This class defines the interface and functionality for the cataloging system within Mantid.
+
+      @author Jay Rainey
+      @date 08/10/2013
+
+      Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+      This file is part of Mantid.
+
+      Mantid is free software; you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation; either version 3 of the License, or
+      (at your option) any later version.
+
+      Mantid is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+      GNU General Public License for more details.
+
+      You should have received a copy of the GNU General Public License
+      along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+      File change history is stored at: <https://github.com/mantidproject/mantid>
+      Code Documentation is available at: <http://doxygen.mantidproject.org>
+    */
 
     class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ICatSearch2 : public QWidget
     {
@@ -41,6 +67,8 @@ namespace MantidQt
       void clearDataFileFrame();
       /// Show the search results frame.
       void showSearchResultsFrame();
+      /// Obtain the index of the column in a table that contains a specified name.
+      int headerIndexByName(QTableWidget* table, const std::string &searchFor);
 
       ///////////////////////////////////////////////////////////////////////////////
       /// Methods for: "Catalog Search"
@@ -72,8 +100,8 @@ namespace MantidQt
 
       /// Populates the table from the results of investigationSelected();
       void populateDataFileTable();
-      /// Obtain the names of the selected files. (Used in downloadDataFiles).
-      void getCheckedFileNames();
+      /// Add a row of checkboxes to the first column of a table.
+      void addCheckBoxes(QTableWidget* table);
       /// Updates the dataFile text boxes with relevant info about the selected dataFile.
       void updateDataFileLabels(QTableWidgetItem* item);
       /// Obtain all file extensions from the provided column (dataFileResults -> File name).

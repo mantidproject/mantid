@@ -504,6 +504,29 @@ namespace MantidQt
       m_icatUiForm.myDataCbox->setChecked(false);
     }
 
+    /**
+     * Obtain the index of the column in a table that contains a specified name.
+     * @param table     :: The table to search the headers on.
+     * @param searchFor :: The header name to search against.
+     * @return The index of the column with the specified name.
+     */
+    int ICatSearch2::headerIndexByName(QTableWidget* table, const std::string &searchFor)
+    {
+      QAbstractItemModel *model = table->model();
+
+      // For every column in the table
+      for (int col = 0; col < table->columnCount(); col++)
+      {
+        // Is the column name the same as the searchFor string?
+        if (searchFor.compare(model->headerData(col, Qt::Horizontal, Qt::DisplayRole).toString()) == 0)
+        {
+          // Yes? Return the index of the column.
+          return (col);
+        }
+      }
+      // This indicates that the column was not found.
+      return (-1);
+    }
 
     ///////////////////////////////////////////////////////////////////////////////
     // Methods for "Search results"
@@ -672,15 +695,39 @@ namespace MantidQt
       // Add data from the workspace to the results table.
       populateTable(dataFileTable, workspace);
 
+      // Add a column full of checkboxes to the results table.
+      addCheckBoxes(dataFileTable);
+
       // Obtain the list of extensions of all dataFiles for the chosen investigation.
       // "File name" is the first column of "dataFileResults" so we make use of it.
-      std::set<std::string> extensions = getDataFileExtensions(workspace.get()->getColumn(0));
+      std::set<std::string> extensions = getDataFileExtensions(workspace.get()->getColumn(headerIndexByName(dataFileTable, "Name")));
 
       // Populate the "Filter type..." combo-box with all possible file extensions.
       populateDataFileType(extensions);
     }
 
     /**
+     * Add a row of checkboxes to the first column of a table.
+     * @param table :: The table to add the checkboxes to.
+     */
+    void ICatSearch2::addCheckBoxes(QTableWidget* table)
+    {
+      // Add the "checkbox" column to the start
+      table->insertColumn(0);
+
+      // Add a checkbox to all rows in the first column.
+      for (int row = 0; row < table->rowCount(); row++)
+      {
+        QTableWidgetItem *newItem  = new QTableWidgetItem();
+        // Allow the widget to take on checkbox functionality.
+        newItem->setCheckState(Qt::Unchecked);
+        // Allow the user to select and check the box.
+        newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsUserCheckable | Qt::ItemIsEnabled);
+        // Add a result to the table.
+        table->setItem(row,0,newItem);
+      }
+    }
+
      * Obtains the names of the selected dataFiles, in preparation for download.
      */
     void ICatSearch2::getCheckedFileNames()
@@ -745,17 +792,14 @@ namespace MantidQt
       {
         // Hide row by default, in order to show only relevant ones.
         table->setRowHidden(row,true);
-        // We only need to check the first column to compare file extensions as it's the file name.
-        for (int col = 0; col < 1; ++col)
+
+        QTableWidgetItem *item = table->item(row,headerIndexByName(table, "Name"));
+
+        // Show the relevant rows depending on file extension. 0 index is "Filter type..." so all will be shown.
+        // Have to convert to lowercase as ".TXT", and ".txt" should be filtered as the same.
+        if (index == 0 || (item->text().toLower().contains(m_icatUiForm.dataFileFilterCombo->text(index).toLower())))
         {
-          QTableWidgetItem *item = table->item(row,col);
-          // Show the relevant rows depending on file extension. 0 index is "Filter type..." so all will be shown.
-          // Have to convert to lowercase as ".TXT", and ".txt" should be filtered as the same.
-          if (index == 0 || (item->text().toLower().contains(m_icatUiForm.dataFileFilterCombo->text(index).toLower())))
-          {
-            table->setRowHidden(row,false);
-            break;
-          }
+          table->setRowHidden(row,false);
         }
       }
     }
