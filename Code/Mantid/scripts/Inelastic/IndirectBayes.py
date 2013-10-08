@@ -55,13 +55,13 @@ def ReadNormFile(resnorm,nsam,resnormWS,Verbose):            # get norm & scale 
 	if resnorm == 1:                     # use ResNorm file
 		if Verbose:
 			logger.notice('ResNorm file is ' + resnormWS)
-		dtnorm = mtd[resnormWS+'_Intensity'].readX(0)
+		dtnorm = mtd[resnormWS+'_Intensity'].readY(0)
 		nrm = len(dtnorm)						# no. points from length of x array
 		if nrm == 0:				
 			error = 'ResNorm file has no Intensity points'			
 			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
-		xscale = mtd[resnormWS+'_Stretch'].readX(0)					# no. points from length of x array
+		xscale = mtd[resnormWS+'_Stretch'].readY(0)					# no. points from length of x array
 		if len(xscale) == 0:				
 			error = 'ResNorm file has no Stretch points'			
 			logger.notice('ERROR *** ' + error)
