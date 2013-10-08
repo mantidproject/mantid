@@ -120,9 +120,8 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
         self.mainExec()
 
         # 3. Export
-        self.log().information("Bragg peak workspace: name = %s; number of columns = %d."% (str(self.inputbraggws), self.inputbraggws.columnCount()))
-        self.setProperty("BraggPeakWorkspace", self.inputbraggws)
-        self.setProperty("ProfileWorkspace", self.inputparamws)
+        self.setProperty("BraggPeakWorkspace", str(self.inputbraggws))
+        self.setProperty("ProfileWorkspace", str(self.inputparamws))
         self.setProperty("OutputWorkspace", self.outwsname)
 
         return
@@ -181,7 +180,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
                     EndX            =   self.endx)
     
         # [Le Bail calculation]
-        self.log().information("Fit range: %f , %f, Outputworkspace = %s" % (self.startx, self.endx, self.outwsname))
+        self.log().debug("Fit range: %f , %f, Outputworkspace = %s" % (self.startx, self.endx, self.outwsname))
         api.LeBailFit(
                 Function                =   'Calculation',
                 InputWorkspace          =   self.dataws, 
@@ -193,7 +192,7 @@ class ExaminePowderDiffProfile(PythonAlgorithm):
     	        FitRegion               =   '%f, %f' % (self.startx, self.endx),
                 BackgroundType          =  self.backgroundtype,
                 UseInputPeakHeights     =   False, 
-                PeakRadius              =   '8',
+                PeakRadius              =   '7',
                 BackgroundParametersWorkspace   =   self.bkgdtablews,
                 PeakType                = self.profiletype,
                 )
