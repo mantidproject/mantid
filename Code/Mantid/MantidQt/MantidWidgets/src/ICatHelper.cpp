@@ -118,5 +118,53 @@ namespace MantidQt
       }
     }
 
+    /**
+     * Retrieve the path(s) to the file that was downloaded (via HTTP) or is stored in the archive.
+     * @param userSelectedFiles :: The file(s) the user has selected and wants to download.
+     * @return A vector containing the paths to the file(s) the user wants.
+     */
+    std::vector<std::string> ICatHelper::getDataFilePaths(std::vector<std::pair<int64_t, std::string>>& userSelectedFiles)
+    {
+      Mantid::API::IAlgorithm_sptr catalogAlgorithm;
+      try
+      {
+        catalogAlgorithm = Mantid::API::AlgorithmManager::Instance().create("CatalogDownloadDataFiles");
+      }
+      catch(std::runtime_error& exception)
+      {
+        exception.what();
+      }
+
+      // Prepare for the ugly!
+
+      // These two vectors are required by the "CatalogDownloadDataFiles" algorithm.
+      std::vector<int64_t> fileIDs;
+      std::vector<std::string> fileNames;
+
+      // For each pair in userSelectedFiles we want to add them to their related vector to pass to the algorithm.
+      for (std::vector<std::pair<int64_t,std::string>>::iterator it = userSelectedFiles.begin(); it != userSelectedFiles.end(); ++it)
+      {
+        fileIDs.push_back(it->first);
+        fileNames.push_back(it->second);
+      }
+
+      // End of the ugly!
+
+      // The file IDs and file names of the data file(s) the user wants to download.
+      catalogAlgorithm->setProperty("FileIds",fileIDs);
+      catalogAlgorithm->setProperty("FileNames",fileNames);
+
+      Poco::ActiveResult<bool> result(catalogAlgorithm->executeAsync());
+      while( !result.available() )
+      {
+        //TODO: Inform the user where the file was saved to depending on result, e.g:
+        // (You do not have access to the archives. Downloading requested file over Internet...)
+        QCoreApplication::processEvents();
+      }
+      // Return a vector containing the file paths to the files to download.
+      return (catalogAlgorithm->getProperty("FileLocations"));
+    }
+
+
   } // namespace MantidWidgets
 } // namespace MantidQt
