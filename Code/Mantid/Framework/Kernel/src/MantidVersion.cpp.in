@@ -4,7 +4,6 @@
 #include "MantidKernel/MantidVersion.h"
 
 #include <sstream>
-#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -40,19 +39,12 @@ const char* MantidVersion::mainDOI()
 
 std::string MantidVersion::releaseDOI()
 {
-  int patchVersion;
-  try
-  {
-    patchVersion = boost::lexical_cast<int>(@MtdVersion_WC_LAST_CHANGED_REV@);
-  }
-  catch(boost::bad_lexical_cast &)
-  {
-    patchVersion = 0;
-  }
+  unsigned int patchVersion = @MtdVersion_WC_LAST_CHANGED_REV@;
 
   std::stringstream doi;
-  doi << mainDOI() << "@VERSION_MAJOR@.@VERSION_MINOR@";
+  doi << mainDOI() << @VERSION_MAJOR@ << "." << @VERSION_MINOR@;
 
+  // Keep to the convention where we write a version number like "3.0.0" as "3.0".
   if( patchVersion != 0 )
     doi << "." << patchVersion;
 
