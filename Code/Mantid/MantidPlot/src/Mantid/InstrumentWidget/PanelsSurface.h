@@ -16,8 +16,6 @@ struct FlatBankInfo
     Mantid::Geometry::ComponentID id;
     /// Bank's rotation
     Mantid::Kernel::Quat rotation;
-    /// Bounding rect
-    RectF rect;
     /// Starting index of bank's detectors in m_unwrappedDetectors vector
     size_t startDetectorIndex;
     /// Ending index of bank's detectors in m_unwrappedDetectors vector (1 past the last one)
@@ -41,6 +39,7 @@ private:
   *     + all ObjCompAssemblies must be cylinders
   *     + two first ObjCompAssemblies (returned by CompAssembly::getChild(i))
   *       cannot lie on the same line (being parallel is alright)
+  *  - CompAssembly with detectors lying in the same plane
   */
 class PanelsSurface: public UnwrappedSurface
 {
@@ -48,19 +47,27 @@ public:
   PanelsSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   ~PanelsSurface();
   void init();
-  void project(const Mantid::Kernel::V3D & pos, double & u, double & v, double & uscale, double & vscale) const;
+  void project(const Mantid::Kernel::V3D & , double & , double & , double & , double & ) const;
 
 protected:
 
   void rotate(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const;
-  void drawCustom(QPainter *painter) const;
+  //void drawCustom(QPainter *painter) const;
 
   // Setup the projection axes
   void setupAxes();
+  // Setup the projection axes
+  void setupBasisAxes(const Mantid::Kernel::V3D &zaxis, Mantid::Kernel::V3D &xaxis, Mantid::Kernel::V3D &yaxis) const;
   // Find all flat banks of detectors.
   void findFlatBanks();
   // Add a flat bank
-  void addFlatBank(Mantid::Geometry::ComponentID id, const Mantid::Kernel::V3D &normal, QList<Mantid::Geometry::ComponentID> objCompAssemblies);
+  void addFlatBank(Mantid::Geometry::ComponentID bankId, const Mantid::Kernel::V3D &normal, QList<Mantid::Geometry::ComponentID> objCompAssemblies);
+  // Add a flat bank
+  void addFlatBankOfDetectors(Mantid::Geometry::ComponentID bankId, const Mantid::Kernel::V3D &normal, QList<Mantid::Geometry::ComponentID> detectors);
+  // Add a component assembly containing a flat array of ObjCompAssemblies
+  void addObjCompAssemblies(Mantid::Geometry::ComponentID bankId);
+  // Add a component assembly
+  void addCompAssembly(Mantid::Geometry::ComponentID bankId);
   // Add a rectangular detector
   void addRectangularDetector(Mantid::Geometry::ComponentID bankId);
   // Calculate bank rotation
@@ -71,7 +78,9 @@ protected:
   void spreadBanks();
   // Find index of the largest bank
   int findLargestBank() const;
+  // Is a polygon overlapped with any of the flat banks
   bool isOverlapped( QPolygonF &polygon, int iexclude ) const;
+  // Remove all found flat banks
   void clearBanks();
 
 protected:

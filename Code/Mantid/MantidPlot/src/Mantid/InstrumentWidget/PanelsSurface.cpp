@@ -6,6 +6,7 @@
 
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Tolerance.h"
 
 #include <QCursor>
 #include <QMessageBox>
@@ -68,33 +69,30 @@ void PanelsSurface::init()
     findFlatBanks();
     spreadBanks();
 
+    RectF surfaceRect;
     for(int i = 0; i < m_flatBanks.size(); ++i)
     {
         RectF rect( m_flatBanks[i]->polygon.boundingRect() );
-        double umin = rect.x0();
-        double umax = rect.x1();
-        double vmin = rect.y0();
-        double vmax = rect.y1();
-        if ( umin < m_u_min ) m_u_min = umin;
-        if ( umax > m_u_max ) m_u_max = umax;
-        if ( vmin < m_v_min ) m_v_min = vmin;
-        if ( vmax > m_v_max ) m_v_max = vmax;
+        surfaceRect.unite( rect );
     }
 
     m_height_max = 0.1;
     m_width_max = 0.1;
-    m_viewRect = RectF( QPointF(m_u_min,m_v_min), QPointF(m_u_max,m_v_max) );
+    m_viewRect = RectF( surfaceRect );
+
     double du = m_viewRect.width() * 0.05;
     double dv = m_viewRect.height() * 0.05;
     m_viewRect.adjust(QPointF(-du,-dv),QPointF(du,dv));
 
+    m_u_min = m_viewRect.x0();
+    m_u_max = m_viewRect.x1();
+    m_v_min = m_viewRect.y0();
+    m_v_max = m_viewRect.y1();
 }
 
-void PanelsSurface::project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale, double &vscale) const
+void PanelsSurface::project(const Mantid::Kernel::V3D&, double&, double&, double&, double&) const
 {
-    (void)pos;
-    u = v = 0;
-    uscale = vscale = 1.0;
+    throw std::runtime_error("Cannot project an arbitrary point to this surface.");
 }
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const
@@ -104,40 +102,53 @@ void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &
     R =  info.rotation * udet.detector->getRotation();
 }
 
-void PanelsSurface::drawCustom(QPainter *painter) const
+// Draw the outlining polygon for each flat bank.
+// (for debugging)
+//void PanelsSurface::drawCustom(QPainter *painter) const
+//{
+//    painter->setPen(QColor(255,0,0));
+//    for(int i = 0; i < m_flatBanks.size(); ++i)
+//    {
+//        painter->setPen(QColor(255,0,0));
+//        painter->drawPolygon(m_flatBanks[i]->polygon);
+//    }
+//}
+
+/**
+  * Define a coordinate system for this projection.
+  */
+void PanelsSurface::setupAxes()
 {
-    painter->setPen(QColor(255,0,0));
-    for(int i = 0; i < m_flatBanks.size(); ++i)
-    {
-        painter->drawPolygon(m_flatBanks[i]->polygon);
-        //painter->drawRect(m_flatBanks[i]->polygon.boundingRect());
-    }
+    setupBasisAxes( m_zaxis, m_xaxis, m_yaxis );
+    m_origin.rx() = m_xaxis.scalar_prod( m_pos );
+    m_origin.ry() = m_yaxis.scalar_prod( m_pos );
 }
 
 /**
   * Given the z axis, define the x and y ones.
+  * @param zaxis :: A given vector in 3d space to become the z axis of a coordinate system.
+  * @param xaxis :: An output arbitrary vector perpendicular to zaxis.
+  * @param yaxis :: An output arbitrary vector perpendicular to both zaxis and xaxis.
   */
-void PanelsSurface::setupAxes()
+void PanelsSurface::setupBasisAxes(const Mantid::Kernel::V3D &zaxis, Mantid::Kernel::V3D &xaxis, Mantid::Kernel::V3D &yaxis) const
 {
     double R, theta, phi;
-    m_zaxis.getSpherical( R, theta, phi );
+    zaxis.getSpherical( R, theta, phi );
     if ( theta <= 45.0 )
     {
-        m_xaxis = Mantid::Kernel::V3D(1,0,0);
+        xaxis = Mantid::Kernel::V3D(1,0,0);
     }
     else if ( phi <= 45.0 )
     {
-        m_xaxis = Mantid::Kernel::V3D(0,1,0);
+        xaxis = Mantid::Kernel::V3D(0,1,0);
     }
     else
     {
-        m_xaxis = Mantid::Kernel::V3D(0,0,1);
+        xaxis = Mantid::Kernel::V3D(0,0,1);
     }
-    m_yaxis = m_zaxis.cross_prod( m_xaxis );
-    m_yaxis.normalize();
-    m_xaxis = m_yaxis.cross_prod( m_zaxis );
-    m_origin.rx() = m_xaxis.scalar_prod( m_pos );
-    m_origin.ry() = m_yaxis.scalar_prod( m_pos );
+    yaxis = zaxis.cross_prod( xaxis );
+    yaxis.normalize();
+    xaxis = yaxis.cross_prod( zaxis );
 }
 
 //-----------------------------------------------------------------------------------------------//
@@ -156,87 +167,12 @@ public:
 
     bool visit(const CompAssemblyActor* actor)
     {
-        auto assembly = actor->getCompAssembly();
-        assert(assembly);
-        size_t nelem = static_cast<size_t>(assembly->nelements());
-        // assemblies with one element cannot be flat (but its element can be)
-        if ( nelem == 1 )
-        {
-            //std::cerr << "Single element, out" << std::endl;
-            return false;
-        }
-        int ndetectors = 0;
-        QList<ComponentID> objCompAssemblies;
-        // normal to the plane, undefined at first
-        Mantid::Kernel::V3D normal(0,0,0);
-        Mantid::Kernel::V3D x,y,pos;
-        for(size_t i = 0; i < nelem; ++i)
-        {
-            auto elem = assembly->getChild((int)i);
-            ObjCompAssembly* objCompAssembly = dynamic_cast<ObjCompAssembly*>( elem.get() );
-            if ( !objCompAssembly )
-            {
-                CompAssembly* compAssembly = dynamic_cast<CompAssembly*>( elem.get() );
-                if ( !compAssembly || compAssembly->nelements() != 1 )
-                {
-                    //m_surface.g_log.warning() << "Not a CompAssembly, out" << std::endl;
-                    return false;
-                }
-                elem = compAssembly->getChild(0);
-                objCompAssembly = dynamic_cast<ObjCompAssembly*>( elem.get() );
-                if ( !objCompAssembly )
-                {
-                    //m_surface.g_log.warning() << "Not a ObjCompAssembly, out" << std::endl;
-                    return false;
-                }
-            }
-            if ( i == 0 )
-            {
-                pos = objCompAssembly->getChild(0)->getPos();
-                x = objCompAssembly->getChild(1)->getPos() - pos;
-                x.normalize();
-            }
-            else if ( i == 1 )
-            {
-                y = objCompAssembly->getChild(0)->getPos() - pos;
-                y.normalize();
-                normal = x.cross_prod( y );
-                if ( normal.nullVector() )
-                {
-                    y = objCompAssembly->getChild(1)->getPos() - objCompAssembly->getChild(0)->getPos();
-                    y.normalize();
-                    normal = x.cross_prod( y );
-                }
-                if ( normal.nullVector() )
-                {
-                    m_surface.g_log.warning() << "Colinear ObjCompAssemblies, out" << std::endl;
-                    return false;
-                }
-                normal.normalize();
-            }
-            else
-            {
-                Mantid::Kernel::V3D vector = objCompAssembly->getChild(0)->getPos() - objCompAssembly->getChild(1)->getPos();
-                vector.normalize();
-                if ( fabs(vector.scalar_prod(normal)) > 1e-3 )
-                {
-                    m_surface.g_log.warning() << "Out of plane, out" << std::endl;
-                    return false;
-                }
-            }
-            ndetectors += objCompAssembly->nelements();
-            objCompAssemblies << objCompAssembly->getComponentID();
-        }
-        if ( !objCompAssemblies.isEmpty() )
-        {
-            m_surface.addFlatBank(assembly->getComponentID(), normal, objCompAssemblies);
-        }
+        m_surface.addObjCompAssemblies(actor->getComponent()->getComponentID());
         return false;
     }
 
     bool visit(const RectangularDetectorActor* actor)
     {
-        m_surface.g_log.warning() << "RectangularDetectorActor " << actor->getNumberOfDetectors() << std::endl;
         m_surface.addRectangularDetector( actor->getComponent()->getComponentID() );
         return false;
     }
@@ -329,6 +265,224 @@ void PanelsSurface::addFlatBank(ComponentID bankId, const Mantid::Kernel::V3D &n
 }
 
 /**
+  * Add a flat bank from an assembly of detectors.
+  * @param bankId :: Component ID of the bank.
+  * @param normal :: Normal vector to the bank's plane.
+  * @param objCompAssemblies :: List of component IDs. Each component must cast to Detector.
+  */
+void PanelsSurface::addFlatBankOfDetectors(ComponentID bankId, const Mantid::Kernel::V3D &normal, QList<ComponentID> detectors)
+{
+    int index = m_flatBanks.size();
+    // save bank info
+    FlatBankInfo *info = new FlatBankInfo(this);
+    m_flatBanks << info;
+    info->id = bankId;
+    // record the first detector index of the bank
+    info->startDetectorIndex = m_unwrappedDetectors.size();
+    int nelem = detectors.size();
+    m_unwrappedDetectors.reserve( m_unwrappedDetectors.size() + nelem );
+
+    // keep reference position on the bank's plane
+    Mantid::Kernel::V3D pos0, pos1;
+    QPointF p0,p1;
+    Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
+    // loop over the detectors
+    for(int i = 0; i < detectors.size(); ++i)
+    {
+        ComponentID id = detectors[i];
+        Mantid::Geometry::IDetector_const_sptr det = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>(
+                    instr->getComponentByID(id));
+
+        if ( i == 0 )
+        {
+            pos0 = det->getPos();
+        }
+        else if ( i == 1 )
+        {
+            // find the rotation to put the bank on the plane
+            info->rotation = calcBankRotation( pos0, normal );
+            pos1 = det->getPos();
+            pos1 -= pos0;
+            info->rotation.rotate(pos1);
+            pos1 += pos0;
+            // start forming the outline polygon
+            p0.rx() = m_xaxis.scalar_prod( pos0 );
+            p0.ry() = m_yaxis.scalar_prod( pos0 );
+            p1.rx() = m_xaxis.scalar_prod( pos1 );
+            p1.ry() = m_yaxis.scalar_prod( pos1 );
+            QVector<QPointF> vert;
+            vert << p1 << p0;
+            info->polygon = QPolygonF(vert);
+        }
+        // add the detector
+        addDetector( det, pos0, index, info->rotation );
+        // update the outline polygon
+        UnwrappedDetector &udet = *(m_unwrappedDetectors.end() - 1);
+        QPointF p2 = QPointF(udet.u,udet.v);
+        QVector<QPointF> vert;
+        vert << p0 << p1 << p2;
+        info->polygon = info->polygon.united(QPolygonF(vert));
+    }
+
+    // record the end detector index of the bank
+    info->endDetectorIndex = m_unwrappedDetectors.size();
+}
+
+/**
+  * Add a component assembly containing a flat array of ObjCompAssemblies.
+  * @param bankId :: Component id of an assembly.
+  */
+void PanelsSurface::addObjCompAssemblies(ComponentID bankId)
+{
+    Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
+    boost::shared_ptr<const Mantid::Geometry::CompAssembly> assembly = boost::dynamic_pointer_cast<const Mantid::Geometry::CompAssembly>(
+            instr->getComponentByID(bankId) );
+
+    size_t nelem = static_cast<size_t>(assembly->nelements());
+    // assemblies with one element cannot be flat (but its element can be)
+    if ( nelem == 1 )
+    {
+        return;
+    }
+    int ndetectors = 0;
+    QList<ComponentID> objCompAssemblies;
+    // normal to the plane, undefined at first
+    Mantid::Kernel::V3D normal(0,0,0);
+    Mantid::Kernel::V3D x,y,pos;
+    for(size_t i = 0; i < nelem; ++i)
+    {
+        auto elem = assembly->getChild((int)i);
+        ObjCompAssembly* objCompAssembly = dynamic_cast<ObjCompAssembly*>( elem.get() );
+        if ( !objCompAssembly )
+        {
+            CompAssembly* compAssembly = dynamic_cast<CompAssembly*>( elem.get() );
+            if ( !compAssembly || compAssembly->nelements() != 1 )
+            {
+                //m_surface.g_log.warning() << "Not a CompAssembly" << std::endl;
+                addCompAssembly( bankId );
+                return;
+            }
+            elem = compAssembly->getChild(0);
+            objCompAssembly = dynamic_cast<ObjCompAssembly*>( elem.get() );
+            if ( !objCompAssembly )
+            {
+                //m_surface.g_log.warning() << "Not a ObjCompAssembly" << std::endl;
+                return;
+            }
+        }
+        if ( i == 0 )
+        {
+            pos = objCompAssembly->getChild(0)->getPos();
+            x = objCompAssembly->getChild(1)->getPos() - pos;
+            x.normalize();
+        }
+        else if ( i == 1 )
+        {
+            y = objCompAssembly->getChild(0)->getPos() - pos;
+            y.normalize();
+            normal = x.cross_prod( y );
+            if ( normal.nullVector() )
+            {
+                y = objCompAssembly->getChild(1)->getPos() - objCompAssembly->getChild(0)->getPos();
+                y.normalize();
+                normal = x.cross_prod( y );
+            }
+            if ( normal.nullVector() )
+            {
+                g_log.warning() << "Colinear ObjCompAssemblies" << std::endl;
+                return;
+            }
+            normal.normalize();
+        }
+        else
+        {
+            Mantid::Kernel::V3D vector = objCompAssembly->getChild(0)->getPos() - objCompAssembly->getChild(1)->getPos();
+            vector.normalize();
+            if ( fabs(vector.scalar_prod(normal)) > Mantid::Kernel::Tolerance )
+            {
+                g_log.warning() << "Assembly " << assembly->getName() << " isn't flat." << std::endl;
+                return;
+            }
+        }
+        ndetectors += objCompAssembly->nelements();
+        objCompAssemblies << objCompAssembly->getComponentID();
+    }
+    if ( !objCompAssemblies.isEmpty() )
+    {
+        addFlatBank(assembly->getComponentID(), normal, objCompAssemblies);
+    }
+}
+
+/**
+  * Add an assembly if its detectors are in the same plane.
+  * @param bankId :: Component id of an assembly.
+  */
+void PanelsSurface::addCompAssembly(ComponentID bankId)
+{
+    Mantid::Geometry::Instrument_const_sptr instr = m_instrActor->getInstrument();
+    boost::shared_ptr<const Mantid::Geometry::CompAssembly> assembly = boost::dynamic_pointer_cast<const Mantid::Geometry::CompAssembly>(
+            instr->getComponentByID(bankId) );
+
+    size_t nelem = static_cast<size_t>(assembly->nelements());
+    // normal to the plane, undefined at first
+    Mantid::Kernel::V3D normal, x, y;
+    Mantid::Kernel::V3D pos0;
+    bool normalFound = false;
+    QList<ComponentID> detectors;
+    for(size_t i = 0; i < nelem; ++i)
+    {
+        auto elem = assembly->getChild((int)i);
+        Mantid::Geometry::IDetector_const_sptr det  = boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector>( elem );
+        if ( !det )
+        {
+            return;
+        }
+        if ( det->isMonitor() ) continue;
+        Mantid::Kernel::V3D pos = det->getPos();
+        if ( i == 0 )
+        {
+            pos0 = pos;
+        }
+        else if ( i == 1 )
+        {
+            // at first set the normal to an argbitrary vector orthogonal to
+            // the line between the first two detectors
+            y = pos - pos0;
+            y.normalize();
+            setupBasisAxes( y, normal, x );
+        }
+        else if ( fabs(normal.scalar_prod(pos - pos0)) > Mantid::Kernel::Tolerance )
+        {
+            if ( !normalFound )
+            {
+                // when first non-colinear detector is found set the normal
+                x = pos - pos0;
+                x.normalize();
+                normal = x.cross_prod(y);
+                normal.normalize();
+                x = y.cross_prod(normal);
+                normalFound = true;
+            }
+            else
+            {
+                g_log.warning() << "Assembly " << assembly->getName() << " isn't flat." << std::endl;
+                return;
+            }
+        }
+        detectors << det->getComponentID();
+    }
+
+    // normalFound doesn't have to be true at this point
+    // if it is false then the normal was found by the first guess
+
+    // add the detectors
+    if ( !detectors.isEmpty() )
+    {
+        addFlatBankOfDetectors( bankId, normal, detectors );
+    }
+}
+
+/**
   * Add a rectangular detector which is flat.
   * @param bankId :: Component id of a rectangular detector.
   */
@@ -363,19 +517,21 @@ void PanelsSurface::addRectangularDetector(ComponentID bankId)
     // set the outline
     QVector<QPointF> verts;
     Mantid::Kernel::V3D pos = pos0;
-    info->rotation.rotate(pos);
     verts << QPointF(pos.X(),pos.Y());
 
-    pos = pos1;
+    pos = pos1 - pos0;
     info->rotation.rotate(pos);
+    pos += pos0;
     verts << QPointF(pos.X(),pos.Y());
 
-    pos = pos2;
+    pos = pos2 - pos0;
     info->rotation.rotate(pos);
+    pos += pos0;
     verts << QPointF(pos.X(),pos.Y());
 
-    pos = pos3;
+    pos = pos3 - pos0;
     info->rotation.rotate(pos);
+    pos += pos0;
     verts << QPointF(pos.X(),pos.Y());
 
     info->polygon = QPolygonF(verts);
@@ -503,6 +659,11 @@ int PanelsSurface::findLargestBank() const
     return index;
 }
 
+/**
+  * Test if a polygon overlaps with any of the flat banks.
+  * @param polygon :: A polygon to test.
+  * @param iexclude :: Index of a flat bank which should be excluded from the test.
+  */
 bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const
 {
     for(int i = 0; i < m_flatBanks.size(); ++i)
@@ -514,6 +675,9 @@ bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const
     return false;
 }
 
+/**
+  * Remove all found flat banks
+  */
 void PanelsSurface::clearBanks()
 {
     for(int i = 0; i < m_flatBanks.size(); ++i)
